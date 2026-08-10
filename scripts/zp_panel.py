@@ -204,8 +204,6 @@ def configs_salvate() -> dict:
 # che puo' riscrivere qualunque chiave di zp.config.yaml puo' anche disarmare le
 # guardie. Chiave -> (etichetta, minimo, massimo).
 CAMPI_CONFIG = {
-    "lavoratori_default":           ("Lavoratori per corsa", 1, 8),
-    "lavoratori_max":               ("Lavoratori: tetto", 1, 8),
     "clusters_per_iteration":       ("Cluster per iterazione", 1, 5),
     "max_effort_hours_per_cluster": ("Ore massime per cluster", 1, 24),
     "max_budget_usd_per_iteration": ("$ per iterazione", 1, 60),
@@ -255,8 +253,6 @@ def config_campi() -> dict:
 COERENZE = [
     ("majority_to_dismiss", "reviewers",
      "servirebbero {a} voti su {b} revisori: una maggioranza irraggiungibile"),
-    ("lavoratori_default", "lavoratori_max",
-     "{a} lavoratori di default contro un tetto di {b}"),
     ("max_budget_usd_per_iteration", "hard_stop_usd_total",
      "{a}$ per iterazione contro un tetto cumulato di {b}$"),
 ]
@@ -351,67 +347,6 @@ def config_scrivi(chiave: str, valore: str) -> str:
     return f"{chiave}: {prima} -> {n} (riga {i + 1}); verifica del piano verde"
 
 
-def gov_diari(quante: int = 14) -> dict:
-    """Le ultime azioni di ogni lavoratore, dal suo diario.
-
-    Sta nel BATTITO, non nel giro lento: e' l'unica cosa che si muove davvero mentre
-    guardi un lavoratore lavorare, e sono solo letture di file (nessun git, nessun
-    processo). I diari sono piccoli — 123 righe il piu' lungo — quindi si rilegge la
-    coda a ogni battito senza pagare niente.
-    """
-    fuori = {}
-    base = os.environ.get("GOV_WORKTREE_BASE") or os.path.join(
-        os.path.dirname(REPO), "heuresys-gov-workers")
-    if not os.path.isdir(base):
-        return fuori
-    try:
-        for nome in sorted(os.listdir(base)):
-            # Il diario di oggi vive FUORI dall'albero (il sorvegliato non custodisce
-            # il proprio registro); quelli scritti prima dello spostamento sono ancora
-            # dentro. Si guarda prima fuori, poi dentro.
-            fuori_d = os.path.join(os.path.dirname(base), "heuresys-gov-diari", nome + ".ndjson")
-            dentro_d = os.path.join(base, nome, ".zp", "diario.ndjson")
-            d = fuori_d if os.path.isfile(fuori_d) else dentro_d
-            if not os.path.isfile(d):
-                continue
-            righe = []
-            with open(d, encoding="utf-8") as f:
-                for riga in f.read().splitlines()[-quante:]:
-                    try:
-                        righe.append(json.loads(riga))
-                    except ValueError:
-                        pass
-            fuori[nome] = righe
-    except OSError:
-        pass
-    return fuori
-
-
-def gov_stato() -> dict:
-    """Il mondo gov, letto da chi lo sa gia' fare.
-
-    `docs/kb/tools/gov_rientro.py` calcola alberi, rami, verdetti e freno, ed e' gia'
-    provato sul campo: la plancia lo IMPORTA invece di rifarne il lavoro, come
-    `plancia.py` importa la funzione di lettura di questo file. Una sola definizione di
-    «chi sono i lavoratori», in un posto solo.
-
-    Costa git (conta i commit), quindi vive sul giro lento, mai sul battito.
-    """
-    try:
-        strumenti = os.path.join(REPO, "docs", "kb", "tools")
-        if strumenti not in sys.path:
-            sys.path.insert(0, strumenti)
-        import gov_rientro
-        return {"perimetri": zp_state("perimetri"),
-                "lavoratori": gov_rientro.lavoratori(),
-                "rami": gov_rientro.rami_con_lavoro(),
-                "verdetti": gov_rientro.verdetti(),
-                "freno": gov_rientro.freno()}
-    except Exception as e:                      # noqa: BLE001 — la plancia non deve morire
-        return {"errore": f"{type(e).__name__}: {e}",
-                "lavoratori": [], "rami": [], "verdetti": [], "freno": "?"}
-
-
 def budget_dal_dato() -> dict:
     """Quanto costa DAVVERO un'ora di lavoro, misurato sulle corse riuscite.
 
@@ -447,8 +382,7 @@ def stato_veloce() -> dict:
     except (OSError, ValueError):
         pass
     giri = corse()
-    return {"diari": gov_diari(),
-            "lock": lock_stato(),
+    return {"lock": lock_stato(),
             "stop_presente": os.path.exists(os.path.join(ZP, "STOP")),
             "ultimo_esito": ultimo,
             "spesa_usd": round(sum(float(g.get("costo_usd") or 0) for g in giri), 2),
@@ -592,20 +526,11 @@ def censimento(conferma: str) -> str:
     if conferma.strip().lower() != "zp censimento ok":
         return "conferma rituale mancante: scrivi esattamente «zp censimento ok»"
 
-    # Il censimento riscrive zp.config.yaml PER INTERO. Se parte mentre dei
-    # lavoratori girano, gli sposta il pavimento sotto i piedi: leggono classi e
-    # perimetri di un piano che non esiste piu'. Il lucchetto e' lo stesso che
-    # gov usa per i cluster, con un nome riservato — e lo porta il PID del
-    # censimento, non quello della plancia, che resta viva per ore.
+    # Il censimento riscrive zp.config.yaml PER INTERO. Il lucchetto lo porta il PID
+    # del censimento, non quello della plancia, che resta viva per ore.
     vivo = chi_riscrive_la_config()
     if vivo:
         return f"c'e' gia' un censimento in corso (pid {vivo}): non ne parte un secondo"
-    in_mano = [f for f in os.listdir(os.path.join(ZP, "locks"))] if os.path.isdir(
-        os.path.join(ZP, "locks")) else []
-    if in_mano:
-        return ("ci sono lavoratori con dei cluster in mano ("
-                + ", ".join(f.replace(".lock", "") for f in in_mano)
-                + "): il censimento riscriverebbe il piano sotto di loro. Aspetta che finiscano.")
 
     p = subprocess.Popen([percorso_claude(), "-p", "zp censimento ok"], cwd=REPO,
                          creationflags=DETACHED, env=ambiente_pulito(),
@@ -852,24 +777,6 @@ nav#viste button.attiva{background:var(--sup);color:var(--inchiostro);border-col
    non torna a zero, non si sta muovendo piu' niente — ed e' l'unica cosa che una
    console di volo deve saper dire a colpo d'occhio.</p></section>
  <section class="card" data-vista="volo"><h2>Stato macchina</h2><div class="stati" id="stati"></div></section>
-<section class="card" data-vista="lavoratori"><h2>I lavoratori, adesso</h2>
-  <div id="gov-lav"></div>
-  <p class="nota">Fonte: <code>gov_rientro.py</code> — alberi, rami e verdetti reali.
-   Un lavoratore committa SOLO sul suo ramo: portare il lavoro su main resta un atto
-   separato e presidiato, che gov compie dopo aver letto il verdetto.</p></section>
- <div class="riga c2" data-vista="lavoratori">
-  <section class="card"><h2>Verdetti</h2><div id="gov-verdetti"></div></section>
-  <section class="card"><h2>Rami con lavoro non ancora su main</h2>
-   <div id="gov-rami"></div>
-   <p class="nota">Non ci arrivano da soli: nessun passo di gov fa merge, per costruzione.</p>
-  </section>
- </div>
- <section class="card" data-vista="lavoratori"><h2>Che cosa stanno facendo</h2>
-  <div id="gov-diari"></div>
-  <p class="nota">Le ultime azioni registrate, aggiornate ogni 2 secondi mentre un
-   lavoratore gira. <b>rifiutata</b> = il recinto ha fermato l'azione: va letta, non
-   ignorata — puo' essere un tentativo legittimo fermato da un perimetro troppo stretto.</p>
- </section>
  <section class="card" data-vista="config"><h2>Il budget, misurato sulle corse vere</h2>
   <div id="cfg-budget"></div></section>
  <section class="card" data-vista="config"><h2>Configurazione del loop</h2>
@@ -882,10 +789,6 @@ nav#viste button.attiva{background:var(--sup);color:var(--inchiostro);border-col
    cambiando.</p>
   <h2 style="margin-top:20px">Cio' che da qui non si tocca</h2>
   <div id="cfg-no"></div></section>
- <section class="card" data-vista="piano"><h2>Composizione dei cluster</h2>
-  <pre id="gov-perimetri" style="max-height:340px"></pre>
-  <p class="nota">Fonte: <code>zp_state.py perimetri</code> — quali cluster possono
-   girare insieme, e su quali file ognuno ha diritto di scrivere.</p></section>
  <section class="card" data-vista="piano"><h2>Il piano in numeri</h2><div class="kpi" id="kpi"></div></section>
  <div class="riga c3">
   <section class="card" data-vista="piano"><h2>Aperti autonomi per ondata</h2><div id="ondate"></div>
@@ -1051,7 +954,7 @@ function statoHtml(cl,ic,nome,desc){return '<div class="stato s-'+cl+'"><span cl
 function tile(v,unita,l){return '<div class="tile"><div class="v">'+v+
  (unita?' <small>'+unita+'</small>':'')+'</div><div class="l">'+l+'</div></div>'}
 
-const VISTE=[['volo','Volo'],['lavoratori','Lavoratori'],['piano','Piano'],['config','Config'],['storico','Storico']];
+const VISTE=[['volo','Volo'],['piano','Piano'],['config','Config'],['storico','Storico']];
 let vista=localStorage.getItem('zp-vista')||'volo';
 if(!VISTE.some(v=>v[0]===vista)) vista='volo';
 function costruisciNav(){
@@ -1072,32 +975,6 @@ function mostraVista(v){
   r.classList.toggle('mono', vivi.length===1); });
  document.querySelectorAll('#viste button').forEach(b=>
   b.classList.toggle('attiva', b.dataset.v===v));
-}
-function renderGov(){
- if(!G){return}
- if(G.errore){$('gov-lav').innerHTML='<p class="vuoto">gov non leggibile: '+G.errore+'</p>';return}
- const L=G.lavoratori||[];
- $('gov-lav').innerHTML = L.length ?
-  '<table><tr><th>albero</th><th>ramo</th><th>cluster</th><th>azioni</th><th>commit</th>'+
-  '<th>non committati</th><th>propone</th></tr>'+L.map(w=>
-   '<tr><td><b>'+w.albero+'</b></td><td><span class="chip">'+w.ramo+'</span></td>'+
-   '<td>'+(w.cluster||'—')+'</td><td class="num">'+w.azioni_registrate+'</td>'+
-   '<td class="num">'+w.commit_propri+'</td>'+
-   '<td class="num">'+(w.file_non_committati? '<b style="color:var(--avviso)">'+
-     w.file_non_committati+'</b>' : '0')+'</td>'+
-   '<td>'+(w.esito_proposto||'<span style="color:var(--muto)">nessun esito</span>')+
-   '</td></tr>').join('')+'</table>'
-  : '<p class="vuoto">Nessun lavoratore in volo.</p>';
- const V=G.verdetti||[];
- $('gov-verdetti').innerHTML = V.length ? V.map(t=>{
-   const rosso=t.indexOf('ROSSO')>=0;
-   return '<div class="stato s-'+(rosso?'critico':'buono')+'"><span class="ic">'+
-    (rosso?'✕':'✓')+'</span><span><small>'+t+'</small></span></div>'}).join('')
-  : '<p class="vuoto">Nessun verdetto scritto.</p>';
- const R=G.rami||[];
- $('gov-rami').innerHTML = R.length ? '<ul style="margin:0;padding-left:18px;color:var(--sec)">'+
-  R.map(t=>'<li>'+t+'</li>').join('')+'</ul>'
-  : '<p class="vuoto">Nessun ramo con lavoro in attesa.</p>';
 }
 function daQuando(iso){
  if(!iso) return null;
@@ -1186,34 +1063,8 @@ function renderVolo(){
   ? statoHtml(fermo?'avviso':'buono', fermo?'⏸':'▶',
       'Ultima azione '+durata(eta),
       diChi+' · '+String(ultima.comando||ultima.oggetto||ultima.bersaglio||'').slice(0,70))
-  : statoHtml('neutro','○','Nessuna azione registrata','nessun lavoratore ha ancora agito');
- const lav=Object.keys(D).length;
- h+= statoHtml(lav?'buono':'neutro', lav?'◉':'○',
-      lav+(lav===1?' lavoratore':' lavoratori')+' con diario',
-      lav? 'i dettagli nella vista Lavoratori' : 'nessun albero di lavoro sul disco');
+  : statoHtml('neutro','○','Nessuna azione registrata','nessuna sessione ha ancora agito');
  $('volo-ora').innerHTML=h;
-}
-function renderDiari(){
- const D=(S&&S.diari)||{}; const nomi=Object.keys(D);
- if(!nomi.length){$('gov-diari').innerHTML='<p class="vuoto">Nessun diario: nessun lavoratore ha ancora agito.</p>';return}
- $('gov-diari').innerHTML=nomi.map(n=>{
-  const righe=D[n]||[];
-  return '<div class="gruppo"><h3>'+n+' — ultime '+righe.length+' azioni</h3>'+
-   (righe.length? '<table>'+righe.slice().reverse().map(r=>{
-     const rif=r.azione==='rifiutata';
-     const q=(r.quando||'').slice(11,19);
-     return '<tr><td class="num" style="color:var(--muto);width:64px">'+q+'</td>'+
-      '<td style="width:88px">'+(rif? '<b style="color:var(--critico)">rifiutata</b>'
-        : '<span style="color:var(--muto)">'+(r.azione||'')+'</span>')+'</td>'+
-      '<td style="color:var(--sec);word-break:break-all">'+
-        '<span class="chip" style="margin-right:6px">'+(r.strumento||'?')+'</span>'+
-        (r.comando||r.oggetto||r.bersaglio||'(senza dettaglio)').slice(0,150)+
-        (rif&&r.perche? ' <span class="chip">'+r.perche+'</span>':'')+'</td></tr>'}).join('')+'</table>'
-    : '<p class="vuoto">diario vuoto</p>')+'</div>'}).join('');
-}
-function renderPerimetri(){
- const t=(G&&G.perimetri)||'';
- $('gov-perimetri').textContent = t || 'non disponibile';
 }
 function render(){
  const s=S,p=s.piano;let h='';
@@ -1295,7 +1146,7 @@ function render(){
   : '<div class="vuoto">nessuna corsa registrata — il driver non è mai partito</div>';
 
  $('log').textContent=schedaLog==='n'? s.log : s.log_censimento;
- renderVolo(); renderGov(); renderDiari(); renderPerimetri(); renderBudget();
+ renderVolo(); renderBudget();
  $('fresco').textContent='aggiornato '+new Date().toLocaleTimeString('it-IT');
  renderSalvate();
 }
@@ -1416,7 +1267,6 @@ async function eliminaConf(nome){$('e-conf').textContent=await post('/api/config
 let G=null;
 async function aggiorna(){
  S=await (await fetch(api('/api/stato'))).json(); S._fermo=0;
- try{ G=await (await fetch(api('/api/gov'))).json() }catch(e){ /* si tiene il precedente */ }
  render(); mostraVista(vista);
 }
 /* Il battito del cockpit: solo cio' che cambia mentre guardi (lock, STOP, ultimo
@@ -1487,8 +1337,6 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(stato())
         if self._percorso() == "/api/volo":
             return self._json(stato_veloce())
-        if self._percorso() == "/api/gov":
-            return self._json(gov_stato())
         if self._percorso() == "/api/config":
             return self._json(config_campi())
         dati = PAGINA.encode("utf-8")

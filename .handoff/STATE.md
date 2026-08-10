@@ -44,6 +44,14 @@ adversarial; le decisioni tecniche sono di Claude.
    era diventato continuo su un verdetto vecchio. Finché quel file c'è, **il cancello dice
    sempre verde**. Si toglie con `rm .zp/verify-off`, poi `python docs/kb/tools/verify_gate.py run`.
 
+## ⚠ Un errore di questa sessione, da sapere prima di toccare i test
+
+Il commit `27c6025d` ha **inghiottito 174 righe che non erano sue**: le correzioni su
+`drift-check` (`#181`), che erano lavoro in corso non committato. Un `git add -u` ha preso
+tutti i file modificati invece dei soli file del ritiro. **Non sono perse, ma non sono state
+provate** — quel codice gira come teardown della suite di integrazione, e la suite non è
+stata eseguita. Prima di lavorare su `#181`, farla girare e vedere se regge.
+
 ## Top priorities (prossima sessione)
 
 1. **Chiudere il ritiro**: i tre punti qui sopra, più la riverifica finale.

@@ -3354,14 +3354,17 @@ BEGIN
     END;
   END IF;
 
-  -- ogni decisione ha un autore e una data, e non precede la richiesta
+  -- ogni decisione ha un autore e una data, e non precede la richiesta.
+  -- #168: «senza autore» distingue i due casi — decided_by NULL con snapshot
+  -- presente = decisore RIMOSSO (la storia c'e', il vivo no: legittimo);
+  -- entrambi NULL = decisione senza autore, la violazione vera.
   SELECT count(*), min(r.approval_request_title) INTO v_cnt, v_sample
   FROM sys.sys_approval_steps s
   JOIN sys.sys_approval_requests r ON r.approval_request_id = s.approval_step_request_id
   WHERE s.approval_step_tenant_id = c_rtl
     AND s.approval_step_status IN ('APPROVED', 'REJECTED')
     AND (s.approval_step_decided_at IS NULL
-      OR s.approval_step_decided_by IS NULL
+      OR (s.approval_step_decided_by IS NULL AND s.approval_step_decided_by_snapshot IS NULL)
       OR s.approval_step_decided_at < r.created_at);
   IF v_cnt > 0 THEN
     BEGIN
@@ -6310,10 +6313,12 @@ BEGIN
   IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7a(ii) FALLITO: violazione iniettata non rilevata'; END IF;
   RAISE NOTICE '[OK] SELFTEST C7a(ii) (richiesta respinta che nessuno ha respinto, rollback)';
 
-  -- ST-C7a(iii): una decisione senza chi l'ha presa
+  -- ST-C7a(iii): una decisione senza chi l'ha presa — ne' vivo NE' tombstone
+  -- (#168: azzerare solo decided_by non basta piu', lo snapshot risponderebbe lui)
   v_fired := false;
   BEGIN
-    UPDATE sys.sys_approval_steps SET approval_step_decided_by = NULL
+    UPDATE sys.sys_approval_steps
+       SET approval_step_decided_by = NULL, approval_step_decided_by_snapshot = NULL
      WHERE ctid = (SELECT s2.ctid FROM sys.sys_approval_steps s2
                     WHERE s2.approval_step_status = 'APPROVED'
                       AND s2.approval_step_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
@@ -6326,6 +6331,59 @@ BEGIN
   END;
   IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7a(iii) FALLITO: violazione iniettata non rilevata'; END IF;
   RAISE NOTICE '[OK] SELFTEST C7a(iii) (decisione senza autore, rollback)';
+
+  -- ST-CASCADE (#168): cancellare un utente NON fa sparire la storia delle sue
+  -- approvazioni. Utente sintetico + richiesta + passo APPROVED, DELETE
+  -- dell'utente, e il passo deve restare: approver NULL, tombstone presente,
+  -- e C7a NON deve accendersi (il decisore rimosso non e' una decisione senza
+  -- autore). Tutto rollbacka via eccezione: il DB resta com'era.
+  v_fired := false;
+  BEGIN
+    DECLARE
+      st_uid  uuid;
+      st_req  uuid;
+      st_cnt  int;
+      st_snap text;
+    BEGIN
+      INSERT INTO sys.sys_users (user_tenant_id, user_email, user_display_name)
+      VALUES ('86ba7a65-217f-48ba-8ce5-5c09b40a66b0',
+              'st-cascade-000303@selftest.local', 'ST Cascade 000303')
+      RETURNING user_id INTO st_uid;
+      INSERT INTO sys.sys_approval_requests
+        (approval_request_tenant_id, approval_request_title, approval_request_status)
+      VALUES ('86ba7a65-217f-48ba-8ce5-5c09b40a66b0',
+              'ST-CASCADE 000303 — richiesta sintetica', 'APPROVED')
+      RETURNING approval_request_id INTO st_req;
+      INSERT INTO sys.sys_approval_steps
+        (approval_step_request_id, approval_step_tenant_id, approval_step_approver_user_id,
+         approval_step_status, approval_step_decided_at, approval_step_decided_by,
+         approval_step_approver_snapshot, approval_step_decided_by_snapshot)
+      VALUES (st_req, '86ba7a65-217f-48ba-8ce5-5c09b40a66b0', st_uid,
+              'APPROVED', now(), st_uid,
+              'st-cascade-000303@selftest.local', 'st-cascade-000303@selftest.local');
+
+      DELETE FROM sys.sys_users WHERE user_id = st_uid;
+
+      SELECT count(*), min(approval_step_approver_snapshot) INTO st_cnt, st_snap
+        FROM sys.sys_approval_steps
+       WHERE approval_step_request_id = st_req
+         AND approval_step_approver_user_id IS NULL
+         AND approval_step_decided_by IS NULL;
+      IF st_cnt <> 1 OR st_snap IS DISTINCT FROM 'st-cascade-000303@selftest.local' THEN
+        RAISE EXCEPTION 'ST_BROKEN: dopo la DELETE il passo e'' % (snapshot %)', st_cnt, st_snap;
+      END IF;
+      PERFORM staging.storia36_check_c7a();  -- il tombstone basta: niente C7a(iii)
+      RAISE EXCEPTION 'ST_OK';
+    END;
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'ST_OK' THEN v_fired := true;
+    ELSIF SQLERRM LIKE 'ST_BROKEN%' OR SQLERRM LIKE '%C7a%' THEN
+      RAISE EXCEPTION 'SELFTEST CASCADE FALLITO: %', SQLERRM;
+    ELSE RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST CASCADE FALLITO: il percorso non e'' arrivato in fondo'; END IF;
+  RAISE NOTICE '[OK] SELFTEST CASCADE #168 (utente cancellato, storia intatta col tombstone, rollback)';
 
   -- ST-C7a(iv): lasciare aperta una richiesta che nessuno deve più decidere
   v_fired := false;

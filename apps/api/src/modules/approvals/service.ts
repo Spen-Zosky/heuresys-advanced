@@ -191,7 +191,9 @@ export const approvalService = {
       // Deliver ONLY the first level's steps to their inbox; higher levels open as prior
       // levels are satisfied (slice-2). Single-level requests behave exactly as slice-1.
       for (const step of steps) {
-        if (step.ordinal !== 1) continue;
+        // approverUserId null (approvatore rimosso, #168) non capita su passi appena
+        // creati, ma il tipo lo ammette: un passo orfano non ha nessuno da avvisare.
+        if (step.ordinal !== 1 || step.approverUserId == null) continue;
         await emitNotification(client, {
           tenantId: step.tenantId,
           userId: step.approverUserId,
@@ -271,7 +273,7 @@ export const approvalService = {
         const req = await repo.findRequestScoped(client, scope, requestId);
         const fresh = await repo.loadSteps(client, requestId);
         for (const s of fresh) {
-          if (s.status !== "PENDING" || s.ordinal !== plan.activeOrdinal) continue;
+          if (s.status !== "PENDING" || s.ordinal !== plan.activeOrdinal || s.approverUserId == null) continue;
           await emitNotification(client, {
             tenantId: s.tenantId,
             userId: s.approverUserId,

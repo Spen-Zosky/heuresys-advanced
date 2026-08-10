@@ -92,20 +92,49 @@ $trg$;
 -- -----------------------------------------------------------------------------
 -- 2. sys.sys_approval_steps — the human-task / transition ledger
 -- -----------------------------------------------------------------------------
+-- #168 (S1053): l'approvatore e' NULLABLE e la sua FK e' SET NULL, non CASCADE.
+-- Il ledger dei passi e' STORIA: rimuovere un utente (mig 000295, incidente S1050)
+-- cancellava a cascata, in silenzio, i passi APPLIED in cui figurava come
+-- approvatore. Il passo sopravvive; chi era resta nello snapshot qui sotto.
 CREATE TABLE IF NOT EXISTS sys.sys_approval_steps (
   approval_step_id               uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
   approval_step_request_id       uuid         NOT NULL,
   approval_step_tenant_id        uuid         NOT NULL,
-  approval_step_approver_user_id uuid         NOT NULL,
+  approval_step_approver_user_id uuid,
   approval_step_ordinal          int          NOT NULL DEFAULT 1,
   approval_step_status           varchar(16)  NOT NULL DEFAULT 'PENDING',
   approval_step_decision_comment text,
   approval_step_decided_at       timestamptz,
   approval_step_decided_by       uuid,
+  -- tombstone: l'email al momento della scrittura, cosi' «chi ha approvato cosa»
+  -- sopravvive alla cancellazione dell'account (SET NULL conserva il passo ma
+  -- perde il nome; lo snapshot conserva anche quello).
+  approval_step_approver_snapshot   varchar(320),
+  approval_step_decided_by_snapshot varchar(320),
   approval_step_metadata         jsonb        NOT NULL DEFAULT '{}'::jsonb,
   created_at                     timestamptz  NOT NULL DEFAULT now(),
   updated_at                     timestamptz  NOT NULL DEFAULT now()
 );
+
+-- Self-healing per i database gia' applicati (la catena si ri-applica intera a
+-- ogni deploy): colonne snapshot, NOT NULL rimosso, FK ricreata SET NULL.
+ALTER TABLE sys.sys_approval_steps ADD COLUMN IF NOT EXISTS approval_step_approver_snapshot   varchar(320);
+ALTER TABLE sys.sys_approval_steps ADD COLUMN IF NOT EXISTS approval_step_decided_by_snapshot varchar(320);
+
+DO $heal$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_attribute
+              WHERE attrelid = 'sys.sys_approval_steps'::regclass
+                AND attname = 'approval_step_approver_user_id' AND attnotnull) THEN
+    ALTER TABLE sys.sys_approval_steps ALTER COLUMN approval_step_approver_user_id DROP NOT NULL;
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_constraint
+              WHERE conname = 'sys_approval_step_approver_fk' AND confdeltype = 'c') THEN
+    ALTER TABLE sys.sys_approval_steps DROP CONSTRAINT sys_approval_step_approver_fk;
+    -- la ri-creazione avviene nel blocco $cs$ qui sotto, che ora la fa SET NULL
+  END IF;
+END;
+$heal$;
 
 DO $cs$
 BEGIN
@@ -126,8 +155,9 @@ BEGIN
       FOREIGN KEY (approval_step_tenant_id) REFERENCES sys.sys_tenancies(tenant_id) ON DELETE CASCADE;
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_approval_step_approver_fk') THEN
+    -- #168: SET NULL, mai CASCADE — il passo e' storia e sopravvive all'approvatore.
     ALTER TABLE sys.sys_approval_steps ADD CONSTRAINT sys_approval_step_approver_fk
-      FOREIGN KEY (approval_step_approver_user_id) REFERENCES sys.sys_users(user_id) ON DELETE CASCADE;
+      FOREIGN KEY (approval_step_approver_user_id) REFERENCES sys.sys_users(user_id) ON DELETE SET NULL;
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_approval_step_decider_fk') THEN
     ALTER TABLE sys.sys_approval_steps ADD CONSTRAINT sys_approval_step_decider_fk
@@ -137,6 +167,9 @@ END;
 $cs$;
 
 -- A user is an approver on a request AT MOST ONCE (clean 23505 -> 409 path).
+-- #168, accettato: con NULLS DISTINCT (default PG16) piu' passi orfani (approver
+-- SET NULL dopo cancellazioni) sulla stessa richiesta non violano l'indice — per
+-- la storia va bene cosi'; il vincolo vale per gli approvatori VIVI.
 CREATE UNIQUE INDEX IF NOT EXISTS sys_approval_step_request_approver_uq
   ON sys.sys_approval_steps (approval_step_request_id, approval_step_approver_user_id);
 -- "my pending approvals" inbox query.

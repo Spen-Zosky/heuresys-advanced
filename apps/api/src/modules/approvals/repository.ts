@@ -64,7 +64,8 @@ export interface ApprovalStepRow {
   approvalStepId: string;
   requestId: string;
   tenantId: string;
-  approverUserId: string;
+  /** #168: null dopo la rimozione dell'account approvatore (FK SET NULL). */
+  approverUserId: string | null;
   ordinal: number;
   levelPolicy: string | null;
   status: string;
@@ -130,7 +131,7 @@ function mapStep(r: Record<string, unknown>): ApprovalStepRow {
     approvalStepId: r.approval_step_id as string,
     requestId: r.approval_step_request_id as string,
     tenantId: r.approval_step_tenant_id as string,
-    approverUserId: r.approval_step_approver_user_id as string,
+    approverUserId: (r.approval_step_approver_user_id as string | null) ?? null,
     ordinal: Number(r.approval_step_ordinal),
     levelPolicy: (r.approval_step_level_policy as string | null) ?? null,
     status: r.approval_step_status as string,
@@ -212,9 +213,10 @@ export async function insertSteps(
   const res = await client.query(
     `INSERT INTO sys.sys_approval_steps
        (approval_step_request_id, approval_step_tenant_id, approval_step_approver_user_id,
-        approval_step_ordinal, approval_step_level_policy)
-     SELECT $1, $2, t.uid, t.ord, t.pol
+        approval_step_ordinal, approval_step_level_policy, approval_step_approver_snapshot)
+     SELECT $1, $2, t.uid, t.ord, t.pol, u.user_email
        FROM unnest($3::uuid[], $4::int[], $5::varchar[]) AS t(uid, ord, pol)
+       JOIN sys.sys_users u ON u.user_id = t.uid
      RETURNING ${STEP_COLS}`,
     [
       requestId,
@@ -256,7 +258,9 @@ export async function findRequestDetail(
   const request = await findRequestScoped(q, scope, id);
   if (!request) return null;
   const stepRes = await q.query(
-    `SELECT ${STEP_COLS_S}, u.user_email AS approver_email, u.user_display_name AS approver_name
+    `SELECT ${STEP_COLS_S},
+            COALESCE(u.user_email, s.approval_step_approver_snapshot) AS approver_email,
+            u.user_display_name AS approver_name
        FROM sys.sys_approval_steps s
        LEFT JOIN sys.sys_users u ON u.user_id = s.approval_step_approver_user_id
       WHERE s.approval_step_request_id = $1
@@ -345,7 +349,9 @@ export async function decideStepGuarded(
   const res = await client.query(
     `UPDATE sys.sys_approval_steps
         SET approval_step_status = $2, approval_step_decision_comment = $3,
-            approval_step_decided_at = now(), approval_step_decided_by = $4
+            approval_step_decided_at = now(), approval_step_decided_by = $4,
+            approval_step_decided_by_snapshot =
+              (SELECT user_email FROM sys.sys_users WHERE user_id = $4)
       WHERE approval_step_id = $1 AND approval_step_status = 'PENDING'
       RETURNING ${STEP_COLS}`,
     [stepId, newStatus, comment, deciderUserId],

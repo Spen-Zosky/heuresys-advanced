@@ -58,6 +58,9 @@ export async function findOverdueSteps(db: DbConnector): Promise<OverdueStep[]> 
        JOIN sys.sys_approval_requests r
          ON r.approval_request_id = s.approval_step_request_id
       WHERE s.approval_step_status = 'PENDING'
+        -- #168: un passo orfano (approvatore rimosso, FK SET NULL) non ha
+        -- nessuno da sollecitare ne' da scalare.
+        AND s.approval_step_approver_user_id IS NOT NULL
         AND s.approval_step_due_at IS NOT NULL
         AND s.approval_step_due_at < now()
         AND r.approval_request_status = 'PENDING'`,

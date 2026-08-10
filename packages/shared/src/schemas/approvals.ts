@@ -53,7 +53,10 @@ export const ApprovalStepSchema = z.object({
   approvalStepId: z.uuid(),
   requestId: z.uuid(),
   tenantId: z.uuid(),
-  approverUserId: z.uuid(),
+  // #168: null quando l'account dell'approvatore e' stato rimosso (FK SET NULL).
+  // Il passo e' storia e sopravvive; l'identita' resta nel tombstone lato DB e
+  // riaffiora in ApprovalStepDetail.approverEmail (COALESCE sullo snapshot).
+  approverUserId: z.uuid().nullable(),
   ordinal: z.number().int(),
   levelPolicy: ApprovalDecisionPolicyEnum.nullable(), // slice-2: per-level quorum (null → request policy)
   status: ApprovalStepStatusEnum,

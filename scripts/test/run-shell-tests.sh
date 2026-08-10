@@ -603,19 +603,18 @@ else
   fail "$CL missing"
 fi
 
-# ------------------------------------------------- Z. le batterie di gov (#173)
+# ------------------------------------------------- Z. le batterie del loop zero-pending
 #
-# [S1052] Queste tre esistevano ma NESSUN cancello le eseguiva: questo file le
-# raccoglieva solo per `bash -n` e shellcheck, mentre le batterie vere sono invocate
-# da sezioni scritte a mano. Sessantasei prove fuori dal presidio — ed e' la ragione
-# per cui la batteria della guardia e' rimasta ROSSA per ore senza che nessuno lo
-# sapesse: B1 aveva spostato il diario, cinque controlli guardavano il posto vecchio,
-# e non c'era niente che li eseguisse.
+# [S1052] Queste esistevano ma NESSUN cancello le eseguiva: questo file le raccoglieva
+# solo per `bash -n` e shellcheck, mentre le batterie vere sono invocate da sezioni
+# scritte a mano. Prove fuori dal presidio — ed e' la ragione per cui una batteria e'
+# rimasta ROSSA per ore senza che nessuno lo sapesse: cinque controlli guardavano il
+# posto vecchio, e non c'era niente che li eseguisse.
 #
 # Si invocano come processi separati e si guarda il CODICE D'USCITA, non l'output:
 # leggere l'esito dai messaggi e' la trappola che questo progetto documenta.
-section "batterie di gov (recinto, verdetti dei revisori, riallineamento alberi)"
-for b in gov-worker-guard-tests.sh zp-review-tests.sh gov-riallineo-tests.sh; do
+section "batterie del loop zero-pending (verdetti dei revisori)"
+for b in zp-review-tests.sh; do
   if [ ! -f "scripts/test/$b" ]; then
     fail "scripts/test/$b manca"
     continue

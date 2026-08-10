@@ -603,6 +603,30 @@ else
   fail "$CL missing"
 fi
 
+# ------------------------------------------------- Z. le batterie di gov (#173)
+#
+# [S1052] Queste tre esistevano ma NESSUN cancello le eseguiva: questo file le
+# raccoglieva solo per `bash -n` e shellcheck, mentre le batterie vere sono invocate
+# da sezioni scritte a mano. Sessantasei prove fuori dal presidio — ed e' la ragione
+# per cui la batteria della guardia e' rimasta ROSSA per ore senza che nessuno lo
+# sapesse: B1 aveva spostato il diario, cinque controlli guardavano il posto vecchio,
+# e non c'era niente che li eseguisse.
+#
+# Si invocano come processi separati e si guarda il CODICE D'USCITA, non l'output:
+# leggere l'esito dai messaggi e' la trappola che questo progetto documenta.
+section "batterie di gov (recinto, verdetti dei revisori, riallineamento alberi)"
+for b in gov-worker-guard-tests.sh zp-review-tests.sh gov-riallineo-tests.sh; do
+  if [ ! -f "scripts/test/$b" ]; then
+    fail "scripts/test/$b manca"
+    continue
+  fi
+  if out="$(bash "scripts/test/$b" 2>&1)"; then
+    ok "$b — $(printf '%s' "$out" | tail -1)"
+  else
+    fail "$b — $(printf '%s' "$out" | tail -1)"
+  fi
+done
+
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

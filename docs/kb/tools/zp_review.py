@@ -38,7 +38,7 @@ COME SI USA
     python docs/kb/tools/zp_review.py risolvi Z-112 --lente correttezza --rilievo 0 \\
         --come "aggiunto il caso limite in drift-check.ts:88, test 5/5"
 
-La radice si impone con `ZP_ROOT`, come per `zp_evidence`: gov istruisce dal repo
+La radice si impone con `ZP_ROOT`, come per `zp_evidence`: si puo' istruire dal repo
 principale e deve poter leggere i verdetti scritti nell'albero del lavoratore.
 """
 from __future__ import annotations

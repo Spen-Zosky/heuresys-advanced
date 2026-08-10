@@ -1,95 +1,71 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-10 (S1052 — la prima corsa presidiata ha chiuso il suo primo cluster: `Z-112` e `Z-250` chiusi).
-> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Stato del PROCESSO gov → `.zp/GOV-DA-FARE.md`.
+**Updated**: 2026-08-10 (S1053 — la modalità di sessione parallela è stata ritirata).
+> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-## Last session brief (S1052)
+## Last session brief (S1053)
 
-**Due lavoratori hanno lavorato in parallelo per la prima volta**, su due cluster di classe
-A con perimetri disgiunti, con un guadagno misurato di **1,83×** sul lavoro in fila. Prima
-però il freno andava sbloccato da un cerchio che si chiudeva su sé stesso — pretendeva
-l'effetto prima della causa. Deciso da Enzo: il freno si chiama `autorizzato_non_presidiato`
-e ora governa esattamente quello.
+**Enzo ha deciso di ritirare la modalità di sessione parallela** e di tornare a due sole
+modalità: `canonical` e `lab`. Il ritiro è stato eseguito nell'ordine obbligato — prima
+inertizzare, poi smontare, poi cancellare — perché le prove di quel codice erano state
+messe *dentro* il cancello di verifica apposta perché una batteria mancante facesse
+fallire il giro.
 
-**`Z-112` è stato chiuso, e con lui `Z-250`** — la voce che aspettava da luglio «una corsa
-presidiata conclusa con un cluster chiuso e il suo commit». Verdetto **VERDE, zero rilievi**:
-cancelli tutti verdi e **le due prove su livelli diversi** che ADR-0026 pretende. Merge
-`b6824e7e`. Chiusi nel piano: 43 → **46**.
+**Cosa è uscito**: 9 file (~2.300 righe), i due hook che sorvegliavano comandi e diario,
+le 4 etichette di sessione tornate a 2, il driver tornato a una sessione sola, tre comandi
+di `zp_state`, la sezione della configurazione, la vista della plancia. **I sei piani non
+sono stati cancellati**: stanno in `docs/archive/modalita-gov-ritirata/`, perché sono il
+resoconto di cosa è stato tentato e perché è stato abbandonato.
 
-**Il processo ha giudicato invece di cedere, e due volte ha detto no**: alla prima
-istruttoria `Z-112` ebbe ROSSO per **una prova su due** — un lavoro tecnicamente completo
-respinto perché le evidenze non bastavano — ed è servito un secondo giro del lavoratore per
-registrarla. `Z-221` resta rosso per un file non committato.
+**Il comando ritirato non fallisce**: non fa più match, quindi degrada a `canonical`.
 
-**Cinque difetti strutturali emersi correndo**, invisibili a ogni batteria: il driver si
-bloccava col rapporto che scrive lui, il recinto fermava il lavoro *dentro* il perimetro, il
-rientro era cieco, la batteria della guardia era rossa, l'istruttoria accusava di «nessun
-diario» chi ne aveva 135 righe. Tutti corretti e provati. E la documentazione è stata
-riallineata al reale su cinque punti — dichiarava due modalità di sessione dove il codice ne
-ha tre, uno schema ritirato, un conteggio fermo, una persona di prova che non esiste più.
+**Due difetti trovati dai cancelli, non da me**: una riga orfana che uccideva `zp_state` a
+ogni invocazione (Python compilava: `bash -n` non l'avrebbe vista), e un comando che
+passava ancora due parametri rimossi — visto dalle prove shell e non dal selftest interno,
+che prova le funzioni e non la riga di comando. Due batterie con angoli diversi.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
 **Fresh session senza pendenze**: zero debiti o task incompleti; doppia verifica e review
 adversarial; le decisioni tecniche sono di Claude.
 
-## Regole che questa sessione ha pagato care
+## ⚠ Cosa resta aperto del ritiro
 
-**Si modifica con gli strumenti di edit, mai con script Python dentro heredoc Bash** (due
-livelli di escape annidati: stringhe rotte tre volte) · **una prova che non può fallire non
-è una prova** · **un conteggio che scarta in silenzio è peggio di uno assente** · **l'esito
-si legge dal codice d'uscita**, mai da `head`/`tail` in coda a una pipe.
-
-## ⚠ COSA E' IN VOLO IN QUESTO MOMENTO (leggi PRIMA di agire)
-
-**Il cancello di verifica sta rieseguendo `test-api`** (lanciato 12:38, ~43 min attesi).
-Il verdetto in `.zp/verify-verdict.json` e' ancora quello VECCHIO e ROSSO: si aggiorna da
-solo quando la corsa chiude. **Prima cosa da fare in sessione nuova**:
-
-```bash
-python -c "import json;d=json.load(open('.zp/verify-verdict.json'));print(d['verdict'], d['generated_at'])"
-```
-
-Se `generated_at` e' **dopo le 13:20 del 2026-08-10**, e' il verdetto nuovo: leggilo.
-Se e' precedente, la corsa non aveva ancora chiuso — rilancia
-`python docs/kb/tools/verify_gate.py run`.
-
-**Il rosso NON e' una regressione**, e ci sono tre misure indipendenti:
-- 00:54 — 1509 test passati, **1 solo file** caduto (`seed-acquisition`), verde da solo;
-- 11:13 — 1511 passati, **1 solo file** caduto (`webauthn`, DIVERSO), verde da solo;
-- 11:19 — corsa **interrotta dalla rete**: colta mentre accadeva (processo a 0 CPU, log
-  fermo, transazione `idle in transaction` da 345s che bloccava due UPDATE, poi
-  `Connection refused` sul DB e `Connection timed out` verso la VM). Esito: 58 file
-  caduti in blocco, 549 test mai eseguiti, 78 minuti invece di 43.
-
-Un difetto vero colpisce sempre lo stesso punto; questo cambia bersaglio a ogni corsa e
-segue lo stato dell'infrastruttura. E' **`Z-251`**, registrato nel backlog con le misure.
+1. **I 4 rami `gov/*` e i 2 alberi di lavoro** non sono stati toccati — contengono **473
+   righe mai entrate in main** (`#182`), di cui 317 sono il versante E2E di `Z-112`.
+   Recuperarle o archiviarle è **decisione di Enzo**.
+2. **Il ruolo di database `gov_worker`** esiste ancora, in sola lettura, insieme al suo
+   segreto locale. Lo script che lo ricreava è stato cancellato: se si decide di
+   rimuoverlo, va fatto sapendo che non c'è più il modo automatico di rifarlo.
+3. **Il registro**: le voci `#173` `#175` `#179` `#180` vanno chiuse come WON'T-DO con la
+   motivazione, e `Z-250` (chiuso) cita una corsa presidiata di un impianto che non esiste
+   più — va aggiunta la riga che lo dice.
+4. **Il freno del cancello di verifica è INSERITO** (`.zp/verify-off`): il messaggio rosso
+   era diventato continuo su un verdetto vecchio. Finché quel file c'è, **il cancello dice
+   sempre verde**. Si toglie con `rm .zp/verify-off`, poi `python docs/kb/tools/verify_gate.py run`.
 
 ## Top priorities (prossima sessione)
 
-1. **`Z-251`** (~2h, **P1**): la suite non regge la contesa sul DB condiviso. È la voce che
-   rende ambiguo **ogni** verdetto e che oggi ha imposto tre riesecuzioni da 43 minuti. La
-   causa è dichiarata nel `vitest.config.ts` — «ogni file rifà i login da zero e Argon2id è
-   lento» — e la cura è condividere le sessioni fra file. **Tocca `apps/api`: da assegnare a
-   un lavoratore, non da fare in gov.**
-2. **Provare `#177` sul campo**: `zp_review.py` è corretto e ha 13 prove, ma **nessun
-   lavoratore l'ha ancora usato** — serve una corsa che arrivi davvero al passo dei revisori.
-3. **`#124` mascheratura, strato 1** (~1 sessione): spaccare `IDENTITY` in `IDENTITY_PRO` /
-   `IDENTITY_PRIV` chiude **6 celle su 8** senza alcun meccanismo nuovo.
+1. **Chiudere il ritiro**: i tre punti qui sopra, più la riverifica finale.
+2. **`Z-251`** (~2h, **P1**): la suite non regge la contesa sul DB condiviso — è la voce che
+   rende ambiguo ogni verdetto. È classe D: serve un'autorizzazione per lotto di Enzo.
+3. **`#181`** (~2-3h): i 7 rilievi sul controllo di drift, di cui uno confermato da due
+   revisori. Le correzioni iniziate giacciono non committate nel working tree.
+4. **`#124` mascheratura, strato 1**: spaccare `IDENTITY` chiude 6 celle su 8.
 
 ## Open questions
 
-- **Il freno resta INSERITO per il non presidiato.** Vuoi che il loop giri anche non
-  sorvegliato? `#177` suggerisce di aspettare: oggi un lavoratore non chiude da solo.
-- **`.zp/GOV-DA-FARE.md` non è versionato**, esiste in una sola copia qui (`#176`).
-- **`#175`**: il verde di `Z-230` fu dato col cancello evidenze cieco. Si ri-istruisce?
+- **I due rami recuperati**: recuperare le 473 righe o archiviarle dichiarandolo?
+- **Il ruolo `gov_worker`**: si revoca o resta?
+- **`#175`**: il verde di `Z-230` fu dato col cancello evidenze cieco — e ora sappiamo che
+  quel lavoro non è nemmeno in main.
 
 ## Verification
 
 ```bash
 python docs/kb/tools/session_start.py                       # menu + salute, un giro
-python docs/kb/tools/gov_rientro.py                         # stato del processo gov
-bash scripts/test/gov-worker-guard-tests.sh                 # recinto e diario
-python docs/kb/tools/zp_selftest.py                         # impianto zp
-bash scripts/zero-pending-driver.sh --lane full-presidiata --dry-run   # corsa sorvegliata
+sh scripts/hooks/hook.sh selftest                           # guardia e parser (83 prove)
+bash scripts/test/run-shell-tests.sh                        # prove shell (148)
+python docs/kb/tools/zp_selftest.py                         # impianto zp (20)
+bash scripts/zero-pending-driver.sh --dry-run               # il loop, a una sessione
 ```

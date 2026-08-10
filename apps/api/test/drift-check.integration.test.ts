@@ -16,7 +16,7 @@
 import { describe, expect, it } from "vitest";
 
 import { pool } from "../src/db/client.js";
-import { PREFISSI, censimento, drift, type Censimento } from "./helpers/drift-check.js";
+import { PREFISSI, censimento, colonneSorvegliate, drift, type Censimento } from "./helpers/drift-check.js";
 
 const interroga = (sql: string, params?: unknown[]) => pool.query(sql, params as never[]);
 
@@ -46,20 +46,70 @@ describe("assert di drift post-suite", () => {
     expect([...nulla.entries()]).toEqual([]);
   });
 
-  it("il drift fra «niente» e i residui reali e' rilevato, con i conteggi giusti", async () => {
+  it("il drift fra «niente» e un insieme popolato e' rilevato, con i conteggi giusti", async () => {
     const niente = await censimento(interroga, [`${IMPOSSIBILE}%`]);
-    const reale = await censimento(interroga, PREFISSI);
 
-    const cresciuti = drift(niente, reale);
+    // `%` — qualunque testo — e NON `PREFISSI`. La differenza e' la ragione per cui
+    // questo test esiste ancora: con `PREFISSI` l'insieme di confronto sono i 4 residui
+    // di giugno, e nel giorno in cui verranno ripuliti — cioe' eseguendo l'ordine che
+    // il messaggio d'errore del rilevatore da' esplicitamente — `reale.size` andrebbe a
+    // 0, il `for` non itererebbe piu' e l'asserzione diventerebbe `0 === 0`. Il test
+    // sarebbe rimasto VERDE senza piu' dimostrare niente: un falso verde nato dal
+    // successo, che e' il modo piu' subdolo di perdere una prova.
+    const popolato = await censimento(interroga, ["%"]);
 
-    // Ogni posto che il censimento reale conosce risulta cresciuto rispetto al vuoto,
+    // La guardia che rende impossibile quella deriva: se l'insieme di confronto si
+    // svuotasse, questo test diventa ROSSO invece di diventare vacuo.
+    expect(popolato.size).toBeGreaterThan(0);
+
+    const cresciuti = drift(niente, popolato);
+
+    // Ogni posto che il censimento conosce risulta cresciuto rispetto al vuoto,
     // con lo stesso conteggio: e' la catena completa censimento -> confronto.
-    expect(cresciuti.length).toBe(reale.size);
+    expect(cresciuti.length).toBe(popolato.size);
     for (const c of cresciuti) {
       expect(c.prima).toBe(0);
-      expect(c.dopo).toBe(reale.get(c.loc));
+      expect(c.dopo).toBe(popolato.get(c.loc));
       expect(c.dopo).toBeGreaterThan(0);
     }
+  });
+
+  it("sa dire quante colonne sta guardando: «nessun residuo» e «non ho guardato» non si confondono", async () => {
+    const colonne = await colonneSorvegliate(interroga);
+
+    // Il numero e' quello che il censimento ispeziona davvero (filtro BASE TABLE incluso).
+    expect(colonne).toBeGreaterThan(100);
+
+    // E combacia con il conteggio indipendente fatto qui, riga per riga: se `censimento`
+    // e `colonneSorvegliate` divergessero, la guardia del setup misurerebbe un universo
+    // diverso da quello censito, e non varrebbe niente.
+    const { rows } = await interroga(
+      `SELECT count(*)::int AS n
+         FROM information_schema.columns c
+         JOIN information_schema.tables t
+           ON t.table_schema = c.table_schema AND t.table_name = c.table_name
+          AND t.table_type = 'BASE TABLE'
+        WHERE c.table_schema = 'sys' AND c.data_type IN ('character varying', 'text')`,
+    );
+    expect(colonne).toBe(Number((rows[0] as { n: number }).n));
+  });
+
+  it("sorveglia il soggetto di inbox-stream, l'unico scrittore della suite che committa davvero", async () => {
+    // `inbox-stream.integration.test.ts:113` apre un `new Client()` fuori dal pool: sfugge
+    // all'isolamento transazionale di D-52 e i suoi INSERT restano se il cleanup salta.
+    // Fino al 2026-08-10 nessun prefisso lo copriva — `IT-S%` ha un trattino letterale
+    // dove il soggetto ha un underscore.
+    const { rows } = await interroga(
+      `SELECT 'IT_SSE_ABC' LIKE ANY($1::text[]) AS coperto,
+              'ITxSSEyABC' LIKE ANY($1::text[]) AS falso_positivo`,
+      [[...PREFISSI]],
+    );
+    const r = rows[0] as { coperto: boolean; falso_positivo: boolean };
+
+    expect(r.coperto).toBe(true);
+    // L'escape conta: senza `\_` l'underscore sarebbe un jolly e il pattern
+    // rastrellerebbe dati veri che cominciano per «IT».
+    expect(r.falso_positivo).toBe(false);
   });
 
   it("un censimento identico non produce drift, e una diminuzione non e' drift", () => {

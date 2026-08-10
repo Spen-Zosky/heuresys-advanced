@@ -837,22 +837,13 @@ def main(argv: list[str]) -> int:
         return cmd_mode(rest)
     if cmd == "set":
         if len(rest) < 2:
-            print(f"uso: set <session_id> <{'|'.join(MODI)}> [cluster] [lavoratore]",
-                  file=sys.stderr)
+            print(f"uso: set <session_id> <{'|'.join(MODI)}>", file=sys.stderr)
             return 1
         if rest[1] not in MODI:
             print(f"modalita' sconosciuta: {rest[1]} (ammesse: {', '.join(MODI)})",
                   file=sys.stderr)
             return 1
-        lavoratore = None
-        if len(rest) > 3:
-            try:
-                lavoratore = int(rest[3])
-            except ValueError:
-                print(f"il numero del lavoratore non e' un numero: {rest[3]}", file=sys.stderr)
-                return 1
-        set_mode(rest[0], rest[1], cluster=(rest[2] if len(rest) > 2 else None),
-                 lavoratore=lavoratore)
+        set_mode(rest[0], rest[1])
         print(get_mode(rest[0]))
         return 0
     if cmd == "gc":

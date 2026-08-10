@@ -2,12 +2,12 @@
 
 Piano: `2026-07-25-zero-pending-plan.md` del 2026-08-10
 
-**44 chiusi su 262.** Restano 188 pezzi che posso fare da solo e 30 che aspettano te.
+**46 chiusi su 262.** Restano 186 pezzi che posso fare da solo e 30 che aspettano te.
 
 ## Cosa resta, per ondata
 
 - **W0** — 1 pezzi, circa 2 ore
-- **W1** — 55 pezzi, circa 107 ore
+- **W1** — 53 pezzi, circa 105 ore
 - **W2** — 37 pezzi, circa 203 ore
 - **W3** — 36 pezzi, circa 168 ore
 - **W4** — 39 pezzi, circa 213 ore
@@ -68,4 +68,4 @@ NOTA DI STATO, misurata in questo giro e non scritta da nessuna parte: il commit
 
 ## Spesa
 
-8 giri, circa 56.82 dollari su un tetto di 120.
+9 giri, circa 68.96 dollari su un tetto di 120.

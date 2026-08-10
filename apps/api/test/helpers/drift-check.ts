@@ -18,8 +18,11 @@
  * una lista scritta a mano invecchia in silenzio, e proprio la coppia che perde righe
  * oggi (`sys_content_*`) non sarebbe mai finita in una lista compilata a intuito. La
  * scansione qui e' ESAUSTIVA — tutte le colonne testuali di `sys` — perche' costa
- * quanto non costa niente: 737 colonne su 219 tabelle, **1,3-2,0 secondi** misurati,
- * contro i ~40 minuti della suite.
+ * quanto non costa niente: **695 colonne su 199 tabelle**, **1,3-2,0 secondi** misurati,
+ * contro i ~40 minuti della suite. (Il numero e' quello che questo codice censisce
+ * davvero: il filtro `table_type='BASE TABLE'` esclude le viste. Senza quel filtro
+ * sarebbero 737 su 216 — la misura che una versione precedente di questo commento
+ * riportava, e che non si riproduceva contro la query qui sotto.)
  *
  * COSA FALLISCE, E COSA NO
  * ------------------------
@@ -56,11 +59,20 @@ const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", 
  *               'ZZ.1.1'); e' il prefisso che ha effettivamente lasciato i residui vivi
  *   TEST%     — 'TEST-APPROVAL', 'TEST-FX-', 'TESTFIX::TL::n', 'TEST_STEPPED'
  *   IT-S%     — fixture datate per sessione ('IT-S1028-LC')
+ *   IT\_SSE\_% — `inbox-stream.integration.test.ts:113`, ed e' il caso che conta di piu':
+ *               apre un `new Client()` FUORI dal pool, quindi sfugge all'isolamento
+ *               transazionale di D-52 e COMMITTA per davvero. E' l'unico scrittore della
+ *               suite d'integrazione che possa lasciare righe dietro di se', e fino al
+ *               2026-08-10 era l'unico che questa lista NON vedeva: `IT-S%` non lo copre,
+ *               perche' il terzo carattere del pattern e' un trattino letterale mentre il
+ *               soggetto ha un underscore. Le barre rovesciate sono necessarie — in LIKE
+ *               `_` e' un jolly, e senza escape il pattern matcherebbe anche 'ITxSSEy'.
+ *               Verificato: 'IT_SSE_ABC' LIKE 'IT\_SSE\_%' -> true, 'ITxSSEyABC' -> false.
  *
  * Chi aggiunge una convenzione nuova la aggiunge qui: e' l'unico posto dove la
  * definizione di «residuo» e' scritta.
  */
-export const PREFISSI = ["E2E%", "ZZ%", "TEST%", "IT-S%"] as const;
+export const PREFISSI = ["E2E%", "ZZ%", "TEST%", "IT-S%", "IT\\_SSE\\_%"] as const;
 
 /** Chi sa interrogare il database. Il pool dell'app, un Client dedicato: indifferente. */
 export type Interrogante = (sql: string, params?: unknown[]) => Promise<{ rows: unknown[] }>;
@@ -99,6 +111,32 @@ export async function censimento(q: Interrogante, prefissi: readonly string[] = 
   const out: Censimento = new Map();
   for (const r of rows as { loc: string; n: string | number }[]) out.set(r.loc, Number(r.n));
   return out;
+}
+
+/**
+ * Quante colonne il censimento sta davvero guardando.
+ *
+ * Esiste per distinguere due esiti che `censimento()` da solo confonde, ed e' la
+ * distinzione fra un rilevatore e un placebo: la mappa torna VUOTA sia quando 695
+ * colonne sono state ispezionate e nessuna ha residui — il caso buono — sia quando
+ * di colonne non ne e' stata ispezionata NESSUNA. Il secondo caso non e' teorico:
+ * `information_schema.columns` mostra solo cio' su cui il ruolo ha privilegi, quindi
+ * un grant mancante, un database sbagliato o uno schema invisibile producono zero
+ * righe. Senza questo conteggio l'esito sarebbe «nessun residuo di test sul
+ * database»: un verde muto, cioe' la peggiore delle risposte, perche' e' identica a
+ * quella giusta.
+ */
+export async function colonneSorvegliate(q: Interrogante): Promise<number> {
+  const { rows } = await q(`
+    SELECT count(*)::int AS n
+      FROM information_schema.columns c
+      JOIN information_schema.tables t
+        ON t.table_schema = c.table_schema
+       AND t.table_name  = c.table_name
+       AND t.table_type  = 'BASE TABLE'
+     WHERE c.table_schema = 'sys'
+       AND c.data_type IN ('character varying', 'text')`);
+  return Number((rows[0] as { n: number | string }).n);
 }
 
 /** Cosa e' COMPARSO fra due censimenti. Le sparizioni non interessano: quello e' cleanup. */
@@ -141,12 +179,30 @@ let baseline: Censimento | null = null;
 export async function setup(): Promise<void> {
   if (process.env["DRIFT_CHECK"] === "0") return;
   try {
-    baseline = await conUnClient(censimento);
+    const { mappa, colonne } = await conUnClient(async (q) => ({
+      mappa: await censimento(q),
+      colonne: await colonneSorvegliate(q),
+    }));
+
+    // Un censimento che non guarda niente non e' un censimento verde: e' cieco.
+    // Meglio dichiararsi scoperti che dire «nessun residuo» senza aver guardato.
+    if (colonne === 0) {
+      baseline = null;
+      console.warn(
+        "[drift] ZERO colonne ispezionate: il rilevatore e' CIECO (grant mancanti, " +
+          "database sbagliato o schema `sys` invisibile a questo ruolo). La corsa NON e' coperta " +
+          "dall'assert di drift — e non e' la stessa cosa di «nessun residuo».",
+      );
+      return;
+    }
+
+    baseline = mappa;
     const pre = totale(baseline);
     console.log(
       pre === 0
-        ? "[drift] baseline: nessun residuo di test sul database."
-        : `[drift] baseline: ${pre} righe residue PRE-ESISTENTI (non le lascia questa corsa):\n` +
+        ? `[drift] baseline: nessun residuo di test sul database (${colonne} colonne ispezionate).`
+        : `[drift] baseline: ${pre} righe residue PRE-ESISTENTI (non le lascia questa corsa), ` +
+            `su ${colonne} colonne ispezionate:\n` +
             [...baseline].map(([loc, n]) => `         ${loc}: ${n}`).join("\n"),
     );
   } catch (e) {
@@ -176,15 +232,30 @@ export async function teardown(): Promise<void> {
     return;
   }
 
-  // NON TOGLIERE questa riga credendola ridondante col `throw` sotto: MISURATO su
-  // Vitest 4.1.10, un teardown di globalSetup che lancia viene stampato come
-  // «error during close ...» e il processo esce **0**. Senza questa riga l'assert non
-  // asserisce: la CI resterebbe verde con le righe residue sul database condiviso.
-  // Prova: forzare il lancio -> EXIT=0; con la riga -> EXIT=1 (esperimento Z-112).
+  // QUI NON SI LANCIA, e la ragione e' misurata (esperimento Z-112, Vitest 4.1.10).
+  //
+  // Su questa versione i teardown di `globalSetup` girano in sequenza e in ordine
+  // INVERSO all'array, ma la catena NON e' protetta per elemento: il primo teardown
+  // che lancia interrompe tutti quelli dopo di se'. Poiche' `drift-check` sta in fondo
+  // all'array, il suo teardown gira per PRIMO — quindi un `throw` qui saltava il
+  // teardown di `suite-lock.ts` e `.zp/suite.lock` restava su disco col PID della corsa,
+  // proprio nel caso per cui questo codice esiste. La corsa successiva trovava un
+  // lucchetto occupato da un processo finito.
+  //
+  // `process.exitCode = 1` da solo ottiene entrambe le cose. Provato con due
+  // globalSetup finti, uno che rilascia un marker e uno che segnala il guasto:
+  //   con `throw`                  -> EXIT=0 e il marker NON viene scritto
+  //   con `process.exitCode` solo  -> EXIT=1 e il marker VIENE scritto
+  // La prima riga dice anche perche' il solo `throw` non bastava comunque: un teardown
+  // che lancia viene stampato come «error during close ...» e il processo esce **0**.
   process.exitCode = 1;
-  throw new Error(
-    `Questa corsa ha lasciato ${cresciuti.reduce((s, c) => s + c.dopo - c.prima, 0)} righe residue sul database condiviso:\n` +
-      cresciuti.map((c) => `  ${c.loc}: ${c.prima} -> ${c.dopo}`).join("\n") +
+  const occorrenze = cresciuti.reduce((s, c) => s + c.dopo - c.prima, 0);
+  console.error(
+    `[drift] QUESTA CORSA HA LASCIATO RIGHE SUL DATABASE CONDIVISO.\n` +
+      // «occorrenze», non «righe»: il conteggio e' per COLONNA, e una riga che porta il
+      // prefisso in due colonne (es. titolo + slug) conta due volte.
+      `  ${occorrenze} occorrenze in ${cresciuti.length} colonne:\n` +
+      cresciuti.map((c) => `    ${c.loc}: ${c.prima} -> ${c.dopo}`).join("\n") +
       `\n  Prefissi sorvegliati: ${PREFISSI.join(", ")}\n` +
       `  Un cleanup non ha ripulito (spesso e' un catch che ingoia l'errore, F-WS-F-9).\n` +
       `  Le righe restano su un database condiviso con la produzione: vanno rimosse a mano.\n` +

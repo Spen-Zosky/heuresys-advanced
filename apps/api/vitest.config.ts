@@ -78,8 +78,15 @@ export default defineConfig({
     // contro 4 su database libero, con ZERO test falliti in entrambi i casi.
     // I teardown di globalSetup girano in ordine INVERSO all'array: `drift-check` sta
     // dopo il lucchetto proprio per questo — il censimento finale avviene mentre la
-    // suite tiene ancora il lucchetto, quindi nessun'altra corsa puo' scrivere righe che
-    // finirebbero attribuite a questa (Z-112).
+    // suite tiene ancora il lucchetto (Z-112).
+    //
+    // Cosa protegge davvero, detto con precisione: il lucchetto e' preso da QUESTA
+    // suite (`vitest` di apps/api) e da nessun altro. Impedisce quindi che una SECONDA
+    // corsa di questa suite scriva righe che verrebbero attribuite alla prima. NON
+    // impedisce niente agli E2E Playwright di apps/web, che hanno la loro config e non
+    // prendono questo lucchetto: se girano in parallelo, le righe che lasciano possono
+    // finire nel drift di questa corsa. E' un limite noto, non una svista — dirlo qui
+    // vale piu' che lasciar credere una protezione che non c'e'.
     globalSetup: ["./test/helpers/suite-lock.ts", "./test/helpers/drift-check.ts"],
   },
 });

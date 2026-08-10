@@ -516,6 +516,21 @@
       "types": "./dist/schemas/organization-unit-processes.d.ts",
       "heuresys-source": "./src/schemas/organization-unit-processes.ts",
       "default": "./dist/schemas/organization-unit-processes.js"
+    },
+    "./schemas/review-cycles": {
+      "types": "./dist/schemas/review-cycles.d.ts",
+      "heuresys-source": "./src/schemas/review-cycles.ts",
+      "default": "./dist/schemas/review-cycles.js"
+    },
+    "./schemas/performance-reviews": {
+      "types": "./dist/schemas/performance-reviews.d.ts",
+      "heuresys-source": "./src/schemas/performance-reviews.ts",
+      "default": "./dist/schemas/performance-reviews.js"
+    },
+    "./schemas/calibration": {
+      "types": "./dist/schemas/calibration.d.ts",
+      "heuresys-source": "./src/schemas/calibration.ts",
+      "default": "./dist/schemas/calibration.js"
     }
   },
   "scripts": {

@@ -171,8 +171,21 @@ gov_worktree_prepara() {     # <repo> <n> [ref] -> stampa il percorso; 1 se fall
     # 2026-08-09 con il commit f059a057 (5 file, +317 righe): recuperato solo perche'
     # git non aveva ancora raccolto l'oggetto. Un albero e' riallineabile solo se non
     # ha NULLA da perdere — ne' in lavoro non salvato, ne' in commit propri.
+    # [S1052] Si conta per CONTENUTO, non per hash. `git pull --rebase` nella procedura
+    # di chiusura RISCRIVE i commit: il lavoro del lavoratore 1 e' entrato in main come
+    # `b87a4efd` mentre il suo ramo puntava ancora a `7eb39abf`, e il merge originale non
+    # esisteva piu'. Contando gli hash, la guardia vedeva «commit propri da non perdere»
+    # su un lavoro GIA' AL SICURO, e quell'albero non si sarebbe riallineato MAI PIU':
+    # misurato, il lavoratore della corsa dopo ha lavorato con una skill vecchia di un
+    # giorno perche' il suo albero era fermo.
+    #
+    # `git cherry` confronta i patch-id: un commit gia' presente in main con altro hash
+    # esce con `-`, uno davvero nuovo con `+`. Si contano solo i `+`, cioe' cio' che
+    # andrebbe perso per davvero. La protezione resta intera — cambia solo che smette di
+    # proteggere copie.
     local suoi
-    suoi="$(git -C "$dir" rev-list --count "$(git -C "$repo" rev-parse main)"..HEAD 2>/dev/null || echo 0)"
+    suoi="$(git -C "$dir" cherry "$(git -C "$repo" rev-parse main)" HEAD 2>/dev/null | grep -c '^+' || true)"
+    suoi="${suoi:-0}"
     if [[ -z "$(git -C "$dir" status --porcelain)" && "${suoi:-0}" == "0" ]]; then
       # Il ref si risolve NEL REPO PRINCIPALE: dentro l'albero «HEAD» e' il commit
       # dell'albero stesso, quindi un reset su HEAD non lo muove di un millimetro —

@@ -37,6 +37,19 @@
   - **resta**: la decisione se far girare il loop anche NON presidiato. Il freno per quello è ancora inserito, ed è tua
   - plancia-S1052: **FATTA, 7 voci su 7** (`3b185b05`, `51ac3eb7`, `3e034f2f`; piano `docs/superpowers/plans/2026-08-09-plancia-gov.md`). Due ritmi (`/api/volo` **0,008 s** contro **1,18 s**), 5 viste, lavoratori + diari in diretta, composizione dei cluster, fascia «in volo adesso», configurazione con guardie/coerenza/rollback provato. Nessuna misura tecnica la decide al posto tuo
 
+- **#177 I tre revisori adversarial vivono in un workflow che sopravvive alla sessione, e i verdetti restano orfani** · status: ACTIVE
+  - priority: P1 · effort: ~2-3h · doc: `.zp/verdetti/w1-Z-112-*.json`, esiti del lavoratore in `<albero>/.zp/last-outcome.json`
+  - misurato-S1052: **due corse su due** il lavoratore ha proposto `cluster-interrupted` sullo stesso motivo — «il workflow `wf_14be665e-eab` non ha ancora restituito i verdetti e il budget dell'iterazione è sceso a ~1,6 USD su 12». Il protocollo della skill non ammette di chiudere un cluster senza i tre revisori, ma quei verdetti stanno in un **workflow asincrono**: quando la sessione finisce (per budget o per fine giro), la sessione successiva **non può più leggerli** e riparte dallo stesso punto
+  - perche-conta: è un blocco **strutturale**, non di denaro. Alzare il tetto non lo risolve — l'ha dimostrato la seconda corsa, che con lo stesso budget ha comunque prodotto lo stesso esito. Finché resta, **nessun lavoratore può chiudere un cluster da solo**: la chiusura dipende sempre da un giudizio esterno
+  - da-fare: o i revisori girano **dentro** la sessione del lavoratore (sincroni, quindi dentro il suo budget), o i loro verdetti si scrivono su disco dove una sessione successiva li ritrova. La seconda è più economica e coerente con il resto dell'impianto, dove lo stato vive su file e non nella memoria di un processo
+  - nota: **non ha impedito la chiusura di `Z-112`** — gov giudica sui cancelli e sulle evidenze, non sull'autovalutazione di chi ha fatto il lavoro. Ma un lavoratore che non può mai dichiararsi chiuso rende il loop dipendente da un presidio, che è l'opposto dello scopo
+
+- **#178 Il troncamento da budget non è mai stato osservato: il tetto contiene la spesa, ma non si è mai visto tagliare** · status: ACTIVE
+  - priority: P2 · effort: ~1h · doc: `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` (Z-250, test ③)
+  - misurato-S1052: in **quattro** corse il tetto ha sempre contenuto la spesa (10,96/12 · 5,28/12 · 0,95/1 · 9,75/12) ma **nessuna sessione è stata tagliata a metà lavoro**. La corsa da 1 $ si è fermata per il `next: stop` lasciato dalla precedente, non per il tetto: il test di Z-250 è stato **eseguito ma dichiarato non probante** invece che spacciato per verde
+  - perche-conta: il tetto è la sola difesa contro una corsa che consuma denaro senza produrre. Finché non lo si è visto **mordere**, non si sa se protegge o se è un numero scritto
+  - da-fare: costruire una prova che possa fallire — un cluster con criterio volutamente lungo e un tetto basso, e verificare che la sessione venga chiusa dal budget e che l'esito registrato lo dica
+
 - **#175 Il verdetto verde di `w1` è stato dato con il cancello delle evidenze cieco** · status: WAIT-INPUT
   - priority: P2 · effort: ~40min (una ri-istruttoria) · doc: `.zp/verdetti/w1-Z-230-20260809-185312.json`
   - misurato-S1052: il cancello cercava le prove in `last-outcome.json`, mentre il lavoratore le scrive in `.zp/prove/<cluster>.json`; **e** `zp_evidence` derivava la radice dal proprio file, quindi dal repo principale guardava `<repo>/.zp/prove/` e rispondeva «nessuna prova registrata» con il file presente e valido. Il cancello **passava sempre e taceva**

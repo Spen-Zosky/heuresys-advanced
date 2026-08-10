@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-09T22:59:29Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2914**
+**Generato**: 2026-08-10T07:04:04Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2916**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 101 |
 | showcase-source | 14 |
-| test | 339 |
+| test | 341 |
 | ux-design-archive | 80 |
 | web-source | 233 |
-| **TOTALE** | **2914** |
+| **TOTALE** | **2916** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2356 |
+| live | 2358 |
 
 ## File per categoria
 
@@ -2425,6 +2425,7 @@
 - `D:\heuresys-advanced\apps\api\test\csv-formula-injection.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\dashboard.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\domain-derived-sections.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\drift-check.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\employee-centric-doctrine.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\engagement-feedback.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\engagement.integration.test.ts` · *live* · git-tracked
@@ -2444,6 +2445,7 @@
 - `D:\heuresys-advanced\apps\api\test\goals.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\actors.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\build-test-app.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\helpers\drift-check.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\login.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\mfa-fixture-secrets.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\org-actors.ts` · *live* · git-tracked

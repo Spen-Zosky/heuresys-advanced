@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-09T22:59:29Z da docs/kb/tools/build_index.py
+# generato: 2026-08-10T07:04:04Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-09T22:59:29Z"
-  total_files: 2914
+  generated_at: "2026-08-10T07:04:04Z"
+  total_files: 2916
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 101
     showcase-source: 14
-    test: 339
+    test: 341
     ux-design-archive: 80
     web-source: 233
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2356
+    live: 2358
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -13904,6 +13904,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\drift-check.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/drift-check.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\employee-centric-doctrine.integration.test.ts'
     root: repo
     rel: 'apps/api/test/employee-centric-doctrine.integration.test.ts'
@@ -14015,6 +14021,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\helpers\build-test-app.ts'
     root: repo
     rel: 'apps/api/test/helpers/build-test-app.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\helpers\drift-check.ts'
+    root: repo
+    rel: 'apps/api/test/helpers/drift-check.ts'
     category: test
     status: live
     provenance: git-tracked

@@ -1,6 +1,6 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-10 (S1052 — la prima corsa presidiata è avvenuta, e ha rotto cinque cose che nessuno vedeva).
+**Updated**: 2026-08-10 (S1052 — la prima corsa presidiata ha chiuso il suo primo cluster: `Z-112` e `Z-250` chiusi).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Stato del PROCESSO gov → `.zp/GOV-DA-FARE.md`.
 
 ## Last session brief (S1052)
@@ -11,19 +11,22 @@ però il freno andava sbloccato da un cerchio che si chiudeva su sé stesso — 
 l'effetto prima della causa. Deciso da Enzo: il freno si chiama `autorizzato_non_presidiato`
 e ora governa esattamente quello.
 
-**Il valore della corsa non sono i cluster chiusi — sono zero — ma i cinque difetti
-strutturali che ha fatto emergere**, invisibili a ogni batteria: il driver si bloccava con
-il rapporto che scrive lui, il recinto fermava il lavoro *dentro* il perimetro, il rientro
-era diventato cieco, la batteria della guardia era rossa, l'istruttoria accusava di «nessun
-diario» chi ne aveva 135 righe. Tutti corretti e provati.
+**`Z-112` è stato chiuso, e con lui `Z-250`** — la voce che aspettava da luglio «una corsa
+presidiata conclusa con un cluster chiuso e il suo commit». Verdetto **VERDE, zero rilievi**:
+cancelli tutti verdi e **le due prove su livelli diversi** che ADR-0026 pretende. Merge
+`b6824e7e`. Chiusi nel piano: 43 → **46**.
 
-**Il processo ha giudicato invece di cedere**: entrambi i lavoratori hanno preso ROSSO per
-ragioni vere (prove insufficienti · lavoro non committato), e uno si è rifiutato di
-dichiarare chiuso un lavoro completo perché non aveva potuto far girare i revisori.
+**Il processo ha giudicato invece di cedere, e due volte ha detto no**: alla prima
+istruttoria `Z-112` ebbe ROSSO per **una prova su due** — un lavoro tecnicamente completo
+respinto perché le evidenze non bastavano — ed è servito un secondo giro del lavoratore per
+registrarla. `Z-221` resta rosso per un file non committato.
 
-**Prima della corsa la documentazione è stata riallineata**: diceva due modalità di sessione
-mentre il codice ne ha tre, prescriveva uno schema ritirato, un conteggio fermo dove il
-database dice altro, e una persona di prova che non esiste più.
+**Cinque difetti strutturali emersi correndo**, invisibili a ogni batteria: il driver si
+bloccava col rapporto che scrive lui, il recinto fermava il lavoro *dentro* il perimetro, il
+rientro era cieco, la batteria della guardia era rossa, l'istruttoria accusava di «nessun
+diario» chi ne aveva 135 righe. Tutti corretti e provati. E la documentazione è stata
+riallineata al reale su cinque punti — dichiarava due modalità di sessione dove il codice ne
+ha tre, uno schema ritirato, un conteggio fermo, una persona di prova che non esiste più.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -40,10 +43,10 @@ livelli di escape annidati hanno rotto le stringhe tre volte (`AUTONOMY_R23_PROJ
 
 ## Top priorities (prossima sessione)
 
-1. **Chiudere `Z-112`** (~30min): il lavoro è completo, committato e valido (perimetro
-   rispettato, cancelli verdi). Manca **la seconda prova** su un livello diverso (ADR-0026).
-   Registrata quella, `bash scripts/gov-chiudi.sh 1` e il cluster chiude — **e con lui
-   `Z-250`**, che aspetta solo un cluster chiuso con il suo commit.
+1. **`#177` i revisori adversarial vivono in un workflow orfano** (~2-3h): due corse su due
+   il lavoratore non ha potuto chiudere da solo, perché i verdetti stanno in un workflow che
+   sopravvive alla sessione e la successiva non li ritrova. È un blocco **strutturale**, non
+   di budget — finché resta, il loop dipende da un presidio, che è l'opposto del suo scopo.
 2. **`#124` mascheratura, strato 1** (~1 sessione): spaccare `IDENTITY` in `IDENTITY_PRO` /
    `IDENTITY_PRIV` chiude **6 celle su 8** senza alcun meccanismo nuovo.
 3. **`Z-251`** (~2h): la suite non regge la contesa sul DB condiviso — un file è caduto per
@@ -51,8 +54,9 @@ livelli di escape annidati hanno rotto le stringhe tre volte (`AUTONOMY_R23_PROJ
 
 ## Open questions
 
-- **Il freno resta INSERITO per il non presidiato.** Ora che la corsa sorvegliata ha
-  funzionato, vuoi che il loop giri anche non presidiato? Decisione tua, senza scadenza.
+- **Il freno resta INSERITO per il non presidiato.** La corsa sorvegliata ora chiude cluster
+  veri. Vuoi che il loop giri anche non presidiato? Decisione tua, senza scadenza — e `#177`
+  suggerisce di aspettare: oggi un lavoratore non riesce a chiudersi da solo.
 - **`.zp/GOV-DA-FARE.md` non è versionato** ed esiste in una sola copia su questa macchina:
   contiene le tue regole d'ingaggio gov (`#176`).
 - **`#175`**: il verdetto verde di `Z-230` fu dato con il cancello evidenze cieco. Il lavoro

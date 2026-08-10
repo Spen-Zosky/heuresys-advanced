@@ -34,10 +34,22 @@ FINITO invece di essere uccisi; al rilancio il driver si e' fermato) · troncame
 meta' lavoro non e' stato osservato) · frontiere della description **superato 8/8** con 3
 controlli negativi.
 
-**Z-250 RESTA APERTO**, e il motivo e' dichiarato: pretende «un cluster chiuso e il suo
-commit», e nessuno dei due ha chiuso. `Z-112` ha preso ROSSO dall'istruttoria per **1 prova
-su 2** (ADR-0026) — lavoro completo e valido, cancelli verdi — e `Z-221` ha lasciato un file
-non committato. **Entrambi i rossi sono giusti: il processo ha giudicato, non ha ceduto.**
+**`Z-112` E `Z-250` SONO CHIUSI** (2026-08-10 09:00). Alla prima istruttoria `Z-112` prese
+ROSSO per **1 prova su 2** (ADR-0026) — lavoro completo e valido, cancelli verdi, respinto
+sulle sole evidenze. Un secondo giro del lavoratore ha registrato la seconda prova su un
+livello diverso (`psql` sullo stato + `integration` sul sistema: «i punti ciechi non
+coincidono»), e l'istruttoria e' tornata **VERDE con zero rilievi** — cancello test verde in
+32 minuti, che conferma retroattivamente che il rosso precedente era `Z-251`, non il lavoro.
+Merge `b6824e7e`. Con `Z-112` si chiude **`Z-250`**, che aspettava da luglio «una corsa
+presidiata conclusa con un cluster chiuso e il suo commit». Chiusi nel piano: 43 -> **46**.
+`Z-221` resta rosso per un file non committato: **il processo ha giudicato, non ha ceduto.**
+
+**Due questioni restano aperte e sono registrate come voci proprie, non sepolte in una
+casella spuntata**: `#177` i tre revisori adversarial vivono in un **workflow asincrono che
+sopravvive alla sessione**, quindi un lavoratore che finisce il budget non ne ritrova mai i
+verdetti — due corse su due si sono fermate li', ed e' un blocco strutturale, non di denaro;
+`#178` il **troncamento da budget non e' mai stato osservato** (in quattro corse il tetto ha
+contenuto la spesa ma non si e' mai visto tagliare).
 
 **CINQUE DIFETTI STRUTTURALI emersi correndo**, nessuno visibile a una batteria:
 1. il driver si bloccava con il rapporto che scrive lui (`.zp/PROGRESS.md` e' tracciato e

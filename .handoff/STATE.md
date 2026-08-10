@@ -35,11 +35,10 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Regole che questa sessione ha pagato care
 
-**Si modifica con gli strumenti di edit, mai con script Python dentro heredoc Bash**: due
-livelli di escape annidati hanno rotto le stringhe tre volte (`AUTONOMY_R23_PROJECT.md`).
-**Una prova che non può fallire non è una prova**: tre cancelli erano verdi per costruzione.
-**Un conteggio che scarta in silenzio ciò che non sa leggere** è peggio di uno assente.
-**L'esito si legge dal codice d'uscita**, mai da `head`/`tail` in coda a una pipe.
+**Si modifica con gli strumenti di edit, mai con script Python dentro heredoc Bash** (due
+livelli di escape annidati: stringhe rotte tre volte) · **una prova che non può fallire non
+è una prova** · **un conteggio che scarta in silenzio è peggio di uno assente** · **l'esito
+si legge dal codice d'uscita**, mai da `head`/`tail` in coda a una pipe.
 
 ## Top priorities (prossima sessione)
 

@@ -1,6 +1,6 @@
 # zero-pending — a che punto siamo
 
-Piano: `2026-07-25-zero-pending-plan.md` del 2026-08-09
+Piano: `2026-07-25-zero-pending-plan.md` del 2026-08-10
 
 **44 chiusi su 262.** Restano 188 pezzi che posso fare da solo e 30 che aspettano te.
 
@@ -12,6 +12,18 @@ Piano: `2026-07-25-zero-pending-plan.md` del 2026-08-09
 - **W3** — 36 pezzi, circa 168 ore
 - **W4** — 39 pezzi, circa 213 ore
 - **W5** — 20 pezzi, circa 213 ore
+
+## Lasciati a metà
+
+- **Z-112** — adversarial ROSSO: 7 rilievi riproducibili, di cui uno confermato da due lenti indipendenti (il lucchetto della suite non viene rilasciato proprio quando il drift scatta) e tre che toccano il DISEGNO, non l'implementazione (falso verde muto su censimento vuoto; test che diventa vacuo restando verde; prefissi che non coprono l'unico scrittore che committa). adversarial.md: oltre tre rilievi confermati o rilievi di disegno => INTERRUPTED con i rilievi allegati, non correzioni impilate. Budget dell'iterazione a 2,7 USD su 12: insufficiente per correggere sette rilievi e ri-verificare. Progresso reale di questo giro: la seconda prova mancante e' stata prodotta e la coppia e' ora VALIDA (psql/stato + integration/sistema-api). (riprende da: I tre revisori sono girati (2 su 3 hanno consegnato prima dello stop per budget; verdetti completi in .zp/verdetti/z112-adversarial-parziale.json). Correggi in questo ordine, POI ri-esegui il passo 2 (zp_evidence registra le due prove) e infine 'bash scripts/gov-chiudi.sh 1':
+1) [CONFERMATO da 2 lenti indipendenti] drift-check.ts:185 + vitest.config.ts:83 — quando il drift lancia, cioe' nel caso per cui il codice esiste, il teardown interrompe la catena di Vitest 4.1.10 (for/await senza try/catch per elemento) e .zp/suite.lock NON viene mai rilasciato: resta su disco col PID della corsa.
+2) drift-check.ts:147 — censimento() non distingue «695 colonne censite, nessun residuo» da «zero colonne censite» (grant mancanti, DB sbagliato, schema invisibile): torna una mappa vuota e il check e' un falso verde muto.
+3) drift-check.integration.test.ts:57 — il test che dimostra il «so dire di SI'» diventa vacuo restando VERDE appena i 4 residui di giugno vengono ripuliti, cioe' appena si esegue l'ordine che il messaggio d'errore stesso da'.
+4) drift-check.ts:63 — PREFISSI non copre inbox-stream.integration.test.ts:113, che scrive con una seconda connessione fuori dal pool (sfugge a D-52) usando SUBJECT 'IT_SSE_*': l'unico scrittore che committa davvero.
+5) vitest.config.ts:81 — il commento afferma che il lucchetto protegge il censimento; falso: .zp/suite.lock e' preso solo da apps/api, la suite E2E Playwright non lo prende.
+6) [bassa] drift-check.ts:186 — il messaggio dice «N righe residue» ma N conta per COLONNA: una riga col prefisso in due colonne conta 2.
+7) [bassa] drift-check.ts:21 — «737 colonne su 219 tabelle» non si riproduce: sono 695 su 199; 737 e' il conteggio senza il filtro table_type='BASE TABLE'.
+NOTA DI STATO, misurata in questo giro e non scritta da nessuna parte: il commit 7eb39abf NON e' su main. Il merge 551dd8d0 citato in .zp/GOV-DA-FARE.md ha portato gov/w1 solo fino a f5aa771c; il commit di Z-112 e' successivo ed e' rimasto sul ramo. Le due prove sono gia' registrate e VALIDE in D:/heuresys-gov-workers/w1/.zp/prove/Z-112.json (psql 2026-08-09T23:03:23 + integration 2026-08-10T08:08:48, 5/5 exit 0).)
 
 ## Aspettano te
 
@@ -49,11 +61,11 @@ Piano: `2026-07-25-zero-pending-plan.md` del 2026-08-09
 ## I prossimi cinque
 
 - **Z-032** (W1, 1.0h, classe B) — claude-mem disabilitato con stub bun-runner: retest sulla 13.12.2 o fail-open permanente dell'hook
-- **Z-112** (W1, 1.0h, classe A) — Nessun assert di drift post-suite (residui E2E% sul DB condiviso)
 - **Z-123** (W1, 1.0h, classe B) — Nessun test asserisce che il boot usi loadRolePermissionCacheWithRetry (i test iniettano un loader f
 - **Z-239** (W1, 1.0h, classe A) — Ecosistema Claude: MEMORY.md non re-indicizzato (55 nodi su disco vs 53 link), nodi session-state da
 - **Z-152** (W1, 1.5h, classe B) — Brand v1: 5 refinement del social media kit (SK-1..SK-5)
+- **Z-221** (W1, 1.5h, classe A) — Roadmap MVP-4 ancora in DRAFT 'awaiting Enzo's review' con AC-01..12 e checklist §11 mai spuntate (s
 
 ## Spesa
 
-7 giri, circa 47.07 dollari su un tetto di 120.
+8 giri, circa 56.82 dollari su un tetto di 120.

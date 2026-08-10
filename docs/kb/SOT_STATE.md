@@ -418,6 +418,20 @@ cancello di fine turno. Il `check` è istantaneo (confronta hash, non esegue le 
 mentre i cicli multipli restano appannaggio del driver esterno. Freno: `.zp/verify-off`. Provato sul
 campo su tutte e quattro le vie: routing, verdetto scaduto, freno, ritorno a verde.
 
+**S1054 — il freno è stato tolto, e il buco che lo rendeva difficile da togliere è chiuso.** Il freno
+era inserito dal 2026-08-10 (rosso su `test-api` che si ripresentava a ogni chiusura di turno). Tolto
+il 2026-08-11 dopo una misura integrale su `aba41ec5`: `typecheck` + `lint` + **`test-api` verde,
+225/225 file, 1544 test, 1834 s** — i ≥50 file rossi del giorno prima passano tutti. Due correzioni
+allo strumento, entrambe nel verso di **stringere**: (1) il ramo «nessuna modifica che richieda
+verifica» di `run` scriveva `verdict: "green"` con `results: []` — un verde per **assenza di misura**,
+che per giunta cancellava dal file il rosso precedente; ora scrive `not-measured`, e `check` lo
+tratta come non-verde. Era anche il motivo per cui il freno sembrava impossibile da togliere: il
+comando indicato per «rimettere il verdetto in pari» (`run`), a working tree pulito, **non esegue
+nulla**; (2) `run --suite NOME` (ripetibile) esegue una suite fuori dal routing e **sempre**, perché
+chi la chiede a mano vuole la misura, non il ricordo di una misura. Falsificabilità provata su 5 casi
+costruiti — rosso, scaduto, non-misurato, verde-fresco, freno — con ripristino del verdetto reale
+verificato per impronta sha256.
+
 **Regola di convivenza Cowork/CLI scritta dove mancava** (§Source of Truth): l'unico writer e
 committer di `docs/kb/` è Claude Code CLI; Cowork e Desktop sono read-only e propongono con un
 append a `docs/kb/COWORK_INBOX.md`; `cowork_code_exchange/` e `cowork_reserved/` restano archivio

@@ -24,16 +24,21 @@ adversarial; le decisioni tecniche sono di Claude.
 
 1. **#183 policy di cancellazione utente** (~1 sessione, **P1**) — mandato di Enzo 2026-08-10:
    «la voglio nel prossimo ciclo». Censimento già in mig `000303`.
-2. **Il freno del cancello di verifica è ANCORA INSERITO** (`.zp/verify-off`, 2026-08-10
-   15:56): finché c'è, il cancello dice sempre verde. `rm .zp/verify-off` poi
-   `python docs/kb/tools/verify_gate.py run` (instrada su test-api ~31min).
+2. ✅ **Il freno del cancello è TOLTO (S1054, 2026-08-11)** — non ri-aprire questa voce. Misura
+   integrale su `aba41ec5`: typecheck + lint + **test-api verde, 225/225 file, 1544 test**, e i
+   ≥50 file rossi del 10/08 passano tutti. Scoperto e chiuso nel farlo: `run` a working tree
+   pulito **non esegue nulla** e scriveva `green` (era il motivo per cui il freno pareva
+   impossibile da togliere) → ora scrive `not-measured`, e c'è `run --suite NOME` per chiedere
+   una misura fuori dal routing. Dettaglio e prove:
+   `docs/superpowers/plans/2026-08-11-cancello-verifica-s1054.md`.
 3. **#124 residuo**: D4 (mask EVALUATION su ~12 moduli — prima il censimento campo-giudizio
    per schema) e D6 (frontend masked esteso). · **#92 passi 4-5** (macchina a stati +
    ESS /v1/me) — rilievo aperto: mapping RBAC più largo del disegno.
 4. **#99 F4** (resolver sull'albero delle unità) — attenzione al contro-oracolo: dopo F4
    resolver e `org-actors` girerebbero sullo stesso albero. · **Z-251** (~2h, classe D:
-   serve autorizzazione per lotto) — la contesa sul DB ha colpito anche oggi (1 file
-   skippato in beforeAll, verde al rilancio). · **#181** (~2-3h) drift-check: correzioni
+   serve autorizzazione per lotto) — attenzione al criterio: l'11/08 la corsa integrale è
+   verde **senza aver corretto niente**, quindi «una corsa verde» non può essere la prova
+   che il difetto è risolto (misura nel blocco Z-251). · **#181** (~2-3h) drift-check: correzioni
    in main via `27c6025d` ma MAI provate — far girare la suite prima di toccarle.
 
 ## Open questions

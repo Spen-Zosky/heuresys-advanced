@@ -32,9 +32,30 @@ Sottocomandi
   route   stampa quali suite servono per il diff corrente (deterministico)
   run     esegue le suite scadute o rosse e scrive .zp/verify-verdict.json;
           quelle gia' verdi sullo stesso contenuto si riusano
-          --all   riesegui tutto, anche cio' che e' gia' verde
+          --all           riesegui tutto, anche cio' che e' gia' verde
+          --suite NOME    esegui QUESTA suite anche se il diff non la instrada
+                          (ripetibile). Serve a misurare a working tree pulito:
+                          vedi «Misura chiesta a mano» qui sotto.
   check   confronta impronte ed exit code — exit 0 se verde e fresco
           --hook  emette il JSON per l'hook Stop invece del testo
+
+Misura chiesta a mano (S1054)
+-----------------------------
+Il router guarda il DIFF: a working tree pulito non instrada niente, e prima
+`run` prendeva la scorciatoia «niente da verificare» scrivendo un verdetto
+`green` con `results: []` — un verde per ASSENZA di misura, che per giunta
+cancellava dal file il rosso precedente. Misurato in S1054, il giorno dopo che
+un freno era stato tirato proprio per un rosso che nessuno riusciva a rimettere
+in pari: il comando indicato per rimetterlo in pari non avrebbe eseguito nulla.
+
+Due correzioni, entrambe nel verso di stringere:
+  * quel ramo scrive ora `verdict: "not-measured"`, mai `green`: il file dice
+    cio' che e' successo (nessuna misura), non cio' che fa comodo;
+  * `--suite NOME` esegue una suite per nome, fuori dal routing, e la esegue
+    SEMPRE — anche se il verdetto precedente la dava verde e fresca: chi la
+    chiede a mano vuole la misura, non il ricordo di una misura.
+Cio' che NON cambia: le suite instradate dal diff restano obbligatorie, e
+nessuna suite risulta passata se non e' stata eseguita su quel contenuto.
 
 Freno
 -----
@@ -440,6 +461,10 @@ def main() -> int:
     ap.add_argument("--all", action="store_true",
                     help="run: riesegui tutte le suite instradate, anche quelle "
                          "gia' verdi sullo stesso contenuto")
+    ap.add_argument("--suite", action="append", metavar="NOME",
+                    help="run: esegui questa suite anche se il diff non la "
+                         "instrada, e sempre (ripetibile). Nomi: "
+                         + ", ".join(sorted(SUITES)))
     args = ap.parse_args()
 
     if args.cmd == "route":
@@ -459,14 +484,30 @@ def main() -> int:
     if args.cmd == "run":
         files = changed_files()
         needed = route(files)
+        # Suite chieste per nome: si eseguono ANCHE se il diff non le instrada.
+        # Un nome sbagliato si ferma qui, con l'elenco: una suite scritta male
+        # non deve poter passare per «eseguita e verde».
+        extra: list[str] = []
+        for s in (args.suite or []):
+            if s not in SUITES:
+                print(f"suite sconosciuta: {s} — disponibili: "
+                      f"{', '.join(sorted(SUITES))}")
+                return 2
+            if s not in extra:
+                extra.append(s)
+        needed = needed + [s for s in extra if s not in needed]
         if not needed and not args.with_e2e:
             print("nessuna modifica che richieda verifica — niente da eseguire")
+            print("  (per misurare comunque una suite: --suite <nome>)")
             VERDICT.parent.mkdir(parents=True, exist_ok=True)
+            # `not-measured`, MAI `green`: qui non e' stato eseguito niente, e un
+            # file che dicesse verde cancellerebbe un rosso precedente senza aver
+            # misurato nulla.
             VERDICT.write_text(json.dumps({
                 "input_hash": input_hash(),
                 "head": git("rev-parse", "HEAD").strip(),
                 "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                "routed": [], "results": [], "verdict": "green",
+                "routed": [], "results": [], "verdict": "not-measured",
             }, indent=2, ensure_ascii=False), encoding="utf-8")
             return 0
         # Si rieseguono SOLO le suite scadute o rosse; quelle gia' verdi sullo stesso
@@ -478,11 +519,16 @@ def main() -> int:
         if args.all:
             to_run, keep = needed, []
         else:
-            to_run = [s for s in needed if s in stale or s in red]
-            keep = [prev[s] for s in fresh]
+            # `extra` entra sempre in to_run ed esce da keep: chi chiede una suite
+            # per nome vuole la misura, non il ricordo di una misura.
+            to_run = [s for s in needed if s in stale or s in red or s in extra]
+            keep = [prev[s] for s in fresh if s not in extra]
         print(f"{len(files)} file modificati → suite: {', '.join(needed)}")
-        if keep:
-            print(f"  riuso (verdi, contenuto invariato): {', '.join(fresh)}")
+        if extra:
+            print(f"  chieste a mano (eseguite comunque): {', '.join(extra)}")
+        riusate = [s for s in fresh if s not in extra]
+        if riusate:
+            print(f"  riuso (verdi, contenuto invariato): {', '.join(riusate)}")
         if not to_run and not args.with_e2e:
             print("  niente da rieseguire")
         verdict = run_suites(to_run, args.with_e2e, files, keep)

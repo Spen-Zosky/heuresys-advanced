@@ -37,7 +37,7 @@ Vedi `adversarial.md`. Tre revisori, contesto vuoto, lenti distinte, mandato di 
 python docs/kb/tools/zp_review.py stato <cluster>    # quali lenti hanno risposto
 ```
 
-Si lanciano **solo le lenti mancanti**, e ogni verdetto si registra appena arriva. Il passo è concluso quando `zp_review.py valida <cluster>` esce 0 — tre lenti su tre, nessun rilievo di severità alta ancora aperto.
+Si lanciano **solo le lenti mancanti**, e il verdetto lo registra **il revisore stesso, come suo ultimo atto** (il contratto del prompt è in `adversarial.md`) — non l'orchestratore dopo il ritorno. Il passo è concluso quando `zp_review.py valida <cluster>` esce 0 — tre lenti su tre, nessun rilievo di severità alta ancora aperto.
 
 Questo rende il passo 3 **ripartibile**, che è ciò che non era: in S1052 due corse su due si sono fermate qui, con i verdetti persi in un workflow orfano di una sessione finita per budget. Se il budget finisce a metà, le lenti già registrate restano — la corsa dopo non le rifà.
 

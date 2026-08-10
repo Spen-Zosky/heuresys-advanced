@@ -49,8 +49,29 @@ att "risolvi con COME: accettato"   0 python "$Z" risolvi Z-999 --lente isolamen
 att "ora il cancello passa"         0 python "$Z" valida Z-999
 
 echo "── la ripresa: i verdetti sopravvivono alla sessione ──"
-RIMASTI=$(ls "$TMP/.zp/revisori" 2>/dev/null | wc -l)
+RIMASTI=$(ls "$TMP/.zp/revisori"/*.json 2>/dev/null | wc -l)
 [[ "$RIMASTI" == "3" ]] && ok "i 3 verdetti restano su disco" || ko "i 3 verdetti restano su disco" 3 "$RIMASTI"
+
+echo "── il canale dei revisori: registrazione via stdin (--json -) ──"
+printf '{"rilievi":[],"conclusione":"stdin ok"}' | python "$Z" registra Z-998 --lente correttezza --json - >/dev/null 2>&1
+R=$?
+[[ "$R" == "0" ]] && ok "verdetto via stdin accettato" || ko "verdetto via stdin accettato" 0 "$R"
+[[ -f "$TMP/.zp/revisori/Z-998-correttezza.json" ]] && ok "il verdetto stdin sta su disco" || ko "il verdetto stdin sta su disco" "file" "assente"
+
+echo "── ri-registrare una lente non distrugge la storia: l'archivio in storico/ ──"
+# Z-999/isolamento porta un risolto_come (annotato sopra): la ri-registrazione
+# deve archiviare il verdetto vecchio, non cancellarlo in silenzio.
+cat > "$TMP/v4.json" <<'EOF'
+{"rilievi":[],"conclusione":"secondo giro: il difetto non si riproduce piu'"}
+EOF
+att "ri-registra la stessa lente" 0 python "$Z" registra Z-999 --lente isolamento --json "$TMP/v4.json"
+STORICO=$(ls "$TMP/.zp/revisori/storico"/Z-999-isolamento-*.json 2>/dev/null | wc -l)
+[[ "$STORICO" == "1" ]] && ok "il verdetto precedente e' in storico/" || ko "il verdetto precedente e' in storico/" 1 "$STORICO"
+grep -q "risolto_come" "$TMP/.zp/revisori/storico"/Z-999-isolamento-*.json 2>/dev/null \
+  && ok "lo storico conserva il risolto_come" || ko "lo storico conserva il risolto_come" "presente" "assente"
+grep -q "risolto_come" "$TMP/.zp/revisori/Z-999-isolamento.json" \
+  && ko "il verdetto nuovo riparte pulito" "assente" "presente" || ok "il verdetto nuovo riparte pulito"
+att "il cancello giudica il verdetto NUOVO (0 rilievi): passa" 0 python "$Z" valida Z-999
 
 echo
 echo "$PASS passati, $FAIL falliti"

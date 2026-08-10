@@ -12,7 +12,7 @@ Tre proprieta' fanno il lavoro, e togliendone una il resto diventa teatro.
 
 ## Come si lanciano
 
-Sempre via **Workflow tool** (`parallel`), mai `Agent` sciolti: serve il cap di concorrenza, l'output strutturato e il fatto che i tre partano davvero insieme. I revisori scrivono il verdetto in un file e restituiscono solo il verdetto strutturato — il diff non torna nel contesto principale.
+Sempre via **Workflow tool** (`parallel`), mai `Agent` sciolti: serve il cap di concorrenza, l'output strutturato e il fatto che i tre partano davvero insieme. **Ogni revisore registra il proprio verdetto DA SÉ, come suo ultimo atto** — gli agenti del workflow hanno Bash, e il prompt di ogni lente termina con l'ordine di eseguire `zp_review.py registra` prima di restituire qualunque cosa. Al workflow torna solo la conclusione: il diff non rientra nel contesto principale, e se la sessione muore a workflow in volo le lenti già concluse sono comunque su disco.
 
 ### Il verdetto si SCRIVE, non si aspetta (S1052 — difetto misurato)
 
@@ -29,18 +29,23 @@ python docs/kb/tools/zp_review.py valida Z-112     # il cancello: 3 su 3 e nessu
 **Tre regole che ne discendono, e non sono negoziabili:**
 
 1. **Prima di lanciare i revisori si chiede `stato`.** Se due lenti hanno già risposto, si lancia **solo la terza**: rilanciarle tutte è pagare due volte lo stesso giudizio.
-2. **Ogni verdetto si registra appena arriva**, una lente alla volta — non si aspetta che tutte e tre tornino per salvarle insieme. Se la sessione muore fra la prima e la seconda, la prima è salva.
+2. **Il verdetto lo registra IL REVISORE, dall'interno del proprio run, come ultimo atto** — non l'orchestratore dopo il ritorno del workflow. La differenza si vede solo quando fa male: se la sessione muore a workflow in volo, le lenti già concluse restano su disco; con la registrazione a valle sarebbero perse di nuovo (il difetto di S1052, seconda forma).
 3. **Un rilievo senza `come_si_riproduce` viene rifiutato dallo strumento**, non discusso dopo: è un sospetto, e questa pagina lo dice da sempre.
 
-Un rilievo di severità **alta** blocca il cancello finché non porta `risolto_come` — e «risolto» da solo non è una risoluzione: serve il *come*, che è verificabile.
+Un rilievo di severità **alta** blocca il cancello finché non porta `risolto_come` — e «risolto» da solo non è una risoluzione: serve il *come*, che è verificabile. Ri-registrare una lente **archivia** il verdetto precedente in `.zp/revisori/storico/` (coi suoi `risolto_come`): il giudizio nuovo riparte pulito, la storia resta.
 
 ```
-parallel([
-  () => agent(prompt('correttezza'),   {phase: 'Verify', schema: VERDICT}),
-  () => agent(prompt('isolamento'),    {phase: 'Verify', schema: VERDICT}),
-  () => agent(prompt('riproducibilita'), {phase: 'Verify', schema: VERDICT}),
-])
+parallel(lentiMancanti.map(lente => () =>
+  agent(prompt(lente), {phase: 'Verify', schema: VERDICT})))
 ```
+
+Il contratto dentro `prompt(lente)`, non negoziabile: *«Il tuo ULTIMO atto, prima di restituire qualunque cosa, è registrare il verdetto tu stesso:*
+```bash
+python docs/kb/tools/zp_review.py registra <cluster> --lente <lente> --json - <<'VERDETTO'
+{"rilievi": [...], "conclusione": "..."}
+VERDETTO
+```
+*Se `registra` esce ≠0 (rilievo senza riproduzione = sospetto), correggi il verdetto e riprova. Poi restituisci SOLO la conclusione.»* — `lentiMancanti` viene da `zp_review.py stato` (regola 1), e l'orchestratore al ritorno (o alla ripresa) rifà `stato` e rilancia solo le lenti senza file.
 
 Schema del verdetto: `{"rilievi": [{"severita": "alta|media|bassa", "file": "...", "riga": N, "cosa": "...", "come_si_riproduce": "..."}], "conclusione": "..."}`.
 

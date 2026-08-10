@@ -47,6 +47,7 @@ import argparse
 import json
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -99,8 +100,17 @@ def cmd_registra(a) -> int:
 
     d["lente"] = a.lente
     d["cluster"] = a.cluster
-    _file(a.cluster, a.lente).write_text(
-        json.dumps(d, ensure_ascii=False, indent=2), encoding="utf-8")
+    dest = _file(a.cluster, a.lente)
+    # Ri-registrare una lente e' un giudizio NUOVO, ma il precedente — coi suoi
+    # `risolto_come` — e' storia e non si distrugge in silenzio: va in storico/.
+    if dest.is_file():
+        storico = REVISORI / "storico"
+        storico.mkdir(parents=True, exist_ok=True)
+        marca = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+        arch = storico / f"{a.cluster}-{a.lente}-{marca}.json"
+        dest.replace(arch)
+        print(f"{a.cluster}/{a.lente}: verdetto precedente archiviato in {arch}")
+    dest.write_text(json.dumps(d, ensure_ascii=False, indent=2), encoding="utf-8")
     n = len(d["rilievi"])
     print(f"{a.cluster}/{a.lente}: verdetto registrato, {n} rilievo/i")
     return 0

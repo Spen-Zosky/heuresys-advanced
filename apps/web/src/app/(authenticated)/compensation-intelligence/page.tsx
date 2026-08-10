@@ -81,8 +81,16 @@ function buildVariablePayColumns(
   return [
     { header: t("compReward.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
     { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.periodStart} → {r.periodEnd}</span> },
-    { header: t("compReward.cols.signalScore"), align: "right", cell: (r) => <span className="tabular-nums">{r.signalScore ?? "—"}</span> },
-    { header: t("compReward.cols.amount"), align: "right", cell: (r) => <span className="tabular-nums">{money(r.amountEur)}</span> },
+    { header: t("compReward.cols.signalScore"), align: "right", cell: (r) => (
+      r.masked?.includes("signalScore")
+        ? <MaskedCell t={t} />
+        : <span className="tabular-nums">{r.signalScore ?? "—"}</span>
+    ) },
+    { header: t("compReward.cols.amount"), align: "right", cell: (r) => (
+      r.masked?.includes("amountEur")
+        ? <MaskedCell t={t} />
+        : <span className="tabular-nums">{money(r.amountEur ?? null)}</span>
+    ) },
     {
       // #37 (B2): l'importo da solo non dice se il premio sia erogabile né come
       // ci si è arrivati. Da qui si apre il ragionamento.
@@ -236,7 +244,11 @@ function buildBonusPoolColumns(t: TFunction): DataColumn<BonusPool>[] {
     { header: t("compReward.cols.scope"), cell: (r) => <span className="font-mono text-xs">{r.scope}</span> },
     { header: t("compReward.cols.orgUnit"), cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.organizationUnitId?.slice(0, 8) ?? "—"}</span> },
     { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.periodStart} → {r.periodEnd}</span> },
-    { header: t("compReward.cols.total"), align: "right", cell: (r) => <span className="tabular-nums">{money(r.totalEur)}</span> },
+    { header: t("compReward.cols.total"), align: "right", cell: (r) => (
+      r.masked?.includes("totalEur")
+        ? <MaskedCell t={t} />
+        : <span className="tabular-nums">{money(r.totalEur ?? null)}</span>
+    ) },
   ];
 }
 

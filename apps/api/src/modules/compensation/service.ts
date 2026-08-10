@@ -6,7 +6,7 @@
 
 import { pool } from "../../db/client.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
-import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
+import { masksUnderPlatformMandate, maskFields, type Masked } from "../../lib/scope/mask.js";
 
 /**
  * #124 — what goes when a compensation row is read under the platform mandate.
@@ -18,6 +18,23 @@ import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
  * open record cannot be verified.
  */
 const COMPENSATION_MONEY_FIELDS = ["amountEur", "narrative", "payload"] as const;
+
+/**
+ * #124 D3 (S1053) — la stessa regola sull'intera superficie del modulo.
+ * Elenchi espliciti per endpoint, misurati sul dato reale prima di scrivere:
+ * il payload di variable-pay porta attainment e curva; quello degli handoff
+ * porta total_gross/total_net; lo score dei reward-gate e' un giudizio
+ * per-persona. La riga resta sempre: periodi, stati, cataloghi, soggetti.
+ */
+const VARIABLE_PAY_MONEY_FIELDS = ["amountEur", "payload", "signalScore"] as const;
+const VARIABLE_PAY_EVAL_MONEY_FIELDS = [
+  "attainment", "curveExplanation", "curveFactor", "finalFactor", "recordedAmountEur",
+] as const;
+const REWARD_GATE_MASKED_FIELDS = ["payload"] as const;
+const REWARD_GATE_RESULT_MASKED_FIELDS = ["payload", "score"] as const;
+const BONUS_POOL_MONEY_FIELDS = ["payload", "totalEur"] as const;
+const ECONOMIC_WEIGHT_MONEY_FIELDS = ["metadata", "value"] as const;
+const HANDOFF_MONEY_FIELDS = ["payload"] as const;
 
 export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
@@ -90,7 +107,7 @@ export const compensationService = {
   async listRewardGates(
     actor: ActorContext,
     query: RewardGatesListQuery,
-  ): Promise<{ items: RewardGate[]; total: number }> {
+  ): Promise<{ items: Masked<RewardGate>[]; total: number }> {
     // ADR-0027 F3 (D-50): gate cross-user reward-gate reads by the actor's ORGANIZATIONAL
     // sub-tree. PLATFORM_ADMIN → all tenants; HR-mandated (TENANT_ADMIN, HRMS_MANAGER) →
     // whole tenant; managerial → transitive org sub-tree; everyone else → self.
@@ -103,7 +120,19 @@ export const compensationService = {
     if (query.userId && !(await canReadOrgTarget(pool, actor, query.userId, tenantId ?? null))) {
       return { items: [], total: 0 };
     }
-    return repo.listRewardGates(pool, { tenantId, userIdAllowList, query });
+    const page = await repo.listRewardGates(pool, { tenantId, userIdAllowList, query });
+    // #124 D3: il cancello (catalogo, stato, periodo) resta leggibile; il
+    // payload e lo SCORE per-persona dell'ultimo esito no.
+    return {
+      ...page,
+      items: page.items.map((g) => {
+        if (!masksUnderPlatformMandate(actor, "COMPENSATION", g.userId)) return g;
+        const masked = maskFields(g, REWARD_GATE_MASKED_FIELDS);
+        return g.latestResult
+          ? { ...masked, latestResult: maskFields(g.latestResult, REWARD_GATE_RESULT_MASKED_FIELDS) }
+          : masked;
+      }),
+    };
   },
 
   /** Le curve di payout visibili al chiamante: globali + quelle del proprio tenant. */
@@ -161,9 +190,19 @@ export const compensationService = {
 
   // ── A/L7 (#32) reads ────────────────────────────────────────────────────────
 
-  /** Org-gated per-person variable pay (I18) — gated on the calculation's subject user. */
+  /** Org-gated per-person variable pay (I18), poi mascherato per il mandato
+   *  piattaforma (#124 D3): l'importo, il punteggio e il payload (che porta
+   *  attainment e curva) spariscono; periodo e soggetto restano. */
   async listVariablePay(actor: ActorContext, query: VariablePayCalculationListQuery) {
-    return repo.listVariablePay(pool, { ...(await orgFilter(actor)), query });
+    const page = await repo.listVariablePay(pool, { ...(await orgFilter(actor)), query });
+    return {
+      ...page,
+      items: page.items.map((c) =>
+        masksUnderPlatformMandate(actor, "COMPENSATION", c.userId)
+          ? maskFields(c, VARIABLE_PAY_MONEY_FIELDS)
+          : c,
+      ),
+    };
   },
 
   /**
@@ -204,9 +243,16 @@ export const compensationService = {
    * Il dato è COMPENSATION per-persona: passa dallo stesso cancello
    * organizzativo delle altre letture per-persona (I18).
    */
-  async evaluateVariablePay(actor: ActorContext, id: string): Promise<VariablePayEvaluation> {
+  async evaluateVariablePay(actor: ActorContext, id: string): Promise<Masked<VariablePayEvaluation>> {
     const calc = await repo.findVariablePayCalculationById(pool, id);
     if (!calc) throw new NotFoundError("VariablePayCalculation");
+    // #124 D3: al mandato piattaforma resta il RAGIONAMENTO dei cancelli
+    // (categoriale, gia' esposto da /distribution) e la curva citata; i numeri
+    // — importo registrato, raggiungimento, fattori — no.
+    const seal = (r: VariablePayEvaluation): Masked<VariablePayEvaluation> =>
+      masksUnderPlatformMandate(actor, "COMPENSATION", calc.userId)
+        ? maskFields(r, VARIABLE_PAY_EVAL_MONEY_FIELDS)
+        : r;
 
     // Cancello organizzativo: si riusa la lista già filtrata invece di
     // duplicare la logica di visibilità. Se il calcolo non compare fra quelli
@@ -254,32 +300,32 @@ export const compensationService = {
     };
 
     if (curveCode === null || attainment === null) {
-      return {
+      return seal({
         ...base,
         attainment, curveCode, curveKind: null, curveFactor: null, curveExplanation: null,
         finalFactor: null,
         notEvaluable: curveCode === null
           ? "Il calcolo non dichiara una curva di erogazione (riga importata dal sistema precedente)"
           : "Il calcolo non dichiara un raggiungimento",
-      };
+      });
     }
 
     const curves = await repo.listPayoutCurves(pool, catalogTenant(actor));
     const curve = curves.items.find((c) => c.code === curveCode);
     if (!curve) {
-      return {
+      return seal({
         ...base,
         attainment, curveCode, curveKind: null, curveFactor: null, curveExplanation: null,
         finalFactor: null,
         notEvaluable: `La curva '${curveCode}' citata dal calcolo non esiste nel catalogo`,
-      };
+      });
     }
 
     const factor = payoutFactor(
       { code: curve.code, kind: curve.kind as PayoutCurveKind, payload: curve.payload },
       attainment,
     );
-    return {
+    return seal({
       ...base,
       attainment,
       curveCode: curve.code,
@@ -288,12 +334,16 @@ export const compensationService = {
       curveExplanation: factor.explanation,
       finalFactor: finalFactor(factor.factor, aggregate.decision),
       notEvaluable: null,
-    };
+    });
   },
 
-  /** Tenant/OU bonus pools (no person rows) — tenant-scoped only. */
+  /** Tenant/OU bonus pools (no person rows) — tenant-scoped only.
+   *  #124 D3 / vincolo 5: la massa monetaria di un'unita' e' COMPENSATION
+   *  aggregata (soggetto null → il mask morde sul platform actor puro). */
   async listBonusPools(actor: ActorContext, query: BonusPoolListQuery) {
-    return repo.listBonusPools(pool, catalogTenant(actor), query);
+    const page = await repo.listBonusPools(pool, catalogTenant(actor), query);
+    if (!masksUnderPlatformMandate(actor, "COMPENSATION", null)) return page;
+    return { ...page, items: page.items.map((b) => maskFields(b, BONUS_POOL_MONEY_FIELDS)) };
   },
 
   /**
@@ -317,13 +367,21 @@ export const compensationService = {
     return repo.listObjectiveRewardRules(pool, catalogTenant(actor), query);
   },
 
-  /** Position economic weight — tenant-scoped only (no person rows). */
+  /** Position economic weight — tenant-scoped only (no person rows).
+   *  #124 D3: sulle posizioni mono-titolare il valore e' un proxy dello
+   *  stipendio (punti di job evaluation): mascherato al mandato piattaforma. */
   async listPositionEconomicWeight(actor: ActorContext, query: PositionEconomicWeightListQuery) {
-    return repo.listPositionEconomicWeight(pool, catalogTenant(actor), query);
+    const page = await repo.listPositionEconomicWeight(pool, catalogTenant(actor), query);
+    if (!masksUnderPlatformMandate(actor, "COMPENSATION", null)) return page;
+    return { ...page, items: page.items.map((w) => maskFields(w, ECONOMIC_WEIGHT_MONEY_FIELDS)) };
   },
 
-  /** Tenant payroll handoff records (no user column) — tenant-scoped only. */
+  /** Tenant payroll handoff records (no user column) — tenant-scoped only.
+   *  #124 D3: il payload porta total_gross/total_net del cedolino mensile
+   *  (misurato) — al mandato piattaforma resta il fatto della consegna. */
   async listPayrollHandoffRecords(actor: ActorContext, query: PayrollHandoffRecordListQuery) {
-    return repo.listPayrollHandoffRecords(pool, catalogTenant(actor), query);
+    const page = await repo.listPayrollHandoffRecords(pool, catalogTenant(actor), query);
+    if (!masksUnderPlatformMandate(actor, "COMPENSATION", null)) return page;
+    return { ...page, items: page.items.map((h) => maskFields(h, HANDOFF_MONEY_FIELDS)) };
   },
 };

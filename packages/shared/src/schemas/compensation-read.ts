@@ -28,11 +28,14 @@ export const VariablePayCalculationSchema = z.object({
   positionId: z.uuid().nullable(),
   periodStart: z.string(), // date (YYYY-MM-DD)
   periodEnd: z.string(),
-  signalScore: z.number().nullable(),
-  amountEur: z.number().nullable(),
-  payload: z.record(z.string(), z.unknown()),
+  // #124 D3: sotto il mandato piattaforma questi tre vengono rimossi e
+  // dichiarati in `masked` (ADR-0032) — il payload porta attainment e curva.
+  signalScore: z.number().nullable().optional(),
+  amountEur: z.number().nullable().optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
   computedAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
+  masked: z.array(z.string()).optional(),
 });
 export type VariablePayCalculation = z.infer<typeof VariablePayCalculationSchema>;
 
@@ -65,16 +68,16 @@ export const VariablePayEvaluationSchema = z.object({
   periodStart: z.string(),
   periodEnd: z.string(),
   /** L'importo gia' registrato sul calcolo, per confronto. */
-  recordedAmountEur: z.number().nullable(),
+  recordedAmountEur: z.number().nullable().optional(),
 
   /** Il raggiungimento letto dal calcolo (`payload.attainment`), se dichiarato. */
-  attainment: z.number().nullable(),
+  attainment: z.number().nullable().optional(),
   /** La curva citata dal calcolo (`payload.curve`), risolta sul catalogo. */
   curveCode: z.string().nullable(),
   curveKind: z.string().nullable(),
   /** Il fattore che la curva produce per quel raggiungimento. */
-  curveFactor: z.number().nullable(),
-  curveExplanation: z.string().nullable(),
+  curveFactor: z.number().nullable().optional(),
+  curveExplanation: z.string().nullable().optional(),
 
   /** I cancelli che insistono sullo stesso periodo della persona. */
   gates: z.array(RewardGateOutcomeSchema),
@@ -82,9 +85,11 @@ export const VariablePayEvaluationSchema = z.object({
   gateExplanation: z.string(),
 
   /** Il fattore dopo i cancelli: un blocco lo porta a zero. */
-  finalFactor: z.number().nullable(),
+  finalFactor: z.number().nullable().optional(),
   /** Perché la valutazione non è calcolabile, quando non lo è. */
   notEvaluable: z.string().nullable(),
+  // #124 D3: i numeri della valutazione sono mascherabili (ADR-0032)
+  masked: z.array(z.string()).optional(),
 });
 export type VariablePayEvaluation = z.infer<typeof VariablePayEvaluationSchema>;
 export type VariablePayCalculationListResponse = z.infer<
@@ -158,10 +163,12 @@ export const BonusPoolSchema = z.object({
   organizationUnitId: z.uuid().nullable(),
   periodStart: z.string(),
   periodEnd: z.string(),
-  totalEur: z.number().nullable(),
-  payload: z.record(z.string(), z.unknown()),
+  // #124 D3 / vincolo 5: aggregato monetario senza soggetto — mascherabile
+  totalEur: z.number().nullable().optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
+  masked: z.array(z.string()).optional(),
 });
 export type BonusPool = z.infer<typeof BonusPoolSchema>;
 
@@ -211,12 +218,14 @@ export const PositionEconomicWeightSchema = z.object({
   positionEconomicWeightId: z.uuid(),
   positionId: z.uuid(),
   tenantId: z.uuid(),
-  value: z.number(),
+  // #124 D3: sulle posizioni mono-titolare il valore e' un proxy dello stipendio
+  value: z.number().optional(),
   periodStart: z.string().nullable(),
   periodEnd: z.string().nullable(),
-  metadata: z.record(z.string(), z.unknown()),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
+  masked: z.array(z.string()).optional(),
 });
 export type PositionEconomicWeight = z.infer<typeof PositionEconomicWeightSchema>;
 

@@ -87,11 +87,13 @@ export const RewardGateResultSchema = z.object({
   rewardGateId: z.uuid(),
   tenantId: z.uuid(),
   status: RewardGateResultStatusSchema,
-  score: z.string().nullable(),
+  // #124 D3: lo score e' un giudizio per-persona — mascherabile (ADR-0032)
+  score: z.string().nullable().optional(),
   evaluatorUserId: z.uuid().nullable(),
   overrideReason: z.string().nullable(),
-  payload: z.record(z.string(), z.unknown()),
+  payload: z.record(z.string(), z.unknown()).optional(),
   recordedAt: z.iso.datetime(),
+  masked: z.array(z.string()).optional(),
 });
 export type RewardGateResult = z.infer<typeof RewardGateResultSchema>;
 
@@ -106,8 +108,9 @@ export const RewardGateSchema = z.object({
   isBlocking: z.boolean(),
   periodStart: z.string(),
   periodEnd: z.string(),
-  payload: z.record(z.string(), z.unknown()),
+  payload: z.record(z.string(), z.unknown()).optional(),
   latestResult: RewardGateResultSchema.nullable(),
+  masked: z.array(z.string()).optional(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -213,10 +216,12 @@ export const PayrollHandoffRecordSchema = z.object({
   periodStart: z.string(),
   periodEnd: z.string(),
   recipientSystem: z.string(),
-  payload: z.record(z.string(), z.unknown()),
+  // #124 D3: il payload porta total_gross/total_net reali — mascherabile
+  payload: z.record(z.string(), z.unknown()).optional(),
   handedOffAt: z.iso.datetime(),
   status: PayrollHandoffStatusSchema,
   createdAt: z.iso.datetime(),
+  masked: z.array(z.string()).optional(),
 });
 export type PayrollHandoffRecord = z.infer<typeof PayrollHandoffRecordSchema>;
 

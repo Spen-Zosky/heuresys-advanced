@@ -19,6 +19,13 @@ resoconto di cosa è stato tentato e perché è stato abbandonato.
 
 **Il comando ritirato non fallisce**: non fa più match, quindi degrada a `canonical`.
 
+**La chiusura leggera ora è un comando**: `python docs/kb/tools/chiudi_leggero.py`. Misura le
+tre mosse che determinano il menu di domani — tutto committato, registro allineato, vista
+rapida di oggi — e **rifiuta di chiudere se una manca**. Non scrive registro né vista rapida:
+quel contenuto richiede giudizio, e uno strumento che lo inventasse produrrebbe un menu
+plausibile e falso. Non pusha. Provato nei due sensi (esce 1 con la vista rapida vecchia,
+0 quando è a posto), e alla prima esecuzione ha detto **no** segnalando se stesso.
+
 **Due difetti trovati dai cancelli, non da me**: una riga orfana che uccideva `zp_state` a
 ogni invocazione (Python compilava: `bash -n` non l'avrebbe vista), e un comando che
 passava ancora due parametri rimossi — visto dalle prove shell e non dal selftest interno,
@@ -72,6 +79,7 @@ stata eseguita. Prima di lavorare su `#181`, farla girare e vedere se regge.
 
 ```bash
 python docs/kb/tools/session_start.py                       # menu + salute, un giro
+python docs/kb/tools/chiudi_leggero.py                      # il cancello della chiusura leggera
 sh scripts/hooks/hook.sh selftest                           # guardia e parser (83 prove)
 bash scripts/test/run-shell-tests.sh                        # prove shell (148)
 python docs/kb/tools/zp_selftest.py                         # impianto zp (20)

@@ -254,14 +254,23 @@ FALLIMENTI = (
 )
 
 
-def estrai_falliti(uscita: str) -> list[str]:
-    """I nomi di cio' che e' caduto, dentro il verdetto stesso.
+TETTO_FALLITI = 50
+
+
+def estrai_falliti(uscita: str) -> tuple[list[str], int]:
+    """(i primi TETTO_FALLITI nomi di cio' che e' caduto, quanti erano in tutto).
 
     E' questo che evita la rilettura del log — e soprattutto la RIESECUZIONE della
     suite — a chi deve solo sapere dove guardare. Costo misurato del non averlo
     (2026-08-05): gate rosso alle 03:03, e per riavere i nomi di 4 file falliti la
     suite intera e' ripartita per altri 36 minuti, con quei nomi che il processo
     aveva avuto in memoria e buttato.
+
+    Il TOTALE viaggia accanto alla lista perche' il taglio non sia muto (S1054).
+    Il verdetto del 2026-08-10 elencava esattamente 50 nomi — cioe' il tetto — e da
+    quel file non e' piu' ricostruibile quanti fossero davvero: chi lo leggeva non
+    aveva modo di sapere che stava guardando una lista tagliata. Uno strumento il
+    cui mestiere e' dare un verdetto non puo' tacere quanto non ha detto.
     """
     pulito = ANSI.sub("", uscita)
     fuori: list[str] = []
@@ -270,7 +279,7 @@ def estrai_falliti(uscita: str) -> list[str]:
             v = grezzo.strip()
             if v and v not in fuori:
                 fuori.append(v)
-    return fuori[:50]
+    return fuori[:TETTO_FALLITI], len(fuori)
 
 
 def scrivi_log(nome: str, uscita: str) -> str:
@@ -362,6 +371,8 @@ def run_suites(names: list[str], with_e2e: bool, files: list[str],
         # L'output INTERO su file, e i nomi dei falliti DENTRO il verdetto: 15 righe
         # di coda bastano a dire «rosso», non a dire «dove».
         log_rel = scrivi_log(name, uscita)
+        falliti, falliti_totale = (estrai_falliti(uscita) if proc.returncode != 0
+                                   else ([], 0))
         results.append({
             "suite": name,
             "level": level,
@@ -370,7 +381,10 @@ def run_suites(names: list[str], with_e2e: bool, files: list[str],
             "duration_s": round(time.time() - t0, 1),
             "log": log_rel,
             "righe": len(uscita.splitlines()),
-            "falliti": estrai_falliti(uscita) if proc.returncode != 0 else [],
+            "falliti": falliti,
+            # Quanti erano DAVVERO: `falliti` si ferma a TETTO_FALLITI, e un elenco
+            # tagliato in silenzio si legge come un elenco completo.
+            "falliti_totale": falliti_totale,
             # L'impronta dei file che instradano questa suite, presa DOPO l'esecuzione:
             # se qualcuno modifica quei file mentre la suite gira, l'impronta registrata
             # e' quella finale e al giro dopo risultera' scaduta. Sbagliare per eccesso
@@ -378,8 +392,13 @@ def run_suites(names: list[str], with_e2e: bool, files: list[str],
             "scope": content_hash(files_for_suite(name, files)),
             "tail": tail,
         })
+        taglio = ""
+        if falliti_totale > len(falliti):
+            taglio = f" · falliti {len(falliti)} di {falliti_totale} elencati"
+        elif falliti_totale:
+            taglio = f" · {falliti_totale} falliti"
         print(f"  [{level}] {name:<20} exit={proc.returncode} "
-              f"({results[-1]['duration_s']}s)")
+              f"({results[-1]['duration_s']}s){taglio}")
     return {
         "input_hash": input_hash(),
         "head": git("rev-parse", "HEAD").strip(),
@@ -431,8 +450,16 @@ def check() -> tuple[bool, str]:
     fresh, stale, red = triage(files, needed)
 
     if red:
+        # Quante cose sono cadute, non solo su quale suite: «ROSSA su test-api» e
+        # «ROSSA su test-api (63 falliti)» chiedono due reazioni diverse. I verdetti
+        # scritti prima di S1054 non portano il totale e degradano al nome nudo.
+        prec = {r["suite"]: r for r in load_verdict().get("results", [])}
+        etichette = []
+        for s in red:
+            n = (prec.get(s) or {}).get("falliti_totale") or 0
+            etichette.append(f"{s} ({n} falliti)" if n else s)
         return False, (
-            f"l'ultima verifica e' ROSSA su: {', '.join(red)}. "
+            f"l'ultima verifica e' ROSSA su: {', '.join(etichette)}. "
             f"Correggi e riesegui: python docs/kb/tools/verify_gate.py run "
             f"(rieseguira' SOLO le suite da rifare). "
             f"Dettaglio in {VERDICT.relative_to(REPO)}"

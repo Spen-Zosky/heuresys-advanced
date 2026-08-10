@@ -626,6 +626,31 @@ for b in zp-review-tests.sh; do
   fi
 done
 
+# ------------------------------------------------- Y. la batteria del cancello di verifica
+#
+# [S1054] Il cancello e' l'unico guardiano di fine turno, e nessuno lo aveva mai
+# visto dire ROSSO in modo controllato: lo si osservava verde e si concludeva che
+# funzionasse. Lo stesso giorno si e' scoperto che il suo ramo «niente da
+# verificare» scriveva `green` senza aver eseguito nulla.
+#
+# Stessa regola della sezione Z: processo separato, si legge il CODICE D'USCITA.
+# La batteria e' in Python perche' deve importare `verify_gate.py` e chiamarne le
+# funzioni pure — un wrapper `.sh` in mezzo aggiungerebbe un file e nessun valore.
+section "batteria del cancello di verifica"
+VGT="scripts/test/verify-gate-tests.py"
+if [ ! -f "$VGT" ]; then
+  fail "$VGT manca"
+else
+  PY="$(command -v python || command -v py || true)"
+  if [ -z "$PY" ]; then
+    fail "$VGT — nessun interprete python trovato (python/py)"
+  elif out="$("$PY" "$VGT" 2>&1)"; then
+    ok "verify-gate-tests.py — $(printf '%s' "$out" | tail -1)"
+  else
+    fail "verify-gate-tests.py — $(printf '%s' "$out" | tail -1)"
+  fi
+fi
+
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

@@ -106,9 +106,17 @@ describe("#29 A/L3 talent-review 9-box read", () => {
     expect(r.statusCode).toBe(403);
   });
 
+  // #124 D4 (S1054): questa prova riguarda la DERIVAZIONE delle bande dai punteggi,
+  // e va fatta con un attore che ha titolo per leggerli. Girava con `admin`
+  // (`enzo.spenuso@heuresys.com`, PLATFORM_ADMIN) ed e' diventata rossa nel momento
+  // in cui ADR-0032 ha smesso di mostrargli il giudizio: non un difetto, ma
+  // l'invariante nuovo che mordeva un oracolo scritto quando non esisteva ancora.
+  // Con `federica` (TENANT_ADMIN, mandato HR — I20) la proprieta' resta verificata
+  // sui valori veri; che al platform le bande NON arrivino e' provato altrove
+  // (`talent-review-mask.integration.test.ts`).
   it("nine-box rows carry potentialBand/performanceBand ∈ {LOW,MEDIUM,HIGH}", async () => {
     const r = await suite.app.inject({
-      method: "GET", url: "/v1/talent-review/nine-box?limit=200", headers: { cookie: ch(admin.cookies) },
+      method: "GET", url: "/v1/talent-review/nine-box?limit=200", headers: { cookie: ch(federica.cookies) },
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { items: { potentialBand: string; performanceBand: string; potential: number | null }[] };

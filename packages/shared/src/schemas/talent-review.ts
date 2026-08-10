@@ -29,11 +29,15 @@ export const NineBoxRowSchema = z.object({
   userId: z.uuid(),
   /** Resolved display name of the subject user (null if the user row is gone). */
   subjectUserName: z.string().nullable(),
-  potential: z.number().nullable(),
-  performance: z.number().nullable(),
-  band: z.string().nullable(),
-  potentialBand: TalentBandEnum,
-  performanceBand: TalentBandEnum,
+  // giudizio (mascherabile, ADR-0032 / #124 D4). Le due BANDE sono derivate dai
+  // due punteggi: mascherare `potential`/`performance` e lasciare le bande
+  // significherebbe pubblicare la casella del 9-box, cioe' la conclusione.
+  potential: z.number().nullable().optional(),
+  performance: z.number().nullable().optional(),
+  band: z.string().nullable().optional(),
+  potentialBand: TalentBandEnum.optional(),
+  performanceBand: TalentBandEnum.optional(),
+  masked: z.array(z.string()).optional(),
   computedAt: z.iso.datetime(),
 });
 export type NineBoxRow = z.infer<typeof NineBoxRowSchema>;
@@ -59,8 +63,11 @@ export const FitScoreSchema = z.object({
   subjectUserName: z.string().nullable(),
   positionId: z.uuid(),
   dimension: z.string(),
-  score: z.number(),
-  payload: z.record(z.string(), z.unknown()),
+  // giudizio (mascherabile, ADR-0032 / #124 D4): il punteggio e il payload che
+  // lo spiega. La DIMENSIONE resta — dice su cosa e' stato valutato, non quanto.
+  score: z.number().optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
+  masked: z.array(z.string()).optional(),
   computedAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
 });
@@ -87,8 +94,11 @@ export const ReadinessScoreSchema = z.object({
   subjectUserName: z.string().nullable(),
   positionId: z.uuid(),
   horizon: z.string(),
-  value: z.number().nullable(),
-  payload: z.record(z.string(), z.unknown()),
+  // giudizio (mascherabile, ADR-0032 / #124 D4). L'ORIZZONTE resta: dice entro
+  // quando ci si chiede se la persona sia pronta, non la risposta.
+  value: z.number().nullable().optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
+  masked: z.array(z.string()).optional(),
   computedAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
 });
@@ -115,9 +125,11 @@ export const SuccessionScoreSchema = z.object({
   userId: z.uuid(),
   subjectUserName: z.string().nullable(),
   positionId: z.uuid(),
-  value: z.number().nullable(),
+  // giudizio (mascherabile, ADR-0032 / #124 D4)
+  value: z.number().nullable().optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
+  masked: z.array(z.string()).optional(),
   horizon: z.string().nullable(),
-  payload: z.record(z.string(), z.unknown()),
   computedAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
 });

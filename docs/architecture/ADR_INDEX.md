@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**31 ADR** in `docs/architecture/adr/`.
+**34 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -32,13 +32,16 @@
 | [0024](adr/0024_legacy_ingestion_employee_centric.md) | Legacy ingestion is EMPLOYEE-centric: `sys_user*` ⟸ legacy `employee*` (not `users`) | ACCEPTED | Legacy ingestion is EMPLOYEE-centric: `sys_user*` ⟸ legacy `employee*` (not `users`) *(dal titolo)* | 2026-06-01 |
 | [0025](adr/0025_sys_skill_categories_nullable_family_fk.md) | `sys_skill_categories.skill_category_family_id` nullable FK (+ WS-3 activity-classification-mapping investigation: source-dump + 000052 fixes, residual FK-conflict blocker) | ACCEPTED | `sys_skill_categories.skill_category_family_id` nullable FK (+ WS-3 activity-classification-mapping investigation: source-dump + 000052 fixes, residual FK-conflict blocker) *(dal titolo)* | 2026-06-01 |
 | [0026](adr/0026_single_production_environment_two_tenants.md) | Single production-grade environment: RTL Bank & Heuresys are the current production tenants | ACCEPTED | Single production-grade environment: RTL Bank & Heuresys are the current production tenants *(dal titolo)* | 2026-06-22 |
-| [0027](adr/0027_two_axis_contextual_authorization.md) | Two-axis contextual authorization: the organizational chain gates sensitive personal data, the functional chain gates activities | ACCEPTED  * | Two-axis contextual authorization: the organizational chain gates sensitive personal data, the functional chain gates activities *(dal titolo)* | 2026-06-30 |
+| [0027](adr/0027_two_axis_contextual_authorization.md) | Two-axis contextual authorization: the organizational chain gates sensitive personal data, the functional chain gates activities | SUPERSEDED by ADR-0036 | Two-axis contextual authorization: the organizational chain gates sensitive personal data, the functional chain gates activities *(dal titolo)* | 2026-06-30 |
 | [0028](adr/0028_ci_enforcement_at_deploy_gate.md) | CI enforcement point: deploy gate, not branch-protection required checks | Accepted | CI enforcement point: deploy gate, not branch-protection required checks *(dal titolo)* | — |
 | [0029](adr/0029_reference_data_i18n_translations_table.md) | i18n dei dati di riferimento: IT canonico in-row + tabella centrale `sys_reference_translations` | Accepted | i18n dei dati di riferimento: IT canonico in-row + tabella centrale `sys_reference_translations` *(dal titolo)* | — |
 | [0030](adr/0030_esco_skill_group_ontology.md) | Ontologia competenze ESCO come cittadino di prim'ordine (`sys_skill_groups`) | Accepted | Ontologia competenze ESCO come cittadino di prim'ordine (`sys_skill_groups`) *(dal titolo)* | — |
 | [0031](adr/0031_ess_self_view_computed_intelligence.md) | Self-view ESS dell'intelligence calcolata (capability + flight-risk) | Accepted | Self-view ESS dell'intelligence calcolata (capability + flight-risk) *(dal titolo)* | — |
 | [0032](adr/0032_platform_mandate_masks_pay_and_evaluation.md) | The platform mandate stops opening pay and evaluation: `mask` becomes a real state | ACCEPTED | The platform mandate stops opening pay and evaluation: `mask` becomes a real state *(dal titolo)* | 2026-08-04 |
 | [0033](adr/0033_generic_tool_catalogue_over_domain_metadata.md) | Catalogo di strumenti generici sui metadati di dominio, invece di uno strumento per modulo | PROPOSED - subordinato alla misura di §6 | Catalogo di strumenti generici sui metadati di dominio, invece di uno strumento per modulo *(dal titolo)* | 2026-08-07 |
+| [0034](adr/0034_migration_chain_is_schema_over_a_data_baseline.md) | La catena di migrazioni è uno strato di schema e controlli sopra una base di dati, non un ricostruttore | Accepted | La catena di migrazioni è uno strato di schema e controlli sopra una base di dati, non un ricostruttore *(dal titolo)* | — |
+| [0035](adr/0035_retirement_amends_the_source_never_deletes_downstream.md) | Ritirare un oggetto: si emenda la fonte, non si cancella a valle | Accepted | Ritirare un oggetto: si emenda la fonte, non si cancella a valle *(dal titolo)* | — |
+| [0036](adr/0036_hierarchical_and_functional_domains.md) | Hierarchical and functional domains: the perimeter and the modality are orthogonal | ACCEPTED * | Hierarchical and functional domains: the perimeter and the modality are orthogonal *(dal titolo)* | 2026-08-10 |
 
 ## Conventions
 

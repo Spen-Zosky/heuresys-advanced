@@ -1,6 +1,6 @@
 # ADR-0027 — Two-axis contextual authorization: the organizational chain gates sensitive personal data, the functional chain gates activities
 
-**Status**: ACCEPTED  *(approved by Enzo 2026-06-30; per his decision the full design was written first, then implemented in phases F0–F6)*
+**Status**: SUPERSEDED by ADR-0036 (2026-08-10) *(originally ACCEPTED — approved by Enzo 2026-06-30; per his decision the full design was written first, then implemented in phases F0–F6. The cardinal rule §1.3(3) survives unchanged as I18; the domain model, the data classes and the mask state now live in ADR-0036)*
 **Date**: 2026-06-30
 **Author**: CLI session (S1012)
 **Decision authority**: Enzo Spenuso

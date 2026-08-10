@@ -7,6 +7,46 @@
 
 ---
 
+## §0 — CI state at the 2026-08-09 triage, and what it implies
+
+Recorded here because the classification alone does not say **why nothing was applied**, and
+because two of these calls are not obvious from the bucket name. Re-runnable at any time:
+
+```bash
+gh pr list --state open --label dependencies --json number,title -q '.[] | "#\(.number)\t\(.title)"'
+gh pr checks <N>
+```
+
+| PR | bump | CI at triage | bucket | applied? |
+|---|---|---|---|---|
+| **#67** | `minor-and-patch` group, **21 updates** (next, fastify, vite, playwright, …) | ❌ **`test-integration` red** (6 other checks green) | `MERGE_BATCH` | **no** — see (a) |
+| **#62** | `fastify-type-provider-zod` 6.1.0 → **7.0.0** | ✅ 7/7 | `DEFER_MAJOR` | no — §5 |
+| **#61** | `typescript` 6.0.3 → **7.0.2** | ❌ **`build-web`, `lint`, `playwright-smoke` red** | `DEFER_MAJOR` | no — §5 |
+| **#60** | `@eslint/js` 9.39.4 → 9.39.5 | ✅ 4/4 | `MERGE_NOW` | **no** — see (b) |
+| **#58** | `github/codeql-action` 3 → **4** | ✅ 3/3 | `DEFER_MAJOR` | no — §5 |
+
+- **(a) `#67` is not mergeable as it stands, and must not be regenerated blind.** The group
+  carries 21 bumps and the integration run is red: nobody knows *which* of the 21 broke it.
+  Asking Dependabot to recreate the PR **throws away that red run** — the only piece of
+  evidence there is — and starts over knowing nothing. The failure has to be attributed to a
+  specific bump first.
+- **(b) `#60` is the easy one and it is still sitting there.** Dev-only, smallest possible
+  bump, every check green: a textbook `MERGE_NOW`. It was classified and deliberately **not**
+  applied, because merging touches `main` and merging into `main` arms the production deploy.
+  It is **not** a duplicate of `#67` — `@eslint/js` is absent from that group's 21 packages,
+  because `#60` (2026-07-27) predates the group PR (2026-08-08) and Dependabot does not
+  absorb an already-open PR into a later group.
+- **No PR carries the `defer-major` label.** §1 prescribes it for that bucket, but the labels
+  on the repo were left untouched: **this section and §5 are the only record of the
+  deferral**. `gh pr list --label defer-major` returns nothing, and that is expected.
+
+> **Since this triage, a sixth PR has appeared and has NOT been classified**: `#68`
+> `pnpm/action-setup` 6.0.9 → 6.0.10 (CI-action patch). Verified open on 2026-08-10. It is
+> listed here so the count in the header is not read as current — at the next triage it
+> starts as unclassified, not as «already looked at».
+
+---
+
 ## §1 — Triage classification matrix
 
 Dependabot opens one PR per dep upgrade (minor/patch bumps arrive grouped). We classify each into one of 4 buckets:

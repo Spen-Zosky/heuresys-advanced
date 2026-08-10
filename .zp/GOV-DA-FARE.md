@@ -115,10 +115,30 @@ misurate una per una:
    Sono le correzioni ai 7 rilievi, iniziate e mai chiuse. **Toccano `apps/api`: perimetro di
    un lavoratore, non di gov.** Vanno assegnate o buttate — non lasciate li'.
 
-**La prossima azione, adesso**: `Z-251` (la suite non regge la contesa sul DB condiviso) con
-**accorpati i 7 rilievi di drift-check** — insistono sugli stessi file, `vitest.config.ts` in
-testa, quindi un solo lavoratore e non due. La corsa mette anche alla prova `#177` sul campo,
-che nessun lavoratore ha ancora usato.
+**La prossima azione, adesso**: `#181` — i 7 rilievi di drift-check — a **un solo**
+lavoratore. Terreno `apps/api/test/**` + `apps/api/vitest.config.ts`, che e' lo stesso
+perimetro di `Z-112`, classe A. La corsa mette anche alla prova `#177` sul campo, che
+nessun lavoratore ha ancora usato.
+
+> ⚠️ **CORREZIONE, misurata dopo aver proposto il contrario tre volte.** `Z-251` **NON e'
+> assegnabile a nessun lavoratore**: in `zp.config.yaml` e' **classe D**, e le corsie
+> ammettono solo A/B (`safe`) o A/B/C (`full`, `full-presidiata`). Il file lo dice a chiare
+> lettere — «D ed E non appaiono in nessuna corsia: non e' una dimenticanza. D richiede
+> autorizzazione per lotto» e «il presidio e' una garanzia sul COME si corre, non un
+> permesso in piu' sul COSA si tocca». La ragione sta nel suo criterio di chiusura: **due
+> corse consecutive della suite mentre gira un `pg_dump` sulla VM di produzione**, cioe'
+> ~90 minuti di test piu' un dump su produzione viva. Serve un'autorizzazione di Enzo per
+> lotto. Non e' un dettaglio procedurale: e' la differenza fra un lavoro di test e
+> un'azione sulla produzione.
+
+**Le tre decisioni aperte, tutte di Enzo** (registrate perche' non si perdano):
+
+1. **`#182`** — i due rami «recuperati» portano **473 righe mai entrate in main**, e uno e'
+   il versante **E2E** di `Z-112` (317 righe, zero file in comune col commit che ha chiuso
+   il cluster, scritto dieci ore prima). Istruire e portare in main, o archiviare dicendolo.
+2. **`Z-251`** — l'autorizzazione per lotto di cui sopra.
+3. **`#175`** — riformulata da `#182`: non e' solo «il verde fu dato col cancello cieco», e'
+   che **il lavoro di `Z-230` non e' in main**.
 
 ## Il freno, adesso
 

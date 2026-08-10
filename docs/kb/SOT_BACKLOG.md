@@ -79,11 +79,13 @@
   - input-richiesto: si ri-istruisce (`bash scripts/gov-chiudi.sh 1`, il rilievo comparirà) oppure si accetta il verde già dato?
   - perche-solo-tuo: il lavoro è un documento di triage, non codice: se il rigore vada applicato retroattivamente a un merge già fatto è una scelta tua, non una misura
 
-- **#176 Il punto di rientro di gov esiste in una sola copia, su una sola macchina** · status: ACTIVE
+- **#176 Il punto di rientro di gov esiste in una sola copia, su una sola macchina** · status: DONE
   - priority: P2 · effort: ~20min · doc: `.zp/GOV-DA-FARE.md`
   - misurato-S1052: `.zp/` è gitignored (con eccezione per `PROGRESS.md`, che infatti è versionato). `GOV-DA-FARE.md` contiene le **regole d'ingaggio decise da Enzo** e lo stato del processo gov, ed è l'unica parte del rientro che una macchina non può dedurre — `gov_rientro.py` rigenera tutto il resto
   - perche-conta: se questa macchina non c'è, quel documento non c'è. Non arriva ai cloni, non è nel backup del repo, e una sessione gov che si apre altrove riparte senza sapere le regole
-  - da-fare: spostarlo dove il repo lo protegge (es. `docs/superpowers/` o un'eccezione in `.gitignore` come già fatto per `PROGRESS.md`), aggiornando il puntatore in `gov_rientro.py`
+  - **il rischio si è materializzato prima che la voce fosse chiusa** (S1053): all'apertura della sessione il file diceva «la prossima azione è una sola: chiudere `Z-112`», mentre `Z-112` era chiuso da quella mattina — verdetto VERDE zero rilievi, merge `b6824e7e`, riga 447 del piano spuntata, e `Z-250` chiuso con lui. **Falso da un giorno, in una copia sola, e nessun posto da cui accorgersene**: una sessione gov che si fosse fidata avrebbe rifatto lavoro già fatto
+  - ✅ **RISOLTO S1053** (`c75940e0`): eccezione `!.zp/GOV-DA-FARE.md` nel `.gitignore`, la seconda delle due strade previste dalla voce — il file resta dov'è, quindi **il puntatore in `gov_rientro.py` non cambia** e non è stato toccato. Contenuto riallineato al reale con le tre misure di sessione
+  - come è stato confermato: provato **nei due sensi**, non solo in quello comodo — `git check-ignore` non ignora più `GOV-DA-FARE.md`, e continua a ignorare `interrupted.json`, `cursor.json` e la **chiave d'accesso della plancia**. Un'eccezione troppo larga lì dentro avrebbe versionato un segreto
 
 - **#172 Il clone del database su linux-pc accumula residui: il `DROP SCHEMA staging` fallisce a ogni giro** · status: ACTIVE
   - priority: P2 · effort: ~30min · doc: `scripts/clone-vm-db.sh` (o il passo `clone-db` di `close-propagate.sh`)

@@ -53,13 +53,10 @@ si legge dal codice d'uscita**, mai da `head`/`tail` in coda a una pipe.
 
 ## Open questions
 
-- **Il freno resta INSERITO per il non presidiato.** La corsa sorvegliata ora chiude cluster
-  veri. Vuoi che il loop giri anche non presidiato? Decisione tua, senza scadenza — e `#177`
-  suggerisce di aspettare: oggi un lavoratore non riesce a chiudersi da solo.
-- **`.zp/GOV-DA-FARE.md` non è versionato** ed esiste in una sola copia su questa macchina:
-  contiene le tue regole d'ingaggio gov (`#176`).
-- **`#175`**: il verdetto verde di `Z-230` fu dato con il cancello evidenze cieco. Il lavoro
-  è già su main. Si ri-istruisce o si accetta?
+- **Il freno resta INSERITO per il non presidiato.** Vuoi che il loop giri anche non
+  sorvegliato? `#177` suggerisce di aspettare: oggi un lavoratore non chiude da solo.
+- **`.zp/GOV-DA-FARE.md` non è versionato**, esiste in una sola copia qui (`#176`).
+- **`#175`**: il verde di `Z-230` fu dato col cancello evidenze cieco. Si ri-istruisce?
 
 ## Verification
 

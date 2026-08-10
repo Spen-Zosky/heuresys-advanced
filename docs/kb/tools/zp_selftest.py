@@ -18,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from zp_state import (RADICE, ZPDIR, carica_config, carica_piano, candidati,  # noqa: E402
-                      verifica, precondizioni_classe_c, gruppo_parallelo, in_conflitto)
+                      verifica, precondizioni_classe_c)
 from zp_gate import coppia_ammessa  # noqa: E402
 
 ESITI = []
@@ -100,99 +100,6 @@ def prove_su_fixture() -> list:
     shutil.rmtree(base, ignore_errors=True)
     return esiti
 
-
-def prove_perimetri() -> list:
-    """15-21 — chi puo' girare insieme (modalita' gov, #173).
-
-    Su piano finto, con l'atteso scritto a mano: sui dati veri nessun cluster ha
-    ancora un perimetro, quindi un test «vivo» direbbe sempre «zero in parallelo»
-    e resterebbe verde anche col confronto rotto.
-    """
-    import shutil
-    esiti = []
-    base = ZPDIR / 'selftest-gov'
-    base.mkdir(parents=True, exist_ok=True)
-    piano = base / 'piano-finto.md'
-    piano.write_text("""# finto
-
-## W1 — igiene (6)
-
-### test (6)
-
-- [ ] **Z-901** (1.0h) — tocca il modulo A
-  - *chiuso quando*: comando
-- [ ] **Z-902** (1.0h) — tocca il modulo B, disgiunto da A
-  - *chiuso quando*: comando
-- [ ] **Z-903** (1.0h) — tocca tutto apps/api, quindi anche il modulo A
-  - *chiuso quando*: comando
-- [ ] **Z-904** (1.0h) — nessun perimetro dichiarato
-  - *chiuso quando*: comando
-- [ ] **Z-905** (1.0h) — tocca apps/api2, che NON e' apps/api
-  - *chiuso quando*: comando
-- [ ] **Z-906** (1.0h) — perimetro jolly: la radice
-  - *chiuso quando*: comando
-""", encoding='utf-8')
-    rel = piano.relative_to(RADICE).as_posix()
-    cfg = {
-        'meta': {'plan': rel},
-        'lanes': {'safe': ['A', 'B']},
-        'gov': {'lavoratori_default': 2, 'lavoratori_max': 3},
-        'clusters': {
-            'Z-901': {'classe': 'B', 'perimetro': ['apps/api/src/modules/a/**']},
-            'Z-902': {'classe': 'B', 'perimetro': ['apps/api/src/modules/b/**']},
-            'Z-903': {'classe': 'B', 'perimetro': ['apps/api/**']},
-            'Z-904': {'classe': 'B'},
-            'Z-905': {'classe': 'B', 'perimetro': ['apps/api2/**']},
-            'Z-906': {'classe': 'B', 'perimetro': ['**']},
-        },
-        'interrupt_resume': {'max_failures_per_cluster': 2},
-    }
-    cl = carica_piano(cfg)
-    per_id = {c.id: c for c in cl}
-
-    # 15 - senza perimetro non si va mai in parallelo (decisione 3)
-    ok = per_id['Z-904'].parallelizzabile is False and per_id['Z-901'].parallelizzabile is True
-    esiti.append(('15 senza perimetro non e parallelizzabile', ok,
-                  f"Z-904={per_id['Z-904'].parallelizzabile} Z-901={per_id['Z-901'].parallelizzabile}"))
-
-    # 16 - due perimetri disgiunti girano insieme
-    g = gruppo_parallelo(cl, cfg, 'safe', lavoratori=2)
-    scelti = [c['id'] for c in g['parallelo']]
-    esiti.append(('16 perimetri disgiunti in parallelo', scelti == ['Z-901', 'Z-902'],
-                  f'scelti {scelti} (attesi Z-901 e Z-902)'))
-
-    # 17 - un perimetro che CONTIENE l'altro e' un conflitto
-    ok = bool(in_conflitto(per_id['Z-901'], per_id['Z-903']))
-    esiti.append(('17 perimetro contenuto = conflitto', ok,
-                  f"apps/api/src/modules/a vs apps/api -> conflitto={ok} (atteso True)"))
-
-    # 18 - ma il confronto e' per segmento: apps/api2 NON e' dentro apps/api
-    ok = not in_conflitto(per_id['Z-903'], per_id['Z-905'])
-    esiti.append(('18 apps/api2 non e dentro apps/api', ok,
-                  f"conflitto={not ok} (atteso False: bloccherebbe lavoro buono)"))
-
-    # 19 - il jolly sulla radice confligge con chiunque
-    ok = (bool(in_conflitto(per_id['Z-906'], per_id['Z-901']))
-          and bool(in_conflitto(per_id['Z-906'], per_id['Z-905'])))
-    esiti.append(('19 il jolly sulla radice tocca tutto', ok,
-                  f"'**' vs due perimetri distinti -> conflitto={ok} (atteso True)"))
-
-    # 20 - chi confligge finisce fra gli scartati, e con il MOTIVO
-    g3 = gruppo_parallelo(cl, cfg, 'safe', lavoratori=3)
-    scartati = {s['id']: s for s in g3['scartati']}
-    ok = ('Z-903' in scartati and scartati['Z-903']['perche'] == 'perimetro sovrapposto'
-          and any(c['id'] == 'Z-901' for c in scartati['Z-903'].get('con', [])))
-    esiti.append(('20 lo scarto dice con chi confligge', ok,
-                  f"Z-903 -> {scartati.get('Z-903', {}).get('perche', 'ASSENTE')}"))
-
-    # 21 - il numero di lavoratori e' un tetto: 9 richiesti, 3 concessi (decisione 4)
-    g9 = gruppo_parallelo(cl, cfg, 'safe', lavoratori=9)
-    ok = g9['lavoratori'] == 3 and len(g9['parallelo']) <= 3
-    esiti.append(('21 lavoratori: il tetto vince sulla richiesta', ok,
-                  f"chiesti 9, concessi {g9['lavoratori']} (atteso 3)"))
-
-    shutil.rmtree(base, ignore_errors=True)
-    return esiti
 
 
 def prove_triage() -> list:
@@ -331,10 +238,6 @@ def main() -> int:
     # girano sui dati vivi e sono tautologici — verificano che la funzione faccia cio' che
     # fa, non che faccia la cosa giusta. Qui l'atteso e' scritto a mano su un piano finto.
     for nome, esito, dett in prove_su_fixture():
-        ESITI.append((nome, esito, dett))
-
-    # 15-21 - i perimetri della modalita' gov (#173), anch'essi su piano finto
-    for nome, esito, dett in prove_perimetri():
         ESITI.append((nome, esito, dett))
 
     # 22-26 - il verdetto sull'eta' del censimento (zp_triage)

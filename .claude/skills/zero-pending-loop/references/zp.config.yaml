@@ -80,22 +80,14 @@ lanes:
   # D ed E non appaiono in nessuna corsia: non e' una dimenticanza.
   # D richiede autorizzazione per lotto, E richiede un input di Enzo.
 
-# MODALITA' GOV (#173) — il loop con piu' lavoratori invece di uno.
-# Piano: docs/superpowers/plans/2026-08-09-modalita-gov.md
-#
-# Il numero e' un TETTO, non un obiettivo: `--lavoratori 5` viene accettato e
-# ridotto a `lavoratori_max`, come gia' fa il driver con i due flag di spesa.
-# Nessuna classificazione di rischio nuova (decisione 5): valgono le classi A-D
-# e le corsie qui sopra, immutate.
 # PERMESSI DELLE SESSIONI LAVORATRICI — concesso da Enzo il 2026-08-09.
 #
-# Perche' serve, misurato e non supposto: nella terza corsa presidiata i due
-# lavoratori hanno lavorato 5 e 21 minuti e si sono fermati DA SOLI, scrivendo il
-# motivo invece di fingere — «gh pr list negato dal sistema permessi (5 tentativi)»
-# e «gli strumenti di gate non sono eseguibili, le scritture su file sono negate».
-# Con `acceptEdits` una sessione puo' modificare file ma non ESEGUIRE comandi: non
-# puo' far girare i test, interrogare il database, usare gh. Cioe' non puo' chiudere
-# un cluster, che e' l'unica cosa per cui esiste.
+# Perche' serve, misurato e non supposto: una sessione si e' fermata DA SOLA dopo
+# pochi minuti, scrivendo il motivo invece di fingere — «gh pr list negato dal
+# sistema permessi (5 tentativi)» e «gli strumenti di gate non sono eseguibili, le
+# scritture su file sono negate». Con `acceptEdits` una sessione puo' modificare file
+# ma non ESEGUIRE comandi: non puo' far girare i test, interrogare il database, usare
+# gh. Cioe' non puo' chiudere un cluster, che e' l'unica cosa per cui esiste.
 #
 # Cosa comporta, detto per intero: `bypassPermissions` da' alla sessione il diritto
 # di eseguire qualunque comando senza chiedere. Le difese che RESTANO e che questa
@@ -104,28 +96,11 @@ lanes:
 #   · la corsia (safe = solo classi A e B): niente produzione, niente schema, niente
 #     segreti;
 #   · il veto sul deploy, imposto da close-propagate fuori dalla corsia presidiata;
-#   · il tetto di spesa per giro e cumulato;
-#   · l'albero di lavoro separato: un lavoratore non tocca il repo principale.
+#   · il tetto di spesa per giro e cumulato.
 #
 # Si revoca rimettendo `acceptEdits`, e il driver torna com'era.
 permessi:
   modalita_lavoratore: bypassPermissions
-
-gov:
-  lavoratori_default: 2
-  lavoratori_max: 3
-  # Un cluster entra in parallelo SOLO se ha un `perimetro:` dichiarato nella sua
-  # voce sotto `clusters:`. Senza, torna sequenziale e non blocca gli altri
-  # (decisione 3). Il perimetro si scrive a mano come la classe, e per la stessa
-  # ragione: dedurlo dalla prosa e' l'errore che la classificazione ha gia' evitato.
-  #
-  #   Z-004: {classe: B, perche: "...", perimetro: [apps/api/src/modules/x/**]}
-  #
-  # ATTENZIONE, misurato S1052: il perimetro governa la collisione FRA FILE, che
-  # non e' l'unica. Tre guardie del loop ragionano sull'intero albero di lavoro
-  # («non parto su repo sporco», l'impronta del cancello di verifica, i controlli
-  # dovuti per file toccato): per questo ogni lavoratore vuole il PROPRIO albero
-  # di lavoro, non solo un perimetro disgiunto. E' la voce G3 del piano.
 
 budget:
   # Il contesto residuo NON e' misurabile dall'interno di una sessione (nessun contatore
@@ -343,7 +318,7 @@ clusters:
   Z-108: {classe: C, perche: "C per azione (il criterio installa o provisiona software di sistema); il testo suggeriva B"}
   Z-109: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
   Z-111: {classe: B, perche: "codice: api, apps/api, vitest"}
-  Z-112: {classe: A, perche: "inerte: DEBT_REGISTER", perimetro: [apps/api/test/**, apps/api/vitest.config.ts]}
+  Z-112: {classe: A, perche: "inerte: DEBT_REGISTER"}
   Z-113: {classe: B, perche: "rivisto a mano: spec E2E mancanti: codice di test"}
   Z-114: {classe: B, perche: "codice: Playwright, route"}
   Z-115: {classe: A, perche: "inerte: docs/"}
@@ -354,7 +329,7 @@ clusters:
   Z-120: {classe: B, perche: "codice: test"}
   Z-121: {classe: B, perche: "codice: test"}
   Z-122: {classe: B, perche: "codice: API, test"}
-  Z-123: {classe: B, perche: "codice: test", perimetro: [apps/api/test/**, apps/api/src/server.ts]}
+  Z-123: {classe: B, perche: "codice: test"}
   Z-124: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
   Z-126: {classe: C, perche: "schema e dati: tabella"}
   Z-127: {classe: B, perche: "codice: CI, component, test"}
@@ -440,10 +415,10 @@ clusters:
   Z-218: {classe: B, perche: "codice: CI, test"}
   Z-219: {classe: C, perche: "schema e dati: tabelle", rivisto: false}
   Z-220: {classe: A, perche: "inerte: SOT_BACKLOG"}
-  Z-221: {classe: A, perche: "inerte: docs/", perimetro: [docs/MVP_4_ROADMAP.md]}
+  Z-221: {classe: A, perche: "inerte: docs/"}
   Z-222: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-223: {classe: A, perche: "inerte: ADR"}
-  Z-230: {classe: B, perche: "codice: zod", perimetro: [docs/github/dependabot-triage-2026-05-26.md]}
+  Z-230: {classe: B, perche: "codice: zod"}
   Z-231: {classe: B, perche: "codice: CI, api, apps/api"}
   Z-233: {classe: A, perche: "inerte: ADR"}
   Z-237: {classe: B, perche: "codice: test"}

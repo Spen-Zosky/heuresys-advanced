@@ -11,7 +11,6 @@ Sottocomandi
     cursore      legge o scrive .zp/cursor.json
     interrotto   registra o elenca i cluster interrotti
     progress     rigenera .zp/PROGRESS.md
-    perimetri    quali cluster possono girare INSIEME (modalita' gov, #173)
 
 Uso tipico dal driver e dalla skill:
     python docs/kb/tools/zp_state.py prossimo --lane safe --json
@@ -35,11 +34,10 @@ except ImportError:
     raise SystemExit(2)
 
 # La radice si puo' IMPORRE. Derivandola solo da dove sta questo file, uno strumento
-# lanciato dal repo principale cerca le prove di un lavoratore in `<repo>/.zp/prove/`,
-# mentre il lavoratore le ha scritte nel PROPRIO albero: misurato il 2026-08-09,
-# `zp_evidence valida Z-230` diceva «nessuna prova registrata» con il file di prove
-# presente e valido, e l'istruttoria di gov non poteva vederle. Senza ZP_ROOT nulla
-# cambia: e' lo stesso rimedio gia' applicato al lucchetto della suite.
+# lanciato da una copia del repo cerca le prove dove non sono state scritte: misurato
+# il 2026-08-09, `zp_evidence valida Z-230` diceva «nessuna prova registrata» con il
+# file di prove presente e valido. Senza ZP_ROOT nulla cambia — e' lo stesso rimedio
+# gia' applicato al lucchetto della suite.
 RADICE = Path(os.environ.get("ZP_ROOT") or Path(__file__).resolve().parents[3])
 CONFIG = RADICE / '.claude' / 'skills' / 'zero-pending-loop' / 'references' / 'zp.config.yaml'
 ZPDIR = RADICE / '.zp'
@@ -80,113 +78,10 @@ class Cluster:
     nota_chiusura: str = ''
     riga: int = 0
     classe: str = ''                # assegnata dalla config, non dal piano
-    perimetro: list = field(default_factory=list)   # idem: si dichiara, non si deduce
 
     @property
     def eseguibile_da_solo(self) -> bool:
         return not self.bloccato_su_enzo
-
-    @property
-    def parallelizzabile(self) -> bool:
-        """Senza perimetro dichiarato un cluster non entra MAI in parallelo.
-
-        Decisione 3 di Enzo (#173): perimetro assente o ambiguo => quel cluster
-        torna sequenziale, senza bloccare gli altri. Il fail-safe e' lo stesso di
-        `get_mode`: nel dubbio, il comportamento di sempre."""
-        return bool(_normalizza_perimetro(self.perimetro))
-
-
-# --- perimetri: quali cluster possono girare insieme ----------------------
-#
-# Il perimetro si DICHIARA in zp.config.yaml, accanto alla classe di rischio e per
-# la stessa ragione: dedurlo dalla prosa della descrizione e' esattamente l'errore
-# che la classificazione a mano ha gia' evitato una volta.
-#
-#   Z-004: {classe: B, perche: "...", perimetro: [apps/api/src/modules/x/**]}
-
-
-def _normalizza_perimetro(voci) -> list:
-    """Da ['apps/api/src/x/**', 'db/'] a ['apps/api/src/x', 'db'].
-
-    Toglie i jolly finali e le barre di contorno, cosi' il confronto e' fra
-    percorsi e non fra glob. `**` e `/` diventano stringa vuota, cioe' LA RADICE:
-    e' il caso limite che deve risultare in conflitto con chiunque, non in
-    «nessuna sovrapposizione»."""
-    fuori = []
-    for v in voci or []:
-        s = str(v).replace('\\', '/').strip()
-        if not s:
-            continue
-        s = re.sub(r'/?\*+$', '', s)          # /** e /* finali
-        s = s.strip('/')
-        fuori.append(s)
-    return fuori
-
-
-def _si_sovrappongono(a: str, b: str) -> bool:
-    """Vero se due percorsi normalizzati si toccano.
-
-    Il confronto e' per SEGMENTO, non per prefisso di stringa: `apps/api` e
-    `apps/api2` sono due cose diverse, e un `startswith` nudo li direbbe in
-    conflitto bloccando lavoro che poteva girare in parallelo."""
-    if a == '' or b == '':
-        return True                            # la radice tocca tutto
-    if a == b:
-        return True
-    return a.startswith(b + '/') or b.startswith(a + '/')
-
-
-def in_conflitto(c1, c2) -> list:
-    """Le coppie di percorsi che mettono due cluster in conflitto. Vuota = disgiunti."""
-    p1, p2 = _normalizza_perimetro(c1.perimetro), _normalizza_perimetro(c2.perimetro)
-    return [(a, b) for a in p1 for b in p2 if _si_sovrappongono(a, b)]
-
-
-def gruppo_parallelo(clusters: list, cfg: dict, corsia: str, lavoratori: int | None = None,
-                     budget_ore: float | None = None, offline: bool = True) -> dict:
-    """Chi puo' girare INSIEME, chi resta in coda, e perche'.
-
-    Selezione golosa sull'ordine dei candidati, che e' gia' quello di priorita':
-    si prende il primo, e ogni successivo entra solo se disgiunto da TUTTI quelli
-    gia' presi. Deterministica — a parita' di piano dà sempre lo stesso esito.
-    """
-    conf_gov = (cfg.get('gov') or {})
-    massimo = conf_gov.get('lavoratori_max') or 3
-    if lavoratori is None:
-        lavoratori = conf_gov.get('lavoratori_default') or 2
-    lavoratori = max(1, min(int(lavoratori), int(massimo)))
-
-    in_corsa = candidati(clusters, cfg, corsia, budget_ore=budget_ore, offline=offline)
-    scelti, sequenziali, scartati = [], [], []
-    for c in in_corsa:
-        if not c.parallelizzabile:
-            sequenziali.append({'id': c.id, 'perche': 'nessun perimetro dichiarato'})
-            continue
-        if len(scelti) >= lavoratori:
-            scartati.append({'id': c.id, 'perche': f'i {lavoratori} posti sono gia occupati'})
-            continue
-        collisioni = [(altro.id, in_conflitto(c, altro)) for altro in scelti
-                      if in_conflitto(c, altro)]
-        if collisioni:
-            scartati.append({
-                'id': c.id,
-                'perche': 'perimetro sovrapposto',
-                'con': [{'id': i, 'percorsi': [f'{a} ~ {b}' for a, b in cp]}
-                        for i, cp in collisioni],
-            })
-            continue
-        scelti.append(c)
-
-    return {
-        'corsia': corsia,
-        'lavoratori': lavoratori,
-        'lavoratori_max': massimo,
-        'parallelo': [{'id': c.id, 'classe': c.classe, 'effort': c.effort,
-                       'perimetro': _normalizza_perimetro(c.perimetro),
-                       'descrizione': c.descrizione} for c in scelti],
-        'sequenziali': sequenziali,
-        'scartati': scartati,
-    }
 
 
 def carica_config(percorso: Path = CONFIG) -> dict:
@@ -255,7 +150,6 @@ def carica_piano(cfg: dict | None = None) -> list[Cluster]:
                 descrizione=mc.group('desc').strip(),
                 riga=n,
                 classe=(voce.get('classe') or '').upper(),
-                perimetro=list(voce.get('perimetro') or []),
             ))
             continue
         if clusters:
@@ -315,35 +209,6 @@ def leggi_cursore() -> dict:
 
 def leggi_interrotti() -> dict:
     return _leggi_json(ZPDIR / 'interrupted.json', {})
-
-
-def cluster_lockati() -> dict:
-    """I cluster che un lavoratore vivo ha in mano -> {id: pid}.
-
-    RETE DI SICUREZZA della modalita' gov (#173). Il driver assegna e prende i
-    lucchetti prima di aprire le sessioni, ma se una sessione ignorasse la sua
-    assegnazione e chiedesse «qual e' il prossimo» si riprenderebbe il lavoro di
-    un altro. Qui i lucchetti vivi escono direttamente dall'universo dei candidati.
-
-    Un lucchetto di un processo MORTO non conta: e' un orfano, e ignorarlo
-    trasformerebbe il primo crollo in un blocco permanente."""
-    fuori = {}
-    dir_lock = ZPDIR / 'locks'
-    if not dir_lock.is_dir():
-        return fuori
-    for f in dir_lock.glob('*.lock'):
-        try:
-            pid = int(f.read_text(encoding='utf-8').splitlines()[0].strip())
-        except (OSError, ValueError, IndexError):
-            continue
-        try:
-            os.kill(pid, 0)
-        except OSError:
-            continue                      # morto: orfano, non blocca nessuno
-        except Exception:
-            pass
-        fuori[f.stem] = pid
-    return fuori
 
 
 def leggi_autorizzazioni() -> set:
@@ -444,7 +309,6 @@ def candidati(clusters: list, cfg: dict, corsia: str, budget_ore: float | None =
     ammesse = classi_ammesse(cfg, corsia)
     autorizzati = leggi_autorizzazioni()
     interrotti = leggi_interrotti()
-    lockati = cluster_lockati()
     max_fall = ((cfg.get('interrupt_resume') or {}).get('max_failures_per_cluster')) or 2
     # Un id e' «chiuso» solo se lo sono TUTTE le sue occorrenze. Con un id duplicato — una
     # riga spuntata e una no — il set costruito sui soli chiusi sbloccava le dipendenze di
@@ -462,8 +326,6 @@ def candidati(clusters: list, cfg: dict, corsia: str, budget_ore: float | None =
     def ammesso(c: Cluster) -> tuple[bool, str]:
         if c.chiuso:
             return False, 'gia chiuso'
-        if c.id in lockati:
-            return False, f'in mano a un altro lavoratore (pid {lockati[c.id]})'
         if not c.eseguibile_da_solo:
             return False, f'bloccato su Enzo: {c.bloccato_su_enzo}'
         if not c.classe:
@@ -542,76 +404,6 @@ def verifica(clusters: list, cfg: dict) -> list:
         if not c.chiuso and c.eseguibile_da_solo and not c.classe:
             rilievi.append(f'{c.id}: senza classe di rischio in zp.config.yaml')
     return rilievi
-
-
-# ---------------------------------------------------------------- stato gov
-
-def alberi_lavoratori(cfg: dict) -> list:
-    """Le cartelle di lavoro dei lavoratori, se esistono. Fuori dal repo."""
-    base = os.environ.get('GOV_WORKTREE_BASE') or str(RADICE.parent / 'heuresys-gov-workers')
-    b = Path(base)
-    if not b.is_dir():
-        return []
-    return sorted(d for d in b.iterdir() if d.is_dir() and (d / '.git').exists())
-
-
-def stato_gov(cfg: dict) -> dict:
-    """Chi sta lavorando a cosa, da quanto, e quanto si e' speso.
-
-    E' il consolidamento MANUALE della decisione 1 di Enzo: si guarda quando si
-    vuole, e non riapre niente. Sola lettura.
-
-    Un lavoratore si dice vivo dal PID, non dalla freschezza di un file: la
-    plancia ha gia' imparato che un file scritto di recente non prova che una
-    sessione sia ancora aperta."""
-    fuori = {'lavoratori': [], 'spesa_usd': 0.0, 'giri': 0,
-             'config_bloccata_da': None, 'freno_inserito': None}
-
-    meta = cfg.get('meta') or {}
-    aut = meta.get('autorizzato_non_presidiato')
-    fuori['freno_inserito'] = not (aut is True or str(aut).lower() == 'true')
-
-    lockati = cluster_lockati()
-    conf = ZPDIR / 'config.lock'
-    if conf.is_file():
-        try:
-            pid = int(conf.read_text(encoding='utf-8').splitlines()[0].strip())
-            os.kill(pid, 0)
-            fuori['config_bloccata_da'] = pid
-        except (OSError, ValueError, IndexError):
-            pass
-
-    for albero in alberi_lavoratori(cfg):
-        esito = albero / '.zp' / 'last-outcome.json'
-        voce = {'albero': albero.name, 'percorso': str(albero),
-                'cluster': None, 'esito': None, 'quando': None}
-        for cid, pid in lockati.items():
-            voce.setdefault('pid', None)
-            if voce['cluster'] is None:
-                voce['cluster'], voce['pid'] = cid, pid
-                break
-        if esito.is_file():
-            try:
-                d = json.loads(esito.read_text(encoding='utf-8'))
-                voce['esito'] = d.get('outcome')
-            except (OSError, ValueError):
-                voce['esito'] = 'illeggibile'
-            voce['quando'] = _quando(esito)
-        fuori['lavoratori'].append(voce)
-
-    giornale = ZPDIR / 'runs.ndjson'
-    if giornale.is_file():
-        for riga in giornale.read_text(encoding='utf-8').splitlines():
-            if not riga.strip():
-                continue
-            try:
-                fuori['spesa_usd'] += float(json.loads(riga).get('costo_usd') or 0)
-                fuori['giri'] += 1
-            except (ValueError, TypeError):
-                continue
-    fuori['spesa_usd'] = round(fuori['spesa_usd'], 2)
-    fuori['in_mano'] = lockati
-    return fuori
 
 
 def _quando(p: Path) -> str:
@@ -724,17 +516,6 @@ def main() -> int:
 
     pp = sub.add_parser('progress')
     pp.add_argument('--lane', default='safe')
-
-    sub.add_parser('stato-gov', help='chi sta lavorando a cosa, da quanto, e quanto si e speso')
-
-    pj = sub.add_parser('perimetro-json', help='il perimetro di UN cluster, come lista JSON')
-    pj.add_argument('cluster')
-
-    pm = sub.add_parser('perimetri', help='chi puo girare insieme, chi resta in coda, e perche')
-    pm.add_argument('--lane', default='safe')
-    pm.add_argument('--lavoratori', type=int, default=None)
-    pm.add_argument('--budget-ore', type=float, default=None)
-    pm.add_argument('--json', action='store_true')
 
     a = ap.parse_args()
     cfg = carica_config()
@@ -853,61 +634,6 @@ def main() -> int:
         print(f'scritto {dest}')
         return 0
 
-    if a.cmd == 'perimetro-json':
-        # Serve al driver per scrivere l'incarico del lavoratore. Scrittura BINARIA
-        # per la ragione gia' pagata una volta: print() su Windows aggiunge un
-        # ritorno a capo che finisce dentro il dato.
-        voce = (cfg.get('clusters') or {}).get(a.cluster) or {}
-        sys.stdout.buffer.write(
-            json.dumps(_normalizza_perimetro(voce.get('perimetro')), ensure_ascii=False).encode())
-        return 0
-
-    if a.cmd == 'stato-gov':
-        st = stato_gov(cfg)
-        print(f"freno {'INSERITO' if st['freno_inserito'] else 'tolto'} · "
-              f"{st['giri']} giri registrati · spesa ${st['spesa_usd']}")
-        if st['config_bloccata_da']:
-            print(f"  ATTENZIONE: la configurazione e' in scrittura (pid {st['config_bloccata_da']}): "
-                  f"un censimento sta girando, non lanciare lavoratori adesso")
-        if not st['lavoratori']:
-            print('  nessuna cartella di lavoro: nessun lavoratore e mai partito '
-                  '(si preparano con --prepara-alberi N)')
-        for l in st['lavoratori']:
-            in_mano = l.get('cluster') or '-'
-            print(f"  {l['albero']:6s} cluster {in_mano:8s} "
-                  f"ultimo esito {l['esito'] or '-':20s} {l['quando'] or ''}")
-        if st['in_mano']:
-            print('  in mano adesso: ' + ', '.join(f'{k} (pid {v})' for k, v in st['in_mano'].items()))
-        else:
-            print('  nessun cluster in mano a nessuno')
-        return 0
-
-    if a.cmd == 'perimetri':
-        esito = gruppo_parallelo(clusters, cfg, a.lane, a.lavoratori, a.budget_ore)
-        if a.json:
-            print(json.dumps(esito, ensure_ascii=False, indent=2))
-            return 0
-        print(f"corsia {esito['corsia']} · {esito['lavoratori']} lavoratori "
-              f"(tetto {esito['lavoratori_max']})")
-        if not esito['parallelo']:
-            print('\nIN PARALLELO: nessuno.')
-        else:
-            print(f"\nIN PARALLELO ({len(esito['parallelo'])}):")
-            for c in esito['parallelo']:
-                print(f"  {c['id']}  [{c['classe']}] {c['effort']}h  {c['descrizione'][:56]}")
-                print(f"      perimetro: {', '.join(c['perimetro'])}")
-        if esito['scartati']:
-            print(f"\nFUORI da questo giro ({len(esito['scartati'])}):")
-            for s in esito['scartati'][:10]:
-                riga = f"  {s['id']}  {s['perche']}"
-                for c in s.get('con', []):
-                    riga += f" con {c['id']} ({'; '.join(c['percorsi'])})"
-                print(riga)
-        if esito['sequenziali']:
-            print(f"\nSEQUENZIALI ({len(esito['sequenziali'])}) — nessun perimetro "
-                  f"dichiarato, girano da soli come sempre:")
-            print('  ' + ', '.join(s['id'] for s in esito['sequenziali'][:20])
-                  + (' ...' if len(esito['sequenziali']) > 20 else ''))
         return 0
 
     return 2

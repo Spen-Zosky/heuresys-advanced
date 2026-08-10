@@ -44,11 +44,19 @@
   - da-fare: o i revisori girano **dentro** la sessione del lavoratore (sincroni, quindi dentro il suo budget), o i loro verdetti si scrivono su disco dove una sessione successiva li ritrova. La seconda è più economica e coerente con il resto dell'impianto, dove lo stato vive su file e non nella memoria di un processo
   - nota: **non ha impedito la chiusura di `Z-112`** — gov giudica sui cancelli e sulle evidenze, non sull'autovalutazione di chi ha fatto il lavoro. Ma un lavoratore che non può mai dichiararsi chiuso rende il loop dipendente da un presidio, che è l'opposto dello scopo
 
-- **#178 Il troncamento da budget non è mai stato osservato: il tetto contiene la spesa, ma non si è mai visto tagliare** · status: ACTIVE
+- **#179 Gli alberi dei lavoratori si fossilizzano dopo il primo merge** · status: DONE
+  - priority: P1 · effort: fatto S1052 · doc: `scripts/gov-lib.sh`, `scripts/test/gov-riallineo-tests.sh`
+  - misurato-S1052: `git pull --rebase` nella procedura di chiusura **riscrive i commit**. Il lavoro del lavoratore 1 è entrato in main come `b87a4efd` mentre `gov/w1` puntava ancora a `7eb39abf`, e il merge originale non esisteva più. La guardia contava i commit **per hash**, quindi vedeva «1 commit proprio da non perdere» su un lavoro **già al sicuro** e si rifiutava di allineare l'albero — **per sempre**
+  - come si è visto: non da un test, ma perché il lavoratore della corsa successiva ha letto il **protocollo vecchio** e non ha usato `zp_review`, aggiunto poche ore prima proprio per lui
+  - ✅ **RISOLTO**: si conta per **contenuto** (`git cherry`, patch-id). Un commit già in main con altro hash non è più «da perdere», uno davvero nuovo resta protetto. Provato in due direzioni (3/3) e sul campo — l'albero è passato da fermo-da-ieri all'ultimo commit, con la skill nuova
+  - lezione: la prova ha dovuto essere **riparata due volte** prima di dire qualcosa — un `2>/dev/null` nascondeva un cherry-pick fallito, e lo scenario senza divergenza di main produceva lo stesso hash, quindi non riproduceva il rebase
+
+- **#178 Il troncamento da budget non è mai stato osservato: il tetto contiene la spesa, ma non si è mai visto tagliare** · status: DONE
   - priority: P2 · effort: ~1h · doc: `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` (Z-250, test ③)
   - misurato-S1052: in **quattro** corse il tetto ha sempre contenuto la spesa (10,96/12 · 5,28/12 · 0,95/1 · 9,75/12) ma **nessuna sessione è stata tagliata a metà lavoro**. La corsa da 1 $ si è fermata per il `next: stop` lasciato dalla precedente, non per il tetto: il test di Z-250 è stato **eseguito ma dichiarato non probante** invece che spacciato per verde
   - perche-conta: il tetto è la sola difesa contro una corsa che consuma denaro senza produrre. Finché non lo si è visto **mordere**, non si sa se protegge o se è un numero scritto
-  - da-fare: costruire una prova che possa fallire — un cluster con criterio volutamente lungo e un tetto basso, e verificare che la sessione venga chiusa dal budget e che l'esito registrato lo dica
+  - ✅ **OSSERVATO S1052, corsa delle 09:52→10:22**: `esito=troncato · costo=$12,14 · durata 1785s` — la spesa ha **superato** il tetto di 12 $ e la sessione è stata chiusa dal budget, con l'esito registrato che lo dice (`nessun esito scritto: troncamento, non fallimento`). Non è servito costruire un caso artificiale: è bastato lasciar lavorare un cluster abbastanza lungo
+  - nota: il tetto **non taglia esattamente a 12** — lascia finire il turno in corso e chiude poco oltre. È il comportamento giusto (tagliare a metà di una chiamata lascerebbe stato incoerente), ma va saputo: il tetto è una soglia di **arresto**, non un limite invalicabile alla spesa
 
 - **#175 Il verdetto verde di `w1` è stato dato con il cancello delle evidenze cieco** · status: WAIT-INPUT
   - priority: P2 · effort: ~40min (una ri-istruttoria) · doc: `.zp/verdetti/w1-Z-230-20260809-185312.json`

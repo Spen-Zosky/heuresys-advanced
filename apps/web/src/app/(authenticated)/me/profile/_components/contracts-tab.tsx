@@ -41,7 +41,7 @@ export function ContractsTab() {
           <Field label={t("profile.full.contracts.ccnlLevel")} value={c.ccnlLevel} />
           <Field
             label={t("profile.full.contracts.gross")}
-            value={fmtMoney(c.grossAnnualSalary, c.currency)}
+            value={fmtMoney(c.grossAnnualSalary ?? null, c.currency ?? null)}
             testId={i === 0 ? "ct-gross" : undefined}
           />
           <Field label={t("profile.full.contracts.workHours")} value={c.workHoursWeekly != null ? `${c.workHoursWeekly} h` : null} />

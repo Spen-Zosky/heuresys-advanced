@@ -36,12 +36,12 @@ export function PaySlipsTab() {
           testId={i === 0 ? "section-payslip-primary" : undefined}
         >
           <Field label={t("profile.full.paySlips.status")} value={enumLabel("paySlipStatus", s.status)} />
-          <Field label={t("profile.full.paySlips.gross")} value={fmtMoney(s.grossPay, "EUR")} testId={i === 0 ? "ps-gross" : undefined} />
-          <Field label={t("profile.full.paySlips.net")} value={fmtMoney(s.netPay, "EUR")} />
+          <Field label={t("profile.full.paySlips.gross")} value={fmtMoney(s.grossPay ?? null, "EUR")} testId={i === 0 ? "ps-gross" : undefined} />
+          <Field label={t("profile.full.paySlips.net")} value={fmtMoney(s.netPay ?? null, "EUR")} />
           <Field label={t("profile.full.paySlips.paymentDate")} value={fmtDate(s.paymentDate)} />
-          <Field label="INPS" value={s.deductions.INPS != null ? fmtMoney(s.deductions.INPS, "EUR") : null} />
-          <Field label="IRPEF" value={s.deductions.IRPEF != null ? fmtMoney(s.deductions.IRPEF, "EUR") : null} />
-          <Field label={t("profile.full.paySlips.totalDeductions")} value={s.deductions.total != null ? fmtMoney(s.deductions.total, "EUR") : null} />
+          <Field label="INPS" value={s.deductions?.INPS != null ? fmtMoney(s.deductions.INPS, "EUR") : null} />
+          <Field label="IRPEF" value={s.deductions?.IRPEF != null ? fmtMoney(s.deductions.IRPEF, "EUR") : null} />
+          <Field label={t("profile.full.paySlips.totalDeductions")} value={s.deductions?.total != null ? fmtMoney(s.deductions.total, "EUR") : null} />
         </ProfileSection>
       ))}
     </div>

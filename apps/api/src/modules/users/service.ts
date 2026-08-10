@@ -33,8 +33,28 @@ import * as repo from "./repository.js";
 // possono divergere.
 import * as meRepo from "../me/repository.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
+import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
 
 const NON_PRIVILEGED_FIELDS = new Set<string>(NON_PRIVILEGED_UPDATABLE_FIELDS);
+
+/**
+ * #124 D1 (ADR-0032) — cosa il dossier NASCONDE al mandato piattaforma puro.
+ * Il dossier e' nato prima del mask (#81 < S1044) ed esponeva buste paga,
+ * stipendio e valutazioni altrui al PLATFORM_ADMIN: la riga resta (periodi,
+ * stati, esistenza del record), il denaro e il giudizio no. Self (I17) e
+ * mandato HR (I20) leggono sempre tutto; /v1/me/* non passa da qui.
+ */
+const PAY_SLIP_MONEY_FIELDS = ["grossPay", "netPay", "deductions"] as const;
+const EMPLOYMENT_PAY_FIELDS = [
+  "salary", "currency", "payScaleArea", "payScaleType",
+  "payScaleGroup", "payScaleLevel", "payPeriodsPerYear",
+] as const;
+// l'inquadramento CCNL resta: e' classificazione contrattuale, non importo
+const CONTRACT_MONEY_FIELDS = ["grossAnnualSalary", "currency", "salaryType", "paymentFrequency"] as const;
+const REVIEW_JUDGMENT_FIELDS = [
+  "overallRating", "goalRating", "competencyRating",
+  "potentialRating", "performanceBox", "potentialBox",
+] as const;
 
 function isPlatformAdmin(a: ActorContext): boolean {
   return a.roles.includes("PLATFORM_ADMIN");
@@ -160,8 +180,18 @@ export const usersService = {
     const careerTargets = careerTargetsRes.items;
     if (!profile) throw new NotFoundError("User");
 
+    // ADR-0032: il mandato piattaforma da solo non apre COMPENSATION/EVALUATION.
+    const masksComp = masksUnderPlatformMandate(actor, "COMPENSATION", id);
+    const masksEval = masksUnderPlatformMandate(actor, "EVALUATION", id);
+
     return {
-      profile, positions, contracts, paySlips, performance,
+      profile: masksComp && profile.employment
+        ? { ...profile, employment: maskFields(profile.employment, EMPLOYMENT_PAY_FIELDS) }
+        : profile,
+      positions,
+      contracts: masksComp ? contracts.map((c) => maskFields(c, CONTRACT_MONEY_FIELDS)) : contracts,
+      paySlips: masksComp ? paySlips.map((p) => maskFields(p, PAY_SLIP_MONEY_FIELDS)) : paySlips,
+      performance: masksEval ? performance.map((r) => maskFields(r, REVIEW_JUDGMENT_FIELDS)) : performance,
       attendance, skills, learning, certifications, goals, careerTargets,
     };
   },

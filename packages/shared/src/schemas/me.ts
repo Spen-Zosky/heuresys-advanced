@@ -119,14 +119,17 @@ export const MeOrganizationSchema = z.object({
   positionTitle: z.string().nullable(),
 });
 
+/** salary + fascia (payScale*) sono la retribuzione: optional perché il dossier
+ *  li maschera sotto il mandato piattaforma (ADR-0032). I fatti del rapporto
+ *  (date, sede, stato) restano sempre. */
 export const MeEmploymentSchema = z.object({
-  salary: z.number().nullable(),
-  currency: z.string().nullable(),
-  payScaleArea: z.string().nullable(),
-  payScaleType: z.string().nullable(),
-  payScaleGroup: z.string().nullable(),
-  payScaleLevel: z.string().nullable(),
-  payPeriodsPerYear: z.number().int().nullable(),
+  salary: z.number().nullable().optional(),
+  currency: z.string().nullable().optional(),
+  payScaleArea: z.string().nullable().optional(),
+  payScaleType: z.string().nullable().optional(),
+  payScaleGroup: z.string().nullable().optional(),
+  payScaleLevel: z.string().nullable().optional(),
+  payPeriodsPerYear: z.number().int().nullable().optional(),
   workSchedulePct: z.number().nullable(),
   pernr: z.string().nullable(),
   companyCode: z.string().nullable(),
@@ -139,6 +142,7 @@ export const MeEmploymentSchema = z.object({
   terminationDate: z.string().nullable(),
   terminationReason: z.string().nullable(),
   status: z.string().nullable(),
+  masked: z.array(z.string()).optional(),
 });
 
 export const MeAuthSummarySchema = z.object({
@@ -176,10 +180,12 @@ export const MeContractSchema = z.object({
   probationEndDate: z.string().nullable(),
   ccnlType: z.string().nullable(),
   ccnlLevel: z.string().nullable(),
-  grossAnnualSalary: z.number().nullable(),
-  currency: z.string().nullable(),
-  salaryType: z.string().nullable(),
-  paymentFrequency: z.string().nullable(),
+  // retribuzione contrattuale: optional per il mask del dossier (ADR-0032);
+  // l'inquadramento CCNL resta visibile, e' classificazione, non importo
+  grossAnnualSalary: z.number().nullable().optional(),
+  currency: z.string().nullable().optional(),
+  salaryType: z.string().nullable().optional(),
+  paymentFrequency: z.string().nullable().optional(),
   workHoursWeekly: z.number().nullable(),
   workScheduleType: z.string().nullable(),
   partTimePercentage: z.number().nullable(),
@@ -188,6 +194,7 @@ export const MeContractSchema = z.object({
   terminationDate: z.string().nullable(),
   terminationReason: z.string().nullable(),
   notes: z.string().nullable(),
+  masked: z.array(z.string()).optional(),
 });
 export type MeContract = z.infer<typeof MeContractSchema>;
 
@@ -199,15 +206,19 @@ export type MeContractsResponse = z.infer<typeof MeContractsResponseSchema>;
 
 /* --- pay-slips (S1011 F4 — cedolini history, mig 000167) ------------------ */
 
+/** I campi-denaro sono optional: sotto il mandato piattaforma (ADR-0032, #124 D1)
+ *  il dossier li RIMUOVE e li dichiara in `masked`. Self-scope (I17) e mandato HR
+ *  (I20) li ricevono sempre; /v1/me/* non maschera mai. */
 export const MePaySlipSchema = z.object({
   period: z.string().nullable(),
   periodStart: z.string().nullable(),
   periodEnd: z.string().nullable(),
-  grossPay: z.number().nullable(),
-  netPay: z.number().nullable(),
-  deductions: z.record(z.string(), z.number()),
+  grossPay: z.number().nullable().optional(),
+  netPay: z.number().nullable().optional(),
+  deductions: z.record(z.string(), z.number()).optional(),
   paymentDate: z.string().nullable(),
   status: z.string().nullable(),
+  masked: z.array(z.string()).optional(),
 });
 export type MePaySlip = z.infer<typeof MePaySlipSchema>;
 
@@ -219,17 +230,20 @@ export type MePaySlipsResponse = z.infer<typeof MePaySlipsResponseSchema>;
 
 /* --- performance (S1010 F3a — review history, read-only consultation) ------ */
 
+/** I campi-giudizio sono optional: EVALUATION sotto mandato piattaforma viene
+ *  mascherata nel dossier (ADR-0032, #124 D1). Tipo, periodo e stato restano. */
 export const MePerformanceReviewSchema = z.object({
   type: z.string().nullable(),
   status: z.string().nullable(),
   periodStart: z.string().nullable(),
   periodEnd: z.string().nullable(),
-  overallRating: z.number().nullable(),
-  goalRating: z.number().nullable(),
-  competencyRating: z.number().nullable(),
-  potentialRating: z.string().nullable(),
-  performanceBox: z.number().int().nullable(),
-  potentialBox: z.number().int().nullable(),
+  overallRating: z.number().nullable().optional(),
+  goalRating: z.number().nullable().optional(),
+  competencyRating: z.number().nullable().optional(),
+  potentialRating: z.string().nullable().optional(),
+  performanceBox: z.number().int().nullable().optional(),
+  potentialBox: z.number().int().nullable().optional(),
+  masked: z.array(z.string()).optional(),
 });
 export type MePerformanceReview = z.infer<typeof MePerformanceReviewSchema>;
 export const MePerformanceResponseSchema = z.object({

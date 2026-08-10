@@ -31,6 +31,16 @@ I test che scrivi restano nel repo: sono parte del cluster, non impalcatura da b
 
 Vedi `adversarial.md`. Tre revisori, contesto vuoto, lenti distinte, mandato di demolire.
 
+**Il passo comincia da `stato`, non dal lancio.** I verdetti vivono su disco, quindi una sessione che riprende deve prima guardare cosa c'è già:
+
+```bash
+python docs/kb/tools/zp_review.py stato <cluster>    # quali lenti hanno risposto
+```
+
+Si lanciano **solo le lenti mancanti**, e ogni verdetto si registra appena arriva. Il passo è concluso quando `zp_review.py valida <cluster>` esce 0 — tre lenti su tre, nessun rilievo di severità alta ancora aperto.
+
+Questo rende il passo 3 **ripartibile**, che è ciò che non era: in S1052 due corse su due si sono fermate qui, con i verdetti persi in un workflow orfano di una sessione finita per budget. Se il budget finisce a metà, le lenti già registrate restano — la corsa dopo non le rifà.
+
 ## Passo 4 — Correzione e ri-test
 
 I rilievi che sopravvivono alla regola di maggioranza si correggono, e dopo la correzione si **ri-esegue** il passo 2. Non basta correggere: una correzione non verificata e' una nuova ipotesi.

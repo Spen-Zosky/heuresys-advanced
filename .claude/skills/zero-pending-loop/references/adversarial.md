@@ -14,6 +14,26 @@ Tre proprieta' fanno il lavoro, e togliendone una il resto diventa teatro.
 
 Sempre via **Workflow tool** (`parallel`), mai `Agent` sciolti: serve il cap di concorrenza, l'output strutturato e il fatto che i tre partano davvero insieme. I revisori scrivono il verdetto in un file e restituiscono solo il verdetto strutturato — il diff non torna nel contesto principale.
 
+### Il verdetto si SCRIVE, non si aspetta (S1052 — difetto misurato)
+
+Questa pagina diceva già «i revisori scrivono il verdetto in un file», ma era una frase: nessun meccanismo la imponeva, e il lavoratore restava in attesa del valore di ritorno del workflow. Misurato **due corse su due** sullo stesso cluster (`Z-112`): la sessione finisce per budget prima che i verdetti tornino, il workflow resta orfano, e la sessione successiva **non può più leggerli**. Il piano del lavoratore lo diceva con parole sue — `P5 | tre revisori adversarial | NON concluso — verdetti non tornati`.
+
+Il costo non è il denaro sprecato: è che **nessun lavoratore può chiudere un cluster da solo**, perché il passo 3 non è mai ripartibile. Da qui `zp_review.py`, che rende il file un meccanismo:
+
+```bash
+python docs/kb/tools/zp_review.py stato Z-112      # PRIMA di lanciare: c'è già qualcosa?
+python docs/kb/tools/zp_review.py registra Z-112 --lente correttezza --json -   # appena una lente conclude
+python docs/kb/tools/zp_review.py valida Z-112     # il cancello: 3 su 3 e nessun rilievo grave aperto
+```
+
+**Tre regole che ne discendono, e non sono negoziabili:**
+
+1. **Prima di lanciare i revisori si chiede `stato`.** Se due lenti hanno già risposto, si lancia **solo la terza**: rilanciarle tutte è pagare due volte lo stesso giudizio.
+2. **Ogni verdetto si registra appena arriva**, una lente alla volta — non si aspetta che tutte e tre tornino per salvarle insieme. Se la sessione muore fra la prima e la seconda, la prima è salva.
+3. **Un rilievo senza `come_si_riproduce` viene rifiutato dallo strumento**, non discusso dopo: è un sospetto, e questa pagina lo dice da sempre.
+
+Un rilievo di severità **alta** blocca il cancello finché non porta `risolto_come` — e «risolto» da solo non è una risoluzione: serve il *come*, che è verificabile.
+
 ```
 parallel([
   () => agent(prompt('correttezza'),   {phase: 'Verify', schema: VERDICT}),

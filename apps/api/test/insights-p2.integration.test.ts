@@ -65,7 +65,11 @@ describe("insights API P2 (cap③ succession-readiness + skill-gap)", () => {
     expect(rc.statusCode).toBe(200);
     expect((rc.json() as { scored: number }).scored).toBeGreaterThan(0);
 
-    const b = (await list(admin, "succession-readiness")).json() as { items: RItem[]; total: number };
+    // #124 D4 (S1054): il recompute resta `admin` (serve insights:admin), ma la
+    // LETTURA che verifica orizzonte, range e spiegazione passa al mandato HR:
+    // al platform quei campi ora non arrivano (ADR-0032), ed e' provato in
+    // `insights-mask.integration.test.ts`.
+    const b = (await list(tenantAdmin, "succession-readiness")).json() as { items: RItem[]; total: number };
     expect(b.total).toBeGreaterThan(0);
     const it0 = b.items[0]!;
     expect(HORIZONS).toContain(it0.horizon);
@@ -96,7 +100,8 @@ describe("insights API P2 (cap③ succession-readiness + skill-gap)", () => {
     expect(rc.statusCode).toBe(200);
     expect((rc.json() as { scored: number }).scored).toBeGreaterThan(0);
 
-    const g = (await list(admin, "skill-gap")).json() as { items: GItem[]; total: number };
+    // #124 D4 (S1054): come sopra — il recompute e' admin, la lettura del giudizio no.
+    const g = (await list(tenantAdmin, "skill-gap")).json() as { items: GItem[]; total: number };
     expect(g.total).toBeGreaterThan(0);
     const it0 = g.items[0]!;
     expect(SEGMENTS).toContain(it0.segment);

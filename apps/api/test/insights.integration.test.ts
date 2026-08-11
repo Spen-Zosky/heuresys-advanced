@@ -159,11 +159,20 @@ describe("insights API (cap③ flight-risk)", () => {
     expect(multi.rows[0]!.multi).toBeGreaterThan(0);
   });
 
-  it("list (admin): valid bands/scores, sorted desc, explainable (weights sum 1.0)", async () => {
-    const r = await list(admin);
+  // #124 D4 (S1054): la prova riguarda la FORMA del punteggio (bande valide, range,
+  // ordinamento, pesi che sommano a 1) e va fatta con un attore che ha titolo per
+  // leggerlo. Girava con `admin` (PLATFORM_ADMIN) ed e' diventata rossa quando
+  // ADR-0032 ha smesso di mostrargli il giudizio: non un difetto, ma l'invariante
+  // nuovo che morde un oracolo scritto prima che esistesse. Con `tenantAdmin`
+  // (mandato HR — I20) la proprieta' resta verificata sui valori veri; che al
+  // platform non arrivino e' provato in `insights-mask.integration.test.ts`.
+  // NB: lo `scope.kind` atteso cambia di conseguenza — PLATFORM era una proprieta'
+  // dell'attore, non del punteggio.
+  it("list (HR mandate): valid bands/scores, sorted desc, explainable (weights sum 1.0)", async () => {
+    const r = await list(tenantAdmin);
     expect(r.statusCode).toBe(200);
     const b = r.json() as ListBody;
-    expect(b.scope.kind).toBe("PLATFORM");
+    expect(b.scope.kind).toBe("TENANT");
     expect(b.items.length).toBeGreaterThan(100);
     for (const it of b.items.slice(0, 20)) {
       expect(BANDS).toContain(it.band);

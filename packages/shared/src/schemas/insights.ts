@@ -34,17 +34,31 @@ export const FlightRiskFeatureContributionSchema = z.object({
 });
 export type FlightRiskFeatureContribution = z.infer<typeof FlightRiskFeatureContributionSchema>;
 
+/**
+ * Il punteggio di rischio di abbandono. I tre campi di giudizio sono opzionali
+ * perche' sotto il solo mandato piattaforma vengono RIMOSSI e dichiarati in
+ * `masked` (ADR-0032, #124 D4).
+ *
+ * `features` se ne va INSIEME al punteggio, e qui la ragione e' piu' forte che
+ * altrove: la spiegazione porta il valore GREZZO di ogni fattore — anzianita',
+ * straordinari, raggiungimento KPI, clima, **percentile della banda retributiva**
+ * e giorni dall'ultimo avanzamento. Mascherare il punteggio lasciando la
+ * spiegazione non solo consentirebbe di ricalcolarlo (la regola e' pubblica e
+ * deterministica), ma pubblicherebbe dati di COMPENSATION per la porta di
+ * servizio. `band` e' derivata da `score`: resta insieme a lui.
+ */
 export const FlightRiskScoreSchema = z.object({
   userId: z.uuid(),
   tenantId: z.uuid(),
   displayName: z.string().nullable(),
   /** 0..100, higher = higher attrition risk. */
-  score: z.number(),
-  band: FlightRiskBandEnum,
+  score: z.number().optional(),
+  band: FlightRiskBandEnum.optional(),
+  /** Per-feature breakdown — the human-auditable explanation of the score. */
+  features: z.array(FlightRiskFeatureContributionSchema).optional(),
+  masked: z.array(z.string()).optional(),
   modelVersion: z.string(),
   computedAt: z.iso.datetime(),
-  /** Per-feature breakdown — the human-auditable explanation of the score. */
-  features: z.array(FlightRiskFeatureContributionSchema),
 });
 export type FlightRiskScore = z.infer<typeof FlightRiskScoreSchema>;
 
@@ -84,12 +98,17 @@ export const SuccessionReadinessScoreSchema = z.object({
   positionId: z.uuid(),
   positionCode: z.string().nullable(),
   positionTitle: z.string().nullable(),
+  // giudizio (mascherabile, ADR-0032 / #124 D4): il valore, l'orizzonte che ne
+  // deriva e la spiegazione coi valori grezzi. Restano la persona e la POSIZIONE
+  // per cui e' stata valutata: che una candidatura sia stata considerata non e'
+  // un segreto, quanto vale si'.
   /** 0..100, higher = more ready to step into the target position. */
-  value: z.number(),
-  horizon: SuccessionReadinessHorizonEnum,
+  value: z.number().optional(),
+  horizon: SuccessionReadinessHorizonEnum.optional(),
+  features: z.array(FlightRiskFeatureContributionSchema).optional(),
+  masked: z.array(z.string()).optional(),
   modelVersion: z.string(),
   computedAt: z.iso.datetime(),
-  features: z.array(FlightRiskFeatureContributionSchema),
 });
 export type SuccessionReadinessScore = z.infer<typeof SuccessionReadinessScoreSchema>;
 
@@ -113,12 +132,15 @@ export const SkillGapScoreSchema = z.object({
   positionId: z.uuid(),
   positionCode: z.string().nullable(),
   positionTitle: z.string().nullable(),
+  // giudizio (mascherabile, ADR-0032 / #124 D4): `segment` e' derivato da `value`,
+  // quindi se ne va con lui — altrimenti «MAJOR_GAP» direbbe la conclusione.
   /** 0..100, higher = larger skill gap for the current role. */
-  value: z.number(),
-  segment: SkillGapSegmentEnum,
+  value: z.number().optional(),
+  segment: SkillGapSegmentEnum.optional(),
+  features: z.array(FlightRiskFeatureContributionSchema).optional(),
+  masked: z.array(z.string()).optional(),
   modelVersion: z.string(),
   computedAt: z.iso.datetime(),
-  features: z.array(FlightRiskFeatureContributionSchema),
 });
 export type SkillGapScore = z.infer<typeof SkillGapScoreSchema>;
 

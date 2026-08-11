@@ -37,6 +37,65 @@ import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
 import { emitNotificationsBulk } from "../../lib/notifications/emit.js";
 import { resolveOrgReadScope, canReadOrgTarget, type OrgReadScope } from "../../lib/scope/resolver.js";
+import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
+
+/**
+ * #124 D4 / ADR-0032 — cosa se ne va quando un punteggio di insight e' letto
+ * sotto il solo mandato piattaforma.
+ *
+ * Su questi tre modelli la spiegazione e' piu' pericolosa del punteggio, ed e'
+ * il motivo per cui `features` non poteva restare:
+ *  - il modello e' DETERMINISTICO e la regola e' pubblica (pesi in questo file),
+ *    quindi da `features` il punteggio si ricalcola esattamente: mascherarlo
+ *    lasciando la spiegazione sarebbe stato un mask solo apparente;
+ *  - `features[].raw` porta i valori GREZZI dei fattori, fra cui
+ *    `kpiAchievement`, `engagementAvg` e **`compBandPct`** — il percentile della
+ *    banda retributiva. Cioe' la spiegazione di un punteggio EVALUATION fa
+ *    passare dati COMPENSATION per la porta di servizio.
+ * Le tre etichette (`band`, `horizon`, `segment`) sono derivate dal valore e se
+ * ne vanno con lui: «CRITICAL» o «MAJOR_GAP» sono la conclusione, non un
+ * dettaglio.
+ *
+ * Cosa RESTA: la persona, la posizione candidata (con codice e titolo), la
+ * versione del modello e la data. Che una valutazione esista, e su cosa, resta
+ * visibile — che e' esattamente il confine di ADR-0032.
+ */
+const FLIGHT_RISK_JUDGMENT_FIELDS = ["score", "band", "features"] as const;
+const READINESS_JUDGMENT_FIELDS = ["value", "horizon", "features"] as const;
+const SKILL_GAP_JUDGMENT_FIELDS = ["value", "segment", "features"] as const;
+
+/**
+ * Applica il mask agli `items` di una lista di insight, lasciando intatti
+ * scope/total — **e neutralizza l'ORDINE**.
+ *
+ * Perche' l'ordine conta quanto i campi. Queste tre liste tornano ordinate per
+ * punteggio decrescente: e' il loro servizio, «chi rischia di piu' per primo».
+ * Ma togliere il punteggio e consegnare la lista nello stesso ordine lascia in
+ * mano al lettore la GRADUATORIA COMPLETA delle persone — piu' informativa, in
+ * molti usi, del numero che si e' tolto. E' precisamente la
+ * «order-preserving truncation» che il vincolo 4 di `lib/scope/mask.ts` vieta
+ * («nothing left to sort by»), e sarebbe sopravvissuta a un test che guarda solo
+ * i campi.
+ *
+ * Quando il mask morde, le righe si riordinano quindi per `userId`: un ordine
+ * stabile, riproducibile e che non dice niente. Chi legge in chiaro continua a
+ * ricevere la classifica vera.
+ */
+function maskItems<T extends { userId: string }, L extends { items: T[] }>(
+  actor: ActorContext,
+  lista: L,
+  fields: readonly string[],
+): L {
+  if (!masksUnderPlatformMandate(actor, "EVALUATION", null)) return lista;
+  const items = lista.items.map((r) =>
+    masksUnderPlatformMandate(actor, "EVALUATION", r.userId) ? maskFields(r, fields) : r,
+  );
+  // Si riordina solo se qualcosa e' stato davvero mascherato: un attore che legge
+  // in chiaro (o che vede solo le proprie righe per I17) tiene la sua classifica.
+  const mascherate = items.filter((r) => "masked" in r).length;
+  if (mascherate === 0) return { ...lista, items };
+  return { ...lista, items: [...items].sort((x, y) => x.userId.localeCompare(y.userId)) };
+}
 
 /**
  * 3.4 GAP_CLOSURE_DUE producer — notify the highest-gap subjects of an open
@@ -356,13 +415,13 @@ export const insightsService = {
       ...s.filter,
       userIdAllowList: orgAllowList(orgScope),
     });
-    const items = rows.map(toFlightRiskScore).sort((x, y) => y.score - x.score);
-    return {
+    const items = rows.map(toFlightRiskScore).sort((x, y) => (y.score ?? 0) - (x.score ?? 0));
+    return maskItems(a, {
       scope: { kind: s.kind, tenantId: s.tenantId },
       items,
       total: items.length,
       generatedAt: new Date().toISOString(),
-    };
+    }, FLIGHT_RISK_JUDGMENT_FIELDS);
   },
 
   /** Single subject (scope-checked). 404 if out of scope or never scored. */
@@ -375,7 +434,12 @@ export const insightsService = {
     if (!(await canReadOrgTarget(pool, a, userId, row.tenantId))) {
       throw new NotFoundError("Flight-risk score");
     }
-    return toFlightRiskScore(row);
+    const score = toFlightRiskScore(row);
+    // #124 D4 — il soggetto e' il parametro stesso della rotta: I17 (il mio
+    // punteggio lo vedo) e' gia' coperto da `masksUnderPlatformMandate`.
+    return masksUnderPlatformMandate(a, "EVALUATION", userId)
+      ? maskFields(score, FLIGHT_RISK_JUDGMENT_FIELDS)
+      : score;
   },
 
   /** Recompute in-platform: extract features → score → append (latest-wins). Admin only. */
@@ -412,8 +476,8 @@ export const insightsService = {
       ...s.filter,
       userIdAllowList: orgAllowList(orgScope),
     });
-    const items = rows.map(toReadinessScore).sort((x, y) => y.value - x.value);
-    return { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: new Date().toISOString() };
+    const items = rows.map(toReadinessScore).sort((x, y) => (y.value ?? 0) - (x.value ?? 0));
+    return maskItems(a, { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: new Date().toISOString() }, READINESS_JUDGMENT_FIELDS);
   },
 
   async recomputeReadiness(a: ActorContext): Promise<InsightsRecomputeResponse> {
@@ -441,8 +505,8 @@ export const insightsService = {
       ...s.filter,
       userIdAllowList: orgAllowList(orgScope),
     });
-    const items = rows.map(toSkillGapScore).sort((x, y) => y.value - x.value);
-    return { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: new Date().toISOString() };
+    const items = rows.map(toSkillGapScore).sort((x, y) => (y.value ?? 0) - (x.value ?? 0));
+    return maskItems(a, { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: new Date().toISOString() }, SKILL_GAP_JUDGMENT_FIELDS);
   },
 
   async recomputeSkillGap(a: ActorContext): Promise<InsightsRecomputeResponse> {

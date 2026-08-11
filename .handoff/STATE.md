@@ -1,19 +1,25 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-10 (S1053 chiusura serale — batch P1 chiuso 8/8).
+**Updated**: 2026-08-11 (S1054).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-## Last session brief (S1053, seconda parte)
+## Last session brief (S1054)
 
-**Il batch «#124 + P1» scelto da Enzo è chiuso 8/8** (piano R24 con prove per voce:
-`docs/superpowers/plans/2026-08-10-batch-p1-s1053.md`). I fatti che contano: la falla del
-dossier (buste/stipendi/valutazioni al platform senza mask) è chiusa e provata a due attori;
-l'anagrafica del dossier è spaccata in professionale/privata per sezione; il mask copre tutta
-la superficie COMPENSATION; cancellare una persona non cancella più le sue approvazioni
-(tombstone + sentinella); ADR-0036 formalizza i domini (I16-I20 riscritti + I22); il ciclo di
-valutazione è a 3/7 (548 review e 35 calibrazioni reali leggibili con orgGate+mask).
-**#149 ha morso**: 6 affermazioni su 10 dei doc lab smentite dalla ri-misura, register
-stantio su #92 (2 passi già fatti) e #177 (già implementato al 90%).
+Sessione lunga in tre tempi. **Primo**: il freno del cancello di verifica è stato tolto, e nel
+farlo si è scoperto perché nessuno ci riusciva — il comando indicato per «rimettere il verdetto
+in pari» a working tree pulito **non esegue nulla** e scriveva `green`. Corretto (`not-measured` +
+`run --suite`), più le due voci nate lì (#184 il troncamento dichiarato, #185 la batteria che
+prova il cancello). **Secondo**: **#124 D4 chiuso su tutti i moduli** — l'intera classe EVALUATION maschera il
+giudizio al solo mandato piattaforma, con il frontend che dichiara ciò che non mostra. Tre reperti
+che valgono più del codice: la *spiegazione* di un punteggio è più rivelatrice del punteggio (e
+sconfinava in COMPENSATION), l'**ordine** di una lista è la graduatoria delle persone, e il
+**vincolo 5** sugli aggregati ha morso per la prima volta. **Terzo**: da una domanda di Enzo sulla
+velocità, il clone del linux-pc è stato riparato alla radice (#172) e la verifica lunga si sposta
+lì — **16 min contro 31**, misurato.
+
+**Tre strumenti che dicevano verde senza aver misurato** sono stati trovati e corretti in questa
+sessione: il cancello a scrivania pulita, il typecheck di `apps/web` (leggeva il `dist` di
+`@heuresys/shared` fermo al 20 luglio) e il confronto del clone (contava righe, non oggetti).
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -22,38 +28,31 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-1. **#183 policy di cancellazione utente** (~1 sessione, **P1**) — mandato di Enzo 2026-08-10:
-   «la voglio nel prossimo ciclo». Censimento già in mig `000303`.
-2. ✅ **Il freno del cancello è TOLTO (S1054, 2026-08-11)** — non ri-aprire questa voce. Misura
-   integrale su `aba41ec5`: typecheck + lint + **test-api verde, 225/225 file, 1544 test**, e i
-   ≥50 file rossi del 10/08 passano tutti. Scoperto e chiuso nel farlo: `run` a working tree
-   pulito **non esegue nulla** e scriveva `green` (era il motivo per cui il freno pareva
-   impossibile da togliere) → ora scrive `not-measured`, e c'è `run --suite NOME` per chiedere
-   una misura fuori dal routing. Dettaglio e prove:
-   `docs/superpowers/plans/2026-08-11-cancello-verifica-s1054.md`.
-3. **#124 residuo**: D4 (mask EVALUATION su ~12 moduli — prima il censimento campo-giudizio
-   per schema) e D6 (frontend masked esteso). · **#92 passi 4-5** (macchina a stati +
-   ESS /v1/me) — rilievo aperto: mapping RBAC più largo del disegno.
-4. **#99 F4** (resolver sull'albero delle unità) — attenzione al contro-oracolo: dopo F4
-   resolver e `org-actors` girerebbero sullo stesso albero. · **Z-251** (~2h, classe D:
-   serve autorizzazione per lotto) — attenzione al criterio: l'11/08 la corsa integrale è
-   verde **senza aver corretto niente**, quindi «una corsa verde» non può essere la prova
-   che il difetto è risolto (misura nel blocco Z-251). · **#181** (~2-3h) drift-check: correzioni
-   in main via `27c6025d` ma MAI provate — far girare la suite prima di toccarle.
+1. **#183 policy di cancellazione utente** (~1 sessione, **P1**) — mandato di Enzo del 2026-08-10,
+   **non iniziata** in S1054 nonostante fosse in programma: il ciclo si è allungato su #124 e sul
+   lavoro di infrastruttura richiesto in corsa. Censimento già in mig `000303`.
+2. **#124 residuo minimo**: resta la sola pagina `users/[userId]` del frontend (D6). D4 è chiuso per intero.
+3. **Le due leve di velocità NON adottate** (misurate, esiti nel `CLAUDE.md`): `isolate: false`
+   manda in rosso quasi tutti i file e richiederebbe di riscrivere `test/helpers/setup.ts`; le
+   sessioni di login condivise valgono molto meno di quanto il registro suppone.
+   Chi riprende il tema parta da lì, non da capo.
+4. **#99 F4** (resolver sull'albero delle unità) e **#92 passi 4-7** restano i due filoni P1 grossi.
 
 ## Open questions
 
-- **#182 — i due rami recuperati** (473 righe mai in main, 317 = versante E2E di Z-112):
-  istruire e portare in main, o archiviare dichiarandolo?
-- **Il ruolo di database `gov_worker`**: si revoca o resta? (read-only; lo script che lo
-  ricreava non esiste più.)
+- **#182 — i due rami recuperati** (473 righe mai in main): istruire e portare in main, o archiviare?
+- **Il ruolo di database `gov_worker`**: si revoca o resta? (read-only, lo script che lo creava non c'è più.)
+- **Un censimento che confronti le tre macchine** come ora fa il clone col database — vale ~1h e
+  chiuderebbe in modo permanente la domanda «sono equivalenti?». In S1054 la risposta è stata
+  data a mano: sì dove conta (PostgreSQL 16.14 su entrambi, Node 22 forzato), no altrove e **per
+  design** (servizi, chiavi in denylist).
 
 ## Verification
 
 ```bash
 python docs/kb/tools/session_start.py                       # menu + salute, un giro
-bash scripts/test/zp-review-tests.sh                        # verdetti su disco (20 prove)
-bash db/scripts/storia36.sh custodia                        # custodia con ST-CASCADE #168
-python docs/kb/tools/verifica_incrociata.py --famiglia X10  # sentinella F3 (X10c)
-cd apps/api && pnpm exec vitest run test/user-dossier-mask.integration.test.ts test/compensation-residual-mask.integration.test.ts
+python docs/kb/tools/verify_gate.py check                   # cancello di fine turno
+python scripts/test/verify-gate-tests.py                    # 12 prove: il cancello sa dire rosso?
+bash scripts/clone-vm-db.sh                                 # 70s — clone allineato per costruzione
+cd apps/api && pnpm exec tsx scripts/prova-live-124-d4.mts   # prova live #124, 15 endpoint
 ```

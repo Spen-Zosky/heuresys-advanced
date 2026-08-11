@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-10T17:42:37Z da docs/kb/tools/build_index.py
+# generato: 2026-08-11T12:31:02Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-10T17:42:37Z"
-  total_files: 2935
+  generated_at: "2026-08-11T12:31:02Z"
+  total_files: 2947
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,7 +13,7 @@ meta:
     api-module: 332
     ci: 17
     claude-config: 36
-    config: 142
+    config: 144
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -22,7 +22,7 @@ meta:
     db-other: 8
     db-script: 47
     db-seed: 148
-    doc-canonical: 576
+    doc-canonical: 579
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 104
     showcase-source: 14
-    test: 347
+    test: 353
     ux-design-archive: 80
-    web-source: 233
+    web-source: 234
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2377
+    live: 2389
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2990,6 +2990,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-124-d4.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-124-d4.mts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\scripts\verify-derived-login.mjs'
     root: repo
     rel: 'apps/api/scripts/verify-derived-login.mjs'
@@ -3527,6 +3533,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\test\run-shell-tests.sh'
     root: repo
     rel: 'scripts/test/run-shell-tests.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\test\verify-gate-tests.py'
+    root: repo
+    rel: 'scripts/test/verify-gate-tests.py'
     category: config
     status: live
     provenance: git-tracked
@@ -11714,6 +11726,24 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-11-cancello-verifica-s1054.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-11-cancello-verifica-s1054.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-11-ciclo-g-124-183-s1054.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-11-ciclo-g-124-183-s1054.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-11-ciclo-h-clone-linux-pc-s1054.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-11-ciclo-h-clone-linux-pc-s1054.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-catalogo-generico-corpus-concetti.md'
     root: repo
     rel: 'docs/superpowers/prompts/2026-08-06-catalogo-generico-corpus-concetti.md'
@@ -14048,6 +14078,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\evidence-mask.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/evidence-mask.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\evidence.integration.test.ts'
     root: repo
     rel: 'apps/api/test/evidence.integration.test.ts'
@@ -14087,6 +14123,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\goals-life.integration.test.ts'
     root: repo
     rel: 'apps/api/test/goals-life.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\goals-okrs-mask.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/goals-okrs-mask.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -14177,6 +14219,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\inbox-stream.integration.test.ts'
     root: repo
     rel: 'apps/api/test/inbox-stream.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\insights-mask.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/insights-mask.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -14582,6 +14630,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\predictions-mask.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/predictions-mask.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\predictions-scope.integration.test.ts'
     root: repo
     rel: 'apps/api/test/predictions-scope.integration.test.ts'
@@ -14906,6 +14960,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\successor-mask.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/successor-mask.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\successor-readiness-scope.integration.test.ts'
     root: repo
     rel: 'apps/api/test/successor-readiness-scope.integration.test.ts'
@@ -14921,6 +14981,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\surveys.integration.test.ts'
     root: repo
     rel: 'apps/api/test/surveys.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\talent-review-mask.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/talent-review-mask.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -17381,6 +17447,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\components\lead-form.tsx'
     root: repo
     rel: 'apps/web/src/components/lead-form.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\components\masked-cell.tsx'
+    root: repo
+    rel: 'apps/web/src/components/masked-cell.tsx'
     category: web-source
     status: live
     provenance: git-tracked

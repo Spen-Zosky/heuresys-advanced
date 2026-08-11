@@ -89,6 +89,8 @@ const CASI: Caso[] = [
     resta: "displayName", spie: ['"raw"'], ordinata: true },
   { path: "/v1/insights/skill-gap", campi: ["features", "segment", "value"],
     resta: "displayName", spie: ['"raw"'], ordinata: true },
+  // goals: se ne va il QUANTO, lo STATO resta per mandato (I20).
+  { path: "/v1/goals?limit=100", campi: ["progressPercent"], resta: "status", spie: [] },
 ];
 
 console.log(`PROVA LIVE #124 D4 — ${BASE} — ${new Date().toISOString()}`);
@@ -196,6 +198,22 @@ for (const caso of CASI) {
     "piano 2 — anche le evidenze che lo spiegano sono mascherate");
   verifica(!ep.raw.includes('"derivation":'), "la derivazione non è passata");
   verifica(eh.raw.includes('"derivation":'), "l'HR vede la derivazione (controprova)");
+}
+
+// ── okrs: la proprietà osservabile sui dati VERI ───────────────────────────
+// Nessuno dei 17 OKR ha un proprietario (misurato S1054), quindi qui il mask non
+// deve mordere: un OKR aziendale non giudica nessuno. Che morda quando il
+// proprietario c'è è provato nel test, che quella condizione se la costruisce.
+{
+  console.log("── /v1/okrs  (nessun proprietario nei dati veri: NON si maschera)");
+  const r = await fetch(`${BASE}/v1/okrs?limit=100`, { headers: { cookie: cPlatform } });
+  const body = (await r.json()) as { items?: Record<string, unknown>[] };
+  const items = body.items ?? [];
+  verifica(items.length > 0, `OKR visti dal platform: ${items.length}`);
+  verifica(items.every((o) => o["masked"] === undefined),
+    "nessun OKR è mascherato — non hanno soggetto, e non c'è nulla da proteggere");
+  verifica(items.every((o) => o["ownerUserId"] === null),
+    "conferma dal vivo: nessuno di questi OKR ha un proprietario");
 }
 
 await closePool();

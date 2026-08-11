@@ -29,8 +29,11 @@ export const GoalSchema = z.object({
   type: GoalTypeEnum,
   category: z.string().nullable(),
   priority: GoalPriorityEnum,
+  // `status` NON e' mascherabile per mandato esplicito: ADR-0032/I20 vuole che
+  // «riga, soggetto, periodo e STATO» restino visibili. Se ne va il QUANTO.
   status: GoalStatusEnum,
-  progressPercent: z.number().int().min(0).max(100),
+  progressPercent: z.number().int().min(0).max(100).optional(),
+  masked: z.array(z.string()).optional(),
   weight: z.number(),
   startDate: z.string().nullable(),
   dueDate: z.string().nullable(),
@@ -109,12 +112,16 @@ export const GoalUpdateSchema = z.object({
   goalId: z.uuid(),
   authorUserId: z.uuid().nullable(),
   type: GoalUpdateTypeEnum,
-  previousProgress: z.number().nullable(),
-  newProgress: z.number().nullable(),
+  // giudizio (mascherabile, ADR-0032 / #124 D4): l'avanzamento e il testo scritto.
+  // Gli STATI restano (I20), come restano tipo, autore e data: si continua a
+  // sapere che l'aggiornamento c'e' stato, chi l'ha fatto e che genere era.
+  previousProgress: z.number().nullable().optional(),
+  newProgress: z.number().nullable().optional(),
+  content: z.string().nullable().optional(),
+  attachments: z.array(z.unknown()).optional(),
+  masked: z.array(z.string()).optional(),
   previousStatus: z.string().nullable(),
   newStatus: z.string().nullable(),
-  content: z.string().nullable(),
-  attachments: z.array(z.unknown()),
   createdAt: z.iso.datetime(),
 });
 export type GoalUpdate = z.infer<typeof GoalUpdateSchema>;
@@ -128,13 +135,16 @@ export const GoalCheckInSchema = z.object({
   goalId: z.uuid(),
   subjectUserId: z.uuid(),
   date: z.string(),
-  previousProgress: z.number().int().nullable(),
-  newProgress: z.number().int().min(0).max(100),
+  // giudizio (mascherabile, ADR-0032 / #124 D4). `confidenceLevel` e' quanto la
+  // persona si sente sicura di farcela: e' una autovalutazione, e va con le altre.
+  previousProgress: z.number().int().nullable().optional(),
+  newProgress: z.number().int().min(0).max(100).optional(),
+  notes: z.string().nullable().optional(),
+  blockers: z.string().nullable().optional(),
+  nextSteps: z.string().nullable().optional(),
+  confidenceLevel: z.number().int().min(1).max(5).nullable().optional(),
+  masked: z.array(z.string()).optional(),
   statusUpdate: GoalCheckInStatusEnum.nullable(),
-  notes: z.string().nullable(),
-  blockers: z.string().nullable(),
-  nextSteps: z.string().nullable(),
-  confidenceLevel: z.number().int().min(1).max(5).nullable(),
   createdAt: z.iso.datetime(),
 });
 export type GoalCheckIn = z.infer<typeof GoalCheckInSchema>;
@@ -165,7 +175,11 @@ export const GoalCommentSchema = z.object({
   goalId: z.uuid(),
   authorUserId: z.uuid().nullable(),
   parentCommentId: z.uuid().nullable(),
-  content: z.string(),
+  // giudizio (mascherabile): il testo di un commento su un obiettivo altrui e'
+  // giudizio in lettere, come `narrative` su un'evidenza. Restano autore, data e
+  // il fatto che il commento esista.
+  content: z.string().optional(),
+  masked: z.array(z.string()).optional(),
   isPrivate: z.boolean(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),

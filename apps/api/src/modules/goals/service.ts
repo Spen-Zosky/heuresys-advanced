@@ -15,6 +15,43 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
+import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
+
+/**
+ * #124 D4 / ADR-0032 — cosa se ne va da un obiettivo letto sotto il solo mandato
+ * piattaforma.
+ *
+ * Qui il confine e' piu' sottile che altrove, e lo detta l'invariante stesso:
+ * **I20 vuole che «riga, soggetto, periodo e STATO» restino visibili**. Quindi
+ * gli stati NON si mascherano — ne' `status` sull'obiettivo, ne' `newStatus` su
+ * un aggiornamento, ne' `statusUpdate` su un check-in — mentre se ne va il
+ * QUANTO: la percentuale di avanzamento, il testo scritto sulla persona, e
+ * l'autovalutazione di sicurezza (`confidenceLevel`).
+ *
+ * Restano intatte due famiglie intere, e non per dimenticanza:
+ *  - `alignments` (come un obiettivo si lega a un altro) e `templates`
+ *    (il catalogo): sono struttura, non giudicano nessuno;
+ *  - `milestones`: titolo, descrizione, data e peso sono la definizione del
+ *    lavoro, e il loro `status` resta per I20 — non c'e' nulla da togliere.
+ */
+const GOAL_JUDGMENT_FIELDS = ["progressPercent"] as const;
+const UPDATE_JUDGMENT_FIELDS = ["previousProgress", "newProgress", "content", "attachments"] as const;
+const CHECKIN_JUDGMENT_FIELDS = [
+  "previousProgress", "newProgress", "notes", "blockers", "nextSteps", "confidenceLevel",
+] as const;
+const COMMENT_JUDGMENT_FIELDS = ["content"] as const;
+
+/**
+ * Il soggetto di una sotto-risorsa e' quello dell'obiettivo PADRE: un check-in
+ * non «appartiene» a chi lo scrive, riguarda la persona di cui e' l'obiettivo.
+ * `loadReadableGoal` lo ha gia' in mano, quindi non costa una query in piu'.
+ */
+function mascheraSe<T extends Record<string, unknown>>(
+  a: ActorContext, subjectUserId: string | null, righe: T[], campi: readonly string[],
+): T[] {
+  if (!masksUnderPlatformMandate(a, "EVALUATION", subjectUserId)) return righe;
+  return righe.map((r) => maskFields(r, campi)) as T[];
+}
 
 // i18n overlay (ADR-0029): swap name/description to the requested locale (fallback = IT in-row).
 const GOAL_TEMPLATE_I18N = {
@@ -87,10 +124,25 @@ export const goalsService = {
     const scope = await resolveOrgReadScope(pool, a);
     const userIdAllowList =
       scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
-    return repo.listGoals(pool, listTenantFilter(a), query, userIdAllowList);
+    const page = await repo.listGoals(pool, listTenantFilter(a), query, userIdAllowList);
+    // #124 — pre-check a costo zero, poi il soggetto vero riga per riga: un
+    // obiettivo senza soggetto (`subjectUserId` null) e' un obiettivo aziendale,
+    // non giudica nessuno, e resta in chiaro.
+    if (!masksUnderPlatformMandate(a, "EVALUATION", null)) return page;
+    return {
+      ...page,
+      items: page.items.map((g) =>
+        g.subjectUserId && masksUnderPlatformMandate(a, "EVALUATION", g.subjectUserId)
+          ? maskFields(g, GOAL_JUDGMENT_FIELDS)
+          : g,
+      ),
+    };
   },
   async getGoal(a: ActorContext, id: string) {
-    return loadReadableGoal(a, id);
+    const g = await loadReadableGoal(a, id);
+    return g.subjectUserId && masksUnderPlatformMandate(a, "EVALUATION", g.subjectUserId)
+      ? maskFields(g, GOAL_JUDGMENT_FIELDS)
+      : g;
   },
   async createGoal(a: ActorContext, body: CreateGoalBody) {
     const tenantId = resolveWriteTenant(a, body.tenantId);
@@ -109,25 +161,28 @@ export const goalsService = {
 
   // ── #26 (S1018): goal-life sub-resource reads — all gated by loadReadableGoal ──
   async listGoalUpdates(a: ActorContext, goalId: string, q: GoalSubListQuery) {
-    await loadReadableGoal(a, goalId);
-    return repo.listGoalUpdates(pool, goalId, q.limit, q.offset);
+    const g = await loadReadableGoal(a, goalId);
+    const page = await repo.listGoalUpdates(pool, goalId, q.limit, q.offset);
+    return { ...page, items: mascheraSe(a, g.subjectUserId, page.items, UPDATE_JUDGMENT_FIELDS) };
   },
   async listGoalCheckIns(a: ActorContext, goalId: string, q: GoalSubListQuery) {
-    await loadReadableGoal(a, goalId);
-    return repo.listGoalCheckIns(pool, goalId, q.limit, q.offset);
+    const g = await loadReadableGoal(a, goalId);
+    const page = await repo.listGoalCheckIns(pool, goalId, q.limit, q.offset);
+    return { ...page, items: mascheraSe(a, g.subjectUserId, page.items, CHECKIN_JUDGMENT_FIELDS) };
   },
   async listGoalMilestones(a: ActorContext, goalId: string, q: GoalSubListQuery) {
     await loadReadableGoal(a, goalId);
     return repo.listGoalMilestones(pool, goalId, q.limit, q.offset);
   },
   async listGoalComments(a: ActorContext, goalId: string, q: GoalSubListQuery) {
-    await loadReadableGoal(a, goalId);
+    const g = await loadReadableGoal(a, goalId);
     // Private comments: author-only, unless the actor reads tenant-wide (all|tenant
     // org scope — HR mandate/platform). Subtree managers do NOT see others' private
     // notes: a private comment is author-audience, not chain-audience.
     const scope = await resolveOrgReadScope(pool, a);
     const includePrivate = scope.kind === "all" || scope.kind === "tenant";
-    return repo.listGoalComments(pool, goalId, a.userId, includePrivate, q.limit, q.offset);
+    const page = await repo.listGoalComments(pool, goalId, a.userId, includePrivate, q.limit, q.offset);
+    return { ...page, items: mascheraSe(a, g.subjectUserId, page.items, COMMENT_JUDGMENT_FIELDS) };
   },
   async listGoalAlignments(a: ActorContext, goalId: string, q: GoalSubListQuery) {
     await loadReadableGoal(a, goalId);
@@ -140,6 +195,18 @@ export const goalsService = {
   },
   async getGoalTimeline(a: ActorContext, goalId: string) {
     const g = await loadReadableGoal(a, goalId);
-    return buildGoalTimeline(g);
+    const linea = await buildGoalTimeline(g);
+    // #124 — il mask sta QUI e non dentro `buildGoalTimeline`, che e' condiviso
+    // con `/v1/me/goals/:id/timeline`: quella e' la propria linea del tempo, e
+    // per I17 non va mascherata mai. Un mask piu' in basso l'avrebbe rotta.
+    if (!g.subjectUserId || !masksUnderPlatformMandate(a, "EVALUATION", g.subjectUserId)) return linea;
+    return {
+      goal: maskFields(g, GOAL_JUDGMENT_FIELDS),
+      events: linea.events.map((e) =>
+        e.kind === "UPDATE" ? { ...e, update: maskFields(e.update, UPDATE_JUDGMENT_FIELDS) }
+        : e.kind === "CHECK_IN" ? { ...e, checkIn: maskFields(e.checkIn, CHECKIN_JUDGMENT_FIELDS) }
+        : e,
+      ),
+    };
   },
 };

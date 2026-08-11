@@ -22,7 +22,7 @@ chiusura non finisce più dichiarando ma **leggendo dalle macchine** — `script
 chiamato in coda a `close-propagate.sh`, confronta lo sha deployato su ogni host con quello atteso,
 conta le corse CI, controlla servizi e produzione, e dichiara con un vocabolario chiuso
 (DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · **NON-VERIFICATO**). Visto dire sì e dire no nello
-stesso pomeriggio: `IN-VOLO` subito dopo l'armamento, `DEPLOYATO` a CI conclusa.
+stesso pomeriggio: `IN-VOLO` subito dopo l'armamento, `DEPLOYATO` a CI conclusa. **Corretto poi un limite dichiarato da me e non scoperto da un guasto** (`41091231`): confrontava con `HEAD`, quindi un commit di sola documentazione — non armato apposta — faceva dire «0/2 host allineati». Ora il riferimento è `refs/heads/prod`, cioè *la decisione* di rilasciare, letta dal remoto; e lo scarto con `HEAD` viene dichiarato invece che taciuto.
 
 **Tre strumenti che dicevano verde senza aver misurato** sono stati trovati e corretti in questa
 sessione: il cancello a scrivania pulita, il typecheck di `apps/web` (leggeva il `dist` di

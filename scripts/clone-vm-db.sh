@@ -33,6 +33,27 @@ echo "[clone-vm-db] streaming pg_dump(VM 16) | pg_restore(local 16) ..."
 # black-hole) lascia il comando appeso finche' non scatta TimeoutStartSec dell'unit —
 # 45 minuti con api e web del gemello gia' fermati da ExecStartPre. 15s bastano.
 SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=30 -o ServerAliveCountMax=4)
+
+# [S1054, #172] Lo schema `staging` va rimosso PRIMA del ripristino, e a mano.
+#
+# Perche' `--clean --if-exists` non basta: il suo `DROP SCHEMA staging` fallisce
+# — «altri oggetti dipendono da esso», le funzioni `storia36_*` — l'errore e' un
+# notice che la riga 60 tollera, il ripristino prosegue e i controlli passano.
+# Ma lo schema NON viene ricreato da zero: cio' che la produzione ha RIMOSSO
+# sopravvive sul clone, e il clone diventa un sovrainsieme della sorgente.
+# Misurato in S1050: funzioni in `staging` — PROD 88, clone 89. La differenza era
+# `storia36_check_c6a(date)`, una firma vecchia sostituita in produzione da
+# `storia36_check_c6a()`: una batteria che l'avesse invocata con un argomento
+# avrebbe eseguito sul gemello **l'implementazione sbagliata**, con un verde che
+# non valeva per il codice vero. Fu rimossa a mano, ma la causa e' rimasta qui.
+#
+# CASCADE e' voluto e non e' un rischio aggiuntivo: droppa cio' che il ripristino
+# subito dopo ricrea dal dump. Se il dump non arriva, il controllo su `dump_rc`
+# (sotto) dichiara gia' il DB incompleto ed esce non-zero.
+echo "[clone-vm-db] drop esplicito di staging (il --clean non ce la fa: dipendenze)"
+sudo -u postgres psql -p "$PORT" -d "$DB_NAME" -v ON_ERROR_STOP=1 \
+  -c 'DROP SCHEMA IF EXISTS staging CASCADE' >/dev/null
+
 set +e
 ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres pg_dump -Fc '$DB_NAME'" \
   | sudo -u postgres "$PG_BIN/pg_restore" --clean --if-exists --no-acl -p "$PORT" -d "$DB_NAME"
@@ -85,6 +106,40 @@ for t in sys.sys_users sys.sys_positions sys.sys_attendance; do
   fi
   printf '  %-26s local=%-7s vm=%-7s %s\n' "$t" "$loc" "$vm" "$status"
 done
+
+# [S1054, #172] Post-condizione sugli OGGETTI, non solo sulle righe.
+#
+# Contare le righe di tre tabelle non vede una funzione di troppo: e' esattamente
+# come il residuo di S1050 e' passato inosservato. Questo censimento confronta,
+# per ogni schema, quante funzioni / tabelle+viste / indici esistono sui due lati.
+# Protegge cio' che NON doveva cambiare — la forma del database — invece del solo
+# contenuto di cio' che ci si aspettava di trovare.
+CENSIMENTO="SELECT string_agg(x, ' ' ORDER BY x) FROM (
+  SELECT n.nspname||'.fun='||count(*)::text AS x FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+   WHERE n.nspname NOT LIKE 'pg_%' AND n.nspname <> 'information_schema' GROUP BY n.nspname
+  UNION ALL
+  SELECT table_schema||'.tab='||count(*)::text FROM information_schema.tables
+   WHERE table_schema NOT LIKE 'pg_%' AND table_schema <> 'information_schema' GROUP BY table_schema
+  UNION ALL
+  SELECT schemaname||'.idx='||count(*)::text FROM pg_indexes
+   WHERE schemaname NOT LIKE 'pg_%' GROUP BY schemaname) s"
+cen_loc="$(psql -h 127.0.0.1 -p "$PORT" -U "$DBUSER" -d "$DB_NAME" -tAc "$CENSIMENTO" 2>>"$ERRLOG" || echo '?')"
+cen_vm="$(ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres psql -d '$DB_NAME' -tAc \"$CENSIMENTO\"" 2>>"$ERRLOG" || echo '?')"
+if [ "$cen_loc" = '?' ] || [ "$cen_vm" = '?' ]; then
+  echo "  censimento oggetti        NON MISURATO"
+  mismatch=1; unmeasured=1
+elif [ "$cen_loc" = "$cen_vm" ]; then
+  echo "  censimento oggetti        OK  ($(printf '%s' "$cen_loc" | wc -w) voci identiche)"
+else
+  echo "  censimento oggetti        DIFF" >&2
+  echo "    VM    : $cen_vm" >&2
+  echo "    clone : $cen_loc" >&2
+  # La differenza, voce per voce: senza questa riga si sa CHE divergono e non DOVE,
+  # ed e' la stessa mezz'ora di archeologia che il progetto ha gia' pagato altrove.
+  echo "    delta : $(comm -3 <(printf '%s' "$cen_vm" | tr ' ' '\n' | sort) \
+                              <(printf '%s' "$cen_loc" | tr ' ' '\n' | sort) | tr '\t' ' ' | tr '\n' ' ')" >&2
+  mismatch=1
+fi
 
 if [ "$mismatch" -ne 0 ]; then
   # Il gate resta invariato: si esce non-zero in ENTRAMBI i casi, perche' un clone non

@@ -252,7 +252,10 @@ fi
 if [ -f "$SCRIPTS/verifica-deploy.sh" ]; then
   log "verifica — cosa dicono le macchine (lettura, non azione)"
   set +e
-  bash "$SCRIPTS/verifica-deploy.sh" "$(git rev-parse HEAD)"
+  # Nessun argomento: lo sha di riferimento lo risolve lo script da `refs/heads/prod`
+  # (l'ultimo ARMATO). Passargli HEAD reintrodurrebbe il difetto per cui un commit
+  # di sola documentazione faceva dire «0/2 host allineati».
+  bash "$SCRIPTS/verifica-deploy.sh"
   verifica_rc=$?
   set -e
   case "$verifica_rc" in

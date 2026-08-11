@@ -26,7 +26,28 @@ set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT" || exit 2
-SHA="${1:-$(git rev-parse HEAD 2>/dev/null)}"
+# Lo sha di riferimento e' l'ULTIMO ARMATO, non HEAD (S1054, seconda stesura).
+#
+# Perche' il cambio: con `HEAD` un commit di sola documentazione — non armato
+# apposta, perche' non c'e' niente da mandare in produzione — faceva dire
+# «0/2 host allineati», cioe' un allarme su una domanda che per quel commit non ha
+# senso porre. La domanda giusta e': gli host sono sull'ultimo sha che abbiamo
+# DECISO di mandare in produzione? Quella decisione ha un nome ed e' `refs/heads/prod`.
+#
+# Si legge dal remoto (`ls-remote`) e non da un `origin/prod` locale, che sarebbe
+# vecchio quanto l'ultimo fetch: qui si vuole la verita' di adesso, non il ricordo.
+# Uno sha passato a mano vince sempre — serve a interrogare il passato.
+ARM_REF="${ARM_REF:-prod}"
+SHA="${1:-}"
+SHA_ORIGINE="argomento esplicito"
+if [ -z "$SHA" ]; then
+  SHA="$(git ls-remote origin "refs/heads/$ARM_REF" 2>/dev/null | awk '{print $1}')"
+  SHA_ORIGINE="ultimo armato (origin/$ARM_REF)"
+fi
+if [ -z "$SHA" ]; then
+  SHA="$(git rev-parse HEAD 2>/dev/null)"
+  SHA_ORIGINE="HEAD — ATTENZIONE: refs/heads/$ARM_REF non leggibile, il confronto puo' essere improprio"
+fi
 SHORT="${SHA:0:8}"
 ATTESA_MAX="${ATTESA_MAX:-0}"
 PROD_URL="${PROD_URL:-https://www.heuresys.com}"
@@ -124,7 +145,17 @@ giro() {
   esac
 }
 
-echo "verifica-deploy — sha atteso $SHORT · host: $HOSTS"
+echo "verifica-deploy — sha atteso $SHORT ($SHA_ORIGINE) · host: $HOSTS"
+# Se HEAD e' andato avanti senza essere armato, lo si dice: e' la situazione normale
+# dopo un commit di sola documentazione, e tacerla farebbe sembrare la verifica
+# «indietro» quando invece sta guardando esattamente il punto giusto.
+_head="$(git rev-parse HEAD 2>/dev/null)"
+if [ -n "$_head" ] && [ "$_head" != "$SHA" ]; then
+  _avanti="$(git rev-list --count "$SHA..$_head" 2>/dev/null || echo '?')"
+  if [ "$_avanti" != "0" ] && [ "$_avanti" != "?" ]; then
+    echo "  (HEAD ${_head:0:8} e' avanti di $_avanti commit NON armati — non riguardano la produzione)"
+  fi
+fi
 t0=$(date +%s)
 while :; do
   giro; rc=$?

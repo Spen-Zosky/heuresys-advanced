@@ -109,10 +109,22 @@ export default function TalentReviewPage() {
   const criticalPositionColumns = useMemo(() => buildCriticalPositionColumns(t), [t]);
   const coverageColumns = useMemo(() => buildCoverageColumns(t), [t]);
 
+  /** Righe che la griglia non può posizionare perché il giudizio è trattenuto (#124 D6). */
+  const nonPosizionabili = useMemo(
+    () => nineBox.rows.filter((r) => r.potentialBand === undefined || r.performanceBand === undefined).length,
+    [nineBox.rows],
+  );
+
   // group the 9-box rows into the 3×3 cells (potentialBand × performanceBand)
   const cells = useMemo(() => {
     const map = new Map<string, NineBoxRow[]>();
     for (const row of nineBox.rows) {
+      // #124 D6: senza le bande la riga NON ha una casella nella griglia. Non le
+      // si inventa una posizione (falserebbe la lettura) e non la si fa sparire
+      // in silenzio: si conta a parte, e il conteggio è dichiarato sotto la
+      // griglia. Una persona che scompare senza spiegazione è il difetto
+      // peggiore dei due.
+      if (row.potentialBand === undefined || row.performanceBand === undefined) continue;
       const key = cellKey(row.potentialBand, row.performanceBand);
       const bucket = map.get(key);
       if (bucket) bucket.push(row);
@@ -152,6 +164,11 @@ export default function TalentReviewPage() {
               </span>
             </div>
             <div className="flex-1 space-y-2">
+              {nonPosizionabili > 0 && (
+                <p data-testid="talent-nine-box-masked" className="text-xs italic text-muted-foreground">
+                  {t("talentReview.nineBox.maskedRows", { count: nonPosizionabili })}
+                </p>
+              )}
               <div data-testid="talent-nine-box" className="grid grid-cols-3 gap-2">
                 {POTENTIAL_ROWS.map((pot) =>
                   PERFORMANCE_COLS.map((perf) => {

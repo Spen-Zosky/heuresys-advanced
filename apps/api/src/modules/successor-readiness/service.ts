@@ -14,7 +14,16 @@ import type {
   CreateSuccessorReadinessBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-import { findCandidateById } from "../successor-candidates/repository.js";
+import { findCandidateById, subjectsOfCandidates } from "../successor-candidates/repository.js";
+import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
+
+/**
+ * #124 D4 / ADR-0032 — se ne vanno il punteggio di prontezza, l'orizzonte che ne
+ * deriva («pronto ora», «fra sei mesi») e il payload che lo spiega. Restano il
+ * candidato di riferimento e la data: si continua a sapere che la valutazione
+ * c'e' stata e quando.
+ */
+const READINESS_JUDGMENT_FIELDS = ["score", "horizon", "payload"] as const;
 import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 export const successorReadinessService = {
@@ -26,7 +35,19 @@ export const successorReadinessService = {
     const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
     const userIdAllowList =
       scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
-    return repo.listReadiness(pool, { tenantId, userIdAllowList, query });
+    const page = await repo.listReadiness(pool, { tenantId, userIdAllowList, query });
+    // #124 — pre-check a costo zero: solo se l'attore legge per solo mandato
+    // piattaforma si paga la query che risolve i soggetti.
+    if (!masksUnderPlatformMandate(actor, "EVALUATION", null)) return page;
+    const soggetti = await subjectsOfCandidates(pool, page.items.map((r) => r.candidateId));
+    return {
+      ...page,
+      items: page.items.map((r) =>
+        masksUnderPlatformMandate(actor, "EVALUATION", soggetti.get(r.candidateId) ?? null)
+          ? maskFields(r, READINESS_JUDGMENT_FIELDS)
+          : r,
+      ),
+    };
   },
 
   async getById(actor: ActorContext, id: string): Promise<SuccessorReadiness> {
@@ -39,7 +60,11 @@ export const successorReadinessService = {
     if (!(await canReadOrgTarget(pool, actor, candidate.userId, target.tenantId))) {
       throw new NotFoundError("SuccessorReadiness");
     }
-    return target;
+    // Il candidato e' gia' stato caricato per il cancello organizzativo: I17 non
+    // costa una query in piu'.
+    return masksUnderPlatformMandate(actor, "EVALUATION", candidate.userId)
+      ? maskFields(target, READINESS_JUDGMENT_FIELDS)
+      : target;
   },
 
   async create(actor: ActorContext, body: CreateSuccessorReadinessBody): Promise<SuccessorReadiness> {

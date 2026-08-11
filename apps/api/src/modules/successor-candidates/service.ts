@@ -19,6 +19,14 @@ import type {
 import * as repo from "./repository.js";
 import { findPoolById } from "../succession-pools/repository.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
+import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
+
+/**
+ * #124 D4 / ADR-0032 — se ne va il giudizio di quanto una persona sia pronta a
+ * succedere; restano il candidato, il pool e lo STATO della candidatura (I20).
+ * `metadata` resta: misurato S1054, contiene la sola chiave `storia36`.
+ */
+const CANDIDATE_JUDGMENT_FIELDS = ["readinessLevel"] as const;
 
 export const successorCandidatesService = {
   async list(actor: ActorContext, query: SuccessorCandidateListQuery) {
@@ -27,14 +35,35 @@ export const successorCandidatesService = {
     const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
     const userIdAllowList =
       scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
-    return repo.listCandidates(pool, { tenantId, userIdAllowList, query });
+    const page = await repo.listCandidates(pool, { tenantId, userIdAllowList, query });
+    if (!masksUnderPlatformMandate(actor, "EVALUATION", null)) return page;
+    return {
+      ...page,
+      items: page.items.map((c) =>
+        masksUnderPlatformMandate(actor, "EVALUATION", c.userId)
+          ? maskFields(c, CANDIDATE_JUDGMENT_FIELDS)
+          : c,
+      ),
+    };
   },
 
   async readinessDistribution(actor: ActorContext): Promise<SuccessorReadinessDistributionResponse> {
     // Stays TENANT-wide by design (F3 aggregates doctrine): grouped counts only, no
     // per-person data is exposed, so the org axis does not apply.
     const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.getReadinessDistribution(pool, tenantId);
+    const dist = await repo.getReadinessDistribution(pool, tenantId);
+
+    // #124 — **vincolo 5** di `lib/scope/mask.ts`, e qui morde davvero per la
+    // prima volta: «gli aggregati seguono il dato». Le RIGHE dei candidati
+    // restano visibili al mandato piattaforma (e' il senso di ADR-0032), quindi
+    // pubblicare anche i conteggi per livello su 20 candidati distribuiti
+    // 6/6/5/3 restringerebbe l'insieme dei possibili in modo sostanziale: si
+    // saprebbe che esattamente 3 di quelle 20 persone sono a sei mesi.
+    // La soppressione e' DICHIARATA: una lista vuota e basta si legge come
+    // «non ci sono candidati», che sarebbe una bugia diversa ma pur sempre una
+    // bugia. `total` resta perche' e' gia' deducibile dalla lista dei candidati.
+    if (!masksUnderPlatformMandate(actor, "EVALUATION", null)) return dist;
+    return { items: [], total: dist.total, masked: ["items"] };
   },
 
   async getById(actor: ActorContext, id: string): Promise<SuccessorCandidate> {
@@ -45,7 +74,9 @@ export const successorCandidatesService = {
     if (!(await canReadOrgTarget(pool, actor, target.userId, target.tenantId))) {
       throw new NotFoundError("SuccessorCandidate");
     }
-    return target;
+    return masksUnderPlatformMandate(actor, "EVALUATION", target.userId)
+      ? maskFields(target, CANDIDATE_JUDGMENT_FIELDS)
+      : target;
   },
 
   async create(actor: ActorContext, body: CreateSuccessorCandidateBody): Promise<SuccessorCandidate> {

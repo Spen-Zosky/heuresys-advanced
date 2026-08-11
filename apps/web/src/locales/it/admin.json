@@ -973,7 +973,8 @@
         "LOW": "Basso",
         "MEDIUM": "Medio",
         "HIGH": "Alto"
-      }
+      },
+      "maskedRows": "{{count}} persone non sono collocabili nella griglia: il giudizio è nascosto per il tuo profilo."
     },
     "kpi": {
       "assessed": "Valutati",

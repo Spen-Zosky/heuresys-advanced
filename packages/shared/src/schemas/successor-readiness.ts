@@ -26,9 +26,13 @@ export const SuccessorReadinessSchema = z.object({
   successorReadinessId: z.uuid(),
   candidateId: z.uuid(),
   tenantId: z.uuid(),
-  score: z.number().nullable(),
-  horizon: SuccessorReadinessHorizonSchema.nullable(),
-  payload: z.record(z.string(), z.unknown()),
+  // giudizio (mascherabile, ADR-0032 / #124 D4): il punteggio, l'orizzonte che
+  // ne deriva e il payload che lo spiega. Restano il candidato di riferimento e
+  // la data: si sa che la valutazione c'e' stata e quando.
+  score: z.number().nullable().optional(),
+  horizon: SuccessorReadinessHorizonSchema.nullable().optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
+  masked: z.array(z.string()).optional(),
   assessedAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
 });

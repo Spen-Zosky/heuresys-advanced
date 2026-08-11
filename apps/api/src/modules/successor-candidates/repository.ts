@@ -143,6 +143,27 @@ export async function findCandidateById(q: DbConnector, id: string): Promise<Suc
   return res.rows[0] ? toCand(res.rows[0]) : null;
 }
 
+/**
+ * candidateId → userId per un lotto di candidature (#124 D4).
+ *
+ * Serve al mask di `successor-readiness`, le cui righe portano il candidato ma
+ * non la persona: senza questa mappa il soggetto non e' noto, e senza soggetto
+ * salterebbe l'esenzione self di **I17** — un attore vedrebbe mascherata la
+ * propria valutazione. Una query sola per pagina, sul modello di
+ * `subjectsOfAssessments` in assessment-results.
+ */
+export async function subjectsOfCandidates(
+  q: DbConnector, ids: string[],
+): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map();
+  const { rows } = await q.query<{ id: string; user_id: string }>(
+    `SELECT successor_candidate_id AS id, successor_candidate_user_id AS user_id
+       FROM sys.sys_successor_candidates WHERE successor_candidate_id = ANY($1::uuid[])`,
+    [ids],
+  );
+  return new Map(rows.map((r) => [r.id, r.user_id]));
+}
+
 export async function findExisting(
   q: DbConnector,
   poolId: string,

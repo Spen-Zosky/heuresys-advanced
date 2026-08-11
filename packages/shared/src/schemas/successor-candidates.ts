@@ -22,8 +22,12 @@ export const SuccessorCandidateSchema = z.object({
   tenantId: z.uuid(),
   userId: z.uuid(),
   userName: z.string().nullable(),
+  // `status` resta visibile per mandato (ADR-0032/I20). Se ne va il GIUDIZIO di
+  // quanto la persona sia pronta: `readinessLevel`. `metadata` resta — misurato
+  // S1054: contiene la sola chiave `storia36`, un marcatore tecnico.
   status: SuccessorCandidateStatusSchema,
-  readinessLevel: z.string().nullable(),
+  readinessLevel: z.string().nullable().optional(),
+  masked: z.array(z.string()).optional(),
   metadata: z.record(z.string(), z.unknown()),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
@@ -53,9 +57,23 @@ export type SuccessorReadinessDistributionItem = z.infer<
   typeof SuccessorReadinessDistributionItemSchema
 >;
 
+/**
+ * La distribuzione e' un AGGREGATO su una classe mascherata, ed e' il primo caso
+ * in cui il **vincolo 5** di `lib/scope/mask.ts` morde davvero: «gli aggregati
+ * seguono il dato — nascondere i valori individuali e pubblicare la media di
+ * un'unita' di tre persone e' una fuga aritmetica».
+ *
+ * Misura S1054: 20 candidati su 4 livelli (6 · 6 · 5 · 3). Le RIGHE restano
+ * visibili al mandato piattaforma (ADR-0032), quindi pubblicare anche i conteggi
+ * per livello restringerebbe l'insieme dei possibili in modo sostanziale. Per
+ * quell'attore gli `items` sono percio' soppressi e la soppressione e'
+ * DICHIARATA in `masked`: una lista vuota senza spiegazione si legge come
+ * «non ci sono candidati», che sarebbe una bugia.
+ */
 export const SuccessorReadinessDistributionResponseSchema = z.object({
   items: z.array(SuccessorReadinessDistributionItemSchema),
   total: z.number().int().min(0),
+  masked: z.array(z.string()).optional(),
 });
 export type SuccessorReadinessDistributionResponse = z.infer<
   typeof SuccessorReadinessDistributionResponseSchema

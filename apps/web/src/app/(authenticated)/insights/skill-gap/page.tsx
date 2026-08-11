@@ -13,6 +13,7 @@ import type {
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { EvidenceDrawer } from "@/components/evidence-drawer";
 
 // Higher value = larger gap = worse: ALIGNED → success, MAJOR_GAP → destructive.
@@ -68,8 +69,17 @@ export default function SkillGapPage() {
         ),
       },
       { header: t("insightsSkillGap.colPosition"), cell: (r) => <span className="text-foreground">{positionLabel(r)}</span> },
-      { header: t("insightsSkillGap.colValue"), align: "right", cell: (r) => <span className={`font-mono font-semibold ${SEGMENT_TEXT[r.segment]}`}>{r.value.toFixed(1)}</span> },
-      { header: t("insightsSkillGap.colSegment"), cell: (r) => <Badge variant={SEGMENT_BADGE[r.segment]}>{t(`insightsSkillGap.segment.${r.segment}`)}</Badge> },
+      { header: t("insightsSkillGap.colValue"), align: "right", cell: (r) => (
+        // #124 D6: assente e dichiarato, non «—».
+        isMasked(r, "value") || r.value === undefined
+          ? <MaskedCell />
+          : <span className={`font-mono font-semibold ${r.segment ? SEGMENT_TEXT[r.segment] : ""}`}>{r.value.toFixed(1)}</span>
+      ) },
+      { header: t("insightsSkillGap.colSegment"), cell: (r) => (
+        isMasked(r, "segment") || r.segment === undefined
+          ? <MaskedCell />
+          : <Badge variant={SEGMENT_BADGE[r.segment]}>{t(`insightsSkillGap.segment.${r.segment}`)}</Badge>
+      ) },
     ],
     [t],
   );
@@ -121,13 +131,13 @@ export default function SkillGapPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                {t("insightsSkillGap.explainDesc", { value: selected.value.toFixed(1), segment: t(`insightsSkillGap.segment.${selected.segment}`), model: selected.modelVersion })}
+                {t("insightsSkillGap.explainDesc", { value: selected.value!.toFixed(1), segment: t(`insightsSkillGap.segment.${selected.segment}`), model: selected.modelVersion })}
               </p>
               <Button type="button" variant="outline" size="sm" data-testid="skillgap-evidence-open"
                       onClick={() => setEvidenceFor(selected)}>
                 {t("insightsSkillGap.evidenceOpen")}
               </Button>
-              {selected.features.map((f) => (
+              {(selected.features ?? []).map((f) => (
                 <div key={f.feature} data-testid="skillgap-feature" className="flex items-center gap-3 text-sm">
                   <span className="w-36 shrink-0 text-foreground">{t(`insightsSkillGap.feature.${f.feature}`, { defaultValue: f.feature })}</span>
                   <div className="h-2 flex-1 overflow-hidden rounded bg-muted" aria-hidden="true">

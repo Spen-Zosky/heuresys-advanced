@@ -13,6 +13,7 @@ import type {
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { MaskedCell, isMasked } from "@/components/masked-cell";
 
 // Higher readiness = better: READY_NOW → success, NOT_READY → destructive.
 // Only confirmed @heuresys/ui Badge variants + registered text tokens.
@@ -68,8 +69,17 @@ export default function SuccessionReadinessPage() {
         ),
       },
       { header: t("insightsReadiness.colPosition"), cell: (r) => <span className="text-foreground">{positionLabel(r)}</span> },
-      { header: t("insightsReadiness.colValue"), align: "right", cell: (r) => <span className={`font-mono font-semibold ${HORIZON_TEXT[r.horizon]}`}>{r.value.toFixed(1)}</span> },
-      { header: t("insightsReadiness.colHorizon"), cell: (r) => <Badge variant={HORIZON_BADGE[r.horizon]}>{t(`insightsReadiness.horizon.${r.horizon}`)}</Badge> },
+      { header: t("insightsReadiness.colValue"), align: "right", cell: (r) => (
+        // #124 D6: assente e dichiarato, non «—».
+        isMasked(r, "value") || r.value === undefined
+          ? <MaskedCell />
+          : <span className={`font-mono font-semibold ${r.horizon ? HORIZON_TEXT[r.horizon] : ""}`}>{r.value.toFixed(1)}</span>
+      ) },
+      { header: t("insightsReadiness.colHorizon"), cell: (r) => (
+        isMasked(r, "horizon") || r.horizon === undefined
+          ? <MaskedCell />
+          : <Badge variant={HORIZON_BADGE[r.horizon]}>{t(`insightsReadiness.horizon.${r.horizon}`)}</Badge>
+      ) },
     ],
     [t],
   );
@@ -121,9 +131,9 @@ export default function SuccessionReadinessPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                {t("insightsReadiness.explainDesc", { value: selected.value.toFixed(1), horizon: t(`insightsReadiness.horizon.${selected.horizon}`), model: selected.modelVersion })}
+                {t("insightsReadiness.explainDesc", { value: selected.value!.toFixed(1), horizon: t(`insightsReadiness.horizon.${selected.horizon}`), model: selected.modelVersion })}
               </p>
-              {selected.features.map((f) => (
+              {(selected.features ?? []).map((f) => (
                 <div key={f.feature} data-testid="readiness-feature" className="flex items-center gap-3 text-sm">
                   <span className="w-36 shrink-0 text-foreground">{t(`insightsReadiness.feature.${f.feature}`, { defaultValue: f.feature })}</span>
                   <div className="h-2 flex-1 overflow-hidden rounded bg-muted" aria-hidden="true">

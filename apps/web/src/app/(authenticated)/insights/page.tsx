@@ -8,6 +8,7 @@ import type { FlightRiskListResponse, FlightRiskScore, FlightRiskBand, InsightsR
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { MaskedCell, isMasked } from "@/components/masked-cell";
 
 // Band → @heuresys/ui Badge variant (only confirmed variants) + registered text token.
 const BAND_BADGE: Record<FlightRiskBand, "success" | "secondary" | "destructive"> = {
@@ -57,8 +58,19 @@ export default function InsightsPage() {
           </button>
         ),
       },
-      { header: t("insights.colScore"), align: "right", cell: (r) => <span className={`font-mono font-semibold ${BAND_TEXT[r.band]}`}>{r.score.toFixed(1)}</span> },
-      { header: t("insights.colBand"), cell: (r) => <Badge variant={BAND_BADGE[r.band]}>{t(`insights.band.${r.band}`)}</Badge> },
+      // #124 D6: il punteggio e la banda sono ASSENTI quando il contratto li
+      // dichiara trattenuti — renderli come «—» rimetterebbe l'ambiguita' che
+      // l'assenza serve proprio a togliere.
+      { header: t("insights.colScore"), align: "right", cell: (r) => (
+        isMasked(r, "score") || r.score === undefined
+          ? <MaskedCell />
+          : <span className={`font-mono font-semibold ${r.band ? BAND_TEXT[r.band] : ""}`}>{r.score.toFixed(1)}</span>
+      ) },
+      { header: t("insights.colBand"), cell: (r) => (
+        isMasked(r, "band") || r.band === undefined
+          ? <MaskedCell />
+          : <Badge variant={BAND_BADGE[r.band]}>{t(`insights.band.${r.band}`)}</Badge>
+      ) },
     ],
     [t],
   );
@@ -110,9 +122,11 @@ export default function InsightsPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                {t("insights.explainDesc", { score: selected.score.toFixed(1), band: t(`insights.band.${selected.band}`), model: selected.modelVersion })}
+                {selected.score === undefined || selected.band === undefined
+                  ? <MaskedCell />
+                  : t("insights.explainDesc", { score: selected.score.toFixed(1), band: t(`insights.band.${selected.band}`), model: selected.modelVersion })}
               </p>
-              {selected.features.map((f) => (
+              {(selected.features ?? []).map((f) => (
                 <div key={f.feature} data-testid="insights-feature" className="flex items-center gap-3 text-sm">
                   <span className="w-36 shrink-0 text-foreground">{t(`insights.feature.${f.feature}`, { defaultValue: f.feature })}</span>
                   <div className="h-2 flex-1 overflow-hidden rounded bg-muted" aria-hidden="true">

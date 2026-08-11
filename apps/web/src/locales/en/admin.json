@@ -973,7 +973,8 @@
         "LOW": "Low",
         "MEDIUM": "Medium",
         "HIGH": "High"
-      }
+      },
+      "maskedRows": "{{count}} people cannot be placed on the grid: the rating is withheld for your profile."
     },
     "kpi": {
       "assessed": "Assessed",

@@ -11,6 +11,7 @@
 import * as OTPAuth from "otpauth";
 import { passwordFor } from "../test/helpers/personas.js";
 import { FIXTURE_TOTP_SECRETS } from "../test/helpers/mfa-fixture-secrets.js";
+import { pool, closePool } from "../src/db/client.js";
 
 const BASE = process.argv[2] ?? "http://localhost:3001";
 const PLATFORM = "enzo.spenuso@heuresys.com";
@@ -150,5 +151,53 @@ for (const caso of CASI) {
   }
 }
 
+// ── evidence: due piani nella stessa risposta ──────────────────────────────
+// La rotta «perche' questo punteggio» ha una testata e le evidenze che la
+// spiegano. Mascherare solo la testata sarebbe consegnare la spiegazione al
+// posto del numero: si verificano ENTRAMBI i piani.
+{
+  const q = async (c: string, p: string) => {
+    const r = await fetch(`${BASE}${p}`, { headers: { cookie: c } });
+    const raw = await r.text();
+    return { status: r.status, raw, body: JSON.parse(raw) as Record<string, unknown> };
+  };
+  const lista = await q(cHr, "/v1/insights/flight-risk");
+  const primo = ((lista.body["items"] ?? []) as { userId: string }[])
+    .find((r) => r.userId !== platform.userId);
+
+  console.log("── /v1/evidence/subject/:userId");
+  const sp = await q(cPlatform, `/v1/evidence/subject/${primo!.userId}?limit=100`);
+  const sh = await q(cHr, `/v1/evidence/subject/${primo!.userId}?limit=100`);
+  const spItems = (sp.body["items"] ?? []) as Record<string, unknown>[];
+  verifica(spItems.length > 0, `evidenze viste dal platform: ${spItems.length} (la RIGA resta)`);
+  verifica(spItems.every((r) => JSON.stringify(r["masked"]) === JSON.stringify(["narrative", "payload", "score"])),
+    "ogni evidenza dichiara masked=[narrative, payload, score]");
+  verifica(spItems.every((r) => Object.hasOwn(r, "title")), "«title» RESTA: dice su cosa si è valutato");
+  for (const chiave of ['"score":', '"narrative":', '"payload":']) {
+    verifica(!sp.raw.includes(chiave), `${chiave} assente per il platform`);
+    verifica(sh.raw.includes(chiave), `${chiave} presente per l'HR (controprova)`);
+  }
+
+  console.log("── /v1/evidence/for-score  (i DUE piani)");
+  // L'id del punteggio non è esposto da alcuna rotta di lista: si legge dal
+  // database, che è la stessa fonte che l'API sta servendo.
+  const { rows } = await pool.query<{ id: string }>(
+    `SELECT flight_risk_score_id AS id FROM sys.sys_flight_risk_scores
+      WHERE flight_risk_score_user_id = $1 LIMIT 1`, [primo!.userId]);
+  const scoreId = rows[0]?.id ?? "";
+  verifica(scoreId !== "", `punteggio da spiegare risolto (${scoreId.slice(0, 8)}…)`);
+  const ep = await q(cPlatform, `/v1/evidence/for-score?scoreType=FLIGHT_RISK_SCORE&scoreId=${scoreId}`);
+  const eh = await q(cHr, `/v1/evidence/for-score?scoreType=FLIGHT_RISK_SCORE&scoreId=${scoreId}`);
+  const testata = ep.body["score"] as Record<string, unknown>;
+  verifica(JSON.stringify(testata?.["masked"]) === JSON.stringify(["band", "derivation", "value"]),
+    "piano 1 — la testata del punteggio è mascherata");
+  verifica(((ep.body["items"] ?? []) as Record<string, unknown>[])
+    .every((r) => JSON.stringify(r["masked"]) === JSON.stringify(["narrative", "payload", "score"])),
+    "piano 2 — anche le evidenze che lo spiegano sono mascherate");
+  verifica(!ep.raw.includes('"derivation":'), "la derivazione non è passata");
+  verifica(eh.raw.includes('"derivation":'), "l'HR vede la derivazione (controprova)");
+}
+
+await closePool();
 console.log(`\nESITO: ${difformi === 0 ? "VERDE" : `ROSSO (${difformi} difformi)`}`);
 process.exit(difformi === 0 ? 0 : 1);

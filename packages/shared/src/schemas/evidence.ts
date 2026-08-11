@@ -32,13 +32,27 @@ export const EvidenceProvenanceSchema = z.object({
 });
 export type EvidenceProvenance = z.infer<typeof EvidenceProvenanceSchema>;
 
+/**
+ * Un'evidenza. I campi di giudizio sono opzionali perche' sotto il solo mandato
+ * piattaforma vengono RIMOSSI e dichiarati in `masked` (ADR-0032, #124 D4).
+ *
+ * Il confine, verificato sul modo in cui il repository costruisce le righe:
+ *  - `title` RESTA — e' la dimensione, il nome della competenza, il titolo del
+ *    modulo, il nome del KPI: dice su COSA si e' valutato, non quanto vale;
+ *  - `narrative` se ne va — e' `..._narrative`, `..._comment`, `feedback_message`,
+ *    `response_strengths`: testo scritto SU una persona, il giudizio in lettere;
+ *  - `source` e `provenance` RESTANO: da dove viene il dato e con quale lineage
+ *    sono l'oggetto stesso del mandato tecnico.
+ */
 export const EvidenceItemSchema = z.object({
   evidenceId: z.string(),
   kind: EvidenceKindEnum,
   subjectUserId: z.uuid(),
   title: z.string(),
-  score: z.number().nullable(),
-  narrative: z.string().nullable(),
+  // giudizio (mascherabile, ADR-0032)
+  score: z.number().nullable().optional(),
+  narrative: z.string().nullable().optional(),
+  masked: z.array(z.string()).optional(),
   /** Source label of the datum (e.g. MANAGER_ASSESSMENT, AI_INFERRED) where present. */
   source: z.string().nullable(),
   /** NULLED for anonymous 360 responses (deanonymization guard). */
@@ -48,7 +62,7 @@ export const EvidenceItemSchema = z.object({
   sourceRecordId: z.string(),
   /** Ingestion-lineage footer (LEFT JOIN sys_source_lineage_records); null when not imported. */
   provenance: EvidenceProvenanceSchema.nullable(),
-  payload: z.record(z.string(), z.unknown()),
+  payload: z.record(z.string(), z.unknown()).optional(),
 });
 export type EvidenceItem = z.infer<typeof EvidenceItemSchema>;
 
@@ -83,11 +97,15 @@ export const EvidenceScoreSchema = z.object({
   type: EvidenceScoreTypeEnum,
   id: z.uuid(),
   subjectUserId: z.uuid(),
-  value: z.number().nullable(),
-  band: z.string().nullable(),
-  modelVersion: z.string().nullable(),
+  // giudizio (mascherabile, ADR-0032 / #124 D4). `derivation` e' la stessa
+  // spiegazione che in `insights` porta i valori grezzi dei fattori: se ne va
+  // col valore, o il punteggio si ricalcola.
+  value: z.number().nullable().optional(),
+  band: z.string().nullable().optional(),
   /** The score's own explainable derivation payload passthrough. */
-  derivation: z.record(z.string(), z.unknown()),
+  derivation: z.record(z.string(), z.unknown()).optional(),
+  masked: z.array(z.string()).optional(),
+  modelVersion: z.string().nullable(),
   computedAt: z.iso.datetime(),
 });
 export type EvidenceScore = z.infer<typeof EvidenceScoreSchema>;

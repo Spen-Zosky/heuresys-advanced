@@ -231,4 +231,36 @@ fi
 if [ -n "$FAILED" ]; then
   die "close-propagate: channel(s) failed on a reachable host:$FAILED — investigate (close NOT clean)"
 fi
+# --- LETTURA DALLE MACCHINE (S1054, richiesta di Enzo) ---------------------------------------
+# L'ultimo atto della chiusura non e' un'azione: e' una LETTURA. Fino a ieri la chiusura
+# finiva con «armato» e li' si fermava — corretto, perche' il deploy avviene dopo, quando
+# la CI passa al verde. Ma «armato» e' cio' che ho FATTO IO, non cio' che e' successo: il
+# fatto vive sulle macchine, in `LAST_GOOD_SHA`, nei servizi attivi e in una produzione che
+# risponde. Questo passo va a leggerlo e lo dichiara con un vocabolario chiuso
+# (DEPLOYATO / IN-VOLO / CI-ROSSA / DISALLINEATO / NON-VERIFICATO), cosi' «chiuso» significa
+# la stessa cosa in giorni diversi.
+#
+# NON aspetta: subito dopo l'armamento lo stato sara' quasi sempre IN-VOLO, ed e' giusto
+# cosi' — #165 dice che la sessione non resta a guardare un controllo che non richiede
+# nessuno che guardi. Serve a due cose: dire con precisione DOVE si e' arrivati, e cogliere
+# il caso in cui il deploy era gia' avvenuto (ri-chiusura, o CI gia' verde da prima).
+# Per sapere com'e' finita piu' tardi: `bash scripts/verifica-deploy.sh`.
+#
+# Non entra in FAILED: un deploy in volo non e' una chiusura sporca. Un DISALLINEATO invece
+# e' un guasto vero, e viene detto forte — ma resta una diagnosi da leggere, non un motivo
+# per bloccare una propagazione gia' andata a buon fine.
+if [ -f "$SCRIPTS/verifica-deploy.sh" ]; then
+  log "verifica — cosa dicono le macchine (lettura, non azione)"
+  set +e
+  bash "$SCRIPTS/verifica-deploy.sh" "$(git rev-parse HEAD)"
+  verifica_rc=$?
+  set -e
+  case "$verifica_rc" in
+    0) verifica_esito="eseguito" ;;
+    1) verifica_esito="fallito"; warn "verifica-deploy: stato NON sano — vedi sopra (la propagazione resta valida)" ;;
+    *) verifica_esito="ignoto";  warn "verifica-deploy: non misurabile — «non lo so» non e' «a posto»" ;;
+  esac
+  [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step verifica-deploy     "$verifica_esito" "lettura da host+CI+produzione sullo sha $(git rev-parse --short HEAD)" >/dev/null 2>&1 || true
+fi
+
 log "close-propagate complete (mode=${MODE:-full} deploy=$DEPLOY arma=$arm_outcome clone-db=$CLONE_DB)"

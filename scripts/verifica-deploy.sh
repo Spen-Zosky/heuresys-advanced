@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+#
+# scripts/verifica-deploy.sh — legge dalle MACCHINE se il deploy è avvenuto (S1054).
+#
+# PERCHÉ ESISTE. Dal #165 la chiusura non aspetta più la CI: **arma** il ramo `prod`
+# e ritorna, e il deploy lo esegue da sé `heuresys-advanced-deploy-watch.timer` sui
+# due host quando la CI diventa verde. La regola è che alla chiusura si annuncia
+# «armato», mai «deployato» — perché «deployato» è un fatto che vive sulle macchine,
+# non nella conversazione. Questo script è la LETTURA di quel fatto: non aspetta e
+# non deploya, fotografa e dichiara.
+#
+# I cinque stati, vocabolario chiuso, così «chiuso» significa lo stesso in giorni diversi:
+#   DEPLOYATO      LAST_GOOD_SHA == atteso su TUTTI gli host, servizi attivi, produzione 200
+#   IN-VOLO        CI in corso, o verde da poco e il sorvegliante non ha ancora propagato
+#   CI-ROSSA       la CI ha bocciato lo sha: il deploy NON avverrà, c'è da correggere
+#   DISALLINEATO   un servizio è giù o la produzione non risponde ⟹ guasto vero
+#   NON-VERIFICATO non è stato possibile misurare (rete, `gh` assente, host giù).
+#                  NON è sinonimo di «a posto»: dice che non si sa, ed è il motivo
+#                  per cui vale la pena avere uno script invece di un comando a memoria.
+#
+# Uso:  bash scripts/verifica-deploy.sh [sha]            # una fotografia (default: HEAD)
+#       ATTESA_MAX=1800 bash scripts/verifica-deploy.sh  # ripassa finché è IN-VOLO
+#
+# Uscita: 0 = DEPLOYATO o IN-VOLO · 1 = CI-ROSSA o DISALLINEATO · 2 = NON-VERIFICATO
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT" || exit 2
+SHA="${1:-$(git rev-parse HEAD 2>/dev/null)}"
+SHORT="${SHA:0:8}"
+ATTESA_MAX="${ATTESA_MAX:-0}"
+PROD_URL="${PROD_URL:-https://www.heuresys.com}"
+HOSTS="${HOSTS:-oracle-vm-default linux-pc}"
+SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=8)
+VERDETTO=""
+
+esito() { printf '  %-22s %s\n' "$1" "$2"; }
+
+# Si contano TUTTE le corse dello sha, non le «ultime N»: un `--limit 5` mostrerebbe
+# cinque verdi mentre la sesta è rossa (misurato: 10 corse per un solo sha).
+ci_conta() {
+  command -v gh >/dev/null || return 1
+  gh run list --branch main --limit 30 --json status,conclusion,headSha \
+    --jq "[.[] | select(.headSha==\"$SHA\")] | \"\(length) \([.[]|select(.conclusion==\"success\")]|length) \([.[]|select(.status!=\"completed\")]|length) \([.[]|select(.conclusion==\"failure\")]|length)\"" 2>/dev/null
+}
+
+# Il marcatore lo scrive `vm-deploy.sh` in `pg_dump_snapshots/` — accanto al dump
+# di sicurezza che prende prima di migrare, non in una cartella `.deploy/`. Il path
+# si CERCA invece di darlo per noto: indovinarlo produrrebbe «host giù?» su un host
+# perfettamente sano, cioè un falso allarme che somiglia a un guasto (misurato
+# scrivendo questo script: la prima stesura diceva esattamente quello).
+sha_host() {
+  ssh "${SSH_OPTS[@]}" "$1"     "find ~/heuresys-advanced -maxdepth 3 -name LAST_GOOD_SHA -print0 2>/dev/null        | xargs -0 -r cat 2>/dev/null | head -1" 2>/dev/null
+}
+servizi_host() {
+  ssh "${SSH_OPTS[@]}" "$1" "printf '%s/%s' \
+    \"\$(systemctl is-active heuresys-advanced-api.service 2>/dev/null)\" \
+    \"\$(systemctl is-active heuresys-advanced-web.service 2>/dev/null)\"" 2>/dev/null
+}
+
+giro() {
+  local totali ok in_corso rosse ci_line verdetto="IN-VOLO" motivo="" \
+        allineati=0 host_tot=0 servizi_ko="" prod_readyz prod_login
+
+  ci_line="$(ci_conta || true)"
+  if [ -z "$ci_line" ]; then
+    esito "CI ($SHORT)" "non misurabile (gh assente o rete giù)"
+    verdetto="NON-VERIFICATO"; motivo="CI non misurabile"
+    totali=0; in_corso=0; rosse=0
+  else
+    read -r totali ok in_corso rosse <<<"$ci_line"
+    esito "CI ($SHORT)" "$totali corse · $ok verdi · $in_corso in corso · $rosse rosse"
+    if   [ "${rosse:-0}"    -gt 0 ]; then verdetto="CI-ROSSA"; motivo="$rosse corse bocciate: il deploy non avverrà"
+    elif [ "${in_corso:-0}" -gt 0 ]; then verdetto="IN-VOLO";  motivo="CI ancora in corso ($in_corso)"
+    elif [ "${totali:-0}"   -eq 0 ]; then verdetto="IN-VOLO";  motivo="nessuna corsa ancora registrata per questo sha"
+    fi
+  fi
+
+  for h in $HOSTS; do
+    host_tot=$((host_tot + 1))
+    local s sv
+    s="$(sha_host "$h")"; sv="$(servizi_host "$h")"
+    if [ -z "$s" ]; then
+      esito "$h" "LAST_GOOD_SHA non leggibile (host giù?)"
+      verdetto="NON-VERIFICATO"; motivo="${motivo:-}${motivo:+ · }$h non leggibile"
+      continue
+    fi
+    if [ "${s:0:40}" = "${SHA:0:40}" ]; then
+      allineati=$((allineati + 1)); esito "$h" "deployato ${s:0:8} · servizi $sv"
+    else
+      esito "$h" "fermo su ${s:0:8} (atteso $SHORT) · servizi $sv"
+    fi
+    case "$sv" in *inactive*|*failed*) servizi_ko="$servizi_ko $h" ;; esac
+  done
+
+  prod_readyz="$(curl -s -o /dev/null -w '%{http_code}' --max-time 12 "$PROD_URL/api/readyz" 2>/dev/null)"
+  prod_login="$(curl  -s -o /dev/null -w '%{http_code}' --max-time 12 "$PROD_URL/login"     2>/dev/null)"
+  esito "produzione" "readyz=$prod_readyz login=$prod_login"
+
+  # DEPLOYATO chiede che TUTTO torni: un solo host allineato non basta — i due gemelli
+  # devono raccontare la stessa storia, o la prossima verifica girerebbe su un codice
+  # diverso da quello che serve il pubblico.
+  if [ "$verdetto" != "CI-ROSSA" ] && [ "$verdetto" != "NON-VERIFICATO" ]; then
+    if [ "$allineati" -eq "$host_tot" ] && [ -z "$servizi_ko" ] \
+       && [ "$prod_readyz" = "200" ] && [ "$prod_login" = "200" ]; then
+      verdetto="DEPLOYATO"; motivo="$host_tot host su $SHORT, servizi attivi, produzione 200"
+    elif [ "${in_corso:-0}" -eq 0 ] && [ "${totali:-0}" -gt 0 ] && [ "$allineati" -lt "$host_tot" ]; then
+      verdetto="IN-VOLO"
+      motivo="CI verde, $allineati/$host_tot host allineati — il sorvegliante propaga entro ~5 min"
+    fi
+    if [ -n "$servizi_ko" ]; then
+      verdetto="DISALLINEATO"; motivo="servizi non attivi su:$servizi_ko"
+    elif [ "$prod_readyz" != "200" ] && [ "${totali:-0}" -gt 0 ] && [ "${in_corso:-0}" -eq 0 ]; then
+      verdetto="DISALLINEATO"; motivo="produzione non risponde (readyz=$prod_readyz) a CI conclusa"
+    fi
+  fi
+
+  VERDETTO="$verdetto"
+  printf '\n  VERDETTO: %s — %s\n' "$verdetto" "$motivo"
+  case "$verdetto" in
+    DEPLOYATO|IN-VOLO) return 0 ;;
+    NON-VERIFICATO)    return 2 ;;
+    *)                 return 1 ;;
+  esac
+}
+
+echo "verifica-deploy — sha atteso $SHORT · host: $HOSTS"
+t0=$(date +%s)
+while :; do
+  giro; rc=$?
+  # Si ripassa SOLO mentre lo stato è IN-VOLO: su DEPLOYATO non c'è altro da sapere,
+  # e su un guasto aspettare non ripara nulla — ritarda soltanto chi deve agire.
+  [ "$ATTESA_MAX" -gt 0 ] || break
+  [ "$VERDETTO" = "IN-VOLO" ] || break
+  if [ $(( $(date +%s) - t0 )) -ge "$ATTESA_MAX" ]; then
+    echo "  (attesa esaurita dopo ${ATTESA_MAX}s: lo stato resta IN-VOLO)"; break
+  fi
+  sleep 60; echo
+done
+exit $rc

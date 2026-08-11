@@ -91,6 +91,10 @@ const CASI: Caso[] = [
     resta: "displayName", spie: ['"raw"'], ordinata: true },
   // goals: se ne va il QUANTO, lo STATO resta per mandato (I20).
   { path: "/v1/goals?limit=100", campi: ["progressPercent"], resta: "status", spie: [] },
+  // successori: via il giudizio di prontezza, resta la candidatura col suo stato.
+  { path: "/v1/successor-candidates?limit=200", campi: ["readinessLevel"], resta: "status", spie: [] },
+  { path: "/v1/successor-readiness?limit=200", campi: ["horizon", "payload", "score"],
+    resta: "assessedAt", spie: [] },
 ];
 
 console.log(`PROVA LIVE #124 D4 — ${BASE} — ${new Date().toISOString()}`);
@@ -214,6 +218,22 @@ for (const caso of CASI) {
     "nessun OKR è mascherato — non hanno soggetto, e non c'è nulla da proteggere");
   verifica(items.every((o) => o["ownerUserId"] === null),
     "conferma dal vivo: nessuno di questi OKR ha un proprietario");
+}
+
+// ── vincolo 5: l'aggregato sulla classe mascherata ─────────────────────────
+{
+  console.log("── /v1/successor-candidates/readiness-distribution  (VINCOLO 5)");
+  const q = async (c: string) => {
+    const r = await fetch(`${BASE}/v1/successor-candidates/readiness-distribution`, { headers: { cookie: c } });
+    return (await r.json()) as { items?: unknown[]; total?: number; masked?: string[] };
+  };
+  const p = await q(cPlatform);
+  const h = await q(cHr);
+  verifica((h.items ?? []).length > 0, `l'HR vede la distribuzione (${(h.items ?? []).length} livelli)`);
+  verifica((p.items ?? []).length === 0, "gli item sono soppressi per il mandato piattaforma");
+  verifica(JSON.stringify(p.masked) === JSON.stringify(["items"]),
+    "la soppressione è DICHIARATA, non silenziosa");
+  verifica(p.total === h.total, `il totale resta (${p.total}) — è già noto dalla lista dei candidati`);
 }
 
 await closePool();

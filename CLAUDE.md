@@ -133,26 +133,13 @@ When a new requirement seems to conflict with these, **stop and ask** rather tha
 - `node_modules/`, `dist/`, `.next/`, `*.tsbuildinfo` — generated.
 - Legacy codebase at `D:\evo.heuresys.com\` (Win) and `/home/ubuntu/heuresys-evo` (OCI VM) — read-only enrichment source. Authorized for inspection but **don't commit absolute paths to it**; reference via `docs/brownfield/BROWNFIELD_IMPORT_PLAN.md`.
 
-## Design System — `@heuresys/ui`
+## Frontend — due divieti che restano sempre carichi
 
-Reusable UI/UX components live in **`@heuresys/ui`**, an npm-published versioned lib derived from `ux-design-shared`, consumed as a normal dep (not `link:`) since migration X18. Full setup, the modify-a-component workflow and the migration history → `docs/kb/xtras/DESIGN_SYSTEM_UI.md`.
-
-**Rules (non-negotiable):**
-- **NEVER** create reusable UI components in `apps/web`, `apps/showcase` o `packages/*` di questo repo. Vanno nel repo `ux-design-shared`.
+- **NEVER** create reusable UI components in `apps/web`, `apps/showcase` o `packages/*` di questo repo. Vanno nel repo `ux-design-shared` (→ `@heuresys/ui`).
 - **NEVER** aggiungere UI runtime deps (Radix, framer-motion, recharts, ecc.) ai `package.json` di questo repo. Appartengono a `@heuresys/ui` e arrivano come transitive deps.
-- Un componente genuinamente heuresys-advanced-specific (es. widget tenant-aware che usa schemi Zod da `@heuresys/shared`) vive in `apps/web/src/components/` — e anche allora, componi primitive di `@heuresys/ui` invece di reimplementarle.
-- React peer: `@heuresys/ui` dichiara React via `peerDependencies`; `apps/web` / `apps/showcase` installano la versione concreta. Evita il crash "due React istanze".
+- **No mock data / demo fixtures / placeholder hard-codes / stubbed endpoints.** Ogni cella, grafico, tabella, form è alimentato da una chiamata `/v1/*` reale; API-first, wiring completo fino al Playwright E2E verde, o non è *done*.
 
-## MVP-2a / MVP-2b frontend — LIVE DATA E2E ONLY (non-negotiable)
-
-Gli MVP sono **shipped**, ma la dottrina vincola **ogni nuovo lavoro frontend**:
-
-- **No mock data / demo fixtures / placeholder hard-codes / stubbed endpoints / static-JSON Next.js routes / hard-coded TanStack `initialData`/`placeholderData`.** Ogni cella, grafico, tabella, form è alimentato da una chiamata `/v1/*` reale sul PostgreSQL della VM via pool live; l'unico "dato vuoto" ammesso è un empty-state reale quando l'API ritorna una lista vuota.
-- **API-first**: mai costruire UI prima che l'endpoint esista, sia tipato in `@heuresys/shared` e coperto da un integration test verde. Se una pagina ha bisogno di un endpoint mancante, si apre una mini-milestone API e si spedisce prima endpoint + test (commit atomico).
-- **Wiring completo prima di "done"**: schema Zod condiviso → repository/service/route API → integration test → tipi frontend da `@heuresys/shared` → hook TanStack Query → componente composto da primitive `@heuresys/ui` → **Playwright E2E verde** (login reale, navigate + assert su dati seminati; le mutazioni si verificano via re-fetch). Qualunque strato mancante = non done.
-- **Correzione + retest obbligatori**: ogni regressione TypeScript, vitest, Playwright o i18n parity blocca il merge. Nessun "TODO: fix later" in codice di produzione.
-
-Dottrina completa (audit-first / TDD ordering, loop pagina per pagina): `docs/archive/NEXT_SESSION_MVP_2A.md`.
+Dottrina completa: `.claude/rules/design-system-ui.md` (design system) e `.claude/rules/frontend-live-data.md` (live-data E2E) — si caricano da sé lavorando su `apps/web/**` o `apps/showcase/**`.
 
 ## Metodo di bonifica (S1049, Enzo — VINCOLANTE)
 
@@ -174,9 +161,8 @@ Sei regole. **Ognuna nasce da un errore reale**, non da teoria:
 - Stile dei commit già stabilito: `feat(api): MVP-1 5.1.X — <module> module (...)`, `chore(db): seed — ...`, `docs(handoff): ...`, `test(api): ...`.
 - **Mai `git push`** senza richiesta esplicita. I commit locali su `main` sono pre-autorizzati per questo progetto; i push no. L'autorizzazione al push è **session-scoped**: una volta concessa vale fino a revoca, e **una sessione nuova torna a "chiedi"**.
 - **Un CI rosso è un errore che Claude DEVE correggere**, mai restituire all'utente — `gh run list` / `gh run watch` come evidenza.
-- **La verifica lunga si esegue sul linux-pc, non su Windows** (S1054, Enzo — **standard di chiusura**). Misurato lo stesso identico corpus: **16 min sul linux-pc contro 31 su Windows**, e la parte che dipende dal database crolla di **4,3×** (1674 s → 385 s). La causa è una sola: da Windows ogni interrogazione attraversa il tunnel SSH e costa **73 ms**, contro una frazione di millisecondo su un database locale — con oltre ventimila interrogazioni il conto è tutto lì. Il prerequisito è che il clone sia allineato, e ora lo è **per costruzione**: `clone-vm-db.sh` costa **70 s**, droppa `staging` esplicitamente (il `--clean` non ce la fa) e confronta gli **oggetti** oltre alle righe, uscendo non-zero se divergono (#172). Ordine obbligato: **propaga → rinfresca il clone → verifica lì**; verificare prima di propagare misurerebbe il codice di ieri. Il cancello locale (`verify_gate`) resta il guardiano di fine turno per il lavoro in corso — quello che si sposta è la corsa lunga di chiusura.
-  - **Due leve provate e NON adottate**, per non farle riscoprire: (1) `isolate: false` in `vitest.config.ts` — l'import è il 49% del tempo residuo, ma spegnere l'isolamento manda in rosso **224 file su 225**: richiederebbe di riscrivere `test/helpers/setup.ts`, non è una taratura; (2) condividere le sessioni di login fra file — misurato che Argon2id costa **91 ms** a verifica e pesa ~2 min su 28, cioè molto meno di quanto il registro suppone.
-- **La chiusura di sessione non aspetta più la CI** (#165, S1049). `close-propagate.sh` **arma** il deploy (`refs/heads/prod`) e ritorna; il deploy in PROD lo esegue da sé `heuresys-advanced-deploy-watch.timer` su VM e linux-pc quando la CI diventa verde. Il cancello CI è lo stesso di prima, solo spostato fuori dalla sessione (ADR-0028, emendamento S1049). Non annunciare mai «deployato» alla chiusura: annuncia «armato». **La chiusura finisce leggendo dalle macchine** (S1054, Enzo): `scripts/verifica-deploy.sh` — chiamato in coda a `close-propagate.sh` — confronta `LAST_GOOD_SHA` sui due host con lo sha atteso, conta **tutte** le corse CI di quello sha, controlla i servizi e interroga la produzione, poi dichiara con un vocabolario chiuso: **DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO**. Non aspetta (subito dopo l'armamento sarà quasi sempre `IN-VOLO`, ed è giusto così) e non blocca la chiusura; per sapere com'è finita più tardi si rilancia a mano, o con `ATTESA_MAX=1800` per ripassare finché resta in volo. `NON-VERIFICATO` **non è** sinonimo di «a posto»: dice che non si è potuto guardare. Per guardarlo accadere in linea: `--deploy-now`.
+- **La verifica lunga di chiusura si esegue sul linux-pc, non su Windows** (S1054, Enzo — **standard di chiusura**). Ordine obbligato: **propaga → rinfresca il clone (`clone-vm-db.sh`) → verifica lì**. Il cancello locale (`verify_gate`) resta il guardiano di fine turno per il lavoro in corso. Misure, causa e due leve già provate e scartate → skill `full-alignment-deploy`.
+- **La chiusura di sessione non aspetta più la CI** (#165, S1049). `close-propagate.sh` **arma** il deploy (`refs/heads/prod`) e ritorna; il rollout lo esegue `heuresys-advanced-deploy-watch.timer` quando la CI diventa verde (ADR-0028, emendamento S1049). Non annunciare mai «deployato» alla chiusura: annuncia «armato». **La chiusura finisce leggendo dalle macchine**: `scripts/verifica-deploy.sh` dichiara con vocabolario chiuso **DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO**; `NON-VERIFICATO` **non** vuol dire «a posto», vuol dire che non si è potuto guardare. Dettaglio operativo → skill `full-alignment-deploy`.
 - Il repo gira su Windows: valgono i vincoli PowerShell del CLAUDE.md globale.
 
 Autonomia operativa: vale la regola globale. Specifiche di progetto (tool preferiti per task, runner CI self-hosted, gestione tunnel, livello di verifica dei test) → `docs/kb/xtras/AUTONOMY_R23_PROJECT.md`.
@@ -189,4 +175,6 @@ Autonomia operativa: vale la regola globale. Specifiche di progetto (tool prefer
 | Modello di sicurezza (Argon2id, JWT, refresh rotation, CSRF, ruoli, personas) | `.claude/rules/security-auth.md` | lavorando su auth/rbac |
 | Migrazioni DB | `.claude/rules/db-migrations.md` | lavorando in `db/**` |
 | Test: Vitest, isolamento transazionale, tunnel | `.claude/rules/tests.md` | lavorando sui test |
-| Dottrina di allineamento cloni e deploy | skill `full-alignment-deploy` | su invocazione |
+| Design system `@heuresys/ui` (setup, workflow, React peer) | `.claude/rules/design-system-ui.md` | lavorando in `apps/web/**`, `apps/showcase/**`, `packages/**` |
+| Dottrina live-data E2E del frontend (no mock, API-first, wiring) | `.claude/rules/frontend-live-data.md` | lavorando in `apps/web/**` o `apps/showcase/**` |
+| Dottrina di allineamento cloni e deploy — **più** le misure della verifica lunga su linux-pc e il dettaglio di `verifica-deploy.sh` | skill `full-alignment-deploy` | su invocazione |

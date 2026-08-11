@@ -62,6 +62,30 @@ Adesso la chiusura **arma e basta**: spinge `refs/heads/prod` sullo sha appena p
 
 **Se il deploy non è arrivato in PROD**, in ordine: `git rev-parse origin/prod` e `origin/main` coincidono? · sull'host, `cat pg_dump_snapshots/LAST_GOOD_SHA` · `systemctl status heuresys-advanced-deploy-watch.timer` · `journalctl -u heuresys-advanced-deploy-watch -n 50` (dice sempre PERCHÉ non ha deployato) · la CI è verde su quello sha?
 
+## La verifica lunga si esegue sul linux-pc, non su Windows (S1054, Enzo — standard di chiusura)
+
+*Migrato dal `CLAUDE.md` di radice: era sempre in contesto ma serve solo qui.*
+
+Misurato lo stesso identico corpus: **16 min sul linux-pc contro 31 su Windows**, e la parte che dipende dal database crolla di **4,3×** (1674 s → 385 s). La causa è una sola: da Windows ogni interrogazione attraversa il tunnel SSH e costa **73 ms**, contro una frazione di millisecondo su un database locale — con oltre ventimila interrogazioni il conto è tutto lì.
+
+Il prerequisito è che il clone sia allineato, e ora lo è **per costruzione**: `clone-vm-db.sh` costa **70 s**, droppa `staging` esplicitamente (il `--clean` non ce la fa) e confronta gli **oggetti** oltre alle righe, uscendo non-zero se divergono (#172).
+
+Ordine obbligato: **propaga → rinfresca il clone → verifica lì**; verificare prima di propagare misurerebbe il codice di ieri. Il cancello locale (`verify_gate`) resta il guardiano di fine turno per il lavoro in corso — quello che si sposta è la corsa lunga di chiusura.
+
+**Due leve provate e NON adottate**, per non farle riscoprire:
+1. `isolate: false` in `vitest.config.ts` — l'import è il 49% del tempo residuo, ma spegnere l'isolamento manda in rosso **224 file su 225**: richiederebbe di riscrivere `test/helpers/setup.ts`, non è una taratura.
+2. Condividere le sessioni di login fra file — misurato che Argon2id costa **91 ms** a verifica e pesa ~2 min su 28, cioè molto meno di quanto il registro suppone.
+
+## `verifica-deploy.sh` — la chiusura finisce leggendo dalle macchine (S1054, Enzo)
+
+*Migrato dal `CLAUDE.md` di radice.*
+
+`scripts/verifica-deploy.sh`, chiamato in coda a `close-propagate.sh`, confronta `LAST_GOOD_SHA` sui due host con lo sha **armato** (`refs/heads/prod`, non `HEAD` — un commit di documentazione dopo l'armamento produrrebbe un falso disallineamento), conta **tutte** le corse CI di quello sha, controlla i servizi e interroga la produzione. Dichiara con un vocabolario chiuso:
+
+**DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO**
+
+Non aspetta (subito dopo l'armamento sarà quasi sempre `IN-VOLO`, ed è giusto così) e non blocca la chiusura. Per sapere com'è finita più tardi si rilancia a mano, o con `ATTESA_MAX=1800` per ripassare finché resta in volo. **`NON-VERIFICATO` non è sinonimo di «a posto»**: dice che non si è potuto guardare.
+
 ## Dove sta il resto
 
 - Razionale completo: `memory/feedback_full_alignment_doctrine.md`

@@ -20,53 +20,14 @@
       "Bash(psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -t -A -c \"SELECT DISTINCT c.table_name FROM information_schema.columns c JOIN information_schema.tables t ON t.table_schema=c.table_schema AND t.table_name=c.table_name AND t.table_type='BASE TABLE' WHERE c.table_schema='sys' AND \\(c.column_name LIKE '%user_id' OR c.column_name LIKE '%employee_id' OR c.column_name LIKE '%person_id'\\) ORDER BY 1;\")"
     ]
   },
-  "skillOverrides": {
-    "consolida-pagina": "off",
-    "dashboards-jobs": "off",
-    "multi-tenant-validator": "off"
-  },
   "hooks": {
-    "UserPromptSubmit": [
+    "SessionStart": [
       {
+        "matcher": "startup|resume|clear",
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && sh scripts/hooks/hook.sh prompt-hook",
-            "timeout": 15
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && sh scripts/hooks/hook.sh lab-guard",
-            "timeout": 15
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && sh scripts/hooks/hook.sh stop-gate",
-            "timeout": 30
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && sh scripts/hooks/hook.sh stop-gate",
-            "timeout": 30
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && command -v powershell.exe >/dev/null 2>&1 && powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/session-boot.ps1 -ProjectRoot \"$CLAUDE_PROJECT_DIR\" || true"
           }
         ]
       }

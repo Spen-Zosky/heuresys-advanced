@@ -97,7 +97,7 @@ Codex has a separate least-privilege audit channel for this repo and the OCI dat
 
 Least privilege is **verified, not asserted** (measured S1034, 2026-07-28; re-check with `SELECT * FROM pg_roles WHERE rolname='codex_auditor'` + `information_schema.role_table_grants`): login but not superuser, no `CREATEDB`/`CREATEROLE`/`BYPASSRLS`, `default_transaction_read_only=on` pinned at role level, `statement_timeout=30s`, `lock_timeout=2s`, `idle_in_transaction_session_timeout=60s`, only grant is `SELECT` on `sys` and `audit`.
 
-**Working-tree consequence**: `.codex/`, `.codex-review/` and the root `AGENTS.md` (Codex's own equivalent of this file) legitimately appear as untracked. They are **not** stray files to clean up, they are **not** Claude's to maintain, and `align-clones` / `close-propagate` do not carry them — the two channels stay separate by design.
+**Working-tree consequence**: `.codex/`, `.codex-review/`, `.agents/` (Codex's skill path — the user-level twin is `~/.agents/skills/`; the in-repo copy holds Codex's own imports of the project skills, and Codex tracks it as its surface to govern) and the root `AGENTS.md` (Codex's own equivalent of this file) legitimately appear as untracked. They are **not** stray files to clean up, they are **not** Claude's to maintain, and `align-clones` / `close-propagate` do not carry them — the two channels stay separate by design.
 
 ## Non-negotiable invariants
 

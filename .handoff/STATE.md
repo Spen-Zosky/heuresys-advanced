@@ -17,6 +17,13 @@ sconfinava in COMPENSATION), l'**ordine** di una lista è la graduatoria delle p
 velocità, il clone del linux-pc è stato riparato alla radice (#172) e la verifica lunga si sposta
 lì — **16 min contro 31**, misurato.
 
+**Coda della sessione, dopo la chiusura formale** (commit `9289a030`): su richiesta di Enzo la
+chiusura non finisce più dichiarando ma **leggendo dalle macchine** — `scripts/verifica-deploy.sh`,
+chiamato in coda a `close-propagate.sh`, confronta lo sha deployato su ogni host con quello atteso,
+conta le corse CI, controlla servizi e produzione, e dichiara con un vocabolario chiuso
+(DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · **NON-VERIFICATO**). Visto dire sì e dire no nello
+stesso pomeriggio: `IN-VOLO` subito dopo l'armamento, `DEPLOYATO` a CI conclusa.
+
 **Tre strumenti che dicevano verde senza aver misurato** sono stati trovati e corretti in questa
 sessione: il cancello a scrivania pulita, il typecheck di `apps/web` (leggeva il `dist` di
 `@heuresys/shared` fermo al 20 luglio) e il confronto del clone (contava righe, non oggetti).

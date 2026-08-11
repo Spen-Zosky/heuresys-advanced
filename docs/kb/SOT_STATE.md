@@ -66,6 +66,21 @@ servirebbe riscrivere `test/helpers/setup.ts`); le sessioni di login condivise v
 `nvm use 22` forzato in `align-clones`, e le chiavi `.env` «mancanti» sono in una **denylist
 deliberata** (un valore di sviluppo ribalterebbe un controllo di sicurezza in produzione).
 
+**LA CHIUSURA FINISCE LEGGENDO, NON DICHIARANDO** (coda di S1054, richiesta di Enzo, `9289a030`).
+Dal #165 la chiusura **arma** e ritorna; ma «armato» e' cio' che ha fatto il modello, non cio' che e'
+successo — il fatto vive sulle macchine. `scripts/verifica-deploy.sh`, chiamato in coda a
+`close-propagate.sh`, legge: corse CI dello sha (**tutte**, non le ultime N — un `--limit 5` mostra
+cinque verdi mentre la sesta e' rossa), `LAST_GOOD_SHA` per host, stato dei servizi, produzione HTTP.
+Verdetto a vocabolario chiuso: **DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO**.
+Non aspetta e non blocca la chiusura (un deploy in volo non e' una chiusura sporca).
+`NON-VERIFICATO` e' uno stato **a se'**: «non ho potuto guardare» non puo' avere la stessa faccia di
+«ho guardato ed e' tutto bene» — il difetto trovato tre volte in questa stessa sessione. Provato in
+entrambi i versi lo stesso pomeriggio: `IN-VOLO` subito dopo l'armamento (host fermi sullo sha
+precedente, 1 corsa in volo) e `DEPLOYATO` a CI conclusa (2 host su `9289a030`, servizi attivi,
+produzione 200). Difetto della prima stesura, corretto e annotato: il path di `LAST_GOOD_SHA` era
+dato per noto (`.deploy/`) e sta invece in `pg_dump_snapshots/` — «host giu'?» su due host sani, un
+falso allarme che somiglia a un guasto. Ora il path si **cerca**.
+
 ### Delta S1052 (2026-08-09/10) — la prima corsa presidiata, e i cinque difetti che ha fatto emergere
 
 **Numeri ri-derivati**: utenti **161** · RBAC map **957** · ruoli **14** · skill **14039** ·

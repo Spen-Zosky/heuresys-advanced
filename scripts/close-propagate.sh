@@ -41,6 +41,11 @@ set -euo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
 SCRIPTS="$ROOT/scripts"
+
+# L'id di questa CORSA di chiusura, ereditato da ogni passo che scrive nel diario
+# (#148). Senza, `close-log.sh report` non sapeva dire dove finiva una chiusura e
+# ne cominciava un'altra: 84 righe su 96 finivano in un blocco unico.
+export HEURESYS_CLOSE_RUN="${HEURESYS_CLOSE_RUN:-$(date +%Y%m%dT%H%M%S)-$$}"
 MARKER="${HEURESYS_MARKER:-$ROOT/.session-align.marker}"   # env override: solo per i test (default invariato)
 LINUXPC_REPO="${LINUXPC_REPO:-/home/enzo/heuresys-advanced}"
 

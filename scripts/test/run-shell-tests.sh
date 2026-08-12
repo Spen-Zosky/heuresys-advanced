@@ -595,6 +595,27 @@ if [ -f "$CL" ]; then
   if printf '%s' "$rep" | grep -q 'STEST' && printf '%s' "$rep" | grep -q 'saltato'; then
     ok "close-log report: aggrega i passi per sessione"
   else fail "close-log report ($rep)"; fi
+  # #148 — DUE CHIUSURE DEVONO RESTARE DISTINTE. Fino al 2026-08-12 il report
+  # raggruppava per sessione e 84 righe su 96 portavano "S?": cinque giorni di
+  # chiusure finivano in un blocco unico, e la domanda per cui il diario esiste
+  # («quante chiusure sono ripetizioni inutili?») restava non misurabile.
+  FAKE_R="$T/fake-close-run.ndjson"
+  HEURESYS_CLOSE_LOG="$FAKE_R" HEURESYS_CLOSE_RUN=RUN-UNO bash "$CL" step registra eseguito 'a' >/dev/null 2>&1
+  HEURESYS_CLOSE_LOG="$FAKE_R" HEURESYS_CLOSE_RUN=RUN-DUE bash "$CL" step registra eseguito 'b' >/dev/null 2>&1
+  rep2="$(HEURESYS_CLOSE_LOG="$FAKE_R" bash "$CL" report 2>&1 || true)"
+  if printf '%s' "$rep2" | grep -q 'RUN-UNO' && printf '%s' "$rep2" | grep -q 'RUN-DUE'; then
+    ok "close-log: due corse di chiusura restano blocchi distinti (#148)"
+  else fail "close-log: le due corse si sono fuse in un blocco solo ($rep2)"; fi
+
+  # Le righe scritte PRIMA di #148 non hanno `run`: devono degradare alla
+  # sessione, non sparire dal rendiconto.
+  printf '{"ts":"2026-08-01T10:00:00+0200","session":"SVECCHIA","host":"x","head":"a","step":"propaga","outcome":"eseguito","why":"storica"}
+' >> "$FAKE_R"
+  rep3="$(HEURESYS_CLOSE_LOG="$FAKE_R" bash "$CL" report 2>&1 || true)"
+  if printf '%s' "$rep3" | grep -q 'SVECCHIA'; then
+    ok "close-log: le righe senza corsa degradano alla sessione invece di sparire"
+  else fail "close-log: una riga storica e' sparita dal rendiconto ($rep3)"; fi
+
   # Il diario è un OSSERVATORE: non deve mai far fallire ciò che osserva.
   if HEURESYS_CLOSE_LOG="/dev/null/impossibile/log.ndjson" bash "$CL" step x y z >/dev/null 2>&1; then
     ok "close-log su path impossibile: non rompe (uscita 0)"

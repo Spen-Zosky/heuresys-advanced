@@ -36,7 +36,14 @@ export const AssessmentSchema = z.object({
   periodStart: DateOnlySchema.nullable(),
   periodEnd: DateOnlySchema.nullable(),
   status: AssessmentStatusSchema,
-  metadata: z.record(z.string(), z.unknown()),
+  // Opzionale per la MASCHERATURA (#124). MISURATO 2026-08-12: **312 righe su
+  // 615** portano `composite_score` qui dentro — il giudizio vive in un campo
+  // non tipizzato, dove un mask per-campo non lo vedrebbe. Si toglie INTERO,
+  // come gia' fatto per `payload` in compensation: un record libero che
+  // dimostrabilmente porta il dato non si maschera a meta'. Stato, soggetto e
+  // periodo restano visibili (I20).
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  masked: z.array(z.string()).optional(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

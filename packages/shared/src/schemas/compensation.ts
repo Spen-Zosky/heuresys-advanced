@@ -58,10 +58,15 @@ export const CompensationProfileSchema = z.object({
   positionCompensationProfileId: z.uuid(),
   positionId: z.uuid(),
   tenantId: z.uuid(),
-  band: CompensationBandSchema.nullable(),
-  economicWeight: z.string().nullable(),
-  rewardGatesApplied: z.array(z.unknown()),
-  metadata: z.record(z.string(), z.unknown()),
+  // Opzionali per la MASCHERATURA (#124): sotto mandato tecnico di piattaforma
+  // la banda e il peso economico vengono tolti e dichiarati in `masked`. La
+  // riga resta — posizione, tenant, date — perche' cio' che si nega e' il
+  // prezzo, non l'esistenza della posizione.
+  band: CompensationBandSchema.nullable().optional(),
+  economicWeight: z.string().nullable().optional(),
+  rewardGatesApplied: z.array(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  masked: z.array(z.string()).optional(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

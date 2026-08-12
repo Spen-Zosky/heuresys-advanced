@@ -105,11 +105,18 @@ export const CompensationAnalyticsResponseSchema = z.object({
   scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
   totalProfiles: z.number().int(), // banded profiles in scope
   ouCount: z.number().int(), // distinct OUs with banded profiles
-  overallMinMidEur: z.number().nullable(),
-  overallMaxMidEur: z.number().nullable(),
-  overallMedianMidEur: z.number().nullable(),
-  bandingByOu: z.array(CompensationBandingByOuRowSchema), // median-desc
-  scatter: z.array(CompensationScatterPointSchema), // mid-desc
+  // Opzionali per la MASCHERATURA, non perche' possano mancare nel dato: sotto
+  // mandato di sola piattaforma questi campi vengono TOLTI e i loro nomi
+  // dichiarati in `masked`. 280 posizioni su 299 hanno UN SOLO titolare, quindi
+  // un punto dello scatter (titolo + banda + mediana) e' la retribuzione di una
+  // persona identificabile: e' il vincolo 5 di ADR-0032 sugli aggregati, che qui
+  // morde piu' forte che sulla lista da cui il vincolo e' nato.
+  overallMinMidEur: z.number().nullable().optional(),
+  overallMaxMidEur: z.number().nullable().optional(),
+  overallMedianMidEur: z.number().nullable().optional(),
+  bandingByOu: z.array(CompensationBandingByOuRowSchema).optional(), // median-desc
+  scatter: z.array(CompensationScatterPointSchema).optional(), // mid-desc
+  masked: z.array(z.string()).optional(),
   generatedAt: z.string(),
 });
 export type CompensationAnalyticsResponse = z.infer<typeof CompensationAnalyticsResponseSchema>;

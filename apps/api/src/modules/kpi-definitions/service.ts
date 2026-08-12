@@ -7,6 +7,7 @@
 import { pool, withTransaction } from "../../db/client.js";
 import { deleteInboxNotificationsForResource } from "../../lib/notifications/cleanup.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
 import { localize, localizeOne } from "../../lib/i18n/localize.js";
 import type { Locale } from "../../middleware/locale.js";
 
@@ -145,6 +146,20 @@ export const kpiDefinitionsService = {
     const userIdAllowList =
       scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
     const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listMeasurements(pool, kpiId, tenantId, query, userIdAllowList);
+    const page = await repo.listMeasurements(pool, kpiId, tenantId, query, userIdAllowList);
+
+    // #124 (S1055) — una misurazione con `userId` NON e' un dato di catalogo: e'
+    // il risultato di quella persona su quell'indicatore, cioe' classe
+    // EVALUATION, la stessa che `assessment-results` gia' maschera allo stesso
+    // attore. MISURATO 2026-08-12: 248 misurazioni su 248 portano un `userId`.
+    // Le righe org-level (`userId` null) non sono di nessuno e restano intere.
+    return {
+      ...page,
+      items: page.items.map((m) =>
+        m.userId !== null && masksUnderPlatformMandate(actor, "EVALUATION", m.userId)
+          ? maskFields(m, ["source", "unit", "value"])
+          : m,
+      ),
+    };
   },
 };

@@ -101,6 +101,16 @@ export const compensationService = {
     }
     const profile = await repo.findCompensationProfileByPositionId(pool, positionId);
     if (!profile) throw new NotFoundError("CompensationProfile");
+
+    // #124 (S1055) — contraddizione interna sanata. Questo stesso modulo gia'
+    // maschera `position-economic-weight` con la ragione «su una posizione con
+    // un solo titolare il valore e' individuale»: MISURATO 2026-08-12, **280
+    // posizioni su 299 hanno un solo titolare**, quindi la ragione vale identica
+    // qui — e qui l'importo e' la BANDA, cioe' il dato piu' diretto dei due.
+    // Restano visibili posizione, tenant e date: la riga esiste, il suo prezzo no.
+    if (masksUnderPlatformMandate(actor, "COMPENSATION", null)) {
+      return maskFields(profile, ["band", "economicWeight", "metadata", "rewardGatesApplied"]);
+    }
     return profile;
   },
 

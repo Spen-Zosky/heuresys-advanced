@@ -253,11 +253,15 @@ describe("GET /v1/analytics/* integration", () => {
     scope: { kind: string; tenantId: string | null };
     totalProfiles: number;
     ouCount: number;
-    overallMinMidEur: number | null;
-    overallMaxMidEur: number | null;
-    overallMedianMidEur: number | null;
-    bandingByOu: Array<{ ou: string; count: number; min: number; q1: number; median: number; q3: number; max: number }>;
-    scatter: Array<{ ou: string; positionTitle: string; bandCode: string; midEur: number; spreadEur: number }>;
+    // Opzionali da #124: al mandato tecnico questi campi sono TOLTI e dichiarati
+    // in `masked`. Il tipo locale deve poterlo rappresentare, o il test non
+    // saprebbe nemmeno esprimere l'asserzione «non deve esserci».
+    overallMinMidEur?: number | null;
+    overallMaxMidEur?: number | null;
+    overallMedianMidEur?: number | null;
+    bandingByOu?: Array<{ ou: string; count: number; min: number; q1: number; median: number; q3: number; max: number }>;
+    scatter?: Array<{ ou: string; positionTitle: string; bandCode: string; midEur: number; spreadEur: number }>;
+    masked?: string[];
     generatedAt: string;
   }
 
@@ -274,20 +278,38 @@ describe("GET /v1/analytics/* integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
-  it("compensation: PLATFORM_ADMIN sees the banded equity rollup (derived live)", async () => {
-    const body = await getJson<CompensationBody>("/v1/analytics/compensation", platformS);
-    expect(body.scope.kind).toBe("PLATFORM");
-    expect(body.scope.tenantId).toBeNull();
+  // Due attori invece di uno, da #124 (S1055): il mandato di piattaforma e'
+  // TECNICO e non apre COMPENSATION (ADR-0032). Su questa rotta la conseguenza
+  // e' forte perche' 280 posizioni su 299 hanno un solo titolare: un punto dello
+  // scatter E' la retribuzione di una persona. Al platform restano i CONTEGGI —
+  // la forma dell'organizzazione senza gli importi — e la derivazione live degli
+  // importi si verifica con chi ha mandato HR. Il caso mascherato ha la sua
+  // prova dedicata in `analytics-aggregate-mask.integration.test.ts`.
+  it("compensation: i conteggi al mandato tecnico, gli importi a quello HR (derivati live)", async () => {
+    const tecnico = await getJson<CompensationBody>("/v1/analytics/compensation", platformS);
+    expect(tecnico.scope.kind).toBe("PLATFORM");
+    expect(tecnico.scope.tenantId).toBeNull();
     const expectedProfiles = await num(`SELECT count(*)::text AS n ${BANDED_JOIN}`);
+    expect(tecnico.totalProfiles).toBe(expectedProfiles);
+    expect(tecnico.scatter).toBeUndefined();
+
+    const body = await getJson<CompensationBody>("/v1/analytics/compensation", tenantS);
     expect(body.totalProfiles).toBe(expectedProfiles);
-    expect(body.ouCount).toBe(body.bandingByOu.length);
+    // Restringere una volta sola, e con un'asserzione: se il mandato HR NON
+    // ricevesse questi campi, il test deve dirlo qui invece di morire piu' sotto
+    // con un errore di tipo che sembrerebbe un difetto della prova.
+    const { bandingByOu, scatter } = body;
+    expect(bandingByOu, "il mandato HR deve vedere il rollup").toBeDefined();
+    expect(scatter, "il mandato HR deve vedere lo scatter").toBeDefined();
+    if (!bandingByOu || !scatter) return;
+    expect(body.ouCount).toBe(bandingByOu.length);
     // One scatter point per banded profile.
-    expect(body.scatter.length).toBe(body.totalProfiles);
+    expect(scatter.length).toBe(body.totalProfiles);
     // Overall mid-€ range across all banded positions, derived live.
     expect(body.overallMinMidEur).toBe(await num(`SELECT min(b.compensation_band_mid_eur)::text AS n ${BANDED_JOIN}`));
     expect(body.overallMaxMidEur).toBe(await num(`SELECT max(b.compensation_band_mid_eur)::text AS n ${BANDED_JOIN}`));
     // Every OU cell is internally consistent (min ≤ q1 ≤ median ≤ q3 ≤ max, count > 0).
-    for (const cell of body.bandingByOu) {
+    for (const cell of bandingByOu) {
       expect(cell.count).toBeGreaterThan(0);
       expect(cell.min).toBeLessThanOrEqual(cell.q1);
       expect(cell.q1).toBeLessThanOrEqual(cell.median);
@@ -295,7 +317,7 @@ describe("GET /v1/analytics/* integration", () => {
       expect(cell.q3).toBeLessThanOrEqual(cell.max);
     }
     // OU cell counts reconcile to the total.
-    const cellSum = body.bandingByOu.reduce((acc, c) => acc + c.count, 0);
+    const cellSum = bandingByOu.reduce((acc, c) => acc + c.count, 0);
     expect(cellSum).toBe(body.totalProfiles);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
@@ -309,8 +331,12 @@ describe("GET /v1/analytics/* integration", () => {
       `SELECT count(DISTINCT pcp.position_compensation_profile_tenant_id)::text AS n ${BANDED_JOIN}`,
     );
     if (tenants === 1) {
+      // Il confronto e' sui CONTEGGI: `bandingByOu` non e' piu' servito al
+      // mandato tecnico (#124), quindi confrontarne la lunghezza misurerebbe la
+      // maschera, non lo scope — che e' cio' che questo test vuole misurare.
       expect(body.totalProfiles).toBe(platformBody.totalProfiles);
-      expect(body.bandingByOu.length).toBe(platformBody.bandingByOu.length);
+      expect(body.ouCount).toBe(platformBody.ouCount);
+      expect(platformBody.bandingByOu).toBeUndefined();
     } else {
       expect(body.totalProfiles).toBeLessThanOrEqual(platformBody.totalProfiles);
     }

@@ -39,7 +39,10 @@ export const UserTargetPositionSchema = z.object({
   horizon: UserTargetPositionHorizonSchema.nullable(),
   reviewStatus: UserTargetPositionReviewStatusSchema,
   reviewerUserId: z.uuid().nullable(),
-  reviewNotes: z.string().nullable(),
+  // Opzionale per la MASCHERATURA (#124): e' il giudizio scritto SU una persona
+  // a proposito del suo obiettivo di carriera, classe EVALUATION.
+  reviewNotes: z.string().nullable().optional(),
+  masked: z.array(z.string()).optional(),
   metadata: z.record(z.string(), z.unknown()),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),

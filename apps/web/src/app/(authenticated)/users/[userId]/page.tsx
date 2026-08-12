@@ -28,6 +28,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
+import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { IdentityEditor } from "./_components/identity-editor";
 import { RolesEditor } from "./_components/roles-editor";
@@ -184,7 +185,7 @@ export default function UserDetailPage() {
           rows={d.contracts.map((c, i) => [
             c.type ? enumLabel("contractType", c.type) : "—",
             c.ccnlLevel ?? "—",
-            fmtMoney(c.grossAnnualSalary),
+            isMasked(c, "grossAnnualSalary") ? <MaskedCell key={`m${i}`} /> : fmtMoney(c.grossAnnualSalary),
             c.workHoursWeekly ?? "—",
             fmtDate(c.startDate),
             <EnumStatusBadge key={i} domain="contractStatus" value={c.status ?? ""} />,

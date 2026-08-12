@@ -15,6 +15,7 @@
  */
 
 import { pool } from "../../db/client.js";
+import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
@@ -50,7 +51,15 @@ export const assessmentsService = {
     const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
     const userIdAllowList =
       scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
-    return repo.listAssessments(pool, { tenantId, userIdAllowList, query });
+    const page = await repo.listAssessments(pool, { tenantId, userIdAllowList, query });
+    return {
+      ...page,
+      items: page.items.map((a) =>
+        masksUnderPlatformMandate(actor, "EVALUATION", a.subjectUserId)
+          ? maskFields(a, ["metadata"])
+          : a,
+      ),
+    };
   },
 
   async getById(actor: ActorContext, id: string): Promise<Assessment> {
@@ -61,7 +70,9 @@ export const assessmentsService = {
     if (!(await canReadOrgTarget(pool, actor, target.subjectUserId, target.tenantId))) {
       throw new NotFoundError("Assessment");
     }
-    return target;
+    return masksUnderPlatformMandate(actor, "EVALUATION", target.subjectUserId)
+      ? maskFields(target, ["metadata"])
+      : target;
   },
 
   async create(actor: ActorContext, body: CreateAssessmentBody): Promise<Assessment> {

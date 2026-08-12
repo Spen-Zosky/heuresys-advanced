@@ -7,6 +7,7 @@
 
 import { pool } from "../../db/client.js";
 import { scopeTierOf } from "../../lib/scope/domains.js";
+import { masksUnderPlatformMandate } from "../../lib/scope/mask.js";
 import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
@@ -106,16 +107,40 @@ export const analyticsService = {
   async compensation(a: ActorContext): Promise<CompensationAnalyticsResponse> {
     const s = await buildScope(a);
     const c = await repo.getCompensationEquity(pool, s.filter);
-    return {
+    const base = {
       scope: { kind: s.kind, tenantId: s.tenantId },
       totalProfiles: c.totalProfiles,
       ouCount: c.ouCount,
+      generatedAt: new Date().toISOString(),
+    };
+
+    // VINCOLO 5 (ADR-0032): un aggregato su una classe mascherata e' una fuga
+    // aritmetica. Qui non e' teorico — MISURATO 2026-08-12: 280 posizioni su 299
+    // hanno UN SOLO titolare, quindi ogni punto dello scatter (titolo, banda,
+    // mediana) E' la retribuzione di quella persona, e il mandato tecnico di
+    // piattaforma non deve leggerla. Restano visibili i CONTEGGI (quante
+    // posizioni, quante unita'): dicono la forma dell'organizzazione senza
+    // dire quanto prende nessuno.
+    if (masksUnderPlatformMandate(a, "COMPENSATION", null)) {
+      return {
+        ...base,
+        masked: [
+          "bandingByOu",
+          "overallMaxMidEur",
+          "overallMedianMidEur",
+          "overallMinMidEur",
+          "scatter",
+        ],
+      };
+    }
+
+    return {
+      ...base,
       overallMinMidEur: c.overallMinMidEur,
       overallMaxMidEur: c.overallMaxMidEur,
       overallMedianMidEur: c.overallMedianMidEur,
       bandingByOu: c.bandingByOu,
       scatter: c.scatter,
-      generatedAt: new Date().toISOString(),
     };
   },
 

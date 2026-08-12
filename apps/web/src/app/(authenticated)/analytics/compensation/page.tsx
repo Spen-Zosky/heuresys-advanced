@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Badge, EmptyState, PageHeader, StatsCard } from "@heuresys/ui";
 import { Building2, Coins, Scale } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
+import { MaskedCell } from "@/components/masked-cell";
 import type {
   CompensationAnalyticsResponse,
   CompensationBandingByOuRow,
@@ -115,9 +116,17 @@ export default function CompensationAnalyticsPage() {
   }
 
   const d = q.data!;
-  const hasData = d.bandingByOu.length > 0;
+  // #124 (S1055) — sotto mandato TECNICO di piattaforma l'API non serve piu'
+  // scatter, boxplot e mediane: 280 posizioni su 299 hanno un solo titolare,
+  // quindi ogni punto sarebbe la retribuzione di una persona. I campi sono
+  // ASSENTI, non vuoti, e i loro nomi arrivano in `masked`. La pagina lo DICE:
+  // un grafico vuoto senza spiegazione farebbe credere che il dato non esista.
+  const mascherato = (d.masked?.length ?? 0) > 0;
+  const bandingByOu = d.bandingByOu ?? [];
+  const scatter = d.scatter ?? [];
+  const hasData = bandingByOu.length > 0;
   const rangeDesc =
-    d.overallMinMidEur !== null && d.overallMaxMidEur !== null
+    d.overallMinMidEur != null && d.overallMaxMidEur != null
       ? t("compensation.range", {
           min: EUR.format(d.overallMinMidEur),
           max: EUR.format(d.overallMaxMidEur),
@@ -157,13 +166,22 @@ export default function CompensationAnalyticsPage() {
         <div data-testid="compensation-mid-range">
           <StatsCard
             label={t("compensation.stats.medianLabel")}
-            value={Math.round(d.overallMedianMidEur ?? 0)}
+            value={d.overallMedianMidEur == null ? 0 : Math.round(d.overallMedianMidEur)}
             unit="€"
             icon={<Scale className="h-4 w-4 text-palette-3" />}
             description={rangeDesc}
           />
         </div>
       </section>
+
+      {mascherato ? (
+        <section
+          data-testid="analytics-compensation-masked"
+          className="rounded-card border border-border bg-card p-6"
+        >
+          <MaskedCell />
+        </section>
+      ) : null}
 
       {hasData ? (
         <section className="space-y-8">
@@ -176,8 +194,8 @@ export default function CompensationAnalyticsPage() {
               className="rounded-card border border-border bg-card p-4"
             >
               <EChartsCard
-                option={bandingBoxplotOption(d.bandingByOu, t("compensation.axisMid"))}
-                height={Math.max(300, d.bandingByOu.length * 30)}
+                option={bandingBoxplotOption(bandingByOu, t("compensation.axisMid"))}
+                height={Math.max(300, bandingByOu.length * 30)}
                 ariaLabel={t("compensation.boxplotAria")}
               />
             </div>
@@ -192,7 +210,7 @@ export default function CompensationAnalyticsPage() {
               className="rounded-card border border-border bg-card p-4"
             >
               <EChartsCard
-                option={equityScatterOption(d.scatter, {
+                option={equityScatterOption(scatter, {
                   mid: t("compensation.axisMid"),
                   spread: t("compensation.axisSpread"),
                 })}

@@ -12,6 +12,7 @@
 
 import { pool } from "../../db/client.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
 
 export type { ActorContext };
 import { NotFoundError, ForbiddenError, ConflictError } from "../../errors/index.js";
@@ -53,7 +54,19 @@ export const userTargetPositionsService = {
     const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
     const userIdAllowList =
       scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
-    return repo.listTargets(pool, { tenantId, userIdAllowList, query });
+    const page = await repo.listTargets(pool, { tenantId, userIdAllowList, query });
+    // #124 (S1055) — `reviewNotes` e' il testo che un revisore scrive SU una
+    // persona a proposito del suo obiettivo di carriera: giudizio, classe
+    // EVALUATION. L'obiettivo in se' (quale posizione, con che stato) resta
+    // visibile: si nega il commento, non l'aspirazione.
+    return {
+      ...page,
+      items: page.items.map((r) =>
+        masksUnderPlatformMandate(actor, "EVALUATION", r.userId)
+          ? maskFields(r, ["reviewNotes"])
+          : r,
+      ),
+    };
   },
 
   async getById(actor: ActorContext, id: string): Promise<UserTargetPosition> {
@@ -63,7 +76,9 @@ export const userTargetPositionsService = {
     if (!(await canReadOrgTarget(pool, actor, target.userId, target.tenantId))) {
       throw new NotFoundError("UserTargetPosition");
     }
-    return target;
+    return masksUnderPlatformMandate(actor, "EVALUATION", target.userId)
+      ? maskFields(target, ["reviewNotes"])
+      : target;
   },
 
   async create(actor: ActorContext, body: CreateUserTargetPositionBody): Promise<UserTargetPosition> {

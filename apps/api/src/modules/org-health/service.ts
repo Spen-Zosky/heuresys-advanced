@@ -12,6 +12,7 @@
 import { ForbiddenError } from "../../errors/index.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { isPlatform } from "../../lib/actor.js";
+import { masksUnderPlatformMandate } from "../../lib/scope/mask.js";
 import type {
   OrgHealthScorecard, OrgHealthUnit, OrgHealthDimension, OrgHealthDimensionScore, OrgHealthStatus,
 } from "@heuresys/shared";
@@ -146,7 +147,30 @@ export const orgHealthService = {
   async scorecard(actor: ActorContext): Promise<OrgHealthScorecard> {
     const tenantId = tenantScope(actor);
     const rows = await repo.loadOrgHealthInputs(tenantId);
-    const units = rows.map(scoreUnit);
+
+    // VINCOLO 5 (ADR-0032) sugli aggregati. `retention` e' 1 - media(rischio di
+    // fuga)/100 e `performance` e' una media di valutazioni: su un'unita' con
+    // campione 1 la media E' il punteggio di quella persona, e si ricava
+    // invertendo l'aritmetica. Sono gli stessi punteggi che `insights` e
+    // `assessment-results` gia' mascherano allo stesso attore: lasciarli qui
+    // sarebbe una porta di servizio sulla stessa classe di dato.
+    //
+    // Non si sopprime il risultato: si dichiarano le due dimensioni NON
+    // DISPONIBILI, e il composito si rinormalizza da se' sulle restanti — il
+    // modulo lo fa gia' per le dimensioni prive di dato (vedi intestazione).
+    // `coverage` scende di conseguenza, ed e' corretto che scenda: chi legge
+    // deve sapere che sta guardando meno modello.
+    const maschera = masksUnderPlatformMandate(actor, "EVALUATION", null);
+    const inputs = maschera
+      ? rows.map((r) => ({
+          ...r,
+          retentionScore: null,
+          retentionSample: 0,
+          performanceScore: null,
+          performanceSample: 0,
+        }))
+      : rows;
+    const units = inputs.map(scoreUnit);
     const distribution = rankUnits(units);
 
     const summary: OrgHealthScorecard["summary"] = {
@@ -181,6 +205,9 @@ export const orgHealthService = {
       bands: { ...B },
       minCoverage: ORG_HEALTH_MIN_COVERAGE,
       distribution,
+      // Dichiarato, non taciuto: senza questa riga le due dimensioni sarebbero
+      // indistinguibili da un buco di strumentazione.
+      ...(maschera ? { masked: ["performance", "retention"] } : {}),
       generatedAt: new Date().toISOString(),
     };
   },

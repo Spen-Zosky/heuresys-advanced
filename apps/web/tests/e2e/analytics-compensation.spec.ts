@@ -7,8 +7,13 @@
  * The headline profile count + the scope badge are asserted against the SAME
  * live GET /v1/analytics/compensation payload the page fetches at runtime.
  *
- * Persona: platformAdmin (enzo.spenuso@heuresys.com → PLATFORM scope). `analytics:view`
- * is granted to the admin roles by migration 000057.
+ * Persona: **tenantAdmin**, non platformAdmin. Da #124 (S1055) il mandato di
+ * piattaforma e' TECNICO e non apre COMPENSATION (ADR-0032): su questa pagina
+ * l'API non serve piu' scatter, boxplot e mediane, perche' 280 posizioni su 299
+ * hanno un solo titolare e ogni punto sarebbe la retribuzione di una persona.
+ * Con quel profilo i due grafici non esistono, ed e' l'esito CORRETTO — il caso
+ * mascherato ha la sua prova in `apps/api/test/analytics-aggregate-mask.integration.test.ts`.
+ * `analytics:view` e' concesso a entrambi i ruoli dalla migrazione 000057.
  */
 
 import { test, expect, type APIRequestContext } from "@playwright/test";
@@ -16,7 +21,7 @@ import { storageStateFor } from "./fixtures";
 
 import type { CompensationAnalyticsResponse } from "@heuresys/shared";
 
-test.use({ storageState: storageStateFor("platformAdmin") });
+test.use({ storageState: storageStateFor("tenantAdmin") });
 
 async function fetchCompensation(request: APIRequestContext): Promise<CompensationAnalyticsResponse> {
   const res = await request.get("/api/v1/analytics/compensation");

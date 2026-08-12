@@ -121,9 +121,14 @@ export const KpiMeasurementSchema = z.object({
   positionId: z.uuid().nullable(),
   periodStart: z.string(),
   periodEnd: z.string(),
-  value: z.number(),
-  unit: z.string().nullable(),
-  source: z.string().nullable(),
+  // Opzionali per la MASCHERATURA (#124): una misurazione con `userId` e' il
+  // valore di quell'indicatore PER QUELLA PERSONA, classe EVALUATION. Sotto
+  // mandato tecnico il valore viene tolto e dichiarato; periodo, indicatore e
+  // soggetto restano, cosi' si sa CHE la misura esiste senza leggerla.
+  value: z.number().optional(),
+  unit: z.string().nullable().optional(),
+  source: z.string().nullable().optional(),
+  masked: z.array(z.string()).optional(),
   recordedAt: z.iso.datetime(),
 });
 export type KpiMeasurement = z.infer<typeof KpiMeasurementSchema>;

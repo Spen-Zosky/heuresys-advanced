@@ -111,6 +111,13 @@ export const OrgHealthScorecardSchema = z.object({
   bands: z.object({ strong: z.number(), healthy: z.number(), watch: z.number() }),
   minCoverage: z.number(),
   /**
+   * Dimensioni tolte per MASCHERATURA (ADR-0032, vincolo 5 sugli aggregati) —
+   * non dimensioni prive di dato. Compaiono nelle `units` con `score: null`
+   * come quelle non strumentate: senza questa lista chi legge non potrebbe
+   * distinguere «nascosto al tuo profilo» da «mai misurato».
+   */
+  masked: z.array(z.string()).optional(),
+  /**
    * Observed spread of the index across the banded units. Published because a composite of
    * six weakly-correlated dimensions compresses toward the middle: without knowing the
    * range, a reader over-reads a gap of half a point as a real difference.

@@ -14,7 +14,11 @@ definizione la apre Enzo, quindi il configuratore COMPONE LA FRASE esatta da
 incollare nella sessione. Nessuna opzione decorativa.
 
 Cosa NON fa: non scavalca freno/lock/repo-pulito/veto-deploy (stanno nel driver);
-non tocca DB ne' prodotto; ascolta SOLO su 127.0.0.1 — non esporla mai.
+non tocca DB ne' prodotto. Rete: ascolta su 0.0.0.0 (misurato 2026-08-12 con
+netstat: 0.0.0.0:8477), ma dalla LAN NON si comanda nulla senza la chiave nell'URL
+— `APERTA=False` di default, e solo `--senza-chiave` la apre davvero. `--solo-locale`
+la toglie del tutto dalla rete. Questa riga diceva «ascolta SOLO su 127.0.0.1»:
+la conclusione era giusta, la ragione no — a difendere e' la chiave, non il bind.
 
 Uso:  py zp_panel.py            # apre http://127.0.0.1:8477
       py zp_panel.py --no-browser

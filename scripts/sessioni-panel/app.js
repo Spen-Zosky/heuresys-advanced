@@ -514,10 +514,26 @@ function VistaSistema({ d }) {
 function VistaZeroPending({ d }) {
   const z = d.zp;
   if (!z) {
+    // Qui risponde sessioni_panel.py da solo: il suo /api/stato non porta `zp`, e non e' un
+    // guasto — non conosce il piano zero-pendenze. Due destinazioni, due mestieri distinti:
+    // :8481 per GUARDARE (plancia unificata, sola lettura), :8477 per AGIRE. Prima questo
+    // ramo nominava solo :8477, cioe' mandava ad agire chi voleva soltanto vedere.
     return html`<div class="riquadro">
-      <span class="nota">questa vista richiede scripts/plancia.py (la plancia unificata) — non
-        è disponibile qui. Nessun problema: apri scripts/zp_panel.py per lo stato completo e
-        le azioni operative.</span></div>`;
+      <span class="nota">questa vista mostra il piano zero-pendenze solo quando a rispondere è
+        la${" "}<b>plancia unificata</b>, che legge da sé entrambe le metà. Qui risponde la sola
+        vista sessioni, che non conosce quei dati.</span>
+      <div style=${{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
+        <a class="bottone acceso" href="http://127.0.0.1:8481/" target="_blank" rel="noopener"
+           style=${{ textDecoration: "none" }}>
+          Guarda tutto — plancia unificata :8481 ↗
+        </a>
+        <a class="bottone" href="http://127.0.0.1:8477/" target="_blank" rel="noopener"
+           style=${{ textDecoration: "none" }}>
+          Agisci — pannello operativo :8477 ↗
+        </a>
+      </div>
+      <span class="nota" style=${{ display: "block", marginTop: "10px" }}>Se :8481 non risponde,
+        avviala con <code>pnpm plancia</code>.</span></div>`;
   }
   const p = z.piano || {};
   const pct = p.totali ? Math.round((100 * p.chiusi) / p.totali) : 0;

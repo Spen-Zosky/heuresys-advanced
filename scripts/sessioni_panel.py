@@ -32,7 +32,12 @@ Vincoli di progetto (INVARIANTE, non rinegoziabile da qui)
   · NESSUNA AZIONE SUL PROGETTO. Le uniche due azioni ammesse sono sulla
     plancia stessa (`aggiorna`, `riavvia`): non toccano file, database, git
     ne' altri processi.
-  · Bind su 127.0.0.1 di default; --solo-locale lo forza sempre.
+  · Bind su 0.0.0.0 di default — la pagina si guarda anche dal telefono; e
+    la lettura e' APERTA (`aperta_default=True`), quindi chiunque sulla rete
+    locale la legge senza chiave. `--solo-locale` la chiude sul solo PC,
+    `--con-chiave` la lascia in rete ma pretende la chiave. Misurato il
+    2026-08-12 con netstat: 0.0.0.0:8479 — questa riga diceva «127.0.0.1 di
+    default» ed era il contrario del codice (panel_base.avvia_server).
   · REDAZIONE dei segreti (scripts/panel_base.py) su ogni testo che potrebbe
     portare credenziali lette da un transcript.
   · Zero dipendenze Python. React/ReactDOM/htm sono in scripts/vendor/,

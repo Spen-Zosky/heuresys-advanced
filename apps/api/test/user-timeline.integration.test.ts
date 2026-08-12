@@ -56,7 +56,7 @@ describe("/v1/user-timeline + /v1/me/timeline (D5 #49)", () => {
   });
 
 /**
- * La storia e' popolata da `db/scripts/import-d5-timeline.sh`, che gira dove vivono i dati
+ * La storia e' popolata da `docs/archive/etl-brownfield-ritirato/scripts/import-d5-timeline.sh (ritirato #170)`, che gira dove vivono i dati
  * legacy. Sul clone di CI la tabella esiste (mig 000222) ma e' VUOTA, e questi test
  * fallivano su `toBeGreaterThan(0)` — verdi in locale, rossi in CI, che e' il modo peggiore
  * di sbagliare (scoperto S1041).

@@ -1,7 +1,7 @@
 /**
  * apps/api/src/modules/user-timeline/repository.ts
  * D5 (#49) — SQL su sys.sys_user_timeline_events. Sola lettura: la tabella si
- * popola dall'import (db/scripts/import-d5-timeline.sh), mai dall'API.
+ * popola dall'import (docs/archive/etl-brownfield-ritirato/scripts/import-d5-timeline.sh (ritirato #170)), mai dall'API.
  */
 import type { Pool, PoolClient } from "pg";
 import type {

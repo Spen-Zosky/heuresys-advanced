@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-11T12:31:02Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2947**
+**Generato**: 2026-08-12T23:30:30Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2957**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -8,21 +8,21 @@
 
 | Categoria | File |
 |---|---|
-| ADR | 35 |
+| ADR | 36 |
 | api-core | 32 |
 | api-module | 332 |
 | ci | 17 |
-| claude-config | 36 |
-| config | 144 |
+| claude-config | 39 |
+| config | 143 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 301 |
+| db-migration | 302 |
 | db-other | 8 |
-| db-script | 47 |
-| db-seed | 148 |
-| doc-canonical | 579 |
+| db-script | 42 |
+| db-seed | 113 |
+| doc-canonical | 623 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 104 |
 | showcase-source | 14 |
-| test | 353 |
+| test | 355 |
 | ux-design-archive | 80 |
 | web-source | 234 |
-| **TOTALE** | **2947** |
+| **TOTALE** | **2957** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2389 |
+| live | 2399 |
 
 ## File per categoria
 
@@ -83,6 +83,7 @@
 - `D:\heuresys-advanced\docs\architecture\adr\0034_migration_chain_is_schema_over_a_data_baseline.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0035_retirement_amends_the_source_never_deletes_downstream.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0036_hierarchical_and_functional_domains.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0037_user_deletion_is_anonymization.md` · *live* · git-tracked
 
 ### api-core
 
@@ -479,8 +480,11 @@
 - `D:\heuresys-advanced\.claude\launch.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\rules\api-module-pattern.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\rules\db-migrations.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\rules\design-system-ui.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\rules\frontend-live-data.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\rules\security-auth.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\rules\tests.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\settings.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\settings.local.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\consolida-pagina\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\consolida-pagina\references\functional_areas.md` · *live* · git-tracked
@@ -556,6 +560,7 @@
 - `D:\heuresys-advanced\apps\api\scripts\dev-whoami.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\export-accessi-csv.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-124-d4.mts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\prova-live-183.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\verify-derived-login.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\tsconfig.json` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\tsconfig.test.json` · *live* · git-tracked
@@ -621,8 +626,6 @@
 - `D:\heuresys-advanced\scripts\dr-drill.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\env-key-merge.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\gdpr-retention-sweep.sh` · *live* · git-tracked
-- `D:\heuresys-advanced\scripts\generate_wave1_column_mappings.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\scripts\generate_wave1_seeds.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\hooks\hook.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\hooks\session_mode.py` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\journal-append.sh` · *live* · git-tracked
@@ -633,7 +636,6 @@
 - `D:\heuresys-advanced\scripts\provision-linux-pc.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\provision-prometheus-vm.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\pull-prod-backups.sh` · *live* · git-tracked
-- `D:\heuresys-advanced\scripts\run-wave1-fullscale.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\session-boot.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\sessioni-panel\app.js` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\sessioni-panel\index.html` · *live* · git-tracked
@@ -652,6 +654,7 @@
 - `D:\heuresys-advanced\scripts\vendor\htm.js` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vendor\react-dom.js` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vendor\react.js` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\verifica-deploy.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vm-bootstrap.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vm-deploy-remote.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vm-deploy.sh` · *live* · git-tracked
@@ -1321,6 +1324,7 @@
 - `D:\heuresys-advanced\db\migrations\000301_settore_e_famiglia_di_modelli.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000302_voce_di_menu_del_fascicolo.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000303_approval_history_survives_user_deletion.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000304_gdpr_registry_covers_belonging_not_prefix.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1341,8 +1345,6 @@
 - `D:\heuresys-advanced\db\scripts\audit-storia36-empty-tables.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\audit-storia36-explanations.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\audit-storia36-semantic.py` · *live* · git-tracked
-- `D:\heuresys-advanced\db\scripts\brownfield-wave-1-preflight.ps1` · *live* · git-tracked
-- `D:\heuresys-advanced\db\scripts\brownfield-wave-1-preflight.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\ci-rehearsal-census.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\ci-rehearsal.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\create_local_database.ps1` · *live* · git-tracked
@@ -1354,9 +1356,6 @@
 - `D:\heuresys-advanced\db\scripts\gen-contracts-seed.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\gen-pay-slips-seed.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\import-d1-user-skills.sh` · *live* · git-tracked
-- `D:\heuresys-advanced\db\scripts\import-d2-engagement.sh` · *live* · git-tracked
-- `D:\heuresys-advanced\db\scripts\import-d5-timeline.sh` · *live* · git-tracked
-- `D:\heuresys-advanced\db\scripts\import-e4-salary-bands.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate-if-pending.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate.sh` · *live* · git-tracked
@@ -1386,39 +1385,12 @@
 ### db-seed
 
 - `D:\heuresys-advanced\db\seeds\.gitkeep` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\sdbi\goals_pilot\01_temp_sdbi_ddl.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\sdbi\goals_pilot\02_phase3_temp_sdbi_seed.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\sdbi\goals_pilot\03_phase5_consolidation.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\sdbi\perf_feedback\01_temp_sdbi_ddl.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\sdbi\perf_feedback\02_phase3_temp_sdbi_seed.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\sdbi\perf_feedback\03_phase5_consolidation.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave1\00_source_export.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave1\01_source_tables.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave1\02_source_columns.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave1\03_table_mappings.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave1\04_column_mappings.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave1\04_column_mappings_report.md` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave1\05_job_families_registry.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cascade_fixes\01_sys_job_roles_mapping_fix.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cascade_fixes\02_sys_esco_occupation_mappings_fix.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cascade_fixes\03_sys_skill_categories_fix.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cascade_fixes\04_sys_skill_taxonomy_edges_fix.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b32_fix\01_org_level_to_cast_enum.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b35_fix\01_skill_taxonomy_edges_lookup_fks.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b35_fix\02_skill_taxonomy_edge_kind_mappings.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b36_fix\01_skill_categories_reclassify.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b37_fix\01_skill_learning_reclassify.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b39_fix\01_learning_path_steps_reclassify.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\brownfield\wave2\x9_block_bcd.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\org_chart_rtl_demo.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\01_kpi_definitions.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\02_kpi_catalog_unification.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\03_kpi_targets.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\reconciliation\04_registry.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\reconciliation\05_career_paths.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\06_user_career_plans.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\07_user_documents.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\reconciliation\08_bonus_pools.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\09_gap_analysis_results.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\10_position_career_paths.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\11_position_learning_requirements.sql` · *live* · git-tracked
@@ -1439,7 +1411,6 @@
 - `D:\heuresys-advanced\db\seeds\reconciliation\26_talent_scores.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\27_behavioral_assessments.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\28_person_evidence_records.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\reconciliation\29_objective_reward_rules.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\30_kpi_metric_definitions.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\31_enterprise_typing_profiles.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\32_critical_role_coverage_status.sql` · *live* · git-tracked
@@ -1453,7 +1424,6 @@
 - `D:\heuresys-advanced\db\seeds\reconciliation\40_org_unit_kpi_templates.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\41_position_kpi_requirements.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\42_registry_s970_bridge.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\reconciliation\43_registry_process_kpi_templates_exclude.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\44_skill_category_mapping.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\45_mentorship.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\46_engagement_surveys.sql` · *live* · git-tracked
@@ -1465,7 +1435,6 @@
 - `D:\heuresys-advanced\db\seeds\reconciliation\52_occupation_skill_requirements.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\53_registry_process_kpi_templates_s994_evidence.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\54_raci_demo_rtl_s994.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\reconciliation\55_survey_templates.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\_gen_m2b.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_banking_learning_catalog.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_banking_skills.sql` · *live* · git-tracked
@@ -1495,11 +1464,6 @@
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\RETIRED.md` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl_positions_hierarchy.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\sdbi\_template\01_temp_sdbi_ddl.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\sdbi\_template\02_phase3_temp_sdbi_seed.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\sdbi\_template\03_phase5_consolidation.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\sdbi\_template\README.md` · *live* · git-tracked
-- `D:\heuresys-advanced\db\seeds\sdbi\_template\mapping_card.template.md` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\storia36\00_foundation.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\storia36\00_repair_g4_contracts.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\storia36\01_attendance_timeoff.sql` · *live* · git-tracked
@@ -1592,6 +1556,50 @@
 - `D:\heuresys-advanced\docs\archive\NEXT_GENERATION_ENTRY_POINT.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_2A.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\SDBI_RUNBOOK.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\generate_wave1_column_mappings.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\generate_wave1_seeds.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-d2-engagement.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-d5-timeline.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-e4-salary-bands.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\run-wave1-fullscale.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\01_temp_sdbi_ddl.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\02_phase3_temp_sdbi_seed.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\03_phase5_consolidation.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\01_temp_sdbi_ddl.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\02_phase3_temp_sdbi_seed.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\03_phase5_consolidation.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\00_source_export.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\01_source_tables.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\02_source_columns.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\03_table_mappings.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\04_column_mappings.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\04_column_mappings_report.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\05_job_families_registry.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\01_sys_job_roles_mapping_fix.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\02_sys_esco_occupation_mappings_fix.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\03_sys_skill_categories_fix.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\04_sys_skill_taxonomy_edges_fix.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b32_fix\01_org_level_to_cast_enum.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b35_fix\01_skill_taxonomy_edges_lookup_fks.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b35_fix\02_skill_taxonomy_edge_kind_mappings.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b36_fix\01_skill_categories_reclassify.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b37_fix\01_skill_learning_reclassify.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b39_fix\01_learning_path_steps_reclassify.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\x9_block_bcd.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\04_registry.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\05_career_paths.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\08_bonus_pools.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\29_objective_reward_rules.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\43_registry_process_kpi_templates_exclude.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\55_survey_templates.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\01_temp_sdbi_ddl.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\02_phase3_temp_sdbi_seed.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\03_phase5_consolidation.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\mapping_card.template.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-analisi-sicurezza-e-remediation.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-fase2-governo-dei-lavoratori.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-modalita-gov.md` · *live* · git-tracked
@@ -1860,7 +1868,6 @@
 - `D:\heuresys-advanced\docs\product\WORKITEM_GAP1_DESIGN_SPEC.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\product\WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\product\WORKITEM_GAP1_PHASE0_VERIFICATION.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\sdbi\RUNBOOK.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\security\.keep` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\security\AUTH_SECURITY_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\source_bundle\Company_HRMS_BPM_AI_Coding_Agent_Bootstrap_Pack_v5.zip` · *live* · git-tracked
@@ -2041,6 +2048,7 @@
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-11-cancello-verifica-s1054.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-11-ciclo-g-124-183-s1054.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-11-ciclo-h-clone-linux-pc-s1054.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-12-batch-p1-p2-s1055.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-catalogo-generico-corpus-concetti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-substrato-semantico-verifica-e-correzioni.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-07-percorsi-carriera-155.md` · *live* · git-tracked
@@ -2398,6 +2406,7 @@
 - `D:\heuresys-advanced\apps\api\test\activity-classifications.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\actors-profile.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\advisor-suggestions.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\analytics-aggregate-mask.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\analytics-csv.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\analytics-export.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\analytics.integration.test.ts` · *live* · git-tracked
@@ -2540,6 +2549,7 @@
 - `D:\heuresys-advanced\apps\api\test\organization-unit-processes-raci-demo.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\organization-unit-processes.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\organization-units.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\per-person-mask.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\performance-reviews.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\pg-pool-resilience.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\position-career-paths.integration.test.ts` · *live* · git-tracked

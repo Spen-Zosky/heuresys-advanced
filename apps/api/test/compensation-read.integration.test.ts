@@ -365,7 +365,7 @@ describe("#32 A/L7 compensation & reward read", () => {
       expect(items.length).toBeGreaterThan(0);
       for (const b of items) expect(b.name).not.toBe(b.code);
 
-      // Le righe `LEGACY_BAND::` le scrive `db/scripts/import-e4-salary-bands.sh`, che
+      // Le righe `LEGACY_BAND::` le scrive `docs/archive/etl-brownfield-ritirato/scripts/import-e4-salary-bands.sh (ritirato #170)`, che
       // gira dove vivono i dati legacy: sul clone di CI NON esistono. Pretenderle qui
       // renderebbe il test verde in locale e rosso in CI — la trappola già registrata
       // come pattern del progetto. Si verifica quindi «se ci sono, sono ben formate»;

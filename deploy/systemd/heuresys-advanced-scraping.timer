@@ -2,7 +2,7 @@
 #
 # cap⑤ scraping P2 (D-5): a CONSERVATIVE weekly probe of the ESCO taxonomy. Reference
 # taxonomies change ~yearly upstream, so most weekly runs are a cheap UNCHANGED no-op
-# via brownfield.source_watermarks (content-hash short-circuit). Don't over-poll
+# via reference_sync.source_watermarks (content-hash short-circuit). Don't over-poll
 # authoritative sources.
 [Unit]
 Description=Heuresys Advanced — weekly ESCO reference-sync probe (cap⑤)

@@ -240,6 +240,74 @@ export async function deactivateUser(
   return (res.rowCount ?? 0) === 1;
 }
 
+/* === Hard delete (revoca di creazione) ================================= */
+
+export interface BlockingHistoryRef {
+  schema: string;
+  table: string;
+  column: string;
+  rows: number;
+}
+
+/** Gli identificatori arrivano dal catalogo di Postgres, non dall'utente; il
+ *  controllo è comunque esplicito perché finiscono interpolati in SQL. */
+const SAFE_IDENT = /^[a-z_][a-z0-9_]*$/;
+
+/**
+ * Le tabelle che IMPEDISCONO la cancellazione fisica di una persona, derivate
+ * dal catalogo a ogni chiamata — mai un elenco scritto a mano, che invecchia
+ * in silenzio alla prima migrazione che ne aggiunge una.
+ *
+ * `ON DELETE RESTRICT` / `NO ACTION` verso `sys_users` sono la dichiarazione,
+ * fatta a livello di database, che quella riga è storia operativa e non può
+ * sparire con il soggetto. Sono l'APPLICAZIONE della policy, non un ostacolo:
+ * questa funzione le legge per poter dare un errore comprensibile invece di
+ * lasciare che sia Postgres a rispondere con una violazione di vincolo.
+ */
+export async function findBlockingHistory(
+  q: DbConnector,
+  userId: string,
+): Promise<BlockingHistoryRef[]> {
+  const fks = await q.query<{ sch: string; tbl: string; col: string }>(
+    `SELECT n.nspname AS sch, src.relname AS tbl, att.attname AS col
+       FROM pg_constraint con
+       JOIN pg_class src     ON src.oid = con.conrelid
+       JOIN pg_namespace n   ON n.oid = src.relnamespace
+       JOIN pg_class tgt     ON tgt.oid = con.confrelid
+       JOIN pg_namespace tn  ON tn.oid = tgt.relnamespace
+       JOIN unnest(con.conkey) WITH ORDINALITY k(attnum, ord) ON true
+       JOIN pg_attribute att ON att.attrelid = src.oid AND att.attnum = k.attnum
+      WHERE con.contype = 'f'
+        AND tgt.relname = 'sys_users' AND tn.nspname = 'sys'
+        AND con.confdeltype IN ('r', 'a')
+      ORDER BY 1, 2, 3`,
+  );
+  if (fks.rows.length === 0) return [];
+
+  const parts: string[] = [];
+  for (const f of fks.rows) {
+    if (!SAFE_IDENT.test(f.sch) || !SAFE_IDENT.test(f.tbl) || !SAFE_IDENT.test(f.col)) {
+      throw new Error(`identificatore non sicuro dal catalogo: ${f.sch}.${f.tbl}.${f.col}`);
+    }
+    parts.push(
+      `SELECT '${f.sch}' AS sch, '${f.tbl}' AS tbl, '${f.col}' AS col,
+              count(*)::int AS n FROM ${f.sch}.${f.tbl} WHERE ${f.col} = $1`,
+    );
+  }
+  const res = await q.query<{ sch: string; tbl: string; col: string; n: number }>(
+    parts.join(" UNION ALL "),
+    [userId],
+  );
+  return res.rows
+    .filter((r) => r.n > 0)
+    .map((r) => ({ schema: r.sch, table: r.tbl, column: r.col, rows: r.n }));
+}
+
+export async function hardDeleteUser(q: DbConnector, userId: string): Promise<boolean> {
+  const res = await q.query(`DELETE FROM sys.sys_users WHERE user_id = $1`, [userId]);
+  return (res.rowCount ?? 0) === 1;
+}
+
 /* === Role grants ======================================================= */
 
 interface RawGrantRow {

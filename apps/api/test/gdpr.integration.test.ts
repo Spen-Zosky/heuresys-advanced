@@ -56,34 +56,50 @@ describe("D-14 F3/F4 GDPR tooling", () => {
     await closePool();
   });
 
-  it("data-map anti-drift: every SUBJECT fk to sys_users on sys_user_* tables is classified", async () => {
+  it("data-map anti-drift: every BELONGING fk to sys_users is classified, on every schema", async () => {
     const r = await suite.app.inject({
       method: "GET",
       url: "/v1/gdpr/data-map",
       headers: headers(platform),
     });
     expect(r.statusCode).toBe(200);
-    const { items } = r.json() as { items: { tableName: string; subjectFkColumn: string }[] };
+    const { items } = r.json() as {
+      items: { tableSchema: string; tableName: string; subjectFkColumn: string }[];
+    };
     expect(items.length).toBeGreaterThan(40);
-    const mapped = new Set(items.map((i) => `${i.tableName}.${i.subjectFkColumn}`));
+    const mapped = new Set(items.map((i) => `${i.tableSchema}.${i.tableName}.${i.subjectFkColumn}`));
 
     // LIVE fk graph — the SoT is pg_constraint, never a hardcoded list.
-    const fks = await pool.query<{ tbl: string; col: string }>(
-      `SELECT c.conrelid::regclass::text AS tbl, a.attname AS col
+    //
+    // Il predicato è l'APPARTENENZA, non il nome della tabella. Fino al 2026-08-12
+    // questa query filtrava `LIKE 'sys.sys_user\_%'`: poteva vedere solo le tabelle
+    // col prefisso, quindi era VERDE con 27 FK di appartenenza non classificate —
+    // e sarebbe rimasta verde con qualunque numero, perché nessuna delle 27 ha quel
+    // prefisso. Un controllo strutturalmente incapace di fallire non è un controllo.
+    //
+    // Il criterio non è inventato qui: `ON DELETE SET NULL` = colonna di PATERNITÀ
+    // (mig 000295:82), che sopravvive al soggetto e resta fuori; CASCADE/RESTRICT/
+    // NO ACTION = APPARTENENZA, cioè dati della persona — e sono esattamente quelli
+    // che l'erasure deve saper trattare e l'export Art. 15 deve saper mostrare.
+    const fks = await pool.query<{ sch: string; tbl: string; col: string }>(
+      `SELECT n.nspname AS sch, src.relname AS tbl, a.attname AS col
          FROM pg_constraint c
+         JOIN pg_class src ON src.oid = c.conrelid
+         JOIN pg_namespace n ON n.oid = src.relnamespace
          JOIN LATERAL unnest(c.conkey) k ON true
          JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = k
         WHERE c.contype = 'f' AND c.confrelid = 'sys.sys_users'::regclass
-          AND c.conrelid::regclass::text LIKE 'sys.sys_user\\_%'`,
+          AND c.confdeltype IN ('c', 'r', 'a')`,
     );
     // ACTOR references are not subject data (registry doctrine, mig 000186).
     const ACTOR_RE = /(^|_)(created_by|updated_by)$|_by$|assessor|reviewer|verified/;
     const subjectFks = fks.rows.filter((f) => !ACTOR_RE.test(f.col));
-    expect(subjectFks.length).toBeGreaterThan(20);
+    expect(subjectFks.length).toBeGreaterThan(60);
     const missing = subjectFks
-      .map((f) => `${f.tbl.replace(/^sys\./, "")}.${f.col}`)
-      .filter((k) => !mapped.has(k));
-    expect(missing, "subject FKs senza classificazione GDPR (aggiorna sys_gdpr_data_map)").toEqual([]);
+      .map((f) => `${f.sch}.${f.tbl}.${f.col}`)
+      .filter((k) => !mapped.has(k))
+      .sort();
+    expect(missing, "FK di appartenenza senza classificazione GDPR (aggiorna sys_gdpr_data_map)").toEqual([]);
   });
 
   it("il registro delle richieste si può RILEGGERE (prima si scriveva soltanto)", async () => {

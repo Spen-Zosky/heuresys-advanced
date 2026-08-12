@@ -414,6 +414,103 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("SELF_DEACTIVATE");
   });
 
+  /* -------------------------------------------------- purge (hard delete) */
+
+  /** Crea un utente usa-e-getta dentro RTL Bank e ne restituisce l'id. */
+  async function creaUsaEGetta(suffisso: string): Promise<string> {
+    const tenantRow = await pool.query<{ tenant_id: string }>(
+      `SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'`,
+    );
+    const rtlTenantId = tenantRow.rows[0]!.tenant_id;
+    const created = await suite.app.inject({
+      method: "POST",
+      url: "/v1/users",
+      headers: {
+        cookie: cookieHeader(platformS.cookies),
+        "x-csrf-token": platformS.csrfToken,
+        "content-type": "application/json",
+      },
+      payload: {
+        email: `${SUITE_PREFIX.toLowerCase()}_${suffisso}@rtl-bank.test`,
+        displayName: `Purge ${suffisso}`,
+        tenantId: rtlTenantId,
+      },
+    });
+    expect(created.statusCode).toBe(201);
+    const { userId } = created.json() as { userId: string };
+    createdUserIds.push(userId);
+    return userId;
+  }
+
+  it("PURGE: utente SENZA storia → 204 e la riga sparisce davvero", async () => {
+    const userId = await creaUsaEGetta("px_pulito");
+
+    const r = await suite.app.inject({
+      method: "DELETE",
+      url: `/v1/users/${userId}/purge`,
+      headers: { cookie: cookieHeader(platformS.cookies), "x-csrf-token": platformS.csrfToken },
+    });
+    expect(r.statusCode).toBe(204);
+
+    // Non basta il 204: si guarda il database. Un 204 su una riga ancora
+    // presente sarebbe il difetto peggiore possibile qui.
+    const resta = await pool.query(`SELECT 1 FROM sys.sys_users WHERE user_id = $1`, [userId]);
+    expect(resta.rowCount).toBe(0);
+  });
+
+  it("PURGE: basta UNA riga di storia operativa → 409 USER_HAS_HISTORY, e l'utente resta", async () => {
+    const userId = await creaUsaEGetta("px_storia");
+    const tenantRow = await pool.query<{ tenant_id: string }>(
+      `SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'`,
+    );
+
+    // UNA sola riga, nella più economica delle 10 tabelle che trattengono
+    // (ON DELETE RESTRICT verso sys_users). Il caso limite è proprio questo:
+    // non «tanta storia», ma il minimo indivisibile.
+    await pool.query(
+      `INSERT INTO audit.user_self_service_actions (action_user_id, action_tenant_id, action_type)
+       VALUES ($1, $2, 'PROFILE_UPDATE')`,
+      [userId, tenantRow.rows[0]!.tenant_id],
+    );
+
+    const r = await suite.app.inject({
+      method: "DELETE",
+      url: `/v1/users/${userId}/purge`,
+      headers: { cookie: cookieHeader(platformS.cookies), "x-csrf-token": platformS.csrfToken },
+    });
+    expect(r.statusCode).toBe(409);
+    const body = r.json() as { error: { code: string; message: string } };
+    expect(body.error.code).toBe("USER_HAS_HISTORY");
+    // L'errore deve DIRE chi trattiene, o chi lo riceve non sa che farsene.
+    expect(body.error.message).toContain("user_self_service_actions");
+
+    const resta = await pool.query(`SELECT 1 FROM sys.sys_users WHERE user_id = $1`, [userId]);
+    expect(resta.rowCount).toBe(1);
+
+    // La via canonica resta percorribile sulla stessa persona.
+    const soft = await suite.app.inject({
+      method: "DELETE",
+      url: `/v1/users/${userId}`,
+      headers: { cookie: cookieHeader(platformS.cookies), "x-csrf-token": platformS.csrfToken },
+    });
+    expect(soft.statusCode).toBe(204);
+    const dopo = await pool.query<{ user_status: string }>(
+      `SELECT user_status FROM sys.sys_users WHERE user_id = $1`,
+      [userId],
+    );
+    expect(dopo.rows[0]!.user_status).toBe("DEACTIVATED");
+  });
+
+  it("PURGE: su se stessi → 409 SELF_PURGE", async () => {
+    const r = await suite.app.inject({
+      method: "DELETE",
+      url: `/v1/users/${platformS.userId}/purge`,
+      headers: { cookie: cookieHeader(platformS.cookies), "x-csrf-token": platformS.csrfToken },
+    });
+    expect(r.statusCode).toBe(409);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("SELF_PURGE");
+  });
+
   /* -------------------------------------------------- role grants */
 
   it("ROLE GRANTS: list/grant/revoke flow as TENANT_ADMIN on a freshly-created user", async () => {

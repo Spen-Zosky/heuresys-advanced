@@ -291,6 +291,40 @@ export const usersService = {
     }
   },
 
+  /**
+   * Cancellazione FISICA — «revoca di creazione», non una via alternativa alla
+   * disattivazione (ADR-0037).
+   *
+   * Per una persona CON storia la via canonica è e resta l'anonimizzazione
+   * (`DELETE /v1/users/:id` per disattivare, poi l'erasure GDPR): questa rotta
+   * esiste per il solo caso dell'utente creato per errore, che non ha ancora
+   * prodotto nulla. Il controllo si fa sul catalogo AL MOMENTO della chiamata,
+   * mai su una misura ereditata; e se anche fosse sbagliato, il database
+   * rifiuterebbe comunque — le RESTRICT restano al loro posto.
+   */
+  async purge(actor: ActorContext, id: string): Promise<void> {
+    const target = await repo.findUserById(pool, id);
+    if (!target) throw new NotFoundError("User");
+    if (!(await canActOnTarget(actor, target, "delete"))) {
+      throw new NotFoundError("User");
+    }
+    if (target.userId === actor.userId) {
+      throw new ConflictError("Cannot purge your own account", "SELF_PURGE");
+    }
+    const blocking = await repo.findBlockingHistory(pool, id);
+    if (blocking.length > 0) {
+      const dettaglio = blocking
+        .map((b) => `${b.schema}.${b.table} (${b.rows})`)
+        .join(", ");
+      throw new ConflictError(
+        `User has operational history and cannot be physically deleted; deactivate instead. Blocking: ${dettaglio}`,
+        "USER_HAS_HISTORY",
+      );
+    }
+    const ok = await repo.hardDeleteUser(pool, id);
+    if (!ok) throw new NotFoundError("User");
+  },
+
   /* -------------------------------------------------- role grants */
 
   async listRoles(actor: ActorContext, id: string): Promise<RoleGrant[]> {

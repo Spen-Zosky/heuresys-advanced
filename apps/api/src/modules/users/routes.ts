@@ -110,6 +110,26 @@ export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
     },
   );
 
+  /* --- DELETE /v1/users/:id/purge (hard → revoca di creazione) ----- */
+  /* Distinta dalla soft di proposito: la cancellazione fisica NON è una
+     variante della disattivazione, è il rimedio all'utente creato per errore
+     (ADR-0037). Risponde 409 USER_HAS_HISTORY appena esiste una riga di storia
+     operativa, elencando quali tabelle la trattengono. */
+  app.delete(
+    "/:id/purge",
+    {
+      preHandler: [app.verifyCsrf, requirePermission("user:delete")],
+      schema: {
+        params: UserIdParamSchema,
+        response: { 204: EmptyResponseSchema },
+      },
+    },
+    async (req, reply) => {
+      await usersService.purge(actorFromReq(req), req.params.id);
+      reply.code(204).send({});
+    },
+  );
+
   /* --- GET /v1/users/:id/roles ------------------------------------- */
   app.get(
     "/:id/roles",

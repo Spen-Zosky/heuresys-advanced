@@ -264,6 +264,68 @@ quell'account: l'esenzione era diventata un **punto cieco**, ora si sorvegliano 
   propri incluso il divieto e la granularità) e `#143` la squadra come **progetto**, con il capo
   progetto che ha autorità sullo scopo e non sulle persone.
 
+## Delta S1055 (2026-08-12 → 13) — sei voci, e sei volte il difetto vero non era quello scritto
+
+**#183 DONE** — `ADR-0037` (cancellare una persona = anonimizzarla; la cancellazione fisica e'
+la *revoca di una creazione*), migrazione **`000304`**, rotta `DELETE /v1/users/:id/purge` col
+guard derivato dal catalogo a ogni chiamata. **Il difetto vero non era la cancellazione
+mancante** (esisteva: soft su `user_status` + erasure GDPR con anonimizzazione della radice) ma
+il **registro GDPR cieco su 27 FK di appartenenza su 71**: ferie, straordinari, obiettivi,
+sondaggi e squadre non entravano nel fascicolo dell'art. 15 ne' venivano toccati da una
+cancellazione. Registro da **56 a 83 righe** (14 RETAIN + 13 DELETE, ognuna con base giuridica).
+**Nessuna delle 262 FK toccata**: 0 utenti su 161 sono cancellabili, quindi convertire le
+RESTRICT avrebbe solo tolto la protezione. Il controllo anti-drift filtrava `sys.sys_user\_%` ed
+era **strutturalmente incapace di fallire** sulle 27; ora il predicato e' l'**appartenenza**
+(`confdeltype IN ('c','r','a')`, ogni schema), visto rosso coi 27 nomi e verde dopo. **Prova
+LIVE su produzione**: il fascicolo di `alberto.colombo@rtl-bank.org` contiene ora **77 righe che
+prima non ne facevano parte**.
+
+**#124 DONE (residuo)** — 6 superfici + 2 pagine. **Due fughe aritmetiche mai nominate**:
+`/v1/analytics/compensation` (lo scatter emette una riga per posizione, e **280 posizioni su 299
+hanno un solo titolare**: ogni punto E' la retribuzione di quella persona) e `/v1/org-health/`
+(`retention` e `performance` sono medie che su campione 1 restituiscono il punteggio individuale
+— le due dimensioni entrano come non disponibili e il composito si rinormalizza da se', con
+`effectiveWeight` a 0). Piu' quattro superfici per-persona, fra cui `assessments`, dove **312
+righe su 615** portavano `composite_score` dentro `metadata`, cioe' in un campo non tipizzato.
+Il canale **CSV** non passa dallo schema Zod: eredita la maschera perche' riusa il service —
+zero codice, ma una prova dedicata. **9 prove nuove**, ogni gruppo visto rosso a difetto iniettato.
+
+**#170 DONE** — gli attrezzi dell'ETL `brownfield` **archiviati, non cancellati**
+(`docs/archive/etl-brownfield-ritirato/`): il ritiro resta reversibile con un `git mv` e non
+serviva la conferma che una cancellazione avrebbe richiesto. Da **39 file a 0**. Scope
+sottostimato di oltre dieci volte (8 eseguibili, non 3, piu' un albero di seed, il template SDBI
+e il suo runbook, 6 seed di riconciliazione). **Il timer `heuresys-advanced-scraping` NON e'
+stato archiviato**: e' installato e **abilitato sulla VM**, nominava lo schema ritirato solo in
+un commento — spostarlo avrebbe spento la sonda settimanale della tassonomia ESCO.
+
+**#127 DONE** — `DIV-COMM`→**`DIV-CRED`**, `DIV-LEGAL`→**`DIR-COMPL`**, con `DIR-LEGAL` intatta
+e protetta da una guardia (sono unita' diverse con perimetri di riservatezza diversi). **Il
+register sbagliava**: dava 4 migrazioni «da non toccare», sono **7** e **nessuna** porta
+`@migrate: once`, quindi si ri-applicano a ogni deploy — lasciarle col codice vecchio rompeva la
+catena. E la rinomina a valle non bastava: su un database esistente `000250` gira **prima**, e
+cercava il codice nuovo su un dato ancora vecchio. La rinomina e' stata percio' spostata
+**dentro `000246`**, il file che crea le unita' (ADR-0035), e la migrazione a valle eliminata.
+Le **quattro decisioni di esecuzione** mai registrate stanno ora in §«Scostamenti accettati».
+**`X1b` era un falso positivo**: `marco.rinaldi` **guida una squadra**, e su 36 persone con
+`TEAM_LEADER` **zero** sono senza comando — la verifica cercava il comando solo fra i
+responsabili di unita'. Corretta la verifica, nessun ruolo revocato.
+
+**#148 misura riparata** — il diario delle chiusure portava `S?` su **84 righe su 96**, perche'
+nessuno dei due chiamanti reali esportava `HEURESYS_SESSION`: `report` raggruppa per sessione, e
+cinque giorni di chiusure finivano in un blocco unico. Ogni riga porta ora l'id di **corsa**, che
+non dipende da variabili da ricordare. La **decisione** sui quattro verbi resta datata 2026-08-20.
+
+**#79** eseguito: **73 tabelle scritte, 73 esposte, 0 scoperte** (erano 30 a S1034).
+
+**Metodo**: la prova generale (`ci-rehearsal.sh`) e' stata **rossa tre volte**, sempre su un
+difetto reale e sempre prima della produzione — inclusa una post-condizione **mia** che misurava
+tutto il registro GDPR invece delle proprie 27 righe. Il cancello di verifica ha prodotto un
+rosso **ambientale** (esaurimento del pool durante la corsa lunga: traccia su `pool.connect()`,
+mai su un'asserzione; il file passa 9/9 da solo) — nominato, non nascosto.
+
+**Conteggi ri-derivati**: **302 file migration** (max `000304`) = **302 applicate** · **233 file**
+di test API · **95 moduli** · utenti **161** · tenant ACTIVE **2** · registro GDPR **83 righe**.
+
 ## Scostamenti accettati fra l'organigramma progettato e quello costruito (RTL Bank)
 
 > **#127 B, registrati S1055 (2026-08-13).** Quattro scelte prese durante l'esecuzione della

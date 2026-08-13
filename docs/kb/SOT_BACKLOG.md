@@ -12,6 +12,18 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
+- **#186 Guardia lab: `psql -Atc` rifiutato e `psql -A -t -c` accettato — le opzioni brevi raggruppate non vengono sciolte** · status: ACTIVE
+  - priority: P2 · effort: ~20min (patch gia' scritta e collaudata) · doc: inbox lab-id 2026-08-12-guardia-psql-opzioni-raggruppate
+  - famiglia: quarta manifestazione di #121 (la guardia legge il testo invece del significato). Chiude UN caso, non la voce: restano SEGMENT_SPLIT (riga 366, spezza su | e ; senza sapere delle virgolette) e il `cd` iniziale non tracciato
+  - causa: `_check_psql` (session_mode.py:498-516) cerca il token ESATTO `-c`; `-Atc` non lo e', `sql_parts` resta vuoto e scatta il ramo «psql senza -c non e' ispezionabile». Stesso effetto su `-Atf`, che cade nel messaggio generico invece che nel divieto di `-f`
+  - natura: ATTRITO, non un varco — il ramo che scatta e' quello che CHIUDE, nessun SQL sfugge all'ispezione. Chi applica la patch deve verificare di non aprirne uno
+  - patch: gia' generata fuori dal repo in D:\heuresys-design-lab\artefatti\patch-guardia\ (copia intera + .diff, +45 righe, due hunk). Si rigenera con `py tools/patch_guardia_psql.py`
+  - prove: 64/64 verdetti IDENTICI sulla batteria `_cases()` del file stesso · 11/11 casi mirati (`-Atc "select 1"` passa; `-Atc "update…"`, `-Atc "delete…"`, `-ccreate table x`, `-Atf`, `psql -At` restano vietati) · falsificazione eseguita: con `_check_psql` sabotato il collaudo da' 7 guasti e uscita 1
+  - da-fare-anche: aggiungere i tre casi a `_cases()` nel repo (le righe sono nella consegna) e ri-eseguire `sh scripts/hooks/hook.sh selftest`
+  - trappola-per-chi-ripete-la-prova: `repo_root()` (riga 62) risale da `__file__` senza CLAUDE_PROJECT_DIR, quindi una copia fuori dal repo crede che il repo sia il lab e tre casi («rm nel repo», «redirezione», «sed -i») risultano falsamente aperti. Ancorare entrambi i moduli prima di caricarli
+  - chiuso-quando: `psql -Atc "select 1"` passa in sessione lab, `psql -Atc "update …"` no, e il selftest e' verde con i tre casi nuovi
+  - lab-id: 2026-08-12-guardia-psql-opzioni-raggruppate
+
 - **#183 Policy di cancellazione utente: la disattivazione esiste, la cancellazione no** · status: DONE
   - priority: P1 · effort: ~1 sessione (censimento gia' fatto; policy + implementazione + prova) · doc: `docs/superpowers/plans/2026-08-10-batch-p1-s1053.md` (scoperte fuori ciclo) + mig `000303` (censimento delle 262 FK)
   - mandato-Enzo (2026-08-10, S1053): «la voglio nel prossimo ciclo». Contesto misurato: anche dopo #168 (approvazioni SET NULL + tombstone), **9 FK RESTRICT + 1 NO ACTION** (presenze, ferie, saldi, assegnazioni posizione, audit self-service, audit MFA) bloccano la hard-DELETE di chiunque abbia storia operativa — `admin@heuresys.com` (mig 000295) e' passato solo perche' non ne aveva. La disattivazione (`sys_users` deactivated) esiste gia'

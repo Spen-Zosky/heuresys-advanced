@@ -1,32 +1,32 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-11 (S1054).
+**Updated**: 2026-08-13 (S1055).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-## Last session brief (S1054)
+## Last session brief (S1055)
 
-Sessione lunga in tre tempi. **Primo**: il freno del cancello di verifica è stato tolto, e nel
-farlo si è scoperto perché nessuno ci riusciva — il comando indicato per «rimettere il verdetto
-in pari» a working tree pulito **non esegue nulla** e scriveva `green`. Corretto (`not-measured` +
-`run --suite`), più le due voci nate lì (#184 il troncamento dichiarato, #185 la batteria che
-prova il cancello). **Secondo**: **#124 D4 chiuso su tutti i moduli** — l'intera classe EVALUATION maschera il
-giudizio al solo mandato piattaforma, con il frontend che dichiara ciò che non mostra. Tre reperti
-che valgono più del codice: la *spiegazione* di un punteggio è più rivelatrice del punteggio (e
-sconfinava in COMPENSATION), l'**ordine** di una lista è la graduatoria delle persone, e il
-**vincolo 5** sugli aggregati ha morso per la prima volta. **Terzo**: da una domanda di Enzo sulla
-velocità, il clone del linux-pc è stato riparato alla radice (#172) e la verifica lunga si sposta
-lì — **16 min contro 31**, misurato.
+Batch su mandato di Enzo — «#183 + #124 + tutto P2» — chiuso a **sei voci**, con un filo che
+le lega e che vale più del conteggio: **quasi ogni voce descriveva un difetto diverso da
+quello reale, e quasi sempre più piccolo**. Il piano è stato smentito dalla misura sei volte
+su sei, e ogni volta prima di eseguire, non dopo.
 
-**Coda della sessione, dopo la chiusura formale** (commit `9289a030`): su richiesta di Enzo la
-chiusura non finisce più dichiarando ma **leggendo dalle macchine** — `scripts/verifica-deploy.sh`,
-chiamato in coda a `close-propagate.sh`, confronta lo sha deployato su ogni host con quello atteso,
-conta le corse CI, controlla servizi e produzione, e dichiara con un vocabolario chiuso
-(DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · **NON-VERIFICATO**). Visto dire sì e dire no nello
-stesso pomeriggio: `IN-VOLO` subito dopo l'armamento, `DEPLOYATO` a CI conclusa. **Corretto poi un limite dichiarato da me e non scoperto da un guasto** (`41091231`): confrontava con `HEAD`, quindi un commit di sola documentazione — non armato apposta — faceva dire «0/2 host allineati». Ora il riferimento è `refs/heads/prod`, cioè *la decisione* di rilasciare, letta dal remoto; e lo scarto con `HEAD` viene dichiarato invece che taciuto.
+**#183** doveva aggiungere una cancellazione che già esisteva; il difetto vero era un
+registro GDPR **cieco su buona parte delle tabelle di appartenenza**, quindi ferie, obiettivi,
+sondaggi e squadre non entravano nel fascicolo dell'art. 15 né venivano toccati da una cancellazione —
+e il controllo anti-drift **non poteva accorgersene**, perché guardava solo le tabelle col
+prefisso `sys_user_`. **#124** dava per «il pezzo più grosso» un lavoro che misura zero: il
+volume vero erano **due fughe aritmetiche mai nominate**, uno scatter dove ogni punto è la
+retribuzione di una persona (280 posizioni su 299 hanno un solo titolare) e un indice dove il
+punteggio individuale si ricava invertendo la media. **#148** chiedeva di rileggere un
+rendiconto che non era leggibile: 84 righe su 96 non dicevano di quale chiusura parlassero.
+**#170** parlava di tre file, erano trentanove — e il timer che sembrava morto era **vivo e
+abilitato sulla VM**. **#127** dava per intoccabili sette migrazioni che invece si
+ri-applicano a ogni deploy, e il suo unico caso aperto era **un falso positivo della verifica**,
+non un difetto del dato: quella persona una squadra la guida.
 
-**Tre strumenti che dicevano verde senza aver misurato** sono stati trovati e corretti in questa
-sessione: il cancello a scrivania pulita, il typecheck di `apps/web` (leggeva il `dist` di
-`@heuresys/shared` fermo al 20 luglio) e il confronto del clone (contava righe, non oggetti).
+**Il metodo che ha retto**: prova generale prima della produzione (rossa **tre volte**, ogni
+volta su un difetto vero, incluso uno mio), e ogni prova nuova **vista fallire** con un
+difetto iniettato prima di essere creduta.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -35,31 +35,35 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-1. **#183 policy di cancellazione utente** (~1 sessione, **P1**) — mandato di Enzo del 2026-08-10,
-   **non iniziata** in S1054 nonostante fosse in programma: il ciclo si è allungato su #124 e sul
-   lavoro di infrastruttura richiesto in corsa. Censimento già in mig `000303`.
-2. **#124 residuo minimo**: resta la sola pagina `users/[userId]` del frontend (D6). D4 è chiuso per intero.
-3. **Le due leve di velocità NON adottate** (misurate, esiti nel `CLAUDE.md`): `isolate: false`
-   manda in rosso quasi tutti i file e richiederebbe di riscrivere `test/helpers/setup.ts`; le
-   sessioni di login condivise valgono molto meno di quanto il registro suppone.
-   Chi riprende il tema parta da lì, non da capo.
-4. **#99 F4** (resolver sull'albero delle unità) e **#92 passi 4-7** restano i due filoni P1 grossi.
+1. **Le dieci voci P2 non ancora fatte** del batch — piano-file vivo in
+   `docs/superpowers/plans/2026-08-12-batch-p1-p2-s1055.md`, con lo stato riga per riga e le
+   misure già raccolte per #147 e #159. **#121 e #128 toccano lo stesso file**
+   (`scripts/hooks/session_mode.py`): vanno in fila, mai in parallelo.
+2. **#147** — la chiave madre **è già propagata** (impronta identica sui tre computer dal
+   26 luglio: il register era stantio). Il residuo vero misurato sono le **email di persone
+   scritte a mano nei file di test di scope** (conteggi in `SOT_STATE`), con gli helper già
+   pronti che le derivano dal database.
+3. **#54 recruiting** resta fuori portata di una sessione singola (5-7): va tagliata a fasi
+   prima di entrare in un batch.
+4. Due voci aspettano **solo te** — vedi Open questions.
 
 ## Open questions
 
-- **#182 — i due rami recuperati** (473 righe mai in main): istruire e portare in main, o archiviare?
-- **Il ruolo di database `gov_worker`**: si revoca o resta? (read-only, lo script che lo creava non c'è più.)
-- **Un censimento che confronti le tre macchine** come ora fa il clone col database — vale ~1h e
-  chiuderebbe in modo permanente la domanda «sono equivalenti?». In S1054 la risposta è stata
-  data a mano: sì dove conta (PostgreSQL 16.14 su entrambi, Node 22 forzato), no altrove e **per
-  design** (servizi, chiavi in denylist).
+- **#135** — quale settore attribuire a **Heuresys**: il tenant dice consulenza direzionale,
+  la carta d'identità dice programmazione informatica, l'invariante I21 dice consulenza. La
+  parte tecnica è pronta, manca la scelta.
+- **#159** — **quale pagina** deve adottare per seconda il ponte dell'agente: è l'input di
+  #156, e senza non si può dichiarare chiusa la voce (il lavoro invece è eseguibile).
+- **#182** — i due rami recuperati (473 righe mai in main): istruire e portare in main, o
+  archiviare dichiarandolo?
+- **Il ruolo di database `gov_worker`**: si revoca o resta?
 
 ## Verification
 
 ```bash
-python docs/kb/tools/session_start.py                       # menu + salute, un giro
-python docs/kb/tools/verify_gate.py check                   # cancello di fine turno
-python scripts/test/verify-gate-tests.py                    # 12 prove: il cancello sa dire rosso?
-bash scripts/clone-vm-db.sh                                 # 70s — clone allineato per costruzione
-cd apps/api && pnpm exec tsx scripts/prova-live-124-d4.mts   # prova live #124, 15 endpoint
+python docs/kb/tools/session_start.py                        # menu + salute, un giro
+python docs/kb/tools/verify_gate.py check                    # cancello di fine turno
+bash scripts/close-log.sh report                             # rendiconto chiusure, ora leggibile
+ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh'   # prova generale, ~26s
+cd apps/api && pnpm exec tsx scripts/prova-live-183.mts https://www.heuresys.com/api
 ```

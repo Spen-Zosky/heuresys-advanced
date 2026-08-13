@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-12T23:30:30Z da docs/kb/tools/build_index.py
+# generato: 2026-08-13T01:21:53Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-12T23:30:30Z"
-  total_files: 2957
+  generated_at: "2026-08-13T01:21:53Z"
+  total_files: 2958
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -22,7 +22,7 @@ meta:
     db-other: 8
     db-script: 42
     db-seed: 113
-    doc-canonical: 623
+    doc-canonical: 624
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2399
+    live: 2400
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -8831,6 +8831,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md'
     root: repo
     rel: 'docs/archive/NEXT_SESSION_MVP_CLOSURE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\README.md'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/README.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

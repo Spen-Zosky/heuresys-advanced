@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-12T23:30:30Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2957**
+**Generato**: 2026-08-13T01:21:53Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2958**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 42 |
 | db-seed | 113 |
-| doc-canonical | 623 |
+| doc-canonical | 624 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 355 |
 | ux-design-archive | 80 |
 | web-source | 234 |
-| **TOTALE** | **2957** |
+| **TOTALE** | **2958** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2399 |
+| live | 2400 |
 
 ## File per categoria
 
@@ -1556,6 +1556,7 @@
 - `D:\heuresys-advanced\docs\archive\NEXT_GENERATION_ENTRY_POINT.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_2A.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\SDBI_RUNBOOK.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.sh` · *live* · git-tracked

@@ -237,6 +237,13 @@ def misura(session: str | None, override_window: int | None, cwd: Path | None = 
         "contesto": ultimo.contesto,
         "picco": picco,
         "residuo": max(0, window - ultimo.contesto),
+        # Il residuo che conta per decidere se APRIRE un lavoro: non quanto manca alla
+        # fine della finestra, ma quanto manca alla soglia che fa CHIUDERE la sessione.
+        # Erano confusi, e la confusione autorizzava lavori che sfondavano il 75%: con
+        # 136.875 token consumati, `--budget 700000` rispondeva «ci sta» mentre quel
+        # lavoro avrebbe portato il contesto all'84%. Uno strumento che dice si' oltre
+        # la propria soglia non e' prudente in ritardo, e' rotto (S1057).
+        "residuo_soglia": max(0, int(window * STOP_CONTESTO) - ultimo.contesto),
         "frazione": round(frazione, 4),
         "percento": round(frazione * 100, 1),
         "campioni": len(camp),
@@ -370,10 +377,15 @@ def stampa(m: dict, budget: int | None) -> int:
     print(f"  ritardo     {m['ritardo']}")
     print(f"  fonte       {m['transcript']}")
     if budget:
-        capiente = m["residuo"] >= budget
+        # Si misura contro la SOGLIA, non contro la fine della finestra: aprire un lavoro
+        # che arriva al 75% significa aprirlo sapendo che va interrotto a meta'.
+        capiente = m["residuo_soglia"] >= budget
         print("-" * 72)
-        print(f"  budget richiesto {budget:,} → {'CI STA' if capiente else 'NON CI STA'}"
-              f" (residuo {m['residuo']:,})")
+        print(f"  budget richiesto {budget:,} → {'CI STA' if capiente else 'NON CI STA'}")
+        print(f"  misurato contro il residuo FINO ALLA SOGLIA {int(STOP_CONTESTO*100)}%:"
+              f" {m['residuo_soglia']:,} token")
+        print(f"  (alla fine della finestra ne mancherebbero {m['residuo']:,}, ma quel"
+              " numero non autorizza niente: oltre la soglia si chiude)")
         print("=" * 72)
         return 0 if capiente else 2
     print("=" * 72)
@@ -454,6 +466,20 @@ def selftest() -> int:
         c = campiona(p)
         check("corrente = ultimo, non il picco", 50_001, c[-1].contesto)
         check("picco distinto dal corrente", 900_001, max(x.contesto for x in c))
+
+        # 3-bis — NEGATIVO: il budget si misura sulla SOGLIA, non sulla fine della
+        #     finestra. Nato da un difetto reale (S1057): con 136.875 token consumati su
+        #     un milione, `--budget 700000` rispondeva «ci sta» perche' guardava gli
+        #     863.125 che mancavano alla fine — mentre quel lavoro avrebbe portato il
+        #     contesto all'84%, ben oltre il 75% che fa chiudere. Il selftest era verde
+        #     29/29 con il difetto dentro: nessun caso guardava questo confine.
+        #     La prova sa fallire: rimettendo `residuo` al posto di `residuo_soglia` le
+        #     due righe qui sotto diventano rosse.
+        finta = {"finestra": 1_000_000, "contesto": 136_875}
+        soglia_res = max(0, int(finta["finestra"] * STOP_CONTESTO) - finta["contesto"])
+        check("residuo fino alla soglia 75%", 613_125, soglia_res)
+        check("un budget che sfonda la soglia e' rifiutato", False, soglia_res >= 700_000)
+        check("un budget che ci sta e' accettato", True, soglia_res >= 600_000)
 
         # 4 — NEGATIVO: modello sconosciuto NON deve spacciare una finestra come certa.
         w, ric = finestra_per("modello-che-non-esiste", None)
@@ -581,7 +607,7 @@ def main() -> int:
 
     if v["chiudi"]:
         return 3
-    if a.budget is not None and m.get("ok") and m["residuo"] < a.budget:
+    if a.budget is not None and m.get("ok") and m["residuo_soglia"] < a.budget:
         return 2
     return 0
 

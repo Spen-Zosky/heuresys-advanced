@@ -38,6 +38,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_menu  # noqa: E402
 import db_health  # noqa: E402
 import lab_inbox  # noqa: E402
+import programmi  # noqa: E402
 import status_dashboard  # noqa: E402
 
 try:
@@ -73,6 +74,16 @@ def main():
             lab = f"   ⚠ lab inbox non leggibile: {exc}"
         if lab:
             print("\n" + lab)
+        # Le voci che valgono piu' di una sessione non si chiudevano mai, perche' ogni
+        # sessione spendeva il suo contesto a ri-capire dove era arrivata la precedente.
+        # `.programmi/` tiene quello stato su disco; qui il boot lo stampa da se', cosi'
+        # nessuna sessione deve RICORDARSI di guardarlo. Muta se non c'e' niente di aperto.
+        try:
+            prog = programmi.riassunto()
+        except Exception as exc:  # una vista non puo' abbattere il boot
+            prog = f"   ⚠ programmi non leggibili: {exc}"
+        if prog:
+            print("\n" + prog)
         print()
         sys.argv = (["status_dashboard"]
                     + ([] if args.net else ["--no-net"])

@@ -133,13 +133,20 @@ class Campione:
 
 
 def slug_progetto(cwd: Path) -> str:
-    """`D:\\heuresys-advanced` -> `D--heuresys-advanced`, come fa Claude Code."""
+    """`D:\\heuresys-advanced` -> `D--heuresys-advanced`, come fa Claude Code.
+
+    Su Unix il trattino iniziale VA TENUTO: `/home/ubuntu` -> `-home-ubuntu`,
+    perche' nasce dallo slash iniziale del path. Verificato il 2026-08-13 contro
+    le directory reali di ~/.claude/projects (`-tmp`, `-home-ubuntu`,
+    `-home-ubuntu-heuresys-advanced`). Uno `.strip("-")` lo mangiava, e il ramo
+    "contesto" restava cieco su ogni macchina Linux e Mac.
+    """
     s = str(cwd.resolve())
     for ch in (":", "\\", "/", "."):
         s = s.replace(ch, "-")
     while "---" in s:
         s = s.replace("---", "--")
-    return s.strip("-") if not s.startswith("D--") else s
+    return s
 
 
 def dir_transcript(cwd: Path | None = None) -> Path:

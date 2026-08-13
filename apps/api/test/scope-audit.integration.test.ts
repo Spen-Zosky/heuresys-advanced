@@ -17,6 +17,15 @@ import {
 import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 import type { ActorContext } from "../src/lib/actor.js";
 import type { RoleCode } from "../src/config/constants.js";
+import { attoriDiScena } from "./helpers/attori-di-scena.js";
+/**
+ * I cinque ruoli di scena, derivati dal dato di oggi invece che scritti a mano (#147).
+ * Non sono cinque persone: sono cinque CARATTERISTICHE, e ognuna e' verificata alla
+ * risoluzione — se domani non esiste piu' un capo con sottoposti, questo file si ferma
+ * dicendo cosa manca, invece di misurare un caso limite in silenzio.
+ */
+const ATTORI = await attoriDiScena();
+
 
 async function actorFor(email: string): Promise<ActorContext> {
   const u = (
@@ -53,9 +62,9 @@ describe("scope/audit — the authorizing axis is recorded (F6, ADR-0027)", () =
 
   beforeAll(async () => {
     [admin, federica, paolo] = await Promise.all([
-      actorFor("enzo.spenuso@heuresys.com"),
-      actorFor("federica.marchetti@rtl-bank.org"),
-      actorFor("paolo.caputo@rtl-bank.org"),
+      actorFor(ATTORI.piattaforma.email),
+      actorFor(ATTORI.hr.email),
+      actorFor(ATTORI.capo.email),
     ]);
     // [S1045] Riporto ed estraneo derivati dall'albero delle unita': i due nomi fissi
     // di prima descrivevano l'organigramma precedente alla ricostruzione, dove i loro

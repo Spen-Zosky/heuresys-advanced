@@ -35,11 +35,11 @@
  *
  * Real RTL personas (password <TEST_ADMIN_PASSWORD>) + their real org relationships (verified live against
  * the reports-to chain in sys.sys_positions / sys.sys_user_position_assignments):
- *   - paolo.caputo@rtl-bank.org       MANAGER        → org sub-tree; tommaso IS in his sub-tree
- *   - tommaso.fiore@rtl-bank.org      USER           → IN paolo's sub-tree (report); self-only role
- *   - antonio.parisi@rtl-bank.org     USER           → OUTSIDER (peer, I19 — NOT in the sub-tree)
- *   - federica.marchetti@rtl-bank.org TENANT_ADMIN   → HR-mandated, tenant-wide (I20)
- *   - enzo.spenuso@heuresys.com              PLATFORM_ADMIN → cross-tenant (sanity)
+ *   - il capo (ATTORI.capo)       MANAGER        → org sub-tree; tommaso IS in his sub-tree
+ *   - il sottoposto (ATTORI.sottoposto)      USER           → IN paolo's sub-tree (report); self-only role
+ *   - l'estraneo (ATTORI.estraneo)     USER           → OUTSIDER (peer, I19 — NOT in the sub-tree)
+ *   - il mandato HR (ATTORI.hr) TENANT_ADMIN   → HR-mandated, tenant-wide (I20)
+ *   - la piattaforma (ATTORI.piattaforma)              PLATFORM_ADMIN → cross-tenant (sanity)
  *
  * `matching:read` is held by plain USERs too (a self-only USER hitting a peer gets 404, not 403 —
  * the route permission passes, the service self-only ladder blocks), so the self-floor below is a
@@ -52,6 +52,15 @@ import { loginRaw } from "./helpers/login.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { pool } from "../src/db/client.js";
 import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
+import { attoriDiScena } from "./helpers/attori-di-scena.js";
+/**
+ * I cinque ruoli di scena, derivati dal dato di oggi invece che scritti a mano (#147).
+ * Non sono cinque persone: sono cinque CARATTERISTICHE, e ognuna e' verificata alla
+ * risoluzione — se domani non esiste piu' un capo con sottoposti, questo file si ferma
+ * dicendo cosa manca, invece di misurare un caso limite in silenzio.
+ */
+const ATTORI = await attoriDiScena();
+
 
 const PWD = TEST_PERSONA_PASSWORD;
 
@@ -93,7 +102,7 @@ let admin: S; // PLATFORM_ADMIN — cross-tenant
 describe("/v1/matching — F3 org-axis isolation (ADR-0027, D-50)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    paolo = await login(suite, "paolo.caputo@rtl-bank.org");
+    paolo = await login(suite, ATTORI.capo.email);
     // [S1045] Il sottoposto e l'estraneo non sono piu' due nomi scritti a mano:
     // li sceglie l'albero delle unita' di oggi (helpers/org-actors.ts). La
     // ricostruzione aveva INVERTITO i due ruoli, e i nomi fissi descrivevano
@@ -102,8 +111,8 @@ describe("/v1/matching — F3 org-axis isolation (ADR-0027, D-50)", () => {
     const estraneo = await unEstraneoOrganizzativo(pool, paolo.userId);
     tommaso = await login(suite, sottoposto.email);
     antonio = await login(suite, estraneo.email);
-    federica = await login(suite, "federica.marchetti@rtl-bank.org");
-    admin = await login(suite, "enzo.spenuso@heuresys.com");
+    federica = await login(suite, ATTORI.hr.email);
+    admin = await login(suite, ATTORI.piattaforma.email);
   });
 
   afterAll(async () => {

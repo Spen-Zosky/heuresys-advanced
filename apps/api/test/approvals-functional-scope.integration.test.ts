@@ -32,6 +32,15 @@ import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { idDi, unMembroDiSquadra, unFuoriSquadra } from "./helpers/org-actors.js";
+import { attoriDiScena } from "./helpers/attori-di-scena.js";
+/**
+ * I cinque ruoli di scena, derivati dal dato di oggi invece che scritti a mano (#147).
+ * Non sono cinque persone: sono cinque CARATTERISTICHE, e ognuna e' verificata alla
+ * risoluzione — se domani non esiste piu' un capo con sottoposti, questo file si ferma
+ * dicendo cosa manca, invece di misurare un caso limite in silenzio.
+ */
+const ATTORI = await attoriDiScena();
+
 
 const PWD = TEST_PERSONA_PASSWORD;
 const TAG = `FXSCOPE-${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -90,15 +99,15 @@ describe("ADR-0027 F4 — approvals are gated by the FUNCTIONAL axis", () => {
 
   beforeAll(async () => {
     suite = await buildTestApp();
-    paolo = await login(suite, "paolo.caputo@rtl-bank.org");
-    federica = await login(suite, "federica.marchetti@rtl-bank.org");
+    paolo = await login(suite, ATTORI.capo.email);
+    federica = await login(suite, ATTORI.hr.email);
     // [S1043] Sottoposto ed estraneo derivati dall'albero delle UNITA': la
     // ricostruzione dell'organigramma ha invertito i ruoli dei due indirizzi che
     // stavano qui. Vedi helpers/org-actors.ts.
     // ASSE FUNZIONALE, non organizzativo: qui «dentro» e «fuori» si misurano
     // sull'appartenenza a una SQUADRA guidata da paolo. Al primo tentativo avevo
     // usato l'asse gerarchico e il test falliva per la ragione sbagliata.
-    const paoloOrg = await idDi(pool, "paolo.caputo@rtl-bank.org");
+    const paoloOrg = await idDi(pool, ATTORI.capo.email);
     const sottoposto = await unMembroDiSquadra(pool, paoloOrg);
     const estraneo = await unFuoriSquadra(pool, paoloOrg);
     tommasoId = sottoposto.userId;

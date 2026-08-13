@@ -31,16 +31,25 @@ import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
+import { attoriDiScena } from "./helpers/attori-di-scena.js";
+/**
+ * I cinque ruoli di scena, derivati dal dato di oggi invece che scritti a mano (#147).
+ * Non sono cinque persone: sono cinque CARATTERISTICHE, e ognuna e' verificata alla
+ * risoluzione — se domani non esiste piu' un capo con sottoposti, questo file si ferma
+ * dicendo cosa manca, invece di misurare un caso limite in silenzio.
+ */
+const ATTORI = await attoriDiScena();
+
 
 const PWD = TEST_PERSONA_PASSWORD;
 const FIXTURE_MODEL_VERSION = "f3-scope-fixture"; // marker → precise afterAll cleanup
 
 const EMAILS = {
-  admin: "enzo.spenuso@heuresys.com",
-  federica: "federica.marchetti@rtl-bank.org",
-  paolo: "paolo.caputo@rtl-bank.org",
-  tommaso: "tommaso.fiore@rtl-bank.org",
-  antonio: "antonio.parisi@rtl-bank.org",
+  admin: ATTORI.piattaforma.email,
+  federica: ATTORI.hr.email,
+  paolo: ATTORI.capo.email,
+  tommaso: ATTORI.sottoposto.email,
+  antonio: ATTORI.estraneo.email,
 } as const;
 
 interface Session {

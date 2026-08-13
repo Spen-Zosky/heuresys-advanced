@@ -28,11 +28,11 @@
  * Real RTL personas (password <TEST_ADMIN_PASSWORD>) + their real org relationships (the same
  * reports-to chain the sibling F3 suites verify — paolo's transitive sub-tree contains
  * tommaso and NOT antonio):
- *   - paolo.caputo@rtl-bank.org       MANAGER       → org sub-tree; tommaso is his report
- *   - tommaso.fiore@rtl-bank.org      USER          → IN paolo's sub-tree (report)
- *   - antonio.parisi@rtl-bank.org     USER          → OUTSIDER (peer, I19 — not in the sub-tree)
- *   - federica.marchetti@rtl-bank.org TENANT_ADMIN  → HR-mandated, tenant-wide (I20)
- *   - enzo.spenuso@heuresys.com              PLATFORM_ADMIN → cross-tenant (sanity)
+ *   - il capo (ATTORI.capo)       MANAGER       → org sub-tree; tommaso is his report
+ *   - il sottoposto (ATTORI.sottoposto)      USER          → IN paolo's sub-tree (report)
+ *   - l'estraneo (ATTORI.estraneo)     USER          → OUTSIDER (peer, I19 — not in the sub-tree)
+ *   - il mandato HR (ATTORI.hr) TENANT_ADMIN  → HR-mandated, tenant-wide (I20)
+ *   - la piattaforma (ATTORI.piattaforma)              PLATFORM_ADMIN → cross-tenant (sanity)
  *
  * `predictions:read` is held by BLUEPRINT_MANAGER / HRMS_MANAGER / MANAGER / PLATFORM_ADMIN /
  * PROCESS_OWNER / TENANT_ADMIN. A plain USER (tommaso/antonio) has NO predictions:read at all —
@@ -47,6 +47,15 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
+import { attoriDiScena } from "./helpers/attori-di-scena.js";
+/**
+ * I cinque ruoli di scena, derivati dal dato di oggi invece che scritti a mano (#147).
+ * Non sono cinque persone: sono cinque CARATTERISTICHE, e ognuna e' verificata alla
+ * risoluzione — se domani non esiste piu' un capo con sottoposti, questo file si ferma
+ * dicendo cosa manca, invece di misurare un caso limite in silenzio.
+ */
+const ATTORI = await attoriDiScena();
+
 
 const PWD = TEST_PERSONA_PASSWORD;
 const SUITE_PREFIX = `IT_PREDSCOPE_${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -101,7 +110,7 @@ let antonioPredictionId: string; // subject = antonio (outsider) → paolo MUST 
 describe("/v1/predictions — F3 org-axis isolation (ADR-0027, D-50)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    paolo = await login(suite, "paolo.caputo@rtl-bank.org");
+    paolo = await login(suite, ATTORI.capo.email);
     // [S1045] Il sottoposto e l'estraneo non sono piu' due nomi scritti a mano:
     // li sceglie l'albero delle unita' di oggi (helpers/org-actors.ts). La
     // ricostruzione aveva INVERTITO i due ruoli, e i nomi fissi descrivevano
@@ -110,8 +119,8 @@ describe("/v1/predictions — F3 org-axis isolation (ADR-0027, D-50)", () => {
     const estraneo = await unEstraneoOrganizzativo(pool, paolo.userId);
     tommaso = await login(suite, sottoposto.email);
     antonio = await login(suite, estraneo.email);
-    federica = await login(suite, "federica.marchetti@rtl-bank.org");
-    admin = await login(suite, "enzo.spenuso@heuresys.com");
+    federica = await login(suite, ATTORI.hr.email);
+    admin = await login(suite, ATTORI.piattaforma.email);
 
     // Deterministic fixtures (self-contained; do not rely on pre-existing seed rows).
     tommasoPredictionId = await seedPrediction(tommaso.userId);

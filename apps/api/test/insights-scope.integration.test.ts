@@ -33,11 +33,11 @@
  * (outsider rows absent / outsider get-by-id blocked), per Enzo's rule.
  *
  * Real RTL personas (password <TEST_ADMIN_PASSWORD>) + their real org relationships:
- *   - paolo.caputo@rtl-bank.org       MANAGER (+PROCESS_OWNER fixture) → org sub-tree; tommaso is his report
- *   - tommaso.fiore@rtl-bank.org      USER          → IN paolo's sub-tree (report); no insights:view
- *   - antonio.parisi@rtl-bank.org     USER          → OUTSIDER (peer, I19 — not in the sub-tree)
- *   - federica.marchetti@rtl-bank.org TENANT_ADMIN  → HR-mandated, tenant-wide (I20)
- *   - enzo.spenuso@heuresys.com              PLATFORM_ADMIN → cross-tenant (sanity)
+ *   - il capo (ATTORI.capo)       MANAGER (+PROCESS_OWNER fixture) → org sub-tree; tommaso is his report
+ *   - il sottoposto (ATTORI.sottoposto)      USER          → IN paolo's sub-tree (report); no insights:view
+ *   - l'estraneo (ATTORI.estraneo)     USER          → OUTSIDER (peer, I19 — not in the sub-tree)
+ *   - il mandato HR (ATTORI.hr) TENANT_ADMIN  → HR-mandated, tenant-wide (I20)
+ *   - la piattaforma (ATTORI.piattaforma)              PLATFORM_ADMIN → cross-tenant (sanity)
  *
  * insights:view is admin/manager-only (D-6, no ESS self-view). A plain USER (tommaso/antonio)
  * has NO insights:view at all — the strongest self-floor: no cross-user read surface exists for
@@ -50,6 +50,15 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
+import { attoriDiScena } from "./helpers/attori-di-scena.js";
+/**
+ * I cinque ruoli di scena, derivati dal dato di oggi invece che scritti a mano (#147).
+ * Non sono cinque persone: sono cinque CARATTERISTICHE, e ognuna e' verificata alla
+ * risoluzione — se domani non esiste piu' un capo con sottoposti, questo file si ferma
+ * dicendo cosa manca, invece di misurare un caso limite in silenzio.
+ */
+const ATTORI = await attoriDiScena();
+
 
 const PWD = TEST_PERSONA_PASSWORD;
 
@@ -129,7 +138,7 @@ describe("/v1/insights — F3 org-axis isolation (ADR-0027, D-50)", () => {
     // afterAll. Idempotent: any leftover PROCESS_OWNER grant for paolo is cleared first.
     const pr = await pool.query<{ user_id: string; user_tenant_id: string }>(
       `SELECT user_id, user_tenant_id FROM sys.sys_users WHERE lower(user_email) = lower($1)`,
-      ["paolo.caputo@rtl-bank.org"],
+      [ATTORI.capo.email],
     );
     const paoloRow = pr.rows[0]!;
     await pool.query(
@@ -147,7 +156,7 @@ describe("/v1/insights — F3 org-axis isolation (ADR-0027, D-50)", () => {
     );
     processOwnerGrantId = grant.rows[0]!.id;
 
-    paolo = await login(suite, "paolo.caputo@rtl-bank.org");
+    paolo = await login(suite, ATTORI.capo.email);
     // [S1045] Il sottoposto e l'estraneo non sono piu' due nomi scritti a mano:
     // li sceglie l'albero delle unita' di oggi (helpers/org-actors.ts). La
     // ricostruzione aveva INVERTITO i due ruoli, e i nomi fissi descrivevano
@@ -156,8 +165,8 @@ describe("/v1/insights — F3 org-axis isolation (ADR-0027, D-50)", () => {
     const estraneo = await unEstraneoOrganizzativo(pool, paolo.userId);
     tommaso = await login(suite, sottoposto.email);
     antonio = await login(suite, estraneo.email);
-    federica = await login(suite, "federica.marchetti@rtl-bank.org");
-    admin = await login(suite, "enzo.spenuso@heuresys.com");
+    federica = await login(suite, ATTORI.hr.email);
+    admin = await login(suite, ATTORI.piattaforma.email);
 
     // Guarantee derived rows exist for the whole active population (tommaso + antonio incl.)
     // so the positive/anti-leak assertions have real subjects. Flight-risk is the primary

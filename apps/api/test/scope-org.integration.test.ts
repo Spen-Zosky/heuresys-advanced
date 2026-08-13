@@ -24,6 +24,15 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { pool } from "../src/db/client.js";
 import { orgSubtreeUserIds, orgAncestorUserIds, isInOrgSubtree } from "../src/lib/scope/org.js";
 import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
+import { attoriDiScena } from "./helpers/attori-di-scena.js";
+/**
+ * I cinque ruoli di scena, derivati dal dato di oggi invece che scritti a mano (#147).
+ * Non sono cinque persone: sono cinque CARATTERISTICHE, e ognuna e' verificata alla
+ * risoluzione — se domani non esiste piu' un capo con sottoposti, questo file si ferma
+ * dicendo cosa manca, invece di misurare un caso limite in silenzio.
+ */
+const ATTORI = await attoriDiScena();
+
 
 async function uid(email: string): Promise<string> {
   const r = await pool.query<{ id: string }>(
@@ -43,8 +52,8 @@ describe("scope/org — organizational axis (F0, ADR-0027)", () => {
 
   beforeAll(async () => {
     [federica, paolo] = await Promise.all([
-      uid("federica.marchetti@rtl-bank.org"),
-      uid("paolo.caputo@rtl-bank.org"),
+      uid(ATTORI.hr.email),
+      uid(ATTORI.capo.email),
     ]);
     // `tommaso` = un sottoposto vero, `antonio` = un estraneo vero. I nomi delle
     // variabili restano per non riscrivere ogni asserzione, ma le persone non sono

@@ -375,6 +375,93 @@ export async function unManagerConPosizioniAttive(pool: Pool): Promise<Attore> {
   return a;
 }
 
+/**
+ * IL CAPO delle verifiche di scope: un MANAGER che, secondo l'albero delle UNITÀ,
+ * ha davvero almeno un sottoposto senza mandato proprio.
+ *
+ * Perché non basta `unManagerConPosizioniAttive` (#147, S1056). Quella garantisce che
+ * il manager POSSIEDA una posizione attiva — che è ciò che serve allo scope TEAM del
+ * cruscotto. Le verifiche di scope organizzativo chiedono un'altra cosa: che esista
+ * qualcuno DENTRO la sua unità da leggere. Sono due caratteristiche diverse, e darle
+ * per equivalenti è come dare per scontato un nome: la stessa classe di difetto.
+ *
+ * La condizione si verifica QUI, non si spera: il candidato è scelto solo se
+ * l'universo dei suoi sottoposti — con gli stessi identici criteri di
+ * `unSottopostoOrganizzativo` — non è vuoto. Così una verifica non può nascere cieca.
+ *
+ * Deterministico (`ORDER BY email LIMIT 1`): due chiamate nello stesso file
+ * restituiscono la stessa persona, altrimenti il sottoposto e l'estraneo verrebbero
+ * calcolati rispetto a due capi diversi.
+ *
+ * Lancia con un messaggio che dice cosa manca, invece di lasciar fallire il login.
+ */
+export async function unCapoConSottoposti(pool: Pool): Promise<Attore> {
+  const r = await pool.query<Attore>(
+    `SELECT u.user_id AS "userId", u.user_email AS email
+       FROM sys.sys_users u
+       JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+        AND ur.user_auth_role_revoked_at IS NULL
+       JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+      WHERE r.auth_role_code = 'MANAGER'
+        AND u.user_status = 'ACTIVE'
+        -- Niente mandato HR o di piattaforma: quelli leggono per tenant o
+        -- cross-tenant, quindi non proverebbero l'asse ORGANIZZATIVO ma un altro.
+        --
+        -- $2, NON $1. I due elenchi sono diversi e confonderli svuota la query per
+        -- costruzione: RUOLI_CON_MANDATO contiene anche MANAGER, quindi usarlo qui
+        -- chiederebbe un manager che non e' un manager. E' successo scrivendo questa
+        -- funzione, e l'ha detto la sua stessa guardia invece di restituire la
+        -- persona sbagliata in silenzio.
+        -- (Nessun apice inverso in questo commento: sta DENTRO un template literal,
+        --  e uno solo di essi chiuderebbe la stringa. E' successo anche questo.)
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_user_auth_roles u2
+                          JOIN sys.sys_auth_roles r2 ON r2.auth_role_id = u2.user_auth_role_role_id
+                         WHERE u2.user_auth_role_user_id = u.user_id
+                           AND u2.user_auth_role_revoked_at IS NULL
+                           AND r2.auth_role_code = ANY($2::text[]))
+        ${PUO_ENTRARE}
+        -- LA CONDIZIONE CHE CONTA: esiste almeno un sottoposto, con gli stessi
+        -- criteri di unSottopostoOrganizzativo. Senza, il test nascerebbe cieco.
+        AND EXISTS (
+          WITH RECURSIVE sue(unita) AS (
+            SELECT organization_unit_id FROM sys.sys_organization_units
+             WHERE organization_unit_manager_user_id = u.user_id AND organization_unit_is_active
+            UNION
+            SELECT o.organization_unit_id FROM sys.sys_organization_units o
+              JOIN sue ON o.organization_unit_parent_id = sue.unita
+             WHERE o.organization_unit_is_active)
+          SELECT 1
+            FROM sue
+            JOIN sys.sys_positions p ON p.position_organization_unit_id = sue.unita
+            JOIN sys.sys_user_position_assignments a
+              ON a.user_position_assignment_position_id = p.position_id
+             AND a.user_position_assignment_status = 'ACTIVE'
+            JOIN sys.sys_users s ON s.user_id = a.user_position_assignment_user_id
+           WHERE s.user_id <> u.user_id
+             AND s.user_tenant_id = u.user_tenant_id
+             AND NOT EXISTS (SELECT 1 FROM sys.sys_user_auth_roles s2
+                               JOIN sys.sys_auth_roles sr ON sr.auth_role_id = s2.user_auth_role_role_id
+                              WHERE s2.user_auth_role_user_id = s.user_id
+                                AND s2.user_auth_role_revoked_at IS NULL
+                                AND sr.auth_role_code = ANY($1::text[]))
+             AND NOT EXISTS (SELECT 1 FROM sys.sys_organization_units so
+                              WHERE so.organization_unit_manager_user_id = s.user_id
+                                AND so.organization_unit_is_active))
+      ORDER BY u.user_email
+      LIMIT 1`,
+    [RUOLI_CON_MANDATO, [...HR_MANDATED_ROLES, "PLATFORM_ADMIN", "CEO"]],
+  );
+  const a = r.rows[0];
+  if (!a) {
+    throw new Error(
+      "nessun MANAGER dirige un'unita' con almeno un sottoposto senza mandato: le verifiche " +
+        "di scope organizzativo non sono misurabili su questo dato — indagare l'albero delle " +
+        "unita' (organization_unit_manager_user_id), non adeguare il test",
+    );
+  }
+  return a;
+}
+
 /** L'id di una persona dal suo indirizzo. Lancia se non esiste: una fixture assente
  *  deve fermare il test, non farlo passare su `undefined`. */
 export async function idDi(pool: Pool, email: string): Promise<string> {

@@ -15,10 +15,10 @@
  * asserts both halves for every member of it: activities granted, sensitive denied.
  *
  * Real personas + their real relationships (verified live, not assumed):
- *   - paolo.caputo@rtl-bank.org    MANAGER, LEAD of DIV-CRED/DIR-CORP/DIR-CREDITI/UFF-CRED-*
- *   - tommaso.fiore@rtl-bank.org   MEMBER of DIV-CRED **and** paolo's org report → both axes
- *   - antonio.parisi@rtl-bank.org  MEMBER of DIV-CFO (marco.rinaldi's team) → neither axis
- *   - federica.marchetti@rtl-bank.org TENANT_ADMIN → HR mandate, tenant-wide
+ *   - il capo (ATTORI.capo)    MANAGER, LEAD of DIV-CRED/DIR-CORP/DIR-CREDITI/UFF-CRED-*
+ *   - il sottoposto (ATTORI.sottoposto)   MEMBER of DIV-CRED **and** paolo's org report → both axes
+ *   - l'estraneo (ATTORI.estraneo)  MEMBER of DIV-CFO (marco.rinaldi's team) → neither axis
+ *   - il mandato HR (ATTORI.hr) TENANT_ADMIN → HR mandate, tenant-wide
  *
  * Fixtures (process participants) are created here and rolled back by the file transaction
  * (D-52), so the shared DB is left untouched.
@@ -31,6 +31,15 @@ import { functionalScopeUserIds, isFunctionalLeader, isInFunctionalScope } from 
 import { orgSubtreeUserIds, isInOrgSubtree } from "../src/lib/scope/org.js";
 import { resolveActivityScope, resolveOrgReadScope } from "../src/lib/scope/resolver.js";
 import { unMembroDiSquadra, unEstraneoAEntrambiGliAssi } from "./helpers/org-actors.js";
+import { attoriDiScena } from "./helpers/attori-di-scena.js";
+/**
+ * I cinque ruoli di scena, derivati dal dato di oggi invece che scritti a mano (#147).
+ * Non sono cinque persone: sono cinque CARATTERISTICHE, e ognuna e' verificata alla
+ * risoluzione — se domani non esiste piu' un capo con sottoposti, questo file si ferma
+ * dicendo cosa manca, invece di misurare un caso limite in silenzio.
+ */
+const ATTORI = await attoriDiScena();
+
 
 /**
  * [S1045] Restano nominati solo i due che il test usa per il RUOLO ISTITUZIONALE:
@@ -42,8 +51,8 @@ import { unMembroDiSquadra, unEstraneoAEntrambiGliAssi } from "./helpers/org-act
  * risposta era gia' «sì» prima di crearla.
  */
 const EMAILS = {
-  paolo: "paolo.caputo@rtl-bank.org",
-  federica: "federica.marchetti@rtl-bank.org",
+  paolo: ATTORI.capo.email,
+  federica: ATTORI.hr.email,
 } as const;
 
 type Attori = keyof typeof EMAILS | "tommaso" | "antonio";

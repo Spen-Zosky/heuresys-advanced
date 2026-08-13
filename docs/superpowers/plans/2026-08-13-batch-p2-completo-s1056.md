@@ -89,14 +89,14 @@ decrescente: massimizza il numero di righe che spariscono.
 | **F3** | #124 — dichiarare la chiusura nel register | evidenza dei commit + verifica live | ~15min | ✅ **FATTO** `989bd1b0` — il lavoro era in main dal 12 agosto, **il register era l'unica cosa rimasta indietro** e teneva una voce P1 nel menu con dentro zero lavoro. Verifica live prima di dichiarare: **47 test su 10 file, exit 0** |
 | **F4** | #135 — vincoli su `tenant_industry_code` | FK/CHECK in migrazione + prova generale | ~45min | ✅ **FATTO** `27b16cab`, mig `000305` — catalogo `sys_industry_codes` (aperto per I21) + NOT NULL + FK + **sentinella** `v_tenant_industry_incoerente`, che `db_health.py` ha raccolto **da sola** (15 → 16). Guardia, sentinella, post-condizione e 7 vincoli **visti fallire** su copia usa-e-getta; live in produzione, sentinella a zero |
 | **F5** | #147 — 138 email cablate in 20 file | zero email letterali, helper dal DB, test verdi | ~1-2h | ✅ **FATTO** `5d02df8f` — **due condizioni su tre erano già vere** (chiave madre con impronta identica sulle 3 macchine, suite auth 92 test verdi): il register era stantio. Il residuo vero erano 138 email in 20 file, ora **0**. `attori-di-scena.ts` deriva i 5 ruoli e li memoizza; `unCapoConSottoposti` **verifica** il sottoposto invece di sperarlo. **156 test di scope verdi**; sabotaggio → exit 1 col messaggio che dice cosa manca. Reperto: `paolo.caputo`, il capo di 14 file, ha **5 posizioni tutte inattive** |
-| **F6** | #121 — guardia lab rifiuta letture | 6 casi di regressione verdi | ~2h | ⏳ |
-| **F7** | #128 — storia completa delle sessioni | `hook.sh storico` + selftest | ~2h | ⏳ |
-| **F8** | #125 — 22 pagine orfane + 52 etichette | nessuna pagina senza voce né motivo | ~2-3h | ⏳ |
-| **F9** | #126 — le 4 tabelle di L7 | login reale vede le proprie predizioni | ~3-4h | ⏳ |
-| **F10** | #123 — organigramma-bis → correzioni | `verifica_incrociata.py` universi ≠ 0 | ~1 sess | ⏳ |
-| **F11** | #117 — completezza portale personale | strumento ri-eseguibile, 3 categorie | ~1 sess | ⏳ |
-| **F12** | #159 — ponte assistente, tutte le schede idonee | criterio di idoneità + scheda persona live | ~3h+ | ⏳ |
-| **F13** | #79 — cancello di esposizione ri-eseguito | `check_exposure.py` exit 0 | ~10min | ⏳ chiusura |
+| **F6** | #121 — guardia lab rifiuta letture | 6 casi di regressione verdi | ~2h | ✅ **FATTO** `e2c1e626` — parser consapevole delle virgolette + corpi heredoc esclusi + `cd` tracciato. **Terza causa trovata eseguendo**: `shlex` POSIX mangia la barra rovesciata, quindi `D:\…` smetteva di essere assoluto. Selftest **99/0** (erano 88), con **5 rovesci** accanto ai 6 casi. Falsificazione **dentro il repo** (fuori la trappola di `repo_root()` maschera tutto): 5 sabotaggi, ognuno preso dai casi giusti |
+| **F7** | #128 — storia completa delle sessioni | `hook.sh storico` + selftest | ~2h | ✅ **FATTO** `1283969a` — `gc` non è più automatica, le sessioni senza comando **esistono** (sempre canonical, mai lab), il marcatore porta un segno di vita, `hook.sh storico` elenca 30 sessioni. Selftest **112/0**. **La prima stesura delle prove non poteva fallire**: simulava il gancio invece di chiamarlo, e 3 sabotaggi su 5 passavano |
+| **F8** | #125 — 22 pagine orfane + 52 etichette | nessuna pagina senza voce né motivo | ~2-3h | ✅ **FATTO** `087db34e`, mig `000306` + cancello `check_pagine_orfane.py`. **Raggiungibilità misurata**: 9 erano già collegate, 13 no — e 10 erano pagine che **I17 garantisce a ogni persona**. Etichette da **1** a **64 su 64**. Cancello visto rosso (12) e verde (0); senza DB esce **2 = non misurabile**. Tre difetti miei colti dalla prova generale, incluso un `ON CONFLICT` che non proteggeva nulla e al secondo deploy avrebbe raddoppiato le etichette |
+| **F9** | #126 — le 4 tabelle di L7 | login reale vede le proprie predizioni | ~3-4h | ⛔ **NON APERTA — dichiarato, non scoperto a fine ciclo**. È a piena pila (2 endpoint + schemi + test + superficie web con login reale): con 218k residui l'avrei lasciata a metà. **Il suo lavoro è però già schedato dentro il cancello di #117**, categoria «decisa, da costruire» |
+| **F10** | #123 — organigramma-bis → correzioni | `verifica_incrociata.py` universi ≠ 0 | ~1 sess | ⛔ **NON APERTA**: la consegna è *leggere un documento intero e ricavarne le correzioni* — aperta per costruzione, non tagliabile a fette |
+| **F11** | #117 — completezza portale personale | strumento ri-eseguibile, 3 categorie | ~1 sess | ✅ **FATTO** `3753ed93` — `check_completezza_self.py`, **cinque** esiti invece di tre. 109 tabelle → 71 raggiungibili · 3 tramite il padre · 5 escluse · 2 decise-da-costruire · **28 scoperte**. **Due falsi verdi miei**, colti provando: la regola sul padre era circolare (FK verso `sys_users`), e il portale compone 11 altri moduli. Senza i padri universali lo strumento esce **0 con 0 scoperte** |
+| **F12** | #159 — ponte assistente, tutte le schede idonee | criterio di idoneità + scheda persona live | ~3h+ | ⛔ **NON APERTA**: il bersaglio è cresciuto (tutte le schede idonee, non una), e va prima definito cosa rende idonea una scheda |
+| **F13** | #79 — cancello di esposizione ri-eseguito | `check_exposure.py` exit 0 | ~10min | ✅ **FATTO** — 73 tabelle scritte, 73 esposte, **0 scoperte**, exit 0. Insieme a lui: pagine orfane 0 · salute DB nei limiti · guardia sessione 112/0 · guardiano 29/29 · integrità stato 0 fail |
 
 **Vincolo d'ordine**: **F6 e F7 toccano lo stesso file** (`scripts/hooks/session_mode.py`) —
 in fila, mai in parallelo. Vincolo ereditato da S1055 e confermato.
@@ -107,4 +107,11 @@ in fila, mai in parallelo. Vincolo ereditato da S1055 e confermato.
 
 *Presentate una volta sola. Non entrano in «cosa resta», non bloccano la chiusura.*
 
-- (vuoto all'apertura)
+- **28 tabelle che descrivono una persona non sono raggiungibili dal suo portale, e nessuno
+  aveva scritto perché.** Le ha trovate il cancello di #117 appena costruito. Alcune sono
+  decisioni che spettano a Enzo — *i sondaggi di clima sono anonimi? il punteggio di
+  aderenza alla posizione si mostra all'interessato?* — altre sono lavoro mio. Non entrano
+  in «cosa resta» di questo ciclo: sono la misura che il ciclo ha prodotto.
+- **`sys_industry_codes` (creata oggi) non compare nel cancello di esposizione**, che
+  guarda 73 tabelle e non l'ha vista. Non è una lacuna del dato — è che l'universo del
+  cancello non cresce da solo. Vale la pena guardarlo, una volta.

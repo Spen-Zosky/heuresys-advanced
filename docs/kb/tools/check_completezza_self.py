@@ -68,8 +68,17 @@ MODULO_ME = REPO / "apps" / "api" / "src" / "modules" / "me"
 #   [PIANO]       piano aziendale non deliberato: comunicarlo ha conseguenze reali sulla
 #                 persona e sul suo responsabile (decisione di Enzo, 2026-08-04).
 #   [PIATTAFORMA] governo della piattaforma, non dato personale.
+#   [RESPONSABILE] misura calcolata SULLA persona ma destinata a chi la dirige: e' uno
+#                 strumento di conduzione, non un dato che la persona consulta di se'
+#                 (decisione di Enzo, 2026-08-13). Diverso da [PIANO]: qui non c'e' una
+#                 proposta da deliberare, c'e' un punteggio gia' calcolato.
 # ---------------------------------------------------------------------------------------
 ESCLUSIONI: dict[str, str] = {
+    # --- decisione esplicita di Enzo (2026-08-13) ------------------------------------
+    "sys_employee_position_fit_scores":
+        "[RESPONSABILE] Enzo, 2026-08-13: il punteggio di aderenza alla posizione e' "
+        "materiale del responsabile, NON si mostra all'interessato. 146 righe, una per "
+        "ciascuna delle 146 persone misurate.",
     # --- decisioni esplicite di Enzo (2026-08-04, voce L7) ---------------------------
     "sys_successor_candidates":
         "[PIANO] Enzo, 2026-08-04: un piano di successione non deliberato. Comunicare a "
@@ -85,6 +94,19 @@ ESCLUSIONI: dict[str, str] = {
     "sys_gdpr_registry": "[PIATTAFORMA] mappa GDPR delle tabelle; il fascicolo dell'art. 15 "
                          "si esercita con la rotta dedicata, non leggendo la mappa.",
     "sys_industry_codes": "[TECNICA] catalogo dei settori (mig 000305).",
+    # --- famiglia «clima»: cio' che NON e' della persona -------------------------------
+    # Derivate dal dato, non decise: in queste due tabelle l'unica colonna che punta a una
+    # persona indica qualcun altro. Vanno distinte dalle risposte, che sono sue e che Enzo
+    # ha deciso il 2026-08-13 di renderle visibili (vedi DA_COSTRUIRE).
+    "sys_engagement_survey_templates":
+        "[ALTRUI] `template_created_by_user_id` e' l'autore del modello di sondaggio (5 "
+        "righe), non l'interessato. Il contenuto raggiunge la persona attraverso il "
+        "sondaggio a cui ha risposto, non leggendo il catalogo dei modelli.",
+    "sys_engagement_feedback":
+        "[ALTRUI] il feedback NON ha mittente: 400 righe e l'unica colonna verso una "
+        "persona e' `feedback_reviewed_by_user_id`, cioe' chi lo ha esaminato. Non "
+        "esistendo un autore registrato, non esiste un «proprio feedback» da rivedere — "
+        "e' anonimo per costruzione dello schema, non per una scelta di visibilita'.",
 }
 
 # I «padri» che NON rendono raggiungibile nessuno.
@@ -118,6 +140,24 @@ DA_COSTRUIRE: dict[str, str] = {
         "#126 — Enzo, 2026-08-04: VISIBILE all'interessato, ma solo il punteggio "
         "dell'allievo verso i PROPRI mentori: `match_mentor_user_id` resta invisibile se "
         "rivela una graduatoria fra persone.",
+    "sys_engagement_survey_responses":
+        "Enzo, 2026-08-13: LA PERSONA PUO' RIVEDERE LE PROPRIE RISPOSTE. 862 risposte di "
+        "158 persone, ciascuna con `response_subject_user_id`. **La premessa della domanda "
+        "non reggeva sul dato**: dei 6 sondaggi nessuno ha `survey_is_anonymous` a vero, "
+        "quindi oggi non esiste un sondaggio anonimo. E anche quando esistera', "
+        "l'anonimato protegge la persona da HR e dal suo capo, non da se' stessa: "
+        "rivedere cio' che si e' scritto non lo viola.",
+    "sys_engagement_surveys":
+        "Enzo, 2026-08-13 (conseguenza diretta): il sondaggio e' il CONTESTO della "
+        "propria risposta — senza titolo e domande la risposta e' una fila di valori "
+        "illeggibile. Diventa raggiungibile quando la superficie delle risposte esiste; "
+        "il suo `survey_created_by_user_id` (l'autore) resta un dato di chi lo ha creato.",
+    "sys_pulse_checks":
+        "Enzo, 2026-08-13 (estensione DERIVATA, dichiarata come tale): 2.834 rilevazioni "
+        "di 157 persone, con umore, carico e soddisfazione scritti DALLA PERSONA su "
+        "`pulse_check_subject_user_id`. E' lo stesso principio delle risposte — cio' che "
+        "la persona ha dichiarato di suo pugno, lo puo' rivedere — applicato all'altra "
+        "famiglia del clima. Se Enzo intendeva i soli sondaggi, questa riga va tolta.",
 }
 
 # Le famiglie che si escludono per prefisso, con la ragione dichiarata una volta sola.

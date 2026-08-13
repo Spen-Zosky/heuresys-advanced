@@ -36,22 +36,39 @@ adversarial; le decisioni tecniche sono di Claude.
    una predizione su di sé che non possono vedere.** È a piena pila (2 endpoint + schemi +
    test + superficie con login reale), ~3-4h, e il suo lavoro è **già schedato** dentro il
    cancello di #117 come «decisa, da costruire».
-2. **Le 28 tabelle scoperte** che il cancello di #117 ha trovato: descrivono una persona,
-   non sono raggiungibili dal suo portale, e nessuno aveva scritto perché. Alcune sono
-   decisioni tue (vedi Open questions), altre lavoro mio. Finché non è chiusa, il cancello
-   **non è agganciato** a `db_health.py`: un rosso a riposo insegna a non guardare i rossi.
+2. **Le tabelle scoperte del cancello di #117: da 28 a 22** (S1057, le due decisioni di
+   Enzo registrate). Descrivono una persona, non sono raggiungibili dal suo portale, e
+   nessuno ha scritto perché. Delle 22 che restano **non è ancora detto quante siano lavoro
+   mio e quante decisioni tue**: alcune hanno già il loro precedente scritto — i punteggi di
+   talento, prontezza e successione sono della stessa natura dell'aderenza appena decisa, e
+   le segnalazioni whistleblowing sono già isolate da ADR-0036 §5 — ma la classificazione
+   non è stata fatta, quindi dire che sono tutte mie sarebbe una supposizione. Finché non è
+   chiusa, il cancello **non è agganciato** a `db_health.py`: un rosso a riposo insegna a
+   non guardare i rossi.
 3. **#123** organigramma-bis e **#159** assistente: entrambe ~1 sessione, entrambe da
    aprire intere. #159 ha il bersaglio cresciuto e va prima definito cosa rende idonea
    una scheda.
 
 ## Open questions
 
-- **Le 28 tabelle scoperte**: due esempi che spettano a te — *i sondaggi di clima sono
-  anonimi, quindi la persona non deve rivedere le proprie risposte?* e *il punteggio di
-  aderenza alla posizione si mostra all'interessato o è materiale del responsabile?*
-- **#182** — i due rami: risolta. Nessuno dei due andava portato dentro com'era; entrambi
-  archiviati in un tag, il contributo buono recepito.
-- **Il ruolo di database `gov_worker`**: si revoca o resta? (aperta dalla sessione scorsa)
+Nessuna domanda aperta. Le tre che c'erano sono decise (Enzo, 2026-08-13, S1057):
+
+- **Sondaggi di clima** → **la persona può rivedere le proprie risposte**. Registrata in
+  `check_completezza_self.py` come *decisa, da costruire*: `sys_engagement_survey_responses`
+  (862 risposte, 158 persone), il suo padre `sys_engagement_surveys` che ne è il contesto, e
+  per estensione derivata `sys_pulse_checks` (2.834 rilevazioni, 157 persone). **La premessa
+  della domanda non reggeva sul dato**: dei 6 sondaggi nessuno ha `survey_is_anonymous` a
+  vero. Escluse invece `sys_engagement_survey_templates` e `sys_engagement_feedback` — nella
+  seconda l'unica colonna verso una persona è il revisore: 400 righe **senza mittente**,
+  anonime per costruzione dello schema.
+- **Punteggio di aderenza alla posizione** → **solo il responsabile**, non l'interessato.
+  `sys_employee_position_fit_scores` (146 righe, 146 persone) è fra le esclusioni motivate,
+  con la categoria nuova `[RESPONSABILE]`.
+- **Il ruolo di database `gov_worker`** → **resta**. Misurato: login sì, superuser no,
+  `default_transaction_read_only=on` pinnato sul ruolo, timeout 120s/5s/300s, e il solo
+  privilegio è `SELECT` (sys 239 · staging 30 · audit 11 · reference_sync 3).
+- **#182** — i due rami: risolta in S1056. Nessuno dei due andava portato dentro com'era;
+  entrambi archiviati in un tag, il contributo buono recepito.
 
 ## Verification
 

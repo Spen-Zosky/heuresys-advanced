@@ -43,6 +43,12 @@ export default defineConfig({
   // D-29: clean up the `E2E Test Cert <ts>` rows the ESS cert spec leaves behind
   // (create+list-only surface, no DELETE endpoint). Inherited by the prod config
   // via `...baseConfig`. Best-effort (never fails the run).
+  // La coppia setup/teardown regge l'assert di drift: il setup misura la linea di
+  // partenza, il teardown ri-misura dopo le pulizie e fallisce se la suite ha lasciato
+  // righe. Senza il setup il conteggio finale non distinguerebbe i residui di questa
+  // corsa da quelli di chiunque altro. `playwright.prod.config.ts` li eredita via
+  // `...baseConfig`, quindi valgono anche nel run completo supportato.
+  globalSetup: "./tests/e2e/global-setup.ts",
   globalTeardown: "./tests/e2e/global-teardown.ts",
   fullyParallel: false,
   // Dev-mode runtime (compile-on-demand, Tailwind 4 JIT) introduces occasional

@@ -13,27 +13,18 @@
  * of row count — see D-27).
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync, existsSync } from "node:fs";
-import { resolve } from "node:path";
 
-/** Read ONLY the non-secret Postgres connection keys from the repo-root .env. */
-function readPgEnv(): Record<string, string> {
-  const envPath = resolve(process.cwd(), "..", "..", ".env");
-  const out: Record<string, string> = {};
-  if (!existsSync(envPath)) return out;
-  for (const line of readFileSync(envPath, "utf8").split(/\r?\n/)) {
-    const m = /^(POSTGRES_(?:HOST|PORT|DB|USER))=(.*)$/.exec(line.trim());
-    if (m) out[m[1]!] = m[2]!;
-  }
-  return out;
-}
+import { pgConn, verificaDrift } from "./e2e-drift";
+import { BASELINE_PATH } from "./global-setup";
 
 export default async function globalTeardown(): Promise<void> {
-  const env = readPgEnv();
-  const host = process.env.PGHOST ?? env.POSTGRES_HOST ?? "localhost";
-  const port = process.env.PGPORT ?? env.POSTGRES_PORT ?? "5433";
-  const db = process.env.PGDATABASE ?? env.POSTGRES_DB ?? "heuresys_advanced";
-  const user = process.env.PGUSER ?? env.POSTGRES_USER ?? "heuresys";
+  // La risoluzione della connessione vive in `e2e-drift.ts`, e non e' un trasloco
+  // cosmetico: la versione che stava qui leggeva `POSTGRES_*` SOLO dal `.env` di radice.
+  // Su CI quel file non esiste (gitignored) e `playwright-smoke.yml` mette
+  // `POSTGRES_DB=heuresys_ci` nell'AMBIENTE, quindi ogni psql qui sotto puntava a
+  // `heuresys_advanced:5433` — inesistente sul runner — falliva, e il `catch` se lo
+  // mangiava. Il teardown era un no-op silenzioso su CI. Misurato 2026-08-13.
+  const { host, port, db, user } = pgConn();
   try {
     const out = execFileSync(
       "psql",
@@ -297,4 +288,16 @@ export default async function globalTeardown(): Promise<void> {
   } catch (err) {
     console.warn("[e2e teardown] survey cleanup skipped:", (err as Error).message);
   }
+
+  // --- l'assert di drift: l'ultima cosa, dopo che tutte le pulizie hanno provato -------
+  //
+  // Tutti i blocchi qui sopra sono best-effort per costruzione: ogni `catch` logga e
+  // ingoia. Finche' nessuno CONTA le righe dopo, una cancellazione che non parte e una
+  // riuscita sono indistinguibili — ed e' cosi' che righe di GIUGNO sono rimaste sul
+  // database fino ad agosto senza che niente lo dicesse.
+  //
+  // Fallisce sul DRIFT (cresciuto rispetto alla partenza), mai sul totale assoluto:
+  // i residui di altri non sono colpa di questa corsa. Un teardown che lancia fa
+  // fallire la corsa anche a test verdi — che e' esattamente l'effetto voluto.
+  verificaDrift(BASELINE_PATH);
 }

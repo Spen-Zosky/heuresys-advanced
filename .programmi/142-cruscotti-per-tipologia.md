@@ -1,7 +1,7 @@
 # 142 — Cruscotti focalizzati per tipologia di utilizzatore
 
 > **item**: #142 · **priorità**: P1 · **stima register**: ~3-4 sessioni
-> **stato**: NON AVVIATO
+> **stato**: IN CORSO
 > **fonti**: direzione di Enzo 2026-08-05 (registrata nel register) · mig `000271`, `000272`
 
 ## Decisioni vincolanti (non si ri-chiedono)
@@ -20,20 +20,34 @@
   Filiale»: quando la famiglia arriva si sostituisce il grant generico con quello specifico,
   **senza toccare chi detiene il ruolo**.
 
-## ⚠ Sovrapposizione da sciogliere prima di iniziare
+## ⚠ Sovrapposizione — SCIOLTA in F1 (2026-08-14)
 
-La **F7 di #99** (`passo 8` del piano domini) prevede «dashboard guidate dal DBMS, tabelle
-dashboard/blocchi derivate da M3». È lo stesso oggetto visto da un'altra parte. Aprire questo
-programma senza decidere chi assorbe chi significa costruirlo due volte.
+**Non è «chi assorbe chi»: è che uno è la fondazione dell'altro, e l'ordine conta.**
+
+`M3` del piano domini (`2026-08-03--definizione-domini.md` §11) dichiara la cascata
+`tipologia → domini attivi → celle M1 non-none → dashboard e blocchi → voci di sidebar →
+pagine`, con la regola: *una tipologia vede una voce **se e solo se** esiste almeno una cella
+non-`none` fra i suoi domini e le classi di dato che quella pagina espone.* Lo scopo dichiarato
+è rendere **derivabile** ciò che oggi è dichiarato a mano.
+
+Quindi: **#99 F7 dà il MECCANISMO** (come si deriva un cruscotto), **#142 dà il CATALOGO**
+(quali cruscotti esistono, per chi, con che contenuto — che è decisione di prodotto e F7 non
+la fornisce).
+
+**Conseguenza operativa, ed è il risultato di F1**: costruire F2/F3 di #142 *prima* di #99 F7
+significa **dichiarare a mano** gli otto permessi e le loro visibilità — esattamente ciò che M3
+esiste per eliminare — e F7 dovrebbe poi smontarli. Perciò **F2 e F3 sono GATED su #99 F7**,
+mentre F1 e F4 restano autonome.
 
 ## Fasi
 
-- [ ] **F1 — INDAGINE: perimetro, sovrapposizione con #99 F7, catalogo delle tipologie** — non è codice. Fatto = (a) decisione scritta su chi assorbe chi fra #142 e #99 F7; (b) elenco chiuso delle tipologie con, per ognuna, il permesso proprio e la persona reale con cui si dimostrerà; (c) misura di cosa il cruscotto unico mostra oggi e a chi · budget ~120k
-- [ ] **F2 — Modello dei cruscotti e dei permessi** — migrazioni: un permesso per cruscotto, grant per ruolo, sostituzione del generico `dashboard:view` dove serve · budget ~180k
-- [ ] **F3 — API per cruscotto** — un endpoint per famiglia, granularità dichiarata per vista, integration test per il **divieto** oltre che per l'accesso · budget ~250k
+- [x] **F1 — INDAGINE: perimetro, sovrapposizione con #99 F7, catalogo delle tipologie** — FATTO 2026-08-14 (S1058). **(a)** sovrapposizione sciolta: vedi sopra — F2/F3 gated su #99 F7. **(b)** catalogo delle tipologie = quello dichiarato da Enzo (Azienda · Processi · Organizzazione · Filiale · HR Management · Platform Management · Tenant Management · Self-Service). **(c)** misura del cruscotto unico, live sul DB di produzione: **una sola voce attiva** — `dashboard` / `/dashboard` / permesso `dashboard:view` / gruppo sidebar `overview` — e **sette ruoli su quattordici** la detengono (`BLUEPRINT_MANAGER, BRANCH_MANAGER, HRMS_MANAGER, MANAGER, PLATFORM_ADMIN, PROCESS_OWNER, TENANT_ADMIN`): sette tipologie diverse guardano la stessa pagina, che è il problema posto da Enzo, misurato. **(d) reperto**: il difetto **D2** del piano domini («4 ruoli su 13 atterrano su `/dashboard` senza poterla vedere») **è già risolto** — `apps/web/src/lib/landing.ts` delega a `landingForPermissions` di `@heuresys/shared` e dichiara in testa che nessuna lista di nomi di ruolo vi sopravvive (voce **#116**): l'atterraggio si deriva dai grant. Una affermazione in meno da inseguire in F2.
+- [ ] **F2 — Modello dei cruscotti e dei permessi** ⛔ GATED su #99 F7 — migrazioni: un permesso per cruscotto, grant per ruolo, sostituzione del generico `dashboard:view` dove serve · budget ~180k
+- [ ] **F3 — API per cruscotto** ⛔ GATED su #99 F7 — un endpoint per famiglia, granularità dichiarata per vista, integration test per il **divieto** oltre che per l'accesso · budget ~250k
 - [ ] **F4 — Frontend + dimostrazione live per tipologia** — pagine, e un login reale **per ogni** tipologia (non una a campione) · budget ~250k
 
 ## Da dove si riprende
 
-**F1**, e la prima domanda è quella di sovrapposizione con #99 F7. Senza risposta, F2 è lavoro
-a rischio di essere buttato.
+**F4** è l'unica fase autonoma rimasta: F2 e F3 aspettano #99 F7, che dà il meccanismo di
+derivazione. Aprire #142 adesso significa in pratica aprire **#99 F3** (il resolver), che è la
+radice di tutto il ramo.

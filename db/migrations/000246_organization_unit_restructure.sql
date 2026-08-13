@@ -26,6 +26,45 @@
 BEGIN;
 
 -- ───────────────────────────────────────────────────────────────────────────────
+-- A0. I DUE CODICI CHE SI SCAMBIAVANO IL SIGNIFICATO (#127, 2026-08-13)
+--     `DIV-COMM` si chiamava «Divisione Crediti» e `DIV-LEGAL` «Direzione
+--     Compliance», mentre il nome «legale» sta su `DIR-LEGAL`, che e' un'unita'
+--     DIVERSA: due codici che si scambiano il senso sono la condizione tipica in
+--     cui qualcuno aggancia un dato all'unita' sbagliata — e qui Compliance e
+--     Affari Legali hanno perimetri di riservatezza diversi.
+--
+--     STA QUI, e non in una migrazione successiva, per una ragione misurata: su
+--     un database ESISTENTE la catena si ri-applica per intero, e `000250`
+--     cerca l'unita' per codice. Con la rinomina a valle, `000250` girava PRIMA
+--     e non trovava piu' nulla — prova generale rossa, «Posizioni centrali:
+--     attese 40, create 39». E' ADR-0035: si emenda il file che crea l'oggetto.
+--     Su un database nuovo questo UPDATE non trova nulla e i codici nascono
+--     gia' giusti dal blocco B.
+UPDATE sys.sys_organization_units
+   SET organization_unit_code = 'DIV-CRED', updated_at = now()
+ WHERE organization_unit_code = 'DIV-COMM';
+UPDATE sys.sys_organization_units
+   SET organization_unit_code = 'DIR-COMPL', updated_at = now()
+ WHERE organization_unit_code = 'DIV-LEGAL';
+
+-- GUARDIA su cio' che NON doveva cambiare: `DIR-LEGAL` e' un'unita' diversa e
+-- deve restare intatta. E' il punto in cui una rinomina distratta fonderebbe
+-- due unita' con perimetri di riservatezza diversi.
+DO $guardia$
+BEGIN
+  IF EXISTS (SELECT 1 FROM sys.sys_organization_units
+              WHERE organization_unit_code IN ('DIV-COMM', 'DIV-LEGAL')) THEN
+    RAISE EXCEPTION '000246 A0: un codice vecchio e'' sopravvissuto alla rinomina';
+  END IF;
+  IF EXISTS (SELECT 1 FROM sys.sys_organization_units
+              WHERE organization_unit_code = 'DIR-COMPL')
+     AND NOT EXISTS (SELECT 1 FROM sys.sys_organization_units
+                      WHERE organization_unit_code = 'DIR-LEGAL') THEN
+    RAISE EXCEPTION '000246 A0: DIR-LEGAL e'' sparita: le due unita'' sono state fuse';
+  END IF;
+END $guardia$;
+
+-- ───────────────────────────────────────────────────────────────────────────────
 -- A. RINOMINE — il nome dice la funzione presidiata
 --    Il criterio: ogni unita si chiama come il processo che governa. «Divisione
 --    CFO» dice chi la dirige, non cosa fa; «Divisione Finanza e Amministrazione»
@@ -36,7 +75,7 @@ UPDATE sys.sys_organization_units AS ou
        updated_at             = now()
   FROM (VALUES
     -- la divisione commerciale presidia il credito: e' il suo mestiere
-    ('DIV-COMM',    'Divisione Crediti'),
+    ('DIV-CRED',    'Divisione Crediti'),
     -- e la sua direzione istruisce ed eroga
     ('DIR-CREDITI', 'Direzione Istruttoria ed Erogazione'),
     -- nomi che dicono la funzione, non la carica
@@ -47,7 +86,7 @@ UPDATE sys.sys_organization_units AS ou
     ('DIR-DEV',     'Direzione Sviluppo Software e Canali Digitali'),
     -- la parte «Legal» e' stata scorporata in DIR-LEGAL (fase 2): qui resta la
     -- funzione di controllo, che assorbe anche il ruolo di protezione dei dati
-    ('DIV-LEGAL',   'Direzione Compliance e Protezione Dati')
+    ('DIR-COMPL',   'Direzione Compliance e Protezione Dati')
   ) AS r(codice, nome_nuovo)
  WHERE ou.organization_unit_code = r.codice;
 
@@ -63,7 +102,7 @@ UPDATE sys.sys_organization_units
                                       FROM sys.sys_organization_unit_types
                                      WHERE organization_unit_type_code = 'DEPARTMENT'),
        updated_at                = now()
- WHERE organization_unit_code = 'DIV-LEGAL';
+ WHERE organization_unit_code = 'DIR-COMPL';
 
 -- ───────────────────────────────────────────────────────────────────────────────
 -- C. SPOSTAMENTI
@@ -77,7 +116,7 @@ UPDATE sys.sys_organization_units
        organization_unit_relation  = 'LINEA',
        updated_at                  = now()
  WHERE organization_unit_code IN (
-   'DIV-RETAIL', 'DIV-COMM', 'DIV-OPS', 'DIV-IT', 'DIV-CFO', 'DIV-HR', 'DIV-MKT'
+   'DIV-RETAIL', 'DIV-CRED', 'DIV-OPS', 'DIV-IT', 'DIV-CFO', 'DIV-HR', 'DIV-MKT'
  );
 
 --    C2. le 3 filiali esistenti passano sotto le Aree territoriali.
@@ -118,7 +157,7 @@ UPDATE sys.sys_organization_units
                                         FROM sys.sys_organization_units
                                        WHERE organization_unit_code = 'RTL'),
        updated_at                  = now()
- WHERE organization_unit_code = 'DIV-LEGAL';
+ WHERE organization_unit_code = 'DIR-COMPL';
 
 -- ───────────────────────────────────────────────────────────────────────────────
 -- E. AUTO-VERIFICA
@@ -228,25 +267,25 @@ COMMIT;
 -- BEGIN;
 --   -- nomi
 --   UPDATE sys.sys_organization_units AS ou SET organization_unit_name = r.vecchio
---     FROM (VALUES ('DIV-COMM','Divisione Commercial Banking'),
+--     FROM (VALUES ('DIV-CRED','Divisione Commercial Banking'),
 --                  ('DIR-CREDITI','Direzione Crediti'),
 --                  ('DIV-CFO','Divisione CFO'),
 --                  ('DIV-HR','Divisione Human Resources'),
 --                  ('DIV-MKT','Divisione Marketing'),
 --                  ('DIR-AML','Direzione AML/Antiriciclaggio'),
 --                  ('DIR-DEV','Direzione Sviluppo Software'),
---                  ('DIV-LEGAL','Divisione Legal & Compliance')) AS r(codice,vecchio)
+--                  ('DIR-COMPL','Divisione Legal & Compliance')) AS r(codice,vecchio)
 --    WHERE ou.organization_unit_code = r.codice;
 --   -- tipo
 --   UPDATE sys.sys_organization_units
 --      SET organization_unit_type='DIVISION',
 --          organization_unit_type_id=(SELECT organization_unit_type_id FROM sys.sys_organization_unit_types WHERE organization_unit_type_code='DIVISION')
---    WHERE organization_unit_code='DIV-LEGAL';
+--    WHERE organization_unit_code='DIR-COMPL';
 --   -- padri: tutto torna sotto la societa, filiali sotto la divisione, controlli dentro Risk
 --   UPDATE sys.sys_organization_units
 --      SET organization_unit_parent_id=(SELECT organization_unit_id FROM sys.sys_organization_units WHERE organization_unit_code='RTL'),
 --          organization_unit_relation='LINEA'
---    WHERE organization_unit_code IN ('DIV-RETAIL','DIV-COMM','DIV-OPS','DIV-IT','DIV-CFO','DIV-HR','DIV-MKT','DIV-LEGAL');
+--    WHERE organization_unit_code IN ('DIV-RETAIL','DIV-CRED','DIV-OPS','DIV-IT','DIV-CFO','DIV-HR','DIV-MKT','DIR-COMPL');
 --   UPDATE sys.sys_organization_units
 --      SET organization_unit_parent_id=(SELECT organization_unit_id FROM sys.sys_organization_units WHERE organization_unit_code='DIV-RETAIL')
 --    WHERE organization_unit_code IN ('FIL-MI-CEN','FIL-BS-CEN','FIL-BG-CEN');

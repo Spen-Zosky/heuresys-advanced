@@ -264,6 +264,29 @@ quell'account: l'esenzione era diventata un **punto cieco**, ora si sorvegliano 
   propri incluso il divieto e la granularità) e `#143` la squadra come **progetto**, con il capo
   progetto che ha autorità sullo scopo e non sulle persone.
 
+## Scostamenti accettati fra l'organigramma progettato e quello costruito (RTL Bank)
+
+> **#127 B, registrati S1055 (2026-08-13).** Quattro scelte prese durante l'esecuzione della
+> ricostruzione, tutte **legittime** e nessuna scritta da nessuna parte. Una decisione senza
+> autore, fra sei mesi, sembra un errore: si registrano qui perche' chi rilegge il disegno
+> (`organigramma.html`) non le scambi per difetti da «correggere». **Ogni riga e' stata
+> ri-misurata sul database prima di essere scritta**, non copiata dal documento d'origine.
+
+| # | Il disegno prevedeva | Il costruito e' | Verificato |
+|---|---|---|---|
+| **B1** | CEO **+ 2 assistenti** al vertice | **solo la CEO**; le due persone sono altrove (Compliance e Affari Legali, che infatti hanno +1 ciascuna) | l'unita' di vertice di RTL Bank porta una sola persona. *Attenzione a non ri-misurarlo male: senza filtro per tenant ne risultano due, ma la seconda e' la CEO di Heuresys System* |
+| **B2** | 10 filiali, **5 + 5** fra le due aree; fra queste **Brescia Sud** e **Treviglio** | 10 filiali, **7 in Area Milano e Provincia + 3 in Brescia-Bergamo**; al posto delle due previste esistono **Como** e **Varese** | conteggio per area: 7 e 3. Il disegno dichiarava modificabili i nomi delle filiali nuove, quindi la scelta rientrava nel mandato |
+| **B3** | «Area Milano» | «**Area Milano e Provincia**» | `AREA-MI` |
+| **B4** | Divisione IT **11** persone, Finanza **9** | IT **8**, Finanza **11** | conteggio ricorsivo sul sottoalbero, sole assegnazioni `PRIMARY`+`ACTIVE` |
+
+**Perche' non si «correggono»**: nessuno dei quattro e' un difetto di dato. Sono decisioni di
+esecuzione prese quando il disegno lasciava margine, e il database e' la fotografia
+dell'azienda reale. Cio' che mancava era la loro **tracciabilita'**.
+
+**Conseguenza dichiarata**: `organigramma.html` descrive quindi una banca che non esiste piu'
+in quei quattro punti. Vive fuori dal repo, e' materiale del lab, e **non si modifica dalla
+sessione canonica**: chi lo rilegge parta da questa tabella.
+
 ## Delta S1045 (2026-08-05 → 06) — la catena smette di disfare; i debiti da cinque a uno
 
 HEAD **`879ed8ce`** (15 commit in S1050, tutti pushati; PROD a `dccec052`, il residuo e' doc + dipendenze). Counts **ri-derivati live**:

@@ -28,12 +28,12 @@ INSERT INTO residui VALUES
   -- ── i 6 rimasti nella Divisione Risk & Compliance ─────────────────────────
   ('luca.conti',       'DIR-MONIT',  'RECU', 'Gestore Recupero Crediti'),        -- Diritto Comm., val 4,0
   ('tommaso.palmieri', 'DIR-MONIT',  'ANMO', 'Analista Monitoraggio Crediti'),   -- Economia
-  ('laura.santoro',    'DIV-LEGAL',  'SPCM', 'Specialista Compliance'),          -- Diritto Comm., val 3,9
+  ('laura.santoro',    'DIR-COMPL',  'SPCM', 'Specialista Compliance'),          -- Diritto Comm., val 3,9
   ('giulia.monti',     'DIR-LEGAL',  'LEGA', 'Legale'),                          -- Diritto
   ('luca.dangelo',     'DIR-RETE',   'SPRE', 'Specialista Qualita e Supporto Rete'), -- Business Adm.
   ('luca.giordano',    'DIR-RETE',   'SPRE', 'Specialista Qualita e Supporto Rete'), -- Economia Aziendale
   -- ── i 6 trovati dalla verifica completa delle eccedenze ───────────────────
-  --    Tre cassieri erano collocati in DIV-COMM, che diventa «Divisione
+  --    Tre cassieri erano collocati in DIV-CRED, che diventa «Divisione
   --    Crediti»: una divisione crediti non ha cassieri, quindi vanno in filiale.
   --    Due analisti finanziari e una quarta cassiera completavano l'organico di
   --    unita che il target dimensiona diversamente.
@@ -454,7 +454,7 @@ COMMIT;
 --   ora misurabile su un albero che dice la verita:
 --   WITH RECURSIVE sub(id) AS (
 --     SELECT organization_unit_id FROM sys.sys_organization_units
---      WHERE organization_unit_code = 'DIV-COMM'
+--      WHERE organization_unit_code = 'DIV-CRED'
 --     UNION ALL
 --     SELECT o.organization_unit_id FROM sys.sys_organization_units o JOIN sub ON o.organization_unit_parent_id = sub.id)
 --   SELECT count(DISTINCT a.user_position_assignment_user_id)

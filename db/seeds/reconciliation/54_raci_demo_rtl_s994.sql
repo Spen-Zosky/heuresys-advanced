@@ -51,49 +51,49 @@ DELETE FROM sys.sys_organization_unit_processes
 WITH raci(ou_code, proc_code, role) AS (
   VALUES
     -- 00 Enterprise Strategy & Governance
-    ('RTL','00','OWNER'), ('DIV-CFO','00','CONTRIBUTOR'), ('DIV-RISK','00','CONSULTED'), ('DIV-LEGAL','00','CONSULTED'), ('DIV-HR','00','INFORMED'),
+    ('RTL','00','OWNER'), ('DIV-CFO','00','CONTRIBUTOR'), ('DIV-RISK','00','CONSULTED'), ('DIR-COMPL','00','CONSULTED'), ('DIV-HR','00','INFORMED'),
     -- 01 Customer Acquisition & Onboarding
-    ('DIV-RETAIL','01','OWNER'), ('DIV-MKT','01','CONTRIBUTOR'), ('DIV-COMM','01','CONTRIBUTOR'), ('DIR-AML','01','CONSULTED'), ('DIV-OPS','01','INFORMED'),
+    ('DIV-RETAIL','01','OWNER'), ('DIV-MKT','01','CONTRIBUTOR'), ('DIV-CRED','01','CONTRIBUTOR'), ('DIR-AML','01','CONSULTED'), ('DIV-OPS','01','INFORMED'),
     -- 02 KYC / AML
-    ('DIR-AML','02','OWNER'), ('DIV-RETAIL','02','CONTRIBUTOR'), ('DIV-COMM','02','CONTRIBUTOR'), ('DIV-LEGAL','02','CONSULTED'), ('DIV-RISK','02','INFORMED'),
+    ('DIR-AML','02','OWNER'), ('DIV-RETAIL','02','CONTRIBUTOR'), ('DIV-CRED','02','CONTRIBUTOR'), ('DIR-COMPL','02','CONSULTED'), ('DIV-RISK','02','INFORMED'),
     -- 03 Account Opening & Maintenance
     ('DIR-BACKOFF','03','OWNER'), ('DIV-RETAIL','03','CONTRIBUTOR'), ('DIR-AML','03','CONSULTED'), ('DIV-OPS','03','INFORMED'),
     -- 04 Payments & Transfers
     ('DIR-PAY','04','OWNER'), ('DIR-BACKOFF','04','CONTRIBUTOR'), ('DIV-RISK','04','CONSULTED'), ('DIV-CFO','04','INFORMED'),
     -- 05 Credit Origination
-    ('DIR-CREDITI','05','OWNER'), ('DIR-CORP','05','CONTRIBUTOR'), ('DIV-RETAIL','05','CONTRIBUTOR'), ('DIR-RISKM','05','CONSULTED'), ('DIV-LEGAL','05','INFORMED'),
+    ('DIR-CREDITI','05','OWNER'), ('DIR-CORP','05','CONTRIBUTOR'), ('DIV-RETAIL','05','CONTRIBUTOR'), ('DIR-RISKM','05','CONSULTED'), ('DIR-COMPL','05','INFORMED'),
     -- 06 Credit Monitoring & Workout
-    ('DIR-CREDITI','06','OWNER'), ('DIR-RISKM','06','CONTRIBUTOR'), ('DIV-LEGAL','06','CONSULTED'), ('DIV-CFO','06','INFORMED'),
+    ('DIR-CREDITI','06','OWNER'), ('DIR-RISKM','06','CONTRIBUTOR'), ('DIR-COMPL','06','CONSULTED'), ('DIV-CFO','06','INFORMED'),
     -- 07 Wealth Advisory
     ('DIR-CORP','07','OWNER'), ('DIV-RETAIL','07','CONTRIBUTOR'), ('DIV-RISK','07','CONSULTED'), ('DIV-CFO','07','INFORMED'),
     -- 08 Retail Investments
-    ('DIV-RETAIL','08','OWNER'), ('DIR-CORP','08','CONTRIBUTOR'), ('DIV-RISK','08','CONSULTED'), ('DIV-LEGAL','08','CONSULTED'), ('DIV-CFO','08','INFORMED'),
+    ('DIV-RETAIL','08','OWNER'), ('DIR-CORP','08','CONTRIBUTOR'), ('DIV-RISK','08','CONSULTED'), ('DIR-COMPL','08','CONSULTED'), ('DIV-CFO','08','INFORMED'),
     -- 09 Treasury & ALM
     ('DIV-CFO','09','OWNER'), ('DIR-RISKM','09','CONTRIBUTOR'), ('DIV-RISK','09','CONSULTED'), ('RTL','09','INFORMED'),
     -- 10 Risk Management
-    ('DIR-RISKM','10','OWNER'), ('DIV-RISK','10','CONTRIBUTOR'), ('DIV-CFO','10','CONSULTED'), ('DIV-LEGAL','10','CONSULTED'), ('RTL','10','INFORMED'),
+    ('DIR-RISKM','10','OWNER'), ('DIV-RISK','10','CONTRIBUTOR'), ('DIV-CFO','10','CONSULTED'), ('DIR-COMPL','10','CONSULTED'), ('RTL','10','INFORMED'),
     -- 11 Compliance & Regulatory Reporting
-    ('DIV-LEGAL','11','OWNER'), ('DIR-AML','11','CONTRIBUTOR'), ('DIV-RISK','11','CONSULTED'), ('DIV-CFO','11','CONSULTED'), ('RTL','11','INFORMED'),
+    ('DIR-COMPL','11','OWNER'), ('DIR-AML','11','CONTRIBUTOR'), ('DIV-RISK','11','CONSULTED'), ('DIV-CFO','11','CONSULTED'), ('RTL','11','INFORMED'),
     -- 12 Internal Audit
-    ('RTL','12','OWNER'), ('DIV-RISK','12','CONTRIBUTOR'), ('DIV-LEGAL','12','CONSULTED'), ('DIV-OPS','12','INFORMED'),
+    ('RTL','12','OWNER'), ('DIV-RISK','12','CONTRIBUTOR'), ('DIR-COMPL','12','CONSULTED'), ('DIV-OPS','12','INFORMED'),
     -- 13 Branch Operations
     ('DIV-OPS','13','OWNER'), ('DIV-RETAIL','13','CONTRIBUTOR'), ('DIR-BACKOFF','13','CONTRIBUTOR'), ('DIV-IT','13','CONSULTED'), ('DIV-CFO','13','INFORMED'),
     -- 14 Customer Service
     ('DIV-RETAIL','14','OWNER'), ('DIV-OPS','14','CONTRIBUTOR'), ('DIV-MKT','14','CONSULTED'), ('DIV-IT','14','INFORMED'),
     -- 15 Marketing & Communications
-    ('DIV-MKT','15','OWNER'), ('DIV-RETAIL','15','CONTRIBUTOR'), ('DIV-COMM','15','CONTRIBUTOR'), ('DIV-LEGAL','15','CONSULTED'), ('RTL','15','INFORMED'),
+    ('DIV-MKT','15','OWNER'), ('DIV-RETAIL','15','CONTRIBUTOR'), ('DIV-CRED','15','CONTRIBUTOR'), ('DIR-COMPL','15','CONSULTED'), ('RTL','15','INFORMED'),
     -- 16 IT & Cybersecurity
     ('DIV-IT','16','OWNER'), ('DIR-INFRA','16','CONTRIBUTOR'), ('DIR-DEV','16','CONTRIBUTOR'), ('DIV-RISK','16','CONSULTED'), ('RTL','16','INFORMED'),
     -- 17 Human Capital Management
-    ('DIV-HR','17','OWNER'), ('DIV-COMM','17','CONTRIBUTOR'), ('DIV-OPS','17','CONTRIBUTOR'), ('DIV-CFO','17','CONSULTED'), ('RTL','17','INFORMED'),
+    ('DIV-HR','17','OWNER'), ('DIV-CRED','17','CONTRIBUTOR'), ('DIV-OPS','17','CONTRIBUTOR'), ('DIV-CFO','17','CONSULTED'), ('RTL','17','INFORMED'),
     -- 18 Finance & Accounting
     ('DIV-CFO','18','OWNER'), ('DIR-BACKOFF','18','CONTRIBUTOR'), ('DIV-RISK','18','CONSULTED'), ('RTL','18','INFORMED'),
     -- 19 Procurement & Vendor Management
-    ('DIV-CFO','19','OWNER'), ('DIV-OPS','19','CONTRIBUTOR'), ('DIV-LEGAL','19','CONSULTED'), ('DIV-IT','19','CONSULTED'), ('RTL','19','INFORMED'),
+    ('DIV-CFO','19','OWNER'), ('DIV-OPS','19','CONTRIBUTOR'), ('DIR-COMPL','19','CONSULTED'), ('DIV-IT','19','CONSULTED'), ('RTL','19','INFORMED'),
     -- 20 Facilities & Real Estate
-    ('DIV-OPS','20','OWNER'), ('DIV-CFO','20','CONTRIBUTOR'), ('DIV-LEGAL','20','CONSULTED'), ('RTL','20','INFORMED'),
+    ('DIV-OPS','20','OWNER'), ('DIV-CFO','20','CONTRIBUTOR'), ('DIR-COMPL','20','CONSULTED'), ('RTL','20','INFORMED'),
     -- 21 Legal
-    ('DIV-LEGAL','21','OWNER'), ('DIR-AML','21','CONTRIBUTOR'), ('DIV-RISK','21','CONSULTED'), ('RTL','21','INFORMED'),
+    ('DIR-COMPL','21','OWNER'), ('DIR-AML','21','CONTRIBUTOR'), ('DIV-RISK','21','CONSULTED'), ('RTL','21','INFORMED'),
     -- 22 Data & Analytics
     ('DIV-IT','22','OWNER'), ('DIR-DEV','22','CONTRIBUTOR'), ('DIV-RISK','22','CONSULTED'), ('DIV-MKT','22','CONSULTED'), ('RTL','22','INFORMED')
 )

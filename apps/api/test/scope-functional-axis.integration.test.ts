@@ -15,8 +15,8 @@
  * asserts both halves for every member of it: activities granted, sensitive denied.
  *
  * Real personas + their real relationships (verified live, not assumed):
- *   - paolo.caputo@rtl-bank.org    MANAGER, LEAD of DIV-COMM/DIR-CORP/DIR-CREDITI/UFF-CRED-*
- *   - tommaso.fiore@rtl-bank.org   MEMBER of DIV-COMM **and** paolo's org report → both axes
+ *   - paolo.caputo@rtl-bank.org    MANAGER, LEAD of DIV-CRED/DIR-CORP/DIR-CREDITI/UFF-CRED-*
+ *   - tommaso.fiore@rtl-bank.org   MEMBER of DIV-CRED **and** paolo's org report → both axes
  *   - antonio.parisi@rtl-bank.org  MEMBER of DIV-CFO (marco.rinaldi's team) → neither axis
  *   - federica.marchetti@rtl-bank.org TENANT_ADMIN → HR mandate, tenant-wide
  *
@@ -90,7 +90,7 @@ describe("ADR-0027 F4 — functional (team/process) axis", () => {
 
     const scope = await functionalScopeUserIds(pool, ids.paolo);
     expect(scope).toContain(ids.paolo); // self, I17
-    expect(scope).toContain(ids.tommaso); // DIV-COMM member
+    expect(scope).toContain(ids.tommaso); // DIV-CRED member
     expect(scope.length).toBeGreaterThan(1);
   });
 

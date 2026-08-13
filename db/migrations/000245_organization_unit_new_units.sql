@@ -155,7 +155,7 @@ FROM (VALUES
   ('AREA-MI',      'Area Milano e Provincia',                       'AREA',               'DIV-RETAIL', 'LINEA'),
   ('AREA-BSBG',    'Area Brescia-Bergamo',                          'AREA',               'DIV-RETAIL', 'LINEA'),
   -- crediti e finanza
-  ('DIR-MONIT',    'Direzione Monitoraggio e Crediti Deteriorati',  'DEPARTMENT',         'DIV-COMM',   'LINEA'),
+  ('DIR-MONIT',    'Direzione Monitoraggio e Crediti Deteriorati',  'DEPARTMENT',         'DIV-CRED',   'LINEA'),
   ('DIR-BILAN',    'Direzione Bilancio e Segnalazioni',             'DEPARTMENT',         'DIV-CFO',    'LINEA'),
   -- risorse umane
   ('UFF-PERS',     'Ufficio Amministrazione del Personale',         'OFFICE',             'DIV-HR',     'LINEA'),

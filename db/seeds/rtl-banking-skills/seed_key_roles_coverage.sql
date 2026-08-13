@@ -26,7 +26,7 @@
 --     colombo → 3A4L ~59.5k (era 3A3L/43.9k, fuori dai pari 59-71k); i 4 promossi
 --     → QD4 + salario in banda MG-1 (86-92k, sotto Head of Commercial 101k)
 --   • band: le 4 posizioni head ricevono il profilo compensativo MG-1 (85-130k)
---   • manager OU: DIV-RISK → alice (era l'IT Director, incoerente), DIV-LEGAL →
+--   • manager OU: DIV-RISK → alice (era l'IT Director, incoerente), DIR-COMPL →
 --     martino, DIV-MKT → gallo, DIR-TREAS → cattaneo, DIR-AUDIT → lombardi
 --   • owner posizioni head → federica.marchetti (precedente: owner CRO)
 --   • team 1:1 con OU: LEAD allineato al manager; membership dei mossi aggiornata
@@ -169,7 +169,7 @@ UPDATE sys.sys_organization_units ou
    SET organization_unit_manager_user_id = r.user_id, updated_at = now()
   FROM _resolved r,
        (VALUES ('POS-00000396','DIV-RISK'), ('POS-TREAS-HEAD','DIR-TREAS'),
-               ('POS-AUDIT-HEAD','DIR-AUDIT'), ('POS-LEGAL-HEAD','DIV-LEGAL'),
+               ('POS-AUDIT-HEAD','DIR-AUDIT'), ('POS-LEGAL-HEAD','DIR-COMPL'),
                ('POS-MKT-HEAD','DIV-MKT')) map(pos_code, ou_code)
  WHERE r.pos_code = map.pos_code
    AND ou.organization_unit_code = map.ou_code
@@ -191,7 +191,7 @@ CREATE TEMP TABLE _team_map ON COMMIT DROP AS
 SELECT map.team_code, r.user_id, r.email
 FROM _resolved r,
      (VALUES ('POS-00000396','DIV-RISK'), ('POS-TREAS-HEAD','DIR-TREAS'),
-             ('POS-AUDIT-HEAD','DIR-AUDIT'), ('POS-LEGAL-HEAD','DIV-LEGAL'),
+             ('POS-AUDIT-HEAD','DIR-AUDIT'), ('POS-LEGAL-HEAD','DIR-COMPL'),
              ('POS-MKT-HEAD','DIV-MKT'), ('POS-00000350','DIR-TREAS')) map(pos_code, team_code)
 WHERE r.pos_code = map.pos_code;
 
@@ -285,7 +285,7 @@ BEGIN
 
   -- 6d. lead team = manager OU per i 5 team toccati
   SELECT count(*) INTO n
-  FROM (VALUES ('DIV-RISK'),('DIR-TREAS'),('DIR-AUDIT'),('DIV-LEGAL'),('DIV-MKT')) k(code)
+  FROM (VALUES ('DIV-RISK'),('DIR-TREAS'),('DIR-AUDIT'),('DIR-COMPL'),('DIV-MKT')) k(code)
   JOIN sys.sys_teams t ON t.team_code = k.code AND t.team_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'::uuid
   JOIN sys.sys_organization_units ou ON ou.organization_unit_code = k.code
    AND ou.organization_unit_tenant_id = t.team_tenant_id

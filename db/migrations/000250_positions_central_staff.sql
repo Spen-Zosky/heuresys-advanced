@@ -88,7 +88,7 @@ INSERT INTO centrali VALUES
   ('martina.gentile',   'DIR-RISKM',       'RSKM'),  -- QD3, dal 2005
   ('alice.rossi',       'DIR-RISKM',       'ANRI'),  -- val 4,9
   ('walter.giuliani',   'DIR-RISKM',       'ANRI'),  -- val 4,8
-  ('helena.negri',      'DIV-LEGAL',       'SPCM'),  -- Scienze Giuridiche
+  ('helena.negri',      'DIR-COMPL',       'SPCM'),  -- Scienze Giuridiche
   ('marta.russo',       'DIR-LEGAL',       'LEGA');  -- laurea magistrale in Giurisprudenza
 
 -- ───────────────────────────────────────────────────────────────────────────────

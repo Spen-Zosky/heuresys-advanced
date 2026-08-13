@@ -179,7 +179,7 @@ check("X1a", "X1", "Responsabile con i ruoli di chi non dirige nulla",
       colonne=["persona", "unita' rette", "ruoli", "riferimento"])
 
 check("X1b", "X1", "Ruolo di comando senza comando",
-      "chi detiene un ruolo di comando ma non regge alcuna unita' attiva",
+      "chi detiene un ruolo di comando ma non regge alcuna unita' attiva ne' alcuna squadra",
       """
       SELECT u.user_email, r.rs,
              coalesce((SELECT c.oucode FROM capo c WHERE c.uid = u.user_id), '(nessuna unita)'),
@@ -190,6 +190,14 @@ check("X1b", "X1", "Ruolo di comando senza comando",
       JOIN sys.sys_users u ON u.user_id = r.uid
       WHERE EXISTS (SELECT 1 FROM comando c WHERE c.auth_role_code = ANY(r.rl))
         AND NOT EXISTS (SELECT 1 FROM ou WHERE organization_unit_manager_user_id = r.uid)
+        -- Una SQUADRA e' un comando quanto un'unita': `TEAM_LEADER` e' per
+        -- definizione il capo di una squadra, e cercarlo solo fra i responsabili
+        -- di unita' lo dichiarava «senza comando» mentre ne aveva uno.
+        -- MISURATO 2026-08-12 (#127): l'unico caso acceso era `marco.rinaldi`,
+        -- che guida 1 squadra; e su 36 persone con `TEAM_LEADER` **zero** sono
+        -- prive sia di unita' sia di squadra. La verifica misurava la propria
+        -- definizione di comando, non un difetto del dato.
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_teams t WHERE t.team_lead_user_id = r.uid)
       ORDER BY 1
       """,
       "SELECT count(*) FROM ruoli r WHERE EXISTS "

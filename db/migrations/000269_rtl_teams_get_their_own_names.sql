@@ -13,11 +13,11 @@
 -- restano, con tutti i loro membri e le loro appartenenze, e prendono un codice e
 -- un nome propri. E' la via che risolve l'ambiguita' senza che nessuno perda un
 -- legame — quelle squadre portano l'asse funzionale di circa 150 persone, e
--- `DIV-COMM` da sola ne ha 33.
+-- `DIV-CRED` da sola ne ha 33.
 --
 -- LA REGOLA DI RINOMINA E' DERIVATA, NON UN ELENCO SCRITTO A MANO:
 --   codice → `TM-` piu' il codice originale privato del prefisso di tipo
---            (`DIV-COMM` → `TM-COMM`, `UFF-CRED-PMI` → `TM-CRED-PMI`)
+--            (`DIV-CRED` → `TM-COMM`, `UFF-CRED-PMI` → `TM-CRED-PMI`)
 --   nome   → «Squadra » piu' il nome originale privato del prefisso di tipo
 --            («Divisione Commercial Banking» → «Squadra Commercial Banking»)
 -- Cosi' la riga dice cosa E', e chi la legge non deve piu' indovinare su quale

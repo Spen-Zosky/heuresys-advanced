@@ -9,11 +9,11 @@
 -- non e' spiegato dalla propria storia.
 --
 -- COME SI E' VISTO, E PERCHE' SI VEDEVA SOLO UN OTTAVO. Il check C6c della custodia
--- storia36 ha segnalato **una** unita: `DIV-LEGAL`, il cui evento del 2025-03-01 dice
+-- storia36 ha segnalato **una** unita: `DIR-COMPL`, il cui evento del 2025-03-01 dice
 -- «-> Divisione Legal & Compliance» mentre l'unita oggi si chiama «Direzione Compliance
 -- e Protezione Dati». C6c confronta l'ESITO DEGLI EVENTI ESISTENTI con il nome di oggi:
 -- le altre 7 unita rinominate non avevano alcun evento, quindi non contraddicevano
--- nulla ed erano invisibili. Registrare solo `DIV-LEGAL` — l'unica che faceva scattare
+-- nulla ed erano invisibili. Registrare solo `DIR-COMPL` — l'unica che faceva scattare
 -- il controllo — avrebbe lasciato il difetto identico sulle altre sette, e muto.
 --
 -- LA DECISIONE (Enzo, 2026-08-07). «E' stata una riorganizzazione vera»: quindi si
@@ -29,7 +29,7 @@
 -- state rinominate dalla 000246 (verificato sull'elenco delle rinomine), quindi il loro
 -- nome di oggi e' anche quello di allora.
 --
--- COSA NON REGISTRA, E PERCHE'. Il cambio di TIPO di `DIV-LEGAL` (da divisione a
+-- COSA NON REGISTRA, E PERCHE'. Il cambio di TIPO di `DIR-COMPL` (da divisione a
 -- direzione) non diventa un evento: `organization_unit_history_change_type` ammette
 -- CREATED/RENAMED/MOVED/MERGED/SPLIT/DEACTIVATED/REACTIVATED e nessun valore per il
 -- cambio di tipo. Aggiungerne uno significa toccare un vincolo CHECK di dominio (RD-08),
@@ -60,7 +60,7 @@ BEGIN
 
   -- ── A. LE OTTO RINOMINE ─────────────────────────────────────────────────────────
   WITH r(codice, prima, nota) AS (VALUES
-    ('DIV-COMM',    'Divisione Commercial Banking',
+    ('DIV-CRED',    'Divisione Commercial Banking',
      'Il nome dice il mestiere: la divisione governa il credito, non un generico «commercial banking».'),
     ('DIR-CREDITI', 'Direzione Crediti',
      'Si distingue dalla divisione che la contiene: qui si istruisce ed eroga, non si governa il credito nel suo insieme.'),
@@ -74,7 +74,7 @@ BEGIN
      'Cade la sigla: il nome e'' in chiaro come per tutte le altre unita.'),
     ('DIR-DEV',     'Direzione Sviluppo Software',
      'Prende in carico anche i canali digitali, e lo dichiara nel nome.'),
-    ('DIV-LEGAL',   'Divisione Legal & Compliance',
+    ('DIR-COMPL',   'Divisione Legal & Compliance',
      'Cambia natura oltre che nome: da divisione di linea a direzione di presidio su conformita'' e protezione dei dati.')
   )
   INSERT INTO sys.sys_organization_unit_history (
@@ -101,7 +101,7 @@ BEGIN
   -- I nomi dei genitori si leggono dal database per codice: non si scrivono qui.
   WITH m(codice, padre_prima, padre_dopo, nota) AS (VALUES
     ('DIV-RETAIL','RTL','DG','Le divisioni operative acquistano un punto di coordinamento: prima pendevano tutte direttamente dalla societa.'),
-    ('DIV-COMM',  'RTL','DG','Le divisioni operative acquistano un punto di coordinamento: prima pendevano tutte direttamente dalla societa.'),
+    ('DIV-CRED',  'RTL','DG','Le divisioni operative acquistano un punto di coordinamento: prima pendevano tutte direttamente dalla societa.'),
     ('DIV-OPS',   'RTL','DG','Le divisioni operative acquistano un punto di coordinamento: prima pendevano tutte direttamente dalla societa.'),
     ('DIV-IT',    'RTL','DG','Le divisioni operative acquistano un punto di coordinamento: prima pendevano tutte direttamente dalla societa.'),
     ('DIV-CFO',   'RTL','DG','Le divisioni operative acquistano un punto di coordinamento: prima pendevano tutte direttamente dalla societa.'),

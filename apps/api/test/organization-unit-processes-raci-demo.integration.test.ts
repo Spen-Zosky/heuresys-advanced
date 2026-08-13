@@ -169,8 +169,8 @@ describe("RACI OU<->process PRODUCTION seed — live read-back via real API (S10
     expect(aml!.blueprintProcessName).toContain("KYC");
   });
 
-  it("by-ou: DIV-LEGAL is OWNER of '11 Compliance & Regulatory Reporting'", async () => {
-    const ou = await ouIdByCode("DIV-LEGAL");
+  it("by-ou: DIR-COMPL is OWNER of '11 Compliance & Regulatory Reporting'", async () => {
+    const ou = await ouIdByCode("DIR-COMPL");
     const r = await suite.app.inject({ method: "GET", url: `/v1/organization-unit-processes/by-ou/${ou}`, headers: { cookie: ch(author.cookies) } });
     expect(r.statusCode).toBe(200);
     const items = (r.json() as { items: { blueprintProcessCode: string; role: string }[] }).items;

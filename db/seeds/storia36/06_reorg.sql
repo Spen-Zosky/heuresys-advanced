@@ -84,7 +84,7 @@ BEGIN
        'Divisione Rischi',
        'Assorbe i controlli di conformità dalla Divisione Compliance e assume la denominazione attuale.',
        true),
-      ('DIV-LEGAL', 'RENAMED',
+      ('DIR-COMPL', 'RENAMED',
        'Divisione Legale',
        'Prende in carico la parte normativa della Compliance e assume la denominazione attuale.',
        true),

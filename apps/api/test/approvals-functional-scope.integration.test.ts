@@ -47,7 +47,7 @@ async function login(t: TestApp, email: string): Promise<S> {
 }
 
 let suite: TestApp;
-let paolo: S; // MANAGER + lead of DIV-COMM → functional scope
+let paolo: S; // MANAGER + lead of DIV-CRED → functional scope
 let federica: S; // TENANT_ADMIN → HR mandate
 let tommasoId: string; // member of paolo's team → inside the functional scope
 let antonioId: string; // member of another team → outside it

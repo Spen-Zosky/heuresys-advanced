@@ -8,16 +8,16 @@
 --   2. NEW OU "Direzione Internal Audit" (DIR-AUDIT) reporting directly to the
 --      HQ/CEO (mandatory independent function for a supervised bank; was absent)
 --   3. Populate the 2 EMPTY divisions (0 positions): Marketing (DIV-MKT) and
---      Legal & Compliance (DIV-LEGAL) with a Head + specialists
+--      Legal & Compliance (DIR-COMPL) with a Head + specialists
 --   4. Fix the orphan position POS-c550cecf "HR Manager" (no OU) -> attach to
 --      Divisione Human Resources (DIV-HR) + ensure an owner
 --   5. Re-attach the 8 Securities Dealers currently mis-filed in RETAIL BRANCHES
 --      (FIL-BG-CEN, FIL-BS-CEN) to Treasury (a trader has no place in a retail
---      branch). The 5 dealers already in DIV-COMM are left as-is (out of the
+--      branch). The 5 dealers already in DIV-CRED are left as-is (out of the
 --      explicit "in filiale" scope; a markets desk under Commercial Banking is
 --      defensible) — flagged for review in the run report.
 --   6. Teams are 1:1 with OU in the RTL pattern -> create matching teams for the
---      2 new OUs (DIV-MKT/DIV-LEGAL already have their teams).
+--      2 new OUs (DIV-MKT/DIR-COMPL already have their teams).
 --
 -- Job roles: reuses the bank roles already DEFINED-but-UNUSED in the global
 --   catalog (RTL-AUDIT internal auditor, RTL-MKT marketing specialist,
@@ -57,9 +57,9 @@ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM sys.sys_organization_units
                  WHERE organization_unit_tenant_id = v_tenant
-                   AND organization_unit_code IN ('RTL','DIV-CFO','DIV-MKT','DIV-LEGAL','DIV-HR')
+                   AND organization_unit_code IN ('RTL','DIV-CFO','DIV-MKT','DIR-COMPL','DIV-HR')
                  GROUP BY organization_unit_tenant_id HAVING count(*) = 5) THEN
-    RAISE EXCEPTION 'Expected anchor OUs (RTL,DIV-CFO,DIV-MKT,DIV-LEGAL,DIV-HR) missing for RTL';
+    RAISE EXCEPTION 'Expected anchor OUs (RTL,DIV-CFO,DIV-MKT,DIR-COMPL,DIV-HR) missing for RTL';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM sys.sys_positions
                  WHERE position_tenant_id = v_tenant
@@ -184,16 +184,16 @@ VALUES
    (SELECT organization_unit_manager_user_id FROM sys.sys_organization_units
       WHERE organization_unit_tenant_id=:'rtl'::uuid AND organization_unit_code='DIV-MKT'),
    'HIGH', (SELECT admin_id FROM _cfg)),
-  -- Head of Legal & Compliance -> reports to CEO, owner = Alice Esposito (DIV-LEGAL manager)
+  -- Head of Legal & Compliance -> reports to CEO, owner = Alice Esposito (DIR-COMPL manager)
   (uuid_generate_v5(uuid_ns_url(), 'rtl-pos:POS-LEGAL-HEAD'), :'rtl'::uuid,
    'POS-LEGAL-HEAD', 'Head of Legal & Compliance',
    (SELECT organization_unit_id FROM sys.sys_organization_units
-      WHERE organization_unit_tenant_id=:'rtl'::uuid AND organization_unit_code='DIV-LEGAL'),
+      WHERE organization_unit_tenant_id=:'rtl'::uuid AND organization_unit_code='DIR-COMPL'),
    (SELECT job_role_id FROM sys.sys_job_roles WHERE job_role_code='RTL-LEGAL'),
    (SELECT position_id FROM sys.sys_positions
       WHERE position_tenant_id=:'rtl'::uuid AND position_code='POS-00000321'),
    (SELECT organization_unit_manager_user_id FROM sys.sys_organization_units
-      WHERE organization_unit_tenant_id=:'rtl'::uuid AND organization_unit_code='DIV-LEGAL'),
+      WHERE organization_unit_tenant_id=:'rtl'::uuid AND organization_unit_code='DIR-COMPL'),
    'HIGH', (SELECT admin_id FROM _cfg))
 ON CONFLICT (position_tenant_id, position_code) DO UPDATE
   SET position_title                 = EXCLUDED.position_title,
@@ -267,7 +267,7 @@ VALUES
   (uuid_generate_v5(uuid_ns_url(), 'rtl-pos:POS-LEGAL-COMPL-01'), :'rtl'::uuid,
    'POS-LEGAL-COMPL-01', 'Compliance Officer',
    (SELECT organization_unit_id FROM sys.sys_organization_units
-      WHERE organization_unit_tenant_id=:'rtl'::uuid AND organization_unit_code='DIV-LEGAL'),
+      WHERE organization_unit_tenant_id=:'rtl'::uuid AND organization_unit_code='DIR-COMPL'),
    (SELECT job_role_id FROM sys.sys_job_roles WHERE job_role_code='RTL-ROLE-COMPLIANCE-OFFICER'),
    (SELECT position_id FROM sys.sys_positions
       WHERE position_tenant_id=:'rtl'::uuid AND position_code='POS-LEGAL-HEAD'),
@@ -275,7 +275,7 @@ VALUES
   (uuid_generate_v5(uuid_ns_url(), 'rtl-pos:POS-LEGAL-COUNSEL-01'), :'rtl'::uuid,
    'POS-LEGAL-COUNSEL-01', 'Legal Counsel',
    (SELECT organization_unit_id FROM sys.sys_organization_units
-      WHERE organization_unit_tenant_id=:'rtl'::uuid AND organization_unit_code='DIV-LEGAL'),
+      WHERE organization_unit_tenant_id=:'rtl'::uuid AND organization_unit_code='DIR-COMPL'),
    (SELECT job_role_id FROM sys.sys_job_roles WHERE job_role_code='RTL-LEGAL'),
    (SELECT position_id FROM sys.sys_positions
       WHERE position_tenant_id=:'rtl'::uuid AND position_code='POS-LEGAL-HEAD'),
@@ -306,7 +306,7 @@ WHERE hr.organization_unit_tenant_id = :'rtl'::uuid
 --    (FIL-BG-CEN, FIL-BS-CEN) to Treasury, reporting to the Head of Treasury.
 --    Idempotent by set membership: after the move they are in DIR-TREAS, so the
 --    branch filter no longer matches on re-run (0 rows). The 5 dealers in
---    DIV-COMM are intentionally NOT moved (out of "in filiale" scope).
+--    DIV-CRED are intentionally NOT moved (out of "in filiale" scope).
 -- ----------------------------------------------------------------------------
 UPDATE sys.sys_positions p
 SET position_organization_unit_id  = (SELECT organization_unit_id FROM sys.sys_organization_units

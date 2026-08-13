@@ -35,7 +35,7 @@
 --   nemmeno fra quelle 15 (i nomi differiscono di una parola).
 --
 --   Le 23 di RTL NON si toccano qui. Portano l'asse funzionale di circa 150
---   persone — `DIV-COMM` da sola ha 33 membri — e cancellarle sarebbe una
+--   persone — `DIV-CRED` da sola ha 33 membri — e cancellarle sarebbe una
 --   modifica di dati di un ordine di grandezza diverso da quello autorizzato,
 --   presa mentre si eseguiva un'altra consegna. E' un reperto da riportare, non
 --   una conseguenza da dedurre.

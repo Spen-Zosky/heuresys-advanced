@@ -1,3 +1,22 @@
+-- ⚠ SEED ONE-SHOT — GIA' APPLICATO. NON rieseguire, NON rendere idempotente.
+--
+-- Questo file ha prodotto il suo effetto una volta sola e il suo effetto e' ancora
+-- nel database (verificato 2026-08-13: le due unita' DIR-TREAS e DIR-AUDIT esistono).
+-- Rieseguirlo viola `sys_teams_pkey` per costruzione — non e' un difetto del file, e'
+-- la conseguenza di riapplicare una creazione a un database che la porta gia'.
+--
+-- Non e' nella catena delle migrazioni e non deve entrarci (ADR-0035: la catena si
+-- riapplica per intero a ogni deploy, quindi un file che crea una volta sola non ci sta).
+-- La guardia qui sotto si ferma con un messaggio leggibile invece di lasciar sbattere
+-- chi lo rilancia contro una chiave duplicata. (#174, S1057)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM sys.sys_organization_units
+              WHERE organization_unit_code IN ('DIR-TREAS', 'DIR-AUDIT')) THEN
+    RAISE EXCEPTION 'SEED ONE-SHOT GIA'' APPLICATO (#174): le unita'' DIR-TREAS/DIR-AUDIT esistono gia''. Questo file va eseguito una volta sola; non e'' idempotente e non deve diventarlo. Se stai ricostruendo il database da zero, eseguilo PRIMA che queste unita'' esistano.';
+  END IF;
+END $$;
+
 -- =============================================================================
 -- Blocco D — Organigramma completion seed for tenant RTL_BANK
 -- Tenant: 86ba7a65-217f-48ba-8ce5-5c09b40a66b0  (RTL Bank, customer-example)

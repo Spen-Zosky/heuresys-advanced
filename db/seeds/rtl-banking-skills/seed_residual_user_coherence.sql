@@ -1,3 +1,17 @@
+-- ⚠ SEED ONE-SHOT — GIA' APPLICATO. NON rieseguire, NON rendere idempotente.
+--
+-- Questo file corregge dati per archetipo e chiude con post-condizioni permanenti
+-- (sezione F, `RAISE EXCEPTION` se la violazione ricompare). Rieseguirlo su un database
+-- che ne porta gia' gli effetti viola `sys_upa_dates_ordered_check` per costruzione.
+--
+-- Come sapere se e' gia' stato applicato, senza rieseguirlo: le sue stesse
+-- post-condizioni della sezione F sono la verifica. Se passano, l'effetto c'e'.
+-- (#174, S1057)
+DO $$
+BEGIN
+  RAISE EXCEPTION 'SEED ONE-SHOT (#174): esegui la sola sezione F (post-condizioni) per sapere se l''effetto c''e'' gia''. Il file intero non e'' ri-eseguibile e non deve diventarlo.';
+END $$;
+
 -- =============================================================================
 -- #72 — Audit coerenza per-user, dimensioni residue (S1028, 2026-07-23)
 --

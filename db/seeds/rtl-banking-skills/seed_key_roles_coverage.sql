@@ -1,3 +1,20 @@
+-- ⚠ SEED ONE-SHOT — STORICO, E I SUOI EFFETTI SONO STATI SUPERATI.
+--
+-- Misurato il 2026-08-13: l'effetto che questo file dichiara — la riattivazione di
+-- `alice.esposito` sulla posizione POS-00000396 (Chief Risk Officer) — **oggi non c'e'
+-- piu'**: zero assegnazioni attive su quella coppia. Nel frattempo l'organigramma e'
+-- stato ricostruito (migrazioni 000244-000256, poi #113 e #118), e la ricostruzione ha
+-- sovrascritto queste assegnazioni.
+--
+-- Quindi non e' solo «gia' applicato»: e' SUPERATO. Rieseguirlo non solo fallisce
+-- (`sys_upa_dates_ordered_check`), ma se funzionasse rimetterebbe uno stato che il
+-- lavoro successivo ha deliberatamente cambiato. Resta come reperto di come si arrivo'
+-- allo stato di allora. NON rieseguire, NON rendere idempotente. (#174, S1057)
+DO $$
+BEGIN
+  RAISE EXCEPTION 'SEED ONE-SHOT SUPERATO (#174): questo file descrive uno stato dell''organigramma precedente alla ricostruzione (mig. 000244-000256, #113, #118). Rieseguirlo rimetterebbe assegnazioni che il lavoro successivo ha cambiato. Se serve davvero, va prima riscritto contro l''organigramma di oggi.';
+END $$;
+
 -- =============================================================================
 -- #70 — Key-roles coverage seed for tenant RTL_BANK (S1025, 2026-07-22)
 -- Tenant: 86ba7a65-217f-48ba-8ce5-5c09b40a66b0  (RTL Bank, customer-example)

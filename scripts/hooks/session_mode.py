@@ -728,7 +728,7 @@ def _check_command(cmd: str):
                     "servizi o script che scrivono. Vietato.")
 
         # --- filesystem verso il repo
-        r = _check_fs(toks, seg)
+        r = _check_fs(toks, seg, cwd_dichiarata)
         if r:
             return r
 
@@ -831,18 +831,62 @@ FS_MUTATORS = {"rm", "rmdir", "mv", "cp", "mkdir", "touch", "chmod", "chown",
                "ln", "truncate", "sed", "dd", "robocopy", "rsync"}
 
 
-def _check_fs(toks: list[str], seg: str):
+# Comandi che NON modificano tutti i loro argomenti: leggono da uno e scrivono su un
+# altro. Per questi si guarda solo cio' che il comando SCRIVE (#133).
+#
+#   cp / rsync   la destinazione e' l'ULTIMO percorso (`cp -r src dst`), salvo `-t DIR`
+#   ln           crea il link: la sorgente non viene toccata
+#   robocopy     ATTENZIONE, sintassi diversa: `robocopy SORGENTE DESTINAZIONE [file...]`,
+#                quindi la destinazione e' il SECONDO percorso, non l'ultimo
+#
+# `mv` NON e' qui di proposito: sposta, quindi cancella la sorgente — entrambi i lati
+# sono modifiche. Tutti gli altri (rm, truncate, chmod, dd, sed -i, ...) modificano ogni
+# argomento che ricevono.
+SOLO_DESTINAZIONE = {"cp", "rsync", "ln", "robocopy"}
+
+
+def _bersagli_scritti(head: str, toks: list[str]) -> list[str]:
+    """I soli argomenti che il comando MODIFICA.
+
+    Nasce da un attrito reale (#133): la guardia cercava un percorso del repo fra TUTTI
+    gli argomenti, quindi vietava `cp <repo>/file <lab>/` — cioe' leggere dal repo e
+    scrivere fuori, che e' esattamente cio' che una sessione lab deve poter fare. Il
+    perimetro di lettura e' totale per definizione; a essere vietata e' la scrittura.
+    """
+    percorsi = [t for t in toks[1:] if _looks_like_path(t)]
+    if head not in SOLO_DESTINAZIONE:
+        return percorsi
+    # `-t DIR` / `--target-directory=DIR`: la destinazione e' dichiarata, non posizionale.
+    for i, t in enumerate(toks):
+        if t == "-t" and i + 1 < len(toks):
+            return [toks[i + 1]]
+        if t.startswith("--target-directory="):
+            return [t.split("=", 1)[1]]
+    if not percorsi:
+        return []
+    if head == "robocopy":
+        # sorgente e destinazione sono i primi due; i successivi sono maschere di file
+        return percorsi[1:2]
+    return percorsi[-1:]
+
+
+def _check_fs(toks: list[str], seg: str, cwd: str | None = None):
     head = os.path.basename(toks[0]) if toks else ""
     if head not in FS_MUTATORS:
         return None
     if head == "sed" and not re.search(r"-i\b", seg):
         return None
-    for t in toks[1:]:
+    # Un `cd` in testa sposta la base dei percorsi relativi, esattamente come per le
+    # redirezioni (#121): senza, `cd <lab> && cp x y` risolveva `y` contro il repo.
+    base = REPO
+    if cwd:
+        base = Path(cwd) if os.path.isabs(cwd) else (REPO / cwd)
+    for t in _bersagli_scritti(head, toks):
         if not _looks_like_path(t):
             continue
-        cand = t if os.path.isabs(t) else str(REPO / t)
+        cand = t if os.path.isabs(t) else str(base / t)
         if is_inside(cand, REPO) and not any(is_inside(cand, r) for r in write_roots()):
-            return (f"modalita' lab: `{head}` con un percorso dentro il repo ({t}). "
+            return (f"modalita' lab: `{head}` scrive su un percorso dentro il repo ({t}). "
                     "Le sessioni lab non modificano il working tree.")
     return None
 
@@ -1043,6 +1087,23 @@ def _cases():
         ("psql CREATE TABLE vero", "Bash", {"command": 'psql -c "create table x (a int)"'}, False),
         ("psql DELETE vero", "Bash", {"command": 'psql -c "delete from sys.sys_users where 1=0"'}, False),
         ("psql DO con create dentro il corpo", "Bash", {"command": 'psql -c "DO $$ BEGIN create table x(a int); END $$"'}, False),
+        # #133 — cio' che conta e' cosa il comando SCRIVE, non quali percorsi nomina.
+        # I casi vanno letti a coppie: il primo di ogni coppia prova che l'attrito e'
+        # finito, il secondo che il divieto e' rimasto. Da soli, ciascuno proverebbe
+        # meta' della cosa — una guardia spalancata passa i primi, una guardia cieca
+        # passa i secondi.
+        ("cp LEGGE dal repo e scrive nel lab", "Bash", {"command": 'cp "%s/docs/kb/SOT_STATE.md" "%s/copia.md"' % (repo, lab)}, True),
+        ("cp scrive DENTRO il repo", "Bash", {"command": 'cp "%s/nota.md" "%s/docs/kb/nota.md"' % (lab, repo)}, False),
+        ("cp -r legge una cartella del repo verso il lab", "Bash", {"command": 'cp -r "%s/docs/kb" "%s/kb-copia"' % (repo, lab)}, True),
+        ("cp -t con destinazione nel repo", "Bash", {"command": 'cp -t "%s/docs" "%s/nota.md"' % (repo, lab)}, False),
+        ("mv dal repo al lab resta vietato: sposta = cancella la sorgente", "Bash", {"command": 'mv "%s/docs/kb/SOT_STATE.md" "%s/preso.md"' % (repo, lab)}, False),
+        ("rm nel lab", "Bash", {"command": 'rm "%s/scratch.txt"' % lab}, True),
+        ("rm nel repo", "Bash", {"command": 'rm "%s/docs/kb/SOT_STATE.md"' % repo}, False),
+        ("robocopy: la destinazione e' il SECONDO argomento, non l'ultimo", "Bash", {"command": r'robocopy "%s\docs" "%s\docs-copia" *.md' % (repo, lab)}, True),
+        ("robocopy con destinazione nel repo", "Bash", {"command": r'robocopy "%s\note" "%s\docs" *.md' % (lab, repo)}, False),
+        # #133 caso 1 — un `cd` in testa sposta la base dei percorsi relativi anche per
+        # il filesystem, non solo per le redirezioni (che lo sapevano gia' da #121).
+        ("cd nel lab, poi cp con percorsi relativi", "Bash", {"command": 'cd "%s" && cp nota.md copia.md' % lab}, True),
         # #186 — le opzioni brevi RAGGRUPPATE sono lo stesso comando di quelle sciolte.
         # I tre casi che contano stanno insieme di proposito: il primo prova che il
         # rifiuto ingiusto e' finito, gli altri due che sciogliere il grappolo non ha

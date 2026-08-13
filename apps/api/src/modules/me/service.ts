@@ -291,6 +291,10 @@ export const meService = {
     const tenantId = requireTenant(actor);
     const assignment = await repo.findMySurveyAssignment(pool, actor.userId, tenantId, surveyId);
     if (!assignment) throw new NotFoundError("Survey", "SURVEY_NOT_ASSIGNED");
+    // Reading one's own answers no longer needs an assignment (2026-08-13); WRITING still
+    // does, exactly as before. Without this line the widened read guard would have widened
+    // the write path too — silently, which is the worse half of the change.
+    if (!assignment.hasAssignment) throw new NotFoundError("Survey", "SURVEY_NOT_ASSIGNED");
     if (assignment.surveyStatus !== "active") throw new NotFoundError("Survey", "SURVEY_NOT_ASSIGNED");
     if (assignment.completedAt !== null) {
       throw new ConflictError("Survey already answered", "SURVEY_ALREADY_ANSWERED");

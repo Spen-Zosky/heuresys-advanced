@@ -833,29 +833,65 @@ export async function skillVisibleToTenant(q: DbConnector, skillId: string, tena
 
 export interface SurveyListItem {
   surveyId: string; title: string; status: string; isAnonymous: boolean;
-  questionCount: number; assignedAt: string; completedAt: string | null;
+  questionCount: number; assignedAt: string | null; completedAt: string | null;
+  /** How many answers of MINE this survey holds. 0 = assigned but not answered yet. */
+  answerCount: number;
 }
 
-/** Surveys ASSIGNED to the caller that are currently active (per-user M2 assignment + active
- *  status). questionCount is a correlated subquery so an unanswered survey still shows its size. */
+/** Surveys the caller can open: the ones ASSIGNED and still active (to answer), plus every
+ *  survey the caller has ALREADY ANSWERED, whatever its status (to review).
+ *
+ *  The second half is the fix for a real defect, measured on production data 2026-08-13:
+ *  the query used to require BOTH an assignment AND `survey_status = 'active'`, and the
+ *  result was that **0 of 8.288 answers** were reachable by the people who wrote them.
+ *  Two independent causes, either of which alone was enough:
+ *    · 786 of 948 assignments point at a `closed` survey — an answered survey closes, and
+ *      with it the only door to one's own answers;
+ *    · 398 of the 961 person/survey pairs that HAVE answers carry no assignment row at all,
+ *      so even an active survey would 404 on the detail guard.
+ *  Hence the union on answers rather than a widened status filter: the right to review what
+ *  one wrote cannot depend on a campaign still being open, nor on a bookkeeping row.
+ *  (Decision by Enzo, 2026-08-13: «la persona può rivedere le proprie risposte».)
+ *
+ *  questionCount is a correlated subquery so an unanswered survey still shows its size. */
 export async function listMyAssignedSurveys(
   q: DbConnector, userId: string, tenantId: string,
 ): Promise<SurveyListItem[]> {
   const res = await q.query<{
     survey_id: string; survey_title: string; survey_status: string;
     survey_is_anonymous: boolean; question_count: string;
-    survey_assignment_assigned_at: Date; survey_assignment_completed_at: Date | null;
+    survey_assignment_assigned_at: Date | null; survey_assignment_completed_at: Date | null;
+    answer_count: string;
   }>(
-    `SELECT s.survey_id, s.survey_title, s.survey_status, s.survey_is_anonymous,
+    `WITH mine AS (
+        SELECT a.survey_assignment_survey_id AS survey_id,
+               a.survey_assignment_assigned_at AS assigned_at,
+               a.survey_assignment_completed_at AS completed_at
+          FROM sys.sys_survey_assignments a
+          JOIN sys.sys_surveys s2 ON s2.survey_id = a.survey_assignment_survey_id
+         WHERE a.survey_assignment_user_id = $1
+           AND a.survey_assignment_tenant_id = $2
+           AND s2.survey_status = 'active'
+        UNION
+        SELECT r.survey_response_survey_id, NULL::timestamptz, NULL::timestamptz
+          FROM sys.sys_survey_responses r
+         WHERE r.survey_response_subject_user_id = $1
+           AND r.survey_response_tenant_id = $2
+     )
+     SELECT s.survey_id, s.survey_title, s.survey_status, s.survey_is_anonymous,
             (SELECT count(*) FROM sys.sys_survey_questions qq
               WHERE qq.survey_question_survey_id = s.survey_id)::text AS question_count,
-            a.survey_assignment_assigned_at, a.survey_assignment_completed_at
-       FROM sys.sys_survey_assignments a
-       JOIN sys.sys_surveys s ON s.survey_id = a.survey_assignment_survey_id
-      WHERE a.survey_assignment_user_id = $1
-        AND a.survey_assignment_tenant_id = $2
-        AND s.survey_status = 'active'
-      ORDER BY a.survey_assignment_assigned_at DESC`,
+            max(m.assigned_at) AS survey_assignment_assigned_at,
+            max(m.completed_at) AS survey_assignment_completed_at,
+            (SELECT count(*) FROM sys.sys_survey_responses rr
+              WHERE rr.survey_response_survey_id = s.survey_id
+                AND rr.survey_response_subject_user_id = $1
+                AND rr.survey_response_tenant_id = $2)::text AS answer_count
+       FROM mine m
+       JOIN sys.sys_surveys s ON s.survey_id = m.survey_id
+      WHERE s.survey_tenant_id = $2
+      GROUP BY s.survey_id, s.survey_title, s.survey_status, s.survey_is_anonymous
+      ORDER BY max(m.assigned_at) DESC NULLS LAST, s.survey_title`,
     [userId, tenantId],
   );
   return res.rows.map((r) => ({
@@ -864,9 +900,13 @@ export async function listMyAssignedSurveys(
     status: r.survey_status,
     isAnonymous: r.survey_is_anonymous,
     questionCount: Number(r.question_count),
-    assignedAt: r.survey_assignment_assigned_at.toISOString(),
+    // Null when the survey is reachable only through one's own answers: there is no
+    // assignment row to date it. Faking a date here would invent a fact.
+    assignedAt: r.survey_assignment_assigned_at
+      ? r.survey_assignment_assigned_at.toISOString() : null,
     completedAt: r.survey_assignment_completed_at
       ? r.survey_assignment_completed_at.toISOString() : null,
+    answerCount: Number(r.answer_count),
   }));
 }
 
@@ -875,24 +915,43 @@ export interface SurveyAssignmentRow {
   surveyStatus: string;
   title: string;
   isAnonymous: boolean;
+  /** True when a real assignment row backs this claim; false when the caller reaches the
+   *  survey ONLY through answers they already wrote. Reading is allowed either way —
+   *  writing requires the assignment, exactly as before (see `submitSurvey`). */
+  hasAssignment: boolean;
 }
 
-/** The caller's assignment for one survey (self-scope guard). Null = not assigned to me → 404
- *  no-leak (cross-tenant / cross-user surveys are indistinguishable from non-existent). */
+/** The caller's claim on one survey (self-scope guard): an assignment, OR at least one answer
+ *  of their own. Null = neither → 404 no-leak (cross-tenant / cross-user surveys stay
+ *  indistinguishable from non-existent).
+ *
+ *  The second branch is deliberate and was measured: 398 of the 961 person/survey pairs that
+ *  hold answers have NO assignment row, so an assignment-only guard hides a person's own
+ *  words from them. Having written an answer is a stronger claim to a survey than being
+ *  listed for it — the tenant match keeps the guard closed. */
 export async function findMySurveyAssignment(
   q: DbConnector, userId: string, tenantId: string, surveyId: string,
 ): Promise<SurveyAssignmentRow | null> {
   const res = await q.query<{
     survey_assignment_completed_at: Date | null;
     survey_status: string; survey_title: string; survey_is_anonymous: boolean;
+    has_assignment: boolean;
   }>(
     `SELECT a.survey_assignment_completed_at, s.survey_status,
-            s.survey_title, s.survey_is_anonymous
-       FROM sys.sys_survey_assignments a
-       JOIN sys.sys_surveys s ON s.survey_id = a.survey_assignment_survey_id
-      WHERE a.survey_assignment_user_id = $1
-        AND a.survey_assignment_tenant_id = $2
-        AND a.survey_assignment_survey_id = $3`,
+            s.survey_title, s.survey_is_anonymous,
+            (a.survey_assignment_survey_id IS NOT NULL) AS has_assignment
+       FROM sys.sys_surveys s
+       LEFT JOIN sys.sys_survey_assignments a
+              ON a.survey_assignment_survey_id = s.survey_id
+             AND a.survey_assignment_user_id = $1
+             AND a.survey_assignment_tenant_id = $2
+      WHERE s.survey_id = $3
+        AND s.survey_tenant_id = $2
+        AND (a.survey_assignment_survey_id IS NOT NULL
+             OR EXISTS (SELECT 1 FROM sys.sys_survey_responses r
+                         WHERE r.survey_response_survey_id = s.survey_id
+                           AND r.survey_response_subject_user_id = $1
+                           AND r.survey_response_tenant_id = $2))`,
     [userId, tenantId, surveyId],
   );
   const r = res.rows[0];
@@ -902,6 +961,7 @@ export async function findMySurveyAssignment(
     surveyStatus: r.survey_status,
     title: r.survey_title,
     isAnonymous: r.survey_is_anonymous,
+    hasAssignment: r.has_assignment,
   };
 }
 

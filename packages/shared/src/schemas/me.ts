@@ -431,8 +431,12 @@ export const MeSurveyListItemSchema = z.object({
   status: z.string(),
   isAnonymous: z.boolean(),
   questionCount: z.number().int(),
-  assignedAt: z.iso.datetime(),
+  /** Null when the survey is reachable only through one's own answers: no assignment row
+   *  exists to date it, and inventing a date would state a fact nobody recorded. */
+  assignedAt: z.iso.datetime().nullable(),
   completedAt: z.iso.datetime().nullable(),
+  /** How many answers of MINE this survey holds — 0 means assigned but not answered yet. */
+  answerCount: z.number().int().min(0),
 });
 export type MeSurveyListItem = z.infer<typeof MeSurveyListItemSchema>;
 export const MeSurveysResponseSchema = z.object({

@@ -49,11 +49,14 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Open questions
 
-- **#135** — quale settore attribuire a **Heuresys**: il tenant dice consulenza direzionale,
-  la carta d'identità dice programmazione informatica, l'invariante I21 dice consulenza. La
-  parte tecnica è pronta, manca la scelta.
-- **#159** — **quale pagina** deve adottare per seconda il ponte dell'agente: è l'input di
-  #156, e senza non si può dichiarare chiusa la voce (il lavoro invece è eseguibile).
+- ~~**#135**~~ — **RISOLTA (Enzo, 2026-08-13): Heuresys è consulenza direzionale.** E il dato
+  già lo diceva: la contraddizione citata dalla voce era stata riparata da #144 e nessuno
+  l'aveva aggiornata. Resta solo lavoro mio — quel campo non ha vincoli, quindi le due
+  dichiarazioni concordano per fortuna e non per costruzione.
+- ~~**#159**~~ — **RISOLTA, e il bersaglio è cresciuto**: l'assistente va in **tutte le schede
+  idonee**, non in una seconda pagina. Serve quindi definire cosa rende una scheda idonea. La
+  pagina della dimostrazione la sceglie Claude: **la scheda di una persona**, perché è dove i
+  permessi mordono di più e una falla si vedrebbe lì per prima.
 - **#182** — i due rami recuperati (473 righe mai in main): istruire e portare in main, o
   archiviare dichiarandolo?
 - **Il ruolo di database `gov_worker`**: si revoca o resta?

@@ -28,9 +28,25 @@ della sessione e somma i tre campi `usage` **restituiti dall'API**
   di un turno. Il numero è un **pavimento**, mai un soffitto — il verso giusto per decidere.
 - **Misura d'apertura**: `122.344 / 1.000.000` = **12,2%**, giudizio LARGO.
 
-**Regola d'arresto di questa sessione**: si misura dopo ogni voce chiusa. Sopra l'**80%** si
-apre solo ciò che si sa chiudere; sopra il **90%** si chiude e basta. Riserva di chiusura:
-**60k token**.
+### ⛔ REGOLA D'ARRESTO DI QUESTA SESSIONE — vincolante (Enzo, 2026-08-13)
+
+> **Al 75% di contesto consumato si INTERROMPONO le attività.** Non «si valuta», non «si
+> propone»: si interrompe. Poi: registrare il progresso, committare **e pushare** tutto,
+> chiusura completa della sessione.
+
+Sta scritta qui e non solo nella conversazione **apposta**: una regola che vive nel contesto
+muore con il contesto. Questo file si rilegge.
+
+- **Soglia**: `frazione >= 0.75` da `context_meter.py` (= 750.000 token sulla finestra da 1M).
+- **Quando si misura**: dopo **ogni** voce chiusa, e prima di aprirne una che si stima ≥60k.
+- **Il numero è un pavimento** (il turno in corso non è ancora nel transcript): a 73-74% si
+  considera già raggiunta, non si tira.
+- **Prima di aprire una voce**: `context_meter.py --budget N` — se il residuo *fino al 75%*
+  non copre N, quella voce non si apre, si passa alla successiva più economica.
+- **Cosa comprende la chiusura**: piano-file aggiornato riga per riga · register e SoT
+  allineati · commit di tutto · **push** · skill `handoff` · propagazione.
+- **Riserva**: la chiusura stessa costa ~60k. Perciò l'ultima voce di lavoro si apre solo se
+  finisce **sotto** il 75%, non «intorno».
 
 ---
 

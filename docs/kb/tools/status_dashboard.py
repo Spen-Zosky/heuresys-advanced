@@ -366,6 +366,36 @@ def sec_drift(no_db, live, sot_md, state_md):
     return s
 
 
+def sec_context():
+    """Quanto contesto ha gia' consumato QUESTA sessione — misurato, non stimato.
+
+    Enzo, 2026-08-13: la stima a impressione non e' affidabile e va sostituita, non
+    solo vietata. `context_meter` legge i token che l'API ha riportato nel transcript
+    JSONL della sessione. Sta qui perche' una regola che vive solo in un resoconto non
+    viene riletta: al boot il numero si vede da se', in ogni sessione.
+
+    Se il transcript non si trova si dichiara NON MISURABILE. Mai un ripiego stimato:
+    un numero inventato qui e' peggio di nessun numero, perche' sembra una misura.
+    """
+    s = Section("CONTESTO DELLA SESSIONE (misurato dal transcript, non stimato)")
+    try:
+        import context_meter
+        m = context_meter.misura(None, None)
+    except Exception as exc:                                    # noqa: BLE001
+        s.add(UNK, f"non misurabile ({type(exc).__name__}) — NON stimare a impressione")
+        return s
+    if not m.get("ok"):
+        s.add(UNK, f"non misurabile: {m.get('errore', '?')} — NON stimare a impressione")
+        return s
+    frazione = m["frazione"]
+    glyph = BAD if frazione >= 0.90 else (DOT if frazione >= 0.60 else OK)
+    s.add(glyph, f"{m['percento']:.1f}% · consumato {m['contesto']:,} · residuo {m['residuo']:,}"
+                 f" su {m['finestra']:,}")
+    s.add(DOT, f"{m['giudizio']}  (soglie 60/80/90% · riserva di chiusura 60k)")
+    s.add(DOT, "il numero e' un PAVIMENTO: il turno in corso non e' ancora nel transcript")
+    return s
+
+
 def sec_backlog(no_db):
     s = Section("BACKLOG (Action register)")
     items = register_items(read(BACKLOG_MD))
@@ -479,6 +509,7 @@ def main():
     state_md = read(STATE_MD) or ""
     db_sec, live = sec_db(args.no_db)
     sections = [
+        sec_context(),
         sec_git(args.no_net),
         sec_ci(args.no_net),
         sec_prod(args.no_net),

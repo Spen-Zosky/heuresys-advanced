@@ -242,6 +242,15 @@ Adesso, in un solo giro:
   python docs/kb/tools/session_start.py
 Poi presenta il menu delle azioni e chiedi: "Scegli #, aggrega (es. 1+4), o nuovo."
 Non iniziare a lavorare prima della scelta.
+
+IL CONTESTO SI MISURA, NON SI STIMA (Enzo, 2026-08-13 — vale sempre):
+  python docs/kb/tools/context_meter.py            # consumato / residuo / %
+  python docs/kb/tools/context_meter.py --budget N # "ci sta un lavoro da N?" exit 2 = no
+Legge i token che l'API ha riportato nel transcript: non e' un'euristica. Il boot
+lo stampa gia' in cima alla dashboard. Nessuna frase sul contesto — «si stringe»,
+«siamo al limite», «meglio chiudere» — senza il numero accanto, e la decisione di
+chiudere resta di Enzo. Se il transcript non si trova si dice NON MISURABILE: mai
+un ripiego a impressione.
 """
 
 LAB_BRIEF = """\
@@ -260,6 +269,13 @@ Vincoli attivi, imposti anche da una guardia automatica:
     si naviga, non si muta. Artefatti Playwright fuori dal repo. Mai
     `pnpm test:e2e*` (fa `next build` e sporca il repo).
   · I valori dei segreti non si trascrivono mai in un artefatto o in un messaggio.
+
+IL CONTESTO SI MISURA, NON SI STIMA (Enzo, 2026-08-13 — vale anche qui):
+  python docs/kb/tools/context_meter.py            # consumato / residuo / %
+  python docs/kb/tools/context_meter.py --budget N # "ci sta un lavoro da N?" exit 2 = no
+E' lettura, quindi la guardia lo lascia passare (verificato). Nessuna frase sul
+contesto senza il numero accanto; se il transcript non si trova si dice NON
+MISURABILE, mai un ripiego a impressione.
 
 Contratto completo: <padre del repo>/heuresys-design-lab/README.md
 Apri leggendo quel README e lo STATO.md accanto, poi chiedi da dove partire.

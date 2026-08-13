@@ -90,7 +90,30 @@ Post-S935 SEC base: `qs` must resolve to `>= 6.15.2` everywhere in the tree.
 pnpm why -r qs
 ```
 
-Verified 2026-08-09: every resolution converges on **6.15.3** — a single version across the workspace, no split resolution. If a `6.15.1` or earlier ever reappears, it will come from a transitive with its own pin; add a path-specific override under `pnpm.overrides` in the root `package.json`.
+⚠️ **The `-r` is load-bearing.** Without it, `pnpm why qs` inspects only the root workspace and prints **nothing at all, with exit code 0** — which reads exactly like "the package is absent" when it is in fact present in a child workspace. A check that cannot distinguish "clean" from "did not look" is not a check.
+
+Verified 2026-08-09, **re-verified 2026-08-13**: every resolution converges on **6.15.3** — a single version across the workspace, no split resolution.
+
+`qs` enters through **one chain only**, and no application workspace depends on it directly:
+
+```
+@heuresys/agent-gateway
+└─ @anthropic-ai/claude-agent-sdk 0.3.220
+   └─ @modelcontextprotocol/sdk 1.29.0 (peer)
+      ├─ express 5.2.1 ──(body-parser 2.3.0)──> qs 6.15.3
+      └─ express-rate-limit 8.6.0 ─> express 5.2.1 (peer) ─> qs 6.15.3
+```
+
+Knowing the entry point is what makes a recovery targeted instead of a guess: if a `6.15.1` or earlier ever reappears it will come from a transitive with its own pin, and the override goes on **that** path —
+
+```json
+"pnpm": {
+  "overrides": {
+    "qs": ">=6.15.2",
+    "express>qs": ">=6.15.2"
+  }
+}
+```
 
 ---
 

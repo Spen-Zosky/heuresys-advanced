@@ -328,6 +328,9 @@ def main() -> int:
     ap.add_argument("--session", help="session-id preciso (default: il transcript piu' recente)")
     ap.add_argument("--window", type=int, help="finestra in token, se il modello non e' riconosciuto")
     ap.add_argument("--budget", type=int, help="quanti token servono: exit 2 se non ci stanno")
+    ap.add_argument("--stop-at", type=float, metavar="FRAZ",
+                    help="soglia d'arresto decisa dall'utente (es. 0.75): exit 3 se raggiunta. "
+                         "Serve a rendere la regola MECCANICA invece che ricordata")
     ap.add_argument("--json", action="store_true", help="output JSON")
     ap.add_argument("--selftest", action="store_true", help="prova che puo' fallire")
     a = ap.parse_args()
@@ -336,12 +339,28 @@ def main() -> int:
         return selftest()
 
     m = misura(a.session, a.window)
+    if a.stop_at and m.get("ok"):
+        m["stop_at"] = a.stop_at
+        m["stop_raggiunta"] = m["frazione"] >= a.stop_at
+        m["token_alla_soglia"] = max(0, int(a.stop_at * m["finestra"]) - m["contesto"])
     if a.json:
         print(json.dumps(m, indent=2, ensure_ascii=False))
         if not m["ok"]:
             return 0
+        if m.get("stop_raggiunta"):
+            return 3
         return 0 if (a.budget is None or m["residuo"] >= a.budget) else 2
-    return stampa(m, a.budget)
+    rc = stampa(m, a.budget)
+    if m.get("ok") and a.stop_at:
+        raggiunta = m["stop_raggiunta"]
+        print(f"  SOGLIA D'ARRESTO {a.stop_at:.0%} → "
+              + ("⛔ RAGGIUNTA: interrompi, registra, committa, pusha, chiudi."
+                 if raggiunta else
+                 f"non raggiunta, mancano {m['token_alla_soglia']:,} token"))
+        print("=" * 72)
+        if raggiunta:
+            return 3
+    return rc
 
 
 if __name__ == "__main__":

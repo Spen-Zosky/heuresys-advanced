@@ -128,16 +128,47 @@ def leggi_marcatore(session_id: str) -> dict:
     return data if isinstance(data, dict) else {}
 
 
-def set_mode(session_id: str, mode: str) -> None:
+def set_mode(session_id: str, mode: str, implicita: bool = False) -> None:
+    """Scrive il marcatore.
+
+    `implicita` distingue una modalita' DICHIARATA da una dedotta: senza il comando,
+    la sessione e' canonica per fail-safe, ed e' un'informazione diversa da «Enzo ha
+    scritto avvia sessione». Il registro deve saper dire quale delle due, altrimenti
+    la storia racconta una certezza che non c'era (#128).
+    """
     STORE.mkdir(parents=True, exist_ok=True)
+    ora = time.strftime("%Y-%m-%dT%H:%M:%S%z")
     payload_marcatore = {
         "mode": mode,
         "session_id": session_id,
         "repo": str(REPO),
-        "set_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "set_at": ora,
+        # L'ULTIMO SEGNO DI VITA, rinfrescato a ogni prompt. Senza, la durata di una
+        # sessione non era misurabile e una sessione lunga poteva vedersi cancellare
+        # il marcatore mentre era in corso.
+        "last_seen": ora,
+        "implicita": implicita,
     }
     marker(session_id).write_text(
         json.dumps(payload_marcatore, indent=2), encoding="utf-8")
+
+
+def tocca(session_id: str) -> None:
+    """Aggiorna il solo `last_seen`, lasciando intatto il resto.
+
+    Non riscrive `mode`: la modalita' la decide il primo messaggio, e un messaggio
+    successivo non deve poterla cambiare per sbaglio. Un errore qui e' silenzioso e
+    grave — sposterebbe una sessione da lab a canonica o viceversa senza dirlo.
+    """
+    p = marker(session_id)
+    try:
+        d = json.loads(p.read_text(encoding="utf-8"))
+        if not isinstance(d, dict):
+            return
+        d["last_seen"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+        p.write_text(json.dumps(d, indent=2), encoding="utf-8")
+    except (OSError, ValueError):
+        return                      # un marcatore illeggibile non fa fallire un prompt
 
 
 # --- che cosa comporta una modalita' -------------------------------------
@@ -157,19 +188,75 @@ def cancello_di_verifica_si_applica(mode: str) -> bool:
     return mode != LAB
 
 
-def gc() -> int:
-    removed = 0
+def gc(giorni: int | None = None, esegui: bool = True) -> list[str]:
+    """Pota i marcatori piu' vecchi di `giorni`. **Non piu' automatica** (#128).
+
+    Prima girava a ogni apertura di sessione con una soglia cablata di 14 giorni e
+    senza dire niente: la storia si accorciava da sola. Adesso e' un atto esplicito —
+    `hook.sh gc [giorni]` — perche' la decisione di potare e' di Enzo, non un effetto
+    collaterale dell'aprire una sessione.
+
+    Restituisce i NOMI dei marcatori interessati invece di un numero: un conteggio non
+    dice cosa si e' perso. Con `esegui=False` si vede cosa cancellerebbe senza farlo.
+    """
+    soglia_s = (giorni if giorni is not None else 14) * 24 * 3600
+    tolti: list[str] = []
     if not STORE.is_dir():
-        return 0
+        return tolti
     now = time.time()
-    for f in STORE.glob("*.json"):
+    for f in sorted(STORE.glob("*.json")):
         try:
-            if now - f.stat().st_mtime > MAX_MARKER_AGE_S:
-                f.unlink()
-                removed += 1
+            if now - f.stat().st_mtime > soglia_s:
+                tolti.append(f.stem)
+                if esegui:
+                    f.unlink()
         except OSError:
             pass
-    return removed
+    return tolti
+
+
+def storico() -> list[dict]:
+    """Le sessioni in ordine cronologico, con modalita' e durata.
+
+    E' la ricostruzione che il 2026-08-04 e' stata fatta a mano leggendo i file uno per
+    uno; qui la fa la macchina. `durata` esiste solo da quando il marcatore porta
+    `last_seen`: per i marcatori piu' vecchi resta `None`, e si dice, invece di
+    inventare uno zero che sembrerebbe una sessione istantanea.
+    """
+    fuori: list[dict] = []
+    if not STORE.is_dir():
+        return fuori
+    for f in STORE.glob("*.json"):
+        if f.name == "payload-shapes.json":
+            continue
+        try:
+            d = json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            fuori.append({"session_id": f.stem, "mode": "?", "set_at": None,
+                          "last_seen": None, "durata_min": None, "implicita": None,
+                          "nota": "marcatore illeggibile"})
+            continue
+        if not isinstance(d, dict):
+            continue
+        inizio, fine = d.get("set_at"), d.get("last_seen")
+        durata = None
+        if inizio and fine:
+            try:
+                a = time.mktime(time.strptime(inizio[:19], "%Y-%m-%dT%H:%M:%S"))
+                b = time.mktime(time.strptime(fine[:19], "%Y-%m-%dT%H:%M:%S"))
+                durata = round((b - a) / 60.0, 1)
+            except ValueError:
+                durata = None
+        fuori.append({
+            "session_id": d.get("session_id") or f.stem,
+            "mode": d.get("mode") or "?",
+            "set_at": inizio,
+            "last_seen": fine,
+            "durata_min": durata,
+            "implicita": d.get("implicita"),
+        })
+    fuori.sort(key=lambda r: (r["set_at"] or ""))
+    return fuori
 
 
 # --- payload degli hook ---------------------------------------------------
@@ -835,14 +922,46 @@ def decide(tool_name: str, tool_input: dict, mode: str = LAB):
 
 
 def cmd_prompt_hook() -> int:
+    """#128: nessuna sessione invisibile, nessuna cancellazione automatica.
+
+    Tre cose cambiano rispetto a prima, e tutte e tre nascono da una decisione di Enzo
+    (2026-08-04): «preferisco avere una storia completa ed eventualmente decidere io
+    quando non mi serve piu'».
+
+    1. UNA SESSIONE SENZA COMANDO ESISTE LO STESSO. Prima, se il primo messaggio non
+       era «avvia sessione», questa funzione usciva senza scrivere niente: quella
+       sessione non esisteva per il registro, pur comportandosi da canonica. Non e'
+       teorico — spiega l'anomalia che la cronistoria del 2026-08-04 aveva dovuto
+       lasciare irrisolta: due documenti scritti in orari coperti da marcatori
+       canonici non erano «una canonica che scrive nel lab», erano una sessione senza
+       marcatore.
+       Il marcatore implicito e' SEMPRE `canonical`, mai `lab`: e' il fail-safe
+       dichiarato, e scrivere un marcatore in assenza di comando non deve poter
+       aprire la modalita' permissiva. E si scrive solo se non ce n'e' gia' uno, cosi'
+       il primo messaggio resta quello che decide.
+    2. IL SEGNO DI VITA. Il marcatore portava solo `set_at`, e la data di modifica non
+       veniva mai rinfrescata: una sessione piu' lunga della soglia si vedeva
+       cancellare il marcatore MENTRE ERA IN CORSO, ricadendo in canonica in silenzio.
+    3. NIENTE `gc()` QUI. La potatura non e' piu' un effetto collaterale dell'aprire
+       una sessione: si chiede a mano con `hook.sh gc`. Un marcatore pesa 161 byte —
+       dieci sessioni al giorno per cinque anni fanno ~3 MB. La cancellazione
+       automatica non difendeva niente che valesse la perdita della storia.
+    """
     data = payload()
     record_shape("UserPromptSubmit", data)
     sid = data.get("session_id") or ""
     mode = parse_start_command(data.get("prompt") or "")
+
     if mode is None:
+        # Nessun comando riconosciuto: la sessione esiste comunque, ed e' canonica.
+        if sid:
+            if not marker(sid).exists():
+                set_mode(sid, CANONICAL, implicita=True)
+            else:
+                tocca(sid)
         return 0
+
     set_mode(sid, mode)
-    gc()
     sys.stdout.write(LAB_BRIEF if mode == LAB else CANONICAL_BRIEF)
     return 0
 
@@ -1078,6 +1197,85 @@ def cmd_selftest() -> int:
         marker(probe_sid).unlink()
         checks.append(("marcatore assente -> canonical", get_mode(probe_sid) == CANONICAL))
         checks.append(("session_id vuoto -> canonical", get_mode("") == CANONICAL))
+
+        # --- #128: nessuna sessione invisibile, nessuna cancellazione automatica ----
+        #
+        # I due casi che la voce dichiara come condizione di chiusura. Il secondo e'
+        # quello che conta di piu': prova che aprire una sessione NON accorcia piu' la
+        # storia. Prima girava `gc()` a ogni apertura, e un marcatore vecchio spariva
+        # senza che nessuno lo chiedesse.
+        senza_cmd = "__selftest_senza_comando__"
+        try:
+            marker(senza_cmd).unlink()
+        except OSError:
+            pass
+
+        # SI CHIAMA IL GANCIO VERO, non una sua imitazione.
+        #
+        # La prima stesura di questi casi *simulava* cio' che fa `cmd_prompt_hook`
+        # («se non esiste, scrivi canonical»). Provata coi sabotaggi, tre su cinque
+        # NON venivano colti: stavo provando la mia simulazione, non il codice. Una
+        # prova che non puo' fallire non e' una prova, e questa non poteva.
+        def prompt(sid: str, testo: str) -> None:
+            import io as _io
+            globale = globals()
+            vero_payload, vera_stdout = globale["payload"], sys.stdout
+            globale["payload"] = lambda: {"session_id": sid, "prompt": testo}
+            sys.stdout = _io.StringIO()          # il brief non deve sporcare l'esito
+            try:
+                cmd_prompt_hook()
+            finally:
+                globale["payload"] = vero_payload
+                sys.stdout = vera_stdout
+
+        prompt(senza_cmd, "ciao, guardiamo insieme una cosa")
+        d = leggi_marcatore(senza_cmd)
+        checks.append(("#128 sessione senza comando: il marcatore esiste", bool(d)))
+        checks.append(("#128 sessione senza comando: e' canonical, MAI lab",
+                       d.get("mode") == CANONICAL))
+        checks.append(("#128 sessione senza comando: dichiarata implicita",
+                       d.get("implicita") is True))
+        checks.append(("#128 il marcatore porta un segno di vita",
+                       bool(d.get("last_seen"))))
+        # `tocca` aggiorna last_seen e NON tocca la modalita'
+        set_mode(senza_cmd, LAB)
+        prima = leggi_marcatore(senza_cmd).get("set_at")
+        tocca(senza_cmd)
+        dopo = leggi_marcatore(senza_cmd)
+        checks.append(("#128 tocca() non cambia la modalita'", dopo.get("mode") == LAB))
+        checks.append(("#128 tocca() non cambia l'inizio", dopo.get("set_at") == prima))
+
+        # un secondo messaggio NON deve cambiare la modalita' decisa dal primo
+        prompt(senza_cmd, "avvia sessione lab")          # arriva DOPO: oggi imposta lab
+        checks.append(("#128 un comando successivo puo' ancora dichiarare la modalita'",
+                       leggi_marcatore(senza_cmd).get("mode") == LAB))
+        prompt(senza_cmd, "un messaggio qualunque")
+        checks.append(("#128 un messaggio qualunque NON riporta a canonical",
+                       leggi_marcatore(senza_cmd).get("mode") == LAB))
+
+        # un marcatore vecchio di oltre la soglia SOPRAVVIVE all'apertura di una sessione
+        vecchio = "__selftest_vecchio__"
+        set_mode(vecchio, CANONICAL)
+        antico = time.time() - (60 * 24 * 3600)
+        os.utime(marker(vecchio), (antico, antico))
+        prompt("__selftest_nuova__", "avvia sessione")    # apre una sessione VERA
+        checks.append(("#128 un marcatore vecchio sopravvive all'apertura",
+                       marker(vecchio).exists()))
+        # ...e `gc --prova` lo VEDE senza cancellarlo, poi `gc` lo cancella davvero
+        visti = gc(14, esegui=False)
+        checks.append(("#128 gc in prova lo elenca", vecchio in visti))
+        checks.append(("#128 gc in prova NON cancella", marker(vecchio).exists()))
+        tolti = gc(14, esegui=True)
+        checks.append(("#128 gc esplicito cancella", vecchio in tolti and not marker(vecchio).exists()))
+        # lo storico non perde nessuna sessione viva
+        ids = {r["session_id"] for r in storico()}
+        checks.append(("#128 lo storico elenca le sessioni vive",
+                       senza_cmd in ids and "__selftest_nuova__" in ids))
+        for s in (senza_cmd, "__selftest_nuova__"):
+            try:
+                marker(s).unlink()
+            except OSError:
+                pass
     except OSError as exc:
         checks.append((f"registro non scrivibile: {exc}", False))
     for desc, res in checks:
@@ -1140,7 +1338,32 @@ def main(argv: list[str]) -> int:
         print(get_mode(rest[0]))
         return 0
     if cmd == "gc":
-        print(f"{gc()} marcatori rimossi")
+        # `hook.sh gc [giorni] [--prova]` — esplicito su cosa cancella, e con una
+        # soglia che si passa invece di subirla cablata (#128).
+        prova = "--prova" in rest
+        arg = next((a for a in rest if a.isdigit()), None)
+        giorni = int(arg) if arg else 14
+        tolti = gc(giorni, esegui=not prova)
+        verbo = "cancellerebbe" if prova else "rimossi"
+        print(f"soglia {giorni} giorni — {len(tolti)} marcatori {verbo}")
+        for t in tolti:
+            print(f"  {t}")
+        if not tolti:
+            print("  (nessuno: la storia resta intera)")
+        return 0
+    if cmd == "storico":
+        righe = storico()
+        if not righe:
+            print("nessuna sessione registrata")
+            return 0
+        print(f"{'inizio':<26} {'modalita':<10} {'durata':>8}  sessione")
+        for r in righe:
+            d = f"{r['durata_min']:.0f}m" if r["durata_min"] is not None else "  —"
+            m = r["mode"] + ("*" if r.get("implicita") else "")
+            print(f"{(r['set_at'] or '?'):<26} {m:<10} {d:>8}  {r['session_id']}")
+        impl = sum(1 for r in righe if r.get("implicita"))
+        print(f"\n{len(righe)} sessioni · {impl} senza comando esplicito (*) · "
+              "nessuna cancellazione automatica")
         return 0
     if cmd == "selftest":
         return cmd_selftest()

@@ -15,7 +15,7 @@ Enzo ha posto il problema per primo: *«la tua capacità di verificare quanto co
 non è solida e affidabile»*. Vero, ed è già una regola scritta
 (`feedback_no_context_estimation`) che però vietava senza dare il sostituto.
 
-**Il sostituto esiste ora**: `docs/kb/tools/context_meter.py`. Legge il transcript JSONL
+**Il sostituto esiste ora**: `docs/kb/tools/guardiano.py`. Legge il transcript JSONL
 della sessione e somma i tre campi `usage` **restituiti dall'API**
 (`input_tokens + cache_read_input_tokens + cache_creation_input_tokens`). Non è una stima:
 è il numero che l'API ha riportato.
@@ -28,20 +28,25 @@ della sessione e somma i tre campi `usage` **restituiti dall'API**
   di un turno. Il numero è un **pavimento**, mai un soffitto — il verso giusto per decidere.
 - **Misura d'apertura**: `122.344 / 1.000.000` = **12,2%**, giudizio LARGO.
 
-### ⛔ REGOLA D'ARRESTO DI QUESTA SESSIONE — vincolante (Enzo, 2026-08-13)
+### ⛔ IL GUARDIANO — regola d'arresto, vincolante (Enzo, 2026-08-13)
 
-> **Al 75% di contesto consumato si INTERROMPONO le attività.** Non «si valuta», non «si
-> propone»: si interrompe. Poi: registrare il progresso, committare **e pushare** tutto,
-> chiusura completa della sessione.
+> **Se contesto ≥ 75% OPPURE finestra 5 ore ≥ 80% si INTERROMPONO le attività.** Non «si
+> valuta», non «si propone»: si interrompe. Poi: registrare il progresso, committare **e
+> pushare** tutto, chiusura completa della sessione.
+
+Il ramo delle 5 ore è stato aggiunto in corsa, per non arrivare allo stop e restare fermi
+ad aspettare il reset. La regola aggregata è ora **permanente e a livello utente**
+(`~/.claude/CLAUDE.md` + memoria), non solo di progetto: vale in ogni sessione e in ogni
+progetto. `python docs/kb/tools/guardiano.py --sorveglia` esce **3** quando scatta.
 
 Sta scritta qui e non solo nella conversazione **apposta**: una regola che vive nel contesto
 muore con il contesto. Questo file si rilegge.
 
-- **Soglia**: `frazione >= 0.75` da `context_meter.py` (= 750.000 token sulla finestra da 1M).
+- **Soglia**: `frazione >= 0.75` da `guardiano.py` (= 750.000 token sulla finestra da 1M), oppure `five_hour_pct >= 80`.
 - **Quando si misura**: dopo **ogni** voce chiusa, e prima di aprirne una che si stima ≥60k.
 - **Il numero è un pavimento** (il turno in corso non è ancora nel transcript): a 73-74% si
   considera già raggiunta, non si tira.
-- **Prima di aprire una voce**: `context_meter.py --budget N` — se il residuo *fino al 75%*
+- **Prima di aprire una voce**: `guardiano.py --budget N` — se il residuo *fino al 75%*
   non copre N, quella voce non si apre, si passa alla successiva più economica.
 - **Cosa comprende la chiusura**: piano-file aggiornato riga per riga · register e SoT
   allineati · commit di tutto · **push** · skill `handoff` · propagazione.
@@ -77,9 +82,10 @@ decrescente: massimizza il numero di righe che spariscono.
 | # | Voce | Fatto = | Costo | Stato |
 |---|---|---|---|---|
 | **F0** | Misuratore di contesto + prova falsificabile | selftest verde, 2 difetti visti rossi | fatto | ✅ **FATTO** |
-| **F1a** | #182 — il documento Dependabot in main | `docs/github/dependabot-triage-*.md` aggiornato in main | ~10min | ⏳ |
-| **F1b** | #182 — il codice residui E2E in main | prova generale verde + suite | ~1h | ⏳ |
-| **F2** | #186 — guardia lab: `psql -Atc` | selftest guardia verde + il caso raggruppato passa | ~20min | ⏳ |
+| **F1a** | #182 — il documento Dependabot in main | `docs/github/dependabot-triage-*.md` aggiornato in main | ~10min | ✅ **FATTO** `c16dbbb6` — il ramo era **superato, non mancante**: main aveva già lo stesso triage in forma più completa (`b55dcabf`, `45cc6014`), inclusa la nota su `#68` che il ramo non poteva avere. `git cherry` confronta l'identità della modifica, non la sostanza. Innestati i 2 soli dettagli additivi, ri-verificati dal vivo. Archiviato in `archivio/gov-w1-recuperato` |
+| **F1b** | #182 — il codice residui E2E in main | prova generale verde + suite | ~1h | ✅ **FATTO** `ca1bb3b6` — diagnosi del ramo **vera**, meccanismo **sbagliato**: portava un manifesto a mano di 19 marcatori, l'impostazione che `drift-check.ts` aveva già misurato e scartato — e infatti **non nomina `sys_content_versions`**, una delle 2 colonne che perdono righe davvero. Recepito col censimento esaustivo (697 colonne). Il difetto peggiore era un altro e taceva: **su CI il teardown è un no-op**. 7 casi, 2 sollevano. Archiviato in `archivio/gov-w2-recuperato` |
+| **F2** | #186 — guardia lab: `psql -Atc` | selftest guardia verde + il caso raggruppato passa | ~20min | ✅ **FATTO** `d7d7dce8` — patch del lab applicata, **88 ok / 0 falliti** e gli 83 verdetti pre-esistenti invariati. In più la batteria ha imparato a controllare il **motivo**, non solo il sì/no: senza, il caso `-Atf` restava verde anche togliendo il ramo che lo riconosce. Falsificazione con **linea di base misurata** (una copia fuori dal repo parte da 83/5 per la trappola di `repo_root()`) — sabotaggi: **+4**, **+1**, **+2 varchi veri** |
+| **F0b** | Il guardiano unico — contesto **e** finestra 5h | selftest verde, 4 difetti visti rossi, dato 5h reale | in corsa | ✅ **FATTO** — richiesta di Enzo arrivata durante F2. Fonte del dato 5h **trovata misurando**: non esiste in nessun file, Claude Code la passa allo stdin della riga di stato → ora persistita in `~/.claude/rate-limits.json`. Regola aggregata installata a **livello utente**. Live: contesto 30% · 5h 38% · 7 giorni **77%** |
 | **F3** | #124 — dichiarare la chiusura nel register | evidenza dei commit + verifica live | ~15min | ⏳ |
 | **F4** | #135 — vincoli su `tenant_industry_code` | FK/CHECK in migrazione + prova generale | ~45min | ⏳ |
 | **F5** | #147 — 138 email cablate in 20 file | zero email letterali, helper dal DB, test verdi | ~1-2h | ⏳ |

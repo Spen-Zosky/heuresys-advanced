@@ -367,32 +367,53 @@ def sec_drift(no_db, live, sot_md, state_md):
 
 
 def sec_context():
-    """Quanto contesto ha gia' consumato QUESTA sessione — misurato, non stimato.
+    """Le due misure che decidono se si continua — contesto e finestra di 5 ore.
 
     Enzo, 2026-08-13: la stima a impressione non e' affidabile e va sostituita, non
-    solo vietata. `context_meter` legge i token che l'API ha riportato nel transcript
-    JSONL della sessione. Sta qui perche' una regola che vive solo in un resoconto non
-    viene riletta: al boot il numero si vede da se', in ogni sessione.
+    solo vietata; e al contesto va affiancato il limite delle 5 ore, per fermarsi PRIMA
+    di sbatterci contro invece che dopo. Il `guardiano` legge i token che l'API ha
+    riportato nel transcript e la percentuale che Claude Code passa alla riga di stato.
 
-    Se il transcript non si trova si dichiara NON MISURABILE. Mai un ripiego stimato:
+    Sta qui perche' una regola che vive solo in un resoconto non viene riletta: al boot
+    i numeri si vedono da se', in ogni sessione.
+
+    Cio' che non si puo' misurare si dichiara NON MISURABILE. Mai un ripiego stimato:
     un numero inventato qui e' peggio di nessun numero, perche' sembra una misura.
     """
-    s = Section("CONTESTO DELLA SESSIONE (misurato dal transcript, non stimato)")
+    s = Section("GUARDIANO — contesto e finestra 5h (misurati, non stimati)")
     try:
-        import context_meter
-        m = context_meter.misura(None, None)
+        import guardiano
+        m = guardiano.misura(None, None)
+        m5 = guardiano.misura_5h()
+        v = guardiano.sorveglia(m, m5)
     except Exception as exc:                                    # noqa: BLE001
         s.add(UNK, f"non misurabile ({type(exc).__name__}) — NON stimare a impressione")
         return s
-    if not m.get("ok"):
-        s.add(UNK, f"non misurabile: {m.get('errore', '?')} — NON stimare a impressione")
-        return s
-    frazione = m["frazione"]
-    glyph = BAD if frazione >= 0.90 else (DOT if frazione >= 0.60 else OK)
-    s.add(glyph, f"{m['percento']:.1f}% · consumato {m['contesto']:,} · residuo {m['residuo']:,}"
-                 f" su {m['finestra']:,}")
-    s.add(DOT, f"{m['giudizio']}  (soglie 60/80/90% · riserva di chiusura 60k)")
-    s.add(DOT, "il numero e' un PAVIMENTO: il turno in corso non e' ancora nel transcript")
+
+    if m.get("ok"):
+        fr = m["frazione"]
+        s.add(BAD if fr >= guardiano.STOP_CONTESTO else (DOT if fr >= 0.60 else OK),
+              f"contesto {m['percento']:.1f}% · consumato {m['contesto']:,} · "
+              f"residuo {m['residuo']:,} su {m['finestra']:,}")
+    else:
+        s.add(UNK, f"contesto non misurabile: {m.get('errore', '?')}")
+
+    if m5.get("ok"):
+        sette = m5.get("sette_giorni_pct")
+        coda = f" · 7 giorni {sette:.0f}%" if isinstance(sette, (int, float)) else ""
+        s.add(BAD if m5["frazione"] >= guardiano.STOP_5H else (DOT if m5["frazione"] >= 0.60 else OK),
+              f"finestra 5h {m5['percento']:.1f}%  (dato di {m5['eta_min']:.0f} min fa{coda})")
+    else:
+        s.add(UNK, f"finestra 5h non misurabile: {m5.get('errore', '?')}")
+
+    if v["cieco"]:
+        s.add(BAD, "GUARDIANO CIECO: nessuna delle due misure disponibile. Non e' un 'tutto bene'.")
+    elif v["chiudi"]:
+        s.add(BAD, f"⛔ SOGLIA RAGGIUNTA — {' e '.join(v['motivi'])} → {guardiano.PROCEDURA}")
+    else:
+        s.add(DOT, f"si continua · soglie {guardiano.STOP_CONTESTO:.0%} contesto / "
+                   f"{guardiano.STOP_5H:.0%} finestra 5h (regola OR)")
+    s.add(DOT, "il contesto e' un PAVIMENTO: il turno in corso non e' ancora nel transcript")
     return s
 
 

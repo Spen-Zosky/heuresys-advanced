@@ -17,7 +17,24 @@
       "Bash(pnpm typecheck:test)",
       "Bash(psql *)",
       "Bash(mkdir -p \"D:/heuresys-design-lab/artefatti/domini\")",
-      "Bash(psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -t -A -c \"SELECT DISTINCT c.table_name FROM information_schema.columns c JOIN information_schema.tables t ON t.table_schema=c.table_schema AND t.table_name=c.table_name AND t.table_type='BASE TABLE' WHERE c.table_schema='sys' AND \\(c.column_name LIKE '%user_id' OR c.column_name LIKE '%employee_id' OR c.column_name LIKE '%person_id'\\) ORDER BY 1;\")"
+      "Bash(psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -t -A -c \"SELECT DISTINCT c.table_name FROM information_schema.columns c JOIN information_schema.tables t ON t.table_schema=c.table_schema AND t.table_name=c.table_name AND t.table_type='BASE TABLE' WHERE c.table_schema='sys' AND \\(c.column_name LIKE '%user_id' OR c.column_name LIKE '%employee_id' OR c.column_name LIKE '%person_id'\\) ORDER BY 1;\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git ls-remote *)",
+      "Bash(cp scripts/close-log.sh /tmp/cl.bak)",
+      "Bash(python -)",
+      "Bash(bash scripts/test/run-shell-tests.sh)",
+      "Bash(cp /tmp/cl.bak scripts/close-log.sh)",
+      "Bash(cd D:/heuresys-advanced)",
+      "Bash(echo 'esca: la squadra __TRACKED_VAR__ passa temporaneamente ad altri')",
+      "Bash(python docs/kb/tools/verifica_incrociata.py --famiglia X1)",
+      "Bash(ssh linux-pc *)",
+      "Bash(git pull *)",
+      "Bash(python docs/kb/tools/handoff_lint.py)",
+      "Bash(MSYS_NO_PATHCONV=1 python -)",
+      "Bash(git commit *)",
+      "Bash(MSYS_NO_PATHCONV=1 git commit -q -m \"docs\\(kb\\): #159 — l'assistente in tutte le schede idonee \\(direzione Enzo\\)\")",
+      "Bash(bash scripts/close-log.sh step registra eseguito \"decisioni di Enzo su #135 e #159 recepite: due open questions chiuse\")"
     ]
   },
   "hooks": {

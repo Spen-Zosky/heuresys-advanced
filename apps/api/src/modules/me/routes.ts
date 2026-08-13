@@ -32,6 +32,7 @@ import {
   MeDevelopmentResponseSchema,
   MeKpisResponseSchema,
   MeCertificationsResponseSchema, MeCertificationSchema, CreateMeCertificationBodySchema,
+  MePredictionsResponseSchema, MeMentorMatchesResponseSchema, MePulseChecksResponseSchema,
   MeDocumentsResponseSchema,
   MePermissionsResponseSchema,
   MeInterfacesResponseSchema,
@@ -388,6 +389,27 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("insight:read:self")],
     schema: { response: { 200: MeDevelopmentResponseSchema } },
   }, async (req) => meService.getDevelopment(selfActor(req)));
+
+  // #126 (Enzo, 2026-08-04): le predizioni algoritmiche su di me, il modello che le ha
+  // prodotte e la data. 468 righe su 156 persone di 158 stavano su di loro senza che
+  // potessero vederle.
+  app.get("/predictions", {
+    preHandler: [requirePermission("insight:read:self")],
+    schema: { response: { 200: MePredictionsResponseSchema } },
+  }, async (req) => meService.listPredictions(selfActor(req)));
+
+  // #126: solo il lato ALLIEVO. Dal lato mentore la stessa tabella è una classifica fra
+  // persone, e quella non è cosa dell'interessato.
+  app.get("/mentor-matches", {
+    preHandler: [requirePermission("insight:read:self")],
+    schema: { response: { 200: MeMentorMatchesResponseSchema } },
+  }, async (req) => meService.listMentorMatches(selfActor(req)));
+
+  // Enzo, 2026-08-13: ciò che la persona ha dichiarato di suo pugno, lo può rivedere.
+  app.get("/pulse-checks", {
+    preHandler: [requirePermission("insight:read:self")],
+    schema: { response: { 200: MePulseChecksResponseSchema } },
+  }, async (req) => meService.listPulseChecks(selfActor(req)));
 
   app.get("/certifications", {
     preHandler: [requirePermission("certification:read:self")],

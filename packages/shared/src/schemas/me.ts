@@ -879,3 +879,56 @@ export const MeProfessionalExperiencesResponseSchema = z.object({
 });
 export type MeProfessionalExperiencesResponse =
   z.infer<typeof MeProfessionalExperiencesResponseSchema>;
+
+/* --- ciò che un algoritmo dice di me (#126) --------------------------- */
+
+export const MePredictionSchema = z.object({
+  predictionId: z.uuid(),
+  type: z.string(),
+  value: z.number().nullable(),
+  label: z.string().nullable(),
+  confidence: z.number().nullable(),
+  computedAt: z.iso.datetime().nullable(),
+  validUntil: z.iso.datetime().nullable(),
+  /** Il modello che ha prodotto il numero. Esce insieme al punteggio di proposito: un
+   *  valore nudo su una persona non è un'informazione, è una sentenza senza processo. */
+  modelName: z.string().nullable(),
+  modelVersion: z.string().nullable(),
+  modelAlgorithm: z.string().nullable(),
+});
+export type MePrediction = z.infer<typeof MePredictionSchema>;
+export const MePredictionsResponseSchema = z.object({
+  items: z.array(MePredictionSchema), total: z.number().int().min(0),
+});
+export type MePredictionsResponse = z.infer<typeof MePredictionsResponseSchema>;
+
+export const MeMentorMatchSchema = z.object({
+  matchId: z.uuid(),
+  skillName: z.string().nullable(),
+  myLevel: z.number().nullable(),
+  mentorLevel: z.number().nullable(),
+  score: z.number().nullable(),
+  isRecommended: z.boolean(),
+  mentorName: z.string().nullable(),
+  expiresAt: z.iso.datetime().nullable(),
+});
+export type MeMentorMatch = z.infer<typeof MeMentorMatchSchema>;
+export const MeMentorMatchesResponseSchema = z.object({
+  items: z.array(MeMentorMatchSchema), total: z.number().int().min(0),
+});
+export type MeMentorMatchesResponse = z.infer<typeof MeMentorMatchesResponseSchema>;
+
+export const MePulseCheckSchema = z.object({
+  pulseCheckId: z.uuid(),
+  date: z.string().nullable(),
+  weekNumber: z.number().int().nullable(),
+  moodScore: z.number().int().nullable(),
+  workloadScore: z.number().int().nullable(),
+  satisfactionScore: z.number().int().nullable(),
+  comment: z.string().nullable(),
+});
+export type MePulseCheck = z.infer<typeof MePulseCheckSchema>;
+export const MePulseChecksResponseSchema = z.object({
+  items: z.array(MePulseCheckSchema), total: z.number().int().min(0),
+});
+export type MePulseChecksResponse = z.infer<typeof MePulseChecksResponseSchema>;

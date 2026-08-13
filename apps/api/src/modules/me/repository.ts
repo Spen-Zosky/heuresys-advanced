@@ -1795,3 +1795,135 @@ export async function listMyProfessionalExperiences(q: DbConnector, userId: stri
   }));
   return { items, total: items.length };
 }
+
+/* --- ciò che un algoritmo dice di me (#126, Enzo 2026-08-04) ------------------------- */
+
+export interface MyPredictionRow {
+  predictionId: string; type: string; value: number | null; label: string | null;
+  confidence: number | null; computedAt: string | null; validUntil: string | null;
+  modelName: string | null; modelVersion: string | null; modelAlgorithm: string | null;
+}
+
+/** Le predizioni che un modello ha calcolato SU DI ME.
+ *
+ *  Misura del 2026-08-04: 468 righe su 156 persone di 158 — quasi tutti avevano una
+ *  predizione su di sé che non potevano vedere. Decisione di Enzo: visibile.
+ *
+ *  Il modello viene esposto insieme al punteggio, e non è un vezzo: un numero nudo che
+ *  dice «0,93» su una persona non è un'informazione, è una sentenza senza processo. Chi
+ *  legge deve poter vedere quale modello lo ha prodotto, con che algoritmo e quando. */
+export async function listMyPredictions(
+  q: DbConnector, userId: string, tenantId: string,
+): Promise<MyPredictionRow[]> {
+  const res = await q.query<{
+    prediction_id: string; prediction_type: string; prediction_value: string | null;
+    prediction_label: string | null; prediction_confidence: string | null;
+    prediction_computed_at: Date | null; prediction_valid_until: Date | null;
+    model_name: string | null; model_version: string | null; model_algorithm: string | null;
+  }>(
+    `SELECT p.prediction_id, p.prediction_type, p.prediction_value, p.prediction_label,
+            p.prediction_confidence, p.prediction_computed_at, p.prediction_valid_until,
+            m.model_name, m.model_version, m.model_algorithm
+       FROM sys.sys_model_predictions p
+       LEFT JOIN sys.sys_predictive_models m ON m.model_id = p.prediction_model_id
+      WHERE p.prediction_subject_user_id = $1
+        AND p.prediction_tenant_id = $2
+      ORDER BY p.prediction_computed_at DESC NULLS LAST, p.prediction_type`,
+    [userId, tenantId],
+  );
+  return res.rows.map((r) => ({
+    predictionId: r.prediction_id,
+    type: r.prediction_type,
+    value: r.prediction_value === null ? null : Number(r.prediction_value),
+    label: r.prediction_label,
+    confidence: r.prediction_confidence === null ? null : Number(r.prediction_confidence),
+    computedAt: r.prediction_computed_at ? r.prediction_computed_at.toISOString() : null,
+    validUntil: r.prediction_valid_until ? r.prediction_valid_until.toISOString() : null,
+    modelName: r.model_name,
+    modelVersion: r.model_version,
+    modelAlgorithm: r.model_algorithm,
+  }));
+}
+
+export interface MyMentorMatchRow {
+  matchId: string; skillName: string | null; myLevel: number | null;
+  mentorLevel: number | null; score: number | null; isRecommended: boolean;
+  mentorName: string | null; expiresAt: string | null;
+}
+
+/** Gli abbinamenti con un mentore in cui l'ALLIEVO sono io.
+ *
+ *  Enzo, 2026-08-04: visibile, «ma solo il punteggio dell'allievo verso i PROPRI mentori».
+ *  Da qui il filtro su `match_mentee_user_id` e NON su `match_mentor_user_id`: dal lato
+ *  mentore la stessa tabella sarebbe una graduatoria fra persone — chi mi è stato
+ *  abbinato e con che punteggio rispetto agli altri — e quella non è cosa mia.
+ *  `match_recommendation_rank` non esce: è la posizione in una classifica. */
+export async function listMyMentorMatches(
+  q: DbConnector, userId: string, tenantId: string,
+): Promise<MyMentorMatchRow[]> {
+  const res = await q.query<{
+    match_id: string; match_skill_name: string | null;
+    match_mentee_level: string | null; match_mentor_level: string | null;
+    match_score: string | null; match_is_recommended: boolean;
+    mentor_name: string | null; match_expires_at: Date | null;
+  }>(
+    `SELECT mm.match_id, mm.match_skill_name, mm.match_mentee_level, mm.match_mentor_level,
+            mm.match_score, mm.match_is_recommended, mm.match_expires_at,
+            nullif(trim(coalesce(u.user_first_name, '') || ' ' || coalesce(u.user_last_name, '')), '')
+              AS mentor_name
+       FROM sys.sys_mentor_match_scores mm
+       LEFT JOIN sys.sys_users u ON u.user_id = mm.match_mentor_user_id
+      WHERE mm.match_mentee_user_id = $1
+        AND mm.match_tenant_id = $2
+      ORDER BY mm.match_score DESC NULLS LAST`,
+    [userId, tenantId],
+  );
+  return res.rows.map((r) => ({
+    matchId: r.match_id,
+    skillName: r.match_skill_name,
+    myLevel: r.match_mentee_level === null ? null : Number(r.match_mentee_level),
+    mentorLevel: r.match_mentor_level === null ? null : Number(r.match_mentor_level),
+    score: r.match_score === null ? null : Number(r.match_score),
+    isRecommended: r.match_is_recommended,
+    mentorName: r.mentor_name,
+    expiresAt: r.match_expires_at ? r.match_expires_at.toISOString() : null,
+  }));
+}
+
+/** Le mie rilevazioni di umore, carico e soddisfazione — le ho scritte io.
+ *
+ *  Enzo, 2026-08-13, come estensione derivata della decisione sui sondaggi: ciò che la
+ *  persona ha dichiarato di suo pugno, lo può rivedere. 2.834 righe su 157 persone, che
+ *  `insights` legge già per calcolarne un punteggio — il punteggio esisteva, la materia
+ *  prima no. */
+export async function listMyPulseChecks(
+  q: DbConnector, userId: string, tenantId: string,
+): Promise<{
+  pulseCheckId: string; date: string | null; weekNumber: number | null;
+  moodScore: number | null; workloadScore: number | null;
+  satisfactionScore: number | null; comment: string | null;
+}[]> {
+  const res = await q.query<{
+    pulse_check_id: string; pulse_check_date: Date | null; pulse_check_week_number: number | null;
+    pulse_check_mood_score: number | null; pulse_check_workload_score: number | null;
+    pulse_check_satisfaction_score: number | null; pulse_check_comment: string | null;
+  }>(
+    `SELECT pulse_check_id, pulse_check_date, pulse_check_week_number,
+            pulse_check_mood_score, pulse_check_workload_score,
+            pulse_check_satisfaction_score, pulse_check_comment
+       FROM sys.sys_pulse_checks
+      WHERE pulse_check_subject_user_id = $1
+        AND pulse_check_tenant_id = $2
+      ORDER BY pulse_check_date DESC NULLS LAST`,
+    [userId, tenantId],
+  );
+  return res.rows.map((r) => ({
+    pulseCheckId: r.pulse_check_id,
+    date: toDateOnly(r.pulse_check_date),
+    weekNumber: r.pulse_check_week_number,
+    moodScore: r.pulse_check_mood_score,
+    workloadScore: r.pulse_check_workload_score,
+    satisfactionScore: r.pulse_check_satisfaction_score,
+    comment: r.pulse_check_comment,
+  }));
+}

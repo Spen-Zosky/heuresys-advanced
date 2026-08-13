@@ -557,4 +557,28 @@ export const meService = {
     });
     return { purpose: body.purpose, action: body.action, occurredAt };
   },
+
+  /* --- ciò che un algoritmo dice di me (#126, Enzo 2026-08-04) ---------------------- */
+
+  /** Le predizioni calcolate SU DI ME, ciascuna col modello che l'ha prodotta. */
+  async listPredictions(actor: SelfActor) {
+    const tenantId = requireTenant(actor);
+    const items = await repo.listMyPredictions(pool, actor.userId, tenantId);
+    return { items, total: items.length };
+  },
+
+  /** Gli abbinamenti in cui l'allievo sono io — mai il lato mentore, che sarebbe una
+   *  graduatoria fra persone (Enzo, 2026-08-04). */
+  async listMentorMatches(actor: SelfActor) {
+    const tenantId = requireTenant(actor);
+    const items = await repo.listMyMentorMatches(pool, actor.userId, tenantId);
+    return { items, total: items.length };
+  },
+
+  /** Le rilevazioni di umore e carico che ho scritto io (Enzo, 2026-08-13). */
+  async listPulseChecks(actor: SelfActor) {
+    const tenantId = requireTenant(actor);
+    const items = await repo.listMyPulseChecks(pool, actor.userId, tenantId);
+    return { items, total: items.length };
+  },
 };

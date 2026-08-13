@@ -511,6 +511,37 @@ def norm_all(s: str) -> str:
     return os.path.normcase(s.replace("\\", "/"))
 
 
+# #121 (quarto caso) — LE OPZIONI BREVI SI RAGGRUPPANO.
+# `psql -Atc "SELECT 1"` e `psql -A -t -c "SELECT 1"` sono lo stesso comando, ma il
+# confronto per token esatto vedeva solo `-Atc`, non trovava `-c`, e chiudeva dicendo
+# «senza -c non e' ispezionabile». Rifiuto ingiusto — non un buco: il ramo che scattava
+# era quello che CHIUDE, quindi nessun SQL e' mai sfuggito all'ispezione. Stessa famiglia
+# degli altri casi di #121: si legge il testo invece del significato.
+#
+# Le opzioni di psql che VOGLIONO un valore. Chi non e' qui dentro non ne prende
+# (`-A`, `-t`, `-x`, `-q`, `-e`, `-1`, ...), quindi il grappolo prosegue.
+PSQL_OPZIONI_CON_VALORE = set("cdfFhLoPpRTUv")
+
+
+def _psql_grappolo(tok: str):
+    """Scioglie un'opzione breve raggruppata di psql.
+
+    -> (lettere, valore_attaccato_o_None) per `-Atc`, `-cSELECT 1`, `-f`;
+       None se il token non e' un grappolo di opzioni brevi (`--command=`, un percorso,
+       l'SQL stesso).
+    Regola POSIX, la stessa di psql: si scorrono le lettere e la PRIMA che vuole un
+    valore se lo prende — attaccato se nel token c'e' dell'altro, altrimenti dal token
+    successivo. Percio' in `-Atc` il valore va a `c`, e in `-cAt` andrebbe a `c`.
+    """
+    if len(tok) < 2 or not tok.startswith("-") or tok.startswith("--"):
+        return None
+    corpo = tok[1:]
+    for i, ch in enumerate(corpo):
+        if ch in PSQL_OPZIONI_CON_VALORE:
+            return corpo[: i + 1], (corpo[i + 1:] or None)
+    return corpo, None
+
+
 def _check_psql(seg: str, toks: list[str]):
     if "<" in seg:
         return "modalita' lab: psql con redirezione da file — SQL non ispezionabile. Vietato."
@@ -522,6 +553,21 @@ def _check_psql(seg: str, toks: list[str]):
             sql_parts.append(toks[i + 1])
         elif t.startswith("--command="):
             sql_parts.append(t.split("=", 1)[1])
+        else:
+            g = _psql_grappolo(t)
+            if not g or t in {"-c", "--command"}:
+                continue
+            lettere, attaccato = g
+            ultima = lettere[-1]
+            if ultima == "f":
+                # `-Atf script.sql`: prima cadeva nel messaggio generico. Vietato lo
+                # stesso, ma detto per quello che e'.
+                return "modalita' lab: psql -f esegue uno script non ispezionabile. Vietato."
+            if ultima == "c":
+                if attaccato is not None:
+                    sql_parts.append(attaccato)
+                elif i + 1 < len(toks):
+                    sql_parts.append(toks[i + 1])
     if not sql_parts:
         return ("modalita' lab: psql senza -c non e' ispezionabile. "
                 "Usa `psql ... -c \"SELECT ...\"`.")
@@ -705,6 +751,22 @@ def _cases():
         ("psql CREATE TABLE vero", "Bash", {"command": 'psql -c "create table x (a int)"'}, False),
         ("psql DELETE vero", "Bash", {"command": 'psql -c "delete from sys.sys_users where 1=0"'}, False),
         ("psql DO con create dentro il corpo", "Bash", {"command": 'psql -c "DO $$ BEGIN create table x(a int); END $$"'}, False),
+        # #186 — le opzioni brevi RAGGRUPPATE sono lo stesso comando di quelle sciolte.
+        # I tre casi che contano stanno insieme di proposito: il primo prova che il
+        # rifiuto ingiusto e' finito, gli altri due che sciogliere il grappolo non ha
+        # aperto un varco. Uno solo dei tre, da solo, non direbbe niente.
+        ("psql -Atc SELECT (opzioni raggruppate)", "Bash", {"command": 'psql -Atc "select 1"'}, True),
+        ("psql -Atc UPDATE (raggruppate, ma scrive)", "Bash", {"command": 'psql -Atc "update sys.sys_users set x=1"'},
+         False, "la query scrive o modifica lo schema"),
+        # Il motivo e' la parte che conta: `-Atf` era vietato anche prima, ma per la
+        # ragione sbagliata («senza -c non e' ispezionabile»). Senza il quinto elemento
+        # questo caso resterebbe verde anche togliendo il ramo che lo riconosce.
+        ("psql -Atf (raggruppate su uno script)", "Bash", {"command": "psql -Atf db/seed.sql"},
+         False, "psql -f esegue uno script non ispezionabile"),
+        ("psql -cCREATE attaccato al grappolo", "Bash", {"command": "psql -ccreate table x (a int)"},
+         False, "la query scrive o modifica lo schema"),
+        ("psql -At senza -c (niente da ispezionare)", "Bash", {"command": "psql -At"},
+         False, "psql senza -c non e' ispezionabile"),
         # #134 (secondo caso) — si decide sul verbo, non sul percorso.
         ("elenco di db/scripts", "Bash", {"command": "ls db/scripts/"}, True),
         ("lettura di uno script di db/scripts", "Bash", {"command": "cat db/scripts/migrate.sh"}, True),
@@ -760,13 +822,25 @@ def _cases():
 def cmd_selftest() -> int:
     ok = bad = 0
     failures = []
-    for desc, tool, inp, expected in _cases():
+    # Un caso e' `(descrizione, tool, input, atteso)` — e facoltativamente un QUINTO
+    # elemento: un pezzo di testo che il motivo deve contenere.
+    #
+    # Serve perche' il solo si'/no non discrimina sempre. `psql -Atf script.sql` e'
+    # vietato sia sciogliendo il grappolo sia non sciogliendolo: cambia il MOTIVO
+    # («esegue uno script non ispezionabile» invece del generico «senza -c»), non
+    # l'esito. Un caso che resta verde comunque non e' una prova, e' un ornamento.
+    for caso in _cases():
+        desc, tool, inp, expected = caso[0], caso[1], caso[2], caso[3]
+        motivo_atteso = caso[4] if len(caso) > 4 else None
         allowed, reason = decide(tool, inp)
-        if allowed == expected:
-            ok += 1
-        else:
+        if allowed != expected:
             bad += 1
             failures.append((desc, expected, allowed, reason))
+        elif motivo_atteso and motivo_atteso not in (reason or ""):
+            bad += 1
+            failures.append((f"{desc} [motivo]", motivo_atteso, reason or "(nessun motivo)", ""))
+        else:
+            ok += 1
 
     # Le due modalita' e cosa comportano. E' il punto in cui una di esse potrebbe
     # essere scambiata per piu' permissiva di quello che e': se qualcuno esentasse

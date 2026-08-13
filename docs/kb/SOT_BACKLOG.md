@@ -12,7 +12,7 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
-- **#186 Guardia lab: `psql -Atc` rifiutato e `psql -A -t -c` accettato — le opzioni brevi raggruppate non vengono sciolte** · status: ACTIVE
+- **#186 Guardia lab: `psql -Atc` rifiutato e `psql -A -t -c` accettato — le opzioni brevi raggruppate non vengono sciolte** · status: DONE
   - priority: P2 · effort: ~20min (patch gia' scritta e collaudata) · doc: inbox lab-id 2026-08-12-guardia-psql-opzioni-raggruppate
   - famiglia: quarta manifestazione di #121 (la guardia legge il testo invece del significato). Chiude UN caso, non la voce: restano SEGMENT_SPLIT (riga 366, spezza su | e ; senza sapere delle virgolette) e il `cd` iniziale non tracciato
   - causa: `_check_psql` (session_mode.py:498-516) cerca il token ESATTO `-c`; `-Atc` non lo e', `sql_parts` resta vuoto e scatta il ramo «psql senza -c non e' ispezionabile». Stesso effetto su `-Atf`, che cade nel messaggio generico invece che nel divieto di `-f`
@@ -23,6 +23,7 @@
   - trappola-per-chi-ripete-la-prova: `repo_root()` (riga 62) risale da `__file__` senza CLAUDE_PROJECT_DIR, quindi una copia fuori dal repo crede che il repo sia il lab e tre casi («rm nel repo», «redirezione», «sed -i») risultano falsamente aperti. Ancorare entrambi i moduli prima di caricarli
   - chiuso-quando: `psql -Atc "select 1"` passa in sessione lab, `psql -Atc "update …"` no, e il selftest e' verde con i tre casi nuovi
   - lab-id: 2026-08-12-guardia-psql-opzioni-raggruppate
+  - ✅ **RISOLTO S1056**: patch del lab applicata (`_psql_grappolo`, regola POSIX: la prima lettera che vuole un valore se lo prende). **Il selftest e' stato reso capace di controllare anche il MOTIVO**, non solo il si'/no — senza, il caso `-Atf` restava verde pure togliendo il ramo che lo riconosce, perche' e' vietato in entrambi i mondi e cambia solo la spiegazione. Falsificazione con **linea di base misurata** (una copia fuori dal repo parte da 83/5 per la trappola di `repo_root()`, non da 88/0): sabotaggio del grappolo **+4** guasti, ramo `-f` rimosso **+1**, SQL finto al posto del vero **+2 varchi veri**. In repo: **88 ok, 0 falliti**, e gli 83 verdetti pre-esistenti invariati
 
 - **#183 Policy di cancellazione utente: la disattivazione esiste, la cancellazione no** · status: DONE
   - priority: P1 · effort: ~1 sessione (censimento gia' fatto; policy + implementazione + prova) · doc: `docs/superpowers/plans/2026-08-10-batch-p1-s1053.md` (scoperte fuori ciclo) + mig `000303` (censimento delle 262 FK)

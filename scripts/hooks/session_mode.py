@@ -385,6 +385,159 @@ DENIED_SKILLS = {"handoff", "zero-pending-loop", "full-alignment-deploy"}
 
 SEGMENT_SPLIT = re.compile(r"\|\||&&|[;\n|]")
 
+# --- #121: il parser guardava il TESTO, non la struttura -------------------------------
+#
+# La guardia spezzava il comando con una regex sulla stringa grezza e cercava le
+# redirezioni allo stesso modo. Cinque rifiuti ingiusti su sei nascevano da li':
+#
+#   psql -At -F'|' -c "SELECT ..."          il `|` DENTRO gli apici spezzava il comando
+#   WHERE compensation_band_max_eur > 120000  un confronto letto come redirezione
+#   ON o2.id > o1.id                          idem, dentro una condizione di join
+#   una stringa SQL contenente ` -> `          idem
+#   def analizza(...) -> dict:                 dentro un heredoc Python
+#
+# In nessuno dei sei ha lasciato passare una scrittura: falliva in CHIUSURA, non in
+# apertura. Ma l'attrito spinge a riscrivere le query per aggirare il parser, ed e' cosi'
+# che si introducono errori veri.
+#
+# Il rischio da presidiare e' il ROVESCIO: rendere il parser consapevole delle virgolette
+# non deve renderlo piu' permissivo. La prova che conta non e' che i sei casi passino —
+# e' che i casi VERI continuino a essere rifiutati.
+
+_APERTURE_HEREDOC = re.compile(r"<<-?\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\1")
+
+
+def _senza_heredoc(cmd: str) -> str:
+    """Toglie il CORPO degli heredoc, lasciando l'intestazione.
+
+    Il corpo di un heredoc non e' shell: e' SQL, Python, JSON. Analizzarlo come se lo
+    fosse produce falsi positivi che non hanno niente a che vedere con la shell — il
+    caso misurato e' `def analizza(...) -> dict:`, dove `>` veniva letto come una
+    redirezione verso un file di nome `dict:`.
+
+    L'intestazione resta, cosi' un `cat <<EOF > file/nel/repo` continua a essere visto.
+    """
+    fuori: list[str] = []
+    righe = cmd.split("\n")
+    i = 0
+    while i < len(righe):
+        r = righe[i]
+        fuori.append(r)
+        m = _APERTURE_HEREDOC.search(r)
+        if m:
+            marcatore = m.group(2)
+            i += 1
+            while i < len(righe) and righe[i].strip() != marcatore:
+                i += 1
+            # la riga del marcatore di chiusura si scarta insieme al corpo
+        i += 1
+    return "\n".join(fuori)
+
+
+def _fuori_virgolette(s: str):
+    """Genera (indice, carattere) per i soli caratteri NON dentro apici.
+
+    Un solo passaggio, uno stato di due valori. Non e' un parser di shell completo e non
+    pretende di esserlo: distingue «dentro una stringa» da «fuori», che e' esattamente
+    la distinzione che mancava.
+    """
+    apice = ""
+    i = 0
+    while i < len(s):
+        c = s[i]
+        if apice:
+            if c == "\\" and apice == '"':
+                i += 2
+                continue
+            if c == apice:
+                apice = ""
+        elif c in "'\"":
+            apice = c
+        else:
+            yield i, c
+        i += 1
+
+
+def _segmenti(cmd: str) -> list[str]:
+    """Spezza il comando sui separatori di shell che stanno FUORI dalle virgolette.
+
+    Stessi separatori di prima (`||`, `&&`, `;`, `|`, a-capo): cambia solo che un `|`
+    dentro `-F'|'` non conta piu' come separatore.
+    """
+    tagli: list[int] = []
+    salta = -1
+    testo = cmd
+    for i, c in _fuori_virgolette(testo):
+        if i <= salta:
+            continue
+        if c in ";\n|&":
+            doppio = testo[i:i + 2] in ("||", "&&")
+            if c == "&" and not doppio:
+                continue                       # `&` singolo: non e' un separatore qui
+            tagli.append(i)
+            salta = i + 1 if doppio else i
+    pezzi, inizio = [], 0
+    for t in tagli:
+        pezzi.append(testo[inizio:t])
+        inizio = t + (2 if testo[t:t + 2] in ("||", "&&") else 1)
+    pezzi.append(testo[inizio:])
+    return pezzi
+
+
+def _redirezioni(seg: str) -> list[str]:
+    """I bersagli delle redirezioni presenti FUORI dalle virgolette, piu' quelli di `tee`.
+
+    `2>&1` e `>&2` non sono scritture su file e non entrano.
+    """
+    fuori = list(_fuori_virgolette(seg))
+    posizioni = {i for i, _ in fuori}
+    bersagli: list[str] = []
+    i = 0
+    while i < len(seg):
+        if i not in posizioni or seg[i] != ">":
+            i += 1
+            continue
+        j = i + 1
+        if j < len(seg) and seg[j] == ">":
+            j += 1
+        if j < len(seg) and seg[j] == "&":       # 2>&1, >&2: duplicazione, non un file
+            i = j + 1
+            continue
+        while j < len(seg) and seg[j] in " \t":
+            j += 1
+        k = j
+        while k < len(seg) and seg[k] not in " \t\n;|&":
+            k += 1
+        if k > j:
+            bersagli.append(seg[j:k].strip("\"'"))
+        i = k if k > j else j + 1
+    for m in re.finditer(r"\btee\b(?:\s+-a)?\s+(\"[^\"]+\"|'[^']+'|[^\s;|&]+)", seg):
+        bersagli.append(m.group(1).strip("\"'"))
+    return bersagli
+
+
+def _cartella_di_lavoro(cmd: str) -> str | None:
+    """La cartella impostata da un `cd` in testa al comando, se c'e'.
+
+    Sesto caso misurato: `cd <cartella-lab>/artefatti && comm ... > pagine-orfane.txt`
+    risultava una scrittura nel repo, perche' un bersaglio relativo veniva risolto
+    SEMPRE contro la radice del repo. Scriveva invece dove e' permesso.
+    """
+    for seg in _segmenti(cmd):
+        s = seg.strip()
+        if not s:
+            continue
+        # Il bersaglio si legge dal TESTO GREZZO, non da `_tokens`. `shlex` in modo
+        # POSIX tratta la barra rovesciata come carattere di fuga, quindi
+        # `D:\heuresys-design-lab` tornava `D:heuresys-design-lab` — che su Windows
+        # NON e' piu' un percorso assoluto, e il bersaglio finiva risolto contro il
+        # repo. Il caso (f) e' caduto proprio qui, e l'ha detto la prova.
+        m = re.match(r"cd\s+(\"[^\"]+\"|'[^']+'|\S+)\s*$", s)
+        if m:
+            return m.group(1).strip("\"'")
+        return None                              # il `cd` conta solo se e' il primo
+    return None
+
 
 def _tokens(segment: str) -> list[str]:
     try:
@@ -416,7 +569,12 @@ def _check_command(cmd: str):
     if not cmd or not cmd.strip():
         return None
 
-    for segment in SEGMENT_SPLIT.split(cmd):
+    # #121: si analizza il comando SENZA i corpi degli heredoc (che non sono shell) e
+    # si spezza sui separatori che stanno FUORI dalle virgolette.
+    cmd_analizzabile = _senza_heredoc(cmd)
+    cwd_dichiarata = _cartella_di_lavoro(cmd_analizzabile)
+
+    for segment in _segmenti(cmd_analizzabile):
         seg = segment.strip()
         if not seg:
             continue
@@ -488,7 +646,7 @@ def _check_command(cmd: str):
             return r
 
         # --- redirezioni dentro il repo
-        r = _check_redirect(seg)
+        r = _check_redirect(seg, cwd_dichiarata)
         if r:
             return r
 
@@ -605,12 +763,23 @@ def _check_fs(toks: list[str], seg: str):
 REDIRECT_RE = re.compile(r"(?:>>?|\btee\b(?:\s+-a)?)\s+(\"[^\"]+\"|'[^']+'|[^\s;|&]+)")
 
 
-def _check_redirect(seg: str):
-    for m in REDIRECT_RE.finditer(seg):
-        target = m.group(1).strip("\"'")
-        if target.startswith("/dev/") or target in {"nul", "NUL", "$null"}:
+def _check_redirect(seg: str, cwd: str | None = None):
+    """#121: i bersagli si cercano FUORI dalle virgolette, e un `cd` in testa conta.
+
+    `cwd` e' la cartella impostata da un `cd` all'inizio del comando. Senza, un
+    bersaglio relativo veniva risolto SEMPRE contro la radice del repo — quindi
+    `cd <lab>/artefatti && ... > nota.txt` risultava una scrittura nel repo mentre
+    scriveva dove e' permesso. Con `cd` fuori dal repo il bersaglio relativo non e'
+    piu' nel repo, e non c'e' niente da vietare.
+    """
+    base = REPO
+    if cwd:
+        p = Path(cwd) if os.path.isabs(cwd) else (REPO / cwd)
+        base = p
+    for target in _redirezioni(seg):
+        if not target or target.startswith("/dev/") or target in {"nul", "NUL", "$null"}:
             continue
-        cand = target if os.path.isabs(target) else str(REPO / target)
+        cand = target if os.path.isabs(target) else str(base / target)
         if is_inside(cand, REPO) and not any(is_inside(cand, r) for r in write_roots()):
             return (f"modalita' lab: redirezione verso {target}, dentro il repo. "
                     f"Scrivi in {LAB_DIR}.")
@@ -771,6 +940,36 @@ def _cases():
          False, "la query scrive o modifica lo schema"),
         ("psql -At senza -c (niente da ispezionare)", "Bash", {"command": "psql -At"},
          False, "psql senza -c non e' ispezionabile"),
+        # #121 — I SEI RIFIUTI INGIUSTI DEL 2026-08-04, come regressione permanente.
+        # Sono letture pure: erano bloccate perche' il parser guardava il testo grezzo.
+        # Stanno qui insieme di proposito — presi uno per uno non direbbero niente, e'
+        # l'insieme che descrive la causa.
+        ("#121 (a) separatore DENTRO gli apici", "Bash",
+         {"command": "psql -At -F'|' -c \"SELECT count(*) FROM sys.sys_users\""}, True),
+        ("#121 (b) confronto > in una WHERE", "Bash",
+         {"command": "psql -c \"SELECT 1 WHERE compensation_band_max_eur > 120000\""}, True),
+        ("#121 (c) confronto > in una condizione di join", "Bash",
+         {"command": "psql -c \"SELECT 1 FROM a o1 JOIN b o2 ON o2.organization_unit_id > o1.organization_unit_id\""}, True),
+        ("#121 (d) una freccia dentro una stringa SQL", "Bash",
+         {"command": "psql -c \"SELECT 'da -> a' AS passaggio\""}, True),
+        ("#121 (e) annotazione di tipo dentro un heredoc", "Bash",
+         {"command": "python - <<'EOF'\ndef analizza(x) -> dict:\n    return {}\nEOF"}, True),
+        ("#121 (f) cd nel lab, poi redirezione relativa", "Bash",
+         {"command": f"cd {LAB_DIR}/artefatti && comm -13 a.txt b.txt > pagine-orfane.txt"}, True),
+        # IL ROVESCIO, che e' la parte che conta: sapere delle virgolette non deve
+        # rendere il parser piu' permissivo. Se uno solo di questi passasse, la
+        # correzione avrebbe aperto un varco invece di chiudere un attrito.
+        ("#121 rovescio: redirezione VERA nel repo", "Bash",
+         {"command": "echo ciao > docs/nota.md"}, False, "redirezione verso"),
+        ("#121 rovescio: redirezione vera dopo un cd NEL repo", "Bash",
+         {"command": "cd docs && echo ciao > nota.md"}, False, "redirezione verso"),
+        ("#121 rovescio: tee nel repo", "Bash",
+         {"command": "cat x | tee docs/nota.md"}, False, "redirezione verso"),
+        ("#121 rovescio: heredoc che redirige nel repo", "Bash",
+         {"command": "cat <<'EOF' > docs/nota.md\ncontenuto\nEOF"}, False, "redirezione verso"),
+        ("#121 rovescio: scrittura SQL dopo un separatore quotato", "Bash",
+         {"command": "psql -At -F'|' -c \"UPDATE sys.sys_users SET x=1\""}, False,
+         "la query scrive o modifica lo schema"),
         # #134 (secondo caso) — si decide sul verbo, non sul percorso.
         ("elenco di db/scripts", "Bash", {"command": "ls db/scripts/"}, True),
         ("lettura di uno script di db/scripts", "Bash", {"command": "cat db/scripts/migrate.sh"}, True),

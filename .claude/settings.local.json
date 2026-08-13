@@ -34,7 +34,25 @@
       "Bash(MSYS_NO_PATHCONV=1 python -)",
       "Bash(git commit *)",
       "Bash(MSYS_NO_PATHCONV=1 git commit -q -m \"docs\\(kb\\): #159 — l'assistente in tutte le schede idonee \\(direzione Enzo\\)\")",
-      "Bash(bash scripts/close-log.sh step registra eseguito \"decisioni di Enzo su #135 e #159 recepite: due open questions chiuse\")"
+      "Bash(bash scripts/close-log.sh step registra eseguito \"decisioni di Enzo su #135 e #159 recepite: due open questions chiuse\")",
+      "Bash(echo \"=== caso negativo: input SENZA rate_limits -> non deve scrivere ===\")",
+      "Bash(echo '{\"model\":{\"display_name\":\"Opus 5\"},\"session_id\":\"SENZA-RL\"}')",
+      "Bash(MSYS_NO_PATHCONV=1 git add -A docs/ CLAUDE.md scripts/hooks/session_mode.py)",
+      "Bash(MSYS_NO_PATHCONV=1 git commit -q -F -)",
+      "Bash(MSYS_NO_PATHCONV=1 git log --oneline -1)",
+      "Bash(python docs/kb/tools/guardiano.py --sorveglia)",
+      "Bash(echo \"guardiano exit=$? \\(0 = si continua\\)\")",
+      "Bash(cp test/helpers/org-actors.ts /tmp/oa.bak)",
+      "Bash(timeout 400 pnpm exec vitest run test/goals-scope.integration.test.ts)",
+      "Bash(echo \"con l'helper sabotato exit=$? \\(atteso != 0\\)\")",
+      "Bash(cp /tmp/oa.bak test/helpers/org-actors.ts)",
+      "Bash(echo \"ripristinato exit=$? \\(atteso 0\\)\")",
+      "Bash(python scripts/hooks/_sab_E.py selftest)",
+      "Bash(echo \"E \\(redirezioni sul testo grezzo, com'era\\) exit=$?\")",
+      "Bash(sed 's/FALLITO\\\\s*//')",
+      "Bash(python docs/kb/tools/_sab_B.py)",
+      "Bash(echo ' B \\(padri universali davvero svuotati\\) exit=__TRACKED_VAR__')",
+      "Bash(python docs/kb/tools/check_completezza_self.py)"
     ]
   },
   "hooks": {

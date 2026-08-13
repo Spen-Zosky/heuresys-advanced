@@ -94,14 +94,33 @@ ESCLUSIONI: dict[str, str] = {
     "sys_gdpr_registry": "[PIATTAFORMA] mappa GDPR delle tabelle; il fascicolo dell'art. 15 "
                          "si esercita con la rotta dedicata, non leggendo la mappa.",
     "sys_industry_codes": "[TECNICA] catalogo dei settori (mig 000305).",
-    # --- famiglia «clima»: cio' che NON e' della persona -------------------------------
-    # Derivate dal dato, non decise: in queste due tabelle l'unica colonna che punta a una
-    # persona indica qualcun altro. Vanno distinte dalle risposte, che sono sue e che Enzo
-    # ha deciso il 2026-08-13 di renderle visibili (vedi DA_COSTRUIRE).
+    # --- la famiglia `sys_engagement_*`: un DOPPIONE FERMO, non il clima vivo -----------
+    #
+    # Correzione della classificazione scritta poche ore prima, nella stessa sessione, e
+    # vale la pena lasciarla scritta perche' l'errore era di metodo: avevo classificato
+    # queste tabelle dal NOME, convinto che «engagement survey» fosse il sondaggio di
+    # clima. Misurando per costruire la superficie e' saltato fuori che le famiglie sono
+    # DUE, e che quella viva e' l'altra:
+    #
+    #   sys_surveys           14 sondaggi, titoli italiani, uno APERTO OGGI
+    #                         («Rilevazione di clima in corso»), 8.288 risposte, esposto
+    #                         dal portale — e' il clima vero.
+    #   sys_engagement_*       6 sondaggi, titoli inglesi, tutti `closed`, l'ultimo fermo
+    #                         al 2025-01-10, 862 risposte, nessuna rotta li nomina.
+    #
+    # Non si espone un residuo: si bonifica. Finche' la decisione non c'e', l'esclusione
+    # e' questa, scritta col suo motivo — che e' esattamente cio' che C4 chiede.
+    "sys_engagement_surveys":
+        "[RESIDUO] doppione fermo della famiglia viva `sys_surveys`: 6 sondaggi in "
+        "inglese, tutti chiusi, l'ultimo del 2025-01-10, nessuna rotta li legge. Il clima "
+        "vero e' `sys_surveys` (14, uno aperto oggi). Da bonificare, non da esporre.",
+    "sys_engagement_survey_responses":
+        "[RESIDUO] le 862 risposte del doppione. Quelle vere sono le 8.288 di "
+        "`sys_survey_responses`, che la persona rilegge da /v1/me/surveys/:id dal "
+        "2026-08-13. Da bonificare insieme alla famiglia.",
     "sys_engagement_survey_templates":
-        "[ALTRUI] `template_created_by_user_id` e' l'autore del modello di sondaggio (5 "
-        "righe), non l'interessato. Il contenuto raggiunge la persona attraverso il "
-        "sondaggio a cui ha risposto, non leggendo il catalogo dei modelli.",
+        "[RESIDUO] i 5 modelli del doppione; per giunta il riferimento a persona e' "
+        "l'autore del modello, non l'interessato.",
     "sys_engagement_feedback":
         "[ALTRUI] il feedback NON ha mittente: 400 righe e l'unica colonna verso una "
         "persona e' `feedback_reviewed_by_user_id`, cioe' chi lo ha esaminato. Non "
@@ -140,24 +159,14 @@ DA_COSTRUIRE: dict[str, str] = {
         "#126 — Enzo, 2026-08-04: VISIBILE all'interessato, ma solo il punteggio "
         "dell'allievo verso i PROPRI mentori: `match_mentor_user_id` resta invisibile se "
         "rivela una graduatoria fra persone.",
-    "sys_engagement_survey_responses":
-        "Enzo, 2026-08-13: LA PERSONA PUO' RIVEDERE LE PROPRIE RISPOSTE. 862 risposte di "
-        "158 persone, ciascuna con `response_subject_user_id`. **La premessa della domanda "
-        "non reggeva sul dato**: dei 6 sondaggi nessuno ha `survey_is_anonymous` a vero, "
-        "quindi oggi non esiste un sondaggio anonimo. E anche quando esistera', "
-        "l'anonimato protegge la persona da HR e dal suo capo, non da se' stessa: "
-        "rivedere cio' che si e' scritto non lo viola.",
-    "sys_engagement_surveys":
-        "Enzo, 2026-08-13 (conseguenza diretta): il sondaggio e' il CONTESTO della "
-        "propria risposta — senza titolo e domande la risposta e' una fila di valori "
-        "illeggibile. Diventa raggiungibile quando la superficie delle risposte esiste; "
-        "il suo `survey_created_by_user_id` (l'autore) resta un dato di chi lo ha creato.",
     "sys_pulse_checks":
         "Enzo, 2026-08-13 (estensione DERIVATA, dichiarata come tale): 2.834 rilevazioni "
         "di 157 persone, con umore, carico e soddisfazione scritti DALLA PERSONA su "
         "`pulse_check_subject_user_id`. E' lo stesso principio delle risposte — cio' che "
-        "la persona ha dichiarato di suo pugno, lo puo' rivedere — applicato all'altra "
-        "famiglia del clima. Se Enzo intendeva i soli sondaggi, questa riga va tolta.",
+        "la persona ha dichiarato di suo pugno, lo puo' rivedere. A differenza della "
+        "famiglia `engagement`, questa tabella NON e' un doppione: e' l'unica del suo "
+        "genere, ed e' viva (la legge `insights` per calcolare un punteggio sulla "
+        "persona). Superficie da costruire.",
 }
 
 # Le famiglie che si escludono per prefisso, con la ragione dichiarata una volta sola.

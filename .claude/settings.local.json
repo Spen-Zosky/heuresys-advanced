@@ -52,7 +52,18 @@
       "Bash(sed 's/FALLITO\\\\s*//')",
       "Bash(python docs/kb/tools/_sab_B.py)",
       "Bash(echo ' B \\(padri universali davvero svuotati\\) exit=__TRACKED_VAR__')",
-      "Bash(python docs/kb/tools/check_completezza_self.py)"
+      "Bash(python docs/kb/tools/check_completezza_self.py)",
+      "Bash(python docs/kb/tools/guardiano.py --selftest)",
+      "Bash(cp docs/kb/tools/guardiano.py /tmp/g.bak)",
+      "Bash(sed -i 's|soglia_res = max\\(0, int\\(finta\\\\[\"finestra\"\\\\] \\\\* STOP_CONTESTO\\) - finta\\\\[\"contesto\"\\\\]\\)|soglia_res = max\\(0, finta[\"finestra\"] - finta[\"contesto\"]\\)|' docs/kb/tools/guardiano.py)",
+      "Bash(cp /tmp/g.bak docs/kb/tools/guardiano.py)",
+      "Bash(cp /tmp/repo.bak apps/api/src/modules/me/repository.ts)",
+      "Bash(cp /tmp/r.bak apps/api/src/modules/me/repository.ts)",
+      "Bash(grep -c \"match_mentee_user_id = \\\\$1\" apps/api/src/modules/me/repository.ts)",
+      "Bash(cp /tmp/r2.bak /d/heuresys-advanced/apps/api/src/modules/me/repository.ts)",
+      "Bash(cp scripts/hooks/session_mode.py /tmp/sm.bak)",
+      "Bash(sh scripts/hooks/hook.sh selftest)",
+      "Bash(cp /tmp/sm.bak scripts/hooks/session_mode.py)"
     ]
   },
   "hooks": {

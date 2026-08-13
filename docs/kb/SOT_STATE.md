@@ -81,6 +81,70 @@ produzione 200). Difetto della prima stesura, corretto e annotato: il path di `L
 dato per noto (`.deploy/`) e sta invece in `pg_dump_snapshots/` — «host giu'?» su due host sani, un
 falso allarme che somiglia a un guasto. Ora il path si **cerca**.
 
+### Delta S1057 (2026-08-13) — il portale personale riprende otto voci, e zero risposte su 8.288 tornano leggibili
+
+**Numeri ri-derivati**: utenti **161** · posizioni **315** · OU **45** · team **26** · tenant ACTIVE
+**2** · RBAC **14 ruoli / 214 permessi / 957 mapping** · skill **14039** · migration su disco **304**
+(max `000306`) = **304 applicate** · moduli `apps/api` **95** · file di test API **236** (217
+`*.integration.test.ts`, **+2** in questa sessione) · rotte `/v1/me/*` **61** (**+3**).
+
+**IL DIFETTO PIU' GRAVE NON ERA UNA FUNZIONE MANCANTE, ERA UNA FUNZIONE ROTTA.** La decisione di
+Enzo del 2026-08-13 («la persona puo' rivedere le proprie risposte» ai sondaggi di clima) sembrava
+aprire un lavoro nuovo. Misurando per costruirlo: delle **8.288 risposte**, **0** erano raggiungibili
+da chi le aveva scritte. Due cause indipendenti, ciascuna sufficiente — l'elenco pretendeva
+`survey_status = 'active'` e **786 assegnazioni su 948** puntano a un ciclo ormai chiuso (tutte le
+risposte esistenti stanno li'; l'unico ciclo aperto non ne ha ancora); la guardia del dettaglio
+pretendeva una riga di assegnazione, e **398 delle 961 coppie** persona/sondaggio che HANNO risposte
+non ce l'hanno. Ora **8.288 su 8.288**, con la lettura allargata e la **scrittura no**
+(`hasAssignment` separa i due casi: rispondere a un ciclo chiuso resta vietato).
+
+**Due famiglie di sondaggi, e quella che sembrava il clima era il doppione.** `sys_surveys` — 14
+rilevazioni, titoli italiani, una **aperta oggi** — e' il clima vero, esposto dal portale.
+`sys_engagement_*` — 6 sondaggi in inglese, tutti chiusi, l'ultimo del 2025-01-10, nessuna rotta li
+legge — e' residuo. Classificato `[RESIDUO]` nel cancello di #117 (bonificare, non esporre): quattro
+migration lo toccano (`000077`, `000097`, `000113`, `000186`), il ritiro e' istruito ma **non
+eseguito** perche' distruttivo.
+
+**#126 chiusa con tre rotte, non due**: `/v1/me/predictions` (468 predizioni su 156 persone di 158),
+`/v1/me/mentor-matches` (**solo il lato allievo** — dal lato mentore la stessa tabella e' una
+graduatoria fra persone), `/v1/me/pulse-checks` (2.834 rilevazioni di 157 persone). Tutte su
+`insight:read:self`, permesso gia' del ruolo `USER`: pavimento ESS di **I17** coperto senza toccare
+la mappa RBAC. Cancello di **#117**: raggiungibili **71 → 74**, «decise da costruire» **a zero**,
+escluse con motivo **5 → 10**, scoperte **28 → 22**.
+
+**Tre prove erano incapaci di fallire, e l'ha detto un sabotaggio.** (1) Il test del confine
+allievo/mentore restava verde filtrando sul lato sbagliato, perche' nel dato chi e' allievo e' anche
+mentore **esattamente una volta per parte**: contare le righe non distingue i lati — riscritto sul
+confronto delle IDENTITA'. (2) Un test del 404 in scrittura passava per il motivo sbagliato (400 di
+validazione, guardia mai raggiunta). (3) L'exit code letto attraverso una pipe (`head`) tornava 0 su
+processi usciti 1 e 3 — tre volte in questa sessione, su strumenti diversi.
+
+**Il guardiano autorizzava di sfondare la propria soglia** (`c631c3d8`): `--budget N` confrontava N
+col residuo fino alla FINE della finestra invece che con la soglia di chiusura — con 136.875 token
+consumati diceva «ci sta» a un lavoro da 700.000, che avrebbe portato il contesto all'84% contro uno
+`STOP_CONTESTO` del 75%. Il numero giusto era gia' stampato quattro righe sotto. Selftest **29 → 32**
+(era verde 29/29 **con il difetto dentro**: nessun caso guardava quel confine); corretto anche nella
+copia a livello utente, che sbagliava in ogni progetto.
+
+**Altre voci chiuse**: **#133** — la guardia lab guarda ora cio' che il comando SCRIVE e non cio' che
+nomina (`cp` legge dal repo e scrive fuori, `robocopy` ha la destinazione al SECONDO argomento, `mv`
+resta fuori perche' spostare cancella la sorgente); selftest **112 → 122**. **#158** — i profili
+semantici hanno un salto: 0 righe a dato invariato, 1 sporcandone una, **156** con la query di prima.
+**#174** — i tre seed one-shot si dichiarano, e uno (`seed_key_roles_coverage`) non era «gia'
+applicato» ma **SUPERATO**: l'effetto che dichiara non esiste piu', la ricostruzione
+dell'organigramma lo ha sovrascritto. **#136** — le nomine del lab erano gia' entrate nel dato per
+la via di #118/#120 (QD3 +10, aree −10). **#137** — la plancia era gia' stata promossa. **#182** —
+decisione gia' presa in S1056, registro rimasto indietro.
+
+**Nuovo debito D-82**: tutte le **468 predizioni** hanno `prediction_model_id` **NULL** mentre i
+modelli attivi sono 4 — meta' della decisione di #126 (esporre il modello) non e' servibile per
+mancanza di dato, non di codice. Ricostruibile per `PERFORMANCE` e `TURNOVER`, non per `GENERIC`.
+
+**#148 in GATED fino al 2026-08-20**, data che la voce fissa da se': il diario delle chiusure copre
+**7 giorni su 14** (114 passi, 78 eseguiti / 27 saltati / 1 fallito). Nessuna chiusura recente ha
+tutti i passi «saltato» — se il quadro regge, la riscrittura in quattro verbi non trova nel diario
+la giustificazione che cercava.
+
 ### Delta S1052 (2026-08-09/10) — la prima corsa presidiata, e i cinque difetti che ha fatto emergere
 
 **Numeri ri-derivati**: utenti **161** · RBAC map **957** · ruoli **14** · skill **14039** ·

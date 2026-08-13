@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-13T10:54:54Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2969**
+**Generato**: 2026-08-13T13:40:47Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2973**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -21,8 +21,8 @@
 | db-migration | 304 |
 | db-other | 8 |
 | db-script | 42 |
-| db-seed | 113 |
-| doc-canonical | 628 |
+| db-seed | 114 |
+| doc-canonical | 629 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 104 |
 | showcase-source | 14 |
-| test | 359 |
+| test | 361 |
 | ux-design-archive | 80 |
 | web-source | 235 |
-| **TOTALE** | **2969** |
+| **TOTALE** | **2973** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2411 |
+| live | 2415 |
 
 ## File per categoria
 
@@ -1438,6 +1438,7 @@
 - `D:\heuresys-advanced\db\seeds\reconciliation\53_registry_process_kpi_templates_s994_evidence.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\54_raci_demo_rtl_s994.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\_gen_m2b.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\rtl-banking-skills\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_banking_learning_catalog.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_banking_skills.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_ccnl_floors.sql` · *live* · git-tracked
@@ -2102,6 +2103,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-substrato-semantico-verifica-e-correzioni.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-07-catalogo-generico-referto-di-programma.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-07-percorsi-carriera-155.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-08-13-batch-S1057.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked
@@ -2514,6 +2516,7 @@
 - `D:\heuresys-advanced\apps\api\test\learning-modules.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\learning-path-steps.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\learning-paths.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\me-algorithmic-self.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-career-tabs.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-content-media.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-development.integration.test.ts` · *live* · git-tracked
@@ -2526,6 +2529,7 @@
 - `D:\heuresys-advanced\apps\api\test\me-profile-full.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-sessions.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-skill-possession.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\me-surveys-review.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-surveys.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\mentorship-data.integration.test.ts` · *live* · git-tracked

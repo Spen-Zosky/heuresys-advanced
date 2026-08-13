@@ -113,6 +113,20 @@ export async function upsertOccupationEmbedding(q: DbConnector, uri: string, vec
  * report evidence-rows, not distinct skills. derived_from_evidence_count = #distinct skills.
  * Returns #profiles written.
  */
+/**
+ * I profili persona, derivati in SQL dalla media dei vettori delle competenze con evidenza.
+ *
+ * #158 — questo era **l'unico corpus senza salto**. Non aveva il difetto del salto-per-hash
+ * (corretto in `5b557d7a`) perche' non aveva alcun salto: `ON CONFLICT DO UPDATE` riscriveva
+ * tutte le 156 righe a ogni corsa, quindi un backfill «a vuoto» a vuoto non era. Non costa
+ * chiamate al servizio di embedding — la media si fa in SQL — ma rendeva impossibile
+ * rispondere alla domanda che serve dopo ogni corsa: *cosa e' cambiato?*
+ *
+ * Il `WHERE` sul DO UPDATE fa si' che `rowCount` conti le sole righe davvero cambiate.
+ * Misurato sul database di produzione in transazione annullata (2026-08-13): a dato
+ * invariato **0 righe**; sporcandone **una** sola, **1**; la query di prima, sullo stesso
+ * stato, ne toccava **156**.
+ */
 export async function deriveUserProfiles(q: DbConnector, modelId: string): Promise<number> {
   const r = await q.query(
     `INSERT INTO sys.sys_user_profile_embeddings (user_id, tenant_id, embedding, derived_from_evidence_count, model_id)
@@ -125,7 +139,10 @@ export async function deriveUserProfiles(q: DbConnector, modelId: string): Promi
      JOIN sys.sys_skill_embeddings se ON se.skill_id = d.sid
      JOIN sys.sys_users u ON u.user_id = d.uid
      GROUP BY d.uid, u.user_tenant_id
-     ON CONFLICT (user_id) DO UPDATE SET embedding = EXCLUDED.embedding, derived_from_evidence_count = EXCLUDED.derived_from_evidence_count, model_id = EXCLUDED.model_id`,
+     ON CONFLICT (user_id) DO UPDATE SET embedding = EXCLUDED.embedding, derived_from_evidence_count = EXCLUDED.derived_from_evidence_count, model_id = EXCLUDED.model_id
+     WHERE sys_user_profile_embeddings.model_id IS DISTINCT FROM EXCLUDED.model_id
+        OR sys_user_profile_embeddings.derived_from_evidence_count IS DISTINCT FROM EXCLUDED.derived_from_evidence_count
+        OR sys_user_profile_embeddings.embedding IS DISTINCT FROM EXCLUDED.embedding`,
     [modelId]);
   return r.rowCount ?? 0;
 }

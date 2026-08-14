@@ -27,9 +27,9 @@ Quindi il ciclo è diviso in due, e **entrambe le metà sono un deliverable**:
 
 | id | cosa | chi | fatto significa | stato |
 |---|---|---|---|---|
-| **A1** | **D-81** — riclassificare: non è un fix, è una dipendenza di fase su #132 GATED | io | il register non lo conta più fra i debiti da correggere; `session_start` non lo stampa come rosso a riposo | ⬜ da fare |
-| **A2** | **#188 + D-84** — le lacune formative e la posizione assente | io | la superficie non mostra più una colonna vuota per sempre; decisione dichiarata nel codice; test che sa fallire | ⬜ da fare |
-| **A3** | **#123 (a)** — la decisione sulle squadre trasversali | io | risposta derivata dalla direzione di Enzo del 2026-08-05 (già presa, non si ri-chiede); #123 chiusa | ⬜ da fare |
+| **A1** | **D-81** — riclassificare: non è un fix, è una dipendenza di fase su #132 GATED | io | il register non lo conta più fra i debiti da correggere; `session_start` non lo stampa come rosso a riposo | ✅ **FATTO** `8c259612` — `status_dashboard`: **0 debiti aperti** (erano 2), rimando inverso in #132 |
+| **A2** | **#188 + D-84** — le lacune formative e la posizione assente | io | la superficie non mostra più una colonna vuota per sempre; decisione dichiarata nel codice; test che sa fallire | ✅ **FATTO** `8c259612` — 4/4 nuovi + 14/14 modulo, **falsificabilità provata**, i18n in parità |
+| **A3** | **#123 (a)** — la decisione sulle squadre trasversali | io | risposta derivata dalla direzione di Enzo del 2026-08-05 (già presa, non si ri-chiede); #123 chiusa | ✅ **FATTO** — 142/172 trasversali ri-misurate; **3 squadre** hanno già un capo più in basso di un membro: il caso di Enzo è nel dato |
 | **A4** | **#79** — cancello di esposizione | io | applicato ai lavori di questo ciclo che toccano dati | ⬜ da fare |
 | **A5** | **#149** — ogni consegna del lab è non verificata | io | applicato per costruzione: ogni numero di questo piano ri-misurato oggi | ⬜ da fare |
 | **B1** | **#99 F5** — completezza di `self` (~200k) | io | ogni tabella che referenzia una persona è raggiungibile self-scope, o l'esclusione è dichiarata **una per una** con motivo | ⬜ da fare |

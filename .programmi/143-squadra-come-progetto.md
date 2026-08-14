@@ -22,6 +22,23 @@
 - `lib/scope/functional.ts` ha **un solo consumatore** di produzione;
   `isInFunctionalScope`/`isFunctionalLeader` **non ne hanno alcuno**.
 
+## Reperto già in mano a F1 — misurato in S1061 (2026-08-14), non da ri-cercare
+
+Chiudendo `#123 (a)` è stato misurato ciò che F1 avrebbe dovuto cercare da sé:
+
+- **174 appartenenze · 159 persone · 26 squadre.** Due appartenenze stanno in squadre senza
+  unità propria e vanno escluse dal rapporto (non hanno un'unità con cui essere trasversali):
+  sulle **172** che restano, **142 sono trasversali (82,6%)**, per **135 persone**.
+- **3 squadre attive hanno già oggi un capo che sta più in basso nell'albero delle unità di un
+  suo membro.** È **il caso che Enzo descrive**, e non è da costruire: esiste nel dato reale.
+  Sono i tre casi su cui F5 dovrà fare la dimostrazione live, invece di fabbricarne uno.
+- Conseguenza per il modello: la trasversalità **non è un difetto da sanare** — è stata
+  registrata come forma attesa chiudendo `#123`. Chi apre F2 non deve ri-aprire quella domanda.
+
+*(le due interrogazioni stanno nella cronaca di `#123` nel register; si ri-derivano in un
+minuto sull'albero delle unità e sugli incarichi attivi — non si ricopiano i numeri, che
+cambiano da soli.)*
+
 ## Proposta tecnica di Claude — DA VALIDARE CON ENZO PRIMA DI F2
 
 (a) **due entità**: progetto (scopo, obiettivo, date, stato) e squadra (chi ci lavora, con

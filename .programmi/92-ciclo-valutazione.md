@@ -1,7 +1,7 @@
 # 92 — Ciclo di valutazione completo (autovalutazione + calibrazione)
 
 > **item**: #92 · **priorità**: P1 · **stima register**: ~2-3 sessioni (restano i passi 4-7)
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 > **fonti**: `D:\heuresys-design-lab\2026-08-03--decisioni-workflow-valutazione-e-presenze.md` righe 84-95 (i 7 passi INTEGRALI) · `docs/superpowers/specs/2026-08-03-consegna-lab-esecuzione.md` §V6 (solo la simulazione R24, **non** i passi)
 
 ## Decisioni vincolanti (non si ri-chiedono)
@@ -32,23 +32,26 @@
   - ⚠ **la sezione dei cicli nasce su un empty-state REALE** (0 righe in `sys_review_cycles`): non è un difetto né un dato finto, è l'unico vuoto che la dottrina live-data ammette. Comparirà da sé quando Enzo aprirà un ciclo.
   - **i giudizi mascherati si dichiarano**, non si mostrano vuoti: `MaskedCell` + `isMasked` su entrambe le pagine — «non c'è» e «non te lo mostro» restano distinti (la stessa lezione di `#188`).
   - verifiche: `i18n:check` **parity OK 3049 × 2 × 10** (+50 chiavi) · typecheck monorepo · lint **0 errori 0 warning** · `next build` verde con **entrambe** le rotte negli artefatti.
-- [ ] **F7 — Playwright E2E con login reale** — `federica.marchetti@rtl-bank.org` per il ramo manager; **una persona senza deleghe** per l'ESS · budget ~120k
+- [x] **F7 — Playwright E2E con login reale** — **FATTA 2026-08-15 (S1061)**. `tests/e2e/performance-cycle.spec.ts`, **10/10 verdi in 1,1 min**, zero flaky, nessun residuo lasciato sul database. Due rami come prescritto: `tenantAdmin` (`federica.marchetti`) per chi conduce, **`outsider` (`antonio.parisi`) per l'ESS** — la persona senza alcun mandato, che è il caso in cui il pavimento I17 deve reggere. Più il rovescio: la pagina manageriale **non si apre** a chi non ha `performance-review:read`.
+  - **nessun numero atteso è cablato**: ogni asserzione confronta ciò che la pagina mostra con ciò che l'API risponde **alla stessa sessione**. I dati di questo progetto cambiano da soli (la storia RTL avanza), quindi un atteso scritto a mano mentirebbe da sé.
+  - ⚠ **la prima stesura era FLAKY, e il difetto era del test**: intercettava la risposta con `waitForResponse`, ma alla prima visita `next dev` compila la pagina su richiesta e la chiamata arriva oltre i 10 s — rosso per la compilazione, non per un difetto del prodotto. Riscritto chiedendo il totale direttamente all'API: **3,1 min con 2 flaky → 1,1 min con 0**.
+  - **falsificabilità provata**: sostituito il totale con uno zero fisso, il test è diventato rosso con `Expected "548" Received "0"`; ripristinato, 10/10.
+  - ⚠ **l'empty-state dei cicli è asserito derivandolo dalla risposta**, non dato per scontato: il giorno che un ciclo esisterà, l'asserzione seguirà da sé invece di diventare rossa per il motivo sbagliato.
 
-## Da dove si riprende
+## PROGRAMMA CHIUSO — 7/7 fasi (2026-08-15, S1061)
 
-**F7 — Playwright E2E con login reale** (~120k), l'ultima fase. F5 e F6 sono chiuse.
+Non resta nulla di questo programma. Ciò che segue **non è lavoro arretrato**, è la
+conseguenza di una decisione che spetta a Enzo e che il programma non può prendere:
 
-Due cose che F6 lascia a F7 e che le risparmiano una ricerca:
-- **le persone dei due rami sono già misurate**: `federica.marchetti@rtl-bank.org` per il ramo
-  manageriale, e per l'ESS **una persona senza alcun mandato** — la si deriva con la query in
-  `apps/api/scripts/prova-live-92-f6.mts`, che è la stessa domanda a cui la pagina risponde
-  (in produzione ha scelto `alberto.colombo@rtl-bank.org`, 4 valutazioni comunicate).
-- **i `data-testid` esistono già**: `perf-kpi-*`, `perf-cycles-*`, `perf-reviews-*`,
-  `perf-calib-*` sulla pagina manageriale, `me-performance-*` su quella ESS.
-
-⚠ Attenzione per F7: la sezione dei cicli è un **empty-state reale** (0 cicli). Un test che
-pretendesse righe lì sarebbe rosso per il motivo sbagliato — si asserisce l'empty-state, o si
-apre prima un ciclo con le API di F4.
+- **L'autovalutazione non è stata costruita**, e non è una dimenticanza: misurato, le 548
+  valutazioni sono tutte `COMPLETED`, `self_assessment_status` è `NOT_STARTED` su tutte, e
+  **non esiste alcun ciclo aperto**. Scrivere quella funzione oggi significherebbe costruirla
+  senza un solo caso su cui dimostrarla. **Serve prima che un ciclo venga aperto** — le API
+  per farlo esistono già (F4), quindi è un atto di prodotto, non una migrazione.
+- **Il giorno che un ciclo si apre**, tre cose si accendono da sé senza toccare codice: la
+  sezione «Cicli» di `/performance` smette di essere un empty-state, la verifica `X7a` di
+  `verifica_incrociata.py` torna falsificabile (oggi dichiara la sua cecità con la causa), e
+  l'autovalutazione ha finalmente un periodo a cui riferirsi.
 
 *(Restano fuori da F4, e vanno dette: le scritture coprono il CICLO. Le sessioni di
 calibrazione e le singole valutazioni hanno i loro stati — misurati: `SCHEDULED·IN_PROGRESS·

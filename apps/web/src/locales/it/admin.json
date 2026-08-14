@@ -305,6 +305,8 @@
       "nameLabel": "Nome",
       "legalNameLabel": "Ragione sociale",
       "countryLabel": "Paese (2 lettere)",
+      "industryLabel": "Settore",
+      "industryPlaceholder": "Scegli un settore…",
       "submit": "Crea",
       "creating": "Creazione…",
       "created": "Azienda creata.",

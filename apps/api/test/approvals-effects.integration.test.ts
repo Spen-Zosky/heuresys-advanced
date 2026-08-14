@@ -3,6 +3,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { anIndustryCode } from "./helpers/industry.js";
 
 // 3.3 slice-3a — approval apply-effect wiring (/v1/approvals/:id/apply dispatches a
 // registered handler that MUTATES the real subject, atomically with markApplied).
@@ -70,9 +71,9 @@ async function seedTenant(status: string): Promise<string> {
   fxCounter += 1;
   const code = `TEST-FX-${status}-${fxCounter}`;
   const r = await pool.query<{ tenant_id: string }>(
-    `INSERT INTO sys.sys_tenancies (tenant_code, tenant_name, tenant_status)
-     VALUES ($1, $2, $3) RETURNING tenant_id`,
-    [code, `[TEST] FX ${status} ${fxCounter}`, status],
+    `INSERT INTO sys.sys_tenancies (tenant_code, tenant_name, tenant_status, tenant_industry_code)
+     VALUES ($1, $2, $3, $4) RETURNING tenant_id`,
+    [code, `[TEST] FX ${status} ${fxCounter}`, status, await anIndustryCode()],
   );
   return r.rows[0]!.tenant_id;
 }

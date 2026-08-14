@@ -12,6 +12,7 @@ import type {
   TenantListQuery,
   CreateTenantBody,
   UpdateTenantBody,
+  IndustryCode,
 } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
@@ -22,7 +23,7 @@ interface RawTenantRow {
   tenant_name: string;
   tenant_legal_name: string | null;
   tenant_country_code: string | null;
-  tenant_industry_code: string | null;
+  tenant_industry_code: string; // NOT NULL dalla mig 000305
   tenant_size_band: string | null;
   tenant_status: string;
   tenant_metadata: Record<string, unknown>;
@@ -132,6 +133,42 @@ export async function findTenantByCode(
   return res.rows[0] ? rowToTenant(res.rows[0]) : null;
 }
 
+/* --- Catalogo dei settori (sys.sys_industry_codes) ----------------------- */
+/* La 000305 ha reso `tenant_industry_code` NOT NULL + FK verso questo catalogo, ma
+   nessuna API lo esponeva: chi doveva creare un tenant non aveva modo di sapere quali
+   codici fossero legittimi (cancello di esposizione, #79). D-83. */
+
+interface RawIndustryRow {
+  industry_code: string;
+  industry_name: string;
+  industry_ateco_code: string;
+}
+
+export async function listIndustryCodes(q: DbConnector): Promise<IndustryCode[]> {
+  const res = await q.query<RawIndustryRow>(
+    `SELECT industry_code, industry_name, industry_ateco_code
+       FROM sys.sys_industry_codes
+      WHERE industry_is_active = true
+      ORDER BY industry_name`,
+  );
+  return res.rows.map((r) => ({
+    industryCode: r.industry_code,
+    industryName: r.industry_name,
+    industryAtecoCode: r.industry_ateco_code,
+  }));
+}
+
+/** True se il codice esiste ed è attivo. Serve a rendere un codice sconosciuto un 400
+ *  leggibile invece di una violazione di FK che arriverebbe al client come 500. */
+export async function industryCodeExists(q: DbConnector, code: string): Promise<boolean> {
+  const res = await q.query<{ ok: boolean }>(
+    `SELECT true AS ok FROM sys.sys_industry_codes
+      WHERE industry_code = $1 AND industry_is_active = true`,
+    [code],
+  );
+  return res.rows.length > 0;
+}
+
 /* --- Create ------------------------------------------------------------- */
 
 export async function insertTenant(
@@ -149,7 +186,7 @@ export async function insertTenant(
       body.tenantName,
       body.tenantLegalName ?? null,
       body.tenantCountryCode ?? null,
-      body.tenantIndustryCode ?? null,
+      body.tenantIndustryCode, // obbligatorio nel contratto: NOT NULL nel DB (000305)
       body.tenantSizeBand ?? null,
       body.tenantStatus,
       JSON.stringify(body.tenantMetadata ?? {}),

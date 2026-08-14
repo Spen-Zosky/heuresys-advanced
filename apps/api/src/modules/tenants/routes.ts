@@ -16,6 +16,7 @@ import {
   CreateTenantBodySchema,
   UpdateTenantBodySchema,
   TenantIdParamSchema,
+  IndustryCodeListResponseSchema,
 } from "@heuresys/shared";
 import { EmptyResponseSchema } from "@heuresys/shared";
 import { ProvisionTenantBodySchema, ProvisionTenantResponseSchema } from "@heuresys/shared";
@@ -37,6 +38,21 @@ export const tenantsRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (req) => tenantsService.list(actorFromReq(req), req.query),
+  );
+
+  /* --- GET /v1/tenants/industry-codes ------------------------------- */
+  /* Dichiarata PRIMA di `/:id` per leggibilità (la rotta statica vince comunque sul
+     parametro). È il dominio ammesso per `tenantIndustryCode`: senza di essa il
+     catalogo restava popolato ma invisibile a ogni client. D-83 / #79. */
+  app.get(
+    "/industry-codes",
+    {
+      preHandler: [requirePermission("tenant:read")],
+      schema: {
+        response: { 200: IndustryCodeListResponseSchema },
+      },
+    },
+    async () => ({ items: await tenantsService.industryCodes() }),
   );
 
   /* --- GET /v1/tenants/:id ----------------------------------------- */

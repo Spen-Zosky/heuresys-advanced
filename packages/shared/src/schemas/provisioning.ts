@@ -25,7 +25,10 @@ export const ProvisionTenantBodySchema = z.object({
   tenantName: z.string().min(1).max(200),
   tenantLegalName: z.string().min(1).max(200).optional(),
   tenantCountryCode: z.string().length(2).optional(),
-  tenantIndustryCode: z.string().max(16).optional(),
+  // OBBLIGATORIO (000305: NOT NULL + FK). Il `max(16)` precedente era comunque troppo
+  // stretto per il catalogo reale: `TRANSPORT_LOGISTICS` sono 19 caratteri — la colonna
+  // è varchar(32) e il contratto rifiutava un codice valido. D-83.
+  tenantIndustryCode: z.string().min(1).max(32),
   tenantSizeBand: TenantSizeBandSchema.optional(),
   // first admin
   adminEmail: z.string().email().max(320),

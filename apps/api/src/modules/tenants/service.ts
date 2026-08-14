@@ -11,13 +11,19 @@ import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
-import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
+import {
+  NotFoundError,
+  ConflictError,
+  ForbiddenError,
+  ValidationError,
+} from "../../errors/index.js";
 import type {
   Tenant,
   TenantListQuery,
   TenantListResponse,
   CreateTenantBody,
   UpdateTenantBody,
+  IndustryCode,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 
@@ -37,7 +43,29 @@ function requireOwnTenant(actor: ActorContext): string {
   return actor.tenantId;
 }
 
+/**
+ * Il settore è NOT NULL + FK verso `sys.sys_industry_codes` dalla mig 000305 (I21).
+ * Lo schema Zod garantisce che ci sia e che sia della lunghezza giusta, non che
+ * esista nel catalogo: senza questo controllo un codice inventato uscirebbe come 500
+ * (violazione di FK) invece che come 400 leggibile. D-83.
+ */
+export async function assertIndustryCode(
+  code: string,
+  q: repo.DbConnector = pool,
+): Promise<void> {
+  if (await repo.industryCodeExists(q, code)) return;
+  const known = await repo.listIndustryCodes(q);
+  throw new ValidationError(
+    { field: "tenantIndustryCode", value: code, allowed: known.map((i) => i.industryCode) },
+    `Unknown industry code '${code}' — see GET /v1/tenants/industry-codes`,
+  );
+}
+
 export const tenantsService = {
+  async industryCodes(): Promise<IndustryCode[]> {
+    return repo.listIndustryCodes(pool);
+  },
+
   async list(actor: ActorContext, query: TenantListQuery): Promise<TenantListResponse> {
     const ownTenantOnly = isPlatformAdmin(actor) ? undefined : requireOwnTenant(actor);
     return repo.listTenants(pool, { ownTenantOnly, query });
@@ -65,12 +93,16 @@ export const tenantsService = {
         "TENANT_CODE_CONFLICT",
       );
     }
+    await assertIndustryCode(body.tenantIndustryCode);
     return repo.insertTenant(pool, body);
   },
 
   async update(actor: ActorContext, id: string, patch: UpdateTenantBody): Promise<Tenant> {
     if (!isPlatformAdmin(actor) && requireOwnTenant(actor) !== id) {
       throw new NotFoundError("Tenant");
+    }
+    if (patch.tenantIndustryCode !== undefined) {
+      await assertIndustryCode(patch.tenantIndustryCode);
     }
     const updated = await repo.updateTenantPartial(pool, id, patch);
     if (!updated) throw new NotFoundError("Tenant");

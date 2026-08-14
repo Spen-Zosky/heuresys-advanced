@@ -12,6 +12,7 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { tenantsService } from "../src/modules/tenants/service.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { anIndustryCode } from "./helpers/industry.js";
 
 const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
 const ADMIN_PASSWORD = TEST_PERSONA_PASSWORD;
@@ -38,12 +39,15 @@ async function loginAdmin(t: TestApp): Promise<LoginResult> {
 
 let suite: TestApp;
 let auth: LoginResult;
+// D-83: il settore e' obbligatorio (000305). Preso dal catalogo, non inventato.
+let industryCode: string;
 const createdTenantIds: string[] = [];
 
 describe("/v1/tenants/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     auth = await loginAdmin(suite);
+    industryCode = await anIndustryCode();
   });
 
   afterAll(async () => {
@@ -73,7 +77,7 @@ describe("/v1/tenants/* integration", () => {
       method: "POST",
       url: "/v1/tenants",
       headers: { cookie: cookieHeader(auth.cookies), "content-type": "application/json" },
-      payload: { tenantCode: `${SUITE_PREFIX}_NOOP`, tenantName: "noop" },
+      payload: { tenantCode: `${SUITE_PREFIX}_NOOP`, tenantName: "noop", tenantIndustryCode: industryCode },
     });
     expect(r.statusCode).toBe(403);
   });
@@ -93,6 +97,7 @@ describe("/v1/tenants/* integration", () => {
       payload: {
         tenantCode: code,
         tenantName: "Happy Path Test",
+        tenantIndustryCode: industryCode,
         tenantSizeBand: "M",
         tenantCountryCode: "IT",
       },
@@ -137,7 +142,7 @@ describe("/v1/tenants/* integration", () => {
         "x-csrf-token": auth.csrfToken,
         "content-type": "application/json",
       },
-      payload: { tenantCode: code, tenantName: "Dup Original" },
+      payload: { tenantCode: code, tenantName: "Dup Original", tenantIndustryCode: industryCode },
     });
     expect(first.statusCode).toBe(201);
     createdTenantIds.push((first.json() as { tenantId: string }).tenantId);
@@ -150,7 +155,7 @@ describe("/v1/tenants/* integration", () => {
         "x-csrf-token": auth.csrfToken,
         "content-type": "application/json",
       },
-      payload: { tenantCode: code, tenantName: "Dup Attempt" },
+      payload: { tenantCode: code, tenantName: "Dup Attempt", tenantIndustryCode: industryCode },
     });
     expect(second.statusCode).toBe(409);
     const errBody = second.json() as { error: { code: string } };
@@ -167,7 +172,7 @@ describe("/v1/tenants/* integration", () => {
         "x-csrf-token": auth.csrfToken,
         "content-type": "application/json",
       },
-      payload: { tenantCode: code, tenantName: "PatchTarget" },
+      payload: { tenantCode: code, tenantName: "PatchTarget", tenantIndustryCode: industryCode },
     });
     const { tenantId } = created.json() as { tenantId: string };
     createdTenantIds.push(tenantId);
@@ -209,7 +214,7 @@ describe("/v1/tenants/* integration", () => {
         "x-csrf-token": auth.csrfToken,
         "content-type": "application/json",
       },
-      payload: { tenantCode: code, tenantName: "Archive Me" },
+      payload: { tenantCode: code, tenantName: "Archive Me", tenantIndustryCode: industryCode },
     });
     const { tenantId } = created.json() as { tenantId: string };
     createdTenantIds.push(tenantId);
@@ -251,6 +256,62 @@ describe("/v1/tenants/* integration", () => {
         "content-type": "application/json",
       },
       payload: { tenantCode: "", tenantName: "missing code", tenantCountryCode: "ITA" },
+    });
+    expect(r.statusCode).toBe(400);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("VALIDATION_ERROR");
+  });
+
+  /* -------------------------------------------------- D-83: il settore */
+
+  it("GET /v1/tenants/industry-codes → il catalogo vivo, non una lista scritta a mano", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/tenants/industry-codes",
+      headers: { cookie: cookieHeader(auth.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as { items: Array<{ industryCode: string; industryAtecoCode: string }> };
+
+    // L'atteso si deriva dalla fonte, non si scrive: se il catalogo cambia, cambia il test.
+    const live = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_industry_codes WHERE industry_is_active = true`,
+    );
+    expect(body.items.length).toBe(Number(live.rows[0]!.n));
+    expect(body.items.length).toBeGreaterThan(0);
+    expect(body.items.every((i) => i.industryCode.length > 0 && i.industryAtecoCode.length > 0)).toBe(true);
+  });
+
+  it("POST /v1/tenants senza settore → 400 di validazione, non 500 dal database", async () => {
+    const r = await suite.app.inject({
+      method: "POST",
+      url: "/v1/tenants",
+      headers: {
+        cookie: cookieHeader(auth.cookies),
+        "x-csrf-token": auth.csrfToken,
+        "content-type": "application/json",
+      },
+      payload: { tenantCode: `${SUITE_PREFIX}_NOIND`, tenantName: "Senza settore" },
+    });
+    // È il caso che ha tenuto la CI rossa dal 13 agosto: passava la validazione e
+    // schiantava sul vincolo NOT NULL della 000305.
+    expect(r.statusCode).toBe(400);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("VALIDATION_ERROR");
+  });
+
+  it("POST /v1/tenants con un settore fuori catalogo → 400, non una violazione di FK", async () => {
+    const r = await suite.app.inject({
+      method: "POST",
+      url: "/v1/tenants",
+      headers: {
+        cookie: cookieHeader(auth.cookies),
+        "x-csrf-token": auth.csrfToken,
+        "content-type": "application/json",
+      },
+      payload: {
+        tenantCode: `${SUITE_PREFIX}_BADIND`,
+        tenantName: "Settore inventato",
+        tenantIndustryCode: "NON_ESISTE_QUESTO",
+      },
     });
     expect(r.statusCode).toBe(400);
     expect((r.json() as { error: { code: string } }).error.code).toBe("VALIDATION_ERROR");

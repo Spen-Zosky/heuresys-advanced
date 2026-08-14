@@ -13,6 +13,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { anIndustryCode } from "./helpers/industry.js";
 import { env } from "../src/config/env.js";
 
 const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
@@ -73,6 +74,7 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
       payload: {
         tenantCode: code,
         tenantName: "Provisioned Org",
+        tenantIndustryCode: await anIndustryCode(),
         tenantCountryCode: "IT",
         adminEmail: newAdminEmail,
         adminDisplayName: "Provisioned Admin",
@@ -131,6 +133,7 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
       payload: {
         tenantCode: `${SUITE_PREFIX}_FORBID`,
         tenantName: "Forbidden",
+        tenantIndustryCode: await anIndustryCode(),
         adminEmail: "x@example.org",
         adminDisplayName: "x",
         adminPassword: NEW_ADMIN_PW,
@@ -144,6 +147,7 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
     const base = {
       tenantCode: code,
       tenantName: "Dup Org",
+      tenantIndustryCode: await anIndustryCode(),
       adminEmail: `admin.${code.toLowerCase()}@example.org`,
       adminDisplayName: "Dup Admin",
       adminPassword: NEW_ADMIN_PW,
@@ -177,6 +181,7 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
       payload: {
         tenantCode: code,
         tenantName: "Archetyped Org",
+        tenantIndustryCode: await anIndustryCode(),
         adminEmail: `admin.${code.toLowerCase()}@example.org`,
         adminDisplayName: "Arch Admin",
         adminPassword: NEW_ADMIN_PW,
@@ -210,6 +215,7 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
       payload: {
         tenantCode: code,
         tenantName: "Bad Arch",
+        tenantIndustryCode: await anIndustryCode(),
         adminEmail: `admin.${code.toLowerCase()}@example.org`,
         adminDisplayName: "x",
         adminPassword: NEW_ADMIN_PW,
@@ -233,6 +239,7 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
         payload: {
           tenantCode: `${SUITE_PREFIX}_OFF`,
           tenantName: "Disabled",
+          tenantIndustryCode: await anIndustryCode(),
           adminEmail: `admin.off.${SUITE_PREFIX.toLowerCase()}@example.org`,
           adminDisplayName: "x",
           adminPassword: NEW_ADMIN_PW,

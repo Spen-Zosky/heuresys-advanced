@@ -3,6 +3,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { anIndustryCode } from "./helpers/industry.js";
 import { getArchetype, archetypeUsers } from "../src/modules/tenant-materialization/blueprints.js";
 
 // #4 WI-C — tenant materialization generator (/v1/tenant-materialization). Real login + live DB.
@@ -160,9 +161,10 @@ beforeAll(async () => {
   preexistingSkills = Number(pre.rows[0]!.c);
   // A non-ACTIVE tenant for the M-1 status guard.
   const t = await pool.query<{ tenant_id: string }>(
-    `INSERT INTO sys.sys_tenancies (tenant_code, tenant_name, tenant_status)
-     VALUES ('TEST-MAT-SUSPENDED', '[TEST] Suspended Materialization Target', 'SUSPENDED')
+    `INSERT INTO sys.sys_tenancies (tenant_code, tenant_name, tenant_status, tenant_industry_code)
+     VALUES ('TEST-MAT-SUSPENDED', '[TEST] Suspended Materialization Target', 'SUSPENDED', $1)
      RETURNING tenant_id`,
+    [await anIndustryCode()],
   );
   suspendedTenantId = t.rows[0]!.tenant_id;
 }, 60_000);

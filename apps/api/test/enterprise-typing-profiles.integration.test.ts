@@ -27,6 +27,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { anIndustryCode } from "./helpers/industry.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const SUITE_PREFIX = `IT_ETP_${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -59,9 +60,9 @@ describe("/v1/enterprise-typing-profiles/* integration", () => {
     userS = await login(suite, "tommaso.fiore@rtl-bank.org");
 
     const t = await pool.query<{ tenant_id: string }>(
-      `INSERT INTO sys.sys_tenancies (tenant_code, tenant_name, tenant_status)
-       VALUES ($1, $2, 'ACTIVE') RETURNING tenant_id`,
-      [`${SUITE_PREFIX}_TEN`, `Throwaway ${SUITE_PREFIX}`],
+      `INSERT INTO sys.sys_tenancies (tenant_code, tenant_name, tenant_status, tenant_industry_code)
+       VALUES ($1, $2, 'ACTIVE', $3) RETURNING tenant_id`,
+      [`${SUITE_PREFIX}_TEN`, `Throwaway ${SUITE_PREFIX}`, await anIndustryCode()],
     );
     throwawayTenantId = t.rows[0]!.tenant_id;
   });

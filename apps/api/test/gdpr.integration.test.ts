@@ -11,6 +11,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { anIndustryCode } from "./helpers/industry.js";
 
 const PLATFORM_ADMIN = "enzo.spenuso@heuresys.com";
 const TENANT_ADMIN = "federica.marchetti@rtl-bank.org";
@@ -302,6 +303,7 @@ describe("D-14 F3/F4 GDPR tooling", () => {
       payload: {
         tenantCode: code,
         tenantName: "Erasure Subject Org",
+        tenantIndustryCode: await anIndustryCode(),
         adminEmail: subjectEmail,
         adminDisplayName: "Erasure Subject",
         adminPassword: SUBJECT_PW,

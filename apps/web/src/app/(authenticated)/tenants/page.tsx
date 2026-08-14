@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Button } from "@heuresys/ui";
-import type { Tenant, CreateTenantBody } from "@heuresys/shared";
+import type { Tenant, CreateTenantBody, IndustryCode } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
@@ -25,14 +25,35 @@ export default function TenantsListPage() {
   const canCreate = perms.data?.permissions.includes("tenant:create") ?? false;
   const canArchive = perms.data?.permissions.includes("tenant:delete") ?? false;
 
-  const [form, setForm] = useState({ tenantCode: "", tenantName: "", tenantLegalName: "", tenantCountryCode: "" });
+  const [form, setForm] = useState({
+    tenantCode: "",
+    tenantName: "",
+    tenantLegalName: "",
+    tenantCountryCode: "",
+    tenantIndustryCode: "",
+  });
   const [notice, setNotice] = useState<string | null>(null);
+
+  // D-83: il settore è obbligatorio nel database (mig 000305, I21) e il suo dominio è
+  // il catalogo `sys_industry_codes`. La tendina lo legge dall'API — nessun elenco
+  // scritto a mano qui, o il giorno che il catalogo cambia questa pagina mentirebbe.
+  const industries = useQuery({
+    queryKey: ["tenants", "industry-codes"],
+    queryFn: () => apiFetch<{ items: IndustryCode[] }>("/v1/tenants/industry-codes"),
+    enabled: canCreate,
+  });
 
   const create = useMutation({
     mutationFn: (body: CreateTenantBody) => apiFetch<Tenant>("/v1/tenants", { method: "POST", body }),
     onSuccess: () => {
       setNotice(t("tenants.editing.created"));
-      setForm({ tenantCode: "", tenantName: "", tenantLegalName: "", tenantCountryCode: "" });
+      setForm({
+        tenantCode: "",
+        tenantName: "",
+        tenantLegalName: "",
+        tenantCountryCode: "",
+        tenantIndustryCode: "",
+      });
       void qc.invalidateQueries({ queryKey: ["tenants"] });
     },
   });
@@ -115,12 +136,16 @@ export default function TenantsListPage() {
             onSubmit={(e) => {
               e.preventDefault();
               setNotice(null);
-              create.mutate({
+              // Niente `as CreateTenantBody`: era il cast a nascondere che questo body
+              // non rispettava più il contratto (D-83). Il tipo deve poter protestare.
+              const body: CreateTenantBody = {
                 tenantCode: form.tenantCode.trim(),
                 tenantName: form.tenantName.trim(),
+                tenantIndustryCode: form.tenantIndustryCode,
                 ...(form.tenantLegalName.trim() ? { tenantLegalName: form.tenantLegalName.trim() } : {}),
                 ...(form.tenantCountryCode.trim() ? { tenantCountryCode: form.tenantCountryCode.trim().toUpperCase() } : {}),
-              } as CreateTenantBody);
+              };
+              create.mutate(body);
             }}
           >
             {([
@@ -140,6 +165,23 @@ export default function TenantsListPage() {
                 />
               </label>
             ))}
+            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+              {t("tenants.editing.industryLabel")}
+              <select
+                data-testid="tenant-field-tenantIndustryCode"
+                required
+                value={form.tenantIndustryCode}
+                onChange={(e) => setForm((f) => ({ ...f, tenantIndustryCode: e.target.value }))}
+                className="rounded-input border border-border bg-background px-2 py-1 text-sm text-foreground"
+              >
+                <option value="">{t("tenants.editing.industryPlaceholder")}</option>
+                {(industries.data?.items ?? []).map((i) => (
+                  <option key={i.industryCode} value={i.industryCode}>
+                    {i.industryName}
+                  </option>
+                ))}
+              </select>
+            </label>
             <Button type="submit" data-testid="tenant-create-submit" disabled={create.isPending}>
               {create.isPending ? t("tenants.editing.creating") : t("tenants.editing.submit")}
             </Button>

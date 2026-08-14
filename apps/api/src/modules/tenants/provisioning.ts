@@ -21,6 +21,7 @@ import { insertUser, findRoleByCode, insertRoleGrant } from "../users/repository
 import { upsertPolicy } from "../mfa-policy/repository.js";
 import { getArchetype } from "../tenant-materialization/blueprints.js";
 import { materialize as materializeArchetype } from "../tenant-materialization/repository.js";
+import { assertIndustryCode } from "./service.js";
 import { NotFoundError, ConflictError } from "../../errors/index.js";
 import type { ActorContext } from "../../lib/actor.js";
 import type { ProvisionTenantBody, ProvisionTenantResponse } from "@heuresys/shared";
@@ -51,6 +52,10 @@ export async function provisionTenant(
       if (existing) {
         throw new ConflictError(`Tenant code '${body.tenantCode}' already exists`, "TENANT_CODE_EXISTS");
       }
+
+      // Il settore è FK verso il catalogo: senza questo, un codice sconosciuto
+      // uscirebbe come 500 dopo aver già fatto lavoro nella transazione. D-83.
+      await assertIndustryCode(body.tenantIndustryCode, client);
 
       const tenant = await insertTenant(client, {
         tenantCode: body.tenantCode,

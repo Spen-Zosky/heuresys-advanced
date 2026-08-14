@@ -305,6 +305,8 @@
       "nameLabel": "Name",
       "legalNameLabel": "Legal name",
       "countryLabel": "Country (2 letters)",
+      "industryLabel": "Industry",
+      "industryPlaceholder": "Select an industry…",
       "submit": "Create",
       "creating": "Creating…",
       "created": "Company created.",

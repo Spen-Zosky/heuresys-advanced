@@ -29,6 +29,11 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
+0. **⛔ PRIMA DI TUTTO — `D-83`: la CI è rossa dal 13 agosto e il deploy è fermo.** La migrazione
+   `000305` ha reso il settore obbligatorio nel database, il contratto Zod lo lascia opzionale:
+   sei test cadono e i due host restano indietro. **Diagnosi completa e cura già scritta** nel
+   registro dei debiti — è un commit atomico (contratto + tre file di test), e la prova è la CI
+   verde, non il verde locale. Finché resta, nessun deploy parte.
 1. **Il menu ora ha una corsia nuova**: `python docs/kb/tools/programmi.py` dice da dove si
    riprende ogni voce lunga. Le tre più mature: **#99 F3** (il resolver sull'albero delle unità —
    è la radice del ramo: sblocca #142 F2/F3), **#92 F4** (scritture del ciclo di valutazione, ma

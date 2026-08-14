@@ -344,22 +344,47 @@ export interface CompensationEquity {
   scatter: CompensationScatterPoint[];
 }
 
-function compensationScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] } {
-  if (scope.isPlatformScope) return { sql: "TRUE", params: [] };
-  const params: unknown[] = [scope.tenantId];
-  const clauses = [`pcp.position_compensation_profile_tenant_id = $1`];
-  if (scope.teamPositionIds.length > 0) {
-    params.push(scope.teamPositionIds);
-    clauses.push(`p.position_id = ANY($${params.length}::uuid[])`);
+/**
+ * @param unitaEscluse #99 F4 — le unità di vertice, quando l'attore sta sotto la soglia di
+ *   catena (ADR-0036 §5). Si esclude **a monte**, nella clausola, e non a valle sui
+ *   risultati: così scatter, banding e i tre estremi (min/mediana/max) sono calcolati
+ *   sullo stesso universo e restano fra loro coerenti. Filtrare a valle avrebbe lasciato
+ *   `overallMaxMidEur` a raccontare la banda del vertice appena tolto dallo scatter — la
+ *   fuga aritmetica che `mask.ts` chiama per nome nella sua quarta proprietà.
+ */
+function compensationScopeClause(
+  scope: ScopeFilter,
+  unitaEscluse: readonly string[] = [],
+): { sql: string; params: unknown[] } {
+  const params: unknown[] = [];
+  const clauses: string[] = [];
+  if (!scope.isPlatformScope) {
+    params.push(scope.tenantId);
+    clauses.push(`pcp.position_compensation_profile_tenant_id = $${params.length}`);
+    if (scope.teamPositionIds.length > 0) {
+      params.push(scope.teamPositionIds);
+      clauses.push(`p.position_id = ANY($${params.length}::uuid[])`);
+    }
   }
+  if (unitaEscluse.length > 0) {
+    params.push(unitaEscluse);
+    // `IS DISTINCT FROM ALL` non esiste: una posizione senza unità (NULL) non è di vertice
+    // e deve restare, quindi il confronto va reso esplicito invece di affidarlo a NOT IN,
+    // che su NULL restituisce NULL e farebbe sparire la riga in silenzio.
+    clauses.push(
+      `(p.position_organization_unit_id IS NULL OR NOT (p.position_organization_unit_id = ANY($${params.length}::uuid[])))`,
+    );
+  }
+  if (clauses.length === 0) return { sql: "TRUE", params: [] };
   return { sql: clauses.join(" AND "), params };
 }
 
 export async function getCompensationEquity(
   q: DbConnector,
   scope: ScopeFilter,
+  unitaEscluse: readonly string[] = [],
 ): Promise<CompensationEquity> {
-  const sc = compensationScopeClause(scope);
+  const sc = compensationScopeClause(scope, unitaEscluse);
   const FROM = `
        FROM sys.sys_position_compensation_profiles pcp
        JOIN sys.sys_positions p ON p.position_id = pcp.position_id

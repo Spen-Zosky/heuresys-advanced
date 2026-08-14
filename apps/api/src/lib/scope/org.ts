@@ -195,3 +195,36 @@ export async function chainLevelOf(q: DbConnector, userId: string): Promise<numb
   const l = res.rows[0]?.livello;
   return l == null ? null : Number(l);
 }
+
+/**
+ * Le unità che stanno entro una certa profondità — cioè le unità **di vertice**.
+ *
+ * Esiste perché la soglia di catena non protegge solo il dato per-persona. Un aggregato
+ * retributivo la aggira senza nominare nessuno: misurato il 2026-08-14, a livello 1 c'è
+ * **un solo** profilo retributivo, banda 220.000 €, ed è il massimo assoluto dell'azienda.
+ * Quindi `overallMaxMidEur` **è** la banda di quella persona, e il punto corrispondente
+ * dello scatter è identificabile con certezza, non per inferenza — vale la quarta proprietà
+ * di `mask.ts`: «gli aggregati seguono il dato».
+ *
+ * L'albero è **lo stesso** di `chainLevelOf`, deliberatamente ricopiato invece di essere
+ * astratto in una vista: se un giorno divergessero, la persona sarebbe di vertice per una
+ * funzione e no per l'altra, che è il difetto peggiore possibile qui. Chi le tocca, le
+ * tocchi insieme.
+ */
+export async function unitaEntroLivello(q: DbConnector, livelloMax: number): Promise<string[]> {
+  const res = await q.query<{ ou: string }>(
+    `WITH RECURSIVE albero AS (
+       SELECT organization_unit_id AS ou, 1 AS livello
+         FROM sys.sys_organization_units
+        WHERE organization_unit_parent_id IS NULL AND organization_unit_is_active
+       UNION ALL
+       SELECT o.organization_unit_id, a.livello + 1
+         FROM sys.sys_organization_units o
+         JOIN albero a ON o.organization_unit_parent_id = a.ou
+        WHERE o.organization_unit_is_active
+     )
+     SELECT DISTINCT ou::text AS ou FROM albero WHERE livello <= $1`,
+    [livelloMax],
+  );
+  return res.rows.map((r) => r.ou);
+}

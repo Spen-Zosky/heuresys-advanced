@@ -7,7 +7,8 @@
 
 import { pool } from "../../db/client.js";
 import { scopeTierOf } from "../../lib/scope/domains.js";
-import { masksUnderPlatformMandate } from "../../lib/scope/mask.js";
+import { masksUnderPlatformMandate, LIVELLO_VERTICE } from "../../lib/scope/mask.js";
+import { chainLevelOf, unitaEntroLivello } from "../../lib/scope/org.js";
 import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
@@ -106,7 +107,23 @@ export const analyticsService = {
 
   async compensation(a: ActorContext): Promise<CompensationAnalyticsResponse> {
     const s = await buildScope(a);
-    const c = await repo.getCompensationEquity(pool, s.filter);
+
+    /* #99 F4 — la soglia di catena vale anche sugli AGGREGATI.
+     *
+     * Il commento sotto (VINCOLO 5) aveva già visto la cosa giusta — ogni punto dello
+     * scatter È la retribuzione di una persona — ma la conclusione si fermava al mandato
+     * tecnico. Misurato il 2026-08-14: a livello 1 c'è **un solo** profilo retributivo,
+     * banda 220.000 €, ed è il massimo assoluto dell'azienda. Quindi per un mandato HR di
+     * livello 3 quel punto non era un'inferenza statistica: era il CEO, in chiaro, e
+     * `overallMaxMidEur` ripeteva la stessa cifra.
+     *
+     * L'esclusione è a MONTE (clausola SQL), non a valle: i tre estremi si ricalcolano da
+     * soli sull'universo ridotto. Un filtro sui risultati avrebbe tolto il punto e lasciato
+     * il massimo — cioè avrebbe nascosto l'addendo pubblicando la somma. */
+    const livelloAttore = await chainLevelOf(pool, a.userId);
+    const sottoSoglia = livelloAttore === null || livelloAttore > LIVELLO_VERTICE;
+    const unitaEscluse = sottoSoglia ? await unitaEntroLivello(pool, LIVELLO_VERTICE) : [];
+    const c = await repo.getCompensationEquity(pool, s.filter, unitaEscluse);
     const base = {
       scope: { kind: s.kind, tenantId: s.tenantId },
       totalProfiles: c.totalProfiles,

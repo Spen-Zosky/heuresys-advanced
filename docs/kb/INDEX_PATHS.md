@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-13T13:40:47Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2973**
+**Generato**: 2026-08-14T00:42:47Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2988**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -8,7 +8,7 @@
 
 | Categoria | File |
 |---|---|
-| ADR | 36 |
+| ADR | 37 |
 | api-core | 32 |
 | api-module | 332 |
 | ci | 17 |
@@ -18,11 +18,11 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 304 |
+| db-migration | 306 |
 | db-other | 8 |
 | db-script | 42 |
 | db-seed | 114 |
-| doc-canonical | 629 |
+| doc-canonical | 641 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 361 |
 | ux-design-archive | 80 |
 | web-source | 235 |
-| **TOTALE** | **2973** |
+| **TOTALE** | **2988** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2415 |
+| live | 2430 |
 
 ## File per categoria
 
@@ -84,6 +84,7 @@
 - `D:\heuresys-advanced\docs\architecture\adr\0035_retirement_amends_the_source_never_deletes_downstream.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0036_hierarchical_and_functional_domains.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0037_user_deletion_is_anonymization.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0038_the_database_is_self_sufficient.md` · *live* · git-tracked
 
 ### api-core
 
@@ -1327,6 +1328,8 @@
 - `D:\heuresys-advanced\db\migrations\000304_gdpr_registry_covers_belonging_not_prefix.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000305_identita_di_settore_per_costruzione.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000306_nessuna_pagina_irraggiungibile.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000307_due_direzioni_di_vertice_a_dirigente.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000308_le_predizioni_ritrovano_il_loro_modello.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1503,6 +1506,14 @@
 
 ### doc-canonical
 
+- `D:\heuresys-advanced\.programmi\142-cruscotti-per-tipologia.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\143-squadra-come-progetto.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\159-ponte-gateway-pagine.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\54-recruiting-ats.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\92-ciclo-valutazione.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\99-domini-gerarchici-funzionali.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\PROGRESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-macchina-stati.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-misura.md` · *live* · git-tracked
@@ -1811,6 +1822,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\check_exposure.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_identita_azienda.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_module_test_coverage.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\check_no_legacy_ingest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_pagine_orfane.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_tenant_contamination.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\chiudi_leggero.py` · *live* · git-tracked
@@ -1824,7 +1836,9 @@
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-merge` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\install-hooks.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\lab_inbox.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\legacy_ingest_allowlist.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\measure_concept_retrieval.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\programmi.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\reconstruct_linked_manifest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\session_start.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\status_dashboard.py` · *live* · git-tracked
@@ -2057,6 +2071,7 @@
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-11-ciclo-h-clone-linux-pc-s1054.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-12-batch-p1-p2-s1055.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-13-batch-p2-completo-s1056.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-14-batch-p1p2p3-s1058.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-catalogo-generico-corpus-concetti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-substrato-semantico-verifica-e-correzioni.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-07-percorsi-carriera-155.md` · *live* · git-tracked

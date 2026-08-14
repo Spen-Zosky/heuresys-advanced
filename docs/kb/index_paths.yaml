@@ -1,14 +1,14 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-13T13:40:47Z da docs/kb/tools/build_index.py
+# generato: 2026-08-14T00:42:47Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-13T13:40:47Z"
-  total_files: 2973
+  generated_at: "2026-08-14T00:42:47Z"
+  total_files: 2988
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 36
+    ADR: 37
     api-core: 32
     api-module: 332
     ci: 17
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 304
+    db-migration: 306
     db-other: 8
     db-script: 42
     db-seed: 114
-    doc-canonical: 629
+    doc-canonical: 641
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2415
+    live: 2430
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -251,6 +251,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\0037_user_deletion_is_anonymization.md'
     root: repo
     rel: 'docs/architecture/adr/0037_user_deletion_is_anonymization.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0038_the_database_is_self_sufficient.md'
+    root: repo
+    rel: 'docs/architecture/adr/0038_the_database_is_self_sufficient.md'
     category: ADR
     status: live
     provenance: git-tracked
@@ -7532,6 +7538,18 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000307_due_direzioni_di_vertice_a_dirigente.sql'
+    root: repo
+    rel: 'db/migrations/000307_due_direzioni_di_vertice_a_dirigente.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000308_le_predizioni_ritrovano_il_loro_modello.sql'
+    root: repo
+    rel: 'db/migrations/000308_le_predizioni_ritrovano_il_loro_modello.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -8514,6 +8532,54 @@ files:
     root: repo
     rel: 'db/seeds/survey-assignments-demo.sql'
     category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\142-cruscotti-per-tipologia.md'
+    root: repo
+    rel: '.programmi/142-cruscotti-per-tipologia.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\143-squadra-come-progetto.md'
+    root: repo
+    rel: '.programmi/143-squadra-come-progetto.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\159-ponte-gateway-pagine.md'
+    root: repo
+    rel: '.programmi/159-ponte-gateway-pagine.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md'
+    root: repo
+    rel: '.programmi/50-knowledge-graph-legacy.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\54-recruiting-ats.md'
+    root: repo
+    rel: '.programmi/54-recruiting-ats.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\92-ciclo-valutazione.md'
+    root: repo
+    rel: '.programmi/92-ciclo-valutazione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\99-domini-gerarchici-funzionali.md'
+    root: repo
+    rel: '.programmi/99-domini-gerarchici-funzionali.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\README.md'
+    root: repo
+    rel: '.programmi/README.md'
+    category: doc-canonical
     status: live
     provenance: git-tracked
   - path: 'D:\heuresys-advanced\.storia36\PROGRESS.md'
@@ -10364,6 +10430,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\check_no_legacy_ingest.py'
+    root: repo
+    rel: 'docs/kb/tools/check_no_legacy_ingest.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\check_pagine_orfane.py'
     root: repo
     rel: 'docs/kb/tools/check_pagine_orfane.py'
@@ -10442,9 +10514,21 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\legacy_ingest_allowlist.txt'
+    root: repo
+    rel: 'docs/kb/tools/legacy_ingest_allowlist.txt'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\measure_concept_retrieval.mjs'
     root: repo
     rel: 'docs/kb/tools/measure_concept_retrieval.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\programmi.py'
+    root: repo
+    rel: 'docs/kb/tools/programmi.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11837,6 +11921,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-13-batch-p2-completo-s1056.md'
     root: repo
     rel: 'docs/superpowers/plans/2026-08-13-batch-p2-completo-s1056.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-14-batch-p1p2p3-s1058.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-14-batch-p1p2p3-s1058.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

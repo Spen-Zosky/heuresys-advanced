@@ -1,29 +1,26 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-13 (S1057).
+**Updated**: 2026-08-14 (S1058).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-## Last session brief (S1057)
+## Last session brief (S1058)
 
-Batch su mandato di Enzo — «costruisci la pagina del clima aggregata a #126, poi sfoltisci
-il più possibile, governato dal guardiano» — chiuso a **otto voci**, con un filo che si è
-ripetuto fino a diventare il tema della sessione: **quasi ogni voce descriveva qualcosa di
-diverso da ciò che il dato diceva davvero**.
+Tre fili. **Il punto fisso**: *un dato che per sua natura può variare si misura prima di
+prenderlo per buono* — enunciato una volta sola in testa al `CLAUDE.md` dopo aver misurato che
+era già scritto **sei volte nello stesso file**, ognuna per la sua materia e nessuna in generale.
+L'ho enunciato dopo averlo violato, su rilievo di Enzo.
 
-La decisione sui sondaggi di clima sembrava aprire una funzione nuova e ne ha scoperta una
-**rotta**: nessuna persona poteva rivedere nessuna delle proprie risposte. Le tabelle che
-credevo fossero il clima erano un **doppione fermo**, mentre il clima vero stava altrove. Le
-nomine del lab erano già entrate nel dato, per un'altra strada. La plancia era già stata
-promossa. Un ramo «da decidere» era già deciso. Un seed «da rendere idempotente» non era da
-riscrivere: era **superato**, e rieseguirlo avrebbe riportato indietro l'organigramma.
+**Il rubinetto chiuso**: il brownfield non è più una fonte. Non un paragrafo — un ADR, un
+invariante riscritto e un **cancello automatico**, che alla prima corsa ha segnalato sé stesso e
+alla seconda ha trovato un file mancato dal censimento a mano: un modello di istruzioni che
+mandava un agente a censire il legacy «per sapere cosa resta da importare».
 
-**Il metodo che ha retto, e che è costato tre volte**: le prove viste fallire. Tre volte una
-mia prova era **incapace di fallire** — un confine provato contando righe invece che
-identità, un 404 che arrivava dalla validazione invece che dalla guardia, e per tre volte un
-exit code letto attraverso una pipe. Ogni volta l'ha detto un sabotaggio, non io.
+**Le voci lunghe hanno una casa**: sette programmi in fasi da una sessione, stato su disco,
+ripresa stampata dal boot. Tre prime fasi chiuse, ognuna ha sciolto un nodo invece di aprirne uno.
 
-**Il guardiano stesso aveva un difetto**: autorizzava lavori che sfondavano la soglia che lui
-impone. Corretto anche nella copia a livello utente, dove sbagliava in ogni progetto.
+**Tema ricorrente, terza sessione di fila**: quasi ogni documento diceva qualcosa che il dato
+smentiva — i sondaggi «che nessuno legge» erano letti da quattro moduli, i 139mila archi «da
+importare» non esistevano ed erano stati esclusi apposta perché derivati.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -32,36 +29,31 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-1. **Non resta più nulla di breve.** Misurato sul menu rigenerato a fine sessione: ogni voce
-   ancora aperta è da una sessione in su — **#123** organigramma-bis (~1), **#50** knowledge
-   graph legacy (~2-3), **#92** ciclo di valutazione (~2-3, restano i passi 4-7), **#142**
-   cruscotti per tipologia (~3-4), **#143** la squadra come progetto (~4-6), **#54**
-   recruiting (~5-7), **#99** domini (~6-8). Aprirne una significa impegnare la sessione a
-   quella, non sfoltire.
-2. **#159 ha il bersaglio cresciuto** per direzione di Enzo del 2026-08-13: non è più «il
-   ponte più una seconda pagina» ma il ponte **più il criterio di idoneità più l'adozione su
-   tutte le pagine che lo soddisfano**. Va ristimata prima di aprirla.
-3. **Le tabelle ancora scoperte** del cancello di #117 (conteggio in SOT_STATE). Finché la
-   classificazione non è chiusa, il cancello **non è agganciato** a `db_health.py`: un rosso
-   a riposo insegna a non guardare i rossi.
+1. **Il menu ora ha una corsia nuova**: `python docs/kb/tools/programmi.py` dice da dove si
+   riprende ogni voce lunga. Le tre più mature: **#99 F3** (il resolver sull'albero delle unità —
+   è la radice del ramo: sblocca #142 F2/F3), **#92 F4** (scritture del ciclo di valutazione, ma
+   prima va sciolto il rilievo sul mapping RBAC più largo del disegno), **#50 F2** (il grafo delle
+   competenze, ora che si sa che non va importato ma costruito).
+2. **#187 è nato P1 e non è ancora stato toccato**: l'indice di salute organizzativa calcola su
+   sondaggi fermi a gennaio 2025 mentre la rilevazione vera è aperta. È il difetto più concreto
+   emerso oggi.
+3. **#69 si è sbloccato e dimagrito**: resta la bonifica dei residui `staging.wave1_*` nel nostro
+   database — piccola e senza dipendenze. Buona da aggregare a qualcosa di più grande.
 
 ## Open questions
 
-- **La famiglia `sys_engagement_*` è residuo: si bonifica?** Sei sondaggi in inglese, tutti
-  chiusi, l'ultimo del gennaio 2025, che nessuna rotta legge — mentre il clima vero vive in
-  `sys_surveys`. L'istruttoria è fatta: **quattro migration** lo toccano (`000077`, `000097`,
-  `000113`, `000186`), quindi il ritiro si misura in file da emendare (ADR-0035: ritirare non
-  è cancellare). **Non eseguito perché distruttivo** — la decisione è tua.
-- **Due responsabili di vertice sono inquadrati QD4 e non Dirigenti** (`matteo.lombardi`,
-  Internal Audit; `sara.gallo`, Marketing). Reggono l'unità, quindi la nomina c'è; è
-  l'inquadramento a non seguirla — lo stesso caso che #118 ha risolto un gradino più in basso.
-- **I due rami `gov/w1-recuperato` e `gov/w2-recuperato` esistono ancora in locale.**
-  Cancellarli è sicuro (i tag `archivio/*` li conservano, verificato) ma è distruttivo.
+- **#50 ha una strada sola ma un titolo nuovo**: il grafo si costruisce dai dati che abbiamo. Va
+  confermato che la vista `/visualizations` sia la sede giusta, o se merita una pagina propria.
+- **#54 F2 comincia da una scelta di modello** (quali entità del recruiting servono davvero) ora
+  che l'import è escluso: è la prima fase che non ha più una sorgente da cui copiare la forma.
+- **D-60 resta aperto e il rubinetto chiuso non lo tocca**: la password del database è condivisa
+  con lo stack evo. È sicurezza, non ingestione.
 
 ## Verification
 
 ```bash
 python docs/kb/tools/session_start.py                        # menu + salute, un giro
+python docs/kb/tools/programmi.py                            # voci multi-sessione: da dove si riprende
 python docs/kb/tools/guardiano.py --sorveglia                # contesto + finestra 5h (regola OR)
 python docs/kb/tools/check_completezza_self.py               # completezza di `self` (C4/I17)
 python docs/kb/tools/check_exposure.py                       # cancello di esposizione

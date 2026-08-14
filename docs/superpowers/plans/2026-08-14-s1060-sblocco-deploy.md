@@ -45,9 +45,9 @@ universale. Quindi si dichiara il permesso, **non** si revoca.
 | V1 | Emendare `db/migrations/000312_*.sql` col blocco marker `TENANT_ADMIN-ALLOWLIST-EXTEND` | io | il file contiene il marker nel formato della `000214` | **FATTO** |
 | V2 | Prova generale della catena su `linux-pc` (`ci-rehearsal.sh`) | io | catena riapplicata due volte, sentinelle interrogate, esito verde | **FATTO** — `ESITO: VERDE`, 287 applicate + 23 saltate ×2 passate (9s + 10s), `[OK] sentinelle 17/17 a zero`; la `000312` esegue `CREATE TABLE / INSERT 0 1 / DROP TABLE` e la post-condizione dichiara «permesso self a 4 ruoli; 546 comunicate, 2 non comunicate» |
 | V3 | Rilanciare il test in locale: da rosso a **verde** | io | `1 failed → 0 failed`, entrambi i test del file passano | **FATTO** — `Test Files 1 passed (1) · Tests 2 passed (2)` in 2,68 s. La prova **sa fallire**: 90 s prima lo stesso comando dava `1 failed \| 1 passed` |
-| V4 | Commit atomico | io | un commit che porta solo questo | DA FARE |
-| V5 | Push su `main` + attesa della CI | io (autorizzazione Enzo) | le 3 corse del commit tutte verdi | DA FARE |
-| V6 | Armare il deploy e verificarne l'esito **dalle macchine** | io | `verifica-deploy.sh` dice **DEPLOYATO** | DA FARE |
+| V4 | Commit atomico | io | un commit che porta solo questo | **FATTO** — `02b62642`, 2 file, 76 inserzioni; grep segreti sullo staged diff: 0 occorrenze |
+| V5 | Push su `main` + attesa della CI | io (autorizzazione Enzo) | le corse del commit tutte verdi | **FATTO** — `CI (02b62642) 3 corse · 3 verdi · 0 in corso · 0 rosse` |
+| V6 | Verificare l'esito **dalle macchine** | io | `verifica-deploy.sh` dice **DEPLOYATO** | **FATTO** — `VERDETTO: DEPLOYATO — 2 host su 02b62642, servizi attivi, produzione 200`; `oracle-vm-default` e `linux-pc` entrambi `deployato 02b62642 · servizi active/active`, `readyz=200 login=200` |
 
 ## Registro delle scoperte (fuori da questo ciclo — R24 §5)
 
@@ -57,4 +57,13 @@ universale. Quindi si dichiara il permesso, **non** si revoca.
 
 ## Chiusura
 
-_(da scrivere leggendo la tabella qui sopra, quando tutte le voci hanno un esito misurato)_
+**CICLO CHIUSO — 6/6 voci fatte, non resta niente.**
+
+Letto dalle macchine, non previsto: `VERDETTO: DEPLOYATO — 2 host su 02b62642, servizi attivi,
+produzione 200`. Il deploy era fermo da `d016ea73` (14 agosto, corsa `31812844661`) e le due macchine
+stavano su `1d4672f3`.
+
+Fuori dal ciclo, non richiesto da Enzo ma nato dalla sua segnalazione durante la sessione: la
+diagnosi e la correzione dei blocchi da permesso nelle sessioni non presidiate (commit `90fe4153`
++ configurazione utente fuori repo + regola nel `CLAUDE.md` globale). Registrato in memoria come
+`reference_unattended_session_prompt_blockers`.

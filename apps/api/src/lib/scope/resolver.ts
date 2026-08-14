@@ -38,17 +38,22 @@ export type OrgReadScope =
   | { kind: "self"; tenantId: string; userIdAllowList: string[] };
 
 /**
- * RBAC roles that are explicit managerial roles ("manager/capo") for the organizational axis
- * (ADR-0027 F1, Enzo's constraint). Being the manager of an org unit (isOrgUnitManager) is the
- * other signal — together they cover responsabile di Divisione / Direzione / centro di costo / OU.
+ * Ruoli RBAC che valgono come «capo» sull'asse organizzativo.
+ *
+ * [#99 F3 — decisione di Enzo, 2026-08-14] IL SEGNALE PRIMARIO È DIRIGERE UN'UNITÀ
+ * (`isOrgUnitManager`): comanda l'organigramma. Questo elenco è un'AGGIUNTA — copre chi ha il
+ * ruolo sulla carta senza dirigere un'unità — non una condizione alternativa di pari rango.
+ * Prima del cambio i due segnali erano indipendenti perché il perimetro nasceva dall'albero
+ * delle POSIZIONI; ora che nasce dall'albero delle unità, «avere riporti» e «dirigere un'unità»
+ * sono la stessa cosa, e il secondo assorbe il primo.
  */
 export const MANAGERIAL_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>(["MANAGER", "CEO"]);
 
 /**
- * Whether the actor holds an EXPLICIT managerial role — an RBAC managerial role OR the manager of
- * at least one org unit. Only such actors get the organizational sub-tree; everyone else sees self
- * only, EVEN IF their org-chart position happens to have reports (Enzo's F1 constraint: the org
- * sub-tree must not apply to any employee who merely has someone under them in the chart).
+ * Se l'attore è un capo: dirige almeno un'unità organizzativa, oppure ha un ruolo RBAC
+ * manageriale. Solo a costoro spetta il perimetro gerarchico; tutti gli altri vedono se stessi —
+ * **anche se nell'albero delle POSIZIONI risultano riporti sotto di loro**. Quell'albero non è
+ * più la fonte del perimetro (#99 F3), ed è esattamente il caso che il vincolo continua a negare.
  */
 async function isManagerial(q: DbConnector, actor: ActorContext): Promise<boolean> {
   if (actor.roles.some((r) => MANAGERIAL_ROLES.has(r))) return true;

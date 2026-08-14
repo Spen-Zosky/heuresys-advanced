@@ -36,13 +36,52 @@ import type { DbConnector } from "./org.js";
 import { isPlatform, type ActorContext } from "../actor.js";
 import { HR_MANDATED_ROLES } from "./resolver.js";
 
-/** The five domains of the domain-definition matrix. */
+/**
+ * I domini funzionali della matrice (ADR-0036).
+ *
+ * I primi cinque esistevano dal principio. I tre in coda sono stati aggiunti da **#99 F6**
+ * (2026-08-15): l'ADR li dichiarava e nessuno li calcolava — «no production consumer of the
+ * functional-scope helpers yet». Ora `activeDomainsOf` li deriva dalle tabelle che li
+ * DEFINISCONO, quindi una nomina fatta oggi è in effetto oggi.
+ *
+ * ⚠ `delegation` è il quarto dominio previsto da ADR-0036 e **non compare qui**: misurato il
+ * 2026-08-15, nel database non esiste alcuna colonna di delega e nel codice «delegate» è solo
+ * il verbo inglese. Dichiararlo senza una fonte dati significherebbe creare un dominio che
+ * non si accende mai — l'errore che questo progetto ha appena finito di classificare come
+ * `[RESIDUO]` sugli OKR. Arriva con la sua tabella, in **F6b**.
+ */
 export type Domain =
   | "platform_mandate"
   | "hr_mandate"
   | "line_management"
   | "team_lead"
-  | "process_owner";
+  | "process_owner"
+  | "mentor"
+  | "approver"
+  | "team_peer";
+
+/**
+ * I domini che aprono una superficie OLTRE il proprio record.
+ *
+ * ⚠ Questa distinzione **non è un dettaglio, è la ragione per cui i tre domini nuovi si
+ * potevano aggiungere senza rompere nulla.** `hasAnyDomain` decide se il menu mostra le voci
+ * amministrative, ed era `activeDomainsOf(...).size > 0`: aggiungere `team_peer` avrebbe reso
+ * vero quel predicato per **159 persone su 161** — cioè avrebbe aperto il menu di governo a
+ * quasi tutta l'azienda. L'API avrebbe poi risposto 403 e nessun dato sarebbe uscito, ma un
+ * menu che offre una funzione altrui è comunque una bugia (è il difetto già corretto in
+ * `#101`, e la lezione non va ri-pagata).
+ *
+ * Essere mentore, approvatore o compagno di squadra dice **cosa fai**, non **su chi puoi
+ * guardare**: è la distinzione di I18, dove l'appartenenza funzionale non apre mai i dati
+ * sensibili di un altro.
+ */
+const DOMINI_CHE_APRONO_UNA_SUPERFICIE: ReadonlySet<Domain> = new Set<Domain>([
+  "platform_mandate",
+  "hr_mandate",
+  "line_management",
+  "team_lead",
+  "process_owner",
+]);
 
 /**
  * The domains this person actually holds, right now.
@@ -63,6 +102,9 @@ export async function activeDomainsOf(
     line_management: boolean;
     team_lead: boolean;
     process_owner: boolean;
+    mentor: boolean;
+    approver: boolean;
+    team_peer: boolean;
   }>(
     `SELECT
        EXISTS (SELECT 1 FROM sys.sys_organization_units o
@@ -73,13 +115,30 @@ export async function activeDomainsOf(
        EXISTS (SELECT 1 FROM sys.sys_process_participants p
                 WHERE p.process_participant_user_id = $1
                   AND p.process_participant_role = 'OWNER'
-                  AND p.process_participant_is_active)        AS process_owner`,
+                  AND p.process_participant_is_active)        AS process_owner,
+       -- #99 F6 — i tre domini che ADR-0036 dichiarava e nessuno calcolava.
+       -- Ciascuno esce dalla tabella che lo DEFINISCE, non da una lista di ruoli.
+       EXISTS (SELECT 1 FROM sys.sys_mentorships m
+                WHERE m.mentorship_mentor_user_id = $1)       AS mentor,
+       EXISTS (SELECT 1 FROM sys.sys_approval_steps a
+                WHERE a.approval_step_approver_user_id = $1)  AS approver,
+       -- Compagno di squadra: MEMBRO, non capo. Chi guida e' gia' team_lead, e un capo
+       -- che risultasse anche «pari» renderebbe i due domini indistinguibili.
+       EXISTS (SELECT 1 FROM sys.sys_team_members tm
+                 JOIN sys.sys_teams t2 ON t2.team_id = tm.team_member_team_id
+                WHERE tm.team_member_user_id = $1
+                  AND tm.team_member_is_active
+                  AND t2.team_is_active
+                  AND t2.team_lead_user_id IS DISTINCT FROM $1) AS team_peer`,
     [actor.userId],
   );
   const r = rows[0];
   if (r?.line_management) domains.add("line_management");
   if (r?.team_lead) domains.add("team_lead");
   if (r?.process_owner) domains.add("process_owner");
+  if (r?.mentor) domains.add("mentor");
+  if (r?.approver) domains.add("approver");
+  if (r?.team_peer) domains.add("team_peer");
   return domains;
 }
 
@@ -91,7 +150,13 @@ export async function activeDomainsOf(
  * whole surface", not "you are locked out".
  */
 export async function hasAnyDomain(q: DbConnector, actor: ActorContext): Promise<boolean> {
-  return (await activeDomainsOf(q, actor)).size > 0;
+  const domini = await activeDomainsOf(q, actor);
+  // NON `size > 0`: dal 2026-08-15 `activeDomainsOf` restituisce anche domini che dicono
+  // cosa fai e non su chi puoi guardare. Vedi `DOMINI_CHE_APRONO_UNA_SUPERFICIE`.
+  // Misurato togliendo questa distinzione: **109 persone in più** vedrebbero il menu
+  // amministrativo. Non è un'ipotesi, è il numero che il test stampa quando si sabota.
+  for (const d of domini) if (DOMINI_CHE_APRONO_UNA_SUPERFICIE.has(d)) return true;
+  return false;
 }
 
 /* --- the breadth tier of an aggregate surface -------------------------------- */

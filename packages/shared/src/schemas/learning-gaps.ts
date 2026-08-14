@@ -45,6 +45,20 @@ export const LearningGapSchema = z.object({
   userId: z.uuid(),
   userName: z.string().nullable(), // G-02: human names resolved on the list endpoint
   positionId: z.uuid().nullable(),
+  /**
+   * #188 — perché questo campo RESTA, benché sia `null` su tutte le righe storiche.
+   *
+   * L'item proponeva o di inferirlo dall'incarico corrente della persona, o di ritirarlo
+   * dalla superficie. Nessuna delle due: `CreateLearningGapBodySchema` **accetta**
+   * `positionId` e la lista lo espone come **filtro**, quindi il contratto è completo —
+   * letto, filtrabile, scrivibile. Ritirarlo renderebbe invisibile una lacuna creata oggi
+   * *con* la posizione, cioè un difetto nuovo al posto di uno registrato.
+   *
+   * Le 270 righe storiche non lo portano perché il dato d'origine non lo portava: è un
+   * fatto sui DATI, non sulla superficie, e come tale è **registrato** — mai inferito.
+   * Presidiato da `test/learning-gaps-position.integration.test.ts` (falsificabilità
+   * provata: ritirando questa riga il test diventa rosso).
+   */
   positionTitle: z.string().nullable(),
   skillId: z.uuid().nullable(),
   skillName: z.string().nullable(),

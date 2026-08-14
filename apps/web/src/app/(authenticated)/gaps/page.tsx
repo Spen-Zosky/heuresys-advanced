@@ -56,11 +56,22 @@ export default function AdminGapsPage() {
       },
       {
         header: t("gaps.cols.position"),
-        cell: (g) => (
-          <span className="text-xs text-muted-foreground">
-            {g.positionTitle ?? (g.positionId ? g.positionId.slice(0, 8) : "—")}
-          </span>
-        ),
+        // #188. La colonna RESTA — l'API la scrive, la filtra e la legge — ma smetteva di
+        // dire la verità in due modi. (1) Su tutte le righe storiche `positionId` è NULL,
+        // e un «—» muto non distingue «nessuno l'ha rilevata» da «c'è ma non te la mostro».
+        // (2) Quando l'id c'era senza il titolo, si mostravano **8 caratteri di un UUID**:
+        // per chi legge non è un'informazione, è rumore che sembra un codice.
+        cell: (g) => {
+          if (g.positionTitle) {
+            return <span className="text-xs text-foreground">{g.positionTitle}</span>;
+          }
+          const chiave = g.positionId ? "gaps.positionUnresolved" : "gaps.positionNotDetected";
+          return (
+            <span className="text-xs italic text-muted-foreground" title={t(`${chiave}Hint`)}>
+              {t(chiave)}
+            </span>
+          );
+        },
       },
       {
         header: t("gaps.cols.skill"),
@@ -72,9 +83,14 @@ export default function AdminGapsPage() {
         cell: (g) => {
           const nomi = g.skillGaps.map((s) => s.skillName);
           if (nomi.length === 0) {
+            // #188, stessa medicina della colonna accanto: niente troncone di UUID.
+            if (g.skillName) {
+              return <span className="text-xs text-foreground">{g.skillName}</span>;
+            }
+            const chiave = g.skillId ? "gaps.skillUnresolved" : "gaps.skillNotDetected";
             return (
-              <span className="text-xs text-muted-foreground">
-                {g.skillName ?? (g.skillId ? g.skillId.slice(0, 8) : "—")}
+              <span className="text-xs italic text-muted-foreground" title={t(`${chiave}Hint`)}>
+                {t(chiave)}
               </span>
             );
           }

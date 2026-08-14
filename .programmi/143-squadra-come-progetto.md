@@ -39,6 +39,22 @@ Chiudendo `#123 (a)` è stato misurato ciò che F1 avrebbe dovuto cercare da sé
 minuto sull'albero delle unità e sugli incarichi attivi — non si ricopiano i numeri, che
 cambiano da soli.)*
 
+## Censimento di F1 — «cosa si rompe» — FATTO in S1061 (2026-08-15)
+
+F1 chiedeva *«il censimento di cosa oggi consuma `sys_teams`, per sapere cosa si rompe»*.
+Misurato, ed è **piccolo**: il modello nuovo ha poca superficie da non rompere.
+
+| dove | cosa | conseguenza per F2/F4 |
+|---|---|---|
+| `modules/teams` | **5 rotte** (l'intero CRUD) | è la superficie da far evolvere, non da sostituire |
+| `modules/public-stats` | un solo `count(*)` su `sys_teams` | un numero in vetrina: cambia solo se cambia la semantica di «squadra» |
+| `lib/scope/functional.ts` | il capo è `team_lead_user_id` **oppure** `sys_team_members` con ruolo `LEAD` | **è qui il perno di F3**: la nozione di «capo funzionale» esiste già e ha due fonti |
+| `apps/web` | **una** pagina autenticata, `/me/team` | il resto delle occorrenze è vetrina, non l'entità |
+
+**Cosa resta di F1**: la sola **validazione del modello a due entità con Enzo** — decisione di
+prodotto, dichiarata sua fin dall'apertura del programma. La parte tecnica di F1 (censimento +
+reperti) è chiusa: chi riprende non deve ri-misurare, deve **chiedere**.
+
 ## Proposta tecnica di Claude — DA VALIDARE CON ENZO PRIMA DI F2
 
 (a) **due entità**: progetto (scopo, obiettivo, date, stato) e squadra (chi ci lavora, con
@@ -57,5 +73,9 @@ progetto**, mai i loro dati personali (è già I18).
 
 ## Da dove si riprende
 
-**F1**. La parte che serve a Enzo è la validazione del modello a due entità: è la scelta che
-costa di più se presa male, e non è una decisione tecnica.
+**F1, e ne resta UNA sola cosa: la domanda a Enzo.** Il censimento e i reperti sono chiusi in
+S1061 (2026-08-15) — vedi le due sezioni sopra. Chi riprende **non ri-misura**: sottopone a
+Enzo il modello a due entità (a)(b)(c), che è la scelta che costa di più se presa male e non è
+una decisione tecnica. Ottenuta la risposta, si va dritti a **F2**.
+
+*(la fase resta non spuntata di proposito: `WAIT-INPUT` su Enzo, non lavoro arretrato.)*

@@ -33,7 +33,8 @@ import * as repo from "./repository.js";
 // possono divergere.
 import * as meRepo from "../me/repository.js";
 import { resolveOrgReadScope, canReadOrgTarget, HR_MANDATED_ROLES } from "../../lib/scope/resolver.js";
-import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
+import { masksUnderPlatformMandate, masksTopOfChainPay, maskFields } from "../../lib/scope/mask.js";
+import { chainLevelOf } from "../../lib/scope/org.js";
 import { isPlatform } from "../../lib/actor.js";
 import { DOSSIER_PRIV_SECTIONS, type UserDossierProfile } from "@heuresys/shared";
 
@@ -183,8 +184,26 @@ export const usersService = {
     if (!profile) throw new NotFoundError("User");
 
     // ADR-0032: il mandato piattaforma da solo non apre COMPENSATION/EVALUATION.
-    const masksComp = masksUnderPlatformMandate(actor, "COMPENSATION", id);
     const masksEval = masksUnderPlatformMandate(actor, "EVALUATION", id);
+
+    /* #99 F4 — la soglia di catena arriva anche QUI, e non era un dettaglio.
+     *
+     * ADR-0036 §5, terza eccezione al mandato HR: la retribuzione di un vertice si legge
+     * **solo da pari livello o più in alto**. `compensation/service.ts` la applicava dal
+     * 2026-08-14; il dossier no, e usciva lo stesso identico dato. Misurato prima di
+     * correggere: un mandato HR di livello 3 leggeva la busta di luglio 2026 di un vertice
+     * — 3.741,23 € lordi — aprendo `/v1/users/:id/dossier`, mentre la stessa persona non
+     * la vedeva da `/v1/compensation/*`. Due porte, due risposte, stesso dato.
+     *
+     * Non è una seconda implementazione della regola: sono le stesse due funzioni che usa
+     * compensation. La regola vive in un posto solo, e qui la si chiama. */
+    const [livelloAttore, livelloSoggetto] = await Promise.all([
+      chainLevelOf(pool, actor.userId),
+      chainLevelOf(pool, id),
+    ]);
+    const masksComp =
+      masksUnderPlatformMandate(actor, "COMPENSATION", id) ||
+      masksTopOfChainPay(actor, id, livelloAttore, livelloSoggetto);
 
     // #124 D2 — strato 1: la sfera PRIVATA dell'anagrafica (matrice dei domini,
     // cella line_management/IDENTITY = mask) va a self, mandato HR e mandato

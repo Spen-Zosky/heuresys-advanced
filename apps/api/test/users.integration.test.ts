@@ -203,11 +203,24 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     // No leak: paolo never sees a user outside his transitive sub-tree. (The list may be a
     // subset of the sub-tree because listUsers also filters by user_status — that's expected.)
     for (const id of apiIds) expect(subtree.has(id)).toBe(true);
-    // TRANSITIVE: paolo sees at least one 2-hop report — a report of his report tommaso —
-    // which the OLD one-hop walk would have excluded. Derived from the helper (no hardcoding).
-    const tommasoReports = (await orgSubtreeUserIds(pool, employeeId)).filter((id) => id !== employeeId);
-    expect(tommasoReports.length).toBeGreaterThan(0); // tommaso is not a leaf (verified on real data)
-    expect(tommasoReports.some((id) => apiIds.has(id))).toBe(true);
+    // TRANSITIVA: paolo vede qualcuno che sta due livelli sotto — in un'unità NIPOTE, non
+    // figlia diretta della sua. [#99 F3] L'atteso si derivava dai riporti di tommaso, che
+    // l'albero delle unità non conosce più: ora si deriva dall'organigramma, che è la fonte.
+    const nipoti = await pool.query<{ user_id: string }>(
+      `SELECT DISTINCT a.user_position_assignment_user_id AS user_id
+         FROM sys.sys_organization_units mia
+         JOIN sys.sys_organization_units figlia ON figlia.organization_unit_parent_id = mia.organization_unit_id
+         JOIN sys.sys_organization_units nipote ON nipote.organization_unit_parent_id = figlia.organization_unit_id
+         JOIN sys.sys_positions p ON p.position_organization_unit_id = nipote.organization_unit_id
+         JOIN sys.sys_user_position_assignments a
+              ON a.user_position_assignment_position_id = p.position_id
+             AND a.user_position_assignment_status = 'ACTIVE'
+        WHERE mia.organization_unit_manager_user_id = $1
+          AND mia.organization_unit_is_active`,
+      [managerS.userId],
+    );
+    expect(nipoti.rows.length).toBeGreaterThan(0); // il capo non dirige una foglia (verificato sul reale)
+    expect(nipoti.rows.some((r) => apiIds.has(r.user_id))).toBe(true);
   });
 
   it("LIST: a NON-MANAGERIAL user sees ONLY self — even with reports in the chart (F1 constraint)", async () => {
@@ -223,9 +236,35 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     const body = r.json() as { items: { userId: string }[]; total: number };
     expect(body.total).toBe(1);
     expect(body.items[0]!.userId).toBe(employeeS.userId);
-    // sanity: the gate is the managerial role, not the absence of reports — tommaso DOES have reports
-    const reports = (await orgSubtreeUserIds(pool, employeeS.userId)).filter((id) => id !== employeeS.userId);
-    expect(reports.length).toBeGreaterThan(0);
+    // [#99 F3] Il cancello è dirigere un'unità, non l'assenza di riporti: costui HA riporti
+    // nell'albero delle POSIZIONI — che dal 2026-08-14 non apre più alcun perimetro — e non
+    // dirige alcuna unità. Senza questo controllo l'asserzione sopra non avrebbe nulla da negare.
+    const riportiPosizionali = await pool.query<{ n: string }>(
+      `WITH RECURSIVE mie AS (
+         SELECT a.user_position_assignment_position_id AS pid
+           FROM sys.sys_user_position_assignments a
+          WHERE a.user_position_assignment_user_id = $1
+            AND a.user_position_assignment_status = 'ACTIVE'
+       ),
+       sotto AS (
+         SELECT p.position_id AS pid FROM sys.sys_positions p JOIN mie m ON p.position_reports_to_position_id = m.pid
+         UNION
+         SELECT p.position_id FROM sys.sys_positions p JOIN sotto s ON p.position_reports_to_position_id = s.pid
+       )
+       SELECT count(DISTINCT a.user_position_assignment_user_id)::text AS n
+         FROM sys.sys_user_position_assignments a
+         JOIN sotto s ON s.pid = a.user_position_assignment_position_id
+        WHERE a.user_position_assignment_status = 'ACTIVE'
+          AND a.user_position_assignment_user_id <> $1`,
+      [employeeS.userId],
+    );
+    expect(Number(riportiPosizionali.rows[0]!.n)).toBeGreaterThan(0);
+    const dirige = await pool.query<{ hit: boolean }>(
+      `SELECT EXISTS (SELECT 1 FROM sys.sys_organization_units
+                       WHERE organization_unit_manager_user_id = $1 AND organization_unit_is_active) AS hit`,
+      [employeeS.userId],
+    );
+    expect(dirige.rows[0]!.hit).toBe(false);
   });
 
   /* -------------------------------------------------- get by id scope */

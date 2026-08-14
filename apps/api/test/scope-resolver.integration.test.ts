@@ -48,6 +48,48 @@ async function actorFor(email: string): Promise<ActorContext> {
   return { userId: u.user_id, tenantId: u.tenant_id, roles };
 }
 
+/**
+ * I riporti secondo l'albero delle POSIZIONI (`position_reports_to_position_id`), che dal
+ * 2026-08-14 NON è più la fonte del perimetro. Serve a tenere il vincolo verificabile: senza
+ * un universo non vuoto, l'asserzione «vede solo sé stesso» non distinguerebbe una regola che
+ * funziona da una che non ha nulla da negare.
+ */
+async function reportsNellAlberoDellePosizioni(userId: string): Promise<string[]> {
+  const r = await pool.query<{ user_id: string }>(
+    `WITH RECURSIVE mie AS (
+       SELECT a.user_position_assignment_position_id AS pid
+         FROM sys.sys_user_position_assignments a
+        WHERE a.user_position_assignment_user_id = $1
+          AND a.user_position_assignment_status = 'ACTIVE'
+     ),
+     sotto AS (
+       SELECT p.position_id AS pid
+         FROM sys.sys_positions p JOIN mie m ON p.position_reports_to_position_id = m.pid
+       UNION
+       SELECT p.position_id
+         FROM sys.sys_positions p JOIN sotto s ON p.position_reports_to_position_id = s.pid
+     )
+     SELECT DISTINCT a.user_position_assignment_user_id AS user_id
+       FROM sys.sys_user_position_assignments a
+       JOIN sotto s ON s.pid = a.user_position_assignment_position_id
+      WHERE a.user_position_assignment_status = 'ACTIVE'
+        AND a.user_position_assignment_user_id <> $1`,
+    [userId],
+  );
+  return r.rows.map((x) => x.user_id);
+}
+
+/** Dirige almeno un'unità dell'organigramma: dal 2026-08-14 è QUESTO il segnale di capo. */
+async function dirigeUnUnita(userId: string): Promise<boolean> {
+  const r = await pool.query<{ hit: boolean }>(
+    `SELECT EXISTS (SELECT 1 FROM sys.sys_organization_units
+                     WHERE organization_unit_manager_user_id = $1
+                       AND organization_unit_is_active) AS hit`,
+    [userId],
+  );
+  return r.rows[0]?.hit ?? false;
+}
+
 describe("scope/resolver — org read scope + managerial constraint (F1, ADR-0027)", () => {
   let admin: ActorContext;
   let federica: ActorContext;
@@ -93,13 +135,20 @@ describe("scope/resolver — org read scope + managerial constraint (F1, ADR-002
     }
   });
 
-  it("CONSTRAINT: a non-managerial user WITH reports → self only (not their sub-tree)", async () => {
+  it("VINCOLO: chi non dirige un'unità vede solo sé stesso — anche con riporti fra le POSIZIONI", async () => {
+    // [#99 F3, decisione di Enzo 2026-08-14] Il capo è chi dirige un'unità
+    // dell'organigramma; il ruolo RBAC è un'aggiunta, non una condizione. La stesura
+    // precedente derivava «ha riporti» da `orgSubtreeUserIds`, che ora percorre le UNITÀ:
+    // l'universo si sarebbe svuotato e il test sarebbe passato senza guardare niente.
+    // L'universo si deriva quindi dall'albero delle POSIZIONI, che esiste ancora nei dati
+    // ed è esattamente ciò che NON deve più aprire un perimetro.
+    const riportiPosizionali = await reportsNellAlberoDellePosizioni(tommaso.userId);
+    expect(riportiPosizionali.length).toBeGreaterThan(0); // la fixture li ha creati davvero
+    expect(await dirigeUnUnita(tommaso.userId)).toBe(false); // e non dirige nulla
+
     const s = await resolveOrgReadScope(pool, tommaso);
     expect(s.kind).toBe("self");
     if (s.kind === "self") expect(s.userIdAllowList).toEqual([tommaso.userId]);
-    // The gate is the managerial role, not the absence of reports — tommaso genuinely has reports.
-    const reports = (await orgSubtreeUserIds(pool, tommaso.userId)).filter((id) => id !== tommaso.userId);
-    expect(reports.length).toBeGreaterThan(0);
   });
 
   it("canReadOrgTarget: a manager reads a report, not an outsider", async () => {
@@ -107,10 +156,10 @@ describe("scope/resolver — org read scope + managerial constraint (F1, ADR-002
     expect(await canReadOrgTarget(pool, paolo, antonio.userId, paolo.tenantId)).toBe(false);
   });
 
-  it("CONSTRAINT: a non-managerial user CANNOT read their own report's record — only self", async () => {
-    const reports = (await orgSubtreeUserIds(pool, tommaso.userId)).filter((id) => id !== tommaso.userId);
-    expect(reports.length).toBeGreaterThan(0);
-    expect(await canReadOrgTarget(pool, tommaso, reports[0]!, tommaso.tenantId)).toBe(false); // report → denied
-    expect(await canReadOrgTarget(pool, tommaso, tommaso.userId, tommaso.tenantId)).toBe(true); // self → ok
+  it("VINCOLO: e non legge la scheda di quel riporto — solo la propria", async () => {
+    const riportiPosizionali = await reportsNellAlberoDellePosizioni(tommaso.userId);
+    expect(riportiPosizionali.length).toBeGreaterThan(0);
+    expect(await canReadOrgTarget(pool, tommaso, riportiPosizionali[0]!, tommaso.tenantId)).toBe(false);
+    expect(await canReadOrgTarget(pool, tommaso, tommaso.userId, tommaso.tenantId)).toBe(true);
   });
 });

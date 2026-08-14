@@ -11,6 +11,34 @@ export const LEARNING_GAP_SEVERITY_VALUES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"
 export const LearningGapSeveritySchema = z.enum(LEARNING_GAP_SEVERITY_VALUES);
 export type LearningGapSeverity = z.infer<typeof LearningGapSeveritySchema>;
 
+/**
+ * Le competenze mancanti di una lacuna, normalizzate.
+ *
+ * PERCHÉ ESISTE, misurato il 2026-08-14 sulle 270 righe vive: `learning_gap_skill_id` e
+ * `learning_gap_position_id` sono NULL su **tutte**, quindi `skillName` e `positionTitle`
+ * uscivano `null` da ogni riga e la superficie non sapeva dire di quale competenza
+ * parlasse. Il nome però c'era: dentro `metadata.legacy.skill_gaps`, che l'API già
+ * restituiva — annegato in un blob e scritto in **due dialetti diversi**, `{skill, gap}`
+ * su 66 righe e `{skill_name, current_level, target_level, gap_severity}` sulle altre.
+ * Farli conoscere entrambi al client sarebbe stato chiedergli di sapere com'era fatto un
+ * database che non esiste più.
+ *
+ * `skillName` (singolare, sopra) resta `null`: dire il nome NON è agganciare la
+ * competenza al catalogo, e riempirlo lascerebbe credere il contrario. Qui il nome è
+ * quello che il dato riporta di sé, e vale per quello.
+ */
+export const LearningGapSkillEntrySchema = z.object({
+  /** Come la competenza è nominata nel dato. Non è una chiave del catalogo competenze. */
+  skillName: z.string(),
+  /** Livello posseduto e livello richiesto, quando il dato li porta (dialetto 2). */
+  currentLevel: z.number().nullable(),
+  targetLevel: z.number().nullable(),
+  /** Ampiezza del divario (dialetto 1) oppure la sua etichetta (dialetto 2). */
+  gap: z.number().nullable(),
+  gapSeverity: z.string().nullable(),
+});
+export type LearningGapSkillEntry = z.infer<typeof LearningGapSkillEntrySchema>;
+
 export const LearningGapSchema = z.object({
   learningGapId: z.uuid(),
   tenantId: z.uuid(),
@@ -20,6 +48,9 @@ export const LearningGapSchema = z.object({
   positionTitle: z.string().nullable(),
   skillId: z.uuid().nullable(),
   skillName: z.string().nullable(),
+  /** Le competenze che la lacuna riguarda, lette dal dato e normalizzate. Mai `null`: se
+   *  non ce ne sono, è una lista vuota — «non lo so» e «nessuna» non si confondono. */
+  skillGaps: z.array(LearningGapSkillEntrySchema),
   requiredProficiency: z.string().nullable(),
   currentProficiency: z.string().nullable(),
   score: z.number().nullable(),

@@ -8,6 +8,7 @@ import type {
   LearningGap,
   LearningGapListQuery,
   LearningGapSeverity,
+  LearningGapSkillEntry,
   CreateLearningGapBody,
   UpdateLearningGapBody,
 } from "@heuresys/shared";
@@ -38,6 +39,44 @@ const COLS = `learning_gap_id, learning_gap_tenant_id, learning_gap_user_id,
   learning_gap_current_proficiency, learning_gap_score, learning_gap_severity,
   learning_gap_detected_at, learning_gap_metadata, created_at, updated_at`;
 
+/**
+ * I due dialetti di `metadata.legacy.skill_gaps`, ridotti a uno.
+ *
+ * Misurato il 2026-08-14 su 955 voci in 270 righe: **tutte** portano un nome, ma sotto due
+ * chiavi diverse — `skill` (66 righe, con `gap` numerico) e `skill_name` (le altre, con
+ * `current_level`, `target_level`, `gap_severity`). Un numero non si inventa dove non c'è:
+ * ciò che il dialetto non porta resta `null`, non `0`.
+ *
+ * Difensiva per costruzione: il metadata è un JSONB libero, quindi qualunque forma
+ * inattesa produce zero voci invece di un errore a runtime su una lista che è già in volo.
+ */
+function normalizzaCompetenze(metadata: Record<string, unknown>): LearningGapSkillEntry[] {
+  const legacy = metadata["legacy"];
+  if (typeof legacy !== "object" || legacy === null) return [];
+  const voci = (legacy as Record<string, unknown>)["skill_gaps"];
+  if (!Array.isArray(voci)) return [];
+  const out: LearningGapSkillEntry[] = [];
+  for (const v of voci) {
+    if (typeof v !== "object" || v === null) continue;
+    const o = v as Record<string, unknown>;
+    const nome = typeof o["skill"] === "string" && o["skill"] !== ""
+      ? o["skill"]
+      : typeof o["skill_name"] === "string" && o["skill_name"] !== ""
+        ? o["skill_name"]
+        : null;
+    if (nome === null) continue;
+    const num = (k: string): number | null => (typeof o[k] === "number" ? (o[k] as number) : null);
+    out.push({
+      skillName: nome,
+      currentLevel: num("current_level"),
+      targetLevel: num("target_level"),
+      gap: num("gap"),
+      gapSeverity: typeof o["gap_severity"] === "string" ? (o["gap_severity"] as string) : null,
+    });
+  }
+  return out;
+}
+
 function toGap(r: Row): LearningGap {
   return {
     learningGapId: r.learning_gap_id,
@@ -48,6 +87,7 @@ function toGap(r: Row): LearningGap {
     positionTitle: r.position_title ?? null,
     skillId: r.learning_gap_skill_id,
     skillName: r.skill_name ?? null,
+    skillGaps: normalizzaCompetenze(r.learning_gap_metadata),
     requiredProficiency: r.learning_gap_required_proficiency,
     currentProficiency: r.learning_gap_current_proficiency,
     score: r.learning_gap_score === null ? null : Number(r.learning_gap_score),

@@ -6,7 +6,8 @@
 
 import { pool } from "../../db/client.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
-import { masksUnderPlatformMandate, maskFields, type Masked } from "../../lib/scope/mask.js";
+import { masksUnderPlatformMandate, masksTopOfChainPay, maskFields, type Masked } from "../../lib/scope/mask.js";
+import { chainLevelOf } from "../../lib/scope/org.js";
 
 /**
  * #124 — what goes when a compensation row is read under the platform mandate.
@@ -90,6 +91,30 @@ async function orgFilter(
 /** Tenant filter for the catalog reads: PLATFORM_ADMIN → all tenants; else own tenant. */
 function catalogTenant(actor: ActorContext): string | undefined {
   return isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+}
+
+/**
+ * [#99 F4] I due qualificatori che valgono sulla retribuzione, applicati insieme.
+ *
+ * Il primo (`masksUnderPlatformMandate`, #124) chiede «sei un amministratore tecnico?».
+ * Il secondo (`masksTopOfChainPay`, ADR-0036 §5) chiede «stai abbastanza in alto per
+ * vedere lo stipendio di un vertice?», e delimita perfino il mandato HR. Uno solo dei
+ * due che dica di mascherare basta: sono limiti diversi, non alternative.
+ *
+ * I livelli si leggono UNA volta per richiesta e si passano dentro: farlo per riga
+ * significherebbe una query ricorsiva per ogni stipendio in elenco.
+ */
+async function mascheraPaga(
+  actor: ActorContext,
+  soggetti: readonly (string | null)[],
+): Promise<(userId: string | null) => boolean> {
+  const distinti = [...new Set(soggetti.filter((x): x is string => x !== null))];
+  const livelli = new Map<string, number | null>();
+  const attore = await chainLevelOf(pool, actor.userId);
+  await Promise.all(distinti.map(async (uid) => livelli.set(uid, await chainLevelOf(pool, uid))));
+  return (userId: string | null) =>
+    masksUnderPlatformMandate(actor, "COMPENSATION", userId) ||
+    masksTopOfChainPay(actor, userId, attore, userId === null ? null : livelli.get(userId) ?? null);
 }
 
 export const compensationService = {
@@ -198,6 +223,7 @@ export const compensationService = {
     return repo.insertPayrollHandoffRecord(pool, tenantId, body);
   },
 
+
   // ── A/L7 (#32) reads ────────────────────────────────────────────────────────
 
   /** Org-gated per-person variable pay (I18), poi mascherato per il mandato
@@ -205,12 +231,11 @@ export const compensationService = {
    *  attainment e curva) spariscono; periodo e soggetto restano. */
   async listVariablePay(actor: ActorContext, query: VariablePayCalculationListQuery) {
     const page = await repo.listVariablePay(pool, { ...(await orgFilter(actor)), query });
+    const maschera = await mascheraPaga(actor, page.items.map((c) => c.userId));
     return {
       ...page,
       items: page.items.map((c) =>
-        masksUnderPlatformMandate(actor, "COMPENSATION", c.userId)
-          ? maskFields(c, VARIABLE_PAY_MONEY_FIELDS)
-          : c,
+        maschera(c.userId) ? maskFields(c, VARIABLE_PAY_MONEY_FIELDS) : c,
       ),
     };
   },
@@ -232,12 +257,11 @@ export const compensationService = {
    */
   async listRecommendations(actor: ActorContext, query: CompensationRecommendationListQuery) {
     const page = await repo.listRecommendations(pool, { ...(await orgFilter(actor)), query });
+    const maschera = await mascheraPaga(actor, page.items.map((r) => r.userId));
     return {
       ...page,
       items: page.items.map((rec) =>
-        masksUnderPlatformMandate(actor, "COMPENSATION", rec.userId)
-          ? maskFields(rec, COMPENSATION_MONEY_FIELDS)
-          : rec,
+        maschera(rec.userId) ? maskFields(rec, COMPENSATION_MONEY_FIELDS) : rec,
       ),
     };
   },

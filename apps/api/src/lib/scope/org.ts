@@ -156,3 +156,42 @@ export async function isInOrgSubtree(
   );
   return res.rows[0]?.hit ?? false;
 }
+
+/* ── #99 F4 — il qualificatore «soglia di catena» ──────────────────────────── */
+
+/**
+ * A che PROFONDITÀ sta una persona nell'albero delle unità: 1 è la radice (l'azienda),
+ * 2 le divisioni, e così scendendo. `null` se non è incardinata in alcuna unità attiva.
+ *
+ * Serve al qualificatore di cella «soglia di catena» (ADR-0036 §5, terza eccezione al
+ * mandato HR): la retribuzione dei vertici è visibile **solo a pari livello o superiore**.
+ * Non è una gerarchia di ruoli — è la stessa struttura da cui nasce il perimetro (F3),
+ * letta in profondità invece che in ampiezza.
+ *
+ * Se una persona occupa più posizioni, vale la PIÙ ALTA: il livello è una proprietà della
+ * persona, e chi siede in una divisione non la perde per un incarico secondario più in basso.
+ */
+export async function chainLevelOf(q: DbConnector, userId: string): Promise<number | null> {
+  const res = await q.query<{ livello: number | null }>(
+    `WITH RECURSIVE albero AS (
+       SELECT organization_unit_id AS ou, 1 AS livello
+         FROM sys.sys_organization_units
+        WHERE organization_unit_parent_id IS NULL AND organization_unit_is_active
+       UNION ALL
+       SELECT o.organization_unit_id, a.livello + 1
+         FROM sys.sys_organization_units o
+         JOIN albero a ON o.organization_unit_parent_id = a.ou
+        WHERE o.organization_unit_is_active
+     )
+     SELECT min(a.livello) AS livello
+       FROM albero a
+       JOIN sys.sys_positions p ON p.position_organization_unit_id = a.ou
+       JOIN sys.sys_user_position_assignments upa
+            ON upa.user_position_assignment_position_id = p.position_id
+           AND upa.user_position_assignment_status = 'ACTIVE'
+      WHERE upa.user_position_assignment_user_id = $1`,
+    [userId],
+  );
+  const l = res.rows[0]?.livello;
+  return l == null ? null : Number(l);
+}

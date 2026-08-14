@@ -118,3 +118,51 @@ export function maskFields<T extends Record<string, unknown>>(
   out["masked"] = [...fields].sort();
   return out as Masked<T>;
 }
+
+/* ── #99 F4 — secondo qualificatore di cella: la SOGLIA DI CATENA ──────────── */
+
+/**
+ * Fino a che profondità dell'albero delle unità una persona è un «vertice».
+ *
+ * Due, e non è un numero scelto a tavolino: misurato sull'organigramma reale il
+ * 2026-08-14, il livello 1 sono le due radici d'azienda e il livello 2 le otto divisioni
+ * e direzioni generali — insieme 19 persone. Dal livello 3 in giù si entra nelle
+ * direzioni operative, dove la retribuzione è materia HR ordinaria.
+ */
+export const LIVELLO_VERTICE = 2;
+
+/**
+ * La retribuzione di un vertice va nascosta a questo attore?
+ *
+ * ADR-0036 §5, terza eccezione al mandato HR: **visibile solo a pari livello o
+ * superiore**. È il qualificatore che delimita perfino `HRMS_MANAGER`, che I22 dichiara
+ * plenipotenziario sui dati business — «plenipotenziario» con quattro eccezioni, e
+ * questa è una di esse. Effetto reale, misurato: il direttore HR sta al livello 3 e
+ * smette di vedere lo stipendio del CEO e dei direttori di divisione; il CEO, al
+ * livello 1, continua a vedere tutto.
+ *
+ * Tre modi in cui la risposta è no, nell'ordine:
+ *  1. la riga è dell'attore stesso — **I17**, il pavimento ESS: la propria retribuzione
+ *     si vede sempre, e un vertice non è nascosto a sé stesso;
+ *  2. il soggetto non è un vertice (livello oltre la soglia): la soglia non si applica
+ *     ai più, si applica a chi sta in cima;
+ *  3. l'attore sta a livello uguale o più alto (numero minore o uguale).
+ *
+ * Chi è FUORI dall'albero — nessuna posizione attiva — non ha livello, quindi non può
+ * essere «pari o superiore» a nessuno: la soglia lo esclude. È la scelta prudente, e la
+ * sola coerente con una regola che parla di catena.
+ *
+ * @param actorLevel   profondità dell'attore (`chainLevelOf`), null se fuori dall'albero
+ * @param subjectLevel profondità del soggetto della riga, null se fuori dall'albero
+ */
+export function masksTopOfChainPay(
+  actor: ActorContext,
+  subjectUserId: string | null,
+  actorLevel: number | null,
+  subjectLevel: number | null,
+): boolean {
+  if (subjectUserId !== null && subjectUserId === actor.userId) return false; // I17
+  if (subjectLevel === null || subjectLevel > LIVELLO_VERTICE) return false;
+  if (actorLevel === null) return true;
+  return actorLevel > subjectLevel;
+}

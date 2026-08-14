@@ -7,16 +7,30 @@
  * Everything returns counts alongside values so the service can tell "scored 0" from
  * "no data", which the composite treats very differently.
  *
- * Engagement note — the answers payload is NOT uniform. Two shapes coexist in
- * sys_engagement_survey_responses.response_answers:
- *   A  {"value": 4, "question_id": "q1", "question_type": "rating"}   → value is 1..5 for
- *      EVERY question_type, nps included
- *   B  {"rating": 2, …} | {"nps": 6, …} | {"text": "…", …}            → rating is 1..5 but
- *      nps is 0..10
- * Reading only `value` would capture 1015 of 2794 ratings (36%) and quietly score the
- * organization on a third of its own survey. Each shape is normalized on its own scale;
- * free-text answers are excluded — in shape A they still carry a numeric `value`, which is
- * a leftover, not a measurement.
+ * Engagement — #187 (2026-08-14). Questo modulo leggeva `sys_engagement_survey_responses`,
+ * che è la famiglia FERMA: sei sondaggi, tutti chiusi, l'ultimo il 2025-01-31. L'indice di
+ * salute raccontava quindi un clima vecchio di diciannove mesi, mentre la rilevazione vera
+ * andava avanti nell'altra famiglia. Il modulo era scritto bene sulla tabella sbagliata.
+ *
+ * Ora legge `sys_survey_responses` + `sys_survey_questions`, dove il clima vive davvero
+ * (misurato 2026-08-14: 8.288 risposte, l'ultima rilevazione conclusa il 2026-06-26).
+ *
+ * DUE SCELTE, entrambe misurate prima di scriverle:
+ *
+ * 1. L'ULTIMA RILEVAZIONE CONCLUSA per tenant, non tutte le risposte. Mediare tre anni di
+ *    rilevazioni smorza proprio ciò che un indice di clima deve mostrare: la curva della
+ *    riorganizzazione (7,71 → 6,80 → 7,61) non arrivava all'indice. La rilevazione `active`
+ *    esiste ma ha 0 risposte: entrerà da sé quando ne avrà, senza toccare questo codice.
+ *
+ * 2. LA SCALA È 1..10, NON 1..5. Qui i valori sono colonne tipizzate, non un payload JSON:
+ *    `survey_response_rating_value` è intero e — misurato su tutte le rilevazioni con dati —
+ *    sta fra 3 e 10, con la massa fra 6 e 8. Normalizzare come se fosse 1..5 (l'errore che
+ *    la famiglia vecchia richiedeva) schiaccerebbe ogni risposta sopra il 5 a punteggio
+ *    pieno. `rating` → (v-1)/9 · `nps` → v/10. Le risposte non numeriche (testo, scelta)
+ *    non sono misurazioni e restano fuori.
+ *
+ * Delta dichiarato sull'indice di engagement, misurato sullo stesso DB il 2026-08-14:
+ * 0,6576 su 3.980 risposte ferme → 0,7342 su 800 risposte della rilevazione 2026-H2.
  */
 import type { Pool, PoolClient } from "pg";
 import { pool } from "../../db/client.js";
@@ -71,23 +85,36 @@ export async function loadOrgHealthInputs(
           AND p.position_organization_unit_id IS NOT NULL
           AND ($1::uuid IS NULL OR p.position_tenant_id = $1::uuid)
      ),
+     latest_survey AS (
+       -- l'ultima rilevazione CON RISPOSTE per tenant: una aperta e ancora vuota non
+       -- deve spegnere l'indice, e una archiviata senza dati non deve vincerla
+       SELECT DISTINCT ON (s.survey_tenant_id) s.survey_id
+         FROM sys.sys_surveys s
+        WHERE ($1::uuid IS NULL OR s.survey_tenant_id = $1::uuid)
+          AND EXISTS (SELECT 1 FROM sys.sys_survey_responses r
+                       WHERE r.survey_response_survey_id = s.survey_id
+                         AND r.survey_response_rating_value IS NOT NULL)
+        ORDER BY s.survey_tenant_id, s.survey_end_date DESC NULLS LAST, s.created_at DESC
+     ),
      engagement AS (
-       -- normalize both payload shapes onto [0,1]; free text is not a measurement
+       -- scala 1..10 (misurata, vedi testata); testo e scelta non sono misurazioni
        SELECT op.ou_id,
               avg(CASE
-                    WHEN e.elem ? 'rating' THEN ((e.elem->>'rating')::numeric - 1) / 4.0
-                    WHEN e.elem ? 'nps'    THEN (e.elem->>'nps')::numeric / 10.0
-                    WHEN e.elem ? 'value' AND e.elem->>'question_type' IN ('rating','nps')
-                                           THEN ((e.elem->>'value')::numeric - 1) / 4.0
+                    WHEN q.survey_question_type = 'nps'
+                      THEN r.survey_response_rating_value::numeric / 10.0
+                    WHEN q.survey_question_type = 'rating'
+                      THEN (r.survey_response_rating_value::numeric - 1) / 9.0
                   END) AS score,
               count(*) FILTER (
-                WHERE e.elem ? 'rating' OR e.elem ? 'nps'
-                   OR (e.elem ? 'value' AND e.elem->>'question_type' IN ('rating','nps'))
+                WHERE q.survey_question_type IN ('rating', 'nps')
               ) AS sample
          FROM ou_people op
-         JOIN sys.sys_engagement_survey_responses r
-              ON r.response_subject_user_id = op.user_id AND r.response_is_complete
-         CROSS JOIN LATERAL jsonb_array_elements(r.response_answers) e(elem)
+         JOIN sys.sys_survey_responses r
+              ON r.survey_response_subject_user_id = op.user_id
+             AND r.survey_response_rating_value IS NOT NULL
+         JOIN latest_survey ls ON ls.survey_id = r.survey_response_survey_id
+         JOIN sys.sys_survey_questions q
+              ON q.survey_question_id = r.survey_response_question_id
         GROUP BY op.ou_id
      ),
      execution AS (

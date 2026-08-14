@@ -253,6 +253,74 @@ describe("#57 F3 — organizational health index", () => {
     expect(scored).toEqual([...scored].sort((a, c) => a - c));
   });
 
+  /* ------------------------------------------------ #187: da quale clima si misura */
+
+  it("l'engagement viene dalla rilevazione VIVA, non dalla famiglia ferma", async () => {
+    const b = (await health(tenantAdmin)).json() as Scorecard;
+    const campione = b.units.reduce(
+      (acc, u) => acc + (u.dimensions.find((d) => d.dimension === "engagement")?.sampleSize ?? 0),
+      0,
+    );
+
+    // Atteso derivato dalla fonte: le risposte numeriche dell'ULTIMA rilevazione con dati,
+    // limitate a chi ha un incarico primario attivo — le stesse persone che l'indice pesa.
+    const { rows: vivo } = await pool.query<{ n: string }>(
+      `WITH ultima AS (
+         SELECT DISTINCT ON (s.survey_tenant_id) s.survey_id
+           FROM sys.sys_surveys s
+          WHERE EXISTS (SELECT 1 FROM sys.sys_survey_responses r
+                         WHERE r.survey_response_survey_id = s.survey_id
+                           AND r.survey_response_rating_value IS NOT NULL)
+          ORDER BY s.survey_tenant_id, s.survey_end_date DESC NULLS LAST, s.created_at DESC
+       )
+       SELECT count(*)::text AS n
+         FROM sys.sys_survey_responses r
+         JOIN ultima u ON u.survey_id = r.survey_response_survey_id
+         JOIN sys.sys_survey_questions q ON q.survey_question_id = r.survey_response_question_id
+        WHERE r.survey_response_rating_value IS NOT NULL
+          AND q.survey_question_type IN ('rating','nps')
+          AND EXISTS (
+            SELECT 1 FROM sys.sys_user_position_assignments a
+              JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+             WHERE a.user_position_assignment_user_id = r.survey_response_subject_user_id
+               AND a.user_position_assignment_kind = 'PRIMARY'
+               AND a.user_position_assignment_status = 'ACTIVE'
+               AND p.position_organization_unit_id IS NOT NULL)`,
+    );
+    expect(campione).toBe(Number(vivo[0]?.n));
+    expect(campione).toBeGreaterThan(0);
+
+    // E NON dalla famiglia ferma: se qualcuno ri-puntasse indietro la sorgente, il campione
+    // tornerebbe a coincidere con quel conteggio e questo test diventerebbe rosso.
+    const { rows: fermo } = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n
+         FROM sys.sys_engagement_survey_responses r
+         CROSS JOIN LATERAL jsonb_array_elements(
+           CASE WHEN jsonb_typeof(r.response_answers) = 'array' THEN r.response_answers
+                ELSE '[]'::jsonb END) e(elem)
+        WHERE r.response_is_complete
+          AND (e.elem ? 'rating' OR e.elem ? 'nps'
+               OR (e.elem ? 'value' AND e.elem->>'question_type' IN ('rating','nps')))`,
+    );
+    expect(campione).not.toBe(Number(fermo[0]?.n));
+  });
+
+  it("la scala delle risposte è 1..10: se comparisse una rilevazione 1..5 la normalizzazione mentirebbe", async () => {
+    // La scala non è dichiarata da nessuna parte (niente CHECK, `survey_question_options` è
+    // vuota): il codice normalizza rating su 1..10 perché è ciò che i dati mostrano. Questa
+    // è la prova che quel presupposto regge ancora — e l'avviso se un giorno smette.
+    const { rows } = await pool.query<{ titolo: string; massimo: string }>(
+      `SELECT s.survey_title AS titolo, max(r.survey_response_rating_value)::text AS massimo
+         FROM sys.sys_survey_responses r
+         JOIN sys.sys_surveys s ON s.survey_id = r.survey_response_survey_id
+         JOIN sys.sys_survey_questions q ON q.survey_question_id = r.survey_response_question_id
+        WHERE q.survey_question_type = 'rating' AND r.survey_response_rating_value IS NOT NULL
+        GROUP BY s.survey_title
+       HAVING max(r.survey_response_rating_value) <= 5`,
+    );
+    expect(rows.map((r) => `${r.titolo} (max ${r.massimo})`)).toEqual([]);
+  });
+
   it("is deterministic: two calls give the same scores", async () => {
     const key = (s: Scorecard) => s.units.map((u) => `${u.orgUnitId}:${u.index}:${u.status}`);
     expect(key((await health(tenantAdmin)).json() as Scorecard))

@@ -126,6 +126,107 @@ ESCLUSIONI: dict[str, str] = {
         "persona e' `feedback_reviewed_by_user_id`, cioe' chi lo ha esaminato. Non "
         "esistendo un autore registrato, non esiste un «proprio feedback» da rivedere — "
         "e' anonimo per costruzione dello schema, non per una scelta di visibilita'.",
+    "sys_engagement_action_plans":
+        "[RESIDUO] gli 8 piani d'azione della famiglia ferma. Stessa sorte del resto di "
+        "`sys_engagement_*`: si bonifica, non si espone.",
+
+    # =================================================================================
+    # #99 F5 (S1061, 2026-08-14) — le 22 che restavano SCOPERTE, classificate una per
+    # una DOPO averle misurate. Il metodo e' quello imparato col doppione `engagement`:
+    # mai dal nome, sempre dal dato e da chi lo legge.
+    # =================================================================================
+
+    # --- il riferimento a persona e' QUALCUN ALTRO -----------------------------------
+    "sys_reward_gate_results":
+        "[ALTRUI] 3.283 righe, e l'unica colonna verso una persona e' "
+        "`reward_gate_result_evaluator_user_id`: chi ha valutato il cancello, non chi lo "
+        "subisce. Il soggetto sta in `sys_reward_gates`, classificata a parte.",
+    "sys_calibration_sessions":
+        "[ALTRUI] 35 sessioni; la colonna verso una persona e' il FACILITATORE. Il "
+        "collegamento all'interessato passa da `sys_calibration_participants`.",
+    "sys_whistleblowing_reports":
+        "[ALTRUI] + isolamento assoluto (ADR-0036 §5). Due righe, e la colonna verso una "
+        "persona e' `whistleblowing_report_assignee_user_id`: chi ha in carico la "
+        "segnalazione, non chi l'ha fatta — il segnalante NON e' registrato, ed e' il "
+        "punto dell'istituto. L'eccezione di ADR-0036 e' la piu' netta delle quattro: qui "
+        "non arriva nemmeno il mandato tecnico, presidiato da #99 F4 su tre livelli.",
+
+    # --- traccia di chi ha fatto cosa: la persona e' l'attore -------------------------
+    "sys_position_skill_requirement_history":
+        "[AUDIT] 181 righe, `..._actor_user_id` = chi ha cambiato un requisito di "
+        "competenza di una POSIZIONE. Il soggetto e' la posizione, non la persona.",
+    "sys_organization_unit_history":
+        "[AUDIT] 26 righe, `..._actor_user_id` = chi ha modificato l'unita'. Storia della "
+        "struttura, non della persona.",
+    "sys_seed_approval_decisions":
+        "[PIATTAFORMA] 12 decisioni di approvazione della pipeline di acquisizione dati; "
+        "la persona e' l'APPROVATORE che governa la piattaforma.",
+
+    # --- misura calcolata sulla persona, destinata a chi la dirige --------------------
+    #
+    # Le quattro qui sotto seguono la decisione che Enzo ha gia' preso il 2026-08-13 su
+    # `sys_employee_position_fit_scores` ([RESPONSABILE]) e quella del 2026-08-04 su
+    # `sys_successor_candidates` ([PIANO]). Non sono decisioni nuove: sono la stessa
+    # decisione applicata alle tabelle sorelle, che allora non erano state nominate.
+    "sys_talent_scores":
+        "[RESPONSABILE] 154 punteggi di talento, uno per persona. Stessa natura del "
+        "punteggio di aderenza alla posizione, che Enzo il 2026-08-13 ha dichiarato "
+        "materiale del responsabile: e' uno strumento di conduzione, non un dato che la "
+        "persona consulta di se'.",
+    "sys_readiness_scores":
+        "[RESPONSABILE] 89 punteggi di prontezza. Idem: misura calcolata SULLA persona "
+        "per chi decide una progressione.",
+    "sys_succession_scores":
+        "[PIANO] 89 punteggi di successione. Coerente con `sys_successor_candidates`, che "
+        "Enzo ha escluso il 2026-08-04: un piano di successione non deliberato non si "
+        "comunica all'interessato. Questa e' la stessa materia, in forma di punteggio.",
+    "sys_calibration_participants":
+        "[PIANO] 20 righe con l'interessato in chiaro, ma la calibrazione E' la "
+        "deliberazione: ADR-0036 §5 tiene invisibile la valutazione finche' non e' "
+        "comunicata (`shared_at OR acknowledged_at`), ed e' il filtro gia' applicato da "
+        "#92 F5 su /v1/me/performance. Esporre il tavolo di calibrazione scavalcherebbe "
+        "quel filtro dall'altra parte.",
+
+    # --- doppioni fermi: si bonificano, non si espongono ------------------------------
+    "sys_kpi_measurements":
+        "[RESIDUO] 248 righe / 138 persone, ferme al 2026-06-03 — e sono lo STESSO dato "
+        "di `sys_user_kpi_evidence` (248 righe / 138 persone, stessa data), che e' quella "
+        "viva: la legge /v1/me/kpis. L'incrocio su (persona, kpi) da' 280 coppie "
+        "combacianti. Esporre anche questa mostrerebbe due volte la stessa misura, con il "
+        "rischio che divergano. Da bonificare, come la famiglia `engagement`.",
+    "sys_okrs":
+        "[RESIDUO] 17 righe, e `okr_owner_user_id` e' NULL su TUTTE E 17 (misurato). "
+        "Nessun OKR appartiene a nessuno: non esiste un «proprio OKR» da mostrare. Non e' "
+        "una scelta di visibilita', e' l'assenza del dato — come per "
+        "`sys_engagement_feedback`. Gli obiettivi vivi sono `sys_goals` (2.189 righe, 158 "
+        "persone), esposti da /v1/me/goals.",
+    "sys_okr_key_results":
+        "[RESIDUO] 20 righe, `key_result_owner_user_id` NULL su tutte e 20. Stessa "
+        "famiglia scollegata di `sys_okrs`.",
+    "sys_okr_check_ins":
+        "[RESIDUO] 25 righe, `check_in_subject_user_id` NULL su tutte e 25. Idem.",
+
+    # --- tecniche ---------------------------------------------------------------------
+    "sys_user_profile_embeddings":
+        "[TECNICA] 156 vettori di embedding del profilo. Non e' un dato leggibile della "
+        "persona ma la sua rappresentazione numerica per la ricerca semantica: mostrarlo "
+        "non aggiunge nulla che il profilo non dica gia' in chiaro. Cio' che ne DERIVA "
+        "(abbinamenti, predizioni) e' esposto e resta il modo giusto di renderne conto.",
+
+    # --- retribuzione variabile: il calcolo non e' la delibera -------------------------
+    #
+    # Cio' che e' stato davvero erogato la persona lo vede gia', nella busta paga
+    # (/v1/me/pay-slips): quello e' il dato deliberato. Queste due tabelle stanno un
+    # gradino PRIMA — sono il motore che propone. Vale la stessa ragione con cui Enzo ha
+    # escluso `sys_compensation_recommendations` il 2026-08-04.
+    "sys_reward_gates":
+        "[PIANO] 3.283 cancelli di premio (persona x posizione x periodo) calcolati dal "
+        "motore di `compensation`. E' la condizione che una proposta di premio deve "
+        "superare, non un importo deciso: comunicarla equivarrebbe ad annunciare un "
+        "premio prima che sia deliberato. L'erogato sta nella busta paga, gia' visibile.",
+    "sys_variable_pay_calculations":
+        "[PIANO] 182 calcoli di retribuzione variabile, stesso gradino dei cancelli. "
+        "Idem: la persona vede l'erogato in busta paga, non la simulazione che lo precede.",
 }
 
 # I «padri» che NON rendono raggiungibile nessuno.
@@ -167,6 +268,34 @@ DA_COSTRUIRE: dict[str, str] = {
         "famiglia `engagement`, questa tabella NON e' un doppione: e' l'unica del suo "
         "genere, ed e' viva (la legge `insights` per calcolare un punteggio sulla "
         "persona). Superficie da costruire.",
+
+    # --- #99 F5 (S1061, 2026-08-14): le quattro che devono diventare raggiungibili -----
+    "sys_kpi_targets":
+        "#99 F5 — VISIBILE: sono gli obiettivi di KPI assegnati alla persona. 301 righe "
+        "su 158 persone, l'ultima del 2026-07-23: viva e recente. Oggi /v1/me/kpis mostra "
+        "i requisiti della POSIZIONE (`sys_position_kpi_requirements`) e l'ultima "
+        "rilevazione, ma NON il bersaglio assegnato a lei: la persona vede a che punto e' "
+        "senza vedere dove doveva arrivare. Superficie da costruire.",
+    "sys_mentorships":
+        "#99 F5 — VISIBILE: 63 rapporti di mentoring reali su 22 allievi, e la persona "
+        "compare sia come mentore sia come allievo. Oggi il portale espone i "
+        "SUGGERIMENTI di abbinamento (`sys_mentor_match_scores`, /v1/me/mentor-matches) "
+        "ma NON i rapporti in corso: si vede chi si potrebbe avere come mentore e non chi "
+        "si ha davvero. Da costruire con lo stesso limite gia' deciso da Enzo per gli "
+        "abbinamenti — nessuna graduatoria fra persone.",
+    "sys_process_participants":
+        "#99 F5 — VISIBILE: 845 partecipazioni a processi aziendali, e **nessun modulo "
+        "API le legge** (misurato: zero riscontri in apps/api/src/modules). Sapere a "
+        "quali processi si partecipa non e' un dato sensibile — e' il proprio lavoro. "
+        "Ricade anche sotto il cancello di esposizione #79: dato popolato che il prodotto "
+        "non espone da nessuna parte, nemmeno al di fuori del portale personale.",
+    "sys_skill_gap_scores":
+        "#99 F5 — VISIBILE: 156 punteggi, uno per persona, con `model_version` e "
+        "`computed_at`. E' la stessa natura di `sys_model_predictions`, che Enzo il "
+        "2026-08-04 ha dichiarato visibile all'interessato: un punteggio algoritmico su "
+        "di lei. Le lacune di dettaglio le vede gia' (/v1/me/gaps), quindi l'aggregato "
+        "non aggiunge sensibilita'. Vale la stessa prescrizione: esporre modello e data, "
+        "non il punteggio nudo.",
 }
 
 # Le famiglie che si escludono per prefisso, con la ragione dichiarata una volta sola.

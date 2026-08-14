@@ -51,6 +51,10 @@ INFORMATIVE = {
     "v_organization_unit_integrity":
         "una riga per unita' con le bandiere di violazione, non una riga per violazione: "
         "l'allarme dell'organigramma e' la sonda su fn_organization_integrity_violations()",
+    "v_incarico_attivo_senza_contratto":
+        "#123 — chi lavora con un contratto scaduto. Informativa PER ORA: rinnovare o "
+        "cessare un rapporto e' una decisione HR, non una correzione tecnica, e finche' "
+        "non e' presa l'atteso non e' zero. Il giorno che lo diventa, si toglie da qui",
 }
 
 # Soglie: superate = allarme. Derivano dalla misura del 2026-08-03, non da teoria.

@@ -4,7 +4,7 @@
  * nessuna riga-persona, il filtro e' il solo tenant (orgGate "catalog").
  */
 import type { Pool, PoolClient } from "pg";
-import type { ReviewCycle, ReviewCycleListQuery } from "@heuresys/shared";
+import type { ReviewCycle, ReviewCycleListQuery, CreateReviewCycleBody } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -66,5 +66,74 @@ export async function listReviewCycles(
 
 export async function findReviewCycleById(q: DbConnector, id: string): Promise<ReviewCycle | null> {
   const res = await q.query(`SELECT ${COLS} FROM sys.sys_review_cycles WHERE review_cycle_id = $1`, [id]);
+  return res.rows[0] ? toCycle(res.rows[0]) : null;
+}
+
+/* ── #92 F4: le scritture ───────────────────────────────────────────────────── */
+
+export async function insertReviewCycle(
+  q: DbConnector,
+  tenantId: string,
+  body: CreateReviewCycleBody,
+): Promise<ReviewCycle> {
+  const res = await q.query<Record<string, unknown>>(
+    `INSERT INTO sys.sys_review_cycles (
+       review_cycle_tenant_id, review_cycle_code, review_cycle_name,
+       review_cycle_description, review_cycle_type,
+       review_cycle_period_start, review_cycle_period_end,
+       review_cycle_self_deadline, review_cycle_manager_deadline,
+       review_cycle_status
+     ) VALUES ($1,$2,$3,$4,$5,$6::date,$7::date,$8::date,$9::date,'DRAFT')
+     RETURNING ${COLS}`,
+    [
+      tenantId, body.code, body.name, body.description ?? null, body.type,
+      body.periodStart, body.periodEnd, body.selfDeadline ?? null, body.managerDeadline ?? null,
+    ],
+  );
+  return toCycle(res.rows[0]!);
+}
+
+export async function findReviewCycleByCode(
+  q: DbConnector,
+  tenantId: string,
+  code: string,
+): Promise<ReviewCycle | null> {
+  const res = await q.query<Record<string, unknown>>(
+    `SELECT ${COLS} FROM sys.sys_review_cycles
+      WHERE review_cycle_tenant_id = $1 AND review_cycle_code = $2`,
+    [tenantId, code],
+  );
+  return res.rows[0] ? toCycle(res.rows[0]) : null;
+}
+
+/**
+ * Scrive lo stato nuovo SOLO se quello attuale e' ancora `atteso`.
+ * Il confronto sta nella `WHERE`, non in un controllo letto prima: fra la lettura e la
+ * scrittura un'altra richiesta puo' aver mosso il ciclo, e allora questa non deve passare.
+ * Ritorna null quando nessuna riga corrisponde — il servizio lo traduce in conflitto.
+ */
+export async function transitionReviewCycle(
+  q: DbConnector,
+  id: string,
+  atteso: string,
+  nuovo: string,
+): Promise<ReviewCycle | null> {
+  const res = await q.query<Record<string, unknown>>(
+    // I cast non sono decorativi: `$3` fa da valore da scrivere E da termine di confronto,
+    // e senza di essi Postgres non riesce a dedurne il tipo («inconsistent types deduced
+    // for parameter $3: text versus character varying»).
+    `UPDATE sys.sys_review_cycles
+        SET review_cycle_status = $3::varchar,
+            review_cycle_opened_at = CASE
+              WHEN $3::text = 'SELF_ASSESSMENT' AND review_cycle_opened_at IS NULL THEN now()
+              ELSE review_cycle_opened_at END,
+            review_cycle_closed_at = CASE
+              WHEN $3::text IN ('FINALIZED','CANCELLED') THEN now()
+              ELSE review_cycle_closed_at END,
+            updated_at = now()
+      WHERE review_cycle_id = $1::uuid AND review_cycle_status = $2::varchar
+      RETURNING ${COLS}`,
+    [id, atteso, nuovo],
+  );
   return res.rows[0] ? toCycle(res.rows[0]) : null;
 }

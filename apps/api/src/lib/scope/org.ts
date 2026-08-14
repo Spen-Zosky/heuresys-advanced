@@ -7,12 +7,23 @@
  * PERSONAL/COMPENSATION/SKILL/EVALUATION data only if that user is in their
  * organizational sub-tree.
  *
- * Chain source: sys_positions.position_reports_to_position_id (self-FK), mapped to
- * users via ACTIVE sys_user_position_assignments. We use `UNION` (not UNION ALL) so a
- * malformed reports-to cycle dedups and the recursion terminates instead of looping.
+ * FONTE DELLA CATENA — #99 F3 (2026-08-14). Era `sys_positions.position_reports_to_position_id`,
+ * l'albero delle POSIZIONI. ADR-0036 dichiara canonico l'albero delle UNITÀ
+ * (`organization_unit_parent_id` + `organization_unit_manager_user_id`): il perimetro
+ * gerarchico dice *su quali persone*, e chi dirige un'unità dirige il suo sottoalbero (I19).
  *
- * F0 is foundation only — these helpers add NO behaviour change; the scope resolver
- * (F1) and the sensitive-module enforcement (F3) consume them.
+ * MISURATO PRIMA DI CAMBIARE, sui dati reali (2026-08-14, 161 attori, 43 unità attive):
+ * i due alberi producono **lo stesso identico perimetro** — 649 accessi prima, 649 dopo,
+ * 0 guadagnati, 0 persi, 161 attori su 161 invariati. Il passaggio non allarga e non
+ * restringe l'accesso di nessuno: allinea la fonte alla definizione.
+ *
+ * Conseguenza sulla PROVA: un test comportamentale sui dati di oggi sarebbe verde con
+ * entrambi gli alberi, cioè non proverebbe nulla. La verifica di F3 inietta una divergenza
+ * in transazione (sposta il riporto di una POSIZIONE senza toccare l'unità) e pretende che
+ * il perimetro NON si muova — se seguisse ancora le posizioni, si muoverebbe.
+ *
+ * `UNION` (non UNION ALL) così un ciclo malformato nell'albero dedup-a e la ricorsione
+ * termina invece di avvitarsi.
  */
 
 import type { Pool, PoolClient } from "pg";
@@ -27,22 +38,25 @@ export type DbConnector = Pool | PoolClient;
  */
 export async function orgSubtreeUserIds(q: DbConnector, actorUserId: string): Promise<string[]> {
   const res = await q.query<{ user_id: string }>(
-    `WITH RECURSIVE my_pos AS (
-       SELECT upa.user_position_assignment_position_id AS pid
-         FROM sys.sys_user_position_assignments upa
-        WHERE upa.user_position_assignment_user_id = $1
-          AND upa.user_position_assignment_status = 'ACTIVE'
+    `WITH RECURSIVE my_units AS (
+       -- le unità che l'attore dirige in prima persona
+       SELECT o.organization_unit_id AS ou_id
+         FROM sys.sys_organization_units o
+        WHERE o.organization_unit_manager_user_id = $1
+          AND o.organization_unit_is_active
      ),
      subtree AS (
-       SELECT pid FROM my_pos
+       SELECT ou_id FROM my_units
        UNION
-       SELECT p.position_id
-         FROM sys.sys_positions p
-         JOIN subtree s ON p.position_reports_to_position_id = s.pid
+       SELECT o.organization_unit_id
+         FROM sys.sys_organization_units o
+         JOIN subtree s ON o.organization_unit_parent_id = s.ou_id
+        WHERE o.organization_unit_is_active
      )
      SELECT DISTINCT upa.user_position_assignment_user_id AS user_id
        FROM sys.sys_user_position_assignments upa
-       JOIN subtree s ON s.pid = upa.user_position_assignment_position_id
+       JOIN sys.sys_positions p ON p.position_id = upa.user_position_assignment_position_id
+       JOIN subtree s ON s.ou_id = p.position_organization_unit_id
       WHERE upa.user_position_assignment_status = 'ACTIVE'
      UNION
      SELECT $1::uuid`,
@@ -57,27 +71,30 @@ export async function orgSubtreeUserIds(q: DbConnector, actorUserId: string): Pr
  */
 export async function orgAncestorUserIds(q: DbConnector, userId: string): Promise<string[]> {
   const res = await q.query<{ user_id: string }>(
-    `WITH RECURSIVE my_pos AS (
-       SELECT upa.user_position_assignment_position_id AS pid
+    `WITH RECURSIVE my_units AS (
+       -- le unità in cui la persona è incardinata dalla sua posizione
+       SELECT p.position_organization_unit_id AS ou_id
          FROM sys.sys_user_position_assignments upa
+         JOIN sys.sys_positions p ON p.position_id = upa.user_position_assignment_position_id
         WHERE upa.user_position_assignment_user_id = $1
           AND upa.user_position_assignment_status = 'ACTIVE'
+          AND p.position_organization_unit_id IS NOT NULL
      ),
      ancestors AS (
-       SELECT p.position_reports_to_position_id AS pid
-         FROM sys.sys_positions p
-         JOIN my_pos m ON p.position_id = m.pid
-        WHERE p.position_reports_to_position_id IS NOT NULL
+       -- la propria unità inclusa: chi la dirige sta sopra di me anche se siamo nella stessa
+       SELECT ou_id FROM my_units
        UNION
-       SELECT p.position_reports_to_position_id
-         FROM sys.sys_positions p
-         JOIN ancestors a ON p.position_id = a.pid
-        WHERE p.position_reports_to_position_id IS NOT NULL
+       SELECT o.organization_unit_parent_id
+         FROM sys.sys_organization_units o
+         JOIN ancestors a ON o.organization_unit_id = a.ou_id
+        WHERE o.organization_unit_parent_id IS NOT NULL
      )
-     SELECT DISTINCT upa.user_position_assignment_user_id AS user_id
-       FROM sys.sys_user_position_assignments upa
-       JOIN ancestors a ON a.pid = upa.user_position_assignment_position_id
-      WHERE upa.user_position_assignment_status = 'ACTIVE'`,
+     SELECT DISTINCT o.organization_unit_manager_user_id AS user_id
+       FROM sys.sys_organization_units o
+       JOIN ancestors a ON a.ou_id = o.organization_unit_id
+      WHERE o.organization_unit_manager_user_id IS NOT NULL
+        AND o.organization_unit_manager_user_id <> $1
+        AND o.organization_unit_is_active`,
     [userId],
   );
   return res.rows.map((r) => r.user_id);
@@ -95,6 +112,7 @@ export async function isOrgUnitManager(q: DbConnector, userId: string): Promise<
     `SELECT EXISTS (
        SELECT 1 FROM sys.sys_organization_units
         WHERE organization_unit_manager_user_id = $1
+          AND organization_unit_is_active
      ) AS hit`,
     [userId],
   );
@@ -112,23 +130,25 @@ export async function isInOrgSubtree(
 ): Promise<boolean> {
   if (actorUserId === targetUserId) return true;
   const res = await q.query<{ hit: boolean }>(
-    `WITH RECURSIVE my_pos AS (
-       SELECT upa.user_position_assignment_position_id AS pid
-         FROM sys.sys_user_position_assignments upa
-        WHERE upa.user_position_assignment_user_id = $1
-          AND upa.user_position_assignment_status = 'ACTIVE'
+    `WITH RECURSIVE my_units AS (
+       SELECT o.organization_unit_id AS ou_id
+         FROM sys.sys_organization_units o
+        WHERE o.organization_unit_manager_user_id = $1
+          AND o.organization_unit_is_active
      ),
      subtree AS (
-       SELECT pid FROM my_pos
+       SELECT ou_id FROM my_units
        UNION
-       SELECT p.position_id
-         FROM sys.sys_positions p
-         JOIN subtree s ON p.position_reports_to_position_id = s.pid
+       SELECT o.organization_unit_id
+         FROM sys.sys_organization_units o
+         JOIN subtree s ON o.organization_unit_parent_id = s.ou_id
+        WHERE o.organization_unit_is_active
      )
      SELECT EXISTS (
        SELECT 1
          FROM sys.sys_user_position_assignments upa
-         JOIN subtree s ON s.pid = upa.user_position_assignment_position_id
+         JOIN sys.sys_positions p ON p.position_id = upa.user_position_assignment_position_id
+         JOIN subtree s ON s.ou_id = p.position_organization_unit_id
         WHERE upa.user_position_assignment_user_id = $2
           AND upa.user_position_assignment_status = 'ACTIVE'
      ) AS hit`,

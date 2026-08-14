@@ -18,6 +18,19 @@
  * resolver di confermare se stesso, gli chiede di concordare con l'organigramma. E'
  * un confronto che puo' fallire — e falliva, prima che la mig 000258 riconnettesse
  * l'albero delle posizioni.
+ *
+ * ⚠ [#99 F3, 2026-08-14] QUEL RAGIONAMENTO SI E' INVERTITO, e va detto invece di
+ * lasciarlo invecchiare. Il resolver ora percorre l'albero delle UNITA' (ADR-0036), che
+ * e' la stessa fonte da cui questi attori si derivano: le sei asserzioni qui sotto sono
+ * diventate CIRCOLARI — chiedono al resolver di concordare con se' stesso, e resterebbero
+ * verdi anche se il perimetro fosse sbagliato. Restano perche' pinnano comunque proprieta'
+ * vere (transitivita', self, isolamento fra rami), ma non sono piu' la prova di F3.
+ *
+ * La prova di F3 e' il blocco in fondo al file: si INIETTA una divergenza fra i due
+ * alberi dentro la transazione del file e si pretende che il perimetro segua le unita'.
+ * Serviva perche' sui dati reali i due alberi COINCIDONO — misurato il 2026-08-14: 161
+ * attori su 161 identici, 649 accessi prima e dopo, 0 guadagnati, 0 persi. Senza fabbricare
+ * una differenza non esiste alcun dato capace di distinguere un albero dall'altro.
  */
 
 import { describe, it, expect, beforeAll } from "vitest";
@@ -99,5 +112,89 @@ describe("scope/org — organizational axis (F0, ADR-0027)", () => {
       `SELECT count(*) AS n FROM sys.sys_positions WHERE position_reports_to_position_id = position_id`,
     );
     expect(Number(r.rows[0]?.n ?? 0)).toBe(0);
+  });
+
+  /* ==================================================================================
+   * #99 F3 — LA PROVA CHE PUO' FALLIRE.
+   *
+   * I due alberi oggi coincidono, quindi nessun dato reale distingue l'uno dall'altro.
+   * Qui la divergenza si FABBRICA, dentro la transazione del file (rollbackata a fine
+   * file da tx-isolation: niente resta sul database).
+   * ================================================================================== */
+
+  it("F3 — il perimetro segue le UNITA': spostare il riporto della POSIZIONE non lo muove", async () => {
+    const prima = await orgSubtreeUserIds(pool, paolo);
+    expect(prima).toContain(tommaso);
+
+    // la posizione del sottoposto viene appesa a un capo di un ALTRO ramo, ma la sua
+    // unità organizzativa non si tocca: per l'organigramma non è successo niente.
+    const pos = await pool.query<{ pid: string; old: string | null }>(
+      `SELECT p.position_id AS pid, p.position_reports_to_position_id AS old
+         FROM sys.sys_user_position_assignments a
+         JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+        WHERE a.user_position_assignment_user_id = $1
+          AND a.user_position_assignment_status = 'ACTIVE'
+        LIMIT 1`,
+      [tommaso],
+    );
+    const posizioneDelSottoposto = pos.rows[0]?.pid;
+    expect(posizioneDelSottoposto).toBeDefined();
+
+    const altrove = await pool.query<{ pid: string }>(
+      `SELECT p.position_id AS pid
+         FROM sys.sys_user_position_assignments a
+         JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+        WHERE a.user_position_assignment_user_id = $1
+          AND a.user_position_assignment_status = 'ACTIVE'
+        LIMIT 1`,
+      [antonio],
+    );
+    expect(altrove.rows[0]?.pid).toBeDefined();
+
+    await pool.query(
+      `UPDATE sys.sys_positions SET position_reports_to_position_id = $2 WHERE position_id = $1`,
+      [posizioneDelSottoposto, altrove.rows[0]!.pid],
+    );
+
+    const dopo = await orgSubtreeUserIds(pool, paolo);
+    // se il resolver percorresse ancora le posizioni, il sottoposto sarebbe appena uscito
+    expect(dopo).toContain(tommaso);
+    expect(await isInOrgSubtree(pool, paolo, tommaso)).toBe(true);
+  });
+
+  it("F3 — e si muove quando cambia l'UNITA' della persona: è l'organigramma a comandare", async () => {
+    expect(await isInOrgSubtree(pool, paolo, tommaso)).toBe(true);
+
+    // Non si sposta l'unità del capo — il sottoposto può stare nell'unità che il capo
+    // dirige DIRETTAMENTE, e in quel caso spostarla non lo toglierebbe dal perimetro
+    // (il capo la dirigerebbe comunque, ovunque sia appesa). Si sposta la PERSONA:
+    // la sua posizione viene incardinata nell'unità dell'estraneo, che per costruzione
+    // sta fuori dal ramo del capo. L'organigramma ora dice che non è più sotto di lui.
+    const unitaEstranea = await pool.query<{ ou: string }>(
+      `SELECT p.position_organization_unit_id AS ou
+         FROM sys.sys_user_position_assignments a
+         JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+        WHERE a.user_position_assignment_user_id = $1
+          AND a.user_position_assignment_status = 'ACTIVE'
+          AND p.position_organization_unit_id IS NOT NULL
+        LIMIT 1`,
+      [antonio],
+    );
+    expect(unitaEstranea.rows[0]?.ou).toBeDefined();
+
+    const { rowCount } = await pool.query(
+      `UPDATE sys.sys_positions
+          SET position_organization_unit_id = $2
+        WHERE position_id IN (
+          SELECT a.user_position_assignment_position_id
+            FROM sys.sys_user_position_assignments a
+           WHERE a.user_position_assignment_user_id = $1
+             AND a.user_position_assignment_status = 'ACTIVE')`,
+      [tommaso, unitaEstranea.rows[0]!.ou],
+    );
+    expect(rowCount).toBeGreaterThan(0);
+
+    expect(await isInOrgSubtree(pool, paolo, tommaso)).toBe(false);
+    expect(await orgSubtreeUserIds(pool, paolo)).not.toContain(tommaso);
   });
 });

@@ -388,7 +388,14 @@ export async function loadPerformance(q: DbConnector, userId: string): Promise<M
             review_overall_rating AS overall_rating, review_goal_achievement_rating AS goal_rating,
             review_competency_rating AS competency_rating, review_potential_rating AS potential_rating,
             review_performance_box AS performance_box, review_potential_box AS potential_box
-       FROM sys.sys_performance_reviews WHERE review_subject_user_id = $1
+       FROM sys.sys_performance_reviews
+      WHERE review_subject_user_id = $1
+        -- [#92 F5] Solo le valutazioni COMUNICATE. ADR-0036 §5 le elenca fra le quattro
+        -- eccezioni al mandato HR e ne fissa il criterio: shared_at OPPURE acknowledged_at.
+        -- Una valutazione scritta ma non ancora consegnata non si legge dall'area personale:
+        -- sarebbe scavalcare il colloquio in cui gliela si dice. Misurato prima di
+        -- correggere: una persona ne vedeva 4 e doveva vederne 2.
+        AND (review_shared_at IS NOT NULL OR review_acknowledged_at IS NOT NULL)
       ORDER BY review_period_end DESC NULLS LAST`, [userId],
   );
   const num = (v: string | null): number | null => (v == null ? null : Number(v));

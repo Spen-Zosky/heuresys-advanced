@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-14T20:40:01Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3005**
+**Generato**: 2026-08-14T22:32:13Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3009**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 42 |
 | db-seed | 114 |
-| doc-canonical | 644 |
+| doc-canonical | 646 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 104 |
 | showcase-source | 14 |
-| test | 371 |
+| test | 373 |
 | ux-design-archive | 80 |
 | web-source | 235 |
-| **TOTALE** | **3005** |
+| **TOTALE** | **3009** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2447 |
+| live | 2451 |
 
 ## File per categoria
 
@@ -1825,6 +1825,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\check_embedding_coverage.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_exposure.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_identita_azienda.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\check_idoneita_agente.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_module_test_coverage.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_no_legacy_ingest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_pagine_orfane.py` · *live* · git-tracked
@@ -2079,6 +2080,7 @@
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-14-batch-s1059.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-14-s1060-b-f4-residuo-e-lacune.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-14-s1060-sblocco-deploy.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-14-s1061-batch-integrale.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-catalogo-generico-corpus-concetti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-substrato-semantico-verifica-e-correzioni.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-07-percorsi-carriera-155.md` · *live* · git-tracked
@@ -2538,6 +2540,7 @@
 - `D:\heuresys-advanced\apps\api\test\kpi-metrology.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\landing-derivation.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\leads.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\learning-gaps-position.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\learning-gaps-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\learning-gaps-skill-names.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\learning-gaps.integration.test.ts` · *live* · git-tracked
@@ -2556,6 +2559,7 @@
 - `D:\heuresys-advanced\apps\api\test\me-permissions.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-preferences.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-profile-full.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\me-self-completeness-f5.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-sessions.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-skill-possession.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-surveys-review.integration.test.ts` · *live* · git-tracked

@@ -122,6 +122,67 @@ falso allarme che somiglia a un guasto. Ora il path si **cerca**.
 
 **9. La prova generale ha lavorato quattro volte.** Ha fermato in 10-13 secondi: una post-condizione messa in un file che gira *prima* della migrazione che la soddisfa; una guardia della `000270` che custodiva l'atteso vecchio (rossa solo alla **seconda** passata); `CREATE OR REPLACE VIEW` che non puo' togliere colonne; e la stessa vista che alla seconda passata litigava con se' stessa. **Un mio errore di sequenza da non ripetere**: la `000310` e' stata applicata in produzione *prima* della prova generale — l'ordine e' prova-poi-produzione, e averla passata dopo non rende corretta la sequenza.
 
+### Delta S1061 (2026-08-15) — il pavimento dei dati personali smette di avere buchi, e sei registri smentiti dalla misura
+
+**Numeri ri-derivati** (misurati, non ricordati): utenti **161** · posizioni attive **161** · OU
+attive **43** · tenant ACTIVE **2** · RBAC **953 mapping** · skill **14039** · migration su disco
+**310** (max `000312`) = **310 applicate** — **nessuna migrazione nuova**, il lavoro di questa
+sessione non ne ha richieste · moduli `apps/api` **95** · file di test API **246** · **debiti
+aperti 0** (erano 2) · **10 commit** (`102c0f8c..c27d1c7f`).
+
+**MANDATO**: *«processa tutti i punti di P1, P2, P3 e anche i debiti, in autonomia, senza
+presidio; e programma ciò che richiede più sessioni»*. Il menu residuo valeva ~2,8M token contro
+918k di contesto misurato all'avvio, quindi il ciclo è stato **diviso a monte** e consegnato in
+entrambe le metà — piano in `docs/superpowers/plans/2026-08-14-s1061-batch-integrale.md`: **11
+voci su 13 eseguite**, 2 **non aperte** (non «arretrate») perché aprirle con 11 punti di finestra
+5h residui le avrebbe lasciate a metà. `programmi.py --verifica`: **7 programmi, nessun difetto** —
+ogni voce residua ha la sua ripresa scritta.
+
+**`#99` F5 — completezza di `self` (I17/C4)**. Ventidue tabelle descrivevano una persona senza che
+lei potesse leggerle. Esito **letto dal cancello**: **109 tabelle = 78 raggiungibili** (erano 74)
+**+ 3 tramite il padre + 28 escluse con motivo**, `SCOPERTE 0`, `DA COSTRUIRE 0`. Quattro superfici
+costruite senza **alcuna migrazione** (i permessi riusati sono già del ruolo base `USER`,
+verificato sul DB prima di scrivere): `GET /v1/me/mentorships` · `/v1/me/processes` ·
+`/v1/me/skill-gap-scores` · e `assignedTarget` su `/v1/me/kpis`. Diciotto esclusioni **applicano
+decisioni già prese** da Enzo a tabelle sorelle mai nominate (4 e 13 agosto).
+
+**La contraddizione `#117`-vs-F5 era apparente**: `#117` aveva costruito il **cancello**, F5 è la
+**classificazione** di ciò che quel cancello elencava. Due lavori diversi, nessuno sbagliato.
+
+**`#188` + `D-84` chiusi, e la scelta binaria dell'item era sbagliata in entrambi i rami**:
+`CreateLearningGapBodySchema` **accetta** `positionId` e la lista lo espone come filtro, quindi
+ritirare la colonna avrebbe reso invisibile una lacuna creata oggi *con* la posizione — un difetto
+nuovo al posto di uno registrato. Verdetto: registrare il dato (0 righe su 270 la portano) e
+togliere le due bugie della superficie (il «—» muto e **gli 8 caratteri di UUID**).
+
+**`D-81` estinto dalla colonna dei debiti**: la riclassificazione era scritta dal 2026-08-14 ma lo
+stato restava «aperto», quindi produceva un rosso a riposo. Non è lavorabile per costruzione
+(serve l'attore che viola la guardia, e arriva con `#132` GATED) → **rimando inverso registrato nel
+blocco `#132`**, che è ciò che impedisce di perderlo.
+
+**`#123` chiusa senza chiedere a Enzo una decisione che aveva già preso**: le squadre restano
+trasversali, perché discende dalla definizione che lui stesso ha dato su `#143` («un team leader
+che può essere gerarchicamente inferiore a uno o più membri»). Ri-misurato: **142 trasversali su
+172** appartenenze (le altre 2 stanno in squadre senza unità e non possono essere trasversali con
+niente), **135 persone**. E **3 squadre hanno già oggi un capo più in basso di un suo membro**: il
+caso che Enzo descrive **esiste nel dato**, non è da costruire.
+
+**`#159` F1**: il criterio di idoneità non è un testo ma **`docs/kb/tools/check_idoneita_agente.py`**
+— **83 schede idonee su 115**. Reperto che cambia F2: **il ponte esiste già** dentro
+`(authenticated)/dev/agent/page.tsx` (300 righe di canale SSE), cioè **esattamente il rischio che
+il programma nominava**; F2 diventa un'estrazione. **`#143` F1**: censimento chiuso — la superficie
+che consuma `sys_teams` è piccola (5 rotte, un `count`, una pagina, e il perno di F3 in
+`lib/scope/functional.ts`); resta la sola domanda a Enzo.
+
+**IL TEMA: la misura ha smentito i registri sei volte, e due erano il mio stesso lavoro.** Le
+tabelle scoperte erano **22, non 28** · `sys_kpi_measurements` è **lo stesso dato** di
+`sys_user_kpi_evidence` (280 coppie combacianti) · l'**intera famiglia OKR** ha il proprietario
+`NULL` su tutte le righe (17, 20, 25): non esiste un «proprio OKR» · `whistleblowing_reports` **non
+registra il segnalante** (l'anonimato è nello schema, prima che nei permessi) · un mio test era
+**verde e non poteva fallire** (nessuno è mentore e allievo insieme, quindi un solo soggetto
+copriva un lato solo: il sabotaggio del lato mentore non fu colto) · un mio strumento stampava
+**«0 pagine» senza protestare**, falso verde perfetto, ora esce `NON MISURABILE`.
+
 ### Delta S1058 (2026-08-14) — il punto fisso, il rubinetto chiuso, e le voci lunghe che sanno dove erano
 
 **Numeri ri-derivati** (misurati, non ricordati): utenti **161** · posizioni attive **161** · OU attive **43** · tenant ACTIVE **2** · RBAC **957 mapping** · skill **14039** · migration su disco **306** (max `000308`) = **306 applicate** · moduli `apps/api` **95** · file di test API **236** · HEAD `9717e51a` · **15 commit** (`25332268..9717e51a`).

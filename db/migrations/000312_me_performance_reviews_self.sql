@@ -28,6 +28,22 @@ WHERE NOT EXISTS (
   SELECT 1 FROM sys.sys_auth_permissions WHERE auth_permission_code = 'performance-review:read:self'
 );
 
+-- Estensione allowlist TENANT_ADMIN (guardia D-57 — parsa dopo il marker).
+-- SERVE perche' la platea qui sotto include TENANT_ADMIN: la 000210 e' deny-by-default,
+-- e un permesso che le arriva senza essere DICHIARATO e' per definizione un assorbimento
+-- silenzioso — esattamente cio' che D-57 descriveva. Il grant effettivo lo fa la INSERT
+-- successiva (000312 > 000210 nell'ordine di catena); questo blocco non tocca il database
+-- (temp table creata e droppata), esiste per rendere la concessione ESPLICITA e leggibile
+-- sia alla guardia sia a chi legge.
+-- [S1060] Mancava, e la CI e' rimasta rossa dal 14 agosto tenendo fermo il deploy su
+-- entrambe le macchine. La prova generale della catena non poteva vederlo: applica il SQL,
+-- non esegue la suite Vitest dove vive la guardia.
+-- TENANT_ADMIN-ALLOWLIST-EXTEND
+CREATE TEMP TABLE _ta_extend_000312(code text PRIMARY KEY);
+INSERT INTO _ta_extend_000312(code) VALUES
+    ('performance-review:read:self');
+DROP TABLE _ta_extend_000312;
+
 INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
 SELECT r.auth_role_id, p.auth_permission_id
   FROM sys.sys_auth_roles r

@@ -64,11 +64,29 @@ export default function AdminGapsPage() {
       },
       {
         header: t("gaps.cols.skill"),
-        cell: (g) => (
-          <span className="text-xs text-muted-foreground">
-            {g.skillName ?? (g.skillId ? g.skillId.slice(0, 8) : "—")}
-          </span>
-        ),
+        // Misurato 2026-08-14: `skillId` è NULL su tutte le 270 righe vive, quindi questa
+        // colonna mostrava «—» sempre. I nomi stanno in `skillGaps`, normalizzati dall'API
+        // dai due dialetti del dato. Si mostra il primo e si dichiara quanti altri ce ne
+        // sono: una riga ne ha da 2 a 6, e mostrarne uno solo senza dirlo sarebbe una mezza
+        // verità dell'esatto tipo che questa colonna aveva già.
+        cell: (g) => {
+          const nomi = g.skillGaps.map((s) => s.skillName);
+          if (nomi.length === 0) {
+            return (
+              <span className="text-xs text-muted-foreground">
+                {g.skillName ?? (g.skillId ? g.skillId.slice(0, 8) : "—")}
+              </span>
+            );
+          }
+          return (
+            <span className="text-xs text-foreground" title={nomi.join(" · ")}>
+              {nomi[0]}
+              {nomi.length > 1 && (
+                <span className="ml-1 text-muted-foreground">+{nomi.length - 1}</span>
+              )}
+            </span>
+          );
+        },
       },
       { header: t("gaps.cols.severity"), cell: (g) => <EnumStatusBadge domain="severity" value={g.severity} /> },
       { header: t("gaps.cols.required"), cell: (g) => <span className="text-xs">{g.requiredProficiency ?? "—"}</span> },

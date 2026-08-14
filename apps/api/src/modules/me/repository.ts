@@ -17,6 +17,7 @@ import type {
 import { ME_PREFERENCE_DEFAULTS } from "@heuresys/shared";
 import type { z } from "zod";
 import { toDateOnly } from "../../lib/date-only.js";
+import { normalizzaCompetenze } from "../learning-gaps/repository.js";
 
 export type DbConnector = Pool | PoolClient;
 type SkillEvidence = z.infer<typeof MeSkillEvidenceSchema>;
@@ -1197,9 +1198,14 @@ export async function listMyGaps(q: DbConnector, userId: string) {
     learning_gap_position_id: string | null;
     learning_gap_severity: string; learning_gap_score: string | null;
     learning_gap_detected_at: Date;
+    learning_gap_metadata: Record<string, unknown>;
   }>(
+    // `learning_gap_metadata` serve perché è LÌ che stanno i nomi delle competenze:
+    // `learning_gap_skill_id` è NULL su tutte le righe vive (misurato 2026-08-14), quindi
+    // senza questa colonna la persona leggeva le proprie lacune senza sapere di cosa.
     `SELECT learning_gap_id, learning_gap_skill_id, learning_gap_position_id,
-            learning_gap_severity, learning_gap_score, learning_gap_detected_at
+            learning_gap_severity, learning_gap_score, learning_gap_detected_at,
+            learning_gap_metadata
        FROM sys.sys_learning_gaps WHERE learning_gap_user_id = $1
        ORDER BY learning_gap_detected_at DESC`,
     [userId],
@@ -1208,6 +1214,10 @@ export async function listMyGaps(q: DbConnector, userId: string) {
     learningGapId: r.learning_gap_id,
     skillId: r.learning_gap_skill_id,
     positionId: r.learning_gap_position_id,
+    // Stessa normalizzazione della superficie amministrativa, importata e non ricopiata:
+    // due dialetti sono già abbastanza, due implementazioni che li interpretano sarebbero
+    // il modo sicuro per farli divergere.
+    skillGaps: normalizzaCompetenze(r.learning_gap_metadata),
     severity: r.learning_gap_severity,
     score: r.learning_gap_score === null ? null : Number(r.learning_gap_score),
     detectedAt: r.learning_gap_detected_at.toISOString(),

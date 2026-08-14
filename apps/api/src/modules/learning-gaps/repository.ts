@@ -50,7 +50,7 @@ const COLS = `learning_gap_id, learning_gap_tenant_id, learning_gap_user_id,
  * Difensiva per costruzione: il metadata è un JSONB libero, quindi qualunque forma
  * inattesa produce zero voci invece di un errore a runtime su una lista che è già in volo.
  */
-function normalizzaCompetenze(metadata: Record<string, unknown>): LearningGapSkillEntry[] {
+export function normalizzaCompetenze(metadata: Record<string, unknown>): LearningGapSkillEntry[] {
   const legacy = metadata["legacy"];
   if (typeof legacy !== "object" || legacy === null) return [];
   const voci = (legacy as Record<string, unknown>)["skill_gaps"];

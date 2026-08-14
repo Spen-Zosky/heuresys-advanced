@@ -107,6 +107,34 @@ describe("lacune formative — la competenza si legge dal dato, non dalla FK vuo
     expect(nomi.length, "nessun nome di competenza è uscito dalla porta HTTP").toBeGreaterThan(0);
   });
 
+  it("l'AREA PERSONALE dice di che competenza si tratta — I17, il pavimento", async () => {
+    // `/v1/me/gaps` legge la stessa tabella da un altro contratto (`MeGapSchema`), che non
+    // portava nemmeno il metadata: la persona vedeva le PROPRIE lacune con un troncone di
+    // UUID al posto della competenza. È la superficie dove il pavimento ESS dovrebbe
+    // funzionare meglio, non peggio.
+    const r = await pool.query<{ email: string }>(
+      `SELECT u.user_email AS email
+         FROM sys.sys_learning_gaps lg
+         JOIN sys.sys_users u ON u.user_id = lg.learning_gap_user_id AND u.user_status = 'ACTIVE'
+        WHERE jsonb_array_length(COALESCE(lg.learning_gap_metadata->'legacy'->'skill_gaps','[]'::jsonb)) > 0
+        LIMIT 1`,
+    );
+    const email = r.rows[0]?.email;
+    if (!email) throw new Error("nessuna persona attiva con lacune: la verifica non guarderebbe nulla");
+
+    const login = await loginRaw(t.app, email);
+    const cookies = (login.cookies as { name: string; value: string }[])
+      .map((c) => `${c.name}=${c.value}`)
+      .join("; ");
+    const res = await t.app.inject({ method: "GET", url: "/v1/me/gaps", headers: { cookie: cookies } });
+    expect(res.statusCode, `area personale: ${res.statusCode} ${res.body.slice(0, 200)}`).toBe(200);
+
+    const body = res.json() as { items: { skillGaps?: { skillName: string }[] }[] };
+    expect(body.items.length, "questa persona non ha lacune dalla sua area personale").toBeGreaterThan(0);
+    const nomi = body.items.flatMap((g) => (g.skillGaps ?? []).map((s) => s.skillName));
+    expect(nomi.length, "l'area personale non dice ancora di che competenza si tratta").toBeGreaterThan(0);
+  });
+
   it("dire il nome NON è agganciare il catalogo: `skillId` resta quello che è", async () => {
     const { items } = await repo.listGaps(pool, { query: { limit: 200, offset: 0 } as never });
     // La colonna è vuota su tutte le righe vive: la normalizzazione non deve averla riempita

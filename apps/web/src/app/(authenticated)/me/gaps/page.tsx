@@ -20,7 +20,28 @@ export default function MeGapsPage() {
   // used to render 3 phantom fields and dropped the real `score`).
   const columns = useMemo<DataColumn<MeGap>[]>(
     () => [
-      { header: t("gaps.colSkill"), cell: (g) => <span className="font-medium text-foreground">{g.skillId ? g.skillId.slice(0, 8) : t("gaps.skillFallback")}</span> },
+      {
+        header: t("gaps.colSkill"),
+        // `skillId` è NULL su tutte le righe vive: questa colonna mostrava a ciascuno un
+        // troncone di UUID o un segnaposto, cioè le PROPRIE lacune senza dire di che
+        // competenza. I nomi arrivano da `skillGaps`, normalizzati dall'API.
+        cell: (g) => {
+          const nomi = g.skillGaps.map((s) => s.skillName);
+          if (nomi.length === 0) {
+            return (
+              <span className="font-medium text-foreground">
+                {g.skillId ? g.skillId.slice(0, 8) : t("gaps.skillFallback")}
+              </span>
+            );
+          }
+          return (
+            <span className="font-medium text-foreground" title={nomi.join(" · ")}>
+              {nomi[0]}
+              {nomi.length > 1 && <span className="ml-1 font-normal text-muted-foreground">+{nomi.length - 1}</span>}
+            </span>
+          );
+        },
+      },
       { header: t("gaps.colSeverity"), cell: (g) => <EnumStatusBadge domain="severity" value={g.severity} /> },
       {
         header: t("gaps.colScore"),

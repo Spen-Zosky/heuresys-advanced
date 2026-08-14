@@ -6,6 +6,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { LearningGapSkillEntrySchema } from "./learning-gaps.js";
 /* --- profile ---------------------------------------------------------- */
 
 export const MeProfileSchema = z.object({
@@ -530,6 +531,12 @@ export const MeGapSchema = z.object({
   learningGapId: z.uuid(),
   skillId: z.uuid().nullable(),
   positionId: z.uuid().nullable(),
+  /** Le competenze che la lacuna riguarda, normalizzate dal dato (vedi
+   *  `learning-gaps.ts`). Qui pesa più che altrove: `skillId` è NULL su tutte le righe
+   *  vive, quindi senza questa lista la persona vedeva le PROPRIE lacune senza sapere di
+   *  che competenza si trattasse — e I17 fa dell'area personale il pavimento, non il
+   *  posto dove si vede meno. */
+  skillGaps: z.array(LearningGapSkillEntrySchema),
   severity: z.string(),
   score: z.number().nullable(),
   detectedAt: z.iso.datetime(),

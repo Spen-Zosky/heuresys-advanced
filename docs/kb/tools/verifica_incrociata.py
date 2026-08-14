@@ -561,7 +561,15 @@ check("X7a", "X7", "Valutazione APERTA con un valutatore che non e' il responsab
       ORDER BY 1
       """,
       "SELECT count(*) FROM sys.sys_performance_reviews WHERE review_status <> 'COMPLETED'",
-      colonne=["valutato", "valutatore", "unita'", "stato"])
+      colonne=["valutato", "valutatore", "unita'", "stato"],
+      precondizione="SELECT count(*) FROM sys.sys_performance_reviews WHERE review_status <> 'COMPLETED'",
+      cecita="non esiste alcuna valutazione APERTA: sono tutte COMPLETED, quindi questa "
+             "verifica non ha nulla da guardare e non va contata fra quelle superate. "
+             "[MISURATO 2026-08-14, #123] La causa non e' nei dati delle valutazioni ma "
+             "un gradino sopra: non esiste alcun CICLO di valutazione, e nessuna delle "
+             "valutazioni e' agganciata a un ciclo. Tornera' falsificabile da se' il "
+             "giorno in cui un ciclo viene aperto (le API per farlo esistono, #92 F4) "
+             "e le valutazioni di quel ciclo nascono non concluse")
 
 check("X7b", "X7", "Valutazione CHIUSA il cui valutatore non e' piu' il responsabile",
       "una valutazione conclusa il cui valutatore non regge oggi l'unita' della persona "

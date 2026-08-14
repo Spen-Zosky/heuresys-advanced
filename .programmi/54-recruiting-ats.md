@@ -17,7 +17,7 @@
 ## Fasi
 
 - [x] **F1 — INDAGINE: leggere §E5 e misurare cosa esiste davvero** — FATTO 2026-08-14 (S1058). **§E5 regge su entrambi i lati, a differenza di #50.** Vedi l'esito sotto, che però cambia il punto di partenza di F2.
-- [ ] **F2 — Modello dati del dominio** — ⚠ **la prima mossa non è progettare: è decidere QUALE delle due famiglie legacy è la sorgente** (vedi sotto). Poi requisition→posting→candidate→interview→offer, agganciata alle posizioni (I1: una requisition nasce da una posizione vacante) · budget ~250k
+- [ ] **F2 — Modello dati del dominio, costruito sul DBMS attuale** — requisition→posting→candidate→interview→offer, agganciata alle posizioni (I1: una requisizione nasce da una posizione vacante). **Nessun import dal legacy** (direzione di Enzo 2026-08-14): il legacy dà i concetti, non le righe · budget ~250k
 - [ ] **F3 — API** — moduli secondo il pattern in 7 passi, un commit per slice · budget ~250k
 - [ ] **F4 — Frontend + E2E con login reale** — cluster `/recruiting`, **componente Kanban di `@heuresys/ui` mai usato** finora, più il posting pubblico (percorso prospect ADR-0026) · budget ~250k
 
@@ -37,22 +37,28 @@ Nessun modulo API di dominio. Confermato.
 | **B — con prefisso `recruiting_`** | `recruiting_candidates` (86) · `recruiting_requisitions` (24) · `recruiting_interviews` (77) · `recruiting_offers` (30) · `recruiting_candidate_history` (213) · `recruiting_interview_participants` (231) · `recruiting_interview_templates` (12) · `recruiting_interviewer_availability` (80) |
 | satelliti | `internal_job_postings` (10) · `internal_mobility_postings` (27) · `job_market_postings` (20) · `job_postings_raw` (8) · `enrichment_candidates` (38) · `succession_candidates` (100 — già importata come `sys_successor_candidates`) |
 
-## ⚠ Il reperto che cambia F2 — due famiglie parallele, e va scelta prima di progettare
+## ⚠ CORREZIONE — la scelta della «famiglia sorgente» non si pone più
 
-Le famiglie **A** e **B** coprono lo **stesso ciclo** con conteggi diversi (100 vs 86 candidati,
-50 vs 24 requisizioni, 128 vs 77 colloqui). **Solo la B ha le offerte** (`recruiting_offers`) e
-tutto il contorno operativo (storico, partecipanti, modelli di colloquio, disponibilità).
+**Direzione di Enzo, 2026-08-14**: *«nessun dato riferito al brownfield deve essere rimesso in
+circolo. Tutto va ricostruito con il DBMS attuale.»*
 
-È **lo stesso pattern** trovato lo stesso giorno su `sys_engagement_*` contro `sys_survey_*`
-(→ **#187**): due famiglie che dicono la stessa cosa, e il consumatore che ne legge una ferma
-mentre l'altra è viva. Lì è costato un indice di salute organizzativa vecchio di diciannove mesi.
+Poche ore prima avevo scritto che F2 doveva cominciare **scegliendo quale delle due famiglie
+legacy importare**. **Quella domanda è morta**: non si importa né la A né la B. Il conteggio
+delle 19 tabelle resta utile per una cosa sola — dice **quali entità serve modellare** (il
+concetto), non da dove prenderne le righe.
 
-**Quindi F2 non comincia disegnando tabelle**: comincia stabilendo, sulle date e sulle chiavi
-esterne, quale famiglia è quella viva — e se la B è un rifacimento della A, la A non va importata
-affatto. Importare la famiglia sbagliata significherebbe **ricreare in advanced, da zero, il
-difetto che #187 dovrà correggere**.
+Ed è per altro coerente con la decisione già registrata qui sopra: *«concept-porting dal
+cantiere evo, mai codice»*. Ora vale anche per i **dati**, non solo per il codice.
+
+Il reperto delle due famiglie conserva comunque un valore, come **monito di modellazione**: nel
+legacy lo stesso ciclo è stato costruito due volte, e solo la seconda versione ha le offerte e il
+contorno operativo (storico, partecipanti, modelli di colloquio, disponibilità). È il segno di
+quali entità sono davvero servite all'uso — e **quello** si porta, perché è conoscenza di
+dominio, non un dato.
 
 ## Da dove si riprende
 
-**F2, dalla scelta della famiglia sorgente.** Non è una preferenza: è la decisione che determina
-se il modello nasce giusto o nasce con dentro il difetto di #187.
+**F2, costruendo il dominio sul DBMS attuale**: requisition → posting → candidate → interview →
+offer, agganciata alle posizioni (**I1**: una requisizione nasce da una posizione vacante, ed è
+il tratto che rende questa storia diversa da un ATS qualunque). Nessun import, nessuna sorgente
+legacy da scegliere.

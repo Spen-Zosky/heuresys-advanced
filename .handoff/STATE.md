@@ -65,6 +65,7 @@ python docs/kb/tools/session_start.py                        # menu + salute, un
 python docs/kb/tools/guardiano.py --sorveglia                # contesto + finestra 5h (regola OR)
 python docs/kb/tools/check_completezza_self.py               # completezza di `self` (C4/I17)
 python docs/kb/tools/check_exposure.py                       # cancello di esposizione
+python docs/kb/tools/check_no_legacy_ingest.py               # il rubinetto brownfield e' chiuso (ADR-0038)
 sh scripts/hooks/hook.sh selftest                            # guardia di sessione
 ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh'   # prova generale
 ```

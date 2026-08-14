@@ -1,6 +1,16 @@
 # ADR-0023 — Data-Source Doctrine: advanced = structural authority, legacy = canonical no-PII source
 
-**Status**: ACCEPTED
+**Status**: ⛔ **SUPERSEDED da ADR-0038** (2026-08-14) — **è cronaca, non un mandato.**
+> Questo ADR spiega **da dove vengono** i dati che oggi sono in `sys.*`, e per questo resta
+> leggibile e utile. **Non descrive più come si procede.** Enzo, 2026-08-14: *«nessun dato
+> riferito al brownfield deve essere rimesso in circolo, tutto va ricostruito con il DBMS
+> attuale»* — il database è autosufficiente e il rubinetto è chiuso. Chi legge questo documento
+> cercando istruzioni sta leggendo il documento sbagliato: → **ADR-0038**, e il cancello
+> `python docs/kb/tools/check_no_legacy_ingest.py` che lo fa rispettare.
+> **Resta invece in vigore**, ed è ribadito da ADR-0038: `sys.*` è l'autorità strutturale;
+> l'ingestione storica non ha mai avuto uno strato di anonimizzazione; i dati si trattano come
+> **produzione reale**.
+
 **Date**: 2026-05-31
 **Author**: CLI session (data-source doctrine review, S951)
 **Decision authority**: Enzo Spenuso

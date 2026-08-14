@@ -1,0 +1,53 @@
+# Artefatti STORICI che nominano il database legacy — congelati da ADR-0038 (2026-08-14).
+#
+# «Nessun dato riferito al brownfield deve essere rimesso in circolo. Tutto va ricostruito
+#  con il DBMS attuale.» (Enzo, 2026-08-14)
+#
+# Questi file hanno gia' fatto il loro lavoro: hanno portato in `sys.*` i dati che oggi SONO
+# il database. Restano dove sono per due ragioni, entrambe scritte negli ADR:
+#   · la catena si ri-applica per intero a ogni deploy (ADR-0034), quindi rimuoverli non
+#     "ritira" nulla — riscriverebbe soltanto la provenienza dei dati odierni;
+#   · ritirare non e' cancellare (ADR-0035).
+#
+# Questo elenco NON e' un permesso a scriverne altri. Serve al cancello
+# `check_no_legacy_ingest.py` per distinguere la storia dal presente: se compare un file
+# NUOVO che nomina il legacy, il cancello esce 1.
+#
+# Per aggiungere una riga serve un motivo scritto accanto. Una riga senza motivo non e'
+# una deroga: e' una dimenticanza travestita.
+
+# --- migrazioni: l'impianto di ingestione, ormai inerte ma in catena -------------------
+db/migrations/000024_brownfield_import_staging.sql
+db/migrations/000029_brownfield_table_mapping_wave.sql
+db/migrations/000076_b50_residual_wall_terminal_annotation.sql
+db/migrations/000222_user_timeline_events.sql
+db/migrations/000235_purge_legacy_tenant_contamination.sql
+db/migrations/000257_ingest_legacy_calibration.sql
+
+# --- script di estrazione: le corse gia' avvenute --------------------------------------
+db/scripts/_lib/cross_os_pipeline.sh
+db/scripts/extract_users_employees_legacy.sh
+db/scripts/extract-wave1-legacy.sh
+db/scripts/gen-anagraphic-seed.sql
+db/scripts/gen-contracts-seed.sql
+db/scripts/gen-pay-slips-seed.sql
+db/scripts/import-d1-user-skills.sh
+db/scripts/reset_local_database.ps1
+db/scripts/setup_oci_vm_database.sh
+db/seeds/rtl-rebuild/00_extract_legacy_subset.sh
+
+# --- seed di riconciliazione: generati dall'ingestione, oggi dati a tutti gli effetti ---
+db/seeds/reconciliation/_gen_m2b.sql
+db/seeds/reconciliation/01_kpi_definitions.sql
+db/seeds/reconciliation/06_user_career_plans.sql
+db/seeds/reconciliation/07_user_documents.sql
+db/seeds/reconciliation/09_gap_analysis_results.sql
+db/seeds/reconciliation/10_position_career_paths.sql
+db/seeds/reconciliation/11_position_learning_requirements.sql
+db/seeds/reconciliation/37_learning_catalog_import.sql
+db/seeds/reconciliation/38_user_learning_evidence.sql
+db/seeds/reconciliation/39_skill_learning_mappings.sql
+db/seeds/reconciliation/40_org_unit_kpi_templates.sql
+db/seeds/reconciliation/41_position_kpi_requirements.sql
+db/seeds/reconciliation/49_succession_pools_candidates.sql
+db/seeds/reconciliation/53_registry_process_kpi_templates_s994_evidence.sql

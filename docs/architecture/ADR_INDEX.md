@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**34 ADR** in `docs/architecture/adr/`.
+**36 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -28,7 +28,7 @@
 | [0018](adr/0018_coalesce_uq_class_of_bug.md) | COALESCE-UQ class-of-bug (split-on-COALESCE) | ACCEPTED | **Helper `replaceTargetColsInConflictInference`** parenthesis-depth-aware preserva COALESCE wrappers in ON CONFLICT inference; enumera 10 sys.* tables affette dalla class-of-bug CW-B49 (split-on-COALESCE su `upsert-sql.ts:661`) | 2026-05-23 |
 | [0020](adr/0020_wave2_scope_application_level_targets.md) | Wave-2 scope for application-level targets (CW-B60-B closure) | ACCEPTED | **Reclassify 3 targets `IMPORT`→`REFERENCE_ONLY`** (sys_blueprint_overrides, sys_position_skill_requirements, sys_position_learning_requirements) — application-level operational data with `created_by` FK + tenant-scoped activation deps, NOT eligible for brownfield import in any Wave. Closes CW-B60-B forensic gap. Migration 000044 idempotent. | 2026-05-26 |
 | [0021](adr/0021_ssh_tunnel_automation_and_service_key.md) | SSH tunnel automation via restricted service-account key (B-31 / CW-B62 closure) | ACCEPTED | SSH tunnel automation via restricted service-account key (B-31 / CW-B62 closure) *(dal titolo)* | 2026-05-28 |
-| [0023](adr/0023_data_source_doctrine.md) | Data-Source Doctrine: advanced = structural authority, legacy = canonical no-PII source | ACCEPTED | Data-Source Doctrine: advanced = structural authority, legacy = canonical no-PII source *(dal titolo)* | 2026-05-31 |
+| [0023](adr/0023_data_source_doctrine.md) | Data-Source Doctrine: advanced = structural authority, legacy = canonical no-PII source | ⛔ **SUPERSEDED da ADR-0038** | Data-Source Doctrine: advanced = structural authority, legacy = canonical no-PII source *(dal titolo)* | — |
 | [0024](adr/0024_legacy_ingestion_employee_centric.md) | Legacy ingestion is EMPLOYEE-centric: `sys_user*` ⟸ legacy `employee*` (not `users`) | ACCEPTED | Legacy ingestion is EMPLOYEE-centric: `sys_user*` ⟸ legacy `employee*` (not `users`) *(dal titolo)* | 2026-06-01 |
 | [0025](adr/0025_sys_skill_categories_nullable_family_fk.md) | `sys_skill_categories.skill_category_family_id` nullable FK (+ WS-3 activity-classification-mapping investigation: source-dump + 000052 fixes, residual FK-conflict blocker) | ACCEPTED | `sys_skill_categories.skill_category_family_id` nullable FK (+ WS-3 activity-classification-mapping investigation: source-dump + 000052 fixes, residual FK-conflict blocker) *(dal titolo)* | 2026-06-01 |
 | [0026](adr/0026_single_production_environment_two_tenants.md) | Single production-grade environment: RTL Bank & Heuresys are the current production tenants | ACCEPTED | Single production-grade environment: RTL Bank & Heuresys are the current production tenants *(dal titolo)* | 2026-06-22 |
@@ -42,6 +42,8 @@
 | [0034](adr/0034_migration_chain_is_schema_over_a_data_baseline.md) | La catena di migrazioni è uno strato di schema e controlli sopra una base di dati, non un ricostruttore | Accepted | La catena di migrazioni è uno strato di schema e controlli sopra una base di dati, non un ricostruttore *(dal titolo)* | — |
 | [0035](adr/0035_retirement_amends_the_source_never_deletes_downstream.md) | Ritirare un oggetto: si emenda la fonte, non si cancella a valle | Accepted | Ritirare un oggetto: si emenda la fonte, non si cancella a valle *(dal titolo)* | — |
 | [0036](adr/0036_hierarchical_and_functional_domains.md) | Hierarchical and functional domains: the perimeter and the modality are orthogonal | ACCEPTED * | Hierarchical and functional domains: the perimeter and the modality are orthogonal *(dal titolo)* | 2026-08-10 |
+| [0037](adr/0037_user_deletion_is_anonymization.md) | Cancellare una persona significa anonimizzarla; la cancellazione fisica è la revoca di una creazione | Accepted | Cancellare una persona significa anonimizzarla; la cancellazione fisica è la revoca di una creazione *(dal titolo)* | — |
+| [0038](adr/0038_the_database_is_self_sufficient.md) | Il database è autosufficiente: il brownfield è storia, non una fonte | ACCEPTED | Il database è autosufficiente: il brownfield è storia, non una fonte *(dal titolo)* | 2026-08-14 |
 
 ## Conventions
 

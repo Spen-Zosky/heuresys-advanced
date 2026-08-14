@@ -181,13 +181,25 @@ SPECS.push({
   label: 'legacy:primary',
   prompt: `${COMMON}
 
-TASK: mappa del legacy PRIMARIO (sorgente dati ADR-0023) — read-only.
-1. DB legacy live: via Bash SSH (prefissa SEMPRE MSYS_NO_PATHCONV=1): MSYS_NO_PATHCONV=1 ssh oracle-vm-default "sudo -u postgres psql -d heuresys_platform -At -c '...'" — estrai: lista tabelle con n_live_tup (pg_stat_user_tables), top 30 per righe, size DB. NON fare dump.
-2. Copertura brownfield nell'advanced (psql locale -h localhost -p 5433 -U heuresys -d heuresys_advanced): brownfield.table_mappings (count per wave/status), brownfield.column_mappings (count totale, count per wave). Scopri le colonne reali con \\d prima di aggregare.
-3. Incrocio: tabelle legacy grosse (>1000 righe) NON coperte da table_mappings → residuo Wave-2/3 (oro per brainstorming).
-4. Data dictionary locale: D:/evo.heuresys.com/db-export/ — elenca i file (solo nomi+size), NON leggerli tutti; leggi solo un eventuale README/indice.
+TASK: mappa dei DATI CHE ABBIAMO — read-only.
 
-Scrivi ${FRAG}/legacy_primary.yaml con sezioni: legacy_tables (top+counts), coverage (waves), uncovered_big_tables, db_export_files.
+⛔ EMENDATO 2026-08-14 — ADR-0038. Questo passo interrogava il database legacy per
+censire "cosa resta da importare". Quella domanda non esiste piu': il rubinetto e'
+chiuso, il DBMS advanced e' autosufficiente, e nessun lavoro futuro importera' righe dal
+legacy. Censire il legacy produrrebbe una lista di cose da NON fare, e prima o poi
+qualcuno la eseguirebbe. Percio' il passo guarda l'advanced.
+
+1. Inventario reale di sys.* (psql -h localhost -p 5433 -U heuresys -d heuresys_advanced):
+   tabelle con conteggio righe, top 30 per volume, dimensione del database.
+2. Tabelle POPOLATE ma non lette da alcun modulo API — e' il cancello di esposizione (#79):
+   python docs/kb/tools/check_exposure.py, e riportane l'esito.
+3. Tabelle VUOTE: per ognuna, e' un vuoto legittimo (event-driven, si popola all'uso) o una
+   funzionalita' che non e' mai partita? La distinzione e' il vero oro per il brainstorming.
+4. reference_sync (ISTAT/ATECO/ESCO/NACE): stato delle sincronizzazioni. NON e' brownfield —
+   sono classificazioni ufficiali esterne, e continuano.
+
+Scrivi ${FRAG}/legacy_primary.yaml con sezioni: sys_tables (top+counts), unexposed_tables,
+empty_tables (con la distinzione del punto 3), reference_sync_state.
 counts: {legacy_tables: N, mapped_tables: N, uncovered_big: N}.
 notables: i residui non importati piu' promettenti.`,
 })

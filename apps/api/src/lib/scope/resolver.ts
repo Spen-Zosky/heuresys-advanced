@@ -50,6 +50,26 @@ export type OrgReadScope =
 export const MANAGERIAL_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>(["MANAGER", "CEO"]);
 
 /**
+ * [#99 F3] LE DUE COMPOSIZIONI CANONICHE. Esistono perche' i moduli se le riscrivevano in
+ * casa: `positions` aveva la sua lista, `teams` la sua, e nessuna sapeva delle altre —
+ * un ruolo aggiunto qui non arrivava la'. ADR-0036: nessuna lista di ruoli locale decide
+ * una vista. Si compongono dai tre mandati, non si elencano a mano.
+ *
+ * `PLATFORM_ADMIN` e' un mandato TECNICO (ADR-0032): apre la superficie, non i dati
+ * sensibili — la mascheratura di COMPENSATION/EVALUATION resta a valle, in mask.ts.
+ */
+export const TENANT_WIDE_MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
+  "PLATFORM_ADMIN",
+  ...HR_MANDATED_ROLES,
+]);
+
+/** Chi sfoglia l'organizzazione oltre se' stesso: i mandati piu' i ruoli manageriali. */
+export const ORG_BROWSE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
+  ...TENANT_WIDE_MANDATE_ROLES,
+  ...MANAGERIAL_ROLES,
+]);
+
+/**
  * Se l'attore è un capo: dirige almeno un'unità organizzativa, oppure ha un ruolo RBAC
  * manageriale. Solo a costoro spetta il perimetro gerarchico; tutti gli altri vedono se stessi —
  * **anche se nell'albero delle POSIZIONI risultano riporti sotto di loro**. Quell'albero non è

@@ -12,7 +12,6 @@ import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   Position,
   PositionListQuery,
@@ -28,15 +27,18 @@ import type {
   PositionLearningRequirement,
   PositionLearningModule,
 } from "@heuresys/shared";
+import { TENANT_WIDE_MANDATE_ROLES } from "../../lib/scope/resolver.js";
 import * as repo from "./repository.js";
 
-const ADMIN_ROLES: RoleCode[] = ["PLATFORM_ADMIN", "TENANT_ADMIN", "HRMS_MANAGER"];
+// [#99 F3] Era una lista locale: `["PLATFORM_ADMIN", "TENANT_ADMIN", "HRMS_MANAGER"]`.
+// Stessi ruoli, ma ora composti dai mandati canonici — un ruolo che entra o esce da un
+// mandato arriva qui da se', invece di restare indietro in silenzio.
 
 function isPlatformAdmin(a: ActorContext): boolean {
   return a.roles.includes("PLATFORM_ADMIN");
 }
 function isAdminLike(a: ActorContext): boolean {
-  return a.roles.some((r) => ADMIN_ROLES.includes(r));
+  return a.roles.some((r) => TENANT_WIDE_MANDATE_ROLES.has(r));
 }
 function isManager(a: ActorContext): boolean {
   return a.roles.includes("MANAGER");

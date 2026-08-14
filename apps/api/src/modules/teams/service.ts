@@ -13,7 +13,6 @@ import { isPlatform, type ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   Team,
   TeamCreateBody,
@@ -23,15 +22,14 @@ import type {
   TeamUpdateBody,
   MyTeamsResponse,
 } from "@heuresys/shared";
+import { ORG_BROWSE_ROLES } from "../../lib/scope/resolver.js";
 import * as repo from "./repository.js";
 
-/** Roles that browse ALL teams in their tenant (vs. the team-scoped "my team" axis). */
-const TEAM_ADMIN_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
-  "PLATFORM_ADMIN", "TENANT_ADMIN", "MANAGER", "CEO", "HRMS_MANAGER",
-]);
-
+/** Chi sfoglia TUTTE le squadre del tenant (contro l'asse «la mia squadra»).
+ *  [#99 F3] Era una lista locale con gli stessi cinque ruoli: ora e' la composizione
+ *  canonica dei mandati piu' i manageriali, cosi' non puo' piu' divergere da `positions`. */
 function isTeamAdmin(a: ActorContext): boolean {
-  return a.roles.some((r) => TEAM_ADMIN_ROLES.has(r));
+  return a.roles.some((r) => ORG_BROWSE_ROLES.has(r));
 }
 function requireOwnTenant(a: ActorContext): string {
   if (!a.tenantId) throw new ForbiddenError("Tenant context required");

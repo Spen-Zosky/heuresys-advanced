@@ -16,10 +16,15 @@ Per due anni il database legacy `heuresys-evo` (`heuresys_evo_platform_db` / db
 `sys.*` è l'autorità strutturale, e il legacy vi si adatta.
 
 Quella fase è finita. Il database advanced non è più un contenitore che aspetta righe da
-altrove: **contiene la storia dell'azienda, coerente e presidiata** — 161 persone, 315 posizioni,
-43 unità organizzative, 36 mesi di presenze, buste, valutazioni, formazione, obiettivi, e venti
-viste-sentinella che ne guardano l'integrità a ogni sessione. Ciò che serve, oggi, si costruisce
-o si deriva **da qui**.
+altrove: **contiene la storia dell'azienda, coerente e presidiata** — persone, posizioni, unità
+organizzative, tre anni di presenze, buste, valutazioni, formazione e obiettivi, con un corredo
+di viste-sentinella che ne guardano l'integrità a ogni sessione. Ciò che serve, oggi, si
+costruisce o si deriva **da qui**.
+
+> I **conteggi non stanno in questo documento**, per scelta. Sono dati che variano, e un numero
+> cristallizzato in un ADR è falso il giorno dopo — è il difetto **D-01**, già pagato una volta.
+> Si ri-derivano: `python docs/kb/tools/session_start.py`, oppure `docs/kb/SOT_STATE.md`, che è
+> la loro unica sede e viene riscritta a ogni chiusura di sessione.
 
 ## Decisione
 
@@ -83,7 +88,8 @@ decisione, non per inerzia.
   19 tabelle legacy restano utili per sapere **cosa modellare**, non da dove prendere le righe.
 - **#50** (grafo delle competenze): già riorientato lo stesso giorno, e per la stessa ragione
   trovata per un'altra strada — l'inventario brownfield classificava `kg_nodes`/`kg_edges`
-  `EXCLUDE` perché **derivati e ricomputabili**. Il grafo in advanced esiste già: 18.420 archi.
+  `EXCLUDE` perché **derivati e ricomputabili**. Il grafo in advanced **esiste già**, in
+  `sys_skill_taxonomy_edges` (il conteggio si misura, non si cita qui).
 
 ## Alternative scartate
 

@@ -15,7 +15,7 @@
 ## Fasi
 
 - [x] **F1 — INDAGINE: cosa contengono davvero i 139k nodi/archi** — FATTO 2026-08-14 (S1058). **Esito: i dati non esistono nella fonte.** Vedi sotto.
-- [ ] **F2 — Il grafo delle competenze, dai dati che abbiamo** — nessun import: la sorgente è `sys_skill_taxonomy_edges` (**18.420 archi**) più il catalogo skill (**14.039**). Fatto = endpoint che serve nodi e archi con i filtri che una vista a grafo richiede (profondità, tipo di relazione, ancoraggio a una skill o a una persona), schema Zod condiviso, integration test. **Il cancello di esposizione (#79) è già soddisfatto per costruzione**: la tabella è già letta, qui le si dà una superficie a grafo · budget ~200k
+- [ ] **F2 — Il grafo delle competenze, dai dati che abbiamo** — nessun import: la sorgente è `sys_skill_taxonomy_edges` più il catalogo skill (i conteggi **si misurano quando si apre la fase**, non si citano qui: crescono). Fatto = endpoint che serve nodi e archi con i filtri che una vista a grafo richiede (profondità, tipo di relazione, ancoraggio a una skill o a una persona), schema Zod condiviso, integration test. **Il cancello di esposizione (#79) è già soddisfatto per costruzione**: la tabella è già letta, qui le si dà una superficie a grafo · budget ~200k
 - [ ] **F3 — La vista, con il componente che aspetta da sempre** — `KGGraphCanvas` di `@heuresys/ui` è stato costruito apposta e **non è mai stato usato**: qui trova il suo primo consumatore. Pagina sotto `/visualizations` (che esiste già), E2E con login reale · budget ~250k
 
 ## ⚠ CORREZIONE dell'esito di F1 (stessa sessione, dopo aver cercato ancora)

@@ -454,11 +454,16 @@ check("X5c", "X5", "Lacuna formativa agganciata a una posizione non piu' ricoper
       "SELECT count(*) FROM sys.sys_learning_gaps WHERE learning_gap_position_id IS NOT NULL",
       colonne=["persona", "competenza", "lacuna", "collocazione attuale"],
       precondizione="SELECT count(learning_gap_position_id) FROM sys.sys_learning_gaps",
-      cecita="delle 270 lacune formative NESSUNA dichiara la posizione, e nessuna la "
-             "competenza: restano utente, punteggio e gravita'. La tabella non e' "
-             "agganciata ne' all'organigramma ne' alla tassonomia delle competenze, "
-             "quindi nessuna migrazione dell'organigramma potra' renderla incoerente "
-             "— ne' coerente")
+      cecita="nessuna lacuna formativa dichiara la posizione, e nessuna la competenza: "
+             "restano utente, punteggio e gravita'. La tabella non e' agganciata ne' "
+             "all'organigramma ne' alla tassonomia, quindi nessuna migrazione potra' "
+             "renderla incoerente — ne' coerente. [MISURATO 2026-08-14, #123] E NON SI "
+             "PUO' SANARE DERIVANDO: i nomi delle competenze esistono, dentro "
+             "metadata->legacy->skill_gaps (955 voci, fino a 6 per riga), ma sono "
+             "**10 nomi distinti in inglese e uno solo trova corrispondenza nel "
+             "catalogo** (Leadership). Agganciare gli altri nove vorrebbe dire "
+             "decidere a mano che cosa significano, cioe' inventare il collegamento. "
+             "La posizione non c'e' proprio, nemmeno nel metadata")
 
 # --- X6 posizione <-> obiettivi e misurazioni ------------------------------
 # La forma del menu' — «obiettivo assegnato da un capo che non e' piu' il capo» — non

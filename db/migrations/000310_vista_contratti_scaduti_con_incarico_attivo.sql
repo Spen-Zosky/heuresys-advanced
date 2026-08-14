@@ -16,60 +16,58 @@
 --   avanza nel tempo (la custodia la porta a ieri), quindi i contratti a termine scadono
 --   da soli, in silenzio, e il dataset si allontana dalla realta' senza che nulla lo dica.
 --
--- PERCHE' INFORMATIVA E NON ALLARME
---   Rinnovare o cessare sette rapporti di lavoro e' una decisione HR, non una correzione
---   tecnica: non la prende una migrazione. La vista nasce quindi **informativa**
---   (`db_health.INFORMATIVE`) — espone il fenomeno e i suoi giorni di scadenza senza
---   bloccare la catena. Diventa un allarme il giorno in cui la decisione e' presa e il
---   valore atteso e' zero: a quel punto basta toglierla da quell'elenco.
+-- DA INFORMATIVA A SENTINELLA, NELLO STESSO GIORNO
+--   Era nata **informativa**: rinnovare o cessare sette rapporti e' una decisione HR, non
+--   una correzione tecnica, e non la prende una migrazione. Enzo l'ha presa poche ore
+--   dopo — «tutti i dipendenti devono avere un contratto in vigore» — quindi la 000311
+--   mette in vigore i sette contratti e questa vista diventa una **SENTINELLA a zero**,
+--   tolta da `db_health.INFORMATIVE`. Chi non ha mai avuto un contratto (il fondatore)
+--   resta fuori dal conteggio: non e' un rapporto di lavoro dipendente.
 --
 -- NON scrive nulla: e' una vista.
 -- ─────────────────────────────────────────────────────────────────────────────
 
-CREATE OR REPLACE VIEW sys.v_incarico_attivo_senza_contratto AS
+-- [EMENDATA il 2026-08-14, stesso giorno] La prima stesura esponeva anche
+-- `contratti_totali` e includeva chi non ha MAI avuto un contratto. La 000311 l'ha poi
+-- ristretta ai soli difetti, e alla SECONDA passata della catena questa migrazione non
+-- riusciva piu a rimpiazzare la vista ristretta (PostgreSQL non consente a
+-- `CREATE OR REPLACE VIEW` di togliere o rinominare colonne). ADR-0035: si emenda il file
+-- che CREA l'oggetto, non si aggiunge un file dopo. La vista nasce quindi gia' cosi'.
+DROP VIEW IF EXISTS sys.v_incarico_attivo_senza_contratto;
+CREATE VIEW sys.v_incarico_attivo_senza_contratto AS
 SELECT
-  a.user_position_assignment_user_id            AS user_id,
-  u.user_email                                  AS email,
-  u.user_tenant_id                              AS tenant_id,
-  p.position_title                              AS posizione,
+  a.user_position_assignment_user_id AS user_id,
+  u.user_email                       AS email,
+  u.user_tenant_id                   AS tenant_id,
+  p.position_title                   AS posizione,
   (SELECT max(c.user_contract_end_date)
      FROM sys.sys_user_contracts c
-    WHERE c.user_contract_user_id = a.user_position_assignment_user_id)  AS scaduto_il,
-  (SELECT count(*)
-     FROM sys.sys_user_contracts c
-    WHERE c.user_contract_user_id = a.user_position_assignment_user_id)  AS contratti_totali,
-  CASE
-    WHEN NOT EXISTS (SELECT 1 FROM sys.sys_user_contracts c
-                      WHERE c.user_contract_user_id = a.user_position_assignment_user_id)
-      THEN 'MAI_AVUTO_CONTRATTO'
-    ELSE 'SCADUTO_E_NON_RINNOVATO'
-  END                                           AS caso
+    WHERE c.user_contract_user_id = a.user_position_assignment_user_id) AS scaduto_il,
+  'SCADUTO_E_NON_RINNOVATO'::text    AS caso
 FROM sys.sys_user_position_assignments a
 JOIN sys.sys_users u     ON u.user_id     = a.user_position_assignment_user_id
 JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
 WHERE a.user_position_assignment_status = 'ACTIVE'
   AND u.user_status = 'ACTIVE'
-  AND NOT EXISTS (
-        SELECT 1 FROM sys.sys_user_contracts c
-         WHERE c.user_contract_user_id = a.user_position_assignment_user_id
-           AND (c.user_contract_end_date IS NULL OR c.user_contract_end_date >= CURRENT_DATE));
+  AND EXISTS (SELECT 1 FROM sys.sys_user_contracts c
+               WHERE c.user_contract_user_id = a.user_position_assignment_user_id)
+  AND NOT EXISTS (SELECT 1 FROM sys.sys_user_contracts c
+                   WHERE c.user_contract_user_id = a.user_position_assignment_user_id
+                     AND (c.user_contract_end_date IS NULL OR c.user_contract_end_date >= CURRENT_DATE));
 
 COMMENT ON VIEW sys.v_incarico_attivo_senza_contratto IS
-  'Chi ha un incarico ATTIVO ma nessun contratto in corso (#123). Due casi distinti nella '
-  'colonna `caso`: SCADUTO_E_NON_RINNOVATO (a termine, giunto a scadenza mentre la persona '
-  'resta in servizio) e MAI_AVUTO_CONTRATTO (strutturale, es. il fondatore). Informativa '
-  'finche la decisione HR su rinnovo/cessazione non e presa; poi diventa una sentinella a zero.';
+  'SENTINELLA (attesa: 0 righe). Chi ha un incarico ATTIVO, ha avuto un contratto, e non '
+  'ne ha piu nessuno in vigore. Mandato di Enzo 2026-08-14: nessuno lavora con un contratto '
+  'scaduto. Chi non ha MAI avuto un contratto e escluso: non e un rapporto di lavoro '
+  'dipendente (es. il fondatore), e non e un difetto.';
 
 -- Post-condizione: la vista deve poter VEDERE. Una vista che non trova mai nulla perche'
 -- e' scritta male darebbe lo stesso verde di un dataset sano.
 DO $$
 DECLARE n_tot int; n_scaduti int; n_mai int;
 BEGIN
-  SELECT count(*),
-         count(*) FILTER (WHERE caso = 'SCADUTO_E_NON_RINNOVATO'),
-         count(*) FILTER (WHERE caso = 'MAI_AVUTO_CONTRATTO')
-    INTO n_tot, n_scaduti, n_mai
-    FROM sys.v_incarico_attivo_senza_contratto;
+  SELECT count(*) INTO n_tot FROM sys.v_incarico_attivo_senza_contratto;
+  n_scaduti := n_tot; n_mai := 0;
 
   IF n_tot = 0 THEN
     RAISE NOTICE '000310: la vista non trova nulla — o il dataset e sano, o la vista non guarda dove deve';

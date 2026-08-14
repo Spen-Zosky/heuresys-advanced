@@ -210,11 +210,14 @@ CREATE INDEX IF NOT EXISTS sys_calibration_discussions_tenant_idx  ON sys.sys_ca
 
 -- ───────────────────────────────────────────────────────────────────────────────
 -- E. I QUATTRO PERMESSI
---    Il pubblico non e' scritto a mano: si ri-deriva da chi ha gia' `talent:read`,
---    che e' la superficie sorella (9-box, fit, readiness, successione). Se domani
---    quel permesso cambia platea, questa migrazione non resta indietro — e' lo
---    stesso criterio usato in 000232 per `leads:update`.
---    HRMS_MANAGER e' plenipotenziario per regola nota e vi rientra da se'.
+--    [#92 F4, 2026-08-14 — questo blocco diceva il contrario, ed era il difetto]
+--    La platea era ri-derivata da chi possiede `talent:read`, «la superficie sorella».
+--    Sorella nei contenuti (9-box, fit, readiness), NON nel titolo di accesso: quel
+--    permesso e' una superficie di CATALOGO e comprende i due mandati di catalogo,
+--    BLUEPRINT_MANAGER e PROCESS_OWNER. Le valutazioni sono dati di PERSONE. Inseguire
+--    una platea che puo' cambiare per ragioni proprie non e' robustezza: e' un varco che
+--    si apre da se'. La platea ora e' DICHIARATA, e per allargarla serve toccare questo
+--    file. HRMS_MANAGER c'e' per I22 (plenipotenziario sui dati business).
 -- ───────────────────────────────────────────────────────────────────────────────
 INSERT INTO sys.sys_auth_permissions (auth_permission_code, auth_permission_name, auth_permission_resource, auth_permission_action)
 VALUES
@@ -224,17 +227,23 @@ VALUES
   ('review-cycle:manage',      'Gestione cicli di valutazione',        'review-cycle',       'manage')
 ON CONFLICT (auth_permission_code) DO NOTHING;
 
+-- [#92 F4, 2026-08-14] EMENDATO ALLA FONTE (ADR-0035). La platea era derivata da chi
+-- possiede `talent:read`, e quel perimetro comprende BLUEPRINT_MANAGER e PROCESS_OWNER:
+-- mandati sui CATALOGHI e sui PROCESSI del tenant, non sulle persone — «leggono le
+-- statistiche di catalogo senza leggere lo stipendio di nessuno» (`lib/scope/domains.ts`).
+-- Le valutazioni sono dati di PERSONE, classe EVALUATION. Copiando la platea di una
+-- superficie di catalogo, il ciclo di valutazione ha ereditato due ruoli che non hanno
+-- titolo a vederlo. Stesso difetto che la 000270 aveva gia' corretto per TENANT_ADMIN.
+-- La platea ora e' dichiarata, non ricalcata: chi ha mandato HR, chi e' plenipotenziario
+-- sui dati business (I22), il mandato tecnico (che legge mascherato, ADR-0032) e il capo
+-- di linea (confinato alla sua catena dal resolver).
 INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
-SELECT rp.auth_role_id, p.auth_permission_id
+SELECT r.auth_role_id, p.auth_permission_id
   FROM sys.sys_auth_permissions p
-  CROSS JOIN LATERAL (
-    SELECT DISTINCT x.auth_role_id
-      FROM sys.sys_auth_role_permissions x
-      JOIN sys.sys_auth_permissions xp ON xp.auth_permission_id = x.auth_permission_id
-     WHERE xp.auth_permission_code = 'talent:read'
-  ) rp
+  CROSS JOIN sys.sys_auth_roles r
  WHERE p.auth_permission_code IN
    ('performance-review:read','performance-review:write','calibration:manage','review-cycle:manage')
+   AND r.auth_role_code IN ('HRMS_MANAGER','TENANT_ADMIN','PLATFORM_ADMIN','MANAGER')
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
 -- Traduzione EN, altrimenti il cancello i18n torna rosso (ADR-0029, e la lezione
@@ -270,16 +279,24 @@ BEGIN
    WHERE auth_permission_code IN ('performance-review:read','performance-review:write','calibration:manage','review-cycle:manage');
   IF n_perm <> 4 THEN RAISE EXCEPTION 'Permessi nuovi: attesi 4, trovati %', n_perm; END IF;
 
-  -- il mapping dev'essere quello di talent:read moltiplicato per 4, non un numero
-  -- scritto qui: se domani cambia la platea cambia anche l'atteso, ed e' giusto cosi'
+  -- [#92 F4] L'atteso e' 4 permessi x 4 ruoli dichiarati. Prima era «4 volte la platea di
+  -- talent:read», che seguiva automaticamente un perimetro sbagliato: se qualcuno avesse
+  -- aggiunto un ruolo a talent:read, la valutazione delle persone se lo sarebbe preso senza
+  -- che nessuno decidesse nulla. Un atteso che insegue la fonte da correggere non e' un
+  -- controllo, e' un megafono.
   SELECT count(*) INTO n_map FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
-   WHERE p.auth_permission_code IN ('performance-review:read','performance-review:write','calibration:manage','review-cycle:manage');
-  IF n_map <> 4 * (SELECT count(DISTINCT x.auth_role_id) FROM sys.sys_auth_role_permissions x
-                     JOIN sys.sys_auth_permissions xp ON xp.auth_permission_id = x.auth_permission_id
-                    WHERE xp.auth_permission_code='talent:read') THEN
-    RAISE EXCEPTION 'Mapping RBAC incompleto: % righe, non 4 volte la platea di talent:read', n_map;
+    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+   WHERE p.auth_permission_code IN ('performance-review:read','performance-review:write','calibration:manage','review-cycle:manage')
+     AND r.auth_role_code IN ('HRMS_MANAGER','TENANT_ADMIN','PLATFORM_ADMIN','MANAGER');
+  IF n_map <> 16 THEN
+    RAISE EXCEPTION 'Mapping RBAC del ciclo di valutazione: attese 16 righe (4 permessi x 4 ruoli), trovate %', n_map;
   END IF;
+
+  -- NB: il divieto ai due mandati di catalogo NON si controlla qui. Questo file gira
+  -- PRIMA della 000309, che e' quella che revoca l'esemplare storico: su un database
+  -- gia' popolato la verifica cadrebbe sempre, e infatti e' caduta alla prova generale.
+  -- Il controllo vive dove la revoca avviene — 000309, post-condizioni.
 
   -- HRMS_MANAGER e' plenipotenziario sui dati business: se non e' fra i mappati,
   -- qualcosa nella derivazione non ha funzionato
@@ -288,7 +305,7 @@ BEGIN
       JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
       JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
      WHERE r.auth_role_code = 'HRMS_MANAGER' AND p.auth_permission_code = 'calibration:manage') THEN
-    RAISE EXCEPTION 'HRMS_MANAGER non ha calibration:manage: la derivazione dalla platea di talent:read non ha funzionato';
+    RAISE EXCEPTION 'HRMS_MANAGER non ha calibration:manage: la concessione alla platea dichiarata non ha funzionato';
   END IF;
 
   SELECT count(*) INTO n_trad FROM sys.sys_reference_translations t

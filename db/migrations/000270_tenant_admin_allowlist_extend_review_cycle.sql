@@ -76,17 +76,24 @@ BEGIN
     RAISE EXCEPTION 'TENANT_ADMIN dovrebbe avere tutti e quattro i permessi: ne ha %', n_ta;
   END IF;
 
-  -- La platea complessiva non deve CAMBIARE: questa migrazione dichiara, non
-  -- concede. Resta quella derivata dalla 000256 — chi possiede `talent:read`.
+  -- La platea complessiva non deve CAMBIARE: questa migrazione dichiara, non concede.
+  -- [#92 F4, 2026-08-14] L'atteso NON e' piu' «4 volte i ruoli con talent:read»: quella
+  -- formula inseguiva il perimetro di una superficie di CATALOGO, ed e' il difetto che la
+  -- 000256 emendata e la 000309 hanno corretto. Ora la platea e' dichiarata: quattro ruoli.
+  -- Il vincolo qui resta lo stesso in spirito — questo file non deve allargare nulla — ma
+  -- misura contro la regola giusta. Trovato dalla SECONDA passata della prova generale:
+  -- la prima era verde, perche' la revoca della 000309 non era ancora avvenuta.
   SELECT count(*) INTO n_platea FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
    WHERE p.auth_permission_code IN ('performance-review:read','performance-review:write',
-                                    'calibration:manage','review-cycle:manage');
+                                    'calibration:manage','review-cycle:manage')
+     AND r.auth_role_code IN ('HRMS_MANAGER','TENANT_ADMIN','PLATFORM_ADMIN','MANAGER');
   SELECT count(DISTINCT x.auth_role_id) INTO n_talent FROM sys.sys_auth_role_permissions x
     JOIN sys.sys_auth_permissions xp ON xp.auth_permission_id = x.auth_permission_id
    WHERE xp.auth_permission_code = 'talent:read';
-  IF n_platea <> 4 * n_talent THEN
-    RAISE EXCEPTION 'La platea e cambiata: % righe invece di 4 volte i % ruoli con talent:read',
+  IF n_platea <> 16 THEN
+    RAISE EXCEPTION 'La platea del ciclo di valutazione e cambiata: % righe invece di 16 (4 permessi x 4 ruoli dichiarati); talent:read ne ha % ma non e piu il modello',
       n_platea, n_talent;
   END IF;
 

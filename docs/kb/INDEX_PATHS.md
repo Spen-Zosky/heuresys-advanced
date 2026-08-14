@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-14T15:05:32Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3000**
+**Generato**: 2026-08-14T20:40:01Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3005**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 42 |
 | db-seed | 114 |
-| doc-canonical | 642 |
+| doc-canonical | 644 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 104 |
 | showcase-source | 14 |
-| test | 368 |
+| test | 371 |
 | ux-design-archive | 80 |
 | web-source | 235 |
-| **TOTALE** | **3000** |
+| **TOTALE** | **3005** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2442 |
+| live | 2447 |
 
 ## File per categoria
 
@@ -2077,6 +2077,8 @@
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-13-batch-p2-completo-s1056.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-14-batch-p1p2p3-s1058.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-14-batch-s1059.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-14-s1060-b-f4-residuo-e-lacune.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-14-s1060-sblocco-deploy.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-catalogo-generico-corpus-concetti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-substrato-semantico-verifica-e-correzioni.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-07-percorsi-carriera-155.md` · *live* · git-tracked
@@ -2470,7 +2472,9 @@
 - `D:\heuresys-advanced\apps\api\test\capability-maturity.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\career-path-steps.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\career-paths.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\chain-threshold-analytics.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\chain-threshold-pay.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\chain-threshold-surfaces.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\compensation-mask.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\compensation-read.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\compensation-residual-mask.integration.test.ts` · *live* · git-tracked
@@ -2535,6 +2539,7 @@
 - `D:\heuresys-advanced\apps\api\test\landing-derivation.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\leads.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\learning-gaps-scope.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\learning-gaps-skill-names.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\learning-gaps.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\learning-modules.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\learning-path-steps.integration.test.ts` · *live* · git-tracked

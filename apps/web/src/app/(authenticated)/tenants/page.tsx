@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Button } from "@heuresys/ui";
-import type { Tenant, CreateTenantBody, IndustryCode } from "@heuresys/shared";
+import type { Tenant, CreateTenantBodyInput, IndustryCode } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
@@ -44,7 +44,7 @@ export default function TenantsListPage() {
   });
 
   const create = useMutation({
-    mutationFn: (body: CreateTenantBody) => apiFetch<Tenant>("/v1/tenants", { method: "POST", body }),
+    mutationFn: (body: CreateTenantBodyInput) => apiFetch<Tenant>("/v1/tenants", { method: "POST", body }),
     onSuccess: () => {
       setNotice(t("tenants.editing.created"));
       setForm({
@@ -137,8 +137,10 @@ export default function TenantsListPage() {
               e.preventDefault();
               setNotice(null);
               // Niente `as CreateTenantBody`: era il cast a nascondere che questo body
-              // non rispettava più il contratto (D-83). Il tipo deve poter protestare.
-              const body: CreateTenantBody = {
+              // non rispettava più il contratto (D-83). Il tipo deve poter protestare —
+              // ed è il tipo d'INGRESSO, quello che un client scrive davvero: `tenantStatus`
+              // e `tenantMetadata` hanno un default, non li compila chi apre l'azienda.
+              const body: CreateTenantBodyInput = {
                 tenantCode: form.tenantCode.trim(),
                 tenantName: form.tenantName.trim(),
                 tenantIndustryCode: form.tenantIndustryCode,

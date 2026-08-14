@@ -74,6 +74,10 @@ export const CreateTenantBodySchema = z.object({
   tenantMetadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateTenantBody = z.infer<typeof CreateTenantBodySchema>;
+/** Il body come lo SCRIVE un client, prima che Zod applichi i default (`tenantStatus`,
+ *  `tenantMetadata`). `CreateTenantBody` è l'uscita — pretenderla in ingresso obbliga
+ *  chi compila un form a dichiarare campi che il server sa già darsi da sé. */
+export type CreateTenantBodyInput = z.input<typeof CreateTenantBodySchema>;
 
 /* --- PATCH /v1/tenants/:id ----------------------------------------------- */
 // tenantCode is immutable; everything else can be patched.

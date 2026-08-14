@@ -38,7 +38,7 @@ Quindi il ciclo è diviso in due, e **entrambe le metà sono un deliverable**:
 | **C1** | **#99 F6/F7/F8** (~750k) | io | file `.programmi/99` aggiornato con la ripresa | ✅ **FATTO** — ora **[5/8]**, riprende da F6, con due misure di F5 regalate a F6 |
 | **C2** | **#142 F2/F3/F4** (~680k) | io | file `.programmi/142` — F2/F3 restano GATED su #99 F7 | ✅ **verificato** — riprende da F4, gate su #99 F7 tuttora valido |
 | **C3** | **#143 F1..F5** (~1,1M) | io | file `.programmi/143` — la validazione del modello è di Enzo | ✅ **FATTO** — riprende da F1, col reperto di #123 già dentro (3 squadre col capo più in basso) |
-| **C4** | **#159 F1..F4** (~770k) | io | file `.programmi/159` — F1 dipende da #156 (WAIT-INPUT) | ✅ **verificato** — riprende da F1 |
+| **C4** | **#159 F1..F4** (~770k) | io | file `.programmi/159` — F1 dipende da #156 (WAIT-INPUT) | ✅ **F1 ESEGUITA** `4256bd45` — 83 idonee su 115, criterio ri-eseguibile; il ponte esiste già dentro `/dev/agent`. Riprende da **F2** |
 | **C5** | **#54 F2..F4** (~750k) | io | file `.programmi/54` — nessun import dal legacy (I12) | ✅ **verificato** — riprende da F2 |
 
 **Verifica del Blocco C, letta dallo strumento e non dichiarata**: `python docs/kb/tools/programmi.py --verifica` → **`programmi OK — 7 programma/i, nessun difetto`**. Ogni voce non chiusa del menu ha un file con la fase successiva e il «da dove si riprende»: **nessuna voce resta aperta senza ripresa scritta**, che era la condizione posta da Enzo.

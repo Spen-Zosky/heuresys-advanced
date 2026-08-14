@@ -615,5 +615,57 @@
     },
     "method": "{{count}} raccomandazioni da {{rules}} regole. Scartate dal controllo delle fonti: {{discarded}}. Modello {{model}}.",
     "methodIdle": "Nessuna derivazione disponibile."
+  },
+  "performance": {
+    "title": "Valutazioni",
+    "description": "Cicli di valutazione, valutazioni delle persone e sessioni di calibrazione.",
+    "error": "Impossibile caricare i dati delle valutazioni.",
+    "kpi": {
+      "cycles": "Cicli",
+      "reviews": "Valutazioni",
+      "calibrations": "Calibrazioni"
+    },
+    "cycles": {
+      "title": "Cicli di valutazione",
+      "hint": "Un ciclo apre la finestra in cui si valuta: senza, le autovalutazioni non hanno un periodo a cui riferirsi.",
+      "emptyTitle": "Nessun ciclo aperto",
+      "emptyDescription": "Non risulta aperto alcun ciclo di valutazione. Le valutazioni qui sotto sono quelle gia' concluse.",
+      "caption": "Elenco cicli di valutazione",
+      "cols": {
+        "code": "Codice",
+        "name": "Nome",
+        "type": "Tipo",
+        "period": "Periodo",
+        "status": "Stato"
+      }
+    },
+    "reviews": {
+      "title": "Valutazioni",
+      "emptyTitle": "Nessuna valutazione",
+      "emptyDescription": "Non ci sono valutazioni nel tuo perimetro.",
+      "caption": "Elenco valutazioni",
+      "subjectUnnamed": "Persona non nominata",
+      "notShared": "Non comunicata",
+      "cols": {
+        "subject": "Persona",
+        "period": "Periodo",
+        "type": "Tipo",
+        "status": "Stato",
+        "overall": "Giudizio",
+        "shared": "Comunicata il"
+      }
+    },
+    "calib": {
+      "title": "Sessioni di calibrazione",
+      "emptyTitle": "Nessuna sessione",
+      "emptyDescription": "Non ci sono sessioni di calibrazione registrate.",
+      "caption": "Elenco sessioni di calibrazione",
+      "cols": {
+        "name": "Sessione",
+        "department": "Area",
+        "scheduled": "Programmata",
+        "status": "Stato"
+      }
+    }
   }
 }

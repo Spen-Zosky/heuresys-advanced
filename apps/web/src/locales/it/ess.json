@@ -743,5 +743,21 @@
     "colStatus": "Stato",
     "colPriority": "Priorità",
     "colCreated": "Creata"
+  },
+  "performance": {
+    "title": "Le mie valutazioni",
+    "description": "Le valutazioni che ti sono state comunicate.",
+    "count": "{{count}} valutazioni",
+    "errorMessage": "Impossibile caricare le tue valutazioni.",
+    "emptyTitle": "Nessuna valutazione comunicata",
+    "emptyDescription": "Non ti e' ancora stata comunicata alcuna valutazione. Quelle non comunicate non compaiono qui: le vedrai dopo il colloquio.",
+    "caption": "Elenco delle mie valutazioni",
+    "colPeriod": "Periodo",
+    "colType": "Tipo",
+    "colStatus": "Stato",
+    "colOverall": "Giudizio complessivo",
+    "colGoals": "Obiettivi",
+    "colCompetency": "Competenze",
+    "colPotential": "Potenziale"
   }
 }

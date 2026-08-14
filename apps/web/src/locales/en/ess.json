@@ -743,5 +743,21 @@
     "colStatus": "Status",
     "colPriority": "Priority",
     "colCreated": "Created"
+  },
+  "performance": {
+    "title": "My performance reviews",
+    "description": "The reviews that have been shared with you.",
+    "count": "{{count}} reviews",
+    "errorMessage": "Unable to load your performance reviews.",
+    "emptyTitle": "No review shared yet",
+    "emptyDescription": "No review has been shared with you yet. Reviews that have not been shared do not appear here: you will see them after the conversation.",
+    "caption": "My performance reviews list",
+    "colPeriod": "Period",
+    "colType": "Type",
+    "colStatus": "Status",
+    "colOverall": "Overall rating",
+    "colGoals": "Goals",
+    "colCompetency": "Competencies",
+    "colPotential": "Potential"
   }
 }

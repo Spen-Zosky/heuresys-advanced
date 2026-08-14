@@ -615,5 +615,57 @@
     },
     "method": "{{count}} recommendations from {{rules}} rules. Discarded by the source check: {{discarded}}. Model {{model}}.",
     "methodIdle": "No derivation available."
+  },
+  "performance": {
+    "title": "Performance reviews",
+    "description": "Review cycles, individual performance reviews and calibration sessions.",
+    "error": "Unable to load performance data.",
+    "kpi": {
+      "cycles": "Cycles",
+      "reviews": "Reviews",
+      "calibrations": "Calibrations"
+    },
+    "cycles": {
+      "title": "Review cycles",
+      "hint": "A cycle opens the window in which people are reviewed: without one, self-assessments have no period to refer to.",
+      "emptyTitle": "No open cycle",
+      "emptyDescription": "No review cycle is currently open. The reviews below are the completed ones.",
+      "caption": "Review cycles list",
+      "cols": {
+        "code": "Code",
+        "name": "Name",
+        "type": "Type",
+        "period": "Period",
+        "status": "Status"
+      }
+    },
+    "reviews": {
+      "title": "Performance reviews",
+      "emptyTitle": "No reviews",
+      "emptyDescription": "There are no reviews within your scope.",
+      "caption": "Performance reviews list",
+      "subjectUnnamed": "Unnamed person",
+      "notShared": "Not shared",
+      "cols": {
+        "subject": "Person",
+        "period": "Period",
+        "type": "Type",
+        "status": "Status",
+        "overall": "Rating",
+        "shared": "Shared on"
+      }
+    },
+    "calib": {
+      "title": "Calibration sessions",
+      "emptyTitle": "No sessions",
+      "emptyDescription": "There are no calibration sessions on record.",
+      "caption": "Calibration sessions list",
+      "cols": {
+        "name": "Session",
+        "department": "Area",
+        "scheduled": "Scheduled",
+        "status": "Status"
+      }
+    }
   }
 }

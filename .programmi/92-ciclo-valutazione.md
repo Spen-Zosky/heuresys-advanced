@@ -26,13 +26,29 @@
   - Presidiato da `apps/api/test/evaluation-rbac-perimeter.integration.test.ts` (5/5), che verifica il **perimetro**, non che una migrazione sia girata.
 - [x] **F5 — ESS: le proprie valutazioni** — **FATTA 2026-08-14** (`a8fad6f4`, mig `000312`). L'avvertenza del piano era giusta e anche di più: la rotta `GET /v1/me/performance` **esisteva già** e mostrava *tutte* le valutazioni, comprese le **non comunicate**. Perdita riprodotta prima di correggere (una persona ne vedeva 4, doveva vederne 2), filtro `shared_at OR acknowledged_at` per ADR-0036 §5, permesso `performance-review:read:self` (I17: era l'unica famiglia di dati personali senza un self). 5/5 + 52/52 sulle superfici vicine
   - ⚠ **L'AUTOVALUTAZIONE NON È IN F5 e non è un dimenticanza**: misurato — 548 valutazioni tutte `COMPLETED`, `self_assessment_status` NOT_STARTED su tutte, **0 cicli esistenti**, 0 valutazioni agganciate a un ciclo. Scrivere quella funzione ora significherebbe costruirla senza un solo caso su cui dimostrarla. **Serve prima un ciclo APERTO** — ed è una decisione di Enzo (aprire il ciclo di valutazione dell'azienda), non una migrazione. Le API per aprirlo esistono già: sono quelle di F4
-- [ ] **F6 — Frontend** — pagina manageriale + pagina ESS, primitive `@heuresys/ui`, hook TanStack, i18n it/en **in parità** · budget ~200k
+- [x] **F6 — Frontend** — **FATTA 2026-08-15 (S1061)**. Due pagine, **zero componenti nuovi** (si compongono `@heuresys/ui` + i pannelli già in repo) e **zero UI deps** aggiunte. `/performance` (manageriale, tre sezioni: cicli · valutazioni · calibrazioni) e `/me/performance` (ESS). Mig. **`000313`** per le due voci di sidebar — una pagina senza voce è irraggiungibile (`#125`), e il menu vive nel DB, non nel frontend. **Nessun permesso nuovo**: riusa `performance-review:read` (platea corretta dalla 000309) e `performance-review:read:self` (000312, che il ruolo base `USER` detiene).
+  - **prova generale della catena VERDE** prima di applicare (`ci-rehearsal.sh` su linux-pc, due passate): `000313 ok — 2 voci di menu, 2 traduzioni EN, 64 altre voci attive intatte`, sentinelle **17/17 a zero**. Applicata poi in produzione.
+  - **dimostrazione LIVE su `https://www.heuresys.com/api`** (`apps/api/scripts/prova-live-92-f6.mts`, due login reali): mandato HR `federica.marchetti` → **0 cicli · 548 valutazioni · 35 calibrazioni**; persona **senza alcun mandato** `alberto.colombo` → **4 valutazioni, esattamente le 4 comunicate** che il database le attribuisce. La prima valutazione che l'HR vede risulta **non comunicata**: il filtro di ADR-0036 §5 morde davvero, non è teorico.
+  - ⚠ **la sezione dei cicli nasce su un empty-state REALE** (0 righe in `sys_review_cycles`): non è un difetto né un dato finto, è l'unico vuoto che la dottrina live-data ammette. Comparirà da sé quando Enzo aprirà un ciclo.
+  - **i giudizi mascherati si dichiarano**, non si mostrano vuoti: `MaskedCell` + `isMasked` su entrambe le pagine — «non c'è» e «non te lo mostro» restano distinti (la stessa lezione di `#188`).
+  - verifiche: `i18n:check` **parity OK 3049 × 2 × 10** (+50 chiavi) · typecheck monorepo · lint **0 errori 0 warning** · `next build` verde con **entrambe** le rotte negli artefatti.
 - [ ] **F7 — Playwright E2E con login reale** — `federica.marchetti@rtl-bank.org` per il ramo manager; **una persona senza deleghe** per l'ESS · budget ~120k
 
 ## Da dove si riprende
 
-**F5 — ESS `/v1/me/performance-reviews/*`**, self-scope. Attenzione dichiarata nel piano:
-`me/repository.ts:388-391,593` **già** legge le review self-scope — si estende, non si duplica.
+**F7 — Playwright E2E con login reale** (~120k), l'ultima fase. F5 e F6 sono chiuse.
+
+Due cose che F6 lascia a F7 e che le risparmiano una ricerca:
+- **le persone dei due rami sono già misurate**: `federica.marchetti@rtl-bank.org` per il ramo
+  manageriale, e per l'ESS **una persona senza alcun mandato** — la si deriva con la query in
+  `apps/api/scripts/prova-live-92-f6.mts`, che è la stessa domanda a cui la pagina risponde
+  (in produzione ha scelto `alberto.colombo@rtl-bank.org`, 4 valutazioni comunicate).
+- **i `data-testid` esistono già**: `perf-kpi-*`, `perf-cycles-*`, `perf-reviews-*`,
+  `perf-calib-*` sulla pagina manageriale, `me-performance-*` su quella ESS.
+
+⚠ Attenzione per F7: la sezione dei cicli è un **empty-state reale** (0 cicli). Un test che
+pretendesse righe lì sarebbe rosso per il motivo sbagliato — si asserisce l'empty-state, o si
+apre prima un ciclo con le API di F4.
 
 *(Restano fuori da F4, e vanno dette: le scritture coprono il CICLO. Le sessioni di
 calibrazione e le singole valutazioni hanno i loro stati — misurati: `SCHEDULED·IN_PROGRESS·

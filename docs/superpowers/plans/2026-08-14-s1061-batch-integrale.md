@@ -33,8 +33,10 @@ Quindi il ciclo è diviso in due, e **entrambe le metà sono un deliverable**:
 | **A4** | **#79** — cancello di esposizione | io | applicato ai lavori di questo ciclo che toccano dati | ✅ **FATTO** — applicato dentro F5: `sys_process_participants`, 845 righe invisibili a **tutta** l'API, trovate e ora esposte |
 | **A5** | **#149** — ogni consegna del lab è non verificata | io | applicato per costruzione: ogni numero di questo piano ri-misurato oggi | ✅ **FATTO** — 4 numeri del register smentiti ri-misurando (22 non 28 scoperte · 142/172 non 142/174 · 2 non 3 KPI · 0 debiti non 2) |
 | **B1** | **#99 F5** — completezza di `self` (~200k) | io | ogni tabella che referenzia una persona è raggiungibile self-scope, o l'esclusione è dichiarata **una per una** con motivo | ✅ **FATTO** `0116cf48`+`03d31799` — **SCOPERTE 0** (erano 22), 4 superfici costruite, 18 escluse motivate |
-| **B2** | **#92 F6** — frontend del ciclo di valutazione (~200k) | io | pagina manageriale + pagina ESS, i18n in parità, live su dati reali | ⬜ da fare |
-| **B3** | **#92 F7** — E2E Playwright con login reale (~120k) | io | due rami provati (manager + ESS senza deleghe) | ⬜ da fare |
+| **B2** | **#92 F6** — frontend del ciclo di valutazione (~200k) | io | pagina manageriale + pagina ESS, i18n in parità, live su dati reali | ⏭ **NON APERTA** — ripresa scritta in `.programmi/92`; aprirla con 11 punti di finestra residui l'avrebbe lasciata a metà |
+| **B3** | **#92 F7** — E2E Playwright con login reale (~120k) | io | due rami provati (manager + ESS senza deleghe) | ⏭ **NON APERTA** — dipende da B2 |
+| **extra** | **#159 F1** — criterio di idoneità (era Blocco C) | io | criterio ri-eseguibile applicato alle pagine reali | ✅ **FATTO** `4256bd45` — 83 idonee su 115; il ponte esiste già dentro `/dev/agent` |
+| **extra** | **#143 F1** — censimento (parte tecnica) | io | cosa consuma `sys_teams`, per sapere cosa si rompe | ✅ **FATTO** `d04b8318` — resta la sola domanda a Enzo (WAIT-INPUT, non arretrato) |
 | **C1** | **#99 F6/F7/F8** (~750k) | io | file `.programmi/99` aggiornato con la ripresa | ✅ **FATTO** — ora **[5/8]**, riprende da F6, con due misure di F5 regalate a F6 |
 | **C2** | **#142 F2/F3/F4** (~680k) | io | file `.programmi/142` — F2/F3 restano GATED su #99 F7 | ✅ **verificato** — riprende da F4, gate su #99 F7 tuttora valido |
 | **C3** | **#143 F1..F5** (~1,1M) | io | file `.programmi/143` — la validazione del modello è di Enzo | ✅ **FATTO** — riprende da F1, col reperto di #123 già dentro (3 squadre col capo più in basso) |
@@ -106,6 +108,40 @@ Quindi il ciclo è diviso in due, e **entrambe le metà sono un deliverable**:
 
 ---
 
-## Diario di esecuzione
+## CHIUSURA — binaria, letta dalla tabella (R24 §6)
 
-*(si riempie mentre si esegue — una riga per voce, con l'evidenza)*
+> **CICLO CHIUSO per il perimetro dichiarato: 11 voci su 13 eseguite, 2 non aperte per
+> misura del guardiano — ed entrambe hanno la ripresa scritta.**
+
+Eseguite: **A1 · A2 · A3 · A4 · A5 · B1 · C1 · C2 · C3 · C4 · C5**, più **due extra** che il
+piano metteva nel Blocco C e che sono state invece *lavorate* (#159 F1, #143 F1 tecnica).
+Non aperte: **B2 · B3** (#92 F6/F7) — non «rimaste indietro»: **non iniziate**, perché
+aprirle con 11 punti di finestra residui le avrebbe lasciate a metà, che è la sola cosa che
+`.programmi/` esiste per impedire.
+
+**I tre numeri della decisione, come prescritto** — residuo misurato: contesto **393k**,
+finestra 5h **69%** (11 punti dalla soglia di 80) · costo stimato della chiusura: handoff +
+propagazione + push · verdetto testuale dello strumento: **`✓ si continua`**. Non si chiude
+perché la soglia sia stata toccata: si chiude **per arrivarci avendo già registrato e
+pushato**, che è ciò che la regola impone di fare *prima* di quel punto.
+
+## Diario di esecuzione — cosa ha smentito la misura
+
+Il ciclo ha corretto **sei affermazioni** che erano scritte nei registri o nel mio stesso
+lavoro. È il motivo per cui il metodo prescrive di misurare prima:
+
+1. **#188 era posta come scelta binaria**, e nessuno dei due rami era giusto: il contratto
+   accetta `positionId` in scrittura, quindi ritirare la colonna avrebbe creato un difetto
+   nuovo. Verdetto: registrare il dato, correggere la superficie.
+2. **Le tabelle scoperte erano 22, non 28** come diceva il register.
+3. **Le appartenenze trasversali sono 142 su 172**, non 144: due squadre non hanno unità e
+   non possono essere trasversali con niente.
+4. **`sys_kpi_measurements` è lo stesso dato di `sys_user_kpi_evidence`** — e l'intera
+   famiglia OKR ha il proprietario `NULL` su ogni riga.
+5. **Un mio test era verde e non poteva fallire**: nessuno è mentore e allievo insieme,
+   quindi un solo soggetto copriva un lato solo.
+6. **Un mio strumento stampava «0 pagine» senza protestare** — falso verde perfetto.
+
+E due *decisioni* non sono state chieste a Enzo perché **le aveva già prese** altrove: la
+trasversalità delle squadre (#123, dalla definizione data su #143) e la classificazione di
+sei tabelle in F5 (dalle decisioni del 4 e 13 agosto su tabelle sorelle).

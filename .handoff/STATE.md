@@ -1,26 +1,33 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-14 (S1058).
+**Updated**: 2026-08-14 (S1059).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-## Last session brief (S1058)
+## Last session brief (S1059)
 
-Tre fili. **Il punto fisso**: *un dato che per sua natura può variare si misura prima di
-prenderlo per buono* — enunciato una volta sola in testa al `CLAUDE.md` dopo aver misurato che
-era già scritto **sei volte nello stesso file**, ognuna per la sua materia e nessuna in generale.
-L'ho enunciato dopo averlo violato, su rilievo di Enzo.
+Sessione di sblocco e di limiti. **La CI era rossa dal 13 agosto e teneva fermo il deploy**: il
+contratto dell'API non seguiva un vincolo messo nel database due sessioni prima. Corretto e
+verde — e misurando sono venuti fuori due difetti in più della diagnosi, fra cui una pagina web
+già rotta in produzione, nascosta da una forzatura che impediva ai controlli di vederla.
 
-**Il rubinetto chiuso**: il brownfield non è più una fonte. Non un paragrafo — un ADR, un
-invariante riscritto e un **cancello automatico**, che alla prima corsa ha segnalato sé stesso e
-alla seconda ha trovato un file mancato dal censimento a mano: un modello di istruzioni che
-mandava un agente a censire il legacy «per sapere cosa resta da importare».
+**Tre limiti al mandato HR ora sono presidiati** (i «qualificatori di cella» di ADR-0036): le
+valutazioni non si leggono finché non sono comunicate; la retribuzione dei vertici è visibile
+solo a chi sta al loro livello o più in alto — il direttore HR smette di vedere lo stipendio del
+CEO; le segnalazioni riservate reggevano già l'isolamento, ma **senza prova**, e ora ce l'hanno.
 
-**Le voci lunghe hanno una casa**: sette programmi in fasi da una sessione, stato su disco,
-ripresa stampata dal boot. Tre prime fasi chiuse, ognuna ha sciolto un nodo invece di aprirne uno.
+**Il perimetro gerarchico gira sull'albero delle unità**, come l'architettura dichiarava da tempo.
+I due alberi davano lo stesso identico risultato, quindi nessun test sui dati di oggi poteva
+distinguerli: la prova **fabbrica** la divergenza dentro una transazione.
 
-**Tema ricorrente, terza sessione di fila**: quasi ogni documento diceva qualcosa che il dato
-smentiva — i sondaggi «che nessuno legge» erano letti da quattro moduli, i 139mila archi «da
-importare» non esistevano ed erano stati esclusi apposta perché derivati.
+**Mandato di Enzo eseguito**: nessuno lavora più con un contratto scaduto, e adesso c'è una
+sentinella che se ne accorge da sola — serviva, perché lo stesso problema era già stato sistemato
+l'8 agosto ed era tornato in una settimana.
+
+**Tema della sessione**: quattro volte la prova generale del database ha fermato in 12 secondi
+difetti che la verifica automatica avrebbe mostrato 25 minuti dopo. E due miei errori li ha
+trovati Enzo leggendo: un'affermazione che contraddiceva un numero appena misurato (da lì una
+regola nuova nel `CLAUDE.md`), e un'unità di misura scambiata — «142 persone» che erano
+appartenenze a squadre.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -29,40 +36,34 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-0. **⛔ PRIMA DI TUTTO — `D-83`: la CI è rossa dal 13 agosto e il deploy è fermo.** La migrazione
-   `000305` ha reso il settore obbligatorio nel database, il contratto Zod lo lascia opzionale:
-   sei test cadono e i due host restano indietro. **Diagnosi completa e cura già scritta** nel
-   registro dei debiti — è un commit atomico (contratto + tre file di test), e la prova è la CI
-   verde, non il verde locale. Finché resta, nessun deploy parte.
-1. **Il menu ora ha una corsia nuova**: `python docs/kb/tools/programmi.py` dice da dove si
-   riprende ogni voce lunga. Le tre più mature: **#99 F3** (il resolver sull'albero delle unità —
-   è la radice del ramo: sblocca #142 F2/F3), **#92 F4** (scritture del ciclo di valutazione, ma
-   prima va sciolto il rilievo sul mapping RBAC più largo del disegno), **#50 F2** (il grafo delle
-   competenze, ora che si sa che non va importato ma costruito).
-2. **#187 è nato P1 e non è ancora stato toccato**: l'indice di salute organizzativa calcola su
-   sondaggi fermi a gennaio 2025 mentre la rilevazione vera è aperta. È il difetto più concreto
-   emerso oggi.
-3. **#69 si è sbloccato e dimagrito**: resta la bonifica dei residui `staging.wave1_*` nel nostro
-   database — piccola e senza dipendenze. Buona da aggregare a qualcosa di più grande.
+1. **Tre decisioni di Enzo sbloccano lavoro già pronto** — nessuna è tecnica:
+   *(a)* **si apre il ciclo di valutazione dell'azienda?** Senza, l'autovalutazione resta una
+   funzione senza casi (548 valutazioni tutte chiuse, zero cicli) e la pagina manageriale di
+   `#92 F6` governerebbe un processo fermo. Le API per aprirlo esistono già.
+   *(b)* **le squadre seguono il nuovo organigramma?** 142 appartenenze su 174 (133 persone su
+   159) stanno in una squadra di un'unità diversa dalla propria — era il 12%, è l'83%, ed è
+   l'effetto della riorganizzazione, non una scelta. È l'unico residuo di `#123`.
+   *(c)* `#156` quale superficie aprire per prima all'agente.
+2. **`#99` F4, il residuo dichiarato**: la soglia di catena è innestata su 2 punti di
+   `compensation`, ma i moduli che mascherano sono **18** — vanno guardati uno per uno (molti non
+   espongono importi per persona). Poi F5 · `.programmi/99-*.md`
+3. **La superficie delle lacune formative serve 270 righe senza competenza e senza posizione**:
+   `learning-gaps/repository.ts:109-110` legge due colonne vuote. Il nome sta nel metadata e si
+   può mostrare **senza** inventare l'aggancio al catalogo — cantiere nuovo, contenuto.
 
 ## Open questions
 
-- **#50 ha una strada sola ma un titolo nuovo**: il grafo si costruisce dai dati che abbiamo. Va
-  confermato che la vista `/visualizations` sia la sede giusta, o se merita una pagina propria.
-- **#54 F2 comincia da una scelta di modello** (quali entità del recruiting servono davvero) ora
-  che l'import è escluso: è la prima fase che non ha più una sorgente da cui copiare la forma.
-- **D-60 resta aperto e il rubinetto chiuso non lo tocca**: la password del database è condivisa
-  con lo stack evo. È sicurezza, non ingestione.
+- **`D-69`**: la sua condizione di riapertura si è verificata (capitolo import chiuso). Smontare
+  l'impianto ETL è ~3-4h; nessuna urgenza (720 kB, zero righe, spento in produzione).
+- **`X5c` e `X7a` restano cieche per sempre?** Entrambe non sanabili e ora lo dichiarano con la
+  causa. Se un ciclo di valutazione viene aperto, X7a torna falsificabile da sé.
 
 ## Verification
 
 ```bash
-python docs/kb/tools/session_start.py                        # menu + salute, un giro
-python docs/kb/tools/programmi.py                            # voci multi-sessione: da dove si riprende
-python docs/kb/tools/guardiano.py --sorveglia                # contesto + finestra 5h (regola OR)
-python docs/kb/tools/check_completezza_self.py               # completezza di `self` (C4/I17)
-python docs/kb/tools/check_exposure.py                       # cancello di esposizione
-python docs/kb/tools/check_no_legacy_ingest.py               # il rubinetto brownfield e' chiuso (ADR-0038)
-sh scripts/hooks/hook.sh selftest                            # guardia di sessione
-ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh'   # prova generale
+python docs/kb/tools/session_start.py        # menu + salute, un colpo solo
+python docs/kb/tools/handoff_lint.py         # cancello di coerenza, bloccante
+python docs/kb/tools/db_health.py            # sentinelle: attese 17/17 a zero
+python docs/kb/tools/verifica_incrociata.py  # 36 verifiche; X5c/X7a cieche DICHIARATE
+bash scripts/verifica-deploy.sh              # DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO
 ```

@@ -26,7 +26,7 @@ Le due numerazioni sono già state confuse una volta. In questo file comanda la 
 - [x] **F1 — ADR che sostituisce ADR-0027 e riscrive I16-I20** *(passo 2)* — ADR-0036 Accepted, ADR-0027 Superseded, CLAUDE.md con I16-I20 + I22, ADR_INDEX rigenerato — FATTO 2026-08-10 (S1053) · commit `4b8b3871`
 - [x] **F2 — Modello dati dei domini + bonifica delle «18 relazioni implausibili»** *(passo 3)* — ASSORBITA: le 18 relazioni oggi sono **0** (query su posizioni attive con riporti: 0 righe su universo 39, assorbite da 000244→000263 + #113/#114) e la sentinella permanente **esiste già** come X10c di `verifica_incrociata.py`, falsificabilità provata per iniezione in transazione — VERIFICATO 2026-08-10 (S1053) · nessuna migrazione da scrivere
 - [x] **F3 — Resolver unico dai domini, sull'albero delle UNITÀ** *(passo 4)* — **FATTA 2026-08-14** (commit `63c0c7e8` + merge `ce3d649b` + `383f1eae`). Perimetro sull'albero delle unità · vincolo F1 riscritto su decisione di Enzo (il capo è chi dirige un'unità) · 4 liste di ruoli misurate, 2 assorbite e 2 escluse con motivo · cancello di deriva `test/unit/role-lists-drift.unit.test.ts` con falsificabilità provata. Dettaglio in §F3
-- [~] **F4 — Mascheratura + i tre qualificatori di cella** *(passo 5)* — **i tre qualificatori sono coperti** (2026-08-14); resta l'ESTENSIONE della soglia di catena alle altre superfici. Stato dei tre:
+- [x] **F4 — Mascheratura + i tre qualificatori di cella** *(passo 5)* — **CHIUSA 2026-08-14 (S1060)**. I tre qualificatori erano coperti; l'estensione della soglia di catena — che era il residuo dichiarato — è fatta, e il vaglio dei 18 moduli è **meccanico e chiuso**: dentro `compensation` (già), `users`/dossier (`0877cdbf`), `analytics` (`ae9cbde3`); fuori `me` (I17), `insights` (la banda è input interno, non esce), `predictions` (percentile dentro `details`, già mascherato), `time-off` (rateo ferie), `evidence`/`okrs`/`talent-review` (falsi positivi: `_payload` contiene «pay»), gli altri 9 senza campi retributivi. Le due perdite trovate erano **reali e misurate**, non teoriche: un mandato HR di livello 3 leggeva dal dossier la busta di luglio di un vertice (3.741,23 €), e dallo scatter di analytics il punto unico a 220.000 € — che è anche il massimo assoluto, quindi `overallMaxMidEur` ripeteva la stessa cifra. Stato dei tre qualificatori:
   - ✅ **stato di comunicazione** (valutazioni invisibili finché non consegnate) — implementato in **#92 F5** (`a8fad6f4`): filtro `shared_at OR acknowledged_at` su `/v1/me/performance`, dove una perdita reale è stata riprodotta e chiusa (una persona ne vedeva 4 su 2 comunicate)
   - ✅ **soglia di catena** (paga dei vertici) — `ba779c32`. `chainLevelOf` + `masksTopOfChainPay`; misurato: 5 livelli, 19 vertici, il direttore HR sta al livello 3 e smette di vedere la paga del CEO. **Innestato su 2 punti di `compensation`; i moduli che mascherano sono 18** → estenderlo è il residuo di F4
   - ✅ **isolamento assoluto** (whistleblowing) — `6c4c92a4`. **Reggeva già**, ma senza prova: ora è presidiato su tre livelli — la platea dei permessi derivata dal DB (solo la custodia), il mandato tecnico che fa login e prende **403** dal vivo, e un cancello di deriva che si accende se un file fuori dal modulo nomina quelle tabelle (rilevatore provato in entrambi i versi: distingue una lettura da un commento)
@@ -42,9 +42,15 @@ con #142. F8 per ultima, perché legge tutto ciò che sta sotto.
 
 ## Da dove si riprende
 
-**F4, il residuo** — i tre qualificatori esistono e sono provati; manca l'**estensione della
-soglia di catena** oltre i 2 punti di `compensation`: i moduli che mascherano sono 18, e
-ognuno va guardato per capire se espone importi per persona (molti no). Poi F5.
+**F5 — completezza di `self`** *(passo 6)*, budget ~200k, voce gemella di **#117**: chiuderla
+chiude anche quello. F4 è chiusa (S1060) e non va riaperta.
+
+Una cosa da sapere prima di F5, imparata in S1060 e valida per ogni fase che segue: la regola
+implementata in `lib/scope/*` **non è la regola applicata**. F4 aveva la funzione giusta, provata
+da 7 test verdi, e due superfici su tre non la chiamavano. Il vaglio delle superfici va fatto
+**meccanicamente** (grep sui campi, non sui nomi dei moduli) e la prova va scritta **contro la
+porta HTTP**, non contro la funzione: `evidence`, `okrs` e `talent-review` sembravano toccare
+dati di paga solo perché `_payload` contiene «pay».
 
 *(storia: F3 è chiusa e su `main`; il branch
 `wip/99-f3-resolver-unita` è stato mergiato (`ce3d649b`) e non serve più.)*

@@ -67,17 +67,33 @@ Quattro tipi di analisi: `individual_role` 72 · `team_benchmark` 68 · `individ
 
 | id | cosa | chi | cosa significa fatto | stato |
 |---|---|---|---|---|
-| A1 | Vaglio meccanico dei 18 moduli: quali espongono davvero un importo per persona | io | lista chiusa, con la ragione di esclusione scritta per ognuno degli esclusi | DA FARE |
-| A2 | Riprodurre la perdita sul dossier (`users`) con una prova rossa | io | un test che fallisce mostrando la paga di un vertice a un attore di livello inferiore | DA FARE |
-| A3 | Innestare la soglia di catena sulle superfici trovate in A1 | io | prova A2 verde, e nessuna regressione sulle superfici già coperte | DA FARE |
-| A4 | Aggiornare `.programmi/99-*.md` — F4 chiusa o residuo ri-dichiarato | io | il file dice lo stato reale, non quello sperato | DA FARE |
-| B1 | La superficie delle lacune mostra la competenza dal metadata | io | `skill_name` non più `null` sulle 270 righe, misurato dall'API viva | DA FARE |
-| B2 | Prova live + `check_no_legacy_ingest.py` verde | io | output reale allegato, cancello a 0 | DA FARE |
+| A1 | Vaglio meccanico dei 18 moduli: quali espongono davvero un importo per persona | io | lista chiusa, con la ragione di esclusione scritta per ognuno degli esclusi | **FATTO** — dentro 3 (`compensation` già, `users`, `analytics`), fuori tutti gli altri **con ragione**; `evidence`/`okrs`/`talent-review` erano falsi positivi (`_payload` contiene «pay») |
+| A2 | Riprodurre la perdita sul dossier (`users`) con una prova rossa | io | un test che fallisce mostrando la paga di un vertice a un attore di livello inferiore | **FATTO** — `AssertionError: busta "2026-07": l'importo lordo di un vertice è uscito: expected 3741.23 to be undefined` |
+| A3 | Innestare la soglia di catena sulle superfici trovate in A1 | io | prova A2 verde, e nessuna regressione sulle superfici già coperte | **FATTO** — `0877cdbf` (dossier, 3/3 + 36/36 vicini) e `ae9cbde3` (analytics, 2/2 + 34/34). La prova di analytics è nata verde → **sabotata e vista rossa** sul numero giusto (`expected 220000 to be less than 220000`), poi ripristinata |
+| A4 | Aggiornare `.programmi/99-*.md` — F4 chiusa o residuo ri-dichiarato | io | il file dice lo stato reale, non quello sperato | **FATTO** — F4 **chiusa**, si riprende da F5 |
+| B1 | La superficie delle lacune mostra la competenza dal metadata | io | la competenza non è più vuota sulle 270 righe, misurato dall'API viva | **FATTO** — `e247ad72` (API) + `d3f497da` (le due schermate, area personale compresa). 955 voci su 955 con un nome, 10 competenze distinte, 270 righe su 270 |
+| B2 | Prova live + `check_no_legacy_ingest.py` verde | io | output reale allegato, cancello a 0 | **FATTO** — `OK — nessun artefatto nuovo prende righe dal legacy`, exit 0. Due chiamate HTTP con login di persone reali (lista amministrativa + area personale), 6/6 |
+
+## Rettifica di due misure mie (non scoperte altrui: errori miei, corretti misurando di nuovo)
+
+1. La misura di apertura di B diceva «**270 su 270** portano i nomi delle competenze»: contava
+   gli **array non vuoti**, non le voci con un nome. Conclusione giusta, ragione sbagliata.
+2. La verifica successiva diceva «**2 nomi distinti** su 955 voci, 823 senza nome»: cercava
+   solo la chiave `skill` e non vedeva l'**intero secondo dialetto** (`skill_name`, con anche
+   `current_level`/`target_level`). Il numero vero è **10 nomi distinti, 955 voci su 955 con
+   un nome**. Se mi fossi fermato lì avrei costruito su un dato dimezzato — o rinunciato.
 
 ## Registro delle scoperte (fuori da questo ciclo — R24 §5)
 
-_(vuoto per ora)_
+| cosa | quando presentarlo |
+|---|---|
+| La prova generale del database (`ci-rehearsal.sh`) non esegue la suite Vitest: una guardia che vive in un test le sfugge per costruzione. È ciò che ha lasciato passare la `000312` in S1059 e ha tenuto la CI rossa per un giorno. | una volta sola, a fine ciclo |
+| `positionTitle` resta vuoto sulle 270 lacune: `learning_gap_position_id` è NULL su tutte. A differenza della competenza, **il metadata non porta un titolo di posizione**, quindi non c'è niente da mostrare — si potrebbe derivare dalla posizione corrente della persona, ma sarebbe un'inferenza, non il dato. Non l'ho fatto. | una volta sola, a fine ciclo |
 
 ## Chiusura
 
-_(da scrivere leggendo la tabella, quando ogni voce ha un esito misurato)_
+**CICLO CHIUSO — 6/6 voci fatte, non resta niente.**
+
+`#99` **F4 è chiusa** (era il residuo dichiarato) e le lacune formative dicono di quale
+competenza parlano su entrambe le schermate. Quattro commit: `0877cdbf` · `ae9cbde3` ·
+`e247ad72` · `d3f497da`. Confine rispettato: **F5 non è stata aperta** e non era promessa.

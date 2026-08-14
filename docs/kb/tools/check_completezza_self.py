@@ -269,7 +269,14 @@ DA_COSTRUIRE: dict[str, str] = {
         "genere, ed e' viva (la legge `insights` per calcolare un punteggio sulla "
         "persona). Superficie da costruire.",
 
-    # --- #99 F5 (S1061, 2026-08-14): le quattro che devono diventare raggiungibili -----
+    # --- #99 F5: COSTRUITE il 2026-08-14 (S1061) — restano qui solo come cronaca -------
+    #
+    # Le quattro voci sotto sono state chiuse nella sessione stessa in cui erano state
+    # aperte: /v1/me/mentorships, /v1/me/processes, /v1/me/skill-gap-scores e il campo
+    # `assignedTarget` di /v1/me/kpis. Lo strumento le classifica ora RAGGIUNGIBILI da se',
+    # leggendo il codice — non da questo elenco, che infatti non le conta piu'.
+    # Presidiate da `test/me-self-completeness-f5.integration.test.ts` (7/7, falsificabilita'
+    # provata su due sabotaggi distinti).
     "sys_kpi_targets":
         "#99 F5 — VISIBILE: sono gli obiettivi di KPI assegnati alla persona. 301 righe "
         "su 158 persone, l'ultima del 2026-07-23: viva e recente. Oggi /v1/me/kpis mostra "

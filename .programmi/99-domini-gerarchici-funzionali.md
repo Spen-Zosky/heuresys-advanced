@@ -30,7 +30,8 @@ Le due numerazioni sono già state confuse una volta. In questo file comanda la 
   - ✅ **stato di comunicazione** (valutazioni invisibili finché non consegnate) — implementato in **#92 F5** (`a8fad6f4`): filtro `shared_at OR acknowledged_at` su `/v1/me/performance`, dove una perdita reale è stata riprodotta e chiusa (una persona ne vedeva 4 su 2 comunicate)
   - ✅ **soglia di catena** (paga dei vertici) — `ba779c32`. `chainLevelOf` + `masksTopOfChainPay`; misurato: 5 livelli, 19 vertici, il direttore HR sta al livello 3 e smette di vedere la paga del CEO. **Innestato su 2 punti di `compensation`; i moduli che mascherano sono 18** → estenderlo è il residuo di F4
   - ✅ **isolamento assoluto** (whistleblowing) — `6c4c92a4`. **Reggeva già**, ma senza prova: ora è presidiato su tre livelli — la platea dei permessi derivata dal DB (solo la custodia), il mandato tecnico che fa login e prende **403** dal vivo, e un cancello di deriva che si accende se un file fuori dal modulo nomina quelle tabelle (rilevatore provato in entrambi i versi: distingue una lettura da un commento)
-- [ ] **F5 — Completezza di `self`: colmare o motivare le tabelle scoperte** *(passo 6)* — I17: ogni tabella che referenzia una persona è raggiungibile self-scope **o la sua esclusione è dichiarata una per una, motivata**. Cancello meccanico = **#117**, che è la voce gemella: chiudere F5 chiude #117 · budget ~200k
+- [x] **F5 — Completezza di `self`: colmare o motivare le tabelle scoperte** *(passo 6)* — **FATTA 2026-08-15 (S1061)**. Esito letto dal cancello, non dichiarato: **109 tabelle = 78 raggiungibili + 3 tramite il padre + 28 escluse con motivo, SCOPERTE 0** (erano 22). Diciotto escluse una per una; **quattro costruite nella stessa sessione** — `/v1/me/mentorships`, `/v1/me/processes`, `/v1/me/skill-gap-scores` e il campo `assignedTarget` di `/v1/me/kpis`. Zero migrazioni: i permessi riusati sono quelli che il ruolo base `USER` già detiene. Dettaglio in §F5
+  - ⚠ **la contraddizione col register era apparente**: `#117` risultava `DONE` mentre questo file lo dava come «gemello da chiudere con F5». Sciolta misurando — **#117 ha costruito il CANCELLO**, F5 è la **classificazione** che quel cancello elencava come scoperta. Due lavori diversi, e nessuno dei due era sbagliato.
 - [ ] **F6 — I quattro domini nuovi: mentore, delega, approvatore, pari** *(passo 7)* — tabelle + endpoint + test · budget ~250k
 - [ ] **F7 — Dashboard guidate dal DBMS (tabelle dashboard/blocchi derivate da M3)** *(passo 8)* — ⚠ **si sovrappone a #142** (cruscotti per tipologia di utilizzatore): prima di aprirla, decidere se F7 assorbe #142 o viceversa, altrimenti si costruisce due volte · budget ~250k
 - [ ] **F8 — Frontend: sidebar e pagine derivate, i 22 orfani risolti, etichette tradotte** *(passo 9)* — E2E per tipologia · budget ~250k
@@ -42,8 +43,16 @@ con #142. F8 per ultima, perché legge tutto ciò che sta sotto.
 
 ## Da dove si riprende
 
-**F5 — completezza di `self`** *(passo 6)*, budget ~200k, voce gemella di **#117**: chiuderla
-chiude anche quello. F4 è chiusa (S1060) e non va riaperta.
+**F6 — i quattro domini nuovi: mentore, delega, approvatore, pari** *(passo 7)*, budget ~250k.
+F4 (S1060) e F5 (S1061) sono chiuse e non vanno riaperte.
+
+Due cose che F5 lascia a F6, e che le fanno risparmiare una misura:
+- **il dominio «mentore» ha già il suo dato e la sua superficie**: `sys_mentorships` (63
+  rapporti, 22 allievi) è ora letta da `/v1/me/mentorships`, e i due lati sono distinti in
+  risposta (`role`). F6 deve aggiungere il **perimetro**, non la lettura.
+- **misurato: nessuno è mentore e allievo insieme.** Un test scritto su un soggetto solo
+  copre quindi un lato solo — è successo davvero qui, e il sabotaggio del lato mentore non
+  fu colto finché non è stato aggiunto un secondo soggetto.
 
 Una cosa da sapere prima di F5, imparata in S1060 e valida per ogni fase che segue: la regola
 implementata in `lib/scope/*` **non è la regola applicata**. F4 aveva la funzione giusta, provata

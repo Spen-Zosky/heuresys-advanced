@@ -749,11 +749,108 @@ export const MeKpiTargetSchema = z.object({
   latestMeasuredValue: z.string().nullable(),
   latestTargetValue: z.string().nullable(),
   latestRecordedAt: z.iso.datetime().nullable(),
+  /**
+   * #99 F5 — il bersaglio ASSEGNATO alla persona, da `sys.sys_kpi_targets`.
+   *
+   * Fino a S1061 questa rotta diceva alla persona *a che punto è* (l'ultima rilevazione)
+   * e *cosa la posizione richiede*, ma non *dove doveva arrivare*: le 301 righe su 158
+   * persone di `sys_kpi_targets` non erano raggiungibili da nessuna superficie self, e
+   * un obiettivo che non si può leggere non è un obiettivo. `null` quando alla persona
+   * non è stato assegnato alcun bersaglio per quel KPI — «non assegnato» e «zero» non
+   * si confondono.
+   */
+  assignedTarget: z
+    .object({
+      kpiTargetId: z.uuid(),
+      periodStart: z.string(),
+      periodEnd: z.string(),
+      targetValue: z.string().nullable(),
+      minimumValue: z.string().nullable(),
+      stretchValue: z.string().nullable(),
+      unit: z.string().nullable(),
+    })
+    .nullable(),
 });
 export type MeKpiTarget = z.infer<typeof MeKpiTargetSchema>;
 
 export const MeKpisResponseSchema = z.object({
   items: z.array(MeKpiTargetSchema),
+  total: z.number().int().min(0),
+});
+
+/* --- #99 F5 (S1061): le tre superfici che I17 pretendeva e non c'erano ---------------
+ *
+ * Non sono tre pagine nuove per completezza formale: ciascuna copre un dato che descrive
+ * la persona, che il database porta popolato, e che nessuna rotta le faceva leggere.
+ * ------------------------------------------------------------------------------------ */
+
+/**
+ * I rapporti di mentoring REALI, dai due lati.
+ *
+ * Il portale esponeva `sys_mentor_match_scores` (/me/mentor-matches), cioè i
+ * **suggerimenti** di abbinamento: la persona vedeva chi *potrebbe* avere come mentore e
+ * non chi *ha davvero*. `role` dice da che parte sta in quel rapporto.
+ */
+export const MeMentorshipSchema = z.object({
+  mentorshipId: z.uuid(),
+  role: z.enum(["MENTOR", "MENTEE"]),
+  /** L'altra persona del rapporto. Il nome sì, la graduatoria no (Enzo, 2026-08-04). */
+  counterpartUserId: z.uuid().nullable(),
+  counterpartName: z.string().nullable(),
+  status: z.string(),
+  focusAreas: z.array(z.string()),
+  goals: z.array(z.string()),
+  meetingFrequency: z.string().nullable(),
+  startDate: z.string().nullable(),
+  endDate: z.string().nullable(),
+});
+export type MeMentorship = z.infer<typeof MeMentorshipSchema>;
+export const MeMentorshipsResponseSchema = z.object({
+  items: z.array(MeMentorshipSchema),
+  total: z.number().int().min(0),
+});
+
+/**
+ * I processi aziendali a cui la persona partecipa.
+ *
+ * 845 righe che **nessun modulo API leggeva** — misurato in S1061, zero riscontri di
+ * `sys_process_participants` in `apps/api/src/modules`. Non è un dato sensibile: è il
+ * proprio lavoro. Cade anche sotto il cancello di esposizione (#79).
+ */
+export const MeProcessParticipationSchema = z.object({
+  participationId: z.uuid(),
+  organizationUnitProcessId: z.uuid(),
+  processName: z.string().nullable(),
+  organizationUnitName: z.string().nullable(),
+  role: z.string(),
+  isActive: z.boolean(),
+});
+export type MeProcessParticipation = z.infer<typeof MeProcessParticipationSchema>;
+export const MeProcessParticipationsResponseSchema = z.object({
+  items: z.array(MeProcessParticipationSchema),
+  total: z.number().int().min(0),
+});
+
+/**
+ * Il punteggio di divario di competenze calcolato sulla persona.
+ *
+ * Stessa natura di `sys_model_predictions`, che Enzo ha dichiarato visibile
+ * all'interessato il 2026-08-04, e stessa prescrizione: **si espongono anche il modello e
+ * la data**, non il punteggio nudo — un numero senza sapere chi e quando l'ha calcolato
+ * non è una spiegazione, è un verdetto.
+ */
+export const MeSkillGapScoreSchema = z.object({
+  skillGapScoreId: z.uuid(),
+  positionId: z.uuid().nullable(),
+  positionTitle: z.string().nullable(),
+  score: z.string().nullable(),
+  segment: z.string().nullable(),
+  modelVersion: z.string().nullable(),
+  computedAt: z.iso.datetime().nullable(),
+});
+export type MeSkillGapScore = z.infer<typeof MeSkillGapScoreSchema>;
+export const MeSkillGapScoresResponseSchema = z.object({
+  items: z.array(MeSkillGapScoreSchema),
   total: z.number().int().min(0),
 });
 

@@ -463,6 +463,21 @@ export const meService = {
     return repo.listMyKpis(pool, actor.userId);
   },
 
+  /* --- #99 F5 (S1061) — tre superfici che I17 pretendeva e non c'erano.
+   *     Self-scope per costruzione: filtrano su actor.userId e sul suo tenant. */
+
+  async listMentorships(actor: SelfActor) {
+    return repo.listMyMentorships(pool, actor.userId, requireTenant(actor));
+  },
+
+  async listProcessParticipations(actor: SelfActor) {
+    return repo.listMyProcessParticipations(pool, actor.userId, requireTenant(actor));
+  },
+
+  async listSkillGapScores(actor: SelfActor) {
+    return repo.listMySkillGapScores(pool, actor.userId, requireTenant(actor));
+  },
+
   /** #59 F/F5 (ADR-0031) — the caller's OWN computed intelligence, evidence
    *  included. Self-scope by construction (filters on actor.userId only). */
   async getDevelopment(actor: SelfActor) {

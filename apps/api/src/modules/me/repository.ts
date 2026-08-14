@@ -12,6 +12,7 @@ import type {
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
   MeKpiTarget, MeCertification, CreateMeCertificationBody, MeDocument,
+  MeMentorship, MeProcessParticipation, MeSkillGapScore,
   UserPreference, UpdateUserPreferenceBody,
 } from "@heuresys/shared";
 import { ME_PREFERENCE_DEFAULTS } from "@heuresys/shared";
@@ -1447,6 +1448,14 @@ export async function listMyKpis(
     latest_measured_value: string | null;
     latest_target_value: string | null;
     latest_recorded_at: Date | null;
+    // #99 F5 — il bersaglio assegnato alla persona, che questa rotta non mostrava.
+    kpi_target_id: string | null;
+    kpi_target_period_start: Date | null;
+    kpi_target_period_end: Date | null;
+    kpi_target_target_value: string | null;
+    kpi_target_minimum_value: string | null;
+    kpi_target_stretch_value: string | null;
+    kpi_target_unit: string | null;
   }>(
     `SELECT
        pkr.position_kpi_requirement_id,
@@ -1460,7 +1469,14 @@ export async function listMyKpis(
        pkr.weight::text,
        ev.user_kpi_evidence_measured_value::text AS latest_measured_value,
        ev.user_kpi_evidence_target_value::text   AS latest_target_value,
-       ev.user_kpi_evidence_recorded_at          AS latest_recorded_at
+       ev.user_kpi_evidence_recorded_at          AS latest_recorded_at,
+       tg.kpi_target_id,
+       tg.kpi_target_period_start,
+       tg.kpi_target_period_end,
+       tg.kpi_target_target_value::text   AS kpi_target_target_value,
+       tg.kpi_target_minimum_value::text  AS kpi_target_minimum_value,
+       tg.kpi_target_stretch_value::text  AS kpi_target_stretch_value,
+       tg.kpi_target_unit
      FROM sys.sys_user_position_assignments a
      JOIN sys.sys_position_kpi_requirements pkr
        ON pkr.position_id = a.user_position_assignment_position_id
@@ -1473,6 +1489,15 @@ export async function listMyKpis(
         ORDER BY e.user_kpi_evidence_recorded_at DESC
         LIMIT 1
      ) ev ON true
+     -- #99 F5: il bersaglio ASSEGNATO alla persona per quel KPI. Si prende il periodo
+     -- piu' recente, non tutti: la rotta risponde «dove devo arrivare adesso».
+     LEFT JOIN LATERAL (
+       SELECT * FROM sys.sys_kpi_targets t
+        WHERE t.kpi_target_user_id = $1
+          AND t.kpi_target_kpi_id  = pkr.kpi_definition_id
+        ORDER BY t.kpi_target_period_end DESC NULLS LAST
+        LIMIT 1
+     ) tg ON true
      WHERE a.user_position_assignment_user_id = $1
        AND a.user_position_assignment_status  = 'ACTIVE'
        AND a.user_position_assignment_kind    = 'PRIMARY'
@@ -1492,6 +1517,166 @@ export async function listMyKpis(
     latestMeasuredValue: row.latest_measured_value,
     latestTargetValue: row.latest_target_value,
     latestRecordedAt: row.latest_recorded_at ? row.latest_recorded_at.toISOString() : null,
+    assignedTarget: row.kpi_target_id
+      ? {
+          kpiTargetId: row.kpi_target_id,
+          periodStart: toDateOnly(row.kpi_target_period_start) ?? "",
+          periodEnd: toDateOnly(row.kpi_target_period_end) ?? "",
+          targetValue: row.kpi_target_target_value,
+          minimumValue: row.kpi_target_minimum_value,
+          stretchValue: row.kpi_target_stretch_value,
+          unit: row.kpi_target_unit,
+        }
+      : null,
+  }));
+  return { items, total: items.length };
+}
+
+/* --- #99 F5 (S1061): le tre superfici che I17 pretendeva e non c'erano ---------------
+ *
+ * Ciascuna copre una tabella che il censimento di `check_completezza_self.py` dava
+ * SCOPERTA: dato popolato che descrive la persona e che nessuna rotta le faceva leggere.
+ * ------------------------------------------------------------------------------------ */
+
+/** I rapporti di mentoring reali, dai DUE lati: si è mentore di qualcuno e allievo di
+ *  qualcun altro, e la stessa persona può essere entrambe le cose.
+ *
+ *  Fino a S1061 il portale mostrava solo `sys_mentor_match_scores` — i **suggerimenti**.
+ *  Vedere chi si potrebbe avere come mentore senza vedere chi si ha davvero è la forma
+ *  peggiore di mezza verità: sembra che il dato ci sia. */
+export async function listMyMentorships(
+  q: DbConnector,
+  userId: string,
+  tenantId: string,
+): Promise<{ items: MeMentorship[]; total: number }> {
+  const res = await q.query<{
+    mentorship_id: string;
+    role: string;
+    counterpart_user_id: string | null;
+    counterpart_name: string | null;
+    mentorship_status: string;
+    mentorship_focus_areas: string[] | null;
+    mentorship_goals: string[] | null;
+    mentorship_meeting_frequency: string | null;
+    mentorship_start_date: Date | null;
+    mentorship_end_date: Date | null;
+  }>(
+    `SELECT m.mentorship_id,
+            CASE WHEN m.mentorship_mentor_user_id = $1 THEN 'MENTOR' ELSE 'MENTEE' END AS role,
+            CASE WHEN m.mentorship_mentor_user_id = $1
+                 THEN m.mentorship_mentee_user_id ELSE m.mentorship_mentor_user_id END AS counterpart_user_id,
+            nullif(trim(coalesce(u.user_first_name, '') || ' ' || coalesce(u.user_last_name, '')), '')
+              AS counterpart_name,
+            m.mentorship_status, m.mentorship_focus_areas, m.mentorship_goals,
+            m.mentorship_meeting_frequency, m.mentorship_start_date, m.mentorship_end_date
+       FROM sys.sys_mentorships m
+       LEFT JOIN sys.sys_users u
+         ON u.user_id = CASE WHEN m.mentorship_mentor_user_id = $1
+                             THEN m.mentorship_mentee_user_id ELSE m.mentorship_mentor_user_id END
+      WHERE (m.mentorship_mentor_user_id = $1 OR m.mentorship_mentee_user_id = $1)
+        AND m.mentorship_tenant_id = $2
+      ORDER BY m.mentorship_start_date DESC NULLS LAST`,
+    [userId, tenantId],
+  );
+  const items: MeMentorship[] = res.rows.map((r) => ({
+    mentorshipId: r.mentorship_id,
+    role: r.role === "MENTOR" ? "MENTOR" : "MENTEE",
+    counterpartUserId: r.counterpart_user_id,
+    counterpartName: r.counterpart_name,
+    status: r.mentorship_status,
+    focusAreas: r.mentorship_focus_areas ?? [],
+    goals: r.mentorship_goals ?? [],
+    meetingFrequency: r.mentorship_meeting_frequency,
+    startDate: toDateOnly(r.mentorship_start_date),
+    endDate: toDateOnly(r.mentorship_end_date),
+  }));
+  return { items, total: items.length };
+}
+
+/** I processi aziendali a cui partecipo, col ruolo che vi ho.
+ *
+ *  845 righe che nessun modulo API leggeva — non «non esposte al portale personale»:
+ *  invisibili ovunque, il caso che il cancello di esposizione (#79) esiste per trovare. */
+export async function listMyProcessParticipations(
+  q: DbConnector,
+  userId: string,
+  tenantId: string,
+): Promise<{ items: MeProcessParticipation[]; total: number }> {
+  const res = await q.query<{
+    process_participant_id: string;
+    process_participant_org_unit_process_id: string;
+    process_name: string | null;
+    organization_unit_name: string | null;
+    process_participant_role: string;
+    process_participant_is_active: boolean;
+  }>(
+    `SELECT pp.process_participant_id,
+            pp.process_participant_org_unit_process_id,
+            bpr.blueprint_process_name  AS process_name,
+            ou.organization_unit_name,
+            pp.process_participant_role,
+            pp.process_participant_is_active
+       FROM sys.sys_process_participants pp
+       LEFT JOIN sys.sys_organization_unit_processes oup
+              ON oup.organization_unit_process_id = pp.process_participant_org_unit_process_id
+       LEFT JOIN sys.sys_blueprint_process_registry bpr
+              ON bpr.blueprint_process_id = oup.org_unit_process_blueprint_process_id
+       LEFT JOIN sys.sys_organization_units ou
+              ON ou.organization_unit_id = oup.org_unit_process_org_unit_id
+      WHERE pp.process_participant_user_id = $1
+        AND pp.process_participant_tenant_id = $2
+      ORDER BY pp.process_participant_is_active DESC, bpr.blueprint_process_name NULLS LAST`,
+    [userId, tenantId],
+  );
+  const items: MeProcessParticipation[] = res.rows.map((r) => ({
+    participationId: r.process_participant_id,
+    organizationUnitProcessId: r.process_participant_org_unit_process_id,
+    processName: r.process_name,
+    organizationUnitName: r.organization_unit_name,
+    role: r.process_participant_role,
+    isActive: r.process_participant_is_active,
+  }));
+  return { items, total: items.length };
+}
+
+/** Il punteggio di divario di competenze calcolato su di me.
+ *
+ *  Si espongono anche modello e data, non il punteggio nudo: è la prescrizione che Enzo
+ *  ha dato il 2026-08-04 per le predizioni, e questa è la stessa specie di dato. */
+export async function listMySkillGapScores(
+  q: DbConnector,
+  userId: string,
+  tenantId: string,
+): Promise<{ items: MeSkillGapScore[]; total: number }> {
+  const res = await q.query<{
+    skill_gap_score_id: string;
+    skill_gap_score_position_id: string | null;
+    position_title: string | null;
+    skill_gap_score_value: string | null;
+    skill_gap_score_segment: string | null;
+    skill_gap_score_model_version: string | null;
+    skill_gap_score_computed_at: Date | null;
+  }>(
+    `SELECT s.skill_gap_score_id, s.skill_gap_score_position_id,
+            p.position_title,
+            s.skill_gap_score_value::text AS skill_gap_score_value,
+            s.skill_gap_score_segment, s.skill_gap_score_model_version,
+            s.skill_gap_score_computed_at
+       FROM sys.sys_skill_gap_scores s
+       LEFT JOIN sys.sys_positions p ON p.position_id = s.skill_gap_score_position_id
+      WHERE s.skill_gap_score_user_id = $1
+        AND s.skill_gap_score_tenant_id = $2
+      ORDER BY s.skill_gap_score_computed_at DESC NULLS LAST`,
+    [userId, tenantId],
+  );
+  const items: MeSkillGapScore[] = res.rows.map((r) => ({
+    skillGapScoreId: r.skill_gap_score_id,
+    positionId: r.skill_gap_score_position_id,
+    positionTitle: r.position_title,
+    score: r.skill_gap_score_value,
+    segment: r.skill_gap_score_segment,
+    modelVersion: r.skill_gap_score_model_version,
+    computedAt: r.skill_gap_score_computed_at ? r.skill_gap_score_computed_at.toISOString() : null,
   }));
   return { items, total: items.length };
 }

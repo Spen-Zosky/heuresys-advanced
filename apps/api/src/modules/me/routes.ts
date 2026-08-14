@@ -31,6 +31,9 @@ import {
   NotificationPreferencesResponseSchema, UpdateNotificationPreferenceBodySchema,
   MeDevelopmentResponseSchema,
   MeKpisResponseSchema,
+  MeMentorshipsResponseSchema,
+  MeProcessParticipationsResponseSchema,
+  MeSkillGapScoresResponseSchema,
   MeCertificationsResponseSchema, MeCertificationSchema, CreateMeCertificationBodySchema,
   MePredictionsResponseSchema, MeMentorMatchesResponseSchema, MePulseChecksResponseSchema,
   MeDocumentsResponseSchema,
@@ -410,6 +413,29 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("insight:read:self")],
     schema: { response: { 200: MePulseChecksResponseSchema } },
   }, async (req) => meService.listPulseChecks(selfActor(req)));
+
+  // #99 F5 (S1061) — le tre superfici che I17 pretendeva e non c'erano. Nessun permesso
+  // nuovo: si riusano quelli che il ruolo base USER già detiene, come per /mentor-matches.
+
+  // I rapporti di mentoring REALI. Gemella di /mentor-matches, che mostra i suggerimenti:
+  // vedere chi si potrebbe avere come mentore senza vedere chi si ha è una mezza verità.
+  app.get("/mentorships", {
+    preHandler: [requirePermission("insight:read:self")],
+    schema: { response: { 200: MeMentorshipsResponseSchema } },
+  }, async (req) => meService.listMentorships(selfActor(req)));
+
+  // I processi a cui partecipo: 845 righe che nessun modulo API leggeva (#79).
+  app.get("/processes", {
+    preHandler: [requirePermission("team:read:self")],
+    schema: { response: { 200: MeProcessParticipationsResponseSchema } },
+  }, async (req) => meService.listProcessParticipations(selfActor(req)));
+
+  // Il punteggio di divario calcolato su di me, con modello e data: la prescrizione che
+  // Enzo ha dato per le predizioni il 2026-08-04, applicata a un dato della stessa specie.
+  app.get("/skill-gap-scores", {
+    preHandler: [requirePermission("gap_analysis:read:self")],
+    schema: { response: { 200: MeSkillGapScoresResponseSchema } },
+  }, async (req) => meService.listSkillGapScores(selfActor(req)));
 
   app.get("/certifications", {
     preHandler: [requirePermission("certification:read:self")],

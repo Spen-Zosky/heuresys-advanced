@@ -8,9 +8,36 @@ At **`v1.0.0` GA baseline** (S957, 2026-06-02). MVP-0→4 and the RBAC/UIX/Persp
 
 **No running count is hardcoded here** (modules / migrations / endpoints / tests / RBAC mappings) — they live in `docs/kb/SOT_STATE.md`, re-derived every session. They drifted before (D-01).
 
-> **La regola è più larga dei conteggi del progetto, e vale in OGNI file** (Enzo, 2026-08-14). **Una misura che varia non si cristallizza da nessuna parte: si misura quando serve, e accanto si scrive il comando che la produce.** Vale per l'occupazione disco di una macchina, la dimensione di un database, una percentuale d'uso, il numero di righe di una tabella — non solo per i conteggi elencati sopra, e non solo in `SOT_STATE`. Un numero simile scritto in un ADR, in un blocco del register o in un piano è **vero il giorno in cui lo scrivi e falso poco dopo**, e chi lo rilegge non ha modo di saperlo. Caso reale che ha prodotto questa regola: «disco VM all'86%» finì in un dossier di inizio agosto e fu ripreso come stato di fatto; misurato il 2026-08-14 era tutt'altro, e nel correggerlo stavo per cristallizzare il numero nuovo esattamente allo stesso modo. **Unica eccezione**: una misura **datata e dichiarata come tale** dentro un'istruttoria o un messaggio di commit — lì è *evidenza storica*, non un'affermazione sul presente, e il contesto lo dice.
+---
 
-**Data provenance** (ADR-0023): `sys.*` business tables are populated by a deterministic brownfield ingestion whose **authoritative data source** is the legacy `heuresys-evo` Docker DB (`heuresys_evo_platform_db` / db `heuresys_platform`). The data is **production data, treated as real**; the advanced `sys.*` schema is the **structural authority** (the legacy adapts to it).
+## ⭐ IL PUNTO FISSO — sopraordinato, e non è negoziabile
+
+> **Un dato che per sua natura può variare si MISURA prima di prenderlo per buono.**
+> *(Enzo, 2026-08-14 — enunciato una volta sola perché era già scritto sei volte in questo stesso file, ognuna per il suo caso, e nessuna che lo dicesse in generale. È per questo che è stato violato.)*
+
+Due corollari, che sono la stessa cosa vista dai due lati:
+
+1. **Non si assume.** Nessuna affermazione su uno stato che cambia — quanti, quanto grande, quanto pieno, se esiste ancora, se è ancora vero — vale finché non è stata misurata **in questa sessione**. Vale anche per le affermazioni **positive**, non solo per quelle negative: «la tabella è popolata», «il documento è aggiornato», «quel campo esiste» sono ipotesi esattamente come i loro contrari.
+2. **Non si cristallizza.** Una misura variabile non si scrive come fatto in nessun documento — ADR, register, piano, README. Si scrive **il comando che la produce**. Un numero del genere è vero il giorno in cui lo scrivi e falso poco dopo, e chi lo rilegge non ha modo di accorgersene.
+
+**Unica eccezione**: una misura **datata e dichiarata tale** dentro un'istruttoria o un messaggio di commit. Lì è *evidenza di quel momento*, non un'affermazione sul presente, e il contesto lo dice da sé.
+
+**Le regole che seguono in questo file non sono sei regole diverse: sono questo principio applicato a sei materie.** Se una situazione non ricade in nessuna di esse, ricade comunque **qui**.
+
+| Applicazione | Dove | Materia |
+|---|---|---|
+| I conteggi del progetto non stanno qui, si ri-derivano | riga sopra + `SOT_STATE.md` | moduli, migrazioni, endpoint, test, RBAC |
+| Il guardiano: **misurati, mai stimati**; ciò che non si misura è **`NON MISURABILE`** | §Canonical commands · §Working conventions | contesto e finestra 5h |
+| **Misura prima, sul vivo** — il piano è un'ipotesi, il sistema che gira è la verità | §Metodo di bonifica ①  | dati e codice |
+| **Le prove devono poter fallire** | §Metodo di bonifica ⑤ | strumenti e test |
+| Ogni consegna del lab è **non verificata** finché non la misuri | `#149` nel register | documenti in arrivo |
+| **Test-before-claim**, e «quando non sai, dillo e verifica» | `~/.claude/CLAUDE.md` | ogni asserzione |
+
+**Caso che ha prodotto l'enunciato**: «disco VM all'86%» finì in un dossier di inizio agosto e fu poi ripreso come stato di fatto. Misurato il 2026-08-14 era tutt'altro — e nel correggerlo stavo per cristallizzare il numero nuovo esattamente allo stesso modo, dentro il register, come argomento di una decisione.
+
+---
+
+**Data provenance** (**ADR-0038**, che supersede ADR-0023): le tabelle business di `sys.*` **sono state** popolate da un'ingestione brownfield deterministica a partire dal DB legacy `heuresys-evo`. **Quella fase è chiusa**: dal 2026-08-14 il database è **autosufficiente** e nessun dato del brownfield viene più rimesso in circolo — ciò che manca si costruisce o si deriva da `sys.*` (cancello: `python docs/kb/tools/check_no_legacy_ingest.py`). Il legacy resta consultabile per i **concetti**, mai per le righe. Invariati: i dati sono **produzione reale**; `sys.*` è l'**autorità strutturale**.
 
 > **OUTPUT RULE (S1011, Enzo — vincolante)**: the "no-PII / synthetic / ADR-0023 / safe-to-publish" qualifier is **RETIRED as a descriptor**. Never append it as reassurance in messages, commits, docs, ADRs or questions; describe a datum for what it **is** (a payslip, an IBAN, an address), never for what it "isn't". The architectural facts stand (no anonymization layer, treat-as-real) — what's banned is the reflexive label.
 

@@ -20,7 +20,7 @@ Ognuna e' meccanica: si legge dal codice, non si giudica a occhio.
                    superficie a isolamento assoluto (whistleblowing, ADR-0036 §5: li'
                    non arriva nemmeno il mandato tecnico).
 """
-import os, re, json
+import os, re, sys, io, json
 
 ROOT = os.path.join("apps", "web", "src", "app")
 
@@ -124,5 +124,15 @@ print("-" * 78)
 print("  NON IDONEE (col motivo, una per una):")
 for r, m in non_idonee:
     print("    %-52s %s" % (r, m))
-json.dump({"idonee": idonee, "non_idonee": non_idonee},
-          open("idoneita.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+# Il JSON si scrive SOLO se richiesto, e dove lo si chiede.
+#
+# La prima stesura lo scriveva sempre in `idoneita.json` nella cartella corrente: eseguito
+# dalla radice del repo, lasciava un file spurio accanto al `package.json` — cioe' uno
+# strumento di misura che sporca cio' che misura. Trovato committando, non da un rilievo.
+if "--json" in sys.argv:
+    i = sys.argv.index("--json")
+    if i + 1 >= len(sys.argv):
+        raise SystemExit("--json vuole un percorso")
+    with io.open(sys.argv[i + 1], "w", encoding="utf-8", newline="\n") as fh:
+        json.dump({"idonee": idonee, "non_idonee": non_idonee}, fh, ensure_ascii=False, indent=1)
+    print("\n  scritto: %s" % sys.argv[i + 1])

@@ -140,6 +140,16 @@ custodia() {
   rawlog="$(mktemp)"
 
   if [[ "$REPAIR" -eq 1 ]]; then
+    # #189 — le funzioni staging.storia36_check_* PRIMA dei seed, non dopo.
+    # Dodici seed su quattordici le invocano come post-condizione, ma a crearle e' la
+    # batteria, che gira dopo: su un database dove una di quelle funzioni non c'e'
+    # ancora la riparazione si spezza a meta' e non e' atomica (misurato in S1062 su
+    # 06_reorg.sql -> storia36_check_c6a). Caricarle prima costa una frazione di secondo
+    # ed e' idempotente: sono tutte CREATE OR REPLACE.
+    log "--repair-missing: carico le funzioni di verifica PRIMA dei seed (#189)"
+    "${PSQL[@]}" "${WFLAG[@]}" -v solo_definizioni=1 -q \
+      -f "$SCRIPT_DIR/verify-storia36.sql" >/dev/null \
+      || { err "impossibile creare le funzioni di verifica: la riparazione si fermerebbe a meta'"; exit 1; }
     log "--repair-missing: ri-eseguo i seed (idempotenti) prima della verifica"
     run_seeds
   fi

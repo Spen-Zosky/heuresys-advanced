@@ -24,6 +24,15 @@
 \else
 \set selftest 0
 \endif
+-- solo_definizioni=1 → crea le funzioni staging.storia36_check_* e NON esegue il runner.
+-- Serve a `storia36.sh custodia --repair-missing` (#189): dodici seed su quattordici
+-- invocano quelle funzioni come post-condizione, ma le crea solo questo file, che gira
+-- DOPO i seed. Su un database dove una funzione non c'e' ancora, la catena di riparazione
+-- si spezza a meta' — misurato in S1062 su `06_reorg.sql` / `storia36_check_c6a`.
+\if :{?solo_definizioni}
+\else
+\set solo_definizioni 0
+\endif
 \if :{?window_end}
 \else
 \set window_end DEFAULT
@@ -7131,8 +7140,12 @@ END $$;
 
 -- ============================================================================
 -- RUNNER — esegue TUTTI i check, stampa l'esito di ognuno, fallisce alla fine
--- se almeno uno è rosso.
+-- se almeno uno è rosso.  Saltato con -v solo_definizioni=1 (#189): in quel modo
+-- questo file serve solo a mettere in piedi le funzioni che i seed invocano.
 -- ============================================================================
+\if :solo_definizioni
+\echo 'storia36 verify: solo definizioni — funzioni create, runner saltato'
+\else
 DO $$
 DECLARE
   v_start  date := current_setting('storia36.window_start')::date;
@@ -7668,3 +7681,4 @@ BEGIN
   END IF;
   RAISE NOTICE 'storia36 verify: batteria globale tutta VERDE';
 END $$;
+\endif

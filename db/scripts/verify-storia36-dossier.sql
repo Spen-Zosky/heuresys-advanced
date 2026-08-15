@@ -93,7 +93,11 @@ BEGIN
     ('sys_schema_migrations'),                 -- registro migrazioni (infra)
     ('sys_skill_proficiency_levels'),          -- catalogo livelli proficiency: agganciato via varchar+CHECK (RD-08), non FK
     ('sys_translatable_field'),                -- registro campi traducibili (i18n infra)
-    ('sys_ui_interfaces')                      -- registro interfacce UI (piattaforma)
+    ('sys_ui_interfaces'),                     -- registro interfacce UI (piattaforma)
+    ('sys_ui_interface_data_classes')          -- classi di dato per voce di menu (mig 000315, #99 F7):
+                                               -- e' la gemella di sys_ui_interfaces, non un dato di persona.
+                                               -- Da qui discende la visibilita' della sidebar (ADR-0036 M1),
+                                               -- quindi appartiene alla piattaforma, non a un dossier
   ),
   alltab AS (
     SELECT c.relname AS tbl

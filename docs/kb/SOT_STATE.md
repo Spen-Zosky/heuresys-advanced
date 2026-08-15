@@ -27,8 +27,12 @@ e **raccomanda di abilitare RLS**, vietato dall'invariante **I5**; aveva `trigge
 `dashboards-jobs` istruisce a `docker compose build` (**I13**), cita `services/frontend/**`
 inesistente, le porte di evo, sette file di memoria assenti e credenziali in chiaro; i suoi trigger
 l'avrebbero attivata sulla **prossima voce del menu** (`#142` F2). `consolida-pagina` opera su
-`rbp_*` e `admin_component_registry`: **0 tabelle** nel database. Auto-invocazione spenta, avviso in
-testa, deroga motivata; la **rimozione dei file** è `#190` (WAIT-INPUT: è di Enzo).
+`rbp_*` e `admin_component_registry`: **0 tabelle** nel database. **`#190` CHIUSO nella stessa
+sessione**: Enzo ha autorizzato e i **4 file sono stati cancellati** — le skill di progetto passano
+da **7 a 4** (`full-alignment-deploy`, `project-atlas`, `storia36-custodia`, `zero-pending-loop`).
+Le **deroghe sono state tolte insieme ai file**, non lasciate a coprire il vuoto: il cancello esce 0
+perché il difetto non c'è più, non perché è esentato. Propagazione verificata **sulle macchine** —
+VM e linux-pc su `dc221331`, quattro skill entrambi.
 
 **Il rinforzo — `docs/kb/tools/check_istruzioni.py`**. Il progetto ha 14 cancelli e guardano tutti
 **codice e dati**: nessuno guardava le **istruzioni**. Quattro controlli confrontati con la realtà

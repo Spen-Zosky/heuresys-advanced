@@ -884,7 +884,15 @@ def _check_fs(toks: list[str], seg: str, cwd: str | None = None):
     for t in _bersagli_scritti(head, toks):
         if not _looks_like_path(t):
             continue
-        cand = t if os.path.isabs(t) else str(base / t)
+        # ⚠ La barra ROVESCIATA e' un separatore su Windows e un carattere qualunque su
+        # Linux. Senza normalizzarla, `robocopy "<lab>\note" "<repo>\docs"` risultava
+        # FUORI dal repo quando il controllo girava su Linux — cioe' la guardia LASCIAVA
+        # PASSARE una scrittura nel working tree, che e' il verso sbagliato in cui
+        # sbagliare. Misurato il 2026-08-16: selftest 122/122 su Windows e 121/122 sulla
+        # CI, sullo stesso commit. Normalizzare non rende la guardia piu' permissiva —
+        # la rende piu' severa, che e' l'unica direzione ammessa per una guardia.
+        t_norm = t.replace("\\", "/")
+        cand = t_norm if os.path.isabs(t_norm) else str(base / t_norm)
         if is_inside(cand, REPO) and not any(is_inside(cand, r) for r in write_roots()):
             return (f"modalita' lab: `{head}` scrive su un percorso dentro il repo ({t}). "
                     "Le sessioni lab non modificano il working tree.")

@@ -629,17 +629,35 @@ if [ -f "$CL" ]; then
     ok "sessione: il file depositato dal boot vince sul ripiego git"
   else fail "sessione: .handoff/session-id ignorato"; fi
   : > "$T/sid-vuoto"
-  sess_ripiego="$(HEURESYS_SESSION_FILE="$T/sid-vuoto" bash "$CL" sessione)"
-  # L'atteso NON e' un numero scritto qui: si deriva dalla storia reale. L'invariante e' che una
-  # sessione IN CORSO viene DOPO l'ultima chiusa — `>`, non `>=`. La prima versione di questa
-  # prova chiedeva solo «assomiglia a S1234», e infatti non si accorse che il ripiego era
-  # regredito da S1064 a S1063 nel momento stesso in cui veniva scritto (il commit che lo
-  # descriveva conteneva «handoff S<N>» nel corpo, e `git log --grep` guarda anche li').
-  ultimo_n="$(git log -200 --format=%s | grep -oE 'handoff S[0-9]{3,4}' | head -n1 | grep -oE '[0-9]{3,4}')"
-  sess_n="$(printf '%s' "$sess_ripiego" | tr -cd '0-9')"
-  if [ -n "$ultimo_n" ] && [ -n "$sess_n" ] && [ "$sess_n" -gt "$ultimo_n" ] 2>/dev/null; then
-    ok "sessione: il ripiego viene DOPO l'ultima chiusura ($sess_ripiego > handoff S$ultimo_n)"
-  else fail "sessione: ripiego '$sess_ripiego' non successivo all'ultimo handoff S$ultimo_n"; fi
+  # L'invariante del ripiego: una sessione IN CORSO viene DOPO l'ultima chiusa — `>`, non `>=`.
+  # La prima versione chiedeva solo «assomiglia a S1234», e infatti non si accorse che il
+  # ripiego era regredito da S1064 a S1063 nel momento stesso in cui veniva scritto (il commit
+  # che lo descriveva conteneva «handoff S<N>» nel corpo, e `git log --grep` guarda anche li').
+  #
+  # ⚠ E LA SECONDA VERSIONE ERA VERDE QUI E ROSSA IN CI, per la ragione gia' registrata:
+  # **la CI fa un checkout SHALLOW e la storia non c'e'**. Interrogare `git log` del repo vero
+  # rende la prova dipendente da quanta storia e' stata scaricata — cioe' non e' piu' una prova
+  # del codice. Si costruisce quindi la storia che serve, in una fixture: due commit, uno dei
+  # quali e' un handoff, e uno STATE che dichiara la stessa sessione. Cosi' l'invariante e'
+  # verificabile ovunque, anche con `git clone --depth 1`.
+  FIXS="$T/fixture-sessione"
+  rm -rf "$FIXS"; mkdir -p "$FIXS/.handoff"
+  ( cd "$FIXS" && git init -q . && git config user.email t@t && git config user.name t \
+    && echo a > a.txt && git add a.txt && git commit -qm "chore: handoff S900" \
+    && printf '**Updated**: (S900)\n' > .handoff/STATE.md \
+    && git add -A && git commit -qm "docs: qualcosa dopo l'handoff" ) >/dev/null 2>&1
+  sess_ripiego="$( cd "$FIXS" && HEURESYS_SESSION_FILE="$FIXS/assente" bash "$ROOT/$CL" sessione )"
+  if [ "$sess_ripiego" = "S901" ]; then
+    ok "sessione: il ripiego viene DOPO l'ultima chiusura (handoff S900 ⟹ S901)"
+  else fail "sessione: ripiego '$sess_ripiego' invece di S901 (handoff S900 in storia)"; fi
+
+  # E il caso simmetrico: se l'handoff di QUESTA sessione e' gia' scritto nello STATE ma non
+  # ancora committato, il ripiego deve dire quello, non il successivo.
+  ( cd "$FIXS" && printf '**Updated**: (S901)\n' > .handoff/STATE.md ) 2>/dev/null
+  sess_scritto="$( cd "$FIXS" && HEURESYS_SESSION_FILE="$FIXS/assente" bash "$ROOT/$CL" sessione )"
+  if [ "$sess_scritto" = "S901" ]; then
+    ok "sessione: STATE piu' avanti dell'ultimo handoff committato ⟹ vince STATE"
+  else fail "sessione: con STATE a S901 il ripiego dice '$sess_scritto'"; fi
   # NEGATIVA: repo senza alcun commit 'handoff S<N>' e senza STATE.md. Deve dichiarare di non
   # sapere. Un numero inventato qui sarebbe peggio del segnaposto che #191 sta togliendo.
   NOSTORIA="$T/nostoria"
@@ -663,8 +681,11 @@ if [ -f "$CL" ]; then
       && echo x > a.txt && git add a.txt && git commit -qm "base" ) >/dev/null 2>&1
     ( cd "$FIXJ" && sh "$ROOT/$PCJ" ) >/dev/null 2>&1
     JLINE="$(head -n1 "$FIXJ/.handoff/session-journal.ndjson" 2>/dev/null || true)"
+    # La forma si verifica QUI, senza interprete: una batteria di shell che chiama `python`
+    # smette di misurare il proprio bersaglio dove python non c'e' — e diventa rossa per la
+    # ragione sbagliata (misurato su un clone usa-e-getta il 2026-08-16).
     if printf '%s' "$JLINE" | grep -q '"ref":"compattazione"' \
-       && printf '%s' "$JLINE" | python -c 'import json,sys; json.loads(sys.stdin.read())' 2>/dev/null; then
+       && printf '%s' "$JLINE" | grep -qE '^\{.*"ts":"[0-9T:Z-]+".*"kind":"note".*"note":"[^"]+"\}$'; then
       ok "precompact: deposita una riga JSON valida di compattazione"
     else fail "precompact: riga assente o non JSON ($JLINE)"; fi
     # NEGATIVA/robustezza: fuori da un repo git non ha dove scrivere. Deve tacere e uscire 0 —

@@ -47,7 +47,36 @@
     motivata in `docs/kb/tools/istruzioni_waivers.txt`.
   - chiuso-quando: Enzo autorizza, i tre file spariscono e `check_istruzioni.py` resta verde con le tre deroghe rimosse
 
-- **#189 `--repair-missing` della storia36 non arriva in fondo: un seed chiama una funzione che nessun seed crea** · status: ACTIVE
+- **#189 `--repair-missing` della storia36 non arriva in fondo: un seed chiama una funzione che nessun seed crea** · status: DONE
+  - ✅ **CHIUSA S1063 (2026-08-15) — e il titolo qui sopra diagnosticava male.** Non era un problema
+    di *ordine* («la funzione non c'è ancora»), era un **disallineamento di firma**:
+    `verify-storia36.sql:2986` definisce `storia36_check_c6a()` **senza parametri**, e
+    `06_reorg.sql:201` la invocava come `c6a(c_reorg)`, con una data. Il corpo della funzione non
+    usa alcuna data — conta gli eventi di storia organizzativa del tenant, con l'id costante al suo
+    interno — e le tre sorelle invocate subito sotto (`c6b`, `c6c`, `c6d`) sono **sempre** state
+    chiamate senza argomenti: era quella riga l'anomala delle quattro. Conseguenza che l'item non
+    coglieva: il seed falliva **sempre**, su qualunque database, **anche con tutte e 65 le funzioni
+    già presenti** — non era una condizione di database nuovo.
+  - **come è emersa**: la prova era costruita per potermi dare torto. Sulla copia usa-e-getta la
+    catena riparata aveva superato il punto di rottura, e mi sarei fermato lì; il controllo
+    successivo ha invece mostrato che `c6a(date)` **non era stata creata** e il totale funzioni era
+    invariato a 65. Senza quel controllo avrei chiuso l'item con la causa vera ancora viva.
+  - **due correzioni, entrambe tenute**: (1) `ab1f83eb` — la firma, che è la causa; (2) `3e226cb7` —
+    le definizioni caricate **prima** dei seed (`verify-storia36.sql -v solo_definizioni=1`, runner
+    saltato), che resta corretta e necessaria su un database dove le funzioni non ci sono ancora.
+  - **prove, su livelli diversi e con il caso negativo eseguito**: guasto **riprodotto** su
+    `createdb --template heuresys_ci prova_189` (*«Nessuna funzione trovata con nome e tipi di
+    argomenti forniti»*, l'errore identico a S1062) · seed 06 dopo il fix → `C6 OK: 1 righe scritte`,
+    `COMMIT`, exit 0 · **twice-run** → `0 righe scritte`, exit 0, cioè **la prova che questo stesso
+    item dichiarava non eseguibile** · custodia completa in produzione **VERDE** · controprova sul
+    file modificato: senza il flag il runner gira ancora (se l'`\if` fosse stato sbagliato avrei
+    spento in silenzio il presidio della storia). Copia usa-e-getta rimossa a fine prova.
+  - **superficie intera verificata, non solo la riga rotta** (pattern P5 del ciclo di autocoscienza):
+    confronto meccanico di ogni invocazione nei quattordici seed contro ogni definizione nelle
+    batterie — **65 definizioni, nessun altro disallineamento**.
+  - **trovato strada facendo e chiuso**: la custodia era rossa *prima* del fix per
+    `sys_ui_interface_data_classes` — la tabella creata **il giorno prima** da `#99` F7 (mig `000315`)
+    e mai registrata nel dossier. Classificata accanto alla gemella `sys_ui_interfaces`.
   - priority: P2 · effort: ~1-2h · doc: skill `storia36-custodia` · trovato: S1062 (2026-08-15)
   - **il difetto, con l'evidenza**: `db/scripts/storia36.sh custodia --repair-missing` si ferma su
     `06_reorg.sql` con `ERROR: function staging.storia36_check_c6a(date) does not exist`. Le funzioni

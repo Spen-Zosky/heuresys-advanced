@@ -12,6 +12,41 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
+- **#191 Il rendiconto delle chiusure non sa di quale sessione parla** · status: ACTIVE
+  - priority: P3 · effort: ~30 min · doc: `scripts/close-log.sh` · trovato: S1063 (2026-08-15, ciclo di autocoscienza)
+  - **il fatto, misurato**: `.handoff/close-log.ndjson` ha **171 righe** e **due sole sessioni distinte**:
+    `S1046` (12 righe) e **`S?` (159 righe)**. Il campo `session` viene da `${HEURESYS_SESSION:-S?}`,
+    e la variabile **non è esportata da nessuno**: `grep -rl HEURESYS_SESSION` la trova solo in chi la
+    *legge* (`close-log.sh`) e in un test. Non è una svista nuova — lo script la documenta lui stesso
+    («MISURATO 2026-08-12 (#148): "S?" NON era il caso raro, era il caso NORMALE»), ma la mitigazione
+    di allora ha cambiato il **raggruppamento** del report, non la causa.
+  - **perché conta**: è lo strumento di accountability delle chiusure. Oggi dice *cosa* è stato fatto e
+    **non** *da chi*. Nel ciclo di autocoscienza ho dovuto ricostruire le ultime 10 sessioni da `git log`,
+    perché il registro nato per dirlo non poteva.
+  - **la strada**: derivare il numero dal commit di handoff (`git log --grep 'handoff S'`) quando la
+    variabile manca, invece di scrivere un segnaposto. Un valore derivato è verificabile; `S?` no.
+  - chiuso-quando: una chiusura nuova scrive una riga con la sessione reale, e `close-log.sh report` la raggruppa per sessione senza degradare
+
+- **#190 Tre skill di questo repo descrivono il progetto legacy — vanno rimosse, e la rimozione è tua** · status: WAIT-INPUT
+  - input-richiesto: l'autorizzazione a **cancellare** i tre file (`.claude/skills/{consolida-pagina,dashboards-jobs,multi-tenant-validator}/`)
+  - perche-solo-tuo: il `CLAUDE.md` globale vieta di cancellare file senza conferma esplicita di Enzo. Ho fatto tutto ciò che potevo senza cancellare: auto-invocazione spenta, avviso in testa, deroga motivata.
+  - doc: `.programmi/mandato-autocoscienza-redenzione.md` · cancello: `python docs/kb/tools/check_istruzioni.py`
+  - **il fatto, misurato il 2026-08-15**: le tre skill istruiscono sul progetto **legacy `heuresys-evo`**,
+    non su questo. `multi-tenant-validator` usa Prisma (**0** `package.json` lo nomina in questo repo) e
+    **raccomanda di abilitare RLS**, che l'invariante **I5** vieta ovunque; aveva `trigger: auto`.
+    `dashboards-jobs` istruisce a fare `docker compose build frontend` (vietato da **I13**), cita
+    `services/frontend/**` (**il path non esiste**), le porte `:8012/:3012` di evo, sette file di memoria
+    inesistenti, e porta **credenziali in chiaro**. `consolida-pagina` opera su `rbp_pages`,
+    `rbp_dashboard_nav_items`, `admin_component_registry`: **0 tabelle** nel database di produzione.
+  - **da quanto**: dal **2026-06-17** — **59 giorni** (`git log --diff-filter=A`).
+  - ⚠ **il rischio era imminente**: i trigger di `dashboards-jobs` («dashboard», «sidebar», «widget»,
+    «layout dashboard») l'avrebbero auto-invocata sulla prossima voce del menu, **`#142` F2 — il modello
+    dei cruscotti**, insegnando il progetto sbagliato su un lavoro di questo.
+  - **già fatto, senza cancellare nulla**: le tre `description` dichiarano ora `⛔ RITIRATA — NON USARE`,
+    `trigger: auto` rimosso, avviso in testa a ciascun file con la tabella afferma-vs-reale, deroga
+    motivata in `docs/kb/tools/istruzioni_waivers.txt`.
+  - chiuso-quando: Enzo autorizza, i tre file spariscono e `check_istruzioni.py` resta verde con le tre deroghe rimosse
+
 - **#189 `--repair-missing` della storia36 non arriva in fondo: un seed chiama una funzione che nessun seed crea** · status: ACTIVE
   - priority: P2 · effort: ~1-2h · doc: skill `storia36-custodia` · trovato: S1062 (2026-08-15)
   - **il difetto, con l'evidenza**: `db/scripts/storia36.sh custodia --repair-missing` si ferma su

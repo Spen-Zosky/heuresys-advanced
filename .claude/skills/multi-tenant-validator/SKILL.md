@@ -1,11 +1,27 @@
 ---
 name: multi-tenant-validator
-description: Validazione architettura multi-tenant e tenantId enforcement
-trigger: auto
+description: "⛔ RITIRATA — NON USARE su heuresys-advanced. Descrive il progetto legacy heuresys-evo (Prisma, middleware $use) e raccomanda PostgreSQL RLS, che l'invariante I5 di questo progetto VIETA ovunque. Qui l'isolamento tenant e' FK + filtro nel middleware API, le query sono SQL parametrizzato grezzo su `pg`, e Prisma non esiste nel repo (misurato 2026-08-15: 0 package.json lo nomina). Non invocare; conservata solo in attesa della decisione di Enzo sulla rimozione."
 model: sonnet
 ---
 
-# Multi-Tenant Validator
+> ## ⛔ SKILL RITIRATA — non descrive questo progetto
+>
+> **Misurato il 2026-08-15** (ciclo di autocoscienza, `.programmi/mandato-autocoscienza-redenzione.md`):
+> questa skill istruisce sul progetto **legacy `heuresys-evo`**, non su `heuresys-advanced`.
+>
+> | Cosa afferma | Realta' misurata di questo repo |
+> |---|---|
+> | query Prisma (`prisma.user.findMany`, `prisma.$use`) | **Prisma non esiste**: 0 `package.json` lo nomina. ADR-0003 — SQL parametrizzato grezzo su `pg` |
+> | «Enable RLS: Consider PostgreSQL Row Level Security» | **vietato dall'invariante I5**: *«Tenant isolation = FK + API middleware filter. NEVER RLS»* |
+> | schema Prisma con `@@index([tenantId])` | lo schema e' SQL in `db/migrations/*.sql`, tabelle `sys.sys_<plural>` (I3/I4) |
+>
+> Aveva `trigger: auto`: si sarebbe auto-invocata su un lavoro multi-tenant, insegnando
+> l'opposto di un invariante non negoziabile. Il trigger e' stato rimosso.
+>
+> **La rimozione definitiva del file spetta a Enzo** — vedi il register.
+> Il cancello che l'ha trovata: `python docs/kb/tools/check_istruzioni.py`.
+
+# Multi-Tenant Validator *(contenuto storico — legacy heuresys-evo)*
 
 Verifica che tutte le query database in architetture multi-tenant includano correttamente `tenantId` per prevenire data leakage tra tenant.
 

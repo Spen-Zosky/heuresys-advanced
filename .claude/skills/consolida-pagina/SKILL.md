@@ -1,17 +1,22 @@
 ---
 name: consolida-pagina
-description: |
-  Gestisce il consolidamento completo di una pagina nel grafo Ruoli-Dashboards-Pagine di Heuresys.
-  Usa questa skill OGNI VOLTA che l'utente dice "consolida pagina", "consolida", "consolida la pagina",
-  "crea nuova pagina web", o quando si lavora su una pagina in una sessione dashboard dedicata.
-  Si attiva anche quando l'utente chiede di collegare una pagina a una dashboard, registrare una nuova pagina nel DB,
-  aggiornare lo status di una pagina, o qualsiasi operazione che modifichi il grafo navigazione
-  (rbp_pages, rbp_dashboard_nav_items, rbp_role_dashboards, rbp_role_permissions).
-  Copre l'intero ciclo: backup, aggiornamento record, navigazione N:M, permessi, scope, field policies,
-  prospettive PET, widget, integrità, restart cache, verifica API, aggiornamento documenti.
+description: "⛔ RITIRATA — NON USARE su heuresys-advanced. Opera sul grafo `rbp_pages`/`rbp_dashboard_nav_items`/`rbp_role_*` e su `admin_component_registry`, che sono tabelle del progetto legacy heuresys-evo: misurato il 2026-08-15 sul database di produzione, ne esistono **0**. Le sue query girerebbero via `docker exec heuresys_evo_platform_db`, vietato da I13. Qui le interfacce vivono in `sys.sys_ui_interfaces` e la visibilita' discende dalla matrice dei domini (ADR-0036, #99 F7). Non invocare; conservata in attesa della decisione di Enzo sulla rimozione."
 ---
 
-# Consolida Pagina — Skill Operativa
+> ## ⛔ SKILL RITIRATA — non descrive questo progetto
+>
+> **Misurato il 2026-08-15** (ciclo di autocoscienza, `.programmi/mandato-autocoscienza-redenzione.md`):
+> `SELECT count(*) ... WHERE table_name LIKE 'rbp_%'` sul database di produzione → **0**.
+> Idem `admin_component_registry` → **0**. Le sette fasi descritte qui aggiornerebbero tabelle
+> che non esistono, attraverso un container Docker che I13 esclude dal percorso canonico.
+>
+> L'equivalente reale di questo progetto: le voci di interfaccia stanno in `sys.sys_ui_interfaces`,
+> la loro visibilita' **discende dalla matrice dei domini** (ADR-0036) dopo la chiusura di `#99` F7,
+> e il permesso lo decide `requirePermission` (`.claude/rules/api-module-pattern.md`).
+>
+> **La rimozione definitiva del file spetta a Enzo.** Cancello: `python docs/kb/tools/check_istruzioni.py`.
+
+# Consolida Pagina *(contenuto storico — legacy heuresys-evo)*
 
 Questa skill orchestra il consolidamento completo di una pagina nel sistema Heuresys, aggiornando l'intero grafo relazionale Ruoli ↔ Dashboards ↔ Pagine. Non si limita al record della pagina: ogni modifica ha impatto a cascata su navigazione, permessi, scope, cache e documenti.
 

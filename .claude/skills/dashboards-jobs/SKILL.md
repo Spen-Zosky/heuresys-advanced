@@ -1,15 +1,27 @@
 ---
 name: dashboards-jobs
-description: |
-  Use when working on dashboards, portal pages, widget engine, sidebar navigation, or any frontend
-  visual component of Heuresys. Triggers: "dashboard", "portal", "widget", "sidebar", "employee portal",
-  "workspace", "scrivania", "layout dashboard", "effetti visivi", "glow", "mockup". Also triggers when
-  fixing visual discrepancies between mockup and live, doing Docker frontend rebuild, or running
-  Playwright visual verification. This skill is SELF-UPDATING: after every dashboard session, update
-  the learnings section with new discoveries.
+description: "⛔ RITIRATA — NON USARE su heuresys-advanced. Descrive le dashboard del progetto legacy heuresys-evo: Docker (`docker compose build frontend`, container `heuresys_evo_platform_db`), porte :8012/:3012 di evo, path `services/frontend/**` che qui non esistono, tabelle `rbp_*`/`admin_component_registry` assenti dal database, e credenziali in chiaro. Su questo progetto valgono I13 (PostgreSQL nativo, NO DOCKER), I3/I4 (tabelle `sys.sys_<plural>`) e la dottrina live-data di `.claude/rules/frontend-live-data.md`. Non invocare; conservata in attesa della decisione di Enzo sulla rimozione."
 ---
 
-# Dashboard Jobs — Skill Operativa Autoaggiornante
+> ## ⛔ SKILL RITIRATA — non descrive questo progetto
+>
+> **Misurato il 2026-08-15** (ciclo di autocoscienza, `.programmi/mandato-autocoscienza-redenzione.md`).
+>
+> | Cosa afferma | Realta' misurata di questo repo |
+> |---|---|
+> | `docker compose build frontend`, `docker restart heuresys_evo_api_gateway` | **I13**: PostgreSQL 16 nativo, **niente Docker** sul percorso canonico (ADR-0004) |
+> | file in `services/frontend/src/components/...` | **il path non esiste**: qui e' `apps/web/src/...` |
+> | `memory/DASHBOARD_NEXT_STEPS.md`, `feedback_dashboard_workflow.md` e altri 5 file di memoria | **non esistono** — la skill si apre istruendo a leggere sette file assenti |
+> | API su `:8012`, frontend su `:3012` | sono le porte di **evo legacy**; advanced e' `:8013`/`:3013` |
+> | password in chiaro nella tabella «Credenziali Test» | vietato in un file versionato |
+>
+> Il pericolo era il suo `description`: parole come «dashboard», «sidebar», «widget» l'avrebbero
+> auto-invocata sulla prossima voce del menu — **`#142` F2, il modello dei cruscotti** — insegnando
+> il progetto sbagliato. Per le dashboard di questo progetto: `.programmi/142-cruscotti-per-tipologia.md`.
+>
+> **La rimozione definitiva del file spetta a Enzo.** Cancello: `python docs/kb/tools/check_istruzioni.py`.
+
+# Dashboard Jobs *(contenuto storico — legacy heuresys-evo)*
 
 Orchestration completa per lavori su dashboard Heuresys: setup contesto, mockup visivo, implementazione,
 verifica Playwright, Docker rebuild, confronto pixel-perfect.

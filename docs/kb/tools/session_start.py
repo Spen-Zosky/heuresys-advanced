@@ -37,6 +37,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_menu  # noqa: E402
 import db_health  # noqa: E402
+import check_istruzioni  # noqa: E402
 import lab_inbox  # noqa: E402
 import programmi  # noqa: E402
 import status_dashboard  # noqa: E402
@@ -97,6 +98,23 @@ def main():
             print("\nSENTINELLE DBMS (viste v_* — db_health.py)")
             sys.argv = ["db_health", "--sentinelle", "--compatto"]
             db_health.main()
+        # I file che ISTRUISCONO devono combaciare col progetto reale (check_istruzioni.py).
+        # Nasce dal ciclo di autocoscienza del 2026-08-15: tre skill di questo repo
+        # descrivevano il legacy heuresys-evo — una raccomandava RLS, che I5 vieta — e
+        # nessun cancello le guardava, perche' tutti gli altri guardano codice e dati.
+        # Non serve il database: gira anche con --no-db. Vista, non gate: si stampa ed esce 0.
+        try:
+            esiti = check_istruzioni.esegui(check_istruzioni.ROOT)
+            tot = sum(len(v) for v in esiti.values())
+            print("\nISTRUZIONI (skill, regole, indice memorie — check_istruzioni.py)")
+            if tot == 0:
+                print("  [OK] istruzioni  combaciano col progetto reale")
+            else:
+                for nome, rilievi in esiti.items():
+                    if rilievi:
+                        print(f"  [!!] {nome}: {len(rilievi)} — `python docs/kb/tools/check_istruzioni.py --elenco`")
+        except Exception as e:  # una vista non deve mai impedire l'avvio
+            print(f"\nISTRUZIONI  [? ] non verificate: {e}")
     finally:
         sys.argv = saved_argv
     return 0

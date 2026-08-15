@@ -1,7 +1,7 @@
 # 99 — Domini gerarchici e funzionali: applicare la definizione
 
 > **item**: #99 · **priorità**: P1 · **stima register**: ~6-8 sessioni
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 > **fonti**: `D:\heuresys-design-lab\2026-08-03--definizione-domini.md` + `2026-08-03--piano-definizione-domini.md` §7 · ADR-0036 · CLAUDE.md I16-I20, I22
 
 ## ⚠ Trappola di numerazione — leggerla prima di tutto
@@ -47,24 +47,31 @@ Le due numerazioni sono già state confuse una volta. In questo file comanda la 
   - **`MASKED_UNDER_PLATFORM_MANDATE` non è più dichiarata**: discende da M1 (`classiMascherateDa`). Erano due dichiarazioni dello stesso fatto in due file, e la seconda sarebbe invecchiata da sola senza che nulla fallisse.
   - ⚠ **la prova non poteva essere comportamentale** — stessa trappola di F3. Delta misurato sui 161 attori: **zero**, tranne la voce del difetto (b). Un test sui dati di oggi sarebbe verde con e senza la derivazione. Perciò la prova **fabbrica la divergenza**: perimetro di chi guida una squadra + permessi di chi legge le analytics → `analytics-skills` sì, `analytics-compensation` no. Errore in cui il file è caduto alla prima stesura, e vale per chiunque prosegua: comporre l'attore con **tutti** i ruoli che hanno il permesso gli conferisce anche i mandati, che aprono le classi da soli — e il caso da provare sparisce.
 - [x] **F8a — Gli orfani e le etichette: da censimento a cancello** — FATTO 2026-08-16 (S1064). **La stima di F8 (~250k) era vecchia di due chiusure e la misura l'ha smentita**: gli orfani non erano 22 ma **10** (`#125` ne aveva chiusi 12, tutti `/me/*`), le **66 voci di menu hanno 67 traduzioni** (il «52 su 52 senza traduzione» è chiuso), e **nessuna voce punta a una pagina inesistente** — il difetto è in una direzione sola. Dei 10: **9 sono schede** della pagina principale del loro gruppo (`section-tabs.tsx`, regola di Enzo in S1009), e **`/dev/agent` è dietro `NEXT_PUBLIC_ENABLE_AGENT_DEV`, che il 2026-08-16 non esiste in nessun `.env`, PROD della VM compreso** (misurato via ssh) — a flag spento rende un avviso, non una console viva: il sospetto del register cade. **Consegna**: `docs/kb/tools/check_pagine_raggiungibili.py` — tre porte ammesse (menu · scheda · deroga **motivata**), cablato in `session_start.py` così gira a ogni avvio. Selftest **10/10**; **visto rosso sul progetto vero** (tolta la deroga → `exit 1`, `/dev/agent` nominato; rimessa → `exit 0`), col codice d'uscita e non con l'output. Il valore non è il conteggio di oggi: è che il giorno in cui una pagina nuova nasce senza porta, qualcuno lo sa · ~60k
-- [ ] **F8b — Frontend: sidebar derivata e pagine, E2E per tipologia** *(passo 9)* — la parte che resta di F8: la sidebar già discende da M1 (F7), qui si verifica **dal lato dell'utente** con un E2E per tipologia · budget ~190k
+- [x] **F8b — Frontend: sidebar derivata e pagine, E2E per tipologia** *(passo 9)* — FATTO 2026-08-16 (S1064). `apps/web/tests/e2e/sidebar-per-tipologia.spec.ts`, **12/12 verdi** su cinque tipologie con login reale. **Il file è costruito attorno alla tautologia da evitare**: confrontare la sidebar con `/v1/me/interfaces` prova che l'interfaccia non aggiunge e non toglie, ma resterebbe verde anche se l'API rispondesse **la stessa cosa a tutti** — un menu uguale per chiunque soddisfa «DOM == API» alla perfezione. Perciò c'è un secondo blocco: sottoinsieme **proprio** (l'estraneo vede strettamente meno dell'amministratore) e prospettive GOVERNANCE/INTELLIGENCE **vuote** per chi non ha domini. **Ha trovato un reperto vero al primo giro**: `antonio.parisi`, senza alcun dominio, vede `/organization/org-chart` — voce che **non dichiara classi di dato**, cioè afferma di non mostrare persone. È la famiglia del difetto corretto oggi su `dashboard`, ma **dichiararle `PERSONAL` toglierebbe l'organigramma a 117 utenti su 161** (misurato): decisione di prodotto, non bonifica → register **`#193`** (WAIT-INPUT). L'asserzione è stata riscritta su ciò che oggi è vero, senza cristallizzare il difetto · ~55k
 
 ## Ordine e vincoli
 
 F3 **prima** di F4 e F5 (entrambe consumano il resolver). F7 dopo la decisione di sovrapposizione
 con #142. F8 per ultima, perché legge tutto ciò che sta sotto.
 
-## Da dove si riprende
+## Non si riprende: è CHIUSO
 
-**F8b — Frontend: sidebar derivata e pagine, E2E per tipologia**, budget ~190k. È **l'ultima**:
-F4 (S1060), F5, F6a, F6b (S1061), F7 (S1062) e **F8a (S1064)** sono chiuse.
+**10 fasi su 10, chiuse il 2026-08-16 (S1064).** L'epica dei domini è finita: dalla definizione
+(ADR-0036) al resolver sull'albero delle unità, ai quattro domini nuovi, alla mascheratura, alla
+completezza di `self`, alla cascata M3 che deriva la sidebar, fino alla verifica **dal lato
+dell'utente** con cinque login reali.
 
-Cosa F8a toglie dal tavolo di F8b, misurato e non dedotto: gli orfani sono **risolti** (nove
-sono schede per disegno, `/dev/agent` è dietro un flag spento in ogni ambiente) e un cancello
-lo sorveglia a ogni avvio; le **etichette del menu sono già tradotte** (67 traduzioni su 66
-voci attive). Resta quindi **solo** la verifica dal lato dell'utente: un E2E per tipologia che
-provi che la sidebar derivata da M1 mostra a ciascun profilo le voci giuste — e **soltanto**
-quelle. Sul Windows di Enzo serve il wrapper Node 22 (`pnpm test:e2e:prod:node22`, D-36).
+**Due cose che l'epica lascia in eredità, e non sono pendenze sue:**
+
+- **`#193` (WAIT-INPUT)** — l'organigramma aziendale non dichiara di mostrare persone.
+  Correggerlo lo toglierebbe a **117 utenti su 161**: è una decisione di prodotto di Enzo,
+  trovata dall'E2E di F8b e registrata invece di essere presa di mia iniziativa.
+- **il buco noto di F7, invariato**: una voce nuova la cui *resource* non è classificata
+  person-level sfugge al cancello e torna al solo RBAC, in silenzio. È dichiarato, non risolto.
+
+**Il numero che riassume l'epica**, misurato e non stimato: la sidebar di ogni persona non
+dipende più da alcuna lista di nomi di ruolo. Le liste erano **sei**; l'ultima — `highestRoleLabel`
+nel modulo `dashboard` — è caduta con `#142` F2, nella stessa sessione che ha chiuso questa.
 
 **F7 ha sbloccato `#142` F2/F3**, che erano `GATED` proprio su di essa: il meccanismo di
 derivazione ora esiste (`M1` + `sys_ui_interface_data_classes` + `almenoUnaCellaAperta`), e

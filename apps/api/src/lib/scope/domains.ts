@@ -44,11 +44,9 @@ import { HR_MANDATED_ROLES } from "./resolver.js";
  * functional-scope helpers yet». Ora `activeDomainsOf` li deriva dalle tabelle che li
  * DEFINISCONO, quindi una nomina fatta oggi è in effetto oggi.
  *
- * ⚠ `delegation` è il quarto dominio previsto da ADR-0036 e **non compare qui**: misurato il
- * 2026-08-15, nel database non esiste alcuna colonna di delega e nel codice «delegate» è solo
- * il verbo inglese. Dichiararlo senza una fonte dati significherebbe creare un dominio che
- * non si accende mai — l'errore che questo progetto ha appena finito di classificare come
- * `[RESIDUO]` sugli OKR. Arriva con la sua tabella, in **F6b**.
+ * `delegation` è arrivato per ultimo, in **F6b**, e con la sua tabella (`000314`): all'inizio
+ * di F6 non esisteva alcuna colonna di delega nel database, e dichiarare un dominio che non
+ * può accendersi sarebbe stato l'errore appena classificato `[RESIDUO]` sugli OKR.
  */
 export type Domain =
   | "platform_mandate"
@@ -58,7 +56,8 @@ export type Domain =
   | "process_owner"
   | "mentor"
   | "approver"
-  | "team_peer";
+  | "team_peer"
+  | "delegation";
 
 /**
  * I domini che aprono una superficie OLTRE il proprio record.
@@ -105,6 +104,7 @@ export async function activeDomainsOf(
     mentor: boolean;
     approver: boolean;
     team_peer: boolean;
+    delegation: boolean;
   }>(
     `SELECT
        EXISTS (SELECT 1 FROM sys.sys_organization_units o
@@ -129,7 +129,16 @@ export async function activeDomainsOf(
                 WHERE tm.team_member_user_id = $1
                   AND tm.team_member_is_active
                   AND t2.team_is_active
-                  AND t2.team_lead_user_id IS DISTINCT FROM $1) AS team_peer`,
+                  AND t2.team_lead_user_id IS DISTINCT FROM $1) AS team_peer,
+       -- F6b: si ha il dominio se si RICEVE una delega IN VIGORE oggi. «In vigore» si
+       -- calcola, non si memorizza: una colonna sarebbe vera il giorno che la scrivi e
+       -- falsa il giorno dopo, senza che nessuno se ne accorga.
+       EXISTS (SELECT 1 FROM sys.sys_user_delegations dl
+                WHERE dl.user_delegation_delegate_id = $1
+                  AND dl.user_delegation_status = 'ACTIVE'
+                  AND dl.user_delegation_starts_on <= current_date
+                  AND (dl.user_delegation_ends_on IS NULL
+                       OR dl.user_delegation_ends_on >= current_date)) AS delegation`,
     [actor.userId],
   );
   const r = rows[0];
@@ -139,6 +148,7 @@ export async function activeDomainsOf(
   if (r?.mentor) domains.add("mentor");
   if (r?.approver) domains.add("approver");
   if (r?.team_peer) domains.add("team_peer");
+  if (r?.delegation) domains.add("delegation");
   return domains;
 }
 

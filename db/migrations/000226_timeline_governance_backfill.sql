@@ -36,6 +36,30 @@ INSERT INTO sys.sys_gdpr_data_map (
 )
 ON CONFLICT (gdpr_map_table_schema, gdpr_map_table_name, gdpr_map_subject_fk) DO NOTHING;
 
+-- [S1061] #99 F6b — le due FK di soggetto delle deleghe (mig 000314).
+--
+-- Registrate QUI e non dopo la 000314, per la ragione che il controllo in coda a QUESTO
+-- file impone: gira prima che un file di numero maggiore possa dichiararle, e la prova
+-- generale lo ha fatto vedere alla seconda passata («2 FK di soggetto su sys_user_*
+-- senza classificazione GDPR»).
+--
+-- Due righe e non una, ed e' la parte che conta: una delega nomina DUE persone, e per
+-- ciascuna il dato dice una cosa diversa di lei. Cancellare la persona che ha delegato
+-- non puo' cancellare la delega di un'altra, quindi la strategia e' `ANONYMIZE` su
+-- entrambe: si toglie il legame con la persona, non l'atto — che resta un fatto
+-- amministrativo avvenuto, con la sua finestra temporale.
+INSERT INTO sys.sys_gdpr_data_map (
+  gdpr_map_table_schema, gdpr_map_table_name, gdpr_map_subject_fk,
+  gdpr_map_data_class, gdpr_map_erasure_strategy, gdpr_map_reference_kind, gdpr_map_legal_basis
+) VALUES
+  ('sys', 'sys_user_delegations', 'user_delegation_delegator_id',
+   'PERSONAL', 'ANONYMIZE', 'SUBJECT',
+   'Chi ha conferito una delega (#99 F6b, mig 000314). Dato personale del soggetto: l''atto amministrativo resta, il legame con la persona si recide.'),
+  ('sys', 'sys_user_delegations', 'user_delegation_delegate_id',
+   'PERSONAL', 'ANONYMIZE', 'SUBJECT',
+   'Chi ha ricevuto una delega (#99 F6b, mig 000314). E'' la persona che acquisisce il dominio funzionale `delegation`: stessa classe e stessa strategia del delegante.')
+ON CONFLICT (gdpr_map_table_schema, gdpr_map_table_name, gdpr_map_subject_fk) DO NOTHING;
+
 -- ------------------------------------------------- 2) allowlist TENANT_ADMIN (dichiarazione)
 -- TENANT_ADMIN-ALLOWLIST-EXTEND
 CREATE TEMP TABLE _ta_extend_000226(code text PRIMARY KEY);

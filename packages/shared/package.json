@@ -177,6 +177,11 @@
       "heuresys-source": "./src/schemas/learning-gaps.ts",
       "default": "./dist/schemas/learning-gaps.js"
     },
+    "./schemas/delegations": {
+      "types": "./dist/schemas/delegations.d.ts",
+      "heuresys-source": "./src/schemas/delegations.ts",
+      "default": "./dist/schemas/delegations.js"
+    },
     "./schemas/career-paths": {
       "types": "./dist/schemas/career-paths.d.ts",
       "heuresys-source": "./src/schemas/career-paths.ts",

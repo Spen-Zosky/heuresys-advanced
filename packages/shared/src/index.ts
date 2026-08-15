@@ -40,6 +40,7 @@ export * from "./schemas/assessment-results.js";
 export * from "./schemas/learning-paths.js";
 export * from "./schemas/learning-path-steps.js";
 export * from "./schemas/learning-gaps.js";
+export * from "./schemas/delegations.js";
 export * from "./schemas/career-paths.js";
 export * from "./schemas/career-path-steps.js";
 export * from "./schemas/user-career-plans.js";

@@ -67,6 +67,8 @@ VALUES
    '[S1043] Sessioni di calibrazione, importate dal legacy dalla mig 000257 con provenienza in sys_source_lineage_records.'),
   ('sys_calibration_participants', 'A', 'IMPORT', 'calibration_participants (30 nel legacy; 20 importati = RTL Bank)',
    '[S1043] Partecipanti alle sessioni di calibrazione, importati dalla mig 000257.'),
+  ('sys_user_delegations', 'D', 'EXCLUDE', NULL,
+   '[S1061] #99 F6b — le deleghe (mig 000314), il quarto dominio funzionale di ADR-0036. Nessuna sorgente legacy: l''istituto non esiste nel vecchio sistema (verificato: nessuna colonna deleg/substitut/stand_in/proxy) e I12 vieta comunque di importare. Registrata QUI e non dopo la 000314 che crea la tabella, per la ragione gia'' scritta sopra: il controllo gira in QUESTO file, e la tabella nasce vuota su ogni database — la prova generale l''ha infatti fatta arrossare alla SECONDA passata, che e'' l''unica in cui il difetto si vede.'),
   ('sys_calibration_discussions', 'A', 'IMPORT', 'calibration_discussions (60 nel legacy; 40 importate = RTL Bank)',
    '[S1043] Discussioni di calibrazione con voto prima/dopo, importate dalla mig 000257.'),
   ('sys_auth_password_reset_tokens', 'D', 'EXCLUDE', NULL,

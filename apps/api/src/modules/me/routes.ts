@@ -34,6 +34,7 @@ import {
   MeMentorshipsResponseSchema,
   MeProcessParticipationsResponseSchema,
   MeSkillGapScoresResponseSchema,
+  MeDelegationsResponseSchema,
   MeCertificationsResponseSchema, MeCertificationSchema, CreateMeCertificationBodySchema,
   MePredictionsResponseSchema, MeMentorMatchesResponseSchema, MePulseChecksResponseSchema,
   MeDocumentsResponseSchema,
@@ -59,6 +60,7 @@ import { actorFromRequest } from "../../lib/actor.js";
 import { timeOffService } from "../time-off/service.js";
 import { userTimelineService } from "../user-timeline/service.js";
 import { teamsService } from "../teams/service.js";
+import { delegationsService } from "../delegations/service.js";
 import { contentService } from "../content/service.js";
 import { createMediaService } from "../content/media-service.js";
 import { LocalDiskStore } from "../content/media-store.js";
@@ -436,6 +438,14 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("gap_analysis:read:self")],
     schema: { response: { 200: MeSkillGapScoresResponseSchema } },
   }, async (req) => meService.listSkillGapScores(selfActor(req)));
+
+  // #99 F6b — le deleghe che mi riguardano, dai due lati (conferite e ricevute). I17: il
+  // permesso riusato è `approval:read:self`, che il ruolo base USER detiene — la delega
+  // nasce per le approvazioni, quindi è la stessa materia, non un permesso nuovo per comodità.
+  app.get("/delegations", {
+    preHandler: [requirePermission("approval:read:self")],
+    schema: { response: { 200: MeDelegationsResponseSchema } },
+  }, async (req) => delegationsService.listMine(actorFromRequest(req)));
 
   app.get("/certifications", {
     preHandler: [requirePermission("certification:read:self")],

@@ -198,7 +198,14 @@ BEGIN
   INSERT INTO staging.storia36_runs (cluster_code, seed_file, rows_written, twice_run_delta)
   VALUES ('C6', '06_reorg.sql', v_tot, v_tot);
 
-  PERFORM staging.storia36_check_c6a(c_reorg);
+  -- #189 — c6a NON prende parametri: `verify-storia36.sql:2986` la definisce come
+  -- `storia36_check_c6a()` e il suo corpo non usa alcuna data (conta gli eventi di
+  -- storia organizzativa del tenant, con l'id del tenant costante dentro la funzione).
+  -- Passarle `c_reorg` la rendeva irrisolvibile — «Nessuna funzione trovata con nome e
+  -- tipi di argomenti forniti» — e spezzava la catena di `--repair-missing` a meta',
+  -- SEMPRE, anche con tutte le funzioni gia' presenti. Le tre sorelle qui sotto sono
+  -- sempre state invocate senza argomenti: era questa riga l'anomala delle quattro.
+  PERFORM staging.storia36_check_c6a();
   PERFORM staging.storia36_check_c6b();
   PERFORM staging.storia36_check_c6c();
   PERFORM staging.storia36_check_c6d();

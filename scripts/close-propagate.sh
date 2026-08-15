@@ -46,6 +46,12 @@ SCRIPTS="$ROOT/scripts"
 # (#148). Senza, `close-log.sh report` non sapeva dire dove finiva una chiusura e
 # ne cominciava un'altra: 84 righe su 96 finivano in un blocco unico.
 export HEURESYS_CLOSE_RUN="${HEURESYS_CLOSE_RUN:-$(date +%Y%m%dT%H%M%S)-$$}"
+
+# ...e la SESSIONE che sta chiudendo (#191). Si deriva UNA volta e si eredita: se ogni passo la
+# ricalcolasse per conto suo, un passo che gira dopo il commit di handoff e uno che gira prima
+# scriverebbero due numeri diversi per la stessa chiusura. `align-clones.sh` scrive nel diario
+# anche quando e' invocato da qui: senza questa export, la sua riga sarebbe di un'altra sessione.
+export HEURESYS_SESSION="${HEURESYS_SESSION:-$(bash "$SCRIPTS/close-log.sh" sessione 2>/dev/null || echo 'S?')}"
 MARKER="${HEURESYS_MARKER:-$ROOT/.session-align.marker}"   # env override: solo per i test (default invariato)
 LINUXPC_REPO="${LINUXPC_REPO:-/home/enzo/heuresys-advanced}"
 

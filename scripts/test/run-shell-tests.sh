@@ -616,6 +616,34 @@ if [ -f "$CL" ]; then
     ok "close-log: le righe senza corsa degradano alla sessione invece di sparire"
   else fail "close-log: una riga storica e' sparita dal rendiconto ($rep3)"; fi
 
+  # #191 — LA SESSIONE, non piu' un segnaposto. Quattro prove: le tre fonti in ordine di
+  # precedenza, e — la piu' importante — il caso in cui NESSUNA sa rispondere, che deve
+  # restare raggiungibile. Se `S?` diventasse irraggiungibile, queste prove non potrebbero
+  # piu' fallire e non sarebbero piu' prove (metodo di bonifica §5).
+  SID="$T/fake-session-id"
+  printf 'S9999\n' > "$SID"
+  if [ "$(HEURESYS_SESSION=SENV HEURESYS_SESSION_FILE="$SID" bash "$CL" sessione)" = "SENV" ]; then
+    ok "sessione: l'env di chi orchestra la chiusura vince su tutto"
+  else fail "sessione: HEURESYS_SESSION non ha la precedenza"; fi
+  if [ "$(HEURESYS_SESSION_FILE="$SID" bash "$CL" sessione)" = "S9999" ]; then
+    ok "sessione: il file depositato dal boot vince sul ripiego git"
+  else fail "sessione: .handoff/session-id ignorato"; fi
+  : > "$T/sid-vuoto"
+  sess_ripiego="$(HEURESYS_SESSION_FILE="$T/sid-vuoto" bash "$CL" sessione)"
+  if printf '%s' "$sess_ripiego" | grep -qE '^S[0-9]{3,4}$'; then
+    ok "sessione: file vuoto ⟹ ripiego git+STATE, non stringa vuota ($sess_ripiego)"
+  else fail "sessione: il file vuoto non degrada al ripiego ($sess_ripiego)"; fi
+  # NEGATIVA: repo senza alcun commit 'handoff S<N>' e senza STATE.md. Deve dichiarare di non
+  # sapere. Un numero inventato qui sarebbe peggio del segnaposto che #191 sta togliendo.
+  NOSTORIA="$T/nostoria"
+  rm -rf "$NOSTORIA"; mkdir -p "$NOSTORIA"
+  ( cd "$NOSTORIA" && git init -q . && git config user.email t@t && git config user.name t \
+    && echo x > a.txt && git add a.txt && git commit -qm "nessun handoff qui" ) >/dev/null 2>&1
+  sess_muta="$( cd "$NOSTORIA" && HEURESYS_SESSION_FILE="$NOSTORIA/assente" bash "$ROOT/$CL" sessione )"
+  if [ "$sess_muta" = "S?" ]; then
+    ok "sessione: senza handoff e senza STATE dichiara S?, non inventa un numero"
+  else fail "sessione: ha inventato '$sess_muta' dove non poteva sapere"; fi
+
   # Il diario è un OSSERVATORE: non deve mai far fallire ciò che osserva.
   if HEURESYS_CLOSE_LOG="/dev/null/impossibile/log.ndjson" bash "$CL" step x y z >/dev/null 2>&1; then
     ok "close-log su path impossibile: non rompe (uscita 0)"

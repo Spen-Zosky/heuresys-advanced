@@ -91,6 +91,42 @@ try {
     if (-not (Test-Path $journal)) { New-Item -ItemType File -Path $journal -Force | Out-Null }
 } catch {}
 
+# 5b. Session id (#191): il numero di QUESTA sessione, fissato ADESSO perche' adesso e' l'unico
+#     momento in cui la risposta e' univoca — nessuna chiusura in volo, quindi l'ultimo commit
+#     `handoff S<N>` e' certamente quello della sessione PRECEDENTE, e questa e' N+1. A chiusura
+#     avvenuta lo stesso calcolo diventa ambiguo (l'ultimo handoff e' quello di QUESTA), ed e' il
+#     motivo per cui il rendiconto delle chiusure ha attribuito 159 righe su 171 a "S?".
+#
+#     Il valore lo calcola `close-log.sh sessione`, non una seconda implementazione qui: due
+#     derivazioni dello stesso numero divergono, e il giorno in cui divergono nessuna delle due
+#     e' credibile. Il file va RIMOSSO prima di derivare, altrimenti si rileggerebbe il numero
+#     della sessione precedente e il boot lo confermerebbe per sempre.
+#     Fallimento = nessun file: close-log torna al proprio ripiego. Mai peggio di prima.
+#
+#     TRAPPOLA WINDOWS, misurata qui il 2026-08-15 e non a memoria: in PowerShell `bash` NON e'
+#     il bash di Git, e' `C:\WINDOWS\system32\bash.exe` — quello di WSL, che su questa macchina
+#     non ha distribuzioni e risponde in UTF-16 «sottosistema Windows per Linux non ha
+#     distribuzioni installate». Il bash giusto si ricava da dove sta `git`, mai per path fisso.
+$sessionMsg = ''
+try {
+    $sidFile = Join-Path $ProjectRoot '.handoff\session-id'
+    $clog    = Join-Path $ProjectRoot 'scripts\close-log.sh'
+    $gitExe  = (Get-Command git -ErrorAction SilentlyContinue).Source
+    $bashExe = if ($gitExe) { Join-Path (Split-Path (Split-Path $gitExe -Parent) -Parent) 'bin\bash.exe' } else { $null }
+    if ((Test-Path $clog) -and $bashExe -and (Test-Path $bashExe)) {
+        Remove-Item -LiteralPath $sidFile -Force -ErrorAction SilentlyContinue
+        Push-Location $ProjectRoot
+        $sid = (& $bashExe 'scripts/close-log.sh' sessione 2>$null | Select-Object -First 1)
+        Pop-Location
+        if ($sid -match '^S[0-9A-Za-z?]+$' -and $sid -ne 'S?') {
+            [System.IO.File]::WriteAllText($sidFile, "$sid`n")
+            $sessionMsg = "[OK]   sessione $sid (depositata in .handoff/session-id)"
+        } else {
+            $sessionMsg = "[!]    sessione NON DERIVABILE: il rendiconto della chiusura dira' S?"
+        }
+    }
+} catch { $sessionMsg = "[!]    sessione NON DERIVABILE (errore al boot): il rendiconto dira' S?" }
+
 # 6. State coherence reality-check (P7, design §11.7): run the handoff lint READ-ONLY and surface
 #    its verdict, so the action menu is not built on already-drifted state (a concurrent session
 #    may have left it incoherent before this one started).
@@ -132,5 +168,6 @@ Write-Output "branch $branch @ $head"
 Write-Output $treeMsg
 Write-Output $pushMsg
 Write-Output $journalMsg
+if ($sessionMsg) { Write-Output $sessionMsg }
 Write-Output $lintMsg
 Write-Output '==================================='

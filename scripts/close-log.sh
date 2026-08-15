@@ -21,12 +21,15 @@
 # Uso:
 #   bash scripts/close-log.sh step <passo> <esito> <perche...>
 #   bash scripts/close-log.sh report [N]        # riassume le ultime N sessioni (default 10)
+#   bash scripts/close-log.sh sessione          # stampa la sessione DERIVATA (#191)
 #
 #   passo : registra|verifica|pubblica|propaga|deploy|clone-db|<libero>
 #   esito : eseguito|saltato|ignoto|fallito|parziale
 #   perche: prosa breve — DEVE dire su quale misura si basa («misurato: ...», «IGNOTO: ...»)
 #
-# La sessione si passa in env HEURESYS_SESSION (es. S1046); in sua assenza la riga porta "S?".
+# La sessione si passa in env HEURESYS_SESSION (es. S1046); in sua assenza viene DERIVATA
+# (#191, catena di precedenza documentata sotto `sessione_derivata`), e solo se ogni fonte
+# tace la riga porta "S?".
 #
 # MISURATO 2026-08-12 (#148): "S?" NON era il caso raro, era il caso NORMALE — 84 righe su 96.
 # Nessuno dei due chiamanti reali (close-propagate.sh, align-clones.sh) esportava
@@ -50,6 +53,52 @@ ROOT="$(git rev-parse --show-toplevel)"
 # env override: solo per i test (default invariato) — il diario reale non va inquinato da righe
 # di prova, altrimenti la misura che serve a decidere la ristrutturazione parte già sporca.
 LOG="${HEURESYS_CLOSE_LOG:-$ROOT/.handoff/close-log.ndjson}"
+# env override: solo per i test, come sopra.
+SESSION_FILE="${HEURESYS_SESSION_FILE:-$ROOT/.handoff/session-id}"
+
+# --------------------------------------------------------------------------- la sessione
+# #191 — MISURATO 2026-08-15: `S?` non era il caso raro, era il caso NORMALE — 159 righe su 171.
+# `${HEURESYS_SESSION:-S?}` da solo non poteva funzionare: NESSUNO esportava quella variabile
+# (`grep -rl HEURESYS_SESSION` la trovava solo in chi la LEGGE e in un test). Il rimedio di #148
+# ha cambiato il RAGGRUPPAMENTO del report, non la causa: le chiusure restavano distinte fra
+# loro, ma nessuna sapeva ancora dire di CHI fosse.
+#
+# PERCHE' IL COMMIT DI HANDOFF NON BASTA COME FONTE PRIMARIA (la strada scritta nel register,
+# provata e declassata a ripiego): l'ultimo commit `handoff S<N>` e' quello della sessione
+# PRECEDENTE mentre la sessione e' in corso (⟹ N+1), e quello di QUESTA dopo la chiusura (⟹ N).
+# I due casi non si distinguono: ne' da STATE.md (dopo l'handoff il numero coincide), ne' da
+# HEAD (dopo il commit di handoff possono atterrarne altri — successo in S1063, `22b78564`).
+# Un valore ambiguo non e' verificabile, ed e' proprio la proprieta' che serve qui.
+#
+# QUINDI il numero si fissa al BOOT, quando la risposta e' univoca (nessuna chiusura in volo),
+# e si deposita in .handoff/session-id — per-macchina e gitignored, come questo stesso diario.
+# Precedenza, dalla piu' forte alla piu' debole. L'ultima dichiara di non sapere invece di
+# inventare, perche' un segnaposto onesto e' misurabile e una deduzione sbagliata no:
+#   1. HEURESYS_SESSION      — chi orchestra la chiusura sa gia' chi e'
+#   2. .handoff/session-id   — depositato dal boot (session-boot.ps1 §5b)
+#   3. git+STATE, RIPIEGO    — vale finche' il boot non ha depositato: se STATE e' piu' avanti
+#      dell'ultimo handoff committato, l'handoff di questa sessione e' scritto ma non ancora
+#      pubblicato (⟹ STATE); altrimenti la sessione e' in corso (⟹ ultimo handoff + 1)
+#   4. S?                    — nessuna delle tre
+sessione_derivata() {
+  if [ -n "${HEURESYS_SESSION:-}" ]; then printf '%s' "$HEURESYS_SESSION"; return; fi
+
+  if [ -s "$SESSION_FILE" ]; then
+    v="$(head -n1 "$SESSION_FILE" | tr -d '\r[:space:]')"
+    if [ -n "$v" ]; then printf '%s' "$v"; return; fi
+  fi
+
+  ultimo="$(git -C "$ROOT" log --grep='handoff S' -1 --format=%s 2>/dev/null || true)"
+  n="$(printf '%s' "$ultimo" | grep -oE 'handoff S[0-9]{3,4}' | grep -oE '[0-9]{3,4}' || true)"
+  st="$(grep -oE '\bS[0-9]{3,4}\b' "$ROOT/.handoff/STATE.md" 2>/dev/null | head -n1 | tr -d 'S' || true)"
+
+  if [ -n "$n" ]; then
+    if [ -n "$st" ] && [ "$st" -gt "$n" ] 2>/dev/null; then printf 'S%s' "$st"; return; fi
+    printf 'S%s' "$((n + 1))"; return
+  fi
+  if [ -n "$st" ]; then printf 'S%s' "$st"; return; fi
+  printf 'S?'
+}
 
 cmd="${1:-step}"; shift || true
 
@@ -59,7 +108,7 @@ case "$cmd" in
     outcome="${1:?usage: close-log.sh step <passo> <esito> <perche...>}"; shift
     why="$*"
     ts="$(date +%Y-%m-%dT%H:%M:%S%z)"
-    session="${HEURESYS_SESSION:-S?}"
+    session="$(sessione_derivata)"
     # L'id di CORSA: ereditato da chi orchestra la chiusura, altrimenti generato qui.
     # Una riga isolata non deve poter finire nel mucchio di un'altra chiusura.
     run="${HEURESYS_CLOSE_RUN:-orfana-$(date +%Y%m%dT%H%M%S)-$$}"
@@ -117,5 +166,11 @@ case "$cmd" in
     done
     ;;
 
-  *) echo "usage: close-log.sh step <passo> <esito> <perche...> | report [N]" >&2; exit 1 ;;
+  sessione)
+    # Chi orchestra la chiusura la esporta una volta e la passa ai figli, cosi' tutti i passi
+    # di una stessa corsa portano lo stesso numero anche se qualcuno gira altrove.
+    sessione_derivata; echo
+    ;;
+
+  *) echo "usage: close-log.sh step <passo> <esito> <perche...> | report [N] | sessione" >&2; exit 1 ;;
 esac

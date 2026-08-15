@@ -16,6 +16,10 @@
 .handoff/session-journal.ndjson
 .handoff/session-journal.recovered.ndjson
 .handoff/close-log.ndjson
+# Session id (#191) — il numero di QUESTA sessione, fissato dal boot quando la risposta è
+# univoca e riletto dal diario delle chiusure. Per-macchina: due macchine possono avere due
+# sessioni aperte, e il numero è di chi la sta vivendo, non del repo.
+.handoff/session-id
 # #165 — stato locale del sorvegliante di deploy (per-macchina, vive solo su VM/linux-pc):
 # il lock che impedisce due deploy sovrapposti e il promemoria «questa CI rossa l'ho gia'
 # segnalata», che evita di riaccendere lo stesso allarme ogni 5 minuti.

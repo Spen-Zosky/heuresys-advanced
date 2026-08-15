@@ -12,7 +12,31 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
-- **#191 Il rendiconto delle chiusure non sa di quale sessione parla** · status: ACTIVE
+- **#191 Il rendiconto delle chiusure non sa di quale sessione parla** · status: DONE
+  - ✅ **CHIUSA S1064 (2026-08-15).** Il numero **non si passa più a mano e non si deduce a
+    posteriori**: si fissa al **boot**, dove la risposta è univoca, e si deposita in
+    `.handoff/session-id` (per-macchina, gitignored come il diario). `close-log.sh` ha una
+    catena di precedenza dichiarata — `HEURESYS_SESSION` → file del boot → ripiego git+STATE →
+    `S?` — e `close-propagate.sh` la **esporta una volta sola** per tutti i suoi figli, così
+    `align-clones.sh` non firma la propria riga con la sessione di qualcun altro.
+  - **la strada del register era quella sbagliata, e la prova lo ha mostrato**: derivare dal
+    commit di handoff è **ambiguo per costruzione**. A sessione in corso l'ultimo `handoff S<N>`
+    è quello della sessione *precedente* (⟹ N+1); a chiusura avvenuta è quello di *questa*
+    (⟹ N). I due casi non si distinguono né da `STATE.md` (dopo l'handoff il numero coincide)
+    né da HEAD (dopo l'handoff possono atterrare altri commit — successo in S1063, `22b78564`).
+    Resta come **ripiego dichiarato**, non come fonte primaria.
+  - ⚠ **trappola Windows, misurata qui e non a memoria**: in PowerShell `bash` è
+    `C:\WINDOWS\system32\bash.exe` — quello di **WSL**, che su questa macchina non ha
+    distribuzioni. Il primo giro di boot ha stampato `sessione NON DERIVABILE`: la prova ha
+    fatto il suo mestiere prima che il difetto arrivasse in una chiusura vera. Il bash giusto
+    si ricava da dove sta `git`, mai da un path fisso.
+  - **evidenza live** (2026-08-15 23:37, `D:\heuresys-advanced`): boot →
+    `[OK] sessione S1064 (depositata in .handoff/session-id)`; riga scritta **senza** alcuna
+    variabile esportata → `{"session":"S1064","run":"orfana-20260815T233739-203151",…}`;
+    `report` la raggruppa come `S1064 (orfana-…)`. `bash scripts/test/run-shell-tests.sh` →
+    **152 ok, 0 failed** con **4 prove nuove**, di cui una **negativa**: un repo senza commit
+    di handoff e senza STATE deve dichiarare `S?` invece di inventare un numero — se quel ramo
+    diventasse irraggiungibile le altre tre non sarebbero più prove.
   - priority: P3 · effort: ~30 min · doc: `scripts/close-log.sh` · trovato: S1063 (2026-08-15, ciclo di autocoscienza)
   - **il fatto, misurato**: `.handoff/close-log.ndjson` ha **171 righe** e **due sole sessioni distinte**:
     `S1046` (12 righe) e **`S?` (159 righe)**. Il campo `session` viene da `${HEURESYS_SESSION:-S?}`,

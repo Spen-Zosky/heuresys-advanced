@@ -1,5 +1,12 @@
 # MANDATO — ciclo di autocoscienza e redenzione
 
+> 📦 **ARCHIVIATO S1064 (2026-08-15) — documento storico, NON stato.** Visse in `.programmi/`,
+> che è la corsia di ciò **da cui si riprende**: un mandato concluso lì dentro faceva uscire
+> rosso `programmi.py --verifica` («nessuna fase — un programma senza fasi non è ripartibile»),
+> e la diagnosi giusta non era aggiungergli fasi finte a posteriori, ma riconoscere che non è
+> mai stato un programma multi-sessione. Il suo esito vive in `SOT_STATE.md`; le quattro
+> scoperte che ha prodotto sono nel register (`#190` e `#191` chiuse, `#192` chiusa in S1064).
+
 > **origine**: mandato di Enzo, S1062 (2026-08-15), non eseguito perché la finestra 5h era all'82%
 > **stato**: IN CORSO — aperto S1063, 2026-08-15 18:10
 > **vincolo del mandato**: va eseguito **per intero, con contesto pieno, PRIMA della chiusura

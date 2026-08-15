@@ -16,7 +16,7 @@ seed e strumenti, non migrazioni): utenti **161** · posizioni **315** · tenant
 RBAC **14 ruoli / 217 permessi / 959 mapping** · skill **14.039** · migration su disco **313**
 (max `000315`) = **313 applicate** · HEAD `a572c2f2`.
 
-**Il mandato di autocoscienza, eseguito per intero** (`.programmi/mandato-autocoscienza-redenzione.md`,
+**Il mandato di autocoscienza, eseguito per intero** (`docs/archive/MANDATO_AUTOCOSCIENZA_S1063.md`,
 17/17 voci). Riletti: 6 regole, **36 ADR**, README, 3 xtras di metodo, **72 memorie**, 7 skill,
 claude-mem. Misurati **5 pattern** di inadempienza su S1053-S1062, estraendo 1715 messaggi umani dai
 transcript invece di cercare per parole chiave.

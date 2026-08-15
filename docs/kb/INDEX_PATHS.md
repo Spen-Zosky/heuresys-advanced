@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-15T17:55:40Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3029**
+**Generato**: 2026-08-15T21:50:22Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3026**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -12,8 +12,8 @@
 | api-core | 33 |
 | api-module | 335 |
 | ci | 17 |
-| claude-config | 39 |
-| config | 145 |
+| claude-config | 35 |
+| config | 146 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
@@ -33,7 +33,7 @@
 | test | 377 |
 | ux-design-archive | 80 |
 | web-source | 237 |
-| **TOTALE** | **3029** |
+| **TOTALE** | **3026** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2471 |
+| live | 2468 |
 
 ## File per categoria
 
@@ -491,11 +491,7 @@
 - `D:\heuresys-advanced\.claude\rules\tests.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\settings.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\settings.local.json` · *live* · git-tracked
-- `D:\heuresys-advanced\.claude\skills\consolida-pagina\SKILL.md` · *live* · git-tracked
-- `D:\heuresys-advanced\.claude\skills\consolida-pagina\references\functional_areas.md` · *live* · git-tracked
-- `D:\heuresys-advanced\.claude\skills\dashboards-jobs\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\full-alignment-deploy\SKILL.md` · *live* · git-tracked
-- `D:\heuresys-advanced\.claude\skills\multi-tenant-validator\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\project-atlas\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\LEARNINGS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\atlas.config.yaml` · *live* · git-tracked
@@ -634,6 +630,7 @@
 - `D:\heuresys-advanced\scripts\env-key-merge.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\gdpr-retention-sweep.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\hooks\hook.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\hooks\precompact-journal.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\hooks\session_mode.py` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\journal-append.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\panel_base.py` · *live* · git-tracked
@@ -1527,7 +1524,6 @@
 - `D:\heuresys-advanced\.programmi\92-ciclo-valutazione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\99-domini-gerarchici-funzionali.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\README.md` · *live* · git-tracked
-- `D:\heuresys-advanced\.programmi\mandato-autocoscienza-redenzione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\PROGRESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-macchina-stati.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-misura.md` · *live* · git-tracked
@@ -1580,6 +1576,7 @@
 - `D:\heuresys-advanced\docs\archive\GOAL_B_REPORT_2026-05-18.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\HANDOFF.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\HANDOFF_BRAND.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\MANDATO_AUTOCOSCIENZA_S1063.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\MIGRATION_STATUS_2026-05-18.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\NEXT_GENERATION_ENTRY_POINT.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_2A.md` · *live* · git-tracked

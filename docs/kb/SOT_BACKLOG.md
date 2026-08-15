@@ -92,7 +92,7 @@
     `heuresys-evo`, che ha un proprio repo. L'equivalente reale di ciascuna vive già altrove — il
     modello dei permessi in `.claude/rules/api-module-pattern.md`, le voci di menu nella matrice dei
     domini (ADR-0036 + `#99` F7), l'isolamento fra tenant negli invarianti I5/I3/I4.
-  - doc: `.programmi/mandato-autocoscienza-redenzione.md` · cancello: `python docs/kb/tools/check_istruzioni.py`
+  - doc: `docs/archive/MANDATO_AUTOCOSCIENZA_S1063.md` (archiviato S1064: era in `.programmi/`, che è la corsia di ciò da cui si RIPRENDE — un mandato concluso lì dentro è un difetto di integrità, non una voce aperta) · cancello: `python docs/kb/tools/check_istruzioni.py`
   - **il fatto, misurato il 2026-08-15**: le tre skill istruiscono sul progetto **legacy `heuresys-evo`**,
     non su questo. `multi-tenant-validator` usa Prisma (**0** `package.json` lo nomina in questo repo) e
     **raccomanda di abilitare RLS**, che l'invariante **I5** vieta ovunque; aveva `trigger: auto`.

@@ -17,7 +17,7 @@ Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on Po
 |---|---|---|
 | API modules + endpoints | Fastify 5 business modules registered under `/v1/*` (+ auth/mfa/me ESS · 2 health) | `docs/kb/SOT_STATE.md` |
 | Shared Zod schemas | `@heuresys/shared` workspace package — schemas + TS types, subpath exports per module | `docs/kb/SOT_STATE.md` |
-| DB tables + migrations | `sys.*` business tables + views + staging/brownfield/audit aux · idempotent numbered migrations (`000001..`) | `docs/kb/SOT_STATE.md` |
+| DB tables + migrations | `sys.*` business tables + views + `staging`/`reference_sync`/`audit` aux · idempotent numbered migrations (`000001..`) | `docs/kb/SOT_STATE.md` |
 | Integration tests | vitest single-thread, real DB via SSH tunnel, no mocks | `docs/kb/SOT_STATE.md` |
 | Web routes | admin SPA + ESS `/me/*` + teams + login + system-health + root router | `docs/kb/SOT_STATE.md` |
 | Playwright E2E | live-data, storageState-backed, real seeded personas | `docs/kb/SOT_STATE.md` |
@@ -160,12 +160,17 @@ Open `http://localhost:3000`, log in as one of the seeded personas (password fro
 
 | Persona | Email | Role | Lands on |
 |---|---|---|---|
-| Platform Admin | `admin@heuresys.com` | `PLATFORM_ADMIN` | `/dashboard` |
+| Platform Admin | `enzo.spenuso@heuresys.com` | `PLATFORM_ADMIN` | `/dashboard` |
 | Tenant Admin | `federica.marchetti@rtl-bank.org` | `TENANT_ADMIN` | `/dashboard` |
 | Manager | `paolo.caputo@rtl-bank.org` | `MANAGER` | `/dashboard` |
 | Employee (Paolo's report) | `tommaso.fiore@rtl-bank.org` | `USER` | `/me` |
 | Outsider | `antonio.parisi@rtl-bank.org` | `USER` | `/me` |
 | Employee | `marco.rinaldi@rtl-bank.org` | `USER` | `/me` |
+
+> ⚠ **The password is not a shared literal**: since Z-262 it is **derived per e-mail** from
+> the master key in `.secrets/` (gitignored). Using `TEST_ADMIN_PASSWORD` directly returns
+> `LOGIN_INVALID` for every persona. Login is a **two-step** call (MFA is on, the second
+> factor is a derived TOTP) — see `apps/api/scripts/verify-derived-login.mjs`.
 
 ---
 
@@ -201,7 +206,7 @@ Every spec asserts on **live data** from the seeded `RTL_BANK_REFERENCE` referen
 These are baked into the architecture and cannot be revisited without an ADR / decision-log entry:
 
 - **I1** Position-centric model. Owner ≠ Incumbent.
-- **I3 / I4** Business tables in `sys.sys_<plural>`. Aux schemas: `staging`, `brownfield`, `audit`, `temp_sdbi` (ADR-0014).
+- **I3 / I4** Business tables in `sys.sys_<plural>`. Aux schemas, **measured live** (`information_schema.schemata`): `staging`, `reference_sync`, `audit`. `brownfield` was **retired** by mig. `000297` (#164 F4) and no longer exists; `temp_sdbi` is gone too.
 - **I5** Tenant isolation = FK + API middleware filter. **Never** Postgres RLS.
 - **I7** Auth tables (11 `sys.sys_auth_*`) are separate from `sys.sys_users`.
 - **I8** Compensation module is **decision support only**, not payroll execution.
@@ -211,7 +216,8 @@ These are baked into the architecture and cannot be revisited without an ADR / d
 - **ADR-0011** ESS portal is hard self-scoped — no `:userId` in `/v1/me/*` URLs; `selfActor()` derives identity from JWT.
 - **ADR-0013** Showcase SoT — `@heuresys/ui` → `apps/web` → `apps/showcase` mirror via `scripts/sync-showcase.sh` → GH Pages.
 
-Full invariant list (I1-I14) + rationale in `CLAUDE.md`.
+Full invariant list (I1-I22) + rationale in `CLAUDE.md` — that file is the source, and the
+range is re-derived from it rather than restated here.
 
 ---
 
@@ -224,12 +230,14 @@ Full invariant list (I1-I14) + rationale in `CLAUDE.md`.
 | MVP-2a — Admin SPA (30 routes) + auth client + axe a11y | ✅ closed acceptance-criteria-complete | `v0.2.1-mvp2a-final` |
 | MVP-2b — ESS portal (`/v1/me/*` + 14 web pages) | ✅ closed | `v0.2.0-mvp2` |
 | MVP-3 — GitHub Tier 0/1, MFA full TOTP login-gating, Brownfield Wave 1 pragmatic 13/19, WCAG 2.2 AA, `@heuresys/ui` npm publish, 2 CVE fixes | ✅ closed | `v0.3.2-mvp3-full` |
-| MVP-4 — Brownfield Wave 2-4, SDBI Phase 2 (ADR-0014 ACCEPTED), MFA multi-kind, React Flow renderer, Mobile responsive, OCI Managed migration prep | ⏳ planned (vedi `docs/MVP_4_ROADMAP.md`) | — |
+| MVP-4 — Brownfield Wave 2-4, SDBI Phase 2 (ADR-0014 ACCEPTED), MFA multi-kind, React Flow renderer, Mobile responsive, OCI Managed migration prep | ✅ closed with the `v1.0.0` GA baseline | `v1.0.0` |
 
-3 P0 immediate da chiudere prima di MVP-4 (vedi `.handoff/STATE.md` + `sessioni/.../FORENSIC_STATE_OF_ART_2026-05-26.md`):
-- **DEFER-F** `/showcase` Next 15 RSC bundle threshold proper fix (PROMPT 025 X21 pending)
-- **CW-B60-A** brownfield engine silent-filter (3 target AUTO_APPROVED + 0 upserted)
-- **CW-B60-B** Wave 2 scope ADR (3 target IMPORT senza staging source)
+Anything still open lives in the **Action register** of `docs/kb/SOT_BACKLOG.md` and in
+`docs/kb/DEBT_REGISTER.md` — not here. This section used to carry three "P0 immediate"
+(`DEFER-F`, `CW-B60-A`, `CW-B60-B`) which the debt register has long marked terminal, and
+the two `CW-B60-*` concerned brownfield waves that **invariant I12 has since closed for
+good** ("il rubinetto è chiuso"). A README that keeps its own to-do list drifts from the
+register the moment one of the two is updated; the register is the source.
 
 For details on what's next, see `.handoff/STATE.md` (live state) and `sessioni/session_2026-05-26_forensic-state-of-the-art/FORENSIC_STATE_OF_ART_2026-05-26.md`.
 

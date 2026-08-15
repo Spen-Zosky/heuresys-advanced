@@ -32,14 +32,11 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-1. ⚠ **`#190` — aspetta te**: autorizzare la **rimozione** delle tre skill che descrivono il
-   legacy. Il pericolo è già spento (non si attivano più da sole, avviso in testa, deroga
-   motivata), ma i file sono ancora lì e cancellarli non è una decisione mia · register `#190`
-2. **`#142` F2 — modello dei cruscotti** (~180k), sbloccata da `#99` F7. Leggere prima i tre
+1. **`#142` F2 — modello dei cruscotti** (~180k), sbloccata da `#99` F7. Leggere prima i tre
    reperti nel register: la derivazione **restringe e non concede**, il permesso per cruscotto
    serve ancora, e nel modulo `dashboard` ci sono due residui da correggere lì · `.programmi/142-*.md`
-3. **`#191` — il rendiconto delle chiusure non sa di quale sessione parla** (~30 min): 159
-   righe su 171 dicono `S?` perché nessuno esporta la variabile · `scripts/close-log.sh`
+2. **`#191` — il rendiconto delle chiusure non sa di quale sessione parla** (~30 min): quasi
+   tutte le righe dicono `S?` perché nessuno esporta la variabile · `scripts/close-log.sh`
 
 ## Open questions
 

@@ -27,9 +27,19 @@
     variabile manca, invece di scrivere un segnaposto. Un valore derivato è verificabile; `S?` no.
   - chiuso-quando: una chiusura nuova scrive una riga con la sessione reale, e `close-log.sh report` la raggruppa per sessione senza degradare
 
-- **#190 Tre skill di questo repo descrivono il progetto legacy — vanno rimosse, e la rimozione è tua** · status: WAIT-INPUT
-  - input-richiesto: l'autorizzazione a **cancellare** i tre file (`.claude/skills/{consolida-pagina,dashboards-jobs,multi-tenant-validator}/`)
-  - perche-solo-tuo: il `CLAUDE.md` globale vieta di cancellare file senza conferma esplicita di Enzo. Ho fatto tutto ciò che potevo senza cancellare: auto-invocazione spenta, avviso in testa, deroga motivata.
+- **#190 Tre skill di questo repo descrivono il progetto legacy — vanno rimosse, e la rimozione è tua** · status: DONE
+  - ✅ **CHIUSA S1063 (2026-08-15) — Enzo ha autorizzato la cancellazione, eseguita.** Rimossi
+    **4 file** (`git rm -r`): `consolida-pagina/` (2 file, incl. `references/functional_areas.md`),
+    `dashboards-jobs/`, `multi-tenant-validator/`. Le skill di progetto passano da **7 a 4**, tutte
+    pertinenti: `full-alignment-deploy`, `project-atlas`, `storia36-custodia`, `zero-pending-loop`.
+  - **Le deroghe sono state tolte insieme ai file, non lasciate a coprire il vuoto**:
+    `istruzioni_waivers.txt` non ha più alcuna deroga attiva, e `check_istruzioni.py` esce **0**
+    perché il difetto **non c'è più**, non perché è esentato. È la differenza fra un cancello che
+    misura e uno che ricorda di essere stato messo a tacere. Selftest ancora **6/6**.
+  - **Nulla di utile è andato perso**: il contenuto era la documentazione operativa di
+    `heuresys-evo`, che ha un proprio repo. L'equivalente reale di ciascuna vive già altrove — il
+    modello dei permessi in `.claude/rules/api-module-pattern.md`, le voci di menu nella matrice dei
+    domini (ADR-0036 + `#99` F7), l'isolamento fra tenant negli invarianti I5/I3/I4.
   - doc: `.programmi/mandato-autocoscienza-redenzione.md` · cancello: `python docs/kb/tools/check_istruzioni.py`
   - **il fatto, misurato il 2026-08-15**: le tre skill istruiscono sul progetto **legacy `heuresys-evo`**,
     non su questo. `multi-tenant-validator` usa Prisma (**0** `package.json` lo nomina in questo repo) e

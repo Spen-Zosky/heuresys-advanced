@@ -2,7 +2,11 @@
 # Una riga SENZA motivo viene ignorata di proposito: una deroga muta non e' una decisione.
 #
 # Formato: <path relativo alla radice del repo>   # <motivo>
-
-.claude/skills/consolida-pagina/SKILL.md        # ritirata il 2026-08-15: descrive il legacy heuresys-evo (rbp_*, admin_component_registry: 0 nel DB). Auto-invocazione spenta e avviso in testa al file; il contenuto resta come storia. La RIMOZIONE del file spetta a Enzo — register.
-.claude/skills/dashboards-jobs/SKILL.md         # ritirata il 2026-08-15: descrive il legacy heuresys-evo (Docker, services/frontend, porte 8012/3012, 7 file di memoria inesistenti). Era la piu' pericolosa: i suoi trigger l'avrebbero attivata su #142 F2. La RIMOZIONE spetta a Enzo — register.
-.claude/skills/multi-tenant-validator/SKILL.md  # ritirata il 2026-08-15: descrive il legacy heuresys-evo (Prisma, assente da questo repo) e RACCOMANDA RLS, vietato dall'invariante I5. Aveva `trigger: auto`, rimosso. La RIMOZIONE spetta a Enzo — register.
+#
+# NESSUNA DEROGA ATTIVA.
+#
+# Le tre che c'erano — consolida-pagina, dashboards-jobs, multi-tenant-validator — sono state
+# CANCELLATE il 2026-08-15 su autorizzazione di Enzo (#190): descrivevano il progetto legacy
+# heuresys-evo e una raccomandava RLS, vietato dall'invariante I5. Il cancello e' verde perche'
+# il difetto non c'e' piu', non perche' e' esentato: e' una differenza che conta, ed e' il motivo
+# per cui le deroghe sono state tolte insieme ai file invece di restare a coprire il vuoto.

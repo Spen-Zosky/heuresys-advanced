@@ -11,23 +11,27 @@ autonomia, senza presidio»*. Il menu vale più di quanto entri in una sessione,
 chiuso, e ciò che resta ha la sua ripresa scritta in un file — nessuna voce lasciata aperta a
 memoria.
 
-**I due debiti aperti sono a zero** e tre voci sono chiuse. Le lacune formative non sapevano
-dire a quale posizione si riferissero: la scelta era posta come «o si inventa la posizione, o
-si toglie la colonna», e misurando è saltato fuori che **nessuna delle due andava bene** —
-quella colonna si può scrivere via API, toglierla avrebbe reso invisibile una lacuna futura.
-Si è registrato il dato e corretta la superficie, che mostrava agli utenti otto caratteri di un
-codice interno.
-
-La parte più grossa è **la completezza dei dati personali**: ventidue tabelle descrivevano una
-persona senza che quella persona potesse leggerle. Diciotto sono state escluse **una per una
-con la ragione scritta**, e quattro sono diventate pagine vere — fra cui i **rapporti di
-mentoring reali**, che il portale non mostrava affatto: si vedeva chi si *potrebbe* avere come
-mentore, non chi si ha davvero.
+**I due debiti aperti sono a zero** e tre voci sono chiuse. La parte più grossa è **la
+completezza dei dati personali**: ventidue tabelle descrivevano una persona senza che quella
+persona potesse leggerle. Diciotto sono state escluse **una per una con la ragione scritta**,
+e quattro sono diventate pagine vere — fra cui i **rapporti di mentoring reali**, che il
+portale non mostrava affatto: si vedeva chi si *potrebbe* avere come mentore, non chi si ha
+davvero.
 
 **Il tema della sessione**: la misura ha smentito i registri **sei volte**, e due di quelle
 smentite riguardavano il mio stesso lavoro — una verifica verde che non poteva fallire, e uno
 strumento che dichiarava «zero pagine» senza protestare. Due decisioni, invece, **non sono
 state chieste a Enzo perché le aveva già prese** altrove, su voci sorelle.
+
+**Poi la sessione è proseguita su richiesta** («continua con #92 F6», e l'istruzione che ne è
+nata: *quando il guardiano dice `✓ si continua` si va avanti automaticamente*). Chiuso per
+intero il **ciclo di valutazione**, che ora ha le sue due pagine e le sue prove con login
+reale, e la fase dei **domini funzionali**, delega compresa — quella non esisteva affatto, né
+come tabella né come istituto.
+
+**Tre volte una prova è stata scoperta incapace di fallire** (il lato mentore, la compilazione
+scambiata per difetto, la revoca che si auto-saltava): ogni volta il difetto era del test, non
+del prodotto.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -37,13 +41,16 @@ adversarial; le decisioni tecniche sono di Claude.
 ## Top priorities (prossima sessione)
 
 1. **Verificare com'è finito il deploy armato in chiusura**: `bash scripts/verifica-deploy.sh`.
-   Se dice `CI-ROSSA` è un errore da correggere subito, non da riportare a Enzo.
-2. **`#92` F6 — frontend del ciclo di valutazione**, ~200k: è la voce che questa sessione ha
-   **deciso di non aprire** per non lasciarla a metà, non una che si è arenata. Pagina
-   manageriale + pagina ESS, i18n in parità · `.programmi/92-*.md`
-3. **`#99` F6 — i quattro domini nuovi** (mentore, delega, approvatore, pari), ~250k. Parte
-   avvantaggiata: il dominio «mentore» ha già dato e superficie da F5, gli resta il perimetro
+   Se dice `CI-ROSSA` è un errore da correggere subito, non da riportare a Enzo. ⚠ Questo
+   giro porta in produzione **due migrazioni** (`000313` voci di menu, `000314` deleghe) e
+   due pagine nuove: vale la pena guardarlo.
+2. **`#99` F7 — dashboard derivate dalla matrice**, ~250k: è la penultima fase del programma.
+   La sovrapposizione con `#142` è già sciolta e non va ridiscussa — **F7 dà il meccanismo**,
+   `#142` dà il catalogo, ed è per questo che `#142` F2/F3 sono `GATED` su questa fase
    · `.programmi/99-*.md`
+3. **`#54` F2 — modello dati del recruiting** (~250k) oppure **`#159` F2 — il ponte**, che ora
+   è un'**estrazione** e non una costruzione: le 300 righe di `/dev/agent` sono già un ponte
+   funzionante nel posto sbagliato.
 
 ## Open questions
 

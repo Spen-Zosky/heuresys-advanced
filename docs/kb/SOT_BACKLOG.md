@@ -12,6 +12,24 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
+- **#189 `--repair-missing` della storia36 non arriva in fondo: un seed chiama una funzione che nessun seed crea** · status: ACTIVE
+  - priority: P2 · effort: ~1-2h · doc: skill `storia36-custodia` · trovato: S1062 (2026-08-15)
+  - **il difetto, con l'evidenza**: `db/scripts/storia36.sh custodia --repair-missing` si ferma su
+    `06_reorg.sql` con `ERROR: function staging.storia36_check_c6a(date) does not exist`. Le funzioni
+    `staging.storia36_check_*` sono create dalle **batterie** (`verify-storia36.sql`), che nel modo
+    `--repair-missing` girano **dopo** i seed: il seed 06 le invoca quando ancora non esistono.
+  - **perché non era mai emerso**: il modo `avanzamento` ri-esegue solo `01`, `04` e `07`, e il modo
+    `custodia` semplice non esegue seed affatto. Il `06` viene eseguito **solo** da `--repair-missing`
+    e dalla `costruzione` (chiusa e una tantum) — quindi il difetto è rimasto invisibile per costruzione.
+  - **conseguenza pratica, misurata**: la riparazione **non è atomica**. In S1062 i seed `00`→`05` hanno
+    committato (fra cui le **105 abilitazioni di sicurezza** che hanno risolto il rosso `C4h(iii)`), poi
+    la catena si è fermata: `06` e `07` non sono stati rieseguiti. Nessun dato corrotto — ma chi lancia
+    `--repair-missing` credendo di aver riparato tutto si sbaglia, e **l'exit 3 è l'unico segnale**.
+  - ⚠ **effetto collaterale sulla regola del twice-run**: la skill esige che dopo una riparazione il seed
+    giri due volte con 0 righe alla seconda. Con la catena che si spezza a metà, quella prova **non è
+    eseguibile** sul modo `--repair-missing`. Va ripristinata insieme al difetto.
+  - chiuso-quando: `--repair-missing` arriva in fondo su un database già sano, e la seconda corsa scrive 0 righe
+
 - **#188 Le lacune formative non sanno a quale posizione si riferiscono** · status: DONE
   - ✅ **CHIUSA S1061 (2026-08-14) — e la scelta binaria che l'item poneva era sbagliata in entrambi i rami.** L'item diceva: o si accetta l'inferenza dall'incarico corrente dichiarandola, o la colonna si ritira dalla superficie. Misurato prima di scegliere: **`CreateLearningGapBodySchema` accetta `positionId`** (riga 103) e `LearningGapListQuerySchema` lo espone come **filtro** (riga 67). Il contratto è **pieno** — letto, filtrabile, scrivibile — quindi ritirarlo avrebbe reso **invisibile una lacuna creata oggi con la posizione**: un difetto nuovo, peggiore di quello registrato. È lo stesso caso di `goal_owner_user_id` in `#123`, dove il verdetto fu *registrare*.
   - **Verdetto: registrare il dato, correggere la superficie.** I dati storici non portano la posizione (0 su 270, **ri-misurato oggi** e non ripreso dal register) e non la si deduce. La superficie però mentiva in due modi, entrambi tolti: il «—» muto, che non distingueva «mai rilevata» da «c'è ma non ti è leggibile», e **gli 8 caratteri di UUID** mostrati quando l'id c'era senza il titolo — rumore che sembra un codice. Ora quattro stati distinti e tradotti (it/en): titolo · *Posizione non risolta* · *Non rilevata* · idem per la competenza.

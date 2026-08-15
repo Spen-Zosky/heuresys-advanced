@@ -26,6 +26,13 @@ che lo standard di S1054 esclude. Misurato in diretta il perché — **135-165 m
 attraverso il tunnel, con vitest al 22% di CPU perché aspetta la rete. Spostata sul linux-pc:
 **verde in 17,7 minuti** contro 55+ senza arrivare in fondo.
 
+**Poi, su richiesta, la storia RTL è stata avanzata sulla VM** (database locale, non via
+tunnel): presenze, assenze, richieste di ferie e approvazioni derivate portate a ieri, e
+`db_health` è tornato **tutto nei limiti**. Il rosso che ne è emerso non era l'orologio come
+sembrava: due dirigenti non avevano **mai** avuto la formazione sicurezza obbligatoria, pur
+essendo inquadrati dal 2003 e dal 2009 mentre nove colleghi identici ce l'avevano. Riparato.
+La riparazione ha però fatto emergere `#189`, un difetto dello strumento stesso.
+
 ## Obiettivo permanente (mandato Enzo, S1029)
 
 **Fresh session senza pendenze**: zero debiti o task incompleti; doppia verifica e review
@@ -33,11 +40,10 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-1. **Le presenze sono ferme da 8 giorni** — allarme reale di `db_health`, **non** causato dal
-   lavoro di S1062: la storia RTL non avanza dal 2026-08-07 e il timer settimanale esegue solo
-   la *custodia*, non l'avanzamento. Rimedio: `storia36.sh avanzamento`, **da lanciare sulla VM**
-   (database locale) e non da Windows via tunnel. Rinviato per finestra 5h al 76%, non per
-   difficoltà · skill `storia36-custodia`
+1. **`#189` — la riparazione della storia36 non arriva in fondo** (~1-2h): un seed invoca una
+   funzione di verifica che le batterie creano *dopo* di lui, quindi `--repair-missing` si
+   spezza a metà e la regola del twice-run non è eseguibile su quel modo. Trovato eseguendolo
+   in S1062, invisibile prima perché quel seed lo tocca solo quel modo · register `#189`
 2. **Verificare com'è finito il deploy armato**: `bash scripts/verifica-deploy.sh`. Questo giro
    porta in produzione la migrazione `000315` e la nuova derivazione della sidebar.
 3. **`#142` F2 — modello dei cruscotti**, ora **sbloccata** da F7 (~180k). Leggere prima i tre

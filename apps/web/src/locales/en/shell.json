@@ -68,6 +68,16 @@
     "TEAM_LEADER": "Team leader",
     "TEAM_MEMBER": "Team member",
     "ORG_DIRECTOR": "Organization director",
-    "WHISTLEBLOWING_CUSTODIAN": "Whistleblowing custodian"
+    "WHISTLEBLOWING_CUSTODIAN": "Whistleblowing custodian",
+    "hr_mandate": "HR mandate",
+    "platform_mandate": "Platform mandate",
+    "line_management": "Line manager",
+    "team_lead": "Team lead",
+    "process_owner": "Process owner",
+    "mentor": "Mentor",
+    "approver": "Approver",
+    "team_peer": "Team peer",
+    "delegation": "Received delegation",
+    "custody": "Whistleblowing custody"
   }
 }

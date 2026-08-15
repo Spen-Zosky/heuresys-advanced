@@ -34,7 +34,7 @@ import type {
   SkillGapListResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-import { findOwnedPositionIds } from "../dashboard/repository.js";
+import { posizioniNelPerimetroOrganizzativo } from "../dashboard/repository.js";
 import { emitNotificationsBulk } from "../../lib/notifications/emit.js";
 import { resolveOrgReadScope, canReadOrgTarget, type OrgReadScope } from "../../lib/scope/resolver.js";
 import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
@@ -160,7 +160,7 @@ async function buildScope(
 ): Promise<{ kind: InsightsScopeKind; filter: repo.ScopeFilter; tenantId: string | null }> {
   const kind = await scopeKind(a);
   const isPlatform = kind === "PLATFORM";
-  const teamPositionIds = kind === "TEAM" ? await findOwnedPositionIds(pool, a.userId) : [];
+  const teamPositionIds = kind === "TEAM" ? await posizioniNelPerimetroOrganizzativo(pool, a.userId) : [];
   const tenantId = isPlatform ? null : a.tenantId;
   return { kind, tenantId, filter: { tenantId, teamPositionIds, isPlatformScope: isPlatform } };
 }

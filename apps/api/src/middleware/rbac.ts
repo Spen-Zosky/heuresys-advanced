@@ -53,6 +53,18 @@ export function rbacCacheStats(): {
   };
 }
 
+/**
+ * Quanti permessi porta un ruolo, letto dalla cache viva (#142 F2).
+ *
+ * Serve a `scopeTierAndRole` per rispondere «quale dei tuoi ruoli spiega cio' che vedi?»
+ * senza una scala di nomi scritta a mano — la sesta lista che il documento dei domini
+ * prediceva. Zero se il ruolo non e' in cache: un ruolo sconosciuto non puo' vincere un
+ * confronto di ampiezza.
+ */
+export function roleGrantSize(role: RoleCode): number {
+  return rolePermissionCache.get(role)?.size ?? 0;
+}
+
 export function userHasPermission(user: { roles: RoleCode[] }, permissionCode: string): boolean {
   for (const role of user.roles) {
     const perms = rolePermissionCache.get(role);

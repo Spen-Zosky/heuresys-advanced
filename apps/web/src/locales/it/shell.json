@@ -68,6 +68,16 @@
     "TEAM_LEADER": "Team leader",
     "TEAM_MEMBER": "Membro del team",
     "ORG_DIRECTOR": "Direttore organizzativo",
-    "WHISTLEBLOWING_CUSTODIAN": "Custode segnalazioni"
+    "WHISTLEBLOWING_CUSTODIAN": "Custode segnalazioni",
+    "hr_mandate": "Mandato HR",
+    "platform_mandate": "Mandato di piattaforma",
+    "line_management": "Responsabile di linea",
+    "team_lead": "Capo squadra",
+    "process_owner": "Proprietario di processo",
+    "mentor": "Mentore",
+    "approver": "Approvatore",
+    "team_peer": "Compagno di squadra",
+    "delegation": "Delega ricevuta",
+    "custody": "Custodia segnalazioni"
   }
 }

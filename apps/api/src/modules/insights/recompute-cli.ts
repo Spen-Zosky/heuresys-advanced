@@ -20,7 +20,7 @@ const log = (o: Record<string, unknown>): void =>
 
 // Synthetic system actor: PLATFORM scope (all tenants / all subjects). The NIL-UUID
 // userId is never read for PLATFORM scope — buildScope() only resolves a userId for
-// TEAM scope (findOwnedPositionIds). No FK/audit row references the actor.
+// TEAM scope (posizioniNelPerimetroOrganizzativo). No FK/audit row references the actor.
 const SYSTEM_ACTOR: ActorContext = {
   userId: "00000000-0000-0000-0000-000000000000",
   tenantId: null,

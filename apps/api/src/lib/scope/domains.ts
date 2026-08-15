@@ -35,6 +35,11 @@
 import type { DbConnector } from "./org.js";
 import { isPlatform, type ActorContext } from "../actor.js";
 import { HR_MANDATED_ROLES } from "./resolver.js";
+import { roleGrantSize } from "../../middleware/rbac.js";
+import type { RoleCode } from "../../config/constants.js";
+// `matrix.ts` importa da qui solo il TIPO `Domain`, che sparisce in compilazione: la
+// dipendenza a runtime e' quindi a senso unico, non un ciclo.
+import { M1 } from "./matrix.js";
 
 /**
  * I domini funzionali della matrice (ADR-0036).
@@ -272,8 +277,85 @@ export async function scopeTierOf(
   actor: ActorContext,
   surface: string,
 ): Promise<ScopeTier> {
-  if (isPlatform(actor)) return "PLATFORM";
-  if (actor.roles.some((r) => TENANT_WIDE_MANDATES.has(r))) return "TENANT";
-  if (await hasAnyDomain(q, actor)) return "TEAM";
+  return (await scopeTierAndRole(q, actor, surface)).tier;
+}
+
+/**
+ * Il tier **e il ruolo che lo giustifica** (#142 F2).
+ *
+ * PERCHE' ESISTE. `dashboard/service.ts` aveva una `highestRoleLabel` con OTTO nomi di ruolo
+ * scritti a mano per rispondere «come ti chiami, nel modo piu' alto?» — la SESTA lista, quella
+ * che il documento dei domini prediceva sarebbe nata a ogni correzione. Ed era gia' sbagliata,
+ * misurato sulla mappa RBAC viva: metteva `BLUEPRINT_MANAGER` (68 permessi) sopra
+ * `HRMS_MANAGER` (149), che I22 dichiara plenipotenziario sui dati business.
+ *
+ * LA DERIVAZIONE, e perche' non e' una lista con un altro nome. Non si cerca «il ruolo piu'
+ * importante» in assoluto — non esiste, e provare a ordinarli e' come nasce una lista. Si
+ * cerca **cio' che spiega il perimetro gia' calcolato**, e la risposta e' diversa nei tre
+ * tier perche' diversa e' la ragione del perimetro:
+ *
+ *  · PLATFORM / TENANT — il tier viene da un RUOLO (`isPlatform`, `TENANT_WIDE_MANDATES`).
+ *    Si sceglie, fra i ruoli che lo giustificano, quello con la concessione piu' ampia,
+ *    misurata sulla cache RBAC gia' caricata all'avvio: nessuna query in piu', nessun elenco
+ *    da aggiornare quando nasce un ruolo.
+ *  · TEAM — il tier NON viene da un ruolo: viene da un DOMINIO, che e' un fatto nei dati
+ *    (dirigi un'unita', guidi una squadra, possiedi un processo). Rispondere con un ruolo
+ *    sarebbe tornare a «chi sei?» invece di «cosa hai», che e' il difetto che questo modulo
+ *    esiste per togliere — e la prova live lo ha mostrato: `cristina.gatti`, che e'
+ *    `BRANCH_MANAGER`, usciva etichettata `USER`, perche' il ruolo-pavimento porta 56
+ *    permessi contro gli 11 di quello che la descrive davvero. Nemmeno escludere i permessi
+ *    `:self` bastava (26 contro 6, misurato). Si risponde quindi col dominio, ordinato per
+ *    quante classi apre in M1: chi ne apre di piu' spiega meglio cio' che si sta guardando.
+ *
+ * ⚠ `TENANT_WIDE_MANDATES` resta un insieme di nomi, e va bene: li' e' la DEFINIZIONE (un
+ * mandato si conferisce, non si deduce dall'organigramma — ADR-0027 §2.5). La differenza fra
+ * una definizione e una lista di comodo e' che la prima ha una ragione scritta.
+ */
+export async function scopeTierAndRole(
+  q: DbConnector,
+  actor: ActorContext,
+  surface: string,
+): Promise<{ tier: ScopeTier; role: string }> {
+  // `isPlatform` E' `roles.includes("PLATFORM_ADMIN")`, e misurato sul catalogo vivo
+  // `PLATFORM_ADMIN` e' l'unico ruolo con `auth_role_is_platform = true`: il ruolo che
+  // giustifica il tier e' quello, senza scelta da fare.
+  if (isPlatform(actor)) return { tier: "PLATFORM", role: "PLATFORM_ADMIN" };
+  const mandati = actor.roles.filter((r) => TENANT_WIDE_MANDATES.has(r));
+  if (mandati.length > 0) return { tier: "TENANT", role: ruoloPiuAmpio(mandati) };
+
+  const domini = await dominiCheApronoUnaSuperficie(q, actor);
+  if (domini.size > 0) return { tier: "TEAM", role: dominioPiuAmpio(domini) };
   throw new NoScopeTierError(surface);
+}
+
+/**
+ * Il dominio che apre piu' classi in M1, fra quelli attivi.
+ *
+ * L'ordine non e' scritto da nessuna parte: si CONTA quante celle non-`none` ha ciascuna riga
+ * della matrice. `line_management` ne apre cinque e vince su `team_lead` che ne apre tre, non
+ * perche' qualcuno l'abbia deciso qui, ma perche' ADR-0036 gli da' piu' modalita'. Il giorno
+ * che la matrice cambia, cambia anche questo, da solo.
+ */
+function dominioPiuAmpio(domini: ReadonlySet<Domain>): string {
+  const ampiezza = (d: Domain): number =>
+    Object.values(M1[d]).filter((m) => m !== "none").length;
+  return [...domini].sort((a, b) => {
+    const diff = ampiezza(b) - ampiezza(a);
+    return diff !== 0 ? diff : a.localeCompare(b);
+  })[0] as string;
+}
+
+/**
+ * Il ruolo con la concessione piu' ampia fra quelli dati, misurato sulla cache RBAC viva.
+ *
+ * A parita' di ampiezza si ordina per codice: non perche' il nome conti, ma perche' una
+ * risposta deve essere la stessa a ogni chiamata — un'etichetta che cambia a caso fra due
+ * ricariche della pagina e' un difetto che nessuno riesce a riprodurre.
+ */
+function ruoloPiuAmpio(ruoli: readonly string[]): string {
+  if (ruoli.length === 0) return "UNKNOWN";
+  return [...ruoli].sort((a, b) => {
+    const d = roleGrantSize(b as RoleCode) - roleGrantSize(a as RoleCode);
+    return d !== 0 ? d : a.localeCompare(b);
+  })[0] as string;
 }

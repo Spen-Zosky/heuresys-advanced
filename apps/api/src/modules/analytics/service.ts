@@ -29,7 +29,7 @@ import type {
   AnalyticsViewSlug,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-import { findOwnedPositionIds } from "../dashboard/repository.js";
+import { posizioniNelPerimetroOrganizzativo } from "../dashboard/repository.js";
 
 type ScopeKind = "PLATFORM" | "TENANT" | "TEAM";
 
@@ -50,7 +50,7 @@ async function buildScope(
   const kind = await scopeKind(a);
   const isPlatform = kind === "PLATFORM";
   const teamPositionIds =
-    kind === "TEAM" ? await findOwnedPositionIds(pool, a.userId) : [];
+    kind === "TEAM" ? await posizioniNelPerimetroOrganizzativo(pool, a.userId) : [];
   const tenantId = isPlatform ? null : a.tenantId;
   return {
     kind,

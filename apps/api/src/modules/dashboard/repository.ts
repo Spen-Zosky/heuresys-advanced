@@ -289,15 +289,52 @@ export async function getRecentActivity(
   }));
 }
 
-export async function findOwnedPositionIds(
+/**
+ * Le posizioni nel perimetro ORGANIZZATIVO dell'attore (#142 F2).
+ *
+ * SI CHIAMAVA `findOwnedPositionIds` E PERCORREVA L'ALBERO SBAGLIATO. Selezionava le
+ * posizioni di cui l'attore e' `position_owner_user_id`, cioe' l'albero delle POSIZIONI,
+ * mentre ADR-0036 fissa canonico quello delle UNITA' (`organization_unit_parent_id` +
+ * `organization_unit_manager_user_id`). Era un residuo di #99 F3 in un punto che F3 non
+ * aveva toccato, e non era locale a questo modulo: la funzione ha TRE consumatori di
+ * produzione — `dashboard`, `analytics`, `insights` — che percio' calcolavano tutti e tre
+ * il perimetro sull'albero non canonico. Correggerla qui li corregge insieme; correggerne
+ * uno solo avrebbe dato a una stessa persona due perimetri diversi su due pagine, che e'
+ * peggio di un perimetro sbagliato ma coerente.
+ *
+ * ⚠ La firma NON cambia — restituisce ancora id di POSIZIONE — apposta: i tre repository
+ * filtrano per `position_id`, e cambiare anche quello avrebbe trasformato una correzione di
+ * perimetro in una riscrittura di tre moduli. Cambia da DOVE vengono gli id.
+ *
+ * `I19` (principio della catena) e' la ragione della ricorsione: chi e' a capo di una catena
+ * vede tutto cio' che le sta sotto, a ogni livello, e niente delle catene sorelle. `UNION`
+ * (non `UNION ALL`) come in `orgSubtreeUserIds`: un ciclo malformato dedup-a e la ricorsione
+ * termina invece di avvitarsi.
+ */
+export async function posizioniNelPerimetroOrganizzativo(
   q: DbConnector,
-  ownerUserId: string,
+  actorUserId: string,
 ): Promise<string[]> {
   const r = await q.query<{ position_id: string }>(
-    `SELECT position_id FROM sys.sys_positions
-      WHERE position_owner_user_id = $1
-        AND position_is_active = true`,
-    [ownerUserId],
+    `WITH RECURSIVE mie_unita AS (
+       SELECT o.organization_unit_id AS ou_id
+         FROM sys.sys_organization_units o
+        WHERE o.organization_unit_manager_user_id = $1
+          AND o.organization_unit_is_active
+     ),
+     sottoalbero AS (
+       SELECT ou_id FROM mie_unita
+       UNION
+       SELECT o.organization_unit_id
+         FROM sys.sys_organization_units o
+         JOIN sottoalbero s ON o.organization_unit_parent_id = s.ou_id
+        WHERE o.organization_unit_is_active
+     )
+     SELECT DISTINCT p.position_id
+       FROM sys.sys_positions p
+       JOIN sottoalbero s ON s.ou_id = p.position_organization_unit_id
+      WHERE p.position_is_active = true`,
+    [actorUserId],
   );
   return r.rows.map((x) => x.position_id);
 }

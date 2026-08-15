@@ -9,6 +9,7 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { unManagerConPosizioniAttive, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
+import { M1 } from "../src/lib/scope/matrix.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 
@@ -140,9 +141,13 @@ describe("GET /v1/dashboard/widgets integration", () => {
       counters: { users: number; positions: number };
       trends: unknown[];
     };
-    expect(body.role).toBe("MANAGER");
+    // #142 F2 — l'attesa era scritta a mano (`"MANAGER"`) e rispecchiava la `highestRoleLabel`
+    // cancellata. Al tier TEAM il perimetro non lo giustifica un RUOLO ma un DOMINIO — un
+    // fatto nei dati — quindi l'etichetta e' un dominio di M1. L'atteso si deriva dalla
+    // matrice, non si sostituisce con un secondo letterale che invecchierebbe uguale.
+    expect(Object.keys(M1)).toContain(body.role);
     expect(body.scope.kind).toBe("TEAM");
-    // paolo.caputo (manager persona) owns his team positions via the rebuild I1 ownership pass.
+    // paolo.caputo (manager persona) dirige unita' reali: il perimetro non e' vuoto.
     expect(body.scope.teamPositionIds.length).toBeGreaterThanOrEqual(1);
     // positions count == owned positions count.
     expect(body.counters.positions).toBe(body.scope.teamPositionIds.length);

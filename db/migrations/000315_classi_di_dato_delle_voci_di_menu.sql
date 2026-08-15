@@ -75,6 +75,19 @@ SELECT i.ui_interface_id, v.data_class
     -- ── INTELLIGENCE ─────────────────────────────────────────────────────────
     ('insights',               'EVALUATION'),
     -- ── OVERVIEW ─────────────────────────────────────────────────────────────
+    -- ⚠ AGGIUNTA S1064 (#142 F2), e sta QUI e non nella 000316 per ADR-0035: questo file
+    -- CREA la tabella e ne CENSISCE le righe. Dichiarare tre classi a valle faceva fallire
+    -- il censimento di questo stesso file alla passata successiva (24 invece di 21) — la
+    -- classe di difetto che la prova generale vede solo alla SECONDA passata, e che l'ha
+    -- trovata in 10 secondi.
+    -- `dashboard` era l'unica voce OVERVIEW senza classi: per M3 significa «non espone dati
+    -- di persona», che e' falso — mostra organico, formazione e attivita' recenti. La
+    -- dichiarazione RESTRINGE, quindi e' stata misurata prima: ogni riga di M1 ha PERSONAL
+    -- diverso da `none` (tranne `delegation`, che ha ACTIVITY in lettura), quindi NESSUNO
+    -- perde la voce. Il test lo verifica invece di assumerlo.
+    ('dashboard',              'PERSONAL'),
+    ('dashboard',              'SKILL'),
+    ('dashboard',              'ACTIVITY'),
     ('approvals',              'ACTIVITY'),
     ('process-owner-console',  'ACTIVITY'),
     -- ⚠ `admin-mfa-policy` NON e' qui, e la sua assenza e' misurata. Dichiararla `CREDENTIAL`
@@ -107,14 +120,18 @@ DO $$
 DECLARE
   n_dich int; n_voci_dich int; n_personal int; n_attive int; n_orfane int; n_compensation int;
 BEGIN
+  -- 24 = le 21 originarie + le 3 di `dashboard` (S1064, #142 F2). Le VOCI restano contate a
+  -- parte perche' i due numeri dicono cose diverse: 24 dichiarazioni su 22 voci — `dashboard`
+  -- e' l'unica che ne porta piu' d'una, ed e' esattamente il caso che rende necessaria la
+  -- distinzione fra «quante righe» e «quante pagine».
   SELECT count(*) INTO n_dich FROM sys.sys_ui_interface_data_classes;
-  IF n_dich <> 21 THEN
-    RAISE EXCEPTION '000315: le dichiarazioni sono % invece di 21 — una voce citata non esiste con quel codice', n_dich;
+  IF n_dich <> 24 THEN
+    RAISE EXCEPTION '000315: le dichiarazioni sono % invece di 24 — una voce citata non esiste con quel codice', n_dich;
   END IF;
 
   SELECT count(DISTINCT ui_interface_id) INTO n_voci_dich FROM sys.sys_ui_interface_data_classes;
-  IF n_voci_dich <> 21 THEN
-    RAISE EXCEPTION '000315: le voci dichiarate sono % invece di 21', n_voci_dich;
+  IF n_voci_dich <> 22 THEN
+    RAISE EXCEPTION '000315: le voci dichiarate sono % invece di 22', n_voci_dich;
   END IF;
 
   -- ⚠ POST-CONDIZIONE CHE PROTEGGE CIO' CHE NON DOVEVA CAMBIARE, ed e' la piu' importante
@@ -154,5 +171,5 @@ BEGIN
     RAISE EXCEPTION '000315: le voci attive sono scese a % — qualcosa e stato spento', n_attive;
   END IF;
 
-  RAISE NOTICE '000315 ok — 21 voci con classe dichiarata, 0 voci PERSONAL toccate, % voci attive intatte', n_attive;
+  RAISE NOTICE '000315 ok — 22 voci con classe dichiarata (24 righe), 0 voci PERSONAL toccate, % voci attive intatte', n_attive;
 END $$;

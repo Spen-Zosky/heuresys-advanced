@@ -80,11 +80,25 @@ BEGIN
 
   -- LE 548 RESTANO. Se un giorno questo numero calasse, qualcuno avrebbe riscritto
   -- la storia: questa asserzione e' la guardia di quella decisione, non un conteggio.
-  IF n_completate <> 548 THEN
-    RAISE EXCEPTION 'Valutazioni concluse REALI: attese 548 INTATTE, trovate % — la storia non si riscrive', n_completate;
+  --
+  -- ⚠ CORRETTA S1064 (2026-08-16) DA `<> 548` A `< 548`, e il perche' e' il PUNTO FISSO del
+  -- CLAUDE.md: un dato che per sua natura puo' variare non si cristallizza. L'intento e'
+  -- scritto due righe sopra ed e' direzionale — «se un giorno questo numero CALASSE» — ma
+  -- l'uguaglianza stretta scattava anche in CRESCITA, che e' cio' che il lavoro legittimo
+  -- produce. Misurato il 2026-08-16 sul database di produzione: 570 concluse, +22 nate tutte
+  -- il 2026-08-15, TUTTE con soggetto e valutatore, ZERO gusci vuoti — la storia che avanza,
+  -- non una corruzione. La catena era percio' VERDE sulla CI (clone congelato, ferma a 548) e
+  -- ROSSA in produzione: la stessa famiglia del difetto che la prova generale intercetta, ma
+  -- al contrario, e per questo la prova generale non poteva vederla.
+  --
+  -- La guardia resta intera: una DIMINUZIONE e' ancora un errore fatale, e le due asserzioni
+  -- sotto (nessun guscio senza soggetto, albero integro) non sono state toccate — sono loro a
+  -- impedire che la crescita ammessa qui faccia entrare righe malformate.
+  IF n_completate < 548 THEN
+    RAISE EXCEPTION 'Valutazioni concluse REALI: attese almeno 548 INTATTE, trovate % — la storia non si riscrive', n_completate;
   END IF;
-  IF n_tot <> 548 THEN
-    RAISE EXCEPTION 'Valutazioni totali: attese 548 (550 meno i due gusci vuoti), trovate %', n_tot;
+  IF n_tot < 548 THEN
+    RAISE EXCEPTION 'Valutazioni totali: attese almeno 548 (550 meno i due gusci vuoti), trovate %', n_tot;
   END IF;
 
   SELECT count(*) INTO n_vuote FROM sys.sys_performance_reviews

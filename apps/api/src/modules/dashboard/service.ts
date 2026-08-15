@@ -5,11 +5,10 @@
  */
 
 import { pool } from "../../db/client.js";
-import { scopeTierOf } from "../../lib/scope/domains.js";
+import { scopeTierAndRole } from "../../lib/scope/domains.js";
 import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
-import type { RoleCode } from "../../config/constants.js";
 import type {
   DashboardScopeKind,
   DashboardWidgetsResponse,
@@ -29,30 +28,20 @@ const DASHBOARD_TREND_WEEKS = 8;
  * "you have no data" when the truth was "we could not place you".
  * `scopeTierOf` throws instead, so the condition is visible rather than silent.
  */
-function highestScope(actor: ActorContext): Promise<DashboardScopeKind> {
-  return scopeTierOf(pool, actor, "dashboard");
+function highestScope(actor: ActorContext): Promise<{ tier: DashboardScopeKind; role: string }> {
+  return scopeTierAndRole(pool, actor, "dashboard");
 }
 
-function highestRoleLabel(actor: ActorContext): string {
-  const order: RoleCode[] = [
-    "PLATFORM_ADMIN",
-    "TENANT_ADMIN",
-    "BLUEPRINT_MANAGER",
-    "HRMS_MANAGER",
-    "PROCESS_OWNER",
-    "MANAGER",
-    "USER",
-    "READ_ONLY",
-  ];
-  for (const r of order) {
-    if (actor.roles.includes(r)) return r;
-  }
-  return actor.roles[0] ?? "UNKNOWN";
-}
+// #142 F2 — `highestRoleLabel` viveva QUI con otto nomi di ruolo scritti a mano: la SESTA
+// lista, quella che il documento dei domini prediceva sarebbe nata a ogni correzione. Era
+// gia' sbagliata, misurato sulla mappa RBAC viva del 2026-08-15: metteva `BLUEPRINT_MANAGER`
+// (68 permessi) sopra `HRMS_MANAGER` (149), che I22 dichiara plenipotenziario sui dati
+// business. Ora l'etichetta arriva da `scopeTierAndRole`, che sceglie fra i ruoli che
+// giustificano il tier quello con la concessione piu' ampia — misurata, non ordinata a mano.
 
 export const dashboardService = {
   async getWidgets(actor: ActorContext): Promise<DashboardWidgetsResponse> {
-    const scopeKind = await highestScope(actor);
+    const { tier: scopeKind, role } = await highestScope(actor);
     const isPlatform = scopeKind === "PLATFORM";
     const isTeamScope = scopeKind === "TEAM" && !isPlatform;
 
@@ -60,10 +49,9 @@ export const dashboardService = {
     const scopeTenantId: string | null = isPlatform ? null : actor.tenantId;
 
     if (isTeamScope) {
-      // MANAGER: scope to own-team via positions where owner = self.
-      teamPositionIds = await repo.findOwnedPositionIds(pool, actor.userId);
-      // If MANAGER has no owned positions, scope becomes empty — render
-      // empty-state on the frontend.
+      // Il perimetro di chi guida: le posizioni incardinate nelle unita' che dirige.
+      // Se non dirige nulla il perimetro e' vuoto e il frontend mostra lo stato vuoto.
+      teamPositionIds = await repo.posizioniNelPerimetroOrganizzativo(pool, actor.userId);
     }
 
     const scope: repo.ScopeFilter = {
@@ -80,7 +68,7 @@ export const dashboardService = {
     ]);
 
     return {
-      role: highestRoleLabel(actor),
+      role,
       scope: {
         kind: scopeKind,
         tenantId: scopeTenantId,

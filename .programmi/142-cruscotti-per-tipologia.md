@@ -42,19 +42,26 @@ mentre F1 e F4 restano autonome.
 ## Fasi
 
 - [x] **F1 — INDAGINE: perimetro, sovrapposizione con #99 F7, catalogo delle tipologie** — FATTO 2026-08-14 (S1058). **(a)** sovrapposizione sciolta: vedi sopra — F2/F3 gated su #99 F7. **(b)** catalogo delle tipologie = quello dichiarato da Enzo (Azienda · Processi · Organizzazione · Filiale · HR Management · Platform Management · Tenant Management · Self-Service). **(c)** misura del cruscotto unico, live sul DB di produzione: **una sola voce attiva** — `dashboard` / `/dashboard` / permesso `dashboard:view` / gruppo sidebar `overview` — e **sette ruoli su quattordici** la detengono (`BLUEPRINT_MANAGER, BRANCH_MANAGER, HRMS_MANAGER, MANAGER, PLATFORM_ADMIN, PROCESS_OWNER, TENANT_ADMIN`): sette tipologie diverse guardano la stessa pagina, che è il problema posto da Enzo, misurato. **(d) reperto**: il difetto **D2** del piano domini («4 ruoli su 13 atterrano su `/dashboard` senza poterla vedere») **è già risolto** — `apps/web/src/lib/landing.ts` delega a `landingForPermissions` di `@heuresys/shared` e dichiara in testa che nessuna lista di nomi di ruolo vi sopravvive (voce **#116**): l'atterraggio si deriva dai grant. Una affermazione in meno da inseguire in F2.
-- [ ] **F2 — Modello dei cruscotti e dei permessi** ✅ **SBLOCCATA 2026-08-15 (S1062)**: #99 F7 è chiusa e il meccanismo esiste — `M1` (`lib/scope/matrix.ts`), la tabella `sys_ui_interface_data_classes` (mig. `000315`) e `almenoUnaCellaAperta`. Un cruscotto nuovo si dichiara con le **classi che espone**, e la sua platea si deriva; i permessi non si scrivono a mano ruolo per ruolo · budget ~180k
+- [x] **F2 — Modello dei cruscotti e dei permessi** — FATTO 2026-08-16 (S1064). **Consegna**: mig. `000316` — 3 tabelle (`sys_dashboards`, `sys_dashboard_blocks`, `sys_dashboard_block_data_classes`), **8 famiglie · 27 viste · 21 classi · 7 permessi · 16 concessioni**, più la sentinella `v_dashboard_class_drift` (le sentinelle passano da 17 a **18**). La granularità vive **nel blocco** e la pagina eredita l'unione: una sola verità, e la sentinella sorveglia il giorno in cui divergessero. **Nessuna famiglia è attiva**: le pagine non esistono ancora (le fa F4) e un `CHECK` impedisce di attivarne una senza pagina — un menu che offre pagine inesistenti è la stessa bugia che F7 ha appena tolto. **Reperto della mappatura**: *Organizzazione* e *Filiale* espongono le **stesse classi** — non le separa il *cosa* ma il *perimetro*; le classi di M1 non possono distinguerle, ed è la conferma che ADR-0036 ha due assi. **I due residui chiusi**: la lista di ruoli a mano (`highestRoleLabel`) sostituita da una derivazione, e l'albero delle **posizioni** sostituito da quello delle **unità** in `posizioniNelPerimetroOrganizzativo` — corretta alla sorgente, quindi `dashboard`+`analytics`+`insights` insieme. **Misura sul vivo**: fra i 25 che possono aprire quelle pagine, **19 vedevano il vuoto e ora vedono i propri dati, 0 perdono qualcosa**. Prove: `dashboards-f2.integration.test.ts` **12/12**, suite toccate **63/63**, `ci-rehearsal` VERDE due passate, prova live con **4 login reali** (`apps/api/scripts/prova-live-142-f2.mts`) · budget ~180k
 - [ ] **F3 — API per cruscotto** ✅ **SBLOCCATA 2026-08-15 (S1062)** — un endpoint per famiglia, granularità dichiarata per vista, integration test per il **divieto** oltre che per l'accesso · budget ~250k
 - [ ] **F4 — Frontend + dimostrazione live per tipologia** — pagine, e un login reale **per ogni** tipologia (non una a campione) · budget ~250k
 
 ## Da dove si riprende
 
-**F2 — Modello dei cruscotti e dei permessi.** Il blocco è caduto il 2026-08-15: #99 F7 ha
-consegnato il meccanismo. Da sapere prima di aprirla, perché cambia il disegno di F2:
+**F3 — API per cruscotto.** F2 ha consegnato il modello il 2026-08-16. Da sapere prima di
+aprire F3, perché ne cambia il disegno:
 
-- La derivazione **restringe, non concede**. Dichiarare che un cruscotto espone `COMPENSATION`
-  non lo apre a nessuno: toglie a chi ha `COMPENSATION = none` in M1 (capi-squadra,
-  proprietari di processo, mentori, approvatori). Il *se* resta il permesso RBAC.
-- **Il permesso proprio per cruscotto serve ancora.** F7 non lo sostituisce: sostituisce la
-  parte «quali tipologie lo vedono», non «esiste il diritto di vederlo».
-- Le otto famiglie dichiarate da Enzo vanno mappate sulle **sette classi** di M1: è lì che si
-  vede se una famiglia è davvero distinta o se è la stessa vista con un altro nome.
+- **Il catalogo è già interrogabile**: `sys_dashboards` → `sys_dashboard_blocks` →
+  `sys_dashboard_block_data_classes`. Un endpoint per famiglia legge di lì quali viste
+  comporre, e la granularità per vista **c'è già** — non va inventata in F3, va onorata.
+- **La platea non si scrive**: il permesso è in `dashboard_permission_code`, e la restrizione
+  è M1 sulle classi del blocco. Un blocco che l'attore non può vedere si **omette**, e
+  l'endpoint deve dire *che* è stato omesso (`masked`, quarto stato — I20), non tacere.
+- **`self` non ha permesso** ed è deliberato (I17): l'endpoint self-service non va gated.
+- ⚠ **`dashboard_is_active` è `false` per tutte e otto**, e un `CHECK` impedisce di attivarne
+  una senza pagina agganciata. È F4 a costruire le pagine e ad attivarle: F3 può servire le
+  API senza attivare nulla.
+- ⚠ **Un permesso nuovo arriva a `PLATFORM_ADMIN` da solo** — `000005` riga 405 è un grant a
+  tappeto che rigira a ogni deploy. Non è un difetto: ADR-0032 protegge i dati HR
+  **mascherando**, non negando il permesso. Chi scrive post-condizioni che contano le
+  concessioni lo deve sapere, o le scrive rosse (successo qui, due volte).

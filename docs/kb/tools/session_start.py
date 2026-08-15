@@ -38,6 +38,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_menu  # noqa: E402
 import db_health  # noqa: E402
 import check_istruzioni  # noqa: E402
+import check_pagine_raggiungibili as check_pagine  # noqa: E402
 import lab_inbox  # noqa: E402
 import programmi  # noqa: E402
 import status_dashboard  # noqa: E402
@@ -115,6 +116,22 @@ def main():
                         print(f"  [!!] {nome}: {len(rilievi)} — `python docs/kb/tools/check_istruzioni.py --elenco`")
         except Exception as e:  # una vista non deve mai impedire l'avvio
             print(f"\nISTRUZIONI  [? ] non verificate: {e}")
+
+        # Ogni pagina autenticata deve avere una PORTA — menu, scheda o deroga motivata
+        # (#99 F8). Il censimento delle orfane esisteva (#125, 22 nell'agosto 2026) ma viveva
+        # in un file di appunti fuori dal repo: un mese dopo nessuno sapeva dire se fossero
+        # ancora 22 senza rifarlo a mano. Vista, non gate: si stampa ed esce 0.
+        try:
+            senza, _der, fonte = check_pagine.analizza(no_db=("--no-db" in saved_argv))
+            print("\nPAGINE (una porta per ciascuna — check_pagine_raggiungibili.py)")
+            if fonte.startswith("NON MISURABILE") or fonte.startswith("saltato"):
+                print(f"  [? ] pagine      menu {fonte}: non e' un verde, e' un non misurabile")
+            elif not senza:
+                print("  [OK] pagine      ogni pagina autenticata ha una porta")
+            else:
+                print(f"  [!!] pagine      {len(senza)} senza porta — `python docs/kb/tools/check_pagine_raggiungibili.py --elenco`")
+        except Exception as e:
+            print(f"\nPAGINE  [? ] non verificate: {e}")
     finally:
         sys.argv = saved_argv
     return 0

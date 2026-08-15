@@ -1,0 +1,12 @@
+# Deroghe di check_pagine_raggiungibili.py — una per riga, con il motivo dopo '#'.
+# Una riga SENZA motivo viene ignorata di proposito: una deroga muta non e' una decisione.
+#
+# Formato: <rotta>   # <motivo>
+#
+# Le nove pagine che #125 lascio' aperte NON sono qui: sono raggiungibili come SCHEDE della
+# pagina principale del loro gruppo (S1009, regola di Enzo «le altre diventano tab dentro la
+# pagina principale»), e il cancello le riconosce da se' leggendo `section-tabs.tsx`. Metterle
+# qui sarebbe stato piu' comodo e sbagliato: una deroga dice «lo so e lo accetto», una scheda
+# dice «c'e' una porta» — sono due affermazioni diverse, e solo la seconda e' vera.
+
+/dev/agent   # console dell'agente (#9 WI-B.4), fuori dal menu di proposito: e' dietro il flag NEXT_PUBLIC_ENABLE_AGENT_DEV, che il 2026-08-16 NON esiste in nessun .env, PROD della VM compreso (misurato) — a flag spento la pagina rende un avviso, non una console viva. Va nel menu solo il giorno in cui il flag si accende in un ambiente.

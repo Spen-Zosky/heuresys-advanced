@@ -46,7 +46,8 @@ Le due numerazioni sono già state confuse una volta. In questo file comanda la 
   - **una classificazione respinta dalla misura**: `mfa_policy → CREDENTIAL` toglieva la pagina ai **due `TENANT_ADMIN` reali** (fra cui il CEO di RTL), perché M1 dà `hr_mandate`/CREDENTIAL = `none`. Ma quella cella dice «HR non amministra le password altrui», non «il tenant admin non configura la sicurezza del proprio tenant»: una **politica** è configurazione dell'organizzazione, non un dato di persona. Ritirata.
   - **`MASKED_UNDER_PLATFORM_MANDATE` non è più dichiarata**: discende da M1 (`classiMascherateDa`). Erano due dichiarazioni dello stesso fatto in due file, e la seconda sarebbe invecchiata da sola senza che nulla fallisse.
   - ⚠ **la prova non poteva essere comportamentale** — stessa trappola di F3. Delta misurato sui 161 attori: **zero**, tranne la voce del difetto (b). Un test sui dati di oggi sarebbe verde con e senza la derivazione. Perciò la prova **fabbrica la divergenza**: perimetro di chi guida una squadra + permessi di chi legge le analytics → `analytics-skills` sì, `analytics-compensation` no. Errore in cui il file è caduto alla prima stesura, e vale per chiunque prosegua: comporre l'attore con **tutti** i ruoli che hanno il permesso gli conferisce anche i mandati, che aprono le classi da soli — e il caso da provare sparisce.
-- [ ] **F8 — Frontend: sidebar e pagine derivate, i 22 orfani risolti, etichette tradotte** *(passo 9)* — E2E per tipologia · budget ~250k
+- [x] **F8a — Gli orfani e le etichette: da censimento a cancello** — FATTO 2026-08-16 (S1064). **La stima di F8 (~250k) era vecchia di due chiusure e la misura l'ha smentita**: gli orfani non erano 22 ma **10** (`#125` ne aveva chiusi 12, tutti `/me/*`), le **66 voci di menu hanno 67 traduzioni** (il «52 su 52 senza traduzione» è chiuso), e **nessuna voce punta a una pagina inesistente** — il difetto è in una direzione sola. Dei 10: **9 sono schede** della pagina principale del loro gruppo (`section-tabs.tsx`, regola di Enzo in S1009), e **`/dev/agent` è dietro `NEXT_PUBLIC_ENABLE_AGENT_DEV`, che il 2026-08-16 non esiste in nessun `.env`, PROD della VM compreso** (misurato via ssh) — a flag spento rende un avviso, non una console viva: il sospetto del register cade. **Consegna**: `docs/kb/tools/check_pagine_raggiungibili.py` — tre porte ammesse (menu · scheda · deroga **motivata**), cablato in `session_start.py` così gira a ogni avvio. Selftest **10/10**; **visto rosso sul progetto vero** (tolta la deroga → `exit 1`, `/dev/agent` nominato; rimessa → `exit 0`), col codice d'uscita e non con l'output. Il valore non è il conteggio di oggi: è che il giorno in cui una pagina nuova nasce senza porta, qualcuno lo sa · ~60k
+- [ ] **F8b — Frontend: sidebar derivata e pagine, E2E per tipologia** *(passo 9)* — la parte che resta di F8: la sidebar già discende da M1 (F7), qui si verifica **dal lato dell'utente** con un E2E per tipologia · budget ~190k
 
 ## Ordine e vincoli
 
@@ -55,8 +56,15 @@ con #142. F8 per ultima, perché legge tutto ciò che sta sotto.
 
 ## Da dove si riprende
 
-**F8 — Frontend: sidebar e pagine derivate** *(passo 9)*, budget ~250k. È **l'ultima**: il
-programma è a **8/9**. F4 (S1060), F5, F6a, F6b (S1061) e F7 (S1062) sono chiuse.
+**F8b — Frontend: sidebar derivata e pagine, E2E per tipologia**, budget ~190k. È **l'ultima**:
+F4 (S1060), F5, F6a, F6b (S1061), F7 (S1062) e **F8a (S1064)** sono chiuse.
+
+Cosa F8a toglie dal tavolo di F8b, misurato e non dedotto: gli orfani sono **risolti** (nove
+sono schede per disegno, `/dev/agent` è dietro un flag spento in ogni ambiente) e un cancello
+lo sorveglia a ogni avvio; le **etichette del menu sono già tradotte** (67 traduzioni su 66
+voci attive). Resta quindi **solo** la verifica dal lato dell'utente: un E2E per tipologia che
+provi che la sidebar derivata da M1 mostra a ciascun profilo le voci giuste — e **soltanto**
+quelle. Sul Windows di Enzo serve il wrapper Node 22 (`pnpm test:e2e:prod:node22`, D-36).
 
 **F7 ha sbloccato `#142` F2/F3**, che erano `GATED` proprio su di essa: il meccanismo di
 derivazione ora esiste (`M1` + `sys_ui_interface_data_classes` + `almenoUnaCellaAperta`), e

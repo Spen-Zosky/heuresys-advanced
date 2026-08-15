@@ -9,6 +9,61 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1063 (2026-08-15) — i cancelli guardavano tutti il codice, nessuno guardava le istruzioni
+
+**Numeri ri-derivati dal vivo** (nessun cambiamento strutturale: la sessione ha toccato script,
+seed e strumenti, non migrazioni): utenti **161** · posizioni **315** · tenant ACTIVE **2** ·
+RBAC **14 ruoli / 217 permessi / 959 mapping** · skill **14.039** · migration su disco **313**
+(max `000315`) = **313 applicate** · HEAD `a572c2f2`.
+
+**Il mandato di autocoscienza, eseguito per intero** (`.programmi/mandato-autocoscienza-redenzione.md`,
+17/17 voci). Riletti: 6 regole, **36 ADR**, README, 3 xtras di metodo, **72 memorie**, 7 skill,
+claude-mem. Misurati **5 pattern** di inadempienza su S1053-S1062, estraendo 1715 messaggi umani dai
+transcript invece di cercare per parole chiave.
+
+**Il reperto**: **tre skill di questo repo descrivevano il progetto legacy `heuresys-evo`**, dal
+**2026-06-17** — 59 giorni. `multi-tenant-validator` usa Prisma (**0** `package.json` lo nomina qui)
+e **raccomanda di abilitare RLS**, vietato dall'invariante **I5**; aveva `trigger: auto`.
+`dashboards-jobs` istruisce a `docker compose build` (**I13**), cita `services/frontend/**`
+inesistente, le porte di evo, sette file di memoria assenti e credenziali in chiaro; i suoi trigger
+l'avrebbero attivata sulla **prossima voce del menu** (`#142` F2). `consolida-pagina` opera su
+`rbp_*` e `admin_component_registry`: **0 tabelle** nel database. Auto-invocazione spenta, avviso in
+testa, deroga motivata; la **rimozione dei file** è `#190` (WAIT-INPUT: è di Enzo).
+
+**Il rinforzo — `docs/kb/tools/check_istruzioni.py`**. Il progetto ha 14 cancelli e guardano tutti
+**codice e dati**: nessuno guardava le **istruzioni**. Quattro controlli confrontati con la realtà
+misurata, non con un elenco a mano: entità inesistenti · RLS raccomandato · credenziali in chiaro ·
+memorie fuori dall'indice. **Selftest 6/6** coi casi negativi (nominare RLS per *vietarlo* non deve
+scattare, o il controllo verrebbe spento in una settimana); **visto rosso** alla prima corsa.
+**97 rilievi reali → 0**. Cablato in `session_start.py`: gira a ogni boot, anche `--no-db`.
+
+**La verifica (d), sfavorevole e misurata**: di 5 regole nate da un richiamo di Enzo, **4 hanno avuto
+una recidiva documentata** — una a 3 giorni (standard S1054, intercettata *da Enzo*), una confessata
+«due volte nella stessa sessione», una già scritta sei volte prima di diventare IL PUNTO FISSO. Le
+regole **meccanizzate** non hanno recidive note. È il motivo per cui il rinforzo è un cancello.
+
+**`#189` DONE — e l'item diagnosticava male.** Non era un problema di *ordine* ma un
+**disallineamento di firma**: `verify-storia36.sql:2986` definisce `storia36_check_c6a()` senza
+parametri, `06_reorg.sql:201` la invocava con una data. Il seed falliva **sempre**, anche a database
+completo. Emerso perché la prova era costruita per potermi dare torto: la catena aveva superato il
+punto di rottura e mi sarei fermato lì, ma il controllo dopo mostrava che la funzione attesa non era
+mai stata creata. **Prove**: guasto riprodotto su `createdb --template heuresys_ci prova_189` ·
+seed 06 → `C6 OK`, exit 0 · **twice-run → 0 righe**, cioè la prova che l'item dichiarava *non
+eseguibile* · custodia in produzione **VERDE** · controprova che il runner gira ancora senza il flag.
+Verificata **l'intera superficie**: 65 definizioni, nessun altro disallineamento. Copia rimossa.
+Tenuto anche il fix di ordine (`-v solo_definizioni=1`), corretto su un database nuovo.
+
+**Trovato strada facendo**: `sys_ui_interface_data_classes` — creata **il giorno prima** da `#99` F7
+(mig `000315`, 21 righe) e mai registrata nel dossier — teneva **rossa** la custodia della storia.
+Classificata accanto alla gemella `sys_ui_interfaces`. Nuovo `#191`: `.handoff/close-log.ndjson`
+attribuisce **159 righe su 171** a `S?` perché `HEURESYS_SESSION` non è esportata da nessuno.
+
+> ⚠️ **S1062 non aveva lasciato un proprio Delta qui** (0 occorrenze prima di questa riga). Per non
+> perderlo: quella sessione ha chiuso **`#99` F7** — la visibilità di una voce di menu discende ora
+> dalla matrice dei domini invece che da un flag scritto a mano, mig `000315` — ha avanzato la storia
+> RTL a ieri sulla VM, riportato `db_health` nei limiti e corretto la formazione sicurezza mancante
+> di due dirigenti.
+
 ### Delta S1054 (2026-08-11) — tre strumenti che dicevano verde senza aver misurato, e #124 D4 chiuso 8/8
 
 **Numeri ri-derivati**: utenti **161** · posizioni **313** · tenant ACTIVE **2** · RBAC **14 ruoli /

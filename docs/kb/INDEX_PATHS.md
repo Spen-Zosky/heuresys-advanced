@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-15T13:37:55Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3026**
+**Generato**: 2026-08-15T17:55:40Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3029**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 42 |
 | db-seed | 114 |
-| doc-canonical | 647 |
+| doc-canonical | 650 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 377 |
 | ux-design-archive | 80 |
 | web-source | 237 |
-| **TOTALE** | **3026** |
+| **TOTALE** | **3029** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2468 |
+| live | 2471 |
 
 ## File per categoria
 
@@ -1527,6 +1527,7 @@
 - `D:\heuresys-advanced\.programmi\92-ciclo-valutazione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\99-domini-gerarchici-funzionali.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\mandato-autocoscienza-redenzione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\PROGRESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-macchina-stati.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-misura.md` · *live* · git-tracked
@@ -1835,6 +1836,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\check_exposure.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_identita_azienda.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_idoneita_agente.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\check_istruzioni.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_module_test_coverage.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_no_legacy_ingest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_pagine_orfane.py` · *live* · git-tracked
@@ -1849,6 +1851,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-commit` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-merge` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\install-hooks.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\istruzioni_waivers.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\lab_inbox.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\legacy_ingest_allowlist.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\measure_concept_retrieval.mjs` · *live* · git-tracked

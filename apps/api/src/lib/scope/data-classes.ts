@@ -16,10 +16,43 @@
  * Keys are the RBAC `auth_permission_resource` values (verified to exist — see the drift test).
  */
 
-/** The closed set of data classes (Enzo's four sensitive categories + the functional one). */
-export type DataClass = "PERSONAL" | "COMPENSATION" | "SKILL" | "EVALUATION" | "ACTIVITY";
+/**
+ * The closed set of data classes — le **sette** di M1 (ADR-0036 §7), non più cinque.
+ *
+ * ⚠ I NOMI. Il documento dei domini le chiama `IDENTITY`, `CONTRACT_PAY`, `COMPETENCE`,
+ * `EVALUATION`, `ACTIVITY`, `CREDENTIAL`, `SPECIAL_CATEGORY`. Qui restano i nomi di questo
+ * file, ed è una scelta: le prime cinque sono già usate da 18 moduli, da `mask.ts` e dal
+ * cancello di boot `gate.ts`. Rinominarle sarebbe un refactor cosmetico su codice di
+ * sicurezza — costo alto, beneficio nominale. L'equivalenza è dichiarata **qui e solo qui**:
+ *
+ *   IDENTITY → PERSONAL · CONTRACT_PAY → COMPENSATION · COMPETENCE → SKILL
+ *   EVALUATION · ACTIVITY · CREDENTIAL · SPECIAL_CATEGORY (invariate)
+ *
+ * Le ultime due sono arrivate con **#99 F7**: esistevano in M1 e non nel codice, quindi due
+ * righe della matrice non erano rappresentabili — `platform_mandate` non poteva dichiarare il
+ * suo `edit` sulle credenziali, e `SPECIAL_CATEGORY` non poteva essere la classe *vuota e
+ * presidiata* che ADR-0036 §5 pretende, perché non esisteva affatto.
+ */
+export type DataClass =
+  | "PERSONAL"
+  | "COMPENSATION"
+  | "SKILL"
+  | "EVALUATION"
+  | "ACTIVITY"
+  | "CREDENTIAL"
+  | "SPECIAL_CATEGORY";
 
-/** Classes gated by the ORGANIZATIONAL axis (sensitive personal data — I18/I20). */
+/**
+ * Classes gated by the ORGANIZATIONAL axis (sensitive personal data — I18/I20).
+ *
+ * ⚠ `CREDENTIAL` e `SPECIAL_CATEGORY` **non entrano qui**, e non è una svista:
+ *  - le credenziali non si leggono per catena gerarchica — un capo non amministra le password
+ *    dei suoi riporti (M1: `line_management`/CREDENTIAL = `none`). Le governa il mandato
+ *    tecnico e il `self`, cioè M1, non l'asse organizzativo;
+ *  - `SPECIAL_CATEGORY` è `none` per **ogni** dominio tranne `self` (ADR-0036 §5): una classe
+ *    che nessun perimetro apre non ha bisogno di un perimetro che la filtri.
+ * Conseguenza pratica: aggiungerle non cambia una riga del comportamento di `gate.ts`.
+ */
 export const SENSITIVE_DATA_CLASSES: ReadonlySet<DataClass> = new Set<DataClass>([
   "PERSONAL",
   "COMPENSATION",
@@ -62,6 +95,13 @@ export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   capability: "SKILL", // Enzo 2026-07-01: capacità riservate (derived from competencies)
   // EVALUATION
   assessment: "EVALUATION",
+  // #99 F7 — buco reale del cancello D-51, trovato misurando le voci di menu. Le 7 rotte
+  // read di `performance-review` (performance-reviews, review-cycles, calibration-sessions)
+  // dichiaravano GIA' `orgGate`, ma per diligenza di chi scrisse #92: la resource non era
+  // classificata, quindi `gate.ts` non la pretendeva e toglierla non avrebbe rotto nulla.
+  // Classificandola, cio' che era volontario diventa obbligatorio — a costo zero, perche'
+  // nessuna rotta va in violazione (misurato prima di aggiungerla).
+  "performance-review": "EVALUATION",
   kpi: "EVALUATION",
   goal: "EVALUATION",
   okr: "EVALUATION",
@@ -78,6 +118,21 @@ export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   // and breaking the cardinal rule (I18).
   approval: "ACTIVITY", // approval requests/steps: work assigned to and raised by people
   team: "ACTIVITY", // team membership: who works with whom
+  // #99 F7 — una segnalazione e' un CASO DA ISTRUIRE, cioe' lavoro, non un dato della
+  // persona. La classe non e' quello che la protegge: la proteggono il permesso, che un
+  // ruolo solo detiene, e l'isolamento assoluto di ADR-0036 §5. Classificarla PERSONAL
+  // sarebbe stato peggio che non classificarla — avrebbe suggerito che la catena
+  // organizzativa possa arrivarci, che e' esattamente cio' che l'isolamento vieta.
+  whistleblowing: "ACTIVITY",
+  // ⚠ `mfa_policy` NON compare qui, ed e' stato misurato prima di deciderlo. Classificarlo
+  // `CREDENTIAL` toglieva la pagina della politica MFA ai due `TENANT_ADMIN` reali — fra cui
+  // il CEO di RTL — perche' M1 da' `hr_mandate`/CREDENTIAL = `none`. Ma quella cella dice
+  // «HR non amministra le password delle persone», non «il tenant admin non configura la
+  // sicurezza del proprio tenant»: una POLITICA e' configurazione dell'organizzazione, non un
+  // dato di persona, e questa mappa contiene solo resource person-level (vedi l'intestazione).
+  // Resta quindi senza classe, governata dal solo RBAC come `tenant` e `system-health`.
+  // La classe `CREDENTIAL` esiste in M1 per le credenziali VERE, che vivono in `/me/security`
+  // (self, I17) e nelle rotte auth — nessuna delle quali e' una resource person-level.
   // NB: `bpm_process` / `organization_unit_processes` stay UNMAPPED on purpose — they are
   // structural catalogues (process templates, OU↔process RACI), not person-level data.
   // The PERSON-level process axis lives in sys_process_participants (mig 000179), which

@@ -39,7 +39,13 @@ Le due numerazioni sono già state confuse una volta. In questo file comanda la 
   - **niente PATCH e niente DELETE**: una delega non si modifica e non si cancella — si revoca, così la storia resta leggibile.
   - ⚠ **la prova generale è stata ROSSA due volte, ed è servita**: la tabella nuova mancava dal registro di riconciliazione (`000062`) e le sue due FK di soggetto dalla mappa GDPR (`000226`). Entrambi difetti che si vedono **solo alla seconda passata** e che sarebbero stati CI rossa 25 minuti dopo il push; entrambi corretti **emendando il file di numero minore**, che è la regola.
   - **prove**: `delegations.integration.test.ts` 7/7 + `domains-f6` 4/4 + `me` = **21/21**. ⚠ **Il primo sabotaggio NON fu colto**: il caso della revoca era scritto sul soggetto condiviso e si auto-saltava con un `if`, perché i casi precedenti gli lasciavano una delega in vigore. Riscritto con un **soggetto dedicato**, il sabotaggio (rimosso il controllo dello stato) è ora rosso con «il dominio resta acceso dopo la revoca».
-- [ ] **F7 — Dashboard guidate dal DBMS (tabelle dashboard/blocchi derivate da M3)** *(passo 8)* — ⚠ **si sovrappone a #142** (cruscotti per tipologia di utilizzatore): prima di aprirla, decidere se F7 assorbe #142 o viceversa, altrimenti si costruisce due volte · budget ~250k
+- [x] **F7 — La cascata M3: la sidebar discende dalla matrice, non dal flag** *(passo 8)* — **FATTA 2026-08-15 (S1062)**. La sovrapposizione con `#142` era già sciolta da `#142` F1 (F7 = meccanismo, #142 = catalogo) e non è stata rinegoziata. Costruiti: **M1 come tabella interrogabile** (`lib/scope/matrix.ts`, 10 domini × 7 classi = 70 celle), le **due classi mancanti** (`CREDENTIAL`, `SPECIAL_CATEGORY` — M1 ne dichiarava 7, il codice ne aveva 5), il **decimo dominio** `custody`, la migrazione **`000315`** (`sys_ui_interface_data_classes`, 21 voci dichiarate) e la derivazione in `me/service.ts`. Prove: `domains-f7.integration.test.ts` **7/7** con sabotaggio provato rosso · contro-oracolo SQL sui 161 attori · **prova live con 3 login reali** (`prova-live-99-f7.mts`, VERDE). Dettaglio in §F7
+  - ⚠ **il contro-oracolo ha smentito il disegno, ed è servito.** La derivazione M1 *pura* — quella che il piano descrive — faceva **guadagnare a 109 persone** le voci di governo: `team_peer` ha `PERSONAL = mask` («dei compagni di squadra vedi nome e competenze»), che tradotto in visibilità di pagina diventa «puoi aprire la gestione utenti». È il difetto da 109 persone già evitato in F6a, rientrato dalla finestra. **M1 RESTRINGE, non sostituisce**: il pavimento (`requires_admin` + domini-che-aprono) resta, e la matrice toglie in più.
+  - ⚠ **`requires_admin` NON è eliminabile, e questo corregge un'aspettativa del piano.** M3 lo dava per derivabile dalle classi esposte; misurato, non lo è: esistono superfici amministrative che **non espongono alcuna classe di dato personale** — `blueprints`, `tenants`, `processes`, `system-health`, `positions`. Per quelle M1 non ha nulla da dire, e il flag resta l'unica cosa che le governa.
+  - **due difetti trovati dalla regola, non cercati**: *(a)* il cancello D-51 aveva un buco — `performance-review` non era in `RESOURCE_DATA_CLASS`, quindi le sue 7 rotte read dichiaravano `orgGate` per diligenza di chi scrisse #92 e **nulla sarebbe fallito togliendolo**; ora è obbligatorio, a costo zero perché nessuna rotta era in violazione. *(b)* `LEARNING_INITIATIVES` (`/learning/training-initiatives`, gruppo *governance*, prospettiva GOVERNANCE) portava `requires_admin=false` ed era offerta a **109 persone**: è lo stesso difetto D1 della console whistleblowing, sulla gemella della voce `learning` che invece ha il flag. Corretta derivandola.
+  - **una classificazione respinta dalla misura**: `mfa_policy → CREDENTIAL` toglieva la pagina ai **due `TENANT_ADMIN` reali** (fra cui il CEO di RTL), perché M1 dà `hr_mandate`/CREDENTIAL = `none`. Ma quella cella dice «HR non amministra le password altrui», non «il tenant admin non configura la sicurezza del proprio tenant»: una **politica** è configurazione dell'organizzazione, non un dato di persona. Ritirata.
+  - **`MASKED_UNDER_PLATFORM_MANDATE` non è più dichiarata**: discende da M1 (`classiMascherateDa`). Erano due dichiarazioni dello stesso fatto in due file, e la seconda sarebbe invecchiata da sola senza che nulla fallisse.
+  - ⚠ **la prova non poteva essere comportamentale** — stessa trappola di F3. Delta misurato sui 161 attori: **zero**, tranne la voce del difetto (b). Un test sui dati di oggi sarebbe verde con e senza la derivazione. Perciò la prova **fabbrica la divergenza**: perimetro di chi guida una squadra + permessi di chi legge le analytics → `analytics-skills` sì, `analytics-compensation` no. Errore in cui il file è caduto alla prima stesura, e vale per chiunque prosegua: comporre l'attore con **tutti** i ruoli che hanno il permesso gli conferisce anche i mandati, che aprono le classi da soli — e il caso da provare sparisce.
 - [ ] **F8 — Frontend: sidebar e pagine derivate, i 22 orfani risolti, etichette tradotte** *(passo 9)* — E2E per tipologia · budget ~250k
 
 ## Ordine e vincoli
@@ -49,14 +55,25 @@ con #142. F8 per ultima, perché legge tutto ciò che sta sotto.
 
 ## Da dove si riprende
 
-**F7 — Dashboard guidate dal DBMS** *(passo 8)*, budget ~250k. F4 (S1060), F5, F6a e F6b
-(S1061) sono chiuse e non vanno riaperte. Restano **F7** e **F8**: il programma è a **7/8**.
+**F8 — Frontend: sidebar e pagine derivate** *(passo 9)*, budget ~250k. È **l'ultima**: il
+programma è a **8/9**. F4 (S1060), F5, F6a, F6b (S1061) e F7 (S1062) sono chiuse.
 
-⚠ **Prima di aprire F7 va sciolta la sovrapposizione con `#142`**, ed è già istruita: `#142` F1
-(S1058) ha stabilito che **F7 dà il MECCANISMO** (come si deriva un cruscotto dalla matrice M3)
-e **`#142` dà il CATALOGO** (quali cruscotti esistono, per chi — decisione di prodotto). Per
-questo `#142` F2/F3 sono `GATED` proprio su questa fase: aprirle prima significherebbe
-dichiarare a mano gli otto permessi che M3 esiste per derivare.
+**F7 ha sbloccato `#142` F2/F3**, che erano `GATED` proprio su di essa: il meccanismo di
+derivazione ora esiste (`M1` + `sys_ui_interface_data_classes` + `almenoUnaCellaAperta`), e
+`#142` può portare il **catalogo** dei cruscotti senza dichiarare a mano i permessi che M3
+esiste per derivare.
+
+Tre cose che F7 lascia a chi prosegue:
+- **`requires_admin` resta, e non è una sconfitta**: governa le superfici amministrative che
+  non espongono dati di persona (cataloghi, blueprint, tenant, salute di sistema), sulle quali
+  M1 non ha voce in capitolo. Chi progetta F8 non deve provare a eliminarlo.
+- **Una voce nuova senza classe dichiarata torna al solo RBAC**, silenziosamente. Il cancello
+  che lo impedisce esiste ma copre solo le voci la cui *resource* è person-level
+  (`domains-f7.integration.test.ts`, «esige la classe su ogni voce…»). Una pagina nuova con
+  una resource non classificata sfugge: è il buco noto, ed è dichiarato.
+- **`Domain` è a 10 su 11.** Manca solo `self`, che non è un dominio da accendere ma il
+  pavimento universale (I17) — aggiungerlo richiederebbe di ammettere che possa valere `none`,
+  che è ciò che I17 vieta.
 
 Tre cose che F6 lascia a chi prosegue:
 - **`Domain` è a 9 su 11.** Mancano `self` e `custody`, che ADR-0036 elenca ma che non sono

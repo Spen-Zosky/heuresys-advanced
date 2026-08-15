@@ -18,6 +18,7 @@ import type {
 import { ME_PREFERENCE_DEFAULTS } from "@heuresys/shared";
 import type { z } from "zod";
 import { toDateOnly } from "../../lib/date-only.js";
+import type { DataClass } from "../../lib/scope/data-classes.js";
 import { normalizzaCompetenze } from "../learning-gaps/repository.js";
 
 export type DbConnector = Pool | PoolClient;
@@ -36,6 +37,14 @@ export interface UiInterfaceRow {
   requiredAction: string | null;
   requiresAdmin: boolean;
   order: number;
+  /**
+   * Le classi di dato che questa voce espone (#99 F7, mig. `000315`).
+   *
+   * Vuoto = «questa pagina non espone dati di persona» — cataloghi, blueprint, processi,
+   * strutture — ed e' un'affermazione, non un'omissione: M1 non ha voce in capitolo e
+   * decide il solo RBAC. Le voci dell'area personale sono vuote apposta (I17).
+   */
+  dataClasses: DataClass[];
 }
 
 /** All active sidebar interfaces (the DB-driven registry). Visibility/gating is applied in the
@@ -51,8 +60,15 @@ export async function loadActiveInterfaces(q: DbConnector): Promise<UiInterfaceR
             ui_interface_required_resource AS "requiredResource",
             ui_interface_required_action   AS "requiredAction",
             ui_interface_requires_admin    AS "requiresAdmin",
-            ui_interface_order             AS "order"
-       FROM sys.sys_ui_interfaces
+            ui_interface_order             AS "order",
+            -- #99 F7: le classi dichiarate dalla 000315. Il COALESCE a '{}' c'e' perche' una
+            -- voce senza dichiarazioni deve arrivare come lista VUOTA, non come NULL: e' la
+            -- differenza fra «non espone dati di persona» e «non lo sappiamo», e la seconda
+            -- non deve esistere.
+            COALESCE((SELECT array_agg(dc.data_class ORDER BY dc.data_class)
+                        FROM sys.sys_ui_interface_data_classes dc
+                       WHERE dc.ui_interface_id = i.ui_interface_id), '{}') AS "dataClasses"
+       FROM sys.sys_ui_interfaces i
       WHERE ui_interface_is_active = true
       ORDER BY ui_interface_order, ui_interface_code`,
   );

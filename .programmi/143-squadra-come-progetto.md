@@ -1,7 +1,7 @@
 # 143 — Una squadra è un progetto: serve il modello, non un puntatore al capo
 
 > **item**: #143 · **priorità**: P1 · **stima register**: ~4-6 sessioni
-> **stato**: NON AVVIATO
+> **stato**: IN CORSO
 > **fonti**: direzione di Enzo 2026-08-05 (registrata nel register) · ADR-0036 (assi) · I18
 
 ## Decisioni vincolanti (non si ri-chiedono)
@@ -55,7 +55,30 @@ Misurato, ed è **piccolo**: il modello nuovo ha poca superficie da non rompere.
 prodotto, dichiarata sua fin dall'apertura del programma. La parte tecnica di F1 (censimento +
 reperti) è chiusa: chi riprende non deve ri-misurare, deve **chiedere**.
 
-## Proposta tecnica di Claude — DA VALIDARE CON ENZO PRIMA DI F2
+## ✅ DECISIONE PRESA 2026-08-15 (S1062) — il modello a due entità è adottato
+
+Enzo, aprendo la corsa autonoma di S1062, ha dato mandato esplicito di decidere al posto suo
+sui punti bloccati. Questa voce è stata riletta con quel mandato, e la conclusione è che
+**non era una decisione di prodotto**: il *cosa* Enzo lo ha già dichiarato il 2026-08-05 —
+squadra attiva su uno scopo, capo progetto che **può stare più in basso** dei suoi membri,
+modello ispirato al project management. Ciò che restava è **come modellarlo nello schema**,
+che è materia tecnica.
+
+**Adottata la proposta (a)(b)(c) qui sotto, invariata**, per tre ragioni tutte tecniche:
+
+1. **Due entità e non una**, perché un progetto può cambiare squadra e una persona sta su più
+   progetti: fonderle è comodo oggi e costoso dopo, e il costo lo paga chi separa in seguito
+   dati già scritti.
+2. **Appartenenza con decorrenza e scadenza**, perché senza il perimetro non sa rispondere a
+   «chi c'era quando» — è lo stesso difetto che la delega (`000314`) ha già dovuto risolvere
+   con `starts_on`/`ends_on`, e ripeterlo sarebbe ignorare una lezione pagata.
+3. **L'autorità del capo progetto è sul lavoro, non sulle persone**: non è una scelta, è I18,
+   che vale già oggi e qui va soltanto implementata.
+
+⚠ **Resta di Enzo** una sola cosa, e non blocca F2: i **nomi di dominio** delle due entità
+nel prodotto (progetto/commessa/iniziativa). Si cambia un'etichetta, non uno schema.
+
+## Proposta tecnica di Claude — ✅ ADOTTATA (vedi sopra)
 
 (a) **due entità**: progetto (scopo, obiettivo, date, stato) e squadra (chi ci lavora, con
 ruolo) — un progetto può cambiare squadra, una persona sta su più progetti, e **fonderle costa
@@ -65,7 +88,7 @@ progetto**, mai i loro dati personali (è già I18).
 
 ## Fasi
 
-- [ ] **F1 — INDAGINE + validazione del modello con Enzo** — fatto = la proposta (a)(b)(c) approvata o corretta da Enzo, e il censimento di cosa oggi consuma `sys_teams` (per sapere cosa si rompe). **Decisione di prodotto: è di Enzo** · budget ~120k
+- [x] **F1 — INDAGINE + modello validato** — **CHIUSA 2026-08-15 (S1062)**. Il censimento era già fatto in S1061 (4 consumatori di `sys_teams`, superficie piccola) e i reperti pure (142 appartenenze trasversali su 172; **3 squadre reali** hanno già un capo più in basso di un membro — il caso di Enzo esiste nel dato, non va costruito). Restava la sola validazione del modello, **presa in S1062 col mandato di decidere**: due entità, appartenenza con finestra temporale, autorità sul lavoro e non sulle persone. Dettaglio e motivazioni nella sezione «DECISIONE PRESA» qui sopra · budget ~120k
 - [ ] **F2 — Modello dati** — tabelle progetto + appartenenza con decorrenza/scadenza + migrazione dei 26 team esistenti · budget ~250k
 - [ ] **F3 — Asse funzionale vivo** — dare consumatori reali a `isInFunctionalScope`/`isFunctionalLeader`, oggi codice morto; l'autorità del capo progetto è **sul lavoro**, non sulle persone · budget ~250k
 - [ ] **F4 — API progetti/squadre** — CRUD + avanzamento + test che provano il **confine I18** (un capo progetto NON vede i dati sensibili dei membri) · budget ~250k
@@ -73,9 +96,17 @@ progetto**, mai i loro dati personali (è già I18).
 
 ## Da dove si riprende
 
-**F1, e ne resta UNA sola cosa: la domanda a Enzo.** Il censimento e i reperti sono chiusi in
-S1061 (2026-08-15) — vedi le due sezioni sopra. Chi riprende **non ri-misura**: sottopone a
-Enzo il modello a due entità (a)(b)(c), che è la scelta che costa di più se presa male e non è
-una decisione tecnica. Ottenuta la risposta, si va dritti a **F2**.
+**F2 — Modello dati.** F1 è chiusa: censimento e reperti in S1061, modello deciso in S1062.
+Non c'è più niente da chiedere prima di partire.
 
-*(la fase resta non spuntata di proposito: `WAIT-INPUT` su Enzo, non lavoro arretrato.)*
+Tre cose che F1 lascia a chi apre F2:
+- **La trasversalità non è un difetto da sanare** — è la forma attesa, registrata chiudendo
+  `#123`. Non ri-aprire quella domanda.
+- **La dimostrazione di F5 non va fabbricata**: 3 squadre reali hanno già oggi un capo
+  gerarchicamente inferiore a un suo membro. Sono quelle.
+- **`lib/scope/functional.ts` è il perno di F3** e la nozione di «capo funzionale» ha già
+  **due fonti** (`team_lead_user_id` **oppure** un membro con ruolo `LEAD`): F2 deve decidere
+  quale delle due sopravvive, o resteranno due verità sullo stesso fatto.
+- ⚠ **`isInFunctionalScope`/`isFunctionalLeader` sono codice morto** — zero consumatori di
+  produzione. Prima di costruirci sopra, verificare che facciano ciò che dicono: nessuno le
+  ha mai esercitate, quindi non c'è prova che funzionino.

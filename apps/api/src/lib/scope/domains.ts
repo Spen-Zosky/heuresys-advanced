@@ -57,7 +57,23 @@ export type Domain =
   | "mentor"
   | "approver"
   | "team_peer"
-  | "delegation";
+  | "delegation"
+  | "custody";
+
+/**
+ * Il mandato di CUSTODIA delle segnalazioni — arrivato con **#99 F7**, e serviva.
+ *
+ * F6 lo aveva lasciato fuori dichiarando che «aggiungerlo richiede una decisione, non del
+ * codice». La decisione l'ha imposta F7: la derivazione della sidebar da M1 ha bisogno di
+ * una riga `custody`, perche' la console delle segnalazioni e' precisamente la voce la cui
+ * visibilita' deve discendere dalla matrice — e' il difetto **D1**, quello da cui e' partito
+ * tutto il lavoro sui domini.
+ *
+ * E' role-shaped come i due mandati, per la stessa ragione di ADR-0036 §2.5: un mandato si
+ * CONFERISCE, non si deduce dall'organigramma. Nessuno diventa custode perche' dirige
+ * un'unita'.
+ */
+const CUSTODY_ROLES: ReadonlySet<string> = new Set(["WHISTLEBLOWING_CUSTODIAN"]);
 
 /**
  * I domini che aprono una superficie OLTRE il proprio record.
@@ -73,6 +89,14 @@ export type Domain =
  * Essere mentore, approvatore o compagno di squadra dice **cosa fai**, non **su chi puoi
  * guardare**: è la distinzione di I18, dove l'appartenenza funzionale non apre mai i dati
  * sensibili di un altro.
+ *
+ * ⚠ **`custody` non entra qui, ed e' una decisione di F7.** Questo insieme risponde «apri una
+ * superficie amministrativa GENERALE?», e da esso discende anche il livello di ampiezza delle
+ * pagine aggregate (`scopeTierOf`). La custodia apre **una sola** superficie, la propria: se
+ * fosse qui, il custode otterrebbe il livello `TEAM` su dashboard, analytics e insights —
+ * superfici che M1 gli nega su ogni classe (`SKILL`/`EVALUATION`/`COMPENSATION` = `none`).
+ * La sua voce di menu gli arriva dalla derivazione M1, che e' precisa dove questo insieme e'
+ * grossolano.
  */
 const DOMINI_CHE_APRONO_UNA_SUPERFICIE: ReadonlySet<Domain> = new Set<Domain>([
   "platform_mandate",
@@ -96,6 +120,7 @@ export async function activeDomainsOf(
   const domains = new Set<Domain>();
   if (isPlatform(actor)) domains.add("platform_mandate");
   if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) domains.add("hr_mandate");
+  if (actor.roles.some((r) => CUSTODY_ROLES.has(r))) domains.add("custody");
 
   const { rows } = await q.query<{
     line_management: boolean;
@@ -160,13 +185,33 @@ export async function activeDomainsOf(
  * whole surface", not "you are locked out".
  */
 export async function hasAnyDomain(q: DbConnector, actor: ActorContext): Promise<boolean> {
+  // NON `size > 0` su TUTTI i domini: dal 2026-08-15 `activeDomainsOf` restituisce anche
+  // domini che dicono cosa fai e non su chi puoi guardare. Misurato togliendo la
+  // distinzione: **109 persone in più** vedrebbero il menu amministrativo. Non è
+  // un'ipotesi, è il numero che il test stampa quando si sabota.
+  return (await dominiCheApronoUnaSuperficie(q, actor)).size > 0;
+}
+
+/**
+ * Quali domini fra quelli attivi aprono una superficie — l'insieme, non il predicato.
+ *
+ * `hasAnyDomain` risponde «sì/no» e basta a decidere se una sezione amministrativa esiste
+ * per questa persona. **#99 F7** ha bisogno di sapere *quali*, perché M1 va interrogata
+ * dominio per dominio: chi guida una squadra apre una superficie, ma sulla classe
+ * `COMPENSATION` la sua cella vale `none`, e la pagina delle retribuzioni non gli va offerta.
+ *
+ * I domini che restano fuori non sono «minori»: dicono **cosa fai** (mentore, approvatore,
+ * pari, delegato), non **su chi puoi guardare** — I18. Interrogare M1 su quelli produrrebbe
+ * il difetto misurato dal contro-oracolo di F7: 109 persone con la pagina di gestione utenti.
+ */
+export async function dominiCheApronoUnaSuperficie(
+  q: DbConnector,
+  actor: ActorContext,
+): Promise<Set<Domain>> {
   const domini = await activeDomainsOf(q, actor);
-  // NON `size > 0`: dal 2026-08-15 `activeDomainsOf` restituisce anche domini che dicono
-  // cosa fai e non su chi puoi guardare. Vedi `DOMINI_CHE_APRONO_UNA_SUPERFICIE`.
-  // Misurato togliendo questa distinzione: **109 persone in più** vedrebbero il menu
-  // amministrativo. Non è un'ipotesi, è il numero che il test stampa quando si sabota.
-  for (const d of domini) if (DOMINI_CHE_APRONO_UNA_SUPERFICIE.has(d)) return true;
-  return false;
+  const out = new Set<Domain>();
+  for (const d of domini) if (DOMINI_CHE_APRONO_UNA_SUPERFICIE.has(d)) out.add(d);
+  return out;
 }
 
 /* --- the breadth tier of an aggregate surface -------------------------------- */

@@ -25,6 +25,10 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { dominiCheApronoUnaSuperficie } from "../src/lib/scope/domains.js";
+import { almenoUnaCellaAperta } from "../src/lib/scope/matrix.js";
+import type { DataClass } from "../src/lib/scope/data-classes.js";
+import type { RoleCode } from "../src/config/constants.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 
@@ -58,10 +62,19 @@ function allCodes(b: Body): string[] {
 
 // --- registry / grants, read from the SAME source the service reads (no hardcoding) -------
 
-type Reg = { code: string; perspective: string; requiresAdmin: boolean; reqPair: string | null };
+type Reg = {
+  code: string; perspective: string; requiresAdmin: boolean; reqPair: string | null;
+  classi: DataClass[];
+};
 
 /** The active sidebar registry — mirrors repo.loadActiveInterfaces' source. `reqPair` is the
- *  `resource:action` string the service tests against the caller's permission codes. */
+ *  `resource:action` string the service tests against the caller's permission codes; `classi`
+ *  are the data classes the page declares (#99 F7, mig `000315`).
+ *
+ *  ⚠ Da F7 il gate ha TRE componenti, non due, e questo gemello dichiarativo le riproduce
+ *  tutte: permesso · pavimento amministrativo · **cella non-`none` fra i domini che aprono
+ *  una superficie e le classi esposte**. La matrice in sé non è verificata qui — ha il suo
+ *  file (`domains-f7.integration.test.ts`); qui si verifica la COMPOSIZIONE. */
 async function loadActiveRegistry(): Promise<Reg[]> {
   const r = await pool.query<Reg>(
     `SELECT ui_interface_code        AS code,
@@ -70,11 +83,38 @@ async function loadActiveRegistry(): Promise<Reg[]> {
             CASE WHEN ui_interface_required_resource IS NULL OR ui_interface_required_action IS NULL
                  THEN NULL
                  ELSE ui_interface_required_resource || ':' || ui_interface_required_action
-            END AS "reqPair"
-       FROM sys.sys_ui_interfaces
+            END AS "reqPair",
+            COALESCE((SELECT array_agg(dc.data_class)
+                        FROM sys.sys_ui_interface_data_classes dc
+                       WHERE dc.ui_interface_id = i.ui_interface_id), '{}') AS classi
+       FROM sys.sys_ui_interfaces i
       WHERE ui_interface_is_active = true`,
   );
   return r.rows;
+}
+
+/** L'attore reale dietro un'email — serve a derivare i domini, non a fabbricarli. */
+async function attoreDi(email: string) {
+  const r = await pool.query<{ user_id: string; tenant_id: string; roles: string[] }>(
+    `SELECT u.user_id, u.user_tenant_id AS tenant_id,
+            array_agg(rr.auth_role_code::text) AS roles
+       FROM sys.sys_users u
+       JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+        AND ur.user_auth_role_revoked_at IS NULL
+       JOIN sys.sys_auth_roles rr ON rr.auth_role_id = ur.user_auth_role_role_id
+      WHERE u.user_email = $1
+      GROUP BY u.user_id, u.user_tenant_id`,
+    [email],
+  );
+  const a = r.rows[0];
+  if (!a) throw new Error(`nessun attore per ${email}`);
+  return { userId: a.user_id, tenantId: a.tenant_id, roles: a.roles as RoleCode[] };
+}
+
+/** Le voci che M1 lascia passare a questa persona (le altre due componenti restano al chiamante). */
+async function passaM1(email: string, righe: Reg[]): Promise<Set<string>> {
+  const domini = await dominiCheApronoUnaSuperficie(pool, await attoreDi(email));
+  return new Set(righe.filter((r) => almenoUnaCellaAperta(domini, r.classi)).map((r) => r.code));
 }
 
 async function loadInactiveCodes(): Promise<string[]> {
@@ -174,7 +214,9 @@ describe("/v1/me/interfaces", () => {
     // derived from the permissions the role actually holds — which also makes this test the
     // guard for "the platform admin cannot read the whistleblowing reports either".
     const adminPerms = await permsForEmail("enzo.spenuso@heuresys.com");
-    const atteso = registry.filter((r) => r.reqPair === null || adminPerms.has(r.reqPair));
+    const m1Admin = await passaM1("enzo.spenuso@heuresys.com", registry);
+    const atteso = registry.filter(
+      (r) => (r.reqPair === null || adminPerms.has(r.reqPair)) && m1Admin.has(r.code));
     expect(allCodes(b).sort()).toEqual(atteso.map((r) => r.code).sort());
     // e il caso che rende la verifica non cieca: c'e' almeno una voce che l'admin NON vede
     expect(registry.some((r) => r.reqPair !== null && !adminPerms.has(r.reqPair))).toBe(true);
@@ -202,8 +244,15 @@ describe("/v1/me/interfaces", () => {
     // requires_admin=false, so the old rule declared it correct for all 163 users to see it in
     // their menu. The test was green precisely because the service was wrong in the same way.
     // A declared permission pair is now always evaluated; the expectation says so too.
+    // #99 F7 — la terza componente. `LEARNING_INITIATIVES` e' il caso che l'ha resa
+    // necessaria: `requires_admin=false` su una voce del gruppo *governance*, quindi il
+    // vecchio atteso la pretendeva visibile a chiunque avesse `learning:read` — 109 persone.
+    // E' lo stesso difetto D1 gia' corretto sulla console delle segnalazioni.
     const userPerms = await permsForEmail(userEmail);
-    const ess = registry.filter((r) => !r.requiresAdmin && (r.reqPair === null || userPerms.has(r.reqPair)));
+    const m1User = await passaM1(userEmail, registry);
+    const ess = registry.filter((r) => !r.requiresAdmin
+      && (r.reqPair === null || userPerms.has(r.reqPair))
+      && m1User.has(r.code));
     for (const section of SECTIONS) {
       const expected = ess.filter((r) => r.perspective === section).map((r) => r.code).sort();
       expect(codes(b, section).sort()).toEqual(expected);
@@ -226,13 +275,15 @@ describe("/v1/me/interfaces", () => {
   it("MANAGER (admin-class) is per-permission filtered WITHIN the admin sections", async () => {
     const b = await interfaces(suite, managerC);
     const managerPerms = await permsForEmail("paolo.caputo@rtl-bank.org");
+    const m1Manager = await passaM1("paolo.caputo@rtl-bank.org", registry);
     const visible = new Set(allCodes(b));
     // Derived gate (declarative twin of service.getInterfaces): for every admin interface,
-    // an admin-class caller sees it iff it has no required perm OR the role holds that perm.
+    // an admin-class caller sees it iff it has no required perm OR the role holds that perm —
+    // e, da #99 F7, se M1 gli lascia almeno una cella aperta sulle classi che la pagina espone.
     // This catches both over-exposure (sees something it lacks the perm for) and under-exposure.
     for (const i of registry) {
       if (!i.requiresAdmin) continue; // ESS covered by the USER test
-      const shouldSee = i.reqPair === null || managerPerms.has(i.reqPair);
+      const shouldSee = (i.reqPair === null || managerPerms.has(i.reqPair)) && m1Manager.has(i.code);
       expect(visible.has(i.code), `${i.code} (reqPair=${i.reqPair ?? "none"})`).toBe(shouldSee);
     }
   });

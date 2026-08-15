@@ -4,7 +4,8 @@
  * from req.user.userId. No method accepts userId from user input.
  */
 import { pool, withTransaction } from "../../db/client.js";
-import { hasAnyDomain } from "../../lib/scope/domains.js";
+import { dominiCheApronoUnaSuperficie } from "../../lib/scope/domains.js";
+import { almenoUnaCellaAperta } from "../../lib/scope/matrix.js";
 import type { RoleCode } from "../../config/constants.js";
 import { NotFoundError, ForbiddenError, ConflictError, UnprocessableEntityError } from "../../errors/index.js";
 import type {
@@ -113,11 +114,16 @@ export const meService = {
    *  returned (an empty one renders an honest empty-state in the UI). */
   async getInterfaces(actor: SelfActor): Promise<MeInterfacesResponse> {
     const permSet = new Set(userPermissionCodes({ roles: actor.roles }));
-    const hasAdminRole = await hasAnyDomain(pool, {
+    const ctx = {
       userId: actor.userId,
       tenantId: actor.tenantId,
       roles: actor.roles as RoleCode[],
-    });
+    };
+    // #99 F7 — i domini che aprono una superficie, non tutti quelli attivi. `hasAnyDomain`
+    // e' il predicato binario costruito su questo stesso insieme; qui serve l'insieme,
+    // perche' M1 va interrogata dominio per dominio.
+    const dominiCheAprono = await dominiCheApronoUnaSuperficie(pool, ctx);
+    const hasAdminRole = dominiCheAprono.size > 0;
     const rows = await repo.loadActiveInterfaces(pool);
     const visible = rows.filter((i) => {
       // Una coppia permesso DICHIARATA si valuta SEMPRE, admin o no. La stesura
@@ -131,8 +137,24 @@ export const meService = {
       // permesso era inerte per la stessa ragione.
       if (i.requiredResource !== null && i.requiredAction !== null
           && !permSet.has(`${i.requiredResource}:${i.requiredAction}`)) return false;
-      if (!i.requiresAdmin) return true; // ESS / always-visible
-      return hasAdminRole; // la sezione admin resta riservata ai ruoli di classe admin
+      // ── il pavimento: invariato da #119. Una voce amministrativa esige un dominio che
+      //    apra una superficie oltre il proprio record.
+      if (i.requiresAdmin && !hasAdminRole) return false;
+      // ── #99 F7, la cascata M3: fra i domini che aprono e le classi che la pagina espone
+      //    deve esistere almeno una cella non-`none`.
+      //
+      //    ⚠ M1 RESTRINGE, NON SOSTITUISCE, e il contro-oracolo lo ha dimostrato: sostituendo
+      //    il pavimento con la sola matrice, **109 persone guadagnavano** le voci di governo
+      //    — perche' `team_peer` ha `PERSONAL = mask` («dei compagni di squadra vedi nome e
+      //    competenze»), che tradotto in visibilita' di pagina diventava «puoi aprire la
+      //    gestione utenti». E' il difetto da 109 persone gia' evitato in F6a, e sarebbe
+      //    rientrato dalla finestra.
+      //
+      //    La granularita' che F7 aggiunge e' quella che al pavimento manca: chi guida una
+      //    squadra apre una superficie, ma M1 gli da' `none` su COMPENSATION e EVALUATION —
+      //    quindi la pagina delle retribuzioni non gli va offerta neanche se il permesso,
+      //    domani, gli venisse concesso.
+      return almenoUnaCellaAperta(dominiCheAprono, i.dataClasses);
     });
     return {
       perspectives: UI_PERSPECTIVES.map((p) => ({

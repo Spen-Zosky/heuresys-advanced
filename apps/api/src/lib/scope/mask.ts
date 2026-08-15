@@ -44,23 +44,23 @@
 import { isPlatform, type ActorContext } from "../actor.js";
 import { HR_MANDATED_ROLES } from "./resolver.js";
 import type { DataClass } from "./data-classes.js";
+import { classiMascherateDa } from "./matrix.js";
 
 /**
  * The classes the platform mandate alone does NOT open.
  *
- * The domain matrix names these cells `platform_mandate`/`CONTRACT_PAY` and
- * `platform_mandate`/`EVALUATION`; in code the pay class is `COMPENSATION`
- * (data-classes.ts), which is the same class under the taxonomy's own name.
+ * ⚠ **DERIVATA da M1 dal 2026-08-15 (#99 F7), non più dichiarata.** Prima era un `Set`
+ * scritto a mano che ripeteva due celle della matrice: due dichiarazioni dello stesso fatto
+ * in due file, e la seconda sarebbe invecchiata da sola il giorno in cui la matrice fosse
+ * cambiata — senza che niente fallisse. Ora la riga `platform_mandate` di M1 è l'unica
+ * sorgente, e un test prova che le due coincidono ancora.
  *
- * `PERSONAL` and `SKILL` are deliberately NOT here: Enzo's decision named
- * salaries and evaluations, and widening it silently would be inventing a
- * decision. They are covered by the IDENTITY_PRO/IDENTITY_PRIV split, which is
- * a separate, class-level change and needs no masking at all.
+ * `PERSONAL` e `SKILL` restano fuori — non perché siano stati omessi qui, ma perché in M1
+ * quelle celle valgono `edit` e `read`: la decisione di Enzo nominava stipendi e valutazioni,
+ * e allargarla in silenzio sarebbe inventare una decisione.
  */
-export const MASKED_UNDER_PLATFORM_MANDATE: ReadonlySet<DataClass> = new Set<DataClass>([
-  "COMPENSATION",
-  "EVALUATION",
-]);
+export const MASKED_UNDER_PLATFORM_MANDATE: ReadonlySet<DataClass> =
+  classiMascherateDa("platform_mandate");
 
 /**
  * Does this actor read this class under the platform mandate ALONE?

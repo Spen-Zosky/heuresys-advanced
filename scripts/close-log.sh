@@ -88,8 +88,13 @@ sessione_derivata() {
     if [ -n "$v" ]; then printf '%s' "$v"; return; fi
   fi
 
-  ultimo="$(git -C "$ROOT" log --grep='handoff S' -1 --format=%s 2>/dev/null || true)"
-  n="$(printf '%s' "$ultimo" | grep -oE 'handoff S[0-9]{3,4}' | grep -oE '[0-9]{3,4}' || true)"
+  # Si guardano i SOGGETTI, non i messaggi interi. `git log --grep` cerca anche nel CORPO:
+  # il commit che ha introdotto questa funzione descriveva «l'ultimo commit `handoff S<N>`»
+  # nel proprio corpo, `--grep` lo ha selezionato, `%s` ha restituito un soggetto senza numero
+  # e il ripiego e' regredito di una sessione nello stesso momento in cui veniva scritto.
+  # Misurato dalla batteria il 2026-08-15 — un difetto che parla di se' stesso.
+  n="$(git -C "$ROOT" log -200 --format=%s 2>/dev/null \
+       | grep -oE 'handoff S[0-9]{3,4}' | head -n1 | grep -oE '[0-9]{3,4}' || true)"
   st="$(grep -oE '\bS[0-9]{3,4}\b' "$ROOT/.handoff/STATE.md" 2>/dev/null | head -n1 | tr -d 'S' || true)"
 
   if [ -n "$n" ]; then

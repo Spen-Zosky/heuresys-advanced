@@ -1,11 +1,17 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "skillOverrides": {
-    "consolida-pagina": "off",
-    "dashboards-jobs": "off",
-    "multi-tenant-validator": "off"
-  },
   "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && sh scripts/hooks/precompact-journal.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [

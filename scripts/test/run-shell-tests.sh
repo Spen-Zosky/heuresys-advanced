@@ -630,9 +630,16 @@ if [ -f "$CL" ]; then
   else fail "sessione: .handoff/session-id ignorato"; fi
   : > "$T/sid-vuoto"
   sess_ripiego="$(HEURESYS_SESSION_FILE="$T/sid-vuoto" bash "$CL" sessione)"
-  if printf '%s' "$sess_ripiego" | grep -qE '^S[0-9]{3,4}$'; then
-    ok "sessione: file vuoto ⟹ ripiego git+STATE, non stringa vuota ($sess_ripiego)"
-  else fail "sessione: il file vuoto non degrada al ripiego ($sess_ripiego)"; fi
+  # L'atteso NON e' un numero scritto qui: si deriva dalla storia reale. L'invariante e' che una
+  # sessione IN CORSO viene DOPO l'ultima chiusa — `>`, non `>=`. La prima versione di questa
+  # prova chiedeva solo «assomiglia a S1234», e infatti non si accorse che il ripiego era
+  # regredito da S1064 a S1063 nel momento stesso in cui veniva scritto (il commit che lo
+  # descriveva conteneva «handoff S<N>» nel corpo, e `git log --grep` guarda anche li').
+  ultimo_n="$(git log -200 --format=%s | grep -oE 'handoff S[0-9]{3,4}' | head -n1 | grep -oE '[0-9]{3,4}')"
+  sess_n="$(printf '%s' "$sess_ripiego" | tr -cd '0-9')"
+  if [ -n "$ultimo_n" ] && [ -n "$sess_n" ] && [ "$sess_n" -gt "$ultimo_n" ] 2>/dev/null; then
+    ok "sessione: il ripiego viene DOPO l'ultima chiusura ($sess_ripiego > handoff S$ultimo_n)"
+  else fail "sessione: ripiego '$sess_ripiego' non successivo all'ultimo handoff S$ultimo_n"; fi
   # NEGATIVA: repo senza alcun commit 'handoff S<N>' e senza STATE.md. Deve dichiarare di non
   # sapere. Un numero inventato qui sarebbe peggio del segnaposto che #191 sta togliendo.
   NOSTORIA="$T/nostoria"
@@ -643,6 +650,30 @@ if [ -f "$CL" ]; then
   if [ "$sess_muta" = "S?" ]; then
     ok "sessione: senza handoff e senza STATE dichiara S?, non inventa un numero"
   else fail "sessione: ha inventato '$sess_muta' dove non poteva sapere"; fi
+
+  # S1064 — il diario di sessione e la COMPATTAZIONE. Le prove girano dentro una fixture git,
+  # mai sul diario reale: un test che scrive nel diario vero mette una compattazione finta
+  # davanti a chi legge la chiusura, ed e' la stessa contaminazione che HEURESYS_CLOSE_LOG
+  # evita per il rendiconto.
+  PCJ="scripts/hooks/precompact-journal.sh"
+  if [ -f "$PCJ" ]; then
+    FIXJ="$T/fix-journal"
+    rm -rf "$FIXJ"; mkdir -p "$FIXJ"
+    ( cd "$FIXJ" && git init -q . && git config user.email t@t && git config user.name t \
+      && echo x > a.txt && git add a.txt && git commit -qm "base" ) >/dev/null 2>&1
+    ( cd "$FIXJ" && sh "$ROOT/$PCJ" ) >/dev/null 2>&1
+    JLINE="$(head -n1 "$FIXJ/.handoff/session-journal.ndjson" 2>/dev/null || true)"
+    if printf '%s' "$JLINE" | grep -q '"ref":"compattazione"' \
+       && printf '%s' "$JLINE" | python -c 'import json,sys; json.loads(sys.stdin.read())' 2>/dev/null; then
+      ok "precompact: deposita una riga JSON valida di compattazione"
+    else fail "precompact: riga assente o non JSON ($JLINE)"; fi
+    # NEGATIVA/robustezza: fuori da un repo git non ha dove scrivere. Deve tacere e uscire 0 —
+    # un hook che fa fallire la compattazione e' peggio del difetto che sorveglia.
+    NOGIT="$T/senza-git"; rm -rf "$NOGIT"; mkdir -p "$NOGIT"
+    if ( cd "$NOGIT" && sh "$ROOT/$PCJ" >/dev/null 2>&1 ); then
+      ok "precompact: fuori da un repo git esce 0 senza rompere la compattazione"
+    else fail "precompact: ha fatto fallire cio' che osserva (uscita non-zero fuori da git)"; fi
+  else fail "$PCJ manca"; fi
 
   # Il diario è un OSSERVATORE: non deve mai far fallire ciò che osserva.
   if HEURESYS_CLOSE_LOG="/dev/null/impossibile/log.ndjson" bash "$CL" step x y z >/dev/null 2>&1; then

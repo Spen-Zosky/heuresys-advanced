@@ -12,6 +12,34 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
+- **#192 Il diario di sessione non scrive — e la misura ha ridimensionato il difetto** · status: DONE
+  - ✅ **CHIUSA S1064 (2026-08-15).** `.handoff/session-journal.ndjson` era a **0 byte dal 10
+    agosto**. La lettura facile era «strumento rotto»; la misura dice altro, e va detto per
+    intero: la regola cardinale della skill `handoff` ammette **quattro** fonti — backlog,
+    debt, STATE, journal — e le sessioni **S1053→S1062** hanno registrato tutto nelle prime
+    tre, che sono **più forti perché versionate**. **Nessuna perdita misurabile.** Il diario
+    non è un registro mancato: è un **cuscinetto**, con un solo caso d'uso reale.
+  - **quel caso è la compattazione del contesto**, ed è l'unico momento in cui un fatto emerso
+    e non ancora registrato sparisce davvero. Il diario era nato per questo (design §11.4) e
+    **proprio lì non veniva mai chiamato**, perché la chiamata dipendeva dal fatto che io me
+    ne ricordassi — la forma di regola che il ciclo di autocoscienza (S1063) ha misurato
+    essere quella con le recidive.
+  - **il rinforzo, proporzionato alla misura**: un hook **`PreCompact`**
+    (`scripts/hooks/precompact-journal.sh`, cablato in `.claude/settings.json`) che deposita
+    una riga deterministica — quando, su quale HEAD, quante righe c'erano — e stampa il
+    promemoria di travasare le pendenze. **Scartate di proposito** due strade più invasive:
+    un cancello bloccante al close (arriva troppo tardi e si soddisfa con una riga finta) e un
+    hook `post-commit` (duplicherebbe `git log`, che il close già legge).
+  - **evidenza**: `PreCompact` **esiste in questa build** — misurato nel bundle installato
+    `~/.local/share/claude/versions/2.1.233`, non dato per buono. Hook eseguito a mano →
+    riga JSON valida `{"ref":"compattazione",…}`, uscita **0**; fuori da un repo git tace ed
+    esce **0** (un osservatore non fa fallire ciò che osserva).
+    `run-shell-tests.sh` → **155 ok / 0 failed**.
+  - **ripulita una deroga rimasta a coprire un vuoto**: `.claude/settings.json` aveva ancora
+    `skillOverrides` `off` per le tre skill **cancellate ieri** da `#190`. Tolte: è la stessa
+    dottrina con cui #190 aveva rimosso le proprie deroghe insieme ai file.
+  - priority: P2 · effort: ~45 min · doc: `scripts/hooks/precompact-journal.sh` · trovato: S1063 (open question in STATE)
+
 - **#191 Il rendiconto delle chiusure non sa di quale sessione parla** · status: DONE
   - ✅ **CHIUSA S1064 (2026-08-15).** Il numero **non si passa più a mano e non si deduce a
     posteriori**: si fissa al **boot**, dove la risposta è univoca, e si deposita in

@@ -1,37 +1,30 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-15 (S1061).
+**Updated**: 2026-08-15 (S1062).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-## Last session brief (S1061)
+## Last session brief (S1062 «Canonica Notturna»)
 
-Sessione a mandato aperto: *«processa tutti i punti di P1, P2, P3 e anche i debiti, in
-autonomia, senza presidio»*. Il menu vale più di quanto entri in una sessione, quindi il ciclo
-è stato diviso a monte in due metà **entrambe consegnate**: ciò che si poteva chiudere è stato
-chiuso, e ciò che resta ha la sua ripresa scritta in un file — nessuna voce lasciata aperta a
-memoria.
+Mandato aperto: *«esegui in piena autonomia P1+P2+P3, per i bloccanti decidi tu»*. Chiusa
+**`#99` F7**, che era la radice: la visibilità di una voce di menu ora **discende dalla
+matrice dei domini** invece che da un flag scritto a mano.
 
-**I due debiti aperti sono a zero** e tre voci sono chiuse. La parte più grossa è **la
-completezza dei dati personali**: ventidue tabelle descrivevano una persona senza che quella
-persona potesse leggerle. Diciotto sono state escluse **una per una con la ragione scritta**,
-e quattro sono diventate pagine vere — fra cui i **rapporti di mentoring reali**, che il
-portale non mostrava affatto: si vedeva chi si *potrebbe* avere come mentore, non chi si ha
-davvero.
+**Il lavoro vero è stato scoprire due volte che il piano aveva torto, e scoprirlo misurando.**
+La derivazione «pura» descritta dal piano avrebbe **regalato a 109 persone** le voci di
+governo — perché essere compagno di squadra apre l'anagrafica in forma ridotta, e tradotto in
+visibilità di pagina diventava «puoi aprire la gestione utenti». È lo stesso difetto da 109
+persone già evitato in F6a, rientrato dalla finestra. E `requires_admin` **non è eliminabile**
+come M3 sperava: esistono pagine amministrative che non espongono alcun dato di persona.
 
-**Il tema della sessione**: la misura ha smentito i registri **sei volte**, e due di quelle
-smentite riguardavano il mio stesso lavoro — una verifica verde che non poteva fallire, e uno
-strumento che dichiarava «zero pagine» senza protestare. Due decisioni, invece, **non sono
-state chieste a Enzo perché le aveva già prese** altrove, su voci sorelle.
+**Due difetti sono emersi dalla regola, non da una ricerca**: un cancello di sicurezza che
+pretendeva un presidio solo per diligenza di chi l'aveva scritto (e nulla sarebbe fallito
+togliendolo), e una pagina di governo offerta a 109 dipendenti per lo stesso difetto già
+corretto sulla console delle segnalazioni.
 
-**Poi la sessione è proseguita su richiesta** («continua con #92 F6», e l'istruzione che ne è
-nata: *quando il guardiano dice `✓ si continua` si va avanti automaticamente*). Chiuso per
-intero il **ciclo di valutazione**, che ora ha le sue due pagine e le sue prove con login
-reale, e la fase dei **domini funzionali**, delega compresa — quella non esisteva affatto, né
-come tabella né come istituto.
-
-**Tre volte una prova è stata scoperta incapace di fallire** (il lato mentore, la compilazione
-scambiata per difetto, la revoca che si auto-saltava): ogni volta il difetto era del test, non
-del prodotto.
+**Correzione di rotta di Enzo, ed era giusta**: avevo lanciato la suite completa su Windows,
+che lo standard di S1054 esclude. Misurato in diretta il perché — **135-165 ms per query**
+attraverso il tunnel, con vitest al 22% di CPU perché aspetta la rete. Spostata sul linux-pc:
+**verde in 17,7 minuti** contro 55+ senza arrivare in fondo.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -40,27 +33,29 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-1. **Verificare com'è finito il deploy armato in chiusura**: `bash scripts/verifica-deploy.sh`.
-   Se dice `CI-ROSSA` è un errore da correggere subito, non da riportare a Enzo. ⚠ Questo
-   giro porta in produzione **due migrazioni** (`000313` voci di menu, `000314` deleghe) e
-   due pagine nuove: vale la pena guardarlo.
-2. **`#99` F7 — dashboard derivate dalla matrice**, ~250k: è la penultima fase del programma.
-   La sovrapposizione con `#142` è già sciolta e non va ridiscussa — **F7 dà il meccanismo**,
-   `#142` dà il catalogo, ed è per questo che `#142` F2/F3 sono `GATED` su questa fase
-   · `.programmi/99-*.md`
-3. **`#54` F2 — modello dati del recruiting** (~250k) oppure **`#159` F2 — il ponte**, che ora
-   è un'**estrazione** e non una costruzione: le 300 righe di `/dev/agent` sono già un ponte
-   funzionante nel posto sbagliato.
+1. **Le presenze sono ferme da 8 giorni** — allarme reale di `db_health`, **non** causato dal
+   lavoro di S1062: la storia RTL non avanza dal 2026-08-07 e il timer settimanale esegue solo
+   la *custodia*, non l'avanzamento. Rimedio: `storia36.sh avanzamento`, **da lanciare sulla VM**
+   (database locale) e non da Windows via tunnel. Rinviato per finestra 5h al 76%, non per
+   difficoltà · skill `storia36-custodia`
+2. **Verificare com'è finito il deploy armato**: `bash scripts/verifica-deploy.sh`. Questo giro
+   porta in produzione la migrazione `000315` e la nuova derivazione della sidebar.
+3. **`#142` F2 — modello dei cruscotti**, ora **sbloccata** da F7 (~180k). Leggere prima i tre
+   reperti annotati nel register: la derivazione **restringe e non concede**, il permesso per
+   cruscotto serve ancora, e nel modulo `dashboard` ci sono due residui da correggere lì
+   (una lista di ruoli a mano; lo scope TEAM ancora sull'albero delle posizioni) · `.programmi/142-*.md`
 
 ## Open questions
 
-- **Tre decisioni di Enzo sbloccano lavoro già pronto, e nessuna è tecnica**: *(a)* si apre il
-  ciclo di valutazione dell'azienda? Senza, l'autovalutazione è una funzione senza casi su cui
-  mostrarla · *(b)* `#143`, il modello «una squadra è un progetto» a due entità: il censimento
-  e i reperti sono chiusi, resta solo la domanda · *(c)* `#156`, quale superficie aprire per
-  prima all'agente — decide su quale delle **83 schede idonee** mostrarlo.
-- **`D-69`**: la condizione di riapertura si è verificata (capitolo import chiuso). Smontare
-  l'impianto ETL è ~3-4h; nessuna urgenza (720 kB, zero righe, spento in produzione).
+- **Due decisioni di Enzo sbloccano lavoro già pronto** (la terza, `#143`, è stata decisa in
+  S1062 col mandato): *(a)* si apre il ciclo di valutazione dell'azienda? · *(b)* `#156`, quale
+  superficie aprire per prima all'agente, fra le **83 schede idonee**.
+- **`#169` — separare password e secondo fattore**: indagata in S1062 e **non eseguita di
+  proposito**. `deriveTotpSecret` è usato da **19 file** (prove live, acceptance del gateway,
+  E2E, helper di login): separare i segreti riprogetta il modo in cui *tutta* la suite fa
+  login, e la trappola è già scattata una volta. Reperto che cambia la soluzione: l'impianto
+  di **esenzione MFA esiste già nel database ed è vuoto** — è quella la strada.
+- **`D-69`**: la condizione di riapertura si è verificata. Smontare l'ETL è ~3-4h, nessuna urgenza.
 - **La prova generale del database non esegue la suite di test**: una guardia che vive in un
   test le sfugge per costruzione. Vale la pena spostare quel controllo dentro la catena?
 
@@ -69,8 +64,12 @@ adversarial; le decisioni tecniche sono di Claude.
 ```bash
 python docs/kb/tools/session_start.py            # menu + salute, un colpo solo
 python docs/kb/tools/handoff_lint.py             # cancello di coerenza, bloccante
-python docs/kb/tools/check_completezza_self.py   # atteso: SCOPERTE 0
-python docs/kb/tools/check_idoneita_agente.py    # atteso: 83 idonee su 115
 python docs/kb/tools/programmi.py --verifica     # atteso: 7 programmi, nessun difetto
+python docs/kb/tools/db_health.py                # atteso: 1 allarme (presenze) finché non si avanza la storia
 bash scripts/verifica-deploy.sh                  # DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO
+```
+
+⚠ **La verifica lunga si esegue sul linux-pc, non qui** (standard S1054, ri-misurato in S1062):
+```bash
+ssh linux-pc 'source ~/.nvm/nvm.sh; nvm use 22; cd ~/heuresys-advanced/apps/api && pnpm exec vitest run'
 ```

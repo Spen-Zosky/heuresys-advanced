@@ -40,7 +40,22 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-1. **`#189` — la riparazione della storia36 non arriva in fondo** (~1-2h): un seed invoca una
+1. ⭐ **MANDATO DI ENZO — ciclo di autocoscienza e redenzione** (S1062, non eseguito: la
+   finestra 5h ha raggiunto **82%** mentre veniva assegnato, e la regola impone di fermarsi).
+   **Va eseguito per intero, con contesto pieno, PRIMA della chiusura della sessione in cui
+   lo si affronta.** Le quattro parti, testuali:
+   *(a)* rileggere **tutti** i documenti del progetto — `CLAUDE.md`, i `README.md`, i vincoli,
+   le regole in `.claude/rules/`, gli **ADR**, la `docs/kb/`, le **memorie**, i **transcript di
+   sessione**, i contenuti di **claude-mem** e qualunque cosa istruisca su come lavorare;
+   *(b)* rianalizzare **tutti gli errori delle ultime 10 sessioni dipesi da negligenza o
+   mancato rispetto delle regole** — non i difetti tecnici, ma le mie inadempienze;
+   *(c)* **rinforzare i meccanismi** che impediscono di ricommetterli;
+   *(d)* **verificare** la capacità reale di autoapprendimento dagli errori e di autocorrezione
+   **stabile** — cioè che la correzione regga nel tempo, non solo subito dopo il richiamo.
+   ⚠ **Materiale già in mano da S1062**, da non ri-cercare: in questa sessione ho violato lo
+   standard S1054 (suite lunga lanciata su Windows invece che sul linux-pc) e sono stato
+   corretto da Enzo, non dai miei controlli — il che è già un dato per la parte *(d)*.
+2. **`#189` — la riparazione della storia36 non arriva in fondo** (~1-2h): un seed invoca una
    funzione di verifica che le batterie creano *dopo* di lui, quindi `--repair-missing` si
    spezza a metà e la regola del twice-run non è eseguibile su quel modo. Trovato eseguendolo
    in S1062, invisibile prima perché quel seed lo tocca solo quel modo · register `#189`

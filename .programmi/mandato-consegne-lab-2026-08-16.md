@@ -27,16 +27,16 @@ Chiusura anticipata obbligatoria: contesto ≥ 75% **oppure** finestra 5h ≥ 80
 
 | id | Cosa | Chi | Cosa significa fatto | Stato |
 |---|---|---|---|---|
-| **F1** | Ingerire le 7 consegne nel register | io | `--ingest` + `handoff_lint.py` verde **+ register letto a occhio** (nessun doppione) + commit | ⬜ |
-| **F2.1** | `guardiano.py`: muore sulla riga del verdetto se stdout non è un terminale | io | `--sorveglia > out.txt` scrive il verdetto ed esce **0 o 3**, mai 1. Anche la copia `~/.claude/tools/` | ⬜ |
-| **F2.2** | `lab_inbox.py`: `str.replace` non dice se ha sostituito → doppioni silenziosi | io | patch (canale + encoding) applicata alle **due** copie; `collaudo_canale.py` 13/13 | ⬜ |
-| **F2.3** | `check_no_legacy_ingest.py` è **rosso** per `check_istruzioni.py` (falso positivo) | io | letto il file io stesso, allowlist col motivo; cancello **0** e `--selftest` **9/9** | ⬜ |
-| **F3** | I 7 residui dentro `#196` e `#198` | io | i due blocchi riscritti sostituiti **per titolo**; lint verde; nessun `chiuso-quando` doppio | ⬜ |
-| **F4** | `#199` — guardia mancante su `link-tenant` | io | test **che oggi passa** diventa rosso senza guardia e verde con; `BLUEPRINT_LINK_IS_PERMANENT` | ⬜ |
-| **F5** | `#196` — censire viste/conteggi/schermate che sommano le due specie di indicatori | io | elenco misurato sul DB e sul codice, non dedotto | ⬜ |
-| **F6** | `#198` — Tenant Builder P3, 9 task | io | **non completabile in questa sessione**: si avanza fin dove il guardiano consente, `resume-from` scritto | ⬜ |
-| **F7** | P4 task **T5** — vista `v_positions_with_critical_skill_gap` | io | numeri **ri-misurati** oggi; zero righe o 97 righe = vista ROTTA | ⬜ |
-| **F8** | 2b/2c — leggere, verificare avversarialmente, lasciare `ACTIVE` con dipendenza `#132` dichiarata | io | annotazione nel file di consegna; nessuna riga di implementazione | ⬜ |
+| **F1** | Ingerire le 7 consegne nel register | io | `--ingest` + `handoff_lint.py` verde **+ register letto a occhio** (nessun doppione) + commit | ✅ FATTA `b7f04661` — 7 blocchi #202-#208, nessun doppione, lint verde |
+| **F2.1** | `guardiano.py`: muore sulla riga del verdetto se stdout non è un terminale | io | `--sorveglia > out.txt` scrive il verdetto ed esce **0 o 3**, mai 1. Anche la copia `~/.claude/tools/` | ✅ FATTA `7911dde8` — difetto riprodotto (exit 1 su `✓`), poi verdetto scritto ed exit 0, selftest 32/32, 2 copie allineate |
+| **F2.2** | `lab_inbox.py`: `str.replace` non dice se ha sostituito → doppioni silenziosi | io | patch (canale + encoding) applicata alle **due** copie; `collaudo_canale.py` 13/13 | ✅ FATTA `7911dde8` — patch applicata **con una correzione mia**: `classifica()` guardava il corpo, non l'intestazione → creava ancora doppioni. Collaudo 14/14 (e C5b, rotto da prima, riparato) |
+| **F2.3** | `check_no_legacy_ingest.py` è **rosso** per `check_istruzioni.py` (falso positivo) | io | letto il file io stesso, allowlist col motivo; cancello **0** e `--selftest` **9/9** | ✅ FATTA `7911dde8` — falso positivo verificato leggendo il file, cancello 0, selftest 9/9 |
+| **F3** | I 7 residui dentro `#196` e `#198` | io | i due blocchi riscritti sostituiti **per titolo**; lint verde; nessun `chiuso-quando` doppio | ✅ FATTA `82d80582` — #196 riscritta (14 campi, uno ciascuno), #198 riga corretta, + i due agganci di #208 |
+| **F4** | `#199` — guardia mancante su `link-tenant` | io | test **che oggi passa** diventa rosso senza guardia e verde con; `BLUEPRINT_LINK_IS_PERMANENT` | ✅ FATTA `e9cbc332` — test rosso prima e verde dopo, dimostrazione LIVE sul fascicolo di RTL Bank |
+| **F5** | `#196` — censire viste/conteggi/schermate che sommano le due specie di indicatori | io | elenco misurato sul DB e sul codice, non dedotto | ✅ FATTA `af44401a` — censimento su 3 livelli + **difetto trovato**: `z.coerce.boolean()` rendeva il filtro una bugia. E2E 101/101 |
+| **F6** | `#198` — Tenant Builder P3, 9 task | io | **non completabile in questa sessione**: si avanza fin dove il guardiano consente, `resume-from` scritto | ⏸ **NON COMPLETABILE** in questa sessione (il lab stesso la dà a ~2 sessioni) — vedi sotto |
+| **F7** | P4 task **T5** — vista `v_positions_with_critical_skill_gap` | io | numeri **ri-misurati** oggi; zero righe o 97 righe = vista ROTTA | ✅ FATTA `dcec8120` — solo T5, come previsto. Oracolo ri-misurato e riprodotto (97·299·70·60·2) + 64 cieche |
+| **F8** | 2b/2c — leggere, verificare avversarialmente, lasciare `ACTIVE` con dipendenza `#132` dichiarata | io | annotazione nel file di consegna; nessuna riga di implementazione | ✅ FATTA `81b5fa19` — verificata, **un rilievo respinto**: il documento dice che P2a è costruita, ma `#132` è ACTIVE |
 
 ---
 

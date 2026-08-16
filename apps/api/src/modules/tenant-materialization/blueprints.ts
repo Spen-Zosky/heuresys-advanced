@@ -40,6 +40,27 @@ export interface ArchetypeKpi {
   polarity: KpiPolarity;
   unit: string;
 }
+/** sys_organization_unit_processes.org_unit_process_role — dominio del CHECK. */
+export type ProcessRole = "OWNER" | "CONTRIBUTOR" | "CONSULTED" | "INFORMED";
+
+/**
+ * Chi presidia quale processo (#198 P3/T2).
+ *
+ * Senza questa dichiarazione, applicare un fascicolo non produce NULLA per lo
+ * strato dei processi — cioe' meta' del fascicolo (spec P3 §11.1): il modello dice
+ * quali processi l'azienda ha, e nessuno dice chi li tiene.
+ *
+ * `processCode` e' il codice del registro (`sys_blueprint_process_registry`), NON
+ * un'invenzione: i 23 codici sono stati letti dal database, e il test
+ * `tenant-materialization-processes` li ri-verifica li' a ogni corsa. Se qualcuno
+ * cambia il registro, il test diventa rosso invece di lasciare l'archetipo a
+ * puntare nel vuoto.
+ */
+export interface ArchetypeProcessOwnership {
+  processCode: string;
+  orgUnitCode: string;
+  role: ProcessRole;
+}
 export interface Archetype {
   key: string;
   label: string;
@@ -47,6 +68,7 @@ export interface Archetype {
   positions: ArchetypePosition[];
   skills: ArchetypeSkill[];
   kpis: ArchetypeKpi[];
+  processOwnership: ArchetypeProcessOwnership[];
 }
 
 // RETAIL_BANK_REFERENCE — a compact, deterministic retail-bank skeleton: 1 HQ, 3 directorates,
@@ -94,6 +116,69 @@ const RETAIL_BANK_REFERENCE: Archetype = {
     { code: "RBR-KPI-PORTFOLIO", name: "Loan Portfolio Quality", polarity: "HIGHER_IS_BETTER", unit: "%" },
     { code: "RBR-KPI-EFFICIENCY", name: "Operational Efficiency", polarity: "HIGHER_IS_BETTER", unit: "%" },
     { code: "RBR-KPI-SALES", name: "Sales Target Attainment", polarity: "HIGHER_IS_BETTER", unit: "%" },
+  ],
+  // P3/T2 — chi presidia quale processo. I 23 `processCode` sono quelli veri di
+  // `sys_blueprint_process_registry` (letti dal database, non scritti a memoria), e
+  // l'attribuzione ricalca come RTL Bank lo fa DAVVERO: 23 OWNER, uno per processo,
+  // piu' i contributori dove il lavoro passa di li'.
+  //
+  // La traduzione non e' 1:1 perche' non puo' esserlo: RTL ha 43 unita' attive,
+  // l'archetipo ne ha 7. Ogni processo va quindi alla direzione dell'archetipo che
+  // copre la funzione della sua proprietaria in RTL — Antiriciclaggio e Compliance
+  // confluiscono in RISK, Back Office e Pagamenti in OPS, Finanza e HR restano in
+  // HQ perche' l'archetipo non ha una direzione per loro. Dove non c'e' un
+  // corrispondente si sale, mai si inventa un'unita'.
+  //
+  // Le tre filiali NON possiedono processi (in RTL nemmeno): contribuiscono a
+  // quelli che passano dallo sportello.
+  processOwnership: [
+    { processCode: "00", orgUnitCode: "RBR-HQ", role: "OWNER" },            // Strategia e governance
+    { processCode: "01", orgUnitCode: "RBR-DIR-RETAIL", role: "OWNER" },    // Acquisizione e onboarding clienti
+    { processCode: "02", orgUnitCode: "RBR-DIR-RISK", role: "OWNER" },      // KYC / AML
+    { processCode: "03", orgUnitCode: "RBR-DIR-OPS", role: "OWNER" },       // Apertura e gestione conti
+    { processCode: "04", orgUnitCode: "RBR-DIR-OPS", role: "OWNER" },       // Pagamenti e bonifici
+    { processCode: "05", orgUnitCode: "RBR-DIR-RETAIL", role: "OWNER" },    // Erogazione del credito
+    { processCode: "06", orgUnitCode: "RBR-DIR-RISK", role: "OWNER" },      // Monitoraggio e recupero crediti
+    { processCode: "07", orgUnitCode: "RBR-DIR-RETAIL", role: "OWNER" },    // Consulenza patrimoniale
+    { processCode: "08", orgUnitCode: "RBR-DIR-RETAIL", role: "OWNER" },    // Investimenti retail
+    { processCode: "09", orgUnitCode: "RBR-HQ", role: "OWNER" },            // Tesoreria e ALM
+    { processCode: "10", orgUnitCode: "RBR-DIR-RISK", role: "OWNER" },      // Gestione del rischio
+    { processCode: "11", orgUnitCode: "RBR-DIR-RISK", role: "OWNER" },      // Compliance e reportistica
+    { processCode: "12", orgUnitCode: "RBR-HQ", role: "OWNER" },            // Audit interno
+    { processCode: "13", orgUnitCode: "RBR-DIR-OPS", role: "OWNER" },       // Operativita' di filiale
+    { processCode: "14", orgUnitCode: "RBR-DIR-RETAIL", role: "OWNER" },    // Servizio clienti
+    { processCode: "15", orgUnitCode: "RBR-HQ", role: "OWNER" },            // Marketing e comunicazione
+    { processCode: "16", orgUnitCode: "RBR-DIR-OPS", role: "OWNER" },       // IT e cybersecurity
+    { processCode: "17", orgUnitCode: "RBR-HQ", role: "OWNER" },            // Gestione del capitale umano
+    { processCode: "18", orgUnitCode: "RBR-HQ", role: "OWNER" },            // Finanza e contabilita'
+    { processCode: "19", orgUnitCode: "RBR-DIR-OPS", role: "OWNER" },       // Approvvigionamenti e fornitori
+    { processCode: "20", orgUnitCode: "RBR-DIR-OPS", role: "OWNER" },       // Facility e immobili
+    { processCode: "21", orgUnitCode: "RBR-DIR-RISK", role: "OWNER" },      // Legale
+    { processCode: "22", orgUnitCode: "RBR-DIR-OPS", role: "OWNER" },       // Dati e analytics
+
+    // I contributori: dove il processo si esegue davvero, oltre a dove si governa.
+    { processCode: "01", orgUnitCode: "RBR-BR-MILANO", role: "CONTRIBUTOR" },
+    { processCode: "01", orgUnitCode: "RBR-BR-ROMA", role: "CONTRIBUTOR" },
+    { processCode: "01", orgUnitCode: "RBR-BR-TORINO", role: "CONTRIBUTOR" },
+    { processCode: "03", orgUnitCode: "RBR-BR-MILANO", role: "CONTRIBUTOR" },
+    { processCode: "03", orgUnitCode: "RBR-BR-ROMA", role: "CONTRIBUTOR" },
+    { processCode: "03", orgUnitCode: "RBR-BR-TORINO", role: "CONTRIBUTOR" },
+    { processCode: "04", orgUnitCode: "RBR-BR-MILANO", role: "CONTRIBUTOR" },
+    { processCode: "04", orgUnitCode: "RBR-BR-ROMA", role: "CONTRIBUTOR" },
+    { processCode: "04", orgUnitCode: "RBR-BR-TORINO", role: "CONTRIBUTOR" },
+    { processCode: "13", orgUnitCode: "RBR-BR-MILANO", role: "CONTRIBUTOR" },
+    { processCode: "13", orgUnitCode: "RBR-BR-ROMA", role: "CONTRIBUTOR" },
+    { processCode: "13", orgUnitCode: "RBR-BR-TORINO", role: "CONTRIBUTOR" },
+    { processCode: "14", orgUnitCode: "RBR-BR-MILANO", role: "CONTRIBUTOR" },
+    { processCode: "14", orgUnitCode: "RBR-BR-ROMA", role: "CONTRIBUTOR" },
+    { processCode: "14", orgUnitCode: "RBR-BR-TORINO", role: "CONTRIBUTOR" },
+    // Il credito si eroga in filiale ma lo governa la direzione; il rischio e' consultato.
+    { processCode: "05", orgUnitCode: "RBR-BR-MILANO", role: "CONTRIBUTOR" },
+    { processCode: "05", orgUnitCode: "RBR-DIR-RISK", role: "CONSULTED" },
+    { processCode: "02", orgUnitCode: "RBR-BR-MILANO", role: "CONTRIBUTOR" },
+    { processCode: "10", orgUnitCode: "RBR-HQ", role: "INFORMED" },
+    { processCode: "11", orgUnitCode: "RBR-HQ", role: "INFORMED" },
+    { processCode: "12", orgUnitCode: "RBR-DIR-RISK", role: "CONSULTED" },
   ],
 };
 

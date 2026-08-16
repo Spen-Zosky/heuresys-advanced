@@ -405,28 +405,30 @@ describe("fascicoli di configurazione", () => {
    * Gli id delle aziende si leggono dal database, mai scritti a mano.
    */
   it("E24 — un fascicolo gia' legato non si stacca piu'", async () => {
-    const {
-      rows: [libera],
-    } = await pool.query<{ id: string; code: string }>(
-      `SELECT t.tenant_id AS id, t.tenant_code AS code
-         FROM sys.sys_tenancies t
-        WHERE NOT EXISTS (SELECT 1 FROM sys.sys_tenant_blueprints b
-                           WHERE b.tenant_blueprint_tenant_id = t.tenant_id)
-        ORDER BY t.tenant_code LIMIT 1`,
+    // Il caso si costruisce da sé e NON si appoggia a un fascicolo pre-esistente.
+    // Prima lo faceva, ed era verde qui e rosso in CI: `RTL-BANK-CONFIG` nasce da
+    // una corsa via API (S1051), non da una migrazione, quindi sul clone della CI
+    // `sys_tenant_blueprints` è VUOTA e l'azienda «occupata» non esiste. Il test
+    // aveva ragione a dichiararsi non misurabile — ma un caso che non si può
+    // eseguire dove conta è un caso che non protegge. (Stessa famiglia del difetto
+    // «verde in locale, rosso in CI»: dato popolato da script, assente sul clone.)
+    // Serve solo che esistano DUE aziende, e nient'altro. Nessuna ipotesi su quali
+    // fascicoli ci siano già: la prima stesura ne pretendeva una «libera» e una
+    // «occupata», ed era verde qui e rossa in CI — `RTL-BANK-CONFIG` nasce da una
+    // corsa via API (S1051), non da una migrazione, quindi sul clone della CI
+    // `sys_tenant_blueprints` è VUOTA e l'azienda occupata non esiste. Il test aveva
+    // ragione a dichiararsi non misurabile, ma un caso che non si può eseguire dove
+    // conta è un caso che non protegge.
+    //
+    // E quella distinzione non serviva: **con la guardia attiva l'UPDATE non trova
+    // righe qualunque sia la destinazione**, perché a mancare è la condizione sul
+    // fascicolo di partenza. Lo stato dell'azienda di arrivo è irrilevante — ed è
+    // proprio questo che il caso (2) dimostra.
+    const { rows: aziende } = await pool.query<{ id: string; code: string }>(
+      `SELECT tenant_id AS id, tenant_code AS code FROM sys.sys_tenancies ORDER BY tenant_code`,
     );
-    const {
-      rows: [occupata],
-    } = await pool.query<{ id: string; code: string }>(
-      `SELECT t.tenant_id AS id, t.tenant_code AS code
-         FROM sys.sys_tenancies t
-         JOIN sys.sys_tenant_blueprints b ON b.tenant_blueprint_tenant_id = t.tenant_id
-        ORDER BY t.tenant_code LIMIT 1`,
-    );
-    if (!libera || !occupata) {
-      throw new Error(
-        "il caso non e' misurabile: servono un'azienda senza fascicolo e una con " +
-          `(trovate: libera=${libera?.code ?? "nessuna"} occupata=${occupata?.code ?? "nessuna"})`,
-      );
+    if (aziende.length < 2) {
+      throw new Error(`il caso non e' misurabile: servono due aziende, trovate ${aziende.length}`);
     }
 
     const blueprintId = await creaFascicolo("E24_PERMANENTE");
@@ -438,21 +440,39 @@ describe("fascicoli di configurazione", () => {
         payload: { tenantId },
       });
 
-    // (1) la prima firma di un fascicolo mai legato: E24 non la vieta
-    const prima = await lega(libera.id);
-    expect(`prima firma → ${prima.statusCode}`).toBe("prima firma → 200");
+    // (1) la prima firma di un fascicolo mai legato: E24 non la vieta. Si prova in
+    // ordine finché una accetta: un'azienda che ha già un fascicolo attivo rifiuta
+    // con ALREADY_LINKED, ed è un caso diverso e legittimo — non un guasto. Un
+    // rifiuto non lega nulla, quindi il fascicolo resta vergine per il tentativo
+    // successivo.
+    let firmata: { id: string; code: string } | undefined;
+    for (const a of aziende) {
+      const r = await lega(a.id);
+      if (r.statusCode === 200) {
+        firmata = a;
+        break;
+      }
+      if (codiceDi(r.json()) !== "BLUEPRINT_TENANT_ALREADY_LINKED") {
+        throw new Error(`prima firma su ${a.code}: ${r.statusCode} ${r.body}`);
+      }
+    }
+    if (!firmata) {
+      throw new Error("il caso non e' misurabile: ogni azienda ha gia' un fascicolo attivo");
+    }
 
-    // (2) verso un'azienda che un fascicolo ce l'ha gia'. Il 409 arriva anche
-    // oggi, ma per la ragione sbagliata (violazione di unicita' sulla
-    // DESTINAZIONE): quello che si misura qui e' il CODICE, non lo stato.
-    const versoOccupata = await lega(occupata.id);
-    expect(versoOccupata.statusCode).toBe(409);
-    expect(codiceDi(versoOccupata.json())).toBe("BLUEPRINT_LINK_IS_PERMANENT");
+    // (2) verso UN'ALTRA azienda qualunque. Qui non conta il suo stato: conta il
+    // CODICE. Prima della guardia questa chiamata rispondeva `200` (se l'altra era
+    // libera) oppure `ALREADY_LINKED` (se occupata) — mai `LINK_IS_PERMANENT`, che
+    // è l'unica risposta che parla del fascicolo di PARTENZA.
+    const altra = aziende.find((a) => a.id !== firmata.id)!;
+    const versoAltra = await lega(altra.id);
+    expect(`verso ${altra.code} → ${versoAltra.statusCode}`).toBe(`verso ${altra.code} → 409`);
+    expect(codiceDi(versoAltra.json())).toBe("BLUEPRINT_LINK_IS_PERMANENT");
 
-    // (3) IL CASO CHE OGGI PASSA: ri-firmarlo sulla STESSA azienda. Nessun indice
+    // (3) IL CASO CHE PRIMA PASSAVA: ri-firmarlo sulla STESSA azienda. Nessun indice
     // unico lo intercetta — e' la stessa riga — quindi qui non c'e' altra rete
     // che la guardia. Un 200 significa che la guardia non e' stata applicata.
-    const dinuovo = await lega(libera.id);
+    const dinuovo = await lega(firmata.id);
     expect(`ri-firma → ${dinuovo.statusCode}`).toBe("ri-firma → 409");
     expect(codiceDi(dinuovo.json())).toBe("BLUEPRINT_LINK_IS_PERMANENT");
 
@@ -465,7 +485,7 @@ describe("fascicoli di configurazione", () => {
         WHERE tenant_blueprint_id = $1`,
       [blueprintId],
     );
-    expect(dopo?.tid).toBe(libera.id);
+    expect(dopo?.tid).toBe(firmata.id);
   });
 });
 

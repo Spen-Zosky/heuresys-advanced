@@ -88,6 +88,33 @@ Chiusura anticipata obbligatoria: contesto ≥ 75% **oppure** finestra 5h ≥ 80
 
 ---
 
+---
+
+## CHIUSURA — **CICLO NON CHIUSO: 9 voci su 10 fatte, resta F6**
+
+Letta dalla tabella sopra, non dalla memoria.
+
+**Fatte**: F1 · F2.1 · F2.2 · F2.3 · F3 · F4 · F5 · F7 · F8 — ognuna con la sua dimostrazione live e
+la sua annotazione nel file di consegna, come `#149` impone.
+
+**Non fatta**: **F6** (`#198` P3, i 9 task). Era **dichiarata non completabile all'apertura**, e il
+lab stesso la stima ~2 sessioni. Avanzata comunque a **4 task su 9** — T1 (registro dell'origine, 2
+migrazioni), T2 (presidio dei processi), T3 (segnaposto parlanti), T8 (metro nel repo) — con
+`resume-from: T4` scritto nel register.
+
+**Perché T4 non è stato aperto**, coi tre numeri che la regola pretende: residuo misurato
+`✓ si continua — mancano 282.843 token`; costo stimato ~150-200k (`repository.ts` è 370 righe di cui
+~250 dipendono dall'archetipo, e i 9 test del modulo vanno tenuti verdi); verdetto dello strumento
+`si continua`. Il guardiano consentiva, ma un refactoring del motore interrotto a metà è peggio di
+uno non iniziato, e sarebbero rimasti ~80k per chiusura, propagazione e deploy.
+
+**Un difetto mio, trovato dalla CI dopo il push e corretto**: `_query-boolean.ts` non aveva il suo
+subpath export in `packages/shared/package.json` (controllo D-03). Avevo eseguito i test di modulo
+mirati e le E2E, non la **suite unit**, che gira con una config propria (`pnpm test:unit`) ed è
+esclusa da quella integration. Corretto, 71/71 verdi, ri-pushato.
+
+---
+
 ## Registro delle scoperte fuori ciclo (R24 §5 — si presentano una volta sola)
 
 | Scoperta | Misura | Presentata |

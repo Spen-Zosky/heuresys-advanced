@@ -10,10 +10,12 @@ lato dell'utente con cinque login reali. Con lei è caduta l'ultima delle **sei 
 ruolo** che decidevano cosa una persona vede — l'etichetta del cruscotto ora si deriva, e al tier
 di squadra risponde con un *dominio*, perché lì il perimetro non lo giustifica un ruolo.
 
-Il filo della sessione è stato lo stesso in tutte e sette le voci: **una cosa che qualcuno doveva
+Il filo della sessione è stato lo stesso in tutte le voci: **una cosa che qualcuno doveva
 ricordarsi diventa una cosa che una macchina misura.** Il rendiconto delle chiusure non sapeva di
 quale sessione parlasse; il diario si scriveva solo se me ne ricordavo; le pagine orfane erano un
-censimento a mano in un file fuori dal repo. Ora sono tre cancelli.
+censimento a mano in un file fuori dal repo. Ora sono tre cancelli — e un quarto ha chiuso, poche
+ore dopo, il buco che l'epica aveva lasciato **dichiarato**: non era «una voce nuova potrebbe
+sfuggire», era il **60% delle resource** che nessuno guardava.
 
 **Due volte la prova mi ha dato torto, ed è il motivo per cui era costruita così.** La prova
 generale ha respinto la migrazione dei cruscotti **tre volte** — un mio conteggio sbagliato, una
@@ -29,9 +31,10 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-1. **`#142` F3 — API per cruscotto** (~250k), sbloccata da F2 di ieri. Il catalogo è già
-   interrogabile e la granularità per vista **c'è già**: non va inventata, va onorata. Un blocco
-   che l'attore non può vedere si **omette dichiarandolo** (`masked`), non si tace ·
+1. **`#142` F3b — i dati dentro le viste**. ⚠ **La stima va rifatta**: avevo scritto ~140k, ma
+   sono **27 viste** e il progetto vieta i segnaposto — o si implementano tutte, o nessuna.
+   Misurata come lavoro vero: **~250-400k**, cioè una sessione piena o due. La modalità di ogni
+   vista è **già decisa** da `modalitaDellaVista`: F3b la legge, non la ricalcola ·
    `.programmi/142-cruscotti-per-tipologia.md`
 2. **`#143` F2 — modello dati «una squadra è un progetto»** (~1 sessione): oggi `sys_teams` non sa
    dire scopo, obiettivo, date né avanzamento · `.programmi/143-squadra-come-progetto.md`

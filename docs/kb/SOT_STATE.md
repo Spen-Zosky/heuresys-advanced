@@ -16,7 +16,7 @@ dei cruscotti, `#142` F2): utenti **161** · posizioni **315** · tenant ACTIVE 
 RBAC **14 ruoli / 224 permessi / 975 mapping** (+7 permessi e +16 concessioni dei cruscotti,
 +5 raccolti dal tappeto di `000005` su `PLATFORM_ADMIN`) · skill **14.039** · migration su
 disco **314** (max `000316`) · sentinelle **18** (+`v_dashboard_class_drift`) · test API
-**250 file** · spec E2E **99** · HEAD `6b781fda`.
+**250 file** · spec E2E **99** · HEAD `38ce5cf6`.
 
 **S1064 (2026-08-16) — «Le cose che non avevano una porta». L'epica `#99` è CHIUSA, 10/10.**
 
@@ -49,6 +49,19 @@ disco **314** (max `000316`) · sentinelle **18** (+`v_dashboard_class_drift`) �
   storia git, che in CI **non c'è** (checkout shallow) — riscritta su fixture.
 - **`#193` aperto e NON eseguito**: l'organigramma aziendale non dichiara di mostrare persone.
   Correggerlo lo toglierebbe a **117 utenti su 161**: decisione di prodotto, di Enzo.
+- **`#142` F3a — il catalogo in lettura**: `GET /v1/dashboard/catalog` e `/catalog/:code`,
+  **10/10 test** di cui metà sul **divieto**. Nessun `requirePermission` sulla lista (non
+  esiste UN permesso per «vedere il catalogo»: ogni famiglia porta il suo, il Self-Service
+  non ne ha). ⚠ **Difetto mio trovato dalla prova live, non dai test**: la mascheratura era un
+  **booleano** e trattava `mask` come aperto — un `PLATFORM_ADMIN` riceveva la vista delle
+  retribuzioni **in chiaro**, contro ADR-0032; il test non lo vide perché era **tautologico**.
+  Ora tre stati (`open`/`masked`/`denied`, `modalitaDellaVista`), e il test confronta i due
+  mandati. Live: tecnico → `masked`, HR → `open`, senza dominio → `403`.
+- **Il buco dichiarato di F7 è chiuso**: non era una voce futura, erano **19 resource su 32**
+  saltate in silenzio (**60%**). Ogni resource sta ora in uno di tre elenchi dichiarati, più
+  un quarto per il dubbio numerato. Cancello visto rosso.
+- ⚠ **Una stima mia da correggere, e l'ho corretta**: `#142` F3b non è ~140k. Sono **27 viste**
+  e i segnaposto sono vietati, quindi o tutte o nessuna: **~250-400k**.
 
 **Il mandato di autocoscienza, eseguito per intero** (`docs/archive/MANDATO_AUTOCOSCIENZA_S1063.md`,
 17/17 voci). Riletti: 6 regole, **36 ADR**, README, 3 xtras di metodo, **72 memorie**, 7 skill,

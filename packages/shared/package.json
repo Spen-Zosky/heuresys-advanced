@@ -17,6 +17,11 @@
       "heuresys-source": "./src/schemas/_pagination.ts",
       "default": "./dist/schemas/_pagination.js"
     },
+    "./schemas/_query-boolean": {
+      "types": "./dist/schemas/_query-boolean.d.ts",
+      "heuresys-source": "./src/schemas/_query-boolean.ts",
+      "default": "./dist/schemas/_query-boolean.js"
+    },
     "./schemas/auth": {
       "types": "./dist/schemas/auth.d.ts",
       "heuresys-source": "./src/schemas/auth.ts",

@@ -133,7 +133,8 @@
   - chiuso-quando: la voce esiste nel register, le quattro voci portano la riga in testa, .handoff/STATE.md porta il puntatore, e chi apre una qualunque delle quattro incontra il rimando prima di leggerne i campi
   - lab-id: 2026-08-16-un-punto-di-ingresso-unico-per-la-consegna-p3
 
-- **#199 E24 — il legame fascicolo↔azienda e' permanente, ma oggi `link-tenant` permette di staccarlo** · status: ACTIVE
+- **#199 E24 — il legame fascicolo↔azienda e' permanente, ma oggi `link-tenant` permette di staccarlo** · status: DONE
+  - ✅ FATTA S1066 (`e9cbc332`): UPDATE guardato su `tenant_blueprint_tenant_id IS NULL` + codice `BLUEPRINT_LINK_IS_PERMANENT` distinto da `BLUEPRINT_TENANT_ALREADY_LINKED`. Test scritto sul caso che PRIMA passava, eseguito ROSSO prima della correzione e verde dopo (10/10). Dimostrazione LIVE sul fascicolo vero di RTL Bank (`scripts/prova-live-199.mts`, login reale con secondo fattore): tentato lo spostamento di RTL-BANK-CONFIG su HEURESYS → HTTP 409 BLUEPRINT_LINK_IS_PERMANENT, e il legame ri-letto dal database e' rimasto RTL_BANK
   - ⚠ PRIMA DI ESEGUIRE: leggi D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md — sequenza, errori gia' trovati, cosa e' gia' verificato (voce #208)
   - priority: P1 · effort: ~20min (una riga di guardia + un codice errore + un test) · doc: inbox lab-id 2026-08-16-e24-il-legame-col-tenant-e-permanente-ma-oggi-no
   - DECISO-da-Enzo-2026-08-16 (E24): il fascicolo resta legato alla prima azienda, non si stacca

@@ -3,6 +3,11 @@
 **Updated**: 2026-08-16 (S1065).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
+⚠ **Prima di lavorare su `#196` `#197` `#198` `#199`** (Tenant Builder P3 e ciò che le sta attorno):
+leggi `D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md`. Sono
+**un corpo solo**, non quattro voci indipendenti: contiene la sequenza con le sue ragioni, gli errori
+già trovati, cosa è già verificato e come, e cosa non fare. Voce `#208` nel register.
+
 ## Last session brief (S1065 «Tre decisioni, e ognuna ha aperto una porta che non era quella»)
 
 **Tre domande aperte hanno avuto risposta, e nessuna si è chiusa dove sembrava.** `#193`

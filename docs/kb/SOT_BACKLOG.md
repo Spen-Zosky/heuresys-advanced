@@ -134,6 +134,7 @@
   - lab-id: 2026-08-16-un-punto-di-ingresso-unico-per-la-consegna-p3
 
 - **#199 E24 — il legame fascicolo↔azienda e' permanente, ma oggi `link-tenant` permette di staccarlo** · status: ACTIVE
+  - ⚠ PRIMA DI ESEGUIRE: leggi D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md — sequenza, errori gia' trovati, cosa e' gia' verificato (voce #208)
   - priority: P1 · effort: ~20min (una riga di guardia + un codice errore + un test) · doc: inbox lab-id 2026-08-16-e24-il-legame-col-tenant-e-permanente-ma-oggi-no
   - DECISO-da-Enzo-2026-08-16 (E24): il fascicolo resta legato alla prima azienda, non si stacca
   - difetto-letto-nel-codice: tenant-blueprints/repository.ts:229-242 fa UPDATE ... SET tenant_blueprint_tenant_id = $2 WHERE tenant_blueprint_id = $1, SENZA condizione sul valore precedente. service.ts:138-152 intercetta solo la violazione di unicita', che protegge l'azienda di DESTINAZIONE, non il fascicolo
@@ -157,30 +158,24 @@
   - priority: P2 · effort: ~1h (la riparazione a monte) · doc: `docs/kb/tools/handoff_lint.py` (`S4`) · `docs/kb/tools/lab_inbox.py`
   - lab-id: 2026-08-16-il-register-ha-due-identificativi-doppi-e-nessuno-lo-vede
 
-- **#196 Gli indicatori: tutti di piattaforma oggi, ma la prima costruzione ne creerebbe di privati** · status: WAIT-INPUT
-  - ⬆ **aggiornamento dal lab** (fuso alla chiusura S1065: veniva da un blocco separato che duplicava questo stesso `#196`)
-  - lab-id: 2026-08-16-il-register-ha-due-identificativi-doppi-e-nessuno-lo-vede
-  - ⬆ **aggiornamento dal lab, 2026-08-16** (ingerito alla chiusura S1065; le righe che seguono venivano da un blocco separato che duplicava questo stesso `#196` — fuso qui, perche' due blocchi con lo stesso numero avrebbero prodotto una voce doppia nel menu):
+- **#196 Gli indicatori: tutti di piattaforma oggi, ma la prima costruzione ne creerebbe di privati** · status: ACTIVE
+  - ⚠ PRIMA DI ESEGUIRE: leggi D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md — sequenza, errori gia' trovati, cosa e' gia' verificato (voce #208)
+  - priority: P2 · effort: ~30min · doc: inbox lab-id 2026-08-16-indicatori-di-azienda-oppure-di-piattaforma
   - DECISO-da-Enzo-2026-08-16 (E22): gli indicatori di un'azienda NON vengono dal catalogo comune, sono suoi
-  - conseguenza-sul-codice: NESSUNA — repository.ts:192-197 crea gia' con is_global=false ed e' corretto. La correzione che sembrava ovvia era quella sbagliata
+  - conseguenza-sul-codice: NESSUNA — tenant-materialization/repository.ts:193-197 crea gia' con is_global=false ed e' corretto. La correzione che sembrava ovvia era quella sbagliata
   - lavoro-residuo (non e' piu' «decidere»): censire viste, conteggi e schermate che dicono «gli indicatori» senza distinguere le due specie. Fino a oggi 199 righe TUTTE is_global=true e senza tenant = UNA specie; dalla prima costruzione sono DUE
   - natura-del-rischio: non un errore di calcolo, ma una cifra plausibile che somma due cose diverse
-  - urgenza: prima di T9 di #198. Dopo, il numero misto esiste gia' e va riconciliato invece che prevenuto
-  - chiuso-quando: le due specie sono dichiarate e nessuna vista le somma senza dirlo
-  - priority: P2 · effort: ~10min dopo la decisione · doc: inbox lab-id 2026-08-16-indicatori-di-azienda-oppure-di-piattaforma
-  - misurato-2026-08-16: sys_kpi_definitions = 199 righe, TUTTE is_global=true e TUTTE senza tenant. Zero definizioni di proprieta' di un'azienda
-  - contrasto: tenant-materialization/repository.ts:192-197 crea 4 definizioni RBR-KPI-* con is_global=FALSE e tenant valorizzato — categoria di cui oggi esistono zero esemplari
-  - natura: NON e' un difetto di codice, e' una decisione di modello che sta per essere presa come effetto collaterale di un archetipo scritto per altro
-  - input-richiesto: **gli indicatori di un'azienda nuova sono SUOI** (ognuna misura cio' che vuole, nessun confronto fra clienti) **o vengono dal CATALOGO COMUNE** (confrontabili, ma il cliente non inventa metriche proprie)?
-  - perche-solo-tuo: e' una scelta di **modello di prodotto**, non una bonifica: decide se la piattaforma vende un metro comune (confrontabile fra clienti, e quindi un asset) o uno strumento che ogni azienda si taglia addosso. La misura dice solo che oggi la categoria «indicatore privato» ha **zero esemplari** e che il motore di materializzazione ne creerebbe quattro alla prima costruzione — cioe' la decisione sta per essere presa da sola, come effetto collaterale di un archetipo scritto per altro. **#149**: consegna del lab, non verificata oltre la misura citata.
-  - conseguenza-se-suoi: si documenta che esistono due specie di indicatori e come si governano
-  - conseguenza-se-comuni: l'archetipo va corretto — is_global=true, e i 4 RBR-KPI-* diventano riferimenti al catalogo invece di definizioni nuove
-  - urgenza: va decisa PRIMA della prima costruzione (T9 di P3), non dopo: e' molto piu' facile scegliere ora che riconciliare fra sei mesi meta' globali e meta' privati
+  - misurato-2026-08-16: sys_kpi_definitions = 199 righe, TUTTE is_global=true e TUTTE senza tenant. Zero definizioni di proprieta' di un'azienda. RI-MISURATO dalla canonica la sera stessa, stesso esito (199|199|199)
+  - contrasto: tenant-materialization/repository.ts:193-197 crea 4 definizioni RBR-KPI-* con is_global=FALSE e tenant valorizzato — categoria di cui oggi esistono zero esemplari. Verificato sul codice dalla canonica: l'INSERT passa `false` come is_global e `tenantId` come proprietario
   - avvertenza-per-chi-ri-misura: uno strumento che conta le righe PER TENANT vede questa tabella come vuota, ed e' corretto ma fuorviante. Le righe ci sono, sono globali
-  - chiuso-quando: Enzo ha deciso, e l'archetipo o la documentazione riflettono la decisione
+  - urgenza: prima di T9 di #198. Dopo, il numero misto esiste gia' e va riconciliato invece che prevenuto — ed e' molto piu' facile scegliere ora che riconciliare fra sei mesi meta' globali e meta' privati
+  - cronaca-superata-2026-08-16: la voce era nata come domanda a Enzo (indicatori suoi o del catalogo comune?), con le due conseguenze alternative e i campi input-richiesto / perche-solo-tuo della corsia WAIT-INPUT. E22 l'ha decisa lo stesso giorno: quelle righe sono state tolte, non modificate, perche' presupponevano una decisione non presa
+  - riscritta-dalla-canonica-2026-08-16: i sette residui della fusione sono chiusi qui (stato contro contenuto, lab-id di #200, testo prima/dopo la decisione, urgenza doppia, chiuso-quando doppio con uno gia' soddisfatto, campi WAIT-INPUT rimasti, effort discordante) — voce #204
   - lab-id: 2026-08-16-indicatori-di-azienda-oppure-di-piattaforma
+  - chiuso-quando: le due specie sono dichiarate e nessuna vista le somma senza dirlo
 
 - **#197 Il marchio `materialized_from` copre 3 tabelle su 8 di quelle che lo stesso motore scrive** · status: ACTIVE
+  - ⚠ PRIMA DI ESEGUIRE: leggi D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md — sequenza, errori gia' trovati, cosa e' gia' verificato (voce #208)
   - priority: P3 · effort: ~15min (documentare, non correggere) · doc: inbox lab-id 2026-08-16-marchio-materializzazione-copre-meta-delle-tabelle
   - fatto: tenant-materialization/repository.ts scrive metadata.materialized_from su sys_organization_units (:71), sys_skills (:153), sys_kpi_definitions (:194) e NON su sys_positions (:103), sys_users (:223), sys_user_position_assignments (:254), sys_user_skill_evidence (:304), sys_user_kpi_evidence (:317)
   - natura: FALSO NEGATIVO SILENZIOSO — «non marcata perche' reale» e «non marcata perche' il motore non la marca» sono indistinguibili guardando il dato
@@ -192,6 +187,7 @@
   - lab-id: 2026-08-16-marchio-materializzazione-copre-meta-delle-tabelle
 
 - **#198 Tenant Builder P3 — la costruzione tracciata: dal fascicolo all'azienda, ogni riga marcata e riconducibile** · status: ACTIVE
+  - ⚠ PRIMA DI ESEGUIRE: leggi D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md — sequenza, errori gia' trovati, cosa e' gia' verificato (voce #208)
   - ⬆ **aggiornamento dal lab, 2026-08-16** (ingerito alla chiusura S1065; le righe che seguono venivano da un blocco separato che duplicava questo stesso `#198` — fuso qui, perche' due blocchi con lo stesso numero avrebbero prodotto una voce doppia nel menu):
   - DECISO-da-Enzo-2026-08-16 (E23): tante persone segnaposto quante le posizioni contemplate. La numerosita' si esprime MOLTIPLICANDO le posizioni, mai affollando la stessa
   - misurato-su-RTL-2026-08-16: 158 persone · 158 posizioni attive (su 312 totali, 154 disattivate dalla ricostruzione) · 158 posizioni occupate da assegnazione ACTIVE. Uno a uno, che e' la lettura fedele di I1 position-centric
@@ -213,7 +209,7 @@
   - chiude-un-debito-di-P1: la sezione `impact` del confronto smette di essere computable:false quando il fascicolo e' legato a un'azienda (il motore ha gia' la modalita' plan). Resta non calcolabile per un fascicolo di trattativa, CON LA RAGIONE NUOVA — mai uno zero al posto di uno sconosciuto
   - permessi: NESSUNO nuovo. tenant_blueprint:write/approve esistono da P1 (solo PLATFORM_ADMIN); la lettura del registro usa provenance:read, che PLATFORM_ADMIN e TENANT_ADMIN detengono gia' — verificato su sys_auth_role_permissions, non dal commento nel codice
   - dentro-P3-non-consegna-separata: l'archetipo TS non dichiara chi presidia quale processo, quindi oggi lo strato 2 del fascicolo non produrrebbe NESSUNA riga in sys_organization_unit_processes (che esiste, RACI OWNER|CONTRIBUTOR|CONSULTED|INFORMED, 96 righe reali, 23 OWNER = 23 processi verificati con count(distinct))
-  - strumento-nuovo: docs/kb/tools/completezza_tenant.py — il metro di E18 derivato da RTL (150 tabelle di tenant, 144 popolate da RTL, 329 relazioni; Heuresys 25,7%/27,4%). Autoprova 2/2 con esiti attesi OPPOSTI (RTL vs se' stesso = 0 mancanze; Heuresys vs RTL > 0). Copia provata in D:\heuresys-design-lab\tools\
+  - strumento-DA-PORTARE-nel-repo (e' il task T8, non e' fatto): completezza_tenant.py oggi vive SOLO nel lab, in <lab>/tools/. In docs/kb/tools/ NON c'e' — verificato con ls il 2026-08-16, tre volte a distanza di ore (due dal lab, una dalla canonica). il metro di E18 derivato da RTL (150 tabelle di tenant, 144 popolate da RTL, 329 relazioni; Heuresys 25,7%/27,4%). Autoprova 2/2 con esiti attesi OPPOSTI (RTL vs se' stesso = 0 mancanze; Heuresys vs RTL > 0). Copia provata in D:\heuresys-design-lab\tools\
   - limite-dichiarato: a fine P3 la copertura del metro sara' MOLTO sotto il 100% perche' la sorgente e' l'archetipo (7 unita', 11 posizioni) e non la ricerca. Il numero va scritto qualunque sia: e' la misura di quanto serve P2. Chi esegue non deve farlo salire
   - prove-che-devono-poter-fallire: doppia riga di registro sullo stesso bersaglio -> respinta dall'unique · applicazione senza build_source_key -> BLUEPRINT_BUILD_SOURCE_MISSING, mai ripiego sull'unico archetipo (e' la R4 di P1 portata nella costruzione) · sabotaggio del passo registro -> rollback INTERO (fascicolo torna APPROVED) · segnaposto generati confrontati coi nomi propri reali -> nessuna collisione · check_identita_azienda deve CONTINUARE a segnalare Heuresys (ATECO 62.10 vs I21): se torna zero su tutte, il controllo si e' rotto
   - chiuso-quando: un'azienda nuova e' stata creata da un fascicolo con login reale su produzione, ogni riga creata ha la sua riga nel registro (conteggi coincidenti), il fascicolo e' APPLIED con applied_at valorizzato, la copertura del metro e' scritta nel referto, e l'azienda e' stata archiviata verificando che le righe restino

@@ -12,6 +12,50 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
+- **#196 Gli indicatori: tutti di piattaforma oggi, ma la prima costruzione ne creerebbe di privati** · status: WAIT-INPUT
+  - priority: P2 · effort: ~10min dopo la decisione · doc: inbox lab-id 2026-08-16-indicatori-di-azienda-oppure-di-piattaforma
+  - misurato-2026-08-16: sys_kpi_definitions = 199 righe, TUTTE is_global=true e TUTTE senza tenant. Zero definizioni di proprieta' di un'azienda
+  - contrasto: tenant-materialization/repository.ts:192-197 crea 4 definizioni RBR-KPI-* con is_global=FALSE e tenant valorizzato — categoria di cui oggi esistono zero esemplari
+  - natura: NON e' un difetto di codice, e' una decisione di modello che sta per essere presa come effetto collaterale di un archetipo scritto per altro
+  - input-richiesto: **gli indicatori di un'azienda nuova sono SUOI** (ognuna misura cio' che vuole, nessun confronto fra clienti) **o vengono dal CATALOGO COMUNE** (confrontabili, ma il cliente non inventa metriche proprie)?
+  - perche-solo-tuo: e' una scelta di **modello di prodotto**, non una bonifica: decide se la piattaforma vende un metro comune (confrontabile fra clienti, e quindi un asset) o uno strumento che ogni azienda si taglia addosso. La misura dice solo che oggi la categoria «indicatore privato» ha **zero esemplari** e che il motore di materializzazione ne creerebbe quattro alla prima costruzione — cioe' la decisione sta per essere presa da sola, come effetto collaterale di un archetipo scritto per altro. **#149**: consegna del lab, non verificata oltre la misura citata.
+  - conseguenza-se-suoi: si documenta che esistono due specie di indicatori e come si governano
+  - conseguenza-se-comuni: l'archetipo va corretto — is_global=true, e i 4 RBR-KPI-* diventano riferimenti al catalogo invece di definizioni nuove
+  - urgenza: va decisa PRIMA della prima costruzione (T9 di P3), non dopo: e' molto piu' facile scegliere ora che riconciliare fra sei mesi meta' globali e meta' privati
+  - avvertenza-per-chi-ri-misura: uno strumento che conta le righe PER TENANT vede questa tabella come vuota, ed e' corretto ma fuorviante. Le righe ci sono, sono globali
+  - chiuso-quando: Enzo ha deciso, e l'archetipo o la documentazione riflettono la decisione
+  - lab-id: 2026-08-16-indicatori-di-azienda-oppure-di-piattaforma
+
+- **#197 Il marchio `materialized_from` copre 3 tabelle su 8 di quelle che lo stesso motore scrive** · status: ACTIVE
+  - priority: P3 · effort: ~15min (documentare, non correggere) · doc: inbox lab-id 2026-08-16-marchio-materializzazione-copre-meta-delle-tabelle
+  - fatto: tenant-materialization/repository.ts scrive metadata.materialized_from su sys_organization_units (:71), sys_skills (:153), sys_kpi_definitions (:194) e NON su sys_positions (:103), sys_users (:223), sys_user_position_assignments (:254), sys_user_skill_evidence (:304), sys_user_kpi_evidence (:317)
+  - natura: FALSO NEGATIVO SILENZIOSO — «non marcata perche' reale» e «non marcata perche' il motore non la marca» sono indistinguibili guardando il dato
+  - latente-oggi: 0 su 45 unita' portano il marchio; 0 codici RBR-% ovunque. Il motore non ha mai costruito in produzione, quindi nessun danno finche' non lo fa (due misure indipendenti, 2026-08-16)
+  - NON-FARE: estendere il marchio alle altre cinque tabelle. La fonte vera diventa sys.sys_generated_record_origins della parte 3 (forma gia' decisa in P1 §4.7, prima che questo difetto emergesse)
+  - fare: commentare il campo come appunto storico del motore e non come marchio, indicando dove sta la fonte; lasciarlo dov'e'
+  - legame: il controllo incrociato di P3 (spec §10.4) DEVE trovare la differenza fra registro e vecchio appunto — se non la trova, sta confrontando una cosa con se' stessa
+  - chiuso-quando: il commento c'e', e il controllo incrociato di P3 riporta la differenza fra le due coperture
+  - lab-id: 2026-08-16-marchio-materializzazione-copre-meta-delle-tabelle
+
+- **#198 Tenant Builder P3 — la costruzione tracciata: dal fascicolo all'azienda, ogni riga marcata e riconducibile** · status: ACTIVE
+  - priority: P1 · effort: ~2 sessioni · doc: inbox lab-id 2026-08-16-tenant-builder-p3-costruzione-tracciata
+  - spec: D:\heuresys-design-lab\2026-08-16--epic-tenant-builder-p3-costruzione.md · piano 9 task: D:\heuresys-design-lab\2026-08-16--piano-implementazione-p3-costruzione.md
+  - dipende-da: #131 (P1, DONE). NON dipende da #132 (P2a) per decisione E21 di Enzo: prima il motore, la ricerca come sorgente dopo
+  - decisioni-di-Enzo: E17 segnaposto parlanti (nome=ruolo, cognome=collocazione) · E18 predisporre il tenant, dati da ricerche, RTL riferimento strutturale, coprire TUTTE le relazioni · E19 i dati iniziali sono i parametri di controllo dell'importazione (contratto P3→P4) · E20 terza azienda vera poi archiviata · E21 motore ora, ricerca come sorgente dopo
+  - stato-misurato-2026-08-16: fascicolo RTL-BANK-CONFIG v1 APPROVED con applied_at VUOTO · motore mai eseguito in produzione (0/45 unita' con materialized_from, 0 codici RBR-% su posizioni/unita'/competenze/indicatori) · 0 utenti SYN_, 161 tutti STANDARD
+  - modello-dati: NUOVA sys.sys_generated_record_origins (registro dell'origine, riferimento polimorfo senza FK come deciso in P1 §4.7, unique su (target_table,target_record_id), stati GENERATED|CONFIRMED|SUPERSEDED) · MODIFICA sys_blueprint_variant_versions += build_source_key varchar(64) null, backfill 'RETAIL_BANK_REFERENCE' sulla v1 di REGIONAL_RETAIL_BANK_MEDIUM
+  - perche-un-registro-nuovo: sys_source_lineage_records ha source_system/source_table/source_record_id NOT NULL e tutte le 70.959 righe sono OLDDB::<tabella>::<id> — descrive un dato IMPORTATO. Un dato generato non ha riga sorgente. Verificato apposta perche' era la conclusione che poteva cadere
+  - E19-senza-tabelle-nuove: il profilo atteso E' sys_position_skill_requirements (1.439 righe su 312 posizioni RTL; required_proficiency + weight + criticality) + _kpi_requirements + _learning_requirements. NON esiste un flag «obbligatoria»: P4 dovra' decidere una soglia, non leggere un booleano
+  - tre-stati-non-due: un requisito verificato da dati veri passa a CONFIRMED (resta in piedi, e' la regola), non a SUPERSEDED (sostituito). E' la distinzione che P4 usera' di piu'
+  - chiude-un-debito-di-P1: la sezione `impact` del confronto smette di essere computable:false quando il fascicolo e' legato a un'azienda (il motore ha gia' la modalita' plan). Resta non calcolabile per un fascicolo di trattativa, CON LA RAGIONE NUOVA — mai uno zero al posto di uno sconosciuto
+  - permessi: NESSUNO nuovo. tenant_blueprint:write/approve esistono da P1 (solo PLATFORM_ADMIN); la lettura del registro usa provenance:read, che PLATFORM_ADMIN e TENANT_ADMIN detengono gia' — verificato su sys_auth_role_permissions, non dal commento nel codice
+  - dentro-P3-non-consegna-separata: l'archetipo TS non dichiara chi presidia quale processo, quindi oggi lo strato 2 del fascicolo non produrrebbe NESSUNA riga in sys_organization_unit_processes (che esiste, RACI OWNER|CONTRIBUTOR|CONSULTED|INFORMED, 96 righe reali, 23 OWNER = 23 processi verificati con count(distinct))
+  - strumento-nuovo: docs/kb/tools/completezza_tenant.py — il metro di E18 derivato da RTL (150 tabelle di tenant, 144 popolate da RTL, 329 relazioni; Heuresys 25,7%/27,4%). Autoprova 2/2 con esiti attesi OPPOSTI (RTL vs se' stesso = 0 mancanze; Heuresys vs RTL > 0). Copia provata in D:\heuresys-design-lab\tools\
+  - limite-dichiarato: a fine P3 la copertura del metro sara' MOLTO sotto il 100% perche' la sorgente e' l'archetipo (7 unita', 11 posizioni) e non la ricerca. Il numero va scritto qualunque sia: e' la misura di quanto serve P2. Chi esegue non deve farlo salire
+  - prove-che-devono-poter-fallire: doppia riga di registro sullo stesso bersaglio -> respinta dall'unique · applicazione senza build_source_key -> BLUEPRINT_BUILD_SOURCE_MISSING, mai ripiego sull'unico archetipo (e' la R4 di P1 portata nella costruzione) · sabotaggio del passo registro -> rollback INTERO (fascicolo torna APPROVED) · segnaposto generati confrontati coi nomi propri reali -> nessuna collisione · check_identita_azienda deve CONTINUARE a segnalare Heuresys (ATECO 62.10 vs I21): se torna zero su tutte, il controllo si e' rotto
+  - chiuso-quando: un'azienda nuova e' stata creata da un fascicolo con login reale su produzione, ogni riga creata ha la sua riga nel registro (conteggi coincidenti), il fascicolo e' APPLIED con applied_at valorizzato, la copertura del metro e' scritta nel referto, e l'azienda e' stata archiviata verificando che le righe restino
+  - lab-id: 2026-08-16-tenant-builder-p3-costruzione-tracciata
+
 - **#195 L'atlante era fermo a nove giorni prima, e nessuno strumento poteva accorgersene** · status: DONE
   - ✅ **CHIUSA S1065 (2026-08-16), nello stesso giro in cui è stata trovata.** L'atlante — che il progetto dichiara **SoT interrogabile** (S1016) — era generato dal commit `a95976a5` del 7 agosto mentre HEAD era `23bcf371`: **208 file di sorgente cambiati nel frattempo**, 5 moduli API nati dopo e quindi invisibili a chiunque lo interrogasse. Trovato **di striscio**, costruendo lo strumento di `#156`, non da un controllo: nessun controllo lo guardava.
   - ⭐ **REGOLA (Enzo, 2026-08-16)**: *«l'atlante deve essere sempre aggiornato e mai fermo a qualcosa di superato o incompleto»*. Recepita in `CLAUDE.md`.

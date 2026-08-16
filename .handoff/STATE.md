@@ -1,28 +1,29 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-16 (S1064).
+**Updated**: 2026-08-16 (S1065).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-## Last session brief (S1064 «Le cose che non avevano una porta»)
+## Last session brief (S1065 «Tre decisioni, e ognuna ha aperto una porta che non era quella»)
 
-**L'epica dei domini è chiusa**: dieci fasi su dieci, dalla definizione fino alla verifica dal
-lato dell'utente con cinque login reali. Con lei è caduta l'ultima delle **sei liste di nomi di
-ruolo** che decidevano cosa una persona vede — l'etichetta del cruscotto ora si deriva, e al tier
-di squadra risponde con un *dominio*, perché lì il perimetro non lo giustifica un ruolo.
+**Tre domande aperte hanno avuto risposta, e nessuna si è chiusa dove sembrava.** `#193`
+(organigramma visibile a chi lavora in azienda) non era una riga di configurazione: dichiarare
+la classe rende la resource *sensibile*, e l'asserzione D-51 al boot avrebbe preteso un cancello
+su rotte che la decisione apre a tutti — **l'app non sarebbe partita**. `#156` è cambiata di
+forma a metà: la direzione *«ovunque porti valore aggiunto»* l'ha trasformata da «quale
+perimetro» a «in che ordine», e lo strumento in una **coda di adozione**. Il ciclo di
+valutazione è aperto in produzione con il login di chi ha il mandato HR, e **lasciato in
+bozza**: dichiarare aperta l'autovalutazione senza la schermata sarebbe un segnaposto.
 
-Il filo della sessione è stato lo stesso in tutte le voci: **una cosa che qualcuno doveva
-ricordarsi diventa una cosa che una macchina misura.** Il rendiconto delle chiusure non sapeva di
-quale sessione parlasse; il diario si scriveva solo se me ne ricordavo; le pagine orfane erano un
-censimento a mano in un file fuori dal repo. Ora sono tre cancelli — e un quarto ha chiuso, poche
-ore dopo, il buco che l'epica aveva lasciato **dichiarato**: non era «una voce nuova potrebbe
-sfuggire», era il **60% delle resource** che nessuno guardava.
+**Il filo è che le prove hanno vinto contro di me cinque volte** — prova generale, un test già
+esistente, e due CI rosse di cui **una aveva torto**: era un oracolo che duplica la logica del
+servizio e accusava il prodotto. **E un cancello scritto stamattina si è attivato contro chi
+l'ha scritto**: l'atlante superato di nove giorni, meccanizzato su direzione di Enzo, mi ha
+fermato due ore dopo. Dettaglio nel register (`#193` · `#156` · `#195`).
 
-**Ogni volta che la prova mi ha dato torto, aveva ragione lei.** La prova generale ha respinto
-la migrazione dei cruscotti più volte; l'E2E è andato rosso su una persona vera e ha prodotto
-`#193`, che è tua; la prova **live** di `#142` F3a ha trovato ciò che i test non vedevano
-perché uno era **tautologico**; `#194` è la stessa lezione al rovescio — uno strumento che
-dichiarava rotta una produzione sana, corretto due volte perché il primo rimedio toglieva la
-causa sistematica ma non i transitori. Sessione fermata da Enzo, tutto in produzione.
+⚠ **Una regressione in produzione, causata e riparata in pochi minuti**: il cancello di verifica
+applica le migrazioni, e ha portato la `000317` in produzione mentre girava ancora il codice
+vecchio. Misurata con un login reale — 117 persone senza l'organigramma — rimossa la riga,
+ri-misurato, ripristinato. Torna col deploy, che porta anche il codice.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -31,25 +32,27 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-1. **`#142` F3b — i dati dentro le viste**. ⚠ **La stima va rifatta**: avevo scritto ~140k, ma
-   sono **27 viste** e il progetto vieta i segnaposto — o si implementano tutte, o nessuna.
-   Misurata come lavoro vero: **~250-400k**, cioè una sessione piena o due. La modalità di ogni
-   vista è **già decisa** da `modalitaDellaVista`: F3b la legge, non la ricalcola ·
-   `.programmi/142-cruscotti-per-tipologia.md`
-2. **`#143` F2 — modello dati «una squadra è un progetto»** (~1 sessione): oggi `sys_teams` non sa
-   dire scopo, obiettivo, date né avanzamento · `.programmi/143-squadra-come-progetto.md`
-3. **`#159` F2 — il ponte gateway↔pagine web** (~3-4 sessioni, nessuna migrazione)
+1. **`#142` F3b — i dati dentro le viste**: sono **27 viste** e il progetto vieta i segnaposto —
+   o tutte, o nessuna; la modalità di ciascuna è **già decisa** da `modalitaDellaVista`, F3b la
+   legge e non la ricalcola · `.programmi/142-cruscotti-per-tipologia.md`
+2. **`#143` F2 — modello dati «una squadra è un progetto»**: oggi `sys_teams` non sa dire scopo,
+   obiettivo, date né avanzamento · `.programmi/143-squadra-come-progetto.md`
+3. **`#159` F2 — il ponte gateway↔pagine web** (nessuna migrazione)
+
+*(dietro, e pronte: `#156` collegare `hrx_entity_query` — resolver fatto, resta l'allowlist; e
+l'**autovalutazione** di `#92`, che il ciclo in bozza rende dimostrabile.)*
 
 ## Open questions
 
-- **`#193` è la decisione più vicina**: l'organigramma aziendale resta visibile a chiunque, o solo
-  a chi ha un dominio? La tua direzione del 5 agosto sulla «rubrica aziendale» punta al *restare*,
-  ma `/users` — stessa materia — oggi è riservata. Le due sono governate in modo opposto.
-- **Resta una sola delle tre**: si apre il **ciclo di valutazione** dell'azienda? Le altre due
-  sono decise (`#193` organigramma a tutti · `#156` prima superficie = `organization-units`).
-- **`#169`** — separare password e secondo fattore: l'impianto di esenzione MFA **esiste già nel
-  database ed è vuoto**, è quella la strada.
-- **`D-69`**: la condizione di riapertura si è verificata. Smontare l'ETL è ~3-4h, nessuna urgenza.
+- **Si apre davvero il ciclo di valutazione?** È creato in **bozza** (`RTL-2026-ANNUAL`, periodo
+  e scadenze decisi da Enzo — dettaglio in `SOT_BACKLOG` `#92`). Farlo avanzare mette tutta
+  l'azienda davanti a un compito: è un atto aziendale, e va fatto quando la schermata
+  dell'autovalutazione esiste.
+- **`/users` è governata al contrario di `/organization`** (`requires_admin=true`) sulla stessa
+  materia: dopo `#193` la contraddizione è più visibile — è la stessa domanda, per i colleghi.
+- ~~`#193` organigramma~~ e ~~`#156` primo perimetro~~: **decise il 2026-08-16**.
+- **`#169`** separare password e secondo fattore (l'esenzione MFA esiste già, vuota: è la strada)
+  · **`D-69`** riapertura verificata, nessuna urgenza.
 
 ## Verification
 

@@ -135,12 +135,25 @@ export const tenantBlueprintsService = {
     return b;
   },
 
+  /**
+   * E24 (#199) — la firma del legame, che e' PERMANENTE.
+   *
+   * Due dinieghi, e non vanno confusi: `BLUEPRINT_TENANT_ALREADY_LINKED` riguarda
+   * l'azienda di DESTINAZIONE (ne ha gia' uno: si sceglie un'altra azienda, ed e'
+   * rimediabile), `BLUEPRINT_LINK_IS_PERMANENT` riguarda QUESTO fascicolo (e' gia'
+   * legato: non e' rimediabile, si archivia e se ne fa uno nuovo). Prima erano
+   * indistinguibili da un client, e la seconda meta' dei casi non era nemmeno
+   * rifiutata.
+   *
+   * Cio' che E24 NON vieta: una trattativa che non va in porto resta senza azienda
+   * e si archivia; un'azienda che riparte da un fascicolo nuovo puo' farlo (l'indice
+   * unico parziale conta solo gli ACTIVE); la prima firma di un fascicolo mai legato.
+   */
   async linkTenant(a: ActorContext, id: string, tenantId: string): Promise<TenantBlueprint> {
     await esisteFascicolo(id);
+    let b: TenantBlueprint | null;
     try {
-      const b = await repo.linkTenant(pool, id, tenantId, a.userId);
-      if (!b) throw new NotFoundError("Fascicolo non trovato");
-      return b;
+      b = await repo.linkTenant(pool, id, tenantId, a.userId);
     } catch (e) {
       if (isUniqueViolation(e)) {
         throw new ConflictError(
@@ -150,6 +163,17 @@ export const tenantBlueprintsService = {
       }
       throw e;
     }
+    if (b) return b;
+    // Zero righe con il fascicolo che esiste (`esisteFascicolo` l'ha appena
+    // accertato) vuol dire una cosa sola: la guardia ha morso. Si rilegge per dire
+    // A QUALE azienda e' legato — un diniego che non lo dice costringe chi lo
+    // riceve a indovinare.
+    const attuale = await repo.findBlueprintById(pool, id);
+    if (!attuale) throw new NotFoundError("Fascicolo non trovato");
+    throw new ConflictError(
+      `Il fascicolo e' gia' legato a un'azienda (${attuale.tenantId ?? "ignota"}) e il legame e' permanente`,
+      "BLUEPRINT_LINK_IS_PERMANENT",
+    );
   },
 
   async getVersion(

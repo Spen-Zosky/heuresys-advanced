@@ -50,6 +50,11 @@ async function login(t: TestApp, email: string): Promise<S> {
 
 const PREFIX = `IT_TB_${randomUUID().slice(0, 8).toUpperCase()}`;
 
+/** Il codice dell'errore sta in `error.code`: leggerlo da `code` da' sempre undefined,
+ *  e un `undefined` confrontato con la stringa attesa fallisce per la ragione sbagliata. */
+const codiceDi = (body: unknown): string | undefined =>
+  (body as { error?: { code?: string } }).error?.code;
+
 let t: TestApp;
 let admin: S;
 let cliente: S;
@@ -379,6 +384,88 @@ describe("fascicoli di configurazione", () => {
         WHERE tenant_blueprint_code = 'NON_DEVE_NASCERE'`,
     );
     expect(rows[0]?.n).toBe("0");
+  });
+
+  /**
+   * E24 (#199) — il legame fascicolo↔azienda e' PERMANENTE.
+   *
+   * Il caso e' scritto su cio' che oggi RIESCE, non su cio' che gia' fallisce:
+   * `linkTenant` aggiornava senza guardare il valore precedente, quindi un
+   * fascicolo gia' legato si spostava con una chiamata sola. Se il passo (3)
+   * risponde 200, la guardia non c'e' — ed e' la ragione per cui questo caso
+   * esiste in questa forma.
+   *
+   * I due dinieghi NON sono lo stesso, e il caso li tiene separati apposta:
+   * `BLUEPRINT_TENANT_ALREADY_LINKED` dice che l'azienda di DESTINAZIONE ha gia'
+   * un fascicolo (il problema e' la', ed e' rimediabile scegliendone un'altra);
+   * `BLUEPRINT_LINK_IS_PERMANENT` dice che e' QUESTO fascicolo a essere gia'
+   * legato (il problema e' qui, e non e' rimediabile). Un client che li confonde
+   * propone all'utente la correzione sbagliata.
+   *
+   * Gli id delle aziende si leggono dal database, mai scritti a mano.
+   */
+  it("E24 — un fascicolo gia' legato non si stacca piu'", async () => {
+    const {
+      rows: [libera],
+    } = await pool.query<{ id: string; code: string }>(
+      `SELECT t.tenant_id AS id, t.tenant_code AS code
+         FROM sys.sys_tenancies t
+        WHERE NOT EXISTS (SELECT 1 FROM sys.sys_tenant_blueprints b
+                           WHERE b.tenant_blueprint_tenant_id = t.tenant_id)
+        ORDER BY t.tenant_code LIMIT 1`,
+    );
+    const {
+      rows: [occupata],
+    } = await pool.query<{ id: string; code: string }>(
+      `SELECT t.tenant_id AS id, t.tenant_code AS code
+         FROM sys.sys_tenancies t
+         JOIN sys.sys_tenant_blueprints b ON b.tenant_blueprint_tenant_id = t.tenant_id
+        ORDER BY t.tenant_code LIMIT 1`,
+    );
+    if (!libera || !occupata) {
+      throw new Error(
+        "il caso non e' misurabile: servono un'azienda senza fascicolo e una con " +
+          `(trovate: libera=${libera?.code ?? "nessuna"} occupata=${occupata?.code ?? "nessuna"})`,
+      );
+    }
+
+    const blueprintId = await creaFascicolo("E24_PERMANENTE");
+    const lega = (tenantId: string) =>
+      t.app.inject({
+        method: "POST",
+        url: `/v1/tenant-blueprints/${blueprintId}/link-tenant`,
+        headers: hdr(admin),
+        payload: { tenantId },
+      });
+
+    // (1) la prima firma di un fascicolo mai legato: E24 non la vieta
+    const prima = await lega(libera.id);
+    expect(`prima firma → ${prima.statusCode}`).toBe("prima firma → 200");
+
+    // (2) verso un'azienda che un fascicolo ce l'ha gia'. Il 409 arriva anche
+    // oggi, ma per la ragione sbagliata (violazione di unicita' sulla
+    // DESTINAZIONE): quello che si misura qui e' il CODICE, non lo stato.
+    const versoOccupata = await lega(occupata.id);
+    expect(versoOccupata.statusCode).toBe(409);
+    expect(codiceDi(versoOccupata.json())).toBe("BLUEPRINT_LINK_IS_PERMANENT");
+
+    // (3) IL CASO CHE OGGI PASSA: ri-firmarlo sulla STESSA azienda. Nessun indice
+    // unico lo intercetta — e' la stessa riga — quindi qui non c'e' altra rete
+    // che la guardia. Un 200 significa che la guardia non e' stata applicata.
+    const dinuovo = await lega(libera.id);
+    expect(`ri-firma → ${dinuovo.statusCode}`).toBe("ri-firma → 409");
+    expect(codiceDi(dinuovo.json())).toBe("BLUEPRINT_LINK_IS_PERMANENT");
+
+    // (4) e il legame originale e' rimasto quello: un diniego che avesse comunque
+    // scritto sarebbe un incidente raccontato male
+    const {
+      rows: [dopo],
+    } = await pool.query<{ tid: string | null }>(
+      `SELECT tenant_blueprint_tenant_id AS tid FROM sys.sys_tenant_blueprints
+        WHERE tenant_blueprint_id = $1`,
+      [blueprintId],
+    );
+    expect(dopo?.tid).toBe(libera.id);
   });
 });
 

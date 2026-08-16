@@ -232,10 +232,18 @@ export async function linkTenant(
   tenantId: string,
   actorUserId: string,
 ): Promise<TenantBlueprint | null> {
+  // UPDATE guardato sullo stato atteso (E24, #199): il legame fascicolo↔azienda e'
+  // PERMANENTE, quindi la firma vale solo su un fascicolo che non ne ha ancora una.
+  // Senza `IS NULL` questa riga sposta un fascicolo gia' legato su un'altra azienda
+  // con una chiamata sola — innocuo finche' nessuna riga nasce da un fascicolo, grave
+  // da P3 in poi, quando il registro dell'origine vi si appoggia. E' l'idioma di
+  // `applyTenantActivation`, di cui questa funzione era l'eccezione.
+  // Un 0-righe qui NON dice «non trovato»: il service ha gia' accertato che esiste.
   const r = await db.query<BlueprintRow>(
     `UPDATE sys.sys_tenant_blueprints
         SET tenant_blueprint_tenant_id = $2, updated_by = $3
-      WHERE tenant_blueprint_id = $1 RETURNING ${B_COLS}`,
+      WHERE tenant_blueprint_id = $1
+        AND tenant_blueprint_tenant_id IS NULL RETURNING ${B_COLS}`,
     [id, tenantId, actorUserId],
   );
   return r.rows[0] ? toBlueprint(r.rows[0]) : null;

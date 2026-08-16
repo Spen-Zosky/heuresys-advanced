@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-16T11:30:50Z da docs/kb/tools/build_index.py
+# generato: 2026-08-16T12:27:35Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-16T11:30:50Z"
-  total_files: 3034
+  generated_at: "2026-08-16T12:27:35Z"
+  total_files: 3036
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 314
+    db-migration: 315
     db-other: 8
     db-script: 42
     db-seed: 114
-    doc-canonical: 652
+    doc-canonical: 653
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2476
+    live: 2478
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -7628,6 +7628,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000317_organigramma_rubrica_aziendale.sql'
+    root: repo
+    rel: 'db/migrations/000317_organigramma_rubrica_aziendale.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -10487,6 +10493,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\check_completezza_self.py'
     root: repo
     rel: 'docs/kb/tools/check_completezza_self.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\check_concetti_agente.py'
+    root: repo
+    rel: 'docs/kb/tools/check_concetti_agente.py'
     category: doc-canonical
     status: live
     provenance: git-tracked

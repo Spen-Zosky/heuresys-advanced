@@ -1,0 +1,26 @@
+{
+ "_fonti": [
+  "docs/kb/atlas/atlas.yaml",
+  "docs/kb/agent-perimetri.json"
+ ],
+ "_generato_da": "docs/kb/tools/build_agent_operations.py — non modificare a mano",
+ "concepts": {
+  "organization-units": {
+   "data": "2026-08-16",
+   "decisione": "Enzo (#156): primo perimetro in sola lettura. Coerente con la decisione dello stesso giorno su #193 — l'organigramma e' rubrica aziendale, visibile a chiunque lavori in azienda. E' l'unico candidato la cui sensibilita' non e' una stima di chi scrive, ma una scelta di prodotto scritta e datata.",
+   "operations": {
+    "get": {
+     "method": "GET",
+     "path": "/",
+     "permission": "organization_unit:read"
+    },
+    "get_by_id": {
+     "method": "GET",
+     "path": "/:id",
+     "permission": "organization_unit:read"
+    }
+   },
+   "solaLettura": true
+  }
+ }
+}

@@ -13,14 +13,45 @@ import {
   dataClassOf,
   isSensitiveClass,
   isSensitiveResource,
+  RESOURCE_RUBRICA_AZIENDALE,
 } from "../../src/lib/scope/data-classes.js";
 
 describe("scope data-classes (unit)", () => {
-  it("coerenza: isSensitiveResource(r) ⟺ dataClassOf(r) ∈ SENSITIVE_DATA_CLASSES", () => {
+  /**
+   * L'equivalenza vale per ogni resource TRANNE quelle di rubrica aziendale (#193), e
+   * l'eccezione è dichiarata qui invece di allargare la maglia del test.
+   *
+   * PERCHÉ ESISTE L'ECCEZIONE. `organization_unit` dichiara `PERSONAL` — l'organigramma
+   * mostra nomi, tacerlo era il difetto che #193 chiude — ma per decisione di Enzo del
+   * 2026-08-16 quel dato è aperto a chiunque lavori in azienda, quindi NON passa dall'asse
+   * organizzativo. Se `isSensitiveResource` la dicesse sensibile, l'asserzione D-51 al boot
+   * pretenderebbe un `orgGate` sulle sue rotte di lettura e **l'app non partirebbe**.
+   *
+   * Questo test è andato rosso in CI appena l'eccezione è stata introdotta, ed è il
+   * comportamento giusto: un'eccezione che nessuna prova nota è un'eccezione che domani
+   * diventa la regola senza che nessuno l'abbia decisa.
+   */
+  it("coerenza: isSensitiveResource(r) ⟺ dataClassOf(r) sensibile, salvo la rubrica aziendale", () => {
     for (const resource of Object.keys(RESOURCE_DATA_CLASS)) {
       const cls = dataClassOf(resource);
       expect(cls, `dataClassOf(${resource})`).not.toBeNull();
-      expect(isSensitiveResource(resource)).toBe(isSensitiveClass(cls!));
+      const atteso = isSensitiveClass(cls!) && RESOURCE_RUBRICA_AZIENDALE[resource] === undefined;
+      expect(isSensitiveResource(resource), resource).toBe(atteso);
+    }
+  });
+
+  it("la rubrica aziendale è un'eccezione DICHIARATA, non una maglia larga", () => {
+    const rubrica = Object.keys(RESOURCE_RUBRICA_AZIENDALE);
+    // Se l'elenco si svuotasse, il test sopra tornerebbe l'equivalenza secca e questo
+    // fallirebbe: l'eccezione non può sparire in silenzio.
+    expect(rubrica.length, "nessuna resource di rubrica: l'eccezione di #193 è sparita").toBeGreaterThan(0);
+    for (const r of rubrica) {
+      // Ognuna dichiara PERSONAL — dice il vero su cosa mostra...
+      expect(dataClassOf(r), `${r} deve dichiarare la classe che espone`).toBe("PERSONAL");
+      // ...e NON è sensibile ai fini dell'asse organizzativo. Le due insieme sono la decisione.
+      expect(isSensitiveResource(r), `${r} è di rubrica: non passa dall'asse organizzativo`).toBe(false);
+      // Una riga senza ragione è indistinguibile da una dimenticanza.
+      expect(RESOURCE_RUBRICA_AZIENDALE[r] ?? "", `${r} senza ragione scritta`).toMatch(/#\d+/);
     }
   });
 

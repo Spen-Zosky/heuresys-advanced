@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-16T11:30:50Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3034**
+**Generato**: 2026-08-16T12:27:35Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3036**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 314 |
+| db-migration | 315 |
 | db-other | 8 |
 | db-script | 42 |
 | db-seed | 114 |
-| doc-canonical | 652 |
+| doc-canonical | 653 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 380 |
 | ux-design-archive | 80 |
 | web-source | 237 |
-| **TOTALE** | **3034** |
+| **TOTALE** | **3036** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2476 |
+| live | 2478 |
 
 ## File per categoria
 
@@ -1343,6 +1343,7 @@
 - `D:\heuresys-advanced\db\migrations\000314_deleghe.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000315_classi_di_dato_delle_voci_di_menu.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000316_modello_dei_cruscotti.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000317_organigramma_rubrica_aziendale.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1832,6 +1833,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\build_linked_manifest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_menu.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_completezza_self.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\check_concetti_agente.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_embedding_coverage.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_exposure.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_identita_azienda.py` · *live* · git-tracked

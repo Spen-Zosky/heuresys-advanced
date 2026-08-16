@@ -64,12 +64,13 @@ FONTI_ATLANTE = ("apps/api/src/modules", "apps/web/src/app",
 
 # La coda di adozione, con la sua data. Cresce: non e' «la scelta», e' cio' che e' gia'
 # entrato. Finche' e' una riga sola, e' il primo passo di un'adozione generale.
-APERTI = {
-    "organization-units":
-        "Enzo, 2026-08-16 — PRIMO perimetro in sola lettura, non l'unico. Coerente con la "
-        "decisione dello stesso giorno su #193: l'organigramma e' rubrica aziendale, "
-        "visibile a chiunque lavori in azienda",
-}
+#
+# ⚠ NON e' scritta qui: si legge da `docs/kb/agent-perimetri.json`, la STESSA fonte da cui
+# `build_agent_operations.py` genera le operazioni che il resolver sa risolvere. Se l'elenco
+# vivesse in due posti, prima o poi direbbero cose diverse — e la divergenza sarebbe fra cio'
+# che questo strumento MOSTRA come aperto e cio' che l'agente puo' davvero raggiungere, cioe'
+# esattamente il tipo di bugia che nessuno va a cercare.
+PERIMETRI = os.path.join("docs", "kb", "agent-perimetri.json")
 
 # V2 — le esclusioni, una per una. Un jolly qui nasconderebbe il giorno in cui un modulo
 # nuovo cade in una di queste famiglie senza che nessuno lo noti.
@@ -107,6 +108,19 @@ def ceco(cosa, rimedio):
     raise SystemExit("NON MISURABILE: %s.\n  %s\n  Uno zero silenzioso qui sarebbe un "
                      "falso verde." % (cosa, rimedio))
 
+
+# ---------------------------------------------------------------- 0. il perimetro deciso
+if not os.path.isfile(PERIMETRI):
+    ceco("i perimetri non esistono in %s" % PERIMETRI, "eseguire dalla radice del repo")
+_perim = json.loads(io.open(PERIMETRI, encoding="utf-8").read())
+APERTI = {}
+for _v in (_perim.get("aperti") or []):
+    if not _v.get("decisione") or not _v.get("data"):
+        ceco("il perimetro '%s' non porta `decisione` e `data`" % _v.get("concetto"),
+             "un'apertura senza chi l'ha decisa e quando non e' verificabile")
+    APERTI[_v["concetto"]] = "%s — %s%s" % (
+        _v["data"], _v["decisione"],
+        " · SOLA LETTURA" if _v.get("sola_lettura") else "")
 
 # ---------------------------------------------------------------- 1. moduli su disco
 # La verita' di OGGI: l'atlante puo' essere indietro, il filesystem no.

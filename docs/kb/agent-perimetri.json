@@ -1,0 +1,13 @@
+{
+  "_cosa": "I perimetri su cui l'agente puo' leggere (#156). FONTE UNICA: la leggono sia check_concetti_agente.py (che mostra la coda di adozione) sia build_agent_operations.py (che genera le operazioni risolvibili). Se l'elenco vivesse in due posti, prima o poi direbbero cose diverse e nessuno se ne accorgerebbe.",
+  "_dottrina": "Enzo, 2026-08-16: «l'agente deve essere applicato a qualunque perimetro nel quale puo' portare valore aggiunto». Questo elenco CRESCE: non e' il confine, e' quanto e' stato aperto finora. La domanda e' l'ordine, non la scelta — l'ordine lo propone check_concetti_agente.py, la riga qui la scrive una decisione.",
+  "_regola": "Una voce senza `decisione` e `data` non e' un perimetro aperto: e' una dimenticanza. Il generatore la rifiuta.",
+  "aperti": [
+    {
+      "concetto": "organization-units",
+      "sola_lettura": true,
+      "data": "2026-08-16",
+      "decisione": "Enzo (#156): primo perimetro in sola lettura. Coerente con la decisione dello stesso giorno su #193 — l'organigramma e' rubrica aziendale, visibile a chiunque lavori in azienda. E' l'unico candidato la cui sensibilita' non e' una stima di chi scrive, ma una scelta di prodotto scritta e datata."
+    }
+  ]
+}

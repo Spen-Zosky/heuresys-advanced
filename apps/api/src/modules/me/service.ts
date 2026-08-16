@@ -154,7 +154,22 @@ export const meService = {
       //    squadra apre una superficie, ma M1 gli da' `none` su COMPENSATION e EVALUATION —
       //    quindi la pagina delle retribuzioni non gli va offerta neanche se il permesso,
       //    domani, gli venisse concesso.
-      return almenoUnaCellaAperta(dominiCheAprono, i.dataClasses);
+      //
+      // ── #193 (mig. `000317`): una classe dichiarata APERTA AL TENANT esce dal filtro.
+      //    Non esce dalla dichiarazione — `dataClasses` continua a dire che la pagina mostra
+      //    persone, perche' quello e' vero e tacerlo era il difetto di partenza. Esce dal
+      //    *filtro*, perche' quel dato e' la rubrica aziendale e la decisione di Enzo del
+      //    2026-08-16 lo tiene aperto a chiunque lavori in azienda.
+      //
+      //    La sottrazione e' additiva per costruzione: se la voce non porta esenzioni,
+      //    `daFiltrare` e' identica a `dataClasses` e il comportamento e' quello di prima.
+      //    Se ogni sua classe e' esente, la lista si svuota e `almenoUnaCellaAperta`
+      //    risponde `true` — la stessa risposta che da' a una pagina senza dati di persona,
+      //    ed e' corretta: una rubrica aziendale si comporta come un catalogo.
+      const daFiltrare = i.dataClassesOpenToTenant.length === 0
+        ? i.dataClasses
+        : i.dataClasses.filter((c) => !i.dataClassesOpenToTenant.includes(c));
+      return almenoUnaCellaAperta(dominiCheAprono, daFiltrare);
     });
     return {
       perspectives: UI_PERSPECTIVES.map((p) => ({

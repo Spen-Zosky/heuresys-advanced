@@ -45,6 +45,15 @@ export interface UiInterfaceRow {
    * decide il solo RBAC. Le voci dell'area personale sono vuote apposta (I17).
    */
   dataClasses: DataClass[];
+  /**
+   * Il sottoinsieme di `dataClasses` che il tenant apre a chiunque (#193, mig. `000317`).
+   *
+   * Oggi una sola: `ORG_CHART`/`PERSONAL`. L'organigramma mostra persone — e lo dichiara,
+   * altrimenti mentirebbe — ma quel dato e' la **rubrica aziendale**, e per decisione di
+   * Enzo del 2026-08-16 resta visibile a chiunque lavori in azienda. Senza questo, M1 la
+   * toglierebbe a 117 utenti su 161.
+   */
+  dataClassesOpenToTenant: DataClass[];
 }
 
 /** All active sidebar interfaces (the DB-driven registry). Visibility/gating is applied in the
@@ -67,7 +76,16 @@ export async function loadActiveInterfaces(q: DbConnector): Promise<UiInterfaceR
             -- non deve esistere.
             COALESCE((SELECT array_agg(dc.data_class ORDER BY dc.data_class)
                         FROM sys.sys_ui_interface_data_classes dc
-                       WHERE dc.ui_interface_id = i.ui_interface_id), '{}') AS "dataClasses"
+                       WHERE dc.ui_interface_id = i.ui_interface_id), '{}') AS "dataClasses",
+            -- #193 (mig. 000317): le classi che la voce espone MA che sono aperte a chiunque
+            -- lavori nel tenant — dato di livello rubrica aziendale. Arrivano SEPARATE, non
+            -- sottratte dalle altre: dataClasses deve continuare a dire la verita' su cosa
+            -- la pagina mostra. E' il servizio a decidere che M1 non le filtra, e lo fa in un
+            -- punto solo e leggibile.
+            COALESCE((SELECT array_agg(dc.data_class ORDER BY dc.data_class)
+                        FROM sys.sys_ui_interface_data_classes dc
+                       WHERE dc.ui_interface_id = i.ui_interface_id
+                         AND dc.data_class_open_to_tenant), '{}') AS "dataClassesOpenToTenant"
        FROM sys.sys_ui_interfaces i
       WHERE ui_interface_is_active = true
       ORDER BY ui_interface_order, ui_interface_code`,

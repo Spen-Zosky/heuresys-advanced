@@ -131,14 +131,21 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
  * di decidere — ed è visibile proprio perché è scritto.
  */
 export const RESOURCE_DA_DECIDERE: Readonly<Record<string, string>> = {
-  organization_unit:
-    "#193 — l'organigramma mostra nomi e collocazione, quindi PERSONAL; ma dichiararlo lo toglierebbe " +
-    "a 117 utenti su 161 (misurato 2026-08-16). È una decisione di prodotto di Enzo, non una bonifica.",
+  // VUOTO, e va letto come un esito: `organization_unit` era l'unica riga, ed è stata
+  // DECISA il 2026-08-16 (#193) — non rimossa per far tacere il cancello. Ora dichiara
+  // `PERSONAL` in `RESOURCE_DATA_CLASS` e sta in `RESOURCE_RUBRICA_AZIENDALE` con la
+  // decisione di Enzo scritta accanto. Un elenco vuoto qui è la condizione sana: se
+  // tornasse a riempirsi, direbbe che si sta rimandando invece di decidere.
 };
 
 export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   // PERSONAL
   user: "PERSONAL",
+  // #193 — l'organigramma mostra nomi e collocazione: dirlo è l'unica affermazione vera.
+  // Sta ANCHE in `RESOURCE_RUBRICA_AZIENDALE`, che è ciò che lo tiene fuori dall'asse
+  // organizzativo per decisione di Enzo (2026-08-16). Le due righe non si contraddicono:
+  // la prima dice *cosa mostra*, la seconda *a chi è aperto*.
+  organization_unit: "PERSONAL",
   user_profile: "PERSONAL",
   document: "PERSONAL",
   certification: "PERSONAL",
@@ -210,8 +217,38 @@ export function isSensitiveClass(dataClass: DataClass): boolean {
   return SENSITIVE_DATA_CLASSES.has(dataClass);
 }
 
+/**
+ * Le resource che mostrano persone ma il cui dato e' **rubrica aziendale** (#193).
+ *
+ * Non sono un quarto modo per tacere, e non somigliano a `RESOURCE_SENZA_DATI_DI_PERSONA`:
+ * quelle affermano «qui non ci sono persone», queste affermano l'opposto — *ci sono, e sono
+ * aperte a chiunque lavori nel tenant*. La differenza e' l'unica che conta, perche' la prima
+ * frase su un organigramma sarebbe falsa.
+ *
+ * Conseguenza tecnica, ed e' la ragione per cui l'elenco esiste separato: una resource qui
+ * NON e' «sensibile» ai fini dell'asse organizzativo, quindi l'asserzione D-51 al boot non
+ * pretende un `orgGate` sulle sue rotte di lettura. Sarebbe un cancello che filtra un dato
+ * che una decisione di prodotto ha gia' aperto — e le rotte fallirebbero l'avvio.
+ *
+ * Ogni riga porta la decisione che la giustifica, con autore e data. Una riga senza non e'
+ * un'esenzione: e' una dimenticanza travestita.
+ */
+export const RESOURCE_RUBRICA_AZIENDALE: Readonly<Record<string, string>> = {
+  organization_unit:
+    "#193 — Enzo, 2026-08-16: «l'organigramma aziendale deve restare visibile a chiunque " +
+    "lavori in azienda». Mostra nomi e collocazione (PERSONAL, dichiarato), ma di livello " +
+    "rubrica: non passa dall'asse organizzativo. Misurato lo stesso giorno: 117 utenti su " +
+    "161 non hanno alcun dominio, e per loro e' l'unica voce non-personale del menu. " +
+    "Il permesso `organization_unit:read` lo detengono tutti e 161 — qui si allinea la " +
+    "dottrina a cio' che l'API gia' concede, non si apre nulla di nuovo.",
+};
+
 /** True iff the resource carries SENSITIVE person-level data (→ organizational axis at F3). */
 export function isSensitiveResource(resource: string): boolean {
+  // #193: la rubrica aziendale dichiara `PERSONAL` e resta fuori dall'asse organizzativo.
+  // Il controllo sta PRIMA della classe, non dopo, perche' e' una decisione che sovrascrive
+  // la classificazione — non un caso che la classificazione non ha previsto.
+  if (RESOURCE_RUBRICA_AZIENDALE[resource] !== undefined) return false;
   const c = dataClassOf(resource);
   return c !== null && isSensitiveClass(c);
 }

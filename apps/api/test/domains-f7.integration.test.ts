@@ -26,7 +26,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool, closePool } from "../src/db/client.js";
 import { meService } from "../src/modules/me/service.js";
 import { M1, classiMascherateDa, almenoUnaCellaAperta } from "../src/lib/scope/matrix.js";
-import { dominiCheApronoUnaSuperficie } from "../src/lib/scope/domains.js";
+import { dominiCheApronoUnaSuperficie, type Domain } from "../src/lib/scope/domains.js";
 import { HR_MANDATED_ROLES } from "../src/lib/scope/resolver.js";
 import { MASKED_UNDER_PLATFORM_MANDATE } from "../src/lib/scope/mask.js";
 import {
@@ -334,5 +334,86 @@ describe("#99 F7 — la voce di menu discende dalla matrice", () => {
         `${dominio} apre SPECIAL_CATEGORY: l'eccezione dichiarata da ADR-0036 §5 è saltata`,
       ).toBe("none");
     }
+  });
+
+  /* ── #193 — l'organigramma è rubrica aziendale (Enzo, 2026-08-16, mig. 000317) ──────
+   *
+   * La voce dichiara `PERSONAL` — che è vero, mostra nomi e collocazione — E dichiara che
+   * quel dato è aperto a chiunque lavori nel tenant. Le due affermazioni insieme sono la
+   * decisione; una sola delle due sarebbe o una bugia (tacere) o una perdita di accesso
+   * per 117 utenti su 161 (dichiarare senza aprire).
+   */
+  describe("#193 l'organigramma dichiara di mostrare persone e resta aperto a tutti", () => {
+    /**
+     * ⚠ LE VOCI SONO DUE, e non è un dettaglio: `/organization` usa la stessa resource e
+     * mostra la stessa materia. La prima stesura ne dichiarava una sola, e a trovarlo è
+     * stato il test «esige la classe su ogni voce la cui resource è person-level» — che
+     * esisteva già ed è andato rosso appena `organization_unit` è diventata person-level.
+     */
+    it("entrambe le voci della struttura dichiarano PERSONAL aperta, con la ragione", async () => {
+      const { rows } = await pool.query<{ code: string; cls: string; aperta: boolean; ragione: string | null }>(
+        `SELECT i.ui_interface_code AS code, dc.data_class AS cls,
+                dc.data_class_open_to_tenant AS aperta, dc.data_class_open_reason AS ragione
+           FROM sys.sys_ui_interface_data_classes dc
+           JOIN sys.sys_ui_interfaces i ON i.ui_interface_id = dc.ui_interface_id
+          WHERE i.ui_interface_required_resource = 'organization_unit'
+            AND i.ui_interface_is_active`,
+      );
+      // L'atteso NON è cablato: si deriva dalle voci attive che usano quella resource.
+      const { rows: attese } = await pool.query<{ code: string }>(
+        `SELECT ui_interface_code AS code FROM sys.sys_ui_interfaces
+          WHERE ui_interface_required_resource = 'organization_unit' AND ui_interface_is_active`,
+      );
+      expect(rows.map((r) => r.code).sort(),
+        "una voce della struttura non dichiara la classe: è il difetto che #193 chiude",
+      ).toEqual(attese.map((r) => r.code).sort());
+      for (const r of rows) {
+        expect(r.cls, r.code).toBe("PERSONAL");
+        expect(r.aperta, `${r.code}: dichiarata PERSONAL ma NON aperta — sparirebbe a 117 utenti su 161`).toBe(true);
+        // Un'esenzione senza ragione è indistinguibile da una dimenticanza.
+        expect(r.ragione ?? "", r.code).toMatch(/#193/);
+      }
+    });
+
+    it("le esenzioni sono SOLO quelle della struttura: M1 non si svuota un pezzo per volta", async () => {
+      const { rows } = await pool.query<{ code: string; resource: string }>(
+        `SELECT i.ui_interface_code AS code, i.ui_interface_required_resource AS resource
+           FROM sys.sys_ui_interface_data_classes dc
+           JOIN sys.sys_ui_interfaces i ON i.ui_interface_id = dc.ui_interface_id
+          WHERE dc.data_class_open_to_tenant`,
+      );
+      expect([...new Set(rows.map((r) => r.resource))],
+        "un'esenzione è comparsa su una resource diversa da `organization_unit`, senza una "
+        + "decisione: è così che i cancelli muoiono davvero",
+      ).toEqual(["organization_unit"]);
+    });
+
+    /**
+     * LA PROVA CHE SA FALLIRE, ed è il cuore del test: si confronta il filtro CON e SENZA
+     * l'esenzione, sullo stesso attore senza domini. Se le due risposte fossero uguali,
+     * l'esenzione non starebbe facendo nulla e questo test sarebbe una tautologia — la
+     * stessa specie di difetto trovata in #142 F3a il giorno prima.
+     */
+    it("senza domini la voce passa SOLO grazie all'esenzione", () => {
+      const nessunDominio = new Set<Domain>();
+      const classi: DataClass[] = ["PERSONAL"];
+      const esenti: DataClass[] = ["PERSONAL"];
+
+      const conEsenzione = almenoUnaCellaAperta(
+        nessunDominio, classi.filter((c) => !esenti.includes(c)));
+      const senzaEsenzione = almenoUnaCellaAperta(nessunDominio, classi);
+
+      expect(conEsenzione, "con l'esenzione la voce deve passare (#193)").toBe(true);
+      expect(senzaEsenzione, "senza esenzione deve CADERE: se passasse comunque, "
+        + "l'esenzione non sta facendo nulla e il test è una tautologia").toBe(false);
+    });
+
+    it("l'esenzione non contagia le classi sensibili della stessa persona", () => {
+      const nessunDominio = new Set<Domain>();
+      // Una voce che espone COMPENSATION non deve passare per il fatto che ORG_CHART è
+      // aperta: l'esenzione vive sulla riga, non sulla classe né sull'attore.
+      expect(almenoUnaCellaAperta(nessunDominio, ["COMPENSATION"] as DataClass[])).toBe(false);
+      expect(almenoUnaCellaAperta(nessunDominio, ["EVALUATION"] as DataClass[])).toBe(false);
+    });
   });
 });

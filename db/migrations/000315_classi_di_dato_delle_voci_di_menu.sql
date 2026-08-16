@@ -124,14 +124,26 @@ BEGIN
   -- parte perche' i due numeri dicono cose diverse: 24 dichiarazioni su 22 voci — `dashboard`
   -- e' l'unica che ne porta piu' d'una, ed e' esattamente il caso che rende necessaria la
   -- distinzione fra «quante righe» e «quante pagine».
+  --
+  -- ⚠ PERCHE' `>=` E NON `=`, ed e' un errore gia' commesso e corretto dalla prova generale
+  -- (2026-08-16, #193). Avevo alzato questa soglia a 25 per far posto alla riga che la
+  -- **000317** aggiunge (`ORG_CHART`/`PERSONAL`), ragionando su ADR-0035: «si emenda il file
+  -- che crea l'oggetto». Giusto il principio, sbagliata l'applicazione — e la prova generale
+  -- l'ha vista subito, ROSSA alla PRIMA passata: su un database da zero la 000315 gira
+  -- **prima** della 000317, quindi le righe sono ancora 24 e un `= 25` non puo' essere vero.
+  -- Un file non puo' contare cio' che un file successivo scrivera'.
+  --
+  -- La forma corretta e' questa: **ogni file garantisce cio' che fa lui**. Qui si pretende
+  -- che le 24 dichiarazioni di questo file ci siano tutte; il totale esatto lo verifica la
+  -- migrazione piu' recente che tocca la tabella, che e' l'unica in grado di conoscerlo.
   SELECT count(*) INTO n_dich FROM sys.sys_ui_interface_data_classes;
-  IF n_dich <> 24 THEN
-    RAISE EXCEPTION '000315: le dichiarazioni sono % invece di 24 — una voce citata non esiste con quel codice', n_dich;
+  IF n_dich < 24 THEN
+    RAISE EXCEPTION '000315: le dichiarazioni sono % e ne servono almeno 24 — una voce citata non esiste con quel codice', n_dich;
   END IF;
 
   SELECT count(DISTINCT ui_interface_id) INTO n_voci_dich FROM sys.sys_ui_interface_data_classes;
-  IF n_voci_dich <> 22 THEN
-    RAISE EXCEPTION '000315: le voci dichiarate sono % invece di 22', n_voci_dich;
+  IF n_voci_dich < 22 THEN
+    RAISE EXCEPTION '000315: le voci dichiarate sono % e ne servono almeno 22', n_voci_dich;
   END IF;
 
   -- ⚠ POST-CONDIZIONE CHE PROTEGGE CIO' CHE NON DOVEVA CAMBIARE, ed e' la piu' importante

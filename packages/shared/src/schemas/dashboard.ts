@@ -76,6 +76,75 @@ export const DashboardTrendSchema = z.object({
 });
 export type DashboardTrend = z.infer<typeof DashboardTrendSchema>;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Il CATALOGO dei cruscotti (#142 F3a) — quali famiglie esistono, per chi, e quali
+// viste le compongono. Distinto da `widgets`, che è l'aggregatore della pagina unica:
+// quello risponde «cosa mostra il cruscotto», questo «quali cruscotti esistono e quali
+// sono tuoi». Il modello vive in `sys_dashboards` → `sys_dashboard_blocks` →
+// `sys_dashboard_block_data_classes` (mig. `000316`).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Le sette classi di M1 (ADR-0036 §7). Stesso vocabolario del CHECK in `000316`. */
+export const DashboardDataClassSchema = z.enum([
+  "PERSONAL", "COMPENSATION", "SKILL", "EVALUATION", "ACTIVITY", "CREDENTIAL", "SPECIAL_CATEGORY",
+]);
+export type DashboardDataClass = z.infer<typeof DashboardDataClassSchema>;
+
+export const DashboardBlockSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  order: z.number().int().min(0),
+  /** Le classi che questa vista espone. Vuoto = non espone dati di persona. */
+  dataClasses: z.array(DashboardDataClassSchema),
+  /**
+   * Come l'attore può guardare questa vista. **Tre stati, non due**, ed è il difetto che
+   * la prova live ha trovato: un booleano `masked` costringeva a scegliere fra «la vedi» e
+   * «non la vedi», e `mask` — il quarto stato di autorizzazione (I20) — finiva dalla parte
+   * sbagliata. Un `PLATFORM_ADMIN` si vedeva così la vista delle retribuzioni **in chiaro**,
+   * mentre ADR-0032 gliela maschera.
+   *  · `open`   — la vista è tua, con i valori
+   *  · `masked` — la vista c'è, i valori sono trattenuti (si DICHIARA, non si tace: una
+   *               vista che sparisce senza spiegazione è indistinguibile da una che non
+   *               esiste, e chi guarda non può nemmeno chiedersi perché)
+   *  · `denied` — nessuno dei tuoi domini apre una delle classi che espone
+   */
+  access: z.enum(["open", "masked", "denied"]),
+});
+export type DashboardBlock = z.infer<typeof DashboardBlockSchema>;
+
+export const DashboardCatalogEntrySchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  route: z.string(),
+  /** `null` solo per il Self-Service: è il pavimento universale (I17), non si concede. */
+  permissionCode: z.string().nullable(),
+  order: z.number().int().min(0),
+  /** `false` finché la pagina non esiste (F4). Un catalogo non è un menu. */
+  isActive: z.boolean(),
+  /** Quante viste compongono il cruscotto, e come si distribuiscono per l'attore. */
+  blockCount: z.number().int().min(0),
+  maskedBlockCount: z.number().int().min(0),
+  deniedBlockCount: z.number().int().min(0),
+});
+export type DashboardCatalogEntry = z.infer<typeof DashboardCatalogEntrySchema>;
+
+export const DashboardCatalogResponseSchema = z.object({
+  dashboards: z.array(DashboardCatalogEntrySchema),
+  generatedAt: z.iso.datetime(),
+});
+export type DashboardCatalogResponse = z.infer<typeof DashboardCatalogResponseSchema>;
+
+export const DashboardDetailResponseSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  route: z.string(),
+  permissionCode: z.string().nullable(),
+  isActive: z.boolean(),
+  blocks: z.array(DashboardBlockSchema),
+  generatedAt: z.iso.datetime(),
+});
+export type DashboardDetailResponse = z.infer<typeof DashboardDetailResponseSchema>;
+
 export const DashboardWidgetsResponseSchema = z.object({
   role: z.string(),
   scope: z.object({

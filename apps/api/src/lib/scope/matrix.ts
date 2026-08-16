@@ -137,6 +137,46 @@ export function almenoUnaCellaAperta(
 }
 
 /**
+ * La modalità con cui l'attore può guardare UNA VISTA, dati i suoi domini (#142 F3a).
+ *
+ * PERCHÉ NON BASTA `almenoUnaCellaAperta`, e la differenza è costata un difetto reale.
+ * Quella funzione risponde a «questa superficie ti riguarda, sì o no?», e per rispondere
+ * tratta `mask` come **aperto** — giustamente: una pagina di cui vedi metà dei valori è
+ * comunque una pagina tua. Ma la domanda di una VISTA dentro un cruscotto è un'altra:
+ * *come* la guardi. Con la sola funzione binaria un `PLATFORM_ADMIN` si vedeva la vista
+ * delle retribuzioni **in chiaro**, mentre ADR-0032 gli dà `mask` su `COMPENSATION`.
+ * Misurato dalla prova live del 2026-08-16, non dal ragionamento.
+ *
+ * LA REGOLA, e sceglie di FALLIRE CHIUSO:
+ *  · per ogni classe della vista si prende la modalità MIGLIORE fra i domini attivi
+ *    (è ciò che l'attore può davvero fare su quella classe);
+ *  · la vista prende poi la modalità PEGGIORE fra le sue classi, perché una vista è una
+ *    cosa sola e non può mostrarne metà: se una delle sue classi è chiusa, la vista è
+ *    chiusa; se una è mascherata, la vista è mascherata.
+ *  · una vista SENZA classi è `open`: non espone dati di persona, e M1 non ha voce in
+ *    capitolo — è il caso del Self-Service (I17), dove mascherare significherebbe negare
+ *    a una persona i propri stessi dati.
+ */
+export type ModalitaVista = "open" | "masked" | "denied";
+
+const FORZA: Record<AccessMode, number> = { edit: 3, read: 2, mask: 1, none: 0 };
+
+export function modalitaDellaVista(
+  domini: ReadonlySet<Domain>,
+  classi: readonly DataClass[],
+): ModalitaVista {
+  if (classi.length === 0) return "open";
+  let peggiore = 3;
+  for (const c of classi) {
+    let migliore = 0;
+    for (const d of domini) migliore = Math.max(migliore, FORZA[M1[d][c]]);
+    peggiore = Math.min(peggiore, migliore);
+  }
+  if (peggiore >= 2) return "open";
+  return peggiore === 1 ? "masked" : "denied";
+}
+
+/**
  * Le classi che il dominio vede **mascherate**.
  *
  * È la sorgente da cui `mask.ts` deriva `MASKED_UNDER_PLATFORM_MANDATE`: prima erano due

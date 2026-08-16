@@ -290,6 +290,62 @@ export async function getRecentActivity(
 }
 
 /**
+ * Il catalogo dei cruscotti con le loro viste e le classi che espongono (#142 F3a).
+ *
+ * UNA query sola, non N+1: le famiglie sono otto e le viste ventisette, ma il numero è
+ * destinato a crescere e un `SELECT` per cruscotto diventerebbe una lista di chiamate in
+ * un ciclo — il difetto che non si vede finché il catalogo è piccolo.
+ *
+ * L'ordinamento è quello DICHIARATO nel modello (`dashboard_order`, `dashboard_block_order`),
+ * non alfabetico: l'ordine con cui i cruscotti si presentano è una decisione di prodotto
+ * scritta nella migrazione, e il repository la rispetta invece di rifarla.
+ */
+export async function caricaCatalogoCruscotti(q: DbConnector): Promise<CruscottoRiga[]> {
+  const r = await q.query<CruscottoRiga>(
+    `SELECT d.dashboard_code            AS code,
+            d.dashboard_name            AS name,
+            d.dashboard_route           AS route,
+            d.dashboard_permission_code AS permission_code,
+            d.dashboard_order           AS ord,
+            d.dashboard_is_active       AS is_active,
+            coalesce(
+              json_agg(
+                json_build_object(
+                  'code',        b.dashboard_block_code,
+                  'name',        b.dashboard_block_name,
+                  'order',       b.dashboard_block_order,
+                  'dataClasses', coalesce(c.classi, '{}')
+                )
+                ORDER BY b.dashboard_block_order, b.dashboard_block_code
+              ) FILTER (WHERE b.dashboard_block_id IS NOT NULL),
+              '[]'
+            ) AS blocks
+       FROM sys.sys_dashboards d
+       LEFT JOIN sys.sys_dashboard_blocks b
+              ON b.dashboard_id = d.dashboard_id AND b.dashboard_block_is_active
+       LEFT JOIN LATERAL (
+              SELECT array_agg(x.data_class ORDER BY x.data_class) AS classi
+                FROM sys.sys_dashboard_block_data_classes x
+               WHERE x.dashboard_block_id = b.dashboard_block_id
+            ) c ON true
+      GROUP BY d.dashboard_id, d.dashboard_code, d.dashboard_name, d.dashboard_route,
+               d.dashboard_permission_code, d.dashboard_order, d.dashboard_is_active
+      ORDER BY d.dashboard_order, d.dashboard_code`,
+  );
+  return r.rows;
+}
+
+export interface CruscottoRiga {
+  code: string;
+  name: string;
+  route: string;
+  permission_code: string | null;
+  ord: number;
+  is_active: boolean;
+  blocks: { code: string; name: string; order: number; dataClasses: string[] }[];
+}
+
+/**
  * Le posizioni nel perimetro ORGANIZZATIVO dell'attore (#142 F2).
  *
  * SI CHIAMAVA `findOwnedPositionIds` E PERCORREVA L'ALBERO SBAGLIATO. Selezionava le

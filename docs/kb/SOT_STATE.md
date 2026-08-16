@@ -16,7 +16,7 @@ dei cruscotti, `#142` F2): utenti **161** · posizioni **315** · tenant ACTIVE 
 RBAC **14 ruoli / 224 permessi / 975 mapping** (+7 permessi e +16 concessioni dei cruscotti,
 +5 raccolti dal tappeto di `000005` su `PLATFORM_ADMIN`) · skill **14.039** · migration su
 disco **314** (max `000316`) · sentinelle **18** (+`v_dashboard_class_drift`) · test API
-**250 file** · spec E2E **99** · HEAD `38ce5cf6`.
+**250 file** · spec E2E **99** · HEAD `d0ff6033`.
 
 **S1064 (2026-08-16) — «Le cose che non avevano una porta». L'epica `#99` è CHIUSA, 10/10.**
 
@@ -60,6 +60,12 @@ disco **314** (max `000316`) · sentinelle **18** (+`v_dashboard_class_drift`) �
 - **Il buco dichiarato di F7 è chiuso**: non era una voce futura, erano **19 resource su 32**
   saltate in silenzio (**60%**). Ogni resource sta ora in uno di tre elenchi dichiarati, più
   un quarto per il dubbio numerato. Cancello visto rosso.
+- **`#194`** — `verifica-deploy` ha dichiarato la produzione **irraggiungibile mentre era
+  sana** (`000` su entrambe le sonde). Separate le cause: IP diretto **200 in 0,12 s**, la VM
+  risponde 200 a sé stessa, tutte le porte in ascolto, `curl -4` **200 in 0,57 s**, e il
+  dominio **non ha record AAAA**. Si impiantava la risoluzione del NOME sul router di casa,
+  che interroga il DNS via IPv6. Un allarme falso costa più di nessun allarme: insegna a non
+  guardarlo. Corretto con `-4` e la misura scritta accanto.
 - ⚠ **Una stima mia da correggere, e l'ho corretta**: `#142` F3b non è ~140k. Sono **27 viste**
   e i segnaposto sono vietati, quindi o tutte o nessuna: **~250-400k**.
 

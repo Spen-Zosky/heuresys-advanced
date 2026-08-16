@@ -51,6 +51,12 @@ INFORMATIVE = {
     "v_organization_unit_integrity":
         "una riga per unita' con le bandiere di violazione, non una riga per violazione: "
         "l'allarme dell'organigramma e' la sonda su fn_organization_integrity_violations()",
+    "v_positions_with_critical_skill_gap":
+        "E25 (P4/T5): una riga per POSIZIONE OCCUPATA, non per anomalia. Lo scostamento fra i "
+        "requisiti CRITICAL e le competenze dell'occupante e' la condizione normale di un'azienda "
+        "vera — misurato su RTL: 60 persone su 97, peggior caso 2 — quindi righe qui NON sono un "
+        "difetto, sono informazione di governo. Porta la colonna `cieca` per distinguere «nessuno "
+        "scostamento» da «non c'era niente da controllare»",
 }
 
 # Soglie: superate = allarme. Derivano dalla misura del 2026-08-03, non da teoria.

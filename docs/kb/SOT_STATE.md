@@ -13,10 +13,27 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 **Numeri ri-derivati dal vivo** (S1064: la sessione ha aggiunto **una** migrazione — il modello
 dei cruscotti, `#142` F2): utenti **161** · posizioni **315** · tenant ACTIVE **2** ·
-RBAC **14 ruoli / 224 permessi / 975 mapping** (+7 permessi e +16 concessioni dei cruscotti,
+RBAC **14 ruoli / 224 permessi / 980 mapping** (+7 permessi e +16 concessioni dei cruscotti,
 +5 raccolti dal tappeto di `000005` su `PLATFORM_ADMIN`) · skill **14.039** · migration su
-disco **318** (max `000320`) · sentinelle **18** (+`v_dashboard_class_drift`) · test API
-**262 file** (232 integration) · spec E2E **99** · moduli API **96** · HEAD `8a2e0020`.
+disco **318** (max `000320`) · sentinelle **18** vigilate + **1 informativa**
+(`v_positions_with_critical_skill_gap`, S1066: restituisce righe per progetto) · tabelle `sys`
+**226** · viste `sys` **26** · test API **264 file** (234 integration) · spec E2E **99** ·
+moduli API **96** · HEAD `bec9feff`.
+
+**S1066 (2026-08-16 sera) — «Le prove hanno trovato quello che nessuno stava cercando».**
+Eseguite le **7 consegne** del design-lab (ingerite come `#202`-`#208`). Chiuse `#199` (guardia su
+`link-tenant`: il legame fascicolo↔azienda non si stacca più — dimostrato tentando lo spostamento
+del fascicolo vero di RTL Bank, HTTP 409 e legame intatto) e `#196` (censimento delle due specie di
+indicatori su viste/API/schermate; il conteggio di `/kpis` ora le dichiara). Riparati i tre
+strumenti di presidio: il **guardiano** moriva sulla riga del verdetto con stdout non-terminale
+uscendo `1`, che non è né «continua» né «chiudi»; il **canale** del lab creava numeri doppi in
+silenzio; il **cancello di ADR-0038** era rosso per uno strumento che il legacy lo combatte.
+`#198` **P3 avanzata a 4 task su 9** (T1 registro dell'origine + mig `000319`/`000320`, T2 presidio
+dei processi, T3 segnaposto parlanti, T8 metro nel repo), `resume-from: T4`. `#206` **P4/T5** fatto
+(mig `000318`, vista dello scostamento). Due voci nuove nate da misure, non da impressioni:
+**`#209`** (21 `z.coerce.boolean()` rendono `?flag=false` uguale a `true` — ogni filtro booleano di
+querystring risponde «tutti») e **`#210`** (`learning_modules` è già misto 77+15, la premessa di
+`#196` è superata altrove).
 
 **S1064 (2026-08-16) — «Le cose che non avevano una porta». L'epica `#99` è CHIUSA, 10/10.**
 

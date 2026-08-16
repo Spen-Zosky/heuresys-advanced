@@ -185,7 +185,8 @@
   - priority: P2 · effort: ~1h (la riparazione a monte) · doc: `docs/kb/tools/handoff_lint.py` (`S4`) · `docs/kb/tools/lab_inbox.py`
   - lab-id: 2026-08-16-il-register-ha-due-identificativi-doppi-e-nessuno-lo-vede
 
-- **#196 Gli indicatori: tutti di piattaforma oggi, ma la prima costruzione ne creerebbe di privati** · status: ACTIVE
+- **#196 Gli indicatori: tutti di piattaforma oggi, ma la prima costruzione ne creerebbe di privati** · status: DONE
+  - ✅ CHIUSA S1066 (`af44401a`): censimento fatto su viste/API/schermate (l'unico caso reale era il conteggio unico di `/kpis`, ora dichiara le due specie), e nel farlo e' emerso che il filtro `isGlobal` MENTIVA — `z.coerce.boolean()` rende `?isGlobal=false` uguale a `true`. Corretto con `_query-boolean.ts`. E2E 101/101, prova live: 199 = 199 di piattaforma + 0 dell'azienda, coerente e dichiarata CIECA sulla seconda specie. Gli altri 20 filtri con lo stesso difetto → **#209**
   - ⚠ PRIMA DI ESEGUIRE: leggi D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md — sequenza, errori gia' trovati, cosa e' gia' verificato (voce #208)
   - priority: P2 · effort: ~30min · doc: inbox lab-id 2026-08-16-indicatori-di-azienda-oppure-di-piattaforma
   - DECISO-da-Enzo-2026-08-16 (E22): gli indicatori di un'azienda NON vengono dal catalogo comune, sono suoi

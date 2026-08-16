@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-16T12:27:35Z da docs/kb/tools/build_index.py
+# generato: 2026-08-16T20:29:23Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-16T12:27:35Z"
-  total_files: 3036
+  generated_at: "2026-08-16T20:29:23Z"
+  total_files: 3052
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,30 +13,30 @@ meta:
     api-module: 335
     ci: 17
     claude-config: 35
-    config: 148
+    config: 153
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 315
+    db-migration: 318
     db-other: 8
     db-script: 42
     db-seed: 114
-    doc-canonical: 653
+    doc-canonical: 658
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 105
+    shared-schema: 106
     showcase-source: 14
-    test: 380
+    test: 382
     ux-design-archive: 80
     web-source: 237
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2478
+    live: 2494
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2888,6 +2888,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\src\atlas-resolver.ts'
+    root: repo
+    rel: 'apps/agent-gateway/src/atlas-resolver.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\src\audit-sink.ts'
     root: repo
     rel: 'apps/agent-gateway/src/audit-sink.ts'
@@ -2945,6 +2951,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\agent-gateway\test\approval-bridge.test.ts'
     root: repo
     rel: 'apps/agent-gateway/test/approval-bridge.test.ts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\test\atlas-resolver.test.ts'
+    root: repo
+    rel: 'apps/agent-gateway/test/atlas-resolver.test.ts'
     category: config
     status: live
     provenance: git-tracked
@@ -3041,6 +3053,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-183.mts'
     root: repo
     rel: 'apps/api/scripts/prova-live-183.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-196.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-196.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-198-t3.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-198-t3.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-199.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-199.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -7634,6 +7664,24 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000318_vista_scostamento_competenze_critiche.sql'
+    root: repo
+    rel: 'db/migrations/000318_vista_scostamento_competenze_critiche.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000319_registro_origine_righe_generate.sql'
+    root: repo
+    rel: 'db/migrations/000319_registro_origine_righe_generate.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000320_sorgente_di_costruzione_della_variante.sql'
+    root: repo
+    rel: 'db/migrations/000320_sorgente_di_costruzione_della_variante.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -8663,6 +8711,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\README.md'
     root: repo
     rel: '.programmi/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\mandato-consegne-lab-2026-08-16.md'
+    root: repo
+    rel: '.programmi/mandato-consegne-lab-2026-08-16.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -9950,6 +10004,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\agent-perimetri.json'
+    root: repo
+    rel: 'docs/kb/agent-perimetri.json'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\atlas\ATLAS.md'
     root: repo
     rel: 'docs/kb/atlas/ATLAS.md'
@@ -9959,6 +10019,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\atlas\ATLAS_CURATED.md'
     root: repo
     rel: 'docs/kb/atlas/ATLAS_CURATED.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\atlas\agent-operations.json'
+    root: repo
+    rel: 'docs/kb/atlas/agent-operations.json'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10448,6 +10514,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\build_agent_operations.py'
+    root: repo
+    rel: 'docs/kb/tools/build_agent_operations.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\build_atlas.py'
     root: repo
     rel: 'docs/kb/tools/build_atlas.py'
@@ -10565,6 +10637,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\chiudi_leggero.py'
     root: repo
     rel: 'docs/kb/tools/chiudi_leggero.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\completezza_tenant.py'
+    root: repo
+    rel: 'docs/kb/tools/completezza_tenant.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -13364,6 +13442,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\_query-boolean.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/_query-boolean.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\activity-classification-mappings.ts'
     root: repo
     rel: 'packages/shared/src/schemas/activity-classification-mappings.ts'
@@ -15491,6 +15575,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\tenant-blueprints.integration.test.ts'
     root: repo
     rel: 'apps/api/test/tenant-blueprints.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\tenant-materialization-processes.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/tenant-materialization-processes.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\tenant-materialization-segnaposto.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/tenant-materialization-segnaposto.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

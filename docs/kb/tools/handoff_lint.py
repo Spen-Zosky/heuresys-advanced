@@ -306,6 +306,26 @@ def check_register(md):
     items = []
     for b in reg:
         items += parse_register_items(b)
+
+    # S4 — un identificativo, una voce. Il cancello non lo guardava, e il 2026-08-16
+    # (#200) il register e' arrivato a portare DUE `#196` e DUE `#198`: l'ingestione
+    # di una consegna del lab aveva creato blocchi di *proposta di aggiornamento*
+    # riusando il numero della voce da aggiornare. Nessuna delle dieci verifiche se
+    # ne accorgeva, e il menu della sessione dopo avrebbe mostrato la stessa voce
+    # due volte con contenuti diversi — cioe' due verita' concorrenti sullo stesso
+    # numero. Trovato a mano leggendo il file, che e' il modo in cui NON si devono
+    # trovare le cose.
+    visti = {}
+    for it in items:
+        m = re.match(r"#(\d+)\b", it["title"])
+        if not m:
+            continue
+        visti.setdefault(m.group(1), []).append(it["title"])
+    for numero, titoli in sorted(visti.items()):
+        if len(titoli) > 1:
+            fail("S4", f"l'identificativo #{numero} apre {len(titoli)} blocchi diversi — "
+                       f"un numero, una voce. Titoli: {titoli}")
+
     for it in items:
         st = it["status"]
         if st not in VALID_STATES:

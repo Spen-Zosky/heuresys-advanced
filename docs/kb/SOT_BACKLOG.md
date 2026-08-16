@@ -12,25 +12,40 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
-- **#196 → aggiornare: da WAIT-INPUT ad ACTIVE, la decisione c'e' (E22)** · status: ACTIVE
+- **#199 E24 — il legame fascicolo↔azienda e' permanente, ma oggi `link-tenant` permette di staccarlo** · status: ACTIVE
+  - priority: P1 · effort: ~20min (una riga di guardia + un codice errore + un test) · doc: inbox lab-id 2026-08-16-e24-il-legame-col-tenant-e-permanente-ma-oggi-no
+  - DECISO-da-Enzo-2026-08-16 (E24): il fascicolo resta legato alla prima azienda, non si stacca
+  - difetto-letto-nel-codice: tenant-blueprints/repository.ts:229-242 fa UPDATE ... SET tenant_blueprint_tenant_id = $2 WHERE tenant_blueprint_id = $1, SENZA condizione sul valore precedente. service.ts:138-152 intercetta solo la violazione di unicita', che protegge l'azienda di DESTINAZIONE, non il fascicolo
+  - conseguenza-concreta: RTL-BANK-CONFIG (APPROVED, legato a RTL_BANK) puo' essere spostato su qualunque azienda senza fascicolo attivo con una sola chiamata, e riesce
+  - gravita': oggi limitata (nessuna riga e' mai stata generata da un fascicolo, niente da orfanare); diventa GRAVE con #198, che al fascicolo aggancia le righe dell'azienda
+  - rimedio: aggiungere `AND tenant_blueprint_tenant_id IS NULL` all'UPDATE (idioma dell'aggiornamento guardato, come applyTenantActivation) + nuovo codice BLUEPRINT_LINK_IS_PERMANENT che dica A QUALE azienda e' gia' legato
+  - non-confondere: BLUEPRINT_TENANT_ALREADY_LINKED (l'azienda di destinazione ha gia' un fascicolo, esiste) e' un caso DIVERSO da BLUEPRINT_LINK_IS_PERMANENT (questo fascicolo e' gia' legato, nuovo). Oggi un client non potrebbe distinguerli
+  - cosa-E24-NON-vieta: trattativa che non va in porto (resta senza azienda, si archivia) · azienda che riparte da un fascicolo nuovo (si archivia il vecchio; l'indice unico parziale conta solo gli ACTIVE) · prima firma di un fascicolo mai legato
+  - prova-che-deve-poter-fallire: legare un fascicolo GIA' legato a una seconda azienda priva di fascicolo -> deve dare BLUEPRINT_LINK_IS_PERMANENT. Se riesce, la guardia non c'e'. Il test va scritto sul caso che oggi PASSA
+  - legame: spec P3 §5.11 e §11.5 (D:\heuresys-design-lab\2026-08-16--epic-tenant-builder-p3-costruzione.md)
+  - chiuso-quando: lo spostamento di un fascicolo gia' legato e' rifiutato, e il test che lo dimostra e' verde
+  - lab-id: 2026-08-16-e24-il-legame-col-tenant-e-permanente-ma-oggi-no
+
+- **#200 Il register aveva due identificativi doppi, e nessuna delle dieci verifiche li guardava** · status: DONE
+  - ✅ **CHIUSA S1065, nello stesso giro in cui è emersa** — e le due sessioni ci sono arrivate **separatamente**: il lab l'ha consegnata mentre la canonica la trovava leggendo il file.
+  - **la causa**: `lab_inbox.py --ingest` emette blocchi di *proposta di aggiornamento* riusando **il numero della voce da aggiornare**. Il register è arrivato a portare due `#196` e due `#198` — cioè due verità concorrenti sullo stesso riferimento, e il menu della sessione dopo le avrebbe mostrate entrambe.
+  - **riparato il dato**: i blocchi-proposta sono stati **fusi** nelle voci vere (il contenuto entra come «aggiornamento dal lab»), non cancellati.
+  - **chiuso il buco nel cancello**: `handoff_lint.py` ha una verifica nuova e bloccante — **`S4`: un identificativo, una voce**. Le dieci precedenti guardavano vocabolario, campi obbligatori, riferimenti pendenti e freschezza dei conteggi; **nessuna guardava i numeri**.
+  - ⚠ **al primo giro `S4` ha trovato un secondo duplicato che nessuno sapeva esistere**: `#4` apriva **due** blocchi — la voce viva `go-to-market` e una storica già chiusa, che riusava il numero da tempo immemorabile. Rinumerata a **`#201`**, con la ragione scritta accanto. È la prova che il controllo non è tautologico: ha visto una cosa che non stavo cercando.
+  - ⚠ **la causa a monte NON è riparata, ed è nominata qui una volta sola**: l'ingestione ri-crea i blocchi-proposta a ogni corsa — l'ho visto succedere **due volte oggi**, dopo averli fusi. `S4` ora lo intercetta al cancello (quindi non passa più in silenzio), ma far sì che `lab_inbox` **fonda invece di duplicare** resta lavoro da fare.
+  - priority: P2 · effort: ~1h (la riparazione a monte) · doc: `docs/kb/tools/handoff_lint.py` (`S4`) · `docs/kb/tools/lab_inbox.py`
+  - lab-id: 2026-08-16-il-register-ha-due-identificativi-doppi-e-nessuno-lo-vede
+
+- **#196 Gli indicatori: tutti di piattaforma oggi, ma la prima costruzione ne creerebbe di privati** · status: WAIT-INPUT
+  - ⬆ **aggiornamento dal lab** (fuso alla chiusura S1065: veniva da un blocco separato che duplicava questo stesso `#196`)
+  - lab-id: 2026-08-16-il-register-ha-due-identificativi-doppi-e-nessuno-lo-vede
+  - ⬆ **aggiornamento dal lab, 2026-08-16** (ingerito alla chiusura S1065; le righe che seguono venivano da un blocco separato che duplicava questo stesso `#196` — fuso qui, perche' due blocchi con lo stesso numero avrebbero prodotto una voce doppia nel menu):
   - DECISO-da-Enzo-2026-08-16 (E22): gli indicatori di un'azienda NON vengono dal catalogo comune, sono suoi
   - conseguenza-sul-codice: NESSUNA — repository.ts:192-197 crea gia' con is_global=false ed e' corretto. La correzione che sembrava ovvia era quella sbagliata
   - lavoro-residuo (non e' piu' «decidere»): censire viste, conteggi e schermate che dicono «gli indicatori» senza distinguere le due specie. Fino a oggi 199 righe TUTTE is_global=true e senza tenant = UNA specie; dalla prima costruzione sono DUE
   - natura-del-rischio: non un errore di calcolo, ma una cifra plausibile che somma due cose diverse
   - urgenza: prima di T9 di #198. Dopo, il numero misto esiste gia' e va riconciliato invece che prevenuto
   - chiuso-quando: le due specie sono dichiarate e nessuna vista le somma senza dirlo
-
-- **#198 → aggiornare: E23 chiude due questioni aperte e ne capovolge una** · status: ACTIVE
-  - DECISO-da-Enzo-2026-08-16 (E23): tante persone segnaposto quante le posizioni contemplate. La numerosita' si esprime MOLTIPLICANDO le posizioni, mai affollando la stessa
-  - misurato-su-RTL-2026-08-16: 158 persone · 158 posizioni attive (su 312 totali, 154 disattivate dalla ricostruzione) · 158 posizioni occupate da assegnazione ACTIVE. Uno a uno, che e' la lettura fedele di I1 position-centric
-  - questione-1-CHIUSA: era «quanti occupanti per posizione»; la domanda vera era «quante posizioni»
-  - questione-2-CAPOVOLTA: non piu' «i due conteggi divergeranno e va mostrato», ma «i segnaposto creati DEVONO coincidere col numero di dipendenti dichiarato nell'identita'». Diventa una verifica, non una spiegazione
-  - conseguenza-su-T3: la disambiguazione dei segnaposto omonimi nella stessa unita' non e' piu' l'eccezione ma la NORMA (tre casse = tre posizioni di cassiere)
-  - conseguenza-su-T9: con l'archetipo attuale i due numeri NON coincideranno (11 posizioni contro 158). La distanza va scritta nel referto: e' la misura di quanto serve P2
-  - spec-gia'-aggiornata: D:\heuresys-design-lab\2026-08-16--epic-tenant-builder-p3-costruzione.md (E22/E23 in tabella, nuova §5.10, §5.3 ampliata, §12 questioni 1-2 decise)
-  - lab-id: 2026-08-16-decisioni-e22-e23-aggiornano-196-e-198
-
-- **#196 Gli indicatori: tutti di piattaforma oggi, ma la prima costruzione ne creerebbe di privati** · status: WAIT-INPUT
   - priority: P2 · effort: ~10min dopo la decisione · doc: inbox lab-id 2026-08-16-indicatori-di-azienda-oppure-di-piattaforma
   - misurato-2026-08-16: sys_kpi_definitions = 199 righe, TUTTE is_global=true e TUTTE senza tenant. Zero definizioni di proprieta' di un'azienda
   - contrasto: tenant-materialization/repository.ts:192-197 crea 4 definizioni RBR-KPI-* con is_global=FALSE e tenant valorizzato — categoria di cui oggi esistono zero esemplari
@@ -56,6 +71,15 @@
   - lab-id: 2026-08-16-marchio-materializzazione-copre-meta-delle-tabelle
 
 - **#198 Tenant Builder P3 — la costruzione tracciata: dal fascicolo all'azienda, ogni riga marcata e riconducibile** · status: ACTIVE
+  - ⬆ **aggiornamento dal lab, 2026-08-16** (ingerito alla chiusura S1065; le righe che seguono venivano da un blocco separato che duplicava questo stesso `#198` — fuso qui, perche' due blocchi con lo stesso numero avrebbero prodotto una voce doppia nel menu):
+  - DECISO-da-Enzo-2026-08-16 (E23): tante persone segnaposto quante le posizioni contemplate. La numerosita' si esprime MOLTIPLICANDO le posizioni, mai affollando la stessa
+  - misurato-su-RTL-2026-08-16: 158 persone · 158 posizioni attive (su 312 totali, 154 disattivate dalla ricostruzione) · 158 posizioni occupate da assegnazione ACTIVE. Uno a uno, che e' la lettura fedele di I1 position-centric
+  - questione-1-CHIUSA: era «quanti occupanti per posizione»; la domanda vera era «quante posizioni»
+  - questione-2-CAPOVOLTA: non piu' «i due conteggi divergeranno e va mostrato», ma «i segnaposto creati DEVONO coincidere col numero di dipendenti dichiarato nell'identita'». Diventa una verifica, non una spiegazione
+  - conseguenza-su-T3: la disambiguazione dei segnaposto omonimi nella stessa unita' non e' piu' l'eccezione ma la NORMA (tre casse = tre posizioni di cassiere)
+  - conseguenza-su-T9: con l'archetipo attuale i due numeri NON coincideranno (11 posizioni contro 158). La distanza va scritta nel referto: e' la misura di quanto serve P2
+  - spec-gia'-aggiornata: D:\heuresys-design-lab\2026-08-16--epic-tenant-builder-p3-costruzione.md (E22/E23 in tabella, nuova §5.10, §5.3 ampliata, §12 questioni 1-2 decise)
+  - lab-id: 2026-08-16-decisioni-e22-e23-aggiornano-196-e-198
   - priority: P1 · effort: ~2 sessioni · doc: inbox lab-id 2026-08-16-tenant-builder-p3-costruzione-tracciata
   - spec: D:\heuresys-design-lab\2026-08-16--epic-tenant-builder-p3-costruzione.md · piano 9 task: D:\heuresys-design-lab\2026-08-16--piano-implementazione-p3-costruzione.md
   - dipende-da: #131 (P1, DONE). NON dipende da #132 (P2a) per decisione E21 di Enzo: prima il motore, la ricerca come sorgente dopo
@@ -1152,7 +1176,8 @@
 - **#23 Personal area /me — portale legacy → navtab (programma S1010-S1011)** · status: DONE
   - priority: P1 · effort: chiuso · doc: SOT_STATE Delta S1010+S1011
   - note: ✅ **DONE S1011** — programma completo, tutto LIVE in prod. `/me/profile` a tab Panoramica/Organizzazione/Contratti/**Cedolini**/Documenti (7 satelliti persona + `sys_user_pay_slips` mig 000164-167) · My HR `/me` a sub-tab Riepilogo/Performance/Presenze · **`/me/career`** 3 sub-tab Obiettivi/Percorsi/Rischio&Successione (backfill goals 632 + `goal:read:self`) · **F5** completa la Personal area: **/me/analytics** (attendance-trend + KPI), **/me/org-chart** (ORG_CHART live + highlight nodo proprio), **/me/approvals** (track-only, empty-state reale) — mig 000168 (3 nav PERSONAL + `approval:read:self`). Decisione IA **Ibrido** (Enzo); approvals **track-only** (Enzo, no submission). `ProfileTabs` riusabile. integration + Playwright verdi per fase; deploy VM + live www verificati (route 401, pagine 307). Residuo evoluzione (submission ferie/permessi) = decisione di prodotto futura, non aperta.
-- **#4 GTM v1-deferrals (follow-up del primo deliverable)** · status: DONE
+- **#201 GTM v1-deferrals (follow-up del primo deliverable)** · status: DONE
+  - ⚠ **rinumerata da `#4` a `#201` alla chiusura S1065**: portava lo stesso identificativo della voce viva `#4 go-to-market`, e due blocchi con lo stesso numero sono due verità concorrenti sullo stesso riferimento. Il duplicato era lì da tempo e **nessuno lo vedeva**: l'ha trovato il controllo `S4` scritto oggi (→ `#200`), al primo giro. Questa è terminale, quindi la rinumerazione non tocca nulla di vivo; i rimandi storici a «#4 deferrals» vanno letti qui.
   - priority: P2 · effort: ~0.5-1 sessione · doc: docs/superpowers/specs/2026-06-22-gtm-investor-onepager-and-guided-demo-design.md
   - note: riattivato S1018 su scelta Enzo (trigger sciolto): lead-management admin UI + status-filter + PATCH status · honeypot-trip observability · `/privacy` full page reale IT/EN · landing a11y audit (Lighthouse ≥95 su `/`, `/investors`, `/demo`, `/login`). Wave W4 programma S1018.
   - closed: S1041 (2026-08-03) — tutti e quattro. Gestione lead (perm `leads:update` + PATCH + pagina + filtro, mig **000232**; solo lo STATO e' modificabile: il consenso vale sui valori dichiarati dalla persona) · honeypot osservabile (`honeypot_trips_total{surface}`, contatore e non log — su un sito esposto conta l'andamento; coperte lead **e** whistleblowing) · informativa art.13 completa IT/EN. **Scoperta**: l'informativa prometteva 24 mesi ma `sys_leads` **non era nel registro GDPR**, quindi nessuna sweep la toccava — promessa senza meccanismo, corretta con mig **000233** (730 giorni, la finestra gia' dichiarata) e provata LIVE col dry-run che ora include `sys.sys_leads`. a11y pubbliche con **axe-core** invece di Lighthouse (gia' in casa, deterministico, asticella piu' alta: zero critical **e** serious) su `/`, `/investors`, `/demo`, `/login`, `/privacy`. **Chiuso anche l'ultimo punto** (2026-08-03): Enzo ha indicato Milano/UE e la regione e' stata **verificata sui metadati dell'istanza** (`region: eu-milan-1`, AD `EU-MILAN-1-AD-1`) invece di essere scritta su un'indicazione — e' un documento legale. Aggiunta la sezione «Ubicazione dei dati e trasferimenti»: trattamento interamente nell'UE, nessun trasferimento verso Paesi terzi, backup in Italia. L'E2E asserisce la presenza della regione, cosi' un cambio di infrastruttura non puo' lasciare il testo indietro in silenzio. Esito: `docs/superpowers/specs/2026-08-02-p2-batch-execution-plan.md` §P2-10.

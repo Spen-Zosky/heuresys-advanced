@@ -3,10 +3,9 @@
 **Updated**: 2026-08-16 (S1065).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-⚠ **Prima di lavorare su `#196` `#197` `#198` `#199`** (Tenant Builder P3 e ciò che le sta attorno):
-leggi `D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md`. Sono
-**un corpo solo**, non quattro voci indipendenti: contiene la sequenza con le sue ragioni, gli errori
-già trovati, cosa è già verificato e come, e cosa non fare. Voce `#208` nel register.
+⚠ **`#196` `#197` `#198` `#199` sono un corpo solo, non quattro voci**: prima di lavorarci leggi
+`D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md` — sequenza,
+errori già trovati, cosa è già verificato, cosa non fare (voce `#208`).
 
 ## Last session brief (S1065 «Tre decisioni, e ognuna ha aperto una porta che non era quella»)
 
@@ -20,15 +19,13 @@ valutazione è aperto in produzione con il login di chi ha il mandato HR, e **la
 bozza**: dichiarare aperta l'autovalutazione senza la schermata sarebbe un segnaposto.
 
 **Il filo è che le prove hanno vinto contro di me cinque volte** — prova generale, un test già
-esistente, e due CI rosse di cui **una aveva torto**: era un oracolo che duplica la logica del
-servizio e accusava il prodotto. **E un cancello scritto stamattina si è attivato contro chi
-l'ha scritto**: l'atlante superato di nove giorni, meccanizzato su direzione di Enzo, mi ha
-fermato due ore dopo. Dettaglio nel register (`#193` · `#156` · `#195`).
+esistente, e due CI rosse di cui **una aveva torto** (un oracolo che duplica la logica del servizio
+e accusava il prodotto). E un cancello scritto quella mattina ha fermato chi l'aveva scritto:
+l'atlante superato di nove giorni. Dettaglio nel register (`#193` · `#156` · `#195`).
 
 ⚠ **Una regressione in produzione, causata e riparata in pochi minuti**: il cancello di verifica
-applica le migrazioni, e ha portato la `000317` in produzione mentre girava ancora il codice
-vecchio. Misurata con un login reale — 117 persone senza l'organigramma — rimossa la riga,
-ri-misurato, ripristinato. Torna col deploy, che porta anche il codice.
+applica le migrazioni, e ha portato la `000317` in produzione col codice ancora vecchio — 117
+persone senza organigramma, misurate con un login reale. Rimossa, ri-misurata, ripristinata.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -44,8 +41,7 @@ adversarial; le decisioni tecniche sono di Claude.
    obiettivo, date né avanzamento · `.programmi/143-squadra-come-progetto.md`
 3. **`#159` F2 — il ponte gateway↔pagine web** (nessuna migrazione)
 
-*(dietro, e pronte: `#156` collegare `hrx_entity_query` — resolver fatto, resta l'allowlist; e
-l'**autovalutazione** di `#92`, che il ciclo in bozza rende dimostrabile.)*
+*(dietro, e pronte: `#156` collegare `hrx_entity_query` — resta l'allowlist; e l'**autovalutazione** di `#92`.)*
 
 ## Open questions
 
@@ -55,9 +51,8 @@ l'**autovalutazione** di `#92`, che il ciclo in bozza rende dimostrabile.)*
   dell'autovalutazione esiste.
 - **`/users` è governata al contrario di `/organization`** (`requires_admin=true`) sulla stessa
   materia: dopo `#193` la contraddizione è più visibile — è la stessa domanda, per i colleghi.
-- ~~`#193` organigramma~~ e ~~`#156` primo perimetro~~: **decise il 2026-08-16**.
 - **`#169`** separare password e secondo fattore (l'esenzione MFA esiste già, vuota: è la strada)
-  · **`D-69`** riapertura verificata, nessuna urgenza.
+  · **`D-69`** riapertura verificata, nessuna urgenza. *(`#193` e `#156`: decise il 2026-08-16.)*
 
 ## Verification
 

@@ -193,10 +193,21 @@ export function listArchetypes(): Archetype[] {
   return Object.values(ARCHETYPES);
 }
 
-/* --- slice-2a: synthetic incumbents ---------------------------------------- */
-// Fixed name pools → deterministic synthetic identities (no Faker dependency at request time).
-const SYN_FIRST = ["Marco", "Giulia", "Luca", "Sofia", "Andrea", "Chiara", "Matteo", "Elena", "Davide", "Francesca", "Stefano", "Alessia"];
-const SYN_LAST = ["Rossi", "Bianchi", "Ferrari", "Russo", "Esposito", "Romano", "Colombo", "Ricci", "Marino", "Greco", "Bruno", "Gallo"];
+/* --- slice-2a: incumbent segnaposto ----------------------------------------- */
+// E17 (#198 P3/T3) — i segnaposto PARLANO: dicono il posto che occupano, non un
+// nome di fantasia.
+//
+// Le due liste di nomi propri italiani che stavano qui (SYN_FIRST/SYN_LAST) sono
+// state RIMOSSE. Producevano «Marco Rossi», «Giulia Bianchi»: identita' che in un
+// elenco di persone non si distinguono da quelle vere, e che nessun filtro riesce a
+// separare a occhio. Il nome era anche l'unica cosa che quelle righe NON potevano
+// dire di utile, visto che l'informazione vera — quale casella e' scoperta — c'era
+// gia' e veniva buttata.
+//
+// Adesso: nome = il ruolo (dal titolo della posizione), cognome = l'unita' che la
+// contiene. «Teller (Milano)» diventa `Teller · Milano Branch`. Restano invariati
+// `user_type = 'GENERATED_INCUMBENT'`, `user_external_code = 'SYN_' || codice`, e
+// l'email sul dominio `.synthetic.example`.
 
 export interface ArchetypeUser {
   externalCode: string; // SYN_<positionCode> — NEVER LEGACY_EMP:: (the brownfield real-person key, I14/ADR-0024)
@@ -210,17 +221,55 @@ export interface ArchetypeUser {
 /** One GENERATED_INCUMBENT placeholder incumbent per archetype position (slice-2a). Deterministic:
  *  name from the fixed pools by position index; email keyed on the unique position code (→ unique
  *  per tenant via sys_users_tenant_email_uq); a clearly-synthetic reserved .example domain. */
+/**
+ * Il ruolo, ripulito dalla qualificazione di sede: «Teller (Milano)» → «Teller».
+ * La sede la dice gia' il cognome, che e' l'unita': ripeterla darebbe
+ * «Teller (Milano) · Milano Branch».
+ */
+function ruoloDa(titolo: string): string {
+  return titolo.replace(/\s*\([^)]*\)\s*$/, "").trim() || titolo.trim();
+}
+
+/**
+ * I segnaposto di un archetipo, uno per posizione (E17 + E23).
+ *
+ * **La disambiguazione e' il percorso NORMALE, non un ramo raro.** E23 dice che la
+ * numerosita' si esprime moltiplicando le posizioni: una filiale con tre casse ha
+ * tre posizioni di cassiere, quindi tre segnaposto che produrrebbero la stessa
+ * coppia ruolo+unita'. E' come RTL e' fatto davvero (158 persone · 158 posizioni ·
+ * 158 occupate, uno a uno).
+ *
+ * Quando la coppia si ripete, l'ordinale va su **TUTTI** i gemelli, mai solo dal
+ * secondo in poi: «Teller · Milano Branch» accanto a «Teller 2 · Milano Branch»
+ * suggerirebbe che il primo sia piu' importante, e non lo e'. O sono tutti
+ * numerati, o nessuno.
+ */
 export function archetypeUsers(a: Archetype): ArchetypeUser[] {
   const slug = a.key.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  return a.positions.map((p, i) => {
-    const firstName = SYN_FIRST[i % SYN_FIRST.length]!;
-    const lastName = SYN_LAST[i % SYN_LAST.length]!;
+  const nomeUnita = new Map(a.orgUnits.map((u) => [u.code, u.name]));
+
+  // Prima passata: quante posizioni producono la stessa coppia ruolo+unita'?
+  const quante = new Map<string, number>();
+  for (const p of a.positions) {
+    const k = `${ruoloDa(p.title)}·${p.orgUnitCode}`;
+    quante.set(k, (quante.get(k) ?? 0) + 1);
+  }
+
+  const progressivo = new Map<string, number>();
+  return a.positions.map((p) => {
+    const ruolo = ruoloDa(p.title);
+    const unita = nomeUnita.get(p.orgUnitCode) ?? p.orgUnitCode;
+    const k = `${ruolo}·${p.orgUnitCode}`;
+    const n = (progressivo.get(k) ?? 0) + 1;
+    progressivo.set(k, n);
+    // Se i gemelli sono piu' di uno, l'ordinale lo portano tutti — anche il primo.
+    const firstName = (quante.get(k) ?? 1) > 1 ? `${ruolo} ${n}` : ruolo;
     return {
       externalCode: `SYN_${p.code}`,
       email: `syn.${p.code.toLowerCase()}@${slug}.synthetic.example`,
       firstName,
-      lastName,
-      displayName: `${firstName} ${lastName}`,
+      lastName: unita,
+      displayName: `${firstName} · ${unita}`,
       positionCode: p.code,
     };
   });

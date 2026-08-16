@@ -17,12 +17,12 @@ censimento a mano in un file fuori dal repo. Ora sono tre cancelli — e un quar
 ore dopo, il buco che l'epica aveva lasciato **dichiarato**: non era «una voce nuova potrebbe
 sfuggire», era il **60% delle resource** che nessuno guardava.
 
-**Due volte la prova mi ha dato torto, ed è il motivo per cui era costruita così.** La prova
-generale ha respinto la migrazione dei cruscotti **tre volte** — un mio conteggio sbagliato, una
-post-condizione di un file precedente, e un grant a tappeto che regala ogni permesso nuovo a
-`PLATFORM_ADMIN` a ogni deploy. L'E2E nuovo è andato rosso al primo giro su una persona vera, e
-la misura ha detto che la correzione ovvia avrebbe tolto l'organigramma a 117 persone su 161:
-non l'ho fatta, è una decisione di prodotto ed è tua (`#193`).
+**Ogni volta che la prova mi ha dato torto, aveva ragione lei.** La prova generale ha respinto
+la migrazione dei cruscotti più volte; l'E2E è andato rosso su una persona vera e ha prodotto
+`#193`, che è tua; la prova **live** di `#142` F3a ha trovato ciò che i test non vedevano
+perché uno era **tautologico**; `#194` è la stessa lezione al rovescio — uno strumento che
+dichiarava rotta una produzione sana, corretto due volte perché il primo rimedio toglieva la
+causa sistematica ma non i transitori. Sessione fermata da Enzo, tutto in produzione.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 

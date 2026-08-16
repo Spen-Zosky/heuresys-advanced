@@ -16,7 +16,7 @@ dei cruscotti, `#142` F2): utenti **161** · posizioni **315** · tenant ACTIVE 
 RBAC **14 ruoli / 224 permessi / 975 mapping** (+7 permessi e +16 concessioni dei cruscotti,
 +5 raccolti dal tappeto di `000005` su `PLATFORM_ADMIN`) · skill **14.039** · migration su
 disco **314** (max `000316`) · sentinelle **18** (+`v_dashboard_class_drift`) · test API
-**250 file** · spec E2E **99** · HEAD `d0ff6033`.
+**250 file** · spec E2E **99** · HEAD `a1efb1b0`.
 
 **S1064 (2026-08-16) — «Le cose che non avevano una porta». L'epica `#99` è CHIUSA, 10/10.**
 

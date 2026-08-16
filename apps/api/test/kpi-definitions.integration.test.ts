@@ -128,4 +128,52 @@ describe("/v1/kpi-definitions/* integration", () => {
     expect(dup.statusCode).toBe(409);
     expect((dup.json() as { error: { code: string } }).error.code).toBe("KPI_CODE_CONFLICT");
   });
+
+  /**
+   * #196 / E22 — le due specie di indicatori devono essere distinguibili CHIEDENDOLO.
+   *
+   * Il filtro c'era già ma mentiva: `z.coerce.boolean()` applica `Boolean(v)`, e da
+   * una querystring `v` è la stringa `"false"` — che è truthy. Quindi
+   * `?isGlobal=false` filtrava i GLOBALI, cioè l'esatto contrario, e la lista
+   * rispondeva «tutti» a qualunque richiesta. Un filtro che non sa dire di no non
+   * è un filtro.
+   *
+   * Il caso è costruito su due indicatori VERI creati qui — uno per specie — e non
+   * sui conteggi del catalogo, che cambiano. Le tre domande devono dare tre
+   * risposte diverse, o una delle tre sta mentendo.
+   */
+  it("#196 — il filtro isGlobal distingue le due specie, e `false` non vuol dire `true`", async () => {
+    const codeT = `${SUITE_PREFIX}_SPECIE_AZIENDA`;
+    const codeG = `${SUITE_PREFIX}_SPECIE_PIATTAFORMA`;
+    for (const [sess, code, nome] of [
+      [tenantS, codeT, "Indicatore dell'azienda"],
+      [platformS, codeG, "Indicatore di piattaforma"],
+    ] as const) {
+      const r = await suite.app.inject({
+        method: "POST", url: "/v1/kpi-definitions",
+        headers: { cookie: ch(sess.cookies), "x-csrf-token": sess.csrfToken, "content-type": "application/json" },
+        payload: { code, name: nome, ...(code === codeG ? { isGlobal: true } : {}) },
+      });
+      expect(`${code} → ${r.statusCode}`).toBe(`${code} → 201`);
+      createdIds.push((r.json() as { kpiDefinitionId: string }).kpiDefinitionId);
+    }
+
+    const codici = async (q: string): Promise<string[]> => {
+      const r = await suite.app.inject({
+        method: "GET", url: `/v1/kpi-definitions?limit=200&search=${SUITE_PREFIX}_SPECIE&${q}`,
+        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
+      });
+      expect(r.statusCode).toBe(200);
+      return (r.json() as { items: Array<{ code: string }> }).items.map((i) => i.code).sort();
+    };
+
+    // senza filtro: entrambe. È l'universo del caso — se qui ne mancasse una, i due
+    // controlli che seguono sarebbero ciechi invece che superati.
+    expect(await codici("")).toEqual([codeG, codeT].sort());
+    // `true` → solo quello di piattaforma
+    expect(await codici("isGlobal=true")).toEqual([codeG]);
+    // `false` → solo quello dell'azienda. È la riga che prima era rossa: rispondeva
+    // come `true`, restituendo l'indicatore sbagliato.
+    expect(await codici("isGlobal=false")).toEqual([codeT]);
+  });
 });

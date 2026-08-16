@@ -71,7 +71,7 @@
   "kpis": {
     "title": "KPI Catalogue",
     "description": "Defined KPIs, with unit, polarity and scope.",
-    "count": "{{count}} KPIs defined",
+    "count": "{{count}} KPIs defined — {{piattaforma}} platform, {{azienda}} company",
     "errorMessage": "Unable to load the KPIs.",
     "emptyTitle": "No KPIs",
     "emptyDescription": "There are no KPIs defined.",

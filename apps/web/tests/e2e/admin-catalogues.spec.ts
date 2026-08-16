@@ -54,7 +54,13 @@ test.describe("MVP-2a admin catalogues — live data", () => {
     test("/kpis shows KPI definitions", async ({ page }) => {
       await page.goto("/kpis");
       await expect(page.getByTestId("kpis-page")).toBeVisible();
-      await expect(page.getByTestId("kpis-count")).toContainText(/\d+\s+KPI/);
+      // #196 / E22 — il conteggio deve dire DI CHE COSA parla: un indicatore è di
+      // piattaforma (catalogo comune) o dell'azienda, e un numero unico somma due
+      // specie senza dichiararlo. Il vecchio /\d+\s+KPI/ resterebbe verde anche
+      // dopo un ritorno indietro, perché quella parte della frase non cambia.
+      await expect(page.getByTestId("kpis-count")).toContainText(
+        /\d+\s+KPIs?\s+(definiti|defined)\s+—\s+\d+\s+(di piattaforma|platform),\s+\d+\s+(dell'azienda|company)/,
+      );
     });
 
     test("/learning shows learning modules catalogue", async ({ page }) => {

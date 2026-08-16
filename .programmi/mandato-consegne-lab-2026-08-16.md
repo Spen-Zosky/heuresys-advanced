@@ -90,6 +90,7 @@ Chiusura anticipata obbligatoria: contesto ≥ 75% **oppure** finestra 5h ≥ 80
 
 ## Registro delle scoperte fuori ciclo (R24 §5 — si presentano una volta sola)
 
-| Scoperta | Dove | Presentata |
+| Scoperta | Misura | Presentata |
 |---|---|---|
-| *(vuoto all'apertura)* | | |
+| **`z.coerce.boolean()` rende ogni filtro booleano di querystring una bugia**: `Boolean("false")` è `true`, quindi `?isGlobal=false` filtrava i globali — l'esatto contrario. **21 occorrenze in 19 file** di `packages/shared/src/schemas/`. Corretta **solo** `kpi-definitions` (serviva a `#196`); le altre 20 no | provata in isolamento: `"false"→true`, `"0"→true`, `""→false` · trovata dalla prova live di `#196`, che si sentiva rispondere «199 indicatori dell'azienda» su 199 tutte di piattaforma | **da presentare a Enzo** |
+| **Le due specie convivono GIÀ, e non negli indicatori**: `learning_modules` ha 92 righe = 77 di piattaforma + **15 dell'azienda**, e `learning/page.tsx` mostra un conteggio unico esattamente come faceva `/kpis`. `career_paths` (7) e `learning_paths` (72) sono **tutte** di azienda. La premessa di `#196` («dalla prima costruzione saranno due specie») è vera per gli indicatori e **già superata** altrove | misurata sul database, 2026-08-16 sera | **da presentare a Enzo** |

@@ -71,7 +71,7 @@
   "kpis": {
     "title": "Catalogo KPI",
     "description": "KPI definiti, con unità, polarità e scope.",
-    "count": "{{count}} KPI definiti",
+    "count": "{{count}} KPI definiti — {{piattaforma}} di piattaforma, {{azienda}} dell'azienda",
     "errorMessage": "Impossibile caricare i KPI.",
     "emptyTitle": "Nessun KPI",
     "emptyDescription": "Non ci sono KPI definiti.",

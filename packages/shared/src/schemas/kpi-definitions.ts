@@ -7,6 +7,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 export const KPI_POLARITY_VALUES = ["HIGHER_IS_BETTER", "LOWER_IS_BETTER", "TARGET_RANGE"] as const;
 /** Esportato come i pari (UserStatus, PositionCriticality, JobRoleSeniority):
  *  apps/web importa TIPI, non valori. */
@@ -30,7 +31,11 @@ export const KpiDefinitionSchema = z.object({
 export type KpiDefinition = z.infer<typeof KpiDefinitionSchema>;
 
 export const KpiDefinitionListQuerySchema = z.object({
-  isGlobal: z.coerce.boolean().optional(),
+  // #196 — `z.coerce.boolean()` rendeva `?isGlobal=false` equivalente a `true`
+  // (`Boolean("false")` e' `true`), quindi il filtro faceva il contrario di quello
+  // che diceva. Le due specie di indicatori non erano distinguibili nemmeno
+  // chiedendolo. → `_query-boolean.ts`
+  isGlobal: queryBoolean().optional(),
   polarity: KpiPolaritySchema.optional(),
   search: z.string().min(1).max(255).optional(),
   ...paginationFields(200, 50),

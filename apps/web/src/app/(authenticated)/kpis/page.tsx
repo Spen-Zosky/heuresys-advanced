@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { Button, Input } from "@heuresys/ui";
 import type { KpiDefinition } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
+import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
@@ -55,6 +57,21 @@ export default function KpisCataloguePage() {
     path: "/v1/kpi-definitions",
     params: { search: cerca.trim() },
   });
+  // #196 / E22 — le due specie di indicatori non si sommano in silenzio.
+  // Un indicatore puo' essere DI PIATTAFORMA (catalogo comune, confrontabile) o
+  // DELL'AZIENDA (E22: quelli di un'azienda sono suoi). Sono cose diverse, e un
+  // numero unico ne darebbe una cifra plausibile che le somma: non un errore di
+  // calcolo, ma una misura che non dice di che cosa parla. Finche' nessuna azienda
+  // e' stata costruita da un fascicolo la seconda specie ha zero esemplari, quindi
+  // il caso e' CIECO oggi e va letto sapendolo — non «a posto».
+  // Costa una riga: `limit=1`, si legge solo `total`.
+  const proprie = useQuery({
+    queryKey: ["kpi-definitions", "conteggio-azienda", cerca.trim()],
+    queryFn: () =>
+      apiFetch<{ total: number }>(
+        `/v1/kpi-definitions?isGlobal=false&limit=1${cerca.trim() ? `&search=${encodeURIComponent(cerca.trim())}` : ""}`,
+      ),
+  });
 
   return (
     <DataTablePanel<KpiDefinition>
@@ -63,7 +80,15 @@ export default function KpisCataloguePage() {
       countTestId="kpis-count"
       title={t("kpis.title")}
       description={t("kpis.description")}
-      count={kpis.query.data ? t("kpis.count", { count: kpis.total }) : undefined}
+      count={
+        kpis.query.data && proprie.data
+          ? t("kpis.count", {
+              count: kpis.total,
+              piattaforma: kpis.total - proprie.data.total,
+              azienda: proprie.data.total,
+            })
+          : undefined
+      }
       isLoading={kpis.query.isLoading}
       isError={kpis.query.isError}
       errorMessage={t("kpis.errorMessage")}

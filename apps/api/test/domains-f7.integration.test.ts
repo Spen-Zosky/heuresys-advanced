@@ -29,7 +29,13 @@ import { M1, classiMascherateDa, almenoUnaCellaAperta } from "../src/lib/scope/m
 import { dominiCheApronoUnaSuperficie } from "../src/lib/scope/domains.js";
 import { HR_MANDATED_ROLES } from "../src/lib/scope/resolver.js";
 import { MASKED_UNDER_PLATFORM_MANDATE } from "../src/lib/scope/mask.js";
-import { RESOURCE_DATA_CLASS, type DataClass } from "../src/lib/scope/data-classes.js";
+import {
+  RESOURCE_DATA_CLASS,
+  RESOURCE_MULTICLASSE,
+  RESOURCE_SENZA_DATI_DI_PERSONA,
+  RESOURCE_DA_DECIDERE,
+  type DataClass,
+} from "../src/lib/scope/data-classes.js";
 import type { RoleCode } from "../src/config/constants.js";
 
 interface Persona {
@@ -253,11 +259,63 @@ describe("#99 F7 — la voce di menu discende dalla matrice", () => {
     const mancanti: string[] = [];
     for (const r of rows) {
       const attesa = RESOURCE_DATA_CLASS[r.resource];
-      if (attesa === undefined) continue; // resource non person-level: nessun obbligo
+      if (attesa === undefined) continue; // trattata dal cancello di completezza, sotto
       if (!(r.classi ?? []).includes(attesa)) mancanti.push(`${r.code} (${r.resource} → ${attesa})`);
     }
     expect(mancanti,
       "queste voci hanno una resource person-level e non dichiarano la sua classe",
+    ).toEqual([]);
+  });
+
+  it("NESSUNA resource passa in silenzio: ognuna sta in uno dei tre elenchi", async () => {
+    // ⚠ IL BUCO DICHIARATO DA F7, MISURATO E CHIUSO (S1064). La riga sopra saltava con un
+    // `continue` ogni resource assente da `RESOURCE_DATA_CLASS`, e il commento la chiamava
+    // «non person-level» — ma nessuno lo aveva verificato. Misurato il 2026-08-16: le
+    // resource di voci attive erano **32** e quelle non classificate **19**. Il cancello non
+    // guardava il **60%** della superficie. Non era «una voce nuova rischia di sfuggire»:
+    // sfuggiva la maggioranza di quelle esistenti, e fra loro `organization_unit`, cioè
+    // esattamente il caso che l'E2E di F8b ha poi trovato a mano.
+    const { rows } = await pool.query<{ resource: string; voci: string; classi: string[] | null }>(
+      `SELECT i.ui_interface_required_resource AS resource,
+              string_agg(DISTINCT i.ui_interface_code, ', ' ORDER BY i.ui_interface_code) AS voci,
+              array_agg(DISTINCT dc.data_class) FILTER (WHERE dc.data_class IS NOT NULL) AS classi
+         FROM sys.sys_ui_interfaces i
+         LEFT JOIN sys.sys_ui_interface_data_classes dc ON dc.ui_interface_id = i.ui_interface_id
+        WHERE i.ui_interface_is_active
+          AND i.ui_interface_required_resource IS NOT NULL
+          AND i.ui_interface_perspective <> 'PERSONAL'
+        GROUP BY 1`,
+    );
+    expect(rows.length, "nessuna resource letta: la prova non misurerebbe nulla").toBeGreaterThan(10);
+
+    const senzaDecisione = rows
+      .filter((r) => RESOURCE_DATA_CLASS[r.resource] === undefined
+        && RESOURCE_MULTICLASSE[r.resource] === undefined
+        && RESOURCE_SENZA_DATI_DI_PERSONA[r.resource] === undefined
+        && RESOURCE_DA_DECIDERE[r.resource] === undefined)
+      .map((r) => `${r.resource} (voci: ${r.voci})`);
+    expect(senzaDecisione,
+      "queste resource non stanno in nessuno dei tre elenchi di `data-classes.ts`: decidile "
+      + "— person-level, multiclasse, o senza dati di persona con la ragione scritta",
+    ).toEqual([]);
+
+    // Una resource MULTICLASSE deve dichiarare almeno una classe su ogni sua voce, o la
+    // dichiarazione «le classi le sceglie la voce» è vuota.
+    const multiSenzaClassi = rows
+      .filter((r) => RESOURCE_MULTICLASSE[r.resource] !== undefined && (r.classi ?? []).length === 0)
+      .map((r) => `${r.resource} (voci: ${r.voci})`);
+    expect(multiSenzaClassi,
+      "dichiarate multiclasse ma nessuna delle loro voci dichiara una classe",
+    ).toEqual([]);
+
+    // ...e il verso opposto, che è quello che smaschera una riga diventata bugia: una resource
+    // dichiarata SENZA dati di persona le cui voci dichiarano invece una classe.
+    const contraddittorie = rows
+      .filter((r) => RESOURCE_SENZA_DATI_DI_PERSONA[r.resource] !== undefined
+        && (r.classi ?? []).length > 0)
+      .map((r) => `${r.resource} dichiara ${(r.classi ?? []).join(",")} (voci: ${r.voci})`);
+    expect(contraddittorie,
+      "dichiarate «non mostrano persone» ma le loro voci dichiarano una classe di persona",
     ).toEqual([]);
   });
 

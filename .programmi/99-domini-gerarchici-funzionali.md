@@ -66,8 +66,17 @@ dell'utente** con cinque login reali.
 - **`#193` (WAIT-INPUT)** — l'organigramma aziendale non dichiara di mostrare persone.
   Correggerlo lo toglierebbe a **117 utenti su 161**: è una decisione di prodotto di Enzo,
   trovata dall'E2E di F8b e registrata invece di essere presa di mia iniziativa.
-- **il buco noto di F7, invariato**: una voce nuova la cui *resource* non è classificata
-  person-level sfugge al cancello e torna al solo RBAC, in silenzio. È dichiarato, non risolto.
+- ~~il buco noto di F7~~ → **CHIUSO il 2026-08-16, poche ore dopo la chiusura dell'epica.**
+  Era descritto come «una voce **nuova** potrebbe sfuggire»; misurato, era molto peggio: le
+  resource di voci attive erano **32** e quelle che il cancello saltava con un `continue`
+  **19** — il **60% della superficie** non era guardato, e fra le non guardate c'era
+  `organization_unit`, cioè proprio il caso che l'E2E di F8b ha poi trovato a mano. Ora ogni
+  resource deve stare in uno dei **tre elenchi** di `data-classes.ts` — person-level ·
+  multiclasse (le sue voci dichiarano le proprie) · senza dati di persona **con la ragione
+  scritta** — più un quarto elenco per il dubbio **dichiarato e numerato** (`organization_unit`
+  → `#193`). Il cancello controlla anche il **verso opposto**: una resource dichiarata «non
+  mostra persone» le cui voci dichiarano una classe è una riga diventata bugia. Visto rosso
+  togliendo una dichiarazione: nomina la resource e le sue pagine.
 
 **Il numero che riassume l'epica**, misurato e non stimato: la sidebar di ogni persona non
 dipende più da alcuna lista di nomi di ruolo. Le liste erano **sei**; l'ultima — `highestRoleLabel`

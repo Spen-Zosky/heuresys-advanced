@@ -75,6 +75,67 @@ export const SENSITIVE_DATA_CLASSES: ReadonlySet<DataClass> = new Set<DataClass>
  * `mentorship` → PERSONAL — all RISERVATI. `engagement_feedback` + `surveys` (feedback/clima) stay
  * UNMAPPED → NORMAL (Enzo: often anonymous/aggregated by policy, not org-gated).
  */
+/**
+ * Le resource che espongono PIÙ classi, e le cui pagine le dichiarano una per una (#99 F8, S1064).
+ *
+ * `RESOURCE_DATA_CLASS` associa **una** classe a una resource, e per la maggior parte basta.
+ * Non basta quando la stessa resource regge pagine con contenuti diversi: le cinque
+ * `analytics-*` condividono `analytics` ed espongono quattro classi diverse — è il caso che
+ * la mig. `000315` cita come ragione per cui la classe **non si deriva dal permesso**.
+ * Per queste l'obbligo non è «dichiara QUELLA classe» ma «dichiarane almeno una»: la scelta
+ * sta sulla voce, dove il contenuto è noto.
+ */
+export const RESOURCE_MULTICLASSE: Readonly<Record<string, string>> = {
+  analytics: "cinque pagine, quattro classi diverse (organico, presenze, competenze, retribuzioni, KPI)",
+  dashboard: "il cruscotto aggrega organico, formazione e attività: tre classi in una pagina",
+  process_owner: "la console dei processi mostra lavoro, non persone — ma lo dichiara lei",
+};
+
+/**
+ * Le resource che NON espongono dati di persona, ognuna con la sua ragione (#99 F8, S1064).
+ *
+ * PERCHÉ ESISTE, ed è un buco misurato e non teorico. Il cancello di F7 saltava in silenzio
+ * ogni resource assente da `RESOURCE_DATA_CLASS` (`if (attesa === undefined) continue`). Il
+ * 2026-08-16 le resource di voci attive erano **32** e quelle non classificate **19**: il
+ * cancello non guardava il **60%** della superficie, e nessuno poteva accorgersene. Una voce
+ * nuova non «rischiava» di sfuggire — sfuggiva la maggioranza di quelle esistenti.
+ *
+ * Ora ogni resource deve stare in uno dei tre elenchi, o il cancello è rosso. Una riga qui è
+ * un'AFFERMAZIONE («questa pagina non mostra persone»), non un'esenzione: se un domani quella
+ * pagina cominciasse a mostrarle, la riga diventerebbe una bugia scritta col proprio nome.
+ */
+export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = {
+  blueprint: "modelli organizzativi: struttura, non persone",
+  tenant_blueprint: "il fascicolo di configurazione di un tenant",
+  bpm_process: "definizioni di processo",
+  job_role: "catalogo delle mansioni — la mansione è un posto, non chi lo occupa",
+  role: "ruoli RBAC: il permesso, non il titolare",
+  mfa_policy: "una politica di tenant è configurazione (misurato in 000315: dichiararla CREDENTIAL toglieva la pagina ai due TENANT_ADMIN reali)",
+  tenant: "configurazione del tenant e salute di sistema",
+  seed_acquisition: "corse tecniche di acquisizione",
+  provenance: "tracciabilità dei dati: da dove vengono, non di chi sono",
+  content: "contenuti editoriali",
+  visualization: "grafici salvati",
+  leads: "contatti commerciali esterni: non sono la forza lavoro del tenant, e la tassonomia delle classi descrive i dati DEI DIPENDENTI",
+  surveys: "risolta da Enzo (2026-07-01): feedback e clima restano NON mappati perché spesso anonimi o aggregati per politica, quindi non org-gated",
+  position: "una posizione è un POSTO nell'organigramma; chi lo occupa si legge da `user`, che è PERSONAL",
+  org_director: "console, salute e consigliere organizzativi: aggregati di struttura",
+};
+
+/**
+ * Le resource su cui la decisione è APERTA, ognuna legata alla voce che la deciderà.
+ *
+ * Non è un terzo modo per tacere: una resource qui è **dichiarata dubbia**, e il dubbio ha un
+ * numero. Il cancello la lascia passare *e la nomina*, così non sparisce dalla vista come
+ * faceva prima. Se questo elenco si riempisse, sarebbe il segnale che si sta rimandando invece
+ * di decidere — ed è visibile proprio perché è scritto.
+ */
+export const RESOURCE_DA_DECIDERE: Readonly<Record<string, string>> = {
+  organization_unit:
+    "#193 — l'organigramma mostra nomi e collocazione, quindi PERSONAL; ma dichiararlo lo toglierebbe " +
+    "a 117 utenti su 161 (misurato 2026-08-16). È una decisione di prodotto di Enzo, non una bonifica.",
+};
+
 export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   // PERSONAL
   user: "PERSONAL",

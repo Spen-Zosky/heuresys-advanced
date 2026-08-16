@@ -54,6 +54,17 @@ import os
 import re
 import sys
 
+# --- stdout utf-8 (2026-08-16) -------------------------------------------------
+# Su Windows, con stdout NON terminale, Python sceglie la codepage ANSI (cp1252) e
+# ogni carattere fuori repertorio fa morire la print con UnicodeEncodeError — exit 1.
+# Qui muoiono il verdetto del guardiano, i titoli con frecce, le emoji del riassunto.
+# `errors="replace"` e' la rete: uno strumento di misura non deve morire di tipografia.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+# -------------------------------------------------------------------------------
+
 QUI = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -163,6 +174,47 @@ def riassunto() -> str:
     return "\n".join(righe)
 
 
+def id_citati(registro: str) -> set[int]:
+    return {int(n) for n in re.findall(r"^- \*\*#(\d+)", registro, re.M)}
+
+
+def classifica(blocco: str, registro: str) -> tuple[str, int | None]:
+    """Che cosa e' questo blocco? ('nuova'|'aggiornamento'|'numero-proprio', id).
+
+    Nasce dal difetto misurato il 2026-08-16 (voce #200): `ingerisci` sostituiva
+    `#NN` con `str.replace`, che NON dice se ha sostituito. Un blocco che portava
+    gia' `#196` entrava tale e quale, e nel registro finivano due `#196`.
+
+    Qui la domanda si fa PRIMA e in modo esplicito, cosi' l'assenza del segnaposto
+    smette di essere un non-evento.
+
+    La domanda si fa sull'INTESTAZIONE, non sul testo (canonica 2026-08-16). La
+    prima stesura chiedeva `"#NN" in blocco`, cioe' guardava tutto il corpo: un
+    blocco intestato `- **#196` che citasse `#NN` piu' sotto — cosa che le consegne
+    di questo lab fanno spesso, perche' parlano del meccanismo stesso — risultava
+    «nuova», e la sostituzione colpiva la CITAZIONE lasciando il numero vero in
+    testa. Misurato su un lab finto: due `#196` nel registro, cioe' il difetto #200
+    che rientra dalla finestra dalla porta della sua stessa correzione.
+    """
+    m = re.match(r"\s*- \*\*#(NN|\d+)", blocco)
+    if not m:
+        return ("numero-proprio", None)        # ne' segnaposto ne' numero: malformato
+    if m.group(1) == "NN":
+        return ("nuova", None)
+    num = int(m.group(1))
+    return ("aggiornamento" if num in id_citati(registro) else "numero-proprio", num)
+
+
+def numera(blocco: str, n: int) -> str:
+    """Il segnaposto si sostituisce SOLO nell'intestazione (canonica 2026-08-16).
+
+    Gemella di `classifica`: se quella decide guardando l'intestazione, questa deve
+    scrivere nello stesso punto, o le due possono divergere. `str.replace(..., 1)`
+    colpirebbe la prima occorrenza ovunque essa sia.
+    """
+    return re.sub(r"^(\s*- \*\*#)NN", rf"\g<1>{n}", blocco, count=1)
+
+
 def blocchi_pronti() -> str:
     registro = _leggi(REGISTRO)
     n = prossimo_id(registro)
@@ -170,11 +222,36 @@ def blocchi_pronti() -> str:
     for c in consegne():
         if not c["valida"] or stato_nel_registro(c["lab_id"], registro) is not None:
             continue
-        b = c["blocco"].replace("#NN", f"#{n}", 1)
+        specie, num = classifica(c["blocco"], registro)
+        if specie != "nuova":
+            fuori.append(f"(NON ingeribile — {specie}"
+                         + (f" di #{num}" if num else "") + f": {c['file']})")
+            continue
+        b = numera(c["blocco"], n)
         b += f"\n  - lab-id: {c['lab_id']}"
         fuori.append(b)
         n += 1
     return "\n\n".join(fuori) if fuori else "(niente da ingerire)"
+
+
+def _referto_respinte(respinte: list) -> str:
+    """Cosa NON e' stato ingerito, e perche'. Il file resta dov'e'."""
+    if not respinte:
+        return ""
+    righe = [f"⚠ {len(respinte)} consegne NON ingerite (restano in inbox/):"]
+    for c, specie, num in respinte:
+        if specie == "aggiornamento":
+            righe.append(f"   · {c['file']}")
+            righe.append(f"     e' una PROPOSTA DI AGGIORNAMENTO per #{num}, che gia' esiste. "
+                         f"Ingerirla creerebbe un secondo #{num} (e' il difetto #200).")
+            righe.append(f"     Apri #{num} nel registro e fondi a mano cio' che serve: "
+                         f"la fusione automatica lascerebbe residui che il lint non vede.")
+        else:
+            righe.append(f"   · {c['file']}")
+            righe.append(f"     il blocco non porta il segnaposto #NN"
+                         + (f" e cita #{num}, che nel registro non esiste" if num else "")
+                         + ". I numeri li assegna l'ingestione: rimetti #NN.")
+    return "\n".join(righe)
 
 
 def ingerisci() -> str:
@@ -183,10 +260,24 @@ def ingerisci() -> str:
                if c["valida"] and stato_nel_registro(c["lab_id"], registro) is None]
     if not da_fare:
         return "niente da ingerire"
+    # Tre esiti, non uno. Un blocco che non porta il segnaposto NON si ingerisce:
+    # o e' una proposta di aggiornamento per una voce che esiste (e allora la
+    # fusione e' un atto di lettura, non di script — la fusione automatica
+    # produrrebbe gli stessi residui che quella manuale ha gia' prodotto), o e' un
+    # numero inventato, che qui non e' ammesso: i numeri li assegna l'ingestione.
+    respinte = []
+    ingeribili = []
+    for c in da_fare:
+        specie, num = classifica(c["blocco"], registro)
+        (ingeribili if specie == "nuova" else respinte).append((c, specie, num))
+    if not ingeribili:
+        return _referto_respinte(respinte) or "niente da ingerire"
+    da_fare = [c for c, _, _ in ingeribili]
+
     n = prossimo_id(registro)
     nuovi = []
     for c in da_fare:
-        b = c["blocco"].replace("#NN", f"#{n}", 1) + f"\n  - lab-id: {c['lab_id']}"
+        b = numera(c["blocco"], n) + f"\n  - lab-id: {c['lab_id']}"
         nuovi.append(b)
         c["id_assegnato"] = n
         n += 1
@@ -203,7 +294,8 @@ def ingerisci() -> str:
         os.replace(c["path"], os.path.join(INGERITE, c["file"]))
         esiti.append(f"#{c['id_assegnato']} «{c['titolo']}» (lab-id {c['lab_id']})")
     return ("ingerite nel registro: " + " · ".join(esiti) +
-            "\nOra: python docs/kb/tools/handoff_lint.py e commit (docs/kb e' SoT).")
+            "\nOra: python docs/kb/tools/handoff_lint.py e commit (docs/kb e' SoT)."
+            + ("\n" + _referto_respinte(respinte) if respinte else ""))
 
 
 def main() -> int:

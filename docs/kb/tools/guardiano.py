@@ -93,6 +93,17 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
+# --- stdout utf-8 (2026-08-16) -------------------------------------------------
+# Su Windows, con stdout NON terminale, Python sceglie la codepage ANSI (cp1252) e
+# ogni carattere fuori repertorio fa morire la print con UnicodeEncodeError — exit 1.
+# Qui muoiono il verdetto del guardiano, i titoli con frecce, le emoji del riassunto.
+# `errors="replace"` e' la rete: uno strumento di misura non deve morire di tipografia.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+# -------------------------------------------------------------------------------
+
 # Finestra per modello. Il transcript dichiara il modello; se non lo riconosciamo
 # NON tiriamo a indovinare: si dichiara sconosciuto e si chiede --window.
 WINDOWS: dict[str, int] = {

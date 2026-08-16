@@ -51,3 +51,12 @@ db/seeds/reconciliation/40_org_unit_kpi_templates.sql
 db/seeds/reconciliation/41_position_kpi_requirements.sql
 db/seeds/reconciliation/49_succession_pools_candidates.sql
 db/seeds/reconciliation/53_registry_process_kpi_templates_s994_evidence.sql
+
+# --- strumenti che nominano il legacy PER COMBATTERLO ---------------------------------
+# check_istruzioni.py cerca nelle istruzioni del repo i riferimenti al vecchio heuresys-evo
+# per segnalarli come SBAGLIATI: la riga 123 mette `heuresys_evo_platform_db` dentro una
+# sonda (`docker exec ... heuresys_evo_platform_db`) che rileva le istruzioni che userebbero
+# il container legacy come runtime. Non legge una riga dal legacy: e' lettura di soli
+# CONCETTI, il caso che questo elenco prevede. Verificato leggendo il file, canonica
+# 2026-08-16 (rilevato dal lab mentre misurava se Tenant Builder P4 violasse I12).
+docs/kb/tools/check_istruzioni.py

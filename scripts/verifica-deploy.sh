@@ -126,8 +126,21 @@ giro() {
   # sistema sano. Un allarme falso costa piu' di nessun allarme, perche' insegna a non
   # guardarlo — ed e' la stessa specie dei falsi verdi che questo progetto continua a trovare,
   # vista dal lato opposto.
-  prod_readyz="$(curl -4 -s -o /dev/null -w '%{http_code}' --max-time 12 "$PROD_URL/api/readyz" 2>/dev/null)"
-  prod_login="$(curl  -4 -s -o /dev/null -w '%{http_code}' --max-time 12 "$PROD_URL/login"     2>/dev/null)"
+  # UN SOLO TENTATIVO NON DISTINGUE UN GUASTO DA UN INCIAMPO. Anche con `-4` la rete di casa
+  # ha picchi che superano i 12 s: misurato il 2026-08-16, tre giri consecutivi dello stesso
+  # comando hanno dato 200 / 200 / 200 con la risoluzione a 0,02 s, e uno intermedio 000. Un
+  # secondo tentativo costa al massimo altri 12 s e toglie di mezzo il transitorio; se anche il
+  # secondo tace, allora e' un fatto e va detto.
+  sonda() {
+    local url="$1" code
+    code="$(curl -4 -s -o /dev/null -w '%{http_code}' --max-time 12 "$url" 2>/dev/null)"
+    if [ "$code" = "000" ]; then
+      code="$(curl -4 -s -o /dev/null -w '%{http_code}' --max-time 12 "$url" 2>/dev/null)"
+    fi
+    printf '%s' "$code"
+  }
+  prod_readyz="$(sonda "$PROD_URL/api/readyz")"
+  prod_login="$(sonda "$PROD_URL/login")"
   esito "produzione" "readyz=$prod_readyz login=$prod_login"
 
   # DEPLOYATO chiede che TUTTO torni: un solo host allineato non basta — i due gemelli

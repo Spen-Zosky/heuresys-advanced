@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-15T21:50:22Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3026**
+**Generato**: 2026-08-16T00:00:18Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3032**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,16 +13,16 @@
 | api-module | 335 |
 | ci | 17 |
 | claude-config | 35 |
-| config | 146 |
+| config | 147 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 313 |
+| db-migration | 314 |
 | db-other | 8 |
 | db-script | 42 |
 | db-seed | 114 |
-| doc-canonical | 650 |
+| doc-canonical | 652 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 105 |
 | showcase-source | 14 |
-| test | 377 |
+| test | 379 |
 | ux-design-archive | 80 |
 | web-source | 237 |
-| **TOTALE** | **3026** |
+| **TOTALE** | **3032** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2468 |
+| live | 2474 |
 
 ## File per categoria
 
@@ -561,6 +561,7 @@
 - `D:\heuresys-advanced\apps\api\scripts\dev-whoami.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\export-accessi-csv.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-124-d4.mts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\prova-live-142-f2.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-183.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-92-f6.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-99-f7.mts` · *live* · git-tracked
@@ -1340,6 +1341,7 @@
 - `D:\heuresys-advanced\db\migrations\000313_voci_menu_valutazione.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000314_deleghe.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000315_classi_di_dato_delle_voci_di_menu.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000316_modello_dei_cruscotti.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1837,6 +1839,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\check_module_test_coverage.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_no_legacy_ingest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_pagine_orfane.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\check_pagine_raggiungibili.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_tenant_contamination.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\chiudi_leggero.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\db_health.py` · *live* · git-tracked
@@ -1852,6 +1855,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\lab_inbox.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\legacy_ingest_allowlist.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\measure_concept_retrieval.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\pagine_waivers.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\programmi.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\reconstruct_linked_manifest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\session_start.py` · *live* · git-tracked
@@ -2500,6 +2504,7 @@
 - `D:\heuresys-advanced\apps\api\test\csrf-origin.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\csv-formula-injection.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\dashboard.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\dashboards-f2.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\delegations.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\domain-derived-sections.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\domains-f6.integration.test.ts` · *live* · git-tracked
@@ -2804,6 +2809,7 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\session-refresh.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\showcase-a11y.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\sidebar-per-tipologia.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\skill-relations.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\skill-taxonomy.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\skills-editing.spec.ts` · *live* · git-tracked

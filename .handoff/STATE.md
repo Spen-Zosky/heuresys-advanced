@@ -1,29 +1,26 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-15 (S1063).
+**Updated**: 2026-08-16 (S1064).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-## Last session brief (S1063 «Il ciclo di redenzione»)
+## Last session brief (S1064 «Le cose che non avevano una porta»)
 
-Eseguito per intero il **mandato di autocoscienza** che S1062 aveva lasciato aperto. Il
-reperto: **tre skill di questo repo descrivevano il progetto legacy** — una raccomandava
-RLS, che l'invariante I5 vieta ovunque, e si sarebbe attivata da sola sulla prossima voce
-del menu. Erano lì da due mesi e nessun controllo le guardava, perché **tutti i cancelli
-del progetto guardano codice e dati, nessuno guardava le istruzioni**. Ora ce n'è uno, e
-gira a ogni avvio.
+**L'epica dei domini è chiusa**: dieci fasi su dieci, dalla definizione fino alla verifica dal
+lato dell'utente con cinque login reali. Con lei è caduta l'ultima delle **sei liste di nomi di
+ruolo** che decidevano cosa una persona vede — l'etichetta del cruscotto ora si deriva, e al tier
+di squadra risponde con un *dominio*, perché lì il perimetro non lo giustifica un ruolo.
 
-**La parte che conta è il verdetto, ed è sfavorevole**: misurando le regole nate da un
-richiamo di Enzo, **quattro su cinque sono state violate di nuovo** — una a tre giorni, una
-due volte nella stessa sessione, una intercettata da Enzo e non dai miei controlli. Le
-regole diventate *meccaniche* non hanno recidive. È il motivo per cui il rinforzo di oggi è
-un cancello eseguibile e non un paragrafo in più.
+Il filo della sessione è stato lo stesso in tutte e sette le voci: **una cosa che qualcuno doveva
+ricordarsi diventa una cosa che una macchina misura.** Il rendiconto delle chiusure non sapeva di
+quale sessione parlasse; il diario si scriveva solo se me ne ricordavo; le pagine orfane erano un
+censimento a mano in un file fuori dal repo. Ora sono tre cancelli.
 
-**Poi `#189`, e la prova mi ha dato torto** — che è la ragione per cui era costruita così.
-L'item diceva «problema di ordine»; corretto quello, la catena superava il punto di rottura
-e mi sarei fermato lì. Il controllo successivo ha mostrato che la funzione attesa non era
-mai stata creata: la causa vera era un **disallineamento di firma**, e il seed falliva
-*sempre*, anche a database perfettamente popolato. Verificata poi l'intera superficie, non
-solo la riga rotta: nessun altro caso.
+**Due volte la prova mi ha dato torto, ed è il motivo per cui era costruita così.** La prova
+generale ha respinto la migrazione dei cruscotti **tre volte** — un mio conteggio sbagliato, una
+post-condizione di un file precedente, e un grant a tappeto che regala ogni permesso nuovo a
+`PLATFORM_ADMIN` a ogni deploy. L'E2E nuovo è andato rosso al primo giro su una persona vera, e
+la misura ha detto che la correzione ovvia avrebbe tolto l'organigramma a 117 persone su 161:
+non l'ho fatta, è una decisione di prodotto ed è tua (`#193`).
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -32,31 +29,33 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-1. **`#142` F2 — modello dei cruscotti** (~180k), sbloccata da `#99` F7. Leggere prima i tre
-   reperti nel register: la derivazione **restringe e non concede**, il permesso per cruscotto
-   serve ancora, e nel modulo `dashboard` ci sono due residui da correggere lì · `.programmi/142-*.md`
-2. **`#191` — il rendiconto delle chiusure non sa di quale sessione parla** (~30 min): quasi
-   tutte le righe dicono `S?` perché nessuno esporta la variabile · `scripts/close-log.sh`
+1. **`#142` F3 — API per cruscotto** (~250k), sbloccata da F2 di ieri. Il catalogo è già
+   interrogabile e la granularità per vista **c'è già**: non va inventata, va onorata. Un blocco
+   che l'attore non può vedere si **omette dichiarandolo** (`masked`), non si tace ·
+   `.programmi/142-cruscotti-per-tipologia.md`
+2. **`#143` F2 — modello dati «una squadra è un progetto»** (~1 sessione): oggi `sys_teams` non sa
+   dire scopo, obiettivo, date né avanzamento · `.programmi/143-squadra-come-progetto.md`
+3. **`#159` F2 — il ponte gateway↔pagine web** (~3-4 sessioni, nessuna migrazione)
 
 ## Open questions
 
-- **Due decisioni di Enzo sbloccano lavoro già pronto**: *(a)* si apre il ciclo di valutazione
-  dell'azienda? · *(b)* `#156`, quale superficie aprire per prima all'agente fra le 83 idonee.
-- **`#169`** — separare password e secondo fattore: `deriveTotpSecret` è usato da una parte estesa
-  della suite, e l'impianto di **esenzione MFA esiste già nel database ed è vuoto**: è quella la strada.
-- **Il diario di sessione non scrive**: `.handoff/session-journal.ndjson` è vuoto dal 10 agosto.
-  Stessa famiglia di `#191` — strumenti di registrazione che non registrano.
+- **`#193` è la decisione più vicina**: l'organigramma aziendale resta visibile a chiunque, o solo
+  a chi ha un dominio? La tua direzione del 5 agosto sulla «rubrica aziendale» punta al *restare*,
+  ma `/users` — stessa materia — oggi è riservata. Le due sono governate in modo opposto.
+- **Le altre due che sbloccano lavoro pronto**: *(a)* si apre il ciclo di valutazione dell'azienda?
+  · *(b)* `#156`, quale superficie aprire per prima all'agente fra le 83 idonee.
+- **`#169`** — separare password e secondo fattore: l'impianto di esenzione MFA **esiste già nel
+  database ed è vuoto**, è quella la strada.
 - **`D-69`**: la condizione di riapertura si è verificata. Smontare l'ETL è ~3-4h, nessuna urgenza.
 
 ## Verification
 
 ```bash
-python docs/kb/tools/session_start.py            # menu + salute, un colpo solo
-python docs/kb/tools/check_istruzioni.py         # NUOVO: le istruzioni combaciano col reale?
-python docs/kb/tools/handoff_lint.py             # cancello di coerenza, bloccante
-python docs/kb/tools/db_health.py                # sentinelle
-bash db/scripts/storia36.sh custodia             # atteso: VERDE
-bash scripts/verifica-deploy.sh                  # DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO
+python docs/kb/tools/session_start.py               # menu + salute, un colpo solo
+python docs/kb/tools/check_pagine_raggiungibili.py  # NUOVO: ogni pagina ha una porta?
+python docs/kb/tools/check_istruzioni.py            # le istruzioni combaciano col reale?
+python docs/kb/tools/handoff_lint.py                # cancello di coerenza, bloccante
+bash scripts/verifica-deploy.sh                     # DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO
 ```
 
 ⚠ **La verifica lunga si esegue sul linux-pc, non qui** (standard S1054):

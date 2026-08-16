@@ -15,8 +15,40 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 dei cruscotti, `#142` F2): utenti **161** · posizioni **315** · tenant ACTIVE **2** ·
 RBAC **14 ruoli / 224 permessi / 975 mapping** (+7 permessi e +16 concessioni dei cruscotti,
 +5 raccolti dal tappeto di `000005` su `PLATFORM_ADMIN`) · skill **14.039** · migration su
-disco **314** (max `000316`) · sentinelle **18** (+`v_dashboard_class_drift`) ·
-HEAD `7010fd42`.
+disco **314** (max `000316`) · sentinelle **18** (+`v_dashboard_class_drift`) · test API
+**250 file** · spec E2E **99** · HEAD `6b781fda`.
+
+**S1064 (2026-08-16) — «Le cose che non avevano una porta». L'epica `#99` è CHIUSA, 10/10.**
+
+- **`#99` F8a+F8b, e con loro l'epica dei domini.** F8a: gli orfani non erano 22 ma **10** —
+  nove sono schede per disegno, `/dev/agent` è dietro un flag spento in **ogni** ambiente
+  (misurato anche sul `.env` di PROD); il censimento manuale di `#125` è diventato il cancello
+  `check_pagine_raggiungibili.py`, cablato nel boot, **visto rosso sul progetto vero**. F8b:
+  `sidebar-per-tipologia.spec.ts` **12/12** su cinque login reali, costruito attorno alla
+  tautologia da evitare — «DOM == API» resterebbe verde anche se l'API rispondesse la stessa
+  cosa a tutti, quindi pretende sottoinsieme **proprio** e prospettive di governo vuote.
+  **Le liste di nomi di ruolo che decidevano una vista erano sei: oggi sono zero.**
+- **`#142` F2 — il modello dei cruscotti** (mig. `000316`): 8 famiglie · 27 viste · 21 classi ·
+  7 permessi · 16 concessioni · sentinella `v_dashboard_class_drift`. La granularità vive **nel
+  blocco** e la pagina eredita l'unione. Nessuna famiglia attiva: le pagine le fa F4, e un
+  `CHECK` impedisce di attivarne una senza pagina. **Reperto**: Organizzazione e Filiale
+  espongono le **stesse classi** — le separa il perimetro, non il contenuto.
+  **I due residui chiusi**: `highestRoleLabel` (già sbagliata: `BLUEPRINT_MANAGER` 68 permessi
+  sopra `HRMS_MANAGER` 149) e l'albero delle posizioni → unità, corretto **alla sorgente** così
+  `dashboard`+`analytics`+`insights` si muovono insieme. **19 persone su 25 vedevano una pagina
+  vuota e ora vedono i propri dati; 0 perdono qualcosa.**
+- **`#191` · `#192`** — gli strumenti che registrano il lavoro non registravano: il rendiconto
+  delle chiusure attribuiva 159 righe su 171 a `S?`, il diario era a 0 byte dal 10 agosto. Il
+  numero di sessione ora si **fissa al boot**, dove la risposta è univoca; il diario si scrive
+  dove serve davvero, cioè alla **compattazione del contesto** (hook `PreCompact`, misurato
+  esistente nella build 2.1.233).
+- **Tre correzioni che nessuno aveva chiesto, tutte trovate provando**: la `000263` asseriva
+  `<> 548` su un dato che **cresce** (570 oggi, +22 legittime) ed era verde in CI e rossa in
+  produzione; la guardia della modalità lab lasciava passare un `robocopy` nel repo **su Linux**
+  perché la barra rovesciata lì non è un separatore; una mia prova cercava un commit nella
+  storia git, che in CI **non c'è** (checkout shallow) — riscritta su fixture.
+- **`#193` aperto e NON eseguito**: l'organigramma aziendale non dichiara di mostrare persone.
+  Correggerlo lo toglierebbe a **117 utenti su 161**: decisione di prodotto, di Enzo.
 
 **Il mandato di autocoscienza, eseguito per intero** (`docs/archive/MANDATO_AUTOCOSCIENZA_S1063.md`,
 17/17 voci). Riletti: 6 regole, **36 ADR**, README, 3 xtras di metodo, **72 memorie**, 7 skill,

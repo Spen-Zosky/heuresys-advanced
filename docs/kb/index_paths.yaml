@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-15T21:50:22Z da docs/kb/tools/build_index.py
+# generato: 2026-08-16T00:00:18Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-15T21:50:22Z"
-  total_files: 3026
+  generated_at: "2026-08-16T00:00:18Z"
+  total_files: 3032
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,16 +13,16 @@ meta:
     api-module: 335
     ci: 17
     claude-config: 35
-    config: 146
+    config: 147
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 313
+    db-migration: 314
     db-other: 8
     db-script: 42
     db-seed: 114
-    doc-canonical: 650
+    doc-canonical: 652
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 105
     showcase-source: 14
-    test: 377
+    test: 379
     ux-design-archive: 80
     web-source: 237
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2468
+    live: 2474
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3023,6 +3023,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-124-d4.mts'
     root: repo
     rel: 'apps/api/scripts/prova-live-124-d4.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-142-f2.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-142-f2.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -7610,6 +7616,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000316_modello_dei_cruscotti.sql'
+    root: repo
+    rel: 'db/migrations/000316_modello_dei_cruscotti.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -10520,6 +10532,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\check_pagine_raggiungibili.py'
+    root: repo
+    rel: 'docs/kb/tools/check_pagine_raggiungibili.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\check_tenant_contamination.py'
     root: repo
     rel: 'docs/kb/tools/check_tenant_contamination.py'
@@ -10607,6 +10625,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\measure_concept_retrieval.mjs'
     root: repo
     rel: 'docs/kb/tools/measure_concept_retrieval.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\pagine_waivers.txt'
+    root: repo
+    rel: 'docs/kb/tools/pagine_waivers.txt'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -14354,6 +14378,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\dashboards-f2.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/dashboards-f2.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\delegations.integration.test.ts'
     root: repo
     rel: 'apps/api/test/delegations.integration.test.ts'
@@ -16175,6 +16205,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/showcase-smoke.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\sidebar-per-tipologia.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/sidebar-per-tipologia.spec.ts'
     category: test
     status: live
     provenance: git-tracked

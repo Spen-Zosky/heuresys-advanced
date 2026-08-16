@@ -114,8 +114,20 @@ giro() {
     case "$sv" in *inactive*|*failed*) servizi_ko="$servizi_ko $h" ;; esac
   done
 
-  prod_readyz="$(curl -s -o /dev/null -w '%{http_code}' --max-time 12 "$PROD_URL/api/readyz" 2>/dev/null)"
-  prod_login="$(curl  -s -o /dev/null -w '%{http_code}' --max-time 12 "$PROD_URL/login"     2>/dev/null)"
+  # ⚠ `-4` NON e' una precauzione teorica: senza, questo controllo ha dichiarato la produzione
+  # IRRAGGIUNGIBILE (`000` su entrambe le sonde) il 2026-08-16 mentre era sana. Misurato subito
+  # dopo: `https://80.225.82.207/login` rispondeva **200 in 0,12 s**, la VM rispondeva 200 a se'
+  # stessa, tutte le porte in ascolto — e `curl -4 https://www.heuresys.com/login` **200 in
+  # 0,57 s**. A impiantarsi era la risoluzione del NOME sul router di casa, che interroga il DNS
+  # via IPv6; il dominio non ha nemmeno un record AAAA, quindi IPv4 e' l'unica strada vera e
+  # forzarla non nasconde nulla.
+  #
+  # Il difetto vero non era il timeout: era che uno STRUMENTO DI MISURA dichiarava rotto un
+  # sistema sano. Un allarme falso costa piu' di nessun allarme, perche' insegna a non
+  # guardarlo — ed e' la stessa specie dei falsi verdi che questo progetto continua a trovare,
+  # vista dal lato opposto.
+  prod_readyz="$(curl -4 -s -o /dev/null -w '%{http_code}' --max-time 12 "$PROD_URL/api/readyz" 2>/dev/null)"
+  prod_login="$(curl  -4 -s -o /dev/null -w '%{http_code}' --max-time 12 "$PROD_URL/login"     2>/dev/null)"
   esito "produzione" "readyz=$prod_readyz login=$prod_login"
 
   # DEPLOYATO chiede che TUTTO torni: un solo host allineato non basta — i due gemelli

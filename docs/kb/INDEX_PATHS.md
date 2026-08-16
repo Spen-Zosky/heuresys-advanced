@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-16T00:00:18Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3032**
+**Generato**: 2026-08-16T11:30:50Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3034**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,7 +13,7 @@
 | api-module | 335 |
 | ci | 17 |
 | claude-config | 35 |
-| config | 147 |
+| config | 148 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 105 |
 | showcase-source | 14 |
-| test | 379 |
+| test | 380 |
 | ux-design-archive | 80 |
 | web-source | 237 |
-| **TOTALE** | **3032** |
+| **TOTALE** | **3034** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2474 |
+| live | 2476 |
 
 ## File per categoria
 
@@ -562,6 +562,7 @@
 - `D:\heuresys-advanced\apps\api\scripts\export-accessi-csv.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-124-d4.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-142-f2.mts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\prova-live-142-f3a.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-183.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-92-f6.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-99-f7.mts` · *live* · git-tracked
@@ -2503,6 +2504,7 @@
 - `D:\heuresys-advanced\apps\api\test\content.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\csrf-origin.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\csv-formula-injection.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\dashboard-catalog.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\dashboard.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\dashboards-f2.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\delegations.integration.test.ts` · *live* · git-tracked

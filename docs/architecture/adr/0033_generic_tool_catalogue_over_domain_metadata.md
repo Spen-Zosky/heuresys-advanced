@@ -251,6 +251,45 @@ una decisione esplicita di Enzo su quale superficie aprire per prima. L'ADR rest
 `PROPOSED` finché quella decisione non c'è: i criteri misurano la fattibilità, non
 sostituiscono la scelta.
 
+### §6.1 — ✅ La decisione c'è, ed è più larga della domanda (Enzo, 2026-08-16)
+
+**La dottrina, che viene prima della scelta**: *«l'agente deve essere applicato a qualunque
+perimetro nel quale può portare valore aggiunto»*. Il bersaglio **non è una superficie**: è
+l'adozione su tutti i perimetri idonei. Questo ADR chiedeva *«quale aprire per prima»* e la
+risposta ricevuta ridefinisce la domanda in *«in che ordine aprirle tutte»* — coerente con
+la direzione gemella data a `#159` il 2026-08-13 («in TUTTE le schede che hanno i
+requisiti»). §7 resta invariato: *tutti i perimetri* non significa *uno strumento per
+modulo*; i tre strumenti generici restano tre.
+
+**Il primo perimetro è il modulo `organization-units`** — l'albero delle unità, 2 letture
+(`GET /`, `GET /:id`), permesso unico `organization_unit:read`, mostrato da 2 pagine.
+
+**Perché quella e non un'altra**, con la ragione che la rende difendibile e non arbitraria:
+lo **stesso giorno** Enzo ha deciso `#193`, cioè che l'organigramma aziendale *«deve restare
+visibile a chiunque lavori in azienda»*. Aprire all'agente un dato che è già dichiarato
+visibile a tutti dentro l'azienda non introduce un rischio nuovo: applica una decisione
+esistente a uno strumento diverso. È l'unico candidato la cui sensibilità **non è una stima
+di chi scrive**, ma una scelta di prodotto scritta e datata.
+
+**Limite dichiarato prima di costruire**, perché l'ADR non prometta ciò che non dà: la
+domanda tipica di quel dominio — *«quante persone lavorano nella Direzione Crediti?»* — è
+una delle due che il recupero ha **mancato** (§6.1 sopra), e per la ragione già chiusa in
+`#157`/D2: è un **calcolo**, non l'identificazione di un dominio. Con questa apertura
+l'agente saprà dire *com'è fatta* un'unità, non *quante persone* contiene: quel numero lo
+serviranno gli endpoint analitici che esistono già.
+
+**Lo stato resta `PROPOSED`**, e la ragione cambia: non manca più la decisione, mancano il
+`resolver` derivato dall'atlante e l'ingresso in allowlist. Collegare prima che il resolver
+sia provato riaprirebbe §5.2 dalla porta accanto.
+
+**La coda di adozione non è scritta qui** — sarebbe un elenco che invecchia. Si ri-deriva:
+`python docs/kb/tools/check_concetti_agente.py`, tre prove meccaniche (**V1** ha una
+lettura · **V2** non è presidio, esclusioni una per una · **V3** almeno una pagina mostra
+quei dati — la forma *misurabile* di «porta valore aggiunto»), poi l'ordine per rischio
+crescente. Pretende l'**atlante fresco** e si ferma se è superato, invece di misurare il
+passato: costruendo lo strumento si è scoperto che l'atlante era fermo a 9 giorni prima,
+con 5 moduli invisibili — vedi `#195`, dove il caso è stato meccanizzato.
+
 ---
 
 ## §7 — What we are NOT doing

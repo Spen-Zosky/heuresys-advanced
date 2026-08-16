@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-16T00:00:18Z da docs/kb/tools/build_index.py
+# generato: 2026-08-16T11:30:50Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-16T00:00:18Z"
-  total_files: 3032
+  generated_at: "2026-08-16T11:30:50Z"
+  total_files: 3034
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,7 +13,7 @@ meta:
     api-module: 335
     ci: 17
     claude-config: 35
-    config: 147
+    config: 148
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 105
     showcase-source: 14
-    test: 379
+    test: 380
     ux-design-archive: 80
     web-source: 237
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2474
+    live: 2476
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3029,6 +3029,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-142-f2.mts'
     root: repo
     rel: 'apps/api/scripts/prova-live-142-f2.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-142-f3a.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-142-f3a.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -14369,6 +14375,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\csv-formula-injection.test.ts'
     root: repo
     rel: 'apps/api/test/csv-formula-injection.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\dashboard-catalog.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/dashboard-catalog.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

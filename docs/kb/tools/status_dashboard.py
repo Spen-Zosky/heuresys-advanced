@@ -324,9 +324,58 @@ def _snapshot(sot_md):
     return re.split(r"(?m)^##\s+(?:.*Delta|.*Aggiornament|[✅⚪🟢🏁🔭⏸🗂])", sot_md, maxsplit=1)[0]
 
 
+"""I percorsi che l'atlante DESCRIVE. Se nessuno di questi e' cambiato dopo la sua
+generazione, l'atlante e' ancora vero — anche se HEAD e' avanzato di venti commit di
+documenti."""
+ATLAS_YAML = os.path.join("docs", "kb", "atlas", "atlas.yaml")
+ATLAS_SOURCES = ("apps/api/src/modules", "apps/web/src/app",
+                 "packages/shared/src/schemas", "db/migrations")
+
+
+def atlas_freshness():
+    """L'atlante e' un artefatto GENERATO: superato = il codice che descrive e' cambiato dopo.
+
+    Enzo, 2026-08-16: «l'atlante deve essere sempre aggiornato e mai fermo a qualcosa di
+    superato o incompleto». Questo lo rende una misura invece di un proposito.
+
+    ⚠ Il confronto NON e' `commit == HEAD`, e la differenza e' tutto: HEAD avanza a ogni
+    commit, anche di soli documenti, quindi quel test sarebbe rosso quasi sempre — un
+    allarme che suona senza motivo insegna a non guardarlo (la lezione di #194, dove un
+    falso ROSSO su una produzione sana e' costato piu' di nessun allarme). Qui la domanda
+    e' l'unica che conta: *dei file che l'atlante descrive, ne e' cambiato qualcuno?*
+    """
+    if not os.path.isfile(ATLAS_YAML):
+        return UNK, "atlante assente → python docs/kb/tools/build_atlas.py"
+    commit = None
+    with io.open(ATLAS_YAML, encoding="utf-8", errors="replace") as fh:
+        for _ in range(12):  # `meta:` sta in testa; non si legge un file da 400KB per una riga
+            line = fh.readline()
+            if not line:
+                break
+            m = re.search(r"generated_from_commit:\s*(\S+)", line)
+            if m:
+                commit = m.group(1).strip('"')
+                break
+    if not commit:
+        return UNK, "atlante senza commit di origine → rigenerarlo"
+    try:
+        changed = subprocess.check_output(
+            ["git", "diff", "--name-only", commit + "..HEAD", "--"] + list(ATLAS_SOURCES),
+            stderr=subprocess.DEVNULL).decode().split()
+    except Exception:
+        return UNK, "atlante: impossibile confrontare %s con HEAD" % commit[:8]
+    if changed:
+        return BAD, ("atlante SUPERATO: %d file di sorgente cambiati dopo %s "
+                     "→ python docs/kb/tools/build_atlas.py" % (len(changed), commit[:8]))
+    return OK, "atlante fresco (da %s, nessun sorgente cambiato dopo)" % commit[:8]
+
+
 def sec_drift(no_db, live, sot_md, state_md):
-    """Live vs documented (§0). Authoritative: migration headline + handoff_lint. Soft: prose presence."""
+    """Live vs documented (§0). Authoritative: migration headline + handoff_lint + atlante."""
     s = Section("STALENESS SELF-CHECK (live vs SOT_STATE §0)")
+    # Authoritative #0 — l'atlante e' la SoT interrogabile del progetto (S1016): se e'
+    # superato, ogni strumento che ci si appoggia misura il passato senza saperlo.
+    s.add(*atlas_freshness())
     # Authoritative #1 — migration headline declared in §0 vs disk (the count handoff_lint gates on).
     if not no_db and live:
         declared = declared_migration_ranges(sot_md)

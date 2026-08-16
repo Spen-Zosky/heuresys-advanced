@@ -45,8 +45,8 @@ adversarial; le decisioni tecniche sono di Claude.
 - **`#193` è la decisione più vicina**: l'organigramma aziendale resta visibile a chiunque, o solo
   a chi ha un dominio? La tua direzione del 5 agosto sulla «rubrica aziendale» punta al *restare*,
   ma `/users` — stessa materia — oggi è riservata. Le due sono governate in modo opposto.
-- **Le altre due che sbloccano lavoro pronto**: *(a)* si apre il ciclo di valutazione dell'azienda?
-  · *(b)* `#156`, quale superficie aprire per prima all'agente fra le 83 idonee.
+- **Resta una sola delle tre**: si apre il **ciclo di valutazione** dell'azienda? Le altre due
+  sono decise (`#193` organigramma a tutti · `#156` prima superficie = `organization-units`).
 - **`#169`** — separare password e secondo fattore: l'impianto di esenzione MFA **esiste già nel
   database ed è vuoto**, è quella la strada.
 - **`D-69`**: la condizione di riapertura si è verificata. Smontare l'ETL è ~3-4h, nessuna urgenza.

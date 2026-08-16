@@ -84,9 +84,15 @@ async function loadActiveRegistry(): Promise<Reg[]> {
                  THEN NULL
                  ELSE ui_interface_required_resource || ':' || ui_interface_required_action
             END AS "reqPair",
+            -- #193: le classi che M1 deve FILTRARE, cioè le dichiarate MENO quelle aperte al
+            -- tenant. L'esenzione si legge dal database, non si cabla qui: se domani ne
+            -- comparisse una seconda, questo oracolo la seguirebbe da sé invece di divergere
+            -- dal servizio in silenzio — che è il difetto peggiore di un oracolo di test,
+            -- perché il rosso accusa il prodotto mentre il torto è della prova.
             COALESCE((SELECT array_agg(dc.data_class)
                         FROM sys.sys_ui_interface_data_classes dc
-                       WHERE dc.ui_interface_id = i.ui_interface_id), '{}') AS classi
+                       WHERE dc.ui_interface_id = i.ui_interface_id
+                         AND NOT dc.data_class_open_to_tenant), '{}') AS classi
        FROM sys.sys_ui_interfaces i
       WHERE ui_interface_is_active = true`,
   );

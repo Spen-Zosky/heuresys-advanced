@@ -40,8 +40,20 @@ export function queryBoolean() {
   return z.preprocess((v) => {
     if (typeof v !== "string") return v;
     const s = v.trim().toLowerCase();
+    // Parametro PRESENTE ma VUOTO (`?flag=`) = non specificato, non illegale. Le
+    // pagine lo producono di continuo — un filtro svuotato resta nella querystring
+    // come chiave senza valore — e trattarlo come errore fa rispondere 400 a una
+    // richiesta legittima. Misurato in S1066: rifiutarlo ha fatto cadere 33 casi
+    // E2E con «element(s) not found», perche' le liste non caricavano affatto.
+    // `undefined` lascia decidere a `.optional()` / `.default()`, che e' il posto
+    // dove quella decisione e' gia' dichiarata schema per schema.
+    if (s === "") return undefined;
     if (VERO.has(s)) return true;
     if (FALSO.has(s)) return false;
     return v; // non riconosciuto: lo rifiuta z.boolean(), non lo indovina questo
-  }, z.boolean());
+    // `.optional()` DEVE stare qui dentro, non fuori: un `.optional()` applicato
+    // sopra `z.preprocess` guarda il valore IN INGRESSO, non quello che il
+    // preprocess restituisce — quindi `""` (che non e' undefined in ingresso) non
+    // verrebbe intercettato, e `z.boolean()` rifiuterebbe l'undefined prodotto qui.
+  }, z.boolean().optional());
 }

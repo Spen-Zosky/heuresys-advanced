@@ -100,6 +100,19 @@ describe("#209 — i filtri booleani di querystring", () => {
     }
   });
 
+  it("il parametro VUOTO vale «non specificato», non «illegale»", () => {
+    // `?flag=` arriva come stringa vuota, e le pagine lo producono di continuo: un
+    // filtro svuotato resta nella querystring come chiave senza valore. Trattarlo
+    // come errore fa rispondere 400 a una richiesta legittima — misurato in S1066,
+    // dove ha fatto cadere 33 casi E2E con «element(s) not found» perché le liste
+    // non caricavano affatto. Il caso manca(va) qui, ed è la ragione per cui non
+    // l'avevo visto prima delle E2E.
+    expect(queryBoolean().optional().parse("")).toBeUndefined();
+    expect(queryBoolean().optional().parse("   ")).toBeUndefined();
+    // e dove lo schema dichiara un default, è il default a decidere — non un 400
+    expect(queryBoolean().optional().default(true).parse("")).toBe(true);
+  });
+
   it("una stringa che non è un booleano viene RIFIUTATA, non addomesticata", () => {
     // È la differenza che conta rispetto a `z.coerce`: quello rispondeva `true` a
     // qualunque cosa, anche a `?isActive=forse`. Meglio un 400 esplicito di un

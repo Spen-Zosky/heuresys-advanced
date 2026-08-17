@@ -30,8 +30,7 @@
  */
 import type { PoolClient } from "pg";
 import { pool } from "../../db/client.js";
-import type { Archetype } from "./blueprints.js";
-import { archetypeUsers, synProficiency, synKpiValue } from "./blueprints.js";
+import type { BuildPlan } from "./build-plan.js";
 
 export type DbConnector = typeof pool | PoolClient;
 
@@ -67,22 +66,32 @@ async function orgUnitTypeId(client: PoolClient, code: string, cache: Map<string
 }
 
 /**
- * Materialize the archetype into `tenantId`.
- *   mode 'apply' (must be inside a transaction): INSERT ... ON CONFLICT DO NOTHING; `created`
- *     counts the rows actually inserted, `skipped` = total - created.
- *   mode 'plan' (read-only): `created` = the rows that WOULD be inserted (don't already exist).
+ * Costruisce dentro `tenantId` le righe che il PIANO dichiara (#198 T4, E21).
+ *
+ * Prima riceveva un `Archetype` e ci guardava dentro; ora riceve un `BuildPlan` e non sa da
+ * dove viene. Il confine è verificabile in un secondo, e la prova sta nel piano di P3:
+ *   grep -n "blueprints\.js" apps/api/src/modules/tenant-materialization/repository.ts
+ * Un `grep` è un criterio debole in generale; qui misura esattamente la cosa che conta.
+ *
+ * ⚠ Il punto è sfuggito di proposito. Scritto senza, questa riga di commento **contiene** la
+ * stringa cercata, e la prova troverebbe sé stessa: un rosso permanente su un file sano, che
+ * è il modo migliore per insegnare a non guardarla più (`#194`). Trovato eseguendola.
+ *
+ *   mode 'apply' (dentro una transazione): INSERT ... ON CONFLICT DO NOTHING; `created`
+ *     conta le righe davvero inserite.
+ *   mode 'plan' (sola lettura): `created` = le righe che VERREBBERO inserite.
  */
 export async function materialize(
   client: PoolClient,
   tenantId: string,
-  archetype: Archetype,
+  plan: BuildPlan,
   mode: "plan" | "apply",
 ): Promise<MaterializeCounts> {
   const typeCache = new Map<string, string | null>();
   const codeToId = new Map<string, string>(); // org-unit code → id (apply: for position FK)
   let orgUnitsCreated = 0;
 
-  for (const ou of archetype.orgUnits) {
+  for (const ou of plan.orgUnits) {
     if (mode === "apply") {
       const typeId = await orgUnitTypeId(client, ou.type, typeCache);
       const parentId = ou.parentCode ? codeToId.get(ou.parentCode) ?? null : null;
@@ -94,7 +103,7 @@ export async function materialize(
          VALUES ($1, $2, $3, $4, $5, $6, true, jsonb_build_object('materialized_from', $7::text))
          ON CONFLICT (organization_unit_tenant_id, organization_unit_code) DO NOTHING
          RETURNING organization_unit_id`,
-        [tenantId, ou.code, ou.name, typeId, ou.type, parentId, archetype.key],
+        [tenantId, ou.code, ou.name, typeId, ou.type, parentId, plan.sourceKey],
       );
       if (ins.rows[0]) {
         orgUnitsCreated++;
@@ -119,7 +128,7 @@ export async function materialize(
 
   const posCodeToId = new Map<string, string>(); // position code → id (apply: for the assignment FK)
   let positionsCreated = 0;
-  for (const p of archetype.positions) {
+  for (const p of plan.positions) {
     if (mode === "apply") {
       const ouId = codeToId.get(p.orgUnitCode) ?? null;
       const ins = await client.query<{ position_id: string }>(
@@ -155,7 +164,7 @@ export async function materialize(
   // feed the per-incumbent evidence below.
   const skillCodeToId = new Map<string, string>();
   let skillsCreated = 0;
-  for (const sk of archetype.skills) {
+  for (const sk of plan.skills) {
     // The natural-key unique index (mig 000189/000196) is on (tenant, lower(trim(name))):
     // post-dedup the surviving row for a name can carry a DIFFERENT code (ESCO:: winner),
     // so the lookup must match by code OR name, and the insert must tolerate a conflict.
@@ -176,7 +185,7 @@ export async function materialize(
            VALUES ($1, $2, $3, $4, false, jsonb_build_object('materialized_from', $5::text))
            ON CONFLICT DO NOTHING
            RETURNING skill_id`,
-          [tenantId, sk.code, sk.name, sk.kind, archetype.key],
+          [tenantId, sk.code, sk.name, sk.kind, plan.sourceKey],
         );
         if (ins.rows[0]) {
           skillCodeToId.set(sk.code, ins.rows[0].skill_id);
@@ -203,7 +212,7 @@ export async function materialize(
 
   const kpiCodeToId = new Map<string, string>();
   let kpisCreated = 0;
-  for (const kp of archetype.kpis) {
+  for (const kp of plan.kpis) {
     if (mode === "apply") {
       const ex = await client.query<{ kpi_definition_id: string }>(
         `SELECT kpi_definition_id FROM sys.sys_kpi_definitions WHERE kpi_definition_tenant_id = $1 AND kpi_definition_code = $2`,
@@ -216,7 +225,7 @@ export async function materialize(
           `INSERT INTO sys.sys_kpi_definitions (kpi_definition_tenant_id, kpi_definition_code, kpi_definition_name, kpi_definition_unit, kpi_definition_polarity, kpi_definition_is_global, kpi_definition_metadata)
            VALUES ($1, $2, $3, $4, $5, false, jsonb_build_object('materialized_from', $6::text))
            RETURNING kpi_definition_id`,
-          [tenantId, kp.code, kp.name, kp.unit, kp.polarity, archetype.key],
+          [tenantId, kp.code, kp.name, kp.unit, kp.polarity, plan.sourceKey],
         );
         kpiCodeToId.set(kp.code, ins.rows[0]!.kpi_definition_id);
         kpisCreated++;
@@ -233,7 +242,7 @@ export async function materialize(
   // LEGACY_EMP:: (I14/ADR-0024). Mirrors db/scripts/seed-reference-bank.ts. Idempotent: user via ON
   // CONFLICT (tenant, lower(email)); assignment/evidence via existence-check (no natural unique on the
   // evidence tables; the partial unique sys_upa_one_primary_active_per_user allows one PRIMARY ACTIVE/user).
-  const synUsers = archetypeUsers(archetype);
+  const synUsers = plan.incumbents;
   const applyUserIds: (string | null)[] = new Array(synUsers.length).fill(null); // apply: ui → userId (for set-based evidence)
   let usersCreated = 0;
   let assignmentsCreated = 0;
@@ -313,13 +322,17 @@ export async function materialize(
     for (let ui = 0; ui < synUsers.length; ui++) {
       const uid = applyUserIds[ui];
       if (!uid) continue;
-      for (let sj = 0; sj < archetype.skills.length; sj++) {
-        const sid = skillCodeToId.get(archetype.skills[sj]!.code);
-        if (sid) { seU.push(uid); seS.push(sid); seP.push(synProficiency(ui, sj)); }
+      const su = synUsers[ui]!;
+      // I VALORI ARRIVANO DAL PIANO, non si ricalcolano qui (#198 T4). Prima il motore
+      // chiamava `synProficiency(ui, sj)` e `synKpiValue(ui, kj)`: erano la regola di
+      // generazione di UNA sorgente, e conoscerla è esattamente ciò che E21 gli toglie.
+      for (const ev of su.skillEvidence) {
+        const sid = skillCodeToId.get(ev.skillCode);
+        if (sid) { seU.push(uid); seS.push(sid); seP.push(ev.declaredProficiency); }
       }
-      for (let kj = 0; kj < archetype.kpis.length; kj++) {
-        const kid = kpiCodeToId.get(archetype.kpis[kj]!.code);
-        if (kid) { keU.push(uid); keK.push(kid); keV.push(synKpiValue(ui, kj)); keUnit.push(archetype.kpis[kj]!.unit); }
+      for (const ev of su.kpiEvidence) {
+        const kid = kpiCodeToId.get(ev.kpiCode);
+        if (kid) { keU.push(uid); keK.push(kid); keV.push(ev.measuredValue); keUnit.push(ev.unit); }
       }
     }
     if (seU.length) {
@@ -353,8 +366,8 @@ export async function materialize(
     const seEmail: string[] = [], seCode: string[] = [];
     const keEmail: string[] = [], keCode: string[] = [];
     for (const su of synUsers) {
-      for (const sk of archetype.skills) { seEmail.push(su.email); seCode.push(sk.code); }
-      for (const kp of archetype.kpis) { keEmail.push(su.email); keCode.push(kp.code); }
+      for (const ev of su.skillEvidence) { seEmail.push(su.email); seCode.push(ev.skillCode); }
+      for (const ev of su.kpiEvidence) { keEmail.push(su.email); keCode.push(ev.kpiCode); }
     }
     if (seEmail.length) {
       const r = await client.query<{ c: number }>(

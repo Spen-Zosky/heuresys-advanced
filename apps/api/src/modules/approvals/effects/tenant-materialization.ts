@@ -23,6 +23,7 @@
  * IDEMPOTENCY comes for free from repo.materialize itself (it skips what already
  * exists) — re-applying yields 0 created / all skipped rather than duplicates.
  */
+import { ArchetypeBuildSource } from "../../tenant-materialization/build-source.js";
 import type { PoolClient } from "pg";
 import type { ApprovalRequestRow } from "../repository.js";
 import { ConflictError } from "../../../errors/index.js";
@@ -72,5 +73,5 @@ export async function applyTenantMaterialization(
     );
   }
 
-  await materialize(client, tenantId, archetype, "apply");
+  await materialize(client, tenantId, await new ArchetypeBuildSource(archetype).plan(), "apply");
 }

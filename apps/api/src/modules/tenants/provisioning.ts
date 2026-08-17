@@ -13,6 +13,7 @@
  * TENANT_CODE_EXISTS (pre-checked in-tx; the unique index
  * sys_tenancies_tenant_code_uq backs it against races via the 23505 map).
  */
+import { ArchetypeBuildSource } from "../tenant-materialization/build-source.js";
 import { withTransaction } from "../../db/client.js";
 import { hashPassword } from "../auth/password.js";
 import { insertIdentity, insertCredential } from "../auth/repository.js";
@@ -109,7 +110,8 @@ export async function provisionTenant(
       // atomically with the tenant (same client → same transaction).
       let archetypeOut: ProvisionTenantResponse["archetype"];
       if (archetype) {
-        const created = await materializeArchetype(client, tenant.tenantId, archetype, "apply");
+        const piano = await new ArchetypeBuildSource(archetype).plan();
+        const created = await materializeArchetype(client, tenant.tenantId, piano, "apply");
         archetypeOut = { key: archetype.key, created };
       }
 

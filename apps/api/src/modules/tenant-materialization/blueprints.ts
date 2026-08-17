@@ -10,10 +10,9 @@
  * position + a PRIMARY ACTIVE assignment (skills/ranked-KPI = slice-2b residuo).
  */
 
-type OrgUnitType = "HEADQUARTERS" | "DIVISION" | "DEPARTMENT" | "TEAM" | "BRANCH" | "OFFICE";
-type Criticality = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
-type SkillKind = "SKILL" | "KNOWLEDGE" | "COMPETENCE" | "BEHAVIOR"; // sys_skills.skill_kind CHECK domain
-type KpiPolarity = "HIGHER_IS_BETTER" | "LOWER_IS_BETTER" | "TARGET_RANGE"; // sys_kpi_definitions.polarity CHECK domain
+// I domini categorici vivono in `build-plan.ts` (#198 T4): sono i CHECK delle colonne, non
+// una proprieta' di questo archetipo, e il modulo neutro non puo' dipendere da una sorgente.
+import type { Criticality, KpiPolarity, OrgUnitType, SkillKind } from "./build-plan.js";
 
 export interface ArchetypeOrgUnit {
   code: string;

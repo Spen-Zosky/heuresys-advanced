@@ -6,6 +6,7 @@
  * tenantId comes from the INPUT (not the JWT), so it MUST be validated as existing + ACTIVE and
  * every write tagged with it (enforced in the repository, I5).
  */
+import { ArchetypeBuildSource } from "./build-source.js";
 import { pool, withTransaction } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 
@@ -56,7 +57,8 @@ export const tenantMaterializationService = {
       skillEvidence: userCount * archetype.skills.length, // one evidence per incumbent × archetype skill
       kpiEvidence: userCount * archetype.kpis.length, // one evidence per incumbent × archetype KPI
     };
-    const created = await withTransaction((client) => repo.materialize(client, body.tenantId, archetype, body.mode));
+    const piano = await new ArchetypeBuildSource(archetype).plan();
+    const created = await withTransaction((client) => repo.materialize(client, body.tenantId, piano, body.mode));
     const skipped = {
       orgUnits: total.orgUnits - created.orgUnits,
       positions: total.positions - created.positions,

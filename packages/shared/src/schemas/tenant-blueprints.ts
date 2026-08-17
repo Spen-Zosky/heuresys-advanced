@@ -55,6 +55,66 @@ export const BlueprintIdentitySchema = z.object({
 });
 export type BlueprintIdentity = z.infer<typeof BlueprintIdentitySchema>;
 
+/**
+ * I SEI PARAMETRI SENZA I QUALI UNA RICERCA NON E' MIRATA.  (#132 F0, S1068)
+ *
+ * Non sono i campi obbligatori per la firma, e la differenza e' il punto: **firmare e
+ * cercare sono due momenti diversi**. Un fascicolo si puo' firmare senza il numero di
+ * addetti; una ricerca avviata senza quel numero produce un'azienda **plausibile e
+ * generica**, e l'esito non lo rivela — e' un difetto che si vede solo confrontando i
+ * parametri della corsa, non guardando cio' che ne esce.
+ *
+ * Perche' sei e non due. La posizione di Enzo (2026-08-17) era *«solo dopo aver
+ * stabilito il codice ATECO e definito il numero di addetti sara' possibile fare le
+ * ricerche mirate»*: giusta nella sostanza, incompleta nel conto. Misurando l'identita'
+ * reale ne servono altri quattro, ognuno perche' cambia la RISPOSTA:
+ *   `countryCode`         organi di controllo, contratto collettivo, obblighi di legge
+ *   `regulatoryIntensity` decide se esiste una direzione Risk & Compliance
+ *   `operatingModelId`    pesa sulla FORMA piu' della dimensione: RETAIL e WHOLESALE,
+ *                         a parita' di settore e addetti, danno strutture opposte —
+ *                         con o senza filiali
+ *   `sizeBandId`          **non e' un doppione di `employeeCount`**: la fascia canalizza
+ *                         la ricerca (si cerca «una banca di fascia M», non «una banca
+ *                         di 158 dipendenti») e serve al prezzo della piattaforma; il
+ *                         numero descrive l'azienda vera, ed e' quello su cui lavorano
+ *                         le tabelle gestionali. Due ruoli, non una ridondanza.
+ *
+ * Il legame fra i due modi di dire la dimensione **non e' presidiato qui**: lo tiene il
+ * database (trigger `sys_blueprint_size_band_coherence`, mig `000323`), perche' un
+ * controllo applicativo non copre le scritture che non passano dall'API. Prima del
+ * 2026-08-17 non esisteva affatto: «fascia XS con 5000 addetti» passava.
+ */
+export const PARAMETRI_RICERCA = [
+  { campo: "industryClassId", etichetta: "settore di attivita' (ATECO)" },
+  { campo: "sizeBandId", etichetta: "fascia dimensionale" },
+  { campo: "employeeCount", etichetta: "numero di addetti" },
+  { campo: "countryCode", etichetta: "paese" },
+  { campo: "regulatoryIntensity", etichetta: "intensita' di vigilanza" },
+  { campo: "operatingModelId", etichetta: "modello operativo" },
+] as const satisfies ReadonlyArray<{ campo: keyof BlueprintIdentity; etichetta: string }>;
+
+/**
+ * Quali dei sei mancano, con l'etichetta leggibile. Elenco **vuoto** = la ricerca si
+ * puo' avviare. Restituisce tutti i mancanti in un colpo, non il primo: chi compila
+ * deve sapere quanto gli resta da fare, non scoprirlo un campo per volta.
+ *
+ * `0` e' un valore legittimo per `employeeCount`? No, e non e' un dettaglio: un'azienda
+ * con zero addetti non e' cercabile, ed e' anche fuori da ogni fascia (la piu' bassa
+ * parte da 1). Percio' qui `0` conta come mancante — mentre lo schema lo ammette,
+ * perche' li' descrive cosa il database accetta, non cosa una ricerca pretende.
+ */
+export function parametriRicercaMancanti(
+  identita: Partial<BlueprintIdentity> | null | undefined,
+): Array<{ campo: string; etichetta: string }> {
+  const i = identita ?? {};
+  return PARAMETRI_RICERCA.filter((p) => {
+    const v = i[p.campo];
+    if (v === null || v === undefined || v === "") return true;
+    if (p.campo === "employeeCount") return typeof v !== "number" || v < 1;
+    return false;
+  }).map((p) => ({ campo: p.campo, etichetta: p.etichetta }));
+}
+
 export const ProcessDecisionSchema = z.object({
   processId: z.uuid(),
   processCode: z.string(),

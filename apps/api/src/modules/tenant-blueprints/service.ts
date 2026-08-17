@@ -15,7 +15,12 @@
  * Ogni rifiuto porta il suo codice: mai un errore nudo (§9 della specifica).
  */
 import { pool, withTransaction } from "../../db/client.js";
-import { ConflictError, NotFoundError, ValidationError } from "../../errors/index.js";
+import {
+  ConflictError,
+  NotFoundError,
+  UnprocessableEntityError,
+  ValidationError,
+} from "../../errors/index.js";
 import type { ActorContext } from "../../lib/actor.js";
 import * as repo from "./repository.js";
 import { proposeModel, isPublishedVariantVersion } from "./derivation.js";
@@ -51,10 +56,26 @@ const isUniqueViolation = (e: unknown): boolean =>
 const MODIFICABILI = ["DRAFT"] as const;
 
 /**
- * I campi senza i quali un fascicolo non e' sottoponibile alla firma. Non sono
- * tutti i campi dell'identita': i ricavi e il numero di dipendenti descrivono
- * l'azienda ma non entrano in nessuna derivazione, e pretenderli bloccherebbe
- * la firma per un dato che non cambia il risultato.
+ * I campi senza i quali un fascicolo non e' sottoponibile alla FIRMA.
+ *
+ * ⚠ CORRETTO S1068 (#132 F0). Diceva: «i ricavi e il numero di dipendenti descrivono
+ * l'azienda ma non entrano in nessuna derivazione, e pretenderli bloccherebbe la firma
+ * per un dato che non cambia il risultato». La prima meta' e' **falsa da quando esiste
+ * la ricerca**: il numero di addetti e il modello operativo entrano in una derivazione,
+ * ed e' la piu' importante — quella che decide che azienda si va a cercare.
+ *
+ * La correzione NON e' aggiungerli qui, e la distinzione e' voluta: **firmare e cercare
+ * sono due momenti diversi**. Un fascicolo si puo' firmare senza sapere quanti addetti
+ * ha l'azienda (accadeva, e bloccarlo ora respingerebbe fascicoli legittimi); una
+ * RICERCA senza quel numero non e' mirata, e non ce ne accorgeremmo dall'esito — ne
+ * uscirebbe un'azienda plausibile e generica.
+ *
+ * Percio' i requisiti della ricerca vivono a parte, in `@heuresys/shared`
+ * (`PARAMETRI_RICERCA` / `parametriRicercaMancanti`), e sono **sei**: questi quattro,
+ * piu' `employeeCount` e `operatingModelId`. Il legame fra fascia e numero e' presidiato
+ * dal database (trigger `sys_blueprint_size_band_coherence`, mig `000323`), non da questo
+ * elenco: un CHECK non puo' leggere la tabella delle fasce, e il trigger regge anche le
+ * scritture che non passano da qui.
  */
 const IDENTITA_OBBLIGATORIA: Array<{ campo: keyof BlueprintIdentity; etichetta: string }> = [
   { campo: "industryClassId", etichetta: "settore di attivita' (ATECO)" },
@@ -240,6 +261,45 @@ export const tenantBlueprintsService = {
   ): Promise<TenantBlueprintVersion> {
     await esisteFascicolo(id);
     const v = await versioneModificabile(id, number);
+
+    // #132 F0 — LA COERENZA FASCIA↔ADDETTI, DETTA IN MODO LEGGIBILE.
+    // Il presidio vero è nel database (trigger `sys_blueprint_size_band_coherence`,
+    // mig `000323`), e ci resta: copre anche le scritture che non passano da qui. Ma un
+    // vincolo di database parla con un messaggio SQL e uno stato 500 — cioè, per chi
+    // compila il fascicolo, «si è rotto qualcosa» invece di «questi due numeri non
+    // stanno insieme». Percio' il controllo si fa ANCHE qui, sullo stato RISULTANTE
+    // dalla patch (non su ciò che arriva: si può cambiare la fascia lasciando il numero,
+    // o il numero lasciando la fascia, e in entrambi i casi l'incoerenza nasce dalla
+    // combinazione, non dal campo toccato).
+    const fasciaFinale = body.sizeBandId !== undefined ? body.sizeBandId : v.identity.sizeBandId;
+    const addettiFinali =
+      body.employeeCount !== undefined ? body.employeeCount : v.identity.employeeCount;
+    if (fasciaFinale && addettiFinali !== null && addettiFinali !== undefined) {
+      const fascia = await repo.findSizeBand(pool, fasciaFinale);
+      // Una fascia che non esiste non si tace: la FK la impedirebbe, ma tacere qui
+      // renderebbe il controllo un no-op il giorno in cui la FK cambiasse.
+      if (!fascia) {
+        throw new UnprocessableEntityError(
+          { campo: "sizeBandId" },
+          "La fascia dimensionale indicata non esiste nel catalogo",
+          "BLUEPRINT_SIZE_BAND_UNKNOWN",
+        );
+      }
+      const sotto = addettiFinali < fascia.min;
+      const sopra = fascia.max !== null && addettiFinali > fascia.max;
+      if (sotto || sopra) {
+        const intervallo = fascia.max === null ? `${fascia.min}+` : `${fascia.min}-${fascia.max}`;
+        // 422 e non 400: il corpo e' sintatticamente valido (Zod l'ha accettato), e'
+        // la REGOLA di dominio a essere violata — la distinzione che
+        // `UnprocessableEntityError` esiste per fare.
+        throw new UnprocessableEntityError(
+          { fascia: fascia.code, intervallo, dichiarati: addettiFinali },
+          `La fascia ${fascia.code} copre ${intervallo} addetti, ma ne sono dichiarati ${addettiFinali}`,
+          "BLUEPRINT_SIZE_BAND_MISMATCH",
+        );
+      }
+    }
+
     const agg = await repo.patchIdentity(pool, v.tenantBlueprintVersionId, body, a.userId);
     if (!agg) throw new NotFoundError("Versione di fascicolo non trovata");
     return agg;

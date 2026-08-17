@@ -1,7 +1,7 @@
 # 132 — La ricerca genera il modello, e l'archetipo scritto a mano sparisce
 
 > **item**: #132 · **priorità**: P1 · **stima**: ~8 sessioni
-> **stato**: NON AVVIATO
+> **stato**: IN CORSO
 > **fonti**: decisione E29 di Enzo (2026-08-17) · epica P2a `D:\heuresys-design-lab\2026-08-05--epic-tenant-builder-p2a-ricerca.md` · piano approvato `~/.claude/plans/jaunty-percolating-storm.md`
 
 ## Decisioni vincolanti (non si ri-chiedono)
@@ -83,16 +83,32 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
 
 ## Fasi
 
-- [ ] **F0 i parametri della ricerca** — tre cose insieme: *(a)* rendere obbligatori prima di
-  **avviare una ricerca** (non prima della firma) i **sei** parametri della tabella qui sopra —
-  ATECO · fascia · **numero di addetti** · paese · vigilanza · **modello operativo**; *(b)*
-  aggiungere il **vincolo di coerenza fascia↔numero** che oggi non esiste; *(c)* correggere il
-  commento di `IDENTITA_OBBLIGATORIA` (`tenant-blueprints/service.ts:52-56`), che dichiara il
-  contrario sul numero di addetti e diventerà falso. Piccola, ma va **prima** di F4: una ricerca
-  avviata senza questi parametri non è mirata, e non ce ne accorgeremmo guardando l'esito — ne
-  uscirebbe un'azienda plausibile e generica.
-  **La prova che deve poter fallire**: un fascicolo con fascia `XS` e `5000` addetti dev'essere
-  **respinto**. Oggi passa
+- [x] **F0 i parametri della ricerca** — 2026-08-17 (S1068) · mig. **`000323`** + contratto in
+  `@heuresys/shared` + validazione nel servizio. Tutte e tre le cose:
+  *(a)* i **sei** parametri sono un contratto esplicito — `PARAMETRI_RICERCA` e
+  `parametriRicercaMancanti()` — **separato** da `IDENTITA_OBBLIGATORIA`, e la separazione è la
+  sostanza: firmare e cercare sono due momenti diversi, e pretendere i sei alla firma respingerebbe
+  fascicoli legittimi. `0` addetti conta come **mancante** (fuori da ogni fascia: la più bassa parte
+  da 1), mentre lo schema lo ammette — perché lì descrive cosa il database accetta, non cosa una
+  ricerca pretende.
+  *(b)* il vincolo fascia↔numero **esiste ora, su due strati con ruoli distinti**: un `CHECK` non
+  può leggerlo (i limiti stanno in un'altra tabella), quindi è un **trigger**
+  `sys_blueprint_size_band_coherence` — pattern già usato nel progetto, e proprio su questa famiglia
+  di tabelle — più la validazione nel servizio, che dà un **422 leggibile** invece di un errore SQL.
+  Sentinella nuova `sys.v_blueprint_size_band_mismatch` (la ventesima vigilata).
+  *(c)* il commento di `IDENTITA_OBBLIGATORIA` corretto: diceva che il numero di addetti «non entra
+  in nessuna derivazione», e con la ricerca quella frase diventa falsa.
+  ✅ **LA PROVA CHE DOVEVA POTER FALLIRE, e ha fallito su richiesta tre volte**: la migrazione
+  **prova il trigger da sé** su una riga reale (99999 addetti respinti, valore 158 ripristinato) e
+  sul clone di CI — dove non ci sono versioni — **dichiara «installato, non verificato»** invece di
+  fingere; togliendo `employeeCount` dal contratto **5 casi su 7** diventano rossi; togliendo la
+  validazione dal servizio i due casi di integrazione mostrano **500 invece di 422** — cioè il dato
+  resta protetto dal trigger ma l'utente vede «si è rotto qualcosa». Live in produzione: `UPDATE`
+  a 7000 addetti → `BLUEPRINT_SIZE_BAND_MISMATCH: la fascia M copre 50-249 addetti, ma ne sono
+  dichiarati 7000`. Prove: unit **91/91** · integrazione fascicoli **12/12** · typecheck api/test/shared
+  ⚠ **il typecheck dei test ha preteso il build di `@heuresys/shared`**: `tsconfig.test.json`
+  risolve al **dist compilato**, che non conosce una funzione appena aggiunta alla sorgente (è il
+  D-03 già noto). Annotare i tipi a mano era il sintomo, non la cura
 - [ ] **F1 dove vive il contenuto di un modello** — migrazioni per unità/posizioni/competenze/
   indicatori di una versione di variante, con chiave naturale per dominio. Riuso di
   `sys_organization_unit_templates` **se la forma regge**, e bonifica delle 225 orfane (o la ragione

@@ -487,6 +487,109 @@ describe("fascicoli di configurazione", () => {
     );
     expect(dopo?.tid).toBe(firmata.id);
   });
+
+  /**
+   * #132 F0 — la coerenza fra i due modi di dire la dimensione.
+   *
+   * Prima del 2026-08-17 si poteva dichiarare fascia `XS` (1-9) con 5000 addetti e nulla
+   * protestava: nessun vincolo legava il numero alla fascia. Con la ricerca (#132 F4)
+   * quel divario manda a cercare l'azienda sbagliata, **e l'esito non lo rivela** — ne
+   * escrebbe un'azienda plausibile e generica.
+   *
+   * Qui si prova il presidio dal lato API, dove l'utente riceve un messaggio invece di un
+   * errore SQL. Ogni caso ha la sua CONTROPROVA: il valore che DEVE passare.
+   */
+  it("un numero di addetti fuori dalla fascia dichiarata viene respinto, e uno dentro passa", async () => {
+    const blueprintId = await creaFascicolo("COERENZA_FASCIA");
+    // Fascia M = 50-249 (letta dal catalogo, non scritta qui).
+    await t.app.inject({
+      method: "PATCH",
+      url: `/v1/tenant-blueprints/${blueprintId}/versions/1/identity`,
+      headers: hdr(admin),
+      payload: await identitaDi("64.19", "M"),
+    });
+
+    // (a) SOPRA il massimo: respinto, e il messaggio dice l'intervallo.
+    const sopra = await t.app.inject({
+      method: "PATCH",
+      url: `/v1/tenant-blueprints/${blueprintId}/versions/1/identity`,
+      headers: hdr(admin),
+      payload: { employeeCount: 5000 },
+    });
+    expect(sopra.statusCode).toBe(422);
+    const errSopra = sopra.json() as { error: { code: string; message: string } };
+    expect(errSopra.error.code).toBe("BLUEPRINT_SIZE_BAND_MISMATCH");
+    expect(errSopra.error.message).toContain("50-249");
+
+    // (b) SOTTO il minimo: respinto anche quello — un solo lato del controllo sarebbe
+    //     metà controllo.
+    const sotto = await t.app.inject({
+      method: "PATCH",
+      url: `/v1/tenant-blueprints/${blueprintId}/versions/1/identity`,
+      headers: hdr(admin),
+      payload: { employeeCount: 3 },
+    });
+    expect(sotto.statusCode).toBe(422);
+    expect((sotto.json() as { error: { code: string } }).error.code).toBe(
+      "BLUEPRINT_SIZE_BAND_MISMATCH",
+    );
+
+    // (c) CONTROPROVA: 158 sta dentro M e passa. Senza questo caso, un controllo che
+    //     rifiutasse SEMPRE sarebbe indistinguibile da uno giusto.
+    const dentro = await t.app.inject({
+      method: "PATCH",
+      url: `/v1/tenant-blueprints/${blueprintId}/versions/1/identity`,
+      headers: hdr(admin),
+      payload: { employeeCount: 158 },
+    });
+    expect(dentro.statusCode).toBe(200);
+    expect((dentro.json() as { identity: { employeeCount: number } }).identity.employeeCount).toBe(
+      158,
+    );
+
+    // (d) NIENTE E' STATO SCRITTO dai due tentativi respinti: si ri-legge dal database,
+    //     non dalla risposta. Un diniego che avesse comunque scritto sarebbe peggio di
+    //     un permesso.
+    const {
+      rows: [riga],
+    } = await pool.query<{ n: number | null }>(
+      `SELECT v.tenant_blueprint_version_employee_count AS n
+         FROM sys.sys_tenant_blueprint_versions v
+        WHERE v.tenant_blueprint_version_blueprint_id = $1`,
+      [blueprintId],
+    );
+    expect(riga?.n).toBe(158);
+  });
+
+  it("cambiare la FASCIA lasciando il numero è la stessa incoerenza, e viene respinta", async () => {
+    // Il controllo guarda lo stato RISULTANTE, non il campo toccato: l'incoerenza nasce
+    // dalla combinazione. Se guardasse solo il campo in arrivo, questo caso passerebbe —
+    // ed è il modo più facile di aggirare il vincolo senza saperlo.
+    const blueprintId = await creaFascicolo("COERENZA_FASCIA_INVERSA");
+    await t.app.inject({
+      method: "PATCH",
+      url: `/v1/tenant-blueprints/${blueprintId}/versions/1/identity`,
+      headers: hdr(admin),
+      payload: { ...(await identitaDi("64.19", "M")), employeeCount: 158 },
+    });
+
+    const {
+      rows: [xs],
+    } = await pool.query<{ id: string }>(
+      `SELECT enterprise_size_band_id AS id FROM sys.sys_enterprise_size_bands
+        WHERE enterprise_size_band_code = 'XS'`,
+    );
+    const r = await t.app.inject({
+      method: "PATCH",
+      url: `/v1/tenant-blueprints/${blueprintId}/versions/1/identity`,
+      headers: hdr(admin),
+      payload: { sizeBandId: xs?.id },
+    });
+    expect(r.statusCode).toBe(422);
+    expect((r.json() as { error: { code: string } }).error.code).toBe(
+      "BLUEPRINT_SIZE_BAND_MISMATCH",
+    );
+  });
 });
 
 interface ProcessoLetto {

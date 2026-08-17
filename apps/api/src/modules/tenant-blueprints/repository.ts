@@ -577,3 +577,38 @@ export async function findApprovers(db: Db): Promise<Array<{ userId: string }>> 
   );
   return r.rows.map((x) => ({ userId: x.user_id }));
 }
+
+/**
+ * I limiti di una fascia dimensionale.  (#132 F0)
+ *
+ * Serve al servizio per dire «la fascia M copre 50-249, ne hai dichiarati 5000» invece
+ * di lasciar parlare il trigger del database con un errore SQL e uno stato 500. I limiti
+ * si LEGGONO dal catalogo: scriverli qui li renderebbe una seconda fonte di verità,
+ * vera il giorno in cui la si scrive e falsa il giorno in cui il catalogo cambia.
+ *
+ * `max` nullo è la fascia più alta (`XL 1000+`), non un dato mancante.
+ */
+export async function findSizeBand(
+  db: Db,
+  sizeBandId: string,
+): Promise<{ code: string; min: number; max: number | null } | null> {
+  const r = await db.query<{
+    enterprise_size_band_code: string;
+    enterprise_size_band_min_employees: number;
+    enterprise_size_band_max_employees: number | null;
+  }>(
+    `SELECT enterprise_size_band_code,
+            enterprise_size_band_min_employees,
+            enterprise_size_band_max_employees
+       FROM sys.sys_enterprise_size_bands
+      WHERE enterprise_size_band_id = $1`,
+    [sizeBandId],
+  );
+  const row = r.rows[0];
+  if (!row) return null;
+  return {
+    code: row.enterprise_size_band_code,
+    min: row.enterprise_size_band_min_employees,
+    max: row.enterprise_size_band_max_employees,
+  };
+}

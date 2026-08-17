@@ -1,53 +1,59 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-17 (S1067).
+**Updated**: 2026-08-17 (S1068).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-⚠ **`#132` HA CAMBIATO NATURA (E29)**: non produce più solo i processi, produce **il modello con cui
-l'azienda viene costruita**, e l'archetipo scritto a mano **sparisce senza lasciare traccia**.
-Piano in 8 fasi: `.programmi/132-ricerca-genera-il-modello.md`. Prima di aprirla, leggilo.
+⚠ **IL MOTORE COSTRUISCE, MA COSTRUISCE SEMPRE UNA BANCA.** `#198` è a **8 task su 9**, ma la
+sorgente resta l'archetipo `RETAIL_BANK_REFERENCE` — **7 unità e 11 posizioni** contro le
+**158** di RTL vera: un fascicolo di qualunque settore produrrebbe quella banca. È la ragione
+di `#132` e la risposta alla domanda di Enzo a fine sessione (→ Top priorities).
 
-## Last session brief (S1067 «l'interruttore, e la domanda che ha smontato l'archetipo»)
+## Last session brief (S1068 «sette difetti trovati eseguendo, cinque nei miei strumenti»)
 
-Ciclo batch chiuso su tutte le voci, poi il lavoro è andato dove Enzo l'ha portato. Il motore che
-costruisce un'azienda da un fascicolo è arrivato **a 7 task su 9**: costruisce da un piano senza
-sapere da dove viene, l'atto è transazionale e registra ogni riga creata, e ora **le rotte lo
-raggiungono** — fino a stamattina il meccanismo esisteva ma nessuno poteva azionarlo.
+**Ciclo NON chiuso: 7 voci su 13**, col confine dichiarato all'apertura (il mandato «tutti i
+P1 e P2» somma ~15-20 sessioni) e la ragione accanto a ognuna delle sei non aperte —
+`.programmi/mandati/mandato-S1068-p3-p1-p2.md`, che porta anche la cronaca completa
+(`docs/archive/HANDOFF_S1068.md`, **non SoT**).
 
-Il filo vero però è un altro: alla prova live del T6 Enzo ha chiesto **da dove venissero i numeri**.
-Venivano da un file scritto a mano con **un solo archetipo**, una banca con tre filiali: il fascicolo
-di un ospedale avrebbe prodotto la stessa banca. Da lì la decisione di ritirarlo e far generare il
-modello dalla ricerca. Tre misure hanno riscritto la difficoltà del lavoro: il ritiro **non costa
-dati** (l'archetipo non ha mai costruito niente in produzione), il confine per sostituirlo era stato
-creato **quella stessa mattina**, e il vero ostacolo non era in nessun piano — **il contenuto di un
-modello non ha dove stare**.
+`#213` non era una scelta di prodotto ma un'identificazione: quei corsi erano di **SmartFood**,
+già purgata dalla `000241`. `#214` ha chiuso **tre** falle della stessa forma — «non so» letto
+come «sicuro» — e la coda passa da 31 a 16 neutri. `#198` T7 ha spostato una pagina **dopo aver
+misurato i permessi**. `#132` F0 ha chiuso un vincolo inesistente («fascia XS con 5000 addetti»
+passava). `#211` ①: i rossi della suite scendono da **35 a 18**.
+
+Il filo: **sette difetti trovati eseguendo, non ragionando** — cinque nei miei stessi strumenti
+di misura, compresi due rimedi che contenevano la bugia che stavano correggendo.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
 **Fresh session senza pendenze**: zero debiti o task incompleti; doppia verifica e review
 adversarial; le decisioni tecniche sono di Claude.
-
 ## Top priorities (prossima sessione)
 
-1. **`#132` F0 → F1** — F0 è piccola e va prima di tutto (i sei parametri obbligatori della ricerca +
-   il vincolo fascia↔numero che **oggi non esiste**: si può dichiarare `XS` con 5000 addetti). F1 è
-   dove vive il contenuto di un modello, e tocca `db/**` → **prova generale sul linux-pc prima del
-   push** · `.programmi/132-ricerca-genera-il-modello.md`
-2. **`#198` T7** — le due pagine (costruzione e registro) nel prodotto. Non dipende da dove nasce il
-   modello, quindi si può intercalare in qualunque momento · `resume-from: T7`
-3. **`#211` la cura della famiglia ①** — la suite E2E completa non può essere verde finché dura più
-   dei 15 minuti di una sessione: da decidere se rinnovare i cookie dentro la corsa o rigenerare lo
-   `storageState` per blocco
+1. **Il campo di prova + `#198` T9** — è ciò che Enzo ha chiesto esplicitamente a fine
+   sessione: *«se e quando sarà possibile testare la creazione di un nuovo tenant/azienda»*.
+   Serve la procedura sul **gemello** (E27) con `scripts/banco_tenant.py` coi due pulsanti
+   *crea usa-e-getta* / *disfa*, poi T9: creare un'azienda vera, costruirla, misurarla,
+   archiviarla. **Nessuna dipendenza aperta · ~1 sessione** · chiude `#198` e sblocca `#197`
+2. **`#132` F1** — dove vive il contenuto di un modello (unità/posizioni/competenze/
+   indicatori). Tocca `db/**` → **prova generale sul linux-pc prima del push**. È la fase più
+   grossa del programma · `.programmi/132-ricerca-genera-il-modello.md`
+   ⚠ **La stima «~2 sessioni» nel register è del 5 agosto**, precedente alla riscrittura
+   E29/E30 che ha cambiato la natura della voce. Con le 7 fasi residue la stima onesta —
+   **dichiarata, non misurata** — è 4-6 sessioni
+3. **`#211`** — le famiglie ②③④⑤⑥ (18 casi) e il reperto degli **80 casi non eseguiti**, causa
+   **non isolata** (escluse `maxFailures` e i blocchi `serial`)
 
 ## Open questions
 
-- **`#213`** — cinque percorsi formativi non hanno titolare e non sono catalogo comune: **nessuna
-  azienda li vede**. Tre si chiamano `OLDDB::learning_paths::<uuid>`. A chi appartengono è una scelta
-  di prodotto, non tecnica.
-- **`#214`** — il criterio della coda dell'agente ha un buco: «più classi» non conta fra le riservate,
-  quindi `analytics` passa fra i «neutri» pur toccando dati di persona. Chiudere il buco o aprire
-  `positions` (il primo davvero neutro)?
-- **`#197`** resta aperta a metà per costruzione: la sua seconda condizione è il T9 di `#198`.
+- **`#215`** (nuova) — lo stato impossibile di `#213` in altre due tabelle, ma la cura è
+  **l'opposto**: le 29 righe di `sys_compensation_bands` sono i **CCNL e i sindacati**, che I21
+  vuole aperti a ogni industria — classificate male, non residui. Cancellarle sarebbe stato l'errore
+- **`apps/web/next-env.d.ts`** — riscritto da `next build`, oscilla fra build di sviluppo e di
+  produzione. Va deciso **una volta** come trattarlo, o torna a ogni corsa
+- **Commit locali non pushati**: il push non è stato autorizzato in S1068 (l'autorizzazione è
+  per-sessione)
+- **`#197`** resta aperta a metà per costruzione: la sua seconda condizione è il T9 di `#198`
 
 ## Verification
 
@@ -56,9 +62,9 @@ python docs/kb/tools/session_start.py               # menu + salute, un colpo so
 python docs/kb/tools/handoff_lint.py                # cancello di coerenza, bloccante
 python docs/kb/tools/programmi.py                   # da dove riprendono gli 8 programmi
 bash scripts/verifica-deploy.sh                     # DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO
-```
-
-⚠ **La verifica lunga si esegue sul linux-pc, non qui** (standard S1054):
-```bash
 ssh linux-pc 'source ~/.nvm/nvm.sh; nvm use 22; cd ~/heuresys-advanced/apps/api && pnpm exec vitest run'
 ```
+
+⚠ La verifica lunga si esegue **sul linux-pc, non qui** (standard S1054). La suite E2E
+completa passa ora da un wrapper a fasi (`#211` ①): `cd apps/web && pnpm test:e2e:prod`,
+che esce **rosso** anche a fasi verdi se un caso non è stato eseguito.

@@ -14,8 +14,30 @@
 import { createSdkMcpServer, tool } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod";
 import type { HeuresysClient } from "./heuresys-client.js";
+import type { AtlasOperationResolver } from "./atlas-resolver.js";
 
-export function buildHeuresysMcp(client: HeuresysClient) {
+/**
+ * Sostituisce i `:segnaposto` del percorso con i parametri, e rifiuta ciò che non torna.
+ *
+ * Due rifiuti, e sono la stessa regola vista da due lati: un segnaposto senza valore
+ * lascerebbe un percorso letterale `/:id` che l'API interpreterebbe come un id chiamato
+ * «:id»; un valore che contiene `/` o `?` uscirebbe dal percorso previsto e ne
+ * raggiungerebbe un altro — che è il modo in cui una lettura diventa qualcos'altro.
+ * Il resolver ha già detto QUALE percorso; qui si difende il fatto che resti quello.
+ */
+export function bindPath(template: string, params: Record<string, unknown>): string {
+  return template.replace(/:([A-Za-z_][A-Za-z0-9_]*)/g, (_m, nome: string) => {
+    const v = params[nome];
+    if (v === undefined || v === null || v === "") {
+      throw new Error(`parametro di percorso mancante: ${nome}`);
+    }
+    const s = String(v);
+    if (/[/?#]/.test(s)) throw new Error(`parametro di percorso non ammesso: ${nome}`);
+    return encodeURIComponent(s);
+  });
+}
+
+export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOperationResolver) {
   const ok = (d: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(d) }] });
 
   const rd = (n: string, p: string) =>
@@ -41,9 +63,87 @@ export function buildHeuresysMcp(client: HeuresysClient) {
       ok(await client.call("DELETE", `${base}/${a.id}`)),
     );
 
+  // --- IL CATALOGO GENERICO (ADR-0033, #156) --------------------------------------
+  // Tre strumenti che non nominano nessuna entità: il dominio lo porta la mappa generata
+  // dall'atlante. Si montano SOLO se un resolver c'è ed è non vuoto — un catalogo che
+  // annuncia capacità e poi nega ogni chiamata insegna al modello a insistere, e riempie
+  // il diario di dinieghi che non sono decisioni di sicurezza ma un errore di montaggio.
+  const generici = operations && !operations.isEmpty()
+    ? [
+        tool(
+          "hrx_concepts_search",
+          "Elenca i concetti di dominio che l'agente puo' interrogare (perimetri aperti). " +
+            "Filtro testuale facoltativo. Ritorna id e operazioni disponibili.",
+          { query: z.string().optional() },
+          async (a: { query?: string }) => {
+            const q = (a.query ?? "").trim().toLowerCase();
+            const ids = operations
+              .conceptIds()
+              .filter((id) => q === "" || id.toLowerCase().includes(q));
+            return ok({
+              concepts: ids.map((id) => ({
+                conceptId: id,
+                operations: Object.keys(operations.operationsOf(id)).sort(),
+              })),
+            });
+          },
+        ),
+        tool(
+          "hrx_concept_describe",
+          "Descrive un concetto: l'elenco CHIUSO delle sue operazioni, con metodo, percorso " +
+            "e permesso richiesto. Cio' che non compare qui non e' invocabile.",
+          { conceptId: z.string() },
+          async (a: { conceptId: string }) => {
+            const ops = operations.operationsOf(a.conceptId);
+            // Un concetto ignoto NON e' un elenco vuoto: la differenza fra «non esiste» e
+            // «esiste e non fa nulla» e' esattamente cio' che il modello deve poter dire.
+            if (Object.keys(ops).length === 0) {
+              return ok({ conceptId: a.conceptId, known: false, operations: {} });
+            }
+            return ok({ conceptId: a.conceptId, known: true, operations: ops });
+          },
+        ),
+        tool(
+          "hrx_entity_query",
+          "Esegue un'operazione dichiarata da hrx_concept_describe. Il metodo e il percorso " +
+            "li decide la mappa, non questo input: dichiararsi in lettura non cambia cio' che " +
+            "l'operazione e'. params riempie i segnaposto del percorso; query va in querystring.",
+          {
+            conceptId: z.string(),
+            operationId: z.string(),
+            params: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
+            query: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
+          },
+          async (a: {
+            conceptId: string;
+            operationId: string;
+            params?: Record<string, string | number | boolean>;
+            query?: Record<string, string | number | boolean>;
+          }) => {
+            const op = operations.operationsOf(a.conceptId)[a.operationId];
+            // Ridondante col gate, e deve restarlo: il gate e' la guardia di sicurezza, questo
+            // e' l'errore leggibile per il modello. Se un giorno il gate venisse invocato in
+            // modo diverso, questa riga resta l'ultima che impedisce una chiamata inventata.
+            if (!op) {
+              throw new Error(
+                `operazione non dichiarata: ${a.conceptId}.${a.operationId} — usa hrx_concept_describe`,
+              );
+            }
+            const percorso = bindPath(op.path, a.params ?? {});
+            const qs = new URLSearchParams(
+              Object.entries(a.query ?? {}).map(([k, v]) => [k, String(v)] as [string, string]),
+            ).toString();
+            const base = `/${a.conceptId}${percorso === "/" ? "" : percorso}`;
+            return ok(await client.call(op.method, qs ? `${base}?${qs}` : base));
+          },
+        ),
+      ]
+    : [];
+
   return createSdkMcpServer({
     name: "heuresys",
     tools: [
+      ...generici,
       // --- reads (auto-approved) ---
       rd("hrx_org_units_list", "/organization-units"),
       rdId("hrx_org_units_get", "/organization-units"),

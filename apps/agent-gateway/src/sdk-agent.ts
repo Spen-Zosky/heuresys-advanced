@@ -11,6 +11,7 @@
  */
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { buildHeuresysMcp } from "./mcp-tools.js";
+import { AtlasOperationResolver } from "./atlas-resolver.js";
 import { makeCanUseTool, type ApproveFn, type GatePrincipal } from "./write-gate.js";
 import type { AuditSink } from "./audit-sink.js";
 import type { HeuresysClient } from "./heuresys-client.js";
@@ -25,6 +26,11 @@ export interface RunHrAgentOptions {
   allowlist?: ReadonlySet<string>;
   /** Principal context for the audit trail (forwarded user vs service user). */
   principal?: GatePrincipal;
+  /**
+   * Risolutore dei perimetri. Di default si carica dall'atlante generato; i test ne
+   * iniettano uno costruito in memoria, per non dipendere da un file che cambia.
+   */
+  operations?: AtlasOperationResolver;
 }
 
 export async function* runHrAgent(
@@ -32,8 +38,15 @@ export async function* runHrAgent(
   client: HeuresysClient,
   opts: RunHrAgentOptions,
 ) {
-  const heuresys = buildHeuresysMcp(client);
+  // Il resolver dei perimetri (#156, ADR-0033 §5.2), collegato in S1067. LO STESSO
+  // oggetto va al catalogo e al gate, e non e' un'ottimizzazione: se il catalogo montasse
+  // una mappa e il gate ne consultasse un'altra, l'agente potrebbe vedere un'operazione
+  // che la guardia non conosce — cioe' esattamente il divario che il gate esiste per
+  // impedire. Una fonte sola, letta una volta.
+  const operations = opts.operations ?? AtlasOperationResolver.load();
+  const heuresys = buildHeuresysMcp(client, operations);
   const canUseTool = makeCanUseTool(opts.approve, {
+    operations,
     ...(opts.approvalTimeoutMs !== undefined ? { approvalTimeoutMs: opts.approvalTimeoutMs } : {}),
     ...(opts.audit !== undefined ? { audit: opts.audit } : {}),
     ...(opts.allowlist !== undefined ? { allowlist: opts.allowlist } : {}),

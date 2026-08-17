@@ -14,6 +14,26 @@
  * SDK-free + pure data so it is unit-testable without the live @anthropic-ai/claude-agent-sdk.
  */
 
+/**
+ * Il CATALOGO GENERICO (ADR-0033, #156 — collegato in S1067).
+ *
+ * Tre strumenti che non nominano nessuna entità: quello che sanno fare lo dice
+ * `docs/kb/atlas/agent-operations.json`, generato dall'atlante e dai perimetri decisi.
+ * Aprire un perimetro nuovo non aggiunge una riga qui — ed è il punto: questo elenco
+ * cresce solo quando cambia il *tipo* di capacità, non quando cambia il dominio.
+ *
+ * `hrx_entity_query` sta fra le LETTURE **per nome soltanto**, e non basterebbe: la sua
+ * classe la decide il resolver dalla coppia (conceptId, operationId), non la stringa. Se
+ * la coppia non si risolve la chiamata è `unresolved` → NEGATA, non «letta». La prova che
+ * lo dimostra è che una `delete_by_id` su un perimetro di sola lettura **non esiste nella
+ * mappa**, quindi non c'è niente da filtrare: non è bloccata, è inesistente.
+ */
+export const GENERIC_TOOL_NAMES = [
+  "hrx_concepts_search",
+  "hrx_concept_describe",
+  "hrx_entity_query",
+] as const;
+
 /** Read tools (auto-allowed by the gate once allowlisted). */
 export const READ_TOOL_NAMES = [
   "hrx_org_units_list",
@@ -72,6 +92,7 @@ function withNamespace(names: readonly string[]): string[] {
 
 /** Frozen deny-by-default allowlist used as the gate's safe default. */
 export const DEFAULT_TOOL_ALLOWLIST: ReadonlySet<string> = new Set([
+  ...withNamespace(GENERIC_TOOL_NAMES),
   ...withNamespace(READ_TOOL_NAMES),
   ...withNamespace(WRITE_TOOL_NAMES),
 ]);

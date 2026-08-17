@@ -102,7 +102,12 @@ export default tseslint.config(
   // declare their own `/* global */` incl. `document`, so a broad .mjs block would
   // collide with them via no-redeclare).
   {
-    files: ["apps/web/scripts/e2e-node22.mjs"],
+    // I due wrapper della suite E2E: `e2e-node22.mjs` (D-36, Playwright sotto Node 22) e
+    // `e2e-blocchi.mjs` (#211 ①, S1068: la suite in fasi separate, cosi' un blocco rosso
+    // non impedisce ai successivi di girare). Restano elencati **uno per uno** e non come
+    // `apps/web/scripts/*.mjs`: gli altri script di quella cartella dichiarano i propri
+    // `/* global */` includendo `document`, e un blocco largo collideva via no-redeclare.
+    files: ["apps/web/scripts/e2e-node22.mjs", "apps/web/scripts/e2e-blocchi.mjs"],
     languageOptions: {
       globals: { ...globals.node },
     },

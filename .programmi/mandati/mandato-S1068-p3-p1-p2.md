@@ -83,11 +83,26 @@ che i vincoli tecnici impongono, non una scelta di comodo.
   **Pretende il campo di prova** (E27: prima sul gemello del linux-pc, poi in produzione), che è
   G4 del mandato precedente e non è ancora fatto → si apre dopo, o resta al prossimo ciclo
 - [ ] **F4 `#197`** (P3) — si chiude quando T9 esiste
-- [ ] **F5 `#132` F0 → F1** — i sei parametri della ricerca + il vincolo fascia↔numero; poi dove
-  vive il contenuto di un modello (tocca `db/**` → **prova generale sul linux-pc prima del push**)
+- [x] **F5a `#132` F0** — 2026-08-17 · mig. `000323` + contratto in `@heuresys/shared` + validazione
+  nel servizio. Il vincolo fascia↔numero **non esisteva**: «XS con 5000 addetti» passava. Due strati
+  con ruoli distinti (trigger per il dato, servizio per il messaggio: il sabotaggio mostra 500 vs
+  422) e **tre sabotaggi** che hanno fatto vedere rosso. Sul clone di CI la migrazione **dichiara**
+  «installato, non verificato» invece di fingere. Unit 91/91, integrazione 12/12
+- [ ] **F5b `#132` F1** — dove vive il contenuto di un modello (unità/posizioni/competenze/
+  indicatori): tocca `db/**` → prova generale sul linux-pc prima del push. È la fase più grossa
+  del programma e **non è stata aperta**: dichiarato, non lasciato intendere
 - [ ] **F6 `#205`** (P3) — si chiude quando cade il gate di `#132`
-- [ ] **F7 `#211` la cura ①** — la sessione scade a metà corsa: rinnovo dentro la corsa o
-  `storageState` per blocco
+- [~] **F7 `#211` la cura ①** — 2026-08-17, **implementata, corsa di verifica IN CORSO**. La scelta
+  fra le due vie era già decisa dai fatti: il rinnovo dentro la corsa fa scattare
+  `REFRESH_REPLAY_DETECTED` (refresh token single-use, ed era scritto nella config da prima), e
+  allungare il TTL altererebbe il sistema sotto test. Quindi il blocco lungo è spezzato in **tre**,
+  con un re-login prima di ciascuno: `setup-refresh → chromium → setup-refresh-2 → chromium-2 →
+  setup-refresh-3 → chromium-3`. La divisione è **derivata dal filesystem** — un elenco a mano
+  lascerebbe fuori la prossima spec in silenzio, che è il difetto stesso di `#211` — e il controllo
+  di copertura è **provato capace di fallire** («96 da eseguire, 64 coperte» → la config non parte).
+  Corrette due affermazioni della vecchia intestazione diventate false: un re-login **non** tiene la
+  suite sotto il tetto «anche mentre cresce», e una passata di setup fa **6** login, non 5.
+  **Manca il numero della corsa completa**: è la misura che #211 dichiara come criterio
 - [ ] **F8 `#142` F3b** — i dati dentro le viste
 - [ ] **F9 `#143` F2** — modello dati «una squadra è un progetto»
 - [ ] **F10 `#159` F2** — il ponte gateway↔pagine

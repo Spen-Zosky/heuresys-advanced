@@ -108,6 +108,7 @@ import { surveysRoutes } from "./modules/surveys/routes.js";
 import { engagementFeedbackRoutes } from "./modules/engagement-feedback/routes.js";
 import { goalsRoutes } from "./modules/goals/routes.js";
 import { okrsRoutes } from "./modules/okrs/routes.js";
+import { generatedOriginsRoutes } from "./modules/generated-origins/routes.js";
 import { provenanceRoutes } from "./modules/provenance/routes.js";
 import { evidenceRoutes } from "./modules/evidence/routes.js";
 import { timeOffRoutes } from "./modules/time-off/routes.js";
@@ -466,6 +467,9 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(goalsRoutes, { prefix: "/v1/goals" });
   await app.register(okrsRoutes, { prefix: "/v1/okrs" });
   await app.register(provenanceRoutes, { prefix: "/v1/provenance" }); // #28 Trust Ledger (S1018)
+  // #198 T6 — il registro dell'origine: cosa di un'azienda e' stato generato da un fascicolo.
+  // Sola lettura; chi scrive e' l'atto di applicazione, dentro la sua transazione.
+  await app.register(generatedOriginsRoutes, { prefix: "/v1/generated-origins" });
   await app.register(evidenceRoutes, { prefix: "/v1/evidence" }); // #27 evidence layer (S1018)
   await app.register(timeOffRoutes, { prefix: "/v1/time-off" }); // A/L8 (#33) time-off/leave read
   await app.register(userTimelineRoutes, { prefix: "/v1/user-timeline" }); // D5 (#49) storia della persona

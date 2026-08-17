@@ -417,6 +417,11 @@
       "heuresys-source": "./src/schemas/engagement-feedback.ts",
       "default": "./dist/schemas/engagement-feedback.js"
     },
+    "./schemas/generated-origins": {
+      "types": "./dist/schemas/generated-origins.d.ts",
+      "heuresys-source": "./src/schemas/generated-origins.ts",
+      "default": "./dist/schemas/generated-origins.js"
+    },
     "./schemas/goals": {
       "types": "./dist/schemas/goals.d.ts",
       "heuresys-source": "./src/schemas/goals.ts",

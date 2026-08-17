@@ -30,6 +30,8 @@ import {
   VersionParamSchema,
   ProcessParamSchema,
   DiffQuerySchema,
+  BuildPlanPreviewSchema,
+  ApplyVersionResponseSchema,
 } from "@heuresys/shared";
 import { tenantBlueprintsService as svc } from "./service.js";
 
@@ -208,6 +210,30 @@ export const tenantBlueprintsRoutes: FastifyPluginAsyncZod = async (app) => {
       );
       reply.code(204).send(null);
     },
+  );
+
+  // #198 T6 — IL PIANO, SENZA SCRIVERE. Permesso di sola lettura: guardare cosa
+  // nascerebbe non e' un atto, e pretendere `write` per una simulazione insegnerebbe a
+  // chiedere il permesso piu' alto per l'operazione piu' innocua.
+  app.post(
+    "/:id/versions/:number/build-plan",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(READ)],
+      schema: { params: VersionParamSchema, response: { 200: BuildPlanPreviewSchema } },
+    },
+    async (req) => svc.buildPlan(actor(req), req.params.id, req.params.number),
+  );
+
+  // #198 T6 — L'APPLICAZIONE. NON costruisce: apre la richiesta di approvazione, e la
+  // costruzione avviene quando quella viene firmata. La risposta non porta conteggi di
+  // righe apposta — vederli qui farebbe credere che sia gia' successo qualcosa.
+  app.post(
+    "/:id/versions/:number/apply",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: { params: VersionParamSchema, response: { 200: ApplyVersionResponseSchema } },
+    },
+    async (req) => svc.applyVersion(actor(req), req.params.id, req.params.number),
   );
 
   app.post(

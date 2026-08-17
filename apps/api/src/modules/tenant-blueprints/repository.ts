@@ -264,6 +264,23 @@ export async function listVersions(
   return r.rows.map(toVersion);
 }
 
+/**
+ * La chiave della sorgente di costruzione dichiarata dal modello ancorato (#198 T6).
+ *
+ * Si legge dalla VERSIONE DI VARIANTE, non dalla versione di fascicolo: e' il modello a
+ * sapere da dove nasce il suo contenuto, e il fascicolo si limita ad ancorarlo. `null` non
+ * e' un ripiego su un archetipo qualsiasi — chi chiama deve fermarsi.
+ */
+export async function findBuildSourceKey(db: Db, variantVersionId: string): Promise<string | null> {
+  const r = await db.query<{ k: string | null }>(
+    `SELECT blueprint_variant_version_build_source_key AS k
+       FROM sys.sys_blueprint_variant_versions
+      WHERE blueprint_variant_version_id = $1`,
+    [variantVersionId],
+  );
+  return r.rows[0]?.k ?? null;
+}
+
 export async function findVersion(
   db: Db,
   blueprintId: string,

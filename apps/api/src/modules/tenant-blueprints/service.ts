@@ -22,6 +22,9 @@ import { proposeModel, isPublishedVariantVersion } from "./derivation.js";
 import { diffVersions, diffAgainstModelLatest } from "./diff.js";
 import { approvalService } from "../approvals/service.js";
 import { TENANT_BLUEPRINT_APPROVAL } from "../approvals/effects/tenant-blueprint-approval.js";
+import { TENANT_BLUEPRINT_APPLICATION } from "../approvals/effects/tenant-blueprint-application.js";
+import { ArchetypeBuildSource } from "../tenant-materialization/build-source.js";
+import { materialize } from "../tenant-materialization/repository.js";
 import type {
   TenantBlueprint,
   TenantBlueprintDetail,
@@ -36,6 +39,8 @@ import type {
   BlueprintDiffResponse,
   SubmitVersionResponse,
   BlueprintIdentity,
+  BuildPlanPreview,
+  ApplyVersionResponse,
 } from "@heuresys/shared";
 
 /** Violazione di un indice unico. */
@@ -417,5 +422,131 @@ export const tenantBlueprintsService = {
       throw new NotFoundError(`La versione ${against} di questo fascicolo non esiste`);
     }
     return diffVersions(pool, corrente, altra);
+  },
+
+  /**
+   * #198 T6 — IL PIANO, SENZA SCRIVERE. Dice cosa nascerebbe e cosa esiste già, e non tocca
+   * niente: `materialize(..., "plan")` fa solo conteggi di esistenza.
+   *
+   * `alreadyThere` non è un dettaglio di presentazione: è ciò che distingue una costruzione
+   * nuova da una ri-applicazione su un'azienda già popolata, e chi guarda il piano deve
+   * poterlo vedere **prima** di firmare, non scoprirlo dopo.
+   */
+  async buildPlan(_a: ActorContext, id: string, number: number): Promise<BuildPlanPreview> {
+    const fascicolo = await esisteFascicolo(id);
+    const v = await repo.findVersion(pool, id, number);
+    if (!v) throw new NotFoundError("Versione di fascicolo non trovata");
+    if (!fascicolo.tenantId) {
+      throw new ConflictError(
+        "Il fascicolo non è legato a un'azienda: non c'è nulla da costruire",
+        "BLUEPRINT_TENANT_NOT_LINKED",
+      );
+    }
+    const chiave = v.variantVersionId
+      ? await repo.findBuildSourceKey(pool, v.variantVersionId)
+      : null;
+    if (!chiave) {
+      throw new ConflictError(
+        "La versione non dichiara una sorgente di costruzione (nessun modello ancorato, o il modello non ne dichiara una)",
+        "BLUEPRINT_BUILD_SOURCE_MISSING",
+      );
+    }
+    const sorgente = ArchetypeBuildSource.fromKey(chiave);
+    if (!sorgente) {
+      throw new ConflictError(`Sorgente di costruzione sconosciuta: ${chiave}`, "BLUEPRINT_BUILD_SOURCE_UNKNOWN");
+    }
+    const piano = await sorgente.plan();
+    // `plan` è di sola lettura, ma vuole comunque un client: si prende dal pool e si
+    // rilascia. Nessuna transazione — non c'è niente da annullare.
+    const client = await pool.connect();
+    let conteggi;
+    try {
+      conteggi = await materialize(client, fascicolo.tenantId, piano, "plan");
+    } finally {
+      client.release();
+    }
+    const totali = {
+      orgUnits: piano.orgUnits.length,
+      positions: piano.positions.length,
+      users: piano.incumbents.length,
+      assignments: piano.incumbents.length,
+      skills: piano.skills.length,
+      kpis: piano.kpis.length,
+      skillEvidence: piano.incumbents.reduce((n, i) => n + i.skillEvidence.length, 0),
+      kpiEvidence: piano.incumbents.reduce((n, i) => n + i.kpiEvidence.length, 0),
+    };
+    const chiavi = Object.keys(totali) as Array<keyof typeof totali>;
+    const alreadyThere = Object.fromEntries(
+      chiavi.map((k) => [k, totali[k] - conteggi[k]]),
+    ) as BuildPlanPreview["alreadyThere"];
+    return {
+      sourceKey: piano.sourceKey,
+      label: piano.label,
+      tenantId: fascicolo.tenantId,
+      willCreate: {
+        orgUnits: conteggi.orgUnits,
+        positions: conteggi.positions,
+        users: conteggi.users,
+        assignments: conteggi.assignments,
+        skills: conteggi.skills,
+        kpis: conteggi.kpis,
+        skillEvidence: conteggi.skillEvidence,
+        kpiEvidence: conteggi.kpiEvidence,
+      },
+      alreadyThere,
+    };
+  },
+
+  /**
+   * #198 T6 — L'APPLICAZIONE **NON COSTRUISCE**: apre la richiesta di approvazione.
+   *
+   * È la stessa forma di `submitVersion`, e la ragione è la stessa di P1: costruire
+   * un'azienda è un atto, e un atto ha bisogno di qualcuno che lo firmi. Chi chiama questa
+   * rotta non vede nascere niente — la costruzione avviene quando l'approvazione arriva, e
+   * la fa l'effetto `TENANT_BLUEPRINT_APPLICATION` dentro una transazione sola.
+   */
+  async applyVersion(a: ActorContext, id: string, number: number): Promise<ApplyVersionResponse> {
+    const fascicolo = await esisteFascicolo(id);
+    const v = await repo.findVersion(pool, id, number);
+    if (!v) throw new NotFoundError("Versione di fascicolo non trovata");
+    if (v.status !== "APPROVED") {
+      throw new ConflictError(
+        `La versione ${v.number} è in stato ${v.status}: si applica solo ciò che è stato approvato`,
+        "BLUEPRINT_VERSION_NOT_APPROVED",
+      );
+    }
+    if (v.appliedAt) {
+      throw new ConflictError(
+        `La versione ${v.number} è già stata applicata`,
+        "BLUEPRINT_VERSION_ALREADY_APPLIED",
+      );
+    }
+    if (!fascicolo.tenantId) {
+      throw new ConflictError(
+        "Il fascicolo non è legato a un'azienda: non c'è nulla da costruire",
+        "BLUEPRINT_TENANT_NOT_LINKED",
+      );
+    }
+
+    const approvatori = await repo.findApprovers(pool);
+    if (approvatori.length === 0) {
+      throw new ConflictError(
+        "Nessun utente puo' firmare la costruzione: manca chi detiene tenant_blueprint:approve",
+        "BLUEPRINT_NO_APPROVER",
+      );
+    }
+    const richiesta = await approvalService.createRequest(a, {
+      title: `Costruzione azienda — fascicolo ${fascicolo.code}, versione ${v.number}`,
+      body: `Applicazione della versione ${v.number}: dal fascicolo «${fascicolo.name}» alle righe dell'azienda. Ogni riga creata sarà registrata nel registro dell'origine.`,
+      resourceType: TENANT_BLUEPRINT_APPLICATION,
+      resourceId: v.tenantBlueprintVersionId,
+      approverUserIds: approvatori.map((x) => x.userId),
+      priority: "HIGH",
+    });
+    return {
+      approvalRequestId: richiesta.approvalRequestId,
+      versionId: v.tenantBlueprintVersionId,
+      status: v.status,
+    };
   },
 };

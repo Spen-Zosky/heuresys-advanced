@@ -9,6 +9,8 @@ import { apiFetch } from "../../../lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "../../../components/data-table-panel";
 import { EnumStatusBadge } from "../../../components/enum-badge";
 import { useEnumLabel } from "../../../lib/enum-labels";
+import { nonEUnaPersona } from "../../../lib/person-label";
+import { StatusPill } from "../../../components/status-pill";
 
 interface UsersList {
   items: User[];
@@ -35,7 +37,23 @@ export default function UsersListPage() {
       },
       { header: t("users.columns.email"), cell: (u) => <span data-testid="user-email" className="text-muted-foreground">{u.email}</span> },
       { header: t("users.columns.status"), cell: (u) => <EnumStatusBadge domain="userStatus" value={u.status} /> },
-      { header: t("users.columns.type"), cell: (u) => <span className="text-xs uppercase text-muted-foreground">{enumLabel("userType", u.type)}</span> },
+      {
+        // #198 T7 — il tipo c'era già, ma in grigio come ogni altra cella: leggibile,
+        // non DISTINGUIBILE. Chi non è una persona ora porta una pastiglia; le persone
+        // restano in grigio, perché un contrassegno su tutte le righe non distingue
+        // nessuna riga.
+        header: t("users.columns.type"),
+        cell: (u) =>
+          nonEUnaPersona(u) ? (
+            <span data-testid="user-type-badge">
+              <StatusPill tone="warning">{enumLabel("userType", u.type)}</StatusPill>
+            </span>
+          ) : (
+            <span className="text-xs uppercase text-muted-foreground">
+              {enumLabel("userType", u.type)}
+            </span>
+          ),
+      },
     ],
     [t, enumLabel],
   );

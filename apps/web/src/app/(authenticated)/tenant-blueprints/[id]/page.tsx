@@ -95,6 +95,18 @@ export default function TenantBlueprintDetailPage({
           >
             {t("dossier.diff.title")}
           </Link>
+          {/* #198 T7 — la porta della costruzione. Sta accanto al confronto e non
+              dietro una condizione sullo stato: il PIANO si può leggere in qualunque
+              stato (è una lettura), ed è la pagina stessa a dire perché la firma non
+              è possibile. Nasconderla in DRAFT vorrebbe dire non poter guardare cosa
+              nascerebbe prima di far approvare il fascicolo — cioè il contrario. */}
+          <Link
+            href={`/tenant-blueprints/${id}/versions/${versione.number}/build`}
+            className="text-sm text-foreground underline-offset-2 hover:underline"
+            data-testid="tenant-blueprint-build-link"
+          >
+            {t("dossier.build.title")}
+          </Link>
         </div>
       </header>
 

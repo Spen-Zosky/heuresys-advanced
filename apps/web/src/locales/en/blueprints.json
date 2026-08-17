@@ -213,6 +213,42 @@
       "renamed": "Renamed",
       "identityChanged": "Identity changed",
       "none": "No difference"
+    },
+    "build": {
+      "title": "Company build",
+      "description": "The plan of what would be created, and the signature that creates it. Two distinct steps, and neither builds on its own.",
+      "plan": "The plan",
+      "planIsReadOnly": "Asking for the plan writes nothing: it is a read, and the numbers below are a forecast.",
+      "planError": "The plan cannot be computed for this version.",
+      "what": "What",
+      "willCreate": "Would be created",
+      "alreadyThere": "Already there",
+      "alreadyThereMeans": "\"Already there\" is what tells a fresh build apart from a re-apply onto an already populated company.",
+      "apply": "Apply",
+      "applyOpensApproval": "Applying does NOT build: it opens an approval request. The build happens when that request is approved.",
+      "applyAction": "Request approval",
+      "applying": "Sending...",
+      "applyDone": "Approval request opened.",
+      "applyError": "The request was not opened.",
+      "noCountsYet": "No row counts, and that is not an omission: nothing has been built yet.",
+      "approvalRequest": "Request",
+      "toApprovals": "Go to approvals",
+      "blockedNoPermission": "Write permission on dossiers is required.",
+      "blockedApplied": "This version has already been applied.",
+      "blockedNotApproved": "The version is in state {{status}}: only an approved version can be applied.",
+      "registry": "Generated records registry",
+      "registryHint": "After the build, every row created by this version is listed in the registry, with its table and rationale.",
+      "toRegistry": "Open the registry",
+      "rows": {
+        "orgUnits": "Organization units",
+        "positions": "Positions",
+        "users": "Placeholder people",
+        "assignments": "Assignments",
+        "skills": "Skills",
+        "kpis": "KPIs",
+        "skillEvidence": "Skill evidence",
+        "kpiEvidence": "KPI evidence"
+      }
     }
   }
 }

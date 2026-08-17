@@ -15,6 +15,8 @@ import type {
   UserListResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useEnumLabel } from "@/lib/enum-labels";
+import { etichettaPersona } from "@/lib/person-label";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 
 const SELECT_CLASS =
@@ -34,6 +36,7 @@ function statusVariant(s: ApprovalStatus): "success" | "secondary" | "destructiv
 
 export default function ApprovalsPage() {
   const { t } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState("");
   const [title, setTitle] = useState("");
@@ -172,9 +175,12 @@ export default function ApprovalsPage() {
                 value={approverIds}
                 onChange={(e) => setApproverIds(Array.from(e.target.selectedOptions, (o) => o.value))}
               >
+                {/* #198 T7 — un segnaposto generato non deve poter essere scelto come
+                    approvatore senza che si veda: la richiesta di firma resterebbe
+                    appesa a qualcuno che non esiste. */}
                 {(users.data?.items ?? []).map((u) => (
                   <option key={u.userId} value={u.userId}>
-                    {u.displayName}
+                    {etichettaPersona(u, enumLabel)}
                   </option>
                 ))}
               </select>

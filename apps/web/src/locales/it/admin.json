@@ -1152,5 +1152,31 @@
     },
     "updateError": "Non è stato possibile aggiornare lo stato.",
     "consentNote": "Consenso raccolto il {{date}} (versione {{version}})."
+  },
+  "generatedOrigins": {
+    "title": "Registro delle righe generate",
+    "description": "Quali righe di quest'azienda sono nate da una costruzione, e da quale versione di quale fascicolo. Non «quante»: quali.",
+    "byTable": "Per tabella",
+    "records": "Le righe",
+    "error": "Il registro non e' leggibile.",
+    "empty": "Nessuna riga.",
+    "nothingYet": "Il registro e' vuoto, e questo non e' un guasto: finche' nessuna costruzione e' stata applicata non c'e' niente da registrare.",
+    "allStatuses": "Tutti gli stati",
+    "noJustification": "nessuna ragione registrata",
+    "cols": {
+      "targetTable": "Tabella",
+      "targetRecord": "Riga",
+      "status": "Stato",
+      "justification": "Ragione",
+      "createdAt": "Creata il",
+      "total": "Totale"
+    },
+    "kpi": {
+      "total": "Righe registrate",
+      "generated": "Generate",
+      "confirmed": "Confermate",
+      "superseded": "Sostituite",
+      "tables": "Tabelle coinvolte"
+    }
   }
 }

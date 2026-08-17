@@ -213,6 +213,42 @@
       "renamed": "Rinominati",
       "identityChanged": "Identità modificata",
       "none": "Nessuna differenza"
+    },
+    "build": {
+      "title": "Costruzione dell'azienda",
+      "description": "Il piano di cio' che nascerebbe, e la firma che lo fa nascere. Due passaggi distinti, e nessuno dei due costruisce da solo.",
+      "plan": "Il piano",
+      "planIsReadOnly": "Chiedere il piano non scrive niente: e' una lettura, e i numeri qui sotto sono una previsione.",
+      "planError": "Il piano non e' calcolabile per questa versione.",
+      "what": "Cosa",
+      "willCreate": "Nascerebbero",
+      "alreadyThere": "Ci sono gia'",
+      "alreadyThereMeans": "«Ci sono gia'» e' cio' che distingue una costruzione nuova da una ri-applicazione su un'azienda gia' popolata.",
+      "apply": "Applicazione",
+      "applyOpensApproval": "Applicare NON costruisce: apre una richiesta di approvazione. La costruzione avviene quando quella richiesta viene approvata.",
+      "applyAction": "Chiedi l'approvazione",
+      "applying": "Invio in corso...",
+      "applyDone": "Richiesta di approvazione aperta.",
+      "applyError": "La richiesta non e' stata aperta.",
+      "noCountsYet": "Nessun conteggio di righe, e non e' una dimenticanza: niente e' stato ancora costruito.",
+      "approvalRequest": "Richiesta",
+      "toApprovals": "Vai alle approvazioni",
+      "blockedNoPermission": "Serve il permesso di scrittura sui fascicoli.",
+      "blockedApplied": "Questa versione e' gia' stata applicata.",
+      "blockedNotApproved": "La versione e' in stato {{status}}: si applica solo una versione approvata.",
+      "registry": "Registro delle righe generate",
+      "registryHint": "Dopo la costruzione, ogni riga nata da questa versione e' elencata nel registro, con la tabella e la ragione.",
+      "toRegistry": "Apri il registro",
+      "rows": {
+        "orgUnits": "Unita' organizzative",
+        "positions": "Posizioni",
+        "users": "Persone segnaposto",
+        "assignments": "Assegnazioni",
+        "skills": "Competenze",
+        "kpis": "Indicatori",
+        "skillEvidence": "Evidenze di competenza",
+        "kpiEvidence": "Evidenze di indicatore"
+      }
     }
   }
 }

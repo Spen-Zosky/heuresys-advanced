@@ -195,7 +195,12 @@ SELECT 'sys_ui_interfaces', i.ui_interface_id, 'ui_interface_label', 'en', t.en,
     ('/skill-taxonomy',         'Skill taxonomy'),
     ('/system-health',          'System health'),
     ('/talent-review',          'Talent review'),
-    ('/tenant-blueprints',      'Configuration blueprints'),
+    -- ⚠ CORRETTA S1068: diceva «Configuration blueprints», cioe' il nome di un'ALTRA
+    -- voce di questo stesso menu (`/blueprints`, i modelli organizzativi). Il fascicolo
+    -- di configurazione di un'azienda non e' un modello, e in inglese le due voci
+    -- risultavano quasi omonime — proprio la distinzione su cui poggia il Tenant
+    -- Builder. Il testo giusto era gia' nella `000302`, su un campo che nessuno leggeva.
+    ('/tenant-blueprints',      'Configuration dossiers'),
     ('/tenants',                'Tenants'),
     ('/time-off',               'Time off & leave'),
     ('/visualizations',         'Visualizations'),

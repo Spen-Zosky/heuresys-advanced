@@ -25,6 +25,11 @@ const CODICE = `E2E-FASCICOLO-${Date.now()}`;
 
 test.describe("fascicolo di configurazione", () => {
   test("dalla carta d'identita' ai processi, fino alla firma", async ({ page }) => {
+    // Stessa ragione del caso della costruzione (S1068): questo percorso attraversa
+    // sei schermate e su un dev server appena avviato la compilazione a freddo si
+    // mangia i 30 secondi del caso. Era **flaky prima** di questa sessione, e un caso
+    // instabile in cima al file rende instabile anche quello che gli sta sotto.
+    test.setTimeout(120_000);
     await page.goto("/tenant-blueprints");
     await expect(page.getByTestId("tenant-blueprints-page")).toBeVisible();
 
@@ -103,7 +108,13 @@ test.describe("fascicolo di configurazione", () => {
     await primo.getByTestId("processo-salva").click();
 
     await page.reload();
+    // ⚠ Dopo un `reload()` la lista dei processi si ri-scarica: leggere il campo
+    // dentro la riga con i 5 secondi di default cercava un elemento che non era
+    // ancora nel DOM («element(s) not found»), ed era **la causa reale del flaky**
+    // di questo caso — non il timeout del test, che alzato a 120s non l'ha risolto.
+    // Prima si aspetta la RIGA, poi si legge il campo. S1068.
     const primoDopo = page.getByTestId("processo-riga").first();
+    await expect(primoDopo).toBeVisible({ timeout: 30_000 });
     await expect(primoDopo.getByTestId("processo-motivazione")).toHaveValue(
       "affidato a un fornitore esterno",
     );
@@ -147,5 +158,92 @@ test.describe("fascicolo di configurazione", () => {
     // La sezione che conta: uno zero qui si leggerebbe «nessuna conseguenza»,
     // che e' il contrario di quello che il sistema sa.
     await expect(page.getByTestId("diff-impatto-stato")).toBeVisible();
+  });
+
+  /**
+   * #198 T7 — la pagina di costruzione, sul FASCICOLO REALE di RTL Bank.
+   *
+   * Non usa il fascicolo creato dal primo caso, e la ragione e' un difetto che ho
+   * incontrato scrivendo questa prova: i due casi qui sopra **dipendono l'uno
+   * dall'altro** (il secondo cerca il codice che crea il primo), quindi quando il
+   * primo diventa instabile il secondo cade con un messaggio che accusa il prodotto.
+   * Appoggiarsi allo stesso codice avrebbe portato dentro quell'accoppiamento.
+   *
+   * `RTL-BANK-CONFIG` v1 e' **APPROVED e mai applicata** (misurato), cioe' esattamente
+   * il caso che conta: il piano E' calcolabile su un'azienda vera e la firma E'
+   * possibile. Percio' qui si verifica il contrario del caso facile:
+   *   - il piano mostra numeri REALI, con le due colonne distinte;
+   *   - il pulsante e' **attivo**, perche' lo stato lo consente — e NON viene premuto:
+   *     aprirebbe una richiesta di firma vera a delle persone. E' lo stesso limite che
+   *     la prova live di T6 ha dichiarato per se'.
+   */
+  test("la costruzione mostra il piano vero del fascicolo di RTL, e la firma e' possibile senza essere data", async ({
+    page,
+  }) => {
+    // La prima navigazione su una pagina NUOVA la fa compilare al dev server, e i 30
+    // secondi di timeout del caso finiscono li' dentro: misurato, «Test timeout of
+    // 30000ms exceeded» sul primo tentativo e verde al secondo. Non e' il prodotto a
+    // essere lento — in `test:e2e:prod` il bundle e' gia' costruito. Alzare la pazienza
+    // NON addomestica la prova: le proprieta' verificate restano identiche, e un caso
+    // che passa solo al secondo tentativo insegna a non guardare i rossi.
+    test.setTimeout(120_000);
+    await page.goto("/tenant-blueprints");
+    const riga = page.getByTestId("tenant-blueprints-row").filter({ hasText: "RTL-BANK-CONFIG" });
+    await expect(riga).toHaveCount(1);
+    await riga.getByTestId("tenant-blueprint-link").click();
+    await expect(page.getByTestId("tenant-blueprint-detail")).toBeVisible({ timeout: 30_000 });
+    await page.getByTestId("tenant-blueprint-build-link").click();
+
+    await expect(page.getByTestId("tenant-blueprint-build")).toBeVisible({ timeout: 30_000 });
+
+    // Il piano c'e' e porta la sorgente dichiarata: senza `build_source_key` la
+    // costruzione dovrebbe rifiutarsi, non ripiegare sull'unico archetipo.
+    await expect(page.getByTestId("build-plan")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId("build-source")).toBeVisible();
+
+    // Le DUE colonne distinte. Un piano con la sola «nascerebbero» renderebbe
+    // indistinguibile una costruzione nuova da una ri-applicazione.
+    const unita = page.getByTestId("build-row-orgUnits");
+    await expect(unita).toBeVisible();
+    const celle = unita.locator("td");
+    await expect(celle).toHaveCount(3);
+    // Il numero di «nascerebbero» e' un numero, non un trattino: il piano e' reale.
+    await expect(celle.nth(1)).toHaveText(/^\d[\d.,]*$/);
+
+    // La firma e' POSSIBILE — e questa e' la prova che la guardia non e' un muro
+    // cieco: su una versione approvata il pulsante si accende.
+    await expect(page.getByTestId("build-apply-button")).toBeEnabled();
+    await expect(page.getByTestId("build-apply-blocked")).toHaveCount(0);
+    // ⚠ E NON SI PREME. Aprirebbe una richiesta di approvazione vera.
+
+    // La porta verso il registro esiste da qui, perche' e' la' che si verifica cosa
+    // e' nato — non nella risposta di `apply`, che di proposito non porta conteggi.
+    await expect(page.getByTestId("build-to-registry")).toBeVisible();
+  });
+
+  /**
+   * #198 T7 — il registro delle righe generate. Finche' nessuna costruzione e' stata
+   * applicata in produzione il registro E' vuoto, e la prova verifica proprio che la
+   * pagina lo DICHIARI invece di mostrare un elenco vuoto che si legge «guasto».
+   */
+  test("il registro delle righe generate dichiara il proprio vuoto invece di sembrare rotto", async ({
+    page,
+  }) => {
+    await page.goto("/generated-origins");
+    await expect(page.getByTestId("generated-origins-page")).toBeVisible();
+    await expect(page.getByTestId("generated-origins-title")).toBeVisible();
+
+    // Il filtro di stato c'e' e i tre stati sono quelli del CHECK in `sys`.
+    const filtro = page.getByTestId("generated-origins-status-filter");
+    await expect(filtro).toBeVisible();
+    await filtro.selectOption("GENERATED");
+
+    // Uno dei due deve essere vero, e sono mutuamente esclusivi: o il registro
+    // dichiara di essere vuoto, o ha almeno una riga da mostrare.
+    const dichiaraVuoto = page.getByTestId("generated-origins-nothing-yet");
+    const righe = page.getByTestId("generated-origins-row");
+    await expect
+      .poll(async () => (await dichiaraVuoto.count()) + (await righe.count()), { timeout: 15_000 })
+      .toBeGreaterThan(0);
   });
 });

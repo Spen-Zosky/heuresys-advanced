@@ -72,7 +72,16 @@ che i vincoli tecnici impongono, non una scelta di comodo.
   è passata per assenza di tentativi → criterio duplice, il secondo letto dalla mappa. Suite
   gateway 92/92 dopo aver corretto `atlas-resolver.test.ts`, che **duplicava una SoT** e si era
   rotto per un'adozione riuscita; ora deriva l'atteso e resta capace di fallire (sabotato → rosso)
-- [ ] **F3 `#198` T7 → T9** — le due pagine nel prodotto, poi il controllo incrociato. `resume-from: T7`
+- [x] **F3a `#198` T7** — 2026-08-17 · mig. `000322` + due pagine + il contrassegno dei segnaposto in
+  tre superfici. **Il piano del lab metteva il registro dove `TENANT_ADMIN` non arriva**, e la misura
+  dei permessi l'ha dimostrato prima di scrivere una riga → pagina autonoma. Due difetti
+  pre-esistenti trovati dalla **seconda passata** della prova generale (traduzione orfana ricreata a
+  ogni deploy + etichetta EN che confondeva il fascicolo col modello). E2E **10/10, zero flaky**
+  dopo tre cause distinte: dev server stale (il `307` di `curl` non lo rivela), accoppiamento fra
+  test, e un campo letto prima che la riga fosse nel DOM. Prova live con due attori: **6/6**
+- [ ] **F3b `#198` T9** — la prova che chiude la parte: un'azienda vera costruita e archiviata.
+  **Pretende il campo di prova** (E27: prima sul gemello del linux-pc, poi in produzione), che è
+  G4 del mandato precedente e non è ancora fatto → si apre dopo, o resta al prossimo ciclo
 - [ ] **F4 `#197`** (P3) — si chiude quando T9 esiste
 - [ ] **F5 `#132` F0 → F1** — i sei parametri della ricerca + il vincolo fascia↔numero; poi dove
   vive il contenuto di un modello (tocca `db/**` → **prova generale sul linux-pc prima del push**)
@@ -118,6 +127,31 @@ scritta ora su un terreno che F1-F2 possono cambiare è un'ipotesi su un'ipotesi
   protegge ciò che **non** doveva cambiare: i 5 `PATH-rtl-bank-*` con le loro **199 assegnazioni
   di 124 persone** ci sono ancora. Rollback: giornale `staging.*_undo` con le righe **prima**
   della cancellazione.
+
+### F3 — `#198` T7 (simulazione fatta al momento di aprirla, 2026-08-17)
+- **Precondizioni verificate, non assunte**: le 4 rotte di T6 esistono
+  (`POST …/versions/:n/build-plan` con `tenant_blueprint:read` · `POST …/apply` con `:write` ·
+  `GET /v1/generated-origins` e `/summary` con `provenance:read`) · i tipi shared ci sono
+  (`BuildPlanPreview`, `ApplyVersionResponse`, `GeneratedOrigin*`) · **il piano del lab sbaglia due
+  cose**: (a) il percorso è `(authenticated)`, non `(admin)`; (b) mette il registro sotto
+  `/tenant-blueprints/[id]/origins`, ma `tenant_blueprint:read` **ce l'ha solo `PLATFORM_ADMIN`**
+  mentre `provenance:read` ce l'ha **anche `TENANT_ADMIN`** (misurato su
+  `sys_auth_role_permissions`) → annidata lì, la pagina sarebbe irraggiungibile proprio da metà dei
+  ruoli che ne hanno il permesso, e la prova che il piano stesso chiede (un `TENANT_ADMIN` che vede
+  il registro della propria azienda) non potrebbe passare. Il registro diventa una pagina **autonoma**
+  `/generated-origins`, accanto a `/provenance` che ha lo stesso permesso e risponde alla stessa
+  domanda; il fascicolo vi rimanda pre-filtrato.
+- **Meccanismo**: due pagine client con TanStack Query + primitive `@heuresys/ui` (nessun componente
+  nuovo riutilizzabile qui — vive in `ux-design-shared`), i18n `blueprints` in parità it/en, e una
+  migrazione per la voce di menu, perché `check_pagine_raggiungibili.py` pretende una **porta** per
+  ogni pagina autenticata senza parametri (quelle con `[id]` sono escluse da sé: la pagina di
+  costruzione ricade lì). L'isolamento per azienda **non** si aggiunge in pagina: è già nel service
+  (`tenantFilter`: platform vede tutto, tenant-admin la propria — I5, mai RLS).
+- **Propagazione**: `apps/web` + una migrazione → commit, e `ci-rehearsal.sh` prima del push.
+- **Chi**: io.
+- **Guardia**: `apply` apre una richiesta di approvazione **vera a persone reali**. Il bottone esiste
+  solo con `tenant_blueprint:write` **e** versione `APPROVED`, e la prova live **non lo premerà in
+  produzione** — esattamente il limite che T6 aveva già dichiarato per sé.
 
 ### F2 — `#214`
 - **Precondizioni**: atlante **fresco** (F0), e `positions` deve comparire fra i **neutri** di

@@ -1152,5 +1152,31 @@
     },
     "updateError": "The status could not be updated.",
     "consentNote": "Consent recorded on {{date}} (version {{version}})."
+  },
+  "generatedOrigins": {
+    "title": "Generated records registry",
+    "description": "Which rows of this company were created by a build, and from which version of which dossier. Not \"how many\": which ones.",
+    "byTable": "By table",
+    "records": "The rows",
+    "error": "The registry cannot be read.",
+    "empty": "No rows.",
+    "nothingYet": "The registry is empty, and that is not a fault: until a build has been applied there is nothing to register.",
+    "allStatuses": "All statuses",
+    "noJustification": "no rationale recorded",
+    "cols": {
+      "targetTable": "Table",
+      "targetRecord": "Row",
+      "status": "Status",
+      "justification": "Rationale",
+      "createdAt": "Created on",
+      "total": "Total"
+    },
+    "kpi": {
+      "total": "Registered rows",
+      "generated": "Generated",
+      "confirmed": "Confirmed",
+      "superseded": "Superseded",
+      "tables": "Tables involved"
+    }
   }
 }

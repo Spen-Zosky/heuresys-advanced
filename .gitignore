@@ -82,6 +82,18 @@ out/
 *.tsbuildinfo
 .cache/
 
+# ⚠ ECCEZIONE OBBLIGATORIA (S1068, 2026-08-17). In un App Router una cartella si chiama
+# come il SEGMENTO DI URL che rappresenta, quindi `build/` puo' essere una ROTTA — e la
+# riga `build/` qui sopra la ingoiava in silenzio. Costo reale, misurato: la pagina
+# `/tenant-blueprints/[id]/versions/[n]/build` di #198 T7 esisteva sul disco, gli E2E la
+# provavano VERDE in locale, e `git add` non la prendeva: il commit non l'avrebbe portata
+# e in produzione sarebbe stata un 404 senza che niente diventasse rosso.
+# `build/` resta perche' e' innocuo altrove, ma NON e' nemmeno necessario per gli output
+# veri: misurato lo stesso giorno, tutte le cartelle `build/` generate stanno sotto
+# `.next/`, che e' gia' ignorato per conto suo.
+!apps/web/src/app/**/build/
+!apps/showcase/src/app/**/build/
+
 # -----------------------------------------------------------------------------
 # Test / coverage
 # -----------------------------------------------------------------------------

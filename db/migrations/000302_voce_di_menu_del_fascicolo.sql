@@ -35,12 +35,32 @@ ON CONFLICT (ui_interface_code) DO NOTHING;
 
 -- Canone i18n (ADR-0029): italiano canonico in riga, inglese come
 -- sovrapposizione. Senza questa riga il cancello di copertura EN va rosso.
+--
+-- ⚠ EMENDATA S1068 (2026-08-17): il campo era `'label'`, e nessuno lo legge. Il
+-- canonico e' `ui_interface_label` — misurato: **66 righe** lo usano, e questa era
+-- l'unica con l'altro nome. Conseguenze reali di quel refuso, entrambe invisibili
+-- finche' la `000322` non ha fatto scattare la post-condizione della `000306` alla
+-- SECONDA passata della prova generale:
+--   (a) questa riga era un ORFANO ricreato a ogni deploy (ADR-0035: la catena si
+--       ri-applica, quindi si emenda il file che lo crea — non si cancella a valle);
+--   (b) l'etichetta EN che l'utente vedeva veniva dalla `000306`, ed era
+--       «Configuration blueprints» — cioe' il nome di un'ALTRA voce di menu
+--       (`/blueprints`, i modelli). Un fascicolo di configurazione non e' un modello,
+--       e chiamarli con la stessa parola in inglese cancella la distinzione su cui
+--       poggia tutto il Tenant Builder. Corretto anche la' nello stesso passaggio.
 INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
-SELECT 'sys_ui_interfaces', i.ui_interface_id, 'label', 'en', 'Configuration dossiers', 'MANUAL'
+SELECT 'sys_ui_interfaces', i.ui_interface_id, 'ui_interface_label', 'en',
+       'Configuration dossiers', 'MANUAL'
   FROM sys.sys_ui_interfaces i
  WHERE i.ui_interface_code = 'tenant-blueprints'
 ON CONFLICT (entity_table, entity_id, field, locale)
   DO UPDATE SET text = EXCLUDED.text, source = 'MANUAL', updated_at = now();
+
+-- In AGGIUNTA all'emendamento (ADR-0035 forma 3): rimuove l'esemplare orfano che le
+-- corse precedenti hanno lasciato. Da sola questa riga non ritirerebbe nulla — al
+-- deploy dopo l'INSERT qui sopra lo ricreerebbe; e' l'emendamento a chiudere il rubinetto.
+DELETE FROM sys.sys_reference_translations
+ WHERE entity_table = 'sys_ui_interfaces' AND field = 'label';
 
 DO $$
 DECLARE n int;
@@ -84,11 +104,12 @@ BEGIN
     RAISE EXCEPTION '000302: in governance ci sono % voci all''ordine 21, ne serve una sola', n;
   END IF;
 
-  -- 5. La copertura EN della voce nuova.
+  -- 5. La copertura EN della voce nuova, col campo canonico (emendato S1068).
   SELECT count(*) INTO n
     FROM sys.sys_reference_translations t
     JOIN sys.sys_ui_interfaces i ON i.ui_interface_id = t.entity_id
-   WHERE t.entity_table = 'sys_ui_interfaces' AND t.locale = 'en' AND t.field = 'label'
+   WHERE t.entity_table = 'sys_ui_interfaces' AND t.locale = 'en'
+     AND t.field = 'ui_interface_label'
      AND i.ui_interface_code = 'tenant-blueprints';
   IF n <> 1 THEN
     RAISE EXCEPTION '000302: manca la traduzione EN dell''etichetta del fascicolo';

@@ -44,8 +44,27 @@ sul fascicolo reale e su `IDENTITA_OBBLIGATORIA` (`tenant-blueprints/service.ts:
 | fascia dimensionale (`sizeBandId`) | **obbligatorio** | insufficiente da solo, vedi sotto |
 | paese (`countryCode`) | **obbligatorio** · RTL = `IT` | **sì**: cambia organi di controllo, contratto, obblighi |
 | intensità di vigilanza (`regulatoryIntensity`) | **obbligatorio** · RTL = `HIGH` | **sì**: decide se esiste una direzione Risk & Compliance |
-| modello operativo (`operatingModelId`) | **opzionale** · catalogo di 6 (RETAIL, WHOLESALE, MIXED, B2B_SERVICES, MANUFACTURING, PUBLIC_SECTOR) | **sì, e pesa sulla FORMA più della dimensione**: RETAIL e WHOLESALE a parità di settore e addetti danno strutture opposte — con o senza filiali |
-| numero di addetti (`employeeCount`) | **opzionale** · RTL = `158` | **sì**, ed è il punto che segue |
+| modello operativo (`operatingModelId`) | **opzionale** → **DA RENDERE OBBLIGATORIO** (Enzo, 2026-08-17) · catalogo di 6 (RETAIL, WHOLESALE, MIXED, B2B_SERVICES, MANUFACTURING, PUBLIC_SECTOR) | **sì, e pesa sulla FORMA più della dimensione**: RETAIL e WHOLESALE a parità di settore e addetti danno strutture opposte — con o senza filiali |
+| numero di addetti (`employeeCount`) | **opzionale** → **DA RENDERE OBBLIGATORIO** · RTL = `158` | **sì**, ed è il punto che segue |
+
+### I due modi di dire la dimensione hanno DUE RUOLI, non uno (Enzo, 2026-08-17)
+
+Non è ridondanza da eliminare: è una distinzione da rispettare.
+
+- **La fascia** (`XS 1-9 · S 10-49 · M 50-249 · L 250-999 · XL 1000+`) serve al **pricing della
+  piattaforma** e **canalizza la ricerca**: si cerca «una banca di fascia M», non «una banca di 158
+  dipendenti». Cinque fasce sono cinque corsie, ed è ciò che rende una ricerca ripetibile e
+  confrontabile fra clienti diversi.
+- **Il numero** descrive l'**azienda vera**, ed è *«quello su cui lavorano le tabelle gestionali»*.
+  Riscontro misurato: il fascicolo di RTL dichiara **158** addetti e RTL ha **158 posizioni attive**
+  — il numero non è un'etichetta, è il dato che il sistema usa davvero.
+
+**⚠ IL BUCO, trovato misurando questa distinzione**: `sys_tenant_blueprint_version_employee_count_check`
+verifica **soltanto** che il numero sia `>= 0`. **Nessun vincolo lega la fascia al numero.** Oggi si
+può dichiarare fascia `XS` (1-9) e `5000` dipendenti, e nulla protesta — la ricerca cercherebbe
+un'azienda minuscola mentre le tabelle gestionali ne descrivono una grande. Con la ricerca questo
+smette di essere teorico. Il vincolo va aggiunto in **F0**: il numero deve cadere dentro la fascia
+dichiarata (`min <= n <= max`, con `max` nullo per `XL`).
 
 **L'incoerenza da sciogliere, ed è nel codice non nei documenti.** La dimensione è dichiarata **due
 volte**: la fascia (obbligatoria) e il numero (opzionale). Il commento sopra `IDENTITA_OBBLIGATORIA`
@@ -64,11 +83,16 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
 
 ## Fasi
 
-- [ ] **F0 i parametri della ricerca** — rendere obbligatori prima di **avviare una ricerca**
-  (non prima della firma) i cinque della tabella qui sopra, e correggere il commento di
-  `IDENTITA_OBBLIGATORIA` che oggi dichiara il contrario sul numero di addetti. Piccola, ma va
-  **prima** di F4: una ricerca avviata senza questi parametri non è mirata, e non ce ne accorgeremmo
-  guardando l'esito — ne uscirebbe un'azienda plausibile e generica
+- [ ] **F0 i parametri della ricerca** — tre cose insieme: *(a)* rendere obbligatori prima di
+  **avviare una ricerca** (non prima della firma) i **sei** parametri della tabella qui sopra —
+  ATECO · fascia · **numero di addetti** · paese · vigilanza · **modello operativo**; *(b)*
+  aggiungere il **vincolo di coerenza fascia↔numero** che oggi non esiste; *(c)* correggere il
+  commento di `IDENTITA_OBBLIGATORIA` (`tenant-blueprints/service.ts:52-56`), che dichiara il
+  contrario sul numero di addetti e diventerà falso. Piccola, ma va **prima** di F4: una ricerca
+  avviata senza questi parametri non è mirata, e non ce ne accorgeremmo guardando l'esito — ne
+  uscirebbe un'azienda plausibile e generica.
+  **La prova che deve poter fallire**: un fascicolo con fascia `XS` e `5000` addetti dev'essere
+  **respinto**. Oggi passa
 - [ ] **F1 dove vive il contenuto di un modello** — migrazioni per unità/posizioni/competenze/
   indicatori di una versione di variante, con chiave naturale per dominio. Riuso di
   `sys_organization_unit_templates` **se la forma regge**, e bonifica delle 225 orfane (o la ragione

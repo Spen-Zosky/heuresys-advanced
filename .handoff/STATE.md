@@ -10,24 +10,18 @@ di `#132` e la risposta alla domanda di Enzo a fine sessione (→ Top priorities
 
 ## Last session brief (S1068 «sette difetti trovati eseguendo, cinque nei miei strumenti»)
 
-**Ciclo NON chiuso: 7 voci su 13**, col confine dichiarato all'apertura (il mandato «tutti i
-P1 e P2» somma ~15-20 sessioni) e la ragione accanto a ognuna delle sei non aperte —
-`.programmi/mandati/mandato-S1068-p3-p1-p2.md`, che porta anche la cronaca completa
-(`docs/archive/HANDOFF_S1068.md`, **non SoT**).
-
-`#213` non era una scelta di prodotto ma un'identificazione: quei corsi erano di **SmartFood**,
-già purgata dalla `000241`. `#214` ha chiuso **tre** falle della stessa forma — «non so» letto
-come «sicuro» — e la coda passa da 31 a 16 neutri. `#198` T7 ha spostato una pagina **dopo aver
-misurato i permessi**. `#132` F0 ha chiuso un vincolo inesistente («fascia XS con 5000 addetti»
-passava). `#211` ①: i rossi della suite scendono da **35 a 18**.
+**Ciclo NON chiuso: 7 voci su 13**, confine dichiarato all'apertura e ragione accanto a ognuna
+delle sei non aperte → `.programmi/mandati/mandato-S1068-p3-p1-p2.md`; cronaca in
+`docs/archive/HANDOFF_S1068.md` (**non SoT**).
 
 Il filo: **sette difetti trovati eseguendo, non ragionando** — cinque nei miei stessi strumenti
 di misura, compresi due rimedi che contenevano la bugia che stavano correggendo.
 
-## Obiettivo permanente (mandato Enzo, S1029)
-
-**Fresh session senza pendenze**: zero debiti o task incompleti; doppia verifica e review
-adversarial; le decisioni tecniche sono di Claude.
+⚠ **FUORI REPO, e non si vede dal git log**: un pacchetto di skill installato il 2026-08-17
+alle 17:57 aveva **sovrascritto `handoff` e `code-review`** con versioni omonime, e la chiusura
+di S1068 è partita su quella sbagliata (stato non aggiornato). Le 26 skill sono state rimosse,
+le originali ripristinate dal linux-pc, backup in
+`[Backup]/matt-pocock-skills-rimosse_20260818`. → memoria `skill_name_collision_masking`.
 ## Top priorities (prossima sessione)
 
 1. **Il campo di prova + `#198` T9** — è ciò che Enzo ha chiesto esplicitamente a fine

@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-17T13:28:10Z da docs/kb/tools/build_index.py
+# generato: 2026-08-17T23:43:20Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-17T13:28:10Z"
-  total_files: 3072
+  generated_at: "2026-08-17T23:43:20Z"
+  total_files: 3084
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,16 +13,16 @@ meta:
     api-module: 341
     ci: 17
     claude-config: 35
-    config: 159
+    config: 161
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 318
+    db-migration: 321
     db-other: 8
     db-script: 42
     db-seed: 114
-    doc-canonical: 661
+    doc-canonical: 663
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 107
     showcase-source: 14
-    test: 386
+    test: 387
     ux-design-archive: 80
-    web-source: 237
+    web-source: 241
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2514
+    live: 2526
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2894,6 +2894,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\scripts\live-perimetro-positions.ts'
+    root: repo
+    rel: 'apps/agent-gateway/scripts/live-perimetro-positions.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\scripts\live-read-acceptance.ts'
     root: repo
     rel: 'apps/agent-gateway/scripts/live-read-acceptance.ts'
@@ -3131,6 +3137,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-198-t6.mts'
     root: repo
     rel: 'apps/api/scripts/prova-live-198-t6.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-198-t7.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-198-t7.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -7754,6 +7766,24 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000321_percorsi_formativi_senza_titolare.sql'
+    root: repo
+    rel: 'db/migrations/000321_percorsi_formativi_senza_titolare.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000322_voce_di_menu_del_registro_origini.sql'
+    root: repo
+    rel: 'db/migrations/000322_voce_di_menu_del_registro_origini.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000323_coerenza_fascia_addetti.sql'
+    root: repo
+    rel: 'db/migrations/000323_coerenza_fascia_addetti.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -8804,6 +8834,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\mandati\mandato-S1068-p3-p1-p2.md'
+    root: repo
+    rel: '.programmi/mandati/mandato-S1068-p3-p1-p2.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\mandati\mandato-consegne-lab-2026-08-16.md'
     root: repo
     rel: '.programmi/mandati/mandato-consegne-lab-2026-08-16.md'
@@ -9119,6 +9155,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\archive\HANDOFF_BRAND.md'
     root: repo
     rel: 'docs/archive/HANDOFF_BRAND.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\HANDOFF_S1068.md'
+    root: repo
+    rel: 'docs/archive/HANDOFF_S1068.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -15764,6 +15806,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\parametri-ricerca.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/parametri-ricerca.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\unit\query-boolean-filters.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/query-boolean-filters.unit.test.ts'
@@ -17180,6 +17228,12 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\scripts\e2e-blocchi.mjs'
+    root: repo
+    rel: 'apps/web/scripts/e2e-blocchi.mjs'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\scripts\e2e-node22.mjs'
     root: repo
     rel: 'apps/web/scripts/e2e-node22.mjs'
@@ -17351,6 +17405,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\gaps\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/gaps/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\generated-origins\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/generated-origins/page.tsx'
     category: web-source
     status: live
     provenance: git-tracked
@@ -17852,6 +17912,12 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\tenant-blueprints\[id]\versions\[n]\build\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/tenant-blueprints/[id]/versions/[n]/build/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\tenant-blueprints\[id]\versions\[n]\diff\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/tenant-blueprints/[id]/versions/[n]/diff/page.tsx'
@@ -18317,6 +18383,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\lib\landing.ts'
     root: repo
     rel: 'apps/web/src/lib/landing.ts'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\lib\person-label.ts'
+    root: repo
+    rel: 'apps/web/src/lib/person-label.ts'
     category: web-source
     status: live
     provenance: git-tracked

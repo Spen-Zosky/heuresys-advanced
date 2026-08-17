@@ -14,7 +14,7 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 **Numeri ri-derivati dal vivo** (la sessione **non ha toccato il database**: nessuna migrazione
 nuova): utenti **161** · posizioni **315** · OU **45** · team **26** · tenant ACTIVE **2** ·
 RBAC **980 mapping** · skill **14.039** · migration su disco **321** (max `000323`) · moduli API
-**97** (+1: `generated-origins`) · test API **255 file** (+11) · spec E2E **99** · HEAD `5366b9be` (S1068)
+**97** (+1: `generated-origins`) · test API **255 file** (+11) · spec E2E **99** · HEAD `c41b9d1a` (S1068)
 · **16 commit**.
 
 **Il ciclo batch (9/9)**: chiuse `#202` `#203` `#204` `#207` `#208` — erano **già fatte e mai

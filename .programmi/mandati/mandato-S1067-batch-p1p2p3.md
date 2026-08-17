@@ -138,6 +138,32 @@ di commit — vedi F1. Perciò la prima fase non è lavoro nuovo: è **riconcili
 
 ---
 
+## Coda del ciclo — il mandato nuovo di Enzo (2026-08-17, dopo la chiusura del batch)
+
+Chiuso il batch, Enzo ha dato una direzione nuova: **serve tutto il processo di creazione di
+un'azienda tranne P4**, perché va sperimentato con **aziende usa e getta attraverso l'interfaccia
+web**, *«senza compromettere la piattaforma»*. Piano approvato in
+`~/.claude/plans/jaunty-percolating-storm.md`.
+
+- [x] **G1 decisioni registrate** — 2026-08-17 · `c5823fd6`. **E27** (si sperimenta prima sul
+  gemello, poi in produzione — e la sicurezza viene dalla destinazione, non da dove sta la
+  schermata) ed **E28** (a fine esperimento: archivia **oppure** disfa la costruzione leggendo dal
+  registro). `#206` → **HOLD** coi quattro campi che il cancello pretende
+- [x] **G2 = T6, la superficie API** — 2026-08-17 · `6ccde457`. Le quattro rotte, **nessun permesso
+  nuovo**. `apply` **non costruisce** — sabotata per vederla rossa: «apply ha creato unità: expected
+  7 to be +0». 18/18, unit 84/84, prova live verde
+- [ ] **G3 = T7, le due pagine nel prodotto** — **NON aperta**, e i tre numeri della regola:
+  residuo misurato **118.136** token prima della soglia · costo stimato ~100k+ (pagine + i18n in
+  parità + E2E con due attori) · verdetto dello strumento **«si continua»**. Lo strumento consente,
+  ma una pagina a metà con le traduzioni scoperte è peggio di una non iniziata — e T7 è l'ultimo
+  pezzo prima della prova che chiude la parte
+- [ ] **G4 il campo di prova** (procedura per il gemello + `scripts/banco_tenant.py` coi due
+  pulsanti) · [ ] **G5 = T9** · [ ] **G6 = `#132`** · [ ] **G7 = `#205`**
+
+**`resume-from`: T7.** `#198` è a **7 task su 9**.
+
+---
+
 ## Esito del ciclo (R24 §6 — letto dalla tabella, non dalla memoria)
 
 **CICLO CHIUSO — 9/9 voci fatte.** F1→F9 tutte spuntate con evidenza. F9 era dichiarata

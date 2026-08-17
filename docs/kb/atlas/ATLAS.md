@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `5ec40cf3` (2026-08-17T12:49:48+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `7ada55b9` (2026-08-17T15:28:29+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 96 |
-| Route API | 594 |
+| Moduli API | 97 |
+| Route API | 598 |
 | Pagine web | 117 |
-| Schemi shared | 106 |
+| Schemi shared | 107 |
 | Tabelle DB | 273 (vuote: 34) |
 | Viste / matview | 27 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 267 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 271 |
 
 ## Moduli API
 
@@ -48,6 +48,7 @@
 | enterprise-typing-profiles | /v1/enterprise-typing-profiles | 4 | 3 | 1 | 1 |
 | evidence | /v1/evidence | 2 | 1 | 14 | 2 |
 | gdpr | /v1/gdpr | 5 | 4 | 4 | 1 |
+| generated-origins | /v1/generated-origins | 2 | 1 | 1 | 1 |
 | goals | /v1/goals | 12 | 4 | 7 | 4 |
 | insights | /v1/insights | 7 | 2 | 15 | 5 |
 | job-families | /v1/job-families | 5 | 3 | 1 | 2 |
@@ -97,7 +98,7 @@
 | surveys | /v1/surveys | 12 | 4 | 3 | 3 |
 | talent-review | /v1/talent-review | 6 | 1 | 7 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 1 |
-| tenant-blueprints | /v1/tenant-blueprints | 15 | 0 | 13 | 1 |
+| tenant-blueprints | /v1/tenant-blueprints | 17 | 0 | 13 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 10 | 3 |
 | tenants | /v1/tenants | 7 | 4 | 2 | 1 |
 | time-off | /v1/time-off | 3 | 1 | 7 | 2 |

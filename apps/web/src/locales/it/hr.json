@@ -364,7 +364,7 @@
   "learning": {
     "title": "Catalogo moduli",
     "description": "Moduli formativi disponibili, globali e di tenant.",
-    "count": "{{count}} moduli",
+    "count": "{{count}} moduli — {{piattaforma}} di piattaforma, {{azienda}} dell'azienda",
     "errorMessage": "Impossibile caricare i moduli.",
     "emptyTitle": "Nessun modulo",
     "emptyDescription": "Non ci sono moduli formativi.",
@@ -409,7 +409,8 @@
       "saveError": "Salvataggio non riuscito.",
       "forbidden": "Non hai i permessi per questa operazione.",
       "duplicate": "Esiste già un percorso con questo codice.",
-      "tenantRequired": "Come amministratore di piattaforma puoi creare solo percorsi globali: spunta «Percorso globale»."
+      "tenantRequired": "Come amministratore di piattaforma puoi creare solo percorsi globali: spunta «Percorso globale».",
+      "count": "{{count}} — {{piattaforma}} di piattaforma, {{azienda}} dell'azienda"
     },
     "steps": {
       "title": "Passi del percorso",

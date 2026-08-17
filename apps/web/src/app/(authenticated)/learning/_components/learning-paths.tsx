@@ -26,6 +26,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { StatusPill } from "@/components/status-pill";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -66,8 +67,21 @@ export function LearningPathsPanel() {
   const paths = useQuery({
     queryKey: ["learning-paths", "list", cerca],
     queryFn: () =>
-      apiFetch<{ items: LearningPath[] }>(
+      apiFetch<{ items: LearningPath[]; total: number }>(
         `/v1/learning-paths?limit=${LIST_LIMIT}${cerca.trim() ? `&search=${encodeURIComponent(cerca.trim())}` : ""}`,
+      ),
+  });
+  // #210 — anche qui le due specie convivono, e il numero accanto al titolo le sommava.
+  // Misurato sul database il 2026-08-17: 72 percorsi = 5 di piattaforma + 67 dell'azienda.
+  // La consegna del lab dava questa tabella per «72 righe, ZERO globali»: e' stata
+  // ri-misurata, e le cinque righe di piattaforma esistono da dicembre 2025 — quindi la
+  // premessa era sbagliata, non superata. E' il PUNTO FISSO: un dato che puo' variare si
+  // misura, comprese le affermazioni positive.
+  const proprie = useQuery({
+    queryKey: ["learning-paths", "conteggio-azienda", cerca],
+    queryFn: () =>
+      apiFetch<{ total: number }>(
+        `/v1/learning-paths?isGlobal=false&limit=1${cerca.trim() ? `&search=${encodeURIComponent(cerca.trim())}` : ""}`,
       ),
   });
 
@@ -124,6 +138,17 @@ export function LearningPathsPanel() {
       header: t("learning.paths.targetOutcome"),
       cell: (p) => <span className="text-sm text-muted-foreground">{p.targetOutcome ?? t("learning.paths.dash")}</span>,
     },
+    // #210 — la specie, riga per riga. Il form la sapeva gia' (`isGlobal`), la lista no:
+    // si vedeva un elenco unico di cose che non sono la stessa cosa. E' la colonna che
+    // /kpis e /learning hanno gia'.
+    {
+      header: t("shared.scope"),
+      cell: (p) => (
+        <StatusPill tone={p.isGlobal ? "info" : "neutral"}>
+          {p.isGlobal ? t("shared.global") : t("shared.tenant")}
+        </StatusPill>
+      ),
+    },
     {
       header: t("common:table.actions"),
       cell: (p) => (
@@ -141,7 +166,15 @@ export function LearningPathsPanel() {
           <CardTitle className="flex items-center justify-between gap-3">
             <span>
               {t("learning.paths.title")}
-              <span className="ml-2 text-sm font-normal text-muted-foreground">{paths.data?.items.length ?? 0}</span>
+              <span className="ml-2 text-sm font-normal text-muted-foreground" data-testid="learning-paths-count">
+                {paths.data && proprie.data
+                  ? t("learning.paths.count", {
+                      count: paths.data.total,
+                      piattaforma: paths.data.total - proprie.data.total,
+                      azienda: proprie.data.total,
+                    })
+                  : (paths.data?.items.length ?? 0)}
+              </span>
             </span>
             {canCreate && (
               <Button type="button" variant="outline" data-testid="path-create-toggle" onClick={() => setAperto((v) => !v)}>

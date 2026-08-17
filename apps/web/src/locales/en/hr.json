@@ -364,7 +364,7 @@
   "learning": {
     "title": "Module Catalogue",
     "description": "Available learning modules, both global and tenant-scoped.",
-    "count": "{{count}} modules",
+    "count": "{{count}} modules — {{piattaforma}} platform, {{azienda}} company",
     "errorMessage": "Unable to load the modules.",
     "emptyTitle": "No modules",
     "emptyDescription": "There are no learning modules.",
@@ -409,7 +409,8 @@
       "saveError": "Save failed.",
       "forbidden": "You do not have permission for this operation.",
       "duplicate": "A path with this code already exists.",
-      "tenantRequired": "As a platform administrator you can only create global paths: tick “Global path”."
+      "tenantRequired": "As a platform administrator you can only create global paths: tick “Global path”.",
+      "count": "{{count}} — {{piattaforma}} platform, {{azienda}} company"
     },
     "steps": {
       "title": "Path steps",

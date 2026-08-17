@@ -66,7 +66,17 @@ test.describe("MVP-2a admin catalogues — live data", () => {
     test("/learning shows learning modules catalogue", async ({ page }) => {
       await page.goto("/learning");
       await expect(page.getByTestId("learning-page")).toBeVisible();
-      await expect(page.getByTestId("learning-count")).toContainText(/\d+\s+moduli/);
+      // #210 — qui le due specie NON sono un'ipotesi sul futuro come su /kpis: convivono
+      // adesso (misurato 2026-08-17: 92 moduli = 77 di piattaforma + 15 dell'azienda), e
+      // il vecchio asserto /\d+\s+moduli/ restava verde proprio sul numero misto.
+      await expect(page.getByTestId("learning-count")).toContainText(
+        /\d+\s+(moduli|modules)\s+—\s+\d+\s+(di piattaforma|platform),\s+\d+\s+(dell'azienda|company)/,
+      );
+      // e il pannello dei percorsi, che mostrava un numero nudo accanto al titolo
+      await expect(page.getByTestId("learning-paths-panel")).toBeVisible();
+      await expect(page.getByTestId("learning-paths-count")).toContainText(
+        /\d+\s+—\s+\d+\s+(di piattaforma|platform),\s+\d+\s+(dell'azienda|company)/,
+      );
     });
   });
 

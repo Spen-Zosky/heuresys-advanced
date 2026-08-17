@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `2614cdab` (2026-08-16T14:11:53+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `f448a394` (2026-08-17T04:11:34+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -9,9 +9,9 @@
 | Moduli API | 96 |
 | Route API | 594 |
 | Pagine web | 117 |
-| Schemi shared | 105 |
-| Tabelle DB | 272 (vuote: 33) |
-| Viste / matview | 26 / 0 |
+| Schemi shared | 106 |
+| Tabelle DB | 273 (vuote: 34) |
+| Viste / matview | 27 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 267 |
 
 ## Moduli API
@@ -98,7 +98,7 @@
 | talent-review | /v1/talent-review | 6 | 1 | 7 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 1 |
 | tenant-blueprints | /v1/tenant-blueprints | 15 | 0 | 13 | 1 |
-| tenant-materialization | /v1/tenant-materialization | 2 | 1 | 10 | 1 |
+| tenant-materialization | /v1/tenant-materialization | 2 | 1 | 10 | 3 |
 | tenants | /v1/tenants | 7 | 4 | 2 | 1 |
 | time-off | /v1/time-off | 3 | 1 | 7 | 2 |
 | training-initiatives | /v1/training-initiatives | 4 | 4 | 3 | 1 |
@@ -153,6 +153,7 @@
 - `sys.sys_auth_password_reset_tokens`
 - `sys.sys_auth_sessions`
 - `sys.sys_content_media`
+- `sys.sys_generated_record_origins`
 - `sys.sys_notification_preferences`
 - `sys.sys_occupation_classification_mappings`
 - `sys.sys_process_kpi_templates`
@@ -172,7 +173,7 @@
 
 ## Anomalie shared exports
 
-- schemi senza subpath export: _pagination
+- schemi senza subpath export: _pagination, _query-boolean
 
 ## Dettaglio completo
 

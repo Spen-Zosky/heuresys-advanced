@@ -63,7 +63,8 @@
   - da-decidere-guardando-i-dati, non a tavolino: `career_paths` e `learning_paths` non hanno righe di piattaforma. Distinguere due specie dove una ha zero esemplari da sempre e' rumore, non informazione — a meno che quello zero sia esso stesso il reperto (un catalogo comune che non e' mai stato riempito)
   - chiuso-quando: nessuna pagina che mostra un catalogo a due specie ne somma il conteggio senza dichiararlo, e per ciascuna e' scritto se le due specie esistono davvero o se una e' vuota
 
-- **#202 Il canale duplica i numeri perche' una str.replace non dice se ha sostituito — e la cura NON e' insegnargli a fondere** · status: ACTIVE
+- **#202 Il canale duplica i numeri perche' una str.replace non dice se ha sostituito — e la cura NON e' insegnargli a fondere** · status: DONE
+  - ✅ FATTA S1066 (`7911dde8`), **chiusa S1067 dopo averla ri-verificata sul vivo**: la patch del lab applicata alle due copie CON una correzione (classifica() guardava il corpo invece dell'intestazione, e ricreava i doppioni). Verifica di chiusura 2026-08-17: `collaudo_canale.py` **14 controlli · 0 difetti · 0 ciechi**, exit 0, rilanciato adesso — non citato da ieri
   - priority: P2 · effort: ~30min (patch scritta e collaudata; restano applicazione su due copie + rilancio di collaudo_canale.py) · doc: inbox lab-id 2026-08-16-il-canale-duplica-perche-una-replace-non-parla
   - chiude-la-causa-di: #200 (DONE). Il dato e' stato riparato e S4 intercetta i doppioni al cancello, ma la causa e' dichiarata dentro #200 stessa e non ha mai avuto una voce propria: «l'ingestione ri-crea i blocchi-proposta a ogni corsa, visto due volte oggi dopo averli fusi»
   - causa-letta-nel-codice: lab_inbox.py:189 fa `c["blocco"].replace("#NN", f"#{n}", 1)`. str.replace NON dice se ha sostituito: un blocco che porta gia' `- **#196` entra nel registro TALE E QUALE, senza errore ne' avviso. E' cosi' che sono nati due #196 e due #198
@@ -78,7 +79,8 @@
   - chiuso-quando: le due copie portano la classificazione a tre esiti, collaudo_canale.py resta verde, e un blocco con un numero gia' esistente viene respinto lasciando il file in inbox/
   - lab-id: 2026-08-16-il-canale-duplica-perche-una-replace-non-parla
 
-- **#203 Il cancello del rubinetto e' rosso, e lo fa scattare uno strumento che il legacy lo combatte** · status: ACTIVE
+- **#203 Il cancello del rubinetto e' rosso, e lo fa scattare uno strumento che il legacy lo combatte** · status: DONE
+  - ✅ FATTA S1066 (`7911dde8`), **chiusa S1067 dopo averla ri-verificata sul vivo**: `check_istruzioni.py` in allowlist col motivo (nomina il container legacy dentro una sonda che lo cerca per segnalarlo sbagliato). Verifica di chiusura 2026-08-17: cancello **exit 0** («31 storici noti, congelati da ADR-0038») e `--selftest` **9/9 verdi** — corretto, non addomesticato
   - priority: P2 · effort: ~5min (una riga in allowlist col motivo) · doc: inbox lab-id 2026-08-16-il-cancello-del-rubinetto-e-rosso-per-uno-strumento-che-lo-difende
   - stato-misurato-2026-08-16-sera: `python docs/kb/tools/check_no_legacy_ingest.py` esce ROSSO e nomina un solo artefatto: docs/kb/tools/check_istruzioni.py
   - e'-un-falso-positivo-VERIFICATO-leggendo-il-file (300 righe): check_istruzioni.py CERCA le istruzioni che parlano del vecchio heuresys-evo per segnalarle come SBAGLIATE. Righe 19-20 «istruiscono sul progetto legacy heuresys-evo — Prisma (assente), tabelle rbp_* (0 nel database)»; righe 120-121 la sonda sulle tabelle rbp_* col commento «reali la', inesistenti qui»; riga 213 un valore volutamente inventato per non replicare una credenziale «anche del legacy». Nomina il legacy per combatterlo
@@ -89,7 +91,8 @@
   - chiuso-quando: check_no_legacy_ingest.py esce 0, la riga di allowlist porta il motivo scritto, e --selftest resta 9/9
   - lab-id: 2026-08-16-il-cancello-del-rubinetto-e-rosso-per-uno-strumento-che-lo-difende
 
-- **#204 La fusione ha lasciato SETTE residui dentro #196 e #198 — i blocchi riscritti sono pronti nella consegna** · status: ACTIVE
+- **#204 La fusione ha lasciato SETTE residui dentro #196 e #198 — i blocchi riscritti sono pronti nella consegna** · status: DONE
+  - ✅ FATTA S1066 (`82d80582`), **chiusa S1067 dopo averla ri-verificata sul vivo**: `#196` riscritta per intero. Verifica di chiusura 2026-08-17, fatta contando i campi del blocco con uno script invece che a occhio: `#196` = 22 righe, **nessun campo duplicato** (né `chiuso-quando`, né `urgenza`, né `lab-id`), status coerente col corpo. In `#198` la riga `strumento-nuovo` non esiste più: al suo posto `T8` risulta ✅ col file `docs/kb/tools/completezza_tenant.py` **presente nel repo**. I due `lab-id` di `#198` restano di proposito (ragione meccanica dichiarata: C4b + L2 accenderebbero un orfano)
   - priority: P2 · effort: ~20min (incollare due blocchi gia' scritti) · doc: inbox lab-id 2026-08-16-la-fusione-ha-lasciato-tre-residui-dentro-la-voce-degli-indicatori
   - coda-di: #200 (DONE). La riparazione ha funzionato — i numeri doppi non ci sono piu' — ma la FUSIONE ha lasciato residui che S4 non puo' vedere, perche' S4 guarda i numeri e questi non sono numeri
   - come-sono-stati-trovati: rilettura riga per riga di tutte e sette le voci generate il 2026-08-16, su richiesta di Enzo. I primi tre erano gia' consegnati; il 4, il 5 e il 6 sono emersi SOLO leggendo la voce intera. Il cancello passa in entrambi i casi
@@ -158,7 +161,8 @@
   - chiuso-quando: un'azienda costruita da P3 ha ricevuto persone reali da una corsa firmata una volta sola, ogni segnaposto sostituito e' SUPERSEDED e disattivato (mai cancellato), nessuna posizione e' SUPERSEDED, la vista dello scostamento e' interrogabile e distingue il vuoto dal cieco, e l'azienda archiviata conserva le sue righe
   - lab-id: 2026-08-16-tenant-builder-p4-estrattori-e-ingestori
 
-- **#207 Il guardiano muore sulla riga del verdetto quando stdout non e' un terminale — e con lui altri due strumenti** · status: ACTIVE
+- **#207 Il guardiano muore sulla riga del verdetto quando stdout non e' un terminale — e con lui altri due strumenti** · status: DONE
+  - ✅ FATTA S1066 (`7911dde8`), **chiusa S1067 dopo averla ri-verificata sul vivo**: encoding cp1252 su stdout non-terminale. Verifica di chiusura 2026-08-17, riproducendo la condizione del difetto invece di fidarsi: `guardiano.py --sorveglia > file` scrive il verdetto («si continua — contesto: mancano 663.034 token») ed esce **0**, mai più 1. `--selftest` **32/32 verdi**. Le due copie (`docs/kb/tools/` e `~/.claude/tools/`) verificate **identiche** con `diff -q`
   - priority: P1 · effort: ~15min (la patch e' scritta e collaudata; resta applicarla e allineare le due copie) · doc: inbox lab-id 2026-08-16-tre-strumenti-muoiono-quando-nessuno-li-guarda
   - difetto-riprodotto-3-volte-2026-08-16: su Windows con stdout NON terminale Python usa cp1252; ogni carattere fuori repertorio fa morire la print con UnicodeEncodeError ed exit 1. guardiano.py muore sul '✓' del verdetto · voci_lab_nel_registro.py sul '↔' di un titolo · lab_inbox.py sul '📥' della prima riga
   - perche-P1: non e' tipografia. Il guardiano stampa le due misure e muore ESATTAMENTE sulla riga della decisione, e `--sorveglia` esce 1 — che nel suo vocabolario non e' ne' «si continua» (0) ne' «si chiude» (3). In una corsa non presidiata, cioe' proprio quando stdout non e' un terminale, il cancello restituisce un codice muto
@@ -174,7 +178,8 @@
   - chiuso-quando: i tre file portano la riconfigurazione, il collaudo passa 9/9, e guardiano.py --sorveglia con stdout rediretto scrive il verdetto ed esce 0 o 3
   - lab-id: 2026-08-16-tre-strumenti-muoiono-quando-nessuno-li-guarda
 
-- **#208 ⚠ PRIMA di eseguire #196/#197/#198/#199 leggi il LEGGIMI-PRIMA: sequenza, errori aperti, cosa e' gia' verificato** · status: ACTIVE
+- **#208 ⚠ PRIMA di eseguire #196/#197/#198/#199 leggi il LEGGIMI-PRIMA: sequenza, errori aperti, cosa e' gia' verificato** · status: DONE
+  - ✅ I DUE AGGANCI FATTI S1066 (`82d80582`), **la lettura fatta S1067 e la voce chiusa**: il `chiuso-quando` chiede quattro cose e sono tutte e quattro verificate il 2026-08-17 — la voce esiste nel register · le **quattro** voci `#196` `#197` `#198` `#199` portano la riga «⚠ PRIMA DI ESEGUIRE» in testa (`grep` → 4 occorrenze, righe 194/220/241/253) · `.handoff/STATE.md` porta il puntatore in testa (righe 6-8, prima del brief) · e il rimando precede ogni altro campo del blocco. La **lettura** del LEGGIMI-PRIMA (8 sezioni) è stata fatta in S1067 prima di aprire `#197`: la sequenza risulta già arrivata a ④ — ① residui `#204` FATTA, ② `#199` DONE, ③ `#196` DONE — quindi restano `#198` (da T4) e `#197`, che si chiude dentro il T9 di `#198`
   - priority: P1 · effort: ~15min (lettura) + ~10min (i due agganci) · doc: D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md
   - richiesta-di-Enzo-2026-08-16: «devi dargli la capacita' di comprendere quello che gli hai passato, gli errori gia' individuati, le correzioni, la sequenza»
   - problema: 7 consegne del lab sono diventate 5 voci (#196 #197 #198 #199 #200) in un register di oltre 250 blocchi. Chi ne apre una dal menu non sa che sono un corpo solo, ne' l'ordine, ne' che 6 errori sono gia' noti e 6 ancora aperti

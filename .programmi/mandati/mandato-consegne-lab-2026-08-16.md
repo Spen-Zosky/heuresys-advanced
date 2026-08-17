@@ -23,6 +23,25 @@ Chiusura anticipata obbligatoria: contesto ≥ 75% **oppure** finestra 5h ≥ 80
 
 ---
 
+## Fasi
+
+*(sezione aggiunta in S1067: `programmi.py --verifica` segnalava «nessuna fase — un programma senza
+fasi non è ripartibile». Il piano viveva nella tabella qui sotto, che lo strumento non legge. Le
+spunte qui riportano l'esito **già registrato** nella tabella, non una nuova valutazione.)*
+
+- [x] **F1 ingerire le 7 consegne** — 2026-08-16 · `b7f04661`, 7 blocchi #202-#208, nessun doppione, lint verde
+- [x] **F2.1 guardiano: muore sulla riga del verdetto** — 2026-08-16 · `7911dde8`, difetto riprodotto (exit 1), poi exit 0, selftest 32/32, 2 copie allineate
+- [x] **F2.2 lab_inbox: str.replace non dice se ha sostituito** — 2026-08-16 · `7911dde8`, patch applicata con una correzione mia, collaudo 14/14
+- [x] **F2.3 cancello del rubinetto rosso su falso positivo** — 2026-08-16 · `7911dde8`, allowlist col motivo, cancello 0, selftest 9/9
+- [x] **F3 i 7 residui dentro #196 e #198** — 2026-08-16 · `82d80582`, #196 riscritta (14 campi, uno ciascuno) + i due agganci di #208
+- [x] **F4 #199 guardia mancante su link-tenant** — 2026-08-16 · `e9cbc332`, test rosso prima e verde dopo, dimostrazione LIVE sul fascicolo di RTL Bank
+- [x] **F5 #196 censire viste e schermate che sommano le due specie** — 2026-08-16 · `af44401a`, censimento su 3 livelli + difetto trovato (`z.coerce.boolean()`), E2E 101/101
+- [x] **F6 #198 Tenant Builder P3** — 2026-08-16 · `dcec8120` e precedenti. **Il criterio dichiarato all'apertura era**: «non completabile in questa sessione: si avanza fin dove il guardiano consente, `resume-from` scritto». Quel criterio è soddisfatto — 4 task su 9 (T1, T2, T3, T8), `resume-from: T4` nel register. Il lavoro residuo **non è una fase di questo mandato**: è la voce `#198`, che vive nel register con vita propria
+- [x] **F7 P4 task T5, vista dei divari critici** — 2026-08-16 · `dcec8120`, oracolo ri-misurato e riprodotto (97·299·70·60·2) + 64 cieche
+- [x] **F8 2b/2c leggere e verificare avversarialmente** — 2026-08-16 · `81b5fa19`, un rilievo respinto (il documento dà P2a per costruita, ma `#132` è ACTIVE)
+
+---
+
 ## Tabella del piano
 
 | id | Cosa | Chi | Cosa significa fatto | Stato |

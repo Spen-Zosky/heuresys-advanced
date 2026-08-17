@@ -69,8 +69,20 @@ fi
 # GitHub, so the RED/PENDING/GREEN *decisions* — not just classify() in isolation —
 # are exercised offline by scripts/test/run-shell-tests.sh. Without it the exit-75
 # branch added below could only be asserted by reading the code, which is not a test.
+#
+# La fixture puo' essere un FILE (un solo esito, per tutti gli sha) o una DIRECTORY con
+# `<sha>.json` piu' un `default.json` di ripiego. La forma a directory serve al gemello di
+# #212: «lo sha armato e' verde ma un commit DENTRO la finestra e' rosso» non e' esprimibile
+# se ogni sha riceve la stessa risposta — il test misurerebbe se' stesso.
 fetch() {
-  if [ -n "${CI_GATE_FIXTURE:-}" ]; then cat "$CI_GATE_FIXTURE"; return; fi
+  if [ -n "${CI_GATE_FIXTURE:-}" ]; then
+    if [ -d "$CI_GATE_FIXTURE" ]; then
+      f="$CI_GATE_FIXTURE/$SHA.json"
+      [ -f "$f" ] || f="$CI_GATE_FIXTURE/default.json"
+      cat "$f"; return
+    fi
+    cat "$CI_GATE_FIXTURE"; return
+  fi
   curl -fsS -m 15 -H 'Accept: application/vnd.github+json' "$1"
 }
 

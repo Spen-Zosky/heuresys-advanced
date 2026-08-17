@@ -130,6 +130,44 @@ case "$gate" in
       exit 1 ;;
 esac
 
+# --- 3b. IL DEPLOY NON PORTA UN COMMIT: PORTA UNA FINESTRA (#212, gemello — S1067).
+#     Il criterio guardava lo sha armato e basta. Ma `vm-deploy` porta in produzione TUTTO
+#     cio' che sta fra LAST_GOOD e ARMED, e un commit di soli documenti ha UNA sola corsa
+#     (State lint): il 2026-08-16 il verde di `5d3028ca` (solo docs/kb/) ha autorizzato il
+#     rollout del codice di `b6132910`, dove «Test (api integration)», «Playwright smoke» e
+#     «Build (web)» erano ancora in volo. La produzione non e' rimasta indietro: e' andata
+#     AVANTI rispetto a cio' che era stato verificato, che e' il guasto peggiore dei due.
+#
+#     Si pretende il verde su ogni commit INTERMEDIO che tocca path di deploy. Gli altri si
+#     saltano di proposito: un commit di soli documenti non ha corse di codice, e chiedergli
+#     un verde che nessuno produrra' mai bloccherebbe il rollout per sempre.
+DEPLOY_PATHS_RE='^(apps|packages|db/migrations|db/scripts|scripts|deploy)/'
+if git merge-base --is-ancestor "$LAST_GOOD" "$ARMED" 2>/dev/null; then
+  intermedi="$(git rev-list "$LAST_GOOD..$ARMED" 2>/dev/null | grep -v "^$ARMED$" || true)"
+  for c in $intermedi; do
+    [ -n "$(git diff --name-only "$c^" "$c" 2>/dev/null | grep -E "$DEPLOY_PATHS_RE" || true)" ] || continue
+    set +e
+    CI_GATE_NONBLOCKING=1 CI_GATE_WAIT=0 bash "$REPO_DIR/scripts/ci-gate.sh" "$c"
+    g2=$?
+    set -e
+    case "$g2" in
+      0)  ;;
+      75) say "CI ancora in volo su ${c:0:8} (commit di codice DENTRO la finestra ${LAST_GOOD:0:8}..${ARMED:0:8}) — non deployo, riprovo al prossimo tick"
+          exit 0 ;;
+      *)  if [ "$(cat "$STATE_FILE" 2>/dev/null || true)" = "red:$c" ]; then exit 0; fi
+          printf 'red:%s\n' "$c" > "$STATE_FILE"
+          err "CI NON VERDE su ${c:0:8}, che sta DENTRO la finestra di questo deploy (${LAST_GOOD:0:8}..${ARMED:0:8})"
+          err "        Lo sha armato e' verde, ma il rollout porterebbe in produzione anche questo commit."
+          exit 1 ;;
+    esac
+  done
+  [ -n "$intermedi" ] && say "finestra ${LAST_GOOD:0:8}..${ARMED:0:8} verificata: nessun commit di codice in volo o rosso"
+else
+  # LAST_GOOD non e' un antenato di ARMED (storia riscritta, o produzione avanti): la
+  # finestra non e' calcolabile. Si dichiara, non si finge di averla guardata.
+  say "finestra non calcolabile (${LAST_GOOD:0:8} non e' antenato di ${ARMED:0:8}) — verificato il solo sha armato"
+fi
+
 if [ "${DEPLOY_WATCH_DRYRUN:-0}" = "1" ]; then
   say "DRY-RUN — qui partirebbe: vm-deploy.sh su ${ARMED:0:8}"
   exit 0

@@ -330,6 +330,43 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
   { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'partirebbe'; } \
     && ok "deploy-watch: armato + arretrato + verde => deploya" || fail "deploy-watch GREEN ($rc: $out)"
+
+  # --- #212 GEMELLO: il deploy porta una FINESTRA, non un commit.
+  #     Successo davvero il 2026-08-16: armato un commit di soli documenti (una sola corsa,
+  #     verde), il rollout ha portato in produzione il codice del commit sotto, le cui tre
+  #     corse erano ancora in volo. La produzione e' andata AVANTI rispetto al verificato.
+  #     Serve una fixture PER-SHA: con un esito solo per tutti, il caso non e' esprimibile.
+  cp "$CG" "$W/scripts/"                                   # ci-gate col seam a directory
+  mkdir -p "$W/apps" "$W/docs" "$F/persha"
+  echo codice > "$W/apps/x.ts"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm "codice"
+  SHA_CODICE="$(git -C "$W" rev-parse HEAD)"
+  echo testo > "$W/docs/y.md"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm "solo documenti"
+  SHA_DOCS="$(git -C "$W" rev-parse HEAD)"
+  git -C "$W" push -q origin HEAD:refs/heads/main
+  git -C "$W" push -qf origin HEAD:refs/heads/prod         # ARMATO = il commit di documenti
+  printf '%s\n' "$SHA1" > "$W/pg_dump_snapshots/LAST_GOOD_SHA"
+  rm -f "$W/.deploy-watch-state"
+  cp "$F/green.json" "$F/persha/$SHA_DOCS.json"            # lo sha armato E' verde
+  cp "$F/green.json" "$F/persha/default.json"
+
+  cp "$F/pending.json" "$F/persha/$SHA_CODICE.json"        # ...ma il codice sotto e' in volo
+  out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'DENTRO la finestra' && ! printf '%s' "$out" | grep -q 'partirebbe'; } \
+    && ok "#212 gemello: sha armato verde ma codice in volo DENTRO la finestra => non deploya" \
+    || fail "#212 gemello PENDING intermedio ($rc: $out)"
+
+  cp "$F/red.json" "$F/persha/$SHA_CODICE.json"            # ...oppure rosso
+  out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
+  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'DENTRO la finestra'; } \
+    && ok "#212 gemello: sha armato verde ma codice ROSSO nella finestra => esce 1, non deploya" \
+    || fail "#212 gemello RED intermedio ($rc: $out)"
+
+  cp "$F/green.json" "$F/persha/$SHA_CODICE.json"          # tutta la finestra verde => si parte
+  rm -f "$W/.deploy-watch-state"
+  out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'partirebbe'; } \
+    && ok "#212 gemello: finestra intera verde => deploya (il controllo non blocca il caso sano)" \
+    || fail "#212 gemello GREEN finestra ($rc: $out)"
   rm -rf "$F"
 else
   fail "$CG o $DW mancante"
@@ -381,9 +418,53 @@ if [ -f "$CP" ]; then
   printf '%s' "$p" | grep -q 'arm=no' \
     && ok "close-propagate: finestra di sessione vuota => misura, e non arma" || fail "arm=no atteso su finestra vuota ($p)"
 
-  p="$(plan "$MKD/assente" --delta --auto-deploy)"
-  printf '%s' "$p" | grep -q 'arm=no' \
-    && ok "close-propagate: marcatore assente => non arma nel dubbio" || fail "arm=no atteso ($p)"
+  # --- #212: la SECONDA corsa nella stessa sessione. La prima consuma il marcatore, e prima
+  #     di S1067 la seconda cadeva in IGNOTO e non armava: la chiusura diceva «propagato»
+  #     mentre refs/heads/prod restava indietro (successo DUE volte in S1066). Ora, senza
+  #     marcatore, la finestra si ri-deriva da `origin/prod..HEAD`.
+  #     FIXTURE GIT DETERMINISTICA, non la storia di questo repo: qui serve una storia vera
+  #     (la finestra e' fatta di commit), e su un checkout shallow della CI la storia non c'e'.
+  P="$(mktemp -d)"; PB="$P/origin.git"; PW="$P/box"
+  git init -q --bare "$PB"
+  git init -q "$PW"
+  git -C "$PW" config user.email t@t; git -C "$PW" config user.name t
+  git -C "$PW" config commit.gpgsign false
+  mkdir -p "$PW/scripts" "$PW/docs"
+  cp "$CP" "$PW/scripts/"
+  echo base > "$PW/docs/a.md"; git -C "$PW" add -A >/dev/null; git -C "$PW" commit -qm base
+  git -C "$PW" remote add origin "$PB"
+  git -C "$PW" push -q origin HEAD:refs/heads/prod       # la produzione parte da qui
+  cpplan() { ( cd "$PW" && HEURESYS_MARKER="$P/assente" CLOSE_PROPAGATE_DRYRUN=1 \
+                bash scripts/close-propagate.sh "$@" 2>/dev/null | grep '^PLAN arm' ); }
+
+  # (a) niente di nuovo dopo la produzione: misura, e non arma
+  p="$(cpplan --delta --auto-deploy)"
+  printf '%s' "$p" | grep -q "arm=no" && printf '%s' "$p" | grep -q "gia' su HEAD" \
+    && ok "#212: marcatore assente + origin/prod == HEAD => misura «niente da armare», non IGNOTO" \
+    || fail "#212 (a): atteso arm=no + «gia' su HEAD» ($p)"
+
+  # (b) commit di SOLI DOCUMENTI sopra la produzione: misura, e non arma
+  echo piu > "$PW/docs/a.md"; git -C "$PW" commit -qam docs
+  p="$(cpplan --delta --auto-deploy)"
+  { printf '%s' "$p" | grep -q "arm=no" && printf '%s' "$p" | grep -q "nessuno su path di deploy"; } \
+    && ok "#212: marcatore assente + finestra di soli documenti => non arma, ma per MISURA" \
+    || fail "#212 (b): atteso arm=no misurato ($p)"
+
+  # (c) commit su path di deploy: DEVE armare — e' il caso che prima restava indietro in silenzio
+  echo x > "$PW/scripts/nuovo.sh"; git -C "$PW" add -A >/dev/null; git -C "$PW" commit -qm codice
+  p="$(cpplan --delta --auto-deploy)"
+  { printf '%s' "$p" | grep -q "arm=arma" && printf '%s' "$p" | grep -q "ri-derivato"; } \
+    && ok "#212: marcatore assente + finestra che tocca path di deploy => ARMA (era il difetto)" \
+    || fail "#212 (c): atteso arm=arma ri-derivato ($p)"
+
+  # (d) e sa ancora dire IGNOTO quando non esiste NESSUNA finestra: senza questo, la correzione
+  #     avrebbe semplicemente spento la dottrina del dubbio invece di darle una misura.
+  p="$( cd "$PW" && HEURESYS_MARKER="$P/assente" DEPLOY_ARM_REF=refchenonesiste \
+        CLOSE_PROPAGATE_DRYRUN=1 bash scripts/close-propagate.sh --delta --auto-deploy 2>/dev/null | grep '^PLAN arm' )"
+  { printf '%s' "$p" | grep -q "arm=no" && printf '%s' "$p" | grep -q "IGNOTO"; } \
+    && ok "#212: nessuna finestra misurabile => IGNOTO e non arma (il dubbio non e' stato spento)" \
+    || fail "#212 (d): atteso IGNOTO ($p)"
+  rm -rf "$P"
 
   # il veto S1030 deve continuare a valere: e' la ragione per cui l'armamento esiste
   p="$(HEURESYS_MARKER="$MK" HEURESYS_CLOSE_NODEPLOY=1 CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --delta --deploy 2>/dev/null | grep '^PLAN arm=')"

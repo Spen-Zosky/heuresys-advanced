@@ -142,11 +142,36 @@ case "$DEPLOY" in
       else
         do_arm=0; arm_why="misurato: nessun commit su path di deploy da ${arm_head:0:8}"
       fi
+    elif [ -n "$MODE" ] && git rev-parse --verify -q "origin/$ARM_REF" >/dev/null 2>&1; then
+      # SECONDA CORSA NELLA STESSA SESSIONE (#212, S1067). La prima propagazione CONSUMA il
+      # marcatore (align-clones.sh:194), quindi la seconda cadeva in IGNOTO e NON armava: la
+      # chiusura diceva «propagato» mentre refs/heads/prod restava sul commit vecchio. Successo
+      # DUE volte in S1066, ed e' il caso di una sessione che va BENE — chi chiude, trova un
+      # rosso, corregge e ri-chiude propaga per forza due volte.
+      #
+      # Il marcatore risponde a «cosa ho fatto in questa sessione». Non e' la domanda giusta:
+      # quella e' «cosa non e' ancora in produzione», e la porta `origin/$ARM_REF..HEAD`, che
+      # non si consuma e non dipende dal ricordarsi di scriverla. E' anche piu' SEVERA: se una
+      # sessione precedente ha lasciato del codice non armato, questa finestra lo vede e quella
+      # di sessione no.
+      arm_span="origin/$ARM_REF..HEAD"
+      if [ -z "$(git rev-list --count "$arm_span" 2>/dev/null | grep -v '^0$' || true)" ]; then
+        do_arm=0; arm_why="ri-derivato: origin/$ARM_REF e' gia' su HEAD, non c'e' niente da armare"
+      elif [ -n "$(git diff --name-only "$arm_span" 2>/dev/null | grep -E "$ARM_PATHS_RE" || true)" ]; then
+        do_arm=1
+        arm_why="ri-derivato da $arm_span (marcatore consumato): $(git rev-list --count "$arm_span") commit non armati toccano path di deploy"
+        warn "marcatore assente — finestra ri-derivata da origin/$ARM_REF: $arm_why"
+      else
+        do_arm=0
+        arm_why="ri-derivato da $arm_span (marcatore consumato): $(git rev-list --count "$arm_span") commit non armati, nessuno su path di deploy"
+      fi
     else
       # Dottrina del dubbio, gemella di align-clones.sh:108-111: armare fa partire un deploy in
-      # PROD senza nessuno che guardi, quindi e' azione cara e nel dubbio NON si esegue.
+      # PROD senza nessuno che guardi, quindi e' azione cara e nel dubbio NON si esegue. Ci si
+      # arriva solo se manca ANCHE origin/$ARM_REF (mai fetchato) o se la modalita' e' full:
+      # li' non esiste nessuna finestra misurabile, e IGNOTO e' la risposta onesta.
       do_arm=0
-      arm_why="IGNOTO: marcatore assente o modalita' full — non armo nel dubbio; forza con --deploy"
+      arm_why="IGNOTO: nessuna finestra misurabile (marcatore assente E origin/$ARM_REF sconosciuto, o modalita' full) — non armo nel dubbio; forza con --deploy"
       warn "armamento non eseguito — $arm_why"
     fi ;;
 esac

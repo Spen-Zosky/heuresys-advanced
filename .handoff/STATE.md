@@ -1,6 +1,6 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-16 (S1066).
+**Updated**: 2026-08-17 (S1066).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
 ⚠ **`#196` `#197` `#198` `#199` sono un corpo solo, non quattro voci**: prima di lavorarci leggi
@@ -39,14 +39,10 @@ adversarial; le decisioni tecniche sono di Claude.
 3. **`#142` F3b — i dati dentro le viste**: 27 viste, o tutte o nessuna ·
    `.programmi/142-cruscotti-per-tipologia.md`
 
-⚠ **La verifica lunga va sul linux-pc, non qui** (standard S1054, disatteso in S1066 pagando 82
-minuti di suite su Windows): là il database è locale, qui ogni query passa dal tunnel SSH. Vale per
-la **suite API**; le **E2E** invece sul linux-pc non hanno un setup che funzioni — l'API di
-produzione è su `:8013` e Playwright assume `:3001`, e puntarcela fa comunque scadere il login.
-Le E2E restano su Windows, con l'API di sviluppo avviata prima.
-
-⚠ **Il verde delle E2E in CI è lo `smoke`**, non la suite intera: `playwright-smoke.yml` esegue
-solo `smoke-5-personas.spec.ts` (101 casi). La suite completa ne ha 337 e **35 sono rossi** → `#211`.
+⚠ **La suite API va sul linux-pc** (S1054, disatteso in S1066: 82 minuti su Windows). Le **E2E** no:
+là non hanno un setup che funzioni (API su `:8013`, Playwright assume `:3001`) — restano su Windows,
+con l'API di sviluppo avviata prima. E il verde in CI è lo **smoke** (`smoke-5-personas.spec.ts`,
+101 casi), non la suite intera: quella ne ha 337 e **35 sono rossi** → `#211`.
 
 ## Open questions
 

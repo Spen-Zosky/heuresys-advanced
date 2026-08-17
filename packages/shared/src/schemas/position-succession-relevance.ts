@@ -7,6 +7,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 export const READINESS_HORIZON_VALUES = [
   "READY_NOW",
   "READY_6_MONTHS",
@@ -30,7 +31,7 @@ export const PositionSuccessionRelevanceSchema = z.object({
 export type PositionSuccessionRelevance = z.infer<typeof PositionSuccessionRelevanceSchema>;
 
 export const PositionSuccessionRelevanceListQuerySchema = z.object({
-  isCritical: z.coerce.boolean().optional(),
+  isCritical: queryBoolean().optional(),
   readinessHorizon: ReadinessHorizonSchema.optional(),
   ...paginationFields(200, 50),
 });

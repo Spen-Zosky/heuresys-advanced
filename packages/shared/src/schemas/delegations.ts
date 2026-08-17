@@ -11,6 +11,7 @@
 
 import { z } from "zod";
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 
 /**
  * L'ambito: una delega non è un assegno in bianco.
@@ -55,7 +56,7 @@ export const DelegationListQuerySchema = z.object({
   delegatorUserId: z.uuid().optional(),
   status: DelegationStatusSchema.optional(),
   /** Solo quelle in vigore oggi. */
-  inForce: z.coerce.boolean().optional(),
+  inForce: queryBoolean().optional(),
   ...paginationFields(200, 50),
 });
 export type DelegationListQuery = z.infer<typeof DelegationListQuerySchema>;

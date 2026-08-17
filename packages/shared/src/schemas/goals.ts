@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 
 const META = z.record(z.string(), z.unknown());
 
@@ -226,7 +227,7 @@ export const GoalTemplateSchema = z.object({
 export type GoalTemplate = z.infer<typeof GoalTemplateSchema>;
 export const GoalTemplateListQuerySchema = z.object({
   category: z.string().max(100).optional(),
-  isActive: z.coerce.boolean().optional(),
+  isActive: queryBoolean().optional(),
   ...paginationFields(200, 50),
 });
 export type GoalTemplateListQuery = z.infer<typeof GoalTemplateListQuerySchema>;

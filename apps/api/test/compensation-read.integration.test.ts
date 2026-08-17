@@ -377,10 +377,90 @@ describe("#32 A/L7 compensation & reward read", () => {
       }
     });
 
+    /**
+     * ⚠ Questo caso era un FALSO VERDE fino a `#209` (S1066), e vale la pena dire
+     * perché: `withValueOnly` usava `z.coerce.boolean()`, che su una querystring
+     * applica `Boolean("false")` — cioè `true`. Le due chiamate qui sotto erano
+     * quindi **la stessa chiamata**, e il `>=` confrontava un insieme con sé stesso:
+     * sempre vero, e cieco per costruzione.
+     *
+     * Ora il filtro filtra davvero, e il caso pretende una differenza STRETTA — ma
+     * solo quando esiste qualcosa da distinguere, misurato sul database invece che
+     * assunto. Se un giorno ogni banda avesse i suoi importi, la differenza sparirebbe
+     * legittimamente, e il caso lo dichiara invece di diventare rosso.
+     */
     it("chiedendole tutte compaiono anche quelle prive di importi", async () => {
+      // L'universo è quello dell'ATTORE, non della tabella: il catalogo è filtrato
+      // per tenant, quindi Federica vede le bande di RTL e non le globali. Misurato
+      // il 2026-08-17: RTL ne ha 12, tutte con importi; le 29 prive di importi sono
+      // globali e stanno fuori dal suo perimetro. Contare quelle — come faceva la
+      // prima stesura di questo controllo — pretende una differenza che non può
+      // esistere, e fa fallire il test per un difetto del test.
+      const { rows } = await pool.query<{ senza: string }>(
+        `SELECT count(*)::text AS senza
+           FROM sys.sys_compensation_bands b
+           JOIN sys.sys_users u ON u.user_tenant_id = b.compensation_band_tenant_id
+          WHERE u.user_email = $1 AND b.compensation_band_mid_eur IS NULL`,
+        ["federica.marchetti@rtl-bank.org"],
+      );
+      const senzaImporti = Number(rows[0]!.senza);
+
       const solo = (await bands(federica, "?withValueOnly=true&limit=200")).json() as { total: number };
       const tutte = (await bands(federica, "?withValueOnly=false&limit=200")).json() as { total: number };
+
       expect(tutte.total).toBeGreaterThanOrEqual(solo.total);
+
+      if (senzaImporti === 0) {
+        // CIECO, e si dichiara. Fino a `#209` questo caso era un falso verde per un
+        // altro motivo — `z.coerce.boolean()` rendeva `"false"` uguale a `true`,
+        // quindi le due chiamate erano LA STESSA e il `>=` confrontava un insieme
+        // con sé stesso. Oggi il filtro funziona, ma nel perimetro di questo attore
+        // non ha nulla da escludere: uguali è la risposta giusta, non una prova.
+        expect(`nessuna banda priva di importi nel perimetro: tutte(${tutte.total}) == solo(${solo.total})`).toBe(
+          `nessuna banda priva di importi nel perimetro: tutte(${tutte.total}) == solo(${tutte.total})`,
+        );
+        return;
+      }
+
+      // Se invece ce ne sono, il filtro deve SAPER DIRE DI NO: numeri uguali qui
+      // significherebbero che `false` non esclude niente.
+      expect(`con ${senzaImporti} prive di importi, tutte(${tutte.total}) > solo(${solo.total})`).toBe(
+        `con ${senzaImporti} prive di importi, tutte(${tutte.total}) > solo(${tutte.total > solo.total ? solo.total : "NON-FILTRA"})`,
+      );
+    });
+
+    /**
+     * `#209` — il caso PRECEDENTE è cieco per costruzione, e questo è il suo gemello
+     * che vede: un attore di piattaforma non ha un tenant nel catalogo
+     * (`catalogTenant` → `undefined`), quindi le bande **globali** gli entrano nel
+     * perimetro — e quelle, misurate, sono prive di importi.
+     *
+     * È qui che il filtro `withValueOnly` può davvero fallire, ed è per questo che
+     * il caso esiste: prima di `#209`, `?withValueOnly=false` valeva `true` e i due
+     * numeri coincidevano. Se tornassero a coincidere, il difetto è tornato.
+     */
+    it("#209 — per chi vede anche le globali, `withValueOnly=false` allarga davvero", async () => {
+      const { rows } = await pool.query<{ senza: string }>(
+        `SELECT count(*)::text AS senza FROM sys.sys_compensation_bands
+          WHERE compensation_band_mid_eur IS NULL`,
+      );
+      const senzaImporti = Number(rows[0]!.senza);
+      if (senzaImporti === 0) {
+        // Universo vuoto: si dichiara invece di passare in silenzio.
+        expect(`nessuna banda priva di importi in tutto il catalogo: caso CIECO`).toBe(
+          `nessuna banda priva di importi in tutto il catalogo: caso CIECO`,
+        );
+        return;
+      }
+
+      const solo = (await bands(admin, "?withValueOnly=true&limit=200")).json() as { total: number };
+      const tutte = (await bands(admin, "?withValueOnly=false&limit=200")).json() as { total: number };
+
+      expect(`tutte(${tutte.total}) > solo(${solo.total})`).toBe(
+        `tutte(${tutte.total}) > solo(${tutte.total > solo.total ? solo.total : "NON-FILTRA: il filtro ignora `false`"})`,
+      );
+      // e la differenza è esattamente quelle prive di importi, non un numero a caso
+      expect(`differenza ${tutte.total - solo.total}`).toBe(`differenza ${senzaImporti}`);
     });
 
     it("il catalogo è del proprio tenant, non di tutti", async () => {

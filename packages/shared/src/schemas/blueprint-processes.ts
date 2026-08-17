@@ -6,6 +6,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 export const BlueprintProcessSchema = z.object({
   blueprintProcessId: z.uuid(),
   variantId: z.uuid(),
@@ -22,7 +23,7 @@ export type BlueprintProcess = z.infer<typeof BlueprintProcessSchema>;
 
 export const BlueprintProcessListQuerySchema = z.object({
   variantId: z.uuid().optional(),
-  isOptional: z.coerce.boolean().optional(),
+  isOptional: queryBoolean().optional(),
   ...paginationFields(500, 100),
 });
 export type BlueprintProcessListQuery = z.infer<typeof BlueprintProcessListQuerySchema>;

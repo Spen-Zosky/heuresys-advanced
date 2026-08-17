@@ -7,6 +7,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 export const LEARNING_KIND_VALUES = [
   "COURSE",
   "MICRO_LESSON",
@@ -45,7 +46,7 @@ export const LearningModuleSchema = z.object({
 export type LearningModule = z.infer<typeof LearningModuleSchema>;
 
 export const LearningModuleListQuerySchema = z.object({
-  isGlobal: z.coerce.boolean().optional(),
+  isGlobal: queryBoolean().optional(),
   kind: LearningKindSchema.optional(),
   delivery: LearningDeliverySchema.optional(),
   search: z.string().min(1).max(255).optional(),

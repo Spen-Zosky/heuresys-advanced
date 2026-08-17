@@ -11,6 +11,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 // -------------------------------------------------------------------
 // Compensation profile (position ↔ band)
 // -------------------------------------------------------------------
@@ -40,7 +41,7 @@ export type CompensationBand = z.infer<typeof CompensationBandSchema>;
  * significa far leggere «esiste ma non so quanto vale». Chi vuole vederle tutte lo chiede.
  */
 export const CompensationBandListQuerySchema = z.object({
-  withValueOnly: z.coerce.boolean().optional().default(true),
+  withValueOnly: queryBoolean().optional().default(true),
   q: z.string().min(1).max(200).optional(),
   ...paginationFields(200, 100),
 });

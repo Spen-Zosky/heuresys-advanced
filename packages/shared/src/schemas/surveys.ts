@@ -9,6 +9,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 const META = z.record(z.string(), z.unknown());
 
 // ─────────────────────────── Templates ───────────────────────────
@@ -34,7 +35,7 @@ export type SurveyTemplate = z.infer<typeof SurveyTemplateSchema>;
 
 export const SurveyTemplateListQuerySchema = z.object({
   category: SurveyTemplateCategoryEnum.optional(),
-  isSystem: z.coerce.boolean().optional(),
+  isSystem: queryBoolean().optional(),
   search: z.string().min(1).max(255).optional(),
   ...paginationFields(200, 50),
 });
@@ -164,7 +165,7 @@ export type SurveyResponse = z.infer<typeof SurveyResponseSchema>;
 
 export const SurveyResponseListQuerySchema = z.object({
   subjectUserId: z.uuid().optional(),
-  isComplete: z.coerce.boolean().optional(),
+  isComplete: queryBoolean().optional(),
   ...paginationFields(500, 50),
 });
 export type SurveyResponseListQuery = z.infer<typeof SurveyResponseListQuerySchema>;

@@ -4,6 +4,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 export const VIZ_LAYOUT_ENGINE_VALUES = [
   "AUTO", "DAGRE", "ELK", "HIERARCHICAL", "TREE",
   "SWIMLANE", "TIMELINE", "FORCE_DIRECTED", "MANUAL",
@@ -26,7 +27,7 @@ export type VizLayout = z.infer<typeof VizLayoutSchema>;
 export const VizLayoutListQuerySchema = z.object({
   graphId: z.uuid().optional(),
   engine: VizLayoutEngineSchema.optional(),
-  isDefault: z.coerce.boolean().optional(),
+  isDefault: queryBoolean().optional(),
   ...paginationFields(200, 50),
 });
 export type VizLayoutListQuery = z.infer<typeof VizLayoutListQuerySchema>;

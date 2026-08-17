@@ -7,6 +7,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 export const CAREER_PATH_KIND_VALUES = [
   "VERTICAL",
   "LATERAL",
@@ -32,7 +33,7 @@ export const CareerPathSchema = z.object({
 export type CareerPath = z.infer<typeof CareerPathSchema>;
 
 export const CareerPathListQuerySchema = z.object({
-  isGlobal: z.coerce.boolean().optional(),
+  isGlobal: queryBoolean().optional(),
   kind: CareerPathKindSchema.optional(),
   search: z.string().min(1).max(255).optional(),
   ...paginationFields(200, 50),

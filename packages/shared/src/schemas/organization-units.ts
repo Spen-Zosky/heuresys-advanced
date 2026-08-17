@@ -6,6 +6,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 export const OrganizationUnitSchema = z.object({
   organizationUnitId: z.uuid(),
   tenantId: z.uuid(),
@@ -33,7 +34,7 @@ export const OrganizationUnitSchema = z.object({
 export type OrganizationUnit = z.infer<typeof OrganizationUnitSchema>;
 
 export const OrganizationUnitListQuerySchema = z.object({
-  isActive: z.coerce.boolean().optional(),
+  isActive: queryBoolean().optional(),
   parentId: z.uuid().optional(),
   managerUserId: z.uuid().optional(),
   ...paginationFields(200, 50),

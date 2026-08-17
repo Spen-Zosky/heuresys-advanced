@@ -5,6 +5,7 @@ import { z } from "zod";
 import { paginationFields } from "./_pagination.js";
 import { VizNodeSchema } from "./visualization-nodes.js";
 import { VizEdgeSchema } from "./visualization-edges.js";
+import { queryBoolean } from "./_query-boolean.js";
 
 export const VIZ_GRAPH_TYPE_VALUES = [
   "ORG_CHART", "PROCESS_FLOW", "CAREER_PATH", "LEARNING_PATH",
@@ -32,7 +33,7 @@ export type VizGraph = z.infer<typeof VizGraphSchema>;
 
 export const VizGraphListQuerySchema = z.object({
   type: VizGraphTypeSchema.optional(),
-  isActive: z.coerce.boolean().optional(),
+  isActive: queryBoolean().optional(),
   search: z.string().min(1).max(255).optional(),
   ...paginationFields(200, 50),
 });

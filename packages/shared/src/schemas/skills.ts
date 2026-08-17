@@ -11,6 +11,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 export const SkillSchema = z.object({
   skillId: z.uuid(),
   tenantId: z.uuid().nullable(),
@@ -27,7 +28,7 @@ export const SkillSchema = z.object({
 export type Skill = z.infer<typeof SkillSchema>;
 
 export const SkillListQuerySchema = z.object({
-  isGlobal: z.coerce.boolean().optional(),
+  isGlobal: queryBoolean().optional(),
   categoryId: z.uuid().optional(),
   search: z.string().min(1).max(255).optional(),
   ...paginationFields(200, 50),

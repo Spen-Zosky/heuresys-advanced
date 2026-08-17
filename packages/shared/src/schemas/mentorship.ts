@@ -9,6 +9,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 const META = z.record(z.string(), z.unknown());
 
 // ─────────────────────────── Programs ───────────────────────────
@@ -221,7 +222,7 @@ export type MentorMatchScore = z.infer<typeof MentorMatchScoreSchema>;
 export const MentorMatchScoreListQuerySchema = z.object({
   mentorUserId: z.uuid().optional(),
   menteeUserId: z.uuid().optional(),
-  isRecommended: z.coerce.boolean().optional(),
+  isRecommended: queryBoolean().optional(),
   ...paginationFields(200, 50),
 });
 export type MentorMatchScoreListQuery = z.infer<typeof MentorMatchScoreListQuerySchema>;

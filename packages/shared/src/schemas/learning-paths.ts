@@ -6,6 +6,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 export const LearningPathSchema = z.object({
   learningPathId: z.uuid(),
   tenantId: z.uuid().nullable(),
@@ -21,7 +22,7 @@ export const LearningPathSchema = z.object({
 export type LearningPath = z.infer<typeof LearningPathSchema>;
 
 export const LearningPathListQuerySchema = z.object({
-  isGlobal: z.coerce.boolean().optional(),
+  isGlobal: queryBoolean().optional(),
   search: z.string().min(1).max(255).optional(),
   ...paginationFields(200, 50),
 });

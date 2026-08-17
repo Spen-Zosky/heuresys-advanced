@@ -7,6 +7,7 @@
  */
 import { z } from "zod";
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 
 export const ProvenanceValidationStatusEnum = z.enum(["VALID", "STALE", "CONFLICTED", "REJECTED"]);
 
@@ -38,8 +39,8 @@ export const ProvenanceListQuerySchema = z.object({
   runId: z.uuid().optional(),
   validationStatus: ProvenanceValidationStatusEnum.optional(),
   minConfidence: z.coerce.number().min(0).max(1).optional(),
-  hasAiModel: z.coerce.boolean().optional(),
-  hasHumanApprover: z.coerce.boolean().optional(),
+  hasAiModel: queryBoolean().optional(),
+  hasHumanApprover: queryBoolean().optional(),
   ...paginationFields(200, 50),
 });
 export type ProvenanceListQuery = z.infer<typeof ProvenanceListQuerySchema>;

@@ -9,6 +9,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 export const POSITION_CRITICALITY_VALUES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const;
 /** Esportato come i pari in `users.ts` (UserStatus/UserType): apps/web importa
  *  TIPI, non valori, e senza questo dovrebbe riscriversi l'unione a mano. */
@@ -55,7 +56,7 @@ export type Position = z.infer<typeof PositionSchema>;
 /* --- list query/response ----------------------------------------------- */
 
 export const PositionListQuerySchema = z.object({
-  isActive: z.coerce.boolean().optional(),
+  isActive: queryBoolean().optional(),
   criticality: PositionCriticalitySchema.optional(),
   organizationUnitId: z.uuid().optional(),
   jobRoleId: z.uuid().optional(),

@@ -11,6 +11,7 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 export const TEAM_MEMBER_ROLES = ["LEAD", "MEMBER"] as const;
 export const TeamMemberRoleSchema = z.enum(TEAM_MEMBER_ROLES);
 export type TeamMemberRole = z.infer<typeof TeamMemberRoleSchema>;
@@ -45,7 +46,7 @@ export const TeamDetailSchema = TeamSchema.extend({
 export type TeamDetail = z.infer<typeof TeamDetailSchema>;
 
 export const TeamListQuerySchema = z.object({
-  isActive: z.coerce.boolean().optional(),
+  isActive: queryBoolean().optional(),
   ...paginationFields(200, 50),
 });
 export type TeamListQuery = z.infer<typeof TeamListQuerySchema>;

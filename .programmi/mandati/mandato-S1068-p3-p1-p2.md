@@ -187,11 +187,55 @@ scritta ora su un terreno che F1-F2 possono cambiare è un'ipotesi su un'ipotesi
 
 ## Esito del ciclo (R24 §6 — letto da questa tabella, non dalla memoria)
 
-*(da compilare a chiusura)*
+**CICLO NON CHIUSO — 7 voci fatte su 13, e il confine era dichiarato all'apertura.**
+
+Fatte con evidenza e commit: **F0** (precondizioni) · **F1** `#213` · **F2** `#214` · **F3a** `#198` T7 ·
+**F5a** `#132` F0 · **F7** `#211` ① · più il cancello di verifica GREEN a ogni passaggio.
+
+**Non aperte, con la ragione accanto** — nessuna è stata «dimenticata»:
+
+| Voce | Perché non è stata aperta |
+|---|---|
+| **F3b** `#198` T9 | pretende il **campo di prova** (E27: prima sul gemello, poi in produzione), che è G4 del ciclo precedente e non esiste ancora |
+| **F4** `#197` | la sua seconda condizione **è** il T9 di `#198` |
+| **F5b** `#132` F1 | la fase più grossa del programma; costo stimato oltre il residuo |
+| **F6** `#205` | ⛔ gated su `#132`, che non è arrivata a F1 |
+| **F8** `#142` F3b | costo stimato **~140k** contro un **residuo misurato di 95.157** token prima della soglia: aprirla voleva dire lasciarla a metà. Verdetto dello strumento accanto: *«✓ si continua — contesto: mancano 95.157 token»* |
+| **F9** `#143` F2 · **F10** `#159` F2 · **F11** `#54` F2 | idem: modelli dati e ponti da 1+ sessione ciascuno |
+| **F12** `#79` | per costruzione non è una fase a sé: si applica **dentro** le fasi che popolano tabelle, e nessuna di quelle fatte popola tabelle nuove |
+
+**Il mandato di Enzo era «tutti i P1 e P2»**, e all'apertura è stato dichiarato che somma
+~15-20 sessioni. Questa ne ha chiuse sette voci; le altre restano nel register col loro
+punto di ripresa, non in questo file.
+
+## Il filo di questa sessione, e non è nelle voci
+
+**Sette difetti trovati non ragionando ma eseguendo**, e cinque erano *nei miei stessi
+strumenti di misura*:
+1. `.gitignore` ingoiava una rotta del prodotto (`build/` è un segmento di URL): verde in
+   locale, **404 in produzione**, e niente sarebbe diventato rosso.
+2. La `000280` era **verde sulla CI e rossa in produzione** — `DISTINCT ON` senza tie-break.
+3. La `000302` ricreava a ogni deploy una traduzione **orfana**, e l'etichetta inglese che
+   l'utente leggeva confondeva il fascicolo col modello.
+4. Il criterio dei perimetri dell'agente leggeva «non so» come «sicuro», **tre volte**.
+5. `atlas-resolver.test.ts` **duplicava una SoT** e si è rotto per un'adozione riuscita.
+6. La prima cura di `#211` ha **reintrodotto il difetto di `#211`**: 263 casi non eseguiti.
+7. E la cura della cura **affermava di contare i casi mentre contava le fasi**.
+
+Il tratto comune: **ogni volta la misura ha smentito il piano o me**, e ogni volta il
+difetto era invisibile a un controllo che pure c'era.
 
 ---
 
 ## Registro delle scoperte — fuori da questo ciclo (R24 §5)
 
+*Si presentano **una volta sola**, come «lo vuoi nel prossimo?». Non entrano in «cosa
+resta» e non bloccano la chiusura.*
+
 | Scoperta | Misura | Stato |
 |---|---|---|
+| **Lo stato impossibile non era solo nei percorsi formativi**: altre due tabelle hanno righe che nessuna azienda vede, e **non è lo stesso difetto** — le 29 sono i CCNL e i sindacati, che `I21` vuole aperti a ogni industria: sono classificate male, non residui. Applicare loro il gesto studiato per i percorsi avrebbe **cancellato i contratti collettivi nazionali** | `sys_compensation_bands` **29** · `sys_skills` **3** | **registrata `#215`** |
+| **80 casi della suite E2E non vengono eseguiti**, e la causa non è isolata: non è `maxFailures` (nessuna config lo imposta) né i blocchi `serial` (11 casi in tutto) | 70 `skipped` + 1 `did not run` nella fase 3, 6+3 nelle altre; totale **80 su 434** | dentro `#211`, **dichiarata non isolata** |
+| **La suite E2E lascia righe di collaudo in produzione**, e questa è la **seconda volta di fila** che le ritiro a mano (S1067: `E2E-SF-*`; oggi: `E2E-JOBFAM/JOBROLE-*`). La pulizia manuale ripetuta è il sintomo: la cura sta nel `global-teardown`, che copre alcune famiglie e non altre | 2 righe, unica causa dei «2 campi con gap i18n» | dentro `#211` (famiglia della suite), **non curata** |
+| **Il drift della suite dichiara 4 righe residue pre-esistenti** su 715 colonne ispezionate — non lasciate dalla corsa, quindi anteriori | 4 righe | reperto, **mai guardato** |
+| **`RESOURCE_MULTICLASSE` descrive le classi in prosa**, quindi nessuno strumento può enumerarle: è la ragione per cui `analytics` e `dashboard` restano «non misurabili» invece di entrare nella coda dell'agente. Renderle un elenco toccherebbe l'asserzione di boot del gate in `apps/api` | 3 resource | voce a sé, **non aperta** |

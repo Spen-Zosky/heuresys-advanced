@@ -1,19 +1,19 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-16T20:29:23Z da docs/kb/tools/build_index.py
+# generato: 2026-08-17T13:28:10Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-16T20:29:23Z"
-  total_files: 3052
+  generated_at: "2026-08-17T13:28:10Z"
+  total_files: 3072
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 37
     api-core: 33
-    api-module: 335
+    api-module: 341
     ci: 17
     claude-config: 35
-    config: 153
+    config: 159
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -22,21 +22,21 @@ meta:
     db-other: 8
     db-script: 42
     db-seed: 114
-    doc-canonical: 658
+    doc-canonical: 661
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 106
+    shared-schema: 107
     showcase-source: 14
-    test: 382
+    test: 386
     ux-design-archive: 80
     web-source: 237
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2494
+    live: 2514
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -557,6 +557,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-activation.ts'
     root: repo
     rel: 'apps/api/src/modules/approvals/effects/tenant-activation.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-blueprint-application.ts'
+    root: repo
+    rel: 'apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -1187,6 +1193,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\gdpr\service.ts'
     root: repo
     rel: 'apps/api/src/modules/gdpr/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\generated-origins\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/generated-origins/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\generated-origins\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/generated-origins/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\generated-origins\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/generated-origins/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -2168,6 +2192,18 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\build-plan.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-materialization/build-plan.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\build-source.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-materialization/build-source.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\repository.ts'
     root: repo
     rel: 'apps/api/src/modules/tenant-materialization/repository.ts'
@@ -2852,6 +2888,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\scripts\live-generic-catalogue-acceptance.ts'
+    root: repo
+    rel: 'apps/agent-gateway/scripts/live-generic-catalogue-acceptance.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\scripts\live-read-acceptance.ts'
     root: repo
     rel: 'apps/agent-gateway/scripts/live-read-acceptance.ts'
@@ -2966,6 +3008,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\test\generic-catalogue.test.ts'
+    root: repo
+    rel: 'apps/agent-gateway/test/generic-catalogue.test.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\test\heuresys-client.test.ts'
     root: repo
     rel: 'apps/agent-gateway/test/heuresys-client.test.ts'
@@ -3026,6 +3074,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\diagnosi-211.mts'
+    root: repo
+    rel: 'apps/api/scripts/diagnosi-211.mts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\scripts\export-accessi-csv.mjs'
     root: repo
     rel: 'apps/api/scripts/export-accessi-csv.mjs'
@@ -3068,9 +3122,27 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-198-t4.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-198-t4.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-198-t6.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-198-t6.mts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-199.mts'
     root: repo
     rel: 'apps/api/scripts/prova-live-199.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-210.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-210.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -8666,6 +8738,12 @@ files:
     category: db-seed
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\132-ricerca-genera-il-modello.md'
+    root: repo
+    rel: '.programmi/132-ricerca-genera-il-modello.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\142-cruscotti-per-tipologia.md'
     root: repo
     rel: '.programmi/142-cruscotti-per-tipologia.md'
@@ -8714,9 +8792,21 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\.programmi\mandato-consegne-lab-2026-08-16.md'
+  - path: 'D:\heuresys-advanced\.programmi\mandati\README.md'
     root: repo
-    rel: '.programmi/mandato-consegne-lab-2026-08-16.md'
+    rel: '.programmi/mandati/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\mandati\mandato-S1067-batch-p1p2p3.md'
+    root: repo
+    rel: '.programmi/mandati/mandato-S1067-batch-p1p2p3.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\mandati\mandato-consegne-lab-2026-08-16.md'
+    root: repo
+    rel: '.programmi/mandati/mandato-consegne-lab-2026-08-16.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -13640,6 +13730,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\generated-origins.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/generated-origins.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\goals.ts'
     root: repo
     rel: 'packages/shared/src/schemas/goals.ts'
@@ -14624,6 +14720,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\generated-origins.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/generated-origins.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\goals-life.integration.test.ts'
     root: repo
     rel: 'apps/api/test/goals-life.integration.test.ts'
@@ -15566,6 +15668,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\tenant-blueprint-application.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/tenant-blueprint-application.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\tenant-blueprint-approval.integration.test.ts'
     root: repo
     rel: 'apps/api/test/tenant-blueprint-approval.integration.test.ts'
@@ -15626,6 +15734,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\build-source.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/build-source.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\unit\date-only.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/date-only.unit.test.ts'
@@ -15647,6 +15761,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\unit\mfa-crypto-fault-status.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/mfa-crypto-fault-status.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\query-boolean-filters.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/query-boolean-filters.unit.test.ts'
     category: test
     status: live
     provenance: git-tracked

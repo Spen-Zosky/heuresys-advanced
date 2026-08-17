@@ -9,6 +9,37 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1067 (2026-08-17) — l'interruttore, e la domanda che ha smontato l'archetipo
+
+**Numeri ri-derivati dal vivo** (la sessione **non ha toccato il database**: nessuna migrazione
+nuova): utenti **161** · posizioni **315** · OU **45** · team **26** · tenant ACTIVE **2** ·
+RBAC **980 mapping** · skill **14.039** · migration su disco **318** (max `000320`) · moduli API
+**97** (+1: `generated-origins`) · test API **255 file** (+11) · spec E2E **99** · HEAD `63dc2e98`
+· **16 commit**.
+
+**Il ciclo batch (9/9)**: chiuse `#202` `#203` `#204` `#207` `#208` — erano **già fatte e mai
+marcate**, e il menu le riproponeva · `#210` (i cataloghi formativi dicono di che cosa parla il loro
+numero) · `#212` (**due** difetti: la seconda propagazione non armava, e il sorvegliante poteva
+deployare codice non ancora verificato) · `#156` (il catalogo generico dell'agente è collegato: tre
+strumenti, 8 decisioni nel diario del gate, nessuna scrittura). Il «gap i18n» **non era un gap**: era
+una riga di collaudo E2E lasciata in produzione da un test morto a metà. `#211` triato: i 35 rossi
+sono **sei famiglie**, e **nessuna è un guasto del prodotto**.
+
+**Tenant Builder P3 da 4 a 7 task su 9**: **T4** (il motore costruisce da un piano e non conosce più
+la sorgente), **T5** (l'atto `APPROVED → APPLIED` in una transazione, con una riga di registro per
+ogni riga creata — provato **sabotando** il registro e verificando che torni indietro tutto), **T6**
+(le quattro rotte: `apply` **non costruisce**, provato sabotandolo).
+
+**🔴 E29 — l'archetipo scritto a mano si ritira, il modello lo genera la ricerca.** Alla prova live
+del T6 Enzo ha chiesto **da dove venissero i numeri**: da `blueprints.ts`, **un solo archetipo**
+scritto a mano a giugno 2026 — il fascicolo di un ospedale avrebbe prodotto la stessa banca. `#132`
+cambia natura e passa da ~2 a **~8 sessioni**. Tre misure: il ritiro **non costa dati** (`0` righe
+`RBR-%`/`SYN_%` in produzione) · lo nominano **12 file** · e il vero lavoro è che **il contenuto di
+un modello non ha dove stare** (per posizioni/competenze/indicatori non esiste nessuna tabella; le
+225 righe di `sys_organization_unit_templates` sono **orfane**). **E30**: sei parametri obbligatori
+prima di una ricerca, e un **buco trovato misurando** — nessun vincolo lega la fascia al numero di
+addetti, si può dichiarare `XS` con 5000.
+
 ### Delta S1063 (2026-08-15) — i cancelli guardavano tutti il codice, nessuno guardava le istruzioni
 
 **Numeri ri-derivati dal vivo** (S1064: la sessione ha aggiunto **una** migrazione — il modello
@@ -19,6 +50,7 @@ disco **318** (max `000320`) · sentinelle **18** vigilate + **1 informativa**
 (`v_positions_with_critical_skill_gap`, S1066: restituisce righe per progetto) · tabelle `sys`
 **226** · viste `sys` **26** · test API **264 file** (234 integration) · spec E2E **99** ·
 moduli API **96** · HEAD `13c32ab7`.
+> ⚠ Numeri di S1063-S1066; quelli correnti stanno nel delta S1067 qui sopra.
 
 **S1066 (2026-08-16 sera) — «Le prove hanno trovato quello che nessuno stava cercando».**
 Eseguite le **7 consegne** del design-lab (ingerite come `#202`-`#208`). Chiuse `#199` (guardia su

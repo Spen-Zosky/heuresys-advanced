@@ -1,26 +1,26 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-17 (S1066).
+**Updated**: 2026-08-17 (S1067).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-⚠ **`#196` `#197` `#198` `#199` sono un corpo solo, non quattro voci**: prima di lavorarci leggi
-`D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md` — sequenza,
-errori già trovati, cosa è già verificato, cosa non fare (voce `#208`).
+⚠ **`#132` HA CAMBIATO NATURA (E29)**: non produce più solo i processi, produce **il modello con cui
+l'azienda viene costruita**, e l'archetipo scritto a mano **sparisce senza lasciare traccia**.
+Piano in 8 fasi: `.programmi/132-ricerca-genera-il-modello.md`. Prima di aprirla, leggilo.
 
-## Last session brief (S1066 «Le prove hanno trovato quello che nessuno stava cercando»)
+## Last session brief (S1067 «l'interruttore, e la domanda che ha smontato l'archetipo»)
 
-**Eseguite le 7 consegne del design-lab.** Il filo della sessione è che **quattro volte una prova
-scritta per dimostrare una cosa ne ha smentita un'altra**, e ogni volta il difetto era più grave di
-quello che stavo correggendo: la prova live degli indicatori ha scoperto che **ogni filtro booleano
-di querystring dell'API mente** (`z.coerce.boolean()` rende `?flag=false` uguale a `true`, in una
-ventina di punti); la prova generale della CI ha fermato una tabella non classificata che sarebbe
-stata CI rossa 25 minuti dopo il push; il collaudo del canale ha rivelato un controllo rotto da
-prima; e la patch del lab per i numeri doppi, applicata com'era, **li creava ancora**.
+Ciclo batch chiuso su tutte le voci, poi il lavoro è andato dove Enzo l'ha portato. Il motore che
+costruisce un'azienda da un fascicolo è arrivato **a 7 task su 9**: costruisce da un piano senza
+sapere da dove viene, l'atto è transazionale e registra ogni riga creata, e ora **le rotte lo
+raggiungono** — fino a stamattina il meccanismo esisteva ma nessuno poteva azionarlo.
 
-**Niente è stato preso per buono.** Ogni consegna verificata contro il sistema vivo: un rilievo
-respinto (il documento 2b/2c dà P2a per *costruita*, ma `#132` non è mai stata implementata), una
-premessa superata (le due specie di indicatori convivono già in `learning_modules`), e cinque prove
-collaudate **sabotandole** per vederle rosse prima di fidarsene.
+Il filo vero però è un altro: alla prova live del T6 Enzo ha chiesto **da dove venissero i numeri**.
+Venivano da un file scritto a mano con **un solo archetipo**, una banca con tre filiali: il fascicolo
+di un ospedale avrebbe prodotto la stessa banca. Da lì la decisione di ritirarlo e far generare il
+modello dalla ricerca. Tre misure hanno riscritto la difficoltà del lavoro: il ritiro **non costa
+dati** (l'archetipo non ha mai costruito niente in produzione), il confine per sostituirlo era stato
+creato **quella stessa mattina**, e il vero ostacolo non era in nessun piano — **il contenuto di un
+modello non ha dove stare**.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -29,38 +29,32 @@ adversarial; le decisioni tecniche sono di Claude.
 
 ## Top priorities (prossima sessione)
 
-1. **`#198` P3 — riprendere da T4** (sorgente parametrica e piano di costruzione, E21): 4 task su 9
-   sono fatti, `resume-from` nel register. T4 disaccoppia il motore dall'archetipo ed è un
-   refactoring di `repository.ts` (370 righe, ~250 dipendono dall'archetipo): **serve il suo spazio**,
-   ed è la ragione per cui non è stato aperto a fine sessione
-2. **`#210` i cataloghi già misti** — ora **sbloccata** (dipendeva da `#209`, chiusa): `learning`
-   mostra un conteggio unico dove le due specie convivono davvero, ed è il caso *non* cieco che
-   `/kpis` non poteva offrire
-3. **`#142` F3b — i dati dentro le viste**: 27 viste, o tutte o nessuna ·
-   `.programmi/142-cruscotti-per-tipologia.md`
-
-⚠ **La suite API va sul linux-pc** (S1054, disatteso in S1066: 82 minuti su Windows). Le **E2E** no:
-là non hanno un setup che funzioni (API su `:8013`, Playwright assume `:3001`) — restano su Windows,
-con l'API di sviluppo avviata prima. E il verde in CI è lo **smoke** (`smoke-5-personas.spec.ts`,
-101 casi), non la suite intera: quella ne ha 337 e **35 sono rossi** → `#211`.
+1. **`#132` F0 → F1** — F0 è piccola e va prima di tutto (i sei parametri obbligatori della ricerca +
+   il vincolo fascia↔numero che **oggi non esiste**: si può dichiarare `XS` con 5000 addetti). F1 è
+   dove vive il contenuto di un modello, e tocca `db/**` → **prova generale sul linux-pc prima del
+   push** · `.programmi/132-ricerca-genera-il-modello.md`
+2. **`#198` T7** — le due pagine (costruzione e registro) nel prodotto. Non dipende da dove nasce il
+   modello, quindi si può intercalare in qualunque momento · `resume-from: T7`
+3. **`#211` la cura della famiglia ①** — la suite E2E completa non può essere verde finché dura più
+   dei 15 minuti di una sessione: da decidere se rinnovare i cookie dentro la corsa o rigenerare lo
+   `storageState` per blocco
 
 ## Open questions
 
-- **`#210`**: `career_paths` e `learning_paths` non hanno **nessuna** riga di piattaforma —
-  distinguere due specie dove una è vuota da sempre è informazione o rumore? *(`#209`, l'altra
-  scoperta, è stata decisa da te e chiusa nella stessa sessione.)*
-- **Si apre davvero il ciclo di valutazione?** È in **bozza** (`RTL-2026-ANNUAL`): farlo avanzare
-  mette tutta l'azienda davanti a un compito, e va fatto quando la schermata dell'autovalutazione
-  esiste.
-- **`/users` è governata al contrario di `/organization`** sulla stessa materia · **`#169`**
-  separare password e secondo fattore · **`D-69`** riapertura verificata, nessuna urgenza.
+- **`#213`** — cinque percorsi formativi non hanno titolare e non sono catalogo comune: **nessuna
+  azienda li vede**. Tre si chiamano `OLDDB::learning_paths::<uuid>`. A chi appartengono è una scelta
+  di prodotto, non tecnica.
+- **`#214`** — il criterio della coda dell'agente ha un buco: «più classi» non conta fra le riservate,
+  quindi `analytics` passa fra i «neutri» pur toccando dati di persona. Chiudere il buco o aprire
+  `positions` (il primo davvero neutro)?
+- **`#197`** resta aperta a metà per costruzione: la sua seconda condizione è il T9 di `#198`.
 
 ## Verification
 
 ```bash
 python docs/kb/tools/session_start.py               # menu + salute, un colpo solo
 python docs/kb/tools/handoff_lint.py                # cancello di coerenza, bloccante
-python docs/kb/tools/completezza_tenant.py --autoprova   # NUOVO nel repo (P3/T8), 2 esiti opposti
+python docs/kb/tools/programmi.py                   # da dove riprendono gli 8 programmi
 bash scripts/verifica-deploy.sh                     # DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO
 ```
 

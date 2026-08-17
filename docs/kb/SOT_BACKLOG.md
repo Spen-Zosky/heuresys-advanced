@@ -12,6 +12,15 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
+- **#212 `close-propagate` non arma il deploy alla seconda corsa nella stessa sessione, e il rollout resta indietro in silenzio** · status: ACTIVE
+  - priority: P2 · effort: ~30min · doc: osservato due volte in S1066
+  - cosa-succede: la prima corsa consuma il marcatore di sessione (`.session-align.marker`). Alla seconda, `arma` esce con «IGNOTO: marcatore assente o vuoto — non armo nel dubbio», e `refs/heads/prod` resta sul commit VECCHIO
+  - perche' conta: la prudenza e' giusta (non si arma alla cieca), ma l'esito e' che la chiusura **dice di aver propagato** mentre il deploy punta a un commit superato. In S1066 e' successo DUE volte: la prima ha lasciato armato un commit con la CI rossa, la seconda un commit vecchio di 5. Entrambe le volte ho armato a mano con `git push origin HEAD:refs/heads/prod`
+  - quando-capita-davvero: ogni volta che una sessione propaga piu' di una volta — cioe' ogni volta che la prima chiusura scopre un rosso e si deve correggere e ri-chiudere. Non e' un caso raro: e' il caso di una sessione che va bene
+  - NON-e'-un-difetto-di-prudenza: il rimedio non e' armare sempre. E' che `arma=ignoto` deve **dirlo forte** (oggi e' una riga fra le altre) oppure ri-derivare la finestra da `origin/prod..HEAD` invece che dal marcatore consumato
+  - la-lettura-finale-lo-vede-gia': `verifica-deploy.sh` stampa «HEAD ... e' avanti di N commit NON armati». E' li' che me ne sono accorto entrambe le volte — quindi il segnale c'e', ma arriva dopo e in tono minore
+  - chiuso-quando: una seconda propagazione nella stessa sessione o arma correttamente, o rende impossibile non accorgersene
+
 - **#211 La suite E2E COMPLETA ha 35 casi rossi, e nessuno se n'era accorto perche' la CI ne esegue uno solo** · status: ACTIVE
   - priority: P2 · effort: ~1 sessione (triage: capire quanti guasti distinti sono, e da quando) · doc: trovata chiudendo #209 (S1066)
   - misura-2026-08-17: `pnpm test:e2e:prod` (suite intera, 337 casi) da' **35 falliti / 302 passati** in ~32 min. Lo **smoke** — `smoke-5-personas.spec.ts`, l'unico che la CI esegue — da' **101/101 verde**

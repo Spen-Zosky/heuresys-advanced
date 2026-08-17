@@ -8,9 +8,27 @@
  * Ogni prova qui ha la sua controprova — il caso che deve dare esito OPPOSTO. Una batteria
  * che verifica solo il ramo felice resta verde anche quando il resolver risponde sempre sì.
  */
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join, resolve as resolvePath } from "node:path";
 import { describe, it, expect } from "vitest";
 import { AtlasOperationResolver } from "../src/atlas-resolver.js";
 import { classifyCall } from "../src/write-gate.js";
+
+/**
+ * La radice del workspace, risalita come fa il resolver (`atlas-resolver.ts:50`): la cwd
+ * cambia fra il gateway (radice) e i test (`apps/agent-gateway`), e un percorso relativo
+ * si leggerebbe in un caso e non nell'altro — cioè verde qui e vuoto in produzione.
+ */
+function radiceRepo(): string {
+  let dir = resolvePath(process.cwd());
+  for (let i = 0; i < 8; i += 1) {
+    if (existsSync(join(dir, "pnpm-workspace.yaml"))) return dir;
+    const su = dirname(dir);
+    if (su === dir) break;
+    dir = su;
+  }
+  return process.cwd();
+}
 
 /** Una mappa minima e realistica: il perimetro di `#156`, in sola lettura. */
 const PERIMETRO_REALE = {
@@ -120,10 +138,21 @@ describe("#156 il file generato sul disco è coerente con la decisione", () => {
   const vero = AtlasOperationResolver.load();
 
   it("porta il perimetro deciso, e solo quello", () => {
-    // L'atteso NON è cablato: è il perimetro dichiarato nel file dei perimetri, letto qui.
+    // ⚠ Il commento diceva «l'atteso NON è cablato» e la riga sotto lo cablava
+    // (`toEqual(["organization-units"])`): il caso è andato rosso il 2026-08-17, quando
+    // Enzo ha aperto `positions` — cioè si è rotto per un'adozione RIUSCITA. Un test che
+    // fotografa quali perimetri sono aperti duplica una SoT (`agent-perimetri.json`) e
+    // trasforma ogni apertura futura in un rosso da spegnere a mano. Ora l'atteso si
+    // DERIVA dalla fonte, e la proprietà verificata è quella vera: il generato dice
+    // esattamente ciò che la decisione dice, né uno in più né uno in meno.
     expect(vero.isEmpty(),
       "agent-operations.json non si legge: rigenerarlo con build_agent_operations.py").toBe(false);
-    expect(vero.conceptIds()).toEqual(["organization-units"]);
+    const perimetri = JSON.parse(
+      readFileSync(join(radiceRepo(), "docs", "kb", "agent-perimetri.json"), "utf8"),
+    ) as { aperti?: Array<{ concetto: string }> };
+    const decisi = (perimetri.aperti ?? []).map((v) => v.concetto).sort();
+    expect(decisi.length, "nessun perimetro deciso: la fonte non si legge").toBeGreaterThan(0);
+    expect(vero.conceptIds().slice().sort()).toEqual(decisi);
   });
 
   it("non contiene NESSUNA operazione di scrittura", () => {

@@ -62,8 +62,16 @@ che i vincoli tecnici impongono, non una scelta di comodo.
   linux-pc, che ha bocciato la prima stesura. **In più**: la `000280` era verde sulla CI e rossa in
   produzione — `DISTINCT ON` senza tie-break; ordine reso totale lì e nei due gemelli di
   `verify-storia36.sql`. Ha prodotto `#215`
-- [ ] **F2 `#214`** — apre `positions` (decisione di Enzo). Riga in `agent-perimetri.json` con
-  `decisione` + `data`, poi rigenerare le operazioni e provare LIVE
+- [x] **F2 `#214`** — 2026-08-17 · `positions` aperto (8 operazioni, tutte letture) **e il buco del
+  criterio chiuso**, che si è rivelato **tre buchi della stessa forma** — «più classi», resource non
+  classificate, nessuna classe leggibile: tutti *assenza di misura letta come assenza di rischio*.
+  Effetto: la coda «neutra» da **31 a 16**, con 14 dichiarati NON MISURABILI. Prova LIVE con tre
+  domande: la terza chiede `users`, che non è aperto → `hrx_entity_query = deny` e tentativo di
+  aggiramento via `Bash = deny`. **Dichiarato ciò che la prova NON misura**: gli strumenti di
+  dominio `hrx_positions_upsert/_delete` esistevano già dietro approvazione umana, e la domanda (2)
+  è passata per assenza di tentativi → criterio duplice, il secondo letto dalla mappa. Suite
+  gateway 92/92 dopo aver corretto `atlas-resolver.test.ts`, che **duplicava una SoT** e si era
+  rotto per un'adozione riuscita; ora deriva l'atteso e resta capace di fallire (sabotato → rosso)
 - [ ] **F3 `#198` T7 → T9** — le due pagine nel prodotto, poi il controllo incrociato. `resume-from: T7`
 - [ ] **F4 `#197`** (P3) — si chiude quando T9 esiste
 - [ ] **F5 `#132` F0 → F1** — i sei parametri della ricerca + il vincolo fascia↔numero; poi dove

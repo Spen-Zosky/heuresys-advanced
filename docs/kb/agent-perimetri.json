@@ -8,6 +8,12 @@
       "sola_lettura": true,
       "data": "2026-08-16",
       "decisione": "Enzo (#156): primo perimetro in sola lettura. Coerente con la decisione dello stesso giorno su #193 — l'organigramma e' rubrica aziendale, visibile a chiunque lavori in azienda. E' l'unico candidato la cui sensibilita' non e' una stima di chi scrive, ma una scelta di prodotto scritta e datata."
+    },
+    {
+      "concetto": "positions",
+      "sola_lettura": true,
+      "data": "2026-08-17",
+      "decisione": "Enzo (#214): «apri positions». Secondo perimetro in sola lettura, ed e' il primo DAVVERO neutro della coda: 8 letture, 5 pagine, e la classe non e' un'assenza ma un'affermazione scritta in data-classes.ts — «una posizione e' un POSTO nell'organigramma; chi lo occupa si legge da user, che e' PERSONAL». Il candidato piu' ampio (analytics, 10 letture) e' stato SCARTATO nella stessa decisione: le sue cinque pagine espongono per dichiarazione propria anche competenze e retribuzioni, e compariva fra i neutri solo per un buco del criterio, chiuso in S1068."
     }
   ]
 }

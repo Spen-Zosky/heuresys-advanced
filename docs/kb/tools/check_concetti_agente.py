@@ -29,9 +29,27 @@ TRE PROVE, tutte meccaniche — si leggono dal codice, non si giudicano a occhio
 
 POI L'ORDINE, che non e' un'ammissione ma una precedenza:
   APERTO      gia' deciso e in adozione. Oggi uno.
-  IN CODA     ordinati per rischio: prima chi non tocca dati di persona, poi le quattro
-              classi riservate. Riservato NON vuol dire escluso: i permessi si applicano
-              comunque sulla sessione inoltrata (ADR-0033 §3). Vuol dire dopo.
+  IN CODA     ordinati per rischio: prima chi non tocca dati di persona, poi chi non e'
+              MISURABILE, poi le quattro classi riservate. Riservato NON vuol dire escluso:
+              i permessi si applicano comunque sulla sessione inoltrata (ADR-0033 §3).
+              Vuol dire dopo.
+
+IL BUCO CHE ERA QUI, chiuso il 2026-08-17 (S1068) su segnalazione di Enzo dentro #214.
+  `analytics` compariva **primo fra i neutri** — 10 letture, 9 pagine — pur portando
+  l'etichetta «piu' classi», e le sue cinque pagine espongono per dichiarazione propria
+  *organico, presenze, competenze, RETRIBUZIONI e KPI*: due delle quattro classi riservate.
+  Passava perche' `piu' classi` non e' una stringa presente in RISERVATE, cioe' per un
+  dettaglio di come e' scritto il confronto, non per una proprieta' del dato. Un secondo
+  buco gemello: una resource assente da tutti e tre gli elenchi usciva etichettata
+  «non classificate: <nome>» e finiva **anch'essa fra i neutri** (`enterprise_typing`).
+  Le due hanno la stessa forma — **assenza di misura letta come assenza di rischio** —
+  ed e' esattamente cio' che il PUNTO FISSO vieta. Ora esiste un terzo scaglione:
+  NON MISURABILE, che sta **dopo** i neutri, e il criterio non deve piu' essere «non e'
+  nell'elenco delle riservate» ma «e' dichiaratamente senza dati di persona».
+  Perche' non l'ho risolto enumerando le classi di una resource multiclasse: il valore in
+  `RESOURCE_MULTICLASSE` e' **prosa**, non un elenco, e cambiarne la forma toccherebbe
+  l'asserzione di boot del gate in `apps/api`. Quella e' una voce a se': qui si corregge
+  lo strumento di misura, che e' cio' che stava sbagliando.
 
 DUE ONESTA' CHE LO STRUMENTO DEVE AVERE:
   1. L'atlante e' GENERATO e invecchia. Qui si pretende **fresco**: se il codice che
@@ -185,7 +203,8 @@ if not consumati:
          "rigenerarlo: senza quella mappa V3 non e' misurabile e ogni modulo sembrerebbe muto")
 
 # ---------------------------------------------------------------- 5. il quadro
-aperti, neutri, riservati, esclusi, senza_lettura, senza_superficie = [], [], [], [], [], []
+aperti, neutri, riservati, esclusi = [], [], [], []
+senza_lettura, senza_superficie, incerti = [], [], []
 
 for mod in moduli:
     if mod in ESCLUSI:                                        # V2
@@ -227,10 +246,25 @@ for mod in moduli:
         senza_superficie.append(riga)
     elif classi & set(RISERVATE):
         riservati.append(riga)
+    elif ignote or not classi or "piu' classi" in classi or "dubbio dichiarato" in classi:
+        # NON MISURABILE: non si sa quali classi tocca, quindi non si sa se e' neutro.
+        # Prima finivano fra i neutri per come era scritto il confronto — vedi il buco
+        # chiuso in S1068 nell'intestazione. Il rimedio e' per riga, e lo dice:
+        if ignote:
+            motivo = ("resource non classificate (%s): vanno dichiarate in data-classes.ts"
+                      % ",".join(ignote))
+        elif not classi:
+            motivo = ("nessuna classe leggibile: nessuna delle sue letture dichiara un "
+                      "permesso, quindi non c'e' resource da cui risalire alla classe")
+        else:
+            motivo = ("classi non enumerabili: `RESOURCE_MULTICLASSE` le descrive in prosa, "
+                      "e almeno una delle sue pagine puo' mostrare dati di persona")
+        incerti.append((mod, len(get), len(pagine), et, motivo))
     else:
+        # Neutro solo per AFFERMAZIONE esplicita, non per assenza dalle riservate.
         neutri.append(riga)
 
-coda = len(neutri) + len(riservati)
+coda = len(neutri) + len(incerti) + len(riservati)
 print("=" * 92)
 print(" #156 — PERIMETRI DELL'AGENTE: la coda di adozione, dal catalogo reale")
 print(" dottrina: ovunque porti valore aggiunto — la domanda e' l'ORDINE, non la scelta")
@@ -244,8 +278,8 @@ print("  V3 nessuna pagina li mostra     %4d   (non un divieto: cambia quando na
       % len(senza_superficie))
 print("  ---")
 print("  GIA' APERTI                     %4d" % len(aperti))
-print("  IN CODA                         %4d   (%d neutri, poi %d riservati)"
-      % (coda, len(neutri), len(riservati)))
+print("  IN CODA                         %4d   (%d neutri, poi %d NON MISURABILI, poi %d riservati)"
+      % (coda, len(neutri), len(incerti), len(riservati)))
 print("-" * 92)
 print("  APERTI — in adozione, con la loro data:")
 if not aperti:
@@ -257,6 +291,12 @@ print("-" * 92)
 print("  IN CODA — neutri per primi (nessun dato di persona), per ampiezza di lettura:")
 for m, n, pg, et in sorted(neutri, key=lambda x: (-x[1], -x[2])):
     print("    %-32s %2d letture · %d pagine   %s" % (m, n, pg, et))
+print("-" * 92)
+print("  IN CODA — NON MISURABILI: non si sa quali classi toccano, quindi non si sa se sono")
+print("  neutri. Stanno dopo, e ognuno porta il suo rimedio (fino a S1068 stavano fra i neutri):")
+for m, n, pg, et, motivo in sorted(incerti, key=lambda x: (-x[1], -x[2])):
+    print("    %-32s %2d letture · %d pagine   %s" % (m, n, pg, et))
+    print("        %s" % motivo)
 if "--riservati" in sys.argv:
     print("-" * 92)
     print("  IN CODA — riservati (4 classi). Non esclusi: dopo.")
@@ -280,7 +320,8 @@ if "--json" in sys.argv:
         raise SystemExit("--json vuole un percorso")
     with io.open(sys.argv[i + 1], "w", encoding="utf-8", newline="\n") as fh:
         json.dump({"atlante": gen, "atlante_vecchio": bool(cambiati),
-                   "aperti": aperti, "neutri": neutri, "riservati": riservati,
+                   "aperti": aperti, "neutri": neutri, "incerti": incerti,
+                   "riservati": riservati,
                    "senza_superficie": senza_superficie, "senza_lettura": senza_lettura,
                    "esclusi": esclusi}, fh, ensure_ascii=False, indent=1)
     print("\n  scritto: %s" % sys.argv[i + 1])

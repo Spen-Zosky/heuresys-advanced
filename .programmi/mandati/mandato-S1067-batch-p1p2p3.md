@@ -63,15 +63,26 @@ di commit — vedi F1. Perciò la prima fase non è lavoro nuovo: è **riconcili
   i riferimenti reggono. Commento scritto. **La voce resta ACTIVE di proposito**: il suo
   `chiuso-quando` ha una seconda condizione (il controllo incrociato di P3 = T9 di `#198`)
   e chiuderla ora sarebbe usare il criterio più facile dei due
-- [ ] **F7 `#211`** — triage: quanti guasti distinti sono i 35 casi E2E rossi, e da quando
+- [x] **F7 `#211`** — 2026-08-17 · suite completa rieseguita (~1h, poi **interrotta di proposito**
+  a 371 esecuzioni / 51 fallimenti, quando tutte le famiglie erano isolate). **I rossi non sono
+  guasti del prodotto: sono SEI famiglie** — ① sessione scaduta a metà corsa (la più numerosa:
+  token da 15 min contro un blocco molto più lungo; le chiamate dirette `page.request` non passano
+  dal rinnovo → 401, le navigazioni → redirect al login) · ② masking ADR-0032 su `PLATFORM_ADMIN`
+  (5 casi; **non** «lista vuota»: gli endpoint danno 161·156·468·50·50·4 righe) · ③ test orfano di
+  una pagina ritirata · ④ test più vecchio di `BRANCH_MANAGER` (mig 000272) · ⑤ dato cambiato ·
+  ⑥ una causa **non isolata, e dichiarata tale**
 - [x] **F8 `#156`** — 2026-08-17 · catalogo generico **collegato** (`concepts_search` →
   `concept_describe` → `entity_query`), stessa mappa a catalogo e gate, `bindPath` a difesa del
   percorso. Prova LIVE con login reale: 3 strumenti usati, **8 decisioni nel diario del gate**,
   nessuna scrittura. **Un ramo cieco trovato nella mia stessa prova** (diario letto dal percorso
   sbagliato → zero righe lette come «tutto bene»): ora è INATTENDIBILE, non verde. 14 casi nuovi,
   suite gateway 92/92, sabotaggio verificato. Adozione → `#214`
-- [ ] **F9 `#198` da T4** — Tenant Builder P3. **Non completabile in questa sessione** per
-  dichiarazione del lab: si avanza fin dove il guardiano consente e si scrive `resume-from`
+- [x] **F9 `#198` da T4** — 2026-08-17 · **avanzata di DUE task**, che è ciò che il criterio
+  dichiarato all'apertura chiedeva («non completabile: si avanza fin dove il guardiano consente,
+  `resume-from` scritto»). **T4** (`fc08f237`): il motore costruisce da un `BuildPlan` e non
+  importa più l'archetipo — prova meccanica vuota, prova live coi numeri identici. **T5**
+  (`4ddc4939`): l'atto `APPROVED → APPLIED`, cinque passi in una transazione, con la **prova di
+  sabotaggio** che dimostra il rollback totale. `resume-from: T6`, restano T6/T7/T9
 
 ---
 
@@ -127,9 +138,27 @@ di commit — vedi F1. Perciò la prima fase non è lavoro nuovo: è **riconcili
 
 ---
 
+## Esito del ciclo (R24 §6 — letto dalla tabella, non dalla memoria)
+
+**CICLO CHIUSO — 9/9 voci fatte.** F1→F9 tutte spuntate con evidenza. F9 era dichiarata
+all'apertura come «non completabile: si avanza fin dove il guardiano consente», e quel criterio
+è soddisfatto — due task avanzati (T4, T5) con `resume-from: T6` scritto nel register.
+
+**Voci del register chiuse in questa sessione**: `#202` `#203` `#204` `#207` `#208` (riconciliate:
+erano fatte e mai marcate) · `#210` · `#212` · `#156`. **Avanzate**: `#197` (prima metà; la
+seconda dipende dal T9 di `#198`) · `#198` (6 task su 9) · `#211` (triage completo).
+**Aperte da questo lavoro**: `#213` `#214`.
+
+---
+
 ## Registro delle scoperte — fuori da questo ciclo (R24 §5)
 
 *Si presentano una volta sola, a fine ciclo, come «lo vuoi nel prossimo?». Non entrano in «cosa
 resta», non bloccano la chiusura.*
 
-- (nessuna, per ora)
+| Scoperta | Misura | Stato |
+|---|---|---|
+| **Cinque percorsi formativi senza titolare e non globali** — uno stato che il modello non sa rappresentare: la lista filtra `(is_global OR tenant_id=$1)`, quindi nessuna azienda li vede e li vede solo il platform | 72 = 52 RTL + 15 Heuresys + **5 senza titolare**; 3 si chiamano `OLDDB::learning_paths::<uuid>` | **registrata `#213`** — serve una decisione di prodotto (a chi appartengono), quindi non l'ho presa io |
+| **Il criterio della coda dell'agente ha un buco**: `piu' classi` non è fra le RISERVATE, quindi `analytics` passa fra i «neutri» pur toccando classi di persona | 1 aperto · 47 in coda (31 neutri) | **dichiarata dentro `#214`** |
+| **La suite E2E completa non può essere verde finché dura più di 15 minuti** — è la famiglia ① di `#211`, e non è un difetto del prodotto | token 15 min · corsa > 50 min | dentro `#211`, con la cura da decidere |
+| **`z.coerce.boolean()` NON è più un problema**: il registro di S1066 lo dava per «20 filtri non corretti», ma la misura di oggi trova **zero usi reali** — solo commenti-monito | `grep` su `apps`+`packages`: 13 occorrenze, tutte in commenti | **superata**, nessuna azione |

@@ -171,14 +171,25 @@ giro() {
 }
 
 echo "verifica-deploy — sha atteso $SHORT ($SHA_ORIGINE) · host: $HOSTS"
-# Se HEAD e' andato avanti senza essere armato, lo si dice: e' la situazione normale
-# dopo un commit di sola documentazione, e tacerla farebbe sembrare la verifica
-# «indietro» quando invece sta guardando esattamente il punto giusto.
+# Se HEAD e' andato avanti senza essere armato, lo si dice. Ma NON si dice se quei commit
+# riguardino o no la produzione senza averlo guardato (#212, S1067): la riga stampava
+# «non riguardano la produzione» in modo INCONDIZIONATO, cioe' una rassicurazione data per
+# vera. Dopo una sessione che ha toccato apps/ e scripts/ quella frase era falsa, e la
+# falsita' arrivava proprio nel momento in cui uno legge per sapere se e' a posto.
+# La regex e' la stessa dell'armamento (close-propagate.sh ARM_PATHS_RE): se divergessero,
+# questa riga rassicurerebbe su un criterio e il deploy partirebbe su un altro.
 _head="$(git rev-parse HEAD 2>/dev/null)"
 if [ -n "$_head" ] && [ "$_head" != "$SHA" ]; then
   _avanti="$(git rev-list --count "$SHA..$_head" 2>/dev/null || echo '?')"
   if [ "$_avanti" != "0" ] && [ "$_avanti" != "?" ]; then
-    echo "  (HEAD ${_head:0:8} e' avanti di $_avanti commit NON armati — non riguardano la produzione)"
+    _re='^(apps|packages|db/migrations|db/scripts|scripts|deploy)/'
+    _tocchi="$(git diff --name-only "$SHA..$_head" 2>/dev/null | grep -cE "$_re" || true)"
+    if [ "${_tocchi:-0}" -gt 0 ]; then
+      echo "  ⚠ HEAD ${_head:0:8} e' avanti di $_avanti commit NON armati, e $_tocchi file toccano path di DEPLOY:"
+      echo "    la produzione e' indietro rispetto al codice. Armare con: git push origin HEAD:refs/heads/prod"
+    else
+      echo "  (HEAD ${_head:0:8} e' avanti di $_avanti commit NON armati — misurato: nessun file su path di deploy)"
+    fi
   fi
 fi
 t0=$(date +%s)

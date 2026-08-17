@@ -48,15 +48,28 @@ di commit — vedi F1. Perciò la prima fase non è lavoro nuovo: è **riconcili
   (`E2E-SF-1786930052128`, creata `2026-08-17 01:27:34 UTC` dalla corsa che ha prodotto i 35 rossi
   di `#211`). Ritirata con guardia + post-condizione + ripristino dichiarato → **0 gap · 0 anomalie
   · 0 orfani**
-- [ ] **F4 `#212`** — `close-propagate` non arma alla seconda corsa nella stessa sessione, e il
-  rollout resta indietro in silenzio
-- [ ] **F5 `#210`** — `learning_modules` 92 righe = 77 di piattaforma + 15 di azienda: tre pagine
-  mostrano un conteggio unico che non è né l'uno né l'altro
-- [ ] **F6 `#197`** — il marchio `materialized_from` copre 3 tabelle su 8: **documentare, non
-  correggere** (il §7 del LEGGIMI-PRIMA lo vieta esplicitamente)
+- [x] **F4 `#212`** — 2026-08-17 · `d9ab295e`. **Due difetti, non uno**: (a) la seconda corsa non
+  armava perché il marcatore era consumato → finestra ri-derivata da `origin/prod..HEAD`;
+  (b) il **gemello**, peggiore: il sorvegliante guardava lo sha armato mentre il rollout porta
+  tutta la finestra `LAST_GOOD..ARMED` → ora pretende il verde su ogni commit intermedio che
+  tocca path di deploy. **7 casi nuovi**, suite shell **162 ok / 0 failed**, ed entrambi i
+  difetti **riprodotti sulle versioni pre-patch** (le prove misurano davvero)
+- [x] **F5 `#210`** — 2026-08-17 · `1a70a014`. Ri-misurato prima di toccare: `learning_modules`
+  92 = 77+15 (confermato) · `learning_paths` 72 = 5+67 — **il lab si sbagliava**, le 5 righe
+  esistono da dicembre 2025 · `career_paths` 7 = 0+7. Due pagine corrette (non tre: la terza
+  non mostra conteggi e ha uno «STOP» dichiarato sul tipo). Prova LIVE con **due attori**,
+  E2E verde, **sabotata per vederla rossa**. Ha prodotto `#213`
+- [x] **F6 `#197`** — 2026-08-17 · `5ec40cf3`. Ri-verificato sul file: 3 marcate / 5 no,
+  i riferimenti reggono. Commento scritto. **La voce resta ACTIVE di proposito**: il suo
+  `chiuso-quando` ha una seconda condizione (il controllo incrociato di P3 = T9 di `#198`)
+  e chiuderla ora sarebbe usare il criterio più facile dei due
 - [ ] **F7 `#211`** — triage: quanti guasti distinti sono i 35 casi E2E rossi, e da quando
-- [ ] **F8 `#156`** — resolver dei perimetri dell'agente dall'atlante, poi adozione. Pretende
-  l'atlante fresco (F2)
+- [x] **F8 `#156`** — 2026-08-17 · catalogo generico **collegato** (`concepts_search` →
+  `concept_describe` → `entity_query`), stessa mappa a catalogo e gate, `bindPath` a difesa del
+  percorso. Prova LIVE con login reale: 3 strumenti usati, **8 decisioni nel diario del gate**,
+  nessuna scrittura. **Un ramo cieco trovato nella mia stessa prova** (diario letto dal percorso
+  sbagliato → zero righe lette come «tutto bene»): ora è INATTENDIBILE, non verde. 14 casi nuovi,
+  suite gateway 92/92, sabotaggio verificato. Adozione → `#214`
 - [ ] **F9 `#198` da T4** — Tenant Builder P3. **Non completabile in questa sessione** per
   dichiarazione del lab: si avanza fin dove il guardiano consente e si scrive `resume-from`
 

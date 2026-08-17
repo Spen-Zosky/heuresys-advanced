@@ -4,6 +4,29 @@
  * target tenant. Every write is tagged with the (already-validated) tenant_id (I5). Idempotent:
  * ON CONFLICT (tenant, code) DO NOTHING. apply runs inside withTransaction (passed PoolClient);
  * plan is read-only (existence counts, no writes).
+ *
+ * ⚠ `metadata.materialized_from` NON E' IL MARCHIO DI PROVENIENZA (#197, S1067).
+ *
+ * Questo motore scrive OTTO tabelle e ne marca TRE: `sys_organization_units` (:71),
+ * `sys_skills` (:153), `sys_kpi_definitions` (:194). Non marca `sys_positions` (:103),
+ * `sys_users` (:223), `sys_user_position_assignments` (:254), `sys_user_skill_evidence`
+ * (:304), `sys_user_kpi_evidence` (:317). Ri-verificato riga per riga sul file il
+ * 2026-08-17 — 3 su 8.
+ *
+ * Perche' e' un guaio piu' grande di una copertura parziale: e' un FALSO NEGATIVO
+ * SILENZIOSO. Su una riga senza marchio, «non e' stata generata» e «e' stata generata da
+ * un pezzo di motore che non marca» sono INDISTINGUIBILI guardando il dato. Un campo che
+ * risponde «no» sia quando la risposta e' no sia quando non sa, non e' una fonte.
+ *
+ * Cosa NON fare (LEGGIMI-PRIMA della consegna P3, §7): estenderlo alle altre cinque. La
+ * fonte vera e' `sys.sys_generated_record_origins` — il registro dell'origine della parte
+ * 3 (forma decisa in P1 §4.7, prima che questo difetto emergesse). Esiste gia' nello
+ * schema ed e' VUOTO (0 righe, misurate il 2026-08-17): il motore non ha ancora costruito
+ * niente in produzione, ed e' la ragione per cui questo difetto e' latente e non un danno.
+ *
+ * Questo campo resta dov'e' come APPUNTO STORICO del motore, non come marchio. Il
+ * controllo incrociato di P3 (spec §10.4) deve riportare la differenza fra le due
+ * coperture: se non la trovasse, starebbe confrontando una cosa con se' stessa.
  */
 import type { PoolClient } from "pg";
 import { pool } from "../../db/client.js";

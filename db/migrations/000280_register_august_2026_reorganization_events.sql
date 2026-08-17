@@ -139,6 +139,19 @@ BEGIN
   -- Non si verifica «ho inserito N righe» (rieseguendo sarebbe 0 e fallirebbe), ma lo
   -- STATO: dopo questa migrazione nessuna unita rinominata puo' avere come ultimo esito
   -- un nome che non porta piu'. E' la proprieta' che C6c misura, asserita qui.
+  --
+  -- ⚠ IL TIE-BREAK NON E' UN DETTAGLIO (corretto S1068, 2026-08-17).
+  -- `DISTINCT ON` tiene la PRIMA riga dell'ordinamento: se due eventi condividono
+  -- `effective_at`, quale sia «l'ultimo» lo decide il piano di esecuzione, cioe'
+  -- nessuno. `DIR-COMPL` ha esattamente questo caso — «Divisione Legale» ->
+  -- «Divisione Legal & Compliance» -> «Direzione Compliance e Protezione Dati»,
+  -- gli ultimi due registrati entrambi al 2026-08-04 — e la catena e' completa e
+  -- corretta: era la PROVA a essere fragile. Effetto misurato: **verde sul database
+  -- della CI e rossa in produzione**, con lo stesso codice e dati equivalenti.
+  -- Il gemello `db/scripts/verify-storia36.sql` aveva gia' imparato la lezione con
+  -- #163 e portava `created_at DESC`; qui non era stato propagato. Ora l'ordine e'
+  -- **totale** (si chiude sull'id), quindi il risultato non puo' piu' dipendere dal
+  -- piano — ne' qui ne' nei due gemelli, allineati nello stesso passaggio.
   SELECT count(*) INTO v_ins
     FROM (SELECT DISTINCT ON (h.organization_unit_history_unit_id)
                  h.organization_unit_history_unit_id AS uid,
@@ -147,7 +160,9 @@ BEGIN
            WHERE h.organization_unit_history_tenant_id = c_rtl
              AND h.organization_unit_history_change_type IN ('RENAMED','MERGED','CREATED')
            ORDER BY h.organization_unit_history_unit_id,
-                    h.organization_unit_history_effective_at DESC) u
+                    h.organization_unit_history_effective_at DESC,
+                    h.created_at DESC,
+                    h.organization_unit_history_id DESC) u
     JOIN sys.sys_organization_units o ON o.organization_unit_id = u.uid
    WHERE u.esito IS NOT NULL AND u.esito <> o.organization_unit_name;
   IF v_ins > 0 THEN

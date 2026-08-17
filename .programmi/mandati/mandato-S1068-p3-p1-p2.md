@@ -42,11 +42,26 @@ che i vincoli tecnici impongono, non una scelta di comodo.
 
 ## Fasi
 
-- [ ] **F0 precondizioni misurate** — atlante fresco (lo pretende `check_concetti_agente.py`, e
-  la dashboard lo dà SUPERATO: 16 file cambiati dopo `5ec40cf3`) + i 2 campi con gap i18n EN
-  (in S1067 il «gap» era una riga di collaudo E2E residua: **da ri-misurare, non da assumere**)
-- [ ] **F1 `#213`** — i cinque percorsi senza titolare: **investigazione chiesta da Enzo**, poi
-  bonifica. Serve una vista-sentinella che valga **5 adesso e 0 dopo**
+- [x] **F0 precondizioni misurate** — 2026-08-17 · `61de0faf`. Atlante rigenerato (97 moduli · 598
+  route · 117 pagine · 107 schemi · 273 tabelle). Il «gap i18n» era di nuovo **due righe di
+  collaudo E2E** (`E2E-JOBFAM/JOBROLE-1786964765376`, create alle 11:06 UTC dalla suite completa
+  di S1067): **seconda volta di fila**. Estensione misurata su TUTTE le colonne `*_code` di TUTTE
+  le tabelle base di `sys` → 2 residui, nessun altro. Ritiro con giornale
+  `staging.e2e_residui_undo_s1068`, guardia (due FK `SET NULL` + due `CASCADE`: serviva davvero) e
+  post-condizione su ciò che non doveva cambiare. **Guardia provata capace di fallire**: rieseguita
+  a lavoro fatto si ferma con «NIENTE DA RITIRARE». 17→16 famiglie, 177→176 ruoli, 315 posizioni
+  invariate, gap i18n 2→0
+- [x] **F1 `#213`** — 2026-08-17 · mig. `000321`. **L'investigazione ha sciolto la domanda da sé**:
+  il tenant legacy dei due corsi in inglese è **SmartFood** (nello stesso seed possiede
+  `CRS-smartfood-*`, `CERT-smartfood-*`, le ISO/FSSC alimentari) — erano il corredo della stessa
+  azienda i cui 35 corsi food/energy furono purgati dalla `000241`, sfuggiti perché né il codice né
+  il nome dicono food. `PATH-heuresys-1/2/3` sono la copia morta dei `PATH-rtl-bank-*` vivi.
+  Esito: 6 rimossi (coi 10 passi dei doppioni) + `SUST-CONS-001` a Heuresys System. Prova LIVE con
+  due attori: **66 = 16 + 50**, prima era 72 = 15 + 52 + **5 di nessuno**. Sentinella provata con
+  una riga-sonda. **Due mie ipotesi smentite dalla misura**, e la seconda dalla prova generale sul
+  linux-pc, che ha bocciato la prima stesura. **In più**: la `000280` era verde sulla CI e rossa in
+  produzione — `DISTINCT ON` senza tie-break; ordine reso totale lì e nei due gemelli di
+  `verify-storia36.sql`. Ha prodotto `#215`
 - [ ] **F2 `#214`** — apre `positions` (decisione di Enzo). Riga in `agent-perimetri.json` con
   `decisione` + `data`, poi rigenerare le operazioni e provare LIVE
 - [ ] **F3 `#198` T7 → T9** — le due pagine nel prodotto, poi il controllo incrociato. `resume-from: T7`

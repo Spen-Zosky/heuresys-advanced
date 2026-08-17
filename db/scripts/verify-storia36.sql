@@ -3174,8 +3174,11 @@ BEGIN
           JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
          WHERE h.organization_unit_history_tenant_id = c_rtl
            AND h.organization_unit_history_new_value ? 'name'
+         -- ordine TOTALE (si chiude sull'id): con due eventi che condividono
+         -- effective_at E created_at, «l'ultimo» lo scegliebbe il piano. S1068.
          ORDER BY h.organization_unit_history_unit_id,
-                  h.organization_unit_history_effective_at DESC, h.created_at DESC) u
+                  h.organization_unit_history_effective_at DESC, h.created_at DESC,
+                  h.organization_unit_history_id DESC) u
   WHERE u.esito IS DISTINCT FROM u.oggi;
   IF v_cnt > 0 THEN
     BEGIN
@@ -3200,7 +3203,8 @@ BEGIN
          WHERE h.organization_unit_history_tenant_id = c_rtl
            AND h.organization_unit_history_new_value ? 'parent_name'
          ORDER BY h.organization_unit_history_unit_id,
-                  h.organization_unit_history_effective_at DESC, h.created_at DESC) u
+                  h.organization_unit_history_effective_at DESC, h.created_at DESC,
+                  h.organization_unit_history_id DESC) u
   WHERE u.approdo IS DISTINCT FROM u.padre_oggi;
   IF v_cnt > 0 THEN
     BEGIN

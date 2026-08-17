@@ -33,17 +33,26 @@ adversarial; le decisioni tecniche sono di Claude.
    sono fatti, `resume-from` nel register. T4 disaccoppia il motore dall'archetipo ed è un
    refactoring di `repository.ts` (370 righe, ~250 dipendono dall'archetipo): **serve il suo spazio**,
    ed è la ragione per cui non è stato aperto a fine sessione
-2. **`#209` i venti filtri booleani** che rispondono «tutti» a qualunque domanda — P1 perché ogni
-   `?isActive=false` oggi mostra il contrario di ciò che dichiara; la cura è già scritta e in uso
+2. **`#210` i cataloghi già misti** — ora **sbloccata** (dipendeva da `#209`, chiusa): `learning`
+   mostra un conteggio unico dove le due specie convivono davvero, ed è il caso *non* cieco che
+   `/kpis` non poteva offrire
 3. **`#142` F3b — i dati dentro le viste**: 27 viste, o tutte o nessuna ·
    `.programmi/142-cruscotti-per-tipologia.md`
 
+⚠ **La verifica lunga va sul linux-pc, non qui** (standard S1054, disatteso in S1066 pagando 82
+minuti di suite su Windows): là il database è locale, qui ogni query passa dal tunnel SSH. Vale per
+la **suite API**; le **E2E** invece sul linux-pc non hanno un setup che funzioni — l'API di
+produzione è su `:8013` e Playwright assume `:3001`, e puntarcela fa comunque scadere il login.
+Le E2E restano su Windows, con l'API di sviluppo avviata prima.
+
+⚠ **Il verde delle E2E in CI è lo `smoke`**, non la suite intera: `playwright-smoke.yml` esegue
+solo `smoke-5-personas.spec.ts` (101 casi). La suite completa ne ha 337 e **35 sono rossi** → `#211`.
+
 ## Open questions
 
-- **Due scoperte da decidere, non da eseguire**: `#209` (correggere i 20 filtri residui cambia il
-  comportamento di venti endpoint — quando?) e `#210` (`career_paths` e `learning_paths` non hanno
-  **nessuna** riga di piattaforma: distinguere due specie dove una è vuota da sempre è informazione
-  o rumore?).
+- **`#210`**: `career_paths` e `learning_paths` non hanno **nessuna** riga di piattaforma —
+  distinguere due specie dove una è vuota da sempre è informazione o rumore? *(`#209`, l'altra
+  scoperta, è stata decisa da te e chiusa nella stessa sessione.)*
 - **Si apre davvero il ciclo di valutazione?** È in **bozza** (`RTL-2026-ANNUAL`): farlo avanzare
   mette tutta l'azienda davanti a un compito, e va fatto quando la schermata dell'autovalutazione
   esiste.

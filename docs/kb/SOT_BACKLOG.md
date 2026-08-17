@@ -12,6 +12,16 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
+- **#211 La suite E2E COMPLETA ha 35 casi rossi, e nessuno se n'era accorto perche' la CI ne esegue uno solo** · status: ACTIVE
+  - priority: P2 · effort: ~1 sessione (triage: capire quanti guasti distinti sono, e da quando) · doc: trovata chiudendo #209 (S1066)
+  - misura-2026-08-17: `pnpm test:e2e:prod` (suite intera, 337 casi) da' **35 falliti / 302 passati** in ~32 min. Lo **smoke** — `smoke-5-personas.spec.ts`, l'unico che la CI esegue — da' **101/101 verde**
+  - perche' non si vedeva: `.github/workflows/playwright-smoke.yml:211` lancia `playwright test smoke-5-personas.spec.ts`. Il resto della suite E2E **non gira in nessuna corsa automatica**: e' verde o rossa solo quando qualcuno la lancia a mano, e nessuno la lanciava
+  - NON e' causata da #209, e la ragione e' meccanica: un filtro booleano rotto risponde 400, e nel log ci sono **3 occorrenze di 400 in tutto** e nessun errore di validazione. Gli errori sono «element(s) not found» (43) e «toBeVisible failed» (41), cioe' pagine che non mostrano cio' che il caso cerca
+  - ⚠ NON VERIFICATO, e va detto: **non ho eseguito la suite completa su un commit precedente**, quindi non so da quando e' rossa ne' se i 35 siano un solo guasto o venti. Il confronto costa ~32 min di suite ed e' il primo passo del triage
+  - dato-di-contesto: prima della correzione di #209 i falliti erano 33, dopo 35. Due casi di scarto su 337 in due corse diverse suggeriscono instabilita' propria della suite, non un effetto della modifica — ma e' un indizio, non una misura
+  - primo-passo-proposto: eseguire la suite su `13c32ab7` (il commit prima di #209) e diffare l'elenco dei falliti. Se coincide, sono tutti pre-esistenti e il triage diventa «da quando», non «per colpa di cosa»
+  - chiuso-quando: si sa quanti guasti distinti ci sono dietro i 35 casi, ognuno ha una voce o una correzione, e il criterio di verde della suite completa e' dichiarato (gira in CI, oppure e' esplicitamente uno strumento a mano con un rosso noto e accettato)
+
 - **#209 Venti filtri booleani dell'API dicono «tutti» a qualunque domanda — `z.coerce.boolean()` su una querystring** · status: DONE
   - ✅ CHIUSA S1066 (`a0384015`): 20 filtri convertiti a `queryBoolean()` in 18 file, con uno script fail-loud su bersaglio assente/ambiguo/residui. Cancello di verifica **GREEN** (typecheck 0, test-api 0 su 264 file), lint verde
   - IL-SOSPETTO-ERA-INFONDATO, e la misura vale piu' del sospetto: **nessuna pagina** passa `false` a questi filtri in querystring. Gli `isGlobal: false` di `apps/web` sono valori di FORM (body JSON), dove un booleano vero attraversa intatto e il difetto non arrivava

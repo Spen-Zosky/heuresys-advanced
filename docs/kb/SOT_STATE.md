@@ -18,7 +18,7 @@ RBAC **14 ruoli / 224 permessi / 980 mapping** (+7 permessi e +16 concessioni de
 disco **318** (max `000320`) · sentinelle **18** vigilate + **1 informativa**
 (`v_positions_with_critical_skill_gap`, S1066: restituisce righe per progetto) · tabelle `sys`
 **226** · viste `sys` **26** · test API **264 file** (234 integration) · spec E2E **99** ·
-moduli API **96** · HEAD `bec9feff`.
+moduli API **96** · HEAD `13c32ab7`.
 
 **S1066 (2026-08-16 sera) — «Le prove hanno trovato quello che nessuno stava cercando».**
 Eseguite le **7 consegne** del design-lab (ingerite come `#202`-`#208`). Chiuse `#199` (guardia su
@@ -33,7 +33,13 @@ dei processi, T3 segnaposto parlanti, T8 metro nel repo), `resume-from: T4`. `#2
 (mig `000318`, vista dello scostamento). Due voci nuove nate da misure, non da impressioni:
 **`#209`** (21 `z.coerce.boolean()` rendono `?flag=false` uguale a `true` — ogni filtro booleano di
 querystring risponde «tutti») e **`#210`** (`learning_modules` è già misto 77+15, la premessa di
-`#196` è superata altrove).
+`#196` è superata altrove). **`#209` è stata poi CHIUSA nella stessa sessione** (`a0384015`, su
+decisione di Enzo): 20 filtri convertiti a `queryBoolean()` in 18 file, cancello di verifica
+**GREEN** su tutta la suite API. Il sospetto del register era infondato — nessuna pagina passa
+`false` a quei filtri in querystring — ma è emerso un **falso verde pre-esistente**: un caso di
+`compensation-read` confrontava due chiamate che il difetto rendeva identiche. Riparato, e
+affiancato da un gemello non cieco (`tutte(41) > solo(12)`, differenza 29 = le righe prive di
+importi). Con `#209` cade il vincolo che teneva ferma **`#210`**.
 
 **S1064 (2026-08-16) — «Le cose che non avevano una porta». L'epica `#99` è CHIUSA, 10/10.**
 

@@ -20,6 +20,10 @@
   - NON-e'-un-difetto-di-prudenza: il rimedio non e' armare sempre. E' che `arma=ignoto` deve **dirlo forte** (oggi e' una riga fra le altre) oppure ri-derivare la finestra da `origin/prod..HEAD` invece che dal marcatore consumato
   - la-lettura-finale-lo-vede-gia': `verifica-deploy.sh` stampa «HEAD ... e' avanti di N commit NON armati». E' li' che me ne sono accorto entrambe le volte — quindi il segnale c'e', ma arriva dopo e in tono minore
   - chiuso-quando: una seconda propagazione nella stessa sessione o arma correttamente, o rende impossibile non accorgersene
+  - ⚠⚠ IL DIFETTO GEMELLO, E' PEGGIORE, misurato la stessa sera: armando un commit di SOLI DOCUMENTI il deploy e' partito **mentre tre corse del codice erano ancora in volo**. `5d3028ca` tocca solo `docs/kb/`, quindi ha UNA sola corsa (State lint); il sorvegliante l'ha vista verde e ha deployato — portando in produzione anche il codice di `b6132910`, dove `Test (api integration)`, `Playwright smoke` e `Build (web)` non avevano ancora finito
+  - perche' e' peggiore di «resta indietro»: li' la produzione e' vecchia, qui e' **avanti rispetto a cio' che e' stato verificato**. Il verde che ha autorizzato il rollout non riguardava il codice che il rollout ha portato
+  - la-radice-e'-una-sola-per-entrambi: il criterio guarda **lo sha armato**, non l'insieme dei commit che quel deploy porta con se'. Un commit di documenti eredita la produzione di tutti i commit sotto di lui senza ereditarne le verifiche
+  - rimedio-proposto (da decidere, non ancora fatto): il sorvegliante pretende il verde di TUTTE le corse su `origin/prod` **e** su ogni commit fra il deployato e l'armato — oppure la chiusura non arma su un commit che non ha una corsa di test propria
 
 - **#211 La suite E2E COMPLETA ha 35 casi rossi, e nessuno se n'era accorto perche' la CI ne esegue uno solo** · status: ACTIVE
   - priority: P2 · effort: ~1 sessione (triage: capire quanti guasti distinti sono, e da quando) · doc: trovata chiudendo #209 (S1066)

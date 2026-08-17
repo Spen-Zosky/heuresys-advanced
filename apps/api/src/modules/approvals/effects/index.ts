@@ -11,11 +11,18 @@ import {
   TENANT_BLUEPRINT_APPROVAL,
   applyTenantBlueprintApproval,
 } from "./tenant-blueprint-approval.js";
+import {
+  TENANT_BLUEPRINT_APPLICATION,
+  applyTenantBlueprintApplication,
+} from "./tenant-blueprint-application.js";
 import { TIME_OFF_REQUEST, applyTimeOffRequest } from "./time-off-request.js";
 
 registerApplyEffect(TENANT_ACTIVATION, applyTenantActivation);
 registerApplyEffect(TENANT_MATERIALIZATION, applyTenantMaterialization);
 registerApplyEffect(TENANT_BLUEPRINT_APPROVAL, applyTenantBlueprintApproval);
+// #198 T5 — l'atto che applica il fascicolo: APPROVED → APPLIED, costruzione, registro
+// dell'origine e proiezione dell'identità, tutto nella stessa transazione.
+registerApplyEffect(TENANT_BLUEPRINT_APPLICATION, applyTenantBlueprintApplication);
 registerApplyEffect(TIME_OFF_REQUEST, applyTimeOffRequest);
 
 export { getApplyEffect, registerApplyEffect } from "./registry.js";

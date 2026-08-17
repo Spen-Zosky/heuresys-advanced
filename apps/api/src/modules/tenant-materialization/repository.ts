@@ -45,6 +45,21 @@ export interface MaterializeCounts {
   kpiEvidence: number;
 }
 
+/**
+ * Una riga davvero creata, con la tabella e la ragione (#198 T5).
+ *
+ * I CONTEGGI NON BASTANO, e la differenza non è di comodità: il registro dell'origine deve
+ * poter dire, riga per riga, «questa l'ha creata quel fascicolo». Un conteggio dice quante
+ * ne sono nate, non QUALI — e su una tabella dove convivono righe generate e righe vere, il
+ * numero non permette di ritrovarle. `#197` descrive lo stesso guaio visto dall'altro lato:
+ * un marchio parziale rende «non generata» e «non marcata» indistinguibili.
+ */
+export interface CreatedRecord {
+  table: string;
+  id: string;
+  justification: string;
+}
+
 /** Tenant status for the M-1 validation (null = tenant does not exist). */
 export async function findTenantStatus(q: DbConnector, tenantId: string): Promise<string | null> {
   const res = await q.query<{ tenant_status: string }>(
@@ -86,7 +101,11 @@ export async function materialize(
   tenantId: string,
   plan: BuildPlan,
   mode: "plan" | "apply",
-): Promise<MaterializeCounts> {
+): Promise<MaterializeCounts & { records: CreatedRecord[] }> {
+  // Le righe create, nell'ordine in cui nascono. In modo 'plan' resta vuoto: non si crea
+  // niente, quindi non c'e' niente da registrare — e un elenco pieno in sola lettura
+  // sarebbe una bugia comoda.
+  const records: CreatedRecord[] = [];
   const typeCache = new Map<string, string | null>();
   const codeToId = new Map<string, string>(); // org-unit code → id (apply: for position FK)
   let orgUnitsCreated = 0;
@@ -108,6 +127,7 @@ export async function materialize(
       if (ins.rows[0]) {
         orgUnitsCreated++;
         codeToId.set(ou.code, ins.rows[0].organization_unit_id);
+        records.push({ table: "sys_organization_units", id: ins.rows[0].organization_unit_id, justification: ou.justification });
       } else {
         const ex = await client.query<{ organization_unit_id: string }>(
           `SELECT organization_unit_id FROM sys.sys_organization_units
@@ -143,6 +163,7 @@ export async function materialize(
       if (ins.rows[0]) {
         positionsCreated++;
         posCodeToId.set(p.code, ins.rows[0].position_id);
+        records.push({ table: "sys_positions", id: ins.rows[0].position_id, justification: p.justification });
       } else {
         const ex = await client.query<{ position_id: string }>(
           `SELECT position_id FROM sys.sys_positions WHERE position_tenant_id = $1 AND position_code = $2`,
@@ -190,6 +211,7 @@ export async function materialize(
         if (ins.rows[0]) {
           skillCodeToId.set(sk.code, ins.rows[0].skill_id);
           skillsCreated++;
+          records.push({ table: "sys_skills", id: ins.rows[0].skill_id, justification: sk.justification });
         } else {
           const again = await client.query<{ skill_id: string }>(
             `SELECT skill_id FROM sys.sys_skills
@@ -229,6 +251,7 @@ export async function materialize(
         );
         kpiCodeToId.set(kp.code, ins.rows[0]!.kpi_definition_id);
         kpisCreated++;
+        records.push({ table: "sys_kpi_definitions", id: ins.rows[0]!.kpi_definition_id, justification: kp.justification });
       }
     } else {
       const ex = await client.query(`SELECT 1 FROM sys.sys_kpi_definitions WHERE kpi_definition_tenant_id = $1 AND kpi_definition_code = $2`, [tenantId, kp.code]);
@@ -265,6 +288,7 @@ export async function materialize(
       if (ins.rows[0]) {
         usersCreated++;
         userId = ins.rows[0].user_id;
+        records.push({ table: "sys_users", id: userId, justification: su.justification });
       } else {
         const ex = await client.query<{ user_id: string }>(
           `SELECT user_id FROM sys.sys_users WHERE user_tenant_id = $1 AND lower(user_email) = lower($2)`,
@@ -282,16 +306,20 @@ export async function materialize(
           [userId, posId],
         );
         if (existing.rowCount === 0) {
-          await client.query(
+          const ass = await client.query<{ user_position_assignment_id: string }>(
             `INSERT INTO sys.sys_user_position_assignments
                (user_position_assignment_tenant_id, user_position_assignment_user_id,
                 user_position_assignment_position_id, user_position_assignment_kind,
                 user_position_assignment_fte, user_position_assignment_start_date,
                 user_position_assignment_status)
-             VALUES ($1, $2, $3, 'PRIMARY', 1.000, '2024-01-01', 'ACTIVE')`,
+             VALUES ($1, $2, $3, 'PRIMARY', 1.000, '2024-01-01', 'ACTIVE')
+             RETURNING user_position_assignment_id`,
             [tenantId, userId, posId],
           );
           assignmentsCreated++;
+          if (ass.rows[0]) {
+            records.push({ table: "sys_user_position_assignments", id: ass.rows[0].user_position_assignment_id, justification: su.justification });
+          }
         }
       }
     } else {
@@ -343,10 +371,14 @@ export async function materialize(
          SELECT t.uid, $1, t.sid, t.prof, 'MANAGER_ASSESSMENT'
            FROM unnest($2::uuid[], $3::uuid[], $4::varchar[]) AS t(uid, sid, prof)
           WHERE NOT EXISTS (SELECT 1 FROM sys.sys_user_skill_evidence e
-            WHERE e.user_skill_evidence_user_id = t.uid AND e.user_skill_evidence_skill_id = t.sid)`,
+            WHERE e.user_skill_evidence_user_id = t.uid AND e.user_skill_evidence_skill_id = t.sid)
+         RETURNING user_skill_evidence_id`,
         [tenantId, seU, seS, seP],
       );
       skillEvidenceCreated = r.rowCount ?? 0;
+      for (const riga of r.rows as Array<{ user_skill_evidence_id: string }>) {
+        records.push({ table: "sys_user_skill_evidence", id: riga.user_skill_evidence_id, justification: `${plan.sourceKey}: evidenza di competenza del titolare segnaposto` });
+      }
     }
     if (keU.length) {
       const r = await client.query(
@@ -357,10 +389,14 @@ export async function materialize(
          SELECT t.uid, $1, t.kid, '2024-01-01', '2024-12-31', t.val, 80, t.unit
            FROM unnest($2::uuid[], $3::uuid[], $4::numeric[], $5::varchar[]) AS t(uid, kid, val, unit)
           WHERE NOT EXISTS (SELECT 1 FROM sys.sys_user_kpi_evidence e
-            WHERE e.user_kpi_evidence_user_id = t.uid AND e.user_kpi_evidence_kpi_id = t.kid)`,
+            WHERE e.user_kpi_evidence_user_id = t.uid AND e.user_kpi_evidence_kpi_id = t.kid)
+         RETURNING user_kpi_evidence_id`,
         [tenantId, keU, keK, keV, keUnit],
       );
       kpiEvidenceCreated = r.rowCount ?? 0;
+      for (const riga of r.rows as Array<{ user_kpi_evidence_id: string }>) {
+        records.push({ table: "sys_user_kpi_evidence", id: riga.user_kpi_evidence_id, justification: `${plan.sourceKey}: evidenza di indicatore del titolare segnaposto` });
+      }
     }
   } else {
     const seEmail: string[] = [], seCode: string[] = [];
@@ -394,6 +430,7 @@ export async function materialize(
   }
 
   return {
+    records,
     orgUnits: orgUnitsCreated,
     positions: positionsCreated,
     users: usersCreated,

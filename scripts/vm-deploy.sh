@@ -29,6 +29,56 @@ SERVICE_GROUP="${SERVICE_GROUP:-$SERVICE_USER}"
 
 log() { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
 
+# ── #217 I3 — IL DEPLOY NON ASPETTA PIU' LA CI ────────────────────────────────────
+# Enzo, 2026-08-18: «la chiusura arma e finisce, non aspetta la produzione».
+#
+# IL DIFETTO, misurato in S1069 e non dedotto: `deploy-watch.sh` e questo script fanno
+# alla STESSA CI la STESSA domanda e si comportano in modo opposto. Il sorvegliante
+# scrive «CI ancora in volo — riprovo al prossimo tick» ed esce 0; qui si dormiva fino
+# a CI_GATE_WAIT=900s per poi dichiarare `TIMEOUT ... deploy FAILED`. Ma una CI in volo
+# non e' un guasto del deploy: e' una domanda fatta troppo presto.
+#
+# LA CURA: il default diventa NON BLOCCANTE. Chi vuole il deploy sincrono lo chiede —
+# `close-propagate.sh --deploy-now` esporta CI_GATE_NONBLOCKING=0 e riottiene il
+# polling di prima. Si riusa la manopola che ESISTE gia' (#165) invece di aggiungerne
+# una seconda accanto: due manopole per lo stesso comportamento divergono, ed e' il
+# difetto che I1 ha appena curato sui path di deploy.
+#
+# PERCHE' USCIRE 0 NON E' UN FINTO VERDE: il cancello gira PRIMA di ogni mutazione
+# (deps, snapshot, migrate, build) — invariante che `run-shell-tests.sh` sezione H
+# verifica da se'. Quindi «non ho deployato» significa che sulla macchina non e'
+# cambiato niente. E il rosso resta rosso: si traduce SOLO il 75, mai l'1.
+#
+# Il seam `--check-gate <sha>` esiste perche' altrimenti questa traduzione sarebbe
+# provabile solo con un deploy vero: la batteria offline lo esercita con
+# CI_GATE_FIXTURE al posto della rete. Stessa convenzione di `ci-gate.sh --classify`
+# e `vm-deploy-remote.sh --print-gate-env`.
+#
+# Ritorna:  0 = procedi col deploy · 10 = rimanda (niente e' stato toccato) · altro = guasto
+gate_ci() {
+  local sha="$1" rc=0
+  : "${CI_GATE_NONBLOCKING:=1}"
+  export CI_GATE_NONBLOCKING
+  bash "$REPO_DIR/scripts/ci-gate.sh" "$sha" || rc=$?
+  case "$rc" in
+    0)  return 0 ;;
+    75) echo "[vm-deploy] CI ancora in volo su ${sha:0:8} — NON deployo, e non ho toccato niente."
+        echo "[vm-deploy] Lo sha e' armato: heuresys-advanced-deploy-watch.timer lo porta in"
+        echo "[vm-deploy] produzione al primo tick con la CI verde. Per aspettare qui, invece:"
+        echo "[vm-deploy] CI_GATE_NONBLOCKING=0 bash scripts/vm-deploy.sh"
+        return 10 ;;
+    *)  return "$rc" ;;
+  esac
+}
+
+# Seam di prova: esegue SOLO la decisione del cancello e ne restituisce l'esito tradotto.
+# Sta qui in cima, prima di nvm e prima di qualunque git, perche' la batteria gira su
+# Windows dove nvm non c'e' e il repo non e' quello di produzione.
+if [ "${1:-}" = "--check-gate" ]; then
+  gate_ci "${2:?usage: vm-deploy.sh --check-gate <sha>}"
+  exit $?
+fi
+
 # Node via nvm (the services run on this Node; argon2 native ABI must match).
 # nvm.sh is NOT safe under set -e/-u/pipefail (it runs commands that return
 # non-zero by design, e.g. nvm_ls_current) — relax strict mode around it.
@@ -78,7 +128,10 @@ fi
 #     changes nothing on the box. DEPLOY_REQUIRE_CI=0 bypasses (emergency only
 #     — the gate logs the bypass loudly). ADR-0028.
 log "gate: CI must be green for the deployed sha (D-08 F2)"
-bash "$REPO_DIR/scripts/ci-gate.sh" "$(git -C "$REPO_DIR" rev-parse HEAD)"
+GATE_RC=0
+gate_ci "$(git -C "$REPO_DIR" rev-parse HEAD)" || GATE_RC=$?
+[ "$GATE_RC" = 10 ] && exit 0
+[ "$GATE_RC" = 0 ] || exit "$GATE_RC"
 
 # 2. Deps (reproducible, exact lockfile match). Clean-reinstall if the Node ABI changed
 #    (native modules argon2/@next/swc/sharp must match NODE_MODULE_VERSION) — a frozen

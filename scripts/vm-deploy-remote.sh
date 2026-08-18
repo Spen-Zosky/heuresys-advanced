@@ -36,9 +36,13 @@
 #   POLL_INTERVAL  seconds between status polls     (default 15)
 #   POLL_MAX       max seconds to watch before detaching (default 2400 = 40 min)
 #
-#   CI_GATE_WAIT / CI_GATE_POLL / CI_GATE_KEY_WORKFLOWS / DEPLOY_REQUIRE_CI
+#   CI_GATE_WAIT / CI_GATE_POLL / CI_GATE_KEY_WORKFLOWS / DEPLOY_REQUIRE_CI /
+#   CI_GATE_NONBLOCKING
 #                  read by ci-gate.sh ON THE REMOTE HOST, forwarded from this client.
-#                  See D-79 below.
+#                  See D-79 below. CI_GATE_NONBLOCKING joined the list in #217 I3: it
+#                  was the ONE gate knob left out, so `CI_GATE_NONBLOCKING=0 ... --deploy`
+#                  (ask for the synchronous deploy) never reached the remote gate — the
+#                  exact shape of D-79, one variable later.
 #
 # D-79: the deploy runs REMOTELY, so an env var set on the client never reaches
 # ci-gate.sh — `CI_GATE_WAIT=2100 align-clones … --deploy` silently kept the gate's
@@ -67,7 +71,7 @@ export MSYS_NO_PATHCONV=1
 # so it is refused LOUDLY rather than forwarded mangled.
 gate_env() {
   local out="" v val
-  for v in CI_GATE_WAIT CI_GATE_POLL CI_GATE_KEY_WORKFLOWS DEPLOY_REQUIRE_CI; do
+  for v in CI_GATE_WAIT CI_GATE_POLL CI_GATE_KEY_WORKFLOWS DEPLOY_REQUIRE_CI CI_GATE_NONBLOCKING; do
     [ -n "${!v+set}" ] || continue
     val="${!v}"
     [ -n "$val" ] || continue

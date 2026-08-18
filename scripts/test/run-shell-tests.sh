@@ -378,6 +378,66 @@ else
   fail "$CG o $DW mancante"
 fi
 
+section "#217 I3 — il deploy non aspetta piu' la CI (e il rosso resta rosso)"
+# IL DIFETTO CHE QUESTI TEST IMPEDISCONO. `deploy-watch.sh` e `vm-deploy.sh` facevano alla
+# STESSA CI la STESSA domanda e si comportavano in modo opposto: il sorvegliante «riprovo al
+# prossimo tick», exit 0; vm-deploy dormiva fino a 900s e poi `TIMEOUT ... deploy FAILED`.
+# Il rischio della cura e' il suo opposto — trasformare un rosso in un verde — quindi i casi
+# 2 e 4 valgono piu' del caso 1: se cadessero, la cura sarebbe peggiore del difetto.
+VD=scripts/vm-deploy.sh; VDR=scripts/vm-deploy-remote.sh; CP=scripts/close-propagate.sh
+if [ -f "$VD" ] && [ -f "$VDR" ] && [ -f "$CP" ]; then
+  F="$(mktemp -d)"; R="$(pwd)"
+  printf '%s' '{"workflow_runs":[{"name":"a","status":"in_progress","conclusion":null}]}'    > "$F/pending.json"
+  printf '%s' '{"workflow_runs":[{"name":"a","status":"completed","conclusion":"success"}]}' > "$F/green.json"
+  printf '%s' '{"workflow_runs":[{"name":"a","status":"completed","conclusion":"failure"}]}' > "$F/red.json"
+  # CI_GATE_WAIT=0: un test non deve poter DORMIRE. Scoperto sabotando (S1070): togliendo il
+  # default non bloccante il primo caso non falliva, entrava nel polling da 900s — e un test
+  # che si blocca al posto di fallire nasconde il difetto invece di mostrarlo. Con lo zero,
+  # lo stesso sabotaggio produce 1 invece di 10 e la sezione diventa rossa in un secondo.
+  cg() { REPO_DIR="$R" CI_GATE_FIXTURE="$F/$1.json" CI_GATE_WAIT=0 bash "$VD" --check-gate deadbeef 2>&1; }
+
+  out="$(cg pending)"; rc=$?
+  { [ "$rc" = 10 ] && printf '%s' "$out" | grep -q 'non ho toccato niente'; } \
+    && ok "vm-deploy: CI in volo => 10 (rimanda) e lo DICHIARA, invece di dormire 900s" \
+    || fail "vm-deploy PENDING ($rc: $out)"
+
+  out="$(cg red)"; rc=$?
+  [ "$rc" = 1 ] && ok "vm-deploy: CI rossa => 1 (il non bloccante NON ammorbidisce il rosso)" \
+                || fail "vm-deploy RED ($rc: $out)"
+
+  out="$(cg green)"; rc=$?
+  [ "$rc" = 0 ] && ok "vm-deploy: CI verde => 0 (procedi)" || fail "vm-deploy GREEN ($rc: $out)"
+
+  # --deploy-now deve conservare il contratto vecchio: chi chiede di aspettare, aspetta.
+  out="$(REPO_DIR="$R" CI_GATE_FIXTURE="$F/pending.json" CI_GATE_NONBLOCKING=0 CI_GATE_WAIT=0 \
+         bash "$VD" --check-gate deadbeef 2>&1)"; rc=$?
+  [ "$rc" = 1 ] && ok "vm-deploy: CI in volo + NONBLOCKING=0 => 1, non 10 (--deploy-now aspetta ancora)" \
+                || fail "vm-deploy PENDING bloccante ($rc: $out)"
+
+  # D-79, una variabile piu' tardi: la manopola deve ARRIVARE al remoto, o non esiste.
+  out="$(CI_GATE_NONBLOCKING=0 bash "$VDR" --print-gate-env)"
+  printf '%s' "$out" | grep -q 'CI_GATE_NONBLOCKING="0"' \
+    && ok "vm-deploy-remote: inoltra CI_GATE_NONBLOCKING al gate REMOTO (era l'unica esclusa)" \
+    || fail "vm-deploy-remote non inoltra la manopola ($out)"
+  out="$(bash "$VDR" --print-gate-env)"
+  printf '%s' "$out" | grep -q 'CI_GATE_NONBLOCKING' \
+    && fail "vm-deploy-remote inoltra la manopola anche quando nessuno l'ha chiesta ($out)" \
+    || ok "vm-deploy-remote: non inoltra nulla se il chiamante non ha chiesto niente"
+
+  # La scelta si LEGGE dal piano di chiusura, non si presume.
+  out="$(bash "$CP" --dry-run 2>&1)"
+  printf '%s' "$out" | grep -q 'ci-gate-nonblocking=1' \
+    && ok "close-propagate: la chiusura normale non aspetta la CI, e il piano lo dichiara" \
+    || fail "close-propagate --dry-run non dichiara il gate ($out)"
+  out="$(bash "$CP" --dry-run --deploy-now 2>&1)"
+  printf '%s' "$out" | grep -q 'ci-gate-nonblocking=0' \
+    && ok "close-propagate: --deploy-now chiede il sincrono, e il piano lo dichiara" \
+    || fail "close-propagate --deploy-now non chiede il sincrono ($out)"
+  rm -rf "$F"
+else
+  fail "$VD, $VDR o $CP mancante"
+fi
+
 section "S1069 — il marcatore di sessione NON si consuma"
 # IL DIFETTO CHE QUESTO TEST IMPEDISCE. `align-clones.sh` cancellava `.session-align.marker`
 # a fine corsa. La SECONDA propagazione della stessa sessione lo trovava sparito e cadeva in

@@ -135,6 +135,10 @@ do_arm=0; arm_why=""; align_deploy_flag="--no-deploy"
 case "$DEPLOY" in
   --no-deploy)  do_arm=0; arm_why="--no-deploy (o veto HEURESYS_CLOSE_NODEPLOY)" ;;
   --deploy-now) do_arm=0; arm_why="--deploy-now: deploy SINCRONO in linea (comportamento pre-#165)"
+                # #217 I3: da qui in poi vm-deploy NON aspetta piu' la CI per default.
+                # --deploy-now e' la richiesta esplicita di aspettarla, quindi e' QUI che
+                # si rimette il polling — e vm-deploy-remote la inoltra al remoto.
+                export CI_GATE_NONBLOCKING=0
                 align_deploy_flag="--deploy" ;;
   --deploy)     do_arm=1; arm_why="--deploy esplicito" ;;
   --auto-deploy)
@@ -192,6 +196,9 @@ if [ -n "$DRYRUN" ]; then
   echo "PLAN clone-db-why: $clone_why"
   echo "PLAN arm=$arm_label ref=$ARM_REF align-deploy-flag=$align_deploy_flag"
   echo "PLAN arm-why: $arm_why"
+  # #217 I3 — la scelta «aspetto la CI oppure no» va LETTA, non presunta: senza questa riga
+  # il piano dichiarava il deploy ma taceva sul suo comportamento piu' importante.
+  echo "PLAN ci-gate-nonblocking=${CI_GATE_NONBLOCKING:-1} ($([ "${CI_GATE_NONBLOCKING:-1}" = 0 ] && echo 'aspetta la CI' || echo 'non aspetta: arma e finisce'))"
   exit 0
 fi
 

@@ -34,10 +34,17 @@ produce `TIMEOUT dopo 900s → deploy FAILED`: stesso gate, stessa CI, due compo
 
 - [x] **I1 Una sola definizione dei path di deploy** — FATTO 2026-08-18 · `77a6011e` · `scripts/lib/deploy-paths.sh`; quattro copie byte-identiche più una quinta sparsa in una condizione · due test riscritti dal criterio «le due righe coincidono» a «esiste una sola fonte» · `run-shell-tests` 165 ok / 0 failed
 - [x] **I2 Il marcatore di sessione non si consuma più** — FATTO 2026-08-18 · `77a6011e` · era la causa diretta dei 12+6 IGNOTO · la prova è nata **falsa due volte** ed è stata sabotata fino a vederla rossa
-- [ ] **I3 La chiusura non aspetta mai la CI** — budget ~40k · **il guadagno grosso**
-      `vm-deploy.sh:81` usa `ci-gate` bloccante. Quando è invocato dalla chiusura deve usare
-      `CI_GATE_NONBLOCKING=1`: CI in volo → non deploya, dichiara «armato, il timer lo prende
-      entro 5 minuti», esce **0**. Il deploy sincrono resta a comando (`--deploy-now`).
+- [x] **I3 La chiusura non aspetta mai la CI** — FATTO 2026-08-18 · il default di `vm-deploy.sh`
+      è ora NON bloccante: CI in volo → dichiara «armato, non ho toccato niente» ed esce **0**;
+      il rosso resta 1. `--deploy-now` esporta `CI_GATE_NONBLOCKING=0` e riottiene il polling,
+      e il piano di chiusura lo **dichiara** (`PLAN ci-gate-nonblocking=`). Trovato strada
+      facendo che `vm-deploy-remote.sh` inoltrava al remoto quattro manopole del gate su
+      cinque: **`CI_GATE_NONBLOCKING` era l'unica esclusa**, cioè D-79 ancora aperto su una
+      variabile — chiedere il sincrono non sarebbe mai arrivato al gate che decide.
+      8 test nuovi, **provati capaci di fallire due volte**: col default rimesso bloccante cade
+      il caso «in volo»; traducendo in «rimanda» anche il rosso ne cadono due, incluso il rosso.
+      Il primo sabotaggio ha scoperto un difetto **del test**: senza `CI_GATE_WAIT=0` non
+      falliva, **dormiva** 900s — e un test che si blocca nasconde il difetto invece di mostrarlo.
 - [ ] **I4 L'armamento non dipende da quale script hai lanciato** — budget ~30k
       Oggi arma solo `close-propagate.sh`; chi usa `align-clones` direttamente lascia il
       meccanismo cieco. Estrarre in `scripts/arma-deploy.sh`, chiamato da entrambi.

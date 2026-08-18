@@ -1,62 +1,82 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-17 (S1068).
+**Updated**: 2026-08-18 (S1069).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-⚠ **IL MOTORE COSTRUISCE, MA COSTRUISCE SEMPRE UNA BANCA.** `#198` è a **8 task su 9**, ma la
-sorgente resta l'archetipo `RETAIL_BANK_REFERENCE` — **7 unità e 11 posizioni** contro le
-**158** di RTL vera: un fascicolo di qualunque settore produrrebbe quella banca. È la ragione
-di `#132` e la risposta alla domanda di Enzo a fine sessione (→ Top priorities).
+⚠ **IL MOTORE HA COSTRUITO DAVVERO, E COSTRUISCE ANCORA UNA BANCA.** `#198` T9a è fatto: due
+aziende create sul gemello dall'archetipo `RETAIL_BANK_REFERENCE`, ogni riga con la sua origine.
+Ma la sorgente resta l'archetipo — **7 unità e 11 posizioni** contro le **158** di RTL vera, e la
+copertura del metro misurata è **7,6%**. Un fascicolo di qualunque settore produrrebbe quella
+banca: è la ragione di `#132`, e ora è un numero e non più un'impressione.
 
-## Last session brief (S1068 «sette difetti trovati eseguendo, cinque nei miei strumenti»)
+## Last session brief (S1069 «tre difetti che nessun test vedeva, e tre voci invisibili al menu»)
 
-**Ciclo NON chiuso: 7 voci su 13**, confine dichiarato all'apertura e ragione accanto a ognuna
-delle sei non aperte → `.programmi/mandati/mandato-S1068-p3-p1-p2.md`; cronaca in
-`docs/archive/HANDOFF_S1068.md` (**non SoT**).
+Il filo della sessione: **ciò che nessuno esegue non è verificato**. Tre difetti veri sono
+emersi solo costruendo e deployando per davvero, e tre voci del backlog erano invisibili al menu
+per tre cause diverse.
 
-Il filo: **sette difetti trovati eseguendo, non ragionando** — cinque nei miei stessi strumenti
-di misura, compresi due rimedi che contenevano la bugia che stavano correggendo.
+**Chiuse**: `#216` (il menu ora spiega e l'avanzamento si deriva) · `#215` (le 29 classificazioni
+riclassificate, tre copie morte rimosse) · `#197` (il controllo incrociato esiste e trova la
+differenza). **Avanzate**: `#198` T9a · `#211` F2. **Aperta**: `#217`, la riprogettazione del
+flusso di chiusura, con I1/I2 già fatti.
 
-⚠ **FUORI REPO, e non si vede dal git log**: un pacchetto di skill installato il 2026-08-17
-alle 17:57 aveva **sovrascritto `handoff` e `code-review`** con versioni omonime, e la chiusura
-di S1068 è partita su quella sbagliata (stato non aggiornato). Le 26 skill sono state rimosse,
-le originali ripristinate dal linux-pc, backup in
-`[Backup]/matt-pocock-skills-rimosse_20260818`. → memoria `skill_name_collision_masking`.
+⚠ **TRE DIFETTI DEL TENANT BUILDER, invisibili ai test perché nessuno costruiva** — per esteso
+nel referto in `.programmi/198-tenant-builder-p3-costruzione.md`. Il peggiore: le competenze
+nascevano senza categoria, e a romperlo era il **deploy successivo**. Un difetto che non rompe
+ciò che lo produce è il più difficile da attribuire.
+
+⚠ **TRE MODI DI SPARIRE DAL MENU, tutti curati** (cancelli `S5`, `S3`, `T3`): la parentetica dopo
+il titolo · la voce fuori dalla sezione taggata · e `priority` col grassetto, che rendeva
+invisibili tre voci P1.
+
+⚠ **LE PROVE SONO NATE FALSE QUATTRO VOLTE**, ogni volta per una ragione diversa, e tutte trovate
+**sabotando** invece che rileggendo. È il metodo, non un incidente.
+
 ## Top priorities (prossima sessione)
 
-1. **Il campo di prova + `#198` T9** — è ciò che Enzo ha chiesto esplicitamente a fine
-   sessione: *«se e quando sarà possibile testare la creazione di un nuovo tenant/azienda»*.
-   Serve la procedura sul **gemello** (E27) con `scripts/banco_tenant.py` coi due pulsanti
-   *crea usa-e-getta* / *disfa*, poi T9: creare un'azienda vera, costruirla, misurarla,
-   archiviarla. **Nessuna dipendenza aperta · ~1 sessione** · chiude `#198` e sblocca `#197`
-2. **`#132` F1** — dove vive il contenuto di un modello (unità/posizioni/competenze/
-   indicatori). Tocca `db/**` → **prova generale sul linux-pc prima del push**. È la fase più
-   grossa del programma · `.programmi/132-ricerca-genera-il-modello.md`
-   ⚠ **La stima «~2 sessioni» nel register è del 5 agosto**, precedente alla riscrittura
-   E29/E30 che ha cambiato la natura della voce. Con le 7 fasi residue la stima onesta —
-   **dichiarata, non misurata** — è 4-6 sessioni
-3. **`#211`** — le famiglie ②③④⑤⑥ (18 casi) e il reperto degli **80 casi non eseguiti**, causa
-   **non isolata** (escluse `maxFailures` e i blocchi `serial`)
+1. **`#217` I3 e I4 — il flusso di chiusura.** Il piano è scritto e ordinato
+   (`.programmi/217-flusso-di-chiusura.md`). I3 toglie l'attesa della CI dalla chiusura — è il
+   guadagno grosso, e la contraddizione è **una riga**: `vm-deploy.sh:81` usa `ci-gate`
+   bloccante mentre `deploy-watch` usa lo stesso gate in modalità non bloccante, **verificato
+   sul campo** dal journal del gemello. I4 toglie il buco per cui `refs/heads/prod` resta
+   indietro quando si usa `align-clones` direttamente.
+2. **`#198` T9b — la costruzione in produzione (E20).** Non è più bloccata: il push è stato
+   autorizzato, la produzione gira il codice corretto, la catena è verde. ⚠ Va lanciata **dopo**
+   aver verificato che il commit della categoria sia in produzione, o si ricrea lo stato che ha
+   fermato la catena.
+3. **`#211` F3 — le famiglie ②③④⑤⑥ della suite E2E** (18 casi). La domanda sugli 80 non eseguiti
+   ha risposta: 74 sono strumenti a comando, 6 si dichiarano ciechi, e nessuno dei sei nasconde
+   un dato che dovrebbe esserci.
 
 ## Open questions
 
-- **`#215`** (nuova) — lo stato impossibile di `#213` in altre due tabelle, ma la cura è
-  **l'opposto**: le 29 righe di `sys_compensation_bands` sono i **CCNL e i sindacati**, che I21
-  vuole aperti a ogni industria — classificate male, non residui. Cancellarle sarebbe stato l'errore
-- **`apps/web/next-env.d.ts`** — riscritto da `next build`, oscilla fra build di sviluppo e di
-  produzione. Va deciso **una volta** come trattarlo, o torna a ogni corsa
-- **`#197`** resta aperta a metà per costruzione: la sua seconda condizione è il T9 di `#198`
+- **Il residuo che la suite E2E lascia in produzione.** Una «Famiglia di collaudo» creata da un
+  test e mai ripulita ha **fatto fallire un deploy** (post-condizione della `000255`). L'ho
+  rimossa, ma la suite non ha un controllo di drift come quella API: è una voce da aprire, o un
+  capitolo di `#181`.
+- **`sys_compensation_bands` ospita 29 righe che non sono bande** (contratti e sigle senza
+  importi): una tabella che porta due specie. Nominato in `#215`, non bonificato di passaggio.
+- **`apps/web/next-env.d.ts`** oscilla fra build di sviluppo e produzione. Aperta da sessioni.
+
+## Stato delle macchine (misurato a fine S1069)
+
+`main` == `refs/heads/prod` == **`e51d5b17`** · produzione **deployata e verde**
+(`api /readyz OK`, `web /login 200`) · timer di deploy **attivi** su VM e linux-pc, che si
+allineano da sé al tick successivo. La chiusura ha **armato e basta**, senza aspettare la CI:
+è la prima applicazione della dottrina che Enzo ha scelto il 2026-08-18.
 
 ## Verification
 
+I numeri non si scrivono qui: si scrive il comando che li produce (⭐ PUNTO FISSO).
+
 ```bash
-python docs/kb/tools/session_start.py               # menu + salute, un colpo solo
-python docs/kb/tools/handoff_lint.py                # cancello di coerenza, bloccante
-python docs/kb/tools/programmi.py                   # da dove riprendono gli 8 programmi
-bash scripts/verifica-deploy.sh                     # DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO
-ssh linux-pc 'source ~/.nvm/nvm.sh; nvm use 22; cd ~/heuresys-advanced/apps/api && pnpm exec vitest run'
+python docs/kb/tools/session_start.py        # menu + salute, un solo giro
+python docs/kb/tools/guardiano.py            # contesto e finestra 5h, misurati
+python docs/kb/tools/handoff_lint.py         # coerenza di stato e register (bloccante)
+python docs/kb/tools/programmi.py --verifica # integrità dei piani multi-sessione
+bash scripts/test/run-shell-tests.sh         # la batteria degli script di servizio
+bash scripts/verifica-deploy.sh              # cosa gira DAVVERO sulle macchine
 ```
 
-⚠ La verifica lunga si esegue **sul linux-pc, non qui** (standard S1054). La suite E2E
-completa passa ora da un wrapper a fasi (`#211` ①): `cd apps/web && pnpm test:e2e:prod`,
-che esce **rosso** anche a fasi verdi se un caso non è stato eseguito.
+Ultima corsa della batteria degli script: **165 ok / 0 failed** (erano 141 a inizio sessione;
+24 controlli nuovi, fra cui `S5`, `T3` e le due prove del marcatore).

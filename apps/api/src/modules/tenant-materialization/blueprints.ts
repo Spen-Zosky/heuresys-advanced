@@ -32,6 +32,10 @@ export interface ArchetypeSkill {
   code: string;
   name: string;
   kind: SkillKind;
+  /** Il codice della categoria nel catalogo globale `sys_skill_categories`. Obbligatorio:
+   *  una competenza senza categoria supera la costruzione e fa fallire il deploy successivo
+   *  (post-condizione della mig. `000196`) — vedi `PlannedSkill.categoryCode`. */
+  categoryCode: string;
 }
 export interface ArchetypeKpi {
   code: string;
@@ -100,15 +104,21 @@ const RETAIL_BANK_REFERENCE: Archetype = {
   ],
   // slice-2b: a compact synthetic skill set (kind from the ESCO domain) + ranked KPIs for the archetype.
   // Codes are RBR-namespaced (collision-safe). These materialize a tenant-scoped catalog + per-incumbent evidence.
+  // La CATEGORIA e' dichiarata qui, una per competenza, e non dedotta dal `kind` (#198 T9a):
+  // sette sono mestiere bancario -> `Technical`, la leadership e' `Leadership`. I codici sono
+  // quelli del catalogo GLOBALE `sys_skill_categories`, e il motore fallisce con un messaggio
+  // parlante se uno di essi non esiste — mai un NULL silenzioso, che e' proprio il difetto che
+  // ha fermato un deploy: competenze senza categoria passano la costruzione e fanno fallire la
+  // post-condizione della mig. `000196` al giro dopo.
   skills: [
-    { code: "RBR-SK-CREDIT-RISK", name: "Credit Risk Analysis", kind: "KNOWLEDGE" },
-    { code: "RBR-SK-AML", name: "AML & Compliance", kind: "KNOWLEDGE" },
-    { code: "RBR-SK-ADVISORY", name: "Customer Advisory", kind: "SKILL" },
-    { code: "RBR-SK-BRANCH-OPS", name: "Branch Operations", kind: "SKILL" },
-    { code: "RBR-SK-FIN-REPORTING", name: "Financial Reporting", kind: "KNOWLEDGE" },
-    { code: "RBR-SK-LEADERSHIP", name: "Leadership", kind: "COMPETENCE" },
-    { code: "RBR-SK-DIGITAL", name: "Digital Banking", kind: "SKILL" },
-    { code: "RBR-SK-CASH", name: "Cash Handling", kind: "SKILL" },
+    { code: "RBR-SK-CREDIT-RISK", name: "Credit Risk Analysis", kind: "KNOWLEDGE", categoryCode: "Technical" },
+    { code: "RBR-SK-AML", name: "AML & Compliance", kind: "KNOWLEDGE", categoryCode: "Technical" },
+    { code: "RBR-SK-ADVISORY", name: "Customer Advisory", kind: "SKILL", categoryCode: "Technical" },
+    { code: "RBR-SK-BRANCH-OPS", name: "Branch Operations", kind: "SKILL", categoryCode: "Technical" },
+    { code: "RBR-SK-FIN-REPORTING", name: "Financial Reporting", kind: "KNOWLEDGE", categoryCode: "Technical" },
+    { code: "RBR-SK-LEADERSHIP", name: "Leadership", kind: "COMPETENCE", categoryCode: "Leadership" },
+    { code: "RBR-SK-DIGITAL", name: "Digital Banking", kind: "SKILL", categoryCode: "Technical" },
+    { code: "RBR-SK-CASH", name: "Cash Handling", kind: "SKILL", categoryCode: "Technical" },
   ],
   kpis: [
     { code: "RBR-KPI-CSAT", name: "Customer Satisfaction", polarity: "HIGHER_IS_BETTER", unit: "score" },

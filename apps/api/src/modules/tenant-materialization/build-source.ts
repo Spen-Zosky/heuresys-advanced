@@ -91,7 +91,7 @@ export class ArchetypeBuildSource implements BuildSource {
         justification: `${perche}: posizione del modello, in ${p.orgUnitCode}`,
       })),
       skills: a.skills.map((sk) => ({
-        code: sk.code, name: sk.name, kind: sk.kind,
+        code: sk.code, name: sk.name, kind: sk.kind, categoryCode: sk.categoryCode,
         justification: `${perche}: competenza del catalogo di modello`,
       })),
       kpis: a.kpis.map((kp) => ({

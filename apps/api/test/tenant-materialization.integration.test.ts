@@ -215,6 +215,19 @@ describe("tenant materialization generator (#4 WI-C)", () => {
     // skills are NEW rows (natural-key matches are reused); evidence covers ALL skills.
     expect(await countCatalog(RTL)).toEqual({ skills: A.skills - preexistingSkills, kpis: A.kpis });
     expect(await countEvidence(RTL)).toEqual({ skillEvidence: A.users * A.skills, kpiEvidence: A.users * A.kpis });
+
+    // Ogni competenza generata ha la sua CATEGORIA (#198 T9a, S1069). Il motore le creava con
+    // `skill_category_id` nullo e la costruzione riusciva: il difetto si vedeva **al deploy
+    // successivo**, dove la post-condizione della mig. `000196` — «ogni evidenza punta a una
+    // competenza con categoria» — trovava 176 evidenze scoperte e fermava la catena. Un difetto
+    // che non rompe ciò che lo produce, ma ciò che viene dopo, è il più difficile da attribuire:
+    // qui lo si prende dove nasce.
+    const scoperte = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_skills
+        WHERE skill_tenant_id = $1 AND skill_code LIKE 'RBR-SK-%' AND skill_category_id IS NULL`,
+      [RTL],
+    );
+    expect(Number(scoperte.rows[0]!.n), "competenze generate senza categoria").toBe(0);
   });
 
   it("re-apply is idempotent (0 created, all skipped)", async () => {

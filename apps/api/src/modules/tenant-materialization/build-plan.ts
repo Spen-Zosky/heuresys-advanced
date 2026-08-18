@@ -60,6 +60,21 @@ export interface PlannedSkill extends Planned {
   code: string;
   name: string;
   kind: SkillKind;
+  /**
+   * La CATEGORIA, dichiarata dalla sorgente e non dedotta dal `kind`.
+   *
+   * Perche' e' obbligatoria (#198 T9a, S1069). Il motore creava competenze con
+   * `skill_category_id` nullo, e la costruzione riusciva: il difetto si vedeva **al deploy
+   * successivo**, dove la post-condizione della mig. `000196` — «ogni evidenza punta a una
+   * competenza con categoria» — trovava 176 evidenze scoperte e fermava la catena. Un difetto
+   * che non rompe cio' che lo produce ma cio' che viene dopo e' il piu' difficile da attribuire.
+   *
+   * Non si deriva dal `kind`: `COMPETENCE` non vuol dire «Leadership», e una regola del genere
+   * sarebbe vera per l'archetipo di oggi e falsa per la prima sorgente che arriva. Il catalogo
+   * `sys_skill_categories` e' GLOBALE (nessun tenant), quindi un'azienda appena creata lo ha
+   * gia' a disposizione.
+   */
+  categoryCode: string;
 }
 
 export interface PlannedKpi extends Planned {

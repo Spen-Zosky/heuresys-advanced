@@ -202,12 +202,30 @@ export async function materialize(
       if (ex.rows[0]) {
         skillCodeToId.set(sk.code, ex.rows[0].skill_id);
       } else {
+        // La categoria si risolve dal catalogo GLOBALE e non può restare nulla: una competenza
+        // senza categoria attraversa la costruzione senza un lamento e fa fallire il DEPLOY
+        // successivo, dove la post-condizione della mig. `000196` pretende che ogni evidenza
+        // punti a una competenza categorizzata. È successo davvero (#198 T9a, S1069): 176
+        // evidenze scoperte, catena ferma, e la causa a due passi di distanza dall'effetto.
+        const cat = await client.query<{ skill_category_id: string }>(
+          `SELECT skill_category_id FROM sys.sys_skill_categories WHERE skill_category_code = $1`,
+          [sk.categoryCode],
+        );
+        const categoryId = cat.rows[0]?.skill_category_id;
+        if (!categoryId) {
+          throw new ConflictError(
+            `La competenza «${sk.name}» dichiara la categoria «${sk.categoryCode}», che non ` +
+              `esiste nel catalogo: la costruzione si ferma invece di creare una riga scoperta`,
+            "SKILL_CATEGORY_UNKNOWN",
+          );
+        }
         const ins = await client.query<{ skill_id: string }>(
-          `INSERT INTO sys.sys_skills (skill_tenant_id, skill_code, skill_name, skill_kind, skill_is_global, skill_metadata)
-           VALUES ($1, $2, $3, $4, false, jsonb_build_object('materialized_from', $5::text))
+          `INSERT INTO sys.sys_skills (skill_tenant_id, skill_code, skill_name, skill_kind,
+                                       skill_category_id, skill_is_global, skill_metadata)
+           VALUES ($1, $2, $3, $4, $6, false, jsonb_build_object('materialized_from', $5::text))
            ON CONFLICT DO NOTHING
            RETURNING skill_id`,
-          [tenantId, sk.code, sk.name, sk.kind, plan.sourceKey],
+          [tenantId, sk.code, sk.name, sk.kind, plan.sourceKey, categoryId],
         );
         if (ins.rows[0]) {
           skillCodeToId.set(sk.code, ins.rows[0].skill_id);

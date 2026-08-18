@@ -529,6 +529,82 @@ else
   fail "$AD o $AC mancante"
 fi
 
+section "#217 I5 — profili di chiusura: quali passi servono, e perche' gli altri no"
+# IL DIFETTO: la chiusura era un rito completo. Una sessione di soli documenti pagava
+# armamento, clone del database e lettura dalle macchine — passi che per lei non
+# significano niente. Ma il rischio della cura e' PIU' GRANDE del difetto: saltare un
+# passo che serviva. Per questo il caso 4 (la propagazione non si salta MAI) e il caso 5
+# (non misurabile => si esegue) valgono piu' dei primi tre.
+PC=scripts/profilo-chiusura.sh
+if [ -f "$PC" ]; then
+  T="$(mktemp -d)"; W="$T/box"
+  git init -q "$W"; git -C "$W" config user.email t@t; git -C "$W" config user.name t
+  git -C "$W" config commit.gpgsign false
+  mkdir -p "$W/scripts/lib" "$W/docs/kb" "$W/apps/api/src" "$W/db/migrations"
+  cp "$PC" "$W/scripts/"; cp scripts/lib/deploy-paths.sh "$W/scripts/lib/"
+  echo base > "$W/README.md"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm base
+  BASE="$(git -C "$W" rev-parse HEAD)"
+  prof() { ( cd "$W" && bash scripts/profilo-chiusura.sh --eval --finestra "$1" 2>/dev/null ); }
+
+  # 1. soli documenti
+  echo testo > "$W/docs/kb/nota.md"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm docs
+  out="$(prof "$BASE..HEAD")"
+  { printf '%s' "$out" | grep -q '^PROFILO=documenti$' \
+    && printf '%s' "$out" | grep -q '^PASSO_ARMA=salta$' \
+    && printf '%s' "$out" | grep -q '^PASSO_CLONEDB=salta$' \
+    && printf '%s' "$out" | grep -q '^PASSO_VERIFICA=salta$'; } \
+    && ok "profilo: soli documenti => niente arma, niente clone-db, niente verifica-deploy" \
+    || fail "profilo documenti ($out)"
+
+  # 4. LA PROPAGAZIONE NON SI SALTA MAI — decisione di Enzo, ed e' il caso che protegge
+  #    il linux-pc (gemello di produzione, runner CI, macchina della verifica lunga).
+  printf '%s' "$out" | grep -q '^PASSO_PROPAGA=esegui$' \
+    && ok "profilo: anche a soli documenti si PROPAGA (i cloni restano allineati sempre)" \
+    || fail "profilo: la propagazione e' stata saltata — e' la decisione che non si tocca ($out)"
+
+  # 5. atlante NON MISURABILE (nella sandbox lo strumento non c'e') => si esegue
+  printf '%s' "$out" | grep -q '^PASSO_ATLANTE=esegui$' \
+    && ok "profilo: atlante non misurabile => si rigenera (si degrada verso il lavoro in piu')" \
+    || fail "profilo: atlante saltato senza averlo potuto misurare ($out)"
+
+  # 6. la forzatura, che i test usano per non dipendere dallo stato vero del repo
+  out2="$( cd "$W" && ATLANTE_FORZA=salta bash scripts/profilo-chiusura.sh --eval --finestra "$BASE..HEAD" 2>/dev/null )"
+  printf '%s' "$out2" | grep -q '^PASSO_ATLANTE=salta$' \
+    && ok "profilo: ATLANTE_FORZA scavalca la misura (seam dei test)" || fail "profilo ATLANTE_FORZA ($out2)"
+
+  # 2. codice
+  echo 'export const x = 1' > "$W/apps/api/src/x.ts"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm codice
+  out="$(prof "$BASE..HEAD")"
+  { printf '%s' "$out" | grep -q '^PROFILO=codice$' \
+    && printf '%s' "$out" | grep -q '^PASSO_ARMA=esegui$' \
+    && printf '%s' "$out" | grep -q '^PASSO_VERIFICA=esegui$' \
+    && printf '%s' "$out" | grep -q '^PASSO_CLONEDB=salta$'; } \
+    && ok "profilo: codice => arma e legge dalle macchine, ma NON rinfresca il clone del database" \
+    || fail "profilo codice ($out)"
+
+  # 3. codice+db
+  echo 'select 1;' > "$W/db/migrations/000001_x.sql"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm db
+  out="$(prof "$BASE..HEAD")"
+  { printf '%s' "$out" | grep -q '^PROFILO=codice+db$' \
+    && printf '%s' "$out" | grep -q '^PASSO_CLONEDB=esegui$'; } \
+    && ok "profilo: codice+db => in piu' rinfresca il clone del gemello" || fail "profilo codice+db ($out)"
+
+  # finestra vuota: nessun commit da portare in produzione
+  out="$(prof "HEAD..HEAD")"
+  printf '%s' "$out" | grep -q '^PROFILO=documenti$' \
+    && ok "profilo: finestra vuota => documenti (non si arma il nulla)" || fail "profilo finestra vuota ($out)"
+  rm -rf "$T"
+
+  # Lo strumento che traduce la misura dell'atlante deve dire UNA delle tre parole, sempre.
+  a="$(python docs/kb/tools/atlante_fresco.py 2>/dev/null || echo VUOTO)"
+  case "$a" in
+    fresco|vecchio|indeciso) ok "atlante_fresco.py: risponde con una parola del vocabolario chiuso ($a)" ;;
+    *) fail "atlante_fresco.py: risposta fuori vocabolario ('$a')" ;;
+  esac
+else
+  fail "$PC mancante"
+fi
+
 section "S1069 — il marcatore di sessione NON si consuma"
 # IL DIFETTO CHE QUESTO TEST IMPEDISCE. `align-clones.sh` cancellava `.session-align.marker`
 # a fine corsa. La SECONDA propagazione della stessa sessione lo trovava sparito e cadeva in

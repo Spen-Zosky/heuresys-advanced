@@ -56,9 +56,17 @@ produce `TIMEOUT dopo 900s → deploy FAILED`: stesso gate, stessa CI, due compo
       l'assegnazione (cieco come il grep di `#194`) — ora prende il nome **dalla guardia** e
       pretende che qualcuno lo assegni davvero; e il conteggio delle righe di diario ora si
       **conta** su un diario vero deviato con `HEURESYS_CLOSE_LOG`, invece di dedursi.
-- [ ] **I5 Profili di chiusura** — budget ~100k · **il cuore**
-      `documenti` / `codice` / `codice+db`, riusando `verify_gate.route()` sulla finestra di
-      sessione. La skill salta i passi che non appartengono al profilo, **dichiarando quali**.
+- [x] **I5 Profili di chiusura** — FATTO 2026-08-18 · `scripts/profilo-chiusura.sh` +
+      `docs/kb/tools/atlante_fresco.py`, e la skill `handoff` con uno **Step 0** che li usa.
+      **Il piano diceva «riusando il router di `verify_gate`»: la misura lo ha smentito** —
+      `lib/deploy-paths.sh` dichiara che i due non vanno fusi («quali PROVE rifare» contro «cosa
+      PROPAGARE», universi diversi), quindi il profilo si costruisce sulle sue regex, importate.
+      **La propagazione NON è un passo del profilo**: il linux-pc resta allineato sempre.
+      🔬 **La prima esecuzione ha smentito la prima stesura**: l'atlante veniva dedotto dai path
+      di deploy, e una finestra che toccava solo `scripts/` stampava «esegui — la finestra tocca
+      sorgenti che l'atlante descrive», che è **falso**. Ora si chiede ad `atlas_freshness()`,
+      la misura canonica del boot. 8 test, sabotati tre volte (propagazione saltata · «non
+      misurabile» tradotto in «salta» · profilo db che non rinfresca il clone): tutti rossi.
 - [ ] **I6 I cinque generatori entrano nel ciclo** — budget ~40k
       `build_agent_operations`, `build_concepts`, `build_linked_manifest`, `build_adr_index`,
       `build_graph_hub` non sono in chiusura né richiamati a cascata. Più un controllo di

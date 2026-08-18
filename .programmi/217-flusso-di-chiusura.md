@@ -1,7 +1,7 @@
 # 217 — Il flusso di chiusura: da rito completo a percorso scelto
 
 > **item**: #217
-> **stato**: IN CORSO
+> **stato**: CHIUSA — 8/8 fasi, 2026-08-18 (S1070)
 
 Enzo, 2026-08-18: *«è instabile, va spesso in errore, deve rifare più volte le stesse azioni,
 richiede tempi lunghi, intercetta errori di GitHub che andrebbero risolti definitivamente e non
@@ -89,8 +89,16 @@ produce `TIMEOUT dopo 900s → deploy FAILED`: stesso gate, stessa CI, due compo
       🔬 La firma del 429 era **cieca**: in regex estesa le parentesi sono un gruppo, e il caso
       reale era stato riconosciuto solo grazie alle altre firme. E il primo sabotaggio non
       sabotava — il grep di controllo trovava il proprio commento (`#194`, di nuovo).
-- [ ] **I8 Il rendiconto viene letto dal boot** — budget ~20k
-      269 record e nessuna decisione li legge.
+- [x] **I8 Il rendiconto viene letto dal boot** — FATTO 2026-08-18 ·
+      `docs/kb/tools/rendiconto_chiusure.py` (`--boot`) + una riga in GIT & SYNC: quanti passi
+      ha richiesto l'ultima chiusura e **quali** sono rimasti non sereni, nominati.
+      **Mostra, non decide** — il vincolo della skill («rendiconto, non stato») è rispettato:
+      nessun exit code blocca niente, e un diario assente dà `UNK`, mai un verde dal buio.
+      Le corse da un passo solo non contano come chiusure, o falserebbero proprio il numero
+      che questa voce vuole veder scendere. 5 test, due sabotaggi rossi.
+      🔬 Terzo errore identico in un giorno: `REPO` risaliva **tre** livelli invece di quattro,
+      e qui produceva «nessuna chiusura registrata» su un diario che ne aveva 269 — un silenzio,
+      cioè il modo peggiore di sbagliare.
 
 ## Chiuso quando
 

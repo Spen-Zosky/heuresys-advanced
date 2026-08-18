@@ -737,6 +737,63 @@ else
   fail "$CR mancante"
 fi
 
+section "#217 I8 — il rendiconto delle chiusure viene letto dal boot"
+# IL DIFETTO: 269 record scritti con cura da tre script, e NESSUNO che li guardasse. La
+# misura che ha fatto nascere #217 veniva proprio da li', ricavata a mano una volta sola.
+# ⚠ Il vincolo che questi test difendono: MOSTRA, NON DECIDE. Nessun exit code blocca
+# niente, e un diario assente non puo' produrre un verde.
+RC=docs/kb/tools/rendiconto_chiusure.py
+if [ -f "$RC" ]; then
+  D="$(mktemp -d)"
+
+  # Una chiusura serena: tutti i passi eseguiti o saltati.
+  cat > "$D/serena.ndjson" <<'EOF'
+{"ts":"2026-08-01T10:00:00+0200","session":"S900","run":"r1","step":"deploy","outcome":"saltato","why":"x"}
+{"ts":"2026-08-01T10:01:00+0200","session":"S900","run":"r1","step":"propaga","outcome":"eseguito","why":"x"}
+EOF
+  out="$(HEURESYS_CLOSE_LOG="$D/serena.ndjson" python "$RC" --boot 2>&1)"
+  { printf '%s' "$out" | grep -q '^OK' && printf '%s' "$out" | grep -q 'tutti sereni'; } \
+    && ok "rendiconto: chiusura senza guasti => OK" || fail "rendiconto serena ($out)"
+
+  # Un passo fallito DEVE emergere: e' la prima cosa da sapere aprendo una sessione.
+  cat > "$D/guasta.ndjson" <<'EOF'
+{"ts":"2026-08-02T10:00:00+0200","session":"S901","run":"r2","step":"propaga","outcome":"eseguito","why":"x"}
+{"ts":"2026-08-02T10:01:00+0200","session":"S901","run":"r2","step":"clone-db","outcome":"ignoto","why":"x"}
+{"ts":"2026-08-02T10:02:00+0200","session":"S901","run":"r2","step":"verifica-deploy","outcome":"fallito","why":"x"}
+EOF
+  out="$(HEURESYS_CLOSE_LOG="$D/guasta.ndjson" python "$RC" --boot 2>&1)"
+  { printf '%s' "$out" | grep -q '^BAD' && printf '%s' "$out" | grep -q 'clone-db:ignoto' \
+    && printf '%s' "$out" | grep -q 'verifica-deploy:fallito'; } \
+    && ok "rendiconto: passi ignoti/falliti emergono NOMINATI, non contati e basta" \
+    || fail "rendiconto guasta ($out)"
+
+  # Diario assente => UNK. Mai un verde dal buio: un «tutto bene» nato dal nulla e'
+  # indistinguibile da uno nato da una misura, ed e' la peggiore delle risposte.
+  out="$(HEURESYS_CLOSE_LOG="$D/non-esiste.ndjson" python "$RC" --boot 2>&1)"
+  { printf '%s' "$out" | grep -q '^UNK'; } \
+    && ok "rendiconto: diario assente => UNK, mai OK (nessun verde dal buio)" \
+    || fail "rendiconto diario assente ($out)"
+
+  # Le corse da un passo solo NON sono chiusure: contarle falserebbe proprio il numero
+  # che #217 vuole veder scendere. (Nel diario vero ce ne sono, lasciate dalle prove.)
+  cat > "$D/orfane.ndjson" <<'EOF'
+{"ts":"2026-08-03T10:00:00+0200","session":"S902","run":"o1","step":"deploy","outcome":"eseguito","why":"a mano"}
+{"ts":"2026-08-03T11:00:00+0200","session":"S902","run":"o2","step":"arma","outcome":"eseguito","why":"a mano"}
+EOF
+  out="$(HEURESYS_CLOSE_LOG="$D/orfane.ndjson" python "$RC" --boot 2>&1)"
+  { printf '%s' "$out" | grep -q '^UNK'; } \
+    && ok "rendiconto: corse da un passo non sono chiusure (il conteggio resta vero)" \
+    || fail "rendiconto orfane ($out)"
+
+  # E il boot deve guardarlo, altrimenti I8 non e' fatta.
+  grep -q 'rendiconto_chiusure' docs/kb/tools/status_dashboard.py \
+    && ok "status_dashboard: il boot legge il rendiconto delle chiusure" \
+    || fail "status_dashboard: nessuno legge il rendiconto"
+  rm -rf "$D"
+else
+  fail "$RC mancante"
+fi
+
 section "S1069 — il marcatore di sessione NON si consuma"
 # IL DIFETTO CHE QUESTO TEST IMPEDISCE. `align-clones.sh` cancellava `.session-align.marker`
 # a fine corsa. La SECONDA propagazione della stessa sessione lo trovava sparito e cadeva in

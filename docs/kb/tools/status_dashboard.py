@@ -186,6 +186,16 @@ def sec_git(no_net):
     sync = f"ahead {ahead} / behind {behind}" if ahead is not None else "ahead ?/behind ? (no fetch)"
     s.add(OK if (ahead == 0 and behind == 0) else (UNK if ahead is None else BAD),
           f"HEAD {head} · origin/main · {sync}")
+    # #217 I8 — il rendiconto delle chiusure viene LETTO. Aveva 269 record e nessuno li
+    # guardava: la misura che ha fatto nascere #217 e' uscita da li', ricavata a mano una
+    # volta sola. Mostra, non decide (la skill: «rendiconto, non stato»).
+    try:
+        sys.path.insert(0, os.path.join(REPO, "docs", "kb", "tools"))
+        import rendiconto_chiusure as rc
+        for stato, testo in rc.righe_boot():
+            s.add({"OK": OK, "BAD": BAD}.get(stato, UNK), testo)
+    except Exception as exc:
+        s.add(UNK, f"rendiconto chiusure: non leggibile ({type(exc).__name__})")
     coda = f" · {ncodex} voci di Codex, attese per contratto" if ncodex else ""
     if nd is None:
         s.add(UNK, "working tree: stato non leggibile")

@@ -182,7 +182,7 @@ _head="$(git rev-parse HEAD 2>/dev/null)"
 if [ -n "$_head" ] && [ "$_head" != "$SHA" ]; then
   _avanti="$(git rev-list --count "$SHA..$_head" 2>/dev/null || echo '?')"
   if [ "$_avanti" != "0" ] && [ "$_avanti" != "?" ]; then
-    _re='^(apps|packages|db/migrations|db/scripts|scripts|deploy)/'
+    . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/deploy-paths.sh"; _re="$DEPLOY_PATHS_RE"
     _tocchi="$(git diff --name-only "$SHA..$_head" 2>/dev/null | grep -cE "$_re" || true)"
     if [ "${_tocchi:-0}" -gt 0 ]; then
       echo "  ⚠ HEAD ${_head:0:8} e' avanti di $_avanti commit NON armati, e $_tocchi file toccano path di DEPLOY:"

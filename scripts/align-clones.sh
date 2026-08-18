@@ -46,7 +46,7 @@ ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
 SCRIPTS="$ROOT/scripts"
 MARKER="${HEURESYS_MARKER:-$ROOT/.session-align.marker}"   # env override: solo per i test (default invariato)
 LOCAL_MEM="${LOCAL_MEM:-$HOME/.claude/projects/D--heuresys-advanced/memory}"
-DEPLOY_PATHS_RE='^(apps|packages|db/migrations|db/scripts|scripts|deploy)/'
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/deploy-paths.sh"   # accanto allo script, non a $ROOT: regge anche in una fixture (S1069)
 LEAN_EXCLUDE='(^|/)pg_dump_snapshots/|(^|/)legacy_data/|(^|/)extracted/|(^|/)graphify-(db-input|out)/|^qa_artifacts/|(^|/)_inspection_artifacts/|(^|/)db_snapshots/|\.(dump|backup|log)$|^\.claude/|^cowork_(code_exchange|reserved)/|^sessioni/|(^|/)\.auth/'
 
 log()  { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
@@ -190,7 +190,23 @@ case "$TARGETS_ARG" in
   all)     align_one vm; RESILIENT=1 align_one linuxpc ;;
 esac
 
-# Consume the marker so the next session starts a fresh delta window.
-if [ "$DELTA" = 1 ] && [ "$HAVE_MARKER" = 1 ]; then rm -f "$MARKER"; fi
+# IL MARCATORE NON SI CONSUMA PIU' (S1069).
+#
+# Qui c'era `rm -f "$MARKER"`, per «far ripartire la finestra di delta alla sessione dopo». Il
+# costo era che la SECONDA propagazione della stessa sessione trovava il marcatore sparito e
+# cadeva in IGNOTO: nel rendiconto delle chiusure sono **12 `clone-db ignoto` e 6 `arma ignoto`**
+# — passi non eseguiti non perche' inutili, ma perche' lo stato che li governava era stato
+# cancellato dalla corsa precedente. Una sessione che propaga due volte e' normale; uno stato
+# che si autodistrugge a meta' non lo e'.
+#
+# Chi apre la finestra nuova resta `session-boot.ps1`, che lo riscrive a ogni avvio di sessione
+# (create-if-absent): e' il posto giusto, perche' e' l'unico che sa quando una sessione comincia.
+# Le decisioni che non possono dipendere da un file cancellabile — armamento e clone-db — hanno
+# gia' la loro finestra derivata da `origin/prod..HEAD`, che non si consuma e non dipende dal
+# ricordarsi di scrivere niente.
+#
+# Resta un solo uso legittimo del marcatore: il `find -newer` per il delta della memoria, che e'
+# una domanda sui FILE («quali sono cambiati da allora») e non sulle decisioni.
+: # marcatore lasciato dov'e' — vedi sopra
 
 log "alignment complete (deploy=$DEPLOY delta=$DELTA${SKIPPED:+ skipped:$SKIPPED})"

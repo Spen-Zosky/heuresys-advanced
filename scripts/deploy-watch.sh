@@ -141,7 +141,7 @@ esac
 #     Si pretende il verde su ogni commit INTERMEDIO che tocca path di deploy. Gli altri si
 #     saltano di proposito: un commit di soli documenti non ha corse di codice, e chiedergli
 #     un verde che nessuno produrra' mai bloccherebbe il rollout per sempre.
-DEPLOY_PATHS_RE='^(apps|packages|db/migrations|db/scripts|scripts|deploy)/'
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/deploy-paths.sh"   # accanto allo script, non a $ROOT: regge anche in una fixture (S1069)
 if git merge-base --is-ancestor "$LAST_GOOD" "$ARMED" 2>/dev/null; then
   intermedi="$(git rev-list "$LAST_GOOD..$ARMED" 2>/dev/null | grep -v "^$ARMED$" || true)"
   for c in $intermedi; do

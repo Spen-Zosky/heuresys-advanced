@@ -40,6 +40,9 @@ set -euo pipefail
 # path conversion active. Close-propagate only needs it for its own direct SSH calls.
 
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
+# I path che decidono: una sola definizione, e caricata PRIMA di chiunque la usi —
+# la riga 112 (clone-db) la legge molto prima del punto in cui stava la vecchia copia (S1069).
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/deploy-paths.sh"   # accanto allo script, non a $ROOT: regge anche in una fixture (S1069)
 SCRIPTS="$ROOT/scripts"
 
 # L'id di questa CORSA di chiusura, ereditato da ogni passo che scrive nel diario
@@ -109,7 +112,7 @@ case "$CLONE_DB" in
   auto)
     if [ -f "$MARKER" ] && [ -n "$(head -1 "$MARKER" | tr -d '\r')" ]; then
       start_head="$(head -1 "$MARKER" | tr -d '\r')"
-      if [ -n "$(git diff --name-only "$start_head"..HEAD 2>/dev/null | grep -E '^db/(migrations|seeds)/' || true)" ]; then
+      if [ -n "$(git diff --name-only "$start_head"..HEAD 2>/dev/null | grep -E "$CLONE_DB_PATHS_RE" || true)" ]; then
         need_clone=1; clone_why="misurato: db/migrations|seeds cambiati in ${start_head:0:8}..HEAD"
       else
         need_clone=0; clone_why="misurato: nessun cambiamento in db/migrations|seeds da ${start_head:0:8}"
@@ -126,7 +129,7 @@ esac
 # PRIMA di chiamarlo: align-clones consuma il marcatore alla fine (riga 194), quindi leggerlo
 # dopo sarebbe una corsa. La regex e' la stessa di align-clones.sh:49 — se una delle due cambia
 # senza l'altra, si arma su un criterio e si deploya su un altro.
-ARM_PATHS_RE='^(apps|packages|db/migrations|db/scripts|scripts|deploy)/'
+ARM_PATHS_RE="$DEPLOY_PATHS_RE"   # stesso criterio del deploy, per costruzione e non per copia (S1069)
 ARM_REF="${DEPLOY_ARM_REF:-prod}"
 do_arm=0; arm_why=""; align_deploy_flag="--no-deploy"
 case "$DEPLOY" in

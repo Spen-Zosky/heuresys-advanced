@@ -117,9 +117,12 @@ fi
 
 # --------------------- D. align-clones.sh auto-deploy gate (production regex)
 section "align-clones.sh — DEPLOY_PATHS_RE auto-deploy gate"
-RE_LINE="$(grep -m1 '^DEPLOY_PATHS_RE=' scripts/align-clones.sh)"
+# La regex si carica DALLA FONTE (scripts/lib/deploy-paths.sh, S1069) invece di essere
+# estratta a grep da align-clones: stesso principio di prima — nessuna copia nel test —
+# ma ora la fonte e' una sola per tutti e quattro gli script che la usano.
+RE_LINE=""
+if ROOT="$(pwd)" . scripts/lib/deploy-paths.sh 2>/dev/null && [ -n "${DEPLOY_PATHS_RE:-}" ]; then RE_LINE="caricata"; fi
 if [ -n "$RE_LINE" ]; then
-  eval "$RE_LINE"   # tests the regex AS SHIPPED — no copy to drift
   should_deploy="apps/api/src/server.ts
 packages/shared/src/index.ts
 db/migrations/000103_x.sql
@@ -139,7 +142,7 @@ README.md
     if printf '%s\n' "$p" | grep -qE "$DEPLOY_PATHS_RE"; then fail "expected NOT deploy-relevant: $p"; else ok "not deploy-relevant: $p"; fi
   done <<< "$should_skip"
 else
-  fail "DEPLOY_PATHS_RE not found in scripts/align-clones.sh"
+  fail "DEPLOY_PATHS_RE non caricabile da scripts/lib/deploy-paths.sh"
 fi
 
 # ------------------------- E. session marker head-parse contract (CRLF, S979)
@@ -283,8 +286,11 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   git init -q "$W"
   git -C "$W" config user.email t@t; git -C "$W" config user.name t
   git -C "$W" config commit.gpgsign false
-  mkdir -p "$W/scripts" "$W/pg_dump_snapshots"
+  mkdir -p "$W/scripts" "$W/scripts/lib" "$W/pg_dump_snapshots"
   cp "$CG" "$DW" "$W/scripts/"
+  # La libreria dei path e' importata dagli script sotto prova: senza, la sandbox
+  # riproduce un repo che non esiste e il test fallisce per una ragione sua (S1069).
+  cp scripts/lib/deploy-paths.sh "$W/scripts/lib/"
   echo x > "$W/f"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm c1
   git -C "$W" remote add origin "$B"; git -C "$W" push -q origin HEAD:refs/heads/main
   SHA1="$(git -C "$W" rev-parse HEAD)"
@@ -372,6 +378,32 @@ else
   fail "$CG o $DW mancante"
 fi
 
+section "S1069 — il marcatore di sessione NON si consuma"
+# IL DIFETTO CHE QUESTO TEST IMPEDISCE. `align-clones.sh` cancellava `.session-align.marker`
+# a fine corsa. La SECONDA propagazione della stessa sessione lo trovava sparito e cadeva in
+# IGNOTO: nel rendiconto sono 12 `clone-db ignoto` e 6 `arma ignoto` — passi saltati non
+# perche' inutili, ma perche' lo stato che li governava era stato distrutto.
+_MKD="$(mktemp -d)"; _MK="$_MKD/marker"; echo deadbeef > "$_MK"
+# (1) funzionale: l'epilogo dello script sono le sue ultime righe. Si eseguono con un
+#     marcatore finto e si guarda se sopravvive.
+( set +eu; DELTA=1; HAVE_MARKER=1; MARKER="$_MK"; SKIPPED=""; DEPLOY=0; DEPLOY_WHY=""
+  log() { :; }; eval "$(tail -8 scripts/align-clones.sh)" ) >/dev/null 2>&1 || true
+if [ -f "$_MK" ]; then
+  ok "il marcatore sopravvive all'epilogo — la seconda corsa misura invece di cadere in IGNOTO"
+else
+  fail "il marcatore e' stato consumato: la seconda propagazione della sessione tornera' IGNOTO"
+fi
+rm -rf "$_MKD"
+# (2) testuale: nessuna forma di cancellazione del marcatore, comunque scritta.
+# I COMMENTI NON CONTANO, e ignorarlo e' costato un rosso: la spiegazione di cio' che e' stato
+# tolto CITA la riga tolta, quindi il primo pattern trovava se' stesso — lo stesso difetto di
+# #194 e del grep di #198 T4, incontrato per la terza volta. Si guardano solo le righe di codice.
+if grep -vE '^[[:space:]]*#' scripts/align-clones.sh | grep -qE 'rm\b[^|;]*\$MARKER'; then
+  fail "align-clones cancella ancora il marcatore (una riga rm lo colpisce)"
+else
+  ok "nessun rm nel sorgente colpisce il marcatore"
+fi
+
 section "#165 — close-propagate arma invece di aspettare la CI"
 # NIENTE STORIA GIT QUI. La CI fa `actions/checkout` con fetch-depth: 1, quindi
 # `git log -- <file> | tail -1` restituisce la PUNTA e ogni diff «da li' a HEAD» e'
@@ -387,14 +419,23 @@ if [ -f "$CP" ]; then
   # --- il criterio di armamento DEVE essere lo stesso con cui align-clones deciderebbe
   #     il deploy. Se i due divergono si arma su un criterio e si deploya su un altro:
   #     e' il difetto piu' grave possibile qui, e nessuno lo vedrebbe a occhio.
-  ARM_LINE="$(grep -m1 '^ARM_PATHS_RE=' "$CP")"
-  DEP_LINE="$(grep -m1 '^DEPLOY_PATHS_RE=' scripts/align-clones.sh)"
-  if [ -n "$ARM_LINE" ] && [ "${ARM_LINE#ARM_PATHS_RE=}" = "${DEP_LINE#DEPLOY_PATHS_RE=}" ]; then
-    ok "close-propagate: criterio di armamento IDENTICO al criterio di deploy di align-clones"
-  else fail "ARM_PATHS_RE diverge da DEPLOY_PATHS_RE ($ARM_LINE | $DEP_LINE)"; fi
+  # Il criterio non e' piu' «le due righe coincidono» ma «esiste UNA SOLA fonte» (S1069):
+  # e' piu' forte, perche' due righe uguali oggi possono divergere domani, mentre quattro
+  # import dello stesso file non possono. Si verifica in due modi che si sorreggono a vicenda:
+  # nessuno script porta una definizione propria, e il valore si carica davvero.
+  _copie="$(grep -l "^\(ARM\|DEPLOY\)_PATHS_RE='\^(apps" scripts/align-clones.sh \
+             scripts/close-propagate.sh scripts/deploy-watch.sh scripts/verifica-deploy.sh 2>/dev/null | wc -l)"
+  if [ "$_copie" -eq 0 ]; then
+    ok "path di deploy: nessuna copia locale nei quattro script — una sola fonte"
+  else fail "$_copie script definiscono ancora una copia locale dei path di deploy"; fi
+
+  ARM_LINE=""
+  if ROOT="$(pwd)" . scripts/lib/deploy-paths.sh 2>/dev/null && [ -n "${DEPLOY_PATHS_RE:-}" ]; then
+    ARM_PATHS_RE="$DEPLOY_PATHS_RE"; ARM_LINE="caricata"
+    ok "path di deploy: la libreria si carica e definisce il predicato"
+  else fail "scripts/lib/deploy-paths.sh non definisce DEPLOY_PATHS_RE"; fi
 
   if [ -n "$ARM_LINE" ]; then
-    eval "$ARM_LINE"   # il predicato come spedito — nessuna copia che possa derivare
     for p in scripts/deploy-watch.sh db/migrations/000300_x.sql apps/api/src/server.ts deploy/systemd/x.timer; do
       if printf '%s\n' "$p" | grep -qE "$ARM_PATHS_RE"; then ok "arma su: $p"; else fail "doveva armare su $p"; fi
     done
@@ -429,8 +470,9 @@ if [ -f "$CP" ]; then
   git init -q "$PW"
   git -C "$PW" config user.email t@t; git -C "$PW" config user.name t
   git -C "$PW" config commit.gpgsign false
-  mkdir -p "$PW/scripts" "$PW/docs"
+  mkdir -p "$PW/scripts" "$PW/scripts/lib" "$PW/docs"
   cp "$CP" "$PW/scripts/"
+  cp scripts/lib/deploy-paths.sh "$PW/scripts/lib/"   # lo script importa la sua libreria accanto a se' (S1069)
   echo base > "$PW/docs/a.md"; git -C "$PW" add -A >/dev/null; git -C "$PW" commit -qm base
   git -C "$PW" remote add origin "$PB"
   git -C "$PW" push -q origin HEAD:refs/heads/prod       # la produzione parte da qui
@@ -593,7 +635,10 @@ if mkdir -p "$FIXT/scripts" "$FIXT/db/migrations" 2>/dev/null \
 fi
 AC="scripts/align-clones.sh"
 DEPLOY_BLOCK="$(sed -n '/^case "\$DEPLOY_FLAG" in/,/^esac/p' "$AC")"
-RE_LINE2="$(grep -m1 '^DEPLOY_PATHS_RE=' "$AC")"
+RE_LINE2=""
+if ROOT="$(pwd)" . scripts/lib/deploy-paths.sh 2>/dev/null && [ -n "${DEPLOY_PATHS_RE:-}" ]; then
+  RE_LINE2="DEPLOY_PATHS_RE='$DEPLOY_PATHS_RE'"   # forma valutabile dentro la subshell di decide()
+fi
 if [ -n "$DEPLOY_BLOCK" ] && [ -n "$RE_LINE2" ]; then
   # Valuta la decisione AS SHIPPED (nessuna copia che possa driftare — stesso principio del test D).
   decide() {  # $1=DEPLOY_FLAG $2=DELTA $3=HAVE_MARKER $4=START_HEAD  ->  "DEPLOY|WHY"

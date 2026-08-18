@@ -605,6 +605,56 @@ else
   fail "$PC mancante"
 fi
 
+section "#217 I6 — gli artefatti derivati entrano nel ciclo (e due, di proposito, no)"
+# IL DIFETTO, misurato: cinque generatori esistevano e nessuno li chiamava. Rigenerando
+# `concepts-corpus.jsonl` sono comparsi 6 concetti esistenti e ne sono spariti 4 di uno
+# schema RITIRATO settimane prima: l'artefatto descriveva un progetto che non esiste piu'.
+BD=docs/kb/tools/build_derivati.py
+if [ -f "$BD" ]; then
+  out="$(python "$BD" --controlla 2>&1)"; rc=$?
+  case "$rc" in
+    0|1|2) ok "build_derivati --controlla: esce con un codice del vocabolario chiuso ($rc)" ;;
+    *)     fail "build_derivati --controlla: codice fuori vocabolario ($rc)" ;;
+  esac
+  n="$(printf '%s\n' "$out" | grep -cE '^\s+\[(OK|!!|\? )\]')"
+  [ "$n" = 3 ] && ok "build_derivati: dichiara una riga per ciascuno dei 3 artefatti in-repo" \
+                || fail "build_derivati: righe di esito = $n (attese 3) — $out"
+
+  # IL FALSO VERDE CORRETTO ALLA PRIMA ESECUZIONE: con la radice sbagliata tutti i
+  # generatori risultavano «assente» e la rigenerazione usciva 0, cioe' dichiarava fatto
+  # un lavoro mai tentato. Un verde che non ha eseguito niente e' peggio di un rosso.
+  V="$(mktemp -d)"
+  out="$(DERIVATI_REPO="$V" python "$BD" 2>&1)"; rc=$?
+  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'nessun generatore eseguito'; } \
+    && ok "build_derivati: nessun generatore eseguito => esce 1 (mai un verde a vuoto)" \
+    || fail "build_derivati radice vuota ($rc: $out)"
+  rm -rf "$V"
+
+  # I DUE CHE NON DEVONO ENTRARE. Scrivono in wiki-space, che esiste SOLO sulla macchina
+  # Windows: metterli in chiusura la farebbe fallire su VM e linux-pc, dove gira davvero.
+  if grep -qE 'build_(linked_manifest|graph_hub)' "$BD" | grep -v '^#' >/dev/null 2>&1; then
+    fail "build_derivati: nomina un generatore che scrive fuori dal repo"
+  fi
+  if python - <<'PY'
+import io, re, sys
+s = io.open('docs/kb/tools/build_derivati.py', encoding='utf-8').read()
+corpo = s.split('"""', 2)[2] if s.count('"""') >= 2 else s   # via la docstring, che li CITA
+sys.exit(1 if re.search(r'ORDINE\s*=\s*\[[^\]]*(linked_manifest|graph_hub)', corpo) else 0)
+PY
+  then
+    ok "build_derivati: i due generatori che scrivono in wiki-space restano FUORI dal ciclo"
+  else
+    fail "build_derivati: un generatore che scrive fuori dal repo e' entrato in ORDINE"
+  fi
+
+  # E il boot deve guardarlo, altrimenti la misura esiste e nessuno la legge.
+  grep -q 'build_derivati' docs/kb/tools/status_dashboard.py \
+    && ok "status_dashboard: lo staleness self-check interroga gli artefatti derivati" \
+    || fail "status_dashboard: nessuno guarda la freschezza dei derivati"
+else
+  fail "$BD mancante"
+fi
+
 section "S1069 — il marcatore di sessione NON si consuma"
 # IL DIFETTO CHE QUESTO TEST IMPEDISCE. `align-clones.sh` cancellava `.session-align.marker`
 # a fine corsa. La SECONDA propagazione della stessa sessione lo trovava sparito e cadeva in

@@ -437,6 +437,24 @@ def sec_drift(no_db, live, sot_md, state_md):
         s.add(UNK, f"handoff_lint non eseguibile: {exc}")
     finally:
         hl.FAILS.clear(); hl.WARNS.clear(); hl.SKIPS.clear()
+    # #217 I6 — gli artefatti DERIVATI invecchiano come l'atlante, e nessuno li guardava.
+    # Misurato il 2026-08-18: `concepts-corpus.jsonl` non aveva 6 concetti esistenti e ne
+    # portava 4 di uno schema RITIRATO settimane prima. Stessa domanda dell'atlante — non
+    # «quanti giorni ha», ma *le sue fonti sono state toccate dopo?*
+    try:
+        sys.path.insert(0, os.path.join(REPO, "docs", "kb", "tools"))
+        import build_derivati as bd
+        esiti = bd.stato()
+        vecchi = [a for a, e, _d in esiti if e == "superato"]
+        ciechi = [a for a, e, _d in esiti if e == "cieco"]
+        if vecchi:
+            s.add(BAD, f"derivati: {len(vecchi)}/{len(esiti)} superati → python docs/kb/tools/build_derivati.py")
+        elif ciechi:
+            s.add(UNK, f"derivati: {len(ciechi)}/{len(esiti)} NON MISURABILI (mai committati)")
+        else:
+            s.add(OK, f"derivati: {len(esiti)}/{len(esiti)} freschi (agent-operations, concepts, ADR_INDEX)")
+    except Exception as exc:
+        s.add(UNK, f"derivati: non misurabili ({type(exc).__name__})")
     # Soft — does §0 prose literally carry the live headline numbers? (after a refresh it should.)
     if not no_db and live:
         snap = _snapshot(sot_md)

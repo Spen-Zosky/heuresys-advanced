@@ -67,10 +67,19 @@ produce `TIMEOUT dopo 900s → deploy FAILED`: stesso gate, stessa CI, due compo
       sorgenti che l'atlante descrive», che è **falso**. Ora si chiede ad `atlas_freshness()`,
       la misura canonica del boot. 8 test, sabotati tre volte (propagazione saltata · «non
       misurabile» tradotto in «salta» · profilo db che non rinfresca il clone): tutti rossi.
-- [ ] **I6 I cinque generatori entrano nel ciclo** — budget ~40k
-      `build_agent_operations`, `build_concepts`, `build_linked_manifest`, `build_adr_index`,
-      `build_graph_hub` non sono in chiusura né richiamati a cascata. Più un controllo di
-      freschezza al boot sul modello di `atlas_freshness()`.
+- [x] **I6 I generatori entrano nel ciclo** — FATTO 2026-08-18 · `build_derivati.py` (rigenera
+      + `--controlla`) chiamato dalla skill **dopo** `build_atlas`, e una riga «derivati» nello
+      STALENESS SELF-CHECK del boot.
+      **Sono TRE, non cinque, e la misura lo impone**: `build_linked_manifest` e `build_graph_hub`
+      scrivono in `wiki-space/`, che esiste **solo sulla macchina Windows** — in chiusura
+      fallirebbero su VM e linux-pc, dove la chiusura gira davvero. Restano a `sync.sh`, e un
+      test impedisce che rientrino di nascosto.
+      **Due dei tre derivano dall'atlante, non dal codice**: è una cascata, e l'ordine è la
+      sostanza. Il difetto era reale e già in atto — `concepts-corpus.jsonl` non aveva **6**
+      concetti esistenti e ne portava **4** dello schema `brownfield-*`, ritirato settimane prima.
+      🔬 Due difetti miei colti eseguendo: la radice del repo risaliva **tre** livelli invece di
+      quattro, e la rigenerazione usciva **0** senza aver eseguito niente — un verde a vuoto.
+      5 test, due sabotaggi, entrambi rossi.
 - [ ] **I7 Il 429 di GitHub** — budget ~40k · ⚠ **prima misurare se accade ancora**
       Se non si riproduce, l'intervento **non si fa** e si scrive perché.
 - [ ] **I8 Il rendiconto viene letto dal boot** — budget ~20k

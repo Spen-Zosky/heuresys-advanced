@@ -623,6 +623,18 @@ def check_titoli_derivati(backlog_md):
         piani = {i for i in (programmi.normalizza_id(f) for f in os.listdir(PROGRAMMI_DIR)) if i}
     except OSError:
         return
+    # T3 — nessuna voce ACTIVE puo' finire fuori da tutti e tre i tier del menu. Il menu
+    # raggruppa per `priority` confrontandola con "P1"/"P2"/"P3": chi scrive `**P1**` per dare
+    # enfasi produce una voce che non compare **affatto** — non in fondo, proprio assente.
+    # Colpiva `#217`, `#181` e `Z-251`, tutte e tre P1, cioe' le piu' urgenti (misurato S1069).
+    # `build_menu` ora ripulisce il markup; questo impedisce che una forma nuova riapra il buco.
+    fuori = [it["title"][:40] for it in attive
+             if it["fields"].get("priority", "P2").replace("*", "").replace("`", "").strip().upper()
+             not in ("P1", "P2", "P3")]
+    if fuori:
+        fail("T3", f"{len(fuori)} voci ACTIVE hanno una priorita' che il menu non sa raggruppare "
+                   f"(es. «{fuori[0]}…»): finirebbero fuori da tutti i tier, cioe' invisibili")
+
     senza = [i for i in (programmi.normalizza_id(it["title"]) for it in attive)
              if i and i not in piani]
     if senza:

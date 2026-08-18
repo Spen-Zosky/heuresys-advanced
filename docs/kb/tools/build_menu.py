@@ -106,6 +106,21 @@ def _age_tag(it, cur):
 # nel register: e' il ⭐ PUNTO FISSO, un dato che varia non si scrive come fatto. T2 in
 # handoff_lint garantisce che ogni voce ACTIVE il suo piano ce l'abbia, quindi qui il ramo
 # «nessun piano» non e' il caso normale: e' un allarme.
+def _priorita(it):
+    """La priorita' di una voce, ripulita dal markup.
+
+    ⚠ TERZO MODO DI SPARIRE DAL MENU, trovato S1069 registrando `#217`. Chi vuole dare enfasi
+    scrive `priority: **P1**`, e il confronto con `"P1"` fallisce: la voce non entra in nessuno
+    dei tre tier e **non compare affatto** — non in fondo, proprio non c'e'. Colpiva `#217`,
+    `#181` e `Z-251`, tutte e tre marcate P1, cioe' le piu' urgenti.
+    Gli altri due modi erano la parentetica dopo il titolo (curata dal parser) e la voce fuori
+    dalla sezione taggata (cancello S3). Il criterio comune: **il menu non deve poter perdere
+    una voce in silenzio**, qualunque cosa faccia chi scrive il register.
+    """
+    grezza = it["fields"].get("priority", "P2")
+    return grezza.replace("*", "").replace("`", "").strip().upper()
+
+
 def _piani_per_id():
     return {p.item: p for p in programmi.carica() if p.item}
 
@@ -171,7 +186,7 @@ def main():
     actives = by["ACTIVE"]
     piani = _piani_per_id()
     for tier in ("P1", "P2", "P3"):
-        rows = [it for it in actives if it["fields"].get("priority", "P2").upper() == tier]
+        rows = [it for it in actives if _priorita(it) == tier]
         if rows:
             out.append(f"### {tier} — ACTIVE")
             for it in rows:

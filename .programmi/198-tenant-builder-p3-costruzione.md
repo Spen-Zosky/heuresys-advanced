@@ -39,11 +39,13 @@ di prova sul gemello (E27).
 - [x] **T9a La costruzione sul gemello, e i due difetti che ha fatto emergere** — FATTO 2026-08-18 · `prova-live-198-t9.mts` 11/11 verdi contro il gemello · `prova-live-198-t9-archivio.mts` 3/3 · due aziende costruite dallo stesso archetipo, 184 righe ciascuna, registro coincidente
       Referto completo nella sezione qui sotto. **Ha trovato due difetti veri**, entrambi
       invisibili ai test perché nessuno costruiva davvero, e nessuno costruiva **due volte**.
-- [ ] **T9b La costruzione vera in produzione, una volta sola (E20)** — ⛔ **blocked-on-Enzo: autorizzazione al push**
-      Il gemello gira ora il codice corretto, ma la produzione gira il bundle deployato, che
-      porta ancora i due difetti. La prova su dati veri **non è eseguibile** finché le
-      correzioni non sono in produzione, e il deploy passa dal push, che è di Enzo.
-      Quando sarà armato: stessa catena, `--archivia`, e il referto si ripete sui numeri veri.
+- [ ] **T9b La costruzione vera in produzione, una volta sola (E20)** — budget ~60k
+      ✅ **SBLOCCATA il 2026-08-18**: Enzo ha autorizzato il push, la produzione gira il codice
+      corretto (`LAST_GOOD 5f4f1560`, poi `77a6011e` armato) e la catena è verde. La prova si
+      esegue con `prova-live-198-t9.mts` puntato alla produzione, poi l archiviazione.
+      ⚠ Prima di lanciarla, rileggere il terzo difetto trovato dal deploy: le competenze
+      generate ora portano la categoria, ma la prova va fatta **dopo** che quel commit è in
+      produzione, o si ricrea lo stato che ha fermato la catena.
 
 ## Referto della costruzione sul gemello (2026-08-18, S1069)
 

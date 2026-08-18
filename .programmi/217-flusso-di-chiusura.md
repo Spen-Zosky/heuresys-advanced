@@ -1,0 +1,66 @@
+# 217 — Il flusso di chiusura: da rito completo a percorso scelto
+
+> **item**: #217
+> **stato**: IN CORSO
+
+Enzo, 2026-08-18: *«è instabile, va spesso in errore, deve rifare più volte le stesse azioni,
+richiede tempi lunghi, intercetta errori di GitHub che andrebbero risolti definitivamente e non
+adotta strategie sufficientemente smart per selezionare le azioni strettamente necessarie in
+ragione delle modifiche generate dalla sessione»*.
+
+Il piano per esteso — diagnosi, tabella del flusso, interventi, verifica end-to-end — vive in
+`~/.claude/plans/woolly-napping-ripple.md`. Qui c'è ciò che serve per riprendere.
+
+## La misura che ha fatto nascere la voce
+
+`.handoff/close-log.ndjson`, 269 record su 4 sessioni: **~67 record per sessione** · in S1064 da
+sola **13 `propaga`, 19 `deploy`, 16 `arma`** · `deploy` **10 eseguiti su 52** · **12 `clone-db
+ignoto` + 6 `arma ignoto`** · **5 `verifica-deploy fallito`**.
+
+## Decisioni di Enzo (non si ri-chiedono)
+
+1. **La chiusura arma e finisce.** Non aspetta la produzione.
+2. **Soli documenti → commit e push, basta.**
+3. **Il linux-pc resta allineato sempre**: non si salta, si adatta il costo.
+
+## Il fatto verificato su cui poggia tutto
+
+`deploy-watch.sh` fa già la cosa giusta e **i timer sono attivi su entrambe le macchine**. Il
+journal del gemello, testuale: *«armato 77a6011e, in produzione 5d3028ca — verifico la CI»* →
+*«CI ancora in volo — riprovo al prossimo tick»*. Dentro `vm-deploy` la **stessa** situazione
+produce `TIMEOUT dopo 900s → deploy FAILED`: stesso gate, stessa CI, due comportamenti opposti.
+
+## Fasi
+
+- [x] **I1 Una sola definizione dei path di deploy** — FATTO 2026-08-18 · `77a6011e` · `scripts/lib/deploy-paths.sh`; quattro copie byte-identiche più una quinta sparsa in una condizione · due test riscritti dal criterio «le due righe coincidono» a «esiste una sola fonte» · `run-shell-tests` 165 ok / 0 failed
+- [x] **I2 Il marcatore di sessione non si consuma più** — FATTO 2026-08-18 · `77a6011e` · era la causa diretta dei 12+6 IGNOTO · la prova è nata **falsa due volte** ed è stata sabotata fino a vederla rossa
+- [ ] **I3 La chiusura non aspetta mai la CI** — budget ~40k · **il guadagno grosso**
+      `vm-deploy.sh:81` usa `ci-gate` bloccante. Quando è invocato dalla chiusura deve usare
+      `CI_GATE_NONBLOCKING=1`: CI in volo → non deploya, dichiara «armato, il timer lo prende
+      entro 5 minuti», esce **0**. Il deploy sincrono resta a comando (`--deploy-now`).
+- [ ] **I4 L'armamento non dipende da quale script hai lanciato** — budget ~30k
+      Oggi arma solo `close-propagate.sh`; chi usa `align-clones` direttamente lascia il
+      meccanismo cieco. Estrarre in `scripts/arma-deploy.sh`, chiamato da entrambi.
+- [ ] **I5 Profili di chiusura** — budget ~100k · **il cuore**
+      `documenti` / `codice` / `codice+db`, riusando `verify_gate.route()` sulla finestra di
+      sessione. La skill salta i passi che non appartengono al profilo, **dichiarando quali**.
+- [ ] **I6 I cinque generatori entrano nel ciclo** — budget ~40k
+      `build_agent_operations`, `build_concepts`, `build_linked_manifest`, `build_adr_index`,
+      `build_graph_hub` non sono in chiusura né richiamati a cascata. Più un controllo di
+      freschezza al boot sul modello di `atlas_freshness()`.
+- [ ] **I7 Il 429 di GitHub** — budget ~40k · ⚠ **prima misurare se accade ancora**
+      Se non si riproduce, l'intervento **non si fa** e si scrive perché.
+- [ ] **I8 Il rendiconto viene letto dal boot** — budget ~20k
+      269 record e nessuna decisione li legge.
+
+## Chiuso quando
+
+Una chiusura di soli documenti finisce sotto i 5 minuti senza toccare build e deploy; una di
+codice arma e finisce senza aspettare la CI; e il rendiconto mostra **un solo** record per
+passo, contro i 13 `propaga` e i 19 `deploy` di S1064.
+
+## Prova che deve poter fallire
+
+Tre chiusure reali, una per profilo, misurate **dal rendiconto** e non a occhio. Se il conteggio
+dei record per passo non scende, la riprogettazione non ha funzionato — per quanto il flusso
+possa sembrare più ordinato.

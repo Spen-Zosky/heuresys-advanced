@@ -246,19 +246,18 @@ fi
 # significherebbe deployare una macchina che non sappiamo in che stato sia.
 arm_outcome="saltato"
 if [ "$do_arm" = 1 ] && [ -z "$FAILED" ]; then
+  # #217 I4 — l'ATTO sta in scripts/arma-deploy.sh, chiamato anche da align-clones.sh.
+  # Qui resta la DECISIONE (la finestra misurata sopra), che e' cio' che questo script sa
+  # e l'altro no. Il diario lo scrive arma-deploy: registrarlo anche qui darebbe due righe
+  # per un passo solo, che e' esattamente il difetto che #217 vuole togliere dal rendiconto.
   log "arma — origin/$ARM_REF -> $(git rev-parse --short HEAD) ($arm_why)"
-  if git push --quiet origin "HEAD:refs/heads/$ARM_REF"; then
+  if bash "$SCRIPTS/arma-deploy.sh" --ref "$ARM_REF" --why "$arm_why"; then
     arm_outcome="eseguito"
-    echo "  armato $(git rev-parse --short HEAD) — il deploy parte da se' entro ~5 minuti dal verde della CI"
-    echo "  (sorvegliante: heuresys-advanced-deploy-watch.timer su VM e linux-pc)"
   else
-    # Non-fast-forward: succede solo se la punta e' stata riportata indietro (revert duro,
-    # reset). Non si forza in automatico — una force-push su una ref di produzione e' una
-    # decisione, non un dettaglio di implementazione.
     FAILED="$FAILED arma"; arm_outcome="fallito"
-    warn "armamento RIFIUTATO da origin (non fast-forward?). Se e' voluto, esplicitamente:"
-    warn "    git push --force origin HEAD:refs/heads/$ARM_REF"
+    warn "armamento rifiutato — vedi il messaggio di arma-deploy.sh qui sopra"
   fi
+  arm_logged=1
 elif [ "$do_arm" = 1 ]; then
   arm_outcome="saltato"; arm_why="$arm_why — MA i canali sono falliti:$FAILED, non armo sopra un allineamento rotto"
   warn "$arm_why"
@@ -266,7 +265,10 @@ else
   log "arma — non eseguito: $arm_why"
   case "$arm_why" in IGNOTO*) arm_outcome="ignoto" ;; esac
 fi
-[ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step arma "$arm_outcome" "$arm_why" >/dev/null 2>&1 || true
+# Il diario dell'armamento lo scrive arma-deploy.sh quando ha AGITO (#217 I4). Qui si
+# registrano solo i rami in cui non e' stato chiamato: non armato, o saltato perche' i
+# canali erano rotti. Senza questa guardia lo stesso passo comparirebbe due volte.
+[ "${arm_logged:-0}" = 1 ] || { [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step arma "$arm_outcome" "$arm_why" >/dev/null 2>&1 || true; }
 
 [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step clone-db "$clone_outcome" "$clone_why" >/dev/null 2>&1 || true
 [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step propaga \

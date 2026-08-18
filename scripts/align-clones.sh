@@ -209,4 +209,20 @@ esac
 # una domanda sui FILE («quali sono cambiati da allora») e non sulle decisioni.
 : # marcatore lasciato dov'e' — vedi sopra
 
+# #217 I4 — CHI DEPLOYA, ARMA. Fino a oggi l'armamento viveva solo in close-propagate.sh:
+# chi lanciava questo script direttamente («pusha e deploya») portava il codice in produzione
+# e lasciava `refs/heads/prod` indietro. Il 2026-08-18 la ref era ferma a un commit DI IERI
+# mentre la VM girava gia' quello di oggi — e il sorvegliante legge PROPRIO quella ref.
+#
+# Fuori dal ciclo per host: armare e' un push a origin, si fa UNA volta e non una per macchina.
+# La condizione e' la stessa che ha autorizzato il deploy, quindi non c'e' un secondo predicato
+# da tenere allineato. Nella chiusura i due casi sono disgiunti per costruzione: quando
+# close-propagate arma passa --no-deploy di qua, e quando passa --deploy (--deploy-now) non arma.
+# L'atto e' comunque idempotente: se origin/prod e' gia' su HEAD dice «niente da armare».
+if [ "$DEPLOY" = 1 ] && [ -f "$SCRIPTS/arma-deploy.sh" ]; then
+  log "arma — refs/heads/${DEPLOY_ARM_REF:-prod} sullo sha appena portato in produzione"
+  bash "$SCRIPTS/arma-deploy.sh" --why "align-clones ha deployato: $DEPLOY_WHY" || \
+    warn "armamento non riuscito — vedi il messaggio di arma-deploy.sh qui sopra"
+fi
+
 log "alignment complete (deploy=$DEPLOY delta=$DELTA${SKIPPED:+ skipped:$SKIPPED})"

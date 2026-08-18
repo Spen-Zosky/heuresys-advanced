@@ -438,6 +438,97 @@ else
   fail "$VD, $VDR o $CP mancante"
 fi
 
+section "#217 I4 — armare e' un atto solo, e chi deploya arma"
+# IL DIFETTO CHE QUESTI TEST IMPEDISCONO, e ha morso il 2026-08-18: l'armamento viveva solo in
+# close-propagate.sh, quindi chi lanciava align-clones direttamente portava il codice in
+# produzione lasciando `refs/heads/prod` a un commit di IERI — e il sorvegliante legge PROPRIO
+# quella ref. Il rischio della cura e' il suo opposto: armare quando non si doveva, o forzare
+# una ref di produzione. I casi 3 e 5 valgono quanto il caso 1.
+AD=scripts/arma-deploy.sh; AC=scripts/align-clones.sh
+if [ -f "$AD" ] && [ -f "$AC" ]; then
+  T="$(mktemp -d)"; B="$T/origin.git"; W="$T/box"
+  git init -q --bare "$B"
+  git init -q "$W"; git -C "$W" config user.email t@t; git -C "$W" config user.name t
+  git -C "$W" config commit.gpgsign false
+  mkdir -p "$W/scripts"; cp "$AD" "$W/scripts/"
+  echo x > "$W/f"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm c1
+  git -C "$W" remote add origin "$B"; git -C "$W" push -q origin HEAD:refs/heads/main
+  SHA1="$(git -C "$W" rev-parse HEAD)"
+  arma() { ( cd "$W" && bash scripts/arma-deploy.sh "$@" 2>&1 ); }
+
+  out="$(arma)"; rc=$?
+  { [ "$rc" = 0 ] && [ "$(git -C "$B" rev-parse refs/heads/prod 2>/dev/null)" = "$SHA1" ]; } \
+    && ok "arma-deploy: ref assente => la spinge su HEAD (e' l'atto che mancava ad align-clones)" \
+    || fail "arma-deploy primo armamento ($rc: $out)"
+
+  out="$(arma)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'niente da armare'; } \
+    && ok "arma-deploy: gia' armato => idempotente, esce 0 (due catene possono chiamarlo)" \
+    || fail "arma-deploy idempotenza ($rc: $out)"
+
+  # La punta avanza; il dry-run deve DIRE e non fare.
+  echo y >> "$W/f"; git -C "$W" commit -qam c2
+  out="$(arma --dry-run)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'DRY-RUN' \
+    && [ "$(git -C "$B" rev-parse refs/heads/prod)" = "$SHA1" ]; } \
+    && ok "arma-deploy: --dry-run dichiara e NON spinge (la ref resta dov'era)" \
+    || fail "arma-deploy dry-run ($rc: $out)"
+
+  # NON-FAST-FORWARD: prod portata su un ramo divergente. Non si forza MAI in automatico.
+  git -C "$W" checkout -q -b divergente "$SHA1"
+  echo z > "$W/g"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm divergente
+  SHA_DIV="$(git -C "$W" rev-parse HEAD)"
+  git -C "$W" push -qf origin HEAD:refs/heads/prod
+  git -C "$W" checkout -q master 2>/dev/null || git -C "$W" checkout -q main
+  out="$(arma)"; rc=$?
+  { [ "$rc" = 1 ] && [ "$(git -C "$B" rev-parse refs/heads/prod)" = "$SHA_DIV" ]; } \
+    && ok "arma-deploy: non-fast-forward => esce 1 e NON forza la ref di produzione" \
+    || fail "arma-deploy non-fast-forward ($rc: $out — prod=$(git -C "$B" rev-parse --short refs/heads/prod))"
+  rm -rf "$T"
+
+  # L'INNESTO in align-clones. Controllo strutturale, ma costruito per essere falsificabile:
+  # si ignorano le righe di commento (il difetto di #194 e' un grep che trova il proprio
+  # commento) e si pretende che la chiamata stia DENTRO una guardia su DEPLOY=1.
+  if awk '!/^[[:space:]]*#/ && /\[ "\$DEPLOY" = 1 \]/ {g=NR}
+          !/^[[:space:]]*#/ && /arma-deploy\.sh/ {a=NR}
+          END {exit !(g && a && g < a && a - g < 6)}' "$AC"; then
+    ok "align-clones: chiama arma-deploy dentro la guardia DEPLOY=1 (chi deploya arma, chi no no)"
+  else
+    fail "align-clones: la chiamata ad arma-deploy manca o non e' guardata da DEPLOY=1"
+  fi
+
+  # UN ARMAMENTO, UNA RIGA DI DIARIO. E' il rumore che #217 vuole togliere dal rendiconto
+  # (13 propaga, 19 deploy, 16 arma in una sola sessione). Qui si conta davvero, sul diario
+  # vero, deviato nella sandbox con HEURESYS_CLOSE_LOG.
+  T2="$(mktemp -d)"; B2="$T2/origin.git"; W2="$T2/box"
+  git init -q --bare "$B2"
+  git init -q "$W2"; git -C "$W2" config user.email t@t; git -C "$W2" config user.name t
+  git -C "$W2" config commit.gpgsign false
+  mkdir -p "$W2/scripts" "$W2/.handoff"; cp "$AD" scripts/close-log.sh "$W2/scripts/"
+  echo x > "$W2/f"; git -C "$W2" add -A >/dev/null; git -C "$W2" commit -qm c1
+  git -C "$W2" remote add origin "$B2"; git -C "$W2" push -q origin HEAD:refs/heads/main
+  ( cd "$W2" && HEURESYS_CLOSE_LOG="$T2/diario.ndjson" bash scripts/arma-deploy.sh >/dev/null 2>&1 )
+  n="$(grep -c '"arma"' "$T2/diario.ndjson" 2>/dev/null || echo 0)"
+  [ "$n" = 1 ] && ok "arma-deploy: un armamento scrive ESATTAMENTE una riga di diario (contata, non dedotta)" \
+                || fail "arma-deploy: righe 'arma' nel diario = $n (attesa 1)"
+  rm -rf "$T2"
+
+  # ...e close-propagate non deve aggiungerne una seconda. Il test guarda l'ACCOPPIAMENTO, non
+  # la presenza di una parola: prende il nome della variabile dalla GUARDIA e pretende che
+  # qualcuno lo assegni davvero. La prima stesura cercava la stringa 'arm_logged' e restava
+  # VERDE anche rinominando l'assegnazione — cieca esattamente come il grep di #194.
+  var="$(awk '!/^[[:space:]]*#/ && /close-log.sh" step arma/ {
+                if (match($0, /\$\{[a-z_]+:-0\}/)) { print substr($0, RSTART+2, RLENGTH-6); exit } }' \
+        scripts/close-propagate.sh)"
+  if [ -n "$var" ] && grep -qE "^[[:space:]]*$var=1[[:space:]]*$" scripts/close-propagate.sh; then
+    ok "close-propagate: la riga di diario e' guardata da \$$var, che un ramo assegna davvero"
+  else
+    fail "close-propagate: guardia della riga di diario assente o scollegata (var='$var')"
+  fi
+else
+  fail "$AD o $AC mancante"
+fi
+
 section "S1069 — il marcatore di sessione NON si consuma"
 # IL DIFETTO CHE QUESTO TEST IMPEDISCE. `align-clones.sh` cancellava `.session-align.marker`
 # a fine corsa. La SECONDA propagazione della stessa sessione lo trovava sparito e cadeva in

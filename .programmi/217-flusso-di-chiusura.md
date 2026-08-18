@@ -45,9 +45,17 @@ produce `TIMEOUT dopo 900s → deploy FAILED`: stesso gate, stessa CI, due compo
       il caso «in volo»; traducendo in «rimanda» anche il rosso ne cadono due, incluso il rosso.
       Il primo sabotaggio ha scoperto un difetto **del test**: senza `CI_GATE_WAIT=0` non
       falliva, **dormiva** 900s — e un test che si blocca nasconde il difetto invece di mostrarlo.
-- [ ] **I4 L'armamento non dipende da quale script hai lanciato** — budget ~30k
-      Oggi arma solo `close-propagate.sh`; chi usa `align-clones` direttamente lascia il
-      meccanismo cieco. Estrarre in `scripts/arma-deploy.sh`, chiamato da entrambi.
+- [x] **I4 L'armamento non dipende da quale script hai lanciato** — FATTO 2026-08-18 ·
+      `scripts/arma-deploy.sh` porta l'ATTO; la DECISIONE resta ai chiamanti, che hanno finestre
+      diverse (close-propagate misura `origin/prod..HEAD`, align-clones sa di stare deployando):
+      così non si duplica un predicato. Nella chiusura i due casi sono **disgiunti per
+      costruzione** — quando close-propagate arma passa `--no-deploy` di là, e quando passa
+      `--deploy` (cioè `--deploy-now`) non arma — e l'atto è comunque idempotente.
+      7 test, **sabotati quattro volte**. Due sabotaggi hanno colto difetti dei test, non del
+      codice: uno cercava la parola `arm_logged` e restava VERDE anche rinominando
+      l'assegnazione (cieco come il grep di `#194`) — ora prende il nome **dalla guardia** e
+      pretende che qualcuno lo assegni davvero; e il conteggio delle righe di diario ora si
+      **conta** su un diario vero deviato con `HEURESYS_CLOSE_LOG`, invece di dedursi.
 - [ ] **I5 Profili di chiusura** — budget ~100k · **il cuore**
       `documenti` / `codice` / `codice+db`, riusando `verify_gate.route()` sulla finestra di
       sessione. La skill salta i passi che non appartengono al profilo, **dichiarando quali**.

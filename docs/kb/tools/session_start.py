@@ -78,10 +78,25 @@ def main():
             print("\n" + lab)
         # Le voci che valgono piu' di una sessione non si chiudevano mai, perche' ogni
         # sessione spendeva il suo contesto a ri-capire dove era arrivata la precedente.
-        # `.programmi/` tiene quello stato su disco; qui il boot lo stampa da se', cosi'
-        # nessuna sessione deve RICORDARSI di guardarlo. Muta se non c'e' niente di aperto.
+        # `.programmi/` tiene quello stato su disco.
+        #
+        # Da S1069 il MENU stampa gia' la riga di avanzamento di ogni voce ACTIVE, derivata da
+        # questi stessi file: ripeterla qui sotto sarebbe dire due volte la stessa cosa — cioe'
+        # il difetto che #216 e' venuta a togliere. Resta il caso che il menu NON copre: un
+        # programma aperto per una voce che non e' fra le corsie del menu (chiusa, parcheggiata,
+        # o mai agganciata al register). Quello va detto, ed e' un'anomalia, non un riepilogo.
         try:
-            prog = programmi.riassunto()
+            from handoff_lint import read as _read, BACKLOG_MD as _BK
+            nel_menu = {programmi.normalizza_id(it["title"])
+                        for it in build_menu.register_items(_read(_BK))
+                        if it["status"] in build_menu.LANES}
+            orfani = [p for p in programmi.carica()
+                      if p.stato_derivato != "CHIUSO" and p.item not in nel_menu]
+            prog = ""
+            if orfani:
+                prog = "PROGRAMMI APERTI FUORI DAL MENU (la voce non e' in nessuna corsia)\n" + \
+                       "\n".join(f"  ⚠ {p.item or p.percorso.stem}  [{p.fatte}/{p.totale}]  "
+                                 f"{p.percorso.name}" for p in orfani)
         except Exception as exc:  # una vista non puo' abbattere il boot
             prog = f"   ⚠ programmi non leggibili: {exc}"
         if prog:

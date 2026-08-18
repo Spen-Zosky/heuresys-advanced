@@ -53,10 +53,47 @@ STATI = {"NON AVVIATO", "IN CORSO", "CHIUSO", "SOSPESO"}
 
 # Una fase: `- [x] **F1 titolo** — ... — FATTO 2026-08-14 · evidenza`
 RE_FASE = re.compile(r"^- \[( |x|X)\]\s+\*\*(?P<sigla>[^*]+?)\*\*\s*(?P<resto>.*)$")
+# Cio' che un umano legge come fase. Il confronto con RE_FASE misura quante fasi il parser sta
+# perdendo: la sigla non puo' contenere `*`, e in `#69` la sigla «I 18 residui `staging.wave1_*`»
+# faceva sparire la fase in silenzio — il menu diceva «0/1 fatte» su un piano che ne mostra due.
+RE_FASE_LASCA = re.compile(r"^- \[( |x|X)\]")
 RE_STATO = re.compile(r"^>\s*\*\*stato\*\*:\s*(?P<stato>[A-Z ]+?)\s*$", re.M)
-RE_ITEM = re.compile(r"^>\s*\*\*item\*\*:\s*#(?P<id>\d+)", re.M)
+RE_ITEM = re.compile(r"^>\s*\*\*item\*\*:\s*[`#]*(?P<id>[A-Za-z]{0,2}-?\d+)", re.M)
 RE_DATA = re.compile(r"\b20\d{2}-\d{2}-\d{2}\b")
 RE_INTERROTTO = re.compile(r"\bINTERROTTO\b")
+
+# L'identificativo di una voce non e' sempre un numero: accanto a `#216` il register porta
+# `Z-251`. Tre strumenti devono riconoscerlo allo stesso modo — questo, il cancello che conta
+# le voci senza piano, e il generatore del menu — e tre copie della stessa regola sono il difetto
+# che #216 racconta. Vive qui una volta sola, e gli altri due la importano.
+RE_ID = re.compile(r"[`#]*([A-Za-z]{0,2}-?\d+)")
+
+
+def normalizza_id(testo: str) -> str | None:
+    """L'id di una voce, da un titolo del register o dal nome di un file di programma.
+    `#216 Titolo` -> `216` · `` `Z-251` — titolo `` -> `Z-251` · `Z251-slug.md` -> `Z-251`."""
+    if not testo:
+        return None
+    m = RE_ID.match(testo.strip())
+    if not m:
+        return None
+    grezzo = m.group(1)
+    if grezzo.isdigit():
+        return grezzo
+    # `Z251` e `Z-251` sono lo stesso identificativo scritto in due modi: il nome di un file non
+    # puo' portare comodamente il trattino nella posizione dell'id, il register si'.
+    lettere = "".join(c for c in grezzo if c.isalpha())
+    cifre = "".join(c for c in grezzo if c.isdigit())
+    return f"{lettere.upper()}-{cifre}" if lettere and cifre else None
+
+
+def _senza_prefisso_id(titolo: str, item: str | None) -> str:
+    """Il titolo del file ripete gia' l'id («99 — Domini…», «Z-251 — La suite…»): il riassunto
+    stampa l'etichetta da se', quindi qui l'id va tolto — qualunque forma abbia."""
+    testo = titolo.strip()
+    if item and testo.upper().startswith(item.upper()):
+        testo = testo[len(item):]
+    return testo.lstrip(" -—:·").strip()
 
 
 @dataclass
@@ -79,10 +116,14 @@ class Fase:
 @dataclass
 class Programma:
     percorso: Path
-    item: int | None
+    item: str | None
     titolo: str
     stato: str
     fasi: list[Fase] = field(default_factory=list)
+    # Righe che un umano legge come fase e che il parser NON ha prodotto. Vedi il difetto (5)
+    # in difetti(): senza questo campo il programma dichiara meno fasi di quante ne ha, e lo fa
+    # in silenzio — «0/1 fatte» su un piano che di fasi ne mostra due.
+    fasi_perse: list[int] = field(default_factory=list)
 
     @property
     def fatte(self) -> int:
@@ -122,6 +163,7 @@ def _leggi(percorso: Path) -> Programma:
             break
 
     fasi: list[Fase] = []
+    perse: list[int] = []
     dentro = False
     for i, r in enumerate(righe, start=1):
         if r.strip().startswith("## Fasi"):
@@ -137,13 +179,16 @@ def _leggi(percorso: Path) -> Programma:
                              fatta=m.group(1).lower() == "x",
                              testo=m.group("resto").strip(),
                              riga=i))
+        elif RE_FASE_LASCA.match(r):
+            perse.append(i)
 
     return Programma(
         percorso=percorso,
-        item=int(m_item.group("id")) if m_item else None,
+        item=normalizza_id(m_item.group("id")) if m_item else None,
         titolo=titolo or percorso.stem,
         stato=(m_stato.group("stato").strip() if m_stato else "?"),
         fasi=fasi,
+        fasi_perse=perse,
     )
 
 
@@ -172,6 +217,12 @@ def difetti(programmi: list[Programma]) -> list[str]:
             continue
         if pr.stato not in STATI:
             fuori.append(f"{nome}: stato '{pr.stato}' fuori dal vocabolario {sorted(STATI)}")
+        # (5) una fase che il parser non produce sparisce dal conteggio SENZA dirlo: il piano
+        # si dichiara piu' corto di quello che e', e il menu mostra un avanzamento sbagliato.
+        # Trovato sul vivo in #69, dove un `*` dentro la sigla ha fatto sparire la prima fase.
+        if pr.fasi_perse:
+            fuori.append(f"{nome}: {len(pr.fasi_perse)} riga/e sembrano fasi e non lo diventano "
+                         f"(righe {pr.fasi_perse}) — la sigla fra ** non puo' contenere '*'")
         # (1) spunta nuda: dichiara fatto senza dire quando e con quale prova
         for f in pr.fasi:
             if f.fatta and not f.ha_evidenza:
@@ -201,12 +252,12 @@ def riassunto(dir_programmi: Path | None = None) -> str:
     if not programmi:
         return ""
     righe = ["PROGRAMMI MULTI-SESSIONE (.programmi/ — si riprende da qui)"]
-    for pr in sorted(programmi, key=lambda p: (p.stato_derivato != "IN CORSO", p.item or 0)):
+    for pr in sorted(programmi, key=lambda p: (p.stato_derivato != "IN CORSO", p.item.isdigit() is False if p.item else True, int(p.item) if p.item and p.item.isdigit() else 0, p.item or "")):
         pross = pr.prossima
         marca = "▶" if pr.stato_derivato == "IN CORSO" else "·"
-        etichetta = f"#{pr.item}" if pr.item else pr.percorso.stem
+        etichetta = (("#" + pr.item) if pr.item.isdigit() else pr.item) if pr.item else pr.percorso.stem
         # il titolo del file ripete gia' l'id ("99 — Domini..."): non stamparlo due volte
-        titolo = re.sub(r"^\d+\s*[—-]\s*", "", pr.titolo).strip()
+        titolo = _senza_prefisso_id(pr.titolo, pr.item)
         righe.append(f"  {marca} {etichetta} {titolo}  [{pr.fatte}/{pr.totale}]")
         if pross:
             testo = pross.testo.split("—")[0].strip() if "—" in pross.testo else pross.testo
@@ -237,7 +288,7 @@ def _selftest() -> int:
         p = carica(d)
         prova("il file sano si legge", len(p) == 1)
         prova("le fasi si contano", p[0].totale == 2 and p[0].fatte == 1)
-        prova("l'item si aggancia", p[0].item == 10)
+        prova("l'item si aggancia", p[0].item == "10")
         prova("la prossima fase e' F2", p[0].prossima is not None and p[0].prossima.sigla.startswith("F2"))
         prova("nessun difetto sul sano", difetti(p) == [])
         prova("il riassunto parla", "10" in riassunto(d))
@@ -321,7 +372,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Programmi multi-sessione: dove eravamo, da dove si riprende.")
     ap.add_argument("--verifica", action="store_true", help="integrita' (exit 1 su difetto)")
     ap.add_argument("--selftest", action="store_true", help="prove che possono fallire")
-    ap.add_argument("--id", type=int, help="un solo programma, per esteso")
+    ap.add_argument("--id", help="un solo programma, per esteso (numero, oppure Z-251)")
     args = ap.parse_args()
 
     if args.selftest:
@@ -341,7 +392,7 @@ def main() -> int:
 
     if args.id is not None:
         for pr in programmi:
-            if pr.item == args.id:
+            if pr.item == normalizza_id(args.id):
                 print(pr.percorso.read_text(encoding="utf-8"))
                 return 0
         print(f"nessun programma per #{args.id}")

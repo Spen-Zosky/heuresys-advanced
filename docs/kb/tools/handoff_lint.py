@@ -38,6 +38,12 @@ import re
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# L'id di una voce lo riconosce `programmi.py`, una volta sola: qui serve a T2 per incrociare
+# le voci ACTIVE coi piani su disco, e la stessa funzione la usa build_menu.py per derivare
+# l'avanzamento. Tre copie della regola sarebbero il difetto che #216 racconta.
+import programmi  # noqa: E402
+
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 STATE_MD = os.path.join(REPO, ".handoff", "STATE.md")
 SOT_MD = os.path.join(REPO, "docs", "kb", "SOT_STATE.md")
@@ -51,6 +57,10 @@ VALID_STATES = {"ACTIVE", "GATED", "WAIT-INPUT", "HOLD", "INTERRUPTED", "DONE", 
 TERMINAL_STATES = {"DONE", "FATTO", "WON'T-DO"}   # never expected in the menu (S3)
 HOLD_REQUIRED = ("hold-reason", "decided-by", "hold-since", "reactivation-trigger")
 WAIT_REQUIRED = ("input-richiesto", "perche-solo-tuo")
+# Un lavoro interrotto senza il punto di ripresa e' un'interruzione dichiarata e persa lo stesso:
+# `build_menu.py` lo porta in cima al menu e scrive «resume-from: ?». Lo stato INTERRUPTED non era
+# mai stato usato in 200 voci (misurato S1069) e nessun controllo pretendeva niente da lui.
+INTERRUPTED_REQUIRED = ("resume-from",)
 DEFER_WORDS = ("differit", "sospes", "rimandat", "sessione dedicata", "DEFER ")
 
 # A "count" token in STATE prose that would violate disjunction (design §3.1: STATE = zero
@@ -257,12 +267,25 @@ def check_sot(md, use_db, cur=None):
                        f"{cur - int(sm.group(1))} sessions stale (> TTL {STALE_TTL}) — re-derive it")
 
 
+# Un titolo puo' portarsi dietro una parentetica in corsivo — «*(era «vecchio nome»; ri-titolato
+# 2026-08-14 perche'…)*» — fra il grassetto e lo stato. La prima stesura pretendeva lo stato
+# SUBITO dopo il titolo, e quelle righe non producevano un item: `#50` e `#69`, entrambe ACTIVE,
+# erano INVISIBILI al menu (misurato S1069) — `#50` con un programma aperto che il boot stampava
+# in una sezione diversa. Il grassetto si chiude sull'ULTIMO `**` prima dello stato, cosi' il
+# titolo resta il nome e non si spezza su un grassetto annidato. S5 qui sotto impedisce la
+# ricaduta: una riga che dichiara uno stato e non diventa un item e' un FAIL.
+RE_ITEM_HEAD = re.compile(r"\s*-\s+\*\*(.+)\*\*[^·]*·?\s*status:\s*([A-Z'\-]+)")
+# Il riconoscitore LASCO: cio' che un umano legge come voce del register. Il confronto fra
+# questo e RE_ITEM_HEAD e' la misura di quante voci il menu sta perdendo.
+RE_ITEM_LASCO = re.compile(r"\s*-\s+\*\*.+?\*\*.*?\bstatus:\s*([A-Z][A-Z'\-]*)")
+
+
 def parse_register_items(md):
     """Items of the form '- **#id title** · status: STATE' with key: value sub-bullets."""
     items = []
     cur = None
     for line in md.splitlines():
-        m = re.match(r"\s*-\s+\*\*(.+?)\*\*\s*·?\s*status:\s*([A-Z'\-]+)", line)
+        m = RE_ITEM_HEAD.match(line)
         if m:
             if cur:
                 items.append(cur)
@@ -328,6 +351,22 @@ def check_register(md):
             fail("S4", f"l'identificativo #{numero} apre {len(titoli)} blocchi diversi — "
                        f"un numero, una voce. Titoli: {titoli}")
 
+    # S5 — una riga che DICHIARA uno stato e non diventa un item e' invisibile al menu, e lo e'
+    # in silenzio: il conteggio del register scende di uno e nessuno ha un secondo numero con cui
+    # confrontarlo. E' cosi' che `#50` e `#69` — entrambe ACTIVE, la prima con un programma aperto
+    # che il boot stampava poco piu' sotto — sono rimaste fuori dal menu (misurato S1069). La causa
+    # era una parentetica in corsivo fra il titolo e lo stato, cioe' prosa legittima. Il cancello
+    # non guarda la CAUSA: confronta cio' che un umano legge come voce (RE_ITEM_LASCO) con cio' che
+    # il parser produce, e pretende che i due numeri coincidano. Qualunque forma nuova che il
+    # parser non digerisce cade qui, non fra sei mesi.
+    lasche = [(n, l) for n, l in enumerate(md.splitlines(), 1)
+              if RE_ITEM_LASCO.match(l) and not RE_ITEM_HEAD.match(l)]
+    if lasche:
+        dove = "; ".join(f"riga {n}: {l.strip()[:70]}" for n, l in lasche[:4])
+        fail("S5", f"{len(lasche)} riga/e dichiarano uno status ma NON producono un item del "
+                   f"register — sono invisibili al menu (build_menu.py legge gli item, non le "
+                   f"righe): {dove}{' …' if len(lasche) > 4 else ''}")
+
     for it in items:
         st = it["status"]
         if st not in VALID_STATES:
@@ -337,6 +376,12 @@ def check_register(md):
             miss = [k for k in HOLD_REQUIRED if k not in it["fields"]]
             if miss:
                 fail("H1", f"HOLD item {it['title']!r} missing required field(s): {miss}")
+        if st == "INTERRUPTED":
+            miss = [k for k in INTERRUPTED_REQUIRED if k not in it["fields"]]
+            if miss:
+                fail("S6", f"INTERRUPTED item {it['title']!r} senza {miss}: il menu lo porta in "
+                           f"cima e non sa dire da dove riprendere — un'interruzione senza punto "
+                           f"di ripresa non e' tracciata, e' solo dichiarata")
         if st == "WAIT-INPUT":
             miss = [k for k in WAIT_REQUIRED if not any(k.startswith(f) or f.startswith(k.split('-')[0])
                                                         for f in it["fields"])]
@@ -519,8 +564,21 @@ def check_lab_inbox():
 # E' il ⭐ PUNTO FISSO del CLAUDE.md applicato al register: **un dato che per sua natura
 # varia non si scrive come fatto — si scrive il modo di produrlo.** L'avanzamento di una
 # voce varia per definizione. Il posto dove vive derivato e' `.programmi/<id>-*.md`, da
-# cui `build_menu.py` legge gia' le fasi (per questo `#132` mostra «fase 1/8» e `#198`
-# no: la prima ha il file, la seconda no).
+# cui `build_menu.py` legge le fasi di OGNI voce ACTIVE — T2 lo garantisce, ed e' bloccante
+# da S1069.
+#
+# L'effort ha la stessa malattia del titolo e va guardato insieme a lui: «~1 sessione (resta
+# il solo T9)» invecchia alla prossima sessione che chiude T9, e il menu lo stampa accanto al
+# nome. Le parole sono diverse — qui non si contano fasi, si dice cosa e' fatto — quindi il
+# riconoscitore e' un altro.
+EFFORT_CON_AVANZAMENTO = re.compile(
+    r"\b(?:e'|è)\s+(?:gia'|già)\s+\w+"                    # «è già fatto»
+    r"|\b(?:gia'|già)\s+(?:fatt|scritt|collaudat|pront)"  # «già fatto/scritta/collaudata»
+    r"|\brest(?:a|ano)\b"                                 # «resta il solo T9», «restano i passi 4-7»
+    r"|\bFATTO\b|\bfatt[ao]\s+in\s+S\d+"                  # «il triage è FATTO in S1067»
+    r"|\bcurata\s+in\s+S\d+"                              # «① curata in S1068»
+    r"|\bF\d+\s+fatta\b",                                 # «il piano ha 8 fasi, F0 fatta»
+    re.IGNORECASE)
 TITOLO_CON_AVANZAMENTO = re.compile(
     r"\b\d+\s+\w+\s+su\s+\d+"                        # «8 task su 9», «3 tabelle su 8»
     r"|\bfase\s+\d+\s*/\s*\d+"                       # «fase 3/5»
@@ -536,36 +594,41 @@ def check_titoli_derivati(backlog_md):
         return
     attive = [it for it in parse_register_items(backlog_md) if it["status"] == "ACTIVE"]
 
-    # T1 — bloccante: il titolo e' un NOME, non un contatore.
+    # T1 — bloccante: il titolo e' un NOME, non un contatore. E l'effort e' un COSTO: quando in
+    # S1068 i titoli sono stati puliti, l'avanzamento si e' spostato li' («resta il solo T9», «il
+    # triage e' FATTO in S1067») — la stessa cristallizzazione con un giro in piu', e il menu la
+    # stampava accanto al titolo esattamente come prima. Le due sedi si guardano insieme, o
+    # pulire l'una insegna solo a scrivere nell'altra.
     colpiti = [it["title"] for it in attive if TITOLO_CON_AVANZAMENTO.search(it["title"])]
     if colpiti:
         primo = colpiti[0][:70]
         fail("T1", f"{len(colpiti)} titolo/i ACTIVE contengono un avanzamento che invecchia "
                    f"(es. «{primo}…»): l'avanzamento si deriva da .programmi/, il titolo e' un nome")
+    sporchi = [(it["title"][:40], it["fields"]["effort"]) for it in attive
+               if "effort" in it["fields"] and EFFORT_CON_AVANZAMENTO.search(it["fields"]["effort"])]
+    if sporchi:
+        t, e = sporchi[0]
+        fail("T1", f"{len(sporchi)} effort ACTIVE dichiarano cosa e' fatto o cosa resta "
+                   f"(es. «{t}…» → «{e[:60]}…»): l'effort e' un COSTO, l'avanzamento sta nel piano")
 
-    # T2 — oggi WARN e non FAIL, e la ragione va scritta: i piani delle voci multi-passo
-    # non esistono ancora (intervento ③ del piano 2026-08-18). Un cancello che nasce rosso
-    # e resta rosso insegna a non guardare i rossi (#194) — diventa FAIL quando i piani ci
-    # sono, e il conteggio qui sotto e' la misura di quanto manca.
+    # T2 — OGNI voce ACTIVE ha il suo piano, anche quella che sta in una sessione sola. La prima
+    # stesura contava solo le multi-sessione, e ne vedeva 3 su 11 mancanti: il filtro sull'effort
+    # lasciava fuori proprio le voci brevi, che sono quelle su cui il menu tace di piu' («~40min»
+    # non dice ne' cosa e' fatto ne' da dove si riprende). Il piano non serve a spezzare una voce:
+    # e' il posto dove «cosa e' fatto / cosa manca / da dove si riprende» esiste in forma leggibile
+    # da uno strumento, ed e' cio' da cui build_menu.py deriva l'avanzamento invece di ricopiarlo.
+    # Bloccante da S1069, quando gli undici piani mancanti sono stati scritti: prima era WARN
+    # perche' un cancello che nasce rosso e resta rosso insegna a non guardare i rossi (#194).
     try:
-        piani = {f.split("-")[0] for f in os.listdir(PROGRAMMI_DIR) if f[:1].isdigit()}
+        piani = {i for i in (programmi.normalizza_id(f) for f in os.listdir(PROGRAMMI_DIR)) if i}
     except OSError:
         return
-    senza = []
-    for it in attive:
-        m = re.match(r"#(\d+)\s", it["title"])
-        if not m:
-            continue
-        idv = m.group(1)
-        if idv in piani:
-            continue
-        eff = it["fields"].get("effort", "")
-        multi = re.search(r"\d+\s*-?\s*\d*\s*sessioni", eff) or "continuativo" in eff.lower()
-        if multi:
-            senza.append(idv)
+    senza = [i for i in (programmi.normalizza_id(it["title"]) for it in attive)
+             if i and i not in piani]
     if senza:
-        warn("T2", f"{len(senza)} voci ACTIVE multi-sessione senza piano in .programmi/ "
-                   f"(#{', #'.join(sorted(senza))}): il menu non puo' mostrare da dove riprendono")
+        fail("T2", f"{len(senza)} voci ACTIVE senza piano in .programmi/ "
+                   f"({', '.join(sorted(senza))}): il menu non puo' mostrare da dove riprendono, "
+                   f"e l'avanzamento tornerebbe a vivere ricopiato nel register")
 
 
 def main():

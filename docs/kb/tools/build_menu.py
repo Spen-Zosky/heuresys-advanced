@@ -27,6 +27,7 @@ except Exception:
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from handoff_lint import (read, split_sections, parse_register_items, current_session,  # noqa: E402
                           BACKLOG_MD, STATE_MD, REPO)
+import programmi  # noqa: E402
 
 PSQL = ["psql", "-h", "localhost", "-p", "5433", "-U", "heuresys", "-d", "heuresys_advanced", "-tAc"]
 LANES = ("ACTIVE", "GATED", "WAIT-INPUT", "HOLD", "INTERRUPTED")
@@ -93,6 +94,42 @@ def _age_tag(it, cur):
     return f" · età {a} sess." if a is not None else ""
 
 
+# ── Il menu SPIEGA, non elenca (Enzo, 2026-08-18 — #216) ─────────────────────────────────
+#
+# «Il menu di azioni all'apertura e' criptico, non spiega bene le azioni, non da istruzioni
+# chiare su cosa e' stato interrotto nella sessione precedente.» Fino a S1069 questa funzione
+# stampava titolo + costo, e per sapere il resto bisognava aprire un register da 156 kB —
+# cioe' esattamente cio' che il menu esiste per evitare.
+#
+# Le quattro cose che servono a scegliere una voce — cosa e' fatto, cosa manca, da dove si
+# riprende, cosa la blocca — si DERIVANO dal piano in `.programmi/<id>-*.md`, mai ricopiate
+# nel register: e' il ⭐ PUNTO FISSO, un dato che varia non si scrive come fatto. T2 in
+# handoff_lint garantisce che ogni voce ACTIVE il suo piano ce l'abbia, quindi qui il ramo
+# «nessun piano» non e' il caso normale: e' un allarme.
+def _piani_per_id():
+    return {p.item: p for p in programmi.carica() if p.item}
+
+
+def _avanzamento(it, piani):
+    """La riga che spiega una voce: quanto e' fatto, da dove si riprende, cosa la blocca."""
+    idv = programmi.normalizza_id(it["title"])
+    pr = piani.get(idv) if idv else None
+    if pr is None:
+        return "    ⚠ nessun piano in `.programmi/` — il menu non sa da dove si riprende"
+    interrotta = next((f for f in pr.fasi if f.interrotta and not f.fatta), None)
+    fase = interrotta or pr.prossima
+    if fase is None:
+        return f"    ✓ {pr.fatte}/{pr.totale} fasi fatte — il piano e' esaurito, la voce va chiusa"
+    testo = fase.testo.split("—")[0].strip() if "—" in fase.testo else fase.testo
+    marca = "⏸ INTERROTTA" if interrotta else "riprendi da"
+    riga = f"    ▸ {pr.fatte}/{pr.totale} fatte · {marca} **{fase.sigla}** {testo[:80]}".rstrip()
+    # «cosa la blocca» sta nella fase stessa quando c'e': il piano dichiara il cancello li'.
+    if "⛔" in fase.testo:
+        blocco = fase.testo.split("⛔", 1)[1].split("·")[0].strip()
+        riga += f"\n      ⛔ {blocco[:70]}"
+    return riga
+
+
 def _trigger_field(it):
     for k in ("reactivation-trigger", "unblock-trigger"):
         if k in it["fields"]:
@@ -124,19 +161,23 @@ def main():
         for it in by["INTERRUPTED"]:
             rf = it["fields"].get("resume-from", "?")
             out.append(f"- **{it['title']}**{_age_tag(it, cur)} — resume-from: {rf}")
+            # La corsia dove l'avanzamento serve di piu' e' proprio questa: chi riprende deve
+            # vedere il punto dichiarato dal register E lo stato del piano, e accorgersi se i
+            # due non combaciano.
+            out.append(_avanzamento(it, _piani_per_id()))
         out.append("")
 
     # ACTIVE — tiered by priority
     actives = by["ACTIVE"]
+    piani = _piani_per_id()
     for tier in ("P1", "P2", "P3"):
         rows = [it for it in actives if it["fields"].get("priority", "P2").upper() == tier]
         if rows:
             out.append(f"### {tier} — ACTIVE")
             for it in rows:
                 eff = it["fields"].get("effort", "")
-                doc = it["fields"].get("doc", "")
-                extra = " · ".join(x for x in (eff, doc) if x)
-                out.append(f"- **{it['title']}**{_age_tag(it, cur)}" + (f" — {extra}" if extra else ""))
+                out.append(f"- **{it['title']}**{_age_tag(it, cur)}" + (f" — {eff}" if eff else ""))
+                out.append(_avanzamento(it, piani))
             out.append("")
 
     # GATED — visible with blocker, flagged if its unblock-trigger now fires (P3)

@@ -647,6 +647,37 @@ PY
     fail "build_derivati: un generatore che scrive fuori dal repo e' entrato in ORDINE"
   fi
 
+  # LA FRESCHEZZA DEVE POTER DIVENTARE ROSSA, e la prima versione non poteva diventare
+  # VERDE: confrontava i timestamp dei commit, quindi un artefatto rigenerato con contenuto
+  # identico (git non committa nulla) restava «superato» per sempre. Un allarme che non si
+  # spegne facendo la cosa giusta e' il difetto di #194. Ora si registra il commit di
+  # generazione, come fa l'atlante, e questi due casi lo verificano nei due versi.
+  REG=docs/kb/atlas/derivati.json
+  if [ -f "$REG" ]; then
+    B="$(mktemp -d)"; cp "$REG" "$B/reg.json"
+
+    mv "$REG" "$B/via.json"
+    python "$BD" --controlla >/dev/null 2>&1
+    [ "$?" = 2 ] && ok "build_derivati: senza registro dice NON MISURABILE (2), mai 'fresco'" \
+                 || fail "build_derivati senza registro non ha dato 2"
+    mv "$B/via.json" "$REG"
+
+    VECCHIO="$(git rev-parse HEAD~6 2>/dev/null || git rev-list --max-parents=0 HEAD | head -1)"
+    python - "$VECCHIO" <<'PYEOF'
+import io, json, sys
+p = 'docs/kb/atlas/derivati.json'
+d = json.load(io.open(p, encoding='utf-8')); d['generato_da_commit'] = sys.argv[1]
+json.dump(d, io.open(p, 'w', encoding='utf-8', newline='\n'), indent=2, ensure_ascii=False)
+PYEOF
+    out="$(python "$BD" --controlla 2>&1)"; rc=$?
+    { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'SUPERATO'; } \
+      && ok "build_derivati: fonti cambiate dopo il commit registrato => SUPERATO (1)" \
+      || fail "build_derivati con registro vecchio non ha visto il superamento ($rc)"
+    cp "$B/reg.json" "$REG"; rm -rf "$B"
+  else
+    fail "build_derivati: manca $REG — nessuna generazione registrata"
+  fi
+
   # E il boot deve guardarlo, altrimenti la misura esiste e nessuno la legge.
   grep -q 'build_derivati' docs/kb/tools/status_dashboard.py \
     && ok "status_dashboard: lo staleness self-check interroga gli artefatti derivati" \

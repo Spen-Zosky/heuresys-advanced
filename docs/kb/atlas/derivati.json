@@ -1,0 +1,8 @@
+{
+  "generato_da_commit": "39af035840044b200ee5174734a367bccc792af7",
+  "artefatti": [
+    "docs/architecture/ADR_INDEX.md",
+    "docs/kb/atlas/agent-operations.json",
+    "docs/kb/atlas/concepts-corpus.jsonl"
+  ]
+}

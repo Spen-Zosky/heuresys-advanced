@@ -34,12 +34,25 @@ USO
     python docs/kb/tools/build_derivati.py --controlla  # non scrive: dice chi e' superato
                                                         # exit 1 se almeno uno lo e', 2 se cieco
 
-COME SI MISURA LA FRESCHEZZA, senza rigenerare. Stessa idea di
-`atlas_freshness()`: non «l'artefatto e' vecchio di N giorni» (falso allarme a
-ogni commit di documenti), ma *le sue fonti sono state toccate DOPO di lui?* La
-domanda si fa a git, che e' l'unico a saperlo, e un file mai committato si
-dichiara NON MISURABILE invece di essere dato per buono.
+COME SI MISURA LA FRESCHEZZA — e la prima versione era ROTTA, in un modo che
+merita di restare scritto. Confrontava il timestamp dell'ultimo commit
+dell'artefatto con quello delle sue fonti. Sembra ragionevole e non lo e': se il
+generatore gira e produce un contenuto IDENTICO, git non ha niente da
+committare, quindi il timestamp dell'artefatto non avanza — e il controllo
+continua a gridare «superato» per sempre. Misurato subito dopo il commit di I6:
+due artefatti su tre erano corretti e restavano rossi. Un allarme che non si puo'
+spegnere facendo la cosa giusta e' esattamente il difetto di `#194`: insegna a
+non guardarlo.
+
+La cura e' il meccanismo che l'atlante usa gia': si REGISTRA il commit da cui la
+generazione e' partita (`docs/kb/atlas/derivati.json`) e si chiede a git *dei
+file-fonte, ne e' cambiato qualcuno DOPO quel commit?* — che e' la stessa domanda
+di `atlas_freshness()`, parola per parola. Il registro e' versionato, cosi' la
+risposta e' la stessa su ogni macchina; se manca, la risposta e' NON MISURABILE,
+mai un «fresco» dato per buono.
 """
+import io
+import json
 import os
 import subprocess
 import sys
@@ -85,16 +98,25 @@ DERIVATI = {
 ORDINE = ["build_agent_operations.py", "build_concepts.py", "build_adr_index.py"]
 
 
-def _git_ts(path: str):
-    """Timestamp dell'ultimo commit che ha toccato `path`. None = mai committato."""
+REGISTRO = "docs/kb/atlas/derivati.json"
+
+
+def _git(*args):
     try:
-        out = subprocess.run(
-            ["git", "-C", REPO, "log", "-1", "--format=%ct", "--", path],
-            capture_output=True, text=True, timeout=30)
+        out = subprocess.run(["git", "-C", REPO, *args],
+                             capture_output=True, text=True, timeout=30)
     except Exception:
         return None
-    v = (out.stdout or "").strip()
-    return int(v) if v.isdigit() else None
+    return out.stdout.strip() if out.returncode == 0 else None
+
+
+def _commit_generazione():
+    """Il commit da cui e' partita l'ultima rigenerazione. None = mai registrato."""
+    try:
+        with io.open(os.path.join(REPO, REGISTRO), encoding="utf-8") as fh:
+            return (json.load(fh) or {}).get("generato_da_commit") or None
+    except Exception:
+        return None
 
 
 def stato():
@@ -109,16 +131,17 @@ def stato():
     accettabile per un controllo di freschezza.
     """
     esiti = []
+    da = _commit_generazione()
     for artefatto, (_gen, fonti) in sorted(DERIVATI.items()):
-        t_art = _git_ts(artefatto)
-        t_fonti = [(f, _git_ts(f)) for f in fonti]
-        if t_art is None or any(t is None for _f, t in t_fonti):
-            esiti.append((artefatto, "cieco", "artefatto o fonte mai committati"))
+        if da is None:
+            esiti.append((artefatto, "cieco", f"{REGISTRO} assente: nessuna generazione registrata"))
             continue
-        piu_recente = max(t for _f, t in t_fonti)
-        if piu_recente > t_art:
-            quali = ", ".join(f for f, t in t_fonti if t == piu_recente)
-            esiti.append((artefatto, "superato", f"{quali} e' cambiato dopo"))
+        cambiati = _git("diff", "--name-only", f"{da}..HEAD", "--", *fonti)
+        if cambiati is None:
+            esiti.append((artefatto, "cieco", f"git non sa rispondere su {da[:8]}..HEAD"))
+        elif cambiati:
+            prime = ", ".join(cambiati.splitlines()[:2])
+            esiti.append((artefatto, "superato", f"cambiato dopo {da[:8]}: {prime}"))
         else:
             esiti.append((artefatto, "fresco", ""))
     return esiti
@@ -164,6 +187,20 @@ def rigenera() -> int:
     if fatti == 0:
         print(f"  [!!] nessun generatore eseguito — radice presunta: {REPO}")
         return 1
+    # Il registro si scrive SOLO se tutto e' andato bene: registrare dopo un fallimento
+    # dichiarerebbe fresco un artefatto che non e' stato ricostruito, ed e' il modo piu'
+    # diretto di trasformare un controllo in una bugia.
+    if esito == 0:
+        head = _git("rev-parse", "HEAD") or ""
+        try:
+            with io.open(os.path.join(REPO, REGISTRO), "w", encoding="utf-8", newline="\n") as fh:
+                json.dump({"generato_da_commit": head,
+                           "artefatti": sorted(DERIVATI)}, fh, indent=2, ensure_ascii=False)
+                fh.write("\n")
+            print(f"  [OK] registro aggiornato ({REGISTRO}, da {head[:8]})")
+        except Exception as exc:
+            print(f"  [!!] registro non scritto: {type(exc).__name__}")
+            return 1
     return esito
 
 

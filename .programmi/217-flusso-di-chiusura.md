@@ -80,8 +80,15 @@ produce `TIMEOUT dopo 900s → deploy FAILED`: stesso gate, stessa CI, due compo
       🔬 Due difetti miei colti eseguendo: la radice del repo risaliva **tre** livelli invece di
       quattro, e la rigenerazione usciva **0** senza aver eseguito niente — un verde a vuoto.
       5 test, due sabotaggi, entrambi rossi.
-- [ ] **I7 Il 429 di GitHub** — budget ~40k · ⚠ **prima misurare se accade ancora**
-      Se non si riproduce, l'intervento **non si fa** e si scrive perché.
+- [x] **I7 Il 429 di GitHub** — FATTO 2026-08-18 · **misurato prima**: episodio reale ma
+      **unico** (2026-08-17, cinque workflow) su 40 corse, e il runner ritenta già tre volte
+      da sé. Quindi **il 429 non si cura** — causa esterna, retry già presente, action pinnate
+      per sicurezza. Si cura il costo vero: `scripts/ci-rosso-di-chi.sh` dice se un rosso è
+      **PROGETTO · INFRASTRUTTURA · NON-VERIFICATO**, senza ammorbidire `ci-gate`. Provato su
+      corse **vere** (il 429 del 17 → INFRASTRUTTURA; vitest fallito del 16 → PROGETTO).
+      🔬 La firma del 429 era **cieca**: in regex estesa le parentesi sono un gruppo, e il caso
+      reale era stato riconosciuto solo grazie alle altre firme. E il primo sabotaggio non
+      sabotava — il grep di controllo trovava il proprio commento (`#194`, di nuovo).
 - [ ] **I8 Il rendiconto viene letto dal boot** — budget ~20k
       269 record e nessuna decisione li legge.
 

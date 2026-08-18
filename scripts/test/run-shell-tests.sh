@@ -662,7 +662,14 @@ PY
                  || fail "build_derivati senza registro non ha dato 2"
     mv "$B/via.json" "$REG"
 
-    VECCHIO="$(git rev-parse HEAD~6 2>/dev/null || git rev-list --max-parents=0 HEAD | head -1)"
+    # ⚠ NON `HEAD~6`: era la prima stesura, ed e' caduta lo stesso giorno. Quel numero
+    # presume che sei commit fa ci fosse una modifica alle fonti — presunzione che scade
+    # al primo commit successivo, e il cancello e' diventato rosso per colpa del test, non
+    # del codice. Qui il commit si DERIVA: si prende il padre dell'ultimo commit che ha
+    # toccato la fonte, cosi' la finestra padre..HEAD contiene quella modifica per
+    # costruzione, oggi e fra sei mesi.
+    FONTE="$(git log -1 --format=%H -- docs/kb/atlas/atlas.yaml 2>/dev/null)"
+    VECCHIO="$(git rev-parse "${FONTE:-HEAD}^" 2>/dev/null || git rev-list --max-parents=0 HEAD | head -1)"
     python - "$VECCHIO" <<'PYEOF'
 import io, json, sys
 p = 'docs/kb/atlas/derivati.json'
@@ -684,6 +691,50 @@ PYEOF
     || fail "status_dashboard: nessuno guarda la freschezza dei derivati"
 else
   fail "$BD mancante"
+fi
+
+section "#217 I7 — un rosso della CI e' nostro o di GitHub?"
+# LA MISURA CHE HA DECISO L'INTERVENTO: il 429 e' reale (2026-08-17, cinque workflow morti
+# insieme sul download di actions/checkout) ma e' accaduto UNA volta su 40 corse, e il runner
+# ritenta gia' tre volte da se'. Quindi il 429 NON si cura — si cura il costo vero, cioe'
+# l'indagine a mano per capire che il rosso non era nostro.
+# IL RISCHIO DI QUESTO STRUMENTO E' ASSOLVERE UN ROSSO VERO: il caso 2 vale piu' del caso 1.
+CR=scripts/ci-rosso-di-chi.sh
+if [ -f "$CR" ]; then
+  F="$(mktemp -d)"
+  printf '##[error]Response status code does not indicate success: 429 (Too Many Requests).\n' > "$F/solo429.log"
+  printf 'test-integration\tRun vitest\t##[error]Process completed with exit code 1.\n' > "$F/progetto.log"
+  printf '##[error]Error: connect ETIMEDOUT — un errore che NON e0 una firma nota\n' > "$F/ignoto.log"
+
+  # Il 429 da solo. E' il caso che smaschera la firma cieca: nella prima stesura il pattern
+  # `429 (Too Many Requests)` aveva le parentesi NON protette, quindi in regex estesa era un
+  # gruppo e non combaciava con la stringa vera. Il caso reale del 17 fu riconosciuto solo
+  # grazie alle altre due firme — cioe' per fortuna.
+  out="$(CI_LOG_FIXTURE="$F/solo429.log" bash "$CR" 2>&1)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q '^INFRASTRUTTURA' \
+    && printf '%s' "$out" | grep -q '429 (Too Many Requests)'; } \
+    && ok "ci-rosso-di-chi: il 429 da solo => INFRASTRUTTURA (la firma aggancia davvero)" \
+    || fail "ci-rosso-di-chi 429 ($rc: $out)"
+
+  # IL CASO CHE PROTEGGE: un rosso vero non si assolve.
+  out="$(CI_LOG_FIXTURE="$F/progetto.log" bash "$CR" 2>&1)"; rc=$?
+  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q '^PROGETTO'; } \
+    && ok "ci-rosso-di-chi: un rosso dei test resta PROGETTO (1) — non si auto-assolve" \
+    || fail "ci-rosso-di-chi progetto ($rc: $out)"
+
+  # Un errore che non e' una firma nota NON diventa infrastruttura per somiglianza.
+  out="$(CI_LOG_FIXTURE="$F/ignoto.log" bash "$CR" 2>&1)"; rc=$?
+  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q '^PROGETTO'; } \
+    && ok "ci-rosso-di-chi: un errore fuori dalle firme note resta PROGETTO (elenco stretto)" \
+    || fail "ci-rosso-di-chi errore ignoto ($rc: $out)"
+
+  out="$(CI_LOG_FIXTURE="$F/non-esiste.log" bash "$CR" 2>&1)"; rc=$?
+  { [ "$rc" = 2 ] && printf '%s' "$out" | grep -q '^NON-VERIFICATO'; } \
+    && ok "ci-rosso-di-chi: log illeggibile => NON-VERIFICATO (2), che non e' 'a posto'" \
+    || fail "ci-rosso-di-chi fixture assente ($rc: $out)"
+  rm -rf "$F"
+else
+  fail "$CR mancante"
 fi
 
 section "S1069 — il marcatore di sessione NON si consuma"

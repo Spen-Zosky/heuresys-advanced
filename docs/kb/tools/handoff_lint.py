@@ -42,6 +42,8 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.a
 STATE_MD = os.path.join(REPO, ".handoff", "STATE.md")
 SOT_MD = os.path.join(REPO, "docs", "kb", "SOT_STATE.md")
 BACKLOG_MD = os.path.join(REPO, "docs", "kb", "SOT_BACKLOG.md")
+# I piani per voce: e' da qui che `build_menu.py` deriva l'avanzamento (T1/T2).
+PROGRAMMI_DIR = os.path.join(REPO, ".programmi")
 
 MAX_STATE_LINES = 70  # STATE.md is the rapid view — keep it short (design §3 says <60; +slack)
 STALE_TTL = 3         # a "(non ri-derivato)" count older than this many sessions → FAIL (P9/§11.9)
@@ -503,6 +505,69 @@ def check_lab_inbox():
                    f"{', '.join(sorted(orfani)[:3])}{'…' if len(orfani) > 3 else ''}")
 
 
+# ── T1/T2 — l'avanzamento si DERIVA, non si ricopia (Enzo, 2026-08-18) ────────────
+#
+# IL DIFETTO CHE QUESTI DUE CONTROLLI ESISTONO PER IMPEDIRE, misurato in S1068.
+# `build_menu.py` costruisce il menu di avvio dai **titoli** e dagli **effort**, non dai
+# corpi delle voci. In S1068 i corpi sono stati aggiornati con spunte ed evidenze e i
+# titoli lasciati intatti: la sessione dopo ha aperto un menu che descriveva difetti
+# gia' curati — «35 casi rossi ... Triage: quanti guasti distinti» quando il triage era
+# fatto e i rossi erano 18. Poi il rammendo: l'avanzamento e' stato scritto NEL titolo
+# («8 task su 9»), che e' la stessa cristallizzazione con un giro in piu' — si stacca
+# alla prossima sessione che avanza di un task.
+#
+# E' il ⭐ PUNTO FISSO del CLAUDE.md applicato al register: **un dato che per sua natura
+# varia non si scrive come fatto — si scrive il modo di produrlo.** L'avanzamento di una
+# voce varia per definizione. Il posto dove vive derivato e' `.programmi/<id>-*.md`, da
+# cui `build_menu.py` legge gia' le fasi (per questo `#132` mostra «fase 1/8» e `#198`
+# no: la prima ha il file, la seconda no).
+TITOLO_CON_AVANZAMENTO = re.compile(
+    r"\b\d+\s+\w+\s+su\s+\d+"                        # «8 task su 9», «3 tabelle su 8»
+    r"|\bfase\s+\d+\s*/\s*\d+"                       # «fase 3/5»
+    r"|\bda\s+\d+\s+a\s+\d+\b"                       # «da 35 a 18»
+    r"|\b\d+\s+(?:candidati|perimetri|righe|casi)\b",  # «47 candidati», «29 righe»
+    re.IGNORECASE)
+
+
+def check_titoli_derivati(backlog_md):
+    """T1 (FAIL): nessun titolo ACTIVE cristallizza un avanzamento.
+       T2 (WARN oggi): una voce multi-passo senza piano non puo' mostrare da dove riprende."""
+    if backlog_md is None:
+        return
+    attive = [it for it in parse_register_items(backlog_md) if it["status"] == "ACTIVE"]
+
+    # T1 — bloccante: il titolo e' un NOME, non un contatore.
+    colpiti = [it["title"] for it in attive if TITOLO_CON_AVANZAMENTO.search(it["title"])]
+    if colpiti:
+        primo = colpiti[0][:70]
+        fail("T1", f"{len(colpiti)} titolo/i ACTIVE contengono un avanzamento che invecchia "
+                   f"(es. «{primo}…»): l'avanzamento si deriva da .programmi/, il titolo e' un nome")
+
+    # T2 — oggi WARN e non FAIL, e la ragione va scritta: i piani delle voci multi-passo
+    # non esistono ancora (intervento ③ del piano 2026-08-18). Un cancello che nasce rosso
+    # e resta rosso insegna a non guardare i rossi (#194) — diventa FAIL quando i piani ci
+    # sono, e il conteggio qui sotto e' la misura di quanto manca.
+    try:
+        piani = {f.split("-")[0] for f in os.listdir(PROGRAMMI_DIR) if f[:1].isdigit()}
+    except OSError:
+        return
+    senza = []
+    for it in attive:
+        m = re.match(r"#(\d+)\s", it["title"])
+        if not m:
+            continue
+        idv = m.group(1)
+        if idv in piani:
+            continue
+        eff = it["fields"].get("effort", "")
+        multi = re.search(r"\d+\s*-?\s*\d*\s*sessioni", eff) or "continuativo" in eff.lower()
+        if multi:
+            senza.append(idv)
+    if senza:
+        warn("T2", f"{len(senza)} voci ACTIVE multi-sessione senza piano in .programmi/ "
+                   f"(#{', #'.join(sorted(senza))}): il menu non puo' mostrare da dove riprendono")
+
+
 def main():
     ap = argparse.ArgumentParser(description="Deterministic gate for the handoff/SoT system.")
     ap.add_argument("--warn-only", action="store_true",
@@ -523,6 +588,7 @@ def main():
         check_backlog_defer(backlog)
         check_atomicity(state, backlog, sot)
         check_loop_closed(state, backlog)
+        check_titoli_derivati(backlog)
         check_lab_inbox()
     except Exception as exc:  # never let the lint itself crash the handoff silently
         print(f"handoff-lint INTERNAL ERROR: {exc}", file=sys.stderr)

@@ -28,7 +28,7 @@
   - la-radice-e'-una-sola-per-entrambi: il criterio guarda **lo sha armato**, non l'insieme dei commit che quel deploy porta con se'. Un commit di documenti eredita la produzione di tutti i commit sotto di lui senza ereditarne le verifiche
   - rimedio-proposto (da decidere, non ancora fatto): il sorvegliante pretende il verde di TUTTE le corse su `origin/prod` **e** su ogni commit fra il deployato e l'armato — oppure la chiusura non arma su un commit che non ha una corsa di test propria
 
-- **#211 La suite E2E: ① curata (i rossi da 35 a 18), ma 80 casi non vengono eseguiti e la causa non e' isolata** · status: ACTIVE
+- **#211 La suite E2E completa: i rossi che non sono guasti del prodotto, e i casi che non vengono eseguiti** · status: ACTIVE
   - 🔬 **TRIAGE FATTO S1067 — i rossi NON sono guasti del prodotto: sono SEI famiglie, e la più grande è la suite che si scade addosso.** Suite completa rieseguita sull'HEAD del 2026-08-17 (`pnpm test:e2e:prod:node22`, ~1h). Ogni famiglia è stata isolata **misurando**, non leggendo il messaggio d'errore
   - **① sessione scaduta a metà corsa — la famiglia più numerosa.** L'access token dura **15 minuti** (`ACCESS_JWT_TTL_SECONDS`, `constants.ts:23`); il blocco `chromium` parte con cookie freschi (progetto `setup-refresh`) ma **dura molto più di 15 minuti**. I test che chiamano l'API **direttamente** con `page.request` non passano dal rinnovo del frontend, e si prendono un **401**: `performance-cycle` («/v1/me/performance ha risposto 401», idem `review-cycles` e `performance-reviews`), `positions-editing` («elenco posizioni non raggiungibile»). Quelli che navigano si prendono il **redirect al login**: in `rbac-route-matrix` la pagina catturata mostra «**Accedi a Heuresys**» mentre il caso aspetta `nav-me`. La rotazione concorrente del refresh token è **esclusa, misurata**: `workers: 1` e `fullyParallel: false`
   - **② `PLATFORM_ADMIN` non vede ciò che ADR-0032 gli maschera** — 5 casi, e sono test rimasti indietro rispetto a una decisione presa: `insights` (flight-risk), `insights/skill-gap`, `insights/succession-readiness`, `compensation-read` ×2. Tutti girano `storageStateFor("platformAdmin")` e cercano elementi di spiegabilità (`insights-feature`, `skillgap-explain`, `comp-evaluation-gates`). **I `testid` esistono tutti nel codice** — sono condizionali, e i campi arrivano `masked` perché `PLATFORM_ADMIN` è un mandato **tecnico**, non HR (I20/ADR-0032, Enzo 2026-08-04, esteso al dossier in S1053). Verificato che **non** è «lista vuota»: gli endpoint rispondono 161 · 156 · 468 · 50 · 50 · 4 righe (`apps/api/scripts/diagnosi-211.mts`)
@@ -75,7 +75,7 @@
   - sospetto-non-verificato: `isActive` compare cinque volte (positions, teams, organization-units, time-off, visualization-graphs). Se una schermata mostra «solo gli attivi» con un `?isActive=false`, oggi sta mostrando esattamente il contrario di cio' che dichiara. **Non l'ho misurato**: va guardato prima di correggere, perche' cambia l'ordine di priorita'
   - chiuso-quando: nessuno schema di `packages/shared/` usa piu' `z.coerce.boolean()`, ogni filtro convertito ha il suo caso a tre risposte, e la suite API piu' le E2E sono verdi
 
-- **#215 Lo stesso stato impossibile sta in altre due tabelle — e non è lo stesso difetto: 29 righe sono classificate male, 3 portano una chiave-macchina** · status: ACTIVE
+- **#215 Lo stesso stato impossibile in altre due tabelle, dove pero' la cura e' l'opposto: righe classificate male, non residui** · status: ACTIVE
   - priority: P2 · effort: ~40min (una UPDATE guardata per le 29 + una decisione sulle 3) · doc: trovata chiudendo #213 (S1068)
   - nasce-da: `#213`. Chiudendo i percorsi formativi ho misurato **tutte** le tabelle che hanno insieme una colonna `*_tenant_id` e una `*_is_global`, invece di fermarmi alla mia: sette tabelle, e lo stato impossibile (`tenant_id IS NULL` **e** `is_global = false`, cioè invisibile a ogni azienda) c'era in tre
   - misura-2026-08-17: `sys_compensation_bands` **29** · `sys_learning_paths` **5** (chiuse da #213) · `sys_skills` **3** · a zero: `career_paths`, `kpi_definitions`, `learning_modules`, `payout_curves`
@@ -308,7 +308,7 @@
   - lab-id: 2026-08-16-indicatori-di-azienda-oppure-di-piattaforma
   - chiuso-quando: le due specie sono dichiarate e nessuna vista le somma senza dirlo
 
-- **#197 Il marchio `materialized_from` copre 3 tabelle su 8 di quelle che lo stesso motore scrive** · status: ACTIVE
+- **#197 Il marchio `materialized_from` non copre tutte le tabelle che lo stesso motore scrive** · status: ACTIVE
   - 🔸 **PRIMA META' FATTA S1067** — il commento c'è (`tenant-materialization/repository.ts`, intestazione del modulo): dichiara che il campo **non è** il marchio di provenienza, che la copertura è 3 su 8 con le righe esatte, che la natura del guaio è il falso negativo silenzioso, che la fonte vera è `sys.sys_generated_record_origins`, e che il campo resta dov'è come appunto storico. **Ri-verificato sul file** il 2026-08-17: marcate `:71` `:153` `:194`, non marcate `:103` `:223` `:254` `:304` `:317` — i riferimenti della consegna reggono ancora dopo T1-T4
   - misure-di-oggi (le stesse due, ri-fatte): `sys.sys_generated_record_origins` **esiste** nello schema ed è **vuota** (0 righe) — il motore non ha ancora costruito in produzione, quindi il difetto resta latente
   - ⏳ **RESTA APERTA la seconda metà**, e non è rinviata per scelta: il `chiuso-quando` chiede anche che *«il controllo incrociato di P3 riporti la differenza fra le due coperture»*, e quel controllo è il **T9 di `#198`**, che non è ancora stato scritto. Chiudere la voce adesso sarebbe usare il criterio più facile dei due — l'errore esatto che `#204` ha appena tolto da `#196`
@@ -323,7 +323,7 @@
   - chiuso-quando: il commento c'e', e il controllo incrociato di P3 riporta la differenza fra le due coperture
   - lab-id: 2026-08-16-marchio-materializzazione-copre-meta-delle-tabelle
 
-- **#198 Tenant Builder P3 — la costruzione tracciata (8 task su 9; resta T9: l'azienda vera costruita e archiviata)** · status: ACTIVE
+- **#198 Tenant Builder P3 — la costruzione tracciata: dal fascicolo all'azienda, ogni riga marcata e riconducibile** · status: ACTIVE
   - ⚠ PRIMA DI ESEGUIRE: leggi D:\heuresys-design-lab\2026-08-16--LEGGIMI-PRIMA-consegna-tenant-builder-p3.md — sequenza, errori gia' trovati, cosa e' gia' verificato (voce #208)
   - **AVANZAMENTO: 8 task su 9 FATTI** (4 in S1066 + T4/T5/T6 in S1067 + **T7 in S1068**), con dimostrazione live ciascuno. **`resume-from: T9`** — resta **solo T9**, che pretende il campo di prova (E27: prima sul gemello, poi in produzione)
   - ✅ **T7 — S1068, le due pagine nel prodotto, e un permesso che ne ha spostata una.** `/tenant-blueprints/[id]/versions/[n]/build` (il piano + la firma) e `/generated-origins` (il registro), più la voce di menu (mig `000322`)
@@ -806,7 +806,7 @@
   - limite-dichiarato: la classificazione automatica cerca **segnali testuali** nei blocchi del registro, non legge i file di consegna né misura il database. Serve a ordinare la coda, non a promuovere o bocciare una voce. Un blocco scritto bene ma sbagliato le sfugge — ed è esattamente il caso che `#149` esiste per coprire, una voce alla volta, quando la si prende in carico
   - lab-id: 2026-08-06-ritrattare-le-ingestioni-alla-luce-delle-correzioni
 
-- **#214 Adozione dell'agente: 2 perimetri aperti, 46 in coda (16 neutri, 14 NON misurabili, 16 riservati)** · status: ACTIVE
+- **#214 Adozione dell'agente sui perimetri in coda, in ordine di rischio crescente** · status: ACTIVE
   - priority: P2 · effort: continuativo (un perimetro per volta; l'apertura è una riga in `agent-perimetri.json` con decisione e data) · doc: `docs/kb/tools/check_concetti_agente.py`
   - nasce-da: `#156`, il cui `chiuso-quando` è soddisfatto (il percorso a tre passi funziona sul vivo). Questa è la **seconda metà della dottrina** di Enzo del 2026-08-16 — *«l'agente va su qualunque perimetro dove porta valore aggiunto»* — che per natura non si chiude in una sessione: è una coda che si consuma
   - stato-misurato-2026-08-17 (**dopo** l'apertura e la correzione del criterio): 97 moduli · **2 aperti** (`organization-units`, `positions`) · **46 in coda** = 16 neutri + **14 NON MISURABILI** + 16 riservati · 12 esclusi come presidio/isolamento, uno per uno col motivo · 37 senza pagina che li mostri (non un divieto: cambia quando nasce la pagina). *Il conteggio precedente diceva «31 neutri»: era lo stesso universo misurato con un criterio che leggeva «non so» come «sicuro»*

@@ -1,1 +1,4 @@
 tests/.auth/
+
+# Il reporter JSON per fase (#211 F2) — artefatto di corsa, si rigenera
+.e2e-fase-*.json

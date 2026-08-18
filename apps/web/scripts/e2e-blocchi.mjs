@@ -30,6 +30,7 @@
  *   E2E_BLOCCHI_NODE22=0 node scripts/e2e-blocchi.mjs  # senza il wrapper Node 22
  */
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 
@@ -75,13 +76,14 @@ if (!Array.isArray(FASI) || FASI.length === 0) {
 
 /** Come si invoca Playwright: attraverso il wrapper Node 22 quando serve (D-36). */
 const usaWrapper = process.env.E2E_BLOCCHI_NODE22 !== "0";
-function playwright(args) {
+function playwright(args, ambiente) {
   const cmd = usaWrapper
     ? [join(HERE, "e2e-node22.mjs"), ...args]
     : [join(WEB_DIR, "node_modules", "@playwright", "test", "cli.js"), ...args];
   // L'uscita si CATTURA e si ri-stampa, invece di ereditarla: senza leggerla non si
   // possono contare i casi, e contare le FASI non basta — vedi `conta()`.
-  const r = spawnSync(process.execPath, cmd, { cwd: WEB_DIR, encoding: "utf8" });
+  const r = spawnSync(process.execPath, cmd,
+    { cwd: WEB_DIR, encoding: "utf8", env: { ...process.env, ...(ambiente ?? {}) } });
   const testo = `${r.stdout ?? ""}${r.stderr ?? ""}`;
   process.stdout.write(testo);
   return { status: r.status ?? 1, testo };
@@ -113,6 +115,54 @@ function conta(testo) {
     skipped: n("skipped"),
     nonEseguiti: n("did not run"),
   };
+}
+
+/**
+ * I MOTIVI dei salti, letti dal reporter JSON — non un elenco scritto qui dentro.
+ *
+ * ⚠ PERCHE' ESISTE (#211 F2, misurato 2026-08-18). Il riepilogo diceva «80 casi non
+ * eseguiti» e quel numero somma DUE SPECIE che non si sommano:
+ *
+ *   · **a comando** — 68 casi di censimento delle pagine (`F4_SWEEP=1`) e 6 di cattura
+ *     dimostrativa (`STORIA36_DEMO=1`). Non girano perche' NON DEVONO girare in una corsa
+ *     normale: sono strumenti, non prove del prodotto;
+ *   · **ciechi sul posto** — il caso parte, guarda il dataset, non trova nulla da misurare
+ *     e si dichiara tale. Questi vanno guardati UNO PER UNO: «nessuna fascia con importi»
+ *     puo' essere la verita' del dataset, oppure un dato che doveva esserci e non c'e'.
+ *
+ * Sommarle da' un numero che sembra giusto ed e' il modo peggiore di essere sbagliato —
+ * la stessa lezione di E22 sugli indicatori. I motivi si leggono dalle annotazioni che
+ * Playwright scrive nel JSON: nessun elenco cablato qui, o il giorno che nasce un motivo
+ * nuovo finirebbe in silenzio nella categoria sbagliata.
+ */
+function motiviDeiSalti(percorsoJson) {
+  const fuori = new Map();
+  let dati;
+  try {
+    dati = JSON.parse(readFileSync(percorsoJson, "utf8"));
+  } catch {
+    return null;   // niente JSON: si dichiara, non si inventa
+  }
+  const visita = (suite) => {
+    for (const spec of suite.specs ?? []) {
+      for (const t of spec.tests ?? []) {
+        const saltato = (t.results ?? []).some((r) => r.status === "skipped")
+          || t.status === "skipped" || t.expectedStatus === "skipped";
+        if (!saltato) continue;
+        const ann = (t.annotations ?? []).find((a) => a.type === "skip" || a.type === "fixme");
+        // Un salto SENZA annotazione non è una scelta di chi ha scritto il caso: in un blocco
+        // `serial` Playwright salta tutto ciò che segue un fallimento. Non è una terza specie
+        // di skip — è lavoro che non è stato provato **a causa di un altro rosso**, e chiamarlo
+        // «senza motivo» lo farebbe sembrare un caso spento apposta.
+        const motivo = ann?.description?.trim()
+          || "travolto da un fallimento precedente nel suo blocco `serial` (non è una scelta)";
+        fuori.set(motivo, (fuori.get(motivo) ?? 0) + 1);
+      }
+    }
+    for (const s of suite.suites ?? []) visita(s);
+  };
+  for (const s of dati.suites ?? []) visita(s);
+  return fuori;
 }
 
 /** Il totale che la config dichiara: il metro contro cui si conta l'eseguito. */
@@ -166,10 +216,13 @@ const esiti = [];
 for (const [i, fase] of FASI.entries()) {
   const n = i + 1;
   if (soloFase !== null && soloFase !== n) continue;
-  const args = ["test", `--config=${CONFIG}`, ...fase.map((p) => `--project=${p}`)];
+  const jsonOut = join(WEB_DIR, `.e2e-fase-${n}.json`);
+  const args = ["test", `--config=${CONFIG}`, ...fase.map((p) => `--project=${p}`),
+                "--reporter=list,json"];
   console.log(`\n${"═".repeat(78)}\n FASE ${n}/${FASI.length} — ${fase.join(" + ")}\n${"═".repeat(78)}`);
-  const r = playwright(args);
-  esiti.push({ fase: n, progetti: fase, exit: r.status, ...conta(r.testo) });
+  const r = playwright(args, { PLAYWRIGHT_JSON_OUTPUT_NAME: jsonOut });
+  esiti.push({ fase: n, progetti: fase, exit: r.status, ...conta(r.testo),
+               motivi: motiviDeiSalti(jsonOut) });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -201,6 +254,28 @@ console.log(`  casi nel riepilogo        : ${visti}`);
 console.log(`  passati                   : ${passati}`);
 console.log(`  falliti                   : ${falliti}${instabili > 0 ? ` (+${instabili} instabili)` : ""}`);
 console.log(`  NON ESEGUITI              : ${nonEseguiti}${nonEseguiti > 0 ? "  ⚠ «non eseguito» non e' «passato»" : ""}`);
+
+// I motivi, raggruppati: un numero solo mescolerebbe gli strumenti a comando coi casi che
+// si dichiarano ciechi, e sono due cose diverse — la prima e' voluta, la seconda va guardata.
+const perMotivo = new Map();
+let motiviIgnoti = false;
+for (const e of esiti) {
+  if (!e.motivi) { motiviIgnoti = true; continue; }
+  for (const [m, q] of e.motivi) perMotivo.set(m, (perMotivo.get(m) ?? 0) + q);
+}
+if (perMotivo.size) {
+  console.log("\n  perche' non sono stati eseguiti (letto dalle annotazioni, non da un elenco):");
+  for (const [m, q] of [...perMotivo].sort((a, b) => b[1] - a[1])) {
+    console.log(`    ${String(q).padStart(4)}  ${m.slice(0, 88)}`);
+  }
+  const classificati = [...perMotivo.values()].reduce((a, b) => a + b, 0);
+  if (classificati < nonEseguiti) {
+    console.log(`    ${String(nonEseguiti - classificati).padStart(4)}  (senza annotazione nel JSON)`);
+  }
+}
+if (motiviIgnoti) {
+  console.log("  ⚠ almeno una fase non ha prodotto il JSON: i motivi di quei salti NON sono noti");
+}
 console.log(
   `  fasi eseguite             : ${esiti.length}/${FASI.length}` +
     (esiti.length === FASI.length ? " — tutte" : " — ⚠ NON tutte"),

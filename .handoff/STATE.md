@@ -45,8 +45,6 @@ le originali ripristinate dal linux-pc, backup in
   vuole aperti a ogni industria — classificate male, non residui. Cancellarle sarebbe stato l'errore
 - **`apps/web/next-env.d.ts`** — riscritto da `next build`, oscilla fra build di sviluppo e di
   produzione. Va deciso **una volta** come trattarlo, o torna a ogni corsa
-- **Commit locali non pushati**: il push non è stato autorizzato in S1068 (l'autorizzazione è
-  per-sessione)
 - **`#197`** resta aperta a metà per costruzione: la sua seconda condizione è il T9 di `#198`
 
 ## Verification

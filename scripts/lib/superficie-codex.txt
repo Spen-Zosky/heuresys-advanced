@@ -1,0 +1,24 @@
+# ─────────────────────────────────────────────────────────────────────────────────
+# LA SUPERFICIE DI CODEX — dichiarata qui una volta sola (S1070, 2026-08-18)
+#
+# Il CLAUDE.md dice che queste voci compaiono legittimamente come non tracciate, che
+# NON sono file sparsi da ripulire, che non sono di Claude da mantenere, e che
+# `align-clones` / `close-propagate` non le portano: i due canali restano separati
+# per disegno.
+#
+# Il difetto che questo file cura: boot e dashboard le contavano come sporcizia mia,
+# quindi il working tree era ROSSO a ogni avvio senza che ci fosse niente da fare —
+# un allarme che insegna a non guardarlo (lo stesso difetto di `#194`).
+#
+# Fonte UNICA, due lettori: `docs/kb/tools/status_dashboard.py` e
+# `scripts/session-boot.ps1`. Non ricopiare la lista altrove: e' esattamente il
+# difetto che `#217` I1 ha appena curato sui path di deploy.
+#
+# Regola di confronto: una voce che finisce con `/` copre la cartella e tutto cio'
+# che ci sta dentro; una voce senza `/` deve combaciare **esattamente**. Cosi'
+# `.codex-mio-appunto.md` resta sporcizia mia e continua a comparire.
+# ─────────────────────────────────────────────────────────────────────────────────
+.agents/
+.codex/
+.codex-review/
+AGENTS.md

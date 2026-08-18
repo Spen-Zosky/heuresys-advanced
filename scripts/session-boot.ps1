@@ -55,6 +55,31 @@ Push-Location $ProjectRoot
 $branch   = (git rev-parse --abbrev-ref HEAD 2>$null)
 $head     = (git log -1 --oneline 2>$null)
 $dirty    = @(git status --porcelain 2>$null)
+
+# La superficie di Codex e' legittimamente non tracciata e NON e' di Claude (CLAUDE.md,
+# sezione "Codex read-only audit channel"): non e' sporcizia da ripulire, e contarla
+# rendeva il working tree ROSSO a ogni avvio senza che ci fosse niente da fare.
+# Fonte UNICA della lista: scripts/lib/superficie-codex.txt, letta anche da
+# docs/kb/tools/status_dashboard.py. Una sola definizione, due lettori.
+$codexVoci = @()
+$codexFile = Join-Path $ProjectRoot 'scripts/lib/superficie-codex.txt'
+if (Test-Path $codexFile) {
+    $codexVoci = @(Get-Content -LiteralPath $codexFile |
+                   ForEach-Object { $_.Trim() } |
+                   Where-Object { $_ -and -not $_.StartsWith('#') })
+}
+$dirtyMio = @(); $dirtyCodex = @()
+foreach ($riga in $dirty) {
+    if ($riga.Length -lt 4) { $dirtyMio += $riga; continue }
+    $p = $riga.Substring(3).Trim().Trim('"')
+    $suo = $false
+    foreach ($v in $codexVoci) {
+        if ($v.EndsWith('/')) {
+            if ($p -eq $v.TrimEnd('/') -or $p.StartsWith($v)) { $suo = $true; break }
+        } elseif ($p -eq $v) { $suo = $true; break }
+    }
+    if ($suo) { $dirtyCodex += $riga } else { $dirtyMio += $riga }
+}
 $unpushed = @(git log '@{u}..HEAD' --oneline 2>$null)
 Pop-Location
 
@@ -157,7 +182,10 @@ try {
     }
 } catch {}
 
-$treeMsg = if ($dirty.Count -gt 0)    { "[!]    working tree DIRTY ($($dirty.Count) files)" } else { '[OK]   working tree clean' }
+$codexCoda = if ($dirtyCodex.Count -gt 0) { " - $($dirtyCodex.Count) voci di Codex, attese per contratto" } else { '' }
+$treeMsg = if ($dirtyMio.Count -gt 0) { "[!]    working tree DIRTY ($($dirtyMio.Count) file miei)$codexCoda" }
+           elseif ($dirtyCodex.Count -gt 0) { "[OK]   working tree pulito$codexCoda" }
+           else { '[OK]   working tree clean' }
 $pushMsg = if ($unpushed.Count -gt 0) { "[!]    $($unpushed.Count) commit(s) unpushed" }       else { '[OK]   synced with origin' }
 
 Write-Output '=== HEURESYS BOOT (project hook) ==='

@@ -56,7 +56,11 @@ invisibili tre voci P1.
   capitolo di `#181`.
 - **`sys_compensation_bands` ospita 29 righe che non sono bande** (contratti e sigle senza
   importi): una tabella che porta due specie. Nominato in `#215`, non bonificato di passaggio.
-- **`apps/web/next-env.d.ts`** oscilla fra build di sviluppo e produzione. Aperta da sessioni.
+- ~~**`apps/web/next-env.d.ts`** oscilla fra build di sviluppo e produzione~~ — **CHIUSA S1070**:
+  il file e' generato da Next e cambia con la modalita' di build, quindi non va tracciato. Ignorato
+  in `.gitignore` e tolto dall'indice in entrambi i workspace, dopo aver misurato che il typecheck
+  di `web` **e** di `showcase` esce 0 senza di lui e senza `.next/` — e che la stessa prova esce 2
+  con un errore deliberato, quindi vede.
 
 ## Stato delle macchine (misurato a fine S1069)
 

@@ -137,6 +137,33 @@ class Section:
         return self
 
 
+def superficie_codex():
+    """Le voci che il CLAUDE.md dichiara legittimamente non tracciate e NON di Claude.
+
+    Fonte UNICA: `scripts/lib/superficie-codex.txt`, letta anche da `session-boot.ps1`.
+    Se il file manca la lista e' vuota, cioe' si torna a contare tutto come sporcizia:
+    degradare verso il rumore, mai verso il silenzio.
+    """
+    p = os.path.join(REPO, "scripts", "lib", "superficie-codex.txt")
+    try:
+        with io.open(p, encoding="utf-8") as f:
+            return [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
+    except OSError:
+        return []
+
+
+def e_di_codex(path, voci):
+    """Una voce che finisce con `/` copre la cartella e il suo contenuto; una senza `/`
+    deve combaciare esattamente — cosi' `.codex-mio-appunto.md` resta sporcizia mia."""
+    for v in voci:
+        if v.endswith("/"):
+            if path == v.rstrip("/") or path.startswith(v):
+                return True
+        elif path == v:
+            return True
+    return False
+
+
 # --- sections -----------------------------------------------------------------------------
 def sec_git(no_net):
     s = Section("GIT & SYNC")
@@ -150,16 +177,22 @@ def sec_git(no_net):
         if len(parts) == 2:
             behind, ahead = int(parts[0]), int(parts[1])
     dirty = sh("git", "-C", REPO, "status", "--porcelain")
-    nd = len([l for l in dirty.splitlines() if l.strip()]) if dirty is not None else None
+    nd = ncodex = None
+    if dirty is not None:
+        righe = [l for l in dirty.splitlines() if l.strip()]
+        voci = superficie_codex()
+        ncodex = len([l for l in righe if e_di_codex(l[3:].strip().strip('"'), voci)])
+        nd = len(righe) - ncodex
     sync = f"ahead {ahead} / behind {behind}" if ahead is not None else "ahead ?/behind ? (no fetch)"
     s.add(OK if (ahead == 0 and behind == 0) else (UNK if ahead is None else BAD),
           f"HEAD {head} · origin/main · {sync}")
+    coda = f" · {ncodex} voci di Codex, attese per contratto" if ncodex else ""
     if nd is None:
         s.add(UNK, "working tree: stato non leggibile")
     elif nd == 0:
-        s.add(OK, "working tree pulito")
+        s.add(OK, "working tree pulito" + coda)
     else:
-        s.add(BAD, f"working tree DIRTY ({nd} file)")
+        s.add(BAD, f"working tree DIRTY ({nd} file miei)" + coda)
     return s
 
 

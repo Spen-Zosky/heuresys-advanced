@@ -82,6 +82,18 @@ out/
 *.tsbuildinfo
 .cache/
 
+# `next-env.d.ts` e' GENERATO da Next e cambia con la MODALITA' di build (S1070,
+# 2026-08-18): `next dev` ci scrive `./.next/dev/types/routes.d.ts`, `next build` ci
+# scrive `./.next/types/routes.d.ts`. Tenerlo tracciato faceva tornare sporco il working
+# tree a ogni alternanza sviluppo/produzione — un rosso permanente al boot, cioe' un
+# allarme che insegna a non guardarlo (lo stesso difetto gia' nominato in `#194`).
+# MISURATO prima di rimuoverlo, e la prova e' capace di fallire: il typecheck di `web` E
+# di `showcase` esce **0** con il file assente e senza `.next/`, e la stessa prova esce
+# **2** con un errore di tipo deliberato. Nessun workflow, script o `package.json` lo
+# nomina; i due `tsconfig.json` lo tengono in `include`, ed e' giusto cosi' — quando c'e'
+# va compilato. Next lo rigenera a ogni `dev`/`build`, quindi nessuna macchina resta senza.
+next-env.d.ts
+
 # ⚠ ECCEZIONE OBBLIGATORIA (S1068, 2026-08-17). In un App Router una cartella si chiama
 # come il SEGMENTO DI URL che rappresenta, quindi `build/` puo' essere una ROTTA — e la
 # riga `build/` qui sopra la ingoiava in silenzio. Costo reale, misurato: la pagina

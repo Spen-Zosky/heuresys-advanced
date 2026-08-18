@@ -1,7 +1,7 @@
 # 197 — Il marchio `materialized_from` non copre tutte le tabelle che lo stesso motore scrive
 
 > **item**: #197
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 
 `tenant-materialization/repository.ts` scrive `metadata.materialized_from` su tre tabelle
 (`sys_organization_units:71`, `sys_skills:153`, `sys_kpi_definitions:194`) e **non** sulle altre
@@ -23,11 +23,15 @@ perché il motore non la marca» sono indistinguibili guardando il dato.
 ## Fasi
 
 - [x] **F1 Il commento che dice cos'è davvero quel campo** — FATTO 2026-08-17 · `5ec40cf3` · l'intestazione di `tenant-materialization/repository.ts` dichiara che il campo **non è** il marchio di provenienza, che la copertura è 3 su 8 con le righe esatte, che la natura è il falso negativo silenzioso, e dove sta la fonte vera
-- [ ] **F2 Il controllo incrociato riporta la differenza fra le due coperture** — budget ~10k
-      ⛔ **è il T9 di `#198`**, non ancora scritto. Il `chiuso-quando` lo chiede esplicitamente e
-      chiudere adesso sarebbe usare il criterio più facile dei due — l'errore che `#204` ha appena
-      tolto da `#196`. Il controllo **deve trovare** la differenza fra registro e vecchio appunto:
-      se non la trova, sta confrontando una cosa con sé stessa.
+- [x] **F2 Il controllo incrociato riporta la differenza fra le due coperture** — FATTO 2026-08-18 · `db/scripts/verifica-origine-vs-marchio.sql`, eseguito sulla prima azienda mai costruita dal motore (#198 T9a, gemello): **165 righe su 184 invisibili al marchio**, 19 coperte da entrambi
+      Il controllo **doveva** trovare una differenza, o starebbe confrontando una cosa con sé
+      stessa. La trova, e la nomina tabella per tabella: il marchio copre unità (7), competenze
+      (8) e indicatori (4); il registro copre anche persone (11), posizioni (11), assegnazioni
+      (11) ed evidenze (88+44).
+      ⚠ **Lo strumento ha mentito alla prima stesura**, e va detto: la query finale ometteva
+      competenze e indicatori dall'elenco del marchio e dichiarava scoperte 177 righe invece di
+      165. Un controllo che **esagera** la differenza è inservibile quanto uno che la tace —
+      nessuno dei due numeri si può usare. Trovato confrontando i suoi due blocchi fra loro.
 
 ## Chiuso quando
 

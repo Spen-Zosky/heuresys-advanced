@@ -569,16 +569,20 @@ export const tenantBlueprintsService = {
     const fascicolo = await esisteFascicolo(id);
     const v = await repo.findVersion(pool, id, number);
     if (!v) throw new NotFoundError("Versione di fascicolo non trovata");
-    if (v.status !== "APPROVED") {
-      throw new ConflictError(
-        `La versione ${v.number} è in stato ${v.status}: si applica solo ciò che è stato approvato`,
-        "BLUEPRINT_VERSION_NOT_APPROVED",
-      );
-    }
+    // L'ordine dei due controlli conta, da quando l'effetto scrive davvero `APPLIED`
+    // (S1069): chiedendo prima lo stato, una versione già applicata risponderebbe
+    // «non è approvata» — vero alla lettera e fuorviante per chi legge. Si nomina la
+    // ragione più specifica per prima.
     if (v.appliedAt) {
       throw new ConflictError(
         `La versione ${v.number} è già stata applicata`,
         "BLUEPRINT_VERSION_ALREADY_APPLIED",
+      );
+    }
+    if (v.status !== "APPROVED") {
+      throw new ConflictError(
+        `La versione ${v.number} è in stato ${v.status}: si applica solo ciò che è stato approvato`,
+        "BLUEPRINT_VERSION_NOT_APPROVED",
       );
     }
     if (!fascicolo.tenantId) {

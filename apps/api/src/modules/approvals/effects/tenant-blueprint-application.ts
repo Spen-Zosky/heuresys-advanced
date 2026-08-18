@@ -64,9 +64,19 @@ export async function applyTenantBlueprintApplication(
   // Il `WHERE … = 'APPROVED'` non è una formalità: senza, ri-applicare un fascicolo già
   // applicato ricostruirebbe l'azienda una seconda volta e il registro conterebbe due
   // origini per le stesse righe.
+  // ⚠ Lo STATO va scritto, non solo la data — e per una sessione intera non è stato così.
+  // La prima stesura metteva `applied_at` e lasciava lo stato su `APPROVED`, mentre il
+  // commento qui sopra dichiarava «APPROVED → APPLIED» e `APPLIED` era da sempre nel
+  // vocabolario del CHECK (mig `000299`). I test di T5 guardavano `applied_at` e passavano;
+  // il difetto è emerso alla prima costruzione vera (T9, S1069), dove il fascicolo di
+  // un'azienda appena costruita continuava a presentarsi come «approvato».
+  // Non era solo cosmetico: la guardia contro la doppia costruzione reggeva per il solo
+  // `applied_at IS NULL`, e chiunque avesse tolto quel predicato fidandosi dello stato
+  // avrebbe riaperto la ri-applicazione.
   const applicato = await client.query<VersioneRow>(
     `UPDATE sys.sys_tenant_blueprint_versions v
-        SET tenant_blueprint_version_applied_at = now()
+        SET tenant_blueprint_version_applied_at = now(),
+            tenant_blueprint_version_status = 'APPLIED'
       WHERE v.tenant_blueprint_version_id = $1
         AND v.tenant_blueprint_version_status = 'APPROVED'
         AND v.tenant_blueprint_version_applied_at IS NULL

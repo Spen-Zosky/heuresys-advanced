@@ -30,6 +30,7 @@
  */
 import type { PoolClient } from "pg";
 import { pool } from "../../db/client.js";
+import { ConflictError } from "../../errors/index.js";
 import type { BuildPlan } from "./build-plan.js";
 
 export type DbConnector = typeof pool | PoolClient;
@@ -218,7 +219,23 @@ export async function materialize(
               WHERE skill_tenant_id = $1 AND lower(trim(skill_name)) = lower(trim($2))`,
             [tenantId, sk.name],
           );
-          skillCodeToId.set(sk.code, again.rows[0]!.skill_id);
+          // Il ripiego cerca dentro QUESTA azienda, ed è giusto così: prendere la riga di
+          // un'altra azienda sarebbe una violazione di isolamento travestita da robustezza.
+          // Ma se non la trova, il conflitto veniva da un vincolo che guarda oltre il tenant,
+          // e `rows[0]!` esplodeva con «Cannot read properties of undefined» — un messaggio
+          // che non nomina né la competenza né la causa. È successo davvero alla seconda
+          // azienda costruita (T9, S1069), per il vincolo globale `sys_skills_code_uq` poi
+          // ritirato dalla mig. `000324`. L'asserzione non protegge a runtime: serve un errore
+          // che dica cosa cercare.
+          const trovata = again.rows[0];
+          if (!trovata) {
+            throw new ConflictError(
+              `La competenza «${sk.name}» (${sk.code}) è in conflitto con una riga che non ` +
+                `appartiene a questa azienda: un vincolo di unicità guarda oltre il tenant`,
+              "SKILL_CODE_CONFLICT_ACROSS_TENANTS",
+            );
+          }
+          skillCodeToId.set(sk.code, trovata.skill_id);
         }
       }
     } else {

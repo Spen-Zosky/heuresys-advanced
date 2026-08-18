@@ -81,12 +81,22 @@ DELETE FROM sys.sys_reference_translations t
    SELECT o.reference_translation_id FROM sys.v_reference_translation_orphans o
     WHERE o.entity_table = 'sys_skills');
 
-DO $seal$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_skills_code_uq') THEN
-    ALTER TABLE sys.sys_skills ADD CONSTRAINT sys_skills_code_uq UNIQUE (skill_code);
-  END IF;
-END;
-$seal$;
+-- ⚠ EMENDATA IL 2026-08-18 (#198 T9, mig. 000324) — QUI NON SI SIGILLA PIU' NIENTE.
+--
+-- Questo blocco aggiungeva `sys_skills_code_uq UNIQUE (skill_code)`, cioe' un sigillo
+-- GLOBALE su un campo che il modello tiene unico PER AZIENDA (`sys_skills_tenant_code_uq`,
+-- dalla 000013). Finche' le competenze nascevano da import e seed non e' emerso; alla
+-- prima azienda costruita dal motore del Tenant Builder si e' visto il conto: la SECONDA
+-- azienda costruita dallo stesso archetipo non poteva esistere, perche' avrebbe portato
+-- gli stessi codici.
+--
+-- La deduplicazione qui sopra RESTA — era il lavoro vero di questa migrazione, ed e' stato
+-- fatto una volta sola su righe reali. Cade solo il sigillo, che era la portata sbagliata
+-- della stessa idea: impedire i codici doppi lo fa gia' il vincolo per azienda, che dentro
+-- un'azienda e' piu' stretto e col `COALESCE` sul tenant nullo copre anche il catalogo comune.
+--
+-- Il blocco e' emendato QUI e non solo disfatto a valle perche' la catena si ri-applica per
+-- intero a ogni deploy (ADR-0035): un DROP nella 000324 sarebbe stato annullato da un
+-- `ADD CONSTRAINT` che gira dopo di lui al giro successivo.
 
 COMMIT;

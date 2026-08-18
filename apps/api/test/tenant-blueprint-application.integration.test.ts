@@ -152,12 +152,20 @@ describe("#198 T5 — l'applicazione del fascicolo", () => {
     try {
       await applyTenantBlueprintApplication(client, richiesta(versionId));
 
-      // il fascicolo è applicato…
-      const v = await client.query<{ applied: string | null }>(
-        `SELECT tenant_blueprint_version_applied_at AS applied FROM sys.sys_tenant_blueprint_versions WHERE tenant_blueprint_version_id = $1`,
+      // il fascicolo è applicato — e «applicato» sono DUE cose, non una. Questa asserzione
+      // ne guardava una sola (`applied_at`), e per una sessione intera l'effetto ha lasciato
+      // lo stato su `APPROVED` senza che niente lo notasse: il difetto è emerso alla prima
+      // costruzione vera (T9, S1069), dove un'azienda appena costruita mostrava un fascicolo
+      // ancora «approvato». Un test che verifica metà di un criterio duplice — e l'intestazione
+      // di questo file lo dichiara duplice fin dalla riga 4 — copre il difetto invece di vederlo.
+      const v = await client.query<{ applied: string | null; stato: string }>(
+        `SELECT tenant_blueprint_version_applied_at AS applied,
+                tenant_blueprint_version_status AS stato
+           FROM sys.sys_tenant_blueprint_versions WHERE tenant_blueprint_version_id = $1`,
         [versionId],
       );
       expect(v.rows[0]!.applied, "applied_at non valorizzato").not.toBeNull();
+      expect(v.rows[0]!.stato, "lo stato è rimasto indietro rispetto alla data").toBe("APPLIED");
 
       // …le righe esistono…
       const unita = await client.query<{ n: string }>(

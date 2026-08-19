@@ -102,6 +102,17 @@ Resta un difetto vero, trovato smentendo quello supposto → **C4**.
   test cercava un commit nella STORIA e in CI il checkout e' `fetch-depth: 1`. Ora si costruisce
   un repo-fixture. Diagnosticato con `ci-rosso-di-chi.sh`, lo strumento nato ieri da `#217` I7,
   che ha risposto **PROGETTO** — prima risposta utile che dava.
+- **CI verificata, zero rossi**: `Shell tests` era `failure` su `df9abd80` ed e' `success` su
+  `d526bed3` — il rosso e' corretto alla radice, non aggirato.
+- **📌 LEZIONE OPERATIVA DI QUESTA SESSIONE, da applicare subito** (domanda di Enzo, 2026-08-19):
+  `Test (api integration)` risultava **gia' verde in CI** su `df9abd80` mentre in locale la stessa
+  suite girava per ~30 minuti contro il database di produzione via tunnel. Il workflow gira su
+  `runs-on: [self-hosted, off-prod]` (`test-integration.yml:45`), cioe' **fuori dalla produzione**.
+  Conseguenze pratiche: (a) rieseguire `test-api` in locale e' lavoro duplicato; (b) contende il DB
+  di produzione, ed e' un sospetto serio per la contesa che `Z-251` insegue; (c) il cancello locale
+  resta il guardiano di fine turno, ma per `test-api` conviene leggere la CI invece di rifarla.
+  ⚠ Non e' ancora una regola scritta nel `CLAUDE.md`: e' una misura di oggi, da confermare.
+
 - **⏭ PROSSIMA: P1.2 `Z-251`** — la suite non regge la contesa sul database, F1→F3.
   - Aprirla ADESSO e' corretto: `#181` e' chiusa e i due condividevano il perimetro
     (`apps/api/test/**`, `vitest.config.ts`), quindi non si sovrascrivono piu'.

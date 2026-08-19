@@ -101,6 +101,10 @@ ROUTES: list[tuple[str, list[str]]] = [
     ("docs/kb/DEBT_",    ["handoff-lint"]),
     ("docs/kb/tools/handoff_lint.py", ["handoff-lint"]),
     (".handoff/",        ["handoff-lint"]),
+    # Un piano si rompe in due modi: cambiando il piano, o cambiando il parser che lo legge.
+    # Entrambi instradano la stessa suite, o meta' dei difetti resta invisibile.
+    (".programmi/",      ["programmi"]),
+    ("docs/kb/tools/programmi.py", ["programmi"]),
 ]
 
 # suite -> (livello, comando). I livelli seguono la piramide del playbook:
@@ -112,6 +116,11 @@ SUITES: dict[str, tuple[str, str]] = {
     "migrate-idempotent": ("L2", "pnpm db:migrate:sh && pnpm db:migrate:sh"),
     "shell-tests":        ("L1", "bash scripts/test/run-shell-tests.sh"),
     "handoff-lint":       ("L1", "python docs/kb/tools/handoff_lint.py"),
+    # #217/S1071 — l'INTEGRITA' dei piani, non solo la loro esistenza. `handoff_lint` T2
+    # verifica che ogni voce ACTIVE ABBIA un file in `.programmi/`; nessuno verificava che
+    # quei file fossero validi. Costo misurato: il piano di `#217` e' entrato in main con
+    # stato fuori vocabolario e due spunte senza evidenza, e TUTTI i cancelli erano verdi.
+    "programmi":          ("L1", "python docs/kb/tools/programmi.py --verifica"),
     # Cruscotto DBMS e guardia anti-contaminazione: instradati su db/** dal
     # momento in cui il loro esito e' verde (2026-08-03, chiusura #89/#91).
     # Un gate che nasce rosso insegna soltanto ad aggirarlo.

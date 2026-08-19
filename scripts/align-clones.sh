@@ -111,9 +111,17 @@ case "$DEPLOY_FLAG" in
       warn "deploy in PROD non eseguito — $DEPLOY_WHY"
     fi ;;
 esac
-[ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step deploy \
-  "$([ "$DEPLOY" = 1 ] && echo eseguito || { case "$DEPLOY_WHY" in IGNOTO*) echo ignoto ;; *) echo saltato ;; esac; })" \
-  "$DEPLOY_WHY" >/dev/null 2>&1 || true
+# #217/S1071 — IL DIARIO NON DICHIARA «ESEGUITO» PRIMA DI ESEGUIRE.
+# Qui si registrano SOLO le decisioni gia' definitive: saltato e ignoto. Il caso
+# `DEPLOY=1` si registra in fondo, DOPO che i deploy sono avvenuti davvero (il deploy
+# vero sta ~55 righe piu' sotto, dentro `align_one`). Prima scriveva `eseguito` qui, e
+# nel diario quell'esito significava «deciso di deployare», non «deployato»: chi lo
+# legge crede il secondo, e da `#217` I8 quel diario lo mostra il boot a ogni avvio.
+# Se lo script muore durante il deploy non c'e' nessuna riga `deploy` — e un passo
+# assente e' piu' onesto di un passo dichiarato riuscito.
+[ "$DEPLOY" = 1 ] || { [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step deploy \
+  "$(case "$DEPLOY_WHY" in IGNOTO*) echo ignoto ;; *) echo saltato ;; esac)" \
+  "$DEPLOY_WHY" >/dev/null 2>&1 || true; }
 
 # DEPLOY_ENV: extra env prepended to vm-deploy.sh per host. The VM uses vm-deploy's defaults
 # (PUBLIC_HOST=80.225.82.207, SERVICE_USER=ubuntu); linux-pc is the LAN PROD twin running as
@@ -219,6 +227,12 @@ esac
 # da tenere allineato. Nella chiusura i due casi sono disgiunti per costruzione: quando
 # close-propagate arma passa --no-deploy di qua, e quando passa --deploy (--deploy-now) non arma.
 # L'atto e' comunque idempotente: se origin/prod e' gia' su HEAD dice «niente da armare».
+# Il deploy e' avvenuto: ADESSO si puo' dire «eseguito» senza mentire (vedi la nota
+# sopra). Ci si arriva solo passando dai deploy per host, che sotto `set -e` abortiscono
+# la corsa se falliscono.
+[ "$DEPLOY" = 1 ] && { [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step deploy \
+  eseguito "$DEPLOY_WHY" >/dev/null 2>&1 || true; }
+
 if [ "$DEPLOY" = 1 ] && [ -f "$SCRIPTS/arma-deploy.sh" ]; then
   log "arma — refs/heads/${DEPLOY_ARM_REF:-prod} sullo sha appena portato in produzione"
   bash "$SCRIPTS/arma-deploy.sh" --why "align-clones ha deployato: $DEPLOY_WHY" || \

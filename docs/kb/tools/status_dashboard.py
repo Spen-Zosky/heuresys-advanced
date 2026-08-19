@@ -363,8 +363,58 @@ def sec_db(no_db):
 
 
 def _snapshot(sot_md):
-    """The §0 snapshot region = everything before the first Delta/archive heading (hl convention)."""
-    return re.split(r"(?m)^##\s+(?:.*Delta|.*Aggiornament|[✅⚪🟢🏁🔭⏸🗂])", sot_md, maxsplit=1)[0]
+    r"""La §0: dall'intestazione «## 0. …» alla PROSSIMA intestazione, qualunque sia.
+
+    ⚠ LA VERSIONE PRECEDENTE TAGLIAVA NEL POSTO SBAGLIATO, e non era un dettaglio.
+    Cercava `^##\s+(?:.*Delta|…)`: su `### Delta S1067` il motore consuma `##`, poi
+    pretende uno spazio e trova un terzo `#` — nessun match. Undici intestazioni di
+    delta erano invisibili, e la «§0» diventava **79.979 caratteri, il 20,9% del
+    file** invece dei **12.885 (3,4%)** della sezione vera.
+
+    Non era un rischio teorico: il 2026-08-19 il controllo su RBAC-map era VERDE
+    mentre la §0 dichiarava `959 map` contro i `980` del vivo — verde perché `980`
+    compariva nei delta storici (piu' un match parassita dentro `3.980`).
+
+    Qui il taglio non prova a indovinare quali intestazioni siano delta: prende la
+    PRIMA intestazione di qualunque livello dopo la §0. Una sezione nuova non puo'
+    quindi allargare la zona per sbaglio.
+    """
+    m = re.search(r"(?m)^##\s+0\.", sot_md)
+    if not m:                      # nessuna §0 dichiarata: si degrada al vecchio taglio,
+        return sot_md              # che e' largo — meglio largo che vuoto, qui.
+    resto = sot_md[m.end():]
+    fine = re.search(r"(?m)^#{1,6}\s", resto)
+    return sot_md[m.start(): m.end() + (fine.start() if fine else len(resto))]
+
+
+# ── C2 — un numero si cerca CON IL SUO CONTESTO, mai nudo ────────────────────────
+# `\b2\b` ha 7 occorrenze nella §0 ristretta e 44 in quella larga: il controllo sui
+# tenant non poteva diventare rosso NE' PRIMA NE' DOPO aver ristretto la zona. Era
+# verde per costruzione, cioe' non era un controllo. Ogni metrica dichiara quindi le
+# parole che qualificano il suo numero; il numero vale solo se una di quelle parole
+# gli sta accanto.
+# Ogni metrica dichiara la forma in cui il suo numero e' scritto: `{n}` e' il valore vivo.
+# ⚠ NON basta «il numero e la parola sono vicini»: provato il 2026-08-19 con una finestra di
+# 44 caratteri, `tenant=3` e `tenant=26` risultavano VERDI lo stesso, perche' in un paragrafo
+# da 12.600 caratteri la parola «tenant» capita accanto a qualunque cifra. Il numero deve
+# essere ATTACCATO alla parola che lo qualifica — «980 map», non «980 da qualche parte
+# vicino a map». Tre metriche hanno il numero prima, `skill` lo ha dopo.
+CONTESTI = {
+    "users":   r"{n}\s+(?:persone|utenti)",
+    "maps":    r"{n}\s+map",
+    "tenants": r"{n}\s+tenant",
+    "skills":  r"skill[^.;]{{0,24}}?{n}",
+}
+
+
+def _numero_qualificato(snap, numero, forma):
+    """Il numero compare nella forma che lo qualifica?
+
+    `forma` e' un template con `{n}`: si interpola il valore vivo e si cerca. Una sola
+    occorrenza basta — in un paragrafo lungo lo stesso numero ricorre per ragioni diverse,
+    ma ne serve UNA scritta nel modo giusto.
+    """
+    return re.search(forma.format(n=numero), snap, re.I) is not None
 
 
 """I percorsi che l'atlante DESCRIVE. Se nessuno di questi e' cambiato dopo la sua
@@ -465,14 +515,16 @@ def sec_drift(no_db, live, sot_md, state_md):
             s.add(OK, f"derivati: {len(esiti)}/{len(esiti)} freschi (agent-operations, concepts, ADR_INDEX)")
     except Exception as exc:
         s.add(UNK, f"derivati: non misurabili ({type(exc).__name__})")
-    # Soft — does §0 prose literally carry the live headline numbers? (after a refresh it should.)
+    # La §0 porta davvero i numeri vivi? Ora la domanda e' posta sulla sezione VERA e
+    # con il contesto: «980 accanto a "map"», non «980 da qualche parte nel 21% del file».
     if not no_db and live:
         snap = _snapshot(sot_md)
         for label, key in (("utenti", "users"), ("RBAC-map", "maps"),
                            ("tenant ACTIVE", "tenants"), ("skill", "skills")):
-            present = re.search(rf"\b{live[key]}\b", snap) is not None
+            present = _numero_qualificato(snap, live[key], CONTESTI[key])
             s.add(OK if present else BAD,
-                  f"{label}: live {live[key]} {'presente in §0' if present else 'NON in §0 → drift'}")
+                  f"{label}: live {live[key]} "
+                  f"{'presente in §0' if present else 'NON in §0 → drift'}")
     return s
 
 

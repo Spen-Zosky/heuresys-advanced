@@ -802,8 +802,19 @@ section "S1069 — il marcatore di sessione NON si consuma"
 _MKD="$(mktemp -d)"; _MK="$_MKD/marker"; echo deadbeef > "$_MK"
 # (1) funzionale: l'epilogo dello script sono le sue ultime righe. Si eseguono con un
 #     marcatore finto e si guarda se sopravvive.
+# ⚠ NON `tail -8`: era la forma precedente, ed e' diventata CIECA il 2026-08-18. Aggiungere
+# in fondo allo script il blocco di armamento (#217 I4) ha spostato l'epilogo del marcatore
+# fuori dalle ultime 8 righe: il test restava VERDE perche' nulla toccava il marcatore, ma
+# non provava piu' niente — se qualcuno avesse rimesso l'`rm`, non se ne sarebbe accorto.
+# E' la TERZA volta che la prova di I2 nasce falsa. Qui il blocco si estrae per ANCORA
+# semantica, e se l'ancora sparisce il test lo dichiara invece di misurare il vuoto.
+_EPI="$(sed -n '/IL MARCATORE NON SI CONSUMA/,$p' scripts/align-clones.sh)"
+if ! printf '%s' "$_EPI" | grep -q 'marcatore lasciato'; then
+  fail "l'epilogo del marcatore non e' piu' estraibile dall'ancora — il test misurerebbe il vuoto"
+fi
 ( set +eu; DELTA=1; HAVE_MARKER=1; MARKER="$_MK"; SKIPPED=""; DEPLOY=0; DEPLOY_WHY=""
-  log() { :; }; eval "$(tail -8 scripts/align-clones.sh)" ) >/dev/null 2>&1 || true
+  SCRIPTS=/dev/null/inesistente
+  log() { :; }; warn() { :; }; eval "$_EPI" ) >/dev/null 2>&1 || true
 if [ -f "$_MK" ]; then
   ok "il marcatore sopravvive all'epilogo — la seconda corsa misura invece di cadere in IGNOTO"
 else

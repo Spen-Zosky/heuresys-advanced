@@ -1,7 +1,8 @@
 # 217 — Il flusso di chiusura: da rito completo a percorso scelto
 
 > **item**: #217
-> **stato**: CHIUSA — 8/8 fasi, 2026-08-18 (S1070)
+> **stato**: CHIUSO
+> **chiuso**: 2026-08-18 (S1070) — 8/8 fasi
 
 Enzo, 2026-08-18: *«è instabile, va spesso in errore, deve rifare più volte le stesse azioni,
 richiede tempi lunghi, intercetta errori di GitHub che andrebbero risolti definitivamente e non
@@ -45,7 +46,7 @@ produce `TIMEOUT dopo 900s → deploy FAILED`: stesso gate, stessa CI, due compo
       il caso «in volo»; traducendo in «rimanda» anche il rosso ne cadono due, incluso il rosso.
       Il primo sabotaggio ha scoperto un difetto **del test**: senza `CI_GATE_WAIT=0` non
       falliva, **dormiva** 900s — e un test che si blocca nasconde il difetto invece di mostrarlo.
-- [x] **I4 L'armamento non dipende da quale script hai lanciato** — FATTO 2026-08-18 ·
+- [x] **I4 L'armamento non dipende da quale script hai lanciato** — FATTO 2026-08-18 · `55108a4b` ·
       `scripts/arma-deploy.sh` porta l'ATTO; la DECISIONE resta ai chiamanti, che hanno finestre
       diverse (close-propagate misura `origin/prod..HEAD`, align-clones sa di stare deployando):
       così non si duplica un predicato. Nella chiusura i due casi sono **disgiunti per
@@ -89,7 +90,7 @@ produce `TIMEOUT dopo 900s → deploy FAILED`: stesso gate, stessa CI, due compo
       🔬 La firma del 429 era **cieca**: in regex estesa le parentesi sono un gruppo, e il caso
       reale era stato riconosciuto solo grazie alle altre firme. E il primo sabotaggio non
       sabotava — il grep di controllo trovava il proprio commento (`#194`, di nuovo).
-- [x] **I8 Il rendiconto viene letto dal boot** — FATTO 2026-08-18 ·
+- [x] **I8 Il rendiconto viene letto dal boot** — FATTO 2026-08-18 · `e4df9012` ·
       `docs/kb/tools/rendiconto_chiusure.py` (`--boot`) + una riga in GIT & SYNC: quanti passi
       ha richiesto l'ultima chiusura e **quali** sono rimasti non sereni, nominati.
       **Mostra, non decide** — il vincolo della skill («rendiconto, non stato») è rispettato:

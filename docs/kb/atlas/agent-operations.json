@@ -102,6 +102,11 @@
      "method": "GET",
      "path": "/:id/versions/:number/processes",
      "permission": null
+    },
+    "get_research_domains": {
+     "method": "GET",
+     "path": "/research-domains",
+     "permission": null
     }
    },
    "solaLettura": true

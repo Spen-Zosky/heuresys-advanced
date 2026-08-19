@@ -1,42 +1,42 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-19T18:31:05Z da docs/kb/tools/build_index.py
+# generato: 2026-08-19T22:51:31Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-19T18:31:05Z"
-  total_files: 3136
+  generated_at: "2026-08-19T22:51:31Z"
+  total_files: 3166
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 37
     api-core: 33
-    api-module: 342
+    api-module: 356
     ci: 17
     claude-config: 35
-    config: 172
+    config: 173
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 330
+    db-migration: 334
     db-other: 8
-    db-script: 43
+    db-script: 44
     db-seed: 114
-    doc-canonical: 686
+    doc-canonical: 687
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 107
+    shared-schema: 108
     showcase-source: 13
-    test: 395
+    test: 403
     ux-design-archive: 80
     web-source: 241
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2578
+    live: 2608
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -1838,6 +1838,84 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\domain.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/domain.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\domains\contenuto-del-modello.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/domains/contenuto-del-modello.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\domains\index.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/domains/index.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\domains\research-sources.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/domains/research-sources.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\engine.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/engine.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\guardia-domande.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/guardia-domande.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\ponte.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/ponte.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\sorgenti\gateway.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/sorgenti/gateway.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\sorgenti\index.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/sorgenti/index.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\sources.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/sources.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\web-reader.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/web-reader.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\review-cycles\repository.ts'
     root: repo
     rel: 'apps/api/src/modules/review-cycles/repository.ts'
@@ -2159,6 +2237,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\teams\service.ts'
     root: repo
     rel: 'apps/api/src/modules/teams/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\campi-bloccanti.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-blueprints/campi-bloccanti.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -2981,6 +3065,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\agent-gateway\src\redact.ts'
     root: repo
     rel: 'apps/agent-gateway/src/redact.ts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\src\research-propose.ts'
+    root: repo
+    rel: 'apps/agent-gateway/src/research-propose.ts'
     category: config
     status: live
     provenance: git-tracked
@@ -7910,6 +8000,30 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000333_la_ricerca_ha_una_corsa_e_le_fonti_un_registro.sql'
+    root: repo
+    rel: 'db/migrations/000333_la_ricerca_ha_una_corsa_e_le_fonti_un_registro.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000334_la_sentinella_non_suona_sul_dominio_che_costruisce_il_registro.sql'
+    root: repo
+    rel: 'db/migrations/000334_la_sentinella_non_suona_sul_dominio_che_costruisce_il_registro.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000335_i_processi_hanno_una_casa_sola.sql'
+    root: repo
+    rel: 'db/migrations/000335_i_processi_hanno_una_casa_sola.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000336_le_famiglie_sono_un_sottoprodotto_dei_clienti.sql'
+    root: repo
+    rel: 'db/migrations/000336_le_famiglie_sono_un_sottoprodotto_dei_clienti.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -8111,6 +8225,12 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\populate-skill-ontology-it.sql'
     root: repo
     rel: 'db/scripts/populate-skill-ontology-it.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\prova-live-ricerca.ts'
+    root: repo
+    rel: 'db/scripts/prova-live-ricerca.ts'
     category: db-script
     status: live
     provenance: git-tracked
@@ -9071,6 +9191,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\mandati\mandato-S1073-prompt-ripresa.md'
     root: repo
     rel: '.programmi/mandati/mandato-S1073-prompt-ripresa.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\mandati\mandato-S1074-prompt-ripresa.md'
+    root: repo
+    rel: '.programmi/mandati/mandato-S1074-prompt-ripresa.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -14258,6 +14384,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\research.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/research.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\review-cycles.ts'
     root: repo
     rel: 'packages/shared/src/schemas/review-cycles.ts'
@@ -15770,6 +15902,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\research.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/research.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\result-cap.test.ts'
     root: repo
     rel: 'apps/api/test/result-cap.test.ts'
@@ -16103,6 +16241,48 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\unit\query-boolean-filters.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/query-boolean-filters.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\research-difese.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/research-difese.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\research-domini-contenuto.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/research-domini-contenuto.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\research-engine.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/research-engine.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\research-ponte.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/research-ponte.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\research-sorgente-gateway.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/research-sorgente-gateway.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\research-sources.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/research-sources.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\research-web-reader.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/research-web-reader.unit.test.ts'
     category: test
     status: live
     provenance: git-tracked

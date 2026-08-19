@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `2807244e` (2026-08-19T20:29:50+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `97407c4c` (2026-08-20T00:32:36+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 97 |
-| Route API | 599 |
+| Moduli API | 98 |
+| Route API | 604 |
 | Pagine web | 120 |
-| Schemi shared | 107 |
+| Schemi shared | 108 |
 | Tabelle DB | 264 (vuote: 21) |
-| Viste / matview | 31 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 267 |
+| Viste / matview | 32 / 0 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 272 |
 
 ## Moduli API
 
@@ -81,10 +81,11 @@
 | provenance | /v1/provenance | 2 | 1 | 1 | 1 |
 | public-stats | /v1/public | 1 | 0 | 11 | 1 |
 | reference-sync | /v1/reference-sync | 4 | 2 | 3 | 2 |
+| research | — | 0 | 0 | 19 | 1 |
 | review-cycles | /v1/review-cycles | 4 | 2 | 1 | 2 |
-| seed-acquisition-runs | /v1/seed-acquisition-runs | 5 | 3 | 1 | 1 |
+| seed-acquisition-runs | /v1/seed-acquisition-runs | 6 | 3 | 1 | 1 |
 | seed-approval-decisions | /v1/seed-approval-decisions | 3 | 2 | 2 | 1 |
-| seed-candidate-records | /v1/seed-candidate-records | 4 | 1 | 3 | 1 |
+| seed-candidate-records | /v1/seed-candidate-records | 5 | 2 | 3 | 1 |
 | semantic-matching | /v1/matching | 10 | 2 | 10 | 5 |
 | skill-aliases | /v1/skill-aliases | 5 | 3 | 2 | 1 |
 | skill-categories | /v1/skill-categories | 5 | 3 | 3 | 1 |
@@ -98,7 +99,7 @@
 | surveys | /v1/surveys | 12 | 4 | 3 | 3 |
 | talent-review | /v1/talent-review | 6 | 1 | 7 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 1 |
-| tenant-blueprints | /v1/tenant-blueprints | 17 | 0 | 13 | 1 |
+| tenant-blueprints | /v1/tenant-blueprints | 20 | 0 | 13 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 2 | 1 |
 | time-off | /v1/time-off | 3 | 1 | 7 | 2 |
@@ -137,7 +138,6 @@
 - `sys.sys_auth_sessions`
 - `sys.sys_blueprint_content_kpis`
 - `sys.sys_blueprint_content_positions`
-- `sys.sys_blueprint_content_processes`
 - `sys.sys_blueprint_content_skills`
 - `sys.sys_blueprint_content_units`
 - `sys.sys_content_media`
@@ -145,6 +145,7 @@
 - `sys.sys_notification_preferences`
 - `sys.sys_occupation_classification_mappings`
 - `sys.sys_process_kpi_templates`
+- `sys.sys_research_sources`
 - `sys.sys_user_delegations`
 
 ## Key counts live

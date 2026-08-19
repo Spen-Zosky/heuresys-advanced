@@ -35,6 +35,7 @@ import {
   AvviaRicercaBodySchema,
   CorsaRicercaSchema,
   DominiRicercabiliResponseSchema,
+  ApplicaRicercaResponseSchema,
 } from "@heuresys/shared";
 import { researchService } from "../research/service.js";
 import { tenantBlueprintsService as svc } from "./service.js";
@@ -298,5 +299,21 @@ export const tenantBlueprintsRoutes: FastifyPluginAsyncZod = async (app) => {
       );
       reply.code(201).send(corsa);
     },
+  );
+
+  /**
+   * #132 F6 — il ponte: le proposte approvate diventano il contenuto del modello.
+   * `tenant_blueprint:write` come l'avvio: e' una scrittura sul modello di quel fascicolo.
+   */
+  app.post(
+    "/:id/versions/:number/apply-research",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: {
+        params: VersionParamSchema,
+        response: { 200: ApplicaRicercaResponseSchema },
+      },
+    },
+    async (req) => researchService.applicaRicerca(actor(req), req.params.id, req.params.number),
   );
 };

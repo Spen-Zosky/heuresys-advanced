@@ -19,6 +19,7 @@ import { platformAdmin } from "./helpers/actors.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { researchService } from "../src/modules/research/service.js";
+import { cataloghiVeri as repoCataloghi } from "../src/modules/research/repository.js";
 import type { ProposalSource, PropostaGrezza } from "../src/modules/research/engine.js";
 import type { WebReader, PaginaLetta } from "../src/modules/research/web-reader.js";
 import { actorFromRequest } from "../src/lib/actor.js";
@@ -263,5 +264,137 @@ describe("⚠ la convivenza con STORIA36", () => {
     const proposte = await researchService.proposte(attore(), corsa.runId);
     expect(proposte.items.every((p) => p.dominio === "research_sources")).toBe(true);
     expect(proposte.items.some((p) => p.dominio === "storia36")).toBe(false);
+  });
+});
+
+describe("#132 F6 — il ponte, contro il database vero", () => {
+  /** Una fonte approvata serve: i domini di contenuto confrontano col registro. */
+  async function fonteApprovata(): Promise<void> {
+    await pool.query(
+      `INSERT INTO sys.sys_research_sources
+         (research_source_host_suffix, research_source_label, research_source_class,
+          research_source_status, research_source_rationale, research_source_approved_by,
+          research_source_approved_at)
+       VALUES ('bancaditalia.it', 'Banca d''Italia', 'INSTITUTIONAL', 'APPROVED',
+               'prova di integrazione: fonte istituzionale', $1, now())
+       ON CONFLICT DO NOTHING`,
+      [adminUserId],
+    );
+  }
+
+  const UNITA = { code: "DIR-RISK", name: "Direzione Rischi", nameEn: "Risk Management", parentCode: null, unitType: "DIVISION", level: 0 };
+  const POSIZIONE = { code: "CRO", name: "Direttore Rischi", nameEn: "Chief Risk Officer", unitCode: "DIR-RISK", reportsToCode: null, criticality: "CRITICAL" };
+
+  /** Avvia una corsa su un dominio di contenuto e approva tutto cio' che e' passato. */
+  async function corsaApprovata(dominio: string, contenuti: unknown[]): Promise<number> {
+    const url = "https://www.bancaditalia.it/vigilanza/";
+    const corsa = await researchService.avvia(attore(), versionId, dominio, {
+      lettore: lettore({ [url]: "<html><body>testo istituzionale</body></html>" }),
+      sorgente: sorgente(contenuti.map((c) => ({ contenuto: c, fonti: [url] })), [url]),
+    });
+    const { items } = await researchService.proposte(attore(), corsa.runId);
+    let approvate = 0;
+    for (const p of items.filter((x) => x.stato === "PASSED" || x.stato === "WARNING")) {
+      await researchService.decidi(attore(), p.candidateId, {
+        decisione: "APPROVED",
+        motivazione: "prova di integrazione: proposta coerente con la fonte letta",
+      });
+      approvate++;
+    }
+    return approvate;
+  }
+
+  it("applicare due volte: la seconda non ha piu' niente da applicare, e lo dice", async () => {
+    // Il caso e' auto-sufficiente di proposito: prima si svuota cio' che i casi precedenti
+    // hanno lasciato approvato, poi si verifica che una SECONDA applicazione si fermi. Un test
+    // che dipendesse dall'ordine di dichiarazione sarebbe verde per caso.
+    await researchService.applicaRicerca(attore(), blueprintId, numero).catch(() => undefined);
+    await expect(researchService.applicaRicerca(attore(), blueprintId, numero)).rejects.toMatchObject({
+      code: "RESEARCH_NOTHING_APPROVED",
+    });
+  });
+
+  it("⚠ i domini di contenuto non partono finche' nessuna fonte e' approvata", async () => {
+    // Si svuota il registro dentro la transazione del file (che a fine file viene disfatta):
+    // il cancello va provato sullo stato che descrive, non su quello che capita.
+    const { rows: prima } = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_research_sources`,
+    );
+    await pool.query(`DELETE FROM sys.sys_research_sources`);
+    try {
+      await expect(
+        researchService.avvia(attore(), versionId, "organization_units", {
+          lettore: lettore({}),
+          sorgente: sorgente([], []),
+        }),
+      ).rejects.toMatchObject({ code: "RESEARCH_NO_APPROVED_SOURCES" });
+    } finally {
+      if (Number(prima[0]!.n) > 0) await fonteApprovata();
+    }
+  });
+
+  it("le proposte approvate diventano contenuto del modello, e passano ad APPLIED", async () => {
+    await fonteApprovata();
+    const n1 = await corsaApprovata("organization_units", [UNITA]);
+    const n2 = await corsaApprovata("positions", [POSIZIONE]);
+    expect(n1 + n2).toBe(2);
+
+    const esito = await researchService.applicaRicerca(attore(), blueprintId, numero);
+    expect(esito.proposteApplicate).toBe(2);
+    expect(esito.contenuto.units).toBeGreaterThanOrEqual(1);
+    expect(esito.contenuto.positions).toBeGreaterThanOrEqual(1);
+
+    // Le righe ci sono davvero, col nome inglese: e' la prova che il ponte ha scritto.
+    const { rows } = await pool.query<{ code: string; en: string; tipo: string }>(
+      `SELECT blueprint_content_unit_code AS code, blueprint_content_unit_name_en AS en,
+              blueprint_content_unit_type AS tipo
+         FROM sys.sys_blueprint_content_units
+        WHERE blueprint_content_unit_version_id = $1 AND blueprint_content_unit_code = 'DIR-RISK'`,
+      [esito.variantVersionId],
+    );
+    expect(rows[0]?.en).toBe("Risk Management");
+    expect(rows[0]?.tipo).toBe("DIVISION");
+
+    // ...e le proposte non sono piu' approvate: sono APPLICATE.
+    const { rows: stati } = await pool.query<{ stato: string; n: string }>(
+      `SELECT c.seed_candidate_record_validation_status AS stato, count(*)::text AS n
+         FROM sys.sys_seed_candidate_records c
+         JOIN sys.sys_seed_acquisition_runs r ON r.seed_acquisition_run_id = c.seed_candidate_record_run_id
+        WHERE r.seed_acquisition_run_blueprint_version_id = $1
+          AND c.seed_candidate_record_domain IN ('organization_units','positions')
+        GROUP BY 1`,
+      [versionId],
+    );
+    expect(stati.find((s) => s.stato === "APPLIED")?.n).toBe("2");
+    expect(stati.find((s) => s.stato === "APPROVED")).toBeUndefined();
+  });
+
+  it("⚠ una proposta non traducibile ferma TUTTA l'applicazione, e dice quale", async () => {
+    await fonteApprovata();
+    // Un tipo di unita' che il catalogo non conosce: passa i controlli del dominio (il tipo e'
+    // una stringa, e il catalogo vive nel database) e si ferma qui, dove il catalogo si legge.
+    await corsaApprovata("organization_units", [{ ...UNITA, code: "DIR-IGNOTA", unitType: "SUCCURSALE" }]);
+
+    await expect(researchService.applicaRicerca(attore(), blueprintId, numero)).rejects.toMatchObject({
+      code: "RESEARCH_CONTENT_NOT_APPLICABLE",
+    });
+
+    // ...e non ha scritto niente: la proposta guasta resta APPROVED, non APPLIED.
+    const { rows } = await pool.query<{ stato: string }>(
+      `SELECT seed_candidate_record_validation_status AS stato FROM sys.sys_seed_candidate_records
+        WHERE seed_candidate_record_natural_key = 'DIR-IGNOTA'`,
+    );
+    expect(rows[0]?.stato).toBe("APPROVED");
+  });
+
+  it("i cataloghi si leggono dal database, non da un elenco scritto a mano", async () => {
+    const c = await repoCataloghi(pool);
+    // I dieci tipi veri, la specie di competenza e il verso di indicatore: se qualcuno
+    // aggiungesse un tipo al catalogo, questo test lo vedrebbe senza essere toccato.
+    expect(c.tipiUnita.has("DIVISION")).toBe(true);
+    expect(c.tipiUnita.size).toBeGreaterThanOrEqual(9);
+    expect(c.specieCompetenza.has("KNOWLEDGE")).toBe(true);
+    expect(c.versiIndicatore.has("TARGET_RANGE")).toBe(true);
+    expect(c.versiIndicatore.has("TARGET_IS_BEST")).toBe(false);
   });
 });

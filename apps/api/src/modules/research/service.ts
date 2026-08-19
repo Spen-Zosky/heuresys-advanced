@@ -12,7 +12,12 @@
 import { pool, withTransaction } from "../../db/client.js";
 import { NotFoundError, UnprocessableEntityError, ConflictError } from "../../errors/index.js";
 import type { ActorContext } from "../../lib/actor.js";
-import type { CorsaRicerca, PropostaRicerca, DecisionePropostaBody } from "@heuresys/shared";
+import type {
+  CorsaRicerca,
+  PropostaRicerca,
+  DecisionePropostaBody,
+  ApplicaRicercaResponse,
+} from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { risolviDominio, chiaviDominio, dominiDichiarati } from "./domains/index.js";
 import { DominioSconosciutoError } from "./domain.js";
@@ -20,6 +25,7 @@ import { eseguiCorsa, type ProposalSource } from "./engine.js";
 import { HttpWebReader, type WebReader } from "./web-reader.js";
 import { esigiDomandeSenzaCliente, terminiRiservati, DomandaNominaIlClienteError } from "./guardia-domande.js";
 import { sorgenteRegistrata } from "./sorgenti/index.js";
+import { traduciProposte, conta } from "./ponte.js";
 
 export interface DipendenzeCorsa {
   /** Chi propone. Iniettabile: i test ne passano una propria, la produzione usa quella vera. */
@@ -211,6 +217,92 @@ export const researchService = {
     const versionId = await repo.versioneDaNumero(pool, blueprintId, numero);
     if (!versionId) throw new NotFoundError("Versione di fascicolo non trovata");
     return this.avvia(a, versionId, dominioChiave, dip);
+  },
+
+  /**
+   * IL PONTE (#132 F6) — le proposte approvate diventano il contenuto del modello.
+   *
+   * ⚠ IL MODELLO DEV'ESSERE GIA' ANCORATO, e non e' una limitazione: ancorare una versione di
+   * variante a un fascicolo scrive un **campo bloccante** (`D-85`), e i campi bloccanti non li
+   * cambia la ricerca — li cambia il proprietario della piattaforma. Il ponte riempie il
+   * modello che il consulente ha scelto; scegliere resta un atto suo.
+   *
+   * ⚠ O TUTTO O NIENTE. Se anche una sola proposta non e' traducibile — un tipo di unita' che
+   * il catalogo non conosce, una posizione che siede in un'unita' che nessuno ha proposto — non
+   * si applica **niente**. Un modello a meta' e' peggio di nessun modello: passerebbe il
+   * cancello e si romperebbe alla costruzione, dove attribuire il difetto e' difficile.
+   * Gli **avvisi** invece non fermano: sono cose da guardare, non da impedire.
+   */
+  async applicaRicerca(
+    // L'attore e' gia' verificato dal permesso della rotta; qui non decide niente, e dirlo
+    // col nome vale piu' di un commento.
+    _a: ActorContext,
+    blueprintId: string,
+    numero: number,
+  ): Promise<ApplicaRicercaResponse> {
+    const versionId = await repo.versioneDaNumero(pool, blueprintId, numero);
+    if (!versionId) throw new NotFoundError("Versione di fascicolo non trovata");
+
+    const proposte = await repo.propostePerApplicazione(pool, versionId);
+    if (proposte.length === 0) {
+      throw new ConflictError(
+        "Nessuna proposta approvata da applicare: prima si decide, poi si applica.",
+        "RESEARCH_NOTHING_APPROVED",
+      );
+    }
+
+    const cataloghi = await repo.cataloghiVeri(pool);
+    const esito = traduciProposte(proposte, cataloghi);
+
+    // ⚠ IL MODELLO ANCORATO SERVE SOLO SE C'E' CONTENUTO DI MODELLO DA SCRIVERE. Le proposte
+    // di fonti hanno un'altra destinazione — il registro — e pretendere un modello per
+    // scriverle bloccherebbe la PRIMA ondata, che e' proprio quella che il modello non ce
+    // l'ha ancora. Ancorare resta un atto del consulente: scrive un campo bloccante (`D-85`),
+    // e i campi bloccanti non li cambia la ricerca.
+    const conMod = conta(esito.contenuto);
+    const contenutoDiModello = conMod.units + conMod.positions + conMod.skills + conMod.kpis + conMod.processes;
+    const variante = contenutoDiModello > 0 ? await repo.varianteAncorata(pool, versionId) : null;
+    if (contenutoDiModello > 0 && !variante) {
+      throw new ConflictError(
+        "Il fascicolo non ha un modello ancorato: la ricerca riempie il modello che il consulente ha scelto, non lo sceglie al posto suo.",
+        "BLUEPRINT_MODEL_NOT_PINNED",
+      );
+    }
+
+    const bloccanti = esito.respinte.filter((r) => r.controllo.esito === "FAILED");
+    if (bloccanti.length > 0) {
+      throw new UnprocessableEntityError(
+        {
+          bloccanti: bloccanti.map((r) => ({
+            chiave: r.chiaveNaturale,
+            regola: r.controllo.regola,
+            messaggio: r.controllo.messaggio ?? "",
+          })),
+        },
+        `${bloccanti.length} proposta/e approvata/e non e' applicabile al modello: non si applica un modello a meta'.`,
+        "RESEARCH_CONTENT_NOT_APPLICABLE",
+      );
+    }
+
+    let applicate = 0;
+    await withTransaction(async (client) => {
+      if (variante) await repo.sostituisciContenuto(client, variante, esito.contenuto);
+      if (esito.contenuto.sources.length > 0) await repo.scriviFontiApprovate(client, esito.contenuto.sources);
+      applicate = await repo.marcaApplicate(client, esito.applicate);
+    });
+
+    const dopo = variante
+      ? await repo.contenutoEsistente(pool, variante)
+      : { units: 0, positions: 0, skills: 0, kpis: 0, processes: 0 };
+    return {
+      variantVersionId: variante,
+      proposteApplicate: applicate,
+      fontiRegistrate: esito.contenuto.sources.length,
+      contenuto: dopo,
+      avvisi: esito.respinte
+        .filter((r) => r.controllo.esito === "WARNING")
+        .map((r) => ({ chiave: r.chiaveNaturale, regola: r.controllo.regola, messaggio: r.controllo.messaggio ?? "" })),
+    };
   },
 
   /** Le proposte di una corsa: stato, controlli applicati, fonti, decisione. */

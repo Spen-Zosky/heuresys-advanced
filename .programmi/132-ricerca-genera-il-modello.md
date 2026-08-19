@@ -569,9 +569,36 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   ✅ Sabotaggio: spento il confronto su un dominio → **3** casi rossi. 13 casi nuovi, unit
   **204/204**, integrazione ricerca 8/8. — `organization_units` · `positions` · `skills` · `kpis` ·
   `business_processes`. Il primo costa la forma, gli altri quattro la riusano
-- [ ] **F6 il ponte: le proposte approvate diventano il modello** — famiglia (se non esiste),
-  variante, versione 1 col contenuto. Riqualifica da scrivere: `sys_blueprint_families` e `_variants`
-  **non sono un catalogo anticipato**, sono un **sottoprodotto dei clienti**
+- [x] **F6 il ponte: le proposte approvate diventano il modello** — **FATTO 2026-08-20 (S1074)**
+  · `research/ponte.ts` + `applicaRicerca` + rotta `apply-research`.
+
+  **DUE DESTINAZIONI, non una, e la seconda l'ha trovata il TEST, non il ragionamento**: i cinque
+  domini di contenuto vanno nel modello (le quattro tabelle di contenuto piu' il registro dei
+  processi, che dalla `000335` e' la loro casa); il dominio `research_sources` va nel **registro
+  delle fonti**. Senza quella strada una proposta di fonte approvata restava `APPROVED` per sempre
+  e **bloccava il ponte** — non e' applicabile al modello, e il ponte non applica niente a meta'.
+  La riga porta approvatore e motivazione della **decisione vera**: il vincolo del database li
+  pretende, e prenderli da altrove sarebbe inventarli.
+
+  ⚠ **Qui si verificano i cataloghi**, ed e' il posto giusto: i vocabolari vivono in tabelle e
+  vincoli, e il ponte li riceve **letti dal database un attimo prima** (i tipi da
+  `sys_organization_unit_types`; la specie e il verso leggendo i `CHECK` con
+  `pg_get_constraintdef`). La funzione resta pura e provabile, e cio' che verifica e' il
+  vocabolario **vero**, non una copia invecchiata (⭐ IL PUNTO FISSO).
+
+  ⚠ **O tutto o niente**: una sola proposta non traducibile ferma l'intera applicazione. Un
+  modello a meta' passerebbe il cancello e si romperebbe **alla costruzione**, lontano da dove e'
+  nato. Gli avvisi invece non fermano e tornano nella risposta.
+
+  ⚠ **Il modello ancorato serve solo se c'e' contenuto di modello**: pretenderlo sempre
+  bloccherebbe la prima ondata, che e' proprio quella che il modello non ce l'ha ancora. Ancorare
+  resta un atto del consulente — scrive un campo bloccante (`D-85`).
+
+  ✅ Sabotaggio: spenta la verifica del catalogo dei tipi → **2** casi rossi. 10 casi unit + 5 di
+  integrazione **contro il database vero**; unit **214/214**, integrazione ricerca **13/13**.
+  📌 **La riqualifica di `sys_blueprint_families` e `_variants` — «non un catalogo anticipato, un
+  sottoprodotto dei clienti» — resta da scrivere nei commenti di quelle tabelle**: e' l'unico
+  residuo dichiarato di F6.
 - [ ] **F7 le due prove** — prima l'azienda nuova di settore diverso (se ne esce una banca,
   l'archetipo è sparito solo di nome), poi RTL Bank come metro di qualità. Sul gemello, poi in
   produzione

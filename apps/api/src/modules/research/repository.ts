@@ -462,3 +462,252 @@ export async function registraDecisione(
     [input.candidateId, input.decisione],
   );
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// IL PONTE (#132 F6) — leggere le proposte approvate, leggere i cataloghi VERI,
+// scrivere il contenuto della versione di variante.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Le proposte APPROVATE di una versione di fascicolo, pronte per il ponte. */
+export async function propostePerApplicazione(
+  q: DbConnector,
+  versionId: string,
+): Promise<
+  Array<{
+    candidateId: string;
+    dominio: string;
+    chiaveNaturale: string;
+    contenuto: unknown;
+    approvatoreUserId: string | null;
+    motivazione: string | null;
+  }>
+> {
+  // La decisione viene con la proposta: chi ha approvato e perche' non sono un di piu' —
+  // il registro delle fonti li pretende per vincolo, e prenderli da altrove sarebbe inventarli.
+  const res = await q.query<{
+    id: string; dominio: string; chiave: string; payload: unknown;
+    chi: string | null; perche: string | null;
+  }>(
+    `SELECT c.seed_candidate_record_id AS id, c.seed_candidate_record_domain AS dominio,
+            c.seed_candidate_record_natural_key AS chiave, c.seed_candidate_record_payload AS payload,
+            d.seed_approval_decision_approver_user_id AS chi,
+            d.seed_approval_decision_rationale AS perche
+       FROM sys.sys_seed_candidate_records c
+       JOIN sys.sys_seed_acquisition_runs r ON r.seed_acquisition_run_id = c.seed_candidate_record_run_id
+       LEFT JOIN LATERAL (
+              SELECT * FROM sys.sys_seed_approval_decisions d2
+               WHERE d2.seed_approval_decision_candidate_id = c.seed_candidate_record_id
+                 AND d2.seed_approval_decision_status = 'APPROVED'
+               ORDER BY d2.seed_approval_decision_decided_at DESC LIMIT 1
+            ) d ON true
+      WHERE r.seed_acquisition_run_blueprint_version_id = $1
+        AND c.seed_candidate_record_validation_status = 'APPROVED'
+      ORDER BY c.created_at`,
+    [versionId],
+  );
+  return res.rows.map((x) => ({
+    candidateId: x.id, dominio: x.dominio, chiaveNaturale: x.chiave, contenuto: x.payload,
+    approvatoreUserId: x.chi, motivazione: x.perche,
+  }));
+}
+
+/**
+ * Le fonti approvate entrano nel registro (§4.3).
+ *
+ * `ON CONFLICT DO UPDATE` sulla chiave naturale del registro: una fonte gia' presente si
+ * aggiorna invece di duplicarsi — e' lo stesso criterio della chiave naturale della proposta,
+ * e le due devono restare d'accordo o una seconda corsa scriverebbe un doppione.
+ */
+export async function scriviFontiApprovate(
+  q: DbConnector,
+  fonti: ReadonlyArray<{
+    hostSuffix: string; label: string; classe: string; paese: string | null;
+    dominio: string | null; motivazione: string; approvatoreUserId: string | null;
+  }>,
+): Promise<number> {
+  let scritte = 0;
+  for (const f of fonti) {
+    const res = await q.query(
+      `INSERT INTO sys.sys_research_sources (
+         research_source_host_suffix, research_source_label, research_source_class,
+         research_source_status, research_source_domain, research_source_country_code,
+         research_source_rationale, research_source_approved_by, research_source_approved_at)
+       VALUES ($1,$2,$3,'APPROVED',$4,$5,$6,$7, now())
+       ON CONFLICT (research_source_host_suffix, coalesce(research_source_domain, '*')) DO UPDATE
+          SET research_source_label = EXCLUDED.research_source_label,
+              research_source_class = EXCLUDED.research_source_class,
+              research_source_status = 'APPROVED',
+              research_source_country_code = EXCLUDED.research_source_country_code,
+              research_source_rationale = EXCLUDED.research_source_rationale,
+              research_source_approved_by = EXCLUDED.research_source_approved_by,
+              research_source_approved_at = now(),
+              updated_at = now()`,
+      [f.hostSuffix, f.label, f.classe, f.dominio, f.paese, f.motivazione, f.approvatoreUserId],
+    );
+    scritte += res.rowCount ?? 0;
+  }
+  return scritte;
+}
+
+/**
+ * I vocabolari veri, letti adesso.
+ *
+ * ⚠ NON si ricopiano in codice. Il tipo di unita' e' una **tabella**; la specie di competenza
+ * e il verso di indicatore sono **vincoli** del database. Un elenco scritto a mano da qualche
+ * parte sarebbe vero il giorno in cui lo si scrive e falso poco dopo (⭐ IL PUNTO FISSO).
+ */
+export async function cataloghiVeri(q: DbConnector): Promise<{
+  tipiUnita: Set<string>;
+  specieCompetenza: Set<string>;
+  versiIndicatore: Set<string>;
+}> {
+  const tipi = await q.query<{ c: string }>(
+    `SELECT organization_unit_type_code AS c FROM sys.sys_organization_unit_types`,
+  );
+  const daCheck = async (nome: string): Promise<Set<string>> => {
+    const r = await q.query<{ d: string }>(
+      `SELECT pg_get_constraintdef(oid) AS d FROM pg_constraint WHERE conname = $1`,
+      [nome],
+    );
+    const def = r.rows[0]?.d ?? "";
+    // I valori ammessi stanno fra apici dentro l'ARRAY del CHECK: si leggono da li', perche'
+    // quello e' il vincolo che il database applica davvero.
+    return new Set([...def.matchAll(/'([A-Z_]+)'::character varying/g)].map((m) => m[1] as string));
+  };
+  return {
+    tipiUnita: new Set(tipi.rows.map((r) => r.c)),
+    specieCompetenza: await daCheck("sys_skills_skill_kind_check"),
+    versiIndicatore: await daCheck("sys_blueprint_content_kpis_verso_ck"),
+  };
+}
+
+/** Il contenuto di una versione di variante: si scrive, e una chiave gia' presente si aggiorna. */
+export async function sostituisciContenuto(
+  q: DbConnector,
+  versionVarianteId: string,
+  c: {
+    units: ReadonlyArray<{ code: string; name: string; nameEn: string; parentCode: string | null; unitType: string; level: number }>;
+    positions: ReadonlyArray<{ code: string; title: string; titleEn: string; unitCode: string; criticality: string }>;
+    skills: ReadonlyArray<{ code: string; name: string; nameEn: string; kind: string; category: string | null }>;
+    kpis: ReadonlyArray<{ code: string; name: string; nameEn: string; unit: string | null; direction: string }>;
+    processes: ReadonlyArray<{ code: string; name: string; nameEn: string; ordinal: number; ownerPositionCode: string | null; isOptional: boolean }>;
+  },
+): Promise<void> {
+  for (const u of c.units) {
+    await q.query(
+      `INSERT INTO sys.sys_blueprint_content_units (
+         blueprint_content_unit_version_id, blueprint_content_unit_code, blueprint_content_unit_name,
+         blueprint_content_unit_name_en, blueprint_content_unit_parent_code, blueprint_content_unit_type,
+         blueprint_content_unit_level)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       ON CONFLICT (blueprint_content_unit_version_id, blueprint_content_unit_code) DO UPDATE
+          SET blueprint_content_unit_name = EXCLUDED.blueprint_content_unit_name,
+              blueprint_content_unit_name_en = EXCLUDED.blueprint_content_unit_name_en,
+              blueprint_content_unit_parent_code = EXCLUDED.blueprint_content_unit_parent_code,
+              blueprint_content_unit_type = EXCLUDED.blueprint_content_unit_type,
+              blueprint_content_unit_level = EXCLUDED.blueprint_content_unit_level,
+              updated_at = now()`,
+      [versionVarianteId, u.code, u.name, u.nameEn, u.parentCode, u.unitType, u.level],
+    );
+  }
+  for (const p of c.positions) {
+    await q.query(
+      `INSERT INTO sys.sys_blueprint_content_positions (
+         blueprint_content_position_version_id, blueprint_content_position_code,
+         blueprint_content_position_title, blueprint_content_position_title_en,
+         blueprint_content_position_unit_code, blueprint_content_position_criticality)
+       VALUES ($1,$2,$3,$4,$5,$6)
+       ON CONFLICT (blueprint_content_position_version_id, blueprint_content_position_code) DO UPDATE
+          SET blueprint_content_position_title = EXCLUDED.blueprint_content_position_title,
+              blueprint_content_position_title_en = EXCLUDED.blueprint_content_position_title_en,
+              blueprint_content_position_unit_code = EXCLUDED.blueprint_content_position_unit_code,
+              blueprint_content_position_criticality = EXCLUDED.blueprint_content_position_criticality,
+              updated_at = now()`,
+      [versionVarianteId, p.code, p.title, p.titleEn, p.unitCode, p.criticality],
+    );
+  }
+  for (const s of c.skills) {
+    await q.query(
+      `INSERT INTO sys.sys_blueprint_content_skills (
+         blueprint_content_skill_version_id, blueprint_content_skill_code, blueprint_content_skill_name,
+         blueprint_content_skill_name_en, blueprint_content_skill_kind, blueprint_content_skill_category)
+       VALUES ($1,$2,$3,$4,$5,$6)
+       ON CONFLICT (blueprint_content_skill_version_id, blueprint_content_skill_code) DO UPDATE
+          SET blueprint_content_skill_name = EXCLUDED.blueprint_content_skill_name,
+              blueprint_content_skill_name_en = EXCLUDED.blueprint_content_skill_name_en,
+              blueprint_content_skill_kind = EXCLUDED.blueprint_content_skill_kind,
+              blueprint_content_skill_category = EXCLUDED.blueprint_content_skill_category,
+              updated_at = now()`,
+      [versionVarianteId, s.code, s.name, s.nameEn, s.kind, s.category],
+    );
+  }
+  for (const k of c.kpis) {
+    await q.query(
+      `INSERT INTO sys.sys_blueprint_content_kpis (
+         blueprint_content_kpi_version_id, blueprint_content_kpi_code, blueprint_content_kpi_name,
+         blueprint_content_kpi_name_en, blueprint_content_kpi_unit, blueprint_content_kpi_direction)
+       VALUES ($1,$2,$3,$4,$5,$6)
+       ON CONFLICT (blueprint_content_kpi_version_id, blueprint_content_kpi_code) DO UPDATE
+          SET blueprint_content_kpi_name = EXCLUDED.blueprint_content_kpi_name,
+              blueprint_content_kpi_name_en = EXCLUDED.blueprint_content_kpi_name_en,
+              blueprint_content_kpi_unit = EXCLUDED.blueprint_content_kpi_unit,
+              blueprint_content_kpi_direction = EXCLUDED.blueprint_content_kpi_direction,
+              updated_at = now()`,
+      [versionVarianteId, k.code, k.name, k.nameEn, k.unit, k.direction],
+    );
+  }
+  // I processi vanno nella loro casa, che e' quella vecchia (#132 F5, mig. 000335): non in una
+  // tabella di contenuto, perche' le decisioni del fascicolo puntano li'.
+  for (const pr of c.processes) {
+    await q.query(
+      `INSERT INTO sys.sys_blueprint_process_registry (
+         blueprint_process_variant_version_id, blueprint_process_variant_id, blueprint_process_code,
+         blueprint_process_name, blueprint_process_name_en, blueprint_process_ordinal,
+         blueprint_process_owner_position_code, blueprint_process_is_optional)
+       SELECT $1, vv.blueprint_variant_version_variant_id, $2, $3, $4, $5, $6, $7
+         FROM sys.sys_blueprint_variant_versions vv
+        WHERE vv.blueprint_variant_version_id = $1
+       ON CONFLICT DO NOTHING`,
+      [versionVarianteId, pr.code, pr.name, pr.nameEn, pr.ordinal, pr.ownerPositionCode, pr.isOptional],
+    );
+  }
+}
+
+/** Le proposte tradotte diventano APPLIED: e' l'ultimo stato del ciclo di §4.7. */
+export async function marcaApplicate(q: DbConnector, candidateIds: readonly string[]): Promise<number> {
+  if (candidateIds.length === 0) return 0;
+  const res = await q.query(
+    `UPDATE sys.sys_seed_candidate_records
+        SET seed_candidate_record_validation_status = 'APPLIED', updated_at = now()
+      WHERE seed_candidate_record_id = ANY($1::uuid[])
+        AND seed_candidate_record_validation_status = 'APPROVED'`,
+    [candidateIds],
+  );
+  return res.rowCount ?? 0;
+}
+
+/** La versione di variante ancorata al fascicolo, se c'e'. */
+export async function varianteAncorata(q: DbConnector, versionId: string): Promise<string | null> {
+  const res = await q.query<{ v: string | null }>(
+    `SELECT tenant_blueprint_version_variant_version_id AS v
+       FROM sys.sys_tenant_blueprint_versions WHERE tenant_blueprint_version_id = $1`,
+    [versionId],
+  );
+  return res.rows[0]?.v ?? null;
+}
+
+/** Quante righe di contenuto ha gia' una versione di variante, per dominio. */
+export async function contenutoEsistente(q: DbConnector, versionVarianteId: string): Promise<{
+  units: number; positions: number; skills: number; kpis: number; processes: number;
+}> {
+  const r = await q.query<{ u: string; p: string; s: string; k: string; pr: string }>(
+    `SELECT (SELECT count(*) FROM sys.sys_blueprint_content_units WHERE blueprint_content_unit_version_id = $1)::text AS u,
+            (SELECT count(*) FROM sys.sys_blueprint_content_positions WHERE blueprint_content_position_version_id = $1)::text AS p,
+            (SELECT count(*) FROM sys.sys_blueprint_content_skills WHERE blueprint_content_skill_version_id = $1)::text AS s,
+            (SELECT count(*) FROM sys.sys_blueprint_content_kpis WHERE blueprint_content_kpi_version_id = $1)::text AS k,
+            (SELECT count(*) FROM sys.sys_blueprint_process_registry WHERE blueprint_process_variant_version_id = $1)::text AS pr`,
+    [versionVarianteId],
+  );
+  const x = r.rows[0] as { u: string; p: string; s: string; k: string; pr: string };
+  return { units: +x.u, positions: +x.p, skills: +x.s, kpis: +x.k, processes: +x.pr };
+}

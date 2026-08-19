@@ -108,3 +108,28 @@ export const DominiRicercabiliResponseSchema = z.object({
   items: z.array(DominoRicercabileSchema),
 });
 export type DominiRicercabiliResponse = z.infer<typeof DominiRicercabiliResponseSchema>;
+
+export const ConteggiContenutoSchema = z.object({
+  units: z.number().int(),
+  positions: z.number().int(),
+  skills: z.number().int(),
+  kpis: z.number().int(),
+  processes: z.number().int(),
+});
+export type ConteggiContenuto = z.infer<typeof ConteggiContenutoSchema>;
+
+/**
+ * L'esito del ponte (#132 F6): le proposte approvate sono diventate il contenuto del modello.
+ * Gli **avvisi** si restituiscono sempre: sono cio' che non blocca ma che chi ha approvato
+ * deve poter vedere — un processo senza presidio, un nome inglese uguale all'italiano.
+ */
+export const ApplicaRicercaResponseSchema = z.object({
+  /** NULLO quando si sono applicate solo fonti: quelle non hanno bisogno di un modello. */
+  variantVersionId: z.uuid().nullable(),
+  proposteApplicate: z.number().int(),
+  /** Quante fonti sono entrate nel registro: e' l'altra destinazione del ponte. */
+  fontiRegistrate: z.number().int(),
+  contenuto: ConteggiContenutoSchema,
+  avvisi: z.array(z.object({ chiave: z.string(), regola: z.string(), messaggio: z.string() })),
+});
+export type ApplicaRicercaResponse = z.infer<typeof ApplicaRicercaResponseSchema>;

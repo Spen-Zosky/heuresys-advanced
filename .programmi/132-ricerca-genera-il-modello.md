@@ -263,7 +263,7 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   provisioning, sorgente) · 113/113 unit · typecheck api + test + agent-gateway · lint monorepo ·
   prova generale **VERDE** (305 migrazioni, due passate, 21/21 sentinelle) · `000328`, `000329` e
   `000330` applicate in produzione.
-- [ ] **F4 il motore di ricerca** — corse, proposte, fonti (indirizzo + data + impronta), decisione
+- [x] **F4 il motore di ricerca** — **FATTO 2026-08-19 (S1074)**, otto sotto-passi su otto: schema, dominio, lettore, motore, difese, `D-85`, superficie API e fornitore reale con la prova live — corse, proposte, fonti (indirizzo + data + impronta), decisione
   motivata. Riuso quasi totale delle 5 tabelle di acquisizione. Due modifiche già misurate
   dall'epica: `tenant_id` nullabili con `CHECK` sulla coppia, e il legame alla versione di fascicolo.
   Più `BLUEPRINT_FIELD_LOCKED` (`D-85`, era `D-81`), che l'epica vuole **insieme**. ⚠ La difesa di §4.4 non è
@@ -336,7 +336,7 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   | **F4e** ✅ | le difese §4.4 e §4.5 — **FATTO 2026-08-19** | il testo grezzo non entra mai in una proposta; le domande verso il web si costruiscono **solo** dai parametri di categoria, con un cancello meccanico |
   | **F4f** ✅ | `D-85` si estingue — **FATTO 2026-08-19** | `BLUEPRINT_FIELD_LOCKED` sui campi bloccanti, col nome del campo e il perche' |
   | **F4g** ✅ | la superficie API — **FATTO 2026-08-19** | le quattro rotte di §6, i permessi, il contratto in `@heuresys/shared` |
-  | **F4h** | il fornitore reale del ragionamento | `/research/propose` nel gateway + la **dimostrazione LIVE**: una corsa vera che legge pagine vere e propone fonti |
+  | **F4h** ✅ | il fornitore reale del ragionamento — **FATTO 2026-08-19** | `/research/propose` nel gateway + la **dimostrazione LIVE**: una corsa vera che legge pagine vere e propone fonti |
 
   ✅ **F4a FATTA — 2026-08-19 (S1074)** · mig. `000333`, applicata in produzione. Una corsa puo'
   appartenere a un **fascicolo** invece che a un tenant (`CHECK` sulla coppia: mai nessuno dei due),
@@ -452,6 +452,38 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   `STORIA36` restano intatte, col loro tenant e senza fascicolo. Sabotaggio: la sorgente assente
   che finge l'elenco vuoto -> rosso **solo** il caso dello zero silenzioso. Unit **185/185**,
   fascicoli 12/12, typecheck api + test, lint.
+
+  ✅ **F4h FATTA — 2026-08-19 (S1074), CON LA PROVA LIVE.** `agent-gateway/research-propose.ts`
+  (endpoint di proposta, dietro un segreto: se non e' configurato **l'endpoint non esiste**) e
+  `research/sorgenti/gateway.ts` lato API. **Due giri, e il secondo vede solo cio' che il primo ha
+  aperto**: se chi propone potesse citare un indirizzo che nessuno ha letto, la proposta
+  porterebbe una fonte **senza impronta**. Chi propone **non ha strumenti** (`allowedTools` vuoto,
+  nessun MCP, nessun `settingSources`): riceve testo e restituisce JSON.
+
+  🔬 **LA CORSA VERA, 2026-08-19 20:21 UTC** — fascicolo `RTL-BANK-CONFIG` v1, attore
+  `enzo.spenuso@heuresys.com`, dominio `research_sources`, fornitore `agent-gateway`
+  sull'abbonamento. **8 pagine web vere lette, 0 non aperte**; **1 proposta `PASSED`** —
+  `bancaditalia.it|64.19`, classe `INSTITUTIONAL` — con **due evidenze** (la circolare 285 e la
+  pagina degli albi), impronte SHA-256 vere e data di lettura. Tutti i controlli verdi, e
+  `SOURCES_POLICY` **`SKIPPED` con la ragione scritta** invece di un `PASSED` che avrebbe fatto
+  credere che il confronto fosse avvenuto. Corsa `79750f14-bf7c-45af-bd79-f1883fccc6e1`,
+  consultabile dall'API. **Quota del primo giro: 1 proposta su 8 pagine** — il numero si scrive
+  qualunque sia (epica §8.2), ed e' conservativo.
+
+  🔬 **LA PRIMA CORSA VERA HA ACCESO UN ALLARME FALSO, ed e' il reperto piu' utile.**
+  La sentinella `v_research_evidence_source_not_approved` e' diventata **rossa su 2 righe**, e
+  aveva ragione alla lettera: `bancaditalia.it` non e' nel registro delle fonti. Ma il registro
+  **non poteva** contenerla — e' il dominio `research_sources` che lo costruisce, ed e' esentato
+  dal confronto proprio per questo (§4.3). Un allarme che si accende su un fatto legittimo **al
+  primo uso** e' il difetto `#194`: una sentinella rossa a riposo smette di essere letta in due
+  giorni. Corretto con la coppia ADR-0035 — `000333` emendata alla fonte + mig. **`000334`** per
+  l'esemplare esistente — e l'esenzione e' **nominata**, non generica: la migrazione **prova sul
+  vivo** che la sentinella si accende ancora su un altro dominio con fonte sconosciuta, e tace
+  solo su `research_sources`. Prova generale **VERDE** (309 migrazioni, due passate, 23/23
+  sentinelle); in produzione: `tutto nei limiti`.
+
+  ✅ Sabotaggio: passare al secondo giro anche le pagine mai aperte -> **2** casi rossi. 6 casi
+  nuovi, suite unit **191/191**, typecheck api + gateway + test, lint.
 
   **Confine di sessione dichiarato**: F4 e' otto sotto-passi con commit atomici. Si va avanti
   finche' il guardiano regge; cio' che non entra resta dichiarato qui, non lasciato a meta'.

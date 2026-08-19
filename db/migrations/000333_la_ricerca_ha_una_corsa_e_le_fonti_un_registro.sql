@@ -285,6 +285,14 @@ SELECT e.seed_source_evidence_id,
   JOIN sys.sys_seed_candidate_records c
     ON c.seed_candidate_record_id = e.seed_source_evidence_candidate_id
  WHERE e.seed_source_evidence_url ~* '^https?://'
+   -- ⚠ IL DOMINIO CHE COSTRUISCE IL REGISTRO NON E' SOGGETTO AL REGISTRO. `research_sources`
+   -- e' la prima ondata di §4.3: le sue fonti non si confrontano con un elenco che nasce
+   -- proprio da quella corsa, e il filtro e' l'approvazione umana, una fonte per volta.
+   -- Senza questa riga la sentinella si accende su un fatto LEGITTIMO al primo uso — e' il
+   -- difetto `#194`, l'allarme che insegna a non guardare gli allarmi. Misurato il
+   -- 2026-08-19 sulla prima corsa vera: 2 righe rosse su due evidenze corrette.
+   -- L'esenzione e' NOMINATA, non generica: ogni altro dominio resta vigilato.
+   AND c.seed_candidate_record_domain <> 'research_sources'
    AND NOT EXISTS (
      SELECT 1 FROM sys.sys_research_sources s
       WHERE s.research_source_status <> 'REJECTED'

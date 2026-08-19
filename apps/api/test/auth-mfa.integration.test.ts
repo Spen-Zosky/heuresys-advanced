@@ -21,6 +21,13 @@ import { sharedMfaService } from "../src/modules/auth/mfa-service.js";
 import * as mfaRepo from "../src/modules/auth/mfa-repository.js";
 import { passwordFor } from "./helpers/personas.js";
 
+import { senzaCacheDiSessione } from "./helpers/session-cache.js";
+
+// Z-251 F2 — questo file esercita il FLUSSO di autenticazione (login, MFA, rotazione del
+// refresh): una sessione presa da un altro file proverebbe qualcosa che il test non sta
+// chiedendo. Qui i login sono veri, sempre.
+senzaCacheDiSessione();
+
 const MFA_EMAIL = "antonio.parisi@rtl-bank.org";
 const MFA_PASSWORD = passwordFor(MFA_EMAIL);
 

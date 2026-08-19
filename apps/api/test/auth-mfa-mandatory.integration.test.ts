@@ -26,6 +26,13 @@ import { COOKIES } from "../src/config/constants.js";
 import { passwordFor } from "./helpers/personas.js";
 import { actorWithoutMfaFactor, tenantAdmin, type Actor } from "./helpers/actors.js";
 
+import { senzaCacheDiSessione } from "./helpers/session-cache.js";
+
+// Z-251 F2 — questo file esercita il FLUSSO di autenticazione (login, MFA, rotazione del
+// refresh): una sessione presa da un altro file proverebbe qualcosa che il test non sta
+// chiedendo. Qui i login sono veri, sempre.
+senzaCacheDiSessione();
+
 // Gli attori si scelgono per CARATTERISTICA (test/helpers/actors.ts), non per
 // nome: a questo file serve "un utente col ruolo su cui la policy è scoped e
 // senza secondo fattore" e "un utente dello STESSO tenant con un ruolo fuori

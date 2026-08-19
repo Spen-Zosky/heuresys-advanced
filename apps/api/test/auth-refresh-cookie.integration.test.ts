@@ -26,6 +26,13 @@ import {
 import { closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
+import { senzaCacheDiSessione } from "./helpers/session-cache.js";
+
+// Z-251 F2 — questo file esercita il FLUSSO di autenticazione (login, MFA, rotazione del
+// refresh): una sessione presa da un altro file proverebbe qualcosa che il test non sta
+// chiedendo. Qui i login sono veri, sempre.
+senzaCacheDiSessione();
+
 const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
 const ADMIN_PASSWORD = TEST_PERSONA_PASSWORD;
 

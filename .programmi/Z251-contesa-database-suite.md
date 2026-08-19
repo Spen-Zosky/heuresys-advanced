@@ -32,6 +32,37 @@ che per questo ha alzato i limiti due volte.
 una taratura.** Alzare ancora i timeout non è una cura: è la terza volta che si sposta la soglia
 invece di togliere la causa.
 
+
+## Simulazione di F2 (R24 §3) — misurata il 2026-08-19, prima di scrivere una riga
+
+Strumento della misura: `apps/api/scripts/profilo-costo-avvio.mts` (creato qui, resta).
+
+| domanda | risposta misurata |
+|---|---|
+| **Precondizioni** | L'access token e' un **JWT stateless**: in `src/` non esiste nessuna `sys_auth_sessions` — le tabelle auth sono 14 e la sola di sessione e' `sys_auth_refresh_tokens` (opaca, su DB). Quindi un token emesso dentro la transazione di un file **resta valido dopo il rollback**, ed e' cio' che rende possibile condividerlo. TTL access **15 min** (`ACCESS_JWT_TTL_SECONDS`), CSRF 24 h. |
+| **Meccanismo** | Cache di sessioni dentro `loginRaw`, **persistita su disco**: `tx-isolation.ts` dichiara che «Vitest isolates the module graph per file», quindi una `Map` in memoria non sopravvive al passaggio di file. Chiave = email; validita' letta dall'`exp` del JWT meno un margine. |
+| **Propagazione** | Il file di cache vive sotto `node_modules/.cache/`: non versionato, non propagato ai cloni, azzerato dal `globalSetup` a ogni corsa. |
+| **Chi** | Io, per intero. Nessun input di Enzo. |
+| **Guardia** | Non e' distruttiva. Le guardie sono tre: mai servire un token entro il margine di scadenza · mai cachare una password **esplicita** (i test del rifiuto devono restare veri) · i **6 file** che esercitano il flusso di autenticazione ne stanno fuori per dichiarazione, e un cancello meccanico verifica che chi tocca il refresh l'abbia dichiarato. |
+
+### Il costo del rito, misurato (mediane su 3 giri, DB di produzione via tunnel)
+
+| pezzo | costo | quante volte |
+|---|---:|---|
+| `loadRolePermissionCache()` | **82 ms** | 1 per file × 255 file |
+| `buildApp() + ready()` | **260 ms** | 1 per file × 255 file |
+| **login completo** (Argon2id ×2 + TOTP step-2) | **753 ms** | ~**670 invocazioni** scritte nei test |
+| query singola (riferimento tunnel) | 59 ms | — |
+
+**Il login e' il costo aggredibile piu' grande**: ~670 × 753 ms ≈ **504 s**, cioe' il **27%** dei 1834 s
+della corsa integrale. Le email distinte sono **7** (`federica.marchetti` 135 · `enzo.spenuso` 118 ·
+`tommaso.fiore` 74 · `paolo.caputo` 60 · `antonio.parisi` 18 · `marco.rinaldi` 3 ·
+`alberto.rossetti` 1). Con l'access TTL di 15 min su una corsa da ~30 min, i login necessari
+scendono a **~7 email × 3 rinnovi ≈ 21**, contro ~670.
+
+⚠ **Cio' che questa misura NON promette**: la voce non si chiude sul tempo, si chiude sui rossi da
+contesa. Il tempo risparmiato e' il mezzo (meno round-trip, meno hash concorrenti), non il fine.
+
 ## Fasi
 
 - [x] **F1 Riprodurre la contesa a comando** — FATTO 2026-08-19 · **NON SI RIPRODUCE con il carico
@@ -58,12 +89,40 @@ invece di togliere la causa.
       togliere i login ripetuti riduce il **numero** di round-trip e di hash, che è ciò su cui si
       può agire. Gli 86 ms restano un fatto misurato e utile — spiegano perché una soglia possa
       essere superata per caso su un file qualunque — ma non spiegano il totale.
-- [ ] **F2 Le sessioni condivise fra file di test** — budget ~80k
-      Il lavoro vero: togliere i login ripetuti invece di allargare i limiti. Perimetro
-      `apps/api/test/**` + `apps/api/vitest.config.ts`.
-- [ ] **F3 Riabbassare i limiti alzati due volte** — budget ~20k
-      È la prova che la causa è andata via: se i limiti devono restare alti, la cura non ha
-      funzionato e va detto.
+- [x] **F2 Le sessioni condivise fra file di test** — FATTO 2026-08-19 · **campione di 12 file:
+      233,62 s → 177,67 s (-24%), 96/96 test verdi in entrambe le corse, e i login veri passano
+      da 79 invocazioni a 11.** Meccanismo: `test/helpers/session-cache.ts` — una sessione per
+      email, persistita sotto `node_modules/.cache/` perché il module graph è isolato per file,
+      con scadenza letta dall'`exp` del JWT e margine di 120 s. Azzerata a ogni corsa dal
+      `globalSetup` (`session-cache-reset.ts`). Le prove: 16 unit + 3 di cancello + 5 di
+      integrazione, e **tre sabotaggi che le hanno fatte diventare rosse** (tolto il margine di
+      scadenza → 2 rossi · accettata una risposta non-200 → 1 rosso · tolta la dichiarazione a un
+      file auth → il cancello lo nomina). Il caso che regge tutta la fase è provato sul vivo: una
+      sessione cachata autentica `/v1/me/profile` su **un'altra istanza dell'app** (200), cioè il
+      JWT sopravvive al rollback della transazione di file. I 6 file che esercitano
+      l'autenticazione ne stanno fuori per dichiarazione: 48/48 verdi.
+      🔬 **Una mia misura preparatoria era incompleta**: avevo scritto «7 email distinte» contando
+      i letterali nei sorgenti. Il solo campione di 12 file ne ha usate **11** — gli altri attori
+      arrivano da `actors.ts`/`org-actors.ts`, che li scelgono per CARATTERISTICA interrogando il
+      database, e nei sorgenti non compaiono come stringhe. Il risparmio sulla corsa integrale
+      dipende da quanti attori distinti tocca, quindi **non si estrapola dal campione**: lo dirà
+      la corsa in CI.
+- [x] **F3 Riabbassare i limiti alzati due volte** — FATTO 2026-08-19 · `testTimeout` **40s → 20s**
+      e `hookTimeout` **120s → 30s**, cioè i valori di prima dei due aggiramenti di S1045.
+      Verificato in locale su **16 file / 139 test, tutti verdi** (i 12 del campione + i 3 auth
+      più pesanti + la prova della cache), 259,51 s.
+      ⚠ **Questa non è ancora la prova che la voce chiede.** «Chiuso quando» pretende corse
+      **ripetute** della suite INTEGRALE con i limiti bassi, e una corsa locale integrale dura
+      ~30 min contendendo il database di produzione. La prova vera è la CI, che esegue
+      `Test (api integration)` su runner self-hosted off-prod: si legge lì, corsa per corsa, e il
+      numero di corse verdi si scrive qui sotto.
+- [ ] **F4 La serie di corse verdi che chiude la voce** — budget ~15k (in gran parte attesa)
+      Il «Chiuso quando» di questa voce pretende corse **ripetute**, e nessuna delle tre fasi
+      precedenti la copriva: era un difetto di decomposizione del piano, trovato dallo strumento
+      (`programmi.py --verifica` diceva «3/3 spuntate ma stato IN CORSO» — e aveva ragione sulla
+      forma). Si legge la CI corsa per corsa e si riempie il contatore in fondo al file: **3 corse
+      consecutive verdi** con i limiti a 20s/30s, poi la voce si chiude. Un rosso da tempo
+      significa che la cura non è bastata, e va scritto invece che tarato.
 
 ## Il reperto di F1 che resta valido, e quello che non regge (2026-08-19)
 
@@ -84,3 +143,13 @@ round-trip — le due cose su cui si può davvero agire.
 
 La suite gira ripetutamente senza cadute da contesa **con i limiti riportati ai valori di prima
 degli aggiramenti**, e il numero di corse su cui è stato verificato è scritto.
+
+### Il contatore delle corse integrali verdi con i limiti bassi (20s / 30s)
+
+> Si aggiorna leggendo la CI, non a memoria: `gh run list --workflow=test-integration.yml`.
+> Una corsa verde non chiude la voce — il fenomeno che insegue **non si riproduce a comando**,
+> quindi serve una serie. Soglia dichiarata: **3 corse consecutive verdi**.
+
+| # | data | commit | esito | note |
+|---|---|---|---|---|
+| — | in attesa della prima corsa dopo il push di F2+F3 | | | |

@@ -31,38 +31,30 @@ export default defineConfig({
     // (vitest.unit.config.ts, no DB/setup) — esclusi qui per non girare due volte.
     exclude: ["test/unit/**", "**/node_modules/**"],
     environment: "node",
-    // [S1045] Alzati da 20s/30s dopo due run interi della suite che hanno prodotto
-    // rossi DIVERSI per la stessa ragione: `gdpr` oltre i 20s di test nel primo,
-    // `user-career-plans-scope` oltre i 30s di hook nel secondo. Entrambi passano da
-    // soli (user-career-plans: 7/7 in 37s) — a cadere non era la logica ma il tempo.
+    // [Z-251 F3, 2026-08-19] RIPORTATO a 20s, il valore di prima degli aggiramenti.
     //
-    // Perche' non e' un cerotto: la suite gira SERIALE contro il PostgreSQL della VM
-    // via tunnel SSH e dura ~37 minuti; un `beforeAll` che fa cinque login reali
-    // (Argon2id, lento per costruzione) e' legittimamente lento quando il DB e' sotto
-    // il carico degli altri 231 file. Un limite tarato sull'esecuzione isolata
-    // trasforma la lentezza in rossi intermittenti — e un rosso che non indica un
-    // difetto e' peggio di nessun rosso, perche' insegna a non guardarlo.
-    testTimeout: 40_000,
-    // [S1045] SECONDA taratura della stessa giornata, e va detto: 30s -> 60s non e'
-    // bastato. Con `assessments` il conto e' esplicito — da solo: 5 test verdi in
-    // 19s totali, di cui 7s di test veri e un `beforeAll` con TRE login. In suite
-    // intera lo stesso hook supera i 60s: oltre OTTO VOLTE piu' lento.
+    // Storia, perche' il numero non torni a salire per abitudine: era 20s; S1045 lo porto'
+    // a 40s dopo due corse intere con rossi DIVERSI per la stessa ragione (`gdpr` oltre i
+    // 20s di test, `user-career-plans-scope` oltre i 30s di hook), entrambi verdi da soli.
+    // La causa non era la logica, era il tempo — e il tempo veniva dai login ripetuti.
     //
-    // Non e' il file a essere lento, e' il PostgreSQL remoto sotto il carico degli
-    // altri 231 file (la suite dura ~40 minuti, di cui 549s solo di import). 120s
-    // copre il degrado misurato con margine.
+    // F2 ha tolto la causa: le sessioni sono condivise fra file (`helpers/session-cache.ts`),
+    // e su un campione di 12 file i login veri passano da 79 a 11, la corsa da 233,62 s a
+    // 177,67 s. Questo abbassamento E' LA PROVA di quel lavoro: se la suite integrale torna
+    // a cadere sul tempo, la cura non e' bastata e va detto, non aggirato una terza volta.
+    testTimeout: 20_000,
+    // [Z-251 F3, 2026-08-19] RIPORTATO a 30s. Era stato alzato DUE volte nella stessa
+    // giornata (S1045: 30s -> 60s, non basto', -> 120s) e la seconda volta il commento
+    // chiudeva cosi': «la causa strutturale resta aperta: ogni file rifa' i login da zero
+    // e Argon2id e' lento per costruzione. Condividere le sessioni fra file e' il lavoro
+    // che toglierebbe la necessita' di questi limiti, e non e' una taratura».
     //
-    // Perche' non maschera un difetto: un hook che si blocca davvero non finisce
-    // nemmeno in due minuti, quindi il limite continua a intercettarlo. Cio' che
-    // smette di intercettare e' la lentezza — che non e' mai stata un difetto e
-    // produceva rossi su un file DIVERSO a ogni esecuzione (gdpr, poi
-    // user-career-plans, poi assessments): la firma inconfondibile del tempo, non
-    // della logica.
-    //
-    // La causa strutturale resta aperta: ogni file rifa' i login da zero e Argon2id
-    // e' lento per costruzione. Condividere le sessioni fra file e' il lavoro che
-    // toglierebbe la necessita' di questi limiti, e non e' una taratura.
-    hookTimeout: 120_000,
+    // Quel lavoro e' stato fatto (Z-251 F2). Il caso peggiore che il limite deve coprire
+    // e' cambiato: non piu' un `beforeAll` con cinque login veri (5 x 753 ms misurati, piu'
+    // il degrado sotto carico), ma il PRIMO file che incontra un attore mai visto nella
+    // corsa — uno o due login, non cinque. 30s copre quel caso; se non lo coprisse, il
+    // rosso e' un'informazione, non un fastidio da tarare.
+    hookTimeout: 30_000,
     // Integration tests share a single DB pool — serial avoids
     // refresh-rotation race conditions across tests.
     // Vitest 4 migration (2026-05-26): poolOptions removed; use top-level
@@ -87,6 +79,13 @@ export default defineConfig({
     // prendono questo lucchetto: se girano in parallelo, le righe che lasciano possono
     // finire nel drift di questa corsa. E' un limite noto, non una svista — dirlo qui
     // vale piu' che lasciar credere una protezione che non c'e'.
-    globalSetup: ["./test/helpers/suite-lock.ts", "./test/helpers/drift-check.ts"],
+    // Z-251 F2: `session-cache-reset` sta PRIMO — deve azzerare la cache delle sessioni
+    // prima che qualunque file possa leggerla, e non ha teardown, quindi la sua posizione
+    // non altera l'ordine inverso che lega `drift-check` al lucchetto.
+    globalSetup: [
+      "./test/helpers/session-cache-reset.ts",
+      "./test/helpers/suite-lock.ts",
+      "./test/helpers/drift-check.ts",
+    ],
   },
 });

@@ -21,6 +21,13 @@ import { InMemoryMailer } from "../src/modules/auth/mailer.js";
 import { sharedEmailRateLimiter } from "../src/modules/auth/email-rate-limit.js";
 import { passwordFor } from "./helpers/personas.js";
 
+import { senzaCacheDiSessione } from "./helpers/session-cache.js";
+
+// Z-251 F2 — questo file esercita il FLUSSO di autenticazione (login, MFA, rotazione del
+// refresh): una sessione presa da un altro file proverebbe qualcosa che il test non sta
+// chiedendo. Qui i login sono veri, sempre.
+senzaCacheDiSessione();
+
 function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }

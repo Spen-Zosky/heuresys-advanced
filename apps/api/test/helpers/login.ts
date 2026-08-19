@@ -20,6 +20,7 @@ import * as OTPAuth from "otpauth";
 import type { Pool } from "pg";
 import { E2E_FIXTURE_LABEL, FIXTURE_TOTP_SECRETS } from "./mfa-fixture-secrets.js";
 import { passwordFor, TEST_PERSONA_PASSWORD } from "./personas.js";
+import { contaLoginVero, leggiSessione, salvaSessione } from "./session-cache.js";
 
 /** Anything with a Fastify-style inject() (the TestApp's instance). */
 interface Injectable {
@@ -35,6 +36,27 @@ interface InjectResponse {
   cookies: Array<{ name: string; value: string }>;
   headers: Record<string, string | string[] | number | undefined>;
   json(): unknown;
+}
+
+/**
+ * Z-251 F2 — ricostruisce la forma di una risposta `inject` da una sessione salvata.
+ * I 190 file che passano di qui leggono `statusCode`, `cookies`, `headers` e `json()`:
+ * l'oggetto deve offrirli tutti e quattro, o il riuso si vedrebbe come un guasto altrove.
+ * `json()` ri-analizza il body a ogni chiamata, esattamente come fa Fastify.
+ */
+function rispostaDaCache(s: {
+  statusCode: number;
+  body: string;
+  cookies: Array<{ name: string; value: string }>;
+  headers: Record<string, string | string[] | number | undefined>;
+}): InjectResponse {
+  return {
+    statusCode: s.statusCode,
+    body: s.body,
+    cookies: s.cookies,
+    headers: s.headers,
+    json: () => JSON.parse(s.body) as unknown,
+  };
 }
 
 /** Current TOTP code for a fixture persona (server validates with ±1 window). */
@@ -68,12 +90,25 @@ export async function loginRaw<A extends Injectable>(
   // Z-262: assente o segnaposto → si deriva dall'email dell'utente che stiamo
   // autenticando. Una password esplicita e diversa passa invariata: i test che
   // verificano il RIFIUTO di una password sbagliata devono continuare a farlo.
-  const pw =
-    password === undefined || password === TEST_PERSONA_PASSWORD ? passwordFor(email) : password;
+  const derivata = password === undefined || password === TEST_PERSONA_PASSWORD;
+  const pw = derivata ? passwordFor(email) : password;
+
+  // Z-251 F2: la sessione condivisa. Solo per la password DERIVATA — con una password
+  // esplicita il chiamante sta provando il comportamento del login, non usandolo per
+  // arrivare altrove, e servirgli una sessione già pronta risponderebbe a una domanda
+  // diversa da quella posta. L'access token è un JWT stateless: resta valido anche dopo
+  // il rollback della transazione del file che lo ha ottenuto (D-52).
+  if (derivata) {
+    const salvata = leggiSessione(email);
+    if (salvata) return rispostaDaCache(salvata) as Awaited<ReturnType<A["inject"]>>;
+  }
+  if (derivata) contaLoginVero(email);
+
   const r1 = await app.inject({ method: "POST", url: "/v1/auth/login", payload: { email, password: pw } });
   if (r1.statusCode !== 200) throw new Error(`login ${email}: ${r1.statusCode}`);
   const b1 = r1.json() as { status?: string; challengeToken?: string };
   if (b1.status === "success" || b1.status === undefined) {
+    if (derivata) salvaSessione(email, r1);
     return r1 as Awaited<ReturnType<A["inject"]>>;
   }
   if (b1.status === "mfa_required") {
@@ -92,6 +127,7 @@ export async function loginRaw<A extends Injectable>(
         `login ${email}: TOTP step-2 failed (${r2.statusCode} ${JSON.stringify(b2)}; x-request-id=${String(reqId)} — per il 500 intermittente D-55 cerca "Unhandled error" con questo reqId nel log del run)`,
       );
     }
+    if (derivata) salvaSessione(email, r2);
     return r2 as Awaited<ReturnType<A["inject"]>>;
   }
   if (b1.status === "mfa_enrollment_required") {

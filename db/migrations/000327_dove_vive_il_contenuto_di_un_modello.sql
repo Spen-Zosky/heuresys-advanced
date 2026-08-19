@@ -116,8 +116,14 @@ CREATE TABLE IF NOT EXISTS sys.sys_blueprint_content_skills (
   CONSTRAINT sys_blueprint_content_skills_uq UNIQUE (blueprint_content_skill_version_id, blueprint_content_skill_code),
   -- Il vocabolario è quello che `sys_skills.skill_kind` usa già: un modello che dichiarasse
   -- una specie che il prodotto non conosce non sarebbe costruibile.
+  -- ⚠ EMENDATO dalla `000328` (#132 F2): questa riga diceva
+  -- `('SKILL','KNOWLEDGE','COMPETENCE','LANGUAGE','CERTIFICATION')`, cioè NON il vocabolario
+  -- di `sys_skills` — la frase qui sopra era vera come intenzione e falsa come contenuto.
+  -- `LANGUAGE` e `CERTIFICATION` passavano il cancello e non erano costruibili; `BEHAVIOR`
+  -- e `OTHER`, che il prodotto conosce, erano vietati al modello. Corretto qui per i
+  -- database nuovi, e nella `000328` per quelli che esistono già (ADR-0035).
   CONSTRAINT sys_blueprint_content_skills_specie_ck
-    CHECK (blueprint_content_skill_kind IN ('SKILL','KNOWLEDGE','COMPETENCE','LANGUAGE','CERTIFICATION'))
+    CHECK (blueprint_content_skill_kind IN ('SKILL','KNOWLEDGE','COMPETENCE','BEHAVIOR','OTHER'))
 );
 CREATE INDEX IF NOT EXISTS sys_blueprint_content_skills_versione_idx
   ON sys.sys_blueprint_content_skills (blueprint_content_skill_version_id);
@@ -136,8 +142,10 @@ CREATE TABLE IF NOT EXISTS sys.sys_blueprint_content_kpis (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT sys_blueprint_content_kpis_uq UNIQUE (blueprint_content_kpi_version_id, blueprint_content_kpi_code),
+  -- ⚠ EMENDATO dalla `000328` (#132 F2): diceva `TARGET_IS_BEST`, che nel prodotto non
+  -- esiste — `sys_kpi_definitions.kpi_definition_polarity` ammette `TARGET_RANGE`.
   CONSTRAINT sys_blueprint_content_kpis_verso_ck
-    CHECK (blueprint_content_kpi_direction IN ('HIGHER_IS_BETTER','LOWER_IS_BETTER','TARGET_IS_BEST'))
+    CHECK (blueprint_content_kpi_direction IN ('HIGHER_IS_BETTER','LOWER_IS_BETTER','TARGET_RANGE'))
 );
 CREATE INDEX IF NOT EXISTS sys_blueprint_content_kpis_versione_idx
   ON sys.sys_blueprint_content_kpis (blueprint_content_kpi_version_id);

@@ -26,7 +26,7 @@
 import type { PoolClient } from "pg";
 import type { ApprovalRequestRow } from "../repository.js";
 import { ConflictError } from "../../../errors/index.js";
-import { ArchetypeBuildSource } from "../../tenant-materialization/build-source.js";
+import { resolveBuildSource } from "../../tenant-materialization/blueprint-build-source.js";
 import { materialize } from "../../tenant-materialization/repository.js";
 
 export const TENANT_BLUEPRINT_APPLICATION = "TENANT_BLUEPRINT_APPLICATION";
@@ -46,6 +46,8 @@ interface VersioneRow {
   tenant_blueprint_id: string;
   tenant_blueprint_tenant_id: string | null;
   build_source_key: string | null;
+  /** La versione di MODELLO ancorata: è lì che vive il contenuto (#132 F2). */
+  variant_version_id: string | null;
 }
 
 export async function applyTenantBlueprintApplication(
@@ -86,7 +88,8 @@ export async function applyTenantBlueprintApplication(
                   WHERE b.tenant_blueprint_id = v.tenant_blueprint_version_blueprint_id) AS tenant_blueprint_tenant_id,
                 (SELECT vv.blueprint_variant_version_build_source_key
                    FROM sys.sys_blueprint_variant_versions vv
-                  WHERE vv.blueprint_variant_version_id = v.tenant_blueprint_version_variant_version_id) AS build_source_key`,
+                  WHERE vv.blueprint_variant_version_id = v.tenant_blueprint_version_variant_version_id) AS build_source_key,
+                v.tenant_blueprint_version_variant_version_id AS variant_version_id`,
     [versionId],
   );
   if (applicato.rowCount !== 1) {
@@ -126,7 +129,10 @@ export async function applyTenantBlueprintApplication(
       "APPLY_EFFECT_FAILED",
     );
   }
-  const sorgente = ArchetypeBuildSource.fromKey(chiave);
+  // ⚠ La sorgente si risolve, non si sceglie qui: `resolveBuildSource` è l'unico posto in cui
+  //   una chiave diventa un modo di costruire (#132 F2). Quando `F3` ritirerà l'archetipo,
+  //   questa riga non cambierà — sparirà un ramo dentro quella funzione.
+  const sorgente = resolveBuildSource(client, chiave, versione.variant_version_id);
   if (!sorgente) {
     throw new ConflictError(`Sorgente di costruzione sconosciuta: ${chiave}`, "APPLY_EFFECT_FAILED");
   }

@@ -70,13 +70,28 @@ export async function findTenantStatus(q: DbConnector, tenantId: string): Promis
   return res.rows[0]?.tenant_status ?? null;
 }
 
-async function orgUnitTypeId(client: PoolClient, code: string, cache: Map<string, string | null>): Promise<string | null> {
-  if (cache.has(code)) return cache.get(code)!;
+async function orgUnitTypeId(client: PoolClient, code: string, cache: Map<string, string>): Promise<string> {
+  const memorizzato = cache.get(code);
+  if (memorizzato !== undefined) return memorizzato;
   const res = await client.query<{ organization_unit_type_id: string }>(
     `SELECT organization_unit_type_id FROM sys.sys_organization_unit_types WHERE organization_unit_type_code = $1`,
     [code],
   );
   const id = res.rows[0]?.organization_unit_type_id ?? null;
+  // ⚠ UN TIPO IGNOTO NON DIVENTA PIU' `NULL` IN SILENZIO (#132 F2, S1072). La colonna
+  //   `organization_unit_type_id` e' nullable: finche' questa funzione tornava `null`, un
+  //   modello che dichiarava un tipo inesistente faceva nascere un'unita' SENZA TIPO e la
+  //   costruzione riusciva. Con l'archetipo scritto a mano non poteva succedere — i suoi sei
+  //   tipi erano corretti per costruzione; con un contenuto che nasce dalla ricerca (E29) e'
+  //   il primo errore che ci si aspetta, ed e' proprio quello che non si vedeva.
+  //   `BlueprintBuildSource` lo intercetta PRIMA di costruire, con un messaggio che elenca i
+  //   tipi ignoti; questa e' la seconda rete, per le sorgenti che non lo fanno.
+  if (id === null) {
+    throw new ConflictError(
+      `Tipo di unita' organizzativa sconosciuto: ${code}. Il catalogo e' sys.sys_organization_unit_types.`,
+      "ORG_UNIT_TYPE_UNKNOWN",
+    );
+  }
   cache.set(code, id);
   return id;
 }
@@ -107,14 +122,30 @@ export async function materialize(
   // niente, quindi non c'e' niente da registrare — e un elenco pieno in sola lettura
   // sarebbe una bugia comoda.
   const records: CreatedRecord[] = [];
-  const typeCache = new Map<string, string | null>();
+  const typeCache = new Map<string, string>();
   const codeToId = new Map<string, string>(); // org-unit code → id (apply: for position FK)
   let orgUnitsCreated = 0;
 
   for (const ou of plan.orgUnits) {
     if (mode === "apply") {
       const typeId = await orgUnitTypeId(client, ou.type, typeCache);
-      const parentId = ou.parentCode ? codeToId.get(ou.parentCode) ?? null : null;
+      // ⚠ IL PADRE DICHIARATO E NON RISOLTO ERA UN ALBERO MUTILATO IN SILENZIO (#132 F2).
+      //   La mappa `codeToId` si riempie man mano: se un figlio arriva prima del padre,
+      //   `get()` torna `undefined` e la vecchia riga lo trasformava in `null` — l'unita'
+      //   nasceva IN CIMA all'albero, e l'atto risultava riuscito. `BlueprintBuildSource`
+      //   ordina topologicamente proprio per questo; qui si verifica che l'ordine sia
+      //   davvero arrivato buono, invece di fidarsene.
+      let parentId: string | null = null;
+      if (ou.parentCode) {
+        parentId = codeToId.get(ou.parentCode) ?? null;
+        if (parentId === null) {
+          throw new ConflictError(
+            `L'unita' ${ou.code} dichiara il padre ${ou.parentCode}, che non e' stato costruito prima di lei: ` +
+              `il piano non e' ordinato padri-prima-dei-figli, oppure quel codice non esiste nel modello.`,
+            "BUILD_PLAN_PARENT_UNRESOLVED",
+          );
+        }
+      }
       const ins = await client.query<{ organization_unit_id: string }>(
         `INSERT INTO sys.sys_organization_units
            (organization_unit_tenant_id, organization_unit_code, organization_unit_name,

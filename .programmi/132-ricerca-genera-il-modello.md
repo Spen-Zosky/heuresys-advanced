@@ -154,9 +154,57 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   «aggiungo una colonna a una tabella che regge»: è dare una casa al contenuto di un modello, con
   la chiave naturale per dominio e il legame alla **versione**, e decidere delle 225 (bonifica o
   ragione scritta). ⚠ `ci-rehearsal.sh` sul linux-pc prima del push
-- [ ] **F2 `BlueprintBuildSource`** — la seconda implementazione di `BuildSource`: il `BuildPlan` si
-  legge dal database. La `justification` diventa **la proposta approvata che ha generato la riga**,
-  e il registro dell'origine diventa una catena completa fino alla fonte web
+- [x] **F2 `BlueprintBuildSource`** — **FATTO 2026-08-19 (S1072)** · `blueprint-build-source.ts`
+  legge le quattro tabelle di contenuto della versione di variante e ne fa un `BuildPlan`;
+  `resolveBuildSource()` e' **l'unico posto** in cui una chiave diventa un modo di costruire —
+  innestato nell'atto (`#198` T5) e nell'anteprima (T6), cosi' che `F3` sia una **rimozione** e
+  non una riscrittura. La `justification` si legge da `metadata->>'justification'` (che `F4`/`F6`
+  riempiranno con la proposta approvata) e **non se ne inventa una** quando manca: si dice da
+  quale modello e versione viene la riga. `incumbents: []` — un modello descrive la forma, non
+  le persone; inventarle farebbe nascere ogni azienda con lo stesso organico fittizio, cioe' il
+  difetto di E29 con un altro nome. Prove: **16/16** integrazione (nuovo file) · 43/43 sui
+  fascicoli e i modelli · 19/19 sul motore · typecheck api + test · lint monorepo.
+
+  🔬 **QUATTRO DIFETTI CHE SOLO IL PRIMO CODICE CHE COSTRUISCE DAVVERO POTEVA VEDERE.** Nessuno
+  era visibile finche' il contenuto lo scriveva a mano un archetipo corretto per costruzione:
+
+  ① **L'ordine delle unita' non era un dettaglio.** `materialize` risolve il padre da una mappa
+  `codice → id` che riempie *man mano*: un figlio che arriva prima del padre otteneva
+  `undefined`, che il codice trasformava in `null` — e l'unita' **nasceva in cima all'albero
+  senza che nessuno protestasse**. Un `SELECT` non ha un ordine buono per costruire un albero.
+  Ora la sorgente ordina **topologicamente** e un ciclo `A → B → A` diventa un errore (il
+  `CHECK` della `000327` vieta solo `A → A`); il motore ha la **seconda rete**
+  (`BUILD_PLAN_PARENT_UNRESOLVED`) invece di accettare un padre irrisolto.
+
+  ② **Un tipo di unita' ignoto era silenzioso**: `orgUnitTypeId` tornava `null` e
+  `organization_unit_type_id` e' nullable — l'unita' nasceva senza tipo e la costruzione
+  riusciva. Ora si verifica contro il catalogo **prima** di produrre il piano (l'anteprima
+  `mode:"plan"` non risolve i tipi: senza questo, direbbe «tutto bene» e la costruzione
+  fallirebbe *dopo* la firma), e il motore rifiuta con `ORG_UNIT_TYPE_UNKNOWN`.
+
+  ③ **Il vocabolario della `000327` non era quello del prodotto** → mig. **`000328`** +
+  emendamento della `000327` (ADR-0035: `CREATE IF NOT EXISTS` non ricrea una tabella che c'e',
+  quindi emendare il solo file di origine avrebbe corretto i database nuovi e lasciato intatto
+  quello di produzione). La specie di una competenza ammetteva `LANGUAGE`/`CERTIFICATION`, che
+  `sys_skills` non conosce, e vietava `BEHAVIOR`/`OTHER`, che conosce; il verso di un indicatore
+  ammetteva `TARGET_IS_BEST`, che nel prodotto non esiste. Un modello cosi' **passava il cancello
+  e non era costruibile** — la stessa forma del difetto T9a, che si rompe dopo, dove attribuirlo
+  e' difficile. La post-condizione **confronta i due `CHECK` fra loro** invece di ricopiare un
+  elenco: il giorno in cui `sys_skills` cambia, diventa rossa da sola.
+
+  ④ **`OrgUnitType` enumerava i sei tipi della banca** su un catalogo che ne ha **dieci**:
+  `PLANT` e `WAREHOUSE` — uno stabilimento e un magazzino — **non erano esprimibili**. E' il
+  ⭐ PUNTO FISSO: il catalogo e' una tabella, e un `type` che la ricopia e' una misura variabile
+  cristallizzata. Ora e' `string`, con la verifica dove il dato vive. Il modello seminato nella
+  prova **non e' una banca**: e' un'azienda manifatturiera con uno stabilimento e un magazzino,
+  cosi' che richiudere quell'unione renda il test rosso.
+
+  ✅ **LE PROVE HANNO FALLITO SU RICHIESTA, quattro volte.** Spento il rifiuto del modello vuoto
+  → rosso **solo** il caso dello zero silenzioso; tolto l'ordinamento topologico → rossi **3**
+  casi (ordine, padre inesistente, ciclo); rimesso `TARGET_IS_BEST` nella `000328` → prova
+  generale **ROSSA** col confronto fra i due domini stampato per esteso; e per il lucchetto,
+  due sabotaggi indipendenti (§ fuori ciclo). Prova generale sul linux-pc **VERDE** prima e dopo:
+  303 migrazioni, due passate, 21/21 sentinelle.
 - [ ] **F3 il ritiro, senza lasciare traccia** — via `blueprints.ts` (287 righe), `getArchetype`,
   `archetypeUsers`, `synProficiency`, `synKpiValue`. I test costruiscono da un modello **seminato nel
   test**, non da uno globale: è la differenza fra una fixture e un archetipo mascherato
@@ -184,6 +232,39 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   avviso.
 - **F7.1** — l'azienda del settore diverso **non deve** avere unità che somigliano a filiali
   bancarie. È il modo più utile in cui questo piano può fallire: direbbe che la ricerca non ricerca.
+
+## Fuori da questo ciclo — trovato misurando, presentato una volta sola
+
+Non entra in «cosa resta» di `#132`, non blocca la chiusura di nessuna fase. Enzo decide se e
+quando.
+
+1. **Il dominio «processi» ha DUE case, e una è nata vuota** (misurato S1072).
+   `sys.sys_blueprint_process_registry` **esisteva già**: 23 righe, agganciata alla versione di
+   variante con una FK *composita* `(versione, variante)`, e con tre tabelle che le puntano
+   (`sys_blueprint_overrides`, `sys_content_blueprint_links`, `sys_organization_unit_processes`).
+   `F1` ha creato `sys_blueprint_content_processes` per lo stesso scopo, e oggi è vuota. Non ha
+   ancora fatto danno — il `BuildPlan` non porta processi e il motore non li costruisce — ma **`F5`
+   dovrà scegliere quale delle due è la casa**, e la scelta non è simmetrica: quella vecchia ha già
+   i dati e i referenti, quella nuova ha `owner_position_code` (il presidio per codice di posizione,
+   che l'archetipo esprime con 23 `OWNER` su *unità*). ⚠ Attenzione al modello: le due attribuiscono
+   il processo a cose diverse — una **posizione** contro una **unità**.
+2. **`sys_organization_unit_types.organization_unit_type_code` non ha un vincolo di unicità**, quindi
+   il contenuto di un modello **non può** agganciare il catalogo con una FK: la verifica del tipo
+   resta nel codice (dove il messaggio d'errore serve) invece che nello schema. Aggiungere l'unico
+   più la FK renderebbe il tipo ignoto impossibile invece che intercettato — è materia di `F5`,
+   dove i cinque domini ricercabili prendono forma.
+3. **Il lucchetto della suite bloccava per un PID riciclato** — ⚠ **già corretto in S1072**, perché
+   impediva di verificare qualunque cosa. `.zp/suite.lock` dichiarava il PID `10720` scritto alle
+   02:38; alle 16:50 quel processo era morto da ore e sotto quel numero girava `svchost.exe`.
+   `kill(pid, 0)` rispondeva «vivo» e la suite era inavviabile. Il commento del lucchetto
+   *dichiarava* di gestire i lock stantii: la difesa c'era ed era **falsa**, perché un
+   identificativo che il sistema riusa non identifica nessuno. Ora si verifica anche **che cosa**
+   gira sotto quel numero (`tasklist` / `/proc/<pid>/cmdline`) e c'è una **scadenza** di 3 ore come
+   rete per il caso peggiore, un PID riciclato *da un altro node*. Prova nuova
+   `test/unit/suite-lock.unit.test.ts`, **4 casi**: i due sabotaggi spengono una difesa per volta e
+   ognuno lascia rosso **solo** il caso che quella difesa copre — che è l'unico modo di sapere che
+   sono davvero due, e non una scritta due volte. Il primo caso è **positivo** apposta: senza, tre
+   negativi resterebbero verdi anche con il lucchetto del tutto disattivato.
 
 ## Ordine e intreccio con `#198`
 

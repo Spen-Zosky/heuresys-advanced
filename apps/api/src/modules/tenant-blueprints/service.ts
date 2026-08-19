@@ -28,7 +28,7 @@ import { diffVersions, diffAgainstModelLatest } from "./diff.js";
 import { approvalService } from "../approvals/service.js";
 import { TENANT_BLUEPRINT_APPROVAL } from "../approvals/effects/tenant-blueprint-approval.js";
 import { TENANT_BLUEPRINT_APPLICATION } from "../approvals/effects/tenant-blueprint-application.js";
-import { ArchetypeBuildSource } from "../tenant-materialization/build-source.js";
+import { resolveBuildSource } from "../tenant-materialization/blueprint-build-source.js";
 import { materialize } from "../tenant-materialization/repository.js";
 import type {
   TenantBlueprint,
@@ -511,7 +511,10 @@ export const tenantBlueprintsService = {
         "BLUEPRINT_BUILD_SOURCE_MISSING",
       );
     }
-    const sorgente = ArchetypeBuildSource.fromKey(chiave);
+    // La sorgente si risolve dalla chiave (#132 F2). L'anteprima deve vedere ESATTAMENTE
+    // ciò che l'atto costruirebbe: se qui si risolvesse diversamente, chi firma guarderebbe
+    // un piano e ne otterrebbe un altro.
+    const sorgente = resolveBuildSource(pool, chiave, v.variantVersionId);
     if (!sorgente) {
       throw new ConflictError(`Sorgente di costruzione sconosciuta: ${chiave}`, "BLUEPRINT_BUILD_SOURCE_UNKNOWN");
     }

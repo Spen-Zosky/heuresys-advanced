@@ -30,9 +30,33 @@
  * al contrario — il modulo neutro dipenderebbe da UNA sorgente specifica. Questi valori
  * non appartengono comunque all'archetipo: sono i domini `CHECK` delle colonne (RD-08).
  */
-export type OrgUnitType = "HEADQUARTERS" | "DIVISION" | "DEPARTMENT" | "TEAM" | "BRANCH" | "OFFICE";
+/**
+ * ⚠ IL TIPO DI UN'UNITÀ NON È UN'UNIONE CHIUSA, ed è una correzione di `#132` F2 — non una
+ * rinuncia alla sicurezza dei tipi.
+ *
+ * Questa riga enumerava `HEADQUARTERS | DIVISION | DEPARTMENT | TEAM | BRANCH | OFFICE`:
+ * i **sei** tipi dell'archetipo bancario. Il catalogo vero, `sys.sys_organization_unit_types`,
+ * ne contiene **dieci** — misurato il 2026-08-19 — e i quattro che mancavano sono
+ * `AREA`, `GENERAL_MANAGEMENT`, `PLANT`, `WAREHOUSE`. Cioè: **uno stabilimento e un
+ * magazzino non erano esprimibili**. Finché il contenuto lo scriveva a mano un archetipo
+ * bancario nessuno se ne accorgeva; con la ricerca (E29) la prima azienda manifatturiera
+ * avrebbe scoperto che il piano non sa nominare i suoi capannoni.
+ *
+ * È anche il ⭐ PUNTO FISSO del progetto: il catalogo dei tipi è una **tabella**, e una riga
+ * nuova ci entra con un `INSERT`. Un `type` TypeScript che la ricopia è una misura variabile
+ * cristallizzata in codice — vera il giorno in cui la si scrive, e falsa poco dopo senza che
+ * nessuno se ne accorga.
+ *
+ * La sicurezza non si perde, si SPOSTA dove il dato vive: `BlueprintBuildSource` verifica
+ * ogni tipo contro il catalogo prima di produrre il piano, e `materialize` rifiuta un tipo
+ * che il catalogo non conosce invece di scrivere `NULL` in silenzio (era il comportamento
+ * di `orgUnitTypeId`, e la colonna `organization_unit_type_id` è nullable: un'unità di tipo
+ * ignoto nasceva senza tipo e nessuno protestava).
+ */
+export type OrgUnitType = string;
 export type Criticality = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
-export type SkillKind = "SKILL" | "KNOWLEDGE" | "COMPETENCE" | "BEHAVIOR";
+/** Il dominio di `sys_skills.skill_kind` — cinque valori, `OTHER` compreso (misurato). */
+export type SkillKind = "SKILL" | "KNOWLEDGE" | "COMPETENCE" | "BEHAVIOR" | "OTHER";
 export type KpiPolarity = "HIGHER_IS_BETTER" | "LOWER_IS_BETTER" | "TARGET_RANGE";
 
 /** Una riga pianificata porta sempre con sé la ragione per cui esiste. */

@@ -1,7 +1,7 @@
 # Z-251 — La suite non regge la contesa sul database: un file diverso cade a ogni giro
 
 > **item**: Z-251
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 
 **Perché conta**: rende **rosso un cancello che dovrebbe essere verde**, e costringe ogni volta a
 un lavoro manuale di discriminazione fra ambiente e difetto. Un rosso che non indica un difetto è
@@ -141,7 +141,7 @@ cancello verificava il criterio SBAGLIATO — cercava una firma (`refresh`) inve
 («questo test dipende dall'identità o dai permessi *di questa* sessione»). Un cancello che guarda
 la firma è verde finché nessuno cambia il modo di scrivere la stessa cosa.
 
-- [ ] **F4 La serie di corse verdi che chiude la voce** — budget ~15k (in gran parte attesa)
+- [x] **F4 La serie di corse verdi che chiude la voce** — **FATTA 2026-08-19 (S1072)**: 5 corse consecutive verdi coi limiti a 20s/30s, lette dalla CI. Evidenza e i tre controlli che le rendono contabili → contatore in fondo al file. Budget ~15k (in gran parte attesa)
       Il «Chiuso quando» di questa voce pretende corse **ripetute**, e nessuna delle tre fasi
       precedenti la copriva: era un difetto di decomposizione del piano, trovato dallo strumento
       (`programmi.py --verifica` diceva «3/3 spuntate ma stato IN CORSO» — e aveva ragione sulla
@@ -180,3 +180,30 @@ degli aggiramenti**, e il numero di corse su cui è stato verificato è scritto.
 | — | 2026-08-19 | `7b002359` | **ROSSA — 6 file** | e non contava: erano un difetto MIO, non la contesa. Corretti sopra. Il contatore riparte dal commit che porta il rimedio |
 | **1** | 2026-08-19 | `62d59c45` | **VERDE** | prima corsa integrale con i limiti a 20s/30s **e** la cache attiva. Letta dalla CI (`gh run list`), non dedotta |
 | — | 2026-08-19 | `95e7c2e8` · `049c1f31` | **ROSSE, e non contano** | **un solo caso**, e non è contesa: `dashboard-catalog` asseriva «nessuna famiglia è attiva finché la pagina non c'è» — la stessa fotografia del momento che avevo corretto nella mig. `000316` e **non avevo cercato nel test**. `#142` F4 le ha attivate, quindi l'asserzione è diventata falsa. Corretta: ora verifica il LEGAME (nessuna attiva senza pagina), che è vero prima e dopo |
+| **1** | 2026-08-19 | `ab93af07` | **VERDE** · 1175 s | la corsa che porta il rimedio: **la serie riparte da qui**, perché due rosse l'avevano interrotta |
+| **2** | 2026-08-19 | `99b71f9d` | **VERDE** · 1177 s | |
+| **3** | 2026-08-19 | `89df7d77` | **VERDE** · 1168 s | **soglia raggiunta** |
+| **4** | 2026-08-19 | `04e990c4` | **VERDE** · 1166 s | oltre la soglia |
+| **5** | 2026-08-19 | `e9cb8a28` | **VERDE** · 1161 s | oltre la soglia |
+
+✅ **F4 CHIUSA 2026-08-19 (S1072) — 5 corse consecutive verdi, soglia 3.** Lette dalla CI
+(`gh run list --workflow=test-integration.yml`), non dedotte.
+
+**Le tre cose verificate prima di contarle**, perché un verde può mentire in tre modi diversi:
+
+1. **I limiti sono davvero quelli bassi**: `apps/api/vitest.config.ts` dichiara
+   `testTimeout: 20_000` e `hookTimeout: 30_000`. Se fossero rimasti alzati, queste corse
+   proverebbero soltanto che un limite largo copre la contesa — cioè l'aggiramento che questa
+   voce esisteva per togliere.
+2. **Le corse sono INTEGRALI, non ridotte**: durano **1161-1177 s**, in una fascia di 16
+   secondi su cinque esecuzioni. Una corsa che saltasse dei file sarebbe **più corta**, e la
+   costanza è ciò che lo esclude senza dover aprire cinque log. (Per confronto: prima delle
+   cure di F2 la stessa suite ne impiegava ~1834.)
+3. **«Consecutive» regge**: fra la prima e l'ultima ci sono due corse `cancelled`
+   (`b655ec31`, `4beb0c54`), che **non sono rossi** — sono state interrotte da un push
+   successivo, e una corsa mai finita non dice niente né a favore né contro.
+
+⚠ **Cosa questa serie NON dimostra.** Che il fenomeno sia estinto: non si riproduceva a comando
+nemmeno prima, e cinque corse sono una serie, non una prova di assenza. Dimostra che **con i
+limiti riportati ai valori di prima degli aggiramenti la suite regge**, che è esattamente ciò che
+il «Chiuso quando» chiede. Se tornasse un rosso da tempo, va scritto qui — non tarato via.

@@ -527,6 +527,11 @@
       "heuresys-source": "./src/schemas/tenant-blueprints.ts",
       "default": "./dist/schemas/tenant-blueprints.js"
     },
+    "./schemas/research": {
+      "types": "./dist/schemas/research.d.ts",
+      "heuresys-source": "./src/schemas/research.ts",
+      "default": "./dist/schemas/research.js"
+    },
     "./schemas/organization-unit-processes": {
       "types": "./dist/schemas/organization-unit-processes.d.ts",
       "heuresys-source": "./src/schemas/organization-unit-processes.ts",

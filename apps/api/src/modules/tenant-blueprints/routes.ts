@@ -32,7 +32,11 @@ import {
   DiffQuerySchema,
   BuildPlanPreviewSchema,
   ApplyVersionResponseSchema,
+  AvviaRicercaBodySchema,
+  CorsaRicercaSchema,
+  DominiRicercabiliResponseSchema,
 } from "@heuresys/shared";
+import { researchService } from "../research/service.js";
 import { tenantBlueprintsService as svc } from "./service.js";
 
 const READ = "tenant_blueprint:read";
@@ -256,5 +260,43 @@ export const tenantBlueprintsRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (req) => svc.diff(actor(req), req.params.id, req.params.number, req.query.against),
+  );
+
+  /**
+   * #132 F4g — la ricerca che genera il contenuto del modello (epica P2a §6).
+   *
+   * `tenant_blueprint:write`, come ogni scrittura sul fascicolo: una corsa scrive proposte,
+   * e le proposte sono materiale di quel fascicolo. Il permesso di DECIDERE e' un altro
+   * (`seed_acquisition:approve`), e la separazione e' voluta: proporre e approvare non sono
+   * lo stesso atto, e non devono poterli fare le stesse mani per distrazione.
+   */
+  app.get(
+    "/research-domains",
+    {
+      preHandler: [requirePermission(READ)],
+      schema: { response: { 200: DominiRicercabiliResponseSchema } },
+    },
+    async () => researchService.domini(),
+  );
+
+  app.post(
+    "/:id/versions/:number/research",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: {
+        params: VersionParamSchema,
+        body: AvviaRicercaBodySchema,
+        response: { 201: CorsaRicercaSchema },
+      },
+    },
+    async (req, reply) => {
+      const corsa = await researchService.avviaPerVersione(
+        actor(req),
+        req.params.id,
+        req.params.number,
+        req.body.dominio,
+      );
+      reply.code(201).send(corsa);
+    },
   );
 };

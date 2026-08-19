@@ -335,7 +335,7 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   | **F4d** ✅ | il motore — **FATTO 2026-08-19** | `research/engine.ts`: corsa → letture → proposte → validazione (forma · fonti · doppioni) → candidati + evidenze + esiti, stato della corsa |
   | **F4e** ✅ | le difese §4.4 e §4.5 — **FATTO 2026-08-19** | il testo grezzo non entra mai in una proposta; le domande verso il web si costruiscono **solo** dai parametri di categoria, con un cancello meccanico |
   | **F4f** ✅ | `D-85` si estingue — **FATTO 2026-08-19** | `BLUEPRINT_FIELD_LOCKED` sui campi bloccanti, col nome del campo e il perche' |
-  | **F4g** | la superficie API | le quattro rotte di §6, i permessi, il contratto in `@heuresys/shared` |
+  | **F4g** ✅ | la superficie API — **FATTO 2026-08-19** | le quattro rotte di §6, i permessi, il contratto in `@heuresys/shared` |
   | **F4h** | il fornitore reale del ragionamento | `/research/propose` nel gateway + la **dimostrazione LIVE**: una corsa vera che legge pagine vere e propone fonti |
 
   ✅ **F4a FATTA — 2026-08-19 (S1074)** · mig. `000333`, applicata in produzione. Una corsa puo'
@@ -435,6 +435,23 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
 
   ✅ Due sabotaggi (tolto il confine di parola → 2 rossi; la ricerca esentata dai bloccanti → 2).
   16 casi nuovi; unit **185/185**, integrazione fascicoli **12/12**, typecheck, lint, handoff-lint.
+
+  ✅ **F4g FATTA — 2026-08-19 (S1074)** · quattro rotte **sui moduli che esistevano gia'**, nessun
+  modulo nuovo: l'elenco dei domini ricercabili, l'avvio di una corsa su una versione di
+  fascicolo, le proposte di una corsa, la decisione motivata su una proposta. Piu' il contratto
+  in `@heuresys/shared`, il repository sulle cinque tabelle e il servizio.
+  **Prima si verifica, poi si scrive**: dominio, sei parametri, guardia sulle domande — e solo
+  dopo nasce la riga della corsa.
+
+  ⚠ **Se non c'e' chi propone, si dice.** La sorgente predefinita **solleva** invece di
+  restituire un elenco vuoto: una corsa «COMPLETED, 0 proposte» perche' non c'era nessuno a
+  proporre e' identica, a chi la legge, a una corsa che ha cercato e non ha trovato niente.
+
+  **8 casi di integrazione sul database vero**, col fascicolo reale `RTL-BANK-CONFIG` (l'unico
+  che ha tutti e sei i parametri). Il caso che conta di piu' e' l'ultimo: le **12** corse di
+  `STORIA36` restano intatte, col loro tenant e senza fascicolo. Sabotaggio: la sorgente assente
+  che finge l'elenco vuoto -> rosso **solo** il caso dello zero silenzioso. Unit **185/185**,
+  fascicoli 12/12, typecheck api + test, lint.
 
   **Confine di sessione dichiarato**: F4 e' otto sotto-passi con commit atomici. Si va avanti
   finche' il guardiano regge; cio' che non entra resta dichiarato qui, non lasciato a meta'.

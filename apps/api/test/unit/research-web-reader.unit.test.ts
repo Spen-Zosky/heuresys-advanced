@@ -177,7 +177,7 @@ describe("la guardia sugli indirizzi — SSRF", () => {
     const r = new HttpWebReader({
       risolviHost: async (host) =>
         host === "pubblico.example" ? [{ address: "93.184.216.34" }] : [{ address: "8.8.8.8" }],
-      fetchImpl: (async (input: URL | RequestInfo) => {
+      fetchImpl: (async (input: unknown) => {
         const u = String(input);
         visitati.push(u);
         if (u.startsWith("https://pubblico.example")) {
@@ -195,7 +195,7 @@ describe("la guardia sugli indirizzi — SSRF", () => {
   it("...e lo stesso salto verso un indirizzo pubblico invece funziona (la controprova)", async () => {
     const r = new HttpWebReader({
       risolviHost: async () => [{ address: "93.184.216.34" }],
-      fetchImpl: (async (input: URL | RequestInfo) => {
+      fetchImpl: (async (input: unknown) => {
         const u = String(input);
         if (u.startsWith("https://pubblico.example")) {
           return new Response(null, { status: 302, headers: { location: "https://altro.example/pagina" } });

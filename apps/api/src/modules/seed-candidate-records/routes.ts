@@ -9,7 +9,9 @@ import {
   SeedCandidateRecordSchema, SeedCandidateRecordListQuerySchema,
   SeedCandidateRecordListResponseSchema, SeedCandidateRecordIdParamSchema,
   SeedValidationResultListResponseSchema, SeedSourceEvidenceListResponseSchema,
+  DecisionePropostaBodySchema, PropostaRicercaSchema,
 } from "@heuresys/shared";
+import { researchService } from "../research/service.js";
 import { seedCandidateRecordsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
 
@@ -41,4 +43,20 @@ export const seedCandidateRecordsRoutes: FastifyPluginAsyncZod = async (app) => 
       response: { 200: SeedSourceEvidenceListResponseSchema },
     },
   }, async (req) => seedCandidateRecordsService.evidence(actor(req), req.params.id));
+
+  /**
+   * #132 F4g — la decisione del consulente, **con motivazione obbligatoria in entrambi i
+   * versi**: un rifiuto senza ragione non insegna niente alla corsa successiva, e
+   * un'approvazione senza ragione rende indistinguibile «l'ho valutata» da «ho premuto il
+   * bottone». Una proposta gia' respinta dai controlli **non si approva a mano**: si corregge
+   * la proposta, o la regola che l'ha respinta.
+   */
+  app.post("/:id/decision", {
+    preHandler: [app.verifyCsrf, requirePermission("seed_acquisition:approve")],
+    schema: {
+      params: SeedCandidateRecordIdParamSchema,
+      body: DecisionePropostaBodySchema,
+      response: { 200: PropostaRicercaSchema },
+    },
+  }, async (req) => researchService.decidi(actor(req), req.params.id, req.body));
 };

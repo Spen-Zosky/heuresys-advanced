@@ -8,7 +8,9 @@ import {
   SeedAcquisitionRunSchema, SeedAcquisitionRunListQuerySchema,
   SeedAcquisitionRunListResponseSchema, CreateSeedAcquisitionRunBodySchema,
   UpdateSeedAcquisitionRunBodySchema, SeedAcquisitionRunIdParamSchema,
+  CandidatiRicercaResponseSchema,
 } from "@heuresys/shared";
+import { researchService } from "../research/service.js";
 import { seedAcquisitionRunsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
 
@@ -39,4 +41,16 @@ export const seedAcquisitionRunsRoutes: FastifyPluginAsyncZod = async (app) => {
     await seedAcquisitionRunsService.delete(actor(req), req.params.id);
     reply.code(204).send(null);
   });
+
+  /**
+   * #132 F4g — le proposte di una corsa, con lo stato, i controlli applicati (uno per uno,
+   * col loro nome), le fonti con impronta, e la decisione umana se c'e' gia'.
+   *
+   * Torna anche le proposte RESPINTE, ed e' il punto: una proposta scartata in silenzio e'
+   * una proposta che nessuno puo' contestare.
+   */
+  app.get("/:id/candidates", {
+    preHandler: [requirePermission("seed_acquisition:read")],
+    schema: { params: SeedAcquisitionRunIdParamSchema, response: { 200: CandidatiRicercaResponseSchema } },
+  }, async (req) => researchService.proposte(actor(req), req.params.id));
 };

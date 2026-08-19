@@ -11,7 +11,7 @@ import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { Button } from "@heuresys/ui";
 import { EntityTable } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
-import type { BlueprintActivation } from "@heuresys/shared";
+import type { BlueprintActivation, TenantListResponse } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 
@@ -59,7 +59,21 @@ export default function BlueprintsPage() {
   const perms = useCurrentUserPermissions();
   const canActivate = perms.data?.permissions.includes("blueprint:activate") ?? false;
   const [variantId, setVariantId] = useState("");
+  // #211 F3 (famiglia ⑥) — L'AZIENDA MANCAVA, e senza di lei la proposta non partiva.
+  // Il servizio risponde `403 TENANT_ID_REQUIRED — PLATFORM_ADMIN must supply body.tenantId`,
+  // e ha ragione: chi opera su piu' aziende deve dire su QUALE sta attivando un modello. La
+  // pagina pero' non lo chiedeva e non lo mandava, quindi il pulsante era inerte per un
+  // amministratore di piattaforma — misurato replicando la stessa POST del browser.
+  const [tenantId, setTenantId] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
+
+  // L'elenco serve solo a chi puo' attivare; per un amministratore di azienda il servizio
+  // deriva il tenant da se', e la scelta resta facoltativa.
+  const tenants = useQuery({
+    queryKey: ["tenants", "per-attivazione"],
+    queryFn: () => apiFetch<TenantListResponse>("/v1/tenants?limit=200"),
+    enabled: canActivate,
+  });
 
   const activations = useQuery({
     queryKey: ["blueprint-activations", "list"],
@@ -72,11 +86,14 @@ export default function BlueprintsPage() {
         method: "POST",
         // Nasce PROPOSED, non ACTIVE: l'attivazione vera è una decisione, non l'effetto
         // collaterale di un clic su un elenco.
-        body: { variantId: id, status: "PROPOSED" },
+        // `tenantId` si manda solo se scelto: chi ha una sola azienda non deve sceglierla,
+        // e il servizio la deriva da sé.
+        body: { variantId: id, status: "PROPOSED", ...(tenantId ? { tenantId } : {}) },
       }),
     onSuccess: () => {
       setNotice(t("activations.activated"));
       setVariantId("");
+      setTenantId("");
       void qc.invalidateQueries({ queryKey: ["blueprint-activations"] });
     },
   });
@@ -147,6 +164,22 @@ export default function BlueprintsPage() {
                 {variants.rows.map((v) => (
                   <option key={v.blueprintVariantId} value={v.blueprintVariantId}>
                     {v.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+              {t("activations.tenantLabel")}
+              <select
+                data-testid="blueprint-activation-tenant"
+                value={tenantId}
+                onChange={(e) => setTenantId(e.target.value)}
+                className="rounded-input border border-border bg-background px-2 py-1 text-sm text-foreground"
+              >
+                <option value="">—</option>
+                {(tenants.data?.items ?? []).map((x) => (
+                  <option key={x.tenantId} value={x.tenantId}>
+                    {x.tenantName}
                   </option>
                 ))}
               </select>

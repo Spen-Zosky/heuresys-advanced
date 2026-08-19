@@ -1,4 +1,4 @@
-# Mandato S1071 — due difetti subito, poi il consumo di tutto P1
+# Mandato S1071→S1072 — due difetti subito, poi il consumo di tutto P1 **e P2**
 
 > **mandato di ciclo**, non programma di voce → vive in `.programmi/mandati/`, fuori dal radar di
 > `programmi.py`. **stato**: IN CORSO
@@ -74,16 +74,32 @@ Resta un difetto vero, trovato smentendo quello supposto → **C4**.
       esisteva da nove giorni e **non la eseguiva nessuno**: instradata come suite `drift-lock`. Il
       rimedio al falso-verde muto **non aveva prova**: estratta `esitoBaseline()`, ora ce l'ha. I
       sette esiti scritti accanto al codice, uno **accettato e dichiarato** invece che risolto
-- [~] **P1.2 `Z-251`** contesa DB — **1/3** · F1 FATTA 2026-08-19: la contesa **non si riproduce**
+- [~] **P1.2 `Z-251`** contesa DB — **3/4** · F2 e F3 FATTE 2026-08-19 (`7b002359`): sessioni
+      condivise fra file (campione di 12 file, 233,62 s → 177,67 s, login veri da 79 a 11) e i
+      due limiti riportati a 20s/30s. La corsa integrale ha trovato **6 rossi che erano MIEI**,
+      corretti in `62d59c45`, e la CI su quel commit e' **VERDE**: contatore 1 su 3. Resta **F4**,
+      che e' attesa di due altre corse verdi. Storia originale: **1/3** · F1 FATTA 2026-08-19: la contesa **non si riproduce**
       col carico di connessioni (70 concorrenti, zero fallimenti), e cercandola e' emerso che ogni
       query costa **86 ms** attraverso il tunnel contro ~1 ms su un DB locale. 🔬 Da quel numero
       avevo tratto la conclusione sbagliata («la latenza domina, si esegua dove il DB e' locale») e
       **la misura successiva l'ha smentita**: in CI, senza tunnel, la stessa suite dura **2065-2187
       s** contro i 1834 in locale. **F2 si fa come scritta**, non e' sospesa
 - [ ] **P1.3 `#198`** T9b — ~60k · ⚠ si ferma a chiedere conferma a Enzo
-- [ ] **P1.4 `#142`** cruscotti, F3b+F4 — ~390k
+- [x] **P1.4 `#142`** cruscotti, F3b+F4 — **VOCE CHIUSA** 2026-08-19 (`62d59c45` + `95e7c2e8`).
+      F3b: 27 fornitori di contenuto, prova live 3/3 con tre login reali, e **tre difetti trovati
+      dalla prova live** — fra cui un 500 sul Self-Service, che I17 garantisce a chiunque.
+      F4: una pagina per otto famiglie, mig `000326`, E2E **19 verdi / zero flaky con SEI login
+      reali**. La prova generale ha fermato **due** difetti prima della CI, entrambi in migrazioni
+      **vecchie**: un'asserzione che era una fotografia del momento, e un totale esatto che il suo
+      stesso commento diceva di spostare
 - [ ] **P1.5 `#143`** squadre, F2→F5 — ~1000k
 - [ ] **P1.6 `#132`** P2a, F1→F7 — budget non dichiarato
+- [x] **P2.1 `#214` F5** — FATTO 2026-08-19 (`95e7c2e8`) · le classi di una resource multiclasse
+      smettono di essere prosa: NON MISURABILI **da 14 a 12**, `analytics` e `dashboard` escono
+      dal «non so». ⏳ **F3 resta di Enzo** (aprire un perimetro e' una decisione di esposizione)
+- [ ] **P2.2 `#211`** suite E2E completa, F3→F5 — ~1 sessione
+- [ ] **P2.3 `#69`** residui `staging.wave1_*` — ~1 sessione
+- [ ] **P2.4 `#159` · `#79` · `#54`** — le lunghe di P2
 - [ ] **P1.Z chiusura del ciclo** — riconciliazione register, chiusura completa, push finale
 
 ## Due cose da nominare prima di arrivarci, non dopo

@@ -15,10 +15,10 @@ test.describe("MVP-2a landing pages — live data", () => {
   // amministrazione, perche' quella e' riservata a un insieme piu' stretto
   // (PLATFORM_ADMIN/TENANT_ADMIN/MANAGER/…), e TEAM_LEADER non vi appartiene. Le due
   // cose non coincidono, ed e' proprio questa distinzione che il test difende.
-  test.describe("as employee (TEAM_LEADER, senza navigazione di amministrazione)", () => {
+  test.describe("as employee (capo filiale: vede il cruscotto, non l'amministrazione)", () => {
     test.use({ storageState: storageStateFor("employee") });
 
-    test("/me renders with role + greeting + cards + no admin nav", async ({ page }) => {
+    test("/me rende con ruolo, saluto e card; il governo di piattaforma resta chiuso", async ({ page }) => {
       await page.goto("/me");
       await expect(page).toHaveURL(/\/me$/);
 
@@ -31,10 +31,29 @@ test.describe("MVP-2a landing pages — live data", () => {
       await expect(page.getByTestId("me-learning-count")).toContainText(/\d+\s+assegnati/);
       await expect(page.getByTestId("me-gaps-count")).toContainText(/\d+\s+aperti/);
 
-      // Non vede la navigazione di amministrazione: TEAM_LEADER non e un ruolo di classe admin.
+      // ⚠ RIFORMULATO IL 2026-08-19 (#211 F3, famiglia ④ del triage), e la ragione e' piu'
+      // interessante di una riga da aggiornare: **la premessa del caso era superata**.
+      //
+      // Pretendeva che un impiegato non vedesse `nav-dashboard` ne' `nav-users`. Misurato oggi
+      // sulla mappa RBAC viva, nessuna delle due regge piu':
+      //   · `tommaso.fiore` ha BRANCH_MANAGER (mig. `000272`) → ha `dashboard:view`, perche'
+      //     regge una filiale, cioe' un sotto-albero gerarchico vero;
+      //   · `USER` — il pavimento universale di I17, che TUTTI hanno — porta `user:read`,
+      //     `position:read` e `tenant:read`. La rubrica aziendale e' di tutti (dottrina `#193`).
+      //
+      // Quindi le quattro voci con testid stabile (dashboard, me, positions, users) le vede
+      // chiunque, e **l'assenza di una voce non e' piu' il modo in cui il modello separa**: a
+      // separare sono lo SCOPE e la MASCHERATURA (ADR-0036, I16). Continuare ad asserire
+      // un'assenza avrebbe difeso una regola che il prodotto non ha piu'.
+      //
+      // Cio' che resta vero, e che il caso ora difende, e' la distinzione autentica: una
+      // superficie di GOVERNO della piattaforma non si apre a chi non ne ha il mandato.
+      // `/provenance` chiede `provenance:read`, che nessuno dei quattro ruoli di tommaso ha.
       await expect(page.getByTestId("nav-me")).toBeVisible();
-      await expect(page.getByTestId("nav-dashboard")).toHaveCount(0);
-      await expect(page.getByTestId("nav-users")).toHaveCount(0);
+      await expect(page.getByTestId("nav-dashboard")).toBeVisible();
+
+      await page.goto("/provenance");
+      await expect(page.getByTestId("provenance-page")).toHaveCount(0);
     });
   });
 

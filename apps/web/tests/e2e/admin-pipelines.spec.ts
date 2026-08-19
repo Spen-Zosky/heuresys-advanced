@@ -1,7 +1,8 @@
 /**
  * apps/web/tests/e2e/admin-pipelines.spec.ts
  *
- * Live-data E2E for /seed-acquisition/runs, /brownfield-adaptation, /gaps.
+ * Live-data E2E for /seed-acquisition/runs e /gaps.
+ * (la pagina brownfield e' uscita dal prodotto con 77b52e04 — vedi la nota qui sotto)
  * tenantAdmin storage for all (PLATFORM_ADMIN required only for cross-tenant
  * brownfield approvals which we don't exercise here).
  */
@@ -18,17 +19,17 @@ test.describe("MVP-2a pipelines — live data", () => {
     await expect(page.getByTestId("seed-runs-count")).toContainText(/\d+\s+run/);
   });
 
-  test("/brownfield-adaptation switches across 3 tabs", async ({ page }) => {
-    await page.goto("/brownfield-adaptation");
-    await expect(page.getByTestId("brownfield-page")).toBeVisible();
-    await expect(page.getByTestId("brownfield-content-inventory")).toBeVisible();
-
-    await page.getByTestId("brownfield-tab-mapping").click();
-    await expect(page.getByTestId("brownfield-content-mapping")).toBeVisible();
-
-    await page.getByTestId("brownfield-tab-runs").click();
-    await expect(page.getByTestId("brownfield-content-runs")).toBeVisible();
-  });
+  // ⚠ RIMOSSO IL 2026-08-19 (#211 F3, famiglia ③ del triage): qui c'era un caso su
+  // `/brownfield-adaptation`, e provava una pagina che il prodotto NON HA PIU'. Non e' una
+  // regressione da riparare: `77b52e04` (#164 F3) ha fatto uscire la funzionalita' brownfield
+  // dal prodotto — 4 moduli API, 4 schemi condivisi e la pagina — dopo aver misurato che le
+  // superfici ETL erano gia' spente in produzione. `sys_ui_interfaces` non ne ha piu' traccia
+  // (0 righe con route `%brownfield%`, misurato).
+  //
+  // Un test orfano e' peggio di nessun test: resta rosso per sempre, e un rosso che non indica
+  // un difetto insegna a non guardare la suite — che e' esattamente cio' che `#211` cura.
+  // Se un giorno la pagina tornasse, tornera' col proprio caso: non si tiene in vita questo
+  // per tenere il posto.
 
   test("/gaps shows severity summary and full list", async ({ page }) => {
     await page.goto("/gaps");

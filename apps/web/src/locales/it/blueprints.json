@@ -131,7 +131,8 @@
     "colFrom": "In vigore dal",
     "empty": "Nessuna attivazione registrata.",
     "loadError": "Non è stato possibile leggere le attivazioni.",
-    "caption": "Le attivazioni registrate per questa azienda."
+    "caption": "Le attivazioni registrate per questa azienda.",
+    "tenantLabel": "Azienda"
   },
   "dossier": {
     "title": "Fascicoli di configurazione",

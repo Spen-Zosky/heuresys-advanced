@@ -50,7 +50,19 @@ test.describe("#57 F3 — organizational health", () => {
     await page.goto("/org-director/health", { waitUntil: "domcontentloaded", timeout: 60_000 });
     await expect(page.getByTestId("org-health-row").first()).toBeVisible({ timeout: 45_000 });
 
-    await expect(page.getByTestId("org-health-row")).toHaveCount(api.total);
+    // ⚠ CORRETTO IL 2026-08-19 (#211 F3, famiglia ⑤ del triage). Diceva
+    // `toHaveCount(api.total)`, e falliva con «expected 39, received 25». Non era un guasto
+    // del prodotto e non era un dato cambiato: `DataTablePanel` **pagina a 25 righe** di
+    // default, quindi l'asserzione era vera solo finche' le unita' misurate stavano sotto
+    // quella soglia. Superata la soglia, il test accusava la pagina di non mostrare righe
+    // che non deve mostrare.
+    //
+    // Ora il caso prova le DUE cose che contano davvero, e nessuna delle due scade con la
+    // crescita del dato: la prima pagina e' piena fino alla soglia, e il conteggio dichiarato
+    // riporta il totale VERO — che e' il modo in cui un lettore sa che ce ne sono altre.
+    const PER_PAGINA = 25;
+    await expect(page.getByTestId("org-health-row")).toHaveCount(Math.min(api.total, PER_PAGINA));
+    await expect(page.getByTestId("org-health-count")).toContainText(String(api.total));
     for (const [status, count] of Object.entries(api.summary)) {
       await expect(page.getByTestId(`org-health-summary-${status}`)).toContainText(String(count));
     }
@@ -60,8 +72,13 @@ test.describe("#57 F3 — organizational health", () => {
 
   test("BOTH readings reach the page: the absolute band and the relative standing", async ({ page, request }) => {
     const api = await fetchHealth(request);
-    const lagging = api.units.find((u: { standing: string }) => u.standing === "LAGGING");
-    const leading = api.units.find((u: { standing: string }) => u.standing === "LEADING");
+    // ⚠ Stessa causa del caso sopra (#211 F3, famiglia ⑤): la pagina ne mostra 25, e cercare
+    // una unita' che sta oltre la prima pagina significa cercarla dove non puo' essere. Le
+    // due letture si verificano quindi su unita' VISIBILI — e l'ordine e' lo stesso dell'API
+    // («weakest first»), quindi le prime 25 dell'una sono le prime 25 dell'altra.
+    const visibili = api.units.slice(0, 25);
+    const lagging = visibili.find((u: { standing: string }) => u.standing === "LAGGING");
+    const leading = visibili.find((u: { standing: string }) => u.standing === "LEADING");
     test.skip(!lagging || !leading, "standings not populated on this dataset");
 
     await page.goto("/org-director/health", { waitUntil: "domcontentloaded", timeout: 60_000 });

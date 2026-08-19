@@ -131,7 +131,8 @@
     "colFrom": "Effective from",
     "empty": "No activation recorded.",
     "loadError": "The activations could not be loaded.",
-    "caption": "Activations recorded for this company."
+    "caption": "Activations recorded for this company.",
+    "tenantLabel": "Company"
   },
   "dossier": {
     "title": "Configuration dossiers",

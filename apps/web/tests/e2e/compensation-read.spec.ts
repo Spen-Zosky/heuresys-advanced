@@ -9,7 +9,20 @@ import { test, expect } from "@playwright/test";
 import { storageStateFor } from "./fixtures";
 
 test.describe("compensation intelligence — comp & reward read panels (#32 A/L7)", () => {
-  test.use({ storageState: storageStateFor("platformAdmin") });
+  // ⚠ ATTORE CAMBIATO IL 2026-08-19 (#211 F3, famiglia ② del triage), e non e' un aggiustamento
+  // di comodo: era `platformAdmin`, e con lui questi casi NON POSSONO passare — ne' devono.
+  //
+  // ADR-0032 (Enzo, 2026-08-04) dice che `PLATFORM_ADMIN` e' un mandato **tecnico**, non HR:
+  // `COMPENSATION` ed `EVALUATION` gli arrivano **mascherati**. Il pannello del calcolo resta
+  // quindi su «Caricamento…» e i testid del conto non compaiono. I test erano rimasti indietro
+  // rispetto a quella decisione di due settimane, e il loro rosso accusava il prodotto di un
+  // difetto che era invece il rispetto di una regola.
+  //
+  // Chi prova il CONTENUTO di un calcolo economico deve avere il mandato per vederlo:
+  // `tenantAdmin` (TENANT_ADMIN) e' HR-mandato per I20. Che al mandato tecnico i valori
+  // restino trattenuti e' una prova a se', qui sotto — perche' quella e' la regola, non un
+  // caso da evitare.
+  test.use({ storageState: storageStateFor("tenantAdmin") });
 
   test("renders the six dormant-data read panels over the live compensation tables", async ({ page }) => {
     await page.goto("/compensation-intelligence");
@@ -111,4 +124,26 @@ test.describe("compensation intelligence — comp & reward read panels (#32 A/L7
     ).toBe(true);
   });
 
+});
+
+test.describe("ADR-0032 sul frontend: al mandato tecnico i valori economici non arrivano", () => {
+  test.use({ storageState: storageStateFor("platformAdmin") });
+
+  test("il pannello del calcolo non espone il conto a chi ha un mandato solo tecnico", async ({
+    page,
+  }) => {
+    // Il complemento del caso sopra, e la ragione per cui il cambio di attore non e' una
+    // scorciatoia: la stessa pagina, con lo stesso percorso, non deve consegnare i valori a
+    // `PLATFORM_ADMIN`. Se un giorno li consegnasse, questo caso diventa rosso — ed e'
+    // esattamente il rosso che si vuole vedere.
+    await page.goto("/compensation-intelligence");
+    await expect(page.getByTestId("comp-variable-pay-row").first()).toBeVisible({ timeout: 30_000 });
+
+    await page.getByTestId("comp-evaluate-button").first().click();
+    await expect(page.getByTestId("comp-evaluation-panel")).toBeVisible({ timeout: 20_000 });
+
+    // Il pannello si apre — la riga, il soggetto e il periodo restano visibili (ADR-0032 non
+    // nega la riga, trattiene i valori) — ma la spiegazione del conto non si materializza.
+    await expect(page.getByTestId("comp-evaluation-gates")).toHaveCount(0);
+  });
 });

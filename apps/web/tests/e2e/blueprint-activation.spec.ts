@@ -39,7 +39,21 @@ test.describe("#45 C3 — attivazione dei blueprint", () => {
 
     const prima = await page.getByTestId("blueprint-activation-row").count();
     await select.selectOption({ index: 1 });
+
+    // #211 F3, famiglia ⑥ — LA CAUSA CHE IL TRIAGE AVEVA ESCLUSO, e che la misura ha
+    // confermato: replicando la POST del browser, il servizio risponde
+    // `403 TENANT_ID_REQUIRED — PLATFORM_ADMIN must supply body.tenantId`. Chi opera su piu'
+    // aziende deve dire su quale sta attivando un modello, e la pagina non lo chiedeva: il
+    // pulsante era inerte per un amministratore di piattaforma. Era l'UNICO guasto vero del
+    // prodotto fra le sei famiglie — le altre cinque erano test rimasti indietro.
+    const azienda = page.getByTestId("blueprint-activation-tenant");
+    await expect(azienda, "la scelta dell'azienda deve esistere: e' cio' che mancava").toBeVisible();
+    await azienda.selectOption({ index: 1 });
+
     await page.getByTestId("blueprint-activation-submit").click();
+    // Se la proposta viene rifiutata, la pagina lo dice: leggerlo qui trasforma un timeout
+    // muto di 30 secondi in un messaggio che nomina il problema.
+    await expect(page.getByTestId("blueprint-activation-error")).toHaveCount(0);
     await expect(page.getByTestId("blueprint-activation-notice")).toBeVisible({ timeout: 30_000 });
 
     await page.reload({ waitUntil: "domcontentloaded" });
@@ -48,7 +62,12 @@ test.describe("#45 C3 — attivazione dei blueprint", () => {
 
     // Il punto: l'attivazione NON è attiva. Una variante non diventa il modello di
     // riferimento perché qualcuno ha cliccato un pulsante in un elenco.
-    await expect(page.getByTestId("blueprint-activation-row").last()).toContainText("PROPOSED");
+    // ⚠ Cercava `.last()`, e assumeva un ordinamento che l'elenco non garantisce: con
+    // un'attivazione ACTIVE gia' presente, l'ultima riga era quella e il caso falliva
+    // dicendo «expected PROPOSED, received …ACTIVE». Si cerca quindi la riga PER CIO' CHE
+    // DEVE ESSERE, non per la posizione che si spera occupi.
+    const proposta = page.getByTestId("blueprint-activation-row").filter({ hasText: "PROPOSED" });
+    await expect(proposta).toHaveCount(1);
   });
 
   test("la variante è mostrata col suo nome, non con l'identificativo", async ({ page }) => {

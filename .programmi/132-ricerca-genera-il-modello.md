@@ -596,9 +596,15 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
 
   ✅ Sabotaggio: spenta la verifica del catalogo dei tipi → **2** casi rossi. 10 casi unit + 5 di
   integrazione **contro il database vero**; unit **214/214**, integrazione ricerca **13/13**.
-  📌 **La riqualifica di `sys_blueprint_families` e `_variants` — «non un catalogo anticipato, un
-  sottoprodotto dei clienti» — resta da scrivere nei commenti di quelle tabelle**: e' l'unico
-  residuo dichiarato di F6.
+  ✅ **E la riqualifica e' scritta dove qualcuno la leggera'** — mig. `000336` in produzione, tre
+  commenti di tabella: `sys_blueprint_families` e `_variants` **non sono un catalogo costruito in
+  anticipo, sono un sottoprodotto dei clienti** (§4.8, E10), piu' il registro delle fonti. Non e'
+  un vezzo: chi apre il database non ha il repository davanti, e due tabelle chiamate «famiglie» e
+  «varianti» invitano a riempirle «per completezza» — cioe' a rimettere dentro **dalla porta dei
+  dati** l'archetipo aprioristico che E29 ha fatto togliere dal codice. Post-condizione sul
+  **contenuto** del commento, non sulla sua presenza: un commento vuoto passerebbe un controllo di
+  sola esistenza. Prova generale VERDE, 311 migrazioni, 23/23 sentinelle; misurato dopo: famiglie
+  1 · varianti 1, descritte e non toccate.
 - [ ] **F7 le due prove** — prima l'azienda nuova di settore diverso (se ne esce una banca,
   l'archetipo è sparito solo di nome), poi RTL Bank come metro di qualità. Sul gemello, poi in
   produzione

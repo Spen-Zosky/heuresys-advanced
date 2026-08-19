@@ -61,6 +61,7 @@ POLIMORFO = "polimorfo"
 ESTERNO = "esterno"
 LAVORAZIONE = "lavorazione"
 MODELLO_IA = "modello-ia"
+RAGIONE = "ragione-scritta"
 DA_RISOLVERE = "da-risolvere"
 
 DESCRIZIONE = {
@@ -69,6 +70,7 @@ DESCRIZIONE = {
     ESTERNO: "identificativo di un sistema esterno — non esiste un referente locale da agganciare",
     LAVORAZIONE: "tabella di transito (staging) — porta le chiavi della provenienza (#69)",
     MODELLO_IA: "nome di un modello di IA, non una riga — non c'e' tabella da agganciare",
+    RAGIONE: "il commento della colonna dichiara PERCHE' non ha un referente (#218 F3/F4)",
     DA_RISOLVERE: "PROMETTE un referente locale e non lo aggancia — e' la materia di #218",
 }
 
@@ -89,7 +91,8 @@ POLIMORFE = re.compile(r"_(resource|subject|source_entity|reference|target_recor
 ESTERNE = re.compile(r"(external_code$|_credential_id$|_tax_id$|_family_id$)")
 
 
-def classifica(schema: str, tabella: str, colonna: str, gemelle: set[str] | None = None) -> str:
+def classifica(schema: str, tabella: str, colonna: str, gemelle: set[str] | None = None,
+               commento: str | None = None) -> str:
     """
     La classe di una colonna. Prima regola che riconosce, vince.
 
@@ -99,6 +102,16 @@ def classifica(schema: str, tabella: str, colonna: str, gemelle: set[str] | None
     viene passato, quella regola non si applica e la colonna puo' finire in `da-risolvere`: e'
     un default prudente, che sbaglia verso il «da guardare» invece che verso il silenzio.
     """
+    # ⚠ LA REGOLA CHE RENDE QUESTO STRUMENTO UNA CURA E NON UNA FOTOGRAFIA (#218 F4).
+    #   Una colonna il cui COMMENTO dichiara perche' non ha un referente e' gia' stata guardata
+    #   e decisa: farla ricomparire a ogni censimento costringerebbe a rifare l'indagine, e chi
+    #   la rifa' la seconda volta non sa che la prima e' avvenuta. La ragione deve pero' stare
+    #   NEL DATABASE — una scritta dentro un file di migrazione non la vede chi interroga il
+    #   database, ed e' esattamente il difetto che F3 ha corretto.
+    #   Il segnale e' il rimando alla voce che ha deciso: un commento qualunque non basta, o
+    #   qualsiasi descrizione diventerebbe un lasciapassare.
+    if commento and "#218" in commento:
+        return RAGIONE
     if schema == "audit" or tabella.endswith("_archive"):
         return ARCHIVIO
     if schema == "staging":
@@ -175,71 +188,90 @@ def migrazione_che_la_crea(colonna: str) -> str:
 
 
 def selftest() -> int:
-    """Il classificatore deve poter sbagliare, e queste prove lo mettono alla prova."""
+    """
+    Il classificatore deve poter sbagliare, e queste prove lo mettono alla prova.
+
+    ⚠ UNA SOLA LISTA E UN SOLO CONTATORE, ed e' una correzione di S1072. La prima stesura
+    teneva tre gruppi di casi con tre cicli separati, e il totale finale sommava le lunghezze
+    a mano: eseguiva **22** casi e ne dichiarava **14**. Peggio ancora, due dei tre cicli
+    giravano PRIMA che il contatore dei rossi esistesse — un caso fallito li avrebbe fatti
+    morire con un `NameError` invece di dire ROSSO. Uno strumento che misura male se' stesso
+    e' il difetto piu' pericoloso che possa avere, perche' il suo verde non significa niente.
+
+    Ogni caso e': (schema, tabella, colonna, gemelle, commento, classe attesa, perche').
+    """
+    G = None  # nessuna gemella
+    C = None  # nessun commento
     casi = [
-        # (schema, tabella, colonna, classe attesa, perche')
-        ("audit", "skills_junk_archive", "skill_id", ARCHIVIO, "schema audit"),
-        ("sys", "qualcosa_archive", "cosa_id", ARCHIVIO, "nome che finisce per _archive"),
-        ("staging", "wave1_job_roles", "staging_target_record_id", LAVORAZIONE, "schema staging"),
-        ("sys", "sys_skill_embeddings", "model_id", MODELLO_IA, "nome di un modello, non una riga"),
-        ("sys", "sys_source_lineage_records", "source_lineage_sdbi_ai_model_id", MODELLO_IA, "modello di IA"),
-        ("sys", "sys_users", "user_external_code", ESTERNO, "codice di un sistema esterno"),
-        ("sys", "sys_user_demographics", "user_demographics_tax_id", ESTERNO, "codice fiscale, non una FK"),
-        ("sys", "sys_auth_refresh_tokens", "auth_refresh_token_family_id", ESTERNO, "raggruppamento, non una riga"),
-        ("sys", "sys_approval_requests", "approval_request_resource_id", POLIMORFO, "risorsa di tipo variabile"),
-        ("sys", "sys_inbox_notifications", "notification_resource_id", POLIMORFO, "idem"),
-        ("sys", "sys_visualization_nodes", "node_source_entity_id", POLIMORFO, "entita' di origine variabile"),
-        ("sys", "sys_organization_unit_templates", "organization_unit_template_blueprint_id", DA_RISOLVERE,
+        # ── le classi che si riconoscono da dove vive la colonna ──
+        ("audit", "skills_junk_archive", "skill_id", G, C, ARCHIVIO, "schema audit"),
+        ("sys", "qualcosa_archive", "cosa_id", G, C, ARCHIVIO, "nome che finisce per _archive"),
+        ("staging", "wave1_job_roles", "staging_target_record_id", G, C, LAVORAZIONE, "schema staging"),
+        # ── quelle che si riconoscono dal nome ──
+        ("sys", "sys_skill_embeddings", "model_id", G, C, MODELLO_IA, "nome di un modello, non una riga"),
+        ("sys", "sys_source_lineage_records", "source_lineage_sdbi_ai_model_id", G, C, MODELLO_IA, "modello di IA"),
+        ("sys", "sys_users", "user_external_code", G, C, ESTERNO, "codice di un sistema esterno"),
+        ("sys", "sys_user_demographics", "user_demographics_tax_id", G, C, ESTERNO, "codice fiscale, non una FK"),
+        ("sys", "sys_auth_refresh_tokens", "auth_refresh_token_family_id", G, C, ESTERNO, "raggruppamento, non una riga"),
+        ("sys", "sys_approval_requests", "approval_request_resource_id", G, C, POLIMORFO, "risorsa di tipo variabile"),
+        ("sys", "sys_inbox_notifications", "notification_resource_id", G, C, POLIMORFO, "idem"),
+        ("sys", "sys_visualization_nodes", "node_source_entity_id", G, C, POLIMORFO, "entita' di origine variabile"),
+        # ── quelle che restano da guardare ──
+        ("sys", "sys_organization_unit_templates", "organization_unit_template_blueprint_id", G, C, DA_RISOLVERE,
          "IL CASO CHE HA APERTO LA VOCE: promette un blueprint e non lo aggancia"),
-        ("sys", "sys_esco_isco_resolved", "isco_classification_id", DA_RISOLVERE, "promette una classificazione locale"),
-    ]
-    # ── La regola della gemella, che il nome da solo non vede (trovata in F2) ──
-    gemelle_casi = [
+        ("sys", "sys_esco_isco_resolved", "isco_classification_id", G, C, DA_RISOLVERE,
+         "promette una classificazione locale"),
+
+        # ── LA REGOLA DELLA GEMELLA, che il nome da solo non vede (trovata in F2) ──
         ("sys", "sys_capability_score_lineage", "capability_score_lineage_child_id",
-         {"capability_score_lineage_child_type"}, POLIMORFO, "ha accanto la sua _type"),
+         {"capability_score_lineage_child_type"}, C, POLIMORFO, "ha accanto la sua _type"),
         ("sys", "sys_user_timeline_events", "user_timeline_event_source_id",
-         {"user_timeline_event_source_table"}, POLIMORFO, "ha accanto la sua _table"),
-        ("sys", "sys_reference_translations", "entity_id",
-         {"entity_table"}, POLIMORFO, "gemella con un nome corto"),
-        # NEGATIVO: senza gemella resta da risolvere, altrimenti la regola assolverebbe tutto
+         {"user_timeline_event_source_table"}, C, POLIMORFO, "ha accanto la sua _table"),
+        ("sys", "sys_reference_translations", "entity_id", {"entity_table"}, C, POLIMORFO,
+         "gemella con un nome corto"),
         ("sys", "sys_organization_unit_templates", "organization_unit_template_blueprint_id",
-         {"organization_unit_template_code", "organization_unit_template_name"}, DA_RISOLVERE,
-         "nessuna gemella: la regola non deve assolverla"),
-        # NEGATIVO: una gemella che non c'e' non si inventa
+         {"organization_unit_template_code", "organization_unit_template_name"}, C, DA_RISOLVERE,
+         "NEGATIVO: nessuna gemella, la regola non deve assolverla"),
         ("sys", "sys_source_lineage_records", "source_lineage_import_run_id",
-         {"source_lineage_source_table"}, DA_RISOLVERE, "la gemella e' di un'altra colonna"),
+         {"source_lineage_source_table"}, C, DA_RISOLVERE,
+         "NEGATIVO: la gemella e' di un'altra colonna"),
+
+        # ── LA REGOLA DEL COMMENTO, che rende lo strumento una cura e non una fotografia (F4) ──
+        ("sys", "sys_source_lineage_records", "source_lineage_import_run_id", G,
+         "Metadato di ESECUZIONE ... Censito e deciso in #218 F2.", RAGIONE,
+         "il commento rimanda alla voce che ha deciso"),
+        ("sys", "sys_source_lineage_records", "source_lineage_import_run_id", G,
+         "La corsa di importazione che ha prodotto questa riga.", DA_RISOLVERE,
+         "NEGATIVO: un commento qualunque non e' un lasciapassare"),
+        ("sys", "sys_organization_unit_templates", "organization_unit_template_blueprint_id", G, C,
+         DA_RISOLVERE, "NEGATIVO: nessun commento, nessuna assoluzione"),
+
+        # ── L'ORDINE DELLE REGOLE, che e' una scelta e va dimostrata ──
+        ("audit", "user_self_service_actions", "action_resource_id", G, C, ARCHIVIO,
+         "archivio batte polimorfo"),
+        ("sys", "sys_source_lineage_records", "source_lineage_table_mapping_id", G,
+         "Metadato di ESECUZIONE ... #218 F2.", RAGIONE,
+         "la ragione scritta batte tutto: e' la prima regola"),
     ]
-    # Casi NEGATIVI: cose che NON devono finire in `da-risolvere`. Senza questi, un
-    # classificatore che restituisse sempre DA_RISOLVERE passerebbe meta' della batteria.
-    negativi = [c for c in casi if c[3] != DA_RISOLVERE]
-    if len(negativi) < 6:
-        print("[selftest] la batteria ha troppi pochi casi negativi per essere una prova")
+
+    # ⚠ Senza abbastanza casi NEGATIVI la batteria non e' una prova: un classificatore che
+    #   rispondesse sempre `da-risolvere` ne passerebbe una fetta, e il censimento tornerebbe
+    #   a essere il mucchio da 317 che F1 esisteva per evitare.
+    negativi = [c for c in casi if c[5] != DA_RISOLVERE]
+    if len(negativi) < 10:
+        print(f"[selftest] solo {len(negativi)} casi negativi: la batteria non e' una prova")
         return 1
 
     rossi = 0
-    for sch, tab, col, atteso, perche in casi:
-        avuto = classifica(sch, tab, col)
+    for sch, tab, col, gem, com, atteso, perche in casi:
+        avuto = classifica(sch, tab, col, gem, com)
         ok = avuto == atteso
         if not ok:
             rossi += 1
-        print(f"  {'OK ' if ok else 'NO '} {sch}.{tab}.{col} → {avuto} (atteso {atteso}) — {perche}")
+        print(f"  {'OK ' if ok else 'NO '} {tab}.{col} → {avuto} (atteso {atteso}) — {perche}")
 
-    for sch, tab, col, gem, atteso, perche in gemelle_casi:
-        avuto = classifica(sch, tab, col, gem)
-        ok = avuto == atteso
-        if not ok:
-            rossi += 1
-        print(f"  {'OK ' if ok else 'NO '} [gemella] {tab}.{col} → {avuto} (atteso {atteso}) — {perche}")
-
-    # Una prova in piu': l'ordine delle regole conta, e va dimostrato invece che promesso.
-    # Una colonna polimorfa dentro un archivio dev'essere ARCHIVIO, non POLIMORFO.
-    ordine = classifica("audit", "user_self_service_actions", "action_resource_id")
-    ok_ordine = ordine == ARCHIVIO
-    if not ok_ordine:
-        rossi += 1
-    print(f"  {'OK ' if ok_ordine else 'NO '} l'ordine delle regole: archivio batte polimorfo → {ordine}")
-
-    print(f"\n[selftest] {len(casi) + 1 - rossi}/{len(casi) + 1} — {'VERDE' if rossi == 0 else 'ROSSO'}")
+    print("")
+    print(f"[selftest] {len(casi) - rossi}/{len(casi)} — {'VERDE' if rossi == 0 else 'ROSSO'}")
     return 0 if rossi == 0 else 1
 
 
@@ -266,16 +298,29 @@ def main() -> int:
     for sch, tab, col in tutte:
         per_tabella.setdefault((sch, tab), set()).add(col)
 
+    # I commenti di colonna, una query sola. Un `col_description` per colonna sarebbe una
+    # raffica di round-trip, e attraverso il tunnel ognuno costa ~86 ms.
+    commenti_righe = interroga(
+        "SELECT n.nspname, c.relname, a.attname, coalesce(d.description,'') "
+        "FROM pg_attribute a "
+        "JOIN pg_class c ON c.oid = a.attrelid "
+        "JOIN pg_namespace n ON n.oid = c.relnamespace "
+        "LEFT JOIN pg_description d ON d.objoid = c.oid AND d.objsubid = a.attnum "
+        "WHERE n.nspname IN ('sys','staging','reference_sync','audit') AND a.attnum > 0 "
+        "AND NOT a.attisdropped AND d.description IS NOT NULL;"
+    )
+    commenti = {(r[0], r[1], r[2]): r[3] for r in commenti_righe if len(r) >= 4}
+
     per_classe: dict[str, list[tuple[str, str, str, str]]] = {}
     for sch, tab, col, tipo in trovate:
-        classe = classifica(sch, tab, col, per_tabella.get((sch, tab)))
+        classe = classifica(sch, tab, col, per_tabella.get((sch, tab)), commenti.get((sch, tab, col)))
         per_classe.setdefault(classe, []).append((sch, tab, col, tipo))
 
     print("CENSIMENTO DEI RIFERIMENTI SENZA REFERENTE (#218 F1) — ri-derivato adesso dal database\n")
     print(f"  colonne che dichiarano un riferimento e non hanno alcun vincolo: {len(trovate)}")
     print("  (solo tabelle vere: le viste non hanno vincoli per costruzione e sarebbero falsi positivi)\n")
 
-    for classe in (DA_RISOLVERE, POLIMORFO, ESTERNO, MODELLO_IA, ARCHIVIO, LAVORAZIONE):
+    for classe in (DA_RISOLVERE, RAGIONE, POLIMORFO, ESTERNO, MODELLO_IA, ARCHIVIO, LAVORAZIONE):
         voci = per_classe.get(classe, [])
         marca = "⛔" if classe == DA_RISOLVERE else "  "
         print(f"{marca} {classe:<14} {len(voci):>4}  — {DESCRIZIONE[classe]}")

@@ -1,7 +1,7 @@
 # 218 — I residui del legacy senza referente locale: analizzarli tutti, e risolverli uno per uno
 
 > **item**: #218
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 
 ## Decisione vincolante (non si ri-chiede)
 
@@ -108,26 +108,85 @@ si emenda il file che crea l'oggetto, non si cancella solo a valle, o al deploy 
       **Le sei decisioni** — il criterio di Enzo è «eliminare (preferito), creare il referente,
       oppure lasciare con la ragione scritta»:
 
+      ⚠⚠ **DUE DECISIONI SU SEI ERANO SBAGLIATE, e le ha corrette il file che crea l'oggetto.**
+      Avevo deciso di *aggiungere* la FK su `import_run_id` (il referente esiste, zero orfani) e
+      di *eliminare* `table_mapping_id`. Poi ho letto la mig. **`000281`**, che quelle due FK le
+      ha **sciolte di proposito** — «sono metadati di ESECUZIONE (quale corsa d'import, quale
+      mappatura), parziali per costruzione: non sono la provenienza, e scioglierli non toglie
+      nulla alla risposta». Rimetterne una contraddirebbe una decisione presa e motivata; togliere
+      l'altra butterebbe il metadato che quella decisione aveva scelto di conservare.
+      **È la stessa lezione di `#132` F1**, ed è la seconda volta in due voci: *«0 su 9» misurava
+      una cosa vera e ne suggeriva una falsa — bastava leggere il file che crea l'oggetto prima di
+      dire cosa sia.* Qui la misura («44.744 puntano a righe che esistono») era vera, e la
+      conclusione che ne traevo falsa.
+
       | # | colonna | misura | decisione |
       |---|---|---|---|
-      | ① | `sys_source_lineage_records.source_lineage_import_run_id` | **44.744** valorizzate, e **tutte e 44.744** puntano a righe che ESISTONO in `reference_sync.import_runs` — misurato con una join, non dedotto | **CREARE IL REFERENTE**: la FK si può aggiungere **senza bonifica**, perché non c'è un solo orfano. È il caso più netto dei sei: il referente c'era già, mancava solo di dirlo |
-      | ② | `sys_source_lineage_records.source_lineage_table_mapping_id` | **57.053** valorizzate · la tabella `table_mappings` **non esiste più** (era in `brownfield`, ritirato da `#164` F4) · **nessun codice la legge** (assente dai campi del modulo `provenance`) | **ELIMINARE** — è la preferita di Enzo e qui non costa niente: punta nel vuoto e nessuno la guarda |
-      | ③ | `sys_source_lineage_records.source_lineage_sdbi_mapping_card_id` | **1.490** valorizzate · `mapping_cards` non esiste · ⚠ **il modulo `provenance` la ESPONE nell'API** (`sdbiMappingCardId`) | **LASCIARE, con la ragione scritta**: è l'identificativo di una scheda del sistema SDBI, cioè un riferimento **esterno** — non un referente locale mancante. Eliminarla sarebbe un cambio di contratto pubblico per un guadagno nullo. La ragione va scritta **accanto alla colonna**, o al prossimo censimento ricompare |
+      | ① | `sys_source_lineage_records.source_lineage_import_run_id` | **44.744** valorizzate, e tutte puntano a righe che ESISTONO in `reference_sync.import_runs` — la tabella è tornata a esistere altrove (`#164` F4 l'ha traslocata da `brownfield`) | **LASCIARE — la ragione è già stata scritta**, nella `000281`: metadato di esecuzione, sciolto apposta. ⚠ Ma vive **solo nel file di migrazione**, e il database non la porta: va nel commento della colonna, o ricompare a ogni censimento |
+      | ② | `sys_source_lineage_records.source_lineage_table_mapping_id` | **57.053** valorizzate · la tabella `table_mappings` **non esiste più** · nessun codice la legge | **LASCIARE, stessa ragione della `000281`** — non «eliminare», come avevo deciso prima di leggerla. È un metadato di esecuzione conservato per scelta: il bersaglio non c'è più, il fatto che quella mappatura sia stata usata sì |
+      | ③ | `sys_source_lineage_records.source_lineage_sdbi_mapping_card_id` | **1.490** valorizzate · `mapping_cards` non esiste · ⚠ il modulo `provenance` la ESPONE nell'API · **è l'unica delle sei che un commento ce l'ha già** | **LASCIARE**: identificativo di una scheda del sistema SDBI, cioè un riferimento **esterno**. Il commento c'è (ADR-0014 §3.4) — ed è la prova che la cura funziona: basta che il censimento lo legga |
       | ④ | `sys_organization_unit_templates.organization_unit_template_blueprint_id` | **225** valorizzate, **9** valori distinti · la mig. `000064` lo dichiara: «legacy template_id group (the 9)» | **LASCIARE, con la ragione scritta** — ed è già indagato in `#132` F1: quei nove **non sono blueprint di questo sistema**, sono il raggruppamento del database di provenienza. Non sono orfani: non hanno **mai** avuto un referente locale. ⚠ Ma il **nome mente sul contenuto** (`..._blueprint_id` per una cosa che non è un blueprint): F3 lo rinomina, ed è quello il lavoro |
       | ⑤ | `sys_generated_record_origins.generated_record_origin_superseded_by_run_id` | **0 righe** · la mig. `000319` la dichiara: «la corsa di importazione che l'ha sostituita (P4); nullo finché non accade» | **LASCIARE, con la ragione scritta**: il referente non manca, **non esiste ancora** — la corsa di P4 (`#206`) non è stata costruita. Agganciarla oggi vorrebbe dire inventare la tabella bersaglio; eliminarla, buttare una decisione di progetto già presa |
       | ⑥ | `sys_advisor_suggestions.advisor_suggestion_rule_id` | **14** valorizzate · `varchar(48)` con un `CHECK`, non un uuid | **LASCIARE, con la ragione scritta**: è il **codice di una regola scritta in codice**, non una riga di una tabella. Il `CHECK` è già il suo vincolo, e una FK richiederebbe di mettere in tabella un catalogo che vive nel codice per scelta |
 
-      **Il conto di F3**: una migrazione che *aggiunge una FK* (①), una che *elimina una colonna*
-      (②) — entrambe con le quattro cose del metodo di bonifica — più *tre commenti di colonna*
-      (③⑤⑥) e *una rinomina* (④). ⚠ Le tre «ragioni scritte» non sono un ripiego: **finché non
-      sono scritte nel database**, al prossimo censimento quelle colonne ricompaiono identiche e
-      qualcuno rifarà questa stessa indagine.
-- [ ] **F3 La bonifica, con le quattro cose** — budget dipende da F1
-      Migrazioni che emendano i file che creano gli oggetti, più la rimozione degli esemplari
-      esistenti. Prova generale sul gemello prima del push, sempre.
-- [ ] **F4 La guardia che impedisce il prossimo** — budget ~30k
-      Un cancello che rende rosso un riferimento nuovo che nomina un oggetto e non lo aggancia.
-      Senza, il censimento di F1 è una fotografia e non una cura.
+      **IL CONTO DI F3 CAMBIA, E IN MEGLIO.** Dopo la correzione non serve né aggiungere una FK
+      né eliminare una colonna: **cinque voci su sei hanno una ragione**, e il difetto vero è che
+      la ragione **non sta nel database**. Misurato: delle sei, **una sola** porta un commento di
+      colonna; le altre cinque no, e la loro ragione vive in un file di migrazione che chi
+      interroga il database non ha davanti.
+
+      Quindi F3 è: **scrivere la ragione accanto alla colonna** (`COMMENT ON COLUMN`, cinque
+      volte) più la **rinomina** di ④, il cui nome mente sul contenuto. E F4 diventa la sua metà
+      naturale: **il censimento legge i commenti**, e una colonna con una ragione dichiarata esce
+      da `da-risolvere`. Così lo strumento smette di essere una fotografia e diventa la cura che
+      la fase chiede — chi aggiunge domani una colonna che promette un referente senza mantenerlo
+      la vede comparire da sola, perché non avrà nessuna ragione scritta.
+- [x] **F3 La bonifica, con le quattro cose** — **FATTA 2026-08-19 (S1072)** · mig. **`000331`**.
+      Dopo la correzione di F2 la bonifica **non è né una FK aggiunta né una colonna eliminata**:
+      è **scrivere la ragione dove chi interroga il database la trova**. Sei `COMMENT ON COLUMN`,
+      ognuno con tre cose — che cosa contiene la colonna, perché non ha un vincolo, e **dove sta
+      la decisione** (il rimando a `#218`, che è anche il segnale che F4 legge).
+      *Le quattro cose del metodo*: (a) la misura prima, dal censimento; (b) la guardia
+      ri-verifica **adesso** che tutte e sei le colonne esistano ancora, e nomina quelle assenti
+      invece di far fallire un `COMMENT ON` su una colonna sparita; (c) la post-condizione
+      protegge **ciò che non doveva cambiare** — le 225 righe ereditate, il contenuto di
+      `sys_source_lineage_records`, e **che nessuna FK sia rinata per distrazione**; (d) il
+      rollback **non serve e la ragione è scritta**: `COMMENT ON` non tocca né dati né struttura.
+
+      🔬 **DUE VOLTE ROSSA SULLA PROVA GENERALE, e il difetto era ogni volta nel controllo.**
+      Prima: «`sys_source_lineage_records` ha 1 chiave esterna» — vero, ma era quella su
+      `tenant_id`, legittima e senza alcun rapporto con quelle sciolte dalla `000281`. Il mio
+      controllo guardava **tutte** le FK della tabella invece delle **due colonne** che riguarda.
+      Poi, prima di correggerlo: l'errore diceva *quante* e non *quali*, e per scoprire il nome
+      serviva una seconda indagine su una macchina remota — ora lo stampa.
+      ⚠ **E ha rivelato una cosa vera, fuori da questa voce**: il clone di CI porta quella FK su
+      `tenant_id` e **la produzione no**. Registrato sotto, non toccato qui.
+- [x] **F4 La guardia che impedisce il prossimo** — **FATTA 2026-08-19 (S1072)**.
+      Il censimento **legge i commenti dal database**: una colonna la cui ragione rimanda a
+      `#218` esce da `da-risolvere` ed entra in `ragione-scritta`. È ciò che trasforma lo
+      strumento da fotografia a cura — chi domani aggiunge una colonna che promette un referente
+      senza mantenerlo la vede comparire da sola, perché non avrà nessuna ragione scritta.
+      ⚠ **Il segnale è il rimando, non un commento qualunque**: altrimenti qualsiasi descrizione
+      diventerebbe un lasciapassare, e sarebbe la guardia a insegnare come aggirarla.
+
+      ✅ **LA BATTERIA, e la correzione che è servita a farla valere.** `--selftest` ha ora **23**
+      casi in **una sola lista**, di cui **13 negativi** — cose che NON devono uscire dall'elenco.
+      ⚠⚠ La stesura precedente teneva tre gruppi con tre cicli separati e sommava le lunghezze a
+      mano: eseguiva **22** casi e ne dichiarava **14**. Peggio, due dei tre cicli giravano
+      **prima che il contatore dei rossi esistesse** — un caso fallito li avrebbe fatti morire
+      con un `NameError` invece di dire ROSSO. **Uno strumento che misura male sé stesso è il
+      difetto più pericoloso che possa avere**, perché il suo verde non significa niente. Ora
+      il numero dei casi eseguiti e quello dichiarato sono lo stesso numero, e si vede.
+
+## Fuori da questa voce — trovato misurando, una volta sola
+
+**Il clone di CI e la produzione non hanno le stesse chiavi esterne.** Trovato dalla
+post-condizione della `000331`: su `sys.sys_source_lineage_records` il clone porta
+`..._tenant_id_fkey` e la produzione **no**. Una delle due ha ragione e l'altra è alla deriva,
+e non si sa quale senza guardare: un vincolo in più sul clone rende la CI **più severa** del
+posto che deve proteggere (verde in produzione, rosso in CI), uno in meno la rende **cieca**.
+Non è materia di `#218` — qui si censiscono i riferimenti senza referente, non la deriva fra
+ambienti — ma è la prima volta che quella deriva viene *misurata* invece che sospettata.
 
 ## Chiuso quando
 

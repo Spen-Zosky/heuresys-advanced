@@ -868,7 +868,7 @@
   - limite-dichiarato: la classificazione automatica cerca **segnali testuali** nei blocchi del registro, non legge i file di consegna né misura il database. Serve a ordinare la coda, non a promuovere o bocciare una voce. Un blocco scritto bene ma sbagliato le sfugge — ed è esattamente il caso che `#149` esiste per coprire, una voce alla volta, quando la si prende in carico
   - lab-id: 2026-08-06-ritrattare-le-ingestioni-alla-luce-delle-correzioni
 
-- **#218 I residui del legacy senza referente locale: analizzarli tutti, e risolverli uno per uno** · status: ACTIVE
+- **#218 I residui del legacy senza referente locale: analizzarli tutti, e risolverli uno per uno** · status: FATTO
   - priority: P1 · effort: **indagine + bonifica, ~2-3 sessioni** (l'indagine misura quanti sono; la bonifica dipende da quel numero) · doc: `.programmi/` (da aprire)
   - nasce-da: **direttiva di Enzo, 2026-08-19** — *«tutti i dati provenienti dal db legacy che non hanno mai avuto un referente locale devono essere analizzati e trattati correttamente: per ognuno si deve decidere se eliminarli o se è opportuno/necessario creare il referente locale. È comunque da privilegiare la cancellazione/bonifica per l'igiene del DBMS attuale, che ormai ha superato il legacy ed è completamente autonomo»*
   - il-caso-che-l'ha-prodotta: le **225** righe di `sys_organization_unit_templates` portano `organization_unit_template_blueprint_id`, che la mig. `000064` dichiara essere «legacy template_id group (the 9)». Nove identificativi del sistema di provenienza, **senza FK** perché non c'è nulla a cui agganciarli. Li avevo letti come «orfani» e stavo per trattarli come un guasto: sono invece un residuo mai risolto

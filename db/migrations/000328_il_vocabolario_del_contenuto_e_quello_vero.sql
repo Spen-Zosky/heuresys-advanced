@@ -134,20 +134,28 @@ BEGIN
   END IF;
 
   -- 3. CIO' CHE NON DOVEVA CAMBIARE. Questa migrazione tocca due vincoli e nient'altro:
-  --    le cinque tabelle restano cinque, e le altre tre conservano i vincoli che avevano.
+  --    le tabelle di contenuto restano quelle, e le altre conservano i vincoli che avevano.
   --    Senza questa verifica, un `DROP CONSTRAINT` scritto sulla tabella sbagliata
   --    passerebbe inosservato.
+  --    ⚠ ERANO CINQUE, e si contavano col carattere jolly. Dal 2026-08-19 (#132 F5) i
+  --    processi hanno una casa sola — quella vecchia, `sys_blueprint_process_registry` — e la
+  --    quinta tabella e' ritirata dalla `000335`. Qui si elencano per NOME le quattro che
+  --    restano: un `LIKE` conterebbe anche la quinta finche' la `000335` non ha girato, e
+  --    questo controllo fallirebbe per l'ORDINE invece che per un difetto.
   IF (SELECT count(*) FROM information_schema.tables
-       WHERE table_schema = 'sys' AND table_name LIKE 'sys_blueprint_content_%') <> 5 THEN
-    RAISE EXCEPTION '000328: le tabelle di contenuto non sono piu'' cinque';
+       WHERE table_schema = 'sys'
+         AND table_name IN ('sys_blueprint_content_units', 'sys_blueprint_content_positions',
+                            'sys_blueprint_content_skills', 'sys_blueprint_content_kpis')) <> 4 THEN
+    RAISE EXCEPTION '000328: le tabelle di contenuto non sono piu'' quattro';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_blueprint_content_positions_criticita_ck')
-     OR NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_blueprint_content_units_non_se_stessa_ck')
-     OR NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_blueprint_content_processes_ordine_ck') THEN
+     OR NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_blueprint_content_units_non_se_stessa_ck') THEN
     RAISE EXCEPTION '000328: un vincolo che non doveva essere toccato e'' sparito';
   END IF;
-  IF (SELECT count(*) FROM pg_constraint WHERE conname LIKE 'sys_blueprint_content_%_uq' AND contype = 'u') <> 5 THEN
-    RAISE EXCEPTION '000328: le cinque chiavi naturali (versione, codice) non sono piu'' cinque';
+  IF (SELECT count(*) FROM pg_constraint WHERE contype = 'u'
+       AND conname IN ('sys_blueprint_content_units_uq', 'sys_blueprint_content_positions_uq',
+                       'sys_blueprint_content_skills_uq', 'sys_blueprint_content_kpis_uq')) <> 4 THEN
+    RAISE EXCEPTION '000328: le quattro chiavi naturali (versione, codice) non sono piu'' quattro';
   END IF;
 
   RAISE NOTICE '000328 ok — il vocabolario del contenuto coincide con quello del prodotto (specie di competenza, verso di indicatore)';

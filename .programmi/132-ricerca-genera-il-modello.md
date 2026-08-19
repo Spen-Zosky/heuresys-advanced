@@ -541,7 +541,18 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
      riconciliazione, o la `000062` la ritrovera' come non classificata) piu' il `DROP` a valle —
      ADR-0035, la coppia. Nessuna bonifica di dati.
 
-- [ ] **F5 i cinque domini ricercabili** — `organization_units` · `positions` · `skills` · `kpis` ·
+- [ ] **F5 i cinque domini ricercabili** — ⏳ **IN CORSO: la casa dei processi e' FATTA
+  2026-08-19 (S1074)**, mig. `000335` in produzione + emendamento di `000327` e `000328`
+  (ADR-0035). La casa vecchia ha preso il **nome inglese** e il **presidio per codice di
+  posizione**; quella nata da F1 e' ritirata — vuota, senza referenti, senza un file di codice
+  che la nominasse. Protetto cio' che non doveva cambiare: **23** processi, **7** decisioni di
+  fascicolo ancora agganciate, **0** assegnazioni orfane, le altre quattro tabelle intatte.
+  🔬 **La prova generale ha fermato QUATTRO difetti della stessa famiglia**, uno per volta
+  (punto 6 del metodo: una batteria che si ferma al primo rosso nasconde gli altri): tre
+  post-condizioni della `000327` e una della `000328` contavano **cinque** tabelle col carattere
+  jolly, e su un database che porta ancora la quinta quel conto fallisce per l'**ordine**, non
+  per un difetto. Ora elencano le quattro **per nome**.
+  ▸ **Resta di F5**: dichiarare i cinque domini ricercabili in codice — `organization_units` · `positions` · `skills` · `kpis` ·
   `business_processes`. Il primo costa la forma, gli altri quattro la riusano
 - [ ] **F6 il ponte: le proposte approvate diventano il modello** — famiglia (se non esiste),
   variante, versione 1 col contenuto. Riqualifica da scrivere: `sys_blueprint_families` e `_variants`

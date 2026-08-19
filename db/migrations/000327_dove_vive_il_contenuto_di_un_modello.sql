@@ -150,26 +150,16 @@ CREATE TABLE IF NOT EXISTS sys.sys_blueprint_content_kpis (
 CREATE INDEX IF NOT EXISTS sys_blueprint_content_kpis_versione_idx
   ON sys.sys_blueprint_content_kpis (blueprint_content_kpi_version_id);
 
--- ── ⑤ i processi ──────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS sys.sys_blueprint_content_processes (
-  blueprint_content_process_id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  blueprint_content_process_version_id uuid         NOT NULL
-    REFERENCES sys.sys_blueprint_variant_versions(blueprint_variant_version_id) ON DELETE CASCADE,
-  blueprint_content_process_code       varchar(64)  NOT NULL,
-  blueprint_content_process_name       varchar(255) NOT NULL,
-  blueprint_content_process_name_en    varchar(255),
-  blueprint_content_process_ordinal    integer      NOT NULL DEFAULT 0,
-  -- Chi presidia il processo, per CODICE di posizione: è l'attribuzione che l'archetipo
-  -- cablato esprime con 23 OWNER, uno per processo.
-  blueprint_content_process_owner_position_code varchar(64),
-  blueprint_content_process_metadata   jsonb        NOT NULL DEFAULT '{}'::jsonb,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT sys_blueprint_content_processes_uq UNIQUE (blueprint_content_process_version_id, blueprint_content_process_code),
-  CONSTRAINT sys_blueprint_content_processes_ordine_ck CHECK (blueprint_content_process_ordinal >= 0)
-);
-CREATE INDEX IF NOT EXISTS sys_blueprint_content_processes_versione_idx
-  ON sys.sys_blueprint_content_processes (blueprint_content_process_version_id);
+-- ── ⑤ i processi: LA TABELLA E' RITIRATA, e il blocco che la creava e' tolto da qui ──
+-- (#132 F5, mig. `000335`). Creava una casa per i processi, per simmetria con gli altri
+-- quattro domini di contenuto. La misura del 2026-08-19 ha detto che la casa dei processi
+-- e' un'altra e c'era gia': `sys_blueprint_process_registry` (mig. `000008`), 23 righe, con
+-- CINQUE tabelle che la referenziano — fra cui le decisioni del consulente sul fascicolo.
+-- Quella creata qui e' rimasta a 0 righe, 0 referenze e 0 file di codice.
+-- Il blocco e' tolto ALLA FONTE perche' la catena si ri-applica per intero a ogni deploy:
+-- lasciarlo qui e togliere la tabella a valle la farebbe rinascere al giro dopo (ADR-0035).
+-- Le due colonne che aveva in piu' — nome inglese e presidio per codice di posizione — sono
+-- passate alla casa vecchia, sempre nella `000335`.
 
 -- ── ⑥ il registro di riconciliazione, che ogni tabella `sys.*` deve dichiarare ──
 -- Trovato dalla PROVA GENERALE alla seconda passata: la `000062` pretende «0 UNCLASSIFIED»
@@ -193,27 +183,36 @@ VALUES
   ('sys_blueprint_content_skills', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — contenuto di modello (#132 F1). Le competenze richieste da un modello; il catalogo vero e'' `sys_skills`, che ha la propria classificazione.]'),
   ('sys_blueprint_content_kpis', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — contenuto di modello (#132 F1). Gli indicatori che un modello propone; le definizioni vive stanno in `sys_kpi_definitions`.]'),
-  ('sys_blueprint_content_processes', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — contenuto di modello (#132 F1). I processi che un modello prevede, col presidio espresso per codice di posizione.]')
+   '[sign-off: EXCLUDE — contenuto di modello (#132 F1). Gli indicatori che un modello propone; le definizioni vive stanno in `sys_kpi_definitions`.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$
 DECLARE n int; v_mancanti text;
 BEGIN
-  -- 1. Le cinque tabelle esistono, e sono cinque: se una mancasse, il dominio che regge
-  --    resterebbe senza casa e F2 lo scoprirebbe costruendo.
+  -- 1. Le tabelle di contenuto esistono, e sono QUATTRO: se una mancasse, il dominio che
+  --    regge resterebbe senza casa e F2 lo scoprirebbe costruendo.
+  --    ⚠ ERANO CINQUE fino al 2026-08-19 (#132 F5): i processi avevano gia' una casa —
+  --    `sys_blueprint_process_registry`, 23 righe e cinque tabelle che la referenziano — e
+  --    quella creata qui e' stata ritirata dalla `000335`, vuota e senza referenti. Il numero
+  --    e' aggiornato QUI, non aggirato altrove: una post-condizione che conta un elenco deve
+  --    contare l'elenco vero, o smette di proteggere qualcosa.
+  --    ⚠ E SI CONTANO PER NOME, non col carattere jolly. Su un database che gia' portava la
+  --    quinta, questo blocco gira PRIMA della `000335` che la ritira: un `LIKE` conterebbe 5 e
+  --    fallirebbe per l'ordine, non per un difetto. Le quattro che devono esserci sono queste.
   SELECT count(*) INTO n FROM information_schema.tables
-   WHERE table_schema = 'sys' AND table_name LIKE 'sys_blueprint_content_%';
-  IF n <> 5 THEN
-    RAISE EXCEPTION '000327: attese 5 tabelle di contenuto, trovate %', n;
+   WHERE table_schema = 'sys'
+     AND table_name IN ('sys_blueprint_content_units', 'sys_blueprint_content_positions',
+                        'sys_blueprint_content_skills', 'sys_blueprint_content_kpis');
+  IF n <> 4 THEN
+    RAISE EXCEPTION '000327: attese 4 tabelle di contenuto, trovate %', n;
   END IF;
 
   -- 2. Ognuna aggancia la VERSIONE, che è il difetto della tabella vecchia. Si verifica la
   --    FK, non il nome della colonna: un nome giusto su una FK assente non protegge niente.
   SELECT string_agg(t.table_name, ', ') INTO v_mancanti
     FROM information_schema.tables t
-   WHERE t.table_schema = 'sys' AND t.table_name LIKE 'sys_blueprint_content_%'
+   WHERE t.table_schema = 'sys' AND t.table_name IN ('sys_blueprint_content_units', 'sys_blueprint_content_positions',
+                        'sys_blueprint_content_skills', 'sys_blueprint_content_kpis')
      AND NOT EXISTS (
        SELECT 1 FROM pg_constraint c
         WHERE c.conrelid = ('sys.' || t.table_name)::regclass
@@ -225,10 +224,14 @@ BEGIN
 
   -- 3. Ognuna ha la sua chiave naturale `(versione, codice)`: senza, due proposte
   --    approvate potrebbero creare due volte la stessa voce e nessuno se ne accorgerebbe.
+  --    Per NOME, come al punto 1 e per la stessa ragione: su un database che porta ancora la
+  --    quinta tabella (ritirata dalla `000335`, che gira dopo) un `LIKE` conterebbe 5.
   SELECT count(*) INTO n FROM pg_constraint
-   WHERE conname LIKE 'sys_blueprint_content_%_uq' AND contype = 'u';
-  IF n <> 5 THEN
-    RAISE EXCEPTION '000327: attese 5 chiavi naturali (versione, codice), trovate %', n;
+   WHERE contype = 'u'
+     AND conname IN ('sys_blueprint_content_units_uq', 'sys_blueprint_content_positions_uq',
+                     'sys_blueprint_content_skills_uq', 'sys_blueprint_content_kpis_uq');
+  IF n <> 4 THEN
+    RAISE EXCEPTION '000327: attese 4 chiavi naturali (versione, codice), trovate %', n;
   END IF;
 
   -- 4. NESSUNA porta `tenant_id`: un modello è di piattaforma, non di un cliente. È la
@@ -236,7 +239,8 @@ BEGIN
   --    distrazione.
   SELECT string_agg(table_name, ', ') INTO v_mancanti
     FROM information_schema.columns
-   WHERE table_schema = 'sys' AND table_name LIKE 'sys_blueprint_content_%'
+   WHERE table_schema = 'sys' AND table_name IN ('sys_blueprint_content_units', 'sys_blueprint_content_positions',
+                        'sys_blueprint_content_skills', 'sys_blueprint_content_kpis')
      AND column_name LIKE '%tenant%';
   IF v_mancanti IS NOT NULL THEN
     RAISE EXCEPTION '000327: queste tabelle di modello portano un tenant: %', v_mancanti;
@@ -253,14 +257,15 @@ BEGIN
   --    passata trovava le mie. Meglio verificarlo qui, dove si legge il perche'.
   SELECT string_agg(t.table_name, ', ') INTO v_mancanti
     FROM information_schema.tables t
-   WHERE t.table_schema = 'sys' AND t.table_name LIKE 'sys_blueprint_content_%'
+   WHERE t.table_schema = 'sys' AND t.table_name IN ('sys_blueprint_content_units', 'sys_blueprint_content_positions',
+                        'sys_blueprint_content_skills', 'sys_blueprint_content_kpis')
      AND NOT EXISTS (SELECT 1 FROM sys.sys_reconciliation_registry r
                       WHERE r.reconciliation_registry_table_name = t.table_name);
   IF v_mancanti IS NOT NULL THEN
     RAISE EXCEPTION '000327: queste tabelle non sono nel registro di riconciliazione: %', v_mancanti;
   END IF;
 
-  RAISE NOTICE '000327 ok — 5 tabelle di contenuto agganciate alla versione, 225 righe ereditate intatte';
+  RAISE NOTICE '000327 ok — 4 tabelle di contenuto agganciate alla versione, 225 righe ereditate intatte';
 END $$;
 
 COMMIT;

@@ -605,9 +605,25 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   **contenuto** del commento, non sulla sua presenza: un commento vuoto passerebbe un controllo di
   sola esistenza. Prova generale VERDE, 311 migrazioni, 23/23 sentinelle; misurato dopo: famiglie
   1 · varianti 1, descritte e non toccate.
-- [ ] **F7 le due prove** — prima l'azienda nuova di settore diverso (se ne esce una banca,
-  l'archetipo è sparito solo di nome), poi RTL Bank come metro di qualità. Sul gemello, poi in
-  produzione
+- [ ] **F7 le due prove** — ⏸ **`blocked-on-Enzo`: l'approvazione della prima fonte** (dichiarato
+  2026-08-20, S1074). Prima l'azienda nuova di settore diverso (se ne esce una banca, l'archetipo
+  è sparito solo di nome), poi RTL Bank come metro di qualità.
+
+  **Perche' e' bloccata, e non e' un intoppo tecnico**: i cinque domini di contenuto confrontano le
+  fonti col registro, e nel registro **non c'e' ancora nessuna fonte approvata**. Approvarle e' una
+  decisione di business — richiesta esplicita di Enzo del 2026-08-05: *«l'elenco delle fonti
+  ammesse non lo scrive nessuno a mano: nasce da una ricerca e lo approva Enzo»* — e il codice la
+  rende meccanica: una fonte `APPROVED` senza approvatore, data e motivazione e' **impossibile per
+  vincolo**.
+
+  **Cosa trova gia' pronto chi riprende**: la corsa vera di `F4h`
+  (`79750f14-bf7c-45af-bd79-f1883fccc6e1`) ha lasciato **una proposta `PASSED`** —
+  `bancaditalia.it`, istituzionale, con due evidenze e le loro impronte. Basta deciderla (la rotta
+  di decisione sulla proposta, con la motivazione) e applicarla (la rotta `apply-research`): il
+  ponte la scrive nel registro, e da quel momento i cinque domini sono ricercabili. **Poi** F7
+  gira: un fascicolo per un'azienda di consulenza (ATECO 70.20), una corsa per dominio, e il
+  controllo meccanico che nessuna chiave naturale proposta coincida con i **23** processi del
+  modello bancario.
 
 ## Le prove che devono poter fallire
 

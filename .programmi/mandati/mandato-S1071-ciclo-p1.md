@@ -118,20 +118,24 @@ Resta un difetto vero, trovato smentendo quello supposto → **C4**.
   resta il guardiano di fine turno, ma per `test-api` conviene leggere la CI invece di rifarla.
   ⚠ Non e' ancora una regola scritta nel `CLAUDE.md`: e' una misura di oggi, da confermare.
 
-- **⏭ PROSSIMA: P1.2 `Z-251`** — la suite non regge la contesa sul database, F1→F3.
-  - Aprirla ADESSO e' corretto: `#181` e' chiusa e i due condividevano il perimetro
-    (`apps/api/test/**`, `vitest.config.ts`), quindi non si sovrascrivono piu'.
-  - ⚠ Il costo dominante **non e' in token** ma in ore-macchina: F1 e F3 pretendono molte corse
-    integrali della suite (1834 s ciascuna, misurate in S1054). Il piano lo dichiara e i 140k di
-    budget **non le coprono**.
-  - ⚠ La decisione vincolante del piano: «alzare ancora i timeout non e' una cura, e' la terza
-    volta che si sposta la soglia invece di togliere la causa». F2 (sessioni condivise fra file)
-    e' il lavoro vero.
-  - 💡 Cosa questa sessione ha imparato e che serve la': la suite API gira **anche in CI su
-    `runs-on: [self-hosted, off-prod]`** (`test-integration.yml:45`). Eseguirla in locale contro
-    il DB di produzione via tunnel e' lavoro duplicato **che contende quel database** — ed e'
-    plausibile che sia una delle cause della contesa che `Z-251` insegue. Da misurare per prima
-    cosa, prima di toccare i timeout.
+- **⏭ PROSSIMA: `Z-251` F2** — sessioni condivise fra file, ~80k. **Non si e' aperta in S1071 con
+  i tre numeri**: residuo misurato 59.866 · costo 80.000 · `guardiano --budget 80000` → **NON CI STA**.
+  - **F2 si fa COME SCRITTA.** La conclusione contraria che avevo tratto da F1 e' stata smentita da
+    una misura fatta subito dopo (in CI, senza tunnel, la suite dura **di piu'**). Non c'e' niente
+    da decidere con Enzo: c'era una mia conclusione sbagliata, ritirata.
+  - Perimetro: `apps/api/test/**` + `apps/api/vitest.config.ts`. `#181` e' chiusa, quindi non c'e'
+    piu' sovrapposizione.
+  - Il lavoro: togliere i login ripetuti. Non alzare i limiti — «e' la terza volta che si sposta la
+    soglia invece di togliere la causa» (decisione vincolante della voce).
+  - Poi **F3**: riabbassare i limiti alzati due volte. E' la prova che la causa e' andata via; se
+    devono restare alti, la cura non ha funzionato e va detto.
+- **Poi `#198` T9b** (~60k): ⚠ crea un'azienda vera in produzione, **una volta sola** → ci si ferma
+  a chiedere conferma a Enzo prima di scrivere. Il `blocked-on-Enzo` che il register portava e'
+  stato **sciolto il 2026-08-18** e riconciliato in S1071.
+- **Register riconciliati in S1071**: `#181` (chiusa), `#198` (due righe che si contraddicevano),
+  `Z-251` (effort «~2h» incompatibile col proprio corpo → ~140k + ore-macchina). **Restano stantii
+  `#132`** (il register non registra F0, che e' fatta con la migrazione `000323`) **e `#142`** (il
+  piano conserva una frase su un gate gia' caduto). Riconciliarli prima di eseguirli.
 
 **Regole di questo ciclo, da non ri-derivare**: push a fine voce si', chiusura completa no (fine
 ciclo) · alla soglia del guardiano si committa, **si pusha**, si aggiorna questo blocco, e si chiude

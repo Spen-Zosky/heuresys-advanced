@@ -68,6 +68,43 @@
     }
    },
    "solaLettura": true
+  },
+  "tenant-blueprints": {
+   "data": "2026-08-19",
+   "decisione": "Enzo (#214 F3): «apri tenant-blueprints». Terzo perimetro in sola lettura. E' il fascicolo di configurazione di un'azienda — struttura, non persone — e `RESOURCE_SENZA_DATI_DI_PERSONA` lo dichiara tale con quelle parole, non per assenza dall'elenco delle riservate. Scelto fra i candidati neutri per ampiezza di lettura (6 letture, 3 pagine) nella stessa decisione in cui F5 ha reso misurabili anche i candidati piu' ampi: `analytics` e `dashboard` sono usciti dai NON MISURABILI e sono caduti fra i RISERVATI per le classi che espongono davvero, quindi non erano in gara.",
+   "operations": {
+    "get": {
+     "method": "GET",
+     "path": "/",
+     "permission": null
+    },
+    "get_by_id": {
+     "method": "GET",
+     "path": "/:id",
+     "permission": null
+    },
+    "get_by_id_versions_by_number": {
+     "method": "GET",
+     "path": "/:id/versions/:number",
+     "permission": null
+    },
+    "get_by_id_versions_by_number_diff": {
+     "method": "GET",
+     "path": "/:id/versions/:number/diff",
+     "permission": null
+    },
+    "get_by_id_versions_by_number_model_proposal": {
+     "method": "GET",
+     "path": "/:id/versions/:number/model-proposal",
+     "permission": null
+    },
+    "get_by_id_versions_by_number_processes": {
+     "method": "GET",
+     "path": "/:id/versions/:number/processes",
+     "permission": null
+    }
+   },
+   "solaLettura": true
   }
  }
 }

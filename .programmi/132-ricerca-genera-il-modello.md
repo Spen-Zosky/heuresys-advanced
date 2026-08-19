@@ -267,7 +267,45 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   motivata. Riuso quasi totale delle 5 tabelle di acquisizione. Due modifiche già misurate
   dall'epica: `tenant_id` nullabili con `CHECK` sulla coppia, e il legame alla versione di fascicolo.
   Più `BLUEPRINT_FIELD_LOCKED` (`D-81`), che l'epica vuole **insieme**. ⚠ La difesa di §4.4 non è
-  opzionale: **una pagina web può contenere istruzioni**, e la ricerca le legge
+  opzionale: **una pagina web può contenere istruzioni**, e la ricerca le legge.
+
+  🔎 **INDAGINE FATTA 2026-08-19 (S1072), implementazione NON aperta** — il guardiano dava capienza
+  per ~250k e F4 ne chiede di piu' (schema + motore + difese + prove): aprirla a meta' sarebbe
+  peggio che non aprirla. Ecco cosa la prossima sessione trova gia' pronto, misurato sul vivo e non
+  dedotto dall'epica:
+
+  | cosa serve a F4 | cosa c'e' gia' | cosa manca |
+  |---|---|---|
+  | la **corsa** | `sys_seed_acquisition_runs` — 13 colonne: modello di prompt, **registro delle fonti** (`source_registry_payload`), stato, inizio e fine | il legame alla **versione di variante**; `tenant_id` e' `NOT NULL` |
+  | la **proposta** | `sys_seed_candidate_records` — dominio, **chiave naturale**, payload, stato di validazione | `tenant_id` e' `NOT NULL` |
+  | la **fonte** | `sys_seed_source_evidence` — `url` + `retrieved_at` + `content_hash`: e' **esattamente** «indirizzo + data + impronta» | ✅ **niente** |
+  | le **regole applicate** | `sys_seed_validation_results` — codice regola, esito, messaggio | ✅ niente |
+  | la **decisione motivata** | `sys_seed_approval_decisions` — approvatore, stato, `rationale` | ✅ niente |
+
+  **① Il registro c'e', il motore no.** Esistono gia' **tre moduli API completi** su queste tabelle
+  — `seed-acquisition-runs`, `seed-candidate-records`, `seed-approval-decisions` — con rotte,
+  servizio, repository e test, sotto il permesso `seed_acquisition:trigger`. Ma `trigger` **registra
+  una corsa**, non la esegue: nessun codice va a leggere una pagina web. F4 non e' «costruire il
+  registro delle ricerche»: e' **aggiungere il motore dietro un registro che esiste gia'**, ed e'
+  molto meno lavoro di quanto il piano lasciasse intendere.
+
+  **② ⚠ LE TABELLE SONO GIA' IN USO, E NON DALLA RICERCA.** Le **12** corse presenti sono tutte di
+  `STORIA36` (la storia RTL a 36 mesi), con 12 proposte, 12 decisioni e 36 validazioni. L'epica
+  diceva «riuso quasi totale»; la misura aggiunge il vincolo che l'epica non poteva vedere: **F4
+  deve conviverci, non appropriarsene**. Rendere `tenant_id` nullabile e agganciare la versione va
+  fatto senza toccare le righe di storia36 — e la post-condizione dovra' proteggere **quelle**,
+  non solo le nuove (metodo di bonifica, punto ④c).
+
+  **③ `D-81` si estingue qui, e il register lo dice gia'.** `BLUEPRINT_FIELD_LOCKED` e' segnato
+  «gestito — non lavorabile per costruzione»: la guardia non poteva essere scritta finche' non
+  esisteva l'attore capace di violarla. Il register rimanda esplicitamente a `#132`. Il codice
+  d'errore e la classificazione dei campi (bloccanti / rivedibili) sono **gia' scritti** nella
+  specifica §4.8: non vanno riprogettati, vanno applicati.
+
+  **④ La difesa di §4.4 non ha ancora nulla su cui appoggiarsi**, ed e' la parte da progettare per
+  prima: `content_hash` conserva l'impronta di cio' che si e' letto, ma nessun codice tratta il
+  testo di una pagina come **dato non fidato**. Finche' il motore non esiste, non esiste nemmeno il
+  punto in cui la difesa va messa — quindi va scritta insieme al motore, non dopo.
 - [ ] **F5 i cinque domini ricercabili** — `organization_units` · `positions` · `skills` · `kpis` ·
   `business_processes`. Il primo costa la forma, gli altri quattro la riusano
 - [ ] **F6 il ponte: le proposte approvate diventano il modello** — famiglia (se non esiste),

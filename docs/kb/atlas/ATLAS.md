@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `a12f0257` (2026-08-19T18:51:50+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `2807244e` (2026-08-19T20:29:50+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 599 |
 | Pagine web | 120 |
 | Schemi shared | 107 |
-| Tabelle DB | 282 (vuote: 39) |
-| Viste / matview | 30 / 0 |
+| Tabelle DB | 264 (vuote: 21) |
+| Viste / matview | 31 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 267 |
 
 ## Moduli API
@@ -126,24 +126,6 @@
 ## Tabelle DB vuote (feature senza dati — candidate brainstorming)
 
 - `audit.user_self_service_actions`
-- `staging.wave1_activity_classification_mappings`
-- `staging.wave1_activity_classifications`
-- `staging.wave1_blueprint_process_registry`
-- `staging.wave1_compensation_bands`
-- `staging.wave1_esco_occupation_mappings`
-- `staging.wave1_job_families`
-- `staging.wave1_job_roles`
-- `staging.wave1_learning_modules`
-- `staging.wave1_learning_path_steps`
-- `staging.wave1_learning_paths`
-- `staging.wave1_process_kpi_templates`
-- `staging.wave1_skill_aliases`
-- `staging.wave1_skill_categories`
-- `staging.wave1_skill_families`
-- `staging.wave1_skill_learning_mappings`
-- `staging.wave1_skill_taxonomy_edges`
-- `staging.wave1_skills`
-- `staging.wave1_user_certifications`
 - `sys.sys_activity_classification_mappings`
 - `sys.sys_auth_mfa_exemption_audit`
 - `sys.sys_auth_mfa_exemption_eligible_users`

@@ -1,66 +1,53 @@
-# heuresys-advanced — STATE (vista rapida)
+# STATE — vista rapida
 
-**Updated**: 2026-08-19 (S1072).
-> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
+> Priorità e domande aperte. I numeri (versioni, conteggi, architettura) stanno in
+> `docs/kb/SOT_STATE.md`, che è l'altra metà e non ripete niente di quanto è scritto qui.
 
-⚠⚠ **IL MOTORE COSTRUISCE ANCORA UNA BANCA, e questa volta l'ha fatto in produzione.** `#198` T9b
-ha creato un'azienda vera partendo dall'archetipo: 184 righe, tutte tracciate, prove A/B/C
-superate. Ma era **la terza banca**, ed Enzo l'ha visto subito. L'azienda è stata **disfatta per
-intero** (conteggi tornati esatti, RTL e Heuresys contati riga per riga: intatti). La causa è
-`apps/api/src/modules/tenant-materialization/blueprints.ts` — 296 righe di banca cablata — e
-`#132` F3 è la fase che la ritira.
+## Last session brief — l'ultima sessione, in breve
 
-## Last session brief (S1072 «la prova che riesce e mostra il difetto»)
+**S1072 — l'archetipo scritto a mano non esiste più.** Il contenuto di un modello si legge dal
+database, e la costruzione di un'azienda ha smesso di produrre sempre la stessa banca. Chiuse
+cinque voci: `#132` F2 e F3, `Z-251`, `#218` per intero, `#69` per intero, `#211` per intero.
+Ogni fase è passata dalla prova generale sul gemello e da un sabotaggio che la rendeva rossa.
 
-Il filo: **una prova può passare e dire che il lavoro è sbagliato**. T9b è verde su tutti i suoi
-criteri e ha comunque prodotto la cosa che non si vuole; la corsa integrale dei test ha trovato
-sei rossi che erano miei; la prova generale ha fermato due migrazioni prima della CI.
+Il filo che le lega: **una misura vera può suggerire una conclusione falsa**. È successo due
+volte in un giorno — su `#132` F1 e su `#218` F2 — e in entrambi i casi la smentita stava nel
+file che crea l'oggetto. Ne è nata una memoria di lavoro.
 
-**Chiusa**: `#142` (le otto famiglie di cruscotto hanno pagina, dati veri e sei login reali).
-**Avanzate**: `Z-251` F2+F3 · `#211` F3 · `#214` F5 + terzo perimetro · `#132` **F1**.
-**Aperta**: `#218`, la direttiva di Enzo sui residui del legacy senza referente.
+## Top priorities — le priorità
 
-⭐ **DUE CORREZIONI DI ENZO che orientano il seguito**: *«ogni volta crei una banca e questo è un
-errore grossolano»* — e, più a fondo, *«è il flusso di creazione che deve generare anche quegli
-oggetti»*: un'azienda di un tipo mai visto non deve **trovare** famiglia e modello, deve
-**produrli**. È `#132` F6.
+1. **`#132` F4 — il motore di ricerca.** L'indagine è fatta e ridimensiona la fase: il registro
+   delle corse **esiste già** (tre moduli API completi su cinque tabelle), manca solo il motore
+   che le esegue. Da progettare per prima la difesa §4.4 — una pagina web può contenere
+   istruzioni, e senza motore non esiste ancora il punto in cui metterla.
+   ⚠ Le tabelle di acquisizione **sono già in uso da storia36**: conviverci, non appropriarsene.
+   → `.programmi/132-ricerca-genera-il-modello.md` · ~1-2 sessioni per F4
+2. **`#198` T9b — la costruzione in produzione.** Resta bloccata, e ora si sa fino a quando:
+   `#132` F6. La versione ancorata dichiara `BLUEPRINT_CONTENT` e quelle tabelle sono vuote,
+   quindi l'atto si rifiuta invece di costruire una quarta banca.
+3. **`#219` — gli otto guasti dietro i rossi della E2E.** Nuova, nata dal triage di `#211`.
+   Prima le due firme che potrebbero non essere guasti (MFA e il test che riceve 400): se
+   l'ipotesi regge, tolgono 3 casi su 12 senza toccare il prodotto.
+   → `.programmi/219-otto-guasti-suite-e2e.md`
 
-⚠ **DUE MIEI ERRORI DELLA STESSA SPECIE**, entrambi scritti accanto al lavoro: ho chiesto conferma
-per T9b senza dire che l'azienda sarebbe stata **necessariamente** una banca; e ho letto «0 su 9»
-come «225 righe orfane» quando il file che le crea diceva cosa fossero. Misurare una cosa vera non
-autorizza a concluderne un'altra.
+## Open questions — le domande aperte
 
-## Top priorities (prossima sessione)
+1. **Il dominio «processi» ha due case, e una è nata vuota.** `sys_blueprint_process_registry`
+   esisteva già (23 righe, agganciata alla versione) e `#132` F1 ne ha creata una seconda,
+   ancora vuota. `#132` F5 dovrà sceglierne una — e la scelta non è simmetrica: le due
+   attribuiscono il processo a cose diverse, una posizione contro una unità.
+2. **Il clone di CI e la produzione non hanno gli stessi vincoli.** Su
+   `sys_source_lineage_records` il clone porta una FK su `tenant_id` che la produzione non ha.
+   Una delle due è alla deriva: un vincolo in più rende la CI più severa del posto che deve
+   proteggere, uno in meno la rende cieca. Misurato, non toccato.
+3. **La suite E2E non entra in CI**, per criterio dichiarato in `#211` F4: dura ~25 minuti su
+   un runner che ne impiega già ~20 per la suite API. Entra quando `#219` porta i falliti a zero.
 
-1. **`#132` F2 — il motore legge il piano dalle tabelle, non dal file.** F1 ha appena creato la
-   casa (mig. `000327`: cinque tabelle di contenuto agganciate alla versione). F2 è la seconda
-   implementazione di `BuildSource`, e apre la strada a F3, che cancella le 296 righe di banca.
-   Piano in `.programmi/132-ricerca-genera-il-modello.md`.
-2. **`#211` F4 — il criterio di verde della suite E2E.** La corsa integrale è **rossa**: 352
-   passati, **13 falliti**, 82 non eseguiti su 448. I 13 NON sono i sette corretti in F3 — sono
-   altri, mai triati. Finché il criterio non è dichiarato, quel rosso resta invisibile.
-3. **`#218` F1 — il censimento dei residui del legacy senza referente locale.** Direttiva di Enzo:
-   per ognuno eliminare (preferito) o creare il referente. Serve prima il numero.
-
-## Open questions
-
-- **Il residuo che la suite E2E lascia in produzione.** Una «Famiglia di collaudo» creata da un
-  test e mai ripulita ha fatto fallire un deploy. La suite web non ha un controllo di drift come
-  quella API: voce da aprire, o capitolo di `#181`.
-- **`sys_compensation_bands` ospita 29 righe che non sono bande** (contratti e sigle senza
-  importi): una tabella che porta due specie. Nominato in `#215`, mai bonificato.
-- **I 13 rossi della corsa E2E integrale non hanno ancora un triage.** Diversi dai sei di `#211`
-  F0: quelli erano noti e nominati, questi no.
-
-## Verification
-
-I numeri non si scrivono qui: si scrive il comando che li produce (⭐ PUNTO FISSO).
+## Verification — la verifica
 
 ```bash
-python docs/kb/tools/session_start.py        # menu + salute, un solo giro
-python docs/kb/tools/guardiano.py            # contesto e finestra 5h, misurati
-python docs/kb/tools/handoff_lint.py         # coerenza di stato e register (bloccante)
-python docs/kb/tools/programmi.py --verifica # integrità dei piani multi-sessione
-ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh'   # prima di ogni push su db/
-bash scripts/verifica-deploy.sh              # cosa gira DAVVERO sulle macchine
+python docs/kb/tools/session_start.py          # menu + salute, un giro solo
+python docs/kb/tools/guardiano.py              # contesto e finestra 5h, misurati
+python docs/kb/tools/censimento_riferimenti_orfani.py --da-risolvere   # deve dire 0
+bash scripts/verifica-deploy.sh                # com'è finita in produzione
 ```

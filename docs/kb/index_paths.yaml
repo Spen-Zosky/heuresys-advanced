@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-19T16:09:40Z da docs/kb/tools/build_index.py
+# generato: 2026-08-19T18:31:05Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-19T16:09:40Z"
-  total_files: 3129
+  generated_at: "2026-08-19T18:31:05Z"
+  total_files: 3136
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 326
+    db-migration: 330
     db-other: 8
     db-script: 43
     db-seed: 114
-    doc-canonical: 684
+    doc-canonical: 686
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 107
     showcase-source: 13
-    test: 394
+    test: 395
     ux-design-archive: 80
     web-source: 241
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2571
+    live: 2578
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -7886,6 +7886,30 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000329_la_sorgente_non_e_piu_un_archetipo.sql'
+    root: repo
+    rel: 'db/migrations/000329_la_sorgente_non_e_piu_un_archetipo.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000330_i_tipi_di_unita_sono_uno_solo_elenco.sql'
+    root: repo
+    rel: 'db/migrations/000330_i_tipi_di_unita_sono_uno_solo_elenco.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000331_la_ragione_sta_accanto_alla_colonna.sql'
+    root: repo
+    rel: 'db/migrations/000331_la_ragione_sta_accanto_alla_colonna.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000332_le_diciotto_wave1_escono.sql'
+    root: repo
+    rel: 'db/migrations/000332_le_diciotto_wave1_escono.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -8963,6 +8987,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\218-residui-legacy-senza-referente.md'
     root: repo
     rel: '.programmi/218-residui-legacy-senza-referente.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\219-otto-guasti-suite-e2e.md'
+    root: repo
+    rel: '.programmi/219-otto-guasti-suite-e2e.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10913,6 +10943,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\build_menu.py'
     root: repo
     rel: 'docs/kb/tools/build_menu.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\censimento_riferimenti_orfani.py'
+    root: repo
+    rel: 'docs/kb/tools/censimento_riferimenti_orfani.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -15071,6 +15107,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\helpers\mfa-fixture-secrets.ts'
     root: repo
     rel: 'apps/api/test/helpers/mfa-fixture-secrets.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\helpers\modello-di-prova.ts'
+    root: repo
+    rel: 'apps/api/test/helpers/modello-di-prova.ts'
     category: test
     status: live
     provenance: git-tracked

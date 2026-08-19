@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-19T16:09:40Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3129**
+**Generato**: 2026-08-19T18:31:05Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3136**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 326 |
+| db-migration | 330 |
 | db-other | 8 |
 | db-script | 43 |
 | db-seed | 114 |
-| doc-canonical | 684 |
+| doc-canonical | 686 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 107 |
 | showcase-source | 13 |
-| test | 394 |
+| test | 395 |
 | ux-design-archive | 80 |
 | web-source | 241 |
-| **TOTALE** | **3129** |
+| **TOTALE** | **3136** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2571 |
+| live | 2578 |
 
 ## File per categoria
 
@@ -1386,6 +1386,10 @@
 - `D:\heuresys-advanced\db\migrations\000326_le_otto_famiglie_di_cruscotto_hanno_una_pagina.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000327_dove_vive_il_contenuto_di_un_modello.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000328_il_vocabolario_del_contenuto_e_quello_vero.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000329_la_sorgente_non_e_piu_un_archetipo.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000330_i_tipi_di_unita_sono_uno_solo_elenco.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000331_la_ragione_sta_accanto_alla_colonna.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000332_le_diciotto_wave1_escono.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1578,6 +1582,7 @@
 - `D:\heuresys-advanced\.programmi\216-passaggio-di-consegne.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\217-flusso-di-chiusura.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\218-residui-legacy-senza-referente.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\219-otto-guasti-suite-e2e.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\54-recruiting-ats.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\69-residui-staging-wave1.md` · *live* · git-tracked
@@ -1903,6 +1908,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\build_index.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_linked_manifest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_menu.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\censimento_riferimenti_orfani.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_completezza_self.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_concetti_agente.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_embedding_coverage.py` · *live* · git-tracked
@@ -2620,6 +2626,7 @@
 - `D:\heuresys-advanced\apps\api\test\helpers\industry.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\login.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\mfa-fixture-secrets.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\helpers\modello-di-prova.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\org-actors.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\personas.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\session-cache-reset.ts` · *live* · git-tracked

@@ -46,16 +46,18 @@ invece di togliere la causa.
       apertura di una connessione **262 ms**, poi **86,5 ms per singola query** su quella già
       aperta. Non è l'handshake: è il **round-trip**. Su un database locale una query vale ~1 ms:
       qui ne vale ~86, perché il percorso è un tunnel SSH verso una VM in cloud. **Fattore ~80×.**
-      Conseguenze, tutte verificabili: (a) i 1834 s della corsa integrale sono dominati dalla
-      **latenza**, non da Argon2id; (b) «un file diverso cade ogni volta» è il comportamento atteso
-      di una soglia superata per caso, non di una contesa; (c) in CI la suite è verde perché gira
-      su `heuresys_ci` **locale al runner** (`test-integration.yml:57`), senza tunnel; (d) i limiti
-      alzati due volte compensavano la **latenza**, e per questo alzarli «funzionava».
-      ⚠ **Questo mette in discussione la decisione vincolante di questa voce**: condividere le
-      sessioni fra file (F2) toglie i login ripetuti, ma **non toglie gli 86 ms per query** — e la
-      suite ne fa migliaia. La cura che li toglie è eseguire la suite **dove il database è locale**,
-      che è ciò che la CI già fa. Non è una decisione che prendo io: è una misura che va portata a
-      Enzo prima di aprire F2, perché ne cambia il senso.
+      ⚠⚠ **DA QUEL NUMERO AVEVO TRATTO LA CONCLUSIONE SBAGLIATA, e la misura successiva l'ha
+      smentita nella stessa ora.** Avevo scritto che i 1834 s erano dominati dalla latenza e che la
+      cura fosse «eseguire la suite dove il database è locale». Poi ho misurato **quanto dura la
+      suite proprio là**: in CI, su `heuresys_ci` locale al runner e **senza tunnel**, il job
+      «Test (api integration)» dura **2065 s e 2187 s** (due corse riuscite) — cioè **più** dei
+      1834 s in locale. Se togliere il tunnel non riduce il tempo, **la latenza non è ciò che
+      domina**: la causa dichiarata nella config — «ogni file rifà i login da zero e Argon2id è
+      lento per costruzione» — regge, ed è CPU, non rete.
+      **Quindi la decisione vincolante di questa voce resta valida**, e `F2` va fatta come scritta:
+      togliere i login ripetuti riduce il **numero** di round-trip e di hash, che è ciò su cui si
+      può agire. Gli 86 ms restano un fatto misurato e utile — spiegano perché una soglia possa
+      essere superata per caso su un file qualunque — ma non spiegano il totale.
 - [ ] **F2 Le sessioni condivise fra file di test** — budget ~80k
       Il lavoro vero: togliere i login ripetuti invece di allargare i limiti. Perimetro
       `apps/api/test/**` + `apps/api/vitest.config.ts`.
@@ -63,23 +65,20 @@ invece di togliere la causa.
       È la prova che la causa è andata via: se i limiti devono restare alti, la cura non ha
       funzionato e va detto.
 
-## ⚠ Da decidere prima di F2 (misura di F1, 2026-08-19)
+## Il reperto di F1 che resta valido, e quello che non regge (2026-08-19)
 
-La decisione vincolante scritta sopra — «condividere le sessioni fra file è il lavoro che
-toglierebbe la necessità dei limiti» — è stata presa **senza conoscere la latenza del tunnel**.
-Ora si sa: **86 ms per query**, ~80 volte un database locale. F2 costa ~80k e toglie i login
-ripetuti; non tocca la latenza, che è ciò che domina i 1834 s.
+**Resta**: ogni query costa **86,5 ms** attraverso il tunnel (apertura di una connessione 262 ms),
+contro ~1 ms su un database locale. È il motivo per cui un file qualunque può superare una soglia
+per caso — cioè spiega la **forma** del guasto («un file diverso ogni volta»), non la sua frequenza
+né il tempo totale.
 
-Le due strade, con quello che si sa oggi:
+**Non regge** — ed è una conclusione mia, smentita da una misura fatta subito dopo: «la latenza
+domina i 1834 s, quindi la cura è eseguire la suite dove il DB è locale». La suite **là** dura
+**2065-2187 s**, cioè di più. Togliere il tunnel non accorcia la corsa.
 
-1. **F2 come scritta** — sessioni condivise. Riduce gli Argon2id e le connessioni. Non riduce i
-   round-trip: la suite continua a pagare 86 ms ogni volta che parla al database.
-2. **Eseguire la suite dove il database è locale** — cioè sul gemello, come la CI già fa e come
-   `#181` ha mostrato oggi (la suite API era **già verde in CI** mentre girava in locale per 30
-   minuti). Non è un lavoro di test: è dove si esegue.
-
-Le due non si escludono. Ma farle nell'ordine scritto significa spendere 80k su ciò che non
-domina, e va detto prima, non dopo.
+Conseguenza per `F2`: si fa **come scritta**. La causa dichiarata nella config (login ripetuti +
+Argon2id) non è stata smentita da niente, e condividere le sessioni riduce il numero di hash e di
+round-trip — le due cose su cui si può davvero agire.
 
 ## Chiuso quando
 

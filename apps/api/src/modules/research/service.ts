@@ -94,6 +94,21 @@ export const researchService = {
       throw e;
     }
 
+    // ④ le fonti: un dominio che confronta col registro e non ha nemmeno una fonte approvata
+    //    NON e' ricercabile. Lo si dice adesso — «zero fonti approvate» e' un'informazione
+    //    utile, e l'epica la vuole esplicita (§4.3: saperlo subito vale piu' che scoprirlo fra
+    //    tre mesi) — invece di avviare una corsa che respingera' ogni proposta una per una.
+    if (dominio.fontiConfrontateColRegistro) {
+      const approvate = await repo.contaFontiApprovate(pool, dominio.chiave);
+      if (approvate === 0) {
+        throw new UnprocessableEntityError(
+          { dominio: dominio.chiave },
+          `Il dominio "${dominio.chiave}" confronta le fonti col registro, e per lui non ce n'e' nemmeno una approvata. Prima si approvano delle fonti (dominio "research_sources"), poi lo si puo' cercare.`,
+          "RESEARCH_NO_APPROVED_SOURCES",
+        );
+      }
+    }
+
     const sorgente = dip.sorgente ?? sorgenteRegistrata();
     const lettore = dip.lettore ?? new HttpWebReader();
     const tenantId = await repo.tenantDelFascicolo(pool, versionId);

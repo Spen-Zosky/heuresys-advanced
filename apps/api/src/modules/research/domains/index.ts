@@ -6,17 +6,20 @@
  * cui una chiave diventa un modo di **costruire**: due elenchi, due responsabilita', e in
  * nessuno dei due un `if` sparso da qualche altra parte nel codice.
  *
- * Oggi ne contiene **uno**: `research_sources`, il dominio pilota. I cinque domini di
- * contenuto — unita', posizioni, competenze, indicatori, processi — arrivano con `F5`, e
- * aggiungerli e' dichiarare un dominio, non toccare il motore. Se per farne entrare uno
- * servisse cambiare `engine.ts`, il contratto sarebbe sbagliato.
+ * Ne contiene **sei**: `research_sources` (il pilota, `F4`) e i cinque di contenuto — unita',
+ * posizioni, competenze, indicatori, processi (`F5`). Aggiungerli e' stato **dichiarare**, non
+ * toccare il motore: `engine.ts` non e' cambiato di una riga, ed era la prova che il contratto
+ * di `domain.ts` reggeva.
  */
 import type { DominioRicercabile } from "../domain.js";
 import { DominioSconosciutoError } from "../domain.js";
 import { RESEARCH_SOURCES_DOMAIN } from "./research-sources.js";
+import { DOMINI_DI_CONTENUTO } from "./contenuto-del-modello.js";
 
 const DOMINI: ReadonlyArray<DominioRicercabile<unknown>> = [
+  // Il pilota per primo: e' quello che costruisce il registro su cui gli altri si appoggiano.
   RESEARCH_SOURCES_DOMAIN as unknown as DominioRicercabile<unknown>,
+  ...(DOMINI_DI_CONTENUTO as unknown as ReadonlyArray<DominioRicercabile<unknown>>),
 ];
 
 const PER_CHIAVE = new Map(DOMINI.map((d) => [d.chiave, d]));
@@ -41,5 +44,5 @@ export function risolviDominio(chiave: string): DominioRicercabile<unknown> {
   return d;
 }
 
-export { RESEARCH_SOURCES_DOMAIN };
+export { RESEARCH_SOURCES_DOMAIN, DOMINI_DI_CONTENUTO };
 export type { FonteProposta } from "./research-sources.js";

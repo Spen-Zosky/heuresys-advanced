@@ -541,7 +541,7 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
      riconciliazione, o la `000062` la ritrovera' come non classificata) piu' il `DROP` a valle —
      ADR-0035, la coppia. Nessuna bonifica di dati.
 
-- [ ] **F5 i cinque domini ricercabili** — ⏳ **IN CORSO: la casa dei processi e' FATTA
+- [x] **F5 i cinque domini ricercabili** — **FATTO 2026-08-19 (S1074)** · la casa dei processi
   2026-08-19 (S1074)**, mig. `000335` in produzione + emendamento di `000327` e `000328`
   (ADR-0035). La casa vecchia ha preso il **nome inglese** e il **presidio per codice di
   posizione**; quella nata da F1 e' ritirata — vuota, senza referenti, senza un file di codice
@@ -552,7 +552,22 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   post-condizioni della `000327` e una della `000328` contavano **cinque** tabelle col carattere
   jolly, e su un database che porta ancora la quinta quel conto fallisce per l'**ordine**, non
   per un difetto. Ora elencano le quattro **per nome**.
-  ▸ **Resta di F5**: dichiarare i cinque domini ricercabili in codice — `organization_units` · `positions` · `skills` · `kpis` ·
+  ▸ **I cinque domini sono dichiarati**: unita', posizioni, competenze, indicatori, processi, in
+  `domains/contenuto-del-modello.ts`. Condividono la forma (codice = chiave naturale, nome
+  **bilingue**, legami interni **per codice** e non per uuid) e i controlli di fondo.
+  ✅ **LA PROVA CHE IL CONTRATTO REGGEVA: `engine.ts` non e' cambiato di una riga.** Il caso che
+  conta fa girare il motore su tutti e cinque **senza conoscerne nessuno per nome** — senza fonti
+  li respinge tutti su `SOURCES_PRESENT`, con una fonte approvata li fa passare tutti, con una
+  fonte non ammessa li respinge tutti su `SOURCES_POLICY`.
+  ⚠ **Cosa NON controllano**, e non e' una dimenticanza: tipo di unita', specie di competenza e
+  verso di indicatore vivono in **cataloghi del database**; ricopiarne l'elenco in un controllo
+  puro sarebbe una misura variabile cristallizzata (⭐ IL PUNTO FISSO). Li verifica `F6`.
+  ⚠ **Tutti e cinque confrontano le fonti col registro**, e oggi il registro non ha nemmeno una
+  fonte approvata: quindi **non sono ancora ricercabili**, e il servizio lo dice **prima** di
+  avviare la corsa (`RESEARCH_NO_APPROVED_SOURCES`). Si sblocca quando Enzo approva le fonti —
+  la prima proposta, `bancaditalia.it`, e' gia' in attesa dalla corsa di `F4h`.
+  ✅ Sabotaggio: spento il confronto su un dominio → **3** casi rossi. 13 casi nuovi, unit
+  **204/204**, integrazione ricerca 8/8. — `organization_units` · `positions` · `skills` · `kpis` ·
   `business_processes`. Il primo costa la forma, gli altri quattro la riusano
 - [ ] **F6 il ponte: le proposte approvate diventano il modello** — famiglia (se non esiste),
   variante, versione 1 col contenuto. Riqualifica da scrivere: `sys_blueprint_families` e `_variants`

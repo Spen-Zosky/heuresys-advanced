@@ -139,6 +139,25 @@ export async function registroFonti(q: DbConnector, dominio: string): Promise<Fo
 }
 
 /**
+ * Quante fonti APPROVATE sono utilizzabili da questo dominio.
+ *
+ * Serve al cancello del servizio: un dominio che confronta col registro e non ha nemmeno una
+ * fonte approvata **non e' ricercabile**, e dirlo prima di avviare la corsa vale piu' che
+ * lasciar respingere ogni proposta una per una — l'esito sarebbe lo stesso, ma il motivo si
+ * leggerebbe solo aprendo dieci schede di validazione.
+ */
+export async function contaFontiApprovate(q: DbConnector, dominio: string): Promise<number> {
+  const res = await q.query<{ n: string }>(
+    `SELECT count(*)::text AS n FROM sys.sys_research_sources
+      WHERE research_source_status = 'APPROVED'
+        AND research_source_class IN ('INSTITUTIONAL','ACCREDITED','TOP_CONSULTING')
+        AND (research_source_domain IS NULL OR research_source_domain = $1)`,
+    [dominio],
+  );
+  return Number(res.rows[0]?.n ?? 0);
+}
+
+/**
  * Le chiavi naturali gia' proposte per questa versione e questo dominio — comprese quelle
  * delle corse precedenti, perche' una seconda corsa non deve riscrivere cio' che c'e'.
  */

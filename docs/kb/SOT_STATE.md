@@ -30,7 +30,8 @@ la sorgente), **T5** (l'atto `APPROVED → APPLIED` in una transazione, con una 
 ogni riga creata — provato **sabotando** il registro e verificando che torni indietro tutto), **T6**
 (le quattro rotte: `apply` **non costruisce**, provato sabotandolo).
 
-**🔴 E29 — l'archetipo scritto a mano si ritira, il modello lo genera la ricerca.** Alla prova live
+**🟢 E29 — l'archetipo scritto a mano È RITIRATO (S1072, 2026-08-19); il modello lo genererà la
+ricerca (F4-F6, ancora da fare).** Alla prova live
 del T6 Enzo ha chiesto **da dove venissero i numeri**: da `blueprints.ts`, **un solo archetipo**
 scritto a mano a giugno 2026 — il fascicolo di un ospedale avrebbe prodotto la stessa banca. `#132`
 cambia natura e passa da ~2 a **~8 sessioni**. Tre misure: il ritiro **non costa dati** (`0` righe

@@ -16,11 +16,13 @@ export type { ActorContext };
 import type {
   DashboardBlock,
   DashboardCatalogResponse,
+  DashboardDataResponse,
   DashboardDetailResponse,
   DashboardScopeKind,
   DashboardWidgetsResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { FORNITORI, chiaveFornitore, type PerimetroBlocchi } from "./blocchi.js";
 
 // #119 — the PLATFORM/TENANT/TEAM ladder used to be declared HERE, and identically
 // in analytics/service.ts and insights/service.ts. Three copies of one rule drift
@@ -146,6 +148,102 @@ export const dashboardService = {
       permissionCode: riga.permission_code,
       isActive: riga.is_active,
       blocks: vistePerAttore(riga.blocks, domini),
+      generatedAt: new Date().toISOString(),
+    };
+  },
+
+  /**
+   * I dati dentro le viste (#142 F3b).
+   *
+   * Il **se** e il **come** sono già decisi: il permesso di famiglia autorizza l'accesso al
+   * cruscotto (stessa condizione, stesso codice di diniego di `getDashboard`), e
+   * `modalitaDellaVista` dice per ogni vista se è `open`, `masked` o `denied`. Questo metodo
+   * aggiunge solo il **cosa**, e lo aggiunge a una sola delle tre:
+   *
+   *  · `open`   → il fornitore gira e il contenuto esce
+   *  · `masked` → il fornitore NON gira: i valori sono trattenuti, e il perché si dichiara
+   *               nominando le classi (ADR-0032 — riga, soggetto, periodo e stato restano
+   *               visibili, sono i valori a mancare)
+   *  · `denied` → il fornitore non gira e non c'è niente da dichiarare oltre al diniego
+   *
+   * ⚠ Una vista `masked` non deve nemmeno TOCCARE il database: se la query girasse e poi si
+   * buttasse il risultato, basterebbe una svista futura — un log, un conteggio, un campo
+   * lasciato passare — perché i valori trapelassero. Non girare è una garanzia strutturale;
+   * girare e scartare è una promessa.
+   */
+  async getDashboardData(actor: ActorContext, code: string): Promise<DashboardDataResponse> {
+    const righe = await repo.caricaCatalogoCruscotti(pool);
+    const riga = righe.find((r) => r.code === code);
+    if (!riga) throw new NotFoundError(`Cruscotto '${code}' inesistente`, "DASHBOARD_NOT_FOUND");
+
+    if (riga.permission_code !== null) {
+      const permessi = new Set(userPermissionCodes({ roles: actor.roles }));
+      if (!permessi.has(riga.permission_code)) {
+        throw new ForbiddenError(`Manca il permesso ${riga.permission_code}`, "FORBIDDEN");
+      }
+    }
+
+    const domini = await dominiCheApronoUnaSuperficie(pool, {
+      userId: actor.userId, tenantId: actor.tenantId, roles: actor.roles,
+    });
+    // ⚠ IL TIER NON È UNA PRECONDIZIONE DEL SELF-SERVICE, e la prova live me lo ha
+    // insegnato con un 500. `scopeTierAndRole` **lancia** (`NoScopeTierError`, #119) quando
+    // non riesce a collocare l'attore — ed è giusto che lo faccia, perché una pagina che dice
+    // «non hai dati» quando la verità è «non ho saputo collocarti» è peggio di un errore.
+    // Ma il Self-Service è il **pavimento universale**: I17 lo garantisce a *chiunque*, e
+    // chiederne il tier significa negare a una persona i propri stessi dati per una ragione
+    // che non la riguarda. Il caso non era teorico: `antonio.parisi`, che non ha alcun
+    // dominio, riceveva 500 sull'unico cruscotto che gli spetta di diritto.
+    const soloSe = code === "self";
+    const tier: DashboardScopeKind = soloSe ? "TEAM" : (await highestScope(actor)).tier;
+
+    // Il perimetro, nei tre casi che il modello prevede. `platform` è l'unico cross-tenant,
+    // e lo è perché il suo permesso di famiglia lo dice — non perché il tier lo consenta.
+    const crossTenant = code === "platform";
+    const unitaDelPerimetro =
+      soloSe || crossTenant || tier === "PLATFORM" || tier === "TENANT"
+        ? []
+        : await repo.unitaNelPerimetroOrganizzativo(pool, actor.userId);
+
+    const perimetro: PerimetroBlocchi = {
+      tenantId: crossTenant ? null : actor.tenantId,
+      userId: actor.userId,
+      unitaDelPerimetro,
+    };
+
+    const blocks = await Promise.all(
+      vistePerAttore(riga.blocks, domini).map(async (v) => {
+        if (v.access === "denied") {
+          return { ...v, content: null, withheldReason: "Nessuno dei tuoi domini apre questa vista" };
+        }
+        if (v.access === "masked") {
+          return {
+            ...v,
+            content: null,
+            withheldReason:
+              `Valori trattenuti: ${v.dataClasses.join(", ")} ti è accessibile in forma mascherata. ` +
+              "La vista esiste e ti riguarda; i valori richiedono un mandato che non hai.",
+          };
+        }
+        const fornitore = FORNITORI[chiaveFornitore(code, v.code)];
+        if (!fornitore) {
+          // Una vista dichiarata nel database senza fornitore nel codice: è un difetto di
+          // allineamento, e si dichiara invece di uscire come una vista vuota — che sarebbe
+          // indistinguibile da «non hai dati».
+          return { ...v, content: null, withheldReason: "Vista senza fornitore di dati" };
+        }
+        return { ...v, content: await fornitore(pool, perimetro), withheldReason: null };
+      }),
+    );
+
+    return {
+      code: riga.code,
+      name: riga.name,
+      route: riga.route,
+      permissionCode: riga.permission_code,
+      isActive: riga.is_active,
+      scope: { kind: tier, tenantId: perimetro.tenantId, teamPositionIds: [] },
+      blocks,
       generatedAt: new Date().toISOString(),
     };
   },

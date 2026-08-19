@@ -159,3 +159,85 @@ export const DashboardWidgetsResponseSchema = z.object({
   generatedAt: z.iso.datetime(),
 });
 export type DashboardWidgetsResponse = z.infer<typeof DashboardWidgetsResponseSchema>;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #142 F3b — i dati DENTRO le viste
+//
+// F3a ha consegnato il catalogo: quali viste esistono e come l'attore può guardarle
+// (`open` / `masked` / `denied`). Qui la granularità smette di essere un modello e
+// diventa una query: ogni vista `open` porta il proprio contenuto reale.
+//
+// LA REGOLA CHE GOVERNA QUESTA SUPERFICIE, ed è la stessa di F3a vista dal lato dei dati:
+//  · `open`   → `content` valorizzato, `withheldReason` assente
+//  · `masked` → `content` NULLO e `withheldReason` che DICHIARA il perché, nominando le
+//               classi trattenute. Una vista che sparisce senza spiegazione è
+//               indistinguibile da una che non esiste (ADR-0032: la riga, il soggetto, il
+//               periodo e lo stato restano visibili — sono i VALORI a essere trattenuti)
+//  · `denied` → `content` nullo, e la query non viene nemmeno eseguita
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Un contatore: un numero con la sua etichetta. La forma più comune fra le 27 viste. */
+export const DashboardBlockCounterSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  value: z.number(),
+});
+export type DashboardBlockCounter = z.infer<typeof DashboardBlockCounterSchema>;
+
+/** Un punto di una serie temporale: il bucket è già formattato per l'asse. */
+export const DashboardBlockPointSchema = z.object({
+  bucket: z.string(),
+  value: z.number(),
+});
+export type DashboardBlockPoint = z.infer<typeof DashboardBlockPointSchema>;
+
+/** Una riga di elenco: identità, etichetta, e i due campi liberi che le viste usano. */
+export const DashboardBlockRowSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  detail: z.string().nullable(),
+  value: z.number().nullable(),
+});
+export type DashboardBlockRow = z.infer<typeof DashboardBlockRowSchema>;
+
+/**
+ * Il contenuto di una vista, in tre forme discriminate. Non è una scelta estetica: il
+ * frontend (F4) deve poter disegnare una vista senza sapere quale sia, o ogni vista nuova
+ * pretenderebbe un componente nuovo — che è esattamente il modo in cui un catalogo
+ * dichiarato smette di essere derivabile.
+ */
+export const DashboardBlockContentSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("counters"), counters: z.array(DashboardBlockCounterSchema) }),
+  z.object({ kind: z.literal("series"), points: z.array(DashboardBlockPointSchema) }),
+  z.object({ kind: z.literal("list"), rows: z.array(DashboardBlockRowSchema) }),
+]);
+export type DashboardBlockContent = z.infer<typeof DashboardBlockContentSchema>;
+
+export const DashboardBlockDataSchema = DashboardBlockSchema.extend({
+  /** I dati reali. `null` per ogni vista che non è `open` — mai un oggetto vuoto. */
+  content: DashboardBlockContentSchema.nullable(),
+  /**
+   * Perché i valori non ci sono. Presente **solo** quando `content` è nullo, e nomina la
+   * causa: le classi mascherate, o il diniego. È la parte che ADR-0032 pretende resti
+   * visibile quando i valori non lo sono.
+   */
+  withheldReason: z.string().nullable(),
+});
+export type DashboardBlockData = z.infer<typeof DashboardBlockDataSchema>;
+
+export const DashboardDataResponseSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  route: z.string(),
+  permissionCode: z.string().nullable(),
+  isActive: z.boolean(),
+  /** Il perimetro su cui i contenuti sono stati calcolati — dichiarato, non implicito. */
+  scope: z.object({
+    kind: DashboardScopeKindSchema,
+    tenantId: z.uuid().nullable(),
+    teamPositionIds: z.array(z.uuid()),
+  }),
+  blocks: z.array(DashboardBlockDataSchema),
+  generatedAt: z.iso.datetime(),
+});
+export type DashboardDataResponse = z.infer<typeof DashboardDataResponseSchema>;

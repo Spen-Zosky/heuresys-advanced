@@ -32,6 +32,14 @@ import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 import { attoriDiScena } from "./helpers/attori-di-scena.js";
+import { senzaCacheDiSessione } from "./helpers/session-cache.js";
+
+// Z-251 F2 — fuori dalla cache delle sessioni. Questo file o ragiona sulla SESSIONE stessa
+// (elenco/revoca delle famiglie), oppure MUTA i ruoli dell'attore: in entrambi i casi una
+// sessione presa da un altro file risponderebbe con un assetto che non e' quello che il
+// test ha appena costruito. Misurato: senza questa riga, 6 file rossi in corsa integrale.
+senzaCacheDiSessione();
+
 /**
  * I cinque ruoli di scena, derivati dal dato di oggi invece che scritti a mano (#147).
  * Non sono cinque persone: sono cinque CARATTERISTICHE, e ognuna e' verificata alla

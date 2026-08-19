@@ -25,6 +25,14 @@ import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
+import { senzaCacheDiSessione } from "./helpers/session-cache.js";
+
+// Z-251 F2 — fuori dalla cache delle sessioni. Questo file o ragiona sulla SESSIONE stessa
+// (elenco/revoca delle famiglie), oppure MUTA i ruoli dell'attore: in entrambi i casi una
+// sessione presa da un altro file risponderebbe con un assetto che non e' quello che il
+// test ha appena costruito. Misurato: senza questa riga, 6 file rossi in corsa integrale.
+senzaCacheDiSessione();
+
 const PWD = TEST_PERSONA_PASSWORD;
 // A syntactically-valid RFC-4122 v4 uuid that does not exist → a granted call 404s at
 // the handler (past the permission gate); an ungranted call 403s at the gate.

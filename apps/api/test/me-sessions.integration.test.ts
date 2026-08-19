@@ -3,6 +3,14 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
+import { senzaCacheDiSessione } from "./helpers/session-cache.js";
+
+// Z-251 F2 — fuori dalla cache delle sessioni. Questo file o ragiona sulla SESSIONE stessa
+// (elenco/revoca delle famiglie), oppure MUTA i ruoli dell'attore: in entrambi i casi una
+// sessione presa da un altro file risponderebbe con un assetto che non e' quello che il
+// test ha appena costruito. Misurato: senza questa riga, 6 file rossi in corsa integrale.
+senzaCacheDiSessione();
+
 // MVP-4 §2.5 — ESS self-service session management (/v1/me/security/sessions + the
 // /v1/auth/sessions/current helper). Real login + live DB. A login creates a refresh-
 // token family; the helper resolves the current family from the access JWT `fam`

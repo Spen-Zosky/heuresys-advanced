@@ -1,6 +1,7 @@
 /**
  * apps/api/src/modules/dashboard/routes.ts
- * 1 endpoint: GET /v1/dashboard/widgets (role-gated).
+ * 4 endpoint: GET /v1/dashboard/widgets (role-gated) · /catalog · /catalog/:code
+ * · /catalog/:code/data (#142 F3b — i dati dentro le viste).
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
@@ -9,6 +10,7 @@ import { actorFromRequest as actor } from "../../lib/actor.js";
 import { z } from "zod";
 import {
   DashboardCatalogResponseSchema,
+  DashboardDataResponseSchema,
   DashboardDetailResponseSchema,
   DashboardWidgetsResponseSchema,
 } from "@heuresys/shared";
@@ -36,4 +38,15 @@ export const dashboardRoutes: FastifyPluginAsyncZod = async (app) => {
       response: { 200: DashboardDetailResponseSchema },
     },
   }, async (req) => dashboardService.getDashboard(actor(req), req.params.code));
+
+  // #142 F3b — i dati dentro le viste. Stessa assenza di `requirePermission` e stessa
+  // ragione: il permesso e' quello della FAMIGLIA richiesta, quindi dipende dal parametro
+  // e non puo' stare in un middleware statico. Il service lo applica e nega con `FORBIDDEN`,
+  // lo stesso codice che `requirePermission` userebbe.
+  app.get("/catalog/:code/data", {
+    schema: {
+      params: z.object({ code: z.string().min(1).max(48) }),
+      response: { 200: DashboardDataResponseSchema },
+    },
+  }, async (req) => dashboardService.getDashboardData(actor(req), req.params.code));
 };

@@ -395,6 +395,45 @@ export async function posizioniNelPerimetroOrganizzativo(
   return r.rows.map((x) => x.position_id);
 }
 
+/**
+ * Le **unità** che l'attore governa, in cascata (#142 F3b).
+ *
+ * Gemella di `posizioniNelPerimetroOrganizzativo`, e gira sullo **stesso** albero — quello
+ * delle unità, `organization_unit_parent_id` + `organization_unit_manager_user_id`, che
+ * ADR-0036 (I16) dichiara fonte canonica del perimetro gerarchico. La differenza è cosa
+ * restituisce: là le posizioni incardinate, qui le unità stesse, perché i contenuti dei
+ * cruscotti si aggregano per unità e passare dalle posizioni costringerebbe ogni query a
+ * risalire indietro.
+ *
+ * Vuoto significa «non governa una catena», e chi chiama lo interpreta come «l'intero
+ * tenant» solo quando il tier lo autorizza — mai come «niente», che è il difetto #119:
+ * una pagina che dice «non hai dati» quando la verità è «non ho saputo collocarti».
+ */
+export async function unitaNelPerimetroOrganizzativo(
+  q: DbConnector,
+  actorUserId: string,
+): Promise<string[]> {
+  const r = await q.query<{ ou_id: string }>(
+    `WITH RECURSIVE mie_unita AS (
+       SELECT o.organization_unit_id AS ou_id
+         FROM sys.sys_organization_units o
+        WHERE o.organization_unit_manager_user_id = $1
+          AND o.organization_unit_is_active
+     ),
+     sottoalbero AS (
+       SELECT ou_id FROM mie_unita
+       UNION
+       SELECT o.organization_unit_id
+         FROM sys.sys_organization_units o
+         JOIN sottoalbero s ON o.organization_unit_parent_id = s.ou_id
+        WHERE o.organization_unit_is_active
+     )
+     SELECT DISTINCT ou_id FROM sottoalbero`,
+    [actorUserId],
+  );
+  return r.rows.map((x) => x.ou_id);
+}
+
 /** Trend entities backed by a real creation/detection timestamp. */
 const TREND_ENTITIES: ReadonlyArray<{
   key: DashboardTrendKey;

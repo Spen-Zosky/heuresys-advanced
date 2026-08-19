@@ -29,6 +29,14 @@ import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { orgSubtreeUserIds } from "../src/lib/scope/org.js";
 import { payoutFactor } from "../src/modules/compensation/reward-engine.js";
 
+import { senzaCacheDiSessione } from "./helpers/session-cache.js";
+
+// Z-251 F2 — fuori dalla cache delle sessioni. Questo file o ragiona sulla SESSIONE stessa
+// (elenco/revoca delle famiglie), oppure MUTA i ruoli dell'attore: in entrambi i casi una
+// sessione presa da un altro file risponderebbe con un assetto che non e' quello che il
+// test ha appena costruito. Misurato: senza questa riga, 6 file rossi in corsa integrale.
+senzaCacheDiSessione();
+
 const PWD = TEST_PERSONA_PASSWORD;
 const PAOLO_EMAIL = "paolo.caputo@rtl-bank.org";
 

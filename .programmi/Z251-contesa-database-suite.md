@@ -116,6 +116,31 @@ contesa. Il tempo risparmiato e' il mezzo (meno round-trip, meno hash concorrent
       ~30 min contendendo il database di produzione. La prova vera è la CI, che esegue
       `Test (api integration)` su runner self-hosted off-prod: si legge lì, corsa per corsa, e il
       numero di corse verdi si scrive qui sotto.
+### ⚠ La prima corsa integrale ha trovato un difetto MIO, e l'ha trovato subito (2026-08-19)
+
+`verify_gate` ha eseguito la suite intera su `7b002359`: **2118 s, 6 file rossi**. Non erano
+flaky — con `TEST_SESSION_CACHE=0` gli stessi sei passano **6/6, 50 test**. Era la cache.
+
+**Due cause, e la seconda non l'avevo prevista:**
+1. **Chi ragiona sulla sessione stessa** — `me-sessions` asserisce «la famiglia corrente
+   sopravvive alla revoca delle altre», e con una sessione presa da un altro file la
+   «corrente» non era quella che il test aveva appena creato. Rientrava nella guardia n.3,
+   ma il mio criterio cercava solo il *refresh*: `/v1/me/security/sessions` non combaciava.
+2. **Chi MUTA i ruoli dell'attore** (`sys_user_auth_roles`) e poi rifà login aspettandosi il
+   nuovo assetto. L'access token è un JWT: fotografa i ruoli **all'emissione**, quindi una
+   sessione precedente alla mutazione risponde con l'assetto vecchio. Questa famiglia non
+   era nel criterio affatto — `capability-composition-scope` concede e revoca ruoli per
+   costruire i propri scenari.
+
+**Rimedio**: il cancello ora ha due criteri invece di uno, ed è strutturale — non una lista di
+nomi. Sono **14 file su 255 (5,5%)** a stare fuori dalla cache: il risparmio resta quasi intatto.
+Riverificato: **9 file, 86 test, tutti verdi** con la cache attiva.
+
+**La lezione, che vale oltre questa voce**: la guardia n.3 c'era e aveva il suo cancello, ma il
+cancello verificava il criterio SBAGLIATO — cercava una firma (`refresh`) invece della proprietà
+(«questo test dipende dall'identità o dai permessi *di questa* sessione»). Un cancello che guarda
+la firma è verde finché nessuno cambia il modo di scrivere la stessa cosa.
+
 - [ ] **F4 La serie di corse verdi che chiude la voce** — budget ~15k (in gran parte attesa)
       Il «Chiuso quando» di questa voce pretende corse **ripetute**, e nessuna delle tre fasi
       precedenti la copriva: era un difetto di decomposizione del piano, trovato dallo strumento
@@ -152,4 +177,4 @@ degli aggiramenti**, e il numero di corse su cui è stato verificato è scritto.
 
 | # | data | commit | esito | note |
 |---|---|---|---|---|
-| — | in attesa della prima corsa dopo il push di F2+F3 | | | |
+| — | 2026-08-19 | `7b002359` | **ROSSA — 6 file** | e non contava: erano un difetto MIO, non la contesa. Corretti sopra. Il contatore riparte dal commit che porta il rimedio |

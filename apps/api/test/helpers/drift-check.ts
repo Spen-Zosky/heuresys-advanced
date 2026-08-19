@@ -18,11 +18,16 @@
  * una lista scritta a mano invecchia in silenzio, e proprio la coppia che perde righe
  * oggi (`sys_content_*`) non sarebbe mai finita in una lista compilata a intuito. La
  * scansione qui e' ESAUSTIVA — tutte le colonne testuali di `sys` — perche' costa
- * quanto non costa niente: **695 colonne su 199 tabelle**, **1,3-2,0 secondi** misurati,
- * contro i ~40 minuti della suite. (Il numero e' quello che questo codice censisce
- * davvero: il filtro `table_type='BASE TABLE'` esclude le viste. Senza quel filtro
- * sarebbero 737 su 216 — la misura che una versione precedente di questo commento
- * riportava, e che non si riproduceva contro la query qui sotto.)
+ * quanto non costa niente: **~700 colonne** di `sys`, **1,3-2,0 secondi** misurati,
+ * contro i ~40 minuti della suite.
+ *
+ * IL NUMERO ESATTO NON SI SCRIVE QUI, e la ragione e' che e' gia' successo due volte.
+ * Il commento diceva «737 su 219», che non si riproduceva; corretto in «695 su 199» il
+ * 2026-08-10, era **715** appena nove giorni dopo — il database cresce, e un conteggio
+ * cablato in un commento invecchia in silenzio mentre sembra una misura. Chi vuole il
+ * numero di adesso chiama `colonneSorvegliate()`, che lo conta: e' la stessa funzione
+ * che il setup usa per non dichiararsi verde quando non ha guardato niente.
+ * (Il filtro `table_type='BASE TABLE'` esclude le viste: senza, il conteggio e' piu' alto.)
  *
  * COSA FALLISCE, E COSA NO
  * ------------------------

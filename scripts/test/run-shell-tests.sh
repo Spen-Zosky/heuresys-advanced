@@ -662,25 +662,49 @@ PY
                  || fail "build_derivati senza registro non ha dato 2"
     mv "$B/via.json" "$REG"
 
-    # ⚠ NON `HEAD~6`: era la prima stesura, ed e' caduta lo stesso giorno. Quel numero
-    # presume che sei commit fa ci fosse una modifica alle fonti — presunzione che scade
-    # al primo commit successivo, e il cancello e' diventato rosso per colpa del test, non
-    # del codice. Qui il commit si DERIVA: si prende il padre dell'ultimo commit che ha
-    # toccato la fonte, cosi' la finestra padre..HEAD contiene quella modifica per
-    # costruzione, oggi e fra sei mesi.
-    FONTE="$(git log -1 --format=%H -- docs/kb/atlas/atlas.yaml 2>/dev/null)"
-    VECCHIO="$(git rev-parse "${FONTE:-HEAD}^" 2>/dev/null || git rev-list --max-parents=0 HEAD | head -1)"
-    python - "$VECCHIO" <<'PYEOF'
-import io, json, sys
-p = 'docs/kb/atlas/derivati.json'
-d = json.load(io.open(p, encoding='utf-8')); d['generato_da_commit'] = sys.argv[1]
-json.dump(d, io.open(p, 'w', encoding='utf-8', newline='\n'), indent=2, ensure_ascii=False)
-PYEOF
-    out="$(python "$BD" --controlla 2>&1)"; rc=$?
+    cp "$B/reg.json" "$REG"; rm -rf "$B"
+
+    # ── IL CASO «SUPERATO» SI PROVA SU UN REPO-FIXTURE, NON SULLA STORIA VERA ──────
+    # Le due stesure precedenti guardavano la storia di QUESTO repo — prima `HEAD~6`, poi
+    # il padre dell'ultimo commit che tocca `atlas.yaml` — e sono cadute entrambe:
+    #   · `HEAD~6` presumeva che sei commit fa ci fosse una modifica alle fonti, e la
+    #     presunzione e' scaduta al primo commit successivo (rosso il 2026-08-18);
+    #   · la derivazione dal path e' rossa **in CI**, dove il checkout e' `fetch-depth: 1`:
+    #     `git log -- <path>` vede solo HEAD e `HEAD^` non esiste, quindi il registro
+    #     riceve un valore vuoto e lo strumento risponde «cieco» (2) invece di
+    #     «superato» (1). E' la trappola gia' registrata come
+    #     `ci_shallow_checkout_git_history`: un test che CERCA un commit nella storia e'
+    #     rosso in CI, e la cura e' costruirsi la storia che gli serve.
+    # Qui la storia se la fa il test: due commit, il secondo tocca la fonte. Deterministico
+    # su Windows, su Linux, con o senza `--depth 1`.
+    S="$(mktemp -d)"; A="$S/repo"
+    mkdir -p "$A/docs/kb/atlas" "$A/docs/architecture/adr" "$A/docs/kb/tools"
+    git init -q "$A"; git -C "$A" config user.email t@t; git -C "$A" config user.name t
+    git -C "$A" config commit.gpgsign false
+    cp "$BD" "$A/docs/kb/tools/"
+    printf 'meta:\n  generated_from_commit: x\n' > "$A/docs/kb/atlas/atlas.yaml"
+    printf '{}\n'  > "$A/docs/kb/atlas/agent-operations.json"
+    printf '\n'    > "$A/docs/kb/atlas/concepts-corpus.jsonl"
+    printf '# adr\n' > "$A/docs/architecture/ADR_INDEX.md"
+    git -C "$A" add -A >/dev/null; git -C "$A" commit -qm base
+    BASE_SHA="$(git -C "$A" rev-parse HEAD)"
+    printf 'meta:\n  generated_from_commit: y\nnuovo: 1\n' > "$A/docs/kb/atlas/atlas.yaml"
+    git -C "$A" add -A >/dev/null; git -C "$A" commit -qm "tocca la fonte"
+    printf '{\n  "generato_da_commit": "%s"\n}\n' "$BASE_SHA" > "$A/docs/kb/atlas/derivati.json"
+
+    out="$(DERIVATI_REPO="$A" python "$BD" --controlla 2>&1)"; rc=$?
     { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'SUPERATO'; } \
       && ok "build_derivati: fonti cambiate dopo il commit registrato => SUPERATO (1)" \
-      || fail "build_derivati con registro vecchio non ha visto il superamento ($rc)"
-    cp "$B/reg.json" "$REG"; rm -rf "$B"
+      || fail "build_derivati con registro vecchio non ha visto il superamento ($rc: $out)"
+
+    # E il verso opposto, sullo stesso fixture: registro allineato a HEAD => fresco.
+    printf '{\n  "generato_da_commit": "%s"\n}\n' "$(git -C "$A" rev-parse HEAD)" \
+      > "$A/docs/kb/atlas/derivati.json"
+    out="$(DERIVATI_REPO="$A" python "$BD" --controlla 2>&1)"; rc=$?
+    { [ "$rc" = 0 ] && ! printf '%s' "$out" | grep -q 'SUPERATO'; } \
+      && ok "build_derivati: registro allineato a HEAD => fresco (0), sullo stesso fixture" \
+      || fail "build_derivati fixture allineato ($rc: $out)"
+    rm -rf "$S"
   else
     fail "build_derivati: manca $REG — nessuna generazione registrata"
   fi

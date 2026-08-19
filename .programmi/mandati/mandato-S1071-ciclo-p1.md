@@ -69,7 +69,9 @@ Resta un difetto vero, trovato smentendo quello supposto → **C4**.
 - [x] **C6 Un cancello controlla i piani** — FATTO 2026-08-19 · suite `programmi` in `verify_gate`,
       instradata da `.programmi/` **e** da `programmi.py` (un piano si rompe cambiando il piano o
       cambiando il parser). Provato togliendo l'evidenza a una spunta: cancello **ROSSO**
-- [ ] **P1.1 `#181`** drift-check, F1→F4 — ~150k
+- [~] **P1.1 `#181`** drift-check — **2/4** · F1 e F2 FATTE 2026-08-19 (le 174 righe coprono tutti
+      e sette i rilievi e sono state **provate per la prima volta**: 7/7; la prova del lucchetto
+      esisteva ed era ineseguita, ora instradata come suite `drift-lock`). **Restano F3 e F4**
 - [ ] **P1.2 `Z-251`** contesa DB, F1→F3 — ~140k + ore-macchina
 - [ ] **P1.3 `#198`** T9b — ~60k · ⚠ si ferma a chiedere conferma a Enzo
 - [ ] **P1.4 `#142`** cruscotti, F3b+F4 — ~390k
@@ -84,6 +86,32 @@ Resta un difetto vero, trovato smentendo quello supposto → **C4**.
   Eseguire T9b ora produrra' una terza banca con copertura del metro ~7,6%. E21 lo copre, e il piano
   di `#198` ordina: «il numero va scritto qualunque sia; chi esegue non deve farlo salire».
 - **Il register e' stantio su 5 voci su 7.** Prima di eseguire una voce si riconcilia il suo blocco.
+
+## Da dove riprende la prossima sessione (handover, aggiornato di continuo)
+
+> Questa sezione si riscrive a ogni fase chiusa. Chi apre una sessione nuova legge **solo** questo
+> blocco piu' il piano della voce in corso: non serve rileggere la conversazione.
+
+**Stato al 2026-08-19** · ultimo commit del ciclo: vedi `git log --oneline -1`.
+
+- **Fase 0 (C1-C6): CHIUSA e committata** (`df9abd80`), pushata insieme al lavoro di `#217`.
+- **P1.1 `#181`: 2 fasi su 4.** Riprendere da **F3** — «il rilievo 2 e gli altri di misurazione».
+  - Il codice di F3 **c'e' gia'** (`colonneSorvegliate()` + il ramo `colonne === 0` che dichiara la
+    cecita', entrati con le 174 righe e ripresi da F1). Quello che manca e' **la prova che lo
+    mostri**: oggi nessun test esercita il caso «zero colonne ispezionate».
+  - Come costruirla: `censimento()` e `colonneSorvegliate()` prendono un `Interrogante`, cioe' una
+    funzione `(sql, params) => {rows}`. Una prova puo' passarne uno finto che risponde `0` e
+    verificare che `setup()` **non** dichiari «nessun residuo». Non serve rompere i grant del DB.
+  - Poi **F4**: i tre rilievi di disegno. Attenzione — la lettura di F1 mostra che **tutti e sette
+    i rilievi risultano gia' corretti nel codice**: F4 potrebbe ridursi a *scrivere gli esiti*
+    accanto al codice, che e' quello che `chiuso-quando` chiede. Va verificato, non assunto.
+- **P1.2 `Z-251`** e' la prossima voce. ⚠ Stesso perimetro di `#181` (`apps/api/test/**`,
+  `vitest.config.ts`): non aprirla prima che `#181` sia chiusa, o le due si sovrascrivono.
+
+**Regole di questo ciclo, da non ri-derivare**: push a fine voce si', chiusura completa no (fine
+ciclo) · alla soglia del guardiano si committa, **si pusha**, si aggiorna questo blocco, e si chiude
+la sessione senza il rito completo · `#149` e' fuori dal conteggio · `#198` T9b si ferma a chiedere
+conferma a Enzo prima di scrivere in produzione.
 
 ## Chiuso quando
 

@@ -1,7 +1,7 @@
 # 181 — I sette rilievi sul controllo di drift, e le correzioni entrate in main senza verifica
 
 > **item**: #181
-> **stato**: NON AVVIATO
+> **stato**: IN CORSO
 
 Tre revisori adversarial hanno prodotto **7 rilievi riproducibili** sul codice di `Z-112`
 (misurato S1053), **uno confermato da due lenti indipendenti** e tre che toccano il **disegno**.
@@ -30,10 +30,28 @@ che quel cluster ha prodotto, non un criterio non raggiunto.
 
 ## Fasi
 
-- [ ] **F1 Decidere che fare delle 174 righe già in main** — budget ~30k
-      Leggerle contro i sette rilievi: quali coprono un rilievo e reggono, quali no. L'esito è
-      scritto: riprese o rifatte, e perché. Nessun «erano già lì».
-- [ ] **F2 Il rilievo 1 — confermato da due lenti** — budget ~40k
+- [x] **F1 Decidere che fare delle 174 righe già in main** — FATTO 2026-08-19 · esito: **RIPRESE**,
+      non rifatte, e la decisione è misurata. Lette una per una contro i sette rilievi: **le
+      coprono tutte e sette**, e con la spiegazione del perché (① `throw` → `process.exitCode`, con
+      l'esperimento dei due globalSetup finti · ② `colonneSorvegliate()` + il ramo che dichiara la
+      cecità · ③ il test confronta con `%` invece che con `PREFISSI`, più una guardia che lo rende
+      rosso invece che vacuo · ④ prefisso `IT\_SSE\_%` con l'escape spiegato · ⑤ il commento dice
+      cosa il lucchetto NON protegge · ⑥ «occorrenze», non «righe» · ⑦ il conteggio corretto).
+      **Provate adesso, per la prima volta**: `vitest run test/drift-check.integration.test.ts` →
+      **7/7 passati**, 715 colonne ispezionate, 4 residui pre-esistenti riconosciuti, nessuno
+      aggiunto. 🔬 Reperto: il commento dichiarava **695** colonne e il vivo ne censisce **715** —
+      numero variabile cristallizzato, terza volta su quella riga. Tolto: ora rimanda a
+      `colonneSorvegliate()`, che lo conta.
+- [x] **F2 Il rilievo 1 — confermato da due lenti** — FATTO 2026-08-19 · il codice era già corretto
+      (F1) e **la prova esisteva già**, tracciata: `scripts/test/drift-check-rilascia-il-lucchetto.sh`.
+      Il difetto era che **non la eseguiva nessuno** — né la batteria né il cancello: un controllo
+      che esiste e non controlla, cioè il difetto che questa voce racconta, applicato alla prova del
+      difetto stesso. Eseguita: **5/5 verdi**, incluso «il lucchetto è stato rilasciato: la catena
+      dei teardown è arrivata in fondo» e «il rilevatore ha VISTO la riga». Instradata in
+      `verify_gate` come suite `drift-lock` su `drift-check.ts` e `vitest.config.ts` — non nella
+      batteria, perché pretende il database e una corsa vera di Vitest. ⚠ Le rotte specifiche
+      **aggiungono** typecheck+test-api invece di sostituirli: `route()` si ferma al primo match, e
+      una rotta con il solo `drift-lock` avrebbe tolto il typecheck ai file più delicati.
       `drift-check.ts:185` + `vitest.config.ts:83`: quando il drift lancia — cioè **nel caso per
       cui il codice esiste** — il teardown interrompe la catena di Vitest e `.zp/suite.lock` non
       viene mai rilasciato. **Si è manifestato da solo**: all'apertura di S1053 il lock era su

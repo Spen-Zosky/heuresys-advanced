@@ -82,6 +82,19 @@ BRAKE = REPO / ".zp" / "verify-off"
 # --- Layer 1: il router --------------------------------------------------
 # prefisso di path -> suite da eseguire. Primo match che vince, in ordine.
 ROUTES: list[tuple[str, list[str]]] = [
+    # ⚠ LE ROTTE PIU' SPECIFICHE VANNO PRIMA: `route()` si ferma al primo prefisso che
+    # combacia (`break`). Messe dopo `apps/api/`, queste due non verrebbero mai raggiunte.
+    #
+    # #181 F2 — la prova che l'assert di drift RILASCIA il lucchetto esisteva, era
+    # tracciata, e non la eseguiva nessuno: non era nella batteria e non era instradata.
+    # Un controllo che esiste e non controlla e' il difetto che #181 racconta, applicato
+    # alla prova del difetto stesso. Gira solo toccando il codice che sorveglia — costa
+    # una corsa vera di Vitest, quindi non va nella batteria di ogni `scripts/`.
+    # Le suite si RIPETONO di proposito: `break` interrompe al primo match, quindi una
+    # rotta specifica che elencasse solo `drift-lock` farebbe PERDERE typecheck e test-api
+    # proprio ai file piu' delicati. Aggiungere, non sostituire.
+    ("apps/api/test/helpers/drift-check.ts", ["typecheck", "test-api", "drift-lock"]),
+    ("apps/api/vitest.config.ts",            ["typecheck", "test-api", "drift-lock"]),
     ("apps/api/",        ["typecheck", "test-api"]),
     ("packages/shared/", ["typecheck", "test-api"]),
     ("apps/web/",        ["typecheck", "lint"]),
@@ -121,6 +134,9 @@ SUITES: dict[str, tuple[str, str]] = {
     # quei file fossero validi. Costo misurato: il piano di `#217` e' entrato in main con
     # stato fuori vocabolario e due spunte senza evidenza, e TUTTI i cancelli erano verdi.
     "programmi":          ("L1", "python docs/kb/tools/programmi.py --verifica"),
+    # L2: monta una suite vera con i globalSetup reali e un test che lascia una riga,
+    # esattamente come `inbox-stream.integration.test.ts:113`. Pretende il database.
+    "drift-lock":         ("L2", "bash scripts/test/drift-check-rilascia-il-lucchetto.sh"),
     # Cruscotto DBMS e guardia anti-contaminazione: instradati su db/** dal
     # momento in cui il loro esito e' verde (2026-08-03, chiusura #89/#91).
     # Un gate che nasce rosso insegna soltanto ad aggirarlo.

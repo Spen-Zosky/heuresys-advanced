@@ -73,13 +73,32 @@ DESCRIZIONE = {
 }
 
 # Nomi di colonna che dichiarano apertamente un riferimento polimorfo.
+#
+# ⚠ IL NOME E' IL SEGNALE DEBOLE, E LA GEMELLA E' QUELLO FORTE — corretto in F2, misurando.
+#   Questa lista riconosceva `..._resource_id` e simili, ma **5 delle 11** voci che il primo
+#   censimento dava «da risolvere» erano polimorfe e si chiamavano altrimenti:
+#   `capability_score_lineage_child_id`, `..._parent_id`, `action_plan_source_id`,
+#   `reference_translations.entity_id`, `user_timeline_event_source_id`.
+#   Il segnale che le accomuna non e' come si chiamano: e' che accanto hanno una **colonna
+#   gemella che ne dichiara il tipo** (`..._type`, `..._table`). Quella e' una proprieta' dello
+#   SCHEMA, verificabile dal database, e non un elenco di nomi da tenere aggiornato a mano —
+#   cioe' esattamente la differenza fra un criterio meccanico e una convenzione.
 POLIMORFE = re.compile(r"_(resource|subject|source_entity|reference|target_record|source_record)_id$")
+
 # Identificativi che nascono fuori da questo sistema.
 ESTERNE = re.compile(r"(external_code$|_credential_id$|_tax_id$|_family_id$)")
 
 
-def classifica(schema: str, tabella: str, colonna: str) -> str:
-    """La classe di una colonna. Prima regola che riconosce, vince."""
+def classifica(schema: str, tabella: str, colonna: str, gemelle: set[str] | None = None) -> str:
+    """
+    La classe di una colonna. Prima regola che riconosce, vince.
+
+    `gemelle` e' l'insieme delle altre colonne della stessa tabella: serve alla regola piu'
+    forte del classificatore — una colonna con accanto la sua `..._type` o `..._table` **dichiara
+    il proprio bersaglio riga per riga**, quindi una FK non le manca, le e' impossibile. Se non
+    viene passato, quella regola non si applica e la colonna puo' finire in `da-risolvere`: e'
+    un default prudente, che sbaglia verso il «da guardare» invece che verso il silenzio.
+    """
     if schema == "audit" or tabella.endswith("_archive"):
         return ARCHIVIO
     if schema == "staging":
@@ -90,6 +109,10 @@ def classifica(schema: str, tabella: str, colonna: str) -> str:
         return ESTERNO
     if POLIMORFE.search(colonna):
         return POLIMORFO
+    if gemelle and colonna.endswith("_id"):
+        radice = colonna[: -len("_id")]
+        if f"{radice}_type" in gemelle or f"{radice}_table" in gemelle:
+            return POLIMORFO
     return DA_RISOLVERE
 
 
@@ -168,8 +191,23 @@ def selftest() -> int:
         ("sys", "sys_visualization_nodes", "node_source_entity_id", POLIMORFO, "entita' di origine variabile"),
         ("sys", "sys_organization_unit_templates", "organization_unit_template_blueprint_id", DA_RISOLVERE,
          "IL CASO CHE HA APERTO LA VOCE: promette un blueprint e non lo aggancia"),
-        ("sys", "sys_nine_box_grid", "user_id", DA_RISOLVERE, "promette un utente locale"),
         ("sys", "sys_esco_isco_resolved", "isco_classification_id", DA_RISOLVERE, "promette una classificazione locale"),
+    ]
+    # ── La regola della gemella, che il nome da solo non vede (trovata in F2) ──
+    gemelle_casi = [
+        ("sys", "sys_capability_score_lineage", "capability_score_lineage_child_id",
+         {"capability_score_lineage_child_type"}, POLIMORFO, "ha accanto la sua _type"),
+        ("sys", "sys_user_timeline_events", "user_timeline_event_source_id",
+         {"user_timeline_event_source_table"}, POLIMORFO, "ha accanto la sua _table"),
+        ("sys", "sys_reference_translations", "entity_id",
+         {"entity_table"}, POLIMORFO, "gemella con un nome corto"),
+        # NEGATIVO: senza gemella resta da risolvere, altrimenti la regola assolverebbe tutto
+        ("sys", "sys_organization_unit_templates", "organization_unit_template_blueprint_id",
+         {"organization_unit_template_code", "organization_unit_template_name"}, DA_RISOLVERE,
+         "nessuna gemella: la regola non deve assolverla"),
+        # NEGATIVO: una gemella che non c'e' non si inventa
+        ("sys", "sys_source_lineage_records", "source_lineage_import_run_id",
+         {"source_lineage_source_table"}, DA_RISOLVERE, "la gemella e' di un'altra colonna"),
     ]
     # Casi NEGATIVI: cose che NON devono finire in `da-risolvere`. Senza questi, un
     # classificatore che restituisse sempre DA_RISOLVERE passerebbe meta' della batteria.
@@ -185,6 +223,13 @@ def selftest() -> int:
         if not ok:
             rossi += 1
         print(f"  {'OK ' if ok else 'NO '} {sch}.{tab}.{col} → {avuto} (atteso {atteso}) — {perche}")
+
+    for sch, tab, col, gem, atteso, perche in gemelle_casi:
+        avuto = classifica(sch, tab, col, gem)
+        ok = avuto == atteso
+        if not ok:
+            rossi += 1
+        print(f"  {'OK ' if ok else 'NO '} [gemella] {tab}.{col} → {avuto} (atteso {atteso}) — {perche}")
 
     # Una prova in piu': l'ordine delle regole conta, e va dimostrato invece che promesso.
     # Una colonna polimorfa dentro un archivio dev'essere ARCHIVIO, non POLIMORFO.
@@ -210,9 +255,21 @@ def main() -> int:
         return selftest()
 
     trovate = interroga(SQL_CENSIMENTO)
+
+    # Le colonne di ogni tabella, per la regola della gemella. Una query sola: chiederlo
+    # tabella per tabella sarebbe una raffica di round-trip da 86 ms l'uno.
+    tutte = interroga(
+        "SELECT table_schema, table_name, column_name FROM information_schema.columns "
+        "WHERE table_schema IN ('sys','staging','reference_sync','audit');"
+    )
+    per_tabella: dict[tuple[str, str], set[str]] = {}
+    for sch, tab, col in tutte:
+        per_tabella.setdefault((sch, tab), set()).add(col)
+
     per_classe: dict[str, list[tuple[str, str, str, str]]] = {}
     for sch, tab, col, tipo in trovate:
-        per_classe.setdefault(classifica(sch, tab, col), []).append((sch, tab, col, tipo))
+        classe = classifica(sch, tab, col, per_tabella.get((sch, tab)))
+        per_classe.setdefault(classe, []).append((sch, tab, col, tipo))
 
     print("CENSIMENTO DEI RIFERIMENTI SENZA REFERENTE (#218 F1) — ri-derivato adesso dal database\n")
     print(f"  colonne che dichiarano un riferimento e non hanno alcun vincolo: {len(trovate)}")

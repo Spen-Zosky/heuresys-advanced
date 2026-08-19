@@ -74,7 +74,10 @@ Resta un difetto vero, trovato smentendo quello supposto → **C4**.
       esisteva da nove giorni e **non la eseguiva nessuno**: instradata come suite `drift-lock`. Il
       rimedio al falso-verde muto **non aveva prova**: estratta `esitoBaseline()`, ora ce l'ha. I
       sette esiti scritti accanto al codice, uno **accettato e dichiarato** invece che risolto
-- [ ] **P1.2 `Z-251`** contesa DB, F1→F3 — ~140k + ore-macchina
+- [~] **P1.2 `Z-251`** contesa DB — **1/3** · F1 FATTA 2026-08-19: la contesa **non si riproduce**
+      col carico di connessioni (70 concorrenti, zero fallimenti), e cercandola e' emerso che ogni
+      query costa **86 ms** attraverso il tunnel contro ~1 ms su un DB locale. ⚠ **F2 e' sospesa
+      in attesa di una decisione di Enzo**: la sua premessa e' stata scritta senza quel numero
 - [ ] **P1.3 `#198`** T9b — ~60k · ⚠ si ferma a chiedere conferma a Enzo
 - [ ] **P1.4 `#142`** cruscotti, F3b+F4 — ~390k
 - [ ] **P1.5 `#143`** squadre, F2→F5 — ~1000k

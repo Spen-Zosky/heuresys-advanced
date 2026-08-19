@@ -1133,6 +1133,15 @@
   - ⚠ **da F3 a F6 nessuna azienda sarà costruibile**, ed è dichiarato in anticipo invece che scoperto dopo
   - 📋 **piano in 8 fasi**: `.programmi/132-ricerca-genera-il-modello.md` — stima **~8 sessioni**
   - effort-ri-stimato-2026-08-17: **~8 sessioni** (era ~2, quando la voce produceva solo i processi)
+  - ✅ **F0 FATTA S1068 (2026-08-17), e questo register non la registrava** — riconciliato S1071.
+    I sei parametri obbligatori prima di una ricerca (**E30**) esistono come contratto
+    `PARAMETRI_RICERCA`, e il buco trovato misurando — nessun vincolo legava la fascia di
+    dimensione al numero di addetti, si poteva dichiarare `XS` con 5000 — è chiuso dalla
+    migrazione **`000323`**: trigger `sys_blueprint_size_band_coherence` + sentinella
+    `sys.v_blueprint_size_band_mismatch` (la ventesima). Prova vista fallire tre volte, ed
+    evidenza live: `BLUEPRINT_SIZE_BAND_MISMATCH: la fascia M copre 50-249 addetti, ma ne sono
+    dichiarati 7000`. **Il piano in `.programmi/` era avanti di una fase intera rispetto a
+    questo blocco**: chi legge il register senza il piano crede la voce non avviata
   - ✅ **IL GATE È CADUTO — misurato 2026-08-15 (S1062)**. `gated-by: Tenant Builder P1`, e **#131 è chiuso su tutti e otto i task** (S1051, fascicolo `RTL-BANK-CONFIG` v1 APPROVED con fotografia firmata). Il menu lo mostrava come bloccato «da ?» soltanto perché il campo `gated-by` è testo libero e `build_menu.py` non lo risolve in un id. **Resta però una dipendenza vera, che non è un blocco tecnico**: il Task 5 esige che Enzo approvi le fonti **una proposta per volta** — è il cancello umano dell'agent-gateway, ed è voluto.
   - priority: P1 · effort: **~4-6 sessioni** (stima dichiarata, non misurata: le «~2 sessioni» erano del 2026-08-05, PRIMA che E29/E30 cambiassero la natura della voce) · gated-by: Tenant Builder P1 (#131, CHIUSO S1051) · doc: D:\heuresys-design-lab\2026-08-05--epic-tenant-builder-p2a-ricerca.md · piano: D:\heuresys-design-lab\2026-08-05--piano-implementazione-p2a-ricerca.md
   - note: decisioni E10-E14 di Enzo. NIENTE catalogo di settori: il modello nasce da ricerca web assistita da AI, proposta per proposta, approvata con motivazione. Riqualifica `sys_blueprint_families`/`_variants` come SOTTOPRODOTTO dei clienti, non catalogo. Riusa cio' che esiste: agent-gateway (approvazione umana per ogni scrittura, gia' provato sulla materializzazione di un tenant), corse/candidati/decisioni, `sys_seed_source_evidence` (url + retrieved_at + content_hash, gia' in uso con repo://), `sys_source_lineage_records` (ha gia' sdbi_ai_model_id e sdbi_human_approver). Manca solo la lettura web: `sdk-agent.ts:53` ha `allowedTools:["Skill"]` — NON spostare mai `mcp__heuresys__*` li' dentro, bypasserebbe il cancello umano. Task 1 obbligatorio: oggi una ricerca per una trattativa e' impossibile (due tenant_id NOT NULL). Task 5 = prima ricerca sulle FONTI, registro che nasce vuoto per vincolo, Enzo approva una per volta. Prova falsificabile: per una societa' di consulenza NESSUNA chiave naturale proposta deve coincidere coi 23 processi bancari

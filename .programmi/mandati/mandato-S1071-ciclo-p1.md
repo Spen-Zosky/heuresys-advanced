@@ -132,10 +132,13 @@ Resta un difetto vero, trovato smentendo quello supposto → **C4**.
 - **Poi `#198` T9b** (~60k): ⚠ crea un'azienda vera in produzione, **una volta sola** → ci si ferma
   a chiedere conferma a Enzo prima di scrivere. Il `blocked-on-Enzo` che il register portava e'
   stato **sciolto il 2026-08-18** e riconciliato in S1071.
-- **Register riconciliati in S1071**: `#181` (chiusa), `#198` (due righe che si contraddicevano),
-  `Z-251` (effort «~2h» incompatibile col proprio corpo → ~140k + ore-macchina). **Restano stantii
-  `#132`** (il register non registra F0, che e' fatta con la migrazione `000323`) **e `#142`** (il
-  piano conserva una frase su un gate gia' caduto). Riconciliarli prima di eseguirli.
+- ✅ **Register riconciliati in S1071 — TUTTI E CINQUE quelli che l'indagine dava stantii**:
+  `#181` (chiusa) · `#198` (il `blocked-on-Enzo` sciolto il 18/08 e una riga che contraddiceva il
+  proprio blocco) · `Z-251` (effort «~2h» incompatibile col proprio corpo → ~140k + ore-macchina,
+  piu' l'esito di F1) · `#132` (il register non registrava **F0**, fatta in S1068 con la
+  migrazione `000323`: chi leggeva il register senza il piano credeva la voce non avviata) ·
+  `#142` (il piano conservava «F2 e F3 sono GATED su #99 F7», gate caduto il 15/08 e fasi gia'
+  fatte). **Nessuna voce P1 ha piu' un register che mente su cio' che e' stato fatto.**
 
 **Regole di questo ciclo, da non ri-derivare**: push a fine voce si', chiusura completa no (fine
 ciclo) · alla soglia del guardiano si committa, **si pusha**, si aggiorna questo blocco, e si chiude

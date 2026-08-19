@@ -36,7 +36,11 @@ la fornisce).
 
 **Conseguenza operativa, ed è il risultato di F1**: costruire F2/F3 di #142 *prima* di #99 F7
 significa **dichiarare a mano** gli otto permessi e le loro visibilità — esattamente ciò che M3
-esiste per eliminare — e F7 dovrebbe poi smontarli. Perciò **F2 e F3 sono GATED su #99 F7**,
+esiste per eliminare — e F7 dovrebbe poi smontarli. ~~Perciò **F2 e F3 sono GATED su #99 F7**~~
+— ⚠ **FRASE SUPERATA, tenuta per storia** (riconciliata S1071): il gate è caduto il 2026-08-15
+(`#99` è DONE, epica chiusa 10/10 in S1064) e F2 e F3 sono **state fatte**, come dice l'elenco
+delle fasi qui sotto. Un piano che conserva un blocco già caduto fa credere fermo ciò che si è
+mosso, ed è il difetto che `#216` ha curato. Testo originale:
 mentre F1 e F4 restano autonome.
 
 ## Fasi

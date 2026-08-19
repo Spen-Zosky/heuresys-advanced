@@ -109,10 +109,40 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   ⚠ **il typecheck dei test ha preteso il build di `@heuresys/shared`**: `tsconfig.test.json`
   risolve al **dist compilato**, che non conosce una funzione appena aggiunta alla sorgente (è il
   D-03 già noto). Annotare i tipi a mano era il sintomo, non la cura
-- [ ] **F1 dove vive il contenuto di un modello** — migrazioni per unità/posizioni/competenze/
-  indicatori di una versione di variante, con chiave naturale per dominio. Riuso di
-  `sys_organization_unit_templates` **se la forma regge**, e bonifica delle 225 orfane (o la ragione
-  scritta per cui restano). ⚠ `ci-rehearsal.sh` sul linux-pc prima del push
+- [~] **F1 dove vive il contenuto di un modello** — **INDAGINE FATTA 2026-08-19, migrazioni da scrivere.**
+  La domanda che F1 poneva — «riuso di `sys_organization_unit_templates` **se la forma regge**» — ha
+  ora una risposta misurata, e la risposta è **no, non come sta**. Tre reperti:
+
+  ① **Le 225 righe sono orfane per intero, non in parte.** Puntano a **9** blueprint distinti, e
+  nessuno dei nove esiste — verificato contro tutte e quattro le tabelle candidate
+  (`sys_blueprint_variants`, `_families`, `sys_tenant_blueprints`, `_variant_versions`): **0 su 9**
+  in ognuna. Non sono «alcune orfane»: è l'intera tabella che punta al vuoto.
+
+  ② **Il riferimento non è vincolato, ed è per questo che sono potute morire in silenzio.**
+  `organization_unit_template_blueprint_id` **non ha alcuna FK**: le uniche FK della tabella vanno
+  verso sé stessa (il padre), verso i tipi di unità e verso `sys_users` (chi ha creato/aggiornato).
+  Una colonna che si chiama `..._blueprint_id` e non è agganciata a nessun blueprint è una promessa
+  che il database non mantiene.
+
+  ③ **Il modello aggancia un «blueprint» generico, non una VERSIONE** — che è invece ciò che F1
+  chiede («contenuto di una **versione di variante**»). È la differenza fra un contenuto che può
+  essere fotografato e riapplicato e uno che galleggia.
+
+  **Cosa esiste per gli altri quattro domini di F5**, censito:
+
+  | dominio | tabella di modelli | righe | stato |
+  |---|---|---:|---|
+  | `organization_units` | `sys_organization_unit_templates` | 225 | **tutte orfane**, nessuna FK al blueprint |
+  | `kpis` (di unità) | `sys_organization_unit_kpi_templates` | 100 | agganciata bene (4 FK), ma porta `tenant_id`: è **per cliente**, non di piattaforma |
+  | `kpis` (di processo) | `sys_process_kpi_templates` | 0 | vuota |
+  | `positions` | — | — | **non esiste** |
+  | `skills` | — | — | **non esiste** |
+
+  **Conseguenza per la scrittura di F1**: due domini su cinque non hanno dove vivere, uno ha una
+  tabella orfana e senza vincolo, uno è per-cliente invece che di piattaforma. La migrazione non è
+  «aggiungo una colonna a una tabella che regge»: è dare una casa al contenuto di un modello, con
+  la chiave naturale per dominio e il legame alla **versione**, e decidere delle 225 (bonifica o
+  ragione scritta). ⚠ `ci-rehearsal.sh` sul linux-pc prima del push
 - [ ] **F2 `BlueprintBuildSource`** — la seconda implementazione di `BuildSource`: il `BuildPlan` si
   legge dal database. La `justification` diventa **la proposta approvata che ha generato la riga**,
   e il registro dell'origine diventa una catena completa fino alla fonte web

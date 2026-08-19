@@ -16,7 +16,14 @@
 import { describe, expect, it } from "vitest";
 
 import { pool } from "../src/db/client.js";
-import { PREFISSI, censimento, colonneSorvegliate, drift, type Censimento } from "./helpers/drift-check.js";
+import {
+  PREFISSI,
+  censimento,
+  colonneSorvegliate,
+  drift,
+  esitoBaseline,
+  type Censimento,
+} from "./helpers/drift-check.js";
 
 const interroga = (sql: string, params?: unknown[]) => pool.query(sql, params as never[]);
 
@@ -72,6 +79,39 @@ describe("assert di drift post-suite", () => {
       expect(c.dopo).toBe(popolato.get(c.loc));
       expect(c.dopo).toBeGreaterThan(0);
     }
+  });
+
+  // ── IL RAMO CIECO, che prima non era provabile (#181 F3) ────────────────────────
+  // Il rimedio al falso-verde muto (rilievo 2) esisteva dal 2026-08-10 e NON AVEVA PROVA:
+  // per esercitarlo bisognava rompere i grant di un database vero, quindi non si provava
+  // mai. Un rimedio senza prova e' la stessa specie di difetto che rimedia.
+  // `esitoBaseline` isola la decisione dal database: qui si chiama con due numeri.
+  it("zero colonne ispezionate NON e' «nessun residuo»: il rilevatore si dichiara cieco", () => {
+    const esito = esitoBaseline(new Map(), 0);
+
+    expect(esito.cieco).toBe(true);
+    // La baseline resta NULL: senza, il teardown confronterebbe con una mappa vuota e
+    // qualunque riga trovata dopo verrebbe attribuita a questa corsa.
+    expect(esito.baseline).toBeNull();
+    expect(esito.messaggio).toMatch(/CIECO/);
+    // E soprattutto: NON deve essere il messaggio del caso verde, che e' la frase che
+    // renderebbe il falso verde indistinguibile da quello vero.
+    // ⚠ Si cerca `baseline: nessun residuo`, non `nessun residuo` da solo: il messaggio
+    // del ramo cieco contiene quelle due parole DENTRO la negazione — «non e' la stessa
+    // cosa di nessun residuo» — e la prima stesura di questa riga e' caduta proprio li'.
+    // Il test ha fatto il suo lavoro: mi ha costretto a leggere il messaggio vero.
+    expect(esito.messaggio).not.toMatch(/baseline: nessun residuo/);
+  });
+
+  it("colonne ispezionate e mappa vuota SI' e' «nessun residuo»: i due casi non si confondono", () => {
+    const esito = esitoBaseline(new Map(), 715);
+
+    expect(esito.cieco).toBe(false);
+    expect(esito.baseline).not.toBeNull();
+    expect(esito.messaggio).toMatch(/nessun residuo/);
+    // Il numero delle colonne guardate compare nel messaggio: e' cio' che permette a un
+    // umano di accorgersi se un giorno diventasse implausibile.
+    expect(esito.messaggio).toMatch(/715/);
   });
 
   it("sa dire quante colonne sta guardando: «nessun residuo» e «non ho guardato» non si confondono", async () => {

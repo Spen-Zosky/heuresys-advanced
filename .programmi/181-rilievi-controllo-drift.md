@@ -1,7 +1,8 @@
 # 181 — I sette rilievi sul controllo di drift, e le correzioni entrate in main senza verifica
 
 > **item**: #181
-> **stato**: IN CORSO
+> **stato**: CHIUSO
+> **chiuso**: 2026-08-19 (S1071) — 4/4 fasi
 
 Tre revisori adversarial hanno prodotto **7 rilievi riproducibili** sul codice di `Z-112`
 (misurato S1053), **uno confermato da due lenti indipendenti** e tre che toccano il **disegno**.
@@ -58,11 +59,25 @@ che quel cluster ha prodotto, non un criterio non raggiunto.
       disco col PID 23580, morto dalle 12:38. Non ha bloccato nulla perché `suite-lock.ts` ignora
       e sovrascrive un lock stantìo — verificato leggendo il codice, non assunto — ma il residuo
       resta. La prova deve mostrare il lock **rilasciato** proprio nel caso in cui il drift lancia.
-- [ ] **F3 Il rilievo 2 e gli altri di misurazione** — budget ~40k
+- [x] **F3 Il rilievo 2 e gli altri di misurazione** — FATTO 2026-08-19 · il rimedio al falso-verde
+      muto esisteva dal 2026-08-10 e **non aveva prova**: per esercitare il ramo cieco serviva
+      rompere i grant di un database vero, quindi non si provava mai — un rimedio senza prova è
+      la stessa specie di difetto che rimedia. Estratta `esitoBaseline(mappa, colonne)`, la
+      decisione isolata dal database: due test la chiamano con due numeri e tengono separati
+      «nessun residuo» e «non ho guardato». **9/9**, e il sabotaggio del ramo (`if (false)`) li
+      fa diventare rossi. 🔬 La prima asserzione era **mia e sbagliata** — cercava `nessun
+      residuo` nel messaggio cieco, che contiene quelle parole dentro la negazione: il test è
+      caduto e mi ha costretto a leggere il messaggio vero invece di presumerlo
       `drift-check.ts:147`: `censimento()` non distingue «695 colonne censite» da «nessuna colonna
       trovata», cioè il falso-verde muto. Un censimento che torna vuoto deve **dirlo**, non
       passare per un censimento riuscito.
-- [ ] **F4 I tre rilievi che toccano il disegno** — budget ~40k
+- [x] **F4 I tre rilievi che toccano il disegno** — FATTO 2026-08-19 · i sette esiti sono scritti
+      **accanto al codice** (testa di `drift-check.ts`), come `chiuso-quando` pretende. I tre di
+      disegno: ③ il test vacuo → confronto con `%` più la guardia che lo rende rosso invece che
+      vacuo · ④ `PREFISSI` → aggiunto `IT\_SSE\_%`, con la ragione dell'escape · ⑤ il commento
+      sulla protezione → **ACCETTATO E DICHIARATO, non risolto**: il lucchetto non copre gli E2E
+      Playwright, il limite è scritto dove sta il `globalSetup`, e renderlo globale sarebbe un
+      lavoro a sé che nessuno ha misurato servire
       Non sono correzioni di riga: vanno decisi, e la decisione va scritta accanto al codice.
 
 ## Chiuso quando

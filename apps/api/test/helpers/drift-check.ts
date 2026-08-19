@@ -29,6 +29,54 @@
  * che il setup usa per non dichiararsi verde quando non ha guardato niente.
  * (Il filtro `table_type='BASE TABLE'` esclude le viste: senza, il conteggio e' piu' alto.)
  *
+ * I SETTE RILIEVI DEI REVISORI, E CHE FINE HANNO FATTO (#181, chiuso 2026-08-19)
+ * -----------------------------------------------------------------------------
+ * Tre revisori adversarial produssero sette rilievi su questo codice (S1053). Le
+ * correzioni entrarono in main lo stesso giorno dentro un commit che non le riguardava
+ * — un `git add -u` troppo largo — e per nove giorni NESSUNO LE AVEVA PROVATE. Sono
+ * state riprese, non rifatte, dopo averle lette una per una e provate. L'esito di
+ * ciascuna sta qui, perche' un rilievo senza esito scritto torna a essere un dubbio.
+ *
+ *   ① lock non rilasciato quando il drift lancia  [confermato da 2 lenti]
+ *      CORRETTO — `throw` sostituito da `process.exitCode = 1` (vedi il teardown, dove
+ *      l'esperimento e' descritto). PROVA: `scripts/test/drift-check-rilascia-il-lucchetto.sh`,
+ *      che esisteva dal 2026-08-10 e che NON ESEGUIVA NESSUNO. Ora e' instradata nel
+ *      cancello come suite `drift-lock`. 5/5 verdi, lucchetto rilasciato.
+ *
+ *   ② `censimento()` non distingue «nessun residuo» da «non ho guardato»
+ *      CORRETTO — `colonneSorvegliate()` + il ramo cieco. Il rimedio pero' era
+ *      IMPROVABILE (per esercitarlo serviva rompere i grant di un database vero), ed e'
+ *      la ragione di `esitoBaseline()`: la decisione isolata dal database, chiamabile con
+ *      due numeri. PROVA: due test che tengono separati i due casi, visti fallire
+ *      sabotando il ramo.
+ *
+ *   ③ il test diventa vacuo restando verde                          [disegno]
+ *      CORRETTO — il confronto usa `%` invece di `PREFISSI`, cosi' ripulire i residui
+ *      (che e' l'ordine che il messaggio d'errore stesso da') non svuota l'insieme di
+ *      confronto. In piu' `expect(popolato.size).toBeGreaterThan(0)`: se si svuotasse
+ *      lo stesso, il test diventa ROSSO invece che vacuo.
+ *
+ *   ④ `PREFISSI` non copriva l'unico scrittore che committa davvero  [disegno]
+ *      CORRETTO — aggiunto `IT\_SSE\_%`. Le barre rovesciate sono necessarie: in LIKE
+ *      `_` e' un jolly. Verificato con le due stringhe di controllo (vedi sopra).
+ *
+ *   ⑤ il commento affermava una protezione che il lucchetto non da'  [disegno]
+ *      ACCETTATO E DICHIARATO, non risolto, ed e' la scelta giusta: il lucchetto e'
+ *      preso da questa suite e da nessun altro, quindi non protegge dagli E2E Playwright
+ *      di `apps/web`, che hanno la loro config. Il limite ora e' scritto in
+ *      `vitest.config.ts` accanto al `globalSetup`. Renderlo un lucchetto globale sarebbe
+ *      un lavoro a se', e nessuno ha misurato che serva.
+ *
+ *   ⑥ «N righe residue» contava per COLONNA
+ *      CORRETTO — il messaggio dice «occorrenze in N colonne»: una riga che porta il
+ *      prefisso in due colonne conta due volte, e ora lo dichiara.
+ *
+ *   ⑦ «737 colonne su 219 tabelle» non si riproduceva
+ *      CORRETTO, E POI CORRETTA LA CORREZIONE. Divenne «695 su 199» il 2026-08-10, ed
+ *      era **715** il 2026-08-19: il database cresce. Il numero esatto e' uscito da
+ *      questo commento (vedi in testa) — un conteggio cablato invecchia in silenzio
+ *      mentre sembra una misura.
+ *
  * COSA FALLISCE, E COSA NO
  * ------------------------
  * Fallisce sul DRIFT: le righe che QUESTA corsa ha lasciato dietro di se' (censimento
@@ -181,6 +229,47 @@ async function conUnClient<T>(fn: (q: Interrogante) => Promise<T>): Promise<T> {
 /** La baseline vive qui: `setup` e `teardown` sono lo stesso modulo nello stesso processo. */
 let baseline: Censimento | null = null;
 
+/**
+ * La decisione che `setup` prende una volta presa la misura, ISOLATA dal database.
+ *
+ * Esiste per una ragione sola: il caso che conta — «zero colonne ispezionate» — non era
+ * provabile. `setup()` apre il suo `Client` da se', quindi per esercitare il ramo cieco
+ * bisognava rompere i grant di un database vero, cioe' non si provava mai. Il risultato
+ * era che il rimedio al falso-verde muto (rilievo 2) esisteva **e non aveva prova**:
+ * esattamente la forma di difetto che questa voce combatte.
+ *
+ * Qui non c'e' nessuna regola nuova: c'e' la stessa decisione, in una funzione che si
+ * puo' chiamare con due numeri.
+ */
+export function esitoBaseline(
+  mappa: Censimento,
+  colonne: number,
+): { baseline: Censimento | null; cieco: boolean; messaggio: string } {
+  // Un censimento che non guarda niente non e' un censimento verde: e' cieco.
+  // Meglio dichiararsi scoperti che dire «nessun residuo» senza aver guardato.
+  if (colonne === 0) {
+    return {
+      baseline: null,
+      cieco: true,
+      messaggio:
+        "[drift] ZERO colonne ispezionate: il rilevatore e' CIECO (grant mancanti, " +
+        "database sbagliato o schema `sys` invisibile a questo ruolo). La corsa NON e' coperta " +
+        "dall'assert di drift — e non e' la stessa cosa di «nessun residuo».",
+    };
+  }
+  const pre = totale(mappa);
+  return {
+    baseline: mappa,
+    cieco: false,
+    messaggio:
+      pre === 0
+        ? `[drift] baseline: nessun residuo di test sul database (${colonne} colonne ispezionate).`
+        : `[drift] baseline: ${pre} righe residue PRE-ESISTENTI (non le lascia questa corsa), ` +
+          `su ${colonne} colonne ispezionate:\n` +
+          [...mappa].map(([loc, n]) => `         ${loc}: ${n}`).join("\n"),
+  };
+}
+
 export async function setup(): Promise<void> {
   if (process.env["DRIFT_CHECK"] === "0") return;
   try {
@@ -189,27 +278,13 @@ export async function setup(): Promise<void> {
       colonne: await colonneSorvegliate(q),
     }));
 
-    // Un censimento che non guarda niente non e' un censimento verde: e' cieco.
-    // Meglio dichiararsi scoperti che dire «nessun residuo» senza aver guardato.
-    if (colonne === 0) {
-      baseline = null;
-      console.warn(
-        "[drift] ZERO colonne ispezionate: il rilevatore e' CIECO (grant mancanti, " +
-          "database sbagliato o schema `sys` invisibile a questo ruolo). La corsa NON e' coperta " +
-          "dall'assert di drift — e non e' la stessa cosa di «nessun residuo».",
-      );
+    const esito = esitoBaseline(mappa, colonne);
+    baseline = esito.baseline;
+    if (esito.cieco) {
+      console.warn(esito.messaggio);
       return;
     }
-
-    baseline = mappa;
-    const pre = totale(baseline);
-    console.log(
-      pre === 0
-        ? `[drift] baseline: nessun residuo di test sul database (${colonne} colonne ispezionate).`
-        : `[drift] baseline: ${pre} righe residue PRE-ESISTENTI (non le lascia questa corsa), ` +
-            `su ${colonne} colonne ispezionate:\n` +
-            [...baseline].map(([loc, n]) => `         ${loc}: ${n}`).join("\n"),
-    );
+    console.log(esito.messaggio);
   } catch (e) {
     baseline = null;
     console.warn(`[drift] baseline NON presa (${(e as Error).message}). Il drift non sara' verificabile.`);

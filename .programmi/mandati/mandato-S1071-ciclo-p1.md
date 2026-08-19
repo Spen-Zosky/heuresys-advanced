@@ -69,9 +69,11 @@ Resta un difetto vero, trovato smentendo quello supposto → **C4**.
 - [x] **C6 Un cancello controlla i piani** — FATTO 2026-08-19 · suite `programmi` in `verify_gate`,
       instradata da `.programmi/` **e** da `programmi.py` (un piano si rompe cambiando il piano o
       cambiando il parser). Provato togliendo l'evidenza a una spunta: cancello **ROSSO**
-- [~] **P1.1 `#181`** drift-check — **2/4** · F1 e F2 FATTE 2026-08-19 (le 174 righe coprono tutti
-      e sette i rilievi e sono state **provate per la prima volta**: 7/7; la prova del lucchetto
-      esisteva ed era ineseguita, ora instradata come suite `drift-lock`). **Restano F3 e F4**
+- [x] **P1.1 `#181`** drift-check — **CHIUSA 4/4** il 2026-08-19. Le 174 righe entrate senza verifica
+      coprono tutti e sette i rilievi, provate per la prima volta (7/7 → 9/9). La prova del lucchetto
+      esisteva da nove giorni e **non la eseguiva nessuno**: instradata come suite `drift-lock`. Il
+      rimedio al falso-verde muto **non aveva prova**: estratta `esitoBaseline()`, ora ce l'ha. I
+      sette esiti scritti accanto al codice, uno **accettato e dichiarato** invece che risolto
 - [ ] **P1.2 `Z-251`** contesa DB, F1→F3 — ~140k + ore-macchina
 - [ ] **P1.3 `#198`** T9b — ~60k · ⚠ si ferma a chiedere conferma a Enzo
 - [ ] **P1.4 `#142`** cruscotti, F3b+F4 — ~390k
@@ -92,21 +94,28 @@ Resta un difetto vero, trovato smentendo quello supposto → **C4**.
 > Questa sezione si riscrive a ogni fase chiusa. Chi apre una sessione nuova legge **solo** questo
 > blocco piu' il piano della voce in corso: non serve rileggere la conversazione.
 
-**Stato al 2026-08-19** · ultimo commit del ciclo: vedi `git log --oneline -1`.
+**Stato al 2026-08-19, 03:1x** · ultimo commit del ciclo: vedi `git log --oneline -1`.
 
-- **Fase 0 (C1-C6): CHIUSA e committata** (`df9abd80`), pushata insieme al lavoro di `#217`.
-- **P1.1 `#181`: 2 fasi su 4.** Riprendere da **F3** — «il rilievo 2 e gli altri di misurazione».
-  - Il codice di F3 **c'e' gia'** (`colonneSorvegliate()` + il ramo `colonne === 0` che dichiara la
-    cecita', entrati con le 174 righe e ripresi da F1). Quello che manca e' **la prova che lo
-    mostri**: oggi nessun test esercita il caso «zero colonne ispezionate».
-  - Come costruirla: `censimento()` e `colonneSorvegliate()` prendono un `Interrogante`, cioe' una
-    funzione `(sql, params) => {rows}`. Una prova puo' passarne uno finto che risponde `0` e
-    verificare che `setup()` **non** dichiari «nessun residuo». Non serve rompere i grant del DB.
-  - Poi **F4**: i tre rilievi di disegno. Attenzione — la lettura di F1 mostra che **tutti e sette
-    i rilievi risultano gia' corretti nel codice**: F4 potrebbe ridursi a *scrivere gli esiti*
-    accanto al codice, che e' quello che `chiuso-quando` chiede. Va verificato, non assunto.
-- **P1.2 `Z-251`** e' la prossima voce. ⚠ Stesso perimetro di `#181` (`apps/api/test/**`,
-  `vitest.config.ts`): non aprirla prima che `#181` sia chiusa, o le due si sovrascrivono.
+- **Fase 0 (C1-C6): CHIUSA** (`df9abd80`), pushata.
+- **P1.1 `#181`: CHIUSA 4/4**, pushata in due tempi (`d526bed3` + il commit di F3/F4).
+- **Un rosso di CI corretto alla radice**: `Shell tests` era rosso dopo il primo push perche' un
+  test cercava un commit nella STORIA e in CI il checkout e' `fetch-depth: 1`. Ora si costruisce
+  un repo-fixture. Diagnosticato con `ci-rosso-di-chi.sh`, lo strumento nato ieri da `#217` I7,
+  che ha risposto **PROGETTO** — prima risposta utile che dava.
+- **⏭ PROSSIMA: P1.2 `Z-251`** — la suite non regge la contesa sul database, F1→F3.
+  - Aprirla ADESSO e' corretto: `#181` e' chiusa e i due condividevano il perimetro
+    (`apps/api/test/**`, `vitest.config.ts`), quindi non si sovrascrivono piu'.
+  - ⚠ Il costo dominante **non e' in token** ma in ore-macchina: F1 e F3 pretendono molte corse
+    integrali della suite (1834 s ciascuna, misurate in S1054). Il piano lo dichiara e i 140k di
+    budget **non le coprono**.
+  - ⚠ La decisione vincolante del piano: «alzare ancora i timeout non e' una cura, e' la terza
+    volta che si sposta la soglia invece di togliere la causa». F2 (sessioni condivise fra file)
+    e' il lavoro vero.
+  - 💡 Cosa questa sessione ha imparato e che serve la': la suite API gira **anche in CI su
+    `runs-on: [self-hosted, off-prod]`** (`test-integration.yml:45`). Eseguirla in locale contro
+    il DB di produzione via tunnel e' lavoro duplicato **che contende quel database** — ed e'
+    plausibile che sia una delle cause della contesa che `Z-251` insegue. Da misurare per prima
+    cosa, prima di toccare i timeout.
 
 **Regole di questo ciclo, da non ri-derivare**: push a fine voce si', chiusura completa no (fine
 ciclo) · alla soglia del guardiano si committa, **si pusha**, si aggiorna questo blocco, e si chiude

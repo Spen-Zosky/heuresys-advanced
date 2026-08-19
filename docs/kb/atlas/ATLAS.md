@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `62d59c45` (2026-08-19T04:54:27+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `04e990c4` (2026-08-19T14:50:03+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,7 +10,7 @@
 | Route API | 599 |
 | Pagine web | 120 |
 | Schemi shared | 107 |
-| Tabelle DB | 276 (vuote: 34) |
+| Tabelle DB | 282 (vuote: 39) |
 | Viste / matview | 30 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 267 |
 
@@ -153,6 +153,11 @@
 - `sys.sys_auth_mfa_webauthn_credentials`
 - `sys.sys_auth_password_reset_tokens`
 - `sys.sys_auth_sessions`
+- `sys.sys_blueprint_content_kpis`
+- `sys.sys_blueprint_content_positions`
+- `sys.sys_blueprint_content_processes`
+- `sys.sys_blueprint_content_skills`
+- `sys.sys_blueprint_content_units`
 - `sys.sys_content_media`
 - `sys.sys_generated_record_origins`
 - `sys.sys_notification_preferences`
@@ -169,7 +174,7 @@
 - roles: **14**
 - permissions: **224**
 - role_permission_mappings: **980**
-- ui_interfaces_active: **67**
+- ui_interfaces_active: **74**
 - skills: **14036**
 
 ## Anomalie shared exports

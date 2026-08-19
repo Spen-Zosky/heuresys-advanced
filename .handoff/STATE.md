@@ -1,73 +1,56 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-18 (S1069).
+**Updated**: 2026-08-19 (S1072).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-⚠ **IL MOTORE HA COSTRUITO DAVVERO, E COSTRUISCE ANCORA UNA BANCA.** `#198` T9a è fatto: due
-aziende create sul gemello dall'archetipo `RETAIL_BANK_REFERENCE`, ogni riga con la sua origine.
-Ma la sorgente resta l'archetipo — **7 unità e 11 posizioni** contro le **158** di RTL vera, e la
-copertura del metro misurata è **7,6%**. Un fascicolo di qualunque settore produrrebbe quella
-banca: è la ragione di `#132`, e ora è un numero e non più un'impressione.
+⚠⚠ **IL MOTORE COSTRUISCE ANCORA UNA BANCA, e questa volta l'ha fatto in produzione.** `#198` T9b
+ha creato un'azienda vera partendo dall'archetipo: 184 righe, tutte tracciate, prove A/B/C
+superate. Ma era **la terza banca**, ed Enzo l'ha visto subito. L'azienda è stata **disfatta per
+intero** (conteggi tornati esatti, RTL e Heuresys contati riga per riga: intatti). La causa è
+`apps/api/src/modules/tenant-materialization/blueprints.ts` — 296 righe di banca cablata — e
+`#132` F3 è la fase che la ritira.
 
-## Last session brief (S1069 «tre difetti che nessun test vedeva, e tre voci invisibili al menu»)
+## Last session brief (S1072 «la prova che riesce e mostra il difetto»)
 
-Il filo della sessione: **ciò che nessuno esegue non è verificato**. Tre difetti veri sono
-emersi solo costruendo e deployando per davvero, e tre voci del backlog erano invisibili al menu
-per tre cause diverse.
+Il filo: **una prova può passare e dire che il lavoro è sbagliato**. T9b è verde su tutti i suoi
+criteri e ha comunque prodotto la cosa che non si vuole; la corsa integrale dei test ha trovato
+sei rossi che erano miei; la prova generale ha fermato due migrazioni prima della CI.
 
-**Chiuse**: `#216` (il menu ora spiega e l'avanzamento si deriva) · `#215` (le 29 classificazioni
-riclassificate, tre copie morte rimosse) · `#197` (il controllo incrociato esiste e trova la
-differenza). **Avanzate**: `#198` T9a · `#211` F2. **Aperta**: `#217`, la riprogettazione del
-flusso di chiusura, con I1/I2 già fatti.
+**Chiusa**: `#142` (le otto famiglie di cruscotto hanno pagina, dati veri e sei login reali).
+**Avanzate**: `Z-251` F2+F3 · `#211` F3 · `#214` F5 + terzo perimetro · `#132` **F1**.
+**Aperta**: `#218`, la direttiva di Enzo sui residui del legacy senza referente.
 
-⚠ **TRE DIFETTI DEL TENANT BUILDER, invisibili ai test perché nessuno costruiva** — per esteso
-nel referto in `.programmi/198-tenant-builder-p3-costruzione.md`. Il peggiore: le competenze
-nascevano senza categoria, e a romperlo era il **deploy successivo**. Un difetto che non rompe
-ciò che lo produce è il più difficile da attribuire.
+⭐ **DUE CORREZIONI DI ENZO che orientano il seguito**: *«ogni volta crei una banca e questo è un
+errore grossolano»* — e, più a fondo, *«è il flusso di creazione che deve generare anche quegli
+oggetti»*: un'azienda di un tipo mai visto non deve **trovare** famiglia e modello, deve
+**produrli**. È `#132` F6.
 
-⚠ **TRE MODI DI SPARIRE DAL MENU, tutti curati** (cancelli `S5`, `S3`, `T3`): la parentetica dopo
-il titolo · la voce fuori dalla sezione taggata · e `priority` col grassetto, che rendeva
-invisibili tre voci P1.
-
-⚠ **LE PROVE SONO NATE FALSE QUATTRO VOLTE**, ogni volta per una ragione diversa, e tutte trovate
-**sabotando** invece che rileggendo. È il metodo, non un incidente.
+⚠ **DUE MIEI ERRORI DELLA STESSA SPECIE**, entrambi scritti accanto al lavoro: ho chiesto conferma
+per T9b senza dire che l'azienda sarebbe stata **necessariamente** una banca; e ho letto «0 su 9»
+come «225 righe orfane» quando il file che le crea diceva cosa fossero. Misurare una cosa vera non
+autorizza a concluderne un'altra.
 
 ## Top priorities (prossima sessione)
 
-1. **`#217` I3 e I4 — il flusso di chiusura.** Il piano è scritto e ordinato
-   (`.programmi/217-flusso-di-chiusura.md`). I3 toglie l'attesa della CI dalla chiusura — è il
-   guadagno grosso, e la contraddizione è **una riga**: `vm-deploy.sh:81` usa `ci-gate`
-   bloccante mentre `deploy-watch` usa lo stesso gate in modalità non bloccante, **verificato
-   sul campo** dal journal del gemello. I4 toglie il buco per cui `refs/heads/prod` resta
-   indietro quando si usa `align-clones` direttamente.
-2. **`#198` T9b — la costruzione in produzione (E20).** Non è più bloccata: il push è stato
-   autorizzato, la produzione gira il codice corretto, la catena è verde. ⚠ Va lanciata **dopo**
-   aver verificato che il commit della categoria sia in produzione, o si ricrea lo stato che ha
-   fermato la catena.
-3. **`#211` F3 — le famiglie ②③④⑤⑥ della suite E2E** (18 casi). La domanda sugli 80 non eseguiti
-   ha risposta: 74 sono strumenti a comando, 6 si dichiarano ciechi, e nessuno dei sei nasconde
-   un dato che dovrebbe esserci.
+1. **`#132` F2 — il motore legge il piano dalle tabelle, non dal file.** F1 ha appena creato la
+   casa (mig. `000327`: cinque tabelle di contenuto agganciate alla versione). F2 è la seconda
+   implementazione di `BuildSource`, e apre la strada a F3, che cancella le 296 righe di banca.
+   Piano in `.programmi/132-ricerca-genera-il-modello.md`.
+2. **`#211` F4 — il criterio di verde della suite E2E.** La corsa integrale è **rossa**: 352
+   passati, **13 falliti**, 82 non eseguiti su 448. I 13 NON sono i sette corretti in F3 — sono
+   altri, mai triati. Finché il criterio non è dichiarato, quel rosso resta invisibile.
+3. **`#218` F1 — il censimento dei residui del legacy senza referente locale.** Direttiva di Enzo:
+   per ognuno eliminare (preferito) o creare il referente. Serve prima il numero.
 
 ## Open questions
 
 - **Il residuo che la suite E2E lascia in produzione.** Una «Famiglia di collaudo» creata da un
-  test e mai ripulita ha **fatto fallire un deploy** (post-condizione della `000255`). L'ho
-  rimossa, ma la suite non ha un controllo di drift come quella API: è una voce da aprire, o un
-  capitolo di `#181`.
+  test e mai ripulita ha fatto fallire un deploy. La suite web non ha un controllo di drift come
+  quella API: voce da aprire, o capitolo di `#181`.
 - **`sys_compensation_bands` ospita 29 righe che non sono bande** (contratti e sigle senza
-  importi): una tabella che porta due specie. Nominato in `#215`, non bonificato di passaggio.
-- ~~**`apps/web/next-env.d.ts`** oscilla fra build di sviluppo e produzione~~ — **CHIUSA S1070**:
-  il file e' generato da Next e cambia con la modalita' di build, quindi non va tracciato. Ignorato
-  in `.gitignore` e tolto dall'indice in entrambi i workspace, dopo aver misurato che il typecheck
-  di `web` **e** di `showcase` esce 0 senza di lui e senza `.next/` — e che la stessa prova esce 2
-  con un errore deliberato, quindi vede.
-
-## Stato delle macchine (misurato a fine S1069)
-
-`main` == `refs/heads/prod` == **`e51d5b17`** · produzione **deployata e verde**
-(`api /readyz OK`, `web /login 200`) · timer di deploy **attivi** su VM e linux-pc, che si
-allineano da sé al tick successivo. La chiusura ha **armato e basta**, senza aspettare la CI:
-è la prima applicazione della dottrina che Enzo ha scelto il 2026-08-18.
+  importi): una tabella che porta due specie. Nominato in `#215`, mai bonificato.
+- **I 13 rossi della corsa E2E integrale non hanno ancora un triage.** Diversi dai sei di `#211`
+  F0: quelli erano noti e nominati, questi no.
 
 ## Verification
 
@@ -78,9 +61,6 @@ python docs/kb/tools/session_start.py        # menu + salute, un solo giro
 python docs/kb/tools/guardiano.py            # contesto e finestra 5h, misurati
 python docs/kb/tools/handoff_lint.py         # coerenza di stato e register (bloccante)
 python docs/kb/tools/programmi.py --verifica # integrità dei piani multi-sessione
-bash scripts/test/run-shell-tests.sh         # la batteria degli script di servizio
+ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh'   # prima di ogni push su db/
 bash scripts/verifica-deploy.sh              # cosa gira DAVVERO sulle macchine
 ```
-
-Ultima corsa della batteria degli script: **165 ok / 0 failed** (erano 141 a inizio sessione;
-24 controlli nuovi, fra cui `S5`, `T3` e le due prove del marcatore).

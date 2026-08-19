@@ -1,7 +1,7 @@
 # 218 — I residui del legacy senza referente locale: analizzarli tutti, e risolverli uno per uno
 
 > **item**: #218
-> **stato**: NON AVVIATO
+> **stato**: IN CORSO
 
 ## Decisione vincolante (non si ri-chiede)
 
@@ -48,13 +48,50 @@ si emenda il file che crea l'oggetto, non si cancella solo a valle, o al deploy 
 
 ## Fasi
 
-- [ ] **F1 Il censimento: quante sono, e dove** — budget ~60k
-      Criterio meccanico da costruire: una colonna che **nomina un oggetto**
-      (`..._blueprint_id`, `..._template_id`, `..._external_code`, valori `LEGACY_*`) e **non ha
-      una FK**. Si interroga `pg_constraint` e `information_schema`, non si va a memoria. L'esito è
-      un elenco con, per ciascuna: quante righe, quale migrazione la crea, e cosa quel file dichiara
-      che sia. **È un deliverable a sé**: senza il numero, «privilegiare la bonifica» non è una
-      decisione ma un'intenzione.
+- [x] **F1 Il censimento: quante sono, e dove** — **FATTO 2026-08-19 (S1072)** · strumento
+      `docs/kb/tools/censimento_riferimenti_orfani.py` (`--elenco` · `--da-risolvere` ·
+      `--con-righe` · `--selftest` **15/15**). Il criterio è meccanico come la fase chiedeva:
+      interroga `pg_constraint` e `information_schema`, e **il numero non è scritto qui** — si
+      ri-deriva a ogni esecuzione (⭐ PUNTO FISSO: un conteggio in un documento è vero il giorno
+      in cui lo scrivi).
+
+      **⚠ IL CRITERIO GREZZO DÀ UN NUMERO INSERVIBILE, e la misura lo dimostra**: applicato senza
+      distinzioni trova **317** colonne. Un elenco così non è una decisione, è un mucchio — e
+      «privilegiare la bonifica» sarebbe rimasta un'intenzione, che è esattamente ciò che questa
+      fase esiste per evitare. Quattro cause di falso positivo, ognuna con una ragione
+      **strutturale** e non discrezionale:
+
+      · le **VISTE** non hanno vincoli per costruzione — una `v_*` che espone `user_id` non ha
+        perso niente, sta proiettando una colonna che altrove è agganciata (34 nel solo `sys`);
+      · gli **ARCHIVI** (`audit.*_archive`) conservano righe **già cancellate**: una FK verso
+        l'origine le renderebbe incancellabili, cioè romperebbe la ragione per cui esistono;
+      · i riferimenti **POLIMORFI** (`approval_request_resource_id`, `notification_resource_id`)
+        puntano a tabelle diverse secondo il tipo: la FK è **impossibile**, non mancante;
+      · le tabelle di **LAVORAZIONE** (`staging.*`) portano le chiavi della provenienza per
+        definizione — sono il bersaglio di **`#69`**, non di questa voce.
+
+      **La misura del 2026-08-19** (datata, quindi evidenza e non affermazione sul presente):
+      **108** colonne su tabelle vere, così ripartite — `da-risolvere` **11** · polimorfo 10 ·
+      esterno 7 · modello-ia 5 · archivio 29 · lavorazione 46. Cioè **le voci che F2 deve
+      decidere una per una sono undici**, non centinaia: la bonifica è alla portata di una
+      sessione, e senza questa fase non si poteva saperlo.
+
+      **Le undici, con righe e migrazione d'origine** (ri-derivabili con `--da-risolvere --con-righe`):
+      `sys_source_lineage_records` ne porta **tre** (l'ex-lineage del brownfield: 70.959 righe, con
+      44.744 / 57.053 / 1.490 valorizzate) · `sys_reference_translations.entity_id` **32.485
+      valorizzate su 32.485** ed è la più grossa · `sys_organization_unit_templates.…_blueprint_id`
+      **225**, il caso che ha aperto la voce (mig. `000064` lo dichiara «legacy template_id group»)
+      · `sys_capability_score_lineage` due colonne × 339 · `sys_user_timeline_events…_source_id`
+      2.682 · `sys_advisor_suggestions…_rule_id` 14 · `sys_engagement_action_plans…_source_id` 8 ·
+      `sys_generated_record_origins…_superseded_by_run_id` **0 righe** — mai usata, ed è la più
+      facile da decidere.
+
+      ✅ **LA PROVA SA FALLIRE, ed è il classificatore a doverlo dimostrare**: `--selftest` ha
+      **15 casi**, di cui **11 negativi** — cioè cose che NON devono finire in `da-risolvere`.
+      Senza quelli, un classificatore che rispondesse sempre «da risolvere» passerebbe metà della
+      batteria e il censimento tornerebbe a essere il mucchio da 317. C'è anche il caso
+      dell'**ordine delle regole** (una colonna polimorfa dentro un archivio dev'essere
+      *archivio*): l'ordine è una scelta, quindi va dimostrato invece che promesso.
 - [ ] **F2 La decisione, una per una** — budget ~40k
       Per ogni voce del censimento: eliminare (preferito), creare il referente locale, o lasciare
       con ragione scritta. La decisione si scrive **accanto alla voce**, non in un documento a parte.

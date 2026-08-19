@@ -93,6 +93,8 @@ import { blueprintOverridesRoutes } from "./modules/blueprint-overrides/routes.j
 import { processKpiTemplatesRoutes } from "./modules/process-kpi-templates/routes.js";
 import { organizationUnitKpiTemplatesRoutes } from "./modules/organization-unit-kpi-templates/routes.js";
 import { seedAcquisitionRunsRoutes } from "./modules/seed-acquisition-runs/routes.js";
+import { sorgenteGatewayDaAmbiente } from "./modules/research/sorgenti/gateway.js";
+import { registraSorgente } from "./modules/research/sorgenti/index.js";
 import { seedCandidateRecordsRoutes } from "./modules/seed-candidate-records/routes.js";
 import { seedApprovalDecisionsRoutes } from "./modules/seed-approval-decisions/routes.js";
 import { meRoutes } from "./modules/me/routes.js";
@@ -453,6 +455,18 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // non ha tolto nulla a nessuno. ADR-0023 resta la dottrina sulla PROVENIENZA dei
   // dati; qui se ne va lo strumento che li portava, che aveva finito il suo lavoro.
   await app.register(seedAcquisitionRunsRoutes, { prefix: "/v1/seed-acquisition-runs" });
+
+  // #132 F4h — chi propone, se questa macchina ce l'ha. Se le variabili non ci sono resta in
+  // piedi la sorgente che DICHIARA la propria assenza: una corsa senza fornitore fallisce
+  // dicendolo, invece di chiudersi «COMPLETED, 0 proposte» — che a chi legge somiglia a una
+  // ricerca andata a vuoto, ed e' il contrario.
+  {
+    const sorgente = sorgenteGatewayDaAmbiente();
+    if (sorgente) {
+      registraSorgente(sorgente);
+      app.log.info({ sorgente: sorgente.chiave }, "ricerca: fornitore di proposte registrato");
+    }
+  }
   await app.register(seedCandidateRecordsRoutes, { prefix: "/v1/seed-candidate-records" });
   await app.register(seedApprovalDecisionsRoutes, { prefix: "/v1/seed-approval-decisions" });
   await app.register(meRoutes, { prefix: "/v1/me" });

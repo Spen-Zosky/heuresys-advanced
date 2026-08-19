@@ -23,11 +23,16 @@ import { FileAuditSink } from "./audit-sink.js";
 import { HeuresysClient } from "./heuresys-client.js";
 import { redact } from "./redact.js";
 import { runHrAgent } from "./sdk-agent.js";
+import { servi, type RichiestaProposta } from "./research-propose.js";
 import type { GatePrincipal } from "./write-gate.js";
 
 const PORT = Number(process.env.AGENT_GATEWAY_PORT ?? 8790);
 const HEURESYS_API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
 const APPROVAL_TIMEOUT_MS = Number(process.env.AGENT_GATEWAY_APPROVAL_TIMEOUT_MS ?? 120_000);
+// #132 F4h — il segreto condiviso con l'API per l'endpoint di proposta. Se non c'e',
+// l'endpoint NON esiste: un servizio in ascolto senza autenticazione «perche' tanto e'
+// locale» e' un servizio che puo' chiamare qualcun altro.
+const RESEARCH_TOKEN = process.env.AGENT_GATEWAY_RESEARCH_TOKEN ?? "";
 
 // Module-level singletons (one per server process):
 //  - the HITL approval registry bridges the SSE stream ↔ POST /agent/approve;
@@ -96,6 +101,42 @@ const server = createServer(async (req, res) => {
       const resolved = approvals.resolve(approvalId, decision as ApprovalDecision);
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ ok: true, resolved }));
+      return;
+    }
+
+    // #132 F4h — chi propone: riceve domande e testo di pagine gia' lette dall'API, e
+    // restituisce JSON. Nessuno strumento, nessun accesso alla piattaforma, nessuna
+    // decisione: e' la sola parte non deterministica della catena, e sta dietro un segreto.
+    if (req.method === "POST" && req.url === "/research/propose") {
+      if (!RESEARCH_TOKEN) {
+        res.writeHead(503, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "RESEARCH_DISABLED", message: "AGENT_GATEWAY_RESEARCH_TOKEN non configurato" }));
+        return;
+      }
+      if (req.headers["x-research-token"] !== RESEARCH_TOKEN) {
+        res.writeHead(401, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "BAD_TOKEN" }));
+        return;
+      }
+      const body = await readBody(req);
+      let richiesta: RichiestaProposta;
+      try {
+        richiesta = JSON.parse(body || "{}") as RichiestaProposta;
+      } catch {
+        res.writeHead(400, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "BAD_JSON" }));
+        return;
+      }
+      try {
+        const esito = await servi(richiesta);
+        res.writeHead(200, { "content-type": "application/json" });
+        res.end(JSON.stringify(esito));
+      } catch (err) {
+        // Un guasto qui e' un ESITO della corsa, non un guasto del gateway: l'API lo
+        // registra come corsa FAILED col motivo, e la corsa resta nel registro.
+        res.writeHead(502, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "PROPOSE_FAILED", message: String(err) }));
+      }
       return;
     }
 

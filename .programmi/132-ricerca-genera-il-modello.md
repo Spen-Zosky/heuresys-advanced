@@ -306,6 +306,85 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   prima: `content_hash` conserva l'impronta di cio' che si e' letto, ma nessun codice tratta il
   testo di una pagina come **dato non fidato**. Finche' il motore non esiste, non esiste nemmeno il
   punto in cui la difesa va messa — quindi va scritta insieme al motore, non dopo.
+
+  ---
+
+  ### La decomposizione, e le decisioni tecniche che la reggono (S1074, 2026-08-19)
+
+  **Dove vive il motore: nell'API, non nel gateway.** Il gateway agente e' un **client** dell'API
+  (`heuresys-client.ts`); farvi vivere il motore invertirebbe la dipendenza. E c'e' una ragione piu'
+  forte: l'impronta di §4.3 dev'essere lo **SHA-256 dei byte effettivamente ricevuti**, e uno
+  strumento `WebFetch` dell'SDK restituisce testo gia' interpretato — i byte non li vede nessuno.
+  L'API legge il web da tre anni (`esco-connector.ts`, `istat-ateco-connector.ts`,
+  `voyage-client.ts`): il lettore di F4 e' lo stesso pattern, con le difese in piu'.
+
+  **I due atti non deterministici stanno dietro due porte iniettabili**, cosi' che le prove possano
+  fallire senza rete e senza modello: `WebReader` (legge, misura, impronta) e `ProposalSource` (chi
+  propone). La seconda ha l'implementazione reale nel gateway (§F4h), dove vive l'abbonamento.
+
+  **Il dominio pilota di F4 e' `research_sources`, non un dominio di contenuto.** Lo prescrive
+  l'epica §4.3 — *«la prima ricerca che la piattaforma esegue e' su dove cercare»* — e scioglie il
+  fondamento circolare: il registro delle fonti nasce da una corsa, e il filtro della prima ondata
+  e' Enzo che approva una fonte per volta. I cinque domini di contenuto restano a `F5`.
+
+  | # | sotto-passo | cosa consegna |
+  |---|---|---|
+  | **F4a** ✅ | lo schema e il registro delle fonti — **FATTO 2026-08-19** | mig. `000333`: `tenant_id` nullabili + `CHECK` sulla coppia, legame alla versione di variante, trigger di coerenza candidato↔corsa, `sys.sys_research_sources` (approvatore obbligatorio quando approvata), sentinella nuova |
+  | **F4b** | il dominio ricercabile e' un contratto in codice | `research/domain.ts` (domande · forma · chiave naturale · controlli), il dominio pilota `research_sources`, il confronto **per suffisso di host** |
+  | **F4c** | il lettore web | `research/web-reader.ts`: solo `https`, guardia SSRF, limiti di dimensione e tempo, **SHA-256 dei byte** che riproduce |
+  | **F4d** | il motore | `research/engine.ts`: corsa → letture → proposte → validazione (forma · fonti · doppioni) → candidati + evidenze + esiti, stato della corsa |
+  | **F4e** | le difese §4.4 e §4.5 | il testo grezzo non entra mai in una proposta; le domande verso il web si costruiscono **solo** dai parametri di categoria, con un cancello meccanico |
+  | **F4f** | `D-81` si estingue | `BLUEPRINT_FIELD_LOCKED` sui campi bloccanti, col nome del campo e il perche' |
+  | **F4g** | la superficie API | le quattro rotte di §6, i permessi, il contratto in `@heuresys/shared` |
+  | **F4h** | il fornitore reale del ragionamento | `/research/propose` nel gateway + la **dimostrazione LIVE**: una corsa vera che legge pagine vere e propone fonti |
+
+  ✅ **F4a FATTA — 2026-08-19 (S1074)** · mig. `000333`, applicata in produzione. Una corsa puo'
+  appartenere a un **fascicolo** invece che a un tenant (`CHECK` sulla coppia: mai nessuno dei due),
+  la proposta segue la corsa (trigger di coerenza), e le fonti hanno un registro —
+  `sys.sys_research_sources`, dove una fonte `APPROVED` **senza** approvatore, data e motivazione e'
+  impossibile per vincolo. Sentinella nuova `sys.v_research_evidence_source_not_approved`, la
+  ventitreesima vigilata.
+
+  🔬 **LA PROVA GENERALE HA FERMATO UN DIFETTO ALLA SECONDA PASSATA**, ed e' la classe che in CI si
+  scopre 25 minuti dopo il push: la `000304` pretende che nessuna FK verso `sys_users` resti fuori
+  dal registro GDPR, e la mia colonna `..._approver_user_id` vi rientrava. La correzione non e' stata
+  registrarla come dato personale ne' aggirare il cancello: e' il **nome**. Chi approva e' un
+  **attore**, e nel progetto gli attori si chiamano `_by` (`tenant_blueprint_version_approved_by`) —
+  che e' esattamente cio' che quel cancello esclude. Rinominata `research_source_approved_by`.
+
+  ✅ **LE PROVE DEVONO POTER FALLIRE, e qui ce ne sono quattro.** La migrazione **prova i due
+  vincoli da se'**, su righe vere, dentro la propria transazione: una corsa senza tenant e senza
+  fascicolo → **RESPINTA**; una proposta che dichiara un tenant diverso dalla sua corsa →
+  **RESPINTA**. Sul clone di CI, dove non esistono versioni di fascicolo, dichiara «installato,
+  **NON verificato**» invece di fingere — in produzione le due prove sono girate davvero (`NOTICE`
+  del 2026-08-19). Poi, sul database di produzione dentro una transazione disfatta:
+  la sentinella si accende **solo** su `bancaditalia.it.attaccante.example` e su un blog mai
+  registrato, e **non** su `dati.bancaditalia.it` — cioe' il confine e' per **suffisso**, non per
+  sottostringa; una fonte `APPROVED` senza approvatore e un suffisso scritto `https://istat.it/`
+  sono **respinti**; e dopo il `ROLLBACK` sentinella a `0`, registro a `0`, le **12** evidenze
+  storiche ancora `12`.
+
+  Prova generale sul linux-pc **VERDE**: 308 migrazioni, due passate, **23/23** sentinelle a zero.
+
+  **Confine di sessione dichiarato**: F4 e' otto sotto-passi con commit atomici. Si va avanti
+  finche' il guardiano regge; cio' che non entra resta dichiarato qui, non lasciato a meta'.
+
+  #### La simulazione a cinque domande (R24 §3) — fatta prima di eseguire
+
+  - **Precondizioni**: il tunnel e' su e il database risponde (boot verde); le 12 corse di storia36
+    esistono e vanno protette; `sys_tenant_blueprint_versions` esiste (mig. `000320`); il gateway
+    gira sull'abbonamento (`AGENT_GATEWAY_SUBSCRIPTION_AUTH=1`) — **solo `F4h` ne dipende**.
+  - **Meccanismo**: la migrazione emenda la `000020` (ADR-0035 — la coppia) *e* corregge
+    l'esemplare esistente; il motore e' un modulo API con due porte iniettabili; le prove girano
+    con Vitest e con un server HTTP locale per il lettore.
+  - **Propagazione**: `db/migrations/**` → prova generale sul linux-pc (`ci-rehearsal.sh`, due
+    passate) **prima** del push; poi la catena di deploy abituale.
+  - **Chi**: tutto Claude. Serve Enzo **solo** per l'approvazione delle prime fonti (`F4h`), che e'
+    una decisione di business — ed e' l'unico punto dichiarato `blocked-on-Enzo` di F4.
+  - **Guardia**: la migrazione tocca colonne in uso. La guardia conta le 12 righe storiche **prima**
+    e la post-condizione verifica che siano **ancora 12, con lo stesso tenant e lo stesso stato** —
+    cioe' protegge cio' che NON doveva cambiare. Rollback dichiarato nella migrazione.
+
 - [ ] **F5 i cinque domini ricercabili** — `organization_units` · `positions` · `skills` · `kpis` ·
   `business_processes`. Il primo costa la forma, gli altri quattro la riusano
 - [ ] **F6 il ponte: le proposte approvate diventano il modello** — famiglia (se non esiste),

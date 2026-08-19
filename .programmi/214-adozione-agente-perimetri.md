@@ -32,14 +32,14 @@ python docs/kb/tools/build_agent_operations.py    # rigenera la mappa dopo un'ap
       I primi della coda per ampiezza di lettura: `analytics` (10 letture · 9 pagine) ·
       `content` (7 · 3) · `tenant-blueprints` (6 · 3) · `visualization-graphs` (5 · 4).
       ⚠ `analytics` è **multiclasse** e dichiara di esporre anche competenze e retribuzioni: è
-      il primo per ampiezza, non il primo per rischio.
+      il primo per ampiezza, non il primo per rischio. **Dal 2026-08-19 (F5) non è più un
+      giudizio da prosa**: le sue classi sono enumerate e lo collocano fra i riservati.
 - [ ] **F4 I 14 NON MISURABILI diventano misurabili** — budget ~50k
       Oggi si presentano come «non so», e prima della correzione si presentavano come «sicuro».
       Finché restano tali, quella parte della coda non è ordinabile.
-- [ ] **F5 Le classi di una resource multiclasse smettono di essere prosa** — budget ~40k
-      Il valore in `RESOURCE_MULTICLASSE` è **prosa**, non un elenco, e cambiarne la forma tocca
-      l'asserzione di boot del gate in `apps/api`. È il lavoro che rende meccanico il giudizio su
-      `analytics` e `dashboard`, e va fatto **prima** di aprirli.
+- [x] **F5 Le classi di una resource multiclasse smettono di essere prosa** — FATTO 2026-08-19 · `RESOURCE_MULTICLASSE` passa da `Record<string,string>` (una frase) a `Record<string,{classi,perche}>` con le classi **enumerate e misurate sul database**, non trascritte dalla frase. Effetto sulla coda, misurato prima e dopo: **NON MISURABILI da 14 a 12**, riservati da 16 a 18 — `analytics` (`COMPENSATION, EVALUATION, PERSONAL, SKILL`) e `dashboard` (`ACTIVITY, PERSONAL, SKILL`) escono dal «non so» e cadono fra i riservati **per le classi che espongono davvero**. Aggiunte anche le 7 famiglie di `#142` (mig. `000326`), che senza una riga qui renderebbero rosso il cancello di `#99 F7`.
+      🔬 **La misura ha smentito la prosa**: la frase su `analytics` nominava le «presenze», ma nessuna delle sue cinque voci dichiara `ACTIVITY`. Una descrizione che nessuno può contraddire invecchia senza che nessuno se ne accorga — ed è il motivo per cui questa fase esisteva.
+      🔬 **Trovata e chiusa una cecità in attesa**: `check_concetti_agente.py` presidiava il caso «parser che non legge più nulla» per `RESOURCE_DATA_CLASS` e **per nessuna delle altre tre**. Cambiando forma, `MULTI` sarebbe tornato `{}` e ogni resource multiclasse sarebbe sparita in silenzio dalla classificazione. Ora la guardia c'è per `MULTI` e per `NO_PERSONE`.
 
 ## Stato misurato (2026-08-17, dopo l'apertura e la correzione del criterio)
 

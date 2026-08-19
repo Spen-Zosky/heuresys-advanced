@@ -178,3 +178,4 @@ degli aggiramenti**, e il numero di corse su cui è stato verificato è scritto.
 | # | data | commit | esito | note |
 |---|---|---|---|---|
 | — | 2026-08-19 | `7b002359` | **ROSSA — 6 file** | e non contava: erano un difetto MIO, non la contesa. Corretti sopra. Il contatore riparte dal commit che porta il rimedio |
+| **1** | 2026-08-19 | `62d59c45` | **VERDE** | prima corsa integrale con i limiti a 20s/30s **e** la cache attiva. Letta dalla CI (`gh run list`), non dedotta |

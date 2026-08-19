@@ -188,13 +188,49 @@ def elenco(nome):
             re.finditer(r'^\s*([A-Za-z_][A-Za-z0-9_]*|"[^"]+")\s*:\s*"([^"]*)"', m.group(1), re.M)}
 
 
+def elenco_multiclasse(nome):
+    """Le resource multiclasse, con le CLASSI ENUMERATE (#214 F5, 2026-08-19).
+
+    Fino a quella data il valore era una frase, e questo strumento non poteva che
+    dichiarare `analytics` e `dashboard` NON MISURABILI: le due resource piu' ampie
+    restavano fuori dalla coda ordinabile perche' la loro descrizione non si poteva
+    interrogare. Ora ogni voce ha la forma
+
+        nome: { classi: ["A", "B"], perche: "..." }
+
+    e le classi si leggono davvero.
+    """
+    m = re.search(r"export const %s[^=]*=\s*\{(.*?)\n\};" % nome, src, re.S)
+    if not m:
+        return {}
+    out = {}
+    corpo = m.group(1) + "\n  },"
+    for c in re.finditer(r'^\s*([A-Za-z_][A-Za-z0-9_]*|"[^"]+")\s*:\s*\{(.*?)\n\s*\},',
+                         corpo, re.S | re.M):
+        chiave = c.group(1).strip('"')
+        cl = re.search(r"classi\s*:\s*\[([^\]]*)\]", c.group(2))
+        out[chiave] = ([x.strip().strip('"') for x in cl.group(1).split(",") if x.strip()]
+                       if cl else [])
+    return out
+
+
 CLASSE = elenco("RESOURCE_DATA_CLASS")
 NO_PERSONE = elenco("RESOURCE_SENZA_DATI_DI_PERSONA")
-MULTI = elenco("RESOURCE_MULTICLASSE")
+MULTI = elenco_multiclasse("RESOURCE_MULTICLASSE")
 DA_DECIDERE = elenco("RESOURCE_DA_DECIDERE")
 if not CLASSE:
     ceco("nessuna classe di dato letta da %s" % CLASSI,
          "la forma di RESOURCE_DATA_CLASS e' cambiata: adeguare la lettura")
+# ⚠ LE GUARDIE CHE MANCAVANO (#214 F5). La cecita' era presidiata per CLASSE e per nessuna
+# delle altre tre: se la forma di RESOURCE_MULTICLASSE cambia, il parser restituisce {} e
+# ogni resource multiclasse sparisce in silenzio dalla classificazione — lo strumento
+# smette di vederla senza dirlo, che e' la specie di falso verde che questo file combatte.
+if not MULTI:
+    ceco("nessuna resource multiclasse letta da %s" % CLASSI,
+         "la forma di RESOURCE_MULTICLASSE e' cambiata: adeguare `elenco_multiclasse`")
+if not NO_PERSONE:
+    ceco("nessuna resource senza dati di persona letta da %s" % CLASSI,
+         "la forma di RESOURCE_SENZA_DATI_DI_PERSONA e' cambiata: adeguare la lettura")
 
 # ---------------------------------------------------------------- 4. V3, chi lo guarda
 consumati = ((atlas.get("cross") or {}).get("endpoints_with_web_consumers") or {})
@@ -231,7 +267,10 @@ for mod in moduli:
         elif r in NO_PERSONE:
             classi.add("nessun dato di persona")
         elif r in MULTI:
-            classi.add("piu' classi")
+            # #214 F5: ENUMERATE, non piu' "piu' classi". E' cio' che toglie `analytics` e
+            # `dashboard` dai NON MISURABILI e le rimette in una coda ordinabile: ora
+            # cadono fra i riservati o fra i neutri per le classi che espongono davvero.
+            classi.update(MULTI[r])
         elif r in DA_DECIDERE:
             classi.add("dubbio dichiarato")
         else:
@@ -246,7 +285,7 @@ for mod in moduli:
         senza_superficie.append(riga)
     elif classi & set(RISERVATE):
         riservati.append(riga)
-    elif ignote or not classi or "piu' classi" in classi or "dubbio dichiarato" in classi:
+    elif ignote or not classi or "dubbio dichiarato" in classi:
         # NON MISURABILE: non si sa quali classi tocca, quindi non si sa se e' neutro.
         # Prima finivano fra i neutri per come era scritto il confronto — vedi il buco
         # chiuso in S1068 nell'intestazione. Il rimedio e' per riga, e lo dice:
@@ -257,8 +296,7 @@ for mod in moduli:
             motivo = ("nessuna classe leggibile: nessuna delle sue letture dichiara un "
                       "permesso, quindi non c'e' resource da cui risalire alla classe")
         else:
-            motivo = ("classi non enumerabili: `RESOURCE_MULTICLASSE` le descrive in prosa, "
-                      "e almeno una delle sue pagine puo' mostrare dati di persona")
+            motivo = "dubbio dichiarato in `RESOURCE_DA_DECIDERE`: la classe non e' decisa"
         incerti.append((mod, len(get), len(pagine), et, motivo))
     else:
         # Neutro solo per AFFERMAZIONE esplicita, non per assenza dalle riservate.

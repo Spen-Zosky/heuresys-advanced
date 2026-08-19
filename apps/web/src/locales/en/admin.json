@@ -554,7 +554,23 @@
     "activityTitle": "Recent activity",
     "activityEmptyTitle": "No recent activity",
     "activityEmptyDesc": "Recent actions in your scope will appear here.",
-    "activitySubtitle": "Scope {{kind}}"
+    "activitySubtitle": "Scope {{kind}}",
+    "famiglie": {
+      "badge": "dashboard",
+      "vistePlurale": "{{count}} views",
+      "visteConTrattenute": "{{count}} views, {{masked}} with withheld values",
+      "colonnaVoce": "Item",
+      "colonnaDettaglio": "Detail",
+      "colonnaValore": "Value",
+      "vuotoValori": "No values in your perimeter",
+      "vuotoAndamento": "No trend in your perimeter",
+      "vuotoRighe": "No rows in your perimeter",
+      "senzaValori": "Values not available",
+      "catalogoIrraggiungibile": "Dashboard catalogue unreachable",
+      "datiIrraggiungibili": "Dashboard data unreachable",
+      "nonDisponibileTitolo": "Dashboard not available",
+      "nonDisponibileTesto": "This dashboard does not exist or is outside your permissions."
+    }
   },
   "visualizations": {
     "title": "Visualizations",

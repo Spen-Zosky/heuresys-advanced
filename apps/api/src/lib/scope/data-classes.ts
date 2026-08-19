@@ -85,10 +85,78 @@ export const SENSITIVE_DATA_CLASSES: ReadonlySet<DataClass> = new Set<DataClass>
  * Per queste l'obbligo non è «dichiara QUELLA classe» ma «dichiarane almeno una»: la scelta
  * sta sulla voce, dove il contenuto è noto.
  */
-export const RESOURCE_MULTICLASSE: Readonly<Record<string, string>> = {
-  analytics: "cinque pagine, quattro classi diverse (organico, presenze, competenze, retribuzioni, KPI)",
-  dashboard: "il cruscotto aggrega organico, formazione e attività: tre classi in una pagina",
-  process_owner: "la console dei processi mostra lavoro, non persone — ma lo dichiara lei",
+export interface ResourceMulticlasse {
+  /** Le classi che questa resource espone, ENUMERATE — misurate, non descritte. */
+  readonly classi: readonly DataClass[];
+  /** Perché una sola classe non basta a rappresentarla. */
+  readonly perche: string;
+}
+
+/**
+ * ⚠ ERANO PROSA, E LA PROSA NON SI PUÒ INTERROGARE (#214 F5, 2026-08-19).
+ *
+ * Fino a oggi il valore era una frase: «cinque pagine, quattro classi diverse (organico,
+ * presenze, competenze, retribuzioni, KPI)». Leggibile da un umano, muta per uno strumento —
+ * e `check_concetti_agente.py` doveva dichiarare `analytics` e `dashboard` **NON MISURABILI**
+ * proprio per questo, cioè lasciare fuori dalla coda ordinabile le due resource più ampie.
+ *
+ * Le classi qui sotto sono state MISURATE sul database il 2026-08-19, non trascritte dalla
+ * frase — e la misura ha già smentito la frase su un punto: la prosa di `analytics` nominava
+ * le «presenze», ma nessuna delle sue cinque voci dichiara `ACTIVITY`. Una descrizione che
+ * nessuno può contraddire invecchia senza che nessuno se ne accorga.
+ *
+ *   SELECT i.ui_interface_required_resource, string_agg(DISTINCT dc.data_class, ',')
+ *     FROM sys.sys_ui_interfaces i
+ *     LEFT JOIN sys.sys_ui_interface_data_classes dc ON dc.ui_interface_id = i.ui_interface_id
+ *    WHERE i.ui_interface_is_active GROUP BY 1;
+ *
+ * Le sette resource `dashboard_*` sono le famiglie di cruscotto di `#142` (mig. `000326`):
+ * ognuna eredita dalle proprie viste l'unione delle classi, e senza una riga qui il cancello
+ * «NESSUNA resource passa in silenzio» le nominerebbe — correttamente.
+ */
+export const RESOURCE_MULTICLASSE: Readonly<Record<string, ResourceMulticlasse>> = {
+  analytics: {
+    classi: ["COMPENSATION", "EVALUATION", "PERSONAL", "SKILL"],
+    perche: "cinque pagine sotto una sola resource, ognuna con il proprio contenuto",
+  },
+  dashboard: {
+    classi: ["ACTIVITY", "PERSONAL", "SKILL"],
+    perche: "il cruscotto aggrega organico, formazione e attività in una pagina",
+  },
+  process_owner: {
+    classi: ["ACTIVITY"],
+    perche: "la console dei processi mostra lavoro, non persone — ma lo dichiara lei",
+  },
+  // #142 — le otto famiglie. `self` non compare: la sua route è `/me`, che ha già la
+  // propria voce e la propria classificazione.
+  dashboard_company: {
+    classi: ["EVALUATION", "PERSONAL", "SKILL"],
+    perche: "quattro viste d'azienda: organico, andamento, competenze, valutazioni",
+  },
+  dashboard_process: {
+    classi: ["ACTIVITY"],
+    perche: "processi, attività e approvazioni: lavoro, non persone",
+  },
+  dashboard_org: {
+    classi: ["PERSONAL"],
+    perche: "struttura, posizioni scoperte e catena di riporto",
+  },
+  dashboard_branch: {
+    classi: ["ACTIVITY", "PERSONAL", "SKILL"],
+    perche: "l'azienda vista da una filiale: organico, attività, competenze",
+  },
+  dashboard_hr: {
+    classi: ["COMPENSATION", "EVALUATION", "PERSONAL", "SKILL"],
+    perche: "cinque viste HR, e la retribuzione è una di esse (ADR-0032 la maschera al mandato tecnico)",
+  },
+  dashboard_platform: {
+    classi: ["ACTIVITY", "CREDENTIAL"],
+    perche: "salute del sistema, credenziali e corse pianificate",
+  },
+  dashboard_tenant: {
+    classi: ["PERSONAL"],
+    perche: "configurazione del tenant, blueprint adottati e utenti",
+  },
 };
 
 /**

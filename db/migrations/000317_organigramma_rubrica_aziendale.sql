@@ -125,15 +125,19 @@ BEGIN
     RAISE EXCEPTION '000317: % voci dell''area personale hanno una classe — I17 a rischio', n_personal;
   END IF;
 
-  -- 5. il totale esatto, e sta QUI perche' questa e' la migrazione piu' recente che tocca
-  --    la tabella — l'unica che possa conoscerlo. La 000315 pretende solo le SUE 24 (`>=`):
-  --    su un database da zero gira prima di questa, quindi un totale esatto la' non puo'
-  --    essere vero. La prova generale l'ha dimostrato ROSSO alla prima passata, prima che
-  --    l'errore uscisse da qui. ⚠ Chi aggiungera' righe dopo di me deve spostare QUESTO
-  --    conteggio nel proprio file, non alzarlo qui.
+  -- 5. ⚠ IL TOTALE ESATTO SE N'E' ANDATO DA QUI IL 2026-08-19, ed e' successo esattamente
+  --    come questo commento prevedeva. Diceva: «chi aggiungera' righe dopo di me deve
+  --    spostare QUESTO conteggio nel proprio file, non alzarlo qui». La `000326` (#142 F4)
+  --    ne ha aggiunte 15 — le classi delle sette famiglie di cruscotto, ereditate dalle
+  --    proprie viste — e la prova generale ha detto «41 invece di 26» alla seconda passata.
+  --
+  --    Quindi questa migrazione torna a pretendere solo le SUE, con `>=`, esattamente come
+  --    la 000315 fa con le proprie 24: e' l'unica forma che resta vera sia su un database
+  --    da zero sia dopo qualunque aggiunta successiva. Il totale esatto ora vive nella
+  --    `000326`, che e' la piu' recente a toccare la tabella — l'unica che possa conoscerlo.
   SELECT count(*) INTO n_dich FROM sys.sys_ui_interface_data_classes;
-  IF n_dich <> 26 THEN
-    RAISE EXCEPTION '000317: le dichiarazioni totali sono % invece di 26 — se e'' una aggiunta legittima, il conteggio esatto va spostato nella migrazione che la introduce', n_dich;
+  IF n_dich < 26 THEN
+    RAISE EXCEPTION '000317: le dichiarazioni sono % e devono essere almeno le mie 26', n_dich;
   END IF;
 
   RAISE NOTICE '000317 ok — % dichiarazioni totali, 2 aperte al tenant (ORG_CHART + org)', n_dich;

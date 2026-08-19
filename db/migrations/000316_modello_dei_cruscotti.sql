@@ -377,8 +377,24 @@ BEGIN
   PERFORM 1 FROM sys.sys_dashboards WHERE dashboard_code = 'self' AND dashboard_permission_code IS NULL;
   IF NOT FOUND THEN RAISE EXCEPTION '000316: il cruscotto senza permesso non e'' self'; END IF;
 
-  -- Nessuna famiglia e' attiva: le pagine non esistono ancora, le costruisce F4.
-  SELECT count(*) INTO n_attivi FROM sys.sys_dashboards WHERE dashboard_is_active;
+  -- ⚠ EMENDATA IL 2026-08-19 (#142 F4), e la ragione va detta perche' e' una lezione.
+  --
+  -- Diceva: «nessuna famiglia e' attiva» (`n_attivi <> 0` -> eccezione), col commento «le
+  -- pagine non esistono ancora, le costruisce F4». Era una FOTOGRAFIA DEL MOMENTO scritta
+  -- nella forma di un invariante: vera il giorno in cui fu scritta, e destinata a diventare
+  -- falsa esattamente quando il lavoro che annunciava fosse stato fatto.
+  --
+  -- F4 le pagine le ha costruite (mig. `000326`), e la prova generale l'ha intercettata alla
+  -- SECONDA passata — cioe' ~25 minuti prima che lo facesse la CI. Il rimedio e' emendare
+  -- QUESTO file, non aggiungerne uno dopo: la catena si ri-applica per intero a ogni deploy,
+  -- e una correzione a valle verrebbe disfatta al giro successivo (ADR-0035).
+  --
+  -- L'invariante che l'asserzione voleva davvero esprimere — vero prima di F4 e dopo — e':
+  -- **nessuna famiglia e' attiva SENZA una pagina**. E' la stessa condizione del CHECK
+  -- `sys_dashboards_attivo_ha_pagina`; averla anche qui la rende una post-condizione letta,
+  -- non solo un vincolo dichiarato.
+  SELECT count(*) INTO n_attivi FROM sys.sys_dashboards
+   WHERE dashboard_is_active AND dashboard_ui_interface_id IS NULL;
   IF n_attivi <> 0 THEN
     RAISE EXCEPTION '000316: % famiglie attive senza pagina — il menu mentirebbe', n_attivi;
   END IF;

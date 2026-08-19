@@ -554,7 +554,23 @@
     "activityTitle": "Attività recente",
     "activityEmptyTitle": "Nessuna attività recente",
     "activityEmptyDesc": "Le azioni recenti del tuo ambito appariranno qui.",
-    "activitySubtitle": "Ambito {{kind}}"
+    "activitySubtitle": "Ambito {{kind}}",
+    "famiglie": {
+      "badge": "cruscotto",
+      "vistePlurale": "{{count}} viste",
+      "visteConTrattenute": "{{count}} viste, di cui {{masked}} con valori trattenuti",
+      "colonnaVoce": "Voce",
+      "colonnaDettaglio": "Dettaglio",
+      "colonnaValore": "Valore",
+      "vuotoValori": "Nessun valore nel tuo perimetro",
+      "vuotoAndamento": "Nessun andamento nel tuo perimetro",
+      "vuotoRighe": "Nessuna riga nel tuo perimetro",
+      "senzaValori": "Valori non disponibili",
+      "catalogoIrraggiungibile": "Catalogo dei cruscotti non raggiungibile",
+      "datiIrraggiungibili": "Dati del cruscotto non raggiungibili",
+      "nonDisponibileTitolo": "Cruscotto non disponibile",
+      "nonDisponibileTesto": "Questo cruscotto non esiste o non rientra nei tuoi permessi."
+    }
   },
   "visualizations": {
     "title": "Visualizations",

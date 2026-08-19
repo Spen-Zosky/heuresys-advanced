@@ -109,7 +109,7 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   ⚠ **il typecheck dei test ha preteso il build di `@heuresys/shared`**: `tsconfig.test.json`
   risolve al **dist compilato**, che non conosce una funzione appena aggiunta alla sorgente (è il
   D-03 già noto). Annotare i tipi a mano era il sintomo, non la cura
-- [~] **F1 dove vive il contenuto di un modello** — **INDAGINE FATTA 2026-08-19, migrazioni da scrivere.**
+- [x] **F1 dove vive il contenuto di un modello** — **FATTO 2026-08-19** · mig. `000327`: cinque tabelle di contenuto (unita', posizioni, competenze, indicatori, processi) agganciate alla **versione di variante**, chiave naturale `(versione, codice)`, legami interni per **codice** e non per uuid, e **nessun `tenant_id`** — con una post-condizione che lo rende impossibile per distrazione. Prova generale **VERDE** (catena intera + 21/21 sentinelle), applicata in produzione: 5 tabelle create, **225 righe ereditate intatte**. 🔬 La prova generale ha fermato un difetto alla seconda passata: la `000062` pretende «0 UNCLASSIFIED» e le cinque tabelle nuove non erano nel registro di riconciliazione — registrate `EXCLUDE`/bucket D con la ragione scritta. **L'indagine che ha preceduto la scrittura:**
   La domanda che F1 poneva — «riuso di `sys_organization_unit_templates` **se la forma regge**» — ha
   ora una risposta misurata, e la risposta è **no, non come sta**. Tre reperti:
 

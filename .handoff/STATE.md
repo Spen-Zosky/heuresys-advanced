@@ -36,10 +36,18 @@ file che crea l'oggetto. Ne è nata una memoria di lavoro.
    esisteva già (23 righe, agganciata alla versione) e `#132` F1 ne ha creata una seconda,
    ancora vuota. `#132` F5 dovrà sceglierne una — e la scelta non è simmetrica: le due
    attribuiscono il processo a cose diverse, una posizione contro una unità.
-2. **Il clone di CI e la produzione non hanno gli stessi vincoli.** Su
-   `sys_source_lineage_records` il clone porta una FK su `tenant_id` che la produzione non ha.
-   Una delle due è alla deriva: un vincolo in più rende la CI più severa del posto che deve
-   proteggere, uno in meno la rende cieca. Misurato, non toccato.
+2. ✅ **CHIUSA in S1074 — il clone di CI e la produzione NON sono alla deriva.** La domanda
+   diceva che su `sys_source_lineage_records` il clone portava una FK su `tenant_id` che la
+   produzione non ha. **Non riproduce**: misurato il 2026-08-19, il vincolo
+   `sys_source_lineage_records_source_lineage_tenant_id_fkey` c'è in **entrambi**, identico.
+   E il confronto strutturale dell'intero schema `sys` non lascia margine: **nessuna** tabella
+   esiste nel clone e manca in produzione; le sole due in più in produzione sono di quel giorno
+   (`sys_research_sources` e la sentinella `v_research_evidence_source_not_approved`, mig.
+   `000333`). Anche lo scarto dei vincoli torna **uno per uno**: 5 `CHECK` e 4 FK in più in
+   produzione = i 4 `CHECK` + 3 FK della tabella nuova, più il `CHECK` sulla coppia e la FK
+   verso la versione di fascicolo aggiunti a `sys_seed_acquisition_runs`. Il clone è **indietro
+   di una sessione**, non divergente, ed è il suo comportamento normale: lo riallinea il proprio
+   processo, non le migrazioni applicate a mano.
 3. **La suite E2E non entra in CI**, per criterio dichiarato in `#211` F4: dura ~25 minuti su
    un runner che ne impiega già ~20 per la suite API. Entra quando `#219` porta i falliti a zero.
 

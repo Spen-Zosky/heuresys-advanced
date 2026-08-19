@@ -1,7 +1,7 @@
 /**
  * apps/api/scripts/prova-live-198-t4.mts — prova LIVE del T4 di #198 (E21), S1067.
  *
- * Che cosa dimostra: dopo che il motore ha smesso di guardare dentro l'archetipo, la
+ * Che cosa dimostra: dopo che il motore ha smesso di guardare dentro la sorgente, la
  * costruzione dice ancora **gli stessi numeri**. Un refactoring che cambia ciò che viene
  * costruito non è un refactoring, ed è la sola cosa che un typecheck verde non può dire.
  *
@@ -13,12 +13,11 @@
 import * as OTPAuth from "otpauth";
 import { passwordFor } from "../test/helpers/personas.js";
 import { FIXTURE_TOTP_SECRETS } from "../test/helpers/mfa-fixture-secrets.js";
-import { getArchetype, archetypeUsers } from "../src/modules/tenant-materialization/blueprints.js";
-import { ArchetypeBuildSource } from "../src/modules/tenant-materialization/build-source.js";
+import { BlueprintBuildSource, listBuildSources } from "../src/modules/tenant-materialization/blueprint-build-source.js";
+import { pool, closePool } from "../src/db/client.js";
 
 const BASE = process.argv[2] ?? "http://localhost:3001";
 const ATTORE = "enzo.spenuso@heuresys.com";
-const CHIAVE = "RETAIL_BANK_REFERENCE";
 
 function totp(email: string): string | null {
   const s = FIXTURE_TOTP_SECRETS[email];
@@ -41,12 +40,22 @@ async function accedi(email: string): Promise<{ cookie: string; csrf: string }> 
 }
 
 async function main(): Promise<void> {
-  const a = getArchetype(CHIAVE);
-  if (!a) throw new Error(`archetipo ${CHIAVE} assente`);
-  const piano = await new ArchetypeBuildSource(a).plan();
+  // ⚠ Il contenuto NON viene piu' da un archetipo scritto in TypeScript (#132 F3, E29): si
+  //   sceglie un modello fra quelli che hanno davvero del contenuto. Se non ce n'e' nessuno,
+  //   la prova lo dice invece di fingere un verde — ed e' lo stato atteso finche' F6 non
+  //   avra' costruito il ponte dalle proposte approvate al modello.
+  const modelli = await listBuildSources(pool);
 
   console.log(`# prova LIVE #198 T4 — ${BASE} — ${new Date().toISOString()}\n`);
-  console.log(`  archetipo ${CHIAVE}: ${a.orgUnits.length} unità · ${a.positions.length} posizioni · ${a.skills.length} competenze · ${a.kpis.length} indicatori · ${archetypeUsers(a).length} titolari`);
+  if (modelli.length === 0) {
+    console.log("  nessun modello ha contenuto: non c'e' niente da costruire.");
+    console.log("  (atteso fra #132 F3 e F6 — il piano lo dichiara: da F3 a F6 nessuna azienda e' costruibile)");
+    await closePool();
+    process.exit(0);
+  }
+  const scelto = modelli[0]!;
+  const piano = await new BlueprintBuildSource(pool, scelto.variantVersionId).plan();
+  console.log(`  modello ${scelto.label}: ${scelto.orgUnitCount} unità · ${scelto.positionCount} posizioni · ${scelto.skillCount} competenze · ${scelto.kpiCount} indicatori`);
   console.log(`  piano    ${piano.sourceKey}: ${piano.orgUnits.length} unità · ${piano.positions.length} posizioni · ${piano.skills.length} competenze · ${piano.kpis.length} indicatori · ${piano.incumbents.length} titolari`);
 
   const evidenzeAttese = piano.incumbents.reduce((n, i) => n + i.skillEvidence.length, 0);
@@ -62,7 +71,7 @@ async function main(): Promise<void> {
   const r = await fetch(`${BASE}/v1/tenant-materialization`, {
     method: "POST",
     headers: { "content-type": "application/json", cookie, "x-csrf-token": csrf },
-    body: JSON.stringify({ tenantId: rtl.tenantId, archetypeKey: CHIAVE, mode: "plan" }),
+    body: JSON.stringify({ tenantId: rtl.tenantId, variantVersionId: scelto.variantVersionId, mode: "plan" }),
   });
   const corpo = (await r.json()) as { total?: Record<string, number>; created?: Record<string, number>; skipped?: Record<string, number> };
   console.log(`\n  POST /v1/tenant-materialization (mode=plan) → HTTP ${r.status}`);
@@ -82,7 +91,8 @@ async function main(): Promise<void> {
   console.log("");
   for (const [n, ok] of esiti) console.log(`  ${ok ? "OK  " : "NO  "} ${n}`);
   const ok = esiti.every(([, v]) => v);
-  console.log(`\nVERDETTO: ${ok ? "il motore costruito dal PIANO dice gli stessi numeri di prima" : "NON equivalente — vedi sopra"}`);
+  console.log(`\nVERDETTO: ${ok ? "il motore costruisce esattamente cio' che il MODELLO dichiara" : "NON equivalente — vedi sopra"}`);
+  await closePool();
   process.exit(ok ? 0 : 1);
 }
 

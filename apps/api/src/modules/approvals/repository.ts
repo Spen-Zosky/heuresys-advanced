@@ -186,7 +186,7 @@ export async function insertRequest(client: PoolClient, input: InsertRequestInpu
       input.tenantId, input.title, input.body, input.resourceType, input.resourceId,
       input.decisionPolicy, input.priority,
       // B3 (#34): apply-effect handlers read their parameters from here (e.g. the
-      // archetypeKey of a TENANT_MATERIALIZATION). The column and the read schema
+      // model version of a TENANT_MATERIALIZATION). The column and the read schema
       // already existed; only the write path dropped it, so a request could never
       // carry the payload its own effect needed.
       JSON.stringify(input.metadata ?? {}),

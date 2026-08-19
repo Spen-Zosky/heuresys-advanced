@@ -14,9 +14,12 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { platformAdmin } from "./helpers/actors.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { seminaModello, type ModelloDiProva } from "./helpers/modello-di-prova.js";
+import { BLUEPRINT_CONTENT_KEY } from "../src/modules/tenant-materialization/blueprint-build-source.js";
 
 const MARCA = `T6-${Date.now()}`;
-const CHIAVE = "RETAIL_BANK_REFERENCE";
+// Il modello si SEMINA qui: non esiste piu' un archetipo globale da cercare (#132 F3).
+let modello: ModelloDiProva;
 
 let t: TestApp;
 let cookie = "";
@@ -34,6 +37,7 @@ async function conta(tabella: string, colonnaTenant: string): Promise<number> {
 }
 
 beforeAll(async () => {
+  modello = await seminaModello(pool, MARCA);
   t = await buildTestApp();
   // L'attore e' una PERSONA VERA che detiene il ruolo, cercata nel database: non un
   // utente inventato per il test. La password si deriva dall'email (Z-262).
@@ -56,18 +60,13 @@ beforeAll(async () => {
   );
   blueprintId = b.rows[0]!.tenant_blueprint_id;
 
-  const vv = await pool.query<{ blueprint_variant_version_id: string }>(
-    `SELECT blueprint_variant_version_id FROM sys.sys_blueprint_variant_versions
-      WHERE blueprint_variant_version_build_source_key = $1 LIMIT 1`,
-    [CHIAVE],
-  );
   await pool.query(
     `INSERT INTO sys.sys_tenant_blueprint_versions
        (tenant_blueprint_version_blueprint_id, tenant_blueprint_version_number,
         tenant_blueprint_version_status, tenant_blueprint_version_variant_version_id,
         tenant_blueprint_version_approved_at)
      VALUES ($1, 1, 'APPROVED', $2, now())`,
-    [blueprintId, vv.rows[0]?.blueprint_variant_version_id ?? null],
+    [blueprintId, modello.variantVersionId],
   );
 });
 
@@ -81,7 +80,7 @@ describe("#198 T6 — il piano di costruzione", () => {
     });
     expect(r.statusCode, r.body).toBe(200);
     const corpo = r.json() as { sourceKey: string; willCreate: Record<string, number>; alreadyThere: Record<string, number> };
-    expect(corpo.sourceKey).toBe(CHIAVE);
+    expect(corpo.sourceKey).toBe(BLUEPRINT_CONTENT_KEY);
     expect(corpo.willCreate.orgUnits).toBeGreaterThan(0);
     // su un'azienda vuota, «esiste già» dev'essere zero: se non lo fosse, il piano
     // starebbe contando righe di qualcun altro

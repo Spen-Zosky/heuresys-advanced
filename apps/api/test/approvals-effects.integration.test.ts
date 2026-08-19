@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { seminaModello, type ModelloDiProva } from "./helpers/modello-di-prova.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
@@ -15,6 +16,10 @@ import { anIndustryCode } from "./helpers/industry.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const TITLE_PREFIX = "TEST-APVFX";
+// Il modello da cui l'effetto costruisce: seminato dal test, non piu' un archetipo globale
+// (#132 F3). La marca lo rende unico anche fra corse ravvicinate.
+const MARCA_MODELLO = `APVFX-${Date.now()}`;
+let modello: ModelloDiProva;
 
 interface S { cookies: Map<string, string>; csrfToken: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
@@ -94,6 +99,7 @@ async function createAndApprove(opts: { title: string; resourceType?: string; re
 }
 
 beforeAll(async () => {
+  modello = await seminaModello(pool, MARCA_MODELLO);
   suite = await buildTestApp();
   admin = await login(suite, "enzo.spenuso@heuresys.com");
   const ids = await pool.query<{ user_id: string }>(`SELECT user_id FROM sys.sys_users WHERE user_email = $1`, ["enzo.spenuso@heuresys.com"]);
@@ -168,7 +174,7 @@ describe("approval apply-effect wiring (3.3 slice-3a)", () => {
       title: `${TITLE_PREFIX} materialize-happy`,
       resourceType: "TENANT_MATERIALIZATION",
       resourceId: subjectId,
-      metadata: { archetypeKey: "RETAIL_BANK_REFERENCE" },
+      metadata: { variantVersionId: modello.variantVersionId },
     });
 
     const applied = await apply(admin, reqId);
@@ -179,7 +185,7 @@ describe("approval apply-effect wiring (3.3 slice-3a)", () => {
     expect(await orgUnitCount(subjectId)).toBeGreaterThan(0);
   });
 
-  it("TENANT_MATERIALIZATION without metadata.archetypeKey → 409 and the apply rolls back", async () => {
+  it("TENANT_MATERIALIZATION senza metadata.variantVersionId → 409 e l'apply torna indietro", async () => {
     const subjectId = await seedTenant("ACTIVE");
     const reqId = await createAndApprove({
       title: `${TITLE_PREFIX} materialize-nometa`,
@@ -206,7 +212,7 @@ describe("approval apply-effect wiring (3.3 slice-3a)", () => {
       title: `${TITLE_PREFIX} materialize-suspended`,
       resourceType: "TENANT_MATERIALIZATION",
       resourceId: subjectId,
-      metadata: { archetypeKey: "RETAIL_BANK_REFERENCE" },
+      metadata: { variantVersionId: modello.variantVersionId },
     });
 
     // …the world changes between approval and apply.

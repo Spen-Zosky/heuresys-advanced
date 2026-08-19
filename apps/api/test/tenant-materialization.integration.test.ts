@@ -1,28 +1,46 @@
+/**
+ * apps/api/test/tenant-materialization.integration.test.ts
+ * COSTRUIRE UN'AZIENDA DA UN MODELLO (#4 WI-C, riscritto da #132 F3 — E29).
+ *
+ * `/v1/tenant-materialization`: login vero, database vivo. Riservato a `PLATFORM_ADMIN`;
+ * l'azienda di destinazione deve esistere ed essere `ACTIVE` (M-1). Le scritture toccano solo
+ * l'azienda validata (I5).
+ *
+ * ⚠ COSA È CAMBIATO. Questo file provava il modulo quando costruiva da un **archetipo**
+ * cablato in TypeScript — 296 righe che descrivevano una banca al dettaglio, con codici
+ * `RBR-*` e titolari sintetici `SYN_RBR-*`. Ritirato da `#132` F3 (E29): *«qualunque azienda
+ * si costruisse, nasceva quella banca»*. Ora il contenuto viene dal database, e il modello di
+ * prova **lo semina questo file** — non è un archetipo con un altro nome, è una fixture che
+ * nasce e muore con la corsa (→ `helpers/modello-di-prova.ts`).
+ *
+ * I CONTEGGI ATTESI SI DERIVANO DAL MODELLO SEMINATO, non sono ricopiati qui: `modello.attese`
+ * viene dallo stesso posto che ha scritto le righe. Ricopiarli sarebbe una seconda SoT da
+ * tenere allineata a mano — e il giorno in cui la fixture cambiasse, il test proverebbe una
+ * cosa diversa da quella che dice.
+ *
+ * ⚠ ZERO TITOLARI NON È UN BUCO, È LA DECISIONE. Un modello descrive la **forma** di
+ * un'azienda, non chi ci lavora: `users`, `assignments` e le evidenze valgono `0`. L'archetipo
+ * ne inventava uno per posizione, ed è il motivo per cui ogni azienda costruita nasceva con lo
+ * stesso organico fittizio.
+ */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
-import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { anIndustryCode } from "./helpers/industry.js";
-import { getArchetype, archetypeUsers } from "../src/modules/tenant-materialization/blueprints.js";
+import { seminaModello, type ModelloDiProva } from "./helpers/modello-di-prova.js";
+import { platformAdmin } from "./helpers/actors.js";
 
-// #4 WI-C — tenant materialization generator (/v1/tenant-materialization). Real login + live DB.
-// PLATFORM_ADMIN-only; the target tenant must exist + be ACTIVE (M-1). Archetype codes are
-// RBR-* (own namespace) so they never collide with a tenant's real seed data. Writes touch
-// only the validated target tenant (I5). afterAll purges every RBR-* row + the temp tenant.
-// Expected counts are DERIVED from the blueprint (the SoT of what materialize creates) plus
-// the live pre-state: a tenant skill matching an archetype skill by natural key (code OR
-// lower(trim(name)) — mig 000189/000196 unique index) is REUSED, not re-created.
-
-const PWD = TEST_PERSONA_PASSWORD;
 const RTL = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
-const HEU = "8bc5bc59-f2d2-4a8a-882a-ea26ac367858";
-const ARCHETYPE = "RETAIL_BANK_REFERENCE";
+const MARCA = `WIC-${Date.now()}`;
 
 interface S { cookies: Map<string, string>; csrfToken: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
 async function login(t: TestApp, email: string): Promise<S> {
-  const r = await loginRaw(t.app, email, PWD);
+  // ⚠ La password NON è un valore unico condiviso: si DERIVA dall'email (Z-262), ed è
+  //   `loginRaw` a farlo quando non gliene si passa una. Un utente `platform.admin@…`
+  //   scritto a mano non esiste: l'attore si cerca nel database per RUOLO.
+  const r = await loginRaw(t.app, email);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
   return { cookies, csrfToken: (r.json() as { csrfToken: string }).csrfToken };
@@ -32,248 +50,178 @@ const jhdr = (s: S) => ({ cookie: ch(s.cookies), "x-csrf-token": s.csrfToken, "c
 let suite: TestApp;
 let admin: S, federica: S;
 let suspendedTenantId: string;
+let modello: ModelloDiProva;
 
-interface Counts { orgUnits: number; positions: number; users: number; assignments: number; skills: number; kpis: number; skillEvidence: number; kpiEvidence: number }
-const C = (orgUnits: number, positions: number, users: number, assignments: number, skills: number, kpis: number, skillEvidence: number, kpiEvidence: number): Counts =>
-  ({ orgUnits, positions, users, assignments, skills, kpis, skillEvidence, kpiEvidence });
-interface Result {
-  created: Counts;
-  skipped: Counts;
-  total: Counts;
-  tenantId: string;
+interface Counts {
+  orgUnits: number; positions: number; users: number; assignments: number;
+  skills: number; kpis: number; skillEvidence: number; kpiEvidence: number;
 }
-function materialize(s: S, tenantId: string, mode: "plan" | "apply") {
+interface Result { created: Counts; skipped: Counts; total: Counts; tenantId: string; sourceLabel: string }
+
+function materialize(s: S, tenantId: string, mode: "plan" | "apply", variantVersionId?: string) {
   return suite.app.inject({
     method: "POST", url: "/v1/tenant-materialization", headers: jhdr(s),
-    payload: { tenantId, archetypeKey: ARCHETYPE, mode },
+    payload: { tenantId, variantVersionId: variantVersionId ?? modello.variantVersionId, mode },
   });
 }
-async function countRbr(tenantId: string): Promise<{ ou: number; pos: number }> {
-  const ou = await pool.query<{ c: string }>(
-    `SELECT count(*) AS c FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1 AND organization_unit_code LIKE 'RBR-%'`,
-    [tenantId],
-  );
-  const pos = await pool.query<{ c: string }>(
-    `SELECT count(*) AS c FROM sys.sys_positions WHERE position_tenant_id = $1 AND position_code LIKE 'RBR-%'`,
-    [tenantId],
-  );
-  return { ou: Number(ou.rows[0]!.c), pos: Number(pos.rows[0]!.c) };
-}
-async function purgeRbr(tenantId: string): Promise<void> {
-  // Order matters (FK): synthetic skill/KPI evidence → assignments → users → catalog → positions → org-units.
-  await pool.query(
-    `DELETE FROM sys.sys_user_skill_evidence e USING sys.sys_users u
-      WHERE e.user_skill_evidence_user_id = u.user_id
-        AND u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'`,
-    [tenantId],
-  );
-  await pool.query(
-    `DELETE FROM sys.sys_user_kpi_evidence e USING sys.sys_users u
-      WHERE e.user_kpi_evidence_user_id = u.user_id
-        AND u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'`,
-    [tenantId],
-  );
-  await pool.query(
-    `DELETE FROM sys.sys_user_position_assignments a USING sys.sys_users u
-      WHERE a.user_position_assignment_user_id = u.user_id
-        AND u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'`,
-    [tenantId],
-  );
-  await pool.query(`DELETE FROM sys.sys_users WHERE user_tenant_id = $1 AND user_external_code LIKE 'SYN_RBR-%'`, [tenantId]);
-  await pool.query(`DELETE FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_code LIKE 'RBR-SK-%'`, [tenantId]);
-  await pool.query(`DELETE FROM sys.sys_kpi_definitions WHERE kpi_definition_tenant_id = $1 AND kpi_definition_code LIKE 'RBR-KPI-%'`, [tenantId]);
-  await pool.query(`DELETE FROM sys.sys_positions WHERE position_tenant_id = $1 AND position_code LIKE 'RBR-%'`, [tenantId]);
-  await pool.query(`DELETE FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1 AND organization_unit_code LIKE 'RBR-%'`, [tenantId]);
-}
-// slice-2a: GENERATED_INCUMBENT placeholder incumbents (SYN_RBR-*) + their PRIMARY ACTIVE assignments.
-async function countSyn(tenantId: string): Promise<{ users: number; assignments: number }> {
-  const u = await pool.query<{ c: string }>(
-    `SELECT count(*) AS c FROM sys.sys_users WHERE user_tenant_id = $1 AND user_external_code LIKE 'SYN_RBR-%'`,
-    [tenantId],
-  );
-  const a = await pool.query<{ c: string }>(
-    `SELECT count(*) AS c FROM sys.sys_user_position_assignments a
-       JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id
-      WHERE u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'
-        AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'`,
-    [tenantId],
-  );
-  return { users: Number(u.rows[0]!.c), assignments: Number(a.rows[0]!.c) };
-}
-// slice-2b: tenant-scoped synthetic skill/KPI catalog (RBR-SK-* / RBR-KPI-*) + per-incumbent evidence.
-async function countCatalog(tenantId: string): Promise<{ skills: number; kpis: number }> {
-  const s = await pool.query<{ c: string }>(
-    `SELECT count(*) AS c FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_code LIKE 'RBR-SK-%'`,
-    [tenantId],
-  );
-  const k = await pool.query<{ c: string }>(
-    `SELECT count(*) AS c FROM sys.sys_kpi_definitions WHERE kpi_definition_tenant_id = $1 AND kpi_definition_code LIKE 'RBR-KPI-%'`,
-    [tenantId],
-  );
-  return { skills: Number(s.rows[0]!.c), kpis: Number(k.rows[0]!.c) };
-}
-async function countEvidence(tenantId: string): Promise<{ skillEvidence: number; kpiEvidence: number }> {
-  const se = await pool.query<{ c: string }>(
-    `SELECT count(*) AS c FROM sys.sys_user_skill_evidence e
-       JOIN sys.sys_users u ON u.user_id = e.user_skill_evidence_user_id
-      WHERE u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'`,
-    [tenantId],
-  );
-  const ke = await pool.query<{ c: string }>(
-    `SELECT count(*) AS c FROM sys.sys_user_kpi_evidence e
-       JOIN sys.sys_users u ON u.user_id = e.user_kpi_evidence_user_id
-      WHERE u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'`,
-    [tenantId],
-  );
-  return { skillEvidence: Number(se.rows[0]!.c), kpiEvidence: Number(ke.rows[0]!.c) };
+
+/** Le righe che QUESTO modello crea, riconosciute dal suffisso della fixture. */
+async function conta(tenantId: string): Promise<{ ou: number; pos: number; skills: number; kpis: number }> {
+  const q = async (sql: string) => {
+    const r = await pool.query<{ c: string }>(sql, [tenantId, `%-${MARCA}`]);
+    return Number(r.rows[0]!.c);
+  };
+  return {
+    ou: await q(`SELECT count(*) AS c FROM sys.sys_organization_units
+                  WHERE organization_unit_tenant_id = $1 AND organization_unit_code LIKE $2`),
+    pos: await q(`SELECT count(*) AS c FROM sys.sys_positions
+                   WHERE position_tenant_id = $1 AND position_code LIKE $2`),
+    skills: await q(`SELECT count(*) AS c FROM sys.sys_skills
+                      WHERE skill_tenant_id = $1 AND skill_code LIKE $2`),
+    kpis: await q(`SELECT count(*) AS c FROM sys.sys_kpi_definitions
+                    WHERE kpi_definition_tenant_id = $1 AND kpi_definition_code LIKE $2`),
+  };
 }
 
-// Blueprint-derived expected set + live pre-state (skills already present in the
-// target tenant by natural key are reused by materialize, not created).
-const arche = getArchetype(ARCHETYPE)!;
-const A = {
-  ou: arche.orgUnits.length,
-  pos: arche.positions.length,
-  users: archetypeUsers(arche).length,
-  skills: arche.skills.length,
-  kpis: arche.kpis.length,
-};
-let preexistingSkills = 0;
-const FULL = () =>
-  C(A.ou, A.pos, A.users, A.pos, A.skills, A.kpis, A.users * A.skills, A.users * A.kpis);
-const CREATED_FIRST = () =>
-  C(A.ou, A.pos, A.users, A.pos, A.skills - preexistingSkills, A.kpis, A.users * A.skills, A.users * A.kpis);
-const SKIPPED_FIRST = () =>
-  C(0, 0, 0, 0, preexistingSkills, 0, 0, 0);
+/** Quante persone generate esistono nell'azienda: dev'essere sempre zero (#132 F2). */
+async function contaGenerati(tenantId: string): Promise<number> {
+  const r = await pool.query<{ c: string }>(
+    `SELECT count(*) AS c FROM sys.sys_users
+      WHERE user_tenant_id = $1 AND coalesce(user_type, '') = 'GENERATED_INCUMBENT'`,
+    [tenantId],
+  );
+  return Number(r.rows[0]!.c);
+}
 
 beforeAll(async () => {
   suite = await buildTestApp();
-  admin = await login(suite, "enzo.spenuso@heuresys.com");
+  modello = await seminaModello(pool, MARCA);
+  admin = await login(suite, (await platformAdmin()).email);
   federica = await login(suite, "federica.marchetti@rtl-bank.org");
-  await purgeRbr(RTL);
-  await purgeRbr(HEU);
-  const pre = await pool.query<{ c: string }>(
-    `SELECT count(*) AS c FROM sys.sys_skills
-      WHERE skill_tenant_id = $1
-        AND (skill_code = ANY($2::text[]) OR lower(trim(skill_name)) = ANY($3::text[]))`,
-    [RTL, arche.skills.map((s) => s.code), arche.skills.map((s) => s.name.trim().toLowerCase())],
-  );
-  preexistingSkills = Number(pre.rows[0]!.c);
-  // A non-ACTIVE tenant for the M-1 status guard.
+
   const t = await pool.query<{ tenant_id: string }>(
     `INSERT INTO sys.sys_tenancies (tenant_code, tenant_name, tenant_status, tenant_industry_code)
-     VALUES ('TEST-MAT-SUSPENDED', '[TEST] Suspended Materialization Target', 'SUSPENDED', $1)
-     RETURNING tenant_id`,
-    [await anIndustryCode()],
+     VALUES ($1, $2, 'SUSPENDED', $3) RETURNING tenant_id`,
+    [`WIC_SUSP_${MARCA}`, "Azienda sospesa di collaudo", await anIndustryCode()],
   );
   suspendedTenantId = t.rows[0]!.tenant_id;
-}, 60_000);
+});
 
 afterAll(async () => {
-  await purgeRbr(RTL);
-  await purgeRbr(HEU);
-  await pool.query(`DELETE FROM sys.sys_tenancies WHERE tenant_id = $1`, [suspendedTenantId]);
   await suite.app.close();
 });
 
-describe("tenant materialization generator (#4 WI-C)", () => {
-  it("GET /archetypes lists the RETAIL_BANK_REFERENCE archetype with its counts", async () => {
-    const r = await suite.app.inject({ method: "GET", url: "/v1/tenant-materialization/archetypes", headers: { cookie: ch(admin.cookies) } });
+describe("costruzione di un'azienda da un modello (#4 WI-C)", () => {
+  it("GET /sources elenca il modello seminato coi suoi conteggi", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/tenant-materialization/sources", headers: { cookie: ch(admin.cookies) },
+    });
     expect(r.statusCode).toBe(200);
-    const b = r.json() as { items: { key: string; orgUnitCount: number; positionCount: number }[] };
-    const a = b.items.find((x) => x.key === ARCHETYPE)!;
-    expect(a.orgUnitCount).toBe(A.ou);
-    expect(a.positionCount).toBe(A.pos);
+    const b = r.json() as { items: { variantVersionId: string; label: string; orgUnitCount: number; positionCount: number }[] };
+    const mio = b.items.find((x) => x.variantVersionId === modello.variantVersionId);
+    expect(mio, "il modello seminato non compare fra quelli costruibili").toBeDefined();
+    expect(mio!.label).toBe(modello.label);
+    expect(mio!.orgUnitCount).toBe(modello.attese.orgUnits);
+    expect(mio!.positionCount).toBe(modello.attese.positions);
   });
 
-  it("plan mode writes nothing and reports the full would-create set", async () => {
-    const before = await countRbr(RTL);
-    expect(before).toEqual({ ou: 0, pos: 0 });
+  it("plan non scrive niente e dichiara tutto ciò che nascerebbe", async () => {
+    const prima = await conta(RTL);
+    expect(prima, "l'azienda non deve già contenere le righe di questo modello").toEqual({
+      ou: 0, pos: 0, skills: 0, kpis: 0,
+    });
+
     const r = await materialize(admin, RTL, "plan");
-    expect(r.statusCode).toBe(200);
+    expect(r.statusCode, r.body).toBe(200);
     const b = r.json() as Result;
-    expect(b.created).toEqual(CREATED_FIRST());
-    expect(b.total).toEqual(FULL());
-    // No writes happened.
-    expect(await countRbr(RTL)).toEqual({ ou: 0, pos: 0 });
-    expect(await countSyn(RTL)).toEqual({ users: 0, assignments: 0 });
-    expect(await countCatalog(RTL)).toEqual({ skills: 0, kpis: 0 });
-    expect(await countEvidence(RTL)).toEqual({ skillEvidence: 0, kpiEvidence: 0 });
+    expect(b.sourceLabel).toBe(modello.label);
+    expect(b.total.orgUnits).toBe(modello.attese.orgUnits);
+    expect(b.total.positions).toBe(modello.attese.positions);
+    expect(b.created.orgUnits).toBe(modello.attese.orgUnits);
+    expect(b.created.positions).toBe(modello.attese.positions);
+
+    // …e dopo un `plan` il database è come prima: è ciò che distingue un'anteprima.
+    expect(await conta(RTL)).toEqual({ ou: 0, pos: 0, skills: 0, kpis: 0 });
   });
 
-  it("apply mode creates the org-units + positions, tagged to the target tenant", async () => {
+  it("apply costruisce davvero, e la prova sta nelle righe non nella risposta", async () => {
     const r = await materialize(admin, RTL, "apply");
-    expect(r.statusCode).toBe(200);
+    expect(r.statusCode, r.body).toBe(200);
     const b = r.json() as Result;
-    expect(b.tenantId).toBe(RTL);
-    expect(b.created).toEqual(CREATED_FIRST());
-    expect(b.skipped).toEqual(SKIPPED_FIRST());
-    expect(await countRbr(RTL)).toEqual({ ou: A.ou, pos: A.pos });
-    // slice-2a: each position now has a GENERATED_INCUMBENT incumbent + a PRIMARY ACTIVE assignment.
-    expect(await countSyn(RTL)).toEqual({ users: A.users, assignments: A.pos });
-    // slice-2b: tenant skill/KPI catalog + per-incumbent evidence. Only the RBR-coded
-    // skills are NEW rows (natural-key matches are reused); evidence covers ALL skills.
-    expect(await countCatalog(RTL)).toEqual({ skills: A.skills - preexistingSkills, kpis: A.kpis });
-    expect(await countEvidence(RTL)).toEqual({ skillEvidence: A.users * A.skills, kpiEvidence: A.users * A.kpis });
+    expect(b.created.orgUnits).toBe(modello.attese.orgUnits);
+    expect(b.created.positions).toBe(modello.attese.positions);
 
-    // Ogni competenza generata ha la sua CATEGORIA (#198 T9a, S1069). Il motore le creava con
-    // `skill_category_id` nullo e la costruzione riusciva: il difetto si vedeva **al deploy
-    // successivo**, dove la post-condizione della mig. `000196` — «ogni evidenza punta a una
-    // competenza con categoria» — trovava 176 evidenze scoperte e fermava la catena. Un difetto
-    // che non rompe ciò che lo produce, ma ciò che viene dopo, è il più difficile da attribuire:
-    // qui lo si prende dove nasce.
-    const scoperte = await pool.query<{ n: string }>(
-      `SELECT count(*)::text AS n FROM sys.sys_skills
-        WHERE skill_tenant_id = $1 AND skill_code LIKE 'RBR-SK-%' AND skill_category_id IS NULL`,
-      [RTL],
+    const dopo = await conta(RTL);
+    expect(dopo.ou).toBe(modello.attese.orgUnits);
+    expect(dopo.pos).toBe(modello.attese.positions);
+    expect(dopo.skills).toBe(modello.attese.skills);
+    expect(dopo.kpis).toBe(modello.attese.kpis);
+  });
+
+  it("⭐ un modello non porta persone: nessun titolare sintetico è nato", async () => {
+    // L'archetipo ne creava uno per posizione, con nome e cognome inventati. Se qualcuno li
+    // reintroducesse, ogni azienda costruita tornerebbe ad avere lo stesso organico finto.
+    expect(await contaGenerati(RTL)).toBe(0);
+  });
+
+  it("⭐ la struttura costruita è un ALBERO: i figli hanno davvero il loro padre", async () => {
+    // È il difetto ① di `#132` F2: il motore risolve il padre da una mappa riempita man mano,
+    // e un figlio costruito prima del padre finiva IN CIMA all'albero in silenzio. Qui si
+    // guarda il risultato sul database, non l'ordine della lista.
+    const r = await pool.query<{ code: string; padre: string | null }>(
+      `SELECT u.organization_unit_code AS code, p.organization_unit_code AS padre
+         FROM sys.sys_organization_units u
+         LEFT JOIN sys.sys_organization_units p ON p.organization_unit_id = u.organization_unit_parent_id
+        WHERE u.organization_unit_tenant_id = $1 AND u.organization_unit_code LIKE $2
+        ORDER BY u.organization_unit_code`,
+      [RTL, `%-${MARCA}`],
     );
-    expect(Number(scoperte.rows[0]!.n), "competenze generate senza categoria").toBe(0);
+    const per = new Map(r.rows.map((x) => [x.code, x.padre]));
+    expect(per.get(`STAB-${MARCA}`)).toBe(`DG-${MARCA}`);
+    expect(per.get(`MAG-${MARCA}`)).toBe(`STAB-${MARCA}`);
+    expect(per.get(`LIN-${MARCA}`)).toBe(`STAB-${MARCA}`);
+    expect(per.get(`DG-${MARCA}`), "la radice non ha padre").toBeNull();
   });
 
-  it("re-apply is idempotent (0 created, all skipped)", async () => {
+  it("ri-applicare è idempotente: zero create, tutte saltate", async () => {
     const r = await materialize(admin, RTL, "apply");
+    expect(r.statusCode, r.body).toBe(200);
     const b = r.json() as Result;
-    expect(b.created).toEqual(C(0, 0, 0, 0, 0, 0, 0, 0));
-    expect(b.skipped).toEqual(FULL());
-    expect(await countRbr(RTL)).toEqual({ ou: A.ou, pos: A.pos });
-    expect(await countSyn(RTL)).toEqual({ users: A.users, assignments: A.pos });
-    expect(await countCatalog(RTL)).toEqual({ skills: A.skills - preexistingSkills, kpis: A.kpis });
-    expect(await countEvidence(RTL)).toEqual({ skillEvidence: A.users * A.skills, kpiEvidence: A.users * A.kpis });
+    expect(b.created.orgUnits).toBe(0);
+    expect(b.created.positions).toBe(0);
+    expect(b.skipped.orgUnits).toBe(modello.attese.orgUnits);
+    expect(b.skipped.positions).toBe(modello.attese.positions);
+    expect(await conta(RTL)).toEqual({
+      ou: modello.attese.orgUnits,
+      pos: modello.attese.positions,
+      skills: modello.attese.skills,
+      kpis: modello.attese.kpis,
+    });
   });
 
-  it("M-1 tenant isolation: a RTL materialization never touches HEURESYS", async () => {
-    expect(await countRbr(HEU)).toEqual({ ou: 0, pos: 0 });
-    expect(await countSyn(HEU)).toEqual({ users: 0, assignments: 0 });
-    expect(await countCatalog(HEU)).toEqual({ skills: 0, kpis: 0 });
-    expect(await countEvidence(HEU)).toEqual({ skillEvidence: 0, kpiEvidence: 0 });
-  });
-
-  it("RBAC: a non-PLATFORM_ADMIN (TENANT_ADMIN) is denied → 403", async () => {
+  it("chi non è PLATFORM_ADMIN non costruisce niente", async () => {
     const r = await materialize(federica, RTL, "apply");
     expect(r.statusCode).toBe(403);
     expect((r.json() as { error: { code: string } }).error.code).toBe("TENANT_MATERIALIZE_ADMIN_ONLY");
   });
 
-  it("M-1: a non-existent target tenant → 404", async () => {
+  it("un'azienda che non esiste → 404, e niente viene scritto", async () => {
     const r = await materialize(admin, "00000000-0000-0000-0000-000000000000", "apply");
     expect(r.statusCode).toBe(404);
   });
 
-  it("M-1: a non-ACTIVE (SUSPENDED) target tenant → 403 TENANT_NOT_ACTIVE", async () => {
+  it("un'azienda non ACTIVE non viene costruita (M-1, ri-verificato adesso)", async () => {
     const r = await materialize(admin, suspendedTenantId, "apply");
     expect(r.statusCode).toBe(403);
     expect((r.json() as { error: { code: string } }).error.code).toBe("TENANT_NOT_ACTIVE");
-    expect(await countRbr(suspendedTenantId)).toEqual({ ou: 0, pos: 0 });
-    expect(await countSyn(suspendedTenantId)).toEqual({ users: 0, assignments: 0 });
-    expect(await countCatalog(suspendedTenantId)).toEqual({ skills: 0, kpis: 0 });
-    expect(await countEvidence(suspendedTenantId)).toEqual({ skillEvidence: 0, kpiEvidence: 0 });
+    expect(await conta(suspendedTenantId)).toEqual({ ou: 0, pos: 0, skills: 0, kpis: 0 });
   });
 
-  it("an unknown archetype → 404", async () => {
-    const r = await suite.app.inject({
-      method: "POST", url: "/v1/tenant-materialization", headers: jhdr(admin),
-      payload: { tenantId: RTL, archetypeKey: "NOPE_NOT_REAL", mode: "plan" },
-    });
-    expect(r.statusCode).toBe(404);
+  it("⭐ un modello che non esiste si rifiuta PRIMA di scrivere, non costruisce zero righe", async () => {
+    // Lo zero silenzioso è il difetto peggiore qui: un'azienda vuota e un atto riuscito sono,
+    // per chi guarda, la stessa cosa (`#132` F2).
+    const r = await materialize(admin, RTL, "apply", "00000000-0000-0000-0000-000000000000");
+    expect(r.statusCode).toBe(409);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("BLUEPRINT_CONTENT_MISSING");
   });
 });

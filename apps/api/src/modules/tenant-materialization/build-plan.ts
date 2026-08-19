@@ -8,16 +8,16 @@
  *
  * PERCHÉ ESISTE, ed è una decisione di modello, non un riordino di file (E21). Il motore
  * `materialize` leggeva `archetype.orgUnits`, `archetype.positions`, `archetype.skills`,
- * `archetype.kpis`, e chiamava `archetypeUsers()` / `synProficiency()` / `synKpiValue()`
- * per conto proprio. Finché fa così, **la sorgente è una sola per costruzione**: qualunque
+ * `archetype.kpis`, e chiamava da sé le funzioni che ne generavano titolari ed evidenze.
+ * Finché fa così, **la sorgente è una sola per costruzione**: qualunque
  * altra — una ricerca (P2a), un'estrazione (P4), un fascicolo compilato a mano — dovrebbe
  * fingersi un archetipo TypeScript per essere costruita. La promessa di E21 («il motore
  * prima della sorgente») sarebbe falsa nel codice mentre è vera nei documenti.
  *
  * Qui il piano porta **anche le evidenze già calcolate**, non i loro ingredienti. Se
- * portasse gli indici (`ui`, `sj`) e lasciasse al motore il compito di chiamare
- * `synProficiency`, il motore continuerebbe a conoscere la regola di generazione di UNA
- * sorgente specifica — che è esattamente ciò che si sta togliendo.
+ * portasse gli indici (`ui`, `sj`) e lasciasse al motore il compito di generarle, il motore
+ * continuerebbe a conoscere la regola di generazione di UNA sorgente specifica — che è
+ * esattamente ciò che si sta togliendo.
  *
  * La `justification` non è ornamento: è ciò che P3 deve poter scrivere nel registro
  * dell'origine per ogni riga creata. Una riga generata senza la decisione che la giustifica
@@ -25,7 +25,7 @@
  * chiudere.
  */
 /**
- * I domini dei campi categorici vivono QUI e non in `blueprints.ts`, ed è una conseguenza
+ * I domini dei campi categorici vivono QUI e non nella sorgente, ed è una conseguenza
  * diretta di E21: se il piano importasse i tipi dall'archetipo, il confine sarebbe scritto
  * al contrario — il modulo neutro dipenderebbe da UNA sorgente specifica. Questi valori
  * non appartengono comunque all'archetipo: sono i domini `CHECK` delle colonne (RD-08).

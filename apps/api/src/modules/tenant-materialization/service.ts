@@ -1,19 +1,37 @@
 /**
  * apps/api/src/modules/tenant-materialization/service.ts
- * #4 WI-C — generate org-units + positions for a target tenant from a deterministic archetype.
- * PLATFORM_ADMIN-only (service-gate, like job-families — no granular permission in the seed; the
- * service user that drives this is a tenant-null PLATFORM_ADMIN). M-1 tenant isolation: the
- * tenantId comes from the INPUT (not the JWT), so it MUST be validated as existing + ACTIVE and
- * every write tagged with it (enforced in the repository, I5).
+ * COSTRUISCI UN'AZIENDA DA UN MODELLO (#4 WI-C, riscritto da #132 F3 — E29).
+ *
+ * Riservato a `PLATFORM_ADMIN` (cancello nel servizio, come per le famiglie professionali —
+ * l'utente di servizio che guida questa operazione è un `PLATFORM_ADMIN` senza azienda).
+ * Isolamento M-1: l'azienda di destinazione arriva dall'INPUT e non dal token, quindi va
+ * verificata esistente e `ACTIVE`, e ogni scrittura porta il suo `tenant_id` (I5, imposto nel
+ * repository).
+ *
+ * ⚠ NON C'È PIÙ UN ARCHETIPO, ed è la decisione E29 di Enzo (2026-08-17): *«il fascicolo non
+ * può avere un archetipo aprioristico, altrimenti genera sempre una banca come RTL. I dati
+ * hardcoded del file di codice scritto a mano devono scomparire — non deve rimanere traccia —
+ * e l'archetipo deve essere generato dalla ricerca.»* Questo modulo nasceva su
+ * un archetipo cablato, 296 righe di TypeScript che descrivevano una banca al dettaglio:
+ * qualunque azienda si costruisse, nasceva quella banca. Ora il contenuto si legge dal
+ * database, dalla versione di modello indicata (`BlueprintBuildSource`, `#132` F2).
+ *
+ * I CONTEGGI NON SI CALCOLANO PIÙ A PARTE. La versione precedente derivava i totali
+ * dall'archetipo (`userCount * archetype.skills.length`, e così via) e li confrontava con ciò
+ * che il motore aveva creato. Erano **due conti della stessa cosa**, tenuti allineati a mano:
+ * il totale ora si legge dal piano, che è l'unica dichiarazione di cosa dovrebbe nascere.
  */
-import { ArchetypeBuildSource } from "./build-source.js";
 import { pool, withTransaction } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
-import { NotFoundError, ForbiddenError } from "../../errors/index.js";
-import type { MaterializeRequestBody, MaterializeResult, ArchetypeListResponse } from "@heuresys/shared";
-import { getArchetype, listArchetypes, archetypeUsers } from "./blueprints.js";
+import { ForbiddenError, NotFoundError } from "../../errors/index.js";
+import type {
+  BuildSourceListResponse,
+  MaterializeRequestBody,
+  MaterializeResult,
+} from "@heuresys/shared";
+import { BlueprintBuildSource, listBuildSources } from "./blueprint-build-source.js";
 import * as repo from "./repository.js";
 
 function ensurePlatformAdmin(actor: ActorContext): void {
@@ -23,41 +41,35 @@ function ensurePlatformAdmin(actor: ActorContext): void {
 }
 
 export const tenantMaterializationService = {
-  listArchetypes(_actor: ActorContext): ArchetypeListResponse {
-    return {
-      items: listArchetypes().map((a) => ({
-        key: a.key,
-        label: a.label,
-        orgUnitCount: a.orgUnits.length,
-        positionCount: a.positions.length,
-      })),
-    };
+  async listSources(_actor: ActorContext): Promise<BuildSourceListResponse> {
+    return { items: await listBuildSources(pool) };
   },
 
   async materialize(actor: ActorContext, body: MaterializeRequestBody): Promise<MaterializeResult> {
     ensurePlatformAdmin(actor);
-    const archetype = getArchetype(body.archetypeKey);
-    if (!archetype) throw new NotFoundError("Archetype");
 
-    // M-1: the target tenant must exist and be ACTIVE (input-supplied tenant, not the JWT's).
+    // Il piano si costruisce PRIMA di toccare l'azienda: un modello vuoto o incoerente fa
+    // fallire qui, senza aver aperto nessuna transazione di scrittura.
+    const piano = await new BlueprintBuildSource(pool, body.variantVersionId).plan();
+
+    // M-1: l'azienda di destinazione deve esistere ed essere ACTIVE (arriva dall'input, non
+    // dal token).
     const status = await repo.findTenantStatus(pool, body.tenantId);
     if (status === null) throw new NotFoundError("Tenant");
     if (status !== "ACTIVE") {
       throw new ForbiddenError(`Tenant is not ACTIVE (status=${status})`, "TENANT_NOT_ACTIVE");
     }
 
-    const userCount = archetypeUsers(archetype).length; // one PRIMARY ACTIVE assignment per synthetic incumbent
     const total = {
-      orgUnits: archetype.orgUnits.length,
-      positions: archetype.positions.length,
-      users: userCount,
-      assignments: userCount,
-      skills: archetype.skills.length,
-      kpis: archetype.kpis.length,
-      skillEvidence: userCount * archetype.skills.length, // one evidence per incumbent × archetype skill
-      kpiEvidence: userCount * archetype.kpis.length, // one evidence per incumbent × archetype KPI
+      orgUnits: piano.orgUnits.length,
+      positions: piano.positions.length,
+      users: piano.incumbents.length,
+      assignments: piano.incumbents.length,
+      skills: piano.skills.length,
+      kpis: piano.kpis.length,
+      skillEvidence: piano.incumbents.reduce((n, i) => n + i.skillEvidence.length, 0),
+      kpiEvidence: piano.incumbents.reduce((n, i) => n + i.kpiEvidence.length, 0),
     };
-    const piano = await new ArchetypeBuildSource(archetype).plan();
     const created = await withTransaction((client) => repo.materialize(client, body.tenantId, piano, body.mode));
     const skipped = {
       orgUnits: total.orgUnits - created.orgUnits,
@@ -69,6 +81,14 @@ export const tenantMaterializationService = {
       skillEvidence: total.skillEvidence - created.skillEvidence,
       kpiEvidence: total.kpiEvidence - created.kpiEvidence,
     };
-    return { tenantId: body.tenantId, archetypeKey: archetype.key, mode: body.mode, created, skipped, total };
+    return {
+      tenantId: body.tenantId,
+      variantVersionId: body.variantVersionId,
+      sourceLabel: piano.label,
+      mode: body.mode,
+      created,
+      skipped,
+      total,
+    };
   },
 };

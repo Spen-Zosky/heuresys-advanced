@@ -205,9 +205,64 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   generale **ROSSA** col confronto fra i due domini stampato per esteso; e per il lucchetto,
   due sabotaggi indipendenti (§ fuori ciclo). Prova generale sul linux-pc **VERDE** prima e dopo:
   303 migrazioni, due passate, 21/21 sentinelle.
-- [ ] **F3 il ritiro, senza lasciare traccia** — via `blueprints.ts` (287 righe), `getArchetype`,
-  `archetypeUsers`, `synProficiency`, `synKpiValue`. I test costruiscono da un modello **seminato nel
-  test**, non da uno globale: è la differenza fra una fixture e un archetipo mascherato
+- [x] **F3 il ritiro, senza lasciare traccia** — **FATTO 2026-08-19 (S1072)** · `blueprints.ts`
+  **cancellato**, e con lui la sorgente che lo leggeva. ✅ **LA PROVA DEL PIANO E' VUOTA**:
+  `grep -rn "RETAIL_BANK_REFERENCE\|getArchetype"` su `apps/` e `packages/` non trova piu' niente —
+  nemmeno nei **commenti**, perche' E29 dice *«non deve rimanere traccia»* e un commento che nomina
+  l'archetipo e' traccia. Dodici file di codice ripuliti, quattro test riscritti, due ritirati, due
+  script di prova live adattati, tre migrazioni.
+
+  **La prova non e' piu' un comando da ricordarsi: e' un cancello che gira a ogni corsa.**
+  `test/unit/build-source.unit.test.ts` scandisce **tutto** `src/` a ogni esecuzione e cade se un
+  nome ritirato ricompare. ⚠ I nomi cercati sono **composti a pezzi** dentro quel file: scritti
+  interi, il cancello troverebbe se' stesso e nascerebbe rosso su un codice sano — e' il difetto
+  `#194`, «un allarme che insegna a non guardarlo». Tre reti: il caso positivo (senza, i negativi
+  sarebbero verdi anche a cancello spento), la controprova su una parola che in `src` c'e' di
+  sicuro, e il conteggio dei file scanditi (>100), perche' una ricorsione rotta renderebbe tutto
+  verde per vacuita'.
+
+  **Cosa e' successo ai due ingressi che costruivano da un archetipo**, ed e' una decisione tecnica,
+  non una rimozione di capacita': `POST /v1/tenant-materialization` e `POST /v1/tenants/provision`
+  ora prendono un `variantVersionId` invece di una chiave; `GET /archetypes` (catalogo **statico**,
+  scritto in TypeScript) diventa `GET /sources`, che elenca i **modelli con del contenuto vero**
+  letti dal database. Nessun alias sul nome vecchio, di proposito: una rotta che risponde con
+  un'altra cosa e' il modo piu' rapido per far credere che l'archetipo esista ancora. Aggiornati
+  anche lo strumento MCP `hrx_tenant_materialize` e i metadati dell'effetto di approvazione
+  (`metadata.archetypeKey` → `metadata.variantVersionId`; misurato: **zero** richieste esistenti in
+  produzione, quindi nessun dato vivo rotto).
+
+  **Il database non poteva restare indietro** — mig. **`000329`** + emendamento della `000320`
+  (ADR-0035, la coppia): una versione di variante in produzione dichiarava ancora
+  `build_source_key` = il nome dell'archetipo, e sarebbe rimasta a nominare una cosa di cui non
+  c'e' piu' traccia. Ora dichiara `BLUEPRINT_CONTENT`. ⚠ **La conseguenza e' voluta e gia'
+  dichiarata da questo piano**: quel modello e' vuoto, quindi quella versione **non e' costruibile**
+  e il fascicolo `APPROVED` che la ancora non si applichera' fino a `F6`. Il rifiuto e' **esplicito**
+  (`BLUEPRINT_CONTENT_EMPTY`), non uno zero silenzioso.
+
+  🔬 **UN QUINTO DIFETTO, trovato perche' la fixture non e' una banca** — mig. **`000330`**. Il tipo
+  di un'unita' e' dichiarato in **due posti**: il catalogo `sys_organization_unit_types` (**dieci**
+  tipi) e un `CHECK` sulla colonna denormalizzata, che ne ammetteva **nove**. Mancava `TEAM`: un tipo
+  **referenziabile ma non scrivibile**, cioe' esistente per meta'. Nessun modello bancario lo usa;
+  un'azienda manifatturiera con una linea di produzione si'. E la misura ha trovato anche **una riga
+  gia' incoerente in produzione** — `HS-PROD`, «Divisione Product & Development», colonna testuale
+  `DIVISION` e FK che puntava a `TEAM` — passata inosservata proprio perche' nessuno confrontava le
+  due dichiarazioni fra loro. Corretta la FK (il nome dice quale delle due ha ragione), con la
+  guardia che si ferma se le righe incoerenti fossero piu' di quella nota, e la post-condizione che
+  **confronta il `CHECK` col catalogo** invece di ricopiarne l'elenco.
+
+  ✅ **LE PROVE HANNO FALLITO SU RICHIESTA.** Il cancello del ritiro: rimessa una traccia intera in
+  `service.ts` → rosso, col file e il nome stampati. ⚠ Il **primo** sabotaggio non era stato visto,
+  e la colpa era del sabotaggio: avevo spezzato io stesso la stringa in due pezzi, quindi non c'era
+  niente da trovare — rifatto col nome intero. La `000329`: rimesso il nome ritirato come valore di
+  destinazione → prova generale **ROSSA**. E la prova generale ha intercettato **un difetto vero
+  dell'ordine di ADR-0035**: la `000320` gira nove numeri prima della `000329`, quindi su un
+  database esistente il suo backfill non tocca niente e la sua post-condizione contava zero — resa
+  tollerante ai **due** valori, con la ragione scritta, senza perdere cio' che intercettava.
+
+  Verde: 18/18 (materializzazione, origini, applicazione del fascicolo) · 28/28 (effetti,
+  provisioning, sorgente) · 113/113 unit · typecheck api + test + agent-gateway · lint monorepo ·
+  prova generale **VERDE** (305 migrazioni, due passate, 21/21 sentinelle) · `000328`, `000329` e
+  `000330` applicate in produzione.
 - [ ] **F4 il motore di ricerca** — corse, proposte, fonti (indirizzo + data + impronta), decisione
   motivata. Riuso quasi totale delle 5 tabelle di acquisizione. Due modifiche già misurate
   dall'epica: `tenant_id` nullabili con `CHECK` sulla coppia, e il legame alla versione di fascicolo.
@@ -226,8 +281,11 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
 
 - **F2** — un fascicolo **senza** modello non deve costruire «zero righe con successo»: deve
   **rifiutarsi**. Uno zero silenzioso qui è il difetto peggiore, perché somiglia a un successo.
-- **F3** — `grep -rn "RETAIL_BANK_REFERENCE\|getArchetype" apps/ packages/` deve tornare **vuota**.
-  Se resta un riferimento, il ritiro non è avvenuto: è stato rinominato.
+- **F3** — ✅ **FATTA, e non è più un comando da ricordarsi**:
+  `grep -rn "RETAIL_BANK_REFERENCE\|getArchetype" apps/ packages/` torna **vuota** (2026-08-19), e
+  la stessa domanda è ora un cancello che gira a ogni corsa dei test
+  (`test/unit/build-source.unit.test.ts`). Se resta un riferimento, il ritiro non è avvenuto: è
+  stato rinominato.
 - **F5** — una proposta con una fonte **non ammessa** va respinta col motivo, non accettata con un
   avviso.
 - **F7.1** — l'azienda del settore diverso **non deve** avere unità che somigliano a filiali

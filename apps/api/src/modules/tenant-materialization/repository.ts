@@ -29,11 +29,14 @@
  * coperture: se non la trovasse, starebbe confrontando una cosa con se' stessa.
  */
 import type { PoolClient } from "pg";
-import { pool } from "../../db/client.js";
 import { ConflictError } from "../../errors/index.js";
 import type { BuildPlan } from "./build-plan.js";
+import type { DbConnector } from "./build-source.js";
 
-export type DbConnector = typeof pool | PoolClient;
+// `DbConnector` vive in `build-source.ts`, dove serve a chi LEGGE: definirlo qui
+// obbligherebbe ogni sorgente a importare il motore, cioe' proprio il modulo che non deve
+// conoscerla (E21). Ri-esportato perche' e' il nome che i chiamanti gia' usano.
+export type { DbConnector };
 
 export interface MaterializeCounts {
   orgUnits: number;
@@ -418,7 +421,7 @@ export async function materialize(
       if (!uid) continue;
       const su = synUsers[ui]!;
       // I VALORI ARRIVANO DAL PIANO, non si ricalcolano qui (#198 T4). Prima il motore
-      // chiamava `synProficiency(ui, sj)` e `synKpiValue(ui, kj)`: erano la regola di
+      // chiamava da sé le due funzioni che inventavano i valori: erano la regola di
       // generazione di UNA sorgente, e conoscerla è esattamente ciò che E21 gli toglie.
       for (const ev of su.skillEvidence) {
         const sid = skillCodeToId.get(ev.skillCode);

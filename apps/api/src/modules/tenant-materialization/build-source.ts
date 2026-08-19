@@ -1,104 +1,46 @@
 /**
  * apps/api/src/modules/tenant-materialization/build-source.ts
- * LA SORGENTE PARAMETRICA (#198 T4, E21 — S1067).
+ * DA DOVE NASCE UN PIANO DI COSTRUZIONE (#198 T4, E21 — S1067 · ritiro dell'archetipo #132 F3).
  *
  * E21, la decisione di Enzo: **il motore viene prima della sorgente**. Una `BuildSource`
  * risponde a una sola domanda — *quali righe vanno create, e perché* — e la risposta è un
- * `BuildPlan`. Il motore non sa da dove viene: un archetipo TypeScript oggi, domani una
- * ricerca (P2a, `#132`), un'estrazione (P4, `#206`), o un fascicolo compilato a mano.
+ * `BuildPlan`. Il motore non sa da dove viene: oggi il contenuto di un modello letto dal
+ * database (`BlueprintBuildSource`, `#132` F2), domani una ricerca (F4), un'estrazione
+ * (P4, `#206`), o un fascicolo compilato a mano.
  *
- * Oggi l'implementazione è UNA SOLA, ed è voluto. Un'interfaccia con un solo esemplare non
- * è astrazione prematura quando il secondo esemplare è già progettato e datato: qui serve a
- * rendere **meccanicamente verificabile** che il motore non guardi dentro l'archetipo —
- * `grep "blueprints.js" repository.ts` deve non trovare niente. Senza questo confine la
- * promessa di E21 resterebbe vera nei documenti e falsa nel codice.
+ * ⚠ QUI VIVEVA LA SORGENTE CHE LEGGEVA L'ARCHETIPO, ED È STATA RITIRATA (`#132` F3 — E29 di
+ * Enzo, 2026-08-17): *«Il fascicolo non può avere un archetipo aprioristico, altrimenti
+ * genera sempre una banca come RTL. I dati hardcoded del file di codice scritto a mano devono
+ * scomparire — non deve rimanere traccia — e l'archetipo deve essere generato dalla ricerca.»*
+ * Con lei se n'è andato `blueprints.ts`: 296 righe che descrivevano una banca al dettaglio, e
+ * che facevano nascere banca **ogni** azienda costruita — misurato il 2026-08-19 su
+ * un'azienda di prova in produzione, poi disfatta per intero.
  *
- * ⚠ Le evidenze si calcolano QUI, non nel motore. `synProficiency` e `synKpiValue` sono la
- * regola di generazione di *questa* sorgente: lasciarle al motore significherebbe che il
- * motore conosce ancora come una sorgente specifica inventa i suoi numeri.
+ * L'interfaccia resta, e adesso ha un solo esemplare per una ragione opposta a quella di
+ * prima: prima ne aveva uno perché il secondo non era ancora nato, ora perché il primo è
+ * stato tolto. Ciò che rende il confine **verificabile** non cambia:
+ *   grep -n "blueprints" apps/api/src/modules/tenant-materialization/repository.ts
+ * deve non trovare niente — il motore non guarda dentro nessuna sorgente.
  */
-import { archetypeUsers, getArchetype, synKpiValue, synProficiency, type Archetype } from "./blueprints.js";
-import type { BuildPlan, PlannedKpiEvidence, PlannedSkillEvidence } from "./build-plan.js";
+import type { PoolClient } from "pg";
+import type { pool } from "../../db/client.js";
+import type { BuildPlan } from "./build-plan.js";
 
 /**
- * Da dove nasce un piano di costruzione. `key` è ciò che il fascicolo dichiara nel campo
+ * Il connettore che una sorgente usa per leggere.
+ *
+ * Sta qui e non nel `repository.ts` del motore perché è ciò di cui una **sorgente** ha
+ * bisogno: se vivesse nel motore, ogni sorgente dovrebbe importare il modulo che non deve
+ * conoscerla, e il confine di E21 sarebbe scritto al contrario.
+ */
+export type DbConnector = typeof pool | PoolClient;
+
+/**
+ * Da dove nasce un piano di costruzione. `key` è ciò che il modello dichiara nel campo
  * `blueprint_variant_version_build_source_key`.
  */
 export interface BuildSource {
   key: string;
   /** Il piano che questa sorgente produce. Asincrono: una sorgente vera legge (DB, rete). */
   plan(): Promise<BuildPlan>;
-}
-
-/**
- * La sorgente che legge un archetipo TypeScript. `justification` dice **quale decisione**
- * giustifica ogni riga: per l'archetipo è la scelta dell'archetipo stesso, e va scritta per
- * esteso perché finisce nel registro dell'origine di P3, dove qualcuno la leggerà senza
- * avere questo file davanti.
- */
-export class ArchetypeBuildSource implements BuildSource {
-  readonly key: string;
-  private readonly archetype: Archetype;
-
-  constructor(archetype: Archetype) {
-    this.archetype = archetype;
-    this.key = archetype.key;
-  }
-
-  /** Risolve la chiave dichiarata dal fascicolo. Chiave ignota → `undefined`, mai un ripiego. */
-  static fromKey(key: string): ArchetypeBuildSource | undefined {
-    const a = getArchetype(key);
-    return a ? new ArchetypeBuildSource(a) : undefined;
-  }
-
-  async plan(): Promise<BuildPlan> {
-    const a = this.archetype;
-    const perche = `archetipo ${a.key}`;
-
-    const incumbenti = archetypeUsers(a).map((u, ui) => {
-      const skillEvidence: PlannedSkillEvidence[] = a.skills.map((sk, sj) => ({
-        skillCode: sk.code,
-        declaredProficiency: synProficiency(ui, sj),
-      }));
-      const kpiEvidence: PlannedKpiEvidence[] = a.kpis.map((kp, kj) => ({
-        kpiCode: kp.code,
-        measuredValue: synKpiValue(ui, kj),
-        unit: kp.unit,
-      }));
-      return {
-        externalCode: u.externalCode,
-        email: u.email,
-        firstName: u.firstName,
-        lastName: u.lastName,
-        displayName: u.displayName,
-        positionCode: u.positionCode,
-        skillEvidence,
-        kpiEvidence,
-        justification: `${perche}: titolare segnaposto della posizione ${u.positionCode}`,
-      };
-    });
-
-    return {
-      sourceKey: a.key,
-      label: a.label,
-      orgUnits: a.orgUnits.map((ou) => ({
-        code: ou.code, name: ou.name, type: ou.type, parentCode: ou.parentCode,
-        justification: `${perche}: unità organizzativa del modello`,
-      })),
-      positions: a.positions.map((p) => ({
-        code: p.code, title: p.title, orgUnitCode: p.orgUnitCode,
-        criticality: p.criticality, economicWeight: p.economicWeight,
-        justification: `${perche}: posizione del modello, in ${p.orgUnitCode}`,
-      })),
-      skills: a.skills.map((sk) => ({
-        code: sk.code, name: sk.name, kind: sk.kind, categoryCode: sk.categoryCode,
-        justification: `${perche}: competenza del catalogo di modello`,
-      })),
-      kpis: a.kpis.map((kp) => ({
-        code: kp.code, name: kp.name, polarity: kp.polarity, unit: kp.unit,
-        justification: `${perche}: indicatore del catalogo di modello`,
-      })),
-      incumbents: incumbenti,
-    };
-  }
 }

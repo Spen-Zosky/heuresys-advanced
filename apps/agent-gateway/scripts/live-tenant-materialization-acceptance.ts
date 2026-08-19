@@ -5,11 +5,17 @@
  * As enzo.spenuso@heuresys.com (PLATFORM_ADMIN) through the gateway /agent SSE stream, the
  * agent is asked to call the heuresys MCP tool `hrx_tenant_materialize` in PLAN mode
  * (mode:"plan" → READ-ONLY: computes would-create/skipped/total counts, NO DB
- * mutation) for the RTL_BANK tenant + the RETAIL_BANK_REFERENCE archetype. The
+ * mutation) for the RTL_BANK tenant + a MODEL version read live from the API. The
  * gateway emits `approval_required` (deny-by-default write gate); this script POSTs
  * /agent/approve {decision:'allow'}; the tool reaches POST /v1/tenant-materialization
- * and returns the MaterializeResult. Verified by the result carrying the archetype
- * key + created/skipped/total count groups. Plan-mode → nothing written → no cleanup.
+ * and returns the MaterializeResult. Verified by the result carrying the model version
+ * + created/skipped/total count groups. Plan-mode → nothing written → no cleanup.
+ *
+ * ⚠ Il modello NON e' piu' un archetipo scritto in TypeScript (#132 F3, E29): si legge da
+ * `GET /v1/tenant-materialization/sources`, che elenca solo le versioni con del contenuto
+ * vero. Se l'elenco e' vuoto non c'e' niente da costruire, e lo script lo dice invece di
+ * fallire su una chiave inventata — e' lo stato atteso finche' F6 non avra' riempito i
+ * modelli.
  *
  * Run (from apps/agent-gateway, key UNSET → MAX subscription):
  *   ACC_EMAIL=enzo.spenuso@heuresys.com pnpm exec tsx scripts/live-tenant-materialization-acceptance.ts
@@ -22,7 +28,7 @@ const GATEWAY = (process.env.AGENT_GATEWAY ?? "http://localhost:8790").replace(/
 const EMAIL = process.env.ACC_EMAIL ?? "enzo.spenuso@heuresys.com";
 const PASSWORD = process.env.ACC_PASSWORD ?? process.env.TEST_ADMIN_PASSWORD ?? "";
 const RTL_TENANT = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
-const ARCHETYPE = "RETAIL_BANK_REFERENCE";
+
 
 function base32Decode(s: string): Buffer {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -70,10 +76,21 @@ async function login(): Promise<string> {
 
 interface RunResult { approvalSeen: boolean; planReturned: boolean; orgUnits: number | null; positions: number | null; isError: boolean; events: number }
 
-async function runPlan(cookies: string): Promise<RunResult> {
+/** Il primo modello che ha davvero del contenuto, letto dall'API. */
+async function primoModello(cookies: string): Promise<{ variantVersionId: string; label: string } | null> {
+  const r = await fetch(`${API}/v1/tenant-materialization/sources`, { headers: { cookie: cookies } });
+  if (!r.ok) throw new Error(`GET /v1/tenant-materialization/sources → HTTP ${r.status}`);
+  const b = (await r.json()) as { items: Array<{ variantVersionId: string; label: string }> };
+  return b.items[0] ?? null;
+}
+
+async function runPlan(cookies: string, variantVersionId: string): Promise<RunResult> {
+  // La risposta deve nominare IL MODELLO chiesto: senza questo, un risultato qualsiasi con i
+  // tre gruppi di conteggi passerebbe per buono.
+  const atteso = variantVersionId;
   const prompt =
     `Call the heuresys MCP tool hrx_tenant_materialize exactly once with this exact JSON payload and nothing else: ` +
-    `{"tenantId":"${RTL_TENANT}","archetypeKey":"${ARCHETYPE}","mode":"plan"}. ` +
+    `{"tenantId":"${RTL_TENANT}","variantVersionId":"${variantVersionId}","mode":"plan"}. ` +
     `Do not read anything first; just call that one tool with that payload and report the result.`;
   const res = await fetch(`${GATEWAY}/agent`, { method: "POST", headers: { "content-type": "application/json", cookie: cookies }, body: JSON.stringify({ prompt }) });
   console.log(`\n[plan] POST /agent → HTTP ${res.status} (SSE)`);
@@ -101,7 +118,7 @@ async function runPlan(cookies: string): Promise<RunResult> {
       return;
     }
     // The tool_result embeds the MaterializeResult (escaped JSON): created+skipped+total count groups.
-    if (/created\\?"\s*:/.test(dataStr) && /skipped\\?"\s*:/.test(dataStr) && /total\\?"\s*:/.test(dataStr) && dataStr.includes(ARCHETYPE)) {
+    if (/created\\?"\s*:/.test(dataStr) && /skipped\\?"\s*:/.test(dataStr) && /total\\?"\s*:/.test(dataStr) && dataStr.includes(atteso)) {
       out.planReturned = true;
       const totalMatch = dataStr.match(/total\\?"\s*:\s*\{[^}]*?orgUnits\\?"\s*:\s*(\d+)[^}]*?positions\\?"\s*:\s*(\d+)/);
       if (totalMatch) { out.orgUnits = Number(totalMatch[1]); out.positions = Number(totalMatch[2]); }
@@ -125,7 +142,14 @@ async function runPlan(cookies: string): Promise<RunResult> {
 async function main(): Promise<void> {
   console.log(`=== WI-C live acceptance (agent plan) — ${EMAIL} @ gateway ${GATEWAY} → API ${API} ===`);
   const cookies = await login();
-  const r = await runPlan(cookies);
+  const modello = await primoModello(cookies);
+  if (!modello) {
+    console.log("nessun modello ha contenuto: non c'e' niente da costruire.");
+    console.log("(atteso fra #132 F3 e F6 — il piano lo dichiara: da F3 a F6 nessuna azienda e' costruibile)");
+    process.exit(0);
+  }
+  console.log(`modello scelto: ${modello.label} (${modello.variantVersionId})`);
+  const r = await runPlan(cookies, modello.variantVersionId);
   console.log(`[plan] approvalSeen=${r.approvalSeen} planReturned=${r.planReturned} total.orgUnits=${r.orgUnits ?? "-"} total.positions=${r.positions ?? "-"} events=${r.events}`);
   const failures: string[] = [];
   if (!r.approvalSeen) failures.push("no approval_required emitted (write gate not engaged for hrx_tenant_materialize)");

@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-19T13:55:07Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3127**
+**Generato**: 2026-08-19T16:09:40Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3129**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 325 |
+| db-migration | 326 |
 | db-other | 8 |
 | db-script | 43 |
 | db-seed | 114 |
-| doc-canonical | 683 |
+| doc-canonical | 684 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 394 |
 | ux-design-archive | 80 |
 | web-source | 241 |
-| **TOTALE** | **3127** |
+| **TOTALE** | **3129** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2569 |
+| live | 2571 |
 
 ## File per categoria
 
@@ -413,7 +413,7 @@
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\service.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\blueprints.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\blueprint-build-source.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\build-plan.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\build-source.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\repository.ts` · *live* · git-tracked
@@ -1385,6 +1385,7 @@
 - `D:\heuresys-advanced\db\migrations\000325_stato_impossibile_bande_e_competenze.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000326_le_otto_famiglie_di_cruscotto_hanno_una_pagina.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000327_dove_vive_il_contenuto_di_un_modello.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000328_il_vocabolario_del_contenuto_e_quello_vero.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1589,6 +1590,7 @@
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1067-batch-p1p2p3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1068-p3-p1-p2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1071-ciclo-p1.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\mandati\mandato-S1073-prompt-ripresa.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-consegne-lab-2026-08-16.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\PROGRESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-macchina-stati.md` · *live* · git-tracked
@@ -2552,6 +2554,7 @@
 - `D:\heuresys-advanced\apps\api\test\auth.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\b3-time-off-approval.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\blueprint-activations.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\blueprint-build-source.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\blueprint-families.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\blueprint-overrides.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\blueprint-processes.integration.test.ts` · *live* · git-tracked
@@ -2769,8 +2772,6 @@
 - `D:\heuresys-advanced\apps\api\test\tenant-blueprint-application.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\tenant-blueprint-approval.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\tenant-blueprints.integration.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\tenant-materialization-processes.integration.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\tenant-materialization-segnaposto.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\tenant-materialization.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\tenants.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\time-off.integration.test.ts` · *live* · git-tracked
@@ -2791,6 +2792,7 @@
 - `D:\heuresys-advanced\apps\api\test\unit\session-cache.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\shared-exports-integrity.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\slow-queries-degradation.unit.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\unit\suite-lock.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\trust-proxy.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\with-transaction-retry.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\user-career-plans-scope.integration.test.ts` · *live* · git-tracked

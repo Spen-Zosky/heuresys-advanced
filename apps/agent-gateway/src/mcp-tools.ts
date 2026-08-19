@@ -183,14 +183,16 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
       up("hrx_blueprint_families_upsert", "/blueprint-families"), // blueprint:activate/override (PLATFORM_ADMIN)
       up("hrx_blueprint_variants_upsert", "/blueprint-variants"),
       up("hrx_blueprint_processes_upsert", "/blueprint-processes"),
-      // WI-C: per-tenant materialization generator (WRITE; PLATFORM_ADMIN service principal).
+      // WI-C: costruzione di un'azienda da un MODELLO (WRITE; utente di servizio
+      // PLATFORM_ADMIN). Prendeva la chiave di un modello cablato in TypeScript, ritirato
+      // da #132 F3 (E29): qualunque azienda si costruisse nasceva la stessa banca.
       // mode=plan is a dry-run (no writes); mode=apply mutates. Both route through the HITL
       // gate (classified WRITE by name in mcp-tool-names.ts → canUseTool approval).
       tool(
         "hrx_tenant_materialize",
-        "Materialize an archetype (org-units + positions) into a target tenant. mode=plan (dry-run) | apply (WRITE). PLATFORM_ADMIN.",
-        { tenantId: z.string(), archetypeKey: z.string(), mode: z.enum(["plan", "apply"]) },
-        async (a: { tenantId: string; archetypeKey: string; mode: "plan" | "apply" }) =>
+        "Build a tenant (org-units, positions, skills, KPIs) from a MODEL version. mode=plan (dry-run) | apply (WRITE). PLATFORM_ADMIN.",
+        { tenantId: z.string(), variantVersionId: z.string(), mode: z.enum(["plan", "apply"]) },
+        async (a: { tenantId: string; variantVersionId: string; mode: "plan" | "apply" }) =>
           ok(await client.call("POST", "/tenant-materialization", a)),
       ),
     ],

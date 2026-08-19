@@ -3,7 +3,7 @@
  * #34 B/B3 — second real apply-effect handler.
  *
  * resource_type = 'TENANT_MATERIALIZATION', resource_id = the target tenant,
- * metadata.archetypeKey = which archetype to materialize. On apply it runs the very
+ * metadata.variantVersionId = da quale MODELLO costruire. On apply it runs the very
  * same `repo.materialize` the direct endpoint runs — but as the *consequence of an
  * approval* rather than of a PLATFORM_ADMIN calling it directly. This is the seam the
  * slice-3 spec named ("a second handler registers the same way, no rework") and it is
@@ -23,11 +23,10 @@
  * IDEMPOTENCY comes for free from repo.materialize itself (it skips what already
  * exists) — re-applying yields 0 created / all skipped rather than duplicates.
  */
-import { ArchetypeBuildSource } from "../../tenant-materialization/build-source.js";
 import type { PoolClient } from "pg";
 import type { ApprovalRequestRow } from "../repository.js";
 import { ConflictError } from "../../../errors/index.js";
-import { getArchetype } from "../../tenant-materialization/blueprints.js";
+import { BlueprintBuildSource } from "../../tenant-materialization/blueprint-build-source.js";
 import { findTenantStatus, materialize } from "../../tenant-materialization/repository.js";
 
 export const TENANT_MATERIALIZATION = "TENANT_MATERIALIZATION";
@@ -44,17 +43,13 @@ export async function applyTenantMaterialization(
     );
   }
 
-  const archetypeKey = request.metadata["archetypeKey"];
-  if (typeof archetypeKey !== "string" || archetypeKey.length === 0) {
+  // ⚠ ERA la chiave di un archetipo scritto in TypeScript, letta dai metadati. Ritirato
+  //   da `#132` F3 (E29): qualunque azienda si costruisse nasceva la stessa banca. Ora si
+  //   indica la VERSIONE DI MODELLO, e il contenuto si legge dal database.
+  const variantVersionId = request.metadata["variantVersionId"];
+  if (typeof variantVersionId !== "string" || variantVersionId.length === 0) {
     throw new ConflictError(
-      "TENANT_MATERIALIZATION approval has no metadata.archetypeKey",
-      "APPLY_EFFECT_FAILED",
-    );
-  }
-  const archetype = getArchetype(archetypeKey);
-  if (!archetype) {
-    throw new ConflictError(
-      `Unknown archetype '${archetypeKey}'`,
+      "TENANT_MATERIALIZATION approval has no metadata.variantVersionId",
       "APPLY_EFFECT_FAILED",
     );
   }
@@ -73,5 +68,8 @@ export async function applyTenantMaterialization(
     );
   }
 
-  await materialize(client, tenantId, await new ArchetypeBuildSource(archetype).plan(), "apply");
+  // Il piano si legge PRIMA della costruzione: un modello vuoto o incoerente fa fallire
+  // l'atto invece di costruire zero righe «con successo» (`#132` F2).
+  const piano = await new BlueprintBuildSource(client, variantVersionId).plan();
+  await materialize(client, tenantId, piano, "apply");
 }

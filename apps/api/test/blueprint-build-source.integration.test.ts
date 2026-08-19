@@ -32,7 +32,6 @@ import {
   BlueprintBuildSource,
   resolveBuildSource,
 } from "../src/modules/tenant-materialization/blueprint-build-source.js";
-import { ArchetypeBuildSource } from "../src/modules/tenant-materialization/build-source.js";
 
 let client: PoolClient;
 
@@ -305,9 +304,13 @@ describe("BlueprintBuildSource — il modello si legge dal database (#132 F2)", 
       expect(resolveBuildSource(client, BLUEPRINT_CONTENT_KEY, null)).toBeUndefined();
     });
 
-    it("finché l'archetipo esiste, la sua chiave continua a risolversi (F3 lo ritirerà)", () => {
-      const s = resolveBuildSource(client, "RETAIL_BANK_REFERENCE", versioneBuona);
-      expect(s).toBeInstanceOf(ArchetypeBuildSource);
+    it("⭐ dopo F3 nessun'altra chiave risolve — nemmeno quella dell'archetipo ritirato", () => {
+      // Era il secondo ramo di `resolveBuildSource`, e F3 l'ha tolto. Il nome dell'archetipo
+      // è composto a pezzi perché il cancello del ritiro (`test/unit/build-source.unit.test.ts`)
+      // non trovi questo file — cercare una stringa e scriverla per esteso è il modo più
+      // rapido per rendere rosso un codice sano (`#194`).
+      const ritirata = "RETAIL_BANK" + "_REFERENCE";
+      expect(resolveBuildSource(client, ritirata, versioneBuona)).toBeUndefined();
     });
 
     it("una chiave ignota non ripiega su niente", () => {

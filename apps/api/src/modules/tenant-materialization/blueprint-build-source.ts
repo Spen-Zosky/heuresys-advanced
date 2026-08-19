@@ -3,7 +3,7 @@
  * LA SORGENTE CHE LEGGE IL MODELLO DAL DATABASE (#132 F2, E29 — S1072).
  *
  * La seconda implementazione di `BuildSource`, e la ragione per cui l'interfaccia esiste.
- * `ArchetypeBuildSource` legge 296 righe di TypeScript scritte a mano; questa legge le
+ * La sorgente che l'ha preceduta leggeva 296 righe di TypeScript scritte a mano; questa legge le
  * cinque tabelle `sys.sys_blueprint_content_*` che la `000327` ha creato, agganciate alla
  * **versione di variante**. È il presupposto perché `F3` possa ritirare l'archetipo:
  * finché il contenuto vive solo in un file, ogni azienda costruita è quella banca —
@@ -48,6 +48,8 @@
  * di inventare persone, e inventarle significherebbe far nascere ogni azienda con lo stesso
  * organico fittizio — la stessa forma di difetto che E29 chiede di togliere.
  */
+import type { BuildSourceSummary } from "@heuresys/shared";
+
 import { ConflictError } from "../../errors/index.js";
 import type {
   BuildPlan,
@@ -59,9 +61,7 @@ import type {
   PlannedSkill,
   SkillKind,
 } from "./build-plan.js";
-import type { BuildSource } from "./build-source.js";
-import { ArchetypeBuildSource } from "./build-source.js";
-import type { DbConnector } from "./repository.js";
+import type { BuildSource, DbConnector } from "./build-source.js";
 
 /**
  * La chiave che una versione di variante dichiara in `blueprint_variant_version_build_source_key`
@@ -418,5 +418,69 @@ export function resolveBuildSource(
     // «sorgente sconosciuta», che è vero — questa sorgente non è istanziabile qui.
     return variantVersionId ? new BlueprintBuildSource(db, variantVersionId) : undefined;
   }
-  return ArchetypeBuildSource.fromKey(key);
+  // ⚠ QUI C'ERA IL SECONDO RAMO, quello che risolveva un archetipo, ed è sparito con `F3`.
+  //   Era la promessa scritta in `F2`: «quando l'archetipo sparirà, sparirà il secondo ramo di
+  //   questa funzione e nient'altro». È andata esattamente così — i chiamanti non sono
+  //   cambiati. Una chiave che non sia quella del contenuto non risolve più niente, e non
+  //   ripiega: costruire un'azienda diversa da quella firmata, con l'atto che risulta
+  //   riuscito, resta il difetto peggiore possibile qui.
+  return undefined;
+}
+
+/**
+ * I modelli da cui si PUÒ costruire — cioè quelli che hanno davvero del contenuto.
+ *
+ * ⚠ Il filtro non è cosmetico. Un elenco che mostrasse anche le versioni vuote inviterebbe a
+ * sceglierne una, e la costruzione che ne segue è il difetto che `F2` esiste per chiudere:
+ * zero righe create con successo, indistinguibile da un successo vero. Qui il criterio è lo
+ * stesso della sorgente — **almeno un'unità organizzativa** — così che ciò che l'elenco offre
+ * e ciò che la costruzione accetta siano la stessa cosa. Se divergessero, l'elenco sarebbe
+ * una promessa che la costruzione non mantiene.
+ */
+export async function listBuildSources(db: DbConnector): Promise<BuildSourceSummary[]> {
+  const r = await db.query<{
+    variant_version_id: string;
+    family_code: string;
+    variant_code: string;
+    version_number: number;
+    status: string;
+    org_unit_count: string;
+    position_count: string;
+    skill_count: string;
+    kpi_count: string;
+  }>(
+    `SELECT vv.blueprint_variant_version_id     AS variant_version_id,
+            f.blueprint_family_code             AS family_code,
+            v.blueprint_variant_code            AS variant_code,
+            vv.blueprint_variant_version_number AS version_number,
+            vv.blueprint_variant_version_status AS status,
+            (SELECT count(*) FROM sys.sys_blueprint_content_units u
+              WHERE u.blueprint_content_unit_version_id = vv.blueprint_variant_version_id) AS org_unit_count,
+            (SELECT count(*) FROM sys.sys_blueprint_content_positions p
+              WHERE p.blueprint_content_position_version_id = vv.blueprint_variant_version_id) AS position_count,
+            (SELECT count(*) FROM sys.sys_blueprint_content_skills s
+              WHERE s.blueprint_content_skill_version_id = vv.blueprint_variant_version_id) AS skill_count,
+            (SELECT count(*) FROM sys.sys_blueprint_content_kpis k
+              WHERE k.blueprint_content_kpi_version_id = vv.blueprint_variant_version_id) AS kpi_count
+       FROM sys.sys_blueprint_variant_versions vv
+       JOIN sys.sys_blueprint_variants v
+         ON v.blueprint_variant_id = vv.blueprint_variant_version_variant_id
+       JOIN sys.sys_blueprint_families f
+         ON f.blueprint_family_id = v.blueprint_variant_family_id
+      WHERE EXISTS (SELECT 1 FROM sys.sys_blueprint_content_units u
+                     WHERE u.blueprint_content_unit_version_id = vv.blueprint_variant_version_id)
+      ORDER BY f.blueprint_family_code, v.blueprint_variant_code, vv.blueprint_variant_version_number`,
+  );
+  return r.rows.map((x) => ({
+    variantVersionId: x.variant_version_id,
+    label: `${x.family_code}/${x.variant_code} v${x.version_number}`,
+    familyCode: x.family_code,
+    variantCode: x.variant_code,
+    versionNumber: x.version_number,
+    status: x.status,
+    orgUnitCount: Number(x.org_unit_count),
+    positionCount: Number(x.position_count),
+    skillCount: Number(x.skill_count),
+    kpiCount: Number(x.kpi_count),
+  }));
 }

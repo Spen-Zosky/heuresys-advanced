@@ -5,7 +5,7 @@
  * POST /v1/tenants/provision takes an organisation from zero to operational in
  * one transactional call: a tenant + its first TENANT_ADMIN (identity + Argon2id
  * credential + role grants) + a per-tenant MFA policy + (F2) an OPTIONAL org
- * archetype materialized in the SAME transaction (org-units, positions,
+ * MODELLO materialized in the SAME transaction (org-units, positions,
  * incumbents — all-or-nothing). Admin-gated (tenant:create = PLATFORM_ADMIN).
  * F2 completeness: the admin gets the practiced role floor (TENANT_ADMIN +
  * USER, I17); a duplicate tenantCode is a clean 409 TENANT_CODE_EXISTS; the
@@ -34,9 +34,11 @@ export const ProvisionTenantBodySchema = z.object({
   adminEmail: z.string().email().max(320),
   adminDisplayName: z.string().min(1).max(200),
   adminPassword: z.string().min(12).max(200),
-  // F2: optional org archetype, materialized inside the SAME transaction
-  // (validated against the deterministic catalog BEFORE any write).
-  archetypeKey: z.string().min(1).max(64).optional(),
+  // F2: modello organizzativo OPZIONALE, costruito dentro la STESSA transazione
+  // (il suo contenuto e' letto e verificato PRIMA di qualunque scrittura).
+  // ⚠ Era `archetypeKey`, la chiave di un archetipo scritto in TypeScript: ritirato da
+  //   `#132` F3 (E29) perche' qualunque azienda si creasse nasceva quella stessa banca.
+  variantVersionId: z.string().uuid().optional(),
 });
 export type ProvisionTenantBody = z.infer<typeof ProvisionTenantBodySchema>;
 
@@ -54,11 +56,13 @@ export const ProvisionTenantResponseSchema = z.object({
     // F2: the granted role floor — TENANT_ADMIN + USER (I17 as practiced)
     roles: z.array(z.string()),
   }),
-  // F2: present only when archetypeKey was supplied — created counts of the
-  // in-transaction materialization.
-  archetype: z
+  // F2: presente solo se `variantVersionId` era stato indicato — cosa e' nato davvero
+  // dentro la transazione.
+  model: z
     .object({
-      key: z.string(),
+      variantVersionId: z.string().uuid(),
+      /** `famiglia/variante v<n>` — il modello, per nome. */
+      label: z.string(),
       created: MaterializeCountsSchema,
     })
     .optional(),

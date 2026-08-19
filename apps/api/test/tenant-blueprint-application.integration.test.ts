@@ -12,6 +12,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { pool } from "../src/db/client.js";
+import { seminaModello, type ModelloDiProva } from "./helpers/modello-di-prova.js";
 import {
   applyTenantBlueprintApplication,
   guasti,
@@ -19,7 +20,8 @@ import {
 import type { ApprovalRequestRow } from "../src/modules/approvals/repository.js";
 
 const MARCA = `T5-${Date.now()}`;
-const CHIAVE = "RETAIL_BANK_REFERENCE";
+// Il modello si SEMINA qui: non esiste piu' un archetipo globale da cercare (#132 F3).
+let modello: ModelloDiProva;
 
 let tenantId = "";
 let versionId = "";
@@ -56,11 +58,6 @@ async function contaUnita(): Promise<number> {
  * questa batteria.
  */
 async function versioneApprovata(numero: number): Promise<string> {
-  const vv = await pool.query<{ blueprint_variant_version_id: string }>(
-    `SELECT blueprint_variant_version_id FROM sys.sys_blueprint_variant_versions
-      WHERE blueprint_variant_version_build_source_key = $1 LIMIT 1`,
-    [CHIAVE],
-  );
   const v = await pool.query<{ tenant_blueprint_version_id: string }>(
     `INSERT INTO sys.sys_tenant_blueprint_versions
        (tenant_blueprint_version_blueprint_id, tenant_blueprint_version_number,
@@ -68,12 +65,13 @@ async function versioneApprovata(numero: number): Promise<string> {
         tenant_blueprint_version_approved_at)
      VALUES ($1, $2, 'APPROVED', $3, now())
      RETURNING tenant_blueprint_version_id`,
-    [blueprintId, numero, vv.rows[0]?.blueprint_variant_version_id ?? null],
+    [blueprintId, numero, modello.variantVersionId],
   );
   return v.rows[0]!.tenant_blueprint_version_id;
 }
 
 beforeAll(async () => {
+  modello = await seminaModello(pool, MARCA);
   // `tenant_industry_code` è NOT NULL e senza default: un'azienda senza settore non esiste
   // (I21 — i dati che derivano dal settore devono essergli coerenti). `FIN_BANKING` è quello
   // dell'archetipo usato qui, quindi la fixture nasce già coerente invece che «qualsiasi».
@@ -91,13 +89,8 @@ beforeAll(async () => {
   );
   blueprintId = b.rows[0]!.tenant_blueprint_id;
 
-  // Una versione di variante che dichiara la sorgente: è il campo che T1 ha aggiunto, ed è
-  // ciò che rende la costruzione parametrica invece che cablata (E21).
-  const vv = await pool.query<{ blueprint_variant_version_id: string }>(
-    `SELECT blueprint_variant_version_id FROM sys.sys_blueprint_variant_versions
-      WHERE blueprint_variant_version_build_source_key = $1 LIMIT 1`,
-    [CHIAVE],
-  );
+  // La versione di variante del modello seminato dichiara la sorgente: è il campo che T1 ha
+  // aggiunto, ed è ciò che rende la costruzione parametrica invece che cablata (E21).
 
   const v = await pool.query<{ tenant_blueprint_version_id: string }>(
     `INSERT INTO sys.sys_tenant_blueprint_versions
@@ -106,7 +99,7 @@ beforeAll(async () => {
         tenant_blueprint_version_approved_at)
      VALUES ($1, 1, 'APPROVED', $2, now())
      RETURNING tenant_blueprint_version_id`,
-    [blueprintId, vv.rows[0]?.blueprint_variant_version_id ?? null],
+    [blueprintId, modello.variantVersionId],
   );
   versionId = v.rows[0]!.tenant_blueprint_version_id;
 });

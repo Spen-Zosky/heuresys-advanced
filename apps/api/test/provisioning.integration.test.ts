@@ -2,14 +2,15 @@
  * apps/api/test/provisioning.integration.test.ts
  * D-14 FASE 1+2 — POST /v1/tenants/provision. Verifies the whole transactional
  * chain (tenant + first TENANT_ADMIN identity/credential/role floor + MFA
- * policy + optional in-tx archetype), that the provisioned admin can
+ * policy + modello organizzativo opzionale, nella stessa transazione), that the provisioned admin can
  * immediately authenticate, admin-gating, the clean 409 on a duplicate
- * tenantCode, archetype validation BEFORE any write, and the
+ * tenantCode, verifica del modello PRIMA di qualunque scrittura, and the
  * TENANT_PROVISION_ENABLED kill-switch.
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { randomUUID } from "node:crypto";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { seminaModello, type ModelloDiProva } from "./helpers/modello-di-prova.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
@@ -18,6 +19,8 @@ import { env } from "../src/config/env.js";
 
 const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
 const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
+const MARCA_MODELLO = `PROV-${Date.now()}`;
+let modello: ModelloDiProva;
 const SUITE_PREFIX = `PROV_${randomUUID().slice(0, 8).toUpperCase()}`;
 const NEW_ADMIN_PW = "Prov1sion#Pass!";
 
@@ -41,6 +44,7 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
   const createdTenantIds: string[] = [];
 
   beforeAll(async () => {
+  modello = await seminaModello(pool, MARCA_MODELLO);
     suite = await buildTestApp();
     admin = await login(suite, ADMIN_EMAIL);
   });
@@ -172,7 +176,7 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
     expect(u.rows.length).toBe(0);
   });
 
-  it("F2: provisions WITH an archetype — org structure materialized in the SAME transaction", async () => {
+  it("F2: crea l'azienda CON un modello — struttura costruita nella STESSA transazione", async () => {
     const code = `${SUITE_PREFIX}_ARCH`;
     const r = await suite.app.inject({
       method: "POST",
@@ -180,33 +184,42 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
       headers: headers(admin),
       payload: {
         tenantCode: code,
-        tenantName: "Archetyped Org",
+        tenantName: "Azienda da modello",
         tenantIndustryCode: await anIndustryCode(),
         adminEmail: `admin.${code.toLowerCase()}@example.org`,
         adminDisplayName: "Arch Admin",
         adminPassword: NEW_ADMIN_PW,
-        archetypeKey: "RETAIL_BANK_REFERENCE",
+        variantVersionId: modello.variantVersionId,
       },
     });
     expect(r.statusCode).toBe(201);
     const out = r.json() as {
       tenant: { id: string };
-      archetype?: { key: string; created: { orgUnits: number; positions: number; users: number } };
+      model?: {
+        variantVersionId: string;
+        label: string;
+        created: { orgUnits: number; positions: number; users: number };
+      };
     };
     createdTenantIds.push(out.tenant.id);
-    expect(out.archetype?.key).toBe("RETAIL_BANK_REFERENCE");
-    expect(out.archetype!.created.orgUnits).toBeGreaterThan(0);
-    expect(out.archetype!.created.positions).toBeGreaterThan(0);
+    expect(out.model?.variantVersionId).toBe(modello.variantVersionId);
+    expect(out.model?.label).toBe(modello.label);
+    expect(out.model!.created.orgUnits).toBe(modello.attese.orgUnits);
+    expect(out.model!.created.positions).toBe(modello.attese.positions);
+    // ⚠ Un modello NON porta persone (#132 F2): zero titolari, ed è voluto. Prima
+    //   l'archetipo ne inventava uno per posizione, e ogni azienda nasceva con lo stesso
+    //   organico fittizio.
+    expect(out.model!.created.users).toBe(0);
 
     // DB proof — the org structure exists under the NEW tenant
     const ou = await pool.query(
       `SELECT count(*)::int AS n FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1`,
       [out.tenant.id],
     );
-    expect(ou.rows[0]?.n).toBe(out.archetype!.created.orgUnits);
+    expect(ou.rows[0]?.n).toBe(out.model!.created.orgUnits);
   });
 
-  it("F2: an unknown archetypeKey is rejected BEFORE any write (no orphan tenant)", async () => {
+  it("F2: un modello che non esiste è respinto PRIMA di qualunque scrittura (nessuna azienda orfana)", async () => {
     const code = `${SUITE_PREFIX}_BADARCH`;
     const r = await suite.app.inject({
       method: "POST",
@@ -214,16 +227,18 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
       headers: headers(admin),
       payload: {
         tenantCode: code,
-        tenantName: "Bad Arch",
+        tenantName: "Modello inesistente",
         tenantIndustryCode: await anIndustryCode(),
         adminEmail: `admin.${code.toLowerCase()}@example.org`,
         adminDisplayName: "x",
         adminPassword: NEW_ADMIN_PW,
-        archetypeKey: "DOES_NOT_EXIST",
+        // Un identificativo ben formato che non corrisponde a nessun modello: è il caso
+        // che conta, perché supera la validazione dello schema e arriva al servizio.
+        variantVersionId: "00000000-0000-0000-0000-000000000000",
       },
     });
-    expect(r.statusCode).toBe(404);
-    expect((r.json() as { error: { code: string } }).error.code).toBe("ARCHETYPE_NOT_FOUND");
+    expect(r.statusCode).toBe(409);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("BLUEPRINT_CONTENT_MISSING");
     const t = await pool.query(`SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = $1`, [code]);
     expect(t.rows.length).toBe(0);
   });

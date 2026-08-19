@@ -6,21 +6,20 @@
  * SQL/validation: tenant + first TENANT_ADMIN (identity + Argon2id credential,
  * must-rotate) + role floor (TENANT_ADMIN + USER, I17 as practiced: 160/162
  * live users carry an explicit USER grant) + a per-tenant MFA policy + (F2) an
- * OPTIONAL org archetype materialized in the SAME transaction. Any failure
+ * OPTIONAL org MODELLO materialized in the SAME transaction. Any failure
  * rolls the whole thing back — no half-provisioned tenant can exist.
  *
  * F2 idempotency contract: a duplicate tenantCode is a clean 409
  * TENANT_CODE_EXISTS (pre-checked in-tx; the unique index
  * sys_tenancies_tenant_code_uq backs it against races via the 23505 map).
  */
-import { ArchetypeBuildSource } from "../tenant-materialization/build-source.js";
-import { withTransaction } from "../../db/client.js";
+import { BlueprintBuildSource } from "../tenant-materialization/blueprint-build-source.js";
+import { pool, withTransaction } from "../../db/client.js";
 import { hashPassword } from "../auth/password.js";
 import { insertIdentity, insertCredential } from "../auth/repository.js";
 import { insertTenant, findTenantByCode } from "./repository.js";
 import { insertUser, findRoleByCode, insertRoleGrant } from "../users/repository.js";
 import { upsertPolicy } from "../mfa-policy/repository.js";
-import { getArchetype } from "../tenant-materialization/blueprints.js";
 import { materialize as materializeArchetype } from "../tenant-materialization/repository.js";
 import { assertIndustryCode } from "./service.js";
 import { NotFoundError, ConflictError } from "../../errors/index.js";
@@ -36,12 +35,14 @@ export async function provisionTenant(
   actor: ActorContext,
   body: ProvisionTenantBody,
 ): Promise<ProvisionTenantResponse> {
-  // F2: validate the archetype BEFORE any write — a typo'd key must not leave
-  // a provisioned-but-empty tenant behind.
-  const archetype = body.archetypeKey ? getArchetype(body.archetypeKey) : null;
-  if (body.archetypeKey && !archetype) {
-    throw new NotFoundError(`Archetype '${body.archetypeKey}' not found`, "ARCHETYPE_NOT_FOUND");
-  }
+  // F2: il MODELLO si legge e si verifica PRIMA di qualunque scrittura — un modello
+  // inesistente, vuoto o incoerente non deve lasciare dietro di sé un'azienda creata e
+  // vuota. `plan()` fa entrambe le cose: legge e verifica.
+  // ⚠ Era la ricerca di un archetipo in un catalogo scritto in TypeScript: ritirato
+  //   da `#132` F3 (E29) perché qualunque azienda si creasse nasceva la stessa banca.
+  const piano = body.variantVersionId
+    ? await new BlueprintBuildSource(pool, body.variantVersionId).plan()
+    : null;
 
   // Hash outside the transaction (Argon2id is CPU-heavy; keep the tx short).
   const hash = await hashPassword(body.adminPassword);
@@ -106,13 +107,12 @@ export async function provisionTenant(
         actorUserId: actor.userId,
       });
 
-      // F2: optional archetype — org-units, positions, incumbents materialized
-      // atomically with the tenant (same client → same transaction).
-      let archetypeOut: ProvisionTenantResponse["archetype"];
-      if (archetype) {
-        const piano = await new ArchetypeBuildSource(archetype).plan();
+      // F2: modello opzionale — unità, posizioni e catalogo costruiti atomicamente con
+      // l'azienda (stesso client → stessa transazione).
+      let modelloOut: ProvisionTenantResponse["model"];
+      if (piano) {
         const created = await materializeArchetype(client, tenant.tenantId, piano, "apply");
-        archetypeOut = { key: archetype.key, created };
+        modelloOut = { variantVersionId: body.variantVersionId!, label: piano.label, created };
       }
 
       return {
@@ -123,7 +123,7 @@ export async function provisionTenant(
           mustRotatePassword: true,
           roles: grantedRoles,
         },
-        ...(archetypeOut ? { archetype: archetypeOut } : {}),
+        ...(modelloOut ? { model: modelloOut } : {}),
       };
     });
   } catch (e) {

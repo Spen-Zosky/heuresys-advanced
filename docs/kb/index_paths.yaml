@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-19T13:55:07Z da docs/kb/tools/build_index.py
+# generato: 2026-08-19T16:09:40Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-19T13:55:07Z"
-  total_files: 3127
+  generated_at: "2026-08-19T16:09:40Z"
+  total_files: 3129
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 325
+    db-migration: 326
     db-other: 8
     db-script: 43
     db-seed: 114
-    doc-canonical: 683
+    doc-canonical: 684
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2569
+    live: 2571
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2192,9 +2192,9 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\blueprints.ts'
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\blueprint-build-source.ts'
     root: repo
-    rel: 'apps/api/src/modules/tenant-materialization/blueprints.ts'
+    rel: 'apps/api/src/modules/tenant-materialization/blueprint-build-source.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -7880,6 +7880,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000328_il_vocabolario_del_contenuto_e_quello_vero.sql'
+    root: repo
+    rel: 'db/migrations/000328_il_vocabolario_del_contenuto_e_quello_vero.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -9029,6 +9035,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\mandati\mandato-S1071-ciclo-p1.md'
     root: repo
     rel: '.programmi/mandati/mandato-S1071-ciclo-p1.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\mandati\mandato-S1073-prompt-ripresa.md'
+    root: repo
+    rel: '.programmi/mandati/mandato-S1073-prompt-ripresa.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -14666,6 +14678,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\blueprint-build-source.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/blueprint-build-source.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\blueprint-families.integration.test.ts'
     root: repo
     rel: 'apps/api/test/blueprint-families.integration.test.ts'
@@ -15968,18 +15986,6 @@ files:
     category: test
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\tenant-materialization-processes.integration.test.ts'
-    root: repo
-    rel: 'apps/api/test/tenant-materialization-processes.integration.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\tenant-materialization-segnaposto.integration.test.ts'
-    root: repo
-    rel: 'apps/api/test/tenant-materialization-segnaposto.integration.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\tenant-materialization.integration.test.ts'
     root: repo
     rel: 'apps/api/test/tenant-materialization.integration.test.ts'
@@ -16097,6 +16103,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\unit\slow-queries-degradation.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/slow-queries-degradation.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\suite-lock.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/suite-lock.unit.test.ts'
     category: test
     status: live
     provenance: git-tracked

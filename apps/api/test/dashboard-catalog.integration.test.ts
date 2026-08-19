@@ -90,7 +90,7 @@ describe("GET /v1/dashboard/catalog — chi vede quali famiglie", () => {
     expect(body.dashboards.every((d) => d.permissionCode === null)).toBe(true);
   });
 
-  it("l'amministratore di piattaforma le vede tutte, e nessuna è attiva finché la pagina non c'è", async () => {
+  it("l'amministratore di piattaforma le vede tutte, e ognuna è attiva perché ha la sua pagina", async () => {
     const r = await app.app.inject({
       method: "GET", url: "/v1/dashboard/catalog", headers: { cookie: ch(platform) },
     });
@@ -98,8 +98,21 @@ describe("GET /v1/dashboard/catalog — chi vede quali famiglie", () => {
     const body = r.json() as Catalogo;
     // `000005` concede a PLATFORM_ADMIN ogni permesso a tappeto: le vede tutte.
     expect(body.dashboards.map((d) => d.code).sort()).toEqual(famiglie.map((f) => f.code).sort());
-    // Un catalogo NON è un menu: finché F4 non costruisce le pagine, nessuna è attiva.
-    expect(body.dashboards.every((d) => d.isActive === false)).toBe(true);
+    // ⚠ CORRETTO IL 2026-08-19 (#142 F4). Diceva: «un catalogo NON è un menu: finché F4 non
+    // costruisce le pagine, nessuna è attiva» — ed era la STESSA fotografia del momento che
+    // la mig. `000316` portava nella propria post-condizione: vera quando fu scritta, e
+    // destinata a diventare falsa esattamente quando F4 avesse fatto il proprio lavoro.
+    // L'ho corretta nella migrazione e non l'ho cercata qui: la CI l'ha trovata per me.
+    //
+    // L'invariante che l'asserzione voleva dire, e che resta vero prima e dopo F4, è che il
+    // catalogo non promette pagine inesistenti. Si verifica quindi il LEGAME, non lo stato:
+    // ogni famiglia attiva ha la sua pagina. È la stessa condizione del CHECK
+    // `sys_dashboards_attivo_ha_pagina`, letta dal lato del contratto pubblico.
+    const { rows: senzaPagina } = await pool.query<{ code: string }>(
+      `SELECT dashboard_code AS code FROM sys.sys_dashboards
+        WHERE dashboard_is_active AND dashboard_ui_interface_id IS NULL`,
+    );
+    expect(senzaPagina.map((x) => x.code), "famiglie attive senza pagina").toEqual([]);
   });
 
   it("il conteggio delle viste combacia col modello, famiglia per famiglia", async () => {

@@ -179,3 +179,4 @@ degli aggiramenti**, e il numero di corse su cui è stato verificato è scritto.
 |---|---|---|---|---|
 | — | 2026-08-19 | `7b002359` | **ROSSA — 6 file** | e non contava: erano un difetto MIO, non la contesa. Corretti sopra. Il contatore riparte dal commit che porta il rimedio |
 | **1** | 2026-08-19 | `62d59c45` | **VERDE** | prima corsa integrale con i limiti a 20s/30s **e** la cache attiva. Letta dalla CI (`gh run list`), non dedotta |
+| — | 2026-08-19 | `95e7c2e8` · `049c1f31` | **ROSSE, e non contano** | **un solo caso**, e non è contesa: `dashboard-catalog` asseriva «nessuna famiglia è attiva finché la pagina non c'è» — la stessa fotografia del momento che avevo corretto nella mig. `000316` e **non avevo cercato nel test**. `#142` F4 le ha attivate, quindi l'asserzione è diventata falsa. Corretta: ora verifica il LEGAME (nessuna attiva senza pagina), che è vero prima e dopo |

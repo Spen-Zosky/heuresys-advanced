@@ -331,7 +331,7 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   |---|---|---|
   | **F4a** ✅ | lo schema e il registro delle fonti — **FATTO 2026-08-19** | mig. `000333`: `tenant_id` nullabili + `CHECK` sulla coppia, legame alla versione di variante, trigger di coerenza candidato↔corsa, `sys.sys_research_sources` (approvatore obbligatorio quando approvata), sentinella nuova |
   | **F4b** ✅ | il dominio ricercabile e' un contratto in codice — **FATTO 2026-08-19** | `research/domain.ts` (domande · forma · chiave naturale · controlli), il dominio pilota `research_sources`, il confronto **per suffisso di host** |
-  | **F4c** | il lettore web | `research/web-reader.ts`: solo `https`, guardia SSRF, limiti di dimensione e tempo, **SHA-256 dei byte** che riproduce |
+  | **F4c** ✅ | il lettore web — **FATTO 2026-08-19** | `research/web-reader.ts`: solo `https`, guardia SSRF, limiti di dimensione e tempo, **SHA-256 dei byte** che riproduce |
   | **F4d** | il motore | `research/engine.ts`: corsa → letture → proposte → validazione (forma · fonti · doppioni) → candidati + evidenze + esiti, stato della corsa |
   | **F4e** | le difese §4.4 e §4.5 | il testo grezzo non entra mai in una proposta; le domande verso il web si costruiscono **solo** dai parametri di categoria, con un cancello meccanico |
   | **F4f** | `D-81` si estingue | `BLUEPRINT_FIELD_LOCKED` sui campi bloccanti, col nome del campo e il perche' |
@@ -379,6 +379,20 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   rifiuto in `fonteAmmessa`), e il caso positivo resta verde — cioe' i negativi non erano verdi per
   vacuita'; spento `SOURCE_EVIDENCE_IS_SELF` → **1** caso rosso soltanto. 21 casi nuovi; suite unit
   **134/134**, typecheck e lint verdi.
+
+  ✅ **F4c FATTA — 2026-08-19 (S1074)** · `research/web-reader.ts`, l'unico punto in cui questo
+  sistema apre una pagina. Quattro guardie: solo `https` · niente rete interna (loopback, privata,
+  **link-local coi metadati** delle macchine virtuali, CGNAT, IPv6 e IPv4 incapsulato) · limiti di
+  byte e di tempo, col limite **ri-verificato sui byte veri** perche' `content-length` lo dichiara
+  chi risponde · **redirect seguiti a mano, ricontrollando ogni salto**. Cio' che esce si chiama
+  `testoNonFidato`, ed e' il nome giusto.
+
+  ✅ **DUE SABOTAGGI, ognuno rosso solo dove deve**: guardia applicata al solo primo salto → **1**
+  caso (e quel caso verifica anche che la seconda destinazione non sia **mai stata aperta**);
+  tolta la riga della rete link-local → **2**. Le porte `fetch` e DNS sono iniettabili proprio
+  perche' quel salto non si puo' provocare con un server locale. L'impronta e' verificata contro
+  uno SHA-256 calcolato per conto proprio su un **server HTTP vero**: 19 casi nuovi, suite unit
+  **153/153**, typecheck e lint verdi.
 
   **Confine di sessione dichiarato**: F4 e' otto sotto-passi con commit atomici. Si va avanti
   finche' il guardiano regge; cio' che non entra resta dichiarato qui, non lasciato a meta'.

@@ -17,17 +17,23 @@
 import { pool, withTransaction } from "../../db/client.js";
 import {
   ConflictError,
+  ForbiddenError,
   NotFoundError,
   UnprocessableEntityError,
   ValidationError,
 } from "../../errors/index.js";
-import type { ActorContext } from "../../lib/actor.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
 import * as repo from "./repository.js";
 import { proposeModel, isPublishedVariantVersion } from "./derivation.js";
 import { diffVersions, diffAgainstModelLatest } from "./diff.js";
 import { approvalService } from "../approvals/service.js";
 import { TENANT_BLUEPRINT_APPROVAL } from "../approvals/effects/tenant-blueprint-approval.js";
 import { TENANT_BLUEPRINT_APPLICATION } from "../approvals/effects/tenant-blueprint-application.js";
+import {
+  violazioniCampiBloccanti,
+  messaggioCampiBloccati,
+  type OrigineModifica,
+} from "./campi-bloccanti.js";
 import { resolveBuildSource } from "../tenant-materialization/blueprint-build-source.js";
 import { materialize } from "../tenant-materialization/repository.js";
 import type {
@@ -258,9 +264,23 @@ export const tenantBlueprintsService = {
     id: string,
     number: number,
     body: PatchIdentityBody,
+    /**
+     * Chi sta modificando. Non e' il permesso — quello lo decide RBAC — e' l'ORIGINE
+     * dell'atto: la ricerca (#132 F6) agira' con le credenziali di un umano che ha tutti i
+     * permessi, quindi senza questa distinzione una proposta nata da una pagina web potrebbe
+     * cambiare il settore di attivita' del cliente e nessun controllo la fermerebbe.
+     */
+    origine: OrigineModifica = isPlatform(a) ? "PLATFORM" : "CLIENTE",
   ): Promise<TenantBlueprintVersion> {
     await esisteFascicolo(id);
     const v = await versioneModificabile(id, number);
+
+    // D-85 (ex D-81) — i campi bloccanti (epica P1 §4.8, decisione E9). Il rifiuto dice QUALE campo
+    // e PERCHE' e' bloccante: un diniego generico costringerebbe chi lo riceve a indovinare.
+    const bloccati = violazioniCampiBloccanti(v.identity, body, origine);
+    if (bloccati.length > 0) {
+      throw new ForbiddenError(messaggioCampiBloccati(bloccati, origine), "BLUEPRINT_FIELD_LOCKED");
+    }
 
     // #132 F0 — LA COERENZA FASCIA↔ADDETTI, DETTA IN MODO LEGGIBILE.
     // Il presidio vero è nel database (trigger `sys_blueprint_size_band_coherence`,

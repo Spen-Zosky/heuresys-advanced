@@ -266,7 +266,7 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
 - [ ] **F4 il motore di ricerca** — corse, proposte, fonti (indirizzo + data + impronta), decisione
   motivata. Riuso quasi totale delle 5 tabelle di acquisizione. Due modifiche già misurate
   dall'epica: `tenant_id` nullabili con `CHECK` sulla coppia, e il legame alla versione di fascicolo.
-  Più `BLUEPRINT_FIELD_LOCKED` (`D-81`), che l'epica vuole **insieme**. ⚠ La difesa di §4.4 non è
+  Più `BLUEPRINT_FIELD_LOCKED` (`D-85`, era `D-81`), che l'epica vuole **insieme**. ⚠ La difesa di §4.4 non è
   opzionale: **una pagina web può contenere istruzioni**, e la ricerca le legge.
 
   🔎 **INDAGINE FATTA 2026-08-19 (S1072), implementazione NON aperta** — il guardiano dava capienza
@@ -296,7 +296,7 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   fatto senza toccare le righe di storia36 — e la post-condizione dovra' proteggere **quelle**,
   non solo le nuove (metodo di bonifica, punto ④c).
 
-  **③ `D-81` si estingue qui, e il register lo dice gia'.** `BLUEPRINT_FIELD_LOCKED` e' segnato
+  **③ `D-85` si estingue qui, e il register lo dice gia'.** `BLUEPRINT_FIELD_LOCKED` e' segnato
   «gestito — non lavorabile per costruzione»: la guardia non poteva essere scritta finche' non
   esisteva l'attore capace di violarla. Il register rimanda esplicitamente a `#132`. Il codice
   d'errore e la classificazione dei campi (bloccanti / rivedibili) sono **gia' scritti** nella
@@ -333,8 +333,8 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   | **F4b** ✅ | il dominio ricercabile e' un contratto in codice — **FATTO 2026-08-19** | `research/domain.ts` (domande · forma · chiave naturale · controlli), il dominio pilota `research_sources`, il confronto **per suffisso di host** |
   | **F4c** ✅ | il lettore web — **FATTO 2026-08-19** | `research/web-reader.ts`: solo `https`, guardia SSRF, limiti di dimensione e tempo, **SHA-256 dei byte** che riproduce |
   | **F4d** ✅ | il motore — **FATTO 2026-08-19** | `research/engine.ts`: corsa → letture → proposte → validazione (forma · fonti · doppioni) → candidati + evidenze + esiti, stato della corsa |
-  | **F4e** | le difese §4.4 e §4.5 | il testo grezzo non entra mai in una proposta; le domande verso il web si costruiscono **solo** dai parametri di categoria, con un cancello meccanico |
-  | **F4f** | `D-81` si estingue | `BLUEPRINT_FIELD_LOCKED` sui campi bloccanti, col nome del campo e il perche' |
+  | **F4e** ✅ | le difese §4.4 e §4.5 — **FATTO 2026-08-19** | il testo grezzo non entra mai in una proposta; le domande verso il web si costruiscono **solo** dai parametri di categoria, con un cancello meccanico |
+  | **F4f** ✅ | `D-85` si estingue — **FATTO 2026-08-19** | `BLUEPRINT_FIELD_LOCKED` sui campi bloccanti, col nome del campo e il perche' |
   | **F4g** | la superficie API | le quattro rotte di §6, i permessi, il contratto in `@heuresys/shared` |
   | **F4h** | il fornitore reale del ragionamento | `/research/propose` nel gateway + la **dimostrazione LIVE**: una corsa vera che legge pagine vere e propone fonti |
 
@@ -410,6 +410,31 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
 
   ✅ Due sabotaggi, ognuno rosso solo dove deve (spenta `RAW_TEXT_LEAK` → 1; fonti dichiarate
   contate come lette → 1). 16 casi nuovi, suite unit **169/169**, typecheck e lint verdi.
+
+  ✅ **F4e FATTA — 2026-08-19 (S1074)** · `research/guardia-domande.ts`. La prima difesa di §4.5
+  e' la firma del tipo; questa e' la **seconda**, perche' la prima protegge dalla svista e non
+  dall'errore: le domande **gia' costruite** si confrontano coi termini che identificano il cliente,
+  e se uno compare la corsa **non parte** (`RESEARCH_QUERY_LEAKS_CLIENT`). Confronto su **parole
+  intere** — `bank` non si accende su «banking» ne' su «bancario» — e soglia a **tre** lettere e non
+  quattro, perche' «RTL» e' un nome e con quattro sarebbe passato indisturbato. Piu'
+  `avvolgiTestoNonFidato()`, che **depura i delimitatori**: un testo che contenesse la riga di
+  chiusura potrebbe far credere che il blocco sia finito.
+
+  ✅ **F4f FATTA — 2026-08-19 (S1074)** · `tenant-blueprints/campi-bloccanti.ts`, agganciato a
+  `patchIdentity`. `PLATFORM` cambia i campi bloccanti (e' il proprietario della piattaforma);
+  `CLIENTE` e `RICERCA` **mai** — e l'attore capace di violare la guardia e' proprio la ricerca, che
+  in `F6` applichera' al fascicolo proposte nate da pagine web. Il rifiuto dice **quale** campo e
+  **perche'**; riscrivere lo stesso valore non e' un cambiamento.
+
+  🔬 **BONIFICA — `D-81` ERA REGISTRATO DUE VOLTE**, con due contenuti diversi: il denominatore
+  della maturita' (rinumerato da `D-72` in S1045 **proprio per togliere una collisione**) e questo.
+  Criterio, non arbitrio: **chi arriva dopo su un numero occupato cede il numero** →
+  `BLUEPRINT_FIELD_LOCKED` diventa **`D-85`**, con la nota-ponte nel register. Aggiornate le fonti
+  vive; i piani e i mandati datati restano come sono, perche' sono cronaca. `uniq -d` sugli
+  identificativi ora non trova piu' niente.
+
+  ✅ Due sabotaggi (tolto il confine di parola → 2 rossi; la ricerca esentata dai bloccanti → 2).
+  16 casi nuovi; unit **185/185**, integrazione fascicoli **12/12**, typecheck, lint, handoff-lint.
 
   **Confine di sessione dichiarato**: F4 e' otto sotto-passi con commit atomici. Si va avanti
   finche' il guardiano regge; cio' che non entra resta dichiarato qui, non lasciato a meta'.

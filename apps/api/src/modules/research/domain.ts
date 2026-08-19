@@ -99,7 +99,7 @@ export interface DominioRicercabile<T = unknown> {
 }
 
 /** Il registro dei domini dichiarati. Si popola in `domains/index.ts`. */
-export type RegistroDomini = ReadonlyMap<string, DominioRicercabile<never>>;
+export type RegistroDomini = ReadonlyMap<string, DominioRicercabile<unknown>>;
 
 export class DominioSconosciutoError extends Error {
   constructor(public readonly chiave: string, disponibili: readonly string[]) {

@@ -332,7 +332,7 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   | **F4a** ✅ | lo schema e il registro delle fonti — **FATTO 2026-08-19** | mig. `000333`: `tenant_id` nullabili + `CHECK` sulla coppia, legame alla versione di variante, trigger di coerenza candidato↔corsa, `sys.sys_research_sources` (approvatore obbligatorio quando approvata), sentinella nuova |
   | **F4b** ✅ | il dominio ricercabile e' un contratto in codice — **FATTO 2026-08-19** | `research/domain.ts` (domande · forma · chiave naturale · controlli), il dominio pilota `research_sources`, il confronto **per suffisso di host** |
   | **F4c** ✅ | il lettore web — **FATTO 2026-08-19** | `research/web-reader.ts`: solo `https`, guardia SSRF, limiti di dimensione e tempo, **SHA-256 dei byte** che riproduce |
-  | **F4d** | il motore | `research/engine.ts`: corsa → letture → proposte → validazione (forma · fonti · doppioni) → candidati + evidenze + esiti, stato della corsa |
+  | **F4d** ✅ | il motore — **FATTO 2026-08-19** | `research/engine.ts`: corsa → letture → proposte → validazione (forma · fonti · doppioni) → candidati + evidenze + esiti, stato della corsa |
   | **F4e** | le difese §4.4 e §4.5 | il testo grezzo non entra mai in una proposta; le domande verso il web si costruiscono **solo** dai parametri di categoria, con un cancello meccanico |
   | **F4f** | `D-81` si estingue | `BLUEPRINT_FIELD_LOCKED` sui campi bloccanti, col nome del campo e il perche' |
   | **F4g** | la superficie API | le quattro rotte di §6, i permessi, il contratto in `@heuresys/shared` |
@@ -393,6 +393,23 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   perche' quel salto non si puo' provocare con un server locale. L'impronta e' verificata contro
   uno SHA-256 calcolato per conto proprio su un **server HTTP vero**: 19 casi nuovi, suite unit
   **153/153**, typecheck e lint verdi.
+
+  ✅ **F4d FATTA — 2026-08-19 (S1074)** · `research/engine.ts`. Cinque controlli trasversali, ognuno
+  col **proprio nome** nel registro delle validazioni — `SHAPE_VALID` (e se la forma non regge gli
+  altri sono `SKIPPED`, non `PASSED`), `SOURCES_PRESENT`, `SOURCES_POLICY`, `NOT_DUPLICATE`,
+  `RAW_TEXT_LEAK` — piu' quelli del dominio. Due cose valgono piu' delle altre: **una fonte
+  dichiarata ma mai aperta non e' una fonte**, e' una citazione, e una citazione non ha impronta;
+  e `RAW_TEXT_LEAK` e' la difesa di §4.4 resa meccanica — un campo che ricopia un blocco lungo di
+  una pagina letta sta **riportando** invece di ricavare, ed e' il veicolo con cui un'istruzione
+  nascosta in una pagina entrerebbe nel modello. La difesa di §4.5 e' il **mandato**: chi propone
+  riceve dominio, contesto di categoria, domande e la lettura — un test conta le chiavi una per una.
+
+  🔬 **UN DIFETTO TROVATO DAL TEST, non dal ragionamento**: il tetto delle pagine tagliava **in
+  silenzio** — la corsa non dichiarava cio' che non aveva aperto per limite raggiunto, e un tetto
+  che taglia in silenzio fa sembrare «coperto» cio' che non lo era. Corretto: si registra.
+
+  ✅ Due sabotaggi, ognuno rosso solo dove deve (spenta `RAW_TEXT_LEAK` → 1; fonti dichiarate
+  contate come lette → 1). 16 casi nuovi, suite unit **169/169**, typecheck e lint verdi.
 
   **Confine di sessione dichiarato**: F4 e' otto sotto-passi con commit atomici. Si va avanti
   finche' il guardiano regge; cio' che non entra resta dichiarato qui, non lasciato a meta'.

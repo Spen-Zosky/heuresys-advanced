@@ -15,8 +15,8 @@ import type { DominioRicercabile } from "../domain.js";
 import { DominioSconosciutoError } from "../domain.js";
 import { RESEARCH_SOURCES_DOMAIN } from "./research-sources.js";
 
-const DOMINI: ReadonlyArray<DominioRicercabile<never>> = [
-  RESEARCH_SOURCES_DOMAIN as unknown as DominioRicercabile<never>,
+const DOMINI: ReadonlyArray<DominioRicercabile<unknown>> = [
+  RESEARCH_SOURCES_DOMAIN as unknown as DominioRicercabile<unknown>,
 ];
 
 const PER_CHIAVE = new Map(DOMINI.map((d) => [d.chiave, d]));
@@ -26,7 +26,7 @@ export function chiaviDominio(): string[] {
   return [...PER_CHIAVE.keys()];
 }
 
-export function dominiDichiarati(): ReadonlyArray<DominioRicercabile<never>> {
+export function dominiDichiarati(): ReadonlyArray<DominioRicercabile<unknown>> {
   return DOMINI;
 }
 
@@ -35,7 +35,7 @@ export function dominiDichiarati(): ReadonlyArray<DominioRicercabile<never>> {
  * valle interpreta come «nessun controllo da applicare»: un dominio sconosciuto che passa
  * silenziosamente scriverebbe proposte che nessuna regola ha guardato.
  */
-export function risolviDominio(chiave: string): DominioRicercabile<never> {
+export function risolviDominio(chiave: string): DominioRicercabile<unknown> {
   const d = PER_CHIAVE.get(chiave);
   if (!d) throw new DominioSconosciutoError(chiave, chiaviDominio());
   return d;

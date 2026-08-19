@@ -12,6 +12,7 @@ import type {
 } from "@heuresys/shared";
 import { Button, Spinner, ErrorState, EmptyState } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
+
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { StatusPill } from "@/components/status-pill";
 
@@ -44,6 +45,24 @@ export default function TenantBlueprintBuildPage({
   const { id, n } = use(params);
   const { t } = useTranslation("blueprints");
   const qc = useQueryClient();
+
+  /**
+   * L'errore dell'API, riconosciuto per FORMA e non con `instanceof`.
+   *
+   * ⚠ `isApiError()` usa `instanceof ApiError`, e nel bundle di produzione quel controllo
+   * torna **false**: la pagina mostrava il messaggio generico e ritentava una risposta 409 —
+   * cioe' una condizione stabile — restando sullo Spinner oltre il timeout del caso E2E.
+   * Misurato leggendo lo screenshot del fallimento: il testo era «Il piano non e' calcolabile
+   * per questa versione», che e' proprio il ramo di ripiego.
+   * Un controllo strutturale non dipende da quale copia della classe ha costruito l'oggetto.
+   */
+  const erroreApi = (e: unknown): { status: number; message: string } | null =>
+    typeof e === "object" && e !== null && "status" in e && "code" in e
+      ? {
+          status: Number((e as { status: unknown }).status),
+          message: String((e as { message?: unknown }).message ?? ""),
+        }
+      : null;
   const perms = useCurrentUserPermissions();
   const canWrite = perms.data?.permissions.includes("tenant_blueprint:write") ?? false;
   const [esitoFirma, setEsitoFirma] = useState<ApplyVersionResponse | null>(null);
@@ -62,6 +81,18 @@ export default function TenantBlueprintBuildPage({
       apiFetch<BuildPlanPreview>(`/v1/tenant-blueprints/${id}/versions/${n}/build-plan`, {
         method: "POST",
       }),
+    // ⚠ UN 4xx NON SI RITENTA, ED E' LA CURA DI UN DIFETTO MISURATO (#211 F4, S1072).
+    //   Il servizio risponde 409 quando il piano non e' calcolabile — modello vuoto, sorgente
+    //   non dichiarata, contenuto incoerente — e sono condizioni STABILI: ritentarle non
+    //   cambia la risposta, ma tiene `isLoading` vero per tutta la durata dei tentativi. La
+    //   pagina restava sullo Spinner **all'infinito** invece di dire cosa fosse successo, e
+    //   il caso E2E non trovava ne' il piano ne' l'errore: era muta proprio quando aveva
+    //   qualcosa di preciso da dire. I 5xx e i guasti di rete restano ritentabili, perche'
+    //   li' un secondo tentativo puo' davvero andare diversamente.
+    retry: (tentativi, errore) => {
+      const api = erroreApi(errore);
+      return api && api.status >= 400 && api.status < 500 ? false : tentativi < 2;
+    },
   });
 
   const firma = useMutation({
@@ -84,7 +115,17 @@ export default function TenantBlueprintBuildPage({
   if (!versione) return <EmptyState title={t("dossier.notFound")} />;
 
   // Perché NON si può firmare — un motivo per volta, e in ordine di precedenza.
-  const motivoBloccante: string | null = !canWrite
+  // ⚠ SE IL PIANO NON C'E', LA FIRMA NON DEVE ACCENDERSI — difetto misurato in `#211` F4.
+  //   Il pulsante «Chiedi l'approvazione» restava attivo anche quando il piano non era
+  //   calcolabile: premendolo si apriva una richiesta di approvazione **vera** per una
+  //   costruzione che sarebbe fallita, e qualcuno avrebbe dovuto decidere su una cosa
+  //   impossibile. Un blocco in piu' qui costa una riga; il contrario costa una richiesta
+  //   sbagliata nella coda di qualcun altro.
+  //   Sta PRIMA degli altri motivi perche' e' il piu' concreto: senza piano non c'e'
+  //   proprio niente da firmare, qualunque sia lo stato della versione.
+  const motivoBloccante: string | null = piano.isError
+    ? t("dossier.build.blockedNoPlan")
+    : !canWrite
     ? t("dossier.build.blockedNoPermission")
     : versione.status === "APPLIED"
       ? t("dossier.build.blockedApplied")
@@ -123,7 +164,26 @@ export default function TenantBlueprintBuildPage({
       </header>
 
       {piano.isError ? (
-        <ErrorState description={t("dossier.build.planError")} />
+        // ⚠ IL MOTIVO, NON UN ERRORE GENERICO (#211 F4, S1072). Qui c'era
+        //   `t("dossier.build.planError")` — una frase uguale per ogni causa. Ma il servizio
+        //   dice cose PRECISE e utili: «il modello non ha contenuto: va prima riempito»,
+        //   «la versione non dichiara una sorgente di costruzione», «sorgente sconosciuta».
+        //   Buttarle via e scrivere «non è stato possibile calcolare il piano» costringe chi
+        //   guarda ad aprire i log per sapere cosa fare — ed è lo stesso difetto che un altro
+        //   caso di questa suite chiama «la pagina dice la verità sul vuoto, invece di tacere».
+        //   Trovato perché `#132` F3 ha reso il modello vuoto: la pagina è diventata muta
+        //   proprio quando aveva qualcosa di preciso da dire.
+        // ⚠ Il contenitore porta il `data-testid`, non `ErrorState`: quel componente viene dal
+        //   design system (`@heuresys/ui`) e NON propaga gli attributi che non conosce —
+        //   misurato, il caso E2E non trovava l'elemento. Il componente non si modifica da
+        //   qui (vive nell'altro repo), quindi il marcatore va sul contenitore.
+        <div data-testid="build-plan-error">
+          <ErrorState
+            description={
+              erroreApi(piano.error)?.message ?? t("dossier.build.planError")
+            }
+          />
+        </div>
       ) : p ? (
         <section
           className="rounded-lg border border-border bg-card p-4"

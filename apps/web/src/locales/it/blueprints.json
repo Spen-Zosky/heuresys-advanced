@@ -249,7 +249,8 @@
         "kpis": "Indicatori",
         "skillEvidence": "Evidenze di competenza",
         "kpiEvidence": "Evidenze di indicatore"
-      }
+      },
+      "blockedNoPlan": "Il piano non è calcolabile: non c'è niente da firmare finché il modello non ha contenuto."
     }
   }
 }

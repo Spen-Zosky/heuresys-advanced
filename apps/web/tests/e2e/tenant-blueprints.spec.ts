@@ -196,28 +196,61 @@ test.describe("fascicolo di configurazione", () => {
 
     await expect(page.getByTestId("tenant-blueprint-build")).toBeVisible({ timeout: 30_000 });
 
-    // Il piano c'e' e porta la sorgente dichiarata: senza `build_source_key` la
-    // costruzione dovrebbe rifiutarsi, non ripiegare sull'unico archetipo.
-    await expect(page.getByTestId("build-plan")).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByTestId("build-source")).toBeVisible();
+    // ⚠⚠ QUESTO CASO HA DUE ESITI LEGITTIMI, e li verifica ENTRAMBI. Non e' indecisione:
+    //    e' l'unico modo di scrivere una prova che resti vera attraverso `#132`.
+    //    · Fino a `#132` F3 il contenuto del modello viveva in un archetipo TypeScript, e
+    //      il piano c'era sempre.
+    //    · Da F3 a F6 il modello e' VUOTO per decisione (E29: «l'archetipo deve sparire e
+    //      nascere dalla ricerca»), quindi la costruzione **si rifiuta** — ed e' il
+    //      comportamento giusto, non un guasto: uno zero silenzioso, «costruito, zero
+    //      righe», sarebbe indistinguibile da un successo.
+    //    · Da F6 in poi il modello avra' di nuovo contenuto e il piano tornera'.
+    //    Un caso che asserisse solo il primo esito sarebbe rosso per mesi su un prodotto
+    //    che si comporta come deve — e un rosso che non indica un difetto insegna a non
+    //    guardare la suite (e' la lezione della famiglia ③ di F3).
+    const piano = page.getByTestId("build-plan");
+    const errore = page.getByTestId("build-plan-error");
+    await expect(piano.or(errore)).toBeVisible({ timeout: 30_000 });
 
-    // Le DUE colonne distinte. Un piano con la sola «nascerebbero» renderebbe
-    // indistinguibile una costruzione nuova da una ri-applicazione.
-    const unita = page.getByTestId("build-row-orgUnits");
-    await expect(unita).toBeVisible();
-    const celle = unita.locator("td");
-    await expect(celle).toHaveCount(3);
-    // Il numero di «nascerebbero» e' un numero, non un trattino: il piano e' reale.
-    await expect(celle.nth(1)).toHaveText(/^\d[\d.,]*$/);
+    if (await piano.isVisible()) {
+      // Il piano c'e' e porta la sorgente dichiarata: senza `build_source_key` la
+      // costruzione dovrebbe rifiutarsi, non ripiegare su una sorgente qualsiasi.
+      await expect(page.getByTestId("build-source")).toBeVisible();
 
-    // La firma e' POSSIBILE — e questa e' la prova che la guardia non e' un muro
-    // cieco: su una versione approvata il pulsante si accende.
-    await expect(page.getByTestId("build-apply-button")).toBeEnabled();
-    await expect(page.getByTestId("build-apply-blocked")).toHaveCount(0);
-    // ⚠ E NON SI PREME. Aprirebbe una richiesta di approvazione vera.
+      // Le DUE colonne distinte. Un piano con la sola «nascerebbero» renderebbe
+      // indistinguibile una costruzione nuova da una ri-applicazione.
+      const unita = page.getByTestId("build-row-orgUnits");
+      await expect(unita).toBeVisible();
+      const celle = unita.locator("td");
+      await expect(celle).toHaveCount(3);
+      // Il numero di «nascerebbero» e' un numero, non un trattino: il piano e' reale.
+      await expect(celle.nth(1)).toHaveText(/^\d[\d.,]*$/);
 
-    // La porta verso il registro esiste da qui, perche' e' la' che si verifica cosa
-    // e' nato — non nella risposta di `apply`, che di proposito non porta conteggi.
+      // La firma e' POSSIBILE — e questa e' la prova che la guardia non e' un muro
+      // cieco: su una versione approvata il pulsante si accende.
+      await expect(page.getByTestId("build-apply-button")).toBeEnabled();
+      await expect(page.getByTestId("build-apply-blocked")).toHaveCount(0);
+      // ⚠ E NON SI PREME. Aprirebbe una richiesta di approvazione vera.
+    } else {
+      // ⭐ IL RIFIUTO DEVE DIRE PERCHE'. Non basta che la pagina non mostri un piano: deve
+      //    riportare il MOTIVO che il servizio ha dato, altrimenti chi guarda deve aprire i
+      //    log per sapere cosa fare. Il messaggio nomina il modello e cosa gli manca.
+      await expect(errore).toContainText(/modello|contenuto|sorgente/i);
+
+      // ⭐ E LA FIRMA NON DEVE ACCENDERSI su un piano che non esiste: premerla aprirebbe una
+      //    richiesta di approvazione VERA per una costruzione che fallira', e qualcuno
+      //    dovrebbe decidere su una cosa impossibile.
+      //    ⚠ Il pulsante RESTA nel DOM, disabilitato, e accanto compare il motivo — ed e'
+      //      meglio che farlo sparire: un pulsante assente non spiega niente, uno spento col
+      //      motivo accanto dice cosa manca. (Prima qui c'era `toHaveCount(0)`: era la
+      //      proprieta' sbagliata, e la prova l'ha mostrato restando rossa su un prodotto
+      //      che si comportava bene.)
+      await expect(page.getByTestId("build-apply-button")).toBeDisabled();
+      await expect(page.getByTestId("build-apply-blocked")).toBeVisible();
+    }
+
+    // La porta verso il registro esiste in entrambi i casi, perche' e' la' che si verifica
+    // cosa e' nato — non nella risposta di `apply`, che di proposito non porta conteggi.
     await expect(page.getByTestId("build-to-registry")).toBeVisible();
   });
 

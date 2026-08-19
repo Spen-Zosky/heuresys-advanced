@@ -249,7 +249,8 @@
         "kpis": "KPIs",
         "skillEvidence": "Skill evidence",
         "kpiEvidence": "KPI evidence"
-      }
+      },
+      "blockedNoPlan": "The plan cannot be computed: there is nothing to sign until the model has content."
     }
   }
 }

@@ -113,18 +113,29 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   La domanda che F1 poneva — «riuso di `sys_organization_unit_templates` **se la forma regge**» — ha
   ora una risposta misurata, e la risposta è **no, non come sta**. Tre reperti:
 
-  ① **Le 225 righe sono orfane per intero, non in parte.** Puntano a **9** blueprint distinti, e
-  nessuno dei nove esiste — verificato contro tutte e quattro le tabelle candidate
-  (`sys_blueprint_variants`, `_families`, `sys_tenant_blueprints`, `_variant_versions`): **0 su 9**
-  in ognuna. Non sono «alcune orfane»: è l'intera tabella che punta al vuoto.
+  ① ⚠ **PRIMA CONCLUSIONE SBAGLIATA, CORRETTA NELLA STESSA ORA.** Avevo misurato che i **9**
+  identificativi non esistono in nessuna delle quattro tabelle candidate (`sys_blueprint_variants`,
+  `_families`, `sys_tenant_blueprints`, `_variant_versions`: **0 su 9** in ognuna) e ne avevo
+  concluso «225 righe orfane». **È falso**, e la risposta stava nel file che le crea: la
+  mig. `000064` dichiara la colonna così — `organization_unit_template_blueprint_id uuid NOT NULL,
+  -- legacy template_id group (the 9)`. Quei nove **non sono blueprint di questo sistema**: sono il
+  `template_id` del database di provenienza, conservato come **raggruppamento**. Non hanno mai avuto
+  un referente locale, quindi non sono diventati orfani: non lo sono mai stati.
+  **La lezione**: «0 su 9» misurava una cosa vera e ne suggeriva una falsa. Bastava leggere il file
+  che crea l'oggetto prima di dire cosa sia — ed è la stessa regola che vale per le migrazioni.
 
-  ② **Il riferimento non è vincolato, ed è per questo che sono potute morire in silenzio.**
-  `organization_unit_template_blueprint_id` **non ha alcuna FK**: le uniche FK della tabella vanno
-  verso sé stessa (il padre), verso i tipi di unità e verso `sys_users` (chi ha creato/aggiornato).
-  Una colonna che si chiama `..._blueprint_id` e non è agganciata a nessun blueprint è una promessa
-  che il database non mantiene.
+  ② **Il riferimento non è vincolato, e ora si sa perché**: non c'è nulla a cui agganciarlo. Le
+  uniche FK vanno verso sé stessa (il padre), verso i tipi di unità e verso `sys_users`. Resta però
+  vero che una colonna chiamata `..._blueprint_id` che raggruppa identificativi di un altro sistema
+  è un nome che mente sul proprio contenuto — e questo F1 lo può correggere.
 
-  ③ **Il modello aggancia un «blueprint» generico, non una VERSIONE** — che è invece ciò che F1
+  ③ **Le 225 righe SONO contenuto di modelli**, ed è il reperto più utile: nove strutture
+  organizzative complete (codice, nome IT/EN, padre, tipo, livello, natura), cioè esattamente ciò
+  che F1 cerca. Vivono già dentro `sys.*`, quindi riusarle non è un import dal legacy (I12: «ciò che
+  manca si costruisce o si deriva dai dati che `sys.*` già contiene») — ma va verificato contro
+  `check_no_legacy_ingest.py` prima di appoggiarvisi.
+
+  ④ **Il modello aggancia un raggruppamento, non una VERSIONE** — che è invece ciò che F1
   chiede («contenuto di una **versione di variante**»). È la differenza fra un contenuto che può
   essere fotografato e riapplicato e uno che galleggia.
 

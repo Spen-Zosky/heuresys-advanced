@@ -868,6 +868,18 @@
   - limite-dichiarato: la classificazione automatica cerca **segnali testuali** nei blocchi del registro, non legge i file di consegna né misura il database. Serve a ordinare la coda, non a promuovere o bocciare una voce. Un blocco scritto bene ma sbagliato le sfugge — ed è esattamente il caso che `#149` esiste per coprire, una voce alla volta, quando la si prende in carico
   - lab-id: 2026-08-06-ritrattare-le-ingestioni-alla-luce-delle-correzioni
 
+- **#218 I residui del legacy senza referente locale: analizzarli tutti, e risolverli uno per uno** · status: ACTIVE
+  - priority: P1 · effort: **indagine + bonifica, ~2-3 sessioni** (l'indagine misura quanti sono; la bonifica dipende da quel numero) · doc: `.programmi/` (da aprire)
+  - nasce-da: **direttiva di Enzo, 2026-08-19** — *«tutti i dati provenienti dal db legacy che non hanno mai avuto un referente locale devono essere analizzati e trattati correttamente: per ognuno si deve decidere se eliminarli o se è opportuno/necessario creare il referente locale. È comunque da privilegiare la cancellazione/bonifica per l'igiene del DBMS attuale, che ormai ha superato il legacy ed è completamente autonomo»*
+  - il-caso-che-l'ha-prodotta: le **225** righe di `sys_organization_unit_templates` portano `organization_unit_template_blueprint_id`, che la mig. `000064` dichiara essere «legacy template_id group (the 9)». Nove identificativi del sistema di provenienza, **senza FK** perché non c'è nulla a cui agganciarli. Li avevo letti come «orfani» e stavo per trattarli come un guasto: sono invece un residuo mai risolto
+  - perche'-conta: un riferimento ereditato che non punta a nulla di locale **mente sul proprio nome** e, a occhio, è indistinguibile da un difetto. Finché ce ne sono, il database non è autonomo dal legacy nemmeno nella propria descrizione di sé
+  - la-previsione-di-Enzo, da verificare: *«un'attenta e approfondita analisi del DBMS sarà in grado di restituire le informazioni necessarie e di permettere una pulizia profonda che ne assicura l'indipendenza e l'autonomia»*
+  - come-si-cerca (il criterio meccanico da costruire): una colonna che **nomina un oggetto** (`..._blueprint_id`, `..._template_id`, `..._external_code`, `LEGACY_*`) e **non ha una FK**. Per ognuna: leggere il file che crea la tabella — quasi sempre dice cosa sia — poi decidere ed eseguire
+  - la-decisione-per-ciascuno: **eliminare (preferito)** oppure **creare il referente locale** se opportuno o necessario. Mai «lasciare com'è» senza una ragione scritta
+  - non-e'-in-conflitto-con-I12: «il rubinetto è chiuso» vieta di **importare** nuove righe dal legacy; questa voce chiede di **risolvere** ciò che è già dentro `sys.*`
+  - vincoli: le quattro cose di `db-migrations.md` (misura prima · guardia · post-condizione che protegge ciò che non doveva cambiare · rollback dichiarato) e **ADR-0035** (si emenda il file che crea l'oggetto, non si cancella solo a valle)
+  - primo-passo: l'indagine — censire con `pg_constraint` tutte le colonne che nominano un oggetto senza FK, e per ognuna leggere la migrazione che la crea. È essa stessa un deliverable con un esito
+
 - **#214 Adozione dell'agente sui perimetri in coda, in ordine di rischio crescente** · status: ACTIVE
   - priority: P2 · effort: continuativo (un perimetro per volta; l'apertura è una riga in `agent-perimetri.json` con decisione e data) · doc: `docs/kb/tools/check_concetti_agente.py`
   - nasce-da: `#156`, il cui `chiuso-quando` è soddisfatto (il percorso a tre passi funziona sul vivo). Questa è la **seconda metà della dottrina** di Enzo del 2026-08-16 — *«l'agente va su qualunque perimetro dove porta valore aggiunto»* — che per natura non si chiude in una sessione: è una coda che si consuma

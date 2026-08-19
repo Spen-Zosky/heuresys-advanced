@@ -330,7 +330,7 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   | # | sotto-passo | cosa consegna |
   |---|---|---|
   | **F4a** ✅ | lo schema e il registro delle fonti — **FATTO 2026-08-19** | mig. `000333`: `tenant_id` nullabili + `CHECK` sulla coppia, legame alla versione di variante, trigger di coerenza candidato↔corsa, `sys.sys_research_sources` (approvatore obbligatorio quando approvata), sentinella nuova |
-  | **F4b** | il dominio ricercabile e' un contratto in codice | `research/domain.ts` (domande · forma · chiave naturale · controlli), il dominio pilota `research_sources`, il confronto **per suffisso di host** |
+  | **F4b** ✅ | il dominio ricercabile e' un contratto in codice — **FATTO 2026-08-19** | `research/domain.ts` (domande · forma · chiave naturale · controlli), il dominio pilota `research_sources`, il confronto **per suffisso di host** |
   | **F4c** | il lettore web | `research/web-reader.ts`: solo `https`, guardia SSRF, limiti di dimensione e tempo, **SHA-256 dei byte** che riproduce |
   | **F4d** | il motore | `research/engine.ts`: corsa → letture → proposte → validazione (forma · fonti · doppioni) → candidati + evidenze + esiti, stato della corsa |
   | **F4e** | le difese §4.4 e §4.5 | il testo grezzo non entra mai in una proposta; le domande verso il web si costruiscono **solo** dai parametri di categoria, con un cancello meccanico |
@@ -365,6 +365,20 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   storiche ancora `12`.
 
   Prova generale sul linux-pc **VERDE**: 308 migrazioni, due passate, **23/23** sentinelle a zero.
+
+  ✅ **F4b FATTA — 2026-08-19 (S1074)** · `research/domain.ts` (il contratto in quattro parti),
+  `research/sources.ts` (la politica delle fonti, confronto **per suffisso** senza regex e senza
+  jolly), `research/domains/research-sources.ts` (il dominio pilota) e `domains/index.ts` — l'unico
+  posto in cui una chiave diventa un modo di **cercare**, gemello di `resolveBuildSource()` per il
+  costruire. La difesa di §4.5 e' nella **firma del tipo**: `domande()` riceve un `ContestoRicerca`
+  di sole categorie, e non il fascicolo — interpolare il nome di un cliente in una domanda diretta
+  al web non e' una svista possibile.
+
+  ✅ **DUE SABOTAGGI INDIPENDENTI, ognuno lascia rosso SOLO cio' che quella difesa copre**:
+  `endsWith` sostituito con `includes` → **3** casi rossi (la trappola, il confine di etichetta, il
+  rifiuto in `fonteAmmessa`), e il caso positivo resta verde — cioe' i negativi non erano verdi per
+  vacuita'; spento `SOURCE_EVIDENCE_IS_SELF` → **1** caso rosso soltanto. 21 casi nuovi; suite unit
+  **134/134**, typecheck e lint verdi.
 
   **Confine di sessione dichiarato**: F4 e' otto sotto-passi con commit atomici. Si va avanti
   finche' il guardiano regge; cio' che non entra resta dichiarato qui, non lasciato a meta'.

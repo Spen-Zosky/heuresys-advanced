@@ -595,11 +595,19 @@ if [ -f "$PC" ]; then
     && ok "profilo: finestra vuota => documenti (non si arma il nulla)" || fail "profilo finestra vuota ($out)"
   rm -rf "$T"
 
-  # Lo strumento che traduce la misura dell'atlante deve dire UNA delle tre parole, sempre.
-  a="$(python docs/kb/tools/atlante_fresco.py 2>/dev/null || echo VUOTO)"
-  case "$a" in
-    fresco|vecchio|indeciso) ok "atlante_fresco.py: risponde con una parola del vocabolario chiuso ($a)" ;;
-    *) fail "atlante_fresco.py: risposta fuori vocabolario ('$a')" ;;
+  # Lo strumento che traduce la misura dell'atlante deve dire UNA delle tre parole, sempre —
+  # e il codice d'uscita fa parte del contratto quanto la parola: 0=fresco 1=vecchio 2=indeciso.
+  # ⚠ QUESTO CASO ERA VERDE SOLO NEL CASO FORTUNATO. Catturava l'output con `|| echo VUOTO`, che
+  # aggiunge «VUOTO» ogni volta che l'uscita non e' zero — cioe' per DUE delle tre risposte
+  # valide. In locale passava perche' qui l'atlante e' fresco (uscita 0); in CI, dove il
+  # checkout e' shallow e la misura non e' possibile, lo strumento risponde correttamente
+  # «indeciso» con uscita 2 e il test lo dichiarava rotto. Ora si verifica la COPPIA
+  # parola↔codice, che e' piu' forte e non ha un caso fortunato.
+  a="$(python docs/kb/tools/atlante_fresco.py 2>/dev/null)"; rc=$?
+  case "$a:$rc" in
+    fresco:0|vecchio:1|indeciso:2)
+      ok "atlante_fresco.py: parola e codice d'uscita si corrispondono ($a/$rc)" ;;
+    *) fail "atlante_fresco.py: fuori contratto — parola '$a' con uscita $rc" ;;
   esac
 else
   fail "$PC mancante"

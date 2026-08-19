@@ -504,6 +504,43 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
     e la post-condizione verifica che siano **ancora 12, con lo stesso tenant e lo stesso stato** —
     cioe' protegge cio' che NON doveva cambiare. Rollback dichiarato nella migrazione.
 
+  🔎 **INDAGINE FATTA 2026-08-19 (S1074) — LA CASA DEI PROCESSI E' QUELLA VECCHIA, e la
+  domanda aperta si chiude.** Misurato sul vivo, leggendo prima i file che creano le due tabelle:
+
+  | | `sys_blueprint_process_registry` (mig. `000008`) | `sys_blueprint_content_processes` (mig. `000327`) |
+  |---|---|---|
+  | righe | **23**, tutte su **una** versione di variante | **0** |
+  | legame alla versione | c'e' (`..._variant_version_id`, popolato) | c'e' |
+  | chi la referenzia | **5 tabelle**, non 3 | **nessuna** |
+  | righe che vi puntano | **111** vive | 0 |
+  | chi la nomina nel codice | i moduli del fascicolo | **nessun file** |
+  | cosa ha in piu' | — | `name_en`, `owner_position_code` |
+
+  **Il reperto che decide**: fra le cinque referenze c'e'
+  `sys_tenant_blueprint_process_decisions` — **le decisioni del consulente sui processi del
+  fascicolo** (7 righe vive, `#131` P1). Scegliere la casa nuova vorrebbe dire che le decisioni
+  gia' prese non hanno piu' a cosa agganciarsi. Le altre quattro: `sys_blueprint_overrides` (7),
+  `sys_process_kpi_templates` (0), `sys_content_blueprint_links` (1) e
+  `sys_organization_unit_processes` (**96**).
+
+  **E le due non attribuiscono la stessa cosa a cose diverse: sono due STRATI.** Le 96 righe di
+  `sys_organization_unit_processes` portano `org_unit_process_tenant_id` e sono una **matrice
+  RACI del cliente** (OWNER 23 · CONSULTED 22 · INFORMED 23 · CONTRIBUTOR 28), non contenuto di
+  modello. `owner_position_code` della tabella nuova e' invece **contenuto**: chi presidia quel
+  processo nel modello, per codice di posizione. La contrapposizione «posizione contro unita'»
+  che questo piano segnalava **non regge alla misura**: una descrive il modello, l'altra
+  l'attuazione in un'azienda.
+
+  **Cosa deve fare `F5`**, e il costo e' misurato:
+  1. la casa e' `sys_blueprint_process_registry`;
+  2. vi si aggiungono le due colonne che la nuova aveva e lei no — il **nome inglese** (E16, «ogni
+     proposta nasce bilingue»: misurato, **0 su 23** processi ha oggi un nome inglese) e il
+     **presidio per codice di posizione**;
+  3. `sys_blueprint_content_processes` si ritira: **0 righe, 0 referenze, 0 file di codice**. Il
+     costo del ritiro e' emendare la `000327` (il blocco ⑤ **e** la sua riga nel registro di
+     riconciliazione, o la `000062` la ritrovera' come non classificata) piu' il `DROP` a valle —
+     ADR-0035, la coppia. Nessuna bonifica di dati.
+
 - [ ] **F5 i cinque domini ricercabili** — `organization_units` · `positions` · `skills` · `kpis` ·
   `business_processes`. Il primo costa la forma, gli altri quattro la riusano
 - [ ] **F6 il ponte: le proposte approvate diventano il modello** — famiglia (se non esiste),
@@ -532,7 +569,9 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
 Non entra in «cosa resta» di `#132`, non blocca la chiusura di nessuna fase. Enzo decide se e
 quando.
 
-1. **Il dominio «processi» ha DUE case, e una è nata vuota** (misurato S1072).
+1. ✅ **RISOLTA in S1074 — Il dominio «processi» ha DUE case, e una è nata vuota** (misurato
+   S1072). La risposta, misurata, sta accanto a `F5`: la casa è quella **vecchia**, e la nuova si
+   ritira a costo quasi nullo. Il testo che segue è la domanda com'era posta, tenuta per storia.
    `sys.sys_blueprint_process_registry` **esisteva già**: 23 righe, agganciata alla versione di
    variante con una FK *composita* `(versione, variante)`, e con tre tabelle che le puntano
    (`sys_blueprint_overrides`, `sys_content_blueprint_links`, `sys_organization_unit_processes`).

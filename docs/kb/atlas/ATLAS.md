@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `04e990c4` (2026-08-19T14:50:03+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `a12f0257` (2026-08-19T18:51:50+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -99,7 +99,7 @@
 | talent-review | /v1/talent-review | 6 | 1 | 7 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 1 |
 | tenant-blueprints | /v1/tenant-blueprints | 17 | 0 | 13 | 1 |
-| tenant-materialization | /v1/tenant-materialization | 2 | 1 | 11 | 3 |
+| tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 2 | 1 |
 | time-off | /v1/time-off | 3 | 1 | 7 | 2 |
 | training-initiatives | /v1/training-initiatives | 4 | 4 | 3 | 1 |

@@ -84,7 +84,12 @@ Resta un difetto vero, trovato smentendo quello supposto → **C4**.
       avevo tratto la conclusione sbagliata («la latenza domina, si esegua dove il DB e' locale») e
       **la misura successiva l'ha smentita**: in CI, senza tunnel, la stessa suite dura **2065-2187
       s** contro i 1834 in locale. **F2 si fa come scritta**, non e' sospesa
-- [ ] **P1.3 `#198`** T9b — ~60k · ⚠ si ferma a chiedere conferma a Enzo
+- [~] **P1.3 `#198`** T9b — **TENTATA e DISFATTA** 2026-08-19 (`99b71f9d`). Enzo aveva autorizzato,
+      ma la mia richiesta di conferma era **incompleta**: non gli ho detto che l'azienda sarebbe
+      stata necessariamente una **banca**, perche' l'archetipo e' cablato in TypeScript (296 righe)
+      e `#132` F3 — che lo ritira — non e' fatta. Il motore ha funzionato (11/11 + PROVA C 3/3,
+      184 righe costruite e 184 tracciate), l'azienda e' stata rimossa per intero e i conteggi sono
+      tornati esatti. **Si rifa' dopo `#132`**
 - [x] **P1.4 `#142`** cruscotti, F3b+F4 — **VOCE CHIUSA** 2026-08-19 (`62d59c45` + `95e7c2e8`).
       F3b: 27 fornitori di contenuto, prova live 3/3 con tre login reali, e **tre difetti trovati
       dalla prova live** — fra cui un 500 sul Self-Service, che I17 garantisce a chiunque.
@@ -93,11 +98,22 @@ Resta un difetto vero, trovato smentendo quello supposto → **C4**.
       **vecchie**: un'asserzione che era una fotografia del momento, e un totale esatto che il suo
       stesso commento diceva di spostare
 - [ ] **P1.5 `#143`** squadre, F2→F5 — ~1000k
-- [ ] **P1.6 `#132`** P2a, F1→F7 — budget non dichiarato
+- [~] **P1.6 `#132`** P2a, F1→F7 — **APERTA da Enzo il 2026-08-19**, e ora e' la voce che sblocca
+      `#198`. **F1: indagine FATTA** (`4beb0c54`) — la forma di `sys_organization_unit_templates`
+      **non regge**: 225 righe orfane per intero (9 blueprint su 9 inesistenti), il riferimento
+      senza FK, e due domini su cinque (`positions`, `skills`) **senza alcuna tabella di modelli**.
+      La scrittura di F1 e' misurata a ~150k: non entrava nel residuo, e si e' fermata all'esito
+      invece che a una migrazione a meta'.
+      ⭐ **La correzione di Enzo che orienta tutta la voce**: *«e' il flusso di creazione che deve
+      generare anche quegli oggetti»* — un'azienda di un tipo mai visto non deve TROVARE famiglia e
+      modello, deve **produrli**. E' `#132` F6, e riqualifica `sys_blueprint_families`/`_variants`:
+      non un catalogo anticipato, ma un **sottoprodotto dei clienti**
 - [x] **P2.1 `#214` F5** — FATTO 2026-08-19 (`95e7c2e8`) · le classi di una resource multiclasse
       smettono di essere prosa: NON MISURABILI **da 14 a 12**, `analytics` e `dashboard` escono
       dal «non so». ⏳ **F3 resta di Enzo** (aprire un perimetro e' una decisione di esposizione)
-- [ ] **P2.2 `#211`** suite E2E completa, F3→F5 — ~1 sessione
+- [~] **P2.2 `#211`** suite E2E — **F3 FATTA** (`049c1f31`): 24 passati, zero falliti sulle sei
+      famiglie; cinque erano test rimasti indietro, la sesta un guasto vero del prodotto (la pagina
+      non chiedeva l'azienda, e il servizio la pretende). **F4 in corso**: serve la corsa integrale
 - [ ] **P2.3 `#69`** residui `staging.wave1_*` — ~1 sessione
 - [ ] **P2.4 `#159` · `#79` · `#54`** — le lunghe di P2
 - [ ] **P1.Z chiusura del ciclo** — riconciliazione register, chiusura completa, push finale

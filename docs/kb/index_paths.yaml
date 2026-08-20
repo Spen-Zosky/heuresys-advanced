@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-20T01:41:24Z da docs/kb/tools/build_index.py
+# generato: 2026-08-20T14:27:22Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-20T01:41:24Z"
-  total_files: 3166
+  generated_at: "2026-08-20T14:27:22Z"
+  total_files: 3175
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,16 +13,16 @@ meta:
     api-module: 356
     ci: 17
     claude-config: 35
-    config: 173
+    config: 174
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 334
+    db-migration: 338
     db-other: 8
     db-script: 44
     db-seed: 114
-    doc-canonical: 687
+    doc-canonical: 691
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2608
+    live: 2617
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3356,6 +3356,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\postgres\parametri-server.sql'
+    root: repo
+    rel: 'deploy/postgres/parametri-server.sql'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\deploy\prometheus\alerts.yml'
     root: repo
     rel: 'deploy/prometheus/alerts.yml'
@@ -3371,30 +3377,6 @@ files:
   - path: 'D:\heuresys-advanced\deploy\systemd\actions-runner-resource.dropin.conf'
     root: repo
     rel: 'deploy/systemd/actions-runner-resource.dropin.conf'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\deploy\systemd\archive\heuresys-advanced-clonedb.service'
-    root: repo
-    rel: 'deploy/systemd/archive/heuresys-advanced-clonedb.service'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\deploy\systemd\archive\heuresys-advanced-clonedb.timer'
-    root: repo
-    rel: 'deploy/systemd/archive/heuresys-advanced-clonedb.timer'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\deploy\systemd\archive\heuresys-backup-pull.service'
-    root: repo
-    rel: 'deploy/systemd/archive/heuresys-backup-pull.service'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\deploy\systemd\archive\heuresys-backup-pull.timer'
-    root: repo
-    rel: 'deploy/systemd/archive/heuresys-backup-pull.timer'
     category: config
     status: live
     provenance: git-tracked
@@ -3551,6 +3533,30 @@ files:
   - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-unit-failure@.service'
     root: repo
     rel: 'deploy/systemd/heuresys-unit-failure@.service'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\solo-linux-pc\heuresys-advanced-clonedb.service'
+    root: repo
+    rel: 'deploy/systemd/solo-linux-pc/heuresys-advanced-clonedb.service'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\solo-linux-pc\heuresys-advanced-clonedb.timer'
+    root: repo
+    rel: 'deploy/systemd/solo-linux-pc/heuresys-advanced-clonedb.timer'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\solo-linux-pc\heuresys-backup-pull.service'
+    root: repo
+    rel: 'deploy/systemd/solo-linux-pc/heuresys-backup-pull.service'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\solo-linux-pc\heuresys-backup-pull.timer'
+    root: repo
+    rel: 'deploy/systemd/solo-linux-pc/heuresys-backup-pull.timer'
     category: config
     status: live
     provenance: git-tracked
@@ -8024,6 +8030,30 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000337_una_cascata_che_svuota_un_catalogo_diventa_un_freno.sql'
+    root: repo
+    rel: 'db/migrations/000337_una_cascata_che_svuota_un_catalogo_diventa_un_freno.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000338_due_identita_di_sola_lettura_non_leggono_i_segreti.sql'
+    root: repo
+    rel: 'db/migrations/000338_due_identita_di_sola_lettura_non_leggono_i_segreti.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000339_una_modifica_a_un_catalogo_lascia_un_registro.sql'
+    root: repo
+    rel: 'db/migrations/000339_una_modifica_a_un_catalogo_lascia_un_registro.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000340_al_database_non_si_affaccia_chiunque.sql'
+    root: repo
+    rel: 'db/migrations/000340_al_database_non_si_affaccia_chiunque.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -9113,6 +9143,30 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\219-otto-guasti-suite-e2e.md'
     root: repo
     rel: '.programmi/219-otto-guasti-suite-e2e.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\220-remediation-dossier-forense.md'
+    root: repo
+    rel: '.programmi/220-remediation-dossier-forense.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\221-remediation-w2-recuperi.md'
+    root: repo
+    rel: '.programmi/221-remediation-w2-recuperi.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\222-remediation-w3-integrita-contenuti.md'
+    root: repo
+    rel: '.programmi/222-remediation-w3-integrita-contenuti.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\223-remediation-w4-pipeline-ruoli.md'
+    root: repo
+    rel: '.programmi/223-remediation-w4-pipeline-ruoli.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

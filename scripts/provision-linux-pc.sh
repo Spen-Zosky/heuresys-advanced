@@ -107,15 +107,15 @@ log "[2.3] archivio off-host dei backup PROD (W0.2) — unit fuori da deploy/sys
 # I dump prodotti da backup-db.sh vivono sullo STESSO disco del DB che proteggono: la
 # perdita del volume porta via DB e backup insieme. linux-pc è l'unico host di archivio
 # disponibile (LAN, dietro NAT), quindi la copia va in PULL: è lui a scaricare, e la VM
-# non riceve alcuna credenziale verso di lui. Gli unit stanno in deploy/systemd/archive/
+# non riceve alcuna credenziale verso di lui. Gli unit stanno in deploy/systemd/solo-linux-pc/
 # perché vm-deploy.sh abiliterebbe qualunque timer trovato in deploy/systemd/ ANCHE sulla
 # VM, dove questo one-shot non ha senso.
 ssh -o BatchMode=yes "$HOST" "cd '$REPO'
   tmp=\$(mktemp -d)
   sed -e \"s#@@REPO_DIR@@#$REPO#g\" -e 's#^User=ubuntu#User=enzo#g' -e 's#^Group=ubuntu#Group=enzo#g' \
-      \"$REPO/deploy/systemd/archive/heuresys-backup-pull.service\" > \"\$tmp/heuresys-backup-pull.service\"
+      \"$REPO/deploy/systemd/solo-linux-pc/heuresys-backup-pull.service\" > \"\$tmp/heuresys-backup-pull.service\"
   sudo install -m 644 -o root -g root \"\$tmp/heuresys-backup-pull.service\" /etc/systemd/system/heuresys-backup-pull.service
-  sudo install -m 644 -o root -g root \"$REPO/deploy/systemd/archive/heuresys-backup-pull.timer\" /etc/systemd/system/heuresys-backup-pull.timer
+  sudo install -m 644 -o root -g root \"$REPO/deploy/systemd/solo-linux-pc/heuresys-backup-pull.timer\" /etc/systemd/system/heuresys-backup-pull.timer
   rm -rf \"\$tmp\"
   sudo systemctl daemon-reload
   sudo systemctl enable --now heuresys-backup-pull.timer >/dev/null 2>&1
@@ -126,14 +126,14 @@ log "[2.4] refresh schedulato del DB clone (Z-022) — unit fuori da deploy/syst
 # Il clone del DB della VM era solo on-demand: fra due lanci manuali il gemello e i suoi
 # 3 gate CI giravano contro dati via via più vecchi della produzione, senza che la
 # divergenza fosse visibile. Timer settimanale (domenica 05:00, Persistent). Gli unit
-# stanno in deploy/systemd/archive/ per la stessa ragione del backup-pull: su la VM
+# stanno in deploy/systemd/solo-linux-pc/ per la stessa ragione del backup-pull: su la VM
 # vm-deploy.sh li abiliterebbe, e lì un clone-da-sé-stesso sarebbe distruttivo.
 ssh -o BatchMode=yes "$HOST" "cd '$REPO'
   tmp=\$(mktemp -d)
   sed -e \"s#@@REPO_DIR@@#$REPO#g\" -e 's#^User=ubuntu#User=enzo#g' -e 's#^Group=ubuntu#Group=enzo#g' \
-      \"$REPO/deploy/systemd/archive/heuresys-advanced-clonedb.service\" > \"\$tmp/heuresys-advanced-clonedb.service\"
+      \"$REPO/deploy/systemd/solo-linux-pc/heuresys-advanced-clonedb.service\" > \"\$tmp/heuresys-advanced-clonedb.service\"
   sudo install -m 644 -o root -g root \"\$tmp/heuresys-advanced-clonedb.service\" /etc/systemd/system/heuresys-advanced-clonedb.service
-  sudo install -m 644 -o root -g root \"$REPO/deploy/systemd/archive/heuresys-advanced-clonedb.timer\" /etc/systemd/system/heuresys-advanced-clonedb.timer
+  sudo install -m 644 -o root -g root \"$REPO/deploy/systemd/solo-linux-pc/heuresys-advanced-clonedb.timer\" /etc/systemd/system/heuresys-advanced-clonedb.timer
   rm -rf \"\$tmp\"
   sudo systemctl daemon-reload
   sudo systemctl enable --now heuresys-advanced-clonedb.timer >/dev/null 2>&1

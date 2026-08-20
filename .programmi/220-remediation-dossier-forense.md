@@ -29,7 +29,7 @@ il crosswalk appena ripristinato — si rifarebbe lo stesso lavoro due volte.
 - **F3-09 RIDIMENSIONATO**: `deploy-watch` è oneshot, `TimeoutStartSec=3600` — sforare i 5 min ritarda, non rompe. Resta la catena che ricresce; `@migrate: once` esiste già (27 occorrenze in 24 file).
 - **F8-01 SMENTITO IN PARTE**: `heuresys-backup-pull.timer` ATTIVO su linux-pc, 7 dump giornalieri ×124MB in `~/heuresys-backups/prod/`, disco 48%. La copia fuori sede esiste (pull); manca il push dalla VM e la riconciliazione repo↔realtà (unit in `deploy/systemd/archive/`).
 - Materiale di recupero presente: `D:\heuresys-datastore\_recupero_20260716\` (crosswalk 5.730 · NACE 1.066 · vedi `PROVENIENZA.md` lì dentro).
-- **NON VERIFICATO**: `BACKUP_OFFHOST_SSH` nei due `.env` (lettura del `.env` PC negata in sessione) → F5 qui sotto.
+- **F8-01/F8-03 SMENTITI (2026-08-20)**: `deploy/systemd/archive/` non significava «ritirato» — la unit stessa dichiarava che la sottodirectory serve a stare fuori dal glob di `vm-deploy.sh`. Rinominata `solo-linux-pc/`. `BACKUP_OFFHOST_SSH` resta vuota **per progetto** (push inutilizzabile: NAT); la lettura del `.env` PC resta negata dal guard, ma la domanda non è più aperta.
 
 ## Decisioni di Enzo (2026-08-20, vincolanti — non si ri-chiedono)
 
@@ -71,14 +71,14 @@ misura live della precondizione al momento (mai ereditata) → migrazione emenda
       · **W1.6** — `track_functions=pl` e `pg_stat_statements.max` più alto. Richiedono il
         riavvio di PostgreSQL: **pianificato e annunciato**, non di passaggio. **fatto =** `SHOW`
         dopo il restart.
-- [ ] **F5 La copia fuori sede: dichiarare ciò che già gira** — budget ~25k · rilievi `F8-01`, `F8-03`
+- [x] **F5 La copia fuori sede: dichiarare ciò che già gira** — FATTO 2026-08-20 · `archive/` → `solo-linux-pc/` + README · il pull è attivo (timer `enabled`, corsa 04:05, dump giornalieri ~124MB) · `BACKUP_OFFHOST_SSH` DEVE restare vuota: il push non è usabile (linux-pc dietro NAT), la direzione giusta è il pull · budget ~25k · rilievi `F8-01`, `F8-03`
       · **W1.7** — il pull su linux-pc **esiste ed è attivo** (misurato S1075): il difetto non è
         l'assenza del backup, è che le unit vivono in `deploy/systemd/archive/`, cioè il repo
         dichiara una realtà diversa da quella che gira. Portarle dove stanno davvero, documentare
         l'offsite, e verificare `BACKUP_OFFHOST_SSH` nei due `.env` (**non verificato**: la
         lettura del `.env` del PC fu negata in S1075). **fatto =** unit tracciate dove girano;
         registro emendato.
-- [ ] **F6 Le statistiche su cui il pianificatore decide** — budget ~15k · rilievo `F4-07`
+- [x] **F6 Le statistiche su cui il pianificatore decide** — FATTO 2026-08-20 · ANALYZE su 12 tabelle, 12/12 con `last_analyze` in giornata · autovacuum `on`, naptime 60s, scale factor 0.1 · budget ~15k · rilievo `F4-07`
       · **W1.8** — `ANALYZE` su requisiti, embeddings e skills, più la verifica che autovacuum
         stia davvero lavorando su quelle tabelle. **fatto =** `last_analyze` in giornata.
 

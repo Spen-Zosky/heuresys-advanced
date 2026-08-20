@@ -4,7 +4,7 @@
 # ogni *.service/*.timer trovato in deploy/systemd/ su OGNI host che deploya — VM inclusa.
 # Questo one-shot invece ha senso su un SOLO tipo di host: l'archivio off-host (oggi
 # linux-pc), che scarica i dump DALLA VM. Sulla VM sarebbe un no-op fallito (proverebbe
-# a rsyncare da se stessa). La sottodirectory `archive/` lo tiene fuori da quel glob:
+# a rsyncare da se stessa). La sottodirectory `solo-linux-pc/` lo tiene fuori da quel glob:
 # ci finisce solo per installazione esplicita.
 [Unit]
 Description=Heuresys — pull off-host dei backup di produzione (W0.2)

@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-20T01:41:24Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3166**
+**Generato**: 2026-08-20T14:27:22Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3175**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,16 +13,16 @@
 | api-module | 356 |
 | ci | 17 |
 | claude-config | 35 |
-| config | 173 |
+| config | 174 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 334 |
+| db-migration | 338 |
 | db-other | 8 |
 | db-script | 44 |
 | db-seed | 114 |
-| doc-canonical | 687 |
+| doc-canonical | 691 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 403 |
 | ux-design-archive | 80 |
 | web-source | 241 |
-| **TOTALE** | **3166** |
+| **TOTALE** | **3175** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2608 |
+| live | 2617 |
 
 ## File per categoria
 
@@ -616,13 +616,10 @@
 - `D:\heuresys-advanced\audit\_groups.json` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\_visual-confirmed.json` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\nginx\www.heuresys.com.conf` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\postgres\parametri-server.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\prometheus\alerts.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\prometheus\prometheus.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\actions-runner-resource.dropin.conf` · *live* · git-tracked
-- `D:\heuresys-advanced\deploy\systemd\archive\heuresys-advanced-clonedb.service` · *live* · git-tracked
-- `D:\heuresys-advanced\deploy\systemd\archive\heuresys-advanced-clonedb.timer` · *live* · git-tracked
-- `D:\heuresys-advanced\deploy\systemd\archive\heuresys-backup-pull.service` · *live* · git-tracked
-- `D:\heuresys-advanced\deploy\systemd\archive\heuresys-backup-pull.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-api.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-approvals-sla.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-approvals-sla.timer` · *live* · git-tracked
@@ -649,6 +646,10 @@
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-web.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-prometheus.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-unit-failure@.service` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\solo-linux-pc\heuresys-advanced-clonedb.service` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\solo-linux-pc\heuresys-advanced-clonedb.timer` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\solo-linux-pc\heuresys-backup-pull.service` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\solo-linux-pc\heuresys-backup-pull.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\eslint.config.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\package.json` · *live* · git-tracked
 - `D:\heuresys-advanced\pnpm-lock.yaml` · *live* · git-tracked
@@ -1409,6 +1410,10 @@
 - `D:\heuresys-advanced\db\migrations\000334_la_sentinella_non_suona_sul_dominio_che_costruisce_il_registro.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000335_i_processi_hanno_una_casa_sola.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000336_le_famiglie_sono_un_sottoprodotto_dei_clienti.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000337_una_cascata_che_svuota_un_catalogo_diventa_un_freno.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000338_due_identita_di_sola_lettura_non_leggono_i_segreti.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000339_una_modifica_a_un_catalogo_lascia_un_registro.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000340_al_database_non_si_affaccia_chiunque.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1603,6 +1608,10 @@
 - `D:\heuresys-advanced\.programmi\217-flusso-di-chiusura.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\218-residui-legacy-senza-referente.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\219-otto-guasti-suite-e2e.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\220-remediation-dossier-forense.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\221-remediation-w2-recuperi.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\222-remediation-w3-integrita-contenuti.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\223-remediation-w4-pipeline-ruoli.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\54-recruiting-ats.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\69-residui-staging-wave1.md` · *live* · git-tracked

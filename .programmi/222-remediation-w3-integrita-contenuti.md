@@ -48,12 +48,25 @@
         all'originale, cioè un campo tradotto che non traduce.
       **fatto =** 0 URI contraffatti sotto il namespace ESCO + 0 traduzioni-copia, con i
       referenti aggiornati e misurati.
-- [ ] **F5 I codici settore e il grafo delle competenze** — budget ~45k · rilievi `F6-04`, `F6-07`
-      · `F6-04` — 5 codici settore ancora ATECO 2007 in `sys_industry_codes` → 2025.
-      · `F6-07` — 286 competenze da ricollegare partendo dagli archi tassonomici già presenti, e
-        84 isolate da curare una per una. **Le 84 non si risolvono in blocco**: se una competenza
-        è isolata davvero, l'esito giusto può essere lasciarla isolata e dirlo.
-      **fatto =** 0 codici 2007 + il conteggio delle isolate spiegato riga per riga.
+- [ ] **F5 I codici settore e il grafo delle competenze** — budget ~45k → **RI-STIMATA, misure fatte il 2026-08-20**
+      ⏸ INTERROTTA dopo la misura: entrambi i rilievi sono più grandi di come il dossier li
+      descriveva, e nessuno dei due si chiude con una regola meccanica. **Le misure qui sotto
+      sono già fatte: la prossima sessione non le rifà, parte dalla decisione.**
+      · `F6-04` — **confermato nel numero**: esattamente **5** codici di `sys_industry_codes`
+        puntano a un ATECO che in 2025 non esiste — `CONSTRUCTION` 41.20 · `EDUCATION` 85.42 ·
+        `IT_SOFTWARE` 62.01 · `RETAIL` 47.19 · `TRANSPORT_LOGISTICS` 52.29. Gli altri 7 sono a
+        posto.
+        ⚠ **La correzione non è meccanica, ed è una scelta di modellazione**: solo
+        `CONSTRUCTION` ha un candidato unico (**41.00**). `EDUCATION` ne ha 13, `RETAIL` una
+        trentina, `IT_SOFTWARE` 3 (62.10 · 62.20 · 62.90), `TRANSPORT_LOGISTICS` 6 (52.21…52.26).
+        La domanda vera che emerge dalla misura: un settore come «Commercio al dettaglio» è
+        rappresentato bene da **una classe di livello 4**, o dovrebbe puntare alla **divisione**?
+        Gli altri 7 usano il livello 4, quindi cambiarlo è una decisione, non una correzione.
+      · `F6-07` — **il dossier sottostima di due ordini di grandezza**: le competenze isolate
+        nel grafo (nessun arco, né come padre né come figlio) sono **4.467 su 14.036**, non 84.
+        Ricollegarle non è una fase da 45k: è un lavoro di curatela su un terzo del catalogo, e
+        va pianificato per sé. **Le 84 del rilievo erano un sottoinsieme, non il totale.**
+      **fatto =** 5 codici decisi uno per uno con la ragione scritta + un piano proprio per le 4.467.
 - [ ] **F6 Il canale unico ruolo↔occupazione** — budget ~40k · rilievo `F2-01`
       Oggi il legame passa da **due** strade — 64 FK e 111 righe di metadata — che non si
       sovrappongono su nemmeno un caso (misurato: 0 sovrapposti su 176 ruoli). Due canali disgiunti

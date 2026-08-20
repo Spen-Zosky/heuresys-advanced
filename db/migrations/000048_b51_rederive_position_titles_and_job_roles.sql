@@ -1,3 +1,19 @@
+-- @migrate: once
+--
+-- PERCHE' `once` (#223 F2, rilievo F3-09 — 2026-08-20). Misurata sul vivo con
+-- `duration_ms` di sys_schema_migrations: questa e' la migrazione PIU' LENTA
+-- della catena, 79.781 ms — quattro volte la seconda, e da sola piu' di tutto il
+-- resto messo insieme. La catena si ri-applica per intero a ogni deploy, quindi
+-- quegli 80 secondi si pagavano ogni volta per ri-derivare un risultato gia'
+-- ottenuto il 2026-06-01.
+--
+-- Non porta guardie vive, ed e' la condizione che rende lecito marcarla: l'unica
+-- `RAISE EXCEPTION` verifica che il blocco di 162 righe incorporato nel file non
+-- sia stato troncato in scrittura — controlla il FILE, non lo stato del
+-- database. Il `RAISE NOTICE` finale e' informativo e non blocca nulla.
+--
+-- Su un database nuovo gira comunque: `once` salta solo quando l'impronta
+-- coincide con quella registrata. La CI from-zero non e' toccata.
 -- 000048_b51_rederive_position_titles_and_job_roles.sql
 -- B-51 (2026-06-01): re-derive the 162 RTL/Heuresys position_title and wire
 -- position_job_role_id from the REAL legacy profession (employees.job_title), employee-centric.

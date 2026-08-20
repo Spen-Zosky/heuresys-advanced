@@ -24,7 +24,7 @@ accettato, chiuso `RISOLTO` nel registro. Non rientra da questa porta.
       nulla è cambiato — write amplification, bloat, e `updated_at` che perde ogni significato.
       Correzione: `UPDATE` condizionale (`WHERE ... IS DISTINCT FROM ...`).
       **fatto =** una corsa a vuoto misurata a **0 righe scritte**, contro le ~14.000 di oggi.
-- [ ] **F2 La catena che ricresce a ogni deploy** — budget ~35k · rilievo `F3-09`
+- [x] **F2 La catena che ricresce a ogni deploy** — FATTO 2026-08-20 · **la misura smentisce il piano**: la più lenta non è `000120` (65s) ma **`000048` con 79.781 ms**, quattro volte la seconda; `000120` non è nemmeno fra le prime 12 (misurato da `duration_ms`, non stimato) · marcata `@migrate: once` perché le sue uniche `RAISE EXCEPTION` verificano il FILE, non lo stato vivo · prova: corsa 1 `applying 000048` ×1 e 23 skipped → corsa 2 **×0 e 24 skipped** · sentinelle a zero, 315 posizioni e 176 ruoli intatti · budget ~35k · rilievo `F3-09`
       La catena si ri-applica per intero a ogni rollout: `000120` da sola pesa **65,4 s**, e
       `000007` risulta eseguita **347 volte**. `@migrate: once` esiste già (27 occorrenze in 24
       file): qui va esteso alle pesanti che sono legittimamente one-shot.

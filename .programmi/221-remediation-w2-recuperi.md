@@ -1,7 +1,7 @@
 # 221 — Remediation forense W2 · Recuperi
 
 > **item**: #221 · **priorità**: P1 · **stima**: ~80-120k token
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 > **capofila**: `.programmi/220-remediation-dossier-forense.md` — lì stanno fonte, verifiche
 > S1075, decisioni di Enzo e il **metodo vincolante** per ogni voce. Non si ricopia qui.
 
@@ -69,19 +69,19 @@ il NACE di questo codice» deve avere risposta per qualunque codice, non solo pe
       **fatto =** 3.257 righe · **0 orfani in entrambi i versi** · ogni riga ATECO ha esattamente
       una NACE · l'impronta si ri-deriva dai dati, non da un file esterno (è la prova che nulla
       è stato importato).
-- [ ] **F3 La datazione onesta dei vettori ricalcolati** — budget ~15k · rilievo `F7-02`
+- [x] **F3 La datazione onesta dei vettori ricalcolati** — FATTO 2026-08-20 · **rilievo SMENTITO**: 14.036/14.036 impronte combaciano, 0 stantii · la tracciabilità non è mai stata `created_at`, è `source_text_hash` · mig 000342 installa la sentinella `sys.v_embedding_impronta_non_combacia` (24/24 a zero) · prova: 0→1→0 cambiando un testo senza ricalcolare · budget ~15k · rilievo `F7-02`
       Gli embedding portano `min = max = 2026-06-06` mentre il testo da cui derivano è cambiato
       dopo: la data dice quando è girato il calcolo, non a cosa si riferisce. O si registra la
       provenienza reale, o si dichiara per iscritto che quel timestamp non è tracciabilità.
       **fatto =** tracciabilità misurabile — data una riga, si sa da quale testo viene.
-- [ ] **F4 Le due misure che possono smentire il dossier** — budget ~25k · rilievi `F7-03`, `F7-06`
+- [x] **F4 Le due misure che possono smentire il dossier** — FATTO 2026-08-20 · **nessun lavoro conseguente, per misura** · F7-03: 92 moduli, **0 food/energy** (i 59 corsi non esistono più); 0 assegnazioni prive di riferimento — le 1.990 «orfane» puntano a un *percorso*, la FK è `SET NULL` · F7-06: 16 famiglie professionali + 176 ruoli = i numeri del referto 27, nomi in italiano e coerenti con FIN_BANKING (I21) · budget ~25k · rilievi `F7-03`, `F7-06`
       Nessuna delle due è una correzione: sono **misure** il cui esito decide se c'è lavoro.
       · **F7-03** — chiusura documentale delle purghe deliberate (mig `000197`, `000200`, `000235`,
         `000241`). In più: **i 59 corsi food con 199 assegnazioni esistono ancora?** Se sì, è una
         domanda per Enzo (I21: contenuto senza un'industry che lo ospiti), non una cancellazione.
       · **F7-06** — famiglie e ruoli rimaneggiati (referto 27 del vault): **confermato o smentito
         con una misura**, e va bene entrambe le cose.
-- [ ] **F5 Il clone di CI riallineato, dopo i recuperi e non prima** — budget ~10k · rilievi `F8-11`, `F8-12`
+- [x] **F5 Il clone di CI riallineato, dopo i recuperi e non prima** — FATTO 2026-08-20 · `scripts/clone-vm-db.sh` (non `db/scripts/`: il piano sbagliava il path) · locale=VM su 161 utenti / 315 posizioni / 118.360 presenze, 13 voci di censimento identiche · `ci-rehearsal.sh` VERDE **dopo** il refresh · budget ~10k · rilievi `F8-11`, `F8-12`
       `bash db/scripts/clone-vm-db.sh`. Va **per ultimo**: rinfrescare prima copierebbe un
       database senza il crosswalk, e la CI misurerebbe il passato.
       **fatto =** conteggi di `heuresys_ci` allineati alla produzione, e `ci-rehearsal.sh` verde

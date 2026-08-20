@@ -155,7 +155,16 @@ describe("reference-sync API (cap⑤ ESCO_SKILL_HIERARCHY, T1.1)", () => {
     expect(b.source).toBe("ESCO_SKILL_HIERARCHY");
     expect(b.skipped).toBe(false);  // watermark was reset → real backfill
     expect(b.total).toBe(2);        // scoped to our 2 synthetic skills
-    expect(b.updated).toBe(2);      // both synthetic rows matched + merged
+    // ONE, not two — and the difference is the point (#223 F1, rilievo F3-02).
+    // The ungrouped skill has no broaderHierarchyConcept: the backfill writes NULL
+    // over a NULL and changes nothing. The UPDATE is now guarded by
+    // `IS DISTINCT FROM`, so a row that does not change is not counted as updated —
+    // which is what "updated" should have meant all along.
+    // Before the guard this said 2, because the unconditional UPDATE rewrote every
+    // matched row whether or not anything differed. That is exactly the ~14,000
+    // identical rewrites per sync run that F3-02 reports; a test asserting 2 here
+    // was asserting the defect.
+    expect(b.updated).toBe(1);      // only the grouped row actually changed
     // grouped skill: skill_group_uri = the FIRST broaderHierarchyConcept (policy)
     expect(await groupUriOf(GROUPED_URI)).toBe(GROUP_HREF);
     // ungrouped skill: NULL preserved (group-unavailable bucket)

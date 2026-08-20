@@ -32,6 +32,7 @@ const codiceDi = (b: unknown): string | undefined => (b as { error?: { code?: st
 let t: TestApp;
 let admin: S;
 let adminUserId: string;
+let fixtureCreata: string | null = null;
 let versionId: string;
 let blueprintId: string;
 let numero: number;
@@ -89,8 +90,52 @@ beforeAll(async () => {
         AND v.tenant_blueprint_version_employee_count >= 1
       ORDER BY v.created_at LIMIT 1`,
   );
-  if (!rows[0]) throw new Error("nessuna versione di fascicolo coi sei parametri: il test misurerebbe il nulla");
-  versionId = rows[0].v; blueprintId = rows[0].b; numero = rows[0].n;
+  // ⚠ NON si fallisce piu' quando il fascicolo non c'e': si COSTRUISCE.
+  //
+  // Il fascicolo RTL-BANK-CONFIG esiste in produzione perche' ce l'ha messo
+  // l'applicazione durante #132. Nessuna migrazione e nessun seed lo crea —
+  // verificato cercando `sys_tenant_blueprint_versions` in tutto db/ — quindi
+  // sul database della CI NON C'E', e questo test falliva li' fin dalla sua
+  // nascita mentre passava in locale. E' il caso descritto dalla memoria
+  // `ci_clone_lacks_script_imported_data`: dato scritto da fuori la catena =
+  // assente sul clone di CI.
+  //
+  // Un test che pretende un dato che nessuno crea non e' severo, e' fragile:
+  // misura in quale database sta girando, non il codice. Qui si prende il
+  // fascicolo reale se c'e' (cosi' in locale continua a provare il dato vero) e
+  // altrimenti se ne costruisce uno equivalente, che `afterAll` rimuove.
+  if (!rows[0]) {
+    const { rows: fatto } = await pool.query<{ v: string; b: string; n: number }>(
+      `WITH b AS (
+         INSERT INTO sys.sys_tenant_blueprints (tenant_blueprint_code, tenant_blueprint_name)
+         VALUES ('TEST-RESEARCH-FIXTURE', 'Fascicolo costruito dal test della ricerca')
+         RETURNING tenant_blueprint_id
+       ), v AS (
+         INSERT INTO sys.sys_tenant_blueprint_versions (
+           tenant_blueprint_version_blueprint_id,
+           tenant_blueprint_version_number,
+           tenant_blueprint_version_industry_class_id,
+           tenant_blueprint_version_operating_model_id,
+           tenant_blueprint_version_employee_count)
+         SELECT b.tenant_blueprint_id, 1,
+                (SELECT activity_classification_id FROM sys.sys_activity_classifications
+                  WHERE activity_classification_scheme = 'ATECO_2025'
+                    AND activity_classification_level = 4 ORDER BY activity_classification_code LIMIT 1),
+                (SELECT operating_model_id FROM sys.sys_operating_model_catalog ORDER BY 1 LIMIT 1),
+                50
+           FROM b
+         RETURNING tenant_blueprint_version_id, tenant_blueprint_version_blueprint_id,
+                   tenant_blueprint_version_number
+       )
+       SELECT tenant_blueprint_version_id AS v, tenant_blueprint_version_blueprint_id AS b,
+              tenant_blueprint_version_number AS n FROM v`,
+    );
+    if (!fatto[0]) throw new Error("non si e' potuto costruire il fascicolo di prova: mancano industry class o operating model");
+    fixtureCreata = fatto[0].b;
+    versionId = fatto[0].v; blueprintId = fatto[0].b; numero = fatto[0].n;
+  } else {
+    versionId = rows[0].v; blueprintId = rows[0].b; numero = rows[0].n;
+  }
 
   const { rows: u } = await pool.query<{ id: string }>(
     `SELECT user_id AS id FROM sys.sys_users WHERE user_email = $1`, [(await platformAdmin()).email],
@@ -98,7 +143,24 @@ beforeAll(async () => {
   adminUserId = u[0]!.id;
 });
 
-afterAll(async () => { await t.app.close(); await closePool(); });
+afterAll(async () => {
+  // Si rimuove SOLO cio' che questo test ha creato. Se il fascicolo reale c'era
+  // gia', `fixtureCreata` resta null e qui non si tocca nulla: un test che
+  // cancella dati che non ha prodotto e' un test che rompe la produzione.
+  //
+  // Con l'isolamento transazionale (D-52) questa pulizia e' ridondante — l'intero
+  // file gira in una transazione rollbackata, fixture del `beforeAll` comprese.
+  // Resta perche' `TEST_TX_ISOLATION=0` e' una via di fuga documentata: sotto
+  // quella bandiera il rollback non c'e', e senza questo blocco la fixture
+  // resterebbe sul database condiviso.
+  if (fixtureCreata) {
+    await pool.query(
+      `DELETE FROM sys.sys_tenant_blueprint_versions WHERE tenant_blueprint_version_blueprint_id = $1`,
+      [fixtureCreata]);
+    await pool.query(`DELETE FROM sys.sys_tenant_blueprints WHERE tenant_blueprint_id = $1`, [fixtureCreata]);
+  }
+  await t.app.close(); await closePool();
+});
 
 /** L'attore, costruito come lo costruirebbe una rotta. */
 const attore = () => actorFromRequest({ user: { sub: adminUserId, tenantId: null, roles: ["PLATFORM_ADMIN"] } } as never);

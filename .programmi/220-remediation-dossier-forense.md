@@ -54,7 +54,7 @@ misura live della precondizione al momento (mai ereditata) → migrazione emenda
         CREA i grant** (ADR-0035: una `REVOKE` a valle viene disfatta al deploy dopo). Nota in
         `.codex-review/service/access/CLAUDE_INTEGRATION.md`. **fatto =** la query dei grant
         torna vuota.
-- [ ] **F2 Gli occhi che oggi sono chiusi** — budget ~45k · rilievi `F5-03`, `F5-02`, `F5-07`
+- [x] **F2 Gli occhi che oggi sono chiusi** — FATTO 2026-08-20 · `deploy/postgres/parametri-server.sql` + mig 000339 · connessioni registrate nel log reale · 15/15 cataloghi con registro e timestamp · prova live: update a vuoto 0 righe, update vero 1 riga · budget ~45k · rilievi `F5-03`, `F5-02`, `F5-07`
       Il database non registra chi fa cosa sui cataloghi, e non conserva traccia delle
       connessioni. Sono due assenze, non due difetti: nulla è rotto, semplicemente non si vede.
       · **W1.3** — logging server (`logging_collector`, `log_connections`,

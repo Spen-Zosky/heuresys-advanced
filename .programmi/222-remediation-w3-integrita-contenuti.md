@@ -29,7 +29,7 @@
         pretende a zero righe: se questa misura invece di sorvegliare, va dichiarata informativa
         o rende rossa la prova generale (→ memoria `new_sys_view_becomes_sentinel`).
       **fatto =** i tre oggetti esistono in produzione e la sentinella è a zero.
-- [ ] **F2 La normalizzazione grande, con il giornale di annullamento** — budget ~40k · rilievi `F1-03`, `F2-05`
+- [x] **F2 La normalizzazione grande, con il giornale di annullamento** — FATTO 2026-08-20 · mig 000344 · 12.887 normalizzate (era un URL di chiamata API, non un URI) · 400 gruppi distinti **invariati** · 291 vuoti intatti · undo **provato**: 12.887 ripristinate e poi rollback · budget ~40k · rilievi `F1-03`, `F2-05`
       Formato di `skill_group_uri` nei metadati: **13.178 righe**. È la scrittura di massa più
       grossa dell'onda, quindi pretende le quattro cose del Metodo di bonifica per intero —
       misura prima, guardia al momento dell'esecuzione, post-condizione **su ciò che non doveva

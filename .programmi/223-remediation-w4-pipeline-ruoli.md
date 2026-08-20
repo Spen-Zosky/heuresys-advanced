@@ -97,8 +97,14 @@ accettato, chiuso `RISOLTO` nel registro. Non rientra da questa porta.
         `ARCHIVED` **senza cancellarle**: sono la provenienza dei dati che il database contiene.
       · `A-10` ✅ **SMENTITO** — nessuna tabella vuota occupa più di 300 kB; quella da 944 kB
         non esiste più.
-      · `A-11` ⏸ **da fare** — i 7 numeri stantii nella documentazione. Non si aggiornano: si
-        sostituiscono con il comando che li ri-deriva (⭐ IL PUNTO FISSO).
+      · `A-11` ✅ **in gran parte SMENTITO** — dei documenti che portano quei 7 numeri, quasi
+        tutti sono **datati nel titolo** (censimenti, spec di giugno-luglio): per la regola del
+        progetto quella è *evidenza di un momento*, l'unica eccezione ammessa, e non si tocca.
+        `FUNCTIONAL_CAPABILITY_LEDGER.md` — l'unico che parlava al presente — porta **già** una
+        nota anti-drift che dichiara la data, rimanda a `SOT_STATE.md` per i conteggi correnti e
+        vieta di ri-hardcodare. Il dossier ha letto i numeri senza leggere la nota.
+        Corretta l'**unica incoerenza vera**: l'intestazione della colonna diceva «count live»
+        al presente e contraddiceva la sua stessa nota.
       **fatto =** dichiarato = misurato, e i 7 numeri non esistono più come numeri.
 
 ## Le prove che devono poter fallire

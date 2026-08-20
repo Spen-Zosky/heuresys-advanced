@@ -1,6 +1,6 @@
 # Functional Capability Ledger — heuresys-advanced
 
-> **Cos'è**: la guida-alla-verifica del prodotto. Per ogni funzionalità dichiara uno **stato verificato** con evidenza concreta (`file:line` + query/count live). È il cuore della SoT di prodotto e l'input del piano di sviluppo funzionale.
+> **Cos'è**: la guida-alla-verifica del prodotto. Per ogni funzionalità dichiara uno **stato verificato** con evidenza concreta (`file:line` + query/conteggio al 2026-06-19). È il cuore della SoT di prodotto e l'input del piano di sviluppo funzionale.
 > **Metodo**: cartografia codice (`db/migrations` + `apps/api/src/modules` + `packages/shared` + `apps/web/src/app`) + count/absence-check **LIVE** sul DB reale (tunnel `:5433` → OCI VM PostgreSQL 16). Verifica eseguita **2026-06-19** (S998) via 7 work-group paralleli read-only. Schema `sys.*`, migrazioni `000001..000141`.
 > **Anti-drift (T2)**: i conteggi qui riportati sono **evidenza della verifica live al 2026-06-19**, non valori SoT congelati. La SoT dei conteggi correnti è `docs/kb/SOT_STATE.md` (ri-derivata ogni sessione). Non ri-hardcodare questi numeri altrove.
 > **Ground-truth**: dove il wiki/`LATENT_CAPABILITY_CATALOG` (ora assorbito qui) divergono dal codice advanced, **vince il codice**. Le sovrastime del wiki (in parte legacy `heuresys-evo`) sono segnalate nella colonna "Discrepanza" e in §9.
@@ -27,7 +27,7 @@
 
 ## 1. PROCESS & BLUEPRINT
 
-| Capability | Modulo/i | Stato | Evidenza (file:line + count live) | Valore | Effort | Discrepanza wiki↔advanced |
+| Capability | Modulo/i | Stato | Evidenza (file:line + conteggio **al 2026-06-19**, vedi Anti-drift) | Valore | Effort | Discrepanza wiki↔advanced |
 |---|---|---|---|---|---|---|
 | Catalogo classificazioni ATECO/NACE | activity-classifications | ✅ | `000007_enterprise_typing.sql:16-58`; modulo+test. `count(sys_activity_classifications)` → **6533** | Alto | done | — |
 | Cross-mapping ATECO↔NACE | activity-classification-mappings | ✅ | `000007:63-81` (confidence); count → **5730** | Medio-alto | done | — |
@@ -51,7 +51,7 @@
 
 ## 2. STRUCTURE
 
-| Capability | Modulo/i | Stato | Evidenza (file:line + count live) | Valore | Effort | Discrepanza |
+| Capability | Modulo/i | Stato | Evidenza (file:line + conteggio al 2026-06-19) | Valore | Effort | Discrepanza |
 |---|---|---|---|---|---|---|
 | Organization-unit tree | organization-units | ✅ | `000009_organization_model.sql:27` (self-FK `:34`); 5 endpoint CRUD; `app.ts:347`; count → **26** (8 unit-type, 6 branch) | Alto | done | — |
 | Org closure-table (ancestor/descendant) | organization-units | 🟡 (presente, non usata) | closure `sys_organization_hierarchies` `000009:98-104` **0 righe**; repo usa solo adjacency `parent_id` | Medio | basso (manca trigger/seed + uso) | — |
@@ -71,7 +71,7 @@
 
 ## 3. ROLE & SUCCESSION
 
-| Capability | Modulo/i | Stato | Evidenza (file:line + count live) | Valore | Effort | Discrepanza |
+| Capability | Modulo/i | Stato | Evidenza (file:line + conteggio al 2026-06-19) | Valore | Effort | Discrepanza |
 |---|---|---|---|---|---|---|
 | Job families catalog | job-families | ✅ | `000010_job_role_model.sql:8`; 5 endpoint; 7 test; count → **27** | Medio | done | — |
 | Job roles catalog | job-roles | ✅ | `000010:21-39` (seniority CHECK); 4 endpoint; 7 test; count → **136** | Medio | done | — |
@@ -94,7 +94,7 @@
 
 ## 4. COMPETENCE (skills / learning / assessment)
 
-| Capability | Modulo/i | Stato | Evidenza (file:line + count live) | Valore | Effort | Discrepanza |
+| Capability | Modulo/i | Stato | Evidenza (file:line + conteggio al 2026-06-19) | Valore | Effort | Discrepanza |
 |---|---|---|---|---|---|---|
 | Skill catalog (ESCO-native) | skills | ✅ | `000013_skill_taxonomy_model.sql:87`; 4 rotte; web `skills/page.tsx:44`; count → **21939** | Alto | done | — |
 | skill_kind dimension | skills | 🟡 | `000120:23-34`; SKILL 10797 · KNOWLEDGE 3230 · COMPETENCE 8 · BEHAVIOR 1 · **NULL 7903** (legacy non classificate) | Medio | basso (backfill) | — |
@@ -129,7 +129,7 @@
 
 ## 5. PERFORMANCE (KPI / compensation / engagement / insights)
 
-| Capability | Modulo/i | Stato | Evidenza (file:line + count live) | Valore | Effort | Discrepanza |
+| Capability | Modulo/i | Stato | Evidenza (file:line + conteggio al 2026-06-19) | Valore | Effort | Discrepanza |
 |---|---|---|---|---|---|---|
 | KPI catalog + cascade (10 tabelle) | kpi-definitions | ✅ | `000015_kpi_model.sql:11-271`; 5 endpoint; web `kpis/page.tsx:47`; 5 test; definitions **243** · targets **248** · measurements **248** · assessment_results **248** | Alto | done | — |
 | Process-level KPI templates | process-kpi-templates | 🟡 | `000015:70-82`; count → **0** | Medio | popolamento | cascade process→KPI non popolato |
@@ -152,7 +152,7 @@
 
 ## 6. PLATFORM (auth / RBAC / multi-tenant / export / matching / viz / ESS / pipeline)
 
-| Capability | Modulo/i | Stato | Evidenza (file:line + count live) | Valore | Effort | Discrepanza |
+| Capability | Modulo/i | Stato | Evidenza (file:line + conteggio al 2026-06-19) | Valore | Effort | Discrepanza |
 |---|---|---|---|---|---|---|
 | Auth — Argon2id + JWT RS256 + refresh rotation/replay | auth | ✅ | `password.ts:16-19` (argon2id 64MiB/3/4); replay `service.ts:521-563`; `000005`; credentials 12 · login_events **67348** · refresh_tokens 42238 | Alto | done | — |
 | MFA multi-factor | mfa-policy, auth(mfa) | 🟡 | schema 5 kind (TOTP/email-OTP/WebAuthn/recovery/exemptions, `000081/099/102/103/116/118`); **factors 6 tutti TOTP**, gli altri 0 | Alto | schema c'è; non-TOTP non esercitato | "MFA multi-kind deferred v1.x" allineato |

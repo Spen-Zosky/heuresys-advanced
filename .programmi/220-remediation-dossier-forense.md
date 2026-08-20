@@ -1,7 +1,7 @@
 # 220 — Remediation forense W1 · Messa in sicurezza
 
 > **item**: #220 · **priorità**: P1 · **stima**: ~120-180k token (1 sessione dedicata)
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 > **capofila del programma #220-#223**: questo file porta fonte, metodo vincolante e decisioni
 > di Enzo per **tutti e quattro**. Il dettaglio delle onde W2/W3/W4 vive nei rispettivi file e
 > **non si ricopia qui** — due copie della stessa tabella divergono, ed è successo.
@@ -67,10 +67,18 @@ misura live della precondizione al momento (mai ereditata) → migrazione emenda
         progetto?) e `heuresys_backup` (`BYPASSRLS` senza alcun grant) vanno spiegati, o la
         revoca spegne qualcosa che serve. **fatto =** ACL misurata; le due anomalie risolte
         oppure dichiarate `WAIT-INPUT` con la domanda precisa.
-- [ ] **F4 Le due che pretendono un restart annunciato** — budget ~20k · rilievi `F8-10`, `F4-04`
-      · **W1.6** — `track_functions=pl` e `pg_stat_statements.max` più alto. Richiedono il
-        riavvio di PostgreSQL: **pianificato e annunciato**, non di passaggio. **fatto =** `SHOW`
-        dopo il restart.
+- [x] **F4 Le due che pretendono un restart annunciato** — FATTO 2026-08-20 · ridotta a UNA da una misura, poi chiusa da una decisione di Enzo · budget ~20k · rilievi `F8-10`, `F4-04`
+      · **W1.6** — `track_functions=pl` NON pretendeva alcun riavvio: context `superuser`, è
+        entrato in vigore con il reload di F2 (misurato: `pending_restart=false`). Restava il
+        solo `pg_stat_statements.max` (5.000 → 10.000).
+      · **Decisione di Enzo, 2026-08-20**: *non* si riavvia la produzione per questo. Il valore
+        è **scritto** in `deploy/postgres/parametri-server.sql` e applicato con `ALTER SYSTEM`,
+        quindi risulta `pending_restart=true`: entrerà in vigore **da sé** al primo riavvio che
+        avvenga per altri motivi. Il beneficio è solo diagnostico e non giustifica
+        un'interruzione decisa da noi.
+      · **fatto =** il parametro è scritto e dichiarato; l'attivazione è delegata, non dimenticata
+        — si verifica con `SELECT name, setting, pending_restart FROM pg_settings WHERE name =
+        'pg_stat_statements.max'`.
 - [x] **F5 La copia fuori sede: dichiarare ciò che già gira** — FATTO 2026-08-20 · `archive/` → `solo-linux-pc/` + README · il pull è attivo (timer `enabled`, corsa 04:05, dump giornalieri ~124MB) · `BACKUP_OFFHOST_SSH` DEVE restare vuota: il push non è usabile (linux-pc dietro NAT), la direzione giusta è il pull · budget ~25k · rilievi `F8-01`, `F8-03`
       · **W1.7** — il pull su linux-pc **esiste ed è attivo** (misurato S1075): il difetto non è
         l'assenza del backup, è che le unit vivono in `deploy/systemd/archive/`, cioè il repo

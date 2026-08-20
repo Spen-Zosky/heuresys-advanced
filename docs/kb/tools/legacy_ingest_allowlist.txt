@@ -60,3 +60,13 @@ db/seeds/reconciliation/53_registry_process_kpi_templates_s994_evidence.sql
 # CONCETTI, il caso che questo elenco prevede. Verificato leggendo il file, canonica
 # 2026-08-16 (rilevato dal lab mentre misurava se Tenant Builder P4 violasse I12).
 docs/kb/tools/check_istruzioni.py
+
+# 000340 nomina `heuresys_platform` in un COMMENTO, e non ne legge una riga. Il file
+# revoca CONNECT a PUBLIC sul database corrente, e la nota dice perche' NON tocca
+# l'altro: «ci si affaccia pgbouncer e non e' stato misurato con quale identita'
+# passino i suoi consumatori — revocare li' senza quella misura sarebbe l'errore che
+# questo file evita». E' una dichiarazione di perimetro, cioe' l'opposto di
+# un'ingestione: dice dove NON si e' andati, e perche'.
+# Il cancello cerca il nome e non puo' distinguere l'uso — ed e' giusto cosi': deve
+# sbagliare verso il rumore, mai verso il silenzio. Canonica 2026-08-20, #220 W1.5.
+db/migrations/000340_al_database_non_si_affaccia_chiunque.sql

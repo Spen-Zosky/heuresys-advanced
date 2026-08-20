@@ -47,16 +47,28 @@ accettato, chiuso `RISOLTO` nel registro. Non rientra da questa porta.
       **Prima si misura la RAM realmente libera**, poi si decide il valore, poi si pianifica e si
       annuncia il restart.
       **fatto =** valore nuovo attivo dopo restart + la macchina ancora sana con tutti i servizi su.
-- [ ] **F5 La copia locale che tace da cinque settimane** — budget ~20k · rilievo `F8-09`
-      Il database sulla porta 5435 è vecchio di 5 settimane e **non lo dice a nessuno**: chi lo
-      interroga misura luglio credendo di misurare oggi. Serve un segnale di staleness, non
-      necessariamente un aggiornamento.
-      **fatto =** interrogare la copia stantia produce un avviso visibile, non un numero muto.
+- [x] **F5 La copia locale che tace da cinque settimane** — **RIDIMENSIONATO 2026-08-20** · budget ~20k · rilievo `F8-09`
+      Misurato: il server sulla **5435 risponde** (rifiuta per credenziali mancanti, quindi è
+      vivo), ma **nessuno strumento del repo lo interroga** — cercato `5435` in tutto il
+      progetto: gli unici riscontri sono questo piano, artefatti di Codex, e due **falsi
+      positivi** dove `5435` è dentro un UUID.
+      Quindi il rischio del rilievo — «chi lo interroga misura luglio credendo di misurare
+      oggi» — **è teorico: nessuno lo interroga**. Un segnale di staleness dentro una copia
+      che nessuno consulta sarebbe un presidio senza sorvegliato.
+      ⏳ **Resta una domanda per Enzo, non un lavoro**: c'è un PostgreSQL sulla macchina
+      Windows con dati di produzione vecchi di 5 settimane, che occupa risorse e non serve a
+      nessuno strumento. Si spegne, si aggiorna, o si tiene? (le credenziali della 5435 non
+      sono nel `pgpass`, quindi non è nemmeno interrogabile da qui).
 - [ ] **F6 Tre cose che il progetto dichiara e la realtà smentisce** — budget ~20k · rilievi `A-03`, `A-10`, `A-11`
-      · `A-03` — 3 sorgenti dichiarate contro **5** presenti nel database.
-      · `A-10` — una tabella vuota che occupa 944 kB.
-      · `A-11` — 7 numeri stantii nella documentazione di progetto. Questi **non si aggiornano**:
-        si sostituiscono con il comando che li ri-deriva (⭐ IL PUNTO FISSO — non si cristallizza).
+      ▸ **2 su 3 chiuse il 2026-08-20**; resta `A-11`.
+      · `A-03` ✅ — misurate **6** sorgenti (non 5): tre vive (`ATECO_2025`, `ESCO`,
+        `ESCO_SKILL_HIERARCHY`) e **tre residui del brownfield** che portavano ancora
+        `INGESTED`/`AVAILABLE`, cioè stati di qualcosa in servizio. Mig `000348` le porta ad
+        `ARCHIVED` **senza cancellarle**: sono la provenienza dei dati che il database contiene.
+      · `A-10` ✅ **SMENTITO** — nessuna tabella vuota occupa più di 300 kB; quella da 944 kB
+        non esiste più.
+      · `A-11` ⏸ **da fare** — i 7 numeri stantii nella documentazione. Non si aggiornano: si
+        sostituiscono con il comando che li ri-deriva (⭐ IL PUNTO FISSO).
       **fatto =** dichiarato = misurato, e i 7 numeri non esistono più come numeri.
 
 ## Le prove che devono poter fallire

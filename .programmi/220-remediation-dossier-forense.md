@@ -62,7 +62,7 @@ misura live della precondizione al momento (mai ereditata) → migrazione emenda
         S1075 — **ri-misurare**, è un dato che varia). **fatto =** `SHOW` + un file di log vivo.
       · **W1.4** — trigger di audit e `updated_at` sui 15 cataloghi (oggi 0 audit, 5/15
         timestamp). **fatto =** 15/15 + una riga di prova comparsa in `audit.*`.
-- [ ] **F3 Chi può connettersi — e due anomalie da capire prima di toccare** — budget ~30k · rilievo `F5-06`
+- [x] **F3 Chi può connettersi — e due anomalie da capire prima di toccare** — FATTO 2026-08-20 · mig 000340 · in prod `datacl` = `=T/heuresys` (PUBLIC senza `c`) · `readyz=200 login=200` dopo la revoca · `lls` = proprietario di un altro progetto, `heuresys_backup` = orfano non usato · budget ~30k · rilievo `F5-06`
       · **W1.5** — `REVOKE CONNECT FROM PUBLIC`. **L'indagine viene prima**: `lls` (di un altro
         progetto?) e `heuresys_backup` (`BYPASSRLS` senza alcun grant) vanno spiegati, o la
         revoca spegne qualcosa che serve. **fatto =** ACL misurata; le due anomalie risolte

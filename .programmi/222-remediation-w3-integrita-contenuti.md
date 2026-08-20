@@ -67,7 +67,7 @@
         Ricollegarle non è una fase da 45k: è un lavoro di curatela su un terzo del catalogo, e
         va pianificato per sé. **Le 84 del rilievo erano un sottoinsieme, non il totale.**
       **fatto =** 5 codici decisi uno per uno con la ragione scritta + un piano proprio per le 4.467.
-- [ ] **F6 Il canale unico ruolo↔occupazione** — budget ~40k · rilievo `F2-01`
+- [x] **F6 Il canale unico ruolo↔occupazione** — FATTO 2026-08-21 · mig 000349 · **il rilievo è smentito nella sostanza**: dei 111 ruoli col campo nei metadati, quelli con un URI dentro sono **ZERO** (titolo compreso) — il dossier ha contato le *chiavi*, non i valori. Non c'erano due canali. Il difetto vero era che 111 chiavi vuote **sembravano** legami a chiunque interrogasse `metadata ? 'esco_occupation_uri'`: rimosse, con giornale di 111 righe · 64 legami preesistenti intatti · budget ~40k · rilievo `F2-01`
       Oggi il legame passa da **due** strade — 64 FK e 111 righe di metadata — che non si
       sovrappongono su nemmeno un caso (misurato: 0 sovrapposti su 176 ruoli). Due canali disgiunti
       per lo stesso concetto sono la premessa di una divergenza: si consolidano in uno.

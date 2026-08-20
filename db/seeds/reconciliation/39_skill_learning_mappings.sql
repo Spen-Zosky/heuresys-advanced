@@ -6,7 +6,7 @@
 -- The skill<->learning bridge maps each course to the ESCO skills it grants. Both legs:
 --   module <- course code -> the GLOBAL course=module (seed 37). Course leg resolves 717/717.
 --   skill  <- esco_skill_uri -> sys.sys_skills.skill_esco_uri. Skill leg resolves 635/717 (88.6%);
---            the 82 unresolved rows carry an esco_uri absent from sys_skills (e.g. http://esco.eu/skill/F6
+--            the 82 unresolved rows carry an esco_uri absent from sys_skills (e.g. CUSTOM::F6
 --            and a handful of non-canonical URIs) — documented as the reduced-recall remainder, NOT
 --            imported (no fabrication). Each resolving esco_uri maps to EXACTLY ONE sys_skill (verified
 --            no multi-map), so the unique key (skill_id, module_id) is collision-safe.

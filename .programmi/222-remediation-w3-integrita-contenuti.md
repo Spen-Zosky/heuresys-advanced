@@ -41,7 +41,7 @@
       campi in `sys_translatable_field`.
       **fatto =** `pnpm i18n:check` verde **e** le traduzioni visibili da un endpoint `/v1/*`
       (→ cancello di esposizione, #79: un dato che nessuna API espone non è nel prodotto).
-- [ ] **F4 Gli URI contraffatti e i canonici nella lingua sbagliata** — budget ~45k · rilievi `F6-03`, `F6-02`
+- [x] **F4 Gli URI contraffatti e i canonici nella lingua sbagliata** — FATTO 2026-08-20 · `F6-03` **risolto**: mig 000346, 70 URI sotto `CUSTOM::`, 13.933 ESCO autentici intatti, 0 vettori invalidati; emendati anche i 2 seed che li nominavano (senza, il giro dopo li rimetteva) · `F6-02` **dichiarato non meccanizzabile**: misurate **217** (non 103) traduzioni EN identiche al canonico, ma il campione mostra che sono nomi propri di tecnologie (`PHP`, `Vyper`, `Solidity`, `Vagrant`, `Adobe Creative Suite`) — identici in ogni lingua e corretti così. Distinguerli da una copia pigra richiede giudizio linguistico riga per riga, non una regola · budget ~45k · rilievi `F6-03`, `F6-02`
       · `F6-03` — 70 URI ESCO che **sembrano** ESCO e non lo sono → namespace `CUSTOM::`.
         **Prima si misura chi li referenzia**: rinominarli senza guardare rompe i riferimenti.
       · `F6-02` — 103 canonici in inglese che portano una «traduzione» italiana identica

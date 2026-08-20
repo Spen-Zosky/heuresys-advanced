@@ -33,14 +33,44 @@ accettato, chiuso `RISOLTO` nel registro. Non rientra da questa porta.
       **fatto =** durata della catena misurata **prima e dopo**, e `bash db/scripts/ci-rehearsal.sh`
       verde (è la prova che l'emendamento non ha rotto la ri-applicabilità).
 - [ ] **F3 La separazione delle identità: migrator, applicazione, sola lettura** — budget ~60k · rilievi `F5-01`, `F4-08`
-      **La voce grossa dell'onda.** Oggi una sola identità fa tutto: migra, serve l'API, legge.
-      Separarla tocca il deploy, i due `.env` e il pool dell'API — cioè tre cose che, sbagliate
-      insieme, lasciano la produzione senza database.
-      **Non si apre senza la simulazione R24 completa scritta**: precondizioni, meccanismo letto
-      nel codice del pool e negli script di deploy, propagazione su VM e linux-pc, guardia, e la
-      via di ritorno se l'API non si riconnette.
-      **fatto =** tre identità distinte, l'API gira con quella meno potente che le basta, e un
-      deploy completo passa da capo.
+      **La voce grossa dell'onda**, e l'unica di W4 non aperta il 2026-08-20: apre e chiude in
+      una sessione sola o non si apre, perché a metà lascia la produzione senza database.
+      **La simulazione R24 è stata fatta il 2026-08-20 e sta qui sotto: la prossima sessione
+      non la rifà, esegue.**
+
+      **① Precondizioni** — misurate 2026-08-20. `heuresys` è proprietario di
+      `heuresys_advanced` e **non** è superuser (`usesuper = f`); i ruoli del cluster sono 6
+      (`heuresys` · `postgres` · `codex_auditor` · `gov_worker` · `heuresys_backup` · `lls`);
+      `PUBLIC` non ha più `CONNECT` (#220 F3). Serve `postgres` via `sudo -u` sulla VM per
+      creare ruoli: `heuresys` non ha `CREATEROLE`.
+
+      **② Meccanismo — letto nel codice, non supposto.**
+      · `apps/api/src/db/client.ts` costruisce **un solo** `pg.Pool` da
+        `POSTGRES_USER` / `POSTGRES_PASSWORD` (più host, porta, db, ssl, `max`). Non esiste
+        un secondo pool: l'identità dell'API è quell'unica coppia.
+      · Le migrazioni girano da `db/scripts/migrate.sh`, che legge lo stesso `.env`.
+      · ⚠ **`verify_gate` applica le migrazioni alla produzione** (memoria
+        `verify_gate_applies_migrations_to_prod`): se il migrator diventa un'identità diversa,
+        anche quel cancello va allineato o fallisce a fine turno.
+      · I consumatori dell'identità sono **almeno tre**: l'API, `migrate.sh`, e gli script di
+        `db/scripts/` — vanno censiti tutti prima, o qualcuno resta fuori.
+
+      **③ Propagazione** — due `.env` (PC e VM, entrambi gitignored e **reali**), più il
+      linux-pc che ha il proprio clone. `.env.example` va aggiornato con i blocchi nuovi.
+      Nessuno di questi arriva con `git pull`: è il caso classico che la skill
+      `full-alignment-deploy` copre.
+
+      **④ Chi** — Claude per intero, tranne un punto: le **password** dei ruoli nuovi sono un
+      segreto, e vanno generate e depositate senza mai comparire nel contesto né in un file
+      versionato. Se serve che Enzo le fornisca o le approvi, la voce diventa `WAIT-INPUT`.
+
+      **⑤ Guardia e via di ritorno** — la guardia è che l'identità dell'applicazione **fallisca**
+      un `CREATE TABLE`: se ci riesce, la separazione è nominale. La via di ritorno è rimettere
+      `POSTGRES_USER=heuresys` nei due `.env` e riavviare l'API — quindi **il valore vecchio va
+      annotato prima di toccarlo**, ed è l'unico rollback che conta.
+
+      **fatto =** tre identità distinte, l'API gira con la meno potente che le basta, il
+      `CREATE TABLE` dell'app viene respinto, e un deploy completo passa da capo.
 - [ ] **F4 La memoria del database, su una macchina che non è solo sua** — budget ~25k · rilievi `F8-06`, `F8-14`
       `shared_buffers` è a 128MB su 11GB. Sembra un aumento ovvio e **non lo è**: la VM ospita
       sette progetti, quindi la memoria che si prende qui la si toglie a qualcun altro.

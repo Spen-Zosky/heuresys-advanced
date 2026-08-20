@@ -104,7 +104,14 @@ beforeAll(async () => {
   // misura in quale database sta girando, non il codice. Qui si prende il
   // fascicolo reale se c'e' (cosi' in locale continua a provare il dato vero) e
   // altrimenti se ne costruisce uno equivalente, che `afterAll` rimuove.
-  if (!rows[0]) {
+  // `RESEARCH_FIXTURE_FORCE=1` costringe il ramo di costruzione anche dove il
+  // fascicolo reale c'e'. Senza, quel ramo gira SOLO in CI — cioe' e' provabile
+  // solo dove non lo si puo' guardare, ed e' esattamente come si e' rotto:
+  // costruito con tre parametri invece di sei, verde in locale (dove non veniva
+  // preso) e rosso in CI. Un ramo che non si puo' esercitare dove si lavora e'
+  // un ramo che si scopre rotto dopo il push.
+  //     cd apps/api && RESEARCH_FIXTURE_FORCE=1 pnpm exec vitest run test/research.integration.test.ts
+  if (!rows[0] || process.env.RESEARCH_FIXTURE_FORCE === "1") {
     const { rows: fatto } = await pool.query<{ v: string; b: string; n: number }>(
       `WITH b AS (
          INSERT INTO sys.sys_tenant_blueprints (tenant_blueprint_code, tenant_blueprint_name)
@@ -114,15 +121,44 @@ beforeAll(async () => {
          INSERT INTO sys.sys_tenant_blueprint_versions (
            tenant_blueprint_version_blueprint_id,
            tenant_blueprint_version_number,
+           -- TUTTI E SEI i parametri della ricerca, non i tre che la SELECT
+           -- qui sopra verifica. La prima stesura ne metteva tre e la CI e'
+           -- andata rossa: RESEARCH_PARAMETERS_MISSING su fascia dimensionale,
+           -- paese e intensita'. La query di selezione ne controlla tre, ma il
+           -- SERVIZIO ne pretende sei — ed e' il servizio il consumatore. Una
+           -- fixture si costruisce per chi la usa, non per chi la trova.
+           -- (niente apici inversi qui dentro: siamo dentro un template literal,
+           --  e uno di quelli chiuderebbe la stringa. E' cosi' che si e' rotta.)
            tenant_blueprint_version_industry_class_id,
            tenant_blueprint_version_operating_model_id,
-           tenant_blueprint_version_employee_count)
+           tenant_blueprint_version_employee_count,
+           tenant_blueprint_version_size_band_id,
+           tenant_blueprint_version_country_code,
+           tenant_blueprint_version_regulatory_intensity,
+           -- il MODELLO ANCORATO: senza, applicaRicerca si ferma con
+           -- BLUEPRINT_MODEL_NOT_PINNED — «la ricerca riempie il modello che il
+           -- consulente ha scelto, non lo sceglie al posto suo». Sono sette
+           -- campi, non sei: il settimo non lo chiede la ricerca ma
+           -- l'applicazione del suo risultato, e si e' visto solo esercitando
+           -- questo ramo in locale.
+           tenant_blueprint_version_variant_version_id)
          SELECT b.tenant_blueprint_id, 1,
                 (SELECT activity_classification_id FROM sys.sys_activity_classifications
                   WHERE activity_classification_scheme = 'ATECO_2025'
                     AND activity_classification_level = 4 ORDER BY activity_classification_code LIMIT 1),
                 (SELECT operating_model_id FROM sys.sys_operating_model_catalog ORDER BY 1 LIMIT 1),
-                50
+                50,
+                -- la fascia che contiene davvero 50 dipendenti: una banda scelta
+                -- a caso contraddirebbe l'employee_count, e la sentinella
+                -- v_blueprint_size_band_mismatch lo direbbe.
+                (SELECT enterprise_size_band_id FROM sys.sys_enterprise_size_bands
+                  WHERE 50 >= coalesce(enterprise_size_band_min_employees, 0)
+                    AND 50 <= coalesce(enterprise_size_band_max_employees, 2147483647)
+                  ORDER BY enterprise_size_band_min_employees LIMIT 1),
+                'IT',
+                'HIGH',
+                (SELECT blueprint_variant_version_id FROM sys.sys_blueprint_variant_versions
+                  ORDER BY created_at LIMIT 1)
            FROM b
          RETURNING tenant_blueprint_version_id, tenant_blueprint_version_blueprint_id,
                    tenant_blueprint_version_number

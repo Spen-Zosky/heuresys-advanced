@@ -102,6 +102,17 @@ const EnvSchema = z.object({
   POSTGRES_DB: z.string(),
   POSTGRES_USER: z.string(),
   POSTGRES_PASSWORD: z.string(),
+
+  // #223 F3 — l'identita' con cui l'API parla al database, quando e' diversa da
+  // quella che applica le migrazioni.
+  //
+  // OPZIONALI DI PROPOSITO, e il fallback e' la parte importante: dove non sono
+  // impostate si continua a usare POSTGRES_USER, quindi il PC di sviluppo, i
+  // test e la CI non cambiano comportamento e non serve toccare i loro `.env`.
+  // In produzione ci sono, e li' l'API gira con un ruolo che puo' scrivere le
+  // RIGHE ma non toccare la STRUTTURA.
+  POSTGRES_APP_USER: z.string().optional(),
+  POSTGRES_APP_PASSWORD: z.string().optional(),
   POSTGRES_SCHEMA: z.string().default("sys"),
   POSTGRES_SSL: z.enum(["disable", "require"]).default("disable"),
 

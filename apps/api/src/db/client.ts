@@ -13,12 +13,49 @@ import pg from "pg";
 import type { PoolClient } from "pg";
 import { env } from "../config/env.js";
 
+/**
+ * #223 F3 (rilievi F5-01, F4-08) — l'API si collega con l'identita' MENO potente
+ * che le basta.
+ *
+ * `POSTGRES_USER` resta il proprietario e il migrator: possiede gli oggetti e
+ * applica la catena (`db/scripts/migrate.sh`, `verify_gate`). Se l'API usasse
+ * lui, un difetto dell'applicazione — una injection, un endpoint sbagliato —
+ * avrebbe in mano i privilegi per cancellare TABELLE, non solo righe.
+ *
+ * Dove `POSTGRES_APP_USER` e' impostata (produzione), il pool usa quella: legge
+ * e scrive le righe, e non ha CREATE su alcuno schema. Dove non c'e' (PC di
+ * sviluppo, test, CI) si ricade sul proprietario, cosi' nessun ambiente si rompe
+ * per una variabile che non ha.
+ *
+ * Il fallback e' volutamente silenzioso su un punto e rumoroso su un altro:
+ * usare il proprietario NON e' un errore in sviluppo, ma in produzione va visto.
+ * Per questo l'identita' scelta finisce nel log di avvio — non la password.
+ */
+const dbUser = env.POSTGRES_APP_USER ?? env.POSTGRES_USER;
+const dbPassword = env.POSTGRES_APP_USER ? (env.POSTGRES_APP_PASSWORD ?? "") : env.POSTGRES_PASSWORD;
+
+if (env.POSTGRES_APP_USER && !env.POSTGRES_APP_PASSWORD) {
+  // Meglio fermarsi all'avvio che collegarsi senza password e scoprire il
+  // problema alla prima query.
+  throw new Error("POSTGRES_APP_USER e' impostata ma POSTGRES_APP_PASSWORD manca");
+}
+
+console.info(
+  JSON.stringify({
+    level: "info",
+    phase: "pg-pool",
+    msg: "identita di connessione",
+    user: dbUser,
+    separata: dbUser !== env.POSTGRES_USER,
+  }),
+);
+
 export const pool = new pg.Pool({
   host: env.POSTGRES_HOST,
   port: env.POSTGRES_PORT,
   database: env.POSTGRES_DB,
-  user: env.POSTGRES_USER,
-  password: env.POSTGRES_PASSWORD,
+  user: dbUser,
+  password: dbPassword,
   ssl: env.POSTGRES_SSL === "require" ? { rejectUnauthorized: true } : undefined,
   max: env.POSTGRES_POOL_MAX,
   idleTimeoutMillis: 30_000,

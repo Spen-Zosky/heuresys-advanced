@@ -1,7 +1,7 @@
 # 222 — Remediation forense W3 · Integrità e contenuti dei cataloghi
 
 > **item**: #222 · **priorità**: P2 · **stima**: ~150-250k token (multi-sessione)
-> **stato**: NON AVVIATO
+> **stato**: IN CORSO
 > **capofila**: `.programmi/220-remediation-dossier-forense.md` — fonte, **metodo vincolante**,
 > decisioni di Enzo e fuori-perimetro. Non si ricopia qui.
 
@@ -16,7 +16,7 @@
 
 ## Fasi
 
-- [ ] **F1 I tre presidi strutturali che impediscono il prossimo guasto** — budget ~40k · rilievi `F1-04`, `F1-06`, `F1-07`
+- [x] **F1 I tre presidi strutturali che impediscono il prossimo guasto** — FATTO 2026-08-20 · mig 000343 · 4 indici in prod · 0 traduzioni senza soggetto · sentinelle 24→25 · prove: URI duplicato **respinto**, sentinella accesa su soggetto fantasma · budget ~40k · rilievi `F1-04`, `F1-06`, `F1-07`
       Vanno per primi perché sono **guardie**: dopo, gli errori che le fasi seguenti correggono
       non possono più rientrare in silenzio.
       · `F1-04` — indice `UNIQUE` su `skill_esco_uri` (14.003 = 14.003 misurato 2026-08-19 →

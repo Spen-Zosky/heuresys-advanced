@@ -1,7 +1,7 @@
 # 223 — Remediation forense W4 · Pipeline, separazione ruoli, prestazioni
 
 > **item**: #223 · **priorità**: P2 · **stima**: ~120-200k token
-> **stato**: NON AVVIATO
+> **stato**: IN CORSO
 > **capofila**: `.programmi/220-remediation-dossier-forense.md` — fonte, **metodo vincolante**,
 > decisioni di Enzo e fuori-perimetro. Non si ricopia qui.
 
@@ -18,7 +18,7 @@ accettato, chiuso `RISOLTO` nel registro. Non rientra da questa porta.
 
 ## Fasi
 
-- [ ] **F1 La corsa che riscrive 14.000 righe identiche** — budget ~30k · rilievo `F3-02`
+- [x] **F1 La corsa che riscrive 14.000 righe identiche** — FATTO 2026-08-20 · `UPDATE` reso condizionale in `repository.ts` · **e una scoperta più grave**: il connettore scriveva l'href ESCO (forma di chiamata API), quindi la prossima corsa avrebbe **disfatto 000344**. Normalizzato alla sorgente (`canonicalConceptUri` in `esco-connector.ts`) e sanati con mig 000347 anche i **5.006** `broader_uri`, che nessuno aveva guardato · undo provato: 5.006 ripristinate e rollback · typecheck verde · budget ~30k · rilievo `F3-02`
       `upsertEscoSkillHierarchy` in `apps/api/src/modules/reference-sync/repository.ts` fa un
       `UPDATE` incondizionato: a ogni sincronizzazione riscrive l'intera gerarchia anche quando
       nulla è cambiato — write amplification, bloat, e `updated_at` che perde ogni significato.

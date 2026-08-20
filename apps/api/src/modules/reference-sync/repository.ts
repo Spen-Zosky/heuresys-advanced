@@ -140,11 +140,22 @@ export async function upsertEscoSkillHierarchy(
 ): Promise<EscoUpsertResult> {
   let updated = 0;
   for (const r of rows) {
+    // The `IS DISTINCT FROM` guard is the whole point: without it this UPDATE
+    // rewrote ~14,000 rows on EVERY sync run, identical values included — write
+    // amplification, table bloat, and an `updated_at` that stopped meaning
+    // "last changed". Measured 2026-08-20; rilievo F3-02.
+    //
+    // It also keeps the audit trail honest: the catalog trigger installed by
+    // migration 000339 skips no-op updates by comparing OLD and NEW, but a row
+    // that is written anyway still burns a WAL record and a dead tuple. Not
+    // writing at all is strictly better than writing and then not logging it.
     const res = await client.query(
       `UPDATE sys.sys_skills
           SET skill_metadata = skill_metadata
               || jsonb_build_object('skill_group_uri', $1::text, 'broader_uri', $2::text)
-        WHERE skill_esco_uri = $3`,
+        WHERE skill_esco_uri = $3
+          AND (    (skill_metadata->>'skill_group_uri') IS DISTINCT FROM $1::text
+                OR (skill_metadata->>'broader_uri')     IS DISTINCT FROM $2::text )`,
       [r.skillGroupUri, r.broaderUri, r.skillEscoUri],
     );
     updated += res.rowCount ?? 0;

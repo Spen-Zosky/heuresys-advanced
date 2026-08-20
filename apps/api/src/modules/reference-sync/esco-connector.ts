@@ -178,11 +178,38 @@ export const ESCO_SKILL_MAX_RETRIES = 5;
 export const ESCO_SKILL_BACKOFF_BASE_MS = 1000;
 
 /** First href in a HATEOAS link array (href preferred, uri fallback) — null if empty. */
+/**
+ * ESCO's `_links` carry the API CALL, not the concept URI:
+ *   https://ec.europa.eu/esco/api/resource/concept?uri=http://data.europa.eu/esco/skill/S1.6.1&language=en
+ * The thing we want to store is the `uri` parameter — the stable identifier of the
+ * concept. The rest (host, path, `language`) describes how we asked, not what we got.
+ *
+ * Storing the call URL made group comparison depend on the endpoint and the language
+ * of the request: two clients asking the same concept in different languages produced
+ * two different "groups". Migration 000344 cleaned up 12,887 rows already written that
+ * way — normalising HERE is what stops the next sync run from putting them back.
+ *
+ * Anything that is not an ESCO API call is returned untouched: a plain concept URI is
+ * already canonical, and a shape we do not recognise must not be silently mangled.
+ */
+export function canonicalConceptUri(href: string | null): string | null {
+  if (!href) return null;
+  const marker = "uri=";
+  const at = href.indexOf(marker);
+  if (at < 0) return href;
+  const tail = href.slice(at + marker.length);
+  const end = tail.indexOf("&");
+  const uri = end < 0 ? tail : tail.slice(0, end);
+  // An empty or non-absolute extraction means the shape was not what we assumed:
+  // keep the original rather than write a broken value.
+  return uri.startsWith("http") ? uri : href;
+}
+
 function firstHref(links: RawEscoSkillLink[] | undefined): string | null {
   if (!links || links.length === 0) return null;
   const first = links[0];
   const href = first?.href ?? first?.uri ?? null;
-  return href && href.length > 0 ? href : null;
+  return href && href.length > 0 ? canonicalConceptUri(href) : null;
 }
 
 /**

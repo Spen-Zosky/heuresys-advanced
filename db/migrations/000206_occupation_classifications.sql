@@ -79,8 +79,8 @@ END $trg$;
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS sys.sys_occupation_classification_mappings (
   occupation_class_mapping_id         uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
-  occupation_class_mapping_source_id  uuid         NOT NULL REFERENCES sys.sys_occupation_classifications(occupation_classification_id) ON DELETE CASCADE,
-  occupation_class_mapping_target_id  uuid         NOT NULL REFERENCES sys.sys_occupation_classifications(occupation_classification_id) ON DELETE CASCADE,
+  occupation_class_mapping_source_id  uuid         NOT NULL REFERENCES sys.sys_occupation_classifications(occupation_classification_id) ON DELETE RESTRICT,
+  occupation_class_mapping_target_id  uuid         NOT NULL REFERENCES sys.sys_occupation_classifications(occupation_classification_id) ON DELETE RESTRICT,
   occupation_class_mapping_kind       varchar(32)  NOT NULL DEFAULT 'EXACT',
   occupation_class_mapping_confidence numeric(4,3) NOT NULL DEFAULT 1.000,
   occupation_class_mapping_metadata   jsonb        NOT NULL DEFAULT '{}'::jsonb,

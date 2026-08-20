@@ -62,8 +62,8 @@ END $trg$;
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS sys.sys_activity_classification_mappings (
   activity_class_mapping_id           uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
-  activity_class_mapping_source_id    uuid         NOT NULL REFERENCES sys.sys_activity_classifications(activity_classification_id) ON DELETE CASCADE,
-  activity_class_mapping_target_id    uuid         NOT NULL REFERENCES sys.sys_activity_classifications(activity_classification_id) ON DELETE CASCADE,
+  activity_class_mapping_source_id    uuid         NOT NULL REFERENCES sys.sys_activity_classifications(activity_classification_id) ON DELETE RESTRICT,
+  activity_class_mapping_target_id    uuid         NOT NULL REFERENCES sys.sys_activity_classifications(activity_classification_id) ON DELETE RESTRICT,
   activity_class_mapping_kind         varchar(32)  NOT NULL DEFAULT 'EXACT',
   activity_class_mapping_confidence   numeric(4,3) NOT NULL DEFAULT 1.000,
   activity_class_mapping_metadata     jsonb        NOT NULL DEFAULT '{}'::jsonb,

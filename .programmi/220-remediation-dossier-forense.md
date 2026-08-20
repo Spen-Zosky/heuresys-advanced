@@ -1,7 +1,7 @@
 # 220 — Remediation forense W1 · Messa in sicurezza
 
 > **item**: #220 · **priorità**: P1 · **stima**: ~120-180k token (1 sessione dedicata)
-> **stato**: NON AVVIATO
+> **stato**: IN CORSO
 > **capofila del programma #220-#223**: questo file porta fonte, metodo vincolante e decisioni
 > di Enzo per **tutti e quattro**. Il dettaglio delle onde W2/W3/W4 vive nei rispettivi file e
 > **non si ricopia qui** — due copie della stessa tabella divergono, ed è successo.
@@ -43,7 +43,7 @@ misura live della precondizione al momento (mai ereditata) → migrazione emenda
 
 ## Fasi
 
-- [ ] **F1 Le due che chiudono un varco di lettura** — budget ~40k · rilievi `F1-01`, `F5-05`
+- [x] **F1 Le due che chiudono un varco di lettura** — FATTO 2026-08-20 · mig 000337+000338 · in prod: 4/4 FK `confdeltype=r` · 12/12 `has_table_privilege`=f, `codex_auditor` conserva 256 oggetti · budget ~40k · rilievi `F1-01`, `F5-05`
       Vanno per prime per due ragioni diverse, entrambe stringenti: la prima **sblocca `#221`**,
       la seconda è un segreto leggibile da un'identità che non dovrebbe vederlo.
       · **W1.1** — 4 FK dei crosswalk da `CASCADE` a `RESTRICT`. **fatto =** `confdeltype=r`

@@ -89,7 +89,7 @@ accettato, chiuso `RISOLTO` nel registro. Non rientra da questa porta.
       Windows con dati di produzione vecchi di 5 settimane, che occupa risorse e non serve a
       nessuno strumento. Si spegne, si aggiorna, o si tiene? (le credenziali della 5435 non
       sono nel `pgpass`, quindi non è nemmeno interrogabile da qui).
-- [ ] **F6 Tre cose che il progetto dichiara e la realtà smentisce** — budget ~20k · rilievi `A-03`, `A-10`, `A-11`
+- [x] **F6 Tre cose che il progetto dichiara e la realtà smentisce** — FATTO 2026-08-20/21 · `A-03` risolto (mig 000348: 3 sorgenti brownfield → `ARCHIVED`, provenienza conservata) · `A-10` **smentito** (nessuna tabella vuota sopra 300 kB) · `A-11` **in gran parte smentito** (i documenti sono datati; l'unico al presente aveva già la nota anti-drift — corretta l'intestazione che diceva «live») · budget ~20k · rilievi `A-03`, `A-10`, `A-11`
       ▸ **2 su 3 chiuse il 2026-08-20**; resta `A-11`.
       · `A-03` ✅ — misurate **6** sorgenti (non 5): tre vive (`ATECO_2025`, `ESCO`,
         `ESCO_SKILL_HIERARCHY`) e **tre residui del brownfield** che portavano ancora

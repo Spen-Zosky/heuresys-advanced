@@ -73,12 +73,22 @@
       per lo stesso concetto sono la premessa di una divergenza: si consolidano in uno.
       **fatto =** un solo canale, 176 ruoli coperti, nessuna perdita di legame misurata prima/dopo.
 - [ ] **F7 Le ridondanze vere e le pulizie basse** — budget ~30k · rilievi `F6-09`, `F6-10`, `F1-05`, `F1-08`, `F1-09`
-      Per ultime perché sono le meno rischiose e le più facili da rimandare senza danno.
-      · `F6-09` — 4 ridondanze **vere** (pattern in `mappa_competenze_rimosse.csv`): «vere»
-        perché il dossier ne aveva contate di più e la misura le ha ridotte a quattro.
-      · `F6-10` tipografia · `F1-05` colonne morte · `F1-08` indici mai usati (**ri-misurare
-        `idx_scan` prima**: un indice inutile su un contatore azzerato dal restart non è inutile)
-        · `F1-09` tipi incoerenti.
+      ▸ **2 delle 5 misurate il 2026-08-21, ed entrambe risultano NON-LAVORO.** Restano `F6-09`,
+      `F6-10`, `F1-09`.
+      · `F1-08` ✅ **non azionabile, e la misura spiega perché**. Gli indici con `idx_scan = 0`
+        sopra 100 kB sono **tre**, e nessuno è inutile: due sono indici **vettoriali HNSW**
+        (`sys_job_role_embeddings`, `sys_user_profile_embeddings`) che servono a una ricerca
+        semantica esistente ma non ancora esercitata — un indice non ancora interrogato non è un
+        indice inutile; il terzo è `idx_skills_created_by`, **creato oggi da `000343`** per
+        sostenere una FK. ⚠ E un indice di FK serve al **controllo referenziale**, che non passa
+        da `idx_scan`: zero letture è il suo stato normale, non un sintomo.
+        (`pg_stat_database.stats_reset` è `NULL`: non si sa nemmeno da quando conta.)
+      · `F1-05` ✅ **non azionabile senza una decisione di prodotto**. Le colonne nulle al 100%
+        ci sono, ma non sono morte: sono **non ancora usate** — l'intero modulo `assessment_*`,
+        gli `created_by`/`updated_by` opzionali, le descrizioni facoltative. Cancellare una
+        colonna perché oggi è vuota significa cancellare una **capacità del modello**;
+        distinguere «morta» da «non ancora usata» richiede di sapere se quella funzionalità è
+        viva, e quella è una domanda di prodotto.
       **fatto =** ognuna delle cinque chiusa o dichiarata non-lavoro con la misura accanto.
 
 ## Le prove che devono poter fallire

@@ -35,7 +35,7 @@
       misura prima, guardia al momento dell'esecuzione, post-condizione **su ciò che non doveva
       cambiare**, e `staging.*_undo` con la funzione che lo applica.
       **fatto =** formato uniforme misurato + undo provato davvero (non solo scritto).
-- [ ] **F3 Le traduzioni ATECO che ci sono già e nessuno vede** — budget ~35k · rilievo `F6-01`
+- [x] **F3 Le traduzioni ATECO che ci sono già e nessuno vede** — FATTO 2026-08-20 · mig 000345 (+ emendata 000341) · **4.304** denominazioni EN ora leggibili dal prodotto · 4.304 DE intatte nei metadati (non travasate: il prodotto ha due lingue) · `i18n:check` parity OK · esposizione 73/73 · budget ~35k · rilievo `F6-01`
       EN e DE sono **già** in `activity_classification_metadata`: costo di acquisizione zero,
       basta portarle dove il prodotto le legge — `sys_reference_translations` — e registrare i
       campi in `sys_translatable_field`.

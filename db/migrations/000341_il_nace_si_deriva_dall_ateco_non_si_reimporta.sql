@@ -108,17 +108,43 @@ SELECT
   a.activity_classification_name,
   a.activity_classification_description,
   a.activity_classification_level,
+  -- ⚠ LE TRADUZIONI VIAGGIANO CON LA RIGA. La prima stesura costruiva un
+  -- metadata tutto nuovo e lasciava indietro `title_en` e `title_de`, che nella
+  -- fonte ci sono su tutte e 3.257 le righe. Il risultato: 1.047 classificazioni
+  -- senza denominazione inglese — e il controllo di copertura EN, che gira in un
+  -- file di numero MINORE, e' andato rosso alla seconda passata della prova
+  -- generale (non alla prima, perche' alla prima quelle righe non esistevano
+  -- ancora quando il controllo passava). Derivare vuol dire portarsi dietro cio'
+  -- che si deriva, non solo il nome.
   jsonb_build_object(
     'derivato_da',      'ATECO_2025',
     'derivato_come',    'identita_fino_al_4_digit',
     'fonte_evidenza',   'mig 000211 (Eurostat KS-GQ-24-007 / EUR-Lex NACE Rev 2.1 / ISTAT ATECO 2025)',
     'nome_preso_da',    'ATECO_2025 (denominazione italiana; le ufficiali NACE non sono nel database)',
-    'mai_importato',    true
+    'mai_importato',    true,
+    'title_en',         a.activity_classification_metadata->>'title_en',
+    'title_de',         a.activity_classification_metadata->>'title_de'
   )
   FROM sys.sys_activity_classifications a
  WHERE a.activity_classification_scheme = 'ATECO_2025'
    AND a.activity_classification_level BETWEEN 1 AND 4
 ON CONFLICT DO NOTHING;
+
+-- Le righe gia' create dalla stesura precedente non le tocca l'INSERT (che ha
+-- `ON CONFLICT DO NOTHING`): vanno allineate esplicitamente alla fonte. La
+-- `WHERE` finale rende l'operazione muta quando non c'e' niente da allineare,
+-- quindi ri-applicabile senza scrivere a vuoto.
+UPDATE sys.sys_activity_classifications n
+   SET activity_classification_metadata =
+         n.activity_classification_metadata
+         || jsonb_build_object('title_en', a.activity_classification_metadata->>'title_en',
+                               'title_de', a.activity_classification_metadata->>'title_de')
+  FROM sys.sys_activity_classifications a
+ WHERE n.activity_classification_scheme = 'NACE_REV_2_1'
+   AND a.activity_classification_scheme = 'ATECO_2025'
+   AND a.activity_classification_code = n.activity_classification_code
+   AND (n.activity_classification_metadata->>'title_en') IS DISTINCT FROM
+       (a.activity_classification_metadata->>'title_en');
 
 -- ---------------------------------------------------------------------------
 -- 2. Il crosswalk, per troncamento.

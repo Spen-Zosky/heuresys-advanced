@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `97407c4c` (2026-08-20T00:32:36+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `132c71fa` (2026-08-21T01:00:33+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 604 |
 | Pagine web | 120 |
 | Schemi shared | 108 |
-| Tabelle DB | 264 (vuote: 21) |
-| Viste / matview | 32 / 0 |
+| Tabelle DB | 270 (vuote: 21) |
+| Viste / matview | 34 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 272 |
 
 ## Moduli API
@@ -127,7 +127,7 @@
 ## Tabelle DB vuote (feature senza dati — candidate brainstorming)
 
 - `audit.user_self_service_actions`
-- `sys.sys_activity_classification_mappings`
+- `staging.mig349_esco_consolidamento_undo`
 - `sys.sys_auth_mfa_exemption_audit`
 - `sys.sys_auth_mfa_exemption_eligible_users`
 - `sys.sys_auth_mfa_exemptions`

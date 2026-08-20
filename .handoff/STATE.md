@@ -5,40 +5,53 @@
 
 ## Last session brief — l'ultima sessione, in breve
 
-**S1075 — il dossier forense è diventato un programma.** Il dossier di heuresys-datastore
-(88 rilievi sul governo dei dati esterni) è stato letto, verificato nei punti portanti e
-trasformato in quattro ondate nel register (`#220`–`#223`, programma in
-`.programmi/220-remediation-dossier-forense.md`). La verifica ha già pagato: due rilievi
-ridimensionati (le purghe del catalogo formativo erano deliberate e versionate; il timer di
-deploy non si sovrappone) e uno smentito a metà (la copia fuori sede dei backup **esiste**:
-il pull notturno su linux-pc è attivo, con 7 dump misurati). Enzo ha deciso: NACE e crosswalk
-rientrano, il PITR resta status quo (RPO 24h accettato), il registro datastore lo aggiorna la
-CLI — le prime emende sono già applicate e il check del vault è verde.
+**S1076 — il dossier forense è stato eseguito, e in gran parte smentito.** Le quattro ondate
+di remediation sono state aperte tutte: `#220` e `#221` **chiuse**, `#222` a 5 fasi su 7,
+`#223` a 4 su 6. Ma il risultato che conta non sono le tredici migrazioni: è che **undici
+rilievi su ventotto non erano ciò che dicevano**. NACE e il crosswalk non erano persi per
+incidente — li aveva rimossi una migrazione deliberata con evidenza Eurostat; i vettori
+"disallineati" combaciavano 14.036 su 14.036; le competenze isolate erano 4.467 e non 84; la
+migrazione più lenta non era quella indicata; e i "111 legami nei metadati" erano 111 chiavi
+**vuote**. Decisione di Enzo: il crosswalk si **deriva** da ATECO_2025 invece di reimportare
+l'ibrido — ed è rientrato, 3.257 corrispondenze, senza far tornare la divisione 45 abolita.
+
+Quattro prove sono **fallite prima di passare**, ed è il motivo per cui il lavoro regge: la
+prova generale sul linux-pc ne ha prese tre (una alla seconda passata), e la quarta era un
+audit che registrava anche gli update a vuoto. Trovato per strada un difetto che il dossier
+non vedeva: la prossima sincronizzazione ESCO avrebbe **disfatto** la normalizzazione appena
+fatta, perché il connettore salvava l'indirizzo di chiamata invece dell'identificativo.
 
 ## Top priorities — le priorità
 
-1. **`#220` W1 remediation — messa in sicurezza.** Le 4 FK `CASCADE` che possono ri-azzerare
-   il crosswalk, i ruoli read-only che leggono i segreti, logging e audit spenti. Sessione
-   dedicata, metodo di bonifica per ogni voce.
-   → `.programmi/220-remediation-dossier-forense.md` · ~1 sessione
-2. **`#132` F7 — le due prove.** ⏸ **Aspetta te, e per una cosa sola**: approvare la prima
+1. **`#223` F3 è ARMATA ma non ancora live.** Le tre identità del database esistono e sono
+   provate in produzione (7 controlli su 7: l'app scrive le righe, `CREATE TABLE` respinto),
+   ma l'API gira ancora col proprietario finché il deploy non passa. Il cancello CI ha armato
+   lo sha: **verificare che il rollout sia avvenuto** è la prima cosa da fare.
+   → `bash scripts/verifica-deploy.sh` · minuti, non una sessione
+2. **`#222` F5 — i cinque codici settore aspettano una decisione, non un lavoro.** Solo
+   `CONSTRUCTION` ha un candidato unico (41.00); `EDUCATION` ne ha 13, `RETAIL` una trentina.
+   La domanda vera che la misura ha fatto emergere: un settore si rappresenta con **una classe
+   di livello 4 o con una divisione**? Le misure sono già nel piano: si parte dalla scelta.
+   → `.programmi/222-remediation-w3-integrita-contenuti.md` · decisione + ~30k
+3. **`#132` F7 — le due prove.** ⏸ **Aspetta te, e per una cosa sola**: approvare la prima
    fonte. La corsa di F4h ha già lasciato una proposta `PASSED` — Banca d'Italia. Decisa e
    applicata, i domini diventano ricercabili e F7 può girare.
    → `.programmi/132-ricerca-genera-il-modello.md` · ~1 sessione dopo lo sblocco
-3. **`#221` W2 remediation — i recuperi approvati.** NACE + crosswalk rientrano (decisione
-   2026-08-20), ma **solo dopo** W1.1: ripristinare sopra le FK `CASCADE` sarebbe rimettere
-   il vaso sullo stesso bordo. Poi `#219` F1 (le due firme E2E, corta) fra le secondarie.
 
 ## Open questions — le domande aperte
 
-1. **Il fornitore di proposte non è configurato in produzione.** Le due variabili
+1. **Il PostgreSQL sulla porta 5435 non serve a nessuno.** Misurato: risponde, ha dati di
+   cinque settimane fa, e **nessuno strumento del repo lo interroga** (cercato `5435` ovunque:
+   solo falsi positivi dentro UUID). Si spegne, si aggiorna, o si tiene?
+2. **`.env.example` non ha `POSTGRES_APP_USER` / `POSTGRES_APP_PASSWORD`.** Non è una
+   dimenticanza: la lettura di `.env*` è negata al guard degli strumenti. Sono documentate in
+   `deploy/postgres/README.md`; aggiungerle all'esempio richiede la tua mano.
+3. **Il fornitore di proposte non è configurato in produzione.** Le due variabili
    (`RESEARCH_GATEWAY_URL` / `RESEARCH_GATEWAY_TOKEN`) vanno nel `.env` — che è tuo. Finché
    mancano, l'API dice «non c'è chi propone», ed è il comportamento voluto.
-2. **`BACKUP_OFFHOST_SSH` nei due `.env`** (PC e VM): la lettura del `.env` PC è stata negata
-   in sessione — il check va fatto in W1.7, o dimmi tu il valore. Non blocca: il pull da
-   linux-pc copre già l'offsite.
-3. **La suite E2E non entra in CI** (criterio `#211` F4: ~25 min). Entra quando `#219` porta
-   i falliti a zero.
+
+*(Chiusa in S1076: `BACKUP_OFFHOST_SSH` **deve restare vuota** — il push non è usabile perché
+il linux-pc sta dietro NAT, e la direzione giusta è il pull, che è attivo.)*
 
 ## Verification — la verifica
 
@@ -47,4 +60,5 @@ python docs/kb/tools/session_start.py          # menu + salute, un giro solo
 python docs/kb/tools/guardiano.py              # contesto e finestra 5h, misurati
 python docs/kb/tools/db_health.py              # le sentinelle, che devono stare a zero
 bash scripts/verifica-deploy.sh                # com'è finita in produzione
+ssh oracle-vm-default 'bash -s' < deploy/postgres/prova-identita-app.sh   # le tre identità
 ```

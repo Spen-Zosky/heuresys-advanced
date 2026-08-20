@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-20T14:27:22Z da docs/kb/tools/build_index.py
+# generato: 2026-08-20T23:03:38Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-20T14:27:22Z"
-  total_files: 3175
+  generated_at: "2026-08-20T23:03:38Z"
+  total_files: 3189
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,16 +13,16 @@ meta:
     api-module: 356
     ci: 17
     claude-config: 35
-    config: 174
+    config: 177
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 338
+    db-migration: 347
     db-other: 8
     db-script: 44
     db-seed: 114
-    doc-canonical: 691
+    doc-canonical: 693
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2617
+    live: 2631
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3356,9 +3356,27 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\postgres\assegna-password-app.sh'
+    root: repo
+    rel: 'deploy/postgres/assegna-password-app.sh'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\deploy\postgres\parametri-server.sql'
     root: repo
     rel: 'deploy/postgres/parametri-server.sql'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\postgres\prova-identita-app.sh'
+    root: repo
+    rel: 'deploy/postgres/prova-identita-app.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\postgres\ruoli.sql'
+    root: repo
+    rel: 'deploy/postgres/ruoli.sql'
     category: config
     status: live
     provenance: git-tracked
@@ -8054,6 +8072,60 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000341_il_nace_si_deriva_dall_ateco_non_si_reimporta.sql'
+    root: repo
+    rel: 'db/migrations/000341_il_nace_si_deriva_dall_ateco_non_si_reimporta.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000342_un_vettore_stantio_lo_dice_l_impronta_non_la_data.sql'
+    root: repo
+    rel: 'db/migrations/000342_un_vettore_stantio_lo_dice_l_impronta_non_la_data.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000343_tre_presidi_perche_il_guasto_non_possa_rientrare.sql'
+    root: repo
+    rel: 'db/migrations/000343_tre_presidi_perche_il_guasto_non_possa_rientrare.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000344_un_uri_di_gruppo_non_e_una_chiamata_api.sql'
+    root: repo
+    rel: 'db/migrations/000344_un_uri_di_gruppo_non_e_una_chiamata_api.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000345_le_traduzioni_ateco_c_erano_gia_e_nessuno_le_vedeva.sql'
+    root: repo
+    rel: 'db/migrations/000345_le_traduzioni_ateco_c_erano_gia_e_nessuno_le_vedeva.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000346_un_uri_che_finge_di_essere_esco_smette_di_fingere.sql'
+    root: repo
+    rel: 'db/migrations/000346_un_uri_che_finge_di_essere_esco_smette_di_fingere.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000347_anche_il_broader_uri_smette_di_essere_una_chiamata.sql'
+    root: repo
+    rel: 'db/migrations/000347_anche_il_broader_uri_smette_di_essere_una_chiamata.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000348_le_sorgenti_di_una_fase_chiusa_lo_dicono.sql'
+    root: repo
+    rel: 'db/migrations/000348_le_sorgenti_di_una_fase_chiusa_lo_dicono.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000349_un_ruolo_e_la_sua_occupazione_si_legano_in_un_posto_solo.sql'
+    root: repo
+    rel: 'db/migrations/000349_un_ruolo_e_la_sua_occupazione_si_legano_in_un_posto_solo.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -9359,6 +9431,18 @@ files:
   - path: 'D:\heuresys-advanced\deploy\README.md'
     root: repo
     rel: 'deploy/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\postgres\README.md'
+    root: repo
+    rel: 'deploy/postgres/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\solo-linux-pc\README.md'
+    root: repo
+    rel: 'deploy/systemd/solo-linux-pc/README.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

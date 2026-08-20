@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-20T14:27:22Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3175**
+**Generato**: 2026-08-20T23:03:38Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3189**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,16 +13,16 @@
 | api-module | 356 |
 | ci | 17 |
 | claude-config | 35 |
-| config | 174 |
+| config | 177 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 338 |
+| db-migration | 347 |
 | db-other | 8 |
 | db-script | 44 |
 | db-seed | 114 |
-| doc-canonical | 691 |
+| doc-canonical | 693 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 403 |
 | ux-design-archive | 80 |
 | web-source | 241 |
-| **TOTALE** | **3175** |
+| **TOTALE** | **3189** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2617 |
+| live | 2631 |
 
 ## File per categoria
 
@@ -616,7 +616,10 @@
 - `D:\heuresys-advanced\audit\_groups.json` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\_visual-confirmed.json` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\nginx\www.heuresys.com.conf` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\postgres\assegna-password-app.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\postgres\parametri-server.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\postgres\prova-identita-app.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\postgres\ruoli.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\prometheus\alerts.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\prometheus\prometheus.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\actions-runner-resource.dropin.conf` · *live* · git-tracked
@@ -1414,6 +1417,15 @@
 - `D:\heuresys-advanced\db\migrations\000338_due_identita_di_sola_lettura_non_leggono_i_segreti.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000339_una_modifica_a_un_catalogo_lascia_un_registro.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000340_al_database_non_si_affaccia_chiunque.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000341_il_nace_si_deriva_dall_ateco_non_si_reimporta.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000342_un_vettore_stantio_lo_dice_l_impronta_non_la_data.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000343_tre_presidi_perche_il_guasto_non_possa_rientrare.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000344_un_uri_di_gruppo_non_e_una_chiamata_api.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000345_le_traduzioni_ateco_c_erano_gia_e_nessuno_le_vedeva.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000346_un_uri_che_finge_di_essere_esco_smette_di_fingere.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000347_anche_il_broader_uri_smette_di_essere_una_chiamata.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000348_le_sorgenti_di_una_fase_chiusa_lo_dicono.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000349_un_ruolo_e_la_sua_occupazione_si_legano_in_un_posto_solo.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1644,6 +1656,8 @@
 - `D:\heuresys-advanced\audit\FINDINGS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\FORENSIC-NOTES-S1006-cli.md` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\postgres\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\solo-linux-pc\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\A11Y_AUDIT_TIER7_2026-05-20.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\BOOTSTRAP_EXECUTION_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\BRAND_V1_DEFERRED_REFINEMENTS.md` · *live* · git-tracked

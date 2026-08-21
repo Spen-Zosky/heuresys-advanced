@@ -120,14 +120,42 @@ Exit 3 → si chiude, senza rinegoziare.
 ## Registro delle scoperte fuori ciclo (R24 §5 — non entra in «cosa resta»)
 
 Presentate a Enzo **una volta sola**, come *«fuori da questo ciclo: le vuoi nel prossimo?»*.
+▸ **Enzo, 2026-08-21: «guardiamoli subito».** Guardati nella stessa sessione, ed erano **tre
+guasti, non due** — quello della custodia ne nascondeva un secondo. Esito sotto ogni voce.
 
 1. **Due unit systemd in `failed` sulla VM, entrambe da prima del mio restart** (verificato con
    `ExecMainExitTimestamp`, quindi non le ho causate io):
-   · `heuresys-advanced-storia36-custodia.service` — fallita **lunedì 17/08 04:30 UTC**, cioè la
-     custodia settimanale della storia RTL 36 mesi non gira da quattro giorni. Ha una skill
-     dedicata (`storia36-custodia`) e un piano di triage suo.
-   · `logrotate.service` — fallita **oggi 21/08 00:00:01 UTC**. Da guardare *insieme* alla nota
-     di `parametri-server.sql`, che sulla rotazione dei log di PostgreSQL ha una posizione
-     precisa: se logrotate non gira, quella posizione va ri-verificata.
+   · `heuresys-advanced-storia36-custodia.service` — fallita **lunedì 17/08 04:30 UTC**.
+     ✅ **RISOLTA sulla VM** (commit `788f19ae`). La storia è **integra**: la batteria di merito è
+     tutta verde, selftest compresi. A fallire era il **presidio di completezza del dossier**, che
+     pretende che ogni tabella `sys.*` appartenga a una famiglia — e **otto** tabelle nate nelle
+     settimane precedenti non erano state classificate (cruscotti `#142`, contenuti dei modelli
+     `#131`, registro fonti `#132`). Classificate una per una con la motivazione. Custodia
+     **VERDE** su Windows e su VM, exit 0 letto sul processo; presidio ri-provato con
+     un'iniezione (scatta e nomina la tabella finta, poi rollback).
+     🔬 **Il debito si accumula da solo**: il report del 17/08 ne elencava **tre**, oggi ne sono
+     comparse **altre cinque**, nate fra il 17 e il 21. Ogni tabella nuova non classificata resta
+     fuori finché qualcuno non la guarda, e la custodia è l'unico posto dove si vede.
+     ⚠ **E sotto ce n'era un altro**: sul linux-pc il rosso è **diverso** (`C2g`, f360=7) e in
+     produzione lo stesso dato dà **0**. Non è un guasto dei dati — il check fa `timestamptz::date`
+     e quindi **cambia verdetto col fuso della sessione** (VM `Etc/UTC`, gemello `Europe/Rome`).
+     Diagnosi completa e ordine di riparazione → **`#224`** nel register, con piano proprio.
+   · `logrotate.service` — fallita **oggi 21/08 00:00:01 UTC**.
+     ✅ **RISOLTA.** Il 13/08 la configurazione di `heuresys-evo` è stata corretta e **il vecchio
+     file è rimasto accanto al nuovo**, dentro `/etc/logrotate.d/` — che logrotate legge per
+     intero: trovava le stesse voci due volte, e usciva `1`. Il backup è stato **spostato** (non
+     cancellato) in `/etc/logrotate.backups/`; l'esecuzione ora dà `Result=success`,
+     `ExecMainStatus=0`, e sulla VM **non resta nessuna unit in `failed`**.
+     🔬 **Correzione a una mia affermazione**: avevo detto «da 8 giorni nessun log ruota». Falso —
+     `api-gateway.log.1` è datato 21/08 00:00. logrotate salta il solo file duplicato e poi esce
+     in errore. Il danno non era lo spazio (49 MB, disco al 77%): era che **l'allarme restava
+     acceso ogni notte**, e un allarme sempre rosso insegna a non guardarlo (`#194`).
+     ▸ Cercato lo **stesso difetto altrove** (backup dentro cartelle lette per intero):
+     `logrotate.d`, `conf.d` di PostgreSQL, `sites-enabled`, `cron.d` sono puliti. In
+     `/etc/systemd/system` c'è `heuresys-advanced-web.service.dev.bak` — **inerte** (systemd carica
+     solo i suffissi noti: verificato, non compare in `list-unit-files`), ma è la vecchia unit *in
+     modalità sviluppo* accanto a quella di produzione. **Non toccata**: è configurazione di un
+     servizio vivo, e la decisione è di Enzo.
    ▸ Il presidio che avrebbe dovuto dirlo esiste — il blocco «JOB SCHEDULATI PROD (registro
      OnFailure)» della dashboard — ma al boot era `[? ] --no-net`: si accende solo con la rete.
+     **Con entrambe le unit riparate e `reset-failed` eseguito, la VM è a zero unit fallite.**

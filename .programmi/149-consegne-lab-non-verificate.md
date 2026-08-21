@@ -27,6 +27,11 @@ quando si spuntano, se ne aggiunge la successiva.
 - [x] **F2 Lo stato dell'inbox del lab** — FATTO 2026-08-13 (S1057) · l'inbox (`<padre del repo>/heuresys-design-lab/inbox/`) è **vuota**: contiene la sola cartella `ingerite/`, ultima consegna assorbita `2026-08-12-guardia-psql-opzioni-raggruppate`. Nessuna ingestione pendente
 - [x] **F3 La verifica avversariale su `#205` (2b/2c)** — FATTO 2026-08-16 (S1066) · misure ri-fatte sul vivo; respinta come **falsa** l'affermazione portante «P2a ha costruito il motore e lo ha dimostrato»: `#132` è ACTIVE, mai implementata. Due numeri del documento già invecchiati (25→26 viste, 158→159 colonne)
 - [ ] **F4 La prossima consegna che arriva, o la prossima ingerita che qualcuno cita** — budget ~30k a consegna
+      ▸ **Misurato il 2026-08-21 (S1077): l'inbox è ancora vuota.** `heuresys-design-lab/inbox/`
+      contiene la sola cartella `ingerite/`; l'ultima consegna assorbita resta quella del
+      **2026-08-16** (le cinque del Tenant Builder P2b/P3/P4 + le due sugli strumenti). Nessuna
+      ingestione pendente, e nessuna decisione eseguita in questa sessione poggia su un documento
+      del lab: il presidio non aveva nulla da esaminare. La misura si rifà, non si eredita.
       Il presidio scatta **prima** di eseguire, non dopo. Se una voce del register cita un
       documento del lab come fonte di una decisione, quel documento va misurato prima che la
       decisione venga eseguita.

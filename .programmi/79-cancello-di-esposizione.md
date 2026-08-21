@@ -25,6 +25,13 @@ cui viene creata: trovarla sei sessioni dopo costa il triplo, perché nel fratte
 - [x] **F1 Le cinque lacune vere, trovate e colmate** — FATTO 2026-08-06 (S1035) · storia organizzativa · registro GDPR che si scriveva e non si rileggeva · istruttoria e fonti della pipeline · revisione degli obiettivi di carriera. **E una tabella morta scartata**: `sys_auth_sessions` non è usata da nessuna parte (le sessioni vere sono i token di refresh)
 - [x] **F2 La verifica dopo le superfici di `#126`** — FATTO 2026-08-13 (S1057) · `check_exposure.py` → **73 tabelle scritte dal programma, 73 lette da almeno un modulo API, 0 non esposte**, exit 0 letto **sul processo**, non dai messaggi
 - [ ] **F3 Il prossimo lavoro che popola tabelle** — budget ~5k per esecuzione
+      ▸ **Eseguito il 2026-08-21 (S1077)** dopo le migrazioni `000351` (fusione di competenze) e
+      `000352` (vincoli di intervallo): **73 tabelle scritte, 73 lette, 0 non esposte**, exit **0**
+      letto sul **processo** e non dai messaggi. Nessuna lacuna aperta da quel lavoro — che era
+      prevedibile, perché sposta e vincola righe esistenti invece di popolare tabelle nuove.
+      ⚠ Il giornale `staging.skill_merge_undo` **non** entra nel conteggio, ed è corretto: il
+      cancello guarda ciò che il *programma* scrive, non le tabelle di servizio delle migrazioni.
+      Una tabella di annullamento che nessuna API legge non è una lacuna di prodotto.
       Il cancello va eseguito **dentro** quel lavoro, prima di dichiararlo chiuso. Se apre una
       lacuna, la lacuna è parte di quel lavoro: non diventa una voce nuova del backlog.
       Il candidato più vicino è `#198` T9, che costruirà righe in otto tabelle.

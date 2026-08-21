@@ -1,7 +1,7 @@
 # 222 — Remediation forense W3 · Integrità e contenuti dei cataloghi
 
 > **item**: #222 · **priorità**: P2 · **stima**: ~150-250k token (multi-sessione)
-> **stato**: IN CORSO
+> **stato**: **CHIUSA 2026-08-21 (S1077)** — 7/7 fasi spuntate (resta `F6-07`, che ha un piano proprio)
 > **capofila**: `.programmi/220-remediation-dossier-forense.md` — fonte, **metodo vincolante**,
 > decisioni di Enzo e fuori-perimetro. Non si ricopia qui.
 
@@ -69,9 +69,39 @@
       sovrappongono su nemmeno un caso (misurato: 0 sovrapposti su 176 ruoli). Due canali disgiunti
       per lo stesso concetto sono la premessa di una divergenza: si consolidano in uno.
       **fatto =** un solo canale, 176 ruoli coperti, nessuna perdita di legame misurata prima/dopo.
-- [ ] **F7 Le ridondanze vere e le pulizie basse** — budget ~30k · rilievi `F6-09`, `F6-10`, `F1-05`, `F1-08`, `F1-09`
-      ▸ **2 delle 5 misurate il 2026-08-21, ed entrambe risultano NON-LAVORO.** Restano `F6-09`,
-      `F6-10`, `F1-09`.
+- [x] **F7 Le ridondanze vere e le pulizie basse** — **FATTO 2026-08-21 (S1077)** · mig `000351` + `000352` · budget ~30k · rilievi `F6-09`, `F6-10`, `F1-05`, `F1-08`, `F1-09`
+      ▸ **5 su 5 chiuse: due erano lavoro vero, tre sono non-lavoro con la misura accanto.**
+      · `F6-09` ✅ **era la più grave delle cinque, e l'etichetta «bassa» la sottostimava.** Non
+        erano «quasi-duplicati ESCO»: i nomi duplicati in tutto il catalogo da 14.036 sono
+        **tre**, e tutti e tre hanno la stessa forma — una riga globale `ESCO::` e una di RTL
+        Bank `COMP::` (il marchio dell'ingestione legacy, che `000161` appone) senza URI e senza
+        tipo. Su quelle righe povere stavano **81 competenze di persone e 94 requisiti di
+        posizione**, contro 26 e 16 sulle globali: chi analizzava i divari partendo dalla riga
+        canonica vedeva **26 persone invece di 107**. Fuse con `000351`; giornale di
+        annullamento di 181 righe **provato davvero** (14.033→14.036, `problem solving` da 69
+        torna a 26, poi `ROLLBACK`). Emendato anche `seed_banking_skills.sql`, che le nominava
+        e si sarebbe fermato col suo guard fail-loud — e che con l'uguaglianza esatta non
+        avrebbe comunque trovato la globale «comunicazione», minuscola.
+        🔬 **Perché `000189` non le aveva prese**, pur essendo una dedup fatta apposta: lavora
+        per *(tenant, nome)* e sigilla con un `UNIQUE` su `(COALESCE(tenant,nil), lower(trim
+        (name)))`. Due righe con lo stesso nome ma tenant **diverso** non violano quel vincolo.
+      · `F6-10` ✅ **NON-LAVORO, e la misura smentisce metà del rilievo.** I nomi in maiuscolo
+        sono **22 su 22 del livello 1** in ATECO_2025 e **22 su 22** in NACE — e **zero** su
+        tutti gli altri livelli (87, 287, 651, 920, 1.290). Non è un'irregolarità sparsa: è una
+        regola applicata al 100% di un livello, cioè la convenzione con cui la fonte pubblica le
+        sezioni. Uniformarla al minuscolo significherebbe divergere dall'originale ISTAT, che è
+        esattamente ciò che **I21** vieta per le tassonomie. L'altra metà del rilievo — «apostrofi
+        misti nello stesso catalogo» — è **falsa**: misurati **0 tipografici e 635 dritti**.
+      · `F1-09` ✅ **la metà azionabile fatta, l'altra dichiarata e motivata.** Fatto: dieci
+        colonne `numeric(4,3)` — confidenze e pesi — avevano un dominio che arriva a **9,999**
+        dove il significato ammette **1**. Quattro colonne della stessa semantica erano già
+        protette: lo squilibrio era che la stessa cosa fosse presidiata in quattro punti e
+        scoperta in dieci. `000352` estende il vincolo, su dati già conformi (misurati: nessun
+        valore fuori intervallo, il più basso è 0,129). **La prova sa dire di no**: un peso di
+        7,5 su un requisito reale viene respinto, 0,750 passa. Non fatto, con la ragione scritta
+        nel file: l'armonizzazione `varchar(255)`/`text`, perché in PostgreSQL i due hanno lo
+        stesso immagazzinamento e le stesse prestazioni — il posto di quella correzione è un
+        dominio riusabile, cioè una decisione di modello, non una migrazione di pulizia.
       · `F1-08` ✅ **non azionabile, e la misura spiega perché**. Gli indici con `idx_scan = 0`
         sopra 100 kB sono **tre**, e nessuno è inutile: due sono indici **vettoriali HNSW**
         (`sys_job_role_embeddings`, `sys_user_profile_embeddings`) che servono a una ricerca

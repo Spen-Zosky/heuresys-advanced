@@ -5,32 +5,37 @@
 
 ## Last session brief — l'ultima sessione, in breve
 
-**S1076 — il dossier forense è stato eseguito, e in gran parte smentito.** Le quattro ondate
-di remediation sono state aperte tutte: `#220` e `#221` **chiuse**, `#222` a 5 fasi su 7,
-`#223` a 4 su 6. Ma il risultato che conta non sono le tredici migrazioni: è che **undici
-rilievi su ventotto non erano ciò che dicevano**. NACE e il crosswalk non erano persi per
-incidente — li aveva rimossi una migrazione deliberata con evidenza Eurostat; i vettori
-"disallineati" combaciavano 14.036 su 14.036; le competenze isolate erano 4.467 e non 84; la
-migrazione più lenta non era quella indicata; e i "111 legami nei metadati" erano 111 chiavi
-**vuote**. Decisione di Enzo: il crosswalk si **deriva** da ATECO_2025 invece di reimportare
-l'ibrido — ed è rientrato, 3.257 corrispondenze, senza far tornare la divisione 45 abolita.
+**S1077 — corsa autonoma su mandato in blocco: dieci voci su dieci, e tre errori che valgono
+quanto il lavoro.** Chiuse per intero le due ondate di remediation rimaste (`#222` W3 e `#223`
+W4), più la manutenzione, il quarto perimetro dell'agente e i due presidi continuativi.
 
-Quattro prove sono **fallite prima di passare**, ed è il motivo per cui il lavoro regge: la
-prova generale sul linux-pc ne ha prese tre (una alla seconda passata), e la quarta era un
-audit che registrava anche gli update a vuoto. Trovato per strada un difetto che il dossier
-non vedeva: la prossima sincronizzazione ESCO avrebbe **disfatto** la normalizzazione appena
-fatta, perché il connettore salvava l'indirizzo di chiamata invece dell'identificativo.
+Il filo che tiene insieme la sessione è **una sola forma d'errore, incontrata tre volte**: una
+misura vera che porta a una conclusione falsa. Il rosso «orologio fuori di 11s» era la latenza
+del tunnel — lo strumento misurava sé stesso. Sul secondo fattore ho concluso dal *default* del
+codice che fosse attivo in produzione: è spento, e a dirlo il falso era un **commento** che
+descriveva l'intenzione mentre chi lo leggeva ne deduceva la configurazione. Sui pesi ho
+misurato i valori presenti (tutti sotto 1) e ne ho dedotto il dominio ammesso: il contratto
+diceva `max(10)`, e la CI mi ha smentito in venti minuti. Ogni volta la correzione è stata
+scritta **accanto al codice**, non solo nel commit.
+
+Il lavoro più utile non era in programma: tre competenze esistevano **in doppio** — una globale
+e una residuo del brownfield — e le prove delle persone stavano spalmate fra le due, così chi
+contava dalla riga canonica ne vedeva un quarto. Fuse, con un giornale di annullamento provato
+davvero. E i due allarmi fermi da giorni sulla VM erano **tre** guasti: uno l'ha nascosto
+l'altro.
 
 ## Top priorities — le priorità
 
-1. **`#222` F6-07 — le 4.467 competenze isolate vogliono un piano proprio.** Il dossier ne
-   contava 84: sono **4.467 su 14.036**, un terzo del catalogo senza alcun arco tassonomico.
-   Non è una fase dentro un'altra voce, è curatela che va pianificata per sé.
+1. **`#224` — un controllo che cambia verdetto a seconda di dove lo lanci.** La custodia della
+   storia è verde in produzione e rossa sul gemello **con gli stessi dati**: il check fa
+   `timestamptz::date` e quindi dipende dal fuso della sessione. La conseguenza è scomoda e va
+   accettata: sistemandolo, sette eventi diventano rossi **anche in produzione**, ed è corretto.
+   Ordine obbligato — prima i dati e chi li genera, poi il controllo.
+   → `.programmi/224-check-non-deterministico-fuso.md` · ~40-60k
+2. **`#222` F6-07 — le 4.467 competenze isolate vogliono un piano proprio.** Il dossier ne
+   contava 84: sono un terzo del catalogo senza alcun arco tassonomico. Non è una fase dentro
+   un'altra voce, è curatela che va pianificata per sé.
    → `.programmi/222-remediation-w3-integrita-contenuti.md` · da decomporre
-2. **`#223` F4 — l'unico riavvio rimasto.** `shared_buffers` a 128MB su 11GB, su una VM che
-   ospita sette progetti: la memoria presa qui la si toglie a qualcun altro. Misura della RAM
-   libera prima, poi il valore, poi un riavvio annunciato.
-   → `.programmi/223-remediation-w4-pipeline-ruoli.md` · ~25k
 3. **`#132` F7 — le due prove.** ⏸ **Aspetta te, e per una cosa sola**: approvare la prima
    fonte. La corsa di F4h ha già lasciato una proposta `PASSED` — Banca d'Italia. Decisa e
    applicata, i domini diventano ricercabili e F7 può girare.
@@ -41,9 +46,13 @@ fatta, perché il connettore salvava l'indirizzo di chiamata invece dell'identif
 1. **Il fornitore di proposte non è configurato in produzione.** Le due variabili
    (`RESEARCH_GATEWAY_URL` / `RESEARCH_GATEWAY_TOKEN`) vanno nel `.env` — che è tuo. Finché
    mancano, l'API dice «non c'è chi propone», ed è il comportamento voluto.
-
-*(Chiusa in S1076: `BACKUP_OFFHOST_SSH` **deve restare vuota** — il push non è usabile perché
-il linux-pc sta dietro NAT, e la direzione giusta è il pull, che è attivo.)*
+2. **Sulla VM c'è una vecchia unit di servizio lasciata accanto a quella viva**
+   (`heuresys-advanced-web.service.dev.bak`, in modalità *sviluppo*). È **inerte** — verificato,
+   il sistema non la carica — ma è configurazione di un servizio di produzione e non l'ho
+   toccata. Si sposta, si tiene, o si lascia dov'è?
+3. **La prova live del quarto perimetro dell'agente non è stata eseguita.** L'apertura di
+   `content` è registrata e la mappa lo dimostra (24 operazioni), ma la dimostrazione end-to-end
+   pretende gateway e API avviati più una corsa dell'agente: è il primo passo del prossimo giro.
 
 ## Verification — la verifica
 
@@ -52,5 +61,5 @@ python docs/kb/tools/session_start.py          # menu + salute, un giro solo
 python docs/kb/tools/guardiano.py              # contesto e finestra 5h, misurati
 python docs/kb/tools/db_health.py              # le sentinelle, che devono stare a zero
 bash scripts/verifica-deploy.sh                # com'è finita in produzione
-ssh oracle-vm-default 'bash -s' < deploy/postgres/prova-identita-app.sh   # le tre identità
+bash db/scripts/storia36.sh custodia           # verde qui, rossa sul gemello → #224
 ```

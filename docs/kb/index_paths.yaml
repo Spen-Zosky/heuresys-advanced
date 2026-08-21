@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-20T23:03:38Z da docs/kb/tools/build_index.py
+# generato: 2026-08-21T23:30:39Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-20T23:03:38Z"
-  total_files: 3189
+  generated_at: "2026-08-21T23:30:39Z"
+  total_files: 3195
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 347
+    db-migration: 351
     db-other: 8
     db-script: 44
     db-seed: 114
-    doc-canonical: 693
+    doc-canonical: 695
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2631
+    live: 2637
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -8126,6 +8126,30 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000350_un_settore_puo_essere_una_divisione_e_il_confronto_lo_capisce.sql'
+    root: repo
+    rel: 'db/migrations/000350_un_settore_puo_essere_una_divisione_e_il_confronto_lo_capisce.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000351_una_competenza_e_una_sola_anche_fra_globale_e_tenant.sql'
+    root: repo
+    rel: 'db/migrations/000351_una_competenza_e_una_sola_anche_fra_globale_e_tenant.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000352_una_confidenza_non_puo_valere_nove_virgola_nove.sql'
+    root: repo
+    rel: 'db/migrations/000352_una_confidenza_non_puo_valere_nove_virgola_nove.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000353_i_pesi_sono_moltiplicatori_non_frazioni.sql'
+    root: repo
+    rel: 'db/migrations/000353_i_pesi_sono_moltiplicatori_non_frazioni.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -9242,6 +9266,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\224-check-non-deterministico-fuso.md'
+    root: repo
+    rel: '.programmi/224-check-non-deterministico-fuso.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md'
     root: repo
     rel: '.programmi/50-knowledge-graph-legacy.md'
@@ -9323,6 +9353,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\mandati\mandato-S1074-prompt-ripresa.md'
     root: repo
     rel: '.programmi/mandati/mandato-S1074-prompt-ripresa.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\mandati\mandato-S1077-corsa-autonoma.md'
+    root: repo
+    rel: '.programmi/mandati/mandato-S1077-corsa-autonoma.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

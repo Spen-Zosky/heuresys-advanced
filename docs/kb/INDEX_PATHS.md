@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-20T23:03:38Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3189**
+**Generato**: 2026-08-21T23:30:39Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3195**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 347 |
+| db-migration | 351 |
 | db-other | 8 |
 | db-script | 44 |
 | db-seed | 114 |
-| doc-canonical | 693 |
+| doc-canonical | 695 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 403 |
 | ux-design-archive | 80 |
 | web-source | 241 |
-| **TOTALE** | **3189** |
+| **TOTALE** | **3195** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2631 |
+| live | 2637 |
 
 ## File per categoria
 
@@ -1426,6 +1426,10 @@
 - `D:\heuresys-advanced\db\migrations\000347_anche_il_broader_uri_smette_di_essere_una_chiamata.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000348_le_sorgenti_di_una_fase_chiusa_lo_dicono.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000349_un_ruolo_e_la_sua_occupazione_si_legano_in_un_posto_solo.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000350_un_settore_puo_essere_una_divisione_e_il_confronto_lo_capisce.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000351_una_competenza_e_una_sola_anche_fra_globale_e_tenant.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000352_una_confidenza_non_puo_valere_nove_virgola_nove.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000353_i_pesi_sono_moltiplicatori_non_frazioni.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1624,6 +1628,7 @@
 - `D:\heuresys-advanced\.programmi\221-remediation-w2-recuperi.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\222-remediation-w3-integrita-contenuti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\223-remediation-w4-pipeline-ruoli.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\224-check-non-deterministico-fuso.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\54-recruiting-ats.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\69-residui-staging-wave1.md` · *live* · git-tracked
@@ -1638,6 +1643,7 @@
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1071-ciclo-p1.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1073-prompt-ripresa.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1074-prompt-ripresa.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\mandati\mandato-S1077-corsa-autonoma.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-consegne-lab-2026-08-16.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\PROGRESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-macchina-stati.md` · *live* · git-tracked

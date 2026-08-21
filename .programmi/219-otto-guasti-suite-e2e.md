@@ -22,7 +22,29 @@ non correggendolo.
 
 ## Fasi
 
-- [ ] **F1 Le due firme che potrebbero non essere guasti** — budget ~30k
+- [ ] **F1 Le due firme che potrebbero non essere guasti** — budget ~30k · ▸ **AVVIATA S1077: `E` corretta, `A` con l'ipotesi SMENTITA e la causa ancora da stabilire**
+      🔬 **`A` — l'ipotesi del triage è falsa, e questo è il risultato che conta.** Il triage
+      dava per probabile che `MFA_ENFORCEMENT_ENABLED` fosse **spento** in produzione per
+      decisione di Enzo, e che quindi i due casi provassero un mondo diverso da quello
+      configurato. Misurato in `apps/api/src/config/env.ts:207`: il valore ha **default `"true"`**
+      e il commento dichiara che PROD/VM/linux-pc lo lasciano **unset → true**, con l'esplicito
+      «zero security regression: mandatory-MFA stays live». In più la persona del caso
+      (`antonio.parisi@rtl-bank.org`, `PERSONAS.outsider`) ha **già** un fattore TOTP
+      **verificato dal 2026-07-26**, e nel sistema ce ne sono 158, tutti verificati.
+      **Il gate è acceso**: chiudere i due casi come «provano un gate spento» sarebbe stato
+      archiviare un guasto vero sotto un'ipotesi comoda. La causa va cercata altrove — il
+      sospetto ora è la **seconda** attesa (`Attempt 2`), dove il caso rifà il login dopo aver
+      consumato la challenge con un codice sbagliato: lì può entrare un blocco per tentativi, o
+      la convivenza di **due** fattori verificati (quello permanente e quello che il test
+      arruola). ⚠ Serve la riproduzione, che è il passo con cui questa fase deve ricominciare.
+      ✅ **`E` — corretta** (`tenants-editing.spec.ts`). Il caso mandava `tenantCode` +
+      `tenantName` e riceveva 400 perché lo schema pretende anche `tenantIndustryCode`
+      (obbligatorio dalla `000305`, D-83): la validazione scattava **prima** del controllo di
+      permesso. Corretto con body completo — **e con il token CSRF**, che il triage non aveva
+      notato: senza, a rispondere sarebbe stato il presidio anti-CSRF, cioè di nuovo la risposta
+      giusta per il motivo sbagliato. Aggiunta un'asserzione che rende il caso **rosso su 400**,
+      così non può tornare a misurare la validazione senza che si veda. Typecheck verde.
+      ⏳ La verifica live di `E` cade nella corsa integrale di **F5**: non è stata eseguita qui.
       **A** (MFA, 2 casi) e **E** (il test che riceve 400). Vanno per prime perché, se
       l'ipotesi regge, si chiudono senza toccare il prodotto — e tolgono **3 casi su 12**.
       · **A**: verificare se `MFA_ENFORCEMENT_ENABLED` è spento in produzione per decisione di

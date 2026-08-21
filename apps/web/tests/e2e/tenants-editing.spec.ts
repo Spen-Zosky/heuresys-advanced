@@ -75,10 +75,30 @@ test.describe("#45 C3 — il cancello vale anche quando il pulsante non si vede"
   test("e non può crearla nemmeno chiamando l'API direttamente", async ({ page }) => {
     // Nascondere un pulsante non è una protezione: l'autorità è il service, e questo
     // test lo dimostra invece di darlo per scontato.
+    //
+    // ⚠ PERCHE' LA RICHIESTA E' COMPLETA (#219 F1, firma E). Prima di S1077 questo
+    // caso mandava solo `tenantCode` e `tenantName` e riceveva **400**: lo schema
+    // pretende anche `tenantIndustryCode` (obbligatorio dalla 000305, D-83), quindi
+    // la validazione scattava PRIMA del controllo di permesso. Il test era rosso —
+    // ma soprattutto non provava ciò che dichiara: se domani il permesso sparisse,
+    // resterebbe rosso lo stesso, e non rileverebbe il buco.
+    //
+    // Stessa ragione per il token CSRF: senza, a rispondere sarebbe il presidio
+    // anti-CSRF e non il controllo di permesso. Due modi diversi di ricevere la
+    // risposta giusta per il motivo sbagliato.
+    const csrf = (await page.context().cookies()).find((c) => c.name === "hrx_csrf")?.value ?? "";
     const res = await page.request.post("/api/v1/tenants", {
-      data: { tenantCode: `${CODE}_FORBIDDEN`, tenantName: "non deve nascere" },
+      headers: { "x-csrf-token": csrf },
+      data: {
+        tenantCode: `${CODE}_FORBIDDEN`,
+        tenantName: "non deve nascere",
+        tenantIndustryCode: "FIN_BANKING",
+      },
       failOnStatusCode: false,
     });
+    // 400 qui NON e' un successo: significherebbe che la richiesta e' stata respinta
+    // dalla validazione, cioe' che il caso e' tornato a misurare la cosa sbagliata.
+    expect(res.status(), "deve rispondere l'autorizzazione, non la validazione").not.toBe(400);
     expect([401, 403]).toContain(res.status());
   });
 });

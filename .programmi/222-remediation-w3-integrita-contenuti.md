@@ -92,13 +92,20 @@
         sezioni. Uniformarla al minuscolo significherebbe divergere dall'originale ISTAT, che è
         esattamente ciò che **I21** vieta per le tassonomie. L'altra metà del rilievo — «apostrofi
         misti nello stesso catalogo» — è **falsa**: misurati **0 tipografici e 635 dritti**.
-      · `F1-09` ✅ **la metà azionabile fatta, l'altra dichiarata e motivata.** Fatto: dieci
-        colonne `numeric(4,3)` — confidenze e pesi — avevano un dominio che arriva a **9,999**
-        dove il significato ammette **1**. Quattro colonne della stessa semantica erano già
-        protette: lo squilibrio era che la stessa cosa fosse presidiata in quattro punti e
-        scoperta in dieci. `000352` estende il vincolo, su dati già conformi (misurati: nessun
-        valore fuori intervallo, il più basso è 0,129). **La prova sa dire di no**: un peso di
-        7,5 su un requisito reale viene respinto, 0,750 passa. Non fatto, con la ragione scritta
+      · `F1-09` ✅ **la metà azionabile fatta, l'altra dichiarata e motivata — e una lezione.**
+        Fatto: **sei** colonne `numeric(4,3)` che stanno davvero fra 0 e 1 — le quattro
+        *confidenze* (probabilità) e i due pesi il cui contratto dichiara `max(1)` — hanno ora il
+        vincolo (`000352`). **La prova sa dire di no**: 7,5 respinto, 0,750 passa.
+        🔬 **La prima stesura ne vincolava DIECI, e la CI l'ha smentita in venti minuti** con due
+        test respinti (`weight = 2.500` e `5.000`). L'errore: avevo misurato i valori *presenti*
+        (tutti dentro 0..1, il più basso 0,129) e ne avevo dedotto il **dominio ammesso**. Ma i
+        dati presenti dicono solo cosa è stato scritto finora; il dominio lo dichiara il
+        contratto, e il contratto dice `z.number().min(0).max(10)` per i pesi delle competenze e
+        `max(9.999) // numeric(4,3)` per quelli dei KPI — con quel commento a dimostrare che il
+        tipo è stato scelto **apposta**. I pesi sono **moltiplicatori**, non frazioni.
+        Corretto con `000353` + emendamento di `000352` (ADR-0035: servono entrambi, o la catena
+        li rimette). Prova simmetrica: peso 2,5 **passa**, confidenza 7,5 **respinta**; i 12 test
+        di `positions.integration` verdi. Non fatto, con la ragione scritta
         nel file: l'armonizzazione `varchar(255)`/`text`, perché in PostgreSQL i due hanno lo
         stesso immagazzinamento e le stesse prestazioni — il posto di quella correzione è un
         dominio riusabile, cioè una decisione di modello, non una migrazione di pulizia.

@@ -1,51 +1,57 @@
 -- ============================================================================
--- 000352 — #222 F7 (rilievo F1-09): dieci colonne il cui dominio ammette
---          9,999 dove il significato ammette 1.
+-- 000352 — #222 F7 (rilievo F1-09): le SEI colonne che stanno davvero fra 0 e 1.
 --
--- IL DIFETTO. `numeric(4,3)` dichiara «quattro cifre di cui tre decimali»,
--- cioe' un dominio che arriva a 9,999. Ma queste dieci colonne portano
--- CONFIDENZE e PESI: quantita' che per definizione stanno fra 0 e 1. Il tipo
--- non lo dice, quindi non lo impedisce — e un peso di 7,5 entrerebbe senza che
--- nulla si lamenti, per poi comparire in una somma ponderata come un numero
--- qualsiasi.
+-- ⚠ QUESTO FILE E' STATO EMENDATO IL GIORNO STESSO IN CUI E' NATO, e la storia
+-- va tenuta perche' l'errore e' istruttivo. La prima stesura vincolava DIECI
+-- colonne `numeric(4,3)` all'intervallo 0..1, e il ragionamento era: «il tipo
+-- ammette 9,999, ma confidenze e pesi stanno fra 0 e 1». La CI l'ha smentito
+-- in venti minuti — due test respinti dal vincolo con `weight = 2.500` e
+-- `weight = 5.000`.
 --
--- MISURATO PRIMA (2026-08-21). I valori reali oggi in produzione:
---   sys_activity_classification_mappings.confidence    1,000 .. 1,000   3.257
---   sys_esco_occupation_mappings.confidence            0,129 .. 1,000   7.714
---   sys_occupation_classification_mappings.confidence     (nessuna riga)     0
---   sys_organization_unit_kpi_templates.weight         1,000 .. 1,000     100
---   sys_position_kpi_requirements.weight               0,250 .. 0,250     168
---   sys_position_skill_requirement_history.new_weight  1,000 .. 1,000     181
---   sys_position_skill_requirement_history.old_weight  1,000 .. 1,000     181
---   sys_position_skill_requirements.weight             0,400 .. 1,000   1.434
---   sys_process_kpi_templates.default_weight             (nessuna riga)     0
---   sys_source_lineage_records.mapping_confidence      0,850 .. 1,000  70.959
--- Nessun valore fuori intervallo: il vincolo si mette su dati gia' conformi e
--- non ha nulla da sanare. E' una GUARDIA per il futuro, non una correzione.
+-- COME MI SONO INGANNATO, che e' il punto. Avevo MISURATO i valori presenti in
+-- produzione e li avevo trovati tutti dentro 0..1 (il piu' basso 0,129). Ma i
+-- dati presenti non dicono il DOMINIO AMMESSO: dicono solo cosa e' stato scritto
+-- finora. Il dominio lo dichiara il contratto, e il contratto dice l'opposto:
+--     AddPositionSkillBodySchema.weight  z.number().min(0).max(10)
+--     AddPositionKpiBodySchema.weight    z.number().min(0).max(9.999)  // numeric(4,3)
+-- Quel commento `// numeric(4,3)` e' la prova che il tipo e' stato scelto APPOSTA
+-- per ammettere quel campo: i pesi sono MOLTIPLICATORI, non frazioni. Solo le
+-- confidenze sono probabilita', e per quelle 0..1 e' giusto.
+-- Una misura vera che suggerisce una conclusione falsa: si legge il file che
+-- DEFINISCE la cosa, non solo la cosa.
+--
+-- LE SEI CHE RESTANO, e perche' ognuna:
+--   · activity_class_mapping_confidence     probabilita'
+--   · esco_occupation_mapping_confidence    probabilita'
+--   · occupation_class_mapping_confidence   probabilita'
+--   · source_lineage_mapping_confidence     probabilita'
+--   · organization_unit_kpi_template_weight contratto `z.number().min(0).max(1)`
+--   · process_kpi_template_default_weight   contratto `z.number().min(0).max(1)`
+--
+-- LE QUATTRO USCITE — pesi con dominio dichiarato oltre 1:
+--   · sys_position_skill_requirements.weight              (max 10)
+--   · sys_position_kpi_requirements.weight                (max 9,999)
+--   · sys_position_skill_requirement_history.new_weight   (storia della prima)
+--   · sys_position_skill_requirement_history.old_weight   (storia della prima)
+-- ADR-0035: emendare QUESTO file fa nascere giusto un database nuovo, ma non
+-- toglie i quattro vincoli gia' creati dove la catena e' passata — lo fa la
+-- `000353`, che esiste solo per quello.
 --
 -- LA CONVENZIONE NON E' INVENTATA QUI: quattro colonne dello stesso significato
 -- hanno gia' questo vincolo, nella forma `col IS NULL OR (col >= 0 AND col <= 1)`
 -- — `sys_positions.position_economic_weight`,
 -- `sys_source_lineage_records.source_lineage_sdbi_confidence`,
 -- `sys_blueprint_content_positions...economic_weight`,
--- `sys_user_position_assignments...fte`. Il difetto era che la stessa semantica
--- fosse protetta in quattro punti e scoperta in dieci: e' quello lo squilibrio,
--- piu' della singola colonna.
+-- `sys_user_position_assignments...fte`.
 --
 -- ⛔ CIO' CHE QUESTO FILE NON FA. `F1-09` nomina anche i tipi disallineati sulle
--- stesse semantiche — nome di competenza `varchar(255)` di qua e `text` di la',
--- lingua `varchar(5)` nelle traduzioni e `varchar(16)` negli alias. Non si
--- toccano, e la ragione e' misurabile: in PostgreSQL `varchar(n)` e `text` hanno
--- lo stesso immagazzinamento e le stesse prestazioni — la differenza e' solo il
--- limite di lunghezza. Cambiare il tipo di una colonna viva significa toccare le
--- viste che la leggono e i tipi generati che la descrivono, per un beneficio che
--- e' di stile. Il posto giusto di quella correzione e' un dominio riusabile
--- dichiarato una volta, cioe' una decisione di modello, non una migrazione di
--- pulizia. Resta scritto nel registro come raccomandazione per il nuovo, non
--- come lavoro pendente su questo.
+-- stesse semantiche — nome di competenza `varchar(255)` di qua e `text` di la'.
+-- Non si toccano: in PostgreSQL i due hanno lo stesso immagazzinamento e le
+-- stesse prestazioni, e il posto di quella correzione e' un dominio riusabile,
+-- cioe' una decisione di modello, non una migrazione di pulizia.
 --
 -- IDEMPOTENTE: ogni vincolo si aggiunge solo se non c'e' gia'.
--- Authored: 2026-08-21 (S1077).
+-- Authored: 2026-08-21 (S1077) · emendata lo stesso giorno dopo la CI.
 -- ============================================================================
 
 DO $$
@@ -60,10 +66,6 @@ BEGIN
       ('sys_esco_occupation_mappings',           'esco_occupation_mapping_confidence'),
       ('sys_occupation_classification_mappings', 'occupation_class_mapping_confidence'),
       ('sys_organization_unit_kpi_templates',    'organization_unit_kpi_template_weight'),
-      ('sys_position_kpi_requirements',          'weight'),
-      ('sys_position_skill_requirement_history', 'position_skill_requirement_history_new_weight'),
-      ('sys_position_skill_requirement_history', 'position_skill_requirement_history_old_weight'),
-      ('sys_position_skill_requirements',        'weight'),
       ('sys_process_kpi_templates',              'process_kpi_template_default_weight'),
       ('sys_source_lineage_records',             'source_lineage_mapping_confidence')
     ) AS t(tabella, colonna)
@@ -105,10 +107,6 @@ BEGIN
       ('sys_esco_occupation_mappings',           'esco_occupation_mapping_confidence'),
       ('sys_occupation_classification_mappings', 'occupation_class_mapping_confidence'),
       ('sys_organization_unit_kpi_templates',    'organization_unit_kpi_template_weight'),
-      ('sys_position_kpi_requirements',          'weight'),
-      ('sys_position_skill_requirement_history', 'position_skill_requirement_history_new_weight'),
-      ('sys_position_skill_requirement_history', 'position_skill_requirement_history_old_weight'),
-      ('sys_position_skill_requirements',        'weight'),
       ('sys_process_kpi_templates',              'process_kpi_template_default_weight'),
       ('sys_source_lineage_records',             'source_lineage_mapping_confidence')
     ) AS t(tabella, colonna)
@@ -121,7 +119,7 @@ BEGIN
         AND pg_get_constraintdef(k.oid) LIKE '%<= (1)%');
 
   IF scoperte <> 0 THEN
-    RAISE EXCEPTION '000352: % colonne di confidenza/peso restano senza vincolo di intervallo', scoperte;
+    RAISE EXCEPTION '000352: % colonne 0..1 restano senza vincolo di intervallo', scoperte;
   END IF;
-  RAISE NOTICE '000352: tutte e dieci le colonne hanno il vincolo 0..1.';
+  RAISE NOTICE '000352: tutte e sei le colonne 0..1 hanno il vincolo.';
 END $$;

@@ -1,7 +1,7 @@
 # 223 — Remediation forense W4 · Pipeline, separazione ruoli, prestazioni
 
 > **item**: #223 · **priorità**: P2 · **stima**: ~120-200k token
-> **stato**: IN CORSO
+> **stato**: **CHIUSA 2026-08-21 (S1077)** — 6/6 fasi spuntate
 > **capofila**: `.programmi/220-remediation-dossier-forense.md` — fonte, **metodo vincolante**,
 > decisioni di Enzo e fuori-perimetro. Non si ricopia qui.
 
@@ -43,12 +43,35 @@ accettato, chiuso `RISOLTO` nel registro. Non rientra da questa porta.
       **Punto che la simulazione non aveva colto**: i trigger di `000339` girano coi privilegi di
       chi esegue, quindi l'app DEVE poter scrivere in `audit` e `staging` — senza, ogni modifica
       a un catalogo fallirebbe.
-- [ ] **F4 La memoria del database, su una macchina che non è solo sua** — budget ~25k · rilievi `F8-06`, `F8-14`
+- [x] **F4 La memoria del database, su una macchina che non è solo sua** — **FATTO 2026-08-21 (S1077)** · `shared_buffers` **128 MB → 1 GB**, `effective_cache_size` **4 → 7 GB** · dichiarati in `deploy/postgres/parametri-server.sql` §5, non solo sulla macchina · budget ~25k · rilievi `F8-06`, `F8-14`
       `shared_buffers` è a 128MB su 11GB. Sembra un aumento ovvio e **non lo è**: la VM ospita
       sette progetti, quindi la memoria che si prende qui la si toglie a qualcun altro.
       **Prima si misura la RAM realmente libera**, poi si decide il valore, poi si pianifica e si
       annuncia il restart.
       **fatto =** valore nuovo attivo dopo restart + la macchina ancora sana con tutti i servizi su.
+      🔬 **Il numero che ha deciso il valore non è il rapporto di cache, è il ring buffer.** Per una
+      scansione su tabella più grande di `shared_buffers/4` PostgreSQL adotta una strategia ad
+      **anello** di 256 kB per non spazzare la cache: a 128 MB quella soglia vale **32 MB**, quindi
+      ogni catalogo sopra i 32 MB veniva riletto dal disco *a ogni interrogazione, per sempre*.
+      Misurato su `sys.sys_skills` con `enable_indexscan=off`, tre corse consecutive:
+      **prima** `read=3924 / 3892 / 3860` (10,6 · 10,0 · 10,1 ms) — **dopo** `read=4323 / 0 / 0`
+      (26,2 a cache fredda, poi **4,5 · 4,0 ms**). Regime stazionario **2,5×**, e la prova poteva
+      fallire: se le corse 2 e 3 avessero mostrato ancora `read≈3892`, l'aumento non avrebbe avuto
+      effetto e sarebbe stato da dichiarare.
+      ⚠ **Ciò che 1 GB NON copre, detto invece che sottinteso**: la soglia sale a 256 MB, quindi
+      `sys_skill_embeddings` (**372 MB**) continua a usare l'anello. Coprirla vorrebbe dire ~1,5 GB
+      di sola soglia, cioè ~6 GB di `shared_buffers` su una macchina con sette inquilini: no.
+      **Misure di contorno**: RAM available 9.631 → **9.727 MB** dopo il restart (nessuna
+      pressione) · 8/8 servizi dei sette progetti `active` · PROD `readyz=200 login=200`.
+      🎁 **Il restart ha anche attivato `pg_stat_statements.max = 10000`**, scritto da `#220` W1.6
+      (F4-04) e rimasto `pending_restart` da allora: un riavvio in meno da pianificare.
+      ⚠ **Trappola verificata prima di riavviare**: `logging_collector` risultava `pending_restart`,
+      che letto di corsa significa «al prossimo riavvio si accende» — cioè ciò che
+      `parametri-server.sql` dichiara **dannoso** qui (doppia rotazione con logrotate). Non era
+      così: il parametro non compare in `auto.conf` né in alcun file sotto `/etc/postgresql/16/main`
+      (grep ricorsivo, `conf.d` inclusa) ed è `off` in attivo/`reset_val`/`boot_val`. È il flag che
+      PG16 alza dopo un `ALTER SYSTEM RESET` e non riabbassa. Dopo il restart: **`off`,
+      `pending=false`**. Si legge `pending_restart` guardando **da dove verrebbe** il valore nuovo.
 - [x] **F5 La copia locale che tace da cinque settimane** — **RIDIMENSIONATO 2026-08-20** · budget ~20k · rilievo `F8-09`
       Misurato: il server sulla **5435 risponde** (rifiuta per credenziali mancanti, quindi è
       vivo), ma **nessuno strumento del repo lo interroga** — cercato `5435` in tutto il

@@ -59,7 +59,7 @@ cadere nell'intervallo; fuori, lo scarto è *almeno* la distanza dall'estremo �
 certo, che la latenza non gonfia. `clock_timestamp()` al posto di `now()`.
 **La prova sa ancora dire di no**: 5/5 casi sintetici, incluso il caso vero di S1037 (PC indietro
 di 10h 21m → `BAD +37249s`) e il confine a 6 s oltre la latenza → `BAD`.
-| **A** | **`#223` F4** — memoria del database su una macchina che non è solo sua | valore nuovo attivo dopo restart **e** i sette progetti ancora su | io | ~25k | ⬜ |
+| **A** | **`#223` F4** — memoria del database su una macchina che non è solo sua | valore nuovo attivo dopo restart **e** i sette progetti ancora su | io | ~25k | ✅ **`#223` CHIUSA 6/6** — 1 GB attivo, `read=3892`→**0**, 8/8 servizi su, PROD 200/200 |
 | **B** | **`#222` F7** — le ridondanze vere e le pulizie basse (`F6-09`, `F6-10`, `F1-09`) | ognuna chiusa **o** dichiarata non-lavoro con la misura accanto | io | ~30k | ⬜ |
 | **C** | **`#219` F1** — le due firme che potrebbero non essere guasti (A: MFA · E: il 400) | 3 casi su 12 chiusi, e la prova di E diventa rossa se si toglie il permesso | io | ~30k | ⬜ |
 | **D** | **`#214` F3** — il terzo perimetro dell'agente | riga in `agent-perimetri.json` con decisione+data, mappa rigenerata, prova live | io | ~60k | ⬜ |
@@ -98,4 +98,15 @@ Exit 3 → si chiude, senza rinegoziare.
 
 ## Registro delle scoperte fuori ciclo (R24 §5 — non entra in «cosa resta»)
 
-_(vuoto all'apertura)_
+Presentate a Enzo **una volta sola**, come *«fuori da questo ciclo: le vuoi nel prossimo?»*.
+
+1. **Due unit systemd in `failed` sulla VM, entrambe da prima del mio restart** (verificato con
+   `ExecMainExitTimestamp`, quindi non le ho causate io):
+   · `heuresys-advanced-storia36-custodia.service` — fallita **lunedì 17/08 04:30 UTC**, cioè la
+     custodia settimanale della storia RTL 36 mesi non gira da quattro giorni. Ha una skill
+     dedicata (`storia36-custodia`) e un piano di triage suo.
+   · `logrotate.service` — fallita **oggi 21/08 00:00:01 UTC**. Da guardare *insieme* alla nota
+     di `parametri-server.sql`, che sulla rotazione dei log di PostgreSQL ha una posizione
+     precisa: se logrotate non gira, quella posizione va ri-verificata.
+   ▸ Il presidio che avrebbe dovuto dirlo esiste — il blocco «JOB SCHEDULATI PROD (registro
+     OnFailure)» della dashboard — ma al boot era `[? ] --no-net`: si accende solo con la rete.

@@ -61,7 +61,12 @@ ALTER SYSTEM SET log_min_duration_statement = '1000ms';
 ALTER SYSTEM SET track_functions = 'pl';
 
 -- ===========================================================================
--- 4. L'UNICO PARAMETRO CHE PRETENDE UN RESTART (context = postmaster)
+-- 4. IL PRIMO DEI PARAMETRI CHE PRETENDONO UN RESTART (context = postmaster)
+--
+-- ⚠ Questa intestazione diceva «L'UNICO» fino a S1077, quando il blocco 5 ne ha
+-- aggiunto un secondo. Un file che dichiara «uno solo» e ne contiene due mente al
+-- prossimo che lo legge — percio' si emenda la frase, non si aggiunge in fondo
+-- sperando che se ne accorga.
 --
 -- Scritto, ma NON attivo finche' PostgreSQL non viene riavviato. Il riavvio e'
 -- F4 di #220: pianificato e annunciato, mai di passaggio — e' la produzione, e
@@ -76,6 +81,67 @@ ALTER SYSTEM SET track_functions = 'pl';
 -- proprio quelle che si vorrebbe vedere quando si cerca una lentezza rara.
 -- ===========================================================================
 ALTER SYSTEM SET pg_stat_statements.max = '10000';
+
+-- ===========================================================================
+-- 5. LA MEMORIA DEL MOTORE, SU UNA MACCHINA CHE NON E' SOLO SUA
+--    #223 F4 · rilievi F8-06 e F8-14 · S1077, 2026-08-21
+--
+-- MISURATO PRIMA, sulla macchina viva, non dedotto dal dossier:
+--   · RAM 11.927 MB · available 9.631 MB · used 2.296 · buff/cache 8.242
+--   · swap in uso 1.461 MB su 8.192 — c'e' stata pressione in passato
+--   · 2 processori · load average 0.08 · 8 giorni di uptime
+--   · database: heuresys_platform 1.113 MB + heuresys_advanced 1.040 MB
+--     + heuresys_ci 1.025 MB = ~3,2 GB
+--   · le 8 tabelle piu' grandi fanno gia' ~840 MB: sys_skill_embeddings da sola
+--     ne pesa 372, cioe' quasi TRE VOLTE l'intera cache del motore
+--   · hit ratio cumulativo 87,04% (`stats_reset` e' NULL: non si sa da quando)
+--
+-- LA PROVA CHE MOSTRA IL DIFETTO MEGLIO DEL RAPPORTO. Una scansione sequenziale
+-- ripetuta su `sys.sys_skills` (60 MB con gli indici, ~34 MB di heap) legge
+-- 3.892 blocchi DA DISCO a ogni corsa — la prima, la seconda, la terza:
+--     CORSA 1  shared hit=399 read=3924   10,6 ms
+--     CORSA 2  shared hit=431 read=3892   10,0 ms
+--     CORSA 3  shared hit=463 read=3860   10,1 ms
+-- Non e' un caso ed e' il punto tecnico di tutta la fase: per una scansione su
+-- tabella piu' grande di `shared_buffers/4`, PostgreSQL adotta una strategia ad
+-- ANELLO di 256 kB per non spazzare la cache. A 128 MB quella soglia vale 32 MB,
+-- e ogni catalogo sopra i 32 MB viene percio' riletto dal disco PER SEMPRE,
+-- per quante volte lo si interroghi. A 1 GB la soglia sale a 256 MB e i cataloghi
+-- del progetto ci entrano.
+--
+-- PERCHE' 1 GB E NON I ~2,9 GB DELLA REGOLA DEL 25%. Perche' la macchina non e'
+-- sua: ci vivono sette progetti (F8-15) e ha DUE processori. La memoria presa
+-- qui e' tolta agli altri inquilini, e lo swap gia' in uso dice che la pressione
+-- non e' teorica. 1 GB e' l'8,4% della RAM fisica e il 10% del disponibile:
+-- otto volte piu' di prima, e abbastanza piccolo da non spostare l'equilibrio.
+-- Il valore si rivede quando cambia la macchina, non quando cambia l'umore.
+--
+-- ROLLBACK DICHIARATO:
+--     ALTER SYSTEM RESET shared_buffers;        -- torna a postgresql.conf: 128MB
+--     ALTER SYSTEM RESET effective_cache_size;  -- torna al default: 4GB
+--     sudo systemctl restart postgresql@16-main
+-- ===========================================================================
+ALTER SYSTEM SET shared_buffers = '1GB';
+
+-- `effective_cache_size` NON alloca nulla: dichiara al pianificatore quanta cache
+-- puo' aspettarsi in tutto (motore + sistema operativo). Al default dichiarava
+-- 4 GB su una macchina che ne ha 11,9 con 8,2 di buff/cache: il pianificatore
+-- sceglieva scansioni sequenziali dove un indice sarebbe stato piu' economico.
+-- 7 GB e' misurato per difetto — resta sotto il buff/cache reale — e non toglie
+-- memoria a nessuno. Context `superuser`: entra col solo reload, senza restart.
+ALTER SYSTEM SET effective_cache_size = '7GB';
+
+-- ⚠ TRAPPOLA INCONTRATA, E VERIFICATA PRIMA DI RIAVVIARE (S1077).
+-- `pg_settings` riportava `logging_collector | pending_restart = true`, che letto
+-- di corsa significa «al prossimo riavvio si accende» — cioe' esattamente cio'
+-- che il blocco qui sotto dichiara dannoso su questa macchina. NON e' cosi', e la
+-- verifica e' questa: il parametro non compare in `postgresql.auto.conf`, ne' in
+-- nessun file sotto `/etc/postgresql/16/main/` (grep ricorsivo, `conf.d` inclusa),
+-- e vale `off` in tutti e tre i campi — attivo, `reset_val`, `boot_val`. E' il
+-- flag che PostgreSQL 16 alza dopo un `ALTER SYSTEM ... RESET` e non riabbassa
+-- piu' fino al riavvio. Dopo il restart resta spento, come deve.
+-- Il modo giusto di leggere `pending_restart` e' quindi: guarda anche da DOVE
+-- verrebbe il valore nuovo. Se non viene da nessun file, non c'e' valore nuovo.
 
 -- ===========================================================================
 -- ⛔ CIO' CHE QUESTO FILE NON FA, E PERCHE' — la parte piu' importante.

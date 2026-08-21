@@ -185,9 +185,32 @@ FROM (VALUES
 LEFT JOIN sys.sys_skills sc
   ON v.is_soft = false AND sc.skill_code = v.skill_key
      AND sc.skill_tenant_id = (SELECT tenant_id FROM _cfg)
-LEFT JOIN sys.sys_skills ss
-  ON v.is_soft = true  AND ss.skill_name = v.skill_key
-     AND ss.skill_tenant_id = (SELECT tenant_id FROM _cfg);
+-- Le soft skill si cercano PRIMA nel tenant e POI fra le globali (mig. 000351).
+--
+-- Prima di S1077 questa join guardava solo dentro RTL, e trovava tre righe
+-- 'COMP::' che erano residui del brownfield: doppioni delle competenze globali
+-- «adattabilita'», «comunicazione» e «problem solving», su cui finivano 81
+-- competenze di persone e 94 requisiti di posizione — mentre le globali ne
+-- portavano 26 e 16. La 000351 le ha fuse; senza questa modifica il guard
+-- fail-loud qui sotto fermerebbe il seed alla prima esecuzione dopo la fusione.
+--
+-- Il confronto e' su lower(btrim(...)) e NON sull'uguaglianza esatta: la
+-- competenza globale si chiama «comunicazione» in minuscolo, questa mappa scrive
+-- «Comunicazione». Con l'uguaglianza esatta la globale non si troverebbe, e il
+-- seed fallirebbe proprio nel caso che questa modifica esiste per coprire.
+--
+-- LATERAL con LIMIT 1 invece di un secondo LEFT JOIN: due righe con lo stesso
+-- nome in scope diversi moltiplicherebbero la mappatura, e una riga in piu' qui
+-- diventa un requisito di posizione in piu' nel prodotto.
+LEFT JOIN LATERAL (
+  SELECT s.skill_id
+    FROM sys.sys_skills s
+   WHERE v.is_soft = true
+     AND lower(btrim(s.skill_name)) = lower(btrim(v.skill_key))
+     AND (s.skill_tenant_id = (SELECT tenant_id FROM _cfg) OR s.skill_tenant_id IS NULL)
+   ORDER BY (s.skill_tenant_id IS NULL), s.created_at
+   LIMIT 1
+) ss ON true;
 
 -- Fail loud if any mapping skill did not resolve (orphan guard)
 DO $$

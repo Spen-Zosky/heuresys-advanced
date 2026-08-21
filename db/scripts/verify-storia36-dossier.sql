@@ -94,10 +94,39 @@ BEGIN
     ('sys_skill_proficiency_levels'),          -- catalogo livelli proficiency: agganciato via varchar+CHECK (RD-08), non FK
     ('sys_translatable_field'),                -- registro campi traducibili (i18n infra)
     ('sys_ui_interfaces'),                     -- registro interfacce UI (piattaforma)
-    ('sys_ui_interface_data_classes')          -- classi di dato per voce di menu (mig 000315, #99 F7):
+    ('sys_ui_interface_data_classes'),         -- classi di dato per voce di menu (mig 000315, #99 F7):
                                                -- e' la gemella di sys_ui_interfaces, non un dato di persona.
                                                -- Da qui discende la visibilita' della sidebar (ADR-0036 M1),
                                                -- quindi appartiene alla piattaforma, non a un dossier
+    ('sys_dashboards'),                        -- definizione dei cruscotti (mig 000316, #142). La sua UNICA
+                                               -- chiave esterna punta a `sys_ui_interfaces`, che e' gia' qui
+                                               -- come piattaforma: e' la DESCRIZIONE di una schermata, non il
+                                               -- dato che vi compare dentro. Nessuna FK verso tenancies o
+                                               -- users, e nessuna FK entrante da dati di business — percio'
+                                               -- la derivazione non puo' catturarla, come per i crosswalk.
+    ('sys_dashboard_blocks'),                  -- i riquadri di un cruscotto: discendono da `sys_dashboards`,
+                                               -- quindi ne condividono la natura (mig 000316, #142)
+    ('sys_dashboard_block_data_classes'),      -- classi di dato per riquadro (mig 000326, #142): sta a
+                                               -- `sys_dashboard_blocks` come `sys_ui_interface_data_classes`
+                                               -- sta a `sys_ui_interfaces` — e' cio' che decide chi vede quel
+                                               -- riquadro (ADR-0036 M1), non cio' che il riquadro mostra
+    ('sys_blueprint_content_units'),           -- le quattro `blueprint_content_*` sono il CONTENUTO di una
+    ('sys_blueprint_content_positions'),       -- versione di variante: unita', posizioni, competenze e KPI
+    ('sys_blueprint_content_skills'),          -- del modello. Tutte e quattro hanno un'unica FK, verso
+    ('sys_blueprint_content_kpis'),            -- `sys_blueprint_variant_versions` (piano blueprint), e ZERO
+                                               -- FK entranti: la derivazione CATALOGO cattura cio' che i
+                                               -- dossier referenziano, e nessuno referenzia queste. Sono il
+                                               -- modello PRIMA che diventi l'azienda di qualcuno — quando lo
+                                               -- diventa, le righe che nascono sono in `sys.*` tenant-scoped
+                                               -- e ricadono nel dossier TENANT per la loro strada.
+    ('sys_research_sources')                   -- registro delle fonti ammesse alla ricerca (mig 000333, #132
+                                               -- F4): dice da quali domini si puo' leggere, cioe' e' governo
+                                               -- della piattaforma. Le sue uniche FK vanno a `sys_users` come
+                                               -- ATTORE (created_by / updated_by / approved_by): sono di
+                                               -- audit, non di appartenenza, ed e' per questo che la
+                                               -- derivazione — che ignora le colonne di attore — non la vede.
+                                               -- Una fonte non e' il dato di una persona: e' un permesso di
+                                               -- lettura verso l'esterno, con chi l'ha firmato accanto.
   ),
   alltab AS (
     SELECT c.relname AS tbl

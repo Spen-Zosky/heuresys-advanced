@@ -23,15 +23,14 @@ fatta, perché il connettore salvava l'indirizzo di chiamata invece dell'identif
 
 ## Top priorities — le priorità
 
-1. **`#223` F3 è ARMATA ma non ancora live.** Le tre identità del database esistono e sono
-   provate in produzione (7 controlli su 7: l'app scrive le righe, `CREATE TABLE` respinto),
-   ma l'API gira ancora col proprietario finché il deploy non passa. Il cancello CI ha armato
-   lo sha: **verificare che il rollout sia avvenuto** è la prima cosa da fare.
-   → `bash scripts/verifica-deploy.sh` · minuti, non una sessione
-2. **`#222` F6-07 — le 4.467 competenze isolate vogliono un piano proprio.** Il dossier ne
+1. **`#222` F6-07 — le 4.467 competenze isolate vogliono un piano proprio.** Il dossier ne
    contava 84: sono **4.467 su 14.036**, un terzo del catalogo senza alcun arco tassonomico.
    Non è una fase dentro un'altra voce, è curatela che va pianificata per sé.
    → `.programmi/222-remediation-w3-integrita-contenuti.md` · da decomporre
+2. **`#223` F4 — l'unico riavvio rimasto.** `shared_buffers` a 128MB su 11GB, su una VM che
+   ospita sette progetti: la memoria presa qui la si toglie a qualcun altro. Misura della RAM
+   libera prima, poi il valore, poi un riavvio annunciato.
+   → `.programmi/223-remediation-w4-pipeline-ruoli.md` · ~25k
 3. **`#132` F7 — le due prove.** ⏸ **Aspetta te, e per una cosa sola**: approvare la prima
    fonte. La corsa di F4h ha già lasciato una proposta `PASSED` — Banca d'Italia. Decisa e
    applicata, i domini diventano ricercabili e F7 può girare.

@@ -32,45 +32,17 @@ accettato, chiuso `RISOLTO` nel registro. Non rientra da questa porta.
       quindi sforare **ritarda, non rompe**. Non è un'urgenza travestita.
       **fatto =** durata della catena misurata **prima e dopo**, e `bash db/scripts/ci-rehearsal.sh`
       verde (è la prova che l'emendamento non ha rotto la ri-applicabilità).
-- [ ] **F3 La separazione delle identità: migrator, applicazione, sola lettura** — budget ~60k · rilievi `F5-01`, `F4-08`
-      **La voce grossa dell'onda**, e l'unica di W4 non aperta il 2026-08-20: apre e chiude in
-      una sessione sola o non si apre, perché a metà lascia la produzione senza database.
-      **La simulazione R24 è stata fatta il 2026-08-20 e sta qui sotto: la prossima sessione
-      non la rifà, esegue.**
-
-      **① Precondizioni** — misurate 2026-08-20. `heuresys` è proprietario di
-      `heuresys_advanced` e **non** è superuser (`usesuper = f`); i ruoli del cluster sono 6
-      (`heuresys` · `postgres` · `codex_auditor` · `gov_worker` · `heuresys_backup` · `lls`);
-      `PUBLIC` non ha più `CONNECT` (#220 F3). Serve `postgres` via `sudo -u` sulla VM per
-      creare ruoli: `heuresys` non ha `CREATEROLE`.
-
-      **② Meccanismo — letto nel codice, non supposto.**
-      · `apps/api/src/db/client.ts` costruisce **un solo** `pg.Pool` da
-        `POSTGRES_USER` / `POSTGRES_PASSWORD` (più host, porta, db, ssl, `max`). Non esiste
-        un secondo pool: l'identità dell'API è quell'unica coppia.
-      · Le migrazioni girano da `db/scripts/migrate.sh`, che legge lo stesso `.env`.
-      · ⚠ **`verify_gate` applica le migrazioni alla produzione** (memoria
-        `verify_gate_applies_migrations_to_prod`): se il migrator diventa un'identità diversa,
-        anche quel cancello va allineato o fallisce a fine turno.
-      · I consumatori dell'identità sono **almeno tre**: l'API, `migrate.sh`, e gli script di
-        `db/scripts/` — vanno censiti tutti prima, o qualcuno resta fuori.
-
-      **③ Propagazione** — due `.env` (PC e VM, entrambi gitignored e **reali**), più il
-      linux-pc che ha il proprio clone. `.env.example` va aggiornato con i blocchi nuovi.
-      Nessuno di questi arriva con `git pull`: è il caso classico che la skill
-      `full-alignment-deploy` copre.
-
-      **④ Chi** — Claude per intero, tranne un punto: le **password** dei ruoli nuovi sono un
-      segreto, e vanno generate e depositate senza mai comparire nel contesto né in un file
-      versionato. Se serve che Enzo le fornisca o le approvi, la voce diventa `WAIT-INPUT`.
-
-      **⑤ Guardia e via di ritorno** — la guardia è che l'identità dell'applicazione **fallisca**
-      un `CREATE TABLE`: se ci riesce, la separazione è nominale. La via di ritorno è rimettere
-      `POSTGRES_USER=heuresys` nei due `.env` e riavviare l'API — quindi **il valore vecchio va
-      annotato prima di toccarlo**, ed è l'unico rollback che conta.
-
-      **fatto =** tre identità distinte, l'API gira con la meno potente che le basta, il
-      `CREATE TABLE` dell'app viene respinto, e un deploy completo passa da capo.
+- [x] **F3 La separazione delle identità: migrator, applicazione, sola lettura** — **FATTO E LIVE 2026-08-21** · rilievi `F5-01`, `F4-08`
+      Tre identità: `heuresys` (proprietario e migrator, invariato) · `heuresys_app` (righe sì,
+      struttura no) · `heuresys_ro` (sola lettura, senza le sei superfici sensibili).
+      Strumenti versionati in `deploy/postgres/`: `ruoli.sql`, `assegna-password-app.sh` (genera
+      il segreto **sulla macchina**, non lo stampa mai), `prova-identita-app.sh`.
+      **fatto =** l'API di produzione gira con `heuresys_app` — misurato nel log di avvio:
+      `{"phase":"pg-pool","user":"heuresys_app","separata":true}` · 7/7 controlli verdi, incluso
+      `CREATE TABLE` **respinto** · `readyz=200 login=200` dopo il deploy.
+      **Punto che la simulazione non aveva colto**: i trigger di `000339` girano coi privilegi di
+      chi esegue, quindi l'app DEVE poter scrivere in `audit` e `staging` — senza, ogni modifica
+      a un catalogo fallirebbe.
 - [ ] **F4 La memoria del database, su una macchina che non è solo sua** — budget ~25k · rilievi `F8-06`, `F8-14`
       `shared_buffers` è a 128MB su 11GB. Sembra un aumento ovvio e **non lo è**: la VM ospita
       sette progetti, quindi la memoria che si prende qui la si toglie a qualcun altro.

@@ -32,7 +32,6 @@ const codiceDi = (b: unknown): string | undefined => (b as { error?: { code?: st
 let t: TestApp;
 let admin: S;
 let adminUserId: string;
-let fixtureCreata: string | null = null;
 let versionId: string;
 let blueprintId: string;
 let numero: number;
@@ -167,7 +166,6 @@ beforeAll(async () => {
               tenant_blueprint_version_number AS n FROM v`,
     );
     if (!fatto[0]) throw new Error("non si e' potuto costruire il fascicolo di prova: mancano industry class o operating model");
-    fixtureCreata = fatto[0].b;
     versionId = fatto[0].v; blueprintId = fatto[0].b; numero = fatto[0].n;
   } else {
     versionId = rows[0].v; blueprintId = rows[0].b; numero = rows[0].n;
@@ -180,21 +178,20 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  // Si rimuove SOLO cio' che questo test ha creato. Se il fascicolo reale c'era
-  // gia', `fixtureCreata` resta null e qui non si tocca nulla: un test che
-  // cancella dati che non ha prodotto e' un test che rompe la produzione.
+  // ⚠ NESSUNA PULIZIA A MANO, e la ragione e' un fallimento misurato.
   //
-  // Con l'isolamento transazionale (D-52) questa pulizia e' ridondante — l'intero
-  // file gira in una transazione rollbackata, fixture del `beforeAll` comprese.
-  // Resta perche' `TEST_TX_ISOLATION=0` e' una via di fuga documentata: sotto
-  // quella bandiera il rollback non c'e', e senza questo blocco la fixture
-  // resterebbe sul database condiviso.
-  if (fixtureCreata) {
-    await pool.query(
-      `DELETE FROM sys.sys_tenant_blueprint_versions WHERE tenant_blueprint_version_blueprint_id = $1`,
-      [fixtureCreata]);
-    await pool.query(`DELETE FROM sys.sys_tenant_blueprints WHERE tenant_blueprint_id = $1`, [fixtureCreata]);
-  }
+  // Qui c'era un DELETE della fixture, tenuto «per sicurezza» nel caso qualcuno
+  // usasse la via di fuga TEST_TX_ISOLATION=0. Quella difesa ipotetica ha rotto
+  // il caso reale: la CI e' andata rossa con una violazione di chiave esterna —
+  // «(tenant_blueprint_version_id)=(...) e' ancora referenziata da
+  // sys_seed_acquisition_runs». Ovvio col senno di poi: il test FA GIRARE delle
+  // corse di ricerca su quella versione, quindi quando arriva afterAll la
+  // versione ha figli.
+  //
+  // L'isolamento transazionale (D-52) rollbacka l'intero file, fixture del
+  // beforeAll comprese e nell'ordine giusto — non ha bisogno di sapere chi
+  // referenzia chi. Proteggersi da uno scenario che nessuno usa, al prezzo di
+  // rompere quello che tutti usano, e' il verso sbagliato.
   await t.app.close(); await closePool();
 });
 

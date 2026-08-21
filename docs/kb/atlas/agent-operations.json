@@ -5,6 +5,48 @@
  ],
  "_generato_da": "docs/kb/tools/build_agent_operations.py — non modificare a mano",
  "concepts": {
+  "content": {
+   "data": "2026-08-21",
+   "decisione": "Enzo (#214 F3, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). QUARTO perimetro in sola lettura, scelto col criterio meccanico e non a intuito: e' il primo della coda dei neutri per ampiezza di lettura (7 letture · 3 pagine), e `RESOURCE_SENZA_DATI_DI_PERSONA` lo dichiara privo di dati di persona con parole proprie — e' il patrimonio documentale di un'azienda (manuali, politiche, materiali), non le persone che vi compaiono. I candidati piu' ampi non erano in gara: `analytics` e `dashboard` sono fra i RISERVATI dal 2026-08-19 (F5) per le classi che espongono davvero. Rischio crescente rispettato: dopo l'organigramma (rubrica), le posizioni (posti) e il fascicolo di configurazione (struttura), il contenuto e' l'oggetto piu' vicino a un documento e piu' lontano da una persona.",
+   "operations": {
+    "get": {
+     "method": "GET",
+     "path": "/",
+     "permission": "content:read"
+    },
+    "get_by_id": {
+     "method": "GET",
+     "path": "/:id",
+     "permission": "content:read"
+    },
+    "get_by_id_media": {
+     "method": "GET",
+     "path": "/:id/media",
+     "permission": "content:read"
+    },
+    "get_by_id_versions": {
+     "method": "GET",
+     "path": "/:id/versions",
+     "permission": "content:read"
+    },
+    "get_categories": {
+     "method": "GET",
+     "path": "/categories",
+     "permission": "content:read"
+    },
+    "get_media_by_mediaid": {
+     "method": "GET",
+     "path": "/media/:mediaId",
+     "permission": "content:read"
+    },
+    "get_search": {
+     "method": "GET",
+     "path": "/search",
+     "permission": "content:read"
+    }
+   },
+   "solaLettura": true
+  },
   "organization-units": {
    "data": "2026-08-16",
    "decisione": "Enzo (#156): primo perimetro in sola lettura. Coerente con la decisione dello stesso giorno su #193 — l'organigramma e' rubrica aziendale, visibile a chiunque lavori in azienda. E' l'unico candidato la cui sensibilita' non e' una stima di chi scrive, ma una scelta di prodotto scritta e datata.",

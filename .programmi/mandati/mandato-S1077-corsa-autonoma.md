@@ -60,11 +60,32 @@ certo, che la latenza non gonfia. `clock_timestamp()` al posto di `now()`.
 **La prova sa ancora dire di no**: 5/5 casi sintetici, incluso il caso vero di S1037 (PC indietro
 di 10h 21m → `BAD +37249s`) e il confine a 6 s oltre la latenza → `BAD`.
 | **A** | **`#223` F4** — memoria del database su una macchina che non è solo sua | valore nuovo attivo dopo restart **e** i sette progetti ancora su | io | ~25k | ✅ **`#223` CHIUSA 6/6** — 1 GB attivo, `read=3892`→**0**, 8/8 servizi su, PROD 200/200 |
-| **B** | **`#222` F7** — le ridondanze vere e le pulizie basse (`F6-09`, `F6-10`, `F1-09`) | ognuna chiusa **o** dichiarata non-lavoro con la misura accanto | io | ~30k | ⬜ |
-| **C** | **`#219` F1** — le due firme che potrebbero non essere guasti (A: MFA · E: il 400) | 3 casi su 12 chiusi, e la prova di E diventa rossa se si toglie il permesso | io | ~30k | ⬜ |
-| **D** | **`#214` F3** — il terzo perimetro dell'agente | riga in `agent-perimetri.json` con decisione+data, mappa rigenerata, prova live | io | ~60k | ⬜ |
-| **E** | **`#149` F4** — misura dell'inbox del lab | inbox misurata adesso: o è vuota, o la consegna passa l'analisi avversariale | io | ~10k | ⬜ |
-| **F** | **`#79` F3** — cancello di esposizione sui lavori di oggi | `check_exposure.py` exit 0 letto **sul processo** dopo A/B/D | io | ~5k | ⬜ |
+| **B** | **`#222` F7** — le ridondanze vere e le pulizie basse (`F6-09`, `F6-10`, `F1-09`) | ognuna chiusa **o** dichiarata non-lavoro con la misura accanto | io | ~30k | ✅ **`#222` CHIUSA 7/7** — mig `000351`+`000352`; 2 lavoro vero, 3 non-lavoro misurato |
+| **C** | **`#219` F1** — le due firme che potrebbero non essere guasti (A: MFA · E: il 400) | 3 casi su 12 chiusi, e la prova di E diventa rossa se si toglie il permesso | io | ~30k | ✅ **F1 chiusa, 3 casi su 12** — e trovato un commento che diceva il falso su un interruttore di sicurezza |
+| **D** | **`#214` F3** — il terzo perimetro dell'agente | riga in `agent-perimetri.json` con decisione+data, mappa rigenerata, prova live | io | ~60k | ✅ **F3 era già fatta** (19/08, piano disallineato) → aperto il **quarto**, `content`: 24 operazioni. ⏳ prova live non eseguita, dichiarata |
+| **E** | **`#149` F4** — misura dell'inbox del lab | inbox misurata adesso: o è vuota, o la consegna passa l'analisi avversariale | io | ~10k | ✅ inbox **vuota**, nessuna consegna pendente |
+| **F** | **`#79` F3** — cancello di esposizione sui lavori di oggi | `check_exposure.py` exit 0 letto **sul processo** dopo A/B/D | io | ~5k | ✅ **73/73, 0 lacune**, exit 0 sul processo |
+
+## Esito — CICLO CHIUSO, 10/10 voci
+
+Tutte le voci del piano sono spuntate. Le due riserve, dichiarate e non nascoste:
+la **prova live del quarto perimetro** (pretende gateway e API avviati, più una corsa
+dell'agente) e la **verifica live** della firma E di `#219`, che cade per costruzione nella corsa
+integrale di `F5`. Nessuna delle due è una pendenza scoperta a fine ciclo: entrambe erano fuori
+dal «fatto =» della loro riga.
+
+Due epiche chiuse per intero: **`#222` (W3) 7/7** e **`#223` (W4) 6/6**.
+
+### L'errore di questa sessione, tenuto scritto perché è il più istruttivo
+
+Su `#219` F1/A ho concluso e **committato** che l'ipotesi del triage fosse falsa, basandomi sul
+**default** del codice (`true`) e sul commento che dichiarava «PROD lo lascia unset». Era un
+default e un indizio, non una misura. `SOT_STATE` diceva il contrario, sono andato a misurare
+sulla macchina, e la produzione ha `MFA_ENFORCEMENT_ENABLED=false`: il gate è **spento**,
+l'ipotesi era **giusta**. Corretto con un commit successivo.
+La causa a monte non era mia: quel commento **diceva il falso** su un interruttore di sicurezza,
+e chi lo legge ne deduce la configurazione della produzione. È stato corretto, ed è il motivo per
+cui la regola del progetto dice di misurare ciò che può variare invece di leggerlo.
 
 **Regola di ingaggio fra una voce e l'altra**: commit atomico + `guardiano.py --sorveglia`.
 Exit 3 → si chiude, senza rinegoziare.

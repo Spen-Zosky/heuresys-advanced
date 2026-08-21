@@ -1,7 +1,7 @@
 # 219 — Gli otto guasti dietro i rossi della suite E2E integrale
 
 > **item**: #219 · **priorità**: P2 · **stima**: ~1-2 sessioni
-> **stato**: NON AVVIATO
+> **stato**: **IN CORSO** — 1/5 fasi (F1 chiusa S1077: 3 casi su 12 tolti)
 > **fonti**: `#211` F4 (S1072, 2026-08-19) — il triage completo, con la firma misurata di
 > ognuno, vive in `.programmi/211-suite-e2e-completa.md` §F4 e **non si ricopia qui**
 
@@ -22,7 +22,7 @@ non correggendolo.
 
 ## Fasi
 
-- [ ] **F1 Le due firme che potrebbero non essere guasti** — budget ~30k · ▸ **AVVIATA S1077: `E` corretta, `A` con l'ipotesi SMENTITA e la causa ancora da stabilire**
+- [x] **F1 Le due firme che potrebbero non essere guasti** — **FATTO 2026-08-21 (S1077)** · entrambe chiuse, **3 casi su 12** tolti · nessuna delle due era un guasto del prodotto, e in tutti e due i casi la prova era debole per una ragione diversa
       ✅ **`A` — l'ipotesi del triage REGGE, e i due casi sono resi condizionali.** Misurato sulla
       macchina di produzione il 2026-08-21: `MFA_ENFORCEMENT_ENABLED` **è presente e vale
       `false`** — il gate al login è **spento**, per la decisione di Enzo che `SOT_STATE` registra

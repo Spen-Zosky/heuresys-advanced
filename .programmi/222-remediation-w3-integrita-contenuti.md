@@ -48,25 +48,22 @@
         all'originale, cioè un campo tradotto che non traduce.
       **fatto =** 0 URI contraffatti sotto il namespace ESCO + 0 traduzioni-copia, con i
       referenti aggiornati e misurati.
-- [ ] **F5 I codici settore e il grafo delle competenze** — budget ~45k → **RI-STIMATA, misure fatte il 2026-08-20**
-      ⏸ INTERROTTA dopo la misura: entrambi i rilievi sono più grandi di come il dossier li
-      descriveva, e nessuno dei due si chiude con una regola meccanica. **Le misure qui sotto
-      sono già fatte: la prossima sessione non le rifà, parte dalla decisione.**
-      · `F6-04` — **confermato nel numero**: esattamente **5** codici di `sys_industry_codes`
-        puntano a un ATECO che in 2025 non esiste — `CONSTRUCTION` 41.20 · `EDUCATION` 85.42 ·
-        `IT_SOFTWARE` 62.01 · `RETAIL` 47.19 · `TRANSPORT_LOGISTICS` 52.29. Gli altri 7 sono a
-        posto.
-        ⚠ **La correzione non è meccanica, ed è una scelta di modellazione**: solo
-        `CONSTRUCTION` ha un candidato unico (**41.00**). `EDUCATION` ne ha 13, `RETAIL` una
-        trentina, `IT_SOFTWARE` 3 (62.10 · 62.20 · 62.90), `TRANSPORT_LOGISTICS` 6 (52.21…52.26).
-        La domanda vera che emerge dalla misura: un settore come «Commercio al dettaglio» è
-        rappresentato bene da **una classe di livello 4**, o dovrebbe puntare alla **divisione**?
-        Gli altri 7 usano il livello 4, quindi cambiarlo è una decisione, non una correzione.
-      · `F6-07` — **il dossier sottostima di due ordini di grandezza**: le competenze isolate
-        nel grafo (nessun arco, né come padre né come figlio) sono **4.467 su 14.036**, non 84.
-        Ricollegarle non è una fase da 45k: è un lavoro di curatela su un terzo del catalogo, e
-        va pianificato per sé. **Le 84 del rilievo erano un sottoinsieme, non il totale.**
-      **fatto =** 5 codici decisi uno per uno con la ragione scritta + un piano proprio per le 4.467.
+- [x] **F5 I codici settore e il grafo delle competenze** — `F6-04` **FATTO 2026-08-21** · `F6-07` resta, e ha bisogno di un piano suo
+      · `F6-04` ✅ mig 000350. **La domanda era mal posta**: quel campo non nomina una classe, alimenta la
+        sentinella `v_tenant_industry_incoerente` che confronta le due dichiarazioni di settore di un
+        tenant. Il confronto era per **uguaglianza**, e questo legava il livello del codice al modo di
+        confrontarlo. Ora è **gerarchico** — la classe del profilo deve *ricadere sotto* il settore — e
+        il settore può essere una divisione, cosa che il `CHECK` di `000305` **già ammetteva**
+        (`^[0-9]{2}(\.[0-9]{1,2})?$`): mancava solo un confronto che sapesse leggerla.
+        Decisione di Enzo 2026-08-21. I cinque: `CONSTRUCTION` 41.20→**41.00** · `IT_SOFTWARE`
+        62.01→**62.10** · `EDUCATION` 85.42→**85** · `RETAIL` 47.19→**47** ·
+        `TRANSPORT_LOGISTICS` 52.29→**52**. Criterio: il codice corrisponde al **nome** del settore.
+        **fatto =** 5/5 esistono in ATECO_2025 · sentinella a zero sui 2 tenant attivi · e sa ancora
+        respingere (provato: 0→1→0 assegnando a `FIN_BANKING` un settore sbagliato).
+      · `F6-07` ⏸ **da fare, con un piano proprio**: le competenze isolate nel grafo sono **4.467 su
+        14.036**, non 84 — il dossier sottostima di due ordini di grandezza. È curatela su un terzo
+        del catalogo, non una fase dentro un'altra voce.
+
 - [x] **F6 Il canale unico ruolo↔occupazione** — FATTO 2026-08-21 · mig 000349 · **il rilievo è smentito nella sostanza**: dei 111 ruoli col campo nei metadati, quelli con un URI dentro sono **ZERO** (titolo compreso) — il dossier ha contato le *chiavi*, non i valori. Non c'erano due canali. Il difetto vero era che 111 chiavi vuote **sembravano** legami a chiunque interrogasse `metadata ? 'esco_occupation_uri'`: rimosse, con giornale di 111 righe · 64 legami preesistenti intatti · budget ~40k · rilievo `F2-01`
       Oggi il legame passa da **due** strade — 64 FK e 111 righe di metadata — che non si
       sovrappongono su nemmeno un caso (misurato: 0 sovrapposti su 176 ruoli). Due canali disgiunti

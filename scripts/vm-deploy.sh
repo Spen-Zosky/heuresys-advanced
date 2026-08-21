@@ -14,7 +14,12 @@
 # Overridable via env: REPO_DIR BRANCH PUBLIC_HOST API_PORT WEB_PORT NODE_MAJOR RESTART_API
 set -euo pipefail
 
-REPO_DIR="${REPO_DIR:-/home/ubuntu/heuresys-advanced}"
+# Il repo e' quello in cui vive QUESTO script, non un percorso cablato.
+# ⚠ Qui c'era `/home/ubuntu/heuresys-advanced`: sul linux-pc quel percorso non
+# esiste, e lo script moriva con «cannot change to» prima ancora di iniziare.
+# Stessa trappola di SERVICE_USER poco sotto — un default che vale su un host
+# solo, in uno script che si lascia lanciare su entrambi.
+REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 BRANCH="${BRANCH:-main}"
 PUBLIC_HOST="${PUBLIC_HOST:-80.225.82.207}"
 API_PORT="${API_PORT:-8013}"
@@ -24,8 +29,30 @@ RESTART_API="${RESTART_API:-1}"   # set 0 to skip restarting the API (web-only d
 # systemd unit owner. Default ubuntu (the OCI VM). The linux-pc PROD twin runs as 'enzo' —
 # align-clones passes SERVICE_USER=enzo PUBLIC_HOST=192.168.1.11 for that leg so the scheduler
 # units (and the inlined web URL) are rendered for the right host (design §12.4).
-SERVICE_USER="${SERVICE_USER:-ubuntu}"
-SERVICE_GROUP="${SERVICE_GROUP:-$SERVICE_USER}"
+# L'utente dei servizi si DERIVA dall'host, non si cabla.
+#
+# ⚠ QUI C'ERA `${SERVICE_USER:-ubuntu}`, e ha rotto il gemello il 2026-08-21.
+# `align-clones` passa sempre SERVICE_USER=enzo per la tratta del linux-pc, quindi
+# il default non si vedeva mai — finche' qualcuno non ha lanciato vm-deploy A MANO
+# su quella macchina. Le 14 unit sono state reinstallate con `User=ubuntu`, che sul
+# linux-pc non esiste: api e web sono morti con `status=217/USER`, e il gemello di
+# produzione e' rimasto giu' finche' non e' stato riparato a mano.
+#
+# `id -un` e' giusto per costruzione su ENTRAMBE le macchine: sulla VM il deploy
+# gira come `ubuntu`, sul linux-pc come `enzo`. Un default che vale solo su un host
+# e' una trappola che aspetta chi lancia lo script sull'altro — e lo script si
+# LASCIA lanciare, perche' `align-clones` lo fa di mestiere.
+SERVICE_USER="${SERVICE_USER:-$(id -un)}"
+SERVICE_GROUP="${SERVICE_GROUP:-$(id -gn)}"
+
+# Guardia esplicita: se l'utente scelto non esiste su questa macchina, le unit
+# verrebbero installate rotte e il guasto si scoprirebbe al restart — cioe' a
+# servizi gia' fermi. Meglio non partire.
+if ! id -u "$SERVICE_USER" >/dev/null 2>&1; then
+  echo "ERROR: SERVICE_USER='$SERVICE_USER' non esiste su $(hostname). Le unit systemd" >&2
+  echo "       verrebbero installate con un utente inesistente (status=217/USER)." >&2
+  exit 1
+fi
 
 log() { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
 

@@ -28,11 +28,10 @@ fatta, perché il connettore salvava l'indirizzo di chiamata invece dell'identif
    ma l'API gira ancora col proprietario finché il deploy non passa. Il cancello CI ha armato
    lo sha: **verificare che il rollout sia avvenuto** è la prima cosa da fare.
    → `bash scripts/verifica-deploy.sh` · minuti, non una sessione
-2. **`#222` F5 — i cinque codici settore aspettano una decisione, non un lavoro.** Solo
-   `CONSTRUCTION` ha un candidato unico (41.00); `EDUCATION` ne ha 13, `RETAIL` una trentina.
-   La domanda vera che la misura ha fatto emergere: un settore si rappresenta con **una classe
-   di livello 4 o con una divisione**? Le misure sono già nel piano: si parte dalla scelta.
-   → `.programmi/222-remediation-w3-integrita-contenuti.md` · decisione + ~30k
+2. **`#222` F6-07 — le 4.467 competenze isolate vogliono un piano proprio.** Il dossier ne
+   contava 84: sono **4.467 su 14.036**, un terzo del catalogo senza alcun arco tassonomico.
+   Non è una fase dentro un'altra voce, è curatela che va pianificata per sé.
+   → `.programmi/222-remediation-w3-integrita-contenuti.md` · da decomporre
 3. **`#132` F7 — le due prove.** ⏸ **Aspetta te, e per una cosa sola**: approvare la prima
    fonte. La corsa di F4h ha già lasciato una proposta `PASSED` — Banca d'Italia. Decisa e
    applicata, i domini diventano ricercabili e F7 può girare.
@@ -40,13 +39,7 @@ fatta, perché il connettore salvava l'indirizzo di chiamata invece dell'identif
 
 ## Open questions — le domande aperte
 
-1. **Il PostgreSQL sulla porta 5435 non serve a nessuno.** Misurato: risponde, ha dati di
-   cinque settimane fa, e **nessuno strumento del repo lo interroga** (cercato `5435` ovunque:
-   solo falsi positivi dentro UUID). Si spegne, si aggiorna, o si tiene?
-2. **`.env.example` non ha `POSTGRES_APP_USER` / `POSTGRES_APP_PASSWORD`.** Non è una
-   dimenticanza: la lettura di `.env*` è negata al guard degli strumenti. Sono documentate in
-   `deploy/postgres/README.md`; aggiungerle all'esempio richiede la tua mano.
-3. **Il fornitore di proposte non è configurato in produzione.** Le due variabili
+1. **Il fornitore di proposte non è configurato in produzione.** Le due variabili
    (`RESEARCH_GATEWAY_URL` / `RESEARCH_GATEWAY_TOKEN`) vanno nel `.env` — che è tuo. Finché
    mancano, l'API dice «non c'è chi propone», ed è il comportamento voluto.
 

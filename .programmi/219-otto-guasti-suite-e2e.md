@@ -23,20 +23,26 @@ non correggendolo.
 ## Fasi
 
 - [ ] **F1 Le due firme che potrebbero non essere guasti** — budget ~30k · ▸ **AVVIATA S1077: `E` corretta, `A` con l'ipotesi SMENTITA e la causa ancora da stabilire**
-      🔬 **`A` — l'ipotesi del triage è falsa, e questo è il risultato che conta.** Il triage
-      dava per probabile che `MFA_ENFORCEMENT_ENABLED` fosse **spento** in produzione per
-      decisione di Enzo, e che quindi i due casi provassero un mondo diverso da quello
-      configurato. Misurato in `apps/api/src/config/env.ts:207`: il valore ha **default `"true"`**
-      e il commento dichiara che PROD/VM/linux-pc lo lasciano **unset → true**, con l'esplicito
-      «zero security regression: mandatory-MFA stays live». In più la persona del caso
-      (`antonio.parisi@rtl-bank.org`, `PERSONAS.outsider`) ha **già** un fattore TOTP
-      **verificato dal 2026-07-26**, e nel sistema ce ne sono 158, tutti verificati.
-      **Il gate è acceso**: chiudere i due casi come «provano un gate spento» sarebbe stato
-      archiviare un guasto vero sotto un'ipotesi comoda. La causa va cercata altrove — il
-      sospetto ora è la **seconda** attesa (`Attempt 2`), dove il caso rifà il login dopo aver
-      consumato la challenge con un codice sbagliato: lì può entrare un blocco per tentativi, o
-      la convivenza di **due** fattori verificati (quello permanente e quello che il test
-      arruola). ⚠ Serve la riproduzione, che è il passo con cui questa fase deve ricominciare.
+      ✅ **`A` — l'ipotesi del triage REGGE, e i due casi sono resi condizionali.** Misurato sulla
+      macchina di produzione il 2026-08-21: `MFA_ENFORCEMENT_ENABLED` **è presente e vale
+      `false`** — il gate al login è **spento**, per la decisione di Enzo che `SOT_STATE` registra
+      dal 2026-08-06 (S1029). I due casi non rilevavano un guasto: **provavano un mondo diverso da
+      quello configurato**. Resi condizionali **osservando il comportamento** (la sfida compare? il
+      pannello di arruolamento compare?) e non leggendo una variabile — così, se Enzo riaccende il
+      gate, tornano a girare da soli senza che nessuno debba ricordarsene. Il verde arriva **senza**
+      toccare la configurazione, che era la condizione dichiarata. Typecheck web e api verdi.
+      🔬 **E la misura ha trovato dell'altro: un commento che diceva il falso su un interruttore
+      di sicurezza.** `apps/api/src/config/env.ts` affermava «PROD/VM/linuxpc leave it UNSET →
+      true → zero security regression (mandatory-MFA stays live)». È falso, e la produzione dice
+      il contrario. Il commento descriveva l'**intenzione** del progetto e chi lo leggeva ne
+      deduceva la **configurazione**: ci sono cascato in questa stessa sessione, arrivando prima
+      alla conclusione opposta — «il gate è acceso, l'ipotesi del triage è falsa» — e correggendola
+      solo perché `SOT_STATE` la contraddiceva e sono andato a misurare sulla macchina.
+      Corretto, con la misura e la data accanto. *(Il default `true` resta giusto: protegge
+      chiunque non dichiari nulla. Ciò che PROD fa oggi si misura sulla macchina, non si legge qui.)*
+      ⚠ Nota di metodo: i 158 fattori TOTP verificati nel sistema — e quello permanente della
+      persona del caso, dal 2026-07-26 — **non** provano che l'enforcement sia attivo. Provano che
+      i fattori esistono. Li avevo usati come indizio a sostegno della conclusione sbagliata.
       ✅ **`E` — corretta** (`tenants-editing.spec.ts`). Il caso mandava `tenantCode` +
       `tenantName` e riceveva 400 perché lo schema pretende anche `tenantIndustryCode`
       (obbligatorio dalla `000305`, D-83): la validazione scattava **prima** del controllo di

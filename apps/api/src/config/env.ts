@@ -194,8 +194,24 @@ const EnvSchema = z.object({
   // Mandatory-MFA login ENFORCEMENT kill-switch (dev/test neutralization seam,
   // S989). DEFAULT true: the login §3b gate (mfa_required for accounts WITH a
   // verified factor + mfa_enrollment_required for in-scope accounts WITHOUT one)
-  // is enforced everywhere unless explicitly turned off. PROD/VM/linuxpc leave it
-  // UNSET → true → zero security regression (mandatory-MFA stays live). Set
+  // is enforced everywhere unless explicitly turned off.
+  //
+  // ⚠ CORRETTO S1077 (2026-08-21) — QUI C'ERA SCRITTO IL FALSO, e mi ci sono
+  // cascato in questa stessa sessione. La riga diceva: «PROD/VM/linuxpc leave it
+  // UNSET → true → zero security regression (mandatory-MFA stays live)». Misurato
+  // sulla macchina di produzione: la variabile **c'è** e vale **false**, cioè
+  // l'enforcement al login e' SPENTO — coerente con `SOT_STATE.md`, che lo
+  // registra dal 2026-08-06 (S1029) come decisione di Enzo, e con la riga «MFA
+  // resta OFF» dello stesso documento.
+  //
+  // Il commento descriveva l'INTENZIONE del progetto (il default sicuro), e chi
+  // lo leggeva ne deduceva la CONFIGURAZIONE. Sono due cose diverse, e su un
+  // interruttore di sicurezza la differenza non e' accademica: leggendo solo
+  // questo file si conclude che la produzione pretende il secondo fattore, e non
+  // lo pretende. Il default `true` resta giusto ed e' quello che protegge
+  // chiunque non dica nulla; cio' che PROD fa oggi si misura sulla macchina.
+  //
+  // Set
   // MFA_ENFORCEMENT_ENABLED=false ONLY in a dev/test .env to bypass the gate
   // entirely so development + automated testing proceed without a second factor.
   // The MFA capability, enrolled factors and the per-tenant policy DATA all stay

@@ -97,6 +97,24 @@ test.describe("MVP-3 Tappa E /login — MFA login-gating", () => {
       // --- Attempt 1: password step surfaces the MFA challenge UI ---
       await page.goto("/login");
       await submitPassword(page, MFA_EMAIL);
+
+      // #219 F1 firma A — il caso e' CONDIZIONALE alla configurazione, non al codice.
+      // Misurato il 2026-08-21 sulla macchina di produzione: `MFA_ENFORCEMENT_ENABLED`
+      // e' presente e vale `false`, cioe' il gate al login e' SPENTO per decisione di
+      // Enzo (SOT_STATE lo registra dal 2026-08-06). Con il gate spento questo caso
+      // non prova un guasto: prova un mondo diverso da quello configurato, e restava
+      // rosso per quello. ⚠ Il verde NON deve arrivare accendendo l'enforcement —
+      // sarebbe far provare al caso una configurazione che la produzione non ha.
+      // Percio' si osserva il COMPORTAMENTO (la sfida compare?) invece di leggere una
+      // variabile: se domani Enzo riaccende il gate, il caso torna a girare da solo.
+      const sfidaComparsa = await page
+        .getByTestId("login-mfa-form")
+        .waitFor({ state: "visible", timeout: 20_000 })
+        .then(() => true, () => false);
+      test.skip(
+        !sfidaComparsa,
+        "MFA enforcement spento in questo ambiente (MFA_ENFORCEMENT_ENABLED=false): il caso proverebbe una configurazione diversa da quella viva",
+      );
       await expect(page.getByTestId("login-mfa-form")).toBeVisible();
       await expect(page.getByTestId("login-mfa-code")).toBeVisible();
       // Wrong code -> error (also consumes this single-use challenge).

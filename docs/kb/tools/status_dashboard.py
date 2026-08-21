@@ -345,20 +345,45 @@ def sec_db(no_db):
     # su MFA, con una scadenza «precedente» alla creazione, perché l'applicazione
     # calcola le scadenze con l'orologio locale e il database registra col proprio.
     # Un dato scritto con un orologio sbagliato non si riconosce guardandolo.
-    skew = q("SELECT round(extract(epoch FROM now()) - extract(epoch FROM %s))::text"
-             % f"to_timestamp({time.time():.3f})")
-    if skew is None:
+    #
+    # ⚠ COME SI MISURA — e perché la versione precedente misurava sé stessa (S1077).
+    # Prendeva `time.time()` mentre COMPONEVA la query, e lo confrontava con `now()`,
+    # che PostgreSQL valuta all'inizio della transazione, cioè DOPO che psql si è
+    # connesso. La differenza conteneva quindi la latenza di apertura della
+    # connessione: sul tunnel SSH sono 11 secondi misurati, ed è esattamente il numero
+    # che la dashboard denunciava come «orologio fuori di 11s» — con l'orologio di
+    # questa macchina allineato a NTP entro 0,2 s (`w32tm /stripchart`). Un falso
+    # ROSSO, della stessa famiglia dei falsi verdi di S1049: lo strumento misurava sé.
+    #
+    # Ora l'istante locale si prende PRIMA e DOPO il round-trip, e l'ora del database
+    # deve cadere in quell'intervallo. Se ci cade, non c'è scarto rilevabile sopra la
+    # latenza — e lo si dice, invece di fingere una precisione che non c'è. Se ne esce,
+    # lo scarto è ALMENO la distanza dall'estremo più vicino: un limite inferiore
+    # certo, che la latenza non può gonfiare. `clock_timestamp()` e non `now()`, per
+    # leggere l'orologio al momento dell'esecuzione e non a inizio transazione.
+    t_before = time.time()
+    dbnow = q("SELECT extract(epoch FROM clock_timestamp())::numeric(20,3)::text")
+    t_after = time.time()
+    if dbnow is None:
         s.add(UNK, "scarto d'orologio non valutabile")
     else:
         try:
-            d = int(float(skew.strip()))
-            if abs(d) <= 5:
-                s.add(OK, f"orologio   allineato col database (scarto {d:+d}s)")
+            db_t, rt = float(dbnow.strip()), t_after - t_before
+            if db_t > t_after:
+                d = db_t - t_after          # + = il database è avanti, la macchina indietro
+            elif db_t < t_before:
+                d = db_t - t_before         # - = la macchina è avanti
             else:
-                s.add(BAD, f"orologio   QUESTA macchina è fuori di {abs(d)}s ({d:+d}) rispetto al database "
-                           f"— le scadenze calcolate qui saranno sbagliate; su Windows: Start-Service W32Time; w32tm /resync")
+                d = 0.0
+            if abs(d) <= 5:
+                s.add(OK, f"orologio   allineato col database (nessuno scarto sopra i {rt:.1f}s "
+                          f"di latenza del round-trip)")
+            else:
+                s.add(BAD, f"orologio   QUESTA macchina è fuori di almeno {abs(d):.0f}s ({d:+.0f}) rispetto al "
+                           f"database — le scadenze calcolate qui saranno sbagliate; su Windows: "
+                           f"Start-Service W32Time; w32tm /resync")
         except ValueError:
-            s.add(UNK, f"scarto d'orologio: output psql inatteso: {skew!r}")
+            s.add(UNK, f"scarto d'orologio: output psql inatteso: {dbnow!r}")
     return s, live
 
 

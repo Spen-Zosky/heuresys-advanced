@@ -1,8 +1,36 @@
 # 224 — Il check che cambia verdetto a seconda di dove lo lanci
 
 > **item**: #224 · **priorità**: P2 · **stima**: ~40-60k token
-> **stato**: DIAGNOSI FATTA (S1077), riparazione non avviata
+> **stato**: ✅ **CHIUSO S1078** — la custodia dà lo stesso esito su 25 ore di fuso
 > **skill**: `storia36-custodia` — il triage a tre esiti vale anche qui
+
+## ✅ Esito (S1078) — e le tre cose che questo piano NON prevedeva
+
+**La prova**: gemello sotto `Pacific/Kiritimati` (+14) · `Pacific/Midway` (−11) · `Europe/Rome` ·
+`Etc/UTC` → **4 verdi**. Produzione (VM) sotto Roma · UTC · Kiritimati → **3 verdi**.
+Prima, sulla **stessa** macchina e sullo **stesso** dato: UTC verde, Roma rosso — e sotto i fusi
+estremi cambiavano perfino *quali* check fallivano (Midway `C10a·C2g·C9a` contro Kiritimati
+`C2g·C4c·C4e`). È questa la misura che il piano chiedeva, ed è stata **vista rossa prima**.
+
+1. **I check fuso-dipendenti erano 10, non uno.** 12 candidati per nome di colonna, meno `c8a` e
+   `c8b` che sono **falsi positivi**: usano `sys_surveys`, dove `survey_*_date` è di tipo `date` e
+   il cast è un no-op. 22 cast corretti. Il sospetto su `v_incarico_attivo_senza_contratto` era
+   **infondato**: quella sentinella non compare fra le fuso-dipendenti (l'unica vista con `::date`
+   è `v_payslip_contract_mismatch`).
+2. **Nessun generatore da emendare** — la voce (3) qui sotto non aveva bersaglio. Misurato: le 776
+   risposte sono `STORIA36::` (386, 2024, dal seed vivo, **zero** nel weekend: quel generatore
+   piazza già a ore 9-16 di un giorno lavorativo) e `FEEDBACK_360::` (390, 2025, **i sette**), che
+   nascono da un ETL brownfield **archiviato e ritirato** (I12/ADR-0038). Nessun file vivo le
+   ricrea: la correzione non oscilla, e ADR-0035 è rispettato per constatazione, non per omissione.
+3. **Correggere la lettura ha scoperto un'asimmetria in scrittura.** Un selftest scriveva
+   `date::timestamptz` — «mezzanotte nel fuso di chi esegue» — e sotto +14 preparava un istante
+   che il check, ora tarato su Roma, vedeva sul giorno prima: `SELFTEST C6a(ii-bis) FALLITO`.
+   Era la regola ⑥ in atto: corretto uno, ne è comparso un altro. Scrivere e leggere devono
+   nominare lo stesso fuso.
+
+I sette eventi sanati in produzione dalla mig. **000354**, con giornale di annullamento
+`staging.storia36_c2g_fuso_undo`: ora sono venerdì fra le 09:00 e le 16:00, cambio di ora legale
+incluso. Prova generale CI **VERDE**, sentinelle 25/25 a zero.
 
 ## Come è venuto fuori
 

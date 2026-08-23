@@ -26,7 +26,7 @@ Entrambi sono stati aggirati a mano una volta e la causa è rimasta.
 | **B2** | D-86 — drop esplicito degli schemi **misurati**, prima del ripristino | io | elenco stampato, `DROP SCHEMA` nome per nome, nessun jolly | ✅ + **B2b non previsto** (sotto) |
 | **B3** | D-86 — prova live sul gemello: la fantasma sparisce, il censimento combacia | io | rilancio: tabella assente, censimento OK, exit 0 | ✅ `fantasma_residua=0`, `13 voci identiche`, exit 0 |
 | **B4** | D-86 — la guardia regge il caso peggiore (VM muta a dump iniziato) | io | il ramo `dump_rc` dichiara il clone incompleto anche col drop preventivo | ✅ esce **prima** di toccare il DB |
-| **C** | #224 — il check che cambia verdetto col fuso | io | secondo il flusso concordato **più** le due correzioni (prova rossa prima; candidati oltre `verify-storia36.sql`) | ⬜ |
+| **C** | #224 — il check che cambia verdetto col fuso | io | secondo il flusso concordato **più** le due correzioni (prova rossa prima; candidati oltre `verify-storia36.sql`) | ✅ **4 fusi verdi sul gemello, 3 in produzione** |
 
 ### B2b — il difetto che la misura ha trovato, e che il piano non prevedeva
 

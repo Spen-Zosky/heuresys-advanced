@@ -819,22 +819,22 @@ DECLARE
   v_cnt bigint;
 BEGIN
   SELECT count(*) INTO v_cnt FROM sys.sys_performance_reviews r
-  JOIN staging.storia36_calendar c ON c.cal_date = r.review_submitted_at::date
+  JOIN staging.storia36_calendar c ON c.cal_date = (r.review_submitted_at AT TIME ZONE 'Europe/Rome')::date
   WHERE r.review_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND NOT c.is_workday;
   IF v_cnt > 0 THEN v_bad := v_bad || format(' submitted=%s', v_cnt); END IF;
 
   SELECT count(*) INTO v_cnt FROM sys.sys_performance_reviews r
-  JOIN staging.storia36_calendar c ON c.cal_date = r.review_acknowledged_at::date
+  JOIN staging.storia36_calendar c ON c.cal_date = (r.review_acknowledged_at AT TIME ZONE 'Europe/Rome')::date
   WHERE r.review_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND NOT c.is_workday;
   IF v_cnt > 0 THEN v_bad := v_bad || format(' acknowledged=%s', v_cnt); END IF;
 
   SELECT count(*) INTO v_cnt FROM sys.sys_goals g
-  JOIN staging.storia36_calendar c ON c.cal_date = g.goal_completed_at::date
+  JOIN staging.storia36_calendar c ON c.cal_date = (g.goal_completed_at AT TIME ZONE 'Europe/Rome')::date
   WHERE g.goal_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND NOT c.is_workday;
   IF v_cnt > 0 THEN v_bad := v_bad || format(' goal_completed=%s', v_cnt); END IF;
 
   SELECT count(*) INTO v_cnt FROM sys.sys_feedback_360_responses f
-  JOIN staging.storia36_calendar c ON c.cal_date = f.response_completed_at::date
+  JOIN staging.storia36_calendar c ON c.cal_date = (f.response_completed_at AT TIME ZONE 'Europe/Rome')::date
   WHERE f.response_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND NOT c.is_workday;
   IF v_cnt > 0 THEN v_bad := v_bad || format(' f360=%s', v_cnt); END IF;
 
@@ -1192,7 +1192,7 @@ RETURNS numeric LANGUAGE sql STABLE AS $fn$
         AND extract(year FROM e.user_learning_evidence_completed_at) = p_year
         AND NOT EXISTS (SELECT 1 FROM sys.sys_attendance a2
                          WHERE a2.attendance_subject_user_id = p_user
-                           AND a2.attendance_date = e.user_learning_evidence_completed_at::date
+                           AND a2.attendance_date = (e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::date
                            AND a2.attendance_status = 'TRAINING'))
 $fn$;
 
@@ -1506,7 +1506,7 @@ BEGIN
   -- successivi partono da un JOIN sul codice iniziativa scritto nel metadata, e
   -- un JOIN interno che non risolve non produce righe — cioè tacerebbe proprio
   -- nel caso peggiore (legame perso). Questo predicato è l'anti-join che lo impedisce.
-  SELECT count(*), min(u.user_email || ' il ' || e.user_learning_evidence_completed_at::date)
+  SELECT count(*), min(u.user_email || ' il ' || (e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::date)
     INTO v_cnt, v_sample
   FROM sys.sys_user_learning_evidence e
   JOIN sys.sys_users u ON u.user_id = e.user_learning_evidence_user_id
@@ -1525,7 +1525,7 @@ BEGIN
   END IF;
 
   SELECT count(*), min(u.user_email || ' — ' || ti.training_initiative_code || ' il ' ||
-                       e.user_learning_evidence_completed_at::date)
+                       (e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::date)
     INTO v_cnt, v_sample
   FROM sys.sys_user_learning_evidence e
   JOIN sys.sys_users u ON u.user_id = e.user_learning_evidence_user_id
@@ -1533,8 +1533,8 @@ BEGIN
     ON ti.training_initiative_code = e.user_learning_evidence_metadata->>'initiative'
    AND ti.training_initiative_tenant_id = e.user_learning_evidence_tenant_id
   WHERE e.user_learning_evidence_metadata->>'kind' = 'AULA'
-    AND (e.user_learning_evidence_completed_at::date < ti.training_initiative_start_date
-      OR e.user_learning_evidence_completed_at::date
+    AND ((e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::date < ti.training_initiative_start_date
+      OR (e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::date
          > COALESCE(ti.training_initiative_end_date, p_end));
   IF v_cnt > 0 THEN
     BEGIN
@@ -1749,7 +1749,7 @@ BEGIN
     AND NOT EXISTS (
       SELECT 1 FROM sys.sys_user_learning_evidence e
        WHERE e.user_learning_evidence_user_id = a.attendance_subject_user_id
-         AND e.user_learning_evidence_completed_at::date = a.attendance_date
+         AND (e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::date = a.attendance_date
          -- la traccia dev'essere di AULA: un completamento in autoapprendimento
          -- capitato nello stesso giorno non è la prova di quella giornata d'aula
          AND e.user_learning_evidence_metadata->>'kind' = 'AULA');
@@ -1775,7 +1775,7 @@ DECLARE
   v_guasti text[] := '{}';
   v_g      text;
 BEGIN
-  SELECT count(*), min(u.user_email || ' — lacuna del ' || g.learning_gap_detected_at::date)
+  SELECT count(*), min(u.user_email || ' — lacuna del ' || (g.learning_gap_detected_at AT TIME ZONE 'Europe/Rome')::date)
     INTO v_cnt, v_sample
   FROM sys.sys_gap_closure_actions a
   JOIN sys.sys_learning_gaps g ON g.learning_gap_id = a.gap_closure_action_gap_id
@@ -1785,7 +1785,7 @@ BEGIN
     AND a.gap_closure_action_status = 'PROPOSED'
     -- maturità misurata sulla frontiera della STORIA, non sul calendario: una
     -- lacuna non «invecchia» perché è passato un mese di orologio reale
-    AND g.learning_gap_detected_at::date
+    AND (g.learning_gap_detected_at AT TIME ZONE 'Europe/Rome')::date
         <= LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end)) - 90;
   IF v_cnt > 0 THEN
     BEGIN
@@ -1796,7 +1796,7 @@ BEGIN
     END;
   END IF;
 
-  SELECT count(*), min(u.user_email || ' — lacuna del ' || g.learning_gap_detected_at::date)
+  SELECT count(*), min(u.user_email || ' — lacuna del ' || (g.learning_gap_detected_at AT TIME ZONE 'Europe/Rome')::date)
     INTO v_cnt, v_sample
   FROM sys.sys_gap_closure_actions a
   JOIN sys.sys_learning_gaps g ON g.learning_gap_id = a.gap_closure_action_gap_id
@@ -2466,7 +2466,7 @@ BEGIN
                       WHERE r.position_skill_requirement_id = h.position_skill_requirement_history_psr_id)
       OR h.position_skill_requirement_history_new_proficiency
          IS NOT DISTINCT FROM h.position_skill_requirement_history_old_proficiency
-      OR h.position_skill_requirement_history_effective_at::date NOT BETWEEN p_start AND p_end);
+      OR (h.position_skill_requirement_history_effective_at AT TIME ZONE 'Europe/Rome')::date NOT BETWEEN p_start AND p_end);
   IF v_cnt > 0 THEN
     BEGIN
       RAISE EXCEPTION 'C5d: % variazioni di requisito orfane, nulle o fuori finestra (es. %)', v_cnt, v_sample;
@@ -3005,12 +3005,12 @@ BEGIN
   END IF;
 
   SELECT count(*), min(o.organization_unit_code || ' @ ' ||
-                       h.organization_unit_history_effective_at::date)
+                       (h.organization_unit_history_effective_at AT TIME ZONE 'Europe/Rome')::date)
     INTO v_cnt, v_sample
   FROM sys.sys_organization_unit_history h
   JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
   WHERE h.organization_unit_history_tenant_id = c_rtl
-    AND h.organization_unit_history_effective_at::date <> ALL (staging.storia36_riordini());
+    AND (h.organization_unit_history_effective_at AT TIME ZONE 'Europe/Rome')::date <> ALL (staging.storia36_riordini());
   IF v_cnt > 0 THEN
     BEGIN
       RAISE EXCEPTION 'C6a(ii): % eventi datati fuori da un riordino registrato (es. %) — riordini registrati: %',
@@ -4196,7 +4196,7 @@ BEGIN
   FROM sys.sys_user_consents c
   JOIN sys.sys_users u ON u.user_id = c.consent_user_id
   WHERE c.consent_tenant_id = c_rtl
-    AND c.consent_occurred_at::date < (
+    AND (c.consent_occurred_at AT TIME ZONE 'Europe/Rome')::date < (
       SELECT min(e.user_employment_hire_date) FROM sys.sys_user_employment e
        WHERE e.user_employment_user_id = c.consent_user_id);
   IF v_cnt > 0 THEN
@@ -4384,7 +4384,7 @@ BEGIN
   FROM sys.sys_auth_login_events le
   JOIN sys.sys_users u ON u.user_id = le.auth_login_event_user_id
   WHERE le.auth_login_event_details->>'storia36' = 'C10'
-    AND le.created_at::date < (
+    AND (le.created_at AT TIME ZONE 'Europe/Rome')::date < (
       SELECT min(e.user_employment_hire_date) FROM sys.sys_user_employment e
        WHERE e.user_employment_user_id = le.auth_login_event_user_id);
   IF v_cnt > 0 THEN
@@ -4512,7 +4512,7 @@ BEGIN
      ORDER BY v.version_number DESC LIMIT 1) ult ON true
   WHERE d.document_tenant_id = c_rtl AND d.document_status = 'published'
     AND (d.document_current_version_id IS DISTINCT FROM ult.version_id
-      OR d.document_effective_date IS DISTINCT FROM ult.created_at::date);
+      OR d.document_effective_date IS DISTINCT FROM (ult.created_at AT TIME ZONE 'Europe/Rome')::date);
   IF v_cnt > 0 THEN
     BEGIN
       RAISE EXCEPTION 'C9a(v): % documenti che non puntano alla loro ultima revisione (es. %)', v_cnt, v_sample;
@@ -5221,13 +5221,13 @@ BEGIN
      USING sys.sys_attendance a
      WHERE a.attendance_status = 'TRAINING'
        AND a.attendance_subject_user_id = e.user_learning_evidence_user_id
-       AND a.attendance_date = e.user_learning_evidence_completed_at::date
+       AND a.attendance_date = (e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::date
        AND a.ctid = (SELECT a2.ctid FROM sys.sys_attendance a2
                       WHERE a2.attendance_status = 'TRAINING'
                         AND a2.attendance_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
                         AND EXISTS (SELECT 1 FROM sys.sys_user_learning_evidence e2
                                      WHERE e2.user_learning_evidence_user_id = a2.attendance_subject_user_id
-                                       AND e2.user_learning_evidence_completed_at::date = a2.attendance_date)
+                                       AND (e2.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::date = a2.attendance_date)
                       LIMIT 1);
     PERFORM staging.storia36_check_c4e();
     RAISE EXCEPTION 'ST_NOT_FIRED';
@@ -5248,7 +5248,7 @@ BEGIN
      WHERE ctid = (SELECT a.ctid FROM sys.sys_gap_closure_actions a
                     JOIN sys.sys_learning_gaps g ON g.learning_gap_id = a.gap_closure_action_gap_id
                    WHERE a.gap_closure_action_kind = 'TRAINING_ASSIGNMENT'
-                     AND g.learning_gap_detected_at::date <= v_end - 90 LIMIT 1);
+                     AND (g.learning_gap_detected_at AT TIME ZONE 'Europe/Rome')::date <= v_end - 90 LIMIT 1);
     PERFORM staging.storia36_check_c4f(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
@@ -6077,7 +6077,15 @@ BEGIN
   v_fired := false;
   BEGIN
     UPDATE sys.sys_organization_unit_history
-       SET organization_unit_history_effective_at = (staging.storia36_riordini())[2]::timestamptz
+       -- #224 — il fuso va dichiarato anche in SCRITTURA, non solo in lettura.
+       -- `date::timestamptz` significa «mezzanotte di quel giorno NEL FUSO DI CHI ESEGUE».
+       -- Da quando C6a legge le date a Roma, un selftest che scrive col fuso di sessione
+       -- prepara un istante che il check vede su un ALTRO giorno: sotto Pacific/Kiritimati
+       -- (+14) il 2026-08-04 diventava il 2026-08-03 a Roma, e il selftest falliva dicendo
+       -- «un riordino REGISTRATO viene rifiutato» — un allarme vero su un difetto della
+       -- prova, non del check. Scrivere e leggere devono nominare lo stesso fuso.
+       SET organization_unit_history_effective_at =
+             (staging.storia36_riordini())[2]::timestamp AT TIME ZONE 'Europe/Rome'
      WHERE organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
     PERFORM staging.storia36_check_c6a();
   EXCEPTION WHEN OTHERS THEN

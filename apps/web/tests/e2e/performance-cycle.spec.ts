@@ -56,8 +56,11 @@ test.describe("#92 F7 — il ciclo di valutazione, lato di chi lo conduce", () =
 
     // Le sessioni di calibrazione: qui il totale non è paginato lato server.
     await expect(page.getByTestId("perf-calib-section")).toBeVisible();
-    const nCalib = await page.getByTestId("perf-calib-row").count();
-    expect(nCalib, "nessuna sessione di calibrazione a schermo").toBeGreaterThan(0);
+    // Stessa fragilità del caso sui cicli (#219 F3/G): oggi questo passa, ma per tempismo —
+    // `count()` non ritenta, quindi è verde finché la tabella è già pronta. Con l'auto-retry
+    // resta verde per la ragione giusta invece che per fortuna.
+    await expect(page.getByTestId("perf-calib-row"), "nessuna sessione di calibrazione a schermo")
+      .not.toHaveCount(0);
   });
 
   test("i cicli: la pagina dice la verità sul vuoto, invece di tacere", async ({ page }) => {
@@ -70,7 +73,14 @@ test.describe("#92 F7 — il ciclo di valutazione, lato di chi lo conduce", () =
       // un'area bianca in cui non si capisce se il dato manchi o stia caricando.
       await expect(page.getByTestId("perf-cycles-empty")).toBeVisible();
     } else {
-      expect(await page.getByTestId("perf-cycles-row").count()).toBeGreaterThan(0);
+      // #219 F3/G — `expect(await locator.count())` è uno SCATTO ISTANTANEO: non ritenta.
+      // La sezione diventa visibile subito (è l'involucro), ma la tabella dentro può essere
+      // ancora in caricamento — e il conteggio cadeva lì, restituendo 0 mentre il ciclo
+      // c'era. Misurato: nel database esiste **un** ciclo (RTL_BANK, stato DRAFT), il
+      // repository usa la STESSA clausola per contare e per elencare (quindi `total` e
+      // `items` non possono divergere), e il numero in cima alla pagina lo mostrava già.
+      // `toHaveCount` ha l'auto-retry, quindi aspetta che la tabella abbia finito.
+      await expect(page.getByTestId("perf-cycles-row")).not.toHaveCount(0);
     }
     // In entrambi i casi il numero in cima deve coincidere con la risposta.
     await expect(page.getByTestId("perf-kpi-cycles")).toHaveText(String(totaleCicli));

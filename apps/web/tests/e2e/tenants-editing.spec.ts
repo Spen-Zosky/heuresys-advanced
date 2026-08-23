@@ -35,6 +35,25 @@ test.describe("#45 C3 — creare e archiviare un'azienda cliente", () => {
     await page.getByTestId("tenant-field-tenantCode").fill(CODE);
     await page.getByTestId("tenant-field-tenantName").fill(NAME);
     await page.getByTestId("tenant-field-tenantCountryCode").fill("IT");
+
+    // #219 F3/D — IL CAMPO CHE IL CASO NON SAPEVA DI DOVER COMPILARE.
+    // `tenantIndustryCode` è obbligatorio dalla mig. `000305` (D-83) ed è un `<select
+    // required>`: senza, il BROWSER blocca l'invio: nessuna chiamata parte, nessun avviso
+    // compare, e la firma registrata («`tenant-notice` non compare dopo la creazione»)
+    // descriveva il sintomo di questo. È lo stesso campo che in F1/E faceva rispondere 400
+    // al caso lato API — lì fu corretta la richiesta, qui era rimasto il form.
+    // Il valore si prende dal catalogo che la pagina ha caricato, non si scrive a mano:
+    // un codice cablato qui invecchierebbe come il nome di squadra di F3/F.
+    const industria = page.getByTestId("tenant-field-tenantIndustryCode");
+    await expect(industria).toBeVisible();
+    // `option:not([value=""])` salta il segnaposto. Se il catalogo fosse vuoto il caso
+    // fallisce QUI, dicendo che manca il catalogo — invece di fallire più avanti su un
+    // avviso mancante, che è la diagnosi sbagliata da cui siamo partiti.
+    const opzioni = industria.locator('option:not([value=""])');
+    await expect(opzioni.first()).toBeAttached({ timeout: 15_000 });
+    const codiceIndustria = await opzioni.first().getAttribute("value");
+    await industria.selectOption(codiceIndustria!);
+
     await page.getByTestId("tenant-create-submit").click();
 
     await expect(page.getByTestId("tenant-notice")).toBeVisible({ timeout: 30_000 });

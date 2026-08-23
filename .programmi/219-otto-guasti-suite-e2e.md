@@ -113,10 +113,34 @@ non correggendolo.
       cominciato a far cadere i **setup di autenticazione** — non i casi — e insistere non
       aggiungeva evidenza. Cadono nella corsa integrale di **F5**, come già `E` di F1.
       Typecheck e lint del web verdi.
-- [ ] **F3 Le tre firme rimaste, una per una** — budget ~50k
-      · **D** creazione/archiviazione di un'azienda (2 casi) · **F** `me-team-name` ripetuto 14
-      volte, mentre nel database la squadra «CFO» è **una** — testid duplicato, violazione di
-      strict mode · **G** 1 ciclo di valutazione esiste e la pagina ne mostra **zero**.
+- [x] **F3 Le tre firme rimaste, una per una** — **FATTO 2026-08-23 (S1078)**, tutte e tre riprodotte, corrette e **verificate live**. E in tutte e tre **la firma del triage era imprecisa o sbagliata**: è la terza volta in questa voce, e conferma la sua premessa — *«sono FIRME, non cause»*.
+      · **D** (`tenants-editing:31` · `:48`) — la firma diceva «`tenant-notice` non compare dopo
+        la creazione». Vero, ma la ragione era **un campo che il caso non sapeva di dover
+        compilare**: `tenantIndustryCode`, obbligatorio dalla mig. `000305` (D-83), è un
+        `<select required>` — senza, **il browser blocca l'invio**: nessuna chiamata parte e
+        nessun avviso può comparire. È **lo stesso campo** che in F1/E faceva rispondere 400 al
+        caso lato API: lì fu corretta la richiesta, qui era rimasto il form. Il valore si
+        prende ora dal catalogo che la pagina carica, non da un codice cablato. ✅ **11 passed**
+      · **F** (`me-team:22`) — la firma diceva «testid duplicato, violazione di strict mode».
+        **Non lo era**: `me-team-name` sta dentro un `.map()`, uno per card, e il caso usa già
+        `.first()`. La causa vera è un **atteso stantio**: il test pretendeva «Divisione CFO»,
+        che è il nome dell'**unità organizzativa** da cui la squadra è derivata
+        (`metadata.ou_code: DIV-CFO`) — la squadra si chiama «Squadra CFO», codice `TM-CFO`.
+        Misurato con `apps/api/scripts/prova-219-f-mie-squadre.mts`: `GET /v1/me/team` risponde
+        **200 con esattamente una squadra**, quindi il perimetro della pagina `/me/*` è
+        corretto e non c'era nessun dato altrui. L'atteso ora si **deriva dalla stessa rotta
+        che alimenta la pagina**. ✅ **9 passed**
+        🔬 E la prima stesura della prova leggeva `items` invece di `teams`, riportando
+        «0 squadre»: un difetto della MISURA travestito da guasto del prodotto, che sarebbe
+        passato per tale senza la stampa del corpo grezzo messa lì apposta.
+      · **G** (`performance-cycle:63`) — la firma diceva «1 ciclo esiste e la pagina ne mostra
+        zero: guasto di visibilità o di scope». **Non era né l'uno né l'altro.** Misurato: il
+        ciclo c'è (RTL_BANK, `DRAFT`), e il repository usa la **stessa clausola** per contare e
+        per elencare, quindi `total` e `items` non possono divergere. Il difetto era nel caso:
+        `expect(await locator.count())` è uno **scatto istantaneo che non ritenta**, e cadeva
+        mentre la tabella stava ancora caricando — la sezione diventa visibile subito perché è
+        l'involucro. Sostituito con `toHaveCount`, che ha l'auto-retry; corretta anche la riga
+        gemella sulle sessioni di calibrazione, che oggi passava **per tempismo**. ✅ **10 passed**
 - [ ] **F4 L'accessibilità, che è l'unica del suo genere** — budget ~30k
       **H**: violazioni a11y **critiche** su `/admin/roles` in vista mobile. Non si raggruppa con
       le altre perché la classe di difetto è diversa e la correzione tocca il markup.

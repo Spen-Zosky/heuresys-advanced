@@ -1345,6 +1345,106 @@ fi
 
 # ------------------------------------------------- Z. le batterie del loop zero-pending
 #
+# ── D-86: le guardie di clone-vm-db.sh, esercitate davvero ───────────────────────
+# Questo script DECIDE SE DROPPARE DEGLI SCHEMI, e fino a S1078 la batteria lo copriva
+# con `bash -n` e basta: si sapeva che era sintassi valida e NIENTE su cosa decide.
+# Le sue guardie sono i rami che in produzione non si percorrono mai — quindi quelli
+# che nessuno vede fallire finche' non servono. Le asserzioni che contano di piu' non
+# sono su cosa fa, ma su cosa NON fa: la traccia registra ogni comando, e si pretende
+# che in caso di dubbio il `DROP SCHEMA` NON compaia.
+section "D-86 — clone-vm-db: le guardie decidono, e si vedono decidere"
+CVD=scripts/clone-vm-db.sh; STUB=scripts/test/finti-comandi-clone-vm-db.sh
+if [ -f "$CVD" ] && [ -f "$STUB" ]; then
+  T="$(mktemp -d)"
+  # ENV_FILE su un file inesistente: senza, lo script leggerebbe il .env VERO e la
+  # prova misurerebbe la macchina invece dello scenario (e' il difetto «una variabile
+  # occupata dal .env» che in S1049 ha prodotto un falso verde).
+  cvd() {
+    # `env` e non un prefisso: le assegnazioni arrivano qui come ARGOMENTI ("$@"), e
+    # un prefisso di variabili non si espande da una variabile — bash cerca un comando
+    # che si chiama "FINTO_VM_KO=1" e trova 127.
+    ( env TRACCIA="$T/traccia" ENV_FILE="$T/nessun.env" CLONE_VM_DB_STUB="$PWD/$STUB" \
+      VM_HOST=finta-vm DB_NAME=finto_db POSTGRES_PORT=1 POSTGRES_USER=finto \
+      "$@" bash "$CVD" ) 2>&1
+  }
+  vuota_traccia() { : > "$T/traccia"; }
+  ha_droppato() { grep -q 'DROP SCHEMA' "$T/traccia"; }
+
+  # 1. la VM non risponde -> si esce PRIMA di toccare il clone.
+  #    E' il caso in cui il codice vecchio faceva danno: droppava `staging` comunque,
+  #    perche' quel drop stava sopra la pipe.
+  vuota_traccia
+  out="$(cvd FINTO_VM_KO=1)"; rc=$?
+  { [ "$rc" = 1 ] && ! ha_droppato && printf '%s' "$out" | grep -q 'non tocco niente'; } \
+    && ok "clone-vm-db: VM muta => esce 1 e NON droppa niente" \
+    || fail "clone-vm-db VM muta ($rc, droppato=$(ha_droppato && echo si || echo no): $out)"
+
+  # 2. l'elenco degli schemi esce vuoto -> non e' «niente da fare», e' una misura
+  #    andata storta in silenzio. Un guard che passa su input vuoto non e' un guard.
+  vuota_traccia
+  out="$(cvd FINTO_SCHEMI_VM= FINTO_SCHEMI_LOC=)"; rc=$?
+  { [ "$rc" = 1 ] && ! ha_droppato && printf '%s' "$out" | grep -q 'VUOTO'; } \
+    && ok "clone-vm-db: elenco schemi vuoto => esce 1 e NON droppa (il guard non si accontenta)" \
+    || fail "clone-vm-db elenco vuoto ($rc: $out)"
+
+  # 3. IL CUORE DI D-86: uno schema che vive SOLO sul clone — cioe' ritirato dalla
+  #    produzione — deve finire nell'elenco da droppare. E' l'unione dei due lati che
+  #    lo cattura; guardando il solo dump, quello schema non esiste e sopravvive.
+  vuota_traccia
+  out="$(cvd FINTO_SCHEMI_VM='sys staging' FINTO_SCHEMI_LOC='sys staging ritirato')"; rc=$?
+  { [ "$rc" = 0 ] && grep -q 'DROP SCHEMA IF EXISTS "ritirato"' "$T/traccia"; } \
+    && ok "clone-vm-db: schema presente SOLO sul clone => droppato (era il difetto D-86)" \
+    || fail "clone-vm-db unione dei due lati ($rc: $(cat "$T/traccia"))"
+
+  # 3b. ...e `public` NON si droppa: ci vivono le 5 estensioni, e il dump non lo
+  #     ricrea (misurato con `pg_restore -l`). Se cadesse, il ripristino fallirebbe
+  #     su CREATE EXTENSION e il clone resterebbe mutilato.
+  vuota_traccia
+  out="$(cvd FINTO_SCHEMI_VM='sys public' FINTO_SCHEMI_LOC='sys public')"; rc=$?
+  { [ "$rc" = 0 ] && ! grep -q 'DROP SCHEMA IF EXISTS "public"' "$T/traccia"; } \
+    && ok "clone-vm-db: public NON viene droppato (ci vivono le estensioni)" \
+    || fail "clone-vm-db public droppato ($rc: $(cat "$T/traccia"))"
+
+  # 4. il dump si interrompe a meta': il clone e' gia' stato droppato, quindi e'
+  #    INCOMPLETO — e va detto, non dedotto dal silenzio. (S1030, review Z-022: un
+  #    dump tagliato al 70% dava exit 0 e una tabella a zero righe.)
+  vuota_traccia
+  out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_DUMP_RC=2)"; rc=$?
+  { [ "$rc" = 2 ] && printf '%s' "$out" | grep -q 'INCOMPLETO'; } \
+    && ok "clone-vm-db: dump interrotto => esce col SUO codice e dichiara il clone incompleto" \
+    || fail "clone-vm-db dump interrotto ($rc: $out)"
+
+  # 5. il censimento diverge -> «NON corrisponde». E' il caso che ha bloccato la
+  #    chiusura di S1074, e deve restare bloccante: e' il guardiano, non il difetto.
+  vuota_traccia
+  out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_CENS_VM='sys.tab=10' FINTO_CENS_LOC='sys.tab=11')"; rc=$?
+  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'NON corrisponde'; } \
+    && ok "clone-vm-db: censimento divergente => FATAL (il guardiano dei ritiri regge)" \
+    || fail "clone-vm-db censimento DIFF ($rc: $out)"
+
+  # 6. «non ho potuto misurare» e «i numeri non combaciano» sono DUE guasti diversi e
+  #    devono dirlo. Confrontare due '?' dava «OK»: il fallimento di entrambi i lati
+  #    si presentava come successo perfetto (D-78).
+  vuota_traccia
+  out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_CONTE_KO=1)"; rc=$?
+  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'NON e. stato possibile' \
+      && printf '%s' "$out" | grep -q 'non e. stato verificato' \
+      && ! printf '%s' "$out" | grep -q 'NON corrisponde'; } \
+    && ok "clone-vm-db: conte non misurabili => «non verificato», NON «divergente»" \
+    || fail "clone-vm-db non misurabile ($rc: $out)"
+
+  # 7. il caso sano arriva in fondo. Senza, i sei casi sopra sarebbero soddisfatti
+  #    anche da uno script che fallisce SEMPRE.
+  vuota_traccia
+  out="$(cvd FINTO_SCHEMI_VM='sys staging' FINTO_SCHEMI_LOC='sys staging')"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'done'; } \
+    && ok "clone-vm-db: tutto sano => esce 0 (il controllo non blocca il caso buono)" \
+    || fail "clone-vm-db caso sano ($rc: $out)"
+  rm -rf "$T"
+else
+  fail "$CVD o $STUB mancante"
+fi
+
 # [S1052] Queste esistevano ma NESSUN cancello le eseguiva: questo file le raccoglieva
 # solo per `bash -n` e shellcheck, mentre le batterie vere sono invocate da sezioni
 # scritte a mano. Prove fuori dal presidio — ed e' la ragione per cui una batteria e'

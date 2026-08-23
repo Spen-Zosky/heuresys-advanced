@@ -34,6 +34,47 @@ echo "[clone-vm-db] streaming pg_dump(VM 16) | pg_restore(local 16) ..."
 # 45 minuti con api e web del gemello gia' fermati da ExecStartPre. 15s bastano.
 SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=30 -o ServerAliveCountMax=4)
 
+# ── L'AGGANCIO DI PROVA (D-86, S1078) ───────────────────────────────────────────
+# Tutto cio' che esce da questo processo — la VM, il database locale come superuser,
+# il database locale come utente applicativo, il travaso dump->restore — passa da
+# queste QUATTRO funzioni e SOLO da queste. Non e' un abbellimento: senza, questo
+# script era provabile unicamente con `bash -n`, cioe' si sapeva che era sintassi
+# valida e NIENTE su cosa decide. E cio' che decide e' se droppare degli schemi.
+#
+# Le guardie che porta — «la VM non risponde, non tocco niente», «l'elenco e' vuoto,
+# non tocco niente», «il dump si e' interrotto, il clone e' INCOMPLETO», «non sono
+# riuscito a MISURARE, che non vuol dire che sia divergente» — sono esattamente i
+# rami che in produzione non si percorrono mai, e che quindi nessuno vede fallire
+# finche' non servono. Un file di sostituzione le rende esercitabili senza una VM e
+# senza un database:
+#
+#   CLONE_VM_DB_STUB=/percorso/finti-comandi.sh bash scripts/clone-vm-db.sh
+#
+# Il file viene letto DOPO le definizioni, quindi puo' ridefinirle; in assenza, lo
+# script si comporta esattamente come prima — e il seam non e' una fiducia, e'
+# verificato dalla corsa live sul gemello che segue ogni modifica.
+remote_psql() {  # una query sulla VM, come postgres, in forma -tAc
+  ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres psql -d '$DB_NAME' -tAc \"$1\""
+}
+pg_super() { sudo -u postgres psql -p "$PORT" -d "$DB_NAME" "$@"; }
+pg_app()   { psql -h 127.0.0.1 -p "$PORT" -U "$DBUSER" -d "$DB_NAME" "$@"; }
+# Imposta due variabili invece di restituire un codice: il lato SINISTRO della pipe
+# conta quanto il destro, ed e' il motivo per cui esiste il controllo su `dump_rc`.
+stream_dump_restore() {
+  set +e
+  ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres pg_dump -Fc '$DB_NAME'" \
+    | sudo -u postgres "$PG_BIN/pg_restore" --clean --if-exists --no-acl -p "$PORT" -d "$DB_NAME"
+  # PIPESTATUS va copiato IN UN COLPO SOLO: si azzera al primo comando eseguito dopo
+  # la pipe — inclusa l'assegnazione che lo legge. Leggerlo due volte di fila dava
+  # "PIPESTATUS[1]: variabile non assegnata" sotto `set -u`.
+  local ps=("${PIPESTATUS[@]}")
+  dump_rc=${ps[0]}
+  rc=${ps[1]:-0}
+  set -e
+}
+# shellcheck disable=SC1090
+[ -n "${CLONE_VM_DB_STUB:-}" ] && . "$CLONE_VM_DB_STUB"
+
 # [S1054 #172 · S1078 D-86] GLI SCHEMI SI RIFANNO DA ZERO PRIMA DEL RIPRISTINO,
 # E L'ELENCO SI MISURA — non si scrive a mano.
 #
@@ -79,14 +120,21 @@ SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=30 -o Ser
 # che `--clean` apre da sempre, su un oggetto riproducibile per definizione.
 Q_SCHEMI="SELECT nspname FROM pg_namespace WHERE nspname NOT LIKE 'pg_%'
           AND nspname NOT IN ('information_schema','public') ORDER BY 1"
-sch_vm="$(ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres psql -d '$DB_NAME' -tAc \"$Q_SCHEMI\"" || echo '?')"
-sch_loc="$(sudo -u postgres psql -p "$PORT" -d "$DB_NAME" -tAc "$Q_SCHEMI" || echo '?')"
+sch_vm="$(remote_psql "$Q_SCHEMI" || echo '?')"
+sch_loc="$(pg_super -tAc "$Q_SCHEMI" || echo '?')"
 if [ "$sch_vm" = '?' ] || [ "$sch_loc" = '?' ]; then
   echo "[clone-vm-db] FATAL: non ho potuto misurare gli schemi (VM o locale) — non tocco niente." >&2
   echo "[clone-vm-db] Droppare su un elenco che non ho letto sarebbe peggio del difetto che curo." >&2
   exit 1
 fi
 SCHEMI="$(printf '%s\n%s\n' "$sch_vm" "$sch_loc" | sed '/^$/d' | sort -u)"
+# `public` fuori, una seconda volta e a mano. La query sopra lo esclude gia', ma quella
+# protezione vive DENTRO una stringa SQL: chi un giorno riscrivesse la query per un'altra
+# ragione se la porterebbe via senza accorgersene, e il guasto si vedrebbe solo al primo
+# ripristino — con le 5 estensioni gia' cadute e il clone mutilato. Due presidi per la
+# stessa cosa qui non sono una ridondanza: sono l'unico dei due che una prova offline
+# riesce a esercitare, perche' l'altro sta nel database.
+SCHEMI="$(printf '%s\n' "$SCHEMI" | grep -vx 'public' || true)"
 # Un guard che passa su input vuoto non e' un guard: se l'elenco e' vuoto, la misura e'
 # andata storta in un modo che non ha prodotto errori — e nessun database sano ha zero
 # schemi applicativi.
@@ -97,20 +145,11 @@ if [ -z "$SCHEMI" ]; then
 fi
 echo "[clone-vm-db] schemi rifatti da zero: $(printf '%s' "$SCHEMI" | tr '\n' ' ')(public escluso: ci vivono le estensioni)"
 for s in $SCHEMI; do
-  sudo -u postgres psql -p "$PORT" -d "$DB_NAME" -v ON_ERROR_STOP=1 \
-    -c "DROP SCHEMA IF EXISTS \"$s\" CASCADE" >/dev/null
+  pg_super -v ON_ERROR_STOP=1 -c "DROP SCHEMA IF EXISTS \"$s\" CASCADE" >/dev/null
 done
 
-set +e
-ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres pg_dump -Fc '$DB_NAME'" \
-  | sudo -u postgres "$PG_BIN/pg_restore" --clean --if-exists --no-acl -p "$PORT" -d "$DB_NAME"
-# PIPESTATUS va copiato IN UN COLPO SOLO: si azzera al primo comando eseguito dopo la
-# pipe — inclusa l'assegnazione che lo legge. Leggerlo due volte di fila dava
-# "PIPESTATUS[1]: variabile non assegnata" sotto `set -u`.
-pipe_status=("${PIPESTATUS[@]}")
-dump_rc=${pipe_status[0]}
-rc=${pipe_status[1]:-0}
-set -e
+dump_rc=0; rc=0
+stream_dump_restore
 
 # Il lato SINISTRO della pipe non era controllato affatto. Se ssh/pg_dump muore a meta'
 # (disco pieno sulla VM, LAN caduta a trasferimento iniziato), pg_restore ha gia' eseguito
@@ -140,8 +179,8 @@ for t in sys.sys_users sys.sys_positions sys.sys_attendance; do
   # connessione locale. Lo script leggeva '?' su tutte le tabelle e annunciava un clone
   # divergente, mentre il clone era allineato riga per riga: falliva la MISURA, non il dato.
   # Con l'errore in chiaro la diagnosi e' immediata invece che archeologica.
-  loc="$(psql -h 127.0.0.1 -p "$PORT" -U "$DBUSER" -d "$DB_NAME" -tAc "SELECT count(*) FROM $t" 2>>"$ERRLOG" || echo '?')"
-  vm="$(ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres psql -d '$DB_NAME' -tAc \"SELECT count(*) FROM $t\"" 2>>"$ERRLOG" || echo '?')"
+  loc="$(pg_app -tAc "SELECT count(*) FROM $t" 2>>"$ERRLOG" || echo '?')"
+  vm="$(remote_psql "SELECT count(*) FROM $t" 2>>"$ERRLOG" || echo '?')"
   # '?' = la query e' fallita. Confrontare due '?' dava "OK": il fallimento di ENTRAMBI i
   # lati si presentava come successo perfetto. Ora un '?' e' sempre un errore.
   if [ "$loc" = '?' ] || [ "$vm" = '?' ]; then
@@ -183,8 +222,8 @@ CENSIMENTO="SELECT string_agg(x, ' ' ORDER BY x) FROM (
   UNION ALL
   SELECT schemaname||'.idx='||count(*)::text FROM pg_indexes
    WHERE schemaname NOT LIKE 'pg_%' GROUP BY schemaname) s"
-cen_loc="$(psql -h 127.0.0.1 -p "$PORT" -U "$DBUSER" -d "$DB_NAME" -tAc "$CENSIMENTO" 2>>"$ERRLOG" || echo '?')"
-cen_vm="$(ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres psql -d '$DB_NAME' -tAc \"$CENSIMENTO\"" 2>>"$ERRLOG" || echo '?')"
+cen_loc="$(pg_app -tAc "$CENSIMENTO" 2>>"$ERRLOG" || echo '?')"
+cen_vm="$(remote_psql "$CENSIMENTO" 2>>"$ERRLOG" || echo '?')"
 if [ "$cen_loc" = '?' ] || [ "$cen_vm" = '?' ]; then
   echo "  censimento oggetti        NON MISURATO"
   mismatch=1; unmeasured=1

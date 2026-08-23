@@ -56,11 +56,44 @@ else: print("NOSIGNAL")
 '
 }
 
+esiti() {  # stdin: GitHub actions/runs JSON → una riga "STATO nome-workflow" per workflow
+  python3 -c '
+import json, sys
+PENDING = ("queued", "in_progress", "waiting", "pending", "requested")
+FAIL    = ("failure", "timed_out", "startup_failure")
+# Precedenza DENTRO lo stesso sha: RED > PENDING > GREEN. Un workflow puo avere piu corse
+# sullo stesso commit (re-run): senza aggregazione, quale riga vince dipenderebbe dallordine
+# in cui lAPI le restituisce, e il verdetto del cancello non sarebbe deterministico.
+# La precedenza e la stessa di classify(): un failure qualsiasi tinge di rosso il workflow.
+RANK = {"RED": 3, "PENDING": 2, "GREEN": 1}
+best = {}
+for r in json.load(sys.stdin).get("workflow_runs", []):
+    n = r.get("name", "?")
+    if r.get("status") in PENDING:                                     s = "PENDING"
+    elif r.get("status") == "completed" and r.get("conclusion") == "success": s = "GREEN"
+    elif r.get("status") == "completed" and r.get("conclusion") in FAIL:      s = "RED"
+    else:                                                              continue
+    if RANK[s] > RANK.get(best.get(n, ""), 0): best[n] = s
+for n in sorted(best):
+    print(best[n], n)
+'
+}
+
 if [ "${1:-}" = "--classify" ]; then classify; exit 0; fi
 
-SHA="${1:?usage: ci-gate.sh <sha> | --classify}"
+# --esiti <sha> (D-87): come --classify, ma NOMINA i workflow invece di riassumerli in una
+# parola. Serve a deploy-watch.sh, che deve poter chiedere «di QUALE workflow e questo verde?»
+# per sapere se un rosso piu a monte e stato superato. Passa dalla stessa fetch(), quindi
+# dalla stessa seam CI_GATE_FIXTURE: e provabile offline come tutto il resto.
+MODO_ESITI=0
+if [ "${1:-}" = "--esiti" ]; then MODO_ESITI=1; shift; fi
 
-if [ "${DEPLOY_REQUIRE_CI:-1}" = "0" ]; then
+SHA="${1:?usage: ci-gate.sh <sha> | --classify | --esiti <sha>}"
+
+# Il bypass d'emergenza non vale per una LETTURA: --esiti non e un cancello, non decide
+# niente, e spegnerlo restituirebbe un elenco vuoto — che il chiamante leggerebbe come
+# «nessun workflow rosso». Un bypass che mente e peggio di un bypass.
+if [ "$MODO_ESITI" = 0 ] && [ "${DEPLOY_REQUIRE_CI:-1}" = "0" ]; then
   echo "[ci-gate] BYPASSED (DEPLOY_REQUIRE_CI=0) — deploying $SHA without CI verification" >&2
   exit 0
 fi
@@ -85,6 +118,15 @@ fetch() {
   fi
   curl -fsS -m 15 -H 'Accept: application/vnd.github+json' "$1"
 }
+
+if [ "$MODO_ESITI" = 1 ]; then
+  if ! RUNS_JSON="$(fetch "$API/actions/runs?head_sha=$SHA&per_page=100")"; then
+    echo "[ci-gate] FATAL: GitHub API unreachable — --esiti fallisce CHIUSO (nessun elenco e' meglio di uno finto)." >&2
+    exit 1
+  fi
+  printf '%s' "$RUNS_JSON" | esiti
+  exit 0
+fi
 
 deadline=$(( $(date +%s) + WAIT_SECS ))
 while :; do

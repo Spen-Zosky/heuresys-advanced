@@ -110,62 +110,130 @@ fi
 
 say "armato ${ARMED:0:8}, in produzione ${LAST_GOOD:0:8} — verifico la CI"
 
-# --- 3. cancello CI, in modo non bloccante: un one-shot non deve dormire 15 minuti.
-set +e
-CI_GATE_NONBLOCKING=1 bash "$REPO_DIR/scripts/ci-gate.sh" "$ARMED"
-gate=$?
-set -e
-case "$gate" in
-  0)  say "CI verde su ${ARMED:0:8}" ;;
-  75) say "CI ancora in volo su ${ARMED:0:8} — riprovo al prossimo tick"; exit 0 ;;
-  *)  # ROSSA (o API irraggiungibile: ci-gate fallisce CHIUSO, ed e' giusto cosi').
-      # Si segnala UNA volta per sha: ripeterlo ogni 5 minuti trasformerebbe un
-      # allarme in rumore, e un allarme che nessuno legge piu' non e' un allarme.
-      if [ "$(cat "$STATE_FILE" 2>/dev/null || true)" = "red:$ARMED" ]; then
-        say "CI non verde su ${ARMED:0:8} — gia' segnalato, resto zitto"
-        exit 0
-      fi
-      printf 'red:%s\n' "$ARMED" > "$STATE_FILE"
-      err "CI NON VERDE sullo sha armato ${ARMED:0:8} — deploy non eseguito (R3: la CI rossa si corregge, non si aggira)"
-      exit 1 ;;
-esac
-
-# --- 3b. IL DEPLOY NON PORTA UN COMMIT: PORTA UNA FINESTRA (#212, gemello — S1067).
-#     Il criterio guardava lo sha armato e basta. Ma `vm-deploy` porta in produzione TUTTO
-#     cio' che sta fra LAST_GOOD e ARMED, e un commit di soli documenti ha UNA sola corsa
-#     (State lint): il 2026-08-16 il verde di `5d3028ca` (solo docs/kb/) ha autorizzato il
-#     rollout del codice di `b6132910`, dove «Test (api integration)», «Playwright smoke» e
-#     «Build (web)» erano ancora in volo. La produzione non e' rimasta indietro: e' andata
-#     AVANTI rispetto a cio' che era stato verificato, che e' il guasto peggiore dei due.
+# --- 3. IL CANCELLO CI: L'ULTIMO ESITO PER WORKFLOW, NON L'ESITO DI OGNI COMMIT.
 #
-#     Si pretende il verde su ogni commit INTERMEDIO che tocca path di deploy. Gli altri si
-#     saltano di proposito: un commit di soli documenti non ha corse di codice, e chiedergli
-#     un verde che nessuno produrra' mai bloccherebbe il rollout per sempre.
+#     IL DEPLOY NON PORTA UN COMMIT: PORTA UNA FINESTRA (#212, gemello — S1067).
+#     `vm-deploy` porta in produzione TUTTO cio' che sta fra LAST_GOOD e ARMED, e un commit
+#     di soli documenti ha UNA sola corsa (State lint): il 2026-08-16 il verde di `5d3028ca`
+#     (solo docs/kb/) ha autorizzato il rollout del codice di `b6132910`, dove «Test (api
+#     integration)», «Playwright smoke» e «Build (web)» erano ancora in volo. La produzione
+#     non e' rimasta indietro: e' andata AVANTI rispetto a cio' che era stato verificato.
+#
+#     La prima cura fu «ogni commit di codice nella finestra dev'essere verde». Curava #212
+#     e apriva D-87: LA STORIA NON SI RISCRIVE, quindi un commit rotto e poi CORRETTO resta
+#     rosso per sempre e blocca la produzione per sempre. Misurato il 2026-08-21: `61ea8b90`
+#     rotto e gia' corretto dal commit successivo ha tenuto ferma la produzione a ogni tick
+#     per un'ora, e si e' sbloccata solo a mano.
+#
+#     IL CRITERIO GIUSTO STA UN GRADINO PIU' IN LA', e li' stanno entrambi i casi:
+#
+#       La CI verifica l'ALBERO, non il diff. Un verde del workflow W su un commit C
+#       certifica l'albero a C per intero, antenati inclusi. Quindi serve, per ogni
+#       workflow W visto nella finestra, il verde di W sul commit PIU' RECENTE che ha
+#       eseguito W. Un rosso di W su un antenato e' irrilevante: quell'albero non va
+#       in produzione — ci va quello di ARMED.
+#
+#     #212 ci sta dentro senza clausole: un ARMED di soli documenti non ha corse di codice,
+#     quindi il commit piu' recente che ha eseguito «Test (api integration)» e' quello di
+#     codice sotto, in volo o rosso, e il cancello blocca. D-87 si scioglie: il workflow
+#     rotto e poi corretto ha il suo esito piu' recente verde, e si parte.
+#
+#     Restano interrogati SOLO ARMED + i commit che toccano path di deploy: non e' una
+#     scorciatoia, e' il tetto delle chiamate all'API pubblica di GitHub (60/ora per IP,
+#     senza token). Un commit di soli documenti in mezzo alla finestra non porta esiti che
+#     ARMED non abbia gia'.
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/deploy-paths.sh"   # accanto allo script, non a $ROOT: regge anche in una fixture (S1069)
+
+# Gli sha da interrogare, DAL PIU' RECENTE AL PIU' VECCHIO — l'ordine E' il criterio:
+# la prima riga che nomina un workflow e' il suo esito piu' recente. `git rev-list` li
+# rende gia' in ordine decrescente, e ARMED va davanti a tutti.
+SHAS="$ARMED"
 if git merge-base --is-ancestor "$LAST_GOOD" "$ARMED" 2>/dev/null; then
-  intermedi="$(git rev-list "$LAST_GOOD..$ARMED" 2>/dev/null | grep -v "^$ARMED$" || true)"
-  for c in $intermedi; do
+  for c in $(git rev-list "$LAST_GOOD..$ARMED" 2>/dev/null | grep -v "^$ARMED$" || true); do
     [ -n "$(git diff --name-only "$c^" "$c" 2>/dev/null | grep -E "$DEPLOY_PATHS_RE" || true)" ] || continue
-    set +e
-    CI_GATE_NONBLOCKING=1 CI_GATE_WAIT=0 bash "$REPO_DIR/scripts/ci-gate.sh" "$c"
-    g2=$?
-    set -e
-    case "$g2" in
-      0)  ;;
-      75) say "CI ancora in volo su ${c:0:8} (commit di codice DENTRO la finestra ${LAST_GOOD:0:8}..${ARMED:0:8}) — non deployo, riprovo al prossimo tick"
-          exit 0 ;;
-      *)  if [ "$(cat "$STATE_FILE" 2>/dev/null || true)" = "red:$c" ]; then exit 0; fi
-          printf 'red:%s\n' "$c" > "$STATE_FILE"
-          err "CI NON VERDE su ${c:0:8}, che sta DENTRO la finestra di questo deploy (${LAST_GOOD:0:8}..${ARMED:0:8})"
-          err "        Lo sha armato e' verde, ma il rollout porterebbe in produzione anche questo commit."
-          exit 1 ;;
-    esac
+    SHAS="$SHAS $c"
   done
-  [ -n "$intermedi" ] && say "finestra ${LAST_GOOD:0:8}..${ARMED:0:8} verificata: nessun commit di codice in volo o rosso"
 else
   # LAST_GOOD non e' un antenato di ARMED (storia riscritta, o produzione avanti): la
   # finestra non e' calcolabile. Si dichiara, non si finge di averla guardata.
   say "finestra non calcolabile (${LAST_GOOD:0:8} non e' antenato di ${ARMED:0:8}) — verificato il solo sha armato"
+fi
+
+RIGHE=""
+for s in $SHAS; do
+  set +e
+  esiti_s="$(bash "$REPO_DIR/scripts/ci-gate.sh" --esiti "$s" 2>/dev/null)"
+  rc_s=$?
+  set -e
+  if [ "$rc_s" -ne 0 ]; then
+    # ci-gate --esiti fallisce CHIUSO sull'API irraggiungibile, e qui si propaga uguale:
+    # un cancello che si apre quando non riesce a guardare non e' un cancello.
+    err "IMPOSSIBILE LEGGERE la CI di ${s:0:8} — non deployo nel dubbio (R3)."
+    exit 1
+  fi
+  [ -n "$esiti_s" ] || continue
+  RIGHE="$RIGHE$(printf '%s' "$esiti_s" | awk -v s="$s" '{print $1, $2, s}')
+"
+done
+
+if [ -z "$RIGHE" ]; then
+  # Nessuna corsa su nessuno degli sha guardati: e' il caso docs-only puro. Non si inventa
+  # un verdetto — si delega a ci-gate, che ha gia' il ripiego dichiarato «i workflow chiave
+  # devono essere verdi sull'ultimo main», ed e' l'unico posto dove quel ripiego vive.
+  say "nessuna corsa sugli sha della finestra — ripiego sul cancello di ci-gate"
+  set +e
+  CI_GATE_NONBLOCKING=1 bash "$REPO_DIR/scripts/ci-gate.sh" "$ARMED"
+  gate=$?
+  set -e
+  case "$gate" in
+    0)  say "CI verde su ${ARMED:0:8}" ;;
+    75) say "CI ancora in volo su ${ARMED:0:8} — riprovo al prossimo tick"; exit 0 ;;
+    *)  if [ "$(cat "$STATE_FILE" 2>/dev/null || true)" = "red:$ARMED" ]; then
+          say "CI non verde su ${ARMED:0:8} — gia' segnalato, resto zitto"; exit 0
+        fi
+        printf 'red:%s\n' "$ARMED" > "$STATE_FILE"
+        err "CI NON VERDE sullo sha armato ${ARMED:0:8} — deploy non eseguito (R3: la CI rossa si corregge, non si aggira)"
+        exit 1 ;;
+  esac
+else
+  # `!visto[$2]++` tiene la PRIMA riga per nome di workflow: siccome le righe scendono dal
+  # commit piu' recente, la prima E' l'esito piu' recente. E' qui, in una riga di awk, che
+  # sta tutta la differenza fra il cancello di prima e questo.
+  ULTIMI="$(printf '%s' "$RIGHE" | awk 'NF && !visto[$2]++')"
+  ROSSO="$(printf '%s\n' "$ULTIMI" | awk '$1=="RED" {print; exit}')"
+  VOLO="$(printf '%s\n'  "$ULTIMI" | awk '$1=="PENDING" {print; exit}')"
+
+  # Il rosso batte l'in-volo: un workflow gia' fallito non diventa verde aspettando, e
+  # segnalarlo subito e' il punto di tutto il meccanismo OnFailure.
+  if [ -n "$ROSSO" ]; then
+    wf="$(printf '%s' "$ROSSO" | awk '{print $2}')"; c="$(printf '%s' "$ROSSO" | awk '{print $3}')"
+    # Si segnala UNA volta per sha: ripeterlo ogni 5 minuti trasformerebbe un allarme in
+    # rumore, e un allarme che nessuno legge piu' non e' un allarme.
+    if [ "$(cat "$STATE_FILE" 2>/dev/null || true)" = "red:$c" ]; then
+      say "CI non verde su ${c:0:8} — gia' segnalato, resto zitto"; exit 0
+    fi
+    printf 'red:%s\n' "$c" > "$STATE_FILE"
+    if [ "$c" = "$ARMED" ]; then
+      err "CI NON VERDE sullo sha armato ${ARMED:0:8} ($wf) — deploy non eseguito (R3: la CI rossa si corregge, non si aggira)"
+    else
+      err "CI NON VERDE: '$wf' e' rosso a ${c:0:8}, che sta DENTRO la finestra di questo deploy (${LAST_GOOD:0:8}..${ARMED:0:8})"
+      err "        Ed e' l'esito PIU' RECENTE di quel workflow nella finestra: nessun commit a valle l'ha rifatto verde."
+      err "        Se e' gia' stato corretto, il rimedio e' un commit che faccia ripartire '$wf' — non un aggiramento."
+    fi
+    exit 1
+  fi
+
+  if [ -n "$VOLO" ]; then
+    wf="$(printf '%s' "$VOLO" | awk '{print $2}')"; c="$(printf '%s' "$VOLO" | awk '{print $3}')"
+    if [ "$c" = "$ARMED" ]; then
+      say "CI ancora in volo su ${ARMED:0:8} ($wf) — riprovo al prossimo tick"
+    else
+      say "CI ancora in volo: '$wf' a ${c:0:8}, DENTRO la finestra ${LAST_GOOD:0:8}..${ARMED:0:8} — non deployo, riprovo al prossimo tick"
+    fi
+    exit 0
+  fi
+
+  say "finestra ${LAST_GOOD:0:8}..${ARMED:0:8} verificata: $(printf '%s\n' "$ULTIMI" | grep -c .) workflow, ultimo esito verde per ognuno"
 fi
 
 if [ "${DEPLOY_WATCH_DRYRUN:-0}" = "1" ]; then

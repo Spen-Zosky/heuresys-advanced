@@ -42,17 +42,13 @@ RESTART_API="${RESTART_API:-1}"   # set 0 to skip restarting the API (web-only d
 # gira come `ubuntu`, sul linux-pc come `enzo`. Un default che vale solo su un host
 # e' una trappola che aspetta chi lancia lo script sull'altro — e lo script si
 # LASCIA lanciare, perche' `align-clones` lo fa di mestiere.
-SERVICE_USER="${SERVICE_USER:-$(id -un)}"
-SERVICE_GROUP="${SERVICE_GROUP:-$(id -gn)}"
-
-# Guardia esplicita: se l'utente scelto non esiste su questa macchina, le unit
-# verrebbero installate rotte e il guasto si scoprirebbe al restart — cioe' a
-# servizi gia' fermi. Meglio non partire.
-if ! id -u "$SERVICE_USER" >/dev/null 2>&1; then
-  echo "ERROR: SERVICE_USER='$SERVICE_USER' non esiste su $(hostname). Le unit systemd" >&2
-  echo "       verrebbero installate con un utente inesistente (status=217/USER)." >&2
-  exit 1
-fi
+# ⚠ IL CALCOLO STA PIU' SOTTO, dopo il seam `--check-gate`, e non e' un capriccio di
+# ordine: `id -gn` NON risolve il GID su Git Bash di Windows («cannot find name for
+# group ID»), e sotto `set -e` una sostituzione di comando fallita dentro
+# un'assegnazione fa terminare lo script. Stando qui in cima faceva morire ANCHE il
+# seam di sola lettura, che di utenti e gruppi non sa che farsene: la batteria offline
+# aveva due casi rossi in permanenza sulla macchina di sviluppo — «vm-deploy PENDING» e
+# «vm-deploy GREEN» — e un rosso permanente e' un rosso che si impara a non guardare.
 
 log() { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
 
@@ -104,6 +100,21 @@ gate_ci() {
 if [ "${1:-}" = "--check-gate" ]; then
   gate_ci "${2:?usage: vm-deploy.sh --check-gate <sha>}"
   exit $?
+fi
+
+# Da qui in giu' si deploya davvero, e serve sapere COME si chiamano l'utente e il gruppo
+# dei servizi. Il perche' della derivazione da `id` — e il guasto del 2026-08-21 che l'ha
+# imposta — sta nel commento lungo in cima al file.
+SERVICE_USER="${SERVICE_USER:-$(id -un)}"
+SERVICE_GROUP="${SERVICE_GROUP:-$(id -gn)}"
+
+# Guardia esplicita: se l'utente scelto non esiste su questa macchina, le unit
+# verrebbero installate rotte e il guasto si scoprirebbe al restart — cioe' a
+# servizi gia' fermi. Meglio non partire.
+if ! id -u "$SERVICE_USER" >/dev/null 2>&1; then
+  echo "ERROR: SERVICE_USER='$SERVICE_USER' non esiste su $(hostname). Le unit systemd" >&2
+  echo "       verrebbero installate con un utente inesistente (status=217/USER)." >&2
+  exit 1
 fi
 
 # Node via nvm (the services run on this Node; argon2 native ABI must match).

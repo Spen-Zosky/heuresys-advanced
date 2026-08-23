@@ -352,27 +352,81 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   git -C "$W" push -qf origin HEAD:refs/heads/prod         # ARMATO = il commit di documenti
   printf '%s\n' "$SHA1" > "$W/pg_dump_snapshots/LAST_GOOD_SHA"
   rm -f "$W/.deploy-watch-state"
-  cp "$F/green.json" "$F/persha/$SHA_DOCS.json"            # lo sha armato E' verde
-  cp "$F/green.json" "$F/persha/default.json"
+  # I NOMI DEI WORKFLOW SONO VERI E DISTINTI, e non e' un dettaglio estetico (D-87, S1078).
+  # Prima queste fixture usavano un generico "a" per lo sha armato E per l'intermedio: letta
+  # alla lettera, quella coppia dice «il workflow a e' stato rosso su un albero vecchio e
+  # verde su quello finale», che e' il caso D-87 — dove la risposta giusta e' DEPLOYA — non
+  # il caso #212. Con un nome solo i due casi collassano e il test misura se' stesso.
+  # Nella realta' del 2026-08-16 i workflow erano diversi: lo sha armato (solo docs/kb/) ebbe
+  # la sola corsa «State lint», e le corse di codice stavano sul commit sotto.
+  printf '%s' '{"workflow_runs":[{"name":"test-integration","status":"completed","conclusion":"failure"}]}' > "$F/ti_red.json"
+  printf '%s' '{"workflow_runs":[{"name":"test-integration","status":"completed","conclusion":"success"}]}' > "$F/ti_green.json"
+  printf '%s' '{"workflow_runs":[{"name":"test-integration","status":"in_progress","conclusion":null}]}'    > "$F/ti_pending.json"
+  printf '%s' '{"workflow_runs":[{"name":"state-lint","status":"completed","conclusion":"success"}]}'       > "$F/sl_green.json"
 
-  cp "$F/pending.json" "$F/persha/$SHA_CODICE.json"        # ...ma il codice sotto e' in volo
+  cp "$F/sl_green.json" "$F/persha/$SHA_DOCS.json"         # lo sha armato e' verde, ma su state-lint
+  cp "$F/green.json"    "$F/persha/default.json"
+
+  cp "$F/ti_pending.json" "$F/persha/$SHA_CODICE.json"     # ...ma il codice sotto e' in volo
   out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
   { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'DENTRO la finestra' && ! printf '%s' "$out" | grep -q 'partirebbe'; } \
     && ok "#212 gemello: sha armato verde ma codice in volo DENTRO la finestra => non deploya" \
     || fail "#212 gemello PENDING intermedio ($rc: $out)"
 
-  cp "$F/red.json" "$F/persha/$SHA_CODICE.json"            # ...oppure rosso
+  cp "$F/ti_red.json" "$F/persha/$SHA_CODICE.json"         # ...oppure rosso
+  rm -f "$W/.deploy-watch-state"
   out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
   { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'DENTRO la finestra'; } \
     && ok "#212 gemello: sha armato verde ma codice ROSSO nella finestra => esce 1, non deploya" \
     || fail "#212 gemello RED intermedio ($rc: $out)"
 
-  cp "$F/green.json" "$F/persha/$SHA_CODICE.json"          # tutta la finestra verde => si parte
+  cp "$F/ti_green.json" "$F/persha/$SHA_CODICE.json"       # tutta la finestra verde => si parte
   rm -f "$W/.deploy-watch-state"
   out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
   { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'partirebbe'; } \
     && ok "#212 gemello: finestra intera verde => deploya (il controllo non blocca il caso sano)" \
     || fail "#212 gemello GREEN finestra ($rc: $out)"
+
+  # --- D-87: UN ROSSO SUPERATO DA UNA CORREZIONE A VALLE NON BLOCCA PER SEMPRE.
+  #     Misurato il 2026-08-21: fb486ad0 verde, be826657 verde, 5a26e610 verde, ma 61ea8b90
+  #     — intermedio, rotto e GIA' CORRETTO dal commit successivo — rosso. La storia non si
+  #     riscrive, quindi quel rosso resta per sempre: senza intervento manuale la produzione
+  #     non sarebbe MAI avanzata. Il sorvegliante si e' fermato a ogni tick per un'ora.
+  #
+  #     Il criterio giusto non e' «ogni commit della finestra sia verde», e': la CI verifica
+  #     l'ALBERO, non il diff — quindi per ogni workflow serve il verde sul commit PIU'
+  #     RECENTE che quel workflow ha eseguito. Un rosso su un antenato e' irrilevante:
+  #     quell'albero non va in produzione.
+  #
+  #     La differenza col caso #212 sta TUTTA nel nome del workflow: qui e' lo STESSO, prima
+  #     rosso e poi verde; li' sono DIVERSI, e quello di codice non e' mai tornato verde.
+  echo rotto > "$W/apps/z.ts";    git -C "$W" add -A >/dev/null; git -C "$W" commit -qm "codice rotto"
+  SHA_ROTTO="$(git -C "$W" rev-parse HEAD)"
+  echo corretto > "$W/apps/z.ts"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm "correzione a valle"
+  SHA_FIX="$(git -C "$W" rev-parse HEAD)"
+  git -C "$W" push -q origin HEAD:refs/heads/main
+  git -C "$W" push -qf origin HEAD:refs/heads/prod          # ARMATO = la correzione
+  printf '%s\n' "$SHA_DOCS" > "$W/pg_dump_snapshots/LAST_GOOD_SHA"
+  rm -f "$W/.deploy-watch-state"
+  cp "$F/ti_red.json"   "$F/persha/$SHA_ROTTO.json"         # l'intermedio e' rosso...
+  cp "$F/ti_green.json" "$F/persha/$SHA_FIX.json"           # ...e lo STESSO workflow e' verde sopra
+  out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'partirebbe'; } \
+    && ok "D-87: rosso intermedio SUPERATO dal verde dello stesso workflow a valle => deploya" \
+    || fail "D-87 rosso superato ($rc: $out)"
+
+  # --- e il gemello: anche un IN VOLO a monte e' superato da un verde a valle. Vale la
+  #     stessa ragione — l'albero che va in produzione e' quello di ARMED, ed e' verificato —
+  #     ma il difetto qui sarebbe piu' subdolo: non blocca «per sempre», blocca finche' una
+  #     corsa vecchia non finisce, cioe' a volte per sempre lo stesso (una corsa cancellata
+  #     resta in_progress). Senza questo caso, il PENDING resterebbe l'unico ramo in cui il
+  #     criterio vecchio sopravvive di nascosto.
+  rm -f "$W/.deploy-watch-state"
+  cp "$F/ti_pending.json" "$F/persha/$SHA_ROTTO.json"
+  out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'partirebbe'; } \
+    && ok "D-87: in volo a monte SUPERATO dal verde dello stesso workflow a valle => deploya" \
+    || fail "D-87 in volo superato ($rc: $out)"
   rm -rf "$F"
 else
   fail "$CG o $DW mancante"

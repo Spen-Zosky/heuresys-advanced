@@ -18,15 +18,28 @@ Entrambi sono stati aggirati a mano una volta e la causa è rimasta.
 
 | id | cosa | chi | fatto = | stato |
 |---|---|---|---|---|
-| **A1** | D-87 — la prova che riproduce il caso reale, **vista fallire** col codice di oggi | io | il caso nuovo in `run-shell-tests.sh` è ROSSO prima della cura | ⬜ |
-| **A2** | D-87 — `ci-gate.sh --esiti <sha>`: i nomi dei workflow per esito, sulla stessa seam fixture | io | `--esiti` stampa `STATO nome` per riga; offline, senza rete | ⬜ |
-| **A3** | D-87 — `deploy-watch.sh`: il cancello guarda **l'ultimo esito per workflow**, non ogni commit | io | A1 diventa verde; i due casi #212 restano bloccanti | ⬜ |
-| **A4** | D-87 — post-condizione: ciò che NON doveva cambiare | io | la sezione #165/#212 intera verde, e la batteria shell completa verde | ⬜ |
-| **B1** | D-86 — misura sul gemello: la tabella fantasma **sopravvive davvero** | io | tabella creata sul clone, `clone-vm-db.sh` lanciato, tabella ancora lì + FATAL | ⬜ |
-| **B2** | D-86 — drop esplicito degli schemi **misurati**, prima del ripristino | io | elenco stampato, `DROP SCHEMA` nome per nome, nessun jolly | ⬜ |
-| **B3** | D-86 — prova live sul gemello: la fantasma sparisce, il censimento combacia | io | rilancio: tabella assente, censimento OK, exit 0 | ⬜ |
-| **B4** | D-86 — la guardia regge il caso peggiore (VM muta a dump iniziato) | io | il ramo `dump_rc` dichiara il clone incompleto anche col drop preventivo | ⬜ |
+| **A1** | D-87 — la prova che riproduce il caso reale, **vista fallire** col codice di oggi | io | il caso nuovo in `run-shell-tests.sh` è ROSSO prima della cura | ✅ `1 fail su 208` |
+| **A2** | D-87 — `ci-gate.sh --esiti <sha>`: i nomi dei workflow per esito, sulla stessa seam fixture | io | `--esiti` stampa `STATO nome` per riga; offline, senza rete | ✅ provato con re-run + pending + cancelled |
+| **A3** | D-87 — `deploy-watch.sh`: il cancello guarda **l'ultimo esito per workflow**, non ogni commit | io | A1 diventa verde; i due casi #212 restano bloccanti | ✅ |
+| **A4** | D-87 — post-condizione: ciò che NON doveva cambiare | io | la sezione #165/#212 intera verde, e la batteria shell completa verde | ✅ **210 ok / 0 failed** |
+| **B1** | D-86 — misura sul gemello: la tabella fantasma **sopravvive davvero** | io | tabella creata sul clone, `clone-vm-db.sh` lanciato, tabella ancora lì + FATAL | ✅ `fantasma=1 righe=1`, exit 1 |
+| **B2** | D-86 — drop esplicito degli schemi **misurati**, prima del ripristino | io | elenco stampato, `DROP SCHEMA` nome per nome, nessun jolly | ✅ + **B2b non previsto** (sotto) |
+| **B3** | D-86 — prova live sul gemello: la fantasma sparisce, il censimento combacia | io | rilancio: tabella assente, censimento OK, exit 0 | ✅ `fantasma_residua=0`, `13 voci identiche`, exit 0 |
+| **B4** | D-86 — la guardia regge il caso peggiore (VM muta a dump iniziato) | io | il ramo `dump_rc` dichiara il clone incompleto anche col drop preventivo | ✅ esce **prima** di toccare il DB |
 | **C** | #224 — il check che cambia verdetto col fuso | io | secondo il flusso concordato **più** le due correzioni (prova rossa prima; candidati oltre `verify-storia36.sql`) | ⬜ |
+
+### B2b — il difetto che la misura ha trovato, e che il piano non prevedeva
+
+Il censimento contava le tabelle da `information_schema.tables`, che mostra **solo ciò su
+cui chi interroga ha privilegi**. I due lati non interrogano con lo stesso ruolo (VM come
+`postgres`, clone come `heuresys`): il confronto non era fra due misure omogenee. Con
+l'esca viva e di proprietà di `postgres`, il censimento leggeva `sys.tab=264` su **entrambi**
+i lati — cieco — e l'allarme scattò solo perché l'esca aveva un indice (`sys.idx` 788≠787).
+
+**Una tabella ritirata senza indici sarebbe passata verde.** Il guardiano dei ritiri non si
+accorgeva dei ritiri. Ora si conta da `pg_class`. Non è una voce nuova del ciclo: è la
+regola ⑤ — *le prove devono poter fallire* — applicata alla prova di B1, che senza questo
+sarebbe stata un falso verde in attesa.
 
 ---
 

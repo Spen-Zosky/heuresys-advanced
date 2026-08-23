@@ -34,25 +34,72 @@ echo "[clone-vm-db] streaming pg_dump(VM 16) | pg_restore(local 16) ..."
 # 45 minuti con api e web del gemello gia' fermati da ExecStartPre. 15s bastano.
 SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=30 -o ServerAliveCountMax=4)
 
-# [S1054, #172] Lo schema `staging` va rimosso PRIMA del ripristino, e a mano.
+# [S1054 #172 · S1078 D-86] GLI SCHEMI SI RIFANNO DA ZERO PRIMA DEL RIPRISTINO,
+# E L'ELENCO SI MISURA — non si scrive a mano.
 #
-# Perche' `--clean --if-exists` non basta: il suo `DROP SCHEMA staging` fallisce
-# — «altri oggetti dipendono da esso», le funzioni `storia36_*` — l'errore e' un
-# notice che la riga 60 tollera, il ripristino prosegue e i controlli passano.
-# Ma lo schema NON viene ricreato da zero: cio' che la produzione ha RIMOSSO
-# sopravvive sul clone, e il clone diventa un sovrainsieme della sorgente.
-# Misurato in S1050: funzioni in `staging` — PROD 88, clone 89. La differenza era
-# `storia36_check_c6a(date)`, una firma vecchia sostituita in produzione da
-# `storia36_check_c6a()`: una batteria che l'avesse invocata con un argomento
-# avrebbe eseguito sul gemello **l'implementazione sbagliata**, con un verde che
-# non valeva per il codice vero. Fu rimossa a mano, ma la causa e' rimasta qui.
+# Perche' `--clean --if-exists` non basta: droppa SOLO gli oggetti presenti nel dump.
+# Il dump emette anche un `DROP SCHEMA IF EXISTS <x>` finale, ma senza CASCADE, e
+# quello fallisce non appena UN oggetto assente dal dump vive ancora nello schema.
+# L'errore e' un notice che la riga sotto tollera, il ripristino prosegue, e cio' che
+# la produzione ha RIMOSSO sopravvive sul clone: il clone diventa un sovrainsieme
+# della sorgente invece che una copia.
+#
+# Due volte, e due materie diverse:
+#   S1050 — funzioni in `staging`: PROD 88, clone 89. La differenza era
+#     `storia36_check_c6a(date)`, firma vecchia sostituita in produzione da
+#     `storia36_check_c6a()`: una batteria che l'avesse invocata con un argomento
+#     avrebbe eseguito sul gemello L'IMPLEMENTAZIONE SBAGLIATA, con un verde che non
+#     valeva per il codice vero. Fu curato droppando il solo `staging`.
+#   S1074 — una TABELLA in `sys`: `sys_blueprint_content_processes`, ritirata dalla
+#     mig. 000335 poche ore prima. Il censimento la vide, dichiaro' `FATAL: il clone
+#     NON corrisponde alla VM`, e `close-propagate.sh` non armo' il deploy. Cioe':
+#     OGNI ritiro di tabella rompeva la chiusura successiva. Anche li' fu curato
+#     l'esemplare, a mano, e la causa rimase qui — che e' come questa riga e' nata.
+#
+# Riprodotto sul gemello il 2026-08-23 prima di scrivere la cura, per non curare a
+# memoria: creata `sys.zz_fantasma_d86`, il ripristino l'ha lasciata viva e lo script
+# e' uscito 1. Nel log: «non è possibile eliminare schema sys perché altri oggetti
+# dipendono da esso — DETTAGLI: tabella sys.zz_fantasma_d86».
+#
+# QUALI schemi. Misurato lo stesso giorno con `pg_restore -l` sul dump vero: il dump
+# ricrea `audit reference_sync staging sys` e NON ricrea `public`, che e' lo schema di
+# default e pg_dump non emette. Ma le 5 estensioni (pgcrypto, uuid-ossp, pg_trgm,
+# vector, pg_stat_statements) ci vivono dentro: droppare `public` farebbe fallire il
+# loro `CREATE EXTENSION ... WITH SCHEMA public`. Quindi `public` resta, e su di lui
+# vigila il solo censimento.
+#
+# L'elenco NON si cabla qui: un elenco scritto a mano e' vero il giorno in cui lo
+# scrivi e falso al primo schema nuovo, e chi lo rilegge non ha modo di accorgersene.
+# Si deriva dai due lati — l'unione, cosi' cade anche uno schema INTERO ritirato in
+# produzione — si stampa, e si droppa NOME PER NOME. Nessun carattere jolly.
 #
 # CASCADE e' voluto e non e' un rischio aggiuntivo: droppa cio' che il ripristino
 # subito dopo ricrea dal dump. Se il dump non arriva, il controllo su `dump_rc`
-# (sotto) dichiara gia' il DB incompleto ed esce non-zero.
-echo "[clone-vm-db] drop esplicito di staging (il --clean non ce la fa: dipendenze)"
-sudo -u postgres psql -p "$PORT" -d "$DB_NAME" -v ON_ERROR_STOP=1 \
-  -c 'DROP SCHEMA IF EXISTS staging CASCADE' >/dev/null
+# (sotto) dichiara gia' il DB incompleto ed esce non-zero — ed e' la stessa finestra
+# che `--clean` apre da sempre, su un oggetto riproducibile per definizione.
+Q_SCHEMI="SELECT nspname FROM pg_namespace WHERE nspname NOT LIKE 'pg_%'
+          AND nspname NOT IN ('information_schema','public') ORDER BY 1"
+sch_vm="$(ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres psql -d '$DB_NAME' -tAc \"$Q_SCHEMI\"" || echo '?')"
+sch_loc="$(sudo -u postgres psql -p "$PORT" -d "$DB_NAME" -tAc "$Q_SCHEMI" || echo '?')"
+if [ "$sch_vm" = '?' ] || [ "$sch_loc" = '?' ]; then
+  echo "[clone-vm-db] FATAL: non ho potuto misurare gli schemi (VM o locale) — non tocco niente." >&2
+  echo "[clone-vm-db] Droppare su un elenco che non ho letto sarebbe peggio del difetto che curo." >&2
+  exit 1
+fi
+SCHEMI="$(printf '%s\n%s\n' "$sch_vm" "$sch_loc" | sed '/^$/d' | sort -u)"
+# Un guard che passa su input vuoto non e' un guard: se l'elenco e' vuoto, la misura e'
+# andata storta in un modo che non ha prodotto errori — e nessun database sano ha zero
+# schemi applicativi.
+if [ -z "$SCHEMI" ]; then
+  echo "[clone-vm-db] FATAL: l'elenco degli schemi e' VUOTO. Nessun database sano lo e':" >&2
+  echo "[clone-vm-db] la misura e' fallita in silenzio. Non procedo." >&2
+  exit 1
+fi
+echo "[clone-vm-db] schemi rifatti da zero: $(printf '%s' "$SCHEMI" | tr '\n' ' ')(public escluso: ci vivono le estensioni)"
+for s in $SCHEMI; do
+  sudo -u postgres psql -p "$PORT" -d "$DB_NAME" -v ON_ERROR_STOP=1 \
+    -c "DROP SCHEMA IF EXISTS \"$s\" CASCADE" >/dev/null
+done
 
 set +e
 ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres pg_dump -Fc '$DB_NAME'" \
@@ -114,12 +161,25 @@ done
 # per ogni schema, quante funzioni / tabelle+viste / indici esistono sui due lati.
 # Protegge cio' che NON doveva cambiare — la forma del database — invece del solo
 # contenuto di cio' che ci si aspettava di trovare.
+#
+# ⚠ [D-86, S1078] LE TABELLE SI CONTANO DA `pg_class`, NON DA `information_schema`.
+# `information_schema.tables` mostra SOLO gli oggetti su cui chi interroga ha un
+# privilegio. I due lati non interrogano con lo stesso ruolo — la VM come `postgres`
+# (superuser, vede tutto), il clone come `heuresys` — quindi la stessa query
+# rispondeva due cose diverse per una ragione che col contenuto del database non
+# c'entrava nulla: il confronto non era fra due misure omogenee.
+# Misurato il 2026-08-23: con `sys.zz_fantasma_d86` viva sul clone e di proprieta' di
+# `postgres`, il censimento leggeva `sys.tab=264` su ENTRAMBI i lati — cieco alla
+# tabella di troppo — e l'allarme scatto' solo perche' quella tabella aveva un indice
+# (`sys.idx` 788 contro 787). Una tabella ritirata SENZA indici sarebbe passata verde:
+# il guardiano dei ritiri non si accorgeva dei ritiri.
 CENSIMENTO="SELECT string_agg(x, ' ' ORDER BY x) FROM (
   SELECT n.nspname||'.fun='||count(*)::text AS x FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
    WHERE n.nspname NOT LIKE 'pg_%' AND n.nspname <> 'information_schema' GROUP BY n.nspname
   UNION ALL
-  SELECT table_schema||'.tab='||count(*)::text FROM information_schema.tables
-   WHERE table_schema NOT LIKE 'pg_%' AND table_schema <> 'information_schema' GROUP BY table_schema
+  SELECT n.nspname||'.tab='||count(*)::text FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+   WHERE c.relkind IN ('r','p','v','m','f') AND n.nspname NOT LIKE 'pg_%'
+     AND n.nspname <> 'information_schema' GROUP BY n.nspname
   UNION ALL
   SELECT schemaname||'.idx='||count(*)::text FROM pg_indexes
    WHERE schemaname NOT LIKE 'pg_%' GROUP BY schemaname) s"

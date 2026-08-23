@@ -83,9 +83,43 @@ ragionamento.
 ▸ **I quattro perimetri aperti, tutti riprovati coi criteri corretti** — `content` ·
 `tenant-blueprints` · `positions` · `organization-units`: **4 VERDI**. I due script vecchi non
 sono stati cancellati (divieto): sono diventati rimandi di poche righe a `live-perimetro.ts`.
-- [ ] **F4 I NON MISURABILI diventano misurabili** — budget ~50k · ▸ erano 14 quando la fase è nata, **oggi sono 11** (F5 ne ha resi misurabili 2, e il catalogo è cambiato). Il numero si ri-deriva, non si scrive qui
-      Oggi si presentano come «non so», e prima della correzione si presentavano come «sicuro».
-      Finché restano tali, quella parte della coda non è ordinabile.
+- [x] **F4 I NON MISURABILI diventano misurabili** — **FATTO 2026-08-23 (S1078): da 11 a ZERO**, e i neutri da 16 a 27. La coda è interamente ordinabile.
+      Gli 11 erano **due famiglie con rimedi diversi**, e la differenza non si vedeva dal numero:
+      - **A — resource mai dichiarate** (5 moduli, 3 resource): `enterprise_typing`,
+        `operating_model`, `organization_unit_processes` → dichiarate in
+        `RESOURCE_SENZA_DATI_DI_PERSONA` con la **misura** accanto, non con una stima.
+      - **B — nessun permesso sulle letture** (6 moduli, tutte tassonomie): il ponte per
+        risalire alla classe si spezza a monte, perché la classe si deriva dalla *resource* e
+        la resource dal *permesso*. Nuovo elenco `MODULO_CATALOGO_GLOBALE`, indicizzato per
+        **modulo**, letto da `check_concetti_agente.py` come quarto ripiego.
+
+      🔬 **La misura ha corretto due volte quello che il nome suggeriva** — ed è il motivo per
+      cui la classe non si stima:
+      - `enterprise_size_band_min/max_employees` e `enterprise_typing_employee_count` sembrano
+        riferimenti a persone: sono **soglie e conteggi**. Il criterio giusto non è il nome
+        della colonna ma la **chiave esterna verso `sys_users`** — e lì restano solo
+        `created_by`/`updated_by`, cioè gli **attori di audit**, che se contassero renderebbero
+        «dati di persona» qualunque tabella del database.
+      - `organization-unit-processes` **legge** `sys_organization_units`, che è `PERSONAL`
+        perché porta il capo dell'unità (`organization_unit_manager_user_id`). Ma il suo
+        schema di risposta (`OrgUnitProcessForOuSchema`) porta identificatori e
+        nome/codice/ordinale del processo, e **nessun campo di persona**: leggere una tabella
+        non è mostrarla.
+
+      🔬 **Verificato sul server, non dedotto**: `GET /v1/<modulo>` senza credenziali risponde
+      **401 su tutti e sei**. L'autenticazione c'è; manca l'autorizzazione *fine*. E non si
+      rimedia creando i permessi: misurato in `sys.sys_auth_permissions`, per le tassonomie
+      esistono `create/update/delete` ma **non** `read` — crearlo e darlo a ogni ruolo sarebbe
+      cerimonia, non sicurezza, ed è coerente con I21 (le tassonomie restano aperte a ogni
+      industry) e I17 (chi compila il proprio profilo deve poter leggere categorie e livelli).
+
+      **Perché non è un quarto modo per tacere**: (a) vale **solo** se non c'è nessuna resource
+      da cui risalire — una dichiarazione non deve mai zittire una misura disponibile; (b) se
+      un modulo dell'elenco **acquisisce** un permesso di lettura, lo strumento lo segnala come
+      *dichiarazione ormai superflua*, invece di lasciarla lì a giustificare un ponte
+      ricostruito; (c) la stessa **guardia di cecità** delle altre tre fonti — sabotata
+      rinominando l'elenco, lo strumento dichiara `NON MISURABILE` invece di dare zero in
+      silenzio. Typecheck API pulito, `domains-f7` 12/12, nessun drift.
 - [x] **F5 Le classi di una resource multiclasse smettono di essere prosa** — FATTO 2026-08-19 · `RESOURCE_MULTICLASSE` passa da `Record<string,string>` (una frase) a `Record<string,{classi,perche}>` con le classi **enumerate e misurate sul database**, non trascritte dalla frase. Effetto sulla coda, misurato prima e dopo: **NON MISURABILI da 14 a 12**, riservati da 16 a 18 — `analytics` (`COMPENSATION, EVALUATION, PERSONAL, SKILL`) e `dashboard` (`ACTIVITY, PERSONAL, SKILL`) escono dal «non so» e cadono fra i riservati **per le classi che espongono davvero**. Aggiunte anche le 7 famiglie di `#142` (mig. `000326`), che senza una riga qui renderebbero rosso il cancello di `#99 F7`.
       🔬 **La misura ha smentito la prosa**: la frase su `analytics` nominava le «presenze», ma nessuna delle sue cinque voci dichiara `ACTIVITY`. Una descrizione che nessuno può contraddire invecchia senza che nessuno se ne accorga — ed è il motivo per cui questa fase esisteva.
       🔬 **Trovata e chiusa una cecità in attesa**: `check_concetti_agente.py` presidiava il caso «parser che non legge più nulla» per `RESOURCE_DATA_CLASS` e **per nessuna delle altre tre**. Cambiando forma, `MULTI` sarebbe tornato `{}` e ogni resource multiclasse sarebbe sparita in silenzio dalla classificazione. Ora la guardia c'è per `MULTI` e per `NO_PERSONE`.

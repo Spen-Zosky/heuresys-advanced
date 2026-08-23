@@ -231,6 +231,15 @@ if not MULTI:
 if not NO_PERSONE:
     ceco("nessuna resource senza dati di persona letta da %s" % CLASSI,
          "la forma di RESOURCE_SENZA_DATI_DI_PERSONA e' cambiata: adeguare la lettura")
+# #214 F4 — i moduli-catalogo, indicizzati per MODULO e non per resource: le loro letture
+# non dichiarano permesso, quindi non c'e' resource da cui risalire. Stessa guardia di
+# cecita' delle altre tre: se la forma cambia e il parser torna {}, quei moduli tornano
+# NON MISURABILI in silenzio — e un elenco che smette di essere letto senza dirlo e' il
+# genere di falso verde che questo file combatte.
+CATALOGO_GLOBALE = elenco("MODULO_CATALOGO_GLOBALE")
+if not CATALOGO_GLOBALE:
+    ceco("nessun modulo-catalogo letto da %s" % CLASSI,
+         "la forma di MODULO_CATALOGO_GLOBALE e' cambiata: adeguare la lettura")
 
 # ---------------------------------------------------------------- 4. V3, chi lo guarda
 consumati = ((atlas.get("cross") or {}).get("endpoints_with_web_consumers") or {})
@@ -241,6 +250,7 @@ if not consumati:
 # ---------------------------------------------------------------- 5. il quadro
 aperti, neutri, riservati, esclusi = [], [], [], []
 senza_lettura, senza_superficie, incerti = [], [], []
+superflue = []   # #214 F4: dichiarazioni di catalogo che il codice ha reso inutili
 
 for mod in moduli:
     if mod in ESCLUSI:                                        # V2
@@ -275,7 +285,20 @@ for mod in moduli:
             classi.add("dubbio dichiarato")
         else:
             ignote.append(r)
+    # #214 F4 — il ripiego per MODULO, quando il ponte per resource non esiste proprio.
+    # Vale SOLO se non c'e' nessuna resource da cui risalire: se il modulo ne ha una, si
+    # usa quella, perche' una dichiarazione non deve mai zittire una misura disponibile.
+    catalogo = not risorse and mod in CATALOGO_GLOBALE
+    if catalogo:
+        classi.add("nessun dato di persona")
+    # ...e se il ponte si e' ricostruito da se', la dichiarazione va tolta invece di
+    # restare li' a giustificare qualcosa che non serve piu'.
+    if bool(risorse) and mod in CATALOGO_GLOBALE:
+        superflue.append((mod, ",".join(risorse)))
+
     et = ", ".join(sorted(classi)) or "-"
+    if catalogo:
+        et += " (catalogo globale, dichiarato)"
     if ignote:
         et = (et + " · non classificate: " + ",".join(ignote)).lstrip("- ").strip()
     riga = (mod, len(get), len(pagine), et)
@@ -335,6 +358,17 @@ print("  neutri. Stanno dopo, e ognuno porta il suo rimedio (fino a S1068 stavan
 for m, n, pg, et, motivo in sorted(incerti, key=lambda x: (-x[1], -x[2])):
     print("    %-32s %2d letture · %d pagine   %s" % (m, n, pg, et))
     print("        %s" % motivo)
+if not incerti:
+    print("    (nessuno — #214 F4 chiusa il 2026-08-23: la coda e' interamente ordinabile)")
+# #214 F4 — una dichiarazione che il codice ha reso inutile va TOLTA, non lasciata li' a
+# giustificare un ponte che nel frattempo si e' ricostruito da se'. Se non si dicesse,
+# resterebbe per sempre: nessuno rilegge un elenco che non protesta.
+if superflue:
+    print("-" * 92)
+    print("  ⚠ DICHIARAZIONI DI CATALOGO ORMAI SUPERFLUE — il modulo ha acquisito un permesso")
+    print("    di lettura, quindi la classe si MISURA e la riga in MODULO_CATALOGO_GLOBALE va tolta:")
+    for m, r in sorted(superflue):
+        print("    %-32s ora risale a: %s" % (m, r))
 if "--riservati" in sys.argv:
     print("-" * 92)
     print("  IN CODA — riservati (4 classi). Non esclusi: dopo.")

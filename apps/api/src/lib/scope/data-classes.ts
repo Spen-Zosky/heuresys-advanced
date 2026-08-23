@@ -188,6 +188,64 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
   surveys: "risolta da Enzo (2026-07-01): feedback e clima restano NON mappati perché spesso anonimi o aggregati per politica, quindi non org-gated",
   position: "una posizione è un POSTO nell'organigramma; chi lo occupa si legge da `user`, che è PERSONAL",
   org_director: "console, salute e consigliere organizzativi: aggregati di struttura",
+  // #214 F4, S1078 — le tre resource che tenevano CINQUE moduli fra i NON MISURABILI.
+  // La classe non è stimata: è misurata sul database, e la misura ha corretto due volte
+  // ciò che il nome suggeriva.
+  enterprise_typing:
+    "tipizzazione d'impresa: bande dimensionali e profili di settore. Le colonne che " +
+    "nominano i dipendenti (`enterprise_size_band_min/max_employees`, " +
+    "`enterprise_typing_employee_count`) sono SOGLIE e CONTEGGI, non riferimenti a " +
+    "persone — misurato: le sole chiavi esterne verso `sys_users` sono `created_by` e " +
+    "`updated_by`, cioè gli attori di audit, che se contassero renderebbero «dati di " +
+    "persona» qualunque tabella del database",
+  operating_model:
+    "catalogo dei modelli operativi: 7 colonne, nessuna chiave esterna verso le persone",
+  organization_unit_processes:
+    "quale processo presidia quale unità: struttura, non persone. Il modulo LEGGE anche " +
+    "`sys_organization_units` — che è PERSONAL perché porta il capo dell'unità " +
+    "(`organization_unit_manager_user_id`) — ma non lo ESPONE: lo schema di risposta " +
+    "(`OrgUnitProcessForOuSchema`) porta identificatori e nome/codice/ordinale del " +
+    "processo, e nessun campo di persona. Leggere una tabella non è mostrarla",
+};
+
+/**
+ * I moduli le cui LETTURE non passano da un permesso, perché sono cataloghi globali
+ * (#214 F4, S1078). Ognuno con la misura che lo sostiene, mai un jolly.
+ *
+ * PERCHÉ SERVE UN QUARTO ELENCO, ed è una domanda giusta da farsi. Gli altri tre sono
+ * indicizzati per RESOURCE, e la resource si ricava dal permesso (`resource:action`). Per
+ * questi sei moduli il ponte si spezza a monte: le loro GET non dichiarano alcun permesso,
+ * quindi non c'è resource da cui risalire, e restavano NON MISURABILI qualunque cosa si
+ * scrivesse negli altri elenchi.
+ *
+ * NON È UN QUARTO MODO PER TACERE — ed è la ragione per cui porta con sé le due misure che
+ * lo rendono smentibile:
+ *   · MISURATO il 2026-08-23: nessuna di queste tabelle ha una chiave esterna verso
+ *     `sys_users` che non sia `created_by`/`updated_by`, e nessuna (tranne `sys_skills`)
+ *     ha una colonna di tenant: sono cataloghi GLOBALI, non dati di un'azienda.
+ *   · MISURATO sul server, non dedotto: `GET /v1/<modulo>` senza credenziali risponde
+ *     401 su tutti e sei. L'autenticazione c'è; manca l'autorizzazione FINE, ed è una
+ *     assenza coerente con I21 (le tassonomie stanno aperte a ogni industry) e con I17
+ *     (il pavimento ESS: chi compila il proprio profilo deve poter leggere le categorie
+ *     e i livelli di padronanza).
+ *
+ * ⚠ SE UN MODULO DI QUESTO ELENCO ACQUISISCE UN PERMESSO DI LETTURA, la sua riga qui
+ * diventa inutile e va tolta: `check_concetti_agente.py` lo dice, invece di lasciarla
+ * a giustificare un ponte che nel frattempo si è ricostruito da sé.
+ *
+ * ⚠ NON è la sede per decidere se quei permessi vadano creati: lo sono i permessi di
+ * scrittura (`skill_taxonomy:create/update/delete`, `job_family:create/update/delete`
+ * esistono), mentre `skill_taxonomy:read` e `job_family:read` NON esistono — misurato in
+ * `sys.sys_auth_permissions`. Crearli e assegnarli a tutti i ruoli sarebbe cerimonia, non
+ * sicurezza: un permesso che nessuno può non avere non discrimina niente.
+ */
+export const MODULO_CATALOGO_GLOBALE: Readonly<Record<string, string>> = {
+  "skill-categories": "categorie del catalogo competenze (tassonomia)",
+  "skill-families": "famiglie del catalogo competenze (tassonomia)",
+  "skill-aliases": "sinonimi delle competenze (tassonomia)",
+  "skill-taxonomy-edges": "archi fra i nodi della tassonomia delle competenze",
+  "skill-proficiency-levels": "livelli di padronanza: la scala, non chi la raggiunge",
+  "job-families": "famiglie professionali (tassonomia)",
 };
 
 /**

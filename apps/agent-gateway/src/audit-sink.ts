@@ -38,6 +38,28 @@ export interface AuditEntry {
   tool: string;
   /** sha256 hex of the REDACTED args (no raw PII/secret ever persisted). */
   argsHash: string;
+  /**
+   * SU COSA è stata presa la decisione, per gli strumenti parametrici (#214, S1078).
+   *
+   * PERCHÉ ESISTE. Fino a oggi il diario diceva CHI, QUANDO, con QUALE STRUMENTO e con
+   * quale ESITO — ma non su quale risorsa: gli strumenti generici si chiamano tutti
+   * `hrx_entity_query`, e il concetto interrogato finiva dentro `argsHash`, cioè in
+   * un'impronta illeggibile. Un registro di decisioni che non sa dire su COSA ha deciso
+   * non è verificabile: non si può rispondere a «l'agente ha davvero letto i contenuti?»
+   * né, che è peggio, a «ha letto qualcosa che non doveva?».
+   *
+   * Si è visto misurando: la prova live del perimetro `content` risultava rossa sul
+   * criterio «almeno una lettura consentita su `content`», e la causa non era l'apertura
+   * — era che quel criterio è soddisfacibile SOLO dai perimetri che hanno strumenti di
+   * dominio omonimi (`hrx_positions_list` porta «positions» nel nome). Per tutti gli
+   * altri era impossibile da soddisfare, e nessuno poteva accorgersene.
+   *
+   * NON È UNA DEROGA AL «MAI PII»: sono identificatori di RISORSA e di OPERAZIONE
+   * (`content`, `get_search`) — la stessa classe di informazione del nome dello
+   * strumento, che è sempre stato registrato in chiaro. Gli argomenti restano hashati.
+   */
+  concept?: string;
+  operation?: string;
   /** Gate decision + a human-readable reason. */
   decision: AuditDecision;
   reason: string;
@@ -65,6 +87,18 @@ export function hashArgs(args: unknown): string {
   return createHash("sha256").update(JSON.stringify(safe)).digest("hex");
 }
 
+/**
+ * Il concetto e l'operazione, letti dagli argomenti degli strumenti parametrici.
+ * Solo stringhe, e solo questi due campi: tutto il resto degli argomenti resta hashato.
+ */
+export function targetOf(args: unknown): { concept?: string; operation?: string } {
+  const a = (args ?? {}) as { conceptId?: unknown; operationId?: unknown };
+  return {
+    ...(typeof a.conceptId === "string" && a.conceptId ? { concept: a.conceptId } : {}),
+    ...(typeof a.operationId === "string" && a.operationId ? { operation: a.operationId } : {}),
+  };
+}
+
 export function toEntry(input: AuditInput): AuditEntry {
   return {
     ts: new Date().toISOString(),
@@ -72,6 +106,7 @@ export function toEntry(input: AuditInput): AuditEntry {
     tenant: input.tenant,
     tool: input.tool,
     argsHash: hashArgs(input.args),
+    ...targetOf(input.args),
     decision: input.decision,
     reason: input.reason,
   };

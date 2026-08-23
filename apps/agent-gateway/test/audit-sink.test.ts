@@ -12,6 +12,7 @@ import {
   FileAuditSink,
   MemoryAuditSink,
   hashArgs,
+  targetOf,
   toEntry,
   type AuditInput,
 } from "../src/audit-sink.js";
@@ -100,5 +101,53 @@ describe("FileAuditSink", () => {
     expect(first).not.toHaveProperty("args"); // no raw args persisted
     const second = JSON.parse(lines[1]!) as Record<string, unknown>;
     expect(second["decision"]).toBe("allow");
+  });
+});
+
+/**
+ * #214, S1078 — IL DIARIO DEVE SAPER DIRE SU COSA HA DECISO.
+ *
+ * Prima registrava chi, quando, con quale strumento e con quale esito, ma non su quale
+ * risorsa: gli strumenti parametrici si chiamano tutti `hrx_entity_query`, e il concetto
+ * finiva dentro `argsHash`, cioè in un'impronta illeggibile. Un registro che non sa dire
+ * su COSA ha deciso non è verificabile — e infatti la prova live del perimetro `content`
+ * risultava rossa su un criterio che, per i perimetri senza strumenti di dominio omonimi,
+ * era impossibile da soddisfare.
+ */
+describe("targetOf — il bersaglio della decisione, senza portarsi dietro i dati", () => {
+  it("estrae concetto e operazione dagli argomenti degli strumenti parametrici", () => {
+    expect(targetOf({ conceptId: "content", operationId: "get_search" }))
+      .toEqual({ concept: "content", operation: "get_search" });
+  });
+
+  it("tace su ciò che non c'è, invece di inventare un campo vuoto", () => {
+    // Un `concept: ""` in un diario si legge come «ha deciso su qualcosa che non so
+    // nominare», che è peggio dell'assenza: l'assenza dice «strumento non parametrico».
+    expect(targetOf({})).toEqual({});
+    expect(targetOf(undefined)).toEqual({});
+    expect(targetOf({ conceptId: "" })).toEqual({});
+    expect(targetOf({ conceptId: 42, operationId: null })).toEqual({});
+  });
+
+  it("NON si porta dietro nient'altro: gli argomenti restano hashati", () => {
+    // La riga che impedisce alla comodità di diventare una fuga: se domani qualcuno
+    // aggiungesse un campo al ritorno di targetOf, questo test diventa rosso.
+    const out = targetOf({ conceptId: "users", operationId: "get", email: "mario@example.org", filtro: { q: "segreto" } });
+    expect(Object.keys(out).sort()).toEqual(["concept", "operation"]);
+    expect(JSON.stringify(out)).not.toContain("example.org");
+    expect(JSON.stringify(out)).not.toContain("segreto");
+  });
+
+  it("toEntry porta il bersaglio nella riga, accanto all'impronta e non al posto suo", () => {
+    const e = toEntry({ ...baseInput, tool: "hrx_entity_query", args: { conceptId: "positions", operationId: "get" } });
+    expect(e.concept).toBe("positions");
+    expect(e.operation).toBe("get");
+    expect(e.argsHash).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("uno strumento NON parametrico non guadagna campi che non ha", () => {
+    const e = toEntry({ ...baseInput, tool: "hrx_positions_list", args: { limit: 10 } });
+    expect(e).not.toHaveProperty("concept");
+    expect(e).not.toHaveProperty("operation");
   });
 });

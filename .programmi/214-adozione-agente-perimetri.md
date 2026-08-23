@@ -41,13 +41,48 @@ python docs/kb/tools/build_agent_operations.py    # rigenera la mappa dopo un'ap
       l'oggetto più vicino a un documento e più lontano da una persona. I candidati più ampi non
       erano in gara: `analytics` e `dashboard` stanno fra i **riservati** dal 2026-08-19 (F5).
       Decisione registrata sotto il mandato in blocco di Enzo del 2026-08-21.
-      ⏳ **La prova live NON è stata eseguita**, e va detto invece di lasciarlo intendere: pretende
-      il gateway su `:8790` e l'API su `:3001` avviati, più una corsa dell'agente. È il **primo
-      passo del prossimo giro**, sul modello di `live-perimetro-tenant-blueprints.ts`:
-      `cd apps/agent-gateway && pnpm exec tsx scripts/live-perimetro-content.ts`.
-      ▸ E quando si scriverà, conviene **parametrizzare invece di duplicare**: i due script
-      esistenti sono quasi identici e differiscono per il concetto, quindi il terzo sarebbe il
-      momento giusto per farne uno solo che prende il perimetro come argomento.
+      ✅ **PROVA LIVE ESEGUITA il 2026-08-23 (S1078) — VERDE**, gateway `:8790` + API `:3001`,
+      login reale con secondo fattore: `pnpm exec tsx scripts/live-perimetro.ts content`.
+      La parametrizzazione era stata suggerita come economia; si è rivelata **la cura di un
+      difetto**, e ha fatto emergerne tre.
+
+### I tre difetti che la prova ha trovato (S1078)
+
+**① La prova del TERZO perimetro non era mai potuta girare.** `live-perimetro-tenant-blueprints.ts`
+era nato il 2026-08-19 copiando quello di `positions`, e in un punto il nome della variabile non
+era stato rinominato: leggeva `opsPositions`, che in quel file non esisteva. Moriva con
+`ERRORE: opsPositions is not defined` **prima del login**. Eppure il registro e questo piano lo
+dichiaravano eseguito. Rifatto il 2026-08-23: **VERDE**.
+
+**② Due criteri erano veri PER VUOTO, e stavano già nell'originale di `positions`** — quindi la
+prova del secondo perimetro, che *è* girata, non misurava ciò che diceva:
+- *«la mappa del perimetro non dichiara nessuna scrittura»* — il filtro iterava le chiavi di
+  **radice** di `agent-operations.json` (`_fonti`, `_generato_da`, `concepts`) cercandovi il nome
+  del perimetro. Nessuna lo contiene → sempre **zero operazioni** → «zero scritture» vero perché
+  non aveva guardato niente. Proprio il criterio che il commento definiva *«quello che non
+  dipende da cosa il modello ha tentato»*.
+- *«nessuna lettura consentita su `users`»* — cercava `"concept":"users"` in un diario che quel
+  campo **non aveva**. Sempre verde.
+
+**③ Il diario del gate non sapeva dire SU COSA aveva deciso.** Gli strumenti parametrici si
+chiamano tutti `hrx_entity_query`, e il concetto finiva dentro `argsHash`, cioè in un'impronta
+illeggibile. Conseguenza: il criterio «almeno una lettura consentita sul perimetro» era
+soddisfacibile **solo** dai perimetri con strumenti di dominio omonimi (`hrx_positions_list`
+porta «positions» nel nome) e **impossibile** per tutti gli altri. Curato in `audit-sink.ts`:
+il diario registra ora `concept` e `operation` — identificatori di risorsa, non dati, la stessa
+classe del nome dello strumento che è sempre stato in chiaro. 5 test nuovi, sabotati: il campo
+in più fa scattare anche le **due guardie preesistenti** sul «mai PII».
+
+▸ **Conseguenza sui criteri**: distinguere `hrx_concept_describe` (elenco chiuso delle
+operazioni — su un concetto non aperto è **vuoto**, `known:false`) da `hrx_entity_query` (le
+righe). Il confine si misura sul secondo. E si è aggiunto il corno mancante: **almeno un
+tentativo sulla sentinella dev'essere stato NEGATO**, o la domanda (3) è verde perché l'agente
+non ha provato — successo davvero su `tenant-blueprints`, e l'ha detto il criterio, non un
+ragionamento.
+
+▸ **I quattro perimetri aperti, tutti riprovati coi criteri corretti** — `content` ·
+`tenant-blueprints` · `positions` · `organization-units`: **4 VERDI**. I due script vecchi non
+sono stati cancellati (divieto): sono diventati rimandi di poche righe a `live-perimetro.ts`.
 - [ ] **F4 I NON MISURABILI diventano misurabili** — budget ~50k · ▸ erano 14 quando la fase è nata, **oggi sono 11** (F5 ne ha resi misurabili 2, e il catalogo è cambiato). Il numero si ri-deriva, non si scrive qui
       Oggi si presentano come «non so», e prima della correzione si presentavano come «sicuro».
       Finché restano tali, quella parte della coda non è ordinabile.

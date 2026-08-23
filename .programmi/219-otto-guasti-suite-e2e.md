@@ -141,9 +141,31 @@ non correggendolo.
         mentre la tabella stava ancora caricando — la sezione diventa visibile subito perché è
         l'involucro. Sostituito con `toHaveCount`, che ha l'auto-retry; corretta anche la riga
         gemella sulle sessioni di calibrazione, che oggi passava **per tempismo**. ✅ **10 passed**
-- [ ] **F4 L'accessibilità, che è l'unica del suo genere** — budget ~30k
-      **H**: violazioni a11y **critiche** su `/admin/roles` in vista mobile. Non si raggruppa con
-      le altre perché la classe di difetto è diversa e la correzione tocca il markup.
+- [x] **F4 L'accessibilità, che è l'unica del suo genere** — **FATTO 2026-08-23 (S1078)**, e non toccando il markup: **il caso era VERDE PER VUOTO**, e nessuno poteva saperlo.
+      **H** doveva essere «violazioni critiche su `/admin/roles` in vista mobile». Eseguito, il
+      caso **passava**. Un verde inatteso non si festeggia, si falsifica: **iniettata di
+      proposito un'immagine senza testo alternativo** — che axe classifica `critical` — il caso
+      è rimasto **verde**. Il controllo non stava guardando la pagina.
+      🔬 Lo dicono due numeri che il referto prima non portava, e che ora porta:
+      **17 nodi esaminati**. Lo screenshot del fallimento è uno sfondo vuoto con
+      «Caricamento…» al centro: `networkidle` si risolve **mentre la pagina sta ancora
+      caricando**, e axe fotografava lo scheletro. Non trovava violazioni perché non c'era
+      niente su cui trovarne — e lo stesso valeva in vista **desktop**, quindi non era un
+      difetto della vista mobile.
+      ⚠ La guardia anti-vacuità che c'era (`audited === route`, nata dai «97 passaggi vacui»
+      di S984) intercetta la **sessione morta** — si finiva su `/login`, che è pulito — ma non
+      una pagina che risponde sulla rotta giusta **senza renderizzare**. Ne serviva una seconda.
+      **Il rimedio, in tre pezzi**: ① si attende il **contenuto renderizzato** (`main *` sopra
+      una soglia), non che la rete taccia; ② il referto registra `regoleSuperate` e
+      `nodiEsaminati`, così «zero violazioni» si distingue da «non c'era niente da guardare»
+      **leggendo il file**, senza rifare la corsa; ③ un'asserzione rende **rosso** il caso che
+      esamina un guscio, col numero nel messaggio.
+      ✅ **Esito misurato**: `/admin/roles` mobile passa da **17** a **14.023** nodi esaminati,
+      e le violazioni sono **0 di ogni severità** — quindi H è davvero risolta, ma prima non lo
+      si poteva affermare. Verificate anche `/dashboard` (615) · `/users` (593) ·
+      `/organization` (877) · `/organization/org-chart` (547): **12 passed**, nessun rosso
+      nuovo. Il rimedio vale per **tutte** le rotte del censimento, che avevano lo stesso
+      falso verde in agguato. Typecheck e lint verdi.
 - [ ] **F5 La corsa che chiude la voce, e il passaggio in CI** — budget ~20k (in gran parte attesa)
       Una corsa integrale con **0 falliti**. Solo allora il criterio di `#211` consente di
       portare la suite in CI, e questa voce si chiude insieme a quel passaggio.

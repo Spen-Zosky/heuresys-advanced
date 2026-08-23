@@ -101,6 +101,20 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
     // the real violation (don't silently swallow it).
   });
 
+  // #219 F4 — SI ASPETTA CHE LA PAGINA CI SIA, non che la rete taccia.
+  // `networkidle` si risolve anche mentre la pagina mostra ancora «Caricamento…»: lo
+  // screenshot del fallimento del 2026-08-23 è esattamente quello, uno sfondo vuoto con
+  // quella parola al centro. Axe fotografava lo scheletro — 17 nodi — e non trovava
+  // violazioni perché non c'era niente su cui trovarne.
+  // L'attesa è sul CONTENUTO renderizzato, non su un testid: questa funzione gira su
+  // decine di rotte diverse e non può conoscerli tutti. Se scade, non si interrompe qui:
+  // si lascia parlare l'asserzione sotto, che dice quanti nodi ha visto e perché non basta.
+  await page.waitForFunction(
+    () => document.querySelectorAll("main *, [role='main'] *").length > 40,
+    undefined,
+    { timeout: 30_000 },
+  ).catch(() => { /* diagnosi all'asserzione di non-vacuità, con il numero misurato */ });
+
   const results = await new AxeBuilder({ page })
     // WCAG 2.0 A/AA + 2.1 A/AA + 2.2 A/AA (Tappa G — extended ruleset).
     // The 2.2 additions cover: focus-not-obscured, focus-appearance (AAA),
@@ -115,6 +129,28 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
       "wcag22aa",
     ])
     .analyze();
+
+  // #219 F4 — LA SECONDA GUARDIA ANTI-VACUITÀ, e nasce da un sabotaggio riuscito.
+  // La guardia sull'URL qui sopra intercetta la sessione morta (si finiva su /login, che
+  // è pulito: 97 passaggi vacui, S984). NON intercetta una pagina che risponde sulla rotta
+  // giusta senza renderizzare il contenuto — e lì axe non trova violazioni per la ragione
+  // peggiore: non c'è niente da esaminare.
+  //
+  // Misurato il 2026-08-23 su `/admin/roles` in vista mobile, il caso `H` di #219: verde,
+  // `critical=0 serious=0 moderate=0 minor=0`. Iniettata di proposito un'immagine SENZA
+  // testo alternativo — che axe classifica `critical` — il caso è rimasto VERDE. Il motivo
+  // lo dicono i numeri nuovi del referto: **17 nodi esaminati**, cioè un guscio. Una pagina
+  // di amministrazione con tabelle e ruoli ne ha centinaia.
+  //
+  // La soglia è volutamente bassa: non misura la ricchezza di una pagina, distingue una
+  // pagina VIVA da un guscio. Se una rotta legittima le sta sotto, il messaggio dice quale
+  // e quanti nodi ha — e la si valuta, invece di alzare il numero per far tacere il rosso.
+  const nodiEsaminati = results.passes.reduce((n, r) => n + r.nodes.length, 0);
+  expect(
+    nodiEsaminati,
+    `pagina non renderizzata: ${route} ha esaminato solo ${nodiEsaminati} nodi — «nessuna ` +
+      `violazione» qui non vuol dire accessibile, vuol dire che non c'era niente da guardare`,
+  ).toBeGreaterThan(40);
 
   const bySeverity = {
     critical: [] as typeof results.violations,
@@ -145,6 +181,15 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
       {
         route,
         summary,
+        // #219 F4 — QUANTO AXE HA DAVVERO GUARDATO. Senza questo numero, «zero violazioni»
+        // non si distingue da «non c'era niente da controllare»: la guardia anti-vacuità
+        // qui sopra intercetta la sessione morta (si finiva su /login, che è pulito), ma
+        // NON una pagina che ha risposto sulla rotta giusta senza renderizzare il
+        // contenuto. `passes` sono le regole superate su nodi reali: su una pagina viva
+        // sono decine, su un guscio vuoto crollano — ed è l'unico modo per accorgersene
+        // leggendo il referto invece di rifare la corsa.
+        regoleSuperate: results.passes.length,
+        nodiEsaminati: results.passes.reduce((n, r) => n + r.nodes.length, 0),
         timestamp: new Date().toISOString(),
         violations: results.violations.map((v) => ({
           id: v.id,

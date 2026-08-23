@@ -59,10 +59,60 @@ non correggendolo.
       · **E**: il caso manda un body **incompleto**, quindi la validazione dello schema scatta
         prima del controllo di permesso e il 400 arriva per la ragione sbagliata. Correzione:
         body **valido** + attesa 401/403, così il caso prova davvero ciò che dichiara.
-- [ ] **F2 Le due firme con una causa sola e due sintomi** — budget ~40k
-      **B** (spiegabilità per-feature, `/insights/skill-gap` e `/insights/succession-readiness`)
-      e **C** (l'editor dell'organigramma non si apre, 2 casi). Quattro casi, probabilmente due
-      cause: si riproduce una pagina per firma e si guarda la chiamata `/v1/*` che la alimenta.
+- [x] **F2 Le due firme con una causa sola e due sintomi** — **FATTO 2026-08-23 (S1078)**, e le cause erano **quattro, non due**. Riprodurre prima di correggere ha pagato tre volte.
+      **B** (spiegabilità per-feature, 2 casi) · **C** (l'editor dell'organigramma, 2 casi).
+
+      **B — la firma nascondeva DUE cose, e la seconda è un guasto vero del prodotto.**
+      ① *Il test era stantio.* `features` è **mascherato** a chi legge sotto il solo mandato
+      di piattaforma (ADR-0032 / #124 D4: il modello è deterministico e i pesi pubblici,
+      quindi da `features` il punteggio si ricalcola; e `features[].raw` porta `compBandPct`,
+      cioè la spiegazione di un punteggio EVALUATION farebbe passare dati COMPENSATION dalla
+      porta di servizio). Entrambi gli spec usavano `storageStateFor("platformAdmin")`:
+      **provavano un mondo che l'architettura vieta**, come i due casi MFA di F1/A.
+      Misurato con `apps/api/scripts/prova-219-b-spiegabilita.mts`, due attori sugli stessi
+      punteggi: piattaforma → **0** con features (156 e 468 dichiarate `masked`); mandato HR →
+      **tutte** con features (2 e 3 fattori sul primo). I casi sono stati **rovesciati** —
+      ora presidiano il mask — e ne sono nati due nuovi con `tenantAdmin` (mandato HR, I20),
+      perché rovesciarli senza aggiungerli avrebbe lasciato «non rende» indistinguibile da
+      «rende solo a chi deve». ✅ I due nuovi **verdi live**.
+      ② *E la pagina si ROMPEVA.* `selected.value!.toFixed(1)` — un'asserzione di TypeScript
+      che a runtime non protegge niente: con `value` mascherato, `undefined.toFixed(1)`
+      lanciava e l'**error boundary** sostituiva l'intera sezione con «si è verificato un
+      errore imprevisto». Cioè: **per un `PLATFORM_ADMIN`, aprire la spiegazione rompeva la
+      pagina**, su entrambe. La tabella il mask lo gestiva già (`MaskedCell` è importato da
+      sempre in quei file) — il pannello se n'era scordato. Corretto con `isMasked` +
+      `MaskedCell`, gli strumenti che c'erano.
+      ⚠ Questo guasto era **invisibile** finché il test moriva prima di arrivarci (sotto).
+
+      **C — la firma registrata dal triage era SBAGLIATA.** Diceva «`orgunit-editor` non
+      visibile (30 s)», cioè: l'editor non si apre. Riprodotto, l'errore vero cade prima —
+      `locator.click: waiting for getByTestId('organization-edit-E2E-OU-…')`: **il pulsante
+      non c'è**, l'unità appena creata non è nel DOM. L'editor non c'entra, non ci si arriva.
+      Causa, con un numero: `page.tsx` porta `C4 (#42): server-side pagination (was
+      ?limit=200)` — la tabella carica **25 righe** (`initialPageSize`), l'API ordina per
+      codice, e con **43** unità un `E2E-OU-…` finisce in pagina 2. Il caso era stantio
+      rispetto a un cambiamento di prodotto successivo, come B lo era rispetto ad ADR-0032.
+      Rimedio: **si sfoglia** (alzare il limite lo renderebbe verde e cieco al giorno in cui
+      le unità superano il nuovo numero). ✅ **Verificato live: 7 passed, 0 failed.**
+      🔬 E il primo helper era **verde in teoria e rosso nei fatti**: aspettava che la barra
+      di paginazione fosse *visibile* — cosa che è sempre — invece che l'intervallo
+      *cambiasse*. Con due sole pagine usciva prima che le righe nuove fossero nel DOM.
+
+      **Il difetto trasversale, trovato mentre si guardava altro.** I quattro casi di
+      `insights-*` morivano con «Test timeout of 30000ms exceeded» — un errore che **non
+      nomina l'elemento che manca**, quindi non dice niente. La config non impostava
+      `timeout`, quindi valeva il default di Playwright (30 s), mentre **47 spec su 100**
+      (misurati) dichiarano attese da 45 s o 60 s: un `toBeVisible({ timeout: 45_000 })` in
+      un test che muore a 30 s è una promessa che non può essere mantenuta. Portato a 90 s —
+      e i guasti veri restano presidiati dai timeout per-azione (10 s / 30 s), che non
+      cambiano. È **questo** che teneva nascosto il guasto ②: il test moriva prima di
+      arrivare al click.
+
+      ⏳ **Cosa NON è stato verificato live**, e va detto: i due casi *rovesciati* su
+      `platformAdmin`. L'ambiente sotto carico (API dev + gateway + `next dev` + tunnel) ha
+      cominciato a far cadere i **setup di autenticazione** — non i casi — e insistere non
+      aggiungeva evidenza. Cadono nella corsa integrale di **F5**, come già `E` di F1.
+      Typecheck e lint del web verdi.
 - [ ] **F3 Le tre firme rimaste, una per una** — budget ~50k
       · **D** creazione/archiviazione di un'azienda (2 casi) · **F** `me-team-name` ripetuto 14
       volte, mentre nel database la squadra «CFO» è **una** — testid duplicato, violazione di

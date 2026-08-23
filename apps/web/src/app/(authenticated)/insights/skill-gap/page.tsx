@@ -130,9 +130,21 @@ export default function SkillGapPage() {
               <CardTitle>{t("insightsSkillGap.explainTitle", { name: selected.displayName ?? selected.userId.slice(0, 8), position: positionLabel(selected) })}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                {t("insightsSkillGap.explainDesc", { value: selected.value!.toFixed(1), segment: t(`insightsSkillGap.segment.${selected.segment}`), model: selected.modelVersion })}
-              </p>
+              {/* #219 F2/B — QUI LA PAGINA SI ROMPEVA, e non per un test.
+                  `selected.value!` è un'asserzione di TypeScript, che a runtime non
+                  protegge niente: ADR-0032 / #124 D4 TOLGONO `value` e `segment` a chi
+                  legge sotto il solo mandato di piattaforma, quindi `undefined.toFixed(1)`
+                  lanciava e l'error boundary sostituiva l'intera sezione con «si è
+                  verificato un errore imprevisto». Cioè: per un PLATFORM_ADMIN, aprire la
+                  spiegazione ROMPEVA la pagina. La tabella il mask lo gestiva già
+                  (`MaskedCell` è importato da sempre) — questo pannello se n'era scordato. */}
+              {isMasked(selected, "value") ? (
+                <MaskedCell />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {t("insightsSkillGap.explainDesc", { value: selected.value!.toFixed(1), segment: t(`insightsSkillGap.segment.${selected.segment}`), model: selected.modelVersion })}
+                </p>
+              )}
               <Button type="button" variant="outline" size="sm" data-testid="skillgap-evidence-open"
                       onClick={() => setEvidenceFor(selected)}>
                 {t("insightsSkillGap.evidenceOpen")}

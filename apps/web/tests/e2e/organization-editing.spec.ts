@@ -35,6 +35,55 @@ async function deleteHeaders(page: Page): Promise<Record<string, string>> {
   };
 }
 
+/**
+ * #219 F2/C — LA TABELLA È PAGINATA, e questi due casi non se n'erano accorti.
+ *
+ * La firma registrata dal triage di `#211` F4 diceva «`orgunit-editor` non visibile (30 s)»,
+ * cioè: l'editor non si apre. **Non era quello.** Riprodotto il 2026-08-23, l'errore vero è
+ * un altro e cade prima:
+ *
+ *     TimeoutError: locator.click: Timeout 10000ms exceeded.
+ *       waiting for getByTestId('organization-edit-E2E-OU-1787516057234')
+ *
+ * Il click fallisce perché il PULSANTE non c'è — l'unità appena creata, che la riga sopra ha
+ * appena verificato esistere sull'API, non è nel DOM. L'editor non c'entra: non ci si arriva.
+ * È il motivo per cui il piano di questa voce prescrive di riprodurre prima di correggere —
+ * «sono FIRME, non cause», e questa ne nascondeva una diversa.
+ *
+ * LA CAUSA, e ha un numero: `page.tsx` porta il commento `C4 (#42): server-side pagination
+ * (was ?limit=200)`. La pagina carica **25 righe per volta** (`initialPageSize = 25` in
+ * `use-paginated-list.ts`) e l'API ordina per `organization_unit_code` — con 42 unità
+ * misurate, un codice `E2E-OU-…` finisce in **pagina 2**, dove il test non ha mai guardato.
+ * Il caso era stantio rispetto a un cambiamento di prodotto successivo, esattamente come i
+ * due di `insights-*` lo erano rispetto ad ADR-0032.
+ *
+ * IL RIMEDIO NON È ALZARE UN LIMITE: si sfoglia, che è ciò che farebbe una persona davanti
+ * a quella tabella. Alzare le righe per pagina renderebbe verde il caso e lo rifarebbe
+ * cieco al giorno in cui le unità superano il nuovo numero.
+ */
+async function vaiAllaRigaDi(page: Page, testId: string): Promise<void> {
+  const bersaglio = page.getByTestId(testId);
+  const barra = page.getByTestId("table-pagination");
+  await expect(barra).toBeVisible({ timeout: 30_000 });
+  for (let giro = 0; giro < 20; giro += 1) {
+    if (await bersaglio.count() > 0) return;
+    const avanti = page.getByTestId("pagination-next");
+    // Ultima pagina: il pulsante c'è ma è disabilitato. Fermarsi qui e lasciare che sia
+    // l'asserzione del chiamante a fallire dà un errore che dice cosa manca — continuare
+    // a cliccare un pulsante spento darebbe un timeout muto.
+    if (await avanti.count() === 0 || await avanti.isDisabled()) return;
+    // ⚠ SI ASPETTA CHE L'INTERVALLO CAMBI, non che la barra sia visibile: la barra è
+    // visibile sempre, anche mentre la pagina nuova sta ancora arrivando. La prima
+    // stesura di questo helper aspettava lei, quindi non aspettava NIENTE — e con due
+    // sole pagine il ciclo usciva subito perché al secondo giro «Successivo» era già
+    // disabilitato, mentre le righe nuove non erano ancora nel DOM. Verde in teoria,
+    // rosso identico a prima nei fatti.
+    const prima = (await barra.textContent()) ?? "";
+    await avanti.click();
+    await expect(barra).not.toHaveText(prima, { timeout: 15_000 });
+  }
+}
+
 test.describe("organigramma — unità create, modificate e spostate dall'interfaccia", () => {
   test.use({ storageState: storageStateFor("tenantAdmin") });
 
@@ -90,6 +139,7 @@ test.describe("organigramma — unità create, modificate e spostate dall'interf
       expect(genitore, "nessuna unità disponibile come genitore").toBeTruthy();
 
       await page.reload({ waitUntil: "domcontentloaded" });
+      await vaiAllaRigaDi(page, `organization-edit-${codice}`);   // #219 F2/C: la tabella è paginata
       await page.getByTestId(`organization-edit-${codice}`).click();
       await expect(page.getByTestId("orgunit-editor")).toBeVisible({ timeout: 30_000 });
 
@@ -145,6 +195,7 @@ test.describe("organigramma — unità create, modificate e spostate dall'interf
 
     // apre il PADRE: fra i suoi genitori possibili non deve comparire né lui
     // stesso né il figlio (lo metterebbe sotto un proprio discendente).
+    await vaiAllaRigaDi(page, `organization-edit-${padre.code}`);   // #219 F2/C: la tabella è paginata
     await page.getByTestId(`organization-edit-${padre.code}`).click();
     await expect(page.getByTestId("orgunit-editor")).toBeVisible({ timeout: 30_000 });
 

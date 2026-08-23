@@ -56,6 +56,17 @@ export default defineConfig({
   // setup. One retry per test absorbs that without masking real bugs.
   retries: 1,
   workers: 1,
+  // #219 F2, S1078 — IL TEMPO CHE UN CASO HA A DISPOSIZIONE DEV'ESSERE ALMENO QUELLO CHE
+  // I CASI SI CONCEDONO. Senza questa riga vale il default di Playwright, 30 s — mentre
+  // **47 spec su 100** (misurati) dichiarano attese da 45 s o 60 s: un
+  // `toBeVisible({ timeout: 45_000 })` dentro un test che muore a 30 s è una promessa che
+  // non può essere mantenuta, e quando scade l'errore non nomina l'elemento che manca —
+  // dice «Test timeout of 30000ms exceeded», cioè non dice niente. È così che quattro casi
+  // di `insights-*` si presentavano come guasti dell'applicazione mentre erano la stessa
+  // lentezza del modo dev (compile-on-demand) contro un tetto troppo basso.
+  // 90 s copre l'attesa più lunga dichiarata (60 s) con margine, e non maschera i guasti
+  // veri: quelli scadono sui timeout per-azione, che restano 10 s e 30 s.
+  timeout: 90_000,
   reporter: [["list"]],
   use: {
     baseURL: WEB_BASE_URL,

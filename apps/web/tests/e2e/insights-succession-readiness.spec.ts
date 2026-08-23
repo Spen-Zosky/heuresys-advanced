@@ -33,7 +33,30 @@ test.describe("cap③ insights /insights/succession-readiness — live data", ()
     await expect(page.getByTestId("readiness-row").first()).toBeVisible();
     await expect(page.getByTestId("readiness-recompute")).toBeVisible();
 
-    // open the top subject's explainability → multiple feature contributions
+    // ⚠ #219 F2/B — il caso si rovescia, ed è il gemello di quello su `/insights/skill-gap`:
+    // una firma sola, due sintomi. ADR-0032 / #124 D4 mascherano `features` sotto il solo
+    // mandato di piattaforma (il modello è deterministico, e `features[].raw` porta
+    // `compBandPct`: la spiegazione di un punteggio EVALUATION farebbe passare dati
+    // COMPENSATION dalla porta di servizio). Misurato il 2026-08-23 sugli stessi 468
+    // punteggi: piattaforma → 0 con features, 468 dichiarate `masked`; mandato HR → 468
+    // con features, 3 fattori sul primo. Rovesciato, è il PRESIDIO del mask.
+    await page.getByTestId("readiness-row-select").first().click();
+    await expect(page.getByTestId("readiness-explain")).toBeVisible();
+    expect(await page.getByTestId("readiness-feature").count()).toBe(0);
+  });
+});
+
+/** #219 F2/B — la spiegazione provata da chi ha il diritto di vederla (I20: TENANT_ADMIN
+ *  è un mandato HR). Senza, rovesciare il caso sopra lascerebbe un buco: «non rende» e
+ *  «rende solo a chi deve» resterebbero indistinguibili. */
+test.describe("cap③ insights /insights/succession-readiness — la spiegazione, a chi la può vedere", () => {
+  test.use({ storageState: storageStateFor("tenantAdmin") });
+
+  test("il mandato HR vede i contributi per-feature", async ({ page }) => {
+    await page.goto("/insights/succession-readiness", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(page.getByTestId("readiness-page")).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByTestId("readiness-row").first()).toBeVisible();
+
     await page.getByTestId("readiness-row-select").first().click();
     await expect(page.getByTestId("readiness-explain")).toBeVisible();
     await expect(page.getByTestId("readiness-feature").first()).toBeVisible();

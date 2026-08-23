@@ -130,9 +130,17 @@ export default function SuccessionReadinessPage() {
               <CardTitle>{t("insightsReadiness.explainTitle", { name: selected.displayName ?? selected.userId.slice(0, 8), position: positionLabel(selected) })}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                {t("insightsReadiness.explainDesc", { value: selected.value!.toFixed(1), horizon: t(`insightsReadiness.horizon.${selected.horizon}`), model: selected.modelVersion })}
-              </p>
+              {/* #219 F2/B — il gemello del guasto su `/insights/skill-gap`: `selected.value!`
+                  è un'asserzione di TypeScript che a runtime non protegge niente, e
+                  ADR-0032 toglie `value` e `horizon` sotto il solo mandato di piattaforma.
+                  `undefined.toFixed(1)` lanciava, e l'error boundary sostituiva la sezione. */}
+              {isMasked(selected, "value") ? (
+                <MaskedCell />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {t("insightsReadiness.explainDesc", { value: selected.value!.toFixed(1), horizon: t(`insightsReadiness.horizon.${selected.horizon}`), model: selected.modelVersion })}
+                </p>
+              )}
               {(selected.features ?? []).map((f) => (
                 <div key={f.feature} data-testid="readiness-feature" className="flex items-center gap-3 text-sm">
                   <span className="w-36 shrink-0 text-foreground">{t(`insightsReadiness.feature.${f.feature}`, { defaultValue: f.feature })}</span>

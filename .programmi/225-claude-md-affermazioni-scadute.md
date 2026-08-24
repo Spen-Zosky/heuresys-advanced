@@ -1,7 +1,7 @@
 # 225 — Due affermazioni del CLAUDE.md sono scadute
 
 > **item**: #225
-> **stato**: IN CORSO (S1079, 2026-08-24)
+> **stato**: CHIUSO (S1079, 2026-08-24)
 > **lab-id**: 2026-08-24-claude-md-due-affermazioni-scadute
 
 ## Perche' questo file e non solo il register

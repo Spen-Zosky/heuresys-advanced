@@ -1,7 +1,7 @@
 # 226 — La storia di RTL diventa scorrevole: l'avanzamento va schedulato, e solo dove il database e' quello vero
 
 > **item**: #226
-> **stato**: IN CORSO (S1079, 2026-08-24)
+> **stato**: CHIUSO (S1079, 2026-08-24)
 > **lab-id**: 2026-08-24-presenze-ferme-avanzamento-non-schedulato
 
 ## Decisione vincolante (non si ri-chiede)

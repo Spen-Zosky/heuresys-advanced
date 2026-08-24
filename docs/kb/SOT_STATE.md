@@ -9,6 +9,48 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1078 (2026-08-23/24) — nove firme, nove bersagli sbagliati: riprodurre prima di correggere
+
+**Chiuse**: `D-87` · `D-86` · `#224` · `#214` (prove live dei 4 perimetri + F4) · `#219` F2/F3/F4.
+**Registro debiti a 0 aperti.** Migrazioni **352** (max `000354`); gateway **97** test (erano 92);
+batteria shell **219** (erano 210, e 3 dei rossi non li aveva introdotti questa sessione).
+
+- **`D-87`** — il cancello del deploy pretendeva il verde su **ogni** commit della finestra, e la
+  storia non si riscrive: un commit rotto e poi **corretto** bloccava la produzione per sempre.
+  Nessuna delle due strade che il registro proponeva: misurando i workflow ne è emersa una terza
+  che le contiene — *la CI verifica l'**albero**, non il diff*, quindi serve il verde sul commit
+  **più recente che ha eseguito quel workflow**. #212 ci sta dentro senza clausole. Nuovo
+  `ci-gate.sh --esiti`. Due test #212 usavano lo **stesso** nome di workflow per l'armato e per
+  l'intermedio: resi fedeli al 2026-08-16, non piegati.
+- **`D-86`** — `pg_restore --clean` droppa solo ciò che è **nel dump**, quindi una tabella
+  ritirata sopravvive nel clone e ogni ritiro rompeva la chiusura successiva. Gli schemi si
+  rifanno da zero, con l'elenco **derivato dai due lati** e droppato nome per nome (`public`
+  escluso **per misura**: `pg_restore -l` dice che il dump non lo ricrea e ci vivono le
+  estensioni). ⚠ **Secondo difetto, peggiore**: il censimento contava da `information_schema`,
+  che mostra **solo ciò su cui chi interroga ha privilegi** — e i due lati interrogano con ruoli
+  diversi. Con l'esca viva leggeva `sys.tab=264` su **entrambi**: una tabella ritirata **senza
+  indici** sarebbe passata verde. Ora si conta da `pg_class`. Aggiunto l'**aggancio di prova**
+  (`CLONE_VM_DB_STUB`) e 8 casi: sabotate due guardie, rossi esattamente 2.
+- **`#224`** — la custodia dava esiti diversi secondo il fuso di chi la lanciava. Le funzioni
+  fuso-dipendenti erano **10**, non una (12 candidate meno 2 falsi positivi). **Nessun generatore
+  da emendare**, contro quanto il piano dava per certo: le 776 risposte si dividono in `STORIA36::`
+  (386, dal seed vivo, **zero** nel weekend) e `FEEDBACK_360::` (390, **i sette**), da un ETL
+  brownfield **archiviato**. Correggere la *lettura* ha scoperto un'asimmetria in *scrittura*.
+  Sanati con la mig. `000354` + giornale `staging.storia36_c2g_fuso_undo`. Prova: **4 fusi verdi**
+  sul gemello, **3** in produzione, su un arco di 25 ore.
+- **`#214`** — la prova live del **terzo** perimetro non era **mai potuta girare** (un nome di
+  variabile non rinominato in una copia), e **due criteri erano veri per vuoto** già
+  nell'originale. Il diario del gate non sapeva dire **su cosa** avesse deciso: ora registra
+  `concept`/`operation`. 4 perimetri riprovati coi criteri corretti → **4 verdi**. **F4**: i
+  NON MISURABILI da **11 a 0** (neutri 16→27), con la misura che ha corretto due volte il nome.
+- **`#219`** 4/5 — **F2**: due firme, **quattro** cause, e una era **un guasto vero** (la pagina
+  si rompeva sui campi mascherati) che il timeout teneva nascosto; scoperto che **47 spec su 100**
+  dichiarano attese più lunghe del tempo che il test ha (default 30 s → 90 s). **F3**: tre firme,
+  tre bersagli sbagliati (un campo obbligatorio mai compilato, un nome atteso stantio, un
+  `count()` che non ritenta). **F4**: il caso a11y era **verde per vuoto** — iniettata una
+  violazione grave, restava verde: esaminava **17** nodi di una pagina ferma su «Caricamento…».
+  Ora `/admin/roles` ne esamina **14.023**, con **0** violazioni di ogni severità.
+
 ### Delta S1077 (2026-08-21/22) — dieci voci su dieci, e tre volte la stessa forma d'errore
 
 **Numeri ri-derivati dal vivo**: migrazioni su disco **352** = applicate **352** (max `000354`) ·

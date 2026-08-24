@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-21T23:30:39Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3195**
+**Generato**: 2026-08-24T00:00:42Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3202**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,16 +13,16 @@
 | api-module | 356 |
 | ci | 17 |
 | claude-config | 35 |
-| config | 177 |
+| config | 182 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 351 |
+| db-migration | 352 |
 | db-other | 8 |
 | db-script | 44 |
 | db-seed | 114 |
-| doc-canonical | 695 |
+| doc-canonical | 696 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 403 |
 | ux-design-archive | 80 |
 | web-source | 241 |
-| **TOTALE** | **3195** |
+| **TOTALE** | **3202** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2637 |
+| live | 2644 |
 
 ## File per categoria
 
@@ -556,6 +556,7 @@
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-generic-catalogue-acceptance.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-perimetro-positions.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-perimetro-tenant-blueprints.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\agent-gateway\scripts\live-perimetro.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-read-acceptance.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-skills-acceptance.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-tenant-materialization-acceptance.ts` · *live* · git-tracked
@@ -591,6 +592,9 @@
 - `D:\heuresys-advanced\apps\api\scripts\diagnosi-211.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\export-accessi-csv.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\profilo-costo-avvio.mts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\prova-219-b-spiegabilita.mts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\prova-219-c-editor.mts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\prova-219-f-mie-squadre.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-124-d4.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-142-f2.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-142-f3a.mts` · *live* · git-tracked
@@ -703,6 +707,7 @@
 - `D:\heuresys-advanced\scripts\sync-memory-tree.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\sync-showcase.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\test\drift-check-rilascia-il-lucchetto.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\test\finti-comandi-clone-vm-db.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\test\run-shell-tests.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\test\verify-gate-tests.py` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\test\zp-review-tests.sh` · *live* · git-tracked
@@ -1430,6 +1435,7 @@
 - `D:\heuresys-advanced\db\migrations\000351_una_competenza_e_una_sola_anche_fra_globale_e_tenant.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000352_una_confidenza_non_puo_valere_nove_virgola_nove.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000353_i_pesi_sono_moltiplicatori_non_frazioni.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000354_una_banca_non_raccoglie_feedback_all_una_di_notte_di_sabato.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1635,6 +1641,7 @@
 - `D:\heuresys-advanced\.programmi\79-cancello-di-esposizione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\92-ciclo-valutazione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\99-domini-gerarchici-funzionali.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\D86-D87-i-due-cancelli-della-chiusura.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked

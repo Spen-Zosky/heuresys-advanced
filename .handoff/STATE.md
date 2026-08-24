@@ -5,41 +5,43 @@
 
 ## Last session brief — l'ultima sessione, in breve
 
-**S1077 — corsa autonoma su mandato in blocco: dieci voci su dieci, e tre errori che valgono
-quanto il lavoro.** Chiuse per intero le due ondate di remediation rimaste (`#222` W3 e `#223`
-W4), più la manutenzione, il quarto perimetro dell'agente e i due presidi continuativi.
+**S1078 — cinque voci chiuse, e il filo che le lega: nove volte su nove, la diagnosi scritta
+nel registro indicava il bersaglio sbagliato.** Chiusi i due debiti che mordevano a ogni
+chiusura (D-87 il cancello del deploy, D-86 il clone che non rifletteva i ritiri), la voce
+`#224` sul fuso, le prove live dei quattro perimetri dell'agente con la sua fase F4, e tre
+delle cinque fasi di `#219`.
 
-Il filo che tiene insieme la sessione è **una sola forma d'errore, incontrata tre volte**: una
-misura vera che porta a una conclusione falsa. Il rosso «orologio fuori di 11s» era la latenza
-del tunnel — lo strumento misurava sé stesso. Sul secondo fattore ho concluso dal *default* del
-codice che fosse attivo in produzione: è spento, e a dirlo il falso era un **commento** che
-descriveva l'intenzione mentre chi lo leggeva ne deduceva la configurazione. Sui pesi ho
-misurato i valori presenti (tutti sotto 1) e ne ho dedotto il dominio ammesso: il contratto
-diceva `max(10)`, e la CI mi ha smentito in venti minuti. Ogni volta la correzione è stata
-scritta **accanto al codice**, non solo nel commit.
+Il filo non è il numero di voci: è **quante volte una firma d'errore ha nascosto un'altra
+causa**. Il rosso «il clone diverge» nascondeva un censimento **cieco per privilegi**, che una
+tabella ritirata senza indici avrebbe superato indisturbato. Il rosso «la spiegabilità non
+rende» nascondeva **una pagina che si rompeva** per chi ha il profilo tecnico. Il rosso
+«l'editor non si apre» era «il pulsante non c'è», perché la tabella è paginata da mesi. E il
+caso di accessibilità **era verde per vuoto**: gli ho iniettato di proposito una violazione
+grave ed è rimasto verde, perché esaminava 17 elementi di una pagina ferma su «Caricamento…».
 
-Il lavoro più utile non era in programma: tre competenze esistevano **in doppio** — una globale
-e una residuo del brownfield — e le prove delle persone stavano spalmate fra le due, così chi
-contava dalla riga canonica ne vedeva un quarto. Fuse, con un giornale di annullamento provato
-davvero. E i due allarmi fermi da giorni sulla VM erano **tre** guasti: uno l'ha nascosto
-l'altro.
+La regola che ha pagato ogni volta è già scritta nel piano di `#219`: **sono firme, non cause —
+si riproduce prima di correggere.** Due volte ha smascherato un difetto dei miei stessi
+strumenti, non del prodotto.
 
 ## Top priorities — le priorità
 
-1. **`#224` — un controllo che cambia verdetto a seconda di dove lo lanci.** La custodia della
-   storia è verde in produzione e rossa sul gemello **con gli stessi dati**: il check fa
-   `timestamptz::date` e quindi dipende dal fuso della sessione. La conseguenza è scomoda e va
-   accettata: sistemandolo, sette eventi diventano rossi **anche in produzione**, ed è corretto.
-   Ordine obbligato — prima i dati e chi li genera, poi il controllo.
-   → `.programmi/224-check-non-deterministico-fuso.md` · ~40-60k
-2. **`#222` F6-07 — le 4.467 competenze isolate vogliono un piano proprio.** Il dossier ne
+1. **`#219` F5 — la corsa che chiude la voce.** Quattro fasi su cinque sono fatte e tutte
+   verificate live; resta **la corsa integrale** della suite (100 spec, build di produzione) che
+   deve riportare **zero falliti**, e solo allora la suite entra in CI secondo il criterio di
+   `#211`. Non è lavoro di correzione: è tempo di macchina, e va aperta con spazio davanti.
+   ⚠ Due casi *rovesciati* di F2 (su `platformAdmin`) non sono stati verificati live e cadono
+   qui, insieme al caso `E` di F1.
+   → `.programmi/219-otto-guasti-suite-e2e.md` · ~20k, in gran parte attesa
+2. **`#132` F7 — le due prove.** ⏸ **Aspetta te, e per una cosa sola**: approvare la prima
+   fonte. La corsa di F4h ha già lasciato una proposta `PASSED` — Banca d'Italia. Decisa e
+   applicata, i domini diventano ricercabili e F7 può girare. **Sblocca anche `#198` T9b**, che
+   oggi è ferma per misura: le quattro tabelle di contenuto sono a zero righe, quindi l'atto si
+   rifiuterebbe con `BLUEPRINT_CONTENT_EMPTY` invece di costruire.
+   → `.programmi/132-ricerca-genera-il-modello.md` · ~1 sessione dopo lo sblocco
+3. **`#222` F6-07 — le 4.467 competenze isolate vogliono un piano proprio.** Il dossier ne
    contava 84: sono un terzo del catalogo senza alcun arco tassonomico. Non è una fase dentro
    un'altra voce, è curatela che va pianificata per sé.
    → `.programmi/222-remediation-w3-integrita-contenuti.md` · da decomporre
-3. **`#132` F7 — le due prove.** ⏸ **Aspetta te, e per una cosa sola**: approvare la prima
-   fonte. La corsa di F4h ha già lasciato una proposta `PASSED` — Banca d'Italia. Decisa e
-   applicata, i domini diventano ricercabili e F7 può girare.
-   → `.programmi/132-ricerca-genera-il-modello.md` · ~1 sessione dopo lo sblocco
 
 ## Open questions — le domande aperte
 
@@ -50,9 +52,12 @@ l'altro.
    (`heuresys-advanced-web.service.dev.bak`, in modalità *sviluppo*). È **inerte** — verificato,
    il sistema non la carica — ma è configurazione di un servizio di produzione e non l'ho
    toccata. Si sposta, si tiene, o si lascia dov'è?
-3. **La prova live del quarto perimetro dell'agente non è stata eseguita.** L'apertura di
-   `content` è registrata e la mappa lo dimostra (24 operazioni), ma la dimostrazione end-to-end
-   pretende gateway e API avviati più una corsa dell'agente: è il primo passo del prossimo giro.
+3. **Vuoi che i moduli-catalogo prendano un permesso di lettura proprio?** Le sei tassonomie
+   (competenze, famiglie professionali, alias, livelli) sono leggibili da **chiunque sia
+   autenticato**: misurato, `skill_taxonomy:read` e `job_family:read` **non esistono**, mentre
+   le scritture hanno il loro. Ho deciso di **non** crearli — un permesso che nessuno può non
+   avere non discrimina niente, e l'apertura è coerente con I21 e I17 — ma è una scelta di
+   prodotto, e se la vuoi diversa si fa.
 
 ## Verification — la verifica
 
@@ -61,5 +66,5 @@ python docs/kb/tools/session_start.py          # menu + salute, un giro solo
 python docs/kb/tools/guardiano.py              # contesto e finestra 5h, misurati
 python docs/kb/tools/db_health.py              # le sentinelle, che devono stare a zero
 bash scripts/verifica-deploy.sh                # com'è finita in produzione
-bash db/scripts/storia36.sh custodia           # verde qui, rossa sul gemello → #224
+bash db/scripts/storia36.sh custodia           # ora verde ovunque, e a qualunque fuso (#224)
 ```

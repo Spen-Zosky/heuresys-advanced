@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-21T23:30:39Z da docs/kb/tools/build_index.py
+# generato: 2026-08-24T00:00:42Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-21T23:30:39Z"
-  total_files: 3195
+  generated_at: "2026-08-24T00:00:42Z"
+  total_files: 3202
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,16 +13,16 @@ meta:
     api-module: 356
     ci: 17
     claude-config: 35
-    config: 177
+    config: 182
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 351
+    db-migration: 352
     db-other: 8
     db-script: 44
     db-seed: 114
-    doc-canonical: 695
+    doc-canonical: 696
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2637
+    live: 2644
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2996,6 +2996,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\scripts\live-perimetro.ts'
+    root: repo
+    rel: 'apps/agent-gateway/scripts/live-perimetro.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\scripts\live-read-acceptance.ts'
     root: repo
     rel: 'apps/agent-gateway/scripts/live-read-acceptance.ts'
@@ -3203,6 +3209,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\profilo-costo-avvio.mts'
     root: repo
     rel: 'apps/api/scripts/profilo-costo-avvio.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-219-b-spiegabilita.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-219-b-spiegabilita.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-219-c-editor.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-219-c-editor.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-219-f-mie-squadre.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-219-f-mie-squadre.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -3875,6 +3899,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\test\drift-check-rilascia-il-lucchetto.sh'
     root: repo
     rel: 'scripts/test/drift-check-rilascia-il-lucchetto.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\test\finti-comandi-clone-vm-db.sh'
+    root: repo
+    rel: 'scripts/test/finti-comandi-clone-vm-db.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -8150,6 +8180,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000354_una_banca_non_raccoglie_feedback_all_una_di_notte_di_sabato.sql'
+    root: repo
+    rel: 'db/migrations/000354_una_banca_non_raccoglie_feedback_all_una_di_notte_di_sabato.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -9305,6 +9341,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\99-domini-gerarchici-funzionali.md'
     root: repo
     rel: '.programmi/99-domini-gerarchici-funzionali.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\D86-D87-i-due-cancelli-della-chiusura.md'
+    root: repo
+    rel: '.programmi/D86-D87-i-due-cancelli-della-chiusura.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

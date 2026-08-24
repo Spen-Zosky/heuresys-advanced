@@ -326,7 +326,7 @@ fi
 # messaggio di chiusura con lo stesso peso degli altri passi — un rosso taciuto qui e' un
 # elenco di azioni che mente alla sessione successiva.
 if [ -f "$ROOT/docs/kb/tools/check_marciume.py" ]; then
-  bold "=== marciume — cosa e' cambiato senza che nessuno lo toccasse (lettura, non azione) ==="
+  log "marciume — cosa e' cambiato senza che nessuno lo toccasse (lettura, non azione)"
   marciume_esito="ignoto"
   if PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python "$ROOT/docs/kb/tools/check_marciume.py"; then
     marciume_esito="eseguito"

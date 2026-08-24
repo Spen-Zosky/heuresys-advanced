@@ -1635,8 +1635,8 @@
   - perche-solo-tuo: `AGENTS.md` e' il file del canale Codex; il CLAUDE.md stabilisce che **non e' di Claude da mantenere** e che i due canali restano separati by design. La rigenerazione passa dal canale Codex, non da qui.
   - priority: P3 · effort: n/a (decisione) · doc: CLAUDE.md §"Codex read-only audit channel"
   - note: S1039 ha portato `CLAUDE.md` da 38.393 a 20.990 caratteri. `AGENTS.md` e' fermo a 36.602 e untracked: prima del refactor i due file erano identici per 158 righe su 186, ora divergono davvero. Non toccato di proposito (invariante di progetto). Nessun impatto sul lavoro CLI.
-- **#86 claude login su VM e linux-pc** · status: WAIT-INPUT
-  - input-richiesto: eseguire `claude login` su `oracle-vm-default` e su `linux-pc`
+- **#86 claude login sul linux-pc (la VM e' risolta)** · status: WAIT-INPUT
+  - input-richiesto: eseguire `claude login` **sul solo `linux-pc`** — la VM e' stata provata e risponde (S1079). Il titolo diceva «VM e linux-pc» ed era meta' falso
   - perche-solo-tuo: e' un flusso OAuth interattivo (browser + conferma umana), non eseguibile via SSH non presidiato
   - priority: P3 · effort: ~5 min · doc: memoria `ref_claude_ecosystem_alignment`
   - note: rilevato in S1039 durante l'allineamento dell'ecosistema: lo smoke test headless (`claude -p`) fallisce l'autenticazione su **entrambi** i cloni — i file di credenziali sono presenti ma i token non sono validi (coerente con "credenziali OAuth forward-only"). **L'allineamento e' riuscito** e viene mantenuto; e' solo la sessione di prova che non parte. Finche' non fai il login, la CLI su quelle macchine non e' utilizzabile. Stato pre-esistente, non causato dall'adeguamento.

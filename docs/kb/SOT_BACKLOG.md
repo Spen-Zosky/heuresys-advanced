@@ -12,7 +12,7 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
-- **#225 Il CLAUDE.md dichiara un difetto risolto come corrente, e cristallizza un numero che cambia** · status: ACTIVE
+- **#225 Il CLAUDE.md dichiara un difetto risolto come corrente, e cristallizza un numero che cambia** · status: DONE
   - priority: P2 · effort: ~15min (due modifiche a un file, piu' la rilettura di I16) · doc: lab-id 2026-08-24-claude-md-due-affermazioni-scadute
   - trovata: riallineando lo stato del lab il 2026-08-24, misurando il register e il cancello del rubinetto — non rileggendo il CLAUDE.md
   - difetto-1-I16: l'invariante dice «il resolver su quell'albero e' il bersaglio di #99 F4 — oggi percorre ancora l'albero delle posizioni, riallineato dal rammendo #114». MISURATO: #99 e' DONE, epica chiusa S1064 (10 fasi su 10), e F3 (2026-08-14, 63c0c7e8) ha portato il perimetro gerarchico sull'albero delle UNITA'. F4 e' chiusa dal 2026-08-14 (S1060)
@@ -23,6 +23,8 @@
   - la-regola-violata-e-nella-stessa-pagina: ⭐ IL PUNTO FISSO — «una misura variabile non si scrive come fatto in nessun documento; si scrive il comando che la produce». Il CLAUDE.md la enuncia e la viola, ed e' il documento da cui gli altri imparano lo stile
   - prova-che-deve-poter-fallire: dopo la correzione, cercare nel CLAUDE.md un numero che descriva una misura variabile e non sia dichiarato datato. Se ne resta uno, la correzione ha curato il sintomo e non la specie
   - chiuso-quando: I16 non afferma piu' nulla al presente su un difetto chiuso, la riga del rubinetto non porta piu' un conteggio, e il grep dei numeri variabili non trova altri casi (o li elenca in una voce nuova)
+  - ✅ **CHIUSA S1079 (2026-08-24)** — commit `91158141`. Le due affermazioni ri-misurate e confermate prima di scrivere (`#99` `DONE` nel register riga 1420 · il cancello del rubinetto eseguito, non contato a mano: le righe dell'allowlist sono 72, i suoi storici 32). I16 riscritta col fatto al presente e il difetto marcato *Storia*; la riga del rubinetto non porta piu' un conteggio.
+  - **la prova che deve poter fallire E' FALLITA, e ha trovato TRE casi in piu'** della stessa specie nello stesso file: (a) i tre file di SoT dichiarati `156KB + 206KB + 65KB`, **misurati 837KB + 390KB + 132KB** — il register e' **5,4 volte** piu' grande di quanto scritto, e quel numero esisteva proprio per dire «non aprirli a boot»; (b) `--selftest (9/9)`, sostituito con «deve uscire tutto verde»; (c) `.handoff/STATE.md (~3KB)`, misurato 4.576 byte. Corretti tutti e tre invece di aprire una voce nuova: erano la stessa correzione, sullo stesso file, applicabile nello stesso minuto
   - lab-id: 2026-08-24-claude-md-due-affermazioni-scadute
 
 - **#226 La storia di RTL diventa scorrevole: l'avanzamento va schedulato, e SOLO dove il database e' quello vero** · status: ACTIVE

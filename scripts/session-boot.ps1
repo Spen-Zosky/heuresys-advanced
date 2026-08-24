@@ -181,6 +181,41 @@ try {
     }
 } catch { $sessionMsg = "[!]    sessione NON DERIVABILE (errore al boot): il rendiconto dira' S?" }
 
+# 5c. L'EREDITA' DELLA SESSIONE PRECEDENTE (#229, S1079 — mandato di Enzo).
+#     «L'avvio di una sessione deve rilevare lo stato effettivo del repo preso in eredita'
+#     dalla sessione precedente, senza omettere alcuna lettura.»
+#
+#     La lettura che mancava: una chiusura INTERROTTA. Il diario registrava solo i passi
+#     completati, quindi una corsa uccisa a meta' lasciava una traccia identica a una corsa
+#     breve e riuscita — misurato il 2026-08-24 su una corsa uccisa a 10 minuti, che il
+#     rendiconto mostrava come «1 passi». La sessione successiva ereditava un lavoro monco
+#     e non aveva modo di saperlo.
+#
+#     Sta QUI, nel hook che gira da se', e non in `session_start.py`: quest'ultimo lo eseguo
+#     seguendo un'istruzione, e un'istruzione si puo' omettere. Un'eredita' che si scopre solo
+#     se qualcuno si ricorda di guardarla non e' un'eredita' rilevata.
+$ereditaMsg = ''
+try {
+    if ($bashExe -and (Test-Path $clog)) {
+        Push-Location $ProjectRoot
+        $rep = (& $bashExe 'scripts/close-log.sh' report 2>$null) -join "`n"
+        Pop-Location
+        if ($rep -match 'CORSE INTERROTTE') {
+            # Si riportano gli identificativi, non il solo allarme: «qualcosa e' interrotto»
+            # senza dire COSA obbliga a rifare l'indagine ogni volta.
+            $righe = @($rep -split "`n" | Where-Object { $_ -match '^\s{6}\S+\s+ultimo passo' })
+            $ereditaMsg = "[!]    EREDITA': $($righe.Count) chiusura/e INTERROTTA/E dalla sessione precedente"
+            foreach ($r in $righe) { $ereditaMsg += "`n     $($r.Trim())" }
+            $ereditaMsg += "`n       -> bash scripts/close-log.sh report   (la corsa e' stata UCCISA, non e' finita)"
+        } else {
+            $ereditaMsg = "[OK]   eredita': nessuna chiusura interrotta in sospeso"
+        }
+    } else {
+        # Anche qui: non si tace. Non aver potuto guardare non e' «a posto».
+        $ereditaMsg = "[!]    EREDITA' NON LETTA: manca bash o close-log.sh - non so se una chiusura e' rimasta a meta'"
+    }
+} catch { $ereditaMsg = "[!]    EREDITA' NON LETTA (errore al boot): non so se una chiusura e' rimasta a meta'" }
+
 # 6. State coherence reality-check (P7, design §11.7): run the handoff lint READ-ONLY and surface
 #    its verdict, so the action menu is not built on already-drifted state (a concurrent session
 #    may have left it incoherent before this one started).
@@ -226,5 +261,6 @@ Write-Output $treeMsg
 Write-Output $pushMsg
 Write-Output $journalMsg
 if ($sessionMsg) { Write-Output $sessionMsg }
+if ($ereditaMsg) { Write-Output $ereditaMsg }
 Write-Output $lintMsg
 Write-Output '==================================='

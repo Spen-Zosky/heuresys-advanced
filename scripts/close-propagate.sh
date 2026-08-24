@@ -55,6 +55,18 @@ export HEURESYS_CLOSE_RUN="${HEURESYS_CLOSE_RUN:-$(date +%Y%m%dT%H%M%S)-$$}"
 # scriverebbero due numeri diversi per la stessa chiusura. `align-clones.sh` scrive nel diario
 # anche quando e' invocato da qui: senza questa export, la sua riga sarebbe di un'altra sessione.
 export HEURESYS_SESSION="${HEURESYS_SESSION:-$(bash "$SCRIPTS/close-log.sh" sessione 2>/dev/null || echo 'S?')}"
+
+# --- APERTURA e CHIUSURA della corsa (#229, S1079) -------------------------------------
+# Il diario registrava solo i passi COMPLETATI, quindi una corsa UCCISA a meta' lasciava una
+# traccia indistinguibile da una corsa breve. Misurato il 2026-08-24 su me stesso: una corsa
+# interrotta a 10 minuti ha lasciato un solo passo (`deploy saltato`) e il rendiconto la
+# mostrava come «1 passi», cioe' come se fosse andata cosi'.
+#
+# Il segnale e' un'ASSENZA, di proposito: si scrive `apertura` all'inizio e `chiusura` alla
+# fine, e una corsa con l'apertura ma senza la chiusura E' STATA INTERROTTA. Un'assenza non
+# puo' essere registrata male — mentre un `trap` che prova a *scrivere* l'interruzione puo'
+# non scattare (SIGKILL), o scattare a sproposito (in S1049 un trap restituiva 1 su un verde).
+[ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step apertura eseguito   "corsa aperta su $(git rev-parse --short HEAD) — se manca la 'chiusura', e' stata interrotta" >/dev/null 2>&1 || true
 MARKER="${HEURESYS_MARKER:-$ROOT/.session-align.marker}"   # env override: solo per i test (default invariato)
 LINUXPC_REPO="${LINUXPC_REPO:-/home/enzo/heuresys-advanced}"
 
@@ -344,5 +356,10 @@ if [ -f "$SCRIPTS/verifica-deploy.sh" ]; then
   esac
   [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step verifica-deploy     "$verifica_esito" "lettura da host+CI+produzione sullo sha $(git rev-parse --short HEAD)" >/dev/null 2>&1 || true
 fi
+
+# La CHIUSURA della corsa: l'ultima riga che questo script scrive nel diario. La sua assenza
+# e' cio' che dice «interrotta» — vedi il blocco APERTURA in testa. Sta PRIMA del log finale
+# perche' il log e' per l'umano, questa riga e' per la sessione successiva.
+[ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step chiusura eseguito   "corsa completata: arma=$arm_outcome clone-db=$CLONE_DB deploy=$DEPLOY" >/dev/null 2>&1 || true
 
 log "close-propagate complete (mode=${MODE:-full} deploy=$DEPLOY arma=$arm_outcome clone-db=$CLONE_DB)"

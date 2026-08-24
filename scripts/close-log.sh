@@ -157,6 +157,29 @@ case "$cmd" in
           printf "\n%s  (%d passi, %s -> %s)\n", etichetta[s], cnt[s], t0[s], t1[s]
           printf "%s", body[s] }
       }' "$LOG"
+    # --- corse INTERROTTE (#229) --------------------------------------------------------
+    # Una corsa che porta l'`apertura` ma non la `chiusura` e' stata uccisa a meta'. Il
+    # segnale e' un'ASSENZA di proposito: un trap che provasse a scrivere l'interruzione puo'
+    # non scattare (SIGKILL) o scattare a sproposito, mentre un'assenza non puo' essere
+    # registrata male. Misurato il 2026-08-24: una corsa uccisa a 10 minuti compariva come
+    # «1 passi», cioe' come una corsa breve e riuscita.
+    # Le corse PRIMA di #229 non hanno l'apertura e non sono giudicabili: si tacciono invece
+    # di dichiararle interrotte, perche' un falso allarme retroattivo su decine di corse
+    # storiche e' il modo piu' rapido per far ignorare questa riga.
+    interrotte="$(awk -F'"' '
+      /"step":"apertura"/ { for(i=1;i<=NF;i++) if ($i=="run") ap[$(i+2)]=1 }
+      /"step":"chiusura"/ { for(i=1;i<=NF;i++) if ($i=="run") ch[$(i+2)]=1 }
+      END { for (r in ap) if (!(r in ch)) print r }' "$LOG" | sort)"
+    if [ -n "$interrotte" ]; then
+      echo
+      echo "  ⚠ CORSE INTERROTTE (apertura senza chiusura) — la sessione successiva le eredita:"
+      echo "$interrotte" | while read -r r; do
+        [ -n "$r" ] || continue
+        ultimo="$(grep "\"run\":\"$r\"" "$LOG" | tail -1 | grep -oE '"step":"[^"]*"' | cut -d'"' -f4)"
+        quando="$(grep "\"run\":\"$r\"" "$LOG" | tail -1 | grep -oE '"ts":"[^"]*"' | cut -d'"' -f4)"
+        printf "      %s  ultimo passo: %-16s %s\n" "$r" "${ultimo:-?}" "${quando:-?}"
+      done
+    fi
     echo
     echo "--- sintesi ---"
     printf "  righe totali : %s\n" "$(wc -l < "$LOG" | tr -d ' ')"

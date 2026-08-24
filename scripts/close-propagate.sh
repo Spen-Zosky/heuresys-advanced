@@ -297,6 +297,37 @@ fi
 # Non entra in FAILED: un deploy in volo non e' una chiusura sporca. Un DISALLINEATO invece
 # e' un guasto vero, e viene detto forte — ma resta una diagnosi da leggere, non un motivo
 # per bloccare una propagazione gia' andata a buon fine.
+# ---------------------------------------------------------------------------
+# IL CANCELLO A TEMPO (#228, S1079) — «e' marcito qualcosa mentre non guardavo?»
+#
+# `verify_gate` guarda il DIFF: un controllo scatta solo se qualcuno tocca un file che lo
+# instrada. Presume che le cose si guastino solo quando le tocchi. I sette difetti bonificati
+# in S1079 dicono di no: una data che scade, un'altra voce che si chiude, una macchina che
+# cambia, il database che si muove — nessuno di questi produce un diff, e nessun cancello
+# legato al diff puo' vederli.
+#
+# Sta QUI e non nella skill `handoff` di proposito: la skill istruisce il modello, questo
+# script gira. Un cancello che dipende dal fatto che qualcuno se lo ricordi e' esattamente
+# il difetto da cui nasce.
+#
+# NON entra in FAILED: e' una diagnosi, non un guasto della propagazione. Il suo esito va nel
+# messaggio di chiusura con lo stesso peso degli altri passi — un rosso taciuto qui e' un
+# elenco di azioni che mente alla sessione successiva.
+if [ -f "$ROOT/docs/kb/tools/check_marciume.py" ]; then
+  bold "=== marciume — cosa e' cambiato senza che nessuno lo toccasse (lettura, non azione) ==="
+  marciume_esito="ignoto"
+  if PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python "$ROOT/docs/kb/tools/check_marciume.py"; then
+    marciume_esito="eseguito"
+  else
+    rc=$?
+    case "$rc" in
+      1) marciume_esito="fallito"; warn "marciume: qualcosa e' marcito — vedi i [!!] qui sopra (la propagazione resta valida)" ;;
+      *) marciume_esito="ignoto";  warn "marciume: NON MISURABILE (exit $rc) — «non lo so» non e' «a posto»" ;;
+    esac
+  fi
+  [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step marciume "$marciume_esito" "cancello a tempo: strumenti scoperti + 5 controlli di stato" >/dev/null 2>&1 || true
+fi
+
 if [ -f "$SCRIPTS/verifica-deploy.sh" ]; then
   log "verifica — cosa dicono le macchine (lettura, non azione)"
   set +e

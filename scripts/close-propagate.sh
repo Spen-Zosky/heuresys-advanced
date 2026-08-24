@@ -49,6 +49,7 @@ SCRIPTS="$ROOT/scripts"
 # (#148). Senza, `close-log.sh report` non sapeva dire dove finiva una chiusura e
 # ne cominciava un'altra: 84 righe su 96 finivano in un blocco unico.
 export HEURESYS_CLOSE_RUN="${HEURESYS_CLOSE_RUN:-$(date +%Y%m%dT%H%M%S)-$$}"
+MARKER="${HEURESYS_MARKER:-$ROOT/.session-align.marker}"   # env override: solo per i test (default invariato)
 
 # ...e la SESSIONE che sta chiudendo (#191). Si deriva UNA volta e si eredita: se ogni passo la
 # ricalcolasse per conto suo, un passo che gira dopo il commit di handoff e uno che gira prima
@@ -229,7 +230,6 @@ fi
 # puo' essere registrata male — mentre un `trap` che prova a *scrivere* l'interruzione puo'
 # non scattare (SIGKILL), o scattare a sproposito (in S1049 un trap restituiva 1 su un verde).
 [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step apertura eseguito   "corsa aperta su $(git rev-parse --short HEAD) — se manca la 'chiusura', e' stata interrotta" >/dev/null 2>&1 || true
-MARKER="${HEURESYS_MARKER:-$ROOT/.session-align.marker}"   # env override: solo per i test (default invariato)
 
 # --- channel 1: repo + payload + memories + deploy -----------------------------------------
 log "channel 1/2 — align-clones (repo + payload + memories${align_deploy_flag:+ + deploy=$align_deploy_flag})"

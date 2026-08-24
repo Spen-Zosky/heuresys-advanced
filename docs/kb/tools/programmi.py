@@ -213,7 +213,17 @@ def difetti(programmi: list[Programma]) -> list[str]:
     for pr in programmi:
         nome = pr.percorso.name
         if not pr.fasi:
-            fuori.append(f"{nome}: nessuna fase — un programma senza fasi non e' ripartibile")
+            # La ragione del controllo e' la RIPARTENZA: senza fasi il menu non sa da dove
+            # riprendere. Un piano CHIUSO non riparte, quindi per lui non e' un difetto —
+            # e chiedergliele produce fasi retroattive inventate, che e' peggio del silenzio.
+            # Misurato in S1079: quattro piani chiusi (#224 #225 #226 D86-D87) tenevano il
+            # cancello rosso senza che ci fosse niente da correggere, e un cancello rosso per
+            # sempre e' un cancello che si impara a scavalcare.
+            # ⚠ Lo sconto vale SOLO per lo stato CHIUSO letto dal vocabolario: un piano il cui
+            # stato non e' riconosciuto vale come aperto, altrimenti basterebbe scrivere male
+            # la riga di stato per uscire dal controllo.
+            if pr.stato != "CHIUSO":
+                fuori.append(f"{nome}: nessuna fase — un programma senza fasi non e' ripartibile")
             continue
         if pr.stato not in STATI:
             fuori.append(f"{nome}: stato '{pr.stato}' fuori dal vocabolario {sorted(STATI)}")
@@ -323,6 +333,24 @@ def _selftest() -> int:
             "# 14 — vuoto\n\n> **item**: #14\n> **stato**: NON AVVIATO\n\n## Fasi\n", encoding="utf-8")
         g = difetti(carica(d))
         prova("un programma senza fasi e' un difetto", any("nessuna fase" in x for x in g))
+
+        # --- lo SCONTO per i piani chiusi, e il modo ovvio di abusarne (S1079)
+        # Il controllo qui sopra esiste per la RIPARTENZA: un piano chiuso non riparte, quindi
+        # per lui non e' un difetto. Ma lo sconto vale solo per uno stato CHIUSO *riconosciuto*:
+        # se bastasse una riga di stato scritta male, il modo di uscire dal controllo sarebbe
+        # peggiorare il file invece di correggerlo.
+        (d / "16-chiuso-vuoto.md").write_text(
+            "# 16\n\n> **item**: #16\n> **stato**: CHIUSO\n\n## Fasi\n", encoding="utf-8")
+        g = difetti(carica(d))
+        prova("un piano CHIUSO senza fasi NON e' un difetto",
+              not any("16-chiuso-vuoto" in x and "nessuna fase" in x for x in g))
+
+        (d / "17-finto-chiuso.md").write_text(
+            "# 17\n\n> **item**: #17\n> **stato**: CHIUSO ma con testo dopo\n\n## Fasi\n",
+            encoding="utf-8")
+        g = difetti(carica(d))
+        prova("uno stato illeggibile NON compra lo sconto dei chiusi",
+              any("17-finto-chiuso" in x and "nessuna fase" in x for x in g))
 
         # --- item mancante
         (d / "15-orfano.md").write_text(

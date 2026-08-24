@@ -123,6 +123,7 @@ sono stati cancellati (divieto): sono diventati rimandi di poche righe a `live-p
 - [x] **F5 Le classi di una resource multiclasse smettono di essere prosa** — FATTO 2026-08-19 · `RESOURCE_MULTICLASSE` passa da `Record<string,string>` (una frase) a `Record<string,{classi,perche}>` con le classi **enumerate e misurate sul database**, non trascritte dalla frase. Effetto sulla coda, misurato prima e dopo: **NON MISURABILI da 14 a 12**, riservati da 16 a 18 — `analytics` (`COMPENSATION, EVALUATION, PERSONAL, SKILL`) e `dashboard` (`ACTIVITY, PERSONAL, SKILL`) escono dal «non so» e cadono fra i riservati **per le classi che espongono davvero**. Aggiunte anche le 7 famiglie di `#142` (mig. `000326`), che senza una riga qui renderebbero rosso il cancello di `#99 F7`.
       🔬 **La misura ha smentito la prosa**: la frase su `analytics` nominava le «presenze», ma nessuna delle sue cinque voci dichiara `ACTIVITY`. Una descrizione che nessuno può contraddire invecchia senza che nessuno se ne accorga — ed è il motivo per cui questa fase esisteva.
       🔬 **Trovata e chiusa una cecità in attesa**: `check_concetti_agente.py` presidiava il caso «parser che non legge più nulla» per `RESOURCE_DATA_CLASS` e **per nessuna delle altre tre**. Cambiando forma, `MULTI` sarebbe tornato `{}` e ogni resource multiclasse sarebbe sparita in silenzio dalla classificazione. Ora la guardia c'è per `MULTI` e per `NO_PERSONE`.
+- [ ] **F6 Consumo della coda dei neutri, un perimetro per volta** — la fase in corso dalla S1079. Prossimi cinque per ampiezza, misurati il 2026-08-24: `visualization-graphs` (5 letture · 4 pagine) · `engagement` (4 · 2) · `tenants` (3 · 4) · `content-blueprint-links` (3 · 2) · `visualization-exports` (3 · 2). ⚠ **L'ordine non si ricopia da qui**: è cronaca di quel giorno, si ri-deriva a ogni apertura con `check_concetti_agente.py`, perché una pagina nuova sposta un modulo in coda. ⚠ `approvals` è sesto per ampiezza ma dichiara `ACTIVITY`: non è fra i neutri puri, e la sua apertura va motivata su quella classe.
 
 ## Stato misurato (2026-08-21, S1077 — ri-derivato, non ricordato)
 
@@ -138,6 +139,26 @@ l'atlante fresco e si rifiuta di rispondere se non lo è.)*
 `hrx_positions_upsert`/`_delete` **esistono e sono montati** da prima dell'apertura, dietro
 approvazione umana (`canUseTool` → HITL), e `write-gate.test.ts` lo misura: con `approve` finto a
 `true` la scrittura **passa**. L'apertura di lettura non è ciò che le tiene chiuse.
+
+## Perché la voce non si chiude quando il piano si esaurisce (S1079)
+
+> **Perché questa fase esiste.** Il 2026-08-24 il generatore del menu ha detto *«6/6 fasi fatte —
+> il piano è esaurito, la voce va chiusa»*. È un **falso positivo**, e la ragione è istruttiva: le
+> fasi F1-F5 erano la costruzione dello **strumento** (aprire i primi perimetri, rendere misurabile
+> il criterio, azzerare i NON MISURABILI). Quella fase è finita davvero. Ma il lavoro della voce non
+> era costruire il criterio: era **usarlo**, e la coda misurata lo stesso giorno porta **45 moduli**.
+> Un piano che descrive la fase finita e tace su quella in corso fa concludere allo strumento che
+> non ci sia più niente da fare.
+
+**Stato misurato il 2026-08-24** (`check_concetti_agente.py`, non ricordato): **4 aperti** ·
+**45 in coda** = 27 neutri + **0 NON MISURABILI** + 18 riservati · 12 esclusi come presidio.
+La coda è **interamente ordinabile** da F4 in poi: non c'è più nessun modulo di cui non si sappia
+cosa espone.
+
+**Il lavoro, d'ora in avanti, è uno solo e si ripete**: prendere il primo della coda dei neutri per
+ampiezza di lettura, aprirlo in sola lettura con la sua riga in `agent-perimetri.json` (decisione +
+data, senza cui lo strumento la rifiuta), rigenerare la mappa, e provarlo **live** con le tre
+domande — di cui la terza è quella che conta (una lettura fuori perimetro **deve** essere negata).
 
 ## Chiuso quando
 

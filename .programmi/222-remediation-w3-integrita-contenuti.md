@@ -1,7 +1,8 @@
 # 222 — Remediation forense W3 · Integrità e contenuti dei cataloghi
 
 > **item**: #222 · **priorità**: P2 · **stima**: ~150-250k token (multi-sessione)
-> **stato**: **CHIUSA 2026-08-21 (S1077)** — 7/7 fasi spuntate (resta `F6-07`, che ha un piano proprio)
+> **stato**: CHIUSO
+> **chiusa**: 2026-08-21 (S1077) — 7/7 fasi spuntate. ⚠ `F6-07` resta, e il suo piano proprio NON esisteva: creato in S1079 come `.programmi/227-competenze-isolate-nel-grafo.md`
 > **capofila**: `.programmi/220-remediation-dossier-forense.md` — fonte, **metodo vincolante**,
 > decisioni di Enzo e fuori-perimetro. Non si ricopia qui.
 

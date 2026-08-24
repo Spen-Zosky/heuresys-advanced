@@ -1,7 +1,8 @@
 # 219 — Gli otto guasti dietro i rossi della suite E2E integrale
 
 > **item**: #219 · **priorità**: P2 · **stima**: ~1-2 sessioni
-> **stato**: **IN CORSO** — 1/5 fasi (F1 chiusa S1077: 3 casi su 12 tolti)
+> **stato**: IN CORSO
+> **avanzamento**: 4/5 fasi (F1-F4 chiuse; resta F5, la corsa integrale)
 > **fonti**: `#211` F4 (S1072, 2026-08-19) — il triage completo, con la firma misurata di
 > ognuno, vive in `.programmi/211-suite-e2e-completa.md` §F4 e **non si ricopia qui**
 

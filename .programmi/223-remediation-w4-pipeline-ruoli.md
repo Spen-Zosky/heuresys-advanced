@@ -1,7 +1,8 @@
 # 223 — Remediation forense W4 · Pipeline, separazione ruoli, prestazioni
 
 > **item**: #223 · **priorità**: P2 · **stima**: ~120-200k token
-> **stato**: **CHIUSA 2026-08-21 (S1077)** — 6/6 fasi spuntate
+> **stato**: CHIUSO
+> **chiusa**: 2026-08-21 (S1077) — 6/6 fasi spuntate
 > **capofila**: `.programmi/220-remediation-dossier-forense.md` — fonte, **metodo vincolante**,
 > decisioni di Enzo e fuori-perimetro. Non si ricopia qui.
 

@@ -1,7 +1,8 @@
 # D-86 e D-87 — i due cancelli che rompono la chiusura
 
 > **voci**: D-87 (deploy-watch) · D-86 (clone-vm-db) · **poi** #224
-> **stato**: piano scritto S1078, simulazione fatta prima di eseguire (R24 §3)
+> **stato**: CHIUSO
+> **chiuso**: S1078 — D-86 e D-87 risolti; #224 chiusa a parte. Piano scritto e simulazione fatta prima di eseguire (R24 §3)
 > **confine di sessione**: A e B sono completabili in questa sessione. #224 dipende da
 > quanto resta dopo; se non ci sta, si dichiara e non si finge di avvicinarsi alla fine.
 

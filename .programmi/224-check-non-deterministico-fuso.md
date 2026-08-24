@@ -1,7 +1,8 @@
 # 224 — Il check che cambia verdetto a seconda di dove lo lanci
 
 > **item**: #224 · **priorità**: P2 · **stima**: ~40-60k token
-> **stato**: ✅ **CHIUSO S1078** — la custodia dà lo stesso esito su 25 ore di fuso
+> **stato**: CHIUSO
+> **chiuso**: S1078 — la custodia dà lo stesso esito su 25 ore di fuso
 > **skill**: `storia36-custodia` — il triage a tre esiti vale anche qui
 
 ## ✅ Esito (S1078) — e le tre cose che questo piano NON prevedeva

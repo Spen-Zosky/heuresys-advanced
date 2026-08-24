@@ -51,6 +51,27 @@ si ricorda di guardarla non è un'eredità rilevata.
       ⚠ **SECONDO TENTATIVO FALLITO, causa diversa**: `align-clones` e' uscito con `die` perche' avevo commit non pushati — controllo legittimo — ma le righe finali stavano **dopo** quel punto, quindi una corsa **fallita** finiva registrata come **uccisa**. Ora `die` scrive `chiusura fallito` prima di uscire: l'uscita controllata si distingue dall'ammazzamento, dove nulla puo' essere eseguito e la sola `apertura` resta l'unico segnale possibile.
       ⚠ **TERZO reperto, dal boot**: annunciava **«58 chiusure interrotte»**. Non era l'awk: erano aperture VERE, scritte dai dry-run degli shell-test perche' avevo messo il marcatore **prima** dell'uscita del dry-run. Due correzioni: l'apertura si scrive **dopo** quel ramo, e una corsa con la **sola** apertura non e' interrotta — **non e' mai partita**. Ora ne segnala **2**, che sono le due corse davvero morte oggi. Banco a cinque casi (completa · uccisa · dry-run · fallita · storica): segnala **solo** l'uccisa — una `close-propagate` reale deve lasciare **apertura + chiusura**, e un boot successivo deve dire «nessuna in sospeso». **fatto =** le due righe nel diario della stessa corsa, e l'esito letto dall'output, non dal codice
 
+## Il reperto che vale piu' delle correzioni (S1079)
+
+**Quattro volte in una sera un aggancio e' sembrato fatto e non lo era**, e ogni volta la
+verifica «rileggo il codice» l'avrebbe dichiarato a posto:
+
+| tentativo | il difetto | come si e' manifestato |
+|---|---|---|
+| 1 | `bold`, funzione **inventata leggendo l'output** invece del codice | lo script muore sulla riga, **exit 0** |
+| 2 | le righe finali stavano **dopo** un `die` legittimo | corsa fallita registrata come **uccisa** |
+| 3 | il marcatore stava **prima** dell'uscita del dry-run | **59** aperture orfane, e il boot gridava «58 interrotte» |
+| 4 | spostando il blocco mi sono portato via la definizione di `MARKER` | `unbound variable` alla prima riga utile |
+
+**La regola che ne esce**, gia' nel `chiuso-quando` e ora dimostrata: un aggancio si prova
+**eseguendo la cosa a cui e' agganciato e leggendone l'output**. Mai rileggendo il codice, e mai
+fidandosi del codice d'uscita — che nei casi 1 e 4 diceva `0` su una corsa morta.
+
+⚠ Il caso 4 ha un limite noto che si dichiara invece di lasciarlo credere: gli shell-test
+esercitano `close-propagate.sh` in **dry-run**, che esce prima della riga dove `MARKER` viene
+usato. Il difetto era quindi **fuori dalla portata** dei test esistenti, ed e' emerso solo alla
+corsa vera. Un test che copra il tratto oltre il dry-run non esiste ancora.
+
 ## Chiuso quando
 
 Una corsa reale lascia `apertura` **e** `chiusura`; una corsa uccisa lascia la sola `apertura` ed è

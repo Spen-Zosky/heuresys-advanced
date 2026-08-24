@@ -55,9 +55,11 @@ MODE="${1:-}"
 [[ -n "$MODE" ]] && shift || true
 WINDOW_END=""
 REPAIR=0
+FORZA=0
 for arg in "$@"; do
   case "$arg" in
     --repair-missing)  REPAIR=1 ;;
+    --forza)           FORZA=1 ;;
     --window-end=*)    WINDOW_END="${arg#*=}" ;;
     *) err "flag sconosciuto: $arg"; usage; exit 1 ;;
   esac
@@ -87,6 +89,49 @@ run_seeds() {
 # Estende la storia fino a ieri (o a --window-end) e ri-deriva ciò che dipende
 # dai fatti nuovi. Ogni passo è idempotente: una seconda corsa scrive 0 righe.
 avanzamento() {
+  # ------------------------------------------------------------------------
+  # GUARDIA (D-STORIA-B, Enzo 2026-08-24 — voce #226)
+  #
+  # L'avanzamento SCRIVE, e il bersaglio viene dal .env DELLA MACCHINA (righe
+  # 44-52). Sul gemello di produzione (linux-pc) quel .env punta al CLONE, che
+  # `clone-vm-db.sh` sovrascrive e che deve restare 1:1 con la produzione: un
+  # clone che si scrive la propria storia diverge, e chi confronta le due
+  # macchine vede differenze che non esistono (e' la specie di D-86).
+  #
+  # Il timer NON e' installato "solo sulla VM": `scripts/vm-deploy.sh` (righe
+  # 268-278) installa e fa `enable --now` di OGNI unit di deploy/systemd/ su
+  # ENTRAMBE le macchine. E' voluto — questa guardia e' cio' che rende innocua
+  # l'installazione sul gemello, dove l'unit gira ogni notte e non scrive nulla.
+  #
+  # Perche' il .env e non il nome dell'host: un controllo su hostname sarebbe
+  # D-39 un'altra volta («due default che valevano su una macchina sola»), gia'
+  # corretto derivando host e utente invece di cablarli. E il default e' NON
+  # scrivere: una macchina nuova non comincia da se' ad allungare una storia.
+  #
+  # `:-0` NON e' cosmetico: lo script ha `set -euo pipefail`, e un riferimento
+  # nudo a una variabile assente abortirebbe con exit != 0 — cioe' un timer
+  # FALLITO ogni notte sul gemello, che e' esattamente il rumore che questa
+  # guardia deve evitare. Qui si esce 0, dicendolo.
+  #
+  # `--forza` copre il lancio a mano: `avanzamento` e' un comando documentato
+  # nel CLAUDE.md, quindi ci si arriva anche per copia-incolla sulla macchina
+  # sbagliata. Una guardia che coprisse solo il timer lascerebbe aperta la
+  # strada piu' probabile per un errore umano.
+  # ------------------------------------------------------------------------
+  if [[ "${STORIA36_AVANZAMENTO:-0}" != "1" && "$FORZA" -eq 0 ]]; then
+    log "avanzamento NON eseguito: questa macchina non lo dichiara."
+    log "  STORIA36_AVANZAMENTO non vale 1 in $ENV_FILE"
+    log "  bersaglio che avrebbe scritto: $POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB"
+    log "  E' il comportamento previsto ovunque tranne che sulla produzione: su un"
+    log "  clone la storia divergerebbe senza che nessuno se ne accorga."
+    log "  Per eseguirlo comunque da questa macchina, ora: --forza"
+    return 0
+  fi
+  if [[ "$FORZA" -eq 1 && "${STORIA36_AVANZAMENTO:-0}" != "1" ]]; then
+    log "avanzamento FORZATO (--forza) su una macchina che non lo dichiara —"
+    log "  bersaglio: $POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB"
+  fi
+
   local adv="$REPO_ROOT/db/seeds/storia36/$ADV_SEED"
   local appr="$REPO_ROOT/db/seeds/storia36/07_approvals.sql"
   [[ -f "$adv" ]] || { err "$ADV_SEED non trovato"; exit 1; }
@@ -130,6 +175,45 @@ run_battery() {
   log "batteria: $(basename "$file")"
   "${PSQL[@]}" "${WFLAG[@]}" -v selftest=1 -f "$file" >>"$rawlog" 2>&1 || rc=$?
   return $rc
+}
+
+# ----------------------------------------------------------------------------
+# Retention dei report della custodia (D-STORIA-B, #226).
+# Con la cadenza GIORNALIERA dell'avanzamento (che termina chiamando custodia)
+# questa directory guadagna un file al giorno: ~30 al mese, senza fine. Sono
+# gitignored (.gitignore:123), quindi non sporcano l'albero di lavoro, ma
+# nessuno li pota. Si tengono gli ultimi $KEEP.
+#
+# Tre precauzioni, perche' qui si cancella:
+#   · la selezione e' un ELENCO costruito, non un jolly passato a rm;
+#   · ogni nome deve combaciare con custodia-YYYY-MM-DD.md ESATTO — un file
+#     messo li' a mano da una persona non viene toccato;
+#   · i nomi sono ISO, quindi l'ordine lessicale del glob E' quello cronologico
+#     e i primi dell'elenco sono i piu' vecchi.
+# Non serve un rollback: il report si ri-genera eseguendo la custodia.
+# ----------------------------------------------------------------------------
+prune_reports() {
+  local dir="$REPO_ROOT/qa_artifacts/storia36" keep=30 f n
+  local buoni=() vecchi=()
+  shopt -s nullglob
+  # Si FILTRA prima e si conta dopo. L'ordine opposto e' un difetto vero, visto
+  # rosso sul banco di prova il 2026-08-24: il glob `custodia-*.md` cattura anche
+  # un file che la guardia sul nome poi salva (es. `custodia-NOTE-di-enzo.md`),
+  # e contando prima del filtro `n` risultava piu' grande del dovuto — su 35
+  # report + 1 estraneo ne cancellava 6 invece di 5, lasciandone 29 invece di 30.
+  # Un errore silenzioso: nessun messaggio, solo un report in meno.
+  for f in "$dir"/custodia-*.md; do
+    [[ "$(basename "$f")" =~ ^custodia-[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$ ]] || continue
+    buoni+=("$f")
+  done
+  shopt -u nullglob
+  (( ${#buoni[@]} > keep )) || return 0
+  n=$(( ${#buoni[@]} - keep ))
+  # nomi ISO: l'ordine lessicale del glob E' quello cronologico, i primi sono i
+  # piu' vecchi. Si cancella un ELENCO costruito, mai un jolly passato a rm.
+  vecchi=("${buoni[@]:0:$n}")
+  rm -f -- "${vecchi[@]}"
+  log "retention: rimossi ${#vecchi[@]} report oltre gli ultimi $keep"
 }
 
 custodia() {
@@ -216,6 +300,7 @@ custodia() {
 
   rm -f "$rawlog"
   log "report: ${report#"$REPO_ROOT"/}"
+  prune_reports
   if [[ "$overall" -eq 0 ]]; then
     log "custodia VERDE"
   else

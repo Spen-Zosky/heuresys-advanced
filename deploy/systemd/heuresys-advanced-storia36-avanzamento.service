@@ -1,0 +1,44 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh / vm-deploy.sh;
+# User= is rewritten per-host by the deploy (ubuntu on the VM, enzo on the twin — D-39).
+#
+# D-STORIA-B (Enzo, 2026-08-24 · voce #226): AVANZAMENTO GIORNALIERO della storia
+# di RTL Bank. Esegue `db/scripts/storia36.sh avanzamento`, che estende la storia
+# dalle punte in cui si e' fermata fino a IERI, ri-deriva cio' che dipende dai
+# fatti nuovi (saldi ferie, maturita' delle lacune, approvazioni) e chiude
+# chiamando la custodia, che verifica cio' che ha appena scritto.
+#
+# Perche' esiste: RTL Bank e' l'azienda che si mostra. Presenze ferme a due
+# settimane fa la fanno sembrare rotta anche quando e' sana, ed e' il primo posto
+# dove si guarda per capire se il sistema e' vivo. Il presidio settimanale
+# esistente risponde a un'altra domanda — verifica PROPRIETA' (coerenza), non
+# FRESCHEZZA: il 2026-08-24 il journal diceva «custodia VERDE» con le presenze
+# ferme da 10 giorni.
+#
+# ⚠ QUESTA UNIT E' INSTALLATA E ATTIVA SU ENTRAMBE LE MACCHINE, ED E' VOLUTO.
+# `scripts/vm-deploy.sh` (righe 268-278) installa e fa `enable --now` di OGNI
+# unit di deploy/systemd/ su ogni host che deploya. Sul gemello di produzione lo
+# script ESCE 0 SENZA SCRIVERE, perche' il suo `.env` non dichiara
+# STORIA36_AVANZAMENTO=1 — e il bersaglio li' e' il CLONE, che deve restare 1:1
+# con la produzione. La guardia vive nello script, non nella collocazione del
+# file: cosi' protegge anche il lancio a mano, che una sottodirectory non
+# toccherebbe. Per accenderlo su una macchina: STORIA36_AVANZAMENTO=1 nel suo .env.
+[Unit]
+Description=Heuresys Advanced — avanzamento giornaliero della storia RTL (D-STORIA-B, #226)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+# Un fallimento notturno resta invisibile finche' qualcuno non guarda
+# `systemctl --failed` per caso: l'handler scrive journal + registro letto dal
+# dashboard di sessione (S1029).
+OnFailure=heuresys-unit-failure@%n.service
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=@@REPO_DIR@@
+ExecStart=/usr/bin/env bash @@REPO_DIR@@/db/scripts/storia36.sh avanzamento
+# Scrittura + la custodia intera (che da sola dura ~43 s sulla VM, ma la batteria
+# ha un tetto di 1800 s): meglio un tetto generoso che un falso fallimento.
+TimeoutStartSec=2700
+Nice=10
+IOSchedulingClass=idle

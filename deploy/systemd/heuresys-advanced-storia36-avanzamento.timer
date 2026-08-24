@@ -1,0 +1,40 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh / vm-deploy.sh.
+#
+# D-STORIA-B (#226): avanzamento GIORNALIERO alle 03:45 locali dell'host.
+#
+# Perche' GIORNALIERO e non settimanale: l'avanzamento termina chiamando la
+# custodia (storia36.sh), che sulla VM dura 43 secondi — non e' un carico che
+# imponga la cadenza settimanale. E la settimanale non basterebbe comunque: con
+# l'avanzamento il lunedi, la domenica successiva la distanza dall'ultimo dato e'
+# gia' 7 giorni, cioe' la soglia di db_health. Il rosso tornerebbe a intermittenza
+# ogni fine settimana, che e' il modo in cui un allarme smette di essere guardato.
+#
+# Perche' 03:45 e NON 04:00. Griglia dei one-shot notturni gia' in calendario:
+# backup 01:30 · auth-housekeeping 02:00 · insights 02:15 · digest 02:45 · sweep
+# GDPR 03:00 · scraping Sun 03:30 · **dr-drill Sun 04:00** · reindex Sun 04:30 ·
+# custodia storia36 Mon 04:30. Le 04:00 collidono con il dr-drill domenicale, e
+# `scripts/dr-drill.sh` fa `pg_restore` di un dump intero in un DB scratch sulla
+# STESSA istanza e poi confronta i conteggi dello scratch con quelli della
+# produzione VIVA: un avanzamento che scrive in quel momento produrrebbe uno
+# scostamento SISTEMATICO ogni domenica — di nuovo un allarme a intermittenza.
+# 03:45 e' libero tutti i giorni tranne la coda dello scraping domenicale, che
+# scrive su `reference_sync` e non su `sys.*`, e resta prima della custodia.
+#
+# `OnCalendar` usa l'ora LOCALE dell'host: la VM e' Etc/UTC, il gemello e'
+# Europe/Rome. Non e' un problema — sul gemello l'unit gira e non scrive.
+[Unit]
+Description=Heuresys Advanced — avanzamento giornaliero della storia RTL 36 mesi
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=*-*-* 03:45:00
+# Jitter contenuto: 03:45+2min resta ben dentro il margine verso le 04:00.
+RandomizedDelaySec=120
+# Recupera l'esecuzione persa se la macchina era spenta (free tier: non e' sempre
+# accesa all'orario previsto). Su una storia scorrevole conta: un giorno saltato
+# e' un giorno di distanza in piu' dalla soglia.
+Persistent=true
+Unit=heuresys-advanced-storia36-avanzamento.service
+
+[Install]
+WantedBy=timers.target

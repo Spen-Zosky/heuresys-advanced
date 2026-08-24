@@ -910,7 +910,7 @@
   - limite-dichiarato: la classificazione automatica cerca **segnali testuali** nei blocchi del registro, non legge i file di consegna né misura il database. Serve a ordinare la coda, non a promuovere o bocciare una voce. Un blocco scritto bene ma sbagliato le sfugge — ed è esattamente il caso che `#149` esiste per coprire, una voce alla volta, quando la si prende in carico
   - lab-id: 2026-08-06-ritrattare-le-ingestioni-alla-luce-delle-correzioni
 
-- **#229 L'eredita' fra sessioni: rilevare cio' che e' stato interrotto, e leggerlo all'avvio** · status: ACTIVE
+- **#229 L'eredita' fra sessioni: rilevare cio' che e' stato interrotto, e leggerlo all'avvio** · status: DONE
   - priority: **P1** · effort: ~1 sessione (marcatori nel diario + lettura all'avvio + le prove nei due versi) · doc: `.programmi/229-eredita-fra-sessioni.md`
   - ✅ **MANDATO DI ENZO, 2026-08-24** — «la responsabilita' di monitorare gli stati di avanzamento, misurandoli e registrandoli nei file opportuni che devono fungere da registri di sessione e' completamente tua», con **due controlli chirurgici**: (1) rilevare e registrare ogni azione e i suoi esiti **anche quando vengono interrotti**; (2) che l'avvio rilevi lo stato ereditato **senza omettere alcuna lettura**
   - difetto-①-misurato-su-me-stesso: una `close-propagate` **uccisa a 10 minuti** ha lasciato un solo passo (`deploy saltato`), e il rendiconto la mostrava come «1 passi» — **indistinguibile da una corsa breve e riuscita**. Il diario registrava solo i passi COMPLETATI
@@ -919,9 +919,10 @@
   - dove-vive-la-lettura: nel hook `session-boot.ps1` §5c, che **gira da se'** — non in `session_start.py`, che eseguo seguendo un'istruzione. Un'eredita' che si scopre solo se qualcuno si ricorda di guardarla non e' un'eredita' rilevata
   - prove: banco a tre casi (corsa completa · uccisa · storica senza apertura) → segnala **solo** l'uccisa · boot provato nei due versi per il numero di sessione e per l'eredita' · sabotaggio del candidato di bash → dice «NON DERIVABILE, resta com'era» e il file non cambia
   - ⚠ difetto mio trovato provando: il backtick in PowerShell e' l'**escape**, e la sequenza `` `b `` stampava «ash» al posto di «bash» — stessa specie della trappola degli heredoc
+  - ✅ **CHIUSA S1079 (2026-08-24)** — corsa reale con `apertura`→…→`chiusura`; banco a **cinque** casi (completa · uccisa · dry-run mai partita · fallita · storica) che segnala **solo** l'uccisa. ⚠ Terzo reperto: il boot annunciava «58 chiusure interrotte» — erano aperture **vere** scritte dai dry-run, perche' il marcatore stava **prima** dell'uscita del dry-run. Due correzioni: si scrive dopo quel ramo, e una corsa con la **sola** apertura non e' interrotta, **non e' mai partita**
   - chiuso-quando: una corsa reale lascia `apertura` **e** `chiusura`; una uccisa lascia la sola `apertura` ed e' **annunciata dal boot successivo**; e il numero di sessione nel diario coincide con quello vero
 
-- **#228 Il cancello a tempo: cosa e' marcito mentre non guardavo** · status: ACTIVE
+- **#228 Il cancello a tempo: cosa e' marcito mentre non guardavo** · status: DONE
   - priority: **P1** · effort: ~1 sessione (uno strumento con selftest, piu. l.aggancio e la prova sul vivo) · doc: `.programmi/228-cancello-a-tempo.md`
   - ✅ **DECISO da Enzo il 2026-08-24** — «procedi con il cancello a tempo», dopo che il censimento di S1079 ha mostrato che **sette difetti su sette** erano invisibili a ogni controllo esistente
   - il-difetto-che-lo-fa-esistere: `verify_gate` guarda il **DIFF** — un controllo scatta se e solo se qualcuno tocca un file che lo instrada. Presume che le cose si guastino **solo quando le tocchi**. Ma una data che scade, un'altra voce che si chiude, una macchina che cambia e il database che si muove **non producono alcun diff**: nessun cancello legato al diff puo' vederli. I sette difetti di S1079 erano tutti di questa specie, e sono stati trovati perche' Enzo ha chiesto di cercarli — che non e' una procedura
@@ -930,6 +931,7 @@
   - ⚠ due difetti MIEI, trovati provando: **(1)** `M4` dava 3 falsi rossi perche' trattava `FATTO` come stato vivo — i terminali sono **tre** (`DONE`/`FATTO`/`WON'T-DO`); **(2)** il primo aggancio in `close-propagate.sh` usava `$RADICE`, che li' non esiste: il test `-f` sarebbe fallito e il blocco **saltato in silenzio**, sembrando agganciato. Entrambi corretti e difesi da un caso nel selftest
   - dove-vive: agganciato a `scripts/close-propagate.sh`, **non** alla skill `handoff` — la skill istruisce il modello, lo script gira. Un cancello che dipende dal fatto che qualcuno se lo ricordi e' il difetto da cui nasce
   - prove: selftest **17/17**, ogni controllo in due versi (uno che accende, uno che deve tacere); **sette sabotaggi** eseguiti, ognuno ha acceso esattamente il caso suo
+  - ✅ **CHIUSA S1079 (2026-08-24)** — la corsa `20260824T200005-1485` porta `marciume: fallito` nel diario e la sezione del cancello nell'output della chiusura. **Tre tentativi**: le prime due volte l'aggancio non girava restituendo **exit 0** (una funzione `bold` inventata leggendo l'output invece del codice; poi un `die` legittimo che stava dopo le righe finali)
   - chiuso-quando: una chiusura di sessione lo esegue **senza che io lo lanci**, il verdetto compare nel suo output, e il passo compare in `close-log.sh report`
 
 - **#227 Le competenze isolate nel grafo: 4.464 su 14.033 senza un solo arco tassonomico** · status: ACTIVE

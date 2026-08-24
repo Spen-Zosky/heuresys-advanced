@@ -158,21 +158,29 @@ case "$cmd" in
           printf "%s", body[s] }
       }' "$LOG"
     # --- corse INTERROTTE (#229) --------------------------------------------------------
-    # Una corsa che porta l'`apertura` ma non la `chiusura` e' stata uccisa a meta'. Il
-    # segnale e' un'ASSENZA di proposito: un trap che provasse a scrivere l'interruzione puo'
-    # non scattare (SIGKILL) o scattare a sproposito, mentre un'assenza non puo' essere
-    # registrata male. Misurato il 2026-08-24: una corsa uccisa a 10 minuti compariva come
-    # «1 passi», cioe' come una corsa breve e riuscita.
-    # Le corse PRIMA di #229 non hanno l'apertura e non sono giudicabili: si tacciono invece
-    # di dichiararle interrotte, perche' un falso allarme retroattivo su decine di corse
-    # storiche e' il modo piu' rapido per far ignorare questa riga.
+    # Una corsa che porta l'`apertura` ma non la `chiusura` e' stata uccisa a meta'. Il segnale
+    # e' un'ASSENZA di proposito: un trap che provasse a scrivere l'interruzione puo' non
+    # scattare (SIGKILL) o scattare a sproposito, mentre un'assenza non puo' essere registrata
+    # male. Misurato il 2026-08-24: una corsa uccisa a 10 minuti compariva come «1 passi».
+    #
+    # DUE esclusioni, ognuna da un falso allarme reale dello stesso giorno:
+    #  · le corse PRIMA di #229 non hanno l'apertura e non sono giudicabili — dichiararle
+    #    interrotte sarebbe un allarme retroattivo su decine di corse storiche;
+    #  · una corsa con la SOLA apertura e nessun passo di lavoro NON e' interrotta: non e' mai
+    #    partita. E' il caso del dry-run, che usciva subito dopo aver scritto l'apertura — 59
+    #    aperture orfane in un pomeriggio, e il boot annunciava «58 chiusure interrotte». Una
+    #    corsa davvero uccisa ha sempre almeno un passo fatto prima di morire.
     interrotte="$(awk -F'"' '
-      /"step":"apertura"/ { for(i=1;i<=NF;i++) if ($i=="run") ap[$(i+2)]=1 }
-      /"step":"chiusura"/ { for(i=1;i<=NF;i++) if ($i=="run") ch[$(i+2)]=1 }
-      END { for (r in ap) if (!(r in ch)) print r }' "$LOG" | sort)"
+      { run=""; step=""
+        for(i=1;i<=NF;i++){ if($i=="run") run=$(i+2); if($i=="step") step=$(i+2) }
+        if(run==""||step=="") next
+        n[run]++
+        if(step=="apertura") ap[run]=1
+        if(step=="chiusura") ch[run]=1 }
+      END { for (r in ap) if (!(r in ch) && n[r] > 1) print r }' "$LOG" | sort)"
     if [ -n "$interrotte" ]; then
       echo
-      echo "  ⚠ CORSE INTERROTTE (apertura senza chiusura) — la sessione successiva le eredita:"
+      echo "  ⚠ CORSE INTERROTTE (apertura, lavoro fatto, nessuna chiusura) — la sessione successiva le eredita:"
       echo "$interrotte" | while read -r r; do
         [ -n "$r" ] || continue
         ultimo="$(grep "\"run\":\"$r\"" "$LOG" | tail -1 | grep -oE '"step":"[^"]*"' | cut -d'"' -f4)"

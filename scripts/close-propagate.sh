@@ -55,19 +55,6 @@ export HEURESYS_CLOSE_RUN="${HEURESYS_CLOSE_RUN:-$(date +%Y%m%dT%H%M%S)-$$}"
 # scriverebbero due numeri diversi per la stessa chiusura. `align-clones.sh` scrive nel diario
 # anche quando e' invocato da qui: senza questa export, la sua riga sarebbe di un'altra sessione.
 export HEURESYS_SESSION="${HEURESYS_SESSION:-$(bash "$SCRIPTS/close-log.sh" sessione 2>/dev/null || echo 'S?')}"
-
-# --- APERTURA e CHIUSURA della corsa (#229, S1079) -------------------------------------
-# Il diario registrava solo i passi COMPLETATI, quindi una corsa UCCISA a meta' lasciava una
-# traccia indistinguibile da una corsa breve. Misurato il 2026-08-24 su me stesso: una corsa
-# interrotta a 10 minuti ha lasciato un solo passo (`deploy saltato`) e il rendiconto la
-# mostrava come «1 passi», cioe' come se fosse andata cosi'.
-#
-# Il segnale e' un'ASSENZA, di proposito: si scrive `apertura` all'inizio e `chiusura` alla
-# fine, e una corsa con l'apertura ma senza la chiusura E' STATA INTERROTTA. Un'assenza non
-# puo' essere registrata male — mentre un `trap` che prova a *scrivere* l'interruzione puo'
-# non scattare (SIGKILL), o scattare a sproposito (in S1049 un trap restituiva 1 su un verde).
-[ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step apertura eseguito   "corsa aperta su $(git rev-parse --short HEAD) — se manca la 'chiusura', e' stata interrotta" >/dev/null 2>&1 || true
-MARKER="${HEURESYS_MARKER:-$ROOT/.session-align.marker}"   # env override: solo per i test (default invariato)
 LINUXPC_REPO="${LINUXPC_REPO:-/home/enzo/heuresys-advanced}"
 
 MODE="--delta"; DEPLOY="--auto-deploy"; CLONE_DB="auto"; DRYRUN="${CLOSE_PROPAGATE_DRYRUN:-}"
@@ -225,6 +212,24 @@ if [ -n "$DRYRUN" ]; then
   echo "PLAN ci-gate-nonblocking=${CI_GATE_NONBLOCKING:-1} ($([ "${CI_GATE_NONBLOCKING:-1}" = 0 ] && echo 'aspetta la CI' || echo 'non aspetta: arma e finisce'))"
   exit 0
 fi
+
+
+# ⚠ Sta DOPO l'uscita del dry-run, e il posto conta: messa prima, ogni prova in dry-run
+# scriveva un'apertura nel diario VERO senza mai arrivare alla chiusura. Misurato il
+# 2026-08-24: 59 aperture orfane in un pomeriggio, e il boot annunciava «58 chiusure
+# interrotte» — un avviso che grida al lupo e che si impara a ignorare.
+# --- APERTURA e CHIUSURA della corsa (#229, S1079) -------------------------------------
+# Il diario registrava solo i passi COMPLETATI, quindi una corsa UCCISA a meta' lasciava una
+# traccia indistinguibile da una corsa breve. Misurato il 2026-08-24 su me stesso: una corsa
+# interrotta a 10 minuti ha lasciato un solo passo (`deploy saltato`) e il rendiconto la
+# mostrava come «1 passi», cioe' come se fosse andata cosi'.
+#
+# Il segnale e' un'ASSENZA, di proposito: si scrive `apertura` all'inizio e `chiusura` alla
+# fine, e una corsa con l'apertura ma senza la chiusura E' STATA INTERROTTA. Un'assenza non
+# puo' essere registrata male — mentre un `trap` che prova a *scrivere* l'interruzione puo'
+# non scattare (SIGKILL), o scattare a sproposito (in S1049 un trap restituiva 1 su un verde).
+[ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step apertura eseguito   "corsa aperta su $(git rev-parse --short HEAD) — se manca la 'chiusura', e' stata interrotta" >/dev/null 2>&1 || true
+MARKER="${HEURESYS_MARKER:-$ROOT/.session-align.marker}"   # env override: solo per i test (default invariato)
 
 # --- channel 1: repo + payload + memories + deploy -----------------------------------------
 log "channel 1/2 — align-clones (repo + payload + memories${align_deploy_flag:+ + deploy=$align_deploy_flag})"

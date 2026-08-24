@@ -5,9 +5,22 @@
 > Se interrotti: marcare `INTERROTTO al passo N — <evidenza>` sul cluster e committare.
 
 ## Decisioni vincolanti (Enzo, S1033)
-- Finestra: **2023-08-01 → 2026-07-31** · riorg **2025-03-01** · crescita moderata · aree delicate a volumi bassi · dump prima di tutto · popolazione chiusa (nessun utente nuovo).
+- Finestra **di costruzione**: **2023-08-01 → 2026-07-31** · riorg **2025-03-01** · crescita moderata · aree delicate a volumi bassi · dump prima di tutto · popolazione chiusa (nessun utente nuovo).
+- **`D-STORIA-B` — LA STORIA È SCORREVOLE** (Enzo, 2026-08-24 · voce `#226`). Alla domanda *«la storia
+  di RTL si ferma alla finestra dichiarata, o continua ad avanzare?»* la risposta è **B: si schedula
+  l'avanzamento**. La finestra qui sopra **non è più una fine**: resta la finestra di *costruzione*, e
+  la storia **arriva sempre a ieri**. Ragione: RTL Bank è l'azienda che si mostra, e presenze ferme a
+  due settimane fa la fanno sembrare rotta anche quando è sana.
+  **Come**: `heuresys-advanced-storia36-avanzamento.timer`, giornaliero alle 03:45, che esegue
+  `storia36.sh avanzamento` — il quale chiude chiamando la custodia. **Gira solo dove il `.env`
+  dichiara `STORIA36_AVANZAMENTO=1`**: altrove esce 0 senza scrivere, perché sul gemello il bersaglio
+  è il *clone*, che deve restare 1:1 con la produzione. La custodia settimanale **resta**: se
+  l'avanzamento fallisce presto, la custodia dentro di esso non viene mai eseguita.
+  **Le prove sono già nel progetto**: `verify-storia36.sql` tratta la finestra come limite
+  **inferiore** (`v_max < DATE '2026-07-31'` fallisce se il calendario non ci *arriva*), e il commento
+  sopra lo dichiara — *«proprietà, non fotografia: il massimo può crescere»*.
 - **Verifica su 4 assi per OGNI cluster** (piano, sezione dedicata): **DOSSIER per-entità** (registro DERIVATO dal grafo FK, completezza 206/206 tabelle mappate; persona/processo/OU/posizione/team/cascata-KPI/tenant — la persona è solo un'istanza) · review adversarial (3 revisori, rilievi qui sotto nel diario) · self-test di ogni check (iniezione violazione → deve scattare) · riconciliazione aggregati. La riorg (C6) ri-esegue i dossier di TUTTE le entità toccate.
-- **Ripetibilità** (piano, sezione "tre modi"): entrypoint `db/scripts/storia36.sh` {costruzione·custodia·avanzamento} dal C0; check = asserzioni di proprietà con finestra a PARAMETRO, mai fotografie; custodia = report + triage a 3 esiti (mancante→repair · check troppo rigido→correggi il check · rottura→item), MAI riparazione automatica di righe modificate; schedulazione settimanale al C12.
+- **Ripetibilità** (piano, sezione "tre modi"): entrypoint `db/scripts/storia36.sh` {costruzione·custodia·avanzamento} dal C0; check = asserzioni di proprietà con finestra a PARAMETRO, mai fotografie; custodia = report + triage a 3 esiti (mancante→repair · check troppo rigido→correggi il check · rottura→item), MAI riparazione automatica di righe modificate; schedulazione al C12 (settimanale per la custodia; **giornaliera per l'avanzamento dal 2026-08-24**, → `D-STORIA-B` qui sopra).
 - **CANCELLO DI ESPOSIZIONE** (Enzo, 2026-07-28 — vincolante e **retroattivo su tutti i cluster**):
   *un dato che nessuna API espone non e' nel prodotto, e' solo nel database*. Nessun cluster si
   chiude finche' cio' che ha scritto non e' raggiungibile: **endpoint, schema condiviso, query,

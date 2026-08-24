@@ -15,7 +15,7 @@ Mandato di Enzo (S1033, 2026-07-27): il DBMS deve rappresentare dati che la piat
 **Decisioni già prese da Enzo — NON richiedere:**
 | Decisione | Valore |
 |---|---|
-| Profondità storica | **36 mesi**: 2023-08-01 → 2026-07-31 |
+| Profondità storica | **36 mesi**: 2023-08-01 → 2026-07-31 — è la finestra di **costruzione**, non una fine: dal 2026-08-24 (`D-STORIA-B`, voce `#226`) un timer giornaliero porta la storia **fino a ieri**. Le date qui sotto restano il perimetro che la costruzione ha prodotto |
 | Carattere del periodo | crescita moderata e stabile |
 | Discontinuità | UNA riorganizzazione a metà periodo (effective **2025-03-01**) |
 | Aree delicate (whistleblowing, GDPR, respinte, uscite) | popolate a volumi bassi e realistici, nessun caso drammatico |
@@ -35,7 +35,7 @@ Mandato di Enzo (S1033, 2026-07-27): il DBMS deve rappresentare dati che la piat
 - **Vincoli esistenti da NON violare**: CCNL floors (`seed_ccnl_floors.sql`, S1025) · straordinari QD/Dirigente esenti + NIGHT solo IT-ops (S1028) · invariante offboarding mig 000188 · RACI 105 righe (`54_raci_*`) · il custode whistleblowing è andrea.martino (mig 000205).
 - **Timestamp storici**: la scrittura via API imprime `now()` — quindi **storico = SQL che replica esattamente la macchina a stati del service** (validata dalle post-condizioni), **recente (ultime ~2 settimane) = via API reale** dove esiste una logica applicativa (approvals). Mai stati che il codice non potrebbe produrre.
 - **Gate esterni**: `sys_process_participants` resta VUOTA (attende decisione RACI di Enzo — register #24); non aggirare.
-- **Dati personali oltre la finestra**: nessun record con data > 2026-07-31; nessun evento per-utente precedente alla sua `hire_date`.
+- **Dati personali oltre la finestra**: nessun evento per-utente precedente alla sua `hire_date`. Il limite superiore **non è più `2026-07-31`**: da `D-STORIA-B` (2026-08-24) la frontiera è **ieri**, e il seed dell'avanzamento fallisce forte se le si chiede il futuro (`window_end >= current_date`). I check leggono la finestra a **parametro**, mai come costante.
 - **Ambiente**: UNO solo ed è produzione. Blocchi reversibili, dump preventivo, `pnpm db:validate` verde dopo ogni cluster.
 - **Test**: la suite non deve MAI dipendere da conteggi esatti pre-storia (feedback `no_hardcoded_test_data`); la guardia `actors-profile.integration.test.ts` (9 profili) deve restare verde dopo ogni cluster.
 - **`docs/kb/DATA_PATTERNS.md`**: ogni cluster vi registra i pattern riusabili scoperti (registro nato S1032).

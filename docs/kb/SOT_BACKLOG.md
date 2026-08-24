@@ -910,6 +910,17 @@
   - limite-dichiarato: la classificazione automatica cerca **segnali testuali** nei blocchi del registro, non legge i file di consegna né misura il database. Serve a ordinare la coda, non a promuovere o bocciare una voce. Un blocco scritto bene ma sbagliato le sfugge — ed è esattamente il caso che `#149` esiste per coprire, una voce alla volta, quando la si prende in carico
   - lab-id: 2026-08-06-ritrattare-le-ingestioni-alla-luce-delle-correzioni
 
+- **#229 L'eredita' fra sessioni: rilevare cio' che e' stato interrotto, e leggerlo all'avvio** · status: ACTIVE
+  - priority: **P1** · effort: ~1 sessione (marcatori nel diario + lettura all'avvio + le prove nei due versi) · doc: `.programmi/229-eredita-fra-sessioni.md`
+  - ✅ **MANDATO DI ENZO, 2026-08-24** — «la responsabilita' di monitorare gli stati di avanzamento, misurandoli e registrandoli nei file opportuni che devono fungere da registri di sessione e' completamente tua», con **due controlli chirurgici**: (1) rilevare e registrare ogni azione e i suoi esiti **anche quando vengono interrotti**; (2) che l'avvio rilevi lo stato ereditato **senza omettere alcuna lettura**
+  - difetto-①-misurato-su-me-stesso: una `close-propagate` **uccisa a 10 minuti** ha lasciato un solo passo (`deploy saltato`), e il rendiconto la mostrava come «1 passi» — **indistinguibile da una corsa breve e riuscita**. Il diario registrava solo i passi COMPLETATI
+  - difetto-②-il-numero-di-sessione-era-fermo-da-QUINDICI-sessioni: `.handoff/session-id` conteneva `S1064` mentre l'ultimo handoff committato era `S1079`. Causa: il boot cercava il bash di Git due livelli sopra `git.exe` piu' `bin/bash.exe`, cioe' in `mingw64/bin/bash.exe`, **che non esiste** — sta in `<root>/bin` e `<root>/usr/bin`. E **il ramo di fallimento non stampava nulla**: ogni passo di chiusura di quindici sessioni e' finito nel diario sotto il numero sbagliato, senza che niente lo dicesse
+  - la-scelta-di-forma: il segnale dell'interruzione e' un'**ASSENZA** (`apertura` senza `chiusura`), **non un trap** — un trap puo' non scattare (SIGKILL) o scattare a sproposito (S1049: uno restituiva 1 su un verde). Un'assenza non puo' essere registrata male
+  - dove-vive-la-lettura: nel hook `session-boot.ps1` §5c, che **gira da se'** — non in `session_start.py`, che eseguo seguendo un'istruzione. Un'eredita' che si scopre solo se qualcuno si ricorda di guardarla non e' un'eredita' rilevata
+  - prove: banco a tre casi (corsa completa · uccisa · storica senza apertura) → segnala **solo** l'uccisa · boot provato nei due versi per il numero di sessione e per l'eredita' · sabotaggio del candidato di bash → dice «NON DERIVABILE, resta com'era» e il file non cambia
+  - ⚠ difetto mio trovato provando: il backtick in PowerShell e' l'**escape**, e la sequenza `` `b `` stampava «ash» al posto di «bash» — stessa specie della trappola degli heredoc
+  - chiuso-quando: una corsa reale lascia `apertura` **e** `chiusura`; una uccisa lascia la sola `apertura` ed e' **annunciata dal boot successivo**; e il numero di sessione nel diario coincide con quello vero
+
 - **#228 Il cancello a tempo: cosa e' marcito mentre non guardavo** · status: ACTIVE
   - priority: **P1** · effort: ~1 sessione (uno strumento con selftest, piu. l.aggancio e la prova sul vivo) · doc: `.programmi/228-cancello-a-tempo.md`
   - ✅ **DECISO da Enzo il 2026-08-24** — «procedi con il cancello a tempo», dopo che il censimento di S1079 ha mostrato che **sette difetti su sette** erano invisibili a ogni controllo esistente

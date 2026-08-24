@@ -136,9 +136,38 @@ $sessionMsg = ''
 try {
     $sidFile = Join-Path $ProjectRoot '.handoff\session-id'
     $clog    = Join-Path $ProjectRoot 'scripts\close-log.sh'
+    # Il bash di Git si cerca in PIU' posti, e ognuno ha una ragione. Misurato qui il
+    # 2026-08-24: `git` risolveva a `C:\Git\mingw64\bin\git.exe`, quindi il vecchio calcolo
+    # (due livelli su + `bin\bash.exe`) puntava a `C:\Git\mingw64\bin\bash.exe`, che NON
+    # esiste — il bash sta in `C:\Git\bin` e in `C:\Git\usr\bin`. Git for Windows mette git
+    # in `<root>\cmd` OPPURE in `<root>\mingw64\bin` a seconda dell'installazione, quindi un
+    # solo candidato non basta: si provano tutti e vince il primo che esiste davvero.
     $gitExe  = (Get-Command git -ErrorAction SilentlyContinue).Source
-    $bashExe = if ($gitExe) { Join-Path (Split-Path (Split-Path $gitExe -Parent) -Parent) 'bin\bash.exe' } else { $null }
-    if ((Test-Path $clog) -and $bashExe -and (Test-Path $bashExe)) {
+    $bashExe = $null
+    if ($gitExe) {
+        $d = Split-Path $gitExe -Parent
+        $radici = @((Split-Path $d -Parent), (Split-Path (Split-Path $d -Parent) -Parent)) |
+                  Where-Object { $_ } | Select-Object -Unique
+        foreach ($r in $radici) {
+            foreach ($sub in @('bin\bash.exe', 'usr\bin\bash.exe')) {
+                $c = Join-Path $r $sub
+                # MAI `C:\WINDOWS\system32\bash.exe`: e' quello di WSL, che su questa macchina
+                # non ha distribuzioni e risponde in UTF-16 (trappola misurata il 2026-08-15).
+                if ((Test-Path $c) -and ($c -notlike '*\System32\*')) { $bashExe = $c; break }
+            }
+            if ($bashExe) { break }
+        }
+    }
+    if (-not (Test-Path $clog)) {
+        # I DUE RAMI CHE TACEVANO. Un boot che non riusciva a derivare la sessione lasciava
+        # `.handoff/session-id` col valore VECCHIO e non diceva nulla: misurato il 2026-08-24,
+        # il file era fermo a S1064 da QUINDICI sessioni, e ogni passo di chiusura di quelle
+        # sessioni e' finito nel diario sotto il numero sbagliato. Un fallimento silenzioso e'
+        # peggio di un errore: sembra che sia andato bene, e nessuno torna a guardare.
+        $sessionMsg = "[!]    sessione NON DERIVABILE: close-log.sh non trovato - .handoff/session-id resta com'era"
+    } elseif (-not $bashExe) {
+        $sessionMsg = "[!]    sessione NON DERIVABILE: bash di Git non trovato (git=$gitExe) - .handoff/session-id resta com'era"
+    } else {
         Remove-Item -LiteralPath $sidFile -Force -ErrorAction SilentlyContinue
         Push-Location $ProjectRoot
         $sid = (& $bashExe 'scripts/close-log.sh' sessione 2>$null | Select-Object -First 1)

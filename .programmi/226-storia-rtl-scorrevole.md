@@ -107,3 +107,45 @@ Il timer giornaliero esiste ed e' attivo su entrambe le macchine ma **scrive sol
 (verificato con `systemctl` e con la prova 1) · `db_health` esce 0 · la seconda corsa e' a delta
 zero · `D-STORIA-B` e' registrata dove la finestra e' dichiarata (`.storia36/PROGRESS.md` e il
 piano storia36).
+
+---
+
+## ESITO — S1079, 2026-08-24 (evidenza live)
+
+### Le tre prove: tutte VERDI
+
+**Prova 1 — il gemello non scrive.** `ssh linux-pc … storia36.sh avanzamento` → **EXIT=0**, e il
+messaggio dichiara il bersaglio che *avrebbe* scritto (`localhost:5432/heuresys_advanced`).
+Clone prima: `2026-08-14 | 118.360`. Clone dopo: `2026-08-14 | 118.360`. **Invariato.**
+
+La stessa guardia era già stata provata **contro la produzione** da Windows (il cui `.env` punta al
+DB vero via tunnel :5433): EXIT=0, `118.360 → 118.360`.
+
+**Prova 2 — la produzione avanza e la sonda diventa verde.** Prima corsa sulla VM: **EXIT=0**,
+*custodia VERDE*. `sys_attendance`: `2026-08-14 | 118.360` → **`2026-08-21 | 119.145`** = **785
+presenze scritte**, più 37 richieste di ferie e 37 passi di approvazione derivati.
+`db_health.py` → **exit 0**, `[ok] giorni dall'ultimo dato: presenze 3`, *«ESITO: tutto nei limiti»*.
+L'unico allarme dell'avvio è sparito.
+
+> La frontiera è il **2026-08-21**, non ieri: oggi è lunedì, ieri era domenica e sabato non è
+> lavorativo. Le presenze esistono solo nei giorni lavorativi — il venerdì è la punta corretta.
+
+**Prova 3 — idempotenza.** Seconda corsa consecutiva: **EXIT=0**, i tre cluster dichiarano
+*«0 righe scritte»*, custodia VERDE. Conteggio indipendente su 4 tabelle (non il registro dello
+strumento, che misurerebbe sé stesso):
+
+```
+PRIMA: attendance=119145 timeoff=2209 steps=837 certs=1059
+DOPO : attendance=119145 timeoff=2209 steps=837 certs=1059
+```
+
+### Prova generale della CI
+
+`ssh linux-pc … ci-rehearsal.sh` → **VERDE**: 328 migrazioni applicate, sentinelle **25/25 a zero**.
+
+### La prova della retention è stata rossa, ed è servita
+
+Prima stesura: su 35 report + 3 file estranei ne lasciava **29** invece di 30. Il conteggio era fatto
+sul glob **prima** del filtro sul nome, quindi un file che la guardia poi salva faceva cancellare un
+report in più — **in silenzio**. Corretto (filtra prima, conta dopo) e ri-provato: 30 rimasti, 3
+estranei intatti, seconda corsa a delta zero, directory inesistente → exit 0.

@@ -216,6 +216,38 @@ try {
     }
 } catch { $ereditaMsg = "[!]    EREDITA' NON LETTA (errore al boot): non so se una chiusura e' rimasta a meta'" }
 
+# 5d. IL VERDETTO LASCIATO DALLA SESSIONE PRECEDENTE (#229, S1079).
+#     Seconda lettura che mancava: `.zp/verify-verdict.json` porta l'esito dell'ultimo cancello
+#     locale, e nessuno lo leggeva all'avvio. Una sessione che chiude (o viene interrotta) con
+#     il cancello ROSSO lasciava la successiva a lavorare su un albero con una verifica fallita,
+#     senza dirlo — e il rosso si scopriva solo alla fine del turno successivo, a lavoro fatto.
+#
+#     ⚠ Il verdetto vale per lo sha su cui e' stato prodotto. Se HEAD e' andato avanti, quel
+#     verdetto non descrive piu' l'albero: si dichiara STANTIO, non «verde». Un verdetto vecchio
+#     letto come attuale e' peggio di nessun verdetto.
+$verdettoMsg = ''
+try {
+    $vf = Join-Path $ProjectRoot '.zp\verify-verdict.json'
+    if (Test-Path $vf) {
+        $v = Get-Content -Raw $vf | ConvertFrom-Json
+        $headOra = (& git -C $ProjectRoot rev-parse HEAD 2>$null)
+        $vHead = "$($v.head)"
+        $stantio = ($headOra -and $vHead -and ($headOra.Trim() -ne $vHead.Trim()))
+        if ($stantio) {
+            $verdettoMsg = "[i ]   cancello locale: verdetto '$($v.verdict)' STANTIO (era su $($vHead.Substring(0,8)), HEAD e' $($headOra.Substring(0,8))) - non descrive questo albero"
+        } elseif ("$($v.verdict)" -eq 'red') {
+            $rosse = @($v.results | Where-Object { $_.exit -ne 0 } | ForEach-Object { $_.suite })
+            $verdettoMsg = "[!]    EREDITA': il cancello locale e' ROSSO su questo stesso HEAD - suite: $($rosse -join ', ')"
+            $verdettoMsg += "`n       -> python docs/kb/tools/verify_gate.py run   (la sessione precedente lo ha lasciato rosso)"
+        } else {
+            $verdettoMsg = "[OK]   cancello locale: verdetto '$($v.verdict)' su questo HEAD"
+        }
+    } else {
+        # Nessun verdetto NON e' un verde: e' che non e' mai stato eseguito su questo albero.
+        $verdettoMsg = "[i ]   cancello locale: nessun verdetto su disco - non e' stato eseguito, non e' 'a posto'"
+    }
+} catch { $verdettoMsg = "[!]    cancello locale: verdetto NON LEGGIBILE - non so cosa ha lasciato la sessione precedente" }
+
 # 6. State coherence reality-check (P7, design §11.7): run the handoff lint READ-ONLY and surface
 #    its verdict, so the action menu is not built on already-drifted state (a concurrent session
 #    may have left it incoherent before this one started).
@@ -262,5 +294,6 @@ Write-Output $pushMsg
 Write-Output $journalMsg
 if ($sessionMsg) { Write-Output $sessionMsg }
 if ($ereditaMsg) { Write-Output $ereditaMsg }
+if ($verdettoMsg) { Write-Output $verdettoMsg }
 Write-Output $lintMsg
 Write-Output '==================================='

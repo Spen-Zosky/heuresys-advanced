@@ -32,12 +32,13 @@ strumenti, non del prodotto.
    ⚠ Due casi *rovesciati* di F2 (su `platformAdmin`) non sono stati verificati live e cadono
    qui, insieme al caso `E` di F1.
    → `.programmi/219-otto-guasti-suite-e2e.md` · ~20k, in gran parte attesa
-2. **`#132` F7 — le due prove.** ⏸ **Aspetta te, e per una cosa sola**: approvare la prima
-   fonte. La corsa di F4h ha già lasciato una proposta `PASSED` — Banca d'Italia. Decisa e
-   applicata, i domini diventano ricercabili e F7 può girare. **Sblocca anche `#198` T9b**, che
-   oggi è ferma per misura: le quattro tabelle di contenuto sono a zero righe, quindi l'atto si
-   rifiuterebbe con `BLUEPRINT_CONTENT_EMPTY` invece di costruire.
-   → `.programmi/132-ricerca-genera-il-modello.md` · ~1 sessione dopo lo sblocco
+2. **`#132` F7 — ✅ l'input è arrivato (E30, 2026-08-24), e ha allargato la fase.** Enzo ha
+   approvato Banca d'Italia **a condizione che il tenant sia di tipologia Banca**. Misurato:
+   `sys_research_sources` è vuota e **non ha alcun campo che leghi una fonte a un settore** —
+   quindi F7 non è più «approva e applica», è *approva, **costruisci il vincolo di
+   pertinenza**, applica*. Inserire la riga senza il vincolo tradirebbe la decisione.
+   **Sblocca `#198` T9b**, ferma per misura (le 4 tabelle di contenuto sono a 0 righe).
+   → `.programmi/132-ricerca-genera-il-modello.md` · ~1 sessione
 3. **`#222` F6-07 — le 4.467 competenze isolate vogliono un piano proprio.** Il dossier ne
    contava 84: sono un terzo del catalogo senza alcun arco tassonomico. Non è una fase dentro
    un'altra voce, è curatela che va pianificata per sé.

@@ -4,23 +4,23 @@
 
 ## Last session brief — l'ultima sessione, in breve
 
-**S1078 — cinque voci chiuse, e il filo che le lega: nove volte su nove, la diagnosi scritta
-nel registro indicava il bersaglio sbagliato.** Chiusi i due debiti che mordevano a ogni
-chiusura (D-87 il cancello del deploy, D-86 il clone che non rifletteva i ritiri), la voce
-`#224` sul fuso, le prove live dei quattro perimetri dell'agente con la sua fase F4, e tre
-delle cinque fasi di `#219`.
+**S1079 — due consegne del lab eseguite, e in entrambe il controllo ha trovato più di quanto
+la consegna dichiarasse.** `#225` (il `CLAUDE.md` diceva corrente un difetto risolto) e `#226`
+(`D-STORIA-B`: la storia di RTL Bank diventa scorrevole) sono chiuse.
 
-Il filo non è il numero di voci: è **quante volte una firma d'errore ha nascosto un'altra
-causa**. Il rosso «il clone diverge» nascondeva un censimento **cieco per privilegi**, che una
-tabella ritirata senza indici avrebbe superato indisturbato. Il rosso «la spiegabilità non
-rende» nascondeva **una pagina che si rompeva** per chi ha il profilo tecnico. Il rosso
-«l'editor non si apre» era «il pulsante non c'è», perché la tabella è paginata da mesi. E il
-caso di accessibilità **era verde per vuoto**: gli ho iniettato di proposito una violazione
-grave ed è rimasto verde, perché esaminava 17 elementi di una pagina ferma su «Caricamento…».
+Il filo: **la prova che doveva chiudere la voce l'ha invece allargata, due volte su due.** Su
+`#225` la ricerca dei numeri cristallizzati doveva confermare che ne restasse zero, e ne ha
+trovati **tre** — il peggiore: il file dichiarava i tre documenti di stato `156+206+65 KB`,
+misurati **837+390+132 KB**, e quel numero esiste per dire «non aprirli all'avvio». Su `#226`
+la prova della potatura è uscita **rossa**: cancellava un rapporto di troppo, in silenzio.
 
-La regola che ha pagato ogni volta è già scritta nel piano di `#219`: **sono firme, non cause —
-si riproduce prima di correggere.** Due volte ha smascherato un difetto dei miei stessi
-strumenti, non del prodotto.
+Tre scelte della consegna `#226` sono state **rifiutate con la misura accanto**: l'orario (le
+04:00 collidono con la prova di ripristino domenicale, che confronta i conteggi con la produzione
+viva), dove mettere la protezione (sul comando, non solo sull'automatismo), e come leggere
+l'interruttore (senza valore di scorta il lavoro notturno **fallirebbe** invece di fermarsi).
+
+Le presenze di RTL Bank erano ferme al 14 agosto — l'unico allarme del sistema. Ora arrivano a
+venerdì 21, il controllo di salute è verde, e da domani si aggiornano da sole.
 
 ## Top priorities — le priorità
 
@@ -31,7 +31,7 @@ strumenti, non del prodotto.
    ⚠ Due casi *rovesciati* di F2 (su `platformAdmin`) non sono stati verificati live e cadono
    qui, insieme al caso `E` di F1.
    → `.programmi/219-otto-guasti-suite-e2e.md` · ~20k, in gran parte attesa
-2. **`#132` F7 — ✅ l'input è arrivato (E30, 2026-08-24), e ha allargato la fase.** Enzo ha
+2. **`#132` F7 — l'input è arrivato (E30, 2026-08-24), e ha allargato la fase.** Enzo ha
    approvato Banca d'Italia **a condizione che il tenant sia di tipologia Banca**. Misurato:
    `sys_research_sources` è vuota e **non ha alcun campo che leghi una fonte a un settore** —
    quindi F7 non è più «approva e applica», è *approva, **costruisci il vincolo di
@@ -66,5 +66,5 @@ python docs/kb/tools/session_start.py          # menu + salute, un giro solo
 python docs/kb/tools/guardiano.py              # contesto e finestra 5h, misurati
 python docs/kb/tools/db_health.py              # le sentinelle, che devono stare a zero
 bash scripts/verifica-deploy.sh                # com'è finita in produzione
-bash db/scripts/storia36.sh custodia           # ora verde ovunque, e a qualunque fuso (#224)
+ssh oracle-vm-default 'systemctl list-timers --all | grep storia36'   # devono essere DUE (#226)
 ```

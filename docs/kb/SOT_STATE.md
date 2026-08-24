@@ -9,6 +9,40 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1079 (2026-08-24) — due consegne del lab, e in entrambe la prova ha allargato la voce
+
+**Chiuse**: `#225` (il `CLAUDE.md` dichiarava corrente un difetto risolto, e cristallizzava un
+numero che cambia) · `#226` (`D-STORIA-B` — la storia di RTL Bank diventa **scorrevole**).
+Migrazioni invariate a **352** (max `000354`); tabelle `sys.*` **231**; nessuna migrazione nuova.
+`sys_attendance`: **119.145** righe, frontiera **2026-08-21** (era 118.360 / 2026-08-14).
+
+- **`#226` — la storia di RTL arriva sempre a ieri.** Decisione di Enzo `D-STORIA-B` (2026-08-24):
+  la finestra `2023-08-01 → 2026-07-31` **cessa di essere una fine** e resta la finestra di
+  *costruzione*. Nuove unit `heuresys-advanced-storia36-avanzamento.{service,timer}`, giornaliere,
+  **installate e attive su entrambe le macchine** — ed è voluto: la guardia vive **nello script**
+  (`STORIA36_AVANZAMENTO=1` nel `.env` della macchina, con `--forza` per il lancio manuale), non
+  nella collocazione del file, così protegge anche il copia-incolla su una macchina sbagliata. Sul
+  gemello l'unit gira, esce `Result=success` e **non scrive**: clone `2026-08-14|118.360`
+  invariato. Prima corsa in produzione: **785 presenze** + 37 richieste di ferie + 37 passi
+  derivati, custodia VERDE, `db_health` **exit 0** — l'unico allarme del sistema è sparito.
+  Seconda corsa a **delta zero** su 4 tabelle. Retention dei rapporti: ultimi 30.
+- **L'orario NON è 04:00 ma 03:45**, contro quanto la consegna proponeva: la griglia completa dei
+  timer dice che `dr-drill` gira `Sun 04:00`, e confronta i conteggi dello scratch con la
+  produzione **viva** — scriverci sopra avrebbe prodotto uno scostamento sistematico ogni domenica.
+- **`#225` — il `CLAUDE.md` non descrive più il passato al presente.** `I16` diceva che il resolver
+  gerarchico *«oggi percorre ancora l'albero delle posizioni»*: `#99` è `DONE` da S1064 e F3
+  (`63c0c7e8`) l'ha portato sull'albero delle **unità**. E **cinque** numeri di misura variabile
+  hanno lasciato il posto al meccanismo che li produce — la prova ne ha trovati **tre oltre**
+  a quello cercato, il peggiore essendo `156KB + 206KB + 65KB` per i tre file di SoT, misurati
+  **837KB + 390KB + 132KB**: il register è **5,4 volte** più grande di quanto il file dichiarasse,
+  e quel numero esiste proprio per dire «non aprirli al boot».
+- **Una prova mia è uscita rossa, ed è servita**: la potatura dei rapporti della custodia ne
+  lasciava **29** invece di 30, perché contava il glob **prima** del filtro sul nome — un file
+  estraneo che la guardia poi salva faceva cancellare un rapporto in più, in silenzio.
+- Prova generale prima del push **VERDE** (328 migrazioni, sentinelle 25/25 a zero);
+  `systemd-analyze verify` sulle due unit exit 0; CI **5/5 verde** su `8b176210`, deployato in
+  produzione dal sorvegliante al primo tick verde.
+
 ### Delta S1078 (2026-08-23/24) — nove firme, nove bersagli sbagliati: riprodurre prima di correggere
 
 **Chiuse**: `D-87` · `D-86` · `#224` · `#214` (prove live dei 4 perimetri + F4) · `#219` F2/F3/F4.
@@ -57,7 +91,7 @@ batteria shell **219** (erano 210, e 3 dei rossi non li aveva introdotti questa 
 utenti **161** · posizioni **315** · team **26** · tenant ACTIVE **2** · RBAC map **980** ·
 skill **14.033** (erano 14.036: `000351` ha fuso 3 doppioni) · moduli API **98** · perimetri
 dell'agente aperti **4** con **24** operazioni risolvibili (erano 3 e 17) · sentinelle **25** ·
-HEAD `ac681c7c`.
+HEAD `728e0d68`.
 
 **Le due ondate rimaste, chiuse**: `#222` **CHIUSA 7/7** · `#223` **CHIUSA 6/6**.
 

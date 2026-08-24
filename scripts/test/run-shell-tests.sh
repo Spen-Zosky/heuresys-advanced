@@ -1491,6 +1491,39 @@ else
   fi
 fi
 
+
+# ------------------------------- Z. una funzione USATA e mai DEFINITA (S1079, #229)
+# Nasce da un difetto reale del 2026-08-24: un blocco nuovo di `close-propagate.sh` chiamava
+# `bold`, che in quello script NON esiste (le sue sono `log`/`warn`/`die`). Il nome era stato
+# dedotto dall'OUTPUT — che mostra «=== … ===» in grassetto — invece che dal codice.
+#
+# Perche' e' passato inosservato: lo script e' morto su quella riga e ha comunque restituito
+# **exit 0**. Il codice d'uscita diceva «bene», e solo l'output diceva la verita'. Le due righe
+# che venivano dopo (il cancello a tempo e il marcatore di CHIUSURA della corsa) non sono mai
+# state eseguite: una corsa monca che si dichiarava riuscita.
+#
+# Volutamente CONSERVATIVO: cerca solo i nomi tipici di questi script, come primo token di una
+# riga. Un analizzatore generale darebbe falsi positivi su comandi esterni e alias, e un test
+# rumoroso e' un test che si smette di guardare.
+section "funzioni usate e mai definite (S1079)"
+fn_rossi=0
+for f in "$ROOT"/scripts/*.sh; do
+  [ -f "$f" ] || continue
+  for nome in $(grep -oE '^[[:space:]]*(bold|log|warn|say|die|info|nota|titolo|step)[[:space:]]' "$f" 2>/dev/null \
+                | sed 's/[[:space:]]//g' | sort -u); do
+    grep -qE "^[[:space:]]*${nome}\(\)" "$f" && continue
+    # puo' arrivare da un file sorgentato: si guarda anche in scripts/lib, altrimenti il test
+    # accuserebbe uno script corretto che eredita le sue funzioni da una libreria.
+    grep -qrE "^[[:space:]]*${nome}\(\)" "$ROOT/scripts/lib" 2>/dev/null && continue
+    printf '    %s: usa «%s», non definita ne qui ne in scripts/lib\n' "$(basename "$f")" "$nome" >&2
+    fn_rossi=$((fn_rossi+1))
+  done
+done
+if [ "$fn_rossi" = 0 ]; then
+  ok "ogni funzione usata negli script e' definita"
+else
+  fail "$fn_rossi funzione/i usata/e e mai definita/e — una riga morta che restituisce exit 0"
+fi
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

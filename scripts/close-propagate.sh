@@ -105,7 +105,19 @@ fi
 
 log()  { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
 warn() { printf '\033[33m[warn]\033[0m %s\n' "$*" >&2; }
-die()  { printf '\033[31m[FATAL]\033[0m %s\n' "$*" >&2; exit 1; }
+# `die` registra la CHIUSURA della corsa prima di uscire (#229, S1079). Senza, una corsa
+# FALLITA finiva nel diario con la sola `apertura` — cioe' indistinguibile da una UCCISA, e le
+# due vanno lette diversamente: un fallimento ha una causa scritta nell'output, un'interruzione
+# no. Misurato il 2026-08-24: `align-clones` e' fallito su un host raggiungibile, `die` e' uscito,
+# e la corsa risultava «interrotta» — con l'esito sbagliato ereditato dalla sessione dopo.
+# ⚠ Questo NON sostituisce il segnale-per-assenza: `die` copre l'uscita CONTROLLATA, mentre un
+# SIGKILL non esegue nulla — e li' la sola `apertura` resta il segnale giusto.
+die()  {
+  printf '\033[31m[FATAL]\033[0m %s\n' "$*" >&2
+  [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step chiusura fallito \
+    "corsa TERMINATA con errore: $*" >/dev/null 2>&1 || true
+  exit 1
+}
 
 FAILED=""
 

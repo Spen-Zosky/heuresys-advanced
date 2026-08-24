@@ -1,7 +1,6 @@
 # STATE — vista rapida
 
-> Priorità e domande aperte. I numeri (versioni, conteggi, architettura) stanno in
-> `docs/kb/SOT_STATE.md`, che è l'altra metà e non ripete niente di quanto è scritto qui.
+> Priorità e domande aperte. I numeri stanno in `docs/kb/SOT_STATE.md`, l'altra metà.
 
 ## Last session brief — l'ultima sessione, in breve
 
@@ -37,7 +36,7 @@ strumenti, non del prodotto.
    `sys_research_sources` è vuota e **non ha alcun campo che leghi una fonte a un settore** —
    quindi F7 non è più «approva e applica», è *approva, **costruisci il vincolo di
    pertinenza**, applica*. Inserire la riga senza il vincolo tradirebbe la decisione.
-   **Sblocca `#198` T9b**, ferma per misura (le 4 tabelle di contenuto sono a 0 righe).
+   **Sblocca `#198` T9b**, ferma per misura: le tabelle di contenuto sono vuote.
    → `.programmi/132-ricerca-genera-il-modello.md` · ~1 sessione
 3. **`#222` F6-07 — le 4.467 competenze isolate vogliono un piano proprio.** Il dossier ne
    contava 84: sono un terzo del catalogo senza alcun arco tassonomico. Non è una fase dentro
@@ -53,12 +52,12 @@ strumenti, non del prodotto.
    (`heuresys-advanced-web.service.dev.bak`, in modalità *sviluppo*). È **inerte** — verificato,
    il sistema non la carica — ma è configurazione di un servizio di produzione e non l'ho
    toccata. Si sposta, si tiene, o si lascia dov'è?
-3. **Vuoi che i moduli-catalogo prendano un permesso di lettura proprio?** Le sei tassonomie
+3. **Vuoi che i moduli-catalogo prendano un permesso di lettura proprio?** Le tassonomie
    (competenze, famiglie professionali, alias, livelli) sono leggibili da **chiunque sia
    autenticato**: misurato, `skill_taxonomy:read` e `job_family:read` **non esistono**, mentre
    le scritture hanno il loro. Ho deciso di **non** crearli — un permesso che nessuno può non
-   avere non discrimina niente, e l'apertura è coerente con I21 e I17 — ma è una scelta di
-   prodotto, e se la vuoi diversa si fa.
+   avere non discrimina niente, e l'apertura è coerente con I21 e I17 — ma se la vuoi diversa
+   si fa.
 
 ## Verification — la verifica
 

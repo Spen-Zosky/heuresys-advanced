@@ -9,6 +9,53 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1079 bis (2026-08-24, sera) — il cancello guardava il diff, e il diff non copre ciò che marcisce
+
+**Chiuse**: `#228` (il cancello a tempo) · `#229` (l'eredità fra sessioni). **Aperta**: `#227`
+(4.464 competenze isolate, il 31,8% del catalogo — era lavoro **orfano** dentro `#222` chiusa).
+Register: **14 ACTIVE · 2 GATED · 6 WAIT-INPUT · 2 HOLD**. Migrazioni **352** (max `000354`),
+tabelle `sys.*` **231**, presenze **119.145** fino al **2026-08-21**. Strumenti a **25**.
+
+- **La scoperta.** `verify_gate` guarda il **DIFF**: un controllo scatta se e solo se qualcuno
+  tocca un file che lo instrada. Presume che le cose si guastino **solo quando le tocchi**. I
+  sette difetti del registro bonificati questa sera erano tutti di un'altra specie — una data
+  che scade (`#148`), un'altra voce che si chiude (`#169` su `#147`), una macchina che cambia
+  (`#86`), una voce chiusa che si porta via un residuo (`F6-07` → 4.464 competenze), il
+  database che si muove (`verifica_incrociata` **rossa**, e nessuno sapeva da quando).
+  **Nessuno produce un diff, quindi nessun cancello legato al diff poteva vederli.**
+- **`#228` il cancello a tempo** (`docs/kb/tools/check_marciume.py`, agganciato a
+  `close-propagate.sh`): esegue i **10** strumenti che nessun diff instrada — l'elenco è
+  **derivato** leggendo `verify_gate.SUITES` e gli import di `session_start`, mai scritto a
+  mano — più cinque controlli nuovi (`M1` dipendenza sciolta · `M2` data passata · `M3` residuo
+  orfano · `M4` piano esaurito su voce viva · `M5` attesa stantia). Selftest **17/17**, ogni
+  controllo in due versi, **sette sabotaggi** che hanno acceso ognuno il caso suo.
+- **La prova che regge**: preso il register **com'era al commit `45e63abf`** (prima che la
+  sessione toccasse nulla) e dato in pasto ai controlli scritti oggi — ritrovano da soli `#169`,
+  `#148`, i quattro residui orfani e le sei attese stantie.
+- **`#229` l'eredità fra sessioni**, tre difetti misurati: (a) `.handoff/session-id` era fermo a
+  **S1064** da **quindici** sessioni, perché il boot cercava il bash di Git in
+  `mingw64/bin/bash.exe` — che non esiste — e **il ramo di fallimento non stampava nulla**;
+  (b) una chiusura **uccisa** era indistinguibile da una riuscita: ora si scrive `apertura`
+  all'inizio e `chiusura` alla fine, e il segnale è un'**assenza** (un trap può non scattare su
+  SIGKILL); (c) il verdetto di `verify_gate` **non veniva letto all'avvio**, quindi si ereditava
+  un rosso senza saperlo — ora distingue **rosso · stantio · assente**.
+- ⚠ **L'aggancio è fallito DUE volte restituendo `exit 0`**, ed è il reperto più istruttivo:
+  la prima per una funzione `bold` **inventata leggendo l'output** invece del codice (le sue
+  sono `log`/`warn`/`die`), la seconda perché le righe finali stavano **dopo** un `die`
+  legittimo. Rimedi: `die` registra `chiusura fallito` prima di uscire, e un test nuovo negli
+  shell-test coglie **ogni** funzione usata e mai definita (suite **220 ok, 0 falliti**).
+- ⚠ **Terzo reperto, dal mio stesso avviso**: annunciava «**58** chiusure interrotte». Erano
+  aperture **vere**, scritte dai dry-run degli shell-test perché il marcatore stava **prima**
+  dell'uscita del dry-run. Due correzioni: si scrive dopo quel ramo, e **una corsa con la sola
+  apertura non è interrotta — non è mai partita**. Ora ne segnala **2**, che sono le due corse
+  davvero morte. Banco a **cinque** casi (completa · uccisa · dry-run · fallita · storica).
+- **Bonifica del registro**: `#214` non «va chiusa» ma aveva il piano fermo alla fase costruita
+  (coda misurata: **45** moduli) · `#169` e `#148` sbloccate · `#86` dimezzata **provando** il
+  login (VM risponde `PONG`, gemello `OAuth session expired`) · tre piani con lo stato in un
+  formato che il parser non leggeva (`#222` e `#223` risultavano non finiti pur avendo tutte le
+  spunte) · quattro piani chiusi che tenevano il cancello rosso per sempre → il controllo ora
+  esenta i **chiusi**, con due casi nel selftest che difendono l'esenzione dall'abuso.
+
 ### Delta S1079 (2026-08-24) — due consegne del lab, e in entrambe la prova ha allargato la voce
 
 **Chiuse**: `#225` (il `CLAUDE.md` dichiarava corrente un difetto risolto, e cristallizzava un
@@ -91,7 +138,7 @@ batteria shell **219** (erano 210, e 3 dei rossi non li aveva introdotti questa 
 utenti **161** · posizioni **315** · team **26** · tenant ACTIVE **2** · RBAC map **980** ·
 skill **14.033** (erano 14.036: `000351` ha fuso 3 doppioni) · moduli API **98** · perimetri
 dell'agente aperti **4** con **24** operazioni risolvibili (erano 3 e 17) · sentinelle **25** ·
-HEAD `728e0d68`.
+HEAD `1162e7c6`.
 
 **Le due ondate rimaste, chiuse**: `#222` **CHIUSA 7/7** · `#223` **CHIUSA 6/6**.
 

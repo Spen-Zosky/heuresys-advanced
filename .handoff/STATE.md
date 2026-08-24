@@ -4,67 +4,56 @@
 
 ## Last session brief — l'ultima sessione, in breve
 
-**S1079 — due consegne del lab eseguite, e in entrambe il controllo ha trovato più di quanto
-la consegna dichiarasse.** `#225` (il `CLAUDE.md` diceva corrente un difetto risolto) e `#226`
-(`D-STORIA-B`: la storia di RTL Bank diventa scorrevole) sono chiuse.
+**S1079 — due consegne del lab eseguite, poi la scoperta che ha cambiato la sessione: il
+sistema di controllo era cieco su un'intera classe di guasti.** Chiuse `#225` `#226` `#228`
+`#229`; aperta `#227` (4.464 competenze isolate — lavoro che era orfano).
 
-Il filo: **la prova che doveva chiudere la voce l'ha invece allargata, due volte su due.** Su
-`#225` la ricerca dei numeri cristallizzati doveva confermare che ne restasse zero, e ne ha
-trovati **tre** — il peggiore: il file dichiarava i tre documenti di stato `156+206+65 KB`,
-misurati **837+390+132 KB**, e quel numero esiste per dire «non aprirli all'avvio». Su `#226`
-la prova della potatura è uscita **rossa**: cancellava un rapporto di troppo, in silenzio.
+Il filo: **il cancello locale guarda il *diff*, e presume che le cose si guastino solo quando
+le tocchi.** Ma una data che scade, un'altra voce che si chiude, una macchina che cambia e il
+database che si muove non producono alcun diff. Sette difetti del registro erano invisibili
+per costruzione, e sono emersi solo perché Enzo ha chiesto di cercarli.
 
-Tre scelte della consegna `#226` sono state **rifiutate con la misura accanto**: l'orario (le
-04:00 collidono con la prova di ripristino domenicale, che confronta i conteggi con la produzione
-viva), dove mettere la protezione (sul comando, non solo sull'automatismo), e come leggere
-l'interruttore (senza valore di scorta il lavoro notturno **fallirebbe** invece di fermarsi).
+Nascono da lì `#228` (il **cancello a tempo**: a ogni chiusura esegue i 10 strumenti che nessun
+diff instrada, più cinque controlli di stato nuovi) e `#229` (**l'eredità fra sessioni**: il
+numero di sessione era fermo da *quindici* sessioni e il boot **taceva**; una chiusura uccisa
+era indistinguibile da una riuscita; il verdetto del cancello non veniva letto all'avvio).
 
-Le presenze di RTL Bank erano ferme al 14 agosto — l'unico allarme del sistema. Ora arrivano a
-venerdì 21, il controllo di salute è verde, e da domani si aggiornano da sole.
+**La lezione più cara**: l'aggancio del cancello è fallito **due volte restituendo `exit 0`**.
+Verificarlo rileggendo il codice l'avrebbe dichiarato fatto, e sarebbe stato falso due volte.
 
 ## Top priorities — le priorità
 
-1. **`#219` F5 — la corsa che chiude la voce.** Quattro fasi su cinque sono fatte e tutte
-   verificate live; resta **la corsa integrale** della suite (100 spec, build di produzione) che
-   deve riportare **zero falliti**, e solo allora la suite entra in CI secondo il criterio di
-   `#211`. Non è lavoro di correzione: è tempo di macchina, e va aperta con spazio davanti.
-   ⚠ Due casi *rovesciati* di F2 (su `platformAdmin`) non sono stati verificati live e cadono
-   qui, insieme al caso `E` di F1.
+1. **`#227` — le 4.464 competenze isolate nel grafo, il 31,8% del catalogo.** Era il residuo
+   `F6-07` di `#222`, chiusa promettendo «un piano proprio» **mai creato**: lavoro orfano per
+   tre giorni, invisibile a ogni elenco. Ha 5 fasi, e la prima è un **censimento per specie** —
+   un elenco piatto di 4.464 righe non è un piano di lavoro.
+   → `.programmi/227-competenze-isolate-nel-grafo.md` · ~2-3 sessioni
+2. **`verifica_incrociata` è ROSSA, e nessuno sapeva da quando.** 10 verifiche con difetti, la
+   più grossa da **667 casi** (requisito di competenza non coperto). Va **classificata** prima
+   di diventare lavoro: alcune righe saranno difetti veri, altre la normalità di un'azienda
+   vera mal classificata dallo strumento. Ora il cancello a tempo la esegue a ogni chiusura.
+   → nessun piano ancora · da decomporre
+3. **`#219` F5 — la corsa che chiude la voce.** Quattro fasi su cinque fatte e verificate live;
+   resta la corsa integrale della suite (100 spec, build di produzione) con **zero falliti**.
+   Non è correzione: è tempo di macchina, e va aperta con spazio davanti.
    → `.programmi/219-otto-guasti-suite-e2e.md` · ~20k, in gran parte attesa
-2. **`#132` F7 — l'input è arrivato (E30, 2026-08-24), e ha allargato la fase.** Enzo ha
-   approvato Banca d'Italia **a condizione che il tenant sia di tipologia Banca**. Misurato:
-   `sys_research_sources` è vuota e **non ha alcun campo che leghi una fonte a un settore** —
-   quindi F7 non è più «approva e applica», è *approva, **costruisci il vincolo di
-   pertinenza**, applica*. Inserire la riga senza il vincolo tradirebbe la decisione.
-   **Sblocca `#198` T9b**, ferma per misura: le tabelle di contenuto sono vuote.
-   → `.programmi/132-ricerca-genera-il-modello.md` · ~1 sessione
-3. **`#222` F6-07 — le 4.467 competenze isolate vogliono un piano proprio.** Il dossier ne
-   contava 84: sono un terzo del catalogo senza alcun arco tassonomico. Non è una fase dentro
-   un'altra voce, è curatela che va pianificata per sé.
-   → `.programmi/222-remediation-w3-integrita-contenuti.md` · da decomporre
 
 ## Open questions — le domande aperte
 
-1. **Il fornitore di proposte non è configurato in produzione.** Le due variabili
-   (`RESEARCH_GATEWAY_URL` / `RESEARCH_GATEWAY_TOKEN`) vanno nel `.env` — che è tuo. Finché
-   mancano, l'API dice «non c'è chi propone», ed è il comportamento voluto.
-2. **Sulla VM c'è una vecchia unit di servizio lasciata accanto a quella viva**
-   (`heuresys-advanced-web.service.dev.bak`, in modalità *sviluppo*). È **inerte** — verificato,
-   il sistema non la carica — ma è configurazione di un servizio di produzione e non l'ho
-   toccata. Si sposta, si tiene, o si lascia dov'è?
-3. **Vuoi che i moduli-catalogo prendano un permesso di lettura proprio?** Le tassonomie
-   (competenze, famiglie professionali, alias, livelli) sono leggibili da **chiunque sia
-   autenticato**: misurato, `skill_taxonomy:read` e `job_family:read` **non esistono**, mentre
-   le scritture hanno il loro. Ho deciso di **non** crearli — un permesso che nessuno può non
-   avere non discrimina niente, e l'apertura è coerente con I21 e I17 — ma se la vuoi diversa
-   si fa.
+1. **Quattro voci aspettano un tuo input e non portano alcuna data**: `#85` `#8` `#16` `#52`.
+   Non si sa da quanto aspettano, e potrebbero essere già risolte — è successo a `#86`, che
+   chiedeva il login su due macchine e su una funzionava già. Le verifico io una per una?
+2. **Il fornitore di proposte non è configurato in produzione** (`RESEARCH_GATEWAY_URL` /
+   `_TOKEN` nel `.env`, che è tuo). Finché mancano, l'API dice «non c'è chi propone».
+3. **Sulla VM resta una vecchia unit di servizio accanto a quella viva**
+   (`heuresys-advanced-web.service.dev.bak`, in modalità sviluppo). È **inerte** — verificato —
+   ma è configurazione di un servizio di produzione. Si sposta, si tiene, o si lascia?
 
 ## Verification — la verifica
 
 ```bash
-python docs/kb/tools/session_start.py          # menu + salute, un giro solo
-python docs/kb/tools/guardiano.py              # contesto e finestra 5h, misurati
-python docs/kb/tools/db_health.py              # le sentinelle, che devono stare a zero
-bash scripts/verifica-deploy.sh                # com'è finita in produzione
-ssh oracle-vm-default 'systemctl list-timers --all | grep storia36'   # devono essere DUE (#226)
+python docs/kb/tools/session_start.py            # menu + salute, un giro solo
+python docs/kb/tools/check_marciume.py           # cio' che marcisce senza produrre un diff
+python docs/kb/tools/guardiano.py                # contesto e finestra 5h, misurati
+bash scripts/close-log.sh report                 # corse interrotte ereditate
 ```

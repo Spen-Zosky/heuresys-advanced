@@ -35,3 +35,22 @@ e serve una voce nuova.
 
 I16 non afferma piu' nulla al presente su un difetto chiuso · la riga del rubinetto non porta piu'
 un conteggio · la ricerca dei numeri variabili non trova altri casi, oppure li elenca in una voce nuova.
+
+---
+
+## ESITO — S1079, 2026-08-24
+
+**Le due correzioni chieste sono state applicate.** Ma la prova che deve poter fallire **è fallita**,
+e ha trovato **tre casi in più della stessa specie** nello stesso file:
+
+| caso | il file diceva | la misura del 2026-08-24 | cosa ho scritto |
+|---|---|---|---|
+| dimensione dei tre file di SoT | `156KB + 206KB + 65KB` | **837KB + 390KB + 132KB** — il register è **5,4 volte** più grande | «sono i tre documenti più grandi del repo e crescono a ogni sessione» |
+| casi di selftest del rubinetto | `--selftest (9/9)` | 9/9 verdi **oggi**, ma cresce se si aggiungono casi | `--selftest` (deve uscire tutto verde) |
+| dimensione di `.handoff/STATE.md` | `~3KB` | **4.576 byte** | il criterio («una frazione dei tre sopra»), non il numero |
+
+**Non ho aperto una voce nuova**: erano la stessa correzione, sullo stesso file, applicabile subito.
+Il primo caso non è cosmetico — quel numero esiste proprio per dire «non aprirli a boot», e
+sottostimarlo di 5 volte rendeva l'avvertimento meno credibile di quanto dovesse essere.
+
+**Stato: CHIUSO.**

@@ -605,14 +605,29 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   **contenuto** del commento, non sulla sua presenza: un commento vuoto passerebbe un controllo di
   sola esistenza. Prova generale VERDE, 311 migrazioni, 23/23 sentinelle; misurato dopo: famiglie
   1 · varianti 1, descritte e non toccate.
-- [ ] **F7 le due prove** — ✅ **SBLOCCATA: l'approvazione è ARRIVATA (Enzo, S1081, 2026-08-25)**:
-  *«Approva bancaditalia.it come prima fonte»*, motivazione: fonte istituzionale della banca
-  centrale, autorevole per il dominio bancario di RTL. ⚠ **L'applicazione NON è stata eseguita**
-  (S1081 chiusa dal guardiano, finestra 5h ≥ 80%): chi riprende esegue la rotta di decisione
-  sulla proposta `PASSED` di `F4h` (id corsa qui sotto) con approvatore=Enzo, data 2026-08-25 e
-  la motivazione sopra, poi `apply-research` — e F7 gira. Prima l'azienda nuova di settore
-  diverso (se ne esce una banca, l'archetipo è sparito solo di nome), poi RTL Bank come metro
-  di qualità.
+- [ ] **F7 le due prove** — ✅ **SBLOCCATA ED ESEGUITA A METÀ (S1081, 2026-08-25).** L'approvazione
+  è arrivata (Enzo: *«Approva bancaditalia.it come prima fonte»* — fonte istituzionale della banca
+  centrale, autorevole per il dominio bancario di RTL) **ed è stata applicata sul vivo**:
+  `apps/api/scripts/prova-live-132-f7-fonte.mts` con login reale dell'utenza di collaudo
+  `piattaforma@collaudo.invalid` (nata in `#169` F2 la stessa sessione) → decisione **200**,
+  `apply-research` **200** (`proposteApplicate: 1 · fontiRegistrate: 1`), e il registro passa da
+  **0 a 1**: `bancaditalia.it · APPROVED · INSTITUTIONAL · 64.19 · IT`, con approvatore e data.
+  Candidato `PASSED → APPLIED`, sentinella `v_research_evidence_source_not_approved` a **0**.
+  ⏭ **Restano le due prove vere**: l'azienda di settore diverso (ATECO 70.20 — se ne esce una
+  banca, l'archetipo è sparito solo di nome) e RTL Bank come metro di qualità
+  - 🔬 **due trappole trovate eseguendo, scritte perché dal fuori non si vedono**: ① la rotta della
+    decisione è **quella sul candidato** (`POST /v1/seed-candidate-records/:id/decision` →
+    `researchService.decidi`), **non** `/v1/seed-approval-decisions`, che è il **ledger
+    append-only** e NON promuove `validation_status`; `apply-research` cerca candidati
+    `APPROVED`, quindi passando dal ledger la decisione veniva scritta e il ponte rispondeva
+    `RESEARCH_NOTHING_APPROVED` — sembra un difetto del prodotto ed è la rotta sbagliata
+    ② `apply-research` non ha corpo, ma con `content-type: application/json` Fastify pretende
+    almeno `{}` (`FST_ERR_CTP_EMPTY_JSON_BODY`)
+  - 📌 **dichiarato invece di nascosto**: i miei tentativi sulla rotta sbagliata hanno lasciato
+    **3 righe** nel ledger `sys_seed_approval_decisions` sullo stesso candidato, tutte `APPROVED`
+    con la motivazione vera. **Non le cancello**: il ledger è append-only per disegno e la
+    lettura prende l'ultima decisione (`ORDER BY decided_at DESC LIMIT 1`), quindi sono
+    ridondanti, non false
 
   **Perche' e' bloccata, e non e' un intoppo tecnico**: i cinque domini di contenuto confrontano le
   fonti col registro, e nel registro **non c'e' ancora nessuna fonte approvata**. Approvarle e' una

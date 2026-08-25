@@ -1,6 +1,8 @@
 # Ciclo DREAM 2026-08-25 — stato alla chiusura S1081-dream (interruzione da guardiano)
 
-**Chiusura corrente**: 2026-08-25 ~19:45, per soglia finestra 5h = 99,0% ≥ 80% (verdetto guardiano incollato nel report; contesto 30,5% misurato, 305k/1M — non è lui la causa). *Chiusura precedente*: S1080, ~17:50, stessa soglia (80,0%).
+**Chiusura corrente**: 2026-08-26 ~01:05 (S1081-dream, ripresa serale), per soglia finestra 5h = 81,0% ≥ 80% (verdetto incollato nel report). *Chiusure precedenti*: stessa soglia — S1080 ~17:50 (80,0%) · S1081-dream pomeridiana ~19:45 (99,0%).
+
+**Stato alla chiusura**: 15/17 voci. **F3 PRESENTATA — WAIT-INPUT**: la tabella MoSCoW ×2 definitiva è in `05_PROPOSTE.md` §V11; alla ripresa, se il via di Enzo è arrivato, si eseguono V12 (file finali 00–07 + manifest + INDEX, col 05 riscritto in forma raggruppata per classe) e V13. **Nota di coordinamento ereditata**: lo stop-gate della sessione resterà rosso su `migrate-idempotent` finché la canonical non committa/applica le sue 000355-000356 e riesegue il suo gate — è deliberato (regola dei mandati), non un guasto da correggere.
 
 ## Contratto del ciclo (immutato, non ri-derivare)
 
@@ -53,3 +55,5 @@
 - **Cinque wargame di prodotto** (#26/#27/#28/#34/#24) restano scritti come lavoro da fare mentre il backlog li segna DONE: chi li apre oggi crede che quelle funzionalità manchino.
 - **Il guardiano non deposita la finestra di questa sessione**: `context-window.json` porta il valore di un'altra sessione, e il ramo contesto si è dichiarato NON MISURABILE a metà sessione (poi tornato misurabile). Comportamento corretto dopo la correzione di ieri, ma la sessione dream non scrive il proprio denominatore.
 - **Il cancello locale gira suite non pertinenti al mandato dream**: `verify_gate` ha instradato typecheck/test-api/db-health per commit della canonical, con corse >10 min dentro una sessione che tocca solo `docs/vision/**`. Da valutare un instradamento per-mandato (fuori ciclo, non urgente).
+- **Incidente 2026-08-26 ~00:35 (chiuso, lezione memorizzata)**: `verify_gate.py run --suite X` AGGIUNGE X alle suite instradate invece di filtrare → la catena migrazioni è stata riapplicata in produzione in concorrenza con l'applicazione della 000355 della canonical → deadlock Postgres. **Esito misurato dalla canonical (~01:05): nessun danno — la vittima era la corsa dream, la sua applicazione è integra; 000355+000356 applicate in produzione, prova generale verde 26/26; le 3 violazioni organigramma di db-health erano le sue utenze SERVICE, curate dalla 000356.** Memoria permanente `verify-gate-suite-flag-adds-not-filters`; per letture future: strumenti singoli read-only (`db_health.py`), mai `run` con file db/ altrui in lavorazione.
+- **Il loop dello stop-gate su sessione non-canonical**: con `migrate-idempotent` instradata da file altrui in lavorazione, lo stop-hook ha bloccato ogni fine turno per ~30 iterazioni senza un'azione sicura disponibile. Proposta per Enzo/canonical: esenzione per-mandato o marcatore di rinvio per suite instradate da file di un'altra sessione attiva.

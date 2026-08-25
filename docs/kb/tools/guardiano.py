@@ -81,7 +81,8 @@ le spostano. Copia gemella a livello utente in `~/.claude/tools/guardiano.py`, c
 regola vale anche nei progetti che non sono questo.
 
 Exit code: 0 tutto bene · 1 selftest fallito · 2 budget non capiente
-           3 SOGLIA RAGGIUNTA -> interrompi, registra, committa, pusha, chiudi.
+           3 SOGLIA RAGGIUNTA -> interrompi, registra, committa, pusha, chiudi
+           4 GUARDIANO CIECO: nessuno dei due rami e' misurabile — non e' un verde.
 """
 from __future__ import annotations
 
@@ -90,6 +91,7 @@ import json
 import os
 import sys
 import tempfile
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -274,10 +276,76 @@ def campiona(path: Path) -> list[Campione]:
     return out
 
 
-def finestra_per(model: str, override: int | None) -> tuple[int, bool]:
-    """(finestra, riconosciuta?). Senza riconoscimento non si indovina."""
+CTX_WINDOW_PATH = Path.home() / ".claude" / "context-window.json"
+
+
+def finestra_misurata(
+    session: str | None,
+    path: Path | None = None,
+    adesso: float | None = None,
+    eta_max_s: int = 900,
+) -> int | None:
+    """La finestra COME LA DICHIARA Claude Code, o None se non e' utilizzabile.
+
+    ⚠ Il denominatore va misurato come il numeratore. Una tabella per modello
+    scritta a mano invecchia al primo modello nuovo, e allora il guardiano non
+    sbaglia di poco: sbaglia di un fattore cinque, e nella direzione che fa
+    chiudere una sessione sana. Misurato il 2026-08-25 su una sessione
+    `claude-fable-5`, assente dalla tabella: 229.747 token diventavano «114.9%»
+    perche' il ripiego assumeva 200.000. **Un contesto oltre il 100% della
+    propria finestra e' impossibile** — l'API avrebbe rifiutato la richiesta —
+    quindi era il denominatore a essere inventato, non il numeratore.
+
+    Il file e' **globale**: lo scrive la riga di stato della sessione che ha
+    disegnato per ultima. Percio' porta `session_id`, e senza quel confronto si
+    ripeterebbe qui lo stesso difetto gia' corretto per il transcript — leggere
+    con sicurezza il dato di qualcun altro. Tre condizioni, tutte necessarie:
+    il file esiste ed e' leggibile · e' della NOSTRA sessione · non e' stantio.
+    """
+    p = path or CTX_WINDOW_PATH
+    try:
+        o = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, ValueError):
+        return None
+    if not isinstance(o, dict):
+        return None
+    size = o.get("size")
+    if not isinstance(size, int) or size <= 0:
+        return None
+    # `session_id` e' troncato nel file: si confronta per prefisso, in entrambe le
+    # direzioni, cosi' regge sia la forma corta sia quella intera.
+    sid = str(o.get("session_id") or "")
+    if session and sid and not (session.startswith(sid) or sid.startswith(session)):
+        return None
+    if not session or not sid:
+        return None  # senza poter verificare a chi appartiene, non si usa
+    epoch = o.get("epoch")
+    if isinstance(epoch, (int, float)):
+        ora = adesso if adesso is not None else time.time()
+        if ora - float(epoch) > eta_max_s:
+            return None  # stantio: la riga di stato non gira, il numero mente
+    return size
+
+
+def finestra_per(
+    model: str,
+    override: int | None,
+    session: str | None = None,
+    ctx_path: Path | None = None,
+    adesso: float | None = None,
+) -> tuple[int, bool]:
+    """(finestra, riconosciuta?). Senza riconoscimento non si indovina.
+
+    Precedenza: `--window` esplicito · la finestra **misurata** che Claude Code
+    dichiara per QUESTA sessione · la tabella per modello. Se nessuna delle tre
+    risponde, `riconosciuta=False` e il ramo contesto si dichiara cieco: non
+    produce ne' percentuale ne' verdetto (vedi `misura`).
+    """
     if override:
         return override, True
+    misurata = finestra_misurata(session, ctx_path, adesso)
+    if misurata:
+        return misurata, True
     if model in WINDOWS:
         return WINDOWS[model], True
     return DEFAULT_WINDOW, False
@@ -302,7 +370,10 @@ def misura(session: str | None, override_window: int | None, cwd: Path | None = 
         return {"ok": False, "errore": f"nessun blocco usage in {path}"}
     ultimo = camp[-1]
     picco = max(c.contesto for c in camp)
-    window, riconosciuta = finestra_per(ultimo.model, override_window)
+    # La sessione risolta: `session` puo' essere None, ma il transcript scelto ne
+    # porta il nome nel filename — ed e' quella che il file globale deve dichiarare.
+    sess = session or path.stem
+    window, riconosciuta = finestra_per(ultimo.model, override_window, sess)
     frazione = ultimo.contesto / window
     return {
         "ok": True,
@@ -384,7 +455,16 @@ def sorveglia(m_ctx: dict, m_5h: dict,
     a uno che nasce da una misura, ed e' la peggiore delle risposte.
     """
     scatti, misurati = [], 0
-    if m_ctx.get("ok"):
+    # ⚠ Il ramo contesto vale SOLO se vale anche il denominatore. Una percentuale con
+    # una finestra indovinata non e' una misura imprecisa: e' un numero inventato che
+    # ha la faccia di una misura. Misurato il 2026-08-25 su una sessione il cui modello
+    # non era in tabella — 229.747 token diventavano «114.9% -> SOGLIA RAGGIUNTA»
+    # perche' il ripiego assumeva 200.000. Un contesto oltre il 100% della propria
+    # finestra e' impossibile, quindi il tradimento era li' da vedere; nessuno lo
+    # guardava perche' il ramo `finestra_riconosciuta` esisteva ma non aveva
+    # conseguenze sul verdetto. Ora ne ha: senza denominatore il ramo e' CIECO, e la
+    # dottrina dello strumento (NON MISURABILE, mai intuire) vale anche per se stesso.
+    if m_ctx.get("ok") and m_ctx.get("finestra_riconosciuta", True):
         misurati += 1
         if m_ctx["frazione"] >= stop_ctx:
             scatti.append(f"contesto {m_ctx['percento']:.1f}% >= {stop_ctx:.0%}")
@@ -600,6 +680,40 @@ def selftest() -> int:
         check("un budget che sfonda la soglia e' rifiutato", False, soglia_res >= 700_000)
         check("un budget che ci sta e' accettato", True, soglia_res >= 600_000)
 
+        # 3-quater — NEGATIVO: FINESTRA IGNOTA -> il ramo contesto e' CIECO, e la
+        #     soglia NON scatta. Caso vivo del 2026-08-25, segnalato da una sessione
+        #     parallela: modello fuori tabella, 229.747 token, ripiego a 200.000 ->
+        #     «contesto 114.9% — SOGLIA RAGGIUNTA, exit 3». Oltre il 100% della
+        #     propria finestra e' IMPOSSIBILE (l'API avrebbe rifiutato): il denominatore
+        #     era inventato. Il flag `finestra_riconosciuta` esisteva gia' ma non aveva
+        #     conseguenze sul verdetto — il difetto era tutto li'.
+        #     La prova sa fallire: togliendo `and m_ctx.get("finestra_riconosciuta")`
+        #     da `sorveglia`, le prime due righe qui sotto diventano rosse.
+        ignota = {"ok": True, "frazione": 1.149, "percento": 114.9,
+                  "finestra_riconosciuta": False}
+        v = sorveglia(ignota, {"ok": False}, STOP_CONTESTO, STOP_5H)
+        check("finestra ignota: la soglia NON scatta", False, v["chiudi"])
+        check("finestra ignota: il verdetto si dichiara cieco", True, v["cieco"])
+        # POSITIVO che rende la prova non banale: con la finestra riconosciuta scatta.
+        nota = dict(ignota, finestra_riconosciuta=True)
+        check("stessa percentuale, ma finestra nota: scatta", True,
+              sorveglia(nota, {"ok": False}, STOP_CONTESTO, STOP_5H)["chiudi"])
+        # E la finestra MISURATA batte la tabella, anche per un modello che c'e'.
+        d3 = tmp / "ctxwin"
+        d3.mkdir(parents=True, exist_ok=True)
+        fctx = d3 / "context-window.json"
+        fctx.write_text(json.dumps({"size": 1_000_000, "epoch": 500,
+                                    "session_id": "abc12345"}), encoding="utf-8")
+        w, ric = finestra_per("claude-fable-5", None, "abc12345", fctx, adesso=600.0)
+        check("la finestra misurata batte la tabella", (1_000_000, True), (w, ric))
+        # NEGATIVO: se il file e' di UN'ALTRA sessione non si usa (stesso difetto del
+        # transcript, e lo stesso rimedio: il file e' globale, quindi porta session_id).
+        w, ric = finestra_per("claude-fable-5", None, "zzz99999", fctx, adesso=600.0)
+        check("finestra di un'altra sessione: ignorata", (200_000, True), (w, ric))
+        # NEGATIVO: stantia -> si ripiega, non si usa un numero vecchio.
+        w, ric = finestra_per("claude-fable-5", None, "abc12345", fctx, adesso=500_000.0)
+        check("finestra stantia: ignorata", (200_000, True), (w, ric))
+
         # 4 — NEGATIVO: modello sconosciuto NON deve spacciare una finestra come certa.
         w, ric = finestra_per("modello-che-non-esiste", None)
         check("finestra sconosciuta dichiarata tale", False, ric)
@@ -728,6 +842,13 @@ def main() -> int:
         return 3
     if a.budget is not None and m.get("ok") and m["residuo_soglia"] < a.budget:
         return 2
+    # ⚠ Un guardiano cieco NON e' un guardiano verde. Con entrambi i rami non
+    # misurabili, `chiudi` e' False — ma per ignoranza, non per capienza: uscire 0
+    # direbbe a uno script «tutto bene» esattamente come dopo una misura riuscita.
+    # Codice distinto, cosi' chi lo usa come cancello puo' trattare il buio per
+    # quello che e'. La stampa lo diceva gia'; il codice d'uscita no.
+    if v["cieco"]:
+        return 4
     return 0
 
 

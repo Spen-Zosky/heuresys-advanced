@@ -19,9 +19,9 @@ find . -type d \( -name node_modules -o -name .next -o -name dist -o -name .git 
 
 **Conteggio totale enumerato (fase A, primario)**: **11317** file `.md/.mdx/.rst/.adoc` col solo pruning meccanico richiesto.
 **Conteggio dopo le esclusioni aggiuntive per generazione automatica** (dichiarate per intero in §Esclusioni): **1237** file — questo è l'universo su cui sono state applicate Fase B (lettura) e Fase D (esclusioni/non-lette-per-volume).
-**File letti individualmente e digerito prodotto in questo documento**: **557**.
-**File in directory dichiarate NON LETTE PER VOLUME** (9 directory, elencate con comando e conteggio in §Directory non lette per volume): **680**.
-557 + 680 = 1237.
+**File letti individualmente e digerito prodotto in questo documento**: **381**.
+**File in directory dichiarate NON LETTE PER VOLUME** (11 directory, elencate con comando e conteggio in §Directory non lette per volume): **856**.
+381 + 856 = 1237.
 
 Verifica aritmetica dei bucket:
 - Mecccanici espliciti nell'incarico (node_modules, .next, dist, .git, coverage, playwright-report, .turbo, build): dichiarati sotto con i loro conteggi reali (node_modules 2627, dist 428, build 2, .next/coverage/playwright-report/.turbo 0 ciascuno) — **non fanno parte** dei due numeri sopra, sono un pruning separato eseguito a monte della prima enumerazione.
@@ -1717,3 +1717,194 @@ Nota: la numerazione ADR salta 0019 e 0022 (mai assegnati/mai committati); non r
 | `deploy/README.md` | regola/dottrina | Deploy/bootstrap idempotenti per ruolo host, gestione secrets, Node 22 via nvm/fnm, filtro workspace cross-shell. | No. |
 | `deploy/postgres/README.md` | SoT-stato | Configurazione server PostgreSQL di produzione (parametri, identita' di connessione), colmata il 2026-08-20 perche' prima non stava scritta da nessuna parte. | No, aggiornato recentemente. |
 | `deploy/systemd/solo-linux-pc/README.md` | SoT-stato | Unit systemd che girano solo su linux-pc (mai per deploy automatico), backup-pull.timer verificato attivo il 2026-08-20. | No. |
+
+### `deploy/reports/claude-align/` — report di drift auto-generati (21 file, stesso formato)
+
+Ognuno confronta checksum sha256 del payload Claude fra macchine (Windows staging vs VM/linux-pc); nessuna prosa, solo tabelle di OK/DRIFT per file. Digesto unico valido per tutti i 21, letto un file rappresentativo per intero (`drift-linuxpc-20260820T235512Z.md`).
+
+| File | Ruolo | Digesto | Sospetto superato? |
+|---|---|---|---|
+| `deploy/reports/claude-align/drift-linuxpc-20260820T235512Z.md` | cronaca/archivio | Report drift auto-generato (checksum ecosistema Claude) per linux-pc, 2026-08-20T23:55:12Z. | No, e' l'esito di quel momento. |
+| `deploy/reports/claude-align/drift-linuxpc-20260821T002708Z.md` | cronaca/archivio | Report drift auto-generato per linux-pc, 2026-08-21T00:27:08Z. | No. |
+| `deploy/reports/claude-align/drift-linuxpc-20260821T233218Z.md` | cronaca/archivio | Report drift auto-generato per linux-pc, 2026-08-21T23:32:18Z. | No. |
+| `deploy/reports/claude-align/drift-linuxpc-20260824T000605Z.md` | cronaca/archivio | Report drift auto-generato per linux-pc, 2026-08-24T00:06:05Z. | No. |
+| `deploy/reports/claude-align/drift-linuxpc-20260824T005516Z.md` | cronaca/archivio | Report drift auto-generato per linux-pc, 2026-08-24T00:55:16Z. | No. |
+| `deploy/reports/claude-align/drift-linuxpc-20260824T154057Z.md` | cronaca/archivio | Report drift auto-generato per linux-pc, 2026-08-24T15:40:57Z. | No. |
+| `deploy/reports/claude-align/drift-linuxpc-20260824T170512Z.md` | cronaca/archivio | Report drift auto-generato per linux-pc, 2026-08-24T17:05:12Z. | No. |
+| `deploy/reports/claude-align/drift-linuxpc-20260824T172838Z.md` | cronaca/archivio | Report drift auto-generato per linux-pc, 2026-08-24T17:28:38Z. | No. |
+| `deploy/reports/claude-align/drift-linuxpc-20260824T174003Z.md` | cronaca/archivio | Report drift auto-generato per linux-pc, 2026-08-24T17:40:03Z. | No. |
+| `deploy/reports/claude-align/drift-linuxpc-20260824T180054Z.md` | cronaca/archivio | Report drift auto-generato per linux-pc, 2026-08-24T18:00:54Z. | No. |
+| `deploy/reports/claude-align/drift-linuxpc-20260824T204811Z.md` | cronaca/archivio | Report drift auto-generato per linux-pc, 2026-08-24T20:48:11Z. | No, e' il piu' recente della serie linux-pc. |
+| `deploy/reports/claude-align/drift-vm-20260821T002708Z.md` | cronaca/archivio | Report drift auto-generato (checksum ecosistema Claude) per la VM OCI, 2026-08-21T00:27:08Z. | No. |
+| `deploy/reports/claude-align/drift-vm-20260821T233218Z.md` | cronaca/archivio | Report drift auto-generato per la VM, 2026-08-21T23:32:18Z. | No. |
+| `deploy/reports/claude-align/drift-vm-20260824T000605Z.md` | cronaca/archivio | Report drift auto-generato per la VM, 2026-08-24T00:06:05Z. | No. |
+| `deploy/reports/claude-align/drift-vm-20260824T005516Z.md` | cronaca/archivio | Report drift auto-generato per la VM, 2026-08-24T00:55:16Z. | No. |
+| `deploy/reports/claude-align/drift-vm-20260824T154057Z.md` | cronaca/archivio | Report drift auto-generato per la VM, 2026-08-24T15:40:57Z. | No. |
+| `deploy/reports/claude-align/drift-vm-20260824T170512Z.md` | cronaca/archivio | Report drift auto-generato per la VM, 2026-08-24T17:05:12Z. | No. |
+| `deploy/reports/claude-align/drift-vm-20260824T172838Z.md` | cronaca/archivio | Report drift auto-generato per la VM, 2026-08-24T17:28:38Z. | No. |
+| `deploy/reports/claude-align/drift-vm-20260824T174003Z.md` | cronaca/archivio | Report drift auto-generato per la VM, 2026-08-24T17:40:03Z. | No. |
+| `deploy/reports/claude-align/drift-vm-20260824T180054Z.md` | cronaca/archivio | Report drift auto-generato per la VM, 2026-08-24T18:00:54Z. | No. |
+| `deploy/reports/claude-align/drift-vm-20260824T204811Z.md` | cronaca/archivio | Report drift auto-generato per la VM, 2026-08-24T20:48:11Z. | No, e' il piu' recente della serie VM. |
+
+### `audit/` (radice, esclusi `audit/pages/` — vedi Directory non lette per volume)
+
+| File | Ruolo | Digesto | Sospetto superato? |
+|---|---|---|---|
+| `audit/BLOCKED-LOG.md` | cronaca/archivio | Log di login bloccati durante un audit E2E (admin, 2026-06-23), auto-generato. | No, log puntuale gia' storicizzato. |
+| `audit/FINDINGS.md` | cronaca/archivio | Raccolta problemi QA forense E2E S1006 su PROD live, metodo audit-first, MFA disattivato per l'audit (da riattivare a fine lavori). | Si, snapshot di uno stato PROD di due mesi fa; la nota "MFA da riattivare" e' scaduta di contesto se non verificata contro lo stato attuale del flag. |
+| `audit/FORENSIC-NOTES-S1006-cli.md` | cronaca/archivio | Note forensi S1006: tail status dei fix (G-01/G-02/skill clean), 2 problemi LIB-BLOCKED su @heuresys/ui, MFA resta disabilitato per decisione Enzo. | Si, stesso motivo: stato PROD/MFA di due mesi fa, non riverificato in questa sessione. |
+
+### `.codex/` — governance di Codex (non tracciato)
+
+| File | Ruolo | Digesto | Sospetto superato? |
+|---|---|---|---|
+| `.codex/AGENTS.md` | esterno-Codex | Istruzioni esclusive per Codex: ruolo permanente di Revisore Capo, sola lettura, divieti su modifiche al repository e ai sistemi collegati. | No — non e' materiale mio da valutare per staleness (CLAUDE.md dichiara .codex/ "non e' mio da mantenere"). |
+
+## Esclusioni — elenco integrale (mai aggregato)
+
+Tutte le esclusioni sono meccaniche (generate, dipendenze di terzi, o segreti mai letti per policy di sicurezza). Nessun documento "editoriale" scritto da Enzo o da una sessione precedente e' stato escluso.
+
+| Directory/file | Ragione |
+|---|---|
+| `node_modules/` (repo-wide) | Dipendenze npm di terze parti. Conteggio reale: 2627 file .md al suo interno. Meccanico esplicito dell'incarico. |
+| `dist/` (repo-wide) | Build output compilato/bundle. Conteggio reale: 428 file .md al suo interno (spesso copie di LICENSE/README di dipendenze bundlate). Meccanico esplicito. |
+| `build/` (repo-wide) | Directory di build. Conteggio reale: 2 file .md. Meccanico esplicito. |
+| `.next/` (repo-wide) | Cache/build Next.js. Conteggio reale: 0 file .md trovati in questo repo al momento del censimento. Meccanico esplicito, dichiarato comunque. |
+| `coverage/` (repo-wide) | Output di copertura test. Conteggio reale: 0 file .md trovati. Meccanico esplicito, dichiarato comunque. |
+| `playwright-report/` (repo-wide) | Report Playwright generato. Conteggio reale: 0 file .md trovati. Meccanico esplicito, dichiarato comunque. |
+| `.turbo/` (repo-wide) | Cache Turborepo. Conteggio reale: 0 file .md trovati. Meccanico esplicito, dichiarato comunque. |
+| `.git/` | Interno di git. Conteggio reale: 0 file .md trovati (i messaggi di commit non sono .md). Meccanico esplicito, dichiarato comunque. |
+| `*.tsbuildinfo` (repo-wide) | Non e' documentazione (JSON di build incrementale TypeScript) ma menzionato nell'incarico come categoria meccanica: 4 file trovati. |
+| `graphify-out/` | Directory GENERATA dal tool `graphify` (grafo di conoscenza da codice+doc), esplicitamente gitignored (`.gitignore:187`). Un file .md per ogni nodo/entita' del grafo: 10049 file secondo l'enumerazione. Non e' nell'elenco meccanico esplicito dell'incarico, ma soddisfa lo stesso criterio (generata, mai editoriale) — dichiarata come deviazione esplicita. |
+| `graphify-db-input/` | Directory GENERATA, input dati per lo stesso tool graphify, gitignored (`.git/info/exclude:7`). 11 file .md. Stessa motivazione di deviazione dichiarata di `graphify-out/`. |
+| `docs/source_bundle/brownfield/extracted/` | Dump generato dall'ispezione del legacy, gitignored (`.gitignore:37`), esplicitamente citato in CLAUDE.md sotto "What NOT to touch". 21 file .md. |
+| `apps/showcase/out/` | Build statico Next.js dello showcase, gitignored (`apps/showcase/.gitignore:4`). 0 file .md trovati al suo interno (contiene .txt/.html di build), dichiarata comunque per completezza. |
+| `.cache/` | Cache locale con runtime Node 22 portable + npm/corepack vendorizzati (dipendenza di terze parti), gitignored (`.gitignore:83`). 165 file .md al suo interno (163 dei quali gia' esclusi meccanicamente perche' annidati in un `node_modules/` interno alla cache; le 2 restanti — CHANGELOG.md e README.md del runtime Node — sono anch'esse dipendenza di terzi). |
+| `pg_dump_snapshots/` | Snapshot pg_dump pre-operazione, gitignored (`.gitignore:159`). Non contiene file .md (28 file .txt di provenienza, esclusi dal perimetro di tipo file di questo censimento perche' non sono testi documentali in prosa ma metadati di dump). |
+| `.secrets/*` | Directory di segreti reali (`accessi.csv`, `dev-access-master.key`, `gov-worker.pass`, `jwt_private.pem`, `jwt_public.pem`, `test_admin_password.txt`, `rollback-000275-fattori-residui-20260806.sql`). Nessun file al suo interno letto, per policy di sicurezza (mai leggere/riportare credenziali). |
+| `.zp/zp-panel-chiave.txt` | Presumibile chiave d'accesso a un pannello di servizio (nome esplicito "chiave"). Non letto per policy di sicurezza. |
+
+## Directory non lette per volume
+
+Queste directory NON sono state escluse: sono dichiarate esplicitamente non lette in questa passata per il loro volume, cosi' come previsto dall'incarico ("verra' rilanciata su di essa una seconda passata"). Ogni file della tabella d'inventario completa (Fase A, sopra) resta comunque censito con path/dimensione/data/titolo — solo il digesto di ruolo/contenuto non e' stato prodotto.
+
+| Directory | N. file `.md` | Comando di conteggio | Natura (perche' e' voluminosa e cosa contiene) |
+|---|---:|---|---|
+| `docs/superpowers/` | 82 | `find docs/superpowers -name "*.md" \| wc -l` | Piani/analisi/prompt/spec di progetto autorati a mano (non generati), datati 2026-05 to 2026-08; e' materiale SoT-adiacente ma numeroso quanto le altre cartelle kb gia' censite per intero. |
+| `docs/wargames/` | 27 | `find docs/wargames -name "*.md" \| wc -l` | Esercizio di revisione adversarial (reviews/tasks), LEDGER + note per singolo round. |
+| `docs/github/` | 34 | `find docs/github -name "*.md" \| wc -l` | Corso personale di riferimento su GitHub (fondamenti/collaborazione/automazione/publishing/security/tooling), non descrive il prodotto heuresys-advanced. |
+| `docs/kb/improvement/` | 39 | `find docs/kb/improvement -name "*.md" \| wc -l` | Programma "RELEASE 100X": audit forense A1-A11 + 14 dossier decisionali (D-01...D-14), materiale storico del ciclo di miglioramento pre-DD. |
+| `docs/source_bundle/` (esclusa `brownfield/extracted/`, gia' meccanica) | 74 | `find docs/source_bundle -name "*.md" \| grep -v '/brownfield/extracted/' \| wc -l` | Bootstrap pack v5 originario (extracted_bootstrap/): spec di dominio/schema/blueprint pre-costruzione, materiale fondativo ma di grande volume. |
+| `audit/pages/` | 213 | `find audit/pages -name "*.md" \| wc -l` | Snapshot per-pagina di un audit QA (coppie `admin-BUGS.md`/`core6-TODO.md` per ciascuna delle ~106 pagine ispezionate), formato fortemente ripetitivo, generato da uno strumento di audit visivo. |
+| `cowork_code_exchange/` | 172 | `find cowork_code_exchange -name "*.md" \| wc -l` | Archivio del protocollo Cowork↔CLI (cicli PROMPT/PLAN/EXEC/REPORT/REVIEW), dichiarato "archivio read-only" da CLAUDE.md, congelato dal 2026-05-27 (S939). |
+| `cowork_reserved/` | 100 | `find cowork_reserved -name "*.md" \| wc -l` | KB storica di Cowork (bias_registry, batch_c1-c12, forense F0-F12), dichiarata "archivio read-only" da CLAUDE.md, stesso congelamento S939. |
+| `.codex-review/` | 68 | `find .codex-review -name "*.md" \| wc -l` | Superficie di governo di Codex (canale di audit read-only separato); CLAUDE.md dichiara esplicitamente che non e' materiale mio da mantenere. |
+| `.agents/` | 24 | `find .agents -name "*.md" \| wc -l` | Copia delle skill di Codex (gemello in-repo di `~/.agents/skills/`); CLAUDE.md dichiara esplicitamente che non e' materiale mio da mantenere. |
+| `.superpowers/` | 23 | `find .superpowers -name "*.md" \| wc -l` | Artefatti di un esercizio "spec-driven-development" (task brief/report + diff di review), sessione dedicata separata dal resto del repo. |
+
+## Contraddizioni e sospetti
+
+Ogni voce riporta entrambe le citazioni (o entrambe le date/misure) senza decidere chi ha ragione, come richiesto.
+
+### 1. `AGENTS.md` (radice) vs `CLAUDE.md` (radice) — dottrina del brownfield
+
+`AGENTS.md` (non tracciato in git, mtime non verificabile con precisione ma contenuto non aggiornato da tempo) riporta ancora, come invariante I12:
+> "I12 Brownfield/legacy = authoritative DATA SOURCE (not mere enrichment). The legacy heuresys-evo Docker DB ... is the canonical source that populates sys.*; v5 sys.* remains the structural authority and the legacy adapts to it via brownfield.column_mappings."
+
+`CLAUDE.md` (aggiornato 2026-08-24/25) riporta invece, come stessa invariante I12:
+> "I12 — ⛔ IL RUBINETTO È CHIUSO (Enzo, 2026-08-14 — supera la formulazione precedente). «Nessun dato riferito al brownfield deve essere rimesso in circolo. Tutto va ricostruito con il DBMS attuale.» Non si importa più nulla dal legacy."
+
+I due file governano lo stesso repository con la stessa numerazione di invariante (I12) e dicono l'opposto sulla liceita' di importare dal legacy.
+
+### 2. `AGENTS.md` vs `.claude/rules/security-auth.md` — esistenza di `admin@heuresys.com`
+
+`AGENTS.md`, sezione Security model, elenca fra le persona di test:
+> "admin@heuresys.com (PLATFORM_ADMIN)"
+
+`.claude/rules/security-auth.md` afferma invece:
+> "admin@heuresys.com NON esiste più — rimosso dalla migrazione 000295, verificato S1052 ... Era ancora citato qui e in .claude/rules/tests.md, e ha già fatto fallire la custodia della storia RTL per giorni (#153)."
+
+Lo stesso indirizzo e-mail e' dato per esistente in un file e per rimosso (con numero di migrazione e sessione di verifica) nell'altro.
+
+### 3. `docs/architecture/adr/0026_single_production_environment_two_tenants.md` vs `CLAUDE.md` (OUTPUT RULE, S1011) — descrivere il dato come "no-PII"
+
+`docs/architecture/adr/0026_...md` §1 afferma:
+> "The data is synthetic case-study data (legacy heuresys-evo + synthetic seeds), so there is never a real-client PII concern (ADR-0023, no-PII global)."
+
+`CLAUDE.md`, sezione OUTPUT RULE, afferma (regola vincolante, S1011, Enzo):
+> "the 'no-PII / synthetic / ADR-0023 / safe-to-publish' qualifier is RETIRED as a descriptor. Never append it as reassurance in messages, commits, docs, ADRs or questions; describe a datum for what it IS ... never for what it 'isn't'."
+
+L'ADR-0026 resta "ACCEPTED" (non superseded) e non e' stato riscritto dopo S1011; usa esattamente la locuzione che la regola successiva vieta esplicitamente anche nei documenti/ADR. Stessa locuzione ("tenant TEST" / "no-PII") compare anche in `docs/integrations/tenant_onboarding_esco_03_...md` e `_04_...md`, entrambi con auto-annotazione S1029 che pero' non tocca questo punto terminologico.
+
+### 4. `docs/architecture/adr/0030_esco_skill_group_ontology.md` vs `.handoff/STATE.md` — copertura ontologica delle competenze
+
+`docs/architecture/adr/0030_...md` (2026-07-21), sezione Consequences:
+> "Copertura ontologica 99,4%: 13.952/14.041 skill collegate (gruppo o edge); 89 scollegate reali = competenze custom COMP:: senza URI ESCO ... + 70 URI non nel dump v1.2.0."
+
+`.handoff/STATE.md` (2026-08-24, S1079), Top priorities:
+> "1. #227 — le 4.464 competenze isolate nel grafo, il 31,8% del catalogo. Era il residuo F6-07 di #222 ..."
+
+Un documento dichiara il 99,4% del catalogo collegato all'ontologia (89 isolate), l'altro (piu' recente) dichiara 4.464 competenze isolate, pari al 31,8% del catalogo. Nessuno dei due file spiega esplicitamente il salto fra le due misure.
+
+### 5. `docs/product/WORKITEM_GAP1_PHASE0_VERIFICATION.md` vs `docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md` / `docs/architecture/adr/0031` — stato di MLCE/Maturity
+
+`docs/product/WORKITEM_GAP1_PHASE0_VERIFICATION.md` (2026-06-19, S997), tabella §1 riga 5:
+> "capability_score / composition (MLCE) | ❌ ASSENTE | Zero match capability_score/composite_score/composition/mlce in migrations+modules+shared ... absence-check live: 0 tabelle → MLCE da costruire da zero"
+
+`docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md` (2026-07-05, S1016), riga di apertura:
+> "Il fatto nuovo: il Ledger (2026-06-19) dichiarava VRIO/OHI/Essential-Ranker «bloccati da MLCE assente» — ma MLCE e Maturity engine esistono dal Gap#1 (S999): capability-composition (317 score live) + capability-maturity (L0-L5, 20 OU) + Porte UI /org-director e /process-owner."
+
+I due documenti dello stesso dominio prodotto (`docs/product/`) sono cronologicamente coerenti (il secondo e' successivo e aggiorna il primo), ma nessuno dei due file WORKITEM_GAP1_* (design-spec, phase0-verification, perspectives-and-scorecard) e' stato aggiornato con un banner di chiusura: restano marcati "Stato: PROPOSTA" mentre secondo altri documenti lo stesso Gap#1 risulta chiuso end-to-end.
+
+### 6. Competitor diretto dichiarato nel dominio prodotto vs contesto operativo di questo censimento
+
+`docs/product/COMPETITIVE_SCORECARD.md` §4:
+> "In quel segmento i tre asset reali convergono ... e il competitor diretto e' essenzialmente uno (365Talents, EU, ESCO-aligned), non 27."
+
+Il CONTESTO fornito per l'esecuzione di questo censimento dichiara invece:
+> "Segmento e competitor scelti: Personio (diretto), Eightfold AI (metro), Zucchetti (coesistente)."
+
+Il documento di prodotto (S997, 2026-06-17) e il contesto operativo di questa sessione (2026-08-25) nominano competitor diretti diversi (365Talents vs Personio) per lo stesso segmento (mid-market EU regolato). Non e' stato verificato se una decisione successiva a `docs/product/` abbia cambiato la scelta, ne' se sia rintracciabile nel register.
+
+### 7. `db/seeds/rtl-rebuild/README.md` vs `db/seeds/rtl-rebuild/RETIRED.md` — stato dei seed di rebuild RTL
+
+`db/seeds/rtl-rebuild/README.md` (2026-05-30), riga 3:
+> "Status: DRAFT authored 2026-05-30. NOT executed. These files perform the RTL tenant rebuild ... Execution is a separate, gated, dedicated session."
+
+`db/seeds/rtl-rebuild/RETIRED.md`, stessa cartella (2026-08-07, S1049):
+> "# db/seeds/rtl-rebuild/ — RITIRATO (2026-08-07, S1049). Questi seed non sono più eseguibili, ed è voluto ... la migrazione 000283 ha rimosso le 12 tabelle staging.rtl_* vuote. I seed che le leggono non trovano più le relazioni e falliscono."
+
+Il README della cartella non e' mai stato aggiornato con un banner di ritiro (resta "DRAFT / NOT executed", che e' gia' esso stesso stato superato dal rebuild S950 di cui parla il file gemello), mentre il file RETIRED.md nella stessa directory dichiara i seed ritirati e non piu' eseguibili.
+
+### 8. `docs/brownfield/ENGINE_STATUS.md` vs `docs/architecture/adr/0038_the_database_is_self_sufficient.md` / invariante I12 — riabilitazione dell'ingestione
+
+`docs/brownfield/ENGINE_STATUS.md` (S1023, non ridatato con precisione dopo), sezione "Re-enabling for a new import wave":
+> "1. On the VM: set BROWNFIELD_ENGINE_ENABLED=true in the repo .env. 2. sudo systemctl restart heuresys-advanced-api ... 3. Run the wave; then set the flag back to false and restart."
+
+`docs/architecture/adr/0038_...md` (2026-08-14) e l'invariante I12 corrente di `CLAUDE.md`:
+> "Non si importa più nulla dal legacy. Ciò che manca si costruisce o si deriva dai dati che sys.* già contiene ... un piano che prevede un import è un piano da riscrivere, non da eseguire."
+
+Il primo documento descrive un percorso operativo esplicito per riabilitare l'ingestione dal legacy per una nuova wave; il secondo (piu' recente) vieta in modo categorico e generale qualunque nuovo import dal legacy, senza eccezioni dichiarate per il meccanismo del flag `BROWNFIELD_ENGINE_ENABLED`.
+
+### 9. `docs/kb/SOT_STATE.md` — contraddizione interna fra la narrativa in testa e le sezioni statiche in coda
+
+La sezione "0. Snapshot in una riga" e il log cronologico "Delta S###" (in testa al file, aggiornati a oggi 2026-08-24/25) descrivono lo stato corrente incl.:
+> "RBAC 14 ruoli/224 perm/980 map (misurati 2026-08-19) ... 231 tabelle sys.*"
+
+La sezione statica "9. Invarianti non negoziabili" (fine del file, dati fermi a S1007 secondo l'annotazione interna) riporta invece testualmente:
+> "I3/I4 schema sys.sys_<plural> (aux: staging/brownfield/audit) ... I12 brownfield/legacy = authoritative no-PII data source (ADR-0023; sys.* = structural authority, no-PII global)"
+
+Lo stesso file elenca lo schema ausiliario `brownfield` come tuttora esistente (superato: ritirato da mig 000297, sezione 4 dello stesso file lo conferma altrove) e ripete la dottrina ADR-0023/no-PII che CLAUDE.md e ADR-0038 dichiarano superata. La sezione "5. Auth/Security" dello stesso file riporta anche "RBAC 12 ruoli × 154 permessi × 681 mapping (S1007)", diverso dal "14 ruoli/224 perm/980 map" della sezione 0. Il file si contraddice al proprio interno fra la parte narrativa (viva) e le sezioni di riferimento statiche (non riallineate).
+
+### 10. Note terminologiche minori (non citate come contraddizioni piene, ma segnalate)
+
+- `docs/architecture/adr/0002_backend_framework_fastify.md` (Accepted) descrive Fastify **4**; README.md e CLAUDE.md correnti dichiarano Fastify **5**. Nessun ADR successivo formalizza il passaggio.
+- `docs/architecture/adr/0007_frontend_next15_app_router.md` (Accepted) descrive Next.js **15**; `docs/kb/SOT_STATE.md` §2 dichiara **Next 16** (B-23, bump S969). Nessun ADR successivo formalizza il passaggio.
+- `heuresys-advanced-bootstrap-vm.md` (2026-05-17) descrive `@heuresys/ui` consumato via symlink `link:../ux-design-shared/ui`; CLAUDE.md e `docs/kb/xtras/DESIGN_SYSTEM_UI.md` correnti dichiarano il consumo via pacchetto npm-pubblicato dalla migrazione X18 (2026-05), con `link:` esplicitamente citato come superato.
+
+## Lacune dichiarate
+
+- Le date "Ultima modifica" della tabella d'inventario per i file **non tracciati in git** (marcati `non-tracciato (mtime fs)`) sono la data di modifica del filesystem, non una data di commit verificabile — per costruzione meno affidabile (puo' riflettere una copia/allineamento invece di una scrittura originale). Riguarda in particolare `.agents/`, `.codex-review/`, `.codex/AGENTS.md`, `AGENTS.md` (radice) e alcuni file di `qa_artifacts/`/`deploy/reports/`.
+- Per le 11 directory dichiarate "non lette per volume" non e' stato prodotto alcun giudizio di ruolo/sospetto per i singoli file: la tabella d'inventario ne riporta comunque path/dimensione/data/titolo per intero.
+- Il conteggio "graphify-out/ 10049" e "graphify-db-input/ 11" nella sezione Esclusioni deriva da un grep sul nome della directory nell'elenco enumerato in Fase A e puo' includere un numero minimo di falsi positivi da percorsi che contengono la stringa "graphify-out" senza esservi dentro (es. riferimenti testuali in altri documenti) — non e' stato isolato con un secondo comando di verifica.
+- Non e' stato verificato contro lo stato attuale del `.env` di produzione se `MFA_ENFORCEMENT_ENABLED` sia stato riattivato dopo l'audit S1006 (`audit/FINDINGS.md`, `audit/FORENSIC-NOTES-S1006-cli.md`): la nota "da riattivare" resta come scritta nel documento originale, senza verifica in questa sessione (sessione di sola lettura sulla documentazione, non sul sistema vivo).

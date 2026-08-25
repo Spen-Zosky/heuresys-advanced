@@ -361,8 +361,15 @@ def giudizio(frazione: float) -> str:
     return "LARGO — nessun vincolo di capienza"
 
 
-def misura(session: str | None, override_window: int | None, cwd: Path | None = None) -> dict:
-    path = trova_transcript(session, cwd)
+def misura(session: str | None, override_window: int | None, cwd: Path | None = None,
+           *, dir_override: Path | None = None, ctx_path: Path | None = None) -> dict:
+    """`dir_override` / `ctx_path` esistono per il selftest: senza poter iniettare
+    un transcript finto, il ramo «frazione impossibile» non sarebbe provabile
+    contro il codice VERO — e una prova che ricalcola la logica invece di
+    chiamarla resta verde anche togliendo il ramo. E' successo, ed e' il motivo
+    per cui questi due parametri ci sono."""
+    path = trova_transcript(session, cwd, dir_override=dir_override,
+                            usa_ambiente=dir_override is None)
     if path is None:
         return {"ok": False, "errore": f"nessun transcript in {dir_transcript(cwd)}"}
     camp = campiona(path)
@@ -373,8 +380,22 @@ def misura(session: str | None, override_window: int | None, cwd: Path | None = 
     # La sessione risolta: `session` puo' essere None, ma il transcript scelto ne
     # porta il nome nel filename — ed e' quella che il file globale deve dichiarare.
     sess = session or path.stem
-    window, riconosciuta = finestra_per(ultimo.model, override_window, sess)
+    window, riconosciuta = finestra_per(ultimo.model, override_window, sess, ctx_path)
     frazione = ultimo.contesto / window
+    # ⚠ LA PROVA DEL NOVE, e vale piu' di ogni tabella: una frazione oltre 1.0 e'
+    # IMPOSSIBILE. Se il contesto avesse davvero superato la finestra, l'API avrebbe
+    # rifiutato la richiesta e quel blocco `usage` non esisterebbe. Quindi non e' il
+    # numeratore a essere strano: e' il denominatore a essere sbagliato — e va
+    # dichiarato tale QUALUNQUE sia la sua fonte, tabella compresa.
+    #
+    # Senza questa riga il difetto sopravvive alla correzione precedente: `finestra_per`
+    # marca `riconosciuta=True` anche quando il valore viene da una tabella scritta a
+    # mano, che invecchia al primo modello nuovo. Misurato il 2026-08-25 su una sessione
+    # `claude-fable-5` in tabella a 200.000 mentre la finestra vera era 1.000.000:
+    # 242.421 token diventavano «121.2% -> ⛔ SOGLIA RAGGIUNTA» con exit 3, cioe' una
+    # sessione al 24% mandata a chiudere. La tabella diceva «riconosciuta» ed era falsa.
+    if frazione > 1.0:
+        riconosciuta = False
     return {
         "ok": True,
         "transcript": str(path),
@@ -713,6 +734,31 @@ def selftest() -> int:
         # NEGATIVO: stantia -> si ripiega, non si usa un numero vecchio.
         w, ric = finestra_per("claude-fable-5", None, "abc12345", fctx, adesso=500_000.0)
         check("finestra stantia: ignorata", (200_000, True), (w, ric))
+
+        # 3-quinquies — NEGATIVO: una frazione OLTRE 1.0 smentisce il denominatore,
+        #     anche quando viene dalla tabella. Terzo giro sullo stesso difetto
+        #     (2026-08-25): le due correzioni precedenti non bastavano, perche'
+        #     `finestra_per` marca «riconosciuta» pure un valore di tabella — e la
+        #     tabella invecchia. Una sessione `claude-fable-5` in tabella a 200.000,
+        #     finestra vera 1.000.000: 242.421 token -> «121.2% -> exit 3» su una
+        #     sessione che stava al 24%. Il segnale c'era ed era inequivocabile.
+        #     La prova sa fallire: togliendo `if frazione > 1.0: riconosciuta = False`
+        #     da `misura`, la prima riga qui sotto diventa rossa.
+        pf = _scrivi(tmp / "oltre1", "sess", [_riga("claude-fable-5", 1, 0, 242_420, 10)])
+        mo = misura("sess", None, dir_override=pf.parent, ctx_path=tmp / "non-esiste.json")
+        check("frazione impossibile: finestra NON riconosciuta", False,
+              mo["finestra_riconosciuta"])
+        check("frazione impossibile: la soglia NON scatta", False,
+              sorveglia(mo, {"ok": False}, STOP_CONTESTO, STOP_5H)["chiudi"])
+        check("frazione impossibile: il verdetto e' cieco", True,
+              sorveglia(mo, {"ok": False}, STOP_CONTESTO, STOP_5H)["cieco"])
+        # POSITIVO che rende la prova non banale: una frazione plausibile resta valida
+        # e la soglia scatta come deve.
+        pf2 = _scrivi(tmp / "oltre2", "sess", [_riga("claude-fable-5", 1, 0, 180_000, 10)])
+        mp = misura("sess", None, dir_override=pf2.parent, ctx_path=tmp / "non-esiste.json")
+        check("frazione plausibile: finestra riconosciuta", True, mp["finestra_riconosciuta"])
+        check("frazione plausibile: la soglia scatta (90% > 75%)", True,
+              sorveglia(mp, {"ok": False}, STOP_CONTESTO, STOP_5H)["chiudi"])
 
         # 4 — NEGATIVO: modello sconosciuto NON deve spacciare una finestra come certa.
         w, ric = finestra_per("modello-che-non-esiste", None)

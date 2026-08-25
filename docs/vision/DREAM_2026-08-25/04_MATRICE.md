@@ -64,7 +64,7 @@
 |---|---|---|---|---|---|---|
 | Catalogo competenze con tassonomia, alias, gerarchia (CRUD) | **Completo** — inv.G; ~14k skill (lat.(f)) | Doc — skills matrix nei Career Frameworks (10 livelli) | Doc — ontologia proprietaria (1,6M skill dichiarate) | n.c. | A | A |
 | Aggancio a tassonomie ufficiali EU/IT (ESCO, ISCO, ISTAT/ATECO) con sync vivo | **Completo** — connettori reference_sync + CLI — arch §9 | NTE | NTE (ontologia proprietaria, non standard pubblici) | n.c. | **A** — vantaggio non copiabile in fretta: standard EU parlano alle PMI regolate | A |
-| Ricerca semantica free-text su skill/occupazioni (AI) | **Parziale** — UI costruita e collegata, ma flag `MATCHING_FREETEXT_ENABLED` default OFF: se OFF in prod l'utente riceve 404 — lat.(d) | NTE | Doc — matching "beyond keywords" | n.c. | M | **A** — demo AI immediata, già pagata |
+| Ricerca semantica free-text su skill/occupazioni (AI) | **Completo** — CORRETTO dal verifier (la bozza diceva "Parziale" dal default di codice): il flag è `=true` sul `.env` della VM, voce #40 DONE con dimostrazione live (F10 corretto). L'inventario diceva già "Completo": la matrice aveva ereditato la lettura sbagliata | NTE | Doc — matching "beyond keywords" | n.c. | M | **A** — già in demo |
 | Matching persona↔occupazioni/posizioni/ruoli (ESS) | **Completo** — inv.S | NTE nativo (mobilità via partner Neobrain) | Doc — cuore del prodotto | n.c. | A — è il "talent" del complemento | A |
 | Inferenza skill da segnali di lavoro reale (progetti, email, app — stile Digital Twin) | **Assente** | NTE | Doc — Digital Twin, skill-refresh continuo | n.c. | B — stato dell'arte, nessun cliente PMI lo chiede oggi (metro: mai MUST) | M |
 | Gap di competenza: individuale (ESS), aziendale, predittivo | **Completo** — inv.G (gaps, insights/skill-gap con ricalcolo) | NTE | Doc (implicito nel matching) | n.c. | A | A |
@@ -154,7 +154,8 @@
 | Dashboard per ruolo + catalogo famiglie di dashboard | **Completo** — inv.C | Doc — dashboard predefinite | Rip — dashboard summary-level (con lamentele) | Doc — dashboard budget | A | A |
 | Analytics: workforce, presenze, straordinari, comp, skill, KPI, rete organizzativa | **Completo** — inv.G, inv.L, inv.P | Doc (aree principali) | Rip | Doc (costi) | A | A |
 | Modelli predittivi come read-model consultabile (registro modelli + 468 predizioni) | **Latente** — 4 route GET, zero UI — lat.(a) | NTE | Doc — è il pitch, ma opaco | n.c. | M | A — "guarda: registro modelli e predizioni ispezionabili" è un racconto di trasparenza AI che Eightfold non fa |
-| Report builder custom + export dati verso strumenti esterni | **Assente** — esiste solo export dei grafici — inv.P | Doc ma **lamentela ricorrente**: rigido, query builder debole, export difficile (G2) | Rip — lamentele identiche | n.c. | M — il diretto qui è debole: parità non necessaria, sorpasso possibile ma non a 6 mesi | B |
+| Report builder custom | **Assente** | Doc ma **lamentela ricorrente**: rigido, query builder debole, export difficile (G2) | Rip — lamentele identiche | n.c. | M — il diretto qui è debole: parità non necessaria | B |
+| Export dati (CSV/XLSX/PDF) verso strumenti esterni | **Latente** — CORRETTO dal verifier (la bozza diceva "Assente"): l'hook globale `?format=` copre ~85 route lista + export dedicato delle 9 viste analytics, ma NESSUNA pagina web lo espone (F35) | Doc (con lamentele su export) | Rip | n.c. | M | B |
 | Statistiche di piattaforma live su pagina investitori | **Completo** — inv.B (unico endpoint pubblico) | n.c. | n.c. | n.c. | B | A |
 
 ## 13. Recruiting e onboarding

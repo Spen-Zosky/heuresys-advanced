@@ -28,9 +28,9 @@
 | V7b | Pass 2 censimento su 11 dir (856 file) | FATTO (S1081 — A 260/260 · B 272/272 · C 324/324, tutti 0 esclusioni e delta 0; C con campione strutturato dichiarato su 4 gruppi ripetitivi; integrazione compilata in `04_MATRICE.md` §Integrazione pass-2) |
 | V8 | Matrice di copertura (bozza `04_MATRICE.md`, due pesi per riga) | BOZZA SCRITTA (S1081 — 19 aree, ~110 righe, due pesi T1/T2, ruoli-colonna applicati; §Integrazione pass-2 da compilare al rientro dei lotti) |
 | V9 | Proposte + evidenze (bozze `05`, `06`) | FATTO (S1081-dream, ripresa serale — 29 schede su 3 lenti + 3 eretiche + 9 scartate con ragione; classi doppie PROVVISORIE, argine MUST ok: T1=3, T2=2; evidenze F1-F34 + S1-S15) |
-| V10 | dream-verifier (opus) | IN CORSO (lanciato ~20:05, output atteso `_raccolta/verifier_verdetti.md`) |
-| V11 | Doppia classificazione + confronto | non iniziata |
-| F3 | Fermata 3 — tabella MoSCoW ×2 | non raggiunta |
+| V10 | dream-verifier (opus) | FATTO (2026-08-26 ~00:00 — `_raccolta/verifier_verdetti.md`, depositato dall'orchestratore dal transcript perché l'agente non scrive; 29/29 giudicate: 3 REGGONO, 22 CON-CORREZIONI, 4 CADONO; 4 fatti corretti, 0 fonti false, 1 cella matrice smentita) |
+| V11 | Doppia classificazione + confronto | FATTO (2026-08-26 — sezione V11 in `05_PROPOSTE.md`: 4 cadute risolte, 22 delta recepiti, evidenze e matrice corrette; 24 vive, MUST: T1={P-01,P-06}, T2={P-13}) |
+| F3 | Fermata 3 — tabella MoSCoW ×2 | **PRESENTATA — WAIT-INPUT (via di Enzo sulla tabella in `05_PROPOSTE.md` §V11)** |
 | V12 | File finali `00`–`07` + `manifest.json` + `INDEX.md` | non iniziata |
 | V13 | Commit finale | non iniziata (i commit di progresso esistono) |
 

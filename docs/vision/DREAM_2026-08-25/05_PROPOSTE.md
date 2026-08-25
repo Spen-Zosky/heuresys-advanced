@@ -1,5 +1,7 @@
 # Proposte — ciclo DREAM 2026-08-25
 
+> **⚠ BANNER V11 (2026-08-26)**: le schede sotto sono la bozza dell'Onda 3, conservata come record. Il verifier le ha giudicate (29/29: 3 REGGONO, 22 CON-CORREZIONI, 4 CADONO) e la **classificazione definitiva con i delta per scheda è nella sezione «V11 — Recepimento e classificazione definitiva» in coda al file**. In caso di divergenza fra una scheda e la sezione V11, vale la V11.
+
 **Stato**: BOZZA (Onda 3, S1081-dream). Classificazione **doppia e PROVVISORIA** (pre-verifier): ogni scheda porta `T1 · T2` — T1 = vendibile a 6 mesi a PMI italiane come complemento talent al gestionale esistente; T2 = dimostrabile dal vivo a prospect/investitori entro pochi mesi. La classificazione definitiva è V11, dopo i verdetti del verifier (Onda 4). Argine MUST ≤ 1/5 per traguardo: **rispettato** (29 sopravvissute → max 5; T1 ne ha 3, T2 ne ha 2).
 
 Riferimenti `F`/`S` → `06_EVIDENZE.md`. Righe di matrice → `04_MATRICE.md` (area §n). `[F]` = fatto verificato, `[S]` = fonte esterna; ciò che non porta né l'uno né l'altro è dichiarato ipotesi.
@@ -325,3 +327,81 @@ Riferimenti `F`/`S` → `06_EVIDENZE.md`. Righe di matrice → `04_MATRICE.md` (
 ## Nota per l'Onda 4 (verifier)
 
 Punti dove questa bozza è più attaccabile, dichiarati: (1) le classi provvisorie T1 si reggono su un'ipotesi di buyer PMI non ancora validata da interviste — le sonde di P-04/P-26/P-28 la misurano; (2) F30/F31/F34 hanno componente documentale/memoria; (3) le celle Personio da snippet indicizzati (blocco anti-bot) sono il punto più debole della base fonti; (4) la leva dichiarata è una stima dell'orchestratore, non una misura.
+
+---
+
+# V11 — Recepimento e classificazione definitiva (2026-08-26, post-verifier)
+
+Verdetti in `_raccolta/verifier_verdetti.md`; evidenze corrette in `06_EVIDENZE.md` (F3/F10/F27/F31 corretti, F35–F39 e S16 aggiunti). I riferimenti di linea (`docs/vision/riferimenti/`) sono applicati: nessuna proposta viola i confini del posizionamento; P-19 incarna «AI-assisted decisions, human-governed outcomes»; P-16 incarna la fondazione EU/IT; P-26 coincide col confine «recruiting supportato, non ATS».
+
+## Le quattro cadute, e il loro esito
+
+| id | esito | perché |
+|---|---|---|
+| P-21 (semantic search ON) | **ELIMINATA — era già fatta.** | Il flag è `true` in PROD dal S975, voce #40 DONE con demo live [F10 corretto]. Non era una proposta: era una lettura sbagliata del ciclo (default di codice preso per stato di produzione mentre la risposta era leggibile in SOT_BACKLOG). Resta un'azione fuori ciclo da 10 minuti: riverifica fresca sulla VM. |
+| P-07 (authoring survey) | **GATED → WAIT-INPUT (decisione m2b di Enzo)** | Il modulo latente scrive su un cluster JSONB che l'ESS non legge [F39]: comporlo lì non arriva ai dipendenti. Prima la decisione semantica fra i due cluster (già aperta come m2b), poi l'authoring — che a quel punto è sul cluster normalizzato, lavoro diverso dalla scheda. |
+| P-18 (assistente AI ESS) | **Declassata a COULD-T2, con rimisura obbligatoria + WAIT-INPUT credenziale** | La console non è accendibile in nessun ambiente (flag assente da ogni `.env`), il gateway è blocked-on-Enzo, il serving customer-facing è «nuovo scope» [F31 corretto]. La visione resta (riferimento LinkedIn: agenti che propongono, non decidono), i piedi per terra no. |
+| P-22 (grafi che si ricordano) | **Spostata fra le SCARTATE (rientra solo con render nuovo)** | Non esiste un canvas che possa onorare i 316 layout: il renderer è Mermaid, che calcola le posizioni; un canvas interattivo è lavoro cross-repo (`ux-design-shared`) di sforzo L — non "una pagina". Il fatto era vero, la conclusione no. |
+
+## Correzioni recepite sulle sopravvissute (delta rispetto alle schede)
+
+- **P-01**: [S4] tolto; «condizione d'ingresso» declassata a ipotesi per l'import file (nella matrice Personio/Eightfold sono n.c. su quella riga); sforzo M→M/L (si aggiungono lineage obbligatorio, guardia/post-condizione/rollback); la sonda richiede un file anagrafico reale → **WAIT-INPUT parziale**, in alternativa si esercita sul tracciato Zucchetti pubblico.
+- **P-02**: la direzione dei tracciati è INVERSA a quanto scritto — sono file che i rilevatori producono **verso** Paghe: si legge la copia di quel flusso, la controparte tecnica è il fornitore presenze; la metà "cedolini" cade (nessuna fonte la sostiene).
+- **P-03**: costo "doc" abbattuto da OpenAPI già generato [F36]; «in tutti e tre» ristretto a «self-service solo nel diretto».
+- **P-04**: **MUST-T1 → SHOULD-T1 provvisorio con promozione condizionata**: sale a MUST se la sonda sui prospect conferma (l'argomento attuale era circolare — citava il giudizio del proprio raccolto). Sforzo → L.
+- **P-05**: sforzo M→L — due costi verificati: cache RBAC boot-only senza invalidazione; 76 INSERT di mapping riapplicati dalla catena a ogni deploy (collisione da progettare con ADR-0035).
+- **P-06**: «cosa esiste già» rimisurato: creare/avanzare un ciclo c'è già; scrivere una valutazione NON ha endpoint; creare una scala nemmeno. L confermato come tetto.
+- **P-08**: «DDL complete» → «mini-spec, contenuto non verificato» [F27 corretto]; scheduler: esiste il precedente `approvals-sla.timer` [F37].
+- **P-10**: vincolo dichiarato: i firmati finirebbero su LocalDiskStore (disco locale) — dipendenza dal media store S3 (lat.(f)); sonda WAIT-INPUT (preventivo commerciale).
+- **P-12**: esiste già il progetto Playwright **Pixel 7** con a11y mobile verde — la proposta diventa estensione di quello, sforzo <S; a11y ≠ resa di layout, resta da misurare quella.
+- **P-13**: MUST-T2 CONFERMATO ma con motivazione riscritta su F22 soltanto (endpoint pagato, zero chiamanti); la rivendicazione «nessuno dei tre» cade (Eightfold era n.c., e [S1] non parlava di PIP).
+- **P-14**: il rischio NON è basso: 3 route su 5 sono distruttive (erasure/retention) → guardia, post-condizione e rollback obbligatori; la soglia di legge ora è ancorata [S16: ≥50 dipendenti]; la pagina pubblica di posizionamento è scope separato.
+- **P-15**: **condizionata a una rimisura di provenienza**: SOT_BACKLOG qualifica le 468 predizioni come "precomputed legacy" — mostrarle come «i nostri modelli» sarebbe l'opposto dell'AI dichiarabile. Prima la provenienza, poi la pagina (dicendo ciò che è).
+- **P-16**: la sonda ha già un esito parziale POSITIVO (il CNEL pubblica «Contratti in Open Data», visto dal verifier); resta da dichiarare che reference_sync è PLATFORM_ADMIN/globale → l'aggancio per-tenant è superficie in più.
+- **P-17**: dipendenza dichiarata: mostrare 43/45 unità in violazione in demo è un autogol senza prima bonificare i dati organizzativi RTL — la card nasce DOPO quella bonifica (voce per il ciclo di sviluppo).
+- **P-19**: leva 3→1 (resta la pipeline seed); nasce come cornice, non come rimedio: oggi nessuna AI scrive in produzione.
+- **P-20**: la vista ESS richiede un modulo `/v1/me/*` nuovo (ADR-0011) — lo sforzo S copre la sola pagina admin; [S9] non copre il mentoring (catena a due passaggi).
+- **P-23**: **spezzata**: (a) broadcast admin = COULD, regge; (b) email/digest = NON è una proposta, è la voce #39 già in HOLD dal 2026-08-25 con motivo scritto — non rientra dalla finestra.
+- **P-24**: sonda sostituita con una query eseguibile ora (approvazioni ferme su approvatore assente), non col pilota di P-06.
+- **P-25**: sforzo S→XS: la riverifica l'ha già fatta il verifier sul codice [F38], il collector systemd è già in repo; resta la decisione di Enzo (fase 5) — **WAIT-INPUT**.
+- **P-26**: dipendenza vera da P-03 dichiarata; la sonda sui lead vale solo sopra una soglia minima di volume (da fissare: <30 lead → la sonda non decide).
+- **P-27**: il criterio diventa a TRE esiti: proposta / **consumer non-web** (CLI, altro modulo — es. `research`, `reference-sync`) / ritiro; cancellato l'obiettivo «toglierne metà» (senza base).
+- **P-28**: stessa soglia minima di volume sulla sonda; resta WAIT-INPUT sui numeri (autorità di Enzo).
+- **P-29**: capovolta nel verso giusto: **non si costruisce l'export, si espone quello che c'è** [F35] — un bottone e la scelta del formato; sforzo M→S. La scartata «report builder» perde la motivazione a catena e resta scartata per sforzo/finestra.
+
+## TABELLA MoSCoW ×2 — per la Fermata 3 (ordinata per leva dentro ogni classe)
+
+**Argine**: 24 proposte vive (29 − P-21 eliminata − P-22 scartata − P-07 gated − P-26 WON'T dichiarato + P-23 spezzata in una) → tetto MUST = 4 per traguardo. T1 ne ha 2, T2 ne ha 1.
+
+| id | proposta | **T1** (vendibile 6 mesi) | **T2** (dimostrabile) | leva | sforzo | vincoli |
+|---|---|---|---|---|---|---|
+| P-01 | Import persone/org da file | **MUST** | COULD | 4 | M/L | sonda WAIT-INPUT parziale |
+| P-06 | Condurre una campagna di valutazione | **MUST** | SHOULD | 2 | L | — |
+| P-04 | SSO aziendale | **SHOULD*** (→MUST se sonda prospect conferma) | COULD | 1 | L | sonda su Enzo/prospect |
+| P-13 | La pagina del PIP | SHOULD | **MUST** | 2 | S/M | — |
+| P-14 | Pacchetto Compliance Italia (GDPR console + WB) | SHOULD | SHOULD | 2 | S/M | superficie distruttiva: guardie |
+| P-16 | CCNL in reference_sync | SHOULD | COULD | 2 | M | CNEL Open Data: esito sonda già positivo |
+| P-03 | API per terzi + webhook | SHOULD | COULD | 3 | L | dopo P-01 |
+| P-05 | Ruoli su misura | SHOULD | COULD | 1 | L | cache RBAC + ADR-0035 |
+| P-08 | Onboarding/offboarding | SHOULD | COULD | 1 | M | — |
+| P-11 | Promemoria scadenze | SHOULD | COULD | 1 | S | — |
+| P-02 | Copia dei tracciati presenze (riscritta) | SHOULD | COULD | 2 | M | dopo P-01 |
+| P-27 | Triage delle latenti (criterio a 3 esiti) | SHOULD | — | 1 | M | dopo V11 |
+| P-15 | AI dichiarabile (registro modelli) | COULD | SHOULD | 1 | S | prima: provenienza delle 468 righe |
+| P-17 | Sentinelle in org-health | COULD | SHOULD | 1 | S | prima: bonifica dati org RTL |
+| P-20 | Pagina mentorship | COULD | SHOULD | 1 | S(+M per ESS) | modulo /me/* nuovo |
+| P-19 | Governance AI a 6 stati | COULD | SHOULD | 1 | M | — |
+| P-12 | Misura resa mobile (est. Pixel 7) | COULD | COULD | 1 | <S | — |
+| P-09 | 360° e feedback continuo | COULD | COULD | 0 | M | dopo P-06 |
+| P-10 | Firma elettronica | COULD | COULD | 0 | M | media store S3; sonda WAIT-INPUT |
+| P-23a | Broadcast admin | COULD | COULD | 0 | S | — |
+| P-24 | Deleghe di mandato | COULD | COULD | 0 | S | sonda = query, eseguibile ora |
+| P-29 | Esporre l'export (bottone) | COULD | COULD | 1 | S | — |
+| P-25 | Prometheus (accensione) | COULD | — | 0 | XS | **WAIT-INPUT** fase 5 (Enzo) |
+| P-18 | Assistente AI ESS | COULD | COULD | 1 | L | **WAIT-INPUT** gateway/credenziale + rimisura |
+| P-28 | Listino pubblico (eretica) | — | COULD | 1 | S | **WAIT-INPUT** numeri (Enzo) |
+| P-07 | Authoring survey | **GATED** (decisione m2b di Enzo) | GATED | 1 | M | — |
+| P-26 | ATS mai (eretica) | **WON'T dichiarato** | — | — | 0 | rientro: soglia lead + P-03 |
+| — | P-21 eliminata (già DONE in PROD) · P-22 scartata (nessun canvas; rientra con renderer cross-repo) | | | | | |
+
+**Confronto fra i due traguardi**: i MUST non collidono — T1 chiede i due ingressi operativi (dati, campagna), T2 chiede una sola cosa (il PIP visibile) e per il resto vive di ciò che è GIÀ completo (blueprint, storia36, flight-risk, semantic search — che si è rivelata già accesa). La spina dorsale T2 è più corta di quanto la bozza credesse, ed è una buona notizia: metà della demo è già in produzione. La tensione vera è una sola: le SHOULD-T1 (SSO, API, ruoli, campagne) sono tutte sforzo L — il semestre non le contiene tutte, e l'ordine lo decideranno le sonde (quasi tutte eseguibili in giorni).

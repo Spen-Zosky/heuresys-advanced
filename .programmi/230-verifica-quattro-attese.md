@@ -1,8 +1,8 @@
 # 230 — Le quattro voci che aspettavano un input: verificate una per una, e tre non erano quello che dicevano
 
 > **item**: #230 (istruttoria — nasce dal mandato di apertura S1080)
-> **stato**: IN CORSO
-> **punto**: le cinque misure sono chiuse; restano le due decisioni, D1 e D2
+> **stato**: CHIUSO
+> **chiuso**: S1080 (2026-08-25) — cinque misure e due decisioni, tutte chiuse
 > **misurato**: 2026-08-25, S1080
 
 ## Perché questa verifica
@@ -33,8 +33,8 @@ che tornano a Enzo, e il dato che va scritto comunque.
 - [x] **V3 #16 — cosa dipende davvero dal sandbox?** — FATTO 2026-08-25 · `grep -ril successfactors` su `apps/ packages/ db/` → **0 file**; `POST_V1_ROADMAP_DOSSIER.md:127` lo dichiara già **ESCLUSO**; §1.A dichiara **F1 eseguibile senza sandbox**
 - [x] **V4 #52 — quanto è bloccato dall'input, e quanto no?** — FATTO 2026-08-25 · `sys.sys_auth_identities` prevede `SSO_OIDC`/`SSO_SAML` dalla mig 000005 (160 righe); implementazione: **zero** (`grep -ril "oidc|saml|sso"` su `apps/api/src` `apps/web/src` `packages/shared/src` → solo la vetrina statica)
 - [x] **V5 — da quanto aspettano, misurato e non dedotto** — FATTO 2026-08-25 · `git log -S` su `SOT_BACKLOG.md`: #8 S998 · #16 S999 · #52 S1018 · #85 S1039 → 82/81/62/41 sessioni
-- [ ] **D1 Le quattro decisioni tornano a Enzo** — presentate S1080 (A/B/C/D nel menu di apertura). Ognuna cambia lo `status` di una voce del register, e lo status di una voce `WAIT-INPUT` **non è mio da cambiare**: è la corsia che dice «aspetta lui». Chiuso quando le quattro voci hanno uno stato che riflette la verifica
-- [ ] **D2 Le date entrano nel register, comunque vada D1** — ogni blocco `WAIT-INPUT` porta la data in cui l'attesa è cominciata. Indipendente dalle decisioni: senza data, `check_marciume` M5 resta cieco su quella corsia e lo dichiara — *«non si può sapere da quanto — cieco, non verde»*
+- [x] **D1 Le cinque decisioni, prese su delega** — FATTO 2026-08-25 · Enzo ha delegato: *«se non è bloccante per il funzionamento vorrei non trovarmela più negli elenchi: decidi tu quale soluzione è meglio tra le cinque»*. Criterio unico applicato, **e misurato voce per voce**: nessuna delle cinque blocca il funzionamento. `#85` e `#16` → **WON'T-DO** (la ragione esisteva già, scritta altrove) · `#8`, `#52`, `#4` → **HOLD** con trigger di riattivazione · in più `#39`, che era `GATED` su `#8`, → **HOLD** per non restare appesa a una voce parcheggiata. Prova: `handoff_lint` 0 fail; il vassoio «aspetta te» passa da **6 voci a 1**
+- [x] **D2 Le date entrano nel register** — FATTO 2026-08-25 · ogni blocco toccato porta ora la sua data (`hold-since` sulle tre in HOLD + le due di `#39`/`#8`, data di ritiro sulle due WON'T-DO). Era la metà indipendente dalle decisioni: senza data `check_marciume` M5 dichiarava quella corsia **cieca, non verde** — *«non si può sapere da quanto»*
 
 ---
 
@@ -62,7 +62,7 @@ Claude's to maintain, and `align-clones` / `close-propagate` do not carry them �
 stay separate by design». La rigenerazione passa dal canale Codex, non da qui. Non c'è un input
 mancante: c'è un invariante già dichiarato.
 
-**Proposta**: `WON'T-DO` per invariante di progetto. Se un giorno Codex dovrà rigenerare il suo
+**Proposta, poi DECISA così su delega di Enzo (2026-08-25)**: `WON'T-DO` per invariante di progetto. Se un giorno Codex dovrà rigenerare il suo
 file, sarà una voce **sua**, non una voce ferma in questo registro.
 
 ---
@@ -98,7 +98,7 @@ app-password poggiavano su Basic Auth: **non esistono più** per un account pers
 è che la risposta non è più producibile. E anche se lo fosse, il nostro mailer non parla OAuth2,
 quindi la mossa non sarebbe comunque «1 sola».
 
-**Proposta**: riscrivere la voce. La domanda giusta non è più «l'app-password», è **quale via di
+**Proposta, poi DECISA così su delega di Enzo (2026-08-25)**: riscrivere la voce. La domanda giusta non è più «l'app-password», è **quale via di
 invio**. Due strade, e la scelta del *cosa* è di Enzo:
 - **(a)** un servizio di posta transazionale con credenziali SMTP proprie (piano gratuito
   sufficiente per OTP + digest) → resta vero «transport già pronto, 1 mossa»;
@@ -132,7 +132,7 @@ righe watermark. Il sandbox (F0) blocca F2-F4, non F1.
 vero è che **l'item è già escluso** — e per un motivo che non dipende dal sandbox (valore
 dimostrativo, non di cliente).
 
-**Proposta**: `WON'T-DO` con la ragione scritta (esclusione S987 + valore dimostrativo), oppure —
+**Proposta, poi DECISA così su delega di Enzo (2026-08-25)**: `WON'T-DO` con la ragione scritta (esclusione S987 + valore dimostrativo), oppure —
 se Enzo vuole tenerla viva — spezzarla e portare **solo F1** in `ACTIVE`, lasciando il resto
 gated sul sandbox. Ciò che non deve restare è la forma attuale: nessun input di Enzo la sblocca,
 perché non è l'input a bloccarla.
@@ -161,7 +161,7 @@ lavoro a monte — rotte OIDC, scambio del codice, aggancio a `sys_auth_identiti
 just-in-time — non è bloccato da niente. Oggi la voce è ferma **al 100%** per un input che serve
 al **10% finale**.
 
-**Proposta**: spezzarla. La parte costruibile va in `ACTIVE`; resta `WAIT-INPUT` (o meglio
+**Proposta, poi DECISA così su delega di Enzo (2026-08-25)**: spezzarla. La parte costruibile va in `ACTIVE`; resta `WAIT-INPUT` (o meglio
 `GATED`, con `unblock-trigger` esplicito) la sola dimostrazione finale. Da valutare, quando si
 arriverà lì, se l'IdP debba per forza essere una risorsa di Enzo: un client OAuth Google è
 gratuito, e Azure AD ha un livello gratuito — ma la scelta del *cosa* resta sua.
@@ -191,3 +191,35 @@ te» senza una data non permette di accorgersi che una voce è morta. È lo stes
 ragione che il sandbox non tocca; `#52` è bloccata tutta per un input che serve solo alla fine.
 Nessuna delle quattro era falsa quando è stata scritta: sono invecchiate, e la corsia non aveva
 modo di dirlo.
+
+---
+
+## Le decisioni, prese su delega (2026-08-25)
+
+Enzo ha delegato con un criterio unico: *«se non è bloccante per il funzionamento vorrei non
+trovarmela più negli elenchi: decidi tu quale soluzione è meglio tra le cinque»*.
+
+**«Bloccante» è stato misurato, non supposto** — soprattutto su `#8`, dove l'email spenta *poteva*
+lasciare fuori un utente che avesse perso la password. Non è così: le rotte di recupero esistono
+(`routes.ts:215-236`) ma **nessuna pagina web le usa**, quindi non c'è un percorso da cui un
+utente possa arrivarci; il secondo fattore gira su **158 fattori TOTP e zero EMAIL_OTP**; e senza
+SMTP il sistema **non fallisce**, ripiega sul `ConsoleMailer`.
+
+| voce | destino | perché |
+|---|---|---|
+| `#85` AGENTS.md | **WON'T-DO** | la risposta era già un invariante scritto nel CLAUDE.md |
+| `#16` SuccessFactors | **WON'T-DO** | già escluso, zero codice, e per una ragione che il sandbox non tocca |
+| `#8` EMAIL | **HOLD** | non blocca nulla, e l'input che chiedeva non è più emesso da Microsoft |
+| `#52` SSO | **HOLD** | l'accesso locale funziona; il fornitore d'identità lo porterà il cliente che lo chiede |
+| `#4` go-to-market | **HOLD** | il GTM è consegnato; manca la sola pagina prezzi, e i numeri restano di Enzo |
+| `#39` digest EMAIL | **HOLD** | *non era fra le cinque*: era `GATED` su `#8`, e lasciarla lì l'avrebbe tenuta negli elenchi aggrappata a una voce parcheggiata |
+
+**Esito misurato**: il vassoio «aspetta te» passa da **6 voci a 1**; `handoff_lint` 0 fail.
+
+## Cosa resta in quella corsia, e perché non l'ho toccata
+
+`#86` — *`claude login` sul linux-pc*. Non era fra le cinque, e **non l'ho decisa io**: lo stesso
+criterio di Enzo si applicherebbe (non blocca il funzionamento del prodotto), ma estenderlo di mia
+iniziativa sarebbe una cascata oltre il mandato. Va detto che è la voce più sana delle sei: è
+**recente**, porta la sua data, è stata **provata sul campo ieri**, chiede cinque minuti di lavoro
+di Enzo e non una decisione. Se anche lei deve uscire dagli elenchi, basta dirlo.

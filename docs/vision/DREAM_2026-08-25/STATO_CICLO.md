@@ -4,6 +4,8 @@
 
 ## Contratto del ciclo (immutato, non ri-derivare)
 
+- **Riferimenti di linea (aggiunti da Enzo a ciclo in corso, ~20:00)**: `docs/vision/riferimenti/{posizionamento-centrale,modello-linkedin-vs-heuresys}.md` (+ README). Vincolano V11: le classi definitive devono rispettare i confini del posizionamento (payroll/T&A/benefit esclusi; recruiting non-ATS ⇒ conferma P-26; «digital twin» da non dichiarare ⇒ conferma lo scarto; «AI-assisted decisions, human-governed outcomes» ⇒ conferma P-19; fondazione EU/IT ⇒ rafforza P-16 CCNL). Le sei esperienze LinkedIn-derivate sono vivaio per i prossimi cicli.
+
 - **Traguardi (Enzo)**: T1 = entro 6 mesi prodotto vendibile a PMI italiane strutturate come complemento talent al gestionale HR esistente · T2 = piattaforma dimostrabile dal vivo a prospect/investitori entro pochi mesi. Doppia classificazione MoSCoW indipendente + confronto; due pesi per riga di matrice; argine MUST ≤ 1/5 per ciascun traguardo.
 - **Competitor e ruoli**: Personio (concorrente diretto), Eightfold AI (metro di riferimento — mai MUST), Zucchetti (piattaforma coesistente — superfici di integrazione, non lacune).
 - **Perimetro di scrittura**: SOLO `docs/vision/**`. Mai `docs/kb/`. Read-only su codice.
@@ -25,8 +27,8 @@
 | F2 | Fermata 2 — esclusioni mostrate integrali a Enzo | FATTO (2026-08-25, S1081 — Enzo ha delegato il via al vaglio orchestratore nel messaggio di ripresa; vaglio rifatto sulle 17 esclusioni: tutte meccaniche, nessuna da recuperare) |
 | V7b | Pass 2 censimento su 11 dir (856 file) | FATTO (S1081 — A 260/260 · B 272/272 · C 324/324, tutti 0 esclusioni e delta 0; C con campione strutturato dichiarato su 4 gruppi ripetitivi; integrazione compilata in `04_MATRICE.md` §Integrazione pass-2) |
 | V8 | Matrice di copertura (bozza `04_MATRICE.md`, due pesi per riga) | BOZZA SCRITTA (S1081 — 19 aree, ~110 righe, due pesi T1/T2, ruoli-colonna applicati; §Integrazione pass-2 da compilare al rientro dei lotti) |
-| V9 | Proposte + evidenze (bozze `05`, `06`) | non iniziata |
-| V10 | dream-verifier (opus) | non iniziata |
+| V9 | Proposte + evidenze (bozze `05`, `06`) | FATTO (S1081-dream, ripresa serale — 29 schede su 3 lenti + 3 eretiche + 9 scartate con ragione; classi doppie PROVVISORIE, argine MUST ok: T1=3, T2=2; evidenze F1-F34 + S1-S15) |
+| V10 | dream-verifier (opus) | IN CORSO (lanciato ~20:05, output atteso `_raccolta/verifier_verdetti.md`) |
 | V11 | Doppia classificazione + confronto | non iniziata |
 | F3 | Fermata 3 — tabella MoSCoW ×2 | non raggiunta |
 | V12 | File finali `00`–`07` + `manifest.json` + `INDEX.md` | non iniziata |

@@ -44,15 +44,15 @@ Non hanno un comando da eseguire oggi: sono cancelli che scattano **dentro** alt
 in coda a un consumo sarebbe fingere di poterle chiudere. Restano `ACTIVE` a ragione, e si
 consumano da sé quando il lavoro che le innesca passa.
 
-## La sequenza decisa
+## Fasi — la sequenza decisa
 
 Criterio, in quest'ordine: **(a)** chiude una voce intera · **(b)** costo crescente · **(c)**
 rischio crescente. La prima parte per prima perché è **quasi tutta attesa** e gira mentre lavoro
 sulle altre.
 
 - [ ] **S1 `#219` F5 — la corsa integrale E2E, 0 falliti** — budget ~20k, in gran parte attesa. Comando: `cd apps/web && pnpm test:e2e:prod:node22` (Node ≥23 → il wrapper è obbligatorio, D-36). Chiude `#219`, e con essa il criterio di `#211` per portare la suite in CI. **Guardia**: un verde che nasce da casi *non eseguiti* non è un verde — questa suite ha già mentito due volte così (263 DID NOT RUN letti come verdi; «4/4 fasi» che contava le fasi e non i casi). Si legge il conteggio dei **casi**, non delle fasi
-- [ ] **S2 `#148` — il rendiconto delle chiusure** — 0/3, ~1h. Lettura + decisione, rischio nullo
-- [ ] **S3 `#169` — i due segreti che nascono dalla stessa chiave** — 0/4, ~1 sessione. Sicurezza: chi ha la password ha anche il secondo fattore
+- [x] **S2 `#148` — il rendiconto delle chiusure** — FATTO 2026-08-25 · voce **CHIUSA** 3/3, commit `3217b3ec`. Decisione registrata: **non si riscrive** in quattro verbi — il rilascio pesa 232 passi contro i 74 dei tre verbi che lo escluderebbero. Due reperti fuori scope nominati una volta sola (60 `apertura` contro 2 `chiusura`; 127 corse su 169 con un solo passo)
+- [ ] **S3 `#169` — i due segreti che nascono dalla stessa chiave** — **in corso, e la direttiva di Enzo del 2026-08-25 l'ha riaperta in grande**: F1 FATTA (censimento, 10 punti derivano il segreto — 7 su 10 hanno bisogno solo di *entrare*), F2 **progettata** dopo la direttiva «utenze di collaudo con permessi propri e autonomi». Il progetto è nel piano `#169`: tre identità `SERVICE`, mandati veri e non ruoli-ombra, chiave separata, esenzione dal secondo fattore col meccanismo già esistente. ⛔ **l'applicazione aspetta la fine di S1**: creare utenze in produzione mentre la suite integrale gira altererebbe ciò che sta misurando
 - [ ] **S4 `#214` F6 — un perimetro dell'agente** — consumabile a pezzi. ⚠ l'ordine **non si ricopia dal piano**: si ri-deriva con `check_concetti_agente.py`, perché una pagina nuova sposta un modulo in coda
 - [ ] **S5 `#227` F1 — censire le 4.464 competenze isolate, per specie** — la voce che Enzo ha nominato in apertura
 

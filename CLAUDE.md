@@ -72,6 +72,10 @@ Historical records live in `docs/archive/` and are **not** SoT. When state chang
 
 The mode is state on disk keyed by `session_id`, written by a `UserPromptSubmit` hook before the model sees the message — it does not depend on remembering to activate it.
 
+**⭐ project-dream = sessioni dedicate (Enzo, 2026-08-25, S1081 — permanente).** I programmi e le attività legati alla skill `project-dream` (cicli DREAM, `docs/vision/**`) **non si prendono in carico** nelle sessioni canonical o lab ordinarie: li gestiscono **sessioni dedicate**, eventualmente già in esecuzione parallela, con cui ci si scambia **messaggi informativi** (ListAgents/SendMessage). Conseguenze operative: le voci DREAM si escludono dal piano dichiarandolo; `docs/vision/**` non si tocca; i file della sessione dream in working tree non entrano nei commit delle altre sessioni (`git add` con path espliciti, mai `-A`).
+
+**Vale identico il verso opposto (stessa istruzione di Enzo, stesso giorno).** I `.programmi/**` e le attività di sviluppo canonico sono di **sessioni dedicate**: una sessione con un altro mandato (dream, lab, analisi, servizio) **non li prende in carico e non ne tiene conto nel proprio piano** — nemmeno quando un cancello o un hook segnala un rosso originato da quei file mentre la sessione dedicata li sta lavorando: si instrada un **messaggio informativo** alla sessione dedicata, si riesegue il cancello dopo la sua correzione, e si prosegue nel proprio perimetro.
+
 ---
 
 After the infra hooks (tunnel/db/branch), **before** asking what to do or starting work, build the action menu from all live sources — never from memory. ONE command, ONE model round:

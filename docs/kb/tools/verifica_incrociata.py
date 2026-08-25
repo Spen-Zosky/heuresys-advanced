@@ -611,13 +611,19 @@ check("X7c", "X7", "Responsabile senza alcuna valutazione da fare",
 
 # --- X8 assi funzionali <-> organigramma -----------------------------------
 check("X8a", "X8", "Squadra o processo agganciato a un'unita' inesistente o inattiva",
-      "un team o un processo di unita' il cui `organization_unit_id` non compare fra "
-      "le unita' attive",
+      "un team o un processo di unita' il cui `organization_unit_id` e' VALORIZZATO ma "
+      "non compare fra le unita' attive. Una squadra SENZA unita' non e' marciume: e' lo "
+      "stato progettato di un team che ATTRAVERSA le unita' (mig 000268, `HS-DELIVERY` — "
+      "una squadra che ricalca un'unita' annulla l'ortogonalita' di ADR-0027)",
       """
-      SELECT 'team ' || t.team_code, t.team_name, coalesce(o.organization_unit_code, '(assente)'), ''
+      SELECT 'team ' || t.team_code, t.team_name,
+             coalesce(tutte.organization_unit_code || ' (inattiva)', '(inesistente)'), ''
       FROM sys.sys_teams t
       LEFT JOIN ou o ON o.organization_unit_id = t.team_organization_unit_id
-      WHERE t.team_is_active AND o.organization_unit_id IS NULL
+      LEFT JOIN sys.sys_organization_units tutte
+             ON tutte.organization_unit_id = t.team_organization_unit_id
+      WHERE t.team_is_active AND t.team_organization_unit_id IS NOT NULL
+        AND o.organization_unit_id IS NULL
       UNION ALL
       SELECT 'processo ' || p.organization_unit_process_id::text, coalesce(p.org_unit_process_role, ''),
              coalesce(o.organization_unit_code, '(assente)'), ''
@@ -709,7 +715,9 @@ check("X9b", "X9", "Assegnazioni sovrapposte nel tempo",
       colonne=["persona", "le due posizioni", "intervallo 1", "intervallo 2"])
 
 check("X9c", "X9", "Persona con contratto attivo e nessuna collocazione",
-      "contratto `ACTIVE` senza alcuna assegnazione di posizione attiva, e il rovescio",
+      "contratto `ACTIVE` senza alcuna assegnazione di posizione attiva, e il rovescio "
+      "(esente il vertice mai amministrato: chi regge la OU radice con ZERO contratti "
+      "in assoluto e' un amministratore, non un dipendente — deciso da Enzo 2026-08-25, S1081)",
       """
       SELECT u.user_email, 'contratto attivo, nessuna posizione', c.lev, ''
       FROM contr c JOIN sys.sys_users u ON u.user_id = c.uid
@@ -718,6 +726,16 @@ check("X9c", "X9", "Persona con contratto attivo e nessuna collocazione",
       SELECT u.user_email, 'posizione attiva, nessun contratto attivo', a.titolo, ''
       FROM att a JOIN sys.sys_users u ON u.user_id = a.uid
       WHERE NOT EXISTS (SELECT 1 FROM contr c WHERE c.uid = a.uid)
+        -- esenzione del vertice (Enzo, 2026-08-25): entrambe le condizioni, mai una sola —
+        -- un vertice CON storia contrattuale resta segnalabile, e chiunque altro pure
+        AND NOT (
+          EXISTS (SELECT 1 FROM sys.sys_organization_units o
+                  WHERE o.organization_unit_parent_id IS NULL
+                    AND o.organization_unit_is_active
+                    AND o.organization_unit_manager_user_id = a.uid)
+          AND NOT EXISTS (SELECT 1 FROM sys.sys_user_contracts c2
+                          WHERE c2.user_contract_user_id = a.uid)
+        )
       ORDER BY 2, 1
       """,
       "SELECT (SELECT count(*) FROM contr) + (SELECT count(*) FROM att)",
@@ -1128,7 +1146,23 @@ def main() -> int:
                                      for e in esiti]}, f, indent=2, ensure_ascii=False)
         print(f"\nreferto grezzo: {os.path.abspath(a.json)}")
 
-    return 1 if allarmi else 0
+    # Tre esiti, non due (stessa convenzione del guardiano: exit 4 = cieco).
+    # Un DIFETTO o una query rotta sono marciume: 1. Una verifica CIECA
+    # DICHIARATA non e' marciume ma nemmeno un verde: 4, cosi' chi legge
+    # l'exit distingue «ho guardato e c'e' del marcio» da «li' non potevo
+    # guardare, e te l'ho detto». Prima cieche e difetti uscivano entrambi 1,
+    # e una cecita' permanente (X7a: nessuna valutazione aperta) teneva rosso
+    # il cancello di chiusura per sempre — un allarme fisso insegna a non
+    # guardarlo (#194).
+    rossi = any(e["stato"] in ("DIFETTO", "ERRORE") for e in esiti)
+    cieche = [e for e in esiti if e["stato"] in ("CIECA", "NON FALSIFICABILE")]
+    if rossi:
+        return 1
+    if cieche:
+        print(f"\nnessun difetto; {len(cieche)} verifiche cieche/non falsificabili "
+              "dichiarate -> exit 4 (cieco non e' marcio, ma non e' un verde)")
+        return 4
+    return 0
 
 
 if __name__ == "__main__":

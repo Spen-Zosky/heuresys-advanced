@@ -159,8 +159,18 @@ def esegui_scoperti(elenco: list[str]) -> list[tuple[str, str, str]]:
             esiti.append((nome, IGNOTO, f"NON MISURABILE — {e}"))
             continue
         coda = [x for x in (r.stdout or "").rstrip().split("\n") if x.strip()]
-        esiti.append((nome, VERDE if r.returncode == 0 else ROSSO,
-                      (coda[-1][:150] if coda else f"exit={r.returncode}")))
+        # exit 4 = CIECO DICHIARATO (convenzione del guardiano): lo strumento ha
+        # guardato, non ha trovato marcio, e dichiara cosa non poteva vedere.
+        # Si stampa — il buio resta visibile — ma non arrossa il cancello.
+        stato = VERDE if r.returncode == 0 else (CIECO if r.returncode == 4 else ROSSO)
+        # La riga da mostrare e' il RIEPILOGO («ESITO: 8 verifiche con difetti...»),
+        # non l'ultima riga: l'ultima riga di un elenco di allarmi e' UN allarme,
+        # e mostrarla come sintesi ha nascosto 7 difetti su 8 per tre chiusure
+        # di fila (S1081) — lo stesso «si ferma al primo rosso» della regola 6,
+        # rovesciato: si fermava all'ULTIMO.
+        riepilogo = next((x for x in reversed(coda) if x.lstrip().startswith("ESITO")),
+                         coda[-1] if coda else f"exit={r.returncode}")
+        esiti.append((nome, stato, riepilogo.strip()[:150]))
     return esiti
 
 
@@ -174,7 +184,9 @@ CAPO = re.compile(r"^- \*\*(#?[A-Za-z]{0,2}-?\d+) (?P<tit>.+?)\*\* .*status: (?P
 # largo dava 114 casi su 181 voci chiuse, quello stretto ne da' 5, di cui 1 vero.
 RESIDUO = re.compile(
     r"(piano proprio|piano suo|voce a s[eé]\b|lavoro-residuo|fuori da questa voce"
-    r"|nominat[ao] (?:qui )?una volta sola|resta da fare|va pianificat|da decompor)", re.I)
+    # \b: senza confine di parola «riNOMINATA una volta sola» accendeva M3 su una
+    # narrazione di chiusura (#163, S1081) — un'unita' rinominata non e' un residuo
+    r"|\bnominat[ao] (?:qui )?una volta sola|resta da fare|va pianificat|da decompor)", re.I)
 DATA = re.compile(r"\b(20\d{2})-(\d{2})-(\d{2})\b")
 # «fino al <data>», «GATED fino al <data>»: una scadenza, non un ostacolo.
 SCADENZA = re.compile(r"fino al\s+(20\d{2}-\d{2}-\d{2})", re.I)
@@ -273,6 +285,7 @@ def m3_residuo_orfano(voci: list[Voce]) -> list[str]:
     nomina lo stesso riferimento, o un piano in `.programmi/`.
     """
     vivi = [v for v in voci if v.stato not in TERMINALI]
+    ids_vivi = {v.id for v in vivi}
     testo_vivi = "\n".join(v.titolo + "\n" + v.testo for v in vivi)
     piani = ""
     d = RADICE / ".programmi"
@@ -289,9 +302,17 @@ def m3_residuo_orfano(voci: list[Voce]) -> list[str]:
         for riga in v.righe:
             if not RESIDUO.search(riga) or len(riga.strip()) < 40:
                 continue
+            if "~~" in riga:
+                # riga superata, tenuta per storia: non dichiara piu' niente a nessuno
+                continue
             # il riferimento nominato nella riga (es. `F6-07`): se nessuno lo raccoglie, e' orfano
             sigle = re.findall(r"`(F\d+-\d+|F\d+|T\d+[a-z]?)`", riga)
             if sigle and any(s in testo_vivi or s in piani for s in sigle):
+                break
+            # destinazione esplicita: `raccolto-in: #NNN` — raccoglie solo una voce VIVA,
+            # perche' un residuo che punta a una voce chiusa e' orfano due volte
+            dest = re.findall(r"raccolto-in:\s*\**#(\d+)", riga)
+            if dest and any(d in ids_vivi for d in dest):
                 break
             fuori.append(f"#{v.id} e' DONE ma dichiara un residuo che nessuna voce viva "
                          f"e nessun piano raccoglie (riga {v.riga}): {riga.strip()[:110]}")
@@ -417,6 +438,19 @@ def selftest() -> int:
     prova("M3 accende su un residuo che nessuno raccoglie", len(m3_residuo_orfano(leggi_register(reg))) == 1)
     reg_ok = reg + "- **#13 chi lo raccoglie** · status: ACTIVE\n  - porta avanti `F9-99`\n"
     prova("M3 TACE se una voce viva lo raccoglie", m3_residuo_orfano(leggi_register(reg_ok)) == [])
+    reg_sup = ("- **#14 epsilon** · status: DONE\n"
+               "  - ~~fuori da questa voce, nominato una volta sola: un lavoro poi eseguito davvero~~ — RIGA SUPERATA\n")
+    prova("M3 TACE su una riga superata (~~)", m3_residuo_orfano(leggi_register(reg_sup)) == [])
+    reg_rac = ("- **#15 zeta** · status: DONE\n"
+               "  - fuori da questa voce, nominato una volta sola: le 29 righe di prova · raccolto-in: #16\n")
+    prova("M3 ACCENDE se raccolto-in punta a una voce chiusa",
+          len(m3_residuo_orfano(leggi_register(reg_rac + "- **#16 eta** · status: DONE\n  - x\n"))) == 1)
+    prova("M3 TACE se raccolto-in punta a una voce viva",
+          m3_residuo_orfano(leggi_register(reg_rac + "- **#16 eta** · status: HOLD\n  - x\n")) == [])
+    reg_rin = ("- **#17 theta** · status: DONE\n"
+               "  - un'unita' viene rinominata una volta sola nel modello, e il vincolo lo pretende cosi'\n")
+    prova("M3 TACE su «rinominata una volta sola» (confine di parola)",
+          m3_residuo_orfano(leggi_register(reg_rin)) == [])
 
     # --- M4: piano esaurito su una voce viva (su una directory di prova, mai sui piani veri:
     #     un selftest che leggesse i piani del repo cambierebbe esito a ogni sessione)
@@ -465,6 +499,27 @@ def selftest() -> int:
         prova("questo file non misura se stesso", "check_marciume" not in fuori)
     except Exception as e:
         prova(f"la derivazione non solleva ({e})", False)
+
+    # --- esegui_scoperti: exit 4 = CIECO dichiarato, non marciume
+    import tempfile as _tf
+    global TOOLS
+    with _tf.TemporaryDirectory() as td:
+        _vecchio_tools = TOOLS
+        TOOLS = Path(td)
+        (TOOLS / "finto_cieco.py").write_text("import sys; print('cieco dichiarato'); sys.exit(4)", encoding="utf-8")
+        (TOOLS / "finto_rosso.py").write_text("import sys; print('marcio'); sys.exit(1)", encoding="utf-8")
+        (TOOLS / "finto_elenco.py").write_text(
+            "import sys\nprint('- allarme 1')\nprint('ESITO: 8 verifiche con difetti')\n"
+            "print('- allarme ultimo')\nsys.exit(1)", encoding="utf-8")
+        try:
+            _righe = {n: (e, c) for n, e, c in
+                      esegui_scoperti(["finto_cieco", "finto_rosso", "finto_elenco"])}
+            prova("exit 4 di uno strumento e' CIECO, non rosso", _righe["finto_cieco"][0] == CIECO)
+            prova("exit 1 di uno strumento resta ROSSO", _righe["finto_rosso"][0] == ROSSO)
+            prova("la sintesi mostrata e' la riga ESITO, non l'ultimo allarme",
+                  _righe["finto_elenco"][1].startswith("ESITO: 8"))
+        finally:
+            TOOLS = _vecchio_tools
 
     rossi = [n for n, ok in esiti if not ok]
     print(f"\n{len(esiti) - len(rossi)}/{len(esiti)} verdi")

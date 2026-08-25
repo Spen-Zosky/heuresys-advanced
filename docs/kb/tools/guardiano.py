@@ -165,15 +165,73 @@ def dir_transcript(cwd: Path | None = None) -> Path:
     return base / slug_progetto(cwd or Path.cwd())
 
 
-def trova_transcript(session: str | None, cwd: Path | None = None) -> Path | None:
-    d = dir_transcript(cwd)
+def trova_transcript(
+    session: str | None,
+    cwd: Path | None = None,
+    *,
+    dir_override: Path | None = None,
+    usa_ambiente: bool = True,
+) -> Path | None:
+    """Il transcript di QUESTA sessione, non l'ultimo che ha scritto.
+
+    `dir_override` e `usa_ambiente` esistono per il selftest: senza poter
+    iniettare una directory finta e spegnere la lettura dell'ambiente, il ramo
+    «due sessioni vive» non sarebbe provabile — e una prova che non puo' fallire
+    non e' una prova.
+
+    ⚠ DIFETTO REALE, misurato il 2026-08-25 (S1080). Il ripiego «il .jsonl con
+    mtime piu' recente» e' corretto con una sessione sola e **falso** con due:
+    su questo repo giravano due sessioni insieme e i loro transcript erano stati
+    scritti nello stesso minuto. Il guardiano ha agganciato quello dell'ALTRA e
+    ha risposto «⛔ SOGLIA RAGGIUNTA — contesto 101.1%» a una sessione che era
+    sotto il 10%. Il verdetto era giusto per la sessione che stava misurando, e
+    completamente sbagliato per chi lo aveva chiesto.
+
+    Era invisibile perche' l'esito **sembra** una misura: percentuale, token,
+    barra piena. I due campi che tradivano lo scambio — `modello` (fable-5 contro
+    opus-5) e `fonte` (un UUID diverso) — erano stampati, ma nessuno li confronta
+    con la propria sessione, e su una macchina sola non divergono mai.
+
+    Precedenza, dalla piu' affidabile:
+      1. `--session` esplicito (il chiamante sa chi e');
+      2. `CLAUDE_CODE_SESSION_ID` — Claude Code lo esporta nell'ambiente del
+         processo, quindi identifica **la sessione che sta chiedendo**;
+      3. il piu' recente per mtime, **solo se e' l'unico candidato**: con due o
+         piu' transcript vivi il ripiego non e' «impreciso», e' una risposta su
+         qualcun altro → si dichiara NON MISURABILE, come vuole la dottrina.
+    """
+    d = dir_override or dir_transcript(cwd)
     if not d.is_dir():
         return None
+    if not session and usa_ambiente:
+        session = (os.environ.get("CLAUDE_CODE_SESSION_ID") or "").strip() or None
     if session:
         p = d / f"{session}.jsonl"
         return p if p.is_file() else None
     cand = sorted(d.glob("*.jsonl"), key=lambda p: p.stat().st_mtime, reverse=True)
-    return cand[0] if cand else None
+    if not cand:
+        return None
+    # Piu' di un transcript scritto di recente = piu' sessioni vive: senza un id
+    # non si puo' sapere quale sia la propria, e tirare a indovinare qui produce
+    # un verdetto sicuro di se' su una sessione altrui.
+    if len(cand) > 1:
+        recenti = _recenti(cand)
+        if len(recenti) > 1:
+            return None
+    return cand[0]
+
+
+def _recenti(cand: list[Path], finestra_s: int = 900) -> list[Path]:
+    """I transcript scritti entro `finestra_s` dal piu' recente.
+
+    Quindici minuti: un transcript piu' vecchio appartiene a una sessione chiusa
+    o ferma, e non compete. La stessa soglia con cui il ramo delle 5 ore dichiara
+    «stantio» un dato della riga di stato.
+    """
+    if not cand:
+        return []
+    ultimo = cand[0].stat().st_mtime
+    return [p for p in cand if ultimo - p.stat().st_mtime <= finestra_s]
 
 
 def campiona(path: Path) -> list[Campione]:
@@ -484,6 +542,49 @@ def selftest() -> int:
         c = campiona(p)
         check("corrente = ultimo, non il picco", 50_001, c[-1].contesto)
         check("picco distinto dal corrente", 900_001, max(x.contesto for x in c))
+
+        # 3-ter — NEGATIVO: DUE SESSIONI VIVE, e nessun id -> NON MISURABILE.
+        #     Nato dal difetto di S1080 (2026-08-25): su questo repo giravano due
+        #     sessioni insieme, il ripiego «il .jsonl con mtime piu' recente» ha
+        #     agganciato quella dell'ALTRA, e il guardiano ha risposto «⛔ SOGLIA
+        #     RAGGIUNTA — contesto 101.1%» a una sessione che stava sotto il 10%.
+        #     Il selftest era verde 32/32 con il difetto dentro: nessun caso
+        #     guardava da QUALE transcript viene la misura.
+        #     La prova sa fallire: togliendo il ramo `len(recenti) > 1` la prima
+        #     riga qui sotto torna rossa, perche' trova_transcript risponde con un
+        #     percorso invece che con None.
+        d2 = tmp / "concorrenti"
+        d2.mkdir(parents=True, exist_ok=True)
+        for nome in ("aaa", "bbb"):
+            (d2 / f"{nome}.jsonl").write_text("{}\n", encoding="utf-8")
+        # Si prova `trova_transcript`, NON `_recenti`: e' li' che sta il ramo, e una
+        # prova sulla sola funzione ausiliaria resterebbe verde anche togliendolo.
+        check("due sessioni vive, nessun id -> NON MISURABILE",
+              None, trova_transcript(None, dir_override=d2, usa_ambiente=False))
+        # POSITIVO che rende la prova non banale: con l'id si misura lo stesso.
+        check("due sessioni vive, ma con l'id -> si misura",
+              "aaa.jsonl",
+              getattr(trova_transcript("aaa", dir_override=d2, usa_ambiente=False), "name", None))
+        # Un transcript fermo da ore non compete: resta un candidato solo, e si misura.
+        vecchio = d2 / "ccc.jsonl"
+        vecchio.write_text("{}\n", encoding="utf-8")
+        os.utime(vecchio, (1_000_000, 1_000_000))
+        d1 = tmp / "sola"
+        d1.mkdir(parents=True, exist_ok=True)
+        (d1 / "unica.jsonl").write_text("{}\n", encoding="utf-8")
+        (d1 / "ferma.jsonl").write_text("{}\n", encoding="utf-8")
+        os.utime(d1 / "ferma.jsonl", (1_000_000, 1_000_000))
+        check("una viva + una ferma da ore -> si misura la viva",
+              "unica.jsonl",
+              getattr(trova_transcript(None, dir_override=d1, usa_ambiente=False), "name", None))
+        # E l'ambiente, quando c'e', ha la precedenza sul ripiego.
+        os.environ["CLAUDE_CODE_SESSION_ID"] = "bbb"
+        try:
+            check("l'ambiente identifica la sessione fra due vive",
+                  "bbb.jsonl",
+                  getattr(trova_transcript(None, dir_override=d2), "name", None))
+        finally:
+            os.environ.pop("CLAUDE_CODE_SESSION_ID", None)
 
         # 3-bis — NEGATIVO: il budget si misura sulla SOGLIA, non sulla fine della
         #     finestra. Nato da un difetto reale (S1057): con 136.875 token consumati su

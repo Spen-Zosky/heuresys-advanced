@@ -63,12 +63,12 @@ catena che sblocca la suite (#169 → #219) · **(c)** il lavoro read-only mentr
     eseguite, e **ogni rosso residuo della batteria ha una voce che lo possiede** (`#234`). La
     chiusura continuerà a dire `marciume: fallito` con la riga «8 verifiche con difetti» finché
     #234 non li consuma — dichiarato, non nascosto
-- [ ] **S3 `#169` F2 — la via d'ingresso per le prove** — il progetto è nel piano `#169`: tre
-  identità `SERVICE` su dominio `.invalid`, mandati veri (PLATFORM_ADMIN · TENANT_ADMIN · USER),
-  chiave separata `.secrets/collaudo-access.key`, esenzione MFA col meccanismo di `000118`.
-  Prima: chiarire cosa ha rimosso `admin@heuresys.com` dopo la `000287`.
-  ⛔ il vincolo «non mentre la suite gira» oggi NON morde: nessuna suite in volo.
-  **fatto =** un accesso reale riuscito con un'utenza di collaudo, la via vecchia ancora al suo posto
+- [x] **S3 `#169` F2 — la via d'ingresso per le prove** — **FATTA 2026-08-25 (S1081)**, commit
+  `71ca9e42` · evidenza: 3 utenze SERVICE provisionate (idempotente, guardie, `--undo`), login
+  in un passo 200×3, password errata 401, **chiave madre 401** (il criterio di #169, misurato),
+  via vecchia intatta (federica 200). Terza guardia `000284` scoperta eseguendo; `admin@` chiarito
+- [ ] **S0-bis (ereditato da S0)** — `#234` possiede gli otto rossi di `verifica_incrociata`;
+  la chiusura porta `marciume: fallito` finché non li consuma — dichiarato, non nascosto
 - [ ] **S1 `#219` F5 — la corsa integrale E2E, 0 falliti** — DOPO S3: capire il guasto esatto dei
   sei setup di autenticazione, instradarli sulla via nuova dove idoneo (il confine di #169 vale:
   i profili di *autorizzazione* restano persone reali), poi `cd apps/web &&

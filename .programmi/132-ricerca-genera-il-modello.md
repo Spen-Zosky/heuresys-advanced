@@ -605,9 +605,14 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   **contenuto** del commento, non sulla sua presenza: un commento vuoto passerebbe un controllo di
   sola esistenza. Prova generale VERDE, 311 migrazioni, 23/23 sentinelle; misurato dopo: famiglie
   1 · varianti 1, descritte e non toccate.
-- [ ] **F7 le due prove** — ⏸ **`blocked-on-Enzo`: l'approvazione della prima fonte** (dichiarato
-  2026-08-20, S1074). Prima l'azienda nuova di settore diverso (se ne esce una banca, l'archetipo
-  è sparito solo di nome), poi RTL Bank come metro di qualità.
+- [ ] **F7 le due prove** — ✅ **SBLOCCATA: l'approvazione è ARRIVATA (Enzo, S1081, 2026-08-25)**:
+  *«Approva bancaditalia.it come prima fonte»*, motivazione: fonte istituzionale della banca
+  centrale, autorevole per il dominio bancario di RTL. ⚠ **L'applicazione NON è stata eseguita**
+  (S1081 chiusa dal guardiano, finestra 5h ≥ 80%): chi riprende esegue la rotta di decisione
+  sulla proposta `PASSED` di `F4h` (id corsa qui sotto) con approvatore=Enzo, data 2026-08-25 e
+  la motivazione sopra, poi `apply-research` — e F7 gira. Prima l'azienda nuova di settore
+  diverso (se ne esce una banca, l'archetipo è sparito solo di nome), poi RTL Bank come metro
+  di qualità.
 
   **Perche' e' bloccata, e non e' un intoppo tecnico**: i cinque domini di contenuto confrontano le
   fonti col registro, e nel registro **non c'e' ancora nessuna fonte approvata**. Approvarle e' una

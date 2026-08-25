@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-24T00:00:42Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3202**
+**Generato**: 2026-08-25T15:47:10Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3222**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,7 +13,7 @@
 | api-module | 356 |
 | ci | 17 |
 | claude-config | 35 |
-| config | 182 |
+| config | 184 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 44 |
 | db-seed | 114 |
-| doc-canonical | 696 |
+| doc-canonical | 714 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 403 |
 | ux-design-archive | 80 |
 | web-source | 241 |
-| **TOTALE** | **3202** |
+| **TOTALE** | **3222** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2644 |
+| live | 2664 |
 
 ## File per categoria
 
@@ -648,6 +648,8 @@
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-reindex.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-scraping.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-scraping.timer` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-storia36-avanzamento.service` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-storia36-avanzamento.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-storia36-custodia.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-storia36-custodia.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-web.service` · *live* · git-tracked
@@ -1617,8 +1619,10 @@
 - `D:\heuresys-advanced\.programmi\132-ricerca-genera-il-modello.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\142-cruscotti-per-tipologia.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\143-squadra-come-progetto.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\148-rendiconto-chiusure-quattro-verbi.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\149-consegne-lab-non-verificate.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\159-ponte-gateway-pagine.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\169-due-segreti-dalla-stessa-chiave.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\181-rilievi-controllo-drift.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\197-marchio-materializzazione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\198-tenant-builder-p3-costruzione.md` · *live* · git-tracked
@@ -1635,6 +1639,13 @@
 - `D:\heuresys-advanced\.programmi\222-remediation-w3-integrita-contenuti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\223-remediation-w4-pipeline-ruoli.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\224-check-non-deterministico-fuso.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\225-claude-md-affermazioni-scadute.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\226-storia-rtl-scorrevole.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\227-competenze-isolate-nel-grafo.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\228-cancello-a-tempo.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\229-eredita-fra-sessioni.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\230-verifica-quattro-attese.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\231-consumo-lavori-attivi.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\54-recruiting-ats.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\69-residui-staging-wave1.md` · *live* · git-tracked
@@ -1973,6 +1984,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\check_identita_azienda.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_idoneita_agente.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_istruzioni.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\check_marciume.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_module_test_coverage.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_no_legacy_ingest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_pagine_orfane.py` · *live* · git-tracked
@@ -2282,6 +2294,14 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-07-catalogo-generico-referto-di-programma.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-07-percorsi-carriera-155.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-13-batch-S1057.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\STATO_CICLO.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\architettura_raw.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\competitor_eightfold.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\competitor_personio.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\competitor_zucchetti.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\docs_censimento.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\inventario_raw.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\latenti_raw.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked

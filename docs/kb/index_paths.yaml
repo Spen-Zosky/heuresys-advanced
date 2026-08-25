@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-24T00:00:42Z da docs/kb/tools/build_index.py
+# generato: 2026-08-25T15:47:10Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-24T00:00:42Z"
-  total_files: 3202
+  generated_at: "2026-08-25T15:47:10Z"
+  total_files: 3222
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,7 +13,7 @@ meta:
     api-module: 356
     ci: 17
     claude-config: 35
-    config: 182
+    config: 184
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -22,7 +22,7 @@ meta:
     db-other: 8
     db-script: 44
     db-seed: 114
-    doc-canonical: 696
+    doc-canonical: 714
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2644
+    live: 2664
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3545,6 +3545,18 @@ files:
   - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-scraping.timer'
     root: repo
     rel: 'deploy/systemd/heuresys-advanced-scraping.timer'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-storia36-avanzamento.service'
+    root: repo
+    rel: 'deploy/systemd/heuresys-advanced-storia36-avanzamento.service'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-storia36-avanzamento.timer'
+    root: repo
+    rel: 'deploy/systemd/heuresys-advanced-storia36-avanzamento.timer'
     category: config
     status: live
     provenance: git-tracked
@@ -9200,6 +9212,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\148-rendiconto-chiusure-quattro-verbi.md'
+    root: repo
+    rel: '.programmi/148-rendiconto-chiusure-quattro-verbi.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\149-consegne-lab-non-verificate.md'
     root: repo
     rel: '.programmi/149-consegne-lab-non-verificate.md'
@@ -9209,6 +9227,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\159-ponte-gateway-pagine.md'
     root: repo
     rel: '.programmi/159-ponte-gateway-pagine.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\169-due-segreti-dalla-stessa-chiave.md'
+    root: repo
+    rel: '.programmi/169-due-segreti-dalla-stessa-chiave.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -9305,6 +9329,48 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\224-check-non-deterministico-fuso.md'
     root: repo
     rel: '.programmi/224-check-non-deterministico-fuso.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\225-claude-md-affermazioni-scadute.md'
+    root: repo
+    rel: '.programmi/225-claude-md-affermazioni-scadute.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\226-storia-rtl-scorrevole.md'
+    root: repo
+    rel: '.programmi/226-storia-rtl-scorrevole.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\227-competenze-isolate-nel-grafo.md'
+    root: repo
+    rel: '.programmi/227-competenze-isolate-nel-grafo.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\228-cancello-a-tempo.md'
+    root: repo
+    rel: '.programmi/228-cancello-a-tempo.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\229-eredita-fra-sessioni.md'
+    root: repo
+    rel: '.programmi/229-eredita-fra-sessioni.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\230-verifica-quattro-attese.md'
+    root: repo
+    rel: '.programmi/230-verifica-quattro-attese.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\231-consumo-lavori-attivi.md'
+    root: repo
+    rel: '.programmi/231-consumo-lavori-attivi.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11336,6 +11402,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\check_marciume.py'
+    root: repo
+    rel: 'docs/kb/tools/check_marciume.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\check_module_test_coverage.py'
     root: repo
     rel: 'docs/kb/tools/check_module_test_coverage.py'
@@ -13187,6 +13259,54 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-13-batch-S1057.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-08-13-batch-S1057.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\STATO_CICLO.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/STATO_CICLO.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\architettura_raw.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/_raccolta/architettura_raw.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\competitor_eightfold.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/_raccolta/competitor_eightfold.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\competitor_personio.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/_raccolta/competitor_personio.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\competitor_zucchetti.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/_raccolta/competitor_zucchetti.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\docs_censimento.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/_raccolta/docs_censimento.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\inventario_raw.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/_raccolta/inventario_raw.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\latenti_raw.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/_raccolta/latenti_raw.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

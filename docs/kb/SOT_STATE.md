@@ -9,6 +9,60 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1080 (2026-08-25) — sei voci escono dagli elenchi, e lo strumento che decide la chiusura mente quattro volte
+
+**Chiusa**: `#148` (rendiconto chiusure — decisione: NON si riscrive). **Ritirate `WON'T-DO`**:
+`#85` `#16`. **Parcheggiate `HOLD`**: `#8` `#52` `#4` `#39`. **Riaperta in grande**: `#169`.
+Register: **13 ACTIVE · 1 GATED · 1 WAIT-INPUT · 6 HOLD**. Nessuna migrazione nuova (**352**,
+max `000354`). Strumenti invariati; `guardiano.py` da 32 a **47** casi di selftest.
+
+- **Le quattro attese, verificate una per una (mandato di apertura).** Tre su quattro non
+  aspettavano nulla: `#85` aveva la risposta già scritta nel CLAUDE.md e una premessa scaduta
+  (il «CLAUDE.md nuovo da 20.990 caratteri» oggi è **38.567**, più grande di prima del riordino);
+  `#8` chiedeva un'app-password Outlook che **Microsoft non emette più** (Basic Auth SMTP spento
+  il 30 aprile 2026); `#16` era **già stata esclusa** altrove, per una ragione che il sandbox non
+  tocca. Solo `#52` aspettava davvero, ed era mal tagliata: l'input serve al 10% finale. Ferme da
+  **82 · 81 · 62 · 41 sessioni** (`git log -S`, dato che non era mai stato registrato).
+  Il vassoio «aspetta te» passa da **6 voci a 1**; `check_marciume` M5 da 5 rossi a **verde**.
+- **`#148` chiusa con una decisione misurata**: i quattro verbi `registra · verifica · pubblica ·
+  propaga` **non descrivono ciò che accade**. Su 435 passi in 19 giorni, il rilascio pesa
+  `deploy 70 + arma 61 + clone-db 60 + verifica-deploy 41 = **232**`, contro i **74** dei tre
+  verbi che lo escluderebbero. Il verbo mancante sarebbe `rilascia`. Due reperti fuori scope:
+  **60 `apertura` contro 2 `chiusura`** (il passo esiste da ieri) e **127 corse su 169 con un
+  solo passo**, cioè aperture che non hanno fatto nulla.
+- **⭐ DIRETTIVA DI ENZO — utenze di collaudo** (`#169`): *«permessi propri e autonomi per
+  verificare il progetto, frontend compreso, senza il rito di login delle persone reali»*.
+  Il modello è già pronto per il grosso: tipo `SERVICE` nel vincolo, mig `000118` che ammette
+  l'esenzione MFA **solo** per quel tipo con guardia sugli altri, `isUserMfaExempt` vivo nel
+  login, e **il censimento delle persone esclude i `SERVICE`** — quindi le utenze nuove non lo
+  fanno scattare. Decisione tecnica: **niente ruoli `COLLAUDO_*`** (sarebbero mandati ombra da
+  iscrivere a ogni insieme di `resolver.ts`; dimenticarne uno non dà errore, dà prove verdi su
+  un mondo che non esiste). Identità proprie, **mandati veri**.
+- **⭐ E la direttiva ha spiegato un rosso che sembrava di un'altra voce.** Corsa integrale E2E
+  lanciata e interrotta dalla soglia; la fase 1 (43,8 min) ha dato `expected 0 · unexpected 6 ·
+  skipped 84`: i sei falliti sono **tutti e soli i setup di autenticazione**. Causa misurata:
+  `admin@heuresys.com` — che la mig `000287` descrive come l'account di **119 file di test** —
+  **non esiste più in `sys_users`**. Conseguenza: **`#219` F5 non è chiudibile prima di `#169`**.
+- **Il guardiano ha mentito quattro volte in un'ora, e tre le ha trovate una sessione parallela.**
+  ① con due sessioni vive sceglieva il transcript per **mtime**: ha detto «⛔ 101,1% CHIUDI» a
+  questa sessione, che stava al 29,5% — leggeva un'altra sessione (`modello` e `fonte` lo
+  dicevano, ma nessuno li confronta). ② il denominatore veniva da una **tabella per modello**
+  che invecchia: 242.421 token su una finestra vera di 1.000.000 diventavano «121,2%». ③ il flag
+  `finestra_riconosciuta` esisteva **ed era stampato**, ma non aveva conseguenze sul verdetto.
+  ④ la sezione alta stampava percentuale, barra e giudizio anche dichiarandosi non riconosciuta.
+  Rimedi: `CLAUDE_CODE_SESSION_ID` + **NON MISURABILE con due transcript vivi**; lettura di
+  `~/.claude/context-window.json` (verificato per `session_id` e freschezza); **una frazione
+  oltre 1.0 smentisce il denominatore** qualunque sia la fonte — l'API avrebbe rifiutato la
+  richiesta, quindi il numeratore non è in discussione; `--sorveglia` esce **4** se cieco.
+- **⚠ La lezione che vale oltre lo strumento: ho scritto DUE prove che non provavano niente.**
+  Entrambe ricalcolavano la logica dentro il test invece di chiamare il codice, e sarebbero
+  rimaste verdi togliendo il ramo da verificare. Scoperte **solo sabotandole**. Da qui i
+  parametri `dir_override` / `ctx_path` su `trova_transcript` e `misura`: esistono perché una
+  prova non iniettabile non è falsificabile. Sabotaggi finali: 47/47 → **44/47 rosso**.
+- **Coordinamento fra sessioni concorrenti**: una sessione parallela ha segnalato che
+  `.programmi/231` bloccava `verify_gate` per tutti — le fasi c'erano ma la sezione non si
+  chiamava `## Fasi`. Il mio cancello aveva detto verde **per riuso** su un file nuovo.
+
 ### Delta S1079 bis (2026-08-24, sera) — il cancello guardava il diff, e il diff non copre ciò che marcisce
 
 **Chiuse**: `#228` (il cancello a tempo) · `#229` (l'eredità fra sessioni). **Aperta**: `#227`

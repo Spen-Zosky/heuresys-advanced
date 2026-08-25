@@ -4,56 +4,59 @@
 
 ## Last session brief — l'ultima sessione, in breve
 
-**S1079 — due consegne del lab eseguite, poi la scoperta che ha cambiato la sessione: il
-sistema di controllo era cieco su un'intera classe di guasti.** Chiuse `#225` `#226` `#228`
-`#229`; aperta `#227` (4.464 competenze isolate — lavoro che era orfano).
+**S1080 — il vassoio «aspetta te» passa da sei voci a una, e lo strumento che decide quando
+chiudere ha mentito tre volte in un'ora.** Chiusa `#148`; ritirate `#85` `#16`; parcheggiate
+`#8` `#52` `#4` `#39`; `#169` riaperta in grande da una direttiva di Enzo.
 
-Il filo: **il cancello locale guarda il *diff*, e presume che le cose si guastino solo quando
-le tocchi.** Ma una data che scade, un'altra voce che si chiude, una macchina che cambia e il
-database che si muove non producono alcun diff. Sette difetti del registro erano invisibili
-per costruzione, e sono emersi solo perché Enzo ha chiesto di cercarli.
+Il filo della sessione: **le voci non erano false quando furono scritte — sono invecchiate, e
+la corsia non aveva modo di dirlo.** Verificate una per una, tre su quattro non aspettavano
+nulla: una aveva la risposta già scritta nel CLAUDE.md, una chiedeva una credenziale che
+Microsoft non emette più da aprile, una era già stata esclusa altrove.
 
-Nascono da lì `#228` (il **cancello a tempo**: a ogni chiusura esegue i 10 strumenti che nessun
-diff instrada, più cinque controlli di stato nuovi) e `#229` (**l'eredità fra sessioni**: il
-numero di sessione era fermo da *quindici* sessioni e il boot **taceva**; una chiusura uccisa
-era indistinguibile da una riuscita; il verdetto del cancello non veniva letto all'avvio).
+Poi la direttiva di Enzo — *«utenze di collaudo con permessi propri e autonomi»* — che ha
+riaperto `#169` con un progetto vero, e che a fine giornata si è rivelata la chiave di un'altra
+voce: **la suite E2E non riesce più a entrare**, e la causa è un'utenza sparita dall'anagrafica.
 
-**La lezione più cara**: l'aggancio del cancello è fallito **due volte restituendo `exit 0`**.
-Verificarlo rileggendo il codice l'avrebbe dichiarato fatto, e sarebbe stato falso due volte.
+**La lezione più cara**: ho scritto **due prove che non provavano niente**, e sarebbero rimaste
+verdi togliendo il codice che dovevano verificare. Le ho scoperte solo sabotandole. «Le prove
+devono poter fallire» non è un principio da citare: è una verifica da eseguire, ogni volta.
 
 ## Top priorities — le priorità
 
-1. **`#227` — le 4.464 competenze isolate nel grafo, il 31,8% del catalogo.** Era il residuo
-   `F6-07` di `#222`, chiusa promettendo «un piano proprio» **mai creato**: lavoro orfano per
-   tre giorni, invisibile a ogni elenco. Ha 5 fasi, e la prima è un **censimento per specie** —
-   un elenco piatto di 4.464 righe non è un piano di lavoro.
+1. **`#169` — le utenze di collaudo, e sono la chiave di due voci.** Direttiva di Enzo:
+   verifiche del progetto (frontend compreso) senza impersonare le persone reali. `F1` fatta,
+   `F2` progettata; il modello è già pronto per il 90% (tipo `SERVICE`, esenzione MFA solo per
+   quel tipo, censimento che esclude i `SERVICE`). Manca costruirle.
+   → `.programmi/169-due-segreti-dalla-stessa-chiave.md` · ~1 sessione
+2. **`#219` F5 — NON è chiudibile prima di `#169`, e ora si sa perché.** La corsa integrale
+   lanciata in S1080 ha dato `expected 0 · unexpected 6 · skipped 84`: i sei rossi sono **tutti
+   e soli i setup di autenticazione**, gli 84 sono saltati perché ne dipendono. Rilanciarla
+   oggi rifarebbe 44 minuti per riottenere gli stessi rossi.
+   → `.programmi/219-otto-guasti-suite-e2e.md` · dopo `#169` F3
+3. **`#227` — le 4.464 competenze isolate**, il 31,8% del catalogo. Invariata da S1079: cinque
+   fasi, la prima è un censimento **per specie** (un elenco piatto di 4.464 righe non è un piano).
    → `.programmi/227-competenze-isolate-nel-grafo.md` · ~2-3 sessioni
-2. **`verifica_incrociata` è ROSSA, e nessuno sapeva da quando.** 10 verifiche con difetti, la
-   più grossa da **667 casi** (requisito di competenza non coperto). Va **classificata** prima
-   di diventare lavoro: alcune righe saranno difetti veri, altre la normalità di un'azienda
-   vera mal classificata dallo strumento. Ora il cancello a tempo la esegue a ogni chiusura.
-   → nessun piano ancora · da decomporre
-3. **`#219` F5 — la corsa che chiude la voce.** Quattro fasi su cinque fatte e verificate live;
-   resta la corsa integrale della suite (100 spec, build di produzione) con **zero falliti**.
-   Non è correzione: è tempo di macchina, e va aperta con spazio davanti.
-   → `.programmi/219-otto-guasti-suite-e2e.md` · ~20k, in gran parte attesa
 
 ## Open questions — le domande aperte
 
-1. **Quattro voci aspettano un tuo input e non portano alcuna data**: `#85` `#8` `#16` `#52`.
-   Non si sa da quanto aspettano, e potrebbero essere già risolte — è successo a `#86`, che
-   chiedeva il login su due macchine e su una funzionava già. Le verifico io una per una?
-2. **Il fornitore di proposte non è configurato in produzione** (`RESEARCH_GATEWAY_URL` /
+1. **Una fila di tre voci è ferma su una tua approvazione di pochi minuti**: `#132` `F7` è
+   `blocked-on-Enzo` per l'approvazione della prima fonte — la corsa ha già lasciato una
+   proposta *PASSED* (`bancaditalia.it`, con due evidenze). Approvandola: `#132` chiude, `#198`
+   può rifare la prova, `#205` si sblocca. Sono ~6-8 sessioni di lavoro dietro quella firma.
+2. **`#86` — l'ultima voce rimasta in «aspetta te»**: `claude login` sul solo linux-pc, cinque
+   minuti tuoi. Le altre cinque le ho decise io su tua delega; questa non era fra quelle. Se
+   vuoi che esca dagli elenchi con lo stesso criterio, dimmelo.
+3. **Il fornitore di proposte non è configurato in produzione** (`RESEARCH_GATEWAY_URL` /
    `_TOKEN` nel `.env`, che è tuo). Finché mancano, l'API dice «non c'è chi propone».
-3. **Sulla VM resta una vecchia unit di servizio accanto a quella viva**
-   (`heuresys-advanced-web.service.dev.bak`, in modalità sviluppo). È **inerte** — verificato —
-   ma è configurazione di un servizio di produzione. Si sposta, si tiene, o si lascia?
+4. **Sulla VM resta una vecchia unit di servizio accanto a quella viva**
+   (`heuresys-advanced-web.service.dev.bak`). È **inerte** — verificato — ma è configurazione
+   di un servizio di produzione. Si sposta, si tiene, o si lascia?
 
 ## Verification — la verifica
 
 ```bash
 python docs/kb/tools/session_start.py            # menu + salute, un giro solo
+python docs/kb/tools/guardiano.py                # contesto e finestra 5h — 3 fix in S1080
+python docs/kb/tools/guardiano.py --selftest     # 47 casi; i 3 nuovi sabotati e verificati
 python docs/kb/tools/check_marciume.py           # cio' che marcisce senza produrre un diff
-python docs/kb/tools/guardiano.py                # contesto e finestra 5h, misurati
-bash scripts/close-log.sh report                 # corse interrotte ereditate
 ```

@@ -537,20 +537,36 @@ def stampa(m: dict, budget: int | None) -> int:
         print(f"[!!] {m['errore']}")
         print("     Senza transcript NON si stima a impressione: si dichiara 'non misurabile'.")
         return 0
+    # ⚠ Senza denominatore NON si stampa una percentuale, ne' una barra, ne' un giudizio.
+    # Il verdetto in fondo era gia' corretto, ma un lettore umano si ferma alla sezione
+    # alta: leggerci «131.7%» e «CHIUDI» accanto a «MODELLO NON RICONOSCIUTO» significa
+    # vedere un numero impossibile presentato come misura, ed e' proprio cio' che questo
+    # strumento esiste per non fare. Il consumato assoluto resta: quello E' misurato.
+    cieco = not m["finestra_riconosciuta"]
     barra_n = 40
     pieni = min(barra_n, int(m["frazione"] * barra_n))
     barra = "#" * pieni + "." * (barra_n - pieni)
     print("=" * 72)
     print(" CONTESTO — misurato dal transcript, non stimato")
     print("=" * 72)
-    print(f"  [{barra}] {m['percento']:.1f}%")
+    if cieco:
+        print("  [" + "?" * barra_n + "] NON MISURABILE")
+    else:
+        print(f"  [{barra}] {m['percento']:.1f}%")
     print(f"  consumato   {m['contesto']:>9,} token")
-    print(f"  residuo     {m['residuo']:>9,} token   (finestra {m['finestra']:,}"
-          f"{'' if m['finestra_riconosciuta'] else ' — MODELLO NON RICONOSCIUTO, usa --window'})")
+    if cieco:
+        print(f"  residuo     NON MISURABILE   (finestra ignota: il modello "
+              f"'{m['model']}' non e' in tabella e Claude Code non l'ha dichiarata "
+              f"per questa sessione — usa --window)")
+    else:
+        print(f"  residuo     {m['residuo']:>9,} token   (finestra {m['finestra']:,})")
     print(f"  picco       {m['picco']:>9,} token")
     print(f"  output tot  {m['output_totale']:>9,} token   su {m['campioni']} misure")
     print(f"  modello     {m['model']}")
-    print(f"  giudizio    {m['giudizio']}")
+    if cieco:
+        print("  giudizio    NON MISURABILE — senza denominatore non si giudica")
+    else:
+        print(f"  giudizio    {m['giudizio']}")
     print(f"  ritardo     {m['ritardo']}")
     print(f"  fonte       {m['transcript']}")
     if budget:

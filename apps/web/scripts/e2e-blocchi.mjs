@@ -105,9 +105,16 @@ function preflight() {
 
   // 1. l'API risponde? (la porta la dichiara la stessa variabile che usa il web)
   const apiBase = process.env.NEXT_PUBLIC_API_PROXY_BASE_URL || "http://localhost:3001";
+  // ⚠ `process.exitCode`, MAI `process.exit()` dentro la promise di `fetch`: su Windows
+  // chiuderebbe l'handle mentre undici lo sta ancora usando, e Node muore con
+  // «Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)» — un codice d'uscita ≠ 0
+  // che questo preflight leggerebbe come «API assente». Misurato in S1081: il primo
+  // preflight scritto cosi' ha dato un FALSO ALLARME su un'API che rispondeva, ed e'
+  // esattamente il difetto di #194 — un allarme che suona senza motivo insegna a non
+  // guardarlo.
   const api = spawnSync(process.execPath,
     ["-e", `fetch(${JSON.stringify(apiBase + "/healthz")},{signal:AbortSignal.timeout(4000)})` +
-           `.then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))`],
+           `.then(r=>{process.exitCode=r.ok?0:1}).catch(()=>{process.exitCode=1})`],
     { encoding: "utf8" });
   if (api.status !== 0) {
     avvisi.push(`API NON raggiungibile su ${apiBase} — nessuna config Playwright la avvia: ` +
@@ -118,7 +125,7 @@ function preflight() {
   const porta = Number(process.env.WEB_PORT ?? 3000);
   const occ = spawnSync(process.execPath,
     ["-e", `const n=require("node:net");const s=n.createServer();` +
-           `s.once("error",()=>process.exit(1));s.once("listening",()=>s.close(()=>process.exit(0)));` +
+           `s.once("error",()=>{process.exitCode=1});s.once("listening",()=>s.close());` +
            `s.listen(${porta},"127.0.0.1")`],
     { encoding: "utf8" });
   if (occ.status !== 0) {

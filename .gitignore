@@ -262,3 +262,6 @@ docs/kb/atlas/concepts-vectors.json
 # Analogo a .zp/ per zero-pending-loop, ma non e' roba sua.
 .panel/
 
+
+# Referto JSON della suite E2E (#219, S1081): sopravvive alla corsa, non si versiona
+apps/web/esiti-e2e.json

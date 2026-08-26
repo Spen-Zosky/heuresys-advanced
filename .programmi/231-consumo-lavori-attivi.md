@@ -69,19 +69,23 @@ catena che sblocca la suite (#169 → #219) · **(c)** il lavoro read-only mentr
   via vecchia intatta (federica 200). Terza guardia `000284` scoperta eseguendo; `admin@` chiarito
 - [ ] **S0-bis (ereditato da S0)** — `#234` possiede gli otto rossi di `verifica_incrociata`;
   la chiusura porta `marciume: fallito` finché non li consuma — dichiarato, non nascosto
-- [ ] **S1 `#219` F5 — la corsa integrale E2E, 0 falliti** — DOPO S3: capire il guasto esatto dei
-  sei setup di autenticazione, instradarli sulla via nuova dove idoneo (il confine di #169 vale:
-  i profili di *autorizzazione* restano persone reali), poi `cd apps/web &&
-  pnpm test:e2e:prod:node22` in background (fase 1 misurata 43,8 min; 4 fasi). Mentre gira:
-  **nessuna scrittura DB che alteri ciò che misura**
-- [ ] **S5 `#227` F1 — censire le 4.464 competenze isolate, per specie** — read-only, gira bene
-  mentre la suite è in volo
-- [ ] **S6 `#132` F7 — registrare l'approvazione + le due prove** — dopo o durante la coda della
-  suite (le fonti non sono materia che la suite misura; verifica al momento)
-- [ ] **S4 `#214` F6 — un perimetro dell'agente** — dopo la suite (la prova live fa login reali).
-  L'ordine si ri-deriva con `check_concetti_agente.py`, mai dal piano
-- [ ] **S7 `#219` F5 — triage della corsa e chiusura** — letti i casi, non le fasi; se 0 falliti →
-  ingresso in CI (il `chiuso-quando` della voce)
+- [x] **S1 `#219` — la suite TORNA A MISURARE** — **FATTO 2026-08-26 (S1081)** · la diagnosi
+  ereditata era **sbagliata**: le sei persone dei setup esistono tutte (`ACTIVE`, identità,
+  fattore MFA) e non c'entrano con `admin@heuresys.com`. Causa vera: **l'API non era accesa**
+  (nessuna config Playwright la avvia) + un `next start` orfano sulla :3000. Rimosse entrambe:
+  **6 setup verdi in 57,7 s**, poi corsa integrale **4/4 fasi: 354 passati su 450**, 10 falliti,
+  83 non eseguiti (68 dietro flag `F4_SWEEP`). Confronto con S1080: `0 passati · 84 saltati`
+- [x] **S5 `#227` F1 — censire le 4.464 competenze isolate** — **FATTO 2026-08-26**, commit
+  `ca47ec4e` · ribalta il piano: 4.332 derivabili a macchina, **30 righe** di curatela vera
+- [x] **S6 `#132` F7 — l'approvazione della fonte** — **FATTO 2026-08-26**, commit `9818457c` ·
+  registro fonti da 0 a 1, `bancaditalia.it APPROVED` con approvatore e data
+- [x] **S4 `#214` F6 — il quinto perimetro** — **FATTO 2026-08-26**, commit `e4d42796` ·
+  `visualization-graphs` aperto **con la guardia** (mig `000355`) perché la sua neutralità era
+  vera oggi e non per costruzione; + `000356`, cura di un difetto **mio** (le utenze SERVICE
+  contate come persone senza posizione: violazioni organigramma 3 → 0)
+- [ ] **S7 `#219` F5 — triage dei 10 falliti** — in corso: rilanciate le fasi rosse col
+  **reporter JSON su file** (il `list` su stdout si perdeva col troncamento). Letti i **casi**,
+  non le fasi
 
 ## Confine di sessione, dichiarato adesso
 

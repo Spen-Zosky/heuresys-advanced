@@ -67,7 +67,12 @@ export default defineConfig({
   // 90 s copre l'attesa più lunga dichiarata (60 s) con margine, e non maschera i guasti
   // veri: quelli scadono sui timeout per-azione, che restano 10 s e 30 s.
   timeout: 90_000,
-  reporter: [["list"]],
+  // Il `list` scrive su stdout, e lo stdout si perde: una corsa integrale dura minuti,
+  // chi la lancia la trotta con `| tail` e il dettaglio dei falliti sparisce — successo in
+  // S1081, dove la corsa ha dato 10 rossi e per leggerli è stato necessario RIFARE le fasi.
+  // Il JSON è il referto che sopravvive alla corsa: si legge dal FILE, come il referto a11y
+  // di #219 F4. `outputFile` fuori da `test-results/`, che Playwright ripulisce a ogni corsa.
+  reporter: [["list"], ["json", { outputFile: "esiti-e2e.json" }]],
   use: {
     baseURL: WEB_BASE_URL,
     trace: "retain-on-failure",

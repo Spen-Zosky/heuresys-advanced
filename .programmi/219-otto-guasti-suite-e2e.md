@@ -217,6 +217,12 @@ non correggendolo.
     - 📌 **la cache RBAC si carica all'AVVIO**: dopo aver rimesso i permessi, l'API continuava a
       negare finché non è stata riavviata. Un 403 che sopravvive alla cura non è sempre un
       permesso mancante
+    - ✅ **VERIFICATO, non dedotto (2026-08-26)**: catena riapplicata per intero — **333
+      migrazioni, 0 errori** · mapping RBAC **da 968 a 980**, cioè il valore esatto del boot ·
+      `mappingsLoaded: 980` all'avvio dell'API · `db_health` **«tutto nei limiti»**, zero
+      violazioni dell'organigramma · e i due casi rieseguiti sono **verdi** (`performance-cycle`
+      2/2, più i 6 setup). Il danno da catena interrotta è chiuso in tutti e tre i punti in cui
+      si vedeva: dati, cache, prova
   - [ ] **F5d-bis I tre guasti veri che restano** (2 a11y + 1 passkey) — ⏸ **fermo su causa
         esterna nella corsa precedente**: `aide --update` (integrità dei file, notturno) satura la VM che ospita il DB
         → pool in timeout → `POST /v1/auth/login` **500** → Playwright vede solo un `waitForURL`

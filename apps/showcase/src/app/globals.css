@@ -3,19 +3,33 @@
  * Contiene SOLO ciò che è specifico dello showcase: gli @source per le directory
  * generate dal sync e le animazioni hx-*. I token di tema NON stanno più qui.
  *
- * S1030 — perché è cambiato. Questo file era un "mirror" manuale del gemello in
- * apps/web, con l'avvertenza di replicare a mano ogni modifica. Non è successo, e
- * il drift è arrivato fino al sito pubblico: qui mancavano sia il blocco
- * `@theme inline` sia i token semantici (--success/--warning/--danger/--info),
- * quindi le classi `text-danger`/`bg-danger` non generavano NESSUNA utility
- * (verificato sul CSS emesso: `.text-danger` assente, `--danger` non definito) e
- * i fix di contrasto AA di S982/S1025 non arrivavano allo showcase. Ora i token
- * hanno una fonte sola — `apps/web/src/app/_theme-tokens.css` — che
- * scripts/sync-showcase.sh copia qui accanto come `_theme-tokens.css`, insieme
- * alle pagine. Il file copiato è gitignored come il resto dell'output del sync.
+ * DA DOVE ARRIVANO I TOKEN. Dalla libreria: `@heuresys/ui/theme` — file
+ * `ui/src/styles/theme-heuresys.css` del repo ux-design-shared, esposto come
+ * sottopercorso del pacchetto dalla versione 1.0.0 (2026-08-26). Lo showcase li
+ * importa direttamente da lì, esattamente come apps/web: i due prodotti leggono
+ * ora lo stesso file, non due copie che si somigliano.
+ *
+ * PERCHÉ È CAMBIATO DUE VOLTE. Originariamente questo file era un "mirror"
+ * manuale del gemello in apps/web, con l'avvertenza di replicare a mano ogni
+ * modifica. Non è successo, e il drift arrivò fino al sito pubblico: qui
+ * mancavano sia il blocco `@theme inline` sia i token semantici
+ * (--success/--warning/--danger/--info), quindi `text-danger`/`bg-danger` non
+ * generavano NESSUNA utility (verificato sul CSS emesso) e i fix di contrasto AA
+ * di S982/S1025 non arrivavano allo showcase. S1030 lo corresse accentrando i
+ * token in `apps/web/src/app/_theme-tokens.css`, copiato qui dal sync — una
+ * fonte sola, ma interna a questo repo. Con più prodotti che adottano il design
+ * system quella fonte è salita di un livello, nella libreria, dove una modifica
+ * di marca raggiunge tutti tramite una release.
+ *
+ * IL SYNC RESTA. `scripts/sync-showcase.sh` continua a copiare qui accanto
+ * `_theme-tokens.css` da apps/web (oggi vuoto, riservato agli override
+ * dell'applicazione); il file copiato è gitignored come il resto dell'output del
+ * sync. L'ordine dei due @import conta: prima il tema della libreria, poi gli
+ * eventuali override locali.
  */
 
 @import "@heuresys/ui/styles";
+@import "@heuresys/ui/theme";
 @import "./_theme-tokens.css";
 
 /*

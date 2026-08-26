@@ -13,11 +13,18 @@
  */
 
 @import "@heuresys/ui/styles";
-/* Token di tema (@theme inline + :root + .dark): FONTE UNICA, condivisa con
-   apps/showcase — scripts/sync-showcase.sh ne copia lì una replica insieme alle
-   pagine. Sta qui in cima, accanto all'altro @import, perché gli @import CSS
-   devono precedere le regole. Vedi il file per il perché: il vecchio mirror
-   manuale nello showcase aveva divergiato in silenzio. */
+/* Token di tema di marca (@theme inline + :root + .dark): la fonte è la
+   LIBRERIA, non più questo repo. Vivono in `@heuresys/ui/theme`
+   (ui/src/styles/theme-heuresys.css del repo ux-design-shared) e arrivano qui
+   con la versione del pacchetto: dal 2026-08-26 una modifica al tema di marca
+   raggiunge tutti i prodotti che adottano il design system tramite una release,
+   invece di restare in una copia per progetto.
+   L'ordine delle due righe conta: prima il tema della libreria, poi gli
+   override locali dell'applicazione — così un override futuro vince.
+   `_theme-tokens.css` NON contiene più i token: ospita i soli scostamenti
+   specifici di apps/web (oggi nessuno). Entrambe stanno qui in cima, accanto
+   all'altro @import, perché gli @import CSS devono precedere le regole. */
+@import "@heuresys/ui/theme";
 @import "./_theme-tokens.css";
 /* Markdown rendering (MarkdownView prose classes) - cap4 CMS P3 rich-text. */
 @plugin "@tailwindcss/typography";

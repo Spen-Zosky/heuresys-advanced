@@ -42,7 +42,7 @@
     "plancia:zp": "python scripts/zp_panel.py"
   },
   "dependencies": {
-    "@heuresys/ui": "^0.1.9"
+    "@heuresys/ui": "^1.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.6",

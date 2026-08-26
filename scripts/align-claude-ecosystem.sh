@@ -46,9 +46,15 @@ STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 # reference/ (2026-08-01): il CLAUDE.md rifattorizzato per Opus 5 istruisce a leggere
 # ~/.claude/reference/*.md prima di lavorare su PowerShell o di connettersi a una macchina
 # remota. Senza questa voce i cloni riceverebbero un CLAUDE.md che punta a file assenti.
-PORTABLE_PATHS=( CLAUDE.md skills commands reference statusline-command.sh )
+# agents/ (2026-08-26, S1081-dream): le definizioni degli agenti della skill project-dream
+# (dream-inventory/latent/architecture/market/docs/verifier) vivono in ~/.claude/agents/ sul
+# SoT Windows: una skill propagata senza i suoi agenti invocherebbe tipi inesistenti sui
+# cloni. La vecchia lettura di agents/ come "lignaggio divergente mac/VM" resta vera per
+# hooks/ e output-styles/; per agents/ il clone puro e' quello IDENTICO al Windows.
+PORTABLE_PATHS=( CLAUDE.md skills commands reference agents statusline-command.sh )
 # wiped on the remote before extract (what makes the clone PURE — the divergent
-# mac/VM lineage dirs agents/ hooks/ output-styles/ are removed, archived in backup):
+# mac/VM lineage dirs hooks/ output-styles/ are removed, archived in backup; agents/ is
+# wiped and re-extracted from the Windows payload since 2026-08-26):
 MANAGED_REMOTE_PATHS=( CLAUDE.md skills commands reference rules agents hooks output-styles statusline-command.sh settings.json scripts )
 # restored from the remote's own backup after a first-run full move:
 PRESERVE_FROM_REMOTE=( .credentials.json projects settings.local.json history.jsonl todos plans tasks )
@@ -422,7 +428,8 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
       base="${p%%@*}"
       printf "%s" "$PL" | grep -q "$base" && echo "plugin_ok=$base" || echo "plugin_MISSING=$base"
     done
-    for d in agents hooks output-styles; do [ -e "$HOME/.claude/$d" ] && echo "purity_FAIL=$d present"; done
+    for d in hooks output-styles; do [ -e "$HOME/.claude/$d" ] && echo "purity_FAIL=$d present"; done
+    [ -e "$HOME/.claude/agents" ] || echo "purity_FAIL=agents MISSING (portable since 2026-08-26)"
     [ -f "$HOME/.claude/.ecosystem-align.json" ] && echo "sentinel=present" || echo "sentinel=MISSING"
     jq -r "\"mem_datadir=\" + (.CLAUDE_MEM_DATA_DIR // \"ABSENT\")" "$HOME/.claude-mem/settings.json" 2>/dev/null || echo "mem_datadir=NO_FILE"
     if [ -f "$HOME/.claude/plugins/installed_plugins.json" ]; then

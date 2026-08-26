@@ -80,6 +80,20 @@ sorgente e le due consegne — e tutti e tre sono lavoro di F3.
   - 🔬 **terza guardia scoperta eseguendo, non leggendo**: la mig `000284` (#139) pretende l'**iscrizione nominativa** in `sys_auth_mfa_exemption_eligible_users` — tre atti distinti (SERVICE · iscrizione · esenzione), mai effetti collaterali. La prima corsa si è fermata lì e la transazione ha retto (0 righe rimaste). L'atto deliberato che autorizza l'iscrizione è la direttiva di Enzo del 2026-08-25, citata per iscritto nella `reason`
   - ✅ **chiarito `admin@heuresys.com`**: rimosso per decisione di Enzo (#139, 2026-08-08 — «l'account tecnico non deve esistere», migs `000285`/`000286`); il commento della `000287` è storia, non stato. La direttiva sulle utenze di collaudo è il successore dichiarato di quel disegno
   - 📌 osservato (coerente con #219 F1): con l'enforcement MFA spento il login è **a un passo anche per le persone** con fattore TOTP — la sfida non parte. `verify-derived-login.mjs` ha l'atteso stantio (pretende 2 passi): da riallineare quando si mette mano a F3, non adesso
+  - ⚠⚠ **CODA DI F2, trovata solo riapplicando la catena (S1081): creare tre utenze `SERVICE`
+    ha fatto FERMARE le migrazioni.** `ERROR: Persone attive senza posizione: 2 (attesa 1,
+    preesistente)` — sono `governo@` e `persona@` sul tenant RTL. Il criterio giusto («un
+    account di servizio non è una persona, non occupa un posto, non riporta a nessuno») era
+    già nel sistema — la sentinella del censimento lo applica dal giorno in cui è nata — ma
+    mancava in **tre punti** che vivono dentro le migrazioni e che la `000356` non poteva
+    raggiungere: la post-condizione della `000250`, il corpo della regola nella `000251` e la
+    post-condizione della `000251` che *interroga quella funzione prima che la `000356` giri*.
+    Curati tutti e tre. **Perché mancava**: quando furono scritti non esisteva alcun account
+    `SERVICE`, quindi l'esclusione non poteva mancare a nessuno — regole vere che restavano
+    vere per assenza dell'unico caso che le smentiva
+  - 📌 **e la prova generale non poteva vederlo**: il clone della CI **non ha utenze SERVICE**,
+    quindi lì la catena passava verde. La prova che può fallire è la riapplicazione in
+    **produzione**, dove il caso esiste. Da ricordare per ogni futura utenza di servizio
   - ⏭ **propagazione della chiave** (`.secrets/collaudo-access.key`, 48 byte, verificata ≠ chiave madre — il modulo la RIFIUTA se coincide): oggi vive solo su Windows. VM, linux-pc e CI la ricevono col lavoro che instrada la suite sulle utenze di collaudo (S1/#219), come `dev-access-master.key` — via script di allineamento e variabile `COLLAUDO_ACCESS_KEY_B64` sul runner
   - ⚠⚠ **INDAGINE FATTA 2026-08-25, e ha smentito il piano: le due strade proposte non sono applicabili come scritte.** Entrambe presuppongono una separazione fra «utenze di collaudo» e «persone vere» che **in questo sistema non esiste, per decisione architetturale** (I15 / ADR-0026: un solo ambiente prod-grade, nessun tenant di test, «le frasi *tenant di TEST* / *mai produzione* sono ritirate»). Misurato: `sys_users` → **161 utenti, tutti `STANDARD`**, zero `SERVICE`, zero utenze di collaudo; `sys_auth_mfa_factors` → **158 fattori, tutti etichettati `derived-access`**, nessun fattore di prova. Le persone che le prove usano (`federica.marchetti@rtl-bank.org`, `paolo.caputo@rtl-bank.org`) **sono persone reali del tenant RTL Bank**
   - **conseguenza sulla strada (b)**: il meccanismo di esenzione **esiste già ed è vivo** — `isUserMfaExempt` è nel flusso di login (`service.ts:392`), le tre tabelle ci sono (`sys_auth_mfa_exemptions` e sorelle, mig `000116`), e sono **vuote**: tabella vuota = comportamento identico a prima. Ma usarlo qui significherebbe **esentare persone reali dall'MFA per far girare i test**, cioè peggiorare la sicurezza in nome di una voce che esiste per migliorarla. E il register lo dichiara già materia di decisione di Enzo (`#139`: *«`user_type='SERVICE'` è il criterio di esenzione dal secondo fattore»* → spostata a WAIT-INPUT proprio per questo)

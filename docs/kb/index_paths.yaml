@@ -1,8 +1,8 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-26T11:47:10Z da docs/kb/tools/build_index.py
+# generato: 2026-08-26T15:23:52Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-26T11:47:10Z"
+  generated_at: "2026-08-26T15:23:52Z"
   total_files: 3246
   roots:
     repo: 'D:\heuresys-advanced'
@@ -18968,12 +18968,6 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\web\src\app\_theme-tokens.css'
-    root: repo
-    rel: 'apps/web/src/app/_theme-tokens.css'
-    category: web-source
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\app\page.tsx'
     root: repo
     rel: 'apps/web/src/app/app/page.tsx'
@@ -19157,6 +19151,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\showcase\typography\page.tsx'
     root: repo
     rel: 'apps/web/src/app/showcase/typography/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\theme-overrides.css'
+    root: repo
+    rel: 'apps/web/src/app/theme-overrides.css'
     category: web-source
     status: live
     provenance: git-tracked

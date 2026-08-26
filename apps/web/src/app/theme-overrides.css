@@ -1,9 +1,9 @@
-/* apps/web/src/app/_theme-tokens.css
+/* apps/web/src/app/theme-overrides.css
  *
  * QUESTO FILE È VUOTO DI PROPOSITO — e va tenuto dov'è.
  *
- * DOVE SONO FINITI I TOKEN. I token di tema di marca (il blocco `@theme inline`
- * più i valori `:root` e `.dark`) non stanno più qui: vivono nella libreria del
+ * DOVE SONO I TOKEN. I token di tema di marca (il blocco `@theme inline` più i
+ * valori `:root` e `.dark`) non stanno in questo repo: vivono nella libreria del
  * design system, in `@heuresys/ui/theme` — file `ui/src/styles/theme-heuresys.css`
  * del repo `ux-design-shared`, esposto come sottopercorso del pacchetto a partire
  * dalla versione 1.0.0 (2026-08-26). Il globals.css di questa app li importa da
@@ -11,11 +11,18 @@
  *
  * PERCHÉ SI SONO SPOSTATI. Fino a S1030 i token erano duplicati a mano nei due
  * globals.css (apps/web e apps/showcase) e il drift arrivò fino al sito
- * pubblico; la soluzione di allora fu accentrarli in questo file, copiato nello
+ * pubblico; la soluzione di allora fu accentrarli qui, in un file copiato nello
  * showcase dal sync. Regge finché il consumatore è uno solo. Con più prodotti
  * che adottano @heuresys/ui, una modifica al tema di marca deve raggiungerli
  * tutti tramite una release della libreria, non restare in una copia per
  * progetto: è lo stesso difetto di prima, semplicemente a un livello più alto.
+ *
+ * PERCHÉ SI CHIAMA COSÌ. Fino al 2026-08-26 il nome era `_theme-tokens.css`, ed
+ * era esatto: i token stavano qui. Svuotato il file, quel nome descriveva ciò
+ * che era stato. Il nome attuale è quello che la libreria stessa prescrive ai
+ * suoi consumatori nel commento di `theme-heuresys.css` — allinearlo con un solo
+ * prodotto in campo costa un rename; farlo con tre significherebbe chiedersi
+ * quale delle convenzioni sia quella buona.
  *
  * COSA VA SCRITTO QUI. Solo override specifici di `apps/web` — cioè scostamenti
  * dichiarati dal tema di marca che valgono per questa applicazione e per nessun
@@ -35,11 +42,13 @@
  * PERCHÉ IL FILE RESTA, PUR VUOTO. Non è un residuo da rimuovere: è un punto di
  * estensione con due dipendenze meccaniche.
  *   - `scripts/sync-showcase.sh` lo copia in apps/showcase a ogni build (riga
- *     con `cp "$WEB/app/_theme-tokens.css" …`): se sparisse, il sync fallirebbe
+ *     con `cp "$WEB/app/theme-overrides.css" …`): se sparisse, il sync fallirebbe
  *     con `set -e` e lo showcase non si costruirebbe più.
  *   - `.github/workflows/showcase.yml` lo sorveglia nel filtro `paths:`, così un
  *     giorno un override scritto qui farà ripartire il deploy di GitHub Pages.
- * Cancellarlo o rinominarlo rompe entrambe.
+ * Cancellarlo o rinominarlo rompe entrambe — e chi lo rinomina deve aggiornare
+ * anche `apps/showcase/.gitignore`, o la copia generata dal sync smetterebbe di
+ * essere ignorata senza che nulla protesti.
  *
  * NON aggiungere qui regole specifiche di un'app (animazioni hx-*, @source,
  * override di stampa): quelle restano nel globals.css di ciascuna.

@@ -21,11 +21,12 @@
    invece di restare in una copia per progetto.
    L'ordine delle due righe conta: prima il tema della libreria, poi gli
    override locali dell'applicazione — così un override futuro vince.
-   `_theme-tokens.css` NON contiene più i token: ospita i soli scostamenti
-   specifici di apps/web (oggi nessuno). Entrambe stanno qui in cima, accanto
+   `theme-overrides.css` non contiene token: ospita i soli scostamenti
+   specifici di apps/web (oggi nessuno), e porta il nome che la libreria
+   prescrive ai suoi consumatori. Entrambe stanno qui in cima, accanto
    all'altro @import, perché gli @import CSS devono precedere le regole. */
 @import "@heuresys/ui/theme";
-@import "./_theme-tokens.css";
+@import "./theme-overrides.css";
 /* Markdown rendering (MarkdownView prose classes) - cap4 CMS P3 rich-text. */
 @plugin "@tailwindcss/typography";
 /* Universal hover affordance is included in @heuresys/ui globals.css */

@@ -15,7 +15,7 @@ on:
       # modifica ai soli token (es. un ritocco di contrasto AA) non farebbe ripartire il
       # deploy, e gh-pages continuerebbe a servire il CSS vecchio a tempo indefinito — lo
       # stesso drift di prima, solo spostato dall'umano che dimentica alla CI che non parte.
-      - "apps/web/src/app/_theme-tokens.css"
+      - "apps/web/src/app/theme-overrides.css"
       - "apps/web/src/app/layout.tsx"
       - "apps/showcase/**"
       - "scripts/sync-showcase.sh"

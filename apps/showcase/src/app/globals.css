@@ -16,21 +16,22 @@
  * (--success/--warning/--danger/--info), quindi `text-danger`/`bg-danger` non
  * generavano NESSUNA utility (verificato sul CSS emesso) e i fix di contrasto AA
  * di S982/S1025 non arrivavano allo showcase. S1030 lo corresse accentrando i
- * token in `apps/web/src/app/_theme-tokens.css`, copiato qui dal sync — una
- * fonte sola, ma interna a questo repo. Con più prodotti che adottano il design
- * system quella fonte è salita di un livello, nella libreria, dove una modifica
- * di marca raggiunge tutti tramite una release.
+ * token in un file di apps/web copiato qui dal sync — una fonte sola, ma interna
+ * a questo repo. Con più prodotti che adottano il design system quella fonte è
+ * salita di un livello, nella libreria, dove una modifica di marca raggiunge
+ * tutti tramite una release.
  *
  * IL SYNC RESTA. `scripts/sync-showcase.sh` continua a copiare qui accanto
- * `_theme-tokens.css` da apps/web (oggi vuoto, riservato agli override
- * dell'applicazione); il file copiato è gitignored come il resto dell'output del
- * sync. L'ordine dei due @import conta: prima il tema della libreria, poi gli
- * eventuali override locali.
+ * `theme-overrides.css` da apps/web (oggi vuoto, riservato agli override
+ * dell'applicazione, e col nome che la libreria prescrive ai consumatori); il
+ * file copiato è gitignored come il resto dell'output del sync. L'ordine dei due
+ * @import conta: prima il tema della libreria, poi gli eventuali override
+ * locali.
  */
 
 @import "@heuresys/ui/styles";
 @import "@heuresys/ui/theme";
-@import "./_theme-tokens.css";
+@import "./theme-overrides.css";
 
 /*
  * Tailwind 4 honors .gitignore for content discovery. The src/app/showcase/
@@ -48,8 +49,8 @@
    bg-green-100, …) survive purge now that the primitive is published (was a local file before). */
 @source "../../node_modules/@heuresys/ui/dist/**/*.{js,mjs}";
 
-/* NB: il blocco `:root` con i valori light stava qui e ora arriva da
-   _theme-tokens.css. I valori locali erano anche più vecchi di quelli di
+/* NB: il blocco `:root` con i valori light stava qui e ora arriva dalla
+   libreria. I valori locali erano anche più vecchi di quelli di
    apps/web: --muted #F1F4F9 vs #E8ECF3, --border #E2E6EE vs #D6DCE7 (il
    ritocco di contrasto per la visibilità della selezione), --color-icon-warning
    #F59E0B vs #B45309 (la correzione AA di S1025). */

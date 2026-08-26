@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-26T11:47:10Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3246**
+**Generato**: 2026-08-26T15:23:52Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3246**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -3275,7 +3275,6 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\visualizations\[graphId]\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\visualizations\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\whistleblowing-console\page.tsx` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\web\src\app\_theme-tokens.css` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\app\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\demo\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\error.tsx` · *live* · git-tracked
@@ -3307,6 +3306,7 @@
 - `D:\heuresys-advanced\apps\web\src\app\showcase\system-health\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\showcase\tables\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\showcase\typography\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\theme-overrides.css` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\whistleblowing\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\ContentMediaPanel.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\SystemHealthDashboard.tsx` · *live* · git-tracked

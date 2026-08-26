@@ -2,7 +2,8 @@
 
 > **item**: #219 · **priorità**: P2 · **stima**: ~1-2 sessioni
 > **stato**: IN CORSO
-> **avanzamento**: 4/5 fasi (F1-F4 chiuse; resta F5, la corsa integrale)
+> **avanzamento**: 4/5 fasi (F1-F4 chiuse; F5 in corso — F5a/F5b/F5c fatte S1081, resta il
+> triage dei 10 falliti, fermo su una causa esterna misurata: `aide` satura la VM di notte)
 > **fonti**: `#211` F4 (S1072, 2026-08-19) — il triage completo, con la firma misurata di
 > ognuno, vive in `.programmi/211-suite-e2e-completa.md` §F4 e **non si ricopia qui**
 
@@ -167,9 +168,38 @@ non correggendolo.
       `/organization` (877) · `/organization/org-chart` (547): **12 passed**, nessun rosso
       nuovo. Il rimedio vale per **tutte** le rotte del censimento, che avevano lo stesso
       falso verde in agguato. Typecheck e lint verdi.
-- [ ] **F5 La corsa che chiude la voce, e il passaggio in CI** — budget ~20k (in gran parte attesa)
-      Una corsa integrale con **0 falliti**. Solo allora il criterio di `#211` consente di
-      portare la suite in CI, e questa voce si chiude insieme a quel passaggio.
+- [ ] **F5 La corsa che chiude la voce, e il passaggio in CI** — ⚠ **la stima «~20k, in gran parte
+      attesa» è SMENTITA**: una corsa integrale sono **4 fasi** e la sola fase 1 ne dura 5-44 minuti
+      a seconda del carico. Una corsa integrale con **0 falliti**; solo allora il criterio di `#211`
+      consente di portare la suite in CI, e la voce si chiude con quel passaggio.
+
+  ### Avanzamento S1081 (2026-08-26) — **la suite TORNA A MISURARE**
+
+  Stato prima: `0 passati · 6 falliti · 84 saltati`, e il register attribuiva la causa a
+  `admin@heuresys.com`. **Smentito misurando**: i sei setup usano sei **persone reali**, tutte
+  `ACTIVE` con identità e fattore MFA. La causa era l'ambiente, non i dati — vedi il preflight.
+
+  Stato ora: **354 passati su 450** · 10 falliti (+3 instabili) · 83 non eseguiti (68 dietro
+  `F4_SWEEP=1`, gli altri 15 con la ragione scritta). Fasi: 1 ROSSA · 2 VERDE · 3 ROSSA · 4 VERDE.
+
+  - [x] **F5a Rimettere in piedi l'ambiente** — API accesa (nessuna config Playwright la avvia) +
+        `:3000` liberata da un `next start` orfano. Esito: **6 setup verdi in 57,7 s**
+  - [x] **F5b Il referto che sopravvive alla corsa** — il solo reporter `list` scriveva su stdout
+        e il dettaglio dei 10 falliti si è perso col troncamento. Aggiunto il reporter **JSON su
+        file** (`apps/web/esiti-e2e.json`, gitignored)
+  - [x] **F5c Il preflight** — le tre cause di rossi-non-guasti (API spenta · `:3000` occupata ·
+        VM carica) misurate **prima** di partire e dichiarate accanto all'esito. Provato nei
+        quattro versi (si accende · vede la porta · dichiara NON MISURABILE · tace con
+        `E2E_PREFLIGHT=0`)
+  - [ ] **F5d Il triage dei 10 falliti** — ⏸ **fermo su causa esterna, e va saputo prima di
+        riprovare**: `aide --update` (integrità dei file, notturno) satura la VM che ospita il DB
+        → pool in timeout → `POST /v1/auth/login` **500** → Playwright vede solo un `waitForURL`
+        che non arriva. Lo stesso setup passava in 5,5 s quaranta minuti prima. **Fra le 02:00 e
+        la fine di `aide` nessuna misura E2E è attendibile**, e parte dei 10 potrebbe essere
+        questa. *Come si riprende*: `ssh oracle-vm-default "cat /proc/loadavg"` (il preflight lo
+        fa da sé), poi `cd apps/web && node scripts/e2e-blocchi.mjs`, poi si leggono i falliti
+        **dal referto JSON**, uno per uno, con la loro firma
+  - [ ] **F5e La corsa che chiude** — 0 falliti, poi il passaggio in CI
 
 ## Le prove che devono poter fallire
 

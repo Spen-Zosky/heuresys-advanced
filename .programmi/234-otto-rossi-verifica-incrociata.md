@@ -47,6 +47,35 @@ porta le quattro cose di `db-migrations.md`. Mai spegnere per far tornare verde 
     un'assegnazione incoerente richiede una **decisione di prodotto** (il KPI segue la persona
     o l'incarico?) che non si deriva dal codice. Resta `DIFETTO` in F2: non si spegne ciò di
     cui non si è certi
+### Indagine S1081 su due delle cinque (l'indagine è essa stessa un deliverable, R24 §2)
+
+**`X6a` — 5 OKR su un reparto che non esiste, e sono DUE nature diverse.** Misurati (su 17 OKR
+totali, tutti con `okr_department` valorizzato):
+
+| reparto dichiarato | obiettivo | natura |
+|---|---|---|
+| `Supply Chain` | «Achieve 100% supplier traceability» | ⚠ **estraneo al dominio**: una banca non ha una supply chain da tracciare |
+| `Sales` | «Increase B2B customer base by 40%» | ⚠ **estraneo**: gergo commerciale generico, non bancario |
+| `Digital Banking` | «Launch mobile banking app v3.0» | coerente, ma il nome non combacia |
+| `Corporate Banking` | «Increase corporate lending by 20%» | coerente, ma il nome non combacia |
+| `Finance` | «Reduce operational costs by 12%» | coerente, ma il nome non combacia |
+
+I primi due odorano di **contaminazione** da un altro dataset (`I21` coerenza di industry, e il
+criterio già usato in S1042: «nomina un'entità inesistente»). Gli altri tre sono **disallineamento
+di nomi** dopo la ricostruzione dell'organigramma: le unità RTL che li coprono esistono ma si
+chiamano `DIV-IT` (Divisione IT & Digital), `DIR-DEV` (Sviluppo Software e Canali Digitali),
+`DIR-COORD` (Coordinamento Commerciale) — nessuna si chiama «Finance» o «Corporate Banking».
+⚠ **`okr_department` è testo libero**, non una FK: è questa la causa a monte, e finché resta tale
+il controllo continuerà ad accendersi a ogni rinomina.
+
+**`X6c` — non sono 2 righe, sono 2 COLONNE mai valorizzate.** `sys_goals.goal_owner_user_id` è
+vuoto su **tutte le 2.189 righe**, `sys_okrs.okr_owner_user_id` su tutte le 17. E **il codice le
+scrive**: l'`INSERT` di `goals/repository.ts:79` e quello di `okrs/repository.ts:71` le
+valorizzano. Quindi non sono colonne morte e non è un difetto del codice applicativo: le righe
+esistenti vengono da **seed/import storici** che non le hanno popolate. La cura è un backfill —
+ma «chi ha assegnato l'obiettivo» è un dato che nessuna fonte porta, quindi va deciso se
+ricostruirlo (dal capo dell'epoca) o dichiarare la colonna vuota per le righe storiche.
+
 - [ ] **F2 Il marciume vero** — i **cinque** rimasti dopo F1: `X3c` contratto attivo senza busta
   recente (2) · `X5d` posizione senza requisiti formativi (8) · `X6a` OKR su reparto inesistente
   (5) · `X6b` KPI non previsto dalla posizione (42, **serve la decisione di prodotto**) · `X6c`

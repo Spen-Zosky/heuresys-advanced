@@ -152,6 +152,38 @@
     }
    },
    "solaLettura": true
+  },
+  "visualization-graphs": {
+   "data": "2026-08-26",
+   "decisione": "Enzo (#214 F3, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). QUINTO perimetro in sola lettura, primo della coda dei neutri per ampiezza di lettura (5 letture · 4 pagine). ⚠ APERTO CON UNA GUARDIA, e la ragione è un buco del criterio trovato misurando (S1081): `data-classes.ts` dichiara `visualization` senza dati di persona («grafici salvati») e i DATI di oggi le danno ragione — 316 nodi su 316 sono di tipo POSITION, nessuna persona — ma il vocabolario che il modello AMMETTE contiene anche 'USER' (dove `node_label` sarebbe il nome di una persona) e 'SUCCESSION_POOL'. La dichiarazione era vera oggi, non per costruzione: il giorno in cui una pagina salvasse un organigramma per persone, l'agente leggerebbe nomi propri da un perimetro dichiarato neutro e nessuno strumento se ne accorgerebbe. Rimedio nella mig 000355: la sentinella `sys.v_grafo_con_nodo_di_persona`, che db_health raccoglie e pretende a zero — bloccante, non informativa. Così l'apertura resta dimostrabile nel tempo invece che cieca.",
+   "operations": {
+    "get": {
+     "method": "GET",
+     "path": "/",
+     "permission": "visualization:read"
+    },
+    "get_by_id": {
+     "method": "GET",
+     "path": "/:id",
+     "permission": "visualization:read"
+    },
+    "get_by_id_render": {
+     "method": "GET",
+     "path": "/:id/render",
+     "permission": "visualization:read"
+    },
+    "get_by_id_versions": {
+     "method": "GET",
+     "path": "/:id/versions",
+     "permission": "visualization:read"
+    },
+    "get_summary": {
+     "method": "GET",
+     "path": "/summary",
+     "permission": "visualization:read"
+    }
+   },
+   "solaLettura": true
   }
  }
 }

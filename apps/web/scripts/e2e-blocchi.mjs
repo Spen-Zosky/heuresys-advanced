@@ -389,6 +389,11 @@ if (falliti > 0) problemi.push(`${falliti} casi falliti`);
 
 if (problemi.length > 0) {
   console.error(`\nROSSO: ${problemi.join(" · ")}.`);
+  // DOVE si leggono i falliti. Senza questa riga il dettaglio sembra vivere solo nello
+  // stdout — che chi lancia una corsa da minuti tronca quasi sempre — e per rileggerlo si
+  // rifanno le fasi da capo. I referti per fase esistono da sempre: mancava chi lo dicesse.
+  console.error(`  Il dettaglio di ogni caso e' nei referti per fase, gia' scritti su disco:`);
+  console.error(`     ${esiti.map((e) => `apps/web/.e2e-fase-${e.fase}.json`).join(" · ")}`);
   // Il contesto va ACCANTO all'esito, non solo in cima: chi legge il referto ore dopo
   // (o lo trova in CI) vede i rossi, non lo scrollback di quando la corsa e' partita.
   if (AVVISI_PREFLIGHT.length > 0) {

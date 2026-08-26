@@ -67,12 +67,14 @@ export default defineConfig({
   // 90 s copre l'attesa più lunga dichiarata (60 s) con margine, e non maschera i guasti
   // veri: quelli scadono sui timeout per-azione, che restano 10 s e 30 s.
   timeout: 90_000,
-  // Il `list` scrive su stdout, e lo stdout si perde: una corsa integrale dura minuti,
-  // chi la lancia la trotta con `| tail` e il dettaglio dei falliti sparisce — successo in
-  // S1081, dove la corsa ha dato 10 rossi e per leggerli è stato necessario RIFARE le fasi.
-  // Il JSON è il referto che sopravvive alla corsa: si legge dal FILE, come il referto a11y
-  // di #219 F4. `outputFile` fuori da `test-results/`, che Playwright ripulisce a ogni corsa.
-  reporter: [["list"], ["json", { outputFile: "esiti-e2e.json" }]],
+  // ⚠ Il referto JSON della corsa integrale NON si configura qui: `e2e-blocchi.mjs` lo
+  // chiede per FASE, con `--reporter=list,json` e `PLAYWRIGHT_JSON_OUTPUT_NAME`, e quella
+  // variabile ha la precedenza su qualunque `outputFile` scritto in questa config. I file
+  // sono `apps/web/.e2e-fase-<N>.json` e li' vanno letti i falliti, uno per uno.
+  // (S1081: ne avevo aggiunto uno qui credendo che mancasse — era ridondante E inefficace,
+  //  perche' la variabile lo sovrascriveva. Il difetto vero non era l'assenza del referto:
+  //  era che nessuno DICEVA dove fosse. Ora lo dice questo commento e lo stampa lo script.)
+  reporter: [["list"]],
   use: {
     baseURL: WEB_BASE_URL,
     trace: "retain-on-failure",

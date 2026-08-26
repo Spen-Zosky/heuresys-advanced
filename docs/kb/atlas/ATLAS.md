@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `c8a29d30` (2026-08-24T01:56:56+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `f7035d15` (2026-08-26T07:34:54+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 604 |
 | Pagine web | 120 |
 | Schemi shared | 108 |
-| Tabelle DB | 272 (vuote: 21) |
-| Viste / matview | 34 / 0 |
+| Tabelle DB | 272 (vuote: 17) |
+| Viste / matview | 35 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 272 |
 
 ## Moduli API
@@ -128,9 +128,6 @@
 
 - `audit.user_self_service_actions`
 - `staging.mig349_esco_consolidamento_undo`
-- `sys.sys_auth_mfa_exemption_audit`
-- `sys.sys_auth_mfa_exemption_eligible_users`
-- `sys.sys_auth_mfa_exemptions`
 - `sys.sys_auth_mfa_otp_challenges`
 - `sys.sys_auth_mfa_recovery_codes`
 - `sys.sys_auth_mfa_webauthn_credentials`
@@ -145,13 +142,12 @@
 - `sys.sys_notification_preferences`
 - `sys.sys_occupation_classification_mappings`
 - `sys.sys_process_kpi_templates`
-- `sys.sys_research_sources`
 - `sys.sys_user_delegations`
 
 ## Key counts live
 
 - tenants_active: **2**
-- users: **161**
+- users: **164**
 - positions: **315**
 - org_units: **45**
 - roles: **14**

@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-25T15:47:10Z da docs/kb/tools/build_index.py
+# generato: 2026-08-26T11:47:10Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-25T15:47:10Z"
-  total_files: 3222
+  generated_at: "2026-08-26T11:47:10Z"
+  total_files: 3246
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,16 +13,16 @@ meta:
     api-module: 356
     ci: 17
     claude-config: 35
-    config: 184
+    config: 187
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 352
+    db-migration: 354
     db-other: 8
-    db-script: 44
+    db-script: 45
     db-seed: 114
-    doc-canonical: 714
+    doc-canonical: 732
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2664
+    live: 2688
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3170,6 +3170,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\collaudo-access.mjs'
+    root: repo
+    rel: 'apps/api/scripts/collaudo-access.mjs'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\scripts\contesa-tunnel.mjs'
     root: repo
     rel: 'apps/api/scripts/contesa-tunnel.mjs'
@@ -3233,6 +3239,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-124-d4.mts'
     root: repo
     rel: 'apps/api/scripts/prova-live-124-d4.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-132-f7-fonte.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-132-f7-fonte.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -3323,6 +3335,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-99-f7.mts'
     root: repo
     rel: 'apps/api/scripts/prova-live-99-f7.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\verify-collaudo-login.mjs'
+    root: repo
+    rel: 'apps/api/scripts/verify-collaudo-login.mjs'
     category: config
     status: live
     provenance: git-tracked
@@ -8198,6 +8216,18 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000355_un_grafo_puo_contenere_persone_e_il_criterio_non_lo_sapeva.sql'
+    root: repo
+    rel: 'db/migrations/000355_un_grafo_puo_contenere_persone_e_il_criterio_non_lo_sapeva.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000356_un_account_di_servizio_non_e_una_persona_senza_posizione.sql'
+    root: repo
+    rel: 'db/migrations/000356_un_account_di_servizio_non_e_una_persona_senza_posizione.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -8405,6 +8435,12 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\prova-live-ricerca.ts'
     root: repo
     rel: 'db/scripts/prova-live-ricerca.ts'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\provision-collaudo-access.ts'
+    root: repo
+    rel: 'db/scripts/provision-collaudo-access.ts'
     category: db-script
     status: live
     provenance: git-tracked
@@ -9371,6 +9407,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\231-consumo-lavori-attivi.md'
     root: repo
     rel: '.programmi/231-consumo-lavori-attivi.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\234-otto-rossi-verifica-incrociata.md'
+    root: repo
+    rel: '.programmi/234-otto-rossi-verifica-incrociata.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -13262,6 +13304,54 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\00_SINTESI.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/00_SINTESI.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\01_INVENTARIO.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/01_INVENTARIO.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\02_LATENTI.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/02_LATENTI.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\03_COMPETITOR.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/03_COMPETITOR.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\04_MATRICE.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/04_MATRICE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\05_PROPOSTE.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/05_PROPOSTE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\06_EVIDENZE.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/06_EVIDENZE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\07_DOCUMENTAZIONE.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/07_DOCUMENTAZIONE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\STATO_CICLO.md'
     root: repo
     rel: 'docs/vision/DREAM_2026-08-25/STATO_CICLO.md'
@@ -13298,6 +13388,24 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\docs_censimento_pass2_a.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/_raccolta/docs_censimento_pass2_a.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\docs_censimento_pass2_b.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/_raccolta/docs_censimento_pass2_b.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\docs_censimento_pass2_c.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/_raccolta/docs_censimento_pass2_c.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\inventario_raw.md'
     root: repo
     rel: 'docs/vision/DREAM_2026-08-25/_raccolta/inventario_raw.md'
@@ -13307,6 +13415,42 @@ files:
   - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\latenti_raw.md'
     root: repo
     rel: 'docs/vision/DREAM_2026-08-25/_raccolta/latenti_raw.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\_raccolta\verifier_verdetti.md'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/_raccolta/verifier_verdetti.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\DREAM_2026-08-25\manifest.json'
+    root: repo
+    rel: 'docs/vision/DREAM_2026-08-25/manifest.json'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\INDEX.md'
+    root: repo
+    rel: 'docs/vision/INDEX.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\riferimenti\README.md'
+    root: repo
+    rel: 'docs/vision/riferimenti/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\riferimenti\modello-linkedin-vs-heuresys.md'
+    root: repo
+    rel: 'docs/vision/riferimenti/modello-linkedin-vs-heuresys.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\vision\riferimenti\posizionamento-centrale.md'
+    root: repo
+    rel: 'docs/vision/riferimenti/posizionamento-centrale.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

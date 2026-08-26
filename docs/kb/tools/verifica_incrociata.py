@@ -305,6 +305,14 @@ check("X3b", "X3", "Retribuzione anomala rispetto ai pari livello",
       ORDER BY 2, 3
       """,
       "SELECT count(*) FROM contr WHERE ral IS NOT NULL",
+      # #234 F1 (S1081): e' una MISURA, non un difetto — e chiamarla difetto teneva rosso
+      # il cancello di chiusura per una proprieta' della matematica. La regola e' il
+      # boxplot di Tukey (1,5 x IQR): in QUALUNQUE popolazione retributiva reale produce
+      # dei fuori-scala, ed e' il suo scopo. Una retribuzione oltre l'intervallo puo'
+      # essere legittima (un dirigente pagato piu' dei pari livello) o un dato digitato
+      # male, e la regola NON puo' distinguerle: quella distinzione la fa una persona,
+      # guardando le righe. Zero non e' l'atteso, quindi non e' un cancello.
+      tipo="misura",
       colonne=["persona", "livello", "retribuzione", "intervallo atteso"])
 
 check("X3c", "X3", "Contratto attivo senza busta paga recente",
@@ -343,6 +351,13 @@ check("X4a", "X4", "Requisito di competenza della posizione attuale non coperto"
       ORDER BY 1, 3
       """,
       "SELECT count(*) FROM att a JOIN sys.sys_position_skill_requirements r ON r.position_id = a.pid",
+      # #234 F1 (S1081): questo E' LO SKILL GAP, cioe' la funzione centrale del prodotto —
+      # non un'incoerenza dei dati. Un'organizzazione reale HA scostamenti fra i requisiti
+      # di un posto e le competenze di chi lo occupa: e' cio' che la piattaforma misura per
+      # costruire percorsi formativi, successione e mobilita'. Pretendere zero qui
+      # significherebbe pretendere un'azienda dove nessuno ha niente da imparare. La
+      # curatela del catalogo che ci sta sotto e' materia di `#227`, non di un cancello.
+      tipo="misura",
       colonne=["persona", "posizione", "competenza", "confronto"])
 
 check("X4b", "X4", "Competenza posseduta che nessuna posizione richiede piu'",
@@ -526,6 +541,13 @@ check("X6d", "X6", "Il catalogo dei KPI di posizione copre una frazione delle po
       HAVING count(*) <> 0
       """,
       "SELECT count(DISTINCT pid) FROM att",
+      # #234 F1 (S1081): lo dice gia' la forma della query — restituisce UNA riga di
+      # riepilogo con dei conteggi, non un elenco di violazioni, e la prima colonna si
+      # chiama «misura». E' la copertura del catalogo dei KPI di posizione, che cresce
+      # via via che le posizioni vengono descritte: un numero da guardare, non un cancello
+      # da tenere a zero. Era classificata DIFETTO e contava 1 — quell'1 e' la riga di
+      # riepilogo, non una posizione.
+      tipo="misura",
       colonne=["misura", "posizioni scoperte", "persone", "ampiezza del catalogo"])
 
 check("X6c", "X6", "Obiettivo personale senza alcun titolare registrato",

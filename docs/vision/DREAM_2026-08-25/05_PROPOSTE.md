@@ -1,6 +1,6 @@
 # Proposte — ciclo DREAM 2026-08-25
 
-> **⚠ BANNER V11 (2026-08-26)**: le schede sotto sono la bozza dell'Onda 3, conservata come record. Il verifier le ha giudicate (29/29: 3 REGGONO, 22 CON-CORREZIONI, 4 CADONO) e la **classificazione definitiva con i delta per scheda è nella sezione «V11 — Recepimento e classificazione definitiva» in coda al file**. In caso di divergenza fra una scheda e la sezione V11, vale la V11.
+> **✅ F3 APPROVATA da Enzo il 2026-08-26** — la tabella MoSCoW ×2 della sezione «V11» in coda è la classificazione DEFINITIVA del ciclo (replicata machine-readable in `manifest.json`). Le schede sotto sono la bozza dell'Onda 3, conservata come record; in caso di divergenza fra una scheda e la V11, vale la V11.
 
 **Stato**: BOZZA (Onda 3, S1081-dream). Classificazione **doppia e PROVVISORIA** (pre-verifier): ogni scheda porta `T1 · T2` — T1 = vendibile a 6 mesi a PMI italiane come complemento talent al gestionale esistente; T2 = dimostrabile dal vivo a prospect/investitori entro pochi mesi. La classificazione definitiva è V11, dopo i verdetti del verifier (Onda 4). Argine MUST ≤ 1/5 per traguardo: **rispettato** (29 sopravvissute → max 5; T1 ne ha 3, T2 ne ha 2).
 

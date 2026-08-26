@@ -1,4 +1,6 @@
-# Ciclo DREAM 2026-08-25 — stato alla chiusura S1081-dream (interruzione da guardiano)
+# Ciclo DREAM 2026-08-25 — **CICLO CHIUSO — 17/17 voci fatte, non resta niente** (2026-08-26)
+
+*(le sezioni sotto restano come cronaca delle chiusure intermedie)*
 
 **Chiusura corrente**: 2026-08-26 ~01:05 (S1081-dream, ripresa serale), per soglia finestra 5h = 81,0% ≥ 80% (verdetto incollato nel report). *Chiusure precedenti*: stessa soglia — S1080 ~17:50 (80,0%) · S1081-dream pomeridiana ~19:45 (99,0%).
 
@@ -32,9 +34,9 @@
 | V9 | Proposte + evidenze (bozze `05`, `06`) | FATTO (S1081-dream, ripresa serale — 29 schede su 3 lenti + 3 eretiche + 9 scartate con ragione; classi doppie PROVVISORIE, argine MUST ok: T1=3, T2=2; evidenze F1-F34 + S1-S15) |
 | V10 | dream-verifier (opus) | FATTO (2026-08-26 ~00:00 — `_raccolta/verifier_verdetti.md`, depositato dall'orchestratore dal transcript perché l'agente non scrive; 29/29 giudicate: 3 REGGONO, 22 CON-CORREZIONI, 4 CADONO; 4 fatti corretti, 0 fonti false, 1 cella matrice smentita) |
 | V11 | Doppia classificazione + confronto | FATTO (2026-08-26 — sezione V11 in `05_PROPOSTE.md`: 4 cadute risolte, 22 delta recepiti, evidenze e matrice corrette; 24 vive, MUST: T1={P-01,P-06}, T2={P-13}) |
-| F3 | Fermata 3 — tabella MoSCoW ×2 | **PRESENTATA — WAIT-INPUT (via di Enzo sulla tabella in `05_PROPOSTE.md` §V11)** |
-| V12 | File finali `00`–`07` + `manifest.json` + `INDEX.md` | non iniziata |
-| V13 | Commit finale | non iniziata (i commit di progresso esistono) |
+| F3 | Fermata 3 — tabella MoSCoW ×2 | FATTO — **APPROVATA da Enzo, 2026-08-26 («approvo la tabella, chiudi il ciclo»)** |
+| V12 | File finali `00`–`07` + `manifest.json` + `INDEX.md` | FATTO (2026-08-26 — 00 sintesi · 01 inventario · 02 latenti · 03 competitor · 04 matrice · 05 proposte con banner F3 · 06 evidenze · 07 documentazione · manifest.json · docs/vision/INDEX.md) |
+| V13 | Commit finale | FATTO (2026-08-26 — vedi commit di chiusura) |
 
 ## Ripresa — primi tre passi (aggiornati alla chiusura S1081-dream)
 

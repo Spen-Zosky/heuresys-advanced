@@ -1,0 +1,47 @@
+{
+  "cycle": "DREAM_2026-08-25",
+  "closed_at": "2026-08-26",
+  "session": "S1081-dream",
+  "goals": {
+    "T1": "entro 6 mesi prodotto vendibile a PMI italiane strutturate come complemento talent al gestionale HR esistente",
+    "T2": "piattaforma dimostrabile dal vivo a prospect/investitori entro pochi mesi"
+  },
+  "competitors": {
+    "personio": "concorrente-diretto",
+    "eightfold": "metro-di-riferimento",
+    "zucchetti": "piattaforma-coesistente"
+  },
+  "f3_approved_by": "Enzo, 2026-08-26",
+  "verifier": {"regge": 3, "regge_con_correzioni": 22, "cade": 4, "fonti_rotte": 0},
+  "proposals": [
+    {"id": "P-01", "title": "Import persone/org da file", "t1": "MUST", "t2": "COULD", "leva": 4, "effort": "M/L", "state": "approved"},
+    {"id": "P-06", "title": "Condurre una campagna di valutazione", "t1": "MUST", "t2": "SHOULD", "leva": 2, "effort": "L", "state": "approved"},
+    {"id": "P-13", "title": "Pagina del Position Intelligence Profile", "t1": "SHOULD", "t2": "MUST", "leva": 2, "effort": "S/M", "state": "approved"},
+    {"id": "P-04", "title": "SSO aziendale", "t1": "SHOULD*", "t2": "COULD", "leva": 1, "effort": "L", "state": "approved", "note": "sale a MUST se la sonda su 3 prospect conferma"},
+    {"id": "P-14", "title": "Pacchetto Compliance Italia (GDPR console + whistleblowing)", "t1": "SHOULD", "t2": "SHOULD", "leva": 2, "effort": "S/M", "state": "approved", "note": "3 route distruttive: guardie obbligatorie"},
+    {"id": "P-16", "title": "CCNL in reference_sync", "t1": "SHOULD", "t2": "COULD", "leva": 2, "effort": "M", "state": "approved", "note": "CNEL Open Data: esito sonda gia' positivo"},
+    {"id": "P-03", "title": "API per terzi + webhook", "t1": "SHOULD", "t2": "COULD", "leva": 3, "effort": "L", "state": "approved", "note": "dopo P-01; OpenAPI gia' generato (F36)"},
+    {"id": "P-05", "title": "Ruoli su misura (role CRUD)", "t1": "SHOULD", "t2": "COULD", "leva": 1, "effort": "L", "state": "approved", "note": "cache RBAC boot-only + ADR-0035"},
+    {"id": "P-08", "title": "Onboarding/offboarding", "t1": "SHOULD", "t2": "COULD", "leva": 1, "effort": "M", "state": "approved"},
+    {"id": "P-11", "title": "Promemoria scadenze", "t1": "SHOULD", "t2": "COULD", "leva": 1, "effort": "S", "state": "approved", "note": "precedente vivo: approvals-sla.timer"},
+    {"id": "P-02", "title": "Copia dei tracciati presenze verso Zucchetti", "t1": "SHOULD", "t2": "COULD", "leva": 2, "effort": "M", "state": "approved", "note": "direzione corretta dal verifier; dopo P-01"},
+    {"id": "P-27", "title": "Triage delle latenti (criterio a 3 esiti)", "t1": "SHOULD", "t2": null, "leva": 1, "effort": "M", "state": "approved"},
+    {"id": "P-15", "title": "AI dichiarabile (registro modelli)", "t1": "COULD", "t2": "SHOULD", "leva": 1, "effort": "S", "state": "approved", "note": "prima: provenienza delle 468 predizioni (precomputed legacy?)"},
+    {"id": "P-17", "title": "Sentinelle in org-health", "t1": "COULD", "t2": "SHOULD", "leva": 1, "effort": "S", "state": "approved", "note": "prima: bonifica dati org RTL"},
+    {"id": "P-20", "title": "Pagina mentorship", "t1": "COULD", "t2": "SHOULD", "leva": 1, "effort": "S+M", "state": "approved", "note": "vista ESS = modulo /v1/me/* nuovo (ADR-0011)"},
+    {"id": "P-19", "title": "Governance AI a 6 stati", "t1": "COULD", "t2": "SHOULD", "leva": 1, "effort": "M", "state": "approved"},
+    {"id": "P-12", "title": "Misura resa mobile (estensione Pixel 7)", "t1": "COULD", "t2": "COULD", "leva": 1, "effort": "XS", "state": "approved"},
+    {"id": "P-09", "title": "360 e feedback continuo", "t1": "COULD", "t2": "COULD", "leva": 0, "effort": "M", "state": "approved", "note": "dopo P-06"},
+    {"id": "P-10", "title": "Firma elettronica", "t1": "COULD", "t2": "COULD", "leva": 0, "effort": "M", "state": "approved", "note": "vincolo media store local-disk"},
+    {"id": "P-23a", "title": "Broadcast admin", "t1": "COULD", "t2": "COULD", "leva": 0, "effort": "S", "state": "approved"},
+    {"id": "P-24", "title": "Deleghe di mandato", "t1": "COULD", "t2": "COULD", "leva": 0, "effort": "S", "state": "approved"},
+    {"id": "P-29", "title": "Esporre l'export (bottone)", "t1": "COULD", "t2": "COULD", "leva": 1, "effort": "S", "state": "approved", "note": "motore gia' esistente (F35)"},
+    {"id": "P-25", "title": "Prometheus (accensione)", "t1": "COULD", "t2": null, "leva": 0, "effort": "XS", "state": "wait-input", "note": "fase 5 = decisione Enzo"},
+    {"id": "P-18", "title": "Assistente AI ESS", "t1": "COULD", "t2": "COULD", "leva": 1, "effort": "L", "state": "wait-input", "note": "gateway/credenziale + rimisura"},
+    {"id": "P-28", "title": "Listino pubblico (eretica)", "t1": null, "t2": "COULD", "leva": 1, "effort": "S", "state": "wait-input", "note": "numeri = autorita' di Enzo"},
+    {"id": "P-07", "title": "Authoring survey", "t1": "GATED", "t2": "GATED", "leva": 1, "effort": "M", "state": "gated", "note": "decisione m2b (due cluster)"},
+    {"id": "P-26", "title": "ATS mai (eretica)", "t1": "WONT", "t2": null, "leva": 0, "effort": "0", "state": "wont", "note": "rientro: soglia lead + P-03"},
+    {"id": "P-21", "title": "Accendere la ricerca semantica", "t1": null, "t2": null, "leva": 0, "effort": "0", "state": "eliminated", "note": "era gia' DONE in PROD (voce #40)"},
+    {"id": "P-22", "title": "Grafi che si ricordano", "t1": null, "t2": null, "leva": 0, "effort": "L", "state": "discarded", "note": "nessun canvas; rientra con renderer cross-repo"}
+  ]
+}

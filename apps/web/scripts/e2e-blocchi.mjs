@@ -74,6 +74,88 @@ if (!Array.isArray(FASI) || FASI.length === 0) {
   process.exit(2);
 }
 
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ * PREFLIGHT — le tre cose che, se non stanno in piedi, producono ROSSI CHE NON
+ * SONO GUASTI. Tutte e tre misurate in S1081 nella stessa giornata, e ognuna e'
+ * costata una corsa (fino a 44 minuti) piu' il triage sbagliato che ne e' seguito:
+ *
+ *   1. L'API SPENTA. Ne' `playwright.config` ne' `playwright.prod.config` avviano
+ *      apps/api: avviano solo il web. Senza API ogni login fallisce, i sei setup
+ *      diventano rossi e TUTTO il resto risulta «skipped» — che e' esattamente il
+ *      referto che il register aveva interpretato come «le utenze non esistono piu'».
+ *   2. LA :3000 OCCUPATA da un `next start` orfano di una corsa uccisa. Con
+ *      `reuseExistingServer: false` la corsa muore subito; e finche' vive, quel
+ *      server serve una build VECCHIA — pagine nuove in 404 senza spiegazione.
+ *   3. LA VM CARICA. Il DB sta sulla VM OCI: quando `aide --update` (integrita' dei
+ *      file, notturno) la satura, il pool va in timeout, il login risponde 500 e
+ *      Playwright mostra solo un `waitForURL` che non arriva. Lo stesso setup che
+ *      quaranta minuti prima passava in 5,5 s.
+ *
+ * NON BLOCCA: dichiara. Un cancello che si rifiuta di correre sarebbe peggio del
+ * male — ma un rosso che non indica un difetto insegna a non guardare la suite, ed
+ * e' la ragione per cui #219 esiste. Qui il referto porta il contesto ACCANTO
+ * all'esito, cosi' chi legge non attribuisce al prodotto cio' che e' dell'ambiente.
+ * `E2E_PREFLIGHT=0` lo salta.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+function preflight() {
+  if (process.env.E2E_PREFLIGHT === "0") return [];
+  const avvisi = [];
+
+  // 1. l'API risponde? (la porta la dichiara la stessa variabile che usa il web)
+  const apiBase = process.env.NEXT_PUBLIC_API_PROXY_BASE_URL || "http://localhost:3001";
+  const api = spawnSync(process.execPath,
+    ["-e", `fetch(${JSON.stringify(apiBase + "/healthz")},{signal:AbortSignal.timeout(4000)})` +
+           `.then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))`],
+    { encoding: "utf8" });
+  if (api.status !== 0) {
+    avvisi.push(`API NON raggiungibile su ${apiBase} — nessuna config Playwright la avvia: ` +
+                `apri un terminale con \`cd apps/api && pnpm dev\`, o ogni login fallira'`);
+  }
+
+  // 2. la :3000 e' libera? Un server sopravvissuto e' peggio di nessun server.
+  const porta = Number(process.env.WEB_PORT ?? 3000);
+  const occ = spawnSync(process.execPath,
+    ["-e", `const n=require("node:net");const s=n.createServer();` +
+           `s.once("error",()=>process.exit(1));s.once("listening",()=>s.close(()=>process.exit(0)));` +
+           `s.listen(${porta},"127.0.0.1")`],
+    { encoding: "utf8" });
+  if (occ.status !== 0) {
+    avvisi.push(`porta ${porta} GIA' OCCUPATA — con reuseExistingServer:false la corsa muore subito, ` +
+                `e se e' un next start orfano sta servendo una build vecchia`);
+  }
+
+  // 3. la VM che ospita il database e' scarica? Si misura, non si presume — e se
+  //    non si puo' misurare si DICHIARA: «non lo so» non e' «a posto».
+  const host = process.env.E2E_DB_HOST_SSH ?? "oracle-vm-default";
+  const vm = spawnSync("ssh", ["-o", "ConnectTimeout=8", "-o", "BatchMode=yes", host,
+                               "cat /proc/loadavg; pgrep -c aide || true"], { encoding: "utf8" });
+  if (vm.status !== 0) {
+    avvisi.push(`carico della VM NON MISURABILE (${host} non risponde): l'esito di questa corsa ` +
+                `non potra' distinguere un guasto da una macchina satura`);
+  } else {
+    const righe = `${vm.stdout}`.trim().split("\n");
+    const load1 = Number.parseFloat(righe[0]?.split(/\s+/)[0] ?? "0");
+    const aide = Number.parseInt(righe[1] ?? "0", 10) || 0;
+    if (aide > 0 || load1 >= 2) {
+      avvisi.push(`VM CARICA (load ${load1}${aide > 0 ? ", `aide` in esecuzione" : ""}) — il DB ` +
+                  `risponde lento, il pool scade e i login vanno in 500: i rossi di questa corsa ` +
+                  `NON sono attribuibili al prodotto finche' non si rimisura a macchina scarica`);
+    }
+  }
+  return avvisi;
+}
+
+const AVVISI_PREFLIGHT = preflight();
+if (AVVISI_PREFLIGHT.length > 0) {
+  console.error("\n" + "=".repeat(78));
+  console.error(" PREFLIGHT — l'ambiente non e' quello che la suite presume");
+  console.error("=".repeat(78));
+  for (const a of AVVISI_PREFLIGHT) console.error(`  [!] ${a}`);
+  console.error("=".repeat(78) + "\n");
+}
+
 /** Come si invoca Playwright: attraverso il wrapper Node 22 quando serve (D-36). */
 const usaWrapper = process.env.E2E_BLOCCHI_NODE22 !== "0";
 function playwright(args, ambiente) {
@@ -300,6 +382,13 @@ if (falliti > 0) problemi.push(`${falliti} casi falliti`);
 
 if (problemi.length > 0) {
   console.error(`\nROSSO: ${problemi.join(" · ")}.`);
+  // Il contesto va ACCANTO all'esito, non solo in cima: chi legge il referto ore dopo
+  // (o lo trova in CI) vede i rossi, non lo scrollback di quando la corsa e' partita.
+  if (AVVISI_PREFLIGHT.length > 0) {
+    console.error("  ⚠ e il preflight aveva gia' detto che l'ambiente non regge:");
+    for (const a of AVVISI_PREFLIGHT) console.error(`     · ${a}`);
+    console.error("    Prima di attribuire questi rossi al prodotto, rimisura ad ambiente sano.");
+  }
   if (esiti.length === FASI.length && nonEseguiti === 0) {
     console.error("  Tutte le fasi hanno girato e nessun caso e' rimasto fuori: i rossi sono guasti da guardare.");
   }

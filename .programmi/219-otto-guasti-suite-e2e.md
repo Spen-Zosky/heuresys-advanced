@@ -191,8 +191,34 @@ non correggendolo.
         VM carica) misurate **prima** di partire e dichiarate accanto all'esito. Provato nei
         quattro versi (si accende · vede la porta · dichiara NON MISURABILE · tace con
         `E2E_PREFLIGHT=0`)
-  - [ ] **F5d Il triage dei 10 falliti** — ⏸ **fermo su causa esterna, e va saputo prima di
-        riprovare**: `aide --update` (integrità dei file, notturno) satura la VM che ospita il DB
+  - [x] **F5d Il triage — FATTO 2026-08-26 a VM scarica: da 10 a 7, e i 3 spariti erano il
+        CARICO.** Corsa ripetuta con `aide` finito (load da 3,79 a **0,63**): **360 passati**,
+        7 falliti, **0 instabili** (erano 3). Le tre firme, lette dai referti per fase:
+    - **a11y (fase 1, 2 pagine × retry)** — `/brownfield-adaptation` esaminata su **21 nodi**,
+      `/privacy` su **40**: è la **guardia anti-vacuità di `F4` che funziona** — non dice «c'è
+      una violazione», dice «questa pagina non ha renderizzato, quindi il verde sarebbe vuoto».
+      Guasto vero, di rendering o di attesa, su due pagine pubbliche
+    - **passkey (fase 3)** — `login-mfa-enrollment.spec.ts`, un locator non visibile nel giro
+      WebAuthn. Da riprodurre
+    - **✅ i due 403 (fase 4) — RISOLTI, e la causa non era quella che sembrava.**
+      `performance-cycle.spec.ts` prova «il ciclo dal lato di chi lo conduce» con `tenantAdmin`
+      e riceveva 403 su `/v1/performance-reviews` e `/v1/review-cycles`. **Non era un buco di
+      disegno**: la `000270` concede quei permessi a `TENANT_ADMIN` da sempre, ed erano
+      **spariti dal database**. Li aveva cancellati la `000210` — l'allowlist deny-by-default,
+      che *cancella ogni grant fuori elenco* — rimasta applicata **senza le migrazioni
+      successive** dopo che il deadlock fra le due sessioni aveva interrotto la catena a metà.
+      Riparato riapplicando la `000270` (`INSERT 0 4`) e poi **l'intera catena in ordine**
+    - ⚠⚠ **e in mezzo ho ripetuto io lo stesso errore**: per curare il 403 avevo emendato la
+      `000210` aggiungendo il permesso all'allowlist, e l'avevo applicata **da sola** — il suo
+      `DELETE` ha tolto altri 4 grant (`mappingsLoaded` da 980 a 968). L'emendamento è stato
+      **ritirato** (la `000270` è già il posto giusto, con il suo marker dedicato) e lo stato
+      ricostruito con la catena intera. Lezione in memoria: *una migrazione auto-riparante
+      applicata fuori ordine distrugge ciò che le successive costruiscono*
+    - 📌 **la cache RBAC si carica all'AVVIO**: dopo aver rimesso i permessi, l'API continuava a
+      negare finché non è stata riavviata. Un 403 che sopravvive alla cura non è sempre un
+      permesso mancante
+  - [ ] **F5d-bis I tre guasti veri che restano** (2 a11y + 1 passkey) — ⏸ **fermo su causa
+        esterna nella corsa precedente**: `aide --update` (integrità dei file, notturno) satura la VM che ospita il DB
         → pool in timeout → `POST /v1/auth/login` **500** → Playwright vede solo un `waitForURL`
         che non arriva. Lo stesso setup passava in 5,5 s quaranta minuti prima. **Fra le 02:00 e
         la fine di `aide` nessuna misura E2E è attendibile**, e parte dei 10 potrebbe essere

@@ -1,8 +1,9 @@
 # 227 — Le competenze isolate nel grafo: un terzo del catalogo senza un solo arco
 
 > **item**: #227
-> **stato**: IN CORSO — F1 fatta (S1081, 2026-08-25); l'effort è da **ri-stimare al ribasso**:
-> il censimento mostra 4.332 derivabili a macchina e **30 righe** di curatela vera, non 4.464
+> **stato**: IN CORSO
+> **nota**: F1 fatta (S1081, 2026-08-25); l'effort è da **ri-stimare al ribasso** — il censimento
+> mostra 4.332 derivabili a macchina e **30 righe** di curatela vera, non 4.464
 > **nasce-da**: `#222` F6-07, che dichiarava «da fare, con un piano proprio» — e quel piano
 > **non è mai stato creato**. La voce `#222` è stata chiusa `DONE` e il residuo è rimasto orfano
 > per tre giorni, invisibile a ogni elenco. Trovato in S1079 censendo i residui dichiarati

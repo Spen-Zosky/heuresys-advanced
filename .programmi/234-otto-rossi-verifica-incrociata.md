@@ -1,7 +1,7 @@
 # 234 — Gli otto rossi di `verifica_incrociata`: cura o riclassificazione, mai il silenzio
 
 > **item**: #234
-> **stato**: APERTO
+> **stato**: IN CORSO
 > **aperto**: S1081 (2026-08-25) — emersi togliendo X9c/X8a/X7a e correggendo il display
 > della batteria (mostrava l'ultimo allarme come sintesi; ora mostra la riga ESITO)
 

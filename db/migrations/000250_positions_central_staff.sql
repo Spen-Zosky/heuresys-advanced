@@ -230,6 +230,12 @@ BEGIN
     FROM sys.sys_users u
    WHERE u.user_status = 'ACTIVE'
      AND u.user_tenant_id = (SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code='RTL_BANK')
+     -- S1081: un account di servizio NON e' una persona e non sta nell'organigramma —
+     -- stesso criterio della sentinella del censimento e della 000356. Quando questa
+     -- post-condizione fu scritta non esisteva alcun SERVICE, quindi l'esclusione non
+     -- poteva mancare a nessuno; con le utenze di collaudo di #169 F2 la catena si
+     -- fermava qui («2, attesa 1») su un dato che non e' un difetto.
+     AND u.user_type IS DISTINCT FROM 'SERVICE'
      AND NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
                       WHERE a.user_position_assignment_user_id = u.user_id
                         AND a.user_position_assignment_status = 'ACTIVE');

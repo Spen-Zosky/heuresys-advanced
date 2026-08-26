@@ -299,6 +299,11 @@ RETURNS TABLE (regola text, violazioni bigint) LANGUAGE sql STABLE AS $$
   SELECT 'persone attive senza posizione',
          count(*) FROM sys.sys_users u
          WHERE u.user_status = 'ACTIVE'
+           -- S1081: gli account di servizio non sono persone (stesso criterio della
+           -- 000356, che ridefinisce questa funzione piu' avanti nella catena). Qui
+           -- l'esclusione serve perche' la 000251 stessa INTERROGA questa funzione
+           -- nella propria post-condizione, quando la 000356 non e' ancora girata.
+           AND u.user_type IS DISTINCT FROM 'SERVICE'
            AND NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
                             WHERE a.user_position_assignment_user_id = u.user_id
                               AND a.user_position_assignment_status = 'ACTIVE');
@@ -350,6 +355,7 @@ BEGIN
 
   SELECT count(*) INTO n_senza_pos FROM sys.sys_users u
    WHERE u.user_status = 'ACTIVE'
+     AND u.user_type IS DISTINCT FROM 'SERVICE'   -- S1081, come sopra
      AND NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
                       WHERE a.user_position_assignment_user_id = u.user_id
                         AND a.user_position_assignment_status = 'ACTIVE');

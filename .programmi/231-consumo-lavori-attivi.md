@@ -83,9 +83,19 @@ catena che sblocca la suite (#169 → #219) · **(c)** il lavoro read-only mentr
   `visualization-graphs` aperto **con la guardia** (mig `000355`) perché la sua neutralità era
   vera oggi e non per costruzione; + `000356`, cura di un difetto **mio** (le utenze SERVICE
   contate come persone senza posizione: violazioni organigramma 3 → 0)
-- [ ] **S7 `#219` F5 — triage dei 10 falliti** — in corso: rilanciate le fasi rosse col
-  **reporter JSON su file** (il `list` su stdout si perdeva col troncamento). Letti i **casi**,
-  non le fasi
+- [ ] **S7 `#219` F5d — triage dei 10 falliti** — ⏳ **in corso, a VM scarica**: `aide` è finito
+  (load da 3,79 a **0,63**), API riaccesa, corsa integrale rilanciata col referto JSON. Il
+  preflight tace, come deve ad ambiente sano — e alla sua prima corsa vera aveva dato un **falso
+  allarme**, curato subito (`process.exit()` dentro un `fetch` aborta Node su Windows): un
+  allarme che grida al lupo la prima volta viene disattivato la seconda
+- [x] **S8 `#234` F1 — le riclassificazioni** — **FATTO 2026-08-26**, commit `0d04316e` e
+  `0c6b9741` · da **8 difetti a 5**: `X3b` (boxplot di Tukey: i fuori-scala sono il suo scopo),
+  `X4a` (**è lo skill gap**, la funzione centrale del prodotto) e `X6d` (una riga di riepilogo,
+  non violazioni) riclassificate a `misura` con la ragione scritta. `X6b` **non toccata di
+  proposito**: serve una decisione di prodotto. Indagate anche `X6a` (2 dei 5 OKR sono estranei
+  al dominio bancario → contaminazione; gli altri 3 sono nomi disallineati, e la causa a monte è
+  che `okr_department` è **testo libero**) e `X6c` (non 2 righe: **2 colonne** mai valorizzate,
+  ma il codice le scrive — sono i seed storici)
 
 ## Confine di sessione, dichiarato adesso
 

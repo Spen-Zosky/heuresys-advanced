@@ -4,23 +4,29 @@
 
 ## Last session brief — l'ultima sessione, in breve
 
-**S1081 — la sessione in cui quasi ogni diagnosi ereditata si è rivelata sbagliata, e l'ultima
-riparazione ha scoperto un danno che nessuno stava cercando.** Consumato il ciclo `#231` su
-mandato di Enzo («procedi con tutte, decidi tu priorità e sequenza»): chiuse `#169` F2, `#132`
-F7, `#227` F1, `#214` F6, `#234` F1, più la fase `F5` di `#219` fino al triage.
+**S1082 — i token di marca escono dal repo ed entrano nella libreria, e a schermo non cambia
+niente: dimostrato, non promesso.** Sessione su mandato esterno (prompt da Claude Desktop, fuori
+register), due cicli chiusi per intero.
 
-Il filo: **misurare ha smentito il registro cinque volte.** La suite E2E non entrava per
-un'utenza sparita — falso, le sei persone c'erano tutte: mancava l'API accesa. Le competenze
-isolate erano curatela su un terzo del catalogo — falso, sono 30 righe di lavoro vero. Tre degli
-otto rossi del cancello erano difetti — falso, erano misure col nome sbagliato, fra cui lo
-scostamento di competenze, che *è* la funzione del prodotto.
+Il tema di marca viveva in `apps/web`, copiato nello showcase dal sync. Ora vive in
+`@heuresys/ui/theme` e arriva ai prodotti con una release: con più consumatori, una modifica di
+marca deve raggiungerli tutti. Il file locale resta al suo posto **svuotato**, punto di estensione
+per gli scostamenti di `apps/web`, col nome che la libreria prescrive.
 
-**La lezione più cara è un errore mio, ripetuto due volte nella stessa ora.** Per curare un 403
-ho applicato da sola una migrazione che *ripara cancellando*: ha tolto quattro permessi, come
-aveva già fatto la catena interrotta dal deadlock fra le due sessioni parallele. Ritirato,
-ricostruito con la catena intera, verificato — 980 mapping, il valore esatto del boot.
+**Il metodo è la parte che vale.** Fotografato il CSS emesso *prima* di toccare qualsiasi cosa: a
+valle di **entrambi** gli interventi gli hash coincidono ancora con quella baseline. E ha pagato
+subito — un token risultava «assente» dopo il lavoro, ma lo era identicamente prima: senza la
+misura preventiva avrei diagnosticato una regressione inesistente.
+
+**Le verifiche prescritte dal mandato erano difettose**, e in tre modi che producevano un verde
+falso: cercavano il CSS dove su Next 16 non sta (prova **cieca**), una pipe mascherava l'exit code
+(prova che non poteva **fallire**), un valore atteso era sbagliato in partenza. Il difetto in più
+è mio: il censimento per il rename girava con uno strumento che **salta i file gitignored** —
+cioè proprio dove un rename morde.
 
 ## Top priorities — le priorità
+
+*Invariate: questa sessione non le ha toccate.*
 
 1. **`#219` — i tre guasti veri che restano**, ora identificati con precisione: `/privacy` e
    `/brownfield-adaptation` **non renderizzano** (21 e 40 nodi: lo dice la guardia anti-vacuità
@@ -51,6 +57,9 @@ ricostruito con la catena intera, verificato — 980 mapping, il valore esatto d
 5. **Il contratto di `marta.pellegrini@rtl-bank.org` è scaduto il 2026-08-25 e non è stato
    rinnovato**, mentre la sua posizione resta attiva. La storia RTL avanza da sé: va rinnovato
    il contratto o chiusa la posizione — è una decisione sui dati, non un difetto.
+6. **Da oggi un ritocco al tema di marca si fa in `ux-design-shared` e pretende una release** —
+   il prezzo del modello. Sblocca la correzione a monte che il register rimandava (badge pieni a
+   contrasto insufficiente, S1038): la faccio quando la nomini.
 
 ## Verification — la verifica
 

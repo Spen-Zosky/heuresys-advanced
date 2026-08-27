@@ -9,6 +9,54 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1082 (2026-08-26) — il tema di marca esce dal repo, e l'identità del CSS emesso lo dimostra
+
+**Stack**: `@heuresys/ui` **^0.1.9 → ^1.0.0** (root + `apps/web` + `apps/showcase`). Il major
+marca lo spostamento dei token, **non** una rottura di API: misurato sui due tarball, la
+superficie esportata è identica (**419 simboli**, 0 rimossi, 0 aggiunti), e `peerDependencies` /
+`dependencies` / `sideEffects` / `files` coincidono. Unico delta negli `exports`: il
+sottopercorso **`"./theme": "./src/styles/theme-heuresys.css"`** (5.955 byte).
+
+**Cosa è cambiato architetturalmente.** Il tema di marca (`@theme inline` + `:root` + `.dark`)
+non è più un file di questo repo: vive in `ux-design-shared` come `ui/src/styles/theme-heuresys.css`
+ed è consumato via `@import "@heuresys/ui/theme"` da entrambe le app. **Conseguenza operativa
+permanente**: un ritocco al tema di marca si fa nella libreria e pretende una release — è il
+prezzo del modello, ed è ciò che lo rende utile con più di un consumatore. Il file locale resta
+al suo posto **svuotato di token**, punto di estensione per gli scostamenti di `apps/web` (oggi
+**zero**), rinominato `_theme-tokens.css` → **`theme-overrides.css`**, il nome che la libreria
+prescrive nel proprio commento. Ordine di cascata invariato: `styles` → `theme` → override locali.
+
+**La misura che regge tutto**: baseline del CSS emesso presa **prima** di iniziare, e ri-confrontata
+dopo **entrambi** i commit — `12vhlr8cex14v.css` (sha `e55ff02f…`) + `1nc9eic8uw3zx.css` (sha
+`b22887e2…`), **132.263 byte**, identici. Attraverso lo spostamento e il rename il CSS servito non
+è cambiato di un byte. `V4` verde su 6 utility semantiche; lo step CI dello showcase verde su
+**26** classi di stato.
+
+**Nel lockfile una deduplicazione, non un aggiornamento**: `@heuresys/ui` dichiara a range
+(`^5.100.9`, `^7.74.0`, `^5.2.2`) tre pacchetti che `apps/web` pinna esatti; il lockfile teneva
+risolte le copie vecchie **accanto** a quelle dell'app (`@tanstack/react-query` 5.101.0,
+`react-hook-form` 7.79.0, `@hookform/resolvers` 5.4.0). Ora convergono sui pin già dichiarati
+(**5.101.4 · 7.83.0 · 5.4.3**), non toccati. Una copia per pacchetto invece di due.
+
+**Sei punti meccanici** aggiornati col rename, due dei quali fallirebbero **in silenzio**: il
+filtro `paths:` di `showcase.yml` (un override futuro non farebbe ripartire il deploy di Pages) e
+`apps/showcase/.gitignore` (la copia generata dal sync smetterebbe di essere ignorata). Guardia
+verificata **dopo** il build: `git check-ignore` copre il file rigenerato. `sync-showcase.sh` e
+`showcase.yml` continuano a funzionare; il commento del sync, che dichiarava ancora «fonte unica in
+apps/web», è stato riallineato a ciò che copia davvero.
+
+**Quattro difetti nelle verifiche prescritte dal mandato, tre dei quali producevano un verde
+falso**: il percorso `.next/static/css` non esiste su Next 16 + Turbopack (il CSS sta in
+`.next/static/chunks` → la prova era **cieca**); una pipe verso `head` mascherava l'exit code (la
+prova non poteva **fallire**); `--radius-card` era atteso come custom property ma è `@theme inline`,
+che Tailwind risolve nell'utility (`.rounded-card{border-radius:1rem}`) — ed era assente
+identicamente **nella baseline**, quindi non una regressione; `git commit` senza `-m` avrebbe
+aperto un editor. Quinto, mio: il censimento del rename girava con ripgrep, che **salta i file
+gitignored** — cioè esattamente dove un rename morde (ri-fatto con `--no-ignore`: nulla era
+nascosto). DB, migrazioni, moduli e RBAC **invariati** — nessun file sotto `db/`, `apps/api/`.
+
+Commit: `b3f1f4e6` (spostamento) · `f1bb2ac1` (rename, con `git mv` riconosciuto al 68%).
+
 ### Delta S1081 (2026-08-25/26) — il registro aveva torto cinque volte, e la riparazione ha scoperto un danno che nessuno cercava
 
 **Numeri ri-derivati dal vivo**: migrazioni su disco **354** = ledger **354** (max `000356`) ·

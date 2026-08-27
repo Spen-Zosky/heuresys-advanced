@@ -104,6 +104,7 @@ Standard workspace scripts (`install`, `dev`, `build`, `typecheck`, `lint`, `tes
 | Typecheck test files | `cd apps/api && pnpm typecheck:test` (uses `tsconfig.test.json`) |
 | DB reset (destructive) | `pnpm db:reset` — **ask user before running** |
 | **Prova generale della CI, prima di pushare** (#165) | `ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh'` — copia `heuresys_ci`, riapplica l'intera catena, interroga le sentinelle. **~26 s** contro i 20-30 min di un giro CI. Lanciala **sempre** dopo aver toccato `db/migrations/**`: le post-condizioni che contano righe sono verdi in locale e rosse in CI (→ memoria `ci_clone_lacks_script_imported_data`). `--migrations-from <ref>` prova la catena com'era; `--from-zero` è il modo severo (oggi si ferma alla 000049) |
+| ⭐ **Applicare le migrazioni alla produzione — SI ESEGUE SULLA VM, non da qui** (Enzo, 2026-08-27) | **`pnpm db:migrate:vm`** (→ `db/scripts/migrate-on-vm.sh`; `--no-pull` per provare prima del push, `HOST=linux-pc` per il gemello). **Misurato lo stesso giorno, stesso script e stesso esito (`334 applied, 21 skipped`): 17 secondi sulla VM contro ~80 minuti da Windows** — un fattore ~280. Non è una differenza di potenza: da Windows il database **non c'è**, e le ~60.000 righe della catena attraversano una per una il tunnel SSH fino a Oracle Cloud; sulla VM il `.env` dichiara `POSTGRES_HOST=localhost` e non c'è rete di mezzo. **`pnpm db:migrate` / `db:migrate:sh` da Windows restano validi e a volte necessari** (nessun accesso SSH, diagnosi locale), ma non sono la via normale: chi li lancia deve sapere che sta pagando quel fattore. ⚠ Prima serve che il file sia **sulla VM** (`git pull` lì dopo il push, oppure `scp` del solo `.sql` quando si prova prima di pushare) |
 | Storia RTL 36 mesi | `bash db/scripts/storia36.sh custodia` (regge ancora?) · `... avanzamento` (portala a ieri) · `... custodia --repair-missing`. Triage e trappole nella skill `storia36-custodia`; stato in `.storia36/PROGRESS.md`. **Due** timer la presidiano su VM e linux-pc: `avanzamento` giornaliero alle 03:45 (**scrive**, e gira solo dove il `.env` dichiara `STORIA36_AVANZAMENTO=1` — altrove esce 0 senza scrivere) e `custodia` settimanale lunedi 04:30. La custodia verifica **proprieta'**, non freschezza: e' verde anche con le presenze ferme (misurato 2026-08-24) — la freschezza la sorveglia `db_health.py` |
 | **Il guardiano** — contesto e finestra 5h, misurati mai stimati | `python docs/kb/tools/guardiano.py` · `--sorveglia` (exit 3 = si chiude) · `--budget N` (exit 2 = non ci sta) · `--selftest`. **Regola: contesto ≥ 75% OPPURE finestra 5h ≥ 80% → interrompi, registra, committa E PUSHA, chiudi.** I numeri vengono dai token che l'**API** riporta nel transcript e da `rate_limits.five_hour` che Claude Code passa alla riga di stato (depositato in `~/.claude/rate-limits.json`). Il boot li stampa già in cima alla dashboard, in **entrambe** le modalità. Copia a livello utente in `~/.claude/tools/guardiano.py` |
 | **Il rubinetto del brownfield è chiuso** — e questo lo tiene chiuso (ADR-0038) | `python docs/kb/tools/check_no_legacy_ingest.py` · `--elenco` · `--selftest` (deve uscire tutto verde). Esce **1** se compare un artefatto **nuovo** che prende righe dal DB legacy. Gli storici sono congelati in `legacy_ingest_allowlist.txt` — quanti siano lo dice lo strumento, non questa riga (⭐ IL PUNTO FISSO: l'allowlist cresce ogni volta che un artefatto storico viene riconosciuto); `reference_sync` (ISTAT/ATECO/ESCO) **non** è brownfield e non fa scattare nulla |
@@ -115,6 +116,21 @@ Standard workspace scripts (`install`, `dev`, `build`, `typecheck`, `lint`, `tes
 | Session mode — diagnostica e autodiagnosi | `sh scripts/hooks/hook.sh mode <session_id>` · `... selftest` · `... gc` (→ `docs/kb/xtras/SESSION_MODES.md`) |
 
 PowerShell scripts are the Windows canonical; `.sh` siblings exist for bash/SSH-to-VM use. Every `db/scripts/*.{ps1,sh}` is idempotent and safe to re-run.
+
+### ⭐ DOVE si esegue un lavoro sul database — tre macchine, tre mestieri (Enzo, 2026-08-27)
+
+*Nasce da un errore reale di quel giorno: ho applicato una migrazione alla produzione **da Windows**, misurando la lentezza mentre accadeva senza chiedermi dove convenisse eseguirla. Ottanta minuti per un lavoro da diciassette secondi.*
+
+**Il database non è su questa macchina.** Windows ospita il codice; il database di produzione vive sulla **VM Oracle** e ci si arriva via tunnel; il **linux-pc** ne tiene una **copia**. Da qui ogni istruzione SQL attraversa la rete: su una catena di ~60.000 righe la differenza non è marginale, è di due ordini di grandezza. Quindi la domanda da porsi **prima** di lanciare un lavoro sul database non è «qual è il comando», è **«su quale macchina va eseguito»**.
+
+| lavoro | dove | perché |
+|---|---|---|
+| **Provare** una migrazione prima di pubblicarla | **linux-pc** — `bash db/scripts/ci-rehearsal.sh` | è una **copia**: si può sbagliare senza conseguenze. DB locale → **~12-26 s** |
+| **Applicare** alla produzione | **VM** — `pnpm db:migrate:vm` | è l'**unico** posto dove sta il database vero, ed è **in casa** rispetto a chi esegue. **17 s misurati** |
+| **Leggere, interrogare, diagnosticare** | **Windows**, via tunnel | poche query: il tunnel non pesa, e qui c'è il contesto di lavoro |
+| **Verifica lunga di chiusura** | **linux-pc** (già regola S1054) | stessa ragione: lì il database non è dall'altra parte di una rete |
+
+**Il corollario che vale anche fuori dal database**: una misura di lentezza è essa stessa un dato. Se un'operazione sta impiegando molto più del previsto, la domanda giusta non è «quanto manca» ma **«la sto eseguendo nel posto sbagliato?»**. Il cancello locale `verify_gate` instrada `migrate-idempotent` **su questa macchina** e ne paga il costo due volte: è un difetto noto dell'instradamento, non una necessità.
 
 ## Infrastructure
 

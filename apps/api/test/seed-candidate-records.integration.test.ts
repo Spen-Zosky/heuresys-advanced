@@ -186,8 +186,43 @@ describe("/v1/seed-candidate-records/* integration (read-only)", () => {
     expect(val.statusCode).toBe(200);
     const vb = val.json() as { items: Array<{ ruleCode: string; status: string }>; total: number };
     expect(vb.total).toBeGreaterThan(0);
-    // le regole sono quelle vere del programma, non etichette generiche
-    expect(vb.items.some((i) => i.ruleCode === "TWICE_RUN_ZERO")).toBe(true);
+
+    // Le regole sono quelle vere del programma, non etichette generiche — l'intento
+    // originale di questa asserzione, e resta.
+    //
+    // ⚠ MA DIPENDONO DAL DOMINIO, e prima non lo facevano. Fino al 2026-08-27 qui
+    // c'era `TWICE_RUN_ZERO` cablato: giusto quando il solo dominio era `storia36`,
+    // falso da quando ne esiste un secondo. La lista ordina per `created_at DESC` e
+    // il test ne prende UNO (`limit=1`), quindi pesca il record piu' RECENTE — e dal
+    // 2026-08-19 il piu' recente e' `research_sources` (`bancaditalia.it|64.19`,
+    // dalla corsa di ricerca live di #132 F4), le cui regole sono un altro insieme:
+    // SHAPE_VALID, SOURCES_POLICY, RAW_TEXT_LEAK, NOT_DUPLICATE... Misurato quel
+    // giorno: 12 record `storia36` del 29 luglio + 1 `research_sources` del 19 agosto.
+    // Il test non era sbagliato quando fu scritto: e' diventato stantio rispetto a
+    // un'evoluzione del prodotto, e nessuno se n'era accorto perche' la suite intera
+    // costa 37 minuti da Windows e non la si eseguiva. Il costo di un controllo non
+    // fa solo perdere tempo: fa perdere difetti.
+    //
+    // Un dominio NON dichiarato qui fa fallire il test di proposito: cosi' chi ne
+    // introduce uno nuovo deve dire quali sono le sue regole, invece di scoprire fra
+    // sei mesi che questa asserzione era diventata muta.
+    const REGOLA_ATTESA_PER_DOMINIO: Record<string, string> = {
+      storia36: "TWICE_RUN_ZERO",
+      research_sources: "SHAPE_VALID",
+    };
+    const dominio = items[0]!.domain;
+    const attesa = REGOLA_ATTESA_PER_DOMINIO[dominio];
+    expect(
+      attesa,
+      `dominio '${dominio}' non dichiarato in REGOLA_ATTESA_PER_DOMINIO: aggiungilo ` +
+        `con una regola che il suo programma emette davvero (viste qui: ` +
+        `${vb.items.map((i) => i.ruleCode).join(", ")})`,
+    ).toBeDefined();
+    expect(
+      vb.items.some((i) => i.ruleCode === attesa),
+      `il record del dominio '${dominio}' non porta la regola '${attesa}' ` +
+        `(regole presenti: ${vb.items.map((i) => i.ruleCode).join(", ")})`,
+    ).toBe(true);
 
     const ev = await suite.app.inject({
       method: "GET", url: `/v1/seed-candidate-records/${id}/evidence`,
@@ -196,8 +231,27 @@ describe("/v1/seed-candidate-records/* integration (read-only)", () => {
     expect(ev.statusCode).toBe(200);
     const eb = ev.json() as { items: Array<{ url: string | null }>; total: number };
     expect(eb.total).toBeGreaterThan(0);
-    // la fonte è il seed stesso, versionato nel repository
-    expect(eb.items[0]!.url).toMatch(/^repo:\/\/db\/seeds\//);
+
+    // Anche la FONTE dipende dal dominio, ed e' la seconda meta' dello stesso difetto:
+    // qui c'era `repo://db/seeds/` cablato, con il commento «la fonte e' il seed stesso,
+    // versionato nel repository». Vero per `storia36`, dove l'evidenza E' il file di seed.
+    // Falso per `research_sources`, dove l'evidenza e' la PAGINA WEB che il lettore ha
+    // scaricato davvero — misurato: `https://www.bancaditalia.it/compiti/v...`.
+    // Una firma ne nascondeva due: la prima asserzione cadeva prima e teneva nascosta
+    // questa. Stesso rimedio, e stesso patto: un dominio non dichiarato fa fallire.
+    const FONTE_ATTESA_PER_DOMINIO: Record<string, RegExp> = {
+      // il seed versionato nel repository
+      storia36: /^repo:\/\/db\/seeds\//,
+      // una pagina pubblica letta dal motore di ricerca, con la sua impronta
+      research_sources: /^https:\/\//,
+    };
+    const fonteAttesa = FONTE_ATTESA_PER_DOMINIO[dominio];
+    expect(
+      fonteAttesa,
+      `dominio '${dominio}' non dichiarato in FONTE_ATTESA_PER_DOMINIO: aggiungilo con ` +
+        `la forma che le sue evidenze hanno davvero (vista qui: ${eb.items[0]!.url})`,
+    ).toBeDefined();
+    expect(eb.items[0]!.url).toMatch(fonteAttesa!);
   });
 
   it("istruttoria e fonti di un record inesistente → 404", async () => {

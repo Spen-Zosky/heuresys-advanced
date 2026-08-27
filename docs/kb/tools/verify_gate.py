@@ -126,7 +126,24 @@ SUITES: dict[str, tuple[str, str]] = {
     "typecheck":          ("L0", "pnpm typecheck"),
     "lint":               ("L0", "pnpm lint"),
     "test-api":           ("L2", "pnpm --filter @heuresys/api test"),
-    "migrate-idempotent": ("L2", "pnpm db:migrate:sh && pnpm db:migrate:sh"),
+    # ⭐ 2026-08-27 (Enzo) — LA PROVA GIRA SU UNA COPIA, E DOVE IL DATABASE VIVE.
+    # Era `pnpm db:migrate:sh && pnpm db:migrate:sh`, e quel comando aveva due
+    # difetti che si sommavano:
+    #   ① applicava la catena ALLA PRODUZIONE, due volte, per provare che fosse
+    #     idempotente — un cancello di verifica che scrive sull'ambiente vero. E'
+    #     il difetto che in S1065 ha portato in produzione una migrazione
+    #     committata e non deployata, lasciando 117 utenti senza organigramma.
+    #   ② lo faceva da questa macchina, dove il database NON C'E': le ~60.000
+    #     righe della catena attraversavano il tunnel SSH una per una. Misurato,
+    #     stesso script e stesso esito: ~80 minuti da Windows contro 17 secondi
+    #     dove il database e' locale. Due volte. Un cancello che costa ore e' un
+    #     cancello che si finisce per aggirare.
+    # Ora: `ci-rehearsal.sh` sul linux-pc — copia usa-e-getta `heuresys_ci`, due
+    # passate, piu' le sentinelle di db_health che la versione locale non
+    # interrogava. Piu' severa e incomparabilmente piu' rapida (12-26 s).
+    # Se il gemello non risponde lo script esce ROSSO e NON ripiega in locale:
+    # ripiegare vorrebbe dire tornare al difetto ①.
+    "migrate-idempotent": ("L2", "bash db/scripts/prova-idempotenza.sh"),
     "shell-tests":        ("L1", "bash scripts/test/run-shell-tests.sh"),
     "handoff-lint":       ("L1", "python docs/kb/tools/handoff_lint.py"),
     # #217/S1071 — l'INTEGRITA' dei piani, non solo la loro esistenza. `handoff_lint` T2
@@ -362,7 +379,12 @@ def chi_occupa_il_db() -> str | None:
 def run_suites(names: list[str], with_e2e: bool, files: list[str],
                keep: list[dict] | None = None) -> dict:
     # Le suite che toccano il database non partono se un'altra e' gia' in corso.
-    if any(n in ("test-api", "migrate-idempotent") for n in names):
+    # ⭐ 2026-08-27: `migrate-idempotent` NON e' piu' in questo elenco, e non e' una
+    # dimenticanza. Da quando la sua prova gira sul gemello, su una copia usa-e-getta,
+    # non tocca piu' il database di produzione — che e' cio' che questo lucchetto
+    # protegge. Tenercela avrebbe bloccato una prova innocua ogni volta che la
+    # produzione era occupata, cioe' proprio quando serve poterla lanciare.
+    if any(n in ("test-api",) for n in names):
         occupante = chi_occupa_il_db()
         if occupante:
             print(f"  [BLOCCO] la suite e' gia' in esecuzione: {occupante}")

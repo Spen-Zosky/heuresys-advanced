@@ -123,12 +123,17 @@ PowerShell scripts are the Windows canonical; `.sh` siblings exist for bash/SSH-
 
 **Il database non è su questa macchina.** Windows ospita il codice; il database di produzione vive sulla **VM Oracle** e ci si arriva via tunnel; il **linux-pc** ne tiene una **copia**. Da qui ogni istruzione SQL attraversa la rete: su una catena di ~60.000 righe la differenza non è marginale, è di due ordini di grandezza. Quindi la domanda da porsi **prima** di lanciare un lavoro sul database non è «qual è il comando», è **«su quale macchina va eseguito»**.
 
-| lavoro | dove | perché |
-|---|---|---|
-| **Provare** una migrazione prima di pubblicarla | **linux-pc** — `bash db/scripts/ci-rehearsal.sh` | è una **copia**: si può sbagliare senza conseguenze. DB locale → **~12-26 s** |
-| **Applicare** alla produzione | **VM** — `pnpm db:migrate:vm` | è l'**unico** posto dove sta il database vero, ed è **in casa** rispetto a chi esegue. **17 s misurati** |
-| **Leggere, interrogare, diagnosticare** | **Windows**, via tunnel | poche query: il tunnel non pesa, e qui c'è il contesto di lavoro |
-| **Verifica lunga di chiusura** | **linux-pc** (già regola S1054) | stessa ragione: lì il database non è dall'altra parte di una rete |
+| lavoro | dove | comando | misurato (stesso comando, stesso esito) |
+|---|---|---|---|
+| **Provare** una migrazione | **gemello**, su copia usa-e-getta | `bash db/scripts/prova-idempotenza.sh` | **13 s** · da qui: ~80 min ×2 |
+| **Applicare** alla produzione | **VM**, unico posto col DB vero | `pnpm db:migrate:vm` | **17 s** · da qui: **~80 min** |
+| **Validare** lo schema (7 viste + twice-run) | **gemello** | `pnpm db:validate:vm` | **20 s** · da qui: **>10 min, non ha finito** |
+| **Test di integrazione API** | **gemello** | `pnpm test:api:vm` | un file: **14 s** · da qui: 83 s |
+| **Qualunque altro lavoro pesante** | **gemello** o VM | `bash db/scripts/sul-gemello.sh '<cmd>'` (`HOST=oracle-vm-default` per la VM) | — |
+| **Leggere, interrogare, diagnosticare** | **Windows**, via tunnel | `psql`, `db_health.py`, i `check_*.py` | poche query: il tunnel non pesa, e qui c'è il contesto |
+| **Verifica lunga di chiusura** | **linux-pc** (già regola S1054) | — | stessa ragione: lì il DB non è dall'altra parte di una rete |
+
+**Tutti questi comandi escono ROSSI se l'host non risponde, e NON ripiegano su questa macchina**: ripiegare rimetterebbe il lavoro sul tunnel, cioè il difetto che esistono per togliere. Un controllo che non ha potuto misurare deve dirlo — «non ho potuto guardare» non è «va bene».
 
 **Il corollario che vale anche fuori dal database**: una misura di lentezza è essa stessa un dato. Se un'operazione sta impiegando molto più del previsto, la domanda giusta non è «quanto manca» ma **«la sto eseguendo nel posto sbagliato?»**. Il cancello locale `verify_gate` instrada `migrate-idempotent` **su questa macchina** e ne paga il costo due volte: è un difetto noto dell'instradamento, non una necessità.
 

@@ -164,7 +164,14 @@ gates:
     - pnpm typecheck
     - "rebuild consumer: api, web, showcase"
   "db/migrations/**":
-    - "pnpm db:migrate x2 con diff pg_dump vuoto"
+    # ⭐ 2026-08-27 (Enzo) — la prova di idempotenza gira SUL GEMELLO, su una copia
+    # usa-e-getta, MAI `pnpm db:migrate` da questa macchina. Due ragioni che si
+    # sommano: (1) `db:migrate` scriverebbe sulla PRODUZIONE per provare
+    # l'idempotenza; (2) da qui il database non c'e', e le ~60.000 righe della
+    # catena attraversano il tunnel SSH una per una — misurato: ~80 minuti contro
+    # 17 secondi dove il database e' locale. Due volte. In un loop NON PRESIDIATO
+    # come questo, quelle ore le perde una corsa che nessuno sta guardando.
+    - "bash db/scripts/prova-idempotenza.sh (ci-rehearsal sul gemello: catena x2 + 26 sentinelle, ~13 s)"
     - pnpm db:validate
   "db/seeds/**":
     - "seed idempotente x2"

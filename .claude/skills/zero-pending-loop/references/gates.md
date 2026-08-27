@@ -20,11 +20,35 @@ Due ragioni per non lanciare sempre tutta la suite. La prima e' il costo: la sui
 | `apps/api/**` | `pnpm typecheck` · `pnpm lint` · vitest sui file toccati **e** sui moduli dipendenti · integration su DB reale (tunnel :5433) |
 | `apps/web/**` | `pnpm typecheck` · `pnpm lint` · `pnpm i18n:check` · Playwright sulle spec pertinenti |
 | `packages/shared/**` | `typecheck` a monte + rebuild dei consumer (`api`, `web`, `showcase`) |
-| `db/migrations/**` | `pnpm db:migrate` due volte con diff `pg_dump` vuoto · `pnpm db:validate` (7 viste) |
-| `db/seeds/**`, `db/scripts/**` | seed idempotente eseguito due volte · `db:validate` |
+| `db/migrations/**` | **`bash db/scripts/prova-idempotenza.sh`** — catena ×2 + 26 sentinelle **sul gemello, su una copia usa-e-getta** (~13 s) · **`pnpm db:validate:vm`** (7 viste + twice-run proof, ~20 s). ⚠ **MAI `pnpm db:migrate` né `pnpm db:validate` da questa macchina** — vedi il riquadro sotto |
+| `db/seeds/**`, `db/scripts/**` | seed idempotente eseguito due volte · **`pnpm db:validate:vm`** |
 | `scripts/**`, `deploy/**` | lint shell + dry-run del percorso modificato |
 | `docs/kb/**` | `python docs/kb/tools/handoff_lint.py` (10 check, bloccante) |
 | `packages/shared/package.json` (subpath exports) | `typecheck` di tutti i consumer + import risolto a runtime |
+
+## ⭐ Un lavoro sul database si esegue DOVE IL DATABASE VIVE (Enzo, 2026-08-27)
+
+*«Non deve più accadere in nessun caso e in nessun controllo.»*
+
+Il database **non sta su questa macchina**: da qui ogni istruzione attraversa un tunnel SSH fino
+alla VM. Per una manciata di letture non pesa; per un controllo che ne fa migliaia diventa
+un'altra cosa. Misurato lo stesso giorno, **stesso comando e stesso esito**:
+
+| controllo | da qui, via tunnel | dove il DB è locale |
+|---|---|---|
+| catena di migrazioni ×2 | **~80 min** ciascuna | **17 s** (VM) · **13 s** su copia (gemello) |
+| `db:validate` | **>10 min, non ha finito** | **20 s** |
+| un file di test API | 83 s | 14 s |
+
+**In un loop non presidiato come questo, quelle ore le perde una corsa che nessuno sta
+guardando** — e un controllo che nessuno aspetta è un controllo che si finisce per saltare.
+
+Comandi da usare: **`bash db/scripts/prova-idempotenza.sh`** (catena ×2 + sentinelle sul gemello)
+· **`pnpm db:validate:vm`** · **`pnpm test:api:vm`** · **`pnpm db:migrate:vm`** (applica alla
+produzione, sulla VM) · in generale **`bash db/scripts/sul-gemello.sh '<comando>'`**.
+
+Tutti escono **rossi** se l'host non risponde, e **non ripiegano qui**: ripiegare rimetterebbe il
+lavoro sul tunnel, cioè il difetto che esistono per togliere.
 
 ## Trappole verificate del repo — non ri-diagnosticarle
 

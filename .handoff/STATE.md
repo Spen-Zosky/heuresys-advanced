@@ -31,8 +31,13 @@ ripristinato, migrazione ritirata da tutte e tre le macchine.
 1. **`#219` F5e — la corsa che chiude, e il passaggio in CI.** I **tre** guasti di F5d-bis sono
    curati (2 a11y + passkey): l'ultima corsa integrale misurata dava `363 passati · 1 fallito`, e
    quel fallito era il passkey, ora risolto. Serve **una corsa a 0 falliti** e poi il passaggio in
-   CI secondo il criterio di `#211` F4. ⚠ La corsa lanciata a fine sessione **non è stata letta**:
-   il suo esito è il primo atto della prossima. → `.programmi/219-otto-guasti-suite-e2e.md`
+   CI secondo il criterio di `#211` F4.
+   ⚠ **PRIMO ATTO DELLA PROSSIMA SESSIONE**: una corsa integrale è stata lanciata a fine S1082 e
+   **non è stata letta** (era alla fase 2 di 4). Il suo referto sopravvive alla corsa — è il
+   reporter JSON aggiunto da F5b: leggi **`apps/web/esiti-e2e.json`**, non rifare la corsa prima
+   di aver guardato lì. Se il file è vecchio o assente, la sequenza è: accendi l'API
+   (`cd apps/api && pnpm dev`) · libera la `:3000` da eventuali orfani · `cd apps/web && node
+   scripts/e2e-blocchi.mjs`. → `.programmi/219-otto-guasti-suite-e2e.md`
 2. **`#234` F2 — resta `X3c`, e la decisione è già presa.** Da 5 difetti a 1. Enzo ha deciso di
    **generare gli stipendi anche per Heuresys** (4 persone, nessun ciclo payroll, contro le 5.638
    buste di RTL). Non entra in una coda: è lavoro dichiarato. Riaperto anche il **Risk Manager**

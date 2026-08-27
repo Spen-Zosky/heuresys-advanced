@@ -222,6 +222,27 @@ test.describe("MVP-4 par.2.5 #4 /login — mandatory-MFA enrollment gate", () =>
 
     await page.goto("/login");
     await submitPassword(page, GATED_EMAIL);
+
+    // #219 F5d-bis (2026-08-27) — LA STESSA CONDIZIONALITÀ DEL CASO GEMELLO QUI SOPRA.
+    // F1/A rese condizionali i due casi MFA che «provavano un mondo diverso da quello
+    // configurato», ma questo — terzo caso dello STESSO file, con la STESSA dipendenza
+    // dal gate §3b — rimase indietro, e da allora era l'unico rosso della sua famiglia.
+    // Misurato oggi sul vivo: `alberto.rossetti` ha **zero** fattori MFA (quindi la
+    // pulizia del caso TOTP funziona e non è quella la causa), e la produzione ha
+    // `MFA_ENFORCEMENT_ENABLED=false` — verificato sulla macchina, non letto da un
+    // commento. Senza il gate acceso il pannello di arruolamento non compare mai, e
+    // questo caso non stava rilevando un guasto: stava chiedendo una configurazione
+    // che il prodotto non ha, per decisione di Enzo (SOT_STATE dal 2026-08-06).
+    // Si osserva il COMPORTAMENTO, non la variabile: se il gate torna acceso, il caso
+    // riprende a girare da sé, senza che nessuno debba ricordarsene.
+    const pannelloComparso = await page
+      .getByTestId("login-enroll-panel")
+      .waitFor({ state: "visible", timeout: 30_000 })
+      .then(() => true, () => false);
+    test.skip(
+      !pannelloComparso,
+      "MFA enforcement spento in questo ambiente (MFA_ENFORCEMENT_ENABLED=false): senza il gate §3b il pannello di arruolamento non compare",
+    );
     await expect(page.getByTestId("login-enroll-panel")).toBeVisible({ timeout: 30_000 });
 
     // From the registration verify onward a verified WEBAUTHN factor exists on

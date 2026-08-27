@@ -125,6 +125,18 @@ ROUTES: list[tuple[str, list[str]]] = [
 SUITES: dict[str, tuple[str, str]] = {
     "typecheck":          ("L0", "pnpm typecheck"),
     "lint":               ("L0", "pnpm lint"),
+    # ⚠ QUESTA RESTA IN LOCALE, ED E' UNA DECISIONE MISURATA — non una dimenticanza
+    # della bonifica del 2026-08-27 che ha spostato `migrate-idempotent` sul gemello.
+    # Costa molto (37 min; sul gemello sarebbero ~17), ma i test provano il CODICE,
+    # non solo i dati: il gemello sta al commit che gli e' stato propagato l'ultima
+    # volta — misurato quel giorno, cinque commit indietro — quindi li' la suite
+    # proverebbe il codice di ieri. Un verde su codice vecchio e' peggio di un'attesa.
+    # Le migrazioni sono un altro caso: sono file `.sql` che si copiano puntualmente,
+    # e `prova-idempotenza.sh` ha una guardia che RIFIUTA di partire se il gemello ne
+    # ha un numero diverso. Per il codice applicativo quella guardia non esiste, e
+    # inventarla significherebbe propagare il repo a ogni giro di test.
+    # Se un giorno si vorra' spostarla: prima serve la propagazione del codice dentro
+    # la suite stessa, e una guardia sull'sha — non basta cambiare l'host.
     "test-api":           ("L2", "pnpm --filter @heuresys/api test"),
     # ⭐ 2026-08-27 (Enzo) — LA PROVA GIRA SU UNA COPIA, E DOVE IL DATABASE VIVE.
     # Era `pnpm db:migrate:sh && pnpm db:migrate:sh`, e quel comando aveva due

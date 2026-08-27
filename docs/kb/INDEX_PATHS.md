@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-27T00:50:05Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3246**
+**Generato**: 2026-08-27T13:53:20Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3251**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 354 |
+| db-migration | 355 |
 | db-other | 8 |
-| db-script | 45 |
+| db-script | 48 |
 | db-seed | 114 |
-| doc-canonical | 732 |
+| doc-canonical | 733 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 403 |
 | ux-design-archive | 80 |
 | web-source | 241 |
-| **TOTALE** | **3246** |
+| **TOTALE** | **3251** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2688 |
+| live | 2693 |
 
 ## File per categoria
 
@@ -1443,6 +1443,7 @@
 - `D:\heuresys-advanced\db\migrations\000354_una_banca_non_raccoglie_feedback_all_una_di_notte_di_sabato.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000355_un_grafo_puo_contenere_persone_e_il_criterio_non_lo_sapeva.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000356_un_account_di_servizio_non_e_una_persona_senza_posizione.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000357_un_okr_di_reparto_o_ha_un_reparto_o_e_di_un_altra_azienda.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1475,6 +1476,7 @@
 - `D:\heuresys-advanced\db\scripts\gen-pay-slips-seed.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\import-d1-user-skills.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate-if-pending.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\migrate-on-vm.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\populate-en-from-esco.sql` · *live* · git-tracked
@@ -1483,6 +1485,7 @@
 - `D:\heuresys-advanced\db\scripts\populate-reference-translations-governance.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\populate-skill-descriptions-it.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\populate-skill-ontology-it.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\prova-idempotenza.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\prova-live-ricerca.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\provision-collaudo-access.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\provision-derived-access.ts` · *live* · git-tracked
@@ -1497,6 +1500,7 @@
 - `D:\heuresys-advanced\db\scripts\setup-ci-database.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\setup_oci_vm_database.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\storia36.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\sul-gemello.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\validate_database.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\validate_database.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\verifica-origine-vs-marchio.sql` · *live* · git-tracked
@@ -2254,6 +2258,7 @@
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-14-s1061-batch-integrale.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-15-92-f6-frontend-valutazione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-18-s1070-rossi-minori-e-217.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-27-batch-s1082-continuazione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-catalogo-generico-corpus-concetti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-substrato-semantico-verifica-e-correzioni.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-07-percorsi-carriera-155.md` · *live* · git-tracked

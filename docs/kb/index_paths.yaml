@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-27T00:50:05Z da docs/kb/tools/build_index.py
+# generato: 2026-08-27T13:53:20Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-27T00:50:05Z"
-  total_files: 3246
+  generated_at: "2026-08-27T13:53:20Z"
+  total_files: 3251
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 354
+    db-migration: 355
     db-other: 8
-    db-script: 45
+    db-script: 48
     db-seed: 114
-    doc-canonical: 732
+    doc-canonical: 733
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2688
+    live: 2693
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -8228,6 +8228,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000357_un_okr_di_reparto_o_ha_un_reparto_o_e_di_un_altra_azienda.sql'
+    root: repo
+    rel: 'db/migrations/000357_un_okr_di_reparto_o_ha_un_reparto_o_e_di_un_altra_azienda.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -8384,6 +8390,12 @@ files:
     category: db-script
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\migrate-on-vm.sh'
+    root: repo
+    rel: 'db/scripts/migrate-on-vm.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\migrate.ps1'
     root: repo
     rel: 'db/scripts/migrate.ps1'
@@ -8429,6 +8441,12 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\populate-skill-ontology-it.sql'
     root: repo
     rel: 'db/scripts/populate-skill-ontology-it.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\prova-idempotenza.sh'
+    root: repo
+    rel: 'db/scripts/prova-idempotenza.sh'
     category: db-script
     status: live
     provenance: git-tracked
@@ -8513,6 +8531,12 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\storia36.sh'
     root: repo
     rel: 'db/scripts/storia36.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\sul-gemello.sh'
+    root: repo
+    rel: 'db/scripts/sul-gemello.sh'
     category: db-script
     status: live
     provenance: git-tracked
@@ -13019,6 +13043,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-18-s1070-rossi-minori-e-217.md'
     root: repo
     rel: 'docs/superpowers/plans/2026-08-18-s1070-rossi-minori-e-217.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-27-batch-s1082-continuazione.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-27-batch-s1082-continuazione.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

@@ -9,6 +9,59 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1082 · parte 2 (2026-08-27) — un controllo troppo caro non fa perdere tempo, fa perdere difetti
+
+**⭐ DOVE si esegue un lavoro sul database — regola nuova nel CLAUDE.md** (Enzo: *«non deve più
+accadere in nessun caso e in nessun controllo»*). Il database non sta sulla macchina di sviluppo:
+da Windows ogni istruzione attraversa il tunnel SSH. Misurato, **stesso comando e stesso esito**:
+
+| controllo | da Windows | dove il DB è locale |
+|---|---|---|
+| catena di migrazioni | **~80 min** | **17 s** (VM) · **13 s** su copia |
+| `db:validate` | **>10 min, non ha finito** | **20 s** |
+| un file di test API | 83 s | 14 s |
+
+**Tre casi vivi censiti e corretti**: ① la suite `migrate-idempotent` del cancello, che oltre a
+essere lenta **applicava la catena alla PRODUZIONE** per provarne l'idempotenza (il meccanismo di
+S1065, 117 utenti senza organigramma) — ora `prova-idempotenza.sh`, su copia usa-e-getta sul
+gemello, **31 s** e con le 26 sentinelle che prima non venivano interrogate; ② la skill autonoma
+`zero-pending-loop`, il caso peggiore perché non presidiata; ③ un comando generico
+`db/scripts/sul-gemello.sh` più `migrate-on-vm.sh`, esposti come `db:migrate:vm`,
+`db:validate:vm`, `test:api:vm`. **Tutti escono rossi se l'host non risponde e non ripiegano in
+locale.** Sette prove di falsificabilità eseguite, inclusa la propagazione dell'exit code.
+`test-api` **resta in locale per decisione motivata**: prova il CODICE, e il gemello sta al commit
+propagato (misurato: 5 indietro) — un verde su codice vecchio è peggio di un'attesa.
+
+**Il costo nascondeva un difetto.** Eseguendo la suite API completa — cosa che da Windows costa 37
+minuti, quindi si evitava — è emerso **1 fallito su 257 file**, rosso **anche contro la
+produzione**. Causa: i 13 `sys_seed_candidate_records` sono di **due domini** (12 `storia36` del 29
+luglio + 1 `research_sources` del 19 agosto, dalla corsa di ricerca live di #132 F4), con insiemi
+di regole ed evidenze **diversi**; il test prendeva il più recente e cablava le regole di uno solo.
+Una firma ne nascondeva due (regole **e** forma della fonte). Corretto derivando l'atteso dal
+dominio, con il patto che **un dominio non dichiarato fa fallire**.
+
+**`#219` F5d-bis — i tre guasti CHIUSI**, e nessuno era ciò che la firma diceva.
+`/brownfield-adaptation` (21 nodi) era una **pagina ritirata dal prodotto** (`77b52e04`, #164 F3)
+il cui ritiro era rimasto a metà in due elenchi — ri-misurato: 0 righe in `sys_ui_interfaces`.
+`/privacy` (40 nodi) passava o falliva **per un nodo**: informativa statica contro una soglia
+tarata su pagine applicative (500-14.023 nodi) → soglia **per rotta**, dichiarata, che discrimina
+ancora perché sta fra il guscio misurato (17) e la pagina viva (41). Il **passkey** era il terzo
+caso MFA rimasto senza la condizionalità che F1/A aveva dato ai due gemelli. Corsa integrale
+misurata dopo le prime due cure: **363 passati · 1 fallito** (era `360 · 7`).
+
+**`#234` F2 — da 5 difetti a 1**, con quattro decisioni di Enzo. `X6a` chiuso (mig. `000357`: 2 OKR
+estranei al dominio bancario rimossi con il criterio della `000235`, 3 riallineati al **codice**
+dell'unità perché sopravviva alle rinomine). `X6b` **riclassificato a misura**: obiettivi di
+incarico e personali *coesistono ed entrambi contano* — resta dichiarato che le due nature non
+sono distinte nei dati. `X5d` eccezione per le apicali, legata al **livello** e non a un elenco.
+`X6c` storico dichiarato vuoto, escluso per **data**. ⚠ **Una derivazione RITIRATA**: la mig.
+`000358` chiudeva `X5d` sul Risk Manager ma **accendeva `X5a`** (8 casi) — la post-condizione
+proteggeva la firma curata, non le altre della batteria. Rollback dichiarato eseguito (5 requisiti
+tolti), stato riportato esattamente com'era, file rimosso da tutte e tre le macchine (355 ovunque).
+
+Migrazioni **355** (max `000357`). Commit: `74f1a9c4` `9b8e0f97` `2ad41b7a` `460c05a2` `77e39808`
+`a5a081f4` `804f9c8d` `fa9eb7f5`.
+
 ### Delta S1082 (2026-08-26) — il tema di marca esce dal repo, e l'identità del CSS emesso lo dimostra
 
 **Stack**: `@heuresys/ui` **^0.1.9 → ^1.0.0** (root + `apps/web` + `apps/showcase`). Il major

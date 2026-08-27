@@ -25,7 +25,11 @@ const SWEEP_ON = process.env.F4_SWEEP === "1";
 const PAGES_PER_PERSONA = {
   platformAdmin: [
     "/dashboard", "/tenants", "/admin/roles", "/admin/mfa-policy", "/users",
-    "/system-health", "/provenance", "/seed-acquisition/runs", "/brownfield-adaptation",
+    // ⚠ `/brownfield-adaptation` TOLTA il 2026-08-27 (#219 F5d-bis) — vedi la nota estesa in
+    // `a11y.spec.ts`: la pagina e' uscita dal prodotto con `77b52e04` (#164 F3) e il ritiro era
+    // rimasto a meta'. Ri-misurato: nessuna directory in apps/web/src/app, 0 righe in
+    // `sys.sys_ui_interfaces` con route '%brownfield%'.
+    "/system-health", "/provenance", "/seed-acquisition/runs",
     "/insights", "/insights/skill-gap", "/insights/succession-readiness",
     "/org-director", "/process-owner", "/content", "/visualizations",
     "/analytics/workforce", "/analytics/kpi", "/analytics/attendance",

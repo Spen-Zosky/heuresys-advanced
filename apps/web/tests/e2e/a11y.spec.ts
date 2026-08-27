@@ -35,6 +35,31 @@ test.describe.configure({ retries: 1 });
 
 type AxeImpact = "critical" | "serious" | "moderate" | "minor";
 
+// #219 F5d-bis (2026-08-27) — LA SOGLIA DI NON-VACUITÀ, PER ROTTA.
+//
+// La guardia sotto distingue una pagina VIVA da un GUSCIO contando i nodi che axe esamina.
+// Il default di 40 è tarato sulle pagine applicative, e per quelle è larghissimo: misurate,
+// stanno fra 500 e 14.023 nodi. Ma `/privacy` è un'informativa statica — 11 sezioni di testo,
+// niente tabelle, niente dati — e ne esamina **41**: passava per UN NODO, e nella corsa del
+// 2026-08-26 ne aveva 40, cioè falliva per uno. Il verde e il rosso erano ugualmente casuali.
+//
+// La cura NON è alzare o abbassare il default: renderebbe cieca la guardia proprio dove serve.
+// È dichiarare la soglia per la rotta che sta legittimamente in basso, con la sua ragione e i
+// suoi numeri — che è ciò che il commento della guardia prescriveva già: «se una rotta legittima
+// le sta sotto, il messaggio dice quale e quanti nodi ha, e la si valuta».
+//
+// Perché 25 discrimina ancora, invece di far tacere il rosso: un guscio misurato vale **17**
+// nodi (`/admin/roles` in vista mobile, il caso H di #219 F4 — uno sfondo con «Caricamento…»),
+// e `/privacy` renderizzata ne vale **41** (misurato oggi su entrambi i progetti Playwright,
+// chromium e mobile-a11y). La soglia sta in mezzo: coglie il guscio, non il contenuto.
+//
+// Margini misurati il 2026-08-27 sulle altre pubbliche, che restano sul default:
+//   /login 63 (+23) · / 130 (+90) · /demo 164 (+124) · /investors 169 (+129).
+const SOGLIA_NODI_DEFAULT = 40;
+const SOGLIA_NODI_PER_ROTTA: Readonly<Record<string, number>> = {
+  "/privacy": 25,
+};
+
 const PAGES_PER_PERSONA = {
   platformAdmin: ["/dashboard", "/tenants", "/admin/roles", "/users", "/system-health"],
   tenantAdmin: [
@@ -51,7 +76,17 @@ const PAGES_PER_PERSONA = {
     "/organization",
     "/processes",
     "/seed-acquisition/runs",
-    "/brownfield-adaptation",
+    // ⚠ `/brownfield-adaptation` TOLTA il 2026-08-27 (#219 F5d-bis): il prodotto NON HA PIU'
+    // quella pagina. `77b52e04` (#164 F3) ha fatto uscire la funzionalita' brownfield — 4 moduli
+    // API, 4 schemi condivisi e la pagina — dopo aver misurato che le superfici ETL erano gia'
+    // spente in produzione. Ri-misurato oggi: la directory non esiste in apps/web/src/app, e
+    // `sys.sys_ui_interfaces` ha **0 righe** con route ilike '%brownfield%'.
+    // Il ritiro era stato fatto a META': `admin-pipelines.spec.ts` aveva rimosso il proprio caso
+    // con la motivazione scritta, ma questo elenco e quello di `f4-sweep.spec.ts` erano rimasti
+    // indietro. Il rosso che ne usciva NON era un guasto di rendering: era la guardia
+    // anti-vacuita' che faceva il suo mestiere su una 404 (21 nodi esaminati).
+    // Se un giorno la pagina tornasse, tornera' col proprio caso: non si tiene in vita una riga
+    // per tenere il posto.
     "/visualizations",
     "/learning/training-initiatives",
     "/organization/org-chart",
@@ -109,9 +144,13 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
   // L'attesa è sul CONTENUTO renderizzato, non su un testid: questa funzione gira su
   // decine di rotte diverse e non può conoscerli tutti. Se scade, non si interrompe qui:
   // si lascia parlare l'asserzione sotto, che dice quanti nodi ha visto e perché non basta.
+  // La soglia è quella della rotta (vedi SOGLIA_NODI_PER_ROTTA): attendere `> 40` su una
+  // pagina che ne ha 41 significava stare 30 s appesi a un'attesa che si risolveva per un
+  // pelo — o non si risolveva affatto, lasciando che axe fotografasse un rendering parziale.
+  const sogliaNodi = SOGLIA_NODI_PER_ROTTA[route] ?? SOGLIA_NODI_DEFAULT;
   await page.waitForFunction(
-    () => document.querySelectorAll("main *, [role='main'] *").length > 40,
-    undefined,
+    (soglia) => document.querySelectorAll("main *, [role='main'] *").length > soglia,
+    sogliaNodi,
     { timeout: 30_000 },
   ).catch(() => { /* diagnosi all'asserzione di non-vacuità, con il numero misurato */ });
 
@@ -148,9 +187,11 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
   const nodiEsaminati = results.passes.reduce((n, r) => n + r.nodes.length, 0);
   expect(
     nodiEsaminati,
-    `pagina non renderizzata: ${route} ha esaminato solo ${nodiEsaminati} nodi — «nessuna ` +
-      `violazione» qui non vuol dire accessibile, vuol dire che non c'era niente da guardare`,
-  ).toBeGreaterThan(40);
+    `pagina non renderizzata: ${route} ha esaminato solo ${nodiEsaminati} nodi (soglia ` +
+      `${sogliaNodi}${sogliaNodi === SOGLIA_NODI_DEFAULT ? "" : ", dichiarata per questa rotta"}` +
+      `) — «nessuna violazione» qui non vuol dire accessibile, vuol dire che non c'era ` +
+      `niente da guardare`,
+  ).toBeGreaterThan(sogliaNodi);
 
   const bySeverity = {
     critical: [] as typeof results.violations,

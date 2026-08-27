@@ -425,6 +425,21 @@ check("X5d", "X5", "Posizione ricoperta che non dichiara alcun requisito formati
       JOIN sys.sys_users u ON u.user_id = a.uid
       WHERE NOT EXISTS (SELECT 1 FROM sys.sys_position_learning_requirements pr
                          WHERE pr.position_id = a.pid)
+      -- ⭐ ECCEZIONE DICHIARATA il 2026-08-27, su decisione di Enzo (#234 F2).
+      -- Le 8 posizioni che restavano erano TUTTE apicali: CEO & Founder, COO, Head of
+      -- Product, Head of Marketing, Head of Internal Audit, Head of Legal & Compliance.
+      -- La causa, misurata leggendo il file che crea l'oggetto: i requisiti formativi
+      -- vennero importati da `job_title_courses` del sistema legacy (207 righe sorgente
+      -- -> 1.791 coppie, seed `11_position_learning_requirements.sql`), mappati per
+      -- RUOLO. I ruoli apicali nel legacy non avevano corsi associati, quindi non c'era
+      -- niente da importare — e il rubinetto del brownfield e' CHIUSO (I12/ADR-0038),
+      -- quindi non si puo' pescarne altri.
+      -- Decisione: una posizione al vertice non ha un percorso formativo obbligatorio.
+      -- Non e' un buco da riempire con dati derivati: e' una proprieta' del dominio.
+      -- ⚠ L'eccezione e' sul LIVELLO, non su un elenco di nomi: se domani nasce una
+      -- nuova posizione apicale eredita l'eccezione, e se una posizione NON apicale
+      -- perde i requisiti il controllo si accende, che e' il verso giusto.
+      AND NOT (p.position_title ~* '^(CEO|COO|CFO|CTO|Head of|Chief |Direttore Generale)')
       GROUP BY p.position_id, p.position_title
       ORDER BY 1
       """,
@@ -505,9 +520,9 @@ check("X6a", "X6", "OKR agganciato a un reparto che nell'organigramma non esiste
       "AND lower(okr_department) <> 'company-wide'",
       colonne=["reparto dichiarato", "obiettivo", "tipo", "dal"])
 
-check("X6b", "X6", "KPI assegnato a chi la propria posizione non lo prevede",
+check("X6b", "X6", "Obiettivi di KPI personali, fuori dai requisiti dell'incarico",
       "un obiettivo di KPI su una persona la cui posizione attiva non elenca quel KPI "
-      "fra i propri requisiti: il KPI segue la persona, non l'incarico",
+      "fra i propri requisiti: e' un obiettivo PERSONALE, non un'incoerenza",
       """
       SELECT u.user_email, coalesce(a.titolo, '(nessuna posizione)'),
              k.kpi_definition_name,
@@ -525,6 +540,24 @@ check("X6b", "X6", "KPI assegnato a chi la propria posizione non lo prevede",
       """SELECT count(*) FROM sys.sys_kpi_targets t
          JOIN att a ON a.uid = t.kpi_target_user_id
          WHERE EXISTS (SELECT 1 FROM sys.sys_position_kpi_requirements r WHERE r.position_id = a.pid)""",
+      # ⭐ RICLASSIFICATO A MISURA il 2026-08-27, su decisione di Enzo (#234 F2).
+      # `F1` lo aveva lasciato DIFETTO di proposito, scrivendo che distinguere un
+      # obiettivo individuale legittimo da un'assegnazione incoerente richiedeva una
+      # decisione di prodotto che non si deriva dal codice. Quella decisione ora c'e',
+      # ed e' testuale: «dovrebbero seguire ENTRAMBE le cose, perche' obiettivi di
+      # incarico e obiettivi personali possono coesistere anche in modo autonomo e
+      # hanno entrambe grande significativita'».
+      # Quindi un KPI fuori dai requisiti della posizione NON e' un difetto: e' la
+      # seconda delle due nature, ed e' legittima quanto la prima. Zero non e' l'atteso
+      # — pretenderlo significherebbe negare gli obiettivi personali — e cio' che non
+      # ha zero come atteso non e' un cancello.
+      # ⚠ RESTA UN LIMITE DEL MODELLO, dichiarato e non risolto qui: le due nature non
+      # sono DISTINTE nei dati. Un obiettivo personale e uno assegnato per errore hanno
+      # oggi la stessa forma, e questa misura non puo' separarli — li conta insieme.
+      # Rappresentarle (una colonna che dichiari la natura dell'obiettivo) e' una
+      # evoluzione del prodotto, non una bonifica: proposta di #234, non effetto
+      # collaterale di questa riclassificazione.
+      tipo="misura",
       colonne=["persona", "posizione", "KPI", "periodo"])
 
 check("X6d", "X6", "Il catalogo dei KPI di posizione copre una frazione delle posizioni",
@@ -555,13 +588,29 @@ check("X6c", "X6", "Obiettivo personale senza alcun titolare registrato",
       "assegnato l'obiettivo: se restano vuoti, dopo le migrazioni nessuno potra' dire "
       "se un obiettivo e' stato dato da un capo che non e' piu' il capo",
       """
-      SELECT 'sys_goals.goal_owner_user_id', count(*)::text || ' righe',
-             count(goal_owner_user_id)::text || ' valorizzate', ''
-      FROM sys.sys_goals HAVING count(goal_owner_user_id) = 0
+      -- ⭐ ECCEZIONE DICHIARATA il 2026-08-27, su decisione di Enzo (#234 F2).
+      -- Misurato: `goal_owner_user_id` e' vuoto su TUTTE le 2.189 righe di sys_goals e
+      -- `okr_owner_user_id` su tutte quelle di sys_okrs — cioe' due COLONNE mai
+      -- valorizzate, non due righe orfane. E il codice le SCRIVE: l'INSERT di
+      -- `goals/repository.ts` e quello di `okrs/repository.ts` le valorizzano. Le righe
+      -- vuote sono tutte di provenienza storica (seed e ingestione), e nessuna fonte
+      -- porta il dato «chi ha assegnato questo obiettivo».
+      -- Decisione: lo storico resta dichiarato vuoto. Ricostruire il titolare dal capo
+      -- dell'epoca sarebbe FABBRICARE un dato che nessuno ha mai registrato, e in un
+      -- sistema dove i dati si trattano come produzione reale e' peggio del vuoto.
+      -- Il controllo guarda quindi le sole righe NUOVE — quelle che il programma crea
+      -- da se' — e si accende se una di quelle nasce senza titolare, che e' il difetto
+      -- vero contro cui questa firma esiste. Le storiche sono escluse per DATA, non per
+      -- elenco: la soglia e' il momento in cui la decisione e' stata presa.
+      SELECT 'sys_goals.goal_owner_user_id (righe dal 2026-08-27)',
+             count(*)::text || ' righe', count(goal_owner_user_id)::text || ' valorizzate', ''
+      FROM sys.sys_goals WHERE created_at >= DATE '2026-08-27'
+      HAVING count(*) > 0 AND count(goal_owner_user_id) = 0
       UNION ALL
-      SELECT 'sys_okrs.okr_owner_user_id', count(*)::text || ' righe',
-             count(okr_owner_user_id)::text || ' valorizzate', ''
-      FROM sys.sys_okrs HAVING count(okr_owner_user_id) = 0
+      SELECT 'sys_okrs.okr_owner_user_id (righe dal 2026-08-27)',
+             count(*)::text || ' righe', count(okr_owner_user_id)::text || ' valorizzate', ''
+      FROM sys.sys_okrs WHERE created_at >= DATE '2026-08-27'
+      HAVING count(*) > 0 AND count(okr_owner_user_id) = 0
       """,
       "SELECT (SELECT count(*) FROM sys.sys_goals) + (SELECT count(*) FROM sys.sys_okrs)",
       colonne=["colonna", "righe", "valorizzate", ""])

@@ -32,12 +32,18 @@ ripristinato, migrazione ritirata da tutte e tre le macchine.
    curati (2 a11y + passkey): l'ultima corsa integrale misurata dava `363 passati · 1 fallito`, e
    quel fallito era il passkey, ora risolto. Serve **una corsa a 0 falliti** e poi il passaggio in
    CI secondo il criterio di `#211` F4.
-   ⚠ **PRIMO ATTO DELLA PROSSIMA SESSIONE**: una corsa integrale è stata lanciata a fine S1082 e
-   **non è stata letta** (era alla fase 2 di 4). Il suo referto sopravvive alla corsa — è il
-   reporter JSON aggiunto da F5b: leggi **`apps/web/esiti-e2e.json`**, non rifare la corsa prima
-   di aver guardato lì. Se il file è vecchio o assente, la sequenza è: accendi l'API
-   (`cd apps/api && pnpm dev`) · libera la `:3000` da eventuali orfani · `cd apps/web && node
-   scripts/e2e-blocchi.mjs`. → `.programmi/219-otto-guasti-suite-e2e.md`
+   ⚠⚠ **PRIMO ATTO DELLA PROSSIMA SESSIONE — E NON FIDARSI DELL'ULTIMA CORSA.** Una corsa
+   integrale è stata lanciata a fine S1082 ed è stata **uccisa alla fase 4/4** dalla chiusura
+   della sessione, che ha terminato anche **l'API**. Conseguenze verificate: il referto
+   `apps/web/esiti-e2e.json` **non esiste** (si scrive a fine corsa), e il log parziale mostra i
+   **setup falliti in timeout** con molti test caduti a cascata — **è l'effetto dell'API morta,
+   non un guasto del prodotto**. Quei rossi vanno **ignorati**: un rosso che non indica un
+   difetto insegna a non guardare la suite, ed è ciò che questa voce cura.
+   **La corsa va rifatta da zero**, in quest'ordine: ① `cd apps/api && pnpm dev` e attendere un
+   **200** vero su `/readyz` (non una risposta qualsiasi) · ② liberare la `:3000` da eventuali
+   orfani · ③ `cd apps/web && node scripts/e2e-blocchi.mjs`. L'ultimo esito **attendibile** resta
+   quello di metà sessione: **`363 passati · 1 fallito`**, e quel fallito (il passkey) è stato
+   curato dopo. → `.programmi/219-otto-guasti-suite-e2e.md`
 2. **`#234` F2 — resta `X3c`, e la decisione è già presa.** Da 5 difetti a 1. Enzo ha deciso di
    **generare gli stipendi anche per Heuresys** (4 persone, nessun ciclo payroll, contro le 5.638
    buste di RTL). Non entra in una coda: è lavoro dichiarato. Riaperto anche il **Risk Manager**

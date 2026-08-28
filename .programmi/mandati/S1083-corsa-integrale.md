@@ -42,19 +42,19 @@ valore/costo più alto e lista che si accorcia), poi quelle a metà, infine le g
 
 | # | voce | fasi | prossima fase | stato |
 |---|---|---|---|---|
-| C1 | `#219` otto guasti suite E2E | 4/5 | F5 la corsa che chiude la voce | ⏳ |
-| C2 | `#234` otto rossi verifica_incrociata | 1/3 | F2 il marciume vero | ⏳ |
-| C3 | `#214` adozione agente perimetri | 6/7 | F6 consumo della coda | ⏳ |
+| C1 | `#219` otto guasti suite E2E | 4/5 | F5 la corsa che chiude la voce | 🔄 corsa integrale in volo — fase 1: 1 fallito (`/me/career` mobile a11y) + 4 flaky + 83 passati |
+| C2 | `#234` otto rossi verifica_incrociata | 1/3 | F2 il marciume vero | ✅ **FATTO** — mig `000361`+`000362`, da 2 difetti a 0 |
+| C3 | `#214` adozione agente perimetri | 6/7 | F6 consumo della coda | ✅ **AVANZATA** — il primo della coda non si apre: 862/862 risposte di clima riconducibili |
 | C4 | `#198` Tenant Builder P3 | 9/10 | T9b costruzione in produzione | ⏳ |
 | C5 | `#132` Tenant Builder P2a | 7/8 | F7 le due prove | ⏳ |
-| C6 | `#169` due segreti | 2/4 | F3 il segreto non è più derivato | ⏳ |
-| C7 | `#227` competenze isolate | 1/5 | F2 le derivabili | ⏳ |
-| C8 | `#149` consegne lab non verificate | 3/4 | F4 la prossima consegna | ⏳ |
-| C9 | `#79` cancello di esposizione | 2/3 | F3 il prossimo lavoro che popola | ⏳ |
+| C6 | `#169` due segreti | 2/4 | F3 il segreto non è più derivato | ✅ **AVANZATA** — F3 riscritta in 3 passi; trovato il rischio PLATFORM_ADMIN derivato + esente MFA |
+| C7 | `#227` competenze isolate | 1/5 | F2 le derivabili | ✅ **FATTA** — non derivabili perché non isolate: 4.383/4.464 hanno il gruppo ESCO |
+| C8 | `#149` consegne lab non verificate | 3/4 | F4 la prossima consegna | ✅ **MISURATA** — inbox vuota, nessun bersaglio |
+| C9 | `#79` cancello di esposizione | 2/3 | F3 il prossimo lavoro che popola | ✅ **ESEGUITO** — 73/73, e trovato un buco: il cancello non vede le migrazioni |
 | C10 | `#50` grafo competenze | 1/3 | F2 il grafo dai dati che abbiamo | ⏳ |
 | C11 | `#159` ponte gateway↔pagine | 1/4 | F2 il ponte | ⏳ |
-| C12 | `#143` squadra come progetto | 1/5 | F2 modello dati | ⏳ |
-| C13 | `#54` recruiting/ATS | 1/4 | F2 modello dati | ⏳ |
+| C12 | `#143` squadra come progetto | 1/5 | F2 modello dati | ✅ **FATTA** — mig `000363`, il capo è un membro non una colonna |
+| C13 | `#54` recruiting/ATS | 1/4 | F2 modello dati | ✅ **FATTA** — mig `000364`, sette entità, zero righe importate |
 | C14 | `#205` Tenant Builder 2b/2c | 0/3 | ⛔ GATED su `#132` | ⏳ |
 
 ---
@@ -76,3 +76,29 @@ valore/costo più alto e lista che si accorcia), poi quelle a metà, infine le g
   2026-08-25: entrambi **falsi positivi**, restano. Stesso criterio di S1042.
 - **D-S1083-04** — numeri `000358` bruciato (come `000035` e `000139`, già saltati nella
   catena): le nuove migrazioni sono `000359` e `000360`.
+- **D-S1083-05** — la nuova sentinella `v_residui_di_collaudo_in_produzione` guarda solo i
+  residui **più vecchi di 24 ore**: una suite in esecuzione ha legittimamente le sue entità in
+  tabella, e un allarme che suona a ogni corsa insegna a non guardarlo (stessa ragione di `#194`).
+- **D-S1083-06** — la `000360` è stata applicata **da sola prima della catena**, perché la
+  `000255` pretende copertura EN a zero e i residui la facevano fallire: la catena non arrivava
+  più in fondo, in produzione.
+- **D-S1083-07** — la `000255` **non si emenda**: la sentinella nuova rende visibile il residuo
+  prima che blocchi la catena, e il teardown fragile della suite è materia di `#219`.
+- **D-S1083-08/11** — i requisiti formativi del rischio si derivano dai sei percorsi del tenant
+  **più** da ciò che chi ricopre la posizione ha davvero svolto, con la guardia «il percorso è
+  già preteso da un'altra posizione». La prima stesura ha acceso `X5a`: il criterio era giusto ma
+  incompleto.
+- **D-S1083-09/10** — le buste del tenant di piattaforma si derivano dal **contratto diviso
+  tredici**, non dalla serie della persona: lo impone la sentinella `v_payslip_contract_mismatch`
+  (mig `000296`). Lo scalino su una serie esistente è la conseguenza corretta.
+- **D-S1083-12** — `Programma.stato_derivato`: senza fasi vale lo stato **dichiarato**. Derivare
+  «NON AVVIATO» da zero spunte è un'affermazione ricavata da zero informazione.
+- **D-S1083-14** — `engagement` **esce dai neutri**: 862 risposte di clima su 862 sono
+  riconducibili alla persona. Il non-mappato è un silenzio, non una dichiarazione di neutralità.
+- **D-S1083-16/21/23** — durante la corsa E2E integrale **non** si applicano migrazioni alla
+  produzione né si toccano `apps/api`/`apps/web`: la catena si riapplica per intero (precedente
+  di deadlock con corsa concorrente, S1081) e `tsx watch` ricaricherebbe l'API sotto i test.
+- **D-S1083-18** — il capo di un progetto è **un membro con ruolo**, non una colonna. La colonna
+  `team_lead_user_id` serve una volta sola, come arbitro dei due casi storici divergenti.
+- **D-S1083-22** — `engagement` e `surveys` vanno entrambe mappate: 862/862 e 948/948
+  riconducibili a una persona. Sono lo stesso difetto, nato dalla stessa frase del 2026-07-01.

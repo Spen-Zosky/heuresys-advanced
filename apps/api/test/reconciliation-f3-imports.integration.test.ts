@@ -52,11 +52,33 @@ describe('reconciliation F3 imports', () => {
     // I numeri restano fissi apposta: questo test sorveglia che l'import F3 non
     // perda righe in silenzio, e un conteggio derivato dal DB si adeguerebbe alla
     // perdita invece di segnalarla.
+    //
+    // ⚠ [S1083] MA UN NUMERO FISSO NON DISTINGUE UNA PERDITA DA UN'AGGIUNTA, e la
+    // migrazione `000361` (#234 F2 / X5d) ne ha aggiunte legittimamente: requisiti
+    // formativi per le 29 posizioni della famiglia rischio, che l'import F3 non
+    // aveva perche' i ruoli del rischio non avevano corsi nel legacy. Il test e'
+    // diventato rosso in CI su un lavoro corretto — cioe' ha segnalato la cosa
+    // sbagliata.
+    //
+    // La cura tiene ENTRAMBE le esigenze: si continua a pretendere 1733 su 153, ma
+    // sul solo **perimetro dell'import**, escludendo le righe che la `000361` ha
+    // creato — e che sono note una per una perche' la migrazione le ha
+    // GIORNALIZZATE in `staging.mig361_requisiti_rischio_undo`. E' precisamente
+    // l'uso per cui quel giornale esiste: non solo disfare, ma anche **sapere cosa
+    // e' stato aggiunto e da chi**.
+    //
+    // Cosi' una PERDITA continua a far arrossare il test (il numero e' ancora
+    // fisso), mentre un'aggiunta dichiarata e tracciata non lo tocca. Un'aggiunta
+    // NON tracciata, invece, lo farebbe arrossare — ed e' giusto: significherebbe
+    // che qualcuno ha scritto in quella tabella senza lasciare traccia.
+    const SOLO_IMPORT = `
+      FROM sys.sys_position_learning_requirements plr
+       WHERE NOT EXISTS (
+         SELECT 1 FROM staging.mig361_requisiti_rischio_undo u
+          WHERE u.requisito_id = plr.position_learning_requirement_id)`;
     it('imported 1733 fan-out rows across 153 positions, all resolving a learning_path', async () => {
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_position_learning_requirements`)).toBe(1733);
-      expect(await count(
-        `SELECT count(DISTINCT position_id)::int AS n FROM sys.sys_position_learning_requirements`,
-      )).toBe(153);
+      expect(await count(`SELECT count(*)::int AS n ${SOLO_IMPORT}`)).toBe(1733);
+      expect(await count(`SELECT count(DISTINCT plr.position_id)::int AS n ${SOLO_IMPORT}`)).toBe(153);
       // every row resolves a real learning_path (FK integrity beyond the constraint)
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_position_learning_requirements plr

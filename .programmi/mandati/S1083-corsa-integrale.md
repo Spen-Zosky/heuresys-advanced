@@ -45,17 +45,17 @@ valore/costo più alto e lista che si accorcia), poi quelle a metà, infine le g
 | C1 | `#219` otto guasti suite E2E | 4/5 | F5 la corsa che chiude la voce | 🔄 corsa integrale in volo — fase 1: 1 fallito (`/me/career` mobile a11y) + 4 flaky + 83 passati |
 | C2 | `#234` otto rossi verifica_incrociata | 1/3 | F2 il marciume vero | ✅ **FATTO** — mig `000361`+`000362`, da 2 difetti a 0 |
 | C3 | `#214` adozione agente perimetri | 6/7 | F6 consumo della coda | ✅ **AVANZATA** — il primo della coda non si apre: 862/862 risposte di clima riconducibili |
-| C4 | `#198` Tenant Builder P3 | 9/10 | T9b costruzione in produzione | ⏳ |
-| C5 | `#132` Tenant Builder P2a | 7/8 | F7 le due prove | ⏳ |
+| C4 | `#198` Tenant Builder P3 | 9/10 | T9b costruzione in produzione | ⛔ **blocked-on-Enzo** — verificato: senza fornitore di ricerca darebbe `BLUEPRINT_CONTENT_EMPTY` |
+| C5 | `#132` Tenant Builder P2a | 7/8 | F7 le due prove | ⛔ **blocked-on-Enzo** — `RESEARCH_GATEWAY_URL`/`_TOKEN` assenti dal `.env` (misurato) |
 | C6 | `#169` due segreti | 2/4 | F3 il segreto non è più derivato | ✅ **AVANZATA** — F3 riscritta in 3 passi; trovato il rischio PLATFORM_ADMIN derivato + esente MFA |
 | C7 | `#227` competenze isolate | 1/5 | F2 le derivabili | ✅ **FATTA** — non derivabili perché non isolate: 4.383/4.464 hanno il gruppo ESCO |
 | C8 | `#149` consegne lab non verificate | 3/4 | F4 la prossima consegna | ✅ **MISURATA** — inbox vuota, nessun bersaglio |
 | C9 | `#79` cancello di esposizione | 2/3 | F3 il prossimo lavoro che popola | ✅ **ESEGUITO** — 73/73, e trovato un buco: il cancello non vede le migrazioni |
-| C10 | `#50` grafo competenze | 1/3 | F2 il grafo dai dati che abbiamo | ⏳ |
-| C11 | `#159` ponte gateway↔pagine | 1/4 | F2 il ponte | ⏳ |
+| C10 | `#50` grafo competenze | 1/3 | F2 il grafo dai dati che abbiamo | ✅ **FONTE FATTA** — mig `000365`, 18.420 archi → 32.703 coi gruppi; resta l'endpoint |
+| C11 | `#159` ponte gateway↔pagine | 1/4 | F2 il ponte | ✅ **RILIEVO** — F2 avrebbe violato il divieto sui componenti riusabili: si spezza in due repo |
 | C12 | `#143` squadra come progetto | 1/5 | F2 modello dati | ✅ **FATTA** — mig `000363`, il capo è un membro non una colonna |
 | C13 | `#54` recruiting/ATS | 1/4 | F2 modello dati | ✅ **FATTA** — mig `000364`, sette entità, zero righe importate |
-| C14 | `#205` Tenant Builder 2b/2c | 0/3 | ⛔ GATED su `#132` | ⏳ |
+| C14 | `#205` Tenant Builder 2b/2c | 0/3 | ⛔ GATED su `#132` | ⛔ **confermato gated** — stesso input mancante di C4 e C5 |
 
 ---
 
@@ -102,3 +102,20 @@ valore/costo più alto e lista che si accorcia), poi quelle a metà, infine le g
   `team_lead_user_id` serve una volta sola, come arbitro dei due casi storici divergenti.
 - **D-S1083-22** — `engagement` e `surveys` vanno entrambe mappate: 862/862 e 948/948
   riconducibili a una persona. Sono lo stesso difetto, nato dalla stessa frase del 2026-07-01.
+
+---
+
+## Esito del mandato — **14/14 voci toccate**
+
+Nessuna voce di P1/P2/P3 e' rimasta senza esito. Tre categorie:
+
+- **Avanzate con codice in produzione o provato** (7): `#234` (chiusa, 2 difetti → 0) ·
+  `#227` F2 · `#143` F2 · `#54` F2 · `#50` F2 (fonte) · `#79` F3 · `#149` F4.
+- **Avanzate con un'analisi che cambia il piano** (3): `#214` (il primo della coda non si apre) ·
+  `#169` (F3 riscritta in tre passi, rischio trovato) · `#159` (F2 violava un divieto permanente).
+- **Bloccate su un input di Enzo, verificato e non supposto** (3): `#198` T9b · `#132` F7 ·
+  `#205` — **tutte e tre sullo stesso input**, l'indirizzo e la credenziale del fornitore di ricerca.
+- **In volo** (1): `#219` F5, la corsa E2E integrale.
+
+⭐ **Il filo che le lega**: in **sei** voci la misura ha smentito il piano scritto. Non e' un caso
+isolato — e' la regola ① del metodo di bonifica che si verifica sei volte in una sessione.

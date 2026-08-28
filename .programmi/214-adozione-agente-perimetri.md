@@ -123,7 +123,38 @@ sono stati cancellati (divieto): sono diventati rimandi di poche righe a `live-p
 - [x] **F5 Le classi di una resource multiclasse smettono di essere prosa** — FATTO 2026-08-19 · `RESOURCE_MULTICLASSE` passa da `Record<string,string>` (una frase) a `Record<string,{classi,perche}>` con le classi **enumerate e misurate sul database**, non trascritte dalla frase. Effetto sulla coda, misurato prima e dopo: **NON MISURABILI da 14 a 12**, riservati da 16 a 18 — `analytics` (`COMPENSATION, EVALUATION, PERSONAL, SKILL`) e `dashboard` (`ACTIVITY, PERSONAL, SKILL`) escono dal «non so» e cadono fra i riservati **per le classi che espongono davvero**. Aggiunte anche le 7 famiglie di `#142` (mig. `000326`), che senza una riga qui renderebbero rosso il cancello di `#99 F7`.
       🔬 **La misura ha smentito la prosa**: la frase su `analytics` nominava le «presenze», ma nessuna delle sue cinque voci dichiara `ACTIVITY`. Una descrizione che nessuno può contraddire invecchia senza che nessuno se ne accorga — ed è il motivo per cui questa fase esisteva.
       🔬 **Trovata e chiusa una cecità in attesa**: `check_concetti_agente.py` presidiava il caso «parser che non legge più nulla» per `RESOURCE_DATA_CLASS` e **per nessuna delle altre tre**. Cambiando forma, `MULTI` sarebbe tornato `{}` e ogni resource multiclasse sarebbe sparita in silenzio dalla classificazione. Ora la guardia c'è per `MULTI` e per `NO_PERSONE`.
-- [ ] **F6 Consumo della coda dei neutri, un perimetro per volta** — ⚠ **coda RI-DERIVATA il 2026-08-25 (S1080)**, e la cronaca del 2026-08-24 qui sotto **non è più l'ordine**: `check_concetti_agente.py` misura oggi **98 moduli · 4 aperti · 45 in coda (27 neutri, 0 non misurabili, 18 riservati)** — atlante fresco (da `c8a29d30`). I primi cinque neutri per ampiezza: `visualization-graphs` (5 letture · 4 pagine) · `engagement` (4 · 2) · `tenants` (3 · 4) · `content-blueprint-links` (3 · 2) · `visualization-exports` (3 · 2). Coincide con la misura del giorno prima, il che dice solo che nel frattempo non sono nate pagine nuove — **non** che l'ordine si possa ricopiare la prossima volta. Nessun perimetro aperto in S1080: la fase resta dov'era. — la fase in corso dalla S1079. Prossimi cinque per ampiezza, misurati il 2026-08-24: `visualization-graphs` (5 letture · 4 pagine) · `engagement` (4 · 2) · `tenants` (3 · 4) · `content-blueprint-links` (3 · 2) · `visualization-exports` (3 · 2). ⚠ **L'ordine non si ricopia da qui**: è cronaca di quel giorno, si ri-deriva a ogni apertura con `check_concetti_agente.py`, perché una pagina nuova sposta un modulo in coda. ⚠ `approvals` è sesto per ampiezza ma dichiara `ACTIVITY`: non è fra i neutri puri, e la sua apertura va motivata su quella classe.
+- [ ] **F6 Consumo della coda dei neutri, un perimetro per volta**
+
+  ### S1083 (2026-08-28) — il primo della coda NON si apre, e la misura dice perché
+
+  Coda ri-derivata dopo aver rigenerato l'atlante (le 4 migrazioni del blocco A lo avevano
+  superato): **98 moduli · 44 in coda (26 neutri · 0 non misurabili · 18 riservati)**. Primo per
+  ampiezza: **`engagement`** (4 letture · 2 pagine).
+
+  **Non si apre, e va tolto dai neutri.** `data-classes.ts` lo lascia `UNMAPPED → NORMAL` con la
+  motivazione di Enzo del 2026-07-01: *«feedback/clima — spesso anonimi/aggregati per policy, non
+  org-gated»*. È una dichiarazione di **policy**, non una proprietà del modello, e i dati la
+  smentiscono senza margine:
+
+  | tabella | righe | riconducibili a una persona |
+  |---|---|---|
+  | `sys_engagement_survey_responses` | 862 | **862** (`response_subject_user_id`) |
+  | `sys_engagement_feedback` | 400 | 45 (`feedback_reviewed_by_user_id`) |
+
+  **Nessuna risposta anonima. Non una.** Aprire questo perimetro darebbe all'agente la lettura di
+  *chi ha detto cosa sul clima aziendale* — materia più delicata, non meno, di una retribuzione.
+
+  ⚠ **È la terza occorrenza della stessa forma**, e questa volta il difetto non è nell'assenza di
+  una misura ma nella **natura dell'affermazione**: F2 trovò «assenza di misura letta come assenza
+  di rischio»; S1081 su `visualization-graphs` trovò «dichiarazione vera oggi, non per
+  costruzione»; qui la dichiarazione **non era vera nemmeno oggi** — nessuno l'aveva verificata
+  sui dati da quando fu scritta. Il criterio accetta come neutro ciò che non è mappato: il
+  non-mappato è un *silenzio*, e un silenzio non è una dichiarazione di neutralità.
+
+  Nessuna esposizione in atto: `engagement` era **in coda**, non aperto. È un difetto del
+  criterio, non una falla viva — ed è stato colto perché la coda lo proponeva come prossimo.
+
+  — ⚠ **coda RI-DERIVATA il 2026-08-25 (S1080)**, e la cronaca del 2026-08-24 qui sotto **non è più l'ordine**: `check_concetti_agente.py` misura oggi **98 moduli · 4 aperti · 45 in coda (27 neutri, 0 non misurabili, 18 riservati)** — atlante fresco (da `c8a29d30`). I primi cinque neutri per ampiezza: `visualization-graphs` (5 letture · 4 pagine) · `engagement` (4 · 2) · `tenants` (3 · 4) · `content-blueprint-links` (3 · 2) · `visualization-exports` (3 · 2). Coincide con la misura del giorno prima, il che dice solo che nel frattempo non sono nate pagine nuove — **non** che l'ordine si possa ricopiare la prossima volta. Nessun perimetro aperto in S1080: la fase resta dov'era. — la fase in corso dalla S1079. Prossimi cinque per ampiezza, misurati il 2026-08-24: `visualization-graphs` (5 letture · 4 pagine) · `engagement` (4 · 2) · `tenants` (3 · 4) · `content-blueprint-links` (3 · 2) · `visualization-exports` (3 · 2). ⚠ **L'ordine non si ricopia da qui**: è cronaca di quel giorno, si ri-deriva a ogni apertura con `check_concetti_agente.py`, perché una pagina nuova sposta un modulo in coda. ⚠ `approvals` è sesto per ampiezza ma dichiara `ACTIVITY`: non è fra i neutri puri, e la sua apertura va motivata su quella classe.
 
 ## Stato misurato (2026-08-21, S1077 — ri-derivato, non ricordato)
 

@@ -77,7 +77,38 @@ segnala, perché nulla è rotto.
   RTL Bank**, tutte del suo tenant e tutte in uso: non sono residuo da bonificare, sono il cuore
   del dominio — e sono isolate perché nessuno le ha mai collocate nella tassonomia. Le 5
   `COMP::` sono le **gemelle vive** di cui `#215` cancellò le copie globali morte (S1069)
-- [ ] **F2 Le derivabili: l'arco si prende dalla fonte, non si inventa** — per le ESCO l'albero esiste a monte e va **letto**, non ricostruito a intuito. ⚠ Vincolo `I12`: il rubinetto del brownfield è chiuso, ma ESCO **non è brownfield** — è la tassonomia europea, e `reference_sync` è la sua casa dichiarata. **fatto =** archi scritti, il conteggio delle isolate scende del numero previsto da F1, e una post-condizione protegge ciò che NON doveva cambiare
+- [x] **F2 Le derivabili: l'arco si prende dalla fonte, non si inventa** — **FATTO 2026-08-28
+  (S1083), e l'esito è che NON SONO DERIVABILI — perché non sono isolate.** È il secondo
+  ribaltamento di questo piano, dopo quello di F1, e come quello nasce da una misura.
+
+  **Le quattro strade, provate una per una e tutte chiuse:**
+
+  | strada | misura | esito |
+  |---|---|---|
+  | il **padre delle sorelle** dello stesso gruppo | **265 gruppi su 358 frammentati** (nessun padre arriva al 50%), 10,9 padri medi per gruppo, fino a **72** in uno solo. Padre unico: 34 gruppi. Dominante ≥80%: 2 | ⛔ sarebbe una scelta arbitraria fra decine di candidati, non una derivazione |
+  | l'**albero dei gruppi** (`skill_group_parent_id`) | dei 6.456 archi `IS_A` esistenti, **ZERO** collegano una competenza al gruppo-padre della propria. 1.705 stanno nello stesso gruppo, 286 senza gruppo, i restanti 4.465 attraversano gruppi senza relazione | ⛔ nessuna regola strutturale da imitare: gli archi vengono dalla fonte ESCO, non dalla struttura |
+  | l'**URI ESCO** | `http://data.europa.eu/esco/skill/<uuid>` — identificatori **opachi**, nessuna gerarchia nel path | ⛔ niente da leggere |
+  | la **fonte ESCO a monte** | già misurato in F1: in `reference_sync` non c'è tassonomia di competenze (solo occupazioni) | ⛔ non c'è |
+
+  **⭐ E QUI LA MISURA RIBALTA LA DOMANDA.** Delle 4.464 «isolate», **4.383 (98,2%) hanno un
+  `skill_group_id`, e TUTTE E 4.383 stanno in un gruppo che ha un padre nell'albero ESCO**
+  (`sys_skill_groups`: 640 gruppi, 636 con padre — l'albero europeo è già nel database, intero).
+
+  Quindi **non sono isolate nella tassonomia: sono isolate nel solo grafo competenza→competenza.**
+  La loro collocazione tassonomica esiste già, ed è quella che ESCO usa davvero — l'appartenenza
+  al gruppo. Il titolo di questa voce — «4.464 su 14.033 senza un solo arco tassonomico» — è vero
+  alla lettera e **fuorviante nella sostanza**: descrive un vuoto in una struttura, non un vuoto
+  di conoscenza.
+
+  **Conseguenza per le fasi che seguono, dichiarata qui e non scoperta dopo**: scrivere 4.332
+  archi inventati avrebbe **peggiorato** il grafo, riempiendolo di legami che nessuna fonte
+  sostiene e che nessuno potrebbe più distinguere dai 6.456 veri (che portano
+  `source=ESCO_v1.2.0` nel loro metadata — gli 11.964 `RELATED`, invece, non dichiarano fonte, ed
+  è già oggi un difetto di tracciabilità). **F5 cambia bersaglio**: la sentinella non deve contare
+  «le competenze senza archi», che è una misura che spaventa senza informare, ma **le competenze
+  senza collocazione tassonomica** — né arco né gruppo. Misurate oggi: **81**, cioè lo 0,58% del
+  catalogo, e sono esattamente le specie S3 (51 ESCO senza gruppo) + S4/S5 (30 non-ESCO) che F3 e
+  F4 hanno già in carico. Il problema non è mai stato un terzo del catalogo. — per le ESCO l'albero esiste a monte e va **letto**, non ricostruito a intuito. ⚠ Vincolo `I12`: il rubinetto del brownfield è chiuso, ma ESCO **non è brownfield** — è la tassonomia europea, e `reference_sync` è la sua casa dichiarata. **fatto =** archi scritti, il conteggio delle isolate scende del numero previsto da F1, e una post-condizione protegge ciò che NON doveva cambiare
 - [ ] **F3 Le non derivabili e non usate: si ritirano o si dichiarano** — una competenza che nessuno usa e che nessuna tassonomia conosce è residuo, non catalogo. ⚠ `ADR-0035`: ritirare non è cancellare — si emenda il file che la crea. **fatto =** ogni riga o ritirata o tenuta **con la ragione scritta**, mai un jolly
 - [ ] **F4 Le usate ma non derivabili: curatela vera** — sono quelle che qualcuno usa davvero e che nessuna fonte sa collocare. Qui l'arco è una **decisione**, e va presa con un criterio dichiarato, non a intuito. **fatto =** criterio scritto, applicato, e una sentinella che tiene il conto delle isolate perché non risalga in silenzio
 - [ ] **F5 La sentinella** — oggi nessuna misura conta le competenze isolate: il numero è potuto crescere fino a un terzo del catalogo senza che niente lo dicesse. ⚠ Una vista `sys.v_*` nuova diventa **automaticamente** una sentinella che pretende zero righe (memoria `new_sys_view_becomes_sentinel`): qui zero non è l'atteso, quindi va dichiarata **informativa** con la sua soglia, o renderà rossa la prova generale. **fatto =** la misura esiste, ha una soglia motivata, ed è stata vista scattare

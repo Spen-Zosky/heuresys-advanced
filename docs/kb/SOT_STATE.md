@@ -1130,7 +1130,19 @@ database non era saturo: 9 connessioni su 100. Il gemello, stessa rotta, rispond
 e sotto raffica nega con un ordinato 429. È la stessa dottrina già scritta per il database — *si
 esegue dove il database vive* — mai estesa alla suite E2E.
 
-Migrazioni **362** (max `000365`). 17 commit di contenuto.
+
+**Coda della sessione, dopo la chiusura** — su domanda di Enzo («le clonazioni arrivano a
+conclusione se chiudo la sessione?»): la risposta misurata è **no**, e `#236` la registra.
+**`#236` F1 CHIUSA**: il clone del gemello non droppa più gli schemi in place — si ricostruisce in
+un database di scena e i due si scambiano il nome con `ALTER DATABASE … RENAME`. La prova è
+l'interruzione: `SIGKILL` a metà ripristino, e subito dopo il clone risponde `164 · 315 · 240`,
+intatto. ⭐ E le verifiche che già esistevano — righe, censimento, schemi — sono passate da
+**referto a condizione**: girano prima dello scambio, quindi un clone divergente non sostituisce
+più quello buono. Batteria a 10 casi, **cinque negativi**. Due difetti trovati solo dalla corsa
+vera: `.pgpass` lega la credenziale al *nome* del database (26 minuti fermo su una richiesta di
+password invisibile → `-w` su ogni psql), e il pre-controllo sulle connessioni era una **misura
+ereditata** che ha bloccato uno scambio per una connessione già in chiusura.
+Migrazioni **362** (max `000365`). 21 commit di contenuto.
 
 ## Delta S1055 (2026-08-12 → 13) — sei voci, e sei volte il difetto vero non era quello scritto
 

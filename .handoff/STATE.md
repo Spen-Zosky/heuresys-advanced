@@ -40,7 +40,11 @@ il database («si esegue dove il database vive»), mai estesa alla suite.
    fornitore di ricerca** (`RESEARCH_GATEWAY_URL` / `_TOKEN`): verificato leggendo il `.env`, sono
    assenti in locale e la dashboard li dà mancanti anche in produzione. Un solo input le sblocca
    tutte e tre. → `.programmi/132-ricerca-genera-il-modello.md`
-3. **`#143` F3 e `#54` F3 — i due modelli dati nuovi aspettano la loro superficie.** Le tabelle sono
+3. **`#236` F2 — l'armamento del clone, ora che F1 ha tolto il rischio di romperlo.** F1 è chiusa:
+   il clone si ricostruisce accanto e uno `SIGKILL` a metà non lascia più macerie (provato). Resta
+   che *muoia* con la sessione. F2 gli dà il trattamento del deploy — si arma, lo esegue un timer
+   sulla macchina — e F3 il comando che ne legge lo stato. → `.programmi/236-lavori-remoti-armati-non-appesi.md`
+4. **`#143` F3 e `#54` F3 — i due modelli dati nuovi aspettano la loro superficie.** Le tabelle sono
    in produzione; servono l'asse funzionale vivo per il primo (`isInFunctionalScope` è ancora codice
    morto) e le rotte per il secondo. → `.programmi/143-squadra-come-progetto.md` · `54-recruiting-ats.md`
 

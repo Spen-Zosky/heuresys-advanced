@@ -185,7 +185,34 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
   content: "contenuti editoriali",
   visualization: "grafici salvati",
   leads: "contatti commerciali esterni: non sono la forza lavoro del tenant, e la tassonomia delle classi descrive i dati DEI DIPENDENTI",
-  surveys: "risolta da Enzo (2026-07-01): feedback e clima restano NON mappati perché spesso anonimi o aggregati per politica, quindi non org-gated",
+  // ⛔ `surveys` ERA QUI, ed è stata tolta il 2026-08-28 (S1083, #214 F6). La riga diceva:
+  // «risolta da Enzo (2026-07-01): feedback e clima restano NON mappati perché spesso anonimi
+  // o aggregati per politica, quindi non org-gated». Era una dichiarazione di POLITICA, e i
+  // dati la smentiscono senza margine — misurati, non supposti:
+  //     sys_survey_assignments          948 righe · 948 con `survey_assignment_user_id`
+  //     sys_engagement_survey_responses 862 righe · 862 con `response_subject_user_id`
+  // Nessuna risposta anonima. Non una. Il commento di questo elenco dice che una riga qui è
+  // un'AFFERMAZIONE e che «se un domani quella pagina cominciasse a mostrarle, la riga
+  // diventerebbe una bugia scritta col proprio nome»: qui non è diventata una bugia col
+  // tempo, lo era già quando è stata scritta, perché nessuno aveva guardato i dati.
+  // `surveys` ed `engagement` stanno ora in `RESOURCE_DATA_CLASS` come `PERSONAL`.
+  //
+  // ⭐ MA LA STESSA MISURA HA CONFERMATO L'ALTRA META DELLA FRASE DEL 2026-07-01, e la
+  // distinzione è fine abbastanza da meritare di essere scritta: `sys_engagement_feedback`
+  // **non ha un autore**. Le sue colonne sono `feedback_natural_key`, `feedback_category`,
+  // `feedback_message`, `feedback_status`, `feedback_reviewed_by_user_id` — e nessuna
+  // identifica chi lo ha scritto. È anonimo **per costruzione**, non per politica. La sola
+  // FK verso una persona è quella del REVISORE, cioè esattamente la specie di colonna che la
+  // guardia GDPR della `000304` esclude per regex.
+  // Quindi la frase di Enzo era **giusta per il feedback e sbagliata per i sondaggi**: le due
+  // cose erano state trattate insieme, e solo una delle due reggeva. Qui non si corregge una
+  // dichiarazione sbagliata — si trasforma un silenzio in un'affermazione misurata.
+  engagement_feedback:
+    "segnalazioni di clima ANONIME PER COSTRUZIONE (misurato 2026-08-28, #214 F6): " +
+    "`sys_engagement_feedback` non ha alcuna colonna che identifichi l'autore — solo " +
+    "`feedback_reviewed_by_user_id`, che è chi la esamina. Da non confondere con " +
+    "`sys_engagement_survey_responses`, dove 862 risposte su 862 portano l'identità di chi " +
+    "ha risposto: quelle sono `engagement`, ed è PERSONAL",
   position: "una posizione è un POSTO nell'organigramma; chi lo occupa si legge da `user`, che è PERSONAL",
   org_director: "console, salute e consigliere organizzativi: aggregati di struttura",
   // #214 F4, S1078 — le tre resource che tenevano CINQUE moduli fra i NON MISURABILI.
@@ -273,6 +300,16 @@ export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   // la prima dice *cosa mostra*, la seconda *a chi è aperto*.
   organization_unit: "PERSONAL",
   user_profile: "PERSONAL",
+  // #214 F6, S1083 — `engagement` e `surveys` erano NON MAPPATE, e il criterio
+  // dei perimetri dell'agente trattava il non-mappato come «neutro». Ma il
+  // non-mappato è un SILENZIO, non una dichiarazione di neutralità: misurando,
+  // **862 risposte di clima su 862** e **948 assegnazioni di sondaggio su 948**
+  // portano l'identità di chi ha risposto. Chi legge queste due resource legge
+  // *chi ha detto cosa sul clima aziendale* — materia più delicata, non meno, di
+  // una retribuzione. `PERSONAL`, quindi, e fuori dalla coda dei perimetri
+  // apribili all'agente.
+  engagement: "PERSONAL",
+  surveys: "PERSONAL",
   document: "PERSONAL",
   certification: "PERSONAL",
   career: "PERSONAL",

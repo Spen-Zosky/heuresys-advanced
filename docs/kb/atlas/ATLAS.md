@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `1834b1c5` (2026-08-28T16:33:21+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `99cc6a06` (2026-08-28T17:39:41+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,7 +10,7 @@
 | Route API | 604 |
 | Pagine web | 120 |
 | Schemi shared | 108 |
-| Tabelle DB | 278 (vuote: 17) |
+| Tabelle DB | 287 (vuote: 24) |
 | Viste / matview | 36 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 272 |
 
@@ -137,8 +137,15 @@
 - `sys.sys_blueprint_content_positions`
 - `sys.sys_blueprint_content_skills`
 - `sys.sys_blueprint_content_units`
+- `sys.sys_candidate_applications`
+- `sys.sys_candidates`
 - `sys.sys_content_media`
 - `sys.sys_generated_record_origins`
+- `sys.sys_interview_feedback`
+- `sys.sys_interviews`
+- `sys.sys_job_offers`
+- `sys.sys_job_postings`
+- `sys.sys_job_requisitions`
 - `sys.sys_notification_preferences`
 - `sys.sys_occupation_classification_mappings`
 - `sys.sys_process_kpi_templates`

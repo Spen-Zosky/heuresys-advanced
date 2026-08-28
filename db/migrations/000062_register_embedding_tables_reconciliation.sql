@@ -89,7 +89,35 @@ VALUES
   ('sys_tenant_blueprint_process_decisions', 'D', 'EXCLUDE', NULL,
    '[S1050] Le decisioni ESPLICITE su ciascun processo del modello (#131, mig 000299): solo gli scostamenti, perche'' il silenzio significa «come dice il modello». Dato generato dalla piattaforma, nessuna sorgente legacy.'),
   ('sys_tenant_blueprint_snapshots', 'D', 'EXCLUDE', NULL,
-   '[S1050] La fotografia immutabile scattata all''approvazione di una versione del fascicolo (#131, mig 000299). E'' una PROVA, protetta da un trigger che rifiuta UPDATE e DELETE. Dato generato dalla piattaforma, nessuna sorgente legacy.')
+   '[S1050] La fotografia immutabile scattata all''approvazione di una versione del fascicolo (#131, mig 000299). E'' una PROVA, protetta da un trigger che rifiuta UPDATE e DELETE. Dato generato dalla piattaforma, nessuna sorgente legacy.'),
+
+  -- [S1083] LE SETTE TABELLE DEL CICLO DI SELEZIONE (#54 F2, mig 000364).
+  -- Stessa ragione di tutte le righe qui sopra: il controllo che pretende 0
+  -- UNCLASSIFIED gira in QUESTO file, quindi una tabella nuova va registrata qui
+  -- e non dopo la migrazione che la crea. Intercettate dalla prova generale sul
+  -- gemello, non dalla CI venticinque minuti dopo il push.
+  --
+  -- Tutte EXCLUDE, e la ragione merita di essere scritta perche'' e'' l''opposto
+  -- di quella delle altre: qui una sorgente legacy ESISTE, ed e'' pure abbondante
+  -- (19 tabelle popolate, con lo stesso ciclo costruito due volte: una famiglia
+  -- senza prefisso e una `recruiting_*` piu'' ricca, che ha le offerte). Non si
+  -- importa nulla lo stesso, perche'' I12 / ADR-0038 hanno chiuso il rubinetto il
+  -- 2026-08-14: il legacy da'' i CONCETTI, non le righe. Il dominio si popolera''
+  -- con l''uso, e la riconciliazione non ha bersaglio per costruzione.
+  ('sys_job_requisitions', 'D', 'EXCLUDE', NULL,
+   '[S1083] La richiesta di coprire una posizione vacante (#54 F2, mig 000364). Il legacy ha requisitions e recruiting_requisitions e NON si importa: I12 vieta di rimettere in circolo dati del brownfield. Nasce vuota, si popola con l''uso.'),
+  ('sys_job_postings', 'D', 'EXCLUDE', NULL,
+   '[S1083] L''annuncio nato da una requisizione (#54 F2, mig 000364), con visibilita'' interna, esterna o pubblica: quest''ultima e'' il percorso prospect di ADR-0026. Il legacy ha job_postings e non si importa (I12).'),
+  ('sys_candidates', 'D', 'EXCLUDE', NULL,
+   '[S1083] La persona ESTERNA che si candida (#54 F2, mig 000364). Non e'' un sys_users e potrebbe non diventarlo mai: consenso e scadenza di conservazione sono COLONNE con un CHECK, perche'' il registro GDPR sorveglia le FK verso sys_users e questa tabella non ne avrebbe. Il legacy ha candidates e recruiting_candidates e non si importa (I12).'),
+  ('sys_candidate_applications', 'D', 'EXCLUDE', NULL,
+   '[S1083] La candidatura, cioe'' un candidato su un annuncio (#54 F2, mig 000364). Lo stadio e'' il campo su cui si appoggera'' il Kanban di F4. Nessun import (I12).'),
+  ('sys_interviews', 'D', 'EXCLUDE', NULL,
+   '[S1083] Il colloquio di una candidatura (#54 F2, mig 000364). Il legacy ha interviews e recruiting_interviews e non si importa (I12).'),
+  ('sys_interview_feedback', 'D', 'EXCLUDE', NULL,
+   '[S1083] La valutazione di chi ha condotto un colloquio (#54 F2, mig 000364). La FK verso sys_users e'' quella dell''INTERVISTATORE, dichiarata nel registro GDPR come incarico funzionale. Il legacy ha interview_feedback e non si importa (I12).'),
+  ('sys_job_offers', 'D', 'EXCLUDE', NULL,
+   '[S1083] L''offerta su una candidatura (#54 F2, mig 000364). E'' l''entita'' che la prima versione del ciclo legacy non aveva e che la seconda ha dovuto aggiungere: e'' il segno che serve davvero. Il legacy ha recruiting_offers e non si importa (I12).')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

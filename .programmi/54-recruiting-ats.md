@@ -17,7 +17,42 @@
 ## Fasi
 
 - [x] **F1 — INDAGINE: leggere §E5 e misurare cosa esiste davvero** — FATTO 2026-08-14 (S1058). **§E5 regge su entrambi i lati, a differenza di #50.** Vedi l'esito sotto, che però cambia il punto di partenza di F2.
-- [ ] **F2 — Modello dati del dominio, costruito sul DBMS attuale** — requisition→posting→candidate→interview→offer, agganciata alle posizioni (I1: una requisizione nasce da una posizione vacante). **Nessun import dal legacy** (direzione di Enzo 2026-08-14): il legacy dà i concetti, non le righe · budget ~250k
+- [x] **F2 — Modello dati del dominio, costruito sul DBMS attuale** — **FATTO 2026-08-28
+  (S1083)**, migrazione `000364`, prova generale VERDE a due passate sul gemello (`7 tabelle · 0
+  FK di persona non dichiarate · 0 righe`, 27/27 sentinelle).
+
+  **Sette entità**: `sys_job_requisitions` → `sys_job_postings` → `sys_candidates` →
+  `sys_candidate_applications` → `sys_interviews` → `sys_interview_feedback` → `sys_job_offers`.
+  Struttura **vuota**: nessun import, e zero righe è il valore atteso — il dominio si popolerà
+  con l'uso (I12/ADR-0038, direzione di Enzo del 2026-08-14).
+
+  **Cosa il monito di modellazione di F1 ha effettivamente cambiato**: il legacy ha lo stesso
+  ciclo costruito **due volte**, e solo la seconda famiglia ha le **offerte**. Chi ha rifatto il
+  lavoro le ha aggiunte — quindi `sys_job_offers` c'è, e non sarebbe stato ovvio partendo dalla
+  prima famiglia. Il contorno operativo (modelli di colloquio, disponibilità degli intervistatori)
+  resta fuori: è ottimizzazione di processo, non il ciclo.
+
+  **Tre scelte che vale la pena non ri-dedurre:**
+  - `requisition_position_id` è **NOT NULL**: I1 non è un commento, è un vincolo. Si copre un
+    *posto*, non si assume una persona; senza quel NOT NULL il recruiting diventerebbe un elenco
+    di assunzioni scollegato dall'organigramma, cioè il modello che I1 vieta.
+  - **un candidato non è un utente**, e la conseguenza è di sostanza: il registro GDPR sorveglia
+    le FK verso `sys_users` e **non vedrebbe `sys_candidates`** — la guardia resterebbe verde su
+    dati personali di persone reali. Per questo consenso e scadenza di conservazione sono
+    **colonne con un CHECK**, non una riga in un documento.
+  - i vincoli che impediscono stati contraddittori sono nello schema, non nel codice: un
+    `HIRED` senza l'utente nato dall'assunzione, un `REJECTED` senza motivo, una risposta a
+    un'offerta mai spedita sono **impossibili**, non «da controllare».
+
+  **Due guardie a monte hanno fermato la catena, e avevano ragione entrambe:**
+  ① la `000304` — una FK verso una persona **si dichiara**: registrate
+  `feedback_interviewer_user_id` e `candidate_hired_user_id`.
+  ② la `000062` — ogni tabella dev'essere **classificata**: le sette sono registrate lì, non nella
+  `000364`, perché è in quel file che gira il controllo (ADR-0035: si emenda il file che crea
+  l'oggetto). Tutte `EXCLUDE`, con una motivazione che è l'opposto di quella delle altre righe del
+  registro: qui una sorgente legacy **esiste ed è abbondante**, e non si importa lo stesso.
+  ⚠ Entrambe si vedono solo alla **seconda passata** — girano prima della `000364` e alla prima
+  non possono vedere tabelle che ancora non esistono.
 - [ ] **F3 — API** — moduli secondo il pattern in 7 passi, un commit per slice · budget ~250k
 - [ ] **F4 — Frontend + E2E con login reale** — cluster `/recruiting`, **componente Kanban di `@heuresys/ui` mai usato** finora, più il posting pubblico (percorso prospect ADR-0026) · budget ~250k
 

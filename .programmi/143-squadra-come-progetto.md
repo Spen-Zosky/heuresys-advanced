@@ -89,7 +89,39 @@ progetto**, mai i loro dati personali (è già I18).
 ## Fasi
 
 - [x] **F1 — INDAGINE + modello validato** — **CHIUSA 2026-08-15 (S1062)**. Il censimento era già fatto in S1061 (4 consumatori di `sys_teams`, superficie piccola) e i reperti pure (142 appartenenze trasversali su 172; **3 squadre reali** hanno già un capo più in basso di un membro — il caso di Enzo esiste nel dato, non va costruito). Restava la sola validazione del modello, **presa in S1062 col mandato di decidere**: due entità, appartenenza con finestra temporale, autorità sul lavoro e non sulle persone. Dettaglio e motivazioni nella sezione «DECISIONE PRESA» qui sopra · budget ~120k
-- [ ] **F2 — Modello dati** — tabelle progetto + appartenenza con decorrenza/scadenza + migrazione dei 26 team esistenti · budget ~250k
+- [x] **F2 — Modello dati** — **FATTO 2026-08-28 (S1083)**, migrazione `000363`, prova generale
+  VERDE a due passate sul gemello (`26 progetti da 26 squadre · 174 appartenenze da 174 · ogni
+  capo ha un LEAD aperto · sys_teams intatta`, 27/27 sentinelle).
+
+  **La decisione che F1 lasciava aperta — quale delle due fonti del capo sopravvive — è presa, e
+  i dati l'hanno imposta.** Misurate oggi, le due fonti **divergono davvero**: 26 squadre, 26 con
+  `team_lead_user_id`, **25** con un membro `LEAD`; `DIV-RISK` ha la colonna e zero membri LEAD,
+  `TM-MKT` ne ha **due**. Sopravvive **l'appartenenza** (`project_member_role = 'LEAD'`), per tre
+  ragioni tecniche: nei modelli di project management il capo è un membro con un ruolo — la forma
+  che Enzo ha chiesto; l'appartenenza porta la finestra e sa dire «chi era capo quando», una
+  colonna non lo saprà mai; e una colonna che duplica un'appartenenza produce **esattamente** le
+  due divergenze misurate, senza che si possa più sapere quale dica il vero.
+  ⚠ Ma la colonna serve **una volta sola, come arbitro**, prima di uscire di scena: è il solo dato
+  che scioglie i due casi storici senza inventare nulla.
+
+  **Due prove hanno potuto fallire, e sono fallite** — è il motivo per cui il modello regge:
+  ① la post-condizione «ogni capo ha un LEAD aperto» ha smentito la prima stesura, che chiedeva
+  *sia* il ruolo LEAD *sia* la colonna: il capo di `DIV-RISK` è iscritto come `MEMBER`, quindi
+  veniva saltato da entrambi i rami e restava un progetto senza capo — cioè proprio ciò che la
+  migrazione doveva riparare. L'arbitro ora vale sempre.
+  ② la `000304` ha fermato la catena con «restano 1 FK di appartenenza fuori dal registro GDPR»:
+  una chiave esterna verso una persona **si dichiara**. Ed è emerso solo alla **seconda passata**,
+  perché la `000304` gira prima della `000363` e alla prima non poteva vedere la tabella nuova —
+  una prova a passata unica non l'avrebbe colta.
+
+  **Cosa questa fase NON fa, dichiarato**: non ritira `sys_teams` (quattro consumatori di
+  produzione; ADR-0035 dice che un ritiro si misura in file da emendare) — le entità nuove nascono
+  **accanto**, con `project_origin_team_id` che conserva la provenienza riga per riga, e finché
+  entrambe esistono `sys_teams` resta la sorgente vera. Non implementa I18: l'autorità del capo è
+  **sul lavoro, non sulle persone**, ed è F3 che dà i primi consumatori veri a
+  `isInFunctionalScope`/`isFunctionalLeader`, oggi codice morto.
+  Lo `scopo` dei 26 progetti migrati resta **vuoto**: è un dato che nessuno ha mai scritto, e
+  riempirlo col nome della squadra sarebbe fingere di averlo.
 - [ ] **F3 — Asse funzionale vivo** — dare consumatori reali a `isInFunctionalScope`/`isFunctionalLeader`, oggi codice morto; l'autorità del capo progetto è **sul lavoro**, non sulle persone · budget ~250k
 - [ ] **F4 — API progetti/squadre** — CRUD + avanzamento + test che provano il **confine I18** (un capo progetto NON vede i dati sensibili dei membri) · budget ~250k
 - [ ] **F5 — Frontend + dimostrazione live** — con un capo progetto reale gerarchicamente inferiore a un suo membro: è il caso che dimostra il modello · budget ~250k

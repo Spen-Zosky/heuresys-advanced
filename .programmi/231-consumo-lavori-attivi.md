@@ -40,7 +40,12 @@ catena che sblocca la suite (#169 → #219) · **(c)** il lavoro read-only mentr
 **(d)** costo e rischio crescenti. Ogni voce chiusa = commit.
 
 - [x] **S2 `#148` — il rendiconto delle chiusure** — FATTO 2026-08-25 (S1080) · evidenza: voce CHIUSA 3/3, commit `3217b3ec`
-- [ ] **S0 `marciume` — il cancello della chiusura è rosso da 3 corse** (nuovo, S1081)
+- [x] **S0 `marciume` — il cancello della chiusura è rosso da 3 corse** — **FATTO 2026-08-28
+  (S1083)** · `check_marciume.py` esce **0** e dichiara «niente è marcito»: le cinque forme di
+  stato M1-M5 verdi, i dieci strumenti scoperti verdi, `verifica_incrociata` da 2 difetti a **0**.
+  Le due sotto-voci S0a/S0b non avevano più bersaglio quando le ho misurate (M3 «residuo orfano in
+  una voce chiusa» è [OK], e X9c non compare fra le firme con difetti): il rosso residuo era tutto
+  in `verifica_incrociata`, cioè in S0-bis. Migrazioni `000361` e `000362`, commit del blocco A
   - **S0a** `X9c`: 1 persona con contratto `ACTIVE` e nessuna assegnazione di posizione attiva —
     identificarla, diagnosticare, curare (guardia + rollback) o dichiarare legittima con la ragione
   - **S0b** `M3`: 4 voci DONE con residuo orfano (`#215` 29 righe non-bande in
@@ -67,8 +72,13 @@ catena che sblocca la suite (#169 → #219) · **(c)** il lavoro read-only mentr
   `71ca9e42` · evidenza: 3 utenze SERVICE provisionate (idempotente, guardie, `--undo`), login
   in un passo 200×3, password errata 401, **chiave madre 401** (il criterio di #169, misurato),
   via vecchia intatta (federica 200). Terza guardia `000284` scoperta eseguendo; `admin@` chiarito
-- [ ] **S0-bis (ereditato da S0)** — `#234` possiede gli otto rossi di `verifica_incrociata`;
-  la chiusura porta `marciume: fallito` finché non li consuma — dichiarato, non nascosto
+- [x] **S0-bis (ereditato da S0)** — `#234` possiede gli otto rossi di `verifica_incrociata` —
+  **FATTO 2026-08-28 (S1083)** · consumati gli ultimi due: `X5d` (migrazione `000361` — nessuna
+  delle 29 posizioni del rischio dichiarava requisiti formativi, non solo la riga rossa) e `X3c`
+  (migrazione `000362` — due contratti attivi del tenant di piattaforma senza busta recente).
+  Curando `X5d` si è **acceso `X5a`**, che prima non poteva accendersi perché il controllo guarda
+  solo le posizioni che dichiarano requisiti: emendato lo stesso file con la regola dell'osservato.
+  Esito live: `0 verifiche con difetti, 7 misure informative, 27 pulite`
 - [x] **S1 `#219` — la suite TORNA A MISURARE** — **FATTO 2026-08-26 (S1081)** · la diagnosi
   ereditata era **sbagliata**: le sei persone dei setup esistono tutte (`ACTIVE`, identità,
   fattore MFA) e non c'entrano con `admin@heuresys.com`. Causa vera: **l'API non era accesa**

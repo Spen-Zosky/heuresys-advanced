@@ -142,8 +142,21 @@ class Programma:
 
     @property
     def stato_derivato(self) -> str:
-        """Lo stato che le SPUNTE dicono — che puo' smentire quello dichiarato."""
-        if self.totale and self.fatte == self.totale:
+        """Lo stato che le SPUNTE dicono — che puo' smentire quello dichiarato.
+
+        SENZA FASI NON C'E' NIENTE DA DERIVARE, e allora vale lo stato dichiarato
+        (S1083). Prima, un programma con zero fasi cadeva su «NON AVVIATO» perche'
+        `fatte == 0`: un'affermazione su uno stato ricavata da zero informazione.
+        Quattro programmi chiusi — `#224`, `#225`, `#226`, `D86-D87` — comparivano
+        cosi' a ogni avvio fra i «PROGRAMMI APERTI FUORI DAL MENU», e il boot
+        chiedeva di lavorare su cose gia' fatte. Sono file di sola narrazione: la
+        loro cronaca sta nel corpo, non in una lista di spunte, e non per questo
+        sono aperti. Le spunte possono smentire lo stato dichiarato solo quando ci
+        sono; dove mancano, chi ha scritto il file e' l'unica fonte.
+        """
+        if not self.totale:
+            return self.stato or "NON AVVIATO"
+        if self.fatte == self.totale:
             return "CHIUSO"
         if self.fatte == 0:
             return "NON AVVIATO"

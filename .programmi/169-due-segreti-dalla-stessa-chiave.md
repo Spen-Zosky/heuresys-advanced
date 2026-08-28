@@ -193,6 +193,44 @@ popolazione fissa nasconde difetti, e il commento di `personas.ts` documenta un 
 verde solo perché girava su `tommaso.fiore`, che per combinazione aveva zero righe del tipo che
 perdeva). Chi userà quale via è parte del lavoro.
 - [ ] **F3 Il segreto smette di essere derivato** — casuale, cifrato a riposo, consegnato una volta sola. **fatto =** un segreto nuovo non è più ricostruibile dalla chiave madre, misurato provando a ricostruirlo
+
+  ### ⚠ ANALISI S1083 (2026-08-28) — F3 non è eseguibile com'è scritta, e ne è emerso un rischio
+
+  **① F3 ha una dipendenza che nessuno aveva dichiarato.** La suite E2E fa login con **persone
+  reali** — `fixtures.ts` dichiara `platformAdmin: enzo.spenuso@heuresys.com`,
+  `tenantAdmin: federica.marchetti@rtl-bank.org`, `employee: paolo.caputo@rtl-bank.org` — e per
+  ciascuna chiama `passwordFor(email)` e `totpFor(email)`, che sono le due derivazioni dalla
+  chiave madre. Finché è così, rendere casuale un segreto **rompe la suite**, e F4 pretende
+  esplicitamente che le due cose stiano insieme.
+  Le utenze di collaudo che F2 ha creato esistono, sono operative e **la suite non le usa**:
+  crearle non ha spostato nessun test. Il passo mancante è *portare la suite sulle utenze di
+  collaudo*, e va prima di F3, non dopo.
+
+  **② E in mezzo c'è un rischio concreto, misurato oggi.** Le tre personas hanno ruoli propri —
+  `piattaforma@collaudo.invalid` è **`PLATFORM_ADMIN`**, `governo@` è `TENANT_ADMIN`, `persona@`
+  è `USER` — e tutte e tre sono già iscritte in `sys_auth_mfa_exemption_eligible_users` (3 righe,
+  motivazione `collaudo-access (#169 F2, direttiva Enzo 2026-08-25)`).
+  Messe insieme, le due cose dicono questo: **l'utenza amministratore di piattaforma ha una
+  password derivata dalla chiave madre ed è esente dal secondo fattore.** Chi possiede la chiave
+  madre completa un accesso come amministratore di piattaforma **senza alcun secondo fattore** —
+  che è, alla lettera, ciò che F4 dichiara debba risultare impossibile.
+  L'esenzione non è un errore: senza di essa un'utenza headless non potrebbe funzionare. È la
+  **combinazione** con la password derivata a essere insostenibile, e nessuna delle due voci la
+  nominava perché sono nate in momenti diversi.
+
+  **③ Conseguenza per il piano, dichiarata invece che scoperta dopo.** F3 si riscrive in tre
+  passi ordinati, e il primo non c'era:
+  - **F3a** — la suite E2E passa alle utenze di collaudo (`fixtures.ts` e i suoi consumatori).
+    Da quel momento nessun test dipende più dai segreti delle persone reali.
+  - **F3b** — le utenze di collaudo smettono di avere la password derivata: casuale, cifrata a
+    riposo, consegnata una volta sola alla suite per una via **diversa dalla chiave madre**.
+    Senza questo, F3a da sola sposta il bersaglio e non toglie il rischio.
+  - **F3c** — solo allora i segreti delle persone reali diventano casuali, ed è il contenuto
+    originale di F3.
+
+  Nessuna riga di codice toccata in S1083: la corsa E2E integrale di `#219` F5 era in volo sugli
+  stessi file, e cambiare le derivazioni sotto i piedi di una suite in esecuzione avrebbe
+  prodotto rossi che nessuno avrebbe saputo leggere.
 - [ ] **F4 La prova che deve poter fallire** — con la chiave madre in mano, **completare** un accesso come amministratore deve risultare **impossibile**, e la suite deve continuare a girare. Le due cose insieme, o la voce non è chiusa: passare la prima rompendo la seconda è il modo ovvio di barare. **fatto =** tentativo eseguito e fallito con evidenza, suite verde
 
 ## Chiuso quando

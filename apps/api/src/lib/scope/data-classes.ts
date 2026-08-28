@@ -185,7 +185,32 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
   content: "contenuti editoriali",
   visualization: "grafici salvati",
   leads: "contatti commerciali esterni: non sono la forza lavoro del tenant, e la tassonomia delle classi descrive i dati DEI DIPENDENTI",
-  // ⛔ `surveys` ERA QUI, ed è stata tolta il 2026-08-28 (S1083, #214 F6). La riga diceva:
+  // ⚠⚠ `surveys` — LA RIGA CHE STAVA QUI ERA FALSA, E RIMETTERLA SAREBBE PEGGIO CHE TOGLIERLA.
+  // Misurato il 2026-08-28 (S1083, #214 F6): `sys_engagement_survey_responses` ha **862 righe
+  // su 862** con `response_subject_user_id`, e `sys_survey_assignments` **948 su 948** con
+  // `survey_assignment_user_id`. Nessuna risposta anonima, non una. Chi legge questa resource
+  // legge *chi ha detto cosa sul clima aziendale*.
+  //
+  // ⛔ E CLASSIFICARLA COME SENSIBILE NON È UNA RIGA: fa scattare `domains-f7` con
+  // `ORG_GATE_MISSING: 21 read route(s)`. Annotarle è meccanico, ma la scelta fra
+  // `orgGate: "catalog"` e `orgGate: "service"` **cambia chi vede le risposte in produzione** —
+  // i template sono catalogo, le risposte no — e un cambiamento del genere pretende la
+  // dimostrazione live che la Definition of Done impone: login reale, e la prova che chi deve
+  // vedere continua a vedere. Farlo in coda a una sessione, senza quella prova, sarebbe
+  // esattamente ciò che quella regola vieta.
+  //
+  // ⛔ E TOGLIERLA E BASTA NON SI PUÒ, perché il cancello di `#99` F7 pretende che **nessuna
+  // resource passi in silenzio**: ognuna sta in uno dei tre elenchi, o il test è rosso. Il
+  // cancello ha ragione, e non gli si mente per farlo tacere.
+  // Quindi la riga **resta** — ma non è più un silenzio: porta accanto la misura che la
+  // smentisce e il nome di ciò che serve per toglierla davvero. Chi la legge oggi vede un
+  // **debito dichiarato**, non un'affermazione.
+  // ⚠ **Il rischio resta aperto e va nel register**: oggi, in produzione, le risposte ai
+  // sondaggi di clima sono raggiungibili con il solo permesso RBAC più il tenant, senza catena
+  // organizzativa — cioè da chiunque abbia `surveys:read`, anche fuori dalla catena di chi ha
+  // risposto.
+  //
+  // ⚠ DEBITO DICHIARATO, non una verità — la riga qui sotto dice:
   // «risolta da Enzo (2026-07-01): feedback e clima restano NON mappati perché spesso anonimi
   // o aggregati per politica, quindi non org-gated». Era una dichiarazione di POLITICA, e i
   // dati la smentiscono senza margine — misurati, non supposti:
@@ -195,7 +220,6 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
   // un'AFFERMAZIONE e che «se un domani quella pagina cominciasse a mostrarle, la riga
   // diventerebbe una bugia scritta col proprio nome»: qui non è diventata una bugia col
   // tempo, lo era già quando è stata scritta, perché nessuno aveva guardato i dati.
-  // `surveys` ed `engagement` stanno ora in `RESOURCE_DATA_CLASS` come `PERSONAL`.
   //
   // ⭐ MA LA STESSA MISURA HA CONFERMATO L'ALTRA META DELLA FRASE DEL 2026-07-01, e la
   // distinzione è fine abbastanza da meritare di essere scritta: `sys_engagement_feedback`
@@ -207,6 +231,7 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
   // Quindi la frase di Enzo era **giusta per il feedback e sbagliata per i sondaggi**: le due
   // cose erano state trattate insieme, e solo una delle due reggeva. Qui non si corregge una
   // dichiarazione sbagliata — si trasforma un silenzio in un'affermazione misurata.
+  surveys: "feedback e clima. ⚠ AFFERMAZIONE SMENTITA DALLA MISURA (2026-08-28): 862 risposte su 862 e 948 assegnazioni su 948 portano l identita del soggetto. Resta qui perche toglierla pretende 21 rotte con org-gate e una prova live — voce di lavoro dichiarata, non una verita",
   engagement_feedback:
     "segnalazioni di clima ANONIME PER COSTRUZIONE (misurato 2026-08-28, #214 F6): " +
     "`sys_engagement_feedback` non ha alcuna colonna che identifichi l'autore — solo " +
@@ -300,16 +325,6 @@ export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   // la prima dice *cosa mostra*, la seconda *a chi è aperto*.
   organization_unit: "PERSONAL",
   user_profile: "PERSONAL",
-  // #214 F6, S1083 — `engagement` e `surveys` erano NON MAPPATE, e il criterio
-  // dei perimetri dell'agente trattava il non-mappato come «neutro». Ma il
-  // non-mappato è un SILENZIO, non una dichiarazione di neutralità: misurando,
-  // **862 risposte di clima su 862** e **948 assegnazioni di sondaggio su 948**
-  // portano l'identità di chi ha risposto. Chi legge queste due resource legge
-  // *chi ha detto cosa sul clima aziendale* — materia più delicata, non meno, di
-  // una retribuzione. `PERSONAL`, quindi, e fuori dalla coda dei perimetri
-  // apribili all'agente.
-  engagement: "PERSONAL",
-  surveys: "PERSONAL",
   document: "PERSONAL",
   certification: "PERSONAL",
   career: "PERSONAL",

@@ -231,7 +231,58 @@ non correggendolo.
         questa. *Come si riprende*: `ssh oracle-vm-default "cat /proc/loadavg"` (il preflight lo
         fa da sé), poi `cd apps/web && node scripts/e2e-blocchi.mjs`, poi si leggono i falliti
         **dal referto JSON**, uno per uno, con la loro firma
-  - [ ] **F5e La corsa che chiude** — 0 falliti, poi il passaggio in CI
+  ### ⭐⭐ S1083 (2026-08-28) — LA CAUSA COMUNE È IL TUNNEL, e non è un guasto del prodotto
+
+  Corsa integrale lanciata **a VM scarica** (`/proc/loadavg` = `0.00 0.04 0.05`: `aide` non
+  c'entrava). Esiti per fase, letti dal log e non parafrasati:
+
+  | fase | esito |
+  |---|---|
+  | 1 — setup + mobile-a11y + a11y-desktop | `1 failed · 4 flaky · 83 passed (38.4m)` |
+  | 2 — setup-refresh + chromium | **`4 failed · 89 did not run · 2 passed (15.6m)`** |
+
+  I 4 falliti della fase 2 sono **tutti e quattro `auth.setup.ts`** — platformAdmin, manager,
+  employee, outsider — e i setup che cadono trascinano **89 test che non hanno girato**. È
+  precisamente il difetto che `e2e-blocchi.mjs` esiste per rendere visibile: «non ho eseguito» non
+  è «passato».
+
+  **La causa, misurata nell'API e non dedotta dai sintomi:**
+  - il log dell'API porta **47 errori**, tutti della stessa specie:
+    `Connection terminated due to connection timeout: Connection terminated unexpectedly` —
+    è il **pool PostgreSQL** che non riesce ad aprire connessioni;
+  - e il database **non è saturo**: misurato durante la corsa, `pg_stat_activity` dava
+    **9 connessioni su `max_connections` = 100**, una sola attiva.
+
+  Fra i due fatti c'è una sola spiegazione: **il collo di bottiglia è il tunnel SSH**.
+  `.env` dichiara `POSTGRES_HOST=localhost` sulla porta `5433`, che è l'imbocco del tunnel verso
+  la VM Oracle. Una suite E2E integrale apre e chiude connessioni a raffica su decine di test
+  paralleli; il tunnel non le regge, l'API riceve timeout, il login risponde 500, e Playwright
+  vede solo un `waitForURL` che non arriva.
+
+  ⭐ **È la stessa dottrina già scritta nel CLAUDE.md per il database, mai estesa alla suite**:
+  *«il lavoro sul DB si esegue dove il DB vive»* — 17 secondi sulla VM contro ~80 minuti da
+  Windows, per la stessa catena. Nessuno l'aveva applicata all'E2E, e per questo ogni corsa da qui
+  attribuiva i propri rossi a guasti del prodotto o al carico notturno di `aide`, cercando la
+  causa dove non era. **I rossi di una corsa integrale lanciata da Windows sono rumore, non
+  misura** — che è, alla lettera, ciò che il commit `ed80fa05` aveva già osservato senza saperne
+  il perché.
+
+  **La cura, ed è eseguibile oggi**: la corsa integrale si esegue sul **gemello**, dove il
+  database è in casa. Verificato, non supposto: `linux-pc` ha Playwright installato, `.env` con
+  `POSTGRES_HOST=localhost` **senza tunnel**, il web vivo su `:3013` (HTTP 200) e **Node 22.19.0
+  come default nvm** — quindi nemmeno il wrapper Node 22 serve, perché quello esiste solo per
+  Windows (D-36).
+
+  ```bash
+  ssh linux-pc 'cd ~/heuresys-advanced/apps/web && pnpm test:e2e:prod'
+  ```
+
+  ⚠ E finché non si esegue là, **F5e non è dimostrabile**: chiedere «0 falliti» a una corsa il cui
+  ambiente produce da sé i propri rossi è chiedere una prova che non può riuscire.
+
+  - [ ] **F5e La corsa che chiude** — 0 falliti, poi il passaggio in CI. ⚠ **Da eseguire SUL
+        GEMELLO** (vedi il riquadro qui sopra): da Windows il tunnel produce rossi propri, e il
+        criterio «0 falliti» diventa irraggiungibile per una ragione che non riguarda il prodotto
 
 ## Le prove che devono poter fallire
 

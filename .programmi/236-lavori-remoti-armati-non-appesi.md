@@ -1,7 +1,7 @@
 # 236 — I lavori remoti si armano, non si appendono alla sessione
 
 > **item**: #236 · **priorità**: P1 · **stima**: ~1 sessione
-> **stato**: NON AVVIATO
+> **stato**: IN CORSO
 > **nasce-da**: S1083 (2026-08-28), domanda di Enzo durante la chiusura: *«mi confermi che le
 > clonazioni sono processi indipendenti che arrivano a conclusione anche se chiudo la sessione?»*
 > La risposta misurata è **no**, e una delle tre è pure distruttiva.
@@ -68,14 +68,37 @@ CI: 20-30 minuti»*. La cura fu **sganciare l'esecuzione dalla sessione**, in qu
 
 ## Fasi
 
-- [ ] **F1 — Lo swap atomico, che vale anche senza il resto** — il clone smette di droppare in
-      place: ripristina in schemi di lavoro (`sys_new`, …) e alla fine fa lo scambio con
-      `ALTER SCHEMA … RENAME` dentro **una** transazione. È DDL, quindi è istantaneo e
-      transazionale in PostgreSQL: o c'è il clone vecchio, o c'è quello nuovo, **mai il vuoto**.
-      ⚠ **Questa fase da sola toglie il rischio peggiore** — un'interruzione non lascerebbe più
-      niente di rotto, solo un lavoro da rifare — e non dipende da F2/F3.
-      **fatto =** interruzione **provata** a metà ripristino (kill del processo), e il clone
-      vecchio è ancora lì, interrogabile
+- [x] **F1 — Lo swap atomico** — **FATTO 2026-08-29 (S1083)**, e la prova è l'interruzione.
+
+  Il clone non droppa più niente: ripristina in `<nome>_stage`, verifica **lì**, e solo se tutto
+  torna scambia i due nomi con `ALTER DATABASE … RENAME`.
+
+  🔬 **La prova, eseguita sul gemello** — `timeout -s KILL 15 bash scripts/clone-vm-db.sh` → exit
+  **137**. `SIGKILL` è la forma più brutale, che nemmeno un `trap` intercetta: peggio del `SIGHUP`
+  che si voleva neutralizzare. Subito dopo, il clone rispondeva **164 utenti · 315 posizioni · 240
+  tabelle**, intatto. Con lo script precedente lo stesso segnale lo avrebbe lasciato vuoto.
+  🔬 **E la corsa sana**, perché i casi negativi da soli sarebbero soddisfatti anche da uno script
+  che non scambia mai: `164/164 · 315/315 · 119.773/119.773 · censimento 13 voci identiche · 4
+  schemi come la sorgente` → scambio eseguito, exit 0, **nessun residuo** `_stage` o `_old`.
+
+  **Due difetti trovati solo perché la corsa è stata fatta davvero:**
+  ① `pg_app` si connette come utente applicativo, e `.pgpass` lega la credenziale al **nome del
+  database** — che ora è nuovo. `psql` è rimasto **26 minuti** fermo su una richiesta di password
+  che nessuno avrebbe mai letto, senza un errore. Curato con `PGPASSWORD` e, soprattutto, con
+  **`-w` su ogni psql**: in una corsa non presidiata un comando che *chiede* è peggio di uno che
+  fallisce.
+  ② Il pre-controllo sulle connessioni era **una misura ereditata**: chiedeva «c'è qualcuno?» e poi
+  rinominava, e ha bloccato uno scambio per **una** connessione anonima che si stava già chiudendo,
+  lasciata dalle verifiche appena concluse. Tolto: il rinomino **è** la misura, e quello che serve
+  non è un controllo prima ma una **diagnosi dopo** — l'errore di PostgreSQL dice che il database è
+  in uso e non dice da chi.
+
+  **Batteria**: 10 casi verdi, di cui **cinque negativi** (dump interrotto, censimento divergente,
+  conte non misurabili, primo e secondo rinomino falliti) che pretendono tutti che lo scambio
+  **non** avvenga. I due casi storici di D-86 — «lo schema ritirato viene droppato», «`public` non
+  si tocca» — sono stati **sostituiti**, non cancellati: quelle proprietà ora sono vere *per
+  costruzione*, e al loro posto si prova che il database di scena nasce da zero.
+
 - [ ] **F2 — L'armamento del clone** — sul gemello nasce `heuresys-clone-watch.timer` col mestiere
       del gemello di quello di deploy: la chiusura **arma** (scrive un file-sentinella con lo sha e
       il motivo), il timer esegue, `OnFailure` è quello già in uso, `Persistent=true`.

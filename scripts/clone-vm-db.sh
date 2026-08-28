@@ -36,10 +36,15 @@ SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=30 -o Ser
 
 # ── L'AGGANCIO DI PROVA (D-86, S1078) ───────────────────────────────────────────
 # Tutto cio' che esce da questo processo — la VM, il database locale come superuser,
-# il database locale come utente applicativo, il travaso dump->restore — passa da
-# queste QUATTRO funzioni e SOLO da queste. Non e' un abbellimento: senza, questo
-# script era provabile unicamente con `bash -n`, cioe' si sapeva che era sintassi
-# valida e NIENTE su cosa decide. E cio' che decide e' se droppare degli schemi.
+# il database locale come utente applicativo, il database `postgres` per le
+# operazioni sui database interi, il travaso dump->restore — passa da queste CINQUE
+# funzioni e SOLO da queste. Non e' un abbellimento: senza, questo script era
+# provabile unicamente con `bash -n`, cioe' si sapeva che era sintassi valida e
+# NIENTE su cosa decide.
+# ⚠ E cio' che decide e' CAMBIATO in S1083 (#236 F1): non piu' «se droppare degli
+# schemi» — quel drop non esiste piu' — ma **se scambiare il clone di scena con
+# quello vero**. La quinta funzione, `pg_maint`, e' quella che esegue lo scambio, ed
+# e' quindi la piu' importante da poter sostituire in una prova.
 #
 # Le guardie che porta — «la VM non risponde, non tocco niente», «l'elenco e' vuoto,
 # non tocco niente», «il dump si e' interrotto, il clone e' INCOMPLETO», «non sono
@@ -56,14 +61,40 @@ SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=30 -o Ser
 remote_psql() {  # una query sulla VM, come postgres, in forma -tAc
   ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres psql -d '$DB_NAME' -tAc \"$1\""
 }
-pg_super() { sudo -u postgres psql -p "$PORT" -d "$DB_NAME" "$@"; }
-pg_app()   { psql -h 127.0.0.1 -p "$PORT" -U "$DBUSER" -d "$DB_NAME" "$@"; }
+# ── S1083, #236 F1: SI RIPRISTINA ACCANTO, NON SOPRA ────────────────────────────
+# `TARGET_DB` e' il database su cui si LAVORA: durante il ripristino e' quello di
+# scena (`<nome>_stage`), e diventa quello vero solo dopo lo scambio. Tutte le
+# verifiche qui sotto lo seguono senza sapere quale sia — che e' precisamente il
+# punto: girano PRIMA dello scambio invece che dopo il danno.
+STAGE_DB="${STAGE_DB:-${DB_NAME}_stage}"
+OLD_DB="${OLD_DB:-${DB_NAME}_old}"
+TARGET_DB="$STAGE_DB"
+# `pg_maint` parla col database `postgres`, non con quello di lavoro: CREATE, DROP e
+# ALTER DATABASE non si possono eseguire da dentro il database che nominano.
+pg_maint() { sudo -u postgres psql -w -p "$PORT" -d postgres "$@"; }
+pg_super() { sudo -u postgres psql -w -p "$PORT" -d "$TARGET_DB" "$@"; }
+# ⚠ DUE DIFESE, e la seconda l'ha imposta la corsa reale (S1083, #236 F1).
+#
+# `-w` — psql NON deve MAI chiedere una password: in una corsa non presidiata quella
+# domanda non la legge nessuno e il processo resta appeso per sempre. Meglio fallire
+# subito e lasciare che la guardia lo dichiari, che e' cio' che le guardie servono a
+# fare. Misurato: la prima stesura di questa fase e' rimasta ferma 26 MINUTI su una
+# richiesta di password invisibile, e il log si era fermato a meta' senza un errore.
+#
+# `PGPASSWORD` — e questa e' la CAUSA di quell'attesa. `.pgpass` associa la credenziale
+# a un NOME DI DATABASE, e il database di scena ha un nome nuovo (`<nome>_stage`) che
+# li' dentro non c'e'. Un difetto che nessuna prova con i finti comandi poteva vedere,
+# perche' vive nella configurazione della macchina e non nel codice: l'ha trovato la
+# corsa vera, ed e' esattamente il motivo per cui una corsa vera va fatta.
+pg_app() {
+  PGPASSWORD="${POSTGRES_PASSWORD:-}" psql -w -h 127.0.0.1 -p "$PORT" -U "$DBUSER" -d "$TARGET_DB" "$@"
+}
 # Imposta due variabili invece di restituire un codice: il lato SINISTRO della pipe
 # conta quanto il destro, ed e' il motivo per cui esiste il controllo su `dump_rc`.
 stream_dump_restore() {
   set +e
   ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres pg_dump -Fc '$DB_NAME'" \
-    | sudo -u postgres "$PG_BIN/pg_restore" --clean --if-exists --no-acl -p "$PORT" -d "$DB_NAME"
+    | sudo -u postgres "$PG_BIN/pg_restore" --no-acl -p "$PORT" -d "$STAGE_DB"
   # PIPESTATUS va copiato IN UN COLPO SOLO: si azzera al primo comando eseguito dopo
   # la pipe — inclusa l'assegnazione che lo legge. Leggerlo due volte di fila dava
   # "PIPESTATUS[1]: variabile non assegnata" sotto `set -u`.
@@ -75,78 +106,89 @@ stream_dump_restore() {
 # shellcheck disable=SC1090
 [ -n "${CLONE_VM_DB_STUB:-}" ] && . "$CLONE_VM_DB_STUB"
 
-# [S1054 #172 · S1078 D-86] GLI SCHEMI SI RIFANNO DA ZERO PRIMA DEL RIPRISTINO,
-# E L'ELENCO SI MISURA — non si scrive a mano.
+# [S1083 · #236 F1] IL CLONE SI RICOSTRUISCE ACCANTO, E SI SCAMBIA ALLA FINE.
 #
-# Perche' `--clean --if-exists` non basta: droppa SOLO gli oggetti presenti nel dump.
-# Il dump emette anche un `DROP SCHEMA IF EXISTS <x>` finale, ma senza CASCADE, e
-# quello fallisce non appena UN oggetto assente dal dump vive ancora nello schema.
-# L'errore e' un notice che la riga sotto tollera, il ripristino prosegue, e cio' che
-# la produzione ha RIMOSSO sopravvive sul clone: il clone diventa un sovrainsieme
-# della sorgente invece che una copia.
+# ⚠ COSA C'ERA PRIMA, e perche' e' cambiato. Fino a oggi questo script droppava gli
+# schemi del clone (`DROP SCHEMA ... CASCADE`, nome per nome) e SUBITO DOPO li
+# ricostruiva dal dump. Il commento di allora diceva che non era un rischio
+# aggiuntivo, «la stessa finestra che --clean apre da sempre, su un oggetto
+# riproducibile per definizione», e che il controllo su `dump_rc` avrebbe comunque
+# dichiarato il database incompleto.
 #
-# Due volte, e due materie diverse:
-#   S1050 — funzioni in `staging`: PROD 88, clone 89. La differenza era
-#     `storia36_check_c6a(date)`, firma vecchia sostituita in produzione da
-#     `storia36_check_c6a()`: una batteria che l'avesse invocata con un argomento
-#     avrebbe eseguito sul gemello L'IMPLEMENTAZIONE SBAGLIATA, con un verde che non
-#     valeva per il codice vero. Fu curato droppando il solo `staging`.
-#   S1074 — una TABELLA in `sys`: `sys_blueprint_content_processes`, ritirata dalla
-#     mig. 000335 poche ore prima. Il censimento la vide, dichiaro' `FATAL: il clone
-#     NON corrisponde alla VM`, e `close-propagate.sh` non armo' il deploy. Cioe':
-#     OGNI ritiro di tabella rompeva la chiusura successiva. Anche li' fu curato
-#     l'esemplare, a mano, e la causa rimase qui — che e' come questa riga e' nata.
+# Erano due affermazioni vere e una conclusione sbagliata: **dichiarare che il clone
+# e' incompleto non lo ripara**, e nel caso che conta il controllo non gira affatto.
+# Misurato in S1083: questo script viene lanciato da `close-propagate.sh` con un
+# `ssh` in PRIMO PIANO, senza `nohup` — quindi chiudere la sessione CLI manda
+# `SIGHUP` e uccide entrambi i lati della pipe. La finestra fra il DROP e la fine del
+# ripristino dura MINUTI (misurata: «193 altri oggetti» in cascata), e chi la
+# attraversa non trova un clone vecchio: non trova niente. Ed e' il database su cui
+# girano la CI e la verifica lunga di chiusura.
 #
-# Riprodotto sul gemello il 2026-08-23 prima di scrivere la cura, per non curare a
-# memoria: creata `sys.zz_fantasma_d86`, il ripristino l'ha lasciata viva e lo script
-# e' uscito 1. Nel log: «non è possibile eliminare schema sys perché altri oggetti
-# dipendono da esso — DETTAGLI: tabella sys.zz_fantasma_d86».
+# LA CURA, e non e' una guardia in piu': e' togliere la finestra. Si ripristina in un
+# database DI SCENA che nasce vuoto accanto a quello vero, si verifica LI', e solo se
+# tutto torna si scambiano i due nomi. Lo scambio e' un `ALTER DATABASE ... RENAME`,
+# cioe' un aggiornamento di catalogo: istantaneo, non copia un byte.
 #
-# QUALI schemi. Misurato lo stesso giorno con `pg_restore -l` sul dump vero: il dump
-# ricrea `audit reference_sync staging sys` e NON ricrea `public`, che e' lo schema di
-# default e pg_dump non emette. Ma le 5 estensioni (pgcrypto, uuid-ossp, pg_trgm,
-# vector, pg_stat_statements) ci vivono dentro: droppare `public` farebbe fallire il
-# loro `CREATE EXTENSION ... WITH SCHEMA public`. Quindi `public` resta, e su di lui
-# vigila il solo censimento.
+# ⭐ E IL GUADAGNO VERO E' UN ALTRO, che non era lo scopo. Le verifiche che questo
+# script gia' faceva — conteggi di righe, censimento degli oggetti — giravano DOPO
+# aver sostituito il clone: dicevano «e' divergente» a danno fatto. Ora girano PRIMA
+# dello scambio, quindi **un clone divergente non sostituisce mai quello buono**. Da
+# referto diventano condizione.
 #
-# L'elenco NON si cabla qui: un elenco scritto a mano e' vero il giorno in cui lo
-# scrivi e falso al primo schema nuovo, e chi lo rilegge non ha modo di accorgersene.
-# Si deriva dai due lati — l'unione, cosi' cade anche uno schema INTERO ritirato in
-# produzione — si stampa, e si droppa NOME PER NOME. Nessun carattere jolly.
+# COSA RESTA VERO del ragionamento di prima: `--clean --if-exists` non basterebbe
+# comunque (droppa i soli oggetti presenti nel dump, quindi cio' che la produzione ha
+# RIMOSSO sopravviverebbe sul clone, rendendolo un sovrainsieme della sorgente — due
+# volte, S1050 sulle funzioni di `staging` e D-86 su una tabella fantasma). Con un
+# database che nasce vuoto il problema non si pone: non c'e' niente da ripulire, e
+# infatti `--clean` e' stato tolto dal ripristino.
 #
-# CASCADE e' voluto e non e' un rischio aggiuntivo: droppa cio' che il ripristino
-# subito dopo ricrea dal dump. Se il dump non arriva, il controllo su `dump_rc`
-# (sotto) dichiara gia' il DB incompleto ed esce non-zero — ed e' la stessa finestra
-# che `--clean` apre da sempre, su un oggetto riproducibile per definizione.
+# `public` non e' piu' un caso speciale. Prima andava escluso a mano — due volte, per
+# prudenza — perche' droppandolo cadevano le 5 estensioni che ci vivono dentro
+# (pgcrypto, uuid-ossp, pg_trgm, vector, pg_stat_statements). In un database nuovo
+# `public` esiste gia' e le estensioni le ricrea il dump: la trappola e' sparita
+# insieme al drop, non e' stata aggirata.
+
+# La misura degli schemi resta, e cambia mestiere: prima serviva a decidere COSA
+# distruggere, ora a decidere SE sostituire. La guardia «non ho potuto misurare»
+# vale ancora, e vale di piu': senza il numero della sorgente non c'e' post-condizione.
 Q_SCHEMI="SELECT nspname FROM pg_namespace WHERE nspname NOT LIKE 'pg_%'
           AND nspname NOT IN ('information_schema','public') ORDER BY 1"
 sch_vm="$(remote_psql "$Q_SCHEMI" || echo '?')"
-sch_loc="$(pg_super -tAc "$Q_SCHEMI" || echo '?')"
-if [ "$sch_vm" = '?' ] || [ "$sch_loc" = '?' ]; then
-  echo "[clone-vm-db] FATAL: non ho potuto misurare gli schemi (VM o locale) — non tocco niente." >&2
-  echo "[clone-vm-db] Droppare su un elenco che non ho letto sarebbe peggio del difetto che curo." >&2
+if [ "$sch_vm" = '?' ]; then
+  echo "[clone-vm-db] FATAL: non ho potuto misurare gli schemi sulla VM — non tocco niente." >&2
+  echo "[clone-vm-db] Senza il numero della sorgente non esiste una post-condizione da verificare." >&2
   exit 1
 fi
-SCHEMI="$(printf '%s\n%s\n' "$sch_vm" "$sch_loc" | sed '/^$/d' | sort -u)"
-# `public` fuori, una seconda volta e a mano. La query sopra lo esclude gia', ma quella
-# protezione vive DENTRO una stringa SQL: chi un giorno riscrivesse la query per un'altra
-# ragione se la porterebbe via senza accorgersene, e il guasto si vedrebbe solo al primo
-# ripristino — con le 5 estensioni gia' cadute e il clone mutilato. Due presidi per la
-# stessa cosa qui non sono una ridondanza: sono l'unico dei due che una prova offline
-# riesce a esercitare, perche' l'altro sta nel database.
-SCHEMI="$(printf '%s\n' "$SCHEMI" | grep -vx 'public' || true)"
-# Un guard che passa su input vuoto non e' un guard: se l'elenco e' vuoto, la misura e'
-# andata storta in un modo che non ha prodotto errori — e nessun database sano ha zero
-# schemi applicativi.
-if [ -z "$SCHEMI" ]; then
-  echo "[clone-vm-db] FATAL: l'elenco degli schemi e' VUOTO. Nessun database sano lo e':" >&2
+SCHEMI_VM="$(printf '%s
+' "$sch_vm" | sed '/^$/d' | sort -u)"
+# Un guard che passa su input vuoto non e' un guard: nessun database sano ha zero
+# schemi applicativi, quindi un elenco vuoto significa che la misura e' fallita in
+# silenzio.
+if [ -z "$SCHEMI_VM" ]; then
+  echo "[clone-vm-db] FATAL: la VM dichiara ZERO schemi applicativi. Nessun database sano lo e':" >&2
   echo "[clone-vm-db] la misura e' fallita in silenzio. Non procedo." >&2
   exit 1
 fi
-echo "[clone-vm-db] schemi rifatti da zero: $(printf '%s' "$SCHEMI" | tr '\n' ' ')(public escluso: ci vivono le estensioni)"
-for s in $SCHEMI; do
-  pg_super -v ON_ERROR_STOP=1 -c "DROP SCHEMA IF EXISTS \"$s\" CASCADE" >/dev/null
-done
+echo "[clone-vm-db] schemi attesi dalla sorgente: $(printf '%s' "$SCHEMI_VM" | tr '
+' ' ')"
+
+# Il database di scena. Un residuo di una corsa interrotta si butta: e' per
+# definizione incompleto, ed e' esattamente cio' che questa cura esiste per non
+# lasciare piu' al suo posto.
+echo "[clone-vm-db] preparo il database di scena: $STAGE_DB"
+pg_maint -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS \"$STAGE_DB\"" >/dev/null
+# Le proprieta' si copiano da quello vero invece di essere cablate: encoding e
+# collazione diverse produrrebbero un clone che ORDINA diversamente dalla sorgente, e
+# nessuno dei controlli qui sotto se ne accorgerebbe.
+PROPS="$(pg_maint -tAc "SELECT pg_encoding_to_char(encoding)||'|'||datcollate||'|'||datctype
+                          FROM pg_database WHERE datname='$DB_NAME'" || echo '')"
+if [ -z "$PROPS" ]; then
+  echo "[clone-vm-db] FATAL: non ho letto encoding/collazione del database vero." >&2
+  exit 1
+fi
+ENC="${PROPS%%|*}"; REST="${PROPS#*|}"; COLL="${REST%%|*}"; CTYPE="${REST##*|}"
+pg_maint -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"$STAGE_DB\" OWNER \"$DBUSER\"
+  TEMPLATE template0 ENCODING '$ENC' LC_COLLATE '$COLL' LC_CTYPE '$CTYPE'" >/dev/null
 
 dump_rc=0; rc=0
 stream_dump_restore
@@ -240,7 +282,40 @@ else
   mismatch=1
 fi
 
+# [S1083 · #236 F1] GLI SCHEMI ATTESI CI SONO TUTTI?
+#
+# La misura fatta all'inizio sulla sorgente serviva a decidere cosa distruggere; qui
+# diventa la post-condizione che decide se sostituire. Un dump troncato che si ferma
+# a meta' puo' lasciare uno schema intero mancante e superare i conteggi di riga —
+# perche' quelle tre tabelle stanno tutte in `sys`, e `staging` o `audit` potrebbero
+# non esserci affatto.
+sch_stage="$(pg_super -tAc "$Q_SCHEMI" 2>>"$ERRLOG" || echo '?')"
+if [ "$sch_stage" = '?' ]; then
+  echo "  schemi del database di scena  NON MISURATI"
+  mismatch=1; unmeasured=1
+else
+  SCHEMI_STAGE="$(printf '%s\n' "$sch_stage" | sed '/^$/d' | sort -u)"
+  if [ "$SCHEMI_STAGE" = "$SCHEMI_VM" ]; then
+    echo "  schemi                    OK  ($(printf '%s' "$SCHEMI_VM" | wc -w) presenti, come la sorgente)"
+  else
+    echo "  schemi                    DIFF" >&2
+    echo "    VM    : $(printf '%s' "$SCHEMI_VM" | tr '\n' ' ')" >&2
+    echo "    scena : $(printf '%s' "$SCHEMI_STAGE" | tr '\n' ' ')" >&2
+    mismatch=1
+  fi
+fi
+
 if [ "$mismatch" -ne 0 ]; then
+  # ⭐ [S1083 · #236 F1] E QUI STA IL GUADAGNO: uscire di qui NON lascia macerie.
+  # Il database vero non e' mai stato toccato — tutto quello che si e' fatto finora
+  # e' avvenuto su `$STAGE_DB`. Il clone precedente e' ancora al suo posto, completo
+  # e interrogabile, e la CI che gira su questa macchina non se ne accorge nemmeno.
+  # Prima di oggi, arrivare a questo `exit 1` significava lasciare un database
+  # mutilato con un messaggio che lo spiegava.
+  echo "[clone-vm-db] il database di scena NON verra' scambiato: $DB_NAME resta quello di prima." >&2
+  # Il residuo di scena si tiene apposta: e' il corpo del reato, e la corsa successiva
+  # lo butta da se'. Buttarlo qui vorrebbe dire cancellare l'unica prova di cosa e'
+  # andato storto, un minuto prima che qualcuno la guardi.
   # Il gate resta invariato: si esce non-zero in ENTRAMBI i casi, perche' un clone non
   # verificato non e' un clone verificato (un falso via libera su un DB mutilato e' la
   # ragione per cui questo controllo esiste — S1030 Z-022). Cambia solo la DIAGNOSI:
@@ -258,4 +333,74 @@ if [ "$mismatch" -ne 0 ]; then
   echo "[clone-vm-db] OnFailure=heuresys-unit-failure@ scrive nel registro degli alert." >&2
   exit 1
 fi
-echo "[clone-vm-db] done"
+# ── [S1083 · #236 F1] LO SCAMBIO ────────────────────────────────────────────────
+#
+# Da qui in poi il database di scena e' verificato: schemi, righe e censimento degli
+# oggetti tornano tutti. Lo scambio e' un aggiornamento di catalogo — `ALTER DATABASE
+# ... RENAME` non copia un byte e non riscrive file: e' istantaneo qualunque sia la
+# dimensione del database.
+#
+# ⚠ PERCHE' NON E' UNA SOLA TRANSAZIONE, dichiarato invece che nascosto: PostgreSQL
+# non ammette `ALTER DATABASE ... RENAME` dentro un blocco transazionale. I due
+# rinomini sono quindi due istruzioni separate, e fra l'una e l'altra c'e' una
+# finestra — di MILLISECONDI, contro i MINUTI di prima, e soprattutto **riparabile**:
+# se il secondo fallisce, il dato non e' perduto, si chiama `$OLD_DB` e il messaggio
+# qui sotto dice esattamente come rimetterlo a posto. La differenza fra le due
+# finestre non e' di grado: in una si perde il database, nell'altra si perde il suo
+# nome.
+#
+# ⚠ LE CONNESSIONI NON SI PRE-CONTROLLANO, SI PROVA E BASTA — e la prima stesura di
+# questa fase sbagliava proprio qui.
+#
+# Chiedere «c'e' qualcuno collegato?» e poi rinominare significa decidere su una
+# misura di un istante prima: e' la «misura ereditata» che il metodo di bonifica
+# vieta, e non e' teoria — misurato oggi, il pre-controllo ha bloccato uno scambio
+# per **una** connessione anonima che stava gia' chiudendosi, lasciata dalle
+# verifiche appena concluse. Un istante dopo non c'era piu' nessuno.
+#
+# Il rinomino invece **e'** la misura: fallisce da se' se qualcuno e' collegato, e lo
+# fa nel momento esatto in cui conta. Quello che va aggiunto non e' un controllo
+# prima, e' una DIAGNOSI dopo: il messaggio di PostgreSQL dice che il database e' in
+# uso e non dice DA CHI, ed e' quella la mezz'ora di archeologia da risparmiare.
+rinomina() { # <da> <a> — ritorna 1 e lascia la diagnosi in `$diagnosi`
+  local da="$1" a="$2"
+  diagnosi=""
+  if pg_maint -v ON_ERROR_STOP=1 -c "ALTER DATABASE \"$da\" RENAME TO \"$a\"" >/dev/null 2>"$ERRLOG.ren"; then
+    return 0
+  fi
+  diagnosi="$(sed 's/^/    | /' "$ERRLOG.ren" 2>/dev/null | head -4)"
+  local chi
+  chi="$(pg_maint -tAc "SELECT string_agg(DISTINCT coalesce(nullif(application_name,''),'(anonimo)')||' ['||state||']', ', ')
+                          FROM pg_stat_activity
+                         WHERE datname = '$da' AND pid <> pg_backend_pid()" 2>/dev/null || echo '?')"
+  [ -n "$chi" ] && diagnosi="$diagnosi"$'\n'"    | collegati a $da: $chi"
+  return 1
+}
+
+echo "[clone-vm-db] scambio: $DB_NAME -> $OLD_DB, $STAGE_DB -> $DB_NAME"
+pg_maint -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS \"$OLD_DB\"" >/dev/null
+if ! rinomina "$DB_NAME" "$OLD_DB"; then
+  echo "[clone-vm-db] FATAL: non ho potuto mettere da parte il clone attuale." >&2
+  printf '%s\n' "$diagnosi" >&2
+  echo "[clone-vm-db] NIENTE E' PERDUTO: il clone attuale e' intatto e quello nuovo, gia'" >&2
+  echo "[clone-vm-db] verificato, aspetta in '$STAGE_DB'. Libera le connessioni e rilancia." >&2
+  exit 1
+fi
+if ! rinomina "$STAGE_DB" "$DB_NAME"; then
+  # La finestra di millisecondi, e cosa fare se ci si capita dentro. Non e' una
+  # rassicurazione: e' il comando, perche' chi legge questo messaggio ha il database
+  # che si chiama con un altro nome e ha bisogno di sapere quale.
+  echo "[clone-vm-db] FATAL: il secondo rinomino e' fallito. IL DATO NON E' PERDUTO." >&2
+  printf '%s\n' "$diagnosi" >&2
+  echo "[clone-vm-db] Il clone precedente si chiama ora '$OLD_DB' e quello nuovo '$STAGE_DB'." >&2
+  echo "[clone-vm-db] Per tornare com'era:  ALTER DATABASE \"$OLD_DB\" RENAME TO \"$DB_NAME\";" >&2
+  exit 1
+fi
+# Da questo punto `$DB_NAME` e' il clone nuovo, quindi le prossime interrogazioni
+# devono andare li'. Vale per chi aggiungera' verifiche dopo lo scambio.
+TARGET_DB="$DB_NAME"
+# Il vecchio si butta solo ADESSO, a scambio riuscito. Tenerlo fin qui e' costato
+# spazio (misurato: 635 MB su 99 GB liberi) e ha comprato l'unica cosa che conta —
+# che in nessun istante di questa procedura esista un momento senza clone.
+pg_maint -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS \"$OLD_DB\"" >/dev/null
+echo "[clone-vm-db] done (scambiato: in nessun istante $DB_NAME e' rimasto senza dati)"

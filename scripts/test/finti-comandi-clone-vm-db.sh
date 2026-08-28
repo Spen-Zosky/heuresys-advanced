@@ -12,7 +12,7 @@
 # fallire finche' non servono, che e' il momento peggiore per scoprirli rotti.
 #
 # COME SI USA: `clone-vm-db.sh` legge questo file (CLONE_VM_DB_STUB) DOPO aver
-# definito le sue quattro funzioni di uscita, e qui le si ridefinisce. Ogni caso di
+# definito le sue cinque funzioni di uscita, e qui le si ridefinisce. Ogni caso di
 # prova si compone con le variabili qui sotto — un file solo, sei scenari, invece di
 # sei copie che divergono.
 #
@@ -47,6 +47,42 @@ remote_psql() {
   return 0
 }
 
+# [S1083 · #236 F1] LA QUINTA FUNZIONE, ed e' quella che decide.
+#
+# `pg_maint` parla col database `postgres` ed esegue CREATE / DROP / ALTER DATABASE:
+# e' l'unica che puo' SCAMBIARE il clone di scena con quello vero. Aggiungerla allo
+# script senza aggiungerla qui ha fatto fallire la batteria al primo colpo, con
+# `sudo.exe: unexpected argument '-u'` — la prova ha colto la funzione non
+# sostituita prima che lo facesse una macchina vera, che e' il suo mestiere.
+#
+# ⚠ Le asserzioni piu' importanti su questa funzione sono NEGATIVE: che il rinomino
+# NON compaia nella traccia quando una verifica e' fallita. Uno scambio che avviene
+# su un clone divergente e' esattamente il difetto che #236 F1 e' venuta a togliere,
+# e sarebbe invisibile a un test che guardasse solo il caso sano.
+pg_maint() {
+  _traccia "pg_maint :: $*"
+  case "$*" in
+    # le proprieta' del database vero: encoding e collazione, nella forma che lo
+    # script si aspetta di spezzare con le espansioni di parametro
+    *pg_encoding_to_char*) printf '%s
+' "${FINTO_PROPS:-UTF8|it_IT.UTF-8|it_IT.UTF-8}" ;;
+    # chi e' collegato: serve alla DIAGNOSI dopo un rinomino fallito, non a un
+    # pre-controllo — quello e' stato tolto (misura ereditata, vedi lo script)
+    *pg_stat_activity*)    printf '%s
+' "${FINTO_CHI_COLLEGATO:-}" ;;
+    # ognuno dei due rinomini puo' essere fatto fallire, e sono due guasti diversi:
+    # il PRIMO lascia tutto com'era, il SECONDO apre la finestra di millisecondi in
+    # cui il dato c'e' ma si chiama `<nome>_old`
+    *"RENAME TO"*)
+      case "$*" in
+        *_stage*) [ "${FINTO_RENAME2_KO:-0}" = "1" ] && return 1 ;;
+        *)        [ "${FINTO_RENAME1_KO:-0}" = "1" ] && return 1 ;;
+      esac
+      return 0 ;;
+    *) return 0 ;;
+  esac
+  return 0
+}
 pg_super() {
   _traccia "pg_super :: $*"
   case "$*" in

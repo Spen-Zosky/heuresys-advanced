@@ -1369,6 +1369,11 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
   }
   vuota_traccia() { : > "$T/traccia"; }
   ha_droppato() { grep -q 'DROP SCHEMA' "$T/traccia"; }
+  # [S1083 · #236 F1] L'ASSERZIONE CHE CONTA E' NEGATIVA: lo scambio NON deve avvenire
+  # quando una verifica e' fallita. Uno scambio su un clone divergente e' esattamente
+  # il difetto che questa fase e' venuta a togliere, e un test che guardasse solo il
+  # caso sano non lo vedrebbe mai.
+  ha_scambiato() { grep -q 'RENAME TO "finto_db"' "$T/traccia"; }
 
   # 1. la VM non risponde -> si esce PRIMA di toccare il clone.
   #    E' il caso in cui il codice vecchio faceva danno: droppava `staging` comunque,
@@ -1383,44 +1388,57 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
   #    andata storta in silenzio. Un guard che passa su input vuoto non e' un guard.
   vuota_traccia
   out="$(cvd FINTO_SCHEMI_VM= FINTO_SCHEMI_LOC=)"; rc=$?
-  { [ "$rc" = 1 ] && ! ha_droppato && printf '%s' "$out" | grep -q 'VUOTO'; } \
-    && ok "clone-vm-db: elenco schemi vuoto => esce 1 e NON droppa (il guard non si accontenta)" \
+  # ⚠ [S1083] Il guard e' lo stesso e vale ancora, ma ora misura il SOLO lato sorgente:
+  # non serve piu' l'unione dei due lati, che serviva a decidere cosa droppare. Quindi
+  # la frase e' cambiata («ZERO schemi applicativi» invece di «VUOTO») e l'asserzione
+  # la segue. Cio' che si pretende e' invariato: esce 1, e non tocca niente.
+  { [ "$rc" = 1 ] && ! ha_droppato && ! ha_scambiato \
+      && printf '%s' "$out" | grep -q 'ZERO schemi applicativi'; } \
+    && ok "clone-vm-db: la sorgente dichiara zero schemi => esce 1 e non tocca niente" \
     || fail "clone-vm-db elenco vuoto ($rc: $out)"
 
-  # 3. IL CUORE DI D-86: uno schema che vive SOLO sul clone — cioe' ritirato dalla
-  #    produzione — deve finire nell'elenco da droppare. E' l'unione dei due lati che
-  #    lo cattura; guardando il solo dump, quello schema non esiste e sopravvive.
+  # 3. [S1083 · #236 F1] LA GARANZIA E' CAMBIATA DI NATURA, e con essa questi due casi.
+  #
+  #    Qui stavano le prove che «uno schema ritirato dalla produzione viene droppato»
+  #    (il cuore di D-86) e che «`public` non si droppa, ci vivono le estensioni».
+  #    Entrambe verificavano un COMPORTAMENTO che oggi non esiste piu': il clone non
+  #    droppa nulla, si ricostruisce in un database che nasce vuoto. Le due proprieta'
+  #    che quelle prove difendevano non sono state abbandonate — sono diventate vere
+  #    PER COSTRUZIONE, ed e' un modo piu' forte di essere vere: uno schema ritirato
+  #    non puo' sopravvivere a un database che non lo ha mai contenuto, e `public` non
+  #    puo' cadere se nessuno lo tocca.
+  #
+  #    Al loro posto va la garanzia nuova, che e' l'unica cosa che quel cambio ha reso
+  #    necessario provare: **il clone di scena viene creato da zero**, non riusato. Un
+  #    residuo di una corsa interrotta e' per definizione incompleto, e riusarlo
+  #    significherebbe scambiare un clone mutilato — cioe' il difetto di partenza,
+  #    ricomparso da un'altra porta.
   vuota_traccia
-  out="$(cvd FINTO_SCHEMI_VM='sys staging' FINTO_SCHEMI_LOC='sys staging ritirato')"; rc=$?
-  { [ "$rc" = 0 ] && grep -q 'DROP SCHEMA IF EXISTS "ritirato"' "$T/traccia"; } \
-    && ok "clone-vm-db: schema presente SOLO sul clone => droppato (era il difetto D-86)" \
-    || fail "clone-vm-db unione dei due lati ($rc: $(cat "$T/traccia"))"
+  out="$(cvd FINTO_SCHEMI_VM='sys staging' FINTO_SCHEMI_LOC='sys staging')"; rc=$?
+  { [ "$rc" = 0 ]       && grep -q 'DROP DATABASE IF EXISTS "finto_db_stage"' "$T/traccia"       && grep -q 'CREATE DATABASE "finto_db_stage"' "$T/traccia"       && ! ha_droppato; }     && ok "clone-vm-db: il database di scena nasce da ZERO, e nessuno schema viene droppato"     || fail "clone-vm-db creazione dello stage ($rc: $(cat "$T/traccia"))"
 
-  # 3b. ...e `public` NON si droppa: ci vivono le 5 estensioni, e il dump non lo
-  #     ricrea (misurato con `pg_restore -l`). Se cadesse, il ripristino fallirebbe
-  #     su CREATE EXTENSION e il clone resterebbe mutilato.
-  vuota_traccia
-  out="$(cvd FINTO_SCHEMI_VM='sys public' FINTO_SCHEMI_LOC='sys public')"; rc=$?
-  { [ "$rc" = 0 ] && ! grep -q 'DROP SCHEMA IF EXISTS "public"' "$T/traccia"; } \
-    && ok "clone-vm-db: public NON viene droppato (ci vivono le estensioni)" \
-    || fail "clone-vm-db public droppato ($rc: $(cat "$T/traccia"))"
+  # 3b. E LO SCAMBIO AVVIENE, nel caso sano: senza questa riga i casi negativi qui
+  #     sotto sarebbero soddisfatti anche da uno script che non scambia MAI.
+  { grep -q 'ALTER DATABASE "finto_db" RENAME TO "finto_db_old"' "$T/traccia"       && grep -q 'ALTER DATABASE "finto_db_stage" RENAME TO "finto_db"' "$T/traccia"; }     && ok "clone-vm-db: caso sano => i due rinomini avvengono, nell'ordine"     || fail "clone-vm-db scambio nel caso sano ($(cat "$T/traccia"))"
+
 
   # 4. il dump si interrompe a meta': il clone e' gia' stato droppato, quindi e'
   #    INCOMPLETO — e va detto, non dedotto dal silenzio. (S1030, review Z-022: un
   #    dump tagliato al 70% dava exit 0 e una tabella a zero righe.)
   vuota_traccia
   out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_DUMP_RC=2)"; rc=$?
-  { [ "$rc" = 2 ] && printf '%s' "$out" | grep -q 'INCOMPLETO'; } \
-    && ok "clone-vm-db: dump interrotto => esce col SUO codice e dichiara il clone incompleto" \
-    || fail "clone-vm-db dump interrotto ($rc: $out)"
+  { [ "$rc" = 2 ] && printf '%s' "$out" | grep -q 'INCOMPLETO' && ! ha_scambiato; } \
+    && ok "clone-vm-db: dump interrotto => esce col SUO codice, e NON scambia (il clone vero resta)" \
+    || fail "clone-vm-db dump interrotto ($rc, scambiato=$(ha_scambiato && echo si || echo no): $out)"
 
   # 5. il censimento diverge -> «NON corrisponde». E' il caso che ha bloccato la
   #    chiusura di S1074, e deve restare bloccante: e' il guardiano, non il difetto.
   vuota_traccia
   out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_CENS_VM='sys.tab=10' FINTO_CENS_LOC='sys.tab=11')"; rc=$?
-  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'NON corrisponde'; } \
-    && ok "clone-vm-db: censimento divergente => FATAL (il guardiano dei ritiri regge)" \
-    || fail "clone-vm-db censimento DIFF ($rc: $out)"
+  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'NON corrisponde' && ! ha_scambiato \
+      && printf '%s' "$out" | grep -q 'resta quello di prima'; } \
+    && ok "clone-vm-db: censimento divergente => FATAL, e il divergente NON prende il posto del buono" \
+    || fail "clone-vm-db censimento DIFF ($rc, scambiato=$(ha_scambiato && echo si || echo no): $out)"
 
   # 6. «non ho potuto misurare» e «i numeri non combaciano» sono DUE guasti diversi e
   #    devono dirlo. Confrontare due '?' dava «OK»: il fallimento di entrambi i lati
@@ -1440,6 +1458,35 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
   { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'done'; } \
     && ok "clone-vm-db: tutto sano => esce 0 (il controllo non blocca il caso buono)" \
     || fail "clone-vm-db caso sano ($rc: $out)"
+
+  # 8. [#236 F1] IL PRIMO RINOMINO FALLISCE — tipicamente perche' qualcuno e' collegato.
+  #    ⚠ Questo caso NON prova un pre-controllo: quello e' stato tolto, ed e' stata la
+  #    corsa reale a imporlo. Chiedere «c'e' qualcuno?» e poi rinominare decide su una
+  #    misura di un istante prima, e misurato oggi ha bloccato uno scambio per UNA
+  #    connessione anonima che si stava gia' chiudendo. Il rinomino E' la misura: qui
+  #    si pretende che, quando fallisce, il clone resti intatto e il messaggio dica
+  #    CHI era collegato — che e' cio' che l'errore di PostgreSQL non dice.
+  vuota_traccia
+  out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_RENAME1_KO=1 \
+             FINTO_CHI_COLLEGATO='api-gemello [idle]')"; rc=$?
+  { [ "$rc" = 1 ] && ! ha_scambiato \
+      && printf '%s' "$out" | grep -q 'NIENTE E. PERDUTO' \
+      && printf '%s' "$out" | grep -q 'api-gemello'; } \
+    && ok "clone-vm-db: primo rinomino fallito => niente scambio, e dice CHI era collegato" \
+    || fail "clone-vm-db primo rinomino ($rc: $out)"
+
+  # 9. LA FINESTRA DI MILLISECONDI, ed e' l'unico rischio che questa fase NON elimina:
+  #    i due rinomini non stanno in una transazione perche' PostgreSQL non lo permette.
+  #    Se il secondo fallisce, il dato NON e' perduto — si chiama `<nome>_old` — e il
+  #    messaggio deve portare il comando esatto per rimetterlo a posto. Un messaggio
+  #    che dicesse solo «errore» lascerebbe chi legge con un database che non trova.
+  vuota_traccia
+  out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_RENAME2_KO=1)"; rc=$?
+  { [ "$rc" = 1 ] \
+      && printf '%s' "$out" | grep -q 'IL DATO NON E. PERDUTO' \
+      && printf '%s' "$out" | grep -q 'ALTER DATABASE "finto_db_old" RENAME TO "finto_db"'; } \
+    && ok "clone-vm-db: secondo rinomino fallito => dice dov'e' il dato E il comando per rimediare" \
+    || fail "clone-vm-db rinomino fallito ($rc: $out)"
   rm -rf "$T"
 else
   fail "$CVD o $STUB mancante"

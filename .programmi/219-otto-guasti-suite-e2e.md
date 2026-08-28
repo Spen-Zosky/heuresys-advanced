@@ -280,6 +280,33 @@ non correggendolo.
   ⚠ E finché non si esegue là, **F5e non è dimostrabile**: chiedere «0 falliti» a una corsa il cui
   ambiente produce da sé i propri rossi è chiedere una prova che non può riuscire.
 
+  #### 🔬 La conferma è arrivata da sé, e vale più della misura che stavo cercando
+
+  Volevo confrontare due raffiche di richieste — una all'API locale, una a quella del gemello — e
+  la prima non è mai partita: **l'API locale era morta**, e il suo log dice perché.
+
+  ```
+  "msg":"API failed to start"
+  Error: Connection terminated due to connection timeout
+      at ... loadRolePermissionCache (modules/auth/cache-loader.ts:58)
+  ```
+
+  Non è caduta sotto carico: **non è riuscita ad avviarsi**. Il primo atto dell'avvio è caricare
+  la cache dei permessi RBAC dal database, e quella singola lettura è andata in timeout
+  attraverso il tunnel. Lo stesso era già accaduto all'avvio di questa sessione, dove i primi due
+  tentativi erano falliti e il terzo era passato per fortuna (`attempt 1`, `attempt 2` nel log,
+  poi `RBAC permission cache loaded`): il ritentativo con backoff è ciò che maschera il difetto
+  nell'uso normale, e non basta più quando la macchina è occupata.
+
+  Il gemello, nello stesso momento e sulla stessa rotta (`/v1/public/platform-stats`, che tocca
+  il database), risponde: **p50 31 ms**, e sotto una raffica di 40 richieste concorrenti nega
+  con un ordinato **429 di rate-limit** — cioè si difende, non si rompe.
+
+  **Questo è il fatto, e la sua conseguenza va oltre la suite E2E**: il tunnel non regge nemmeno
+  **l'avvio dell'API**. Ogni corsa lanciata da qui parte da un ambiente che può morire da solo, e
+  i suoi rossi non dicono nulla sul prodotto. Spiega anche i `socket hang up` che Next.js
+  registrava mentre proxava verso `:3001`: non era un errore di rete, era un'API che non c'era.
+
   - [ ] **F5e La corsa che chiude** — 0 falliti, poi il passaggio in CI. ⚠ **Da eseguire SUL
         GEMELLO** (vedi il riquadro qui sopra): da Windows il tunnel produce rossi propri, e il
         criterio «0 falliti» diventa irraggiungibile per una ragione che non riguarda il prodotto

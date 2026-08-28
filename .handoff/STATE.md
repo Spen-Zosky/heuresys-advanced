@@ -29,21 +29,26 @@ il database («si esegue dove il database vive»), mai estesa alla suite.
 
 ## Top priorities — le priorità
 
-1. **`#219` F5e — la corsa integrale, ma SUL GEMELLO.** È il primo atto della prossima sessione, e
-   **non va rifatta da Windows**: la corsa di ieri ha dato `fase 1: 1 fallito + 4 flaky + 83
+1. **`#236` F2 — L'ARMAMENTO DEL CLONE. Deciso da Enzo il 2026-08-29: è il PRIMO ATTO della
+   prossima sessione**, e si apre con contesto pulito per una ragione misurata: a fine S1083 il
+   guardiano dava `exit 2` su qualunque budget da 60k, e F2 tocca `close-propagate.sh` —
+   spezzarla a metà lascerebbe la chiusura di sessione ad armare qualcosa che nessun sorvegliante
+   esegue ancora. Il piano è scritto e dettagliato, il
+   modello da copiare è quello del deploy (`#165`): armamento atomico · esecuzione fatta da un
+   timer sulla macchina · `OnFailure` · `Persistent=true`. **F1 è chiusa e ha già tolto il
+   pericolo** — oggi la peggiore conseguenza di una chiusura a sproposito è un clone da rifare,
+   non un database rotto. → `.programmi/236-lavori-remoti-armati-non-appesi.md`
+2. **`#219` F5e — la corsa integrale, ma SUL GEMELLO**, e **non da Windows**: la corsa di ieri ha dato `fase 1: 1 fallito + 4 flaky + 83
    passati` e `fase 2: 4 falliti + 89 NON ESEGUITI`, e i quattro falliti erano **tutti i setup di
    autenticazione**, uccisi da un'API che il tunnel non tiene in vita. Verificato: il gemello ha
    Playwright, Node 22 di default, il database **in casa** e il web vivo.
    `ssh linux-pc 'cd ~/heuresys-advanced/apps/web && pnpm test:e2e:prod'` — dopo un `git pull` là.
    → `.programmi/219-otto-guasti-suite-e2e.md`
-2. **Tre voci aspettano lo stesso tuo input, e nessuna lo diceva.** `#198` T9b, `#132` F7 e `#205` sono tutte `blocked-on-Enzo` sull'**indirizzo e la credenziale del
+3. **Tre voci aspettano lo stesso tuo input, e nessuna lo diceva.** `#198` T9b, `#132` F7 e `#205` sono tutte `blocked-on-Enzo` sull'**indirizzo e la credenziale del
    fornitore di ricerca** (`RESEARCH_GATEWAY_URL` / `_TOKEN`): verificato leggendo il `.env`, sono
    assenti in locale e la dashboard li dà mancanti anche in produzione. Un solo input le sblocca
    tutte e tre. → `.programmi/132-ricerca-genera-il-modello.md`
-3. **`#236` F2 — l'armamento del clone, ora che F1 ha tolto il rischio di romperlo.** F1 è chiusa:
-   il clone si ricostruisce accanto e uno `SIGKILL` a metà non lascia più macerie (provato). Resta
-   che *muoia* con la sessione. F2 gli dà il trattamento del deploy — si arma, lo esegue un timer
-   sulla macchina — e F3 il comando che ne legge lo stato. → `.programmi/236-lavori-remoti-armati-non-appesi.md`
+
 4. **`#143` F3 e `#54` F3 — i due modelli dati nuovi aspettano la loro superficie.** Le tabelle sono
    in produzione; servono l'asse funzionale vivo per il primo (`isInFunctionalScope` è ancora codice
    morto) e le rotte per il secondo. → `.programmi/143-squadra-come-progetto.md` · `54-recruiting-ats.md`

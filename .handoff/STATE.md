@@ -4,82 +4,66 @@
 
 ## Last session brief — l'ultima sessione, in breve
 
-**S1082 — la sessione in cui un controllo troppo caro si è rivelato un modo di perdere
-difetti, non solo tempo.** Aperta su un mandato esterno (i token di marca alla libreria),
-proseguita sul batch `#219 → #234 → #227`, e deviata da una domanda di Enzo che ha aperto la
-vena più produttiva della giornata.
+**S1083 — la sessione in cui la misura ha smentito il piano scritto sei volte, e una di quelle
+volte ha spiegato perché una voce non si chiudeva da mesi.** Mandato di Enzo: risolvere i quattro
+rossi del cruscotto e i cinque programmi aperti, poi *iniziare le corse* di ogni voce P1/P2/P3,
+decidendo tutto da me e fermandomi solo sulla capienza. Tutti e tre i blocchi chiusi.
 
-**Il filo.** Applicavo una migrazione alla produzione da Windows guardando la catena avanzare per
-ottanta minuti, *misurando la lentezza mentre accadeva* senza chiedermi dove convenisse eseguirla.
-Alla domanda di Enzo — «perché non lo fai sulla VM?» — la misura ha risposto: **17 secondi**. Da lì
-il censimento di ogni controllo che pagava lo stesso pedaggio, e la scoperta che il costo
-**nasconde**: la suite API da 37 minuti non si eseguiva, e conteneva un rosso vero invisibile da
-settimane.
+**I quattro rossi non erano quattro problemi.** Due erano sintomi di guasti più grandi: il registro
+delle migrazioni nominava un file introvabile su tutte e tre le macchine e in tutta la storia git —
+ed era la **traccia di un ritiro fatto a metà** in S1082, dove il file fu tolto e la sua riga di
+registro no. E il «gap di traduzione» erano **tre entità di collaudo**
+dimenticate da una corsa E2E morta a metà, che **bloccavano l'intera catena in produzione** perché
+una migrazione a monte pretende copertura EN a zero.
 
-**Le firme mentono, quinta conferma di fila.** Nessuno dei cinque guasti curati era ciò che la
-firma diceva: i due rossi a11y erano un ritiro fatto a metà e una soglia sul filo di un nodo · il
-passkey era il terzo caso MFA rimasto senza la condizionalità dei gemelli · il test dei record
-cercava una regola in un dominio che ne ha un'altra.
+**Il filo che lega la giornata**: in sei voci diverse la misura ha corretto il piano. Le 4.464
+competenze «isolate nel grafo» non sono isolate affatto — il 98,2% ha un gruppo ESCO con un padre,
+e quelle davvero scollegate sono **81**. Il primo perimetro della coda dell'agente **non si apre**:
+862 risposte di clima su 862 portano il nome di chi ha risposto. `#159` F2 avrebbe prodotto ciò che
+un divieto permanente vieta. E `#169` F3 non era eseguibile com'era scritta.
 
-**E un errore mio, disfatto con lo strumento giusto.** La derivazione dei requisiti per il Risk
-Manager ha chiuso `X5d` **accendendo `X5a`**: la post-condizione proteggeva ciò che non doveva
-cambiare *dentro* la firma curata, non le altre della batteria. Rollback eseguito, stato
-ripristinato, migrazione ritirata da tutte e tre le macchine.
+**La scoperta che vale oltre la sessione**: i rossi delle corse E2E lanciate da Windows sono
+**rumore**. L'API non regge il tunnel — non è caduta sotto carico, **non è riuscita ad avviarsi**,
+perché il caricamento della cache dei permessi va in timeout. È la stessa dottrina già scritta per
+il database («si esegue dove il database vive»), mai estesa alla suite.
 
 ## Top priorities — le priorità
 
-1. **`#219` F5e — la corsa che chiude, e il passaggio in CI.** I **tre** guasti di F5d-bis sono
-   curati (2 a11y + passkey): l'ultima corsa integrale misurata dava `363 passati · 1 fallito`, e
-   quel fallito era il passkey, ora risolto. Serve **una corsa a 0 falliti** e poi il passaggio in
-   CI secondo il criterio di `#211` F4.
-   ⚠⚠ **PRIMO ATTO DELLA PROSSIMA SESSIONE — E NON FIDARSI DELL'ULTIMA CORSA.** Una corsa
-   integrale è stata lanciata a fine S1082 ed è stata **uccisa alla fase 4/4** dalla chiusura
-   della sessione, che ha terminato anche **l'API**. Conseguenze verificate: il referto
-   `apps/web/esiti-e2e.json` **non esiste** (si scrive a fine corsa), e il log parziale mostra i
-   **setup falliti in timeout** con molti test caduti a cascata — **è l'effetto dell'API morta,
-   non un guasto del prodotto**. Quei rossi vanno **ignorati**: un rosso che non indica un
-   difetto insegna a non guardare la suite, ed è ciò che questa voce cura.
-   **La corsa va rifatta da zero**, in quest'ordine: ① `cd apps/api && pnpm dev` e attendere un
-   **200** vero su `/readyz` (non una risposta qualsiasi) · ② liberare la `:3000` da eventuali
-   orfani · ③ `cd apps/web && node scripts/e2e-blocchi.mjs`. L'ultimo esito **attendibile** resta
-   quello di metà sessione: **`363 passati · 1 fallito`**, e quel fallito (il passkey) è stato
-   curato dopo. → `.programmi/219-otto-guasti-suite-e2e.md`
-2. **`#234` F2 — resta `X3c`, e la decisione è già presa.** Da 5 difetti a 1. Enzo ha deciso di
-   **generare gli stipendi anche per Heuresys** (4 persone, nessun ciclo payroll, contro le 5.638
-   buste di RTL). Non entra in una coda: è lavoro dichiarato. Riaperto anche il **Risk Manager**
-   di `X5d`, con l'istruttoria migliorata: la derivazione dai pari è possibile ma **non è
-   innocua**. → `.programmi/234-otto-rossi-verifica-incrociata.md`
-3. **`#227` F2 — gli archi derivabili**, non toccata in questa sessione: 4.332 competenze stanno
-   in gruppi che hanno già sorelle collegate. ⚠ La fonte ESCO a monte **non è più consultabile**:
-   F2 lavora su ciò che il database già contiene. → `.programmi/227-competenze-isolate-nel-grafo.md`
+1. **`#219` F5e — la corsa integrale, ma SUL GEMELLO.** È il primo atto della prossima sessione, e
+   **non va rifatta da Windows**: la corsa di ieri ha dato `fase 1: 1 fallito + 4 flaky + 83
+   passati` e `fase 2: 4 falliti + 89 NON ESEGUITI`, e i quattro falliti erano **tutti i setup di
+   autenticazione**, uccisi da un'API che il tunnel non tiene in vita. Verificato: il gemello ha
+   Playwright, Node 22 di default, il database **in casa** e il web vivo.
+   `ssh linux-pc 'cd ~/heuresys-advanced/apps/web && pnpm test:e2e:prod'` — dopo un `git pull` là.
+   → `.programmi/219-otto-guasti-suite-e2e.md`
+2. **Tre voci aspettano lo stesso tuo input, e nessuna lo diceva.** `#198` T9b, `#132` F7 e `#205` sono tutte `blocked-on-Enzo` sull'**indirizzo e la credenziale del
+   fornitore di ricerca** (`RESEARCH_GATEWAY_URL` / `_TOKEN`): verificato leggendo il `.env`, sono
+   assenti in locale e la dashboard li dà mancanti anche in produzione. Un solo input le sblocca
+   tutte e tre. → `.programmi/132-ricerca-genera-il-modello.md`
+3. **`#143` F3 e `#54` F3 — i due modelli dati nuovi aspettano la loro superficie.** Le tabelle sono
+   in produzione; servono l'asse funzionale vivo per il primo (`isInFunctionalScope` è ancora codice
+   morto) e le rotte per il secondo. → `.programmi/143-squadra-come-progetto.md` · `54-recruiting-ats.md`
 
 ## Open questions — le domande aperte
 
-1. **Chi ha pushato il 26 agosto alle 18:47?** Due commit di prodotto sono arrivati su `origin/main`
-   senza che io eseguissi alcun push, la CI è partita e il sito pubblico è stato ripubblicato. Non
-   è un'attività pianificata, non è una sessione CLI parallela, e il diario non registra nulla. Se
-   non riconosci l'azione, il progetto ha una regola precisa su chi può pushare qui e qualcosa
-   l'ha aggirata.
-2. **`#86`** — `claude login` sul solo linux-pc, cinque minuti tuoi. Invariata da S1080.
-3. **La chiave di collaudo vive solo su Windows** (`.secrets/collaudo-access.key`): va propagata
-   come la chiave madre perché la suite giri con le utenze nuove su CI e linux-pc. La propago?
-4. **Il fornitore di proposte non è configurato in produzione** (`RESEARCH_GATEWAY_URL`/`_TOKEN`).
-5. **Sulla VM resta una vecchia unit di servizio** (`heuresys-advanced-web.service.dev.bak`),
-   inerte ma è configurazione di produzione. Si sposta, si tiene, o si lascia?
-6. **Il contratto di `marta.pellegrini@rtl-bank.org` è scaduto il 2026-08-25** e la sua posizione
-   resta attiva: va rinnovato o chiusa la posizione. È una decisione sui dati.
-7. **Un ritocco al tema di marca ora si fa in `ux-design-shared` e pretende una release** — il
-   prezzo del modello. Sblocca la correzione a monte che il register rimandava (badge pieni a
-   contrasto insufficiente, S1038): la faccio quando la nomini.
+1. **Chi ha pushato il 26 agosto alle 18:47?** Invariata da S1082: due commit di prodotto arrivati
+   su `origin/main` senza un push mio, con CI partita e sito ripubblicato. Non è un'attività
+   pianificata né una sessione CLI parallela, e il diario non registra nulla.
+2. **`#86`** — `claude login` sul solo `linux-pc`, cinque minuti tuoi. Invariata da S1080.
+3. **Le risposte ai sondaggi di clima sono oggi leggibili fuori dalla catena organizzativa.**
+   Misurato: chiunque abbia `surveys:read` le vede, anche di persone che non gli riportano.
+   Classificarle come sensibili è la cura, ma comporta annotare **21 rotte** con l'org-gate e
+   cambia chi vede cosa in produzione: pretende una prova live, quindi è una voce di lavoro e non
+   un ritocco. La riga in `data-classes.ts` resta, ma da oggi porta accanto la misura che la
+   smentisce.
 
-## Verification — la verifica
+## Verification — come si controlla
 
 ```bash
 python docs/kb/tools/session_start.py            # menu + salute, un giro solo
-python docs/kb/tools/guardiano.py                # contesto e finestra 5h
-python docs/kb/tools/verifica_incrociata.py      # #234: 1 difetto residuo (X3c)
-bash db/scripts/prova-idempotenza.sh             # ⭐ catena x2 + sentinelle SUL GEMELLO (~13 s)
-pnpm db:migrate:vm                               # ⭐ applica alla produzione SULLA VM (~17 s)
-cd apps/api && pnpm dev                          # ⚠ PRIMA di ogni corsa E2E
-cd apps/web && node scripts/e2e-blocchi.mjs      # la corsa integrale, 4 fasi
+python docs/kb/tools/verifica_incrociata.py      # atteso: 0 verifiche con difetti
+python docs/kb/tools/check_marciume.py           # atteso: «niente e' marcito»
+bash scripts/verifica-deploy.sh                  # com'e' finito il deploy armato
 ```
+
+> I numeri (migrazioni, moduli, conteggi DB, CI) stanno in `docs/kb/SOT_STATE.md`.

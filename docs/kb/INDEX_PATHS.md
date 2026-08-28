@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-27T13:53:20Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3251**
+**Generato**: 2026-08-28T20:59:01Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3260**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 355 |
+| db-migration | 362 |
 | db-other | 8 |
 | db-script | 48 |
 | db-seed | 114 |
-| doc-canonical | 733 |
+| doc-canonical | 734 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 108 |
 | showcase-source | 13 |
-| test | 403 |
+| test | 404 |
 | ux-design-archive | 80 |
 | web-source | 241 |
-| **TOTALE** | **3251** |
+| **TOTALE** | **3260** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2693 |
+| live | 2702 |
 
 ## File per categoria
 
@@ -1444,6 +1444,13 @@
 - `D:\heuresys-advanced\db\migrations\000355_un_grafo_puo_contenere_persone_e_il_criterio_non_lo_sapeva.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000356_un_account_di_servizio_non_e_una_persona_senza_posizione.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000357_un_okr_di_reparto_o_ha_un_reparto_o_e_di_un_altra_azienda.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000359_il_registro_non_puo_nominare_un_file_che_non_esiste.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000360_una_corsa_di_collaudo_non_lascia_residui_in_produzione.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000361_una_posizione_ricoperta_deve_dire_cosa_si_deve_saper_fare.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000362_un_contratto_attivo_deve_avere_una_busta_paga_recente.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000363_una_squadra_e_un_progetto_il_modello.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000364_il_ciclo_di_selezione_dalla_posizione_vacante_alla_offerta.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000365_il_grafo_delle_competenze_ha_due_tipi_di_legame.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1667,6 +1674,7 @@
 - `D:\heuresys-advanced\.programmi\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1067-batch-p1p2p3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1068-p3-p1-p2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1071-ciclo-p1.md` · *live* · git-tracked
@@ -2868,6 +2876,7 @@
 - `D:\heuresys-advanced\apps\api\test\skill-aliases.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\skill-categories.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\skill-families.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\skill-graph.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\skill-proficiency-levels.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\skill-taxonomy-edges.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\skills-i18n.integration.test.ts` · *live* · git-tracked

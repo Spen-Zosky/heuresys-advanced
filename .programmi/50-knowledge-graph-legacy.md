@@ -15,8 +15,9 @@
 ## Fasi
 
 - [x] **F1 — INDAGINE: cosa contengono davvero i 139k nodi/archi** — FATTO 2026-08-14 (S1058). **Esito: i dati non esistono nella fonte.** Vedi sotto.
-- [ ] **F2 — Il grafo delle competenze, dai dati che abbiamo** — ⚙️ **LA FONTE È FATTA (S1083,
-  2026-08-28, mig `000365`); resta l'endpoint.** Prova generale VERDE sul gemello, due passate,
+- [x] **F2 — Il grafo delle competenze, dai dati che abbiamo** — ✅ **CHIUSA (S1083, 2026-08-28)**:
+  fonte (mig `000365`) + endpoint `GET /v1/skills/graph` + 7 test di integrazione **verdi sul
+  gemello**. Prova generale VERDE sul gemello, due passate,
   27/27 sentinelle.
 
   ⭐ **E la premessa di questa fase era sbagliata: la sorgente NON è `sys_skill_taxonomy_edges`
@@ -40,8 +41,14 @@
   ⚠ **Funzioni e non viste**, e non è stile: `db_health` raccoglie ogni `sys.v_*` e pretende zero
   righe; una vista che serve un grafo ne ha decine di migliaia e sarebbe rossa a ogni avvio.
 
-  **Resta da fare**: le rotte `/v1/*` con schema Zod condiviso e gli integration test — sono
-  `apps/api`, e in S1083 la corsa E2E integrale di `#219` era in volo sugli stessi processi.
+  **I due difetti che solo i test potevano trovare**, ed è la ragione per cui sono scritti
+  confrontando due misure invece di chiedere «risponde 200»:
+  ① `isEsco` tornava `null` invece di `false` — in SQL `NULL LIKE 'http%'` vale NULL, e le
+  competenze senza URI facevano rifiutare l'**intero** payload dallo schema di risposta: un 500
+  su una rotta che funzionava;
+  ② `?includeGroups=false` **accendeva** i gruppi invece di spegnerli, perché
+  `z.coerce.boolean()` fa `Boolean("false")`, che vale `true`. L'ha colto il test «spegnerli ne
+  toglie»; leggere il codice non l'avrebbe fatto.
 
   *(testo originale della fase)* nessun import: la sorgente è `sys_skill_taxonomy_edges` più il catalogo skill (i conteggi **si misurano quando si apre la fase**, non si citano qui: crescono). Fatto = endpoint che serve nodi e archi con i filtri che una vista a grafo richiede (profondità, tipo di relazione, ancoraggio a una skill o a una persona), schema Zod condiviso, integration test. **Il cancello di esposizione (#79) è già soddisfatto per costruzione**: la tabella è già letta, qui le si dà una superficie a grafo · budget ~200k
 - [ ] **F3 — La vista, con il componente che aspetta da sempre** — `KGGraphCanvas` di `@heuresys/ui` è stato costruito apposta e **non è mai stato usato**: qui trova il suo primo consumatore. Pagina sotto `/visualizations` (che esiste già), E2E con login reale · budget ~250k

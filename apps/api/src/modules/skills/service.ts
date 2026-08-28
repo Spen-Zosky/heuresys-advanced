@@ -18,6 +18,8 @@ const SKILL_I18N = {
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
 import type {
   Skill,
+  SkillGraphQuery,
+  SkillGraphResponse,
   SkillListQuery,
   CreateSkillBody,
   UpdateSkillBody,
@@ -31,6 +33,56 @@ function visible(actor: ActorContext, skill: Skill): boolean {
 }
 
 export const skillsService = {
+  /**
+   * Il grafo delle competenze (#50 F2, S1083).
+   *
+   * ⚠ VISIBILITA: il catalogo delle competenze e' in larghissima parte GLOBALE
+   * (ESCO), e i nodi che portano un tenant sono le competenze proprie di
+   * un'azienda. Un attore non-platform non deve vedere i nodi di un ALTRO
+   * tenant: il filtro si applica qui, sui nodi, e gli archi che restano orfani
+   * cadono di conseguenza — un arco verso un nodo che non si puo' vedere non e'
+   * un'informazione parziale, e' una fuga di notizie sul fatto che esista.
+   */
+  async graph(actor: ActorContext, query: SkillGraphQuery): Promise<SkillGraphResponse> {
+    const { nodes, edges } = await repo.fetchSkillGraph(
+      pool,
+      query.root ?? null,
+      query.depth,
+      query.kinds ?? null,
+      query.includeGroups,
+    );
+
+    const visibili = isPlatform(actor)
+      ? nodes
+      : nodes.filter((n) => n.node_tenant === null || n.node_tenant === actor.tenantId);
+    const ammessi = new Set(visibili.map((n) => n.node_id));
+    const archi = edges.filter((e) => ammessi.has(e.source_id) && ammessi.has(e.target_id));
+
+    return {
+      nodes: visibili.map((n) => ({
+        id: n.node_id,
+        kind: n.node_kind,
+        label: n.node_label,
+        code: n.node_code,
+        tenantId: n.node_tenant,
+        isEsco: n.node_esco,
+      })),
+      edges: archi.map((e) => ({
+        source: e.source_id,
+        target: e.target_id,
+        kind: e.edge_kind,
+        family: e.edge_family,
+        source_ref: e.edge_source,
+      })),
+      counts: {
+        nodes: visibili.length,
+        edges: archi.length,
+        explicitEdges: archi.filter((e) => e.edge_family === "EXPLICIT").length,
+        groupEdges: archi.filter((e) => e.edge_family === "GROUP").length,
+      },
+    };
+  },
+
   async list(actor: ActorContext, query: SkillListQuery, locale: Locale = "it") {
     // PLATFORM_ADMIN: no tenant filter. Others: tenant filter limits to
     // (global OR own tenant) at SQL level.

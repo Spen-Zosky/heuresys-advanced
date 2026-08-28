@@ -205,3 +205,48 @@ export async function updateSkillPartial(
   );
   return res.rows[0] ? toSkill(res.rows[0]) : null;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * IL GRAFO — #50 F2 (S1083)
+ *
+ * Le due funzioni SQL sono la fonte (migrazione 000365) e stanno nel database,
+ * non qui: la camminata in ampiezza su decine di migliaia di archi si fa dove
+ * stanno gli archi. Questo repository le interroga e basta.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+interface GraphNodeRow {
+  node_id: string;
+  node_kind: "SKILL" | "GROUP";
+  node_label: string;
+  node_code: string | null;
+  node_tenant: string | null;
+  node_esco: boolean;
+}
+
+interface GraphEdgeRow {
+  source_id: string;
+  target_id: string;
+  edge_kind: string;
+  edge_family: "EXPLICIT" | "GROUP";
+  edge_source: string | null;
+}
+
+export async function fetchSkillGraph(
+  q: DbConnector,
+  root: string | null,
+  depth: number,
+  kinds: string[] | null,
+  includeGroups: boolean,
+): Promise<{ nodes: GraphNodeRow[]; edges: GraphEdgeRow[] }> {
+  const [nodes, edges] = await Promise.all([
+    q.query<GraphNodeRow>(
+      `SELECT * FROM sys.fn_skill_graph_nodes($1::uuid, $2::integer, $3::boolean)`,
+      [root, depth, includeGroups],
+    ),
+    q.query<GraphEdgeRow>(
+      `SELECT * FROM sys.fn_skill_graph_edges($1::uuid, $2::integer, $3::text[], $4::boolean)`,
+      [root, depth, kinds, includeGroups],
+    ),
+  ]);
+  return { nodes: nodes.rows, edges: edges.rows };
+}

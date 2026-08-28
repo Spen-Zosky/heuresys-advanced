@@ -147,7 +147,11 @@ LANGUAGE sql STABLE AS $$
     SELECT target_id FROM sys.fn_skill_graph_edges(p_root, p_depth, NULL, p_include_groups)
   )
   SELECT s.skill_id, 'SKILL'::varchar, s.skill_name::varchar, s.skill_code::varchar,
-         s.skill_tenant_id, (s.skill_esco_uri LIKE 'http%')
+         -- ⚠ coalesce, e non e' pedanteria: `NULL LIKE 'http%'` vale NULL, non false.
+         -- Le competenze senza URI (le CUSTOM:: e le COMP::) tornavano `isEsco: null`,
+         -- e lo schema Zod della risposta rifiutava l'intero payload con un 500 —
+         -- trovato dal test di integrazione, non dalla lettura del codice.
+         s.skill_tenant_id, coalesce(s.skill_esco_uri LIKE 'http%', false)
     FROM sys.sys_skills s
    WHERE p_root IS NULL OR s.skill_id IN (SELECT id FROM coinvolti)
   UNION ALL

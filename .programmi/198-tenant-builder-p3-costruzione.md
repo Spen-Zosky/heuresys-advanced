@@ -45,6 +45,15 @@ di prova sul gemello (E27).
       ⚠ **E la seconda correzione di Enzo va oltre**: *«è il flusso di creazione che deve generare anche quegli oggetti»* — un'azienda di un tipo mai visto non deve TROVARE famiglia e modello, deve **produrli**. Il mio «con un settore non bancario il sistema si ferma perché non c'è famiglia» descriveva il difetto, non un comportamento corretto. È ciò che `#132` **F6** chiama «il ponte: le proposte approvate diventano il modello — famiglia (se non esiste)».
       **Disfacimento** (E28, autorizzato): 13 tabelle censite da `pg_constraint` invece che ricordate, giornale delle 184 righe in `staging.t9prova_undo`, guardia sullo stato `ARCHIVED`, post-condizione che ha verificato **RTL Bank e Heuresys intatti**. Conteggi tornati esatti: 2 tenant · registro 0 · 45 unità · 315 posizioni · 161 utenti · 14.036 competenze. Sospeso e riacceso nella stessa transazione il solo trigger `sys_tenant_blueprint_snapshot_immutable_trg` (mai `session_replication_role`, che avrebbe spento anche le FK).
       **Cosa resta per chiudere T9b**: rifarla DOPO `#132`, quando il modello sarà generato dalla ricerca invece che dall'archetipo cablato. Allora l'azienda costruita non sarà una banca per inerzia — budget ~60k
+      ⛔ **VERIFICATO IN S1083 (2026-08-28): la catena di dipendenze arriva a un input che solo
+      Enzo può dare.** T9b dipende da `#132` F7 (il modello dev'essere generato dalla ricerca);
+      `#132` F7 pretende una corsa di ricerca vera; e il **fornitore di proposte non è
+      configurato**: `RESEARCH_GATEWAY_URL` e `RESEARCH_GATEWAY_TOKEN` sono **assenti dal `.env`
+      locale** (misurato, non supposto) e la dashboard li dà mancanti anche in produzione.
+      Quindi lo stato onesto di T9b non è «da fare» ma **`blocked-on-Enzo`**, e con essa
+      `#132` F7 e `#205` (che è già dichiarata GATED su `#132`): **tre voci del menu, un solo
+      input**. Nessuna delle tre è avanzabile in questa sessione, e forzarle produrrebbe
+      `BLUEPRINT_CONTENT_EMPTY` o una corsa di ricerca senza fornitore.
       ✅ **SBLOCCATA il 2026-08-18**: Enzo ha autorizzato il push, la produzione gira il codice
       corretto (`LAST_GOOD 5f4f1560`, poi `77a6011e` armato) e la catena è verde. La prova si
       esegue con `prova-live-198-t9.mts` puntato alla produzione, poi l archiviazione.

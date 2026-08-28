@@ -615,6 +615,16 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   Candidato `PASSED → APPLIED`, sentinella `v_research_evidence_source_not_approved` a **0**.
   ⏭ **Restano le due prove vere**: l'azienda di settore diverso (ATECO 70.20 — se ne esce una
   banca, l'archetipo è sparito solo di nome) e RTL Bank come metro di qualità
+  ⛔ **MISURATO IN S1083 (2026-08-28): le due prove sono `blocked-on-Enzo`, e non per l'approvazione
+  della fonte — quella è arrivata.** Pretendono una **corsa di ricerca vera**, e il fornitore di
+  proposte **non è configurato**: `RESEARCH_GATEWAY_URL` e `RESEARCH_GATEWAY_TOKEN` sono
+  **assenti dal `.env` locale** (verificato leggendo il file, non supposto), e la dashboard li dà
+  mancanti anche in produzione. Senza fornitore la corsa non parte, e senza corsa non c'è nulla da
+  confrontare coi 23 processi del modello bancario.
+  ⚠ **Questo blocco non ferma una voce, ne ferma tre**: `#198` T9b non è rifacibile finché il
+  modello non è generato dalla ricerca (darebbe `BLUEPRINT_CONTENT_EMPTY`), e `#205` è già
+  dichiarata GATED su questa. **Un solo input di Enzo — l'indirizzo e la credenziale del
+  fornitore — sblocca 9/10, 7/8 e 0/3 in tre voci diverse.**
   - 🔬 **due trappole trovate eseguendo, scritte perché dal fuori non si vedono**: ① la rotta della
     decisione è **quella sul candidato** (`POST /v1/seed-candidate-records/:id/decision` →
     `researchService.decidi`), **non** `/v1/seed-approval-decisions`, che è il **ledger

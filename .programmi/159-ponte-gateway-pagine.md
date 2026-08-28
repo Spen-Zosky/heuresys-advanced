@@ -37,6 +37,30 @@ adozione su tutte le pagine idonee**. Stima: **~3-4 sessioni**, così ripartite.
   - ⚠ **il primo giro dava «0 pagine totali» e non protestava** — un falso verde perfetto, causato dall'esecuzione fuori dalla radice. Lo strumento ora **esce `NON MISURABILE`** invece di stampare zeri sereni.
   - **resta di F1 la sola dimostrazione**: quale delle 83 aprire per prima dipende da **#156** (WAIT-INPUT su Enzo). Il criterio non ne dipende — la lista è già prodotta.
 - [ ] **F2 — Il ponte** — un canale in streaming + un componente riusabile, scritto **fuori** da qualunque pagina (è il rischio nominato) · budget ~250k
+
+  ### ⚠ RILIEVO S1083 (2026-08-28) — «fuori da una pagina» non basta: c'è un divieto permanente
+
+  Questa fase dice *«un componente riusabile, scritto fuori da qualunque pagina»*, e in nessun
+  punto di questo file compare il vincolo che la governa. Il CLAUDE.md è categorico:
+  > **NEVER** create reusable UI components in `apps/web`, `apps/showcase` o `packages/*` di
+  > questo repo. Vanno nel repo `ux-design-shared` (→ `@heuresys/ui`).
+
+  «Fuori da una pagina» ≠ «fuori dal repo». Estraendo le 300 righe di
+  `apps/web/src/app/(authenticated)/dev/agent/page.tsx` in un `apps/web/src/components/…`, F2
+  produrrebbe **esattamente ciò che il divieto vieta** — e se ne accorgerebbe a lavoro fatto,
+  dopo un budget da ~250k.
+
+  **Il ponte va quindi spezzato in due, e le due metà vivono in repo diversi:**
+  - **il canale in streaming** — logica applicativa (client del gateway, gestione dello stream,
+    stato della conversazione). Non è design system: **resta in questo repo**, in `apps/web/src/lib`
+    o come hook, dove sta già la logica non-UI.
+  - **il componente** — la superficie visiva riusabile su ogni pagina idonea. Va in
+    **`ux-design-shared`** e arriva qui come `@heuresys/ui`, insieme a ogni dipendenza UI che
+    dovesse servire (il secondo divieto: nessuna dep UI runtime nei `package.json` di questo repo).
+
+  **Conseguenza di pianificazione**: F2 non è una fase di un solo repo, quindi il budget «~250k»
+  è la sola metà di qui. La metà di là ha il suo ciclo — pubblicazione del pacchetto, bump della
+  versione, allineamento — e va dichiarata prima di cominciare, non scoperta a metà.
 - [ ] **F3 — Adozione su tutte le pagine idonee** — la prova che il ponte è riusabile è che la seconda pagina non lo tocca · budget ~250k
 - [ ] **F4 — Dimostrazione live** — login reale, agente attivo su almeno due schede idonee di natura diversa · budget ~120k
 

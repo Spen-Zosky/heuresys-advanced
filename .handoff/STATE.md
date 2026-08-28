@@ -50,6 +50,11 @@ il database («si esegue dove il database vive»), mai estesa alla suite.
    su `origin/main` senza un push mio, con CI partita e sito ripubblicato. Non è un'attività
    pianificata né una sessione CLI parallela, e il diario non registra nulla.
 2. **`#86`** — `claude login` sul solo `linux-pc`, cinque minuti tuoi. Invariata da S1080.
+   ⚠ **E una risposta che vale la pena sapere subito** (`#236`): oggi **solo il deploy** sopravvive
+   alla chiusura della sessione — è un timer systemd sulla VM, e si legge con
+   `bash scripts/verifica-deploy.sh`. Le **clonazioni no**: girano sotto un `ssh` in primo piano, e
+   quella del database contiene un `DROP … CASCADE` in place. Chiudere la CLI nella finestra
+   sbagliata lascia il gemello **rotto**, non indietro.
 3. **Le risposte ai sondaggi di clima sono oggi leggibili fuori dalla catena organizzativa.**
    Misurato: chiunque abbia `surveys:read` le vede, anche di persone che non gli riportano.
    Classificarle come sensibili è la cura, ma comporta annotare **21 rotte** con l'org-gate e

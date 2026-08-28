@@ -74,6 +74,36 @@ MODULO_ME = REPO / "apps" / "api" / "src" / "modules" / "me"
 #                 proposta da deliberare, c'e' un punteggio gia' calcolato.
 # ---------------------------------------------------------------------------------------
 ESCLUSIONI: dict[str, str] = {
+    # --- S1083 (2026-08-28): le tre tabelle nate oggi, e il cancello ha fatto il suo mestiere ---
+    #
+    # Le ho create io in questa sessione (mig. `000363` e `000364`), e il controllo le ha
+    # colte al primo giro: referenziano una persona e non erano ne' raggiungibili ne'
+    # dichiarate. C4 pretende una delle due cose, e questa e' la seconda — con la sua
+    # ragione, non con un silenzio.
+    #
+    # ⚠ TUTTE E TRE SONO ESCLUSIONI **TEMPORANEE PER COSTRUZIONE**, ed e' la loro natura:
+    # non dicono «questo dato non si mostra all'interessato», dicono «la superficie che lo
+    # mostrerebbe non esiste ancora». Vanno rimosse da qui quando le rispettive fasi
+    # arrivano, non quando qualcuno se ne ricorda — per questo ognuna nomina la fase.
+    "sys_project_members":
+        "[SUPERFICIE-NON-ANCORA-COSTRUITA] `#143` F2 (mig. 000363) ha creato il modello; "
+        "la superficie e' F4 (API progetti/squadre) e F5 (frontend). Un partecipante DEVE "
+        "poter vedere i propri progetti dal portale, e quando ci sara' la rotta `/v1/me/*` "
+        "questa riga va TOLTA, non emendata. Nel frattempo la tabella e' letta da nessuno: "
+        "26 progetti e 174 appartenenze migrati dalle squadre, zero consumatori.",
+    "sys_candidates":
+        "[NON-E-UNA-PERSONA-DEL-TENANT] `#54` F2 (mig. 000364). La FK verso `sys_users` e' "
+        "`candidate_hired_user_id`, cioe' il collegamento all'utente NATO da un'assunzione "
+        "— non il soggetto del dato, che e' un candidato ESTERNO all'azienda e non ha un "
+        "portale dipendente. Il suo diritto di accesso non passa da ESS: passa dalla base "
+        "giuridica dichiarata nello schema (`candidate_consent_given_on`, "
+        "`candidate_retention_until`). Tabella vuota per scelta: il dominio si popola con l'uso.",
+    "sys_interview_feedback":
+        "[VALUTAZIONE-NON-COMUNICATA] `#54` F2 (mig. 000364). La FK e' quella "
+        "dell'INTERVISTATORE, non del valutato, quindi «self» qui significherebbe «le "
+        "valutazioni che HO SCRITTO io» — ed e' la stessa materia della quarta eccezione di "
+        "ADR-0036 §5 (valutazioni non comunicate): mostrarle prima che una decisione sia "
+        "presa ha conseguenze reali. Tabella vuota per scelta.",
     # --- decisione esplicita di Enzo (2026-08-13) ------------------------------------
     "sys_employee_position_fit_scores":
         "[RESPONSABILE] Enzo, 2026-08-13: il punteggio di aderenza alla posizione e' "

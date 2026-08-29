@@ -74,6 +74,23 @@ err() { printf '[arma-clone] %s\n' "$*" >&2; }
 
 sull_host() { MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes -o ConnectTimeout=8 "$HOST" "$@"; }
 
+# --- 0. IL DRY-RUN NON TOCCA NIENTE, HOST COMPRESO.
+#
+# ⚠ DIFETTO TROVATO DALLA CI (2026-08-29, sha ed1e6366) — verde in locale, rosso in CI, e
+# la differenza non era il codice: era che da qui `linux-pc` risponde e dal runner no.
+# Il controllo del dry-run stava DOPO le tre domande all'host, quindi su una macchina che
+# non vede il gemello `--dry-run` usciva `IGNOTO` invece di dichiarare cosa avrebbe fatto.
+#
+# Un dry-run che ha bisogno della rete non e' un dry-run: il suo mestiere e' dire
+# l'intenzione senza produrre effetti, e interrogare un host E' un effetto — apre una
+# connessione, puo' bloccarsi, e cambia l'esito a seconda di dove lo lanci. Chi vuole
+# sapere se l'host risponde lancia il comando vero.
+if [ -n "$DRYRUN" ]; then
+  say "DRY-RUN — innescherei $UNIT su $HOST${WHY:+ ($WHY)}"
+  say "  (non interrogo $HOST: un dry-run non tocca niente, host compreso)"
+  exit 0
+fi
+
 # --- 1. l'host risponde? Se no si DICHIARA, non si finge di aver armato.
 if ! sull_host 'exit 0' 2>/dev/null; then
   err "IGNOTO: $HOST non risponde — nessun clone armato."
@@ -97,11 +114,6 @@ fi
 if sull_host "systemctl is-active --quiet '$UNIT'"; then
   say "un clone e' GIA' in corso su $HOST — non ne accavallo un altro"
   diario saltato "${WHY:-clone gia in corso su $HOST}"
-  exit 0
-fi
-
-if [ -n "$DRYRUN" ]; then
-  say "DRY-RUN — innescherei $UNIT su $HOST${WHY:+ ($WHY)}"
   exit 0
 fi
 

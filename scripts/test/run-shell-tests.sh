@@ -223,11 +223,18 @@ if [ -f "$AC" ]; then
   if printf '%s' "$out" | grep -qi 'preso in carico'; then
     fail "arma-clone: un host morto NON puo' dire «preso in carico»"
   else ok "arma-clone: un host morto non si traveste da armato"; fi
-  # G3: --dry-run non tocca niente e lo dice
-  out="$(ARMA_CLONE_DRYRUN=1 bash "$AC" --why test 2>&1)"; rc=$?
+  # G3: --dry-run non tocca niente E NON HA BISOGNO DELL'HOST.
+  #
+  # ⚠ L'HOST MORTO NEL TEST NON E' UN DETTAGLIO — e' la proprieta' che si prova. La
+  # prima stesura usava l'host di default: verde qui, dove `linux-pc` risponde, e ROSSA
+  # in CI, dove il runner non lo vede (misurato sullo sha ed1e6366). Il difetto era
+  # nello script, non nel test: il ramo del dry-run stava DOPO le domande all'host,
+  # quindi su una macchina senza gemello `--dry-run` usciva IGNOTO invece di dichiarare
+  # l'intenzione. Un dry-run che ha bisogno della rete non e' un dry-run.
+  out="$(CLONE_ARM_HOST=host-morto-per-il-dry-run ARMA_CLONE_DRYRUN=1 bash "$AC" --why test 2>&1)"; rc=$?
   if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'DRY-RUN'; then
-    ok "arma-clone: --dry-run dichiara e non innesca"
-  else fail "arma-clone: --dry-run rotto (rc=$rc)"; fi
+    ok "arma-clone: --dry-run dichiara senza toccare l'host (regge anche in CI)"
+  else fail "arma-clone: --dry-run rotto con host irraggiungibile (rc=$rc)"; fi
   # G4: flag sconosciuto rifiutato prima di toccare qualunque host
   if bash "$AC" --flag-che-non-esiste >/dev/null 2>&1; then
     fail "arma-clone: un flag sconosciuto dovrebbe uscire non-zero"

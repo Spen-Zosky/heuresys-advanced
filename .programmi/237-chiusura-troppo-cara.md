@@ -245,6 +245,24 @@ della soluzione — che è precisamente ciò che Enzo non vuole.
   cerca una spiegazione al perché avrebbe dovuto funzionare.
 - **F3** — la soglia va vista **rossa** almeno una volta, altrimenti è un numero scritto.
 
+## ⚠ LA CONFERMA DI F2 È NEGATIVA (misurata alla chiusura di S1084, 2026-08-29)
+
+F2 prescriveva: *«la cura si misura con lo stesso metro di F1, sulla chiusura successiva. Se il
+numero non scende, la cura non ha funzionato: si dichiara e si passa alla seconda voce, non si
+cerca una spiegazione al perché avrebbe dovuto funzionare»*.
+
+**Misurato durante la chiusura stessa: 44.728 token (4,5%)** — contro una media di **28.352** su 14
+chiusure, e contro i **37.855** di S1083. È un **pavimento**: il turno in corso non è ancora nel
+transcript, quindi il definitivo è più alto.
+
+**Il peso è sceso del 65%, il costo no.** Nessuna spiegazione, come prescritto: si passa alla
+**seconda voce della tabella di F1**, che è `SOT_STATE.md` — 432.938 byte, ~56.000 token di sola
+lettura misurati in F1 (il doppio di quanto valeva il register), e senza cura.
+
+**Prima cosa da fare alla prossima sessione**: rileggere il numero **definitivo** con
+`python docs/kb/tools/costo_chiusura.py -n 15`, ora che la chiusura di S1084 è interamente nel
+transcript. Poi aprire **F4** sulla seconda voce.
+
 ## Chiuso quando
 
 Si sa dove va il costo della chiusura, la voce più cara è scesa in modo misurato, e un cancello

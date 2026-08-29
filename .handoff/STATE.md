@@ -26,12 +26,16 @@ in un file accanto, e riprodotta lo stesso. Un commento altrove non è un presid
 
 ## Top priorities — le priorità
 
-1. **La cura di `#237` F2 va CONFERMATA su questa chiusura, ed è il primo atto naturale della
-   prossima sessione.** Il register è passato da **911.609 a 321.121 byte (−65%)** archiviando 193
-   voci chiuse, ma il piano prescrive che il guadagno si misuri *sulla chiusura successiva*, non sul
-   peso. Il comando è `python docs/kb/tools/costo_chiusura.py -n 14`: se la chiusura di S1084 non
-   scende sotto la media di 28.352 token, la cura non ha funzionato e si passa alla **seconda** voce
-   della tabella — `SOT_STATE.md`, ancora **432.938 byte** e senza cura. → `.programmi/237-*.md`
+1. **⭐ La cura di `#237` F2 NON ha funzionato, ed è già misurato.** Il register è sceso del
+   65% (911.609 → 321.121 byte, 193 voci archiviate), ma la chiusura di S1084 è costata
+   **44.728 token — sopra** la media di 28.352 e sopra i 37.855 di S1083. Ed è un **pavimento**: il
+   numero è stato letto mentre la chiusura era ancora in corso, quindi il definitivo è più alto.
+   Il piano di `#237` è esplicito su cosa fare adesso: *«se il numero non scende, la cura non ha
+   funzionato: si dichiara e si passa alla seconda voce, non si cerca una spiegazione al perché
+   avrebbe dovuto funzionare»*. **La seconda voce è `SOT_STATE.md`**, 432.938 byte e senza cura —
+   ed è il file che F1 misurò a ~56.000 token di sola lettura, il doppio del register.
+   Primo atto: rileggere il numero definitivo con `python docs/kb/tools/costo_chiusura.py -n 15`
+   (a chiusura conclusa), poi riaprire `#237` con una F4. → `.programmi/237-*.md`
 2. **`#219` F5e — la corsa E2E integrale, SUL GEMELLO e non da Windows.** Invariata da S1083 e
    ancora la voce P2 più matura: i falliti erano tutti setup di autenticazione, uccisi da un'API
    che il tunnel non tiene viva.

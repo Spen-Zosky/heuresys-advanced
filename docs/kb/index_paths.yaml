@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-28T20:59:01Z da docs/kb/tools/build_index.py
+# generato: 2026-08-29T13:59:10Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-28T20:59:01Z"
-  total_files: 3260
+  generated_at: "2026-08-29T13:59:10Z"
+  total_files: 3270
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,7 +13,7 @@ meta:
     api-module: 356
     ci: 17
     claude-config: 35
-    config: 187
+    config: 189
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -22,7 +22,7 @@ meta:
     db-other: 8
     db-script: 48
     db-seed: 114
-    doc-canonical: 734
+    doc-canonical: 742
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2702
+    live: 2712
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3674,6 +3674,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\arma-clone.sh'
+    root: repo
+    rel: 'scripts/arma-clone.sh'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\scripts\arma-deploy.sh'
     root: repo
     rel: 'scripts/arma-deploy.sh'
@@ -3977,6 +3983,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\vendor\react.js'
     root: repo
     rel: 'scripts/vendor/react.js'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\verifica-cloni.sh'
+    root: repo
+    rel: 'scripts/verifica-cloni.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -9482,6 +9494,24 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\235-sondaggi-clima-fuori-catena.md'
+    root: repo
+    rel: '.programmi/235-sondaggi-clima-fuori-catena.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\236-lavori-remoti-armati-non-appesi.md'
+    root: repo
+    rel: '.programmi/236-lavori-remoti-armati-non-appesi.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\237-chiusura-troppo-cara.md'
+    root: repo
+    rel: '.programmi/237-chiusura-troppo-cara.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md'
     root: repo
     rel: '.programmi/50-knowledge-graph-legacy.md'
@@ -9545,6 +9575,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md'
     root: repo
     rel: '.programmi/mandati/S1083-corsa-integrale.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\mandati\S1084-rossi-237-236.md'
+    root: repo
+    rel: '.programmi/mandati/S1084-rossi-237-236.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -9947,6 +9983,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md'
     root: repo
     rel: 'docs/archive/NEXT_SESSION_MVP_CLOSURE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\SOT_BACKLOG_CHIUSI.md'
+    root: repo
+    rel: 'docs/archive/SOT_BACKLOG_CHIUSI.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11558,9 +11600,21 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\compatta_register.py'
+    root: repo
+    rel: 'docs/kb/tools/compatta_register.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\completezza_tenant.py'
     root: repo
     rel: 'docs/kb/tools/completezza_tenant.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\costo_chiusura.py'
+    root: repo
+    rel: 'docs/kb/tools/costo_chiusura.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11645,6 +11699,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\pagine_waivers.txt'
     root: repo
     rel: 'docs/kb/tools/pagine_waivers.txt'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\peso_stato.py'
+    root: repo
+    rel: 'docs/kb/tools/peso_stato.py'
     category: doc-canonical
     status: live
     provenance: git-tracked

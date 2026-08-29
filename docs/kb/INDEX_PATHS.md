@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-28T20:59:01Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3260**
+**Generato**: 2026-08-29T13:59:10Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3270**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,7 +13,7 @@
 | api-module | 356 |
 | ci | 17 |
 | claude-config | 35 |
-| config | 187 |
+| config | 189 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 48 |
 | db-seed | 114 |
-| doc-canonical | 734 |
+| doc-canonical | 742 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 404 |
 | ux-design-archive | 80 |
 | web-source | 241 |
-| **TOTALE** | **3260** |
+| **TOTALE** | **3270** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2702 |
+| live | 2712 |
 
 ## File per categoria
 
@@ -669,6 +669,7 @@
 - `D:\heuresys-advanced\scripts\align-claude-ecosystem.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\align-clones.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\archive-dumps.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\arma-clone.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\arma-deploy.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\auth-housekeeping.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\backup-db.sh` · *live* · git-tracked
@@ -720,6 +721,7 @@
 - `D:\heuresys-advanced\scripts\vendor\htm.js` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vendor\react-dom.js` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vendor\react.js` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\verifica-cloni.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\verifica-deploy.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vm-bootstrap.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vm-deploy-remote.sh` · *live* · git-tracked
@@ -1664,6 +1666,9 @@
 - `D:\heuresys-advanced\.programmi\230-verifica-quattro-attese.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\231-consumo-lavori-attivi.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\234-otto-rossi-verifica-incrociata.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\235-sondaggi-clima-fuori-catena.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\236-lavori-remoti-armati-non-appesi.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\237-chiusura-troppo-cara.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\54-recruiting-ats.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\69-residui-staging-wave1.md` · *live* · git-tracked
@@ -1675,6 +1680,7 @@
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\mandati\S1084-rossi-237-236.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1067-batch-p1p2p3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1068-p3-p1-p2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1071-ciclo-p1.md` · *live* · git-tracked
@@ -1742,6 +1748,7 @@
 - `D:\heuresys-advanced\docs\archive\NEXT_GENERATION_ENTRY_POINT.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_2A.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\SOT_BACKLOG_CHIUSI.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\SDBI_RUNBOOK.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.ps1` · *live* · git-tracked
@@ -2010,7 +2017,9 @@
 - `D:\heuresys-advanced\docs\kb\tools\check_pagine_raggiungibili.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_tenant_contamination.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\chiudi_leggero.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\compatta_register.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\completezza_tenant.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\costo_chiusura.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\db_health.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\dead_columns.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\dump_route_schemas.ts` · *live* · git-tracked
@@ -2025,6 +2034,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\legacy_ingest_allowlist.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\measure_concept_retrieval.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\pagine_waivers.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\peso_stato.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\programmi.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\reconstruct_linked_manifest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\rendiconto_chiusure.py` · *live* · git-tracked

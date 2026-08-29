@@ -9,6 +9,100 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1084 (2026-08-29) — una premessa falsa, e una cosa da costruire che c'era gia'
+
+**`#237` CHIUSA (F1+F2+F3) e `#236` CHIUSA (F1-F4)**, piu' i tre rossi del boot. 9 commit,
+`8db8b5bd..b794efe9`, CI **4/4 verde** (`State lint` non riparte sull'ultimo commit: e' filtrato per
+path, ed era verde su quello che tocca `docs/kb/`).
+
+**⭐ La chiusura di sessione costa il 2,8%, non il 25%.** `#237` F1: strumento nuovo
+`docs/kb/tools/costo_chiusura.py` (`--dettaglio`, `--csv`, `--selftest` = 15 casi). Misurato su
+**14 chiusure distinte** (17-29 agosto): **28.352 token in media**, peggiore 69.326 (6,9%), migliore
+11.102 (1,1%). Il 25% veniva dal delta del guardiano fra l'invocazione della skill e la fine di
+S1083 (192.430 token), che **sommava alla chiusura il lavoro fatto in mezzo** — la stessa chiusura,
+isolata, costa 37.855 token. L'isolamento non e' un'euristica: Claude Code marca ogni turno con
+`attributionSkill` sul record `assistant`.
+
+Ripartizione (396.931 token su 14 chiusure): **lettura di stato 25,2%** · **scrittura di stato
+23,0%** · altri comandi 13,9% · cancelli e lint 11,7% · commit/push 6,9% · propagazione 5,9% ·
+deliberazione 4,4% · derivati 1,9%. Lo stato vale il **48,2%**, e **leggerlo costa piu' che
+scriverlo**. Le tre ipotesi del piano si riordinano: il peso dello stato vale meta', la ripetizione
+il 19,5%, lo stile di scrittura il **4,4%** — era l'ipotesi piu' scomoda, misurata non e' il
+problema.
+
+Tre difetti trovati dalla prova di falsificabilita', ognuno invisibile nel numero e visibile nel
+confronto fra le due misure indipendenti: (1) **un messaggio non e' un record** (1.049 record per 525
+messaggi, tutti con lo stesso `usage`: il testo prendeva 0 token e il costo finiva sull'ultimo
+`tool_use`); (2) una **categoria residua al 43%**, che era lettura di stato via shell; (3) la **stessa
+chiusura contata due volte** (fork/ripresa dello stesso transcript).
+
+**`#237` F2 — il register era per l'80% cronaca chiusa.** Misurato prima di toccare: 193 item
+terminali su 223, **624.828 byte = l'80%** del register vivo. `docs/kb/tools/compatta_register.py`
+(`--esegui`, `--selftest` = 11 casi) sposta ogni blocco terminale per intero in
+`docs/archive/SOT_BACKLOG_CHIUSI.md` e ne lascia **la prima riga** — id, titolo, status — piu' il
+puntatore, cosi' il controllo A2 del lint continua a trovare cio' che cerca. **`SOT_BACKLOG.md`
+911.609 -> 321.121 byte, -65%** (~227.900 -> ~80.300 token). Menu identico, lint 0 fail/2 warn,
+boot invariato. La post-condizione **ha bloccato la prima scrittura**: 1 item su 193 (`#224`) non
+si ritrovava nell'archivio — era una riga vuota di differenza, e il confronto misurava la spaziatura
+invece della perdita di dati.
+
+**`#237` F3 — il presidio, con UNA soglia motivata.** `docs/kb/tools/peso_stato.py`, letto dal boot
+nello STALENESS SELF-CHECK: **quota di cronaca terminale nel register > 25% -> ROSSO**. Si giudica il
+peso **morto**, non il peso (trenta voci vive lunghe sono trenta voci vive); il peso assoluto dei
+quattro documenti si dichiara e non arrossisce, perche' `SOT_STATE.md` (432.938 byte) non ha ancora
+una cura e un rosso senza rimedio e' rumore. **Visto rosso su un dato vero**: eseguito sul
+register di `HEAD~1` da' `BAD` all'**80,8%**; oggi `[OK] 16%`.
+
+**`#236` F2 — il clone si arma su systemd.** Non e' nato il timer che il piano prevedeva: sul
+gemello c'era gia' `heuresys-advanced-clonedb.service` (Z-022) con `OnFailure`, `Persistent=true`,
+`TimeoutStartSec=900` e lo stop/riavvio di api+web. Mancava **l'innesco su richiesta**:
+`scripts/arma-clone.sh` fa `systemctl start --no-block` e ritorna — il clone diventa figlio di
+**systemd**, non dell'ssh. `close-propagate.sh` passa da «lancia e aspetta» ad «arma e ritorna»
+(esito `armato`; il diario lo scrive `arma-clone.sh` col passo omonimo). **MainPID 412164, PPID 1**;
+poi `pkill -9` su **ogni ssh** mentre il clone girava -> `Result=success`, 71 s, clone a 164 utenti /
+315 posizioni / 45 OU / 14.033 skill, nessun residuo `_stage`/`_old`, api e web riaccesi da
+`ExecStopPost`.
+
+**`#236` F3 — «posso chiudere?» e' un comando.** `scripts/verifica-cloni.sh` legge i tre lavori dalle
+macchine, ognuno col proprio vocabolario chiuso; il verdetto del deploy e' **delegato** a
+`verifica-deploy.sh` (due criteri per una domanda sola prima o poi divergono). Il clone guarda due
+cose: l'esito dell'unita' **e** la distanza in migrazioni dalla produzione. **Un falso allarme
+perpetuo evitato perche' misurato**: `settings.json` era nel criterio di freschezza dell'ecosistema,
+e portava le 03:28 di quella mattina — lo riscrive il *runtime*, non l'uomo. Dentro, il verdetto
+sarebbe stato `INDIETRO` a ogni sessione per sempre.
+
+**`#236` F4 — l'ecosistema non si arma, e va detto.** L'orchestratore gira su Windows e il payload
+(`~/.claude`) **e'** la fonte di verita': un timer remoto non avrebbe da dove prendere cio' che
+installa. Cio' che si e' tolto e' il **danno silenzioso**: un marcatore
+`~/.claude/.ecosystem-align.INCORSO` scritto **prima** del wipe e tolto solo a corsa conclusa (o
+dopo un rollback riuscito), col comando di ripristino dentro. Interruzione vera con `kill -9`
+nella finestra fra wipe e fine -> verdetto `INTERROTTO`, exit 1, mentre la sentinella diceva
+«allineato». Due difetti che solo l'interruzione ha fatto uscire: **`--delta` avrebbe SALTATO l'host
+rotto** (guardava «payload invariato + sentinella», e la sentinella c'e' anche a meta'), e
+**`DISALLINEATO` era un falso allarme strutturale** — due host allineati in momenti diversi con lo
+stesso payload hanno contenuto identico e stamp diversi, quindi il verdetto e' uscito dal
+vocabolario e si giudica sulla corsa **piu' vecchia**.
+
+**I tre rossi del boot.** (1) derivati 2/3 superati -> rigenerati. (2) `marciume:fallito`: il guasto era
+**gia' riparato** la sera prima (diario, riga 491), ma `rendiconto_chiusure.py` guarda **una sola
+corsa** e non poteva vederlo — regola meccanica nuova (*lo stesso passo, sereno piu' tardi, e'
+riparato*), `--selftest` 5 casi di cui **quattro** pretendono che il rosso NON si spenga.
+(3) working tree sporco -> committato il solo file mio; le 4 voci di Codex restano untracked.
+
+**CI rossa corretta** (`b794efe9`): `arma-clone --dry-run` interrogava l'host **prima** di dichiarare
+l'intenzione — verde qui dove `linux-pc` risponde, rosso sul runner che non lo vede. Un dry-run che
+ha bisogno della rete non e' un dry-run: il ramo e' salito in cima, e il test ora passa un host
+deliberatamente morto cosi' il caso vale su ogni macchina.
+
+**Batteria shell: 248 ok / 0 falliti** (era 225): 19 casi nuovi su `arma-clone`, `verifica-cloni` e
+`align-claude-ecosystem`, di cui **dieci negativi**. Numeri vivi invariati: 362 migrazioni · 164
+utenti · 315 posizioni · 45 OU · 26 team · 2 tenant · 14.033 skill.
+
+**Una trappola riprodotta due volte in un giorno, e gia' documentata**: un apostrofo dentro un
+`${VAR:-default}` (o in un `printf` a singoli apici) apre una stringa che inghiotte il resto del
+file — `bash -n` resta verde e uno `exit 1` smette di essere un comando. L'avvertimento era in testa
+a `arma-deploy.sh`, e non e' bastato: ora c'e' un caso in batteria che cerca il pattern.
+
 ### Delta S1082 · parte 2 (2026-08-27) — un controllo troppo caro non fa perdere tempo, fa perdere difetti
 
 **⭐ DOVE si esegue un lavoro sul database — regola nuova nel CLAUDE.md** (Enzo: *«non deve più

@@ -1,7 +1,7 @@
 # 237 — La chiusura costa un quarto di finestra, e non si sa perché
 
 > **item**: #237 · **priorità**: P1 · **stima**: ~1 sessione (F1 sola: ~40k)
-> **stato**: NON AVVIATO
+> **stato**: IN CORSO — **F1 FATTA il 2026-08-29 (S1084)**, e ha smentito la premessa
 > **nasce-da**: Enzo, 2026-08-29, a fine S1083: *«l'handoff è un collo di bottiglia che non abbiamo
 > mai risolto adeguatamente. Una chiusura sessione non può e non deve consumare il 25% di una
 > finestra di contesto. È urgente trovare soluzioni adeguate, ma non per tentativi ed errori.»*
@@ -28,6 +28,9 @@ della soluzione — che è precisamente ciò che Enzo non vuole.
 - Delta misurato dal guardiano fra l'invocazione della skill `handoff` e la fine di S1083:
   **192.430 token (19,2%)** — ⚠ ma include `#236` F1 e la correzione CI, che sono lavoro vero.
   **La quota della chiusura pura NON è misurata.** È il primo buco da chiudere.
+  → ✅ **CHIUSO da F1 il 2026-08-29**: isolata, quella stessa chiusura costa **37.855 token
+  (3,8%)**. I restanti ~154.000 erano lavoro. Questa riga resta come cronaca di com'era
+  formulata la domanda, non come misura: la misura sta nella scheda di F1 più sotto.
 
 ## Le tre ipotesi, da falsificare non da assumere
 
@@ -44,13 +47,88 @@ della soluzione — che è precisamente ciò che Enzo non vuole.
 
 ## Fasi
 
-- [ ] **F1 — DOVE VA IL COSTO, misurato dal transcript e non stimato** — il transcript JSONL porta
-      i token per turno. Si attribuisce ogni turno di una chiusura a una categoria (scrittura di
-      stato · rigenerazione derivati · lint · propagazione · commit/push · verifica) e si ottiene
-      la ripartizione vera, su **almeno tre sessioni** perché una sola non fa una regola.
-      **fatto =** una tabella «categoria → token → % della chiusura», e la risposta alla domanda
-      che oggi non ha risposta: *quanto costa la chiusura pura?* · budget ~40k
-- [ ] **F2 — La cura della voce più cara, una sola** — si affronta la prima della tabella di F1,
+- [x] **F1 — DOVE VA IL COSTO, misurato dal transcript e non stimato** — **FATTA 2026-08-29
+      (S1084)**. Strumento: `python docs/kb/tools/costo_chiusura.py` (`--dettaglio`, `--csv`,
+      `--selftest` = **15 casi verdi**). Misurato su **14 chiusure** distinte, dal 17 al 29 agosto.
+
+  ### ⭐ LA RISPOSTA — e la premessa della voce era falsa
+
+  **La chiusura pura costa 28.352 token in media: il 2,8% di una finestra da 1M.** Non il 25%.
+  La peggiore delle quattordici si ferma a **69.326 (6,9%)**, la più leggera a 11.102 (1,1%).
+
+  Da dove veniva il 25%. Dal delta che il piano stesso riportava — «192.430 token fra
+  l'invocazione della skill e la fine di S1083» — con accanto l'avvertenza, già scritta, che
+  includeva `#236` F1 e la correzione CI. **Quella misura non isolava la chiusura**: sommava tutto
+  ciò che era accaduto dopo che la skill era stata invocata. La stessa chiusura di S1083, isolata,
+  costa **37.855 token — 3,8%**. Il resto era lavoro vero.
+
+  Non serviva indovinare dove comincia una chiusura: Claude Code **marca alla sorgente** ogni
+  turno prodotto sotto una skill (`attributionSkill` sul record `assistant`). I turni marcati
+  `handoff` sono la chiusura, anche quando altro lavoro la interrompe a metà — che è esattamente
+  il caso che falsava il numero.
+
+  ### La ripartizione — 14 chiusure, 396.931 token
+
+  | categoria | token | % | turni |
+  |---|---:|---:|---:|
+  | **lettura di stato** | 100.064 | **25,2%** | 52 |
+  | **scrittura di stato** | 91.134 | **23,0%** | 44 |
+  | altri comandi | 55.017 | 13,9% | 89 |
+  | cancelli e lint | 46.462 | 11,7% | 53 |
+  | commit e push | 27.572 | 6,9% | 51 |
+  | propagazione | 23.341 | 5,9% | 30 |
+  | deliberazione (solo testo) | 17.312 | 4,4% | 16 |
+  | scrittura (altri file) | 12.939 | 3,3% | 6 |
+  | altro (non classificato) | 12.710 | 3,2% | 7 |
+  | rigenerazione derivati | 7.502 | 1,9% | 15 |
+  | stato via shell (misto) | 2.584 | 0,7% | 1 |
+  | lettura (altri file) | 294 | 0,1% | 1 |
+
+  **Lo stato è il 48,2% del costo** — e la sorpresa è che **leggerlo costa più che scriverlo**
+  (25,2% contro 23,0%). Le tre ipotesi del piano vanno riordinate di conseguenza: l'ipotesi 1
+  (il peso dello stato) è confermata e vale quasi metà; l'ipotesi 2 (la ripetizione: cancelli,
+  propagazione, derivati) vale il 19,5%; l'ipotesi 3 (il mio stile di scrittura — i turni di sola
+  deliberazione) vale il **4,4%**, cioè è la più piccola delle tre. Era la più scomoda, ed è
+  quella che il piano voleva misurare per prima proprio per questo: misurata, non è il problema.
+
+  ### Tre difetti trovati perché la prova poteva fallire
+
+  La prova di falsificabilità non è decorativa: ha **rotto tre volte la misura**, e ogni volta
+  il difetto era invisibile nel numero e visibile nel confronto fra le due misure indipendenti.
+
+  ① **Un messaggio non è un record.** Claude Code scrive più record `assistant` per lo stesso
+  messaggio — uno per blocco (ragionamento, testo, ogni `tool_use`) — **tutti con lo stesso
+  `usage`**. Misurato: 1.049 record per 525 messaggi, fino a 6 per messaggio. Contati come turni
+  distinti, la crescita fra due blocchi dello stesso messaggio è zero: il blocco di testo prendeva
+  0 token e l'intero costo finiva sull'ultimo `tool_use`. Il sintomo era «deliberazione» al 41,9%
+  dei byte e 3,6% dei token. Curato fondendo per `message.id`.
+
+  ② **Una categoria residua che divora il 43%.** «altri comandi» era la voce più grande della
+  prima tabella — cioè la risposta alla domanda di `#237` era un'etichetta vuota. Guardandoci
+  dentro: `cat .handoff/STATE.md`, `head SOT_STATE.md`, `sed -n '971,985p' SOT_BACKLOG.md`. Era
+  **lettura dello stato fatta via shell**, che il classificatore riconosceva solo dal nome del
+  tool. Curato — e con un terzo esito onesto, `stato via shell (misto)`, per gli heredoc che
+  possono leggere o scrivere: fingere di saperlo sarebbe stato peggio.
+
+  ③ **La stessa chiusura contata due volte.** Due coppie di transcript davano numeri identici al
+  singolo token. I file non sono identici (2.422 righe contro 3.157): sono il **fork o la
+  ripresa** della stessa sessione, che si porta dietro la medesima coda di chiusura. Escluse, e
+  lo strumento dichiara quante ne ha fuse.
+
+  Resta una divergenza dichiarata e **attesa** su `scrittura di stato` (23,0% dei token, 43,9%
+  dei byte): il transcript salva per ogni `Edit` anche `oldString`/`newString`/`structuredPatch`,
+  che pesano in byte ma in contesto non entrano.
+
+  ### Cosa cambia per F2
+
+  La voce più cara **non è quella che il piano si aspettava**. Non è la scrittura dei tre
+  documenti: è la loro **lettura**, 100.064 token su 52 turni — ~1.900 token per turno, quasi
+  tutti `cat`/`head`/`sed` su `SOT_*` e `.handoff/STATE.md` per ritrovare il punto da emendare.
+  È anche la più curabile, perché una lettura non produce niente che resti.
+- [ ] **F2 — La cura della voce più cara, una sola** — ⭐ **la voce ora ha un nome, e non è quella
+      attesa: la LETTURA dello stato, 25,2% (100.064 token su 52 turni)**. Fuori da S1084 per
+      scelta dichiarata: decidere la cura nello stesso turno in cui è arrivata la misura sarebbe
+      il «per tentativi» che questa voce vieta in apertura. Si affronta la prima della tabella di F1,
       non tutte insieme: una cura per volta, con la misura prima e dopo. Se la voce più cara è il
       peso di `SOT_BACKLOG`, la cura è l'archiviazione degli item terminali (219 item, quanti
       terminali? si misura); se è la ripetizione, è il profilo; se sono io, è una regola di

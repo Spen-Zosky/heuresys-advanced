@@ -125,10 +125,69 @@ della soluzione — che è precisamente ciò che Enzo non vuole.
   documenti: è la loro **lettura**, 100.064 token su 52 turni — ~1.900 token per turno, quasi
   tutti `cat`/`head`/`sed` su `SOT_*` e `.handoff/STATE.md` per ritrovare il punto da emendare.
   È anche la più curabile, perché una lettura non produce niente che resti.
-- [ ] **F2 — La cura della voce più cara, una sola** — ⭐ **la voce ora ha un nome, e non è quella
-      attesa: la LETTURA dello stato, 25,2% (100.064 token su 52 turni)**. Fuori da S1084 per
-      scelta dichiarata: decidere la cura nello stesso turno in cui è arrivata la misura sarebbe
-      il «per tentativi» che questa voce vieta in apertura. Si affronta la prima della tabella di F1,
+- [x] **F2 — La cura della voce più cara, una sola** — **FATTA 2026-08-29 (S1084)**, dopo che
+      Enzo ha chiesto di procedere anche con le fasi successive.
+
+  ### Cosa si è misurato prima di toccare
+
+  La voce più cara è la **lettura dello stato** (25,2%, 100.064 token su 52 turni). Guardando
+  *cosa* si legge: `cat .handoff/STATE.md` ~29.500 token in 9 letture su 14 chiusure ·
+  `SOT_STATE.md` ~56.000 · `SOT_BACKLOG.md` ~21.600 fra `sed -n 'N,Mp'`, `grep -n '^### #…'`
+  e letture dirette. È il girare intorno a un documento grande per ritrovare il punto da
+  emendare.
+
+  E il register è grande per una ragione precisa:
+
+  | | item | byte | quota |
+  |---|---:|---:|---:|
+  | DONE | 185 | 592.211 | 76% |
+  | FATTO | 3 | 18.432 | 2% |
+  | WON'T-DO | 5 | 14.185 | 1% |
+  | **terminali** | **193** | **624.828** | **80%** |
+  | vivi (ACTIVE/HOLD/GATED/WAIT-INPUT) | 30 | 148.220 | 20% |
+
+  **Quattro quinti del register sono cronaca di lavoro già chiuso**, e ogni `grep` la
+  attraversa.
+
+  ### La cura: compattare, non cancellare
+
+  `python docs/kb/tools/compatta_register.py` (`--esegui`, `--selftest` = **11 casi verdi**).
+  Ogni blocco terminale va per intero in `docs/archive/SOT_BACKLOG_CHIUSI.md`; al suo posto
+  resta **la sua prima riga** — id, titolo, status — più il puntatore. Nulla si perde,
+  `docs/archive/` è il posto che il CLAUDE.md indica per i record storici, e `handoff_lint`
+  continua a trovare ciò che cerca (il controllo A2 chiede che un id chiuso in STATE sia
+  *terminale nel backlog*: la riga-indice porta ancora `· status: DONE`).
+
+  **Misurato: `SOT_BACKLOG.md` 911.609 → 321.121 byte, −65%.** Da ~227.900 a ~80.300 token.
+
+  ### Le quattro cose che una scrittura di massa deve portare
+
+  (a) la misura **prima**, stampata a ogni corsa · (b) una **guardia** che rilegge lo status
+  al momento dell'esecuzione, mai ereditato · (c) **cinque post-condizioni**, e la più
+  importante protegge ciò che *non* doveva cambiare: i 30 item vivi devono restare identici
+  **byte per byte** · (d) **rollback dichiarato**: `git checkout --` sui due file, che qui
+  basta perché git *è* il giornale.
+
+  🔬 **E la post-condizione ha fatto il suo mestiere alla prima corsa vera**: ha **bloccato la
+  scrittura** perché 1 item su 193 (`#224`) non si ritrovava nell'archivio. Non era perso —
+  è l'ultimo blocco terminale prima della fine del register, e si porta dietro una riga vuota
+  che l'archivio toglie. Il confronto misurava la spaziatura, non la perdita di dati. Curato
+  con un `.rstrip()`, e con **due** casi nuovi nel selftest: uno che prova che una riga vuota
+  non fa scattare l'allarme, e uno che prova che un archivio **mutilato** lo fa ancora.
+
+  🔬 **Dopo la scrittura**: `handoff_lint` **0 fail / 2 warn** (gli stessi di prima),
+  `build_menu` produce un menu **identico** (19 voci), il boot dà `ACTIVE 17 · GATED 1 ·
+  WAIT-INPUT 1 · HOLD 8` come prima e `derivati 3/3 freschi`.
+
+  ### ⚠ Quello che questa cura NON fa, dichiarato
+
+  La lettura di stato è ripartita fra **tre** file, e questa cura ne tocca uno: `SOT_BACKLOG`
+  valeva ~21.600 dei 100.064 token. Restano `SOT_STATE.md` (432.938 byte) e le riletture
+  ripetute di `.handoff/STATE.md`. E soprattutto: **il numero vero si misura sulla chiusura
+  successiva**, con `costo_chiusura.py`, come il piano prescrive. Finché quella misura non
+  c'è, questa fase ha ridotto il *peso* — non ha ancora dimostrato di aver ridotto il *costo*.
+
+  _(testo originale della fase, per storia)_ Si affronta la prima della tabella di F1,
       non tutte insieme: una cura per volta, con la misura prima e dopo. Se la voce più cara è il
       peso di `SOT_BACKLOG`, la cura è l'archiviazione degli item terminali (219 item, quanti
       terminali? si misura); se è la ripetizione, è il profilo; se sono io, è una regola di

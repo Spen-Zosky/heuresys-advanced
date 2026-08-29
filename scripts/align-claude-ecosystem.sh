@@ -249,6 +249,35 @@ auth_presence() {
     [ -s "$HOME/.claude.json" ] && echo claude.json=present || echo claude.json=MISSING'
 }
 
+# --------------------------------------------------------------------------------------
+# #236 F4 (S1084) — LA FINESTRA IN CUI L'HOST E' A META', E CHI SE NE ACCORGE.
+#
+# Questo script NON e' armabile su systemd come il clone (#236 F2), e la ragione e'
+# strutturale, non pigrizia: l'orchestratore gira QUI e il payload — il catalogo
+# `~/.claude` di Windows — E' la fonte di verita'. Un timer sul remoto non avrebbe da
+# dove prendere cio' che deve installare. Si dichiara invece di fingere.
+#
+# Cio' che si puo' togliere e' il DANNO SILENZIOSO. `backup_remote` fa backup **e wipe**
+# dei managed paths; poi vengono push del payload, plugin, claude-mem, SDK. In mezzo c'e'
+# una finestra di minuti in cui l'host ha un `~/.claude` incompleto. Lo script sa gia'
+# ripararsi quando un PASSO fallisce (`rollback_host` su push fallito, su file di auth
+# sparito, su smoke rosso) — ma non puo' ripararsi se a morire e' la SESSIONE che lo
+# esegue: un SIGHUP non lascia nessuno a chiamare il rollback.
+#
+# Percio' un marcatore: si scrive PRIMA del wipe e si toglie solo a corsa conclusa (o
+# dopo un rollback riuscito). Se resta li', quell'host e' stato lasciato a meta' — e
+# `scripts/verifica-cloni.sh` lo dichiara `INTERROTTO` invece di dire ALLINEATO leggendo
+# una sentinella vecchia. Porta con se' il comando di rollback, perche' chi lo trova
+# deve poter agire senza ricostruire lo stamp a memoria.
+INCORSO_FILE='$HOME/.claude/.ecosystem-align.INCORSO'
+segna_incorso() {
+  rssh "$HOST" "mkdir -p \"\$HOME/.claude\" 2>/dev/null; printf '%s\n' \
+    'stamp=$STAMP' 'host_sorgente=$(hostname)' 'iniziato=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
+    'rollback=bash scripts/align-claude-ecosystem.sh $1 --rollback $STAMP' \
+    > \"$INCORSO_FILE\"" 2>/dev/null || true
+}
+togli_incorso() { rssh "$HOST" "rm -f \"$INCORSO_FILE\"" 2>/dev/null || true; }
+
 backup_remote() {  # sets BACKUP_KIND=full|incr — runs the backup + wipe of managed paths
   local managed="${MANAGED_REMOTE_PATHS[*]}" preserve="${PRESERVE_FROM_REMOTE[*]}"
   if rssh "$HOST" '[ -f "$HOME/.claude/.ecosystem-align.json" ]'; then
@@ -380,6 +409,13 @@ rollback_host() {  # $1 = kind, $2 = stamp
       echo \"[rollback] no backup found for stamp $stamp\" >&2; exit 1
     fi
     [ -f \"\$HOME/.claude-mem/settings.json.bak-$stamp\" ] && cp -a \"\$HOME/.claude-mem/settings.json.bak-$stamp\" \"\$HOME/.claude-mem/settings.json\" || true"
+  # #236 F4 — dopo un rollback riuscito l'host NON e' piu' a meta': ha uno stato
+  # coerente, quello di prima. Lasciare il marcatore lo farebbe dichiarare INTERROTTO
+  # per sempre, cioe' un allarme su un host gia' riparato — lo stesso difetto che R2 di
+  # S1084 ha tolto dal rendiconto delle chiusure.
+  # ⚠ Il ripristino `full` rimette al suo posto un `~/.claude` che il marcatore non l'ha
+  # mai avuto, ma quello `incr` no: li' il file resterebbe. Si toglie in entrambi i casi.
+  togli_incorso
 }
 
 # #60 G1 (S1028): retention N-ultimi sui report locali (gitignored) — la dir
@@ -525,11 +561,26 @@ align_host() {  # $1 = kind
     else die "[$kind] $HOST unreachable (use --resilient to skip)"; fi
   fi
 
+  # #236 F4 — UN HOST LASCIATO A META' NON SI SALTA MAI, nemmeno in `--delta`.
+  #
+  # DIFETTO TROVATO DALLA PROVA (2026-08-29, S1084), non ragionato a tavolino: dopo aver
+  # ucciso un allineamento a meta' corsa, il giro successivo con `--delta` avrebbe SALTATO
+  # quell'host — perche' la condizione guardava «payload invariato + sentinella presente»,
+  # e la sentinella c'e' anche su un host incompleto (la scrive `push_payload`, prima
+  # della fine). Cioe' il rimedio consigliato da `verifica-cloni.sh` avrebbe lasciato la
+  # macchina rotta esattamente com'era, dicendo «skip» con l'aria di aver fatto il lavoro.
+  #
+  # Il marcatore ha la precedenza sulla sentinella qui come li': e' l'unico dei due che
+  # sa distinguere «finito» da «cominciato».
   if [ "$DELTA" = 1 ] && [ -f "$MARKER" ]; then
     local changed
     changed="$(find "$SRC/CLAUDE.md" "$SRC/skills" "$SRC/commands" "$SRC/statusline-command.sh" "$SRC/settings.json" "$BOOTSTRAP_SRC" "$CLAUDE_MEM_SRC" -newer "$MARKER" 2>/dev/null | head -1)"
     if [ -z "$changed" ] && rssh "$HOST" '[ -f "$HOME/.claude/.ecosystem-align.json" ]'; then
-      log "[$kind] delta: no ecosystem changes this session + already aligned — skip"; return 0
+      if rssh "$HOST" '[ -f "$HOME/.claude/.ecosystem-align.INCORSO" ]'; then
+        warn "[$kind] delta: nessun cambiamento, MA l'host porta un allineamento lasciato a meta' — NON lo salto"
+      else
+        log "[$kind] delta: no ecosystem changes this session + already aligned — skip"; return 0
+      fi
     fi
   fi
 
@@ -556,6 +607,10 @@ align_host() {  # $1 = kind
   local auth_pre; auth_pre="$(auth_presence)"
   echo "$auth_pre" | sed 's/^/  /'
 
+  # #236 F4 — il marcatore va scritto PRIMA del wipe, non dopo: fra i due c'e' proprio la
+  # finestra che si vuole rendere visibile. Scriverlo dopo lascerebbe scoperto il caso in
+  # cui la sessione muore durante il backup stesso.
+  segna_incorso "$kind"
   log "[$kind] backup + wipe managed paths"
   backup_remote
   echo "  backup kind: $BACKUP_KIND (stamp $STAMP)"
@@ -609,6 +664,12 @@ align_host() {  # $1 = kind
   fi
 
   cleanup; STAGE=""
+  # #236 F4 — l'host non e' piu' a meta': da qui in poi un'interruzione non lascia uno
+  # stato misto, perche' payload, plugin, claude-mem e SDK sono gia' posati. Il `verify`
+  # che segue e' una LETTURA e non cambia niente, quindi il marcatore si toglie prima:
+  # tenerlo fino a dopo il verify farebbe dichiarare INTERROTTO un host sano se la
+  # sessione muore mentre legge un rapporto.
+  togli_incorso
   log "[$kind] verify"
   verify_host "$kind" || warn "[$kind] post-align verify reported drift — inspect report"
   log "[$kind] DONE (backup: $BACKUP_KIND @ $STAMP)"

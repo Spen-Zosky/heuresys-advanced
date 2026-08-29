@@ -85,7 +85,7 @@ bash scripts/verifica-deploy.sh                  # il solo deploy (verifica-clon
 > `bash scripts/verifica-cloni.sh`, non una memoria (`#236` F3). Tre verdetti a vocabolario
 > chiuso: deploy `DEPLOYATO/IN-VOLO/CI-ROSSA/DISALLINEATO/NON-VERIFICATO` - clone
 > `FRESCO/IN-CORSO/INDIETRO/FALLITO/NON-VERIFICATO` - ecosistema
-> `ALLINEATO/INDIETRO/DISALLINEATO/NON-VERIFICATO`. **`NON-VERIFICATO` non vuol dire «a
+> `ALLINEATO/INDIETRO/INTERROTTO/NON-VERIFICATO`. **`NON-VERIFICATO` non vuol dire «a
 > posto»: vuol dire «non ho potuto guardare».** Esce 0 se niente e' in guasto, 1 su un
 > guasto vero, 2 se non ha potuto misurare.
 

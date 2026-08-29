@@ -232,10 +232,67 @@ CI: 20-30 minuti»*. La cura fu **sganciare l'esecuzione dalla sessione**, in qu
   migrazioni) · ecosistema ALLINEATO`, exit 0.
   **③ Batteria: 242 ok, 0 falliti** — sette casi nuovi, di cui quattro negativi.
 
-- [ ] **F4 — L'ecosistema Claude, stesso trattamento** — `align-claude-ecosystem` non è
-      distruttivo, quindi il rischio è minore e la fase è ultima; ma un allineamento interrotto a
-      metà lascia una macchina con plugin misti, che è un guasto silenzioso.
-      **fatto =** anche questo armabile, e dichiarato da `verifica-cloni.sh`
+- [x] **F4 — L'ecosistema Claude, stesso trattamento** — **FATTO 2026-08-29 (S1084)**, ma non
+      come diceva la riga: **non è armabile, e la ragione è strutturale.**
+
+  ### Perché non si arma, detto invece che aggirato
+
+  Il clone si è potuto sganciare perché l'esecutore sta **sul gemello**. Qui no:
+  l'orchestratore gira su Windows e il payload — il catalogo `~/.claude` — **è** la fonte di
+  verità. Un timer sul remoto non avrebbe da dove prendere ciò che deve installare. Lo si
+  dichiara nella testata dello script, invece di costruire un armamento finto.
+
+  ### Quello che invece si è tolto: il danno silenzioso
+
+  `backup_remote` fa backup **e wipe** dei managed paths; poi vengono push, plugin,
+  claude-mem, SDK. In mezzo c'è una finestra di minuti in cui l'host ha un `~/.claude`
+  incompleto. Lo script sapeva già ripararsi quando fallisce un **passo** (rollback su push
+  fallito, su file di auth sparito, su smoke rosso) — ma non quando muore la **sessione**:
+  un SIGHUP non lascia nessuno a chiamare il rollback.
+
+  Ora un marcatore `~/.claude/.ecosystem-align.INCORSO` si scrive **prima** del wipe e si
+  toglie solo a corsa conclusa — o dopo un rollback riuscito, perché un host ripristinato ha
+  uno stato coerente e lasciarlo marcato sarebbe un allarme su un guasto già riparato (lo
+  stesso difetto che R2 di questa sessione ha tolto dal rendiconto delle chiusure). Porta con
+  sé **il comando di rollback con lo stamp giusto**, così chi lo trova può agire senza
+  ricostruirlo a memoria. `verifica-cloni.sh` lo legge **prima** della sentinella e dichiara
+  `INTERROTTO`.
+
+  L'ordine di lettura è il punto: un host lasciato a metà **ha ancora** la sentinella della
+  corsa precedente — anzi, ha già quella *nuova*, perché la scrive `push_payload` prima della
+  fine. Leggerla per prima lo farebbe dichiarare allineato mentre il suo catalogo è
+  incompleto: un verde su un guasto, il peggior esito possibile per uno strumento di verifica.
+
+  ### 🔬 Le prove — e due difetti che solo l'interruzione vera ha fatto uscire
+
+  **① Il ciclo completo, su una corsa reale**: marcatore visto **durante** (`04:39`, mentre la
+  corsa era alla fase «auth presence»), assente **dopo**. E una corsa uccisa durante il
+  `verify` finale **non** produce un falso `INTERROTTO`, perché lì il marcatore è già tolto —
+  il `verify` è una lettura e non lascia nulla a metà.
+
+  **② L'interruzione vera**: `kill -9` sul processo di allineamento nella finestra fra wipe e
+  fine. Il marcatore resta, con lo stamp reale `20260829T024146Z`, e il verdetto è
+  `INTERROTTO`, exit 1 — mentre la sentinella diceva «allineato».
+
+  **⚠ ① Il difetto che la prova ha scoperto: il rimedio non riparava.** Al giro successivo,
+  `--delta` avrebbe **saltato** quell'host: la sua condizione era «payload invariato +
+  sentinella presente», e la sentinella c'è anche su un host incompleto. Cioè il rimedio
+  consigliato da `verifica-cloni.sh` avrebbe lasciato la macchina rotta dicendo «skip», con
+  l'aria di aver lavorato. Curato — il marcatore ha la precedenza anche lì — e provato in
+  entrambi i versi: con l'host marcato *«nessun cambiamento, MA l'host porta un allineamento
+  lasciato a metà — NON lo salto»*; con l'host sano, lo skip regge.
+
+  **⚠ ② `DISALLINEATO` era un falso allarme strutturale.** Dopo aver riallineato il solo
+  gemello, i due host avevano stamp diversi e il verdetto usciva `DISALLINEATO`, cioè
+  *guasto*. Ma `--delta` salta un host quando il payload non è cambiato: **due host allineati
+  in momenti diversi con lo stesso payload hanno contenuto identico e stamp diversi.** La
+  domanda giusta non è «vengono dalla stessa corsa?» ma «il catalogo è cambiato dopo la
+  corsa più **vecchia**?». `DISALLINEATO` è uscito dal vocabolario: restano `ALLINEATO ·
+  INDIETRO · INTERROTTO · NON-VERIFICATO`, quattro stati che si misurano davvero.
+
+  **③ Batteria: 248 ok, 0 falliti** — sei casi nuovi, fra cui l'ordine di scrittura del
+  marcatore, il rollback che lo toglie, e il ramo `--delta` che non deve saltare un host a
+  metà.
 
 ## Le prove che devono poter fallire
 

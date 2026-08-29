@@ -288,8 +288,50 @@ if [ -f "$VC" ]; then
   if grep -nE "printf '[^']*'[a-z]" "$VC" >/dev/null 2>&1; then
     fail "verifica-cloni: apostrofo dentro un printf a singoli apici"
   else ok "verifica-cloni: nessun apostrofo dentro un printf a singoli apici"; fi
+  # H8: un host lasciato a meta' si legge PRIMA della sentinella. L'ordine e' il punto:
+  #     un host interrotto HA ancora la sentinella della corsa precedente, e leggerla per
+  #     prima lo farebbe dichiarare allineato mentre il suo ~/.claude e' incompleto —
+  #     un verde su un guasto, il peggior esito possibile per uno strumento di verifica.
+  if grep -q 'ecosystem-align.INCORSO' "$VC"; then
+    ok "verifica-cloni: legge il marcatore di corsa a meta' (#236 F4)"
+  else fail "verifica-cloni: non legge il marcatore INCORSO — un host a meta' passerebbe per allineato"; fi
+  # H9: `DISALLINEATO` NON deve tornare nel vocabolario dell'ecosistema. Stamp diversi
+  #     non sono un guasto: `--delta` salta un host col payload invariato, quindi due host
+  #     allineati in momenti diversi hanno contenuto uguale e stamp diversi.
+  if sed -n '/verifica_ecosistema()/,/^}/p' "$VC" | grep -q 'V_ECO="DISALLINEATO"'; then
+    fail "verifica-cloni: stamp diversi tornano a produrre DISALLINEATO (falso allarme strutturale)"
+  else ok "verifica-cloni: stamp diversi non sono un guasto (si giudica sulla corsa piu' vecchia)"; fi
 else
   fail "verifica-cloni.sh assente (#236 F3)"
+fi
+
+# ------------------- G-quater. align-claude-ecosystem.sh — la finestra a meta' (#236 F4)
+section "align-claude-ecosystem.sh — la finestra a meta' (#236 F4)"
+AE="scripts/align-claude-ecosystem.sh"
+if [ -f "$AE" ]; then
+  # I1: il marcatore si scrive PRIMA del wipe. Dopo lascerebbe scoperta la morte durante
+  #     il backup stesso, che e' dentro la finestra pericolosa.
+  if awk '/segna_incorso "\$kind"/{s=NR} /backup_remote$/{if(s && NR>s){print "ok"; exit}}' "$AE" | grep -q ok; then
+    ok "align-ecosystem: il marcatore si scrive PRIMA del wipe"
+  else fail "align-ecosystem: segna_incorso non precede backup_remote"; fi
+  # I2: e si toglie a corsa conclusa
+  if grep -q 'togli_incorso' "$AE"; then
+    ok "align-ecosystem: il marcatore si toglie a corsa conclusa"
+  else fail "align-ecosystem: manca togli_incorso — l'host resterebbe INTERROTTO per sempre"; fi
+  # I3: anche dopo un rollback riuscito. Un host ripristinato ha uno stato coerente:
+  #     lasciarlo marcato sarebbe un allarme su un guasto gia' riparato (come R2, S1084).
+  if sed -n '/^rollback_host()/,/^}/p' "$AE" | grep -q 'togli_incorso'; then
+    ok "align-ecosystem: il rollback toglie il marcatore (niente allarme su un host riparato)"
+  else fail "align-ecosystem: dopo un rollback l'host resterebbe dichiarato INTERROTTO"; fi
+  # I4: IL DIFETTO TROVATO DALLA PROVA — `--delta` non deve saltare un host a meta'.
+  #     La sentinella c'e' anche su un host incompleto (la scrive push_payload, prima
+  #     della fine), quindi il criterio «payload invariato + sentinella» da solo avrebbe
+  #     lasciato rotta la macchina dicendo «skip».
+  if sed -n '/DELTA" = 1 \] && \[ -f "\$MARKER"/,/^  fi/p' "$AE" | grep -q 'ecosystem-align.INCORSO'; then
+    ok "align-ecosystem: --delta NON salta un host lasciato a meta' (#236 F4)"
+  else fail "align-ecosystem: --delta salterebbe un host a meta' — il rimedio non riparerebbe"; fi
+else
+  fail "align-claude-ecosystem.sh assente"
 fi
 
 # ------------------- G. vm-deploy-remote.sh — detached-deploy wiring (D-49, static)

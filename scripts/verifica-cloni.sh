@@ -20,7 +20,7 @@
 # loro mestiere e' un altro e riusare le parole del deploy le renderebbe vaghe:
 #
 #   clone:       FRESCO · IN-CORSO · INDIETRO · FALLITO · NON-VERIFICATO
-#   ecosistema:  ALLINEATO · INDIETRO · DISALLINEATO · NON-VERIFICATO
+#   ecosistema:  ALLINEATO · INDIETRO · INTERROTTO · NON-VERIFICATO
 #
 # ⚠ NON-VERIFICATO NON VUOL DIRE «A POSTO». Vuol dire «non ho potuto guardare», ed e' la
 # ragione per cui questo script esiste invece di un comando ricordato a memoria: un
@@ -146,7 +146,11 @@ verifica_clone() {
 # con `stamp` e `manifestSha`. ⚠ I `manifestSha` dei due host sono DIVERSI per costruzione
 # — `settings.json` viene trasformato per-OS — quindi confrontarli darebbe un allarme
 # permanente su un sistema sano. Misurato il 2026-08-29: stesso stamp `20260828T210637Z`,
-# sha `7b7865d7…` sulla VM e `c384ce8a…` sul gemello. Il criterio buono e' lo **stamp**:
+# sha `7b7865d7…` sulla VM e `c384ce8a…` sul gemello. Ma nemmeno lo **stamp** basta da
+# solo — due host allineati in momenti diversi con lo STESSO payload hanno contenuto
+# identico e stamp diversi, perche' `--delta` salta un host quando il payload non e'
+# cambiato. Il criterio vero e': **il catalogo e' cambiato dopo la corsa piu' VECCHIA?**
+# Lo stamp serve a sapere quale corsa guardare, non a giudicare da solo:
 # stessa corsa di allineamento, oppure uno degli host e' rimasto a una corsa precedente.
 #
 # E poi la domanda che conta davvero: **il catalogo e' cambiato dopo l'ultimo
@@ -154,8 +158,19 @@ verifica_clone() {
 # quelle di qui.
 verifica_ecosistema() {
   titolo "ECOSISTEMA CLAUDE — i remoti hanno il catalogo di questa macchina?"
-  local stamps="" mancanti="" h s
+  local stamps="" mancanti="" interrotti="" h s inc
   for h in $ECO_HOSTS; do
+    # PRIMA il marcatore di corsa in atto (#236 F4), poi la sentinella. L'ordine conta:
+    # un host lasciato a meta' HA ancora la sentinella della corsa PRECEDENTE, e leggerla
+    # per prima lo farebbe dichiarare allineato mentre il suo `~/.claude` e' incompleto.
+    # E' il caso peggiore possibile per uno strumento di verifica: un verde su un guasto.
+    inc="$(MSYS_NO_PATHCONV=1 ssh "${SSH_OPTS[@]}" "$h" \
+           "cat ~/.claude/.ecosystem-align.INCORSO 2>/dev/null | tr '\n' ' '" 2>/dev/null)"
+    if [ -n "$inc" ]; then
+      riga "$h" "⚠ ALLINEAMENTO LASCIATO A META' — $inc"
+      interrotti="$interrotti $h"
+      continue
+    fi
     s="$(MSYS_NO_PATHCONV=1 ssh "${SSH_OPTS[@]}" "$h" \
          "sed -n 's/.*\"stamp\":\"\\([^\"]*\\)\".*/\\1/p' ~/.claude/.ecosystem-align.json 2>/dev/null" 2>/dev/null | tr -d '[:space:]')"
     if [ -z "$s" ]; then
@@ -167,22 +182,42 @@ verifica_ecosistema() {
     fi
   done
 
+  # Un host a meta' batte tutto il resto: e' l'unico stato in cui il catalogo di quella
+  # macchina puo' essere incompleto, e il rimedio (il rollback) e' scritto nel marcatore.
+  if [ -n "$interrotti" ]; then
+    riga "verdetto" "INTERROTTO — allineamento lasciato a meta' su:$interrotti"
+    riga "  rimedio" "il comando di rollback e' dentro il marcatore, con lo stamp giusto"
+    riga "  oppure" "bash scripts/align-claude-ecosystem.sh all --delta   (rifa' la corsa)"
+    V_ECO="INTERROTTO"; peggiora 1; return
+  fi
+
   if [ -n "$mancanti" ]; then
     riga "verdetto" "NON-VERIFICATO — non letti:$mancanti"
     V_ECO="NON-VERIFICATO"; peggiora 2; return
   fi
 
-  local unici
+  # ⚠ STAMP DIVERSI NON SONO UN GUASTO, e la prima stesura sbagliava a dirlo.
+  #
+  # Misurato il 2026-08-29 provando F4: dopo aver riallineato il solo gemello, i due host
+  # portavano stamp diversi e il verdetto usciva `DISALLINEATO` — cioe' un guasto. Ma
+  # `--delta` salta un host quando il payload non e' cambiato, quindi due host allineati
+  # in momenti diversi CON LO STESSO PAYLOAD hanno contenuto identico e stamp diversi.
+  # Chiamarlo guasto sarebbe un falso allarme strutturale, e i falsi allarmi insegnano a
+  # non guardare (#194).
+  #
+  # La domanda giusta non e' «vengono dalla stessa corsa?» ma «il catalogo e' cambiato
+  # dopo la piu' VECCHIA delle corse?». Se non lo e', tutti gli host hanno il catalogo di
+  # adesso, comunque ci siano arrivati. Percio' `DISALLINEATO` e' uscito dal vocabolario:
+  # restano ALLINEATO · INDIETRO · INTERROTTO · NON-VERIFICATO, quattro stati che si
+  # misurano davvero.
+  local st unici
   unici="$(printf '%s\n' $stamps | sort -u | wc -l | tr -d '[:space:]')"
-  if [ "$unici" != "1" ]; then
-    riga "verdetto" "DISALLINEATO — gli host non vengono dalla stessa corsa di allineamento"
-    V_ECO="DISALLINEATO"; peggiora 1; return
-  fi
+  st="$(printf '%s\n' $stamps | sort | head -1)"     # la PIU' VECCHIA: e' quella che decide
+  [ "$unici" = "1" ] || riga "corse" "$unici diverse — si giudica sulla piu' vecchia ($st)"
 
   # Il catalogo sorgente e' cambiato dopo? `stamp` e' UTC compatto (20260828T210637Z):
   # si converte in epoch e si confronta col file piu' recente del payload.
-  local st ep_stamp piu_nuovo
-  st="$(printf '%s\n' $stamps | head -1)"
+  local ep_stamp piu_nuovo
   ep_stamp="$(date -u -d "${st:0:4}-${st:4:2}-${st:6:2} ${st:9:2}:${st:11:2}:${st:13:2}" +%s 2>/dev/null)"
   if [ -z "$ep_stamp" ]; then
     riga "verdetto" "NON-VERIFICATO — stamp «$st» non interpretabile come data"
@@ -207,7 +242,7 @@ verifica_ecosistema() {
     riga "  rimedio" "bash scripts/align-claude-ecosystem.sh all --delta"
     V_ECO="INDIETRO"; peggiora 1; return
   fi
-  riga "verdetto" "ALLINEATO — stessa corsa ($st), CLAUDE.md/skills/commands non toccati dopo"
+  riga "verdetto" "ALLINEATO — catalogo non toccato dopo la corsa piu' vecchia ($st)"
   riga "  non guardato" "settings.json (riscritto dal runtime a ogni sessione, e trasformato per-OS): bash scripts/align-claude-ecosystem.sh all --verify"
   V_ECO="ALLINEATO"
 }

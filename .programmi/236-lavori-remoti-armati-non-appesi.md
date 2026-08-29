@@ -1,7 +1,7 @@
 # 236 — I lavori remoti si armano, non si appendono alla sessione
 
 > **item**: #236 · **priorità**: P1 · **stima**: ~1 sessione
-> **stato**: IN CORSO
+> **stato**: IN CORSO — F1 e **F2 FATTE**; restano F3 (`verifica-cloni.sh`) e F4 (ecosistema)
 > **nasce-da**: S1083 (2026-08-28), domanda di Enzo durante la chiusura: *«mi confermi che le
 > clonazioni sono processi indipendenti che arrivano a conclusione anche se chiudo la sessione?»*
 > La risposta misurata è **no**, e una delle tre è pure distruttiva.
@@ -44,8 +44,8 @@ comando»*. È vero — ma vale **solo per il deploy**:
 | lavoro | come gira oggi | sopravvive alla chiusura? |
 |---|---|---|
 | **deploy in produzione** | `heuresys-advanced-deploy-watch.timer` — timer systemd **sulla VM** | ✅ **sì** |
-| `align-clones` / ecosistema Claude | comando remoto via `ssh` in primo piano | ❌ no |
-| `clone-vm-db` | idem, **e contiene un `DROP … CASCADE`** | ❌ no, e lascia uno stato rotto |
+| `align-clones` / ecosistema Claude | comando remoto via `ssh` in primo piano | ❌ no → **F4** |
+| `clone-vm-db` | ~~`ssh` in primo piano~~ → **innescato su systemd** (`arma-clone.sh`, F2) | ✅ **sì, dal 2026-08-29** — provato uccidendo ogni ssh a metà corsa |
 
 Il comando che Enzo non ricordava è **`bash scripts/verifica-deploy.sh`**, e legge lo stato del
 solo deploy con vocabolario chiuso: `DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO ·
@@ -99,11 +99,87 @@ CI: 20-30 minuti»*. La cura fu **sganciare l'esecuzione dalla sessione**, in qu
   si tocca» — sono stati **sostituiti**, non cancellati: quelle proprietà ora sono vere *per
   costruzione*, e al loro posto si prova che il database di scena nasce da zero.
 
-- [ ] **F2 — L'armamento del clone** — sul gemello nasce `heuresys-clone-watch.timer` col mestiere
-      del gemello di quello di deploy: la chiusura **arma** (scrive un file-sentinella con lo sha e
-      il motivo), il timer esegue, `OnFailure` è quello già in uso, `Persistent=true`.
-      `close-propagate.sh` passa da «lancia e aspetta» a «arma e ritorna».
-      **fatto =** chiusura della sessione **durante** un clone in corso, e il clone finisce lo stesso
+- [x] **F2 — L'armamento del clone** — **FATTO 2026-08-29 (S1084)**, e non è nato il timer che
+      questa riga prevedeva: **c'era già**.
+
+  ### ⭐ Quello che non serviva inventare
+
+  Il piano diceva «sul gemello nasce `heuresys-clone-watch.timer`». Prima di scriverlo ho guardato
+  cosa c'è davvero sul gemello, e c'era **`heuresys-advanced-clonedb.service`** — viva dal 2026
+  (Z-022), con *tutto* ciò che il modello di `#165` pretende: `OnFailure=heuresys-unit-failure@%n`,
+  `Persistent=true` sul timer, `TimeoutStartSec=900`, e in più lo stop di `api`+`web` prima del
+  ripristino con un `ExecStopPost` che li riaccende **sempre**, anche quando il clone fallisce.
+
+  Mancava **una cosa sola: un innesco su richiesta.** Il timer la esegue la domenica alle 08:00, e
+  fra una domenica e l'altra l'unico modo di rinfrescare il gemello era il comando appeso alla
+  sessione. Scrivere un secondo sorvegliante avrebbe duplicato un meccanismo collaudato da mesi.
+
+  ### L'atto è una riga: `systemctl start --no-block`
+
+  `scripts/arma-clone.sh` (nuovo) innesca l'unità sul gemello e **ritorna**. Il `--no-block` è
+  tutto il punto: senza, `systemctl start` *attende* la fine del one-shot e si sarebbe daccapo —
+  appesi all'ssh, con in più un livello. Con, systemd prende in carico l'unità e il clone diventa
+  figlio **di systemd**.
+
+  `close-propagate.sh` passa da «lancia e aspetta» ad «arma e ritorna», e da qui in poi **non sa**
+  come è finito il clone — né deve fingere di saperlo: lo dirà `verifica-cloni.sh` (F3), come già
+  fa `verifica-deploy.sh` per il deploy. Il suo esito diventa `armato`, e il diario lo scrive
+  `arma-clone.sh` col passo `arma-clone`, con la stessa guardia anti-doppione di `#217` I4.
+
+  ### 🔬 Le prove, eseguite — e la seconda è quella che conta
+
+  **① Il clone è figlio di systemd, non dell'ssh.** Misurato subito dopo l'innesco:
+  `MainPID=412164`, e `ps -o ppid=` su quel pid risponde **1**, cioè `systemd`. Nessun `sshd` nella
+  catena.
+
+  **② Ucciso ogni ssh MENTRE il clone girava.** `pkill -9 -f "sshd: enzo"` sul gemello — che è
+  peggio del `SIGHUP` che una chiusura di sessione provocherebbe. La connessione è caduta a metà
+  (`Connection to 192.168.1.11 closed by remote host`). Esito del clone, riletto dopo:
+
+  | misura | esito |
+  |---|---|
+  | `systemctl is-active` | `inactive` (finito) |
+  | `Result` · `ExecMainStatus` | **`success`** · **0** |
+  | durata | 04:10:24 → 04:11:35 = **71 secondi**, terminati **senza più nessun ssh** |
+  | il clone risponde | **164 utenti · 315 posizioni · 45 OU · 14.033 skill** — le stesse conte della produzione |
+  | residui `_stage` / `_old` | **nessuno** (lo swap atomico di F1 ha chiuso) |
+  | `api` e `web` sul gemello | **`active`** — `ExecStopPost` li ha riaccesi |
+
+  Con la riga di prima, quel `SIGKILL` avrebbe interrotto un ripristino a metà.
+
+  ⚠ Un dettaglio della prova conferma un difetto già noto: il primo tentativo di leggere le conte
+  è rimasto **appeso su «Inserisci la password»**, perché il `psql` di verifica non aveva `-w`. È
+  esattamente ① di F1 (26 minuti fermi su una richiesta che nessuno avrebbe letto). In una corsa
+  non presidiata un comando che *chiede* è peggio di uno che fallisce.
+
+  **③ I casi negativi, nella batteria** (`scripts/test/run-shell-tests.sh`, sezione *arma-clone*,
+  **234 ok / 0 falliti**): host irraggiungibile → `IGNOTO` dichiarato ed exit 0, e soprattutto un
+  host morto **non può** dire «preso in carico»; `--dry-run` non innesca; flag sconosciuto
+  rifiutato; `--no-block` presente. Più due prove sul percorso vero: che `close-propagate` **non**
+  contenga più un `ssh … clone-vm-db.sh` in primo piano, e che chiami `arma-clone.sh`.
+
+  ### ⚠ Il difetto che ha reso verde un caso negativo, e come si è visto
+
+  Il caso «unità inesistente → `fallito`, exit 1» **usciva 0**. Causa: un apostrofo dentro un
+  `${WHY:-unita' $UNIT assente}`. Bash apre lì una stringa anche fra doppi apici, e la stringa si
+  richiude su un apostrofo più avanti nel file: `bash -n` resta verde perché la sintassi torna, ma
+  lo `exit 1` **smette di essere un comando** — è finito dentro un letterale. La traccia `bash -x`
+  lo mostra senza appello: l'esecuzione finisce sull'ultima riga della funzione, e `+ exit 1` non
+  compare mai.
+
+  È una trappola **già documentata** in `scripts/arma-deploy.sh`, che porta l'avvertimento in
+  testa. L'avevo letto, e l'ho riprodotta lo stesso: un commento in un altro file non è un
+  presidio. Ora lo è — la batteria ha un caso che cerca quel pattern in `arma-clone.sh`, e una
+  ricerca su tutto il repo ha confermato che l'unica altra occorrenza (`close-propagate.sh:58`)
+  ha apostrofi **bilanciati**, quindi è sana.
+
+  ### Cosa resta scoperto, dichiarato
+
+  Se il gemello è **spento** al momento della chiusura, non si arma niente: `arma-clone.sh` lo
+  dice (`IGNOTO`, mai un verde) ed esce 0 per non far cadere una chiusura sana, e il recupero è il
+  timer settimanale con `Persistent=true` — cioè fino a sei giorni di ritardo. Portarlo a zero
+  vuol dire una ref armata che il gemello consuma da sé al ritorno: è materia di F3, che deve
+  comunque leggere lo stato dei tre lavori.
 - [ ] **F3 — `verifica-cloni.sh`, gemello di `verifica-deploy.sh`** — stesso vocabolario chiuso, e
       `NON-VERIFICATO` che significa «non ho potuto guardare», mai «a posto». Nominato nella
       sezione *Verification* di `.handoff/STATE.md`, così la risposta a «posso chiudere?» è un

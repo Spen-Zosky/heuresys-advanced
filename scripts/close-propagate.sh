@@ -251,23 +251,39 @@ else
 fi
 
 # --- linux-pc bare-metal DB refresh (policy §12.3-B: conditional; need_clone computed above) -
+#
+# #236 F2 (S1084) — QUI SI ARMA, NON SI ASPETTA. Fino a questa data la riga era:
+#
+#     ssh -o BatchMode=yes linux-pc "cd '$LINUXPC_REPO' && bash scripts/clone-vm-db.sh"
+#
+# cioe' il clone girava sul gemello ma come figlio di un `ssh` che viveva DENTRO la
+# sessione CLI. Chiudere la sessione mandava SIGHUP a meta' lavoro — e dentro
+# `clone-vm-db.sh` c'e' un ripristino del database. Alla domanda di Enzo «le clonazioni
+# arrivano a conclusione anche se chiudo la sessione?» la risposta misurata era **no**.
+#
+# Adesso l'atto e' `scripts/arma-clone.sh`, che innesca l'unita' systemd gia' esistente
+# sul gemello (`heuresys-advanced-clonedb.service`) con `--no-block`: systemd la prende
+# in carico e ritorna. Il clone diventa figlio di systemd, non di questo script.
+# Conseguenza voluta: da qui in poi la chiusura **non sa** come e' finito il clone, e non
+# deve fingere di saperlo — lo dira' `verifica-cloni.sh` (#236 F3), come per il deploy.
 clone_outcome="saltato"
 if [ "$need_clone" = 1 ]; then
-  log "clone-db — linux-pc DB refresh ($clone_why)"
-  if MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes -o ConnectTimeout=8 linux-pc 'exit 0' 2>/dev/null; then
-    if MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes linux-pc "cd '$LINUXPC_REPO' && bash scripts/clone-vm-db.sh"; then
-      clone_outcome="eseguito"
-    else
-      FAILED="$FAILED clone-vm-db"; clone_outcome="fallito"
-      clone_why="$clone_why — MA clone-vm-db.sh è uscito in errore su linux-pc"
-    fi
-  else
-    warn "linux-pc unreachable — clone-db skipped (run scripts/clone-vm-db.sh there when up)"
-    clone_outcome="ignoto"
-    clone_why="$clone_why — MA linux-pc irraggiungibile: eseguire scripts/clone-vm-db.sh là quando torna su"
-  fi
+  log "clone-db — armo il refresh del gemello ($clone_why)"
+  set +e
+  bash "$SCRIPTS/arma-clone.sh" --why "$clone_why"
+  rc_clone=$?
+  set -e
+  case "$rc_clone" in
+    0) clone_outcome="armato" ;;
+    *) FAILED="$FAILED arma-clone"; clone_outcome="fallito"
+       clone_why="$clone_why — MA l'armamento del clone e' stato rifiutato dal gemello" ;;
+  esac
+  # Il diario lo scrive arma-clone.sh, col passo `arma-clone` e il suo vocabolario
+  # (eseguito|saltato|ignoto|fallito). Registrarlo anche qui darebbe due righe per un
+  # passo solo — lo stesso difetto che #217 I4 ha tolto dall'armamento del deploy.
+  clone_logged=1
 else
-  log "clone-db — non eseguito: $clone_why"
+  log "clone-db — non armato: $clone_why"
   case "$clone_why" in IGNOTO*) clone_outcome="ignoto" ;; esac
 fi
 # --- ARMAMENTO (#165) — l'ultimo atto della chiusura, e dura un secondo -----------------------
@@ -299,7 +315,10 @@ fi
 # canali erano rotti. Senza questa guardia lo stesso passo comparirebbe due volte.
 [ "${arm_logged:-0}" = 1 ] || { [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step arma "$arm_outcome" "$arm_why" >/dev/null 2>&1 || true; }
 
-[ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step clone-db "$clone_outcome" "$clone_why" >/dev/null 2>&1 || true
+# Stessa guardia dell'armamento del deploy (#236 F2): quando arma-clone.sh e' stato
+# chiamato, il diario lo scrive lui col passo `arma-clone`. Qui restano i soli rami in
+# cui non lo si e' chiamato — clone non necessario, o finestra non misurabile.
+[ "${clone_logged:-0}" = 1 ] || { [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step clone-db "$clone_outcome" "$clone_why" >/dev/null 2>&1 || true; }
 [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step propaga \
   "$([ -n "$FAILED" ] && echo fallito || echo eseguito)" \
   "canali: align-clones + align-claude-ecosystem (mode=${MODE:-full}, deploy=$DEPLOY)${FAILED:+ — falliti:$FAILED}" >/dev/null 2>&1 || true

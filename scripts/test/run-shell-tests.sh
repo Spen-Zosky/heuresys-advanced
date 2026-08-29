@@ -177,10 +177,75 @@ else ok "unknown flag rejected (exit 1, before any channel)"; fi
 a="$(CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --delta 2>&1)"; b="$(CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --delta 2>&1)"
 if [ "$a" = "$b" ]; then ok "dry-run plan is idempotent (stable across runs)"; else fail "dry-run not idempotent"; fi
 # F6: host-off resilience + fail-loud wiring present (static — no live LAN host in CI)
-if grep -q 'ConnectTimeout=8' "$CP" && grep -q 'unreachable' "$CP" \
+#
+# ⚠ AGGIORNATO IN S1084 (#236 F2). Il test cercava `ConnectTimeout=8` e `unreachable`
+# dentro close-propagate.sh: erano nel blocco che lanciava il clone via ssh in primo
+# piano, e quel blocco non c'e' piu' — l'atto e' passato a scripts/arma-clone.sh, che
+# innesca l'unita' systemd del gemello con --no-block. La proprieta' non e' sparita, si
+# e' spostata: qui si guarda dove vive ADESSO, invece di rimettere stringhe morte nel
+# file solo per far tacere un grep. (La resilienza di arma-clone e' anche provata
+# funzionalmente nella sezione G-bis, che e' la prova vera.)
+if grep -q 'ConnectTimeout=8' "$ROOT/scripts/arma-clone.sh" \
+   && grep -q 'non risponde' "$ROOT/scripts/arma-clone.sh" \
    && grep -q 'failed on a reachable host' "$CP"; then
-  ok "resilience: unreachable→skip+warn, reachable-fail→fail-loud (die)"
+  ok "resilience: unreachable→skip+warn (arma-clone), reachable-fail→fail-loud (die)"
 else fail "resilience/fail-loud wiring missing"; fi
+# F7: il clone si ARMA, non si aspetta — la riga che lo appendeva alla sessione non deve
+#     tornare. E' il difetto di #236: un `ssh ... clone-vm-db.sh` in primo piano muore di
+#     SIGHUP quando la sessione si chiude, a meta' ripristino del database.
+#     I COMMENTI SI ESCLUDONO, e non e' un dettaglio: la testata del blocco cita la
+#     riga vecchia per spiegare cosa e' cambiato, ed e' giusto che la citi. Un test che
+#     non distingue il codice dal commento costringerebbe a cancellare la spiegazione
+#     per far tacere un grep — cioe' a pagare la prova con la memoria del perche'.
+if grep -vE '^[[:space:]]*#' "$CP" | grep -qE 'ssh[^|]*clone-vm-db\.sh'; then
+  fail "close-propagate lancia ancora clone-vm-db.sh via ssh in primo piano (#236 F2)"
+else ok "close-propagate arma il clone invece di appenderlo alla sessione (#236 F2)"; fi
+if grep -q 'arma-clone.sh' "$CP"; then
+  ok "close-propagate chiama arma-clone.sh"
+else fail "close-propagate non chiama arma-clone.sh"; fi
+
+# ------------------- G-bis. arma-clone.sh — l'armamento del clone (#236 F2, funzionale)
+#
+# Questi casi girano OVUNQUE, CI compresa: usano un host che non esiste, quindi non
+# pretendono la LAN. I casi che richiedono il gemello vivo (unita' assente => fallito;
+# innesco reale => preso in carico da systemd) sono provati a mano e documentati in
+# .programmi/236-lavori-remoti-armati-non-appesi.md.
+section "arma-clone.sh — armamento del clone (#236 F2)"
+AC="scripts/arma-clone.sh"
+if [ -f "$AC" ]; then
+  # G1: host che non risponde => IGNOTO, e NON un verde. Esce 0 perche' un gemello
+  #     spento non deve far fallire una chiusura sana, ma lo dichiara.
+  out="$(CLONE_ARM_HOST=host-che-non-esiste-236 bash "$AC" --why test 2>&1)"; rc=$?
+  if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'IGNOTO'; then
+    ok "arma-clone: host irraggiungibile => IGNOTO dichiarato, exit 0 (non fa cadere la chiusura)"
+  else fail "arma-clone: host irraggiungibile — atteso IGNOTO+exit 0, avuto rc=$rc"; fi
+  # G2: e IGNOTO non deve poter passare per «armato»
+  if printf '%s' "$out" | grep -qi 'preso in carico'; then
+    fail "arma-clone: un host morto NON puo' dire «preso in carico»"
+  else ok "arma-clone: un host morto non si traveste da armato"; fi
+  # G3: --dry-run non tocca niente e lo dice
+  out="$(ARMA_CLONE_DRYRUN=1 bash "$AC" --why test 2>&1)"; rc=$?
+  if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'DRY-RUN'; then
+    ok "arma-clone: --dry-run dichiara e non innesca"
+  else fail "arma-clone: --dry-run rotto (rc=$rc)"; fi
+  # G4: flag sconosciuto rifiutato prima di toccare qualunque host
+  if bash "$AC" --flag-che-non-esiste >/dev/null 2>&1; then
+    fail "arma-clone: un flag sconosciuto dovrebbe uscire non-zero"
+  else ok "arma-clone: flag sconosciuto rifiutato"; fi
+  # G5: `--no-block` E' il meccanismo. Senza, systemctl start ATTENDE il oneshot e si
+  #     torna appesi all'ssh: e' la riga che fa esistere questa fase.
+  if grep -q 'systemctl start --no-block' "$AC"; then
+    ok "arma-clone: innesca con --no-block (il clone e' figlio di systemd, non dell'ssh)"
+  else fail "arma-clone: manca --no-block — il clone resterebbe appeso alla sessione"; fi
+  # G6: nessun apostrofo dentro un ${VAR:-default} — bash apre una stringa che inghiotte
+  #     il resto del file, e uno `exit 1` smette di essere un comando. Costato un caso
+  #     negativo verde in S1084, e arma-deploy.sh porta lo stesso avvertimento in testa.
+  if grep -qE '\$\{[A-Za-z_]+:-[^}]*'"'"'[^}]*\}' "$AC"; then
+    fail "arma-clone: apostrofo dentro un \${VAR:-default} — bash inghiotte il resto del file"
+  else ok "arma-clone: nessun apostrofo dentro un \${VAR:-default}"; fi
+else
+  fail "arma-clone.sh assente (#236 F2)"
+fi
 
 # ------------------- G. vm-deploy-remote.sh — detached-deploy wiring (D-49, static)
 section "vm-deploy-remote.sh — detached deploy + poll wiring (D-49)"

@@ -247,6 +247,51 @@ else
   fail "arma-clone.sh assente (#236 F2)"
 fi
 
+# ------------------- G-ter. verifica-cloni.sh — i tre verdetti (#236 F3, funzionale)
+#
+# La prova che conta e' il SILENZIO: un host che non risponde deve produrre
+# NON-VERIFICATO, mai un verde. Un controllo che tace quando la rete e' giu' insegna a
+# fidarsi del silenzio, ed e' il difetto che questo script esiste per togliere.
+section "verifica-cloni.sh — i tre lavori armati (#236 F3)"
+VC="scripts/verifica-cloni.sh"
+if [ -f "$VC" ]; then
+  # H1: gemello spento => NON-VERIFICATO, exit 2 (non 0, non 1)
+  out="$(CLONE_ARM_HOST=host-spento-test-236 bash "$VC" --solo clone 2>&1)"; rc=$?
+  if [ "$rc" = 2 ] && printf '%s' "$out" | grep -q 'NON-VERIFICATO'; then
+    ok "verifica-cloni: gemello spento => NON-VERIFICATO, exit 2"
+  else fail "verifica-cloni: gemello spento — atteso NON-VERIFICATO+exit 2, avuto rc=$rc"; fi
+  # H2: e non deve poter dire FRESCO su un host che non ha guardato
+  if printf '%s' "$out" | grep -q 'FRESCO'; then
+    fail "verifica-cloni: un gemello spento NON puo' risultare FRESCO"
+  else ok "verifica-cloni: un host spento non si traveste da fresco"; fi
+  # H3: idem per l'ecosistema
+  out="$(ECO_HOSTS=host-spento-test-236 bash "$VC" --solo ecosistema 2>&1)"; rc=$?
+  if [ "$rc" = 2 ] && printf '%s' "$out" | grep -q 'NON-VERIFICATO'; then
+    ok "verifica-cloni: host dell'ecosistema spento => NON-VERIFICATO, exit 2"
+  else fail "verifica-cloni: ecosistema con host spento — atteso NON-VERIFICATO+exit 2, avuto rc=$rc"; fi
+  # H4: un --solo sconosciuto non deve girare mezzo controllo e poi dire va bene
+  if bash "$VC" --solo inventato >/dev/null 2>&1; then
+    fail "verifica-cloni: --solo con un valore inesistente dovrebbe uscire non-zero"
+  else ok "verifica-cloni: --solo con valore inesistente rifiutato"; fi
+  # H5: settings.json resta FUORI dal criterio di freschezza. Il runtime lo riscrive a
+  #     ogni sessione: dentro, il verdetto sarebbe INDIETRO per sempre — un allarme
+  #     sempre acceso e' un allarme che nessuno guarda piu' (#194).
+  if grep -qE 'newermt.*settings\.json|settings\.json.*-newermt' "$VC"; then
+    fail "verifica-cloni: settings.json e' nel criterio di freschezza => INDIETRO perpetuo"
+  else ok "verifica-cloni: settings.json fuori dal criterio di freschezza (e dichiarato)"; fi
+  # H6: il verdetto del deploy NON si riscrive, si delega — due criteri per una domanda
+  #     sola prima o poi divergono.
+  if grep -q 'verifica-deploy.sh' "$VC"; then
+    ok "verifica-cloni: il deploy lo giudica verifica-deploy.sh (nessun secondo criterio)"
+  else fail "verifica-cloni: il verdetto del deploy e' stato riscritto invece che delegato"; fi
+  # H7: la trappola dell'apostrofo, di nuovo — stavolta in una stringa a singoli apici
+  if grep -nE "printf '[^']*'[a-z]" "$VC" >/dev/null 2>&1; then
+    fail "verifica-cloni: apostrofo dentro un printf a singoli apici"
+  else ok "verifica-cloni: nessun apostrofo dentro un printf a singoli apici"; fi
+else
+  fail "verifica-cloni.sh assente (#236 F3)"
+fi
+
 # ------------------- G. vm-deploy-remote.sh — detached-deploy wiring (D-49, static)
 section "vm-deploy-remote.sh — detached deploy + poll wiring (D-49)"
 VDR="scripts/vm-deploy-remote.sh"

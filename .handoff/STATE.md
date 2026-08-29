@@ -77,7 +77,16 @@ il database («si esegue dove il database vive»), mai estesa alla suite.
 python docs/kb/tools/session_start.py            # menu + salute, un giro solo
 python docs/kb/tools/verifica_incrociata.py      # atteso: 0 verifiche con difetti
 python docs/kb/tools/check_marciume.py           # atteso: «niente e' marcito»
-bash scripts/verifica-deploy.sh                  # com'e' finito il deploy armato
+bash scripts/verifica-cloni.sh                   # I TRE LAVORI ARMATI: deploy - clone - ecosistema
+bash scripts/verifica-deploy.sh                  # il solo deploy (verifica-cloni ci si appoggia)
 ```
+
+> **«Posso chiudere la sessione mentre quelle attivita' procedono?»** — la risposta e'
+> `bash scripts/verifica-cloni.sh`, non una memoria (`#236` F3). Tre verdetti a vocabolario
+> chiuso: deploy `DEPLOYATO/IN-VOLO/CI-ROSSA/DISALLINEATO/NON-VERIFICATO` - clone
+> `FRESCO/IN-CORSO/INDIETRO/FALLITO/NON-VERIFICATO` - ecosistema
+> `ALLINEATO/INDIETRO/DISALLINEATO/NON-VERIFICATO`. **`NON-VERIFICATO` non vuol dire «a
+> posto»: vuol dire «non ho potuto guardare».** Esce 0 se niente e' in guasto, 1 su un
+> guasto vero, 2 se non ha potuto misurare.
 
 > I numeri (migrazioni, moduli, conteggi DB, CI) stanno in `docs/kb/SOT_STATE.md`.

@@ -180,12 +180,58 @@ CI: 20-30 minuti»*. La cura fu **sganciare l'esecuzione dalla sessione**, in qu
   timer settimanale con `Persistent=true` — cioè fino a sei giorni di ritardo. Portarlo a zero
   vuol dire una ref armata che il gemello consuma da sé al ritorno: è materia di F3, che deve
   comunque leggere lo stato dei tre lavori.
-- [ ] **F3 — `verifica-cloni.sh`, gemello di `verifica-deploy.sh`** — stesso vocabolario chiuso, e
-      `NON-VERIFICATO` che significa «non ho potuto guardare», mai «a posto». Nominato nella
-      sezione *Verification* di `.handoff/STATE.md`, così la risposta a «posso chiudere?» è un
-      comando e non una memoria.
-      **fatto =** il comando esiste, dichiara i tre lavori (deploy · clone · ecosistema) e ognuno
-      porta il proprio verdetto
+- [x] **F3 — `verifica-cloni.sh`, gemello di `verifica-deploy.sh`** — **FATTO 2026-08-29 (S1084)**.
+      `bash scripts/verifica-cloni.sh` — nominato nella sezione *Verification* di
+      `.handoff/STATE.md`, con la domanda in chiaro: *«posso chiudere?»* è un comando, non una
+      memoria. `--solo deploy|clone|ecosistema` · `--breve`.
+
+  ### Tre mestieri, tre vocabolari — non uno solo riusato
+
+  | lavoro | verdetti | come si misura |
+  |---|---|---|
+  | **deploy** | `DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO` | **delegato** a `verifica-deploy.sh` |
+  | **clone** | `FRESCO · IN-CORSO · INDIETRO · FALLITO · NON-VERIFICATO` | esito dell'unità **+** distanza in migrazioni dalla produzione |
+  | **ecosistema** | `ALLINEATO · INDIETRO · DISALLINEATO · NON-VERIFICATO` | `stamp` della sentinella su ogni host + catalogo toccato dopo |
+
+  Il verdetto del deploy **non si riscrive**: `verifica-deploy.sh` ha già il cancello CI, la
+  sonda IPv4 col secondo tentativo e la finestra dei commit non armati. Due criteri per una
+  domanda sola prima o poi divergono. Esce **0** se niente è in guasto, **1** su un guasto,
+  **2** se non ha potuto misurare.
+
+  **Il clone guarda due cose, non una.** `Result=success` dice che l'ultima corsa è andata
+  bene; non dice che il clone sia *attuale*. Un clone riuscito una settimana fa, con tre
+  migrazioni applicate in produzione da allora, è sano **e indietro** — e su quello girano la
+  CI e la verifica lunga di chiusura. Perciò il verdetto confronta anche le migrazioni.
+
+  ### ⚠ Il falso allarme perpetuo, evitato perché misurato
+
+  La prima stesura metteva `~/.claude/settings.json` fra i file la cui data decide se
+  l'ecosistema è indietro. Misurato subito: quel file portava **le 03:28 di quella stessa
+  mattina — l'avvio di questa sessione**. Lo riscrive il *runtime* di Claude Code (stile di
+  uscita, permessi concessi al volo), non l'uomo, e per giunta viene **trasformato per-OS**
+  prima di arrivare sui remoti. Tenendolo dentro, il verdetto sarebbe stato `INDIETRO` **a
+  ogni singola sessione, per sempre**: un allarme sempre acceso è un allarme che nessuno
+  guarda più — lo stesso difetto che `#194` descrive per l'atlante, e che R2 di questa
+  sessione ha curato per il rendiconto delle chiusure.
+
+  Il file è fuori dal criterio, e il limite è **dichiarato in uscita** (`non guardato:
+  settings.json … usa --verify`), non nascosto.
+
+  Stessa disciplina sui `manifestSha`: i due host ne hanno di **diversi per costruzione**
+  (misurato: stesso `stamp` `20260828T210637Z`, sha `7b7865d7…` sulla VM e `c384ce8a…` sul
+  gemello), quindi confrontarli sarebbe stato un allarme permanente su un sistema sano. Il
+  criterio buono è lo `stamp`.
+
+  ### 🔬 Le prove, e la prima è quella che F3 pretendeva
+
+  **① Host spento → `NON-VERIFICATO`, exit 2** — non 0 e non 1. Verificato **senza pipe**
+  (una pipe maschera l'exit code) su entrambi i blocchi: clone `exit 2`, ecosistema `exit 2`.
+  E un host spento **non può** risultare `FRESCO`: è un caso a sé nella batteria, perché il
+  caso felice da solo sarebbe verde anche con uno script che non guarda niente.
+  **② Il giro completo, sulle macchine vere** — `deploy DEPLOYATO · clone FRESCO (362 = 362
+  migrazioni) · ecosistema ALLINEATO`, exit 0.
+  **③ Batteria: 242 ok, 0 falliti** — sette casi nuovi, di cui quattro negativi.
+
 - [ ] **F4 — L'ecosistema Claude, stesso trattamento** — `align-claude-ecosystem` non è
       distruttivo, quindi il rischio è minore e la fase è ultima; ma un allineamento interrotto a
       metà lascia una macchina con plugin misti, che è un guasto silenzioso.

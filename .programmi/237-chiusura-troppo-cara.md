@@ -1,7 +1,8 @@
 # 237 — La chiusura costa un quarto di finestra, e non si sa perché
 
 > **item**: #237 · **priorità**: P1 · **stima**: ~1 sessione (F1 sola: ~40k)
-> **stato**: IN CORSO — **F1 FATTA il 2026-08-29 (S1084)**, e ha smentito la premessa
+> **stato**: ✅ **CHIUSA il 2026-08-29 (S1084)** — F1, F2, F3 tutte fatte. F1 ha smentito la premessa
+> della voce: la chiusura costa il **2,8%**, non il 25%.
 > **nasce-da**: Enzo, 2026-08-29, a fine S1083: *«l'handoff è un collo di bottiglia che non abbiamo
 > mai risolto adeguatamente. Una chiusura sessione non può e non deve consumare il 25% di una
 > finestra di contesto. È urgente trovare soluzioni adeguate, ma non per tentativi ed errori.»*
@@ -192,11 +193,47 @@ della soluzione — che è precisamente ciò che Enzo non vuole.
       peso di `SOT_BACKLOG`, la cura è l'archiviazione degli item terminali (219 item, quanti
       terminali? si misura); se è la ripetizione, è il profilo; se sono io, è una regola di
       scrittura. **fatto =** la stessa misura di F1 rifatta, e il numero è sceso · budget ~60k
-- [ ] **F3 — Il presidio, perché non ricresca** — qualunque sia la cura, senza un cancello il
-      problema torna: `SOT_BACKLOG` è cresciuto per due anni senza che nessuno se ne accorgesse.
-      Un controllo al boot che dichiara il peso dello stato e arrossisce oltre una soglia
-      **motivata dalla misura di F1**, non scelta a caso. **fatto =** il cancello esiste, ed è
-      stato visto rosso · budget ~40k
+- [x] **F3 — Il presidio, perché non ricresca** — **FATTO 2026-08-29 (S1084)**.
+      `python docs/kb/tools/peso_stato.py` (`--boot`, `--selftest` = **5 casi verdi**), letto
+      dal boot dentro lo **STALENESS SELF-CHECK**.
+
+  ### Una soglia sola, e motivata
+
+  > **quota di cronaca terminale dentro il register > 25% → ROSSO**
+
+  **Perché la quota e non il peso.** Il peso di per sé non è un difetto: trenta voci vive
+  lunghe sono trenta voci vive. È il **peso morto** che si paga senza riceverne niente —
+  ogni `grep` lo attraversa, ogni `sed -n 'N,Mp'` conta le sue righe, ogni lettura lo porta
+  in contesto. Prima di F2 quella quota era l'**80,8%**.
+
+  **Perché 25%.** È meno di un terzo della strada verso l'80% appena tolto, quindi si
+  interviene molto prima che il problema torni grave. E il rimedio è **un comando solo**,
+  già scritto e già provato: un rosso azionabile è un rosso che viene guardato invece che
+  spento.
+
+  **Una soglia sola, non cinque.** Il peso assoluto dei quattro documenti si **dichiara** e
+  non arrossisce: `SOT_STATE.md` pesa più del register e non ha ancora una cura, e un rosso
+  senza rimedio è rumore — lo stesso difetto che `#194` descrive per l'atlante, e che R2 di
+  questa sessione ha appena tolto dal rendiconto delle chiusure.
+
+  ### 🔬 Visto rosso su un dato vero, non su una finzione
+
+  La fase chiedeva un cancello «visto rosso». Eseguito sul register **com'era ieri**
+  (`git show HEAD~1:docs/kb/SOT_BACKLOG.md`, 926.216 byte):
+
+  ```
+  register di PRIMA di F2 — quota terminale: 80.8%  (193 terminali, 30 vivi)
+  verdetto: BAD
+    peso stato: cronaca chiusa al 81% del register (soglia 25%, 193 item)
+                — python docs/kb/tools/compatta_register.py --esegui
+  ```
+
+  E oggi, sullo stesso register dopo la cura: `[OK] peso stato: cronaca chiusa 16%
+  (soglia 25%) · stato 875 KB (~224k token)`. Il 16% e non lo 0% perché le 193 righe-indice
+  restano, ed è giusto: sono l'indice, e pesano ~200 byte ciascuna invece di ~3.000.
+
+  Il `--selftest` porta anche il caso che conta di più in un cancello: **register assente →
+  `NON MISURABILE`**, mai un verde nato dal buio · budget ~40k
 
 ## Le prove che devono poter fallire
 

@@ -540,6 +540,17 @@ def sec_drift(no_db, live, sot_md, state_md):
             s.add(OK, f"derivati: {len(esiti)}/{len(esiti)} freschi (agent-operations, concepts, ADR_INDEX)")
     except Exception as exc:
         s.add(UNK, f"derivati: non misurabili ({type(exc).__name__})")
+    # #237 F3 — il peso dello stato non deve poter risalire in silenzio. `SOT_BACKLOG` e'
+    # cresciuto per due anni fino a 911 KB senza che nessuno se ne accorgesse, e F1 ha
+    # misurato che la LETTURA dello stato e' la voce piu' cara di una chiusura (25,2%).
+    # Qui non si giudica il peso — trenta voci vive lunghe sono trenta voci vive — si
+    # giudica il peso MORTO: la quota di cronaca gia' chiusa dentro il register.
+    try:
+        import peso_stato as ps
+        for stato, testo in ps.righe_boot():
+            s.add({"OK": OK, "BAD": BAD}.get(stato, UNK), testo)
+    except Exception as exc:
+        s.add(UNK, f"peso stato: non misurabile ({type(exc).__name__})")
     # La §0 porta davvero i numeri vivi? Ora la domanda e' posta sulla sezione VERA e
     # con il contesto: «980 accanto a "map"», non «980 da qualche parte nel 21% del file».
     if not no_db and live:

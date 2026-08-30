@@ -180,12 +180,12 @@ lavoro: sono cancelli che si consumano dentro le altre voci.
 
 | ord | voce | fase | perché qui | stato |
 |---|---|---|---|---|
-| B1 | `#219` | F5 | la suite E2E è il sensore di tutto il resto: finché è cieca ogni «verde» vale meno | ☐ |
+| B1 | `#219` | F5 | la suite E2E è il sensore di tutto il resto: finché è cieca ogni «verde» vale meno | ⏳ **corsa integrale in volo sul gemello**, fase 4/4 |
 | B2 | `#235` | F1-F3 | **P1, ed è una falla di riservatezza viva in produzione**: 862 risposte di clima leggibili fuori catena | ☑ **FATTA** — prova live 5/5 su due persone reali; il giacimento vero era di 11.984 righe, non 862 |
-| B3 | `#234` | F2-F3 | il marciume vero dietro i rossi residui di `verifica_incrociata` | ☐ |
-| B4 | `#227` | F3-F5 | ri-stimata al ribasso da F1: 4.332 derivabili a macchina, 30 righe di curatela | ☐ |
+| B3 | `#234` | F2-F3 | il marciume vero dietro i rossi residui di `verifica_incrociata` | ☑ **CHIUSA** — F2 senza bersaglio (0 difetti misurati), F3 verde; 3 falsi rossi caduti |
+| B4 | `#227` | F3-F5 | ri-stimata al ribasso da F1: 4.332 derivabili a macchina, 30 righe di curatela | ⏳ **in corso** — F3+F5 in mig `000368` (ritiro delle 2 + sentinella `v_skill_isolate_residue`), attende la prova generale. F4 (le 28 in uso) resta |
 | B5 | `#169` | F3-F4 | i due segreti: tocca le utenze, si apre a suite ferma e lontano dal confine | ☐ |
-| B6 | `#214` | F6 | un perimetro per volta, coda già ordinata dallo strumento | ☐ |
+| B6 | `#214` | F6 | un perimetro per volta, coda già ordinata dallo strumento | ⏳ **in corso** — `tenants` scelto col criterio meccanico, mig `000367` con guardia scritta, attende la prova generale |
 | B7 | `#50` | F3 | la vista del grafo: il componente aspetta da sempre | ☐ |
 | B8 | `#159` | F2 | il ponte gateway↔pagine | ☐ |
 | B9 | `#132` | F7 | verificare lo stato reale (S1081 dichiara F7 fatta, il menu dice 7/8) | ☐ |
@@ -209,3 +209,14 @@ Cose vere trovate **eseguendo**, che non sono voci di questo ciclo e non ne allu
    due moduli diversi (`engagement` e `surveys`) — con risposte, template e domande separate. Non
    è un difetto in sé, ma nessun documento lo dice, e una voce di lavoro che ne conosce una sola
    misura metà del problema (è successo a `#235`).
+
+## Le due regole permanenti del menu, applicate (non sono lavoro: sono cancelli)
+
+- **`#79` F3 — «il prossimo lavoro che popola tabelle»**: si è consumata dentro `#235` e `#227`.
+  `check_exposure.py`, eseguito il 2026-08-30 dentro `check_marciume`, dice **«Nessuna lacuna di
+  esposizione»**. Le due viste nate oggi (`v_tenant_metadata_con_dato_di_persona`,
+  `v_skill_isolate_residue`) sono **sentinelle**, non dati di prodotto: non hanno una superficie
+  da esporre, e il cancello non le nomina.
+- **`#149` F4 — «la prossima consegna del lab»**: **nessuna consegna in arrivo** in questa
+  sessione (la inbox del lab non ha prodotto nulla al boot). La regola resta armata; dichiararla
+  applicata a vuoto sarebbe un falso verde.

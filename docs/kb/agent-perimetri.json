@@ -32,6 +32,12 @@
       "sola_lettura": true,
       "data": "2026-08-26",
       "decisione": "Enzo (#214 F3, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). QUINTO perimetro in sola lettura, primo della coda dei neutri per ampiezza di lettura (5 letture · 4 pagine). ⚠ APERTO CON UNA GUARDIA, e la ragione è un buco del criterio trovato misurando (S1081): `data-classes.ts` dichiara `visualization` senza dati di persona («grafici salvati») e i DATI di oggi le danno ragione — 316 nodi su 316 sono di tipo POSITION, nessuna persona — ma il vocabolario che il modello AMMETTE contiene anche 'USER' (dove `node_label` sarebbe il nome di una persona) e 'SUCCESSION_POOL'. La dichiarazione era vera oggi, non per costruzione: il giorno in cui una pagina salvasse un organigramma per persone, l'agente leggerebbe nomi propri da un perimetro dichiarato neutro e nessuno strumento se ne accorgerebbe. Rimedio nella mig 000355: la sentinella `sys.v_grafo_con_nodo_di_persona`, che db_health raccoglie e pretende a zero — bloccante, non informativa. Così l'apertura resta dimostrabile nel tempo invece che cieca."
+    },
+    {
+      "concetto": "tenants",
+      "sola_lettura": true,
+      "data": "2026-08-30",
+      "decisione": "Enzo (#214 F3, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). SESTO perimetro in sola lettura, primo della coda dei neutri per ampiezza di lettura (3 letture · 4 pagine). E' l'unico finora la cui neutralita' e' vera PER COSTRUZIONE e non per misura: `sys_tenancies` non ha alcuna colonna di persona (verificato su information_schema, non dedotto dai nomi) e le tre rotte read — lista, catalogo degli industry-code, singolo tenant — non uniscono persone. ⚠ APERTO CON UNA GUARDIA per l'unica via d'ingresso che resta: `tenant_metadata` e' JSONB, oggi porta solo chiavi di configurazione (domain, industry, ateco_code, is_platform, legacy_tenant_id, rebuilt_at, regulatory_intensity, blueprint_variant_code) ma per costruzione puo' accogliere un referente o una email. Mig `000367`: la sentinella `sys.v_tenant_metadata_con_dato_di_persona`, che db_health raccoglie e pretende a zero — bloccante, non informativa — e che la migrazione stessa PROVA ROSSA iniettando un referente in un tenant finto e disfacendolo. E' lo stesso rimedio di `visualization-graphs` (000355), applicato prima che il buco si apra invece che dopo averlo trovato. · SOLA LETTURA"
     }
   ]
 }

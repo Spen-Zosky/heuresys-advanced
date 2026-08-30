@@ -9,6 +9,7 @@ import { isPlatform, type ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 import type {
   SurveyTemplateListQuery, CreateSurveyTemplateBody, UpdateSurveyTemplateBody,
   SurveyListQuery, CreateSurveyBody, UpdateSurveyBody,
@@ -30,6 +31,16 @@ function assertVisible(a: ActorContext, rowTenantId: string, resource: string): 
   if (a.tenantId === null || rowTenantId !== a.tenantId) throw new NotFoundError(resource);
 }
 
+/**
+ * #235 — la lista di utenti che l'attore puo' leggere sull'asse organizzativo, o `undefined`
+ * quando non c'e' limite (piattaforma, mandato HR). Un solo posto da cui esce, cosi' lista e
+ * platea non possono divergere.
+ */
+async function orgAllowList(a: ActorContext): Promise<string[] | undefined> {
+  const scope = await resolveOrgReadScope(pool, a);
+  return scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+}
+
 /** Resolve the tenant a write lands in. */
 function resolveWriteTenant(a: ActorContext, bodyTenantId?: string): string {
   if (isPlatform(a)) {
@@ -39,6 +50,13 @@ function resolveWriteTenant(a: ActorContext, bodyTenantId?: string): string {
   }
   if (!a.tenantId) throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
   return a.tenantId;
+}
+
+/** #235 — la platea ridotta a chi l'attore puo' leggere. `null` resta `null`. */
+function filtraPlatea<T extends { audienceIds: string[] | null }>(s: T, consentiti: string[]): T {
+  if (s.audienceIds === null) return s;
+  const visti = new Set(consentiti);
+  return { ...s, audienceIds: s.audienceIds.filter((id) => visti.has(id)) };
 }
 
 export const surveysService = {
@@ -72,14 +90,24 @@ export const surveysService = {
   },
 
   // ── Surveys ──
+  // #235 — la campagna e' struttura (titolo, periodo, stato) e resta visibile a chi ha il
+  // permesso: nasconderla non proteggerebbe nessuno e toglierebbe l'uso legittimo. Cio' che
+  // porta persone e' `audienceIds`, la platea: quella si filtra con l'asse organizzativo.
+  // Oggi e' vuota su tutte e 6 le campagne (misurato 2026-08-30) — ed e' proprio per questo
+  // che il filtro va messo adesso: una riga che oggi non fa nulla, ma che rende la
+  // dichiarazione `orgGate` vera per COSTRUZIONE invece che per una misura che puo' cambiare.
   async listSurveys(a: ActorContext, query: SurveyListQuery) {
-    return repo.listSurveys(pool, listTenantFilter(a), query);
+    const page = await repo.listSurveys(pool, listTenantFilter(a), query);
+    const consentiti = await orgAllowList(a);
+    if (!consentiti) return page;
+    return { ...page, items: page.items.map((s) => filtraPlatea(s, consentiti)) };
   },
   async getSurvey(a: ActorContext, id: string) {
     const s = await repo.findSurveyById(pool, id);
     if (!s) throw new NotFoundError("Survey");
     assertVisible(a, s.tenantId, "Survey");
-    return s;
+    const consentiti = await orgAllowList(a);
+    return consentiti ? filtraPlatea(s, consentiti) : s;
   },
   async createSurvey(a: ActorContext, body: CreateSurveyBody) {
     const tenantId = resolveWriteTenant(a, body.tenantId);
@@ -101,16 +129,24 @@ export const surveysService = {
   },
 
   // ── Responses (read-only, nested under a survey) ──
+  // #235 — chi ha detto cosa sul clima aziendale si legge SOLO dentro la propria catena
+  // organizzativa (I18: l'appartenenza funzionale non apre un dato sensibile). Self resta
+  // sempre leggibile: `resolveOrgReadScope` mette l'attore nella propria allow-list (I17).
   async listResponses(a: ActorContext, surveyId: string, query: SurveyResponseListQuery) {
     const s = await repo.findSurveyById(pool, surveyId);
     if (!s) throw new NotFoundError("Survey");
     assertVisible(a, s.tenantId, "Survey");
-    return repo.listResponsesBySurvey(pool, surveyId, query);
+    return repo.listResponsesBySurvey(pool, surveyId, query, await orgAllowList(a));
   },
   async getResponse(a: ActorContext, id: string) {
     const r = await repo.findResponseById(pool, id);
     if (!r) throw new NotFoundError("Survey response");
     assertVisible(a, r.tenantId, "Survey response");
+    // 404 e non 403, come `assertVisible`: un 403 direbbe «esiste ma non te la do», cioe'
+    // confermerebbe che quella persona ha risposto — che e' meta' del dato da proteggere.
+    if (r.subjectUserId && !(await canReadOrgTarget(pool, a, r.subjectUserId, r.tenantId))) {
+      throw new NotFoundError("Survey response");
+    }
     return r;
   },
 };

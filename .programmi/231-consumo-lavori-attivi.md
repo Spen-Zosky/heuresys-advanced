@@ -181,7 +181,7 @@ lavoro: sono cancelli che si consumano dentro le altre voci.
 | ord | voce | fase | perché qui | stato |
 |---|---|---|---|---|
 | B1 | `#219` | F5 | la suite E2E è il sensore di tutto il resto: finché è cieca ogni «verde» vale meno | ☐ |
-| B2 | `#235` | F1-F3 | **P1, ed è una falla di riservatezza viva in produzione**: 862 risposte di clima leggibili fuori catena | ☐ |
+| B2 | `#235` | F1-F3 | **P1, ed è una falla di riservatezza viva in produzione**: 862 risposte di clima leggibili fuori catena | ☑ **FATTA** — prova live 5/5 su due persone reali; il giacimento vero era di 11.984 righe, non 862 |
 | B3 | `#234` | F2-F3 | il marciume vero dietro i rossi residui di `verifica_incrociata` | ☐ |
 | B4 | `#227` | F3-F5 | ri-stimata al ribasso da F1: 4.332 derivabili a macchina, 30 righe di curatela | ☐ |
 | B5 | `#169` | F3-F4 | i due segreti: tocca le utenze, si apre a suite ferma e lontano dal confine | ☐ |
@@ -190,3 +190,22 @@ lavoro: sono cancelli che si consumano dentro le altre voci.
 | B8 | `#159` | F2 | il ponte gateway↔pagine | ☐ |
 | B9 | `#132` | F7 | verificare lo stato reale (S1081 dichiara F7 fatta, il menu dice 7/8) | ☐ |
 | B10 | `#143` · `#54` · `#198` T9b · `#205` | — | grosse o dipendenti: si aprono solo se il guardiano lo consente | ☐ |
+
+## Registro delle scoperte (R24 §5 — fuori da questo ciclo, presentate una volta sola)
+
+Cose vere trovate **eseguendo**, che non sono voci di questo ciclo e non ne allungano la lista:
+
+1. **Il flag `isAnonymous` esiste e non è onorato in uscita.** `SurveySchema` dichiara
+   `isAnonymous`, e le tabelle hanno `survey_is_anonymous` / `survey_template_is_anonymous`. Oggi
+   nessuna promessa è tradita (misurato: 6 sondaggi su 6 con `is_anonymous = false`), ma se
+   qualcuno creasse un sondaggio anonimo le risposte continuerebbero a uscire con
+   `subjectUserId`. È una riga di codice — e una decisione di prodotto sul cosa fare del campo.
+2. **Il gemello serve una UI che parla con l'API di PRODUZIONE.** Misurato il 2026-08-30:
+   `heuresys-advanced-web.service` sul linux-pc dichiara
+   `NEXT_PUBLIC_API_BASE_URL=http://80.225.82.207:8013/v1`, cioè la VM. Chi usa il gemello per
+   provare dal browser **scrive in produzione**. Trovato perché la corsa E2E si è fermata sulla
+   guardia che avevo messo apposta.
+3. **`sys_surveys` e `sys_engagement_surveys` sono due famiglie di tabelle parallele**, servite da
+   due moduli diversi (`engagement` e `surveys`) — con risposte, template e domande separate. Non
+   è un difetto in sé, ma nessun documento lo dice, e una voce di lavoro che ne conosce una sola
+   misura metà del problema (è successo a `#235`).

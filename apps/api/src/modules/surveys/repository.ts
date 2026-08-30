@@ -188,10 +188,26 @@ function toResponse(r: ResponseRow): SurveyResponse {
     metadata: r.response_metadata, createdAt: r.created_at.toISOString(),
   };
 }
+/**
+ * #235 — `userIdAllowList` e' l'asse organizzativo, non un filtro di comodo: `undefined`
+ * significa «nessun limite» (piattaforma o mandato HR), una lista VUOTA significa «nessuno»
+ * e deve rendere zero righe, non tutte. La forma e' identica a `listGoals`, di proposito:
+ * due modi diversi di scrivere lo stesso cancello sono due modi di sbagliarlo.
+ *
+ * NB: qui NON si aggiunge `OR ... IS NULL` come in `listGoals` — un obiettivo senza soggetto
+ * e' un obiettivo aziendale, una risposta senza soggetto sarebbe una risposta anonima, e
+ * un'anonima non deve diventare visibile a chi non vede la platea.
+ */
 export async function listResponsesBySurvey(
   q: DbConnector, surveyId: string, query: SurveyResponseListQuery,
+  userIdAllowList?: string[],
 ): Promise<{ items: SurveyResponse[]; total: number }> {
   const where: string[] = [`response_survey_id = $1`]; const params: unknown[] = [surveyId];
+  if (userIdAllowList) {
+    if (userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(userIdAllowList);
+    where.push(`response_subject_user_id = ANY($${params.length}::uuid[])`);
+  }
   if (query.subjectUserId) { params.push(query.subjectUserId); where.push(`response_subject_user_id = $${params.length}`); }
   if (query.isComplete !== undefined) { params.push(query.isComplete); where.push(`response_is_complete = $${params.length}`); }
   const wc = `WHERE ${where.join(" AND ")}`;

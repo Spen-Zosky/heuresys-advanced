@@ -89,6 +89,21 @@ export async function findSurveyMeta(
 }
 
 /** Per-question aggregation (response count + avg rating) for one survey. */
+/**
+ * #235 — SOGLIA DI k-ANONIMATO. Un aggregato non e' anonimo per il fatto di essere un
+ * aggregato: con una sola risposta la «media» E' quella risposta, e con due o tre si risale
+ * per differenza. `aggregate` sulle rotte qui sotto sarebbe quindi una dichiarazione vera
+ * oggi e falsa il giorno in cui una campagna parte con pochi rispondenti.
+ *
+ * Misurato il 2026-08-30 prima di scegliere il valore: delle 61 domande con almeno una
+ * risposta, **nessuna** ne ha meno di 5. La soglia percio' non cambia un solo numero visibile
+ * adesso — serve a impedire che il giorno in cui cambiera' nessuno se ne accorga.
+ *
+ * k=5 e' la soglia di uso comune per i dati di clima. Il CONTEGGIO resta sempre visibile
+ * (sapere che una domanda ha avuto 2 risposte non dice quali): si sopprime la MEDIA.
+ */
+export const K_ANONIMATO_MINIMO = 5;
+
 export async function surveyResults(pool: Pool, surveyId: string): Promise<EngagementQuestionResult[]> {
   const res = await pool.query(
     `SELECT q.survey_question_id, q.survey_question_text, q.survey_question_type,
@@ -110,7 +125,10 @@ export async function surveyResults(pool: Pool, surveyId: string): Promise<Engag
     category: r.survey_question_category,
     displayOrder: numOrNull(r.survey_question_display_order),
     responseCount: Number(r.response_count),
-    avgRating: r.avg_rating == null ? null : Math.round(Number(r.avg_rating) * 100) / 100,
+    avgRating:
+      r.avg_rating == null || Number(r.response_count) < K_ANONIMATO_MINIMO
+        ? null
+        : Math.round(Number(r.avg_rating) * 100) / 100,
   }));
 }
 
@@ -136,12 +154,14 @@ export async function pulseAggregation(
   const items = res.rows.map((r) => {
     const n = Number(r.n);
     total += n;
+    // #235 — sotto la soglia il conteggio resta, le medie no (vedi K_ANONIMATO_MINIMO).
+    const raro = n < K_ANONIMATO_MINIMO;
     return {
       weekNumber: numOrNull(r.week),
       count: n,
-      avgMood: r2(r.avg_mood),
-      avgWorkload: r2(r.avg_workload),
-      avgSatisfaction: r2(r.avg_satisfaction),
+      avgMood: raro ? null : r2(r.avg_mood),
+      avgWorkload: raro ? null : r2(r.avg_workload),
+      avgSatisfaction: raro ? null : r2(r.avg_satisfaction),
     };
   });
   return { items, totalChecks: total };

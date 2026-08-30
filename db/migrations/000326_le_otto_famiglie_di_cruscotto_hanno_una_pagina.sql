@@ -183,14 +183,23 @@ BEGIN
     RAISE EXCEPTION '000326: % famiglie hanno viste con classi ma la voce di menu non le eredita', n;
   END IF;
 
-  -- 7. IL TOTALE ESATTO delle dichiarazioni di classe, che eredito dalla `000317`.
-  --    Quel file lo teneva e lo diceva: «chi aggiungera' righe dopo di me deve spostare
-  --    QUESTO conteggio nel proprio file, non alzarlo qui». Io ne aggiungo 15 (le classi
-  --    delle sette famiglie), 26 + 15 = 41, e da oggi il totale esatto sta qui — finche'
-  --    qualcuno ne aggiungera' altre e se lo portera' via a sua volta.
-  SELECT count(*) INTO n FROM sys.sys_ui_interface_data_classes;
-  IF n <> 41 THEN
-    RAISE EXCEPTION '000326: le dichiarazioni di classe totali sono % invece di 41 — se e'' una aggiunta legittima, il conteggio esatto va spostato nella migrazione che la introduce', n;
+  -- 7. LE MIE 15 RIGHE, non il totale del mondo (emendato dalla `000366`, 2026-08-30).
+  --    Questo controllo contava `count(*)` sull'INTERA tabella e pretendeva 41 — cioe'
+  --    cristallizzava una misura che cresce a ogni voce nuova. Il file lo sapeva e lasciava
+  --    l'istruzione «chi aggiungera' righe deve spostare QUESTO conteggio nel proprio file»:
+  --    e' un protocollo che funziona, ma costringe ogni migrazione futura a passare di qui
+  --    e a rendere rossa la prova generale prima di accorgersene (successo davvero, oggi).
+  --    Quindi il totale se lo porta via la `000366`, come il protocollo prescrive, e qui
+  --    resta cio' che questo file DEVE davvero garantire: le sue proprie dichiarazioni.
+  --    Un controllo che guarda solo cio' che ha scritto non invecchia.
+  SELECT count(*) INTO n
+    FROM sys.sys_ui_interface_data_classes dc
+    JOIN sys.sys_ui_interfaces i ON i.ui_interface_id = dc.ui_interface_id
+   WHERE i.ui_interface_code IN ('dashboard-azienda','dashboard-processi','dashboard-organizzazione',
+                                 'dashboard-filiale','dashboard-hr','dashboard-platform',
+                                 'dashboard-tenant');
+  IF n <> 15 THEN
+    RAISE EXCEPTION '000326: le sette famiglie dichiarano % classi invece di 15', n;
   END IF;
 
   -- 8. Le sette etichette hanno la loro traduzione inglese.

@@ -185,53 +185,10 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
   content: "contenuti editoriali",
   visualization: "grafici salvati",
   leads: "contatti commerciali esterni: non sono la forza lavoro del tenant, e la tassonomia delle classi descrive i dati DEI DIPENDENTI",
-  // ⚠⚠ `surveys` — LA RIGA CHE STAVA QUI ERA FALSA, E RIMETTERLA SAREBBE PEGGIO CHE TOGLIERLA.
-  // Misurato il 2026-08-28 (S1083, #214 F6): `sys_engagement_survey_responses` ha **862 righe
-  // su 862** con `response_subject_user_id`, e `sys_survey_assignments` **948 su 948** con
-  // `survey_assignment_user_id`. Nessuna risposta anonima, non una. Chi legge questa resource
-  // legge *chi ha detto cosa sul clima aziendale*.
-  //
-  // ⛔ E CLASSIFICARLA COME SENSIBILE NON È UNA RIGA: fa scattare `domains-f7` con
-  // `ORG_GATE_MISSING: 21 read route(s)`. Annotarle è meccanico, ma la scelta fra
-  // `orgGate: "catalog"` e `orgGate: "service"` **cambia chi vede le risposte in produzione** —
-  // i template sono catalogo, le risposte no — e un cambiamento del genere pretende la
-  // dimostrazione live che la Definition of Done impone: login reale, e la prova che chi deve
-  // vedere continua a vedere. Farlo in coda a una sessione, senza quella prova, sarebbe
-  // esattamente ciò che quella regola vieta.
-  //
-  // ⛔ E TOGLIERLA E BASTA NON SI PUÒ, perché il cancello di `#99` F7 pretende che **nessuna
-  // resource passi in silenzio**: ognuna sta in uno dei tre elenchi, o il test è rosso. Il
-  // cancello ha ragione, e non gli si mente per farlo tacere.
-  // Quindi la riga **resta** — ma non è più un silenzio: porta accanto la misura che la
-  // smentisce e il nome di ciò che serve per toglierla davvero. Chi la legge oggi vede un
-  // **debito dichiarato**, non un'affermazione.
-  // ⚠ **Il rischio resta aperto e va nel register**: oggi, in produzione, le risposte ai
-  // sondaggi di clima sono raggiungibili con il solo permesso RBAC più il tenant, senza catena
-  // organizzativa — cioè da chiunque abbia `surveys:read`, anche fuori dalla catena di chi ha
-  // risposto.
-  //
-  // ⚠ DEBITO DICHIARATO, non una verità — la riga qui sotto dice:
-  // «risolta da Enzo (2026-07-01): feedback e clima restano NON mappati perché spesso anonimi
-  // o aggregati per politica, quindi non org-gated». Era una dichiarazione di POLITICA, e i
-  // dati la smentiscono senza margine — misurati, non supposti:
-  //     sys_survey_assignments          948 righe · 948 con `survey_assignment_user_id`
-  //     sys_engagement_survey_responses 862 righe · 862 con `response_subject_user_id`
-  // Nessuna risposta anonima. Non una. Il commento di questo elenco dice che una riga qui è
-  // un'AFFERMAZIONE e che «se un domani quella pagina cominciasse a mostrarle, la riga
-  // diventerebbe una bugia scritta col proprio nome»: qui non è diventata una bugia col
-  // tempo, lo era già quando è stata scritta, perché nessuno aveva guardato i dati.
-  //
-  // ⭐ MA LA STESSA MISURA HA CONFERMATO L'ALTRA META DELLA FRASE DEL 2026-07-01, e la
-  // distinzione è fine abbastanza da meritare di essere scritta: `sys_engagement_feedback`
-  // **non ha un autore**. Le sue colonne sono `feedback_natural_key`, `feedback_category`,
-  // `feedback_message`, `feedback_status`, `feedback_reviewed_by_user_id` — e nessuna
-  // identifica chi lo ha scritto. È anonimo **per costruzione**, non per politica. La sola
-  // FK verso una persona è quella del REVISORE, cioè esattamente la specie di colonna che la
-  // guardia GDPR della `000304` esclude per regex.
-  // Quindi la frase di Enzo era **giusta per il feedback e sbagliata per i sondaggi**: le due
-  // cose erano state trattate insieme, e solo una delle due reggeva. Qui non si corregge una
-  // dichiarazione sbagliata — si trasforma un silenzio in un'affermazione misurata.
-  surveys: "feedback e clima. ⚠ AFFERMAZIONE SMENTITA DALLA MISURA (2026-08-28): 862 risposte su 862 e 948 assegnazioni su 948 portano l identita del soggetto. Resta qui perche toglierla pretende 21 rotte con org-gate e una prova live — voce di lavoro dichiarata, non una verita",
+  // ✅ `surveys` NON È PIÙ QUI (#235, S1085): la riga che stava in questo elenco diceva che la
+  // resource non porta dati di persona, ed era falsa — 862 risposte su 862 portano
+  // `response_subject_user_id`. È stata classificata `PERSONAL` (vedi RESOURCE_DATA_CLASS) e le
+  // sue rotte read dichiarano `orgGate`. La cronaca del debito vive nel register, alla voce.
   engagement_feedback:
     "segnalazioni di clima ANONIME PER COSTRUZIONE (misurato 2026-08-28, #214 F6): " +
     "`sys_engagement_feedback` non ha alcuna colonna che identifichi l'autore — solo " +
@@ -329,6 +286,13 @@ export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   certification: "PERSONAL",
   career: "PERSONAL",
   mentorship: "PERSONAL", // Enzo 2026-07-01: riservato (personal development relationship)
+  // #235 (S1085) — le risposte a un sondaggio di clima sono l'OPINIONE della persona, non un
+  // giudizio SU di lei: `PERSONAL`, non `EVALUATION`. Misurato prima di scegliere: 862 risposte
+  // su 862 portano `response_subject_user_id`, 6 sondaggi su 6 dichiarano
+  // `survey_is_anonymous = false`, e `survey_audience_ids` è vuoto su tutte e 6 — quindi oggi
+  // nessuna promessa di anonimato è tradita, e nessuna platea è esposta. Restano fuori: i
+  // template (catalogo di domande) e `engagement_feedback`, anonimo PER COSTRUZIONE.
+  surveys: "PERSONAL",
   leave: "PERSONAL", // A/L8 (#33): time-off requests + balance ledger — person-level, org-gated
   // COMPENSATION
   compensation_intelligence: "COMPENSATION",

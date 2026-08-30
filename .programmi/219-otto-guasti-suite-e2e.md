@@ -325,3 +325,36 @@ non correggendolo.
 
 Una corsa integrale della suite E2E riporta **0 falliti**, e la suite entra in CI secondo il
 criterio dichiarato in `#211` F4.
+
+  ### S1085 (2026-08-30) — LA PRIMA CORSA CHE ARRIVA IN FONDO A TUTTE E QUATTRO LE FASI
+
+  Eseguita **sul gemello**, come S1083 aveva stabilito. Esito della prima corsa:
+  **326 passati · 43 falliti · 78 non eseguiti** su 447 — `fasi eseguite: 4/4, tutte`.
+  E' la prima volta: in S1081 le fasi 3 e 4 non venivano nemmeno raggiunte.
+
+  ⚠⚠ **Ma i 43 falliti sono in larga parte rumore che ho causato io, e va detto prima dei
+  numeri.** Le firme, lette dai referti JSON e raggruppate, puntano a una causa dominante:
+  la connessione rifiutata verso l'API su `127.0.0.1:3001`, piu' una nuvola di «creazione
+  non accettata dall'API», «salvataggio non accettato», «assegnazione non accettata» —
+  tutte scritture verso quella porta. **Avevo acceso l'API su :3001 per la prova live di
+  `#235` e l'ho spenta mentre la corsa girava.** Il preflight lo aveva scritto a chiare
+  lettere («API NON raggiungibile su localhost:3001») e l'ho classificato come rumore: e'
+  esattamente l'errore che questa voce esiste per non ripetere. Corsa **rifatta** con
+  l'API viva per tutta la durata.
+
+  #### Tre difetti d'ambiente veri, trovati eseguendo (questi restano)
+
+  1. **I teardown E2E non avevano credenziali.** `fe_sendauth: no password supplied` su ogni
+     `psql` di pulizia: sul gemello l'utente non aveva `~/.pgpass`. Conseguenza: i dati di
+     prova restano nel clone. Curato scrivendo `~/.pgpass` (600) dal `.env` della macchina.
+  2. **E quei residui rompono la catena delle migrazioni.** Le 4 `E2E-SKILL-%` rimaste hanno
+     fatto fallire il clone su «Copertura EN: restano 4 traduzioni mancanti» — una skill di
+     prova senza traduzione inglese blocca `db/scripts/migrate.sh`. Ripulite, catena
+     riapplicata (341 migrazioni).
+  3. **Il build del gemello aveva l'API di PRODUZIONE inlinata** (l'indirizzo della VM): una
+     corsa lanciata su quel build avrebbe fatto scrivere alla suite nel database di
+     produzione. Le `NEXT_PUBLIC_*` sono inline al build, non a runtime, quindi la corsa va
+     preceduta da un `next build` con le variabili giuste.
+     ⚠ La prima stesura della guardia cercava il solo indirizzo IP e ha fermato una corsa
+     **sana**: quell'indirizzo compare anche come testo dimostrativo in
+     `SystemHealthDashboard.tsx`. Si cerca l'URL completo.

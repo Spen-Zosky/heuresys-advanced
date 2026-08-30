@@ -170,3 +170,23 @@ le buone dalle cattive, e questo e' il reperto che F4 deve portarsi dietro.
 - la **soglia**, che serve come filtro grossolano ma **non basta**: sotto la soglia si dichiara
   «non collocabile a macchina», sopra si **rilegge** prima di scrivere;
 - il **giornale di rollback**, perche' 28 archi scritti a macchina vanno potuti disfare.
+
+
+### F4 e F5 CHIUSE — S1085, mig `000369`
+
+**18 collocate, 10 respinte con la ragione.** Il criterio non e' una soglia: la macchina propone
+(ESCO piu' vicina per embedding fra quelle gia' collocate), la decisione si prende una per una.
+Misura in produzione dopo l'applicazione: isolate **4.464 -> 4.444** · non-ESCO ancora isolate
+**10**, esattamente le respinte · 18 archi nel giornale di rollback · sentinella a **0**.
+
+**Le 10 respinte, e perche'** — restano isolate, ed e' la risposta giusta:
+`CASH-MGMT` (trasporto contanti e' logistica) · `SUSTAIN-FIN` e `DIGITAL-PAY` (arco invertito:
+il green bond e la carta di credito sono *dentro* i concetti proposti) · `AML-OPS` (confina con
+le frodi, non ne e' specie) · `KYC-DUE` (identifica il cliente, non ne misura il merito) ·
+`IFRS9` (principio contabile) · `CORE-BANKING` (un gestionale non e' «configurare sistemi TIC») ·
+`INT-AUDIT` (verifica i controlli, non gestisce il rischio) · `TRADE-FIN` (non e' analisi del
+credito) · `PSD2-OPEN` (PSD2 e GDPR sono normative diverse).
+
+**Chiuso quando** — soddisfatto: le quattro specie di F1 hanno tutte una destinazione eseguita,
+il conteggio e' sceso al valore che F1 dichiarava raggiungibile (**non a zero**, e con la ragione
+scritta per ognuna che resta), e la sentinella `v_skill_isolate_residue` lo sorveglia.

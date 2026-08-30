@@ -114,3 +114,79 @@ nell'ordine sopra e ciò che non entra resta nel register, che è già la sua ca
 comunque**: `#143` · `#159` · `#54` · `#50` F2 · `#227` F2-F5 · `#198` T9b · `#169` F3-F4 (F3
 cambia i segreti delle 158 utenze: non si apre a suite in volo né a ridosso del confine di
 sessione). `#86` resta WAIT-INPUT: `claude login` sul linux-pc lo può fare solo Enzo (~5 min).
+
+---
+
+# S1085 (2026-08-30) — il mandato rinnovato: «consuma tutte le voci di P1, P2 e P3»
+
+> **Enzo, S1085**: *«risolvi subito 1, 2 e 3 e poi inizia a consumare tutte le voci presenti in
+> P1, P2 e P3 procedendo in modo automatico e autonomo e prendendo te le decisioni al mio posto,
+> privilegiando le tue raccomandazioni e gli standard elevati di coding e di sviluppo».*
+> Batch delegato: decido ordine e merito tecnico, eseguo end-to-end, committo a ogni voce chiusa,
+> non chiedo fra una e l'altra.
+
+## Confine di sessione, dichiarato adesso (R24 §4)
+
+Al boot: contesto **8,3%**, finestra 5h **14,0%** — `si continua`. Le voci ACTIVE di P1+P2+P3
+sommano una stima dichiarata di **~25-35 sessioni**: **non entrano tutte qui**, e non è una
+rinuncia, è una misura. Il taglio lo decide il guardiano (75% contesto / 80% 5h), non io: si
+esegue nell'ordine sotto finché la soglia non arriva, e ciò che resta è già a casa nel register.
+`#86` resta `WAIT-INPUT` (solo Enzo può fare `claude login` sul linux-pc) e `#41` resta `GATED`
+(limite di spesa mensile, non una decisione tecnica).
+
+## Blocco A — i tre punti segnalati al boot
+
+| id | cosa | chi | fatto = | stato |
+|---|---|---|---|---|
+| A1 | `#238` F1 — `verifica-deploy` distingue un clone in corso da un guasto | io | verdetto `IN-VOLO` a clone in corso, `DISALLINEATO` a servizio davvero giù | ☑ **FATTO** — 3 prove, verdetti opposti a parità di servizi |
+| A2 | `#231` entra nel register come voce ACTIVE (oggi è un programma orfano) | io | il boot non stampa più «PROGRAMMI APERTI FUORI DAL MENU», perché la realtà è cambiata | ☐ |
+| A3 | La dashboard dichiara **perché** psql non ha risposto, invece di accusare il tunnel | io | tre cause distinte nel messaggio + il timeout della prima query non mente | ☐ |
+
+**Misura che apre il blocco (2026-08-30, questa sessione)** — i due rossi del boot erano **falsi
+allarmi**, non guasti:
+- `bash scripts/verifica-deploy.sh` → **`DEPLOYATO`** — 2 host su `bd944a4e`, CI 4 corse 4 verdi,
+  servizi `active/active`, produzione `readyz=200 login=200`. Il `verifica-deploy:fallito` del
+  rendiconto di S1084 era la finestra del clone (cioè **esattamente** `#238`).
+- `psql … COUNTS_SQL` → `164|315|45|26|14|224|980|14033|2|362` in **0,90 s**, exit 0; dashboard
+  rieseguita → sezione DATABASE **tutta verde**. Il `[? ] psql non raggiungibile (tunnel giù?)`
+  del boot non è riproducibile: `q()` inghiotte ogni eccezione e ne stampa **una sola causa**,
+  che era pure quella sbagliata (il tunnel era su — il BOOT hook lo aveva appena misurato).
+
+### Simulazione A1 (R24 §3)
+- **precondizioni**: `verifica-deploy.sh` esiste; `verifica-cloni.sh` ha già il verdetto `IN-CORSO`
+  e il criterio non va inventato; ssh ai due host risponde.
+- **meccanismo**: `systemctl is-active heuresys-advanced-clonedb.service` **prima** del giudizio
+  sui servizi — letto nel file, non supposto.
+- **propagazione**: file di `scripts/`, portato dal `git pull` dei cloni; nessuna migrazione.
+- **chi**: io.
+- **guardia**: la prova deve poter fallire — a clone **non** in corso e servizio giù il verdetto
+  deve tornare `DISALLINEATO`, altrimenti ho solo spento un allarme.
+
+### Simulazione A3
+- **precondizioni**: tunnel su (misurato); il fallimento del boot **non è riproducibile**, quindi
+  la cura non è «far funzionare psql» — funziona — è **non dichiarare una causa non misurata**.
+- **meccanismo**: `q()` in `status_dashboard.py` cattura `TimeoutExpired` / `FileNotFoundError` /
+  `CalledProcessError` separatamente e ne riporta il messaggio di psql.
+- **propagazione**: file di `docs/kb/tools/`, letto da `session_start` in-process.
+- **chi**: io.
+- **guardia**: si prova con tre fallimenti **veri** (porta sbagliata, binario inesistente, SQL
+  invalido) e ognuno deve produrre una frase diversa.
+
+## Blocco B — la sequenza decisa per le voci del menu
+
+Criterio: **(a)** prima ciò che è un rischio in produzione o che rende cieco un sensore ·
+**(b)** poi il costo crescente · **(c)** le regole permanenti (`#79` F3, `#149` F4) non sono
+lavoro: sono cancelli che si consumano dentro le altre voci.
+
+| ord | voce | fase | perché qui | stato |
+|---|---|---|---|---|
+| B1 | `#219` | F5 | la suite E2E è il sensore di tutto il resto: finché è cieca ogni «verde» vale meno | ☐ |
+| B2 | `#235` | F1-F3 | **P1, ed è una falla di riservatezza viva in produzione**: 862 risposte di clima leggibili fuori catena | ☐ |
+| B3 | `#234` | F2-F3 | il marciume vero dietro i rossi residui di `verifica_incrociata` | ☐ |
+| B4 | `#227` | F3-F5 | ri-stimata al ribasso da F1: 4.332 derivabili a macchina, 30 righe di curatela | ☐ |
+| B5 | `#169` | F3-F4 | i due segreti: tocca le utenze, si apre a suite ferma e lontano dal confine | ☐ |
+| B6 | `#214` | F6 | un perimetro per volta, coda già ordinata dallo strumento | ☐ |
+| B7 | `#50` | F3 | la vista del grafo: il componente aspetta da sempre | ☐ |
+| B8 | `#159` | F2 | il ponte gateway↔pagine | ☐ |
+| B9 | `#132` | F7 | verificare lo stato reale (S1081 dichiara F7 fatta, il menu dice 7/8) | ☐ |
+| B10 | `#143` · `#54` · `#198` T9b · `#205` | — | grosse o dipendenti: si aprono solo se il guardiano lo consente | ☐ |

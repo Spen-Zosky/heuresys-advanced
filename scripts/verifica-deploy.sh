@@ -73,15 +73,25 @@ ci_conta() {
 sha_host() {
   ssh "${SSH_OPTS[@]}" "$1"     "find ~/heuresys-advanced -maxdepth 3 -name LAST_GOOD_SHA -print0 2>/dev/null        | xargs -0 -r cat 2>/dev/null | head -1" 2>/dev/null
 }
+# Un clone in corso ferma api e web DI PROPOSITO e li riaccende a lavoro finito
+# (`ExecStopPost` di heuresys-advanced-clonedb.service). Misurato in S1084: clone concluso
+# 16:02:37 con `Result=success`, API ripartita 16:02:41 - quattro secondi dopo. Chiedere
+# «sono attivi?» senza chiedere «sta girando un clone?» dichiara DISALLINEATO un gemello
+# sano; e da `#236` F2 la chiusura ARMA il clone, quindi quella finestra cade esattamente
+# dove questo strumento guarda. Il criterio non e' nuovo: `verifica-cloni.sh` dichiara gia'
+# `IN-CORSO` sulla stessa unita' - due strumenti non devono dire cose diverse dello stesso
+# fatto, quindi si legge la stessa variabile d'ambiente (#238).
+CLONE_UNIT="${CLONE_ARM_UNIT:-heuresys-advanced-clonedb.service}"
 servizi_host() {
-  ssh "${SSH_OPTS[@]}" "$1" "printf '%s/%s' \
+  ssh "${SSH_OPTS[@]}" "$1" "printf '%s/%s %s' \
     \"\$(systemctl is-active heuresys-advanced-api.service 2>/dev/null)\" \
-    \"\$(systemctl is-active heuresys-advanced-web.service 2>/dev/null)\"" 2>/dev/null
+    \"\$(systemctl is-active heuresys-advanced-web.service 2>/dev/null)\" \
+    \"\$(systemctl is-active '$CLONE_UNIT' 2>/dev/null)\"" 2>/dev/null
 }
 
 giro() {
   local totali ok in_corso rosse ci_line verdetto="IN-VOLO" motivo="" \
-        allineati=0 host_tot=0 servizi_ko="" prod_readyz prod_login
+        allineati=0 host_tot=0 servizi_ko="" cloni_in_corso="" prod_readyz prod_login
 
   ci_line="$(ci_conta || true)"
   if [ -z "$ci_line" ]; then
@@ -99,19 +109,28 @@ giro() {
 
   for h in $HOSTS; do
     host_tot=$((host_tot + 1))
-    local s sv
-    s="$(sha_host "$h")"; sv="$(servizi_host "$h")"
+    local s sv sv_raw clone clone_nota=""
+    s="$(sha_host "$h")"; sv_raw="$(servizi_host "$h")"
+    # `printf '%s/%s %s'` -> "api/web clone". Se la risposta e' vuota o senza il terzo campo
+    # (host giu', systemd muto), `clone` resta vuoto e NON si nasconde nessun allarme.
+    sv="${sv_raw%% *}"; clone="${sv_raw##* }"
+    [ "$clone" = "$sv" ] && clone=""
+    case "$clone" in active|activating|reloading) clone_nota=" - clone in corso" ;; *) clone="" ;; esac
     if [ -z "$s" ]; then
       esito "$h" "LAST_GOOD_SHA non leggibile (host giù?)"
       verdetto="NON-VERIFICATO"; motivo="${motivo:-}${motivo:+ · }$h non leggibile"
       continue
     fi
     if [ "${s:0:40}" = "${SHA:0:40}" ]; then
-      allineati=$((allineati + 1)); esito "$h" "deployato ${s:0:8} · servizi $sv"
+      allineati=$((allineati + 1)); esito "$h" "deployato ${s:0:8} · servizi $sv$clone_nota"
     else
-      esito "$h" "fermo su ${s:0:8} (atteso $SHORT) · servizi $sv"
+      esito "$h" "fermo su ${s:0:8} (atteso $SHORT) · servizi $sv$clone_nota"
     fi
-    case "$sv" in *inactive*|*failed*) servizi_ko="$servizi_ko $h" ;; esac
+    case "$sv" in
+      *inactive*|*failed*)
+        if [ -n "$clone" ]; then cloni_in_corso="$cloni_in_corso $h"
+        else                     servizi_ko="$servizi_ko $h"; fi ;;
+    esac
   done
 
   # ⚠ `-4` NON e' una precauzione teorica: senza, questo controllo ha dichiarato la produzione
@@ -147,7 +166,7 @@ giro() {
   # devono raccontare la stessa storia, o la prossima verifica girerebbe su un codice
   # diverso da quello che serve il pubblico.
   if [ "$verdetto" != "CI-ROSSA" ] && [ "$verdetto" != "NON-VERIFICATO" ]; then
-    if [ "$allineati" -eq "$host_tot" ] && [ -z "$servizi_ko" ] \
+    if [ "$allineati" -eq "$host_tot" ] && [ -z "$servizi_ko" ] && [ -z "$cloni_in_corso" ] \
        && [ "$prod_readyz" = "200" ] && [ "$prod_login" = "200" ]; then
       verdetto="DEPLOYATO"; motivo="$host_tot host su $SHORT, servizi attivi, produzione 200"
     elif [ "${in_corso:-0}" -eq 0 ] && [ "${totali:-0}" -gt 0 ] && [ "$allineati" -lt "$host_tot" ]; then
@@ -158,6 +177,9 @@ giro() {
       verdetto="DISALLINEATO"; motivo="servizi non attivi su:$servizi_ko"
     elif [ "$prod_readyz" != "200" ] && [ "${totali:-0}" -gt 0 ] && [ "${in_corso:-0}" -eq 0 ]; then
       verdetto="DISALLINEATO"; motivo="produzione non risponde (readyz=$prod_readyz) a CI conclusa"
+    elif [ -n "$cloni_in_corso" ]; then
+      verdetto="IN-VOLO"
+      motivo="rifacimento del clone in corso su:$cloni_in_corso - api e web sono fermi di proposito, ripassare fra un minuto"
     fi
   fi
 

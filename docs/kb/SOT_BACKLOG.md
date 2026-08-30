@@ -236,6 +236,14 @@
   - si-riprende-con: *«riprendi #233»*
   - priority: P3 · effort: ~1h (fondere invece di duplicare, con la prova nei due versi) · doc: `docs/kb/tools/lab_inbox.py` · `docs/kb/tools/handoff_lint.py` (`S4`)
 
+- **#231 Consumare i lavori attivi: il ciclo di esecuzione delegato** · status: ACTIVE
+  - nasce-da: Enzo, S1080 (2026-08-25) — *«consumiamo i lavori attivi nell'elenco: decidi tu priorita' e sequenze»*; rinnovato S1081 e di nuovo **S1085** (2026-08-30) — *«consuma tutte le voci presenti in P1, P2 e P3 procedendo in modo automatico e autonomo, prendendo te le decisioni al mio posto»*
+  - cos-e: **non e' una voce di prodotto**, e' la casa del batch delegato — l'ordine deciso, la simulazione R24 di ogni voce, e cosa e' entrato in quale sessione. Il dettaglio vive in `.programmi/231-consumo-lavori-attivi.md`, non qui
+  - perche-sta-nel-register: fino a S1084 il programma era aperto e la sua voce **non era in nessuna corsia**, quindi il boot lo stampava fra i «PROGRAMMI APERTI FUORI DAL MENU» — un'anomalia vera, segnalata da uno strumento che funzionava. La cura e' agganciarlo al register, non zittire il controllo
+  - come-si-consuma: ogni voce chiusa dal ciclo e' un commit atomico con la sua evidenza live; questa voce non chiude nulla da sola
+  - priority: P2 · effort: continuativo (una fase per sessione, il taglio lo decide il guardiano) · doc: `.programmi/231-consumo-lavori-attivi.md`
+  - chiuso-quando: Enzo ritira il mandato, oppure P1/P2/P3 non hanno piu' voci ACTIVE
+
 - **#238 `verifica-deploy` chiama guasto un clone in corso: i servizi del gemello sono spenti di proposito** · status: DONE
 - esito-S1085 (2026-08-30): **CHIUSA.** `scripts/verifica-deploy.sh` chiede lo stato di `heuresys-advanced-clonedb.service` **nello stesso `ssh`** che gia' leggeva api e web (nessun giro in piu'), e legge `CLONE_ARM_UNIT` — la **stessa** variabile di `verifica-cloni.sh`, cosi' i due strumenti non possono dire cose diverse dello stesso fatto. Servizi giu' **con** clone in corso -> `IN-VOLO`; **senza** -> `DISALLINEATO`. I due guasti veri (servizio giu', produzione muta) restano **davanti** al ramo benigno: un guasto vince sempre. Se il terzo campo non arriva (host giu', systemd muto) l'allarme **non** viene nascosto.
   - prove-che-potevano-fallire (eseguite, a parita' di stato dei servizi il verdetto e' opposto): **neutra** = sistema sano -> `DEPLOYATO` exit 0 · **A** = api ferma sul gemello, nessun clone -> `DISALLINEATO — servizi non attivi su: linux-pc` exit **1** · **B** = *stessa* api ferma, unita' di clone attiva (`CLONE_ARM_UNIT=ssh.service`) -> `IN-VOLO — rifacimento del clone in corso su: linux-pc` exit **0**, riga host `servizi inactive/active - clone in corso`. Api riaccesa, giro finale `DEPLOYATO`

@@ -106,13 +106,37 @@ def sh(*args, timeout=20):
         return None
 
 
+# Perche' l'ultima query non ha risposto. Prima esisteva solo `None`, e la dashboard lo
+# traduceva sempre in «psql non raggiungibile (tunnel :5433 giu'?)» - una CAUSA, dichiarata
+# senza averla misurata. Al boot di S1085 quella riga e' comparsa mentre il tunnel era su
+# (il BOOT hook lo aveva appena verificato) e la stessa query girava in 0,90 s: un guasto
+# inventato su un sistema sano, la stessa specie di falso allarme di #238.
+ULTIMA_CAUSA_PSQL = None
+
+
 def q(sql, timeout=15):
-    """One psql round-trip. Returns stripped stdout, or None on any failure (tunnel down)."""
+    """One psql round-trip. Returns stripped stdout, or None on failure.
+
+    On failure, registers WHY in ULTIMA_CAUSA_PSQL: timeout, binary missing, or psql's own
+    stderr. Chi stampa deve riportare quella causa, non indovinarne una.
+    """
+    global ULTIMA_CAUSA_PSQL
     try:
-        return subprocess.check_output(PSQL + [sql], text=True, stderr=subprocess.DEVNULL,
-                                       timeout=timeout).strip()
-    except Exception:
-        return None
+        out = subprocess.check_output(PSQL + [sql], text=True, stderr=subprocess.PIPE,
+                                      timeout=timeout).strip()
+        ULTIMA_CAUSA_PSQL = None
+        return out
+    except subprocess.TimeoutExpired:
+        ULTIMA_CAUSA_PSQL = (f"psql non ha risposto entro {timeout}s "
+                             f"(tunnel :5433 lento, o giu' senza chiudere la porta)")
+    except FileNotFoundError:
+        ULTIMA_CAUSA_PSQL = f"psql non trovato: {PSQL[0]}"
+    except subprocess.CalledProcessError as exc:
+        righe = [r for r in (exc.stderr or "").strip().splitlines() if r.strip()]
+        ULTIMA_CAUSA_PSQL = f"psql exit {exc.returncode}: {righe[0] if righe else 'nessun messaggio'}"
+    except Exception as exc:  # una vista non puo' abbattere il boot
+        ULTIMA_CAUSA_PSQL = f"{type(exc).__name__}: {exc}"
+    return None
 
 
 def http_status(url, timeout=6):
@@ -305,9 +329,12 @@ def sec_db(no_db):
         s.add(UNK, "--no-db")
         return s, {}
     files, mx = real_migration_count()
-    counts_raw = q(COUNTS_SQL)
+    # 30s solo per la PRIMA query: e' quella che paga l'avvio a freddo di psql.EXE su Windows
+    # (caricamento DLL + scansione dell'antivirus). A regime la stessa query costa ~0,9 s,
+    # quindi il margine non rallenta nessun boot sano - si spende solo quando qualcosa non va.
+    counts_raw = q(COUNTS_SQL, timeout=30)
     if counts_raw is None:
-        s.add(UNK, "psql non raggiungibile (tunnel :5433 giù?)")
+        s.add(UNK, ULTIMA_CAUSA_PSQL or "psql non ha risposto (causa non registrata)")
         return s, {}
     vals = counts_raw.replace("\n", "|").split("|")
     try:

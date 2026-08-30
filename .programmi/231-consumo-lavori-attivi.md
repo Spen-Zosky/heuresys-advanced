@@ -139,8 +139,8 @@ esegue nell'ordine sotto finché la soglia non arriva, e ciò che resta è già 
 | id | cosa | chi | fatto = | stato |
 |---|---|---|---|---|
 | A1 | `#238` F1 — `verifica-deploy` distingue un clone in corso da un guasto | io | verdetto `IN-VOLO` a clone in corso, `DISALLINEATO` a servizio davvero giù | ☑ **FATTO** — 3 prove, verdetti opposti a parità di servizi |
-| A2 | `#231` entra nel register come voce ACTIVE (oggi è un programma orfano) | io | il boot non stampa più «PROGRAMMI APERTI FUORI DAL MENU», perché la realtà è cambiata | ☐ |
-| A3 | La dashboard dichiara **perché** psql non ha risposto, invece di accusare il tunnel | io | tre cause distinte nel messaggio + il timeout della prima query non mente | ☐ |
+| A2 | `#231` entra nel register come voce ACTIVE (oggi è un programma orfano) | io | il boot non stampa più «PROGRAMMI APERTI FUORI DAL MENU», perché la realtà è cambiata | ☑ **FATTO** — 0 orfani (l'avviso ne ha scoperto un secondo, `#238`, chiuso anch'esso) |
+| A3 | La dashboard dichiara **perché** psql non ha risposto, invece di accusare il tunnel | io | tre cause distinte nel messaggio + il timeout della prima query non mente | ☑ **FATTO** — 4 prove, e una ha scoperto un difetto nella cura stessa |
 
 **Misura che apre il blocco (2026-08-30, questa sessione)** — i due rossi del boot erano **falsi
 allarmi**, non guasti:

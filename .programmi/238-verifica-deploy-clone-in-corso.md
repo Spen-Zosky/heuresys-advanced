@@ -1,7 +1,7 @@
 # 238 — `verifica-deploy` chiama guasto un clone in corso
 
 > **item**: #238 · **priorità**: P2 · **stima**: ~30min
-> **stato**: NON AVVIATO
+> **stato**: CHIUSO (S1085, 2026-08-30)
 > **nasce-da**: la chiusura di S1084 (2026-08-29) — il **primo giro vero** dell'armamento del clone
 > introdotto da `#236` F2. Trovato eseguendo, non ragionando.
 
@@ -50,7 +50,18 @@ uno lo chiama «in corso», l'altro «guasto».
 
 ## Fasi
 
-- [ ] **F1 — La domanda in più, e una sola fonte per il fatto** — `verifica-deploy.sh` chiede lo
+- [x] **F1 — La domanda in più, e una sola fonte per il fatto** — **FATTA S1085 (2026-08-30)**,
+      commit `37566612`. Lo stato dell'unità si legge **nello stesso `ssh`** che già interrogava api
+      e web (nessun giro di rete in più) e attraverso la **stessa** variabile `CLONE_ARM_UNIT` che usa
+      `verifica-cloni.sh`: la fonte del fatto è una sola, quindi i due strumenti non *possono* più
+      dare verdetti opposti. I due guasti veri (servizio giù, produzione muta) restano **davanti** al
+      ramo benigno — un guasto vince sempre — e se il terzo campo non arriva (host giù, systemd muto)
+      l'allarme non viene nascosto.
+      **le tre prove, eseguite** (a parità di stato dei servizi il verdetto è opposto): neutra
+      `DEPLOYATO` exit 0 · **A** api ferma senza clone → `DISALLINEATO — servizi non attivi su:
+      linux-pc` exit **1** · **B** *stessa* api ferma con unità di clone attiva → `IN-VOLO —
+      rifacimento del clone in corso su: linux-pc` exit **0**. Api riaccesa, giro finale `DEPLOYATO`
+      <!-- fase originale: --> — `verifica-deploy.sh` chiede lo
       stato dell'unità del clone prima di giudicare i servizi. La logica non si duplica: si legge
       dove già vive (`verifica-cloni.sh`), o si estrae in un punto solo.
       **fatto =** i due strumenti non possono più dare verdetti opposti sullo stesso host

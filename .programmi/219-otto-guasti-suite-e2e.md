@@ -358,3 +358,36 @@ criterio dichiarato in `#211` F4.
      ⚠ La prima stesura della guardia cercava il solo indirizzo IP e ha fermato una corsa
      **sana**: quell'indirizzo compare anche come testo dimostrativo in
      `SystemHealthDashboard.tsx`. Si cerca l'URL completo.
+
+  #### ⚠⚠ LA SECONDA CORSA HA SMENTITO LA MIA SPIEGAZIONE, e la smentita vale piu' del numero
+
+  Avevo scritto qui sopra che i 43 falliti erano «in larga parte rumore che ho causato io»
+  spegnendo l'API su :3001 a meta' corsa. **Rifatta con l'API viva per tutta la durata:
+  327 passati · 42 falliti · 78 non eseguiti** — contro 326 · 43 · 78. Praticamente identica.
+  **L'ipotesi era sbagliata**: l'API spenta spiegava le firme che avevo guardato per prime
+  (`ECONNREFUSED`), non i falliti. Una misura vera puo' suggerire una conclusione falsa, e la
+  correzione resta scritta accanto all'errore invece di sostituirlo.
+
+  **La causa dominante, letta dalle firme della corsa pulita**: sono **403**, cioe' permesso
+  negato — `Expected 200/201, Received 403` su **22 occorrenze delle 42**, quasi tutte su
+  *scritture* (creazione famiglia, definizione indicatore, inserimento modulo, salvataggio).
+  Il resto sono locator non trovati, che possono benissimo esserne la conseguenza a valle.
+
+  **Cosa e' gia' escluso, misurato e non supposto:**
+  - i permessi nel database **ci sono**: `sys_auth_role_permissions` = **980** sul clone del
+    gemello **e** in produzione, cioe' il valore che il boot dichiara corretto. Non e' la
+    `000210` che ha tolto grant (il difetto di S1081);
+  - i 403 **non escono dall'API dev su :3001**: il suo log ne porta **2** in tutta la corsa,
+    contro le 22 viste dai test. Vengono dall'altra API — quella di produzione del gemello
+    su :8013, dove il `next start` di Playwright manda le richieste attraverso il proxy.
+
+  **Da dove riprende F5d-bis**, con una domanda precisa invece che con 42 casi: *perche' l'API
+  su :8013 nega una scrittura che il ruolo ha il permesso di fare?* Le tre piste, in ordine di
+  costo: ① il **CSRF** — i test prendono il token da un'API e scrivono verso l'altra, e un
+  token non riconosciuto risponde **403** esattamente come un permesso mancante; ② la **cache
+  RBAC**, che si carica all'avvio e non si accorge di una catena riapplicata sotto
+  (memoria `selfhealing_migration_out_of_order_destroys`); ③ un permesso davvero mancante per
+  quegli attori, che il conteggio a 980 non esclude riga per riga.
+  ⚠ La prima pista e' anche un **difetto dell'impianto di prova**, non del prodotto: la corsa
+  gira con `NEXT_PUBLIC_API_PROXY_BASE_URL=:8013` mentre i test chiamano `:3001`. **Due API in
+  gioco nella stessa corsa**: finche' e' cosi', nessun 403 e' interpretabile.

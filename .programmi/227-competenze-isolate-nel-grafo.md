@@ -118,3 +118,55 @@ segnala, perché nulla è rotto.
 Le quattro specie di F1 hanno tutte una destinazione eseguita, il conteggio delle isolate è sceso
 al valore che F1 dichiara raggiungibile (**non a zero** — alcune resteranno, con la ragione
 scritta), e una sentinella lo sorveglia perché non risalga senza che nessuno se ne accorga.
+
+
+## S1085 (2026-08-30) — F3 e F5 chiuse, e **il criterio di F4 e' gia' misurato**
+
+**F3** — le due non-ESCO mai usate ritirate (`CUSTOM::BANCASSUR`, `CUSTOM::FRAUD-DET`), mig
+`000368`. La risposta non era ovvia: sono competenze *bancarie*, e I21 tiene il catalogo
+coerente con l'industry, quindi sembravano catalogo legittimo. A decidere e' stata la
+**provenienza**: vengono dall'estrazione legacy, le 23 sorelle dello stesso file qualcuno le
+usa, queste no. Due guardie ri-verificate all'esecuzione, tre post-condizioni, e un rollback
+vero (`staging.skill_ritirate_undo` + `staging.ripristina_skill_ritirata()`). La misura prima
+del `DELETE` ha trovato **2 embedding** che le referenziavano: passano anch'essi dal giornale.
+
+**F5** — sentinella `sys.v_skill_isolate_residue`, bloccante. La soglia **non** e' «zero
+isolate»: 4.434 su 4.464 sono ESCO con URI, la tassonomia europea che I21 tiene aperta —
+pretendere zero li' equivarrebbe a potarla. Zero e' l'atteso solo per il **residuo**.
+
+### F4 — il criterio, misurato invece che immaginato
+
+Le 28 in uso hanno **tutte** un embedding (28 su 28, misurato), e le ESCO collocate nella
+tassonomia ne hanno 14.003: **l'arco si puo' DERIVARE invece di inventarlo**, cercando la
+competenza ESCO piu' vicina che gia' abbia un padre.
+
+Prime dodici proposte, per somiglianza coseno decrescente:
+
+| isolata | ESCO piu' vicina | somiglianza |
+|---|---|---|
+| Collaborazione | collaborare con i colleghi | 0,890 |
+| Consulenza per la gestione patrimoniale | offrire consulenza in materia di investimenti | 0,866 |
+| Gestione del rischio operativo | Gestione del rischio | 0,851 |
+| Gestione del rischio di mercato | Gestione del rischio | 0,840 |
+| Innovazione | cercare innovazioni per le pratiche in uso | 0,826 |
+| **Gestione della liquidita' aziendale** | **gestire il trasporto di contanti** | **0,823** |
+| Erogazione prestiti | gestire le domande di prestito | 0,800 |
+| Stress testing e analisi di scenario | Gestione del rischio | 0,799 |
+| Orientamento ai risultati | attuare obiettivi a breve termine | 0,796 |
+| **Finanza sostenibile ed ESG** | **green bond** | **0,792** |
+| Gestione degli NPL | tecniche di riscossione debiti | 0,789 |
+| Orientamento al cliente | soddisfare i clienti | 0,781 |
+
+⚠⚠ **E la misura dice anche che applicarlo alla cieca sarebbe sbagliato**: «Gestione della
+liquidita' aziendale» → «gestire il trasporto di contanti» e' **semanticamente falsa** pur
+stando a 0,823, sopra a proposte corrette come «Erogazione prestiti» → «gestire le domande di
+prestito» (0,800). **La somiglianza non ordina la correttezza**: una soglia da sola non separa
+le buone dalle cattive, e questo e' il reperto che F4 deve portarsi dietro.
+
+**Cosa resta da decidere in F4**, e va deciso guardando le 28 una per una:
+- la **direzione** dell'arco: `IS_A` verso la vicina (es. «Gestione del rischio operativo»
+  *IS_A* «Gestione del rischio»), non verso il *padre* della vicina — la vicina e' gia' il
+  concetto sovraordinato nei casi buoni;
+- la **soglia**, che serve come filtro grossolano ma **non basta**: sotto la soglia si dichiara
+  «non collocabile a macchina», sopra si **rilegge** prima di scrivere;
+- il **giornale di rollback**, perche' 28 archi scritti a macchina vanno potuti disfare.

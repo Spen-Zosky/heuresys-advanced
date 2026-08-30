@@ -76,12 +76,12 @@ esistenti vengono da **seed/import storici** che non le hanno popolate. La cura 
 ma «chi ha assegnato l'obiettivo» è un dato che nessuna fonte porta, quindi va deciso se
 ricostruirlo (dal capo dell'epoca) o dichiarare la colonna vuota per le righe storiche.
 
-- [ ] **F2 Il marciume vero** — i **cinque** rimasti dopo F1: `X3c` contratto attivo senza busta
+- [x] **F2 Il marciume vero** — **SENZA BERSAGLIO, misurato 2026-08-30 (S1085)**: la corsa su produzione da' `0 verifiche con difetti, 7 misure informative, 27 pulite`. I cinque erano gia' stati consumati in S1083; questo file era indietro rispetto ai fatti. *(testo originale:)* — i **cinque** rimasti dopo F1: `X3c` contratto attivo senza busta
   recente (2) · `X5d` posizione senza requisiti formativi (8) · `X6a` OKR su reparto inesistente
   (5) · `X6b` KPI non previsto dalla posizione (42, **serve la decisione di prodotto**) · `X6c`
   obiettivo senza titolare (2). Per ognuna:
   file che crea, causa, cura con guardia/post-condizione/rollback, `ci-rehearsal` se tocca
   `db/**`. **fatto =** conteggio a zero o eccezione dichiarata nel check con data e ragione
-- [ ] **F3 La corsa che chiude** — `verifica_incrociata` esce **0 o 4** (cieco dichiarato),
+- [x] **F3 La corsa che chiude** — **FATTA S1085**: `verifica_incrociata` exit **4** (cieco dichiarato, uno dei due valori ammessi) e `check_marciume.py` exit **0** — «niente e' marcito». Per arrivarci sono caduti tre falsi rossi: due da **tunnel degradato** (74 s per una query banale, 1,48 s dopo averlo ricreato) e uno da **atlante superato** dai cambiamenti di #235. *(testo originale:)* — `verifica_incrociata` esce **0 o 4** (cieco dichiarato),
   la batteria del cancello mostra il verde, e una chiusura reale non porta più
   `marciume: fallito`. **fatto =** output allegato della corsa e della chiusura

@@ -13,6 +13,9 @@ cd "$HOME/heuresys-advanced" || exit 1
 export NVM_DIR="$HOME/.nvm"
 # shellcheck disable=SC1091
 . "$NVM_DIR/nvm.sh" >/dev/null 2>&1
+# Il fornitore invoca `claude`, che su questa macchina sta in ~/.local/bin e NON e' nel PATH
+# di una shell non interattiva (misurato: «claude: File o directory non esistente»).
+export PATH="$HOME/.local/bin:$PATH"
 
 TOKEN="$(cat "$HOME/.research-token")"
 [ -n "$TOKEN" ] || { echo "token assente"; exit 2; }

@@ -88,21 +88,30 @@ async function main(): Promise<void> {
   if (!v) throw new Error("il fascicolo non ha versioni");
   console.log(`[versione] ${v.number} (${v.status})`);
 
-  const dominio = process.env.DOMINIO ?? elenco[0]!;
-  console.log(`\n[corsa] dominio «${dominio}» — apre pagine vere, puo' durare minuti...`);
-  const corsa = await post<{ corsaId?: string; runId?: string; id?: string }>(
-    s, `/v1/tenant-blueprints/${rtl.tenantBlueprintId}/versions/${v.number}/research`, { dominio });
-  const corsaId = corsa.corsaId ?? corsa.runId ?? corsa.id;
-  console.log(`[corsa] avviata: ${corsaId}`);
+  let corsaId = process.env.CORSA_ID;
+  if (corsaId) {
+    console.log(`\n[corsa] rileggo quella gia' fatta: ${corsaId} (nessuna spesa)`);
+  } else {
+    const dominio = process.env.DOMINIO ?? elenco[0]!;
+    console.log(`\n[corsa] dominio «${dominio}» — apre pagine vere, puo' durare minuti...`);
+    const corsa = await post<{ corsaId?: string; runId?: string; id?: string }>(
+      s, `/v1/tenant-blueprints/${rtl.tenantBlueprintId}/versions/${v.number}/research`, { dominio });
+    corsaId = corsa.corsaId ?? corsa.runId ?? corsa.id;
+    console.log(`[corsa] avviata: ${corsaId}`);
+  }
 
-  const proposte = await get<{ items?: Array<{ stato?: string; status?: string; fonti?: unknown[] }> }>(
+  // Il campo si chiama `evidenze` (letto in `PropostaRicercaSchema`), non `fonti`: la prima
+  // stesura contava zero e avrebbe fatto concludere che le proposte non portano fonti — mentre
+  // il motore respinge proprio quelle senza (`SOURCES_PRESENT`), quindi 5 su 5 `PASSED` lo
+  // smentiva gia' da solo.
+  const proposte = await get<{ items?: Array<{ stato?: string; status?: string; evidenze?: unknown[] }> }>(
     s, `/v1/seed-acquisition-runs/${corsaId}/candidates`);
   const items = proposte.items ?? [];
   const perStato = items.reduce<Record<string, number>>((acc, p) => {
     const k = (p.stato ?? p.status ?? "?") as string;
     acc[k] = (acc[k] ?? 0) + 1; return acc;
   }, {});
-  const conFonti = items.filter((p) => Array.isArray(p.fonti) && p.fonti.length > 0).length;
+  const conFonti = items.filter((p) => Array.isArray(p.evidenze) && p.evidenze.length > 0).length;
 
   console.log(`\n[proposte] ${items.length} — per stato: ${JSON.stringify(perStato)}`);
   console.log(`[proposte] con almeno una fonte con impronta: ${conFonti}`);

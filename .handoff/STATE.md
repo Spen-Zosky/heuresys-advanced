@@ -34,6 +34,13 @@ Consob, a una società di consulenza la sua associazione di categoria — zero f
   ne verifichi l'esito** con `bash scripts/verifica-deploy.sh`.
   ⭐ E il fatto strutturale, che vale oltre l'incidente: **il runner della CI e il campo di prova sono
   la stessa macchina**. Un processo lasciato acceso li' non e' un residuo innocuo, e' una CI rossa.
+- ⚠ **I due worktree `gov/w1` e `gov/w2` esistono e nessuna fonte di stato li nominava** (`#240`, HOLD).
+  Creati il 9 agosto, vivono fuori dal repo, **mai pubblicati**, 530 e 545 commit indietro. Una sessione
+  parallela vi ha committato ieri sera e ha proposto di annullare con `reset --soft`: **non si e' fatto**
+  — la regola vieta di riscrivere la storia con piu' alberi, `--soft` non fa ciò che dichiara, e quel
+  commit protegge contenuto che esiste solo lì. Fatto invece: messe al sicuro **67 righe** di
+  `MVP_4_ROADMAP.md` in `w2`, ferme dal 9 agosto e mai committate (commit `f2c36534`, **sul ramo gov, non
+  pubblicato**). Al riallineamento: `AVVIO.md` darà un `add/add`, `CHIUSURA.md` no. Dettaglio in `#240`.
 - **Chi ha pushato il 26 agosto alle 18:47?** Invariata da S1082.
 - **I due fascicoli di prova in produzione**: `PROVA-F7-CONSULENZA` va rimosso (vuoto, e il suo nome
   inquina la guardia); `PROVA-F7-ALFA` è la prova di `#132` F7 — si tiene o si rimuove?

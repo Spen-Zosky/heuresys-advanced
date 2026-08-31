@@ -52,6 +52,25 @@ const DRY = process.argv.includes("--dry-run");
  *  preesistenti, la cui credenziale veniva da TEST_ADMIN_PASSWORD: senza questo
  *  i test che derivano la password fallirebbero proprio sulle vecchie personas. */
 const REALIGN = process.argv.includes("--realign");
+/**
+ * `--solo a@x,b@y` — agisce **solo** su quegli indirizzi (Enzo, 2026-08-31).
+ *
+ * Nasce da un caso vero: in produzione le 158 personas entrano gia' (misurato con
+ * `verify-derived-login`), e a non entrare erano le **tre utenze di collaudo**. Senza questa
+ * opzione l'unico modo di ripararle era `--realign`, che riscrive la password di TUTTI per
+ * costruzione — cioe' un intervento da 162 righe per un guasto da 3. Un rimedio piu' largo
+ * del guasto e' un guasto a sua volta.
+ *
+ * Si combina con `--realign`: `--solo` sceglie CHI, `--realign` dice di riscrivere anche a
+ * chi una credenziale ce l'ha gia' (che e' esattamente il caso delle tre).
+ */
+const SOLO = (() => {
+  const a = process.argv.find((x) => x.startsWith("--solo="));
+  const set = new Set(
+    (a ? a.slice("--solo=".length) : "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean),
+  );
+  return set.size > 0 ? set : null;
+})();
 
 interface Row {
   user_id: string;
@@ -79,6 +98,9 @@ async function main(): Promise<void> {
     );
 
     for (const u of rows) {
+      // `--solo` filtra PRIMA di ogni altra cosa: chi non e' nell'elenco non viene nemmeno
+      // contato fra i visti, cosi' il riepilogo finale parla solo di cio' che si e' toccato.
+      if (SOLO && !SOLO.has(u.user_email.toLowerCase())) continue;
       stats.visti++;
       if (isRealPerson(u.user_email)) {
         stats.esclusi++;

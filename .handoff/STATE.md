@@ -27,6 +27,13 @@ Consob, a una società di consulenza la sua associazione di categoria — zero f
 
 ## Open questions — le domande aperte
 
+- ⚠ **La `Playwright smoke` su `d4df1841` e' fallita, e la causa e' MIA**: la CI gira sul gemello, e
+  ha trovato la **porta 3001 occupata** dall'API di sviluppo che avevo acceso li' per le prove di
+  `#235` e `#132`. Non e' un difetto del codice — la stessa corsa su `a3dfd53c` era verde. **Rilanciata**
+  (`gh run rerun 33350045185`), ed era in coda dietro `Test (api integration)`: **la prossima sessione
+  ne verifichi l'esito** con `bash scripts/verifica-deploy.sh`.
+  ⭐ E il fatto strutturale, che vale oltre l'incidente: **il runner della CI e il campo di prova sono
+  la stessa macchina**. Un processo lasciato acceso li' non e' un residuo innocuo, e' una CI rossa.
 - **Chi ha pushato il 26 agosto alle 18:47?** Invariata da S1082.
 - **I due fascicoli di prova in produzione**: `PROVA-F7-CONSULENZA` va rimosso (vuoto, e il suo nome
   inquina la guardia); `PROVA-F7-ALFA` è la prova di `#132` F7 — si tiene o si rimuove?

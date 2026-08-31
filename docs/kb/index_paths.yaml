@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-29T13:59:10Z da docs/kb/tools/build_index.py
+# generato: 2026-08-31T02:12:26Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-29T13:59:10Z"
-  total_files: 3270
+  generated_at: "2026-08-31T02:12:26Z"
+  total_files: 3284
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -12,17 +12,17 @@ meta:
     api-core: 33
     api-module: 356
     ci: 17
-    claude-config: 35
-    config: 189
+    claude-config: 37
+    config: 194
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 362
+    db-migration: 366
     db-other: 8
     db-script: 48
     db-seed: 114
-    doc-canonical: 742
+    doc-canonical: 744
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 108
     showcase-source: 13
-    test: 404
+    test: 405
     ux-design-archive: 80
     web-source: 241
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2712
+    live: 2726
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2738,6 +2738,18 @@ files:
     category: claude-config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\sessione\AVVIO.md'
+    root: repo
+    rel: '.claude/sessione/AVVIO.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\sessione\CHIUSURA.md'
+    root: repo
+    rel: '.claude/sessione/CHIUSURA.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.claude\settings.json'
     root: repo
     rel: '.claude/settings.json'
@@ -3218,6 +3230,18 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-132-f7-corsa-di-ricerca.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-132-f7-corsa-di-ricerca.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-132-f7-due-prove-di-merito.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-132-f7-due-prove-di-merito.mts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-219-b-spiegabilita.mts'
     root: repo
     rel: 'apps/api/scripts/prova-219-b-spiegabilita.mts'
@@ -3233,6 +3257,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-219-f-mie-squadre.mts'
     root: repo
     rel: 'apps/api/scripts/prova-219-f-mie-squadre.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-235-risposte-di-clima.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-235-risposte-di-clima.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -3692,6 +3722,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\avvia-ricerca.sh'
+    root: repo
+    rel: 'scripts/avvia-ricerca.sh'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\scripts\backup-db.sh'
     root: repo
     rel: 'scripts/backup-db.sh'
@@ -3833,6 +3869,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\plancia.py'
     root: repo
     rel: 'scripts/plancia.py'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\posso-uscire.sh'
+    root: repo
+    rel: 'scripts/posso-uscire.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -8288,6 +8330,30 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000366_le_risposte_di_clima_sono_un_dato_della_persona.sql'
+    root: repo
+    rel: 'db/migrations/000366_le_risposte_di_clima_sono_un_dato_della_persona.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000367_il_metadata_di_un_tenant_non_deve_poter_contenere_persone.sql'
+    root: repo
+    rel: 'db/migrations/000367_il_metadata_di_un_tenant_non_deve_poter_contenere_persone.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000368_le_due_competenze_bancarie_che_nessuno_ha_mai_usato.sql'
+    root: repo
+    rel: 'db/migrations/000368_le_due_competenze_bancarie_che_nessuno_ha_mai_usato.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000369_le_ventotto_competenze_bancarie_trovano_posto_nella_tassonomia.sql'
+    root: repo
+    rel: 'db/migrations/000369_le_ventotto_competenze_bancarie_trovano_posto_nella_tassonomia.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -9509,6 +9575,18 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\237-chiusura-troppo-cara.md'
     root: repo
     rel: '.programmi/237-chiusura-troppo-cara.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\238-verifica-deploy-clone-in-corso.md'
+    root: repo
+    rel: '.programmi/238-verifica-deploy-clone-in-corso.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\239-nome-del-cliente-blocca-la-ricerca.md'
+    root: repo
+    rel: '.programmi/239-nome-del-cliente-blocca-la-ricerca.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -16745,6 +16823,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\successor-readiness.integration.test.ts'
     root: repo
     rel: 'apps/api/test/successor-readiness.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\surveys-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/surveys-scope.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

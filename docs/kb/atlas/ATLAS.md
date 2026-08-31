@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `5b25e360` (2026-08-30T17:54:25+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `58a24f40` (2026-08-31T04:11:01+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 605 |
 | Pagine web | 120 |
 | Schemi shared | 108 |
-| Tabelle DB | 287 (vuote: 24) |
-| Viste / matview | 36 / 0 |
+| Tabelle DB | 289 (vuote: 24) |
+| Viste / matview | 38 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 273 |
 
 ## Moduli API
@@ -96,7 +96,7 @@
 | succession-pools | /v1/succession-pools | 5 | 4 | 4 | 2 |
 | successor-candidates | /v1/successor-candidates | 6 | 4 | 3 | 2 |
 | successor-readiness | /v1/successor-readiness | 3 | 2 | 2 | 2 |
-| surveys | /v1/surveys | 12 | 4 | 3 | 3 |
+| surveys | /v1/surveys | 12 | 4 | 3 | 4 |
 | talent-review | /v1/talent-review | 6 | 1 | 7 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 1 |
 | tenant-blueprints | /v1/tenant-blueprints | 20 | 0 | 13 | 1 |
@@ -161,7 +161,7 @@
 - permissions: **224**
 - role_permission_mappings: **980**
 - ui_interfaces_active: **74**
-- skills: **14033**
+- skills: **14031**
 
 ## Anomalie shared exports
 

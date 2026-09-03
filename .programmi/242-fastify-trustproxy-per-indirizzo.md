@@ -47,7 +47,7 @@ la prova va creduta invece che aggirata.
 
 | id | cosa | cosa significa fatto | stato |
 |---|---|---|---|
-| **F1** | Misurare quale indirizzo l'API vede come peer | il valore è **misurato** su una richiesta vera, non dedotto | ⬜ |
+| **F1** | Misurare quale indirizzo l'API vede come peer | il valore è **misurato** su una richiesta vera, non dedotto | ✅ **FATTO** 2026-09-03 — `req.ip` è l'IP reale, l'XFF forgiato è ignorato |
 | **F2** | `TRUST_PROXY` in produzione da `1` a indirizzi/CIDR | il `.env` della VM porta la forma per indirizzo, e l'API riavviata la legge | ⬜ |
 | **F3** | `parseTrustProxy` + test: la forma numerica si **respinge** | un `TRUST_PROXY=1` fa fallire l'avvio con un messaggio che dice cosa mettere | ⬜ |
 | **F4** | Il bump a 5.12.1 sui due manifest | `Typecheck` verde in CI | ⬜ |
@@ -74,6 +74,57 @@ Quindi il peer immediato dell'API è **il processo Next**, non nginx. Da qui due
 ⚠ **Sospetto da verificare, non un fatto**: se la seconda risposta è «no», allora `TRUST_PROXY=1`
 oggi non sta già dando l'IP reale, e il rate limiting per IP è già in un secchio solo. Non è
 misurato: è la prima cosa che F1 deve stabilire.
+
+---
+
+## ✅ F1 — MISURATA (2026-09-03, S1086). Il sospetto era INFONDATO, e ora si sa perché
+
+**L'assetto attuale funziona ed è sicuro.** Una sola richiesta lo dimostra, e dimostra
+*entrambe* le proprietà che questa voce chiedeva di preservare:
+
+```bash
+curl -4 -X POST https://www.heuresys.com/api/v1/auth/login \
+     -H 'X-Forwarded-For: 203.0.113.7' \
+     -H 'Content-Type: application/json' \
+     -d '{"email":"probe-242-f1@example.invalid","password":"…"}'      # -> 401
+```
+
+Poi, in `sys.sys_auth_login_events` (la rotta di login vi deposita `req.ip`):
+
+```
+       ip       |          created_at
+----------------+------------------------------
+ 37.120.137.234 | 2026-09-03 21:54:24.945+00
+```
+
+- `req.ip` è **l'IP pubblico reale del client** — non `127.0.0.1`, quindi la catena
+  browser → nginx → rewrite di Next → API **propaga l'`X-Forwarded-For`**;
+- l'IP **forgiato a sinistra** (`203.0.113.7`, TEST-NET-3) **non** è diventato `req.ip`: il
+  conteggio di salti ignora l'entrata falsificata e prende quella che nginx ha davvero
+  appeso. È precisamente ciò che D-28 prescrive.
+
+**Questa è la prova che deve poter fallire**, ed è già scritta: entrambe le condizioni in una
+richiesta. Va rieseguita dopo la migrazione — se la prima cade, `req.ip` è il proxy; se cade la
+seconda, chiunque può dichiararsi un altro IP.
+
+### ⚠ Il trabocchetto in cui sono caduto, e che vale la pena lasciare scritto
+
+Guardando lo storico avevo trovato **91.409 eventi su `127.0.0.1`**, e negli ultimi 30 giorni
+**1.753 su 1.818 (96,4%)**. Ne avevo concluso che l'IP reale non arrivasse. **Era falso**: quel
+traffico *nasce sulla macchina stessa* — la suite E2E che gira sul runner, i controlli di salute,
+i dati della storia — e per esso `127.0.0.1` è l'indirizzo corretto. I login dal browser
+registrano l'IP vero (`188.216.74.236`, `146.70.182.27`, e ora la sonda).
+
+Una misura vera che suggerisce una conclusione falsa: il conteggio era esatto, la popolazione
+no. La sonda ha risolto in una richiesta ciò che l'aggregato non poteva dire.
+
+### Cosa cambia per questa voce
+
+Il mandato si **rovescia di segno**: non c'è un difetto da riparare, c'è un comportamento
+**verificato buono da preservare**. E questo *rafforza* la ragione per cui fastify ≥ 5.12 resta
+fuori — con la forma numerica neutralizzata, `req.ip` diventerebbe il peer (`127.0.0.1`) per
+**tutto** il traffico web, e si perderebbe esattamente ciò che la sonda ha appena mostrato
+funzionante. F2/F3/F4 restano come sono; F1 è chiusa.
 
 ### La prova che deve poter fallire
 

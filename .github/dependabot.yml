@@ -32,6 +32,23 @@ updates:
       # Revisit when the runtime itself moves to the next LTS (S1030, cluster Z-004).
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+      # fastify >= 5.12 ha RIMOSSO la forma numerica di `trustProxy`, che questa
+      # piattaforma usa in produzione (TRUST_PROXY=1, D-28). In lib/request.js:
+      #   if (typeof tp === 'number') { return function () { return false } }
+      # Non e' deprecata: non si fida piu' di nulla. Preso il bump, `req.ip`
+      # diventerebbe l'indirizzo del proxy e il rate limiting per IP finirebbe in
+      # un secchio solo per tutte le richieste — senza errore, senza log, senza
+      # test rosso. Le PR #76 e #75 sono state chiuse per questo.
+      #
+      # Questo ignore esiste perche' chiuderle NON BASTA: al giro dopo Dependabot
+      # ha rimesso lo stesso bump DENTRO il gruppo minor-and-patch (PR #74, poi
+      # #78), dove passa molto piu' facilmente inosservato. Senza questa riga,
+      # ogni settimana qualcuno deve accorgersene di nuovo.
+      #
+      # ⚠ SI TOGLIE quando la voce #242 e' chiusa (migrazione di `trustProxy`
+      # alla forma per indirizzo), non prima.
+      - dependency-name: "fastify"
+        versions: [">=5.12"]
     labels:
       - "dependencies"
       - "area/deps"

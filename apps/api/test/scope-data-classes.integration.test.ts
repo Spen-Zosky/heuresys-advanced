@@ -47,13 +47,23 @@ describe("scope/data-classes — taxonomy (F2, ADR-0027)", () => {
     expect(SENSITIVE_DATA_CLASSES.has("ACTIVITY")).toBe(false);
   });
 
-  it("Enzo 2026-07-01: formazione/mentorship/matching/capacità sensitive; feedback & surveys normal", () => {
+  it("Enzo 2026-07-01: formazione/mentorship/matching/capacità sensitive; feedback normal — e `surveys` sensitive da #235", () => {
     for (const r of ["learning", "training_initiative", "mentorship", "matching", "capability"]) {
       expect(isSensitiveResource(r), `${r} must be sensitive per Enzo`).toBe(true);
     }
-    for (const r of ["engagement_feedback", "surveys"]) {
-      expect(isSensitiveResource(r), `${r} must stay normal per Enzo`).toBe(false);
-    }
+    // `engagement_feedback` resta neutro, e a ragione: `sys_engagement_feedback` non ha ALCUNA
+    // colonna che identifichi l'autore — solo `feedback_reviewed_by_user_id`, che è chi la
+    // esamina. È anonimo PER COSTRUZIONE (misurato 2026-08-28, #214 F6).
+    expect(
+      isSensitiveResource("engagement_feedback"),
+      "engagement_feedback must stay normal per Enzo",
+    ).toBe(false);
+    // `surveys` stava qui accanto fino a #235 (S1085, commit `5b25e360`), che l'ha spostata
+    // DOPO aver misurato: 862 risposte su 862 portano `response_subject_user_id`, 6 sondaggi su
+    // 6 dichiarano `survey_is_anonymous = false`. La frase del 2026-07-01 presupponeva che la
+    // resource non portasse dati di persona, e quel presupposto era falso — quindi qui si
+    // registra lo spostamento, non si riafferma la frase superata.
+    expect(isSensitiveResource("surveys"), "surveys is PERSONAL since #235").toBe(true);
   });
 
   it("a non-person resource is unclassified → RBAC + tenant only", () => {

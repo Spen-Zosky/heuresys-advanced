@@ -561,7 +561,7 @@
     "test": "node -e \"console.log('(@heuresys/shared has no unit tests; Zod schemas are exercised via the @heuresys/api integration suite)')\""
   },
   "dependencies": {
-    "zod": "4.4.3"
+    "zod": "4.5.4"
   },
   "devDependencies": {
     "typescript": "6.0.3"

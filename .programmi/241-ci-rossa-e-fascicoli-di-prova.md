@@ -18,8 +18,8 @@ si dichiara chiusa.
 |---|---|---|---|---|
 | **V1** | Rimuovere `PROVA-F7-ALFA` e `PROVA-F7-CONSULENZA` dalla produzione | io | i fascicoli in produzione passano da 3 a 1; `RTL-BANK-CONFIG` intatto; giornale di rollback popolato | ✅ **FATTO** |
 | **V2** | Il test che pretende `surveys` neutro contraddice `#235` | io | `Test (api integration)` verde in CI sul commit nuovo | 🟡 corretto e verde in locale; **il verde di CI aspetta il push** |
-| **V3** | La porta 3001 occupata sul runner tiene rossa la `Playwright smoke` | io + conferma di Enzo per il kill | `ss -ltnp` sul runner non mostra nulla su :3001, e la smoke rilanciata è verde | 🟡 **identificato**, aspetta la conferma per terminare il processo |
-| **V4** | Le PR Dependabot su fastify 5.12.1 (e la terza, `qs`) | io | le PR fastify chiuse con la ragione, il bump fatto da noi con i tipi corretti, `Typecheck` verde | ⬜ |
+| **V3** | La porta 3001 occupata sul runner tiene rossa la `Playwright smoke` | io + conferma di Enzo per il kill | `ss -ltnp` sul runner non mostra nulla su :3001, e la smoke rilanciata è verde | ✅ **FATTO** — porta libera, servizi veri intatti |
+| **V4** | Le PR Dependabot su fastify 5.12.1 (e la terza, `qs`) | io | le PR fastify risolte con la ragione misurata, e il lavoro che ne consegue registrato | ✅ **FATTO** — `#76` e `#75` chiuse, migrazione registrata come `#242` |
 
 ---
 
@@ -180,6 +180,28 @@ armato e mai eseguito.
 - **Guardia** — non si tocca se il PID appartiene a un'unità systemd o al runner stesso. Il
   bersaglio è un `pnpm dev` orfano, e va riconosciuto come tale prima.
 
+### L'esito
+
+Enzo ha autorizzato la terminazione dell'intera sessione abbandonata (2026-09-03). **Prima di
+eseguire ho guardato il bersaglio, e la mia stessa descrizione era da correggere**: il «Tasks: 35»
+di `systemctl` sono **thread**, non processi. I processi erano **quattro**, tutti lo stesso albero:
+
+```
+45476  pnpm dev
+45504    sh -c tsx watch --conditions heuresys-source src/server.ts
+45505      tsx cli.mjs watch
+89772        node --require tsx/preflight … src/server.ts     ← quello in ascolto sulla 3001
+```
+
+`loginctl terminate-session 61` **non ha avuto effetto** (porta ancora occupata dopo 4 secondi):
+la terminazione è avvenuta sull'albero dei PID. Esito misurato: **porta 3001 libera**, e i due
+servizi veri — API `:8013` e web `:3013` — **ancora in ascolto**.
+
+⭐ Il fatto strutturale, che vale oltre l'incidente e che S1085 aveva già nominato: **il runner
+della CI e il campo di prova sono la stessa macchina**. Un `pnpm dev` lasciato acceso lì non è un
+residuo innocuo, è una CI rossa — e in questo caso lo è stata per tre giorni, tenendo la
+produzione ferma su `bd944a4e`.
+
 ---
 
 ## V4 — Le PR Dependabot
@@ -232,6 +254,39 @@ sé quando V3 libera la porta.
   chiusura delle due PR con la ragione scritta nel commento.
 - **Chi** — io.
 - **Guardia** — non distruttivo sul codice; la chiusura di una PR è reversibile (si riapre).
+
+### L'esito — e la decisione è cambiata, perché la riproduzione ha detto altro
+
+La riproduzione in locale (`5.12.1` installato, `pnpm typecheck`) ha dato **5 errori, identici a
+quelli della CI**. Ma la causa non era quella che avevo ipotizzato — «basta dichiarare il tipo del
+parametro». **fastify 5.12.1 ha rimosso di proposito il supporto alla forma numerica di
+`trustProxy`**, che è quella che la produzione usa:
+
+```js
+// node_modules/fastify/lib/request.js — 5.12.1
+if (typeof tp === 'number') {
+  // Hop-count-only trust cannot validate the immediate peer. Fail closed…
+  return function () { return false }
+}
+```
+
+Non si fida più di nulla. Con `TRUST_PROXY=1` in produzione (D-28), prendere il bump avrebbe fatto
+diventare `req.ip` l'indirizzo del proxy, e il **rate limiting per IP sarebbe finito in un secchio
+solo per tutte le richieste** — senza errore, senza log, senza test rosso.
+
+**Quindi il bump non si prende**, e zittire il typecheck con un cast sarebbe stato il modo di
+rendere verde il rosso lasciando intatto il difetto. Le due PR (`#76` e `#75` — lo stesso bump
+spezzato in due manifest, e nessuna delle due poteva diventare verde da sola) sono state chiuse
+con la ragione misurata scritta nel commento. L'albero è tornato a `5.10.0`, verificato:
+`require('fastify/package.json').version → 5.10.0`.
+
+Il lavoro che ne consegue — migrare `trustProxy` dalla forma a conteggio di salti a quella per
+indirizzo — è registrato come **`#242`**, con la sua decomposizione in
+`.programmi/242-fastify-trustproxy-per-indirizzo.md`. `5.12.1` è l'ultima pubblicata: non è
+un'attesa che si risolve da sé.
+
+La terza PR (`qs 6.16.0`, `#77`) **non è stata toccata**: non ha difetti propri — Typecheck, Lint
+e Build erano già verdi — ed era rossa solo per la porta 3001 di V3, che ora è libera.
 
 ---
 

@@ -1800,3 +1800,541 @@
   - voci: **(1)** il check non è deterministico — va fissato il fuso *dentro* il confronto, e il fuso giusto è **`Europe/Rome`**: `staging.storia36_calendar` è un calendario **italiano** (misurato: Liberazione, Festa della Repubblica, Ferragosto e Santo Stefano sono non lavorativi anche quando cadono di venerdì), quindi confrontarlo con giorni UTC accosta due sistemi diversi · **(2)** fissato Roma, i sette diventano rossi **anche in produzione**, ed è corretto che lo siano: una banca non raccoglie un feedback all'una di notte di sabato. Sono artefatti del generatore, che li ha piazzati a «fine giornata» ragionando in UTC · **(3)** ADR-0035: la correzione va **nel generatore** (`db/seeds/storia36/02_performance.sql`), non solo nelle sette righe, o la prossima corsa le rimette
   - fuori-perimetro-dichiarato: **quanti ALTRI check hanno lo stesso difetto** non è stato misurato — ogni `timestamptz::date` nelle batterie è un candidato, e `C2g` potrebbe essere solo quello che si è visto per primo. Va contato prima di stimare l'effort
   - chiuso-quando: la custodia è **verde su entrambe le macchine** e il suo verdetto non dipende più dal fuso di chi la lancia — provato lanciandola con `TimeZone` diversi e ottenendo lo stesso esito
+
+
+- **#225 Il CLAUDE.md dichiara un difetto risolto come corrente, e cristallizza un numero che cambia** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#226 La storia di RTL diventa scorrevole: l'avanzamento va schedulato, e SOLO dove il database e' quello vero** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#212 `close-propagate` non arma il deploy alla seconda corsa nella stessa sessione, e il rollout resta indietro in silenzio** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#211 La suite E2E completa: i rossi che non sono guasti del prodotto, e i casi che non vengono eseguiti** · status: FATTO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#209 Venti filtri booleani dell'API dicono «tutti» a qualunque domanda — `z.coerce.boolean()` su una querystring** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#217 Il flusso di chiusura è un rito completo dove servirebbe un percorso scelto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#216 Il passaggio di consegne fra sessioni: il menu elenca invece di spiegare, e l'avanzamento vive ricopiato invece che derivato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#215 Lo stesso stato impossibile in altre due tabelle, dove pero' la cura e' l'opposto: righe classificate male, non residui** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#213 Cinque percorsi formativi non hanno titolare e non sono catalogo comune: uno stato che il modello non sa rappresentare** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#210 Le due specie convivono GIA', e non negli indicatori: `learning_modules` e' misto da prima che qualcuno se ne accorgesse** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#202 Il canale duplica i numeri perche' una str.replace non dice se ha sostituito — e la cura NON e' insegnargli a fondere** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#203 Il cancello del rubinetto e' rosso, e lo fa scattare uno strumento che il legacy lo combatte** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#204 La fusione ha lasciato SETTE residui dentro #196 e #198 — i blocchi riscritti sono pronti nella consegna** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#207 Il guardiano muore sulla riga del verdetto quando stdout non e' un terminale — e con lui altri due strumenti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#208 ⚠ PRIMA di eseguire #196/#197/#198/#199 leggi il LEGGIMI-PRIMA: sequenza, errori aperti, cosa e' gia' verificato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#199 E24 — il legame fascicolo↔azienda e' permanente, ma oggi `link-tenant` permette di staccarlo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#200 Il register aveva due identificativi doppi, e nessuna delle dieci verifiche li guardava** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#196 Gli indicatori: tutti di piattaforma oggi, ma la prima costruzione ne creerebbe di privati** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#197 Il marchio `materialized_from` non copre tutte le tabelle che lo stesso motore scrive** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#195 L'atlante era fermo a nove giorni prima, e nessuno strumento poteva accorgersene** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#194 `verifica-deploy` ha dichiarato la produzione irraggiungibile mentre era sana** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#193 L'organigramma aziendale non dichiara di mostrare persone — e sistemarlo lo toglierebbe a 117 su 161** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#192 Il diario di sessione non scrive — e la misura ha ridimensionato il difetto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#191 Il rendiconto delle chiusure non sa di quale sessione parla** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#190 Tre skill di questo repo descrivono il progetto legacy — vanno rimosse, e la rimozione è tua** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#189 `--repair-missing` della storia36 non arriva in fondo: un seed chiama una funzione che nessun seed crea** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#188 Le lacune formative non sanno a quale posizione si riferiscono** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#187 L'indice di salute organizzativa misura un clima fermo a gennaio 2025** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#186 Guardia lab: `psql -Atc` rifiutato e `psql -A -t -c` accettato — le opzioni brevi raggruppate non vengono sciolte** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#183 Policy di cancellazione utente: la disattivazione esiste, la cancellazione no** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#184 L'elenco dei file caduti si ferma a 50 senza dirlo: il verdetto tace il proprio troncamento** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#185 La prova che il cancello sa dire rosso e' una tantum: se non e' presidiata, non esiste** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#174 I seed di `rtl-banking-skills` non sono ri-eseguibili: violano i vincoli al secondo giro** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#173 Modalità «gov»: la versione parallela del loop zero-pendenze** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#181 I sette rilievi sul controllo di drift, e le correzioni entrate in main senza verifica** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#182 Due rami «recuperati» contengono lavoro mai entrato in main — e uno è il versante E2E del cluster che abbiamo chiuso** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#177 I tre revisori adversarial vivono in un workflow che sopravvive alla sessione, e i verdetti restano orfani** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#180 Sessantasei prove che nessun cancello esegue — ed è il motivo per cui una batteria è rimasta rossa senza che nessuno lo sapesse** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#179 Gli alberi dei lavoratori si fossilizzano dopo il primo merge** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#178 Il troncamento da budget non è mai stato osservato: il tetto contiene la spesa, ma non si è mai visto tagliare** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#175 Il verdetto verde di `w1` è stato dato con il cancello delle evidenze cieco** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#176 Il punto di rientro di gov esiste in una sola copia, su una sola macchina** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#172 Il clone del database su linux-pc accumula residui: il `DROP SCHEMA staging` fallisce a ogni giro** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#171 Otto vulnerabilita' aperte che nessuna voce registrava** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#170 Gli script dell'ingestione ritirata parlano ancora di uno schema che non esiste** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#168 Cancellare una persona cancella la storia delle sue approvazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#150 Ritrattare le voci del lab alla luce delle correzioni del 2026-08-06** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#229 L'eredita' fra sessioni: rilevare cio' che e' stato interrotto, e leggerlo all'avvio** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#228 Il cancello a tempo: cosa e' marcito mentre non guardavo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#227 Le competenze isolate nel grafo: 4.464 su 14.033 senza un solo arco tassonomico** · status: DONE
+- esito-S1085 (2026-08-30): **CHIUSA su tutte e cinque le fasi.** Isolate **4.464 -> 4.444** in produzione: 2 ritirate (`000368`) e 18 collocate (`000369`). Restano **10** non-ESCO isolate, ed e' l'esito giusto: sono **dichiarate una per una con la ragione**, non dimenticate
+  - **F4 — la curatela, e il reperto che la rende una curatela e non un calcolo.** Tutte e 28 hanno un embedding e le ESCO collocate ne hanno 14.003, quindi l'arco si **deriva** invece di inventarlo. Ma la misura ha smentito l'idea di applicarlo a soglia: «Gestione della liquidita' aziendale» -> «gestire il trasporto di contanti» e' **falsa a 0,823**, sopra a proposte corrette come «Erogazione prestiti» -> «gestire le domande di prestito» (0,800). **La somiglianza non ordina la correttezza**: nessuna soglia separa le buone dalle cattive, quindi la macchina propone e la decisione si prende una per una. 18 collocate con `IS_A` (verso letto dagli archi esistenti, non supposto), 10 respinte con la ragione: arco invertito (`SUSTAIN-FIN` -> green bond, `DIGITAL-PAY` -> carta di credito), materia diversa (`IFRS9` contabilita', `PSD2-OPEN` vs GDPR, `KYC-DUE` vs merito creditizio), o semplicemente falsa (`CASH-MGMT`)
+  - guardie e post-condizioni: ogni codice dell'elenco deve **risolversi** (un refuso darebbe un arco in meno in silenzio) · nessun arco riflessivo · il padre dev'essere ESCO · il grafo cresce **esattamente** degli archi scritti · e le **10 respinte devono essere rimaste tali**, altrimenti la ragione scritta nel file diventerebbe una bugia. Rollback: `staging.skill_archi_undo` (18 righe) + `staging.disfa_archi_di()`
+- avanzamento-S1085 (2026-08-30): **F3 e F5 CHIUSE con la mig `000368`; resta F4** (le 28 in uso, curatela vera). **F3** — le due non-ESCO mai usate (`CUSTOM::BANCASSUR`, `CUSTOM::FRAUD-DET`) **ritirate**, nominate una per una. La risposta non era ovvia: sono competenze *bancarie*, e I21 tiene il catalogo coerente con l'industry, quindi sembravano catalogo legittimo. A decidere e' stata la **provenienza**, misurata: vengono dall'estrazione legacy (`db/seeds/rtl-rebuild/extracted/tenant_custom_skills.csv` ← `00_extract_legacy_subset.sh`), le 23 sorelle dello stesso file qualcuno le usa, queste no — residuo dell'import senza referente, e il rubinetto e' chiuso (I12). ⚠ Il CSV **non e' versionato**, quindi emendarlo non propagherebbe nulla: la cura sta nella catena. Portate: due guardie ri-verificate all'esecuzione (non usate · ancora isolate), tre post-condizioni (i bersagli spariti · **23 CUSTOM restano** · il catalogo cala esattamente di quanto tolto), e un **rollback vero** — `staging.skill_ritirate_undo` con la riga intera e `staging.ripristina_skill_ritirata()`. 🔬 E la misura prima del `DELETE` ha trovato **2 embedding** che le referenziavano: sarebbero spariti per cascata silenziosa, lasciando un undo che rimetteva una competenza monca — passano anch'essi dal giornale e si cancellano esplicitamente
+  - **F5 — la sentinella**: `sys.v_skill_isolate_residue`, **bloccante** (zero atteso). La soglia **non** e' «zero competenze isolate»: 4.434 delle 4.464 sono ESCO con URI, cioe' la tassonomia europea che I21 tiene aperta a ogni industry — pretendere zero li' equivarrebbe a potarla. Zero e' l'atteso solo per il **residuo**: senza URI, senza un arco, e che nessuno usa
+  - ✅ **F2 CHIUSA (S1083, 2026-08-28), e l'esito è che NON SONO DERIVABILI — perché non sono isolate.** Quattro strade provate e chiuse, ognuna con la sua misura: il padre delle sorelle (**265 gruppi su 358 frammentati**, 10,9 padri medi, fino a 72 in uno solo — sarebbe una scelta arbitraria, non una derivazione) · l'albero dei gruppi (**zero** dei 6.456 archi `IS_A` esistenti lo segue) · l'URI ESCO (uuid opachi) · la fonte a monte (già misurata assente in F1). Poi la misura ha **ribaltato la domanda**: delle 4.464 «isolate», **4.383 (98,2%) hanno un gruppo, e tutte stanno in un gruppo con un padre nell'albero ESCO** — `sys_skill_groups`, 640 gruppi di cui 636 con padre, l'albero europeo intero. Non sono isolate nella tassonomia: lo sono nel **solo** grafo competenza→competenza. Scrivere i 4.332 archi «derivati» avrebbe **peggiorato** il grafo. ⏭ **F5 cambia bersaglio**: la sentinella non conta «le competenze senza archi» — una misura che spaventa senza informare — ma quelle **senza collocazione tassonomica**, né arco né gruppo: misurate **81**, lo 0,58% del catalogo, ed è l'insieme che F3 e F4 hanno già in carico
+  - ✅ **F1 FATTA (S1081, 2026-08-25), e RIBALTA il piano: la curatela umana non è su un terzo del catalogo, è su 30 righe.** Misura ri-derivata (4.464/14.033 = 31,8%, regge). Cinque specie: **4.332** ESCO in gruppi che hanno **già sorelle collegate** → l'arco si **deriva**, non si inventa (366 gruppi in comune su 386) · 51 ESCO con gruppo ma senza sorelle · 51 ESCO senza gruppo · **28 non-ESCO USATE davvero** (il catalogo bancario di RTL: AML, Basilea, IFRS9, KYC… + 5 comportamentali `COMP::`) = la curatela vera · 2 non-ESCO mai usate. **Le 4.434 ESCO non le usa NESSUNO**, né persona né posizione
+  - ⚠ tre reperti che cambiano F2/F3: **zero gemelli** (la strada «copia l'arco dall'omonimo» non esiste — misurata) · solo **1.705 `IS_A` su 6.456** hanno il padre nello stesso gruppo, quindi «padre = il gruppo» è falso · **la fonte ESCO a monte non è più consultabile come tassonomia di competenze** (`reference_sync` non ha tabelle di skill; le `sys_esco_*` sono occupazioni): F2 lavora su ciò che il DB già contiene
+  - priority: P2 · effort: **da ri-stimare al ribasso** (era «~2-3 sessioni, curatela su un terzo del catalogo»: F1 mostra 4.332 derivabili a macchina + 30 righe di curatela) · doc: `.programmi/227-competenze-isolate-nel-grafo.md`
+  - ~~nasce-da: **#222** F6-07, che dichiarava «da fare, con un piano proprio», e quel piano non era mai stato creato: il residuo era rimasto orfano per tre giorni~~ — **e' la genealogia di questa voce, non un residuo aperto: #227 e' nata per raccoglierlo e chiudendosi l'ha raccolto (S1085)**
+  - misura-2026-08-24 (ri-derivata, non ricopiata): **14.033** competenze · **18.420** archi · **4.464 isolate** = **31,8%** del catalogo senza alcun arco, ne' in su ne' in giu'. `#222` diceva 4.467/14.036; la differenza sono le 3 fuse in S1077 (mig `000351`). Il dossier forense ne stimava **84**: sottostima di due ordini di grandezza
+  - perche-conta: il grafo e' il substrato di somiglianza, scostamento requisito/persona, percorsi formativi e successione. Una competenza senza archi **esiste ma non partecipa** — e nessuna misura di integrita' la segnala, perche' non e' rotto niente. Un terzo del catalogo cosi' non e' un difetto di integrita': e' una capacita' dichiarata che su un terzo dei casi non funziona
+  - ⚠ nessuna sentinella conta oggi le isolate: il numero e' potuto crescere fino a un terzo del catalogo **in silenzio**. F5 la crea, e va dichiarata **informativa** (una vista `sys.v_*` nuova diventa automaticamente una sentinella che pretende zero righe, e qui zero non e' l'atteso)
+  - chiuso-quando: le quattro specie di F1 hanno una destinazione eseguita, il conteggio e' sceso al valore che F1 dichiara raggiungibile (**non a zero** — alcune restano, con la ragione scritta), e una sentinella lo sorveglia
+
+- **#238 `verifica-deploy` chiama guasto un clone in corso: i servizi del gemello sono spenti di proposito** · status: DONE
+- esito-S1085 (2026-08-30): **CHIUSA.** `scripts/verifica-deploy.sh` chiede lo stato di `heuresys-advanced-clonedb.service` **nello stesso `ssh`** che gia' leggeva api e web (nessun giro in piu'), e legge `CLONE_ARM_UNIT` — la **stessa** variabile di `verifica-cloni.sh`, cosi' i due strumenti non possono dire cose diverse dello stesso fatto. Servizi giu' **con** clone in corso -> `IN-VOLO`; **senza** -> `DISALLINEATO`. I due guasti veri (servizio giu', produzione muta) restano **davanti** al ramo benigno: un guasto vince sempre. Se il terzo campo non arriva (host giu', systemd muto) l'allarme **non** viene nascosto.
+  - prove-che-potevano-fallire (eseguite, a parita' di stato dei servizi il verdetto e' opposto): **neutra** = sistema sano -> `DEPLOYATO` exit 0 · **A** = api ferma sul gemello, nessun clone -> `DISALLINEATO — servizi non attivi su: linux-pc` exit **1** · **B** = *stessa* api ferma, unita' di clone attiva (`CLONE_ARM_UNIT=ssh.service`) -> `IN-VOLO — rifacimento del clone in corso su: linux-pc` exit **0**, riga host `servizi inactive/active - clone in corso`. Api riaccesa, giro finale `DEPLOYATO`
+  - ⚠ nato-dal-boot-di-S1085: il rendiconto di S1084 portava `verifica-deploy: fallito`, ma il deploy era sano (`DEPLOYATO`, 2 host su `bd944a4e`, CI 4/4 verdi, produzione 200): il rosso **era** questa voce
+  - nasce-da: la chiusura di S1084 (2026-08-29), primo giro vero dell'armamento del clone (`#236` F2). Trovato eseguendo, non ragionando
+  - misurato: `verifica-deploy.sh` ha dato **`DISALLINEATO — servizi non attivi su: linux-pc`** (`inactive/inactive`). Non era un guasto: stava girando `heuresys-advanced-clonedb.service`, che ferma api e web **di proposito** prima del ripristino e li riaccende con `ExecStopPost`. Prova: clone concluso `16:02:37` con `Result=success`, API ripartita `16:02:41` — quattro secondi dopo. Rieseguita la lettura: `deploy IN-VOLO · clone FRESCO · ecosistema ALLINEATO`, exit 0
+  - perche-conta: e' **la specie di falso allarme che S1084 ha passato la giornata a togliere** (il rendiconto delle chiusure, `settings.json` nell'ecosistema, `DISALLINEATO` sugli stamp). Un guasto dichiarato su una condizione transitoria e **voluta** insegna a non guardare il verdetto — e questo verdetto e' l'ultimo atto di ogni chiusura, quindi e' il posto peggiore dove metterlo
+  - ⚠ e diventera' piu' frequente, non meno: da `#236` F2 la chiusura **arma** il clone, quindi la finestra in cui i servizi del gemello sono giu' cade proprio dove `verifica-deploy` guarda
+  - cura-proposta (da verificare, non ancora decisa): `verifica-deploy.sh` chiede a `systemctl is-active heuresys-advanced-clonedb.service` **prima** di giudicare i servizi, e se un clone e' in corso dichiara `IN-VOLO` invece di `DISALLINEATO`. La logica esiste gia' in `verifica-cloni.sh` (verdetto `IN-CORSO`), quindi non c'e' un criterio nuovo da inventare: c'e' da non far dire a due strumenti cose diverse sullo stesso fatto
+  - prova-che-deve-poter-fallire: armare un clone e leggere il verdetto **mentre gira** — deve dire `IN-VOLO`, non `DISALLINEATO`; e a clone finito con un servizio davvero giu' deve tornare `DISALLINEATO`
+  - priority: P2 · effort: ~30min (una domanda in piu' prima del giudizio, piu' le due prove)
+
+- **#237 La chiusura costa un quarto di finestra, e non si sa perche'** · status: DONE
+- esito-S1084: **CHIUSA su tutte e tre le fasi, e la premessa della voce era falsa.** F1: la chiusura pura costa **28.352 token = 2,8%** di 1M (media su **14** chiusure), non il 25%; il 25% veniva dal delta del guardiano, che sommava il lavoro fatto in mezzo. Ripartizione: **lettura di stato 25,2%**, scrittura 23,0%, altri comandi 13,9%, cancelli 11,7%, commit/push 6,9%, propagazione 5,9%, **stile di scrittura 4,4%** (l'ipotesi piu' scomoda, e la piu' piccola). Strumento `docs/kb/tools/costo_chiusura.py`, --selftest 15 casi; tre difetti trovati dalla prova di falsificabilita' (un messaggio non e' un record; categoria residua al 43%; stessa chiusura contata due volte). F2: il register era per l'**80%** cronaca chiusa (193 item terminali su 223) -> `compatta_register.py` archivia i blocchi e ne lascia la riga-indice: **911.609 -> 321.121 byte, -65%**, menu identico, lint invariato; la post-condizione **ha bloccato la prima scrittura** su 1 item di 193. F3: `peso_stato.py` nel boot, **una** soglia motivata (cronaca terminale > 25%), **vista rossa** sul register di HEAD~1 (80,8%) e verde oggi (16%). ⚠ **Il guadagno di F2 va CONFERMATO sulla chiusura successiva** con `costo_chiusura.py -n 14`: finche' quella misura non c'e', e' sceso il peso, non il costo. Se non scende, la seconda voce e' `SOT_STATE.md` (432.938 byte, senza cura)
+  - nasce-da: Enzo, 2026-08-29 a fine S1083 — *«l'handoff e' un collo di bottiglia che non abbiamo mai risolto adeguatamente... una chiusura sessione non puo' e non deve consumare il 25% di una finestra... e' urgente trovare soluzioni adeguate, ma non per tentativi ed errori»*
+  - misurato-2026-08-29: `SOT_BACKLOG` **926.928 byte (~232k token, 23% di una finestra da 1M)** · `SOT_STATE` 432.938 (~11%) · `DEBT_REGISTER` 136.170 (~3%). I tre grandi valgono **~37%** se letti per intero. `SOT_BACKLOG` ha **333 byte di riga media**, cresce di ~5 righe a chiusura e **non cala mai**: 2.730 → 2.785 in dieci chiusure, append-only di fatto, 219 item di cui molti terminali
+  - ⚠ NON misurato, ed e' il primo buco: **la quota della chiusura pura**. Il delta del guardiano fra l'invocazione della skill e la fine di S1083 e' **192.430 token (19,2%)**, ma include `#236` F1 e la correzione CI, che sono lavoro vero
+  - ⚠⚠ **il vincolo di metodo viene prima della cura**: F1 non tocca niente, misura. Ogni proposta formulata prima di quella misura e' una scommessa — cioe' i «tentativi ed errori» che Enzo ha escluso
+  - tre-ipotesi-da-falsificare: ① il **peso** dello stato (edit mirati su file enormi costano comunque, e la crescita e' illimitata) · ② la **ripetizione** (quattro file riscritti, tre artefatti rigenerati, lint due volte, propagazione, verifica: quante servono a OGNI chiusura?) · ③ **lo stile di scrittura di Claude** — commenti da 60 righe, messaggi di commit da 40. Hanno un valore reale e misurabile (in S1083 hanno impedito almeno tre volte di ricominciare un'indagine gia' fatta), ma nessuno ha mai pesato il costo contro quel valore. **E' l'ipotesi piu' scomoda, quindi si misura per prima**
+  - priority: P1 · effort: ~1 sessione (F1 sola ~40k) · doc: `.programmi/237-chiusura-troppo-cara.md`
+  - chiuso-quando: si sa dove va il costo, la voce piu' cara e' scesa **in modo misurato**, e un cancello impedisce che risalga in silenzio
+
+- **#236 I lavori remoti si armano, non si appendono alla sessione** · status: DONE
+- esito-S1084: **CHIUSA su tutte e quattro le fasi.** F2: non e' nato il timer previsto dal piano — sul gemello c'era gia' `heuresys-advanced-clonedb.service` con `OnFailure`, `Persistent=true` e lo stop/riavvio di api+web; mancava **l'innesco su richiesta**. `scripts/arma-clone.sh` fa `systemctl start --no-block` e ritorna: il clone diventa figlio di **systemd**, non dell'ssh. Provato con `pkill -9` su **ogni ssh** a meta' corsa -> `Result=success`, 71 s, clone intatto (164/315/45/14.033), nessun residuo, servizi riaccesi. F3: `scripts/verifica-cloni.sh` legge i tre lavori con tre vocabolari chiusi (il deploy **delegato** a `verifica-deploy.sh`); host spento -> `NON-VERIFICATO` exit 2, mai un verde. Evitato un falso allarme perpetuo: `settings.json` e' riscritto dal runtime a ogni sessione, quindi e' fuori dal criterio di freschezza e il limite e' dichiarato. F4: l'ecosistema **non e' armabile** e lo si dichiara (l'orchestratore e il payload stanno su Windows); si e' tolto il **danno silenzioso** con un marcatore scritto prima del wipe e tolto a corsa conclusa -> verdetto `INTERROTTO`. L'interruzione vera ha scoperto due difetti: `--delta` avrebbe **saltato** l'host rotto, e `DISALLINEATO` era un falso allarme strutturale (stamp diversi non implicano contenuto diverso). Batteria **248 ok / 0**
+  - nasce-da: S1083 (2026-08-28), domanda di Enzo in chiusura — *«mi confermi che le clonazioni sono processi indipendenti che arrivano a conclusione anche se chiudo la sessione?»*. Risposta misurata: **no**, e una delle tre è distruttiva
+  - misura-2026-08-28 (letta nel codice): `close-propagate.sh:258` lancia il clone con `ssh -o BatchMode=yes linux-pc "… bash scripts/clone-vm-db.sh"` — **nessun `nohup`, `setsid` o `&`**: il processo gira sul gemello ma è figlio di un `ssh` che vive nella sessione CLI, quindi un `SIGHUP` lo raggiunge. E `clone-vm-db.sh:148` fa `DROP SCHEMA IF EXISTS … CASCADE` **in place** prima del `pg_restore`: fra il drop e la fine c'è una finestra di **minuti** (oggi misurata: `193 altri oggetti` in cascata) in cui il clone **non esiste**. Chiudere lì non lo lascia indietro, lo lascia **rotto** — ed è il database su cui girano la CI e la verifica lunga di chiusura
+  - ⚠ lo-script-conosce-meta-del-problema: le righe 154-160 portano già una guardia per «se `ssh`/`pg_dump` muore a metà, `pg_restore` ha già eseguito…», con un `FATAL`. Intercetta la morte del **lato sinistro** della pipe; non può intercettare la morte di **entrambi i lati insieme**, che è ciò che fa la chiusura della sessione
+  - ✅ cosa-invece-e-davvero-armato: **solo il deploy**. `heuresys-advanced-deploy-watch.timer` è un timer systemd **sulla VM**, non figlio di nessuna sessione — ed è il motivo per cui alla chiusura si dice «armato» e mai «deployato». Il comando che lo legge è `bash scripts/verifica-deploy.sh`. `align-clones` e `clone-vm-db` **non** hanno questo trattamento
+  - ⭐ il-modello-da-estendere-esiste-gia (`#165`): armamento **atomico** (si scrive un riferimento, non si esegue) · esecuzione fatta dalla **macchina** (timer systemd) · fallimento visibile da sé (`OnFailure=heuresys-unit-failure@%n.service`) · `Persistent=true` per recuperare l'occorrenza persa dopo uno spegnimento
+  - ⚠ **F1 vale anche da sola**: lo swap atomico (ripristino in `sys_new` + `ALTER SCHEMA … RENAME` in una transazione) toglie il rischio peggiore **senza** dipendere dall'armamento — un'interruzione lascerebbe un lavoro da rifare, non uno stato rotto
+  - priority: P1 · effort: ~1 sessione · doc: `.programmi/236-lavori-remoti-armati-non-appesi.md`
+  - chiuso-quando: alla domanda «posso chiudere mentre queste attività procedono?» si risponde **sì** per deploy, clone ed ecosistema, e la risposta si **verifica con un comando** (`verifica-cloni.sh`) invece di ricordarla
+
+- **#235 Le risposte ai sondaggi di clima si leggono fuori dalla catena organizzativa** · status: DONE
+- esito-S1085 (2026-08-30): **CHIUSA, con prova live su due persone reali.** `surveys` e' `PERSONAL` in `RESOURCE_DATA_CLASS`, le 6 rotte read di `/v1/surveys/*` e le 4 di `/v1/engagement/*` dichiarano `orgGate`, e il servizio applica l'asse organizzativo dove serve. Le rotte NON sono tutte uguali, ed e' il punto della voce: **templates → `catalog`** (le domande sono catalogo; l'unica colonna di persona e' `template_created_by_user_id`, cioe' l'autore) · **campagne → `service`** (`survey_audience_ids` e' la platea: oggi vuota su tutte e 6, e proprio per questo si filtra invece di dichiararla catalogo — una misura che puo' cambiare non regge una dichiarazione) · **risposte → `service`** (lista filtrata per allow-list, singola risposta gated con `canReadOrgTarget`, e **404 non 403**: un 403 confermerebbe che quella persona ha risposto, cioe' meta' del dato da proteggere) · **results + pulse → `aggregate`**
+  - ⚠⚠ **la misura ha trovato un secondo giacimento, dieci volte piu' grande di quello censito.** La voce parlava di 862 risposte in `sys_engagement_survey_responses`; il modulo `/v1/engagement/*` usa **tabelle diverse** — `sys_survey_responses` **8.288 righe, tutte con identita'**, e `sys_pulse_checks` **2.834, tutte con identita'**. Due famiglie parallele, e la voce ne conosceva una sola
+  - ⭐ **k-anonimato sugli aggregati**: `aggregate` non e' anonimo per il fatto di essere un aggregato — con una sola risposta la media E' quella risposta. Introdotto `K_ANONIMATO_MINIMO = 5`: sotto la soglia il **conteggio resta** (sapere che una domanda ha avuto 2 risposte non dice quali) e la **media viene soppressa**. Misurato prima di scegliere il valore: delle 61 domande con almeno una risposta **nessuna** ne ha meno di 5, quindi oggi non cambia un solo numero visibile — serve a impedire che il giorno in cui cambiera' nessuno se ne accorga
+  - migrazione `000366` (prova generale VERDE, poi produzione in **10 s** sulla VM): la voce di menu `engagement` dichiara `PERSONAL` **non aperta al tenant** — l'esenzione della `000317` e' per la rubrica aziendale, e chi ha detto cosa sul clima e' l'opposto. Misurato prima: nessuno dei 18 titolari di `surveys:read` perde la voce (in M1 `PERSONAL` e' `none` nel solo dominio `delegation`)
+  - 🔬 **la prova generale ha intercettato un difetto strutturale**: la `000326` fissava il **totale** delle dichiarazioni di classe (41), cioe' cristallizzava una misura che cresce a ogni voce nuova. Il totale e' passato alla `000366` come il protocollo di quel file prescrive, e al suo posto la `000326` ora verifica le **proprie** 15 righe — un controllo che guarda solo cio' che ha scritto non invecchia
+  - prova-live-che-poteva-fallire (`apps/api/scripts/prova-235-risposte-di-clima.mts`, eseguita **sul gemello** perche' da Windows l'API non si avvia — il pool va in timeout attraverso il tunnel, e la VM era scarica: `loadavg 0.05`, `aide` fermo): sondaggio da 150 risposte · **mandato HR** (`federica.marchetti@rtl-bank.org`, TENANT_ADMIN) → **150 su 150**, I20 intatto · **capo di catena** (`paolo.caputo@rtl-bank.org`, MANAGER) → **18 risposte, catena di 19 persone, 0 fuori catena**. Prima della cura ne avrebbe viste 150. **5 criteri su 5**, e tre di essi sono scritti per fallire (se il manager vedesse quanto l'HR il gate non filtra; se l'HR vedesse meno, avrei rotto un uso legittimo; se il manager vedesse zero, sarebbe una porta murata)
+  - test: `surveys` · `engagement` · `me-surveys` · `domains-f6` · `domains-f7` — **5 file verdi** (il primo giro di `domains-f7` sul gemello era rosso perche' il clone non aveva ancora la `000366`)
+  - nasce-da: S1083 (2026-08-28), lavorando su `#214` F6. Il criterio dei perimetri dell'agente trattava `surveys` come «neutra» perché non mappata in `data-classes.ts`, e la riga che lo dichiarava era **falsa**
+  - misura-2026-08-28: `sys_engagement_survey_responses` **862 righe su 862** con `response_subject_user_id` · `sys_survey_assignments` **948 su 948** con `survey_assignment_user_id`. **Nessuna risposta anonima, non una.** Oggi, in produzione, chiunque abbia `surveys:read` legge *chi ha detto cosa sul clima aziendale*, anche di persone fuori dalla propria catena — perché senza classificazione la resource è gated dal solo RBAC più il tenant
+  - ⛔ perche-non-e-stata-curata-subito: classificarla sensibile **non è una riga**. Fa scattare `domains-f7` con `ORG_GATE_MISSING: 21 read route(s)`, e la scelta fra `orgGate: "catalog"` e `orgGate: "service"` **cambia chi vede le risposte in produzione** — i template sono catalogo, le risposte no. Un cambiamento del genere pretende la dimostrazione **live** che la Definition of Done impone: login reale, e la prova che chi deve vedere continua a vedere. Farlo in coda a una sessione, senza quella prova, sarebbe esattamente ciò che quella regola vieta
+  - ⚠ stato-attuale-del-codice: la riga in `RESOURCE_SENZA_DATI_DI_PERSONA` **resta** (il cancello di `#99` F7 pretende che nessuna resource passi in silenzio, e non gli si mente per farlo tacere) — ma **non è più un silenzio**: porta accanto la misura che la smentisce e il puntatore a questa voce. Chi la legge vede un **debito dichiarato**, non un'affermazione
+  - ⚠ non-confondere-con-`engagement_feedback`: quella è anonima **per costruzione** — `sys_engagement_feedback` non ha alcuna colonna che identifichi l'autore, solo il revisore — e la sua dichiarazione è vera e ora misurata
+  - priority: P1 · effort: ~1 sessione (21 rotte da annotare + prova live con due profili) · doc: `apps/api/src/lib/scope/data-classes.ts`
+  - chiuso-quando: `surveys` è classificata, le 21 rotte dichiarano il proprio org-gate, `domains-f7` è verde, e una dimostrazione live con login reale prova che chi deve vedere vede ancora e chi non deve non vede più
+
+- **#234 Gli otto rossi di `verifica_incrociata`, uno per uno: cura o riclassificazione, mai il silenzio** · status: DONE
+- esito-S1085 (2026-08-30): **CHIUSA, e F2 non aveva piu' bersaglio: lo si e' saputo misurando, non leggendo.** Il register e il programma dicevano «cinque rossi rimasti» (`X3c`, `X5d`, `X6a`, `X6b`, `X6c`); la corsa di oggi sul database di **produzione** da' **`0 verifiche con difetti, 7 misure informative, 27 pulite`**, exit **4** (due verifiche cieche dichiarate — `X5c` e `X7a` — perche' cieco non e' marcio ma non e' un verde). I cinque erano gia' stati consumati in S1083; lo stato scritto era indietro rispetto ai fatti
+  - **F3 soddisfatta**: `verifica_incrociata` esce **4** (uno dei due valori ammessi) e `check_marciume.py` esce **0** — «niente e' marcito»
+  - ⚠⚠ **e per arrivarci sono caduti due falsi allarmi, nessuno dei quali era marciume.** `check_pagine_orfane` dichiarava «il menu non e' interrogabile (database irraggiungibile)» e `verifica_incrociata` «NON MISURABILE — oltre 240s»: **il database era perfettamente raggiungibile**. Misurato: una `SELECT count(*)` su 74 righe impiegava **74 secondi** con la VM a `loadavg 0.05`. Il collo di bottiglia era il **tunnel SSH degradato** dopo una sessione intensa di `scp` e comandi remoti. Ricreato il tunnel: la **stessa query, 1,48 s** — un fattore ~50. La cura di quei due «NON MISURABILE» non era alzare i timeout (avrebbe nascosto il difetto): era ricreare il tunnel
+  - il terzo rosso era l'**atlante superato** dai cambiamenti di `#235` di oggi (7 sorgenti cambiati dopo `ec2d4eb4`) — `check_concetti_agente` si rifiuta di misurare il passato, e ha ragione. Rigenerato: **98 moduli API · 605 route · 120 pagine web · 108 schemi shared · 287 tabelle DB**
+  - nasce-da: S1081 — la batteria del cancello a tempo mostrava **solo l'ultima riga** dello stdout di ogni strumento, e dietro c'erano otto difetti accesi da sempre, emersi uno alla volta man mano che si curava quello visibile (regola ⑥ del metodo, tre volte nella stessa sessione: X9c → X8a → X7a → gli otto). Il display è corretto (ora mostra la riga ESITO); gli otto restano e sono di questa voce
+  - misura-2026-08-25 (S1081, da rieseguire alla presa in carico): `X3b` retribuzione anomala vs pari livello **5/160** · `X3c` contratto attivo senza busta recente **2/160** · `X4a` requisito di competenza non coperto **667/1434** · `X5d` posizione ricoperta senza requisiti formativi **8/161** · `X6a` OKR su reparto inesistente **5/9** · `X6b` KPI assegnato non previsto dalla posizione **42/78** · `X6c` obiettivo senza titolare **2/2206** · `X6d` catalogo KPI copre una frazione delle posizioni **1**
+  - ⚠ sospetto-da-verificare-per-primo: alcune sono **misure di business classificate DIFETTO** — `X4a` (un'organizzazione reale HA gap di competenze: è ciò che #227 e il grafo misurano), `X3b` (statistica, non incoerenza), `X6b`/`X6d` (copertura). Se il sospetto regge, la cura è `tipo="misura"` con la ragione scritta nel check — è correggere lo strumento, non silenziarlo. Le altre (`X6a` reparti inesistenti, `X6c` senza titolare, `X3c`, `X5d`) odorano di marciume vero: per ognuna leggi il file che crea l'oggetto, poi misura → causa → cura con le quattro cose di `db-migrations.md`
+  - ✅ **F2 quasi chiusa (S1082, 2026-08-27): da 5 difetti a 1**, con quattro decisioni di Enzo prese su istruttoria. `X6a` **CHIUSO** (mig. `000357`, applicata e verificata: 2 OKR estranei al dominio bancario — «Supply Chain», «Sales» — rimossi col criterio della `000235` che ne aveva già tolti 3 alimentari; 3 riallineati al **codice** dell'unità, non al nome, perché sopravviva alle rinomine). `X6b` **→ misura**: Enzo ha sciolto il nodo che F1 lasciò aperto — *«dovrebbero seguire ENTRAMBE le cose, perché obiettivi di incarico e obiettivi personali possono coesistere anche in modo autonomo e hanno entrambe grande significatività»* — quindi zero non è l'atteso. `X5d` **eccezione per le apicali**, legata al **livello** e non a un elenco di nomi (causa misurata: i requisiti vennero importati da `job_title_courses` mappando per ruolo, e i ruoli apicali nel legacy non avevano corsi; il rubinetto è chiuso). `X6c` **storico dichiarato vuoto**, escluso per **data**: nessuna fonte porta «chi ha assegnato», e ricostruirlo sarebbe fabbricare un dato
+  - ⚠ **UNA DERIVAZIONE RITIRATA, e la lezione vale oltre questa voce.** Per l'ottava posizione di `X5d` — **Risk Manager**, non apicale — la mig. `000358` faceva ereditare i requisiti obbligatori dai pari della stessa unità (`DIR-RISKM`: Analista Rischio 26, Responsabile Direzione RM 9). Prova generale verde, applicata in produzione, `X5d` a zero. **E `X5a`, che era a zero, è passato a 8**: dando requisiti a quella posizione l'ho fatta entrare nel raggio di un controllo che prima la ignorava, e i percorsi realmente assegnati non coincidono coi 5 derivati. **La post-condizione proteggeva ciò che non doveva cambiare DENTRO la firma curata, non le altre della batteria** — una scrittura che cambia l'insieme su cui un altro check lavora può accenderlo. Rollback dichiarato eseguito (5 requisiti tolti), stato riportato esattamente com'era, file rimosso da tutte e tre le macchine (355 ovunque). **Il Risk Manager torna aperto**, con l'istruttoria migliorata: la derivazione è possibile ma **non è innocua**
+  - ✅ **F2 CHIUSA (S1083, 2026-08-28): da 2 difetti a ZERO.** `X3c` — mig. `000362`: le buste del tenant di piattaforma si derivano dal **contratto diviso TREDICI**, non dalla serie della persona, e a imporlo è stata la prova generale: la prima stesura proseguiva la serie ed è uscita rossa perché esiste già `v_payslip_contract_mismatch` (mig. `000296`) che pretende `lordo × 13 = annuo` entro 0,50. Lo scalino su una serie esistente è la conseguenza corretta, non un effetto collaterale. `X5d` — mig. `000361`, **secondo tentativo dopo il ritiro di S1082 e questa volta regge**: copre **tutte e 29** le posizioni della famiglia rischio (non la sola riga rossa: le altre sono vacanti, curarne una lasciava la mina innescata). ⚠ Ha **riacceso `X5a` di nuovo** — ma stavolta la causa è stata letta invece di essere subita: chi ricopre quella posizione ha svolto anche Basel III/IV, AML, GDPR, Cybersecurity, Sicurezza sul Lavoro, D&I, cioè compliance bancaria che nessuna inferenza sui nomi dei corsi avrebbe prodotto. Il criterio non era sbagliato, era **incompleto** (ha davvero tutti e sei i percorsi del rischio). Terzo blocco con regola meccanica — la posizione riconosce anche i percorsi che chi la ricopre ha assegnati **e che almeno un'altra posizione già pretende**, dove la seconda condizione è la guardia contro l'arbitrio. Esito live: `0 verifiche con difetti, 7 misure informative, 27 pulite`, e `check_marciume` dichiara «niente è marcito»
+  - ⏭ **residuo: F3**, l'ultima fase della voce
+  - conseguenza-dichiarata: **finché questa voce non consuma gli otto, ogni chiusura porta `marciume: fallito`** — ed è giusto così: il rosso è posseduto, non spento. La riga del cancello ora dice «8 verifiche con difetti», che è la verità
+  - priority: P2 · effort: ~1-2 sessioni (otto firme, alcune probabilmente riclassificazioni da mezz'ora) · doc: `docs/kb/tools/verifica_incrociata.py`
+  - chiuso-quando: `verifica_incrociata` esce 0 o 4 (cieco dichiarato), e ogni riclassificazione porta la propria ragione scritta accanto al check
+
+- **#218 I residui del legacy senza referente locale: analizzarli tutti, e risolverli uno per uno** · status: FATTO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#156 Perimetri dell'agente: il resolver dall'atlante, poi l'adozione su ogni perimetro con valore** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#157 Le domande di aggregazione sono FUORI dallo scopo del catalogo generico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#161 I 113 piani di carriera non dicono verso quale posizione: l'obiettivo è vuoto su tutte le righe** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#162 Il seed della carriera non è più a delta zero: rieseguirlo scrive 137 righe e ne rompe un check** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#167 Cinque check della custodia RTL erano nascosti dietro `C6c`: review, buste, premi e preposti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#166 L'ambiente non è ricostruibile dalle sole migrazioni: la catena si ferma al 49° file su un database vuoto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#165 La chiusura di sessione dura un'ora perché aspetta la CI: sganciare il deploy e smettere di scoprire in CI ciò che si vede in locale** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#164 Igienizzare il database dal legacy: ritirare l'adattamento brownfield, conservare la tracciabilità** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#163 La storia di un'unità si ferma a un nome che l'unità non porta più, e il modello ammette un solo riordino** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#160 I bacini di successione puntano a mestieri che i candidati non fanno: 27 casi, e nessuno li vedeva** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#158 `deriveUserProfiles` riscrive sempre tutti i 156 profili: l'unico corpus senza salto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#155 I percorsi di carriera sono rimasti indietro dalla ricostruzione dell'organigramma: 207 su 252 puntano a posizioni morte** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#154 Deploy del codice su linux-pc non eseguito: il cancello CI ha retto durante il disservizio GitHub** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#153 La custodia settimanale della storia RTL fallisce da tre giorni e nessuno se n'era accorto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#152 Le suite MFA lasciano fattori residui in produzione: 32 accumulati in 10 giorni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#151 La sentinella dell'organigramma segnala come violazione ogni unita' ritirata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#144 Il settore di Heuresys System e' deciso: ATECO 2025 70.20** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#145 Ordine: #140 prima della revoca dei permessi della parte 1 del Tenant Builder** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#129 Canale lab-canonica: gli id sono confrontati per sottostringa** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#130 Il cancello di verifica butta l'output delle suite** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#131 Tenant Builder P1 — il fascicolo di configurazione di un'azienda** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#132 Tenant Builder P2a — la ricerca che genera il modello del fascicolo** · status: DONE
+- ✅✅✅ **F7 CHIUSA — LE DUE PROVE DI MERITO SONO VERDI (2026-08-31, in produzione).** Tre criteri su tre, e il risultato dimostra il punto invece di limitarsi a passare:
+  - **societa' di consulenza** (`PROVA-F7-ALFA`, ATECO **70.20** · fascia M · B2B_SERVICES · IT · 120 addetti · vigilanza LOW), corsa `2b687141` → **8 proposte**: `istat.it` · `registroimprese.it` · `cnel.it` · `normattiva.it` · `lavoro.gov.it` · `ispettorato.gov.it` · `uni.com` · **`assoconsult.org`** (l'associazione di categoria della consulenza di management)
+  - **RTL Bank**, corsa `fa34bf04` → **5 proposte**, tutte marcate `64.19`: **`bancaditalia.it`** · **`consob.it`** · `istat.it` · `cnel.it` · `eur-lex.europa.eu`
+  - **in comune: 0.** L'archetipo bancario non viene ripetuto: alla banca propone la banca centrale e la Consob, alla consulenza la sua associazione di categoria. E la prova B impedisce la scorciatoia — due insiemi disgiunti non dimostrerebbero nulla se nessuno dei due fosse pertinente
+  - ⚠⚠ **DIFETTO VERO TROVATO DALLA PROVA** — raccolto-in: #239 —, e non e' del mio script: la guardia §4.5 deriva i termini riservati dal **nome del cliente** e vieta le domande che lo nominino. Un fascicolo chiamato «…consulenza…» rende riservata la parola «consulenza», e la domanda che il motore genera sul settore la contiene **per forza** → `RESEARCH_QUERY_LEAKS_CLIENT`, e la ricerca **non parte mai**. Colpisce qualunque azienda vera che si chiami come il proprio settore (una «Consulenza Lombarda», una «Banca Popolare»). Aggirato qui con un nome neutro; **la cura vera resta da fare** — registrata come voce nuova
+  - tre altri rifiuti incontrati, e tutti e tre **il sistema aveva ragione**: `422 RESEARCH_PARAMETERS_MISSING` (un fascicolo senza carta d'identita' non si cerca: indovinare il settore sarebbe proprio l'archetipo) · `422 BLUEPRINT_SIZE_BAND_MISMATCH` (fascia XL con 120 addetti: coerenza verificata) · `422 RESEARCH_NO_APPROVED_SOURCES` (i domini di contenuto pretendono una fonte approvata **per quel fascicolo**, e le fonti non sono globali)
+  - ⚠ **artefatti lasciati in produzione, dichiarati**: i fascicoli **`PROVA-F7-CONSULENZA`** (vuoto, nome che inquina la guardia — da rimuovere) e **`PROVA-F7-ALFA`** (con carta d'identita' e due corse: e' la prova, si tiene finche' serve da riferimento)
+- ✅✅ **E POI IN PRODUZIONE (2026-08-31), che e' la dimostrazione che la Definition of Done chiede.** Corsa `afc4bd7a-8422-4fef-b85e-c20f4c2ba401` sul fascicolo `RTL-BANK-CONFIG` v1, dominio `research_sources`, con login reale di `piattaforma@collaudo.invalid`: **7 proposte, tutte `PASSED`, tutte e 7 con almeno un'evidenza con impronta**. Tre criteri su tre
+  - il blocco che restava era il login di quell'utenza, riparato **senza toccare nessuno**: `--solo=` nel provisioning, **3 utenze esaminate, 3 credenziali, 3 fattori**. Verificato dopo: l'utenza di collaudo entra, e `federica.marchetti@rtl-bank.org` — **non toccata** — continua a entrare
+  - i due processi (fornitore e API di prova) sono stati spenti a lavoro finito e le parole d'ordine cancellate: i servizi di produzione non sono mai stati riavviati
+- ✅ **CORSA VERA ESEGUITA E VERDE (2026-08-31), appena Enzo ha fatto il `claude login`.** Corsa `145ccdb4-7977-4058-8f5b-b60106927041` sul fascicolo `RTL-BANK-CONFIG` v1, dominio `research_sources`: **5 proposte, tutte `PASSED`, tutte e 5 con almeno un'evidenza con impronta**. I tre criteri della prova sono verdi — il fornitore risponde, la corsa produce (zero non sarebbe un successo), e ogni proposta porta le sue fonti
+  - 🔬 **il terzo criterio era rosso per un mio errore, non del prodotto**: leggevo `fonti` mentre lo schema dice `evidenze`. Il motore respinge le proposte senza fonti (`SOURCES_PRESENT`), quindi «5 su 5 PASSED con 0 fonti» era una contraddizione che smentiva da sola la mia lettura. **Quarto nome di campo indovinato invece che letto** in questa voce (`codice` invece di `chiave`, `blueprintId` invece di `tenantBlueprintId`, una rotta `/versions` che non esiste, e ora `fonti`): il metodo giusto e' aprire lo schema, e costa meno
+  - lo strumento ora sa **rileggere** una corsa gia' fatta (`CORSA_ID=...`): verificare un nome di campo non deve costare un'altra corsa, che apre pagine vere e fa lavorare il modello
+  - ⏭ **cosa resta di F7**: le due prove di merito — un'azienda di **settore diverso** (ATECO 70.20: se ne esce una banca, l'archetipo e' sparito solo di nome) e RTL Bank come metro di qualita'. E la corsa va rifatta **in produzione**, dove pero' il login dell'utenza di collaudo e' ancora da sistemare (vedi sotto)
+- ⭐ **RETTIFICA-S1085 (2026-08-31), e cambia la natura del blocco: NON serve nessuna credenziale di un fornitore.** Verificato nel codice invece che nel documento: il «fornitore di proposte» **e' un componente del progetto**, `apps/agent-gateway` (`POST /research/propose`, header `x-research-token`, porta 8790). `RESEARCH_GATEWAY_URL` e' l'indirizzo di casa nostra e `RESEARCH_GATEWAY_TOKEN` una parola d'ordine condivisa fra API e gateway: **la si genera, non la si procura**. Configurata e provata in questa sessione, senza scriverla in nessun `.env` — passata solo nell'ambiente dei due processi
+  - **la catena FUNZIONA end-to-end, misurata sul gemello**: login reale (`piattaforma@collaudo.invalid`) · **6 domini ricercabili** (`research_sources`, `organization_units`, `positions`, `skills`, `kpis`, `business_processes`) · fascicolo `RTL-BANK-CONFIG` **v1 APPROVED** · la corsa parte e l'API interroga il fornitore. Casca **all'ultimo anello**
+  - ⛔ **IL BLOCCO VERO, e non era quello scritto**: il fornitore risponde *«Failed to authenticate: OAuth session expired and could not be refreshed»*. Il gateway fa lavorare Claude sull'abbonamento (`AGENT_GATEWAY_SUBSCRIPTION_AUTH=1`) e **la sessione sul `linux-pc` e' scaduta** — cioe' e' **esattamente `#86`**, gia' a menu come voce separata e mai collegata a questa. Un `claude login` sul gemello, cinque minuti, sblocca `#132` F7 e con lei `#198` e `#205`
+  - ⚠ **e in produzione il blocco e' un altro, piu' delicato**: sulla VM la sessione Claude e' **valida** (provata: `claude -p` risponde), ma il login di `piattaforma@collaudo.invalid` da' `LOGIN_INVALID`. La chiave madre e' **identica** sulle tre macchine (stessa impronta `b0d0ed55`), quindi non e' quella: le credenziali in banca dati non corrispondono alla derivazione. Sul **clone** l'ho riallineato con `pnpm db:provision-access --realign` — **162 credenziali create, nessuna era allineata** — e il login ha funzionato subito dopo. **In produzione NON l'ho fatto**: cambierebbe la password di 162 utenze reali, ed e' una decisione di Enzo, non una tecnica
+  - strumento pronto per chi riprende: `apps/api/scripts/prova-132-f7-corsa-di-ricerca.mts` (login, domini, fascicolo, corsa, proposte con impronta) e `scripts/avvia-ricerca.sh` nello scratchpad
+- stato-corretto-S1085 (2026-08-30): **era `ACTIVE` e non lo e'**: F7 e' `blocked-on-Enzo` da S1083, e una voce che aspetta un input di Enzo non appartiene alla corsia del lavoro eseguibile — stando in `ACTIVE` compariva ogni sessione come se qualcuno potesse prenderla in mano. Serve **una cosa sola**: l'indirizzo e la credenziale del fornitore di proposte (`RESEARCH_GATEWAY_URL`, `RESEARCH_GATEWAY_TOKEN`). Senza fornitore la corsa di ricerca non parte, e senza corsa non c'e' nulla da confrontare coi 23 processi del modello bancario
+  - ⚠ **un solo input sblocca tre voci**: `#132` F7 (7/8), `#198` T9b (9/10, oggi darebbe `BLUEPRINT_CONTENT_EMPTY` perche' il modello va **generato dalla ricerca**) e `#205` (0/3, gia' `GATED` su questa)
+  - ⚠ la misura sull'assenza delle due variabili e' quella di **S1083**, non ri-verificata in S1085: la lettura del `.env` e' negata dal permesso in questa sessione, e non si aggira. Chi riprende la rifaccia
+  - ⛔ **F7 è `blocked-on-Enzo`, e non per l'approvazione della fonte — quella è arrivata (S1081).** Misurato in S1083 leggendo il `.env`: `RESEARCH_GATEWAY_URL` e `RESEARCH_GATEWAY_TOKEN` sono **assenti in locale**, e la dashboard li dà mancanti anche in produzione. Le due prove pretendono una **corsa di ricerca vera**: senza fornitore non parte, e senza corsa non c'è nulla da confrontare coi 23 processi del modello bancario. ⚠ **Questo blocco non ferma una voce, ne ferma TRE**: `#198` T9b non è rifacibile finché il modello non nasce dalla ricerca (darebbe `BLUEPRINT_CONTENT_EMPTY`), e `#205` è già GATED su questa. **Un solo input di Enzo — indirizzo e credenziale del fornitore — sblocca 9/10, 7/8 e 0/3**
+  - ✅ **IL BLOCCO SU ENZO È SCIOLTO, E APPLICATO SUL VIVO (S1081, 2026-08-25).** Enzo ha approvato **`bancaditalia.it`** come prima fonte (istituzionale, banca centrale, autorevole per il dominio bancario di RTL). Eseguito con `prova-live-132-f7-fonte.mts`, login reale dell'utenza di collaudo nata lo stesso giorno (`#169` F2): decisione **200**, `apply-research` **200** (`proposteApplicate 1 · fontiRegistrate 1`), **registro fonti da 0 a 1** con approvatore e data, candidato `PASSED → APPLIED`, sentinella evidenze a 0. **La fila di tre voci non è più ferma su di te**: restano le due prove di F7 (azienda ATECO 70.20 + RTL come metro), poi `#198` T9b e `#205`
+  - 🔬 la rotta della decisione è quella sul **candidato** (`/v1/seed-candidate-records/:id/decision`), non il ledger append-only `/v1/seed-approval-decisions`: passando dal ledger la decisione si scrive ma `apply-research` risponde `RESEARCH_NOTHING_APPROVED`. Dettaglio e seconda trappola (corpo `{}` obbligatorio) nel piano
+  - priority: P1 · effort: ~1 sessione (F7 + il vincolo di pertinenza, sotto) · doc: `.programmi/132-ricerca-genera-il-modello.md`
+  - ✅ **DECISO da Enzo il 2026-08-24 (E30) — l'input che la voce aspettava è arrivato, NON si ri-chiede.** *«Approvo Banca d'Italia come prima fonte di ricerca ma solo se il tenant/azienda appartiene alla tipologia Banca.»* L'approvazione **c'è**, ed è **condizionata alla pertinenza di settore**: `bancaditalia.it` vale per un'azienda bancaria e **non** per un'azienda di un altro settore.
+  - ⚠ **LA CONDIZIONE NON È ESPRIMIBILE OGGI, e va costruita** — misurato il 2026-08-24, non dedotto. `sys.sys_research_sources` è **vuota** (0 righe) e le sue colonne sono `host_suffix · label · class · status · domain · country_code · rationale · approved_by · approved_at · metadata`: **nessun campo lega una fonte a una tipologia d'impresa**. I `CHECK` presenti garantiscono che una fonte `APPROVED` porti approvatore, data e motivazione — cosa giusta e già in vigore — ma non conoscono il settore. Quindi F7 **non è più «approva e applica»**: è *approva, **costruisci il vincolo di pertinenza**, e applica*. Inserire la riga senza il vincolo tradirebbe la decisione, perché la fonte resterebbe usabile per costruire un'azienda non bancaria — che è esattamente ciò che E30 esclude.
+  - **come si legherà**, da decidere in apertura di F7 con l'evidenza sul tavolo: il settore del tenant è già un dato di prima classe — `sys_tenancies.tenant_industry_code` con vincolo (mig. `000242`), `FIN_BANKING` per RTL Bank — e l'invariante **I21** parla già la stessa lingua («i dati che derivano dal settore di un tenant devono essergli coerenti»). Le strade plausibili sono un campo di pertinenza sulla fonte, oppure una tabella di associazione fonte↔settore se una fonte potrà valerne più d'uno: **la scelta si fa misurando**, non qui.
+  - 🔗 **sblocca `#198` T9b**, ferma non per scelta ma per misura: le quattro tabelle `sys_blueprint_content_*` sono a **0 righe**, quindi l'atto si rifiuta con `BLUEPRINT_CONTENT_EMPTY` invece di costruire una quarta banca.
+  - cronaca-superata-2026-08-24: i due campi della corsia WAIT-INPUT sono tolti perché presupponevano una decisione non presa. Restano qui sotto come storia di cosa fu chiesto, e perché.
+  - input-richiesto: **l'approvazione della prima fonte di ricerca.** La corsa vera del 2026-08-19 ha lasciato una proposta `PASSED` — `bancaditalia.it`, classe `INSTITUTIONAL`, con due evidenze e le loro impronte. Va decisa con una motivazione e applicata: da quel momento il registro delle fonti non e' piu' vuoto e i cinque domini di contenuto diventano ricercabili
+  - perche-solo-tuo: e' una **decisione di business**, richiesta esplicita di Enzo del 2026-08-05 — *«l'elenco delle fonti ammesse non lo scrive nessuno a mano: nasce da una ricerca e lo approva Enzo»*. Il codice la rende meccanica invece che affidarla alla disciplina: una fonte `APPROVED` senza approvatore, data e motivazione e' **impossibile per vincolo** (mig. `000333`). Nessuna scorciatoia tecnica puo' sostituirla, e inventare un approvatore sarebbe esattamente cio' che il vincolo esiste per impedire
+  - ⏸ **l'unica fase aperta e' F7** (le due prove). L'avanzamento fase per fase sta nel piano, non qui: `.programmi/132-ricerca-genera-il-modello.md`
+  - 🔴 **LA VOCE CAMBIA NATURA — DECISO da Enzo il 2026-08-17 (E29), e vale più di tutto ciò che segue.** *«Il fascicolo non può avere un archetipo aprioristico, altrimenti genera sempre una banca come RTL. I dati hardcoded che vengono dal file di codice scritto a mano devono scomparire — non deve rimanere traccia — e l'archetipo deve essere generato dalla ricerca.»* Questa voce non produce più **solo i processi**: produce **il modello con cui l'azienda viene costruita**
+  - **come è emerso**: chiudendo il T6 di `#198`, la prova live diceva «7 unità, 11 posizioni, 8 competenze, 4 indicatori». Enzo ha chiesto **da dove venissero quei numeri**. Vengono da `apps/api/src/modules/tenant-materialization/blueprints.ts` (giugno 2026): **un solo archetipo**, una banca al dettaglio con tre filiali, scritta a mano. Conseguenza: il fascicolo di un ospedale o di una software house produrrebbe **la stessa banca**
+  - **DECISO da Enzo, 2026-08-17**: il modello copre **tutto** — unità, posizioni, competenze, indicatori, processi (non solo `business_processes` come prevedeva l'epica) · e la **prima prova si fa su un'azienda nuova di un settore diverso**, poi su RTL Bank: la prima dimostra che il meccanismo **non ha memoria** del bancario, la seconda misura **quanto è buono** contro un'azienda vera (40 unità attive, 158 posizioni)
+  - ✅ **il ritiro non costa dati, misurato 2026-08-17**: `0` unità · `0` posizioni · `0` competenze con codice `RBR-%` · `0` utenti `SYN_%`. **L'archetipo non ha mai costruito niente in produzione**: si toglie una capacità mai usata che produceva il risultato sbagliato
+  - ✅ **il confine per sostituirlo esiste già, ed è del 2026-08-17**: il T4 di `#198` ha reso `BuildSource` un'interfaccia con **una** implementazione. Il ritiro non è un refactoring del motore — è scrivere la seconda implementazione e cancellare la prima
+  - ⚠ **IL VERO LAVORO, che nessun piano nominava**: il contenuto di un modello **non ha dove stare**. `sys_blueprint_families/_variants/_variant_versions` sono un **guscio** (1 riga ciascuna, che punta a `RETAIL_BANK_REFERENCE`) e non contengono unità, posizioni, competenze o indicatori. Per le unità c'è `sys_organization_unit_templates` — **225 righe ORFANE**, nessun fascicolo le possiede, 25 codici in 9 copie identiche (il «residuo, non sapere» di P2a §9). Per posizioni, competenze e indicatori **non esiste nulla**
+  - ⚠ **da F3 a F6 nessuna azienda sarà costruibile**, ed è dichiarato in anticipo invece che scoperto dopo
+  - 📋 **piano in 8 fasi**: `.programmi/132-ricerca-genera-il-modello.md` — stima **~8 sessioni**
+  - effort-ri-stimato-2026-08-17: **~8 sessioni** (era ~2, quando la voce produceva solo i processi)
+  - ✅ **F0 FATTA S1068 (2026-08-17), e questo register non la registrava** — riconciliato S1071.
+    I sei parametri obbligatori prima di una ricerca (**E30**) esistono come contratto
+    `PARAMETRI_RICERCA`, e il buco trovato misurando — nessun vincolo legava la fascia di
+    dimensione al numero di addetti, si poteva dichiarare `XS` con 5000 — è chiuso dalla
+    migrazione **`000323`**: trigger `sys_blueprint_size_band_coherence` + sentinella
+    `sys.v_blueprint_size_band_mismatch` (la ventesima). Prova vista fallire tre volte, ed
+    evidenza live: `BLUEPRINT_SIZE_BAND_MISMATCH: la fascia M copre 50-249 addetti, ma ne sono
+    dichiarati 7000`. **Il piano in `.programmi/` era avanti di una fase intera rispetto a
+    questo blocco**: chi legge il register senza il piano crede la voce non avviata
+  - ✅ **IL GATE È CADUTO — misurato 2026-08-15 (S1062)**. `gated-by: Tenant Builder P1`, e **#131 è chiuso su tutti e otto i task** (S1051, fascicolo `RTL-BANK-CONFIG` v1 APPROVED con fotografia firmata). Il menu lo mostrava come bloccato «da ?» soltanto perché il campo `gated-by` è testo libero e `build_menu.py` non lo risolve in un id. **Resta però una dipendenza vera, che non è un blocco tecnico**: il Task 5 esige che Enzo approvi le fonti **una proposta per volta** — è il cancello umano dell'agent-gateway, ed è voluto.
+  - priority: P1 · effort: **~4-6 sessioni** (stima dichiarata, non misurata: le «~2 sessioni» erano del 2026-08-05, PRIMA che E29/E30 cambiassero la natura della voce) · gated-by: Tenant Builder P1 (#131, CHIUSO S1051) · doc: D:\heuresys-design-lab\2026-08-05--epic-tenant-builder-p2a-ricerca.md · piano: D:\heuresys-design-lab\2026-08-05--piano-implementazione-p2a-ricerca.md
+  - note: decisioni E10-E14 di Enzo. NIENTE catalogo di settori: il modello nasce da ricerca web assistita da AI, proposta per proposta, approvata con motivazione. Riqualifica `sys_blueprint_families`/`_variants` come SOTTOPRODOTTO dei clienti, non catalogo. Riusa cio' che esiste: agent-gateway (approvazione umana per ogni scrittura, gia' provato sulla materializzazione di un tenant), corse/candidati/decisioni, `sys_seed_source_evidence` (url + retrieved_at + content_hash, gia' in uso con repo://), `sys_source_lineage_records` (ha gia' sdbi_ai_model_id e sdbi_human_approver). Manca solo la lettura web: `sdk-agent.ts:53` ha `allowedTools:["Skill"]` — NON spostare mai `mcp__heuresys__*` li' dentro, bypasserebbe il cancello umano. Task 1 obbligatorio: oggi una ricerca per una trattativa e' impossibile (due tenant_id NOT NULL). Task 5 = prima ricerca sulle FONTI, registro che nasce vuoto per vincolo, Enzo approva una per volta. Prova falsificabile: per una societa' di consulenza NESSUNA chiave naturale proposta deve coincidere coi 23 processi bancari
+  - ⚠ **da fare INSIEME a questa voce, non dopo: `BLUEPRINT_FIELD_LOCKED` (`D-85`, era `D-81`).** La §4.8 dell'epica classifica i campi del fascicolo in bloccanti e rivedibili e prevede il rifiuto motivato di chi tocca un campo bloccante. In P1 la guardia **non era scrivibile**: l'unico attore che tocca il fascicolo è `PLATFORM_ADMIN`, che può cambiare tutto, quindi nessun test poteva farla scattare. **L'attore che la viola arriva qui** — il cliente che rivede i campi che gli competono. Il codice d'errore e la classificazione dei campi sono **già scritti nella specifica**: non vanno riprogettati, vanno applicati. `D-85` è stato estinto dalla colonna dei debiti in S1061 proprio perché non era lavorabile finché questa voce resta chiusa: **questo rimando è ciò che impedisce di perderlo.**
+  - lab-id: 2026-08-05-epica-tenant-builder-parte-2a
+
+- **#133 Guardia lab: il ruolo dell'argomento non è considerato nei comandi di copia** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#134 La guardia lab rifiuta una SELECT se una stringa contiene una parola di scrittura** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#135 L'identita' di un'azienda e' dichiarata due volte e per Heuresys le due dissentono** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#136 La pagina delle nomine del lab non è mai stata nominata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#137 Plancia di osservabilità delle sessioni (strumento del lab)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#138 Nessun lucchetto impedisce due suite di test sullo stesso database** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#139 Il tipo «utenza di servizio» esiste e non lo usa nessuno: le utenze tecniche contano come persone** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#116 28 persone su 45 atterrano su un cruscotto che il loro ruolo non può vedere** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#117 Completezza del portale personale: derivarla meccanicamente invece che a mano** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#118 Dieci responsabili passano a Quadro Direttivo (QD3); la posizione di martina.gentile è confermata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#119 D3 e D4: le liste di ruoli scritte a mano che la definizione dei domini esiste per eliminare** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#120 Le dieci posizioni di comando passano a `MG-2`, con collocazione derivata da anzianità e valutazione** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#121 La guardia della sessione lab rifiuta letture legittime: sei casi in un giorno, due cause** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#122 Tenant Heuresys: `HS-MGMT` esiste due volte, una per asse, e `HS-PROD` è l'unica unità di tipo TEAM del database** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#123 Leggere `organigramma-bis.html`, ricavarne le situazioni da correggere ed eseguirle** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#124 Mascheratura nel contratto dati: sei celle su otto si chiudono spaccando una classe, due richiedono il meccanismo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#125 22 pagine autenticate irraggiungibili dal menu, e 52 etichette di menu su 52 senza traduzione** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#126 Le quattro tabelle di L7: predizioni e abbinamenti mentore diventano visibili all'interessato, successioni e raccomandazioni retributive no** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#127 Stabilizzazione post-ricostruzione: due codici disallineati e quattro decisioni non registrate** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#128 Il registro delle sessioni diventa una storia completa: nessuna cancellazione automatica, nessuna sessione invisibile** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#115 I test di perimetro descrivono l'organigramma di ieri (24 file, 81 rossi)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#114 L'albero delle posizioni è spezzato in 15 tronconi: il resolver gerarchico non raggiunge più chi ha l'incarico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#112 I cataloghi dei requisiti hanno perso l'aggancio nella ricostruzione dell'organigramma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#113 30 responsabili di unità senza ruolo di comando dopo la ricostruzione dell'organigramma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#99 Domini gerarchici e funzionali: applicare la definizione (8 fasi)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#100 Organigramma incoerente al 66%: ricostruzione (prerequisito delle matrici)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#101 Console segnalazioni offerta a tutti e negata dall'API (menu che mente + 403 travestito da guasto)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#102 Sei incoerenze fra organigramma e dati della persona + promozione di `verifica_incrociata.py`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#103 Organigramma fase 1: tassonomia delle unità (migrazione 000244)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#104 Organigramma fase 2: creazione delle 17 unità nuove (migrazione 000245)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#105 Organigramma fase 3: ristrutturazione (migrazione 000246)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#106 Organigramma fase 4: le 29 nomine dei responsabili (migrazione 000247)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#107 Organigramma fase 5a: posizioni di comando (migrazione 000248)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#108 Organigramma fase 5b: le persone della rete (migrazione 000249)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#109 Organigramma fase 5c: le divisioni centrali (migrazione 000250)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#110 Organigramma fase 6: chiusura e cancelli (migrazione 000251)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#111 Le 545 valutazioni ereditate dall'albero delle posizioni: decidere prima di applicare le otto migrazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#94 Driver zp: budget di costo dinamici per corsa (config = soffitto)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#95 Igiene zp: i tre reperti del collaudo presidiato + pre-check anti-stale** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#96 Canale automatico lab→canonica: installare lab_inbox** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#97 Promozione plancia zp (dashboard + configuratore) in scripts/** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#98 Cinque percorsi formativi di RTL Bank hanno una chiave-macchina al posto del nome** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#89 Contaminazione da tenant legacy mai migrati** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#90 Cruscotto di salute del DBMS — 14 sentinelle mai interrogate** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#91 Bonifica strutturale del DBMS (indici, vincoli, statistiche)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#92 Ciclo di valutazione completo (autovalutazione + calibrazione)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#93 Rimozione della validazione presenze** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#88 Il peso economico delle posizioni e' un campo vuoto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#87 Il genitore di un'unità organizzativa può stare in un altro tenant** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#84 Le rules path-scoped si caricano quando servono?** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#85 AGENTS.md divergente dal CLAUDE.md rifattorizzato** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#86 claude login sul linux-pc (la VM e' risolta)** · status: DONE
+- esito-S1085 (2026-08-31): **FATTO DA ENZO, e verificato subito dopo**: `~/.local/bin/claude -p` sul `linux-pc` risponde. ⚠ Nota per chi automatizza: `claude` **non e' nel PATH** di una shell non interattiva su quella macchina (sta in `~/.local/bin`), e un servizio che lo invoca senza aggiungerlo fallisce con «File o directory non esistente» — misurato oggi, e curato in `scripts/avvia-ricerca.sh`
+  - ⭐ **e ha sbloccato la ricerca**: con la sessione viva la corsa di `#132` F7 e' girata davvero (vedi li')
+  - ⭐ **S1085: non e' piu' una voce di manutenzione, e' un PREREQUISITO.** Misurato oggi: senza quella sessione il fornitore di proposte non puo' lavorare, quindi `#132` F7 non gira sul gemello — e con lei restano ferme `#198` e `#205`. Sulla VM la sessione e' valida (provata), sul `linux-pc` e' scaduta: «OAuth session expired and could not be refreshed»
+  - input-richiesto: eseguire `claude login` **sul solo `linux-pc`** — la VM e' stata provata e risponde (S1079). Il titolo diceva «VM e linux-pc» ed era meta' falso
+  - perche-solo-tuo: e' un flusso OAuth interattivo (browser + conferma umana), non eseguibile via SSH non presidiato
+  - priority: P3 · effort: ~5 min · doc: memoria `ref_claude_ecosystem_alignment`
+  - note: rilevato in S1039 durante l'allineamento dell'ecosistema: lo smoke test headless (`claude -p`) fallisce l'autenticazione su **entrambi** i cloni — i file di credenziali sono presenti ma i token non sono validi (coerente con "credenziali OAuth forward-only"). **L'allineamento e' riuscito** e viene mantenuto; e' solo la sessione di prova che non parte. Finche' non fai il login, la CLI su quelle macchine non e' utilizzabile. Stato pre-esistente, non causato dall'adeguamento.
+  - ✅ **META' RISOLTA, PROVATA SUL CAMPO S1079 (2026-08-24)** — non dedotta dalla presenza del file di credenziali, che questa stessa voce dichiara insufficiente: eseguito lo smoke test vero. **VM `oracle-vm-default`: risponde `PONG`** — il login funziona, quella meta' e' chiusa. **`linux-pc`: ancora rotta** — `Failed to authenticate: OAuth session expired and could not be refreshed`. Resta `WAIT-INPUT` **solo per il gemello**, e li' serve davvero il flusso interattivo.
+  - ⚠ **il primo tentativo di prova era sbagliato, non il sistema**: cercando `claude` in un `PATH` costruito a mano ho letto «non installato» sul gemello; sta in `~/.local/bin/claude` e si trova con una shell di login. Una misura sbagliata che *conferma* l'ipotesi e' il modo piu' facile per chiudere una voce che non e' chiusa
+
+- **#24 Autorizzazione bi-assiale (ADR-0027) — resta solo F4 (asse funzionale/attività)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#23 Personal area /me — portale legacy → navtab (programma S1010-S1011)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#201 GTM v1-deferrals (follow-up del primo deliverable)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#17 Wave-3 multi-tenant-onboarding (residuo L2/L3 multi-industry)** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#9/#10/#11 audit forense 100X** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#64 R2 data-completeness (condizione finance-readiness #2)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#65 NACE integrità parent (F-A06)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#77 Storia RTL 36 mesi — popolamento integrale del DBMS** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#78 storia36 C5 — coda dei rilievi adversarial non assorbiti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#80 storia36 C12 — audit finale e chiusura del programma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#81 La scheda di una persona non racconta la persona** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#82 Collaudo di accessibilità intermittente su `/me/inbox`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#66 PR Dependabot in coda (post-S1023)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#68 Fase 4 forense — frontend per-superficie (residuo: esecuzione P2)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#69 Bonifica dei residui `staging.wave1_*` nell'advanced** *(era «Fase 3 Blocco E — chiusura brownfield lato DBMS legacy»; ri-titolato 2026-08-14: lo spegnimento del legacy è uscito dall'item per decisione di Enzo, e ciò che resta sta tutto nel nostro DBMS)* · status: FATTO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#70 RTL — coprire i ruoli chiave vacanti (riassegnando dipendenti esistenti)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#71 RTL — realismo dati via ricerca web focalizzata (retribuzioni CCNL + tabelle di dominio)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#72 Audit coerenza per-user — dimensioni residue (education↔ruolo, KPI/OKR per ruolo, attendance-pattern, anagrafiche satellite)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#67 linux-pc gemello PROD — refresh DB clone (post-S1023)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#73 NACE legacy — verifica currency vs Rev 2.1 o deprecazione controllata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#74 notifications — GET amministrativa per audit dei broadcast (da D-70)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#75 teams — lifecycle API (create/update/membership) (da D-71)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#16 SuccessFactors** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#18 doc-cleanup `is_synthetic`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#19 E2E users-page post-synthetic** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#20 audit QA forense S1006 — il grosso** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#21 residuo tail audit S1006 — a11y + perf** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#22 sidebar IA redesign — 5 sezioni + lingua header + tab-merge** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#146 (ex Z-261) Esposizione MFA in repository pubblico: 7 fattori `e2e-fixture` ancora attivi in produzione** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#147 (ex Z-262) Accesso derivato per tutti gli utenti: chiave madre non propagata a VM e linux-pc** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#148 Rileggere il rendiconto delle chiusure e decidere se la chiusura va riscritta in quattro verbi** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#25 A/L5 — ponte posizione→learning (accende `positions/[id]/learning`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#26 A/L1 — vita dei goal/OKR (updates, check-ins, milestones, comments, alignments)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#27 A/L2 — evidence layer (le prove sotto gli score)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#28 A/L0 — Trust Ledger: read-API provenance (70.972 righe lineage)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#30 A/L4 — gap closure (plans/actions/results)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#31 A/L6 — metrologia KPI (measurements/methods/weighting)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#34 B/B3 — approval effects: nuovi handler (primo flusso approvativo reale)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#35 B/B7 — observability completa (/metrics Prometheus + slow-query + 4 sezioni system-health)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#36 B/B5 — visualization: versioning + export engine** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#37 B/B2 — reward-gate engine sui variable-pay** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#38 B/B6 — inbox push SSE (da polling 30s)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#42 C/C4 — fondazioni frontend (paginazione server-side, refactor shared-types, apiFetch FormData)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#43 C/C2 — editing cataloghi (skills/KPI/learning/job) + nuova `/job-catalog`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#44 C/C1 — editing People & Org (users/positions/org-units)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#83 L'API non impedisce i cicli nell'organigramma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#45 C/C3 — editing tenant & platform** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#46 D/D1 — skill possession per-employee (import wave-2)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#47 D/D2 — engagement/PULSAR history (sblocca flight-risk pieno + fix dual-shape)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#48 D/D3 — goal history GOKMER (gemello di #26)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#49 D/D5 — employee timeline** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#51 E/E1 — whistleblowing (D.Lgs 24/2023) con ruolo custodian dedicato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#53 E/E4 — payroll ops read-extended** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#55 F/F1 — Essential Capability Ranker** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#56 F/F2 — VRIO scorecard (`/org-director/vrio`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#57 F/F3 — OHI org-health scorecard** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#58 F/F4 — AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#59 F/F5 — ESS self-view FULL (capability + flight-risk con evidenze)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#60 G/G1 — retention & storage (archive `audit.import_validation_results` 547MB)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#61 G/G2 — RBAC hygiene (perm `:delete` dedicati su 27 route; normalizzazione proxy)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#62 G/G3 — integrità preventiva (acyclicity IS_A, warn LIMIT 5000, dual-shape)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#63 G/G5 — archivio script esausti (move-not-delete)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#140 La catena di migrazioni non è stabile: ri-applicarla disfa correzioni già chiuse** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#141 `HS-PROD` è ancora un'unità di tipo «squadra», che S1044 dichiara eliminata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#142 Cruscotti focalizzati per tipologia di utilizzatore** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#220 Remediation forense W1 — messa in sicurezza: FK a cascata, segreti leggibili, audit e logging spenti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#221 Remediation forense W2 — recuperi: NACE e crosswalk rientrano (decisione Enzo 2026-08-20)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#222 Remediation forense W3 — integrità e contenuti dei cataloghi** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#223 Remediation forense W4 — pipeline, separazione ruoli, prestazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#224 Il check che cambia verdetto a seconda di dove lo lanci, e i sette eventi che lo accendono** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`

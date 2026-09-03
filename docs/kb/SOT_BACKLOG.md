@@ -241,6 +241,16 @@
   - priority: P2 · effort: continuativo (una fase per sessione, il taglio lo decide il guardiano) · doc: `.programmi/231-consumo-lavori-attivi.md`
   - chiuso-quando: Enzo ritira il mandato, oppure P1/P2/P3 non hanno piu' voci ACTIVE
 
+- **#241 La CI rossa che teneva la produzione indietro, e i due fascicoli di prova** · status: DONE  ·  ↦ `.programmi/241-ci-rossa-e-fascicoli-di-prova.md`
+  - nasce-da: due mandati di Enzo (2026-09-03, S1086) — «PROVA-F7-ALFA in produzione: si rimuove» e «le PR fastify sono rosse: decidi tu»
+  - esito: i due fascicoli di prova rimossi dalla produzione con giornale di rollback · il test su `surveys` allineato a `#235` · la porta 3001 liberata sul runner · le PR fastify chiuse, migrazione registrata come `#242`. **DEPLOYATO**: due host su `c6a39068`, servizi attivi, produzione 200
+  - scoperto-eseguendo: la mia misura «i fascicoli non hanno costruito nulla» era **falsa** — avevo guardato due tabelle figlie su tre, e la prova generale sul gemello l'ha smentita prima della produzione (tre FK sono `RESTRICT`, e ALFA aveva 2 corse di ricerca con 15 candidati sotto)
+
+- **#243 I due rossi di igiene del cruscotto, e le sette PR Dependabot rimaste** · status: DONE  ·  ↦ `.programmi/243-igiene-e-pr-dependabot.md`
+  - nasce-da: mandato di Enzo (2026-09-03, S1086) — «aprili e risolvili tutti»
+  - esito: **zero PR Dependabot aperte**; sei assorbite in `main`, una respinta (`typescript` 7.0.2: `typescript-eslint` dichiara `typescript >=4.8.4 <6.1.0`, e Next non riconosce l'installazione). I due rossi di igiene chiusi: derivati rigenerati, cronaca chiusa dal 38% al 18% del register
+  - scoperto-eseguendo: `Dependabot Updates` era rossa per **due aggiornamenti di sicurezza impossibili** (`fast-uri`, `fflate`) bloccati dal **nostro** `pnpm.overrides`, non da una dipendenza terza · fastify 5.12.1 si e' ripresentato **tre volte**, l'ultima dentro un gruppo di 7, da cui il presidio in `dependabot.yml` · due difetti negli strumenti, di cui uno introdotto da me in questo stesso ciclo (`compatta_register.py` duplicava il puntatore su 193 righe su 201)
+
 - **#242 fastify >= 5.12 ha tolto il `trustProxy` a conteggio di salti: la produzione va migrata alla forma per indirizzo** · status: ACTIVE
   - nasce-da: le due PR Dependabot su fastify 5.12.1 (`#76` e `#75`), che Enzo ha chiesto di risolvere (2026-09-03, S1086). Chiuse entrambe con la ragione scritta: **il bump non si prende finche' questa voce non e' fatta**
   - misurato-2026-09-03: la firma e' passata da `boolean | string | string[] | number | TrustProxyFunction` (5.10.0) a **senza `number`** (5.12.1), e il tipo segue il comportamento. In `lib/request.js` della 5.12.1 la forma numerica non e' deprecata, **e' neutralizzata**: `if (typeof tp === 'number') return function () { return false }` — con il commento upstream «Hop-count-only trust cannot validate the immediate peer. Fail closed». Riprodotto in locale: **5 errori di tipo in `apps/api/src/app.ts`** (206, 218, 267, 336, 513), che sono **uno solo che si propaga** — l'overload non risolve, TypeScript ripiega su quello HTTP/2 sicuro, e ogni uso dell'istanza diventa incompatibile

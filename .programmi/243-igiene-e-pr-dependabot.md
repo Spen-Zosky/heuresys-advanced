@@ -10,12 +10,47 @@
 
 | id | cosa | cosa significa fatto | stato |
 |---|---|---|---|
-| **I1** | Derivati superati (2/3) | `session_start.py` non segnala più il rosso dei derivati | ⬜ |
-| **I2** | Peso dello stato: cronaca chiusa al 38% del register | il rosso sparisce, `handoff_lint` resta 0 FAIL, i 27 item vivi ci sono tutti | ⬜ |
-| **D1** | Le PR senza difetti propri, assorbite in un batch | i bump nel repo, CI verde, PR chiuse come assorbite | ⬜ |
-| **D2** | `fastify-type-provider-zod` 6.1.0 → **7.0.0** (major) | preso, oppure respinto con la ragione misurata | ⬜ |
-| **D3** | `typescript` 6.0.3 → **7.0.2** (major) | preso, oppure respinto con la ragione misurata | ⬜ |
-| **D4** | `#74` — gruppo `minor-and-patch`, **32 aggiornamenti**, quattro check rossi | preso, spacchettato, oppure respinto con la ragione | ⬜ |
+| **I1** | Derivati superati (2/3) | `session_start.py` non segnala più il rosso dei derivati | ✅ **FATTO** |
+| **I2** | Peso dello stato: cronaca chiusa al 38% del register | il rosso sparisce, `handoff_lint` resta 0 FAIL, i 27 item vivi ci sono tutti | ✅ **FATTO** — sceso al 18%, sotto la soglia del 25% |
+| **D1** | Le PR senza difetti propri, assorbite in un batch | i bump nel repo, CI verde, PR chiuse come assorbite | ✅ **FATTO** — `#77` `#68` `#60` `#58` |
+| **D2** | `fastify-type-provider-zod` 6.1.0 → **7.0.0** (major) | preso, oppure respinto con la ragione misurata | ✅ **PRESO**, dopo aver misurato la superficie del cambio encode/decode |
+| **D3** | `typescript` 6.0.3 → **7.0.2** (major) | preso, oppure respinto con la ragione misurata | ✅ **RESPINTO** — `typescript-eslint` dichiara `typescript >=4.8.4 <6.1.0` |
+| **D4** | `#74` — gruppo `minor-and-patch`, **32 aggiornamenti**, quattro check rossi | preso, spacchettato, oppure respinto con la ragione | ✅ **SPACCHETTATO** — 31 presi, fastify escluso |
+| **D5** | *(non pianificata)* `#78`, nata durante il ciclo, e il presidio che chiude il rubinetto | zero PR aperte, e fastify non si ripresenta da solo | ✅ **FATTO** |
+
+## L'esito, misurato
+
+**Zero PR Dependabot aperte** (`gh pr list` → vuoto). Sette chiuse: sei assorbite, una respinta —
+più `#78`, nata a metà ciclo.
+
+I commit: `2f38cb19` (igiene) · `baff815b` (32 bump) · `123029d5` (actions) · `4d6e784d`
+(fastify-type-provider-zod + sicurezza) · `e06025b0` (`#78`) · `2b5975ef` (presidio) ·
+`e682b1ff` (correzione di `compatta_register`).
+
+### Le tre cose che non erano nel piano, e che il ciclo ha scoperto
+
+**① `Dependabot Updates` era rossa, e il blocco era nostro.** Due aggiornamenti *di sicurezza*
+impossibili: `fast-uri` (risolvibile 4.1.2, non vulnerabile 4.1.3) e `fflate` (0.6.10 → 0.6.11).
+`conflicting-dependencies: []` in entrambi i casi, ed è l'indizio: il vincolo veniva dal **nostro**
+`pnpm.overrides`, che Dependabot non tocca. L'override di `fast-uri` fissava il pavimento
+a `>=4.1.2`, cioè esattamente alla versione diventata vulnerabile. Alzati: `fast-uri` → 4.1.4,
+`fflate` → 0.6.11 (pin scoped su `three-stdlib`, per non trascinare quel consumatore da 0.6 a 0.8).
+
+**② fastify 5.12.1 si è ripresentato tre volte in poche ore** — PR dedicate, poi dentro il gruppo
+di 32, poi dentro un gruppo di 7. Chiudere le PR non basta: dentro un gruppo quel bump è una riga
+fra trentadue e nessun check si accende. Da qui il presidio in `dependabot.yml`, scoped a `>=5.12`,
+con la ragione accanto e la condizione per toglierlo (la chiusura di `#242`).
+
+**③ Due difetti negli strumenti, uno dei quali l'ho introdotto io in questo ciclo.**
+`compatta_register.py` appendeva il puntatore all'archivio **sempre**: la mia corsa ha lasciato
+`↦ path ↦ path` su **193 righe su 201**, e nessun cancello se n'è accorto perché la riga resta
+formalmente valida. Riparate. E il suo selftest teneva `tot = 11` scritto a mano: con i due casi
+nuovi eseguiva 13 prove e stampava «11/11» — e cancellandone una avrebbe continuato a stampare
+«11/11» eseguendone 10. Ora conta mentre gira: 13/13.
+
+Anche il mio `assorbi-74.py` aveva un difetto, e me l'ha mostrato `#78`: un dizionario
+`{pacchetto: versione}` perdeva la seconda forma di un pacchetto dichiarato sia `^4.23.1` sia
+`4.23.1`, così `agent-gateway` era rimasto indietro. Corretto.
 
 ## La misura di partenza (2026-09-03)
 

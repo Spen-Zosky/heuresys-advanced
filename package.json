@@ -49,13 +49,13 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.6",
-    "@eslint/js": "9.39.4",
+    "@eslint/js": "9.39.5",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.11",
+    "eslint-config-next": "16.3.3",
     "eslint-plugin-i18next": "^6.1.5",
-    "globals": "17.7.0",
-    "playwright": "1.62.0",
-    "typescript-eslint": "8.65.0"
+    "globals": "17.11.0",
+    "playwright": "1.62.1",
+    "typescript-eslint": "8.68.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -81,8 +81,8 @@
       "exceljs>tmp": ">=0.2.6",
       "react": "19.2.8",
       "react-dom": "19.2.8",
-      "@types/react": "19.2.17",
-      "@types/react-dom": "19.2.3",
+      "@types/react": "19.2.18",
+      "@types/react-dom": "19.2.5",
       "@fastify/static": ">=10.1.2",
       "find-my-way": ">=9.7.0",
       "fast-uri": ">=4.1.2",

@@ -59,6 +59,10 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(
 BACKLOG = os.path.join(REPO, "docs", "kb", "SOT_BACKLOG.md")
 ARCHIVIO = os.path.join(REPO, "docs", "archive", "SOT_BACKLOG_CHIUSI.md")
 
+# Il puntatore come appare NEL MARKDOWN — path relativo al repo, non di filesystem.
+# Serve anche a riconoscerlo: e' la sentinella che rende idempotente l'appensione.
+PUNTATORE = "↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`"
+
 TERMINALI = ("DONE", "FATTO", "WON'T-DO", "WON-T-DO", "WONT-DO")
 INIZIO_ITEM = re.compile(r"^- \*\*#(\d+)")
 STATUS = re.compile(r"status:\s*`?([A-Z'\-]+)")
@@ -107,7 +111,16 @@ def compatta(testo):
         out.extend(righe[cursore:i])
         # la riga-indice: la PRIMA riga del blocco, che gia' porta id, titolo e status,
         # piu' il puntatore. Non si riscrive il titolo: riscriverlo lo farebbe divergere.
-        out.append(righe[i].rstrip() + "  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`")
+        #
+        # ⚠ IL PUNTATORE SI APPENDE UNA VOLTA SOLA. Fino a S1086 questa riga lo
+        # appendeva SEMPRE, e una seconda corsa dello strumento su voci gia'
+        # archiviate ne accodava un altro: misurato, 193 righe su 201 si sono
+        # ritrovate «· ↦ path · ↦ path». Nessun cancello se ne accorgeva, perche'
+        # la riga resta formalmente valida — sporca, ma valida.
+        riga = righe[i].rstrip()
+        if PUNTATORE not in riga:
+            riga += f"  ·  {PUNTATORE}"
+        out.append(riga)
         pezzi_arch.append("\n".join(righe[i:f]).rstrip())
         archiviati.append(ident)
         cursore = f
@@ -250,9 +263,15 @@ def main(argv):
 def selftest():
     """Su testi sintetici: i numeri attesi sono noti, e i casi negativi contano di piu'."""
     ko = 0
+    eseguiti = 0
 
     def prova(nome, ok):
-        nonlocal ko
+        # ⚠ Il totale si CONTA, non si scrive: fino a S1086 era `tot = 11` a mano,
+        # e stampava «11/11» anche quando i casi erano 13 — e avrebbe continuato a
+        # stamparlo cancellandone uno. E' il punto fisso del progetto applicato allo
+        # strumento stesso: un dato che puo' variare si misura.
+        nonlocal ko, eseguiti
+        eseguiti += 1
         ko += 0 if ok else 1
         print(f"  [{'OK' if ok else '!!'}] {nome}")
 
@@ -275,6 +294,20 @@ def selftest():
           "- **#2 due** · status: ACTIVE\n  - viva a\n  - viva b" in dopo)
     prova("il blocco archiviato porta il puntatore",
           "- **#1 uno** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`" in dopo)
+    # ⚠ IL CASO CHE MI E' SFUGGITO, e che in S1086 ha sporcato 193 righe su 201:
+    # una riga-indice che il puntatore ce l'ha GIA' non deve prenderne un secondo.
+    # Non lo accendeva nessun cancello, perche' la riga resta formalmente valida.
+    gia_indicizzato = (
+        "# testa\n\n"
+        f"- **#7 sette** · status: DONE  ·  {PUNTATORE}\n{corpo}\n")
+    d_idem, _, _, _ = compatta(gia_indicizzato)
+    prova("il puntatore non si duplica su una riga che ce l'ha gia'",
+          d_idem.count(PUNTATORE) == 1)
+    # e la prova deve poter fallire: senza puntatore, uno ce ne finisce eccome
+    senza = "# testa\n\n" + f"- **#8 otto** · status: DONE\n{corpo}\n"
+    d_senza, _, _, _ = compatta(senza)
+    prova("...ma su una riga che non ce l'ha, il puntatore ci finisce",
+          d_senza.count(PUNTATORE) == 1)
     prova("il corpo del terminale non e' piu' nel register", "- riga 7 " not in dopo)
     prova("il corpo del terminale E' nell'archivio", arch.count("- riga 7 ") == 2)
     # IL CASO CHE CONTA: cio' che sta sotto la cronaca storica non si tocca due volte
@@ -304,8 +337,7 @@ def selftest():
           any("non si ritrovano" in g
               for g in verifica(t2, d3, ar3.replace("riga 7 ", "TOLTO "), a3, v3)))
 
-    tot = 11
-    print(f"\n  {tot - ko}/{tot} casi verdi")
+    print(f"\n  {eseguiti - ko}/{eseguiti} casi verdi")
     return 1 if ko else 0
 
 

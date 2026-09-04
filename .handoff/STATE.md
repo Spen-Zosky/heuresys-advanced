@@ -36,6 +36,14 @@ dell'agente. Zero PR Dependabot aperte. Produzione **DEPLOYATO**.
 - **`#242` F2/F3/F4** — la migrazione di `trustProxy` alla forma per indirizzo. F1 è chiusa e ha
   rovesciato il segno della voce: non c'è un difetto da riparare, c'è un comportamento
   **verificato buono da preservare** prima di poter salire a fastify ≥ 5.12.
+- ⚠ **L'allineamento dell'ecosistema Claude e' ROTTO, e la causa e' fuori da questo repo**:
+  `align-claude-ecosystem.sh:39` cerca `session-bootstrap.sh` in `~/Claude Desktop/scripts/`, ma
+  quella cartella e' stata riorganizzata il 2026-09-04 alle 16:42 (lavoro della sessione
+  datastore). L'unica copia trovata e' in `~/personal_scripts/remoto/`, **datata 2 agosto**:
+  NON l'ho ripuntata li' — propagare un bootstrap vecchio a tutte le macchine sarebbe peggio del
+  guasto. Serve sapere dove quel file deve vivere adesso. Il canale repo (`align-clones`) e'
+  andato a buon fine; il deploy e' stato armato a mano, perche' il canale fallito e' la
+  sincronizzazione della configurazione Claude e non tocca cio' che va in produzione.
 - **Chi ha pushato il 26 agosto alle 18:47?** Invariata da S1082.
 - **`PROVA-F7-ALFA` è tornato sul gemello** (lo ricrea la prova di `#132` F7). In produzione è
   stato rimosso su decisione di Enzo; sul clone è un artefatto di prova, non un residuo.

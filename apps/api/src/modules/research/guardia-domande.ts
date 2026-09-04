@@ -46,33 +46,52 @@ const LUNGHEZZA_MINIMA = 3;
  * domini di posta. Si spezzano anche in parole, perche' «RTL Bank S.p.A.» va intercettato
  * anche quando in una domanda comparisse il solo «RTL».
  */
-export function terminiRiservati(input: {
-  nomeTenant?: string | null;
-  codiceTenant?: string | null;
-  codiceFascicolo?: string | null;
-  dominiPosta?: readonly string[];
-}): string[] {
-  const grezzi: string[] = [];
+export function terminiRiservati(
+  input: {
+    nomeTenant?: string | null;
+    codiceTenant?: string | null;
+    codiceFascicolo?: string | null;
+    dominiPosta?: readonly string[];
+  },
+  /**
+   * #239 — le parole che **classificano** invece di identificare: i nomi dei settori e dei
+   * modelli operativi, letti dalle tabelle che li dichiarano (`vocabolarioDiDominio`).
+   * Omesso, la guardia si comporta come prima: nessuna sottrazione.
+   */
+  vocabolarioDiDominio: readonly string[] = [],
+): string[] {
+  // ⚠ INTERI e PAROLE si tengono separati, ed e' il cuore della cura di #239.
+  // La sottrazione del vocabolario vale SOLO sulle parole singole. Il nome intero resta
+  // sempre riservato: cosi' un cliente che si chiamasse davvero «Costruzioni S.p.A.»
+  // perde la protezione sulla parola «costruzioni» — che da sola classifica e non
+  // identifica — ma NON quella sulla propria ragione sociale per esteso. Sottrarre senza
+  // questa rete sarebbe indebolire la guardia, che e' il modo ovvio di barare su questa voce.
+  const interi: string[] = [];
+  const parole: string[] = [];
+
   for (const v of [input.nomeTenant, input.codiceTenant, input.codiceFascicolo]) {
     if (!v) continue;
-    grezzi.push(v);
-    grezzi.push(...v.split(/[^\p{L}\p{N}]+/u));
+    interi.push(v);
+    parole.push(...v.split(/[^\p{L}\p{N}]+/u));
   }
   for (const d of input.dominiPosta ?? []) {
     if (!d) continue;
-    grezzi.push(d);
+    interi.push(d);
     // `rtl-bank.org` identifica anche come `rtl-bank`: la radice basta a riconoscere.
     const radice = d.split(".")[0];
-    if (radice) grezzi.push(radice);
+    if (radice) interi.push(radice);
   }
 
-  const puliti = grezzi
-    .map((t) => t.trim().toLowerCase())
-    .filter((t) => t.length >= LUNGHEZZA_MINIMA)
-    // Le sigle societarie non identificano nessuno: sono in ogni ragione sociale.
-    .filter((t) => !["s.p.a", "spa", "s.r.l", "srl", "sarl", "gmbh", "plc", "inc", "ltd"].includes(t));
+  const normalizza = (elenco: readonly string[]) =>
+    elenco
+      .map((t) => t.trim().toLowerCase())
+      .filter((t) => t.length >= LUNGHEZZA_MINIMA)
+      // Le sigle societarie non identificano nessuno: sono in ogni ragione sociale.
+      .filter((t) => !["s.p.a", "spa", "s.r.l", "srl", "sarl", "gmbh", "plc", "inc", "ltd"].includes(t));
 
-  return [...new Set(puliti)];
+  const dominio = new Set(vocabolarioDiDominio.map((p) => p.trim().toLowerCase()));
+
+  return [...new Set([...normalizza(interi), ...normalizza(parole).filter((t) => !dominio.has(t))])];
 }
 
 /** Le domande che nominano il cliente, con il termine che le tradisce. */

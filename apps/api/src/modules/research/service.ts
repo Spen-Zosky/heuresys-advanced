@@ -91,8 +91,12 @@ export const researchService = {
     //    la corsa: una corsa registrata e poi rifiutata sarebbe un RUNNING mai partito.
     const domande = dominio.domande(contesto);
     const cliente = await repo.identitaClienteDaVersione(pool, versionId);
+    // #239 — le parole che classificano un'azienda non la identificano: si sottraggono dai
+    // termini riservati, o un cliente che porta nel nome il proprio settore non e'
+    // ricercabile. Lette dalle tabelle della tassonomia, mai da un elenco scritto a mano.
+    const vocabolario = await repo.vocabolarioDiDominio(pool);
     try {
-      esigiDomandeSenzaCliente(domande, terminiRiservati(cliente));
+      esigiDomandeSenzaCliente(domande, terminiRiservati(cliente, vocabolario));
     } catch (e) {
       if (e instanceof DomandaNominaIlClienteError) {
         throw new UnprocessableEntityError({ violazioni: e.violazioni }, e.message, e.code);

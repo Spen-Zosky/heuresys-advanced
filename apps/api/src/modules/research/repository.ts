@@ -102,6 +102,37 @@ export async function identitaClienteDaVersione(
   return { nomeTenant: r?.nome ?? null, codiceTenant: r?.codice ?? null, codiceFascicolo: r?.fascicolo ?? null };
 }
 
+/**
+ * Il VOCABOLARIO DI DOMINIO: le parole che **classificano** un'azienda invece di
+ * identificarla (#239). Serve alla guardia di §4.5 per non confondere le due cose.
+ *
+ * Nasce da un caso vero: un fascicolo chiamato «societa' di consulenza (ATECO 70.20)»
+ * rendeva riservata la parola «consulenza», e la domanda che il motore genera da se' —
+ * «Quali processi aziendali governa di norma un'impresa italiana del settore ATECO …» —
+ * la contiene. La corsa non partiva. Non e' un caso di laboratorio: colpisce qualunque
+ * azienda che porti nel nome la parola del proprio settore, che nel mondo reale sono
+ * tantissime.
+ *
+ * ⚠ Si legge dalle DUE TABELLE che dichiarano la tassonomia, non da un elenco scritto a
+ * mano: un elenco a mano invecchia in silenzio appena qualcuno aggiunge un settore, e
+ * questa e' precisamente la classe di dato che il progetto ordina di misurare invece che
+ * cristallizzare. Misurato il 2026-09-03: 12 settori + 6 modelli operativi -> 33 parole.
+ */
+export async function vocabolarioDiDominio(q: DbConnector): Promise<string[]> {
+  const res = await q.query<{ parola: string }>(
+    `SELECT DISTINCT lower(p) AS parola
+       FROM (
+         SELECT unnest(regexp_split_to_array(industry_name, '[^[:alnum:]]+')) AS p
+           FROM sys.sys_industry_codes
+         UNION ALL
+         SELECT unnest(regexp_split_to_array(operating_model_name, '[^[:alnum:]]+'))
+           FROM sys.sys_operating_model_catalog
+       ) x
+      WHERE length(p) >= 3`,
+  );
+  return res.rows.map((r) => r.parola);
+}
+
 /** Il tenant del fascicolo, se gia' firmato. `null` per una trattativa. */
 export async function tenantDelFascicolo(q: DbConnector, versionId: string): Promise<string | null> {
   const res = await q.query<{ tenant_id: string | null }>(

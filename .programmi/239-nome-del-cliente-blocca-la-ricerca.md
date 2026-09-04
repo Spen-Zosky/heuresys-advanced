@@ -1,7 +1,7 @@
 # 239 — Il nome del cliente può rendere la ricerca impossibile
 
 > **item**: #239 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: NON AVVIATO
+> **stato**: FATTO (S1086, 2026-09-04)
 > **nasce-da**: le due prove di merito di `#132` F7 (2026-08-31). **Trovato eseguendo**, non
 > ragionando: la prova cercava tutt'altro — se la ricerca ripete l'archetipo bancario — e ha
 > incontrato questo per strada.
@@ -63,13 +63,72 @@ voce non deve fare.
 
 ## Fasi
 
-- [ ] **F1 — Misurare il vocabolario di dominio** — quante e quali parole sono già dichiarate
+- [x] **F1 — Misurare il vocabolario di dominio** — FATTO 2026-09-04 — quante e quali parole sono già dichiarate
       come settori/modelli nel sistema. Senza questo numero la scelta fra ① e ② è un'opinione.
       **fatto =** il conteggio esiste, e con esso la decisione fra le due strade, scritta
-- [ ] **F2 — La cura, con le due prove insieme** — quella scelta in F1, più i due casi sopra.
+- [x] **F2 — La cura, con le due prove insieme** — FATTO 2026-09-04 — quella scelta in F1, più i due casi sopra.
       **fatto =** entrambe verdi nella stessa corsa
 
 ## Chiuso quando
 
 Un'azienda che si chiama come il proprio settore può essere cercata, e una domanda che nomina
 il cliente continua a essere respinta.
+
+
+---
+
+## L'esito (S1086, 2026-09-04)
+
+### F1 — la misura che ha deciso, e ha ribaltato la stima
+
+Il piano dava la strada ① («sottrarre il vocabolario di dominio») come **più precisa e più
+costosa**, e diceva che la scelta dipendeva da quanto quel vocabolario fosse largo. Misurato:
+
+```
+sys_industry_codes            12 righe
+sys_operating_model_catalog    6 righe
+parole distinte (>= 3 lettere) 33
+```
+
+**Diciotto righe.** La ① non è la strada costosa: è una query. La stima era sbagliata, e solo la
+misura poteva dirlo — che è esattamente il motivo per cui F1 esisteva come fase a sé.
+
+E il vocabolario contiene proprio le parole che fanno danno: «consulenza» compare in **due**
+settori su dodici (`MGMT_CONSULTING` e `IT_SOFTWARE`), e con lei «banche», «assicurazioni»,
+«costruzioni», «trasporto», «istruzione».
+
+### F2 — la cura: le due strade non erano alternative
+
+Il piano le presentava come un aut-aut. **Non lo sono**: la ② è la rete che rende sicura la ①.
+
+- le **parole singole** che appartengono al vocabolario si sottraggono dai termini riservati —
+  «consulenza» da sola *classifica*, non identifica;
+- il **nome per esteso** resta sempre riservato — così un cliente che si chiamasse davvero
+  «Costruzioni Lombarde» perde la protezione sulla parola comune, ma **non** sulla propria
+  ragione sociale.
+
+Sottrarre senza quella rete sarebbe stato indebolire la guardia, cioè il modo ovvio di barare su
+questa voce. Il codice tiene `interi` e `parole` in due elenchi separati proprio per questo.
+
+Il vocabolario si legge dalle **due tabelle che lo dichiarano**, mai da un elenco scritto a mano:
+un elenco a mano invecchia in silenzio appena qualcuno aggiunge un settore.
+
+### Le prove, insieme e falsificabili — 19/19 verdi sul gemello
+
+| prova | cosa dimostra |
+|---|---|
+| il vocabolario viene dalle tabelle | non è un elenco cristallizzato; non fissa il numero esatto, che può variare |
+| **A** — fascicolo col proprio settore | la corsa **parte** |
+| **A'** — la stessa senza vocabolario | la corsa è **respinta** — senza questo caso, A sarebbe verde anche in un mondo dove la guardia non ha mai funzionato |
+| **B** — domanda che nomina il cliente | resta **respinta** |
+| **B'** — cliente chiamato come un settore | il nome per esteso lo protegge ancora |
+| le sigle societarie | `spa` non diventa un termine riservato |
+
+⚠ **Dove sono state eseguite, e perché**: sul **gemello**. Da Windows la suite muore con
+`Connection terminated due to connection timeout` — e **muore anche sul baseline senza le mie
+modifiche**, il che è la prova che è il tunnel e non il codice. Il tunnel è stato ricreato
+(1,3 s contro i timeout precedenti) e non basta comunque per un pool che apre molte connessioni.
+
+Il repo del gemello è stato rimesso a posto dopo la corsa — `file sporchi rimasti: 0` — perché
+quella macchina è il gemello di produzione **e** il runner della CI, e questa sessione ha già
+speso una notte a ripulire un processo dimenticato lì sopra.

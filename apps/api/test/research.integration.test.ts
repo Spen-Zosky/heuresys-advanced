@@ -20,6 +20,11 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { researchService } from "../src/modules/research/service.js";
 import { cataloghiVeri as repoCataloghi } from "../src/modules/research/repository.js";
+import { vocabolarioDiDominio } from "../src/modules/research/repository.js";
+import {
+  terminiRiservati,
+  domandeCheNominanoIlCliente,
+} from "../src/modules/research/guardia-domande.js";
 import type { ProposalSource, PropostaGrezza } from "../src/modules/research/engine.js";
 import type { WebReader, PaginaLetta } from "../src/modules/research/web-reader.js";
 import { actorFromRequest } from "../src/lib/actor.js";
@@ -491,5 +496,87 @@ describe("#132 F6 — il ponte, contro il database vero", () => {
     expect(c.specieCompetenza.has("KNOWLEDGE")).toBe(true);
     expect(c.versiIndicatore.has("TARGET_RANGE")).toBe(true);
     expect(c.versiIndicatore.has("TARGET_IS_BEST")).toBe(false);
+  });
+});
+
+/**
+ * #239 — IL NOME DEL CLIENTE PUO' RENDERE LA RICERCA IMPOSSIBILE.
+ *
+ * Un fascicolo chiamato «societa' di consulenza (ATECO 70.20)» rendeva riservata la parola
+ * «consulenza», e la domanda che il motore genera da se' — «Quali processi aziendali governa
+ * di norma un'impresa italiana del settore ATECO …» — la contiene. La corsa veniva respinta
+ * con `RESEARCH_QUERY_LEAKS_CLIENT`. Non e' un caso di laboratorio: colpisce qualunque
+ * azienda che porti nel nome la parola del proprio settore.
+ *
+ * ⚠ LE DUE PROVE VANNO INSIEME, o si e' solo indebolita la guardia — che e' il modo ovvio di
+ * barare su questa voce:
+ *   A) un fascicolo chiamato col proprio settore deve poter PARTIRE;
+ *   B) una domanda che nomina davvero il cliente deve restare RESPINTA.
+ *
+ * Il vocabolario NON e' scritto qui: si legge dalle tabelle che lo dichiarano, cosi' il
+ * giorno che qualcuno aggiunge un settore il test lo vede senza essere toccato.
+ */
+describe("#239 — classificare non e' identificare", () => {
+  const DOMANDA_SUL_SETTORE =
+    "Quali processi aziendali governa di norma un'impresa italiana del settore ATECO 70.20, " +
+    "cioe' la consulenza direzionale?";
+
+  let vocabolario: string[];
+
+  beforeAll(async () => {
+    vocabolario = await vocabolarioDiDominio(pool);
+  });
+
+  it("il vocabolario viene dalle tabelle della tassonomia, non da un elenco a mano", () => {
+    // Non si fissa il numero esatto: e' un dato che puo' variare, e cristallizzarlo qui
+    // renderebbe rosso il test al primo settore aggiunto. Si fissa cio' che deve valere.
+    expect(vocabolario.length).toBeGreaterThanOrEqual(20);
+    expect(vocabolario).toContain("consulenza");
+    expect(vocabolario.every((p) => p.length >= 3)).toBe(true);
+    expect(vocabolario.every((p) => p === p.toLowerCase())).toBe(true);
+  });
+
+  it("A — un fascicolo chiamato col proprio settore PARTE", () => {
+    const riservati = terminiRiservati({ codiceFascicolo: "PROVA-F7-CONSULENZA" }, vocabolario);
+    expect(riservati).not.toContain("consulenza");
+    expect(domandeCheNominanoIlCliente([DOMANDA_SUL_SETTORE], riservati)).toEqual([]);
+  });
+
+  it("A' — e la prova sa distinguere: SENZA vocabolario la stessa corsa e' respinta", () => {
+    // Se questo caso non fosse rosso, la prova A sarebbe verde anche in un mondo dove la
+    // guardia non ha mai funzionato: non distinguerebbe la cura dall'assenza di guardia.
+    const senzaCura = terminiRiservati({ codiceFascicolo: "PROVA-F7-CONSULENZA" });
+    expect(senzaCura).toContain("consulenza");
+    expect(domandeCheNominanoIlCliente([DOMANDA_SUL_SETTORE], senzaCura)).toHaveLength(1);
+  });
+
+  it("B — una domanda che nomina davvero il cliente resta RESPINTA", () => {
+    const riservati = terminiRiservati({ nomeTenant: "Alfa S.p.A." }, vocabolario);
+    expect(riservati).toContain("alfa");
+    const violazioni = domandeCheNominanoIlCliente(
+      ["Come organizza i propri processi la Alfa S.p.A. di Milano?"],
+      riservati,
+    );
+    expect(violazioni).toHaveLength(1);
+    // ⚠ Non si fissa QUALE termine la tradisce: la guardia riconosce prima il nome per
+    // esteso («alfa s.p.a.») e poi la parola, e l'ordine e' un dettaglio d'implementazione.
+    // Cio' che conta e' che la domanda sia respinta e che il termine venga dal cliente.
+    expect(violazioni[0]?.termine).toContain("alfa");
+  });
+
+  it("B' — la rete: un cliente che si chiama COME un settore tiene il nome per esteso", () => {
+    // La sottrazione vale sulle parole singole. La ragione sociale intera resta riservata,
+    // altrimenti sottrarre sarebbe indebolire.
+    const riservati = terminiRiservati({ nomeTenant: "Costruzioni Lombarde" }, vocabolario);
+    expect(riservati).not.toContain("costruzioni"); // da sola classifica
+    expect(riservati).toContain("costruzioni lombarde"); // per esteso identifica
+    expect(
+      domandeCheNominanoIlCliente(["Chi sono i concorrenti di Costruzioni Lombarde?"], riservati),
+    ).toHaveLength(1);
+  });
+
+  it("le sigle societarie non diventano termini riservati", () => {
+    const riservati = terminiRiservati({ nomeTenant: "Alfa S.p.A." }, vocabolario);
+    expect(riservati).not.toContain("spa");
   });
 });

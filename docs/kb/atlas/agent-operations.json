@@ -47,6 +47,28 @@
    },
    "solaLettura": true
   },
+  "content-blueprint-links": {
+   "data": "2026-09-04",
+   "decisione": "Enzo (#214 F3/F6, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). SETTIMO perimetro in sola lettura. Scelto col criterio meccanico e non a intuito — primo della coda dei neutri per ampiezza di lettura (3 letture · 2 pagine) — ma la testa della coda era un PARI con `visualization-exports`, stesse 3 letture e 2 pagine. Il pari lo scioglie la regola dell'ordine, che e' il RISCHIO CRESCENTE: `visualization-exports` eredita la superficie di `visualization-graphs`, aperto il 2026-08-26 CON UNA GUARDIA perche' il vocabolario dei nodi ammette 'USER'. Fra due candidati pari si apre prima quello piu' lontano da una persona. NEUTRALITA' MISURATA su information_schema, non dedotta dai nomi: delle dieci colonne di `sys_content_blueprint_links` nessuna e' il SOGGETTO di un dato di persona — `link_created_by` e' l'ATTORE che ha creato il collegamento, la stessa distinzione gia' fatta per `feedback_reviewed_by_user_id`: chi esamina non e' chi e' esaminato. ⚠ APERTO CON UNA GUARDIA, e stavolta le porte sono DUE invece di una: `link_metadata` e' JSONB (la stessa di `tenant_metadata`, mig. 000367) e `link_note` e' TESTO LIBERO — questa e' nuova, perche' una persona vi entra scrivendola, senza una chiave che la annunci. Mig `000370`: la sentinella `sys.v_content_blueprint_link_con_dato_di_persona` guarda entrambe, db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E DUE le porte iniettando un indirizzo di posta e disfacendolo — una sentinella provata su una porta sola sarebbe verde anche essendo cieca sull'altra. Sul testo libero il criterio e' l'indirizzo di posta e non «un nome di persona»: quello e' indecidibile, e una guardia che pretende di riconoscerlo mente.",
+   "operations": {
+    "get_by_document": {
+     "method": "GET",
+     "path": "/by-document",
+     "permission": "content:read"
+    },
+    "get_by_process": {
+     "method": "GET",
+     "path": "/by-process",
+     "permission": "blueprint:read"
+    },
+    "get_by_variant": {
+     "method": "GET",
+     "path": "/by-variant",
+     "permission": "blueprint:read"
+    }
+   },
+   "solaLettura": true
+  },
   "organization-units": {
    "data": "2026-08-16",
    "decisione": "Enzo (#156): primo perimetro in sola lettura. Coerente con la decisione dello stesso giorno su #193 — l'organigramma e' rubrica aziendale, visibile a chiunque lavori in azienda. E' l'unico candidato la cui sensibilita' non e' una stima di chi scrive, ma una scelta di prodotto scritta e datata.",

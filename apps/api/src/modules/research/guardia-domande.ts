@@ -122,6 +122,52 @@ export function domandeCheNominanoIlCliente(
   return violazioni;
 }
 
+/** Il codice con cui si rifiuta una fonte registrata per un dominio che non esiste. */
+export const RESEARCH_SOURCE_DOMAIN_UNKNOWN = "RESEARCH_SOURCE_DOMAIN_UNKNOWN";
+
+export class FonteConDominioIgnotoError extends Error {
+  readonly code = RESEARCH_SOURCE_DOMAIN_UNKNOWN;
+  constructor(
+    public readonly fonti: ReadonlyArray<{ hostSuffix: string; dominio: string }>,
+    public readonly dichiarati: readonly string[],
+  ) {
+    super(
+      `${fonti.length} fonte/i dichiarano un dominio che non esiste: ` +
+        `${fonti.map((f) => `"${f.dominio}" (${f.hostSuffix})`).join(", ")}. ` +
+        `Una fonte registrata per un dominio inesistente non la vedra' mai nessuno. ` +
+        `I domini dichiarati sono: ${dichiarati.join(", ")}.`,
+    );
+    this.name = "FonteConDominioIgnotoError";
+  }
+}
+
+/**
+ * #245 — IL DOMINIO DI UNA FONTE DEVE ESISTERE.
+ *
+ * Fino a S1086 quella colonna era testo libero, e ci e' finito dentro `64.19` — un codice
+ * ATECO, cioe' un SETTORE — al posto della chiave di un dominio ricercabile. La lettura del
+ * registro filtra su quella colonna, quindi la **sola fonte approvata del sistema** e' rimasta
+ * invisibile a ogni corsa per dieci giorni, e tre voci del menu sono state ferme con una
+ * diagnosi sbagliata («un input che solo Enzo puo' dare»).
+ *
+ * ⚠ L'INCOERENZA CHE QUESTO CHIUDE: l'**avvio** di una corsa il controllo ce l'aveva gia'
+ * (`RESEARCH_DOMAIN_UNKNOWN`, con l'elenco dei dichiarati); la **registrazione** di una fonte
+ * no. Lo stesso concetto era validato in un punto e non nell'altro — ed e' il punto non
+ * validato quello che scrive.
+ *
+ * `null` resta valido e significa «vale per tutti i domini»: e' il commento della colonna.
+ */
+export function esigiDominiDiFonteDichiarati(
+  fonti: ReadonlyArray<{ hostSuffix: string; dominio: string | null | undefined }>,
+  dichiarati: readonly string[],
+): void {
+  const noti = new Set(dichiarati);
+  const ignote = fonti
+    .filter((f) => f.dominio !== null && f.dominio !== undefined && !noti.has(f.dominio))
+    .map((f) => ({ hostSuffix: f.hostSuffix, dominio: f.dominio as string }));
+  if (ignote.length > 0) throw new FonteConDominioIgnotoError(ignote, dichiarati);
+}
+
 /** Il cancello: o le domande sono pulite, o la corsa non parte. */
 export function esigiDomandeSenzaCliente(
   domande: readonly string[],

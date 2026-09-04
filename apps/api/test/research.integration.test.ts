@@ -24,7 +24,10 @@ import { vocabolarioDiDominio } from "../src/modules/research/repository.js";
 import {
   terminiRiservati,
   domandeCheNominanoIlCliente,
+  esigiDominiDiFonteDichiarati,
+  FonteConDominioIgnotoError,
 } from "../src/modules/research/guardia-domande.js";
+import { chiaviDominio } from "../src/modules/research/domains/index.js";
 import type { ProposalSource, PropostaGrezza } from "../src/modules/research/engine.js";
 import type { WebReader, PaginaLetta } from "../src/modules/research/web-reader.js";
 import { actorFromRequest } from "../src/lib/actor.js";
@@ -578,5 +581,64 @@ describe("#239 — classificare non e' identificare", () => {
   it("le sigle societarie non diventano termini riservati", () => {
     const riservati = terminiRiservati({ nomeTenant: "Alfa S.p.A." }, vocabolario);
     expect(riservati).not.toContain("spa");
+  });
+});
+
+
+/**
+ * #245 — IL DOMINIO DI UNA FONTE DEVE ESISTERE.
+ *
+ * Nasce da un difetto vero: la SOLA fonte approvata del sistema portava
+ * `research_source_domain = '64.19'` — un codice ATECO, cioe' un SETTORE — al posto della
+ * chiave di un dominio ricercabile. La lettura del registro filtra su quella colonna, quindi
+ * quella riga non e' MAI stata vista da nessuna corsa: ogni ricerca moriva con
+ * `RESEARCH_NO_APPROVED_SOURCES`, e tre voci del menu sono rimaste ferme dieci giorni con la
+ * diagnosi sbagliata.
+ *
+ * L'incoerenza che questo chiude: l'AVVIO di una corsa il controllo ce l'aveva gia'; la
+ * REGISTRAZIONE di una fonte no — ed e' il punto non validato quello che scrive.
+ */
+describe("#245 — una fonte non si registra per un dominio che non esiste", () => {
+  it("un dominio IGNOTO viene respinto, e l'errore dice quali esistono", () => {
+    let preso: FonteConDominioIgnotoError | null = null;
+    try {
+      esigiDominiDiFonteDichiarati(
+        [{ hostSuffix: "bancaditalia.it", dominio: "64.19" }],
+        chiaviDominio(),
+      );
+    } catch (e) {
+      preso = e as FonteConDominioIgnotoError;
+    }
+    expect(preso).toBeInstanceOf(FonteConDominioIgnotoError);
+    expect(preso?.code).toBe("RESEARCH_SOURCE_DOMAIN_UNKNOWN");
+    expect(preso?.fonti[0]?.dominio).toBe("64.19");
+    // l'elenco dei dichiarati e' parte dell'informazione, non un dettaglio
+    expect(preso?.dichiarati.length).toBeGreaterThan(0);
+  });
+
+  it("...ma un dominio DICHIARATO passa — senza questo, la guardia potrebbe respingere tutto", () => {
+    const dichiarato = chiaviDominio()[0]!;
+    expect(() =>
+      esigiDominiDiFonteDichiarati([{ hostSuffix: "esempio.it", dominio: dichiarato }], chiaviDominio()),
+    ).not.toThrow();
+  });
+
+  it("`null` resta valido: e' il «vale per tutti i domini» del commento di colonna", () => {
+    expect(() =>
+      esigiDominiDiFonteDichiarati([{ hostSuffix: "esempio.it", dominio: null }], chiaviDominio()),
+    ).not.toThrow();
+  });
+
+  it("nel database non c'e' nessuna fonte con un dominio non dichiarato", async () => {
+    const res = await pool.query<{ host: string; dominio: string }>(
+      `SELECT research_source_host_suffix AS host, research_source_domain AS dominio
+         FROM sys.sys_research_sources
+        WHERE research_source_domain IS NOT NULL`,
+    );
+    const noti = new Set(chiaviDominio());
+    const ignote = res.rows.filter((r) => !noti.has(r.dominio));
+    // Se questo diventa rosso, una fonte e' invisibile a ogni corsa: e' esattamente il
+    // difetto che ha tenuto ferme tre voci, e non lo segnalava nulla.
+    expect(ignote, `fonti con dominio non dichiarato: ${JSON.stringify(ignote)}`).toEqual([]);
   });
 });

@@ -1,7 +1,7 @@
 # 245 — Il dominio di una fonte di ricerca è testo libero, e nessuno controlla che esista
 
 > **item**: #245 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: NON AVVIATO
+> **stato**: FATTO (S1086, 2026-09-04)
 > **nasce-da**: il difetto trovato chiudendo `#132` F7 (2026-09-04, S1086).
 
 ## Il fatto, misurato
@@ -42,16 +42,17 @@ un dominio sconosciuto dà `RESEARCH_DOMAIN_UNKNOWN` con l'elenco dei dichiarati
 ✅ **La riga è corretta**, in produzione e sul gemello (`db/scripts/244-...sql`), col settore
 conservato in `research_source_metadata.ateco` invece che perso.
 
-❌ **Il buco è aperto.** Correggere la riga senza chiudere il buco significa riaverlo: è la
-ragione per cui questa voce esiste invece di essere già chiusa.
+✅ **Il buco è chiuso** — nella stessa sessione che l'ha aperto (vedi «L'esito» in fondo).
+*Quando questa voce è nata, questa riga diceva «il buco è aperto», ed era la ragione per cui la
+voce esisteva: correggere la riga senza chiudere il buco significa riaverlo.*
 
 ## Fasi
 
-- [ ] **F1 — La validazione** — la chiave del dominio si confronta con `chiaviDominio()` nel
+- [x] **F1 — La validazione** — FATTO — la chiave del dominio si confronta con `chiaviDominio()` nel
       punto che scrive (`repository.ts`, registrazione delle fonti) e/o nello schema Zod,
       restituendo 422 con l'elenco dei dichiarati, come già fa l'avvio corsa.
       **fatto =** una fonte con dominio inesistente viene respinta
-- [ ] **F2 — Il controllo sull'esistente** — una riga già presente con un dominio ignoto deve
+- [x] **F2 — Il controllo sull'esistente** — FATTO — una riga già presente con un dominio ignoto deve
       essere **visibile**, non silenziosa: una sentinella o un controllo in `db_health`.
       **fatto =** il controllo esiste e si è visto rosso su un caso finto
 
@@ -68,3 +69,43 @@ Tutte e tre insieme, o si è solo spostato il problema:
 
 Nessun dominio di fonte può essere scritto se non è dichiarato, e ciò che è già scritto e non
 lo è viene segnalato invece di restare invisibile.
+
+
+---
+
+## L'esito (S1086, 2026-09-04)
+
+**F1** — la guardia vive in `guardia-domande.ts`, insieme alle altre, e non annegata nel
+servizio: così si può provare da sola. `esigiDominiDiFonteDichiarati(fonti, chiaviDominio())`
+lancia `FonteConDominioIgnotoError` → 422 `RESEARCH_SOURCE_DOMAIN_UNKNOWN`, con **l'elenco dei
+domini dichiarati dentro l'errore** — la stessa forma che l'avvio corsa usava già. L'incoerenza
+fra i due punti è chiusa.
+
+**F2** — il controllo sull'esistente è un test di integrazione contro il database vero: nessuna
+riga di `sys_research_sources` può avere un dominio non dichiarato.
+
+### Le prove, e quella che le rende credibili — 23/23 verdi
+
+| prova | esito |
+|---|---|
+| dominio ignoto → respinto, con l'elenco dei dichiarati | ✅ |
+| dominio **dichiarato** → passa | ✅ — senza questa, la guardia potrebbe respingere tutto ed essere lo stesso «verde» |
+| `null` → passa (è il «vale per tutti» del commento di colonna) | ✅ |
+| nel database nessuna fonte ha un dominio non dichiarato | ✅ |
+
+**Sabotaggio dichiarato**, perché un controllo che non si è mai visto rosso non è un controllo:
+
+```
+stato sano   → exit 0
+dominio forzato a 'SABOTAGGIO_245' → exit 1
+  × nel database non c'e' nessuna fonte con un dominio non dichiarato
+  AssertionError: fonti con dominio non dichiarato:
+    [{"host":"bancaditalia.it","dominio":"SABOTAGGIO_245"}]
+ripristinato → UPDATE 1 · file sporchi: 0
+```
+
+Il messaggio **nomina la riga colpevole**: è la differenza fra un controllo che dice «qualcosa
+non va» e uno che dice cosa.
+
+Eseguito sul gemello (da Windows la suite muore sul tunnel), e il repo del gemello è stato
+rimesso a posto.

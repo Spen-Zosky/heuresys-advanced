@@ -23,7 +23,13 @@ import { risolviDominio, chiaviDominio, dominiDichiarati } from "./domains/index
 import { DominioSconosciutoError } from "./domain.js";
 import { eseguiCorsa, type ProposalSource } from "./engine.js";
 import { HttpWebReader, type WebReader } from "./web-reader.js";
-import { esigiDomandeSenzaCliente, terminiRiservati, DomandaNominaIlClienteError } from "./guardia-domande.js";
+import {
+  esigiDomandeSenzaCliente,
+  terminiRiservati,
+  DomandaNominaIlClienteError,
+  esigiDominiDiFonteDichiarati,
+  FonteConDominioIgnotoError,
+} from "./guardia-domande.js";
 import { sorgenteRegistrata } from "./sorgenti/index.js";
 import { traduciProposte, conta } from "./ponte.js";
 
@@ -286,6 +292,28 @@ export const researchService = {
         `${bloccanti.length} proposta/e approvata/e non e' applicabile al modello: non si applica un modello a meta'.`,
         "RESEARCH_CONTENT_NOT_APPLICABLE",
       );
+    }
+
+    // #245 — IL DOMINIO DI UNA FONTE DEVE ESISTERE. Fino a S1086 questa colonna era testo
+    // libero, e ci e' finito dentro `64.19` — un codice ATECO, cioe' un SETTORE — al posto
+    // della chiave di un dominio ricercabile. La lettura filtra su quella colonna, quindi la
+    // SOLA fonte approvata del sistema e' rimasta invisibile a ogni corsa per dieci giorni, e
+    // tre voci del menu sono state ferme con la diagnosi sbagliata.
+    //
+    // L'incoerenza che questo chiude: l'AVVIO di una corsa il controllo ce l'ha gia'
+    // (`RESEARCH_DOMAIN_UNKNOWN`), la REGISTRAZIONE di una fonte no. Stesso concetto,
+    // validato in un punto solo.
+    try {
+      esigiDominiDiFonteDichiarati(esito.contenuto.sources, chiaviDominio());
+    } catch (e) {
+      if (e instanceof FonteConDominioIgnotoError) {
+        throw new UnprocessableEntityError(
+          { fonti: e.fonti, dichiarati: e.dichiarati },
+          e.message,
+          e.code,
+        );
+      }
+      throw e;
     }
 
     let applicate = 0;

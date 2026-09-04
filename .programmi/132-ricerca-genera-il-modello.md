@@ -605,7 +605,7 @@ Il commento nel codice va aggiornato insieme, o resterà a dire il contrario di 
   **contenuto** del commento, non sulla sua presenza: un commento vuoto passerebbe un controllo di
   sola esistenza. Prova generale VERDE, 311 migrazioni, 23/23 sentinelle; misurato dopo: famiglie
   1 · varianti 1, descritte e non toccate.
-- [ ] **F7 le due prove** — ✅ **SBLOCCATA ED ESEGUITA A METÀ (S1081, 2026-08-25).** L'approvazione
+- [x] **F7 le due prove** — ✅ **CHIUSA 2026-09-04 (S1086)** — ✅ **SBLOCCATA ED ESEGUITA A METÀ (S1081, 2026-08-25).** L'approvazione
   è arrivata (Enzo: *«Approva bancaditalia.it come prima fonte»* — fonte istituzionale della banca
   centrale, autorevole per il dominio bancario di RTL) **ed è stata applicata sul vivo**:
   `apps/api/scripts/prova-live-132-f7-fonte.mts` con login reale dell'utenza di collaudo
@@ -709,3 +709,49 @@ quando.
 F1 → F2 → F3 → F4 → F5 → F6 → F7. Il **T7** di `#198` (le due pagine) si può intercalare in qualunque
 momento: non dipende da *dove* nasce il modello. Il **T9** (la prova che chiude P3) ha senso **dopo**
 F6, altrimenti misurerebbe una costruzione fatta dall'archetipo che stiamo togliendo.
+
+
+---
+
+## ✅ F7 CHIUSA — 2026-09-04 (S1086). Il blocco dichiarato non esisteva
+
+**Le due prove di merito sono VERDI**, eseguite sul gemello (E27):
+
+```
+consulenza (ATECO 70.20) : 15 proposte — CONSULTING_DELIVERY · CONSULTANT_RECRUITING
+                           · CONSULTANT_TRAINING · E_INVOICING · CCNL_APPLICATION …
+RTL Bank   (ATECO 64.19) : 34 proposte — AML_SOS · AML_VALUTAZIONE_RISCHIO
+                           · ASSETTI_PARTECIPATIVI · BILANCIO_INFORMATIVA …
+chiavi in comune         : 0
+
+ESITO: VERDE — la ricerca ascolta l'azienda, non ripete un archetipo.
+```
+
+La prova poteva fallire in **tre** modi (stesse chiavi · consulenza vuota · RTL vuota): è per
+questo che il verde vale qualcosa.
+
+### Perché era ferma, e non per la ragione scritta
+
+La nota di S1083 diceva **`blocked-on-Enzo`**: «`RESEARCH_GATEWAY_URL` e `RESEARCH_GATEWAY_TOKEN`
+sono assenti dal `.env`». Vero, **e di proposito**. `scripts/avvia-ricerca.sh` — scritto *dopo*
+quella nota — dichiara che il fornitore è `apps/agent-gateway`, un nostro servizio, e che il
+segreto vive in `~/.research-token` (600), fuori dai file versionabili. Mancava quel file:
+`openssl rand -hex 32`. Tre voci ferme per una lettura nel posto sbagliato.
+
+### Il difetto vero, che nessuna nota aveva visto
+
+L'**unica fonte approvata del sistema** era invisibile a tutti i domini:
+
+```
+bancaditalia.it | APPROVED | research_source_domain = '64.19'
+```
+
+`research_source_domain` vuole la chiave di un **dominio ricercabile**; `64.19` è un codice
+ATECO, cioè un **settore**. La lettura filtra su quella colonna, quindi la riga non è mai stata
+vista e ogni corsa moriva con `RESEARCH_NO_APPROVED_SOURCES`. L'approvazione di Enzo del 25
+agosto era arrivata e la riga c'era: era nella casella sbagliata. Corretta in produzione e sul
+gemello con `db/scripts/244-...sql`, settore conservato nei metadati.
+
+⚠ **Il buco a monte resta aperto**: lo schema accetta il dominio come testo libero
+(`z.string().min(1).max(64)`), senza confronto coi domini dichiarati. È per questo che «64.19»
+è potuto entrare. Correggere la riga senza chiudere il buco significa riaverlo → voce `#245`.

@@ -20,9 +20,30 @@ Le scoperte vanno nel registro in fondo a questo file, non in «cosa resta».
 | N1 | Tunnel `:5433` degradato — 78 s per una count su 2 righe, VM scarica (load 0.11) | io | una count torna in pochi secondi | **FATTO** — ricreato, 78 s → 3,2 s |
 | N2 | Derivati 2/3 superati | io | `build_derivati.py` verde e registro aggiornato | **FATTO** |
 | N3 | Pagine NON MISURABILE (TimeoutExpired) | io | il cancello misura e dichiara un esito | **FATTO** — era il tunnel; 77 pagine, ogni pagina ha una porta |
-| N4 | Sentinella `v_incarico_attivo_senza_contratto` = 1 riga | io | sentinella a zero **e** un presidio che la tiene a zero da sola | in corso |
-| N5 | Allineamento ecosistema Claude rotto (`align-claude-ecosystem.sh:39`) | io | lo script trova il bootstrap, o la riga sparisce con motivo | da fare |
-| N6 | Chiusura S1086: 2 passi non sereni (chiusura, propaga) | io | causa nominata; se è N5, si chiude con N5 | da fare |
+| N4 | Sentinella `v_incarico_attivo_senza_contratto` = 1 riga | io | sentinella a zero **e** un presidio che la tiene a zero da sola | **FATTO** — mig `000371`, sentinella 0, presidio agganciato all'avanzamento |
+| N5 | Allineamento ecosistema Claude rotto (`align-claude-ecosystem.sh:39`) | io | lo script trova il bootstrap, o la riga sparisce con motivo | **FATTO** — sorgente in `~/.claude/scripts/`; allineamento VM+linux-pc exit 0 |
+| N6 | Chiusura S1086: 2 passi non sereni (chiusura, propaga) | io | causa nominata; se è N5, si chiude con N5 | **FATTO** — era N5 |
+| N7 | **Tre servizi systemd FAILED in produzione**, invisibili al boot (`--no-net`) | io | i tre tornano `Result=success` | **FATTO** — vedi sotto |
+| N8 | **CI rossa** su `0d7475d8` (*Lint (all workspaces)*) che blocca il deploy | io | corsa verde su un commit successivo | ⏳ **serve il push** (unico passo non delegato) |
+
+### N7 — i tre servizi, e i cinque guasti in fila
+
+Scoperti misurando la VM, non dal boot: la dashboard li dichiarava `[? ] --no-net`.
+
+| servizio | era | causa vera | ora |
+|---|---|---|---|
+| `storia36-avanzamento` | FAILED dal 2026-09-04 | cinque guasti annidati (sotto) | `Result=success`, custodia VERDE |
+| `storia36-custodia` | FAILED dal 2026-08-31 | gli stessi | `Result=success`, custodia VERDE |
+| `deploy-watch` | FAILED | CI rossa su `0d7475d8` — si rifiutava **correttamente** di deployare | `Result=success`; il deploy resta fermo per N8 |
+
+I cinque guasti, ognuno nascosto dal precedente (regola di bonifica §6):
+C4a (pavimento CCNL a chi non è un lavoratore) → C4h(i) (stessa classe) → C10a
+(qui mancava il **dato**, non il criterio → mig `000372`) → C11b(ii) (pretendeva
+candidati da una corsa `FAILED`) → C8a(ii) (**il check misurava l'orologio e il
+seed la frontiera**: 26 giorni di divergenza) → e un sesto trovato dalla batteria
+stessa, il selftest di C10a(ii) che sceglieva la riga da guastare a caso.
+
+**Frontiera della storia RTL: 2026-09-04** — arrivata a ieri, come D-STORIA-B chiede.
 
 ### N4 — simulazione a 5 domande (R24 §3)
 

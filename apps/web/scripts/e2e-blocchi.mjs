@@ -39,6 +39,43 @@ const WEB_DIR = resolve(HERE, "..");
 const CONFIG = "playwright.prod.config.ts";
 
 /**
+ * Il `.env` del repo, letto come lo legge `playwright.config.ts`.
+ *
+ * Senza questo il preflight non vedeva NIENTE del `.env` e ripiegava su valori cablati.
+ * Misurato il 2026-09-05 sul gemello: dichiarava «API NON raggiungibile su
+ * http://localhost:3001» mentre l'API rispondeva sulla 8013 — la porta che il `.env` dice
+ * (`PORT=8013`) e che l'unit systemd del web passa al processo, ma che una shell qualunque
+ * non ha. La 3001 non e' l'API di nessuno: e' solo il ripiego scritto qui dentro, ed e' la
+ * stessa 3001 su cui `.handoff/STATE.md` teneva aperta la domanda «di chi e' questa porta?».
+ * Risposta: di nessuno.
+ *
+ * Un preflight che ripiega su un valore inventato non avvisa, DEPISTA — e questa e' la
+ * seconda volta che questo stesso preflight produce un falso allarme (la prima in S1081,
+ * `process.exit()` dentro un fetch). Un allarme che suona senza motivo insegna a non
+ * guardarlo, che e' esattamente il difetto di `#194`.
+ */
+function leggiEnv() {
+  const valori = {};
+  for (const p of [resolve(WEB_DIR, "../../.env"), resolve(WEB_DIR, ".env")]) {
+    let testo;
+    try {
+      testo = readFileSync(p, "utf8");
+    } catch {
+      continue; // il file puo' non esserci (CI): i valori arrivano dall'ambiente
+    }
+    for (const riga of testo.split(/\r?\n/)) {
+      const m = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/.exec(riga);
+      if (!m) continue;
+      valori[m[1]] = m[2].trim().replace(/^["']|["']$/g, "");
+    }
+  }
+  return valori;
+}
+const ENV_FILE = leggiEnv();
+/** L'ambiente vince sul file: chi esporta una variabile sa quello che fa. */
+const env = (nome) => process.env[nome] ?? ENV_FILE[nome];
+
+/**
  * Le fasi si LEGGONO dalla config — una sola fonte, o le due divergono in silenzio e la
  * fase mancante non gira.
  *
@@ -103,8 +140,21 @@ function preflight() {
   if (process.env.E2E_PREFLIGHT === "0") return [];
   const avvisi = [];
 
-  // 1. l'API risponde? (la porta la dichiara la stessa variabile che usa il web)
-  const apiBase = process.env.NEXT_PUBLIC_API_PROXY_BASE_URL || "http://localhost:3001";
+  // 1. l'API risponde? La base si DERIVA, in quest'ordine, e non si inventa mai:
+  //    ① la variabile che usa il web, se qualcuno l'ha esportata o messa nel `.env`;
+  //    ② altrimenti la `PORT` che il `.env` dichiara per l'API — e' la stessa che l'unit
+  //       systemd passa al processo, quindi e' la porta vera anche da una shell nuda;
+  //    ③ se nemmeno quella c'e', si dichiara NON MISURABILE e ci si ferma li'. Il ripiego
+  //       su una porta cablata (era `http://localhost:3001`) non avvisava: DEPISTAVA.
+  const apiBase = env("NEXT_PUBLIC_API_PROXY_BASE_URL")
+    ?? (env("PORT") ? `http://localhost:${env("PORT")}` : null);
+  //    ⚠ e se manca, si prosegue con gli ALTRI due controlli invece di uscire: una batteria
+  //      che si ferma al primo rosso nasconde tutti gli altri (regola di bonifica §6).
+  if (!apiBase) {
+    avvisi.push("porta dell'API NON MISURABILE: ne' NEXT_PUBLIC_API_PROXY_BASE_URL ne' PORT " +
+                "sono dichiarate (ambiente o .env). Non tiro a indovinare una porta: senza " +
+                "questo dato i rossi della corsa non sono attribuibili");
+  }
   // ⚠ `process.exitCode`, MAI `process.exit()` dentro la promise di `fetch`: su Windows
   // chiuderebbe l'handle mentre undici lo sta ancora usando, e Node muore con
   // «Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)» — un codice d'uscita ≠ 0
@@ -112,13 +162,15 @@ function preflight() {
   // preflight scritto cosi' ha dato un FALSO ALLARME su un'API che rispondeva, ed e'
   // esattamente il difetto di #194 — un allarme che suona senza motivo insegna a non
   // guardarlo.
-  const api = spawnSync(process.execPath,
-    ["-e", `fetch(${JSON.stringify(apiBase + "/healthz")},{signal:AbortSignal.timeout(4000)})` +
-           `.then(r=>{process.exitCode=r.ok?0:1}).catch(()=>{process.exitCode=1})`],
-    { encoding: "utf8" });
-  if (api.status !== 0) {
-    avvisi.push(`API NON raggiungibile su ${apiBase} — nessuna config Playwright la avvia: ` +
-                `apri un terminale con \`cd apps/api && pnpm dev\`, o ogni login fallira'`);
+  if (apiBase) {
+    const api = spawnSync(process.execPath,
+      ["-e", `fetch(${JSON.stringify(apiBase + "/healthz")},{signal:AbortSignal.timeout(4000)})` +
+             `.then(r=>{process.exitCode=r.ok?0:1}).catch(()=>{process.exitCode=1})`],
+      { encoding: "utf8" });
+    if (api.status !== 0) {
+      avvisi.push(`API NON raggiungibile su ${apiBase} — nessuna config Playwright la avvia: ` +
+                  `apri un terminale con \`cd apps/api && pnpm dev\`, o ogni login fallira'`);
+    }
   }
 
   // 2. la :3000 e' libera? Un server sopravvissuto e' peggio di nessun server.
@@ -133,20 +185,35 @@ function preflight() {
                 `e se e' un next start orfano sta servendo una build vecchia`);
   }
 
-  // 3. la VM che ospita il database e' scarica? Si misura, non si presume — e se
+  // 3. la macchina che ospita il database e' scarica? Si misura, non si presume — e se
   //    non si puo' misurare si DICHIARA: «non lo so» non e' «a posto».
-  const host = process.env.E2E_DB_HOST_SSH ?? "oracle-vm-default";
-  const vm = spawnSync("ssh", ["-o", "ConnectTimeout=8", "-o", "BatchMode=yes", host,
-                               "cat /proc/loadavg; pgrep -c aide || true"], { encoding: "utf8" });
+  //
+  //    ⚠ QUALE macchina, pero', lo dice il `.env`, non una costante. Fino al 2026-09-05 qui
+  //    c'era `oracle-vm-default` cablato, e la corsa sul GEMELLO — dove il database e' in
+  //    casa e la VM non c'entra niente — misurava il carico della macchina sbagliata e ne
+  //    riportava l'esito come proprio. E' la stessa dottrina gia' scritta per il database
+  //    («il lavoro si esegue dove il DB vive»), applicata al suo controllo: se il `.env`
+  //    dichiara il DB oltre il tunnel (`POSTGRES_PORT=5433`), la macchina che conta e' la
+  //    VM; se lo dichiara in casa (il gemello ha `localhost:5432`), la macchina che conta
+  //    e' QUESTA, e si misura senza uscire.
+  const oltreIlTunnel = String(env("POSTGRES_PORT") ?? "5433") === "5433";
+  const host = process.env.E2E_DB_HOST_SSH ?? (oltreIlTunnel ? "oracle-vm-default" : null);
+  const vm = host
+    ? spawnSync("ssh", ["-o", "ConnectTimeout=8", "-o", "BatchMode=yes", host,
+                        "cat /proc/loadavg; pgrep -c aide || true"], { encoding: "utf8" })
+    : spawnSync("sh", ["-c", "cat /proc/loadavg; pgrep -c aide || true"], { encoding: "utf8" });
+  // Il messaggio NOMINA la macchina misurata: dire «la VM» avendo guardato questa macchina
+  // e' la stessa specie di bugia del ripiego sulla 3001.
+  const chi = host ?? "questa macchina (il DB e' in casa)";
   if (vm.status !== 0) {
-    avvisi.push(`carico della VM NON MISURABILE (${host} non risponde): l'esito di questa corsa ` +
+    avvisi.push(`carico di ${chi} NON MISURABILE: l'esito di questa corsa ` +
                 `non potra' distinguere un guasto da una macchina satura`);
   } else {
     const righe = `${vm.stdout}`.trim().split("\n");
     const load1 = Number.parseFloat(righe[0]?.split(/\s+/)[0] ?? "0");
     const aide = Number.parseInt(righe[1] ?? "0", 10) || 0;
     if (aide > 0 || load1 >= 2) {
-      avvisi.push(`VM CARICA (load ${load1}${aide > 0 ? ", `aide` in esecuzione" : ""}) — il DB ` +
+      avvisi.push(`${chi} CARICA (load ${load1}${aide > 0 ? ", `aide` in esecuzione" : ""}) — il DB ` +
                   `risponde lento, il pool scade e i login vanno in 500: i rossi di questa corsa ` +
                   `NON sono attribuibili al prodotto finche' non si rimisura a macchina scarica`);
     }
@@ -161,6 +228,17 @@ if (AVVISI_PREFLIGHT.length > 0) {
   console.error("=".repeat(78));
   for (const a of AVVISI_PREFLIGHT) console.error(`  [!] ${a}`);
   console.error("=".repeat(78) + "\n");
+}
+
+// `--solo-preflight`: esce qui, con 0 se l'ambiente e' pulito e 1 se ha qualcosa da dire.
+// Serve a rendere il preflight FALSIFICABILE senza pagare un'ora di corsa: e' cosi' che il
+// 2026-09-05 si e' potuto provare che la porta dell'API non era piu' quella cablata.
+if (process.argv.includes("--solo-preflight")) {
+  console.error(AVVISI_PREFLIGHT.length === 0
+    ? "preflight: nessun avviso — l'ambiente e' quello che la suite presume"
+    : `preflight: ${AVVISI_PREFLIGHT.length} avviso/i (sopra)`);
+  process.exitCode = AVVISI_PREFLIGHT.length === 0 ? 0 : 1;
+  process.exit();
 }
 
 /** Come si invoca Playwright: attraverso il wrapper Node 22 quando serve (D-36). */

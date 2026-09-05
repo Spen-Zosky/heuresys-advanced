@@ -1,7 +1,7 @@
 # 205 — Tenant Builder 2b e 2c: la coda dei domini ricercabili, e il patrimonio senza le parole di un altro
 
 > **item**: #205
-> **stato**: NON AVVIATO
+> **stato**: NON AVVIATO · ⚠ gate CADUTO ma **F1 resta non eseguibile in modo utile** — misura del 2026-09-05, sotto
 
 Con questa e con P4, tutte e quattro le parti del Tenant Builder sono progettate: P1 chiusa ·
 P2a `#132` · 2b/2c qui · P3 `#198` · P4 consegnata.
@@ -74,3 +74,40 @@ motore esiste, nessuna dimostrazione è avvenuta.
 Esiste lo strumento che ri-deriva la coda con autoprova a esiti opposti, il primo dominio è stato
 dichiarato e ha prodotto proposte approvate, e la prova della frase riconoscibile sullo strato di
 forma dà zero riscontri.
+
+
+---
+
+## ⚠ Misurato il 2026-09-05 (S1087): il gate e' caduto, ma F1 non e' diventata eseguibile
+
+La dipendenza dura diceva: «la coda non e' calcolabile finche' 2a non e' fatta — la prova R2
+dipende da `sys_research_sources`, che **non esiste**». `#132` e' stata chiusa (con F7) in S1086,
+e la tabella ora esiste davvero:
+
+```
+to_regclass('sys.sys_research_sources') -> presente, 15 colonne
+select research_source_status, research_source_domain, count(*) ... :
+  APPROVED | business_processes | 1
+```
+
+**Una riga sola, per un dominio solo — e quel dominio e' proprio quello gia' percorso da 2a.**
+
+Conseguenza diretta sulla prova R2 («esiste almeno una fonte ammessa che ne parla»): applicata
+oggi, escluderebbe **ogni** candidato tranne `business_processes`. Lo strumento di F1 nascerebbe
+verde e restituirebbe una coda con dentro solo cio' che e' gia' fatto — cioe' **un verde nato dal
+vuoto**, che e' esattamente la forma di falso verde che questo repository ha imparato a
+riconoscere. E la sua autoprova a esiti opposti («un dominio che deve passare e uno che deve
+essere escluso da *ciascuna* delle tre prove») **non sarebbe costruibile su R2**, perche' non
+esiste un secondo dominio con cui provare il «no».
+
+Non e' la decisione di Enzo a mancare (quella su «che cosa passa a un cliente nuovo» riguarda F1
+ma e' separabile): **manca la materia**. Il registro delle fonti si popola percorrendo domini, e
+percorrere domini e' F2 — che dipende da F1. Il nodo si scioglie approvando altre fonti, che e'
+un atto di business, oppure dichiarando che R2 vale «una fonte ammessa **puo'** esistere per quel
+dominio» invece di «esiste» — ma quella e' una riscrittura del criterio, non la sua applicazione,
+e questo piano vieta esplicitamente di scrivere a mano un criterio.
+
+**Sta a Enzo**, e sono due domande, non una:
+1. quali altre fonti si approvano (business: da quali siti la piattaforma accetta di imparare);
+2. se R2 va riscritta al potenziale — e con quale ordine, dato che il criterio 4 dice «per
+   ricaduta», che si calcola sulle relazioni e non sulle fonti.

@@ -164,6 +164,16 @@ avanzamento() {
     "${PSQL[@]}" -f "$d"
   done
 
+  # I CONTRATTI non sono nel perimetro di 13_avanzamento.sql (che dichiara:
+  # calendario, presenze/assenze, buste paga) — ma il tempo avanza per tutti, e
+  # i contratti a termine scadono da soli. Fino alla 000371 ogni scadenza
+  # produceva un difetto che qualcuno doveva accorgersi di correggere a mano:
+  # 000289 su 23 persone, 000311 su 7 otto giorni dopo, una terza il 2026-09-05.
+  # Qui il rinnovo diventa ricorrente, col criterio della 000311 e non uno nuovo.
+  # Idempotente: a campo pulito scrive 0 righe.
+  log "avanzamento: rinnovo i contratti scaduti con incarico attivo"
+  "${PSQL[@]}" -c "SELECT * FROM staging.contratti_rinnova_scaduti();"
+
   log "avanzamento: verifico con la custodia"
   custodia
 }

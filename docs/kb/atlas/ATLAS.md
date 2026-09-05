@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `8b9af0b6` (2026-09-05T14:59:07+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `6d2f1aaf` (2026-09-05T15:42:11+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -11,7 +11,7 @@
 | Pagine web | 120 |
 | Schemi shared | 108 |
 | Tabelle DB | 290 (vuote: 24) |
-| Viste / matview | 39 / 0 |
+| Viste / matview | 40 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 273 |
 
 ## Moduli API

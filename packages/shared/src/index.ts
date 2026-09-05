@@ -109,6 +109,7 @@ export * from "./schemas/content-blueprint-links.js";
 export * from "./schemas/organization-unit-processes.js";
 export * from "./schemas/engagement.js";
 export * from "./schemas/approvals.js";
+export * from "./schemas/job-postings.js";
 export * from "./schemas/job-requisitions.js";
 export * from "./schemas/tenant-materialization.js";
 export * from "./schemas/time-off.js";

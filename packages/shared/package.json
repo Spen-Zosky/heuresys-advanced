@@ -102,6 +102,11 @@
       "heuresys-source": "./src/schemas/job-families.ts",
       "default": "./dist/schemas/job-families.js"
     },
+    "./schemas/job-postings": {
+      "types": "./dist/schemas/job-postings.d.ts",
+      "heuresys-source": "./src/schemas/job-postings.ts",
+      "default": "./dist/schemas/job-postings.js"
+    },
     "./schemas/job-requisitions": {
       "types": "./dist/schemas/job-requisitions.d.ts",
       "heuresys-source": "./src/schemas/job-requisitions.ts",

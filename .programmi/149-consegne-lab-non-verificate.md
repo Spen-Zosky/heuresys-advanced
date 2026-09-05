@@ -27,6 +27,16 @@ quando si spuntano, se ne aggiunge la successiva.
 - [x] **F2 Lo stato dell'inbox del lab** — FATTO 2026-08-13 (S1057) · l'inbox (`<padre del repo>/heuresys-design-lab/inbox/`) è **vuota**: contiene la sola cartella `ingerite/`, ultima consegna assorbita `2026-08-12-guardia-psql-opzioni-raggruppate`. Nessuna ingestione pendente
 - [x] **F3 La verifica avversariale su `#205` (2b/2c)** — FATTO 2026-08-16 (S1066) · misure ri-fatte sul vivo; respinta come **falsa** l'affermazione portante «P2a ha costruito il motore e lo ha dimostrato»: `#132` è ACTIVE, mai implementata. Due numeri del documento già invecchiati (25→26 viste, 158→159 colonne)
 - [ ] **F4 La prossima consegna che arriva, o la prossima ingerita che qualcuno cita** — budget ~30k a consegna
+      ▸ **Misurato il 2026-09-05 (S1087): l'inbox e' ancora vuota.** `heuresys-design-lab/inbox/`
+      contiene la sola cartella `ingerite/`, invariata dal 2026-08-24. E il presidio e' stato
+      applicato dove serviva davvero: **nessuna** delle decisioni eseguite in questa sessione
+      poggia su un documento del lab — poggiano tutte su misure prese sul vivo (il parco
+      contratti, i tre servizi systemd, le colonne di `information_schema`, il registro delle
+      fonti). Anzi, il presidio ha lavorato in senso proprio su **due affermazioni dei nostri
+      stessi programmi**, che sono la stessa specie di fonte non verificata: `#219` dava il
+      gemello con «Node 22.19.0 come default nvm» (misurato: **v12.22.9**) e `#242` dava la
+      5.12.1 per ultima (misurata: **5.12.3**). Un documento interno invecchia come uno del lab.
+      La misura si rifa', non si eredita.
       ▸ **Misurato il 2026-08-28 (S1083): nessun bersaglio.** `lab_inbox.riassunto()` torna vuota —
       nessuna consegna del lab in attesa di verifica, e nessuna è stata citata in sessione. La fase
       resta aperta perché è continuativa e si attiva su evento; dichiararla «fatta» perché oggi la

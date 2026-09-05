@@ -83,7 +83,7 @@ a termine scadono da soli. È la **terza** occorrenza dello stesso fenomeno (`00
 | id | voce | costo dichiarato | stato |
 |---|---|---|---|
 | P1-1 | `#198` T9b — la costruzione vera in produzione | ~1 sessione | da fare |
-| P1-2 | `#149` F4 — consegne del lab non verificate | continuativo | da fare |
+| P1-2 | `#149` F4 — consegne del lab non verificate | continuativo | ✅ **onorata** — inbox vuota (misurata), e il presidio ha smentito 2 affermazioni dei *nostri* programmi |
 | P1-3 | `#143` F3 — asse funzionale vivo | ~4-6 sessioni | **fuori confine dichiarato** |
 | P2-1 | `#231` S7 — triage dei 10 falliti (= `#219` F5d) | continuativo | da fare |
 | P2-2 | `#242` trustProxy per indirizzo + fastify 5.12.3 | ~1 sessione | ✅ **CHIUSA** — F2+F3+F4, voce a DONE nel register |
@@ -92,7 +92,7 @@ a termine scadono da soli. È la **terza** occorrenza dello stesso fenomeno (`00
 | P2-5 | `#159` F2 — il ponte | ~3-4 sessioni | **fuori confine dichiarato** |
 | P2-6 | `#79` F3 — cancello di esposizione | continuo | ✅ **onorata** — 73/73 esposte; il dato scritto dalla `000372` è letto dal modulo `gdpr` |
 | P2-7 | `#54` F3 — recruiting/ATS, API | ~5-7 sessioni | **fuori confine dichiarato** |
-| P3-1 | `#205` F1 — coda dei domini ricercabili | ~1 sessione | da fare |
+| P3-1 | `#205` F1 — coda dei domini ricercabili | ~1 sessione | ⏳ **gate caduto, ma manca la materia** — 1 sola fonte approvata: R2 darebbe una coda vuota. Due domande a Enzo, registrate nel programma |
 | P3-2 | `#50` F3 — la vista del grafo delle competenze | ~2 sessioni | da fare |
 
 ---

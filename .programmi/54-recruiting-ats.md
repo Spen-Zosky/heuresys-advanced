@@ -54,9 +54,9 @@
   ⚠ Entrambe si vedono solo alla **seconda passata** — girano prima della `000364` e alla prima
   non possono vedere tabelle che ancora non esistono.
 - [ ] **F3 — API** — moduli secondo il pattern in 7 passi, un commit per slice · budget ~250k
-      ▸ **2 fette su 7 fatte (S1087, 2026-09-05)**: `job-requisitions` (4 rotte, 10 test) e
-      `job-postings` (4 rotte, 8 test). Restano candidates, applications, interviews,
-      feedback, offers.
+      ▸ **3 fette su 7 fatte (S1087, 2026-09-05)**: `job-requisitions` (4 rotte, 10 test),
+      `job-postings` (4 rotte, 8 test), `candidates` (4 rotte, 9 test). Restano
+      applications, interviews, feedback, offers.
 - [ ] **F4 — Frontend + E2E con login reale** — cluster `/recruiting`, **componente Kanban di `@heuresys/ui` mai usato** finora, più il posting pubblico (percorso prospect ADR-0026) · budget ~250k
 
 ## Esito di F1 — misurato il 2026-08-14
@@ -143,10 +143,27 @@ che li confonde passa per la ragione sbagliata, ed e' scritto nella regola del m
 `job-requisitions` **10/10** · `job-postings` **8/8** · allowlist **2/2**. Tutti contro il DB
 reale, nessun mock.
 
-### Perche' mi sono fermato a due fette
+### La terza fetta: `candidates`, e perche' merita un paragrafo suo
 
-Guardiano misurato: contesto **61,6%**, giudizio **MEDIO**, residuo ~134k. La terza fetta
-(`candidates`) tocca **dati personali di persone che non sono utenti** — il registro GDPR
-sorveglia le FK verso `sys_users` e non vedrebbe quella tabella, quindi consenso e scadenza di
-conservazione sono colonne con un CHECK, non una riga in un documento (F2 lo dichiara). Merita
-spazio per essere fatta bene, non gli avanzi di una sessione.
+Tocca **dati personali di persone che non sono utenti**: il registro GDPR sorveglia le FK verso
+`sys_users` e **non vede** `sys_candidates`, quindi la guardia resterebbe verde su nome, cognome,
+indirizzo e telefono di persone reali. E' la ragione per cui consenso e scadenza di conservazione
+sono colonne con un CHECK e non una riga in un documento (F2 lo dichiara), ed e' la ragione per cui
+i suoi nove test provano **i tre vincoli uno per uno** invece del solo percorso felice:
+
+| vincolo | cosa impedisce | codice |
+|---|---|---|
+| `retention_until >= consent_given_on` | conservare un dato da prima di averne il permesso | `CANDIDATE_RETENTION_INVALID` |
+| `HIRED` impone `hired_user_id` | un assunto senza l'utente nato dall'assunzione | `CANDIDATE_HIRED_WITHOUT_USER` |
+| indirizzo unico nel tenant | la stessa persona due volte nella stessa azienda | `CANDIDATE_EMAIL_CONFLICT` |
+
+In piu', il service verifica che l'utente dell'assunzione sia **dello stesso tenant**: quella
+colonna non ha un vincolo che lo imponga, quindi senza il controllo si potrebbe assumere
+dichiarando un utente di un'altra azienda. E l'indirizzo **non e' modificabile**: e' la chiave
+naturale, e cambiarlo trasformerebbe una persona in un'altra lasciando appese le sue candidature.
+
+### Perche' mi sono fermato a tre fette
+
+Guardiano misurato alla fine: contesto **68,8%**, giudizio **MEDIO**, residuo ~62k, contro una
+soglia di chiusura al 75%. Le quattro fette che restano (`applications`, `interviews`,
+`feedback`, `offers`) chiudono il ciclo e vanno fatte con lo spazio per provarle davvero.

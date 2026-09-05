@@ -123,3 +123,53 @@ del metro è scritta nel referto · l'azienda è stata archiviata verificando ch
 Doppia riga di registro sullo stesso bersaglio → respinta dall'unique · applicazione senza
 `build_source_key` → `BLUEPRINT_BUILD_SOURCE_MISSING`, mai ripiego sull'unico archetipo ·
 sabotaggio del passo registro → rollback intero · segnaposto confrontati coi nomi propri reali.
+
+
+---
+
+## ⚠ Misurato il 2026-09-05 (S1087): il blocco di T9b si e' SPOSTATO, non e' sparito
+
+`#132` e' stata chiusa con F7 in S1086, e il menu di questa sessione dava T9b «sbloccata».
+Misurato sul vivo prima di eseguirla, **non lo e'** — ma la ragione non e' piu' quella
+registrata in S1083.
+
+**Allora** (S1083) il blocco era il *fornitore di ricerca*: `RESEARCH_GATEWAY_URL` e
+`RESEARCH_GATEWAY_TOKEN` assenti. Quello e' caduto: la ricerca funziona, ha letto pagine vere e
+ha prodotto proposte approvate.
+
+**Oggi** il blocco e' che il modello e' vuoto, e le proposte non parlano dei domini che servono:
+
+```
+sys_blueprint_content_units      0        <- il confine di BLUEPRINT_CONTENT_EMPTY
+sys_blueprint_content_positions  0
+sys_blueprint_content_skills     0
+sys_blueprint_content_kpis       0
+
+proposte per dominio, con la loro decisione:
+  storia36          APPLIED 12   APPROVED 12
+  research_sources  PASSED  11 · APPLIED 1 · WARNING 1   APPROVED 4
+```
+
+**Nessuna proposta riguarda unita' organizzative, posizioni, competenze o indicatori** — cioe'
+esattamente i quattro domini da cui `BlueprintBuildSource.plan()` costruisce. Lanciare T9b oggi
+non produrrebbe «una quarta banca»: si rifiuterebbe con `BLUEPRINT_CONTENT_EMPTY`, che e' il
+comportamento corretto (`blueprint-build-source.ts:207`, e il confine e' sulle UNITA' perche'
+ogni posizione dichiara `unit_code NOT NULL`).
+
+### ⭐ Tre voci del menu, un solo nodo — di nuovo, ma un nodo diverso
+
+`#198` T9b · `#132` (il ponte che riempie il modello) · `#205` F1 (la coda dei domini
+ricercabili) dipendono tutte dalla stessa cosa: **esistono fonti approvate per i domini di
+struttura?** Misurato: `sys_research_sources` ha **una riga sola**, `APPROVED`, dominio
+`business_processes`.
+
+Finche' resta una sola:
+- T9b non ha un modello da cui costruire;
+- `#205` F1 costruirebbe una coda con dentro solo cio' che e' gia' fatto (§ nel suo programma);
+- e il ponte non ha proposte da portare.
+
+**La domanda per Enzo e' una sola, e non e' tecnica**: *da quali fonti la piattaforma accetta di
+imparare com'e' fatta un'azienda* — per le unita' organizzative, le posizioni, le competenze e
+gli indicatori. E' la stessa domanda che `#205` pone come «che cosa passa a un cliente nuovo»,
+vista dall'altro capo. Nessuna misura puo' rispondere, e scriverla a mano e' vietato dai piani
+di entrambe le voci.

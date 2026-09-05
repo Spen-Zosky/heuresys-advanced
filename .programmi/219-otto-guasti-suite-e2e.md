@@ -391,3 +391,55 @@ criterio dichiarato in `#211` F4.
   ⚠ La prima pista e' anche un **difetto dell'impianto di prova**, non del prodotto: la corsa
   gira con `NEXT_PUBLIC_API_PROXY_BASE_URL=:8013` mentre i test chiamano `:3001`. **Due API in
   gioco nella stessa corsa**: finche' e' cosi', nessun 403 e' interpretabile.
+
+
+---
+
+## ⭐⭐ S1087 (2026-09-05) — LA CAUSA COMUNE NON ERA IL TUNNEL: ERA LA 3001
+
+S1083 aveva concluso «il collo di bottiglia e' il tunnel SSH» e prescritto la corsa sul gemello.
+La cura era **giusta come pratica** e la diagnosi **sbagliata come causa**, e si e' visto solo
+eseguendola davvero.
+
+**La misura.** Corsa integrale sul gemello — dove il DB e' in casa e **il tunnel non c'e'** —
+con l'API viva e sana: `journalctl` dell'API riporta **zero** «Connection terminated», **zero**
+timeout di pool, **zero** errori. Esito:
+
+```
+[WebServer] Failed to proxy http://localhost:3001/v1/auth/login
+            Error: connect ECONNREFUSED 127.0.0.1:3001
+4 failed (i quattro auth.setup) · 1 flaky · 82 did not run · 1 passed (14.2m)
+```
+
+Gli **stessi** quattro setup e gli **stessi** 82 test non eseguiti di S1083. Il tunnel non c'era,
+il guasto era identico: **il tunnel aveva preso la colpa di questo**.
+
+**La causa vera, ed e' due volte lo stesso ripiego cablato:**
+
+| file | riga | ripiego |
+|---|---|---|
+| `apps/web/next.config.js` | 17 | `... \|\| "http://localhost:3001"` |
+| `apps/web/scripts/e2e-blocchi.mjs` | 107 | `... \|\| "http://localhost:3001"` |
+
+Il web che Playwright avvia e' **un altro processo** e non eredita
+`NEXT_PUBLIC_API_PROXY_BASE_URL` da nessuna parte: l'unit systemd ce l'ha, quel web no. Quindi
+ripiegava sulla 3001 e ogni login moriva in `ECONNREFUSED`, i quattro setup andavano in
+`waitForURL` timeout, e 82 test non giravano.
+
+⭐ **Ed e' anche la risposta a una domanda aperta da S1086** — «di chi e' la 3001?». Di
+**nessuno**: `mappa_porte.py --intrusi` conferma che non e' occupata. Non era del datastore, non
+era della CI: era solo questo ripiego, scritto in due file.
+
+**La correzione**: la base dell'API si deriva una volta sola e si **passa** al processo
+Playwright; `next.config.js` deriva da `PORT` e, se finisce sul ripiego, lo **dice** con un
+warning che nomina la riga colpevole.
+
+### ⚠ Un secondo fatto strutturale, misurato nello stesso giro
+
+Il gemello fa **tre mestieri insieme**: clone di produzione, **runner della CI** e desktop.
+Misurato durante la corsa: `git` al 124%, `Runner.Worker` al 58%, `gnome-software` all'86%,
+load 3.12. Il preflight lo dichiara (e ora nomina la macchina giusta, non «la VM»).
+
+**Conseguenza operativa per F5e**: la corsa che chiude la voce va lanciata **quando la CI non
+gira**, altrimenti la macchina e' carica per costruzione e i rossi tornano non attribuibili —
+che e' la stessa trappola di `aide` sulla VM, su un'altra macchina e per un'altra ragione.

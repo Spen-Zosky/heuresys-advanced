@@ -16,6 +16,9 @@ boot non poteva vedere: sotto ce n'erano **cinque guasti in fila**, ognuno nasco
 
 ## Top priorities — le priorita'
 
+> ⭐ **Enzo, chiudendo S1087: «alla prossima sessione riprendi da `#219` F5e».** Non è una
+> preferenza fra pari: è il punto da cui si comincia, prima del menu.
+
 1. **`#219` F5e — la corsa di conferma** (~1 sessione). L'ambiente è ora coerente e la prima fase è
    verde piena, dove prima cadeva sui setup e trascinava con sé quasi tutta la suite. ⚠ Va lanciata **a macchina
    scarica**: il gemello è anche il runner della CI, e il triage dei 44 restanti è già su disco

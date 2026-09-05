@@ -46,6 +46,7 @@ import { teamsRoutes } from "./modules/teams/routes.js";
 import { skillsRoutes } from "./modules/skills/routes.js";
 import { kpiDefinitionsRoutes } from "./modules/kpi-definitions/routes.js";
 import { jobFamiliesRoutes } from "./modules/job-families/routes.js";
+import { candidatesRoutes } from "./modules/candidates/routes.js";
 import { jobPostingsRoutes } from "./modules/job-postings/routes.js";
 import { jobRequisitionsRoutes } from "./modules/job-requisitions/routes.js";
 import { jobRolesRoutes } from "./modules/job-roles/routes.js";
@@ -406,6 +407,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(skillsRoutes, { prefix: "/v1/skills" });
   await app.register(kpiDefinitionsRoutes, { prefix: "/v1/kpi-definitions" });
   await app.register(jobFamiliesRoutes, { prefix: "/v1/job-families" });
+  await app.register(candidatesRoutes, { prefix: "/v1/candidates" });
   await app.register(jobPostingsRoutes, { prefix: "/v1/job-postings" });
   await app.register(jobRequisitionsRoutes, { prefix: "/v1/job-requisitions" });
   await app.register(jobRolesRoutes, { prefix: "/v1/job-roles" });

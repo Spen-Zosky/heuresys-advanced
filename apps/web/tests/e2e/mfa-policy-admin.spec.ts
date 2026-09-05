@@ -6,9 +6,9 @@
  * finally (S983 WS-E: the live row may be the REAL mandatory-MFA activation).
  */
 import { test, expect, request as pwRequest } from "@playwright/test";
-import { completeApiLogin, storageStateFor } from "./fixtures";
+import { completeApiLogin, storageStateFor, API_BASE } from "./fixtures";
 
-const API_BASE = process.env.API_BASE ?? "http://localhost:3001";
+
 
 test.use({ storageState: storageStateFor("platformAdmin") });
 

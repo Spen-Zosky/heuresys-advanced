@@ -21,10 +21,18 @@ import { FIXTURE_TOTP_SECRETS } from "./mfa-fixture-secrets";
  * Normalize by stripping a trailing `/v1`. Single definition — specs import this
  * instead of re-deriving it (four had drifted copies).
  */
-export const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001").replace(
-  /\/v1\/?$/,
-  "",
-);
+export const API_BASE = (
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  process.env.NEXT_PUBLIC_API_PROXY_BASE_URL ??
+  // ⚠ `PORT` prima del ripiego cablato (#219, 2026-09-05). La 3001 non e' l'API di
+  // nessuno — `mappa_porte.py --intrusi` conferma che non e' occupata: e' solo il valore
+  // che compariva, con la stessa forma, in tre posti diversi. Due erano ripieghi in
+  // codice (`next.config.js`, `e2e-blocchi.mjs`), il terzo era una dichiarazione stantia
+  // nel `.env` del gemello. Insieme sono costati tre sessioni di diagnosi sbagliata: i
+  // quattro `auth.setup` cadevano e 82 test non giravano, e la colpa e' finita prima su
+  // `aide` che satura la VM, poi sul tunnel SSH. Nessuna delle due era la causa.
+  (process.env.PORT ? `http://localhost:${process.env.PORT}` : "http://localhost:3001")
+).replace(/\/v1\/?$/, "");
 
 // Z-262: non esiste piu' UNA password condivisa — ogni utente ha la propria,
 // derivata dalla chiave madre. La costante unica che stava qui e' rimasta dopo

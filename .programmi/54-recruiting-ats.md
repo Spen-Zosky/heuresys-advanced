@@ -54,6 +54,9 @@
   ⚠ Entrambe si vedono solo alla **seconda passata** — girano prima della `000364` e alla prima
   non possono vedere tabelle che ancora non esistono.
 - [ ] **F3 — API** — moduli secondo il pattern in 7 passi, un commit per slice · budget ~250k
+      ▸ **2 fette su 7 fatte (S1087, 2026-09-05)**: `job-requisitions` (4 rotte, 10 test) e
+      `job-postings` (4 rotte, 8 test). Restano candidates, applications, interviews,
+      feedback, offers.
 - [ ] **F4 — Frontend + E2E con login reale** — cluster `/recruiting`, **componente Kanban di `@heuresys/ui` mai usato** finora, più il posting pubblico (percorso prospect ADR-0026) · budget ~250k
 
 ## Esito di F1 — misurato il 2026-08-14
@@ -97,3 +100,53 @@ dominio, non un dato.
 offer, agganciata alle posizioni (**I1**: una requisizione nasce da una posizione vacante, ed è
 il tratto che rende questa storia diversa da un ATS qualunque). Nessun import, nessuna sorgente
 legacy da scegliere.
+
+
+## Esito parziale di F3 — 2026-09-05 (S1087), due fette su sette
+
+### Mig `000374` — i permessi, che non c'erano
+
+Misurato prima di scrivere: `sys_auth_permissions` non conteneva **nulla** che nominasse
+requisition, recruiting o candidate. Due permessi e non quattro (doctrine `000212`):
+`job-requisition:read` e `job-requisition:manage`, un solo verbo di scrittura per l'intero
+ciclo funzionale. Audience esplicita: `PLATFORM_ADMIN`, `TENANT_ADMIN`, `HRMS_MANAGER` —
+l'ultimo per **I22**, che lo fa plenipotenziario sui dati business.
+
+⚠ Col marker `TENANT_ADMIN-ALLOWLIST-EXTEND`, che **non e' un opzionale**: la `000210`
+cancella ogni grant a `TENANT_ADMIN` fuori dalla sua allowlist e la catena si riapplica a
+ogni deploy. Senza il marker i due permessi sarebbero stati concessi e poi tolti al giro
+dopo, con un 403 che nessuno avrebbe saputo spiegare. La guardia
+`rbac-tenant-admin-allowlist.test.ts` lo verifica (2/2 verde).
+
+### Le scelte di contratto che vale la pena non ri-dedurre
+
+| scelta | ragione |
+|---|---|
+| `positionId` **obbligatorio** | I1: si copre un POSTO. Ammetterlo nullo avrebbe fatto accettare all'API cio' che il database rifiuta — un 500 al posto di un 400 |
+| `status` **non si accetta in creazione** | una richiesta nasce `DRAFT`; il ciclo di vita e' una successione di decisioni, non un campo che si scrive all'inizio |
+| `positionId` / `requisitionId` **non modificabili** | cambiare il posto coperto non e' una modifica, e' un'altra richiesta — e scollegherebbe dall'organigramma cio' che vi pende sotto |
+| la posizione dev'essere **di quel tenant** | la FK da sola accetterebbe un posto di un'altra azienda, che I5 vieta |
+| il tenant dell'annuncio **si eredita** | riceverlo dal body aprirebbe la strada a un annuncio in un tenant con la sua richiesta in un altro |
+| **nessuna DELETE** | si porta a `CANCELLED`/`CLOSED`. Cancellare la radice cancellerebbe la storia di persone reali (ADR-0035) |
+| `404` e non `403` per l'altrui | un 403 confermerebbe che quel codice esiste altrove, che e' gia' una perdita |
+
+### Due livelli di diniego, provati entrambi
+
+`FORBIDDEN` quando il ruolo non ha il permesso (lo da' `requirePermission`) ·
+`PERMISSION_DENIED` quando il permesso c'e' ma il perimetro no (lo da' il service). Un test
+che li confonde passa per la ragione sbagliata, ed e' scritto nella regola del modulo.
+
+### Misure
+
+`ci-rehearsal` VERDE (catena due volte, sentinelle 31/31) · `000374` applicata in produzione
+(2 permessi x 3 ruoli = 6 concessioni) · `pnpm typecheck` verde su tutti i workspace ·
+`job-requisitions` **10/10** · `job-postings` **8/8** · allowlist **2/2**. Tutti contro il DB
+reale, nessun mock.
+
+### Perche' mi sono fermato a due fette
+
+Guardiano misurato: contesto **61,6%**, giudizio **MEDIO**, residuo ~134k. La terza fetta
+(`candidates`) tocca **dati personali di persone che non sono utenti** — il registro GDPR
+sorveglia le FK verso `sys_users` e non vedrebbe quella tabella, quindi consenso e scadenza di
+conservazione sono colonne con un CHECK, non una riga in un documento (F2 lo dichiara). Merita
+spazio per essere fatta bene, non gli avanzi di una sessione.

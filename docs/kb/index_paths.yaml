@@ -1,42 +1,42 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-04T16:15:50Z da docs/kb/tools/build_index.py
+# generato: 2026-09-05T16:16:39Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-04T16:15:50Z"
-  total_files: 3293
+  generated_at: "2026-09-05T16:16:39Z"
+  total_files: 3314
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 37
     api-core: 33
-    api-module: 356
+    api-module: 365
     ci: 17
     claude-config: 37
-    config: 194
+    config: 195
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 367
+    db-migration: 371
     db-other: 8
     db-script: 50
     db-seed: 114
-    doc-canonical: 750
+    doc-canonical: 751
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 108
+    shared-schema: 111
     showcase-source: 13
-    test: 405
+    test: 408
     ux-design-archive: 80
     web-source: 241
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2735
+    live: 2756
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -878,6 +878,24 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\candidates\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/candidates/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\candidates\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/candidates/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\candidates\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/candidates/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\capability-composition\recompute-cli.ts'
     root: repo
     rel: 'apps/api/src/modules/capability-composition/recompute-cli.ts'
@@ -1277,6 +1295,42 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\job-families\service.ts'
     root: repo
     rel: 'apps/api/src/modules/job-families/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\job-postings\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/job-postings/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\job-postings\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/job-postings/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\job-postings\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/job-postings/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\job-requisitions\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/job-requisitions/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\job-requisitions\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/job-requisitions/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\job-requisitions\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/job-requisitions/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -2945,6 +2999,12 @@ files:
   - path: 'D:\heuresys-advanced\.nvmrc'
     root: repo
     rel: '.nvmrc'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\219-triage-2026-09-05.txt'
+    root: repo
+    rel: '.programmi/219-triage-2026-09-05.txt'
     category: config
     status: live
     provenance: git-tracked
@@ -8360,6 +8420,30 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000371_il_rinnovo_dei_contratti_smette_di_essere_una_fotografia.sql'
+    root: repo
+    rel: 'db/migrations/000371_il_rinnovo_dei_contratti_smette_di_essere_una_fotografia.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000372_chi_ha_un_account_ha_espresso_le_sue_scelte.sql'
+    root: repo
+    rel: 'db/migrations/000372_chi_ha_un_account_ha_espresso_le_sue_scelte.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000373_un_export_di_visualizzazione_non_deve_poter_contenere_persone.sql'
+    root: repo
+    rel: 'db/migrations/000373_un_export_di_visualizzazione_non_deve_poter_contenere_persone.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000374_permessi_del_recruiting_le_richieste_di_personale.sql'
+    root: repo
+    rel: 'db/migrations/000374_permessi_del_recruiting_le_richieste_di_personale.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -9677,6 +9761,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\README.md'
     root: repo
     rel: '.programmi/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1087-piano-sessione.md'
+    root: repo
+    rel: '.programmi/S1087-piano-sessione.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -14816,6 +14906,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\candidates.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/candidates.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\capability-composition.ts'
     root: repo
     rel: 'packages/shared/src/schemas/capability-composition.ts'
@@ -14939,6 +15035,18 @@ files:
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\job-families.ts'
     root: repo
     rel: 'packages/shared/src/schemas/job-families.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\job-postings.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/job-postings.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\job-requisitions.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/job-requisitions.ts'
     category: shared-schema
     status: live
     provenance: git-tracked
@@ -15644,6 +15752,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\candidates.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/candidates.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\capability-composition-scope.integration.test.ts'
     root: repo
     rel: 'apps/api/test/capability-composition-scope.integration.test.ts'
@@ -16103,6 +16217,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\job-families.integration.test.ts'
     root: repo
     rel: 'apps/api/test/job-families.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\job-postings.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/job-postings.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\job-requisitions.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/job-requisitions.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

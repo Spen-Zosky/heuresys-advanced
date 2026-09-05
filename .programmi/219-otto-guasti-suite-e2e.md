@@ -539,3 +539,63 @@ corsa e' partita. Alla prossima corsa spariscono da soli.
 Sciogliere il 403 delle scritture (una causa, oltre un terzo dei falliti), poi rilanciare.
 ⚠ E lanciarla **quando la CI non gira**: il gemello e' anche il runner, e durante questa
 corsa il carico era oltre 3 con `Runner.Worker` al 58%.
+
+
+---
+
+## ⭐⭐ LA CAUSA VERA DEI 44, e non era nessuna delle due ipotesi di F5d
+
+Le due ipotesi che F5d aveva lasciato vive sono state **smentite misurando**, e restano
+scritte perche' il modo in cui sono cadute vale piu' della conclusione:
+
+```
+POST /v1/approvals  SENZA token CSRF  ->  400 VALIDATION_ERROR
+```
+
+Un 400 di validazione dimostra **due cose insieme**: la chiamata era passata attraverso
+RBAC (quindi **non e' il permesso**) e non era stata fermata dal double-submit (quindi
+**non e' il CSRF**). Una misura sola, due ipotesi cadute.
+
+**Quello che c'era davvero**, misurato subito dopo sul gemello:
+
+```
+apps/api/dist/server.js   costruito il 3 SETTEMBRE
+repo                      a 0a5b8f83, di oggi
+```
+
+L'API gira da un **bundle**, non dai sorgenti: un `git pull` aggiorna i file e **non tocca
+il bundle**. La corsa ha percio' provato un frontend ricostruito oggi contro un'API vecchia
+di due giorni, e la gran parte dei 44 erano scritture rifiutate da un contratto che non era
+piu' quello — fra cui un login che **non restituiva piu' `csrfToken`**, campo che ogni test
+si aspetta di leggere dalla risposta.
+
+### E' la TERZA volta oggi che la causa sta in un artefatto generato
+
+| # | artefatto | cosa nascondeva |
+|---|---|---|
+| 1 | `.next/routes-manifest.json` | il proxy `/api/*` compilato verso la 3001 |
+| 2 | `.next/` servito da un `next start` non riavviato | un build precedente al `git pull` |
+| 3 | `apps/api/dist/server.js` | l'API costruita due giorni prima degli spec |
+
+Nessuno dei tre si trova cercando nel codice: sono **gitignored per costruzione**, ed e' la
+stessa specie di punto cieco gia' registrata in memoria per i rename. Il preflight ora ne
+guarda due su tre (manifest e bundle); il terzo lo copre gia' il controllo sulla porta.
+
+### Stato dell'ambiente alla fine di S1087
+
+- gemello allineato a `f09720cd`, `pnpm install` + `shared build` + **`api build`** rifatti,
+  API riavviata (bundle 1.92 MB, coi due moduli nuovi di `#54`);
+- web ricostruito con la destinazione giusta del proxy;
+- preflight **pulito su tutti i controlli tranne uno**.
+
+### ⚠ Perche' la corsa di conferma NON e' stata lanciata
+
+Il preflight dichiara la macchina carica (**load 4.08**), e la causa misurata non e' la CI:
+e' **`gnome-software` all'86% di CPU**, un processo del desktop. Lanciare una corsa che il
+preflight ha appena dichiarato non attribuibile sarebbe ignorare lo strumento costruito
+poche ore prima per non farlo.
+
+**La corsa di conferma e' il primo passo della prossima sessione**, e va lanciata a macchina
+scarica — verificando `/proc/loadavg` e che `gnome-software` non stia macinando. Con
+l'ambiente ora coerente, e' la misura che dice quanti dei 44 erano davvero guasti del
+prodotto: la fase 1, gia' verde a 88/88, suggerisce che siano molti meno.

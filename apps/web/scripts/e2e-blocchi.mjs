@@ -30,7 +30,7 @@
  *   E2E_BLOCCHI_NODE22=0 node scripts/e2e-blocchi.mjs  # senza il wrapper Node 22
  */
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 
@@ -227,6 +227,46 @@ function preflight() {
                   `i rewrites si fissano al build e non all'avvio, quindi ogni login ` +
                   `fallira' in ECONNREFUSED. Rimedio: ricostruire con ` +
                   `NEXT_PUBLIC_API_PROXY_BASE_URL=${apiBase} pnpm build`);
+    }
+  }
+
+  // 2-ter. ⭐ L'API CHE RISPONDE E' COSTRUITA DAL CODICE DI ADESSO?
+  //
+  // Stessa classe del controllo qui sopra, e trovato lo stesso giorno: un ARTEFATTO
+  // GENERATO piu' vecchio del sorgente. In produzione l'API gira da un bundle
+  // (`dist/server.js`), non dai sorgenti: un `git pull` aggiorna i file e NON tocca il
+  // bundle, quindi la suite finisce per provare un frontend nuovo contro un'API vecchia.
+  //
+  // Misurato il 2026-09-05 sul gemello: bundle del **3 settembre**, repo a `0a5b8f83` di
+  // oggi. La corsa integrale ha prodotto 44 falliti, e la gran parte erano scritture
+  // rifiutate da un'API che non conosceva il contratto degli spec che la interrogavano —
+  // fra cui un login che non restituiva piu' `csrfToken`, campo che ogni test si aspetta.
+  //
+  // Non e' un errore: e' un ambiente incoerente, e il preflight esiste per dirlo PRIMA.
+  {
+    const bundle = join(WEB_DIR, "..", "api", "dist", "server.js");
+    try {
+      const eta = statSync(bundle).mtimeMs;
+      // Il metro e' il commit piu' recente che tocca l'API, non l'orologio: un bundle
+      // costruito ieri va benissimo se da ieri nessuno ha toccato apps/api.
+      const ultimo = spawnSync(
+        "git",
+        ["log", "-1", "--format=%ct", "--", "apps/api/src", "packages/shared/src"],
+        { cwd: join(WEB_DIR, "..", ".."), encoding: "utf8" },
+      );
+      const commit = Number.parseInt(`${ultimo.stdout}`.trim(), 10) * 1000;
+      if (ultimo.status === 0 && Number.isFinite(commit) && commit > eta) {
+        const giorni = Math.round((commit - eta) / 86_400_000);
+        avvisi.push(
+          `il bundle dell'API (apps/api/dist/server.js) e' piu' VECCHIO dell'ultimo commit ` +
+            `che tocca apps/api o packages/shared (di ~${giorni} giorno/i): la suite provera' ` +
+            `un frontend nuovo contro un'API vecchia, e i suoi rossi non saranno attribuibili. ` +
+            `Rimedio: cd apps/api && pnpm build && sudo systemctl restart heuresys-advanced-api`,
+        );
+      }
+    } catch {
+      // niente bundle: l'API gira dai sorgenti (sviluppo), e allora non c'e' niente da
+      // confrontare. Il silenzio qui e' corretto, non e' un controllo saltato.
     }
   }
 

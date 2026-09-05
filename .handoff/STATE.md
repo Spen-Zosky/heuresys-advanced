@@ -22,9 +22,10 @@ boot non poteva vedere: sotto ce n'erano **cinque guasti in fila**, ognuno nasco
    (`.programmi/219-triage-2026-09-05.txt`).
 2. **`#54` F3 — le quattro fette che restano** (~2 sessioni). Tre fette su sette fatte oggi, tutte
    con i loro test verdi; il pattern è rodato e le prossime costano meno della prima.
-3. **`#246` — i 25 contratti a termine senza scadenza** (~1 sessione). Nessuna sentinella li vede,
-   e non per svista: la vista cerca chi non ha più un contratto, e uno senza fine è in vigore per
-   sempre.
+3. **`#246` — i contratti a termine assegnati a caso a un terzo dell'organico** (~1 sessione).
+   ⭐ **Enzo ha già deciso la regola**: nessun contratto a termine a chi ha più di 12 mesi di
+   anzianità, e la scadenza si calcola in modo coerente — dopo 16 mesi si passa a tempo
+   indeterminato. Applicata ai dati di oggi non ne resta a termine nessuno.
 
 ## Open questions — le domande aperte
 
@@ -33,11 +34,17 @@ boot non poteva vedere: sotto ce n'erano **cinque guasti in fila**, ognuno nasco
   **una sola**, sul dominio dei processi aziendali. Tre voci ferme su questa domanda sola (`#198`, `#205`,
   il ponte di `#132`), ora entrambe in `WAIT-INPUT`. Non è una misura: è cosa Heuresys accetta come
   sapere, e i piani vietano di scriverlo a mano.
-- **`#246`: i 25 `fixed_term` senza data sono a tempo indeterminato col tipo sbagliato, o manca la
-  data?** Le due letture producono esattamente le stesse righe — il database non può distinguerle.
+- ✅ *Chiusa da Enzo il 2026-09-05*: la regola dei contratti a termine (12 mesi di ammissibilità,
+  16 di durata massima). ⚠ E la sua domanda — «un terzo dell'organico a termine mi sembra
+  eccessivo» — ha smontato la **mia** prima lettura, che vedeva metà del difetto.
 - **Chi ha pushato il 26 agosto alle 18:47?** Invariata da S1082.
 - ✅ *Chiusa*: «di chi è la porta 3001?» — **di nessuno**. Era solo un ripiego cablato, scritto in
   tre posti diversi.
+
+⚠ **Il working tree è condiviso**: durante la chiusura un'altra sessione ha spostato il branch su
+`docs/statuspill-nel-contratto`, e un commit di questa sessione vi è finito sopra. Recuperato su
+`main` senza riscrivere niente (nuovo commit, mai un cherry-pick). **Verificare `git branch
+--show-current` prima di committare** finché si lavora in più di uno.
 
 ## Verification — come si controlla
 

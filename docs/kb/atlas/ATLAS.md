@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `6d2f1aaf` (2026-09-05T15:42:11+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `81b4b53a` (2026-09-05T17:57:02+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 98 |
-| Route API | 605 |
+| Moduli API | 101 |
+| Route API | 617 |
 | Pagine web | 120 |
-| Schemi shared | 108 |
+| Schemi shared | 111 |
 | Tabelle DB | 290 (vuote: 24) |
 | Viste / matview | 40 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 273 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 279 |
 
 ## Moduli API
 
@@ -33,6 +33,7 @@
 | blueprint-processes | /v1/blueprint-processes | 5 | 4 | 2 | 1 |
 | blueprint-variants | /v1/blueprint-variants | 5 | 4 | 3 | 1 |
 | calibration-sessions | /v1/calibration-sessions | 3 | 1 | 4 | 1 |
+| candidates | /v1/candidates | 4 | 2 | 2 | 3 |
 | capability-composition | /v1/capability | 5 | 2 | 15 | 2 |
 | capability-maturity | /v1/capability | 3 | 2 | 8 | 2 |
 | career-path-steps | /v1/career-path-steps | 5 | 4 | 3 | 1 |
@@ -52,6 +53,8 @@
 | goals | /v1/goals | 12 | 4 | 7 | 4 |
 | insights | /v1/insights | 7 | 2 | 15 | 5 |
 | job-families | /v1/job-families | 5 | 3 | 1 | 2 |
+| job-postings | /v1/job-postings | 4 | 2 | 2 | 1 |
+| job-requisitions | /v1/job-requisitions | 4 | 2 | 2 | 1 |
 | job-roles | /v1/job-roles | 4 | 3 | 2 | 1 |
 | kpi-definitions | /v1/kpi-definitions | 9 | 4 | 5 | 1 |
 | leads | /v1/leads | 3 | 2 | 1 | 1 |
@@ -158,8 +161,8 @@
 - positions: **315**
 - org_units: **45**
 - roles: **14**
-- permissions: **224**
-- role_permission_mappings: **980**
+- permissions: **226**
+- role_permission_mappings: **986**
 - ui_interfaces_active: **74**
 - skills: **14031**
 

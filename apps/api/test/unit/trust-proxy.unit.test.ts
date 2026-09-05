@@ -20,10 +20,23 @@ describe("parseTrustProxy (unit)", () => {
     expect(parseTrustProxy(" True ")).toBe(true);
   });
 
-  it('"<n>" → number (hop count; PROD dietro nginx singolo = 1)', () => {
-    expect(parseTrustProxy("1")).toBe(1);
-    expect(parseTrustProxy("2")).toBe(2);
-    expect(parseTrustProxy(" 0 ")).toBe(0);
+  // #242 F3 (2026-09-05): la forma a conteggio di salti si RESPINGE. Da fastify 5.12
+  // significa «non fidarti di niente», e in silenzio: req.ip diventerebbe l'indirizzo del
+  // proxy e il rate limiting per IP finirebbe in un secchio solo, senza errore ne' log.
+  // ⚠ Questo file e' la SECONDA copia dei casi di parseTrustProxy (l'altra e'
+  // test/trust-proxy.test.ts): aggiornandone una sola, la CI resta rossa — e cosi' e'
+  // stato, misurato oggi sulla corsa di `4cebad1a`.
+  it('"<n>" → RESPINTO, con un messaggio che dice cosa usare al suo posto', () => {
+    for (const v of ["1", "2", " 0 ", "10"]) {
+      expect(() => parseTrustProxy(v), `TRUST_PROXY="${v}" deve essere respinto`).toThrow(
+        /hop-count/i,
+      );
+    }
+    expect(() => parseTrustProxy("1")).toThrow(/TRUST_PROXY=127\.0\.0\.1,::1/);
+  });
+
+  it("la forma per indirizzo che ha sostituito l'1 in produzione resta valida", () => {
+    expect(parseTrustProxy("127.0.0.1,::1")).toBe("127.0.0.1,::1");
   });
 
   it("IP / CIDR / lista → string passthrough (trust-list proxy-addr)", () => {

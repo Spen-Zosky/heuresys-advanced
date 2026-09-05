@@ -443,3 +443,36 @@ load 3.12. Il preflight lo dichiara (e ora nomina la macchina giusta, non «la V
 **Conseguenza operativa per F5e**: la corsa che chiude la voce va lanciata **quando la CI non
 gira**, altrimenti la macchina e' carica per costruzione e i rossi tornano non attribuibili —
 che e' la stessa trappola di `aide` sulla VM, su un'altra macchina e per un'altra ragione.
+
+
+### La prova: fase 1 da `4 failed` + 82 non eseguiti a **88 passed**
+
+```
+prima (manifest verso :3001)   4 failed · 1 flaky · 82 did not run ·  1 passed (14.2m)
+dopo  (manifest verso :8013)   0 failed · 0 flaky ·  0 did not run · 88 passed (19.3m)
+                               fase 1  VERDE
+```
+
+Prova pulita: **stessa macchina, stesso carico, stessa suite** — e' cambiata solo la
+destinazione compilata del proxy.
+
+### E la 3001 era scritta in un TERZO posto: nel `.env` stesso
+
+La corsa verde ha lasciato un residuo che **non fa fallire nulla e degrada in silenzio**:
+
+```
+[auth.setup] locale baseline restore skipped for platformAdmin:
+             Error: apiRequestContext.patch: connect ECONNREFUSED 127.0.0.1:3001
+             (idem per tenantAdmin, manager, employee, outsider, custodian)
+```
+
+I fixture E2E leggono `NEXT_PUBLIC_API_BASE_URL`, che la config di Playwright idrata dal `.env`
+del repo — e il `.env` **del gemello** dichiarava quella variabile sulla porta 3001. Non era il
+ripiego del codice a scattare: la porta sbagliata era scritta nel `.env`, un valore stantio che
+in produzione l'unit systemd sovrascrive e che quindi nessuno vedeva, ma che i test raccolgono.
+
+Corretto sul gemello alla porta 8013, con backup del file.
+
+**Tre posti, la stessa porta, tre modi diversi di nasconderla**: un ripiego cablato nel config
+del web, uno nello script della suite, e una dichiarazione stantia in un file gitignored. E' il
+ritratto di come un valore sbagliato sopravvive a tre sessioni di caccia.

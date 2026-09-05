@@ -24,7 +24,7 @@ Le scoperte vanno nel registro in fondo a questo file, non in «cosa resta».
 | N5 | Allineamento ecosistema Claude rotto (`align-claude-ecosystem.sh:39`) | io | lo script trova il bootstrap, o la riga sparisce con motivo | **FATTO** — sorgente in `~/.claude/scripts/`; allineamento VM+linux-pc exit 0 |
 | N6 | Chiusura S1086: 2 passi non sereni (chiusura, propaga) | io | causa nominata; se è N5, si chiude con N5 | **FATTO** — era N5 |
 | N7 | **Tre servizi systemd FAILED in produzione**, invisibili al boot (`--no-net`) | io | i tre tornano `Result=success` | **FATTO** — vedi sotto |
-| N8 | **CI rossa** su `0d7475d8` (*Lint (all workspaces)*) che blocca il deploy | io | corsa verde su un commit successivo | ⏳ **serve il push** (unico passo non delegato) |
+| N8 | **CI rossa** su `0d7475d8` (*Lint (all workspaces)*) che blocca il deploy | io | corsa verde su un commit successivo | **FATTO** — il generato era già allineato da `c0e0cbb0`, mancava solo una corsa: *Lint* **verde su `3fd996fd`** |
 
 ### N7 — i tre servizi, e i cinque guasti in fila
 
@@ -86,11 +86,11 @@ a termine scadono da soli. È la **terza** occorrenza dello stesso fenomeno (`00
 | P1-2 | `#149` F4 — consegne del lab non verificate | continuativo | da fare |
 | P1-3 | `#143` F3 — asse funzionale vivo | ~4-6 sessioni | **fuori confine dichiarato** |
 | P2-1 | `#231` S7 — triage dei 10 falliti (= `#219` F5d) | continuativo | da fare |
-| P2-2 | `#242` — piano esaurito, la voce va chiusa | ~1 sessione | da fare |
-| P2-3 | `#219` F5 — la corsa che chiude la voce | ~1-2 sessioni | da fare |
-| P2-4 | `#214` F6 — consumo della coda dei neutri | continuativo | da fare |
+| P2-2 | `#242` trustProxy per indirizzo + fastify 5.12.3 | ~1 sessione | ✅ **CHIUSA** — F2+F3+F4, voce a DONE nel register |
+| P2-3 | `#219` F5 — la corsa che chiude la voce | ~1-2 sessioni | **in corso** — vedi sotto |
+| P2-4 | `#214` F6 — consumo della coda dei neutri | continuativo | ✅ **OTTAVO perimetro aperto** (`visualization-exports`), guardia su 4 porte, mig `000373` |
 | P2-5 | `#159` F2 — il ponte | ~3-4 sessioni | **fuori confine dichiarato** |
-| P2-6 | `#79` F3 — cancello di esposizione | continuo | da fare |
+| P2-6 | `#79` F3 — cancello di esposizione | continuo | ✅ **onorata** — 73/73 esposte; il dato scritto dalla `000372` è letto dal modulo `gdpr` |
 | P2-7 | `#54` F3 — recruiting/ATS, API | ~5-7 sessioni | **fuori confine dichiarato** |
 | P3-1 | `#205` F1 — coda dei domini ricercabili | ~1 sessione | da fare |
 | P3-2 | `#50` F3 — la vista del grafo delle competenze | ~2 sessioni | da fare |
@@ -106,3 +106,25 @@ Si presentano **una volta sola**. Non entrano in «cosa resta», non bloccano la
    sentinella li vede, perché la vista cerca chi non ha più un contratto in vigore e uno senza fine
    è in vigore per sempre. Non li tocco: è una scrittura di massa su produzione fuori dal punto non
    verde che mi è stato chiesto di risolvere. Lo vuoi nel prossimo ciclo?
+
+
+---
+
+## `#219` F5 — quello che ho trovato preparando la corsa
+
+Il programma dichiara la cura, misurata in S1083: **la corsa integrale si esegue sul gemello**,
+perche' da Windows il collo di bottiglia e' il tunnel e «i rossi di una corsa lanciata da qui
+sono rumore, non misura». Preparando l'ambiente ho trovato **due affermazioni del programma
+che oggi non reggono**, entrambe misurate:
+
+1. **«`linux-pc` ha Node 22.19.0 come default nvm, quindi nemmeno il wrapper serve».**
+   Misurato il 2026-09-05: `bash -lc "node -v"` sul gemello dà **v12.22.9**. Il servizio web
+   gira davvero con 22.19.0, ma solo perche' la sua unit systemd se lo dichiara nel `PATH`.
+   Una corsa Playwright lanciata da una shell qualsiasi userebbe il 12, dove non parte.
+2. **Il web del gemello rispondeva `500`** (`renderToPipeableStream is not implemented`), con
+   un `.next` costruito il 4 settembre — cioe' prima del pull di oggi. Non e' un guasto del
+   prodotto: e' un artefatto stantio, ed e' della stessa famiglia gia' registrata in memoria
+   («pagine nuove 404 se il server e' stale»).
+
+Nessuna delle due e' colpa di chi ha scritto il programma: sono **fatti che cambiano**, ed e'
+la ragione per cui il PUNTO FISSO dice di misurarli invece di ereditarli.

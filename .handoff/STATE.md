@@ -16,12 +16,12 @@ boot non poteva vedere: sotto ce n'erano **cinque guasti in fila**, ognuno nasco
 
 ## Top priorities — le priorita'
 
-1. **`#219` F5e — la corsa di conferma** (~1 sessione). L'ambiente è ora coerente e la fase 1 è
-   verde piena (88/88, dove prima dava 4 falliti e 82 non eseguiti). ⚠ Va lanciata **a macchina
+1. **`#219` F5e — la corsa di conferma** (~1 sessione). L'ambiente è ora coerente e la prima fase è
+   verde piena, dove prima cadeva sui setup e trascinava con sé quasi tutta la suite. ⚠ Va lanciata **a macchina
    scarica**: il gemello è anche il runner della CI, e il triage dei 44 restanti è già su disco
    (`.programmi/219-triage-2026-09-05.txt`).
-2. **`#54` F3 — le quattro fette che restano** (~2 sessioni). Tre su sette fatte oggi con 27 test
-   verdi; il pattern è rodato e le prossime costano meno della prima.
+2. **`#54` F3 — le quattro fette che restano** (~2 sessioni). Tre fette su sette fatte oggi, tutte
+   con i loro test verdi; il pattern è rodato e le prossime costano meno della prima.
 3. **`#246` — i 25 contratti a termine senza scadenza** (~1 sessione). Nessuna sentinella li vede,
    e non per svista: la vista cerca chi non ha più un contratto, e uno senza fine è in vigore per
    sempre.
@@ -29,8 +29,8 @@ boot non poteva vedere: sotto ce n'erano **cinque guasti in fila**, ognuno nasco
 ## Open questions — le domande aperte
 
 - ⭐ **Da quali fonti la piattaforma accetta di imparare com'è fatta un'azienda?** — le unità
-  organizzative, le posizioni, le competenze, gli indicatori. Oggi `sys_research_sources` ha **una
-  riga sola**, dominio `business_processes`. Tre voci ferme su questa domanda sola (`#198`, `#205`,
+  organizzative, le posizioni, le competenze, gli indicatori. Oggi il registro delle fonti ne porta
+  **una sola**, sul dominio dei processi aziendali. Tre voci ferme su questa domanda sola (`#198`, `#205`,
   il ponte di `#132`), ora entrambe in `WAIT-INPUT`. Non è una misura: è cosa Heuresys accetta come
   sapere, e i piani vietano di scriverlo a mano.
 - **`#246`: i 25 `fixed_term` senza data sono a tempo indeterminato col tipo sbagliato, o manca la

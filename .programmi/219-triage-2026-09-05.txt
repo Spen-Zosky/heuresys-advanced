@@ -1,0 +1,118 @@
+TRIAGE DELLA CORSA INTEGRALE — 2026-09-05 (S1087), sul gemello
+================================================================================
+Prodotto da: node scripts/e2e-blocchi.mjs  (quattro fasi, referti .e2e-fase-N.json)
+Strumento:   raggruppa i NON RIUSCITI per FIRMA d'errore, non per file — due test con
+             la stessa firma hanno probabilmente la stessa causa (dottrina di #219:
+             «sono FIRME, non cause»).
+
+ESITO COMPLESSIVO: ROSSO — 44 casi falliti, 78 non eseguiti.
+
+⭐ MA LA FASE 1 E' VERDE PIENA: 88 attesi, 0 non riusciti, 0 saltati. Prima della
+correzione di oggi la stessa fase dava 4 falliti + 82 non eseguiti + 1 passato.
+
+================================================================================
+
+### .e2e-fase-1.json  —  attesi 88 · non riusciti 0 · instabili 0 · saltati 0
+  (nessun test non riuscito)
+
+### .e2e-fase-2.json  —  attesi 83 · non riusciti 9 · instabili 0 · saltati 3
+
+  [6x] Error: expect(received).toBe(expected) // Object.is equality
+        · approvals.spec.ts › approvals lifecycle (live) › create naming self → approve → APPROVED → apply → APPLIED
+        · content-blueprint-links.spec.ts › cap④ CMS P3 content↔blueprint cross-link — live data › attach a blueprint to
+        · content-media.spec.ts › cap4 CMS P3 /content/[id] — media attachments (live) › upload → list → download → dele
+        · content-search.spec.ts › cap④ CMS /content full-text search — live data › search box returns ranked live hits 
+        · content.spec.ts › cap④ CMS admin /content — live data › author can create, edit (version bump), and delete a d
+        · ess-certifications-upload.spec.ts › ESS certifications upload form — live data › can add a new certification a
+
+  [2x] Error: expect(locator).toBeVisible() failed
+        · blueprint-activation.spec.ts › #45 C3 — attivazione dei blueprint › proporre una variante crea un'attivazione,
+        · compensation-read.spec.ts › ADR-0032 sul frontend: al mandato tecnico i valori economici non arrivano › il pan
+
+  [1x] Error: expect(locator).toHaveCount(expected) failed
+        · content-workflow.spec.ts › admin submits → publishes; employee reads it in the handbook; draft stays hidden
+
+### .e2e-fase-3.json  —  attesi 69 · non riusciti 17 · instabili 0 · saltati 68
+
+  [5x] Error: expect(received).toBe(expected) // Object.is equality
+        · me-preferences.spec.ts › ESS preferences — theme + palette server source-of-truth › changing theme+palette per
+        · me-sessions.spec.ts › MVP-4 §2.5 ESS session management — live data › lists own sessions, flags the current de
+        · mfa-enroll.spec.ts › MVP-3 Tappa E-UI /me/security — TOTP enrollment flow › page renders + enroll TOTP shows Q
+        · mfa-enroll.spec.ts › MVP-3 Tappa E-UI /me/security — TOTP enrollment flow › EMAIL_OTP enroll shows email-code 
+        · mfa-enroll.spec.ts › MVP-3 Tappa E-UI /me/security — TOTP enrollment flow › client-side gate: 5-digit code blo
+
+  [4x] Error: expect(locator).toBeVisible() failed
+        · leads-management.spec.ts › #4 W4 — gestione delle richieste di contatto › il cambio di stato persiste: sopravv
+        · login-mfa-enrollment.spec.ts › MVP-4 par.2.5 #4 /login — mandatory-MFA enrollment gate › TOTP leg: gate panel 
+        · matching-freetext.spec.ts › free-text semantic search (#40) › employee on /me/matching › submits a query and g
+        · matching-freetext.spec.ts › free-text semantic search (#40) › tenant admin on /skills › semantic catalog searc
+
+  [1x] Error: apiRequestContext.post: connect ECONNREFUSED 127.0.0.1:3001
+        · handbook-media.spec.ts › employee sees the embedded image inline + the attachment list on the handbook detail
+
+  [1x] Error: creazione famiglia non accettata
+        · job-catalog.spec.ts › catalogo mansioni › crea una famiglia, un ruolo che vi appartiene, lo rinomina e ripulis
+
+  [1x] Error: definizione indicatore non accettata
+        · kpis-editing.spec.ts › catalogo KPI — definizione e correzione › definisce un indicatore, lo ritrova cercandol
+
+  [1x] Error: expect(locator).toHaveCount(expected) failed
+        · landing-pages.spec.ts › MVP-2a landing pages — live data › as employee (capo filiale: vede il cruscotto, non l
+
+  [1x] Error: inserimento modulo non accettato
+        · learning-editing.spec.ts › catalogo formativo — inserimento e correzione › inserisce un modulo, lo ritrova cer
+
+  [1x] Error: creazione percorso non accettata
+        · learning-paths.spec.ts › percorsi formativi › compone un percorso con due moduli, ne inverte l'ordine e lo smo
+
+  [1x] Error: expect(received).toMatchObject(expected)
+        · me-preferences.spec.ts › ESS preferences — UI locale server source-of-truth (i18n Fase 0b) › changing language
+
+  [1x] Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:3001
+        · mfa-policy-admin.spec.ts › mfa-policy admin page: list, toggle HS policy on (READ_ONLY scope), restore off
+
+### .e2e-fase-4.json  —  attesi 85 · non riusciti 18 · instabili 0 · saltati 7
+
+  [4x] Error: expect(locator).toBeVisible() failed
+        · serie-a-panels.spec.ts › Serie-A panels (#30, #31) › #30 gap-closure panel renders plans + analysis results
+        · tenants-editing.spec.ts › #45 C3 — creare e archiviare un'azienda cliente › una nuova azienda creata dall'inte
+        · tenants-editing.spec.ts › #45 C3 — creare e archiviare un'azienda cliente › archiviare l'azienda la porta in s
+        · webauthn.spec.ts › MVP-4 §2.5 WebAuthn passkey enroll — live data › registers a passkey via a virtual authenti
+
+  [2x] Error: il salvataggio non è stato accettato dall'API
+        · positions-editing.spec.ts › posizione — si modifica dall'interfaccia › cambia la criticità, la rilegge dal dat
+        · users-editing.spec.ts › scheda persona — anagrafica e ruoli si modificano dall'interfaccia › modifica l'anagra
+
+  [2x] TimeoutError: locator.waitFor: Timeout 45000ms exceeded.
+        · session-refresh.spec.ts › D-26: access expiry recovers via single silent refresh, no hard-logout
+        · whistleblowing.spec.ts › Whistleblowing — custodian console (live) › console renders the live reports list, or
+
+  [1x] Error: creazione non accettata dall'API
+        · organization-editing.spec.ts › organigramma — unità create, modificate e spostate dall'interfaccia › crea un'u
+
+  [1x] Error: creazione sinonimo non accettata
+        · skill-relations.spec.ts › competenza — sinonimi e legami › aggiunge un sinonimo e un legame, poi li elimina, v
+
+  [1x] Error: creazione famiglia non accettata
+        · skill-taxonomy.spec.ts › tassonomia competenze › crea una famiglia, una categoria dentro di essa, rinomina e r
+
+  [1x] Error: creazione competenza non accettata
+        · skills-editing.spec.ts › catalogo competenze — creazione e correzione › crea una competenza, la ritrova cercan
+
+  [1x] Error: expect(received).toContain(expected) // indexOf
+        · surveys-m2.spec.ts › ESS surveys (live) › answer an assigned survey → completed (verified via re-fetch)
+
+  [1x] Error: expect(locator).toHaveValue(expected) failed
+        · tenant-blueprints.spec.ts › fascicolo di configurazione › dalla carta d'identita' ai processi, fino alla firma
+
+  [1x] Error: expect(locator).toHaveCount(expected) failed
+        · tenant-blueprints.spec.ts › fascicolo di configurazione › il confronto dichiara l'impatto non calcolabile inve
+
+  [1x] Error: expect(locator).toContainText(expected) failed
+        · tenant-blueprints.spec.ts › fascicolo di configurazione › la costruzione mostra il piano vero del fascicolo di
+
+  [1x] Error: assegnazione non accettata dall'API
+        · users-editing.spec.ts › scheda persona — anagrafica e ruoli si modificano dall'interfaccia › assegna un ruolo 
+
+  [1x] TimeoutError: page.waitForEvent: Timeout 30000ms exceeded while waiting for event "download"
+        · visualizations.spec.ts › MVP-2a visualizations — live data › versioning and export (#36) › generating an expor

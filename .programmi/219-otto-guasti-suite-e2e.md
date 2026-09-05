@@ -476,3 +476,66 @@ Corretto sul gemello alla porta 8013, con backup del file.
 **Tre posti, la stessa porta, tre modi diversi di nasconderla**: un ripiego cablato nel config
 del web, uno nello script della suite, e una dichiarazione stantia in un file gitignored. E' il
 ritratto di come un valore sbagliato sopravvive a tre sessioni di caccia.
+
+
+---
+
+## ✅ F5d — IL TRIAGE, FATTO SUL VIVO (2026-09-05, S1087)
+
+Corsa integrale a quattro fasi sul gemello, con l'ambiente riparato. Triage completo,
+raggruppato per FIRMA e non per file, in `.programmi/219-triage-2026-09-05.txt`.
+
+| fase | attesi | non riusciti | saltati |
+|---|---|---|---|
+| 1 — setup + mobile-a11y + a11y-desktop | 88 | **0** | 0 |
+| 2 — setup-refresh + chromium | 83 | 9 | 3 |
+| 3 — setup-refresh-2 + chromium-2 | 69 | 17 | 68 |
+| 4 — setup-refresh-3 + chromium-3 | 85 | 18 | 7 |
+
+**ROSSO: 44 falliti, 78 non eseguiti** — e la fase 1 e' **verde piena**, dove prima della
+correzione di oggi dava `4 failed · 82 did not run · 1 passed`.
+
+### La firma dominante, isolata: `403` sulle SCRITTURE
+
+Le due famiglie piu' numerose sono in realta' **la stessa cosa detta in due modi**:
+
+```
+[6x] expect(received).toBe(expected)   ->  Expected: 200 · Received: 403
+[9x] «creazione non accettata» / «assegnazione non accettata» /
+     «definizione indicatore non accettata» / «inserimento modulo non accettato» / …
+```
+
+Le seconde sono messaggi propri degli spec che avvolgono lo stesso rifiuto. Sommate, sono
+**oltre un terzo dei 44**, e riguardano tutte una **scrittura fatta dal browser**.
+
+### Due ipotesi vive, e come si distinguono
+
+Sono state **escluse** misurando, non per esclusione logica:
+
+| ipotesi | verdetto | misura |
+|---|---|---|
+| cache RBAC stantia sull'API del gemello | ❌ **esclusa** | l'API gira dal 2026-09-04 con `mappingsLoaded: 980`, e il DB del gemello ne ha esattamente **980** |
+| grant persi dalla `000210` fuori ordine | ❌ **esclusa** | gemello 980 · produzione 986, e la differenza sono **esattamente le 6 concessioni della `000374`** applicata oggi solo in produzione |
+| `NEXT_PUBLIC_API_BASE_URL` che ho cambiato oggi | ❌ **esclusa** | quella variabile **non compare in `apps/web/src`**: il browser passa dal proxy same-origin `/api/*`, non da lei |
+| **CSRF dopo il `setup-refresh`** | 🔎 **VIVA** | la fase 1 non fa scritture ed e' verde; le fasi 2-4 cominciano tutte con un **re-login**, e sono le sole che falliscono in scrittura |
+| **permesso davvero mancante** per quelle persone sul clone | 🔎 **VIVA** | non ancora misurata |
+
+**Come si distinguono, in una prova sola**: login via API come la persona del caso sul
+gemello, poi la stessa POST **con** il token CSRF fresco. Se passa, e' il CSRF che il
+re-login rigenera mentre lo `storageState` salvato porta ancora il vecchio; se da' 403
+anche cosi', e' il permesso. ⚠ La password si **deriva per-email** (Z-262), non e' una
+costante: e' il passo che rende la prova meno immediata di quanto sembri.
+
+### Due falliti sono gia' corretti, e non da riparare
+
+`handbook-media.spec.ts` e `mfa-policy-admin.spec.ts` cadono su
+`apiRequestContext: connect ECONNREFUSED 127.0.0.1:3001` — sono **esattamente i due spec**
+che il commit `89f26862` di oggi ha fatto importare `API_BASE` da `fixtures.ts` invece di
+ri-derivarlo con il ripiego cablato. Il gemello aveva ancora il codice vecchio quando la
+corsa e' partita. Alla prossima corsa spariscono da soli.
+
+### Cosa resta per F5e
+
+Sciogliere il 403 delle scritture (una causa, oltre un terzo dei falliti), poi rilanciare.
+⚠ E lanciarla **quando la CI non gira**: il gemello e' anche il runner, e durante questa
+corsa il carico era oltre 3 con `Runner.Worker` al 58%.

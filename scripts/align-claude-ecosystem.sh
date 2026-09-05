@@ -36,7 +36,19 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC="$HOME/.claude"
-BOOTSTRAP_SRC="$HOME/Claude Desktop/scripts/session-bootstrap.sh"
+# session-bootstrap.sh — il sorgente vive in ~/.claude/scripts/, che e' GIA' il path di
+# destinazione su ogni clone (riga `cp -a "$BOOTSTRAP_SRC" "$P/scripts/..."` piu' sotto).
+# Stava in `~/Claude Desktop/scripts/` fino al 2026-09-05, e da li' e' sparito: il riordino
+# di quella cartella (2026-08-31, lavoro di un'altra sessione) l'ha portato sotto
+# `mount-dischi-avvio_20260831/backup-pre-riordino/`, e l'allineamento dell'intero ecosistema
+# Claude e' morto sulla guardia di riga 146 — due chiusure di seguito con `propaga: fallito`.
+# Il difetto non era il file mancante: era che il SORGENTE di questo script viveva in una
+# cartella che questo script non possiede e che altre sessioni riorganizzano legittimamente.
+# Misurato prima di spostarlo: le quattro copie esistenti (Windows ×2, linux-pc, VM) hanno
+# tutte lo stesso hash fa30afc0 e la stessa data (2026-08-02). Non esisteva nessuna versione
+# piu' recente, quindi il timore di S1086 — «propagare un bootstrap vecchio sarebbe peggio
+# del guasto» — non aveva un caso a cui applicarsi.
+BOOTSTRAP_SRC="$HOME/.claude/scripts/session-bootstrap.sh"
 CLAUDE_MEM_SRC="$HOME/.claude-mem/settings.json"
 REPORTS_DIR="$ROOT/deploy/reports/claude-align"
 MARKER="$ROOT/.session-align.marker"

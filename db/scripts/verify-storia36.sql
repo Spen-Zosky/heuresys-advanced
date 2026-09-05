@@ -1228,7 +1228,22 @@ RETURNS numeric LANGUAGE sql STABLE AS $fn$
               WHERE c.user_certification_user_id = p_user
                 AND c.user_certification_issuer IN ('IVASS','EFPA Italia')) THEN 30 ELSE 24 END AS base,
            (SELECT min(e.user_employment_hire_date) FROM sys.sys_user_employment e
-             WHERE e.user_employment_user_id = p_user) AS hire
+             WHERE e.user_employment_user_id = p_user) AS hire,
+           -- Chi non ha NESSUN rapporto di lavoro non e' un dipendente, e un
+           -- monte-ore formativo non gli e' dovuto: pavimento zero. Serve la
+           -- distinzione fra «nessun rapporto» e «rapporto con la data mancante»,
+           -- perche' il `COALESCE(hire, p_start)` piu' sotto e' il ripiego giusto
+           -- per il secondo caso e quello sbagliato per il primo — trattava chi
+           -- non e' mai stato assunto come presente dall'inizio della finestra.
+           -- Difetto misurato il 2026-09-05: l'avanzamento giornaliero della
+           -- storia era ROSSO dal 4 settembre su «governo@collaudo.invalid 2023:
+           -- 0.0h < 10.00h dovute» — un utente di collaudo creato il 2026-08-25,
+           -- a cui il check chiedeva la formazione obbligatoria del 2023.
+           -- Il criterio e' meccanico e non nomina nessuno: misurato lo stesso
+           -- giorno, gli utenti ACTIVE di RTL senza rapporto di lavoro sono
+           -- ESATTAMENTE i due di collaudo, quindi non maschera nessun dipendente.
+           EXISTS (SELECT 1 FROM sys.sys_user_employment e
+                    WHERE e.user_employment_user_id = p_user) AS ha_rapporto
   ), m AS (
     SELECT count(*) AS covered
       FROM b, lim, generate_series(1, 12) AS g(mm)
@@ -1236,7 +1251,9 @@ RETURNS numeric LANGUAGE sql STABLE AS $fn$
        AND (make_date(p_year, g.mm, 1) + interval '1 month - 1 day')::date
            >= GREATEST(p_start, COALESCE(b.hire, p_start))
   )
-  SELECT round(b.base * m.covered / 12.0, 2) FROM b, m
+  SELECT CASE WHEN b.ha_rapporto THEN round(b.base * m.covered / 12.0, 2)
+              ELSE 0::numeric END
+    FROM b, m
 $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2001,11 +2018,20 @@ DECLARE
 BEGIN
   p_end := LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end));
 
-  -- (i) formazione lavoratori: obbligo di OGNI lavoratore, senza eccezioni
+  -- (i) formazione lavoratori: obbligo di OGNI lavoratore, senza eccezioni.
+  --     «Lavoratore», non «utente»: il perimetro ora dice cio' che questo commento
+  --     dichiarava gia'. Fino al 2026-09-05 misurava ogni utente ATTIVO del tenant,
+  --     e da li' pretendeva la formazione sicurezza anche da chi non ha alcun
+  --     rapporto di lavoro — stessa classe di difetto corretta lo stesso giorno nel
+  --     pavimento C4 (`storia36_c4_hours_floor`). Il criterio e' meccanico e non
+  --     nomina nessuno; misurato allora, isolava esattamente i due utenti di
+  --     collaudo e nessun dipendente.
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
   FROM sys.sys_users u
   WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
     AND u.user_status = 'ACTIVE'
+    AND EXISTS (SELECT 1 FROM sys.sys_user_employment e
+                 WHERE e.user_employment_user_id = u.user_id)
     AND NOT EXISTS (
       SELECT 1 FROM sys.sys_user_certifications c
        WHERE c.user_certification_user_id = u.user_id
@@ -3596,6 +3622,16 @@ DECLARE
   v_guasti text[] := '{}';
   v_g      text;
 BEGIN
+  -- La maturità si misura sulla FRONTIERA della storia, non sull'orologio —
+  -- stessa riga che C4h ha in testa, e stessa ragione. Senza, il check e il seed
+  -- che lo soddisfa misuravano due cose diverse: `window_end` vale per default
+  -- FINE MESE CORRENTE (2026-09-30), mentre `08_engagement.sql` chiude le
+  -- rilevazioni scadute leggendo `storia36_c4_frontier()` (2026-09-04). Ventisei
+  -- giorni di divergenza, e in mezzo una rilevazione che il check dichiarava
+  -- scaduta e il seed non poteva chiudere: un rosso che nessuna ri-esecuzione
+  -- avrebbe mai potuto spegnere. Misurato il 2026-09-05.
+  p_end := LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end));
+
   -- un ciclo chiuso senza domande non si è svolto: o è archiviato, o mente
   SELECT count(*), min(s.survey_title) INTO v_cnt, v_sample
   FROM sys.sys_surveys s
@@ -3807,9 +3843,18 @@ BEGIN
     END;
   END IF;
 
+  -- Le corse FALLITE restano fuori: una corsa che non e' arrivata in fondo non ha
+  -- prodotto candidati per definizione, e pretenderglieli e' chiedere a un
+  -- fallimento di somigliare a un successo. Il rosso del 2026-09-05 era
+  -- `RICERCA-RESEARCH_SOURCES-3-41297164`, status FAILED, 0 record — accanto a tre
+  -- sorelle COMPLETED con 7, 5 e 1 record. La registrazione fedele di un tentativo
+  -- fallito e' un dato che vale, e cancellarla per far tornare un check sarebbe
+  -- peggio del rosso. Cio' che il check deve continuare a vedere e' una corsa che
+  -- si dichiara COMPLETED senza aver raccolto niente: quella si', e' un difetto.
   SELECT count(*), min(r.seed_acquisition_run_code) INTO v_cnt, v_sample
   FROM sys.sys_seed_acquisition_runs r
   WHERE r.seed_acquisition_run_tenant_id = c_rtl
+    AND r.seed_acquisition_run_status <> 'FAILED'
     AND NOT EXISTS (SELECT 1 FROM sys.sys_seed_candidate_records c
                      WHERE c.seed_candidate_record_run_id = r.seed_acquisition_run_id);
   IF v_cnt > 0 THEN
@@ -6822,8 +6867,20 @@ BEGIN
     -- ST-C10a(ii): una scelta espressa prima di essere stati assunti
     v_fired := false;
     BEGIN
+      -- La riga da guastare dev'essere di una persona CON una data di assunzione:
+      -- il predicato di C10a(ii) confronta con `min(hire_date)`, e su chi non ha
+      -- rapporto di lavoro quel confronto e' NULL — quindi non scatta, e non
+      -- perche' il check sia rotto. Un `LIMIT 1` senza ordine e' una lotteria:
+      -- ha funzionato finche' le sole righe presenti erano di dipendenti, ed e'
+      -- diventato rosso il 2026-09-05, appena la 000372 ha dato le loro scelte
+      -- anche a due account senza assunzione. Un autotest deve scegliere il caso
+      -- che mette alla prova il predicato, non uno a caso.
       UPDATE sys.sys_user_consents SET consent_occurred_at = consent_occurred_at - interval '4000 days'
-       WHERE ctid = (SELECT c2.ctid FROM sys.sys_user_consents c2 LIMIT 1);
+       WHERE ctid = (SELECT c2.ctid FROM sys.sys_user_consents c2
+                      WHERE EXISTS (SELECT 1 FROM sys.sys_user_employment e
+                                     WHERE e.user_employment_user_id = c2.consent_user_id
+                                       AND e.user_employment_hire_date IS NOT NULL)
+                      LIMIT 1);
       PERFORM staging.storia36_check_c10a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN

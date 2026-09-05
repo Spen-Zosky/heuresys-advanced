@@ -150,12 +150,23 @@ avanzamento() {
   #        (`staging.storia36_c4_frontier()`), quindi si ri-esegue il seed
   #        invece di duplicarne la regola qui. Aggiunto il 2026-08-08: senza,
   #        ogni avanzamento lasciava C4f rosso e la custodia falliva.
+  #   08 → una rilevazione di clima non resta «in corso» quando la sua finestra
+  #        e' chiusa da un mese. E' lo stesso caso del 04, e per la stessa
+  #        ragione: il C8 legge la frontiera da se' (`storia36_c4_frontier()`,
+  #        riga 67) e chiude le rilevazioni scadute (righe 95-117), ma quella
+  #        regola non girava mai perche' il seed non era in questa lista.
+  #        Misurato il 2026-09-05: la custodia era ROSSA su C8a(ii) — la
+  #        «Rilevazione di clima in corso» era attiva con la finestra finita il
+  #        2026-08-07, un mese prima. Aggiunto qui invece di riscrivere la regola
+  #        nell'avanzamento: AP-01, una regola in un posto solo.
   #   07 → le approvazioni nascono dalle richieste nuove
-  # L'ordine conta: 04 prima di 07, perche' le approvazioni delle edizioni
-  # formative derivano dalle edizioni che il 04 puo' aver appena creato.
+  # L'ordine conta: 04 e 08 prima di 07, perche' le approvazioni derivano dalle
+  # edizioni formative che il 04 puo' aver appena creato e dalle iniziative che
+  # il 08 puo' aver appena fatto seguire a un ciclo sotto soglia.
   local derived=(
     "$REPO_ROOT/db/seeds/storia36/01_attendance_timeoff.sql"
     "$REPO_ROOT/db/seeds/storia36/04_learning.sql"
+    "$REPO_ROOT/db/seeds/storia36/08_engagement.sql"
     "$appr"
   )
   for d in "${derived[@]}"; do

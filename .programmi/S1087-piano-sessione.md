@@ -128,3 +128,38 @@ che oggi non reggono**, entrambe misurate:
 
 Nessuna delle due e' colpa di chi ha scritto il programma: sono **fatti che cambiano**, ed e'
 la ragione per cui il PUNTO FISSO dice di misurarli invece di ereditarli.
+
+
+---
+
+## `#219` — quello che la corsa ha trovato, ed e' piu' di quello che cercavo
+
+Il programma prescriveva la corsa sul gemello, e la cura era giusta come **pratica**. La
+**diagnosi** che l'aveva motivata — «il collo di bottiglia e' il tunnel SSH» (S1083) — era
+invece sbagliata, e si e' visto solo eseguendola: sul gemello il tunnel **non c'e'**, l'API era
+viva e sana (zero errori, zero timeout di pool nel suo log), e i quattro `auth.setup` cadevano
+uguale, trascinando 82 test.
+
+**La causa vera, in due strati.**
+
+1. Un ripiego cablato — `|| "http://localhost:3001"` — scritto **due volte**, in
+   `next.config.js:17` e in `e2e-blocchi.mjs:107`. Il web che Playwright avvia e' un altro
+   processo e non eredita `NEXT_PUBLIC_API_PROXY_BASE_URL` da nessuna parte.
+2. E soprattutto: **quel valore si CONGELA al `next build`**, dentro
+   `.next/routes-manifest.json`. `next start` non lo ri-valuta. Quindi la prima correzione —
+   passare la variabile al processo Playwright — era **giusta e inutile**: arrivava troppo tardi.
+
+⭐ **Ed e' questa la ragione per cui il difetto e' sopravvissuto a tre sessioni di diagnosi.**
+Il valore non sta nel codice: sta in un **artefatto generato**, quindi gitignored. Nessuna
+ricerca nei sorgenti poteva trovarlo — e' la stessa specie di punto cieco gia' registrata in
+memoria per i rename. Ogni volta la colpa e' finita su qualcosa di plausibile: prima `aide` che
+satura la VM di notte, poi il tunnel. Due spiegazioni ragionevoli, due volte la cosa sbagliata.
+
+**Il rimedio che resta**: il preflight guadagna un quarto controllo che **legge il manifest**,
+non il sorgente, e confronta la destinazione compilata con l'API misurata. Provato in entrambi
+i versi: tace quando combaciano, protesta e dice come rimediare quando no.
+
+⚠ **Un secondo fatto, che vale per la prossima corsa**: il gemello fa tre mestieri insieme —
+clone di produzione, **runner della CI**, desktop. Misurato durante la corsa: `git` al 124%,
+`Runner.Worker` al 58%, load oltre 3. La corsa che chiude F5e va lanciata **quando la CI non
+gira**, o la macchina e' carica per costruzione e i rossi tornano non attribuibili.

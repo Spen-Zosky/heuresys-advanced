@@ -199,6 +199,37 @@ function preflight() {
                 `e se e' un next start orfano sta servendo una build vecchia`);
   }
 
+  // 2-bis. ⭐ LA DESTINAZIONE DEL PROXY, LETTA DALL'ARTEFATTO COMPILATO.
+  //
+  // E' il controllo che mancava, ed e' costato tre sessioni di diagnosi sbagliata.
+  // `next build` COMPILA i rewrites dentro `.next/routes-manifest.json`: la destinazione di
+  // `/api/*` viene fissata al momento del build e `next start` non la ri-valuta. Quindi
+  // esportare `NEXT_PUBLIC_API_PROXY_BASE_URL` prima della CORSA non serve a niente — va
+  // esportata prima del BUILD, e se il build e' stato fatto senza, il proxy punta per sempre
+  // al ripiego cablato.
+  //
+  // Misurato il 2026-09-05 sul gemello: manifest costruito alle 15:19 con `localhost:3001`,
+  // API viva sulla 8013, e ogni login morto in ECONNREFUSED — con l'API sana e il tunnel
+  // assente. Il valore stava in un artefatto GENERATO, cioe' gitignored: nessuna ricerca nel
+  // codice poteva trovarlo, ed e' la stessa specie di punto cieco gia' registrata per i
+  // rename. Per questo il controllo non guarda il sorgente: guarda il manifest.
+  if (apiBase) {
+    const manifest = join(WEB_DIR, ".next", "routes-manifest.json");
+    let compilata = null;
+    try {
+      const m = /"destination"\s*:\s*"(https?:\/\/[^/"]+)/.exec(readFileSync(manifest, "utf8"));
+      compilata = m?.[1] ?? null;
+    } catch {
+      // niente build: la corsa lo fara' da se', e allora il manifest nascera' giusto
+    }
+    if (compilata && compilata !== apiBase) {
+      avvisi.push(`il proxy /api/* e' COMPILATO verso ${compilata}, ma l'API sta su ${apiBase} — ` +
+                  `i rewrites si fissano al build e non all'avvio, quindi ogni login ` +
+                  `fallira' in ECONNREFUSED. Rimedio: ricostruire con ` +
+                  `NEXT_PUBLIC_API_PROXY_BASE_URL=${apiBase} pnpm build`);
+    }
+  }
+
   // 3. la macchina che ospita il database e' scarica? Si misura, non si presume — e se
   //    non si puo' misurare si DICHIARA: «non lo so» non e' «a posto».
   //

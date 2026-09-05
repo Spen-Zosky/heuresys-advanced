@@ -197,6 +197,28 @@
    },
    "solaLettura": true
   },
+  "visualization-exports": {
+   "data": "2026-09-05",
+   "decisione": "Enzo (#214 F6, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). OTTAVO perimetro in sola lettura, e stavolta la coda non ha lasciato scelta: e' il primo dei neutri per ampiezza di lettura (3 letture · 2 pagine) SENZA PARI — ed e' lo stesso candidato che il settimo aveva scartato il 2026-09-04, quando il pari con `content-blueprint-links` fu sciolto dalla regola del rischio crescente. La regola che allora lo rimando' indietro e' la stessa che oggi lo fa passare. NEUTRALITA' MISURATA su information_schema, non dedotta dai nomi: delle undici colonne di `sys_visualization_exports` nessuna e' il SOGGETTO di un dato di persona — sono il grafo di origine, il layout, il formato, il contenuto e la sua misura; non c'e' nemmeno un ATTORE, quindi qui non serve la distinzione «chi esamina non e' chi e' esaminato» servita altrove. ⚠ APERTO CON UNA GUARDIA, e le porte sono QUATTRO — una in piu' del settimo, e la quarta e' di natura diversa dalle altre. Un export EREDITA la superficie di `visualization-graphs` (aperto 2026-08-26 con guardia, perche' il vocabolario dei nodi ammette 'USER'), ma la eredita GIA' SERIALIZZATA: la sentinella del grafo (`v_grafo_con_nodo_di_persona`, mig 000355) guarda i nodi VIVI, mentre un export e' una fotografia gia' scattata. Se un grafo con nodi di persona venisse esportato e poi corretto, la sentinella del grafo tornerebbe verde e l'export resterebbe con i nomi dentro, leggibile dall'agente e invisibile a ogni strumento esistente. Non e' un caso di scuola: `export_payload` contiene oggi SVG interi da ~29 KB, cioe' le etichette dei nodi disegnate una per una. Mig `000373`: la sentinella `sys.v_export_di_visualizzazione_con_dato_di_persona` guarda ① `export_metadata` JSONB, ② `export_payload`, ③ `export_payload_uri` e ④ la DISCENDENZA da un grafo con nodi di tipo 'USER' — la via che le altre tre non possono vedere, perche' un nome proprio senza chiocciola non e' riconoscibile in un testo ma il TIPO del nodo lo dichiara. db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E QUATTRO le porte iniettando e disfacendo. Sul testo il criterio resta l'indirizzo di posta e non «un nome di persona»: quello e' indecidibile, e una guardia che pretende di riconoscerlo mente. Misurato prima di aprire (2026-09-05, produzione): 16 export · 13 con payload · 3 con uri · 3 con metadata; email nel payload 0, nell'uri 0, nel metadata 0, export da grafi con nodi 'USER' 0.",
+   "operations": {
+    "get": {
+     "method": "GET",
+     "path": "/",
+     "permission": "visualization:read"
+    },
+    "get_by_id": {
+     "method": "GET",
+     "path": "/:id",
+     "permission": "visualization:read"
+    },
+    "get_by_id_download": {
+     "method": "GET",
+     "path": "/:id/download",
+     "permission": "visualization:read"
+    }
+   },
+   "solaLettura": true
+  },
   "visualization-graphs": {
    "data": "2026-08-26",
    "decisione": "Enzo (#214 F3, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). QUINTO perimetro in sola lettura, primo della coda dei neutri per ampiezza di lettura (5 letture · 4 pagine). ⚠ APERTO CON UNA GUARDIA, e la ragione è un buco del criterio trovato misurando (S1081): `data-classes.ts` dichiara `visualization` senza dati di persona («grafici salvati») e i DATI di oggi le danno ragione — 316 nodi su 316 sono di tipo POSITION, nessuna persona — ma il vocabolario che il modello AMMETTE contiene anche 'USER' (dove `node_label` sarebbe il nome di una persona) e 'SUCCESSION_POOL'. La dichiarazione era vera oggi, non per costruzione: il giorno in cui una pagina salvasse un organigramma per persone, l'agente leggerebbe nomi propri da un perimetro dichiarato neutro e nessuno strumento se ne accorgerebbe. Rimedio nella mig 000355: la sentinella `sys.v_grafo_con_nodo_di_persona`, che db_health raccoglie e pretende a zero — bloccante, non informativa. Così l'apertura resta dimostrabile nel tempo invece che cieca.",

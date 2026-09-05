@@ -76,6 +76,21 @@ const ENV_FILE = leggiEnv();
 const env = (nome) => process.env[nome] ?? ENV_FILE[nome];
 
 /**
+ * Dove sta l'API, DERIVATA in tre passi e mai inventata:
+ *   ① la variabile che usa il web, se qualcuno l'ha esportata o messa nel `.env`;
+ *   ② altrimenti la `PORT` che il `.env` dichiara per l'API — la stessa che l'unit systemd
+ *      passa al processo, quindi la porta vera anche da una shell nuda;
+ *   ③ altrimenti `null`, che vuol dire NON MISURABILE. Mai una porta cablata.
+ *
+ * Serve a DUE cose, e la seconda e' quella che chiude i quattro setup falliti di `#219`:
+ * il preflight la interroga, e la corsa la PASSA al processo Playwright — perche' il web
+ * che Playwright avvia e' un altro processo, e senza questa variabile `next.config.js`
+ * ripiega sulla 3001 e ogni login muore in ECONNREFUSED.
+ */
+const API_BASE_URL = env("NEXT_PUBLIC_API_PROXY_BASE_URL")
+  ?? (env("PORT") ? `http://localhost:${env("PORT")}` : null);
+
+/**
  * Le fasi si LEGGONO dalla config — una sola fonte, o le due divergono in silenzio e la
  * fase mancante non gira.
  *
@@ -146,8 +161,7 @@ function preflight() {
   //       systemd passa al processo, quindi e' la porta vera anche da una shell nuda;
   //    ③ se nemmeno quella c'e', si dichiara NON MISURABILE e ci si ferma li'. Il ripiego
   //       su una porta cablata (era `http://localhost:3001`) non avvisava: DEPISTAVA.
-  const apiBase = env("NEXT_PUBLIC_API_PROXY_BASE_URL")
-    ?? (env("PORT") ? `http://localhost:${env("PORT")}` : null);
+  const apiBase = API_BASE_URL;
   //    ⚠ e se manca, si prosegue con gli ALTRI due controlli invece di uscire: una batteria
   //      che si ferma al primo rosso nasconde tutti gli altri (regola di bonifica §6).
   if (!apiBase) {
@@ -387,7 +401,24 @@ for (const [i, fase] of FASI.entries()) {
   const args = ["test", `--config=${CONFIG}`, ...fase.map((p) => `--project=${p}`),
                 "--reporter=list,json"];
   console.log(`\n${"═".repeat(78)}\n FASE ${n}/${FASI.length} — ${fase.join(" + ")}\n${"═".repeat(78)}`);
-  const r = playwright(args, { PLAYWRIGHT_JSON_OUTPUT_NAME: jsonOut });
+  // ⭐ LA VARIABILE SI PASSA AL FIGLIO, o il web che Playwright avvia non sa dov'e' l'API.
+  //
+  // `next.config.js:17` fa lo STESSO ripiego che il preflight faceva — `|| "http://localhost:3001"` —
+  // e il web che la suite avvia non eredita la variabile da nessuna parte: l'unit systemd ce l'ha,
+  // ma quel web e' un altro processo. Risultato misurato il 2026-09-05 sul gemello, con l'API viva
+  // e sana (zero errori nel suo log, zero timeout di pool):
+  //
+  //   [WebServer] Failed to proxy http://localhost:3001/v1/auth/login  ECONNREFUSED 127.0.0.1:3001
+  //   4 failed (i quattro auth.setup) · 1 flaky · 82 did not run · 1 passed
+  //
+  // Sono ESATTAMENTE i quattro setup che S1083 aveva attribuito al TUNNEL, e con essi gli 82 test
+  // che non hanno girato. La diagnosi di allora era plausibile e sbagliata: la corsa girava da
+  // Windows, dove il tunnel c'e' davvero, e il tunnel ha preso la colpa di questo. La prova che
+  // non era lui: qui il tunnel non c'e' — il DB e' in casa — e il guasto e' identico.
+  const r = playwright(args, {
+    PLAYWRIGHT_JSON_OUTPUT_NAME: jsonOut,
+    ...(API_BASE_URL ? { NEXT_PUBLIC_API_PROXY_BASE_URL: API_BASE_URL } : {}),
+  });
   esiti.push({ fase: n, progetti: fase, exit: r.status, ...conta(r.testo),
                motivi: motiviDeiSalti(jsonOut) });
 }

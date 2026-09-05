@@ -90,10 +90,12 @@ const EnvSchema = z.object({
   POSTGRES_POOL_MAX: z.coerce.number().int().min(1).max(200).default(20),
   // Reverse-proxy trust for req.ip (drives per-IP rate-limiting). Parsed via parseTrustProxy,
   // NOT z.coerce.boolean — that turns "false" into true (the same footgun COOKIE_SECURE avoids,
-  // see below). D-28 / S-100X-A2 F-WS-H-1: PROD behind the nginx TLS proxy MUST set TRUST_PROXY=1
-  // (one hop) so the login brute-force limiter keys on the genuine client IP and a forged
-  // X-Forwarded-For cannot evade it. "false"/"" = direct (no proxy); "true" = trust-all (spoofable);
-  // "<n>" = hop count; "<ip|cidr>[,…]" = trust-list. Yields boolean | number | string.
+  // see below). D-28 / S-100X-A2 F-WS-H-1: PROD behind the nginx TLS proxy MUST set the ADDRESS
+  // form — TRUST_PROXY=127.0.0.1,::1 — so the login brute-force limiter keys on the genuine
+  // client IP and a forged X-Forwarded-For cannot evade it. "false"/"" = direct (no proxy);
+  // "true" = trust-all (spoofable); "<ip|cidr>[,…]" = trust-list. Yields boolean | string.
+  // ⛔ The hop-count form ("1") is REJECTED at boot since #242 F3: fastify >= 5.12 reads it as
+  // "trust nothing" and silently collapses req.ip onto the proxy. PROD ran "1" until 2026-09-05.
   TRUST_PROXY: z.string().default("false").transform(parseTrustProxy),
 
   // Database

@@ -1,7 +1,7 @@
 # 242 — fastify ≥ 5.12 ha tolto il `trustProxy` a conteggio di salti
 
 > **item**: #242 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: NON AVVIATO
+> **stato**: ✅ **CHIUSA** — F1..F4 fatte il 2026-09-05 (S1087)
 > **nasce-da**: le due PR Dependabot su fastify 5.12.1 (`#76`, `#75`), che Enzo ha chiesto di
 > risolvere il 2026-09-03 (S1086). Chiuse entrambe con la ragione scritta.
 
@@ -48,9 +48,9 @@ la prova va creduta invece che aggirata.
 | id | cosa | cosa significa fatto | stato |
 |---|---|---|---|
 | **F1** | Misurare quale indirizzo l'API vede come peer | il valore è **misurato** su una richiesta vera, non dedotto | ✅ **FATTO** 2026-09-03 — `req.ip` è l'IP reale, l'XFF forgiato è ignorato |
-| **F2** | `TRUST_PROXY` in produzione da `1` a indirizzi/CIDR | il `.env` della VM porta la forma per indirizzo, e l'API riavviata la legge | ⬜ |
-| **F3** | `parseTrustProxy` + test: la forma numerica si **respinge** | un `TRUST_PROXY=1` fa fallire l'avvio con un messaggio che dice cosa mettere | ⬜ |
-| **F4** | Il bump a 5.12.1 sui due manifest | `Typecheck` verde in CI | ⬜ |
+| **F2** | `TRUST_PROXY` in produzione da `1` a indirizzi/CIDR | il `.env` della VM porta la forma per indirizzo, e l'API riavviata la legge | ✅ **FATTO** 2026-09-05 — `127.0.0.1,::1`, sonda verde su entrambe le proprietà |
+| **F3** | `parseTrustProxy` + test: la forma numerica si **respinge** | un `TRUST_PROXY=1` fa fallire l'avvio con un messaggio che dice cosa mettere | ✅ **FATTO** — throw con la forma da usare; 5/5 test verdi |
+| **F4** | Il bump sui manifest | `Typecheck` verde | ✅ **FATTO** — a **5.12.3** (l'ultima, non la 5.12.1 del piano); un manifest solo; typecheck verde |
 
 ### F1 — la misura, ed è la voce che regge tutte le altre
 
@@ -140,3 +140,72 @@ Con il nuovo assetto, entrambe insieme — o si è solo spostato il difetto:
   rimesso la forma numerica. Non è un'attesa che si risolve da sé.
 - Le due PR erano **lo stesso bump spezzato in due manifest** (radice e `apps/api`), e nessuna
   delle due poteva diventare verde da sola.
+
+
+---
+
+## ✅ F2/F3/F4 — CHIUSE il 2026-09-05 (S1087)
+
+### F2 — la produzione passa alla forma per indirizzo
+
+`.env` della VM: `TRUST_PROXY=1` → **`TRUST_PROXY=127.0.0.1,::1`**, API riavviata.
+La sonda di F1 rieseguita, e **entrambe** le proprietà reggono:
+
+```
+POST https://www.heuresys.com/api/v1/auth/login  -H 'X-Forwarded-For: 203.0.113.7'   -> 401
+sys.sys_auth_login_events -> ip = 37.120.137.234   (l'IP pubblico reale del client)
+```
+
+- `req.ip` e' l'IP **reale**, non `127.0.0.1` del proxy;
+- l'XFF forgiato a sinistra (`203.0.113.7`) **non** e' diventato `req.ip`.
+
+Riferimento preso prima del cambio, con `TRUST_PROXY=1`: stesso IP. La forma per
+indirizzo **preserva esattamente** il comportamento, che era il punto della voce.
+
+### ⚠ Tre falsi rossi, e la ragione unica sotto tutti e tre
+
+Durante F2 la produzione e' sembrata rotta **tre volte** (`500`, poi `readyz=500`,
+poi `curl 000` con l'API «in ascolto»). Ogni volta la causa era la stessa: **l'API
+impiega ~24 secondi** fra `systemctl restart` e la prima risposta utile, e ogni
+misura era caduta dentro quella finestra. Una di quelle volte ho perfino ripristinato
+la produzione «per prudenza» sulla base di una conclusione sbagliata.
+
+La misura era vera ogni volta; la conclusione no. Il rimedio non e' guardare meglio:
+e' **non misurare finche' non risponde**. Ogni prova su un servizio riavviato ora
+passa da un'attesa attiva (polling su `/readyz` fino a 200), mai da uno `sleep`.
+
+### F3 — la forma numerica si respinge, e il messaggio dice cosa mettere
+
+`parseTrustProxy` **lancia** su `^\d+$`, con un messaggio che nomina il valore da
+usare (`TRUST_PROXY=127.0.0.1,::1`) e l'alternativa (`false`). Il tipo di ritorno
+scende a `boolean | string`, che e' esattamente cio' che la 5.12 accetta.
+
+Non e' rigore per il rigore: la forma numerica **non e' deprecata, e' silenziosamente
+inerte** — l'API sarebbe partita, avrebbe risposto, e avrebbe messo ogni richiesta
+nello stesso secchio di rate limiting, senza un errore, un log o un test rosso. Un
+valore diventato pericoloso deve fermare l'avvio, non degradare in un default sbagliato.
+
+Allineati anche `.env.example` e il commento in `env.ts`, che prescrivevano `=1`.
+
+### F4 — il bump
+
+`apps/api/package.json`: `fastify` **5.11.3 → 5.12.3**. Il piano diceva 5.12.1: misurato
+dal registry il 2026-09-05, l'ultima e' la **5.12.3**. Un manifest solo — la seconda PR
+Dependabot riguardava la radice, che oggi non dichiara piu' `fastify`.
+
+Verificato **sul codice installato**, non sul changelog: `lib/request.js:51` della 5.12.3
+ha ancora il fail-closed sulla forma numerica, e `fastify.d.ts:152` non ammette piu' `number`.
+
+Misure: `pnpm typecheck` **verde su tutti i workspace** (era il rosso che aveva aperto la
+voce: 5 errori in `app.ts`) · `vitest run test/trust-proxy.test.ts` **5/5**.
+
+### I `.env` di ogni ambiente, misurati dopo il cambio
+
+| ambiente | valore |
+|---|---|
+| Windows | `false` |
+| linux-pc | `false` |
+| VM (produzione) | `127.0.0.1,::1` |
+| CI | non lo imposta → default `false` |
+
+Nessuno dichiara piu' la forma numerica: il throw di F3 non puo' rompere nessun avvio.

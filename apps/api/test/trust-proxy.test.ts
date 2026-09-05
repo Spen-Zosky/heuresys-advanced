@@ -17,10 +17,27 @@ describe("parseTrustProxy (D-28)", () => {
     expect(parseTrustProxy("TRUE")).toBe(true);
   });
 
-  it("numeric string → hop-count number (PROD behind nginx = 1)", () => {
-    expect(parseTrustProxy("1")).toBe(1);
-    expect(parseTrustProxy("2")).toBe(2);
-    expect(parseTrustProxy(" 1 ")).toBe(1);
+  // #242 F3 (2026-09-05): la forma a conteggio di salti si RESPINGE, non si accetta.
+  // Da fastify 5.12 significa «non fidarti di niente», e in silenzio: req.ip diventa
+  // l'indirizzo del proxy e il rate limiting per IP finisce in un secchio solo, senza
+  // errore, senza log e senza un test rosso. Un valore diventato pericoloso deve far
+  // fallire l'avvio, non degradare in un default sbagliato.
+  it("numeric string → REJECTED, with a message that says what to use instead", () => {
+    for (const v of ["1", "2", " 1 ", "0", "10"]) {
+      expect(() => parseTrustProxy(v), `TRUST_PROXY="${v}" deve essere respinto`).toThrow(
+        /hop-count/i,
+      );
+    }
+    // il messaggio non si limita a dire di no: dice cosa mettere
+    expect(() => parseTrustProxy("1")).toThrow(/TRUST_PROXY=127\.0\.0\.1,::1/);
+    expect(() => parseTrustProxy("1")).toThrow(/TRUST_PROXY=false/);
+  });
+
+  it("la forma per indirizzo che ha SOSTITUITO l'1 in produzione resta valida", () => {
+    // #242 F2: misurato sulla produzione il 2026-09-05, questo valore preserva
+    // entrambe le proprietà che l'1 garantiva — req.ip e' l'IP reale del client, e
+    // un X-Forwarded-For forgiato a sinistra non riesce a farsi passare per un altro IP.
+    expect(parseTrustProxy("127.0.0.1,::1")).toBe("127.0.0.1,::1");
   });
 
   it("IP / CIDR / comma-list → trust-list string (verbatim, trimmed)", () => {

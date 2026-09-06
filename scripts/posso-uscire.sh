@@ -24,6 +24,15 @@
 #   ATTENDI         N lavori locali stanno girando, e /exit li ucciderebbe
 #   NON-VERIFICATO  non ho potuto guardare — NON e' «a posto»
 #
+# ⚠ LIMITE NOTO, dichiarato invece che nascosto (S1090): il conteggio degli `ssh` in primo
+# piano e' PER MACCHINA, non per sessione. Con due sessioni aperte sullo stesso albero, l'ssh
+# di una fa dire ATTENDI anche all'altra, che non ha niente in volo. E' successo in S1090: la
+# sessione di `#219` stava estraendo i referti E2E dal runner, e questa chiusura ha ereditato
+# il suo ATTENDI. Il conteggio dei TASK e' stato ancorato al progetto (sotto); per l'ssh non
+# esiste un modo altrettanto semplice di attribuirlo a una sessione, quindi resta cosi' e
+# chi legge deve saperlo: davanti a un ATTENDI mosso dal solo ssh, si guarda `ps -ef` e si
+# stabilisce di chi e' prima di aspettare.
+#
 # Uso:  bash scripts/posso-uscire.sh [--tasks <dir>] [--breve]
 # Uscita: 0 = USCITA SICURA · 1 = ATTENDI · 2 = NON-VERIFICATO
 set -uo pipefail
@@ -46,8 +55,23 @@ riga() { printf '  %-26s %s\n' "$1" "$2"; }
 # guardato e' identico a uno nato da una misura, ed e' la peggiore delle risposte.
 if [ -z "$TASKS" ]; then
   base="${TEMP:-${TMP:-/tmp}}/claude"
-  # la directory `tasks` piu' recente sotto il progetto corrente
-  TASKS="$(ls -dt "$base"/*/*/tasks 2>/dev/null | head -1)"
+  # ⚠⚠ IL GLOB VA ANCORATO AL PROGETTO, o misura un'ALTRA sessione (S1090, misurato).
+  # `"$base"/*/*/tasks` attraversa TUTTI i progetti: il primo livello e' il progetto, il
+  # secondo la sessione. Il commento diceva «sotto il progetto corrente» e il codice non lo
+  # faceva — e il piu' recente vince, quindi bastava avere una sessione viva su un altro
+  # progetto per ereditarne i task. E' successo davvero: la chiusura di S1090 ha dichiarato
+  # ATTENDI su `b7e7i6u98` e `btw53u1zz`, che erano di `D--heuresys-datastore`. Un ATTENDI
+  # falso e' peggio di un NON-VERIFICATO: sembra una misura, e trattiene chi potrebbe uscire.
+  # La CLI nomina la cartella del progetto dal suo percorso, con i separatori resi innocui:
+  # `D:\heuresys-advanced` -> `D--heuresys-advanced`.
+  # ⚠ In Git Bash `$ROOT` e' `/d/heuresys-advanced`, NON `D:\heuresys-advanced`: la forma
+  # Windows la da' `pwd -W`, e solo li' la lettera del disco porta i due punti. Si prova
+  # quella e si ripiega sulla conversione del path MSYS, cosi' la riga regge in entrambe.
+  win="$(cd "$ROOT" && pwd -W 2>/dev/null || printf '%s' "$ROOT")"
+  proj="$(printf '%s' "$win" | sed -e 's#^/\([A-Za-z]\)/#\1:/#' -e 's#^\([A-Za-z]\):#\1-#' -e 's#[/\\]#-#g')"
+  TASKS="$(ls -dt "$base/$proj"/*/tasks 2>/dev/null | head -1)"
+  # Se il progetto non ha una sua cartella non si ripiega su quella di un altro: si dichiara.
+  # Ripiegare rimetterebbe in gioco esattamente il difetto che queste righe tolgono.
 fi
 
 echo "posso-uscire — cosa muore con /exit, e cosa no"

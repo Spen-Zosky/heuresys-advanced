@@ -120,7 +120,36 @@ const EnvSchema = z.object({
 
   // Auth
   COOKIE_SECRET: z.string().min(32),
-  ADMIN_ORIGIN: z.url().default("http://localhost:3000"),
+  /**
+   * Le origini del browser che questa API serve — **una o più**, separate da virgola.
+   *
+   * Perche' piu' di una (S1088). Una macchina puo' servire legittimamente due origini
+   * diverse: il gemello di produzione risponde su `http://192.168.1.11:3013` all'uso
+   * umano e su `http://localhost:3000` al web che la suite E2E avvia per conto suo.
+   * Con una sola origine ammessa, **ogni scrittura fatta dal browser** durante la corsa
+   * veniva rifiutata con `ORIGIN_MISMATCH` — 42 casi rossi, che tre triage successivi
+   * hanno attribuito ai permessi perche' `verifyCsrf` e `requirePermission` rispondono
+   * entrambi 403 (misurato: `Origin: …3013` -> 200, `Origin: …3000` -> 403).
+   *
+   * ⚠ Questo NON allarga il presidio, e la differenza e' tutta qui: l'elenco resta
+   * **chiuso e dichiarato**, e il confronto resta per **uguaglianza esatta di origine**
+   * — mai un prefisso, mai un carattere jolly. E' la proprieta' che F-007/F-010
+   * protegge (`https://admin.example.com.evil.com` e `http://localhost:30000` devono
+   * restare fuori), e vale identica su un elenco di uno o di tre. In produzione il
+   * valore dichiarato resta **una sola** origine.
+   */
+  ADMIN_ORIGIN: z
+    .string()
+    .default("http://localhost:3000")
+    .refine(
+      (v) =>
+        v
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .every((s) => URL.canParse(s)),
+      { message: "ADMIN_ORIGIN: una o piu' URL assolute separate da virgola" },
+    ),
 
   // Cookie `Secure` flag for the auth cookies (access/refresh/csrf). When unset it
   // defaults to (NODE_ENV === 'production') — Secure cookies require HTTPS, so a
@@ -297,8 +326,28 @@ if (parsed.NODE_ENV === "production" && !parsed.MFA_ENCRYPTION_KEY) {
 const jwtPrivateKey = readKeyMaterial("JWT_PRIVATE_KEY", ".secrets/jwt_private.pem");
 const jwtPublicKey  = readKeyMaterial("JWT_PUBLIC_KEY",  ".secrets/jwt_public.pem");
 
+/**
+ * Le origini ammesse, normalizzate a `origin` (schema+host+porta) una volta sola.
+ *
+ * Si normalizza QUI e non nel punto d'uso perche' `new URL(x).origin` toglie il path e
+ * la barra finale: senza, `http://localhost:3000/` e `http://localhost:3000` sarebbero
+ * due cose diverse e il confronto esatto fallirebbe per un carattere di battitura.
+ */
+const adminOrigins = parsed.ADMIN_ORIGIN.split(",")
+  .map((s) => s.trim())
+  .filter(Boolean)
+  .map((s) => new URL(s).origin);
+
 export const env = {
   ...parsed,
+  /**
+   * L'origine **canonica**: la prima dichiarata. E' quella che finisce nei link che
+   * l'API costruisce per un essere umano (il reset della password), dove un elenco non
+   * avrebbe senso — un link e' uno solo.
+   */
+  ADMIN_ORIGIN: adminOrigins[0]!,
+  /** Tutte le origini ammesse — il presidio CSRF, CORS e la CSP leggono questa. */
+  ADMIN_ORIGINS: adminOrigins,
   JWT_PRIVATE_KEY: jwtPrivateKey,
   JWT_PUBLIC_KEY:  jwtPublicKey,
 };

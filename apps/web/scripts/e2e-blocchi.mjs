@@ -303,6 +303,56 @@ function preflight() {
                   `NON sono attribuibili al prodotto finche' non si rimisura a macchina scarica`);
     }
   }
+
+  // 4. ⭐ L'API AMMETTE L'ORIGINE DA CUI IL BROWSER LE PARLERA'?
+  //
+  // Il controllo che mancava, e che e' costato la corsa di S1087 e i suoi 42 rossi.
+  // `verifyCsrf` fa due cose, e la seconda nessuno la guardava: dopo il double-submit
+  // confronta l'header `Origin` con `ADMIN_ORIGIN`, e se non combacia risponde **403** —
+  // lo stesso codice di un permesso negato. Tre triage successivi hanno percio'
+  // attribuito ai permessi cio' che era una variabile d'ambiente.
+  //
+  // Misurato il 2026-09-06 sul gemello, stessa sessione e stesso token, sola differenza
+  // l'header: `Origin: http://192.168.1.11:3013` -> **200**, `Origin: http://localhost:3000`
+  // -> **403 ORIGIN_MISMATCH**. Il web che Playwright avvia parla da `localhost:3000`,
+  // l'API del gemello ammetteva solo la 3013: **ogni scrittura fatta dal browser** era
+  // rifiutata, mentre quelle fatte da `page.request` passavano (non hanno `Origin`, e il
+  // controllo si salta) — ed e' per questo che la stessa rotta mostrava sia 200 sia 403.
+  //
+  // Si interroga l'API invece di leggere il `.env`: il `.env` dice cosa e' scritto, la
+  // risposta dice cosa quel processo sta applicando — e fra i due c'e' un riavvio.
+  //
+  // ⚠ E LA SONDA DEVE PASSARE IL DOUBLE-SUBMIT PER ARRIVARE AL CONTROLLO SULL'ORIGINE.
+  // La prima stesura mandava il solo header `Origin` e usciva VERDE su un ambiente che
+  // era rotto: senza token la richiesta muore prima, con un 403 `CSRF_FAIL` che questo
+  // controllo non riconosce. Era un controllo che non poteva vedere il difetto che
+  // esiste per vedere. Si mandano quindi cookie e header CSRF **uguali fra loro** — il
+  // presidio confronta solo l'uguaglianza, non la validita' — e cosi' si arriva al
+  // secondo controllo, che e' quello da misurare.
+  if (apiBase) {
+    const origine = `http://localhost:${porta}`;
+    const finto = "preflight-origine-non-e-un-token-vero";
+    const r = spawnSync(process.execPath, ["-e",
+      `fetch(${JSON.stringify(apiBase + "/v1/auth/refresh")},{method:"POST",` +
+      `headers:{origin:${JSON.stringify(origine)},` +
+      `cookie:${JSON.stringify(`hrx_csrf=${finto}`)},` +
+      `"x-csrf-token":${JSON.stringify(finto)}},signal:AbortSignal.timeout(5000)})` +
+      `.then(async r=>{const b=await r.text();` +
+      // 403 ORIGIN_MISMATCH = l'origine e' rifiutata. Qualunque altra risposta (401, 403
+      // CSRF_FAIL) significa che il controllo sull'origine e' stato SUPERATO: senza
+      // credenziali la richiesta muore piu' avanti, ed e' esattamente cio' che vogliamo.
+      `process.exitCode = (r.status===403 && b.includes("ORIGIN_MISMATCH"))?9:0})` +
+      `.catch(()=>{process.exitCode=0})`],
+      { encoding: "utf8" });
+    if (r.status === 9) {
+      avvisi.push(`l'API su ${apiBase} NON AMMETTE l'origine ${origine}, da cui il browser ` +
+                  `della suite le parlera': ogni scrittura fatta dalla pagina ricevera' 403 ` +
+                  `ORIGIN_MISMATCH — indistinguibile da un permesso negato. Rimedio: ` +
+                  `dichiarare quell'origine in ADMIN_ORIGIN (accetta un elenco separato da ` +
+                  `virgola) e riavviare l'API`);
+    }
+  }
+
   return avvisi;
 }
 

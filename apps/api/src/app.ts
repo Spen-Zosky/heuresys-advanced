@@ -277,14 +277,17 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:"],
-        connectSrc: ["'self'", env.ADMIN_ORIGIN],
+        connectSrc: ["'self'", ...env.ADMIN_ORIGINS],
       },
     },
   });
 
   // 4. CORS for the admin SPA (must precede route handlers)
   await app.register(cors, {
-    origin: env.ADMIN_ORIGIN,
+    // Tutte le origini dichiarate, non solo la canonica: una macchina puo' servirne
+    // legittimamente piu' di una (vedi ADMIN_ORIGIN in config/env.ts). L'elenco resta
+    // chiuso e il confronto esatto — @fastify/cors su un array fa uguaglianza.
+    origin: env.ADMIN_ORIGINS,
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
   });

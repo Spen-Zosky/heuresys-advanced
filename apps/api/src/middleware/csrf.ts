@@ -17,6 +17,29 @@ declare module "fastify" {
   }
 }
 
+/**
+ * L'origine della richiesta e' fra quelle ammesse?
+ *
+ * Funzione **pura ed esportata** apposta: la decisione di sicurezza sta qui, e qui si
+ * puo' provare con elenchi di una, due o tre voci senza dipendere da cosa dichiara il
+ * `.env` della macchina che esegue i test. Dentro il preHandler sarebbe provabile solo
+ * con l'elenco che l'ambiente ha, cioe' quasi mai quello che serve provare.
+ *
+ * @param ammesse origini **gia' normalizzate** con `new URL(x).origin`.
+ */
+export function origineAmmessa(originHeader: string, ammesse: readonly string[]): boolean {
+  if (ammesse.length === 0) return true; // nessuna dichiarata = controllo non attivo
+  let richiesta: string;
+  try {
+    richiesta = new URL(originHeader).origin;
+  } catch {
+    return false; // un'origine che non si sa leggere non e' un'origine ammessa
+  }
+  // Uguaglianza ESATTA su ogni voce — mai un prefisso: `startsWith` ammetteva
+  // "http://localhost:30000" e "https://admin.example.com.evil.com" (F-007/F-010).
+  return ammesse.includes(richiesta);
+}
+
 const plugin: FastifyPluginAsync = async (app) => {
   async function verifyCsrf(req: FastifyRequest, _reply: FastifyReply) {
     if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return;
@@ -32,16 +55,8 @@ const plugin: FastifyPluginAsync = async (app) => {
     // equality — a prefix match (startsWith) would admit look-alike hosts such as
     // "https://admin.example.com.evil.com" or "http://localhost:30000". F-007/F-010.
     const originHeader = req.headers.origin ?? req.headers.referer;
-    if (originHeader && env.ADMIN_ORIGIN) {
-      let requestOrigin: string | null = null;
-      try {
-        requestOrigin = new URL(originHeader).origin;
-      } catch {
-        requestOrigin = null;
-      }
-      if (requestOrigin !== new URL(env.ADMIN_ORIGIN).origin) {
-        throw new ForbiddenError("Request origin not allowed", "ORIGIN_MISMATCH");
-      }
+    if (originHeader && !origineAmmessa(originHeader, env.ADMIN_ORIGINS)) {
+      throw new ForbiddenError("Request origin not allowed", "ORIGIN_MISMATCH");
     }
   }
 

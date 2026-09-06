@@ -73,6 +73,14 @@ function* percorriSpec(nodo) {
  * dall'altra, ed e' l'unica parte su cui il raggruppamento deve poter sbagliare in modo
  * visibile.
  */
+// I codici ANSI di Playwright vanno TOLTI prima di raggruppare per firma: due errori
+// identici con colori diversi darebbero due firme diverse, cioe' il triage sbaglierebbe il
+// suo unico mestiere. Il carattere di escape e' il **bersaglio** della regex, non un
+// carattere finito qui per sbaglio — che e' il caso contro cui `no-control-regex` esiste.
+// Per questo la regola si disattiva qui e solo qui, invece di riscrivere la regex in modo
+// da nasconderla: `String.fromCharCode(27)` passerebbe il lint occultando l'intento, che e'
+// il modo peggiore di essere verdi.
+// eslint-disable-next-line no-control-regex
 const senzaAnsi = (t) => String(t ?? "").replace(/\u001b\[[0-9;]*m/g, "");
 
 function firma(messaggio) {

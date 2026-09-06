@@ -102,12 +102,24 @@ export default tseslint.config(
   // declare their own `/* global */` incl. `document`, so a broad .mjs block would
   // collide with them via no-redeclare).
   {
-    // I due wrapper della suite E2E: `e2e-node22.mjs` (D-36, Playwright sotto Node 22) e
+    // I tre strumenti della suite E2E: `e2e-node22.mjs` (D-36, Playwright sotto Node 22),
     // `e2e-blocchi.mjs` (#211 ①, S1068: la suite in fasi separate, cosi' un blocco rosso
-    // non impedisce ai successivi di girare). Restano elencati **uno per uno** e non come
+    // non impedisce ai successivi di girare) e `e2e-triage.mjs` (#219, S1089: legge i
+    // referti delle fasi e dichiara l'esito). Restano elencati **uno per uno** e non come
     // `apps/web/scripts/*.mjs`: gli altri script di quella cartella dichiarano i propri
     // `/* global */` includendo `document`, e un blocco largo collideva via no-redeclare.
-    files: ["apps/web/scripts/e2e-node22.mjs", "apps/web/scripts/e2e-blocchi.mjs"],
+    //
+    // ⚠ IL PREZZO DI QUESTA FORMA, pagato il 2026-09-06 (S1090): un elenco per nome **non
+    // si accorge di un file nuovo**. `e2e-triage.mjs` e' nato in S1089 ed e' rimasto fuori,
+    // quindi ogni `process`/`console` al suo interno era `no-undef` — CI `Lint` rossa, e il
+    // rollout in produzione fermo dietro di essa. Chi aggiunge uno script Node qui dentro
+    // deve aggiungerne il nome anche qui: il glob resta escluso per la ragione sopra, ma la
+    // ragione ha un costo e va saputo.
+    files: [
+      "apps/web/scripts/e2e-node22.mjs",
+      "apps/web/scripts/e2e-blocchi.mjs",
+      "apps/web/scripts/e2e-triage.mjs",
+    ],
     languageOptions: {
       globals: { ...globals.node },
     },

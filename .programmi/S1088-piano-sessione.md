@@ -52,3 +52,13 @@ gemello, perché un lavoro remoto in foreground muore con la sessione CLI.
 «cosa resta»)*
 
 - drift `RBAC-map`: live 986 non presente in `SOT_STATE §0` — rosso dello STALENESS SELF-CHECK all'avvio.
+
+- ⚠ `posso-uscire.sh` **conta se stesso** e dà sempre `ATTENDI` quando il suo output passa da
+  una pipe: l'id del «task in volo» cambia a ogni corsa — `bf2sf88jk`, poi `bumhe9ds6`, poi
+  `b8l9z3w06` — ed è la corsa stessa. Lo strumento lo dichiara nella sua nota, «non mi sono
+  ritrovato fra i task (output rediretto?)», quindi non mente; ma il verdetto resta
+  inutilizzabile, e in una chiusura non presidiata bloccherebbe per sempre. Verificato in modo
+  indipendente lo stesso giorno: zero processi `git` o `ssh` vivi.
+- ⚠ Trovati **sette processi orfani** su questa macchina: quattro `git` delle 06:11 e delle
+  14:47 — push appesi al prompt delle credenziali di `#248` — e tre `ssh` delle 08:23-08:30,
+  residui di comandi già uccisi. Nessuno produceva più nulla; terminati.

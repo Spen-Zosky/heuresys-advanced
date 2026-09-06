@@ -752,3 +752,69 @@ prima stesura di quella sonda usciva **VERDE su un ambiente rotto**: senza token
 richiesta moriva sul double-submit e non arrivava mai al controllo sull'origine — un
 controllo che non poteva vedere il difetto per cui esisteva. Corretta mandando cookie e
 header uguali fra loro, e provata nei due versi (rossa prima della correzione, verde dopo).
+
+### I sei residui: due famiglie, misurate riproducendoli (S1088)
+
+**Eseguiti in isolamento, ne fallisce UNO su sei.** È la distinzione che la riproduzione
+serviva a fare, e che nessun triage per firma poteva dare: un caso che passa da solo e
+cade nella corsa ha una causa diversa da uno che cade sempre.
+
+| caso | da solo | nella sua fase | famiglia |
+|---|---|---|---|
+| `compensation-read` | ❌ **rosso** | rosso | guasto proprio |
+| `matching-freetext` ×2 | ✅ verde | ❌ rosso | interferenza di fase |
+| `landing-pages` | ✅ verde | ❌ rosso | caso verde **per tempismo** |
+| `serie-a-panels` | ✅ verde | (fase 4) | da riprodurre |
+| `session-refresh` | ✅ verde | (fase 4) | da riprodurre |
+
+#### ✅ `compensation-read` — CHIUSO, ed era un guasto vero del prodotto
+
+Per un `PLATFORM_ADMIN`, aprire il pannello di valutazione **rompeva l'intera sezione**
+(error boundary, misurato nell'`error-context`). ADR-0032 non mette `null` al posto di un
+valore trattenuto: lo **toglie**. Il pannello controllava `finalFactor !== null`, ma il
+campo arriva `undefined` — `undefined !== null` è vero — e `.toFixed(4)` lanciava.
+
+⭐ **La causa a monte, che è la parte che conta**: il frontend ridichiarava **a mano**
+`VariablePayEvaluationView` invece di usare il tipo condiviso. La copia diceva
+`finalFactor: number | null` e non conosceva `masked`: affermava cioè che il campo c'è
+sempre. Con un tipo che mente sul contratto, TypeScript non poteva segnalare niente.
+
+🔬 **La prova vale più del verde**: rimesso il difetto a mano dopo aver sostituito il tipo,
+**il build non compila più** — `TS18048: 'q.data.finalFactor' is possibly 'undefined'`.
+Prima lo stesso codice passava e arrivava in produzione. Il guasto non è solo corretto: è
+diventato impossibile da reintrodurre in silenzio.
+
+E **il caso contraddiceva la decisione che dichiarava di presidiare**: pretendeva
+`comp-evaluation-gates` a zero, mentre `#124` D3 dice che al mandato solo tecnico
+**restano** il ragionamento dei cancelli e la curva, e spariscono i numeri. Misurato sulla
+risposta reale: `masked` porta `attainment, curveExplanation, curveFactor, finalFactor,
+recordedAmountEur`; i cancelli arrivano — 7 voci, `ALLOW`, spiegazione presente. Il caso
+restava verde solo perché la pagina si rompeva prima di arrivarci. Riscritto con l'atteso
+**derivato dalla risposta**. ✅ 10 passed.
+
+#### ✅ `landing-pages` — il caso chiedeva alla PAGINA di essere un confine di sicurezza
+
+Asseriva `provenance-page` a zero per chi non ha `provenance:read`. Ma questo progetto
+dichiara il contrario, e per esteso, in `generated-origins/page.tsx`: *«l'isolamento NON è
+qui: è nel servizio. Una pagina non è un confine di sicurezza»*. `/provenance` rende infatti
+il proprio guscio a chiunque digiti l'URL — è l'**API** che nega con 403.
+
+E passava **per tempismo**: `toHaveCount(0)` è verde nell'istante in cui l'elemento non è
+*ancora* comparso. Da solo la pagina è più lenta e il caso passava; dentro la fase 3, a cache
+calda, l'elemento faceva in tempo a comparire e diventava rosso. Un'assenza misurata così
+prova un ritardo, non un'assenza — stessa specie del difetto già corretto in F3/G.
+Riscritto su ciò che separa davvero: **il sommario risponde 403** e il guscio resta.
+
+#### 🔎 `matching-freetext` ×2 — resta aperto, e la firma è precisa
+
+`getByTestId('semantic-search-skill-row')` non compare in 20 s: la ricerca semantica non
+restituisce nulla **dentro la fase 3**, mentre da sola funziona. Il commento del caso dice
+«query-time embedding + kNN su 25k embedding live»: la pista da misurare è se sotto la fase
+qualcosa alteri l'indice o se il servizio degradi. **Non ancora diagnosticato**, e si dichiara
+invece di lasciarlo intendere.
+
+#### Un difetto d'ambiente trovato eseguendo
+
+Alla fine di una fase resta un **`next-server` orfano sulla :3000** (misurato: pid vivo, il
+servizio del gemello sta sulla :3013 ed era sano). La corsa successiva muore subito con «porta
+già in uso» — è precisamente ciò che il preflight controlla, e che qui si è visto accadere.

@@ -52,8 +52,29 @@ test.describe("MVP-2a landing pages — live data", () => {
       await expect(page.getByTestId("nav-me")).toBeVisible();
       await expect(page.getByTestId("nav-dashboard")).toBeVisible();
 
+      // ⚠ QUESTA ASSERZIONE CHIEDEVA ALLA PAGINA DI ESSERE UN CONFINE DI SICUREZZA, e questo
+      // progetto dichiara il contrario (corretto S1088). `generated-origins/page.tsx` lo scrive
+      // per esteso — «l'isolamento NON e' qui: e' nel servizio. Una pagina non e' un confine di
+      // sicurezza» — e `/provenance` rende infatti il proprio guscio a chiunque digiti l'URL: e'
+      // l'API che nega i dati con 403. Pretendere `provenance-page` a zero era quindi chiedere
+      // un comportamento che il prodotto non ha e non vuole avere.
+      //
+      // E il caso passava **per tempismo**, non perche' avesse ragione: `toHaveCount(0)` e' verde
+      // nell'istante in cui l'elemento non e' ANCORA comparso. Da solo la pagina e' piu' lenta e
+      // il caso passava; dentro la fase 3, a cache calda, l'elemento faceva in tempo a comparire
+      // e il caso diventava rosso. Un'assenza misurata cosi' non prova un'assenza: prova un
+      // ritardo — ed e' la stessa specie di difetto gia' corretta in `#219` F3/G.
+      //
+      // Cio' che separa davvero e' che **i dati di governo non arrivano**: si asserisce quello.
+      const risposta = page.waitForResponse(
+        (r) => r.url().includes("/v1/provenance/summary"),
+        { timeout: 20_000 },
+      );
       await page.goto("/provenance");
-      await expect(page.getByTestId("provenance-page")).toHaveCount(0);
+      expect((await risposta).status(), "senza provenance:read il sommario dev'essere negato").toBe(403);
+      // Il guscio c'e' — ed e' corretto che ci sia: e' cio' che questo caso ora dichiara,
+      // invece di negarlo. I dati no, e li' sta la separazione.
+      await expect(page.getByTestId("provenance-title")).toBeVisible();
     });
   });
 

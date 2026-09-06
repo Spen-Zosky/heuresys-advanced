@@ -51,6 +51,12 @@ INFORMATIVE = {
     "v_organization_unit_integrity":
         "una riga per unita' con le bandiere di violazione, non una riga per violazione: "
         "l'allarme dell'organigramma e' la sonda su fn_organization_integrity_violations()",
+    "v_quota_contratti_a_termine":
+        "#246 F4: una riga per AZIENDA con la quota di rapporti a termine sul totale attivo. "
+        "Conta stato, non anomalie — una riga per tenant c'e' sempre, anche a zero contratti a "
+        "termine. Nasce perche' il difetto di #246 (un terzo dell'organico a tempo determinato) "
+        "e' sopravvissuto due anni non essendo mai stato un numero che qualcuno guardava; le "
+        "violazioni della regola le presidiano le due sentinelle della 000376",
     "v_positions_with_critical_skill_gap":
         "E25 (P4/T5): una riga per POSIZIONE OCCUPATA, non per anomalia. Lo scostamento fra i "
         "requisiti CRITICAL e le competenze dell'occupante e' la condizione normale di un'azienda "

@@ -86,16 +86,16 @@ i 16 mesi dall'assunzione, e non potrà mancare.
 
 ## Le fasi
 
-- [ ] **F1 — La conversione dei 51** — `fixed_term` con anzianità > 12 mesi diventa `permanent` e
+- [x] **F1 — La conversione dei 51** — FATTA S1088, mig. 000375, 51 convertiti in produzione, rollback provato — `fixed_term` con anzianità > 12 mesi diventa `permanent` e
       perde la data di fine. Emendando **il file che crea** l'oggetto dove serve (ADR-0035: la
       catena si ri-applica per intero, una `UPDATE` a valle viene disfatta al giro dopo), con
       giornale di rollback e post-condizione che protegge anche ciò che **non** doveva cambiare —
       i 109 `permanent` restano 109, e le retribuzioni non si toccano (misurate congrue ad agosto
       contro il pavimento CCNL dalla `000311`).
-- [ ] **F2 — La scadenza coerente, per i contratti futuri** — un `fixed_term` deve avere una
+- [x] **F2 — La scadenza coerente** — FATTA S1088 (mig. 000376, sentinella invece di CHECK: il vincolo dovrebbe leggere unaltra tabella), per i contratti futuri** — un `fixed_term` deve avere una
       `end_date`, e quella data non può superare i 16 mesi dalla data di assunzione. È un vincolo
       sui dati, non un controllo nel codice: dove possibile un `CHECK`, altrimenti una sentinella.
-- [ ] **F3 — Le due sentinelle, provate ROSSE** — ① nessun `fixed_term` con anzianità oltre i 12
+- [x] **F3 — Le due sentinelle, provate ROSSE** — FATTE S1088, mig. 000376, tre iniezioni verificate e disfatte — ① nessun `fixed_term` con anzianità oltre i 12
       mesi; ② nessun `fixed_term` senza scadenza o con scadenza oltre i 16 mesi dall'assunzione.
       Entrambe raccolte da `db_health`, entrambe **provate rosse** iniettando un caso e
       disfacendolo, come la `000373` ha fatto sulle sue quattro porte: una sentinella mai vista
@@ -118,3 +118,89 @@ i 16 mesi dall'assunzione, e non potrà mancare.
 Nessun contratto a termine appartiene a chi ha più di 12 mesi di anzianità, ogni contratto a
 termine ha una scadenza entro i 16 mesi dall'assunzione, e due sentinelle a zero — provate rosse —
 lo mantengono nel tempo.
+
+---
+
+## ✅ S1088 (2026-09-06) — F1, F2 e F3 CHIUSE IN PRODUZIONE
+
+### La misura, ri-fatta prima di agire
+
+Il piano era del giorno prima, e i suoi numeri erano un'ipotesi. Ri-misurato in produzione
+il 2026-09-06:
+
+```
+sys_user_contracts ACTIVE:  160 righe
+  permanent   109
+  fixed_term   51   ·  25 senza data di fine  ·  51 su 51 con anzianità OLTRE i 12 mesi
+```
+
+⚠ **Tutti e 51**, non una parte: applicata la regola di Enzo ai dati di oggi, nessuno resta
+a termine. Non è un caso limite, è la conseguenza aritmetica del fatto che l'assunzione più
+recente fra loro è di anni fa.
+
+### F1 — la conversione (mig. `000375`)
+
+Quattro cose, come impone il metodo di bonifica §4: la **guardia** che ri-seleziona le righe
+al momento dell'esecuzione (mai ereditate dalla misura scritta nel commento); il **giornale**
+— riusato `staging.contratti_scaduti_undo` della `000311`, che ha già il campo `migrazione`,
+invece di crearne un secondo che sarebbe una seconda verità; le **post-condizioni** che
+proteggono anche ciò che *non* doveva cambiare (nessuna retribuzione mossa, i `permanent`
+cresciuti esattamente dei convertiti); il **rollback dichiarato**.
+
+⚠ **E il rollback dichiarato per primo era FALSO.** Avevo scritto di riusare
+`contratti_scaduti_ripristina_ric('000375')` — ma quella funzione **pretende** un tag della
+forma `RIC-YYYYMMDD` e avrebbe rifiutato il tag. Una via di ritorno che non funziona è
+peggio di non averne una: la si scopre nel momento esatto in cui serve. Aggiunta la variante
+generale `staging.contratti_ripristina_migrazione(tag)`; quella della `000371` resta intatta.
+
+🔬 **Il rollback è stato ESEGUITO, non solo dichiarato**: sul clone del gemello ha
+ripristinato **51 righe** e riportato lo stato a `fixed_term 51 (25 senza fine) / permanent
+109` — identico alla misura di partenza. Poi ri-applicata.
+
+### F2 + F3 — le due sentinelle (mig. `000376`)
+
+**Perché non un `CHECK`**, e la ragione è di sostanza: entrambe le regole confrontano una
+colonna di `sys_user_contracts` con la data di assunzione, che vive in un'altra tabella — un
+vincolo non può leggerla. E l'ammissibilità dipende da `current_date`: una condizione che
+cambia da sola nel tempo renderebbe invalida domani una riga valida oggi, facendo fallire
+ogni `UPDATE` successivo.
+
+- `sys.v_contratto_a_termine_fuori_ammissibilita` — a termine oltre i 12 mesi di anzianità;
+- `sys.v_contratto_a_termine_durata_incoerente` — senza scadenza, o oltre i 16 mesi.
+
+🔬 **Provate ROSSE dentro la migrazione stessa**, su un contratto vero e non su un caso
+costruito: tre iniezioni (tipo sbagliato · scadenza troppo lontana · scadenza assente), ognuna
+verificata, poi disfatte. Se una vista non vedesse il proprio caso, la migrazione **fallisce**
+invece di dichiararsi verde.
+
+### L'esito, letto dalle macchine
+
+```
+prova generale (ci-rehearsal, heuresys_ci)   VERDE · 349 migrazioni · sentinelle 33/33 a zero
+                                                     (erano 31: le due nuove entrano da sole)
+produzione, dopo pnpm db:migrate:vm          contratti a termine: 0
+                                             v_contratto_a_termine_fuori_ammissibilita:  0
+                                             v_contratto_a_termine_durata_incoerente:    0
+                                             giornale 000375: 51 righe, ritorno disponibile
+```
+
+⚠ **La prova generale da sola NON bastava, e va detto**: sul database della CI la `000375`
+ha convertito **0** contratti, perché quel clone non ha i dati importati da script (memoria
+`ci_clone_lacks_script_imported_data`). Ha provato che la catena regge, non che la migrazione
+faccia il suo lavoro — quella prova è stata fatta sul clone del gemello, che è 1:1 con la
+produzione.
+
+### E il seed che creava il difetto è stato emendato
+
+`db/seeds/rtl-rebuild/15_user_contracts.generated.sql` porta le 51 righe fuori regola: è ciò
+che le **crea**, e senza emendarlo un rebuild futuro le ricreerebbe da zero (ADR-0035). La
+regola è applicata in coda al seed invece che dentro le 51 `INSERT`, così le righe generate
+restano la fotografia fedele del legacy — che è il loro scopo — e la regola vive in un punto
+solo.
+
+### Cosa resta
+
+**F4** — il rapporto: la quota di contratti a termine sull'organico come numero che qualcuno
+guarda. È la seconda metà della causa («il difetto è sopravvissuto perché nessuno l'aveva mai
+messo su carta»), ma il presidio meccanico ora c'è: le due sentinelle sono in `db_health` e
+diventano rosse da sole.

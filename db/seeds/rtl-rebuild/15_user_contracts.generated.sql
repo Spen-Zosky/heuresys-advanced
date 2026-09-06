@@ -269,3 +269,36 @@ INSERT INTO sys.sys_user_contracts (user_contract_user_id, user_contract_tenant_
 INSERT INTO sys.sys_user_contracts (user_contract_user_id, user_contract_tenant_id, user_contract_type, user_contract_code, user_contract_start_date, user_contract_end_date, user_contract_probation_end_date, user_contract_ccnl_type, user_contract_ccnl_level, user_contract_gross_annual_salary, user_contract_currency, user_contract_salary_type, user_contract_payment_frequency, user_contract_work_hours_weekly, user_contract_work_schedule_type, user_contract_part_time_percentage, user_contract_job_title, user_contract_status, user_contract_termination_date, user_contract_termination_reason, user_contract_notes) SELECT u.user_id, u.user_tenant_id, 'permanent', 'CTR-2019-0162', '2019-01-20'::date, NULL::date, NULL::date, 'CCNL Commercio', 'Quadro', '49938.77'::numeric, 'EUR', 'annual', 'monthly', '40.0'::numeric, 'full_time', NULL::numeric, 'Food safety inspector', 'active', NULL::date, NULL, NULL FROM sys.sys_users u WHERE u.user_external_code = 'LEGACY_EMP::e98b22ed-99fa-415d-b40a-0f74a5e6b936';
 INSERT INTO sys.sys_user_contracts (user_contract_user_id, user_contract_tenant_id, user_contract_type, user_contract_code, user_contract_start_date, user_contract_end_date, user_contract_probation_end_date, user_contract_ccnl_type, user_contract_ccnl_level, user_contract_gross_annual_salary, user_contract_currency, user_contract_salary_type, user_contract_payment_frequency, user_contract_work_hours_weekly, user_contract_work_schedule_type, user_contract_part_time_percentage, user_contract_job_title, user_contract_status, user_contract_termination_date, user_contract_termination_reason, user_contract_notes) SELECT u.user_id, u.user_tenant_id, 'permanent', 'CTR-2018-0146', '2018-05-15'::date, NULL::date, NULL::date, 'CCNL Commercio', 'Livello 2', '114567.56'::numeric, 'EUR', 'annual', 'monthly', '40.0'::numeric, 'full_time', NULL::numeric, 'Production supervisor', 'active', NULL::date, NULL, NULL FROM sys.sys_users u WHERE u.user_external_code = 'LEGACY_EMP::477b19ea-2040-414f-bdf1-b99a218c87ad';
 COMMIT;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- EMENDAMENTO #246 (S1088) — la regola dei contratti a termine, applicata QUI
+--
+-- Le INSERT qui sopra vengono dall'estrazione del legacy e portano **51
+-- contratti a termine su 160**, tutti a persone con più di dodici anni di
+-- anzianità: un terzo dell'organico di una banca a tempo determinato, che nel
+-- settore non esiste. La 000375 lo ha bonificato in produzione, ma questo file
+-- è ciò che CREA quelle righe: senza questo blocco, un rebuild futuro
+-- ricreerebbe il difetto da zero (ADR-0035 — si emenda il file che crea
+-- l'oggetto, non solo l'esemplare esistente).
+--
+-- LA REGOLA (Enzo, 2026-09-05): nessun contratto a termine a chi ha più di 12
+-- mesi di anzianità; la scadenza non supera i 16 mesi dall'assunzione.
+--
+-- Si applica in coda invece di correggere le 51 INSERT una per una: le righe
+-- generate restano la fotografia fedele di ciò che il legacy conteneva — che è
+-- il loro scopo — e la regola resta leggibile in un punto solo, dove chiunque
+-- la trova. Le due sentinelle della 000376 verificano l'esito.
+-- ─────────────────────────────────────────────────────────────────────────────
+BEGIN;
+
+UPDATE sys.sys_user_contracts c
+   SET user_contract_type     = 'permanent',
+       user_contract_end_date = NULL
+  FROM sys.sys_user_employment e
+ WHERE e.user_employment_user_id = c.user_contract_user_id
+   AND c.user_contract_status = 'ACTIVE'
+   AND c.user_contract_type   = 'fixed_term'
+   AND e.user_employment_hire_date IS NOT NULL
+   AND age(current_date, e.user_employment_hire_date) > interval '12 months';
+
+COMMIT;

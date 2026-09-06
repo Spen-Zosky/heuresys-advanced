@@ -599,3 +599,90 @@ poche ore prima per non farlo.
 scarica — verificando `/proc/loadavg` e che `gnome-software` non stia macinando. Con
 l'ambiente ora coerente, e' la misura che dice quanti dei 44 erano davvero guasti del
 prodotto: la fase 1, gia' verde a 88/88, suggerisce che siano molti meno.
+
+---
+
+## ⭐⭐ S1088 (2026-09-06) — LA CORSA DI CONFERMA, E LA CAUSA DEI 403 È IL PRESIDIO CSRF
+
+**Ambiente rimesso in coerenza prima di partire**, e il preflight ha trovato da sé un difetto
+che avrebbe reso i rossi non attribuibili: il bundle dell'API sul gemello era delle **17:34**
+e il commit `b3723129` (modulo `candidates` di `#54` F3) delle **17:56** — cioè la stessa
+specie di guasto di S1087, un artefatto generato più vecchio del sorgente, intercettato
+questa volta **prima** della corsa e non dopo. Rifatto (1.93 MB), API riavviata,
+`mappingsLoaded: 986` (a fine S1087 il gemello ne aveva 980: ora combacia con la produzione).
+Gemello allineato a `b28081d8`, `@heuresys/ui` 1.0.0 → 1.1.0, web ricostruito verso `:8013`.
+Preflight `EXIT=0`, CI ferma, load `1.38`.
+
+### La misura
+
+```
+fase 1  VERDE   88 passati ·  0 falliti ·  0 non eseguiti   (13.9m)
+fase 2  ROSSA   83 passati ·  9 falliti ·  3 non eseguiti   ( 6.6m)
+fase 3  ROSSA   70 passati · 16 falliti · 68 non eseguiti
+fase 4  ROSSA   86 passati · 17 falliti ·  7 non eseguiti
+                327 passati · 42 falliti · 78 non eseguiti  su 447 · fasi 4/4
+```
+
+Triage per firma in `.programmi/219-triage-2026-09-06.txt`, prodotto dal nuovo
+`apps/web/scripts/e2e-triage.mjs` (il triage era stato rifatto a mano tre volte senza
+lasciare uno strumento).
+
+### ⚠ La ricostruzione del bundle NON ha spostato il numero: 42 contro i 44 di S1087
+
+S1087 aveva concluso che i 44 falliti erano «scritture rifiutate da un'API vecchia di due
+giorni». Il bundle è stato ricostruito, l'API riavviata, e i falliti sono **42**. È la
+**quarta** ipotesi di questa voce che cade misurando — dopo `aide`, il tunnel e l'API spenta.
+Resta scritta accanto alla correzione, perché il modo in cui cade vale più della conclusione.
+
+### La causa vera, e questa volta non ammette alternative
+
+**① Il 403 è la firma dominante, e la firma da sola non basta a nominarlo.** Misurato nel log
+dell'API: **98 risposte 403** durante la corsa, di cui **77 su scritture**. Ma
+`CsrfFailedError` e `ForbiddenError` rispondono **entrambe 403**
+(`middleware/errorHandler.ts:41` e `:49`): dallo status non si distingue un permesso negato da
+un token non combaciante. È il motivo per cui tre triage successivi hanno attribuito questi
+rossi ai permessi.
+
+**② Le ipotesi «permesso» e «concorrenza» sono ESCLUSE, misurando.**
+
+| ipotesi | verdetto | misura |
+|---|---|---|
+| permesso mancante | ❌ esclusa | `TENANT_ADMIN` ha `approval:create` e i 5 permessi `content:*`; `federica.marchetti` legge senza problemi nello stesso file |
+| grant persi / cache RBAC | ❌ esclusa | gemello **986** mapping = produzione, `mappingsLoaded: 986` all'avvio |
+| concorrenza fra worker | ❌ esclusa | `playwright.config.ts`: `workers: 1`, `fullyParallel: false` — non c'è parallelismo |
+| stato accumulato nella corsa lunga | ❌ esclusa | `approvals.spec.ts` **da solo**: `1 failed · 6 passed (38.4s)` — riproducibile, deterministico |
+| origine non ammessa (`ORIGIN_MISMATCH`) | ❌ esclusa | **199 scritture riuscite** nella stessa corsa: se l'origine fosse rifiutata non ne passerebbe nessuna |
+
+**③ La prova che chiude, ed è una rotta che non ha permessi da negare.**
+
+```
+POST /v1/auth/refresh   ->  403, quattro volte su quattro
+apps/api/src/modules/auth/routes.ts:146   preHandler: [app.verifyCsrf]
+```
+
+Quella rotta **non ha `requirePermission`**, non ha org-gate, non ha scope: l'unico preHandler
+è il presidio CSRF. Un suo 403 può venire da lì e **da nient'altro**. Non è più un'ipotesi da
+riprodurre: è misurata su un caso in cui nessuna causa alternativa è disponibile.
+
+**④ E il quadro torna in ogni punto:**
+- la **fase 1 non fa scritture** e produce **zero** 403 (il primo compare alle 03:04, cioè
+  appena finita); le fasi 2-4 cominciano tutte con un `setup-refresh`, e sono le sole rosse;
+- la **stessa rotta** prende sia 200 sia 403 — `PATCH /v1/me/preferences` **26 ok e 4 negati**,
+  `POST /v1/skills` 4 create e 2 negate: dipende dalla sessione, non dalla rotta né dal ruolo;
+- i 403 colpiscono anche `/v1/me/*`, che per **I17** nessun permesso può negare: il CSRF gira
+  **prima** di ogni scope.
+
+### 🔬 Il difetto strutturale che tiene la sessione morta: il rinnovo è protetto da ciò che deve rinnovare
+
+`POST /v1/auth/refresh` restituisce un **csrfToken nuovo** e riscrive i cookie — è la via con
+cui una sessione disallineata tornerebbe allineata. Ma è **essa stessa dietro `verifyCsrf`**:
+se il token è già disallineato, il rinnovo viene rifiutato per la stessa ragione che avrebbe
+dovuto curare, e da lì in avanti ogni scrittura di quella sessione fallisce senza via d'uscita.
+Non è un difetto dei test: è del disegno del presidio.
+
+### Cosa resta per chiudere F5e
+
+Riallineare cookie e header CSRF dopo il `setup-refresh` — e decidere se `/v1/auth/refresh`
+debba restare dietro il presidio che rende irreversibile il disallineamento. Poi rilanciare la
+corsa integrale a macchina scarica. ⚠ Il gemello è anche il runner della CI: si guarda
+`/proc/loadavg` **e** che `gnome-software` non stia macinando.

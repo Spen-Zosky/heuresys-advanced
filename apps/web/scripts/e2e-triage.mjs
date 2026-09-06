@@ -41,6 +41,16 @@ const arg = (nome) => {
 };
 const FASI = (arg("--fasi") ?? "1,2,3,4").split(",").map((s) => Number(s.trim()));
 const OUT = arg("--out");
+/**
+ * `--dettaglio N`: sotto ogni firma, il messaggio INTERO dei primi N casi.
+ *
+ * Serve a distinguere cose che la firma da sola confonde. Misurato in S1088: la firma
+ * «expect(received).toBe(expected)» copre da sola 11 casi, e senza il corpo del
+ * messaggio non si vede se dietro c'e' un 403 (permesso), un 400 (validazione) o un
+ * 500 — che sono tre cause diverse con tre cure diverse. Un triage che non lo
+ * distingue e' un triage che sembra fatto.
+ */
+const DETTAGLIO = Number(arg("--dettaglio") ?? 0);
 
 /** Ogni `spec` di Playwright porta i suoi `tests`, e ogni test i suoi `results`. */
 function* percorriSpec(nodo) {
@@ -63,10 +73,10 @@ function* percorriSpec(nodo) {
  * dall'altra, ed e' l'unica parte su cui il raggruppamento deve poter sbagliare in modo
  * visibile.
  */
+const senzaAnsi = (t) => String(t ?? "").replace(/\u001b\[[0-9;]*m/g, "");
+
 function firma(messaggio) {
-  const pulito = String(messaggio ?? "")
-    // eslint-disable-next-line no-control-regex
-    .replace(/\u001b\[[0-9;]*m/g, "")
+  const pulito = senzaAnsi(messaggio)
     .split("\n")
     .map((r) => r.trim())
     .filter(Boolean);
@@ -132,7 +142,7 @@ for (const n of FASI) {
         const f = firma(err?.message ?? (t.results ?? [])[0]?.error?.message);
         const titolo = `${spec.file} › ${spec.title}`.slice(0, 110);
         if (!gruppi.has(f)) gruppi.set(f, []);
-        gruppi.get(f).push(titolo);
+        gruppi.get(f).push({ titolo, corpo: String(err?.message ?? "") });
         if (!firmeGlobali.has(f)) firmeGlobali.set(f, 0);
         firmeGlobali.set(f, firmeGlobali.get(f) + 1);
       }
@@ -149,7 +159,15 @@ for (const n of FASI) {
   for (const [f, casi] of [...gruppi.entries()].sort((a, b) => b[1].length - a[1].length)) {
     dice("");
     dice(`  [${casi.length}x] ${f}`);
-    for (const c of casi) dice(`        · ${c}`);
+    for (const c of casi) dice(`        · ${c.titolo}`);
+    for (const c of casi.slice(0, DETTAGLIO)) {
+      dice("");
+      dice(`        ┌─ ${c.titolo}`);
+      for (const r of senzaAnsi(c.corpo).split("\n").slice(0, 22)) {
+        dice(`        │ ${r}`);
+      }
+      dice("        └─");
+    }
   }
   dice("");
 }

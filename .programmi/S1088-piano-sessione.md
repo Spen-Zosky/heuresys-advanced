@@ -13,10 +13,10 @@
 |---|---|---|---|---|
 | A | Allineare il gemello a `b28081d8` e ricostruire ciò che ne dipende | io | `git rev-parse HEAD` sul gemello = `b28081d8`, `pnpm install` fatto, web ricostruito con la destinazione giusta del proxy | ✅ **FATTO** — gemello a `b28081d8`; `@heuresys/ui` 1.0.0 → **1.1.0**; web ricostruito (manifest → `http://localhost:8013`); **e il preflight ha trovato un'incoerenza vera**: il bundle dell'API era delle 17:34 e `b3723129` (modulo `candidates` di `#54` F3) delle **17:56** — bundle rifatto (1.93 MB) e API riavviata, `mappingsLoaded: 986` (combacia con la produzione; a fine S1087 il gemello ne aveva 980) |
 | B | Preflight pulito su tutti i controlli | io | `node scripts/e2e-blocchi.mjs --solo-preflight` esce 0 e non porta avvisi | ✅ **FATTO** — `EXIT=0`, «nessun avviso — l'ambiente e' quello che la suite presume». Load `1.38`, **0 job CI in corso** |
-| C | Corsa integrale 4/4 fasi sul gemello, a macchina scarica | io | referti JSON delle 4 fasi su disco + conteggio eseguiti = totale dichiarato | 🔄 **IN CORSO** — lanciata 2026-09-06 02:52 sotto `setsid nohup` (PID 20250), log `/tmp/e2e-s1088.log`, esito in `/tmp/e2e-s1088.esito` |
-| D | Triage dei falliti per **firma**, letto dai referti | io | un file di triage con ogni firma, la sua occorrenza e la sua ipotesi di causa | ⬜ |
-| E | Se falliti = 0 → passaggio della suite in CI (criterio `#211` F4) | io | il workflow esegue la suite e la CI è verde | ⬜ |
-| F | Registrare l'esito in `.programmi/219-*` e nel register | io | il file porta la misura con la data | ⬜ |
+| C | Corsa integrale 4/4 fasi sul gemello, a macchina scarica | io | referti JSON delle 4 fasi su disco + conteggio eseguiti = totale dichiarato | ✅ **FATTO** — 4/4 fasi, 447 casi dichiarati = 447 contati · **327 passati · 42 falliti · 78 non eseguiti** · fase 1 VERDE piena (88). Lanciata — lanciata 2026-09-06 02:52 sotto `setsid nohup` (PID 20250), log `/tmp/e2e-s1088.log`, esito in `/tmp/e2e-s1088.esito` |
+| D | Triage dei falliti per **firma**, letto dai referti | io | un file di triage con ogni firma, la sua occorrenza e la sua ipotesi di causa | ✅ **FATTO** — `.programmi/219-triage-2026-09-06.txt` (623 righe), prodotto dal nuovo `e2e-triage.mjs`. **Causa dominante isolata e provata**: il presidio CSRF, non i permessi — `POST /v1/auth/refresh` risponde 403 e non ha alcun `requirePermission`, quindi non esiste causa alternativa. Quattro ipotesi escluse misurando |
+| E | Se falliti = 0 → passaggio della suite in CI (criterio `#211` F4) | io | il workflow esegue la suite e la CI è verde | ⛔ **NON RAGGIUNTO** — i falliti sono 42, il criterio di `#211` non è soddisfatto. Non è una voce saltata: è una voce il cui esito è ROSSO, e la causa è ora nominata |
+| F | Registrare l'esito in `.programmi/219-*` e nel register | io | il file porta la misura con la data | ✅ **FATTO** — sezione S1088 in `219-otto-guasti-suite-e2e.md` |
 
 ## Simulazione — le cinque domande, per la voce che conta (C)
 

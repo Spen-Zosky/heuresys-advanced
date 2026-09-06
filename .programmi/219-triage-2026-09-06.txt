@@ -1,0 +1,623 @@
+TRIAGE DELLA CORSA INTEGRALE — 2026-09-06
+================================================================================
+Prodotto da: node scripts/e2e-triage.mjs  (legge apps/web/.e2e-fase-N.json)
+Raggruppa i NON RIUSCITI per FIRMA d'errore, non per file — due test con la
+stessa firma hanno PROBABILMENTE la stessa causa. La dottrina di #219 dice che
+l'ipotesi va riprodotta prima di essere creduta: la firma registrata dal triage
+si e' rivelata sbagliata tre volte su tre (F2, F3, F4).
+
+### .e2e-fase-1.json  —  attesi 88 · non riusciti 0 · instabili 0 · saltati 0
+  (nessun test non riuscito)
+
+### .e2e-fase-2.json  —  attesi 83 · non riusciti 9 · instabili 0 · saltati 3
+
+  [6x] Error: expect(received).toBe(expected) // Object.is equality
+        · approvals.spec.ts › create naming self → approve → APPROVED → apply → APPLIED
+        · content-blueprint-links.spec.ts › attach a blueprint to a doc, see it on the blueprint's documentation tab, de
+        · content-media.spec.ts › upload → list → download → delete, full live loop
+        · content-search.spec.ts › search box returns ranked live hits with snippet highlight + empty state
+        · content.spec.ts › author can create, edit (version bump), and delete a document
+        · ess-certifications-upload.spec.ts › can add a new certification and see it in the list
+
+        ┌─ approvals.spec.ts › create naming self → approve → APPROVED → apply → APPLIED
+        │ Error: expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 200
+        │ Received: 403
+        │ 
+        │   31 |       page.getByTestId("approval-create-submit").click(),
+        │   32 |     ]);
+        │ > 33 |     expect(createRes.status()).toBe(200);
+        │      |                                ^
+        │   34 |     await expect(page.getByTestId("approval-create-success")).toBeVisible();
+        │   35 |
+        │   36 |     // Re-fetch proof: the new request shows in the live list → open it.
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/approvals.spec.ts:33:32
+        └─
+
+  [2x] Error: expect(locator).toHaveCount(expected) failed
+        · blueprint-activation.spec.ts › proporre una variante crea un'attivazione, e nasce PROPOSED
+        · content-workflow.spec.ts › admin submits → publishes; employee reads it in the handbook; draft stays hidden
+
+        ┌─ blueprint-activation.spec.ts › proporre una variante crea un'attivazione, e nasce PROPOSED
+        │ Error: expect(locator).toHaveCount(expected) failed
+        │ 
+        │ Locator:  getByTestId('blueprint-activation-error')
+        │ Expected: 0
+        │ Received: 1
+        │ Timeout:  5000ms
+        │ 
+        │ Call log:
+        │   - Expect "toHaveCount" with timeout 5000ms
+        │   - waiting for getByTestId('blueprint-activation-error')
+        │     14 × locator resolved to 1 element
+        │        - unexpected value "1"
+        │ 
+        │ 
+        │   54 |     // Se la proposta viene rifiutata, la pagina lo dice: leggerlo qui trasforma un timeout
+        │   55 |     // muto di 30 secondi in un messaggio che nomina il problema.
+        │ > 56 |     await expect(page.getByTestId("blueprint-activation-error")).toHaveCount(0);
+        │      |                                                                  ^
+        │   57 |     await expect(page.getByTestId("blueprint-activation-notice")).toBeVisible({ timeout: 30_000 });
+        │   58 |
+        │   59 |     await page.reload({ waitUntil: "domcontentloaded" });
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/blueprint-activation.spec.ts:56:66
+        └─
+
+  [1x] Error: expect(locator).toBeVisible() failed
+        · compensation-read.spec.ts › il pannello del calcolo non espone il conto a chi ha un mandato solo tecnico
+
+        ┌─ compensation-read.spec.ts › il pannello del calcolo non espone il conto a chi ha un mandato solo tecnico
+        │ Error: expect(locator).toBeVisible() failed
+        │ 
+        │ Locator: getByTestId('comp-evaluation-panel')
+        │ Expected: visible
+        │ Timeout: 20000ms
+        │ Error: element(s) not found
+        │ 
+        │ Call log:
+        │   - Expect "toBeVisible" with timeout 20000ms
+        │   - waiting for getByTestId('comp-evaluation-panel')
+        │ 
+        │ 
+        │   141 |
+        │   142 |     await page.getByTestId("comp-evaluate-button").first().click();
+        │ > 143 |     await expect(page.getByTestId("comp-evaluation-panel")).toBeVisible({ timeout: 20_000 });
+        │       |                                                             ^
+        │   144 |
+        │   145 |     // Il pannello si apre — la riga, il soggetto e il periodo restano visibili (ADR-0032 non
+        │   146 |     // nega la riga, trattiene i valori) — ma la spiegazione del conto non si materializza.
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/compensation-read.spec.ts:143:61
+        └─
+
+### .e2e-fase-3.json  —  attesi 70 · non riusciti 16 · instabili 0 · saltati 68
+
+  [5x] Error: expect(locator).toBeVisible() failed
+        · leads-management.spec.ts › il cambio di stato persiste: sopravvive a un ricaricamento
+        · login-mfa-enrollment.spec.ts › TOTP leg: gate panel → enroll+verify → auto re-login → MFA challenge → /me
+        · matching-freetext.spec.ts › submits a query and gets ranked skills + occupations from the live index
+        · matching-freetext.spec.ts › semantic catalog search returns results on the skills page
+        · mfa-policy-admin.spec.ts › mfa-policy admin page: list, toggle HS policy on (READ_ONLY scope), restore off
+
+        ┌─ leads-management.spec.ts › il cambio di stato persiste: sopravvive a un ricaricamento
+        │ Error: expect(locator).toBeVisible() failed
+        │ 
+        │ Locator: getByTestId('lead-row').filter({ hasText: 'E2E Prospect' }).first().getByTestId('lead-status-CONTACTED')
+        │ Expected: visible
+        │ Timeout: 20000ms
+        │ Error: element(s) not found
+        │ 
+        │ Call log:
+        │   - Expect "toBeVisible" with timeout 20000ms
+        │   - waiting for getByTestId('lead-row').filter({ hasText: 'E2E Prospect' }).first().getByTestId('lead-status-CONTACTED')
+        │ 
+        │ 
+        │   81 |     const reloaded = page.getByTestId("lead-row").filter({ hasText: lead.name }).first();
+        │   82 |     await expect(reloaded).toBeVisible({ timeout: 45_000 });
+        │ > 83 |     await expect(reloaded.getByTestId(`lead-status-${next}`)).toBeVisible({ timeout: 20_000 });
+        │      |                                                               ^
+        │   84 |
+        │   85 |     // E l'API — la fonte, non la pagina — riporta il nuovo stato.
+        │   86 |     const after = await fetchLeads(request);
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/leads-management.spec.ts:83:63
+        └─
+
+  [5x] Error: expect(received).toBe(expected) // Object.is equality
+        · me-preferences.spec.ts › changing theme+palette persists across a full reload (server SoT)
+        · me-sessions.spec.ts › lists own sessions, flags the current device, logs out everywhere else
+        · mfa-enroll.spec.ts › page renders + enroll TOTP shows QR + cancel restores state
+        · mfa-enroll.spec.ts › EMAIL_OTP enroll shows email-code form + resend, cancel restores state
+        · mfa-enroll.spec.ts › client-side gate: 5-digit code blocks form submit
+
+        ┌─ me-preferences.spec.ts › changing theme+palette persists across a full reload (server SoT)
+        │ Error: expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 200
+        │ Received: 403
+        │ 
+        │   35 |     page.getByTestId(testId).click(),
+        │   36 |   ]);
+        │ > 37 |   expect(resp.status()).toBe(200);
+        │      |                         ^
+        │   38 | }
+        │   39 |
+        │   40 | async function bodyBackground(page: Page): Promise<string> {
+        │     at patchAndWait (/home/enzo/heuresys-advanced/apps/web/tests/e2e/me-preferences.spec.ts:37:25)
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/me-preferences.spec.ts:61:5
+        └─
+
+  [1x] Error: creazione famiglia non accettata
+        · job-catalog.spec.ts › crea una famiglia, un ruolo che vi appartiene, lo rinomina e ripulisce
+
+        ┌─ job-catalog.spec.ts › crea una famiglia, un ruolo che vi appartiene, lo rinomina e ripulisce
+        │ Error: creazione famiglia non accettata
+        │ 
+        │ expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 201
+        │ Received: 403
+        │ 
+        │   71 |         page.getByTestId("family-create-submit").click(),
+        │   72 |       ]);
+        │ > 73 |       expect(postFam.status(), "creazione famiglia non accettata").toBe(201);
+        │      |                                                                    ^
+        │   74 |
+        │   75 |       const famRes = await request.get(`${API_BASE}/v1/job-families?limit=200`, { headers: { cookie } });
+        │   76 |       const famiglia = ((await famRes.json()).items as Array<{ jobFamilyId: string; code: string }>).find(
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/job-catalog.spec.ts:73:68
+        └─
+
+  [1x] Error: definizione indicatore non accettata
+        · kpis-editing.spec.ts › definisce un indicatore, lo ritrova cercandolo, lo corregge e lo rimuove
+
+        ┌─ kpis-editing.spec.ts › definisce un indicatore, lo ritrova cercandolo, lo corregge e lo rimuove
+        │ Error: definizione indicatore non accettata
+        │ 
+        │ expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 201
+        │ Received: 403
+        │ 
+        │   69 |         page.getByTestId("kpi-create-submit").click(),
+        │   70 |       ]);
+        │ > 71 |       expect(post.status(), "definizione indicatore non accettata").toBe(201);
+        │      |                                                                     ^
+        │   72 |       const creato = (await post.json()) as {
+        │   73 |         kpiDefinitionId: string;
+        │   74 |         polarity: string;
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/kpis-editing.spec.ts:71:69
+        └─
+
+  [1x] Error: expect(locator).toHaveCount(expected) failed
+        · landing-pages.spec.ts › /me rende con ruolo, saluto e card; il governo di piattaforma resta chiuso
+
+        ┌─ landing-pages.spec.ts › /me rende con ruolo, saluto e card; il governo di piattaforma resta chiuso
+        │ Error: expect(locator).toHaveCount(expected) failed
+        │ 
+        │ Locator:  getByTestId('provenance-page')
+        │ Expected: 0
+        │ Received: 1
+        │ Timeout:  5000ms
+        │ 
+        │ Call log:
+        │   - Expect "toHaveCount" with timeout 5000ms
+        │   - waiting for getByTestId('provenance-page')
+        │     14 × locator resolved to 1 element
+        │        - unexpected value "1"
+        │ 
+        │ 
+        │   54 |
+        │   55 |       await page.goto("/provenance");
+        │ > 56 |       await expect(page.getByTestId("provenance-page")).toHaveCount(0);
+        │      |                                                         ^
+        │   57 |     });
+        │   58 |   });
+        │   59 |
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/landing-pages.spec.ts:56:57
+        └─
+
+  [1x] Error: inserimento modulo non accettato
+        · learning-editing.spec.ts › inserisce un modulo, lo ritrova cercandolo, lo corregge e lo rimuove
+
+        ┌─ learning-editing.spec.ts › inserisce un modulo, lo ritrova cercandolo, lo corregge e lo rimuove
+        │ Error: inserimento modulo non accettato
+        │ 
+        │ expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 201
+        │ Received: 403
+        │ 
+        │   67 |         page.getByTestId("learning-create-submit").click(),
+        │   68 |       ]);
+        │ > 69 |       expect(post.status(), "inserimento modulo non accettato").toBe(201);
+        │      |                                                                 ^
+        │   70 |       const creato = (await post.json()) as {
+        │   71 |         learningModuleId: string;
+        │   72 |         kind: string;
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/learning-editing.spec.ts:69:65
+        └─
+
+  [1x] Error: creazione percorso non accettata
+        · learning-paths.spec.ts › compone un percorso con due moduli, ne inverte l'ordine e lo smonta
+
+        ┌─ learning-paths.spec.ts › compone un percorso con due moduli, ne inverte l'ordine e lo smonta
+        │ Error: creazione percorso non accettata
+        │ 
+        │ expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 201
+        │ Received: 403
+        │ 
+        │   78 |         page.getByTestId("path-create-submit").click(),
+        │   79 |       ]);
+        │ > 80 |       expect(postPath.status(), "creazione percorso non accettata").toBe(201);
+        │      |                                                                     ^
+        │   81 |       const percorso = (await postPath.json()) as { learningPathId: string; targetOutcome: string | null };
+        │   82 |       percorsoId = percorso.learningPathId;
+        │   83 |       expect(percorso.targetOutcome, "il risultato atteso non è stato salvato").toBe("Risultato di collaudo");
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/learning-paths.spec.ts:80:69
+        └─
+
+  [1x] Error: expect(received).toMatchObject(expected)
+        · me-preferences.spec.ts › changing language persists server-side across a cookie+cache-cleared reload
+
+        ┌─ me-preferences.spec.ts › changing language persists server-side across a cookie+cache-cleared reload
+        │ Error: expect(received).toMatchObject(expected)
+        │ 
+        │ - Expected  - 1
+        │ + Received  + 1
+        │ 
+        │   Object {
+        │ -   "locale": "en",
+        │ +   "locale": "it",
+        │   }
+        │ 
+        │   121 |     const apiResp = await page.request.get("/api/v1/me/preferences");
+        │   122 |     expect(apiResp.status()).toBe(200);
+        │ > 123 |     expect(await apiResp.json()).toMatchObject({ locale: "en" });
+        │       |                                  ^
+        │   124 |
+        │   125 |     // Clear the NEXT_LOCALE cookie (only) and localStorage, then reload: the re-applied locale
+        │   126 |     // can ONLY come from the server (GET /v1/me/preferences → PreferencesApplier → setLocale, which
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/me-preferences.spec.ts:123:34
+        └─
+
+### .e2e-fase-4.json  —  attesi 86 · non riusciti 17 · instabili 0 · saltati 7
+
+  [3x] Error: expect(locator).toBeVisible() failed
+        · serie-a-panels.spec.ts › #30 gap-closure panel renders plans + analysis results
+        · tenants-editing.spec.ts › una nuova azienda creata dall'interfaccia compare nell'elenco e sopravvive al ricari
+        · tenants-editing.spec.ts › archiviare l'azienda la porta in stato ARCHIVED, e resta tale dopo il ricaricamento
+
+        ┌─ serie-a-panels.spec.ts › #30 gap-closure panel renders plans + analysis results
+        │ Error: expect(locator).toBeVisible() failed
+        │ 
+        │ Locator: getByTestId('gap-plan-row').first().or(getByTestId('gap-closure'))
+        │ Expected: visible
+        │ Error: strict mode violation: getByTestId('gap-plan-row').first().or(getByTestId('gap-closure')) resolved to 2 elements:
+        │     1) <section class="space-y-6" data-testid="gap-closure">…</section> aka getByTestId('gap-closure')
+        │     2) <tr data-testid="gap-plan-row" class="transition-colors hover:bg-muted/60 ">…</tr> aka getByRole('row', { name: 'ad1887ab 1 2026-11-09 Attivo' })
+        │ 
+        │ Call log:
+        │   - Expect "toBeVisible" with timeout 15000ms
+        │   - waiting for getByTestId('gap-plan-row').first().or(getByTestId('gap-closure'))
+        │ 
+        │ 
+        │   26 |     await expect(
+        │   27 |       page.getByTestId("gap-plan-row").first().or(page.getByTestId("gap-closure")),
+        │ > 28 |     ).toBeVisible({ timeout: 15_000 });
+        │      |       ^
+        │   29 |   });
+        │   30 | });
+        │   31 |
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/serie-a-panels.spec.ts:28:7
+        └─
+
+  [2x] Error: il salvataggio non è stato accettato dall'API
+        · positions-editing.spec.ts › cambia la criticità, la rilegge dal database e la ripristina
+        · users-editing.spec.ts › modifica l'anagrafica, la rilegge dal database e la ripristina
+
+        ┌─ positions-editing.spec.ts › cambia la criticità, la rilegge dal database e la ripristina
+        │ Error: il salvataggio non è stato accettato dall'API
+        │ 
+        │ expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 200
+        │ Received: 403
+        │ 
+        │   69 |         page.getByTestId("position-edit-save").click(),
+        │   70 |       ]);
+        │ > 71 |       expect(patch.status(), "il salvataggio non è stato accettato dall'API").toBe(200);
+        │      |                                                                               ^
+        │   72 |       await expect(page.getByTestId("position-edit-saved")).toBeVisible({ timeout: 15_000 });
+        │   73 |
+        │   74 |       // PROVA VERA #1: il database ha il valore nuovo
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/positions-editing.spec.ts:71:79
+        └─
+
+  [1x] Error: creazione non accettata dall'API
+        · organization-editing.spec.ts › crea un'unità, la sposta sotto un'altra e verifica ogni passo sull'API
+
+        ┌─ organization-editing.spec.ts › crea un'unità, la sposta sotto un'altra e verifica ogni passo sull'API
+        │ Error: creazione non accettata dall'API
+        │ 
+        │ expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 201
+        │ Received: 403
+        │ 
+        │   120 |         page.getByTestId("orgunit-create-submit").click(),
+        │   121 |       ]);
+        │ > 122 |       expect(post.status(), "creazione non accettata dall'API").toBe(201);
+        │       |                                                                 ^
+        │   123 |
+        │   124 |       // PROVA VERA #1: l'unità esiste sull'API, non solo nel form
+        │   125 |       const cercata = await request.get(
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/organization-editing.spec.ts:122:65
+        └─
+
+  [1x] TimeoutError: locator.waitFor: Timeout <tempo> exceeded.
+        · session-refresh.spec.ts › D-26: access expiry recovers via single silent refresh, no hard-logout
+
+        ┌─ session-refresh.spec.ts › D-26: access expiry recovers via single silent refresh, no hard-logout
+        │ TimeoutError: locator.waitFor: Timeout 45000ms exceeded.
+        │ Call log:
+        │   - waiting for getByTestId('nav-me') to be visible
+        │ 
+        │ 
+        │   66 |   // Authenticated shell rendered = middleware let the resumable session
+        │   67 |   // through AND the silent refresh recovered the data layer.
+        │ > 68 |   await page.getByTestId("nav-me").waitFor({ state: "visible", timeout: 45_000 });
+        │      |                                    ^
+        │   69 |   expect(page.url()).not.toContain("/login");
+        │   70 |
+        │   71 |   await expect.poll(okRefreshes, { timeout: 15_000 }).toBeGreaterThanOrEqual(1);
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/session-refresh.spec.ts:68:36
+        └─
+
+  [1x] Error: creazione sinonimo non accettata
+        · skill-relations.spec.ts › aggiunge un sinonimo e un legame, poi li elimina, verificando sull'API
+
+        ┌─ skill-relations.spec.ts › aggiunge un sinonimo e un legame, poi li elimina, verificando sull'API
+        │ Error: creazione sinonimo non accettata
+        │ 
+        │ expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 201
+        │ Received: 403
+        │ 
+        │   83 |       page.getByTestId("skill-alias-add-submit").click(),
+        │   84 |     ]);
+        │ > 85 |     expect(postAlias.status(), "creazione sinonimo non accettata").toBe(201);
+        │      |                                                                    ^
+        │   86 |
+        │   87 |     // PROVA VERA #1: il sinonimo è sull'API, legato alla competenza giusta
+        │   88 |     const aliasRes = await request.get(`${API_BASE}/v1/skill-aliases?skillId=${skillA.skillId}&limit=200`, {
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/skill-relations.spec.ts:85:68
+        └─
+
+  [1x] Error: creazione famiglia non accettata
+        · skill-taxonomy.spec.ts › crea una famiglia, una categoria dentro di essa, rinomina e ripulisce
+
+        ┌─ skill-taxonomy.spec.ts › crea una famiglia, una categoria dentro di essa, rinomina e ripulisce
+        │ Error: creazione famiglia non accettata
+        │ 
+        │ expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 201
+        │ Received: 403
+        │ 
+        │   81 |         page.getByTestId("family-create-submit").click(),
+        │   82 |       ]);
+        │ > 83 |       expect(postFam.status(), "creazione famiglia non accettata").toBe(201);
+        │      |                                                                    ^
+        │   84 |       famigliaId = ((await postFam.json()) as { skillFamilyId: string }).skillFamilyId;
+        │   85 |
+        │   86 |       // --- categoria DENTRO quella famiglia ---
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/skill-taxonomy.spec.ts:83:68
+        └─
+
+  [1x] Error: creazione competenza non accettata
+        · skills-editing.spec.ts › crea una competenza, la ritrova cercandola, la rinomina e rilegge dal database
+
+        ┌─ skills-editing.spec.ts › crea una competenza, la ritrova cercandola, la rinomina e rilegge dal database
+        │ Error: creazione competenza non accettata
+        │ 
+        │ expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 201
+        │ Received: 403
+        │ 
+        │   46 |       page.getByTestId("skill-create-submit").click(),
+        │   47 |     ]);
+        │ > 48 |     expect(post.status(), "creazione competenza non accettata").toBe(201);
+        │      |                                                                 ^
+        │   49 |     const creata = (await post.json()) as { skillId: string; code: string };
+        │   50 |     expect(creata.code).toBe(codice);
+        │   51 |
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/skills-editing.spec.ts:48:65
+        └─
+
+  [1x] Error: expect(received).toContain(expected) // indexOf
+        · surveys-m2.spec.ts › answer an assigned survey → completed (verified via re-fetch)
+
+        ┌─ surveys-m2.spec.ts › answer an assigned survey → completed (verified via re-fetch)
+        │ Error: expect(received).toContain(expected) // indexOf
+        │ 
+        │ Expected value: 403
+        │ Received array: [200, 201]
+        │ 
+        │   60 |       page.getByTestId("me-survey-submit").click(),
+        │   61 |     ]);
+        │ > 62 |     expect([200, 201]).toContain(res.status());
+        │      |                        ^
+        │   63 |     await expect(page.getByTestId("me-survey-success")).toBeVisible();
+        │   64 |
+        │   65 |     // Rileggi l'elenco → la riga appena compilata porta il segno di completata
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/surveys-m2.spec.ts:62:24
+        └─
+
+  [1x] Error: expect(locator).toHaveValue(expected) failed
+        · tenant-blueprints.spec.ts › dalla carta d'identita' ai processi, fino alla firma
+
+        ┌─ tenant-blueprints.spec.ts › dalla carta d'identita' ai processi, fino alla firma
+        │ Error: expect(locator).toHaveValue(expected) failed
+        │ 
+        │ Locator:  getByTestId('tenant-blueprint-code')
+        │ Expected: ""
+        │ Received: "E2E-FASCICOLO-1788657904283"
+        │ Timeout:  5000ms
+        │ 
+        │ Call log:
+        │   - Expect "toHaveValue" with timeout 5000ms
+        │   - waiting for getByTestId('tenant-blueprint-code')
+        │     14 × locator resolved to <input id="_r_0_" required="" type="text" data-testid="tenant-blueprint-code" value="E2E-FASCICOLO-1788657904283" class="flex w-full rounded-md border bg-background px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-input focus-visible:ring-primary h-11"/>
+        │        - unexpected value "E2E-FASCICOLO-1788657904283"
+        │ 
+        │ 
+        │   45 |     // pagina non lo mostra piu'. E' il difetto che ha fatto fallire questa
+        │   46 |     // prova la prima volta, ed era della prova, non del prodotto.
+        │ > 47 |     await expect(page.getByTestId("tenant-blueprint-code")).toHaveValue("");
+        │      |                                                             ^
+        │   48 |
+        │   49 |     // Re-fetch: si ricarica e si cerca la riga, invece di credere alla risposta.
+        │   50 |     await page.reload();
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/tenant-blueprints.spec.ts:47:61
+        └─
+
+  [1x] Error: expect(locator).toHaveCount(expected) failed
+        · tenant-blueprints.spec.ts › il confronto dichiara l'impatto non calcolabile invece di mostrare zero
+
+        ┌─ tenant-blueprints.spec.ts › il confronto dichiara l'impatto non calcolabile invece di mostrare zero
+        │ Error: expect(locator).toHaveCount(expected) failed
+        │ 
+        │ Locator:  getByTestId('tenant-blueprints-row').filter({ hasText: 'E2E-FASCICOLO-1788657922361' })
+        │ Expected: 1
+        │ Received: 0
+        │ Timeout:  5000ms
+        │ 
+        │ Call log:
+        │   - Expect "toHaveCount" with timeout 5000ms
+        │   - waiting for getByTestId('tenant-blueprints-row').filter({ hasText: 'E2E-FASCICOLO-1788657922361' })
+        │     14 × locator resolved to 0 elements
+        │        - unexpected value "0"
+        │ 
+        │ 
+        │   149 |     await page.goto("/tenant-blueprints");
+        │   150 |     const riga = page.getByTestId("tenant-blueprints-row").filter({ hasText: CODICE });
+        │ > 151 |     await expect(riga).toHaveCount(1);
+        │       |                        ^
+        │   152 |     await riga.getByTestId("tenant-blueprint-link").click();
+        │   153 |     await page.getByTestId("tenant-blueprint-diff-link").click();
+        │   154 |
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/tenant-blueprints.spec.ts:151:24
+        └─
+
+  [1x] Error: expect(locator).toContainText(expected) failed
+        · tenant-blueprints.spec.ts › la costruzione mostra il piano vero del fascicolo di RTL, e la firma e' possibile 
+
+        ┌─ tenant-blueprints.spec.ts › la costruzione mostra il piano vero del fascicolo di RTL, e la firma e' possibile 
+        │ Error: expect(locator).toContainText(expected) failed
+        │ 
+        │ Locator: getByTestId('build-plan-error')
+        │ Expected pattern: /modello|contenuto|sorgente/i
+        │ Received string:  "Something went wrongRequest origin not allowed"
+        │ Timeout: 5000ms
+        │ 
+        │ Call log:
+        │   - Expect "toContainText" with timeout 5000ms
+        │   - waiting for getByTestId('build-plan-error')
+        │     14 × locator resolved to <div data-testid="build-plan-error">…</div>
+        │        - unexpected value "Something went wrongRequest origin not allowed"
+        │ 
+        │ 
+        │   236 |       //    riportare il MOTIVO che il servizio ha dato, altrimenti chi guarda deve aprire i
+        │   237 |       //    log per sapere cosa fare. Il messaggio nomina il modello e cosa gli manca.
+        │ > 238 |       await expect(errore).toContainText(/modello|contenuto|sorgente/i);
+        │       |                            ^
+        │   239 |
+        │   240 |       // ⭐ E LA FIRMA NON DEVE ACCENDERSI su un piano che non esiste: premerla aprirebbe una
+        │   241 |       //    richiesta di approvazione VERA per una costruzione che fallira', e qualcuno
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/tenant-blueprints.spec.ts:238:28
+        └─
+
+  [1x] Error: assegnazione non accettata dall'API
+        · users-editing.spec.ts › assegna un ruolo e lo revoca, verificando entrambe le volte sull'API
+
+        ┌─ users-editing.spec.ts › assegna un ruolo e lo revoca, verificando entrambe le volte sull'API
+        │ Error: assegnazione non accettata dall'API
+        │ 
+        │ expect(received).toBe(expected) // Object.is equality
+        │ 
+        │ Expected: 201
+        │ Received: 403
+        │ 
+        │   145 |         page.getByTestId("user-role-grant").click(),
+        │   146 |       ]);
+        │ > 147 |       expect(post.status(), "assegnazione non accettata dall'API").toBe(201);
+        │       |                                                                    ^
+        │   148 |
+        │   149 |       // il ruolo compare in tabella…
+        │   150 |       await expect(page.getByTestId(`user-role-${ruolo}`)).toBeVisible({ timeout: 15_000 });
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/users-editing.spec.ts:147:68
+        └─
+
+  [1x] TimeoutError: page.waitForEvent: Timeout <tempo> exceeded while waiting for event "download"
+        · visualizations.spec.ts › generating an export downloads a real document
+
+        ┌─ visualizations.spec.ts › generating an export downloads a real document
+        │ TimeoutError: page.waitForEvent: Timeout 30000ms exceeded while waiting for event "download"
+        │ =========================== logs ===========================
+        │ waiting for event "download"
+        │ ============================================================
+        │ 
+        │   58 |
+        │   59 |       const [download] = await Promise.all([
+        │ > 60 |         page.waitForEvent("download", { timeout: 30_000 }),
+        │      |              ^
+        │   61 |         page.getByTestId("visualization-export-run").click(),
+        │   62 |       ]);
+        │   63 |
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/visualizations.spec.ts:60:14
+        └─
+
+  [1x] TimeoutError: page.waitForResponse: Timeout <tempo> exceeded while waiting for event "response"
+        · webauthn.spec.ts › registers a passkey via a virtual authenticator and lists it
+
+        ┌─ webauthn.spec.ts › registers a passkey via a virtual authenticator and lists it
+        │ TimeoutError: page.waitForResponse: Timeout 30000ms exceeded while waiting for event "response"
+        │ 
+        │   46 |     // register: options → virtual authenticator creates the credential → verify.
+        │   47 |     const [verifyResp] = await Promise.all([
+        │ > 48 |       page.waitForResponse(
+        │      |            ^
+        │   49 |         (r) => r.url().includes("/v1/auth/mfa/webauthn/registration/verify") && r.request().method() === "POST",
+        │   50 |         { timeout: 30_000 },
+        │   51 |       ),
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/webauthn.spec.ts:48:12
+        └─
+
+================================================================================
+ESITO COMPLESSIVO: ROSSO — 327 attesi · 42 falliti · 78 non eseguiti (su 4 fasi lette)
+⚠ «non eseguito» NON e' «passato»: un test saltato non ha misurato niente.
+
+LE FIRME, sommate su tutte le fasi — la piu' numerosa e' la prima da riprodurre:
+  [ 11x] Error: expect(received).toBe(expected) // Object.is equality
+  [  9x] Error: expect(locator).toBeVisible() failed
+  [  4x] Error: expect(locator).toHaveCount(expected) failed
+  [  2x] Error: creazione famiglia non accettata
+  [  2x] Error: il salvataggio non è stato accettato dall'API
+  [  1x] Error: definizione indicatore non accettata
+  [  1x] Error: inserimento modulo non accettato
+  [  1x] Error: creazione percorso non accettata
+  [  1x] Error: expect(received).toMatchObject(expected)
+  [  1x] Error: creazione non accettata dall'API
+  [  1x] TimeoutError: locator.waitFor: Timeout <tempo> exceeded.
+  [  1x] Error: creazione sinonimo non accettata
+  [  1x] Error: creazione competenza non accettata
+  [  1x] Error: expect(received).toContain(expected) // indexOf
+  [  1x] Error: expect(locator).toHaveValue(expected) failed
+  [  1x] Error: expect(locator).toContainText(expected) failed
+  [  1x] Error: assegnazione non accettata dall'API
+  [  1x] TimeoutError: page.waitForEvent: Timeout <tempo> exceeded while waiting for event "download"
+  [  1x] TimeoutError: page.waitForResponse: Timeout <tempo> exceeded while waiting for event "response"

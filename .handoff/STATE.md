@@ -1,114 +1,62 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: chiusura S1089 (2026-09-06). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: chiusura S1090 (2026-09-06). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief — l'ultima sessione, in breve
 
-Tre voci chiuse su richiesta di Enzo. **`#246` è finita** su tutte e quattro le fasi: la quota
-di contratti a termine di RTL Bank è passata dal 32 % a **0,0 %**, con due sentinelle a
-presidio e un rapporto che rende la domanda ripetibile senza di lui. **`#169` è tornata
-attiva**: il blocco esterno è caduto (la suite è verde), ma misurando è emerso che le utenze
-di collaudo sono **tre** contro le **sei** persone che la suite usa. **`#219`** ha ora un
-workflow di CI dedicato, manuale, che il preflight protegge.
+Sessione breve, nata da una domanda: *«cosa significa 8 programmi aperti senza corsia?»*. La
+misura ha risposto che erano **otto falsi allarmi** — cinque voci chiuse da giorni con il
+file-piano rimasto indietro, e tre quaderni di sessione contati come programmi. Curati tutti e
+otto, e curata la causa: il quaderno di sessione non è più censito come programma.
 
-Il filo della giornata, di nuovo: **una misura vera può portare a una conclusione falsa**. Ho
-corretto due mie affermazioni — «`heuresys_ci` non ha i dati» (falso: 161 utenti contro 164,
-stessi contratti e competenze) e «cinque casi passano da soli» (falso: non erano stati
-eseguiti). Il correttivo che funziona è **contare l'oggetto**, non dedurlo da un effetto.
+Il filo: **un allarme che si accende sempre è un allarme che si impara a non guardare**. E il
+cancello che lo diceva — `programmi.py --verifica`, exit 1 — funziona da sempre e **non lo
+interroga nessuno**: né il boot, né la chiusura, né la CI. È diventata `#249`.
+
+⚠ Ri-osservato sul vivo: `| tail` **maschera l'exit code**. Un cancello rosso letto attraverso
+una pipe sembra verde.
 
 ## Top priorities — le priorità
 
-1. **`#219` — il primo giro verde del workflow integrale** (~1 sessione). Stato preciso più
-   sotto: il workflow esiste ed è **manuale**; il secondo giro era in corso alla chiusura.
-   Si rilancia con `gh workflow run playwright-integrale.yml --ref main` e si guarda **il
-   passo di preflight**: è lì che si vede se l'origine ammessa in CI è quella giusta.
-2. **`#169` F3a — la suite passa alle utenze di collaudo** (~1-2 sessioni). ⚠ **Serve una
-   decisione tua prima di iniziare**: le utenze di collaudo coprono `PLATFORM_ADMIN`,
-   `TENANT_ADMIN` e `USER`; restano scoperti *manager*, *outsider* e **custodian**. Per la
-   custodia delle segnalazioni whistleblowing — isolamento assoluto per ADR-0036 §5 — va
-   deciso **se un'utenza di servizio possa portarne il mandato**. È sicurezza, non tecnica.
-3. **`#54` F3 — le quattro fette che restano** (~2 sessioni). Pattern rodato.
+> ⭐ **Mandato di Enzo per la sessione successiva (S1090)**: *processare **tutte** le voci P1, P2 e
+> P3 in sequenza automatica, decisa da me e dichiarata all'inizio, senza presentare il menu e
+> senza aspettare una scelta.* Il guardiano governa il taglio, non la volontà: alle soglie si
+> interrompe comunque. Il mandato si esaurisce con quella sessione.
+
+1. **`#249` per prima** (~1 sessione) — è il residuo esplicito di questa chiusura: `--verifica`
+   dà **22 difetti su 12 piani** (numero da ri-derivare, non da credere), più il presidio che
+   manca. F3 è il bersaglio vero: qualcuno deve interrogare quel cancello.
+2. **`#219` — il primo giro verde del workflow integrale** (~1 sessione). Il **quinto giro** era
+   `queued` alla chiusura (`34043971361`): il runner è uno solo. Si legge con
+   `gh run list --workflow=playwright-integrale.yml --limit 3`.
+3. **`#169` F3a** (~1-2 sessioni). ⚠ **Serve una decisione tua**: le utenze di collaudo coprono
+   `PLATFORM_ADMIN`, `TENANT_ADMIN` e `USER`; restano scoperti *manager*, *outsider* e
+   **custodian**. Per la custodia whistleblowing (isolamento assoluto, ADR-0036 §5) va deciso se
+   un'utenza di servizio possa portarne il mandato. È sicurezza, non tecnica.
 
 ## Open questions — le domande aperte
 
-- ⭐ **Da quali fonti la piattaforma accetta di imparare com'è fatta un'azienda?** — il
-  registro ne porta **una sola**. Tre voci ferme qui (`#198`, `#205`, il ponte di `#132`).
+- ⭐ **Da quali fonti la piattaforma accetta di imparare com'è fatta un'azienda?** — il registro
+  ne porta **una sola**. Tre voci ferme qui (`#198`, `#205`, il ponte di `#132`).
 - **La ricerca semantica sul gemello è accesa** e ogni corsa integrale costa **due chiamate a
   pagamento** al fornitore di embedding. Va bene, o la si rispegne lì?
-- ⚠ **Una chiave API è transitata nell'output di un comando** in S1088 (mai scritta in un
-  file). Quella del fornitore di embedding è da ruotare, per prudenza.
+- ⚠ **Una chiave API è transitata nell'output di un comando** in S1088 (mai scritta in un file).
+  Quella del fornitore di embedding è da ruotare, per prudenza.
 - **Chi ha pushato il 26 agosto alle 18:47?** Invariata da S1082.
 
-## Dove riprendere ESATTAMENTE — `#219` in CI
+## ⚠ Questa chiusura NON ha propagato né deployato
 
-Perché una sessione nuova non debba ricostruire niente:
-
-- il workflow è `.github/workflows/playwright-integrale.yml`, **`workflow_dispatch` soltanto**:
-  non gira su push, quindi non può rompere nulla mentre è in prova;
-- **primo giro rosso** (`34038765559`): mancavano i passi preparatori — `tsx: not found`,
-  `node_modules missing`. Corretto riusando la sequenza dello smoke;
-- **secondo giro** (`34039328831`): rosso **sul preflight**, e il preflight ha fatto il suo
-  mestiere — si e' fermato in **due secondi** dichiarando «porta dell'API NON MISURABILE: ne'
-  `NEXT_PUBLIC_API_PROXY_BASE_URL` ne' `PORT` sono dichiarate» invece di indovinare una porta
-  e produrre una corsa intera di rossi non attribuibili. In locale la porta si deriva dal
-  `.env` del repo; **in CI quel file non esiste** (il checkout e' pulito). Corretto
-  dichiarando `PORT: "3001"` e `NEXT_PUBLIC_API_PROXY_BASE_URL` a livello di job — la seconda
-  serve **prima del build del web**, perche' Next compila i rewrites al momento del build;
-- **terzo giro** (`34040733480`): **rosso**, ancora sul preflight — ma molto più avanti:
-  preparazione, migrazioni, seed e avvio dell'API tutti verdi, si è fermato **solo**
-  sull'origine non ammessa. Restava un ostacolo, non più tre;
-- ⚠⚠ **il drop-in systemd NON funzionava, e `systemctl` non poteva dirlo.** Misurato
-  2026-09-06 sul processo vivo del runner:
-
-  ```
-  systemctl show -p Environment  → ADMIN_ORIGIN=http://localhost:3187   (quello che credevo)
-  /proc/<MainPID>/environ        → ADMIN_ORIGIN=http://localhost:3000   (quello che c'era)
-  ```
-
-  Fra i quattro drop-in del servizio, `override.conf` ordina **dopo** `e2e-origin.conf` e
-  porta `EnvironmentFile=/etc/heuresys-runner.env`: systemd applica `Environment=` ed
-  `EnvironmentFile=` nell'ordine in cui compaiono e **l'ultimo vince**, quindi quel file
-  rimetteva la 3000. La frase che avevo scritto dentro il drop-in — «le variabili di un
-  drop-in sono applicate dopo gli EnvironmentFile» — era **falsa**, e nessun `systemctl show`
-  poteva smentirla: **non mostra il contenuto degli EnvironmentFile**. Solo
-  `/proc/<pid>/environ` mostra l'ambiente che il processo ha davvero;
-- **la cura è nel repository, non sul gemello**: `ADMIN_ORIGIN: "http://localhost:3187"` è ora
-  dichiarata nell'`env:` del job in `playwright-integrale.yml`. L'ambiente del job sovrascrive
-  quello ereditato dal servizio qualunque cosa esso dica, è versionato, compare nel log del
-  passo e **non richiede `sudo`** sul gemello. Il drop-in resta sul runner ed è **inerte**:
-  non serve toccarlo, e cancellarlo richiederebbe `sudo`;
-- **quarto giro** (`34042451236`): **preflight VERDE** — la correzione ha funzionato, e per
-  la prima volta la corsa è arrivata a lanciare Playwright. Rossa lì, per due difetti
-  distinti, entrambi corretti nel commit `bd5e8f34`:
-  1. **0 casi eseguiti sui 447 dichiarati**, quattro fasi rosse in pochi secondi con
-     «Could not find a production build in the `.next` directory». `playwright.prod.config.ts`
-     avvia il web con `next start`, che pretende un build già emesso; in locale non si vede
-     perché lo script di comodo li tiene insieme (`"test:e2e:prod": "next build && node
-     scripts/e2e-blocchi.mjs"`) e il workflow chiamava **solo la seconda metà**. Lo smoke non
-     ha mai avuto il problema perché usa `playwright.config.ts`, cioè `next dev`. Aggiunto un
-     passo di build **dopo** il preflight — quello costa due secondi, il build alcuni minuti,
-     e fermarsi sull'ambiente sbagliato deve restare la cosa più economica del workflow;
-  2. ⚠⚠ **e il triage ha dichiarato «ESITO COMPLESSIVO: VERDE» su quella corsa.** Quattro
-     referti letti, zero casi dentro: la guardia esisteva solo per «nessun referto letto», e
-     il ramo verde si prendeva 0 falliti e 0 non eseguiti. Lo strumento che deve scoprire i
-     rossi non attribuibili ne ha prodotto uno suo. Ora «referto letto» e «test eseguito» si
-     contano separati e l'esito diventa **NON MISURABILE** (uscita 2). Provato in entrambi i
-     versi;
-- **quinto giro** (`34043971361`): lanciato dopo `bd5e8f34` — si legge con
-  `gh run list --workflow=playwright-integrale.yml --limit 3`, e se rosso
-  `gh run view <id> --log-failed`. Un giro di CI **prosegue da sé** e non muore con la
-  sessione; il runner è uno solo, quindi può restare in coda dietro ai controlli del push;
-- 🔎 **e se il preflight dovesse ancora dichiarare l'origine non ammessa**: la lezione di
-  questo giro è che il valore *dichiarato* e il valore *vivo* possono divergere. Non si torna
-  a cercare dove sia scritto: si legge dal processo che risponde —
-  `ssh linux-pc 'strings /proc/<pid-di-node>/environ | grep ADMIN_ORIGIN'`.
+Richiesta esplicita di Enzo: commit e push, **senza** allineamento dei cloni e **senza** armare il
+deploy. Conseguenza da non fraintendere: `origin/main` è avanti, **VM e linux-pc restano al commit
+precedente** e nessun `refs/heads/prod` è stato armato. Il profilo diceva `arma: esegui` — è stato
+saltato per decisione, non perché non servisse. Chi riprende propaga prima di misurare le macchine.
 
 ## Verification — come si controlla
 
 ```bash
 python docs/kb/tools/session_start.py       # menu + salute, un solo giro
-bash scripts/verifica-deploy.sh             # DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO
+python docs/kb/tools/programmi.py --verifica # SENZA pipe: la pipe maschera l'exit code
+bash scripts/verifica-deploy.sh             # atteso DISALLINEATO finché non si propaga
 gh run list --workflow=playwright-integrale.yml --limit 3
-ssh linux-pc 'cat /proc/loadavg'            # prima di ogni corsa E2E: sotto 2, o i rossi non sono attribuibili
-cd apps/web && node scripts/e2e-blocchi.mjs --solo-preflight   # 0 = l'ambiente e' quello che la suite presume
+ssh linux-pc 'cat /proc/loadavg'            # prima di ogni corsa E2E: sotto 2
 ```

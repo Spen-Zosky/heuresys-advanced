@@ -74,6 +74,24 @@ jobs:
       # compilato verso la porta sbagliata è costato tre sessioni di diagnosi).
       PORT: "3001"
       NEXT_PUBLIC_API_PROXY_BASE_URL: "http://localhost:3001"
+      # ⚠ L'ORIGINE AMMESSA SI DICHIARA QUI, NON SUL RUNNER — misurato 2026-09-06.
+      # Il terzo giro (34040733480) è morto sul preflight con «l'API non ammette
+      # l'origine http://localhost:3187». Il drop-in systemd installato in S1089
+      # dichiarava il valore giusto, e `systemctl show -p Environment` lo
+      # confermava — ma il processo VIVO del runner ne aveva un altro:
+      #   systemctl show -p Environment  → ADMIN_ORIGIN=http://localhost:3187
+      #   /proc/<MainPID>/environ        → ADMIN_ORIGIN=http://localhost:3000
+      # Perché: fra i drop-in del servizio, `override.conf` ordina DOPO
+      # `e2e-origin.conf` e porta `EnvironmentFile=/etc/heuresys-runner.env`.
+      # systemd applica `Environment=` e `EnvironmentFile=` nell'ordine in cui
+      # compaiono, e l'ultimo vince: il file rimetteva la 3000. La convinzione
+      # scritta nel drop-in — «un drop-in è applicato dopo gli EnvironmentFile» —
+      # era falsa, e `systemctl show` non poteva smentirla perché NON mostra il
+      # contenuto degli EnvironmentFile. Solo `/proc/<pid>/environ` lo mostra.
+      # Dichiararla nel job la mette dove il valore è VERSIONATO, visibile nel
+      # log del passo, e non richiede `sudo` sul gemello: l'ambiente del job
+      # sovrascrive quello ereditato dal servizio, qualunque cosa esso dica.
+      ADMIN_ORIGIN: "http://localhost:3187"
 
     steps:
       - name: Checkout

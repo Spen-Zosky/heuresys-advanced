@@ -127,3 +127,15 @@ ogni rosso ha nominato una causa d'ambiente diversa — il valore del workflow �
 - **giro 7**: lanciato dopo quelle tre correzioni.
   `gh run list --workflow=playwright-integrale.yml --limit 3`; se rosso,
   `gh run view <id> --log-failed`.
+
+## Verification — come si controlla
+
+```bash
+python docs/kb/tools/session_start.py        # menu + salute, un solo giro
+python docs/kb/tools/programmi.py --verifica # SENZA pipe: la pipe maschera l'exit code
+python docs/kb/tools/handoff_lint.py         # coerenza dello stato, bloccante
+bash scripts/verifica-deploy.sh              # atteso DISALLINEATO: S1090 non ha propagato
+bash scripts/posso-uscire.sh                 # ⚠ l'ssh e' contato per MACCHINA, non per sessione
+gh run list --workflow=playwright-integrale.yml --limit 3
+ssh linux-pc 'cat /proc/loadavg'             # prima di ogni corsa E2E: sotto 2
+```

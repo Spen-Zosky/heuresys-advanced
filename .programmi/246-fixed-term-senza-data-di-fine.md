@@ -1,7 +1,11 @@
 # 246 — I contratti a termine assegnati a caso a un terzo dell'organico
 
 > **item**: #246 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: NON AVVIATO · **regola decisa da Enzo il 2026-09-05** (vedi §La regola)
+> **stato**: CHIUSO
+> **chiusa**: S1089 (2026-09-06), e **ri-misurato in produzione il 2026-09-06 (S1090)**:
+> `sys_user_contracts` ACTIVE = **160 `permanent`, zero `fixed_term`**. La regola di Enzo
+> (nessun contratto a termine oltre i 12 mesi di anzianita') e' applicata: 51 su 51 convertiti.
+> **regola decisa da Enzo il 2026-09-05** (vedi §La regola)
 > **nasce-da**: la bonifica di S1087 sui contratti scaduti (mig `000371`). Misurando il parco per
 > applicare il rinnovo ricorrente è emerso un secondo fenomeno, **fuori dal punto non verde** che
 > quella voce doveva chiudere, e quindi riportato invece che eseguito.

@@ -1,7 +1,9 @@
 # 245 — Il dominio di una fonte di ricerca è testo libero, e nessuno controlla che esista
 
 > **item**: #245 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: FATTO (S1086, 2026-09-04)
+> **stato**: CHIUSO
+> **chiusa**: S1086 (2026-09-04). Stessa causa di `#239`: `FATTO` e' vocabolario del register,
+> non del parser dei piani
 > **nasce-da**: il difetto trovato chiudendo `#132` F7 (2026-09-04, S1086).
 
 ## Il fatto, misurato
@@ -48,11 +50,11 @@ voce esisteva: correggere la riga senza chiudere il buco significa riaverlo.*
 
 ## Fasi
 
-- [x] **F1 — La validazione** — FATTO — la chiave del dominio si confronta con `chiaviDominio()` nel
+- [x] **F1 — La validazione** — **FATTO 2026-09-04 (S1086)**: la guardia vive in `guardia-domande.ts` e lancia 422 `RESEARCH_SOURCE_DOMAIN_UNKNOWN` con l'elenco dei domini dichiarati dentro l'errore.
       punto che scrive (`repository.ts`, registrazione delle fonti) e/o nello schema Zod,
       restituendo 422 con l'elenco dei dichiarati, come già fa l'avvio corsa.
       **fatto =** una fonte con dominio inesistente viene respinta
-- [x] **F2 — Il controllo sull'esistente** — FATTO — una riga già presente con un dominio ignoto deve
+- [x] **F2 — Il controllo sull'esistente** — **FATTO 2026-09-04 (S1086)**: test contro il database vero, e **sabotaggio dichiarato** — forzando un dominio inesistente il controllo si è visto ROSSO e ha nominato la riga colpevole, poi verde sul sano. 23/23 prove verdi.
       essere **visibile**, non silenziosa: una sentinella o un controllo in `db_health`.
       **fatto =** il controllo esiste e si è visto rosso su un caso finto
 

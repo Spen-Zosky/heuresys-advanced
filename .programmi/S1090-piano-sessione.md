@@ -72,3 +72,29 @@ Guardiano all'apertura del ciclo: contesto **9,8 %**, finestra 5h **44,0 %** —
   esiste anche questo stesso file. La differenza è dichiarata, non ricalibrata a posteriori.
 - V7 è la prova d'insieme: se la sezione sparisse per un errore di lettura invece che per la cura,
   sparirebbe anche il resto dell'output. Si guarda che il menu ci sia ancora.
+
+---
+
+## Ciclo 2 — richiesto da Enzo nello stesso turno
+
+> *«devi prevedere che tutto quello che è rimasto fuori da questo ciclo venga fatto nel prossimo.
+> inoltre, nella sessione nuova devi processare tutti i P1, P2 e P3 nella sequenza che ritieni
+> opportuno in modo automatico. committa e pusha senza deploy e allineamento»*
+
+La lista non si è allungata da sé: l'ha allungata Enzo, esplicitamente, dopo la chiusura del
+ciclo 1. Le voci nuove sono tre, e sono di registrazione — nessuna tocca codice di prodotto.
+
+| id | cosa | chi | cosa significa fatto | stato |
+|---|---|---|---|---|
+| **W1** | I 22 difetti residui diventano una voce viva del register, non una frase in chat | io | `#249` `ACTIVE` nel register **con il suo piano**; `handoff_lint` 0 FAIL | ✅ **FATTO** |
+| **W2** | Il mandato «processa tutte le corsie» sopravvive alla riscrittura dello stato | io | memoria di progetto + riga nell'indice, che il boot carica da sé | ✅ **FATTO** |
+| **W3** | Chiusura pulita: commit e push, **senza** deploy né allineamento dei cloni | io | `origin/main` allineato; nessun `refs/heads/prod` armato, nessun clone toccato | ✅ **FATTO** |
+
+**Perché `#249` ha preteso un piano prima ancora di esistere come voce**: `handoff_lint` esce
+**FAIL T2** su una voce `ACTIVE` senza file in `.programmi/` — «il menu non può mostrare da dove
+riprende». Il cancello ha ragione, ed è la stessa deriva che `#249` viene a togliere: una voce
+senza piano è una voce che la sessione dopo deve ri-capire da capo.
+
+**Su W3, dichiarato invece che sottinteso**: deploy e allineamento sono **saltati per richiesta di
+Enzo**, non perché non servissero. Nessun `refs/heads/prod` è stato armato, il gemello e la VM
+restano al commit precedente. Chi riprende non deve leggere questa chiusura come «propagato».

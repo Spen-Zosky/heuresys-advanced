@@ -1,7 +1,8 @@
 # 238 — `verifica-deploy` chiama guasto un clone in corso
 
 > **item**: #238 · **priorità**: P2 · **stima**: ~30min
-> **stato**: CHIUSO (S1085, 2026-08-30)
+> **stato**: CHIUSO
+> **chiusa**: S1085 (2026-08-30)
 > **nasce-da**: la chiusura di S1084 (2026-08-29) — il **primo giro vero** dell'armamento del clone
 > introdotto da `#236` F2. Trovato eseguendo, non ragionando.
 

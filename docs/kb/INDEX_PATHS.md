@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-06T03:54:44Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3320**
+**Generato**: 2026-09-06T17:44:06Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3327**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -11,18 +11,18 @@
 | ADR | 37 |
 | api-core | 33 |
 | api-module | 365 |
-| ci | 17 |
+| ci | 18 |
 | claude-config | 37 |
-| config | 197 |
+| config | 198 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 371 |
+| db-migration | 374 |
 | db-other | 8 |
 | db-script | 50 |
 | db-seed | 114 |
-| doc-canonical | 753 |
+| doc-canonical | 755 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 409 |
 | ux-design-archive | 80 |
 | web-source | 242 |
-| **TOTALE** | **3320** |
+| **TOTALE** | **3327** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2762 |
+| live | 2769 |
 
 ## File per categoria
 
@@ -503,6 +503,7 @@
 - `D:\heuresys-advanced\.github\workflows\codeql.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\i18n-parity.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\lint.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\workflows\playwright-integrale.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\playwright-smoke.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\shell-tests.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\showcase.yml` · *live* · git-tracked
@@ -721,6 +722,7 @@
 - `D:\heuresys-advanced\scripts\provision-linux-pc.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\provision-prometheus-vm.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\pull-prod-backups.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\ripara-env.py` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\session-boot.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\sessioni-panel\app.js` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\sessioni-panel\index.html` · *live* · git-tracked
@@ -1481,6 +1483,9 @@
 - `D:\heuresys-advanced\db\migrations\000372_chi_ha_un_account_ha_espresso_le_sue_scelte.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000373_un_export_di_visualizzazione_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000374_permessi_del_recruiting_le_richieste_di_personale.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000375_nessun_contratto_a_termine_a_chi_ha_piu_di_dodici_mesi.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000376_le_due_sentinelle_dei_contratti_a_termine.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000377_la_quota_di_contratti_a_termine_diventa_un_numero_che_si_guarda.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1716,6 +1721,8 @@
 - `D:\heuresys-advanced\.programmi\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1087-piano-sessione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1088-piano-sessione.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1089-piano-sessione.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1090-piano-sessione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked

@@ -1,7 +1,9 @@
 # 132 — La ricerca genera il modello, e l'archetipo scritto a mano sparisce
 
 > **item**: #132 · **priorità**: P1 · **stima**: ~8 sessioni
-> **stato**: IN CORSO
+> **stato**: CHIUSO
+> **chiusa**: le 8 fasi sono tutte spuntate e `status: DONE` nel register. La riga diceva
+> ancora `IN CORSO` (allineata in S1090)
 > **fonti**: decisione E29 di Enzo (2026-08-17) · epica P2a `D:\heuresys-design-lab\2026-08-05--epic-tenant-builder-p2a-ricerca.md` · piano approvato `~/.claude/plans/jaunty-percolating-storm.md`
 
 ## Decisioni vincolanti (non si ri-chiedono)

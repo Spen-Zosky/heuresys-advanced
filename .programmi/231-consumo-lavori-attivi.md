@@ -40,7 +40,7 @@ catena che sblocca la suite (#169 → #219) · **(c)** il lavoro read-only mentr
 **(d)** costo e rischio crescenti. Ogni voce chiusa = commit.
 
 - [x] **S2 `#148` — il rendiconto delle chiusure** — FATTO 2026-08-25 (S1080) · evidenza: voce CHIUSA 3/3, commit `3217b3ec`
-- [x] **S0 `marciume` — il cancello della chiusura è rosso da 3 corse** — **FATTO 2026-08-28
+- [x] **S0 `marciume` — il cancello della chiusura è rosso da 3 corse** — **FATTO 2026-08-28 (S1083)**, `check_marciume.py` esce **0**: M1-M5 verdi, dieci strumenti verdi, `verifica_incrociata` da 2 difetti a 0.
   (S1083)** · `check_marciume.py` esce **0** e dichiara «niente è marcito»: le cinque forme di
   stato M1-M5 verdi, i dieci strumenti scoperti verdi, `verifica_incrociata` da 2 difetti a **0**.
   Le due sotto-voci S0a/S0b non avevano più bersaglio quando le ho misurate (M3 «residuo orfano in
@@ -72,7 +72,7 @@ catena che sblocca la suite (#169 → #219) · **(c)** il lavoro read-only mentr
   `71ca9e42` · evidenza: 3 utenze SERVICE provisionate (idempotente, guardie, `--undo`), login
   in un passo 200×3, password errata 401, **chiave madre 401** (il criterio di #169, misurato),
   via vecchia intatta (federica 200). Terza guardia `000284` scoperta eseguendo; `admin@` chiarito
-- [x] **S0-bis (ereditato da S0)** — `#234` possiede gli otto rossi di `verifica_incrociata` —
+- [x] **S0-bis (ereditato da S0)** — **FATTO 2026-08-28 (S1083)**: `#234` possiede gli otto rossi di `verifica_incrociata`, e gli ultimi due sono consumati (mig `000361` e `000362`).
   **FATTO 2026-08-28 (S1083)** · consumati gli ultimi due: `X5d` (migrazione `000361` — nessuna
   delle 29 posizioni del rischio dichiarava requisiti formativi, non solo la riga rossa) e `X3c`
   (migrazione `000362` — due contratti attivi del tenant di piattaforma senza busta recente).

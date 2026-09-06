@@ -9,6 +9,72 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1090 (2026-09-06) — otto programmi «aperti» che erano chiusi, e il cancello che nessuno interroga
+
+**Numeri ri-derivati dal vivo**: migrazioni su disco **374** (max `000377`) · file di test API
+**263** · HEAD `2a750da8` (pre-commit di chiusura). **Nessun cambiamento di prodotto**: la sessione
+ha toccato solo `.programmi/`, `docs/kb/tools/programmi.py` e i registri — nessuna migrazione,
+nessun modulo, nessuna riga di API o di web. I conteggi di dominio restano quelli di S1089.
+
+**Il fatto.** Il boot elencava **8 «PROGRAMMI APERTI FUORI DAL MENU»**. Misurati: erano **otto
+falsi allarmi**. `#227` `#235` `#241` `#242` `#243` sono tutti `status: DONE` nel register — il
+lavoro era finito, la contabilità del file-piano no; e `S1087` `S1088` `S1089` sono **quaderni di
+sessione**, che R24 impone a ogni sessione e che non hanno né possono avere un item nel backlog.
+
+**Due cause meccaniche, entrambe misurate e non dedotte:**
+
+- `RE_STATO` accetta `^> **stato**: [A-Z ]+$` e **nient'altro**. `IN CORSO (S1086)` e
+  `✅ **CHIUSA** — F1..F4 fatte il 2026-09-05` sono leggibilissime per un umano e **mute** per il
+  parser: cadono su `?`, e un piano con stato illeggibile vale come aperto. La cronaca della
+  chiusura è passata a una riga sua, lo stato è tornato nel vocabolario.
+- Un `S<N>-piano-sessione.md` cadeva fra gli orfani **per costruzione**, uno in più a ogni
+  sessione. `carica()` ora lo salta, con la ragione scritta accanto al codice.
+
+`#227` e `#235` avevano fasi davvero eseguite in S1085 e mai spuntate: allineate con l'evidenza
+già scritta e datata (mig `000368`/`000369`; mig `000366` più la prova live su
+`federica.marchetti@rtl-bank.org` 150/150 e `paolo.caputo@rtl-bank.org` 18/150). **Nessuna spunta
+senza evidenza.** L'unica riga in sospeso di `#241` — «il verde di CI aspetta il push» — è stata
+**misurata**: `Test (api integration)` è `success` su main negli ultimi tre giri consecutivi.
+
+**⭐ Il reperto che vale oltre la sessione**: il cancello `programmi.py --verifica` **esiste,
+funziona ed esce 1** — e **non lo interroga nessuno**: né il boot, né la chiusura, né la CI. Una
+deriva che nessuno misura si accumula, ed è così che otto piani chiusi sono finiti a comparire a
+ogni avvio. È diventata **`#249`** (P2, `ACTIVE`, con piano): i difetti residui erano **22 su 12
+piani** al 2026-09-06 — misura **datata**, da ri-derivare con quel comando, non da credere.
+
+⚠ **Ri-osservato sul vivo, per la seconda volta in due sessioni**: `| tail` **maschera l'exit
+code**. Lo stesso comando dava `EXIT=0` attraverso la pipe e `EXIT=1` senza. Un cancello rosso
+letto attraverso una pipe sembra verde (memoria `pipe_masks_exit_code`).
+
+**Prove**: `--verifica` 29 → **22 difetti**, zero righe sui file curati · `--selftest` 18/18 →
+**20/20 verdi**, due casi nuovi (il primo usa un file che *sarebbe* un difetto se venisse letto,
+il secondo impedisce di comprarsi quel verde escludendo troppo; provata anche la contro-prova:
+disattivando l'esclusione il file ricompare) · programmi censiti 53 → **49** · `session_start.py`
+non stampa più la sezione, e il menu è intatto.
+
+**⚠ Questa chiusura non ha propagato né deployato**, per richiesta esplicita di Enzo: commit e
+push soltanto. Il profilo diceva `arma: esegui` — saltato **per decisione**, non perché non
+servisse. **VM e linux-pc restano indietro**, nessun `refs/heads/prod` è armato.
+
+**⭐ E il cancello di fine turno ha rifiutato la chiusura**, su `programmi` rosso. Non era un rosso
+mio — era **pre-esistente**, e la regola del progetto non ammette quella parola. Sanati tutti:
+**29 difetti → 0**, `programmi.py --verifica` esce **0** («50 programma/i, nessun difetto»). Le due
+specie erano quelle previste: 15 righe di stato fuori dal vocabolario o in contraddizione con le
+spunte, e **7 spunte con l'evidenza sulla riga SUCCESSIVA** — `RE_FASE` legge solo la prima, e i
+20 caratteri minimi tagliavano fuori un `— **FATTO 2026-08-28` da 18. Di `#249` resta **F3**, il
+presidio: oggi il gate ha fermato la chiusura *per caso*, perché i file instradati erano cambiati.
+
+**E la ri-misura ha sciolto una contraddizione che nessuno cercava**: `#246` era `ACTIVE` nel
+register e «finita» in `.handoff/STATE.md`. Misurato in produzione — `sys_user_contracts` ACTIVE =
+**160 `permanent`, zero `fixed_term`** — la voce era davvero chiusa e il register indietro:
+portato a `DONE` con la misura accanto.
+
+**Sessione parallela sullo stesso albero** (`#219`, workflow Playwright integrale in CI): il suo
+commit `0e06d90d` contiene la riscrittura di `.handoff/STATE.md` di questa chiusura — `git add` su
+un file che l'altra sessione aveva già modificato. Nessun lavoro perso, la storia **non** è stata
+riscritta (si è in due), e la rettifica vive nei messaggi fra le due sessioni. È il rischio che il
+CLAUDE.md descrive: l'indice di Git è uno solo e condiviso.
+
 ### Delta S1089 (2026-09-06) — `#246` chiusa, `#169` sbloccata, la corsa integrale entra in CI
 
 **Numeri ri-derivati dal vivo**: migrazioni su disco **374** (max `000377`) · RBAC **14 ruoli /

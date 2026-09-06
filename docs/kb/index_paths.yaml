@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-06T03:54:44Z da docs/kb/tools/build_index.py
+# generato: 2026-09-06T17:44:06Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-06T03:54:44Z"
-  total_files: 3320
+  generated_at: "2026-09-06T17:44:06Z"
+  total_files: 3327
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -11,18 +11,18 @@ meta:
     ADR: 37
     api-core: 33
     api-module: 365
-    ci: 17
+    ci: 18
     claude-config: 37
-    config: 197
+    config: 198
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 371
+    db-migration: 374
     db-other: 8
     db-script: 50
     db-seed: 114
-    doc-canonical: 753
+    doc-canonical: 755
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2762
+    live: 2769
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2714,6 +2714,12 @@ files:
     category: ci
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.github\workflows\playwright-integrale.yml'
+    root: repo
+    rel: '.github/workflows/playwright-integrale.yml'
+    category: ci
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.github\workflows\playwright-smoke.yml'
     root: repo
     rel: '.github/workflows/playwright-smoke.yml'
@@ -3983,6 +3989,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\pull-prod-backups.sh'
     root: repo
     rel: 'scripts/pull-prod-backups.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\ripara-env.py'
+    root: repo
+    rel: 'scripts/ripara-env.py'
     category: config
     status: live
     provenance: git-tracked
@@ -8456,6 +8468,24 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000375_nessun_contratto_a_termine_a_chi_ha_piu_di_dodici_mesi.sql'
+    root: repo
+    rel: 'db/migrations/000375_nessun_contratto_a_termine_a_chi_ha_piu_di_dodici_mesi.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000376_le_due_sentinelle_dei_contratti_a_termine.sql'
+    root: repo
+    rel: 'db/migrations/000376_le_due_sentinelle_dei_contratti_a_termine.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000377_la_quota_di_contratti_a_termine_diventa_un_numero_che_si_guarda.sql'
+    root: repo
+    rel: 'db/migrations/000377_la_quota_di_contratti_a_termine_diventa_un_numero_che_si_guarda.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -9791,6 +9821,18 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\S1088-piano-sessione.md'
     root: repo
     rel: '.programmi/S1088-piano-sessione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1089-piano-sessione.md'
+    root: repo
+    rel: '.programmi/S1089-piano-sessione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1090-piano-sessione.md'
+    root: repo
+    rel: '.programmi/S1090-piano-sessione.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

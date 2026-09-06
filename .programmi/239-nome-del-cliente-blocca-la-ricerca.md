@@ -1,7 +1,10 @@
 # 239 — Il nome del cliente può rendere la ricerca impossibile
 
 > **item**: #239 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: FATTO (S1086, 2026-09-04)
+> **stato**: CHIUSO
+> **chiusa**: S1086 (2026-09-04). ⚠ `FATTO` non e' nel vocabolario del parser
+> (`NON AVVIATO`/`IN CORSO`/`CHIUSO`/`SOSPESO`): e' il vocabolario del **register**, e i due non
+> vanno confusi
 > **nasce-da**: le due prove di merito di `#132` F7 (2026-08-31). **Trovato eseguendo**, non
 > ragionando: la prova cercava tutt'altro — se la ricerca ripete l'archetipo bancario — e ha
 > incontrato questo per strada.

@@ -17,7 +17,7 @@
 ## Fasi
 
 - [x] **F1 — INDAGINE: leggere §E5 e misurare cosa esiste davvero** — FATTO 2026-08-14 (S1058). **§E5 regge su entrambi i lati, a differenza di #50.** Vedi l'esito sotto, che però cambia il punto di partenza di F2.
-- [x] **F2 — Modello dati del dominio, costruito sul DBMS attuale** — **FATTO 2026-08-28
+- [x] **F2 — Modello dati del dominio, costruito sul DBMS attuale** — **FATTO 2026-08-28 (S1083)**, migrazione `000364`, prova generale VERDE a due passate sul gemello.
   (S1083)**, migrazione `000364`, prova generale VERDE a due passate sul gemello (`7 tabelle · 0
   FK di persona non dichiarate · 0 righe`, 27/27 sentinelle).
 

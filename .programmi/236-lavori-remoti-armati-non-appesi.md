@@ -1,7 +1,9 @@
 # 236 — I lavori remoti si armano, non si appendono alla sessione
 
 > **item**: #236 · **priorità**: P1 · **stima**: ~1 sessione
-> **stato**: IN CORSO — F1 e **F2 FATTE**; restano F3 (`verifica-cloni.sh`) e F4 (ecosistema)
+> **stato**: CHIUSO
+> **chiusa**: S1084 (2026-08-29) — **F1..F4 tutte fatte**; `status: DONE` nel register. La riga
+> diceva ancora «restano F3 e F4», scritta quando era vero (allineata in S1090)
 > **nasce-da**: S1083 (2026-08-28), domanda di Enzo durante la chiusura: *«mi confermi che le
 > clonazioni sono processi indipendenti che arrivano a conclusione anche se chiudo la sessione?»*
 > La risposta misurata è **no**, e una delle tre è pure distruttiva.

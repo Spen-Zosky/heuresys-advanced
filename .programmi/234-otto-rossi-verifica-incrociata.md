@@ -1,7 +1,8 @@
 # 234 — Gli otto rossi di `verifica_incrociata`: cura o riclassificazione, mai il silenzio
 
 > **item**: #234
-> **stato**: IN CORSO
+> **stato**: CHIUSO
+> **chiusa**: S1085 (2026-08-30) — 3/3 fasi spuntate, `status: DONE` nel register
 > **aperto**: S1081 (2026-08-25) — emersi togliendo X9c/X8a/X7a e correggendo il display
 > della batteria (mostrava l'ultimo allarme come sintesi; ora mostra la riga ESITO)
 
@@ -82,6 +83,6 @@ ricostruirlo (dal capo dell'epoca) o dichiarare la colonna vuota per le righe st
   obiettivo senza titolare (2). Per ognuna:
   file che crea, causa, cura con guardia/post-condizione/rollback, `ci-rehearsal` se tocca
   `db/**`. **fatto =** conteggio a zero o eccezione dichiarata nel check con data e ragione
-- [x] **F3 La corsa che chiude** — **FATTA S1085**: `verifica_incrociata` exit **4** (cieco dichiarato, uno dei due valori ammessi) e `check_marciume.py` exit **0** — «niente e' marcito». Per arrivarci sono caduti tre falsi rossi: due da **tunnel degradato** (74 s per una query banale, 1,48 s dopo averlo ricreato) e uno da **atlante superato** dai cambiamenti di #235. *(testo originale:)* — `verifica_incrociata` esce **0 o 4** (cieco dichiarato),
+- [x] **F3 La corsa che chiude** — **FATTA 2026-08-30 (S1085)**: `verifica_incrociata` exit **4** (cieco dichiarato, uno dei due valori ammessi) e `check_marciume.py` exit **0** — «niente e' marcito». Per arrivarci sono caduti tre falsi rossi: due da **tunnel degradato** (74 s per una query banale, 1,48 s dopo averlo ricreato) e uno da **atlante superato** dai cambiamenti di #235.
   la batteria del cancello mostra il verde, e una chiusura reale non porta più
   `marciume: fallito`. **fatto =** output allegato della corsa e della chiusura

@@ -1,7 +1,8 @@
 # 237 — La chiusura costa un quarto di finestra, e non si sa perché
 
 > **item**: #237 · **priorità**: P1 · **stima**: ~1 sessione (F1 sola: ~40k)
-> **stato**: ✅ **CHIUSA il 2026-08-29 (S1084)** — F1, F2, F3 tutte fatte. F1 ha smentito la premessa
+> **stato**: CHIUSO
+> **chiusa**: il 2026-08-29 (S1084) — F1, F2, F3 tutte fatte. **F1 ha smentito la premessa**
 > della voce: la chiusura costa il **2,8%**, non il 25%.
 > **nasce-da**: Enzo, 2026-08-29, a fine S1083: *«l'handoff è un collo di bottiglia che non abbiamo
 > mai risolto adeguatamente. Una chiusura sessione non può e non deve consumare il 25% di una
@@ -48,7 +49,7 @@ della soluzione — che è precisamente ciò che Enzo non vuole.
 
 ## Fasi
 
-- [x] **F1 — DOVE VA IL COSTO, misurato dal transcript e non stimato** — **FATTA 2026-08-29
+- [x] **F1 — DOVE VA IL COSTO, misurato dal transcript e non stimato** — **FATTA 2026-08-29 (S1084)**, strumento `costo_chiusura.py` (selftest 15 casi verdi) su **14 chiusure** reali.
       (S1084)**. Strumento: `python docs/kb/tools/costo_chiusura.py` (`--dettaglio`, `--csv`,
       `--selftest` = **15 casi verdi**). Misurato su **14 chiusure** distinte, dal 17 al 29 agosto.
 

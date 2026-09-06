@@ -23,9 +23,12 @@ una pipe sembra verde.
 > senza aspettare una scelta.* Il guardiano governa il taglio, non la volontà: alle soglie si
 > interrompe comunque. Il mandato si esaurisce con quella sessione.
 
-1. **`#249` per prima** (~1 sessione) — è il residuo esplicito di questa chiusura: `--verifica`
-   dà **22 difetti su 12 piani** (numero da ri-derivare, non da credere), più il presidio che
-   manca. F3 è il bersaglio vero: qualcuno deve interrogare quel cancello.
+1. **`#249` F3 — il presidio** (~1 sessione). F1 e F2 sono state **eseguite in questa chiusura**:
+   il cancello di fine turno ha rifiutato la chiusura su un `programmi` rosso, e la regola del
+   progetto non ammette il «pre-esistente». `programmi.py --verifica` è passato da **29 difetti a
+   0** — «50 programma/i, nessun difetto». Resta il bersaglio vero: **nessuno interroga quel
+   cancello** (non il boot, non la chiusura, non la CI). Oggi ha fermato la chiusura *per caso*,
+   perché i file instradati erano cambiati.
 2. **`#219` — il primo giro verde del workflow integrale** (~1 sessione). Il quinto giro ha
    **eseguito la suite** e ne è uscito rosso per una causa d'ambiente, ora corretta; il
    **sesto** (`34050172629`) è in corso. Dettaglio nella sezione dedicata più sotto.
@@ -47,9 +50,13 @@ una pipe sembra verde.
 ## ⚠ Questa chiusura NON ha propagato né deployato
 
 Richiesta esplicita di Enzo: commit e push, **senza** allineamento dei cloni e **senza** armare il
-deploy. Conseguenza da non fraintendere: `origin/main` è avanti, **VM e linux-pc restano al commit
-precedente** e nessun `refs/heads/prod` è stato armato. Il profilo diceva `arma: esegui` — è stato
-saltato per decisione, non perché non servisse. Chi riprende propaga prima di misurare le macchine.
+deploy. Il profilo diceva `arma: esegui` — saltato **per decisione**, non perché non servisse.
+
+Conseguenza da non fraintendere: **VM e linux-pc restano indietro** e nessun `refs/heads/prod` è
+stato armato. `origin/main` invece è avanzato — anche per il push della sessione parallela di
+`#219` (fino a `4e9d6d34`): il codice è pubblicato, **non** propagato. Chi riprende propaga prima
+di misurare le macchine, e `verifica-deploy.sh` dirà `DISALLINEATO` fino ad allora — è l'atteso,
+non un guasto.
 
 ## Dove riprendere ESATTAMENTE — `#219` in CI
 

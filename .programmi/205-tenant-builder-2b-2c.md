@@ -1,7 +1,10 @@
 # 205 — Tenant Builder 2b e 2c: la coda dei domini ricercabili, e il patrimonio senza le parole di un altro
 
 > **item**: #205
-> **stato**: NON AVVIATO · ⚠ gate CADUTO ma **F1 resta non eseguibile in modo utile** — misura del 2026-09-05, sotto
+> **stato**: NON AVVIATO
+> **nota**: ⚠ gate CADUTO ma **F1 resta non eseguibile in modo utile** — misura del 2026-09-05,
+> sotto. La voce e' `WAIT-INPUT` nel register. (La cronaca stava sulla riga di stato, che il
+> parser legge solo se contiene esclusivamente il vocabolario — allineata in S1090)
 
 Con questa e con P4, tutte e quattro le parti del Tenant Builder sono progettate: P1 chiusa ·
 P2a `#132` · 2b/2c qui · P3 `#198` · P4 consegnata.

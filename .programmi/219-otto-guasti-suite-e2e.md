@@ -937,3 +937,67 @@ negato, e che nessuno aveva distinto perché dallo status non si distingue.
 
 Il **passaggio in CI** (l'altra metà del criterio di `#211` F4) ha tre ostacoli misurati
 qui sopra e resta aperto: non è la coda di F5e, è un lavoro suo.
+
+---
+
+## ⭐ S1089 — IL PASSAGGIO IN CI: la strada scelta, e un'affermazione mia da correggere
+
+### ⚠ Primo: «`heuresys_ci` non ha i dati» era SBAGLIATO
+
+L'ho scritto ieri come uno dei tre ostacoli, e ha quasi fatto scartare la strada giusta.
+Misurato oggi, i due database sono quasi identici:
+
+```
+heuresys_advanced   164 utenti · 160 contratti · 14.031 competenze · 2 tenant
+heuresys_ci         161 utenti · 160 contratti · 14.031 competenze · 2 tenant
+```
+
+La differenza sono **tre utenze di servizio** (quelle di `#169` F2, create in produzione e
+non nel clone), non il dataset. L'inferenza sbagliata nasceva da un fatto vero letto male:
+la `000375` su `heuresys_ci` converte **0** contratti — ma perché **la catena stessa** li
+aveva già convertiti alla prima applicazione, non perché i contratti mancassero.
+
+È la seconda volta in due giorni che una misura vera mi porta a una conclusione falsa
+(memoria `read_the_file_that_creates_it`). Il correttivo che ha funzionato entrambe le
+volte: **contare l'oggetto**, invece di dedurne l'esistenza dall'effetto di qualcos'altro.
+
+### Gli altri due ostacoli, e come sono stati sciolti
+
+| ostacolo | soluzione |
+|---|---|
+| la CI esegue **solo lo smoke**, che è il gate su ogni push e deve restare rapido | **workflow separato** `playwright-integrale.yml`, `workflow_dispatch` — manuale finché non sarà verde almeno una volta |
+| tetto **30 minuti** contro i ~35 misurati | `timeout-minutes: 75` (35 di corsa + build + avvii + margine) |
+
+### E un ostacolo che nessuno aveva nominato: l'origine ammessa in CI
+
+`verifyCsrf` rifiuta con **403** ogni scrittura fatta dal browser se l'origine non è
+dichiarata — lo stesso codice di un permesso negato. In CI il web nasce su una porta propria
+(`PLAYWRIGHT_WEB_PORT=3187`), quindi l'origine è un'altra ancora.
+
+⚠ L'`ADMIN_ORIGIN` del runner **non è leggibile** da qui: vive in `/etc/heuresys-runner.env`,
+root-only, e `sudo` non è disponibile senza password. **NON MISURABILE**, e non lo si deduce
+dal comportamento dello smoke: quello non fa scritture e passerebbe comunque. Invece di
+presumerlo, il workflow **lo interroga sull'API viva** col preflight, e si ferma in pochi
+secondi se non combacia.
+
+### 🔬 E preparandolo il preflight ha rivelato un proprio difetto, prima che costasse
+
+Leggeva `process.env.WEB_PORT`, ma la variabile vera è **`PLAYWRIGHT_WEB_PORT`** — quella che
+`playwright.config.ts` usa e che la CI imposta. Due controlli su tre (la porta occupata e
+l'origine ammessa) guardavano quindi la **porta 3000** mentre il web nasceva altrove: uscivano
+verdi per costruzione. Corretto, e provato subito:
+
+```
+PLAYWRIGHT_WEB_PORT=3187 node scripts/e2e-blocchi.mjs --solo-preflight
+  [!] l'API su http://localhost:8013 NON AMMETTE l'origine http://localhost:3187 …
+```
+
+Cioè: senza questa correzione il primo giro del workflow avrebbe prodotto decine di rossi non
+attribuibili — **esattamente il difetto che `#219` esiste per togliere**, reintrodotto dal
+passo che doveva chiuderlo. Con essa, la corsa si ferma in due secondi nominando la causa.
+
+### Cosa resta, dichiarato
+
+Il workflow **non è ancora stato eseguito**: è manuale apposta, e il suo primo giro va
+lanciato quando il runner è libero. Se il preflight lì dichiara l'origine non ammessa, la cura
+è una riga in `/etc/heuresys-runner.env` — che richiede **sudo sul gemello**, cioè Enzo.

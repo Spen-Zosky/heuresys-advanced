@@ -188,7 +188,14 @@ function preflight() {
   }
 
   // 2. la :3000 e' libera? Un server sopravvissuto e' peggio di nessun server.
-  const porta = Number(process.env.WEB_PORT ?? 3000);
+  // ⚠ `PLAYWRIGHT_WEB_PORT` per PRIMA, ed e' la variabile VERA: e' quella che
+  // `playwright.config.ts` legge (`WEB_PORT = process.env.PLAYWRIGHT_WEB_PORT ?? "3000"`)
+  // e che la CI imposta per non collidere con gli altri servizi della macchina.
+  // Leggendo solo `WEB_PORT` questo preflight controllava la porta 3000 mentre il web
+  // nasceva altrove: due controlli su tre — la porta occupata e l'origine ammessa —
+  // guardavano il posto sbagliato e uscivano verdi per costruzione. Trovato in S1089
+  // preparando il passaggio in CI, prima che costasse una corsa.
+  const porta = Number(process.env.PLAYWRIGHT_WEB_PORT ?? process.env.WEB_PORT ?? 3000);
   const occ = spawnSync(process.execPath,
     ["-e", `const n=require("node:net");const s=n.createServer();` +
            `s.once("error",()=>{process.exitCode=1});s.once("listening",()=>s.close());` +

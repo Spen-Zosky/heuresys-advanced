@@ -1,0 +1,118 @@
+name: Playwright integrale (suite E2E completa, a fasi)
+
+# #219 F5e — S1089. La corsa INTEGRALE della suite, non lo smoke.
+#
+# ── PERCHÉ UN WORKFLOW SEPARATO, E NON UNA RIGA CAMBIATA IN playwright-smoke ──
+# Lo smoke è il gate #6 su ogni push: gira in pochi minuti e deve restare tale.
+# La corsa integrale dura ~35 minuti misurati (13,8 + 6,6 + ~7 + ~7) e ha
+# precondizioni d'ambiente proprie. Innestarla lì dentro significherebbe legare
+# ogni push a una corsa lunga, e al primo rosso non attribuibile la si
+# spegnerebbe — cioè si tornerebbe al punto di partenza.
+#
+# Questo workflow è quindi **solo manuale** (`workflow_dispatch`) finché non
+# avrà dimostrato di essere verde in CI almeno una volta. La decisione di
+# renderlo automatico è successiva e va presa sui numeri di quel giro, non qui.
+#
+# ── COSA È GIÀ VERO, MISURATO (2026-09-06) ───────────────────────────────────
+# ⚠ Una convinzione precedente era SBAGLIATA e va corretta qui, perché ha quasi
+#   fatto scartare questa strada: si diceva che `heuresys_ci` «non ha i dati su
+#   cui la suite è tarata». Misurato:
+#
+#     heuresys_advanced   164 utenti · 160 contratti · 14.031 competenze · 2 tenant
+#     heuresys_ci         161 utenti · 160 contratti · 14.031 competenze · 2 tenant
+#
+#   La differenza sono **tre utenze di servizio**, non il dataset. L'inferenza
+#   sbagliata nasceva dal fatto che la migrazione 000375 su `heuresys_ci`
+#   converte 0 contratti — ma perché la catena stessa li aveva già convertiti,
+#   non per assenza di dati.
+#
+# ── L'OSTACOLO CHE RESTA, E CHE QUESTO WORKFLOW MISURA INVECE DI PRESUMERE ───
+# `verifyCsrf` rifiuta con **403** ogni scrittura fatta dal browser se l'origine
+# da cui parte non è fra quelle dichiarate in `ADMIN_ORIGIN` — ed è lo stesso
+# codice di un permesso negato, quindi indistinguibile nei referti. È il guasto
+# che in S1088 ha prodotto 42 rossi attribuiti per tre sessioni ai permessi.
+# L'`ADMIN_ORIGIN` del runner **non è leggibile** da fuori (vive in
+# `/etc/heuresys-runner.env`, root-only): invece di presumerlo, il passo di
+# preflight lo **interroga sull'API viva** e ferma la corsa PRIMA di spendere 35
+# minuti se non combacia.
+
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: playwright-integrale-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  playwright-integrale:
+    runs-on: [self-hosted, off-prod]
+    # ~35 minuti misurati + margine per build e avvii. Il tetto di 30 dello
+    # smoke sarebbe stato superato dalla sola fase 1 in una giornata carica.
+    timeout-minutes: 75
+    env:
+      # D-08: la CI non tocca MAI la produzione.
+      POSTGRES_DB: heuresys_ci
+      POSTGRES_DATABASE: heuresys_ci
+      NODE_ENV: test
+      LOG_LEVEL: warn
+      PLAYWRIGHT_WEB_PORT: "3187"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Avvia l'API (nessuna config Playwright lo fa)
+        working-directory: apps/api
+        # ⚠ Né `playwright.config` né `playwright.prod.config` avviano `apps/api`:
+        # avviano solo il web. Senza questo passo ogni login fallisce, i sei setup
+        # diventano rossi e TUTTO il resto risulta «skipped» — il referto che in
+        # S1080 fu letto come «le utenze non esistono più». Il preflight lo
+        # dichiara, ma qui va proprio acceso.
+        # `setsid` perché un figlio con `&` prende SIGHUP fra un passo e l'altro.
+        run: |
+          if curl -sf http://localhost:3001/readyz > /dev/null 2>&1; then
+            echo "porta 3001 gia' occupata da un processo estraneo:"; ss -ltnp | grep ":3001" || true; exit 1
+          fi
+          setsid bash -c 'pnpm dev > /tmp/api-integrale.log 2>&1' &
+          for i in $(seq 1 90); do
+            curl -sf http://localhost:3001/readyz > /dev/null && { echo "API su"; break; }
+            sleep 1
+          done
+          curl -s http://localhost:3001/readyz | grep -q '"database"' || {
+            echo "cio' che risponde su :3001 NON e' l'API heuresys-advanced"; tail -50 /tmp/api-integrale.log; exit 1; }
+
+      - name: Preflight — l'ambiente è quello che la suite presume?
+        working-directory: apps/web
+        # ⚠ QUESTO PASSO VALE L'INTERO WORKFLOW. Senza, un'origine non ammessa o
+        # un bundle vecchio producono decine di rossi che NON sono guasti, e il
+        # referto non lo dice: è precisamente ciò che ha fatto perdere tre
+        # sessioni. Qui la corsa si ferma in pochi secondi, con un messaggio che
+        # nomina la causa.
+        run: node scripts/e2e-blocchi.mjs --solo-preflight
+
+      - name: Corsa integrale a fasi
+        working-directory: apps/web
+        # Fasi come INVOCAZIONI SEPARATE di Playwright: un rosso in una fase non
+        # può impedire alle altre di girare (in Playwright un progetto la cui
+        # dipendenza fallisce viene SALTATO, e «non ho eseguito» non è
+        # «passato»). Lo script conta gli eseguiti e li confronta col totale
+        # dichiarato da --list: se non torna esce rosso anche a fasi tutte verdi.
+        run: node scripts/e2e-blocchi.mjs
+
+      - name: Triage per firma (anche quando è verde)
+        working-directory: apps/web
+        if: always()
+        # `if: always()` perché il triage serve SOPRATTUTTO quando la corsa è
+        # rossa. Non fa fallire il job: raggruppa e conta, e la sua uscita è
+        # informazione per chi legge, non un secondo verdetto.
+        continue-on-error: true
+        run: node scripts/e2e-triage.mjs --dettaglio 1
+
+      - name: Referti per fase
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-referti
+          path: |
+            apps/web/.e2e-fase-*.json
+            apps/web/playwright-report/
+          retention-days: 7

@@ -203,7 +203,30 @@
 - **#171 Otto vulnerabilita' aperte che nessuna voce registrava** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#170 Gli script dell'ingestione ritirata parlano ancora di uno schema che non esiste** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#168 Cancellare una persona cancella la storia delle sue approvazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
-- **#169 Separare i due segreti: la password derivata e il secondo fattore non possono nascere dalla stessa chiave** · status: GATED
+- **#169 Separare i due segreti: la password derivata e il secondo fattore non possono nascere dalla stessa chiave** · status: ACTIVE
+  - ⭐ **RIVALUTAZIONE DEL GATE (2026-09-06, S1089 — su richiesta di Enzo): il blocco ESTERNO è
+    caduto, e resta un passo INTERNO che ora ha un ostacolo misurato.**
+    Il gate aveva **due** componenti, non una: *«`#219` — la suite deve tornare misurabile»* **+**
+    *«il passo intermedio sulle utenze di collaudo»*.
+    ① La prima è **caduta**, misurata: la corsa integrale di S1088 dà **369 passati · 0 falliti ·
+    4/4 fasi**. La seconda metà di F4 — «la suite continua a girare» — è di nuovo dimostrabile,
+    quindi non si è più costretti a barare passando la prima e rompendo la seconda.
+    ② La seconda **non era un gate esterno**: è **F3a** di questa voce stessa (la suite passa alle
+    utenze di collaudo). Per questo lo status torna `ACTIVE` e non resta `GATED`: non aspetta più
+    nessun altro item.
+  - ⚠ **E MISURANDO OGGI È EMERSO UN OSTACOLO DIMENSIONALE CHE NESSUNA VOCE NOMINAVA**: le utenze
+    di collaudo sono **tre** (`piattaforma@` PLATFORM_ADMIN · `governo@` TENANT_ADMIN ·
+    `persona@` USER, verificate `SERVICE` in produzione), ma la suite usa **sei** persone —
+    `enzo.spenuso@`, `federica.marchetti@`, `paolo.caputo@`, `tommaso.fiore@`, `antonio.parisi@`,
+    `andrea.martino@`. F3a **non è una sostituzione uno-a-uno**: restano scoperti i profili
+    *manager*, *outsider* e *custodian*, che la suite non usa per «entrare» ma per provare **i
+    confini** — la catena organizzativa (I19) e l'isolamento della custodia whistleblowing
+    (ADR-0036 §5).
+  - ⏭ **Quindi F3a costa più di quanto la voce stimasse**, e la scelta è dichiarata prima di
+    eseguire: o si creano **altre tre** utenze di collaudo con quei mandati — e per la custodia
+    va deciso se un'utenza di servizio possa portarne il mandato, che è una decisione di
+    sicurezza, non tecnica — oppure la suite resta **in parte** sulle persone reali, il che
+    rimette in piedi esattamente il problema che F3c deve togliere.
 - stato-corretto-S1085 (2026-08-30): **era `ACTIVE` e non lo e'.** L'analisi di S1083 lo dice gia' nel programma e il register non l'aveva recepito: **F3 non e' eseguibile com'e' scritta**. La suite E2E fa login con **persone reali** (`fixtures.ts`: `enzo.spenuso@`, `federica.marchetti@`, `paolo.caputo@`) e per ognuna chiama `passwordFor` e `totpFor`, cioe' le due derivazioni dalla chiave madre: rendere casuale un segreto **rompe la suite**. Il passo mancante — *portare la suite sulle utenze di collaudo* che F2 ha gia' creato — va **prima** di F3, non dopo
   - ⛔ **e la prova di chiusura dipende da `#219`**: F4 pretende che il tentativo con la chiave madre fallisca **e** che la suite continui a girare, «le due cose insieme, o la voce non e' chiusa». Con la suite a 42 falliti (misurati S1085) quella seconda meta' non e' dimostrabile: passare la prima rompendo la seconda sarebbe il modo ovvio di barare
   - gated-su: **`#219`** (la suite deve tornare misurabile) + il passo intermedio sulle utenze di collaudo. ⚠ **NON piu' `#147`**: quel gate e' chiuso da tempo e restava scritto qui, facendo apparire il blocco come «gia' sciolto» al cancello del marciume (M1). Il blocco vero e' un altro, ed e' questo

@@ -4,43 +4,42 @@
 
 ## Last session brief — l'ultima sessione, in breve
 
-Una sola voce, `#219` F5e, e il filo conduttore è che **la firma di un errore non è la sua
-causa**: quarantadue casi rossi che tre sessioni avevano attribuito ai permessi erano in
-realtà l'API che rifiutava l'**indirizzo da cui il browser dei test le parlava**. Le due
-cose rispondono con lo stesso codice, e per questo nessuno le aveva distinte.
+Il filo conduttore: **la firma di un errore non è la sua causa**. Quarantadue casi rossi che
+tre sessioni avevano attribuito ai permessi erano l'API che rifiutava **l'indirizzo da cui
+il browser dei test le parlava** — e le due cose rispondono con lo stesso codice, quindi
+nessuno le aveva distinte. La suite E2E è passata da 42 falliti a **zero**, la prima volta
+da quando `#219` esiste.
 
-La prova è venuta da una richiesta che non ha permessi da controllare: se anche quella
-viene rifiutata, il colpevole non può essere un permesso. Corretta la configurazione,
-la corsa integrale è passata **da 42 falliti a 6**, e la famiglia che ne produceva più di
-un terzo è sparita del tutto.
+Sono cadute **cinque** spiegazioni precedenti, tutte plausibili: il job notturno della VM,
+il tunnel, l'API spenta, il bundle vecchio, i permessi. E ne è caduta una **mia**, nello
+stesso giorno: avevo dichiarato che cinque casi «passavano da soli» usando un comando che
+li **saltava in silenzio** — cioè il difetto per cui quella voce esiste.
 
-⚠ Sono cadute **quattro** spiegazioni precedenti, tutte plausibili e tutte sbagliate: il
-lavoro notturno della VM, il tunnel, l'API spenta, il bundle vecchio. Ognuna era stata
-scritta come conclusione.
+Chiusa anche `#246`: un terzo dell'organico della banca risultava a tempo determinato, e
+applicando la regola di Enzo **nessuno dei 51 era ammissibile**. Produzione bonificata, due
+sentinelle a presidio, provate rosse.
 
 ## Top priorities — le priorità
 
-1. **`#219` F5e — i sei residui** (~1 sessione). Nessuno è una scrittura negata, quindi
-   sono guasti di natura diversa fra loro. ⚠ **`session-refresh` per primo**: prova il
-   rinnovo silenzioso della sessione, cioè la stessa rotta al centro della diagnosi di
-   ieri — che fallisse anche prima non lo assolve. Triage pronto in
-   `.programmi/219-triage-2026-09-06-dopo-correzione.txt`. Solo a zero falliti la suite
-   entra in CI, che è ciò che chiude la voce.
-2. **`#54` F3 — le quattro fette che restano** (~2 sessioni). Pattern rodato, le prossime
-   costano meno della prima.
-3. **`#246` — i contratti a termine** (~1 sessione). La regola l'ha già decisa Enzo: niente
-   contratto a termine sopra i 12 mesi di anzianità, a 16 si passa a indeterminato.
+1. **`#219` — il passaggio in CI** (~1 sessione). È l'unica metà non chiusa del criterio di
+   `#211` F4, e ha **tre ostacoli misurati**: la CI esegue solo lo smoke, ha un tetto di 30
+   minuti contro i ~35 della corsa, e usa `heuresys_ci`, che non ha i dati su cui la suite è
+   tarata. Va scelto quale dei tre cammini prendere — dichiarato in `.programmi/219-*`.
+2. **`#248` — le credenziali git di questa macchina** (~10 minuti tuoi, `WAIT-INPUT`).
+   Bloccano ogni push e ogni armamento del deploy da Windows, e il guasto **si pianta in
+   silenzio** invece di fallire. Aggirato oggi passando dal gemello.
+3. **`#54` F3 — le quattro fette che restano** (~2 sessioni). Pattern rodato.
 
 ## Open questions — le domande aperte
 
-- ⭐ **Da quali fonti la piattaforma accetta di imparare com'è fatta un'azienda?** — unità
-  organizzative, posizioni, competenze, indicatori. Il registro delle fonti ne porta **una
-  sola**, sul dominio dei processi. Tre voci ferme qui (`#198`, `#205`, il ponte di `#132`).
-  Non è una misura: è cosa Heuresys accetta come sapere, e i piani vietano di scriverlo a mano.
+- ⭐ **Da quali fonti la piattaforma accetta di imparare com'è fatta un'azienda?** — Il
+  registro ne porta **una sola**. Tre voci ferme qui (`#198`, `#205`, il ponte di `#132`).
+  Non è una misura: è cosa Heuresys accetta come sapere.
+- **La ricerca semantica sul gemello ora è accesa**, e ogni corsa integrale costa **due
+  chiamate a pagamento** al fornitore di embedding. Va bene, o la si rispegne lì?
+- ⚠ **Una chiave API è transitata nell'output di un comando** durante la diagnosi di oggi
+  (non scritta in alcun file). Quella del fornitore di embedding è da ruotare, per prudenza.
 - **Chi ha pushato il 26 agosto alle 18:47?** Invariata da S1082.
-- *Nuova*: **`/v1/auth/refresh` è protetto dal presidio che serve a rinnovare.** Se il token
-  si disallinea, il rimedio è chiuso a chiave dal problema che dovrebbe curare. Ieri non era
-  questo il guasto, ma il disegno resta così — vale la pena deciderlo prima che lo diventi.
 
 ## Verification — come si controlla
 

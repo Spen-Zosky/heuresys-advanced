@@ -124,9 +124,33 @@ ogni rosso ha nominato una causa d'ambiente diversa — il valore del workflow �
      `heuresys_ci`. Lo crea uno **script** (`db/scripts/ricostruisci-fascicolo-rtl.ts`), non
      una migrazione, e la catena applicata al clone non lo porta con sé — la trappola già
      registrata. Aggiunto come passo preparatorio: è idempotente e si verifica da sé;
-- **giro 7**: lanciato dopo quelle tre correzioni.
-  `gh run list --workflow=playwright-integrale.yml --limit 3`; se rosso,
-  `gh run view <id> --log-failed`.
+- **giro 7** (`34053659812`): **non è nemmeno partito** — il preflight l'ha fermato in due
+  secondi perché il gemello era a **load 3.33**, caricato dalla batteria di controlli del mio
+  stesso push. È il comportamento voluto: sotto carico il DB risponde lento, i login vanno in
+  500 e i rossi non sarebbero attribuibili. ⚠ Da tenere presente: **il runner è uno solo**, e
+  ogni push mette in coda lint/typecheck/test/CodeQL sulla stessa macchina — la corsa
+  integrale si lancia **a coda vuota**, non subito dopo un push;
+- **giro 8** (`34056854155`): **quattro fasi VERDI, 367 passati, ZERO falliti**. Le tre
+  correzioni tengono tutte. È uscito rosso lo stesso, per un difetto **dello strumento**;
+- ⚠⚠ **e quel difetto era la specie che `#219` esiste per togliere.** `e2e-blocchi.mjs`
+  rendeva rossa la corsa per QUALUNQUE caso non eseguito, e gli 80 dell'ottavo giro erano
+  **tutti dichiarati** (67 censimenti a comando, 6 catture su richiesta, 2 spenti per decisione
+  di costo, 5 casi che guardano il dataset e non trovano nulla). Un verdetto che non può **mai**
+  diventare verde non è severo: è l'allarme che suona sempre di `#194`, e fa sparire il rosso
+  vero nel rumore del rosso finto. La distinzione non è una convenzione nuova, era già nei
+  dati: un salto **annotato** è una scelta di chi ha scritto il caso; un salto **senza
+  annotazione** non l'ha deciso nessuno — è un caso travolto da un rosso precedente nel blocco
+  `serial` (nel giro 5 erano **350 su 423**, ed erano il difetto vero). Ora solo i secondi
+  fanno rosso, e il verde **dichiara** quanti sono stati esclusi per scelta invece di tacerlo;
+- 🔧 aggiunto **`--solo-riepilogo`**: rilegge i referti già su disco e ri-emette il verdetto
+  **senza eseguire una sola fase**. Esiste per la stessa ragione di `--solo-preflight` — un
+  verdetto che non si può provare senza pagare un'ora di corsa non è una prova, è una promessa.
+  Provato nei due versi con referti costruiti apposta (esclusione dichiarata → verde;
+  salto senza ragione → rosso), e poi **sui referti veri del giro 8**, che ora danno
+  `VERDE — 80 dichiarati · 0 senza una ragione`;
+- **giro 9**: lanciato dopo questa correzione, a coda vuota. È quello che deve dire verde da
+  sé, in CI, senza riletture. `gh run list --workflow=playwright-integrale.yml --limit 3`;
+  se rosso, `gh run view <id> --log-failed`.
 
 ## Verification — come si controlla
 

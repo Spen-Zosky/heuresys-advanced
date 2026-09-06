@@ -495,6 +495,28 @@ function conta(testo) {
  * Playwright scrive nel JSON: nessun elenco cablato qui, o il giorno che nasce un motivo
  * nuovo finirebbe in silenzio nella categoria sbagliata.
  */
+const MOTIVO_TRAVOLTO =
+  "travolto da un fallimento precedente nel suo blocco `serial` (non è una scelta)";
+
+/**
+ * I casi di una fase, letti dal JSON invece che dal riepilogo a schermo.
+ * Serve a `--solo-riepilogo`: rileggere una corsa gia' fatta senza rifarla.
+ */
+function contaDalJson(percorsoJson) {
+  try {
+    const st = JSON.parse(readFileSync(percorsoJson, "utf8")).stats ?? {};
+    return {
+      passed: st.expected ?? 0,
+      failed: st.unexpected ?? 0,
+      flaky: st.flaky ?? 0,
+      skipped: st.skipped ?? 0,
+      nonEseguiti: 0,   // nel JSON i «did not run» sono gia' dentro `skipped`
+    };
+  } catch {
+    return null;
+  }
+}
+
 function motiviDeiSalti(percorsoJson) {
   const fuori = new Map();
   let dati;
@@ -514,8 +536,7 @@ function motiviDeiSalti(percorsoJson) {
         // `serial` Playwright salta tutto ciò che segue un fallimento. Non è una terza specie
         // di skip — è lavoro che non è stato provato **a causa di un altro rosso**, e chiamarlo
         // «senza motivo» lo farebbe sembrare un caso spento apposta.
-        const motivo = ann?.description?.trim()
-          || "travolto da un fallimento precedente nel suo blocco `serial` (non è una scelta)";
+        const motivo = ann?.description?.trim() || MOTIVO_TRAVOLTO;
         fuori.set(motivo, (fuori.get(motivo) ?? 0) + 1);
       }
     }
@@ -562,8 +583,16 @@ const soloFase = (() => {
   return n;
 })();
 
-const atteso = soloFase === null ? totaleAtteso() : null;
-if (soloFase === null && atteso === null) {
+// ⭐ `--solo-riepilogo`: rilegge i referti gia' su disco e ri-emette il verdetto, SENZA
+// eseguire una sola fase. Esiste per la stessa ragione di `--solo-preflight`: un verdetto
+// che non si puo' provare senza pagare un'ora di corsa non e' una prova, e' una promessa.
+// In questa modalita' NON si giudica la copertura (quante fasi, quanti casi sui dichiarati):
+// i referti in ingresso possono essere parziali per costruzione. Si giudica **solo** la
+// classificazione dei salti, che e' cio' che questa modalita' serve a rendere falsificabile.
+const SOLO_RIEPILOGO = process.argv.includes("--solo-riepilogo");
+
+const atteso = (soloFase === null && !SOLO_RIEPILOGO) ? totaleAtteso() : null;
+if (soloFase === null && !SOLO_RIEPILOGO && atteso === null) {
   console.error(
     "e2e-blocchi: non ho potuto leggere il totale atteso da `--list`.\n" +
       "  Senza quel numero non posso dire se ho eseguito tutto, e un conteggio cieco\n" +
@@ -579,6 +608,12 @@ for (const [i, fase] of FASI.entries()) {
   const jsonOut = join(WEB_DIR, `.e2e-fase-${n}.json`);
   const args = ["test", `--config=${CONFIG}`, ...fase.map((p) => `--project=${p}`),
                 "--reporter=list,json"];
+  if (SOLO_RIEPILOGO) {
+    const c = contaDalJson(jsonOut);
+    if (c) esiti.push({ fase: n, progetti: fase, exit: c.failed > 0 ? 1 : 0, ...c,
+                        motivi: motiviDeiSalti(jsonOut) });
+    continue;
+  }
   console.log(`\n${"═".repeat(78)}\n FASE ${n}/${FASI.length} — ${fase.join(" + ")}\n${"═".repeat(78)}`);
   // ⭐ LA VARIABILE SI PASSA AL FIGLIO, o il web che Playwright avvia non sa dov'e' l'API.
   //
@@ -640,12 +675,42 @@ for (const e of esiti) {
   if (!e.motivi) { motiviIgnoti = true; continue; }
   for (const [m, q] of e.motivi) perMotivo.set(m, (perMotivo.get(m) ?? 0) + q);
 }
+// ⭐ DUE SPECIE DI «NON ESEGUITO», E SOLO UNA E' UN DIFETTO (misurato 2026-09-06, giro 8).
+//
+// Fino a qui QUALUNQUE caso non eseguito rendeva rossa la corsa. Ma l'ottavo giro in CI ha
+// chiuso 367 casi passati, ZERO falliti, quattro fasi verdi — ed e' uscito ROSSO per 80 non
+// eseguiti che erano **tutti dichiarati**: 67 censimenti a comando, 6 catture su richiesta, 2
+// spenti per decisione di costo, 5 casi che guardano il dataset e non trovano nulla da
+// misurare. Un verdetto che non puo' MAI diventare verde non e' severo: e' l'allarme che suona
+// sempre di #194, e chi lo legge impara a non guardarlo — cosi' il rosso vero, quello che
+// questo script esiste per rendere visibile, sparisce nel rumore del rosso finto.
+//
+// La distinzione NON e' una convenzione nuova: e' gia' nei dati. Playwright annota il salto con
+// la ragione scritta da chi ha scritto il caso; un salto SENZA annotazione non l'ha deciso
+// nessuno — e' un caso travolto da un rosso precedente nel suo blocco `serial`.
+//   · dichiarato   → qualcuno ha detto perche'. Si conta, si stampa, NON e' rosso.
+//   · involontario → nessuno l'ha scelto. E' lavoro mai provato: ROSSO.
+// Nel giro 5 gli involontari erano 350 su 423, ed erano esattamente il difetto di #219.
+//
+// ⚠ E una fase senza JSON resta rossa a prescindere: se non si e' potuto classificare, non si
+// e' potuto dire che andava bene — «non ho guardato» non e' «a posto».
+const classificati = perMotivo.size
+  ? [...perMotivo.values()].reduce((a, b) => a + b, 0)
+  : 0;
+const saltiInvolontari =
+  (perMotivo.get(MOTIVO_TRAVOLTO) ?? 0) + Math.max(0, nonEseguiti - classificati);
+const saltiDichiarati = nonEseguiti - saltiInvolontari;
+if (nonEseguiti > 0) {
+  console.log(`    di cui dichiarati        : ${saltiDichiarati}` +
+              `   ·   senza una ragione: ${saltiInvolontari}${saltiInvolontari > 0 ? "  ⚠" : ""}`);
+}
+
 if (perMotivo.size) {
   console.log("\n  perche' non sono stati eseguiti (letto dalle annotazioni, non da un elenco):");
   for (const [m, q] of [...perMotivo].sort((a, b) => b[1] - a[1])) {
     console.log(`    ${String(q).padStart(4)}  ${m.slice(0, 88)}`);
   }
-  const classificati = [...perMotivo.values()].reduce((a, b) => a + b, 0);
+  // (il totale classificato e' calcolato piu' sopra, insieme alle due specie)
   if (classificati < nonEseguiti) {
     console.log(`    ${String(nonEseguiti - classificati).padStart(4)}  (senza annotazione nel JSON)`);
   }
@@ -661,17 +726,22 @@ console.log(
 const problemi = [];
 // (1) Una fase mai partita: la suite non e' stata eseguita, e non si sommano i verdi
 //     delle altre come se lo fosse.
-if (esiti.length !== FASI.length) {
+if (!SOLO_RIEPILOGO && esiti.length !== FASI.length) {
   problemi.push(`${FASI.length - esiti.length} fasi non eseguite`);
 }
 // (2) Il riepilogo non copre il dichiarato: qualcosa e' sparito fra `--list` e la corsa,
 //     e un totale che non torna e' un conteggio di cui non si puo' fidare.
-if (visti !== atteso) {
+if (!SOLO_RIEPILOGO && visti !== atteso) {
   problemi.push(`il riepilogo copre ${visti} casi sui ${atteso} dichiarati`);
 }
 // (3) Casi non eseguiti: e' il difetto che questo script esiste per rendere visibile.
-if (nonEseguiti > 0) {
-  problemi.push(`${nonEseguiti} casi non eseguiti`);
+if (saltiInvolontari > 0) {
+  problemi.push(`${saltiInvolontari} casi non eseguiti senza una ragione dichiarata`);
+}
+// (3-bis) Una fase che non ha prodotto il JSON non e' classificabile: non si e' potuto
+//     guardare, e questo non e' «a posto».
+if (motiviIgnoti) {
+  problemi.push("almeno una fase non ha prodotto il referto JSON: i suoi salti non sono classificabili");
 }
 if (falliti > 0) problemi.push(`${falliti} casi falliti`);
 
@@ -694,4 +764,16 @@ if (problemi.length > 0) {
   }
   process.exit(1);
 }
-console.log("\nVERDE: tutte le fasi hanno girato, ogni caso dichiarato e' stato eseguito, nessun rosso.");
+console.log("");
+console.log(
+  "VERDE: tutte le fasi hanno girato, nessun caso e' rimasto fuori senza una ragione, nessun rosso.",
+);
+// ⚠ Il verde NON tace cio' che e' stato escluso: dirlo qui e' la differenza fra «tutto
+// provato» e «tutto cio' che qualcuno ha deciso di provare». Un caso escluso per scelta
+// non e' passato — e' escluso, e l'esclusione ha un nome scritto sopra.
+if (saltiDichiarati > 0) {
+  console.log(
+    `  (${saltiDichiarati} casi non eseguiti PER SCELTA, con la ragione scritta qui sopra: ` +
+      "non sono passati, sono esclusi — e l'esclusione e' dichiarata)",
+  );
+}

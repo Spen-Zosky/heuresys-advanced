@@ -307,7 +307,7 @@ non correggendolo.
   i suoi rossi non dicono nulla sul prodotto. Spiega anche i `socket hang up` che Next.js
   registrava mentre proxava verso `:3001`: non era un errore di rete, era un'API che non c'era.
 
-  - [ ] **F5e La corsa che chiude** — 0 falliti, poi il passaggio in CI. ⚠ **Da eseguire SUL
+  - [x] **F5e La corsa che chiude — FATTA S1088: 369 passati, ZERO falliti, 4/4 fasi.** Resta il solo passaggio in CI, che ha tre ostacoli misurati ed e un lavoro suo. *(testo originale)* — 0 falliti, poi il passaggio in CI. ⚠ **Da eseguire SUL
         GEMELLO** (vedi il riquadro qui sopra): da Windows il tunnel produce rossi propri, e il
         criterio «0 falliti» diventa irraggiungibile per una ragione che non riguarda il prodotto
 
@@ -892,3 +892,48 @@ che `#219` esiste per togliere, reintrodotto dal passo che dovrebbe chiuderlo.
 cammini si prende — allineare i dati di `heuresys_ci`, eseguire in CI il sottoinsieme che
 non dipende dal dataset, oppure lasciare la corsa integrale al gemello e portare in CI la
 sola verifica che sia stata eseguita. Si dichiara e non si improvvisa.
+
+---
+
+## 🎯 S1088 — LA CORSA CHE CHIUDE: **QUATTRO FASI VERDI, ZERO FALLITI**
+
+```
+  fase 1  VERDE   88 passati · 0 falliti · 0 instabili ·  0 non eseguiti
+  fase 2  VERDE   92 passati · 0 falliti · 0 instabili ·  3 non eseguiti
+  fase 3  VERDE   86 passati · 0 falliti · 0 instabili · 68 non eseguiti
+  fase 4  VERDE  103 passati · 0 falliti · 0 instabili ·  7 non eseguiti
+
+  dichiarati da --list : 447        casi nel riepilogo : 447
+  passati              : 369        FALLITI            : 0
+  non eseguiti         :  78        fasi eseguite      : 4/4 — tutte
+```
+
+**Il criterio di `#211` F4 — zero falliti — è raggiunto.** È la prima volta da quando questa
+voce esiste.
+
+I **78 non eseguiti** portano ognuno la propria ragione, letta dalle annotazioni e non da un
+elenco scritto a mano: 67 sono il censimento dietro `F4_SWEEP=1`, 6 catture on-demand, e i
+restanti 5 sono casi che su questo dataset non hanno soggetto (nessuna attivazione da
+mostrare, nessuna fascia importata su questo tenant, il trasporto EMAIL non configurato —
+`#8`, che è `WAIT-INPUT` su un input di Enzo). Lo script esce comunque **rosso** su di essi,
+ed è giusto così: «non eseguito» non è «passato», e la voce che ha generato questa disciplina
+è proprio questa.
+
+### Il cammino, in un colpo d'occhio
+
+```
+S1087   327 passati ·  42 falliti     ipotesi: «bundle dell'API vecchio»
+S1088a  327 passati ·  42 falliti     bundle ricostruito — IPOTESI SMENTITA
+S1088b  363 passati ·   6 falliti     corretta l'ORIGINE ammessa
+S1088c  369 passati ·   0 falliti     chiusi i sei residui
+```
+
+Delle **cinque** spiegazioni che questa voce ha attraversato — il job notturno della VM, il
+tunnel SSH, l'API spenta, il bundle vecchio, i permessi — **nessuna era la causa**. Lo era
+un controllo sull'origine della richiesta che rispondeva con lo stesso codice di un permesso
+negato, e che nessuno aveva distinto perché dallo status non si distingue.
+
+### Cosa NON è chiuso, e va detto
+
+Il **passaggio in CI** (l'altra metà del criterio di `#211` F4) ha tre ostacoli misurati
+qui sopra e resta aperto: non è la coda di F5e, è un lavoro suo.

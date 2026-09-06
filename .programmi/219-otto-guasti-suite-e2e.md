@@ -870,3 +870,25 @@ e la diagnosi parte naturalmente dal servizio, cioè dal posto sbagliato.
 
 📌 Nota di costo, che è una decisione e non un dettaglio: ogni ricerca è una **chiamata a
 pagamento**. La flag ora accesa sul gemello significa due chiamate per corsa integrale.
+
+### Il passaggio in CI non è un cambio di riga — misurato prima di provarci (S1088)
+
+`#211` F4 dice che la suite entra in CI a zero falliti. Guardato il workflow invece di
+darlo per scontato, il passaggio ha **tre ostacoli**, e nessuno si risolve cambiando il
+comando:
+
+| ostacolo | misura |
+|---|---|
+| la CI esegue **solo lo smoke** | `playwright-smoke.yml:211` → `playwright test smoke-5-personas.spec.ts` |
+| il tetto del job è **30 minuti** | `timeout-minutes: 30`, contro i **~35** di una corsa integrale a quattro fasi |
+| il database **non è lo stesso** | il job forza `POSTGRES_DB: heuresys_ci` (D-08: la CI non tocca mai la produzione), e quel clone **non ha i dati importati da script** — la stessa ragione per cui la `000375` vi ha convertito **0** contratti mentre sul clone del gemello ne convertiva 51 |
+
+Il terzo è quello di sostanza: la suite integrale è tarata su un dataset 1:1 con la
+produzione, e su `heuresys_ci` una parte dei casi non avrebbe i dati che presume. Portarla
+in CI così com'è produrrebbe rossi che **non sono guasti** — cioè esattamente il difetto
+che `#219` esiste per togliere, reintrodotto dal passo che dovrebbe chiuderlo.
+
+**Quindi il passaggio in CI è un lavoro suo**, non la coda di F5e: va deciso *quale* dei tre
+cammini si prende — allineare i dati di `heuresys_ci`, eseguire in CI il sottoinsieme che
+non dipende dal dataset, oppure lasciare la corsa integrale al gemello e portare in CI la
+sola verifica che sia stata eseguita. Si dichiara e non si improvvisa.

@@ -1,9 +1,11 @@
 # 219 — Gli otto guasti dietro i rossi della suite E2E integrale
 
 > **item**: #219 · **priorità**: P2 · **stima**: ~1-2 sessioni
-> **stato**: IN CORSO
-> **avanzamento**: 4/5 fasi (F1-F4 chiuse; F5 in corso — F5a/F5b/F5c fatte S1081, resta il
-> triage dei 10 falliti, fermo su una causa esterna misurata: `aide` satura la VM di notte)
+> **stato**: CHIUSO
+> **chiusa**: 2026-09-06 (S1090) — corsa CI `34060405061` `success`, 367 passati · 0 falliti
+> **avanzamento**: 5/5 fasi. F5e chiusa in CI al nono giro, con nove cause d'ambiente nominate
+> una per una (tabella in fondo). Resta fuori, dichiarato: la ricerca semantica spenta in CI
+> per decisione di costo, e il workflow manuale per decisione successiva
 > **fonti**: `#211` F4 (S1072, 2026-08-19) — il triage completo, con la firma misurata di
 > ognuno, vive in `.programmi/211-suite-e2e-completa.md` §F4 e **non si ricopia qui**
 
@@ -168,7 +170,8 @@ non correggendolo.
       `/organization` (877) · `/organization/org-chart` (547): **12 passed**, nessun rosso
       nuovo. Il rimedio vale per **tutte** le rotte del censimento, che avevano lo stesso
       falso verde in agguato. Typecheck e lint verdi.
-- [ ] **F5 La corsa che chiude la voce, e il passaggio in CI** — ⚠ **la stima «~20k, in gran parte
+- [x] **F5 La corsa che chiude la voce, e il passaggio in CI** — **FATTO 2026-09-06 (S1090)** · corsa CI `34060405061` conclusa `success`: **367 passati · 0 falliti · 447 casi contati su 447 dichiarati**, e gli 80 non eseguiti sono **tutti dichiarati con la loro ragione**. Nove giri, nove cause d'ambiente nominate una per una (tabella in §S1090); nessuna era il prodotto.
+      ⚠ **la stima «~20k, in gran parte
       attesa» è SMENTITA**: una corsa integrale sono **4 fasi** e la sola fase 1 ne dura 5-44 minuti
       a seconda del carico. Una corsa integrale con **0 falliti**; solo allora il criterio di `#211`
       consente di portare la suite in CI, e la voce si chiude con quel passaggio.
@@ -996,8 +999,85 @@ Cioè: senza questa correzione il primo giro del workflow avrebbe prodotto decin
 attribuibili — **esattamente il difetto che `#219` esiste per togliere**, reintrodotto dal
 passo che doveva chiuderlo. Con essa, la corsa si ferma in due secondi nominando la causa.
 
-### Cosa resta, dichiarato
+### Cosa restava, dichiarato allora
 
-Il workflow **non è ancora stato eseguito**: è manuale apposta, e il suo primo giro va
-lanciato quando il runner è libero. Se il preflight lì dichiara l'origine non ammessa, la cura
-è una riga in `/etc/heuresys-runner.env` — che richiede **sudo sul gemello**, cioè Enzo.
+Il workflow **non era ancora stato eseguito**: manuale apposta, e il suo primo giro andava
+lanciato a runner libero. *(Superato dal capitolo qui sotto: la cura non è stata una riga in
+`/etc/heuresys-runner.env` — quella strada si è rivelata inefficace, e non serviva `sudo`.)*
+
+---
+
+## ✅ S1090 (2026-09-06) — IL PASSAGGIO IN CI, CHIUSO: **nove giri, nove cause**
+
+**FATTO 2026-09-06** — corsa `34060405061`, conclusione `success` in 35 minuti:
+`367 passati · 0 falliti · 80 non eseguiti, di cui dichiarati 80 e senza una ragione 0`,
+su 447 casi dichiarati da `--list` e 447 contati. È il criterio di `#211` F4 soddisfatto **in
+CI**, non su una macchina di sviluppo.
+
+Il valore del workflow è tutto in questa tabella: **ogni giro rosso ha nominato una causa
+diversa, e nessuna era il prodotto.** Nove giri per arrivarci non è un costo: è la misura di
+quante differenze silenziose separavano «gira sul gemello» da «gira in CI».
+
+| giro | esito | causa nominata |
+|---|---|---|
+| 1 `34038765559` | rosso in 90 s | mancavano i passi preparatori (`tsx: not found`) |
+| 2 `34039328831` | rosso, preflight | «porta dell'API NON MISURABILE»: in CI il `.env` non esiste |
+| 3 `34040733480` | rosso, preflight | origine non ammessa — **il drop-in systemd non vinceva** |
+| 4 `34042451236` | 0 casi su 447 | `next start` senza `next build` |
+| 5 `34043971361` | 17 · 4 · 423 | budget dei login = **10** (default di produzione) |
+| 6 `34056854155` | 367 · **0** · 80 | passkey, ricerca semantica, fascicolo RTL |
+| 7 `34053659812` | non partito | gemello a **load 3.33**: il preflight l'ha fermato |
+| 8 `34056854155` | 367 · **0** · 80 | il **verdetto stesso** era rotto |
+| 9 `34060405061` | ✅ **VERDE** | — |
+
+### ⚠⚠ Le tre lezioni che valgono oltre questa voce
+
+**① `systemctl show` può confermare una cosa falsa.** Il drop-in dichiarava
+`ADMIN_ORIGIN=http://localhost:3187` e `systemctl show -p Environment` lo confermava — ma il
+processo vivo ne aveva un altro:
+
+```
+systemctl show -p Environment   → ADMIN_ORIGIN=http://localhost:3187   (quello che credevo)
+strings /proc/<MainPID>/environ → ADMIN_ORIGIN=http://localhost:3000   (quello che c'era)
+```
+
+Fra i quattro drop-in del servizio, `override.conf` ordina **dopo** e porta
+`EnvironmentFile=/etc/heuresys-runner.env`: systemd applica `Environment=` ed
+`EnvironmentFile=` nell'ordine in cui compaiono e **l'ultimo vince**. `systemctl show` **non
+mostra il contenuto degli EnvironmentFile**, quindi non poteva smentirmi. La cura è finita nel
+**repository** (`env:` del job): versionata, visibile nel log del passo, e senza `sudo`.
+
+**② Tre elenchi chiusi di origini, e nessuno sapeva della porta della CI.** `ADMIN_ORIGIN`
+(CSRF), `WEBAUTHN_ORIGINS` (passkey) e la destinazione compilata del proxy sono tre presidi
+indipendenti che dicono «da dove accetto di parlare». In CI il web nasce sulla **3187** e
+tutti e tre puntavano altrove. Quando nasce un ambiente nuovo, **si cercano tutti gli elenchi
+di origini**, non quello che ha fallito per primo.
+
+**③ Il verdetto che non può mai essere verde è un verdetto rotto.** L'ottavo giro aveva 367
+passati e zero falliti, e usciva rosso per 80 casi non eseguiti **tutti dichiarati**. Un
+allarme che suona sempre si impara a non guardare (`#194`), e fa sparire il rosso vero nel
+rumore. La distinzione era già nei dati: un salto **annotato** è una scelta, uno **senza
+annotazione** è un caso travolto da un rosso precedente nel blocco `serial` — nel giro 5 erano
+**350 su 423**, ed erano il difetto vero. Ora solo i secondi fanno rosso, e il verde
+**dichiara** quanti sono stati esclusi per scelta.
+
+### Cosa il preflight sa vedere adesso, e cosa è costato impararlo
+
+Cinque controlli, ognuno nato da un giro perso: porta dell'API misurabile · porta del web
+libera · destinazione del proxy **compilata** nel manifest · età del bundle dell'API · origine
+ammessa, **interrogata sull'API viva** · carico della macchina · **budget dei login**, letto da
+`x-ratelimit-limit` sull'API viva. Ognuno provato in entrambi i versi.
+
+Aggiunto anche **`--solo-riepilogo`**: rilegge i referti già su disco e ri-emette il verdetto
+senza eseguire una sola fase — stessa ragione di `--solo-preflight`, cioè rendere il verdetto
+falsificabile senza pagare un'ora di corsa.
+
+### Le due cose che restano fuori, dichiarate
+
+- **la ricerca semantica è spenta in CI** (`E2E_RICERCA_SEMANTICA=0`): ogni ricerca è una
+  chiamata **a pagamento**, e accenderla è una decisione di costo di Enzo. I due casi si
+  dichiarano non eseguiti con la ragione scritta;
+- **il workflow resta manuale** (`workflow_dispatch`). Renderlo automatico è una decisione
+  successiva, da prendere sui numeri di questi giri: ~35 minuti di corsa su un runner che è
+  **uno solo** e che serve anche lo smoke di ogni push. ⚠ Il giro 7 lo dimostra: lanciata
+  subito dopo un push, la corsa integrale trova la macchina carica e il preflight la ferma.

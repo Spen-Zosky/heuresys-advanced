@@ -29,9 +29,8 @@ una pipe sembra verde.
    0** — «50 programma/i, nessun difetto». Resta il bersaglio vero: **nessuno interroga quel
    cancello** (non il boot, non la chiusura, non la CI). Oggi ha fermato la chiusura *per caso*,
    perché i file instradati erano cambiati.
-2. **`#219` — il primo giro verde del workflow integrale** (~1 sessione). Il quinto giro ha
-   **eseguito la suite** e ne è uscito rosso per una causa d'ambiente, ora corretta; il
-   **sesto** (`34050172629`) è in corso. Dettaglio nella sezione dedicata più sotto.
+2. ~~**`#219`**~~ — **CHIUSA il 2026-09-06**: la suite integrale gira in CI ed è verde. Non è
+   più una priorità; la sezione dedicata più sotto tiene le tre lezioni che restano.
 3. **`#169` F3a** (~1-2 sessioni). ⚠ **Serve una decisione tua**: le utenze di collaudo coprono
    `PLATFORM_ADMIN`, `TENANT_ADMIN` e `USER`; restano scoperti *manager*, *outsider* e
    **custodian**. Per la custodia whistleblowing (isolamento assoluto, ADR-0036 §5) va deciso se
@@ -58,99 +57,28 @@ stato armato. `origin/main` invece è avanzato — anche per il push della sessi
 di misurare le macchine, e `verifica-deploy.sh` dirà `DISALLINEATO` fino ad allora — è l'atteso,
 non un guasto.
 
-## Dove riprendere ESATTAMENTE — `#219` in CI
+## `#219` — CHIUSA, e le tre lezioni che restano
 
-*Scritto dalla sessione che ha lavorato `#219` in parallelo alla chiusura S1090. Sei giri, e
-ogni rosso ha nominato una causa d'ambiente diversa — il valore del workflow è tutto qui.*
+**La suite integrale gira in CI ed è verde** (corsa `34060405061`, `success`, 35 minuti):
+367 passati · 0 falliti · 80 non eseguiti, **tutti dichiarati**, su 447 contati su 447.
+La cronaca dei **nove giri, nove cause** sta in `.programmi/219-otto-guasti-suite-e2e.md`
+§S1090 e non si ricopia qui. Le tre lezioni che valgono oltre la voce:
 
-- il workflow è `.github/workflows/playwright-integrale.yml`, **`workflow_dispatch` soltanto**:
-  non gira su push, quindi non può rompere nulla mentre è in prova;
-- **giro 1** (`34038765559`): mancavano i passi preparatori (`tsx: not found`). Corretto
-  riusando la sequenza dello smoke;
-- **giro 2** (`34039328831`): preflight rosso in due secondi — «porta dell'API NON MISURABILE».
-  In locale si deriva dal `.env`; **in CI quel file non esiste**. Dichiarate `PORT` e
-  `NEXT_PUBLIC_API_PROXY_BASE_URL` a livello di job (la seconda serve **prima del build**:
-  Next compila i rewrites lì dentro);
-- **giro 3** (`34040733480`): preflight rosso sull'origine. ⚠⚠ **Il drop-in systemd sul runner
-  non vinceva, e `systemctl` non poteva dirlo**:
+1. **`systemctl show` può confermare una cosa falsa.** Dichiarava l'origine giusta; il
+   processo vivo ne aveva un'altra. Fra i drop-in, un `EnvironmentFile` successivo vince, e
+   `systemctl show` **non ne mostra il contenuto**. Si legge dal processo:
+   `ssh linux-pc 'strings /proc/<pid>/environ | grep NOME'`.
+2. **Gli elenchi chiusi di origini sono tre**, non uno — `ADMIN_ORIGIN` (CSRF),
+   `WEBAUTHN_ORIGINS` (passkey), la destinazione **compilata** del proxy. Un ambiente nuovo li
+   fa fallire tutti: si cercano tutti, non quello che si è rotto per primo.
+3. **Un verdetto che non può mai essere verde è rotto.** 367 passati, 0 falliti, e rosso per
+   80 salti tutti dichiarati: è l'allarme che suona sempre (`#194`), e fa sparire il rosso
+   vero nel rumore.
 
-  ```
-  systemctl show -p Environment  → ADMIN_ORIGIN=http://localhost:3187   (quello che credevo)
-  strings /proc/<MainPID>/environ → ADMIN_ORIGIN=http://localhost:3000   (quello che c'era)
-  ```
-
-  Fra i quattro drop-in, `override.conf` ordina **dopo** e porta
-  `EnvironmentFile=/etc/heuresys-runner.env`: systemd applica `Environment=` ed
-  `EnvironmentFile=` nell'ordine in cui compaiono e **l'ultimo vince**. `systemctl show`
-  **non mostra il contenuto degli EnvironmentFile**, quindi confermava una cosa falsa. Cura:
-  `ADMIN_ORIGIN` dichiarata nell'`env:` del job — versionata, visibile nel log, **niente
-  `sudo`**. Il drop-in resta sul runner ed è inerte;
-- **giro 4** (`34042451236`): preflight verde, **0 casi eseguiti sui 447** — «Could not find a
-  production build in the `.next` directory». La config integrale avvia il web con
-  `next start`, che pretende un build; in locale lo script di comodo li tiene insieme
-  (`"test:e2e:prod": "next build && node scripts/e2e-blocchi.mjs"`) e il workflow chiamava
-  **solo la seconda metà**. Aggiunto il build **dopo** il preflight. ⚠⚠ E su quella corsa il
-  **triage aveva dichiarato «VERDE»**: quattro referti letti, zero casi dentro. Corretto —
-  «referto letto» e «test eseguito» ora si contano separati, e l'esito è **NON MISURABILE**;
-- **giro 5** (`34043971361`): la suite ha girato davvero. 17 passati · 4 falliti · **423 non
-  eseguiti**, e i quattro falliti erano lo stesso caso in tutte le fasi:
-  `auth.setup.ts › authenticate as custodian`, timeout su `waitForURL("**/me")`.
-  **La causa l'ha scritta la pagina** nello scatto del fallimento: «Troppi tentativi.»
-  `AUTH_LOGIN_RATELIMIT_MAX` non era dichiarata — valeva il default di produzione (**10**) — e
-  cadeva sempre il **sesto** personaggio perché è l'ultimo della fila; aprendo un blocco
-  `serial` si è portato dietro **350 «non eseguiti»**, che non è «passati».
-  ⚠ Due ipotesi più comode misurate e **smentite** prima: in `heuresys_ci` il custodian è
-  **identico** a quello di produzione (stesso stato, stessa identità, stessi 4 ruoli) e ha
-  **gli stessi 62 permessi**, nessuno `dashboard:*`;
-- corretto in `4e9d6d34`: la variabile nel workflow — **l'unica** che `playwright-smoke.yml`
-  dichiarava e l'integrale no, trovata confrontando i due blocchi `env:` uno contro l'altro,
-  non a memoria — più un **quinto controllo nel preflight**, che interroga l'API viva leggendo
-  `x-ratelimit-limit` e si ferma se il tetto è sotto 40. Provato nei tre rami: silenzioso a
-  200, rosso sotto soglia, **NON MISURABILE** se l'header manca;
-- **giro 6** (`34050172629`): **364 passati · 5 falliti · 78 non eseguiti**, e dei 78 ben 76
-  sono esclusioni **dichiarate** (censimenti a comando, casi senza dati su questo tenant,
-  `#8` in attesa di credenziale). La suite è quindi sostanzialmente in piedi in CI: restano
-  **cinque** casi, in tre famiglie, tutte misurate e tutte d'ambiente — nessuna del prodotto:
-  1. **passkey/WebAuthn (2)** — `WEBAUTHN_ORIGINS` vale `http://localhost:3000` per default e
-     in CI il web nasce sulla **3187**: la registrazione rispondeva **400**. Stessa specie di
-     `ADMIN_ORIGIN`, un elenco chiuso mai aggiornato per la porta della CI. Dichiarata nel job;
-  2. **ricerca semantica (2)** — `MATCHING_FREETEXT_ENABLED` è spenta per default, e **ogni
-     ricerca è una chiamata a pagamento**. Accenderla in CI è una **decisione di costo, non
-     tecnica** (→ domande aperte). Finché è spenta i due casi si dichiarano **non eseguiti**
-     con la ragione scritta, invece di fallire come se il prodotto fosse rotto: la condizione
-     è una variabile dichiarata (`E2E_RICERCA_SEMANTICA=0`) e **non una sonda**, perché
-     interrogare l'API costerebbe una chiamata in più proprio dove il flag è acceso;
-  3. **fascicolo di RTL (1)** — `RTL-BANK-CONFIG` misurato: **1** in produzione, **0** in
-     `heuresys_ci`. Lo crea uno **script** (`db/scripts/ricostruisci-fascicolo-rtl.ts`), non
-     una migrazione, e la catena applicata al clone non lo porta con sé — la trappola già
-     registrata. Aggiunto come passo preparatorio: è idempotente e si verifica da sé;
-- **giro 7** (`34053659812`): **non è nemmeno partito** — il preflight l'ha fermato in due
-  secondi perché il gemello era a **load 3.33**, caricato dalla batteria di controlli del mio
-  stesso push. È il comportamento voluto: sotto carico il DB risponde lento, i login vanno in
-  500 e i rossi non sarebbero attribuibili. ⚠ Da tenere presente: **il runner è uno solo**, e
-  ogni push mette in coda lint/typecheck/test/CodeQL sulla stessa macchina — la corsa
-  integrale si lancia **a coda vuota**, non subito dopo un push;
-- **giro 8** (`34056854155`): **quattro fasi VERDI, 367 passati, ZERO falliti**. Le tre
-  correzioni tengono tutte. È uscito rosso lo stesso, per un difetto **dello strumento**;
-- ⚠⚠ **e quel difetto era la specie che `#219` esiste per togliere.** `e2e-blocchi.mjs`
-  rendeva rossa la corsa per QUALUNQUE caso non eseguito, e gli 80 dell'ottavo giro erano
-  **tutti dichiarati** (67 censimenti a comando, 6 catture su richiesta, 2 spenti per decisione
-  di costo, 5 casi che guardano il dataset e non trovano nulla). Un verdetto che non può **mai**
-  diventare verde non è severo: è l'allarme che suona sempre di `#194`, e fa sparire il rosso
-  vero nel rumore del rosso finto. La distinzione non è una convenzione nuova, era già nei
-  dati: un salto **annotato** è una scelta di chi ha scritto il caso; un salto **senza
-  annotazione** non l'ha deciso nessuno — è un caso travolto da un rosso precedente nel blocco
-  `serial` (nel giro 5 erano **350 su 423**, ed erano il difetto vero). Ora solo i secondi
-  fanno rosso, e il verde **dichiara** quanti sono stati esclusi per scelta invece di tacerlo;
-- 🔧 aggiunto **`--solo-riepilogo`**: rilegge i referti già su disco e ri-emette il verdetto
-  **senza eseguire una sola fase**. Esiste per la stessa ragione di `--solo-preflight` — un
-  verdetto che non si può provare senza pagare un'ora di corsa non è una prova, è una promessa.
-  Provato nei due versi con referti costruiti apposta (esclusione dichiarata → verde;
-  salto senza ragione → rosso), e poi **sui referti veri del giro 8**, che ora danno
-  `VERDE — 80 dichiarati · 0 senza una ragione`;
-- **giro 9**: lanciato dopo questa correzione, a coda vuota. È quello che deve dire verde da
-  sé, in CI, senza riletture. `gh run list --workflow=playwright-integrale.yml --limit 3`;
-  se rosso, `gh run view <id> --log-failed`.
+⏭ **Restano fuori, dichiarate**: la ricerca semantica **spenta in CI**
+(`E2E_RICERCA_SEMANTICA=0`) perché ogni ricerca è una chiamata a pagamento — accenderla è una
+**decisione di costo tua**; e il workflow **manuale**, perché il runner è **uno solo** e serve
+anche lo smoke di ogni push. Renderlo automatico è una decisione successiva.
 
 ## Verification — come si controlla
 

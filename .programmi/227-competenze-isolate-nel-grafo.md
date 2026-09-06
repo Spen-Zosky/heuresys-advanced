@@ -1,7 +1,10 @@
 # 227 — Le competenze isolate nel grafo: un terzo del catalogo senza un solo arco
 
 > **item**: #227
-> **stato**: IN CORSO
+> **stato**: CHIUSO
+> **chiusa**: S1085 (2026-08-30), mig `000368` (F3) e `000369` (F4/F5) — `status: DONE` nel register.
+> Le spunte sono state allineate in S1090 (2026-09-06): il lavoro era finito da sei giorni, la
+> contabilità di questo file no, e il piano compariva a ogni avvio fra i programmi orfani
 > **nota**: F1 fatta (S1081, 2026-08-25); l'effort è da **ri-stimare al ribasso** — il censimento
 > mostra 4.332 derivabili a macchina e **30 righe** di curatela vera, non 4.464
 > **nasce-da**: `#222` F6-07, che dichiarava «da fare, con un piano proprio» — e quel piano
@@ -77,8 +80,7 @@ segnala, perché nulla è rotto.
   RTL Bank**, tutte del suo tenant e tutte in uso: non sono residuo da bonificare, sono il cuore
   del dominio — e sono isolate perché nessuno le ha mai collocate nella tassonomia. Le 5
   `COMP::` sono le **gemelle vive** di cui `#215` cancellò le copie globali morte (S1069)
-- [x] **F2 Le derivabili: l'arco si prende dalla fonte, non si inventa** — **FATTO 2026-08-28
-  (S1083), e l'esito è che NON SONO DERIVABILI — perché non sono isolate.** È il secondo
+- [x] **F2 Le derivabili: l'arco si prende dalla fonte, non si inventa** — **FATTO 2026-08-28 (S1083)**, quattro strade misurate e tutte chiuse. **E l'esito è che NON SONO DERIVABILI — perché non sono isolate.** È il secondo
   ribaltamento di questo piano, dopo quello di F1, e come quello nasce da una misura.
 
   **Le quattro strade, provate una per una e tutte chiuse:**
@@ -109,9 +111,9 @@ segnala, perché nulla è rotto.
   senza collocazione tassonomica** — né arco né gruppo. Misurate oggi: **81**, cioè lo 0,58% del
   catalogo, e sono esattamente le specie S3 (51 ESCO senza gruppo) + S4/S5 (30 non-ESCO) che F3 e
   F4 hanno già in carico. Il problema non è mai stato un terzo del catalogo. — per le ESCO l'albero esiste a monte e va **letto**, non ricostruito a intuito. ⚠ Vincolo `I12`: il rubinetto del brownfield è chiuso, ma ESCO **non è brownfield** — è la tassonomia europea, e `reference_sync` è la sua casa dichiarata. **fatto =** archi scritti, il conteggio delle isolate scende del numero previsto da F1, e una post-condizione protegge ciò che NON doveva cambiare
-- [ ] **F3 Le non derivabili e non usate: si ritirano o si dichiarano** — una competenza che nessuno usa e che nessuna tassonomia conosce è residuo, non catalogo. ⚠ `ADR-0035`: ritirare non è cancellare — si emenda il file che la crea. **fatto =** ogni riga o ritirata o tenuta **con la ragione scritta**, mai un jolly
-- [ ] **F4 Le usate ma non derivabili: curatela vera** — sono quelle che qualcuno usa davvero e che nessuna fonte sa collocare. Qui l'arco è una **decisione**, e va presa con un criterio dichiarato, non a intuito. **fatto =** criterio scritto, applicato, e una sentinella che tiene il conto delle isolate perché non risalga in silenzio
-- [ ] **F5 La sentinella** — oggi nessuna misura conta le competenze isolate: il numero è potuto crescere fino a un terzo del catalogo senza che niente lo dicesse. ⚠ Una vista `sys.v_*` nuova diventa **automaticamente** una sentinella che pretende zero righe (memoria `new_sys_view_becomes_sentinel`): qui zero non è l'atteso, quindi va dichiarata **informativa** con la sua soglia, o renderà rossa la prova generale. **fatto =** la misura esiste, ha una soglia motivata, ed è stata vista scattare
+- [x] **F3 Le non derivabili e non usate: si ritirano o si dichiarano** — **FATTO 2026-08-30 (S1085)**, mig `000368`: ritirate `CUSTOM::BANCASSUR` e `CUSTOM::FRAUD-DET`, elenco esplicito, due guardie ri-verificate all'esecuzione, tre post-condizioni, rollback vero (`staging.skill_ritirate_undo` + `staging.ripristina_skill_ritirata()`), e i 2 embedding che le referenziavano passati anch'essi dal giornale. Cronaca nella sezione «S1085» più sotto. — una competenza che nessuno usa e che nessuna tassonomia conosce è residuo, non catalogo. ⚠ `ADR-0035`: ritirare non è cancellare — si emenda il file che la crea. **fatto =** ogni riga o ritirata o tenuta **con la ragione scritta**, mai un jolly
+- [x] **F4 Le usate ma non derivabili: curatela vera** — **FATTO 2026-08-30 (S1085)**, mig `000369`: delle 28 in uso, **18 collocate e 10 respinte con la ragione scritta una per una**. Il criterio non è una soglia — la macchina propone la ESCO più vicina per embedding fra quelle già collocate, la decisione si prende a mano, perché la somiglianza non ordina la correttezza (misurato: «Gestione della liquidità aziendale» → «gestire il trasporto di contanti» sta a 0,823 ed è falsa). Misura dopo l'applicazione: isolate 4.464 → **4.444**, non-ESCO ancora isolate **10** (esattamente le respinte), 18 archi nel giornale di rollback. — sono quelle che qualcuno usa davvero e che nessuna fonte sa collocare. Qui l'arco è una **decisione**, e va presa con un criterio dichiarato, non a intuito. **fatto =** criterio scritto, applicato, e una sentinella che tiene il conto delle isolate perché non risalga in silenzio
+- [x] **F5 La sentinella** — **FATTO 2026-08-30 (S1085)**: `sys.v_skill_isolate_residue`, bloccante, misurata a **0**. La soglia **non** è «zero isolate» — 4.434 su 4.464 sono ESCO con URI, la tassonomia europea che `I21` tiene aperta, e pretendere zero lì equivarrebbe a potarla: zero è l'atteso solo per il **residuo**. — oggi nessuna misura conta le competenze isolate: il numero è potuto crescere fino a un terzo del catalogo senza che niente lo dicesse. ⚠ Una vista `sys.v_*` nuova diventa **automaticamente** una sentinella che pretende zero righe (memoria `new_sys_view_becomes_sentinel`): qui zero non è l'atteso, quindi va dichiarata **informativa** con la sua soglia, o renderà rossa la prova generale. **fatto =** la misura esiste, ha una soglia motivata, ed è stata vista scattare
 
 ## Chiuso quando
 

@@ -1,7 +1,12 @@
 # 242 — fastify ≥ 5.12 ha tolto il `trustProxy` a conteggio di salti
 
 > **item**: #242 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: ✅ **CHIUSA** — F1..F4 fatte il 2026-09-05 (S1087)
+> **stato**: CHIUSO
+> **chiusa**: F1..F4 fatte il 2026-09-05 (S1087) — `status: DONE` nel register.
+> ⚠ La riga di stato diceva `✅ **CHIUSA** — F1..F4 fatte il 2026-09-05 (S1087)`: leggibilissima
+> per un umano e **muta per il parser**, che accetta `^> **stato**: [A-Z ]+$` e su tutto il resto
+> cade su `?`. Un piano dichiarato chiuso in prosa risultava aperto e compariva a ogni avvio fra
+> i programmi orfani
 > **nasce-da**: le due PR Dependabot su fastify 5.12.1 (`#76`, `#75`), che Enzo ha chiesto di
 > risolvere il 2026-09-03 (S1086). Chiuse entrambe con la ragione scritta.
 

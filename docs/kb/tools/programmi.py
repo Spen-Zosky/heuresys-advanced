@@ -68,6 +68,10 @@ RE_INTERROTTO = re.compile(r"\bINTERROTTO\b")
 # che #216 racconta. Vive qui una volta sola, e gli altri due la importano.
 RE_ID = re.compile(r"[`#]*([A-Za-z]{0,2}-?\d+)")
 
+# `S1089-piano-sessione.md` — il quaderno di una singola sessione (R24), non un programma
+# multi-sessione. Vedi la ragione per esteso in `carica()`.
+RE_PIANO_SESSIONE = re.compile(r"^S\d+-piano-sessione\.md$", re.I)
+
 
 def normalizza_id(testo: str) -> str | None:
     """L'id di una voce, da un titolo del register o dal nome di un file di programma.
@@ -212,6 +216,15 @@ def carica(dir_programmi: Path | None = None) -> list[Programma]:
     out = []
     for p in sorted(d.glob("*.md")):
         if p.name.upper() == "README.MD":
+            continue
+        # Un PIANO DI SESSIONE non e' un programma multi-sessione: e' il quaderno di UNA
+        # giornata, che R24 impone a ogni sessione e che si chiude con essa. Non ha un item nel
+        # register e non puo' averlo — non e' una voce di backlog — quindi ogni suo file cadeva
+        # per costruzione fra i «PROGRAMMI APERTI FUORI DAL MENU» e fra i difetti «nessuna fase».
+        # Misurato in S1090: tre file (S1087, S1088, S1089) su otto orfani, destinati a crescere
+        # di uno per sessione. Un allarme che si accende sempre e' un allarme che si impara a non
+        # guardare — e' il difetto che #194 e' venuta a togliere.
+        if RE_PIANO_SESSIONE.match(p.name):
             continue
         try:
             out.append(_leggi(p))
@@ -379,6 +392,19 @@ def _selftest() -> int:
               difetti([_leggi(_scrivi_tmp(d, "16-chiuso.md",
                     "# 16 — chiuso\n\n> **item**: #16\n> **stato**: CHIUSO\n\n"
                     "## Fasi\n- [x] **F1** — fatta — FATTO 2026-08-14 · prova\n"))]) == [])
+
+        # --- il piano di sessione non e' un programma (S1090)
+        # Contenuto scelto apposta perche' SAREBBE un difetto se venisse letto: niente item,
+        # niente fasi, stato fuori vocabolario. Se l'esclusione smettesse di funzionare, la
+        # prima prova diventerebbe rossa — e la seconda impedisce di comprarsi quel verde
+        # escludendo troppo.
+        (d / "S1090-piano-sessione.md").write_text(
+            "# S1090 — piano di sessione\n\n> **stato**: IN CORSO (S1090)\n", encoding="utf-8")
+        letti = {p.percorso.name for p in carica(d)}
+        prova("un piano di sessione non viene censito fra i programmi",
+              "S1090-piano-sessione.md" not in letti)
+        prova("l'esclusione dei piani di sessione NON si porta via i programmi veri",
+              "10-sano.md" in letti and "16-chiuso.md" in letti)
 
         # --- il riassunto tace quando non c'e' nulla
         with tempfile.TemporaryDirectory() as vuota:

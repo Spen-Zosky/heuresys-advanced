@@ -1,7 +1,10 @@
 # 243 — I due rossi di igiene, e le sette PR Dependabot rimaste
 
 > **item**: #243 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: IN CORSO (S1086)
+> **stato**: CHIUSO
+> **chiusa**: S1086 (2026-09-03) — le sette voci del corpo (I1, I2, D1…D5) sono tutte ✅ e
+> `status: DONE` nel register. Stessa causa meccanica di `#241`: la parentesi in
+> `IN CORSO (S1086)` mette la riga fuori dal vocabolario del parser, e il piano risultava aperto
 > **nasce-da**: mandato di Enzo (2026-09-03) — *«i due rossi di igiene del cruscotto, e le sei PR
 > Dependabot rimaste oltre alle tre di cui abbiamo parlato, inclusa qs 6.16.0: aprili e risolvili
 > tutti»*.

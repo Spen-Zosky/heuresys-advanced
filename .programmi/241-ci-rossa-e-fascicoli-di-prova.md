@@ -1,7 +1,13 @@
 # 241 — La CI rossa che teneva la produzione indietro, e i due fascicoli di prova
 
 > **item**: #241 · **priorità**: P1 · **stima**: ~1 sessione
-> **stato**: IN CORSO (S1086)
+> **stato**: CHIUSO
+> **chiusa**: S1086 (2026-09-03) su V1·V3·V4; V2 dipendeva dal verde di CI dopo il push, e il
+> verde c'è — `Test (api integration)` è `success` su main negli ultimi tre giri consecutivi
+> (misurato 2026-09-06, S1090). `status: DONE` nel register.
+> ⚠ La riga di stato diceva `IN CORSO (S1086)`: la parentesi la mette **fuori dal vocabolario**
+> che il parser accetta (`^> **stato**: [A-Z ]+$`), quindi il piano risultava aperto e compariva
+> a ogni avvio fra i programmi orfani. La cronaca della chiusura va in una riga sua, non in questa
 > **nasce-da**: due mandati diretti di Enzo (2026-09-03) — «PROVA-F7-ALFA in produzione: si
 > rimuove» e «le PR di Dependabot su fastify 5.12.1 sono rosse: vanno risolte, decidi tu» — più
 > il rosso ereditato da S1085, che `verifica-deploy.sh` dichiarava `CI-ROSSA` sul commit armato.
@@ -17,7 +23,7 @@ si dichiara chiusa.
 | id | cosa | chi | cosa significa fatto | stato |
 |---|---|---|---|---|
 | **V1** | Rimuovere `PROVA-F7-ALFA` e `PROVA-F7-CONSULENZA` dalla produzione | io | i fascicoli in produzione passano da 3 a 1; `RTL-BANK-CONFIG` intatto; giornale di rollback popolato | ✅ **FATTO** |
-| **V2** | Il test che pretende `surveys` neutro contraddice `#235` | io | `Test (api integration)` verde in CI sul commit nuovo | 🟡 corretto e verde in locale; **il verde di CI aspetta il push** |
+| **V2** | Il test che pretende `surveys` neutro contraddice `#235` | io | `Test (api integration)` verde in CI sul commit nuovo | ✅ **FATTO** — verde in CI, misurato 2026-09-06 (S1090): `success` sugli ultimi tre giri di main |
 | **V3** | La porta 3001 occupata sul runner tiene rossa la `Playwright smoke` | io + conferma di Enzo per il kill | `ss -ltnp` sul runner non mostra nulla su :3001, e la smoke rilanciata è verde | ✅ **FATTO** — porta libera, servizi veri intatti |
 | **V4** | Le PR Dependabot su fastify 5.12.1 (e la terza, `qs`) | io | le PR fastify risolte con la ragione misurata, e il lavoro che ne consegue registrato | ✅ **FATTO** — `#76` e `#75` chiuse, migrazione registrata come `#242` |
 

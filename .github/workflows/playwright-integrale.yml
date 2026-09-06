@@ -60,6 +60,20 @@ jobs:
       NODE_ENV: test
       LOG_LEVEL: warn
       PLAYWRIGHT_WEB_PORT: "3187"
+      # ⚠ DOVE STA L'API, DICHIARATO — e il preflight ha preteso proprio questo.
+      # In locale la porta si deriva dal `.env` del repo; in CI quel file NON
+      # ESISTE (il checkout è pulito) e nessuna delle due variabili era nel job:
+      # il preflight si è fermato in due secondi con «porta dell'API NON
+      # MISURABILE — non tiro a indovinare una porta», che è il comportamento
+      # giusto. Indovinare avrebbe prodotto una corsa intera di rossi non
+      # attribuibili.
+      # `PORT` è quella su cui il passo «Avvia l'API» la fa nascere;
+      # `NEXT_PUBLIC_API_PROXY_BASE_URL` è la destinazione che Next COMPILA nei
+      # rewrites al momento del build — va quindi dichiarata a livello di job,
+      # prima che la config Playwright costruisca il web (S1088: un manifest
+      # compilato verso la porta sbagliata è costato tre sessioni di diagnosi).
+      PORT: "3001"
+      NEXT_PUBLIC_API_PROXY_BASE_URL: "http://localhost:3001"
 
     steps:
       - name: Checkout

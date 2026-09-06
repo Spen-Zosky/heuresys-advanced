@@ -25,7 +25,14 @@
 - **#202 Il canale duplica i numeri perche' una str.replace non dice se ha sostituito — e la cura NON e' insegnargli a fondere** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#203 Il cancello del rubinetto e' rosso, e lo fa scattare uno strumento che il legacy lo combatte** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#204 La fusione ha lasciato SETTE residui dentro #196 e #198 — i blocchi riscritti sono pronti nella consegna** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
-- **#248 Le credenziali git di questa macchina non funzionano piu': un push da Windows si PIANTA invece di fallire** · status: WAIT-INPUT
+- **#248 Le credenziali git di questa macchina non funzionano piu': un push da Windows si PIANTA invece di fallire** · status: DONE
+  - ✅ **RISOLTA da Enzo il 2026-09-06 (S1089)**: rifatto il login a GitHub. La prova non è
+    `git ls-remote` — quello riesce **anche senza credenziali** su un repository pubblico, ed è
+    il motivo per cui durante il guasto sembrava che la rete funzionasse. La prova è un push che
+    **autentica**: `GIT_TERMINAL_PROMPT=0 git push --dry-run origin main` → «Everything
+    up-to-date», exit 0, in meno di un secondo e senza alcun prompt. `gh auth status` →
+    «Logged in to github.com account Spen-Zosky (keyring)» — non più il credential store di
+    Windows che non riusciva a persistere.
   - input-richiesto: un'**autenticazione interattiva** a GitHub da questa macchina — `gh auth login -h github.com`, oppure sbloccare la chiave SSH, oppure riparare il credential store
   - perche-solo-tuo: e' un accesso che richiede browser, password o passphrase: nessun workaround da riga di comando puo' completarlo al posto tuo
   - scoperto-S1088 (2026-09-06): un `git push origin main` e' rimasto **appeso per oltre venti minuti senza scrivere una riga**. Non era la rete — `git ls-remote` rispondeva in meno di 25 s. Misurate le **tre** vie, tutte chiuse: ① HTTPS -> `Unable to persist credentials with the 'wincredman' credential store` + `could not read Username`, cioe' il gestore chiede un nome utente a uno stdin che non c'e' e **aspetta per sempre**; ② SSH -> `sign_and_send_pubkey: signing failed for ED25519 … agent refused operation`, e il file della chiave non e' accessibile nel path che ssh cerca; ③ `gh auth status` -> «The token in default is invalid»

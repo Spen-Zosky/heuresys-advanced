@@ -179,6 +179,25 @@ jobs:
         # sessioni. Qui la corsa si ferma in pochi secondi nominando la causa.
         run: node scripts/e2e-blocchi.mjs --solo-preflight
 
+      - name: Build del web (la corsa integrale gira su `next start`, non su `next dev`)
+        working-directory: apps/web
+        # ⚠ IL PASSO CHE MANCAVA — quarto giro (34042451236), tutte e quattro le
+        # fasi rosse in pochi secondi con lo stesso messaggio:
+        #   «Could not find a production build in the '.next' directory»
+        # Non era un guasto della suite: 0 test eseguiti su 447 dichiarati.
+        # `playwright.prod.config.ts` avvia il web con `next start`, che pretende
+        # un build già emesso. In locale non si vede perché lo script di comodo
+        # li tiene insieme:
+        #   "test:e2e:prod": "next build && node scripts/e2e-blocchi.mjs"
+        # e il workflow chiamava solo la SECONDA metà. Lo smoke non ha mai avuto
+        # questo problema perché usa `playwright.config.ts`, cioè `next dev`.
+        # ⚠ Va DOPO il preflight, non prima: il preflight costa due secondi e il
+        # build alcuni minuti — fermarsi sull'ambiente sbagliato deve restare la
+        # cosa più economica che questo workflow sa fare.
+        # `NEXT_PUBLIC_API_PROXY_BASE_URL` è dichiarata nell'`env:` del job
+        # proprio perché Next la COMPILA qui dentro, nei rewrites.
+        run: pnpm exec next build
+
       - name: Corsa integrale a fasi
         working-directory: apps/web
         # Fasi come INVOCAZIONI SEPARATE di Playwright: un rosso in una fase non

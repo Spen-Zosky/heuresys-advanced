@@ -175,6 +175,19 @@ for (const n of FASI) {
 dice("=".repeat(80));
 if (fasiLette === 0) {
   dice("NESSUN REFERTO LETTO — l'esito e' NON MISURABILE, che non e' «va bene».");
+} else if (totAttesi === 0) {
+  // ⚠⚠ IL FALSO VERDE CHE QUESTO STRUMENTO HA PRODOTTO DAVVERO (2026-09-06,
+  // giro CI 34042451236). Quattro referti letti, ognuno con ZERO casi: il web non
+  // era stato costruito, `next start` e' morto e nessuna fase ha eseguito niente.
+  // Con la sola guardia su `fasiLette` il ramo VERDE si prendeva 0 falliti e 0 non
+  // eseguiti e dichiarava «ESITO COMPLESSIVO: VERDE» su una corsa che non aveva
+  // misurato NULLA — cioe' esattamente il difetto che #219 esiste per togliere,
+  // riprodotto dallo strumento che lo deve scoprire.
+  // Un referto letto non e' un test eseguito: le due cose si contano separate.
+  dice(`REFERTI LETTI MA VUOTI (${fasiLette} fasi, 0 casi in totale) — l'esito e' ` +
+       "NON MISURABILE, che non e' «va bene».");
+  dice("  Le fasi sono morte prima di eseguire: la causa sta nel log della corsa,");
+  dice("  non qui. Sospetto tipico: il web non parte (`next start` senza `next build`).");
 } else {
   dice(`ESITO COMPLESSIVO: ${totFalliti === 0 && totNonEseguiti === 0 ? "VERDE" : "ROSSO"} — ` +
        `${totAttesi} attesi · ${totFalliti} falliti · ${totNonEseguiti} non eseguiti ` +
@@ -199,4 +212,5 @@ if (OUT) {
   process.stdout.write(testo);
 }
 
-process.exitCode = fasiLette === 0 ? 2 : (totFalliti > 0 || totNonEseguiti > 0 ? 1 : 0);
+process.exitCode = (fasiLette === 0 || totAttesi === 0) ? 2
+  : (totFalliti > 0 || totNonEseguiti > 0 ? 1 : 0);

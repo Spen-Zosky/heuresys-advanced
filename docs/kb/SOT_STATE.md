@@ -9,6 +9,81 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1088 (2026-09-06) — i 403 della suite E2E erano l'origine, non i permessi
+
+**Numeri ri-derivati dal vivo** (non ricordati): migrazioni su disco **371** (max `000374`) ·
+RBAC **14 ruoli / 226 permessi / 986 mappature** (la §0 ne dichiarava 224/980, misurati il
+2026-08-19: era il rosso dello STALENESS SELF-CHECK all'avvio) · file di test API **263** ·
+spec E2E **100** · utenti **164** · tenant ACTIVE **2** · skill **14031**.
+
+**`#219` F5e — la corsa di conferma, e la causa dei 42 rossi.** Corsa integrale 4/4 fasi sul
+gemello a macchina scarica. Prima: **327 passati · 42 falliti · 78 non eseguiti**. La
+spiegazione di S1087 («un'API costruita due giorni prima degli spec») è caduta: bundle
+ricostruito, e i falliti sono rimasti 42 contro 44 — **quarta ipotesi smentita misurando**,
+dopo `aide`, il tunnel e l'API spenta.
+
+**La causa vera, provata su una rotta che non ha permessi da negare.** `CsrfFailedError` e
+`ForbiddenError` rispondono **entrambe 403** (`middleware/errorHandler.ts`), quindi dallo
+status un permesso negato e un rifiuto del presidio sono indistinguibili: è per questo che
+tre triage successivi hanno accusato i permessi. Il trace del caso fallito mostra header e
+cookie CSRF che **combaciano** — il double-submit passava. A rifiutare era il *secondo*
+controllo di `verifyCsrf`, quello sull'origine. Misurato su `/v1/auth/refresh` (nessuno
+schema di body da validare, nessun `requirePermission`), tre chiamate identiche e sola
+differenza l'header:
+
+```
+Origin http://192.168.1.11:3013  (dichiarata in ADMIN_ORIGIN)  ->  HTTP 200
+Origin http://localhost:3000     (da cui parla il browser E2E) ->  HTTP 403 ORIGIN_MISMATCH
+senza Origin                                                    ->  HTTP 401 (controllo saltato)
+```
+
+Il web che Playwright avvia parla da `localhost:3000`, l'API del gemello ammetteva solo la
+3013: **ogni scrittura fatta dalla pagina** era rifiutata, mentre quelle fatte da
+`page.request` passavano — non hanno `Origin`, e il controllo si salta. Da qui i due fatti
+che nessuna ipotesi sui permessi spiegava: la **stessa rotta** con esiti opposti
+(`PATCH /v1/me/preferences`: 26 ok, 4 negati) e la **fase 1 verde piena**, che dal browser
+non scrive.
+
+**La correzione.** `ADMIN_ORIGIN` accetta ora un **elenco** di origini separate da virgola —
+una macchina può servirne legittimamente più d'una. Non allarga il presidio: l'elenco resta
+chiuso e dichiarato, e il confronto resta per **uguaglianza esatta di origine**, mai un
+prefisso (F-007/F-010). In produzione il valore dichiarato resta **una sola**. La decisione
+vive in una funzione pura esportata (`origineAmmessa`), perché attraverso l'app si potrebbe
+provare solo l'elenco che il `.env` della macchina dichiara.
+
+**L'esito, misurato subito dopo sulla stessa macchina e con lo stesso carico:**
+
+```
+                prima            dopo
+fase 1   88 ·  0 ·  0      88 ·  0 ·  0     VERDE piena
+fase 2   83 ·  9 ·  3      91 ·  1 ·  3
+fase 3   70 · 16 · 68      83 ·  3 · 68
+fase 4   86 · 17 ·  7     101 ·  2 ·  7
+        327 · 42 · 78     363 ·  6 · 78     (passati · falliti · non eseguiti)
+```
+
+I **78 non eseguiti non sono rossi**: 67 sono il censimento dietro `F4_SWEEP=1`, gli altri
+portano la loro ragione dichiarata. **F5e resta aperta**: il criterio di `#211` chiede zero
+falliti e sono sei — `compensation-read` · `matching-freetext` ×2 · `landing-pages` ·
+`serie-a-panels` · `session-refresh`. Nessuno è una scrittura negata.
+
+**Tre strumenti nuovi o riparati, e ognuno provato nei suoi stati:**
+- `apps/web/scripts/e2e-triage.mjs` — il triage per firma era stato rifatto **a mano tre
+  volte** (S1081, S1085, S1087) senza lasciare niente. Provato verde/rosso/non-misurabile.
+- il **preflight** ora interroga l'API sull'origine ammessa — non legge il `.env`, perché il
+  file dice cosa è scritto e la risposta dice cosa quel processo applica, e fra i due c'è un
+  riavvio. ⚠ La prima stesura di quella sonda usciva **verde su un ambiente rotto**: senza
+  token la richiesta moriva sul double-submit prima di arrivare al controllo. Corretta e
+  provata nei due versi.
+- `csrf-origini-elenco.unit.test.ts` — 10 casi con i look-alike costruiti sulla voce di
+  **mezzo** e sull'**ultima**: un'implementazione che controllasse bene solo la prima
+  passerebbe un test scritto sulla prima. Falsificato rimettendo a mano le due
+  implementazioni sbagliate (1 rosso e 2 rossi).
+
+**E il preflight ha pagato prima ancora della corsa**: ha intercettato un bundle dell'API
+delle 17:34 contro un commit delle 17:56 (`b3723129`, modulo `candidates` di `#54` F3) —
+stessa specie di guasto di S1087, ma trovato **prima** invece che dopo.
+
 ### Delta S1086 (2026-09-03/04) — tre catene rotte da un dato scritto nella casella sbagliata
 
 **Numeri ri-derivati dal vivo** (non ricordati): migrazioni su disco **371** (max `000374`) ·

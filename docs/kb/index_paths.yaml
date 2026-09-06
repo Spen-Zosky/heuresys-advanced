@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-05T16:16:39Z da docs/kb/tools/build_index.py
+# generato: 2026-09-06T03:54:44Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-05T16:16:39Z"
-  total_files: 3314
+  generated_at: "2026-09-06T03:54:44Z"
+  total_files: 3320
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,7 +13,7 @@ meta:
     api-module: 365
     ci: 17
     claude-config: 37
-    config: 195
+    config: 197
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -22,7 +22,7 @@ meta:
     db-other: 8
     db-script: 50
     db-seed: 114
-    doc-canonical: 751
+    doc-canonical: 753
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 111
     showcase-source: 13
-    test: 408
+    test: 409
     ux-design-archive: 80
-    web-source: 241
+    web-source: 242
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2756
+    live: 2762
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3005,6 +3005,18 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\219-triage-2026-09-05.txt'
     root: repo
     rel: '.programmi/219-triage-2026-09-05.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\219-triage-2026-09-06-dopo-correzione.txt'
+    root: repo
+    rel: '.programmi/219-triage-2026-09-06-dopo-correzione.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\219-triage-2026-09-06.txt'
+    root: repo
+    rel: '.programmi/219-triage-2026-09-06.txt'
     category: config
     status: live
     provenance: git-tracked
@@ -9716,6 +9728,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\246-fixed-term-senza-data-di-fine.md'
+    root: repo
+    rel: '.programmi/246-fixed-term-senza-data-di-fine.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md'
     root: repo
     rel: '.programmi/50-knowledge-graph-legacy.md'
@@ -9767,6 +9785,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\S1087-piano-sessione.md'
     root: repo
     rel: '.programmi/S1087-piano-sessione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1088-piano-sessione.md'
+    root: repo
+    rel: '.programmi/S1088-piano-sessione.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -15872,6 +15896,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\csrf-origini-elenco.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/csrf-origini-elenco.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\csv-formula-injection.test.ts'
     root: repo
     rel: 'apps/api/test/csv-formula-injection.test.ts'
@@ -18611,6 +18641,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\scripts\e2e-node22.mjs'
     root: repo
     rel: 'apps/web/scripts/e2e-node22.mjs'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\scripts\e2e-triage.mjs'
+    root: repo
+    rel: 'apps/web/scripts/e2e-triage.mjs'
     category: web-source
     status: live
     provenance: git-tracked

@@ -1,60 +1,53 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: chiusura S1087 (2026-09-05). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: chiusura S1088 (2026-09-06). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief — l'ultima sessione, in breve
 
-Sessione in delega totale. Il filo conduttore, trovato e non cercato: **tre volte in un giorno la
-causa vera stava in un artefatto generato** — quindi gitignored, e invisibile a qualunque ricerca
-nel codice. È così che la suite E2E ha resistito a tre sessioni di diagnosi: una porta cablata nel
-manifest compilato del proxy, un `.next` servito da un server non riavviato, e il bundle dell'API
-costruito due giorni prima degli spec che lo interrogavano. Le spiegazioni precedenti — il job
-notturno che satura la VM, il tunnel SSH — erano ragionevoli e sbagliate.
+Una sola voce, `#219` F5e, e il filo conduttore è che **la firma di un errore non è la sua
+causa**: quarantadue casi rossi che tre sessioni avevano attribuito ai permessi erano in
+realtà l'API che rifiutava l'**indirizzo da cui il browser dei test le parlava**. Le due
+cose rispondono con lo stesso codice, e per questo nessuno le aveva distinte.
 
-Chiusi tutti e otto i punti non verdi dell'avvio, fra cui **tre servizi fermi in produzione** che il
-boot non poteva vedere: sotto ce n'erano **cinque guasti in fila**, ognuno nascosto dal precedente.
+La prova è venuta da una richiesta che non ha permessi da controllare: se anche quella
+viene rifiutata, il colpevole non può essere un permesso. Corretta la configurazione,
+la corsa integrale è passata **da 42 falliti a 6**, e la famiglia che ne produceva più di
+un terzo è sparita del tutto.
 
-## Top priorities — le priorita'
+⚠ Sono cadute **quattro** spiegazioni precedenti, tutte plausibili e tutte sbagliate: il
+lavoro notturno della VM, il tunnel, l'API spenta, il bundle vecchio. Ognuna era stata
+scritta come conclusione.
 
-> ⭐ **Enzo, chiudendo S1087: «alla prossima sessione riprendi da `#219` F5e».** Non è una
-> preferenza fra pari: è il punto da cui si comincia, prima del menu.
+## Top priorities — le priorità
 
-1. **`#219` F5e — la corsa di conferma** (~1 sessione). L'ambiente è ora coerente e la prima fase è
-   verde piena, dove prima cadeva sui setup e trascinava con sé quasi tutta la suite. ⚠ Va lanciata **a macchina
-   scarica**: il gemello è anche il runner della CI, e il triage dei 44 restanti è già su disco
-   (`.programmi/219-triage-2026-09-05.txt`).
-2. **`#54` F3 — le quattro fette che restano** (~2 sessioni). Tre fette su sette fatte oggi, tutte
-   con i loro test verdi; il pattern è rodato e le prossime costano meno della prima.
-3. **`#246` — i contratti a termine assegnati a caso a un terzo dell'organico** (~1 sessione).
-   ⭐ **Enzo ha già deciso la regola**: nessun contratto a termine a chi ha più di 12 mesi di
-   anzianità, e la scadenza si calcola in modo coerente — dopo 16 mesi si passa a tempo
-   indeterminato. Applicata ai dati di oggi non ne resta a termine nessuno.
+1. **`#219` F5e — i sei residui** (~1 sessione). Nessuno è una scrittura negata, quindi
+   sono guasti di natura diversa fra loro. ⚠ **`session-refresh` per primo**: prova il
+   rinnovo silenzioso della sessione, cioè la stessa rotta al centro della diagnosi di
+   ieri — che fallisse anche prima non lo assolve. Triage pronto in
+   `.programmi/219-triage-2026-09-06-dopo-correzione.txt`. Solo a zero falliti la suite
+   entra in CI, che è ciò che chiude la voce.
+2. **`#54` F3 — le quattro fette che restano** (~2 sessioni). Pattern rodato, le prossime
+   costano meno della prima.
+3. **`#246` — i contratti a termine** (~1 sessione). La regola l'ha già decisa Enzo: niente
+   contratto a termine sopra i 12 mesi di anzianità, a 16 si passa a indeterminato.
 
 ## Open questions — le domande aperte
 
-- ⭐ **Da quali fonti la piattaforma accetta di imparare com'è fatta un'azienda?** — le unità
-  organizzative, le posizioni, le competenze, gli indicatori. Oggi il registro delle fonti ne porta
-  **una sola**, sul dominio dei processi aziendali. Tre voci ferme su questa domanda sola (`#198`, `#205`,
-  il ponte di `#132`), ora entrambe in `WAIT-INPUT`. Non è una misura: è cosa Heuresys accetta come
-  sapere, e i piani vietano di scriverlo a mano.
-- ✅ *Chiusa da Enzo il 2026-09-05*: la regola dei contratti a termine (12 mesi di ammissibilità,
-  16 di durata massima). ⚠ E la sua domanda — «un terzo dell'organico a termine mi sembra
-  eccessivo» — ha smontato la **mia** prima lettura, che vedeva metà del difetto.
+- ⭐ **Da quali fonti la piattaforma accetta di imparare com'è fatta un'azienda?** — unità
+  organizzative, posizioni, competenze, indicatori. Il registro delle fonti ne porta **una
+  sola**, sul dominio dei processi. Tre voci ferme qui (`#198`, `#205`, il ponte di `#132`).
+  Non è una misura: è cosa Heuresys accetta come sapere, e i piani vietano di scriverlo a mano.
 - **Chi ha pushato il 26 agosto alle 18:47?** Invariata da S1082.
-- ✅ *Chiusa*: «di chi è la porta 3001?» — **di nessuno**. Era solo un ripiego cablato, scritto in
-  tre posti diversi.
-
-⚠ **Il working tree è condiviso**: durante la chiusura un'altra sessione ha spostato il branch su
-`docs/statuspill-nel-contratto`, e un commit di questa sessione vi è finito sopra. Recuperato su
-`main` senza riscrivere niente (nuovo commit, mai un cherry-pick). **Verificare `git branch
---show-current` prima di committare** finché si lavora in più di uno.
+- *Nuova*: **`/v1/auth/refresh` è protetto dal presidio che serve a rinnovare.** Se il token
+  si disallinea, il rimedio è chiuso a chiave dal problema che dovrebbe curare. Ieri non era
+  questo il guasto, ma il disegno resta così — vale la pena deciderlo prima che lo diventi.
 
 ## Verification — come si controlla
 
 ```bash
 python docs/kb/tools/session_start.py       # menu + salute, un solo giro
 bash scripts/verifica-deploy.sh             # DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO
-python docs/kb/tools/check_marciume.py      # deve dire «niente e' marcito»
 ssh linux-pc 'cat /proc/loadavg'            # prima di ogni corsa E2E: sotto 2, o i rossi non sono attribuibili
 cd apps/web && node scripts/e2e-blocchi.mjs --solo-preflight   # 0 = l'ambiente e' quello che la suite presume
+cd apps/web && node scripts/e2e-triage.mjs --dettaglio 1       # i falliti raggruppati per firma
 ```

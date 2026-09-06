@@ -755,17 +755,31 @@ header uguali fra loro, e provata nei due versi (rossa prima della correzione, v
 
 ### I sei residui: due famiglie, misurate riproducendoli (S1088)
 
-**Eseguiti in isolamento, ne fallisce UNO su sei.** È la distinzione che la riproduzione
-serviva a fare, e che nessun triage per firma poteva dare: un caso che passa da solo e
-cade nella corsa ha una causa diversa da uno che cade sempre.
+**Eseguiti in isolamento, ne fallisce UNO su sei.**
+
+⚠⚠ **E QUESTA FRASE ERA FALSA QUANDO L'HO SCRITTA — l'errore è mio e lo lascio scritto
+accanto alla correzione.** La riproduzione girava con `--project=chromium`, che contiene
+**solo gli spec della fase 2**: i quattro casi delle fasi 3 e 4 non sono stati eseguiti
+affatto, e Playwright non lo dice — li omette in silenzio. Il «9 passed» che leggevo erano
+gli altri casi di `compensation-read`. Ho quindi classificato come «passano da soli»
+quattro test **che nessuno aveva eseguito**.
+
+È, alla lettera, il difetto per cui `#219` e `e2e-blocchi.mjs` esistono: **«non eseguito»
+non è «passato»** — e ci sono cascato mentre stavo lavorando proprio a quello. Il progetto
+giusto va nominato per fase (`chromium` = fase 2, `chromium-2` = fase 3, `chromium-3` =
+fase 4), e un `--project` sbagliato produce un verde vuoto.
+
+Ciò che resta vero dopo la ri-misura: la distinzione fra un caso che cade **sempre** e uno
+che cade **solo nella sua fase** è utile, e le due famiglie qui sotto sono quelle
+confermate eseguendo davvero.
 
 | caso | da solo | nella sua fase | famiglia |
 |---|---|---|---|
 | `compensation-read` | ❌ **rosso** | rosso | guasto proprio |
-| `matching-freetext` ×2 | ✅ verde | ❌ rosso | interferenza di fase |
-| `landing-pages` | ✅ verde | ❌ rosso | caso verde **per tempismo** |
-| `serie-a-panels` | ✅ verde | (fase 4) | da riprodurre |
-| `session-refresh` | ✅ verde | (fase 4) | da riprodurre |
+| `matching-freetext` ×2 | *non eseguito* | ❌ rosso | **flag spenta sul gemello** |
+| `landing-pages` | ✅ verde (`chromium-2`) | ❌ rosso → ✅ **corretto** | caso verde **per tempismo** |
+| `serie-a-panels` | *non eseguito* | (fase 4) | da riprodurre |
+| `session-refresh` | *non eseguito* | (fase 4) | da riprodurre |
 
 #### ✅ `compensation-read` — CHIUSO, ed era un guasto vero del prodotto
 
@@ -805,16 +819,54 @@ calda, l'elemento faceva in tempo a comparire e diventava rosso. Un'assenza misu
 prova un ritardo, non un'assenza — stessa specie del difetto già corretto in F3/G.
 Riscritto su ciò che separa davvero: **il sommario risponde 403** e il guscio resta.
 
-#### 🔎 `matching-freetext` ×2 — resta aperto, e la firma è precisa
+#### 🔎 `matching-freetext` ×2 — la causa è l'AMBIENTE, non il prodotto
 
-`getByTestId('semantic-search-skill-row')` non compare in 20 s: la ricerca semantica non
-restituisce nulla **dentro la fase 3**, mentre da sola funziona. Il commento del caso dice
-«query-time embedding + kNN su 25k embedding live»: la pista da misurare è se sotto la fase
-qualcosa alteri l'indice o se il servizio degradi. **Non ancora diagnosticato**, e si dichiara
-invece di lasciarlo intendere.
+`getByTestId('semantic-search-skill-row')` non compare in 20 s. Letto nel log dell'API
+invece che dedotto dalla firma, il motivo è netto:
+
+```
+GET /v1/matching/search?q=gestione%20del%20rischio%20bancario  ->  404 in 1 ms
+```
+
+**404 in un millisecondo** non è una ricerca che non trova nulla: è una rotta che **non
+esiste**. È dietro una flag, e la flag diverge fra le due macchine — `MATCHING_FREETEXT_ENABLED=true`
+è dichiarata **in produzione** e **manca nel `.env` del gemello**. La suite prova quindi una
+funzione che su quella macchina non è accesa.
+
+⚠ Nota di costo, che è una decisione e non un dettaglio: ogni ricerca è una **chiamata a
+pagamento** al fornitore di embedding. Accendere la flag sul gemello significa spendere due
+chiamate per corsa integrale.
 
 #### Un difetto d'ambiente trovato eseguendo
 
 Alla fine di una fase resta un **`next-server` orfano sulla :3000** (misurato: pid vivo, il
 servizio del gemello sta sulla :3013 ed era sano). La corsa successiva muore subito con «porta
 già in uso» — è precisamente ciò che il preflight controlla, e che qui si è visto accadere.
+
+#### ✅ `matching-freetext` ×2 — CHIUSI, e la causa era **una riga del `.env` senza a-capo**
+
+La firma diceva «la ricerca semantica non restituisce righe». Letto il log dell'API invece
+che dedotto, la catena è venuta fuori in tre misure, ognuna che smentiva la lettura
+precedente:
+
+1. **`404` in 1 millisecondo.** Non una ricerca che non trova nulla: una rotta che **non
+   esiste**. È dietro `MATCHING_FREETEXT_ENABLED`, dichiarata `true` **in produzione** e
+   **assente** dal `.env` del gemello.
+2. Accesa la flag e riavviata l'API: **`500`**, e il log lo nomina —
+   `Voyage embed failed: HTTP 401 — Provided API key is invalid`.
+3. E la chiave *c'era*. Il difetto vero: nel `.env` del gemello **mancava un a-capo**, e il
+   valore della chiave aveva **inglobato la variabile successiva**. Il file resta
+   sintatticamente accettabile — nessun parser protesta — ma una variabile porta un valore
+   sbagliato e l'altra **sparisce del tutto**. È così che la flag risultava mancante: non
+   era mai stata tolta, era finita dentro un'altra riga.
+
+Riparato con uno strumento che spezza le righe a doppia assegnazione e **non stampa mai un
+valore** (`/tmp/ripara-env.py`; un rapporto che mostra i segreti è peggio del difetto che
+descrive), rimosso il duplicato che ne è emerso, API riavviata. ✅ **8 passed**.
+
+⚠ **Vale oltre questo caso**: un `.env` a cui manca un a-capo non dà errore da nessuna
+parte. Si manifesta molto più tardi, come un servizio esterno che rifiuta le credenziali —
+e la diagnosi parte naturalmente dal servizio, cioè dal posto sbagliato.
+
+📌 Nota di costo, che è una decisione e non un dettaglio: ogni ricerca è una **chiamata a
+pagamento**. La flag ora accesa sul gemello significa due chiamate per corsa integrale.

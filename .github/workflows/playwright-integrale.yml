@@ -5,13 +5,21 @@ name: Playwright integrale (suite E2E completa, a fasi)
 # ── PERCHÉ UN WORKFLOW SEPARATO, E NON UNA RIGA CAMBIATA IN playwright-smoke ──
 # Lo smoke è il gate #6 su ogni push: gira in pochi minuti e deve restare tale.
 # La corsa integrale dura ~35 minuti misurati (13,8 + 6,6 + ~7 + ~7) e ha
-# precondizioni d'ambiente proprie. Innestarla lì dentro significherebbe legare
-# ogni push a una corsa lunga, e al primo rosso non attribuibile la si
-# spegnerebbe — cioè si tornerebbe al punto di partenza.
+# precondizioni d'ambiente proprie. Innestarla lì dentro legherebbe ogni push a
+# una corsa lunga, e al primo rosso non attribuibile la si spegnerebbe — cioè si
+# tornerebbe al punto di partenza.
 #
-# Questo workflow è quindi **solo manuale** (`workflow_dispatch`) finché non
-# avrà dimostrato di essere verde in CI almeno una volta. La decisione di
-# renderlo automatico è successiva e va presa sui numeri di quel giro, non qui.
+# Resta quindi **solo manuale** (`workflow_dispatch`) finché non sarà verde in CI
+# almeno una volta. Renderlo automatico è una decisione successiva, da prendere
+# sui numeri di quel giro.
+#
+# ── LA PREPARAZIONE È QUELLA DELLO SMOKE, RIUSATA E NON REINVENTATA ──────────
+# ⚠ La prima stesura (S1089) saltava dall'avvio dell'API senza installare nulla:
+#   `tsx: not found`, `node_modules missing`, job rosso in 90 secondi. I passi
+#   qui sotto — pnpm, Node, install, browser, migrazioni, seed delle persone —
+#   sono gli stessi di `playwright-smoke.yml`, dove sono già collaudati, e ognuno
+#   porta la ragione per cui esiste: riscriverli a memoria avrebbe rifatto gli
+#   stessi errori che quel file ha già pagato.
 #
 # ── COSA È GIÀ VERO, MISURATO (2026-09-06) ───────────────────────────────────
 # ⚠ Una convinzione precedente era SBAGLIATA e va corretta qui, perché ha quasi
@@ -21,19 +29,15 @@ name: Playwright integrale (suite E2E completa, a fasi)
 #     heuresys_advanced   164 utenti · 160 contratti · 14.031 competenze · 2 tenant
 #     heuresys_ci         161 utenti · 160 contratti · 14.031 competenze · 2 tenant
 #
-#   La differenza sono **tre utenze di servizio**, non il dataset. L'inferenza
-#   sbagliata nasceva dal fatto che la migrazione 000375 su `heuresys_ci`
-#   converte 0 contratti — ma perché la catena stessa li aveva già convertiti,
-#   non per assenza di dati.
+#   La differenza sono **tre utenze di servizio**, non il dataset.
 #
-# ── L'OSTACOLO CHE RESTA, E CHE QUESTO WORKFLOW MISURA INVECE DI PRESUMERE ───
+# ── L'OSTACOLO CHE QUESTO WORKFLOW MISURA INVECE DI PRESUMERE ────────────────
 # `verifyCsrf` rifiuta con **403** ogni scrittura fatta dal browser se l'origine
-# da cui parte non è fra quelle dichiarate in `ADMIN_ORIGIN` — ed è lo stesso
-# codice di un permesso negato, quindi indistinguibile nei referti. È il guasto
-# che in S1088 ha prodotto 42 rossi attribuiti per tre sessioni ai permessi.
-# L'`ADMIN_ORIGIN` del runner **non è leggibile** da fuori (vive in
-# `/etc/heuresys-runner.env`, root-only): invece di presumerlo, il passo di
-# preflight lo **interroga sull'API viva** e ferma la corsa PRIMA di spendere 35
+# non è fra quelle dichiarate in `ADMIN_ORIGIN` — stesso codice di un permesso
+# negato, quindi indistinguibile nei referti. È il guasto che in S1088 ha
+# prodotto 42 rossi attribuiti per tre sessioni ai permessi. Sul runner
+# l'origine è `http://localhost:3187`, dichiarata in un drop-in systemd; il
+# preflight la **interroga sull'API viva** e ferma la corsa PRIMA di spendere 35
 # minuti se non combacia.
 
 on:
@@ -46,8 +50,8 @@ concurrency:
 jobs:
   playwright-integrale:
     runs-on: [self-hosted, off-prod]
-    # ~35 minuti misurati + margine per build e avvii. Il tetto di 30 dello
-    # smoke sarebbe stato superato dalla sola fase 1 in una giornata carica.
+    # ~35 minuti misurati + build, avvii e margine. Il tetto di 30 dello smoke
+    # sarebbe stato superato dalla sola fase 1 in una giornata carica.
     timeout-minutes: 75
     env:
       # D-08: la CI non tocca MAI la produzione.
@@ -58,15 +62,70 @@ jobs:
       PLAYWRIGHT_WEB_PORT: "3187"
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+        with:
+          version: 9.15.0
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Resolve Playwright version
+        id: pw-version
+        run: |
+          PW_VERSION=$(pnpm --filter @heuresys/web exec playwright --version | awk '{print $2}')
+          echo "version=${PW_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers (~/.cache/ms-playwright)
+        id: pw-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-ms-playwright-${{ steps.pw-version.outputs.version }}
+
+      - name: Install Playwright browser binaries (cache miss)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @heuresys/web exec playwright install chromium
+
+      - name: Cache Next.js build (apps/web/.next/cache)
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: apps/web/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('apps/web/**/*.{js,jsx,ts,tsx}') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
+
+      # heuresys_ci è un clone di PROD congelato al provisioning (D-08). Portarlo
+      # a HEAD è idempotente e provato a due passate.
+      - name: Apply migrations (idempotent, brings the clone to HEAD)
+        run: |
+          printf 'POSTGRES_HOST=%s\nPOSTGRES_PORT=%s\nPOSTGRES_DB=%s\nPOSTGRES_USER=%s\nPOSTGRES_PASSWORD=%s\n' \
+            "${POSTGRES_HOST:-localhost}" "${POSTGRES_PORT:-5432}" "$POSTGRES_DB" "$POSTGRES_USER" "$POSTGRES_PASSWORD" > /tmp/ci-migrate-integrale.env
+          bash db/scripts/migrate.sh /tmp/ci-migrate-integrale.env
+          rm -f /tmp/ci-migrate-integrale.env
+
+      # Le migrazioni portano i RUOLI, non l'autenticazione delle persone: una
+      # persona nata dopo il clone non potrebbe entrare (S1027).
+      - name: Seed test personas (idempotent, login-only)
+        run: pnpm db:seed-test-admin
 
       - name: Avvia l'API (nessuna config Playwright lo fa)
         working-directory: apps/api
         # ⚠ Né `playwright.config` né `playwright.prod.config` avviano `apps/api`:
         # avviano solo il web. Senza questo passo ogni login fallisce, i sei setup
         # diventano rossi e TUTTO il resto risulta «skipped» — il referto che in
-        # S1080 fu letto come «le utenze non esistono più». Il preflight lo
-        # dichiara, ma qui va proprio acceso.
+        # S1080 fu letto come «le utenze non esistono più».
         # `setsid` perché un figlio con `&` prende SIGHUP fra un passo e l'altro.
         run: |
           if curl -sf http://localhost:3001/readyz > /dev/null 2>&1; then
@@ -85,8 +144,7 @@ jobs:
         # ⚠ QUESTO PASSO VALE L'INTERO WORKFLOW. Senza, un'origine non ammessa o
         # un bundle vecchio producono decine di rossi che NON sono guasti, e il
         # referto non lo dice: è precisamente ciò che ha fatto perdere tre
-        # sessioni. Qui la corsa si ferma in pochi secondi, con un messaggio che
-        # nomina la causa.
+        # sessioni. Qui la corsa si ferma in pochi secondi nominando la causa.
         run: node scripts/e2e-blocchi.mjs --solo-preflight
 
       - name: Corsa integrale a fasi
@@ -101,9 +159,6 @@ jobs:
       - name: Triage per firma (anche quando è verde)
         working-directory: apps/web
         if: always()
-        # `if: always()` perché il triage serve SOPRATTUTTO quando la corsa è
-        # rossa. Non fa fallire il job: raggruppa e conta, e la sua uscita è
-        # informazione per chi legge, non un secondo verdetto.
         continue-on-error: true
         run: node scripts/e2e-triage.mjs --dettaglio 1
 

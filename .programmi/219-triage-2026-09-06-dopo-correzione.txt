@@ -1,0 +1,152 @@
+TRIAGE DELLA CORSA INTEGRALE — 2026-09-06
+================================================================================
+Prodotto da: node scripts/e2e-triage.mjs  (legge apps/web/.e2e-fase-N.json)
+Raggruppa i NON RIUSCITI per FIRMA d'errore, non per file — due test con la
+stessa firma hanno PROBABILMENTE la stessa causa. La dottrina di #219 dice che
+l'ipotesi va riprodotta prima di essere creduta: la firma registrata dal triage
+si e' rivelata sbagliata tre volte su tre (F2, F3, F4).
+
+### .e2e-fase-1.json  —  attesi 88 · non riusciti 0 · instabili 0 · saltati 0
+  (nessun test non riuscito)
+
+### .e2e-fase-2.json  —  attesi 91 · non riusciti 1 · instabili 0 · saltati 3
+
+  [1x] Error: expect(locator).toBeVisible() failed
+        · compensation-read.spec.ts › il pannello del calcolo non espone il conto a chi ha un mandato solo tecnico
+
+        ┌─ compensation-read.spec.ts › il pannello del calcolo non espone il conto a chi ha un mandato solo tecnico
+        │ Error: expect(locator).toBeVisible() failed
+        │ 
+        │ Locator: getByTestId('comp-evaluation-panel')
+        │ Expected: visible
+        │ Timeout: 20000ms
+        │ Error: element(s) not found
+        │ 
+        │ Call log:
+        │   - Expect "toBeVisible" with timeout 20000ms
+        │   - waiting for getByTestId('comp-evaluation-panel')
+        │ 
+        │ 
+        │   141 |
+        │   142 |     await page.getByTestId("comp-evaluate-button").first().click();
+        │ > 143 |     await expect(page.getByTestId("comp-evaluation-panel")).toBeVisible({ timeout: 20_000 });
+        │       |                                                             ^
+        │   144 |
+        │   145 |     // Il pannello si apre — la riga, il soggetto e il periodo restano visibili (ADR-0032 non
+        │   146 |     // nega la riga, trattiene i valori) — ma la spiegazione del conto non si materializza.
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/compensation-read.spec.ts:143:61
+        └─
+
+### .e2e-fase-3.json  —  attesi 83 · non riusciti 3 · instabili 0 · saltati 68
+
+  [2x] Error: expect(locator).toBeVisible() failed
+        · matching-freetext.spec.ts › submits a query and gets ranked skills + occupations from the live index
+        · matching-freetext.spec.ts › semantic catalog search returns results on the skills page
+
+        ┌─ matching-freetext.spec.ts › submits a query and gets ranked skills + occupations from the live index
+        │ Error: expect(locator).toBeVisible() failed
+        │ 
+        │ Locator: getByTestId('semantic-search-skill-row').first()
+        │ Expected: visible
+        │ Timeout: 20000ms
+        │ Error: element(s) not found
+        │ 
+        │ Call log:
+        │   - Expect "toBeVisible" with timeout 20000ms
+        │   - waiting for getByTestId('semantic-search-skill-row').first()
+        │ 
+        │ 
+        │   23 |
+        │   24 |       // Query-time embedding + kNN over 25k live embeddings — allow network time.
+        │ > 25 |       await expect(page.getByTestId("semantic-search-skill-row").first()).toBeVisible({ timeout: 20_000 });
+        │      |                                                                           ^
+        │   26 |       expect(await page.getByTestId("semantic-search-skill-row").count()).toBeGreaterThan(0);
+        │   27 |       expect(await page.getByTestId("semantic-search-occ-row").count()).toBeGreaterThan(0);
+        │   28 |     });
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/matching-freetext.spec.ts:25:75
+        └─
+
+  [1x] Error: expect(locator).toHaveCount(expected) failed
+        · landing-pages.spec.ts › /me rende con ruolo, saluto e card; il governo di piattaforma resta chiuso
+
+        ┌─ landing-pages.spec.ts › /me rende con ruolo, saluto e card; il governo di piattaforma resta chiuso
+        │ Error: expect(locator).toHaveCount(expected) failed
+        │ 
+        │ Locator:  getByTestId('provenance-page')
+        │ Expected: 0
+        │ Received: 1
+        │ Timeout:  5000ms
+        │ 
+        │ Call log:
+        │   - Expect "toHaveCount" with timeout 5000ms
+        │   - waiting for getByTestId('provenance-page')
+        │     14 × locator resolved to 1 element
+        │        - unexpected value "1"
+        │ 
+        │ 
+        │   54 |
+        │   55 |       await page.goto("/provenance");
+        │ > 56 |       await expect(page.getByTestId("provenance-page")).toHaveCount(0);
+        │      |                                                         ^
+        │   57 |     });
+        │   58 |   });
+        │   59 |
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/landing-pages.spec.ts:56:57
+        └─
+
+### .e2e-fase-4.json  —  attesi 101 · non riusciti 2 · instabili 0 · saltati 7
+
+  [1x] Error: expect(locator).toBeVisible() failed
+        · serie-a-panels.spec.ts › #30 gap-closure panel renders plans + analysis results
+
+        ┌─ serie-a-panels.spec.ts › #30 gap-closure panel renders plans + analysis results
+        │ Error: expect(locator).toBeVisible() failed
+        │ 
+        │ Locator: getByTestId('gap-plan-row').first().or(getByTestId('gap-closure'))
+        │ Expected: visible
+        │ Error: strict mode violation: getByTestId('gap-plan-row').first().or(getByTestId('gap-closure')) resolved to 2 elements:
+        │     1) <section class="space-y-6" data-testid="gap-closure">…</section> aka getByTestId('gap-closure')
+        │     2) <tr data-testid="gap-plan-row" class="transition-colors hover:bg-muted/60 ">…</tr> aka getByRole('row', { name: 'ad1887ab 1 2026-11-09 Attivo' })
+        │ 
+        │ Call log:
+        │   - Expect "toBeVisible" with timeout 15000ms
+        │   - waiting for getByTestId('gap-plan-row').first().or(getByTestId('gap-closure'))
+        │ 
+        │ 
+        │   26 |     await expect(
+        │   27 |       page.getByTestId("gap-plan-row").first().or(page.getByTestId("gap-closure")),
+        │ > 28 |     ).toBeVisible({ timeout: 15_000 });
+        │      |       ^
+        │   29 |   });
+        │   30 | });
+        │   31 |
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/serie-a-panels.spec.ts:28:7
+        └─
+
+  [1x] TimeoutError: locator.waitFor: Timeout <tempo> exceeded.
+        · session-refresh.spec.ts › D-26: access expiry recovers via single silent refresh, no hard-logout
+
+        ┌─ session-refresh.spec.ts › D-26: access expiry recovers via single silent refresh, no hard-logout
+        │ TimeoutError: locator.waitFor: Timeout 45000ms exceeded.
+        │ Call log:
+        │   - waiting for getByTestId('nav-me') to be visible
+        │ 
+        │ 
+        │   66 |   // Authenticated shell rendered = middleware let the resumable session
+        │   67 |   // through AND the silent refresh recovered the data layer.
+        │ > 68 |   await page.getByTestId("nav-me").waitFor({ state: "visible", timeout: 45_000 });
+        │      |                                    ^
+        │   69 |   expect(page.url()).not.toContain("/login");
+        │   70 |
+        │   71 |   await expect.poll(okRefreshes, { timeout: 15_000 }).toBeGreaterThanOrEqual(1);
+        │     at /home/enzo/heuresys-advanced/apps/web/tests/e2e/session-refresh.spec.ts:68:36
+        └─
+
+================================================================================
+ESITO COMPLESSIVO: ROSSO — 363 attesi · 6 falliti · 78 non eseguiti (su 4 fasi lette)
+⚠ «non eseguito» NON e' «passato»: un test saltato non ha misurato niente.
+
+LE FIRME, sommate su tutte le fasi — la piu' numerosa e' la prima da riprodurre:
+  [  4x] Error: expect(locator).toBeVisible() failed
+  [  1x] Error: expect(locator).toHaveCount(expected) failed
+  [  1x] TimeoutError: locator.waitFor: Timeout <tempo> exceeded.

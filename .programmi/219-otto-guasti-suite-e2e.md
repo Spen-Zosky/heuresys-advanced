@@ -686,3 +686,69 @@ Riallineare cookie e header CSRF dopo il `setup-refresh` — e decidere se `/v1/
 debba restare dietro il presidio che rende irreversibile il disallineamento. Poi rilanciare la
 corsa integrale a macchina scarica. ⚠ Il gemello è anche il runner della CI: si guarda
 `/proc/loadavg` **e** che `gnome-software` non stia macinando.
+
+### ✅ La correzione, e la corsa che la misura: da 42 falliti a 6
+
+**La causa non era il token**, ed è il trace ad averlo detto: nel caso fallito header e
+cookie CSRF **combaciavano** e la risposta era comunque 403. A rifiutare era il *secondo*
+controllo di `verifyCsrf`, quello sull'origine — che nessuno guardava perché risponde con
+lo stesso codice di un permesso negato.
+
+Provato su `/v1/auth/refresh` (nessuno schema di body, nessun `requirePermission`: un suo
+403 può venire solo dal presidio), tre chiamate identiche, sola differenza l'header:
+
+```
+Origin http://192.168.1.11:3013  (dichiarata)      ->  HTTP 200
+Origin http://localhost:3000     (il browser E2E)  ->  HTTP 403 ORIGIN_MISMATCH
+senza Origin                                       ->  HTTP 401 (il controllo si salta)
+```
+
+Ed è per questo che la stessa rotta mostrava sia 200 sia 403 (`PATCH /v1/me/preferences`:
+26 ok, 4 negati): passavano le chiamate fatte da `page.request`, che non hanno `Origin`;
+fallivano quelle fatte **dalla pagina**. E per questo la fase 1, che non scrive dal
+browser, era verde piena.
+
+`ADMIN_ORIGIN` accetta ora un **elenco** di origini (commit `955d1853`) — chiuso,
+dichiarato, confrontato per uguaglianza esatta come prima. Il `.env` del gemello dichiara
+le due che quella macchina serve davvero, API ricostruita e riavviata. Corsa integrale
+rifatta subito dopo, stessa macchina, stesso carico:
+
+```
+                prima            dopo
+fase 1   88 ·  0 ·  0      88 ·  0 ·  0     VERDE piena
+fase 2   83 ·  9 ·  3      91 ·  1 ·  3
+fase 3   70 · 16 · 68      83 ·  3 · 68
+fase 4   86 · 17 ·  7     101 ·  2 ·  7
+        327 · 42 · 78     363 ·  6 · 78     (passati · falliti · non eseguiti)
+```
+
+**I 78 non eseguiti non sono rossi**: ognuno porta la sua ragione dichiarata — 67 sono il
+censimento dietro `F4_SWEEP=1`, gli altri sono catture on-demand o casi che su questo
+dataset non hanno soggetto.
+
+### I sei residui, e nessuno di loro è una scrittura negata
+
+| caso | firma |
+|---|---|
+| `compensation-read` — il pannello del calcolo verso un mandato solo tecnico | locator non visibile |
+| `matching-freetext` × 2 — indice semantico su competenze e occupazioni | locator non visibile |
+| `landing-pages` — `/me` con ruolo, saluto e card | conteggio diverso dall'atteso |
+| `serie-a-panels` — `#30` pannello gap-closure | locator non visibile |
+| `session-refresh` — `D-26` rinnovo silenzioso senza logout | attesa scaduta |
+
+La famiglia dei 403 sulle scritture — **oltre un terzo dei falliti in tre sessioni
+consecutive** — è sparita per intero. I sei che restano sono guasti di natura diversa, da
+riprodurre uno per uno secondo la dottrina di questa voce: sono firme, non cause.
+
+⚠ `session-refresh` merita di essere guardato per primo: prova il rinnovo silenzioso della
+sessione, cioè la stessa rotta al centro della diagnosi di oggi. Che fallisse anche prima
+non lo assolve — significa solo che non era il 403 dell'origine.
+
+### Il controllo che ora impedisce il ritorno del difetto
+
+Il preflight interroga l'API — **non legge il `.env`**, perché il file dice cosa è scritto
+e la risposta dice cosa quel processo sta applicando, e fra i due c'è un riavvio. ⚠ La
+prima stesura di quella sonda usciva **VERDE su un ambiente rotto**: senza token la
+richiesta moriva sul double-submit e non arrivava mai al controllo sull'origine — un
+controllo che non poteva vedere il difetto per cui esisteva. Corretta mandando cookie e
+header uguali fra loro, e provata nei due versi (rossa prima della correzione, verde dopo).

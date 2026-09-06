@@ -47,8 +47,17 @@ Perché una sessione nuova non debba ricostruire niente:
   non gira su push, quindi non può rompere nulla mentre è in prova;
 - **primo giro rosso** (`34038765559`): mancavano i passi preparatori — `tsx: not found`,
   `node_modules missing`. Corretto riusando la sequenza dello smoke;
-- **secondo giro** (`34039328831`): lanciato alla chiusura di S1089, esito da leggere con
-  `gh run view 34039328831`;
+- **secondo giro** (`34039328831`): rosso **sul preflight**, e il preflight ha fatto il suo
+  mestiere — si e' fermato in **due secondi** dichiarando «porta dell'API NON MISURABILE: ne'
+  `NEXT_PUBLIC_API_PROXY_BASE_URL` ne' `PORT` sono dichiarate» invece di indovinare una porta
+  e produrre una corsa intera di rossi non attribuibili. In locale la porta si deriva dal
+  `.env` del repo; **in CI quel file non esiste** (il checkout e' pulito). Corretto
+  dichiarando `PORT: "3001"` e `NEXT_PUBLIC_API_PROXY_BASE_URL` a livello di job — la seconda
+  serve **prima del build del web**, perche' Next compila i rewrites al momento del build;
+- **terzo giro** (`34040733480`): lanciato alla chiusura di S1089 e **prosegue da se'** — un
+  giro di CI non muore con la sessione. Si legge con
+  `gh run view 34040733480 --json status,conclusion,jobs` e, se rosso,
+  `gh run view 34040733480 --log-failed`;
 - sul runner l'origine ammessa è dichiarata da un **drop-in systemd** installato in S1089:
   `/etc/systemd/system/actions.runner.Spen-Zosky-heuresys-advanced.linux-pc-runner.service.d/e2e-origin.conf`
   → `ADMIN_ORIGIN=http://localhost:3187`. Si annulla cancellando quel file. Verificato attivo

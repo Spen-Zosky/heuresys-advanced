@@ -107,22 +107,23 @@ ogni rosso ha nominato una causa d'ambiente diversa — il valore del workflow �
   non a memoria — più un **quinto controllo nel preflight**, che interroga l'API viva leggendo
   `x-ratelimit-limit` e si ferma se il tetto è sotto 40. Provato nei tre rami: silenzioso a
   200, rosso sotto soglia, **NON MISURABILE** se l'header manca;
-- **giro 6** (`34050172629`): in corso. `gh run list --workflow=playwright-integrale.yml --limit 3`;
-  se rosso, `gh run view <id> --log-failed`. Un giro di CI **prosegue da sé** e non muore con
-  la sessione; il runner è uno solo, quindi può restare in coda dietro ai controlli del push.
-
-🔧 **Come si legge un guasto della suite in CI senza scaricare artefatti**: i referti restano
-sul runner in `~/actions-runner/_work/heuresys-advanced/heuresys-advanced/apps/web/.e2e-fase-*.json`,
-e accanto c'è `test-results/<caso>/error-context.md` con **lo scatto della pagina al momento del
-fallimento** — è lì che si è letto «Troppi tentativi», che nessun referto JSON diceva.
-⚠ `test-results/` viene ripulita a ogni fase: sopravvive solo l'ultima.
-
-## Verification — come si controlla
-
-```bash
-python docs/kb/tools/session_start.py       # menu + salute, un solo giro
-python docs/kb/tools/programmi.py --verifica # SENZA pipe: la pipe maschera l'exit code
-bash scripts/verifica-deploy.sh             # atteso DISALLINEATO finché non si propaga
-gh run list --workflow=playwright-integrale.yml --limit 3
-ssh linux-pc 'cat /proc/loadavg'            # prima di ogni corsa E2E: sotto 2
-```
+- **giro 6** (`34050172629`): **364 passati · 5 falliti · 78 non eseguiti**, e dei 78 ben 76
+  sono esclusioni **dichiarate** (censimenti a comando, casi senza dati su questo tenant,
+  `#8` in attesa di credenziale). La suite è quindi sostanzialmente in piedi in CI: restano
+  **cinque** casi, in tre famiglie, tutte misurate e tutte d'ambiente — nessuna del prodotto:
+  1. **passkey/WebAuthn (2)** — `WEBAUTHN_ORIGINS` vale `http://localhost:3000` per default e
+     in CI il web nasce sulla **3187**: la registrazione rispondeva **400**. Stessa specie di
+     `ADMIN_ORIGIN`, un elenco chiuso mai aggiornato per la porta della CI. Dichiarata nel job;
+  2. **ricerca semantica (2)** — `MATCHING_FREETEXT_ENABLED` è spenta per default, e **ogni
+     ricerca è una chiamata a pagamento**. Accenderla in CI è una **decisione di costo, non
+     tecnica** (→ domande aperte). Finché è spenta i due casi si dichiarano **non eseguiti**
+     con la ragione scritta, invece di fallire come se il prodotto fosse rotto: la condizione
+     è una variabile dichiarata (`E2E_RICERCA_SEMANTICA=0`) e **non una sonda**, perché
+     interrogare l'API costerebbe una chiamata in più proprio dove il flag è acceso;
+  3. **fascicolo di RTL (1)** — `RTL-BANK-CONFIG` misurato: **1** in produzione, **0** in
+     `heuresys_ci`. Lo crea uno **script** (`db/scripts/ricostruisci-fascicolo-rtl.ts`), non
+     una migrazione, e la catena applicata al clone non lo porta con sé — la trappola già
+     registrata. Aggiunto come passo preparatorio: è idempotente e si verifica da sé;
+- **giro 7**: lanciato dopo quelle tre correzioni.
+  `gh run list --workflow=playwright-integrale.yml --limit 3`; se rosso,
+  `gh run view <id> --log-failed`.

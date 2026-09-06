@@ -106,6 +106,25 @@ jobs:
       # (confrontati i due blocchi `env:` uno contro l'altro, non a memoria): la
       # cifra è la sua, già collaudata in CI, non un numero inventato qui.
       AUTH_LOGIN_RATELIMIT_MAX: "200"
+      # ⚠ L'ORIGINE DELLA CERIMONIA PASSKEY — sesto giro (34050172629), 2 rossi.
+      # `WEBAUTHN_ORIGINS` vale `http://localhost:3000` per default e in CI il web
+      # nasce sulla 3187: la registrazione di una passkey rispondeva **400** invece
+      # di 200 (`login-mfa-enrollment.spec.ts`, `webauthn.spec.ts`). È la STESSA
+      # specie di ADMIN_ORIGIN — un elenco chiuso di origini ammesse che nessuno
+      # aveva aggiornato per la porta della CI — e come quella si dichiara qui.
+      # `WEBAUTHN_RP_ID` resta il default `localhost`: l'RP ID è il dominio senza
+      # schema né porta, e il dominio è proprio quello.
+      WEBAUTHN_ORIGINS: "http://localhost:3187"
+      # ⚠ LA RICERCA SEMANTICA È DICHIARATA SPENTA QUI, e non è un ripiego tecnico:
+      # `MATCHING_FREETEXT_ENABLED` è spenta per default e ogni ricerca è **una
+      # chiamata a pagamento** al fornitore di embedding (due per corsa integrale).
+      # Accenderla in CI è una decisione di costo, non mia: resta fra le domande
+      # aperte in `.handoff/STATE.md`. Finché è spenta, i due casi di
+      # `matching-freetext.spec.ts` si dichiarano NON ESEGUITI con la ragione
+      # scritta — che è la forma onesta — invece di fallire come se il prodotto
+      # fosse rotto. Per accenderli: togliere questa riga e dare `VOYAGE_API_KEY`
+      # e `MATCHING_FREETEXT_ENABLED=true` all'API del runner.
+      E2E_RICERCA_SEMANTICA: "0"
 
     steps:
       - name: Checkout
@@ -165,6 +184,20 @@ jobs:
       # persona nata dopo il clone non potrebbe entrare (S1027).
       - name: Seed test personas (idempotent, login-only)
         run: pnpm db:seed-test-admin
+
+      - name: Ricostruisci il fascicolo di RTL (dato creato da script, non da migrazione)
+        working-directory: apps/api
+        # ⚠ Sesto giro (34050172629), 1 rosso: `tenant-blueprints.spec.ts` cercava la
+        # riga `RTL-BANK-CONFIG` e ne trovava zero. Misurato sui due database:
+        #   heuresys_advanced -> 1     heuresys_ci -> 0
+        # Non è un guasto: quel fascicolo lo crea uno SCRIPT
+        # (`db/scripts/ricostruisci-fascicolo-rtl.ts`), non una migrazione, e la
+        # catena applicata al clone della CI non lo porta con sé. È la trappola già
+        # registrata — «tabella creata da migration ma popolata da script = vuota su
+        # CI» — e si cura come il seed delle persone: eseguendo lo script.
+        # È idempotente e si verifica da sé (esce ≠ 0 se anche una sola motivazione
+        # differisce di un carattere), quindi qui fa due mestieri in uno.
+        run: pnpm exec tsx ../../db/scripts/ricostruisci-fascicolo-rtl.ts
 
       - name: Avvia l'API (nessuna config Playwright lo fa)
         working-directory: apps/api

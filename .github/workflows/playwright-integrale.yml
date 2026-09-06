@@ -92,6 +92,20 @@ jobs:
       # log del passo, e non richiede `sudo` sul gemello: l'ambiente del job
       # sovrascrive quello ereditato dal servizio, qualunque cosa esso dica.
       ADMIN_ORIGIN: "http://localhost:3187"
+      # ⚠ IL LIMITATORE DEI LOGIN — quinto giro (34043971361), e la pagina lo ha
+      # detto da sé nello scatto del fallimento: «Troppi tentativi. Riprova tra
+      # qualche minuto.» `/v1/auth/login` accetta `AUTH_LOGIN_RATELIMIT_MAX`
+      # tentativi per IP ogni 5 minuti, e il default è la policy di produzione:
+      # **10**. In locale il `.env` del repo lo alza; in CI quel file non esiste,
+      # quindi valeva 10 — e la sola preparazione ne consuma già di più: sonda del
+      # preflight + sei personaggi + i ritentativi. Cadeva sempre il SESTO,
+      # `custodian`, che è l'ultimo della fila: non un guasto della custodia, un
+      # posto in coda. E siccome quel caso apre un blocco `serial`, si è portato
+      # dietro 350 test «non eseguiti» — che non è «passati».
+      # ⚠ Ed è l'UNICA variabile che `playwright-smoke.yml` dichiarava e questo no
+      # (confrontati i due blocchi `env:` uno contro l'altro, non a memoria): la
+      # cifra è la sua, già collaudata in CI, non un numero inventato qui.
+      AUTH_LOGIN_RATELIMIT_MAX: "200"
 
     steps:
       - name: Checkout

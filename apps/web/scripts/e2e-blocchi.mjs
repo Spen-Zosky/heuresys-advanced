@@ -360,6 +360,57 @@ function preflight() {
     }
   }
 
+  // 5. ⭐ IL BUDGET DEI LOGIN BASTA PER LA PREPARAZIONE?
+  //
+  // Il controllo che mancava al quinto giro in CI (34043971361), e che e' costato
+  // 45 minuti per un difetto che qui si vede in mezzo secondo. `/v1/auth/login`
+  // accetta `AUTH_LOGIN_RATELIMIT_MAX` tentativi per IP ogni 5 minuti; il default
+  // e' la policy di produzione, **10**. In locale il `.env` lo alza, in CI quel
+  // file non esiste — e la sola preparazione ne consuma di piu'.
+  //
+  // Come si e' manifestato: sempre il SESTO personaggio (`custodian`, l'ultimo
+  // della fila) in timeout su `waitForURL`, in tutte e quattro le fasi. Sembrava
+  // un guasto della custodia; era un posto in coda. E siccome quel caso apre un
+  // blocco `serial`, si e' portato dietro 350 test «non eseguiti».
+  // La pagina lo diceva, nello scatto del fallimento: «Troppi tentativi.»
+  //
+  // ⚠ Si INTERROGA l'API, non si legge una variabile: fra il `.env` e il processo
+  // c'e' un riavvio, ed e' il processo che applica. `@fastify/rate-limit` scrive
+  // il tetto in `x-ratelimit-limit` su OGNI risposta della rotta, anche un 401 —
+  // quindi la sonda misura senza avere bisogno di credenziali.
+  //
+  // La soglia, con l'aritmetica in chiaro invece di un numero calato dall'alto:
+  // sei personaggi x 2 ritentativi = 18 tentativi per fase, piu' la sonda; e una
+  // finestra di 5 minuti puo' stare a cavallo di DUE fasi consecutive. Sotto 40
+  // la preparazione non ha margine, e i suoi rossi non sono attribuibili.
+  if (apiBase) {
+    const sonda = spawnSync(process.execPath, ["-e",
+      `fetch(${JSON.stringify(apiBase + "/v1/auth/login")},{method:"POST",` +
+      `headers:{"content-type":"application/json"},` +
+      // Un indirizzo che non puo' esistere (`.invalid` e' riservato da RFC 2606):
+      // la sonda non deve poter contribuire al blocco di un'utenza vera.
+      `body:JSON.stringify({email:"preflight-sonda@example.invalid",password:"x"}),` +
+      `signal:AbortSignal.timeout(5000)})` +
+      `.then(r=>{const v=r.headers.get("x-ratelimit-limit");` +
+      `console.log(v??"");process.exitCode=0})` +
+      `.catch(()=>{console.log("");process.exitCode=0})`],
+      { encoding: "utf8" });
+    const tetto = Number.parseInt(`${sonda.stdout}`.trim(), 10);
+    if (!Number.isFinite(tetto)) {
+      avvisi.push("budget dei login NON MISURABILE: l'API non ha restituito " +
+                  "`x-ratelimit-limit` su /v1/auth/login. Non e' «va bene»: se il tetto " +
+                  "fosse quello di produzione (10), la sola preparazione lo esaurirebbe e " +
+                  "gli ultimi personaggi fallirebbero il login senza che il referto lo dica");
+    } else if (tetto < 40) {
+      avvisi.push(`budget dei login TROPPO BASSO: l'API ammette ${tetto} tentativi ogni 5 ` +
+                  `minuti, ma la sola preparazione ne chiede fino a ~38 (sei personaggi con ` +
+                  `i ritentativi, su due fasi che possono cadere nella stessa finestra). ` +
+                  `Gli ULTIMI personaggi falliranno il login con «Troppi tentativi», e il ` +
+                  `referto mostrera' un timeout su waitForURL — indistinguibile da un guasto ` +
+                  `del prodotto. Rimedio: AUTH_LOGIN_RATELIMIT_MAX=200 nell'ambiente dell'API`);
+    }
+  }
+
   return avvisi;
 }
 

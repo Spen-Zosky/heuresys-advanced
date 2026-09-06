@@ -75,6 +75,24 @@ import sys
 import time
 from pathlib import Path
 
+# Su Windows lo stdout di Python eredita la codepage della console (cp1252), e una
+# singola freccia in un messaggio di stato fa morire il cancello con
+# `UnicodeEncodeError` PRIMA che abbia eseguito una sola suite. Misurato il 2026-09-06
+# (S1088): `verify_gate.py run` in traceback su `'charmap' codec can't encode '→'`,
+# con l'hook Stop che rimandava all'inizio a ogni tentativo.
+#
+# ⚠ E il modo in cui fallisce e' peggio del fallimento: un cancello che va in traceback
+# non dice «rosso», dice **niente** — e chi lo lancia da uno script vede solo un exit
+# code diverso da zero, indistinguibile da una suite fallita davvero.
+#
+# `errors="replace"` invece di `strict`: un carattere che la console non sa disegnare
+# deve degradare in un punto interrogativo, mai fermare una verifica.
+for _flusso in (sys.stdout, sys.stderr):
+    try:
+        _flusso.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+    except (AttributeError, ValueError):
+        pass  # flusso rediretto o gia' configurato: non e' un errore
+
 REPO = Path(__file__).resolve().parents[3]
 VERDICT = REPO / ".zp" / "verify-verdict.json"
 BRAKE = REPO / ".zp" / "verify-off"

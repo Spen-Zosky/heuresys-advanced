@@ -142,8 +142,28 @@ test.describe("ADR-0032 sul frontend: al mandato tecnico i valori economici non 
     await page.getByTestId("comp-evaluate-button").first().click();
     await expect(page.getByTestId("comp-evaluation-panel")).toBeVisible({ timeout: 20_000 });
 
-    // Il pannello si apre — la riga, il soggetto e il periodo restano visibili (ADR-0032 non
-    // nega la riga, trattiene i valori) — ma la spiegazione del conto non si materializza.
-    await expect(page.getByTestId("comp-evaluation-gates")).toHaveCount(0);
+    // ⚠ QUESTO CASO PRETENDEVA `comp-evaluation-gates` A ZERO, E CONTRADDICEVA LA DECISIONE
+    // CHE DICHIARA DI PRESIDIARE (corretto S1088). ADR-0032 / #124 D3 dice l'opposto: al
+    // mandato solo tecnico **restano** il ragionamento dei cancelli (categoriale, già
+    // esposto da `/distribution`) e la curva citata; spariscono **i numeri**. Misurato sulla
+    // risposta reale: `masked` porta `attainment, curveExplanation, curveFactor,
+    // finalFactor, recordedAmountEur`, e i cancelli arrivano — 7 voci, decisione e
+    // spiegazione presenti. Il caso misurava quindi la cosa sbagliata, e restava verde solo
+    // perché la pagina si rompeva prima di arrivarci.
+    //
+    // 1. I CANCELLI CI SONO — e questa asserzione è ciò che rende il caso capace di fallire
+    //    nel verso opposto: se un giorno il mascheramento si allargasse fino a togliere il
+    //    ragionamento, qui diventerebbe rosso invece di passare in silenzio.
+    await expect(page.getByTestId("comp-evaluation-gates")).toBeVisible();
+
+    // 2. I NUMERI NO. `finalFactor` è mascherato, quindi la riga che lo mostra non esiste.
+    await expect(page.getByTestId("comp-evaluation-final")).toHaveCount(0);
+
+    // 3. E LA PAGINA NON DEVE ROMPERSI. È il guasto vero che questo caso ha scoperto: il
+    //    pannello leggeva `finalFactor !== null` su un campo **assente** — `undefined !==
+    //    null` è vero — e `.toFixed(4)` faceva scattare l'error boundary, cancellando
+    //    l'intera sezione. Senza un'asserzione esplicita quel guasto tornerebbe invisibile,
+    //    perché un pannello che non si apre e un pannello vuoto si somigliano.
+    await expect(page.getByTestId("comp-evaluation-close")).toBeVisible();
   });
 });

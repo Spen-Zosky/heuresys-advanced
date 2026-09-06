@@ -10,7 +10,7 @@ import type {
   ObjectiveRewardRule, PositionEconomicWeight, PayrollHandoffRecord,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
-import type { CompensationBandListResponse, CompensationBand as CompensationBandRow } from "@heuresys/shared";
+import type { CompensationBandListResponse, CompensationBand as CompensationBandRow, VariablePayEvaluation } from "@heuresys/shared";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
@@ -108,23 +108,22 @@ function buildVariablePayColumns(
   ];
 }
 
-/** Esiti dei cancelli e curva applicata a un singolo calcolo (#37 B2). */
-interface VariablePayEvaluationView {
-  variablePayCalculationId: string;
-  periodStart: string;
-  periodEnd: string;
-  recordedAmountEur: number | null;
-  attainment: number | null;
-  curveCode: string | null;
-  curveKind: string | null;
-  curveFactor: number | null;
-  curveExplanation: string | null;
-  gates: Array<{ gateCode: string; gateName: string; isBlocking: boolean; status: string; overrideReason: string | null }>;
-  gateDecision: "ALLOW" | "ALLOW_WITH_WARNING" | "BLOCK";
-  gateExplanation: string;
-  finalFactor: number | null;
-  notEvaluable: string | null;
-}
+/**
+ * Esiti dei cancelli e curva applicata a un singolo calcolo (#37 B2).
+ *
+ * ⚠ QUI C'ERA UNA COPIA SCRITTA A MANO DEL CONTRATTO, ED È LA CAUSA A MONTE DEL
+ * GUASTO (S1088). Dichiarava `recordedAmountEur: number | null`, `finalFactor:
+ * number | null` e non conosceva `masked` — cioè affermava che quei campi ci sono
+ * sempre e al massimo valgono `null`. È falso: ADR-0032 li **toglie** dalla
+ * risposta e ne scrive il nome in `masked`. Con quella copia TypeScript non poteva
+ * segnalare niente, il controllo `finalFactor !== null` passava su un `undefined` e
+ * `.toFixed(4)` faceva scattare l'error boundary: per un `PLATFORM_ADMIN` aprire il
+ * pannello **rompeva l'intera sezione**.
+ *
+ * Il tipo vero vive in `@heuresys/shared` ed è la sola fonte del contratto: una
+ * copia locale non è una comodità, è una seconda verità che diverge in silenzio.
+ */
+type VariablePayEvaluationView = VariablePayEvaluation;
 
 function EvaluationPanel({ calculationId, onClose }: { calculationId: string; onClose: () => void }) {
   const { t } = useTranslation("admin");
@@ -160,10 +159,20 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
         </p>
       ) : q.data ? (
         <div className="space-y-4 text-sm">
+          {/*
+            #124 / ADR-0032 — un campo trattenuto e' ASSENTE dalla risposta, non `null`.
+            Ogni lettura qui sotto passa quindi da `masked`, come gia' fanno le colonne
+            della tabella: leggere il valore e fidarsi di un controllo su `null` e' il
+            difetto che rompeva questo pannello (vedi il commento su `finalFactor`).
+          */}
           <p className="text-muted-foreground">
             {t("compReward.evaluation.period", { from: q.data.periodStart, to: q.data.periodEnd })}
             {" · "}
-            {t("compReward.evaluation.recorded", { amount: money(q.data.recordedAmountEur) })}
+            {q.data.masked?.includes("recordedAmountEur") ? (
+              <MaskedCell t={t} />
+            ) : (
+              t("compReward.evaluation.recorded", { amount: money(q.data.recordedAmountEur ?? null) })
+            )}
           </p>
 
           {q.data.notEvaluable ? (
@@ -176,8 +185,13 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
                 {t("compReward.evaluation.curve", { code: q.data.curveCode, kind: q.data.curveKind })}
               </p>
               {/* La spiegazione arriva dal motore: la stessa frase che un
-                  destinatario può usare per rifare il conto. */}
-              <p className="text-muted-foreground">{q.data.curveExplanation}</p>
+                  destinatario può usare per rifare il conto — e al mandato solo
+                  tecnico non arriva affatto, perché contiene i numeri. */}
+              {q.data.masked?.includes("curveExplanation") ? (
+                <MaskedCell t={t} />
+              ) : (
+                <p className="text-muted-foreground">{q.data.curveExplanation}</p>
+              )}
             </div>
           )}
 
@@ -210,7 +224,18 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
             ) : null}
           </div>
 
-          {q.data.finalFactor !== null ? (
+          {/*
+            ⚠ IL DIFETTO CHE ROMPEVA LA PAGINA, e vale oltre questa riga (S1088).
+            Il controllo era `q.data.finalFactor !== null`. Ma ADR-0032 non mette `null`
+            al posto di un valore trattenuto: lo TOGLIE — quindi il campo arriva
+            `undefined`, `undefined !== null` è **vero**, e `.toFixed(4)` lanciava.
+            Per un `PLATFORM_ADMIN` aprire questo pannello faceva scattare l'error
+            boundary e spariva l'intera sezione: non «un numero mancante», la pagina rotta.
+            È lo stesso guasto già trovato in `#219` F2 sulla spiegabilità per-feature, che
+            si ripresenta ovunque un controllo `!== null` incontri un campo mascherato.
+            Si guarda `masked` PRIMA, e solo dopo si legge il valore.
+          */}
+          {q.data.masked?.includes("finalFactor") ? null : q.data.finalFactor != null ? (
             <p data-testid="comp-evaluation-final" className="font-medium text-foreground">
               {t("compReward.evaluation.finalFactor", { factor: q.data.finalFactor.toFixed(4) })}
             </p>

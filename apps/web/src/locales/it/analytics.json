@@ -204,5 +204,21 @@
       "PROJECT": "Progetto",
       "ON_CALL": "Reperibilità"
     }
+  },
+  "skillsGraph": {
+    "title": "Grafo delle competenze",
+    "description": "Il vicinato di una competenza: i legami dichiarati fra competenze e l'appartenenza alla tassonomia ESCO. Si parte sempre da una competenza — il catalogo intero conta oltre 18.000 archi e disegnarlo per intero non sarebbe una vista.",
+    "searchLabel": "Cerca una competenza",
+    "searchPlaceholder": "almeno due caratteri…",
+    "depth": "{{count}} salto",
+    "depth_other": "{{count}} salti",
+    "pickTitle": "Scegli una competenza",
+    "pickDescription": "Cerca una competenza qui sopra e selezionala: il grafo mostrera' il suo vicinato.",
+    "nodes": "Nodi",
+    "explicitEdges": "Legami dichiarati",
+    "groupEdges": "Legami di appartenenza",
+    "canvasEmpty": "Nessun legame per questa competenza a questa profondita'.",
+    "legendExplicit": "Legame dichiarato fra competenze",
+    "legendGroup": "Appartenenza alla tassonomia"
   }
 }

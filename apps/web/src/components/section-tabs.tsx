@@ -38,6 +38,11 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
     { href: "/analytics/skills", key: "skill.coverage" },
     { href: "/analytics/skills-by-category", key: "skill.category" },
     { href: "/analytics/skills-group-share", key: "skill.group" },
+    // #50 F3 (S1091): la vista del grafo. Entra come SCHEDA del gruppo skill e non
+    // come voce nuova di sidebar — e' la regola di Enzo S1009, «le altre diventano
+    // tab dentro la pagina principale», ed e' anche cio' che rende la pagina
+    // raggiungibile per check_pagine_raggiungibili senza una migrazione di menu.
+    { href: "/analytics/skills-graph", key: "skill.graph" },
     { href: "/skills", key: "skill.catalog" },
     { href: "/gaps", key: "skill.gap" },
     { href: "/insights/skill-gap", key: "skill.skillGap" },

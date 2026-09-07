@@ -53,6 +53,72 @@
   *(testo originale della fase)* nessun import: la sorgente è `sys_skill_taxonomy_edges` più il catalogo skill (i conteggi **si misurano quando si apre la fase**, non si citano qui: crescono). Fatto = endpoint che serve nodi e archi con i filtri che una vista a grafo richiede (profondità, tipo di relazione, ancoraggio a una skill o a una persona), schema Zod condiviso, integration test. **Il cancello di esposizione (#79) è già soddisfatto per costruzione**: la tabella è già letta, qui le si dà una superficie a grafo · budget ~200k
 - [ ] **F3 — La vista, con il componente che aspetta da sempre** — `KGGraphCanvas` di `@heuresys/ui` è stato costruito apposta e **non è mai stato usato**: qui trova il suo primo consumatore. Pagina sotto `/visualizations` (che esiste già), E2E con login reale · budget ~250k
 
+  ### S1091 (2026-09-07) — la vista esiste, e la voce è costata molto meno del previsto
+
+  ⭐ **Il primo atto è stato scoprire che METÀ del lavoro era già fatto, e per poco non l'ho
+  duplicata.** Avevo cominciato a costruire un endpoint del grafo su `skill-taxonomy-edges` —
+  schema Zod, repository con CTE ricorsiva, service, rotta. **Il typecheck l'ha fermato**: i nomi
+  `SkillGraphQuery`/`SkillGraphResponse` **esistevano già** in `@heuresys/shared`, perché
+  `GET /v1/skills/graph` era stato costruito da **F2** ed è più completo del mio (nodi `SKILL`
+  e `GROUP`, archi `EXPLICIT` e `GROUP`, conteggi, `orgGate: "catalog"`, `skill:read`). Tutto il
+  mio lavoro sull'API è stato **disfatto** con un `git checkout` dei quattro file: F3 è **solo la
+  vista**, e il piano lo diceva — sono stato io a leggerlo male. Il cancello ha fatto ciò per cui
+  esiste, ma la lettura di `skills/routes.ts` prima di scrivere sarebbe costata trenta secondi.
+
+  **Cosa è stato costruito, e dove.**
+  - **La pagina** `apps/web/src/app/(authenticated)/analytics/skills-graph/page.tsx`, primo e
+    unico consumatore di `KGGraphCanvas` (verificato con un grep su `apps/` e `packages/` prima
+    di scrivere: nessun altro). Nessun componente nuovo in questo repository — il canvas arriva
+    dal design system, come vuole la regola.
+  - ⚠ **Si parte sempre da una competenza, e non è una comodità dell'interfaccia**: l'endpoint
+    accetta `root` assente e allora restituisce l'intero catalogo — **18.438 archi espliciti**
+    misurati in produzione (`RELATED` 11.762 · `IS_A` 6.474 · `PREREQUISITE_OF` 198 · `PART_OF` 4)
+    più quelli di appartenenza. Disegnarli tutti non è una vista, è un blocco del browser.
+  - **La porta**: entra come **scheda** del gruppo `skill` in `section-tabs.tsx`, non come voce
+    nuova di sidebar. È la regola di Enzo S1009 («le altre diventano tab dentro la pagina
+    principale») ed evita una migrazione di menu. `check_pagine_raggiungibili.py`: schede da
+    16 a **17**, «ogni pagina autenticata ha una porta».
+  - **i18n** IT+EN completo (`shell:tabs.skill.graph`, `analytics:skillsGraph.*`) —
+    `i18n:check` → **Parity OK, 3143 chiavi × 2 lingue × 10 namespace**.
+
+  🔬 **Dimostrazione LIVE su dati reali** — `node apps/api/scripts/prova-live-50-f3-grafo.mjs`,
+  login con **persona reale** `federica.marchetti@rtl-bank.org` (**HTTP 200**) contro la
+  produzione:
+  ```
+  grafo «Assembly (programmazione informatica)» — nodi 182 · dichiarati 159 · appartenenza 166
+  grafo «Java (programmazione informatica)»     — nodi 184 · dichiarati 157 · appartenenza 175
+  ESITO: OK — 5 competenze con vicinato vero, lette da una persona reale
+  ```
+  Lo script porta un **vocabolario chiuso** e distingue `NON MISURABILE` (login non passato) da
+  `VUOTO` (grafo che risponde senza vicini): un login rifiutato non è un giudizio sul grafo.
+  ⚠ E la sua prima stesura **derivava la password riscrivendola a memoria** → 401 che sembrava un
+  problema di credenziali. La derivazione ora si **importa** da chi la definisce.
+
+  **Le due prove E2E sono scritte per poter fallire** (`apps/web/tests/e2e/skills-graph.spec.ts`):
+  la prima non si accontenta che il canvas compaia — confronta i **numeri della pagina** con
+  quelli che l'API calcola per la stessa competenza e profondità, perché un disegno con i dati
+  sbagliati passerebbe un test sul solo rendering; la seconda cambia la profondità e pretende che
+  il conteggio **scenda**, e sceglie apposta una competenza il cui vicinato a 1 e a 2 salti è
+  diverso — su una isolata i due numeri coinciderebbero e il test sarebbe verde qualunque cosa
+  accada. Nessun nome di competenza è cablato: si sceglie interrogando il catalogo vero.
+
+  ⏳ **La corsa E2E NON è stata eseguita qui, e va detto com'è andata invece di lasciarlo capire.**
+  Tentata in locale con `pnpm test:e2e:prod:node22 --grep`; il **preflight della suite** ha
+  dichiarato l'ambiente inadatto prima ancora di partire, con tre avvisi: *«API NON raggiungibile
+  su localhost:3001 — nessuna config Playwright la avvia»*, *«il bundle dell'API è più VECCHIO
+  dell'ultimo commit di ~2 giorni: la suite proverebbe un frontend nuovo contro un'API vecchia, e
+  i suoi rossi non sarebbero attribuibili»*, e *«budget dei login NON MISURABILE»*. La corsa è
+  stata **fermata**, non lasciata fallire: un rosso prodotto da un ambiente sbagliato non è
+  un'informazione, è rumore che poi qualcuno deve smontare.
+  **La corsa vera è quella di CI**, che è il modo supportato per questa suite (D-24) ed è come
+  `#219` l'ha portata al verde in S1090 — 367 passati, 0 falliti. Va lanciata dopo il push:
+  `gh workflow run playwright-integrale.yml` (è manuale perché il runner è uno solo).
+  Finché quella non è verde, **F3 resta aperta**: la pagina è costruita e provata sui dati veri,
+  ma la prova end-to-end che la voce pretende non è stata eseguita.
+
+  Cancelli: `typecheck` API e web puliti · `lint` 5/5 · `i18n:check` OK ·
+  `check_pagine_raggiungibili` OK.
+
 ## ⚠ CORREZIONE dell'esito di F1 (stessa sessione, dopo aver cercato ancora)
 
 **La prima conclusione era vera ma incompleta, e la ragione cambia la decisione.** Avevo scritto

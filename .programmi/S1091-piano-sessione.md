@@ -36,11 +36,11 @@ con tutto il lavoro dentro.
 | **V2** | `#249` **F3** — il presidio: il cancello `programmi.py --verifica` va interrogato da qualcuno | io | il presidio esiste ed è stato **visto scattare** su un difetto finto, poi tolto | ✅ **FATTO** |
 | **V3** | `#231` **S7** — ri-leggere il residuo ora che `#219` è chiusa | io | il piano dice cosa resta davvero, o la voce si chiude | ✅ **FATTO** — S7 senza bersaglio (corsa `34060405061` success, 0 falliti); voce **CHIUSA**, 0 fasi aperte |
 | **V4** | `#149` **F4** — la prossima consegna del lab trattata come non verificata | io | consegna trattata, oppure «nessuna consegna nuova» misurato e dichiarato | ✅ **FATTO** — inbox vuota, misurata due volte (`lab_inbox.py` + `ls`); il presidio ha però lavorato su un'affermazione ereditata da `STATE.md`, ri-misurata con `gh` |
-| **V5** | `#79` **F3** — cancello di esposizione sul prossimo lavoro che popola tabelle | io | `check_exposure.py` interrogato sul lavoro di questa sessione, o no-op dichiarato | ⏳ |
+| **V5** | `#79` **F3** — cancello di esposizione sul prossimo lavoro che popola tabelle | io | `check_exposure.py` interrogato sul lavoro di questa sessione, o no-op dichiarato | ✅ **FATTO** — 73 tabelle scritte, **73 lette da un modulo API, 0 non esposte**: nessuna lacuna. `sys_research_sources`, popolata oggi, è letta dal modulo `research` |
 | **V6** | `#214` **F6** — un perimetro dalla coda dei neutri, in ordine di rischio crescente | io | una riga nuova in `agent-perimetri.json` con decisione e data | ✅ **FATTO** — nono perimetro `enterprise-size-bands`, pari a sette sciolto col rischio crescente, mig `000378` con guardia a due porte, live in produzione |
 | **V7** | `#169` **F3** — il segreto smette di essere derivato. ⚠ include la decisione sulla custodia whistleblowing, che prendo io | io | i due segreti separati, e la decisione scritta con la sua ragione | ✅ **F3b FATTA** — e la misura ha trovato un **buco aperto in produzione**, non un lavoro da fare: la chiave madre apriva `PLATFORM_ADMIN` esente da MFA. Chiuso e provato live. F3a/F3c restano |
 | **V8** | `#198`/`#205` — la domanda ferma da tre voci: da quali fonti la piattaforma impara com'è fatta un'azienda | io | risposta decisa e scritta; le due voci escono da WAIT-INPUT | ✅ **FATTO** — mig `000379`: criterio per **classe**, non elenco; 5 fonti su 5 domini live; R2 **non** si riscrive al potenziale. `#205`→ACTIVE, `#198`→GATED (blocco tecnico vero: modello vuoto) |
-| **V9** | `#50` **F3** — la vista del grafo delle competenze (~250k) | io | la vista esiste e mostra dati reali | ⏳ |
+| **V9** | `#50` **F3** — la vista del grafo delle competenze (~250k) | io | la vista esiste e mostra dati reali | 🟡 **PARZIALE** — pagina costruita, primo consumatore di `KGGraphCanvas`, prova live con persona reale OK. ⏳ **E2E non eseguito**: il preflight ha dichiarato l'ambiente locale inadatto; la corsa vera è in CI, da lanciare dopo il push. F3 **resta aperta** |
 | **V10** | `#159` **F2** — il ponte gateway↔pagine | io | il ponte esiste e vale per le pagine future | ⏳ |
 | **V11** | `#143` **F3** — asse funzionale vivo | io | l'asse funzionale è vivo end-to-end | ⏳ |
 | **V12** | `#54` **F3** — API del cluster recruiting | io | le rotte esistono, testate, live | ⏳ |
@@ -51,7 +51,9 @@ con tutto il lavoro dentro.
 Le scoperte nuove si scrivono qui e **non entrano in «cosa resta»**. Si presentano una volta sola
 alla fine, come *«fuori da questo ciclo: lo vuoi nel prossimo?»*.
 
-- *(vuoto all'apertura)*
+- ⚠ **Un utente senza fattore TOTP.** `provision-derived-access --dry-run` dichiara «fattori TOTP creati **1**»: c'è una persona a cui manca il secondo fattore. Non l'ho toccata — un dry-run non scrive, e curarlo era fuori da questa voce.
+- ⚠ **`isRealPerson` è una lista chiusa di DUE email** (`chiara.spenuso@`, `andrea.spenuso@`) mentre le persone del sistema sono 161. Le altre 159 ricevono la password derivata dalla chiave madre **per progetto** (Z-262), ma il nome della funzione dice un'altra cosa e induce in errore chi la legge — è così che ho letto male la protezione delle utenze SERVICE.
+- ⚠ **`#50` F2 aveva già costruito l'API del grafo** e il piano di F3 non lo diceva abbastanza forte: ho cominciato a duplicarla e mi ha fermato il typecheck. Vale la pena che il piano di una fase nomini gli artefatti che la fase precedente ha lasciato.
 
 ## Le prove che devono poter fallire
 

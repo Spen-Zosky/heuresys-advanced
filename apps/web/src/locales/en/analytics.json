@@ -204,5 +204,21 @@
       "PROJECT": "Project",
       "ON_CALL": "On-call"
     }
+  },
+  "skillsGraph": {
+    "title": "Skill graph",
+    "description": "The neighbourhood of a skill: declared links between skills plus membership in the ESCO taxonomy. You always start from one skill — the whole catalogue holds over 18,000 edges, and drawing all of it would not be a view.",
+    "searchLabel": "Search a skill",
+    "searchPlaceholder": "at least two characters…",
+    "depth": "{{count}} hop",
+    "depth_other": "{{count}} hops",
+    "pickTitle": "Pick a skill",
+    "pickDescription": "Search a skill above and select it: the graph will show its neighbourhood.",
+    "nodes": "Nodes",
+    "explicitEdges": "Declared links",
+    "groupEdges": "Membership links",
+    "canvasEmpty": "No links for this skill at this depth.",
+    "legendExplicit": "Declared link between skills",
+    "legendGroup": "Taxonomy membership"
   }
 }

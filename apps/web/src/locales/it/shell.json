@@ -27,7 +27,8 @@
       "group": "Per gruppo",
       "catalog": "Catalogo",
       "gap": "Gap",
-      "skillGap": "Skill gap"
+      "skillGap": "Skill gap",
+      "graph": "Grafo"
     },
     "comp": {
       "analytics": "Analisi",

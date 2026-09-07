@@ -49,6 +49,7 @@ import { jobFamiliesRoutes } from "./modules/job-families/routes.js";
 import { candidatesRoutes } from "./modules/candidates/routes.js";
 import { candidateApplicationsRoutes } from "./modules/candidate-applications/routes.js";
 import { interviewsRoutes } from "./modules/interviews/routes.js";
+import { interviewFeedbackRoutes } from "./modules/interview-feedback/routes.js";
 import { jobPostingsRoutes } from "./modules/job-postings/routes.js";
 import { jobRequisitionsRoutes } from "./modules/job-requisitions/routes.js";
 import { jobRolesRoutes } from "./modules/job-roles/routes.js";
@@ -415,6 +416,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(candidatesRoutes, { prefix: "/v1/candidates" });
   await app.register(candidateApplicationsRoutes, { prefix: "/v1/candidate-applications" });
   await app.register(interviewsRoutes, { prefix: "/v1/interviews" });
+  await app.register(interviewFeedbackRoutes, { prefix: "/v1/interview-feedback" });
   await app.register(jobPostingsRoutes, { prefix: "/v1/job-postings" });
   await app.register(jobRequisitionsRoutes, { prefix: "/v1/job-requisitions" });
   await app.register(jobRolesRoutes, { prefix: "/v1/job-roles" });

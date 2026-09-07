@@ -1,0 +1,65 @@
+name: Atlas freshness (la conoscenza non deve invecchiare)
+
+# ⭐ Enzo, 2026-08-16 (#195): «l'atlante deve essere sempre aggiornato e mai fermo a
+# qualcosa di superato o incompleto». È la SoT interrogabile del progetto: se è superato,
+# ogni strumento che vi si appoggia misura il passato senza saperlo — e non se ne accorge.
+#
+# ── PERCHÉ UN WORKFLOW E NON IL CANCELLO LOCALE ─────────────────────────────
+# Misurato due volte nella sola S1091: l'atlante si è superato, il boot non lo ha visto e
+# se ne è accorto `check_marciume` a fine sessione, quando la propagazione era già partita.
+# La cura ovvia — instradare la suite in `verify_gate` — NON funziona, e la ragione è di
+# sostanza: quel cancello guarda il DIFF NON COMMITTATO, mentre `atlas_freshness()` guarda
+# `commit-dell-atlante..HEAD`, cioè i commit già fatti. Appena il modulo nuovo è committato
+# il working tree è pulito, il gate non instrada nulla e la misura non gira. Due finestre
+# diverse: la finestra giusta è dopo il push, ed è qui.
+#
+# ── LA TRAPPOLA CHE QUESTO WORKFLOW EVITA ───────────────────────────────────
+# ⚠ `fetch-depth: 0`, e NON è una precauzione generica. `atlas_freshness()` esegue
+# `git diff <commit-dell-atlante>..HEAD`: con il `fetch-depth: 1` che usano gli altri
+# workflow di questo repo quel commit non esiste nel clone, il diff fallisce, la funzione
+# torna `UNK` e lo strumento esce **2** — cioè un ROSSO PERMANENTE che non dipende
+# dall'atlante ma dal checkout. Sarebbe l'allarme che suona sempre (#194), introdotto dal
+# presidio che serviva a toglierne uno.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      # Gli stessi quattro di `ATLAS_SOURCES` in status_dashboard.py. Se cambiano lì,
+      # cambiano qui: due elenchi che divergono direbbero cose diverse sullo stesso fatto.
+      - "apps/api/src/modules/**"
+      - "apps/web/src/app/**"
+      - "packages/shared/src/schemas/**"
+      - "db/migrations/**"
+      - "docs/kb/tools/build_atlas.py"
+      - ".github/workflows/atlas-freshness.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: atlas-freshness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  atlas-freshness:
+    # Stessa protezione degli altri workflow: il runner self-hosted sta sull'host di
+    # PRODUZIONE, quindi una PR da un fork non ci deve girare mai (D-08).
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 5
+    steps:
+      - name: Checkout (storia intera — la misura ne ha bisogno)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: L'atlante è ancora vero?
+        # Esiti dello strumento, e nessuno dei tre è ambiguo:
+        #   fresco   (0) nessun file descritto dall'atlante è cambiato dopo la sua generazione
+        #   vecchio  (1) ne è cambiato almeno uno → `python docs/kb/tools/build_atlas.py`
+        #   indeciso (2) non misurabile → si degrada verso il lavoro in più, mai verso il
+        #                silenzio. Anche qui è rosso: «non ho potuto guardare» NON è «a posto».
+        run: |
+          set -e
+          esito="$(python3 docs/kb/tools/atlante_fresco.py || true)"
+          echo "atlante: $esito"
+          python3 docs/kb/tools/atlante_fresco.py

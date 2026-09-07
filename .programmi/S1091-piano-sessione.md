@@ -32,8 +32,8 @@ con tutto il lavoro dentro.
 
 | id | cosa | chi | cosa significa fatto | stato |
 |---|---|---|---|---|
-| **V1** | I due RED dello staleness: derivati 2/3 superati · cronaca al 39 % del register (soglia 25 %) | io | `session_start.py` non stampa più i due `[!!]`; verdetto staleness senza RED | ⏳ |
-| **V2** | `#249` **F3** — il presidio: il cancello `programmi.py --verifica` va interrogato da qualcuno | io | il presidio esiste ed è stato **visto scattare** su un difetto finto, poi tolto | ⏳ |
+| **V1** | I due RED dello staleness: derivati 2/3 superati · cronaca al 39 % del register (soglia 25 %) | io | `session_start.py` non stampa più i due `[!!]`; verdetto staleness senza RED | ✅ **FATTO** — peso 38,7 % → **20,6 % VERDE**; il RED «derivati» era di provenienza, non di contenuto |
+| **V2** | `#249` **F3** — il presidio: il cancello `programmi.py --verifica` va interrogato da qualcuno | io | il presidio esiste ed è stato **visto scattare** su un difetto finto, poi tolto | ✅ **FATTO** |
 | **V3** | `#231` **S7** — ri-leggere il residuo ora che `#219` è chiusa | io | il piano dice cosa resta davvero, o la voce si chiude | ⏳ |
 | **V4** | `#149` **F4** — la prossima consegna del lab trattata come non verificata | io | consegna trattata, oppure «nessuna consegna nuova» misurato e dichiarato | ⏳ |
 | **V5** | `#79` **F3** — cancello di esposizione sul prossimo lavoro che popola tabelle | io | `check_exposure.py` interrogato sul lavoro di questa sessione, o no-op dichiarato | ⏳ |

@@ -1,7 +1,7 @@
 # 249 — La contabilità dei piani va indietro rispetto ai fatti, e il cancello che lo dice non lo interroga nessuno
 
 > **item**: #249 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 > **avanzamento**: F1 e F2 eseguite in S1090 (2026-09-06) — il cancello locale di fine turno ha
 > rifiutato la chiusura su un `programmi` rosso, e la regola del progetto non ammette il
 > «pre-esistente». Resta **F3**, il presidio, che è il bersaglio vero della voce
@@ -53,7 +53,8 @@ Il bersaglio vero di questa voce **non sono i 22 difetti**: è il presidio che m
       `#235` la mig `000366` più la prova live, e `#241` V2 è stata **misurata** (`Test (api
       integration)` verde su main) invece che dedotta. **fatto =** `--verifica` esce **0**, oppure
       ogni piano ancora rosso porta la ragione scritta
-- [ ] **F3 — Il presidio, che è il motivo per cui la voce esiste** — il cancello va **interrogato
+- [x] **F3 — Il presidio, che è il motivo per cui la voce esiste** — **FATTO 2026-09-07 (S1091)**: il presidio è in **due** posti, non uno, e i due coprono momenti diversi. ① **Cancello locale** — `verify_gate.py` ROUTES: `docs/kb/SOT_BACKLOG.md` instrada ora `["handoff-lint", "programmi"]`, messa **prima** del prefisso generico `docs/kb/SOT_` perché il router è «primo prefisso che vince». È la correzione che conta: la deriva **non nasce toccando `.programmi/`**, nasce quando una voce passa a `DONE` nel register e il file-piano resta indietro — instradata sui soli piani, la suite scattava per coincidenza, ed è letteralmente ciò che è successo in S1090. ② **CI** — `state-lint.yml` (già instradato su `SOT_BACKLOG.md`) guadagna `.programmi/**` + `docs/kb/tools/programmi.py` nei `paths` e due passi bloccanti: `--selftest` poi `--verifica`. Rende il cancello inaggirabile per chi committa da un'altra interfaccia. **Scartato il boot**, con la ragione: sarebbe rumore a ogni avvio, cioè il difetto che `#194` è venuta a togliere. **Prova che ha potuto fallire, eseguita sul vivo**: stato del piano portato a `IN CORSO (prova del presidio S1091)` → `--verifica` **exit 1**, 2 difetti, nomina il file; `verify_gate.py route` → «suite instradate: **programmi**», `[L1]` rossa. Difetto rimosso subito dopo. `--selftest` 20/20 verde.
+  *(testo originale:)* — il cancello va **interrogato
       da qualcuno**: boot, chiusura o CI. Va scelto dove, con la ragione: il boot lo rende visibile
       ma rumoroso, la chiusura lo lega al momento in cui la deriva nasce (una voce si chiude e il
       piano resta indietro), la CI lo rende inaggirabile. **fatto =** il presidio esiste, ed è

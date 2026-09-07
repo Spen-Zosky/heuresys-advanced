@@ -14,6 +14,8 @@ on:
       - "docs/kb/SOT_BACKLOG.md"
       - "docs/kb/DEBT_REGISTER.md"
       - "docs/kb/tools/handoff_lint.py"
+      - ".programmi/**"
+      - "docs/kb/tools/programmi.py"
       - ".github/workflows/state-lint.yml"
   pull_request:
     branches: [main]
@@ -23,6 +25,8 @@ on:
       - "docs/kb/SOT_BACKLOG.md"
       - "docs/kb/DEBT_REGISTER.md"
       - "docs/kb/tools/handoff_lint.py"
+      - ".programmi/**"
+      - "docs/kb/tools/programmi.py"
       - ".github/workflows/state-lint.yml"
   workflow_dispatch: {}
 
@@ -53,6 +57,19 @@ jobs:
       # self-test verifica lo STRUMENTO sui casi che deve saper distinguere (furto di
       # prefisso, commenti, file vuoti), poi il censimento verifica il REPO. Uno strumento
       # di copertura che non controlla se stesso e' una dichiarazione, non una misura.
+      # #249 F3 (S1091). Il cancello `programmi.py --verifica` esisteva, funzionava ed
+      # usciva 1 — e NESSUNO lo interrogava: ne' il boot, ne' la chiusura, ne' la CI. Una
+      # deriva che nessuno misura si accumula: era arrivata a 29 difetti su 12 piani, e
+      # in S1090 ha fermato una chiusura per pura coincidenza. Qui e' inaggirabile, anche
+      # per chi committa da un'altra interfaccia. Il self-test viene prima per la stessa
+      # ragione dei due passi qui sotto: uno strumento che non prova se stesso e' una
+      # dichiarazione, non una misura.
+      - name: Piani multi-sessione — self-test dello strumento
+        run: python3 docs/kb/tools/programmi.py --selftest
+
+      - name: Piani multi-sessione — integrita' della contabilita' (blocking gate)
+        run: python3 docs/kb/tools/programmi.py --verifica
+
       - name: Module/test coverage census — self-test
         run: python3 docs/kb/tools/check_module_test_coverage.py --self-test
 

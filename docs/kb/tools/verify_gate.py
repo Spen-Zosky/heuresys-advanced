@@ -128,6 +128,13 @@ ROUTES: list[tuple[str, list[str]]] = [
     ("db/",              ["typecheck", "db-health", "no-contamination"]),
     ("scripts/",         ["shell-tests"]),
     # solo i file di stato governati dall'handoff, non i tool sotto docs/kb/tools/
+    # `programmi` sta su SOT_BACKLOG per #249 F3 (S1091): la deriva della contabilita'
+    # dei piani NON nasce toccando `.programmi/` — nasce QUI, quando una voce passa a
+    # DONE nel register e il file-piano resta indietro. Instradata sui soli `.programmi/`
+    # la suite scattava per caso, quando capitava che si toccasse anche un piano: e'
+    # esattamente cio' che e' successo in S1090, dove ha fermato la chiusura per
+    # coincidenza. Legarla al register la lega al momento in cui il difetto si crea.
+    ("docs/kb/SOT_BACKLOG.md", ["handoff-lint", "programmi"]),
     ("docs/kb/SOT_",     ["handoff-lint"]),
     ("docs/kb/DEBT_",    ["handoff-lint"]),
     ("docs/kb/tools/handoff_lint.py", ["handoff-lint"]),

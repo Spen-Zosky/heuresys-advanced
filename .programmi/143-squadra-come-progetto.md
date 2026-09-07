@@ -123,6 +123,45 @@ progetto**, mai i loro dati personali (è già I18).
   Lo `scopo` dei 26 progetti migrati resta **vuoto**: è un dato che nessuno ha mai scritto, e
   riempirlo col nome della squadra sarebbe fingere di averlo.
 - [ ] **F3 — Asse funzionale vivo** — dare consumatori reali a `isInFunctionalScope`/`isFunctionalLeader`, oggi codice morto; l'autorità del capo progetto è **sul lavoro**, non sulle persone · budget ~250k
+
+  ### 🟡 S1091 (2026-09-07) — il primo passo di F3, quello che il piano stesso prescriveva
+
+  Questa fase apre con un avvertimento scritto qui sotto e mai eseguito: *«`isInFunctionalScope`
+  / `isFunctionalLeader` sono **codice morto** — zero consumatori di produzione. Prima di
+  costruirci sopra, verificare che facciano ciò che dicono: nessuno le ha mai esercitate, quindi
+  non c'è prova che funzionino»*. **Ri-misurato oggi: ancora vero** — `grep` su `apps/api/src`
+  trova zero usi fuori dal file che le definisce.
+
+  Ora la prova c'è: `apps/api/test/functional-scope.integration.test.ts`, **6 casi, verdi in
+  115 ms** sul gemello (dove il database vive), contro i dati reali — 26 squadre attive, 174
+  membri attivi, 26 righe con ruolo `LEAD`, misurati lo stesso giorno.
+
+  **⭐ E le prove POSSONO fallire, perché le ho viste fallire.** Un verde al primo colpo su un
+  test appena scritto non dimostra niente. Sabotaggio dichiarato ed eseguito: in
+  `functionalScopeUserIds` la condizione che lega la squadra al suo capo è stata sostituita da
+  `true`, così che ogni squadra risultasse guidata dall'attore. Esito: **exit 1, 2 test falliti**,
+  e sono **esattamente i due che dovevano** — «non contiene l'estraneo» e la concordanza di
+  `isInFunctionalScope` nei due versi. Gli altri quattro sono rimasti verdi, ed è coerente: quel
+  sabotaggio **allarga** il perimetro, non lo svuota. File ripristinato con `git checkout`,
+  verificato che la parola `SABOTAGGIO` non compaia più (0 occorrenze) e ri-eseguito: **6/6**.
+
+  **Cosa dicono i sei casi** — e la seconda vale più della prima, perché la prima la
+  soddisferebbe anche una funzione che restituisce tutti:
+  1. il capo ha nel perimetro i membri della squadra che guida;
+  2. ⭐ **non** ha nel perimetro chi non è in nessuna sua squadra;
+  3. il perimetro comprende sempre sé stessi, **anche per chi non guida niente** (I17);
+  4. `isInFunctionalScope` concorda con l'elenco nei due versi, self incluso;
+  5. `isFunctionalLeader` distingue chi guida da chi no — **col caso negativo**, senza il quale
+     una funzione che risponde sempre `true` passerebbe;
+  6. ⚠ le **due fonti** del «capo funzionale» (`team_lead_user_id` **oppure** una riga membro con
+     ruolo `LEAD`) danno lo stesso esito: per chiunque sia capo per *una* delle due,
+     `isFunctionalLeader` risponde `true`. È il nodo che il piano lascia aperto — «F2 deve
+     decidere quale delle due sopravvive, o resteranno due verità sullo stesso fatto» — e questo
+     caso lo **misura** invece di supporlo. Oggi concordano.
+
+  ⏳ **Resta il cuore di F3**: dare consumatori **reali** alle tre funzioni. Questo passo prova
+  che si possono usare; non le usa. È la differenza fra «lo strumento è affilato» e «lo strumento
+  è al lavoro», e chiamarla F3 chiusa sarebbe il falso verde di questa fase.
 - [ ] **F4 — API progetti/squadre** — CRUD + avanzamento + test che provano il **confine I18** (un capo progetto NON vede i dati sensibili dei membri) · budget ~250k
 - [ ] **F5 — Frontend + dimostrazione live** — con un capo progetto reale gerarchicamente inferiore a un suo membro: è il caso che dimostra il modello · budget ~250k
 

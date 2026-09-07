@@ -34,7 +34,7 @@ con tutto il lavoro dentro.
 |---|---|---|---|---|
 | **V1** | I due RED dello staleness: derivati 2/3 superati · cronaca al 39 % del register (soglia 25 %) | io | `session_start.py` non stampa più i due `[!!]`; verdetto staleness senza RED | ✅ **FATTO** — peso 38,7 % → **20,6 % VERDE**; il RED «derivati» era di provenienza, non di contenuto |
 | **V2** | `#249` **F3** — il presidio: il cancello `programmi.py --verifica` va interrogato da qualcuno | io | il presidio esiste ed è stato **visto scattare** su un difetto finto, poi tolto | ✅ **FATTO** |
-| **V3** | `#231` **S7** — ri-leggere il residuo ora che `#219` è chiusa | io | il piano dice cosa resta davvero, o la voce si chiude | ⏳ |
+| **V3** | `#231` **S7** — ri-leggere il residuo ora che `#219` è chiusa | io | il piano dice cosa resta davvero, o la voce si chiude | ✅ **FATTO** — S7 senza bersaglio (corsa `34060405061` success, 0 falliti); voce **CHIUSA**, 0 fasi aperte |
 | **V4** | `#149` **F4** — la prossima consegna del lab trattata come non verificata | io | consegna trattata, oppure «nessuna consegna nuova» misurato e dichiarato | ⏳ |
 | **V5** | `#79` **F3** — cancello di esposizione sul prossimo lavoro che popola tabelle | io | `check_exposure.py` interrogato sul lavoro di questa sessione, o no-op dichiarato | ⏳ |
 | **V6** | `#214` **F6** — un perimetro dalla coda dei neutri, in ordine di rischio crescente | io | una riga nuova in `agent-perimetri.json` con decisione e data | ⏳ |

@@ -280,7 +280,9 @@
   - si-riprende-con: *«riprendi #233»*
   - priority: P3 · effort: ~1h (fondere invece di duplicare, con la prova nei due versi) · doc: `docs/kb/tools/lab_inbox.py` · `docs/kb/tools/handoff_lint.py` (`S4`)
 
-- **#231 Consumare i lavori attivi: il ciclo di esecuzione delegato** · status: ACTIVE
+- **#231 Consumare i lavori attivi: il ciclo di esecuzione delegato** · status: DONE
+  - ✅ **CHIUSA 2026-09-07 (S1091)**: **zero fasi aperte** (misurato `grep -c '^- \[ \]'` → 0). L'ultima, `S7 #219 F5d — triage dei 10 falliti`, **non aveva più bersaglio**: `#219` è chiusa e la corsa integrale `34060405061` su main è `completed success` (35m13s, 367 passati · **0 falliti** · 80 non eseguiti tutti dichiarati). Il mandato che la voce serviva — S1080, rinnovato S1081 e S1085 — è esaurito; quello equivalente di S1091 vive in `.programmi/S1091-piano-sessione.md` e **non riapre questa voce**. Una voce «ciclo di esecuzione» tenuta aperta per sempre è una voce che non si chiude mai: occupava una corsia ACTIVE da dieci sessioni
+  - ⭐ **conseguenza che vale oltre la voce**: con la suite verde cade il gate scritto in `#169` F4 — *«la prova pretende che la suite continui a girare, e con 42 falliti quella metà non è dimostrabile»*
   - nasce-da: Enzo, S1080 (2026-08-25) — *«consumiamo i lavori attivi nell'elenco: decidi tu priorita' e sequenze»*; rinnovato S1081 e di nuovo **S1085** (2026-08-30) — *«consuma tutte le voci presenti in P1, P2 e P3 procedendo in modo automatico e autonomo, prendendo te le decisioni al mio posto»*
   - cos-e: **non e' una voce di prodotto**, e' la casa del batch delegato — l'ordine deciso, la simulazione R24 di ogni voce, e cosa e' entrato in quale sessione. Il dettaglio vive in `.programmi/231-consumo-lavori-attivi.md`, non qui
   - perche-sta-nel-register: fino a S1084 il programma era aperto e la sua voce **non era in nessuna corsia**, quindi il boot lo stampava fra i «PROGRAMMI APERTI FUORI DAL MENU» — un'anomalia vera, segnalata da uno strumento che funzionava. La cura e' agganciarlo al register, non zittire il controllo

@@ -1,8 +1,15 @@
 # 231 — Consumare i lavori attivi: la sequenza, e le tre voci che non erano eseguibili
 
 > **item**: #231 (ciclo di esecuzione — mandato di Enzo S1080, rinnovato S1081)
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 > **aperto**: S1080 (2026-08-25) · **ripreso**: S1081 (2026-08-25, «Canonical Session 02»)
+> **chiuso**: S1091 (2026-09-07) — **tutte le fasi sono spuntate, zero aperte** (misurato:
+> `grep -c '^- \[ \]'` → 0). L'ultima, S7, non aveva più bersaglio: `#219` è chiusa e la corsa
+> integrale `34060405061` è `success` con **0 falliti**. Il mandato che questa voce serviva —
+> S1080, rinnovato S1081 e S1085 — è esaurito. Il mandato equivalente di S1091 **non riapre
+> questa voce**: ha la sua casa in `.programmi/S1091-piano-sessione.md`. Una voce «ciclo di
+> esecuzione» tenuta aperta per sempre è una voce che non si chiude mai, e occupava una corsia
+> ACTIVE da dieci sessioni.
 
 ## Il mandato
 
@@ -93,7 +100,8 @@ catena che sblocca la suite (#169 → #219) · **(c)** il lavoro read-only mentr
   `visualization-graphs` aperto **con la guardia** (mig `000355`) perché la sua neutralità era
   vera oggi e non per costruzione; + `000356`, cura di un difetto **mio** (le utenze SERVICE
   contate come persone senza posizione: violazioni organigramma 3 → 0)
-- [ ] **S7 `#219` F5d — triage dei 10 falliti** — ⏳ **in corso, a VM scarica**: `aide` è finito
+- [x] **S7 `#219` F5d — triage dei 10 falliti** — **FATTO 2026-09-06 (S1090), misurato 2026-09-07 (S1091)**: la voce non ha più bersaglio perché i dieci falliti **non esistono più**. `#219` è CHIUSA e la corsa integrale `34060405061` su `main` è `completed success` in 35m13s — **367 passati · 0 falliti · 80 non eseguiti, tutti dichiarati**, su 447 contati su 447 (misurato con `gh run list --workflow=playwright-integrale.yml`, che al boot risultava «non disponibile» solo perché la rete era spenta con `--no-net`). ⭐ **Conseguenza che vale oltre questa riga**: cade il gate scritto in `#169` F4 — *«la prova pretende che la suite continui a girare, e con 42 falliti quella metà non è dimostrabile»*. Ora lo è. Cronaca dei nove giri in `.programmi/219-otto-guasti-suite-e2e.md` §S1090.
+  *(testo originale:)* — ⏳ **in corso, a VM scarica**: `aide` è finito
   (load da 3,79 a **0,63**), API riaccesa, corsa integrale rilanciata col referto JSON. Il
   preflight tace, come deve ad ambiente sano — e alla sua prima corsa vera aveva dato un **falso
   allarme**, curato subito (`process.exit()` dentro un `fetch` aborta Node su Windows): un

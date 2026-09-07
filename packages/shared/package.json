@@ -112,6 +112,11 @@
       "heuresys-source": "./src/schemas/candidate-applications.ts",
       "default": "./dist/schemas/candidate-applications.js"
     },
+    "./schemas/interviews": {
+      "types": "./dist/schemas/interviews.d.ts",
+      "heuresys-source": "./src/schemas/interviews.ts",
+      "default": "./dist/schemas/interviews.js"
+    },
     "./schemas/job-postings": {
       "types": "./dist/schemas/job-postings.d.ts",
       "heuresys-source": "./src/schemas/job-postings.ts",

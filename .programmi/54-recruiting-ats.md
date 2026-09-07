@@ -54,10 +54,35 @@
   ⚠ Entrambe si vedono solo alla **seconda passata** — girano prima della `000364` e alla prima
   non possono vedere tabelle che ancora non esistono.
 - [ ] **F3 — API** — moduli secondo il pattern in 7 passi, un commit per slice · budget ~250k
-      ▸ **4 fette su 7 fatte**: `job-requisitions` (4 rotte, 10 test), `job-postings`
-      (4 rotte, 8 test), `candidates` (4 rotte, 9 test) — S1087, 2026-09-05 — e
-      **`candidate-applications` (4 rotte, 9 test)**, S1091, 2026-09-07. Restano
-      interviews, feedback, offers.
+      ▸ **5 fette su 7 fatte**: `job-requisitions` (4 rotte, 10 test), `job-postings`
+      (4 rotte, 8 test), `candidates` (4 rotte, 9 test) — S1087, 2026-09-05 — piu'
+      **`candidate-applications` (4 rotte, 9 test)** e **`interviews` (4 rotte, 9 test)**,
+      entrambe S1091, 2026-09-07. Restano **feedback** e **offers**.
+
+      ### La quinta fetta (S1091) — e le lezioni della quarta hanno tenuto
+
+      `interviews` si appende a una CANDIDATURA, non a una persona, e la differenza e' di
+      sostanza: la stessa persona puo' candidarsi a due annunci, e i colloqui dell'uno non
+      sono quelli dell'altro. La chiave esterna lo dice gia' — punta a
+      `sys_candidate_applications` — e porta un `ON DELETE CASCADE`, che e' una ragione in
+      piu' per cui nessuna di queste fette espone DELETE.
+
+      **9/9 verdi AL PRIMO COLPO**, e non e' fortuna: le due lezioni pagate un'ora prima
+      sono state applicate prima di sbatterci — insert e update in **due statement** (mai la
+      CTE di scrittura), e il presidio «uno stato terminale pretende il suo dato» messo nel
+      **service**, che legge la riga, e non nello schema, che guarda solo il corpo.
+
+      ⚠ **Un verde al primo colpo va sondato, o non e' una prova.** Sabotato il controllo
+      del tenant (`if (false && …)`): esito **exit 1, un solo test fallito**, ed e'
+      esattamente «⭐ RIFIUTA un colloquio che scavalca il tenant». Gli altri otto restano
+      verdi, come dev'essere: quel controllo presidia una cosa sola. Ripristinato, 9/9.
+
+      Scelte di contratto dichiarate: la **data e' facoltativa** in creazione — `SCHEDULED`
+      senza data vuol dire «da fissare», e pretenderla obbligherebbe a inventarne una, che e'
+      peggio di una assente perche' nessuno la distinguerebbe piu' da una vera; nasce sempre
+      `SCHEDULED`, perche' un colloquio nato `COMPLETED` non e' mai stato fissato; nessuna
+      DELETE, perche' `CANCELLED` e `NO_SHOW` sono **esiti** che dicono cose diverse, e una
+      riga cancellata non le direbbe piu'.
 
       ### La quarta fetta (S1091) — la cerniera, e i due difetti che ha trovato
 

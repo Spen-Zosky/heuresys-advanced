@@ -54,9 +54,53 @@
   ⚠ Entrambe si vedono solo alla **seconda passata** — girano prima della `000364` e alla prima
   non possono vedere tabelle che ancora non esistono.
 - [ ] **F3 — API** — moduli secondo il pattern in 7 passi, un commit per slice · budget ~250k
-      ▸ **3 fette su 7 fatte (S1087, 2026-09-05)**: `job-requisitions` (4 rotte, 10 test),
-      `job-postings` (4 rotte, 8 test), `candidates` (4 rotte, 9 test). Restano
-      applications, interviews, feedback, offers.
+      ▸ **4 fette su 7 fatte**: `job-requisitions` (4 rotte, 10 test), `job-postings`
+      (4 rotte, 8 test), `candidates` (4 rotte, 9 test) — S1087, 2026-09-05 — e
+      **`candidate-applications` (4 rotte, 9 test)**, S1091, 2026-09-07. Restano
+      interviews, feedback, offers.
+
+      ### La quarta fetta (S1091) — la cerniera, e i due difetti che ha trovato
+
+      `candidate-applications` lega una persona a un annuncio: le tre fette precedenti hanno
+      costruito i due capi, questa costruisce il legame. Senza, il recruiting resta un elenco
+      di persone accanto a un elenco di annunci. Pattern in 7 passi rispettato; permessi
+      riusati (`job-requisition:read`/`:manage`); nessuna DELETE, perche' una candidatura e'
+      **il fatto che una persona si e' presentata** e quel fatto non si disfa — si chiude con
+      `WITHDRAWN` o `REJECTED` col suo motivo.
+
+      ⭐ **Il caso di prova che vale piu' di tutti**: una candidatura che **scavalca il
+      tenant**. Le due chiavi esterne guardano ciascuna la propria tabella e non si parlano,
+      quindi per PostgreSQL «persona dell'azienda A candidata all'annuncio dell'azienda B» e'
+      una riga perfettamente valida. Il controllo esiste solo nel service, e se sparisse
+      **ogni altro test resterebbe verde**: e' una falla di isolamento (I5) che nessun vincolo
+      coglierebbe.
+
+      🔬 **Due difetti trovati eseguendo, non leggendo** — ed entrambi miei:
+      1. **`WITH n AS (INSERT … RETURNING) SELECT …` non funziona**: in PostgreSQL la parte
+         principale vede lo stesso snapshot delle CTE di scrittura, quindi la riga appena
+         inserita non c'e' ancora e il SELECT torna vuoto. Prima corsa: **5 rossi**, il primo
+         un 500 «Cannot read properties of undefined», gli altri quattro la sua conseguenza
+         (senza id le PATCH chiedevano `/undefined`). Corretto uno, ne sono caduti quattro —
+         ed e' la regola «una batteria che si ferma al primo rosso nasconde tutti gli altri»
+         vista da vicino. Le tre fette precedenti usavano gia' la forma giusta: bastava
+         guardarle.
+      2. **Il quinto rosso ha cambiato il CODICE, non il test.** Avevo messo il controllo «un
+         rifiuto pretende il suo motivo» anche nello schema Zod, che rispondeva 400. Sembrava
+         un presidio in piu' e invece respingeva un caso **legittimo**: una candidatura che ha
+         gia' il motivo sulla riga e cambia solo fase. Lo schema guarda il CORPO e non conosce
+         lo stato di arrivo, quindi non puo' decidere. Il controllo e' rimasto dove
+         l'informazione c'e' — nel service, che risponde 409 — col CHECK del database come
+         ultima rete. **Un presidio messo dove non ha i dati per giudicare non e' un presidio
+         in piu': e' un rifiuto sbagliato in piu'.**
+
+      Esito: **9/9 verdi sul gemello**, dove il database vive. `typecheck` API e `typecheck:test`
+      puliti, `lint` 5/5.
+
+      ⚠ **Le tabelle del recruiting sono VUOTE in produzione** (misurato lo stesso giorno:
+      0 candidati, 0 annunci, 0 requisizioni). Il modello c'e', i dati no — quindi la
+      dimostrazione live su dati di dominio reali non e' possibile oggi e non e' stata
+      simulata: le fixture nascono e muoiono dentro la transazione del file, come nelle tre
+      fette precedenti. Popolare il ciclo e' materia di F4, non di questa fase.
 - [ ] **F4 — Frontend + E2E con login reale** — cluster `/recruiting`, **componente Kanban di `@heuresys/ui` mai usato** finora, più il posting pubblico (percorso prospect ADR-0026) · budget ~250k
 
 ## Esito di F1 — misurato il 2026-08-14

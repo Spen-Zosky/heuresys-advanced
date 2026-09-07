@@ -110,6 +110,7 @@ export * from "./schemas/organization-unit-processes.js";
 export * from "./schemas/engagement.js";
 export * from "./schemas/approvals.js";
 export * from "./schemas/candidates.js";
+export * from "./schemas/candidate-applications.js";
 export * from "./schemas/job-postings.js";
 export * from "./schemas/job-requisitions.js";
 export * from "./schemas/tenant-materialization.js";

@@ -43,7 +43,7 @@ con tutto il lavoro dentro.
 | **V9** | `#50` **F3** — la vista del grafo delle competenze (~250k) | io | la vista esiste e mostra dati reali | 🟡 **PARZIALE** — pagina costruita, primo consumatore di `KGGraphCanvas`, prova live con persona reale OK. ⏳ **E2E non eseguito**: il preflight ha dichiarato l'ambiente locale inadatto; la corsa vera è in CI, da lanciare dopo il push. F3 **resta aperta** |
 | **V10** | `#159` **F2** — il ponte gateway↔pagine | io | il ponte esiste e vale per le pagine future | 🟡 **PARZIALE** — il **canale** estratto in `use-agent-stream.ts` (pagina 300→183 righe) e reso davvero riusabile: **non traduce**, restituisce un `code` i18n. Il **componente** è di `ux-design-shared`, altro repo, non aperto. Prova dinamica assente e dichiarata |
 | **V11** | `#143` **F3** — asse funzionale vivo | io | l'asse funzionale è vivo end-to-end | 🟡 **PARZIALE** — eseguito il primo passo che F3 stessa prescrive: le tre funzioni erano **codice morto mai esercitato**, ora hanno **6 test verdi** sui dati reali e li ho **visti fallire** sabotando la funzione. Resta il cuore: dare loro consumatori reali |
-| **V12** | `#54` **F3** — API del cluster recruiting | io | le rotte esistono, testate, live | ⏳ |
+| **V12** | `#54` **F3** — API del cluster recruiting | io | le rotte esistono, testate, live | 🟡 **UNA FETTA SU QUATTRO RESTANTI** — `candidate-applications` completa (4 rotte, **9/9 test verdi** sul gemello). Trovati due difetti miei eseguendo. F3 passa a **4 fette su 7**; restano interviews, feedback, offers |
 | **V13** | Propagazione: VM + linux-pc allineate, deploy armato | io | `verifica-deploy.sh` non dice più `DISALLINEATO` | ⏳ |
 
 ## Registro «fuori da questo ciclo»

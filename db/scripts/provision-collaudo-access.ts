@@ -49,6 +49,41 @@ const ARGON2_PARAMS = {
 
 const DRY = process.argv.includes("--dry-run");
 const UNDO = process.argv.includes("--undo");
+/**
+ * `--riallinea` — riporta le tre utenze alla LORO chiave, quando qualcosa gliel'ha tolta
+ * (#169 F3b, S1091 — 2026-09-07).
+ *
+ * Perche' esiste, misurato in produzione quel giorno: le tre entravano con la password
+ * derivata dalla CHIAVE MADRE (HTTP 200) e NON con la propria (HTTP 401) — il rovescio
+ * esatto di cio' che F2 aveva provato il 2026-08-25 — e portavano un fattore TOTP
+ * `VERIFIED` che il modello di collaudo non prevede. La cronologia lo dice senza margini:
+ * credenziale del 25 agosto `rotated_at = 31 agosto`, credenziale nuova e fattore TOTP
+ * entrambi creati il 31. Quel giorno le tre sono state «riparate» con
+ * `provision-derived-access --solo=`, che deriva TUTTO dalla chiave madre.
+ * Effetto: chi possiede la chiave madre completava un accesso come
+ * `piattaforma@collaudo.invalid`, che e' PLATFORM_ADMIN ed e' esente dal secondo fattore.
+ * E' alla lettera cio' che #169 F4 dichiara debba essere IMPOSSIBILE.
+ *
+ * La via che ha prodotto il guasto e' ora chiusa a monte da una guardia strutturale su
+ * `user_type = 'SERVICE'` in `provision-derived-access.ts`. Questo flag rimedia
+ * all'esemplare gia' presente — che una guardia, da sola, non disfa.
+ *
+ * Le quattro cose di ogni scrittura di massa, anche per tre righe:
+ *  (a) misura prima  — credenziali correnti e fattori, contati e stampati
+ *  (b) guardia       — agisce SOLO sulle tre email di COLLAUDO_IDENTITIES e SOLO se
+ *                      `user_type = 'SERVICE'`: elenco esplicito, mai un carattere jolly
+ *  (c) post-condizione — gli STANDARD restano identici e la sentinella del censimento
+ *                      resta a zero (gia' presenti in coda a main), e in piu' i fattori
+ *                      delle PERSONE non cambiano di numero
+ *  (d) rollback      — giornale `staging.collaudo_riallineo_undo`, popolato PRIMA di
+ *                      toccare qualunque cosa: porta l'hash e il segreto rimossi, cosi'
+ *                      lo stato del 31 agosto e' ricostruibile riga per riga
+ */
+const RIALLINEA = process.argv.includes("--riallinea");
+const UNDO_REASON =
+  "#169 F3b (S1091, 2026-09-07): rimosso perche' derivato dalla CHIAVE MADRE invece che " +
+  "dalla chiave di collaudo. Misurato live: password di collaudo 401, password da chiave " +
+  "madre 200 su tutte e tre. Introdotto il 2026-08-31 da provision-derived-access --solo=.";
 const EXEMPTION_REASON =
   "collaudo-access (#169 F2, direttiva Enzo 2026-08-25): utenza di collaudo SERVICE, " +
   "verifiche funzionali e frontend senza il rito di login delle persone reali";
@@ -105,9 +140,40 @@ async function main(): Promise<void> {
     const stdBefore = before.rows[0]!.std;
     console.log(`misura prima: STANDARD=${stdBefore} SERVICE=${before.rows[0]!.srv}`);
 
-    const stats = { utenti: 0, ruoli: 0, identita: 0, credenziali: 0, iscrizioni: 0, esenzioni: 0, invariati: 0 };
+    // (a) misura prima, parte seconda — serve solo a `--riallinea`, ma si prende SEMPRE:
+    //     e' la post-condizione (c) a pretenderla, e una misura presa solo nel ramo che
+    //     la usa e' una misura che al primo cambio di ramo sparisce.
+    const facBefore = await db.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_auth_mfa_factors f
+         JOIN sys.sys_users u ON u.user_id = f.auth_mfa_factor_user_id
+        WHERE u.user_type <> 'SERVICE'`);
+    const fattoriPersoneBefore = facBefore.rows[0]!.n;
+
+    const stats = {
+      utenti: 0, ruoli: 0, identita: 0, credenziali: 0, iscrizioni: 0, esenzioni: 0,
+      riallineate: 0, fattoriRimossi: 0, invariati: 0,
+    };
 
     await db.query("BEGIN");
+
+    // (d) il giornale del rollback, creato PRIMA di qualunque scrittura. Vive in `staging`,
+    //     che e' lo schema ausiliario dichiarato per questa materia (I3/I4).
+    if (RIALLINEA && !DRY) {
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS staging.collaudo_riallineo_undo (
+          undo_id      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          undo_email   varchar(255) NOT NULL,
+          undo_specie  varchar(64)  NOT NULL,
+          undo_valore  text         NOT NULL,
+          undo_ragione text         NOT NULL,
+          undo_at      timestamptz  NOT NULL DEFAULT now()
+        )`);
+      await db.query(`COMMENT ON TABLE staging.collaudo_riallineo_undo IS
+        'GIORNALE DI ROLLBACK (#169 F3b, 2026-09-07). Porta gli hash di credenziale e i '
+        'segreti di fattore RIMOSSI dalle tre utenze di collaudo quando sono state riportate '
+        'alla loro chiave propria. Ogni riga rende ricostruibile lo stato precedente. Non e'' '
+        'una tabella di lavoro: non si svuota per fare spazio.'`);
+    }
     for (const c of COLLAUDO_IDENTITIES) {
       let touched = false;
 
@@ -169,7 +235,30 @@ async function main(): Promise<void> {
         const cred = await db.query<{ n: string }>(
           `SELECT count(*)::text AS n FROM sys.sys_auth_credentials
             WHERE auth_credential_identity_id = $1 AND auth_credential_is_current`, [identityId]);
-        if (cred.rows[0]!.n === "0") {
+        // --riallinea: la credenziale corrente NON viene dalla chiave di collaudo (lo dice la
+        // prova live: 401 con la propria, 200 con la madre). Si archivia nel giornale e si
+        // ruota, cosi' il ramo qui sotto la ricrea dalla chiave giusta.
+        if (RIALLINEA && cred.rows[0]!.n !== "0") {
+          stats.riallineate++; touched = true;
+          if (!DRY) {
+            await db.query(
+              `INSERT INTO staging.collaudo_riallineo_undo
+                 (undo_email, undo_specie, undo_valore, undo_ragione)
+               SELECT $1, 'credenziale', auth_credential_hash, $2
+                 FROM sys.sys_auth_credentials
+                WHERE auth_credential_identity_id = $3 AND auth_credential_is_current`,
+              [c.email, UNDO_REASON, identityId]);
+            await db.query(
+              `UPDATE sys.sys_auth_credentials
+                  SET auth_credential_is_current = false, rotated_at = now()
+                WHERE auth_credential_identity_id = $1 AND auth_credential_is_current`, [identityId]);
+          }
+        }
+        // `|| RIALLINEA` e non `|| (RIALLINEA && !DRY)`: la seconda forma faceva dire al
+        // dry-run «credenziali create 0» mentre l'esecuzione vera ne avrebbe create 3. Un
+        // giro a vuoto che sottostima e' peggio che inutile — e' la stessa lezione gia'
+        // scritta nel gemello di questo script.
+        if (cred.rows[0]!.n === "0" || RIALLINEA) {
           stats.credenziali++; touched = true;
           if (!DRY) {
             const hash = await argon2.hash(deriveCollaudoPassword(key, c.email), ARGON2_PARAMS);
@@ -217,7 +306,26 @@ async function main(): Promise<void> {
       const fac = await db.query<{ n: string }>(
         `SELECT count(*)::text AS n FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`,
         [userId]);
-      if (fac.rows[0]!.n !== "0") fail(`${c.email} ha ${fac.rows[0]!.n} fattori MFA: non previsto, fermati e guarda`);
+      if (fac.rows[0]!.n !== "0") {
+        // Senza `--riallinea` ci si FERMA, ed e' giusto cosi': un fattore che non dovrebbe
+        // esserci e' un fatto da guardare, non da assorbire in silenzio. Con `--riallinea`
+        // lo si toglie, ma prima lo si scrive nel giornale: il segreto rimosso e' l'unica
+        // cosa che rende lo stato precedente ricostruibile.
+        if (!RIALLINEA) fail(`${c.email} ha ${fac.rows[0]!.n} fattori MFA: non previsto, fermati e guarda`);
+        stats.fattoriRimossi += Number(fac.rows[0]!.n); touched = true;
+        if (!DRY) {
+          await db.query(
+            `INSERT INTO staging.collaudo_riallineo_undo
+               (undo_email, undo_specie, undo_valore, undo_ragione)
+             SELECT $1, 'fattore-' || lower(auth_mfa_factor_kind), auth_mfa_factor_secret, $2
+               FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $3`,
+            [c.email, UNDO_REASON, userId]);
+          // elenco esplicito: si cancella per user_id di UNA delle tre email dichiarate in
+          // COLLAUDO_IDENTITIES, gia' verificata SERVICE piu' sopra. Mai un carattere jolly.
+          await db.query(
+            `DELETE FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`, [userId]);
+        }
+      }
 
       if (!touched) stats.invariati++;
     }
@@ -236,6 +344,21 @@ async function main(): Promise<void> {
         await db.query("ROLLBACK");
         fail(`la sentinella v_user_census_deviation non e' piu' a zero (${sent.rows[0]!.n}): rollback`);
       }
+      // (c) la post-condizione che protegge cio' che NON doveva cambiare. `--riallinea`
+      //     CANCELLA fattori MFA: la cosa da proteggere non e' il numero di fattori delle
+      //     tre — quello DEVE andare a zero — ma quello delle PERSONE, che la DELETE non
+      //     deve poter sfiorare. Senza questa riga un errore nella clausola WHERE
+      //     lascerebbe 158 persone senza secondo fattore e nessuno se ne accorgerebbe qui.
+      const facAfter = await db.query<{ n: string }>(
+        `SELECT count(*)::text AS n FROM sys.sys_auth_mfa_factors f
+           JOIN sys.sys_users u ON u.user_id = f.auth_mfa_factor_user_id
+          WHERE u.user_type <> 'SERVICE'`);
+      if (facAfter.rows[0]!.n !== fattoriPersoneBefore) {
+        await db.query("ROLLBACK");
+        fail(
+          `i fattori MFA delle PERSONE sono cambiati (${fattoriPersoneBefore} -> ` +
+          `${facAfter.rows[0]!.n}): la cancellazione ha toccato chi non doveva. Rollback.`);
+      }
     }
     await db.query(DRY ? "ROLLBACK" : "COMMIT");
 
@@ -247,6 +370,8 @@ ${DRY ? "DRY-RUN (nessuna scrittura)" : "ESEGUITO"}
   credenziali create ............ ${stats.credenziali}
   iscrizioni all'elenco (000284)  ${stats.iscrizioni}
   esenzioni MFA ................. ${stats.esenzioni}
+  credenziali RIALLINEATE ....... ${stats.riallineate}   [#169 F3b: ruotate perche' non dalla chiave di collaudo]
+  fattori MFA rimossi ........... ${stats.fattoriRimossi}   [un segreto di troppo su un'utenza esente]
   gia' a posto (invariati) ...... ${stats.invariati}
   rollback dichiarato ........... pnpm db:provision-collaudo --undo  (le 3 email, mai un jolly)
 `);

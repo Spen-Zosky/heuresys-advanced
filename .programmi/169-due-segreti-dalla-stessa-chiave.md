@@ -194,6 +194,80 @@ verde solo perché girava su `tommaso.fiore`, che per combinazione aveva zero ri
 perdeva). Chi userà quale via è parte del lavoro.
 - [ ] **F3 Il segreto smette di essere derivato** — casuale, cifrato a riposo, consegnato una volta sola. **fatto =** un segreto nuovo non è più ricostruibile dalla chiave madre, misurato provando a ricostruirlo
 
+  ### ✅ F3b — FATTA 2026-09-07 (S1091). E la misura ha trovato un buco APERTO, non un lavoro da fare
+
+  **Ordine invertito rispetto al piano, e la ragione è misurata.** Il piano diceva F3a → F3b → F3c
+  perché «F3a da sola sposta il bersaglio». Vero — ma non dice che F3b *dipenda* da F3a: le
+  utenze di collaudo **la suite non le usa** (lo dichiara il piano stesso), quindi toglier loro la
+  password derivata **non tocca un solo test**. F3b era eseguibile subito, e toglieva il rischio
+  più grave. F3a resta il lavoro grosso (34 spec dipendono dai dati di persone reali).
+
+  **⚠ Il reperto, misurato in produzione PRIMA di toccare qualunque cosa.**
+  `node apps/api/scripts/verify-collaudo-login.mjs https://www.heuresys.com/api` → **FALLITO**,
+  e col rovescio esatto dell'atteso su tutte e tre:
+
+  | | atteso | misurato |
+  |---|---|---|
+  | password di **collaudo** | 200 | **401** |
+  | password **errata** | 401 | 401 ✓ |
+  | password da **chiave madre** | 401 | **200** |
+
+  Cioè: **chi possiede la chiave madre completava un accesso come `piattaforma@collaudo.invalid`,
+  che è `PLATFORM_ADMIN` ed è esente dal secondo fattore** (mig `000118`). È alla lettera ciò che
+  F4 dichiara debba essere impossibile — e non era una previsione: era lo stato della produzione.
+
+  **La causa, trovata leggendo il file che CREA l'oggetto e non il commento che lo descrive.**
+  `provision-collaudo-access.ts` dichiara in testa «credenziali derivate da una chiave PROPRIA —
+  mai la chiave madre», e F2 lo aveva provato il 25 agosto. Ma `provision-derived-access.ts`
+  agisce su **ogni** utente `ACTIVE` che non sia `isRealPerson`, e `isRealPerson` è una **lista
+  chiusa di due email di persone** — un'utenza di servizio non vi ha posto per definizione, quindi
+  **non era protetta da niente**. Il 2026-08-31 le tre sono state «riparate» proprio da lì con
+  `--solo=` (lo dice il commento di quell'opzione), perdendo la credenziale dalla chiave propria.
+
+  La cronologia nel database non lascia margini:
+
+  | | 25 ago | 31 ago |
+  |---|---|---|
+  | credenziale | creata (chiave propria) | `rotated_at`, sostituita (chiave madre) |
+  | fattore TOTP | *nessuno, per progetto* | creato `VERIFIED` (chiave madre) |
+
+  Il fattore TOTP è il **secondo** reperto: le utenze di collaudo nascono **senza** TOTP —
+  l'autonomia sta nell'esenzione, non in un segreto in più da custodire. Ne avevano uno, derivato
+  dalla stessa chiave madre.
+
+  **Il rimedio, in due pezzi, perché una guardia da sola non disfa l'esemplare già presente.**
+  1. **La guardia, strutturale** — `provision-derived-access.ts` esclude `user_type = 'SERVICE'`,
+     e la esclusione sta **dopo** `--solo`: così nemmeno un elenco esplicito può raggiungerle.
+     Su `user_type`, cioè una proprietà del **modello**, non su una lista da mantenere a mano.
+  2. **Il riallineamento, chirurgico** — nuovo `pnpm db:provision-collaudo --riallinea`: ruota la
+     credenziale, la ricrea dalla chiave propria, rimuove i fattori non previsti. Scelto al posto
+     di `--undo` + ri-provisioning, che avrebbe **cancellato gli utenti** — un rimedio più largo
+     del guasto è un guasto a sua volta.
+
+  **Le quattro cose di ogni scrittura, anche per tre righe**: (a) misura prima, live e sul
+  database; (b) guardia — solo le tre email di `COLLAUDO_IDENTITIES`, solo se `SERVICE`, elenco
+  esplicito mai un jolly; (c) post-condizione **su ciò che non doveva cambiare** — gli `STANDARD`
+  invariati, la sentinella del censimento a zero, e **il numero di fattori MFA delle PERSONE
+  identico**, perché la `DELETE` non deve poterle sfiorare; (d) rollback — giornale
+  `staging.collaudo_riallineo_undo`, popolato **prima** di toccare qualsiasi cosa: **6 righe**
+  (3 credenziali + 3 segreti di fattore), lo stato del 31 agosto è ricostruibile riga per riga.
+
+  🔬 **Evidenza live, dopo**:
+  ```
+  password di COLLAUDO ........ HTTP 200, mfa_required=false, cookie=3
+  password ERRATA ............. HTTP 401
+  password da CHIAVE MADRE .... HTTP 401   <- la separazione, misurata
+  ESITO: OK — il collaudo entra in un passo, la chiave madre non apre niente
+  ```
+  su tutte e tre. Nessuna regressione sulle persone: `federica.marchetti@rtl-bank.org` entra con
+  la password derivata (**HTTP 200**), e la guardia non le riguarda per costruzione. `typecheck`
+  dell'API pulito. Il dry-run è stato corretto perché **dicesse il vero**: sottostimava a 0 le
+  credenziali che l'esecuzione vera avrebbe creato.
+
+  **Resta F3a** (la suite passa alle utenze di collaudo — 34 spec dipendono dai dati di persone
+  reali, e c'è una tensione da nominare con la Definition of Done, che pretende login con persona
+  reale) e **F3c** (i segreti delle persone reali diventano casuali).
+
   ### ⚠ ANALISI S1083 (2026-08-28) — F3 non è eseguibile com'è scritta, e ne è emerso un rischio
 
   **① F3 ha una dipendenza che nessuno aveva dichiarato.** La suite E2E fa login con **persone

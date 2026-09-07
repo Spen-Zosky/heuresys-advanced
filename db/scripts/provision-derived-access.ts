@@ -75,6 +75,7 @@ const SOLO = (() => {
 interface Row {
   user_id: string;
   user_email: string;
+  user_type: string;
 }
 
 async function main(): Promise<void> {
@@ -89,11 +90,11 @@ async function main(): Promise<void> {
   });
   await db.connect();
 
-  const stats = { visti: 0, esclusi: 0, identita: 0, credenziali: 0, fattori: 0, invariati: 0 };
+  const stats = { visti: 0, esclusi: 0, service: 0, identita: 0, credenziali: 0, fattori: 0, invariati: 0 };
 
   try {
     const { rows } = await db.query<Row>(
-      `SELECT user_id, user_email FROM sys.sys_users
+      `SELECT user_id, user_email, user_type FROM sys.sys_users
         WHERE user_status = 'ACTIVE' ORDER BY user_email`,
     );
 
@@ -101,6 +102,30 @@ async function main(): Promise<void> {
       // `--solo` filtra PRIMA di ogni altra cosa: chi non e' nell'elenco non viene nemmeno
       // contato fra i visti, cosi' il riepilogo finale parla solo di cio' che si e' toccato.
       if (SOLO && !SOLO.has(u.user_email.toLowerCase())) continue;
+      // ⛔ LA GUARDIA STRUTTURALE (#169 F3b, S1091 — 2026-09-07). Un'utenza SERVICE non
+      // riceve MAI una credenziale derivata dalla chiave madre, e la guardia sta QUI —
+      // DOPO `--solo` — apposta: cosi' nemmeno un elenco esplicito puo' raggiungerla.
+      //
+      // Perche' esiste. Misurato in produzione oggi: le tre utenze di collaudo entravano
+      // con la password derivata dalla CHIAVE MADRE (HTTP 200) e non con la propria
+      // (HTTP 401) — il rovescio esatto di cio' che #169 F2 aveva provato il 2026-08-25.
+      // La causa non e' un difetto di questo file: e' che il 2026-08-31 le tre sono state
+      // «riparate» con `--solo=` proprio da qui (lo dice il commento di SOLO qui sopra),
+      // e cosi' facendo hanno perso la credenziale derivata dalla loro chiave propria.
+      // Il risultato era il rischio che #169 F4 dichiara debba essere IMPOSSIBILE: chi
+      // possiede la chiave madre completa un accesso come `piattaforma@collaudo.invalid`,
+      // che e' PLATFORM_ADMIN ed e' esente dal secondo fattore (mig 000118).
+      //
+      // La guardia e' su `user_type`, cioe' una proprieta' del MODELLO, e non
+      // sull'elenco `isRealPerson`: quello e' una lista chiusa di PERSONE, e un'utenza di
+      // servizio non vi ha posto per definizione — protetta da una lista in cui non puo'
+      // stare, non era protetta da niente. Le credenziali delle SERVICE le governa
+      // `provision-collaudo-access.ts`, che deriva dalla chiave PROPRIA
+      // (.secrets/collaudo-access.key).
+      if (u.user_type === "SERVICE") {
+        stats.service++;
+        continue;
+      }
       stats.visti++;
       if (isRealPerson(u.user_email)) {
         stats.esclusi++;
@@ -202,6 +227,7 @@ async function main(): Promise<void> {
 ${mode}
   utenti ACTIVE esaminati ....... ${stats.visti}
   esclusi (persone reali) ....... ${stats.esclusi}   [${REAL_PERSON_EMAILS.join(", ")}]
+  esclusi (utenze SERVICE) ...... ${stats.service}   [#169 F3b: le governa provision-collaudo-access, chiave propria]
   identita' create .............. ${stats.identita}
   credenziali create ............ ${stats.credenziali}
   fattori TOTP creati ........... ${stats.fattori}

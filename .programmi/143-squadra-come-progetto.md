@@ -159,9 +159,59 @@ progetto**, mai i loro dati personali (è già I18).
      decidere quale delle due sopravvive, o resteranno due verità sullo stesso fatto» — e questo
      caso lo **misura** invece di supporlo. Oggi concordano.
 
-  ⏳ **Resta il cuore di F3**: dare consumatori **reali** alle tre funzioni. Questo passo prova
+  ⏳ **Resta il cuore di F3**: dare consumatori **reali** alle funzioni. Questo passo prova
   che si possono usare; non le usa. È la differenza fra «lo strumento è affilato» e «lo strumento
   è al lavoro», e chiamarla F3 chiusa sarebbe il falso verde di questa fase.
+
+  ### ⚠ CORREZIONE, stessa sessione — «tre funzioni senza consumatori» era una frase più larga della misura
+
+  Avevo scritto, qui e nel commit, che **le tre** funzioni erano codice morto. **Sono due.**
+  `functionalScopeUserIds` **ha** un consumatore, ed è di produzione:
+  `lib/scope/resolver.ts:154`, dentro `resolveActivityScope`, che a sua volta alimenta la
+  superficie di lettura di `approvals` (#24 F4). Il piano lo diceva giusto — nomina
+  `isInFunctionalScope` e `isFunctionalLeader`, e **solo quelle due** sono senza consumatori.
+  Ero io ad aver allargato la frase oltre la misura che l'aveva prodotta: il `grep` cercava
+  quei due nomi, e la conclusione ne ha nominati tre.
+
+  ### 🔬 IL REPERTO CHE APRE IL CUORE DI F3 — `teams` segue l'asse SBAGLIATO
+
+  Cercando il primo consumatore naturale sono partito da un'ipotesi, e **la misura l'ha
+  smentita**: credevo che `teams` fosse tenant-wide come lo erano le approvazioni prima di
+  `#24`. Non lo è — ha già un asse proprio (`isTeamAdmin` + membership, che il commento chiama
+  «the 3rd scope axis»). Ma ne ha uno **diverso da quello che la sua classe prescrive**:
+
+  | | chi vede TUTTO |
+  |---|---|
+  | `teams` (oggi) | `ORG_BROWSE_ROLES` = `PLATFORM_ADMIN` + mandati HR **+ `MANAGERIAL_ROLES`** |
+  | asse funzionale (`resolveActivityScope`) | `PLATFORM_ADMIN` + mandati HR — **i manageriali NO** |
+
+  E l'esclusione dei manageriali dall'asse funzionale non è una svista: `resolver.ts:151-153`
+  la motiva per iscritto — *«No managerial-role precondition here (unlike the org axis):
+  leading a team or owning a process IS the credential»*. Guidare una squadra **è** il titolo;
+  avere un ruolo manageriale non lo è.
+
+  `team` è dichiarato `ACTIVITY` in `data-classes.ts` — «team membership: who works with whom»
+  — quindi la sua lettura dovrebbe seguire l'asse **funzionale**. Segue invece quello
+  organizzativo.
+
+  **Quanto pesa, misurato in produzione il 2026-09-07:**
+  - **10** persone con un ruolo manageriale (`MANAGER` / `CEO`);
+  - di queste, **6 non guidano nessuna squadra** — né come `team_lead_user_id`, né con una riga
+    membro di ruolo `LEAD`;
+  - eppure vedono **tutte e 26** le squadre attive del tenant, cioè «chi lavora con chi» per
+    l'intera azienda.
+
+  Non è una violazione di I18 — `team` non è un dato sensibile — ma è una lettura **più larga
+  di quanto la classe prescriva**, e soprattutto sono **due verità sullo stesso fatto**: chi
+  vede il lavoro altrui è deciso in due posti che non si parlano. È lo stesso difetto che
+  `resolver.ts:53-56` dichiara di essere venuto a togliere: *«esistono perché i moduli se le
+  riscrivevano in casa: `positions` aveva la sua lista, **`teams` la sua**, e nessuna sapeva
+  delle altre»*. Una delle due è rimasta.
+
+  **Il passo successivo, e non è stato fatto qui**: portare la lettura di `teams` su
+  `resolveActivityScope`, come fece `#24` per `approvals` — superficie di **lettura** soltanto,
+  scritture invariate. Restringe la vista a 6 persone reali, quindi è un cambiamento di
+  comportamento su una superficie viva e vuole il suo test prima, non dopo.
 - [ ] **F4 — API progetti/squadre** — CRUD + avanzamento + test che provano il **confine I18** (un capo progetto NON vede i dati sensibili dei membri) · budget ~250k
 - [ ] **F5 — Frontend + dimostrazione live** — con un capo progetto reale gerarchicamente inferiore a un suo membro: è il caso che dimostra il modello · budget ~250k
 

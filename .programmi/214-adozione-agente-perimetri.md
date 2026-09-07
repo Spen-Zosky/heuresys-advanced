@@ -125,6 +125,59 @@ sono stati cancellati (divieto): sono diventati rimandi di poche righe a `live-p
       🔬 **Trovata e chiusa una cecità in attesa**: `check_concetti_agente.py` presidiava il caso «parser che non legge più nulla» per `RESOURCE_DATA_CLASS` e **per nessuna delle altre tre**. Cambiando forma, `MULTI` sarebbe tornato `{}` e ogni resource multiclasse sarebbe sparita in silenzio dalla classificazione. Ora la guardia c'è per `MULTI` e per `NO_PERSONE`.
 - [ ] **F6 Consumo della coda dei neutri, un perimetro per volta**
 
+  ### S1091 (2026-09-07) — il NONO perimetro, e un pari a sette
+
+  Coda ri-derivata: **101 moduli · 8 aperti · 41 in coda (22 neutri · 0 non misurabili · 19
+  riservati)**. La testa dei neutri **non era un pari a due**, come il 2026-09-04: era un **pari
+  a SETTE** — `blueprint-families`, `blueprint-variants`, `enterprise-size-bands`,
+  `enterprise-typing-profiles`, `job-roles`, `operating-models`, `skill-categories`, tutti a
+  2 letture · 2 pagine.
+
+  **Sciolto con la regola di sempre — il rischio crescente**, che applicata a sette candidati
+  produce una scala leggibile senza opinione:
+
+  | distanza da una persona | moduli | perché |
+  |---|---|---|
+  | **più vicini** | `job-roles` · `skill-categories` | un ruolo è ciò che una persona **ricopre**, una categoria di competenza ciò che **possiede**: sono i vocabolari con cui si descrivono le persone, non le imprese |
+  | intermedi | `blueprint-families` · `blueprint-variants` · `operating-models` · `enterprise-typing-profiles` | descrivono **come è fatta** un'organizzazione |
+  | **più lontano** | `enterprise-size-bands` | è una **scala di misura dell'impresa** — quanti dipendenti, quanto fatturato. Non è un oggetto che una persona possa occupare, possedere o ricoprire |
+
+  ⚠ `approvals` è più ampio (2 letture · 3 pagine) ma **non era in gara**: dichiara `ACTIVITY`,
+  e la sua apertura andrà motivata su quella classe, non su una neutralità che non ha.
+
+  **Neutralità misurata su `information_schema`**, non dedotta dai nomi: delle undici colonne di
+  `sys_enterprise_size_bands` nessuna è il SOGGETTO di un dato di persona — e qui, a differenza
+  di `content-blueprint-links`, **non c'è nemmeno un ATTORE**: non esiste un `created_by`, quindi
+  la distinzione «chi esamina non è chi è esaminato» non serve.
+
+  ⚠ **Aperto CON UNA GUARDIA**, due porte, le stesse della `000370`: `enterprise_size_band_metadata`
+  è JSONB e `enterprise_size_band_description` è TESTO LIBERO. La neutralità è vera **oggi**, non
+  per costruzione — lo stesso caso di `visualization-graphs` (`000355`) e `tenants` (`000367`).
+  Misurato in produzione prima di aprire: **5 bande · 0 con descrizione · 0 con metadata · 0
+  indirizzi di posta** in nessuna delle due porte. Un perimetro vuoto oggi non è un perimetro
+  chiuso domani: la guardia si mette **prima** che il buco si apra.
+
+  **Mig `000378`** — `sys.v_banda_dimensionale_con_dato_di_persona`, raccolta da `db_health` e
+  pretesa a zero (bloccante, non informativa). La migrazione **prova la sentinella rossa su
+  entrambe le porte** iniettando un indirizzo di posta e disfacendolo: una sentinella provata su
+  una porta sola sarebbe verde anche essendo cieca sull'altra.
+
+  🔬 **Evidenza live, in quest'ordine**:
+  - prova generale sul gemello — `ssh linux-pc 'bash db/scripts/ci-rehearsal.sh'` → **VERDE**,
+    «000378: sentinella installata e provata su entrambe le porte · 5 bande invariate»,
+    sentinelle **34/34 a zero** (da 33: la nuova è raccolta);
+  - produzione — `pnpm db:migrate:vm --no-pull` → exit 0, **26 s**, «351 applied, 24 skipped»;
+  - dimostrazione — `select count(*) from sys.v_banda_dimensionale_con_dato_di_persona` → **0**,
+    e `db_health` la mostra `[ok] … 0`.
+
+  ⚠ **Curato lo stesso giorno un allarme che non era mio**: `db_health` usciva **1** per tuple
+  morte al 19,3 % su `sys_auth_refresh_tokens` (325 morte su 1.360 vive, ultimo autovacuum il
+  31 agosto). `VACUUM (ANALYZE)` → **0 morte**, `db_health` exit **0**. La regola del progetto non
+  ammette il «pre-esistente», e quell'allarme avrebbe reso rosso il cancello di fine turno di
+  questa sessione — che instrada `db-health` perché ho toccato `db/`.
+
+  Coda dopo l'apertura: **9 aperti · 40 in coda (21 neutri)**.
+
   ### S1083 (2026-08-28) — il primo della coda NON si apre, e la misura dice perché
 
   Coda ri-derivata dopo aver rigenerato l'atlante (le 4 migrazioni del blocco A lo avevano

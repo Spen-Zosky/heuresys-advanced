@@ -27,6 +27,18 @@ quando si spuntano, se ne aggiunge la successiva.
 - [x] **F2 Lo stato dell'inbox del lab** — FATTO 2026-08-13 (S1057) · l'inbox (`<padre del repo>/heuresys-design-lab/inbox/`) è **vuota**: contiene la sola cartella `ingerite/`, ultima consegna assorbita `2026-08-12-guardia-psql-opzioni-raggruppate`. Nessuna ingestione pendente
 - [x] **F3 La verifica avversariale su `#205` (2b/2c)** — FATTO 2026-08-16 (S1066) · misure ri-fatte sul vivo; respinta come **falsa** l'affermazione portante «P2a ha costruito il motore e lo ha dimostrato»: `#132` è ACTIVE, mai implementata. Due numeri del documento già invecchiati (25→26 viste, 158→159 colonne)
 - [ ] **F4 La prossima consegna che arriva, o la prossima ingerita che qualcuno cita** — budget ~30k a consegna
+      ▸ **Misurato il 2026-09-07 (S1091): nessun bersaglio, e la misura è doppia.**
+      `python docs/kb/tools/lab_inbox.py` → «lab inbox: vuota»; e `ls -la D:/heuresys-design-lab/inbox/`
+      mostra la sola cartella `ingerite/`, con data **24 agosto** — invariata. Due metodi
+      indipendenti, perché uno solo direbbe «lo strumento tace», non «non c'è niente».
+      Nessuna decisione eseguita in S1091 poggia su un documento del lab: V1 poggia su
+      `peso_stato.py` e `handoff_lint.py`, V2 sul codice di `verify_gate.py` letto e sulla prova
+      del presidio fatta scattare, V3 su `gh run list` e su un `grep` di conteggio. ⭐ E il
+      presidio ha lavorato **in senso proprio** su un'affermazione ereditata: `.handoff/STATE.md`
+      dava `#219` per chiusa e la suite per verde — vero, ma l'ho **ri-misurato** con
+      `gh run list` invece di ereditarlo, ed è quella misura che ha permesso di chiudere `#231`.
+      La fase resta aperta perché è continuativa: dichiararla «fatta» perché oggi l'inbox è vuota
+      sarebbe scambiare l'assenza di lavoro per lavoro svolto.
       ▸ **Misurato il 2026-09-05 (S1087): l'inbox e' ancora vuota.** `heuresys-design-lab/inbox/`
       contiene la sola cartella `ingerite/`, invariata dal 2026-08-24. E il presidio e' stato
       applicato dove serviva davvero: **nessuna** delle decisioni eseguite in questa sessione

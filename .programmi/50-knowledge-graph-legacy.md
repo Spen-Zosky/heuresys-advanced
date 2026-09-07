@@ -1,7 +1,9 @@
 # 50 — D/D4: legacy knowledge graph (`kg_nodes` / `kg_edges`, 139k)
 
 > **item**: #50 · **priorità**: P3 · **stima register**: ~2-3 sessioni
-> **stato**: IN CORSO
+> **stato**: CHIUSO
+> **chiuso**: S1091 (2026-09-07) — F3 con E2E verde in CI (corsa `34147363112`, due test
+> passati e non saltati, verificati nel referto). Zero fasi aperte.
 > **fonti**: `docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md` §D4
 
 ## Decisioni vincolanti (non si ri-chiedono)
@@ -51,7 +53,7 @@
   toglie»; leggere il codice non l'avrebbe fatto.
 
   *(testo originale della fase)* nessun import: la sorgente è `sys_skill_taxonomy_edges` più il catalogo skill (i conteggi **si misurano quando si apre la fase**, non si citano qui: crescono). Fatto = endpoint che serve nodi e archi con i filtri che una vista a grafo richiede (profondità, tipo di relazione, ancoraggio a una skill o a una persona), schema Zod condiviso, integration test. **Il cancello di esposizione (#79) è già soddisfatto per costruzione**: la tabella è già letta, qui le si dà una superficie a grafo · budget ~200k
-- [ ] **F3 — La vista, con il componente che aspetta da sempre** — `KGGraphCanvas` di `@heuresys/ui` è stato costruito apposta e **non è mai stato usato**: qui trova il suo primo consumatore. Pagina sotto `/visualizations` (che esiste già), E2E con login reale · budget ~250k
+- [x] **F3 — La vista, con il componente che aspetta da sempre** — **FATTA 2026-09-07 (S1091)**: pagina `/analytics/skills-graph`, primo consumatore di `KGGraphCanvas`, E2E **verde in CI** (corsa `34147363112`, due test passati e non saltati). Cronaca sotto. — `KGGraphCanvas` di `@heuresys/ui` è stato costruito apposta e **non è mai stato usato**: qui trova il suo primo consumatore. Pagina sotto `/visualizations` (che esiste già), E2E con login reale · budget ~250k
 
   ### S1091 (2026-09-07) — la vista esiste, e la voce è costata molto meno del previsto
 
@@ -102,6 +104,21 @@
   diverso — su una isolata i due numeri coinciderebbero e il test sarebbe verde qualunque cosa
   accada. Nessun nome di competenza è cablato: si sceglie interrogando il catalogo vero.
 
+  ### ✅ E2E VERDE IN CI — F3 CHIUSA (2026-09-07, stessa sessione)
+
+  Corsa integrale `34147363112` su `main`: **`completed success`**. E «success» non basta —
+  la suite dichiara anche i test *non eseguiti*, quindi un verde potrebbe nascondere due
+  salti. **Misurato nel referto**, non dedotto:
+  ```
+  ✓ 58 [chromium-3] › skills-graph.spec.ts:56  › il grafo delle competenze mostra il vicinato reale (3.6s)
+  ✓ 59 [chromium-3] › skills-graph.spec.ts:109 › la profondita' cambia il grafo, e la pagina lo riflette (4.3s)
+  ```
+  e la pagina compare nel build (`├ ƒ /analytics/skills-graph`). Login reale, dati reali,
+  numeri della pagina confrontati con quelli che l'API calcola.
+
+  **F3 è chiusa**: la vista esiste, mostra dati veri, ed è provata end-to-end.
+
+  *(cronaca del tentativo locale, tenuta perché spiega perché la corsa vera è quella di CI:)*
   ⏳ **La corsa E2E NON è stata eseguita qui, e va detto com'è andata invece di lasciarlo capire.**
   Tentata in locale con `pnpm test:e2e:prod:node22 --grep`; il **preflight della suite** ha
   dichiarato l'ambiente inadatto prima ancora di partire, con tre avvisi: *«API NON raggiungibile

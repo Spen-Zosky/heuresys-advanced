@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `cc0bbe8c` (2026-09-07T18:48:47+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `48e9d68d` (2026-09-07T19:48:03+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 102 |
-| Route API | 621 |
+| Moduli API | 103 |
+| Route API | 625 |
 | Pagine web | 121 |
-| Schemi shared | 112 |
+| Schemi shared | 113 |
 | Tabelle DB | 291 (vuote: 24) |
-| Viste / matview | 44 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 280 |
+| Viste / matview | 45 / 0 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 282 |
 
 ## Moduli API
 
@@ -53,6 +53,7 @@
 | generated-origins | /v1/generated-origins | 2 | 1 | 1 | 1 |
 | goals | /v1/goals | 12 | 4 | 7 | 4 |
 | insights | /v1/insights | 7 | 2 | 15 | 5 |
+| interviews | /v1/interviews | 4 | 2 | 2 | 1 |
 | job-families | /v1/job-families | 5 | 3 | 1 | 2 |
 | job-postings | /v1/job-postings | 4 | 2 | 2 | 1 |
 | job-requisitions | /v1/job-requisitions | 4 | 2 | 2 | 1 |

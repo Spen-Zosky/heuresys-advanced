@@ -1,6 +1,6 @@
 # S1091 — piano di sessione
 
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 > **nasce-da**: mandato di Enzo all'avvio (2026-09-07) — *«esegui tutti da P0 a P3 in autonomia e
 > automaticamente prendendo decisioni per mio conto, nell'ordine che ritieni più appropriato.
 > L'unico guardiano che comanda è quello della capienza»*.
@@ -44,7 +44,26 @@ con tutto il lavoro dentro.
 | **V10** | `#159` **F2** — il ponte gateway↔pagine | io | il ponte esiste e vale per le pagine future | 🟡 **PARZIALE** — il **canale** estratto in `use-agent-stream.ts` (pagina 300→183 righe) e reso davvero riusabile: **non traduce**, restituisce un `code` i18n. Il **componente** è di `ux-design-shared`, altro repo, non aperto. Prova dinamica assente e dichiarata |
 | **V11** | `#143` **F3** — asse funzionale vivo | io | l'asse funzionale è vivo end-to-end | 🟡 **PARZIALE** — eseguito il primo passo che F3 stessa prescrive: le tre funzioni erano **codice morto mai esercitato**, ora hanno **6 test verdi** sui dati reali e li ho **visti fallire** sabotando la funzione. Resta il cuore: dare loro consumatori reali |
 | **V12** | `#54` **F3** — API del cluster recruiting | io | le rotte esistono, testate, live | 🟡 **UNA FETTA SU QUATTRO RESTANTI** — `candidate-applications` completa (4 rotte, **9/9 test verdi** sul gemello). Trovati due difetti miei eseguendo. F3 passa a **4 fette su 7**; restano interviews, feedback, offers |
-| **V13** | Propagazione: VM + linux-pc allineate, deploy armato | io | `verifica-deploy.sh` non dice più `DISALLINEATO` | ⏳ |
+| **V13** | Propagazione: VM + linux-pc allineate, deploy armato | io | `verifica-deploy.sh` non dice più `DISALLINEATO` | ✅ **FATTO** — propagati VM e linux-pc (exit 0), deploy **armato**; verdetto `IN-VOLO`, che subito dopo l'armamento è l'atteso. Ri-propagato e ri-armato in coda al ciclo, sul HEAD finale |
+
+## ESITO — **CICLO CHIUSO**, 13/13 voci affrontate
+
+**8 voci chiuse per intero** (V1-V8) e **5 portate avanti con il confine dichiarato**
+(V9-V13). Le quattro voci «da più sessioni» erano dichiarate come non completabili
+**all'apertura**, non alla resa dei conti: di ognuna è stato eseguito il primo passo che il
+suo piano prescriveva, e ciò che resta è scritto nella voce, non qui.
+
+Guardiano alla chiusura del ciclo: contesto **~56 %**, finestra 5h **10 %** — sotto entrambe
+le soglie (75 % / 80 %). Il ciclo non è finito per capienza: è finito perché le voci erano
+finite.
+
+⭐ **Tre scoperte che non erano nel piano, e valgono più di metà del lavoro previsto:**
+1. **Un buco di sicurezza aperto in produzione** (V7) — chi possedeva la chiave madre
+   entrava come `PLATFORM_ADMIN` esente dal secondo fattore. Non era un lavoro da fare: era
+   lo stato reale, e nessun cancello lo vedeva.
+2. **Stavo per duplicare un'API che esisteva già** (V9) — fermato dal typecheck, disfatto.
+3. **Un presidio messo dove non ha l'informazione per giudicare** (V12) — respingeva un caso
+   legittimo, e a scoprirlo è stato un test che ha cambiato il codice invece di adattarsi.
 
 ## Registro «fuori da questo ciclo»
 

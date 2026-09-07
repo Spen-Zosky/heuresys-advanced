@@ -38,6 +38,40 @@ adozione su tutte le pagine idonee**. Stima: **~3-4 sessioni**, così ripartite.
   - **resta di F1 la sola dimostrazione**: quale delle 83 aprire per prima dipende da **#156** (WAIT-INPUT su Enzo). Il criterio non ne dipende — la lista è già prodotta.
 - [ ] **F2 — Il ponte** — un canale in streaming + un componente riusabile, scritto **fuori** da qualunque pagina (è il rischio nominato) · budget ~250k
 
+  ### 🟡 S1091 (2026-09-07) — la METÀ DI QUI è fatta. L'altra è di un altro repo, e resta
+
+  Eseguita seguendo alla lettera il rilievo S1083 qui sotto, che spezza F2 in due metà in repo
+  diversi. **Questa sessione ha fatto la prima**, e non ha toccato la seconda.
+
+  **Il canale** vive ora in `apps/web/src/lib/use-agent-stream.ts` — accanto a
+  `use-inbox-stream.ts`, che era già il precedente per uno stream applicativo. Porta lo stream
+  SSE, l'interprete dei blocchi, lo stato della corsa e la risoluzione delle approvazioni. È
+  logica applicativa, **non design system**: sta qui per costruzione, non per comodità.
+
+  ⭐ **La cosa che lo rende davvero riusabile, e che nella pagina non c'era: l'hook NON traduce.**
+  Restituisce `notice: { kind, code, params }` — una chiave i18n **senza namespace** — e chi lo
+  monta la prefissa col proprio. Nella console di sviluppo i messaggi erano costruiti con
+  `t("agentDev.…")` **dentro la logica**: un secondo consumatore avrebbe ereditato le stringhe
+  della *prima* pagina, ed è alla lettera il difetto che questa voce è venuta a togliere — «il
+  ponte deve valere per le pagine future, non per la prima». Estrarre senza accorgersene avrebbe
+  prodotto un ponte che serve una pagina sola, cioè nessun ponte.
+
+  **La pagina resta il primo consumatore e ora fa una cosa sola: rendere.** Misura:
+  **300 → 183 righe**, il canale 227 (commento incluso). L'unico stato rimasto nella vista è il
+  `prompt`, che è ciò che l'utente scrive.
+
+  ⏳ **Cosa NON è stato fatto, dichiarato invece che lasciato intendere:**
+  - **il componente** — la superficie visiva riusabile va in **`ux-design-shared`** e torna come
+    `@heuresys/ui`. È un **altro repository**, con il suo ciclo (pubblicazione, bump, allineamento)
+    e la sua pubblicazione npm. Non è stato aperto: il budget «~250k» della fase copre la sola
+    metà di qui, come il rilievo S1083 dice espressamente;
+  - **una prova dinamica del canale** — `apps/web` ha `vitest` fra le dipendenze ma **nessuna
+    config e nessuno script `test`**: non esiste una suite unitaria del frontend, e crearne una è
+    infrastruttura nuova, fuori da questa fase. Esercitare lo stream end-to-end pretende il
+    gateway vivo. L'estrazione è quindi verificata dai soli cancelli **statici**: `typecheck` web
+    pulito e `lint` pulito. **Dirlo è il punto**: due cancelli statici verdi non sono una prova
+    che il canale si comporti come prima, e chiamarli tali sarebbe il falso verde di questa fase.
+
   ### ⚠ RILIEVO S1083 (2026-08-28) — «fuori da una pagina» non basta: c'è un divieto permanente
 
   Questa fase dice *«un componente riusabile, scritto fuori da qualunque pagina»*, e in nessun

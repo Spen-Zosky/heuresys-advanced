@@ -17,46 +17,32 @@
  * no reusable UI primitive is defined in apps/web). Strings live in the existing
  * `admin` i18n namespace under `agentDev.*` (it + en).
  *
+ * ⭐ #159 F2 (S1091): il CANALE non vive piu' qui. Stream SSE, stato della corsa e
+ * approvazioni stanno in `@/lib/use-agent-stream`, cosi' che la prossima pagina idonea
+ * non debba ricopiarli da questa — che e' il bersaglio della voce, «il ponte deve valere
+ * per le pagine future, non per la prima». Questa pagina resta il PRIMO consumatore, e
+ * ora fa una cosa sola: rendere. In particolare TRADUCE lei gli avvisi: l'hook
+ * restituisce un `code` i18n, non una stringa gia' tradotta, altrimenti un secondo
+ * consumatore erediterebbe le stringhe di `agentDev.*`.
+ *
  * This page renders without a live agent (the live drive is blocked-on-Enzo:
  * dev subscription out_of_credits / PROD credential required). Submitting a prompt
  * when the gateway is unreachable surfaces a real error in the stream, by design.
  */
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { AGENT_DEV_ENABLED, useAgentStream } from "@/lib/use-agent-stream";
 
-// Feature flag + gateway URL come from build-time public env (KEY names only — R10).
-const AGENT_DEV_ENABLED = process.env.NEXT_PUBLIC_ENABLE_AGENT_DEV === "1";
+// L'indirizzo del gateway si mostra a schermo, quindi resta leggibile anche qui: sono
+// i NOMI delle chiavi d'ambiente, mai i valori dei segreti (R10).
 const GATEWAY_URL = (process.env.NEXT_PUBLIC_AGENT_GATEWAY_URL ?? "http://localhost:8790").replace(/\/$/, "");
 
 /** A pending write approval surfaced by an `approval_required` SSE event. */
-interface PendingApproval {
-  approvalId: string;
-  /** Already redacted by the gateway. */
-  tool: unknown;
-  /** Already redacted by the gateway. */
-  input: unknown;
-}
+/* Tipi e interprete SSE sono usciti da qui: vivono in `@/lib/use-agent-stream`,
+   perche' erano il CANALE e non la vista. Vederli qui dentro era il segno che la
+   prossima pagina avrebbe dovuto ricopiarli. */
 
-/** One rendered line of the SSE stream (raw event block, capped). */
-interface StreamLine {
-  id: number;
-  /** SSE `event:` name when present (`approval_required` / `error` / `done`), else `message`. */
-  kind: string;
-  text: string;
-}
-
-/** Parses one SSE block ("event: x\n data: {...}") into kind + payload text. */
-function parseSseBlock(block: string): { kind: string; data: string } {
-  let kind = "message";
-  const dataParts: string[] = [];
-  for (const raw of block.split("\n")) {
-    const line = raw.trimEnd();
-    if (line.startsWith("event:")) kind = line.slice("event:".length).trim();
-    else if (line.startsWith("data:")) dataParts.push(line.slice("data:".length).trim());
-  }
-  return { kind, data: dataParts.join("\n") };
-}
 
 function DisabledNotice() {
   const { t } = useTranslation("admin");
@@ -77,119 +63,16 @@ function DisabledNotice() {
 export default function AgentDevConsolePage() {
   const { t } = useTranslation("admin");
 
+  // Il prompt e' della VISTA (e' cio' che l'utente scrive); tutto il resto e' del canale.
   const [prompt, setPrompt] = useState("");
-  const [running, setRunning] = useState(false);
-  const [lines, setLines] = useState<StreamLine[]>([]);
-  const [approval, setApproval] = useState<PendingApproval | null>(null);
-  const [notice, setNotice] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
+  const { running, lines, approval, notice, run, stop, resolveApproval } = useAgentStream();
 
-  const abortRef = useRef<AbortController | null>(null);
-  const lineIdRef = useRef(0);
-
-  const pushLine = useCallback((kind: string, text: string) => {
-    lineIdRef.current += 1;
-    const id = lineIdRef.current;
-    // Cap the rendered buffer so a long run does not balloon the DOM.
-    setLines((prev) => [...prev.slice(-199), { id, kind, text }]);
-  }, []);
-
-  const handleSseBlock = useCallback(
-    (block: string) => {
-      if (!block.trim()) return;
-      const { kind, data } = parseSseBlock(block);
-      if (kind === "approval_required") {
-        try {
-          const parsed = JSON.parse(data) as { approvalId?: string; tool?: unknown; input?: unknown };
-          if (parsed.approvalId) {
-            setApproval({ approvalId: parsed.approvalId, tool: parsed.tool, input: parsed.input });
-          }
-        } catch {
-          /* ignore malformed approval payload */
-        }
-      }
-      pushLine(kind, data.replace(/\s+/g, " ").slice(0, 600));
-    },
-    [pushLine],
-  );
-
-  const resolveApproval = useCallback(
-    async (decision: "allow" | "deny") => {
-      if (!approval) return;
-      const { approvalId } = approval;
-      setApproval(null);
-      try {
-        await fetch(`${GATEWAY_URL}/agent/approve`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ approvalId, decision }),
-        });
-        setNotice({ kind: "ok", msg: t("agentDev.approvalResolved", { decision }) });
-      } catch (err) {
-        setNotice({ kind: "err", msg: err instanceof Error ? err.message : String(err) });
-      }
-    },
-    [approval, t],
-  );
-
-  const run = useCallback(async () => {
-    if (running || !prompt.trim()) return;
-    setRunning(true);
-    setNotice(null);
-    setApproval(null);
-    setLines([]);
-    lineIdRef.current = 0;
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    try {
-      const res = await fetch(`${GATEWAY_URL}/agent`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        credentials: "include", // forward hrx_access / hrx_csrf cookies to the gateway
-        body: JSON.stringify({ prompt }),
-        signal: controller.signal,
-      });
-
-      if (!res.ok || !res.body) {
-        const detail = await res.text().catch(() => "");
-        if (res.status === 401) {
-          setNotice({ kind: "err", msg: t("agentDev.noSession") });
-        } else {
-          setNotice({ kind: "err", msg: t("agentDev.errorRun", { message: `HTTP ${res.status} ${detail}`.trim() }) });
-        }
-        return;
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      // SSE frames are separated by a blank line ("\n\n").
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const blocks = buffer.split("\n\n");
-        buffer = blocks.pop() ?? "";
-        for (const block of blocks) handleSseBlock(block);
-      }
-      if (buffer.trim()) handleSseBlock(buffer);
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") {
-        // user-initiated stop — not an error
-      } else {
-        setNotice({ kind: "err", msg: t("agentDev.errorRun", { message: err instanceof Error ? err.message : String(err) }) });
-      }
-    } finally {
-      setRunning(false);
-      abortRef.current = null;
-    }
-  }, [running, prompt, handleSseBlock, t]);
-
-  const stop = useCallback(() => {
-    abortRef.current?.abort();
-  }, []);
+  // ⭐ La traduzione avviene QUI, non nell'hook. `notice.code` e' una chiave senza
+  //    namespace: questa pagina la prefissa col proprio (`agentDev.*`), la prossima col suo.
+  //    Se l'hook restituisse una stringa gia' tradotta, ogni consumatore futuro
+  //    erediterebbe le parole di questa console.
+  const noticeText =
+    notice === null ? null : t(`agentDev.${notice.code}`, notice.params ?? {});
 
   // Feature-gate: render a soft notice, never a hard 404 (project rule).
   if (!AGENT_DEV_ENABLED) return <DisabledNotice />;
@@ -219,7 +102,7 @@ export default function AgentDevConsolePage() {
           </label>
 
           <div className="flex gap-3">
-            <Button type="button" data-testid="agentdev-run" onClick={() => void run()} disabled={running || !prompt.trim()}>
+            <Button type="button" data-testid="agentdev-run" onClick={() => void run(prompt)} disabled={running || !prompt.trim()}>
               {running ? t("agentDev.running") : t("agentDev.run")}
             </Button>
             {running && (
@@ -235,7 +118,7 @@ export default function AgentDevConsolePage() {
               className={`text-sm font-medium ${notice.kind === "ok" ? "text-success" : "text-danger"}`}
               role={notice.kind === "err" ? "alert" : undefined}
             >
-              {notice.msg}
+              {noticeText}
             </p>
           )}
         </CardContent>

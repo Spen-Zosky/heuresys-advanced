@@ -48,6 +48,15 @@ INFORMATIVE = {
     "v_reconciliation_status": "registro delle decisioni di riconciliazione, non un difetto",
     "v_reference_translation_coverage": "copertura traduzioni per entita', metrica",
     "v_pip_completeness": "elenca i PIP incompleti: informativa, ha una soglia propria",
+    "v_persona_senza_secondo_fattore":
+        "S1091: elenca le persone ATTIVE senza alcun fattore MFA. Conta STATO, non anomalie, e "
+        "NON pretende zero righe: due persone sono escluse dalla derivazione per decisione di "
+        "Enzo (S1032) e la colonna `attesa_per_decisione` le marca. Bloccante dovrebbe "
+        "escluderle ricopiando qui l'elenco REAL_PERSON_EMAILS che vive in derive-access.mjs — "
+        "due verita' sullo stesso fatto — e l'elenco delle esenzioni MFA non le puo' accogliere "
+        "(il trigger della 000118 ammette SOLO utenze SERVICE). Nasce da un residuo vero, una "
+        "persona con identita' e credenziale ma senza fattore, sopravvissuta dieci mesi perche' "
+        "nessuna vista lo misurava",
     "v_organization_unit_integrity":
         "una riga per unita' con le bandiere di violazione, non una riga per violazione: "
         "l'allarme dell'organigramma e' la sonda su fn_organization_integrity_violations()",

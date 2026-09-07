@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `f5e7527e` (2026-09-07T17:50:42+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `cc0bbe8c` (2026-09-07T18:48:47+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 101 |
-| Route API | 617 |
+| Moduli API | 102 |
+| Route API | 621 |
 | Pagine web | 121 |
-| Schemi shared | 111 |
+| Schemi shared | 112 |
 | Tabelle DB | 291 (vuote: 24) |
 | Viste / matview | 44 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 278 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 280 |
 
 ## Moduli API
 
@@ -33,6 +33,7 @@
 | blueprint-processes | /v1/blueprint-processes | 5 | 4 | 2 | 1 |
 | blueprint-variants | /v1/blueprint-variants | 5 | 4 | 3 | 1 |
 | calibration-sessions | /v1/calibration-sessions | 3 | 1 | 4 | 1 |
+| candidate-applications | /v1/candidate-applications | 4 | 2 | 3 | 1 |
 | candidates | /v1/candidates | 4 | 2 | 2 | 3 |
 | capability-composition | /v1/capability | 5 | 2 | 15 | 2 |
 | capability-maturity | /v1/capability | 3 | 2 | 8 | 2 |

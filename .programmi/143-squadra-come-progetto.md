@@ -208,10 +208,33 @@ progetto**, mai i loro dati personali (è già I18).
   riscrivevano in casa: `positions` aveva la sua lista, **`teams` la sua**, e nessuna sapeva
   delle altre»*. Una delle due è rimasta.
 
-  **Il passo successivo, e non è stato fatto qui**: portare la lettura di `teams` su
-  `resolveActivityScope`, come fece `#24` per `approvals` — superficie di **lettura** soltanto,
-  scritture invariate. Restringe la vista a 6 persone reali, quindi è un cambiamento di
-  comportamento su una superficie viva e vuole il suo test prima, non dopo.
+  ### ✅ CORRETTO, stessa sessione — `teams` è passato all'asse funzionale
+
+  La lista di ruoli locale sparisce: `haVistaPiena()` chiama `resolveActivityScope` e tiene la
+  vista piena solo a `all` (piattaforma) e `tenant` (mandato HR). Il filtro del repository
+  (`memberUserId`) resta com'era — la modifica è chirurgica. Superficie di **lettura** soltanto,
+  lista e dettaglio, scritture invariate: esattamente come fece `#24` per `approvals`.
+
+  ⚠⚠ **E il sondaggio ha ripagato, perché la prima versione del test era CIECA.** Confrontava
+  con il totale di **tutte** le squadre attive (26) mentre la lista è filtrata per tenant (RTL
+  ne ha 25): `25 < 26` era vero sempre — anche col criterio precedente. Rimesso il vecchio
+  codice, **il test restava verde**. L'ho scoperto solo perché ho sondato invece di fidarmi del
+  verde. Corretto legando il confronto al tenant della persona, e la prova rifatta:
+
+  | | esito |
+  |---|---|
+  | criterio **vecchio** (sabotaggio) | **exit 1** — `AssertionError: expected 25 to be less than 25` |
+  | criterio **nuovo** | **20/20 verdi** (2 del file nuovo + 18 della suite `teams` esistente) |
+
+  Il test deriva gli attori dal dato di oggi — chi ha un mandato HR (controllo: vede tutto) e
+  chi ha un ruolo manageriale senza squadre guidate né mandati (il caso che decide) — e **si
+  ferma dicendo cosa manca** se il dataset non contiene più il caso, invece di misurare in
+  silenzio.
+
+  ⏳ **Resta**: `isInFunctionalScope` e `isFunctionalLeader` non hanno ancora consumatori. Questo
+  passo ha dato all'asse funzionale una superficie in più (`teams`), ma per la via di
+  `resolveActivityScope` → `functionalScopeUserIds`. Le due funzioni per-record aspettano una
+  superficie che gatti **un singolo record contro una persona**, che oggi non esiste.
 - [ ] **F4 — API progetti/squadre** — CRUD + avanzamento + test che provano il **confine I18** (un capo progetto NON vede i dati sensibili dei membri) · budget ~250k
 - [ ] **F5 — Frontend + dimostrazione live** — con un capo progetto reale gerarchicamente inferiore a un suo membro: è il caso che dimostra il modello · budget ~250k
 

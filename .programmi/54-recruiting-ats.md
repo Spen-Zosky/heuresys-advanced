@@ -121,6 +121,18 @@
       Esito: **9/9 verdi sul gemello**, dove il database vive. `typecheck` API e `typecheck:test`
       puliti, `lint` 5/5.
 
+      ⚠⚠ **E un difetto che solo la corsa INTEGRALE poteva trovare, comparso a mezzanotte.**
+      Il file era 9/9 girando da solo, tutto il giorno. Nella corsa integrale delle 00:30 è
+      diventato rosso su «accetta il rifiuto quando porta il suo motivo»: `expected 409 to be
+      200`. La causa non è la suite intera — è il **fuso**. Il test costruiva la data di
+      chiusura con `new Date().toISOString().slice(0,10)`, che è **UTC**, mentre il database
+      scrive `appliedOn` con `current_date`, che è il fuso del server: dopo la mezzanotte
+      locale le due dicono **giorni diversi**, la chiusura risulta precedente all'arrivo e il
+      `CHECK` — cioè il presidio che funziona — la respinge. Corretto prendendo la data **dal
+      database** (l'`appliedOn` che la creazione restituisce) invece che da JavaScript.
+      ⭐ È una prova che ha fatto il suo mestiere due volte: prima cogliendo il difetto del
+      codice, poi cogliendo un difetto **proprio** che sarebbe stato invisibile per 23 ore su 24.
+
       ⚠ **Le tabelle del recruiting sono VUOTE in produzione** (misurato lo stesso giorno:
       0 candidati, 0 annunci, 0 requisizioni). Il modello c'e', i dati no — quindi la
       dimostrazione live su dati di dominio reali non e' possibile oggi e non e' stata

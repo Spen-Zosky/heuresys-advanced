@@ -60,6 +60,15 @@ const candidatiCreati: string[] = [];
 const annunciCreati: string[] = [];
 const requisizioniCreate: string[] = [];
 const candidatureCreate: string[] = [];
+/**
+ * ⚠ La data di arrivo si prende DAL DATABASE, non da `new Date()`.
+ * `new Date().toISOString().slice(0,10)` è UTC; `current_date` di PostgreSQL è il fuso del
+ * server. Fra mezzanotte e l'alba le due dicono giorni DIVERSI, e una chiusura datata «oggi
+ * UTC» risulta precedente a un arrivo datato «oggi locale» — 409 invece di 200. Non è
+ * teorico: questo test è passato tutto il giorno ed è diventato rosso alle 00:30, nella
+ * corsa integrale della stessa sessione che lo aveva scritto.
+ */
+let arrivoDellaPrima = "";
 
 async function crea(sessione: S, payload: Record<string, unknown>) {
   return suite.app.inject({
@@ -197,6 +206,7 @@ describe("/v1/candidate-applications/* integration", () => {
     expect(r.statusCode).toBe(201);
     const b = r.json() as { applicationId: string; stage: string; appliedOn: string };
     candidatureCreate.push(b.applicationId);
+    arrivoDellaPrima = b.appliedOn;
     expect(b.stage).toBe("APPLIED");
     expect(b.appliedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
@@ -262,7 +272,9 @@ describe("/v1/candidate-applications/* integration", () => {
     const r = await patch(tenant, id, {
       stage: "REJECTED",
       rejectReason: "profilo non allineato alla richiesta",
-      closedOn: new Date().toISOString().slice(0, 10),
+      // la stessa data che il database ha scritto in `appliedOn`: chiudere il giorno
+      // dell'arrivo è legittimo (il CHECK è `>=`), e non dipende dal fuso di chi lo scrive
+      closedOn: arrivoDellaPrima,
     });
     expect(r.statusCode).toBe(200);
     const b = r.json() as { stage: string; rejectReason: string | null };

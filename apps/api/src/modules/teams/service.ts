@@ -22,14 +22,37 @@ import type {
   TeamUpdateBody,
   MyTeamsResponse,
 } from "@heuresys/shared";
-import { ORG_BROWSE_ROLES } from "../../lib/scope/resolver.js";
+import { resolveActivityScope } from "../../lib/scope/resolver.js";
 import * as repo from "./repository.js";
 
 /** Chi sfoglia TUTTE le squadre del tenant (contro l'asse «la mia squadra»).
  *  [#99 F3] Era una lista locale con gli stessi cinque ruoli: ora e' la composizione
  *  canonica dei mandati piu' i manageriali, cosi' non puo' piu' divergere da `positions`. */
-function isTeamAdmin(a: ActorContext): boolean {
-  return a.roles.some((r) => ORG_BROWSE_ROLES.has(r));
+/**
+ * Vista piena sulle squadre del tenant — ⭐ dall'ASSE FUNZIONALE, non piu' da una lista di
+ * ruoli locale (S1091).
+ *
+ * `team` e' dichiarato `ACTIVITY` in `data-classes.ts` («team membership: who works with
+ * whom»), e la classe ACTIVITY e' gattata dall'asse FUNZIONALE (ADR-0027 F4). Questo modulo
+ * usava invece `ORG_BROWSE_ROLES`, che e' la composizione dell'asse ORGANIZZATIVO e include
+ * i ruoli manageriali. Due assi diversi sulla stessa risorsa, decisi in due posti che non si
+ * parlano — ed e' letteralmente il difetto che `resolver.ts` dichiara di essere venuto a
+ * togliere, citando `teams` fra i colpevoli: «i moduli se le riscrivevano in casa».
+ *
+ * ⚠ La differenza NON e' teorica, ed e' stata misurata in produzione prima di toccare
+ * (2026-09-07): 10 persone con un ruolo manageriale, di cui **6 non guidano alcuna squadra**
+ * — ne' come `team_lead_user_id`, ne' con una riga membro `LEAD` — vedevano comunque tutte
+ * e 26 le squadre attive del tenant. Ora vedono le proprie.
+ *
+ * E l'esclusione dei manageriali dall'asse funzionale non e' una svista di quel resolver: la
+ * motiva per iscritto — «leading a team or owning a process IS the credential». Guidare una
+ * squadra E' il titolo per vedere il lavoro altrui; avere un ruolo manageriale non lo e'.
+ * I mandati veri (PLATFORM_ADMIN, TENANT_ADMIN, HRMS_MANAGER) tengono la vista piena, come
+ * in `approvals`.
+ */
+async function haVistaPiena(a: ActorContext): Promise<boolean> {
+  const scope = await resolveActivityScope(pool, a);
+  return scope.kind === "all" || scope.kind === "tenant";
 }
 function requireOwnTenant(a: ActorContext): string {
   if (!a.tenantId) throw new ForbiddenError("Tenant context required");
@@ -41,7 +64,7 @@ export const teamsService = {
    *  team-scoped actor sees only the teams they lead or belong to (the 3rd scope axis). */
   async list(actor: ActorContext, query: TeamListQuery): Promise<{ items: Team[]; total: number }> {
     const tenantId = isPlatform(actor) ? undefined : requireOwnTenant(actor);
-    const memberUserId = isTeamAdmin(actor) ? undefined : actor.userId;
+    const memberUserId = (await haVistaPiena(actor)) ? undefined : actor.userId;
     return repo.listTeams(pool, {
       ...(tenantId !== undefined ? { tenantId } : {}),
       ...(memberUserId !== undefined ? { memberUserId } : {}),
@@ -58,7 +81,7 @@ export const teamsService = {
     if (!team) throw new NotFoundError("Team");
     if (!isPlatform(actor)) {
       if (!actor.tenantId || team.tenantId !== actor.tenantId) throw new NotFoundError("Team");
-      if (!isTeamAdmin(actor)) {
+      if (!(await haVistaPiena(actor))) {
         const inScope = await repo.userInTeam(pool, teamId, actor.userId);
         if (!inScope) throw new NotFoundError("Team");
       }

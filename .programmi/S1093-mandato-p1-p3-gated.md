@@ -50,7 +50,7 @@ Stato: `da-fare` · `in-corso` · `FATTO` · `non-fatta (ragione)`
 | A4 | `#143` F4/F5 | claude | API progetti/squadre + confine I18 dimostrato | **non-fatta** — stimata ~4-6 sessioni nel register; il confine di sessione era dichiarato all'inizio |
 | A5 | `#159` F2 — il ponte | claude | — | **non-fatta** — stimata ~3-4 sessioni |
 | A6 | `#149` F4 | claude | si chiude *su* una consegna | **non-fatta** — nessuna consegna in arrivo da verificare in questa sessione. ▸ Ma il suo principio è stato **applicato**: le due affermazioni scritte nel codice smentite oggi (`mfa-fixture-secrets.ts` e il commento del seed) sono esattamente «premesse dei nostri piani trattate come fonti non verificate» |
-| A7 | i tre gated: verdetto misurato | claude | per ognuno GATE-REALE / GATE-CADUTO con evidenza | **non-fatta** — la ricognizione delegata era ancora in corso al taglio; nessun verdetto è stato dichiarato senza misura |
+| A7 | i tre gated: verdetto misurato | claude | per ognuno GATE-REALE / GATE-CADUTO con evidenza | **FATTA in ricognizione** — arrivata dopo il bilancio: `#198` **GATE CONFERMATO** (le 4 tabelle a zero, ri-misurate). Gli altri due, con le decomposizioni di tutte le voci, in `S1093-ricognizione-10-voci.json` |
 
 ---
 
@@ -229,3 +229,18 @@ venisse rifiutato dal login, dato che `decryptSecret` è self-identifying e avre
 rileggerlo as-is. So che cifrarlo ha reso verde la suite, e questo è un fatto misurato; il
 *perché* resta **non spiegato**, e scrivere una causa plausibile al posto di una misurata sarebbe
 esattamente il difetto che questa sessione ha corretto due volte.
+
+
+---
+
+## ⭐ CODA — la ricognizione è arrivata dopo il bilancio, e ha eseguito A6 senza volerlo
+
+13 agenti su 13, nessun errore. Deposito e guida in `S1093-ricognizione-10-voci{,-LEGGIMI}.md/json`.
+
+**Ha di fatto eseguito `#149` F4**, che questo piano aveva dichiarato *non-fatta* per mancanza di
+una consegna da verificare. Era vero per metà: l'innesco di F4 ha **due** rami, e in cinque
+sessioni è stato misurato solo il primo. Il secondo — *«la prossima ingerita che qualcuno cita»* —
+misurato adesso, ha **5 bersagli vivi** e nessuno verificato.
+
+Aggiornamento del bilancio: **7 voci su 9**, con A7 risolta almeno per `#198` (gate confermato) e
+A6 eseguita nella sostanza. Il conto si legge dalla tabella, e la tabella ora dice questo.

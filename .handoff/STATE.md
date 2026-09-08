@@ -46,6 +46,19 @@ in produzione) · `#79` **F3** (cancello verde) · la chiave API di S1088 è **r
 3. **`#143` F4/F5** — API progetti/squadre col confine I18.
 4. **`#159` F2** — il ponte gateway↔pagine.
 
+⭐ **E c'è una ricognizione misurata da leggere prima di pianificare**:
+`.programmi/S1093-ricognizione-10-voci-LEGGIMI.md` (la guida) e il `.json` accanto (318 KB —
+non si apre per intero). 13 agenti hanno misurato sul campo le 10 voci e i tre gate; ogni voce
+porta la decomposizione fino al comando, scritta per una sessione che non ha quel contesto.
+⚠ Vale la regola di `#149` **anche su quel file**: è una consegna, ed è **non verificata**
+finché non la si misura.
+
+**Il reperto che ne esce, e riguarda il presidio stesso**: `#149` F4 è stato dichiarato
+«nessun bersaglio» **cinque volte** misurando metà del proprio innesco — solo «la consegna che
+arriva», mai «quella ingerita che qualcuno cita». Misurato ora il secondo ramo: **5 documenti
+del lab sono citati dal register come fonte eseguibile e nessuno porta un segno di verifica**.
+È DIF-4 applicata al presidio che esiste per intercettare DIF-4.
+
 ## Open questions
 
 - ⏳ **SOSPESA per decisione di Enzo (2026-09-08)**: dove custodire la chiave del collaudo.

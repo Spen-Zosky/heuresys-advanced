@@ -51,6 +51,12 @@ import { mkdirSync, writeFileSync } from "node:fs";
 // generale prima che la CI potesse vederla. Un seed non e' esente dagli invarianti solo
 // perche' e' uno script.
 import { encryptSecret } from "../../apps/api/src/modules/auth/secret-crypto.js";
+import { createHash } from "node:crypto";
+
+/** Otto caratteri di digest: identificano un segreto senza rivelarlo. Mai il valore, mai in un log. */
+function impronta(segreto: string): string {
+  return createHash("sha256").update(segreto).digest("hex").slice(0, 8);
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -207,6 +213,17 @@ function depositaSegretiDiCollaudo(segreti: Record<string, string>): void {
   if (quanti === 0) {
     console.log("  totp-collaudo: nessun segreto da depositare");
     return;
+  }
+  // ⭐ S1093 — L'IMPRONTA, e perché costa una riga e vale un giro di CI intero.
+  // Il primo tentativo di correzione ha lasciato la CI rossa con un errore DIVERSO: la
+  // fixture forniva un codice e il server rispondeva «Codice MFA non valido o scaduto». Da
+  // fuori non si distingue fra «il deposito non è quello che il server legge» e «il server
+  // non riesce a leggere il proprio segreto»: sono due guasti opposti con lo stesso sintomo.
+  // Stampare qui l'impronta di ciò che si è scritto, e nella fixture quella di ciò che si è
+  // usato, rende quel confronto una MISURA invece di un'ipotesi. Otto caratteri di digest:
+  // identificano senza rivelare — un segreto non si stampa mai, nemmeno in un log di CI.
+  for (const [email, s] of Object.entries(segreti)) {
+    console.log(`    impronta ${email.padEnd(34)} ${impronta(s)}`);
   }
   mkdirSync(dirname(PERCORSO_SEGRETI), { recursive: true });
   writeFileSync(

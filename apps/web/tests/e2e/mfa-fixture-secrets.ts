@@ -37,6 +37,7 @@
  */
 import path from "node:path";
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { readMaster, derivePassword } from "../../../api/scripts/derive-access.mjs";
 
 /** Etichetta dei fattori creati dal provisioning derivato (Z-262). */
@@ -88,7 +89,23 @@ function deposito(): Record<string, string> {
  */
 export function totpSecretFor(email: string): string {
   const segreto = deposito()[email];
-  if (segreto) return segreto;
+  if (segreto) {
+    // ⭐ S1093 — L'IMPRONTA, gemella di quella che stampa il seed.
+    // Il primo tentativo di correzione ha lasciato la CI rossa con un errore DIVERSO da
+    // prima: la fixture forniva un codice e il server rispondeva «Codice MFA non valido o
+    // scaduto». Da fuori quel sintomo non distingue due guasti opposti — «il deposito non è
+    // quello che il server legge» e «il server non riesce a leggere il proprio segreto».
+    // Con le due impronte accanto nel log, il confronto diventa una misura: uguali ⇒ il
+    // guasto è nel server (chiave di cifratura, orologio); diverse ⇒ qualcuno riscrive il
+    // fattore dopo il seed. Otto caratteri di digest: identificano senza rivelare.
+    console.log(
+      `[mfa-fixture] ${email}: segreto dal deposito, impronta ${createHash("sha256")
+        .update(segreto)
+        .digest("hex")
+        .slice(0, 8)}`,
+    );
+    return segreto;
+  }
   throw new Error(
     `Nessun segreto TOTP di collaudo per ${email}. La suite e' arrivata al secondo fattore, ` +
       `quindi l'enforcement MFA e' acceso su questo ambiente (in produzione e' spento). ` +

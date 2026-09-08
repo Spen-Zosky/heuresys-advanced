@@ -41,10 +41,10 @@ Stato: `da-fare` · `in-corso` · `FATTO` · `non-fatta (ragione)`
 
 | id | cosa | chi | cosa significa fatto | stato |
 |---|---|---|---|---|
-| **P0** | CI Playwright smoke torna verde | claude | `gh run list` su HEAD: playwright-smoke = success | in-corso |
-| P0b | Typecheck + Lint concludono su HEAD (ora `cancelled`, cioè mai misurati) | claude | entrambe `success` sullo stesso sha | da-fare |
-| A1 | `#169` F4 — la prova formale | claude | prova che ri-deriva **tutti** i segreti dalla chiave madre e mostra 0 corrispondenze | da-fare |
-| A2 | `#214` F6 — un perimetro | claude | riga in `agent-perimetri.json` + dimostrazione live | da-fare |
+| **P0** | CI Playwright smoke torna verde | claude | `gh run list` su HEAD: playwright-smoke = success | in-corso (corsa in volo) |
+| P0b | Typecheck + Lint concludono su HEAD (erano `cancelled`, cioè mai misurati) | claude | entrambe `success` sullo stesso sha | **FATTO** — verdi su `a9bc5921`, insieme a Test/Build/CodeQL/Shell |
+| A1 | `#169` F4 — la prova formale | claude | prova che ri-deriva **tutti** i segreti e mostra 0 corrispondenze | **FATTO** — `pnpm db:verify-separazione-totp`: 159 esaminati, **0 derivabili**, controprova superata. Secondo corno **VIOLATO** in produzione e quantificato (159/164 chiusi fuori se si accende l'enforcement) |
+| A2 | `#214` F6 — un perimetro | claude | riga in `agent-perimetri.json` + dimostrazione live | **FATTO** — `blueprint-families` undicesimo, mig `000382` **in produzione** (19 s sulla VM), sentinella a **0**, `db_health` tutto nei limiti |
 | A3 | `#54` F4 + `#79` F3 | claude | pagina `/recruiting` su dati reali + cancello esposizione verde | da-fare |
 | A4 | `#143` F4/F5 | claude | API progetti/squadre + confine I18 dimostrato | da-fare |
 | A5 | `#159` F2 — il ponte | claude | — | da-fare |
@@ -100,11 +100,15 @@ subordinata a `mfaEnforcement`.
 - **Propagazione**: il file dei segreti è **per-macchina** e si rigenera a ogni seed; non entra nel
   repo (gitignored) e non viaggia con `align-clones`. Nessun artefatto nuovo da propagare.
 - **Chi**: claude, per intero.
-- **Guardia**: l'export **non deve mai avvenire in produzione**. Guardia: `NODE_ENV === "test"`.
-  Regge sul caso limite? Se `NODE_ENV` è **assente** → `undefined !== "test"` → non esporta
-  (fail-safe corretto). In produzione `NODE_ENV=production` → non esporta. In CI il job dichiara
-  `NODE_ENV: test` → esporta. **Una guardia che sbaglia qui scrive su disco i secondi fattori veri**:
-  è il punto più delicato del fix, ed è per questo che è negativa per difetto.
+- **Guardia**: l'export **non deve mai avvenire in produzione**. ⚠ La prima stesura era
+  `NODE_ENV === "test"` e **non bastava**, come mi sono accorto rileggendo il caso limite prima di
+  provarla: su questa macchina il `.env` punta alla **produzione** via tunnel, quindi un
+  `NODE_ENV=test` distratto avrebbe rigenerato i secondi fattori veri. La guardia finale pretende
+  **due** condizioni — l'ambiente lo dichiara (`NODE_ENV=test`) **e** il database si dichiara di
+  collaudo dal proprio nome (`heuresys_ci`, o `*_ci` / `*_test`) — ed è negativa per difetto in ogni
+  ramo cieco. **Provata a esiti opposti**: si apre su `heuresys_ci` (7 segreti depositati, uguali al
+  DB per md5), si chiude su `heuresys_advanced` (impronta `4bf6467545130397` prima e dopo, nessun
+  file scritto, avviso esplicito).
 
 ### La decisione, e le due strade scartate
 
@@ -147,3 +151,24 @@ questa correzione, e `verifica-deploy.sh` smette di dire `CI-ROSSA`.
 - Lo step `playwright install-deps chromium` del job esce **1** (`Failed to install browser
   dependencies`) e il job prosegue lo stesso. Oggi non fa danno — i browser ci sono già sul runner —
   ma è un fallimento silenziato: da guardare, non in questo ciclo.
+
+
+---
+
+## Cronologia misurata di questa sessione
+
+| ora | cosa | evidenza |
+|---|---|---|
+| — | **P0** la CI era rossa da due commit, e non era instabilità | 6 setup Playwright falliti, causa isolata anello per anello |
+| — | il fix, provato **dove il database vive** | prova A (deposito == DB, 7/7) e prova B (la guardia respinge un DB di produzione, impronta invariata) |
+| — | **A1** `#169` F4 | 159 fattori, 0 derivabili · secondo corno violato: `PLATFORM_ADMIN`, 224 permessi, in un passo |
+| — | **A2** `#214` F6 | prova generale **rossa al primo giro** — e il difetto era mio, di un'ora prima |
+| — | il seed scriveva i segreti **in chiaro** | `v_mfa_secrets_in_cleartext: 7 righe` → corretto con `encryptSecret` → **7→0** |
+| — | prova generale, secondo giro | **VERDE**, 36/36 sentinelle a zero |
+| — | migrazione in produzione | 19 s sulla VM · sentinella nuova a 0 · `db_health` **tutto nei limiti** |
+
+**Il reperto della sessione**: la prova generale ha trovato un difetto **mio**, introdotto un'ora
+prima, che la CI avrebbe scoperto venticinque minuti dopo il push. «Funziona» non è «è corretto»:
+scrivere il segreto in chiaro funzionava — `decryptSecret` è self-identifying e lo rileggeva —
+ma accendeva una sentinella che pretende zero. Un seed non è esente dagli invarianti perché è
+uno script.

@@ -45,11 +45,12 @@ Stato: `da-fare` · `in-corso` · `FATTO` · `non-fatta (ragione)`
 | P0b | Typecheck + Lint concludono su HEAD (erano `cancelled`, cioè mai misurati) | claude | entrambe `success` sullo stesso sha | **FATTO** — verdi su `a9bc5921`, insieme a Test/Build/CodeQL/Shell |
 | A1 | `#169` F4 — la prova formale | claude | prova che ri-deriva **tutti** i segreti e mostra 0 corrispondenze | **FATTO** — `pnpm db:verify-separazione-totp`: 159 esaminati, **0 derivabili**, controprova superata. Secondo corno **VIOLATO** in produzione e quantificato (159/164 chiusi fuori se si accende l'enforcement) |
 | A2 | `#214` F6 — un perimetro | claude | riga in `agent-perimetri.json` + dimostrazione live | **FATTO** — `blueprint-families` undicesimo, mig `000382` **in produzione** (19 s sulla VM), sentinella a **0**, `db_health` tutto nei limiti |
-| A3 | `#54` F4 + `#79` F3 | claude | pagina `/recruiting` su dati reali + cancello esposizione verde | da-fare |
-| A4 | `#143` F4/F5 | claude | API progetti/squadre + confine I18 dimostrato | da-fare |
-| A5 | `#159` F2 — il ponte | claude | — | da-fare |
-| A6 | `#149` F4 | claude | — | da-fare |
-| A7 | i tre gated: verdetto misurato + azione conseguente | claude | per ognuno GATE-REALE / GATE-CADUTO con evidenza | da-fare |
+| A3a | `#79` F3 — cancello di esposizione | claude | `check_exposure.py` verde | **FATTO** — 73 tabelle scritte, 73 esposte, **0 lacune** |
+| A3b | `#54` F4 — frontend `/recruiting` | claude | pagina su dati reali + E2E con login reale | **non-fatta** — voce da ~1-2 sessioni, non apribile con la finestra 5h a 66%. ⚠ Lascio una misura per chi la riprende: `sys_candidates` ha **1 riga**, non zero (lo stato dichiarava le sette tabelle «vuote») |
+| A4 | `#143` F4/F5 | claude | API progetti/squadre + confine I18 dimostrato | **non-fatta** — stimata ~4-6 sessioni nel register; il confine di sessione era dichiarato all'inizio |
+| A5 | `#159` F2 — il ponte | claude | — | **non-fatta** — stimata ~3-4 sessioni |
+| A6 | `#149` F4 | claude | si chiude *su* una consegna | **non-fatta** — nessuna consegna in arrivo da verificare in questa sessione. ▸ Ma il suo principio è stato **applicato**: le due affermazioni scritte nel codice smentite oggi (`mfa-fixture-secrets.ts` e il commento del seed) sono esattamente «premesse dei nostri piani trattate come fonti non verificate» |
+| A7 | i tre gated: verdetto misurato | claude | per ognuno GATE-REALE / GATE-CADUTO con evidenza | **non-fatta** — la ricognizione delegata era ancora in corso al taglio; nessun verdetto è stato dichiarato senza misura |
 
 ---
 
@@ -172,3 +173,34 @@ prima, che la CI avrebbe scoperto venticinque minuti dopo il push. «Funziona» 
 scrivere il segreto in chiaro funzionava — `decryptSecret` è self-identifying e lo rileggeva —
 ma accendeva una sentinella che pretende zero. Un seed non è esente dagli invarianti perché è
 uno script.
+
+
+---
+
+## CHIUSURA — bilancio letto dalla tabella, non dalla memoria (R24 §6)
+
+**CICLO NON CHIUSO — 5 voci su 9 fatte.** Non è una sorpresa e non è una pendenza nascosta:
+il confine era **dichiarato nella prima riga di questo file**, prima di cominciare, e il criterio
+di taglio è quello che Enzo ha nominato — il guardiano della capienza.
+
+| fatte | non fatte, e perché |
+|---|---|
+| P0b · A1 (`#169` F4) · A2 (`#214` F6) · A3a (`#79` F3) · la chiave API ruotata | A3b `#54` F4, A4 `#143`, A5 `#159` — **voci da più sessioni ciascuna** per stima del register stesso |
+| | A6 `#149` F4 — non c'era una consegna da verificare |
+| | A7 i gated — la ricognizione delegata non ha finito in tempo, e **nessun gate è stato dichiarato senza misura** |
+| | **P0** la CI — l'errore è cambiato, la causa prima è rimossa, la diagnosi è **strumentata** |
+
+**Misure di chiusura**: contesto **39%** · finestra 5h **66%** — il guardiano non ha mai tagliato,
+il margine sì.
+
+## Registro delle scoperte fuori ciclo (R24 §5 — una volta sola, non diventano pendenze)
+
+Si presentano qui e **non entrano in «cosa resta»**. Se le vuoi, entrano nel prossimo ciclo.
+
+1. **Un percorso di ri-enrollment MFA.** È la precondizione, ora quantificata, dell'unica
+   decisione che manca a `#169`: 159 utenti su 164 non conoscono il proprio secondo fattore.
+2. **`playwright install-deps chromium` esce 1 e il job prosegue.** Oggi non fa danno — i
+   browser sono già sul runner — ma è un fallimento silenziato.
+3. **`stop-deriving-totp` non è idempotente per proprietà.** Rieseguito su un database già
+   bonificato rigenererebbe tutti e 159 i segreti, perché il suo criterio è l'etichetta e non
+   la derivabilità. Ora esiste lo strumento che misura la differenza.

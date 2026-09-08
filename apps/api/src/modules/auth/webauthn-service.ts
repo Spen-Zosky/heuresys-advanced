@@ -39,7 +39,7 @@ import type {
   PublicKeyCredentialRequestOptionsJSON,
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
-  AuthenticatorTransportFuture,
+  AuthenticatorTransport,
 } from "@simplewebauthn/server";
 import { pool } from "../../db/client.js";
 import { ApiError, UnauthorizedError } from "../../errors/index.js";
@@ -381,12 +381,23 @@ export function createWebauthnService(
   };
 }
 
-/** Parse the stored JSON-array transports string back into the typed union. */
-function parseTransports(json: string): AuthenticatorTransportFuture[] | undefined {
+/** Parse the stored JSON-array transports string back into the typed union.
+ *
+ * ⭐ S1093 — il tipo era `AuthenticatorTransportFuture`, che in `@simplewebauthn/server@14`
+ * **non esiste più** (effetto collaterale della PR #776 upstream: non è nemmeno elencato fra i
+ * breaking change dichiarati, che nominano solo il minimo di Node). Faceva fallire il typecheck
+ * della PR Dependabot #83 con `TS2724 … Did you mean 'AuthenticatorTransport'?`.
+ *
+ * `AuthenticatorTransport` è esportato **da entrambe** le versioni — verificato sui `.d.ts` della
+ * 13.3.2 installata, non dedotto dal changelog — quindi questa riga rende il codice compatibile
+ * con la v13 di oggi **e** con la v14 che arriverà, senza dover sincronizzare due cambiamenti.
+ * Era il super-tipo che ammetteva i transport «futuri»; qui il valore arriva da una colonna di
+ * testo e viene comunque asserito con un cast, quindi la stretta non toglie nulla a runtime. */
+function parseTransports(json: string): AuthenticatorTransport[] | undefined {
   try {
     const parsed = JSON.parse(json) as unknown;
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed as AuthenticatorTransportFuture[];
+      return parsed as AuthenticatorTransport[];
     }
     return undefined;
   } catch {

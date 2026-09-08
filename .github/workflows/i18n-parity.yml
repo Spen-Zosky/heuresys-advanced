@@ -65,7 +65,21 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "22"
-          cache: pnpm
+      # ⛔ NIENTE `cache: pnpm` QUI — misurato il 2026-09-08, e toglierlo e' la correzione.
+      # Su questo runner `[self-hosted, oci-vm]` la cache di setup-node ha raggiunto **4,28 GB**,
+      # e salvarla costa piu' del lavoro che il job fa: misurato sul log della PR #84,
+      #   04:52:50 -> 04:55:42  tutti gli step VERDI (2m52s di lavoro utile)
+      #   04:55:42              parte `tar --use-compress-program zstdmt`
+      #   05:02:50              ##[error]The operation was canceled  (7m08s dentro il tar)
+      # e sul job gemello l'upload e' stato ucciso al **98,4% di 4,28 GB**. Il `timeout-minutes: 10`
+      # scadeva DOPO che il lavoro era finito: i controlli risultavano CANCELLED, che non e' un
+      # fallimento — e' **assenza di misura**, cioe' la cosa peggiore, perche' somiglia a un verde.
+      # E su un runner PERSISTENTE quella cache non serve: lo store di pnpm vive gia' sul disco
+      # della macchina e sopravvive fra le corse. Serve sui runner effimeri, e infatti resta dov'e'
+      # utile (`showcase.yml`, che gira su `ubuntu-latest`).
+      # ⚠ Gli altri workflow self-hosted la tengono di proposito: `build-web`, `playwright-*` e
+      # `test-integration` hanno timeout da 20 a 75 minuti e non hanno mai mostrato il difetto.
+      # Toglierla anche a loro sarebbe allargare una correzione oltre la sua misura.
 
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile --prefer-offline

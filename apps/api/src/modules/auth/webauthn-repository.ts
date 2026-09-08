@@ -23,7 +23,7 @@ export interface WebauthnCredentialRow {
   /** COSE public key as a Node Buffer (bytea column). */
   publicKey: Buffer;
   counter: number;
-  /** JSON-array string of AuthenticatorTransportFuture values. */
+  /** JSON-array string of AuthenticatorTransport values (S1093: era `…Future`, ritirato in v14). */
   transports: string;
   aaguid: string | null;
   deviceLabel: string;

@@ -125,6 +125,62 @@ sono stati cancellati (divieto): sono diventati rimandi di poche righe a `live-p
       🔬 **Trovata e chiusa una cecità in attesa**: `check_concetti_agente.py` presidiava il caso «parser che non legge più nulla» per `RESOURCE_DATA_CLASS` e **per nessuna delle altre tre**. Cambiando forma, `MULTI` sarebbe tornato `{}` e ogni resource multiclasse sarebbe sparita in silenzio dalla classificazione. Ora la guardia c'è per `MULTI` e per `NO_PERSONE`.
 - [ ] **F6 Consumo della coda dei neutri, un perimetro per volta**
 
+  ### S1092 (2026-09-08) — il DECIMO perimetro, e la misura ha cambiato il candidato
+
+  Coda ri-derivata **sull'atlante fresco**: **105 moduli · 9 aperti · 40 in coda (21 neutri)**.
+  ⚠ Lo strumento si era **rifiutato di misurare** su un atlante superato — i due moduli nati
+  poche ore prima (`interview-feedback`, `job-offers`) non c'erano — ed è la prova che quel
+  rifiuto serve: uno zero silenzioso sarebbe stato un falso verde.
+
+  Testa dei neutri: di nuovo un **pari a sei**. L'ordine fra i sei lo aveva già dato la
+  `000378` col rischio crescente, ma **dentro i quattro "intermedi" un ordine non c'era**.
+
+  ⭐ **L'ordine interno lo dà la misura delle PORTE, non i nomi** (produzione, 2026-09-08):
+
+  | candidato | descrizione | metadata | esito |
+  |---|---|---|---|
+  | `blueprint-variants` | **0** | **0** | entrambe le porte vuote → **scelto** |
+  | `blueprint-families` | 1 (testo neutro) | 0 | |
+  | `operating-models` | 6 righe | | |
+  | `enterprise-typing-profiles` | — | **2/2 con un nome proprio in chiaro** | |
+
+  ⚠⚠ **Il reperto che ha cambiato la scelta.** `enterprise-typing-profiles` sembrava il
+  candidato naturale: sorella diretta della banda dimensionale aperta il giorno prima, e
+  nessuna delle sue quindici colonne è il **soggetto** di un dato di persona. Ma la sua unica
+  porta è **già occupata**: `enterprise_typing_metadata` porta la chiave `decided_by` con
+  valore «Enzo 2026-06-15», su entrambe le righe.
+
+  È un **attore**, non un soggetto — la distinzione già fatta per `link_created_by`. Ma a
+  differenza di un `created_by` uuid, che è **opaco**, qui c'è un nome proprio **in chiaro**
+  che l'agente leggerebbe. Il criterio di tutte le sentinelle di questa famiglia è
+  l'indirizzo di posta, *«e non un nome di persona: quello è indecidibile, e una guardia che
+  pretende di riconoscerlo mente»*. Quel criterio resta giusto — ma lì produrrebbe una
+  guardia che nasce **cieca sull'unico caso che quel perimetro contiene davvero**. Aprirlo
+  oggi vorrebbe dire dichiarare neutra una porta che sappiamo occupata: **resta in coda, più
+  indietro di quanto sembrasse**, e la ragione è scritta perché chi lo riprenderà non la
+  ri-deduca.
+
+  Non è un divieto né una voce nuova: è la regola del rischio crescente applicata a un
+  **dato** invece che a un nome.
+
+  **Il decimo è quindi `blueprint-variants`** — l'oggetto più derivato dei quattro: una
+  configurazione di una famiglia di configurazioni, agganciata a una banda dimensionale, cioè
+  a un perimetro già aperto e già presidiato. Neutralità misurata su `information_schema`:
+  nessuna delle nove colonne è il soggetto di un dato di persona, e non c'è nemmeno un
+  attore (`created_by` non esiste).
+
+  ⚠ **Aperto con una guardia**, due porte (`metadata` JSONB · `description` testo libero).
+  **Mig `000381`**, sentinella `sys.v_variante_di_fascicolo_con_dato_di_persona`, provata
+  rossa su **entrambe** le porte.
+
+  🔬 **Evidenza live, in quest'ordine**:
+  - prova generale sul gemello → **VERDE** a due passate, «sentinella installata e provata su
+    entrambe le porte · 1 varianti invariate», sentinelle **35/35 a zero** (da 34), catena 13 s;
+  - produzione — `pnpm db:migrate:vm` → exit 0, **14 s**, «354 applied, 24 skipped»;
+  - dimostrazione — la sentinella dice **0**, e `db_health` la mostra `[ok] … 0`, exit **0**.
+
+  Coda dopo: **10 aperti · 39 in coda (20 neutri)**.
+
   ### S1091 (2026-09-07) — il NONO perimetro, e un pari a sette
 
   Coda ri-derivata: **101 moduli · 8 aperti · 41 in coda (22 neutri · 0 non misurabili · 19

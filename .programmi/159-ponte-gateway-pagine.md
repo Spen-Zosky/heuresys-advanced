@@ -38,6 +38,38 @@ adozione su tutte le pagine idonee**. Stima: **~3-4 sessioni**, così ripartite.
   - **resta di F1 la sola dimostrazione**: quale delle 83 aprire per prima dipende da **#156** (WAIT-INPUT su Enzo). Il criterio non ne dipende — la lista è già prodotta.
 - [ ] **F2 — Il ponte** — un canale in streaming + un componente riusabile, scritto **fuori** da qualunque pagina (è il rischio nominato) · budget ~250k
 
+  ### ✅ S1092 (2026-09-08) — il buco dichiarato da S1091 è chiuso per la parte provabile
+
+  S1091 aveva lasciato il canale coperto dai soli cancelli **statici**, e lo aveva scritto
+  apertamente: *«due cancelli statici verdi non sono una prova che il canale si comporti come
+  prima, e chiamarli tali sarebbe il falso verde di questa fase»*. Quella frase era la
+  descrizione di un buco, non una scusa — quindi si chiude.
+
+  **Nasce la prima suite unitaria del frontend**: `apps/web/vitest.config.ts` + script `test`.
+  ⚠ **Nessuna dipendenza nuova**: `vitest@4.1.11` era già fra le devDependencies di
+  `apps/web`, mancavano solo config e script. E la config è **deliberatamente minima** —
+  `environment: "node"`, nessun DOM, nessuna `@testing-library` — perché provare un hook React
+  pretende un renderer, cioè dipendenze nuove: un ambiente che si allarga «per ogni evenienza»
+  è superficie che nessuno usa e tutti mantengono. Esclude `tests/e2e/**`, che ha il suo runner.
+
+  **7 casi su `parseSseBlock`**, scritti dal **protocollo** e non dall'implementazione — è il
+  modo in cui una prova può ancora fallire quando l'implementazione cambia in silenzio. I due
+  che contano davvero sono quelli che un interprete ingenuo sbaglia: le righe `data:` multiple
+  si uniscono con un **a-capo** (un payload lungo arriva spezzato, e concatenarlo produce un
+  JSON incollato che nessuno legge più), e i due punti **dentro** al valore non si tagliano
+  (uno `split(":")` distruggerebbe ogni JSON). Più i commenti di keep-alive, il `\r` di
+  Windows, il blocco vuoto e il tipo di default.
+
+  **Sondato**: sostituito `join("\n")` con `join("")` → **1 fallito su 7**, ed è esattamente
+  «⭐ unisce le righe `data:` multiple con un a-capo». Ripristinato, 7/7, e il file è tornato
+  identico byte per byte (`git diff` vuoto). `typecheck` web pulito, `lint` 4/4.
+
+  ⏳ **Il perimetro resta dichiarato, o il verde mentirebbe**: qui si prova una funzione
+  **pura**. Un verde significa «l'interprete dei blocchi si comporta come deve», **non** «il
+  canale funziona»: `useAgentStream` è un hook e non ha ancora prova automatica. E il
+  **componente** resta di `ux-design-shared`, che è un altro repository (vedi il rilievo
+  S1083 qui sotto).
+
   ### 🟡 S1091 (2026-09-07) — la METÀ DI QUI è fatta. L'altra è di un altro repo, e resta
 
   Eseguita seguendo alla lettera il rilievo S1083 qui sotto, che spezza F2 in due metà in repo

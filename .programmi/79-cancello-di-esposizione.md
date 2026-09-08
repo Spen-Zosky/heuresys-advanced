@@ -25,6 +25,26 @@ cui viene creata: trovarla sei sessioni dopo costa il triplo, perché nel fratte
 - [x] **F1 Le cinque lacune vere, trovate e colmate** — FATTO 2026-08-06 (S1035) · storia organizzativa · registro GDPR che si scriveva e non si rileggeva · istruttoria e fonti della pipeline · revisione degli obiettivi di carriera. **E una tabella morta scartata**: `sys_auth_sessions` non è usata da nessuna parte (le sessioni vere sono i token di refresh)
 - [x] **F2 La verifica dopo le superfici di `#126`** — FATTO 2026-08-13 (S1057) · `check_exposure.py` → **73 tabelle scritte dal programma, 73 lette da almeno un modulo API, 0 non esposte**, exit 0 letto **sul processo**, non dai messaggi
 - [ ] **F3 Il prossimo lavoro che popola tabelle** — budget ~5k per esecuzione
+
+  ### Esecuzione S1092 (2026-09-08) — dopo #54 F3 e #214 F6
+
+  `python docs/kb/tools/check_exposure.py` → **73 scritte · 73 lette · 0 esentate · 0 non
+  esposte**, «Nessuna lacuna di esposizione», **exit 0 letto sul processo** e non dai
+  messaggi (D-24 / la lezione della pipe che maschera l'uscita).
+
+  ⚠ **E va detto perché è verde, o il verde non prova niente.** Il lavoro di questa sessione
+  **non ha popolato** alcuna tabella: ha costruito API su tabelle **vuote per progetto**
+  (il recruiting si popolerà con l'uso — I12/ADR-0038). Il cancello guarda «scritto dal
+  programma e non letto da nessuna API»: dove non si è scritto, non ha nulla da dire. Un
+  verde qui è **corretto e non informativo**, ed è diverso da un verde che assolve.
+
+  ▸ **Il verso opposto, misurato lo stesso giorno**, che questo cancello non guarda: con le
+  ultime due fette **tutte e sette** le tabelle del recruiting hanno ora un modulo API che
+  le legge — `job_requisitions` 2 · `job_postings` 2 · `candidates` 3 ·
+  `candidate_applications` 3 · `interviews` 2 · `interview_feedback` 1 · `job_offers` 1.
+  Prima ne mancavano due. Non è materia di questo cancello (che parte dai *dati* e cerca
+  l'API), ma è la stessa proprietà vista dall'altro capo, e conviene averla scritta il
+  giorno in cui è diventata vera.
       ▸ **Eseguito il 2026-08-28 (S1083)** dopo le quattro migrazioni del blocco A, di cui **due
       popolano davvero**: `000361` (requisiti formativi delle posizioni del rischio) e `000362`
       (buste paga del tenant di piattaforma). Cancello: **73 tabelle scritte, 73 lette, 0 non

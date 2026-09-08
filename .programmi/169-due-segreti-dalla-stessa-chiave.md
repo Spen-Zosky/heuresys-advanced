@@ -194,6 +194,77 @@ verde solo perché girava su `tommaso.fiore`, che per combinazione aveva zero ri
 perdeva). Chi userà quale via è parte del lavoro.
 - [ ] **F3 Il segreto smette di essere derivato** — casuale, cifrato a riposo, consegnato una volta sola. **fatto =** un segreto nuovo non è più ricostruibile dalla chiave madre, misurato provando a ricostruirlo
 
+  ### 🔬 INDAGINE S1092 (2026-09-08) — la misura che il piano dichiarava decisiva, e non era mai stata fatta
+
+  Il piano scriveva, proponendo la «terza via»: *«⚠ E porta con sé la domanda che la decide:
+  **se le due chiavi finiscono nello stesso posto, la separazione è formale e non reale**.
+  Prima di scegliere va misurato dove vive `MASTER_PATH` e dove potrebbe vivere la seconda».*
+  **Misurata adesso. La risposta è: nello stesso posto, ovunque.**
+
+  | luogo | `dev-access-master.key` | `collaudo-access.key` |
+  |---|---|---|
+  | Windows — `.secrets/` | ✔ 48 byte | ✔ 48 byte, **stessa cartella** |
+  | linux-pc — `.secrets/` | ✔ | ✔ |
+  | linux-pc — runner CI `~/actions-runner/.env` | ✔ `DEV_ACCESS_MASTER_KEY_B64` | ✔ `COLLAUDO_ACCESS_KEY_B64`, **stesso file** |
+  | VM Oracle — `.secrets/` | ✔ | ✔ |
+
+  **Non esiste un solo luogo in cui viva una delle due e non l'altra.** E non è un caso da
+  correggere con un `mv`: `align-clones` propaga `.secrets/` **come blocco** — è così che la
+  chiave di collaudo è arrivata sui cloni senza che nessuno la copiasse (registrato in F2).
+
+  ⚠ **Conseguenza su F3b, che questo piano dichiara chiusa.** F3b ha reso vero il suo test —
+  «password da chiave madre → 401» — e quel test è onesto. Ma il criterio di **F4** è più
+  largo: *«con la chiave madre in mano, completare un accesso come amministratore deve
+  risultare impossibile»*. In pratica «avere la chiave madre» significa **aver letto
+  `.secrets/`**, e chi legge quella cartella legge anche l'altra chiave. La separazione
+  ottenuta è **formale**: due file invece di uno, dietro la stessa porta.
+
+  Questo **non annulla F3b**, e vale la pena dire perché: prima, il segreto del collaudo si
+  ricavava dalla *stessa* chiave con una funzione pubblica nel repository — bastava il
+  codice. Adesso serve un secondo file. È un passo avanti reale; non è la proprietà che F4
+  chiede.
+
+  ### ⚠ E F3a com'è scritta non è un refactoring: è una richiesta di dati
+
+  Misurato lo stesso giorno, in produzione:
+
+  | | posizioni | squadre |
+  |---|---|---|
+  | `governo@` · `persona@` · `piattaforma@collaudo.invalid` | **0** | **0** |
+  | `tommaso.fiore@rtl-bank.org` (la persona che 34 spec nominano) | 2 | 1 |
+
+  Le sei personas della suite sono **persone reali con dati seminati** — e `fixtures.ts` lo
+  dichiara: la chiave `employee` non è mai stata rinominata proprio perché *«34 spec la
+  nominano e dipendono dai suoi dati seminati (carriera, My HR, embedding del profilo)»*.
+  Su 101 spec, **89 nominano una persona**.
+
+  Quindi «portare la suite sulle utenze di collaudo» significa una di due cose, e nessuna
+  delle due è quella che il piano lascia intendere:
+  1. **dare alle utenze di servizio i dati di una persona** — carriera, valutazioni,
+     posizione, squadra. Cioè fabbricare una persona finta dentro un ambiente che I15 /
+     ADR-0026 tengono prod-grade apposta;
+  2. **rinunciare a ciò che quelle spec verificano** — che è la maggior parte di ciò che la
+     suite prova, perché una pagina si prova con dei dati dentro.
+
+  🔒 **La decisione è di Enzo, e la nomino invece di sceglierla di nascosto.** Sono due
+  domande distinte, e la seconda si può sciogliere anche senza la prima:
+  - **(A) dove custodire la seconda chiave**, perché la separazione smetta di essere
+    formale. Oggi le due viaggiano insieme per costruzione, ed è `align-clones` a volerlo.
+    Toccare questo è infrastruttura su tre macchine più la CI.
+  - **(B) se la suite E2E debba girare con identità di servizio o con persone reali.** La
+    direttiva del 2026-08-25 dice *«senza passare per il rito di login delle persone
+    reali»*; la Definition of Done dice *«per le pagine autenticate la dimostrazione LIVE =
+    login con una persona reale»*. **Non si contraddicono se si separano i due usi** — la
+    *suite automatica* da una parte, la *dimostrazione live* di uno step dall'altra — ed è
+    la lettura che propongo. Ma resta il fatto (1): le utenze di servizio non hanno dati, e
+    senza dati 89 spec su 101 non provano più ciò per cui esistono.
+
+  ▸ **Strada che NON dipende da nessuna delle due**, e che resta il contenuto originale
+  della voce: **F3c**, i segreti delle persone reali diventano casuali. Un segreto casuale
+  non è ricostruibile da *nessuna* chiave, quindi chiude la voce senza dover decidere dove
+  custodirne una seconda. Il suo costo è che la suite non può più derivare i TOTP — cioè
+  ricade in (B). **Le due domande sono lo stesso nodo visto dai due lati.**
+
   ### ✅ F3b — FATTA 2026-09-07 (S1091). E la misura ha trovato un buco APERTO, non un lavoro da fare
 
   **Ordine invertito rispetto al piano, e la ragione è misurata.** Il piano diceva F3a → F3b → F3c

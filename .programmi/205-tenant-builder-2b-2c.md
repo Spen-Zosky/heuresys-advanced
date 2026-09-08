@@ -81,6 +81,46 @@ forma dà zero riscontri.
 
 ---
 
+## ⚠⚠ RI-MISURATO il 2026-09-08 (S1092): il fatto è cambiato, e ribalta metà della conclusione qui sotto
+
+Il paragrafo del 2026-09-05 poggia su una misura precisa — *«una riga sola, per un dominio
+solo, e quel dominio è proprio quello già percorso da 2a»* — e da lì conclude che lo
+strumento di F1 «nascerebbe verde restituendo una coda con dentro solo ciò che è già fatto».
+
+**Quella misura non descrive più il presente.** Ri-derivata oggi:
+
+```
+APPROVED | business_processes | 1        APPROVED | positions   | 1
+APPROVED | kpis               | 1        APPROVED | skills      | 1
+APPROVED | organization_units | 1
+```
+
+**Cinque domini approvati, non uno** — uno per **ciascuno** dei cinque domini di contenuto.
+La conclusione «R2 escluderebbe ogni candidato tranne `business_processes`» è quindi falsa
+oggi: R2 li ammetterebbe tutti e cinque.
+
+**Ma questo non rende F1 eseguibile, e la ragione è cambiata**, quindi va riscritta invece
+che ereditata:
+
+- il catalogo dei domini ricercabili conta **sei** voci — i cinque di contenuto più
+  `research_sources`, che è il dominio **del registro stesso**. Quindi l'autoprova a esiti
+  opposti su R2 è *tecnicamente* costruibile (cinque passano, uno no), ma l'unico candidato
+  che R2 escluderebbe è un dominio **meta**: quello che popola le fonti, non uno che le
+  consuma. È un «no» che non rappresenta ciò che R2 vuole misurare, e una prova che dice no
+  solo sul caso degenere è una prova debole;
+- soprattutto, **la coda perde il suo senso**: se tutti e cinque i domini di contenuto
+  passano R2, la coda che F1 dovrebbe produrre è lunga cinque e R2 non ne ordina nessuno.
+  L'ordine dovrebbe venire dagli altri criteri, e il piano vieta esplicitamente di scriverne
+  uno a mano.
+
+⭐ **Delle due domande poste a Enzo il 2026-09-05, la prima è quella che conta ora, e non è
+sciolta**: *«quali altre fonti si approvano — da quali siti la piattaforma accetta di
+imparare»*. Con una fonte per dominio, il registro c'è ma non discrimina; è
+l'**ampiezza** delle fonti approvate a dare a R2 qualcosa da separare. La seconda (riscrivere
+R2 al potenziale) **perde urgenza**: al potenziale o all'atto, oggi il risultato è lo stesso.
+
+*Il paragrafo che segue resta come cronaca del 2026-09-05, non come stato.*
+
 ## ⚠ Misurato il 2026-09-05 (S1087): il gate e' caduto, ma F1 non e' diventata eseguibile
 
 La dipendenza dura diceva: «la coda non e' calcolabile finche' 2a non e' fatta — la prova R2

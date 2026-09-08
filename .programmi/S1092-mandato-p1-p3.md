@@ -32,25 +32,43 @@ nella chiusura, voce per voce.
 
 | id | cosa | chi | «fatto» significa | stato |
 |---|---|---|---|---|
-| 9a | Rigenera l'atlante (`build_atlas.py`) | io | STALENESS self-check verde sulla riga atlante | ⏳ |
-| 9b | Rigenera i derivati (`build_derivati.py`) | io | 3/3 derivati freschi | ⏳ |
-| 9c | Compatta il register (`compatta_register.py --esegui`) | io | cronaca < 25% del register | ⏳ |
-| 9d | Commit atomico dell'igiene | io | working tree pulito, handoff_lint 0 FAIL | ⏳ |
-| 10a | Suite API completa **sul gemello**, gemello allineato a HEAD | io | numero di test falliti misurato, log allegato | ⏳ |
-| 10b | Verdetto `verify_gate` rimesso in pari o dichiarato non-misurabile con la ragione | io | `.zp/verify-verdict.json` fresco su HEAD, o ragione scritta | ⏳ |
-| 3 | #54 F3 — fette `feedback` e `offers` | io | endpoint live + prova su dati reali | ⏳ |
-| 4 | #143 F3 — asse funzionale vivo | io | `isInFunctionalScope` ha un consumatore reale | ⏳ |
-| 5 | #169 F3 — il segreto smette di essere derivato | io | secondo fattore da segreto proprio, migrazione applicata | ⏳ |
-| 6 | #214 F6 — consumo della coda dei neutri | io | ≥1 perimetro aperto con riga di decisione datata | ⏳ |
-| 7 | #79 F3 — cancello di esposizione sul lavoro nuovo | io | `check_exposure.py` verde sulle tabelle toccate | ⏳ |
-| 8 | #149 F4 — prossima consegna del lab trattata come non verificata | io | consegna misurata o dichiarata assente | ⏳ |
-| 9v | #159 F2 — il ponte | io | ponte con criterio di idoneità, o confine dichiarato | ⏳ |
-| 10v | #205 — ri-misura del gate su #132 | io | gate confermato o sciolto, con la misura | ⏳ |
+| 9a | Rigenera l'atlante (`build_atlas.py`) | io | STALENESS self-check verde sulla riga atlante | ✅ |
+| 9b | Rigenera i derivati (`build_derivati.py`) | io | 3/3 derivati freschi | ✅ |
+| 9c | Compatta il register (`compatta_register.py --esegui`) | io | cronaca < 25% del register | ✅ 27% → 22% |
+| 9d | Commit atomico dell'igiene | io | working tree pulito, handoff_lint 0 FAIL | ✅ `c6a46985` + `c96354f2` |
+| 10a | Suite API completa **sul gemello**, gemello allineato a HEAD | io | numero di test falliti misurato, log allegato | ✅ **1883/1883**, exit 0 |
+| 10b | Verdetto `verify_gate` rimesso in pari o dichiarato non-misurabile con la ragione | io | `.zp/verify-verdict.json` fresco su HEAD, o ragione scritta | ✅ misura vera acquisita; il file resta `not-measured` (il diff non instrada nulla) |
+| 3 | #54 F3 — fette `feedback` e `offers` | io | endpoint live + prova su dati reali | ✅ **F3 CHIUSA 7/7** |
+| 4 | #143 F3 — asse funzionale vivo | io | `isInFunctionalScope` ha un consumatore reale | ✅ **F3 CHIUSA**, due consumatori |
+| 5 | #169 F3 — il segreto smette di essere derivato | io | secondo fattore da segreto proprio, migrazione applicata | ⛔ → **WAIT-INPUT**: due decisioni di Enzo, nominate con i numeri |
+| 6 | #214 F6 — consumo della coda dei neutri | io | ≥1 perimetro aperto con riga di decisione datata | ✅ **decimo perimetro**, live in produzione |
+| 7 | #79 F3 — cancello di esposizione sul lavoro nuovo | io | `check_exposure.py` verde sulle tabelle toccate | ✅ 73/73, exit 0 sul processo |
+| 8 | #149 F4 — prossima consegna del lab trattata come non verificata | io | consegna misurata o dichiarata assente | ✅ inbox vuota (2 misure) + **3 affermazioni ereditate smentite** |
+| 9v | #159 F2 — il ponte | io | ponte con criterio di idoneità, o confine dichiarato | ✅ prova dinamica costruita; componente **fuori repo**, dichiarato |
+| 10v | #205 — ri-misura del gate su #132 | io | gate confermato o sciolto, con la misura | ✅ misurato: **1 → 5 domini**, conclusione precedente ribaltata |
 
 Legenda stato: ⏳ da fare · 🔄 in corso · ✅ fatto · ⛔ bloccato · ⏭ fuori sessione (guardiano)
 
+**ESITO — 13/14 voci fatte.** L'unica non fatta è la **5** (`#169` F3), e non per capienza:
+è passata a **WAIT-INPUT** perché l'indagine ha prodotto un fatto che sposta la decisione su
+Enzo. Il guardiano non ha mai tagliato: contesto **41,9%**, finestra 5h **36%**, verdetto
+«si continua» a ogni misura.
+
+⛔ **Le due GATED, ri-misurate e non ereditate**: `#198` regge (le 4 `sys_blueprint_content_*`
+sono ancora tutte a **0**) · `#41` è bloccata da un limite di spesa, che è di Enzo.
+
 ---
 
-## Registro delle scoperte (R24 §5 — non entrano in «cosa resta»)
+## Registro delle scoperte (R24 §5 — presentate una volta sola, fuori da «cosa resta»)
 
-*(vuoto all'apertura)*
+1. **La separazione delle due chiavi è formale** (`#169`): `dev-access-master.key` e
+   `collaudo-access.key` convivono in `.secrets/` su tutte e tre le macchine e nello stesso
+   file `.env` del runner CI. Registrato nel register come input richiesto.
+2. **`enterprise_typing_metadata` ha già un nome proprio in chiaro** (`decided_by` =
+   «Enzo 2026-06-15»): il criterio dell'indirizzo di posta non lo vede. Registrato nella
+   `000381` e in `agent-perimetri.json`.
+3. **`resolveActivityScope` registrava `self` per un capo senza membri** — corretto in
+   `#143` F3, ma la classe del difetto (un conteggio che misura la portata e non il titolo)
+   può ripresentarsi altrove.
+4. **`apps/web` non aveva alcuna suite unitaria** — ora ne ha una minima. Estenderla a React
+   pretende dipendenze nuove: non fatto, dichiarato.

@@ -259,6 +259,26 @@ tunnel, mentre la prova generale lavora su una **copia usa-e-getta** di `heuresy
 che è in produzione, l'altro ciò che il tuo codice **produce**. Un seed sbagliato non tocca la
 produzione: il primo è cieco su di lui per costruzione.
 
+### C4 — Una prova distruttiva gira su una COPIA, mai sull'originale — e un database di collaudo È un oggetto condiviso
+
+*Aggiunta il 2026-09-08, poche ore dopo C1, perché **l'ho violata mentre costruivo C1**.*
+
+Per dimostrare che il seed fosse deterministico ho fatto `DELETE` dei fattori TOTP su
+`heuresys_ci` e li ho ricreati — due volte. `heuresys_ci` non è un mio banco di prova: è **il
+database vero della CI**, e in quel momento una corsa era in volo. `Test (api integration)` è
+passata da **success** (su `4cfc4c14`, ore 15:37) a **failure** (su `aa4235e9`, ore 16:21) con
+l'errore *«the fixture TOTP factor is missing»*, cioè esattamente ciò che avevo appena cancellato.
+
+**La regola**: qualunque prova che *cancella, sovrascrive o rigenera* gira su una **copia
+usa-e-getta**, mai sull'originale. È già il modo in cui lavora `ci-rehearsal.sh` — copia
+`heuresys_ci` e prova sulla copia — e la ragione per cui esiste era proprio questa. Il difetto
+non è stato non sapere: è stato non applicare a me stesso lo strumento che avevo appena scritto.
+
+⚠ **Un database non sembra un «oggetto» finché non lo si tratta come tale.** Il censimento di C1
+funziona anche sui nomi di database: `chi_sorveglia.py heuresys_ci` elenca **tre workflow CI** che
+lo usano, `test-integration.yml` con dieci riscontri. Una riga, prima del `DELETE`, e l'incidente
+non sarebbe successo.
+
 ### C3 — Un seed porta a uno STATO DICHIARATO, non negozia con quello che trova
 
 *«È scritto con logiche del tipo "inserisci solo se non c'è già": con lo stesso comando, se la riga

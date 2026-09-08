@@ -50,7 +50,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 // sentinella `v_mfa_secrets_in_cleartext`, che pretende zero: l'ha vista rossa la prova
 // generale prima che la CI potesse vederla. Un seed non e' esente dagli invarianti solo
 // perche' e' uno script.
-import { encryptSecret } from "../../apps/api/src/modules/auth/secret-crypto.js";
+import { encryptSecret, decryptSecret } from "../../apps/api/src/modules/auth/secret-crypto.js";
 import { createHash } from "node:crypto";
 
 /** Otto caratteri di digest: identificano un segreto senza rivelarlo. Mai il valore, mai in un log. */
@@ -112,8 +112,19 @@ interface EnsureResult {
  * zero. L'ha vista rossa la prova generale (`ci-rehearsal.sh`, 7 righe) prima che potesse
  * vederla la CI. Un seed non è esente dagli invarianti perché è uno script.
  *
- * I fattori con questa label restano esclusi dalla ri-cifratura pigra
- * (`mfa-service.ts`, `isCommittedFixture`): non cambiano sotto i piedi di chi li scrive.
+ * ⚠⚠ E QUI AVEVO SCRITTO UNA COSA FALSA, il 2026-09-08, poche ore prima di questa riga:
+ * «i fattori con questa label restano esclusi dalla ri-cifratura pigra». **Non è vero.**
+ * `mfa-service.ts` esclude i fattori la cui label vale `FIXTURE_FACTOR_LABEL`, che è
+ * `"e2e-fixture"` — la label usata dai **sette test di integrazione API**. Quella scritta
+ * qui è `E2E_FIXTURE_LABEL = "derived-access"`, che è un'altra cosa: **due famiglie di
+ * fixture con due etichette**, e l'esclusione ne copre una sola.
+ *
+ * Quindi i fattori creati da questo seed **non** sono esclusi: dopo un login riuscito la
+ * ri-cifratura pigra li tocca. Oggi è innocuo, perché li scriviamo già cifrati e quel ramo
+ * scatta solo su un segreto in chiaro. Ma la frase era falsa quando l'ho scritta, ed è
+ * esattamente la classe di difetto che questo progetto insegue: un'affermazione plausibile
+ * messa in un commento senza misurarla. La misura è una riga:
+ * `python docs/kb/tools/chi_sorveglia.py e2e-fixture`.
  *
  * ⭐ #169 F3c + S1093 — il segreto è **casuale**: chi possiede la chiave madre non
  * lo ricostruisce, ed era quello il difetto della voce. Ma casuale non vuol dire
@@ -318,6 +329,101 @@ async function ensureAuth(
   return { userId, identityCreated, credentialCreated, totpFactorCreated: false };
 }
 
+/**
+ * ⭐ S1093 F4 — LO STATO DICHIARATO, e perché è il rimedio all'aleatorietà.
+ *
+ * Enzo, 2026-09-08: *«È scritto con logiche del tipo "inserisci solo se non c'è già": con lo
+ * stesso comando, se la riga c'è si comporta in un modo, se non c'è in un altro.
+ * L'instabilità è dentro lo strumento, progettata lì dentro, non nell'esecuzione.»*
+ *
+ * La diagnosi è giusta. Un seed che **negozia** con ciò che trova, girando su un database che
+ * è una copia della produzione — e che quindi parte da uno stato diverso ogni volta — produce
+ * esiti diversi dallo stesso comando. E chi lo lancia non ha modo di accorgersene, perché
+ * l'uscita dice `CREATED` o `EXISTS`, cioè **cosa ha fatto**, non **dove è arrivato**.
+ *
+ * Questa funzione ribalta la domanda: non «cosa ho fatto», ma **«lo stato è quello dichiarato?»**.
+ * È una post-condizione, e come tutte le post-condizioni di questo progetto guarda anche ciò
+ * che NON doveva cambiare. Se lo stato non è quello atteso **il seed fallisce**, invece di
+ * riuscire a metà e lasciare che se ne accorga la suite mezz'ora dopo.
+ *
+ * LO STATO DICHIARATO, per ogni persona dell'elenco:
+ *   ① esiste un'identità LOCAL con una credenziale corrente;
+ *   ② esiste **esattamente un** fattore TOTP con l'etichetta di questa famiglia, VERIFICATO;
+ *   ③ il suo segreto è cifrato a riposo (`enc:v1:`), o la sentinella dei segreti in chiaro
+ *      si accende — ed è la stessa che ha colto questo script il 2026-09-08;
+ *   ④ **in collaudo soltanto**: quel segreto è quello depositato per Playwright. È il corno
+ *      che rende il seed DETERMINISTICO dove serve — a parità di ambiente, lo stesso comando
+ *      lascia lo stesso stato, quale che fosse il punto di partenza.
+ */
+async function dichiaraStatoRaggiunto(
+  client: Client,
+  ambienteDiCollaudo: boolean,
+  segreti: Record<string, string>,
+): Promise<void> {
+  const guasti: string[] = [];
+
+  for (const email of PERSONA_EMAILS) {
+    const { rows } = await client.query<{
+      fattori: string;
+      verificati: string;
+      cifrati: string;
+      segreto: string | null;
+    }>(
+      `SELECT count(*)::text                                            AS fattori,
+              count(*) FILTER (WHERE f.auth_mfa_factor_verified)::text  AS verificati,
+              count(*) FILTER (WHERE f.auth_mfa_factor_secret LIKE 'enc:v1:%')::text AS cifrati,
+              max(f.auth_mfa_factor_secret)                             AS segreto
+         FROM sys.sys_auth_mfa_factors f
+         JOIN sys.sys_users u ON u.user_id = f.auth_mfa_factor_user_id
+        WHERE u.user_email = $1
+          AND f.auth_mfa_factor_kind = 'TOTP'
+          AND f.auth_mfa_factor_metadata->>'label' = $2`,
+      [email, E2E_FIXTURE_LABEL],
+    );
+    const r = rows[0];
+    if (!r || r.fattori !== "1") {
+      guasti.push(`${email}: fattori TOTP '${E2E_FIXTURE_LABEL}' = ${r?.fattori ?? "?"}, atteso 1`);
+      continue;
+    }
+    if (r.verificati !== "1") guasti.push(`${email}: il fattore non e' VERIFICATO`);
+    if (r.cifrati !== "1") {
+      guasti.push(
+        `${email}: il segreto NON e' cifrato a riposo — accende v_mfa_secrets_in_cleartext`,
+      );
+    }
+    // ④ il corno del collaudo: cio' che la suite usera' deve essere cio' che il database ha.
+    if (ambienteDiCollaudo && r.segreto) {
+      const atteso = segreti[email];
+      if (!atteso) {
+        guasti.push(`${email}: nessun segreto depositato, ma l'ambiente e' di collaudo`);
+      } else if (decryptSecret(r.segreto) !== atteso) {
+        guasti.push(
+          `${email}: il segreto nel database NON e' quello depositato per la suite ` +
+            `(impronte ${impronta(decryptSecret(r.segreto))} contro ${impronta(atteso)})`,
+        );
+      }
+    }
+  }
+
+  if (guasti.length) {
+    console.error("");
+    console.error("⛔ STATO NON RAGGIUNTO — il seed non ha portato il database dove dichiara:");
+    for (const g of guasti) console.error(`   ✗ ${g}`);
+    throw new Error(
+      `seed-test-admin: ${guasti.length} scostamenti dallo stato dichiarato. ` +
+        `Un seed che riesce a meta' e' peggio di un seed che fallisce: il difetto si scopre ` +
+        `mezz'ora dopo, addosso a chi lo usa.`,
+    );
+  }
+
+  console.log(
+    `  stato dichiarato: VERIFICATO su ${PERSONA_EMAILS.length} persone — 1 fattore TOTP ` +
+      `verificato e cifrato ciascuna` +
+      (ambienteDiCollaudo ? ", e il segreto e' quello depositato per la suite" : ""),
+  );
+}
+
+
 async function main() {
   // Z-262 (2026-07-26): la password di una persona NON è più una costante condivisa,
   // è DERIVATA per-utente dalla chiave madre (.secrets/dev-access-master.key) — la
@@ -379,6 +485,8 @@ async function main() {
     }
     console.log("  password : DERIVATA per-utente dalla chiave madre (Z-262) — mai registrata");
     console.log("─".repeat(76));
+
+    await dichiaraStatoRaggiunto(client, ambienteDiCollaudo, segretiDiCollaudo);
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;

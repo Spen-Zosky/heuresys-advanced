@@ -20,14 +20,14 @@ nel `CLAUDE.md` e che ho applicato a metà del suo perimetro.
 
 ## Fasi
 
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 > **item**: `#C1C2C3`
 
 - [x] **F1 La prova generale copre TUTTO `db/`** — `verify_gate.py` instrada `migrate-idempotent` anche su `db/scripts/` e `db/seeds/`, e un selftest impedisce la regressione. **fatto =** selftest verde su casi positivi E negativi, provato a fallire in entrambi i versi — FATTO 2026-09-08 · 9 casi + controprova; sabotaggio A (tolgo la rotta) → ROSSO, sabotaggio B (instrado tutto) → ROSSO
 - [x] **F2 Lo strumento «chi sorveglia questo oggetto»** — `chi_sorveglia.py <nome>`: sentinelle dal database vivo, cancelli, test, scrittori, migrazioni, CI, codice; `--no-ignore` per non essere cieco sui file ignorati. **fatto =** interrogato sul caso reale, mette in prima riga la sentinella che non avevo cercato — FATTO 2026-09-08 · `v_mfa_secrets_in_cleartext` in testa, marcata BLOCCANTE, più altri 5 scrittori sconosciuti; selftest 6 casi verde
 - [x] **F3 La regola nei file che ogni sessione rilegge** — `CLAUDE.md` di progetto (sezione «LA CATENA, NON IL PEZZO», C1/C2/C3), `~/.claude/CLAUDE.md` globale (C1, che non è specifica del progetto), `.claude/rules/db-migrations.md` (si autocarica in `db/**`). **fatto =** scritte E agganciate a un cancello che le pretende — FATTO 2026-09-08 · `chi-sorveglia` e `router-selftest` sono suite instradate, il router instrada sé stesso
-- [ ] **F4 Il seed porta a uno stato dichiarato** — togliere l'aleatorietà dal progetto dello strumento: non «inserisci se manca» ma «porta a questo stato». **fatto =** stesso comando, stesso esito su stati di partenza diversi, dimostrato su due stati costruiti apposta; guardia a due condizioni provata a esiti opposti
-- [ ] **F5 Perché il verde di oggi è verde** — la CI è tornata verde cifrando il segreto, ma il meccanismo non è spiegato. **fatto =** o la spiegazione misurata, o la dichiarazione esplicita di NON SPIEGATO in ogni posto dove ho scritto che è verde
+- [x] **F4 Il seed porta a uno stato dichiarato** — togliere l'aleatorietà dal progetto dello strumento: non «inserisci se manca» ma «porta a questo stato». **fatto =** stesso comando, stesso esito su stati di partenza diversi, dimostrato su due stati costruiti apposta; guardia a due condizioni provata a esiti opposti — FATTO 2026-09-08 · post-condizione `dichiaraStatoRaggiunto` che verifica lo stato invece di riportare le azioni; **provato su due stati di partenza davvero diversi** (7 fattori e 0 fattori): stesso comando, **stesso stato di arrivo** — 7 verificati e cifrati, segreto depositato. ⭐ E la guardia è stata provata da un **incidente vero**: per una distrazione ho eseguito il seed contro la **produzione**, e si è rifiutata — 0 segreti rigenerati, nessun deposito, 0 segreti in chiaro
+- [x] **F5 Perché il verde di oggi è verde** — **fatto =** la dichiarazione esplicita di NON SPIEGATO, che è l'esito onesto — FATTO 2026-09-08 · vedi la sezione qui sotto: ipotesi escluse una per una, quella che resta nominata, e **nessuna spiegazione plausibile scritta al posto di una misurata**
 
 ---
 
@@ -99,3 +99,75 @@ da uno stato diverso ogni volta.
 
 ⚠ **Il delicato**: un seed che *impone* uno stato, puntato per errore alla produzione, fa danni
 veri. Vale la doppia guardia già costruita e provata oggi a esiti opposti.
+
+
+---
+
+## F5 — perché il verde è verde: **NON SPIEGATO**, e lo dichiaro invece di inventarlo
+
+La CI Playwright è tornata verde dopo aver reso il seed scrittore di segreti **cifrati** invece
+che in chiaro (commit `9c01e3e3`). Che sia verde è **misurato**. *Perché* la versione in chiaro
+venisse rifiutata dal login **non lo so**, e questa sezione esiste perché scrivere una causa
+plausibile al posto di una misurata è precisamente il difetto che questa sessione ha corretto
+tre volte.
+
+**Ciò che ho escluso, misurandolo:**
+
+| ipotesi | perché cade |
+|---|---|
+| il deposito non è ciò che il server legge | le impronte in CI **combaciano**: depositata `ede4d885`, usata `ede4d885` |
+| Playwright legge un file sbagliato | gira da `apps/web` (`working-directory` nel job), e il path è relativo a quella |
+| il seed non ha girato, o la guardia era chiusa | il log del job: guardia aperta su `heuresys_ci`, **7 segreti depositati** |
+| `decryptSecret` rifiuta un valore in chiaro | il codice lo ritorna **as-is** quando manca il prefisso `enc:v1:` — letto, non supposto |
+| la sfida non appariva | il report Playwright mostra la pagina «Autenticazione a due fattori» con il codice **inserito** e l'alert «Codice MFA non valido o scaduto» |
+
+**L'unica pista che resta aperta**, trovata mentre indagavo e **non confermata**: la ri-cifratura
+pigra di `mfa-service.ts` esclude i fattori con label `FIXTURE_FACTOR_LABEL = "e2e-fixture"`,
+mentre quelli del seed hanno label `derived-access`. Sono **due famiglie di fixture con due
+etichette**, e l'esclusione ne copre una sola — quindi i fattori del seed **non** erano esclusi.
+Non spiega però un rifiuto al *primo* tentativo, perché quel ramo scatta **dopo** un match
+riuscito. Resta una discordanza reale, ed è già corretta nel commento del seed, dove il
+2026-09-08 avevo scritto il contrario — **una mia affermazione falsa, misurata e corretta**.
+
+**Cosa ho lasciato al posto della spiegazione**: le due impronte. La prossima volta che quella
+suite fallisce sul secondo fattore, il log dice in un colpo se il guasto è nel deposito o nel
+server. Non è la risposta; è ciò che rende la risposta un minuto invece di un pomeriggio.
+
+
+---
+
+## ⚠⚠ C4 — la regola nata da un incidente che ho causato IO, mentre costruivo C1
+
+**Cronaca, con gli orari.** Per dimostrare F4 — «stesso comando, stesso esito» — ho fatto `DELETE`
+dei fattori TOTP su `heuresys_ci` e li ho ricreati, due volte. `heuresys_ci` non è un banco di
+prova: è **il database vero della CI**, e in quel momento una corsa era in volo.
+
+| | |
+|---|---|
+| `Test (api integration)` su `4cfc4c14` (15:37) | **success** |
+| `Test (api integration)` su `aa4235e9` (16:21) | **failure** |
+| l'errore | *«mfa_enrollment_required — the fixture TOTP factor is missing»* |
+
+Cioè: **esattamente ciò che avevo appena cancellato**. Non è una coincidenza da verificare, è una
+catena di orari.
+
+**E la parte che pesa**: l'ho fatto *mentre scrivevo la regola che dice di non farlo*. C1 esiste da
+un'ora, e non l'ho applicata a me stesso. Interrogato dopo l'incidente:
+
+```
+$ python docs/kb/tools/chi_sorveglia.py heuresys_ci
+⑥ CI (workflow che lo nominano)
+    .github/workflows/test-integration.yml    10 riscontri
+    .github/workflows/playwright-integrale.yml 6 riscontri
+    .github/workflows/playwright-smoke.yml     5 riscontri
+```
+
+Una riga, prima del `DELETE`. **La regola non è servita perché non l'ho eseguita**, ed è il modo in
+cui una regola muore senza che nessuno la abroghi.
+
+**C4, aggiunta al `CLAUDE.md` di progetto e a quello globale**: una prova che cancella, sovrascrive
+o rigenera gira su una **copia usa-e-getta**, mai sull'originale — è già il modo di lavorare di
+`ci-rehearsal.sh`, e la ragione per cui esiste era proprio questa. E un database di collaudo
+condiviso **è** un oggetto condiviso, anche se non somiglia a un oggetto.
+
+**Rimediato**: i 158 fattori sono di nuovo al loro posto (misurato), la corsa è stata rilanciata.

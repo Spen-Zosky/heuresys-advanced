@@ -122,7 +122,8 @@ progetto**, mai i loro dati personali (è già I18).
   `isInFunctionalScope`/`isFunctionalLeader`, oggi codice morto.
   Lo `scopo` dei 26 progetti migrati resta **vuoto**: è un dato che nessuno ha mai scritto, e
   riempirlo col nome della squadra sarebbe fingere di averlo.
-- [x] **F3 — Asse funzionale vivo — CHIUSA 2026-09-08 (S1092).** Le due funzioni hanno
+- [x] **F3 — Asse funzionale vivo** — CHIUSA 2026-09-08 (S1092) · `6648517c` · 44/44 verdi sul
+      gemello, entrambi i consumatori sondati col sabotaggio. Le due funzioni hanno
       consumatori reali, e cercarli ha scoperto un difetto.
 
       ### ⭐ `isFunctionalLeader` — il conteggio non distingueva due cose diverse
@@ -171,7 +172,7 @@ progetto**, mai i loro dati personali (è già I18).
       ▸ *Storia*: i passi precedenti di questa fase sono qui sotto (S1091 — la prova delle
       cinque proprietà, e il reperto di `teams` sull'asse sbagliato).
 
-- [ ] ~~**F3 — Asse funzionale vivo**~~ *(intestazione storica, tenuta per i passi sotto)*
+*(Sotto: i passi precedenti di F3, tenuti per cronaca. La fase è chiusa qui sopra.)*
 
   ### 🟡 S1091 (2026-09-07) — il primo passo di F3, quello che il piano stesso prescriveva
 

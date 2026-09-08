@@ -30,9 +30,16 @@
  * distingue questa suite dalla Playwright, che gira contro il server reale e non la incontra
  * mai.
  *
- * ⚠ Il caricamento avviene **una volta sola all'import**, con un `await` di modulo: serve a
- * tenere `totpSecretFor` **sincrona**, come la usano `login.ts` e il Proxy qui sotto. Una
- * firma asincrona si sarebbe propagata a ogni chiamante per un guadagno nullo.
+ * ⚠ Il caricamento è **esplicito** (`caricaSegretiTotp()`, chiamata una volta dal setup di
+ * vitest) e non un `await` di modulo. La prima stesura usava proprio quello, per tenere
+ * `totpSecretFor` **sincrona** come la usano `login.ts` e il Proxy — e in vitest funzionava.
+ * **Ma `tsx` compila in CJS**, dove il top-level await non esiste: `seed-test-admin.ts`, che
+ * arriva qui per la catena degli import, è morto con *«Top-level await is currently not
+ * supported with the "cjs" output format»*. Un modulo che si carica da sé è comodo finché
+ * non lo importa qualcuno che non può aspettarlo.
+ *
+ * La firma resta sincrona, che era il punto: una firma asincrona si sarebbe propagata a ogni
+ * chiamante per un guadagno nullo.
  *
  * Il controllo di parità (mfa-fixture-parity.test.ts) verifica che nessuna delle due copie
  * contenga valori letterali: è il test che fallisce se qualcuno reintroduce un segreto.
@@ -50,8 +57,16 @@ export const E2E_FIXTURE_LABEL = "derived-access";
  * ha arruolato per conto proprio non è materia dei test, e leggerlo sarebbe entrare in una
  * credenziale vera senza averne ragione.
  */
-const SEGRETI: Map<string, string> = await (async () => {
-  const m = new Map<string, string>();
+const SEGRETI = new Map<string, string>();
+
+/**
+ * Popola la cache. La chiama **una volta** il setup di vitest, prima di ogni test.
+ *
+ * Idempotente: una seconda chiamata non rilegge. Chi importa questo modulo senza chiamarla
+ * — `seed-test-admin.ts`, per esempio — non paga nulla e non tocca il database.
+ */
+export async function caricaSegretiTotp(): Promise<number> {
+  if (SEGRETI.size > 0) return SEGRETI.size;
   const r = await pool.query<{ email: string; secret: string }>(
     `SELECT u.user_email AS email, f.auth_mfa_factor_secret AS secret
        FROM sys.sys_auth_mfa_factors f
@@ -64,10 +79,10 @@ const SEGRETI: Map<string, string> = await (async () => {
     // Un segreto non cifrato non è un caso da gestire in silenzio: `decryptSecret`
     // restituisce il valore così com'è quando non porta il prefisso, e va bene —
     // la sentinella `v_mfa_secrets_in_cleartext` è il posto in cui quel fatto si vede.
-    m.set(riga.email.toLowerCase(), decryptSecret(riga.secret));
+    SEGRETI.set(riga.email.toLowerCase(), decryptSecret(riga.secret));
   }
-  return m;
-})();
+  return SEGRETI.size;
+}
 
 /**
  * Il segreto TOTP di qualunque utente impersonabile.
@@ -79,10 +94,15 @@ const SEGRETI: Map<string, string> = await (async () => {
 export function totpSecretFor(email: string): string {
   const s = SEGRETI.get(email.toLowerCase());
   if (s === undefined) {
+    // I due casi si distinguono, perché il rimedio è diverso: cache non caricata (chi
+    // esegue non è passato dal setup) contro fattore assente per quella persona.
+    const causa =
+      SEGRETI.size === 0
+        ? "la cache non e' stata caricata: chiama caricaSegretiTotp() (lo fa il setup di vitest)"
+        : `la persona non ha un fattore '${E2E_FIXTURE_LABEL}' — 'pnpm db:provision-access' lo crea`;
     throw new Error(
-      `Nessun fattore TOTP '${E2E_FIXTURE_LABEL}' per ${email}. ` +
-        `Il segreto non si deriva piu' (#169 F3c): si legge dal database. ` +
-        `Se la persona esiste, le manca il fattore — 'pnpm db:provision-access' lo crea.`,
+      `Nessun segreto TOTP per ${email}. Non si deriva piu' (#169 F3c): si legge dal ` +
+        `database, e ${causa}.`,
     );
   }
   return s;

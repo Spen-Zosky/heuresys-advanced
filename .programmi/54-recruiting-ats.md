@@ -53,8 +53,8 @@
   registro: qui una sorgente legacy **esiste ed è abbondante**, e non si importa lo stesso.
   ⚠ Entrambe si vedono solo alla **seconda passata** — girano prima della `000364` e alla prima
   non possono vedere tabelle che ancora non esistono.
-- [x] **F3 — API — FATTA 2026-09-08 (S1092), 7 fette su 7.** Le ultime due in questa
-      sessione: `interview-feedback` (4 rotte, 9 test) e `job-offers` (4 rotte, 11 test),
+- [x] **F3 — API** — FATTA 2026-09-08 (S1092) · `cdcb2fd9` + `ed0bccf8` · **7 fette su 7**,
+      le ultime due `interview-feedback` (4 rotte, 9 test) e `job-offers` (4 rotte, 11 test),
       entrambe verdi **sul gemello** e sondate col sabotaggio.
 
       ### La sesta fetta (S1092) — due scavalchi, non uno

@@ -39,3 +39,13 @@ if (process.env.TEST_TX_ISOLATION !== "0") {
     await endFileTx();
   });
 }
+
+// #169 F3c — i segreti TOTP non si derivano più dalla chiave madre: si leggono dal
+// database, dove sono cifrati. Il caricamento sta QUI e non nel modulo che li serve,
+// perché un `await` di modulo non si compila in CJS e romperebbe `tsx` (misurato: la
+// Playwright smoke è morta su «Top-level await ... "cjs" output format»). L'import è
+// dinamico per la stessa ragione degli altri: dotenv deve aver già popolato l'ambiente.
+beforeAll(async () => {
+  const { caricaSegretiTotp } = await import("./mfa-fixture-secrets.js");
+  await caricaSegretiTotp();
+});

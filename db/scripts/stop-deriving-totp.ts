@@ -44,14 +44,15 @@
  *   pnpm db:stop-deriving-totp --undo      # riapplica il giornale
  */
 import { Client } from "pg";
-import { randomBytes } from "node:crypto";
 import { config as dotenvConfig } from "dotenv";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+// `deriveTotpSecret` serve alla sola PROVA: ri-derivare ogni segreto per dimostrare che
+// nessuno combacia più. `segretoTotpCasuale` è la generazione, e vive in un posto solo.
 import {
   readMaster,
   deriveTotpSecret,
-  toBase32,
+  segretoTotpCasuale,
   isRealPerson,
 } from "../../apps/api/scripts/derive-access.mjs";
 import { encryptSecret, decryptSecret } from "../../apps/api/src/modules/auth/secret-crypto.js";
@@ -64,15 +65,6 @@ const UNDO = process.argv.includes("--undo");
 
 /** L'etichetta dei fattori nati dalla derivazione. Nessun altro fattore si tocca. */
 const ETICHETTA = "derived-access";
-
-/**
- * Venti byte casuali in base32 — la stessa **forma** del derivato (che prende i primi 20
- * byte di un HMAC-SHA256), così ogni consumatore continua a leggere ciò che si aspetta.
- * Cambia l'origine, non il formato: `randomBytes` invece di una funzione della chiave.
- */
-function segretoCasuale(): string {
-  return toBase32(randomBytes(20));
-}
 
 interface Riga {
   id: string;
@@ -215,7 +207,7 @@ async function main(): Promise<void> {
     // ── LA SOSTITUZIONE, un id per volta ────────────────────────────────────────
     let scritti = 0;
     for (const r of daFare) {
-      const nuovo = encryptSecret(segretoCasuale());
+      const nuovo = encryptSecret(segretoTotpCasuale());
       // ⚠ Nessun `updated_at`: questa tabella non ce l'ha — ha solo `created_at`. Scoperto
       // eseguendo, non leggendo: la forma «SET valore, updated_at = now()» è talmente
       // abituale nel resto del repository da sembrare corretta a occhio.

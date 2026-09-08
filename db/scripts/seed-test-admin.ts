@@ -33,12 +33,14 @@
 
 import { Client } from "pg";
 import argon2 from "argon2";
+import { E2E_FIXTURE_LABEL } from "../../apps/api/test/helpers/mfa-fixture-secrets.js";
+// Z-262: una sola implementazione della derivazione, importata — mai una copia.
+// #169 F3c: e una sola della GENERAZIONE, per la stessa ragione.
 import {
-  E2E_FIXTURE_LABEL,
-  FIXTURE_TOTP_SECRETS,
-} from "../../apps/api/test/helpers/mfa-fixture-secrets.js";
-// Z-262: una sola implementazione della derivazione, importata — mai una copia
-import { readMaster, derivePassword } from "../../apps/api/scripts/derive-access.mjs";
+  readMaster,
+  derivePassword,
+  segretoTotpCasuale,
+} from "../../apps/api/scripts/derive-access.mjs";
 import { config as dotenvConfig } from "dotenv";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -87,8 +89,11 @@ interface EnsureResult {
  * the discriminator that shields the fixture from the suites' scoped DELETEs.
  */
 async function ensureTotpFactor(client: Client, userId: string, email: string): Promise<boolean> {
-  const secret = FIXTURE_TOTP_SECRETS[email];
-  if (!secret) throw new Error(`No fixture TOTP secret for ${email} — add it to mfa-fixture-secrets.ts`);
+  // ⭐ #169 F3c — il segreto di un fattore che NASCE QUI è casuale, non derivato né letto.
+  // Leggerlo sarebbe un circolo: il segreto vive nel fattore, e il fattore è ciò che questa
+  // funzione sta creando. L'`INSERT ... WHERE NOT EXISTS` qui sotto resta l'idempotenza —
+  // se il fattore c'è già, questo valore non viene scritto e nessuno lo usa.
+  const secret = segretoTotpCasuale();
   const res = await client.query(
     `INSERT INTO sys.sys_auth_mfa_factors
        (auth_mfa_factor_user_id, auth_mfa_factor_kind, auth_mfa_factor_secret,

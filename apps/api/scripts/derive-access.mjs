@@ -5,7 +5,7 @@
  * provisioning. Una sola implementazione — due copie divergono, e quando
  * divergono producono password che il server rifiuta senza spiegare perche'.
  */
-import { createHmac } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 import { readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 
@@ -108,8 +108,33 @@ export function derivePassword(master, email) {
   return (toBase32(h.subarray(0, 13)).slice(0, 20).match(/.{1,4}/g) ?? []).join("-");
 }
 
-/** Segreto TOTP standard: 160 bit in base32, come lo vuole ogni authenticator. */
+/**
+ * Segreto TOTP standard: 160 bit in base32, come lo vuole ogni authenticator.
+ *
+ * ⛔ **NON si usa più per CREARE un fattore** (#169 F3c, 2026-09-08): un segreto derivato
+ * dalla stessa chiave della password non è un secondo fattore, è lo stesso fattore contato
+ * due volte. Chi crea un fattore usa `segretoTotpCasuale()` qui sotto.
+ *
+ * Resta esportata perché serve alla **prova**: `stop-deriving-totp.ts` la chiama per
+ * ri-derivare ogni segreto e verificare che nessuno combaci più. È l'unico uso legittimo —
+ * dimostrare che la derivazione non apre più niente.
+ */
 export function deriveTotpSecret(master, email) {
   const h = createHmac("sha256", master).update(`totp:v1:${email.toLowerCase()}`).digest();
   return toBase32(h.subarray(0, 20));
+}
+
+/**
+ * Il segreto di un fattore NUOVO: 160 bit **casuali** in base32 (#169 F3c).
+ *
+ * Stessa forma del derivato — venti byte, stesso alfabeto — così ogni consumatore continua a
+ * leggere ciò che si aspetta. Cambia l'origine, non il formato: non è funzione di nulla,
+ * quindi non è ricostruibile da nessuna chiave, né oggi né dopo una rotazione.
+ *
+ * ⚠ Sta **qui**, nel modulo che entrambi i lati importano, e non copiata in ogni script che
+ * crea fattori: tre copie della stessa generazione sono tre posti in cui, un giorno, due
+ * dicono una cosa e la terza un'altra.
+ */
+export function segretoTotpCasuale() {
+  return toBase32(randomBytes(20));
 }

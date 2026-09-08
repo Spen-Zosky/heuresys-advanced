@@ -28,7 +28,7 @@ import { fileURLToPath } from "node:url";
 import {
   readMaster,
   derivePassword,
-  deriveTotpSecret,
+  segretoTotpCasuale,
   isRealPerson,
   REAL_PERSON_EMAILS,
 } from "../../apps/api/scripts/derive-access.mjs";
@@ -133,7 +133,13 @@ async function main(): Promise<void> {
       }
 
       const password = derivePassword(master, u.user_email);
-      const totpSecret = deriveTotpSecret(master, u.user_email);
+      // ⭐ #169 F3c — il segreto di un fattore NUOVO è CASUALE, non derivato. Un segreto
+      // ricavato dalla stessa chiave della password non è un secondo fattore: è lo stesso
+      // fattore contato due volte. Le password restano derivate — non erano loro il difetto.
+      // ⚠ Vale solo per i fattori che nascono qui: quelli esistenti non si toccano (il
+      // guard `n === "0"` più sotto), e i 159 già in produzione sono stati resi casuali da
+      // `pnpm db:stop-deriving-totp`.
+      const totpSecret = segretoTotpCasuale();
       let touched = false;
 
       // 1. identità di accesso (LOCAL)

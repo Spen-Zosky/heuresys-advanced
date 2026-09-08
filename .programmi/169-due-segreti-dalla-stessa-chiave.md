@@ -194,6 +194,62 @@ verde solo perché girava su `tommaso.fiore`, che per combinazione aveva zero ri
 perdeva). Chi userà quale via è parte del lavoro.
 - [ ] **F3 Il segreto smette di essere derivato** — casuale, cifrato a riposo, consegnato una volta sola. **fatto =** un segreto nuovo non è più ricostruibile dalla chiave madre, misurato provando a ricostruirlo
 
+  ### ✅ F3c ESEGUITA S1092 (2026-09-08) — e la strada era molto più corta di come il piano la temeva
+
+  ⚠⚠ **Prima, una mia analisi sbagliata, corretta misurando.** Avevo misurato che il ramo a
+  due passi (`if (status === "mfa_required")`) non si percorre mai, perché in produzione
+  l'enforcement MFA è **spento** — e ne avevo concluso che rendere casuali i segreti non
+  rompeva nulla. **Falso**, ed è un salto di dominio: `buildTestApp` **accende** l'enforcement
+  di proposito (`mfaEnforcement: true`, app.ts §S989), quindi ogni login della **suite API**
+  percorre davvero la sfida e usa il segreto derivato. La misura era giusta sulla produzione;
+  la frase era più larga della misura.
+
+  ⭐ **Ma la conseguenza non è F3a.** Il piano temeva «portare la suite sulle utenze di
+  collaudo» — 89 spec su 101 e i loro dati. Il problema vero è molto più piccolo: **i test
+  devono conoscere *un* segreto valido**, non *quel* segreto. E il segreto ce l'hanno già a
+  portata di mano — **nel database**, dove è cifrato, e a cui un test di integrazione accede
+  già con credenziali piene.
+
+  Quindi: `apps/api/test/helpers/mfa-fixture-secrets.ts` **legge e decifra** invece di
+  derivare. Nessuna delle 101 spec toccata, nessuna persona sostituita, nessuna decisione di
+  Enzo richiesta. Il caricamento è un `await` di modulo, per tenere `totpSecretFor`
+  **sincrona** come la usano `login.ts` e il Proxy: una firma asincrona si sarebbe propagata
+  a ogni chiamante per un guadagno nullo.
+
+  **La copia Playwright non può fare lo stesso** — `apps/web` non ha un client PostgreSQL, e
+  aggiungerlo per una suite di browser sarebbe una dipendenza nuova in cambio di niente.
+  Quindi lì `totpSecretFor` **fallisce, e dice cosa fare**: è la scelta fra un errore che si
+  legge e un 401 al passo due che accuserebbe il login invece della fixture. Oggi non toglie
+  nulla (quella suite gira contro il server reale, enforcement spento); il giorno
+  dell'accensione la strada è già costruita e non è quella — le utenze di collaudo sono
+  **esenti** per progetto.
+
+  **Lo strumento**: `pnpm db:stop-deriving-totp` (`--dry-run` · `--undo`), con le **quattro
+  cose** di ogni scrittura di massa — la misura prima, la guardia ri-verificata al momento
+  (solo `kind='TOTP'` con `label='derived-access'`, per elenco esplicito di id, mai un jolly),
+  le post-condizioni **su ciò che non doveva cambiare** (fattori totali, fattori di altro tipo,
+  persone reali), e il rollback in `staging.totp_derivato_undo`, popolato **prima** di toccare
+  qualsiasi cosa.
+
+  ⭐ **E la prova non è «ho scritto»**: lo strumento **ri-deriva** ogni segreto dalla chiave
+  madre e conta quanti combaciano ancora. Attesi **zero**; se ne trovasse uno solo, disfa e
+  si ferma. È l'unica affermazione che chiude la voce.
+
+  🔬 **Due difetti trovati eseguendo, non leggendo** — ed entrambi miei:
+  1. **`sys_auth_mfa_factors` non ha `updated_at`**, ha solo `created_at`. La forma «SET
+     valore, updated_at = now()» è talmente abituale nel resto del repository da sembrare
+     giusta a occhio. La corsa si è fermata **dopo** aver scritto tutte e 159 le righe di
+     giornale e **prima** di toccare un solo segreto.
+  2. E quel mezzo passo ha rivelato il secondo: il giornale scriveva **una riga per
+     tentativo** invece di una per fattore. Alla corsa dopo, `--undo` avrebbe riapplicato il
+     valore dell'ultimo tentativo invece di quello **originale** — cioè un rollback che dice
+     il falso. Corretto: si scrive solo se non c'è già una riga non riapplicata.
+
+  🔬 **E un terzo, che non c'entra con questa voce**: la corsa integrale ha trovato
+  `interview-feedback` e `job-offers` **senza subpath export** in `packages/shared` — un mio
+  difetto delle fette di stamattina, che il pattern dei moduli prescrive e che avevo saltato.
+  Corretto. È il motivo per cui la corsa integrale esiste.
+
   ### 🔬 INDAGINE S1092 (2026-09-08) — la misura che il piano dichiarava decisiva, e non era mai stata fatta
 
   Il piano scriveva, proponendo la «terza via»: *«⚠ E porta con sé la domanda che la decide:
@@ -376,6 +432,27 @@ perdeva). Chi userà quale via è parte del lavoro.
   Nessuna riga di codice toccata in S1083: la corsa E2E integrale di `#219` F5 era in volo sugli
   stessi file, e cambiare le derivazioni sotto i piedi di una suite in esecuzione avrebbe
   prodotto rossi che nessuno avrebbe saputo leggere.
+
+  ### ⛔ F3a È CANCELLATA (S1092, 2026-09-08) — non rinviata: non serve più
+
+  F3a esisteva per una ragione sola: *«finché la suite fa login con persone reali, rendere
+  casuale un segreto la rompe»*. La ragione era giusta, la conclusione no — perché dava per
+  scontato che l'unico modo di conoscere il segreto fosse **derivarlo**.
+
+  I test lo **leggono dal database**, dove è cifrato e a cui accedono già con credenziali
+  piene. Nessuna delle 101 spec è stata toccata, nessuna persona sostituita, nessun dato
+  fabbricato per un'utenza di servizio. Il costo stimato di F3a era una sessione o più; il
+  costo reale del passo che la sostituisce è **un file**.
+
+  ⭐ **La lezione, che vale oltre questa voce**: F3a nasceva da una domanda mal posta — «da
+  quale identità fa login la suite?» — quando quella giusta era «da dove prende il segreto?».
+  Il piano aveva scritto la dipendenza fra le due come se fosse necessaria, e per tre
+  sessioni nessuno l'ha rimessa in discussione: era **una premessa**, e le premesse dei nostri
+  stessi piani sono fonti non verificate esattamente come le consegne del lab (`#149`).
+
+  ▸ Resta vero il rilievo qui sotto sul **componente** e sui dati: portare la suite su
+  identità di servizio, se un giorno servisse, resta il lavoro che era. Semplicemente non
+  serve **per chiudere questa voce**.
 - [ ] **F4 La prova che deve poter fallire** — con la chiave madre in mano, **completare** un accesso come amministratore deve risultare **impossibile**, e la suite deve continuare a girare. Le due cose insieme, o la voce non è chiusa: passare la prima rompendo la seconda è il modo ovvio di barare. **fatto =** tentativo eseguito e fallito con evidenza, suite verde
 
 ## Chiuso quando

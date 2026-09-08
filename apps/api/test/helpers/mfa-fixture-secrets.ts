@@ -2,46 +2,96 @@
  * apps/api/test/helpers/mfa-fixture-secrets.ts
  * Segreti TOTP delle identità usate dai test.
  *
- * Z-262 (2026-07-26) — QUESTO FILE NON CONTIENE PIÙ VALORI. Prima ne conteneva
- * sette, scritti in chiaro, e il repository è pubblico: erano scaricabili da
- * chiunque senza autenticazione (`raw.githubusercontent.com` → 200). A quei
- * segreti corrispondevano sette fattori MFA attivi in produzione — fra cui
- * PLATFORM_ADMIN, TENANT_ADMIN/CEO e il custode del canale whistleblowing —
- * quindi per quegli account il secondo fattore non proteggeva più nulla.
+ * Z-262 (2026-07-26) — QUESTO FILE NON CONTIENE VALORI. Prima ne conteneva sette, scritti in
+ * chiaro, e il repository è pubblico: erano scaricabili da chiunque senza autenticazione, e a
+ * quei segreti corrispondevano sette fattori MFA attivi in produzione — fra cui
+ * PLATFORM_ADMIN, TENANT_ADMIN/CEO e il custode del canale whistleblowing.
  *
- * Ora il segreto si DERIVA dalla chiave madre (.secrets/dev-access-master.key,
- * gitignored) con la stessa funzione usata dal provisioning e da `dev:whoami`.
- * Due conseguenze volute:
- *   - non c'è nulla da pubblicare: chi legge il repository non ottiene niente;
- *   - funziona per QUALUNQUE utente, non per sette — che è ciò che permette ai
- *     test di girare sull'intera popolazione invece che su personas fisse.
+ * ⭐ #169 F3c (2026-09-08) — IL SEGRETO NON SI DERIVA PIÙ: SI LEGGE.
  *
- * Il controllo di parità (mfa-fixture-parity.test.ts) verifica ora che nessuna
- * delle due copie (qui e apps/web/tests/e2e) contenga valori letterali: è il
- * test che fallisce se qualcuno reintroduce un segreto nel repository.
+ * Fino a oggi il segreto si ricavava dalla chiave madre con la stessa funzione del
+ * provisioning. Risolveva il problema della pubblicazione, ma ne lasciava aperto un altro,
+ * ed è la voce `#169`: la **stessa** chiave generava la password *e* il secondo fattore, due
+ * HMAC distinti dal solo prefisso. Chi possedeva la chiave possedeva entrambi — quindi per
+ * quel soggetto l'MFA non era un secondo fattore, era lo stesso fattore contato due volte.
+ *
+ * Da qui i segreti in produzione sono **casuali**, e questo file li prende dove sono: nel
+ * database, cifrati, e li decifra con la chiave di cifratura che il server usa già. Tre
+ * conseguenze volute:
+ *   · non c'è più **nulla da calcolare**: chi ha la chiave madre non costruisce alcun codice;
+ *   · continua a funzionare per **qualunque** utente, che è ciò che permette ai test di
+ *     girare sull'intera popolazione invece che su sette personas fisse;
+ *   · e la lettura è **legittima**: un test di integrazione ha già il database con
+ *     credenziali piene — non gli si sta concedendo nulla che non avesse.
+ *
+ * ⚠ **PERCHÉ SERVE ANCORA**, dato che in produzione l'enforcement MFA è spento: perché
+ * `buildTestApp` lo **accende di proposito** (`mfaEnforcement: true`, app.ts §S989), quindi
+ * ogni login di questa suite percorre davvero la sfida a due passi. È il dettaglio che
+ * distingue questa suite dalla Playwright, che gira contro il server reale e non la incontra
+ * mai.
+ *
+ * ⚠ Il caricamento avviene **una volta sola all'import**, con un `await` di modulo: serve a
+ * tenere `totpSecretFor` **sincrona**, come la usano `login.ts` e il Proxy qui sotto. Una
+ * firma asincrona si sarebbe propagata a ogni chiamante per un guadagno nullo.
+ *
+ * Il controllo di parità (mfa-fixture-parity.test.ts) verifica che nessuna delle due copie
+ * contenga valori letterali: è il test che fallisce se qualcuno reintroduce un segreto.
  */
-import { readMaster, deriveTotpSecret } from "../../scripts/derive-access.mjs";
+import { pool } from "../../src/db/client.js";
+import { decryptSecret } from "../../src/modules/auth/secret-crypto.js";
 
-/** Etichetta dei fattori creati dal provisioning derivato (Z-262). Sostituisce
- *  `e2e-fixture`, l'etichetta dei fattori con i segreti pubblicati. */
+/** Etichetta dei fattori creati dal provisioning derivato (Z-262). */
 export const E2E_FIXTURE_LABEL = "derived-access";
 
-let masterCache: Buffer | null = null;
-function master(): Buffer {
-  masterCache ??= readMaster();
-  return masterCache;
-}
+/**
+ * I segreti in chiaro, per indirizzo, letti una volta all'import.
+ *
+ * ⚠ Si legge **solo** ciò che porta l'etichetta di questa suite: un fattore che una persona
+ * ha arruolato per conto proprio non è materia dei test, e leggerlo sarebbe entrare in una
+ * credenziale vera senza averne ragione.
+ */
+const SEGRETI: Map<string, string> = await (async () => {
+  const m = new Map<string, string>();
+  const r = await pool.query<{ email: string; secret: string }>(
+    `SELECT u.user_email AS email, f.auth_mfa_factor_secret AS secret
+       FROM sys.sys_auth_mfa_factors f
+       JOIN sys.sys_users u ON u.user_id = f.auth_mfa_factor_user_id
+      WHERE f.auth_mfa_factor_kind = 'TOTP'
+        AND f.auth_mfa_factor_metadata->>'label' = $1`,
+    [E2E_FIXTURE_LABEL],
+  );
+  for (const riga of r.rows) {
+    // Un segreto non cifrato non è un caso da gestire in silenzio: `decryptSecret`
+    // restituisce il valore così com'è quando non porta il prefisso, e va bene —
+    // la sentinella `v_mfa_secrets_in_cleartext` è il posto in cui quel fatto si vede.
+    m.set(riga.email.toLowerCase(), decryptSecret(riga.secret));
+  }
+  return m;
+})();
 
-/** Il segreto TOTP di QUALUNQUE utente impersonabile, ricalcolato al momento. */
+/**
+ * Il segreto TOTP di qualunque utente impersonabile.
+ *
+ * ⚠ Se manca **fallisce forte e dice cosa fare**: un `undefined` che scivola dentro un
+ * `mfaCode` produrrebbe un 401 al passo due, cioè un rosso che accusa il login invece della
+ * fixture assente. È la differenza fra una prova che indica il guasto e una che lo nasconde.
+ */
 export function totpSecretFor(email: string): string {
-  return deriveTotpSecret(master(), email);
+  const s = SEGRETI.get(email.toLowerCase());
+  if (s === undefined) {
+    throw new Error(
+      `Nessun fattore TOTP '${E2E_FIXTURE_LABEL}' per ${email}. ` +
+        `Il segreto non si deriva piu' (#169 F3c): si legge dal database. ` +
+        `Se la persona esiste, le manca il fattore — 'pnpm db:provision-access' lo crea.`,
+    );
+  }
+  return s;
 }
 
 /**
- * Le persone storicamente usate dai test. Non è più un elenco privilegiato —
- * qualunque utente è impersonabile — ma resta come insieme di riferimento per i
- * test che vogliono profili noti (un amministratore, un manager con riporti, un
- * dipendente, un estraneo alla linea gerarchica).
+ * Le persone storicamente usate dai test. Non è un elenco privilegiato — qualunque utente è
+ * impersonabile — ma resta come insieme di riferimento per i test che vogliono profili noti
+ * (un amministratore, un manager con riporti, un dipendente, un estraneo alla linea).
  */
 export const FIXTURE_PERSONA_EMAILS = [
   "enzo.spenuso@heuresys.com",
@@ -54,9 +104,8 @@ export const FIXTURE_PERSONA_EMAILS = [
 ];
 
 /**
- * @deprecated Z-262 — i segreti non sono più una tabella di valori. Resta per i
- * chiamanti non ancora migrati e si popola per derivazione; nel codice nuovo usa
- * `totpSecretFor(email)`, che funziona per ogni utente e non solo per questi.
+ * @deprecated Z-262 — i segreti non sono più una tabella di valori. Resta per i chiamanti non
+ * ancora migrati; nel codice nuovo usa `totpSecretFor(email)`, che funziona per ogni utente.
  */
 export const FIXTURE_TOTP_SECRETS: Record<string, string> = new Proxy(
   {},

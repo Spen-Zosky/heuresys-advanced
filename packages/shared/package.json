@@ -117,10 +117,20 @@
       "heuresys-source": "./src/schemas/interviews.ts",
       "default": "./dist/schemas/interviews.js"
     },
+    "./schemas/interview-feedback": {
+      "types": "./dist/schemas/interview-feedback.d.ts",
+      "heuresys-source": "./src/schemas/interview-feedback.ts",
+      "default": "./dist/schemas/interview-feedback.js"
+    },
     "./schemas/job-postings": {
       "types": "./dist/schemas/job-postings.d.ts",
       "heuresys-source": "./src/schemas/job-postings.ts",
       "default": "./dist/schemas/job-postings.js"
+    },
+    "./schemas/job-offers": {
+      "types": "./dist/schemas/job-offers.d.ts",
+      "heuresys-source": "./src/schemas/job-offers.ts",
+      "default": "./dist/schemas/job-offers.js"
     },
     "./schemas/job-requisitions": {
       "types": "./dist/schemas/job-requisitions.d.ts",

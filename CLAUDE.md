@@ -212,6 +212,70 @@ Sei regole. **Ognuna nasce da un errore reale**, non da teoria:
 5. **Le prove devono poter fallire.** Un controllo che non si è mai visto rosso non è una prova. In S1049 tre miei strumenti hanno prodotto **falsi verdi** (una variabile occupata dal `.env`, un esito letto dai messaggi invece che dal codice d'uscita, un `trap` che restituiva 1 su un verde): ogni volta lo strumento misurava sé stesso.
 6. **Una batteria che si ferma al primo rosso nasconde tutti gli altri** — **sei** occorrenze in due sessioni, una perfino dentro la stessa funzione. Quando ne correggi uno, **rilancia**: quasi sempre ne compare un altro che era lì da mesi.
 
+## ⭐ LA CATENA, NON IL PEZZO — tre regole definitive (Enzo, 2026-09-08 · VINCOLANTI)
+
+*Nascono da una contestazione precisa: «i risultati del tuo lavoro sono sempre aleatori e
+raramente hanno lo stesso esito quando ripetuti. Non c'è stabilità delle correzioni, non c'è
+stabilità dei seed, Playwright fallisce ripetutamente, le durate cambiano anche del 1000%.
+Evidentemente quando lavori non verifichi tutta l'intera catena delle azioni e degli oggetti che
+tocchi, così succede che a una correzione si crea un nuovo errore nello stesso contesto.»*
+
+**Non sono un suggerimento e non sono una buona pratica: sono una regola definitiva.** Enzo ha
+chiesto esplicitamente che vivessero qui, dove ogni sessione le rilegge.
+
+**Il caso che le ha generate**, misurato lo stesso giorno: ho modificato `seed-test-admin.ts`
+perché scrivesse i segreti TOTP **in chiaro**. Funzionava. Ma dal 2026-08-08 esiste la sentinella
+`v_mfa_secrets_in_cleartext`, che pretende **zero** segreti in chiaro. È scattata un'ora dopo, e
+**solo perché nel frattempo avevo toccato anche una migrazione**. Toccando il solo seed, il
+cancello sarebbe stato verde e il rosso sarebbe comparso in CI, a push fatto.
+
+### C1 — Prima di toccare un oggetto, censisci chi lo sorveglia
+
+```bash
+python docs/kb/tools/chi_sorveglia.py <tabella|colonna|vista|file|script>
+```
+
+Elenca in una riga: le **sentinelle** che lo interrogano (lette dal database vivo, non dedotte
+dalle migrazioni), i **cancelli** che possono fermarti, i **test** che asseriscono su di lui, gli
+**scrittori** che gli mettono le mani addosso, le **migrazioni** che lo creano — e il file che lo
+**crea** è quello da emendare, non l'ultimo che lo tocca (ADR-0035). Cerca con `--no-ignore`,
+perché un file gitignored è esattamente dove un difetto si nasconde, e marca quei riscontri invece
+di tacerli. `--selftest` per la prova, che ha casi negativi e una controprova.
+
+**Non dice se puoi toccarlo: dice chi guarda.** La decisione resta tua, ma presa sapendo. Un
+elenco vuoto è un'informazione, non un permesso; se il database non risponde dichiara **NON
+MISURATO**, perché «non ho potuto guardare» non è «non c'è niente».
+
+### C2 — La prova generale copre TUTTO `db/`, non solo le migrazioni
+
+Era già scritto qui — *«ogni tocco a `db/**` passa da `ci-rehearsal.sh`»* — ma
+`verify_gate.py` la instradava **solo** su `db/migrations/`: `db/scripts/` e `db/seeds/` cadevano
+sulla rotta generica, che non la chiedeva. Una regola che si applica a memoria è un proposito.
+**Corretto il 2026-09-08**: `("db/", [… "migrate-idempotent"])`, con `verify_gate.py selftest` che
+lo prova su otto casi — positivi **e negativi** — e che il router instrada su sé stesso.
+
+⚠ **`db-health` non copre lo stesso caso, e sembra di sì**: interroga la **produzione** via
+tunnel, mentre la prova generale lavora su una **copia usa-e-getta** di `heuresys_ci`. Uno vede ciò
+che è in produzione, l'altro ciò che il tuo codice **produce**. Un seed sbagliato non tocca la
+produzione: il primo è cieco su di lui per costruzione.
+
+### C3 — Un seed porta a uno STATO DICHIARATO, non negozia con quello che trova
+
+*«È scritto con logiche del tipo "inserisci solo se non c'è già": con lo stesso comando, se la riga
+c'è si comporta in un modo, se non c'è in un altro. L'instabilità è dentro lo strumento,
+progettata lì dentro, non nell'esecuzione.»* (Enzo, stesso giorno.)
+
+Un seed che si adatta allo stato di partenza — su un database che è una **copia della produzione**,
+e che quindi parte da uno stato diverso ogni volta — produce esiti diversi dallo stesso comando.
+Quell'aleatorietà **non è dell'esecuzione, è del progetto dello strumento**.
+
+Quindi: un seed dichiara lo stato a cui porta, e ce lo porta. ⚠ E siccome imporre uno stato su un
+database di produzione fa danni veri, ogni seed che impone pretende una **guardia a due
+condizioni** — l'ambiente lo dichiara **e** il database si dichiara di collaudo dal proprio nome —
+**provata a esiti opposti**: che si apra dove deve, e che **si rifiuti** dove non deve.
+
+---
+
 ## Working conventions
 
 - **TS strict quirks**: `tsconfig.base.json` ha `noUncheckedIndexedAccess: true` più `noUnusedLocals` / `noUnusedParameters`. L'accesso per indice e `Map.get()` ritornano `T | undefined` — restringi esplicitamente. I parametri inutilizzati vanno prefissati `_`. `exactOptionalPropertyTypes` è intenzionalmente **off** per non rovinare l'ergonomia dei tipi inferiti da Zod.

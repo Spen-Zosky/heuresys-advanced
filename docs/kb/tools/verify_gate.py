@@ -15,7 +15,8 @@ contenuto:
 
 Prima l'impronta era una sola per tutto (HEAD + status + diff): correggere una
 pagina di `apps/web` scadeva anche i 37 minuti di `test-api`, e modificare
-questo stesso file — che non instrada alcuna suite — azzerava il verdetto. Con
+questo stesso file — che allora non instradava alcuna suite — azzerava il verdetto.
+(Dal 2026-09-08 ne instrada una, `router-selftest`: vedi ROUTES.) Con
 una suite cosi' lunga il ciclo «correggi -> verifica» non converge: ogni
 correzione suggerita dal verdetto invalida il verdetto, e l'hook Stop rimanda
 all'inizio. Da qui la granularita' per suite, e `run` che riesegue solo cio'
@@ -125,7 +126,31 @@ ROUTES: list[tuple[str, list[str]]] = [
     # 000273: headline a 000272, disco a 000273, gate locale verde, `state-lint`
     # rosso e deploy bloccato dal suo stesso cancello.
     ("db/migrations/",   ["migrate-idempotent", "db-health", "no-contamination", "handoff-lint"]),
-    ("db/",              ["typecheck", "db-health", "no-contamination"]),
+    # ⭐ S1093 — `migrate-idempotent` STA ANCHE QUI, e la sua assenza era un buco misurato.
+    #
+    # Il router usa il PRIMO PREFISSO CHE VINCE: `db/migrations/` copre le migrazioni, e tutto
+    # il resto di `db/` — `db/scripts/`, `db/seeds/` — cadeva su questa riga, che la prova
+    # generale non la chiedeva. Cosi' un seed poteva entrare in main senza che nessuno lo
+    # provasse su una copia.
+    #
+    # ⚠ E `db-health`, che c'era gia', NON copre lo stesso caso: interroga la PRODUZIONE via
+    # tunnel, mentre `migrate-idempotent` (→ `prova-idempotenza.sh` → `ci-rehearsal.sh` sul
+    # gemello) lavora su una COPIA usa-e-getta di `heuresys_ci`. Due controlli che sembrano
+    # guardare la stessa cosa e guardano due database diversi: uno vede cio' che e' in
+    # produzione, l'altro cio' che il tuo codice PRODUCE. Un seed sbagliato non tocca la
+    # produzione, quindi il primo e' cieco su di lui per costruzione.
+    #
+    # 🔬 Il costo misurato, 2026-09-08: la prova generale ha trovato un difetto introdotto
+    # un'ora prima — `seed-test-admin.ts` scriveva i segreti TOTP in chiaro e accendeva la
+    # sentinella `v_mfa_secrets_in_cleartext` — ma l'ha trovato solo perche' nella stessa
+    # sessione era stata toccata ANCHE una migrazione. Toccando il solo seed, il cancello
+    # sarebbe stato verde e il rosso sarebbe comparso in CI, a push fatto.
+    #
+    # Il `CLAUDE.md` dichiarava gia' «ogni tocco a `db/**` passa da `ci-rehearsal.sh`»: la
+    # regola c'era, l'instradamento no, e una regola che si applica a memoria e' un proposito.
+    # Costo: 14-18 s sul gemello (misurato, due corse). Se il gemello non risponde la suite
+    # esce ROSSA e non ripiega in locale — di proposito.
+    ("db/",              ["typecheck", "db-health", "no-contamination", "migrate-idempotent"]),
     ("scripts/",         ["shell-tests"]),
     # solo i file di stato governati dall'handoff, non i tool sotto docs/kb/tools/
     # `programmi` sta su SOT_BACKLOG per #249 F3 (S1091): la deriva della contabilita'
@@ -138,6 +163,11 @@ ROUTES: list[tuple[str, list[str]]] = [
     ("docs/kb/SOT_",     ["handoff-lint"]),
     ("docs/kb/DEBT_",    ["handoff-lint"]),
     ("docs/kb/tools/handoff_lint.py", ["handoff-lint"]),
+    # Il router che instrada se stesso: senza questa riga, modificare la tabella delle
+    # rotte non instradava NIENTE (il docstring lo diceva come un vanto — «questo file
+    # non instrada alcuna suite» — ed era invece il punto cieco).
+    ("docs/kb/tools/verify_gate.py", ["router-selftest"]),
+    ("docs/kb/tools/chi_sorveglia.py", ["chi-sorveglia"]),
     (".handoff/",        ["handoff-lint"]),
     # Un piano si rompe in due modi: cambiando il piano, o cambiando il parser che lo legge.
     # Entrambi instradano la stessa suite, o meta' dei difetti resta invisibile.
@@ -188,6 +218,16 @@ SUITES: dict[str, tuple[str, str]] = {
     # quei file fossero validi. Costo misurato: il piano di `#217` e' entrato in main con
     # stato fuori vocabolario e due spunte senza evidenza, e TUTTI i cancelli erano verdi.
     "programmi":          ("L1", "python docs/kb/tools/programmi.py --verifica"),
+    # ⭐ S1093 — chi modifica il ROUTER deve provare il router. La riga che instradava
+    # la prova generale solo su `db/migrations/` e' stata corretta a mano: una riga
+    # corretta a mano si ri-rompe a mano, e senza questa suite nessuno se ne accorgerebbe
+    # finche' il difetto non torna. Costa millisecondi ed e' L0: nessuna scusa per saltarla.
+    "router-selftest":    ("L0", "python docs/kb/tools/verify_gate.py selftest"),
+    # C1 della regola «la catena, non il pezzo»: lo strumento che censisce i sorveglianti
+    # deve a sua volta essere provato. Se si rompe in silenzio, la regola resta scritta e
+    # smette di essere applicabile — che e' il modo in cui una regola muore senza che
+    # nessuno la abroghi.
+    "chi-sorveglia":      ("L0", "python docs/kb/tools/chi_sorveglia.py --selftest"),
     # L2: monta una suite vera con i globalSetup reali e un test che lascia una riga,
     # esattamente come `inbox-stream.integration.test.ts:113`. Pretende il database.
     "drift-lock":         ("L2", "bash scripts/test/drift-check-rilascia-il-lucchetto.sh"),
@@ -561,10 +601,72 @@ def check() -> tuple[bool, str]:
     return True, f"verdetto verde e fresco su {', '.join(fresh)}"
 
 
+# --- Il selftest del ROUTER (S1093) -------------------------------------
+#
+# Nasce da un difetto misurato: `db/scripts/` non instradava la prova generale, e un seed
+# poteva entrare in main senza che nessuno lo provasse su una copia. La riga e' stata
+# corretta — ma una riga corretta a mano si ri-rompe a mano, e nessuno se ne accorge finche'
+# il difetto non torna.
+#
+# ⚠ I casi NEGATIVI qui sotto non sono decorazione: senza di essi un router che instradasse
+# TUTTO su TUTTO passerebbe ogni caso positivo. Una prova che non puo' fallire non e' una prova.
+CASI_ROUTER: list[tuple[str, list[str], list[str]]] = [
+    # (file,                              deve instradare,          NON deve instradare)
+    ("db/migrations/000382_x.sql",         ["migrate-idempotent",
+                                            "handoff-lint"],         []),
+    # ⭐ il caso che ha fatto nascere questo selftest
+    ("db/scripts/seed-test-admin.ts",      ["migrate-idempotent"],   ["handoff-lint"]),
+    ("db/seeds/rtl-rebuild/x.sql",         ["migrate-idempotent"],   []),
+    ("db/scripts/qualunque-cosa.sh",       ["migrate-idempotent"],   []),
+    # negativi: il router deve saper dire di NO, o direbbe di si' a tutto
+    ("apps/api/src/modules/auth/x.ts",     [],                       ["migrate-idempotent",
+                                                                      "db-health"]),
+    ("README.md",                          [],                       ["migrate-idempotent",
+                                                                      "typecheck",
+                                                                      "handoff-lint"]),
+    ("apps/web/tests/e2e/fixtures.ts",     [],                       ["migrate-idempotent"]),
+    # il router instrada se stesso, o modificarlo resta il punto cieco che era
+    ("docs/kb/tools/verify_gate.py",       ["router-selftest"],      ["migrate-idempotent"]),
+    ("docs/kb/tools/chi_sorveglia.py",     ["chi-sorveglia"],        ["migrate-idempotent"]),
+]
+
+
+def selftest() -> int:
+    """Il router instrada cio' che deve, e NON instrada cio' che non deve."""
+    errori: list[str] = []
+    for f, attese, vietate in CASI_ROUTER:
+        got = route([f])
+        for s in attese:
+            if s not in got:
+                errori.append(f"{f}: manca '{s}' (instrada: {got or 'niente'})")
+        for s in vietate:
+            if s in got:
+                errori.append(f"{f}: instrada '{s}' e NON dovrebbe (instrada: {got})")
+
+    # La controprova del selftest stesso: se `route` restituisse sempre tutto, i casi
+    # positivi passerebbero e i negativi no. Se restituisse sempre niente, il contrario.
+    # Questo verifica che la funzione DISCRIMINI davvero, non che risponda.
+    tutto = set(route(["db/migrations/x.sql"]))
+    niente = set(route(["README.md"]))
+    if not tutto:
+        errori.append("controprova: `route` non instrada nulla nemmeno su una migrazione")
+    if niente:
+        errori.append(f"controprova: `route` instrada {sorted(niente)} su un README")
+
+    if errori:
+        print("SELFTEST ROUTER — ROSSO")
+        for e in errori:
+            print(f"  ✗ {e}")
+        return 1
+    print(f"SELFTEST ROUTER — verde ({len(CASI_ROUTER)} casi, positivi e negativi, "
+          f"piu' la controprova che il router discrimini)")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=["route", "run", "check"])
+    ap.add_argument("cmd", choices=["route", "run", "check", "selftest"])
     ap.add_argument("--hook", action="store_true",
                     help="check: emetti il JSON per l'hook Stop")
     ap.add_argument("--with-e2e", action="store_true",
@@ -591,6 +693,9 @@ def main() -> int:
             lvl, cmd = SUITES[n]
             print(f"  [{lvl}] {n:<20} {cmd}")
         return 0
+
+    if args.cmd == "selftest":
+        return selftest()
 
     if args.cmd == "run":
         files = changed_files()

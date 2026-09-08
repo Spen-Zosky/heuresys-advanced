@@ -37,6 +37,23 @@ davanti ciò che sblocca gli altri.
 
 ## Registro deliverable
 
+> **stato**: CHIUSO
+> **item**: `#169`
+
+- [x] **F1 P0 — la CI Playwright torna verde** — era rossa da due commit per un buco di `#169` F3c. **fatto =** `playwright-smoke: success` — FATTO 2026-09-08 · run `34239606307` su `084dcb30`; impronte a conferma, depositata `ede4d885` = usata `ede4d885`
+- [x] **F2 P0b — Typecheck e Lint concludono davvero** — erano `cancelled`, cioè mai misurati. **fatto =** entrambe `success` sullo stesso sha — FATTO 2026-09-08 · verdi su `a9bc5921` insieme a Test/Build/CodeQL/Shell
+- [x] **F3 `#169` F4 — la prova che deve poter fallire** — con la chiave madre in mano il secondo fattore non si ottiene. **fatto =** prova automatica con controprova interna — FATTO 2026-09-08 · `pnpm db:verify-separazione-totp`: 159 esaminati, **0 derivabili**; secondo corno VIOLATO in produzione e quantificato (159/164 chiusi fuori se si accende l'enforcement)
+- [x] **F4 `#214` F6 — un perimetro dell'agente** — undicesimo, `blueprint-families`. **fatto =** riga in `agent-perimetri.json` + dimostrazione live — FATTO 2026-09-08 · mig `000382` in produzione (19 s sulla VM), sentinella a 0, `db_health` tutto nei limiti
+- [x] **F5 `#79` F3 — il cancello di esposizione** — **fatto =** `check_exposure.py` verde — FATTO 2026-09-08 · 73 tabelle scritte, 73 esposte, 0 lacune
+- [x] **F6 `#198` — il gate è ancora vero?** — **fatto =** verdetto misurato con evidenza — FATTO 2026-09-08 · GATE CONFERMATO: `sys_blueprint_content_*` tutte a zero, ri-misurate dalla ricognizione
+- [x] **F7 `#149` F4 — la consegna non verificata** — **fatto =** il secondo ramo dell'innesco misurato — FATTO 2026-09-08 · 5 documenti del lab citati dal register come fonte eseguibile, **nessuno verificato**; era stato dichiarato «nessun bersaglio» cinque volte misurando metà dell'innesco
+- [ ] **F8 `#54` F4 — frontend `/recruiting`** — NON FATTA: voce da ~1-2 sessioni, fuori dal confine dichiarato all'inizio. ⚠ Lascio una misura a chi la riprende: `sys_candidates` ha **1 riga**, non zero
+- [ ] **F9 `#143` F4/F5 — API progetti/squadre** — NON FATTA: stimata ~4-6 sessioni nel register
+- [ ] **F10 `#159` F2 — il ponte gateway↔pagine** — NON FATTA: stimata ~3-4 sessioni
+
+### La tabella di partenza, tenuta per cronaca
+
+
 Stato: `da-fare` · `in-corso` · `FATTO` · `non-fatta (ragione)`
 
 | id | cosa | chi | cosa significa fatto | stato |

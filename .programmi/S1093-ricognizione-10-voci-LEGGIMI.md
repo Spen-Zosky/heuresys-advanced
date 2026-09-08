@@ -51,6 +51,21 @@ intercettare DIF-4*. Ed è la seconda volta oggi che quella famiglia si presenta
 6. **Il gate di `#198` è confermato vero**: `sys_blueprint_content_{units,positions,skills,kpis}`
    = 0 · 0 · 0 · 0.
 
+## Fasi — perché questa ricognizione è lavoro, non un documento
+
+> **stato**: IN CORSO
+> **item**: `#149`
+
+⚠ Queste fasi esistono anche perché un cancello le pretende (`programmi.py --verifica`), e il
+fatto che il file l'abbia fatto **uscire rosso** è esso stesso una dimostrazione della regola C1:
+ho creato tre file in `.programmi/` senza chiedermi chi li sorveglia. `chi_sorveglia.py .programmi`
+avrebbe elencato `programmi.py` e altri **sei** cancelli.
+
+- [x] **F1 Depositare la ricognizione dove non si perda** — 2,27 milioni di token di subagent non possono vivere in una cartella temporanea. **fatto =** file nel repo + guida di lettura — FATTO 2026-09-08
+- [ ] **F2 Verificare le smentite prima di agirvi** — le sei smentite qui sotto sono affermazioni di 13 agenti, **non fatti acquisiti**. **fatto =** ognuna ri-misurata, o dichiarata non ri-misurata. ⚠ La n.2 va rifatta **con lo stesso strumento** che produsse il 225 (`completezza_tenant.py`), non con una conta diversa: altrimenti si smentisce un numero con un numero che misura un'altra cosa
+- [ ] **F3 Portare i marker di verifica sui cinque documenti citati** — la ritrattazione di `#205` fu scritta sul biglietto di consegna invece che sul dossier, e il rilievo respinto sopravvive alla riga 87. **fatto =** ogni documento citato dal register porta il proprio esito, o è dichiarato non verificato
+- [ ] **F4 Rendere il presidio misurabile a macchina** — il marker esiste in due grafie e nessuno strumento lo cerca. **fatto =** uno strumento lo cerca e sa uscire rosso
+
 ## Come si usa
 
 Non è una lista di cose da fare: è la **base misurata** su cui costruire il prossimo piano. Le

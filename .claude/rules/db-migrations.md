@@ -11,6 +11,49 @@ Ogni migrazione è **idempotente** — `CREATE TABLE IF NOT EXISTS`, `INSERT …
 
 Quando aggiungi una migrazione, segui il pattern esistente: numero sequenziale successivo, un solo file descrittivo, corpo idempotente, **nessuna operazione distruttiva**.
 
+## ⭐ PRIMA DI TOCCARE: chi sorveglia gia' quell'oggetto? (Enzo, 2026-09-08 — vincolante)
+
+```bash
+python docs/kb/tools/chi_sorveglia.py <tabella|colonna|vista|script>
+```
+
+**Si esegue PRIMA di modificare, non dopo.** Elenca sentinelle (lette dal database vivo), cancelli,
+test, altri scrittori e le migrazioni che creano l'oggetto — perche' e' **il file che crea** quello
+da emendare, non l'ultimo che tocca (ADR-0035).
+
+🔬 **Il caso che ha generato la regola, misurato il 2026-09-08.** Ho modificato
+`seed-test-admin.ts` perche' scrivesse i segreti TOTP in chiaro. Funzionava. Ma dal 2026-08-08
+esiste `sys.v_mfa_secrets_in_cleartext`, che pretende **zero**: e' scattata un'ora dopo, e solo
+perche' nel frattempo avevo toccato **anche** una migrazione. Interrogato oggi su quella colonna,
+lo strumento mette la sentinella in **prima riga, marcata BLOCCANTE**, e mostra **altri cinque
+scrittori** della stessa colonna che non sapevo esistessero.
+
+## ⭐ La prova generale vale per TUTTO `db/`, non solo per le migrazioni
+
+La riga qui sopra dice «ogni tocco a `db/**`», ed era vera come regola e falsa come
+**instradamento**: `verify_gate.py` chiedeva `migrate-idempotent` **solo** su `db/migrations/`, e
+`db/scripts/` + `db/seeds/` cadevano sulla rotta generica, che non la chiedeva. Corretto il
+2026-09-08, con `verify_gate.py selftest` a impedire la regressione — otto casi, positivi e
+negativi, e il router che instrada **se stesso**.
+
+⚠ **`db-health` non e' un sostituto e sembra di si'**: interroga la **produzione** via tunnel,
+mentre la prova generale lavora su una **copia usa-e-getta** di `heuresys_ci`. Uno vede cio' che e'
+in produzione, l'altro cio' che il tuo codice **produce**: un seed sbagliato non tocca la
+produzione, quindi il primo e' cieco su di lui per costruzione.
+
+## ⭐ Un seed porta a uno STATO DICHIARATO
+
+*«E' scritto con logiche del tipo "inserisci solo se non c'e' gia'": con lo stesso comando, se la
+riga c'e' si comporta in un modo, se non c'e' in un altro. L'instabilita' e' dentro lo strumento,
+progettata li' dentro, non nell'esecuzione.»* (Enzo, 2026-09-08.)
+
+Su un database che e' una **copia della produzione** — e che quindi parte da uno stato diverso ogni
+volta — un seed che si adatta produce esiti diversi dallo stesso comando. Quindi un seed **dichiara
+lo stato a cui porta e ce lo porta**; e siccome imporre uno stato in produzione fa danni veri, ogni
+seed che impone pretende una **guardia a due condizioni** (l'ambiente lo dichiara **e** il database
+si dichiara di collaudo dal proprio nome), **provata a esiti opposti**: che si apra dove deve, e
+che **si rifiuti** dove non deve.
+
 ## Prima di applicare: la prova generale (obbligatoria)
 
 ```bash

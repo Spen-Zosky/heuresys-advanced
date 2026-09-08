@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `d92cbd58` (2026-09-08T01:11:39+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `093d3988` (2026-09-08T02:47:52+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 103 |
-| Route API | 625 |
+| Moduli API | 105 |
+| Route API | 633 |
 | Pagine web | 121 |
-| Schemi shared | 113 |
-| Tabelle DB | 291 (vuote: 24) |
+| Schemi shared | 115 |
+| Tabelle DB | 291 (vuote: 23) |
 | Viste / matview | 45 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 282 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 286 |
 
 ## Moduli API
 
@@ -53,8 +53,10 @@
 | generated-origins | /v1/generated-origins | 2 | 1 | 1 | 1 |
 | goals | /v1/goals | 12 | 4 | 7 | 4 |
 | insights | /v1/insights | 7 | 2 | 15 | 5 |
+| interview-feedback | /v1/interview-feedback | 4 | 2 | 3 | 1 |
 | interviews | /v1/interviews | 4 | 2 | 2 | 1 |
 | job-families | /v1/job-families | 5 | 3 | 1 | 2 |
+| job-offers | /v1/job-offers | 4 | 2 | 2 | 1 |
 | job-postings | /v1/job-postings | 4 | 2 | 2 | 1 |
 | job-requisitions | /v1/job-requisitions | 4 | 2 | 2 | 1 |
 | job-roles | /v1/job-roles | 4 | 3 | 2 | 1 |
@@ -143,7 +145,6 @@
 - `sys.sys_blueprint_content_skills`
 - `sys.sys_blueprint_content_units`
 - `sys.sys_candidate_applications`
-- `sys.sys_candidates`
 - `sys.sys_content_media`
 - `sys.sys_generated_record_origins`
 - `sys.sys_interview_feedback`
@@ -170,7 +171,7 @@
 
 ## Anomalie shared exports
 
-- schemi senza subpath export: _pagination, _query-boolean
+- schemi senza subpath export: _pagination, _query-boolean, interview-feedback, job-offers
 
 ## Dettaglio completo
 

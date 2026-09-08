@@ -11,6 +11,40 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 ### Delta S1092 (2026-09-08) — quattro fasi chiuse, il decimo perimetro, e i segreti che smettono di essere derivati
 
+### Delta S1093 (2026-09-08/09) — la CI rossa, i tre rimedi all'instabilità, le PR Dependabot
+
+**Numeri ri-derivati dal vivo il 2026-09-09**: migrazioni su disco **379** (max `000382`) · file di test
+API **269** · moduli API **105** · perimetri dell'agente aperti **11** · HEAD `06a85d00`.
+
+**Chiuse**: `#169` **F4** (prova con controprova interna: 159 fattori TOTP, **0 ancora derivabili** dalla
+chiave madre; secondo corno **violato** in produzione e quantificato — accendere l'enforcement chiuderebbe
+fuori **159 utenti su 164**) · `#214` **F6** (undicesimo perimetro `blueprint-families`, mig `000382` in
+produzione in 19 s, sentinella a 0) · `#79` **F3** (73 tabelle scritte, 73 esposte, 0 lacune) · `#149`
+**F4** (il secondo ramo dell'innesco, mai misurato in cinque sessioni: **5 documenti del lab** citati dal
+register come fonte eseguibile, **nessuno verificato**) · `#198` gate **CONFERMATO** (le 4 tabelle a zero).
+
+**La CI**: era rossa da due commit per un buco di `#169` F3c — in CI `MFA_ENFORCEMENT_ENABLED` vale `true`
+per default e il job non lo spegne, quindi la suite passava dal secondo fattore e non poteva rispondere.
+Tornata **verde** (`084dcb30`) cifrando il segreto nel seed. ⚠ *Perché* la versione in chiaro venisse
+rifiutata resta **NON SPIEGATO**: cinque ipotesi escluse misurandole, una pista non confermata (le due
+label `e2e-fixture` / `derived-access` sono diverse e l'esclusione dalla ri-cifratura ne copre una sola).
+
+**Le quattro PR Dependabot**: nessuna era rotta dai pacchetti. `#83` — `AuthenticatorTransportFuture`
+**ritirato in v14** e non elencato fra i breaking change; corretto su `main` con `AuthenticatorTransport`,
+esportato da **entrambe** le versioni. `#84` — i `CANCELLED` erano **assenza di misura**: la cache di
+setup-node su `oci-vm` era arrivata a **4,28 GB**, il `tar` durava 7 min e il `timeout-minutes: 10`
+uccideva il job **dopo** che tutti gli step erano verdi; tolta dai soli tre workflow con quel limite.
+`#85`/`#86` — rossi del **commit di base**, già corretti su `main`: serve il rebase.
+
+**Strumenti nuovi**: `docs/kb/tools/chi_sorveglia.py` (censisce sentinelle/cancelli/test/scrittori di un
+oggetto, `--no-ignore`, selftest con casi negativi) · `db/scripts/verify-separazione-totp.ts` (`#169` F4,
+con controprova interna) · `verify_gate.py selftest` (10 casi, il router instrada **sé stesso**).
+
+**Regole nuove, vincolanti** (`CLAUDE.md` §«LA CATENA, NON IL PEZZO»): **C1** censisci chi sorveglia prima
+di toccare · **C2** la prova generale copre **tutto** `db/`, non solo le migrazioni · **C3** un seed porta
+a uno **stato dichiarato** · **C4** una prova distruttiva gira su una **copia**, e un database di collaudo
+condiviso **è** un oggetto condiviso.
+
 **Numeri ri-derivati dal vivo**: migrazioni su disco **379** (max `000382`) = **378** applicate ·
 moduli API **105** (+2: `interview-feedback`, `job-offers`) · file di test API **269** · tabelle
 `sys.*` **240** · utenti **161 persone + 3 SERVICE** · RBAC **14 ruoli / 226 permessi / 986 mapping**

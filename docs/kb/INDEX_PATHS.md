@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-08T03:32:33Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3364**
+**Generato**: 2026-09-08T23:12:22Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3371**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,16 +13,16 @@
 | api-module | 377 |
 | ci | 19 |
 | claude-config | 37 |
-| config | 199 |
+| config | 200 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 378 |
+| db-migration | 379 |
 | db-other | 8 |
-| db-script | 51 |
+| db-script | 52 |
 | db-seed | 114 |
-| doc-canonical | 758 |
+| doc-canonical | 762 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 416 |
 | ux-design-archive | 80 |
 | web-source | 246 |
-| **TOTALE** | **3364** |
+| **TOTALE** | **3371** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2806 |
+| live | 2813 |
 
 ## File per categoria
 
@@ -574,6 +574,7 @@
 - `D:\heuresys-advanced\.programmi\219-triage-2026-09-05.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\219-triage-2026-09-06-dopo-correzione.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\219-triage-2026-09-06.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1093-ricognizione-10-voci.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\dossier-catalog-derivation.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\dossier-derivation.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\dossier-derivation.txt` · *live* · git-tracked
@@ -1504,6 +1505,7 @@
 - `D:\heuresys-advanced\db\migrations\000379_da_quali_fonti_la_piattaforma_impara_com_e_fatta_un_azienda.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000380_una_persona_senza_secondo_fattore_deve_essere_un_numero_che_si_guarda.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000381_una_variante_di_fascicolo_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000382_una_famiglia_di_fascicoli_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1567,6 +1569,7 @@
 - `D:\heuresys-advanced\db\scripts\validate_database.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\validate_database.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\verifica-origine-vs-marchio.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\verify-separazione-totp.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\verify-storia36-dossier.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\verify-storia36.sql` · *live* · git-tracked
 
@@ -1744,7 +1747,9 @@
 - `D:\heuresys-advanced\.programmi\S1089-piano-sessione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1090-piano-sessione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1091-piano-sessione.md` · *live* · git-tracked
-- `D:\heuresys-advanced\.programmi\S1092-mandato-p1-p3.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1093-mandato-p1-p3-gated.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1093-ricognizione-10-voci-LEGGIMI.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1093-tre-rimedi-instabilita.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked
@@ -1868,6 +1873,7 @@
 - `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-plancia-gov.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-corsa-181-sequenza-prevista.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-ritiro-modalita-gov.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\piani-sessione\S1092-mandato-p1-p3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\scripts-exhausted\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\scripts-exhausted\bisect-cw-b59-createctx.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\apply-pending.mjs` · *live* · git-tracked
@@ -2084,6 +2090,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\check_pagine_orfane.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_pagine_raggiungibili.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_tenant_contamination.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\chi_sorveglia.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\chiudi_leggero.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\compatta_register.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\completezza_tenant.py` · *live* · git-tracked

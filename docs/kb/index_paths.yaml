@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-08T03:32:33Z da docs/kb/tools/build_index.py
+# generato: 2026-09-08T23:12:22Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-08T03:32:33Z"
-  total_files: 3364
+  generated_at: "2026-09-08T23:12:22Z"
+  total_files: 3371
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,16 +13,16 @@ meta:
     api-module: 377
     ci: 19
     claude-config: 37
-    config: 199
+    config: 200
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 378
+    db-migration: 379
     db-other: 8
-    db-script: 51
+    db-script: 52
     db-seed: 114
-    doc-canonical: 758
+    doc-canonical: 762
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2806
+    live: 2813
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3101,6 +3101,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\219-triage-2026-09-06.txt'
     root: repo
     rel: '.programmi/219-triage-2026-09-06.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1093-ricognizione-10-voci.json'
+    root: repo
+    rel: '.programmi/S1093-ricognizione-10-voci.json'
     category: config
     status: live
     provenance: git-tracked
@@ -8594,6 +8600,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000382_una_famiglia_di_fascicoli_non_deve_poter_contenere_persone.sql'
+    root: repo
+    rel: 'db/migrations/000382_una_famiglia_di_fascicoli_non_deve_poter_contenere_persone.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -8933,6 +8945,12 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\verifica-origine-vs-marchio.sql'
     root: repo
     rel: 'db/scripts/verifica-origine-vs-marchio.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\verify-separazione-totp.ts'
+    root: repo
+    rel: 'db/scripts/verify-separazione-totp.ts'
     category: db-script
     status: live
     provenance: git-tracked
@@ -9962,9 +9980,21 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\.programmi\S1092-mandato-p1-p3.md'
+  - path: 'D:\heuresys-advanced\.programmi\S1093-mandato-p1-p3-gated.md'
     root: repo
-    rel: '.programmi/S1092-mandato-p1-p3.md'
+    rel: '.programmi/S1093-mandato-p1-p3-gated.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1093-ricognizione-10-voci-LEGGIMI.md'
+    root: repo
+    rel: '.programmi/S1093-ricognizione-10-voci-LEGGIMI.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1093-tre-rimedi-instabilita.md'
+    root: repo
+    rel: '.programmi/S1093-tre-rimedi-instabilita.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10703,6 +10733,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-ritiro-modalita-gov.md'
     root: repo
     rel: 'docs/archive/modalita-gov-ritirata/2026-08-10-ritiro-modalita-gov.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\piani-sessione\S1092-mandato-p1-p3.md'
+    root: repo
+    rel: 'docs/archive/piani-sessione/S1092-mandato-p1-p3.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11999,6 +12035,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\check_tenant_contamination.py'
     root: repo
     rel: 'docs/kb/tools/check_tenant_contamination.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\chi_sorveglia.py'
+    root: repo
+    rel: 'docs/kb/tools/chi_sorveglia.py'
     category: doc-canonical
     status: live
     provenance: git-tracked

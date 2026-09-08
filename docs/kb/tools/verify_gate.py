@@ -168,6 +168,19 @@ ROUTES: list[tuple[str, list[str]]] = [
     # non instrada alcuna suite» — ed era invece il punto cieco).
     ("docs/kb/tools/verify_gate.py", ["router-selftest"]),
     ("docs/kb/tools/chi_sorveglia.py", ["chi-sorveglia"]),
+    # ⭐ S1093 — `agent-perimetri.json` E' UNA SoT, e un test la sorveglia.
+    # `apps/agent-gateway/test/atlas-resolver.test.ts` confronta i perimetri DECISI in questo
+    # file con quelli presenti nella MAPPA generata (`docs/kb/atlas/agent-operations.json`):
+    # aprire un perimetro senza rigenerare la mappa fa cadere quel test.
+    # 🔬 E' successo davvero, due volte nello stesso giorno e per la stessa ragione: la PR
+    # Dependabot #86 era rossa con `expected ['content', ...(8)] to deeply equal
+    # ['blueprint-variants', ...(9)]` — e ho poi scoperto di aver appena introdotto la stessa
+    # discordanza io, aprendo `blueprint-families` senza rigenerare (11 decisi contro 10 nella
+    # mappa). Il cancello locale non l'ha vista perche' questo file non instradava nulla.
+    # `atlas-freshness` non basta: guarda se l'atlante e' vecchio, non se i due elenchi
+    # combaciano — sono due domande diverse.
+    ("docs/kb/agent-perimetri.json", ["agent-gateway-test"]),
+    ("docs/kb/atlas/agent-operations.json", ["agent-gateway-test"]),
     (".handoff/",        ["handoff-lint"]),
     # Un piano si rompe in due modi: cambiando il piano, o cambiando il parser che lo legge.
     # Entrambi instradano la stessa suite, o meta' dei difetti resta invisibile.
@@ -228,6 +241,9 @@ SUITES: dict[str, tuple[str, str]] = {
     # smette di essere applicabile — che e' il modo in cui una regola muore senza che
     # nessuno la abroghi.
     "chi-sorveglia":      ("L0", "python docs/kb/tools/chi_sorveglia.py --selftest"),
+    # I test del gateway, che sono anche i guardiani della coerenza fra i perimetri decisi e
+    # la mappa generata. L0 nel costo, L1 nella sostanza: girano senza database.
+    "agent-gateway-test": ("L1", "pnpm --filter @heuresys/agent-gateway test"),
     # L2: monta una suite vera con i globalSetup reali e un test che lascia una riga,
     # esattamente come `inbox-stream.integration.test.ts:113`. Pretende il database.
     "drift-lock":         ("L2", "bash scripts/test/drift-check-rilascia-il-lucchetto.sh"),
@@ -628,6 +644,8 @@ CASI_ROUTER: list[tuple[str, list[str], list[str]]] = [
     # il router instrada se stesso, o modificarlo resta il punto cieco che era
     ("docs/kb/tools/verify_gate.py",       ["router-selftest"],      ["migrate-idempotent"]),
     ("docs/kb/tools/chi_sorveglia.py",     ["chi-sorveglia"],        ["migrate-idempotent"]),
+    # aprire un perimetro deve far girare il test che confronta decisi e mappa
+    ("docs/kb/agent-perimetri.json",       ["agent-gateway-test"],   ["migrate-idempotent"]),
 ]
 
 

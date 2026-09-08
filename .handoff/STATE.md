@@ -4,51 +4,59 @@
 
 ## Last session brief
 
-Sessione su mandato «igiene, verify_gate, poi tutte le voci P1→P3 in autonomia, ordine a
-mia scelta». Piano-file in `.programmi/S1092-mandato-p1-p3.md`, chiuso **13 voci su 14**;
-poi Enzo ha chiesto una raccomandazione sulle due domande rimaste e ha detto di eseguirla.
-Il guardiano non ha mai tagliato.
+Sessione su mandato «esegui tutte le voci da P1 a P3 e i gated in autonomia, decidendo per
+mio conto, nell'ordine che ritieni più appropriato — l'unico guardiano che comanda è quello
+della capienza». Piano-file in `.programmi/S1093-mandato-p1-p3-gated.md`.
 
-**Chiuse**: `#54` F3 (recruiting, 7 fette su 7) · `#143` F3 (asse funzionale) · `#214` F6
-(decimo perimetro, live) · `#169` F3c (i segreti TOTP non sono più derivati).
+**Chiuse**: `#169` **F4** (misurata, con esito onesto) · `#214` **F6** (undicesimo perimetro,
+in produzione) · `#79` **F3** (cancello verde) · la chiave API di S1088 è **ruotata** (Enzo).
+**Aperta e strumentata**: la CI Playwright, che era rossa da due commit.
 
 ## ⭐ Quattro reperti che valgono oltre le voci
 
-1. **Una premessa del nostro piano era falsa, e ha retto tre sessioni.** `#169` F3a doveva
-   spostare 89 spec su 101 alle utenze di collaudo, perché «la suite deriva il segreto».
-   La domanda giusta non era *da quale identità entrano i test* ma **da dove prendono il
-   segreto**: lo leggono dal database. F3a **cancellata**, costo reale **un file**.
-   → Le premesse dei nostri piani sono fonti non verificate come le consegne del lab (`#149`).
-2. **Ho concluso da una misura giusta una frase più larga di essa**: «il ramo MFA non si
-   percorre mai» era vero in produzione (enforcement spento) e **falso nei test**, che lo
-   accendono di proposito. Salto di dominio — la famiglia DIF-4.
-3. **Un conteggio può misurare la portata invece del titolo**: `resolveActivityScope`
-   registrava `self` per un capo la cui squadra è vuota, cioè «non ha ambito funzionale».
-4. **Una porta può essere vuota per il criterio e occupata nei fatti**:
-   `enterprise_typing_metadata` non contiene indirizzi di posta — quindi la guardia di
-   famiglia lo direbbe pulito — ma contiene un nome proprio in chiaro.
+1. **La CI era rossa per un buco lasciato da `#169` F3c, e nessuno l'aveva collegato alla
+   voce.** In CI `MFA_ENFORCEMENT_ENABLED` vale **`true` per default** e il job non lo
+   spegne: la CI accende quel ramo **di proposito**. Il commento del codice diceva che non
+   si percorreva mai — vero in produzione, falso in CI. Ancora **DIF-4**, nella stessa voce
+   dove S1092 l'aveva già trovato una volta.
+2. **La prova generale ha trovato un difetto mio di un'ora prima.** Il fix scriveva i segreti
+   TOTP **in chiaro**: funzionava (`decryptSecret` è self-identifying) ma accendeva
+   `v_mfa_secrets_in_cleartext`. «Funziona» non è «è corretto», e un seed non è esente dagli
+   invarianti perché è uno script. 26 secondi contro i 25 minuti di un giro di CI.
+3. **Un conteggio misurava la portata invece della proprietà, e sembrava dire il contrario.**
+   `stop-deriving-totp --dry-run` stampa «DA RENDERE CASUALI: 159» contando i fattori con
+   un'etichetta — su un database già bonificato stampa lo stesso numero. Letto come misura
+   avrebbe fatto concludere che F3c non fosse mai stata applicata.
+4. **Una guardia giusta a metà è una guardia sbagliata.** `NODE_ENV=test` da solo avrebbe
+   rigenerato i secondi fattori **veri**, perché su Windows il `.env` punta alla produzione
+   via tunnel. La guardia finale pretende anche che il database si dichiari di collaudo dal
+   proprio nome, ed è **provata a esiti opposti**.
 
 ## Top priorities
 
-1. **`#169` F4** — la prova formale, ed è l'ultima della voce. La sostanza c'è già: chi ha
-   la chiave madre non ottiene più alcun secondo fattore, misurato ri-derivandoli tutti.
-2. **`#54` F4** — frontend `/recruiting` + Kanban + E2E con login reale. Le sette tabelle
-   sono **vuote**: la dimostrazione su dati di dominio è materia di questa fase.
-3. **`#143` F4/F5** — API progetti/squadre col confine I18, poi la dimostrazione con un capo
-   progetto gerarchicamente inferiore a un suo membro (3 squadre reali hanno già quella forma).
-4. **`#214` F6** — continuativa: la coda si ri-deriva, non si ricorda.
+1. **La CI Playwright non è ancora verde**, ma l'errore è **cambiato** e la diagnosi è
+   **strumentata, non da rifare**: il codice ora viene fornito e il server risponde «Codice
+   MFA non valido o scaduto». Il seed stampa l'impronta di ciò che **deposita**, la fixture
+   quella di ciò che **usa**. Al prossimo giro basta confrontare due numeri di otto
+   caratteri: **uguali** ⇒ il guasto è nel server (chiave di cifratura sul runner, orologio);
+   **diversi** ⇒ qualcosa riscrive il fattore dopo il seed. ⚠ `/etc/heuresys-runner-crypto.env`
+   esiste sul runner ma è leggibile solo da root: **non confermato e non escluso**.
+2. **`#54` F4** — frontend `/recruiting` + Kanban + E2E. ⚠ Misurato: `sys_candidates` ha
+   **1 riga**, non zero — lo stato precedente diceva le sette tabelle «vuote».
+3. **`#143` F4/F5** — API progetti/squadre col confine I18.
+4. **`#159` F2** — il ponte gateway↔pagine.
 
 ## Open questions
 
-- ⏳ **SOSPESA per decisione di Enzo (2026-09-08)**: dove custodire la chiave del collaudo,
-  perché smetta di viaggiare insieme alla chiave madre. F3c l'ha **ridimensionata** — quella
-  porta non apre più nulla di amministrativo — ma le due chiavi restano co-locate ovunque.
-- **Se e quando accendere l'enforcement MFA**: scelta di prodotto, senza scadenza. È l'unico
-  evento che rimetterebbe in gioco le utenze di collaudo per la suite.
-- **`#205` F1**: serve sapere **da quali siti** la piattaforma accetta di imparare. Con una
-  fonte per dominio il registro c'è ma non discrimina.
+- ⏳ **SOSPESA per decisione di Enzo (2026-09-08)**: dove custodire la chiave del collaudo.
+- **Se e quando accendere l'enforcement MFA** — ⭐ ora **ha il suo numero**: **159 utenti su
+  164 attivi** hanno un fattore TOTP verificato il cui segreto è casuale e **non è mai stato
+  consegnato a nessuno**. Accenderlo oggi chiuderebbe fuori il **97%** delle persone. La
+  precondizione è un **percorso di ri-enrollment**: non è più una scelta senza vincoli, è una
+  scelta con una precondizione misurata.
+- **`#205` F1**: serve sapere **da quali siti** la piattaforma accetta di imparare.
 - **`#198`** resta GATED su un fatto ri-misurato: `sys_blueprint_content_*` tutte a zero.
-- ✅ **RISOLTA (Enzo, 2026-09-08 · S1093)**: la chiave API transitata nell'output di un comando in S1088 è stata **ruotata**. Nessuna azione residua.
+- ✅ **RISOLTA**: la chiave API transitata in un output in S1088 è stata **ruotata**.
 
 ## Verification
 

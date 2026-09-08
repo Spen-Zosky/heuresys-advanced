@@ -9,6 +9,36 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1092 (2026-09-08) — quattro fasi chiuse, il decimo perimetro, e i segreti che smettono di essere derivati
+
+**Numeri ri-derivati dal vivo**: migrazioni su disco **378** (max `000381`) = **378** applicate ·
+moduli API **105** (+2: `interview-feedback`, `job-offers`) · file di test API **269** · tabelle
+`sys.*` **240** · utenti **161 persone + 3 SERVICE** · RBAC **14 ruoli / 226 permessi / 986 mapping**
+· sentinelle **35** (+1: `v_variante_di_fascicolo_con_dato_di_persona`) · HEAD `47b26292`
+(pre-commit di chiusura).
+
+**Chiuse quattro fasi.** `#54` **F3 completa — 7 fette su 7**: `interview-feedback` (prima superficie
+del ciclo con **due** scavalchi possibili, colloquio *e* intervistatore) e `job-offers`, che scioglie
+la domanda lasciata aperta dalla mig `000364` — **la retribuzione di un'offerta si maschera come
+quella di un dipendente**, non per analogia ma perché ADR-0032 parla del *mandato di chi guarda*, non
+del soggetto guardato. `#143` **F3**: `isInFunctionalScope` e `isFunctionalLeader` hanno consumatori
+reali, e cercarli ha scoperto un difetto — `resolveActivityScope` decideva con `scope.length > 1`,
+quindi registrava `self` per un capo la cui squadra è vuota. `#214` **F6**: decimo perimetro
+(`blueprint-variants`), mig `000381`, live in produzione. `#169` **F3c**: i **159** segreti TOTP in
+produzione sono ora **casuali** — nessuno ricostruibile dalla chiave madre, misurato ri-derivandoli
+tutti e 159.
+
+⭐ **Il reperto che vale più di tutti**: `#169` F3a — stimata «una sessione o più», 89 spec su 101 da
+spostare — **è stata cancellata**. Nasceva da una premessa mai rimessa in discussione per tre
+sessioni: che l'unico modo di conoscere il segreto fosse *derivarlo*. I test lo **leggono dal
+database**, dove è cifrato e a cui accedono già con credenziali piene. Costo reale: **un file**. Le
+premesse dei nostri piani sono fonti non verificate esattamente come le consegne del lab (`#149`).
+
+**Igiene di apertura**: atlante, derivati e register rimessi in pari (cronaca chiusa 27% → 22%, 212
+item archiviati). **`verify_gate` misurato**: suite API completa sul gemello **269 file / 1905 test,
+tutti verdi** — il verdetto salvato diceva `not-measured`, non «rosso» come STATE riportava.
+`apps/web` ha ora la sua **prima suite unitaria** (`vitest`, ambiente node, nessuna dipendenza nuova).
+
 ### Delta S1090 (2026-09-06) — otto programmi «aperti» che erano chiusi, e il cancello che nessuno interroga
 
 **Numeri ri-derivati dal vivo**: migrazioni su disco **378** (max `000381`) · file di test API

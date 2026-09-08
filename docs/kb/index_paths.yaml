@@ -1,42 +1,42 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-06T17:44:06Z da docs/kb/tools/build_index.py
+# generato: 2026-09-08T03:32:33Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-06T17:44:06Z"
-  total_files: 3327
+  generated_at: "2026-09-08T03:32:33Z"
+  total_files: 3364
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 37
     api-core: 33
-    api-module: 365
-    ci: 18
+    api-module: 377
+    ci: 19
     claude-config: 37
-    config: 198
+    config: 199
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 374
+    db-migration: 378
     db-other: 8
-    db-script: 50
+    db-script: 51
     db-seed: 114
-    doc-canonical: 755
+    doc-canonical: 758
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 111
+    shared-schema: 115
     showcase-source: 13
-    test: 409
+    test: 416
     ux-design-archive: 80
-    web-source: 242
+    web-source: 246
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2769
+    live: 2806
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -878,6 +878,24 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\candidate-applications\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/candidate-applications/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\candidate-applications\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/candidate-applications/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\candidate-applications\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/candidate-applications/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\candidates\repository.ts'
     root: repo
     rel: 'apps/api/src/modules/candidates/repository.ts'
@@ -1280,6 +1298,42 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\interview-feedback\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/interview-feedback/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\interview-feedback\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/interview-feedback/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\interview-feedback\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/interview-feedback/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\interviews\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/interviews/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\interviews\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/interviews/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\interviews\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/interviews/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\job-families\repository.ts'
     root: repo
     rel: 'apps/api/src/modules/job-families/repository.ts'
@@ -1295,6 +1349,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\job-families\service.ts'
     root: repo
     rel: 'apps/api/src/modules/job-families/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\job-offers\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/job-offers/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\job-offers\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/job-offers/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\job-offers\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/job-offers/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -2690,6 +2762,12 @@ files:
     category: ci
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.github\workflows\atlas-freshness.yml'
+    root: repo
+    rel: '.github/workflows/atlas-freshness.yml'
+    category: ci
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.github\workflows\build-web.yml'
     root: repo
     rel: '.github/workflows/build-web.yml'
@@ -3431,6 +3509,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-210.mts'
     root: repo
     rel: 'apps/api/scripts/prova-live-210.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-50-f3-grafo.mjs'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-50-f3-grafo.mjs'
     category: config
     status: live
     provenance: git-tracked
@@ -8486,6 +8570,30 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000378_una_banda_dimensionale_di_impresa_non_deve_poter_contenere_persone.sql'
+    root: repo
+    rel: 'db/migrations/000378_una_banda_dimensionale_di_impresa_non_deve_poter_contenere_persone.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000379_da_quali_fonti_la_piattaforma_impara_com_e_fatta_un_azienda.sql'
+    root: repo
+    rel: 'db/migrations/000379_da_quali_fonti_la_piattaforma_impara_com_e_fatta_un_azienda.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000380_una_persona_senza_secondo_fattore_deve_essere_un_numero_che_si_guarda.sql'
+    root: repo
+    rel: 'db/migrations/000380_una_persona_senza_secondo_fattore_deve_essere_un_numero_che_si_guarda.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000381_una_variante_di_fascicolo_non_deve_poter_contenere_persone.sql'
+    root: repo
+    rel: 'db/migrations/000381_una_variante_di_fascicolo_non_deve_poter_contenere_persone.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -8789,6 +8897,12 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\setup_oci_vm_database.sh'
     root: repo
     rel: 'db/scripts/setup_oci_vm_database.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\stop-deriving-totp.ts'
+    root: repo
+    rel: 'db/scripts/stop-deriving-totp.ts'
     category: db-script
     status: live
     provenance: git-tracked
@@ -9764,6 +9878,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\249-contabilita-dei-piani-e-cancello-non-interrogato.md'
+    root: repo
+    rel: '.programmi/249-contabilita-dei-piani-e-cancello-non-interrogato.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md'
     root: repo
     rel: '.programmi/50-knowledge-graph-legacy.md'
@@ -9833,6 +9953,18 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\S1090-piano-sessione.md'
     root: repo
     rel: '.programmi/S1090-piano-sessione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1091-piano-sessione.md'
+    root: repo
+    rel: '.programmi/S1091-piano-sessione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1092-mandato-p1-p3.md'
+    root: repo
+    rel: '.programmi/S1092-mandato-p1-p3.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -14972,6 +15104,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\candidate-applications.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/candidate-applications.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\candidates.ts'
     root: repo
     rel: 'packages/shared/src/schemas/candidates.ts'
@@ -15098,9 +15236,27 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\interview-feedback.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/interview-feedback.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\interviews.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/interviews.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\job-families.ts'
     root: repo
     rel: 'packages/shared/src/schemas/job-families.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\job-offers.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/job-offers.ts'
     category: shared-schema
     status: live
     provenance: git-tracked
@@ -15818,6 +15974,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\candidate-applications.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/candidate-applications.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\candidates.integration.test.ts'
     root: repo
     rel: 'apps/api/test/candidates.integration.test.ts'
@@ -16094,6 +16256,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\functional-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/functional-scope.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\gap-closure.integration.test.ts'
     root: repo
     rel: 'apps/api/test/gap-closure.integration.test.ts'
@@ -16274,6 +16442,18 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\interview-feedback.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/interview-feedback.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\interviews.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/interviews.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\istat-ateco-connector.test.ts'
     root: repo
     rel: 'apps/api/test/istat-ateco-connector.test.ts'
@@ -16289,6 +16469,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\job-families.integration.test.ts'
     root: repo
     rel: 'apps/api/test/job-families.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\job-offers.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/job-offers.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -17099,6 +17285,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\talent-review.integration.test.ts'
     root: repo
     rel: 'apps/api/test/talent-review.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\teams-functional-axis.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/teams-functional-axis.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -17972,6 +18164,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\skills-graph.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/skills-graph.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\smoke-5-personas.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/smoke-5-personas.spec.ts'
@@ -18755,6 +18953,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\analytics\skills-by-category\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/analytics/skills-by-category/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\analytics\skills-graph\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/analytics/skills-graph/page.tsx'
     category: web-source
     status: live
     provenance: git-tracked
@@ -19856,6 +20060,18 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\lib\use-agent-stream.test.ts'
+    root: repo
+    rel: 'apps/web/src/lib/use-agent-stream.test.ts'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\lib\use-agent-stream.ts'
+    root: repo
+    rel: 'apps/web/src/lib/use-agent-stream.ts'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\lib\use-inbox-stream.ts'
     root: repo
     rel: 'apps/web/src/lib/use-inbox-stream.ts'
@@ -19997,6 +20213,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tsconfig.json'
     root: repo
     rel: 'apps/web/tsconfig.json'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\vitest.config.ts'
+    root: repo
+    rel: 'apps/web/vitest.config.ts'
     category: web-source
     status: live
     provenance: git-tracked

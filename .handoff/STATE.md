@@ -48,7 +48,7 @@ Il guardiano non ha mai tagliato.
 - **`#205` F1**: serve sapere **da quali siti** la piattaforma accetta di imparare. Con una
   fonte per dominio il registro c'è ma non discrimina.
 - **`#198`** resta GATED su un fatto ri-misurato: `sys_blueprint_content_*` tutte a zero.
-- ⚠ Una chiave API è transitata nell'output di un comando in S1088: **da ruotare**.
+- ✅ **RISOLTA (Enzo, 2026-09-08 · S1093)**: la chiave API transitata nell'output di un comando in S1088 è stata **ruotata**. Nessuna azione residua.
 
 ## Verification
 

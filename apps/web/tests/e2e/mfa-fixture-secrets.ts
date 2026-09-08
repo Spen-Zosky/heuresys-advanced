@@ -21,14 +21,22 @@
  * non ha un client PostgreSQL, e aggiungerlo per una suite di browser sarebbe una dipendenza
  * nuova in cambio di nulla.
  *
- * ⚠ Quindi `totpSecretFor` **fallisce, e dice cosa fare**, invece di restituire un valore
- * che non apre più niente. Non è una rinuncia: è la scelta fra un errore che si legge e un
- * 401 al passo due che accuserebbe il login invece della fixture. E oggi non toglie nulla —
- * misurato: la suite Playwright gira contro il server reale, dove l'enforcement MFA è
- * **spento**, quindi il login si chiude al primo passo e questa funzione non viene chiamata.
- * Il giorno in cui l'enforcement si accende, la strada è già costruita e non è questa: le
- * utenze di collaudo di `#169` F2 sono **esenti** dal secondo fattore per progetto.
+ * ⚠ **Quella nota conteneva un errore, e va letta come cronaca.** Diceva: «oggi non toglie
+ * nulla — misurato: la suite gira contro il server reale, dove l'enforcement MFA è spento,
+ * quindi questa funzione non viene chiamata». La misura era giusta e la frase più larga
+ * della misura (**DIF-4**): vera in produzione, **falsa in CI**, dove
+ * `MFA_ENFORCEMENT_ENABLED` vale `true` per default e il job non lo spegne — la CI accende
+ * quel ramo **di proposito** (S983 WS-E). Costo misurato: sei setup di autenticazione rossi
+ * e l'intera suite a cascata, run `34186462524`.
+ *
+ * ⭐ S1093 — come sta adesso. Il segreto **resta casuale e non derivabile** (l'invariante di
+ * F3c è intatta), ma non è più *ignoto*: il seed di collaudo lo genera e lo deposita in
+ * `tests/.auth/totp-secrets.json` — gitignored, per-macchina, rigenerato a ogni corsa, e
+ * scritto **solo** con `NODE_ENV=test`. `totpSecretFor` legge da lì, e fallisce forte se il
+ * deposito manca.
  */
+import path from "node:path";
+import { readFileSync } from "node:fs";
 import { readMaster, derivePassword } from "../../../api/scripts/derive-access.mjs";
 
 /** Etichetta dei fattori creati dal provisioning derivato (Z-262). */
@@ -40,19 +48,52 @@ function master(): Buffer {
   return masterCache;
 }
 
+/** Il deposito che il seed di collaudo scrive (gitignored, per-macchina, rigenerato a ogni corsa).
+ *  Relativo alla cwd di Playwright (`apps/web`), come `storageStateFor` in fixtures.ts — una sola
+ *  convenzione di percorso per la stessa cartella, non due. */
+const PERCORSO_SEGRETI = path.join("tests", ".auth", "totp-secrets.json");
+
+let depositoCache: Record<string, string> | null = null;
+function deposito(): Record<string, string> {
+  if (depositoCache) return depositoCache;
+  try {
+    const grezzo = JSON.parse(readFileSync(PERCORSO_SEGRETI, "utf8")) as {
+      segreti?: Record<string, string>;
+    };
+    depositoCache = grezzo.segreti ?? {};
+  } catch {
+    depositoCache = {};
+  }
+  return depositoCache;
+}
+
 /**
- * ⛔ Il segreto TOTP non è più ottenibile da qui — vedi la nota in testa.
+ * Il segreto TOTP della persona, **letto dal deposito del collaudo** — mai derivato.
  *
- * Fallisce **forte**: un valore sbagliato produrrebbe un 401 al passo due, cioè un rosso che
- * accusa il login mentre il guasto è la fixture. Questo messaggio dice invece qual è la
- * strada, il giorno in cui qualcuno la incontrerà.
+ * ⭐ S1093 — perché questa funzione è tornata a restituire un valore. Dal 2026-09-08 (#169 F3c)
+ * lanciava sempre, sul presupposto che il ramo MFA non si percorresse mai: *«la suite gira contro
+ * il server reale, dove l'enforcement è spento»*. Vero in produzione — misurato, il login di una
+ * persona vera si chiude al primo passo — e **falso in CI**, dove `MFA_ENFORCEMENT_ENABLED` vale
+ * `true` per default (`apps/api/src/config/env.ts`) e il job non lo spegne: la CI accende quel ramo
+ * **di proposito**, per esercitarlo (S983 WS-E). Risultato misurato: sei setup di autenticazione
+ * rossi, due tentativi ciascuno, e con essi l'intera suite.
+ *
+ * L'invariante di F3c resta intatta: il segreto **non si deriva dalla chiave madre**, è casuale, e
+ * chi possiede quella chiave non lo ricostruisce. Ma casuale non vuol dire ignoto a chi lo genera:
+ * il seed di collaudo lo scrive in `tests/.auth/totp-secrets.json`, gitignored, rigenerato a ogni
+ * corsa, mai propagato, e prodotto **solo** con `NODE_ENV=test`.
+ *
+ * Se il deposito manca, si **fallisce forte** invece di indovinare: un valore sbagliato darebbe un
+ * 401 al passo due, cioè un rosso che accusa il login mentre il guasto è la fixture.
  */
 export function totpSecretFor(email: string): string {
+  const segreto = deposito()[email];
+  if (segreto) return segreto;
   throw new Error(
-    `Il segreto TOTP di ${email} non si deriva piu' (#169 F3c): in produzione e' casuale, ` +
-      `e questa suite non ha modo di leggerlo dal database. ` +
-      `Sei qui perche' l'enforcement MFA e' stato acceso: la suite deve passare dalle ` +
-      `utenze di collaudo (#169 F2), che sono esenti dal secondo fattore per progetto.`,
+    `Nessun segreto TOTP di collaudo per ${email}. La suite e' arrivata al secondo fattore, ` +
+      `quindi l'enforcement MFA e' acceso su questo ambiente (in produzione e' spento). ` +
+      `Il segreto e' casuale (#169 F3c) e non si deriva: lo deposita il seed. ` +
+      `Rimedio: NODE_ENV=test pnpm db:seed-test-admin — scrive tests/.auth/totp-secrets.json.`,
   );
 }
 

@@ -44,6 +44,7 @@ import {
 import { config as dotenvConfig } from "dotenv";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { mkdirSync, writeFileSync } from "node:fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -82,17 +83,33 @@ interface EnsureResult {
 
 /**
  * S983 WS-E (mandatory-MFA total coverage): ensure the persona carries the
- * VERIFIED e2e-fixture TOTP factor (single-source secret from
- * apps/api/test/helpers/mfa-fixture-secrets.ts; base32 stored as-is — the
- * platform stores TOTP secrets base32-plaintext, see mfa-service.ts). The
- * metadata label is BOTH the idempotency key (no unique on (user,kind)) and
- * the discriminator that shields the fixture from the suites' scoped DELETEs.
+ * VERIFIED e2e-fixture TOTP factor. The metadata label is BOTH the idempotency
+ * key (no unique on (user,kind)) and the discriminator that shields the fixture
+ * from the suites' scoped DELETEs.
+ *
+ * ⚠ La riga «base32 stored as-is — the platform stores TOTP secrets
+ * base32-plaintext» che stava qui è **scaduta** e va tolta, non tramandata:
+ * misurato il 2026-09-08, ogni segreto TOTP in produzione è lungo 93 caratteri,
+ * cioè `enc:v1:` + iv + tag + ciphertext in base64 — sono **cifrati AES-256-GCM**
+ * (QW-SEC6, `secret-crypto.ts`). Ciò che resta vero, ed è il seam che questa
+ * funzione usa, è che `decryptSecret` è *self-identifying*: un valore senza il
+ * prefisso `enc:v1:` torna **as-is**, quindi un segreto scritto qui in chiaro
+ * funziona senza toccare la cifratura. E i fattori con questa label sono esclusi
+ * dalla ri-cifratura pigra (`mfa-service.ts`, `isCommittedFixture`), quindi non
+ * cambiano sotto i piedi di chi li ha appena scritti.
+ *
+ * ⭐ #169 F3c + S1093 — il segreto è **casuale**: chi possiede la chiave madre non
+ * lo ricostruisce, ed era quello il difetto della voce. Ma casuale non vuol dire
+ * *ignoto a chi lo genera*: in un ambiente di **collaudo** la suite deve poter
+ * rispondere al secondo fattore, o smette di provare il ramo MFA che la CI accende
+ * apposta. Quindi con `imponi` la funzione **restituisce** il segreto in chiaro al
+ * chiamante, che lo depositerà dove Playwright lo legge — mai in produzione.
  */
-async function ensureTotpFactor(client: Client, userId: string, email: string): Promise<boolean> {
-  // ⭐ #169 F3c — il segreto di un fattore che NASCE QUI è casuale, non derivato né letto.
-  // Leggerlo sarebbe un circolo: il segreto vive nel fattore, e il fattore è ciò che questa
-  // funzione sta creando. L'`INSERT ... WHERE NOT EXISTS` qui sotto resta l'idempotenza —
-  // se il fattore c'è già, questo valore non viene scritto e nessuno lo usa.
+async function ensureTotpFactor(
+  client: Client,
+  userId: string,
+  imponi: boolean,
+): Promise<{ creato: boolean; segreto: string | null }> {
   const secret = segretoTotpCasuale();
   const res = await client.query(
     `INSERT INTO sys.sys_auth_mfa_factors
@@ -107,7 +124,96 @@ async function ensureTotpFactor(client: Client, userId: string, email: string): 
       )`,
     [userId, secret, E2E_FIXTURE_LABEL],
   );
-  return (res.rowCount ?? 0) > 0;
+  const creato = (res.rowCount ?? 0) > 0;
+  if (creato) return { creato, segreto: secret };
+  if (!imponi) return { creato, segreto: null };
+
+  // Il fattore c'era già e il suo segreto è ignoto — casuale quando fu scritto, e oggi
+  // cifrato at-rest. In collaudo lo si **rigenera**, perché un secondo fattore a cui
+  // nessuno sa rispondere non prova niente: manda in timeout l'autenticazione e con essa
+  // l'intera suite (misurato: 6 setup rossi × 2 tentativi, run 34186462524).
+  // La guardia che tiene questo ramo fuori dalla produzione è sul chiamante, ed è
+  // negativa per difetto.
+  await client.query(
+    `UPDATE sys.sys_auth_mfa_factors
+        SET auth_mfa_factor_secret = $2, auth_mfa_factor_verified = true
+      WHERE auth_mfa_factor_user_id = $1
+        AND auth_mfa_factor_kind = 'TOTP'
+        AND auth_mfa_factor_metadata->>'label' = $3`,
+    [userId, secret, E2E_FIXTURE_LABEL],
+  );
+  return { creato, segreto: secret };
+}
+
+/**
+ * ⭐ S1093 — LA GUARDIA. È il punto più delicato di questo script: se sbaglia, **rigenera i
+ * secondi fattori veri delle persone in produzione** e li deposita su disco.
+ *
+ * Serve che siano vere **entrambe** le condizioni, perché una sola non basta:
+ *  1. `NODE_ENV === "test"` — l'ambiente lo dichiara. Da sola è **insufficiente**: su questa
+ *     macchina il `.env` punta alla produzione via tunnel, quindi un `NODE_ENV=test` distratto
+ *     scriverebbe lì. È il caso limite che ha fatto riscrivere questa guardia.
+ *  2. il **database** si dichiara di collaudo dal proprio nome (`heuresys_ci`, o un qualunque
+ *     `*_ci` / `*_test`). La produzione è `heuresys_advanced` e non corrisponde mai.
+ *
+ * È negativa per difetto in ogni ramo cieco: `NODE_ENV` assente non è `"test"`; `POSTGRES_DB`
+ * assente non corrisponde ad alcun criterio. Nessun ramo «se non so, esporto».
+ *
+ * Se un giorno la CI rinomina il proprio database, questa guardia la fa tornare **rossa** con
+ * un messaggio esplicito invece di aprirsi: è il verso giusto in cui sbagliare.
+ */
+function eDiCollaudo(): boolean {
+  if (process.env.NODE_ENV !== "test") return false;
+  const db = process.env.POSTGRES_DB;
+  if (!db) return false;
+  const collaudo = db === "heuresys_ci" || /_(ci|test)$/.test(db);
+  if (!collaudo) {
+    // Dirlo forte: chi ha scritto NODE_ENV=test si aspetta l'export, e un rifiuto silenzioso
+    // lo manderebbe a cercare il guasto dentro Playwright invece che nella propria riga di
+    // comando. Il rifiuto è corretto; ciò che non deve essere è muto.
+    console.warn(
+      `  ⚠ NODE_ENV=test ma il database e' '${db}': NON e' un database di collaudo, ` +
+        `quindi i segreti TOTP non vengono ne' rigenerati ne' depositati (guardia S1093).`,
+    );
+  }
+  return collaudo;
+}
+
+/** Dove Playwright va a leggere i segreti del solo ambiente di collaudo.
+ *  `apps/web/tests/.auth/` è già gitignored (`apps/web/.gitignore:1`) perché ospita
+ *  gli storageState, che contengono cookie di sessione veri: è la casa giusta. */
+const PERCORSO_SEGRETI = resolve(repoRoot, "apps", "web", "tests", ".auth", "totp-secrets.json");
+
+/**
+ * Deposita i segreti TOTP dell'ambiente di collaudo dove la fixture Playwright li legge.
+ *
+ * Chiamata SOLO dietro la guardia `NODE_ENV === "test"`. Non è un canale di distribuzione:
+ * il file è per-macchina, si riscrive a ogni seed, non entra nel repository e non viaggia
+ * con `align-clones.sh`. In CI nasce e muore dentro il job.
+ */
+function depositaSegretiDiCollaudo(segreti: Record<string, string>): void {
+  const quanti = Object.keys(segreti).length;
+  if (quanti === 0) {
+    console.log("  totp-collaudo: nessun segreto da depositare");
+    return;
+  }
+  mkdirSync(dirname(PERCORSO_SEGRETI), { recursive: true });
+  writeFileSync(
+    PERCORSO_SEGRETI,
+    `${JSON.stringify(
+      {
+        avvertenza:
+          "Segreti TOTP del solo ambiente di COLLAUDO. Rigenerati a ogni seed, gitignored, " +
+          "mai propagati. Scritti solo con NODE_ENV=test (db/scripts/seed-test-admin.ts).",
+        database: process.env.POSTGRES_DB ?? null,
+        segreti,
+      },
+      null,
+      2,
+    )}\n`,
+    { encoding: "utf8", mode: 0o600 },
+  );
+  console.log(`  totp-collaudo: ${quanti} segreti depositati in apps/web/tests/.auth/`);
 }
 
 /**
@@ -214,14 +320,24 @@ async function main() {
   try {
     await client.query("BEGIN");
 
+    // ⭐ S1093 — LA GUARDIA, ed è il punto più delicato di questo script.
+    const ambienteDiCollaudo = eDiCollaudo();
+    const segretiDiCollaudo: Record<string, string> = {};
+
     const report: Array<{ email: string } & EnsureResult> = [];
     for (const email of PERSONA_EMAILS) {
       const r = await ensureAuth(client, email, derivePassword(master, email), wantsReset);
-      r.totpFactorCreated = await ensureTotpFactor(client, r.userId, email);
+      const totp = await ensureTotpFactor(client, r.userId, ambienteDiCollaudo);
+      r.totpFactorCreated = totp.creato;
+      if (ambienteDiCollaudo && totp.segreto) segretiDiCollaudo[email] = totp.segreto;
       report.push({ email, ...r });
     }
 
     await client.query("COMMIT");
+
+    // Deposito DOPO il COMMIT: un file che annuncia segreti che una ROLLBACK ha appena
+    // disfatto sarebbe peggio di nessun file — la suite li userebbe e accuserebbe il login.
+    if (ambienteDiCollaudo) depositaSegretiDiCollaudo(segretiDiCollaudo);
 
     console.log("─".repeat(76));
     console.log("E2E/integration persona auth seeded (real RTL_BANK users):");

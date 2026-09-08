@@ -453,7 +453,46 @@ perdeva). Chi userà quale via è parte del lavoro.
   ▸ Resta vero il rilievo qui sotto sul **componente** e sui dati: portare la suite su
   identità di servizio, se un giorno servisse, resta il lavoro che era. Semplicemente non
   serve **per chiudere questa voce**.
-- [ ] **F4 La prova che deve poter fallire** — con la chiave madre in mano, **completare** un accesso come amministratore deve risultare **impossibile**, e la suite deve continuare a girare. Le due cose insieme, o la voce non è chiusa: passare la prima rompendo la seconda è il modo ovvio di barare. **fatto =** tentativo eseguito e fallito con evidenza, suite verde
+- [~] **F4 La prova che deve poter fallire** — **MISURATA S1093 (2026-09-08): primo corno SUPERATO, secondo corno VIOLATO in produzione, e il blocco e' quantificato.**
+
+  Lo strumento e' `pnpm db:verify-separazione-totp` (`db/scripts/verify-separazione-totp.ts`),
+  uscite `0` separati / `1` violata / `2` NON MISURABILE. Porta una **controprova interna**:
+  prima di dichiarare qualunque zero verifica di saper riconoscere una corrispondenza quando
+  c'e', perche' uno zero e un confronto rotto si assomigliano moltissimo.
+
+  🔬 **Primo corno — SUPERATO** (produzione, 2026-09-08):
+  ```
+  controprova ..................... superata (il confronto vede, e non vede troppo)
+  fattori TOTP esaminati .......... 159
+  di cui cifrati a riposo ......... 159
+  NON leggibili (non misurati) .... 0
+  ANCORA DERIVABILI dalla chiave .. 0
+  SEPARATI: nessun secondo fattore si ottiene dalla chiave madre
+  ```
+
+  ⚠ **Il conteggio che c'era NON diceva questo, e sembrava dirlo.** `stop-deriving-totp --dry-run`
+  stampa «DA RENDERE CASUALI: 159», che conta i fattori con l'etichetta `derived-access` — cioe'
+  la **portata**, non la proprieta'. Su un database gia' bonificato stampa lo stesso numero: letto
+  come misura avrebbe fatto concludere che F3c non fosse mai stata applicata.
+
+  🔴 **Secondo corno — VIOLATO in produzione**, misurato con un login vero:
+  con la sola chiave madre si completa un accesso **in un passo** come
+  `USER, PLATFORM_ADMIN, MANAGER` — **224 permessi**. Non e' un difetto della separazione dei
+  segreti, che regge: e' che **l'enforcement MFA e' spento** su quell'ambiente, quindi la password
+  derivata basta da sola.
+
+  ⛔ **E accenderlo oggi non si puo', ed e' un numero, non un'opinione**: **159 utenti su 164
+  attivi** hanno un fattore TOTP verificato il cui segreto e' **casuale e non e' mai stato
+  consegnato a nessuno** (e' il senso stesso di F3c). Accendere l'enforcement chiuderebbe fuori
+  il **97%** delle persone. La precondizione mancante e' un **percorso di ri-enrollment**, che e'
+  lavoro di prodotto e non appartiene a questa voce.
+
+  ➡ **Stato onesto della voce**: la proprieta' che `#169` esisteva per ottenere — password e
+  secondo fattore non nascono piu' dalla stessa chiave — **e' raggiunta e ora e' misurabile in
+  permanenza**. Cio' che manca non e' dentro `#169`: e' la decisione sull'enforcement, che questa
+  sessione ha dotato del numero che le serviva.
+
+- [ ] **F4 (formulazione originale, tenuta per confronto)** — con la chiave madre in mano, **completare** un accesso come amministratore deve risultare **impossibile**, e la suite deve continuare a girare. Le due cose insieme, o la voce non è chiusa: passare la prima rompendo la seconda è il modo ovvio di barare. **fatto =** tentativo eseguito e fallito con evidenza, suite verde
 
 ## Chiuso quando
 

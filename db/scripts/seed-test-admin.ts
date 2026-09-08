@@ -45,6 +45,12 @@ import { config as dotenvConfig } from "dotenv";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mkdirSync, writeFileSync } from "node:fs";
+// ⭐ S1093 — il segreto si scrive CIFRATO, come lo scriverebbe il repository. Scriverlo in
+// chiaro «funziona» (decryptSecret e' self-identifying e lo rileggerebbe as-is) ma accende la
+// sentinella `v_mfa_secrets_in_cleartext`, che pretende zero: l'ha vista rossa la prova
+// generale prima che la CI potesse vederla. Un seed non e' esente dagli invarianti solo
+// perche' e' uno script.
+import { encryptSecret } from "../../apps/api/src/modules/auth/secret-crypto.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -91,12 +97,17 @@ interface EnsureResult {
  * base32-plaintext» che stava qui è **scaduta** e va tolta, non tramandata:
  * misurato il 2026-09-08, ogni segreto TOTP in produzione è lungo 93 caratteri,
  * cioè `enc:v1:` + iv + tag + ciphertext in base64 — sono **cifrati AES-256-GCM**
- * (QW-SEC6, `secret-crypto.ts`). Ciò che resta vero, ed è il seam che questa
- * funzione usa, è che `decryptSecret` è *self-identifying*: un valore senza il
- * prefisso `enc:v1:` torna **as-is**, quindi un segreto scritto qui in chiaro
- * funziona senza toccare la cifratura. E i fattori con questa label sono esclusi
- * dalla ri-cifratura pigra (`mfa-service.ts`, `isCommittedFixture`), quindi non
- * cambiano sotto i piedi di chi li ha appena scritti.
+ * (QW-SEC6, `secret-crypto.ts`), quindi **questa funzione li scrive cifrati**, con
+ * la stessa `encryptSecret` del repository — una sola implementazione, non una copia.
+ *
+ * ⚠ Scriverli in chiaro *funzionerebbe*, ed è la prima cosa che ho fatto: `decryptSecret`
+ * è self-identifying e un valore senza il prefisso `enc:v1:` torna as-is. Ma «funziona»
+ * non è «è corretto»: accende la sentinella `v_mfa_secrets_in_cleartext`, che pretende
+ * zero. L'ha vista rossa la prova generale (`ci-rehearsal.sh`, 7 righe) prima che potesse
+ * vederla la CI. Un seed non è esente dagli invarianti perché è uno script.
+ *
+ * I fattori con questa label restano esclusi dalla ri-cifratura pigra
+ * (`mfa-service.ts`, `isCommittedFixture`): non cambiano sotto i piedi di chi li scrive.
  *
  * ⭐ #169 F3c + S1093 — il segreto è **casuale**: chi possiede la chiave madre non
  * lo ricostruisce, ed era quello il difetto della voce. Ma casuale non vuol dire
@@ -122,7 +133,7 @@ async function ensureTotpFactor(
            AND f.auth_mfa_factor_kind = 'TOTP'
            AND f.auth_mfa_factor_metadata->>'label' = $3
       )`,
-    [userId, secret, E2E_FIXTURE_LABEL],
+    [userId, encryptSecret(secret), E2E_FIXTURE_LABEL],
   );
   const creato = (res.rowCount ?? 0) > 0;
   if (creato) return { creato, segreto: secret };
@@ -140,7 +151,7 @@ async function ensureTotpFactor(
       WHERE auth_mfa_factor_user_id = $1
         AND auth_mfa_factor_kind = 'TOTP'
         AND auth_mfa_factor_metadata->>'label' = $3`,
-    [userId, secret, E2E_FIXTURE_LABEL],
+    [userId, encryptSecret(secret), E2E_FIXTURE_LABEL],
   );
   return { creato, segreto: secret };
 }

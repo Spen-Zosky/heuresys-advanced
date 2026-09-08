@@ -34,13 +34,13 @@ in produzione) · `#79` **F3** (cancello verde) · la chiave API di S1088 è **r
 
 ## Top priorities
 
-1. **La CI Playwright non è ancora verde**, ma l'errore è **cambiato** e la diagnosi è
-   **strumentata, non da rifare**: il codice ora viene fornito e il server risponde «Codice
-   MFA non valido o scaduto». Il seed stampa l'impronta di ciò che **deposita**, la fixture
-   quella di ciò che **usa**. Al prossimo giro basta confrontare due numeri di otto
-   caratteri: **uguali** ⇒ il guasto è nel server (chiave di cifratura sul runner, orologio);
-   **diversi** ⇒ qualcosa riscrive il fattore dopo il seed. ⚠ `/etc/heuresys-runner-crypto.env`
-   esiste sul runner ma è leggibile solo da root: **non confermato e non escluso**.
+1. ✅ **La CI Playwright è tornata VERDE** (`success` su `084dcb30`, run `34239606307`). Ha
+   chiuso il cerchio la **cifratura** del segreto — la stessa che la prova generale aveva
+   preteso per la sentinella dei segreti in chiaro. Le due impronte messe lì per
+   *diagnosticare* hanno finito per **confermare**: depositata `ede4d885`, usata `ede4d885`.
+   ⚠ **Resta non spiegato** *perché* il segreto in chiaro venisse rifiutato dal login, dato
+   che `decryptSecret` è self-identifying e avrebbe dovuto rileggerlo as-is. Cifrarlo ha reso
+   verde la suite: quello è misurato. Il meccanismo no — e non si inventa.
 2. **`#54` F4** — frontend `/recruiting` + Kanban + E2E. ⚠ Misurato: `sys_candidates` ha
    **1 riga**, non zero — lo stato precedente diceva le sette tabelle «vuote».
 3. **`#143` F4/F5** — API progetti/squadre col confine I18.

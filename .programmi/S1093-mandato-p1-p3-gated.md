@@ -41,7 +41,7 @@ Stato: `da-fare` · `in-corso` · `FATTO` · `non-fatta (ragione)`
 
 | id | cosa | chi | cosa significa fatto | stato |
 |---|---|---|---|---|
-| **P0** | CI Playwright smoke torna verde | claude | `gh run list` su HEAD: playwright-smoke = success | in-corso (corsa in volo) |
+| **P0** | CI Playwright smoke torna verde | claude | `gh run list`: playwright-smoke = success | **FATTO** — `success` su `084dcb30`, run `34239606307`. E le impronte lo confermano: depositata `ede4d885`, usata `ede4d885` |
 | P0b | Typecheck + Lint concludono su HEAD (erano `cancelled`, cioè mai misurati) | claude | entrambe `success` sullo stesso sha | **FATTO** — verdi su `a9bc5921`, insieme a Test/Build/CodeQL/Shell |
 | A1 | `#169` F4 — la prova formale | claude | prova che ri-deriva **tutti** i segreti e mostra 0 corrispondenze | **FATTO** — `pnpm db:verify-separazione-totp`: 159 esaminati, **0 derivabili**, controprova superata. Secondo corno **VIOLATO** in produzione e quantificato (159/164 chiusi fuori se si accende l'enforcement) |
 | A2 | `#214` F6 — un perimetro | claude | riga in `agent-perimetri.json` + dimostrazione live | **FATTO** — `blueprint-families` undicesimo, mig `000382` **in produzione** (19 s sulla VM), sentinella a **0**, `db_health` tutto nei limiti |
@@ -179,7 +179,7 @@ uno script.
 
 ## CHIUSURA — bilancio letto dalla tabella, non dalla memoria (R24 §6)
 
-**CICLO NON CHIUSO — 5 voci su 9 fatte.** Non è una sorpresa e non è una pendenza nascosta:
+**CICLO NON CHIUSO — 6 voci su 9 fatte** (P0 è rientrato verde dopo la stesura di questo bilancio). Non è una sorpresa e non è una pendenza nascosta:
 il confine era **dichiarato nella prima riga di questo file**, prima di cominciare, e il criterio
 di taglio è quello che Enzo ha nominato — il guardiano della capienza.
 
@@ -188,7 +188,7 @@ di taglio è quello che Enzo ha nominato — il guardiano della capienza.
 | P0b · A1 (`#169` F4) · A2 (`#214` F6) · A3a (`#79` F3) · la chiave API ruotata | A3b `#54` F4, A4 `#143`, A5 `#159` — **voci da più sessioni ciascuna** per stima del register stesso |
 | | A6 `#149` F4 — non c'era una consegna da verificare |
 | | A7 i gated — la ricognizione delegata non ha finito in tempo, e **nessun gate è stato dichiarato senza misura** |
-| | **P0** la CI — l'errore è cambiato, la causa prima è rimossa, la diagnosi è **strumentata** |
+| **P0 la CI è VERDE** — chiusa dopo la chiusura del piano | |
 
 **Misure di chiusura**: contesto **39%** · finestra 5h **66%** — il guardiano non ha mai tagliato,
 il margine sì.
@@ -204,3 +204,28 @@ Si presentano qui e **non entrano in «cosa resta»**. Se le vuoi, entrano nel p
 3. **`stop-deriving-totp` non è idempotente per proprietà.** Rieseguito su un database già
    bonificato rigenererebbe tutti e 159 i segreti, perché il suo criterio è l'etichetta e non
    la derivabilità. Ora esiste lo strumento che misura la differenza.
+
+
+---
+
+## ⭐ P0 è VERDE — e la strumentazione ha confermato la catena invece di servire a diagnosticarla
+
+`Playwright smoke: success` su `084dcb30` (run `34239606307`). La correzione che ha chiuso il
+cerchio è quella del commit `9c01e3e3`: **scrivere il segreto cifrato** invece che in chiaro — la
+stessa che la prova generale aveva preteso per la sentinella `v_mfa_secrets_in_cleartext`, e che
+si è rivelata necessaria anche perché il login lo accettasse.
+
+Le due impronte, che erano state messe lì per *diagnosticare*, hanno finito per **confermare**:
+
+```
+seed     impronta enzo.spenuso@heuresys.com          ede4d885
+fixture  [mfa-fixture] enzo.spenuso@heuresys.com: segreto dal deposito, impronta ede4d885
+seed     impronta federica.marchetti@rtl-bank.org    cd1c13ed
+fixture  [mfa-fixture] federica.marchetti@rtl-bank.org: ... impronta cd1c13ed
+```
+
+⚠ **Ciò che NON dichiaro**: non ho la spiegazione meccanica di *perché* il segreto in chiaro
+venisse rifiutato dal login, dato che `decryptSecret` è self-identifying e avrebbe dovuto
+rileggerlo as-is. So che cifrarlo ha reso verde la suite, e questo è un fatto misurato; il
+*perché* resta **non spiegato**, e scrivere una causa plausibile al posto di una misurata sarebbe
+esattamente il difetto che questa sessione ha corretto due volte.

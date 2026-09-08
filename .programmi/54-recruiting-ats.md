@@ -53,8 +53,60 @@
   registro: qui una sorgente legacy **esiste ed è abbondante**, e non si importa lo stesso.
   ⚠ Entrambe si vedono solo alla **seconda passata** — girano prima della `000364` e alla prima
   non possono vedere tabelle che ancora non esistono.
-- [ ] **F3 — API** — moduli secondo il pattern in 7 passi, un commit per slice · budget ~250k
-      ▸ **5 fette su 7 fatte**: `job-requisitions` (4 rotte, 10 test), `job-postings`
+- [x] **F3 — API — FATTA 2026-09-08 (S1092), 7 fette su 7.** Le ultime due in questa
+      sessione: `interview-feedback` (4 rotte, 9 test) e `job-offers` (4 rotte, 11 test),
+      entrambe verdi **sul gemello** e sondate col sabotaggio.
+
+      ### La sesta fetta (S1092) — due scavalchi, non uno
+
+      `interview-feedback` è la prima superficie del ciclo con **due** chiavi esterne da
+      presidiare: il colloquio *e* l'intervistatore. `sys_users` è una tabella sola per
+      tutte le aziende, quindi «valutazione nostra, su un colloquio nostro, firmata da un
+      dipendente di un'altra azienda» è una riga valida per PostgreSQL. Sondato: sabotato
+      quel controllo, cade **esattamente** «⭐ RIFIUTA un INTERVISTATORE di un altro
+      tenant», 1 su 9. Gli altri otto restano verdi.
+
+      Scelte dichiarate: `interviewerUserId` si **dichiara**, non si deduce dall'attore —
+      chi conduce la selezione registra anche le valutazioni di un panel a cui non ha
+      partecipato, e su una decisione di assunzione l'attribuzione è la sostanza; la
+      raccomandazione ha un default e il punteggio no; nessuna DELETE, perché una
+      valutazione è **il fatto che una persona si è espressa**.
+
+      ### La settima fetta (S1092) — e la domanda che la `000364` aveva lasciato aperta
+
+      ⭐ **Sciolta.** Il commento di `sys_job_offers` diceva che le regole di mascheramento
+      andavano *decise* qui e non ereditate per analogia. Decisione: **la retribuzione di
+      un'offerta si maschera come quella di un dipendente** — non per analogia, ma perché
+      la ragione di ADR-0032 si applica identica. `PLATFORM_ADMIN` è un mandato **tecnico**,
+      non HR, e chi diagnostica un sistema non ha ragione di conoscere le proposte
+      economiche fatte alle persone. Che la persona sia dentro o fuori l'organizzazione
+      cambia il **soggetto**, non il mandato di chi guarda.
+
+      Si riusa `lib/scope/mask.ts`, non lo si riscrive: la riga resta intera, sparisce il
+      solo importo e l'assenza si **dichiara** in `masked`. `subjectUserId` è `null` perché
+      un candidato non è un utente, e questo spegne da sé l'eccezione I17. Sondato:
+      neutralizzata la maschera cade 1 test su 11, ed è quello del platform; il contro-caso
+      HR resta verde — senza di lui il primo proverebbe solo che *qualcosa* manca, non che
+      manca per la ragione giusta (I20).
+
+      Tre presidi che nessun vincolo coglierebbe: **una** offerta aperta per candidatura
+      («aperta» dipende dallo stato, quindi nessun vincolo potrebbe dirlo) · da uno stato
+      terminale non si riparte (il database guarda una riga, non la sua storia) · una
+      risposta pretende un'offerta spedita.
+
+      🔬 **Un difetto trovato eseguendo**: la seconda candidatura di prova riusava lo stesso
+      candidato sullo stesso annuncio e `sys_candidate_applications_unique` l'ha fermata. Il
+      vincolo ha ragione — una persona si candida a un annuncio una volta sola — quindi ho
+      cambiato **il test**, non il modello.
+
+      ⚠ **Una misura d'ambiente che vale oltre questa voce**: la stessa fetta costa **11 s
+      sul gemello** e 88-110 s via tunnel, con il `beforeAll` che supera l'hookTimeout in
+      modo **intermittente**. Un test che sembra fragile può essere un test eseguito nel
+      posto sbagliato.
+
+      ▸ *Storia delle prime cinque fette*: `job-requisitions`, `job-postings`, `candidates`
+      (S1087, 2026-09-05), `candidate-applications` e `interviews` (S1091, 2026-09-07).
+      ▸ **5 fette su 7 fatte** (stato al 2026-09-07): `job-requisitions` (4 rotte, 10 test), `job-postings`
       (4 rotte, 8 test), `candidates` (4 rotte, 9 test) — S1087, 2026-09-05 — piu'
       **`candidate-applications` (4 rotte, 9 test)** e **`interviews` (4 rotte, 9 test)**,
       entrambe S1091, 2026-09-07. Restano **feedback** e **offers**.

@@ -59,6 +59,34 @@ arriva», mai «quella ingerita che qualcuno cita». Misurato ora il secondo ram
 del lab sono citati dal register come fonte eseguibile e nessuno porta un segno di verifica**.
 È DIF-4 applicata al presidio che esiste per intercettare DIF-4.
 
+## ⭐ Le quattro PR Dependabot — risolte, e nessuna era rotta dai pacchetti
+
+| PR | causa vera, misurata | stato |
+|---|---|---|
+| `#83` server 13→14 | `AuthenticatorTransportFuture` **ritirato in v14** e non elencato fra i breaking change dichiarati | ✅ corretto su `main`: `AuthenticatorTransport` è esportato da **entrambe** le versioni (letto dai `.d.ts`, non dal changelog), quindi il codice è compatibile prima e dopo il bump |
+| `#84` browser 13→14 | i `CANCELLED` **non erano fallimenti**: la cache di setup-node su `oci-vm` è arrivata a **4,28 GB**, il `tar` durava 7 min e il `timeout-minutes: 10` uccideva il job **dopo** che tutti gli step erano verdi (upload morto al 98,4%) | ✅ tolta `cache: pnpm` dai **soli tre** workflow su `oci-vm`; su runner persistente non serve, e resta dov'è utile (`showcase.yml`, effimero) |
+| `#85` vitest 4→5 | rossi del **commit di base**, non del bump; nessun breaking change di vitest 5 tocca il repo | ⏳ serve `@dependabot rebase` |
+| `#86` gruppo 15 minor/patch | idem — le due derive già corrette su `main` | ⏳ rebase **chiesto** |
+
+⚠ **E indagando ho trovato un difetto mio**: avevo aperto `blueprint-families` scrivendolo in
+`agent-perimetri.json` **senza rigenerare** `agent-operations.json` (11 decisi contro 10 generati).
+`main` era rosso per causa mia. Corretto, e il file ora **instrada** il test che lo sorveglia —
+prima non instradava nulla.
+
+## ⛔ Due cose che restano a Enzo
+
+1. **La memoria di questa macchina è satura**: 0,9 GB liberi su 15,9, con **29 processi `node`
+   orfani per 1,48 GB**. Ha ucciso la verifica **tre volte** e persino i cicli di attesa. La suite
+   `test-api` **non è eseguibile qui**: non è un verde, è **NON MISURABILE**. Misura delegata alla
+   CI (commit `620d8691`). ▸ Non chiudo i processi perché è un divieto esplicito: serve un tuo sì.
+2. ⚠⚠ **Il cancello si dichiara verde su contenuto che non ha misurato.** Il router guarda le
+   modifiche **non committate**: dopo un `git commit` l'obbligo di verifica svanisce, e
+   `verify_gate check` risponde «VERDE — nessuna modifica che richieda verifica» mentre `test-api`
+   non è mai girata. Il codice lo dichiara voluto — «il contenuto è lo stesso» — ma quella frase
+   regge solo **se** il contenuto è stato verificato prima del commit. Inoltre, quando il lucchetto
+   blocca una suite già in corso, `run` **esce 0**. Non l'ho sfruttato: ho dichiarato ogni volta
+   cosa non era misurato.
+
 ## Open questions
 
 - ⏳ **SOSPESA per decisione di Enzo (2026-09-08)**: dove custodire la chiave del collaudo.

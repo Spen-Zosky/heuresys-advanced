@@ -122,7 +122,56 @@ progetto**, mai i loro dati personali (è già I18).
   `isInFunctionalScope`/`isFunctionalLeader`, oggi codice morto.
   Lo `scopo` dei 26 progetti migrati resta **vuoto**: è un dato che nessuno ha mai scritto, e
   riempirlo col nome della squadra sarebbe fingere di averlo.
-- [ ] **F3 — Asse funzionale vivo** — dare consumatori reali a `isInFunctionalScope`/`isFunctionalLeader`, oggi codice morto; l'autorità del capo progetto è **sul lavoro**, non sulle persone · budget ~250k
+- [x] **F3 — Asse funzionale vivo — CHIUSA 2026-09-08 (S1092).** Le due funzioni hanno
+      consumatori reali, e cercarli ha scoperto un difetto.
+
+      ### ⭐ `isFunctionalLeader` — il conteggio non distingueva due cose diverse
+
+      `resolveActivityScope` sceglieva fra `functional` e `self` con `scope.length > 1`. Ma
+      chi guida una squadra **senza membri attivi** ha una lista lunga uno — se stesso —
+      esattamente come chi non guida niente. Il giornale degli accessi registrava `self`
+      per una persona che un ambito funzionale ce l'ha: falso, e falso proprio dove si va a
+      leggere chi era autorizzato da cosa. È la distinzione che il commento della funzione
+      dichiara di servire, e che non aveva chiamanti. È anche la simmetria mancante con
+      l'asse organizzativo, dove `isManagerial` è consultato **prima** di misurare il
+      sotto-albero.
+
+      ⚠ L'ambito **non si allarga**: la lista resta quella persona. Cambia l'asse che
+      autorizza, quindi cambia solo l'audit — verificato che i due soli consumatori
+      (`approvals`, `teams`) guardano `all`/`tenant` e vedono lo stesso esito.
+
+      ⚠ **Il caso non esiste in produzione** (misurato: zero capi con sole squadre vuote),
+      quindi il test lo **costruisce** — che è diverso dall'inventarne uno impossibile: una
+      squadra appena creata non ha ancora membri.
+
+      🔬 E la fixture ha trovato un difetto suo: i casi del file condividono la transazione,
+      quindi finché la squadra esiste antonio **è** un capo, e questo rendeva `functional`
+      anche il test che lo vuole `self`. Prima corsa 1 fallito su 44, e a fallire era il
+      test giusto. La squadra si toglie in un `finally`, e il test verifica in chiusura che
+      lo stato di partenza sia tornato.
+
+      ### ⭐ `isInFunctionalScope` — il gate per-record delle approvazioni
+
+      Il dettaglio di una richiesta materializzava **l'intero elenco** delle persone in
+      ambito funzionale per giudicare **un** record. Per un record solo la domanda non è
+      «chi è nel mio ambito», è «questa persona ci sta?» — la firma della funzione.
+
+      La regola resta identica al frammento SQL che sostituisce, e va letta per intero: si
+      vede una richiesta se il suo autore è nel proprio ambito **oppure** se si è
+      approvatore di uno dei suoi passi. Senza la seconda metà, chi deve decidere non
+      aprirebbe ciò su cui deve decidere. Un autore `null` non è nell'ambito di nessuno,
+      come `= ANY(array)` non ha mai fatto passare un `NULL`: ora si legge invece di doverlo
+      dedurre.
+
+      **Sondati entrambi, uno per volta**: neutralizzato il gate → cade «an out-of-scope
+      request cannot be fetched by id (404, no existence leak)», 1 su 5; neutralizzato il
+      ramo del capo → cade «⭐ un capo con una squadra VUOTA risolve a functional», 1 su 7.
+      Ripristinati: **44/44 verdi** su quattro file, sul gemello.
+
+      ▸ *Storia*: i passi precedenti di questa fase sono qui sotto (S1091 — la prova delle
+      cinque proprietà, e il reperto di `teams` sull'asse sbagliato).
+
+- [ ] ~~**F3 — Asse funzionale vivo**~~ *(intestazione storica, tenuta per i passi sotto)*
 
   ### 🟡 S1091 (2026-09-07) — il primo passo di F3, quello che il piano stesso prescriveva
 

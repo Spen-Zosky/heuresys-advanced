@@ -114,6 +114,67 @@ describe("ADR-0027 F4 — functional (team/process) axis", () => {
   });
 
   /**
+   * ⭐ #143 F3 — **un capo la cui squadra è vuota resta un capo.**
+   *
+   * È il caso che il conteggio da solo non sa distinguere: chi guida una squadra senza
+   * membri attivi ha una lista lunga uno — se stesso — esattamente come chi non guida
+   * niente. Prima di questo lavoro `resolveActivityScope` decideva con `length > 1`, e
+   * registrava `self` nel giornale degli accessi: cioè «non ha un ambito funzionale», che
+   * di quella persona è falso.
+   *
+   * ⚠ **Misurato prima di scrivere il test**: in produzione, oggi, di capi così non ce n'è
+   * nessuno — quindi il caso si costruisce, e la fixture vive e muore dentro la transazione
+   * del file (D-52). Costruire un caso assente è diverso dall'inventarne uno impossibile:
+   * una squadra appena creata non ha ancora membri, ed è la condizione normale del giorno
+   * in cui nasce.
+   *
+   * ⚠ E l'ambito NON si allarga: la lista resta lui solo. Cambia l'asse che autorizza —
+   * il che si vede dal `kind`, e si verifica qui che entrambe le cose siano vere insieme.
+   */
+  it("⭐ un capo con una squadra VUOTA risolve a `functional`, non a `self`", async () => {
+    // Precondizione: antonio non guida niente. Se un giorno non fosse più vero, il test
+    // misurerebbe un caso già concesso invece di quello che vuole provare.
+    expect(
+      await isFunctionalLeader(pool, ids.antonio),
+      "antonio guida gia' qualcosa: la fixture non misurerebbe piu' il caso della squadra vuota",
+    ).toBe(false);
+    const prima = await resolveActivityScope(pool, actor(ids.antonio, ["USER"]));
+    expect(prima.kind).toBe("self");
+
+    const squadraVuota = await pool.query<{ team_id: string }>(
+      `INSERT INTO sys.sys_teams
+         (team_tenant_id, team_code, team_name, team_lead_user_id, team_is_active)
+       VALUES ($1, $2, $3, $4, true)
+       RETURNING team_id`,
+      [rtlTenantId, `IT-F3-VUOTA-${Date.now()}`, "Squadra appena nata, senza membri", ids.antonio],
+    );
+    const teamId = squadraVuota.rows[0]?.team_id;
+    expect(teamId).toBeDefined();
+
+    // ⚠ La fixture si toglie DENTRO il test, non in `afterAll`: i casi di questo file
+    // condividono la transazione, e finché la squadra esiste antonio È un capo — il che
+    // rende `functional` anche il test che lo vuole `self`. Misurato: senza questo
+    // `finally` la corsa esce 1 fallito su 44, e a fallire è il test giusto.
+    try {
+      // Ora è un capo, e il conteggio non se ne accorgerebbe: la sua lista è ancora [lui].
+      expect(await isFunctionalLeader(pool, ids.antonio)).toBe(true);
+      expect(await functionalScopeUserIds(pool, ids.antonio)).toEqual([ids.antonio]);
+
+      const dopo = await resolveActivityScope(pool, actor(ids.antonio, ["USER"]));
+      expect(dopo.kind, "un capo senza membri e' comunque autorizzato dall'asse funzionale").toBe(
+        "functional",
+      );
+      // L'ambito non si è allargato di una persona: è cambiato l'asse, non la portata.
+      if (dopo.kind === "functional") expect(dopo.userIdAllowList).toEqual([ids.antonio]);
+    } finally {
+      await pool.query(`DELETE FROM sys.sys_teams WHERE team_id = $1`, [teamId]);
+    }
+
+    // E lo stato di partenza è ripristinato: il file può proseguire senza sapere di questo test.
+    expect(await isFunctionalLeader(pool, ids.antonio)).toBe(false);
+  });
+
+  /**
    * THE CARDINAL RULE (I18), asserted on the real population rather than a contrived pair:
    * for every user who is in paolo's functional scope but outside his org sub-tree,
    * activities must be granted and sensitive data denied. If the two axes were ever collapsed

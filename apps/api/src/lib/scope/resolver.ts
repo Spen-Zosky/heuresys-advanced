@@ -16,7 +16,7 @@ import type { ActorContext } from "../actor.js";
 import type { RoleCode } from "../../config/constants.js";
 import { ForbiddenError } from "../../errors/index.js";
 import { orgSubtreeUserIds, isInOrgSubtree, isOrgUnitManager, type DbConnector } from "./org.js";
-import { functionalScopeUserIds } from "./functional.js";
+import { functionalScopeUserIds, isFunctionalLeader } from "./functional.js";
 import { recordScopeAccess, type ScopeAxis } from "./audit.js";
 
 /**
@@ -156,6 +156,28 @@ export async function resolveActivityScope(
     audit("functional", tenantId);
     return { kind: "functional", tenantId, userIdAllowList: scope };
   }
+
+  // ⭐ #143 F3 — un capo le cui squadre sono OGGI VUOTE resta un capo.
+  //
+  // Il conteggio da solo non li distingue: chi guida una squadra senza membri attivi ha
+  // una lista lunga uno — se stesso — esattamente come chi non guida niente. `length > 1`
+  // li confonderebbe, e il registro degli accessi direbbe `self`, cioè «non ha un ambito
+  // funzionale»: falso, e falso proprio nel posto dove si va a leggere chi era autorizzato
+  // da cosa. È la distinzione che `isFunctionalLeader` dichiara di servire — «tell "has no
+  // functional scope beyond self" apart from "leads things but they are empty"» — e fino a
+  // qui non aveva un chiamante.
+  //
+  // ⚠ L'ambito NON si allarga: la lista resta quella, cioè se stesso. Cambia l'ASSE che
+  // autorizza, e cambia solo l'audit — i due consumatori di questo valore (`approvals`,
+  // `teams`) guardano `all`/`tenant` e vedono lo stesso identico esito.
+  //
+  // È anche la simmetria che mancava con l'asse organizzativo, dove `isManagerial` viene
+  // consultato PRIMA di misurare il sotto-albero.
+  if (await isFunctionalLeader(q, actor.userId)) {
+    audit("functional", tenantId);
+    return { kind: "functional", tenantId, userIdAllowList: scope };
+  }
+
   audit("self", tenantId);
   return { kind: "self", tenantId, userIdAllowList: [actor.userId] };
 }

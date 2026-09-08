@@ -38,6 +38,7 @@ import type {
 import * as repo from "./repository.js";
 import { getApplyEffect } from "./effects/index.js";
 import { resolveActivityScope } from "../../lib/scope/resolver.js";
+import { isInFunctionalScope } from "../../lib/scope/functional.js";
 
 export type { ActorContext };
 
@@ -222,9 +223,38 @@ export const approvalService = {
     return { items: items.map(toListItem), total: items.length };
   },
 
+  /**
+   * ⭐ #143 F3 — il gate qui è PER-RECORD, non una lista.
+   *
+   * La lista (`buildReadScope`) materializza tutte le persone del proprio ambito funzionale
+   * e le passa a SQL come array. Per **un solo** record quella forma dice la cosa giusta nel
+   * modo sbagliato: la domanda non è «chi è nel mio ambito», è «questa persona ci sta?». È
+   * la firma di `isInFunctionalScope`, che si dichiara «boolean form of
+   * functionalScopeUserIds for per-record gates» e fino a qui non aveva un chiamante.
+   *
+   * ⚠ La regola resta **identica** a quella del frammento SQL che sostituisce, e va letta
+   * per intero: si vede una richiesta se il suo autore è nel proprio ambito funzionale
+   * **oppure** se si è approvatore di uno dei suoi passi. La seconda metà non è un di più —
+   * senza, chi deve decidere non aprirebbe ciò su cui deve decidere.
+   *
+   * ⚠ E un autore `null` non è nell'ambito di nessuno: `created_by = ANY(array)` in SQL non
+   * ha mai fatto passare un `NULL`, e qui la stessa cosa si legge invece di doverla dedurre
+   * dalla semantica dei tre valori.
+   */
   async getRequest(a: ActorContext, id: string): Promise<ApprovalRequestDetail> {
-    const detail = await repo.findRequestDetail(pool, await buildReadScope(a), id);
+    const detail = await repo.findRequestDetail(pool, buildScope(a), id);
     if (!detail) throw new NotFoundError("Approval request");
+
+    const scope = await resolveActivityScope(pool, a);
+    if (scope.kind !== "all" && scope.kind !== "tenant") {
+      const autore = detail.request.createdBy;
+      const decidoIo = detail.steps.some((s) => s.approverUserId === a.userId);
+      const nelMioAmbito =
+        autore !== null && (await isInFunctionalScope(pool, a.userId, autore));
+      // Un record fuori ambito non si distingue da uno che non esiste: 404, non 403.
+      if (!nelMioAmbito && !decidoIo) throw new NotFoundError("Approval request");
+    }
+
     return {
       ...toRequest(detail.request),
       createdByEmail: detail.createdByEmail,

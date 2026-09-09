@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-09T13:32:58Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3371**
+**Generato**: 2026-09-09T17:28:04Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3384**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -10,7 +10,7 @@
 |---|---|
 | ADR | 37 |
 | api-core | 33 |
-| api-module | 377 |
+| api-module | 380 |
 | ci | 19 |
 | claude-config | 37 |
 | config | 200 |
@@ -18,22 +18,22 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 379 |
+| db-migration | 382 |
 | db-other | 8 |
-| db-script | 52 |
+| db-script | 53 |
 | db-seed | 114 |
-| doc-canonical | 762 |
+| doc-canonical | 763 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
 | session | 12 |
 | shared-pkg | 4 |
-| shared-schema | 115 |
+| shared-schema | 116 |
 | showcase-source | 13 |
-| test | 416 |
+| test | 418 |
 | ux-design-archive | 80 |
-| web-source | 246 |
-| **TOTALE** | **3371** |
+| web-source | 248 |
+| **TOTALE** | **3384** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2813 |
+| live | 2826 |
 
 ## File per categoria
 
@@ -363,6 +363,9 @@
 - `D:\heuresys-advanced\apps\api\src\modules\process-kpi-templates\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\process-kpi-templates\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\process-kpi-templates\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\projects\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\projects\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\projects\service.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\provenance\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\provenance\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\provenance\service.ts` · *live* · git-tracked
@@ -1506,6 +1509,9 @@
 - `D:\heuresys-advanced\db\migrations\000380_una_persona_senza_secondo_fattore_deve_essere_un_numero_che_si_guarda.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000381_una_variante_di_fascicolo_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000382_una_famiglia_di_fascicoli_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000383_una_banca_ha_sempre_un_ascolto_aperto_anche_domani.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000384_i_progetti_hanno_i_loro_permessi.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000385_i_progetti_hanno_una_voce_di_menu.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1549,6 +1555,7 @@
 - `D:\heuresys-advanced\db\scripts\populate-reference-translations-governance.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\populate-skill-descriptions-it.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\populate-skill-ontology-it.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\prova-api-sul-gemello.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\prova-idempotenza.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\prova-live-ricerca.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\provision-collaudo-access.ts` · *live* · git-tracked
@@ -2090,6 +2097,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\check_pagine_orfane.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_pagine_raggiungibili.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_tenant_contamination.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\check_verifica_consegne.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\chi_sorveglia.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\chiudi_leggero.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\compatta_register.py` · *live* · git-tracked
@@ -2682,6 +2690,7 @@
 - `D:\heuresys-advanced\packages\shared\src\schemas\positions.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\predictions.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\process-kpi-templates.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\projects.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\provenance.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\provisioning.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\public-stats.ts` · *live* · git-tracked
@@ -2934,6 +2943,7 @@
 - `D:\heuresys-advanced\apps\api\test\predictions-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\predictions.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\process-kpi-templates.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\projects.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\provenance.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\provisioning.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\psr-derivation.integration.test.ts` · *live* · git-tracked
@@ -3131,6 +3141,7 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\position-sub.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\positions-editing.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\privacy-notice.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\projects.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\provenance.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\rbac-route-matrix.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\role-badge.spec.ts` · *live* · git-tracked
@@ -3372,6 +3383,8 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\process-owner\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\processes\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\projects\[id]\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\projects\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\provenance\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\seed-acquisition\runs\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\skill-taxonomy\_components\taxonomy-panels.tsx` · *live* · git-tracked

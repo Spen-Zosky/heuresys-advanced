@@ -1,68 +1,59 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: chiusura S1093 (2026-09-09). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: chiusura S1094 (2026-09-09). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-Mandato «tutte le voci P1→P3 e i gated in autonomia». Poi Enzo ha contestato un difetto di fondo —
-*«i risultati sono aleatori, non verifichi la catena degli oggetti che tocchi»* — e ha chiesto tre
-rimedi **come regole definitive**. Infine: risolvere le PR Dependabot. Piani in `.programmi/S1093-*.md`.
+Mandato: «procedi con tutto in autonomia». I commit sono tutti col cancello verde e pushati.
+**`#143` CHIUSA, tutte le fasi** — i progetti hanno un'API, una pagina e una prova del confine I18.
+**`D-88` RISOLTO.** `test-api` gira sul gemello. L'ascolto di RTL non scade più.
+**`#149`** F2/F3/F4 chiuse: il presidio delle consegne ora si misura a macchina.
 
-**Chiuse**: `#169` F4 · `#214` F6 (undicesimo perimetro, in produzione) · `#79` F3 · `#149` F4 ·
-`#198` gate confermato · la CI rossa · le 4 PR Dependabot. **La chiave API di S1088 è ruotata.**
+## ⭐ Il filo: sei difetti, una famiglia sola
 
-## ⭐ Il reperto: cinque «verdi» che significavano «non ho guardato»
+Ognuno era **un verde che significava «non ho guardato»** — la contestazione di Enzo dell'8/9,
+trovata sei volte in un giorno:
 
-Una sola famiglia in cinque forme, ed è la risposta alla contestazione: un commento che diceva «quel
-ramo non si percorre mai» (falso in CI) · un conteggio che misurava la **portata** invece della
-**proprietà** · job CI `CANCELLED` scambiabili per verdi · il cancello che si dichiara verde dopo un
-commit senza aver eseguito i test · un esito di suite perso in silenzio.
+- il cancello certificava **2 suite su 12** e rispondeva VERDE;
+- l'impronta di verifica valeva `e3b0c442…` (SHA-256 del **vuoto**) e passava su qualsiasi contenuto;
+- una rilevazione chiamata «in corso» era **chiusa da un mese**, e la finestra non poteva spostarsi;
+- il menu di avvio invitava a **chiudere `#169`**, che ha due fasi aperte di cui una di sicurezza;
+- `#149` era cieco su **metà del proprio innesco**, e stavo per essere la sesta sessione a sbagliare;
+- un marker diceva «verificata» con numeri di un mese prima (`sys` 225 → oggi **240**).
 
-**E le regole non bastano: ho rifatto lo stesso errore quattro volte mentre scrivevo il rimedio**
-(segreto in chiaro · file di piano senza fasi · `DELETE` sul database della CI mentre girava · mappa
-dell'agente non rigenerata). L'unica volta in cui il danno si è fermato subito è quella in cui una
-**guardia automatica** si è rifiutata. Serve che qualcosa dica di no, non che io ricordi.
-
-## Regole nuove, vincolanti (`CLAUDE.md` §«LA CATENA, NON IL PEZZO»)
-
-**C1** censisci chi sorveglia un oggetto prima di toccarlo (`chi_sorveglia.py`) · **C2** la prova
-generale copre **tutto** `db/` · **C3** un seed porta a uno **stato dichiarato** · **C4** una prova
-distruttiva gira su una **copia**, e un database di collaudo condiviso **è** un oggetto condiviso.
-C1 sta anche nel `CLAUDE.md` globale. Ognuna ha una suite che la pretende.
+**Tre volte uno strumento ha colto un mio errore prima che diventasse un danno**: il selftest
+dell'impronta (due difetti nel mio codice), `programmi.py` (due incoerenze mentre chiudevo un
+piano), il cancello locale (i test di `verify_gate` che avevo rotto violando C1 io stesso).
 
 ## Top priorities
 
-1. ⚠⚠ **`D-88` — il cancello si dichiara verde su contenuto che non ha misurato.** Guarda le modifiche
-   *non committate*: committare fa svanire l'obbligo di verifica. E un `[BLOCCO]` del lucchetto **esce
-   0**. Finché regge questo, ogni regola scritta oggi poggia su un controllo che può mentire.
+1. **`#169` F3 — «il segreto smette di essere derivato»**. Tocca l'autenticazione di **159 utenti
+   su 164**: merita capienza piena, non un residuo di fine sessione. ⚠ Il menu diceva «voce da
+   chiudere» ed era falso: ora dice `2/4, riprendi da F3`.
 2. **`#54` F4** — frontend `/recruiting` + E2E. ⚠ `sys_candidates` ha **1 riga**, non zero.
-3. **`#143` F4/F5** — API progetti/squadre col confine I18.
+3. **`D-92`** — due piani si dichiarano CHIUSI con fasi aperte (`246-fixed-term` e `S1093-mandato`). Il parser è corretto; resta il **lavoro** che dichiaravano fatto.
 
-▸ Poi, in ordine: `#159` F2 (il ponte gateway↔pagine) · PR `#85`, che ha solo bisogno di un
-`@dependabot rebase` (per la `#86` è già chiesto).
-
-⭐ Prima di pianificare: `.programmi/S1093-ricognizione-10-voci-LEGGIMI.md` — 13 agenti hanno misurato
-sul campo le 10 voci e i tre gate, con la decomposizione fino al comando. ⚠ È una consegna, quindi
-**non verificata** finché non la si misura (`#149`).
+▸ Poi: `#159` F2 (il ponte gateway↔pagine) · `#214` F6 (dodicesimo perimetro) · `#149` F4, che ora
+ha uno strumento che gli dice quando ha bersagli.
 
 ## Open questions
 
+- **Il pattern da catturare, proposto e non deciso**: tre volte in una sessione ho ri-derivato a
+  mano la headline delle migrazioni in `SOT_STATE.md`, o `handoff-lint D3` blocca. Uno script o un
+  hook? Non implementato di iniziativa.
+- **Enforcement MFA** — accenderlo oggi chiuderebbe fuori **159 utenti su 164**. Precondizione: un
+  percorso di ri-enrollment. È la stessa cosa che `#169` F3 deve rendere possibile.
 - ⏳ **SOSPESA (Enzo, 2026-09-08)**: dove custodire la chiave del collaudo.
-- **Enforcement MFA** — ora ha il suo numero: **159 utenti su 164** hanno un fattore il cui segreto è
-  casuale e non è mai stato consegnato. Accenderlo oggi chiuderebbe fuori il 97%. Precondizione: un
-  percorso di ri-enrollment.
 - **`#205` F1**: da quali siti la piattaforma accetta di imparare.
-- ⛔ **Serve un tuo sì**: **29 processi `node` orfani** tengono la RAM a 0,9 GB su 15,9. Hanno ucciso la
-  verifica **tre volte**; `test-api` **non è eseguibile qui** — NON MISURABILE, non verde.
-- ⚠ **NON SPIEGATO**: perché il segreto TOTP *in chiaro* venisse rifiutato dal login. Cifrarlo ha reso
-  verde la CI (misurato); il meccanismo no, e non l'ho inventato.
+- ⚠ **NON SPIEGATO** (da S1093): perché il segreto TOTP *in chiaro* venisse rifiutato dal login.
 
 ## Verification
 
 ```bash
 python docs/kb/tools/session_start.py
-python docs/kb/tools/chi_sorveglia.py --selftest   # C1: lo strumento sa ancora discriminare?
-python docs/kb/tools/verify_gate.py selftest       # C2: il router instrada cio' che deve
-bash scripts/verifica-deploy.sh                    # DEPLOYATO/IN-VOLO/CI-ROSSA/DISALLINEATO/NON-VERIFICATO
-python docs/kb/tools/db_health.py                  # sentinelle, atteso exit 0
+python docs/kb/tools/verify_gate.py selftest        # 10 casi router + 4 sull'impronta
+python docs/kb/tools/check_verifica_consegne.py     # 0 verde · 1 non verificata · 2 NON MISURATO
+python docs/kb/tools/programmi.py --selftest        # 22 casi, 2 nuovi con controprova
+bash scripts/verifica-deploy.sh                     # DEPLOYATO/IN-VOLO/CI-ROSSA/DISALLINEATO/NON-VERIFICATO
+python docs/kb/tools/db_health.py                   # sentinelle, atteso exit 0
 ```

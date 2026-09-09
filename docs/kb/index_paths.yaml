@@ -1,16 +1,16 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-09T13:32:58Z da docs/kb/tools/build_index.py
+# generato: 2026-09-09T17:28:04Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-09T13:32:58Z"
-  total_files: 3371
+  generated_at: "2026-09-09T17:28:04Z"
+  total_files: 3384
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 37
     api-core: 33
-    api-module: 377
+    api-module: 380
     ci: 19
     claude-config: 37
     config: 200
@@ -18,25 +18,25 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 379
+    db-migration: 382
     db-other: 8
-    db-script: 52
+    db-script: 53
     db-seed: 114
-    doc-canonical: 762
+    doc-canonical: 763
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 115
+    shared-schema: 116
     showcase-source: 13
-    test: 416
+    test: 418
     ux-design-archive: 80
-    web-source: 246
+    web-source: 248
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2813
+    live: 2826
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -1889,6 +1889,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\process-kpi-templates\service.ts'
     root: repo
     rel: 'apps/api/src/modules/process-kpi-templates/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\projects\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/projects/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\projects\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/projects/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\projects\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/projects/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -8606,6 +8624,24 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000383_una_banca_ha_sempre_un_ascolto_aperto_anche_domani.sql'
+    root: repo
+    rel: 'db/migrations/000383_una_banca_ha_sempre_un_ascolto_aperto_anche_domani.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000384_i_progetti_hanno_i_loro_permessi.sql'
+    root: repo
+    rel: 'db/migrations/000384_i_progetti_hanno_i_loro_permessi.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000385_i_progetti_hanno_una_voce_di_menu.sql'
+    root: repo
+    rel: 'db/migrations/000385_i_progetti_hanno_una_voce_di_menu.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -8825,6 +8861,12 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\populate-skill-ontology-it.sql'
     root: repo
     rel: 'db/scripts/populate-skill-ontology-it.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\prova-api-sul-gemello.sh'
+    root: repo
+    rel: 'db/scripts/prova-api-sul-gemello.sh'
     category: db-script
     status: live
     provenance: git-tracked
@@ -12035,6 +12077,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\check_tenant_contamination.py'
     root: repo
     rel: 'docs/kb/tools/check_tenant_contamination.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\check_verifica_consegne.py'
+    root: repo
+    rel: 'docs/kb/tools/check_verifica_consegne.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -15482,6 +15530,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\projects.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/projects.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\provenance.ts'
     root: repo
     rel: 'packages/shared/src/schemas/provenance.ts'
@@ -16958,6 +17012,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\projects.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/projects.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\provenance.integration.test.ts'
     root: repo
     rel: 'apps/api/test/provenance.integration.test.ts'
@@ -18137,6 +18197,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\privacy-notice.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/privacy-notice.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\projects.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/projects.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -19547,6 +19613,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\processes\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/processes/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\projects\[id]\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/projects/[id]/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\projects\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/projects/page.tsx'
     category: web-source
     status: live
     provenance: git-tracked

@@ -1,7 +1,7 @@
 # 143 — Una squadra è un progetto: serve il modello, non un puntatore al capo
 
 > **item**: #143 · **priorità**: P1 · **stima register**: ~4-6 sessioni
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 > **fonti**: direzione di Enzo 2026-08-05 (registrata nel register) · ADR-0036 (assi) · I18
 
 ## Decisioni vincolanti (non si ri-chiedono)
@@ -312,7 +312,32 @@ progetto**, mai i loro dati personali (è già I18).
   un progetto o e' completato o e' annullato: la distinzione che un solo `CLOSED` avrebbe perso.
   In piu' `DEPARTMENT_MANAGER`, che avevo scritto nella migrazione, **non e' un ruolo di questo
   sistema** (e' `MANAGER`) · budget ~250k
-- [ ] **F5 — Frontend + dimostrazione live** — con un capo progetto reale gerarchicamente inferiore a un suo membro: è il caso che dimostra il modello · budget ~250k
+- [x] **F5 — Frontend + dimostrazione live** — **CHIUSA 2026-09-09 (S1094)**. Pagine `/projects`
+  (lista) e `/projects/[id]` (dettaglio) in `apps/web`, alimentate da `/v1/projects` e da
+  nient'altro; voce di menu `workforce` ordine 30 (mig. `000385`); i18n IT/EN, parita' verde
+  (3168 chiavi × 2 lingue). Nessun componente UI nuovo in questo repo: solo `@heuresys/ui`.
+
+  🔬 **La dimostrazione, su dati di produzione e con login veri.** `paolo.caputo@rtl-bank.org`
+  guida `TM-COMM` **senza mandato HR**: vede **6 progetti** (DIR-CORP, TM-COMM, TM-CREDITI,
+  TM-CRED-PMI, TM-CRED-RETAIL, TM-OPS) contro i **25** del mandato — l'asse funzionale filtra sul
+  server, non nella pagina. E di ogni membro esistono **sette campi soli**: `userId, role, email,
+  fullName, startsOn, endsOn, isCurrent`. Nient'altro passa di li'.
+
+  **E2E `projects.spec.ts`: 9/9 verdi in 1 minuto**, login reali di tutte e sei le personas. Il
+  terzo caso e' il confine I18 guardato dal browser: nel dettaglio nessuna parola delle classi
+  sensibili, e **zero collegamenti** verso `/users/` — un capo progetto non ha una porta per il
+  dossier di chi gli lavora insieme.
+
+  ⚠ **Due difetti trovati e corretti, entrambi visibili solo da chi esegue davvero.**
+  ① La `000306` verifica che ogni voce di menu attiva abbia la sua traduzione, e cerca il campo
+  `ui_interface_label`: avevo scritto `label`. La prima passata era verde — la `000306` gira
+  PRIMA della `000385` e la voce ancora non esisteva — e il rosso e' arrivato alla **seconda**,
+  «75 voci attive ma 74 etichette tradotte». E' il motivo per cui la prova generale fa due giri.
+  ② Con il **dev server** l'autenticazione E2E falliva sistematicamente (1,5 min a tentativo):
+  `waitForLoadState("networkidle")` non arriva mai con HMR e compilazione a richiesta. Con
+  `next build` + `next start` gli stessi setup passano in **3-6 secondi**. Non era il prodotto:
+  era l'ambiente di prova, ed e' la ragione per cui `test:e2e:prod` e' l'unica modalita'
+  supportata per un run completo (D-24) · budget ~250k
 
 ## Da dove si riprende
 

@@ -668,5 +668,36 @@
         "status": "Status"
       }
     }
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "The work of the organisation and who carries it. You see the projects you take part in; with an HR mandate, every project in the tenant.",
+    "error": "Could not load the projects.",
+    "detailError": "Could not load the project.",
+    "emptyTitle": "No projects",
+    "emptyDesc": "You are not taking part in any ongoing project.",
+    "count": "{{count}} projects in total",
+    "members": "{{count}} members",
+    "membersTitle": "Who works on it ({{count}})",
+    "progress": "{{pct}}% complete",
+    "progressLabel": "Progress",
+    "progressUnset": "not declared",
+    "statusLabel": "Status",
+    "overview": "At a glance",
+    "purpose": "Purpose",
+    "since": "since {{date}}",
+    "status": {
+      "PLANNED": "Planned",
+      "ACTIVE": "Active",
+      "ON_HOLD": "On hold",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "role": {
+      "LEAD": "Lead",
+      "MEMBER": "Member",
+      "CONTRIBUTOR": "Contributor",
+      "OBSERVER": "Observer"
+    }
   }
 }

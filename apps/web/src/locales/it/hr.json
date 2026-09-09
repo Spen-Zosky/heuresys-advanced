@@ -668,5 +668,36 @@
         "status": "Stato"
       }
     }
+  },
+  "projects": {
+    "title": "Progetti",
+    "description": "Il lavoro dell'organizzazione e chi lo porta avanti. Vedi i progetti a cui partecipi; con un mandato HR, tutti quelli del tenant.",
+    "error": "Non e' stato possibile caricare i progetti.",
+    "detailError": "Non e' stato possibile caricare il progetto.",
+    "emptyTitle": "Nessun progetto",
+    "emptyDesc": "Non partecipi ad alcun progetto in corso.",
+    "count": "{{count}} progetti totali",
+    "members": "{{count}} membri",
+    "membersTitle": "Chi ci lavora ({{count}})",
+    "progress": "{{pct}}% completato",
+    "progressLabel": "Avanzamento",
+    "progressUnset": "non dichiarato",
+    "statusLabel": "Stato",
+    "overview": "In sintesi",
+    "purpose": "Scopo",
+    "since": "dal {{date}}",
+    "status": {
+      "PLANNED": "Pianificato",
+      "ACTIVE": "In corso",
+      "ON_HOLD": "Sospeso",
+      "COMPLETED": "Concluso",
+      "CANCELLED": "Annullato"
+    },
+    "role": {
+      "LEAD": "Responsabile",
+      "MEMBER": "Membro",
+      "CONTRIBUTOR": "Collaboratore",
+      "OBSERVER": "Osservatore"
+    }
   }
 }

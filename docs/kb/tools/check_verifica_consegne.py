@@ -120,11 +120,22 @@ def controlla() -> tuple[int, list[str]]:
 
     senza: list[str] = []
     assenti: list[str] = []
+    non_del_lab: list[str] = []
     con: list[tuple[str, dict[str, str]]] = []
     for n in nomi:
         p = trova_documento(n)
         if p is None:
-            assenti.append(n)
+            # ⚠ Un nome `AAAA-MM-GG-slug` non e' per forza una consegna del lab: `docs/superpowers/`
+            # usa lo stesso schema per specifiche e piani INTERNI, che sono documenti del repo e non
+            # cadono sotto `#149` (la regola parla di cio' che ARRIVA dal lab). La prima stesura li
+            # contava come «citati e non trovati» e faceva uscire NON MISURATO a ogni chiusura:
+            # un allarme permanente su un non-problema, cioe' il modo piu' rapido di insegnare a
+            # ignorare un cancello. Misurato in S1094 sui cinque casi che lo accendevano.
+            if any(REPO.joinpath(d).rglob(f"{n}*") for d in ("docs",)) and \
+               next(REPO.joinpath("docs").rglob(f"{n}*"), None) is not None:
+                non_del_lab.append(n)
+            else:
+                assenti.append(n)
             continue
         mk = marker_di(p)
         if mk is None:
@@ -134,8 +145,11 @@ def controlla() -> tuple[int, list[str]]:
 
     for n, mk in con:
         righe.append(f"  [OK] {n}\n         esito {mk['esito'].upper()} · {mk['sessione']} · {mk['data']}")
+    if non_del_lab:
+        righe.append(f"  [..] {len(non_del_lab)} nomi citati sono documenti INTERNI del repo "
+                     f"(`docs/superpowers/`), non consegne del lab: fuori dal perimetro di #149")
     for n in assenti:
-        righe.append(f"  [? ] {n} — citato dal register ma NON TROVATO nel lab")
+        righe.append(f"  [? ] {n} — citato dal register ma NON TROVATO ne' nel lab ne' nel repo")
     for n in senza:
         righe.append(f"  [!!] {n} — citato dal register, SENZA marker di verifica")
 

@@ -415,6 +415,11 @@ const hrOrganico: Fornitore = async (q, p) => {
 };
 
 const hrRetribuzioni: Fornitore = async (q, p) => {
+  // B8 (2026-09-09): ordinare per il TESTO del periodo (`ORDER BY 1 DESC`) e' alfabetico,
+  // non cronologico — tre periodi scritti in prosa ("September 2025" invece di "2025-09")
+  // finivano in cima e spingevano fuori dalla finestra i mesi veri. Si ordina per la DATA
+  // reale (`user_pay_slip_period_start`), non per il testo che la descrive: regge anche se
+  // un periodo malformato dovesse ricomparire.
   const r = await q.query<{ bucket: string; value: string }>(
     `${CTE_UNITA}
      SELECT ps.user_pay_slip_period AS bucket, count(*) AS value
@@ -424,7 +429,7 @@ const hrRetribuzioni: Fornitore = async (q, p) => {
         AND a.user_position_assignment_status = 'ACTIVE'
        JOIN sys.sys_positions pos ON pos.position_id = a.user_position_assignment_position_id
       WHERE pos.position_organization_unit_id IN (SELECT organization_unit_id FROM perimetro)
-      GROUP BY 1 ORDER BY 1 DESC LIMIT 12`,
+      GROUP BY 1 ORDER BY min(ps.user_pay_slip_period_start) DESC LIMIT 12`,
     P(p),
   );
   return serie(r.rows.map((x) => ({ bucket: s(x.bucket), value: n(x.value) })).reverse());

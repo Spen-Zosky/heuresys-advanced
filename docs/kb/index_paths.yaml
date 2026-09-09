@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-09T17:28:04Z da docs/kb/tools/build_index.py
+# generato: 2026-09-09T18:43:57Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-09T17:28:04Z"
-  total_files: 3384
+  generated_at: "2026-09-09T18:43:57Z"
+  total_files: 3386
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,7 +18,7 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 382
+    db-migration: 384
     db-other: 8
     db-script: 53
     db-seed: 114
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2826
+    live: 2828
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -8642,6 +8642,18 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000386_il_confine_fra_clienti_su_tutti_i_punti.sql'
+    root: repo
+    rel: 'db/migrations/000386_il_confine_fra_clienti_su_tutti_i_punti.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000387_le_sentinelle_che_non_esistevano_su_tre_catene.sql'
+    root: repo
+    rel: 'db/migrations/000387_le_sentinelle_che_non_esistevano_su_tre_catene.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -10178,12 +10190,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\START_HERE.md'
-    root: repo
-    rel: 'START_HERE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\README.md'
     root: repo
     rel: 'apps/agent-gateway/README.md'
@@ -10235,12 +10241,6 @@ files:
   - path: 'D:\heuresys-advanced\docs\BRAND_V1_DEFERRED_REFINEMENTS.md'
     root: repo
     rel: 'docs/BRAND_V1_DEFERRED_REFINEMENTS.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\MVP_4_ROADMAP.md'
-    root: repo
-    rel: 'docs/MVP_4_ROADMAP.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10376,12 +10376,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\api\API_IMPLEMENTATION_PLAN.md'
-    root: repo
-    rel: 'docs/api/API_IMPLEMENTATION_PLAN.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\api\MVP_2A_API_GAP_AUDIT.md'
     root: repo
     rel: 'docs/api/MVP_2A_API_GAP_AUDIT.md'
@@ -10406,9 +10400,21 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\API_IMPLEMENTATION_PLAN.md'
+    root: repo
+    rel: 'docs/archive/API_IMPLEMENTATION_PLAN.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\archive\BRAND_SESSION_CHARTER.md'
     root: repo
     rel: 'docs/archive/BRAND_SESSION_CHARTER.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\FRONTEND_IMPLEMENTATION_PLAN.md'
+    root: repo
+    rel: 'docs/archive/FRONTEND_IMPLEMENTATION_PLAN.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10442,9 +10448,21 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\MIGRATION_IMPLEMENTATION_PLAN.md'
+    root: repo
+    rel: 'docs/archive/MIGRATION_IMPLEMENTATION_PLAN.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\archive\MIGRATION_STATUS_2026-05-18.md'
     root: repo
     rel: 'docs/archive/MIGRATION_STATUS_2026-05-18.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\MVP_4_ROADMAP.md'
+    root: repo
+    rel: 'docs/archive/MVP_4_ROADMAP.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10469,6 +10487,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\archive\SOT_BACKLOG_CHIUSI.md'
     root: repo
     rel: 'docs/archive/SOT_BACKLOG_CHIUSI.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\START_HERE.md'
+    root: repo
+    rel: 'docs/archive/START_HERE.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10742,6 +10766,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\heuresys-advanced-bootstrap-vm.md'
+    root: repo
+    rel: 'docs/archive/heuresys-advanced-bootstrap-vm.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-analisi-sicurezza-e-remediation.md'
     root: repo
     rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-gov-analisi-sicurezza-e-remediation.md'
@@ -10970,12 +11000,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\db\MIGRATION_IMPLEMENTATION_PLAN.md'
-    root: repo
-    rel: 'docs/db/MIGRATION_IMPLEMENTATION_PLAN.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\db\TARGET_SCHEMA_DESIGN.md'
     root: repo
     rel: 'docs/db/TARGET_SCHEMA_DESIGN.md'
@@ -11117,12 +11141,6 @@ files:
   - path: 'D:\heuresys-advanced\docs\frontend\.keep'
     root: repo
     rel: 'docs/frontend/.keep'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\frontend\FRONTEND_IMPLEMENTATION_PLAN.md'
-    root: repo
-    rel: 'docs/frontend/FRONTEND_IMPLEMENTATION_PLAN.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -14261,12 +14279,6 @@ files:
   - path: 'D:\heuresys-advanced\docs\wargames\tasks\17-heuresys-wave3.md'
     root: repo
     rel: 'docs/wargames/tasks/17-heuresys-wave3.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\heuresys-advanced-bootstrap-vm.md'
-    root: repo
-    rel: 'heuresys-advanced-bootstrap-vm.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

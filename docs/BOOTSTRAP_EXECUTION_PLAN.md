@@ -1,7 +1,7 @@
 # Bootstrap Execution Plan
 ## Heuresys Advanced — HRMS/BPM Platform v5
 
-> **Status:** Planning deliverable #1 of 10 (Section 18). Awaiting user review/approval before Section 19 (heavy implementation) is unlocked.
+> **Status:** ARCHIVIO STORICO — cronaca del gate di approvazione. Le 10 deliverable e ADR-0011 sono state approvate da Enzo il 2026-05-16 (RD-24, §11) e la Section 19 è sbloccata da allora: il corpo di questo documento registra quella decisione, non la attende più. Corretto B20 (2026-09-09) — solo l'intestazione, il corpo resta cronaca legittima.
 > **Date:** 2026‑05‑16
 > **Source of Truth:** `docs/source_bundle/extracted_bootstrap/` (v5 Bootstrap Pack) — canonical target architecture.
 > **Brownfield enrichment source:** `docs/source_bundle/brownfield/db-export.zip` (legacy `heuresys_platform` PostgreSQL 16 DB, 576 business tables, 16 domains).

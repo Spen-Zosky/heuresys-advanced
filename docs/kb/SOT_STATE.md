@@ -2952,7 +2952,7 @@ Sessione **ultracode**, aggregato **item #1-8** dal menu eseguiti in autonomia (
 
 ## 3. API (apps/api) — heart MVP-1→4
 
-- **Plugin chain fisso 13-step** (non riordinare; vedi `docs/api/API_IMPLEMENTATION_PLAN.md` §3.2): zod compilers → requestId → helmet → cors → cookie → JWT RS256 → rate-limit → auth (decode-only) → CSRF (opt-in) → tenantContext → errorHandler → /healthz+/readyz → module routes.
+- **Plugin chain fisso 13-step** (non riordinare; vedi `docs/archive/API_IMPLEMENTATION_PLAN.md` §3.2 — archiviato B20, S1095): zod compilers → requestId → helmet → cors → cookie → JWT RS256 → rate-limit → auth (decode-only) → CSRF (opt-in) → tenantContext → errorHandler → /healthz+/readyz → module routes.
 - **85 route module business** (`/v1/` prefix in `app.ts`; 96 `app.register` totali incl. infra, S1007), **~458 route handler** (grep `app.{get,post,put,patch,delete}` nei moduli, S1007) (BI analytics ① P1→P3 + P2-ext: `/v1/analytics/{workforce,kpi}` S958 + `{attendance,compensation,skills}` P2 S962 + `org-network` P3 S965 + **`overtime` P2-ext S969**; migration nav `000059`,`000066..000068`,`000070`,`000071`). Pattern modulo a 7 step (schema shared → repository raw SQL → service + ActorContext → routes con `requirePermission` + `verifyCsrf` → register → integration test → atomic commit). **Non deviare.**
 - **Test API**: **160 file** `apps/api/test/*.test.ts` (hit DB live via tunnel, no mock). Conteggio pass live ri-derivato dal CI `test-integration` (§7), **non hardcodato** (S1007: fix assertion skill-count → derivata live dal DB, anti-staleness).
 - **Shared**: `packages/shared` — **87 schema module** Zod in `src/schemas/` (S1007) + subpath exports.

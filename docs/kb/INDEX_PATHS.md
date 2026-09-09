@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-09T17:28:04Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3384**
+**Generato**: 2026-09-09T18:43:57Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3386**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,7 +18,7 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 382 |
+| db-migration | 384 |
 | db-other | 8 |
 | db-script | 53 |
 | db-seed | 114 |
@@ -33,7 +33,7 @@
 | test | 418 |
 | ux-design-archive | 80 |
 | web-source | 248 |
-| **TOTALE** | **3384** |
+| **TOTALE** | **3386** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2826 |
+| live | 2828 |
 
 ## File per categoria
 
@@ -1512,6 +1512,8 @@
 - `D:\heuresys-advanced\db\migrations\000383_una_banca_ha_sempre_un_ascolto_aperto_anche_domani.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000384_i_progetti_hanno_i_loro_permessi.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000385_i_progetti_hanno_una_voce_di_menu.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000386_il_confine_fra_clienti_su_tutti_i_punti.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000387_le_sentinelle_che_non_esistevano_su_tre_catene.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1780,7 +1782,6 @@
 - `D:\heuresys-advanced\.zp\PROGRESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\CLAUDE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\README.md` · *live* · git-tracked
-- `D:\heuresys-advanced\START_HERE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\FINDINGS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\FORENSIC-NOTES-S1006-cli.md` · *live* · git-tracked
@@ -1790,7 +1791,6 @@
 - `D:\heuresys-advanced\docs\A11Y_AUDIT_TIER7_2026-05-20.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\BOOTSTRAP_EXECUTION_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\BRAND_V1_DEFERRED_REFINEMENTS.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\MVP_4_ROADMAP.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\SHOWCASE_AUDIT_2026-05-20.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase.json` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__charts.json` · *live* · git-tracked
@@ -1813,22 +1813,26 @@
 - `D:\heuresys-advanced\docs\a11y-manual-checklist.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\a11y-tail-items.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\api\.keep` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\api\API_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\api\MVP_2A_API_GAP_AUDIT.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\.keep` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\ADR_INDEX.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\brand-component-contract.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\API_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\BRAND_SESSION_CHARTER.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\FRONTEND_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\GOAL_B_REPORT_2026-05-18.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\HANDOFF.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\HANDOFF_BRAND.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\HANDOFF_S1068.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\MANDATO_AUTOCOSCIENZA_S1063.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\MIGRATION_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\MIGRATION_STATUS_2026-05-18.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\MVP_4_ROADMAP.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\NEXT_GENERATION_ENTRY_POINT.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_2A.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\SOT_BACKLOG_CHIUSI.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\START_HERE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\SDBI_RUNBOOK.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.ps1` · *live* · git-tracked
@@ -1874,6 +1878,7 @@
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\03_phase5_consolidation.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\mapping_card.template.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\heuresys-advanced-bootstrap-vm.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-analisi-sicurezza-e-remediation.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-fase2-governo-dei-lavoratori.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-modalita-gov.md` · *live* · git-tracked
@@ -1912,7 +1917,6 @@
 - `D:\heuresys-advanced\docs\ci\workflows-overview.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\cw-b59-true-root-cause-2026-05-26.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\db\.keep` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\db\MIGRATION_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\db\TARGET_SCHEMA_DESIGN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\due-diligence\00_CHARTER.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\due-diligence\01_DISCOVERY.md` · *live* · git-tracked
@@ -1937,7 +1941,6 @@
 - `D:\heuresys-advanced\docs\due-diligence\workstreams\WS-X2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\due-diligence\workstreams\WS-X3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\frontend\.keep` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\frontend\FRONTEND_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\github\00-glossario.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\github\01-fondamenti\01-cosa-e-github.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\github\01-fondamenti\02-account-e-repo.md` · *live* · git-tracked
@@ -2461,7 +2464,6 @@
 - `D:\heuresys-advanced\docs\wargames\tasks\15-heuresys-pricing.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\tasks\16-heuresys-approval-effects.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\tasks\17-heuresys-wave3.md` · *live* · git-tracked
-- `D:\heuresys-advanced\heuresys-advanced-bootstrap-vm.md` · *live* · git-tracked
 
 ### handoff-state
 

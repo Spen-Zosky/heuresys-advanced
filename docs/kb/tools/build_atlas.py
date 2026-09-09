@@ -94,6 +94,13 @@ RE_SHARED_IMPORT = re.compile(r"import\s+(?:type\s+)?\{([^}]*)\}\s*from\s*[\"']@
 def parse_routes_file(text):
     """Estrae le route da un file routes: [{method, path, permission, csrf, orgGate}]."""
     routes = []
+    # B2 (2026-09-09): `tenant-blueprints/routes.ts` passa il permesso come COSTANTE
+    # modulo-livello (`requirePermission(READ)`), non come stringa letterale. La regex
+    # sotto catturava solo il letterale e dichiarava la rotta "senza permesso" — a
+    # mentire era l'atlante, non l'API. Le costanti si risolvono una volta sola sul
+    # testo intero del file, prima di scandire le rotte.
+    const_perms = dict(re.findall(
+        r"^const\s+([A-Z_][A-Z0-9_]*)\s*=\s*[\"']([^\"']+)[\"']", text, re.MULTILINE))
     # blocchi app.<method>( "path", { ...options... }  — scandiamo per occorrenza
     for m in re.finditer(r"app\.(get|post|put|patch|delete)\(\s*\n?\s*[\"'`]([^\"'`]*)[\"'`]", text):
         method, path = m.group(1).upper(), m.group(2)
@@ -105,6 +112,10 @@ def parse_routes_file(text):
         pm = re.search(r"requirePermission\(\s*[\"']([^\"']+)[\"']", opts)
         if pm:
             perm = pm.group(1)
+        else:
+            pcm = re.search(r"requirePermission\(\s*([A-Z_][A-Z0-9_]*)\s*\)", opts)
+            if pcm:
+                perm = const_perms.get(pcm.group(1))
         csrf = "verifyCsrf" in opts
         og = None
         ogm = re.search(r"orgGate:\s*[\"']([^\"']+)[\"']", opts)

@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `ea8a1754` (2026-09-09T19:22:16+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `7d9e4d90` (2026-09-09T20:20:37+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 640 |
 | Pagine web | 123 |
 | Schemi shared | 116 |
-| Tabelle DB | 293 (vuote: 23) |
-| Viste / matview | 47 / 0 |
+| Tabelle DB | 294 (vuote: 23) |
+| Viste / matview | 48 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 288 |
 
 ## Moduli API
@@ -107,7 +107,7 @@
 | surveys | /v1/surveys | 12 | 4 | 3 | 4 |
 | talent-review | /v1/talent-review | 6 | 1 | 7 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
-| tenant-blueprints | /v1/tenant-blueprints | 20 | 0 | 13 | 1 |
+| tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 13 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 2 | 1 |
 | time-off | /v1/time-off | 3 | 1 | 7 | 2 |

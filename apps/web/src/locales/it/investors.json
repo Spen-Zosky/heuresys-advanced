@@ -6,14 +6,14 @@
   },
   "opportunity": {
     "title": "L'opportunità",
-    "body": "Il mid-market europeo regolato (banking, assicurazioni, sanità, utility) deve governare competenze e struttura organizzativa su uno standard aperto (ESCO) con raccomandazioni auditabili secondo l'AI Act. In questa nicchia il concorrente diretto è circa uno, non ventisette."
+    "body": "Il mid-market europeo regolato (banking, assicurazioni, sanità, utility) deve governare competenze e struttura organizzativa su uno standard aperto (ESCO) con raccomandazioni auditabili — un'esigenza che l'AI Act rende non rinviabile per i sistemi che toccano le persone. In questa nicchia il concorrente diretto è circa uno, non ventisette."
   },
   "proof": {
     "title": "Cosa abbiamo costruito",
     "tagline": "Ogni numero è tracciabile alla sua fonte.",
     "liveLabel": "live",
     "loading": "—",
-    "asOf": "dati di codebase, S1011",
+    "asOf": "dati di codebase al 9 settembre 2026",
     "live": {
       "skills": "Competenze ESCO (tassonomia)",
       "occupationSkillEdges": "Collegamenti occupazione→competenza",
@@ -38,8 +38,9 @@
   "wedges": {
     "title": "Perché Heuresys",
     "esco": { "title": "ESCO-native, aperta", "body": "Standard pubblico EU: nessun lock-in proprietario, benchmarking cross-country, interoperabilità con il mercato del lavoro europeo." },
-    "explain": { "title": "Spiegabile = compliance AI Act", "body": "Ogni raccomandazione (successione, flight-risk, gap) è deterministica e auditabile davanti a un regolatore. Niente black-box: il vantaggio più sottovalutato." },
-    "position": { "title": "Modello position-centric", "body": "La posizione è entità prima: org-design e legame struttura↔processo↔competenza che gli ERP servono a costi proibitivi." }
+    "explain": { "title": "Spiegabile per costruzione", "body": "Ogni raccomandazione (successione, flight-risk, gap) è deterministica e auditabile davanti a un regolatore. Niente black-box: il vantaggio più sottovalutato." },
+    "position": { "title": "Modello position-centric", "body": "La posizione è entità prima: org-design e legame struttura↔processo↔competenza che gli ERP servono a costi proibitivi." },
+    "govern": { "title": "Governo del dato personale, con un meccanismo e non una promessa", "body": "Ogni tabella che contiene dati di una persona è dichiarata in un registro interno alla piattaforma, con la propria classe di dato e la propria strategia di cancellazione; dove è dichiarata una finestra di conservazione, un processo notturno la applica leggendo quel registro. Le richieste degli interessati hanno un percorso applicativo, non una casella di posta." }
   },
   "traction": {
     "title": "A che punto siamo (onesto)",
@@ -48,7 +49,7 @@
   },
   "whyNow": {
     "title": "Perché ora, perché noi",
-    "body": "ESCO + AI Act rendono attuale lo standard aperto e la spiegabilità. Disciplina ingegneristica che sotto-promette e si auto-espone (23 ADR, findings pubblici); layer dati allineato agli standard, difendibile."
+    "body": "ESCO + AI Act rendono attuale lo standard aperto e la spiegabilità. Disciplina ingegneristica che sotto-promette e si auto-espone (36 ADR al 9 settembre 2026, findings pubblici); layer dati allineato agli standard, difendibile."
   },
   "roadmap": {
     "title": "Dove stiamo andando",

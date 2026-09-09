@@ -5,7 +5,7 @@
   },
   "hero": {
     "title": "The EU-native, ESCO-based, explainable Skills & Org Intelligence platform for the regulated mid-market",
-    "subtitle": "Govern skills, positions and organizational capability on a European public standard (ESCO) with auditable, AI-Act-ready recommendations.",
+    "subtitle": "Govern skills, positions and organizational capability on a European public standard (ESCO) with deterministic recommendations, reconstructable step by step before an auditor.",
     "cta": "Book a demo"
   },
   "wedges": {
@@ -15,7 +15,7 @@
       "body": "An EU public standard: no proprietary lock-in, cross-country benchmarking, interoperability."
     },
     "explain": {
-      "title": "Explainable = AI-Act compliance",
+      "title": "Explainable by design",
       "body": "Every recommendation (succession, flight-risk, gap) is deterministic and auditable before a regulator. No black-box."
     },
     "position": {

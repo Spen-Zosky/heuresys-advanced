@@ -5,7 +5,7 @@
   },
   "hero": {
     "title": "La piattaforma Skills & Org Intelligence EU-native, ESCO-based e spiegabile per il mid-market regolato",
-    "subtitle": "Governa competenze, posizioni e capacità organizzativa con uno standard pubblico europeo (ESCO) e raccomandazioni auditabili, compliant con l'AI Act.",
+    "subtitle": "Governa competenze, posizioni e capacità organizzativa con uno standard pubblico europeo (ESCO) e raccomandazioni deterministiche, ricostruibili passo per passo davanti a un revisore.",
     "cta": "Prenota una demo"
   },
   "wedges": {
@@ -15,7 +15,7 @@
       "body": "Standard pubblico EU: nessun lock-in proprietario, benchmarking cross-country, interoperabilità."
     },
     "explain": {
-      "title": "Spiegabile = compliance AI Act",
+      "title": "Spiegabile per costruzione",
       "body": "Ogni raccomandazione (successione, flight-risk, gap) è deterministica e auditabile davanti a un regolatore. Niente black-box."
     },
     "position": {

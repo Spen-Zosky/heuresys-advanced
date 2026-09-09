@@ -6,14 +6,14 @@
   },
   "opportunity": {
     "title": "The opportunity",
-    "body": "The European regulated mid-market (banking, insurance, healthcare, utilities) must govern skills and organizational structure on an open standard (ESCO) with recommendations auditable under the AI Act. In that niche the direct competitor is roughly one, not twenty-seven."
+    "body": "The European regulated mid-market (banking, insurance, healthcare, utilities) must govern skills and organizational structure on an open standard (ESCO) with auditable recommendations — a need the AI Act makes non-deferrable for systems that touch people. In that niche the direct competitor is roughly one, not twenty-seven."
   },
   "proof": {
     "title": "What we've built",
     "tagline": "Every number traces back to its source.",
     "liveLabel": "live",
     "loading": "—",
-    "asOf": "codebase data, S1011",
+    "asOf": "codebase data as of September 9, 2026",
     "live": {
       "skills": "ESCO skills (taxonomy)",
       "occupationSkillEdges": "Occupation→skill links",
@@ -38,8 +38,9 @@
   "wedges": {
     "title": "Why Heuresys",
     "esco": { "title": "ESCO-native, open", "body": "EU public standard: no proprietary lock-in, cross-country benchmarking, interoperability with the European labour market." },
-    "explain": { "title": "Explainable = AI-Act compliance", "body": "Every recommendation (succession, flight-risk, gap) is deterministic and auditable before a regulator. No black-box: the most underrated wedge." },
-    "position": { "title": "Position-centric model", "body": "The position is a first-class entity: org-design and the structure↔process↔skill linkage that ERPs serve at prohibitive cost." }
+    "explain": { "title": "Explainable by design", "body": "Every recommendation (succession, flight-risk, gap) is deterministic and auditable before a regulator. No black-box: the most underrated wedge." },
+    "position": { "title": "Position-centric model", "body": "The position is a first-class entity: org-design and the structure↔process↔skill linkage that ERPs serve at prohibitive cost." },
+    "govern": { "title": "Personal-data governance, backed by a mechanism, not a promise", "body": "Every table holding personal data is declared in a platform-internal register, with its own data class and deletion strategy; where a retention window is declared, a nightly process applies it by reading that same register. Data-subject requests follow an application flow, not a mailbox." }
   },
   "traction": {
     "title": "Where we are (honestly)",
@@ -48,7 +49,7 @@
   },
   "whyNow": {
     "title": "Why now, why us",
-    "body": "ESCO + the AI Act make the open standard and explainability timely. Engineering discipline that under-promises and self-exposes (23 ADRs, public findings); a standards-aligned, defensible data layer."
+    "body": "ESCO + the AI Act make the open standard and explainability timely. Engineering discipline that under-promises and self-exposes (36 ADRs as of September 9, 2026, public findings); a standards-aligned, defensible data layer."
   },
   "roadmap": {
     "title": "Where we're going",

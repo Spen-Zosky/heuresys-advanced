@@ -11,9 +11,19 @@ const LIVE_KEYS: (keyof PlatformStatsResponse)[] = [
   "organizationUnits", "teams", "rolePermissionMappings", "uiInterfaces", "activeTenancies",
 ];
 
+// Numeri statici al 9 settembre 2026 (M2.2 del bundle 2026-09-09 — erano scaduti da S1011,
+// alcuni quasi dimezzati). "Statico" qui significa "scritto a mano", non "vero per sempre":
+// datati e dichiarati tali in `proof.asOf`, cosi' come vuole IL PUNTO FISSO del CLAUDE.md.
+// Comandi di ri-misura, uno per riga:
+//   modules    find apps/api/src/modules -maxdepth 1 -mindepth 1 -type d | wc -l
+//   endpoints  grep -rhE '^\s*(app|fastify|server)\.(get|post|put|patch|delete)\(' apps/api/src/modules/*/routes.ts | wc -l
+//   migrations git ls-files 'db/migrations/*.sql' | wc -l
+//   apiTests   grep -rhE '^\s*(it|test)\(' apps/api/test/*.ts | wc -l
+//   e2e        grep -rhE '^\s*test\(' apps/web/tests/e2e/*.ts | wc -l
+//   pages      git ls-files 'apps/web/src/app/**/page.tsx' | wc -l
 const STATIC_FACTS = [
-  { key: "modules", value: 85 }, { key: "endpoints", value: 466 }, { key: "migrations", value: 165 },
-  { key: "apiTests", value: 1098 }, { key: "e2e", value: 123 }, { key: "pages", value: 98 },
+  { key: "modules", value: 106 }, { key: "endpoints", value: 615 }, { key: "migrations", value: 384 },
+  { key: "apiTests", value: 1871 }, { key: "e2e", value: 239 }, { key: "pages", value: 122 },
 ] as const;
 
 export default function InvestorsPage() {
@@ -70,8 +80,8 @@ export default function InvestorsPage() {
 
       <section data-testid="investors-wedges" className="mx-auto max-w-6xl px-6 py-12">
         <h2 className="mb-6 text-center text-xl font-semibold">{t("wedges.title")}</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {(["esco", "explain", "position"] as const).map((k) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {(["esco", "explain", "position", "govern"] as const).map((k) => (
             <Card key={k} data-testid={`wedge-${k}`} data-print-card>
               <CardContent className="space-y-2 p-6">
                 <h3 className="font-medium">{t(`wedges.${k}.title`)}</h3>

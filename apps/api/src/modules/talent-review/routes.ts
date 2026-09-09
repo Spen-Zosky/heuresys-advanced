@@ -20,7 +20,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const talentReviewRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/nine-box", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("talent:read")],
     schema: {
       querystring: NineBoxListQuerySchema,
@@ -29,7 +29,7 @@ export const talentReviewRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => talentReviewService.listNineBox(actor(req), req.query));
 
   app.get("/fit", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("talent:read")],
     schema: {
       querystring: FitScoreListQuerySchema,
@@ -38,7 +38,7 @@ export const talentReviewRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => talentReviewService.listFit(actor(req), req.query));
 
   app.get("/readiness", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("talent:read")],
     schema: {
       querystring: ReadinessScoreListQuerySchema,
@@ -47,7 +47,7 @@ export const talentReviewRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => talentReviewService.listReadiness(actor(req), req.query));
 
   app.get("/succession", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("talent:read")],
     schema: {
       querystring: SuccessionScoreListQuerySchema,
@@ -56,7 +56,7 @@ export const talentReviewRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => talentReviewService.listSuccession(actor(req), req.query));
 
   app.get("/critical-positions", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("talent:read")],
     schema: {
       querystring: CriticalPositionListQuerySchema,
@@ -65,7 +65,7 @@ export const talentReviewRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => talentReviewService.listCriticalPositions(actor(req), req.query));
 
   app.get("/critical-coverage", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("talent:read")],
     schema: {
       querystring: CriticalCoverageListQuerySchema,

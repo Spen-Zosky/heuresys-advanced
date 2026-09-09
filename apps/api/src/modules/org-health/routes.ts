@@ -18,7 +18,7 @@ export const orgHealthRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/",
     {
-      config: { orgGate: "aggregate" },
+      config: { orgGate: "aggregate", tenantGate: "service" },
       preHandler: [requirePermission("org_director:read")],
       schema: { response: { 200: OrgHealthScorecardSchema } },
     },

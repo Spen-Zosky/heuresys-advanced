@@ -5,7 +5,7 @@
  * delega non si «modifica» — se le condizioni cambiano si revoca quella e se ne conferisce
  * un'altra, così la storia resta leggibile invece di essere sovrascritta.
  *
- * `orgGate: "service"` su tutte: il servizio governa l'esposizione (filtro tenant + mandato),
+ * `orgGate: "service", tenantGate: "service"` su tutte: il servizio governa l'esposizione (filtro tenant + mandato),
  * ed è la dichiarazione che ADR-0031 pretende da ogni rotta che tocchi persone.
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
@@ -23,7 +23,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const delegationsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("delegation:read")],
     schema: {
       querystring: DelegationListQuerySchema,
@@ -32,13 +32,13 @@ export const delegationsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => delegationsService.list(actor(req), req.query));
 
   app.get("/:id", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("delegation:read")],
     schema: { params: DelegationIdParamSchema, response: { 200: DelegationSchema } },
   }, async (req) => delegationsService.get(actor(req), req.params.id));
 
   app.post("/", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [app.verifyCsrf, requirePermission("delegation:manage")],
     schema: { body: CreateDelegationBodySchema, response: { 201: DelegationSchema } },
   }, async (req, reply) => {
@@ -49,7 +49,7 @@ export const delegationsRoutes: FastifyPluginAsyncZod = async (app) => {
   // La revoca è una POST e non una DELETE: non si cancella una delega, si registra che è
   // stata revocata. L'atto avvenuto resta un fatto amministrativo.
   app.post("/:id/revoke", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [app.verifyCsrf, requirePermission("delegation:manage")],
     schema: {
       params: DelegationIdParamSchema,

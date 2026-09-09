@@ -16,7 +16,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const performanceReviewsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("performance-review:read")],
     schema: {
       querystring: PerformanceReviewListQuerySchema,
@@ -25,7 +25,7 @@ export const performanceReviewsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => performanceReviewsService.list(actor(req), req.query));
 
   app.get("/:reviewId", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("performance-review:read")],
     schema: {
       params: PerformanceReviewParamSchema,

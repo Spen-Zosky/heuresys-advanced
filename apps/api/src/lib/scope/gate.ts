@@ -1,5 +1,7 @@
 /**
- * apps/api/src/lib/scope/gate.ts — the taxonomy made PRESCRIPTIVE (ADR-0027 F2, D-51).
+ * apps/api/src/lib/scope/gate.ts — the taxonomy made PRESCRIPTIVE (ADR-0027 F2, D-51),
+ * ora estesa all'asse del CLIENTE (B23, bundle 2026-09-09: "il modello esiste già... va
+ * esteso all'asse del cliente").
  *
  * Before this file, `data-classes.ts` only classified: every sensitive module hand-wired
  * resolveOrgReadScope/canReadOrgTarget in its service, and NOTHING failed if a new module on a
@@ -18,6 +20,20 @@
  * Self-scope routes (`<resource>:<verb>:self`) are exempt by design: I17 guarantees them and the
  * services pin them to actor.userId. Write verbs are tenant+RBAC-gated (the org axis gates READS
  * — I18). Non-classified resources never enter the assertion (RBAC+tenant only, by design).
+ *
+ * **Asse del cliente (`tenantGate`, B23)** — stessa popolazione di rotte (read non-self su
+ * risorsa sensibile), stesso meccanismo, seconda domanda: *come questa rotta tratta il confine
+ * fra clienti?* Prima di questo file il filtro tenant era affidato a ogni servizio scritto a
+ * mano (I5: FK + filtro middleware, MAI RLS) — `tenantContext.ts` si limita a depositare
+ * `req.tenantId`, non forza nessun filtro. Il valore `"service"` è la dichiarazione che la
+ * query nel repository filtra esplicitamente per tenant; `"platform"` è la dichiarazione che
+ * la risorsa non ha `tenant_id` ed è legittimamente cross-cliente (oggi un solo caso:
+ * `assessment-methods`, catalogo di 5 righe seminate, nessuna colonna tenant). **Confine
+ * dichiarato**: questo gate copre le stesse rotte sensibili già governate da `orgGate` — non i
+ * 352 punti censiti da B1 (quelli sono verificati sul dato vivo da
+ * `sys.v_tenant_boundary_violations_full`, non sulla dichiarazione del codice). Estendere la
+ * copertura oltre le risorse sensibili è lavoro futuro, non silenzioso: va dichiarato, non dato
+ * per fatto.
  */
 
 import type { FastifyInstance, RouteOptions, preHandlerHookHandler } from "fastify";
@@ -28,6 +44,11 @@ export type OrgGateDeclaration = "service" | "catalog" | "aggregate";
 
 const ORG_GATE_VALUES: ReadonlySet<string> = new Set(["service", "catalog", "aggregate"]);
 
+/** Closed set of tenant-gate declarations (B23) — stessa popolazione di rotte di orgGate. */
+export type TenantGateDeclaration = "service" | "platform";
+
+const TENANT_GATE_VALUES: ReadonlySet<string> = new Set(["service", "platform"]);
+
 /** Permission verbs that expose data (the org axis gates reads — I18). */
 const READ_VERBS: ReadonlySet<string> = new Set(["read", "view", "list"]);
 
@@ -35,6 +56,8 @@ declare module "fastify" {
   interface FastifyContextConfig {
     /** D-51: mandatory on read routes whose RBAC resource is sensitive (data-classes.ts). */
     orgGate?: OrgGateDeclaration;
+    /** B23: mandatory on the SAME read routes — how this route treats the tenant boundary. */
+    tenantGate?: TenantGateDeclaration;
   }
   interface FastifyInstance {
     /** D-51: what the org-gate collector saw — test introspection (set by registerOrgGateAssertion). */
@@ -49,13 +72,16 @@ export interface OrgGatedRoute {
   resource: string;
   permissionCode: string;
   orgGate: OrgGateDeclaration | undefined;
+  tenantGate: TenantGateDeclaration | undefined;
 }
 
 export interface OrgGateStats {
   /** Every sensitive-read route collected at registration time. */
   sensitiveReadRoutes: OrgGatedRoute[];
-  /** The subset with a missing/invalid declaration (boot fails if non-empty). */
+  /** The subset with a missing/invalid orgGate declaration (boot fails if non-empty). */
   violations: OrgGatedRoute[];
+  /** B23: the subset with a missing/invalid tenantGate declaration (boot fails if non-empty). */
+  tenantViolations: OrgGatedRoute[];
 }
 
 /** Extract the RBAC permission codes attached to the route's preHandlers by requirePermission. */
@@ -88,7 +114,7 @@ function isSensitiveReadCode(code: string): { resource: string } | null {
  * can assert the surface was actually collected.
  */
 export function registerOrgGateAssertion(app: FastifyInstance): OrgGateStats {
-  const stats: OrgGateStats = { sensitiveReadRoutes: [], violations: [] };
+  const stats: OrgGateStats = { sensitiveReadRoutes: [], violations: [], tenantViolations: [] };
   app.decorate("orgGateStats", stats);
 
   app.addHook("onRoute", (route) => {
@@ -96,30 +122,48 @@ export function registerOrgGateAssertion(app: FastifyInstance): OrgGateStats {
       const sensitive = isSensitiveReadCode(permissionCode);
       if (!sensitive) continue;
       const orgGate = route.config?.orgGate;
+      const tenantGate = route.config?.tenantGate;
       const entry: OrgGatedRoute = {
         method: Array.isArray(route.method) ? route.method.join(",") : route.method,
         url: route.url,
         resource: sensitive.resource,
         permissionCode,
         orgGate,
+        tenantGate,
       };
       stats.sensitiveReadRoutes.push(entry);
       if (orgGate === undefined || !ORG_GATE_VALUES.has(orgGate)) stats.violations.push(entry);
+      if (tenantGate === undefined || !TENANT_GATE_VALUES.has(tenantGate)) {
+        stats.tenantViolations.push(entry);
+      }
     }
   });
 
   app.addHook("onReady", async () => {
-    if (stats.violations.length === 0) return;
-    const list = stats.violations
-      .map((v) => `  ${v.method} ${v.url} — ${v.permissionCode} (data-class resource: ${v.resource})`)
-      .join("\n");
-    throw new Error(
-      `ORG_GATE_MISSING: ${stats.violations.length} read route(s) on SENSITIVE data-class resources ` +
-        `lack an org-gate declaration (ADR-0027 F2, D-51).\n${list}\n` +
-        `Fix: enforce the org read scope in the service (lib/scope/resolver.ts) and declare ` +
-        `config: { orgGate: "service" } on the route — or, if the route provably returns no ` +
-        `person-level rows, declare "catalog" / "aggregate".`,
-    );
+    if (stats.violations.length > 0) {
+      const list = stats.violations
+        .map((v) => `  ${v.method} ${v.url} — ${v.permissionCode} (data-class resource: ${v.resource})`)
+        .join("\n");
+      throw new Error(
+        `ORG_GATE_MISSING: ${stats.violations.length} read route(s) on SENSITIVE data-class resources ` +
+          `lack an org-gate declaration (ADR-0027 F2, D-51).\n${list}\n` +
+          `Fix: enforce the org read scope in the service (lib/scope/resolver.ts) and declare ` +
+          `config: { orgGate: "service" } on the route — or, if the route provably returns no ` +
+          `person-level rows, declare "catalog" / "aggregate".`,
+      );
+    }
+    if (stats.tenantViolations.length > 0) {
+      const list = stats.tenantViolations
+        .map((v) => `  ${v.method} ${v.url} — ${v.permissionCode} (data-class resource: ${v.resource})`)
+        .join("\n");
+      throw new Error(
+        `TENANT_GATE_MISSING: ${stats.tenantViolations.length} read route(s) on SENSITIVE data-class ` +
+          `resources lack a tenant-gate declaration (B23, bundle 2026-09-09).\n${list}\n` +
+          `Fix: filter the repository query by the actor's tenant and declare ` +
+          `config: { tenantGate: "service" } on the route — or, if the resource provably has no ` +
+          `tenant_id column (a platform-wide catalog), declare "platform".`,
+      );
+    }
   });
 
   return stats;

@@ -25,39 +25,39 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const kpiDefinitionsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("kpi:read")],
     schema: { querystring: KpiDefinitionListQuerySchema, response: { 200: KpiDefinitionListResponseSchema } },
   }, async (req) => kpiDefinitionsService.list(actor(req), req.query, req.locale));
 
   // #31 (S1018) — metrology catalogs (global, 000015 §7-§8): literal routes.
   app.get("/assessment-methods", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("kpi:read")],
     schema: { response: { 200: KpiAssessmentMethodListResponseSchema } },
   }, async () => kpiDefinitionsService.listAssessmentMethods());
 
   app.get("/weighting-rules", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("kpi:read")],
     schema: { response: { 200: KpiWeightingRuleListResponseSchema } },
   }, async () => kpiDefinitionsService.listWeightingRules());
 
   app.get("/:id", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("kpi:read")],
     schema: { params: KpiDefinitionIdParamSchema, response: { 200: KpiDefinitionSchema } },
   }, async (req) => kpiDefinitionsService.getById(actor(req), req.params.id, req.locale));
 
   // #31 (S1018) — per-KPI metrology sub-reads.
   app.get("/:id/metrics", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("kpi:read")],
     schema: { params: KpiDefinitionIdParamSchema, response: { 200: KpiMetricListResponseSchema } },
   }, async (req) => kpiDefinitionsService.listMetrics(actor(req), req.params.id));
 
   app.get("/:id/measurements", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("kpi:read")],
     schema: { params: KpiDefinitionIdParamSchema, querystring: KpiMeasurementListQuerySchema, response: { 200: KpiMeasurementListResponseSchema } },
   }, async (req) => kpiDefinitionsService.listMeasurements(actor(req), req.params.id, req.query));

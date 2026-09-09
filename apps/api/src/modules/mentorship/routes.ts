@@ -22,13 +22,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 export const mentorshipRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── Programs ──
   app.get("/programs", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("mentorship:read")],
     schema: { querystring: MentorshipProgramListQuerySchema, response: { 200: MentorshipProgramListResponseSchema } },
   }, async (req) => mentorshipService.listPrograms(actor(req), req.query));
 
   app.get("/programs/:id", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("mentorship:read")],
     schema: { params: MentorshipIdParamSchema, response: { 200: MentorshipProgramSchema } },
   }, async (req) => mentorshipService.getProgram(actor(req), req.params.id));
@@ -50,13 +50,13 @@ export const mentorshipRoutes: FastifyPluginAsyncZod = async (app) => {
 
   // ── Pairings ──
   app.get("/pairings", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("mentorship:read")],
     schema: { querystring: MentorshipListQuerySchema, response: { 200: MentorshipListResponseSchema } },
   }, async (req) => mentorshipService.listMentorships(actor(req), req.query));
 
   app.get("/pairings/:id", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("mentorship:read")],
     schema: { params: MentorshipIdParamSchema, response: { 200: MentorshipSchema } },
   }, async (req) => mentorshipService.getMentorship(actor(req), req.params.id));
@@ -78,7 +78,7 @@ export const mentorshipRoutes: FastifyPluginAsyncZod = async (app) => {
 
   // ── Sessions (nested + flat) ──
   app.get("/pairings/:id/sessions", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("mentorship:read")],
     schema: { params: MentorshipIdParamSchema, response: { 200: MentorshipSessionListResponseSchema } },
   }, async (req) => mentorshipService.listSessions(actor(req), req.params.id));
@@ -89,7 +89,7 @@ export const mentorshipRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req, reply) => { reply.code(201).send(await mentorshipService.createSession(actor(req), req.params.id, req.body)); });
 
   app.get("/sessions/:id", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("mentorship:read")],
     schema: { params: MentorshipIdParamSchema, response: { 200: MentorshipSessionSchema } },
   }, async (req) => mentorshipService.getSession(actor(req), req.params.id));
@@ -106,13 +106,13 @@ export const mentorshipRoutes: FastifyPluginAsyncZod = async (app) => {
 
   // ── Match scores (read-only) ──
   app.get("/match-scores", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("mentorship:read")],
     schema: { querystring: MentorMatchScoreListQuerySchema, response: { 200: MentorMatchScoreListResponseSchema } },
   }, async (req) => mentorshipService.listMatchScores(actor(req), req.query));
 
   app.get("/match-scores/:id", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("mentorship:read")],
     schema: { params: MentorshipIdParamSchema, response: { 200: MentorMatchScoreSchema } },
   }, async (req) => mentorshipService.getMatchScore(actor(req), req.params.id));

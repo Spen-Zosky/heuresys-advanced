@@ -15,7 +15,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const userTimelineRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("timeline:read")],
     schema: {
       querystring: UserTimelineListQuerySchema,
@@ -24,7 +24,7 @@ export const userTimelineRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => userTimelineService.list(actor(req), req.query));
 
   app.get("/summary", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("timeline:read")],
     schema: {
       querystring: UserTimelineListQuerySchema,

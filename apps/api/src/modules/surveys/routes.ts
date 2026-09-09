@@ -38,13 +38,13 @@ export const surveysRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── Templates ──
   app.get("/templates", {
     preHandler: [requirePermission("surveys:read")],
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     schema: { querystring: SurveyTemplateListQuerySchema, response: { 200: SurveyTemplateListResponseSchema } },
   }, async (req) => surveysService.listTemplates(actor(req), req.query));
 
   app.get("/templates/:id", {
     preHandler: [requirePermission("surveys:read")],
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     schema: { params: SurveyIdParamSchema, response: { 200: SurveyTemplateSchema } },
   }, async (req) => surveysService.getTemplate(actor(req), req.params.id));
 
@@ -66,13 +66,13 @@ export const surveysRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── Surveys ──
   app.get("/", {
     preHandler: [requirePermission("surveys:read")],
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     schema: { querystring: SurveyListQuerySchema, response: { 200: SurveyListResponseSchema } },
   }, async (req) => surveysService.listSurveys(actor(req), req.query));
 
   app.get("/:id", {
     preHandler: [requirePermission("surveys:read")],
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     schema: { params: SurveyIdParamSchema, response: { 200: SurveySchema } },
   }, async (req) => surveysService.getSurvey(actor(req), req.params.id));
 
@@ -94,13 +94,13 @@ export const surveysRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── Responses (read-only event log) ──
   app.get("/:id/responses", {
     preHandler: [requirePermission("surveys:read")],
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     schema: { params: SurveyIdParamSchema, querystring: SurveyResponseListQuerySchema, response: { 200: SurveyResponseListResponseSchema } },
   }, async (req) => surveysService.listResponses(actor(req), req.params.id, req.query));
 
   app.get("/responses/:id", {
     preHandler: [requirePermission("surveys:read")],
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     schema: { params: SurveyIdParamSchema, response: { 200: SurveyResponseSchema } },
   }, async (req) => surveysService.getResponse(actor(req), req.params.id));
 };

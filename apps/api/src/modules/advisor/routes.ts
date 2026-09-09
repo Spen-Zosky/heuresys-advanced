@@ -19,7 +19,7 @@ export const advisorRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/suggestions",
     {
-      config: { orgGate: "aggregate" },
+      config: { orgGate: "aggregate", tenantGate: "service" },
       preHandler: [requirePermission("org_director:read")],
       schema: { response: { 200: AdvisorSuggestionsResponseSchema } },
     },
@@ -29,7 +29,7 @@ export const advisorRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/audit",
     {
-      config: { orgGate: "aggregate" },
+      config: { orgGate: "aggregate", tenantGate: "service" },
       preHandler: [requirePermission("org_director:read")],
       schema: { response: { 200: AdvisorSuggestionsResponseSchema } },
     },

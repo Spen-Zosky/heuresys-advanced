@@ -15,7 +15,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const evidenceRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/subject/:userId", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("evidence:read")],
     schema: {
       params: z.object({ userId: z.uuid() }),
@@ -25,7 +25,7 @@ export const evidenceRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => evidenceService.listForSubject(actor(req), req.params.userId, req.query.types, req.query.limit, req.query.offset));
 
   app.get("/for-score", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("evidence:read")],
     schema: { querystring: EvidenceForScoreQuerySchema, response: { 200: EvidenceForScoreResponseSchema } },
   }, async (req) => evidenceService.forScore(actor(req), req.query.scoreType, req.query.scoreId));

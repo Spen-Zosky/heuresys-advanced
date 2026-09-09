@@ -22,7 +22,7 @@ export const engagementRoutes: FastifyPluginAsyncZod = async (app) => {
   // non per come sono i dati oggi.
   app.get("/surveys", {
     preHandler: [requirePermission("surveys:read")],
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     schema: { response: { 200: EngagementSurveyListResponseSchema } },
   }, async (req) => engagementService.listSurveys(actor(req)));
 
@@ -30,14 +30,14 @@ export const engagementRoutes: FastifyPluginAsyncZod = async (app) => {
   // k-anonimato nel repository e' cio' che rende vera questa dichiarazione anche domani.
   app.get("/surveys/:surveyId/results", {
     preHandler: [requirePermission("surveys:read")],
-    config: { orgGate: "aggregate" },
+    config: { orgGate: "aggregate", tenantGate: "service" },
     schema: { params: EngagementSurveyIdParamSchema, response: { 200: EngagementSurveyResultsResponseSchema } },
   }, async (req) => engagementService.surveyResults(actor(req), req.params.surveyId));
 
   // #235 — aggregato per settimana ISO, stessa soglia.
   app.get("/pulse", {
     preHandler: [requirePermission("surveys:read")],
-    config: { orgGate: "aggregate" },
+    config: { orgGate: "aggregate", tenantGate: "service" },
     schema: { response: { 200: EngagementPulseResponseSchema } },
   }, async (req) => engagementService.pulse(actor(req)));
 
@@ -45,7 +45,7 @@ export const engagementRoutes: FastifyPluginAsyncZod = async (app) => {
   // (misurato su information_schema, non dedotto dal nome).
   app.get("/templates", {
     preHandler: [requirePermission("surveys:read")],
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     schema: { response: { 200: EngagementTemplateListResponseSchema } },
   }, async (req) => engagementService.listTemplates(actor(req)));
 };

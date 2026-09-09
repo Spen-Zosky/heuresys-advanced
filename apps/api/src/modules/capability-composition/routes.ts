@@ -26,7 +26,7 @@ export const capabilityCompositionRoutes: FastifyPluginAsyncZod = async (app) =>
   app.get(
     "/composition",
     {
-      config: { orgGate: "service" },
+      config: { orgGate: "service", tenantGate: "service" },
       preHandler: [requirePermission("capability:read")],
       schema: { querystring: CapabilityCompositionListQuerySchema, response: { 200: CapabilityScoreListResponseSchema } },
     },
@@ -41,7 +41,7 @@ export const capabilityCompositionRoutes: FastifyPluginAsyncZod = async (app) =>
       // Org-wide aggregate (skill-level, no per-person rows) → `aggregate` gate, like the
       // sibling capability-maturity endpoints. D-51 requires the declaration because the
       // `capability` resource is SKILL-sensitive; the ranking never exposes who-holds-what.
-      config: { orgGate: "aggregate" },
+      config: { orgGate: "aggregate", tenantGate: "service" },
       preHandler: [requirePermission("capability:read")],
       schema: { response: { 200: EssentialCapabilityRankingSchema } },
     },
@@ -55,7 +55,7 @@ export const capabilityCompositionRoutes: FastifyPluginAsyncZod = async (app) =>
       // Org-wide aggregate over skill-group totals; no per-person row is ever emitted, so the
       // `aggregate` gate applies exactly as for F1 (D-51 requires the explicit declaration
       // because the `capability` resource is SKILL-sensitive).
-      config: { orgGate: "aggregate" },
+      config: { orgGate: "aggregate", tenantGate: "service" },
       preHandler: [requirePermission("capability:read")],
       schema: { response: { 200: VrioScorecardSchema } },
     },
@@ -65,7 +65,7 @@ export const capabilityCompositionRoutes: FastifyPluginAsyncZod = async (app) =>
   app.get(
     "/composition/:subjectType/:subjectId",
     {
-      config: { orgGate: "service" },
+      config: { orgGate: "service", tenantGate: "service" },
       preHandler: [requirePermission("capability:read")],
       schema: { params: CapabilitySubjectParamSchema, response: { 200: CapabilityScoreSchema } },
     },

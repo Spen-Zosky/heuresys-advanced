@@ -28,39 +28,39 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const learningGapsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("gap_analysis:read")],
     schema: { querystring: LearningGapListQuerySchema, response: { 200: LearningGapListResponseSchema } },
   }, async (req) => learningGapsService.list(actor(req), req.query));
 
   // #30 (S1018) — gap-closure reads (literal routes before /:id).
   app.get("/closure-plans", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("gap_analysis:read")],
     schema: { querystring: GapClosurePlanListQuerySchema, response: { 200: GapClosurePlanListResponseSchema } },
   }, async (req) => learningGapsService.listClosurePlans(actor(req), req.query));
 
   app.get("/analysis-results", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("gap_analysis:read")],
     schema: { querystring: GapAnalysisResultListQuerySchema, response: { 200: GapAnalysisResultListResponseSchema } },
   }, async (req) => learningGapsService.listAnalysisResults(actor(req), req.query));
 
   // C4 (#42) — severity aggregate for the /gaps KPI strip (literal route before /:id).
   app.get("/summary", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("gap_analysis:read")],
     schema: { response: { 200: LearningGapSummaryResponseSchema } },
   }, async (req) => learningGapsService.severitySummary(actor(req)));
 
   app.get("/:id", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("gap_analysis:read")],
     schema: { params: LearningGapIdParamSchema, response: { 200: LearningGapSchema } },
   }, async (req) => learningGapsService.getById(actor(req), req.params.id));
 
   app.get("/:id/closure-actions", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("gap_analysis:read")],
     schema: { params: LearningGapIdParamSchema, response: { 200: GapClosureActionListResponseSchema } },
   }, async (req) => learningGapsService.listClosureActions(actor(req), req.params.id));

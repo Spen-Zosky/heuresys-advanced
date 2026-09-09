@@ -22,7 +22,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const userTargetPositionsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("career_succession:read")],
     schema: {
       querystring: UserTargetPositionListQuerySchema,
@@ -31,7 +31,7 @@ export const userTargetPositionsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => userTargetPositionsService.list(actor(req), req.query));
 
   app.get("/:id", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("career_succession:read")],
     schema: {
       params: UserTargetPositionIdParamSchema,

@@ -17,7 +17,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const calibrationSessionsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("performance-review:read")],
     schema: {
       querystring: CalibrationSessionListQuerySchema,
@@ -26,7 +26,7 @@ export const calibrationSessionsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => calibrationSessionsService.list(actor(req), req.query));
 
   app.get("/:sessionId", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("performance-review:read")],
     schema: {
       params: CalibrationSessionParamSchema,
@@ -35,7 +35,7 @@ export const calibrationSessionsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => calibrationSessionsService.getById(actor(req), req.params.sessionId));
 
   app.get("/:sessionId/discussions", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("performance-review:read")],
     schema: {
       params: CalibrationSessionParamSchema,

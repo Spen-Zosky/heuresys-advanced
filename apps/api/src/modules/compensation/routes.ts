@@ -39,7 +39,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/profiles/:positionId", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: { params: CompensationProfilePositionParamSchema, response: { 200: CompensationProfileSchema } },
   }, async (req) => compensationService.getProfileByPosition(actor(req), req.params.positionId));
@@ -51,7 +51,7 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
     // non per persona — nessuna riga riferita a un individuo esce da qui. La guardia
     // prescrittiva di D-51 rifiuta l'avvio se questa dichiarazione manca, e ha fatto
     // esattamente il suo mestiere quando l'avevo dimenticata.
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: {
       querystring: CompensationBandListQuerySchema,
@@ -60,19 +60,19 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => compensationService.listCompensationBands(actor(req), req.query));
 
   app.get("/reward-gates", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: { querystring: RewardGatesListQuerySchema, response: { 200: RewardGatesListResponseSchema } },
   }, async (req) => compensationService.listRewardGates(actor(req), req.query));
 
   app.get("/payout-curves", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: { response: { 200: PayoutCurveListResponseSchema } },
   }, async (req) => compensationService.listPayoutCurves(actor(req)));
 
   app.get("/distribution", {
-    config: { orgGate: "aggregate" },
+    config: { orgGate: "aggregate", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: { response: { 200: CompensationDistributionResponseSchema } },
   }, async (req) => compensationService.getRewardGateDistribution(actor(req)));
@@ -98,7 +98,7 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
   // (resolveOrgReadScope in the service). The rest carry no person rows → "catalog".
 
   app.get("/variable-pay", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: {
       querystring: VariablePayCalculationListQuerySchema,
@@ -108,7 +108,7 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
 
   // #37 (B2) — la valutazione di un singolo calcolo: curva + cancelli.
   app.get("/variable-pay/:id/evaluation", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: {
       params: z.object({ id: z.uuid() }),
@@ -117,7 +117,7 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => compensationService.evaluateVariablePay(actor(req), req.params.id));
 
   app.get("/recommendations", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: {
       querystring: CompensationRecommendationListQuerySchema,
@@ -126,7 +126,7 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => compensationService.listRecommendations(actor(req), req.query));
 
   app.get("/bonus-pools", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: {
       querystring: BonusPoolListQuerySchema,
@@ -135,7 +135,7 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => compensationService.listBonusPools(actor(req), req.query));
 
   app.get("/objective-reward-rules", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: {
       querystring: ObjectiveRewardRuleListQuerySchema,
@@ -144,7 +144,7 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => compensationService.listObjectiveRewardRules(actor(req), req.query));
 
   app.get("/position-economic-weight", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: {
       querystring: PositionEconomicWeightListQuerySchema,
@@ -153,7 +153,7 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => compensationService.listPositionEconomicWeight(actor(req), req.query));
 
   app.get("/handoff-records", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: {
       querystring: PayrollHandoffRecordListQuerySchema,

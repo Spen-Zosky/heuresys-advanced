@@ -24,10 +24,12 @@ describe("scope/gate — org-gate boot assertion (D-51, ADR-0027 F2 prescriptive
     await app.ready();
     const stats = app.orgGateStats;
     expect(stats.violations).toEqual([]);
+    expect(stats.tenantViolations).toEqual([]); // B23
     // The surface was actually collected (the assertion is live, not vacuously green).
     expect(stats.sensitiveReadRoutes.length).toBeGreaterThan(0);
     for (const r of stats.sensitiveReadRoutes) {
       expect(["service", "catalog", "aggregate"], `${r.method} ${r.url}`).toContain(r.orgGate);
+      expect(["service", "platform"], `${r.method} ${r.url}`).toContain(r.tenantGate);
     }
     await app.close();
   });
@@ -37,19 +39,40 @@ describe("scope/gate — org-gate boot assertion (D-51, ADR-0027 F2 prescriptive
     registerOrgGateAssertion(app);
     app.get(
       "/naked",
-      { preHandler: [requirePermission(`${sensitiveResource}:read`)] },
+      {
+        config: { tenantGate: "service" },
+        preHandler: [requirePermission(`${sensitiveResource}:read`)],
+      },
       async () => ({}),
     );
     await expect(app.ready()).rejects.toThrow(/ORG_GATE_MISSING[\s\S]*\/naked/);
     await app.close();
   });
 
-  it("the same route WITH a declaration boots", async () => {
+  it("a sensitive read route WITHOUT config.tenantGate refuses to boot (TENANT_GATE_MISSING, B23)", async () => {
+    const app = Fastify();
+    registerOrgGateAssertion(app);
+    app.get(
+      "/naked-tenant",
+      {
+        config: { orgGate: "service" },
+        preHandler: [requirePermission(`${sensitiveResource}:read`)],
+      },
+      async () => ({}),
+    );
+    await expect(app.ready()).rejects.toThrow(/TENANT_GATE_MISSING[\s\S]*\/naked-tenant/);
+    await app.close();
+  });
+
+  it("the same route WITH both declarations boots", async () => {
     const app = Fastify();
     registerOrgGateAssertion(app);
     app.get(
       "/declared",
-      { config: { orgGate: "service" }, preHandler: [requirePermission(`${sensitiveResource}:read`)] },
+      {
+        config: { orgGate: "service", tenantGate: "service" },
+        preHandler: [requirePermission(`${sensitiveResource}:read`)],
+      },
       async () => ({}),
     );
     await expect(app.ready()).resolves.toBeDefined();

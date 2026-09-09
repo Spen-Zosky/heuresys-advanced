@@ -21,19 +21,19 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const successorCandidatesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("career_succession:read")],
     schema: { querystring: SuccessorCandidateListQuerySchema, response: { 200: SuccessorCandidateListResponseSchema } },
   }, async (req) => successorCandidatesService.list(actor(req), req.query));
 
   app.get("/readiness-distribution", {
-    config: { orgGate: "aggregate" },
+    config: { orgGate: "aggregate", tenantGate: "service" },
     preHandler: [requirePermission("career_succession:read")],
     schema: { response: { 200: SuccessorReadinessDistributionResponseSchema } },
   }, async (req) => successorCandidatesService.readinessDistribution(actor(req)));
 
   app.get("/:id", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("career_succession:read")],
     schema: { params: SuccessorCandidateIdParamSchema, response: { 200: SuccessorCandidateSchema } },
   }, async (req) => successorCandidatesService.getById(actor(req), req.params.id));

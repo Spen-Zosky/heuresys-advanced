@@ -17,7 +17,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const reviewCyclesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("performance-review:read")],
     schema: {
       querystring: ReviewCycleListQuerySchema,
@@ -26,7 +26,7 @@ export const reviewCyclesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => reviewCyclesService.list(actor(req), req.query));
 
   app.get("/:cycleId", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("performance-review:read")],
     schema: {
       params: ReviewCycleParamSchema,
@@ -37,7 +37,7 @@ export const reviewCyclesRoutes: FastifyPluginAsyncZod = async (app) => {
   /* ── #92 F4: le scritture ─────────────────────────────────────────────────── */
 
   app.post("/", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [app.verifyCsrf, requirePermission("review-cycle:manage")],
     schema: {
       body: CreateReviewCycleBodySchema,
@@ -52,7 +52,7 @@ export const reviewCyclesRoutes: FastifyPluginAsyncZod = async (app) => {
   /** Il passaggio di stato e' una rotta a se': non e' un PATCH generico sui campi, perche'
    *  cambiare stato non e' modificare un attributo — e' far avanzare un processo. */
   app.post("/:cycleId/transition", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [app.verifyCsrf, requirePermission("review-cycle:manage")],
     schema: {
       params: ReviewCycleParamSchema,

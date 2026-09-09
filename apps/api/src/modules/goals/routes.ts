@@ -18,56 +18,56 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const goalsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("goal:read")],
     schema: { querystring: GoalListQuerySchema, response: { 200: GoalListResponseSchema } },
   }, async (req) => goalsService.listGoals(actor(req), req.query));
 
   // #26 (S1018) goal-life sub-resources — literal route first (Fastify statics win over :id anyway).
   app.get("/templates", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("goal:read")],
     schema: { querystring: GoalTemplateListQuerySchema, response: { 200: GoalTemplateListResponseSchema } },
   }, async (req) => goalsService.listGoalTemplates(actor(req), req.query, req.locale));
 
   app.get("/:id", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("goal:read")],
     schema: { params: GoalIdParamSchema, response: { 200: GoalSchema } },
   }, async (req) => goalsService.getGoal(actor(req), req.params.id));
 
   app.get("/:id/updates", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("goal:read")],
     schema: { params: GoalIdParamSchema, querystring: GoalSubListQuerySchema, response: { 200: GoalUpdateListResponseSchema } },
   }, async (req) => goalsService.listGoalUpdates(actor(req), req.params.id, req.query));
 
   app.get("/:id/check-ins", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("goal:read")],
     schema: { params: GoalIdParamSchema, querystring: GoalSubListQuerySchema, response: { 200: GoalCheckInListResponseSchema } },
   }, async (req) => goalsService.listGoalCheckIns(actor(req), req.params.id, req.query));
 
   app.get("/:id/milestones", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("goal:read")],
     schema: { params: GoalIdParamSchema, querystring: GoalSubListQuerySchema, response: { 200: GoalMilestoneListResponseSchema } },
   }, async (req) => goalsService.listGoalMilestones(actor(req), req.params.id, req.query));
 
   app.get("/:id/comments", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("goal:read")],
     schema: { params: GoalIdParamSchema, querystring: GoalSubListQuerySchema, response: { 200: GoalCommentListResponseSchema } },
   }, async (req) => goalsService.listGoalComments(actor(req), req.params.id, req.query));
 
   app.get("/:id/alignments", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("goal:read")],
     schema: { params: GoalIdParamSchema, querystring: GoalSubListQuerySchema, response: { 200: GoalAlignmentListResponseSchema } },
   }, async (req) => goalsService.listGoalAlignments(actor(req), req.params.id, req.query));
 
   app.get("/:id/timeline", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("goal:read")],
     schema: { params: GoalIdParamSchema, response: { 200: GoalTimelineResponseSchema } },
   }, async (req) => goalsService.getGoalTimeline(actor(req), req.params.id));

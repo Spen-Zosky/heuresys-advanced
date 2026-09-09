@@ -16,7 +16,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const timeOffRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/requests", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("leave:read")],
     schema: {
       querystring: TimeOffRequestListQuerySchema,
@@ -25,7 +25,7 @@ export const timeOffRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => timeOffService.listRequests(actor(req), req.query));
 
   app.get("/accrual-rules", {
-    config: { orgGate: "catalog" },
+    config: { orgGate: "catalog", tenantGate: "service" },
     preHandler: [requirePermission("leave:read")],
     schema: {
       querystring: LeaveAccrualRuleListQuerySchema,
@@ -34,7 +34,7 @@ export const timeOffRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => timeOffService.listAccrualRules(actor(req), req.query));
 
   app.get("/balance-transactions", {
-    config: { orgGate: "service" },
+    config: { orgGate: "service", tenantGate: "service" },
     preHandler: [requirePermission("leave:read")],
     schema: {
       querystring: LeaveBalanceTransactionListQuerySchema,

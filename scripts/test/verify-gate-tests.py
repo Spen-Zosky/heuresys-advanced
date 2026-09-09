@@ -113,11 +113,26 @@ def prove_sul_verdetto(vg) -> None:
                      f"(instradate: {instradate})")
         return
 
+    # S1094 — il verdetto fittizio deve nominare TUTTE le suite che il cancello
+    # puo' pretendere, non le sole instradate dal file di prova. E' lo stesso
+    # principio gia' scritto qui sopra («derivare l'atteso dallo stato, mai
+    # presumerlo»), applicato al perimetro cresciuto: da quando `check` chiede
+    # anche le suite ASSENTI dal verdetto che coprono file (D-88 ④), un verdetto
+    # che ne nomina solo due e' incompleto per costruzione, e il caso «verde e
+    # fresco» diventerebbe BLOCCO per le dieci che non nomina — cioe' la prova
+    # misurerebbe di nuovo il proprio ambiente invece del cancello.
+    copre: set[str] = set()
+    for f in vg.git("ls-files").splitlines():
+        copre.update(vg.route_file(f))
+    tutte = sorted(set(instradate) | copre)
+
     def stesura(rossa: str | None = None, scope_vero: bool = True) -> list[dict]:
+        # `impronta_suite` e non piu' `content_hash(files_for_suite(...))`: e' la
+        # grandezza che `check` confronta adesso, ed e' invariante al commit.
         return [riga(s, 1 if s == rossa else 0,
-                     vg.content_hash(vg.files_for_suite(s, files)) if scope_vero
+                     vg.impronta_suite(s) if scope_vero
                      else "impronta-di-un-altro-contenuto")
-                for s in instradate]
+                for s in tutte]
 
     scrivi_verdetto(stesura(rossa="test-api"), "red")
     code, out = check()

@@ -8,10 +8,9 @@ exit code. Se lo stato cambia, il verdetto scade da solo.
 
 Freschezza PER SUITE (S1045)
 ----------------------------
-Ogni suite porta l'impronta dei SOLI file che la instradano, presa sul
-contenuto:
+Ogni suite porta l'impronta del CONTENUTO CHE COPRE, non del suo stato git:
 
-    scope(suite) = sha256( contenuto dei file modificati che instradano suite )
+    scope(suite) = sha256( sha-git di ogni file sotto le rotte della suite )
 
 Prima l'impronta era una sola per tutto (HEAD + status + diff): correggere una
 pagina di `apps/web` scadeva anche i 37 minuti di `test-api`, e modificare
@@ -22,8 +21,21 @@ correzione suggerita dal verdetto invalida il verdetto, e l'hook Stop rimanda
 all'inizio. Da qui la granularita' per suite, e `run` che riesegue solo cio'
 che serve.
 
-Conseguenza voluta: `git commit` non scade piu' niente — il contenuto
-verificato e' lo stesso, cambia solo dove e' scritto.
+`git commit` non scade niente, ed e' voluto: il contenuto verificato e' lo
+stesso, cambia solo dove e' scritto.
+
+⚠ Ma fino al 2026-09-09 questa frase copriva un difetto, non una proprieta'
+(D-88 ①). L'impronta si prendeva sui soli file NON COMMITTATI che instradavano
+la suite: dopo un commit quell'insieme e' vuoto, e l'impronta del vuoto vale
+`e3b0c442...` — sempre uguale a se stessa, quindi sempre «fresca». Committare
+non lasciava il contenuto verificato: lo faceva SPARIRE dal campo visivo,
+insieme all'obbligo di verificarlo. Misurato due volte in un giorno, una su
+migrazioni gia' applicate alla produzione. Ora l'impronta copre TUTTI i file
+sotto le rotte della suite, committati o meno, e l'invarianza al commit e' una
+conseguenza dell'algoritmo (`git hash-object`, gli stessi hash e gli stessi
+filtri dell'indice) invece di un effetto collaterale del non guardare.
+Il selftest la prova a esiti opposti su un repo usa-e-getta: vedi
+`selftest_impronta()`.
 
 Rieseguire e' idempotente: stesso stato -> stesso verdetto, nessun effetto
 collaterale.
@@ -340,6 +352,110 @@ def input_hash() -> str:
 # Cio' che NON cambia: una suite si considera passata solo se e' stata eseguita
 # davvero su quel contenuto. Nessuna scorciatoia, granularita' diversa.
 
+# --- D-88 ①: l'impronta del CONTENUTO COPERTO, invariante al commit ---------
+#
+# IL DIFETTO CHE CHIUDE, misurato due volte il 2026-09-09 nella stessa sessione.
+# `changed_files()` guarda `git status --porcelain` e `git diff HEAD`: entrambe
+# vedono solo cio' che NON e' committato. Quindi, dopo un `git commit`:
+#
+#   files   = []                      -> niente da instradare
+#   needed  = route([]) = []          -> «nessuna modifica che richieda verifica»
+#   scope   = content_hash([])        -> sha256 della stringa VUOTA, e3b0c442...
+#
+# Committare faceva svanire l'obbligo di verifica, e il verdetto restava
+# ancorato al nulla: `e3b0c442...` e' esattamente lo scope trovato nel verdetto
+# lasciato dalla sessione precedente, dove `test-api` non era mai girata. Il
+# commento qui sopra lo dichiarava voluto — «git commit non scade niente: il
+# contenuto verificato e' lo stesso» — e la frase e' vera SOLO SE quel contenuto
+# era stato verificato prima del commit. Quando la verifica era stata uccisa
+# dalla saturazione di memoria, il commit la faceva sparire dal campo visivo
+# insieme all'obbligo di rifarla.
+#
+# IL RIMEDIO, che e' quello che D-88 chiede: la freschezza non si misura piu'
+# su «cosa e' cambiato rispetto a HEAD» ma su «il contenuto che questa suite
+# copre e' ancora quello che ho verificato?». Il commit diventa irrilevante per
+# COSTRUZIONE, non per promessa.
+#
+# COSTO, misurato prima di scegliere il disegno (2026-09-09, 3323 file tracciati):
+#   leggendo il contenuto di ogni file  : 13,59 s   <- inaccettabile a ogni Stop
+#   dagli hash che git ha gia' in indice:  0,19 s   <- ~68x piu' rapido
+# `git ls-files -s` restituisce il sha1 del CONTENUTO di ogni file tracciato,
+# gia' calcolato. Committare non lo cambia (il contenuto e' lo stesso), che e'
+# precisamente la proprieta' che serve. Per i pochi file sporchi — modificati,
+# non tracciati o cancellati — si legge il contenuto reale, perche' li' l'indice
+# e il disco possono divergere.
+
+def _sha_indice() -> dict[str, str]:
+    """path -> sha1 del contenuto, come git lo tiene in indice. Costo ~0,08s."""
+    fuori: dict[str, str] = {}
+    for line in git("ls-files", "-s").splitlines():
+        if "\t" not in line:
+            continue
+        meta, path = line.split("\t", 1)
+        parti = meta.split()
+        if len(parti) >= 2:
+            fuori[path.strip().strip('"')] = parti[1]
+    return fuori
+
+
+def impronta_suite(suite: str) -> str:
+    """Impronta del contenuto che QUESTA suite verifica — non del suo stato git.
+
+    Due proprieta', ed e' per averle che questa funzione esiste:
+      · invariante al commit: `git add` + `git commit` non la cambiano, perche'
+        misura byte, non lo stato dell'albero di lavoro;
+      · cambia appena cambia un file che la suite copre, tracciato o meno.
+    """
+    mappa = _sha_indice()
+
+    # I file sporchi: il disco vince sull'indice, perche' e' il disco che i test
+    # leggono. Ma l'hash DEVE essere calcolato nello stesso modo dei puliti,
+    # altrimenti l'impronta cambia al commit per un motivo che col contenuto non
+    # c'entra niente — ed e' proprio la proprieta' che questa funzione promette.
+    #
+    # ⚠ DUE TRAPPOLE, tutte e due colte dal selftest invece che in produzione:
+    #   ① `git ls-files -s` da' un SHA-1 in formato git (`blob <len>\0` + dati),
+    #      non uno sha256 del contenuto: confrontare i due e' confrontare due
+    #      algoritmi diversi, e il commit spostava l'impronta ogni volta;
+    #   ② con `core.autocrlf=input` — che e' la configurazione di questo repo —
+    #      l'indice contiene il contenuto NORMALIZZATO a LF mentre il disco ha
+    #      CRLF. Un hash calcolato sui byte del disco non combacerebbe con quello
+    #      dell'indice nemmeno usando l'algoritmo giusto.
+    # `git hash-object` risolve entrambe: e' lo stesso codice che git usa per
+    # riempire l'indice, filtri compresi. Un solo processo per tutti i file.
+    sporchi = changed_files()
+    da_hashare = [f for f in sporchi if (REPO / f).is_file()]
+    if da_hashare:
+        uscita = git("hash-object", "--", *da_hashare).splitlines()
+        for f, sha in zip(da_hashare, uscita):
+            mappa[f] = sha.strip()
+
+    for f in sporchi:
+        fp = REPO / f
+        if fp.is_dir():
+            mappa[f] = "<dir>"
+        elif not fp.exists():
+            # cancellato dal disco ma ancora in indice: e' un cambiamento, e va
+            # visto — altrimenti togliere un file di test non scadrebbe la suite
+            mappa[f] = "<assente>"
+
+    h = hashlib.sha256()
+    for p in sorted(mappa):
+        if suite in route_file(p):
+            h.update(p.encode())
+            h.update(mappa[p].encode())
+    return h.hexdigest()
+
+
+def route_file(path: str) -> list[str]:
+    """Le suite che UN file instrada (prima rotta che combacia, come route())."""
+    norm = path.replace("\\", "/")
+    for prefix, names in ROUTES:
+        if norm.startswith(prefix):
+            return names
+    return []
+
+
 def files_for_suite(suite: str, files: list[str]) -> list[str]:
     """I file modificati che instradano QUESTA suite (primo prefisso che vince)."""
     out: list[str] = []
@@ -545,7 +661,12 @@ def run_suites(names: list[str], with_e2e: bool, files: list[str],
             # se qualcuno modifica quei file mentre la suite gira, l'impronta registrata
             # e' quella finale e al giro dopo risultera' scaduta. Sbagliare per eccesso
             # di prudenza e' l'unico verso accettabile per un cancello.
-            "scope": content_hash(files_for_suite(name, files)),
+            # D-88 ①: e' l'impronta del CONTENUTO COPERTO dalla suite, la stessa
+            # grandezza che `check` confronta. Prima era l'impronta dei soli file
+            # non committati che la instradavano: a valle di un commit quell'insieme
+            # e' vuoto, e l'impronta del vuoto e' sempre uguale a se stessa — cioe'
+            # un verdetto che si dichiarava valido su qualunque contenuto.
+            "scope": impronta_suite(name),
             "tail": tail,
         })
         taglio = ""
@@ -584,7 +705,10 @@ def triage(files: list[str], needed: list[str]) -> tuple[list[str], list[str], l
         r = prev.get(s)
         # Un verdetto scritto prima di S1045 non ha "scope": si tratta come scaduto,
         # cioe' si riverifica. Un formato vecchio non deve poter passare per fresco.
-        if not r or r.get("scope") != content_hash(files_for_suite(s, files)):
+        # D-88 ①: il confronto e' sull'impronta del CONTENUTO COPERTO, non piu' su
+        # quella dei soli file non committati — che dopo un commit era l'impronta
+        # dell'insieme vuoto, uguale per tutti e sempre soddisfatta.
+        if not r or r.get("scope") != impronta_suite(s):
             stale.append(s)
         elif r["exit"] != 0:
             red.append(s)
@@ -593,13 +717,62 @@ def triage(files: list[str], needed: list[str]) -> tuple[list[str], list[str], l
     return fresh, stale, red
 
 
+def suite_da_verificare(files: list[str]) -> list[str]:
+    """Le suite che questo stato dell'albero obbliga a verificare.
+
+    ⚠ UNA SOLA definizione, usata da `check` E da `run`. Averne due era un difetto
+    misurato il 2026-09-09: `check` chiedeva sette suite e `run` — che instradava
+    sul solo `route(files)` — ne eseguiva due, poi riscriveva il verdetto GREEN.
+    Il comando che il cancello suggerisce deve fare esattamente cio' che il
+    cancello chiede, altrimenti il verdetto e' d'accordo con se stesso e con
+    nient'altro.
+
+    Quattro ragioni per cui una suite entra, e le ultime due sono le due meta'
+    di D-88 che mancavano:
+      ① un file che la instrada e' cambiato adesso (il routing di sempre);
+      ② il suo ultimo esito era rosso;
+      ③ l'impronta del contenuto che copre non e' quella su cui e' stata
+         verificata — committare o meno non c'entra piu' niente;
+      ④ NON COMPARE nel verdetto pur coprendo file che esistono. Questa era la
+         piu' larga delle tre falle, e la piu' silenziosa: il 2026-09-09 il
+         verdetto certificava 2 suite su 12 — `typecheck` (1418 file coperti),
+         `lint` (367), `db-health` (555) e altre sette non c'erano affatto — e
+         il cancello rispondeva VERDE. Una suite assente non e' una suite
+         verde: e' una suite di cui non si sa niente, e un cancello che non
+         distingue le due cose e' il difetto che D-88 descrive.
+
+    Una suite che non copre NESSUN file resta fuori, e non e' un buco: e' il
+    caso di una suite il cui perimetro non esiste in questo albero.
+    """
+    prev = {r["suite"]: r for r in load_verdict().get("results", [])}
+    needed = list(route(files))
+
+    # quante suite coprono almeno un file tracciato: una passata sola su ls-files
+    copre: dict[str, int] = {}
+    for f in git("ls-files").splitlines():
+        for s in route_file(f):
+            copre[s] = copre.get(s, 0) + 1
+
+    for s in SUITES:
+        if s in needed:
+            continue
+        r = prev.get(s)
+        if r is None:
+            if copre.get(s):
+                needed.append(s)
+        elif r.get("scope") != impronta_suite(s) or r.get("exit") != 0:
+            needed.append(s)
+    return needed
+
+
 def check() -> tuple[bool, str]:
     """(ok, motivo). ok=True significa: si puo' chiudere il turno."""
     if BRAKE.exists():
         return True, "freno tirato (.zp/verify-off)"
 
     files = changed_files()
-    needed = route(files)
+    needed = suite_da_verificare(files)
+
     if not needed:
         return True, "nessuna modifica che richieda verifica"
 
@@ -687,14 +860,95 @@ def selftest() -> int:
     if niente:
         errori.append(f"controprova: `route` instrada {sorted(niente)} su un README")
 
+    errori += selftest_impronta()
+
     if errori:
         print("SELFTEST ROUTER — ROSSO")
         for e in errori:
             print(f"  ✗ {e}")
         return 1
     print(f"SELFTEST ROUTER — verde ({len(CASI_ROUTER)} casi, positivi e negativi, "
-          f"piu' la controprova che il router discrimini)")
+          f"piu' la controprova che il router discrimini, piu' 4 casi sull'impronta "
+          f"invariante al commit)")
     return 0
+
+
+# --- La prova di D-88 ①, su un repo USA-E-GETTA -----------------------------
+#
+# Perche' un repo-fixture e non il repo vero: la proprieta' da provare e' «un
+# COMMIT non cambia l'impronta», e provarla qui significherebbe committare nel
+# repository di lavoro a ogni selftest. E' la stessa ragione di C4 — una prova
+# che scrive gira su una copia usa-e-getta — applicata a git invece che al
+# database. Il fixture nasce in una directory temporanea e non tocca nulla.
+#
+# I quattro casi, e sono due coppie a esiti opposti perche' una prova che sa solo
+# dire di si' non e' una prova:
+#   ① dopo `git add` + `git commit` l'impronta e' IDENTICA   <- il difetto di D-88
+#   ② modificando un file coperto l'impronta CAMBIA          <- non e' una costante
+#   ③ un file NON coperto dalla suite non la influenza       <- discrimina per rotta
+#   ④ cancellare un file coperto CAMBIA l'impronta           <- non solo aggiunte
+
+def selftest_impronta() -> list[str]:
+    import tempfile
+    errori: list[str] = []
+    global REPO
+    originale = REPO
+    tmp = tempfile.mkdtemp(prefix="vg-impronta-")
+    try:
+        base = Path(tmp)
+        (base / "apps" / "api" / "src").mkdir(parents=True)
+        (base / "docs").mkdir(parents=True)
+        (base / "apps" / "api" / "src" / "a.ts").write_text("uno\n", encoding="utf-8")
+        (base / "apps" / "api" / "src" / "b.ts").write_text("due\n", encoding="utf-8")
+        (base / "docs" / "nota.md").write_text("fuori rotta\n", encoding="utf-8")
+
+        def g(*a: str) -> None:
+            subprocess.run(["git", "-C", str(base), *a],
+                           capture_output=True, text=True, check=False)
+
+        g("init", "-q")
+        g("config", "user.email", "selftest@local")
+        g("config", "user.name", "selftest")
+        g("add", "-A")
+        g("commit", "-q", "-m", "base")
+        g("add", "-A")   # niente da aggiungere: parte pulito
+
+        REPO = base
+        # ①  il commit non deve spostare l'impronta
+        (base / "apps" / "api" / "src" / "a.ts").write_text("uno modificato\n", encoding="utf-8")
+        prima = impronta_suite("test-api")
+        g("add", "-A")
+        g("commit", "-q", "-m", "modifica")
+        dopo = impronta_suite("test-api")
+        if prima != dopo:
+            errori.append("impronta ①: il COMMIT ha cambiato l'impronta "
+                          f"({prima[:12]} -> {dopo[:12]}) — deve essere invariante")
+
+        # ②  ma una modifica vera deve spostarla
+        (base / "apps" / "api" / "src" / "b.ts").write_text("due modificato\n", encoding="utf-8")
+        cambiata = impronta_suite("test-api")
+        if cambiata == dopo:
+            errori.append("impronta ②: modificando un file coperto l'impronta NON e' cambiata "
+                          "— sarebbe una costante travestita da misura")
+
+        # ③  un file fuori dalle rotte della suite non la riguarda
+        g("add", "-A"); g("commit", "-q", "-m", "b")
+        riferimento = impronta_suite("test-api")
+        (base / "docs" / "nota.md").write_text("cambiata fuori rotta\n", encoding="utf-8")
+        if impronta_suite("test-api") != riferimento:
+            errori.append("impronta ③: un file fuori dalle rotte di `test-api` "
+                          "ne ha cambiato l'impronta")
+
+        # ④  togliere un file coperto e' un cambiamento quanto modificarlo
+        (base / "apps" / "api" / "src" / "b.ts").unlink()
+        if impronta_suite("test-api") == riferimento:
+            errori.append("impronta ④: CANCELLARE un file coperto non ha cambiato "
+                          "l'impronta — una suite potrebbe perdere un test e restare verde")
+    except Exception as e:                                   # noqa: BLE001
+        errori.append(f"impronta: il fixture non e' stato eseguibile: {e!r}")
+    finally:
+        REPO = originale
+    return errori
 
 
 def main() -> int:
@@ -733,7 +987,10 @@ def main() -> int:
 
     if args.cmd == "run":
         files = changed_files()
-        needed = route(files)
+        # La STESSA definizione che usa `check`, non `route(files)`: vedi
+        # `suite_da_verificare`. Con due definizioni diverse il cancello chiedeva
+        # sette suite e il comando che suggeriva ne eseguiva due.
+        needed = suite_da_verificare(files)
         # Suite chieste per nome: si eseguono ANCHE se il diff non le instrada.
         # Un nome sbagliato si ferma qui, con l'elenco: una suite scritta male
         # non deve poter passare per «eseguita e verde».
@@ -772,7 +1029,15 @@ def main() -> int:
             # `extra` entra sempre in to_run ed esce da keep: chi chiede una suite
             # per nome vuole la misura, non il ricordo di una misura.
             to_run = [s for s in needed if s in stale or s in red or s in extra]
-            keep = [prev[s] for s in fresh if s not in extra]
+            # ⚠ `keep` porta avanti OGNI risultato precedente che non si riesegue,
+            # non solo quelli fra le suite instradate adesso. Prima erano solo le
+            # `fresh` di `needed`, e il verdetto PERDEVA le altre: una suite uscita
+            # dal file spariva anche dall'obbligo, perche' `check` non puo'
+            # distinguere «mai verificata» da «verificata e poi dimenticata».
+            # E' D-88 in una terza forma — l'assenza di misura letta come assenza
+            # di obbligo — misurata il 2026-09-09 su un verdetto GREEN scritto
+            # dopo aver eseguito 2 suite delle 7 richieste.
+            keep = [r for s, r in prev.items() if s not in to_run]
         print(f"{len(files)} file modificati → suite: {', '.join(needed)}")
         if extra:
             print(f"  chieste a mano (eseguite comunque): {', '.join(extra)}")

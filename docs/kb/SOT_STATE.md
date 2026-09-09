@@ -18,6 +18,50 @@ API **270** · moduli API **106** · perimetri dell'agente aperti **11** · HEAD
 
 ---
 
+## S1095 (2026-09-10) — il push rimasto indietro, tre vulnerabilità, e due voci dichiarate chiuse che non lo erano
+
+**Numeri ri-derivati dal vivo il 2026-09-10**: migrazioni su disco **393** (max `000396`, invariate
+da S1094 — nessuna migrazione in questa sessione) · file di test API **270** · HEAD `d1b79c38`.
+
+**Prima corsa**: 19 commit locali di S1094 (fix B1-B20 del bundle Cowork, `verify_gate`, headline
+SOT_STATE) erano committati ma mai pushati — `git push origin main` (`edf355ec..d1b79c38`).
+
+**Seconda corsa — revisione Cowork del bundle `BUNDLE_CLI_20260909`**: 11 delle 13 voci di fase
+1+2 chiuse in S1094 reggono alla misura indipendente; **due erano dichiarate chiuse quando non lo
+erano**:
+
+- **B18 (secondo fattore obbligatorio)**: l'interruttore globale `MFA_ENFORCEMENT_ENABLED=true` era
+  acceso, ma le **due politiche per cliente** in `sys.sys_auth_mfa_policies` erano `enabled=false`
+  dal 27 agosto — il codice fa scattare l'obbligo solo quando la politica del cliente è abilitata,
+  quindi **nessun utente era davvero obbligato**. Chiusa ora via `PUT /v1/mfa-policy/:tenantId`
+  live (login reale: federica.marchetti su RTL Bank, enzo.spenuso su Heuresys System),
+  `roleCodes=NULL` (tutti i ruoli — verificato sicuro: 164 utenti ACTIVE, 159 con fattore
+  verificato, dei 5 senza fattore 3 sono SERVICE già esentati dal 2026-08-25 e 2 sono persone
+  reali che andranno in iscrizione al prossimo login, non bloccate). Guardia a esiti opposti: 14/14
+  test verdi sul gemello (`auth-mfa-mandatory`, `auth-mfa-enforcement-switch`, `mfa-policy`).
+- **B23 (cancello meccanico sull'isolamento fra clienti)**: `apps/api/src/lib/scope/gate.ts` non
+  era mai stato toccato — la voce era nel piano ma nascosta in una sezione diversa. Estesa con una
+  seconda dichiarazione, `tenantGate: "service" | "platform"`, sulla **stessa popolazione** di
+  `orgGate` (150 rotte read non-self su risorsa sensibile, 41 moduli): 40 moduli `"service"`
+  (query già filtrata per tenant, verificato per-modulo sul `repository.ts`), 1 `"platform"`
+  (`assessment-methods`, catalogo di 5 righe seminate, nessuna colonna `tenant_id`). Come per
+  `orgGate`, l'app **rifiuta di avviarsi** se una rotta sensibile non dichiara l'uno o l'altro
+  valore — provato a esiti opposti (rotta nuda → `TENANT_GATE_MISSING`, rotta dichiarata → avvia).
+  **Confine dichiarato**: copre le rotte già governate da `orgGate`, non i 352 punti censiti da B1
+  (quelli si verificano sul dato vivo via `sys.v_tenant_boundary_violations_full`, non sulla
+  dichiarazione del codice) — estendere oltre è lavoro futuro, non dato per fatto.
+- **La terza voce del mandato (rotazione di una chiave)** risulta **già decisa da Enzo il
+  2026-09-09**: sospesa, non una pendenza. Nessuna credenziale toccata.
+
+**3 vulnerabilità Dependabot corrette** (`157` sharp high, `156` js-yaml high, `155`
+`@ai-sdk/provider-utils` low): gli `overrides` in `package.json` esistevano già da un ciclo
+precedente ma erano rimasti indietro (`sharp >=0.35.0` includeva ancora 0.35.3 vulnerabile,
+`js-yaml ^4.3.1` includeva 4.3.1 vulnerabile). Corretti a `sharp >=0.35.4`, `js-yaml ^4.3.2`,
+aggiunto `@ai-sdk/provider-utils: 4.0.33` **pin esatto** (non un range aperto: il pacchetto `ai`
+6.0.193 fissa quella dipendenza a `4.0.27` esatto, e un primo tentativo con `>=4.0.33` senza tetto
+aveva risolto a `5.0.39`, un major mai testato con quell'`ai` — corretto prima di committare).
+Typecheck + lint verdi su tutti i workspace dopo il bump.
+
 ## S1094 (2026-09-09) — sei difetti della stessa famiglia: un verde che significava «non ho guardato»
 
 **`#143` CHIUSA, 5/5.** **F4**: modulo API `projects` (7 rotte, mig `000384`, 9 test verdi in 17 s sul

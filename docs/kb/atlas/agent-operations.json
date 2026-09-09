@@ -191,37 +191,37 @@
     "get": {
      "method": "GET",
      "path": "/",
-     "permission": null
+     "permission": "tenant_blueprint:read"
     },
     "get_by_id": {
      "method": "GET",
      "path": "/:id",
-     "permission": null
+     "permission": "tenant_blueprint:read"
     },
     "get_by_id_versions_by_number": {
      "method": "GET",
      "path": "/:id/versions/:number",
-     "permission": null
+     "permission": "tenant_blueprint:read"
     },
     "get_by_id_versions_by_number_diff": {
      "method": "GET",
      "path": "/:id/versions/:number/diff",
-     "permission": null
+     "permission": "tenant_blueprint:read"
     },
     "get_by_id_versions_by_number_model_proposal": {
      "method": "GET",
      "path": "/:id/versions/:number/model-proposal",
-     "permission": null
+     "permission": "tenant_blueprint:read"
     },
     "get_by_id_versions_by_number_processes": {
      "method": "GET",
      "path": "/:id/versions/:number/processes",
-     "permission": null
+     "permission": "tenant_blueprint:read"
     },
     "get_research_domains": {
      "method": "GET",
      "path": "/research-domains",
-     "permission": null
+     "permission": "tenant_blueprint:read"
     }
    },
    "solaLettura": true

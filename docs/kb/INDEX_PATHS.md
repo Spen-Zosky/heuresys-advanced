@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-09T18:43:57Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3386**
+**Generato**: 2026-09-09T22:57:53Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3399**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,16 +13,16 @@
 | api-module | 380 |
 | ci | 19 |
 | claude-config | 37 |
-| config | 200 |
+| config | 201 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 384 |
+| db-migration | 393 |
 | db-other | 8 |
-| db-script | 53 |
+| db-script | 55 |
 | db-seed | 114 |
-| doc-canonical | 763 |
+| doc-canonical | 764 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 418 |
 | ux-design-archive | 80 |
 | web-source | 248 |
-| **TOTALE** | **3386** |
+| **TOTALE** | **3399** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2828 |
+| live | 2841 |
 
 ## File per categoria
 
@@ -649,6 +649,7 @@
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-50-f3-grafo.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-92-f6.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-99-f7.mts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\prova-live-B5-okr-fuori-settore.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\verify-collaudo-login.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\verify-derived-login.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\tsconfig.json` · *live* · git-tracked
@@ -1514,6 +1515,15 @@
 - `D:\heuresys-advanced\db\migrations\000385_i_progetti_hanno_una_voce_di_menu.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000386_il_confine_fra_clienti_su_tutti_i_punti.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000387_le_sentinelle_che_non_esistevano_su_tre_catene.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000388_il_contenuto_di_un_tenant_deve_essere_del_suo_settore.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000389_un_ruolo_di_cliente_non_si_concede_senza_cliente.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000390_la_sentinella_delle_buste_non_esclude_piu_nessuno.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000391_paid_leave_entra_nel_vocabolario_delle_assenze.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000392_la_sentinella_straordinari_guarda_la_data_del_lavoro.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000393_lorganigramma_sorveglia_la_catena_viva.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000394_la_voce_progetti_dichiara_la_sua_classe.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000395_chi_chiude_un_gap_non_e_il_gap.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000396_le_valutazioni_non_condivise_hanno_un_registro_di_eccezione.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1577,6 +1587,8 @@
 - `D:\heuresys-advanced\db\scripts\sul-gemello.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\validate_database.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\validate_database.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\verifica-b7-accessi-tenant.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\verifica-b9-sanatoria-straordinari.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\verifica-origine-vs-marchio.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\verify-separazione-totp.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\verify-storia36-dossier.sql` · *live* · git-tracked
@@ -1782,6 +1794,7 @@
 - `D:\heuresys-advanced\.zp\PROGRESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\CLAUDE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\START_HERE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\FINDINGS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\FORENSIC-NOTES-S1006-cli.md` · *live* · git-tracked

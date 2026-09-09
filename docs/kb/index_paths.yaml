@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-09T18:43:57Z da docs/kb/tools/build_index.py
+# generato: 2026-09-09T22:57:53Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-09T18:43:57Z"
-  total_files: 3386
+  generated_at: "2026-09-09T22:57:53Z"
+  total_files: 3399
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,16 +13,16 @@ meta:
     api-module: 380
     ci: 19
     claude-config: 37
-    config: 200
+    config: 201
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 384
+    db-migration: 393
     db-other: 8
-    db-script: 53
+    db-script: 55
     db-seed: 114
-    doc-canonical: 763
+    doc-canonical: 764
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2828
+    live: 2841
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3551,6 +3551,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-99-f7.mts'
     root: repo
     rel: 'apps/api/scripts/prova-live-99-f7.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-B5-okr-fuori-settore.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-B5-okr-fuori-settore.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -8654,6 +8660,60 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000388_il_contenuto_di_un_tenant_deve_essere_del_suo_settore.sql'
+    root: repo
+    rel: 'db/migrations/000388_il_contenuto_di_un_tenant_deve_essere_del_suo_settore.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000389_un_ruolo_di_cliente_non_si_concede_senza_cliente.sql'
+    root: repo
+    rel: 'db/migrations/000389_un_ruolo_di_cliente_non_si_concede_senza_cliente.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000390_la_sentinella_delle_buste_non_esclude_piu_nessuno.sql'
+    root: repo
+    rel: 'db/migrations/000390_la_sentinella_delle_buste_non_esclude_piu_nessuno.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000391_paid_leave_entra_nel_vocabolario_delle_assenze.sql'
+    root: repo
+    rel: 'db/migrations/000391_paid_leave_entra_nel_vocabolario_delle_assenze.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000392_la_sentinella_straordinari_guarda_la_data_del_lavoro.sql'
+    root: repo
+    rel: 'db/migrations/000392_la_sentinella_straordinari_guarda_la_data_del_lavoro.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000393_lorganigramma_sorveglia_la_catena_viva.sql'
+    root: repo
+    rel: 'db/migrations/000393_lorganigramma_sorveglia_la_catena_viva.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000394_la_voce_progetti_dichiara_la_sua_classe.sql'
+    root: repo
+    rel: 'db/migrations/000394_la_voce_progetti_dichiara_la_sua_classe.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000395_chi_chiude_un_gap_non_e_il_gap.sql'
+    root: repo
+    rel: 'db/migrations/000395_chi_chiude_un_gap_non_e_il_gap.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000396_le_valutazioni_non_condivise_hanno_un_registro_di_eccezione.sql'
+    root: repo
+    rel: 'db/migrations/000396_le_valutazioni_non_condivise_hanno_un_registro_di_eccezione.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -8993,6 +9053,18 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\validate_database.sh'
     root: repo
     rel: 'db/scripts/validate_database.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\verifica-b7-accessi-tenant.sql'
+    root: repo
+    rel: 'db/scripts/verifica-b7-accessi-tenant.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\verifica-b9-sanatoria-straordinari.sql'
+    root: repo
+    rel: 'db/scripts/verifica-b9-sanatoria-straordinari.sql'
     category: db-script
     status: live
     provenance: git-tracked
@@ -10187,6 +10259,12 @@ files:
   - path: 'D:\heuresys-advanced\README.md'
     root: repo
     rel: 'README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\START_HERE.md'
+    root: repo
+    rel: 'START_HERE.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

@@ -54,7 +54,10 @@ intercettare DIF-4*. Ed è la seconda volta oggi che quella famiglia si presenta
 ## Fasi — perché questa ricognizione è lavoro, non un documento
 
 > **stato**: CHIUSO
-> **item**: `#149`
+> **registro di sessione** — cronaca di cio' che si e' fatto, non il programma di una
+> voce: non dichiara `item` di proposito. Rivendicarne uno faceva mostrare QUESTO file
+> al posto del piano della voce, e su `#169` il menu e' arrivato a scrivere «il piano
+> e' esaurito, la voce va chiusa» mentre restavano due fasi aperte (misurato S1094).
 
 ⚠ Queste fasi esistono anche perché un cancello le pretende (`programmi.py --verifica`), e il
 fatto che il file l'abbia fatto **uscire rosso** è esso stesso una dimostrazione della regola C1:

@@ -62,6 +62,16 @@ RE_ITEM = re.compile(r"^>\s*\*\*item\*\*:\s*[`#]*(?P<id>[A-Za-z]{0,2}-?\d+)", re
 RE_DATA = re.compile(r"\b20\d{2}-\d{2}-\d{2}\b")
 RE_INTERROTTO = re.compile(r"\bINTERROTTO\b")
 
+# L'heading che apre l'elenco delle fasi. ⭐ Era il confronto esatto `## Fasi`, e in S1094 si e'
+# misurato quanto costa: `246-fixed-term…` scrive «## Le fasi», `S1093-mandato…` «## Registro
+# deliverable» — e per tutti e due il parser vedeva ZERO fasi. Il menu li presentava come
+# «0/0 fatte, il piano e' esaurito, la voce va chiusa», e su `#169` quella frase riguardava una
+# voce con DUE fasi aperte, di cui una e' «il segreto smette di essere derivato»: una questione
+# di sicurezza che il menu invitava a chiudere. Un articolo in piu' nel titolo di una sezione
+# non deve poter nascondere il lavoro che resta.
+RE_SEZIONE_FASI = re.compile(
+    r"^#{2,}\s*(le\s+)?fasi\b|^#{2,}\s*registro\s+(dei\s+)?deliverable\b", re.I)
+
 # L'identificativo di una voce non e' sempre un numero: accanto a `#216` il register porta
 # `Z-251`. Tre strumenti devono riconoscerlo allo stesso modo — questo, il cancello che conta
 # le voci senza piano, e il generatore del menu — e tre copie della stessa regola sono il difetto
@@ -71,6 +81,15 @@ RE_ID = re.compile(r"[`#]*([A-Za-z]{0,2}-?\d+)")
 # `S1089-piano-sessione.md` — il quaderno di una singola sessione (R24), non un programma
 # multi-sessione. Vedi la ragione per esteso in `carica()`.
 RE_PIANO_SESSIONE = re.compile(r"^S\d+-piano-sessione\.md$", re.I)
+
+# ⭐ Un REGISTRO DI SESSIONE racconta cosa si e' fatto; un PROGRAMMA dice da dove si riprende.
+# Sono due cose diverse e finivano nello stesso cesto: `S1093-mandato-p1-p3-gated.md` dichiarava
+# `item: #169` perche' quella era la prima voce lavorata, e il menu ha mostrato LUI al posto del
+# piano di `#169` — scrivendo «il piano e' esaurito, la voce va chiusa» su una voce con due fasi
+# aperte, una delle quali di sicurezza (misurato S1094). La convenzione esisteva gia' per
+# `S<n>-piano-sessione.md`, che `carica()` salta: qui diventa DICHIARATA invece che dedotta dal
+# nome, cosi' chi scrive un registro lo dice e non deve indovinare come chiamarlo.
+RE_REGISTRO_SESSIONE = re.compile(r"^>\s*\*\*registro di sessione\*\*", re.M | re.I)
 
 
 def normalizza_id(testo: str) -> str | None:
@@ -183,7 +202,7 @@ def _leggi(percorso: Path) -> Programma:
     perse: list[int] = []
     dentro = False
     for i, r in enumerate(righe, start=1):
-        if r.strip().startswith("## Fasi"):
+        if RE_SEZIONE_FASI.match(r.strip()):
             dentro = True
             continue
         if dentro and r.startswith("## "):
@@ -227,15 +246,55 @@ def carica(dir_programmi: Path | None = None) -> list[Programma]:
         if RE_PIANO_SESSIONE.match(p.name):
             continue
         try:
+            testo = p.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        # Un registro di sessione si dichiara tale e non entra fra i programmi: non ha una
+        # voce da cui riprendere, ha una cronaca da rileggere.
+        if RE_REGISTRO_SESSIONE.search(testo):
+            continue
+        try:
             out.append(_leggi(p))
         except Exception:
             continue
     return out
 
 
+def righe_del_file(percorso: Path) -> list[str]:
+    """Le righe grezze di un programma. Serve ai controlli che devono guardare FUORI
+    dalla sezione delle fasi — cioe' proprio dove il parser non guarda."""
+    try:
+        return percorso.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return []
+
+
 def difetti(programmi: list[Programma]) -> list[str]:
     """I controlli che possono uscire ROSSI. Ognuno nasce da un modo di barare."""
     fuori = []
+
+    # ⭐ DUE PROGRAMMI PER LO STESSO ITEM: il menu ne mostra UNO, e puo' essere quello
+    # sbagliato. Misurato in S1094, ed e' costato un'indicazione pericolosa:
+    #   · `#169` aveva il suo piano (2/4 fasi, F3 aperta e' «il segreto smette di essere
+    #     derivato», cioe' una questione di sicurezza) E il registro di sessione
+    #     `S1093-mandato-p1-p3-gated.md`, che dichiara lo stesso item ed e' CHIUSO. Il menu
+    #     di avvio ha mostrato il secondo e ha scritto **«il piano e' esaurito, la voce va
+    #     chiusa»** su una voce con lavoro di sicurezza aperto.
+    #   · `#149` aveva lo stesso problema: il menu diceva «1/4, riprendi da F2» leggendo il
+    #     registro della ricognizione invece del piano del presidio (3/4).
+    # Non e' il menu a essere rotto: e' che due file rivendicano la stessa voce e nessuno
+    # lo diceva. Un registro di sessione racconta cosa si e' fatto, un programma dice da
+    # dove si riprende: se il primo si dichiara programma della voce, la ripartenza mente.
+    per_item: dict[str, list[str]] = {}
+    for pr in programmi:
+        if pr.item:
+            per_item.setdefault(pr.item, []).append(pr.percorso.name)
+    for item, nomi in sorted(per_item.items()):
+        if len(nomi) > 1:
+            fuori.append(
+                f"item #{item}: {len(nomi)} programmi lo rivendicano ({', '.join(sorted(nomi))}) "
+                f"— il menu ne mostra uno solo, e puo' essere quello sbagliato")
+
     for pr in programmi:
         nome = pr.percorso.name
         if not pr.fasi:
@@ -248,7 +307,32 @@ def difetti(programmi: list[Programma]) -> list[str]:
             # ⚠ Lo sconto vale SOLO per lo stato CHIUSO letto dal vocabolario: un piano il cui
             # stato non e' riconosciuto vale come aperto, altrimenti basterebbe scrivere male
             # la riga di stato per uscire dal controllo.
-            if pr.stato != "CHIUSO":
+            # ⭐ MA PRIMA: il file contiene righe che un umano legge come fasi, e il parser
+            # non ne ha riconosciuta nessuna? Allora non e' «un programma senza fasi»: e' un
+            # programma le cui fasi sono INVISIBILI, ed e' molto peggio — perche' il menu lo
+            # presenta come «0/0 fatte, il piano e' esaurito, la voce va chiusa».
+            #
+            # Misurato in S1094: `S1093-mandato-p1-p3-gated.md` ha DIECI righe-fase sotto un
+            # heading `## Registro deliverable` invece di `## Fasi`. Il parser cerca le fasi
+            # solo dentro la sezione che conosce, quindi non le vede — e `fasi_perse`, che
+            # esiste apposta per dire quante ne sta perdendo, restava a ZERO perche' conta
+            # solo dentro quella stessa sezione. Il controllo che doveva accorgersene era
+            # cieco esattamente dove serviva.
+            #
+            # Conseguenza vera, non teorica: il menu di avvio ha scritto «la voce #169 va
+            # chiusa» su una voce con due fasi aperte, di cui una e' «il segreto smette di
+            # essere derivato» — una questione di sicurezza. E' l'ennesima forma della stessa
+            # famiglia: l'assenza di misura letta come assenza di lavoro.
+            #
+            # ⚠ Questo difetto NON ha lo sconto per i CHIUSI: un file chiuso le cui fasi sono
+            # invisibili mente comunque a chi lo legge, e il menu non ha modo di saperlo.
+            invisibili = sum(1 for r in righe_del_file(pr.percorso) if RE_FASE_LASCA.match(r))
+            if invisibili:
+                fuori.append(
+                    f"{nome}: {invisibili} righe sembrano fasi ma il parser non ne vede NESSUNA "
+                    f"— stanno fuori dalla sezione delle fasi (heading diverso da '## Fasi'?), "
+                    f"e il menu presentera' il piano come esaurito")
+            elif pr.stato != "CHIUSO":
                 fuori.append(f"{nome}: nessuna fase — un programma senza fasi non e' ripartibile")
             continue
         if pr.stato not in STATI:
@@ -328,6 +412,20 @@ def _selftest() -> int:
         prova("la prossima fase e' F2", p[0].prossima is not None and p[0].prossima.sigla.startswith("F2"))
         prova("nessun difetto sul sano", difetti(p) == [])
         prova("il riassunto parla", "10" in riassunto(d))
+
+        # --- due programmi per lo stesso item (S1094)
+        # Il caso reale: un REGISTRO di sessione che rivendica l'item di una voce. Il menu
+        # ne mostra uno solo, e su `#169` ha mostrato il registro CHIUSO scrivendo «la voce
+        # va chiusa» mentre il piano vero aveva due fasi aperte, di cui una di sicurezza.
+        (d / "S9999-registro.md").write_text(
+            "# S9999 — registro di sessione\n\n> **item**: #10\n> **stato**: CHIUSO\n\n"
+            "## Fasi\n- [x] **F1 fatta** — FATTO 2026-01-01 · evidenza\n", encoding="utf-8")
+        g_dup = difetti(carica(d))
+        prova("due programmi sullo stesso item sono un difetto",
+              any("lo rivendicano" in x for x in g_dup))
+        (d / "S9999-registro.md").unlink()
+        prova("tolto il doppione, il difetto sparisce",
+              not any("lo rivendicano" in x for x in difetti(carica(d))))
 
         # --- spunta nuda (senza data/evidenza)
         (d / "11-nuda.md").write_text(

@@ -1,7 +1,7 @@
 # 246 — I contratti a termine assegnati a caso a un terzo dell'organico
 
 > **item**: #246 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: CHIUSO
+> **stato**: IN CORSO
 > **chiusa**: S1089 (2026-09-06), e **ri-misurato in produzione il 2026-09-06 (S1090)**:
 > `sys_user_contracts` ACTIVE = **160 `permanent`, zero `fixed_term`**. La regola di Enzo
 > (nessun contratto a termine oltre i 12 mesi di anzianita') e' applicata: 51 su 51 convertiti.
@@ -90,16 +90,16 @@ i 16 mesi dall'assunzione, e non potrà mancare.
 
 ## Le fasi
 
-- [x] **F1 — La conversione dei 51** — FATTA S1088, mig. 000375, 51 convertiti in produzione, rollback provato — `fixed_term` con anzianità > 12 mesi diventa `permanent` e
+- [x] **F1 — La conversione dei 51** — FATTA S1088 (2026-09-06), mig. 000375, 51 convertiti in produzione, rollback provato — `fixed_term` con anzianità > 12 mesi diventa `permanent` e
       perde la data di fine. Emendando **il file che crea** l'oggetto dove serve (ADR-0035: la
       catena si ri-applica per intero, una `UPDATE` a valle viene disfatta al giro dopo), con
       giornale di rollback e post-condizione che protegge anche ciò che **non** doveva cambiare —
       i 109 `permanent` restano 109, e le retribuzioni non si toccano (misurate congrue ad agosto
       contro il pavimento CCNL dalla `000311`).
-- [x] **F2 — La scadenza coerente** — FATTA S1088 (mig. 000376, sentinella invece di CHECK: il vincolo dovrebbe leggere unaltra tabella), per i contratti futuri** — un `fixed_term` deve avere una
+- [x] **F2 — La scadenza coerente** — FATTA S1088 (2026-09-06, mig. 000376, sentinella invece di CHECK: il vincolo dovrebbe leggere unaltra tabella), per i contratti futuri** — un `fixed_term` deve avere una
       `end_date`, e quella data non può superare i 16 mesi dalla data di assunzione. È un vincolo
       sui dati, non un controllo nel codice: dove possibile un `CHECK`, altrimenti una sentinella.
-- [x] **F3 — Le due sentinelle, provate ROSSE** — FATTE S1088, mig. 000376, tre iniezioni verificate e disfatte — ① nessun `fixed_term` con anzianità oltre i 12
+- [x] **F3 — Le due sentinelle, provate ROSSE** — FATTE S1088 (2026-09-06), mig. 000376, tre iniezioni verificate e disfatte — ① nessun `fixed_term` con anzianità oltre i 12
       mesi; ② nessun `fixed_term` senza scadenza o con scadenza oltre i 16 mesi dall'assunzione.
       Entrambe raccolte da `db_health`, entrambe **provate rosse** iniettando un caso e
       disfacendolo, come la `000373` ha fatto sulle sue quattro porte: una sentinella mai vista

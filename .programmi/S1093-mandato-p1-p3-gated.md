@@ -38,7 +38,10 @@ davanti ciò che sblocca gli altri.
 ## Registro deliverable
 
 > **stato**: CHIUSO
-> **item**: `#169`
+> **registro di sessione** — cronaca di cio' che si e' fatto, non il programma di una
+> voce: non dichiara `item` di proposito. Rivendicarne uno faceva mostrare QUESTO file
+> al posto del piano della voce, e su `#169` il menu e' arrivato a scrivere «il piano
+> e' esaurito, la voce va chiusa» mentre restavano due fasi aperte (misurato S1094).
 
 - [x] **F1 P0 — la CI Playwright torna verde** — era rossa da due commit per un buco di `#169` F3c. **fatto =** `playwright-smoke: success` — FATTO 2026-09-08 · run `34239606307` su `084dcb30`; impronte a conferma, depositata `ede4d885` = usata `ede4d885`
 - [x] **F2 P0b — Typecheck e Lint concludono davvero** — erano `cancelled`, cioè mai misurati. **fatto =** entrambe `success` sullo stesso sha — FATTO 2026-09-08 · verdi su `a9bc5921` insieme a Test/Build/CodeQL/Shell

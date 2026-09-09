@@ -185,6 +185,16 @@ avanzamento() {
   log "avanzamento: rinnovo i contratti scaduti con incarico attivo"
   "${PSQL[@]}" -c "SELECT * FROM staging.contratti_rinnova_scaduti();"
 
+  # L'ASCOLTO ha la stessa forma del difetto dei contratti, e la stessa cura
+  # (000383). `08_engagement.sql` crea la rilevazione «in corso» con finestra
+  # (costruzione-6, costruzione+14) e identita' fissa piu' ON CONFLICT DO NOTHING:
+  # alla riesecuzione la riga esiste gia', la finestra non si sposta, e venti
+  # giorni dopo l'ESS non ha piu' nulla da compilare. Misurato il 2026-09-09:
+  # 14 rilevazioni, zero aperte, e la piu' recente si chiama «in corso» ed era
+  # scaduta da un mese. Idempotente: a ascolto gia' aperto scrive 0 righe.
+  log "avanzamento: tengo aperto l'ascolto (rilevazione di clima)"
+  "${PSQL[@]}" -c "SELECT * FROM staging.rilevazione_clima_rinnova();"
+
   log "avanzamento: verifico con la custodia"
   custodia
 }

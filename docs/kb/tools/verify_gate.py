@@ -193,19 +193,35 @@ ROUTES: list[tuple[str, list[str]]] = [
 SUITES: dict[str, tuple[str, str]] = {
     "typecheck":          ("L0", "pnpm typecheck"),
     "lint":               ("L0", "pnpm lint"),
-    # ⚠ QUESTA RESTA IN LOCALE, ED E' UNA DECISIONE MISURATA — non una dimenticanza
-    # della bonifica del 2026-08-27 che ha spostato `migrate-idempotent` sul gemello.
-    # Costa molto (37 min; sul gemello sarebbero ~17), ma i test provano il CODICE,
-    # non solo i dati: il gemello sta al commit che gli e' stato propagato l'ultima
-    # volta — misurato quel giorno, cinque commit indietro — quindi li' la suite
-    # proverebbe il codice di ieri. Un verde su codice vecchio e' peggio di un'attesa.
-    # Le migrazioni sono un altro caso: sono file `.sql` che si copiano puntualmente,
-    # e `prova-idempotenza.sh` ha una guardia che RIFIUTA di partire se il gemello ne
-    # ha un numero diverso. Per il codice applicativo quella guardia non esiste, e
-    # inventarla significherebbe propagare il repo a ogni giro di test.
-    # Se un giorno si vorra' spostarla: prima serve la propagazione del codice dentro
-    # la suite stessa, e una guardia sull'sha — non basta cambiare l'host.
-    "test-api":           ("L2", "pnpm --filter @heuresys/api test"),
+    # ⭐ 2026-09-09 (Enzo, S1094) — SPOSTATA SUL GEMELLO, e la condizione che la
+    # tratteneva qui non e' stata aggirata: e' stata costruita.
+    #
+    # Il commento precedente diceva, giustamente, che spostare l'host non bastava:
+    #   «il gemello sta al commit che gli e' stato propagato l'ultima volta [...]
+    #    quindi li' la suite proverebbe il codice di ieri. Un verde su codice
+    #    vecchio e' peggio di un'attesa. Se un giorno si vorra' spostarla: prima
+    #    serve la propagazione del codice dentro la suite stessa, e una guardia
+    #    sull'sha — non basta cambiare l'host.»
+    # `prova-api-sul-gemello.sh` e' quelle due cose. La guardia e' piu' forte di
+    # quella chiesta: confronta l'**impronta del contenuto** (sha256 per file,
+    # lista ordinata, sha256 della lista) invece dello sha del commit — perche' lo
+    # sha di un commit non vede le modifiche non committate, e sono proprio quelle
+    # che una suite di verifica deve provare. Se le impronte non combaciano la
+    # suite NON PARTE: rosso dichiarato, mai un verde su codice che non e' il mio.
+    #
+    # MISURA, stessa suite e stesso commit (2026-09-09):
+    #   da Windows, via tunnel : 2054 s (34 min) — 4 file rossi
+    #   sul gemello            : 1002 s (17 min) — 1 file rosso
+    # Il fattore e' ~2x, non i ~140x delle migrazioni: qui il costo non e' il
+    # tunnel ma l'import dei moduli (537 s dei 1002). Tre dei quattro rossi erano
+    # falsi, prodotti dalla latenza del tunnel; l'unico vero e' `me-surveys`, ed e'
+    # un buco di DATI nel clone. Su un file solo il divario e' quello che conta:
+    # 83 s da qui contro 14 s la' (misurato 2026-08-27).
+    #
+    # ⚠ Se una rotta nuova instrada `test-api`, va aggiunta anche a `PERCORSI`
+    # dentro lo script: altrimenti la suite girerebbe su contenuto non propagato,
+    # cioe' il difetto che lo script esiste per chiudere.
+    "test-api":           ("L2", "bash db/scripts/prova-api-sul-gemello.sh"),
     # ⭐ 2026-08-27 (Enzo) — LA PROVA GIRA SU UNA COPIA, E DOVE IL DATABASE VIVE.
     # Era `pnpm db:migrate:sh && pnpm db:migrate:sh`, e quel comando aveva due
     # difetti che si sommavano:

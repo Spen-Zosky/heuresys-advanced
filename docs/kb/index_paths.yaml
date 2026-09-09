@@ -1,8 +1,8 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-08T23:12:22Z da docs/kb/tools/build_index.py
+# generato: 2026-09-09T13:32:58Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-08T23:12:22Z"
+  generated_at: "2026-09-09T13:32:58Z"
   total_files: 3371
   roots:
     repo: 'D:\heuresys-advanced'

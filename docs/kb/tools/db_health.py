@@ -66,6 +66,12 @@ INFORMATIVE = {
         "termine. Nasce perche' il difetto di #246 (un terzo dell'organico a tempo determinato) "
         "e' sopravvissuto due anni non essendo mai stato un numero che qualcuno guardava; le "
         "violazioni della regola le presidiano le due sentinelle della 000376",
+    "v_valutazione_condivisione_eccezioni_coperte":
+        "mig. 000396, decisione di Enzo (2026-09-09): quante valutazioni COMPLETED-non-"
+        "condivise sono coperte da un'eccezione dichiarata (sys_valutazione_condivisione_"
+        "eccezioni, una riga per valutazione con motivo e condizione di chiusura). Conta "
+        "copertura, non anomalie — ma il numero resta visibile qui apposta: il debito non "
+        "deve sparire dal cruscotto solo perche' e' stato dichiarato invece che risolto.",
     "v_positions_with_critical_skill_gap":
         "E25 (P4/T5): una riga per POSIZIONE OCCUPATA, non per anomalia. Lo scostamento fra i "
         "requisiti CRITICAL e le competenze dell'occupante e' la condizione normale di un'azienda "

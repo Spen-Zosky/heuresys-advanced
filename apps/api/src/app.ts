@@ -42,6 +42,7 @@ import { tenantsRoutes } from "./modules/tenants/routes.js";
 import { usersRoutes } from "./modules/users/routes.js";
 import { positionsRoutes } from "./modules/positions/routes.js";
 import { organizationUnitsRoutes } from "./modules/organization-units/routes.js";
+import { projectsRoutes } from "./modules/projects/routes.js";
 import { teamsRoutes } from "./modules/teams/routes.js";
 import { skillsRoutes } from "./modules/skills/routes.js";
 import { kpiDefinitionsRoutes } from "./modules/kpi-definitions/routes.js";
@@ -410,6 +411,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(positionsRoutes, { prefix: "/v1/positions" });
   await app.register(organizationUnitsRoutes, { prefix: "/v1/organization-units" });
   await app.register(tenantMaterializationRoutes, { prefix: "/v1/tenant-materialization" });
+  await app.register(projectsRoutes, { prefix: "/v1/projects" });
   await app.register(teamsRoutes, { prefix: "/v1/teams" });
   await app.register(skillsRoutes, { prefix: "/v1/skills" });
   await app.register(kpiDefinitionsRoutes, { prefix: "/v1/kpi-definitions" });

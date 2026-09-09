@@ -82,6 +82,11 @@
       "heuresys-source": "./src/schemas/organization-units.ts",
       "default": "./dist/schemas/organization-units.js"
     },
+    "./schemas/projects": {
+      "types": "./dist/schemas/projects.d.ts",
+      "heuresys-source": "./src/schemas/projects.ts",
+      "default": "./dist/schemas/projects.js"
+    },
     "./schemas/teams": {
       "types": "./dist/schemas/teams.d.ts",
       "heuresys-source": "./src/schemas/teams.ts",

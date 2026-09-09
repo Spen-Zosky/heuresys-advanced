@@ -285,13 +285,40 @@ progetto**, mai i loro dati personali (è già I18).
   passo ha dato all'asse funzionale una superficie in più (`teams`), ma per la via di
   `resolveActivityScope` → `functionalScopeUserIds`. Le due funzioni per-record aspettano una
   superficie che gatti **un singolo record contro una persona**, che oggi non esiste.
-- [ ] **F4 — API progetti/squadre** — CRUD + avanzamento + test che provano il **confine I18** (un capo progetto NON vede i dati sensibili dei membri) · budget ~250k
+- [x] **F4 — API progetti/squadre** — **CHIUSA 2026-09-09 (S1094)**. Modulo `projects`: 7 rotte
+  (`GET /` · `GET /:id` · `POST /` · `PATCH /:id` · `PATCH /:id/progress` · `PUT|DELETE
+  /:id/members/:userId`), mig. `000384` con i tre permessi. **9 test verdi in 17 s sul gemello.**
+
+  ⭐ **Il confine I18 e' provato, e la prova sa fallire.** Due test: il capo vede i membri e di
+  loro *nessun* campo delle quattro classi sensibili; e guidare un progetto **non apre il
+  dossier** di un membro (403/404). ⚠ Il secondo sarebbe stato **cieco** da solo — un 403 lo
+  darebbe anche una rotta inesistente — quindi porta la **controprova**: lo stesso dossier,
+  chiesto dal mandato, torna **200**. E' il difetto `25 < 26` che `teams` aveva gia' pagato.
+
+  🔬 **Dimostrazione LIVE su produzione** (2026-09-09): API contro il DB vero, login reale
+  `federica.marchetti@rtl-bank.org` → `GET /v1/projects` **200**, **25 progetti** del tenant RTL
+  (`DIR-CORP` 5 membri · `DIV-RISK` 36 · `TM-AML` 5). 25 e non 26: il ventiseiesimo e' di
+  Heuresys System, e l'isolamento tenant lo tiene fuori.
+
+  **Chiude anche `#79`** (cancello di esposizione): i 26 progetti e le 174 appartenenze della
+  `000363` erano nel database dal 2026-08-28 e **nessuna API li esponeva** — misurato con
+  `chi_sorveglia.py sys_projects`: nessun modulo, nessun test, nessuna sentinella.
+
+  ⚠ **Tre volte lo schema vivo ha smentito l'assunzione**, ed e' la ragione per cui si misura
+  prima: ① `sys_project_members` **non ha** un unico su (progetto, persona) — ne ha uno
+  *parziale* che impone **un solo LEAD aperto**, quindi l'`ON CONFLICT` sarebbe morto a runtime;
+  ② i ruoli ammessi dal CHECK sono **quattro** (`LEAD, MEMBER, CONTRIBUTOR, OBSERVER`), non due;
+  ③ gli stati sono `PLANNED, ACTIVE, ON_HOLD, COMPLETED, CANCELLED` — **`CLOSED` non esiste**, e
+  un progetto o e' completato o e' annullato: la distinzione che un solo `CLOSED` avrebbe perso.
+  In piu' `DEPARTMENT_MANAGER`, che avevo scritto nella migrazione, **non e' un ruolo di questo
+  sistema** (e' `MANAGER`) · budget ~250k
 - [ ] **F5 — Frontend + dimostrazione live** — con un capo progetto reale gerarchicamente inferiore a un suo membro: è il caso che dimostra il modello · budget ~250k
 
 ## Da dove si riprende
 
-**F2 — Modello dati.** F1 è chiusa: censimento e reperti in S1061, modello deciso in S1062.
-Non c'è più niente da chiedere prima di partire.
+**F5 — Frontend + dimostrazione live.** F1-F4 sono chiuse (S1062 · S1083 · S1092 · S1094).
+⚠ Questa riga diceva ancora «F2» il 2026-09-09, quando F2, F3 e F4 erano gia' fatte: una
+sezione «da dove si riprende» che non si aggiorna manda al punto sbagliato chi si fida di lei.
 
 Tre cose che F1 lascia a chi apre F2:
 - **La trasversalità non è un difetto da sanare** — è la forma attesa, registrata chiudendo

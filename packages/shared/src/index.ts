@@ -21,6 +21,7 @@ export * from "./schemas/performance-reviews.js";
 export * from "./schemas/calibration.js";
 export * from "./schemas/positions.js";
 export * from "./schemas/organization-units.js";
+export * from "./schemas/projects.js";
 export * from "./schemas/teams.js";
 export * from "./schemas/skills.js";
 export * from "./schemas/kpi-definitions.js";

@@ -328,6 +328,11 @@ export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   // and breaking the cardinal rule (I18).
   approval: "ACTIVITY", // approval requests/steps: work assigned to and raised by people
   team: "ACTIVITY", // team membership: who works with whom
+  // Verify-gate finding (2026-09-09, B-fase-1/2 bundle): `project` was reachable via
+  // PUT/DELETE /:id/members/:userId (real person↔project membership) but absent from every
+  // data-class list — the exact crack #99 F7 was written to close. Same reasoning as `team`:
+  // membership is ACTIVITY (who works on what), not a sensitive-class fact about the person.
+  project: "ACTIVITY", // project membership: who works on what
   // #99 F7 — una segnalazione e' un CASO DA ISTRUIRE, cioe' lavoro, non un dato della
   // persona. La classe non e' quello che la protegge: la proteggono il permesso, che un
   // ruolo solo detiene, e l'isolamento assoluto di ADR-0036 §5. Classificarla PERSONAL

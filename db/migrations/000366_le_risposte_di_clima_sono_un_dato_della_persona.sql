@@ -82,15 +82,17 @@ BEGIN
     RAISE EXCEPTION '000366: % dichiarazioni orfane in sys_ui_interface_data_classes', n_orfane;
   END IF;
 
-  -- 5. IL TOTALE ESATTO delle dichiarazioni di classe, che eredito dalla `000326` — la quale
-  --    lo aveva ereditato dalla `000317`, con l'istruzione «chi aggiungera' righe dopo di me
-  --    deve spostare QUESTO conteggio nel proprio file». Lo raccolgo: 41 + 1 = 42.
-  --    ⚠ La `000326` NON e' rimasta senza guardia: al suo posto ora verifica le PROPRIE 15
-  --    righe (le sette famiglie di cruscotto), che e' cio' che quel file deve garantire e
-  --    che non invecchia. Il totale resta qui, e chi aggiungera' la prossima se lo prendera'.
-  SELECT count(*) INTO n_engagement FROM sys.sys_ui_interface_data_classes;
-  IF n_engagement <> 42 THEN
-    RAISE EXCEPTION '000366: le dichiarazioni di classe totali sono % invece di 42 — se e'' un''aggiunta legittima, il conteggio esatto va spostato nella migrazione che la introduce', n_engagement;
+  -- 5. IL TOTALE ESATTO E' PASSATO ALLA `000394` (2026-09-09): quella migrazione ha aggiunto
+  --    la riga per `projects`/ACTIVITY, portando il totale a 43, e ha raccolto — come
+  --    questo file aveva raccolto da `000326`, che l'aveva raccolto da `000317` — l'obbligo
+  --    di spostare il conteggio in avanti. Qui resta SOLO la responsabilita' propria: la
+  --    riga di engagement (PERSONAL, non aperta al tenant) c'e' ed e' UNA sola.
+  SELECT count(*) INTO n_engagement
+    FROM sys.sys_ui_interface_data_classes dc
+    JOIN sys.sys_ui_interfaces i ON i.ui_interface_id = dc.ui_interface_id
+   WHERE i.ui_interface_code = 'engagement';
+  IF n_engagement <> 1 THEN
+    RAISE EXCEPTION '000366: engagement ha % dichiarazioni, ne era attesa 1', n_engagement;
   END IF;
 
   RAISE NOTICE '000366 OK — engagement dichiara PERSONAL, non aperta al tenant; me-surveys intatta';

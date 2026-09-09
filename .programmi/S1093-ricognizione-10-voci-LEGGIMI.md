@@ -53,7 +53,7 @@ intercettare DIF-4*. Ed è la seconda volta oggi che quella famiglia si presenta
 
 ## Fasi — perché questa ricognizione è lavoro, non un documento
 
-> **stato**: IN CORSO
+> **stato**: CHIUSO
 > **item**: `#149`
 
 ⚠ Queste fasi esistono anche perché un cancello le pretende (`programmi.py --verifica`), e il
@@ -86,8 +86,36 @@ avrebbe elencato `programmi.py` e altri **sei** cancelli.
   **esattamente** cio' che cinque sessioni hanno fatto misurando meta' dell'innesco. Me ne sono
   accorto solo leggendo questo file. Il reperto in cima non e' un avviso storico: e' una trappola
   che scatta ancora
-- [ ] **F3 Portare i marker di verifica sui cinque documenti citati** — la ritrattazione di `#205` fu scritta sul biglietto di consegna invece che sul dossier, e il rilievo respinto sopravvive alla riga 87. **fatto =** ogni documento citato dal register porta il proprio esito, o è dichiarato non verificato
-- [ ] **F4 Rendere il presidio misurabile a macchina** — il marker esiste in due grafie e nessuno strumento lo cerca. **fatto =** uno strumento lo cerca e sa uscire rosso
+- [x] **F3 Portare i marker di verifica sui documenti citati** — **FATTA 2026-09-09 (S1094)**.
+  I documenti citati dal register sono **sei**, non cinque: `check_verifica_consegne.py` li censisce
+  da sé invece di fidarsi di un elenco scritto a mano. Ognuno porta ora il proprio esito:
+  · `2026-08-16-tenant-builder-p2b-p2c` → **SMENTITO**, con la misura di oggi accanto (tre delle
+    quattro conferme di S1066 sono cadute) — è il documento di `#205`, l'unico che ho ri-misurato;
+  · gli altri cinque → **NON-VERIFICATO**, dichiarato. Non è un giudizio sul contenuto: è la
+    dichiarazione che nessuno li ha verificati dopo l'ingestione, e che l'ingestione non è una
+    verifica. Un documento muto sembra verificato; uno che dichiara di non esserlo no.
+  ⚠ I file del lab vivono **fuori dal repository** (`heuresys-design-lab/`), quindi i marker non
+  entrano in un commit: stanno sui documenti, che è dove `#149` regola 3 dice di scriverli.
+- [x] **F4 Rendere il presidio misurabile a macchina** — **FATTA 2026-09-09 (S1094)**:
+  `docs/kb/tools/check_verifica_consegne.py`. Definisce **una grafia sola** e la cerca:
+
+      > **#149 verifica avversariale** · esito: CONFERMATO · sessione: S1094 · data: 2026-09-09
+
+  ⭐ **Data e sessione sono obbligatorie, e il selftest lo prova rifiutando un marker che non le
+  porta.** Nasce dal difetto misurato oggi sulla riga 54 del register: «`sys` ha 225 tabelle
+  (confermato)» era vero a S1066 e falso adesso, e chi lo rileggeva non aveva modo di
+  accorgersene. Un marker deve dire **quando** si è guardato, non che si è guardato per sempre.
+
+  ⭐ **E chiude il buco strutturale del secondo ramo**: lo strumento non guarda l'inbox, guarda
+  **chi il register cita**. È il ramo che cinque sessioni non hanno mai misurato perché nessuno
+  strumento lo misurava — un innesco che dipende da chi si ricorda di guardare non è un presidio.
+
+  **Sa uscire rosso, e sa distinguere tre stati**: `0` verde · `1` una consegna citata non porta
+  il marker · `2` **NON MISURATO** (lab irraggiungibile, o consegne citate che nel lab non
+  esistono). Misurato adesso: exit **1** prima dei marker, exit **2** dopo — restano 5 consegne
+  che il register nomina e che nel lab non ci sono, ed è un buco dichiarato invece che nascosto.
+  `--selftest` verde su **9 casi**, dei quali cinque negativi (marker senza data, senza sessione,
+  in prosa libera, con grafia vicina ma diversa, con esito fuori vocabolario).
 
 ## Come si usa
 

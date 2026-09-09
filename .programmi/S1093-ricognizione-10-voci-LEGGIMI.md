@@ -62,7 +62,30 @@ ho creato tre file in `.programmi/` senza chiedermi chi li sorveglia. `chi_sorve
 avrebbe elencato `programmi.py` e altri **sei** cancelli.
 
 - [x] **F1 Depositare la ricognizione dove non si perda** — 2,27 milioni di token di subagent non possono vivere in una cartella temporanea. **fatto =** file nel repo + guida di lettura — FATTO 2026-09-08
-- [ ] **F2 Verificare le smentite prima di agirvi** — le sei smentite qui sotto sono affermazioni di 13 agenti, **non fatti acquisiti**. **fatto =** ognuna ri-misurata, o dichiarata non ri-misurata. ⚠ La n.2 va rifatta **con lo stesso strumento** che produsse il 225 (`completezza_tenant.py`), non con una conta diversa: altrimenti si smentisce un numero con un numero che misura un'altra cosa
+- [x] **F2 Verificare le smentite prima di agirvi** — **FATTA 2026-09-09 (S1094)**. Sei su sei
+  ri-misurate sul vivo: **cinque CONFERMATE, una da correggere nel suo enunciato.**
+
+  | # | esito | la misura di oggi |
+  |---|---|---|
+  | ① `#205` ritrattata sul biglietto, non sul dossier | ✅ CONFERMATA | il marker `VERIFICATA-AVVERSARIALMENTE-S1066` sta a `SOT_BACKLOG.md:54`, cioe' nel register; il dossier non lo porta |
+  | ② due conferme di S1066 oggi false | ✅ CONFERMATA, **e sono tre** | `sys_research_sources` **esiste con 5 righe** (era «NON esiste, la dipendenza dura regge») · tabelle di `sys` **240** (era «225 confermato») · e la terza che nessuno aveva contato: `completezza_tenant.py` oggi da' **160 / 147 / 334** dove la riga dichiara **150 / 144 / 329** |
+  | ③ register di `#149` indietro rispetto al piano | ✅ CONFERMATA | l'ultima sessione citata nel blocco e' **S1087** |
+  | ④ numeri di `#206` scaduti | ✅ CONFERMATA | `sys_position_skill_requirements` **1.434** (doc: 1.439) · `_learning_requirements` **1.886** (doc: 1.733) |
+  | ⑤ conformita' non misurabile a macchina | ✅ CONFERMATA, **e peggio** | cercando le due grafie canoniche su 64 consegne ingerite: **zero riscontri**. Le forme reali sono prosa (`VERIFICATO-leggendo-il-file`, `voci-VERIFICATE-PULITE`, `verificate-una-SECONDA-volta`): non esiste un marker, esistono frasi |
+  | ⑥ gate di `#198` vero | ✅ CONFERMATA | `sys_blueprint_content_{units,positions,skills,kpis}` = **0 · 0 · 0 · 0** |
+
+  ⚠ **L'avvertenza sulla n.2 era giusta, e ho scoperto perche'.** Il piano diceva di rifare il
+  confronto «con lo stesso strumento che produsse il 225». Misurato: `completezza_tenant.py`
+  **non produce quel numero** — da' 160 tabelle di tenant, mentre 225/240 e' la conta delle
+  tabelle di `sys`. Sono **due grandezze diverse**, e la riga 54 del register le tiene sulla
+  stessa riga come se fossero un unico rilievo. Le ho misurate **entrambe** invece di sceglierne
+  una: 225 → **240** sulla propria grandezza, 150 → **160** sulla sua.
+
+  🔬 **E questa fase e' servita a evitare la sesta occorrenza dello stesso errore.** Aprendo
+  `#149` ho eseguito `ls inbox/` — vuota — e stavo per dichiarare «F4 non ha bersagli», che e'
+  **esattamente** cio' che cinque sessioni hanno fatto misurando meta' dell'innesco. Me ne sono
+  accorto solo leggendo questo file. Il reperto in cima non e' un avviso storico: e' una trappola
+  che scatta ancora
 - [ ] **F3 Portare i marker di verifica sui cinque documenti citati** — la ritrattazione di `#205` fu scritta sul biglietto di consegna invece che sul dossier, e il rilievo respinto sopravvive alla riga 87. **fatto =** ogni documento citato dal register porta il proprio esito, o è dichiarato non verificato
 - [ ] **F4 Rendere il presidio misurabile a macchina** — il marker esiste in due grafie e nessuno strumento lo cerca. **fatto =** uno strumento lo cerca e sa uscire rosso
 

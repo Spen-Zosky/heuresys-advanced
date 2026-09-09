@@ -288,10 +288,12 @@ export type MeAttendanceResponse = z.infer<typeof MeAttendanceResponseSchema>;
 
 /* --- time-off request submission (B3 #34 — the first real approval flow) --- */
 
-/** Mirrors the sys_time_off_requests leave_type CHECK (10 values). */
+/** Mirrors the sys_time_off_requests leave_type CHECK (11 values — PAID_LEAVE added by
+ *  mig. 000391 / B9, 2026-09-09: 869 attendance rows carried that status with no request
+ *  type able to represent it). */
 export const ME_LEAVE_TYPES = [
   "VACATION", "SICK", "PERSONAL", "MATERNITY", "PATERNITY",
-  "BEREAVEMENT", "STUDY", "SABBATICAL", "UNPAID", "OTHER",
+  "BEREAVEMENT", "STUDY", "SABBATICAL", "UNPAID", "OTHER", "PAID_LEAVE",
 ] as const;
 export const MeLeaveTypeSchema = z.enum(ME_LEAVE_TYPES);
 export type MeLeaveType = z.infer<typeof MeLeaveTypeSchema>;

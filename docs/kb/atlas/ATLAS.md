@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `22ed80b4` (2026-09-10T01:24:03+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `01c3d162` (2026-09-10T15:40:56+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 640 |
 | Pagine web | 123 |
 | Schemi shared | 116 |
-| Tabelle DB | 299 (vuote: 23) |
-| Viste / matview | 53 / 0 |
+| Tabelle DB | 308 (vuote: 18) |
+| Viste / matview | 55 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 288 |
 
 ## Moduli API
@@ -109,7 +109,7 @@
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
 | tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 13 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
-| tenants | /v1/tenants | 7 | 4 | 2 | 1 |
+| tenants | /v1/tenants | 7 | 4 | 3 | 1 |
 | time-off | /v1/time-off | 3 | 1 | 7 | 2 |
 | training-initiatives | /v1/training-initiatives | 4 | 4 | 3 | 1 |
 | user-career-plans | /v1/user-career-plans | 5 | 4 | 4 | 2 |
@@ -141,10 +141,6 @@
 - `sys.sys_auth_mfa_webauthn_credentials`
 - `sys.sys_auth_password_reset_tokens`
 - `sys.sys_auth_sessions`
-- `sys.sys_blueprint_content_kpis`
-- `sys.sys_blueprint_content_positions`
-- `sys.sys_blueprint_content_skills`
-- `sys.sys_blueprint_content_units`
 - `sys.sys_candidate_applications`
 - `sys.sys_content_media`
 - `sys.sys_generated_record_origins`
@@ -155,7 +151,6 @@
 - `sys.sys_job_requisitions`
 - `sys.sys_notification_preferences`
 - `sys.sys_occupation_classification_mappings`
-- `sys.sys_process_kpi_templates`
 - `sys.sys_user_delegations`
 
 ## Key counts live

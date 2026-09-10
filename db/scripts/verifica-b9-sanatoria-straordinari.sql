@@ -8,6 +8,10 @@
 -- staging.sanatoria_straordinari_undo (elenco degli overtime_id creati).
 --
 -- Uso: psql ... -f db/scripts/verifica-b9-sanatoria-straordinari.sql
+-- ⚠ AGGIORNATO S1096 (C6): dal 2026-09-10 la sentinella NON ha piu' la soglia di data. Prima
+--   guardava solo le presenze successive all'ultima richiesta registrata, quindi ogni sanatoria
+--   la riportava a zero su un insieme quasi vuoto; ora guarda OGNI presenza con straordinario
+--   priva di richiesta. Lo zero atteso qui sotto vale ancora, ma ora significa molto di piu'.
 --   atteso SEMPRE: 0 righe dalla sentinella v_straordinari_non_autorizzati (mig. 000387,
 --   corretta 000392). Se il processo di richiesta si ferma di nuovo, questa vista lo dira'.
 

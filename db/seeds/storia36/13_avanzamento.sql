@@ -523,6 +523,91 @@ BEGIN
   GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
   RAISE NOTICE 'storia36 ADV: presenze inserite %', v_n;
 
+  -- ══════════════════════════════════════════════════════════════════════════════════════
+  -- 2.8b LE ORE DI STRAORDINARIO CHE QUESTO FILE INVENTA DEVONO PORTARE LA LORO RICHIESTA.
+  --
+  -- IL DIFETTO, misurato il 2026-09-10 (S1096). Il blocco qui sopra genera ore di
+  -- straordinario per sorteggio deterministico — un giorno lavorativo su otto — e le scrive
+  -- in `sys_attendance` SENZA la corrispondente riga in `sys_overtime`. La sentinella
+  -- `sys.v_straordinari_non_autorizzati` confronta le due catene e si accende: la mattina
+  -- del 2026-09-10 mostrava 10 presenze per 11 ore, tutte del giorno prima, cioe' prodotte
+  -- dalla corsa notturna delle 03:45.
+  --
+  -- B9 (S1095) aveva sanato le 2.436 righe storiche, ma nessuno aveva corretto CHI le
+  -- produce: il giorno dopo la sentinella era rossa di nuovo. Sanare a valle una cosa che
+  -- nasce a monte e' il difetto che ADR-0035 nomina — si emenda il file che crea l'oggetto.
+  --
+  -- ⚠ IL PERIMETRO E' LA FINESTRA DI QUESTA CORSA, e la prima stesura sbagliava. Scritta
+  -- «per ogni presenza senza richiesta», avrebbe toccato 9.420 righe invece delle 10 del
+  -- giorno prima: la guardia della sanatoria l'ha fermata misurando i due insiemi. Il fatto
+  -- che li separa: la sentinella guarda solo le presenze OLTRE l'ultima richiesta esistente,
+  -- quindi le 9.410 piu' vecchie non le vede — sono uno strato storico, e decidere cosa
+  -- farne e' una decisione di Enzo, non un effetto collaterale di questo file. Qui si copre
+  -- cio' che questa corsa ha appena scritto, che e' il suo perimetro naturale.
+  --
+  -- L'APPROVATORE non e' inventato: e' il responsabile dell'unita' della persona; se quella
+  -- unita' non ha un responsabile, un HRMS_MANAGER del cliente. Se non c'e' nessuno dei due
+  -- la riga NON si scrive — meglio una sentinella che resta rossa e lo dice, che una
+  -- autorizzazione firmata da nessuno.
+  -- ══════════════════════════════════════════════════════════════════════════════════════
+  INSERT INTO sys.sys_overtime (
+    overtime_tenant_id, overtime_natural_key, overtime_subject_user_id, overtime_date,
+    overtime_type, overtime_hours, overtime_status,
+    overtime_requested_by_user_id, overtime_requested_at,
+    overtime_approved_by_user_id, overtime_approved_at, overtime_reason)
+  SELECT
+    a.attendance_tenant_id,
+    'STORIA36::ADV::OVERTIME::' || a.attendance_subject_user_id || '::' || a.attendance_date,
+    a.attendance_subject_user_id,
+    a.attendance_date,
+    CASE WHEN extract(isodow FROM a.attendance_date) >= 6 THEN 'WEEKEND' ELSE 'WEEKDAY' END,
+    a.attendance_hours_overtime,
+    'APPROVED',
+    app.approvatore, a.attendance_date::timestamptz,
+    app.approvatore, a.attendance_date::timestamptz,
+    'Straordinario della giornata, autorizzato dal responsabile. Riga scritta dall''avanzamento '
+      || 'insieme alla presenza che la genera (S1096): prima le ore nascevano senza richiesta e '
+      || 'la sentinella v_straordinari_non_autorizzati si accendeva ogni notte.'
+  FROM sys.sys_attendance a
+  CROSS JOIN LATERAL (
+    SELECT COALESCE(
+      -- ⚠ La persona si lega alla sua unita' passando dall'INCARICO, non da
+      -- `position_owner_user_id`: I1 dice che il titolare di una posizione non e' il suo
+      -- proprietario, e usare quella colonna darebbe l'approvatore di un'altra persona.
+      (SELECT ou.organization_unit_manager_user_id
+         FROM sys.sys_user_position_assignments upa
+         JOIN sys.sys_positions p
+           ON p.position_id = upa.user_position_assignment_position_id
+         JOIN sys.sys_organization_units ou
+           ON ou.organization_unit_id = p.position_organization_unit_id
+        WHERE upa.user_position_assignment_user_id = a.attendance_subject_user_id
+          AND upa.user_position_assignment_status = 'ACTIVE'
+          AND ou.organization_unit_manager_user_id IS NOT NULL
+          AND ou.organization_unit_manager_user_id <> a.attendance_subject_user_id
+        LIMIT 1),
+      (SELECT ur.user_auth_role_user_id
+         FROM sys.sys_user_auth_roles ur
+         JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+        WHERE r.auth_role_code = 'HRMS_MANAGER'
+          AND ur.user_auth_role_tenant_id = a.attendance_tenant_id
+          AND ur.user_auth_role_revoked_at IS NULL
+          AND ur.user_auth_role_user_id <> a.attendance_subject_user_id
+        LIMIT 1)
+    ) AS approvatore
+  ) app
+  WHERE a.attendance_hours_overtime > 0
+    AND a.attendance_date >= v_start          -- solo la finestra che questa corsa ha scritto
+    AND a.attendance_date <= v_end
+    AND app.approvatore IS NOT NULL
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_overtime o
+       WHERE o.overtime_subject_user_id = a.attendance_subject_user_id
+         AND o.overtime_date = a.attendance_date
+         AND o.overtime_hours > 0)
+  ON CONFLICT DO NOTHING;
+  GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
+  RAISE NOTICE 'storia36 ADV: richieste di straordinario scritte %', v_n;
+
   INSERT INTO staging.storia36_runs (cluster_code, seed_file, rows_written, twice_run_delta)
   VALUES ('ADV', '13_avanzamento.sql (presenze)', v_tot, v_tot);
 END $$;

@@ -344,18 +344,32 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
 // registry rationale. This guards against a silent regression that imports the table or
 // flips its terminal status without the crosswalk.
 describe('reconciliation registry — B-42 process_kpi_templates EXCLUDE re-confirmed (S994)', () => {
-  it('sys_process_kpi_templates resolves EXCLUDE in the view and stays empty', async () => {
-    const { rows: view } = await pool.query<{ resolved_status: string }>(
-      `SELECT resolved_status FROM sys.v_reconciliation_status
-        WHERE table_name = 'sys_process_kpi_templates'`,
+  // ⚠ AGGIORNATO S1096 — la guardia era «stays empty», e dal 2026-09-09 non lo e' piu': B30 ha
+  // ricostruito 73 legami PER SIGNIFICATO dai KPI gia' presenti, senza importare nulla dal
+  // legacy. Il conteggio a zero era una conseguenza della decisione, non la decisione: cio' che
+  // S970/S994 proteggono e' che nessuno fabbrichi un crosswalk. Ora si misura QUELLO — ogni
+  // riga deve risolvere il registro dei processi **v5**, cosa che un import dal legacy non
+  // potrebbe fare (0/25 di sovrapposizione fra i keyspace, misurato in S994).
+  // ⚠ `resolved_status` non e' piu' 'EXCLUDE' ma 'POPULATED', e non e' un guasto: nel database
+  // vivo 49 tabelle dichiarate EXCLUDE risolvono POPULATED — quella parola dice «ha righe»,
+  // non «e' stata riconciliata». La dichiarazione, che e' la decisione, resta EXCLUDE.
+  it('nessun crosswalk fabbricato: ogni riga risolve il registro dei processi v5', async () => {
+    const { rows: dich } = await pool.query<{ declared: string }>(
+      `SELECT reconciliation_registry_declared_status AS declared
+         FROM sys.sys_reconciliation_registry
+        WHERE reconciliation_registry_table_name = 'sys_process_kpi_templates'`,
     );
-    expect(view).toHaveLength(1);
-    expect(view[0]?.resolved_status).toBe('EXCLUDE');
+    expect(dich).toHaveLength(1);
+    expect(dich[0]?.declared).toBe('EXCLUDE');
 
-    const { rows: cnt } = await pool.query<{ n: number }>(
-      `SELECT count(*)::int AS n FROM sys.sys_process_kpi_templates`,
+    const { rows: cnt } = await pool.query<{ righe: number; risolte: number }>(
+      `SELECT (SELECT count(*)::int FROM sys.sys_process_kpi_templates) AS righe,
+              (SELECT count(*)::int FROM sys.sys_process_kpi_templates t
+                 JOIN sys.sys_blueprint_process_registry r
+                   ON r.blueprint_process_id = t.process_kpi_template_process_id) AS risolte`,
     );
-    expect(cnt[0]?.n, 'sys_process_kpi_templates must remain empty (no fabricated crosswalk)').toBe(0);
+    expect(cnt[0]?.risolte, 'righe che non risolvono il registro v5 = crosswalk dal legacy')
+      .toBe(cnt[0]?.righe);
   });
 
   it('the registry row carries declared_status EXCLUDE + the S994 re-confirmation evidence', async () => {

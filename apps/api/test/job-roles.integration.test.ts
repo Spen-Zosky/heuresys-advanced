@@ -24,6 +24,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { codiciDelProfilo, perimetroDiCatalogo } from "../src/lib/scope/profilo.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const SUITE_PREFIX = `IT_JR_${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -276,6 +277,84 @@ describe("/v1/job-roles/* integration", () => {
       `SELECT count(*)::text AS n FROM sys.sys_job_roles WHERE job_role_tenant_id IS NULL`,
     );
     expect(Number(catalogo.rows[0]!.n)).toBeGreaterThanOrEqual(176);
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  // C1 (S1096) — HEURESYS HA UN PROFILO SUO, E LE SUE PERSONE VEDONO I PROPRI MESTIERI.
+  //
+  // Prima della migrazione 000400 HEURESYS non aveva nessuna attivazione, quindi il
+  // fail-closed di lib/scope/profilo.ts restituiva ZERO ruoli e 404 per identificativo a due
+  // persone reali (TEAM_LEADER e USER). La giustificazione scritta nel codice — «HEURESYS usa
+  // zero ruoli nelle proprie posizioni» — era falsa: veniva da una query su un tenant_code
+  // che non esiste.
+  //
+  // ⚠ LA PROVA GIRA SUL RESOLVER, non su un login, e la ragione e' dichiarata: andrea e
+  // chiara non sono fra le personas dei test, quindi le loro credenziali non sono derivabili
+  // con la convenzione della suite. Il resolver e' pero' l'unita' che DECIDE cosa quelle
+  // persone vedono: e' li' che la domanda si risolve, ed e' li' che si misura.
+  //
+  // Sa fallire: se l'attivazione di HEURESYS sparisse, `codiciDelProfilo` tornerebbe vuoto e
+  // il primo expect cadrebbe.
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  it("C1 — il profilo di HEURESYS contiene i mestieri che le sue posizioni usano davvero", async () => {
+    const t = await pool.query<{ id: string }>(
+      `SELECT tenant_id AS id FROM sys.sys_tenancies WHERE tenant_code = 'HEURESYS'`,
+    );
+    expect(t.rowCount, "il cliente HEURESYS non esiste").toBe(1);
+    const tenantId = t.rows[0]!.id;
+
+    // Cio' che le posizioni di HEURESYS usano, ri-derivato dal vivo e mai cablato.
+    const usati = await pool.query<{ code: string }>(
+      `SELECT DISTINCT jr.job_role_code AS code
+         FROM sys.sys_positions p
+         JOIN sys.sys_job_roles jr ON jr.job_role_id = p.position_job_role_id
+        WHERE p.position_tenant_id = $1`,
+      [tenantId],
+    );
+    expect(usati.rowCount, "HEURESYS non usa nessun ruolo: la prova non discrimina")
+      .toBeGreaterThan(0);
+
+    const profilo = await codiciDelProfilo(pool, tenantId, "job_roles");
+    expect(profilo.length, "il profilo di HEURESYS e' vuoto: le sue persone vedrebbero zero ruoli")
+      .toBeGreaterThan(0);
+
+    const mancanti = usati.rows.map((r) => r.code).filter((c) => !profilo.includes(c));
+    expect(mancanti, `mestieri usati da HEURESYS e fuori dal suo profilo: ${mancanti.join(", ")}`)
+      .toEqual([]);
+  });
+
+  it("C1 — una persona di HEURESYS che non amministra la piattaforma riceve il profilo, non il vuoto e non il catalogo", async () => {
+    const u = await pool.query<{ id: string; tenant: string }>(
+      `SELECT u.user_id AS id, u.user_tenant_id AS tenant
+         FROM sys.sys_users u
+         JOIN sys.sys_tenancies t ON t.tenant_id = u.user_tenant_id AND t.tenant_code = 'HEURESYS'
+        WHERE u.user_status = 'ACTIVE'
+          AND NOT EXISTS (
+            SELECT 1 FROM sys.sys_user_auth_roles ur
+              JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+             WHERE ur.user_auth_role_user_id = u.user_id
+               AND ur.user_auth_role_revoked_at IS NULL
+               AND r.auth_role_code = 'PLATFORM_ADMIN')
+        LIMIT 1`,
+    );
+    expect(u.rowCount, "nessuna persona non-di-piattaforma in HEURESYS").toBe(1);
+
+    const perimetro = await perimetroDiCatalogo(
+      pool,
+      { userId: u.rows[0]!.id, tenantId: u.rows[0]!.tenant, roles: ["USER"] },
+      "job_roles",
+    );
+    expect(perimetro.tipo, "una persona non-di-piattaforma non deve vedere tutto il catalogo")
+      .toBe("profilo");
+    if (perimetro.tipo === "profilo") {
+      expect(perimetro.codici.length, "il perimetro e' vuoto: e' il difetto che C1 chiude")
+        .toBeGreaterThan(0);
+      const catalogo = await pool.query<{ n: string }>(
+        `SELECT count(*)::text AS n FROM sys.sys_job_roles WHERE job_role_tenant_id IS NULL`,
+      );
+      expect(perimetro.codici.length, "il profilo coincide col catalogo intero: non filtra nulla")
+        .toBeLessThan(Number(catalogo.rows[0]!.n));
+    }
   });
 
   it("POST without x-csrf-token header → 403", async () => {

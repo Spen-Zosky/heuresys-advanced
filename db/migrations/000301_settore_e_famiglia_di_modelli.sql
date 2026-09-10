@@ -226,10 +226,21 @@ BEGIN
     RAISE EXCEPTION '000301: il registro dei processi doveva restare a 23 righe, ne ha %', n;
   END IF;
 
+  -- ⚠ EMENDATA S1096 (2026-09-10, C1) — era `n <> 1`, cioe' il conteggio esatto delle
+  --   versioni pubblicate cristallizzato in una post-condizione. Questo file NON tocca le
+  --   versioni: la sua responsabilita' e' che ne esista almeno una, perche' senza una versione
+  --   pubblicata la derivazione settore->famiglia non serve a niente. Il conteggio esatto era
+  --   una promessa piu' larga di cio' che il file fa, ed e' diventata rossa il giorno in cui
+  --   la `000400` ne ha aggiunta una LEGITTIMA per HEURESYS — un cliente di un altro settore
+  --   che non poteva ereditare il modello della banca (I21).
+  --   Stessa forma dell'emendamento della `000394`: «chi aggiungera' righe dopo di me deve
+  --   spostare QUESTO conteggio nel proprio file, e ridurre questa guardia alla propria sola
+  --   responsabilita'». Il conteggio esatto vive ora nella post-condizione della `000400`.
   SELECT count(*) INTO n FROM sys.sys_blueprint_variant_versions
    WHERE blueprint_variant_version_status = 'PUBLISHED';
-  IF n <> 1 THEN
-    RAISE EXCEPTION '000301: doveva restare 1 sola versione di modello pubblicata, ce ne sono %', n;
+  IF n < 1 THEN
+    RAISE EXCEPTION '000301: nessuna versione di modello pubblicata: la derivazione '
+                    'settore->famiglia non avrebbe nulla su cui atterrare (ne erano attese >= 1)';
   END IF;
 
   SELECT count(*) INTO n FROM sys.sys_tenancies WHERE tenant_status = 'ACTIVE';

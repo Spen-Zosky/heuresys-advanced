@@ -17,11 +17,23 @@
  * «una proposta nomina "la direzione commerciale", non un identificativo che non conosce»).
  *
  * ⚠ FAIL-CLOSED, DICHIARATO. Un cliente che non ha nessuna attivazione ha un profilo VUOTO:
- * vede solo le proprie voci, non il catalogo intero. Misurato il 2026-09-10 prima di
- * decidere: l'unico cliente in questa condizione è `HEURESYS`, che usa ZERO ruoli nelle
- * proprie posizioni — nessuna funzione esistente si rompe. La scelta opposta (nessun profilo
- * ⇒ vedi tutto) avrebbe reso il filtro inefficace proprio dove nessuno lo ha ancora
- * configurato, che è quando serve di più.
+ * vede solo le proprie voci, non il catalogo intero. La scelta opposta (nessun profilo ⇒ vedi
+ * tutto) renderebbe il filtro inefficace proprio dove nessuno lo ha ancora configurato, che è
+ * quando serve di più.
+ *
+ * ⚠⚠ LA GIUSTIFICAZIONE CHE STAVA QUI ERA FALSA, ed è stata corretta il 2026-09-10 (C1).
+ * Diceva: «l'unico cliente in questa condizione è HEURESYS, che usa ZERO ruoli nelle proprie
+ * posizioni — nessuna funzione esistente si rompe». Quello zero veniva da una query che
+ * interrogava `tenant_code = 'HEURESYS_SYSTEM'`, un codice che NON ESISTE: il codice vero è
+ * `HEURESYS`. Zero righe da un codice sbagliato, lette come zero ruoli. La misura vera:
+ * HEURESYS ha **tre posizioni attive** e tutte e tre usano un ruolo di catalogo, e il
+ * fail-closed stava restituendo zero righe e 404 a persone reali (TEAM_LEADER e USER).
+ * Una giustificazione falsa dentro il codice è peggio di nessuna giustificazione: chi la
+ * legge smette di verificare.
+ * Il rimedio non è stato ammorbidire il fail-closed — è dare a HEURESYS il profilo che gli
+ * mancava (mig. `000400`: famiglia `MGMT_CONSULTING`, variante propria, i tre ruoli in uso).
+ * Il fail-closed resta, ed è giusto che resti: un cliente senza profilo dichiarato è un
+ * cliente da configurare, non uno a cui aprire il catalogo di tutti.
  *
  * ⚠ CHI VEDE IL CATALOGO INTERO: chi amministra la piattaforma. È l'eccezione che l'ADR
  * dichiara — «il catalogo intero resta visibile a chi amministra la piattaforma e a chi sta

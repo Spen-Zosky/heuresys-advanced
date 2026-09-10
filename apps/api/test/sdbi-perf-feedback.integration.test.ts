@@ -90,8 +90,21 @@ describe('SDBI Option-B — perf reviews + feedback360', () => {
       `SELECT count(*)::int AS n FROM sys.sys_performance_review_competency_ratings WHERE rating_tenant_id <> $1`, [RTL_TENANT])).toBe(0);
     expect(await count(
       `SELECT count(*)::int AS n FROM sys.sys_feedback_360_responses WHERE response_tenant_id <> $1`, [RTL_TENANT])).toBe(0);
+    // sys_continuous_feedback is NOT RTL-exclusive like the other three (found S1095, CI red
+    // on 22ed80b4): one legacy row's to/from employees resolve — via LEGACY_EMP:: — to two
+    // Heuresys System users (andrea.spenuso, chiara.spenuso), and feedback_tenant_id correctly
+    // follows them there; only the import's natural_key kept the RTL namespace template. The
+    // hardcoded "must equal RTL_TENANT" assumption held only because that resolution used to be
+    // incomplete (feedback_from_user_id is still NULL — 'unresolved_from' in metadata) — it is
+    // not an invariant of the table. The real I5 check, tenant-agnostic and falsifiable: where a
+    // participant resolves to a user, the row's tenant must match THAT user's tenant.
     expect(await count(
-      `SELECT count(*)::int AS n FROM sys.sys_continuous_feedback WHERE feedback_tenant_id <> $1`, [RTL_TENANT])).toBe(0);
+      `SELECT count(*)::int AS n FROM sys.sys_continuous_feedback f
+        WHERE EXISTS (SELECT 1 FROM sys.sys_users u
+                       WHERE u.user_id = f.feedback_to_user_id AND u.user_tenant_id <> f.feedback_tenant_id)
+           OR EXISTS (SELECT 1 FROM sys.sys_users u
+                       WHERE u.user_id = f.feedback_from_user_id AND u.user_tenant_id <> f.feedback_tenant_id)`,
+    )).toBe(0);
   });
 
   it('0 NULL on NOT-NULL columns', async () => {

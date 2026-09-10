@@ -14,10 +14,14 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const activityMappingsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    // ADR-0039: mappature fra tassonomie di attivita': aperte a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("enterprise_typing:read")],
     schema: { querystring: ActivityMappingListQuerySchema, response: { 200: ActivityMappingListResponseSchema } },
   }, async (req) => activityMappingsService.list(actor(req), req.query));
   app.get("/:id", {
+    // ADR-0039: mappature fra tassonomie di attivita': aperte a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("enterprise_typing:read")],
     schema: { params: ActivityMappingIdParamSchema, response: { 200: ActivityClassificationMappingSchema } },
   }, async (req) => activityMappingsService.getById(actor(req), req.params.id));

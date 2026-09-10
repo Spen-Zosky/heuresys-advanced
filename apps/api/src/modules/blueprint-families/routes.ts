@@ -13,10 +13,14 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const blueprintFamiliesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    // ADR-0039: famiglie di modello: struttura d'azienda, aperta a ogni settore per disegno (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("blueprint:read")],
     schema: { querystring: BlueprintFamilyListQuerySchema, response: { 200: BlueprintFamilyListResponseSchema } },
   }, async (req) => blueprintFamiliesService.list(actor(req), req.query));
   app.get("/:id", {
+    // ADR-0039: famiglie di modello: struttura d'azienda, aperta a ogni settore per disegno (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("blueprint:read")],
     schema: { params: BlueprintFamilyIdParamSchema, response: { 200: BlueprintFamilySchema } },
   }, async (req) => blueprintFamiliesService.getById(actor(req), req.params.id));

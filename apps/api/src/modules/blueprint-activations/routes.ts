@@ -14,10 +14,14 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const blueprintActivationsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    // ADR-0039: il service filtra per cliente (isPlatform ? tutto : actor.tenantId): un cliente vede la propria attivazione
+    config: { catalogGate: "tenant" },
     preHandler: [requirePermission("blueprint:read")],
     schema: { querystring: BlueprintActivationListQuerySchema, response: { 200: BlueprintActivationListResponseSchema } },
   }, async (req) => blueprintActivationsService.list(actor(req), req.query));
   app.get("/:id", {
+    // ADR-0039: il service filtra per cliente (isPlatform ? tutto : actor.tenantId): un cliente vede la propria attivazione
+    config: { catalogGate: "tenant" },
     preHandler: [requirePermission("blueprint:read")],
     schema: { params: BlueprintActivationIdParamSchema, response: { 200: BlueprintActivationSchema } },
   }, async (req) => blueprintActivationsService.getById(actor(req), req.params.id));

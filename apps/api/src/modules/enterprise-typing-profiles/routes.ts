@@ -14,10 +14,14 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const enterpriseTypingProfilesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    // ADR-0039: il service filtra per cliente: il profilo di tipizzazione e' del cliente
+    config: { catalogGate: "tenant" },
     preHandler: [requirePermission("enterprise_typing:read")],
     schema: { querystring: EnterpriseTypingProfileListQuerySchema, response: { 200: EnterpriseTypingProfileListResponseSchema } },
   }, async (req) => enterpriseTypingProfilesService.list(actor(req), req.query));
   app.get("/:id", {
+    // ADR-0039: il service filtra per cliente: il profilo di tipizzazione e' del cliente
+    config: { catalogGate: "tenant" },
     preHandler: [requirePermission("enterprise_typing:read")],
     schema: { params: EnterpriseTypingProfileIdParamSchema, response: { 200: EnterpriseTypingProfileSchema } },
   }, async (req) => enterpriseTypingProfilesService.getById(actor(req), req.params.id));

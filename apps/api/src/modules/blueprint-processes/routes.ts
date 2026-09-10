@@ -13,10 +13,14 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const blueprintProcessesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    // ADR-0039: registro dei processi di modello: struttura, aperta a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("blueprint:read")],
     schema: { querystring: BlueprintProcessListQuerySchema, response: { 200: BlueprintProcessListResponseSchema } },
   }, async (req) => blueprintProcessesService.list(actor(req), req.query));
   app.get("/:id", {
+    // ADR-0039: registro dei processi di modello: struttura, aperta a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("blueprint:read")],
     schema: { params: BlueprintProcessIdParamSchema, response: { 200: BlueprintProcessSchema } },
   }, async (req) => blueprintProcessesService.getById(actor(req), req.params.id));

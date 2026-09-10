@@ -46,12 +46,12 @@ export const contentBlueprintLinksRoutes: FastifyPluginAsyncZod = async (app) =>
   /* --- blueprint-side reads (blueprint:read) --- */
   app.get(
     "/by-process",
-    { preHandler: [requirePermission("blueprint:read")], schema: { querystring: LinksByProcessQuerySchema, response: { 200: LinksForProcessResponseSchema } } },
+    { config: { catalogGate: "tenant" }, preHandler: [requirePermission("blueprint:read")], schema: { querystring: LinksByProcessQuerySchema, response: { 200: LinksForProcessResponseSchema } } },
     async (req) => contentBlueprintLinkService.listForProcess(actor(req), req.query.blueprintProcessId),
   );
   app.get(
     "/by-variant",
-    { preHandler: [requirePermission("blueprint:read")], schema: { querystring: LinksByVariantQuerySchema, response: { 200: LinksForProcessResponseSchema } } },
+    { config: { catalogGate: "tenant" }, preHandler: [requirePermission("blueprint:read")], schema: { querystring: LinksByVariantQuerySchema, response: { 200: LinksForProcessResponseSchema } } },
     async (req) => contentBlueprintLinkService.listForVariant(actor(req), req.query.variantId),
   );
 };

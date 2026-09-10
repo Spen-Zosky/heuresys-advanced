@@ -14,10 +14,14 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const activityClassificationsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    // ADR-0039: ATECO/NACE: tassonomia di attivita', aperta a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("enterprise_typing:read")],
     schema: { querystring: ActivityClassificationListQuerySchema, response: { 200: ActivityClassificationListResponseSchema } },
   }, async (req) => activityClassificationsService.list(actor(req), req.query));
   app.get("/:id", {
+    // ADR-0039: ATECO/NACE: tassonomia di attivita', aperta a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("enterprise_typing:read")],
     schema: { params: ActivityClassificationIdParamSchema, response: { 200: ActivityClassificationSchema } },
   }, async (req) => activityClassificationsService.getById(actor(req), req.params.id));

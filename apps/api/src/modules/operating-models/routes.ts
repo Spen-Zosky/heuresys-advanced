@@ -15,10 +15,14 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const operatingModelsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    // ADR-0039: catalogo dei modelli operativi: classificazione, aperta a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("operating_model:read")],
     schema: { response: { 200: OperatingModelListResponseSchema } },
   }, async (req) => operatingModelsService.list(actor(req)));
   app.get("/:id", {
+    // ADR-0039: catalogo dei modelli operativi: classificazione, aperta a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("operating_model:read")],
     schema: { params: OperatingModelIdParamSchema, response: { 200: OperatingModelSchema } },
   }, async (req) => operatingModelsService.getById(actor(req), req.params.id));

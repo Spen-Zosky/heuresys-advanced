@@ -1,7 +1,14 @@
 /**
  * apps/api/src/modules/job-roles/repository.ts
- * Raw SQL for sys.sys_job_roles (no tenant_id — platform-level, FK to
- * sys.sys_job_families.job_family_id).
+ * Raw SQL for sys.sys_job_roles — un CATALOGO di piattaforma con, dal 2026-09-10 (ADR-0039,
+ * mig. 000397), una colonna del cliente ANNULLABILE per le voci proprie: NULL = riga di
+ * catalogo, valorizzata = voce che quel cliente si è creato. FK a sys_job_families.
+ *
+ * ⚠ La lettura non è più «tutto il catalogo». Passa dal PROFILO (lib/scope/profilo.ts): un
+ * utente del cliente riceve le voci del proprio profilo più le proprie, chi amministra la
+ * piattaforma riceve il catalogo intero. Prima di questa data `/v1/job-roles` restituiva a
+ * chiunque tutti i 176 ruoli — compresi «pasticcere-confettiere» e «operatore di reattore
+ * nucleare» a un responsabile HR di una banca.
  */
 
 import type { Pool, PoolClient } from "pg";
@@ -11,6 +18,7 @@ import type {
   CreateJobRoleBody,
   UpdateJobRoleBody,
 } from "@heuresys/shared";
+import type { PerimetroDiCatalogo } from "../../lib/scope/profilo.js";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -48,9 +56,23 @@ function toJr(r: Row): JobRole {
 export async function listJobRoles(
   q: DbConnector,
   query: JobRoleListQuery,
+  perimetro: PerimetroDiCatalogo,
 ): Promise<{ items: JobRole[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
+  // ADR-0039 regola 4 — il perimetro entra PRIMA di ogni altro filtro: il profilo del
+  // cliente più le sue voci proprie, mai il catalogo intero.
+  if (perimetro.tipo === "profilo") {
+    params.push(perimetro.codici);
+    const codici = params.length;
+    if (perimetro.tenantId === null) {
+      where.push(`job_role_code = ANY($${codici}::text[])`);
+    } else {
+      params.push(perimetro.tenantId);
+      const tenant = params.length;
+      where.push(`(job_role_code = ANY($${codici}::text[]) OR job_role_tenant_id = $${tenant})`);
+    }
+  }
   if (query.jobFamilyId) {
     params.push(query.jobFamilyId);
     where.push(`job_role_family_id = $${params.length}`);
@@ -88,8 +110,47 @@ export async function findJobRoleById(q: DbConnector, id: string): Promise<JobRo
   return res.rows[0] ? toJr(res.rows[0]) : null;
 }
 
-export async function findJobRoleByCode(q: DbConnector, code: string): Promise<JobRole | null> {
-  const res = await q.query<Row>(`SELECT ${COLS} FROM sys.sys_job_roles WHERE job_role_code = $1`, [code]);
+/**
+ * Come sopra, ma dentro il perimetro dell'attore. Serve perché un filtro applicato al solo
+ * ELENCO si aggira chiedendo la riga per identificativo: chi ha visto un uuid una volta
+ * continuerebbe a leggere il ruolo anche dopo che il profilo ha smesso di contenerlo.
+ */
+export async function findJobRoleInPerimeter(
+  q: DbConnector,
+  id: string,
+  perimetro: PerimetroDiCatalogo,
+): Promise<JobRole | null> {
+  if (perimetro.tipo === "tutto") return findJobRoleById(q, id);
+  const params: unknown[] = [id, perimetro.codici];
+  let clausola = `job_role_code = ANY($2::text[])`;
+  if (perimetro.tenantId !== null) {
+    params.push(perimetro.tenantId);
+    clausola = `(${clausola} OR job_role_tenant_id = $3)`;
+  }
+  const res = await q.query<Row>(
+    `SELECT ${COLS} FROM sys.sys_job_roles WHERE job_role_id = $1 AND ${clausola}`,
+    params,
+  );
+  return res.rows[0] ? toJr(res.rows[0]) : null;
+}
+
+/**
+ * Il doppione si cerca DENTRO lo stesso proprietario, perché è lì che l'unicità vive dal
+ * 2026-09-10 (mig. 000397, `UNIQUE (COALESCE(tenant, zero), code)`): un cliente che si dà una
+ * voce propria non collide con la voce omonima di un altro cliente, né con il catalogo.
+ * Cercare il codice su tutta la tabella riporterebbe l'unicità globale nel codice dopo
+ * averla tolta dallo schema — e sarebbe il tipo di divergenza che nessuno nota per mesi.
+ */
+export async function findJobRoleByCode(
+  q: DbConnector,
+  code: string,
+  tenantId: string | null,
+): Promise<JobRole | null> {
+  const res = await q.query<Row>(
+    `SELECT ${COLS} FROM sys.sys_job_roles
+      WHERE job_role_code = $1 AND job_role_tenant_id IS NOT DISTINCT FROM $2`,
+    [code, tenantId],
+  );
   return res.rows[0] ? toJr(res.rows[0]) : null;
 }
 
@@ -105,12 +166,15 @@ export async function insertJobRole(
   q: DbConnector,
   body: CreateJobRoleBody,
   createdBy: string,
+  /** ADR-0039 regola 3 — NULL crea una riga di CATALOGO, valorizzato una VOCE PROPRIA. */
+  tenantId: string | null,
 ): Promise<JobRole> {
   const res = await q.query<Row>(
     `INSERT INTO sys.sys_job_roles (
         job_role_family_id, job_role_code, job_role_name,
-        job_role_description, job_role_seniority_level, job_role_metadata, created_by
-      ) VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7)
+        job_role_description, job_role_seniority_level, job_role_metadata, created_by,
+        job_role_tenant_id
+      ) VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8)
       RETURNING ${COLS}`,
     [
       // ADR-0015: body.jobFamilyId is now nullable+optional; null when family unknown.
@@ -121,6 +185,7 @@ export async function insertJobRole(
       body.seniorityLevel ?? null,
       JSON.stringify(body.metadata ?? {}),
       createdBy,
+      tenantId,
     ],
   );
   return toJr(res.rows[0]!);

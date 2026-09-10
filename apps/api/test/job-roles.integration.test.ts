@@ -171,6 +171,113 @@ describe("/v1/job-roles/* integration", () => {
     expect((dup.json() as ErrEnvelope).error.code).toBe("JOB_ROLE_CODE_CONFLICT");
   });
 
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  // B21 + B22 (ADR-0039) — LA PROVA A ESITI OPPOSTI SUL PROFILO DEL CLIENTE.
+  //
+  // La domanda e' una sola — «dammi i ruoli professionali» — e le risposte devono essere
+  // DUE: chi amministra la piattaforma riceve il catalogo intero, un utente della banca
+  // riceve solo il proprio profilo. Se le due risposte coincidessero, il filtro non
+  // esisterebbe: e' cosi' che questa prova sa fallire.
+  //
+  // ⚠ NIENTE E' SCRITTO A MANO. I ruoli fuori dal profilo si ri-derivano dal database vivo
+  // (le tabelle di contenuto del modello attivo della banca), mai da un elenco nel test:
+  // un elenco cablato sarebbe vero il giorno in cui lo si scrive e falso al giro dopo.
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  it("B21 — un utente della banca NON riceve i ruoli fuori dal suo profilo, chi amministra la piattaforma SI'", async () => {
+    // ① Il fatto, misurato sul vivo: quali ruoli il catalogo ha e il profilo della banca no.
+    const fuoriProfilo = await pool.query<{ code: string }>(
+      `SELECT jr.job_role_code AS code
+         FROM sys.sys_job_roles jr
+        WHERE jr.job_role_tenant_id IS NULL
+          AND NOT EXISTS (
+            SELECT 1
+              FROM sys.sys_blueprint_content_job_roles ct
+              JOIN sys.sys_blueprint_variant_versions vv
+                ON vv.blueprint_variant_version_id = ct.blueprint_content_job_role_version_id
+               AND vv.blueprint_variant_version_status = 'PUBLISHED'
+              JOIN sys.sys_blueprint_activations a
+                ON a.blueprint_activation_variant_id = vv.blueprint_variant_version_variant_id
+               AND a.blueprint_activation_status = 'ACTIVE'
+              JOIN sys.sys_tenancies t
+                ON t.tenant_id = a.blueprint_activation_tenant_id
+               AND t.tenant_code = 'RTL_BANK'
+             WHERE ct.blueprint_content_job_role_code = jr.job_role_code)`,
+    );
+    // Se il profilo coprisse tutto il catalogo la prova non potrebbe distinguere nulla, e un
+    // verde nascerebbe dal vuoto: qui si ferma, dicendo perche'.
+    expect(
+      fuoriProfilo.rowCount,
+      "il profilo della banca copre TUTTO il catalogo: la prova non puo' discriminare",
+    ).toBeGreaterThan(0);
+    const codiciFuori = new Set(fuoriProfilo.rows.map((r) => r.code));
+
+    // ② L'utente della banca: nessuno di quei codici deve comparire.
+    const banca = await suite.app.inject({
+      method: "GET",
+      url: "/v1/job-roles?limit=200",
+      headers: { cookie: ch(userS.cookies) },
+    });
+    expect(banca.statusCode).toBe(200);
+    const visti = (banca.json() as { items: { code: string }[] }).items.map((i) => i.code);
+    const trapelati = visti.filter((c) => codiciFuori.has(c));
+    expect(trapelati, `ruoli fuori profilo restituiti alla banca: ${trapelati.join(", ")}`)
+      .toEqual([]);
+
+    // ③ Chi amministra la piattaforma li vede: e' l'esito OPPOSTO sulla stessa domanda, ed e'
+    //    anche la prova che il catalogo NON si e' svuotato (condizione posta da Enzo).
+    const piattaforma = await suite.app.inject({
+      method: "GET",
+      url: "/v1/job-roles?limit=200",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(piattaforma.statusCode).toBe(200);
+    const vistiDaPiattaforma = new Set(
+      (piattaforma.json() as { items: { code: string }[] }).items.map((i) => i.code),
+    );
+    const primoFuori = [...codiciFuori][0]!;
+    expect(vistiDaPiattaforma.has(primoFuori), `il catalogo intero non contiene ${primoFuori}`)
+      .toBe(true);
+    expect(vistiDaPiattaforma.size).toBeGreaterThan(visti.length);
+  });
+
+  it("B21 — un ruolo fuori profilo non e' leggibile per identificativo dalla banca (404, non 403)", async () => {
+    // Il filtro sull'elenco si aggirerebbe chiedendo la riga per uuid: qui si verifica che
+    // non si aggiri. E la risposta e' 404 perche' un 403 direbbe che quel ruolo esiste.
+    const fuori = await pool.query<{ id: string }>(
+      `SELECT jr.job_role_id AS id
+         FROM sys.sys_job_roles jr
+        WHERE jr.job_role_tenant_id IS NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM sys.sys_blueprint_content_job_roles ct
+             WHERE ct.blueprint_content_job_role_code = jr.job_role_code)
+        LIMIT 1`,
+    );
+    expect(fuori.rowCount, "nessun ruolo fuori profilo: la prova non discrimina").toBe(1);
+    const id = fuori.rows[0]!.id;
+
+    const daBanca = await suite.app.inject({
+      method: "GET",
+      url: `/v1/job-roles/${id}`,
+      headers: { cookie: ch(userS.cookies) },
+    });
+    expect(daBanca.statusCode).toBe(404);
+
+    const daPiattaforma = await suite.app.inject({
+      method: "GET",
+      url: `/v1/job-roles/${id}`,
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(daPiattaforma.statusCode).toBe(200);
+  });
+
+  it("B22 — il catalogo non si svuota: i ruoli fuori profilo restano nel catalogo di piattaforma", async () => {
+    // La condizione che Enzo ha posto per iscritto, verificata sul dato e non sul discorso.
+    const catalogo = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_job_roles WHERE job_role_tenant_id IS NULL`,
+    );
+    expect(Number(catalogo.rows[0]!.n)).toBeGreaterThanOrEqual(176);
+  });
+
   it("POST without x-csrf-token header → 403", async () => {
     const r = await suite.app.inject({
       method: "POST",

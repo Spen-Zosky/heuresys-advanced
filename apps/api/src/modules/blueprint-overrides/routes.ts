@@ -13,10 +13,14 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const blueprintOverridesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    // ADR-0039: il service filtra per cliente: uno scostamento e' del cliente che lo ha deciso
+    config: { catalogGate: "tenant" },
     preHandler: [requirePermission("blueprint:read")],
     schema: { querystring: BlueprintOverrideListQuerySchema, response: { 200: BlueprintOverrideListResponseSchema } },
   }, async (req) => blueprintOverridesService.list(actor(req), req.query));
   app.get("/:id", {
+    // ADR-0039: il service filtra per cliente: uno scostamento e' del cliente che lo ha deciso
+    config: { catalogGate: "tenant" },
     preHandler: [requirePermission("blueprint:read")],
     schema: { params: BlueprintOverrideIdParamSchema, response: { 200: BlueprintOverrideSchema } },
   }, async (req) => blueprintOverridesService.getById(actor(req), req.params.id));

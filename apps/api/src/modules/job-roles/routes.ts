@@ -19,11 +19,15 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const jobRolesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    // ADR-0039: ADR-0039 regola 4: il profilo del cliente piu' le sue voci proprie, mai il catalogo intero
+    config: { catalogGate: "profile" },
     preHandler: [requirePermission("job_role:read")],
     schema: { querystring: JobRoleListQuerySchema, response: { 200: JobRoleListResponseSchema } },
   }, async (req) => jobRolesService.list(actor(req), req.query));
 
   app.get("/:id", {
+    // ADR-0039: ADR-0039 regola 4: il profilo del cliente piu' le sue voci proprie, mai il catalogo intero
+    config: { catalogGate: "profile" },
     preHandler: [requirePermission("job_role:read")],
     schema: { params: JobRoleIdParamSchema, response: { 200: JobRoleSchema } },
   }, async (req) => jobRolesService.getById(actor(req), req.params.id));

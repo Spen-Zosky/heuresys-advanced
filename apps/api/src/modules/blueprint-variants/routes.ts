@@ -13,10 +13,14 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const blueprintVariantsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    // ADR-0039: varianti di modello: struttura, aperta a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("blueprint:read")],
     schema: { querystring: BlueprintVariantListQuerySchema, response: { 200: BlueprintVariantListResponseSchema } },
   }, async (req) => blueprintVariantsService.list(actor(req), req.query));
   app.get("/:id", {
+    // ADR-0039: varianti di modello: struttura, aperta a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("blueprint:read")],
     schema: { params: BlueprintVariantIdParamSchema, response: { 200: BlueprintVariantSchema } },
   }, async (req) => blueprintVariantsService.getById(actor(req), req.params.id));

@@ -39,6 +39,47 @@
 import type { FastifyInstance, RouteOptions, preHandlerHookHandler } from "fastify";
 import { isSensitiveResource } from "./data-classes.js";
 
+/* ═══════════════════════════════════════════════════════════════════════════════════════
+ * IL TERZO ASSE — il CATALOGO (ADR-0039, B22). «Catalogo intero o profilo del cliente?»
+ *
+ * ADR-0039 chiede di aggiungere al cancello la seconda domanda: una rotta che restituisce un
+ * catalogo deve dire se serve il catalogo INTERO o il PROFILO del cliente. Ma la domanda non
+ * si poteva innestare su `orgGate: "catalog"` come sembrava, e la misura del 2026-09-10 dice
+ * perché: `job_role` sta in `RESOURCE_SENZA_DATI_DI_PERSONA`, quindi le sue rotte non entrano
+ * nemmeno nella popolazione di `orgGate` — che raccoglie SOLO le risorse sensibili. I due
+ * insiemi sono disgiunti quasi per definizione: un catalogo è ciò che non porta persone.
+ *
+ * Quindi terza popolazione, stesso meccanismo, elenco DICHIARATO — mai dedotto. La presenza
+ * di una colonna del cliente non basta a riconoscere un catalogo: da oggi `sys_job_roles` ne
+ * ha una, e resta un catalogo (la colonna serve alle voci proprie, non a partizionare).
+ *
+ * QUATTRO VALORI, e il terzo esiste perché la misura lo ha imposto. Dichiarare `"platform"` su
+ * `blueprint:read`, `enterprise_typing:read` e `operating_model:read` sarebbe stata
+ * un'affermazione FALSA: quei permessi sono concessi anche a `USER`, cioè a chiunque —
+ * verificato su `sys_auth_role_permissions` il 2026-09-10, prima di scrivere la riga.
+ * Il quarto, `"tenant"`, nasce dalla stessa disciplina: attivazioni, scostamenti e profili di
+ * tipizzazione portano un permesso di catalogo ma la loro query filtra già per cliente —
+ * chiamarli catalogo aperto sarebbe stato comodo e falso.
+ *
+ * ⚠ CONFINE DICHIARATO, sul modello di `tenantGate` (B23): l'insieme nasce con le quattro
+ * risorse-catalogo che questo blocco governa. Estenderlo è lavoro futuro da dichiarare, non
+ * da dare per fatto — e una risorsa aggiunta all'insieme rende subito rosse le sue rotte
+ * finché non rispondono alla domanda, che è il punto.
+ * ═══════════════════════════════════════════════════════════════════════════════════════ */
+
+/** Le risorse RBAC che espongono un CATALOGO di piattaforma. Elenco dichiarato, non dedotto. */
+export const RISORSE_DI_CATALOGO: ReadonlyMap<string, string> = new Map([
+  ["job_role", "i 176 ruoli professionali: catalogo condiviso, profilo per cliente (ADR-0039)"],
+  ["blueprint", "famiglie, varianti, versioni e contenuto dei modelli d'azienda"],
+  ["enterprise_typing", "bande dimensionali e classificazioni di attività: tassonomie (I21)"],
+  ["operating_model", "catalogo dei modelli operativi"],
+]);
+
+/** Closed set of catalog-gate declarations (ADR-0039). */
+export type CatalogGateDeclaration = "profile" | "platform" | "open" | "tenant";
+
+const CATALOG_GATE_VALUES: ReadonlySet<string> = new Set(["profile", "platform", "open", "tenant"]);
+
 /** Closed set of org-gate declarations a sensitive read route may carry. */
 export type OrgGateDeclaration = "service" | "catalog" | "aggregate";
 
@@ -58,6 +99,19 @@ declare module "fastify" {
     orgGate?: OrgGateDeclaration;
     /** B23: mandatory on the SAME read routes — how this route treats the tenant boundary. */
     tenantGate?: TenantGateDeclaration;
+    /**
+     * ADR-0039: obbligatoria su ogni rotta di lettura la cui risorsa è in `RISORSE_DI_CATALOGO`.
+     *   "profile"  — la rotta restituisce il profilo del cliente (più le sue voci proprie),
+     *                mai il catalogo intero. È la regola 4 dell'ADR.
+     *   "platform" — la rotta serve il catalogo INTERO, ed è ristretta a chi amministra la
+     *                piattaforma o costruisce un cliente nuovo.
+     *   "open"     — catalogo aperto a ogni cliente PER DISEGNO: tassonomie e classificazioni
+     *                che I21 tiene aperte a tutti i settori. La ragione va scritta accanto.
+     *   "tenant"   — la rotta NON restituisce un catalogo: il permesso è quello di un
+     *                catalogo, ma la query filtra già per il cliente e ciò che esce è suo.
+     *                È il caso di attivazioni, scostamenti e profili di tipizzazione.
+     */
+    catalogGate?: CatalogGateDeclaration;
   }
   interface FastifyInstance {
     /** D-51: what the org-gate collector saw — test introspection (set by registerOrgGateAssertion). */
@@ -73,6 +127,7 @@ export interface OrgGatedRoute {
   permissionCode: string;
   orgGate: OrgGateDeclaration | undefined;
   tenantGate: TenantGateDeclaration | undefined;
+  catalogGate?: CatalogGateDeclaration | undefined;
 }
 
 export interface OrgGateStats {
@@ -82,6 +137,10 @@ export interface OrgGateStats {
   violations: OrgGatedRoute[];
   /** B23: the subset with a missing/invalid tenantGate declaration (boot fails if non-empty). */
   tenantViolations: OrgGatedRoute[];
+  /** ADR-0039: ogni rotta read su una risorsa di CATALOGO, vista dal collettore. */
+  catalogReadRoutes: OrgGatedRoute[];
+  /** ADR-0039: quelle senza una dichiarazione `catalogGate` valida (l'avvio fallisce). */
+  catalogViolations: OrgGatedRoute[];
 }
 
 /** Extract the RBAC permission codes attached to the route's preHandlers by requirePermission. */
@@ -108,17 +167,51 @@ function isSensitiveReadCode(code: string): { resource: string } | null {
   return { resource };
 }
 
+/** True iff the permission code is a non-self READ on a declared PLATFORM CATALOG (ADR-0039). */
+function isCatalogReadCode(code: string): { resource: string } | null {
+  const parts = code.split(":");
+  const resource = parts[0];
+  const verb = parts[1];
+  if (!resource || !verb) return null;
+  if (parts.includes("self")) return null;
+  if (!READ_VERBS.has(verb)) return null;
+  if (!RISORSE_DI_CATALOGO.has(resource)) return null;
+  return { resource };
+}
+
 /**
  * Wire the collector + boot assertion onto the app. Call it BEFORE registering module routes
  * (onRoute only sees routes registered after the hook). Decorates `app.orgGateStats` so tests
  * can assert the surface was actually collected.
  */
 export function registerOrgGateAssertion(app: FastifyInstance): OrgGateStats {
-  const stats: OrgGateStats = { sensitiveReadRoutes: [], violations: [], tenantViolations: [] };
+  const stats: OrgGateStats = {
+    sensitiveReadRoutes: [], violations: [], tenantViolations: [],
+    catalogReadRoutes: [], catalogViolations: [],
+  };
   app.decorate("orgGateStats", stats);
 
   app.addHook("onRoute", (route) => {
     for (const permissionCode of permissionCodesOf(route)) {
+      // ADR-0039 — il terzo asse, su una popolazione DISGIUNTA da quella sensibile.
+      const catalogo = isCatalogReadCode(permissionCode);
+      if (catalogo) {
+        const catalogGate = route.config?.catalogGate;
+        const voce: OrgGatedRoute = {
+          method: Array.isArray(route.method) ? route.method.join(",") : route.method,
+          url: route.url,
+          resource: catalogo.resource,
+          permissionCode,
+          orgGate: route.config?.orgGate,
+          tenantGate: route.config?.tenantGate,
+          catalogGate,
+        };
+        stats.catalogReadRoutes.push(voce);
+        if (catalogGate === undefined || !CATALOG_GATE_VALUES.has(catalogGate)) {
+          stats.catalogViolations.push(voce);
+        }
+      }
+
       const sensitive = isSensitiveReadCode(permissionCode);
       if (!sensitive) continue;
       const orgGate = route.config?.orgGate;
@@ -162,6 +255,21 @@ export function registerOrgGateAssertion(app: FastifyInstance): OrgGateStats {
           `Fix: filter the repository query by the actor's tenant and declare ` +
           `config: { tenantGate: "service" } on the route — or, if the resource provably has no ` +
           `tenant_id column (a platform-wide catalog), declare "platform".`,
+      );
+    }
+    if (stats.catalogViolations.length > 0) {
+      const list = stats.catalogViolations
+        .map((v) => `  ${v.method} ${v.url} — ${v.permissionCode} (catalogo: ${v.resource})`)
+        .join("\n");
+      throw new Error(
+        `CATALOG_GATE_MISSING: ${stats.catalogViolations.length} rotta/e di lettura su un ` +
+          `CATALOGO di piattaforma non dicono se restituiscono il catalogo intero o il ` +
+          `profilo del cliente (ADR-0039, B22).\n${list}\n` +
+          `Rimedio: filtra per il profilo del cliente (lib/scope/profilo.ts) e dichiara ` +
+          `config: { catalogGate: "profile" } — oppure "platform" se la rotta serve chi ` +
+          `costruisce un cliente ed è ristretta a chi amministra la piattaforma, oppure ` +
+          `"open" se è una tassonomia aperta a ogni settore per disegno (I21), scrivendo ` +
+          `accanto la ragione.`,
       );
     }
   });

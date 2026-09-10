@@ -13,10 +13,14 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const enterpriseSizeBandsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    // ADR-0039: bande dimensionali: classificazione, aperta a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("enterprise_typing:read")],
     schema: { response: { 200: EnterpriseSizeBandListResponseSchema } },
   }, async (req) => enterpriseSizeBandsService.list(actor(req)));
   app.get("/:id", {
+    // ADR-0039: bande dimensionali: classificazione, aperta a ogni settore (I21)
+    config: { catalogGate: "open" },
     preHandler: [requirePermission("enterprise_typing:read")],
     schema: { params: EnterpriseSizeBandIdParamSchema, response: { 200: EnterpriseSizeBandSchema } },
   }, async (req) => enterpriseSizeBandsService.getById(actor(req), req.params.id));

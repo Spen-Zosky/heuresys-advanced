@@ -131,6 +131,13 @@ ON CONFLICT (blueprint_content_dashboard_version_id, blueprint_content_dashboard
 
 COMMIT;
 
+-- Una tabella popolata e mai analizzata fa suonare `db_health.py` («tabelle popolate mai
+-- analizzate»), e non e' un formalismo: il pianificatore non ha statistiche e sceglie al buio.
+-- Misurato subito dopo la prima applicazione — `sys_blueprint_content_dashboards`, 8 righe,
+-- `last_analyze` e `last_autoanalyze` entrambi vuoti: l'autovacuum non era ancora passato.
+ANALYZE sys.sys_blueprint_content_job_roles;
+ANALYZE sys.sys_blueprint_content_dashboards;
+
 -- ============================================================================================
 -- LE POST-CONDIZIONI — anche su cio' che NON doveva cambiare (metodo di bonifica ④c)
 -- ============================================================================================

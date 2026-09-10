@@ -81,15 +81,88 @@ SELECT 'sys_job_roles', jr.job_role_id, 'description', 'en', e.descrizione_en, '
   FROM en e JOIN sys.sys_job_roles jr ON jr.job_role_code = e.codice
 ON CONFLICT DO NOTHING;
 
+-- ═══════════════════════════════════════════════════════════════════════════════
+-- EMENDAMENTO S1096 (2026-09-10) — I 34 KPI DI SETTORE BANCARIO NATI CON B30.
+--
+-- IL FATTO, misurato in produzione mentre si applicava un'altra migrazione: la catena si
+-- e' fermata QUI con «Copertura EN: restano 34 traduzioni mancanti». I 34 sono i KPI di
+-- settore che B30 (S1095, 2026-09-09) ha aggiunto a `sys_kpi_definitions` — 233 righe, 199
+-- tradotte — e sono entrati senza il loro nome inglese.
+--
+-- PERCHE' LA CORREZIONE STA QUI e non in un file di numero maggiore: la prova che pretende
+-- «copertura EN a zero» gira in QUESTO file, quindi nessuna migrazione successiva farebbe
+-- in tempo a scriverle. E' lo stesso ragionamento, e la stessa forma, dei sei emendamenti
+-- della `000062` sul registro di riconciliazione.
+--
+-- PERCHE' LA CI ERA VERDE E LA PRODUZIONE ROSSA: quei 34 KPI sono stati inseriti da uno
+-- SCRIPT (`03_sql/31_L04_L06_kpi_di_settore.sql` del bundle), non da una migrazione. Sul
+-- clone della CI non esistono, quindi li' la copertura era gia' a zero e nessuno ha visto
+-- niente — e' il difetto gia' registrato in memoria come «clone di CI senza i dati da
+-- script». L'INSERT qui sotto si aggancia per CODICE: dove i KPI non ci sono scrive zero
+-- righe e la guardia resta verde lo stesso.
+--
+-- La traduzione e' terminologia bancaria inglese corrente, non parola per parola.
+-- ═══════════════════════════════════════════════════════════════════════════════
+CREATE TEMP TABLE en_kpi (codice text, nome_en text) ON COMMIT DROP;
+INSERT INTO en_kpi VALUES
+  ('BP-012-KPI-01', 'Strategic plan delivery'),
+  ('BP-012-KPI-02', 'Cost/income ratio'),
+  ('BP-012-KPI-03', 'Board resolutions implemented on time'),
+  ('BP-013-KPI-01', 'Account opening turnaround time'),
+  ('BP-013-KPI-02', 'Rejected account opening applications'),
+  ('BP-013-KPI-03', 'Dormant accounts as a share of total'),
+  ('BP-014-KPI-01', 'Non-performing loan recovery rate'),
+  ('BP-014-KPI-02', 'Average recovery time'),
+  ('BP-014-KPI-03', 'Exposures past due over 90 days'),
+  ('BP-014-KPI-04', 'Provision coverage ratio'),
+  ('BP-015-KPI-01', 'Products sold within suitability profile'),
+  ('BP-015-KPI-02', 'Retail net inflows'),
+  ('BP-015-KPI-03', 'Complaints on investment products'),
+  ('BP-016-KPI-01', 'Average counter waiting time'),
+  ('BP-016-KPI-02', 'Cash differences'),
+  ('BP-016-KPI-03', 'Counter transactions per teller'),
+  ('BP-017-KPI-01', 'Complaints resolved at first contact'),
+  ('BP-017-KPI-02', 'Average response time'),
+  ('BP-017-KPI-03', 'Net promoter score'),
+  ('BP-018-KPI-01', 'Customer acquisition cost'),
+  ('BP-018-KPI-02', 'Campaign conversion rate'),
+  ('BP-018-KPI-03', 'Brand awareness'),
+  ('BP-019-KPI-01', 'Procurement savings achieved'),
+  ('BP-019-KPI-02', 'Critical suppliers with an up-to-date assessment'),
+  ('BP-019-KPI-03', 'Purchase cycle time'),
+  ('BP-020-KPI-01', 'Cost per workstation'),
+  ('BP-020-KPI-02', 'Energy consumption per square metre'),
+  ('BP-020-KPI-03', 'Space occupancy'),
+  ('BP-021-KPI-01', 'Open litigation cases'),
+  ('BP-021-KPI-02', 'Favourable outcome in closed litigation'),
+  ('BP-021-KPI-03', 'Contract review turnaround time'),
+  ('BP-022-KPI-01', 'Data quality on critical domains'),
+  ('BP-022-KPI-02', 'Regulatory reports delivered on time'),
+  ('BP-022-KPI-03', 'Data request fulfilment time');
+
+INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+SELECT 'sys_kpi_definitions', k.kpi_definition_id, 'name', 'en', e.nome_en, 'LLM'
+  FROM en_kpi e JOIN sys.sys_kpi_definitions k ON k.kpi_definition_code = e.codice
+ON CONFLICT DO NOTHING;
+
 -- ───────────────────────────────────────────────────────────────────────────────
 -- AUTO-VERIFICA
 -- ───────────────────────────────────────────────────────────────────────────────
 DO $$
 DECLARE
-  n_mappa int; n_agganciati int; n_gap int; n_orfani int;
+  n_mappa int; n_agganciati int; n_gap int; n_orfani int; n_kpi int;
 BEGIN
   SELECT count(*) INTO n_mappa FROM en;
   IF n_mappa <> 39 THEN RAISE EXCEPTION 'Mappa EN: attese 39 righe, trovate %', n_mappa; END IF;
+
+  -- [S1096] I 34 KPI: o ci sono tutti, o non c'e' nessuno. Un numero in mezzo vuol dire che
+  -- i codici sono cambiati sotto — e allora la mappa qui sopra e' da rifare, non da subire.
+  -- Zero e' l'esito legittimo sul clone della CI, dove quei KPI non sono mai stati inseriti.
+  SELECT count(*) INTO n_kpi FROM en_kpi e
+    JOIN sys.sys_kpi_definitions k ON k.kpi_definition_code = e.codice;
+  IF n_kpi NOT IN (0, 34) THEN
+    RAISE EXCEPTION 'Mappa EN dei KPI: agganciati % codici su 34 — i codici sono cambiati', n_kpi;
+  END IF;
 
   -- ogni codice della mappa corrisponde a un ruolo che esiste: un refuso nel codice
   -- passerebbe in silenzio, lasciando la traduzione non scritta e il gap aperto
@@ -99,7 +172,10 @@ BEGIN
     RAISE EXCEPTION 'Codici della mappa che non corrispondono ad alcun ruolo: %', 39 - n_agganciati;
   END IF;
 
-  -- LA PROVA: la vista di copertura torna a zero campi con gap
+  -- LA PROVA: la vista di copertura torna a zero campi con gap.
+  -- ⚠ La prova guarda TUTTA la copertura, non solo i ruoli di questo file, ed e' voluto:
+  --    e' il presidio che si accorge di righe di catalogo entrate senza traduzione. Il
+  --    2026-09-10 e' scattato per davvero (vedi l'emendamento S1096 in coda al file).
   SELECT coalesce(sum(missing), 0) INTO n_gap FROM sys.v_reference_translation_coverage;
   IF n_gap <> 0 THEN
     RAISE EXCEPTION 'Copertura EN: restano % traduzioni mancanti', n_gap;

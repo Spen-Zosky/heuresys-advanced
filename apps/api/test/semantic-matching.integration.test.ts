@@ -123,6 +123,23 @@ beforeAll(async () => {
   };
   jrNear = await mkJobRole(JR_CODES[0]!);
   jrXtenant = await mkJobRole(JR_CODES[1]!);
+
+  // ⚠ C4 (2026-09-10) — IL CRITERIO DI VISIBILITA' E' CAMBIATO, e la fixture deve dirlo.
+  // Prima bastava che una posizione del cliente usasse il ruolo; ora il motore di somiglianza
+  // passa dal PROFILO del cliente (ADR-0039), come gia' /v1/job-roles. Quindi il ruolo
+  // "vicino" va messo NEL PROFILO della banca, non solo agganciato a una posizione — e quello
+  // cross-tenant resta fuori, che e' cio' che il test deve continuare a distinguere.
+  await pool.query(
+    `INSERT INTO sys.sys_blueprint_content_job_roles
+       (blueprint_content_job_role_version_id, blueprint_content_job_role_code,
+        blueprint_content_job_role_name)
+     SELECT vv.blueprint_variant_version_id, $1, $1
+       FROM sys.sys_blueprint_variant_versions vv
+       JOIN sys.sys_blueprint_variants v
+         ON v.blueprint_variant_id = vv.blueprint_variant_version_variant_id
+      WHERE v.blueprint_variant_code = 'REGIONAL_RETAIL_BANK_MEDIUM'
+        AND vv.blueprint_variant_version_status = 'PUBLISHED'
+     ON CONFLICT DO NOTHING`, [JR_CODES[0]!]);
   await pool.query(
     `INSERT INTO sys.sys_job_role_embeddings (job_role_id, embedding, model_id)
      VALUES ($1,$3::vector,'itmatch'),($2,$3::vector,'itmatch')`, // both @ unit(0): unit(0) vs near(0) ≈ 0.999
@@ -292,12 +309,12 @@ describe("semantic-matching API", () => {
     expect(body.evidenceCount).toBe(4);
   });
 
-  it("job-roles are tenant-scoped (I5): an HR-mandated actor sees the in-tenant-referenced role but NOT the cross-tenant-only one", async () => {
+  it("job-roles passano dal PROFILO del cliente (C4): l'attore vede il ruolo del proprio profilo, non quello fuori", async () => {
     const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/job-roles?limit=50`, headers: { cookie: ch(tenantAdmin.cookies) } });
     expect(r.statusCode).toBe(200);
     const codes = (r.json() as { items: { jobRoleCode: string }[] }).items.map((x) => x.jobRoleCode);
-    expect(codes).toContain("IT_MATCH_JR_NEAR");      // referenced by an RTL position → visible
-    expect(codes).not.toContain("IT_MATCH_JR_XT");    // referenced ONLY cross-tenant → hidden
+    expect(codes).toContain("IT_MATCH_JR_NEAR");      // nel PROFILO della banca → visibile
+    expect(codes).not.toContain("IT_MATCH_JR_XT");    // fuori dal profilo → nascosto (C4)
   });
 
   it("PLATFORM_ADMIN sees both throwaway job_roles (incl. the cross-tenant-only one)", async () => {
@@ -306,6 +323,70 @@ describe("semantic-matching API", () => {
     const codes = (r.json() as { items: { jobRoleCode: string }[] }).items.map((x) => x.jobRoleCode);
     expect(codes).toContain("IT_MATCH_JR_NEAR");
     expect(codes).toContain("IT_MATCH_JR_XT");
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  // C4 (S1096) — I 34 RUOLI FUORI PROFILO NON SONO PIU' PROPONIBILI ALLA BANCA.
+  //
+  // Il fatto misurato il 2026-09-10, prima della correzione: il filtro di visibilita' di
+  // questo modulo faceva uscire un ruolo se NESSUNA posizione lo usava. I 34 ruoli di altri
+  // settori (pasticcere, operatore di reattore nucleare, le direzioni QSE e R&D) sono tutti
+  // «non usati da nessuna posizione»: passavano quel filtro 34 su 34, e 34 su 34 hanno un
+  // embedding. La porta chiusa da B21 su /v1/job-roles era rimasta aperta qui.
+  //
+  // La prova si ri-deriva dal database vivo — mai un elenco cablato — e sa fallire: se il
+  // perimetro tornasse a essere il vecchio predicato, i 34 ricomparirebbero.
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  it("C4 — nessuno dei ruoli fuori dal profilo della banca e' proponibile a un suo utente", async () => {
+    const fuori = await pool.query<{ code: string }>(
+      `SELECT jr.job_role_code AS code
+         FROM sys.sys_job_roles jr
+         JOIN sys.sys_job_role_embeddings e ON e.job_role_id = jr.job_role_id
+        WHERE jr.job_role_tenant_id IS NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM sys.sys_blueprint_content_job_roles ct
+              JOIN sys.sys_blueprint_variant_versions vv
+                ON vv.blueprint_variant_version_id = ct.blueprint_content_job_role_version_id
+               AND vv.blueprint_variant_version_status = 'PUBLISHED'
+              JOIN sys.sys_blueprint_activations a
+                ON a.blueprint_activation_variant_id = vv.blueprint_variant_version_variant_id
+               AND a.blueprint_activation_status = 'ACTIVE'
+              JOIN sys.sys_tenancies t
+                ON t.tenant_id = a.blueprint_activation_tenant_id AND t.tenant_code = 'RTL_BANK'
+             WHERE ct.blueprint_content_job_role_code = jr.job_role_code)`,
+    );
+    expect(
+      fuori.rowCount,
+      "nessun ruolo fuori profilo con embedding: la prova non puo' discriminare",
+    ).toBeGreaterThan(0);
+    const codiciFuori = new Set(fuori.rows.map((r) => r.code));
+
+    const banca = await suite.app.inject({
+      method: "GET",
+      url: `/v1/matching/users/${uHas}/job-roles?limit=50`,
+      headers: { cookie: ch(tenantAdmin.cookies) },
+    });
+    expect(banca.statusCode).toBe(200);
+    const visti = (banca.json() as { items: { jobRoleCode: string }[] }).items.map((x) => x.jobRoleCode);
+    const trapelati = visti.filter((c) => codiciFuori.has(c));
+    expect(trapelati, `ruoli fuori profilo proposti alla banca: ${trapelati.join(", ")}`).toEqual([]);
+
+    // L'esito OPPOSTO sulla stessa domanda, ed e' cio' che rende la prima meta' una prova e
+    // non un artefatto del taglio: con lo STESSO limite (50, il massimo del contratto) chi
+    // amministra la piattaforma ne vede comunque almeno uno. Se non ne vedesse nessuno, lo
+    // zero della banca potrebbe venire dall'ordinamento invece che dal filtro.
+    const piattaforma = await suite.app.inject({
+      method: "GET",
+      url: `/v1/matching/users/${uHas}/job-roles?limit=50`,
+      headers: { cookie: ch(admin.cookies) },
+    });
+    expect(piattaforma.statusCode).toBe(200);
+    const daPiattaforma = new Set(
+      (piattaforma.json() as { items: { jobRoleCode: string }[] }).items.map((x) => x.jobRoleCode),
+    );
+    expect([...codiciFuori].some((c) => daPiattaforma.has(c)),
+      "chi amministra la piattaforma non vede piu' nessuno dei ruoli fuori profilo: il filtro e' troppo largo",
+    ).toBe(true);
   });
 
   it("a plain USER may only target its own job-roles (peer → 404, self → 200) [option b]", async () => {

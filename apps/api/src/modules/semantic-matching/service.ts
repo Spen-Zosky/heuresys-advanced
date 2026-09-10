@@ -13,6 +13,7 @@ import type { RoleCode } from "../../config/constants.js";
 import type { MatchQuery, FreeTextQuery } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { canReadOrgTarget } from "../../lib/scope/resolver.js";
+import { perimetroDiCatalogo } from "../../lib/scope/profilo.js";
 import { runBackfill, type BackfillSummary } from "./backfill.js";
 import { makeEmbedder, type Embedder } from "./voyage-client.js";
 import { withQueryCache } from "./query-embedding-cache.js";
@@ -121,10 +122,15 @@ export const semanticMatchingService = {
 
   // ── AI ②·Fase 2 ──────────────────────────────────────────────────────────
 
-  /** Caller's own person-profile → top-N best-matching JOB_ROLES (ESS self). Tenant-scoped (I5). */
+  /**
+   * Caller's own person-profile → top-N best-matching JOB_ROLES (ESS self).
+   * ⚠ Dal 2026-09-10 il perimetro è quello del PROFILO del cliente (C4, ADR-0039), non più il
+   * predicato «ruolo non usato da nessuno» che lasciava passare i 34 ruoli fuori profilo.
+   */
   async myJobRoles(a: ActorContext, q: MatchQuery) {
-    const tenantId = isPlatform(a) ? undefined : (a.tenantId ?? ZERO_UUID);
-    return repo.knnJobRolesForUser(pool, a.userId, tenantId, q.limit);
+    return repo.knnJobRolesForUser(
+      pool, a.userId, await perimetroDiCatalogo(pool, a, "job_roles"), q.limit,
+    );
   },
 
   /**
@@ -137,8 +143,13 @@ export const semanticMatchingService = {
     if (tenant === null) throw new NotFoundError("User");
     if (!isPlatform(a) && (a.tenantId === null || tenant !== a.tenantId)) throw new NotFoundError("User");
     if (!(await canReadOrgTarget(pool, a, userId, tenant))) throw new NotFoundError("User");
-    const tenantId = isPlatform(a) ? undefined : tenant;
-    return repo.knnJobRolesForUser(pool, userId, tenantId, q.limit);
+    // Il perimetro è quello del cliente del BERSAGLIO, non dell'attore: i controlli qui sopra
+    // hanno già stabilito che l'attore può vederlo, e i ruoli proponibili sono quelli
+    // dell'azienda in cui quella persona lavora.
+    const perimetro = isPlatform(a)
+      ? ({ tipo: "tutto" } as const)
+      : await perimetroDiCatalogo(pool, { ...a, tenantId: tenant }, "job_roles");
+    return repo.knnJobRolesForUser(pool, userId, perimetro, q.limit);
   },
 
   /**

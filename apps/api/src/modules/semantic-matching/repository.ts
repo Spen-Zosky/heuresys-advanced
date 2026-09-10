@@ -5,6 +5,7 @@
  */
 import type { Pool, PoolClient } from "pg";
 import type { OccupationMatch, SkillMatch, PositionMatch, JobRoleMatch, SimilarUserMatch } from "@heuresys/shared";
+import type { PerimetroDiCatalogo } from "../../lib/scope/profilo.js";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -25,6 +26,13 @@ export async function readSkillCorpus(q: DbConnector): Promise<CorpusItem[]> {
   return r.rows;
 }
 
+/**
+ * ⚠ QUESTO LEGGE L'INTERO CATALOGO, ED E' VOLUTO (C4, 2026-09-10). Costruisce il VOCABOLARIO su
+ * cui si calcolano gli embedding, non la RISPOSTA che un utente riceve: un vocabolario parziale
+ * darebbe vettori diversi a seconda di chi guarda, cioè un motore che cambia risposta senza che
+ * il dato sia cambiato. Il perimetro del cliente si applica dove si risponde —
+ * `knnJobRolesForUser` — e non dove si impara.
+ */
 export async function readJobRoleCorpus(q: DbConnector): Promise<CorpusItem[]> {
   const r = await q.query<CorpusItem>(
     `SELECT job_role_id AS id,
@@ -241,31 +249,50 @@ export async function knnPositionsForUser(
 
 /**
  * A user's person-profile → top-N best-matching JOB_ROLES (AI ②·Fase 2, read-only).
- * job_roles are a GLOBAL CATALOG (no tenant column). Tenant-awareness (I5): a non-platform
- * actor sees the global catalog (roles referenced by NO position) PLUS roles referenced by at
- * least one position in `tenantId`; a role referenced ONLY by cross-tenant positions is hidden.
- * `tenantId` undefined (PLATFORM_ADMIN) → no filter (all roles). Mirrors the occupations/positions
- * empty-state: evidenceCount=0 → honest empty items (no profile = no matches).
+ *
+ * ⚠⚠ IL PERIMETRO E' QUELLO DEL PROFILO, dal 2026-09-10 (C4, ADR-0039). Prima questa funzione
+ * aveva un filtro di visibilità PROPRIO — «il ruolo esce se nessuna posizione lo usa, oppure se
+ * lo usa una posizione del cliente» — e quel predicato lasciava passare tutto ciò che nessuno
+ * usa. Misurato il 2026-09-10: i **34 ruoli fuori dal profilo della banca** (pasticcere,
+ * operatore di reattore nucleare, le direzioni QSE e R&D) passavano quel filtro **34 su 34**, e
+ * **34 su 34 hanno un embedding**: erano quindi proponibili a un utente della banca. La porta
+ * che B21 aveva chiuso su `/v1/job-roles` era rimasta aperta qui, e la ragione è che erano due
+ * domande scritte due volte invece di una sola posta bene.
+ *
+ * Ora la domanda è una sola e sta in `lib/scope/profilo.ts`: il profilo del cliente più le sue
+ * voci proprie; il catalogo intero solo a chi amministra la piattaforma.
+ *
+ * ⚠ IL CANCELLO NON COPRE QUESTE ROTTE, ed è dichiarato invece che sperato: la risorsa RBAC del
+ * modulo è `matching`, non `job_role`, quindi `RISORSE_DI_CATALOGO` in `lib/scope/gate.ts` non
+ * le raggiunge e `catalogGate` non si accende qui. Il filtro è nel servizio e questa nota è ciò
+ * che tiene il fatto visibile: allargare l'insieme del cancello a `matching` sarebbe un
+ * cambiamento di popolazione, da dichiarare in un blocco suo.
+ *
+ * Mirrors the occupations/positions empty-state: evidenceCount=0 → honest empty items.
  */
 export async function knnJobRolesForUser(
   q: DbConnector,
   userId: string,
-  tenantId: string | undefined,
+  perimetro: PerimetroDiCatalogo,
   limit: number,
 ): Promise<{ items: JobRoleMatch[]; evidenceCount: number }> {
   const prof = await q.query<{ derived_from_evidence_count: number }>(
     `SELECT derived_from_evidence_count FROM sys.sys_user_profile_embeddings WHERE user_id = $1`, [userId]);
   if (prof.rowCount === 0) return { items: [], evidenceCount: 0 };
 
-  const params: unknown[] = tenantId === undefined ? [userId, limit] : [userId, limit, tenantId];
-  // Visibility predicate (only when tenant-scoped): role is global (no referencing position) OR
-  // referenced by an in-tenant position.
-  const vis = tenantId === undefined
-    ? ""
-    : ` AND (
-         NOT EXISTS (SELECT 1 FROM sys.sys_positions p WHERE p.position_job_role_id = jr.job_role_id)
-         OR EXISTS (SELECT 1 FROM sys.sys_positions p WHERE p.position_job_role_id = jr.job_role_id AND p.position_tenant_id = $3)
-       )`;
+  const params: unknown[] = [userId, limit];
+  let vis = "";
+  if (perimetro.tipo === "profilo") {
+    params.push(perimetro.codici);
+    const codici = params.length;
+    if (perimetro.tenantId === null) {
+      vis = ` AND jr.job_role_code = ANY($${codici}::text[])`;
+    } else {
+      params.push(perimetro.tenantId);
+      const tenant = params.length;
+      vis = ` AND (jr.job_role_code = ANY($${codici}::text[]) OR jr.job_role_tenant_id = $${tenant})`;
+    }
+  }
   const r = await q.query<{ job_role_id: string; job_role_code: string; job_role_name: string | null; job_role_seniority_level: string | null; score: string }>(
     `WITH me AS (SELECT embedding FROM sys.sys_user_profile_embeddings WHERE user_id = $1)
      SELECT jr.job_role_id, jr.job_role_code, jr.job_role_name, jr.job_role_seniority_level,

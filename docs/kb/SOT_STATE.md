@@ -71,6 +71,28 @@ risoluzione era incompleta (`feedback_from_user_id` resta NULL). Sostituita con 
 coerenza tenant-persona reale (dove un partecipante risolve, il tenant della riga deve combaciare)
 — verificato 0 sul vivo, 9/9 verdi sul gemello.
 
+**Terza corsa — bundle Cowork, fase 3 (B11, B12, B30) CHIUSA, dati reali in produzione**:
+**B11** — 160 ruoli ri-mappati su ESCO (`03_sql/30_B11_mappature_esco.sql`): PRIMA 16
+buone/48 scadenti/112 senza → DOPO 0 scadenti, 0 senza mappatura, catalogo (7.650 righe)
+intatto; nuova sentinella `sys.v_esco_mappature_inaffidabili`. **B30** — i KPI di settore
+bancario (`03_sql/31_L04_L06_kpi_di_settore.sql`): PRIMA 0 legami/0 KPI blueprint (11/23
+processi coperti) → DOPO 73 KPI, 73 legami, 23/23 processi coperti; nuova sentinella
+`sys.v_processi_senza_kpi`. **B12** — nessun file SQL era pronto per questa voce: scritto
+`03_sql/32_B12_caricamento_pilota.sql` sullo stesso modello guardia/giornale/post-condizione
+di B11/B30, per le tre tabelle `sys_blueprint_content_{units,positions,skills}` (vuote da
+quando il meccanismo dei blueprint esiste): 33 unità, 71 posizioni, 132 competenze (167 righe
+del CSV, 32 codici ESCO ripetuti su più mestieri, deduplicati per codice dopo aver verificato
+che nome e kind restassero coerenti fra le righe duplicate) — 0 posizioni orfane. La prima
+corsa dello script si è fermata sulla propria guardia (duplicati non previsti): corretta e
+rilanciata, non forzata. `db_health.py` verde dopo tutti e tre i caricamenti.
+
+**MFA_ENCRYPTION_KEY — misurata, non ruotata**: 159/159 fattori TOTP verificati e cifrati
+(0 in chiaro), invariato dall'8/9. Scritta la procedura di rotazione a sei passi (nessuna
+riga eseguita) in `02_istruttorie/PROCEDURA_rotazione_MFA_ENCRYPTION_KEY_20260910.md` del
+bundle — ricifratura con doppia chiave sul modello di `db/scripts/encrypt-totp-secrets.ts`,
+verifica round-trip prima di ogni scrittura, flip della chiave solo a ricifratura completa
+(l'utente non vede nulla). La rotazione resta una decisione di Enzo.
+
 ## S1094 (2026-09-09) — sei difetti della stessa famiglia: un verde che significava «non ho guardato»
 
 **`#143` CHIUSA, 5/5.** **F4**: modulo API `projects` (7 rotte, mig `000384`, 9 test verdi in 17 s sul

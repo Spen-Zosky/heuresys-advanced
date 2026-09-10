@@ -4,32 +4,20 @@
 
 ## Last session brief
 
-S1095 (due corse). **Prima corsa**: trovati 19 commit locali su main mai pushati (fix B1-B20 +
-verify_gate + headline SOT_STATE, committati dopo che S1094 aveva già chiuso) → pushati, 0 residui.
-**Seconda corsa** — mandato Cowork (bundle `BUNDLE_CLI_20260909`, revisione del 2026-09-09 su 3
-voci dichiarate chiuse quando non lo erano):
-- **3 vulnerabilità Dependabot corrette** (sharp 0.35.3→0.35.4, js-yaml 4.3.1→4.3.2, `ai`-sdk
-  provider-utils 4.0.27→4.0.33 — pin esatto, non major-bump): override in `package.json`,
-  typecheck+lint verdi.
-- **B18 (secondo fattore obbligatorio) CHIUSA davvero**: le due politiche per cliente
-  (`sys_auth_mfa_policies`) portate a `enabled=true` via API live, login reale (federica.marchetti,
-  enzo.spenuso). I 5 utenti ACTIVE senza fattore: 3 SERVICE già esentati (#169 F2), 2 persone reali
-  (andrea.spenuso, chiara.spenuso) andranno in iscrizione al prossimo login. Guardia a esiti
-  opposti verde (dettaglio conteggi → SOT_STATE).
-- **B23 (cancello tenant) CHIUSA**: `gate.ts` esteso con `tenantGate` (stessa popolazione di
-  `orgGate`). Guardia provata a esiti opposti: rotta senza dichiarazione impedisce l'avvio
-  (dettaglio conteggi → SOT_STATE).
-- **VOCE 3 del mandato (rotazione chiave) NON eseguita**: il piano aggiornato (`01_PIANO.md`,
-  riga `B18b`) la dichiara **SOSPESA da Enzo il 2026-09-09** — non una pendenza, una decisione già
-  presa. Nessuna credenziale toccata.
-- ⚠ **Pulizia dovuta**: `apps/api/scripts/_tmp-enable-mfa-policy.mjs` e
-  `_tmp-verify-mfa-gate-prod.mjs` sono script usa-e-getta lasciati nel repo (non committati) — da
-  rimuovere con conferma esplicita (regola: mai cancellare senza autorizzazione).
-- **CI-ROSSA trovata e corretta**: `sdbi-perf-feedback.integration.test.ts` dava per invariante che
-  `sys_continuous_feedback` fosse solo-RTL — pre-esistente, non da questa sessione. Una riga
-  legacy risolve a due utenti Heuresys System; il tenant della riga la segue correttamente, era il
-  test ad avere l'assunzione stale. Sostituito con un controllo di coerenza reale, verificato 0 sul
-  vivo. Pushato; CI in corso su questo commit.
+S1095, tre corse. **Prima**: 19 commit di S1094 rimasti solo locali → pushati. **Seconda** — 3
+vulnerabilità Dependabot corrette; **B18** (secondo fattore obbligatorio) chiuso davvero (le due
+politiche per cliente erano spente, ora accese via API live, nessuno resta bloccato); **B23**
+(cancello sull'isolamento clienti) costruito — `gate.ts` esteso con `tenantGate`, l'app rifiuta di
+avviarsi se una rotta sensibile dimentica il confine; trovata e corretta una CI-rossa pre-esistente
+(un test dava per invariante che una tabella fosse solo-RTL, non lo è più — dato corretto, test
+stale). **Terza** — Fase 3 del bundle Cowork chiusa: **B11** (160 ruoli ri-mappati su ESCO, 0
+scadenti, 0 senza mappatura), **B30** (73 KPI/73 legami, tutti i processi coperti), **B12** (33
+unità + 71 posizioni + 132 competenze nelle tabelle di contenuto del blueprint bancario, prima
+vuote — nessun SQL era pronto, scritto sul modello di B11/B30). `db_health.py` verde dopo tutto.
+Misurata (non ruotata) `MFA_ENCRYPTION_KEY`: tutti i fattori cifrati, procedura scritta in
+`02_istruttorie/PROCEDURA_rotazione_MFA_ENCRYPTION_KEY_20260910.md` del bundle, decisione a Enzo.
+⚠ Pulizia fatta su richiesta: i due script usa-e-getta `_tmp-*.mjs` sono stati cancellati (confermato
+da Enzo), incluse le copie orfane rimaste sul gemello dopo la propagazione.
 
 ## Top priorities
 
@@ -37,8 +25,8 @@ voci dichiarate chiuse quando non lo erano):
    su 164**: merita capienza piena, non un residuo di fine sessione.
 2. **`#54` F4** — frontend `/recruiting` + E2E. ⚠ `sys_candidates` ha **1 riga**, non zero.
 3. **`D-92`** — due piani si dichiarano CHIUSI con fasi aperte (`246-fixed-term` e `S1093-mandato`).
-4. **Bundle Cowork, fase 3** — B11 (mappature ESCO), B12 (CSV pronti), B30 (KPI settore): dati già
-   pronti in `03_sql/`+`04_dati/` del bundle, da caricare.
+4. **Bundle Cowork, fase 4** — B13 (dossier persona), B14 (filiali), B15 (censimento API↔pagine),
+   B16 (scheda cliente per il cliente): nessun dato pronto, da progettare.
 
 ▸ Poi: `#159` F2 (ponte gateway↔pagine) · `#214` F6 (dodicesimo perimetro) · `#149` F4.
 
@@ -46,12 +34,15 @@ voci dichiarate chiuse quando non lo erano):
 
 - **Il pattern da catturare**: la headline delle migrazioni in `SOT_STATE.md` si ri-deriva a mano
   ogni volta. Uno script o un hook? Non implementato di iniziativa.
-- ⏳ **SOSPESA (Enzo, 2026-09-08 e 2026-09-09)**: dove custodire la chiave del collaudo; rotazione di
-  `MFA_ENCRYPTION_KEY`/chiave API — nessuna delle due si tocca finché Enzo non decide.
+- ⏳ **SOSPESA (Enzo)**: dove custodire la chiave del collaudo; rotazione di `MFA_ENCRYPTION_KEY` —
+  procedura pronta (vedi sopra), la decisione di quando resta sua.
 - **`#205` F1**: da quali siti la piattaforma accetta di imparare.
 - ⚠ **NON SPIEGATO** (da S1093): perché il segreto TOTP *in chiaro* venisse rifiutato dal login.
 - **andrea.spenuso / chiara.spenuso** vedranno «iscrizione richiesta» al prossimo login (effetto
   atteso di B18, non un guasto).
+- **Discrepanza rimisurata**: il mandato riportava `v_valutazione_completata_non_condivisa` a 570
+  righe (568 coperte + 2 no); rimisurato in S1095 è **0**. Non indagato — registrato nel piano del
+  bundle, fuori dal mandato di questa corsa.
 
 ## Verification
 

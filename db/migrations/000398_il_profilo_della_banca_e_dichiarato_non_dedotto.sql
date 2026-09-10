@@ -120,6 +120,53 @@ SELECT (SELECT id FROM versione_banca),
 ON CONFLICT (blueprint_content_job_role_version_id, blueprint_content_job_role_code) DO NOTHING;
 
 -- ── ② le dashboard del profilo ───────────────────────────────────────────────────────────
+-- ⚠ EMENDATO S1096 / B31 (2026-09-10). La prima stesura inseriva TUTTI i cruscotti del
+-- catalogo, `platform` compreso, e la `000403` lo toglieva a valle. La prova generale ha
+-- mostrato che alla SECONDA passata il giornale di ripristino passava da 1 riga a 2: questo
+-- file lo rimetteva e quello lo ritoglieva, a ogni deploy, per sempre. E' il difetto che
+-- ADR-0035 nomina — «una DELETE a valle viene disfatta al giro dopo; si emenda il file che
+-- CREA l'oggetto». Ora il filtro sta QUI, alla fonte.
+--
+-- LA REGOLA SI CALCOLA DAI DATI e vive in UNA funzione sola, definita qui perche' questo e' il
+-- file di numero minore che ne ha bisogno. `tenant` NON e' escluso — `TENANT_ADMIN` lo
+-- possiede, ed e' il cruscotto con cui un cliente amministra se' stesso; `self` non ha
+-- permessi ed e' il pavimento ESS di I17, e la regola lo lascia passare. La prova a esiti
+-- opposti su tutti e tre i casi sta in coda alla `000403`.
+
+CREATE OR REPLACE FUNCTION sys.fn_cruscotto_e_di_sola_piattaforma(p_codice text)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+AS $fn$
+  SELECT EXISTS (
+    SELECT 1
+      FROM sys.sys_dashboards d
+      JOIN sys.sys_auth_permissions p
+        ON p.auth_permission_code = d.dashboard_permission_code
+     WHERE d.dashboard_code = p_codice
+       -- (1) il permesso esiste ED e' concesso a qualcuno: senza questa condizione `self`,
+       --     che non ha permesso, sarebbe «di sola piattaforma» per vacuita'.
+       AND EXISTS (SELECT 1 FROM sys.sys_auth_role_permissions rp
+                    WHERE rp.auth_permission_id = p.auth_permission_id)
+       -- (2) e chi lo possiede e' SOLTANTO PLATFORM_ADMIN.
+       AND NOT EXISTS (
+         SELECT 1
+           FROM sys.sys_auth_role_permissions rp
+           JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+          WHERE rp.auth_permission_id = p.auth_permission_id
+            AND r.auth_role_code <> 'PLATFORM_ADMIN')
+  );
+$fn$;
+
+COMMENT ON FUNCTION sys.fn_cruscotto_e_di_sola_piattaforma(text) IS
+  'B31 (2026-09-10). Vero quando il permesso di quel cruscotto e'' concesso, e lo e'' soltanto '
+  'a PLATFORM_ADMIN: allora e'' amministrazione di piattaforma e non appartiene al profilo di '
+  'un cliente. Le due condizioni sono in quest''ordine apposta: `self` non ha alcun permesso e '
+  'una regola che guardasse solo la seconda lo butterebbe fuori per vacuita'', mentre e'' il '
+  'pavimento ESS che I17 garantisce a chiunque.';
+
+
+-- Tutti i cruscotti del catalogo, TRANNE quelli di sola amministrazione di piattaforma.
 INSERT INTO sys.sys_blueprint_content_dashboards
   (blueprint_content_dashboard_version_id, blueprint_content_dashboard_code,
    blueprint_content_dashboard_name, blueprint_content_dashboard_order,
@@ -127,6 +174,7 @@ INSERT INTO sys.sys_blueprint_content_dashboards
 SELECT (SELECT id FROM versione_banca), d.dashboard_code, d.dashboard_name, d.dashboard_order,
        jsonb_build_object('origine', 'S1096 B22 — tutte le viste di prodotto, nessuna e'' di settore')
   FROM sys.sys_dashboards d
+ WHERE NOT sys.fn_cruscotto_e_di_sola_piattaforma(d.dashboard_code)
 ON CONFLICT (blueprint_content_dashboard_version_id, blueprint_content_dashboard_code) DO NOTHING;
 
 COMMIT;

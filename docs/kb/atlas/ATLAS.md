@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `c0cf3754` (2026-09-10T23:21:31+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `87aed725` (2026-09-10T23:22:28+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 106 |
-| Route API | 640 |
+| Moduli API | 107 |
+| Route API | 642 |
 | Pagine web | 123 |
-| Schemi shared | 116 |
-| Tabelle DB | 310 (vuote: 18) |
-| Viste / matview | 55 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 288 |
+| Schemi shared | 117 |
+| Tabelle DB | 311 (vuote: 18) |
+| Viste / matview | 56 / 0 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 290 |
 
 ## Moduli API
 
@@ -32,6 +32,7 @@
 | blueprint-overrides | /v1/blueprint-overrides | 4 | 3 | 3 | 1 |
 | blueprint-processes | /v1/blueprint-processes | 5 | 4 | 2 | 1 |
 | blueprint-variants | /v1/blueprint-variants | 5 | 4 | 3 | 1 |
+| branches | /v1/branches | 2 | 2 | 1 | 2 |
 | calibration-sessions | /v1/calibration-sessions | 3 | 1 | 4 | 1 |
 | candidate-applications | /v1/candidate-applications | 4 | 2 | 3 | 1 |
 | candidates | /v1/candidates | 4 | 2 | 2 | 3 |
@@ -160,8 +161,8 @@
 - positions: **315**
 - org_units: **45**
 - roles: **14**
-- permissions: **229**
-- role_permission_mappings: **1003**
+- permissions: **231**
+- role_permission_mappings: **1015**
 - ui_interfaces_active: **75**
 - skills: **14031**
 

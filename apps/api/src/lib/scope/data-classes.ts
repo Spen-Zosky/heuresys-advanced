@@ -196,6 +196,7 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
     "`sys_engagement_survey_responses`, dove 862 risposte su 862 portano l'identità di chi " +
     "ha risposto: quelle sono `engagement`, ed è PERSONAL",
   position: "una posizione è un POSTO nell'organigramma; chi lo occupa si legge da `user`, che è PERSONAL",
+  branch: "una filiale è un LUOGO: codice, indirizzo, orari, zona regolamentare — nessun soggetto di dato di persona (B14, misurato su information_schema il 2026-09-10: le uniche colonne verso sys_users sono created_by/updated_by, che sono attori)",
   org_director: "console, salute e consigliere organizzativi: aggregati di struttura",
   // #214 F4, S1078 — le tre resource che tenevano CINQUE moduli fra i NON MISURABILI.
   // La classe non è stimata: è misurata sul database, e la misura ha corretto due volte

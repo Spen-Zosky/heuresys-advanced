@@ -23,6 +23,7 @@ export * from "./schemas/positions.js";
 export * from "./schemas/organization-units.js";
 export * from "./schemas/projects.js";
 export * from "./schemas/teams.js";
+export * from "./schemas/branches.js";
 export * from "./schemas/skills.js";
 export * from "./schemas/kpi-definitions.js";
 export * from "./schemas/job-families.js";

@@ -591,6 +591,11 @@
       "types": "./dist/schemas/calibration.d.ts",
       "heuresys-source": "./src/schemas/calibration.ts",
       "default": "./dist/schemas/calibration.js"
+    },
+    "./schemas/branches": {
+      "types": "./dist/schemas/branches.d.ts",
+      "heuresys-source": "./src/schemas/branches.ts",
+      "default": "./dist/schemas/branches.js"
     }
   },
   "scripts": {

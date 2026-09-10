@@ -44,6 +44,7 @@ import { positionsRoutes } from "./modules/positions/routes.js";
 import { organizationUnitsRoutes } from "./modules/organization-units/routes.js";
 import { projectsRoutes } from "./modules/projects/routes.js";
 import { teamsRoutes } from "./modules/teams/routes.js";
+import { branchesRoutes } from "./modules/branches/routes.js";
 import { skillsRoutes } from "./modules/skills/routes.js";
 import { kpiDefinitionsRoutes } from "./modules/kpi-definitions/routes.js";
 import { jobFamiliesRoutes } from "./modules/job-families/routes.js";
@@ -413,6 +414,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(tenantMaterializationRoutes, { prefix: "/v1/tenant-materialization" });
   await app.register(projectsRoutes, { prefix: "/v1/projects" });
   await app.register(teamsRoutes, { prefix: "/v1/teams" });
+  // B14 (2026-09-10): le filiali esistevano nel database e non nel prodotto.
+  await app.register(branchesRoutes, { prefix: "/v1/branches" });
   await app.register(skillsRoutes, { prefix: "/v1/skills" });
   await app.register(kpiDefinitionsRoutes, { prefix: "/v1/kpi-definitions" });
   await app.register(jobFamiliesRoutes, { prefix: "/v1/job-families" });

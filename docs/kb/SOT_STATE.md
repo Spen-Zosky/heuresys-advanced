@@ -62,6 +62,15 @@ aggiunto `@ai-sdk/provider-utils: 4.0.33` **pin esatto** (non un range aperto: i
 aveva risolto a `5.0.39`, un major mai testato con quell'`ai` — corretto prima di committare).
 Typecheck + lint verdi su tutti i workspace dopo il bump.
 
+**CI-ROSSA trovata dopo il push, e corretta (pre-esistente, non introdotta da questa sessione)**:
+`sdbi-perf-feedback.integration.test.ts` assumeva `sys_continuous_feedback` interamente RTL Bank
+(design D6 SDBI). Una riga legacy risolve — via `LEGACY_EMP::` — a due utenti Heuresys System
+(andrea.spenuso, chiara.spenuso); `feedback_tenant_id` segue correttamente quella risoluzione,
+solo il `natural_key` dell'import ha tenuto lo spazio dei nomi RTL. L'assunzione valeva finché la
+risoluzione era incompleta (`feedback_from_user_id` resta NULL). Sostituita con un controllo di
+coerenza tenant-persona reale (dove un partecipante risolve, il tenant della riga deve combaciare)
+— verificato 0 sul vivo, 9/9 verdi sul gemello.
+
 ## S1094 (2026-09-09) — sei difetti della stessa famiglia: un verde che significava «non ho guardato»
 
 **`#143` CHIUSA, 5/5.** **F4**: modulo API `projects` (7 rotte, mig `000384`, 9 test verdi in 17 s sul

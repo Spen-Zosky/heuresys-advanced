@@ -25,6 +25,11 @@ voci dichiarate chiuse quando non lo erano):
 - ⚠ **Pulizia dovuta**: `apps/api/scripts/_tmp-enable-mfa-policy.mjs` e
   `_tmp-verify-mfa-gate-prod.mjs` sono script usa-e-getta lasciati nel repo (non committati) — da
   rimuovere con conferma esplicita (regola: mai cancellare senza autorizzazione).
+- **CI-ROSSA trovata e corretta**: `sdbi-perf-feedback.integration.test.ts` dava per invariante che
+  `sys_continuous_feedback` fosse solo-RTL — pre-esistente, non da questa sessione. Una riga
+  legacy risolve a due utenti Heuresys System; il tenant della riga la segue correttamente, era il
+  test ad avere l'assunzione stale. Sostituito con un controllo di coerenza reale, verificato 0 sul
+  vivo. Pushato; CI in corso su questo commit.
 
 ## Top priorities
 

@@ -21,6 +21,7 @@ import { insertTenant, findTenantByCode } from "./repository.js";
 import { insertUser, findRoleByCode, insertRoleGrant } from "../users/repository.js";
 import { upsertPolicy } from "../mfa-policy/repository.js";
 import { materialize as materializeArchetype } from "../tenant-materialization/repository.js";
+import { insertActivation } from "../blueprint-activations/repository.js";
 import { assertIndustryCode } from "./service.js";
 import { NotFoundError, ConflictError } from "../../errors/index.js";
 import type { ActorContext } from "../../lib/actor.js";
@@ -112,6 +113,41 @@ export async function provisionTenant(
       let modelloOut: ProvisionTenantResponse["model"];
       if (piano) {
         const created = await materializeArchetype(client, tenant.tenantId, piano, "apply");
+
+        // ═══ B24 + ADR-0039 — L'ANELLO CHE MANCAVA ═══════════════════════════════════
+        // Fino al 2026-09-10 questa catena costruiva un'azienda operativa e la lasciava
+        // SENZA UN PROFILO DICHIARATO: nessuna riga in `sys_blueprint_activations`, cioè
+        // nessun legame fra il cliente e il modello da cui era nato. Prima di ADR-0039 non
+        // si notava — i cataloghi si vedevano tutti comunque. Da oggi si nota subito, ed è
+        // il modo giusto: un cliente senza attivazione ha un profilo VUOTO
+        // (`lib/scope/profilo.ts`, fail-closed dichiarato), quindi aprirebbe l'elenco dei
+        // ruoli e non ne troverebbe nessuno — un'azienda «operativa» che non lo è.
+        //
+        // L'attivazione nasce ACTIVE e nella stessa transazione di tutto il resto: se una
+        // qualunque parte fallisce, non resta né l'azienda né il suo profilo.
+        const variante = await client.query<{ id: string }>(
+          `SELECT blueprint_variant_version_variant_id AS id
+             FROM sys.sys_blueprint_variant_versions
+            WHERE blueprint_variant_version_id = $1`,
+          [body.variantVersionId],
+        );
+        const variantId = variante.rows[0]?.id;
+        if (!variantId) {
+          // Non può accadere — `plan()` ha già letto quella versione — ma un `!` qui
+          // sarebbe una promessa fatta al compilatore invece che una verifica.
+          throw new NotFoundError("BlueprintVariantVersion", "VARIANT_VERSION_NOT_FOUND");
+        }
+        await insertActivation(
+          client,
+          tenant.tenantId,
+          {
+            variantId,
+            status: "ACTIVE",
+            metadata: { origine: "D-14 provision-engine", adr: "ADR-0039 B24" },
+          },
+          actor.userId,
+        );
+
         modelloOut = { variantVersionId: body.variantVersionId!, label: piano.label, created };
       }
 

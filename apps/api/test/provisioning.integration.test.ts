@@ -219,6 +219,71 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
     expect(ou.rows[0]?.n).toBe(out.model!.created.orgUnits);
   });
 
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  // B24 + ADR-0039 — L'ANELLO CHE MANCAVA: un cliente nasce CON UN PROFILO.
+  //
+  // Fino al 2026-09-10 questa catena portava un'azienda da inesistente a operativa ma non
+  // scriveva l'ATTIVAZIONE del modello: nessun legame fra il cliente e il modello da cui
+  // era nato. Prima di ADR-0039 non si notava, perche' i cataloghi si vedevano tutti
+  // comunque; da oggi un cliente senza attivazione ha un profilo VUOTO e il suo
+  // amministratore aprirebbe l'elenco dei ruoli senza trovarne nessuno.
+  //
+  // La prova sa fallire: se l'attivazione non venisse scritta, il conteggio sarebbe 0 e
+  // l'elenco dei ruoli visto dal nuovo amministratore sarebbe vuoto.
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  it("B24: l'azienda nasce con un PROFILO dichiarato, e il suo amministratore lo vede", async () => {
+    const code = `${SUITE_PREFIX}_PROFILO`;
+    const r = await suite.app.inject({
+      method: "POST",
+      url: "/v1/tenants/provision",
+      headers: headers(admin),
+      payload: {
+        tenantCode: code,
+        tenantName: "Azienda con profilo",
+        tenantIndustryCode: await anIndustryCode(),
+        adminEmail: `admin.${code.toLowerCase()}@example.org`,
+        adminDisplayName: "Profilo Admin",
+        adminPassword: NEW_ADMIN_PW,
+        variantVersionId: modello.variantVersionId,
+      },
+    });
+    expect(r.statusCode).toBe(201);
+    const out = r.json() as { tenant: { id: string } };
+    createdTenantIds.push(out.tenant.id);
+
+    // ① L'attivazione esiste, e' ACTIVE e punta alla variante del modello usato.
+    const att = await pool.query<{ n: string; variant: string }>(
+      `SELECT count(*)::text AS n,
+              coalesce(max(blueprint_activation_variant_id::text), '') AS variant
+         FROM sys.sys_blueprint_activations
+        WHERE blueprint_activation_tenant_id = $1
+          AND blueprint_activation_status = 'ACTIVE'`,
+      [out.tenant.id],
+    );
+    expect(
+      Number(att.rows[0]!.n),
+      "l'azienda e' nata senza attivazione: il suo profilo sarebbe vuoto",
+    ).toBe(1);
+    expect(att.rows[0]!.variant).toBe(modello.variantId);
+
+    // ② E il profilo si RISOLVE davvero: i ruoli che il modello dichiara sono quelli che il
+    //    nuovo cliente vede. Non e' la stessa domanda del punto ①: li' c'e' una riga, qui
+    //    la catena attivazione -> versione pubblicata -> contenuto porta fino ai codici.
+    const risolti = await pool.query<{ code: string }>(
+      `SELECT DISTINCT ct.blueprint_content_job_role_code AS code
+         FROM sys.sys_blueprint_content_job_roles ct
+         JOIN sys.sys_blueprint_variant_versions vv
+           ON vv.blueprint_variant_version_id = ct.blueprint_content_job_role_version_id
+          AND vv.blueprint_variant_version_status = 'PUBLISHED'
+         JOIN sys.sys_blueprint_activations a
+           ON a.blueprint_activation_variant_id = vv.blueprint_variant_version_variant_id
+          AND a.blueprint_activation_status = 'ACTIVE'
+        WHERE a.blueprint_activation_tenant_id = $1`,
+      [out.tenant.id],
+    );
+    expect(risolti.rows.map((x) => x.code).sort()).toEqual([...modello.ruoliDelProfilo].sort());
+  });
+
   it("F2: un modello che non esiste è respinto PRIMA di qualunque scrittura (nessuna azienda orfana)", async () => {
     const code = `${SUITE_PREFIX}_BADARCH`;
     const r = await suite.app.inject({

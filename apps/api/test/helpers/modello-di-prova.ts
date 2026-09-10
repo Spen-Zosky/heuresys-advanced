@@ -28,6 +28,13 @@ export interface ModelloDiProva {
   label: string;
   /** Quante righe il modello dichiara, per dominio: i test ci confrontano i conteggi. */
   attese: { orgUnits: number; positions: number; skills: number; kpis: number };
+  /**
+   * ADR-0039 / B24 — i codici dei ruoli professionali che il PROFILO di questo modello
+   * dichiara. Sono presi dal catalogo VIVO, non inventati: un profilo che nomina codici
+   * inesistenti sarebbe non-vuoto e produrrebbe comunque un elenco vuoto — cioe' un test
+   * verde che non dimostra niente.
+   */
+  ruoliDelProfilo: string[];
 }
 
 /**
@@ -139,11 +146,38 @@ export async function seminaModello(
     [variantVersionId, `KPI-OEE-${suffisso}`, `KPI-SCAR-${suffisso}`],
   );
 
+  // ADR-0039 / B24 — il PROFILO del modello: quali ruoli del catalogo un'azienda nata da qui
+  // si porta dietro. I codici si LEGGONO dal catalogo (come le categorie di competenza qui
+  // sopra, e per la stessa ragione): scriverli a mano darebbe un profilo che nomina ruoli
+  // inesistenti, e un elenco vuoto che passerebbe per un filtro funzionante.
+  const ruoli = await client.query<{ code: string; name: string }>(
+    `SELECT job_role_code AS code, job_role_name AS name
+       FROM sys.sys_job_roles
+      WHERE job_role_tenant_id IS NULL
+      ORDER BY job_role_code
+      LIMIT 2`,
+  );
+  if (ruoli.rows.length < 2) {
+    throw new Error(
+      `il catalogo dei ruoli professionali ne ha ${ruoli.rows.length}: la fixture ne pretende 2`,
+    );
+  }
+  for (const r of ruoli.rows) {
+    await client.query(
+      `INSERT INTO sys.sys_blueprint_content_job_roles
+         (blueprint_content_job_role_version_id, blueprint_content_job_role_code,
+          blueprint_content_job_role_name)
+       VALUES ($1, $2, $3)`,
+      [variantVersionId, r.code, r.name],
+    );
+  }
+
   return {
     familyId,
     variantId,
     variantVersionId,
     label: `${familyCode}/${variantCode} v1`,
     attese: { orgUnits: 4, positions: 2, skills: 2, kpis: 2 },
+    ruoliDelProfilo: ruoli.rows.map((r) => r.code),
   };
 }

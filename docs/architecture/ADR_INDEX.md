@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**36 ADR** in `docs/architecture/adr/`.
+**37 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -44,6 +44,7 @@
 | [0036](adr/0036_hierarchical_and_functional_domains.md) | Hierarchical and functional domains: the perimeter and the modality are orthogonal | ACCEPTED * | Hierarchical and functional domains: the perimeter and the modality are orthogonal *(dal titolo)* | 2026-08-10 |
 | [0037](adr/0037_user_deletion_is_anonymization.md) | Cancellare una persona significa anonimizzarla; la cancellazione fisica è la revoca di una creazione | Accepted | Cancellare una persona significa anonimizzarla; la cancellazione fisica è la revoca di una creazione *(dal titolo)* | — |
 | [0038](adr/0038_the_database_is_self_sufficient.md) | Il database è autosufficiente: il brownfield è storia, non una fonte | ACCEPTED | Il database è autosufficiente: il brownfield è storia, non una fonte *(dal titolo)* | 2026-08-14 |
+| [0039](adr/0039_catalogo_profilo_e_voci_proprie_del_cliente.md) | Catalogo, profilo, voci proprie: dove vive ciò che un cliente può farsi su misura | — | Catalogo, profilo, voci proprie: dove vive ciò che un cliente può farsi su misura *(dal titolo)* | — |
 
 ## Conventions
 

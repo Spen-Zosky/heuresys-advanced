@@ -14,7 +14,7 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 ### Delta S1093 (2026-09-08/09) — la CI rossa, i tre rimedi all'instabilità, le PR Dependabot
 
 **Numeri ri-derivati dal vivo il 2026-09-09**: migrazioni su disco **382** (max `000385`) · file di test
-API **270** · moduli API **106** · perimetri dell'agente aperti **11** · HEAD `6978fc17`.
+API **270** · moduli API **106** · perimetri dell'agente aperti **11** · HEAD `27eb6d34`.
 
 ---
 

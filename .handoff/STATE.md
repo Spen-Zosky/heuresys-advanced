@@ -21,6 +21,17 @@ da Enzo), incluse le copie orfane rimaste sul gemello dopo la propagazione.
 
 ## Top priorities
 
+0. ⚠ **CI ROSSA da chiudere per prima — `Test (api integration)` su `1987af4a`.** Le altre
+   SETTE corse sono verdi. Non e' stata diagnosticata: la sessione si e' fermata sulla soglia
+   del contesto (guardiano: «mancano 5.054 token», e il contesto e' un pavimento) mentre il
+   cancello locale era ancora in corso. **Ipotesi NON verificata**, da provare e non da
+   credere: `apps/api/test/branches.integration.test.ts` (nato in questo blocco, B14) pretende
+   che la banca abbia almeno una filiale — `expect(una.rowCount).toBe(1)` — e le 6 righe di
+   `sys_branches` potrebbero non esistere sul clone della CI, che e' il difetto gia' visto tre
+   volte in questa sessione (dato entrato da script e non dalla catena). Primo comando:
+   `gh run view <id> --log-failed`.
+
+
 1. **`#169` F3 — «il segreto smette di essere derivato»**. Tocca l'autenticazione di **159 utenti
    su 164**: merita capienza piena, non un residuo di fine sessione.
 2. **`#54` F4** — frontend `/recruiting` + E2E. ⚠ `sys_candidates` ha **1 riga**, non zero.

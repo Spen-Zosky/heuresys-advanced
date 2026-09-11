@@ -52,6 +52,23 @@ SELECT r.auth_role_id, p.auth_permission_id
                             'CEO', 'MANAGER', 'BRANCH_MANAGER')
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
+-- ── L'ALLOWLIST DI TENANT_ADMIN, che NON e' una formalita' ──────────────────────────────
+-- ⚠ INTERCETTATO DAL CANCELLO, non previsto quando ho scritto questo file. Esiste un elenco
+-- dichiarato di cio' che `TENANT_ADMIN` puo' possedere (mig. `000210`), e la guardia
+-- `rbac-tenant-admin-allowlist.test.ts` fallisce su ogni permesso che quel ruolo assorbe senza
+-- esserci: «permessi assorbiti da TENANT_ADMIN fuori allowlist: branch:list, branch:read».
+-- Non era un test stale — era un difetto di questo file, e la guardia ha fatto il suo mestiere.
+--
+-- L'estensione e' voluta e dichiarata: un amministratore di cliente deve poter leggere le
+-- filiali del proprio cliente, che sono unita' organizzative con un indirizzo. Il marker qui
+-- sotto e' il modo che il progetto ha scelto per rendere l'estensione ESPLICITA invece che
+-- silenziosa — stessa forma della `000212` per `team:manage`.
+-- TENANT_ADMIN-ALLOWLIST-EXTEND
+CREATE TEMP TABLE _ta_extend_000404(code text PRIMARY KEY);
+INSERT INTO _ta_extend_000404(code) VALUES
+    ('branch:list'),
+    ('branch:read');
+
 -- ── LE TRADUZIONI INGLESI, che NON sono un dettaglio cosmetico ──────────────────────────
 -- `sys_auth_permissions` e' nel registro dei campi traducibili (`sys_translatable_field`) per
 -- nome E descrizione, e la guardia della `000255` pretende copertura EN totale: due permessi

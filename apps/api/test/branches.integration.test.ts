@@ -112,11 +112,25 @@ describe("/v1/branches — B14", () => {
       `SELECT tenant_id AS id FROM sys.sys_tenancies WHERE tenant_code <> 'RTL_BANK' LIMIT 1`,
     );
     expect(altro.rowCount, "non esiste un secondo cliente: la prova non discrimina").toBe(1);
+    // ⚠ L'UNITA' DEVE ESSERE SENZA FILIALE, e la prima stesura non lo pretendeva: prendeva la
+    // prima con un `LIMIT 1` senza ordine, e `sys_branches_organization_unit_uq` impone UNA
+    // filiale per unita'. Esito: verde da una macchina, rosso da un'altra, sullo stesso
+    // comando — l'instabilita' che nasce quando una prova NEGOZIA con lo stato che trova
+    // invece di dichiarare quello che le serve.
     const ou = await pool.query<{ id: string }>(
-      `SELECT organization_unit_id AS id FROM sys.sys_organization_units
-        WHERE organization_unit_tenant_id = $1 LIMIT 1`, [altro.rows[0]!.id],
+      `SELECT ou.organization_unit_id AS id
+         FROM sys.sys_organization_units ou
+        WHERE ou.organization_unit_tenant_id = $1
+          AND NOT EXISTS (SELECT 1 FROM sys.sys_branches b
+                           WHERE b.branch_organization_unit_id = ou.organization_unit_id)
+        ORDER BY ou.organization_unit_id
+        LIMIT 1`, [altro.rows[0]!.id],
     );
-    expect(ou.rowCount, "il secondo cliente non ha unita' organizzative").toBe(1);
+    expect(
+      ou.rowCount,
+      "il secondo cliente non ha un'unita' organizzativa LIBERA da filiali: la prova non puo' "
+        + "costruire il proprio caso",
+    ).toBe(1);
 
     const creata = await pool.query<{ id: string }>(
       `INSERT INTO sys.sys_branches

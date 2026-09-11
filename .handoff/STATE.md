@@ -25,11 +25,19 @@ da Enzo), incluse le copie orfane rimaste sul gemello dopo la propagazione.
    SETTE corse sono verdi. Non e' stata diagnosticata: la sessione si e' fermata sulla soglia
    del contesto (guardiano: «mancano 5.054 token», e il contesto e' un pavimento) mentre il
    cancello locale era ancora in corso. **Ipotesi NON verificata**, da provare e non da
-   credere: `apps/api/test/branches.integration.test.ts` (nato in questo blocco, B14) pretende
-   che la banca abbia almeno una filiale — `expect(una.rowCount).toBe(1)` — e le 6 righe di
-   `sys_branches` potrebbero non esistere sul clone della CI, che e' il difetto gia' visto tre
-   volte in questa sessione (dato entrato da script e non dalla catena). Primo comando:
-   `gh run view <id> --log-failed`.
+   credere. **AGGIORNATO con la MISURA**: il cancello locale, finito dopo la chiusura, nomina
+   **DUE file**, ed entrambi nascono da B14 di questo blocco:
+   · `apps/api/test/branches.integration.test.ts` — atteso: le 6 righe di `sys_branches` non
+     esistono sul clone della CI (dato entrato da script e non dalla catena, il difetto gia'
+     visto tre volte in questa sessione). Rimedio probabile: portare le filiali nella catena,
+     come ha fatto la `000401` per i contenuti KPI.
+   · `apps/api/test/rbac-tenant-admin-allowlist.test.ts` — **QUESTO NON ERA PREVISTO, ed e' il
+     piu' importante**: esiste un'allowlist di cio' che `TENANT_ADMIN` puo' possedere, e la
+     mig. `000404` gli ha concesso `branch:list`/`branch:read` senza aggiungerli a quell'elenco.
+     E' un difetto del mio lavoro, non un test stale: o i due permessi entrano nell'allowlist
+     con la loro ragione, o non vanno concessi a `TENANT_ADMIN`. Da decidere guardando il file,
+     non a memoria.
+   Primo comando: `cd apps/api && pnpm exec vitest run test/rbac-tenant-admin-allowlist.test.ts`.
 
 
 1. **`#169` F3 — «il segreto smette di essere derivato»**. Tocca l'autenticazione di **159 utenti

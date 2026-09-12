@@ -1,9 +1,8 @@
 # 205 — Tenant Builder 2b e 2c: la coda dei domini ricercabili, e il patrimonio senza le parole di un altro
 
 > **item**: #205
-> **stato**: NON AVVIATO
-> **nota**: ⚠ gate CADUTO ma **F1 resta non eseguibile in modo utile** — misura del 2026-09-05,
-> sotto. La voce e' `WAIT-INPUT` nel register. (La cronaca stava sulla riga di stato, che il
+> **stato**: IN CORSO
+> **nota**: ⚠ gate CADUTO; F1 **eseguita** in S1095 (2026-09-12) sciogliendo il nodo di R2 senza riscriverla — vedi F1. La voce torna `ACTIVE` nel register. (La cronaca stava sulla riga di stato, che il
 > parser legge solo se contiene esclusivamente il vocabolario — allineata in S1090)
 
 Con questa e con P4, tutte e quattro le parti del Tenant Builder sono progettate: P1 chiusa ·
@@ -40,13 +39,41 @@ il confronto di somiglianza fra testi · **citare il numero 196**, che non si ri
 
 ## Fasi
 
-- [ ] **F1 Lo strumento che ri-deriva la coda** — ⛔ GATED su `#132` · budget ~60k
+- [x] **F1 Lo strumento che ri-deriva la coda** — FATTA 2026-09-12 (S1095) · `docs/kb/tools/check_domini_ricercabili.py`, autoprova **9/9** a esiti opposti su tabelle VERE (per ciascuna delle tre prove un caso che passa e uno escluso); coda misurata: 248 tabelle · 84 cataloghi aperti (R1 no, I21) · 89 di persona (R3 no) · **75 ricercabili**, di cui **4 percorribili oggi** (`sys_positions` ricaduta 29, `sys_organization_units` 11, `sys_kpi_definitions` 6, `sys_skills` 6) e 71 che aspettano una fonte · budget ~60k
+
+  ### ✅ S1095 (2026-09-12) — lo strumento, e tre cose che ha detto subito
+
+  **Il gate era caduto** (`#132` DONE) e la ragione per cui F1 «non era eseguibile in modo
+  utile» era che R2, con una fonte per dominio, non discriminava. **Sciolto senza riscrivere
+  R2**: resta «esiste una fonte ammessa», ma non *esclude* dalla coda — la **spacca**. Chi passa
+  R1+R3 è ricercabile; R2 dice se è *percorribile oggi* o se *aspetta una fonte*. L'ordine è per
+  **ricaduta** (FK entranti da tabelle di tenant), come impone la decisione 4, e a parità per
+  numero di fonti. Niente è scritto a mano: universo da `information_schema`, domini da
+  `domains/*.ts` (`chiave: "…"`), fonti da `sys_research_sources`.
+
+  🔬 **L'autoprova ha corretto il criterio alla prima corsa**: `sys_positions` risultava «di
+  persona» per `position_owner_user_id`. Il proprietario di una posizione è un **attore**
+  (I1: owner ≠ incumbent), non il soggetto — come `feedback_reviewed_by_user_id` in #214. Il
+  criterio ora distingue `owner/manager/approver/assessor/reviewer/interviewer…_user_id` da
+  `subject/hired/employee_user_id`, e due attese nuove lo tengono fermo (`sys_organization_units`
+  passa nonostante il manager; `sys_assessments` è escluso per il soggetto).
+
+  ⚠ **Reperto**: `business_processes` ha una fonte APPROVED (`bancaditalia.it`) ma la sua
+  destinazione, `sys_blueprint_process_registry` (#132 F5, mig 000335), **non ha `tenant_id`**:
+  non è contenuto di un cliente, è il registro dei processi del *blueprint*. Lo strumento lo
+  dichiara («domini CON fonte ma destinazione non ricercabile») invece di tacerlo. Non è un
+  difetto della coda: è una domanda per F2 — se «percorrere `business_processes`» produce
+  patrimonio (2c) e non contenuto di tenant, allora è già dall'altra parte di E12.
+
+  **La decisione delegata** («cosa passa a un cliente nuovo», che il piano lasciava a Enzo) è
+  presa e scritta nella testata dello strumento: le tassonomie non passano perché sono già di
+  tutti (I21); passa ciò che appartiene al cliente. Se Enzo la ribalta, cambia R1.
       `check_domini_ricercabili.py`, gemello dichiarato di `check_concetti_agente.py`, che
       ri-deriva la coda dal catalogo reale a ogni esecuzione. **Autoprova a esiti opposti
       obbligatoria**: un dominio che deve passare e uno che deve essere escluso da *ciascuna*
       delle tre prove. Se non sa dire di no tre volte non è un criterio, è un elenco con una
       funzione davanti.
-- [ ] **F2 Il primo dominio della coda, dichiarato e percorso** — ⛔ GATED su F1 · budget ~80k
+- [ ] **F2 Il primo dominio della coda, dichiarato e percorso** — budget ~80k · il gate su F1 è caduto (S1095); la testa della coda è `sys_positions` (dominio `positions`, fonte `ilo.org`). Percorrerlo è una corsa di ricerca sul gateway (abbonamento, `#86`): NON fatta in S1095 per capienza dichiarata
       Deve produrre proposte approvate, non solo comparire in cima a una lista.
 - [ ] **F3 Lo strato di forma (2c) e la prova della frase riconoscibile** — budget ~60k
       Prendere una proposta approvata del cliente A con una frase riconoscibile, promuoverla a

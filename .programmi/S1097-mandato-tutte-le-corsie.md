@@ -65,9 +65,9 @@ Stato: `[ ]` da fare · `[x]` FATTA con data ed evidenza · `NON FATTA (ragione)
 
 - [x] **F1 Igiene** — **fatto =** `build_derivati.py` verde, staleness check tutto OK — FATTA 2026-09-12 · derivati 3/3 (`696d7022`)
 - [x] **F2 `#214` F6** — **fatto =** `candidate-applications` misurato (classe corretta se necessario); riga in `agent-perimetri.json`, migrazione in produzione, sentinella a 0, `db_health` verde — FATTA 2026-09-12 · `candidates`+`candidate-applications` erano un falso neutro (permesso `job-requisition` condiviso): ESCLUSI nel criterio; quattordicesimo perimetro `job-roles`, mig `000408`; gemello VERDE 45/45; produzione 12 s «381 applied»; sentinella 0; `db_health` exit 0; coda 14 aperti · 41 in coda
-- [ ] **F3 `#149` F4** — **fatto =** `check_verifica_consegne.py` verde e inbox misurata
-- [ ] **F4 `#79` F3** — **fatto =** `check_exposure.py` exit 0 dopo i lavori che popolano
-- [ ] **F5 headline migrazioni** — **fatto =** strumento che ri-deriva la headline in `SOT_STATE §0`, con autoprova, agganciato alla chiusura
+- [x] **F3 `#149` F4** — **fatto =** `check_verifica_consegne.py` verde e inbox misurata — FATTA 2026-09-12 · strumento VERDE exit 0; nessun file nel lab più nuovo del registro S1096 (`find -newer`): niente è arrivato, la fase resta aperta per costruzione
+- [x] **F4 `#79` F3** — **fatto =** `check_exposure.py` exit 0 dopo i lavori che popolano — FATTA 2026-09-12 · dopo la 000408: «Nessuna lacuna di esposizione», exit 0; si ri-esegue dopo F6/F9
+- [x] **F5 headline migrazioni** — **fatto =** strumento che ri-deriva la headline in `SOT_STATE §0`, con autoprova, agganciato alla chiusura — FATTA 2026-09-12 · `aggiorna_numeri_sot.py` (6 forme: utenti, RBAC, tenant, tabelle, migrazioni, skill; stessa grammatica che il boot legge), selftest 8/8 a esiti opposti, `--check` ha trovato il drift vero 404/407→405/408 e l'ha riscritto; Passo A di CHIUSURA.md lo invoca; open-Q chiusa
 - [ ] **F6 endpoint eccezioni di condivisione** — **fatto =** rotta `/v1/...` in sola lettura con scope HR, test di integrazione verde sul gemello, deroga tolta da `exposure_waivers.txt`, cancello verde
 - [ ] **F7 `#240`** — **fatto =** contenuto dei due worktree misurato, decisione scritta nel register
 - [ ] **F8 `#233`** — **fatto =** `--ingest` idempotente: due corse = un blocco; prova a esiti opposti
@@ -87,6 +87,9 @@ Si scrive qui sotto **prima** di aprire ciascuna voce.
 | voce | precondizioni · meccanismo · propagazione · chi · guardia | cosa la misura ha detto |
 |---|---|---|
 | F1 | tunnel su · `build_derivati.py` · commit · io · nessuna scrittura DB | i derivati erano già aggiornati nel contenuto: solo il registro era indietro |
+| F3 | lab montato in `D:/heuresys-design-lab` · `check_verifica_consegne.py` + `find -newer` · — · io · sola lettura | niente di nuovo dal 2026-09-12 16:16 |
+| F4 | cancello verde al boot · `check_exposure.py` · — · io · sola lettura | la 000408 crea una vista, non popola: 0 lacune |
+| F5 | `status_dashboard.sec_db` importabile · regex per forma sulla sola §0 + selftest con fixture · CHIUSURA.md Passo A · io · una forma assente esce 2, mai riscrittura altrove; Delta datati intoccati per costruzione | il primo `--check` ha trovato il drift che io stesso avevo appena creato con la 000408 |
 | F2 | atlante fresco · candidato per rischio crescente + porte misurate + mig con sentinella provata rossa (modello 000407) · gemello → VM → `db_health` · io · post-condizione per impronta; `chi_sorveglia data-classes.ts` = F7 test + `check_concetti_agente` | la testa della coda era un FALSO: tre moduli sotto un permesso solo, e la dichiarazione copriva anche i due che descrivono persone |
 
 ## Fuori da questo ciclo — presentate una volta sola (R24 §5)

@@ -51,6 +51,19 @@ RI-DERIVA i numeri, non fidarti della memoria: conteggi DB via `psql`, lista mig
 sezioni snapshot/stack/DB/CI. Se un conteggio non è ri-derivabile (tunnel giù), marcalo
 `(non ri-derivato — tunnel down)`.
 
+**La headline della §0 la riscrive uno strumento, non la mano** (S1097, chiude la open-Q di
+S1094-S1096):
+
+```bash
+python docs/kb/tools/aggiorna_numeri_sot.py          # utenti · RBAC · tenant · tabelle · migrazioni · skill
+python docs/kb/tools/aggiorna_numeri_sot.py --check  # exit 1 = drift; 2 = forma non trovata; 3 = DB giù
+```
+
+Scrive con la **stessa grammatica** che `status_dashboard.py` legge («1015 map», «2 tenant»), solo
+dentro la §0, mai nei Delta datati. Se esce **2**, la grammatica della §0 è cambiata: si adegua
+`FORME` nello strumento, non si riscrive a mano. Il resto del Passo A (posizioni, OU, team, versioni,
+tag, HEAD) resta a mano finché non ha una forma stabile da agganciare.
+
 ---
 
 ## Passo B — Allinea i registri d'azione

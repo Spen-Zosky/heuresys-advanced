@@ -35,8 +35,6 @@ oggi tutto verde) · `#41` (GATED: il top-up è superato, serve un `--update` in
 - ⏳ **SOSPESA (Enzo)**: dove custodire la chiave del collaudo; rotazione di `MFA_ENCRYPTION_KEY`.
 - **`sys_valutazione_condivisione_eccezioni` ha 568 righe e nessuna API la espone**: oggi in
   deroga come attestazione di governo. Se HR deve vederle dal prodotto, serve un endpoint.
-- **Il pattern da catturare**: la headline delle migrazioni in `SOT_STATE.md` si ri-deriva a mano
-  a ogni chiusura. Uno script o un hook? Non implementato di iniziativa.
 - **Igiene fuori repo**: `C:\Git\` porta ~29 log di sessioni CLI e
   `.handoff/session-journal.recovered.ndjson` del 6 settembre è già consolidato. Mai cancellati
   senza il tuo sì.

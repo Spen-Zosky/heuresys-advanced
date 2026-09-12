@@ -54,8 +54,8 @@ proposte approvate → modello pieno → costruzione), quindi si percorrono in f
 
 Stato: `[ ]` da fare · `[x]` FATTA con data ed evidenza · `NON FATTA (ragione)`.
 
-- [ ] **F1 Igiene** — **fatto =** `build_derivati.py` verde; RBAC-map in `SOT_STATE §0` = live
-- [ ] **F2 `#149` F4 — 4 consegne** — **fatto =** ogni consegna citata porta un esito diverso da NON-VERIFICATO, scritto nel file e letto da `check_verifica_consegne.py`
+- [x] **F1 Igiene** — **fatto =** `build_derivati.py` verde; RBAC-map in `SOT_STATE §0` = live — FATTA 2026-09-12 · derivati 3/3 (`e7138744`); il drift era un falso del grassetto (`**1015** map`), corretta la forma: staleness check 9/9 OK
+- [x] **F2 `#149` F4 — 4 consegne** — **fatto =** ogni consegna citata porta un esito diverso da NON-VERIFICATO, scritto nel file e letto da `check_verifica_consegne.py` — FATTA 2026-09-12 · 3 CONFERMATO + 1 PARZIALE (p3: smentito «tutte le 70.959 righe OLDDB::»); strumento VERDE exit 0
 - [ ] **F3 `#214` F6 — tredicesimo perimetro** — **fatto =** riga in `agent-perimetri.json`, migrazione in produzione, sentinella a 0, `db_health` verde
 - [ ] **F4 `#79` F3 — il buco del cancello** — **fatto =** `check_exposure.py` conta anche le tabelle popolate da migrazione; autoprova a esiti opposti; verde sul processo
 - [ ] **F5 `#205` F2 — `positions` percorso** — **fatto =** corsa di ricerca eseguita, proposte decise e applicate, registro fonti aggiornato
@@ -69,6 +69,11 @@ Stato: `[ ]` da fare · `[x]` FATTA con data ed evidenza · `NON FATTA (ragione)
 ## Simulazione a 5 domande (R24 §3) — per voce, prima di partire
 
 Si scrive qui sotto **prima** di aprire ciascuna voce.
+
+| voce | precondizioni · meccanismo · propagazione · chi · guardia | cosa la misura ha detto |
+|---|---|---|
+| F1 | tunnel su · `build_derivati.py` + forma qualificata in §0 · commit · io · nessuna scrittura distruttiva | il drift RBAC era un falso del grassetto |
+| F2 | 4 file in `inbox/ingerite/` · misura sul vivo + marker letto da `check_verifica_consegne.py` · lab fuori repo, piano #149 nel repo · io · solo scritture di testo | p3 poggiava su un numero falso (OLDDB 64.482/70.959) con conclusione giusta |
 
 ## Fuori da questo ciclo — presentate una volta sola (R24 §5)
 

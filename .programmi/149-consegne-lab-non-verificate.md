@@ -27,6 +27,18 @@ quando si spuntano, se ne aggiunge la successiva.
 - [x] **F2 Lo stato dell'inbox del lab** — FATTO 2026-08-13 (S1057) · l'inbox (`<padre del repo>/heuresys-design-lab/inbox/`) è **vuota**: contiene la sola cartella `ingerite/`, ultima consegna assorbita `2026-08-12-guardia-psql-opzioni-raggruppate`. Nessuna ingestione pendente
 - [x] **F3 La verifica avversariale su `#205` (2b/2c)** — FATTO 2026-08-16 (S1066) · misure ri-fatte sul vivo; respinta come **falsa** l'affermazione portante «P2a ha costruito il motore e lo ha dimostrato»: `#132` è ACTIVE, mai implementata. Due numeri del documento già invecchiati (25→26 viste, 158→159 colonne)
 - [ ] **F4 La prossima consegna che arriva, o la prossima ingerita che qualcuno cita** — budget ~30k a consegna · eseguita 2026-09-12 (S1095) su `2026-08-12-guardia-psql-opzioni-raggruppate` (citata due volte dal register, marker NON-VERIFICATO da S1094): cinque affermazioni portanti misurate una per una → esito **PARZIALE**, scritto nel file — il difetto e' confermato ma la consegna e' gia' stata eseguita (patch nel repo, `PSQL_OPZIONI_CON_VALORE` riga 772; tre casi in `_cases()`; `hook.sh selftest` 122/0; `#121` DONE), quindi meta' del documento descrive uno stato che non esiste piu'. `check_verifica_consegne.py` la legge: `esito PARZIALE · S1095`. Restano 4 consegne citate con marker NON-VERIFICATO (istruzione-vincolante, e22-e23, p3, p4): la fase resta aperta per costruzione
+      ▸ **Eseguita il 2026-09-12 (S1096) sulle 4 consegne rimaste con marker NON-VERIFICATO** —
+      ognuna con le affermazioni portanti misurate sul vivo e il referto scritto nel file:
+      `istruzione-vincolante` **CONFERMATO** (000118 §1, 000021 r.166, 000008 r.63 reggono;
+      copertura 64/64; `verifica_consegne.py` 20+8+3, i 3 falliti sono fatti cambiati dopo
+      agosto) · `e22-e23` **CONFERMATO** (158/158/312 identici; `is_global=false` alle righe
+      259/317; `#196` DONE quindi la riattivazione proposta è superata) · `p3` **PARZIALE** —
+      **smentita** «tutte le 70.959 righe sono `OLDDB::`»: sono 64.482 + 95 `LEGACY_` + 6.382
+      NULL, la conclusione regge per il NOT NULL delle colonne sorgente, non per quel numero;
+      e «1.439 su 312 posizioni» erano 1.434 su **157** · `p4` **CONFERMATO** (oracolo T5
+      97/299/70/60 riprodotto esatto; tipi di approvazione 4→5, effetti 4→5, candidati +13
+      `research_sources`). `check_verifica_consegne.py` → **VERDE, 0 NON-VERIFICATO**, exit 0.
+      La fase resta aperta perché continuativa: scatta alla prossima consegna o citazione.
       ▸ **Misurato il 2026-09-08 (S1092): nessun bersaglio, e la misura resta doppia.**
       `python docs/kb/tools/lab_inbox.py` → «lab inbox: vuota», **exit 0 letto sul processo**;
       e `ls -la D:/heuresys-design-lab/inbox/` mostra la sola cartella `ingerite/`, **ferma al

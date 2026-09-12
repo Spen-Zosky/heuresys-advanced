@@ -4,7 +4,8 @@
 per mio conto, nell'ordine che ritieni più appropriato. l'unico guardiano che comanda è quello
 della capienza.»*
 
-> **stato**: IN CORSO
+> **stato**: CHIUSO
+> **chiuso**: 2026-09-12 — 7 voci fatte su 8; la voce non fatta (F7) porta la ragione e vive nel piano della sua voce. CHIUSO vuol dire «la sessione ha finito», non «il lavoro è finito» (D-92).
 > **registro di sessione** — cronaca di ciò che si fa, non il programma di una voce: non
 > dichiara `item` di proposito (la ragione è scritta in `S1093-mandato-p1-p3-gated.md`, e in
 > D-92). Le fasi che restano aperte a fine sessione **vivono già nel piano della loro voce**
@@ -49,10 +50,29 @@ Stato: `[ ]` da fare · `[x]` FATTA con data ed evidenza · `NON FATTA (ragione)
 - [x] **F4 `#214` F6 — dodicesimo perimetro** — **fatto =** riga in `agent-perimetri.json`, migrazione in produzione, sentinella a 0, `db_health` verde — FATTA 2026-09-12 · `operating-models`, mig `000405`; gemello VERDE 43/43; produzione 21 s «378 applied»; sentinella 0; `db_health` exit 0; coda 12 aperti · 38 in coda
 - [x] **F5 `#54` F4 — frontend `/recruiting` + E2E con login reale** — **fatto =** pagine su dati reali, E2E verde, `check_exposure.py` verde (`#79` F3) — FATTA 2026-09-12 · 5 pagine + `/jobs` pubblica; API `public-job-postings` 4/4 sul gemello (sondata); mig `000406` in produzione (19 s); `recruiting.spec.ts` **16/16** in prod-mode, drift 0; `check_exposure` 0 lacune; voce `#54` CHIUSA (4/4)
 - [x] **F6 `#205` F1** — FATTA 2026-09-12 · `check_domini_ricercabili.py`, autoprova 9/9, coda 75 ricercabili / 4 percorribili oggi; reperto su `business_processes` (destinazione senza tenant_id). **F2-F3 NON FATTE**: fuori dal confine per capienza (guardiano: mancavano 211k alla soglia prima di F1, e la chiusura ne chiede ~100k) — vivono nel piano `#205`, voce ACTIVE
-- [ ] **F7 `#159` F2 — il componente** — **fatto =** componente in `@heuresys/ui`, la pagina `dev/agent` lo consuma, typecheck e lint verdi
+- [ ] **F7 `#159` F2 — il componente** — **fatto =** componente in `@heuresys/ui`, la pagina `dev/agent` lo consuma, typecheck e lint verdi — **NON FATTA (ragione)**: stimata ~250k e in un altro repository (`ux-design-shared`, con ciclo di pubblicazione); al momento della scelta il guardiano misurava **182.304 token alla soglia** (contesto 56,8%), e la chiusura ne chiede ~100k. Non si apre una fase che non si chiude. Vive in `.programmi/159-ponte-gateway-pagine.md` (F2 aperta), voce `#159` ACTIVE
 - [x] **F8 `#149` F4** — **fatto =** almeno una consegna citata verificata avversarialmente nel file — FATTA 2026-09-12 · `guardia-psql-opzioni-raggruppate`: 5 affermazioni misurate, esito PARZIALE scritto nel file e letto dallo strumento
 
 ## Simulazione a 5 domande (R24 §3) — per voce, prima di partire
 
 Si compila qui sotto **prima** di aprire ciascuna voce, non a fine ciclo.
+
+Le simulazioni sono state scritte in chat, voce per voce, prima di ogni apertura (precondizione ·
+meccanismo · propagazione · chi · guardia). Qui restano i reperti che hanno cambiato il corso:
+
+| voce | cosa la simulazione non sapeva, e la misura ha detto |
+|---|---|
+| D-92 | `#246` F4 era **già fatta** (mig 000377, 2026-09-06) e mai spuntata: il difetto al rovescio |
+| `#169` | con l'obbligo MFA acceso (B18) il secondo corno di F4 è **superato**: 401 al passo 2 |
+| `#214` | `sys_operating_model_catalog`: `''` e NULL sono due valori — il ripristino rimette il valore salvato |
+| `#54` | tre regole del server trovate eseguendo: colloquio senza data, REJECTED senza motivo, `/jobs` fuori da `PUBLIC_PATHS` |
+| `#149` | `compatta_register.py` riappendeva le righe-indice a ogni corsa (4 → 6 copie di `#121`) — corretto e archivio ripulito |
+| `#205` | l'owner di una posizione è un **attore**, non un soggetto: il criterio R3 era troppo largo |
+
+## Fuori da questo ciclo — presentate una volta sola (R24 §5)
+
+- **`enzo.spenuso@heuresys.com` non può entrare dal browser**: fattore TOTP casuale mai consegnato (#169 F3c) + obbligo acceso (B18) + **0 codici di recupero** (misurato). Rimedio più pulito: cancellare il suo fattore → «iscrizione richiesta» al prossimo login. È una DELETE su un dato di Enzo: **si fa solo con la sua conferma**.
+- **Quattro log scritti in `C:\Git\`** da questa sessione (`rehearsal.log`, `migrate-vm.log`, `dbh.log`, `dbh2.log`: una variabile vuota in un redirect) — accanto a ~25 log di sessioni precedenti con lo stesso difetto. Non cancellati (divieto); da decidere se svuotare la cartella.
+- **`business_processes`** ha una fonte approvata ma la sua destinazione non è contenuto di tenant: da sciogliere in `#205` F2.
+- **Bundle Cowork fase 4** (B13-B16): non è una voce del register P1-P3, non toccata.
 

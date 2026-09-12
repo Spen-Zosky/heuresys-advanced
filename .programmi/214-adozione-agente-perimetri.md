@@ -125,6 +125,44 @@ sono stati cancellati (divieto): sono diventati rimandi di poche righe a `live-p
       🔬 **Trovata e chiusa una cecità in attesa**: `check_concetti_agente.py` presidiava il caso «parser che non legge più nulla» per `RESOURCE_DATA_CLASS` e **per nessuna delle altre tre**. Cambiando forma, `MULTI` sarebbe tornato `{}` e ogni resource multiclasse sarebbe sparita in silenzio dalla classificazione. Ora la guardia c'è per `MULTI` e per `NO_PERSONE`.
 - [ ] **F6 Consumo della coda dei neutri, un perimetro per volta**
 
+  ### S1095 (2026-09-12) — il DODICESIMO perimetro chiude la terna degli «intermedi»
+
+  Coda ri-derivata sull'atlante fresco (da `8b81b12f`): **107 moduli · 11 aperti · 39 in coda
+  (20 neutri)**. Testa dei neutri: un **pari a quattro** — `enterprise-typing-profiles`,
+  `job-roles`, `operating-models`, `skill-categories`, tutti a 2 letture · 2 pagine. L'ordine è
+  quello già stabilito (rischio crescente): `job-roles` e `skill-categories` i più vicini a una
+  persona; `enterprise-typing-profiles` scartato per la porta già occupata (vale ancora, ri-letto
+  il ragionamento della 000382); resta **`operating-models`**, ultimo dei quattro «intermedi».
+
+  **Cosa è**: `sys_operating_model_catalog`, un **catalogo** di sei modelli (B2B_SERVICES,
+  MANUFACTURING, MIXED, PUBLIC_SECTOR, RETAIL, WHOLESALE) senza `tenant_id` — una classificazione
+  aperta a ogni settore (I21). Neutralità misurata su `information_schema`: sette colonne,
+  nessun soggetto, nessun attore. Due porte: `operating_model_metadata` JSONB (`{}` su 6/6) e
+  `operating_model_description` testo libero (NULL su 6/6). Misurato prima di aprire: 0 indirizzi
+  di posta.
+
+  ⚠ **Aperto con una guardia — mig `000405`**, `sys.v_modello_operativo_con_dato_di_persona`,
+  provata rossa su **entrambe** le porte con la post-condizione per impronta della 000382.
+  🔬 Un dettaglio che la 000382 non aveva: il ripristino della descrizione rimette il valore
+  **salvato** e non uno ricostruito con `nullif(replace(…))`, perché `''` e NULL sono due valori
+  diversi e l'impronta li distingue — su una descrizione NULL la forma della 000382 sarebbe
+  passata per caso, su una `''` avrebbe fatto fallire la migrazione.
+
+  🔬 **Evidenza live, in quest'ordine**:
+  - prova generale sul gemello (`ci-rehearsal.sh`) → **VERDE**, «000405: sentinella installata
+    e provata su entrambe le porte · 6 modelli invariati, contenuto identico per impronta»,
+    sentinelle **43/43 a zero** (da 42), catena 16 s;
+  - produzione — `pnpm db:migrate:vm --no-pull` → exit 0, **21 s**, «378 applied, 24 skipped»;
+  - dimostrazione — la sentinella dice **0**, 6 modelli con descrizione NULL e metadata `{}`
+    come prima; `db_health` exit **0** (dopo un `VACUUM (ANALYZE)` su
+    `sys_auth_role_permissions`, 23,3% di tuple morte lasciate dalla catena — stesso caso di
+    S1091, curato perché la regola non ammette il «pre-esistente»).
+
+  Coda dopo: **12 aperti · 38 in coda (19 neutri)**. Prossimi in testa: `job-roles` e
+  `skill-categories` (i vocabolari delle persone: si apriranno con una motivazione su quella
+  vicinanza, non per ampiezza) ed `enterprise-typing-profiles` (finché `decided_by` porta un
+  nome in chiaro, non si apre).
+
   ### S1092 (2026-09-08) — il DECIMO perimetro, e la misura ha cambiato il candidato
 
   Coda ri-derivata **sull'atlante fresco**: **105 moduli · 9 aperti · 40 in coda (21 neutri)**.

@@ -120,6 +120,23 @@
    },
    "solaLettura": true
   },
+  "operating-models": {
+   "data": "2026-09-12",
+   "decisione": "Claude, per delega esplicita di Enzo (S1095, 2026-09-12: «esegui tutti da P1 a P3 in autonomia e automaticamente prendendo decisioni per mio conto, nell'ordine che ritieni piu' appropriato»). DODICESIMO perimetro in sola lettura. Scelto col criterio meccanico: coda ri-derivata sull'atlante fresco (da 8b81b12f) — 107 moduli, 11 aperti, 39 in coda di cui 20 neutri — e la testa dei neutri e' un PARI a quattro, tutti a 2 letture e 2 pagine (enterprise-typing-profiles, job-roles, operating-models, skill-categories). ⚠ `approvals` e' piu' ampio (2 letture, 3 pagine) ma NON e' in gara: dichiara ACTIVITY, stessa esclusione della 000378 e della 000382. L'ordine fra i quattro e' il RISCHIO CRESCENTE gia' stabilito: job-roles e skill-categories restano i piu' VICINI a una persona (un ruolo e' cio' che una persona ricopre, una categoria di competenza cio' che possiede); enterprise-typing-profiles resta SCARTATO per la ragione misurata il 2026-09-08, che vale ancora — la sua unica porta, il JSONB enterprise_typing_metadata, e' GIA' OCCUPATA da `decided_by` con un NOME PROPRIO IN CHIARO. Resta operating-models, l'ultimo dei quattro «intermedi» ancora in coda: la 000381 ha aperto le varianti, la 000382 le famiglie, questa chiude la terna. COSA E': `sys_operating_model_catalog` e' un CATALOGO di modelli operativi (B2B_SERVICES, MANUFACTURING, MIXED, PUBLIC_SECTOR, RETAIL, WHOLESALE), una classificazione aperta a ogni settore (I21) senza tenant_id: e' il vocabolario con cui un cliente si descrive, non contenuto di un cliente. NEUTRALITA' MISURATA su information_schema, non dedotta dai nomi: delle sette colonne nessuna e' il SOGGETTO di un dato di persona, e non c'e' nemmeno un ATTORE (non esiste un created_by). ⚠ APERTO CON UNA GUARDIA: le porte sono DUE, le stesse della 000370/000378/000381/000382 — operating_model_metadata e' JSONB (oggi `{}` su tutte e sei le righe) e operating_model_description e' TESTO LIBERO (oggi NULL su tutte e sei). Mig 000405: la sentinella sys.v_modello_operativo_con_dato_di_persona guarda entrambe le porte, db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E DUE iniettando un indirizzo di posta e disfacendolo, con la post-condizione per IMPRONTA md5 della 000382 — e il ripristino della descrizione rimette il valore SALVATO, perche' '' e NULL sono due valori diversi. Misurato in produzione prima di aprire (2026-09-12): 6 modelli, 0 con descrizione, metadata `{}` su tutti, 0 indirizzi di posta in nessuna delle due porte. Un perimetro vuoto oggi non e' un perimetro chiuso domani: la guardia si mette PRIMA che il buco si apra.",
+   "operations": {
+    "get": {
+     "method": "GET",
+     "path": "/",
+     "permission": "operating_model:read"
+    },
+    "get_by_id": {
+     "method": "GET",
+     "path": "/:id",
+     "permission": "operating_model:read"
+    }
+   },
+   "solaLettura": true
+  },
   "organization-units": {
    "data": "2026-08-16",
    "decisione": "Enzo (#156): primo perimetro in sola lettura. Coerente con la decisione dello stesso giorno su #193 — l'organigramma e' rubrica aziendale, visibile a chiunque lavori in azienda. E' l'unico candidato la cui sensibilita' non e' una stima di chi scrive, ma una scelta di prodotto scritta e datata.",

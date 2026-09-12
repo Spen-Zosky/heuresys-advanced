@@ -647,6 +647,7 @@
       "caption": "Elenco valutazioni",
       "subjectUnnamed": "Persona non nominata",
       "notShared": "Non comunicata",
+      "notSharedException": "Non comunicata — eccezione dichiarata il {{date}}",
       "cols": {
         "subject": "Persona",
         "period": "Periodo",

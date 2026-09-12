@@ -180,6 +180,11 @@ ROUTES: list[tuple[str, list[str]]] = [
     # non instrada alcuna suite» — ed era invece il punto cieco).
     ("docs/kb/tools/verify_gate.py", ["router-selftest"]),
     ("docs/kb/tools/chi_sorveglia.py", ["chi-sorveglia"]),
+    # S1097 — due strumenti con autoprova a esiti opposti, instradati su se stessi come
+    # chi_sorveglia: l'ingestione del lab (#233: non duplica, rifiuta) e la headline di
+    # SOT_STATE §0 (F5). Un'autoprova che nessun cancello lancia e' un proposito.
+    ("docs/kb/tools/lab_inbox.py", ["lab-inbox-selftest"]),
+    ("docs/kb/tools/aggiorna_numeri_sot.py", ["numeri-sot-selftest"]),
     # ⭐ S1093 — `agent-perimetri.json` E' UNA SoT, e un test la sorveglia.
     # `apps/agent-gateway/test/atlas-resolver.test.ts` confronta i perimetri DECISI in questo
     # file con quelli presenti nella MAPPA generata (`docs/kb/atlas/agent-operations.json`):
@@ -269,6 +274,8 @@ SUITES: dict[str, tuple[str, str]] = {
     # smette di essere applicabile — che e' il modo in cui una regola muore senza che
     # nessuno la abroghi.
     "chi-sorveglia":      ("L0", "python docs/kb/tools/chi_sorveglia.py --selftest"),
+    "lab-inbox-selftest": ("L0", "python docs/kb/tools/lab_inbox.py --selftest"),
+    "numeri-sot-selftest": ("L0", "python docs/kb/tools/aggiorna_numeri_sot.py --selftest"),
     # I test del gateway, che sono anche i guardiani della coerenza fra i perimetri decisi e
     # la mappa generata. L0 nel costo, L1 nella sostanza: girano senza database.
     "agent-gateway-test": ("L1", "pnpm --filter @heuresys/agent-gateway test"),

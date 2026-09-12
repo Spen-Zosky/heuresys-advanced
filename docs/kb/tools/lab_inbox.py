@@ -298,11 +298,79 @@ def ingerisci() -> str:
             + ("\n" + _referto_respinte(respinte) if respinte else ""))
 
 
+def selftest() -> int:
+    """#233 — la prova a esiti opposti che mancava: `--ingest` non duplica, rifiuta.
+
+    Il rifiuto delle proposte di aggiornamento esiste da `7911dde8` (2026-08-16), ma
+    nessuna prova lo teneva fermo: un ritorno al `str.replace` sarebbe passato in
+    silenzio. Qui si costruisce un lab e un registro FINTI (via HRX_REPO/HRX_LAB, in
+    un processo figlio, cosi' le radici del modulo non toccano il repo vero) e si
+    misurano i tre esiti: la consegna nuova entra col prossimo numero; la proposta
+    di aggiornamento resta in inbox e il registro e' IDENTICO byte per byte; il
+    numero inventato e' respinto. Sola lettura sul repo vero, sempre.
+    """
+    import subprocess
+    import tempfile
+
+    esiti = []
+
+    def caso(nome, cond):
+        esiti.append(bool(cond))
+        print(("  [OK] " if cond else "  [FAIL] ") + nome)
+
+    with tempfile.TemporaryDirectory() as radice:
+        repo = os.path.join(radice, "heuresys-advanced")
+        lab = os.path.join(radice, "heuresys-design-lab")
+        os.makedirs(os.path.join(repo, "docs", "kb"))
+        os.makedirs(os.path.join(lab, "inbox"))
+        registro = os.path.join(repo, "docs", "kb", "SOT_BACKLOG.md")
+        base = ("# register\n\n- **#7 Voce che esiste** · status: ACTIVE\n  - nota: x\n\n"
+                "- **#3 Altra** · status: DONE\n")
+        with open(registro, "w", encoding="utf-8", newline="\n") as f:
+            f.write(base)
+
+        def consegna(nome, lab_id, testata):
+            with open(os.path.join(lab, "inbox", nome), "w", encoding="utf-8", newline="\n") as f:
+                f.write(f"---\nlab-id: {lab_id}\ntitolo: {nome}\n---\n\n```markdown\n"
+                        f"- **{testata} Titolo** · status: ACTIVE\n  - nota: cita #NN nel corpo\n```\n")
+
+        consegna("a-nuova.md", "lab-a", "#NN")
+        consegna("b-aggiornamento.md", "lab-b", "#7")
+        consegna("c-inventata.md", "lab-c", "#42")
+
+        env = dict(os.environ, HRX_REPO=repo, HRX_LAB=lab)
+        out = subprocess.run([sys.executable, os.path.abspath(__file__), "--ingest"],
+                             capture_output=True, text=True, env=env, encoding="utf-8").stdout
+
+        dopo = open(registro, encoding="utf-8").read()
+        nuova = "- **#8 Titolo** · status: ACTIVE\n  - nota: cita #NN nel corpo\n  - lab-id: lab-a\n\n"
+        caso("la consegna NUOVA entra col prossimo numero libero (#8) e la sua lab-id",
+             nuova in dopo)
+        caso("la proposta di AGGIORNAMENTO per #7 NON e' entrata: un solo `#7` nel registro",
+             dopo.count("- **#7 ") == 1 and "lab-id: lab-b" not in dopo)
+        caso("il registro, tolta la voce nuova, e' IDENTICO a prima byte per byte",
+             dopo.replace(nuova, "", 1) == base)
+        caso("il numero INVENTATO (#42) e' respinto", "#42" not in dopo)
+        inbox = set(os.listdir(os.path.join(lab, "inbox"))) - {"ingerite"}
+        caso("le due respinte restano in inbox/, la nuova e' passata in ingerite/",
+             inbox == {"b-aggiornamento.md", "c-inventata.md"}
+             and os.path.exists(os.path.join(lab, "inbox", "ingerite", "a-nuova.md")))
+        caso("il referto nomina il rifiuto e la sua ragione (#200)",
+             "PROPOSTA DI AGGIORNAMENTO per #7" in out and "difetto #200" in out)
+        # contro-prova: senza il rifiuto la stessa corsa produrrebbe due `#7`, e il
+        # secondo caso lo vedrebbe. La prova puo' fallire.
+    print("SELFTEST", "VERDE" if all(esiti) else "ROSSO", f"{sum(esiti)}/{len(esiti)}")
+    return 0 if all(esiti) else 1
+
+
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--blocchi", action="store_true")
     p.add_argument("--ingest", action="store_true")
+    p.add_argument("--selftest", action="store_true")
     a = p.parse_args()
+    if a.selftest:
+        return selftest()
     if a.ingest:
         print(ingerisci())
     elif a.blocchi:

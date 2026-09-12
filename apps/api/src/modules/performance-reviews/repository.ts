@@ -5,7 +5,7 @@
  * resolveOrgReadScope; qui solo tenant + allowlist.
  */
 import type { Pool, PoolClient } from "pg";
-import type { PerformanceReview, PerformanceReviewListQuery } from "@heuresys/shared";
+import type { CondivisioneEccezione, PerformanceReview, PerformanceReviewListQuery } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -16,6 +16,11 @@ const COLS = `review_id, review_tenant_id, review_subject_user_id,
   review_self_assessment_status,
   review_self_submitted_at, review_manager_submitted_at, review_calibrated_at,
   review_finalized_at, review_shared_at, review_acknowledged_at,
+  (SELECT json_build_object('motivo', e.eccezione_motivo, 'decisaDa', e.eccezione_decisa_da,
+                            'decisaIl', e.eccezione_decisa_il::text,
+                            'condizioneChiusura', e.eccezione_condizione_chiusura)
+     FROM sys.sys_valutazione_condivisione_eccezioni e
+    WHERE e.review_id = sys_performance_reviews.review_id) AS condivisione_eccezione,
   review_overall_rating, review_goal_achievement_rating, review_competency_rating,
   review_self_rating, review_calibrated_rating, review_pre_calibration_rating,
   review_potential_rating, review_performance_box, review_potential_box,
@@ -50,6 +55,9 @@ function toReview(r: Record<string, unknown>): PerformanceReview {
     finalizedAt: isoN(r.review_finalized_at),
     sharedAt: isoN(r.review_shared_at),
     acknowledgedAt: isoN(r.review_acknowledged_at),
+    // S1097 — il registro di eccezione (000396) esce con la valutazione che copre: e' governo
+    // del percorso, non giudizio, e resta visibile anche sotto il mandato piattaforma.
+    condivisioneEccezione: (r.condivisione_eccezione as CondivisioneEccezione | null) ?? null,
     overallRating: numN(r.review_overall_rating),
     goalAchievementRating: numN(r.review_goal_achievement_rating),
     competencyRating: numN(r.review_competency_rating),
@@ -85,6 +93,10 @@ export async function listReviews(
   if (query.reviewCycleId) { params.push(query.reviewCycleId); where.push(`review_cycle_id = $${params.length}`); }
   if (query.type) { params.push(query.type); where.push(`review_type = $${params.length}`); }
   if (query.status) { params.push(query.status); where.push(`review_status = $${params.length}`); }
+  if (query.soloEccezioni) {
+    where.push(`EXISTS (SELECT 1 FROM sys.sys_valutazione_condivisione_eccezioni e
+                         WHERE e.review_id = sys_performance_reviews.review_id)`);
+  }
   const clause = where.length ? ` WHERE ${where.join(" AND ")}` : "";
 
   const count = await q.query(`SELECT count(*)::int AS n FROM sys.sys_performance_reviews${clause}`, params);

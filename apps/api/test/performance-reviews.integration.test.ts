@@ -134,6 +134,70 @@ describe("#92 passo 3/7 — /v1/performance-reviews", () => {
     expect(raw.includes('"calibratedRating":')).toBe(false);
   });
 
+  // S1097 — il registro di eccezione (mig 000396, 568 righe) prima non era esposto da nessuna
+  // API: era in deroga al cancello #79. Ora esce con la valutazione che copre.
+  describe("l'eccezione di condivisione (000396) esce con la valutazione", () => {
+    let coperteRtl = 0;
+    let unaCoperta: { id: string; motivo: string; decisa_da: string } | undefined;
+
+    beforeAll(async () => {
+      const t0 = (await pool.query(
+        `SELECT user_tenant_id AS t FROM sys.sys_users WHERE user_email = $1`, [HR_EMAIL])).rows[0]!.t;
+      coperteRtl = Number((await pool.query(
+        `SELECT count(*)::int AS n FROM sys.sys_valutazione_condivisione_eccezioni e
+           JOIN sys.sys_performance_reviews r ON r.review_id = e.review_id
+          WHERE r.review_tenant_id = $1`, [t0])).rows[0]!.n);
+      unaCoperta = (await pool.query<{ id: string; motivo: string; decisa_da: string }>(
+        `SELECT e.review_id AS id, e.eccezione_motivo AS motivo, e.eccezione_decisa_da AS decisa_da
+           FROM sys.sys_valutazione_condivisione_eccezioni e
+           JOIN sys.sys_performance_reviews r ON r.review_id = e.review_id
+          WHERE r.review_tenant_id = $1 ORDER BY e.review_id LIMIT 1`, [t0])).rows[0];
+    });
+
+    it("gira su un universo dove PUÒ fallire: il registro non è vuoto", () => {
+      expect(coperteRtl, "nessuna eccezione registrata per RTL: prova cieca").toBeGreaterThan(0);
+      expect(unaCoperta).toBeDefined();
+    });
+
+    it("il dettaglio porta l'eccezione, coi campi del registro, e NON la maschera al platform", async () => {
+      for (const who of ["hr", "platform"]) {
+        const res = await t.app.inject({
+          method: "GET", url: `/v1/performance-reviews/${unaCoperta!.id}`, headers: { cookie: cookies[who]! },
+        });
+        expect(res.statusCode, `${who}: ${res.body.slice(0, 200)}`).toBe(200);
+        const r = res.json() as { condivisioneEccezione: Record<string, string> | null; masked?: string[] };
+        expect(r.condivisioneEccezione, `${who}: eccezione assente`).not.toBeNull();
+        expect(r.condivisioneEccezione!["motivo"]).toBe(unaCoperta!.motivo);
+        expect(r.condivisioneEccezione!["decisaDa"]).toBe(unaCoperta!.decisa_da);
+        expect(r.condivisioneEccezione!["decisaIl"]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(r.condivisioneEccezione!["condizioneChiusura"]!.length).toBeGreaterThan(10);
+        // e' governo del percorso, non giudizio: il platform la legge (le date di workflow pure)
+        if (who === "platform") expect(r.masked).not.toContain("condivisioneEccezione");
+      }
+    });
+
+    it("`soloEccezioni=true` restituisce esattamente le coperte del tenant, e ognuna porta l'eccezione", async () => {
+      const { items, total } = await listAs("hr", "limit=200&soloEccezioni=true");
+      expect(total).toBe(coperteRtl);
+      expect(total, "le coperte non sono tutte le valutazioni: il filtro deve filtrare").toBeLessThan(dbTotalRtl);
+      for (const r of items) expect(r["condivisioneEccezione"]).not.toBeNull();
+    });
+
+    it("una valutazione NON coperta porta null — il campo esiste sempre, l'eccezione no", async () => {
+      const nonCoperta = (await pool.query<{ id: string }>(
+        `SELECT r.review_id AS id FROM sys.sys_performance_reviews r
+          WHERE r.review_tenant_id = (SELECT user_tenant_id FROM sys.sys_users WHERE user_email = $1)
+            AND NOT EXISTS (SELECT 1 FROM sys.sys_valutazione_condivisione_eccezioni e WHERE e.review_id = r.review_id)
+          ORDER BY r.review_id LIMIT 1`, [HR_EMAIL])).rows[0];
+      expect(nonCoperta, "tutte le valutazioni sono coperte: il caso opposto non e' provabile").toBeDefined();
+      const res = await t.app.inject({
+        method: "GET", url: `/v1/performance-reviews/${nonCoperta!.id}`, headers: { cookie: cookies.hr! },
+      });
+      expect(res.statusCode).toBe(200);
+      expect((res.json() as { condivisioneEccezione: unknown }).condivisioneEccezione).toBeNull();
+    });
+  });
+
   it("un soggetto esplicito fuori portata risponde pagina vuota, non i dati altrui", async () => {
     // la CEO del tenant e' fuori dal sotto-albero di un capo intermedio
     const ceo = (await pool.query<{ id: string }>(

@@ -1,3 +1,21 @@
+const fs = require("node:fs");
+const path = require("node:path");
+
+/**
+ * La porta dell'API letta dal `.env` di radice (la riga `PORT=`), mai da `process.env.PORT`:
+ * sotto `next dev -p N` quella variabile vale N, cioe' la porta del WEB, e il proxy si
+ * chiuderebbe su se stesso. Ritorna `null` se il file o la riga non ci sono.
+ */
+function portaApiDalDotenv() {
+  try {
+    const testo = fs.readFileSync(path.join(__dirname, "..", "..", ".env"), "utf8");
+    const m = testo.match(/^PORT=\s*"?(\d+)"?\s*$/m);
+    return m ? `http://localhost:${m[1]}` : null;
+  } catch {
+    return null;
+  }
+}
+
 /** @type {import('next').NextConfig} */
 module.exports = {
   reactStrictMode: true,
@@ -26,9 +44,16 @@ module.exports = {
   // Ora: si deriva da `PORT` quando c'e' (la stessa che il `.env` dichiara per l'API), e
   // se si finisce sul ripiego lo si DICE. Un ripiego silenzioso su un valore inventato non
   // e' un default: e' un depistaggio che costa una corsa e un triage sbagliato.
+  //
+  // ⚠ E IL RIPIEGO SU `PORT` SI MORDEVA LA CODA (S1097, 2026-09-12, misurato). `next dev -p 3000`
+  // scrive `process.env.PORT=3000` nel PROPRIO processo: la riga qui sotto leggeva quella, e il
+  // proxy `/api/*` puntava al web stesso — `GET /api/readyz` rispondeva `307 /login?next=/readyz`,
+  // ogni login «Impossibile contattare il server», 12/12 `auth.setup` rossi con l'API viva su
+  // :3001. La `PORT` che interessa e' quella dell'API, e sta nel `.env` di radice: si legge DA
+  // LI', non dall'ambiente del processo, che `next` ha gia' riscritto.
   async rewrites() {
     const esplicita = process.env.NEXT_PUBLIC_API_PROXY_BASE_URL;
-    const daPort = process.env.PORT ? `http://localhost:${process.env.PORT}` : null;
+    const daPort = portaApiDalDotenv();
     const base = esplicita ?? daPort ?? "http://localhost:3001";
     if (!esplicita && !daPort) {
       console.warn(

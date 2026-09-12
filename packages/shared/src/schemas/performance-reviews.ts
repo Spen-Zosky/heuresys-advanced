@@ -10,6 +10,22 @@
  */
 import { z } from "zod";
 
+/**
+ * L'ECCEZIONE DI CONDIVISIONE (mig 000396, decisione di Enzo 2026-09-09): una valutazione
+ * COMPLETED mai condivisa perche' il passo di condivisione del workflow non e' mai stato
+ * costruito, con la ragione, chi ha deciso, quando, e la condizione che la chiude. E' un
+ * dato di GOVERNO sul percorso — come le date di workflow — non un giudizio: quindi NON
+ * viene mascherato sotto il mandato piattaforma. Nulla quando la valutazione non e' coperta.
+ * Fino a S1097 il registro (568 righe) non era esposto da nessuna API (deroga #79).
+ */
+export const CondivisioneEccezioneSchema = z.object({
+  motivo: z.string(),
+  decisaDa: z.string(),
+  decisaIl: z.string(),
+  condizioneChiusura: z.string(),
+});
+export type CondivisioneEccezione = z.infer<typeof CondivisioneEccezioneSchema>;
+
 export const PerformanceReviewSchema = z.object({
   reviewId: z.uuid(),
   tenantId: z.uuid(),
@@ -29,6 +45,7 @@ export const PerformanceReviewSchema = z.object({
   finalizedAt: z.iso.datetime().nullable(),
   sharedAt: z.iso.datetime().nullable(),
   acknowledgedAt: z.iso.datetime().nullable(),
+  condivisioneEccezione: CondivisioneEccezioneSchema.nullable(),
   // giudizio (mascherabile, ADR-0032)
   overallRating: z.number().nullable().optional(),
   goalAchievementRating: z.number().nullable().optional(),
@@ -58,6 +75,8 @@ export const PerformanceReviewListQuerySchema = z.object({
   reviewCycleId: z.uuid().optional(),
   type: z.string().max(32).optional(),
   status: z.string().max(32).optional(),
+  /** solo le valutazioni coperte da un'eccezione di condivisione (registro 000396) */
+  soloEccezioni: z.coerce.boolean().optional(),
   limit: z.coerce.number().int().min(1).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
 });

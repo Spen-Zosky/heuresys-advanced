@@ -63,6 +63,31 @@ test.describe("#92 F7 — il ciclo di valutazione, lato di chi lo conduce", () =
       .not.toHaveCount(0);
   });
 
+  // S1097 — il registro di eccezione (000396) esce con la valutazione: la pagina lo mostra
+  // nella cella «condivisa». Atteso derivato dall'API nella stessa sessione: quante coperte
+  // risponde `soloEccezioni=true`, e se sono più di zero la prima pagina — ordinata per
+  // periodo — DEVE portarne almeno una a schermo se l'API la restituisce in quella pagina.
+  test("l'eccezione di condivisione si vede, e si vede solo dove l'API la dichiara", async ({ page }) => {
+    // stessa pagina che la tabella chiede: 25 righe, offset 0 (default di usePaginatedList)
+    const r = await page.request.get(`${API_BASE}/v1/performance-reviews?limit=25&offset=0`);
+    expect(r.status()).toBe(200);
+    const body = (await r.json()) as { items: { condivisioneEccezione: { decisaIl: string } | null; sharedAt: string | null }[] };
+    const coperteInPagina = body.items.filter((i) => i.condivisioneEccezione && !i.sharedAt).length;
+    const nonCoperteInPagina = body.items.filter((i) => !i.condivisioneEccezione && !i.sharedAt).length;
+
+    await page.goto("/performance");
+    await expect(page.getByTestId("perf-reviews-section")).toBeVisible();
+    const righe = page.getByTestId("perf-reviews-row");
+    await expect(righe.first()).toBeVisible();
+    const conEccezione = righe.filter({ hasText: /eccezione dichiarata|exception declared/i });
+    await expect(conEccezione, "la pagina mostra un numero di eccezioni diverso da quello che l'API risponde")
+      .toHaveCount(coperteInPagina);
+    // e la riga NON coperta resta «non comunicata»: l'eccezione qualifica, non nasconde —
+    // le «non comunicate» a schermo sono le coperte più le nude, né una in più né una in meno
+    const nonComunicate = righe.filter({ hasText: /Non comunicata|Not shared/ });
+    await expect(nonComunicate).toHaveCount(coperteInPagina + nonCoperteInPagina);
+  });
+
   test("i cicli: la pagina dice la verità sul vuoto, invece di tacere", async ({ page }) => {
     const totaleCicli = await totale(page, "/v1/review-cycles?limit=50&offset=0");
 

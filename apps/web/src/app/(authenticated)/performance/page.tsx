@@ -129,11 +129,24 @@ export default function PerformancePage() {
         // Le DATE del percorso non sono il giudizio e restano visibili anche quando il
         // voto è mascherato: è la scelta già fatta nel contratto (ADR-0032).
         header: t("performance.reviews.cols.shared"),
-        cell: (r) => (
-          <span className="text-xs text-muted-foreground">
-            {r.sharedAt ? new Date(r.sharedAt).toLocaleDateString() : t("performance.reviews.notShared")}
-          </span>
-        ),
+        cell: (r) =>
+          r.sharedAt ? (
+            <span className="text-xs text-muted-foreground">{new Date(r.sharedAt).toLocaleDateString()}</span>
+          ) : r.condivisioneEccezione ? (
+            // S1097 — l'eccezione di condivisione (registro 000396) non fa sparire la riga «non
+            // comunicata»: la qualifica. Il motivo intero sta nel title, la data della decisione
+            // nel testo — così l'HR vede QUALI valutazioni sono coperte, e da quando.
+            <span
+              className="text-xs text-muted-foreground underline decoration-dotted"
+              title={`${r.condivisioneEccezione.motivo} — ${r.condivisioneEccezione.decisaDa}`}
+            >
+              {t("performance.reviews.notSharedException", {
+                date: new Date(r.condivisioneEccezione.decisaIl).toLocaleDateString(),
+              })}
+            </span>
+          ) : (
+            <span className="text-xs text-muted-foreground">{t("performance.reviews.notShared")}</span>
+          ),
       },
     ],
     [t],

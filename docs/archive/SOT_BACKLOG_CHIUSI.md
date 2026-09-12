@@ -2184,3 +2184,12 @@
   - priority: P2 · effort: ~5-7 sessioni (fasi con commit atomici) · doc: docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md §E5
   - programma: `.programmi/54-recruiting-ats.md` — voce multi-sessione: fasi, decisioni gia' prese e punto di ripresa stanno li'. `python docs/kb/tools/programmi.py --id 54`
   - note: decisione Enzo S1018 — in coda al batch (wave W11). Concept-porting dal cantiere evo, mai codice (I5: no RLS).
+
+- **#233 `lab_inbox --ingest` duplica i blocchi-proposta invece di fonderli** · status: DONE
+  - chiusa-2026-09-12 (S1097, mandato «hold» in autonomia). **La premessa non era più vera**: il rifiuto delle proposte di aggiornamento esiste da `7911dde8` (2026-08-16) — `classifica()` guarda l'INTESTAZIONE del blocco, e una proposta per una voce esistente **non entra**: resta in `inbox/` con un referto che nomina #200 e chiede la fusione a mano (scelta dichiarata nel codice: la fusione automatica lascerebbe residui che il lint non vede). Mancava la **prova**: aggiunto `lab_inbox.py --selftest` — lab e registro finti via `HRX_REPO`/`HRX_LAB` in un processo figlio, tre consegne (nuova `#NN`, aggiornamento `#7`, numero inventato `#42`) → **6/6**: la nuova entra come `#8` con la sua lab-id, il registro tolta la nuova è identico byte per byte, le due respinte restano in inbox. **Sabotaggio dichiarato**: forzando `classifica` a dire sempre «nuova» la prova esce **1/6 ROSSO**. Instradata nel cancello (`verify_gate.py`: `lab-inbox-selftest`, L0, sul file stesso)
+  - hold-reason (storico): residuo dichiarato da `#200` (S1065) e raccolto qui dal cancello a tempo (M3): l'ingestione ri-crea i blocchi-proposta a ogni corsa riusando il numero della voce da aggiornare. `handoff_lint` `S4` lo **intercetta già al cancello** (un id, una voce — bloccante), quindi non passa in silenzio; la riparazione a monte resta da fare. Il difetto è **dormiente**: l'inbox del lab è vuota (misurato S1077, sola cartella `ingerite/`)
+  - decided-by: Claude (raccolta meccanica del residuo, S1081)
+  - hold-since: 2026-08-25
+  - reactivation-trigger: `{kind: manual}` — oppure la prossima consegna del lab da ingerire: la riparazione va fatta **prima** della corsa di `--ingest`
+  - si-riprende-con: *«riprendi #233»*
+  - priority: P3 · effort: ~1h (fondere invece di duplicare, con la prova nei due versi) · doc: `docs/kb/tools/lab_inbox.py` · `docs/kb/tools/handoff_lint.py` (`S4`)

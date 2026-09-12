@@ -647,6 +647,7 @@
       "caption": "Performance reviews list",
       "subjectUnnamed": "Unnamed person",
       "notShared": "Not shared",
+      "notSharedException": "Not shared — exception declared on {{date}}",
       "cols": {
         "subject": "Person",
         "period": "Period",

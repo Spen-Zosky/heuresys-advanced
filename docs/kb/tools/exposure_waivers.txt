@@ -14,4 +14,3 @@ sys_tenant_boundary_author_columns  # allowlist delle colonne-autore per la sent
 sys_industry_forbidden_terms        # vocabolario della sentinella v_contenuto_fuori_settore (000388, I21): configura una guardia, non e' un dato
 sys_translatable_field              # registro dei campi traducibili (000190): letto da v_reference_translation_coverage/orphans e da i18n:check; e' metadato dello schema
 sys_auth_mfa_exemption_audit        # giornale di audit scritto dal trigger di sys_auth_mfa_exemptions (000118): si legge con psql in un'indagine di sicurezza, mai dal prodotto
-sys_valutazione_condivisione_eccezioni  # registro di eccezione di governo (000396, decisione di Enzo 2026-09-09): letto da v_valutazione_condivisione_eccezioni_coperte per la sentinella; e' un'attestazione, non contenuto — se dovra' essere visibile in prodotto, questa riga cade e nasce l'endpoint

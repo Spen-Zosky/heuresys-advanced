@@ -78,8 +78,40 @@ describe("la sorgente del gateway", () => {
 
     const primo = g.richieste.find((r) => r.fase === "indirizzi")!;
     expect(primo.fontiAmmesse).toEqual(["istat.it"]);
-    // istat.it e il suo sottodominio si leggono; assoconsult.org no, e non e' un errore: e' il perimetro
-    expect(viste).toEqual(["https://www.istat.it/x", "https://dati.istat.it/z"]);
+    // S1097: prima si TENTA la mappa del sito della fonte (qui non c'e': 404, e non e' un errore);
+    // poi istat.it e il suo sottodominio si leggono; assoconsult.org no — e' il perimetro
+    expect(viste).toEqual([
+      "https://istat.it/sitemap.xml", "https://www.istat.it/sitemap.xml",
+      "https://www.istat.it/x", "https://dati.istat.it/z",
+    ]);
+    expect(primo.candidati, "senza mappa non si mandano candidati: si chiede come prima").toBeUndefined();
+  });
+
+  it("S1097 (#205 F2) — con la mappa del sito, il primo giro riceve i candidati REALI e la mappa non si rilegge come pagina", async () => {
+    const g = gatewayFinto({
+      // il modello «sceglie» due indirizzi, uno dei quali e' la mappa stessa: non va aperta come pagina
+      indirizzi: ["https://www.istat.it/imprese/organizzazione/", "https://istat.it/sitemap.xml"],
+      proposte: [],
+    });
+    const viste: string[] = [];
+    const s = creaSorgenteGateway({ url: "http://gateway.local", token: "segreto", fetchImpl: g.fetchImpl });
+    await s.proponi({
+      ...mandato({
+        "https://istat.it/sitemap.xml": "https://www.istat.it/news/1/ https://www.istat.it/imprese/organizzazione/",
+        "https://www.istat.it/imprese/organizzazione/": "come sono organizzate le imprese",
+      }, viste),
+      domande: ["Come è organizzata un'impresa?"],
+      fontiAmmesse: ["istat.it"],
+    });
+    const primo = g.richieste.find((r) => r.fase === "indirizzi")!;
+    // ordinati per attinenza: la pagina che risponde alla domanda prima delle news
+    expect(primo.candidati).toEqual([
+      "https://www.istat.it/imprese/organizzazione/", "https://www.istat.it/news/1/",
+    ]);
+    // la mappa e' stata letta UNA volta (passo ⓪) e non riaperta come pagina al passo ②
+    expect(viste.filter((u) => u.endsWith("sitemap.xml"))).toEqual(["https://istat.it/sitemap.xml"]);
+    const secondo = g.richieste.find((r) => r.fase === "proposte") as { pagine: Array<{ url: string }> };
+    expect(secondo.pagine.map((p) => p.url)).toEqual(["https://www.istat.it/imprese/organizzazione/"]);
   });
 
   it("S1096 — senza perimetro (dominio che non confronta col registro) si legge tutto, come prima", async () => {

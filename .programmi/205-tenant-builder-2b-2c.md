@@ -113,6 +113,33 @@ il confronto di somiglianza fra testi · **citare il numero 196**, che non si ri
   (una sitemap, o uno strumento di ricerca nel gateway) invece di indovinare, oppure il registro
   riceve la fonte di settore quando una corsa la propone — e le proposte di fonte si presentano
   a Enzo, che è chi le approva davvero (S1081). Il driver e le due correzioni restano nel repo.
+  ### 🟡 S1097 (2026-09-12) — la fase «indirizzi» ora SA CERCARE; la corsa resta da fare
+
+  Il finding di S1096 («o la fase indirizzi sa cercare, o il registro riceve la fonte di
+  settore») è stato eseguito nella prima forma, **nell'API e non nel gateway** (che per §4.4
+  non ha strumenti e non deve averne). Passo ⓪ nuovo in `sorgenti/gateway.ts`
+  (`sorgenti/mappa-del-sito.ts`): per ogni fonte ammessa l'API legge `sitemap.xml` (e fino a
+  2 sotto-mappe se è un indice, mai oltre 12 mappe per corsa) **con lo stesso lettore delle
+  pagine** — guardie, limiti, impronta — ne estrae gli indirizzi reali del suo host, li ordina
+  per attinenza alle domande (confronto per radice di 6 caratteri: «organizzata» trova
+  «organizzazione») e li passa al modello come `candidati`. Il prompt dice «scegli da qui, non
+  inventare», e il gateway **scarta per costruzione** ciò che non sta nell'elenco. Una mappa
+  assente non ferma la corsa: si chiede senza candidati, come prima, e l'esito per fonte si
+  registra (`letta`/`assente`/`vuota`).
+
+  🔬 Unit **17/17** (`research-mappa-del-sito.unit.test.ts` 8, `research-sorgente-gateway`
+  9 di cui 1 nuovo): i due rossi della prima corsa hanno **corretto lo strumento** — l'ordine
+  per parola intera metteva `news` davanti a `organizzazione` per pura brevità. Typecheck e
+  lint verdi su api e gateway.
+
+  ⏳ **Non eseguita la corsa su `positions`**, e va detto: pretende la catena della ricerca
+  (`claude` autenticato solo su Windows + API e lettore sul gemello via `ssh -R 8790`) e il
+  tunnel era degradato (7,8 s per una `count`). Il prossimo passo è UNA corsa con
+  `percorri-dominio.mts` e leggere `fonti` nell'esito: quante mappe si sono aperte, quanti
+  candidati, e se il modello ha scelto pagine che descrivono una società di consulenza. Se
+  le mappe istituzionali non portano quelle pagine, resta la seconda forma del finding:
+  la fonte di settore (`assoconsult.org`) proposta a te.
+
 - [ ] **F3 Lo strato di forma (2c) e la prova della frase riconoscibile** — budget ~60k
       Prendere una proposta approvata del cliente A con una frase riconoscibile, promuoverla a
       patrimonio, e cercare **quella frase** nello strato di forma: deve dare **zero** riscontri.

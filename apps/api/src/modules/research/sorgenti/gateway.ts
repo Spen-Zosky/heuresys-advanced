@@ -22,6 +22,7 @@ import { hostOf, suffissoCopre } from "../sources.js";
 import { risolviDominio } from "../domains/index.js";
 import { avvolgiTestoNonFidato } from "../guardia-domande.js";
 import { SorgenteNonDisponibileError } from "./index.js";
+import { candidatiDalleMappe } from "./mappa-del-sito.js";
 import { z } from "zod";
 
 export interface ConfigurazioneGateway {
@@ -69,6 +70,14 @@ export function creaSorgenteGateway(cfg: ConfigurazioneGateway): ProposalSource 
     async proponi(m: MandatoRicerca): Promise<PropostaGrezza[]> {
       const dominio = risolviDominio(m.dominio);
 
+      // ⓪ la mappa del sito (#205 F2, S1097): gli indirizzi REALI delle fonti ammesse, letti
+      //    dal lettore con le sue guardie, ordinati per attinenza. Il modello sceglie fra
+      //    questi invece di indovinare percorsi. Senza perimetro non c'e' niente da mappare;
+      //    una mappa assente o troppo grande non ferma la corsa: si torna a chiedere senza.
+      const mappa = m.fontiAmmesse.length > 0
+        ? await candidatiDalleMappe(m.fontiAmmesse, m.domande, m.leggi)
+        : { candidati: [], fonti: [] };
+
       // ① dove guardare
       const passo1 = (await chiama(cfg, {
         fase: "indirizzi",
@@ -77,6 +86,7 @@ export function creaSorgenteGateway(cfg: ConfigurazioneGateway): ProposalSource 
         contesto: m.contesto,
         massimo: cfg.indirizziMassimi ?? 8,
         fontiAmmesse: m.fontiAmmesse,
+        ...(mappa.candidati.length > 0 ? { candidati: mappa.candidati } : {}),
       })) as { indirizzi?: unknown };
       // Un indirizzo fuori dal perimetro non si legge: la proposta che ne nascerebbe cadrebbe
       // comunque su SOURCES_POLICY, e la lettura sarebbe spesa per essere buttata. Se il
@@ -90,9 +100,10 @@ export function creaSorgenteGateway(cfg: ConfigurazioneGateway): ProposalSource 
         return h !== null && m.fontiAmmesse.some((s) => suffissoCopre(s, h));
       });
 
-      // ② l'API apre le pagine: qui passano guardie, limiti e impronta.
+      // ② l'API apre le pagine: qui passano guardie, limiti e impronta. Le mappe gia' lette
+      //    non sono pagine di contenuto: si saltano anche se il modello le rimandasse.
       const pagine: Array<{ url: string; testo: string }> = [];
-      for (const url of indirizzi) {
+      for (const url of indirizzi.filter((u) => !/sitemap[^/]*\.xml(\.gz)?$/i.test(u))) {
         try {
           const p = await m.leggi(url);
           pagine.push({ url: p.url, testo: avvolgiTestoNonFidato(p) });

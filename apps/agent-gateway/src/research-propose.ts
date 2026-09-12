@@ -33,6 +33,10 @@ export interface RichiestaIndirizzi {
   massimo?: number;
   /** Gli host ammessi per questo dominio (S1096): se non e' vuoto, gli indirizzi si scelgono SOLO li'. */
   fontiAmmesse?: string[];
+  /** #205 F2 (S1097): gli indirizzi REALI letti dalle mappe dei siti ammessi, gia' ordinati per
+   *  attinenza dall'API. Se ci sono, il modello SCEGLIE fra questi invece di indovinare
+   *  percorsi — misurato in S1096: meta' degli indirizzi indovinati erano 404. */
+  candidati?: string[];
 }
 
 export interface RichiestaProposte {
@@ -108,13 +112,23 @@ export async function proponiIndirizzi(r: RichiestaIndirizzi): Promise<string[]>
           "Ogni indirizzo deve stare su uno di quegli host. Un indirizzo altrove verra' scartato senza essere letto: scegli le pagine di quegli host che rispondono meglio alle domande.",
         ]
       : []),
+    ...(r.candidati && r.candidati.length > 0
+      ? [
+          "⭐ ELENCO REALE: questi sono indirizzi ESISTENTI, letti dalle mappe dei siti ammessi e gia' ordinati per attinenza. SCEGLI da qui le pagine che rispondono meglio alle domande — non inventare percorsi: un indirizzo che non sta in questo elenco viene scartato.",
+          ...r.candidati.map((u, i) => `${i + 1}. ${u}`),
+        ]
+      : []),
     "Solo https. Niente forum, blog, aggregatori o contenuti di provenienza ignota.",
     'Rispondi con: {"indirizzi": ["https://...", "..."]}',
   ].join("\n");
 
   const out = estraiJson(await chiedi(prompt)) as { indirizzi?: unknown };
   const lista = Array.isArray(out.indirizzi) ? out.indirizzi : [];
-  return lista.filter((x): x is string => typeof x === "string").slice(0, massimo);
+  const scelti = lista.filter((x): x is string => typeof x === "string");
+  // Con un elenco reale la promessa del prompt vale per costruzione: cio' che non e'
+  // nell'elenco non torna, qualunque cosa il modello abbia scritto.
+  const ammessi = r.candidati && r.candidati.length > 0 ? new Set(r.candidati) : null;
+  return (ammessi ? scelti.filter((u) => ammessi.has(u)) : scelti).slice(0, massimo);
 }
 
 /** Fase 2 — dalle pagine lette alle proposte strutturate. */

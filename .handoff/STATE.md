@@ -1,76 +1,53 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: S1095 (2026-09-10). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: S1095 (2026-09-12, seconda corsa). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-S1095, tre corse. **Prima**: 19 commit di S1094 rimasti solo locali → pushati. **Seconda** — 3
-vulnerabilità Dependabot corrette; **B18** (secondo fattore obbligatorio) chiuso davvero (le due
-politiche per cliente erano spente, ora accese via API live, nessuno resta bloccato); **B23**
-(cancello sull'isolamento clienti) costruito — `gate.ts` esteso con `tenantGate`, l'app rifiuta di
-avviarsi se una rotta sensibile dimentica il confine; trovata e corretta una CI-rossa pre-esistente
-(un test dava per invariante che una tabella fosse solo-RTL, non lo è più — dato corretto, test
-stale). **Terza** — Fase 3 del bundle Cowork chiusa: **B11** (160 ruoli ri-mappati su ESCO, 0
-scadenti, 0 senza mappatura), **B30** (73 KPI/73 legami, tutti i processi coperti), **B12** (33
-unità + 71 posizioni + 132 competenze nelle tabelle di contenuto del blueprint bancario, prima
-vuote — nessun SQL era pronto, scritto sul modello di B11/B30). `db_health.py` verde dopo tutto.
-Misurata (non ruotata) `MFA_ENCRYPTION_KEY`: tutti i fattori cifrati, procedura scritta in
-`02_istruttorie/PROCEDURA_rotazione_MFA_ENCRYPTION_KEY_20260910.md` del bundle, decisione a Enzo.
-⚠ Pulizia fatta su richiesta: i due script usa-e-getta `_tmp-*.mjs` sono stati cancellati (confermato
-da Enzo), incluse le copie orfane rimaste sul gemello dopo la propagazione.
+Mandato di Enzo: tutte le voci P1→P3 in autonomia, con il solo guardiano della capienza a
+governare il taglio. Registro in `.programmi/S1095-mandato-p1-p3.md`: **sette voci su otto**.
+`#169` e `#54` **chiuse** (la chiave madre non completa più un accesso in produzione; il
+recruiting dal browser con Kanban e vetrina pubblica `/jobs`, E2E verde con login reale);
+`D-92` risolto (il difetto era al rovescio: una fase fatta e mai spuntata); dodicesimo
+perimetro dell'agente; `#205` F1 (lo strumento della coda dei domini ricercabili); `#149` F4 su
+una consegna. Due strumenti corretti misurando: `compatta_register.py` gonfiava l'archivio a
+ogni corsa, e il criterio R3 scambiava l'owner di una posizione per una persona. Cancello di
+fine turno GREEN su tutte le suite, test-api compresa sul gemello. `#159` F2 non aperta, con la
+ragione: altro repository, e capienza insufficiente a chiuderla intera.
 
 ## Top priorities
 
-0. ⚠ **CI ROSSA da chiudere per prima — `Test (api integration)` su `1987af4a`.** Le altre
-   SETTE corse sono verdi. Non e' stata diagnosticata: la sessione si e' fermata sulla soglia
-   del contesto (guardiano: «mancano 5.054 token», e il contesto e' un pavimento) mentre il
-   cancello locale era ancora in corso. **Ipotesi NON verificata**, da provare e non da
-   credere. **AGGIORNATO con la MISURA**: il cancello locale, finito dopo la chiusura, nomina
-   **DUE file**, ed entrambi nascono da B14 di questo blocco:
-   · `apps/api/test/branches.integration.test.ts` — atteso: le 6 righe di `sys_branches` non
-     esistono sul clone della CI (dato entrato da script e non dalla catena, il difetto gia'
-     visto tre volte in questa sessione). Rimedio probabile: portare le filiali nella catena,
-     come ha fatto la `000401` per i contenuti KPI.
-   · `apps/api/test/rbac-tenant-admin-allowlist.test.ts` — **QUESTO NON ERA PREVISTO, ed e' il
-     piu' importante**: esiste un'allowlist di cio' che `TENANT_ADMIN` puo' possedere, e la
-     mig. `000404` gli ha concesso `branch:list`/`branch:read` senza aggiungerli a quell'elenco.
-     E' un difetto del mio lavoro, non un test stale: o i due permessi entrano nell'allowlist
-     con la loro ragione, o non vanno concessi a `TENANT_ADMIN`. Da decidere guardando il file,
-     non a memoria.
-   Primo comando: `cd apps/api && pnpm exec vitest run test/rbac-tenant-admin-allowlist.test.ts`.
+1. **`#250` — Enzo non entra in produzione dal browser** (WAIT-INPUT): fattore TOTP casuale
+   mai consegnato + obbligo acceso + **0 codici di recupero**, misurato. Serve la tua conferma
+   a cancellare il fattore: al login successivo ti ri-iscrivi col tuo authenticator.
+2. **`#159` F2** — il componente del ponte gateway↔pagine in `ux-design-shared` (~250k): si
+   apre con capienza piena e quel repository libero da sessioni parallele.
+3. **`#205` F2** — percorrere `positions` (testa della coda, fonte `ilo.org`) con una corsa di
+   ricerca sul gateway; poi F3. Reperto da sciogliere prima: `business_processes` ha una fonte
+   ma la sua destinazione non ha `tenant_id`.
 
-
-1. **`#169` F3 — «il segreto smette di essere derivato»**. Tocca l'autenticazione di **159 utenti
-   su 164**: merita capienza piena, non un residuo di fine sessione.
-2. **`#54` F4** — frontend `/recruiting` + E2E. ⚠ `sys_candidates` ha **1 riga**, non zero.
-3. **`D-92`** — due piani si dichiarano CHIUSI con fasi aperte (`246-fixed-term` e `S1093-mandato`).
-4. **Bundle Cowork, fase 4** — B13 (dossier persona), B14 (filiali), B15 (censimento API↔pagine),
-   B16 (scheda cliente per il cliente): nessun dato pronto, da progettare.
-
-▸ Poi: `#159` F2 (ponte gateway↔pagine) · `#214` F6 (dodicesimo perimetro) · `#149` F4.
+▸ Poi: `#214` F6 (prossimi: `job-roles`, `skill-categories` — vocabolari delle persone, vanno
+motivati su quella vicinanza) · `#149` F4 (4 consegne citate ancora NON-VERIFICATO) · Bundle
+Cowork fase 4 (B13 dossier persona, B15 censimento API↔pagine, B16 scheda cliente: da progettare).
 
 ## Open questions
 
+- ⏳ **SOSPESA (Enzo)**: dove custodire la chiave del collaudo; rotazione di `MFA_ENCRYPTION_KEY`
+  (procedura pronta nel bundle). Non è più un gate di `#169`.
 - **Il pattern da catturare**: la headline delle migrazioni in `SOT_STATE.md` si ri-deriva a mano
-  ogni volta. Uno script o un hook? Non implementato di iniziativa.
-- ⏳ **SOSPESA (Enzo)**: dove custodire la chiave del collaudo; rotazione di `MFA_ENCRYPTION_KEY` —
-  procedura pronta (vedi sopra), la decisione di quando resta sua.
-- **`#205` F1**: da quali siti la piattaforma accetta di imparare.
-- ⚠ **NON SPIEGATO** (da S1093): perché il segreto TOTP *in chiaro* venisse rifiutato dal login.
-- **andrea.spenuso / chiara.spenuso** vedranno «iscrizione richiesta» al prossimo login (effetto
-  atteso di B18, non un guasto).
-- **Discrepanza rimisurata**: il mandato riportava `v_valutazione_completata_non_condivisa` a 570
-  righe (568 coperte + 2 no); rimisurato in S1095 è **0**. Non indagato — registrato nel piano del
-  bundle, fuori dal mandato di questa corsa.
+  ogni volta (oggi due volte). Uno script o un hook? Non implementato di iniziativa.
+- **Igiene fuori repo**: `C:\Git\` porta ~29 log di sessioni CLI (4 di questa: una variabile vuota
+  in un redirect) e `.handoff/session-journal.recovered.ndjson` del 6 settembre è già consolidato.
+  Nessuno dei due cancellato: mai senza il tuo sì.
 
 ## Verification
 
 ```bash
 python docs/kb/tools/session_start.py
-python docs/kb/tools/verify_gate.py selftest        # 10 casi router + 4 sull'impronta
-python docs/kb/tools/check_verifica_consegne.py     # 0 verde · 1 non verificata · 2 NON MISURATO
-python docs/kb/tools/programmi.py --selftest        # 22 casi, 2 nuovi con controprova
-bash scripts/verifica-deploy.sh                     # DEPLOYATO/IN-VOLO/CI-ROSSA/DISALLINEATO/NON-VERIFICATO
-python docs/kb/tools/db_health.py                   # sentinelle, atteso exit 0
-cd apps/api && pnpm exec vitest run test/org-gate.integration.test.ts   # tenantGate, 4/4 attesi
+python docs/kb/tools/verify_gate.py check                 # GREEN su 344cd461 (9 suite)
+python docs/kb/tools/check_domini_ricercabili.py --selftest   # 9/9
+python docs/kb/tools/compatta_register.py --selftest      # 15/15; a secco: «NIENTE DA COMPATTARE»
+python docs/kb/tools/programmi.py --verifica              # 51 programmi, nessun difetto
+bash scripts/verifica-deploy.sh                           # DEPLOYATO/IN-VOLO/CI-ROSSA/DISALLINEATO/NON-VERIFICATO
+cd apps/api && node scripts/verify-derived-login.mjs federica.marchetti@rtl-bank.org https://www.heuresys.com/api   # atteso: passo 2, 401
 ```

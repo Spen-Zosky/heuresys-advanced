@@ -25,6 +25,9 @@ export const CompensationBandSchema = z.object({
   midEur: z.string().nullable(),
   maxEur: z.string().nullable(),
   isGlobal: z.boolean(),
+  /** #232 (000409): la specie e' DICHIARATA, non dedotta da un importo mancante. Una BAND
+   *  senza `midEur` e' impossibile per CHECK; CCNL e UNION sono classificazioni (I21). */
+  kind: z.enum(["BAND", "CCNL", "UNION"]),
   metadata: z.record(z.string(), z.unknown()),
 });
 export type CompensationBand = z.infer<typeof CompensationBandSchema>;
@@ -42,6 +45,8 @@ export type CompensationBand = z.infer<typeof CompensationBandSchema>;
  */
 export const CompensationBandListQuerySchema = z.object({
   withValueOnly: queryBoolean().optional().default(true),
+  /** solo una specie: BAND (fasce), CCNL (contratti), UNION (sigle). Assente = tutte. */
+  kind: z.enum(["BAND", "CCNL", "UNION"]).optional(),
   q: z.string().min(1).max(200).optional(),
   ...paginationFields(200, 100),
 });

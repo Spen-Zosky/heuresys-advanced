@@ -390,6 +390,7 @@ export const compensationService = {
   async listCompensationBands(actor: ActorContext, query: CompensationBandListQuery) {
     return repo.listCompensationBands(pool, catalogTenant(actor) ?? null, {
       withValueOnly: query.withValueOnly,
+      ...(query.kind ? { kind: query.kind } : {}),
       ...(query.q ? { q: query.q } : {}),
       limit: query.limit,
       offset: query.offset,

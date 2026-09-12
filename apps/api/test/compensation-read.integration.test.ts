@@ -471,6 +471,30 @@ describe("#32 A/L7 compensation & reward read", () => {
       expect(`differenza ${tutte.total - solo.total}`).toBe(`differenza ${senzaImporti}`);
     });
 
+    // #232 (000409) — la specie e' DICHIARATA nella riga, non dedotta dall'importo mancante.
+    it("#232 — ogni riga porta la specie, e le prive di importo sono TUTTE classificazioni", async () => {
+      const tutte = (await bands(admin, "?withValueOnly=false&limit=200")).json() as {
+        items: Array<{ kind: string; midEur: string | null; code: string }>;
+      };
+      expect(tutte.items.length).toBeGreaterThan(0);
+      for (const b of tutte.items) expect(["BAND", "CCNL", "UNION"]).toContain(b.kind);
+      const bandSenzaImporto = tutte.items.filter((b) => b.kind === "BAND" && b.midEur == null);
+      expect(bandSenzaImporto, "una BAND senza importo e' impossibile per CHECK (000409)").toEqual([]);
+      // atteso derivato dal DB, non cablato
+      const { rows } = await pool.query<{ k: string; n: string }>(
+        `SELECT compensation_band_kind AS k, count(*)::text AS n FROM sys.sys_compensation_bands GROUP BY 1`,
+      );
+      const attese = Object.fromEntries(rows.map((r) => [r.k, Number(r.n)]));
+      for (const k of ["CCNL", "UNION"] as const) {
+        if (!attese[k]) continue;
+        const solo = (await bands(admin, `?withValueOnly=false&kind=${k}&limit=200`)).json() as {
+          total: number; items: Array<{ kind: string }>;
+        };
+        expect(solo.total, `kind=${k}`).toBe(attese[k]);
+        for (const b of solo.items) expect(b.kind).toBe(k);
+      }
+    });
+
     it("il catalogo è del proprio tenant, non di tutti", async () => {
       const r = await bands(federica, "?limit=200");
       const items = (r.json() as { items: Array<{ tenantId: string | null }> }).items;

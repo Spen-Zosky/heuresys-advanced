@@ -229,13 +229,7 @@
 - **#229 L'eredita' fra sessioni: rilevare cio' che e' stato interrotto, e leggerlo all'avvio** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#228 Il cancello a tempo: cosa e' marcito mentre non guardavo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#227 Le competenze isolate nel grafo: 4.464 su 14.033 senza un solo arco tassonomico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
-- **#232 Le 29 classificazioni dentro `sys_compensation_bands`: una tabella, due specie** · status: HOLD
-  - hold-reason: residuo dichiarato da `#215` (S1069) e raccolto qui dal cancello a tempo (M3): la mig `000325` ha riclassificato 29 righe — 7 CCNL + 22 sigle sindacali, tutte senza importi (`min_eur` nullo su 29/29) — come **classificazioni** (I21), ma vivono ancora nella tabella delle **bande retributive**. Funziona; la domanda è di modellazione (tabella di riferimento propria, o colonna di specie) e non blocca nulla
-  - decided-by: Claude (raccolta meccanica del residuo, S1081 — la decisione di modellazione resterà da prendere alla ripresa)
-  - hold-since: 2026-08-25
-  - reactivation-trigger: `{kind: manual}` — oppure il primo lavoro che tocca `sys_compensation_bands` (il cancello di esposizione `#79` e la dottrina di bonifica valgono lì)
-  - si-riprende-con: *«riprendi #232»*
-  - priority: P3 · effort: ~1 sessione (decisione di modellazione + eventuale migrazione con le quattro cose di `db-migrations.md`) · doc: register `#215` (mig `000325`, giornale `staging.competenze_orfane_rimosse_undo`)
+- **#232 Le 29 classificazioni dentro `sys_compensation_bands`: una tabella, due specie** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 
 - **#233 `lab_inbox --ingest` duplica i blocchi-proposta invece di fonderli** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 

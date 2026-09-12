@@ -47,6 +47,7 @@ interface ProfileRow {
   band_mid_eur: string | null;
   band_max_eur: string | null;
   band_is_global: boolean | null;
+  band_kind: "BAND" | "CCNL" | "UNION" | null;
   band_metadata: Record<string, unknown> | null;
   economic_weight: string | null;
   reward_gates_applied: unknown[];
@@ -72,6 +73,7 @@ export async function findCompensationProfileByPositionId(
        b.compensation_band_mid_eur::text AS band_mid_eur,
        b.compensation_band_max_eur::text AS band_max_eur,
        b.compensation_band_is_global AS band_is_global,
+       b.compensation_band_kind      AS band_kind,
        b.compensation_band_metadata  AS band_metadata,
        p.economic_weight::text AS economic_weight,
        p.reward_gates_applied,
@@ -99,6 +101,7 @@ export async function findCompensationProfileByPositionId(
           midEur: r.band_mid_eur,
           maxEur: r.band_max_eur,
           isGlobal: r.band_is_global ?? false,
+          kind: r.band_kind ?? "BAND",
           metadata: r.band_metadata ?? {},
         }
       : null,
@@ -1074,11 +1077,12 @@ export async function listGateOutcomesForPeriod(
 export async function listCompensationBands(
   db: DbConnector,
   tenantId: string | null,
-  q: { withValueOnly: boolean; q?: string; limit: number; offset: number },
+  q: { withValueOnly: boolean; kind?: "BAND" | "CCNL" | "UNION"; q?: string; limit: number; offset: number },
 ): Promise<{ items: CompensationBand[]; total: number; totalIncludingValueless: number }> {
   const params: unknown[] = [tenantId];
   const where: string[] = ["($1::uuid IS NULL OR compensation_band_tenant_id = $1::uuid)"];
   if (q.withValueOnly) where.push("compensation_band_mid_eur IS NOT NULL");
+  if (q.kind) { params.push(q.kind); where.push(`compensation_band_kind = $${params.length}`); }
   if (q.q) {
     params.push(`%${q.q}%`);
     where.push(`(compensation_band_name ILIKE $${params.length} OR compensation_band_code ILIKE $${params.length})`);
@@ -1097,7 +1101,7 @@ export async function listCompensationBands(
     `SELECT compensation_band_id, compensation_band_tenant_id, compensation_band_code,
             compensation_band_name, compensation_band_min_eur::text AS min_eur,
             compensation_band_mid_eur::text AS mid_eur, compensation_band_max_eur::text AS max_eur,
-            compensation_band_is_global, compensation_band_metadata
+            compensation_band_is_global, compensation_band_kind, compensation_band_metadata
        FROM sys.sys_compensation_bands
       WHERE ${whereSql}
       ORDER BY compensation_band_mid_eur DESC NULLS LAST, compensation_band_name
@@ -1117,6 +1121,7 @@ export async function listCompensationBands(
       midEur: (r.mid_eur as string | null) ?? null,
       maxEur: (r.max_eur as string | null) ?? null,
       isGlobal: (r.compensation_band_is_global as boolean) ?? false,
+      kind: r.compensation_band_kind as "BAND" | "CCNL" | "UNION",
       metadata: (r.compensation_band_metadata as Record<string, unknown>) ?? {},
     })),
   };

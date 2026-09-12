@@ -3314,3 +3314,493 @@
 - **#223 Remediation forense W4 — pipeline, separazione ruoli, prestazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 
 - **#224 Il check che cambia verdetto a seconda di dove lo lanci, e i sette eventi che lo accendono** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+
+- **#225 Il CLAUDE.md dichiara un difetto risolto come corrente, e cristallizza un numero che cambia** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#226 La storia di RTL diventa scorrevole: l'avanzamento va schedulato, e SOLO dove il database e' quello vero** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#212 `close-propagate` non arma il deploy alla seconda corsa nella stessa sessione, e il rollout resta indietro in silenzio** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#211 La suite E2E completa: i rossi che non sono guasti del prodotto, e i casi che non vengono eseguiti** · status: FATTO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#209 Venti filtri booleani dell'API dicono «tutti» a qualunque domanda — `z.coerce.boolean()` su una querystring** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#217 Il flusso di chiusura è un rito completo dove servirebbe un percorso scelto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#216 Il passaggio di consegne fra sessioni: il menu elenca invece di spiegare, e l'avanzamento vive ricopiato invece che derivato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#215 Lo stesso stato impossibile in altre due tabelle, dove pero' la cura e' l'opposto: righe classificate male, non residui** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#213 Cinque percorsi formativi non hanno titolare e non sono catalogo comune: uno stato che il modello non sa rappresentare** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#210 Le due specie convivono GIA', e non negli indicatori: `learning_modules` e' misto da prima che qualcuno se ne accorgesse** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#202 Il canale duplica i numeri perche' una str.replace non dice se ha sostituito — e la cura NON e' insegnargli a fondere** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#203 Il cancello del rubinetto e' rosso, e lo fa scattare uno strumento che il legacy lo combatte** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#204 La fusione ha lasciato SETTE residui dentro #196 e #198 — i blocchi riscritti sono pronti nella consegna** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#249 La contabilità dei piani va indietro rispetto ai fatti, e il cancello che lo dice non lo interroga nessuno** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#248 Le credenziali git di questa macchina non funzionano piu': un push da Windows si PIANTA invece di fallire** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#207 Il guardiano muore sulla riga del verdetto quando stdout non e' un terminale — e con lui altri due strumenti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#208 ⚠ PRIMA di eseguire #196/#197/#198/#199 leggi il LEGGIMI-PRIMA: sequenza, errori aperti, cosa e' gia' verificato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#199 E24 — il legame fascicolo↔azienda e' permanente, ma oggi `link-tenant` permette di staccarlo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#200 Il register aveva due identificativi doppi, e nessuna delle dieci verifiche li guardava** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#196 Gli indicatori: tutti di piattaforma oggi, ma la prima costruzione ne creerebbe di privati** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#197 Il marchio `materialized_from` non copre tutte le tabelle che lo stesso motore scrive** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#195 L'atlante era fermo a nove giorni prima, e nessuno strumento poteva accorgersene** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#194 `verifica-deploy` ha dichiarato la produzione irraggiungibile mentre era sana** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#193 L'organigramma aziendale non dichiara di mostrare persone — e sistemarlo lo toglierebbe a 117 su 161** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#192 Il diario di sessione non scrive — e la misura ha ridimensionato il difetto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#191 Il rendiconto delle chiusure non sa di quale sessione parla** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#190 Tre skill di questo repo descrivono il progetto legacy — vanno rimosse, e la rimozione è tua** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#189 `--repair-missing` della storia36 non arriva in fondo: un seed chiama una funzione che nessun seed crea** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#188 Le lacune formative non sanno a quale posizione si riferiscono** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#187 L'indice di salute organizzativa misura un clima fermo a gennaio 2025** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#186 Guardia lab: `psql -Atc` rifiutato e `psql -A -t -c` accettato — le opzioni brevi raggruppate non vengono sciolte** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#183 Policy di cancellazione utente: la disattivazione esiste, la cancellazione no** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#184 L'elenco dei file caduti si ferma a 50 senza dirlo: il verdetto tace il proprio troncamento** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#185 La prova che il cancello sa dire rosso e' una tantum: se non e' presidiata, non esiste** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#174 I seed di `rtl-banking-skills` non sono ri-eseguibili: violano i vincoli al secondo giro** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#173 Modalità «gov»: la versione parallela del loop zero-pendenze** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#181 I sette rilievi sul controllo di drift, e le correzioni entrate in main senza verifica** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#182 Due rami «recuperati» contengono lavoro mai entrato in main — e uno è il versante E2E del cluster che abbiamo chiuso** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#177 I tre revisori adversarial vivono in un workflow che sopravvive alla sessione, e i verdetti restano orfani** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#180 Sessantasei prove che nessun cancello esegue — ed è il motivo per cui una batteria è rimasta rossa senza che nessuno lo sapesse** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#179 Gli alberi dei lavoratori si fossilizzano dopo il primo merge** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#178 Il troncamento da budget non è mai stato osservato: il tetto contiene la spesa, ma non si è mai visto tagliare** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#175 Il verdetto verde di `w1` è stato dato con il cancello delle evidenze cieco** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#176 Il punto di rientro di gov esiste in una sola copia, su una sola macchina** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#172 Il clone del database su linux-pc accumula residui: il `DROP SCHEMA staging` fallisce a ogni giro** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#171 Otto vulnerabilita' aperte che nessuna voce registrava** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#170 Gli script dell'ingestione ritirata parlano ancora di uno schema che non esiste** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#168 Cancellare una persona cancella la storia delle sue approvazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#169 Separare i due segreti: la password derivata e il secondo fattore non possono nascere dalla stessa chiave** · status: DONE
+  - ✅ **CHIUSA S1095 (2026-09-12) — il secondo corno di F4 è SUPERATO, ri-misurato in produzione con l'obbligo acceso.** B18 (2026-09-09) ha abilitato le politiche MFA dei due clienti; `verify-derived-login.mjs federica.marchetti@rtl-bank.org https://www.heuresys.com/api` → password derivata dalla chiave madre: **passo 2, HTTP 401, 0 cookie** — il TOTP ricostruito dalla chiave è respinto; password errata 401. Primo corno già superato (S1093: 159 fattori, 0 derivabili). La proprietà per cui la voce esisteva è raggiunta e misurabile in permanenza (`pnpm db:verify-separazione-totp`). La domanda **(A)** sulla custodia della seconda chiave resta SOSPESA da Enzo e **non è più un gate di questa voce**: con i segreti casuali, chi ha la chiave madre non ottiene il secondo fattore da nessun file. ⚠ Conseguenza fuori voce, registrata nel piano: con obbligo acceso e segreti mai consegnati, chi entra dal browser ha bisogno di un ri-enrollment — `enzo.spenuso@heuresys.com` ha un fattore casuale e 0 codici di recupero (misurato).
+  - ✅ **F4 MISURATA S1093 (2026-09-08) — primo corno SUPERATO, secondo corno VIOLATO, e il blocco è un numero.** Lo strumento è `pnpm db:verify-separazione-totp` (uscite `0` separati / `1` violata / `2` NON MISURABILE) e porta una **controprova interna**: prima di dichiarare qualunque zero verifica di saper riconoscere una corrispondenza quando c'è, e di non vederne dove non ci sono — uno zero e un confronto rotto si assomigliano troppo. 🔬 **Primo corno, produzione**: 159 fattori esaminati · 159 cifrati a riposo · 0 illeggibili · **0 ancora derivabili**. ⚠⚠ **E il conteggio che c'era NON diceva questo, pur sembrando dirlo**: `stop-deriving-totp --dry-run` stampa «DA RENDERE CASUALI: 159», che conta i fattori con l'etichetta `derived-access` — cioè la **portata** dell'operazione, non la proprietà; su un database già bonificato stampa lo stesso numero, e letto come misura avrebbe fatto concludere che F3c non fosse mai stata applicata. 🔴 **Secondo corno, misurato con un login vero**: con la sola chiave madre si completa un accesso **in un passo** come `USER, PLATFORM_ADMIN, MANAGER` — **224 permessi**. Non è un difetto della separazione, che regge: è l'**enforcement MFA spento** su quell'ambiente. ⛔ **E accenderlo oggi non si può, ed è un numero**: **159 utenti su 164 attivi** hanno un fattore TOTP verificato il cui segreto è casuale e **non è mai stato consegnato a nessuno** — è il senso stesso di F3c. Accendere l'enforcement chiuderebbe fuori il **97%** delle persone. La precondizione mancante è un **percorso di ri-enrollment**, che è lavoro di prodotto e **non appartiene a questa voce**. ➡ **Stato onesto**: la proprietà per cui `#169` esisteva — password e secondo fattore non nascono più dalla stessa chiave — è **raggiunta e ora misurabile in permanenza**; ciò che manca è la decisione sull'enforcement, che questa sessione ha dotato del numero che le serviva
+  - ⚠ **E F3c aveva lasciato la CI rossa, in un modo che nessuno aveva collegato alla voce** (corretto in S1093): la suite Playwright non poteva più rispondere al secondo fattore, perché in CI `MFA_ENFORCEMENT_ENABLED` vale **`true` per default** e il job non lo spegne — la CI accende quel ramo **di proposito** (S983 WS-E). Sei setup di autenticazione rossi, due tentativi ciascuno, l'intera suite a cascata. Il rimedio **non** è spegnere l'enforcement in CI (renderebbe verde il test smettendo di provare la cosa) né spostare le personas sulle utenze di collaudo (è la F3a già cancellata): il **seed deposita** il segreto casuale dell'ambiente di collaudo in un file gitignored e la fixture lo legge — l'invariante di F3c resta intatta, il segreto resta casuale e non derivabile, ma smette di essere ignoto **a chi lo genera**. ⚠ La guardia pretende **due** condizioni (`NODE_ENV=test` **e** un database che si dichiari di collaudo dal nome), perché la sola prima non basta: su Windows il `.env` punta alla produzione via tunnel. Provata a esiti opposti sul gemello: si apre su `heuresys_ci` (7 segreti, uguali al DB per md5), si chiude su `heuresys_advanced` (impronta invariata, nessun file). ✅ **CI VERDE** (`Playwright smoke: success` su `084dcb30`, run `34239606307`): ha chiuso il cerchio la **cifratura** del segreto, la stessa che la prova generale aveva preteso per la sentinella `v_mfa_secrets_in_cleartext`. Le due impronte messe lì per diagnosticare hanno finito per **confermare** (depositata `ede4d885` = usata `ede4d885`). ⚠ Resta **non spiegato** *perché* il segreto in chiaro venisse rifiutato, dato che `decryptSecret` è self-identifying: cifrarlo ha reso verde la suite ed è un fatto misurato, il meccanismo no — e non lo si inventa. ▸ Cronaca del passaggio intermedio: l'errore era **cambiato** — il codice ora viene fornito e il server risponde «Codice MFA non valido o scaduto» — e la diagnosi è stata **strumentata** invece che indovinata (il seed stampa l'impronta di ciò che deposita, la fixture quella di ciò che usa: impronte uguali ⇒ guasto nel server, diverse ⇒ qualcuno riscrive il fattore dopo il seed)
+  - ✅ **F3c ESEGUITA S1092 (2026-09-08) — i segreti TOTP delle 159 persone in produzione sono CASUALI**, e nessuno è più ricostruibile dalla chiave madre (misurato ri-derivandoli tutti e 159: **0 combaciano**). ⚠⚠ Prima, **una mia analisi sbagliata corretta misurando**: avevo concluso che il ramo a due passi non si percorre mai perché in produzione l'enforcement MFA è spento — falso, `buildTestApp` lo **accende di proposito**, quindi la suite API usa davvero il segreto. La misura era giusta sulla produzione, la frase era più larga della misura. ⭐ **Ma la conseguenza non è F3a, ed è il reperto che vale di più**: il piano temeva di dover portare 89 spec su 101 alle utenze di collaudo (una sessione o più), mentre il problema vero è che i test devono conoscere **un** segreto valido, non **quel** segreto — e ce l'hanno già nel **database**, cifrato, a cui accedono con credenziali piene. `mfa-fixture-secrets.ts` **legge e decifra** invece di derivare: costo reale **un file**, nessuna spec toccata, nessun dato fabbricato. ⛔ **F3a è CANCELLATA, non rinviata** — nasceva da una domanda mal posta («da quale identità fa login la suite?» invece di «da dove prende il segreto?»), e per tre sessioni quella premessa non è stata rimessa in discussione: le premesse dei nostri piani sono fonti non verificate come le consegne del lab (`#149`). Strumento `pnpm db:stop-deriving-totp` con le quattro cose (misura · guardia per elenco esplicito · post-condizioni su ciò che non doveva cambiare · rollback in `staging.totp_derivato_undo`), e la prova **ri-deriva** invece di dichiarare. 🔬 Tre difetti trovati eseguendo, tutti miei: `sys_auth_mfa_factors` **non ha `updated_at`** · il giornale scriveva una riga **per tentativo** invece che per fattore (un rollback che avrebbe detto il falso) · `interview-feedback` e `job-offers` erano **senza subpath export** in `packages/shared`. Misure: gemello **269 file / 1905 test tutti verdi** coi segreti già casuali (è la prova che decide — F4 pretende separazione **e** suite viva) · produzione 159 sostituiti, fattori totali invariati · login live di `federica.marchetti@rtl-bank.org` **HTTP 200** · **0** utenze SERVICE hanno un fattore TOTP, quindi il collaudo non è stato toccato · `db_health` exit 0, segreti in chiaro **0**. ⚠ `verify-collaudo-login.mjs` **NON MISURATO** (HTTP 429, rate-limit dei tentativi): non è un guasto e non è un verde
+  - ⏳ **Resta F4** (la prova formale) e la sola domanda **(A)** qui sotto, che F3c ha **ridimensionato**: con i segreti casuali, chi ha la chiave madre non ottiene più alcun secondo fattore. La co-locazione delle due chiavi resta un fatto, ma pesa meno di quanto pesasse prima
+  - 🔬 **INDAGINE S1092 (2026-09-08) — fatta la misura che il piano dichiarava decisiva, e l'esito sposta la voce su di te.** Il piano scriveva: *«se le due chiavi finiscono nello stesso posto, la separazione è formale e non reale — prima di scegliere va misurato dove vive `MASTER_PATH` e dove potrebbe vivere la seconda»*. **Misurato: nello stesso posto, ovunque.** `dev-access-master.key` e `collaudo-access.key` convivono in `.secrets/` su Windows, sul linux-pc e sulla VM, e le due variabili corrispondenti convivono nello **stesso file** `~/actions-runner/.env` del runner CI. Non esiste un luogo in cui viva una sola delle due — e non è una svista da correggere con uno spostamento: `align-clones` propaga `.secrets/` **come blocco**, ed è così che la chiave di collaudo è arrivata sui cloni senza che nessuno la copiasse. ⚠ **Conseguenza su F3b**, che il piano dà per chiusa: il suo test («password da chiave madre → 401») è onesto, ma il criterio di **F4** è più largo — «con la chiave madre in mano completare un accesso deve risultare impossibile» — e in pratica «avere la chiave madre» vuol dire **aver letto `.secrets/`**, dove c'è anche l'altra. La separazione è **formale**: due file dietro la stessa porta. Non annulla F3b (prima bastava il codice del repository, ora serve un secondo file: è un passo avanti reale) ma non è la proprietà che F4 chiede. ⚠ **E F3a non è un refactoring, è una richiesta di dati**: misurato, le tre utenze di collaudo hanno **0 posizioni e 0 squadre**, mentre `tommaso.fiore` — la persona che 34 spec nominano — ne ha 2 e 1, e `fixtures.ts` dichiara per iscritto che quelle spec «dipendono dai suoi dati seminati». Su 101 spec, **89 nominano una persona**. Portare la suite sulle utenze di servizio significa quindi o **fabbricare una persona finta** in un ambiente che I15/ADR-0026 tengono prod-grade apposta, o **rinunciare a ciò che quelle spec verificano**
+  - input-richiesto: due decisioni, e la seconda si può sciogliere anche senza la prima. **(A) Dove custodire la seconda chiave** — oggi `.secrets/` è propagata come blocco da `align-clones`, quindi le due viaggiano insieme *per costruzione*: separarle vuol dire scegliere un contenitore diverso su tre macchine più il runner CI. **(B) Se la suite E2E debba girare con identità di servizio o con persone reali** — la direttiva del 2026-08-25 e la Definition of Done tirano in due direzioni, e la lettura che propongo è che non si contraddicano perché parlano di due usi diversi (suite automatica ≠ dimostrazione live di uno step). Serve che tu confermi quella lettura, o ne dia un'altra.
+  - perche-solo-tuo: (A) è una scelta di **custodia dei segreti** su infrastruttura tua, non una scelta tecnica interna al codice: cambia dove vive una chiave sulle macchine di produzione, e chi vi ha accesso. (B) mette in tensione due tue direttive scritte — quella del 2026-08-25 sulle utenze di collaudo e la Definition of Done sul login con persona reale: **interpretarne una a scapito dell'altra sarebbe decidere al tuo posto**. Il costo di sbagliare è alto e misurato: 89 spec su 101 nominano una persona, e le utenze di servizio hanno 0 posizioni e 0 squadre.
+  - ⏳ **Le due decisioni per esteso**: **(A)** dove custodire la seconda chiave, perché la separazione smetta di essere formale — è infrastruttura su tre macchine più la CI, e oggi `align-clones` le tiene insieme di proposito; **(B)** se la suite E2E debba girare con identità di servizio o con persone reali. La direttiva del 2026-08-25 dice «senza passare per il rito di login delle persone reali», la Definition of Done dice «per le pagine autenticate la dimostrazione LIVE = login con una persona reale»: **non si contraddicono se si separano i due usi** — la suite automatica da una parte, la dimostrazione live di uno step dall'altra — ed è la lettura che propongo, ma resta che senza dati 89 spec su 101 non provano più ciò per cui esistono. ▸ **F3c** (segreti delle persone reali casuali) chiuderebbe la voce senza decidere (A), perché un segreto casuale non è ricostruibile da nessuna chiave — ma ricade in (B), perché la suite non potrebbe più derivare i TOTP. Le due domande sono lo stesso nodo visto dai due lati
+  - ⭐ **RIVALUTAZIONE DEL GATE (2026-09-06, S1089 — su richiesta di Enzo): il blocco ESTERNO è
+    caduto, e resta un passo INTERNO che ora ha un ostacolo misurato.**
+    Il gate aveva **due** componenti, non una: *«`#219` — la suite deve tornare misurabile»* **+**
+    *«il passo intermedio sulle utenze di collaudo»*.
+    ① La prima è **caduta**, misurata: la corsa integrale di S1088 dà **369 passati · 0 falliti ·
+    4/4 fasi**. La seconda metà di F4 — «la suite continua a girare» — è di nuovo dimostrabile,
+    quindi non si è più costretti a barare passando la prima e rompendo la seconda.
+    ② La seconda **non era un gate esterno**: è **F3a** di questa voce stessa (la suite passa alle
+    utenze di collaudo). Per questo lo status torna `ACTIVE` e non resta `GATED`: non aspetta più
+    nessun altro item.
+  - ⚠ **E MISURANDO OGGI È EMERSO UN OSTACOLO DIMENSIONALE CHE NESSUNA VOCE NOMINAVA**: le utenze
+    di collaudo sono **tre** (`piattaforma@` PLATFORM_ADMIN · `governo@` TENANT_ADMIN ·
+    `persona@` USER, verificate `SERVICE` in produzione), ma la suite usa **sei** persone —
+    `enzo.spenuso@`, `federica.marchetti@`, `paolo.caputo@`, `tommaso.fiore@`, `antonio.parisi@`,
+    `andrea.martino@`. F3a **non è una sostituzione uno-a-uno**: restano scoperti i profili
+    *manager*, *outsider* e *custodian*, che la suite non usa per «entrare» ma per provare **i
+    confini** — la catena organizzativa (I19) e l'isolamento della custodia whistleblowing
+    (ADR-0036 §5).
+  - ⏭ **Quindi F3a costa più di quanto la voce stimasse**, e la scelta è dichiarata prima di
+    eseguire: o si creano **altre tre** utenze di collaudo con quei mandati — e per la custodia
+    va deciso se un'utenza di servizio possa portarne il mandato, che è una decisione di
+    sicurezza, non tecnica — oppure la suite resta **in parte** sulle persone reali, il che
+    rimette in piedi esattamente il problema che F3c deve togliere.
+- stato-corretto-S1085 (2026-08-30): **era `ACTIVE` e non lo e'.** L'analisi di S1083 lo dice gia' nel programma e il register non l'aveva recepito: **F3 non e' eseguibile com'e' scritta**. La suite E2E fa login con **persone reali** (`fixtures.ts`: `enzo.spenuso@`, `federica.marchetti@`, `paolo.caputo@`) e per ognuna chiama `passwordFor` e `totpFor`, cioe' le due derivazioni dalla chiave madre: rendere casuale un segreto **rompe la suite**. Il passo mancante — *portare la suite sulle utenze di collaudo* che F2 ha gia' creato — va **prima** di F3, non dopo
+  - ⛔ **e la prova di chiusura dipende da `#219`**: F4 pretende che il tentativo con la chiave madre fallisca **e** che la suite continui a girare, «le due cose insieme, o la voce non e' chiusa». Con la suite a 42 falliti (misurati S1085) quella seconda meta' non e' dimostrabile: passare la prima rompendo la seconda sarebbe il modo ovvio di barare
+  - gated-su: **`#219`** (la suite deve tornare misurabile) + il passo intermedio sulle utenze di collaudo. ⚠ **NON piu' `#147`**: quel gate e' chiuso da tempo e restava scritto qui, facendo apparire il blocco come «gia' sciolto» al cancello del marciume (M1). Il blocco vero e' un altro, ed e' questo
+  - ⚠ **F3 NON È ESEGUIBILE COM'È SCRITTA (analisi S1083, 2026-08-28), e l'analisi ha trovato un rischio.** ① La suite E2E fa login con **persone reali** (`fixtures.ts`: `enzo.spenuso@heuresys.com`, `federica.marchetti@rtl-bank.org`, `paolo.caputo@rtl-bank.org`) e per ciascuna chiama `passwordFor()` e `totpFor()`: finché è così, rendere casuale un segreto **rompe la suite**, e F4 pretende che le due cose stiano insieme. Le utenze di collaudo di F2 esistono e **la suite non le usa**. ② Misurato: `piattaforma@collaudo.invalid` è **`PLATFORM_ADMIN`**, e tutte e tre le personas sono già in `sys_auth_mfa_exemption_eligible_users`. Messe insieme: **l'utenza amministratore di piattaforma ha password derivata dalla chiave madre ed è esente dal secondo fattore** — alla lettera ciò che F4 dichiara debba risultare impossibile. L'esenzione non è un errore (un'utenza headless non funzionerebbe senza); è la **combinazione** a essere insostenibile, e nessuna delle due voci la nominava perché sono nate in momenti diversi. ⏭ **F3 si riscrive in tre passi**, e il primo non c'era: **F3a** la suite passa alle utenze di collaudo · **F3b** le utenze di collaudo perdono la password derivata · **F3c** i segreti delle persone reali diventano casuali (il contenuto originale)
+  - ✅ **F2 FATTA (S1081, 2026-08-25) — la via d'ingresso ESISTE ed è provata sul vivo**: 3 utenze `SERVICE` su `.invalid` (piattaforma/PLATFORM_ADMIN su HEURESYS · governo/TENANT_ADMIN su RTL · persona/USER su RTL), chiave propria `.secrets/collaudo-access.key` (rifiutata dal modulo se coincide con la madre), `pnpm db:provision-collaudo` idempotente (2ª corsa 0 scritture) con guardie e `--undo` dichiarato. Prova: le tre entrano **in un passo** (200, no MFA, 3 cookie), password errata 401, **password derivata dalla chiave madre → 401** — il criterio di chiusura della voce, misurato. La via vecchia intatta (federica → 200). 🔬 Terza guardia scoperta eseguendo: la `000284` pretende l'iscrizione nominativa (tre atti distinti) — l'atto è la direttiva, citata nella reason. Chiarito anche `admin@heuresys.com`: rimosso per #139 (decisione Enzo 2026-08-08), la `000287` è storia. Resta: F3 (il segreto smette di essere derivato — tocca le 158, non a suite in volo) e F4
+  - ⭐ **DIRETTIVA DI ENZO 2026-08-25 (S1080) — vincolante, non si ri-chiede**: *«è fondamentale predisporre utenze di collaudo che hanno regole di accesso e permessi propri ed autonomi tali da permettere le verifiche sul progetto (compreso il frontend) senza passare per il rito di login delle persone reali»*. **Scioglie `F2`**, che chiedeva proprio quale via d'ingresso dare alle prove
+  - **F1 FATTA** (2026-08-25): censite **10 chiamate** a `deriveTotpSecret` + 2 al solo `derivePassword`. Classificate: **7 su 10 hanno bisogno di *entrare*, non del valore** — sono prove e test; le altre 3 sono la sorgente (`provision-derived-access.ts:88-89`) e le due consegne all'operatore. Meccanismo: `derive-access.mjs:106-115`, un HMAC sulla stessa chiave madre distinto dal solo prefisso (`pwd:v1:` / `totp:v1:`)
+  - **F2 PROGETTATA** (2026-08-25) — il progetto sta in `.programmi/169-due-segreti-dalla-stessa-chiave.md`. Tre identità `SERVICE` su dominio `.invalid` (RFC 2606): `piattaforma@` su Heuresys System, `governo@` e `persona@` su RTL Bank. Chiave separata, esenti dal secondo fattore col meccanismo già esistente
+  - **quattro cose che c'erano già e non vanno reinventate** (misurate, non ricordate): il tipo `SERVICE` è nel vincolo di `sys_users.user_type` · la mig `000118` ammette l'esenzione MFA **solo** per `SERVICE`, con guardia che rifiuta gli altri · `isUserMfaExempt` è vivo nel login (`service.ts:392`) · **la sentinella del censimento esclude i `SERVICE`** (`count(*) FILTER (WHERE user_type IS DISTINCT FROM 'SERVICE')`), quindi le utenze nuove **non** la fanno scattare
+  - ⚠ **la verifica che ha cambiato la decisione tecnica**: i mandati si riconoscono **per codice di ruolo**, in insiemi chiusi (`resolver.ts:27-70`), e ADR-0036 dichiara che *«nessuna lista di ruoli locale decide una vista»*. Quindi **niente ruoli `COLLAUDO_*`**: sarebbero **mandati ombra** da iscrivere a ogni insieme, e dimenticarne uno non darebbe errore — darebbe un collaudo che vede più o meno del mandato che imita, con le prove verdi su un mondo che non esiste. Le utenze portano i **mandati veri**; ciò che è «proprio e autonomo» è l'identità, le credenziali e l'assegnazione, cioè l'indipendenza **dalle persone**, che è il fine della direttiva
+  - ⚠ **un'affermazione della mig `000287` non regge più**: dava `admin@heuresys.com` per vivo, tipizzato `SERVICE` e usato da «119 file di test». Misurato oggi: **non esiste in `sys_users`** (zero righe con `admin` nell'email, zero righe non-`STANDARD`). Da chiarire prima di costruire
+  - ⛔ **applicazione sospesa mentre la suite integrale di `#219` gira**: creare utenze in produzione altererebbe ciò che sta misurando
+  - ✅ **GATE SCIOLTO, misurato S1079 (2026-08-24)**: la voce era `GATED` su `#147`, che nel register risulta **`DONE`**. La dipendenza non esiste piu' e la voce non era piu' bloccata — nessuno strumento se n'era accorto, perche' il cancello locale guarda il **diff** e lo sblocco di una voce non produce alcun diff sui file che la instradano
+  - priority: P2 · effort: ~1 sessione · doc: `docs/superpowers/plans/2026-08-08-tre-domande-aperte.md` §C
+  - blocker: **#219** — la suite E2E deve tornare misurabile. F3 rende casuale un segreto e **rompe la suite**, che oggi fa login con persone reali derivando password e TOTP dalla chiave madre; e F4 pretende esplicitamente che la suite continui a girare.
+  - nota-di-corsia (S1085): questa voce dichiarava come blocco la 147 (chiave madre non propagata), **chiusa da tempo**. Un blocco gia' sciolto lasciato scritto fa sembrare la voce ferma per una ragione che non esiste piu' — ed e' esattamente cio' che il cancello M1 e' venuto a togliere. Il numero e' scritto senza cancelletto di proposito: in una riga di *blocker* il cancello legge ogni riferimento, e citarne uno chiuso lo riaccenderebbe.
+  - unblock-trigger: {kind: manual}
+  - misurato-S1050: la stessa chiave madre genera **la password** (`derivePassword`) **e il segreto dell'authenticator** (`deriveTotpSecret`). Chi ha la chiave ha gia' entrambi: per quell'attore **l'MFA non e' un secondo fattore**. Vale per tutti i 158, ma pesa sull'amministratore. Non e' una regressione di `#139`: il raggio d'azione e' il *mandato*, identico a quando l'amministratore era `admin@heuresys.com`. Verificato che l'account del proprietario **non porta dati personali**: 0 buste, 0 contratto, 0 scheda d'impiego
+  - non-e-una-rotazione: il segreto e' **derivato in modo deterministico** da chiave+email, quindi «rigenerarlo» restituisce lo stesso valore. Una rotazione vera passa dalla chiave madre, che cambierebbe tutte e 158 le password — il codice lo vieta esplicitamente
+  - forma-proposta: password derivata (i test devono poter entrare) + segreto authenticator **non** derivato, casuale e cifrato, consegnato alla sola persona. Costo vero: i test e le prove sul browser devono superare l'MFA in un altro modo — e' questo il pezzo da progettare, non la separazione in se'
+  - chiuso-quando: chi ha la chiave madre non puo' completare un accesso come l'amministratore, e la suite continua a girare
+
+- **#150 Ritrattare le voci del lab alla luce delle correzioni del 2026-08-06** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#229 L'eredita' fra sessioni: rilevare cio' che e' stato interrotto, e leggerlo all'avvio** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#228 Il cancello a tempo: cosa e' marcito mentre non guardavo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#227 Le competenze isolate nel grafo: 4.464 su 14.033 senza un solo arco tassonomico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#231 Consumare i lavori attivi: il ciclo di esecuzione delegato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#241 La CI rossa che teneva la produzione indietro, e i due fascicoli di prova** · status: DONE  ·  ↦ `.programmi/241-ci-rossa-e-fascicoli-di-prova.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#245 Il dominio di una fonte di ricerca e' testo libero, e nessuno controlla che esista** · status: DONE  ·  ↦ `.programmi/245-dominio-fonte-testo-libero.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#243 I due rossi di igiene del cruscotto, e le sette PR Dependabot rimaste** · status: DONE  ·  ↦ `.programmi/243-igiene-e-pr-dependabot.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#242 fastify >= 5.12 ha tolto il `trustProxy` a conteggio di salti: la produzione va migrata alla forma per indirizzo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#239 Il nome del cliente puo' rendere la ricerca impossibile: la guardia si morde la coda** · status: DONE  ·  ↦ `.programmi/239-nome-del-cliente-blocca-la-ricerca.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#238 `verifica-deploy` chiama guasto un clone in corso: i servizi del gemello sono spenti di proposito** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#237 La chiusura costa un quarto di finestra, e non si sa perche'** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#236 I lavori remoti si armano, non si appendono alla sessione** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#235 Le risposte ai sondaggi di clima si leggono fuori dalla catena organizzativa** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#234 Gli otto rossi di `verifica_incrociata`, uno per uno: cura o riclassificazione, mai il silenzio** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#219 Gli otto guasti dietro i rossi della suite E2E integrale** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#218 I residui del legacy senza referente locale: analizzarli tutti, e risolverli uno per uno** · status: FATTO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#156 Perimetri dell'agente: il resolver dall'atlante, poi l'adozione su ogni perimetro con valore** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#157 Le domande di aggregazione sono FUORI dallo scopo del catalogo generico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#161 I 113 piani di carriera non dicono verso quale posizione: l'obiettivo è vuoto su tutte le righe** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#162 Il seed della carriera non è più a delta zero: rieseguirlo scrive 137 righe e ne rompe un check** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#167 Cinque check della custodia RTL erano nascosti dietro `C6c`: review, buste, premi e preposti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#166 L'ambiente non è ricostruibile dalle sole migrazioni: la catena si ferma al 49° file su un database vuoto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#165 La chiusura di sessione dura un'ora perché aspetta la CI: sganciare il deploy e smettere di scoprire in CI ciò che si vede in locale** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#164 Igienizzare il database dal legacy: ritirare l'adattamento brownfield, conservare la tracciabilità** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#163 La storia di un'unità si ferma a un nome che l'unità non porta più, e il modello ammette un solo riordino** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#160 I bacini di successione puntano a mestieri che i candidati non fanno: 27 casi, e nessuno li vedeva** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#158 `deriveUserProfiles` riscrive sempre tutti i 156 profili: l'unico corpus senza salto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#155 I percorsi di carriera sono rimasti indietro dalla ricostruzione dell'organigramma: 207 su 252 puntano a posizioni morte** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#154 Deploy del codice su linux-pc non eseguito: il cancello CI ha retto durante il disservizio GitHub** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#153 La custodia settimanale della storia RTL fallisce da tre giorni e nessuno se n'era accorto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#152 Le suite MFA lasciano fattori residui in produzione: 32 accumulati in 10 giorni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#151 La sentinella dell'organigramma segnala come violazione ogni unita' ritirata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#144 Il settore di Heuresys System e' deciso: ATECO 2025 70.20** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#145 Ordine: #140 prima della revoca dei permessi della parte 1 del Tenant Builder** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#129 Canale lab-canonica: gli id sono confrontati per sottostringa** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#130 Il cancello di verifica butta l'output delle suite** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#131 Tenant Builder P1 — il fascicolo di configurazione di un'azienda** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#132 Tenant Builder P2a — la ricerca che genera il modello del fascicolo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#133 Guardia lab: il ruolo dell'argomento non è considerato nei comandi di copia** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#134 La guardia lab rifiuta una SELECT se una stringa contiene una parola di scrittura** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#135 L'identita' di un'azienda e' dichiarata due volte e per Heuresys le due dissentono** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#136 La pagina delle nomine del lab non è mai stata nominata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#137 Plancia di osservabilità delle sessioni (strumento del lab)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#138 Nessun lucchetto impedisce due suite di test sullo stesso database** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#139 Il tipo «utenza di servizio» esiste e non lo usa nessuno: le utenze tecniche contano come persone** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#116 28 persone su 45 atterrano su un cruscotto che il loro ruolo non può vedere** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#117 Completezza del portale personale: derivarla meccanicamente invece che a mano** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#118 Dieci responsabili passano a Quadro Direttivo (QD3); la posizione di martina.gentile è confermata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#119 D3 e D4: le liste di ruoli scritte a mano che la definizione dei domini esiste per eliminare** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#120 Le dieci posizioni di comando passano a `MG-2`, con collocazione derivata da anzianità e valutazione** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#121 La guardia della sessione lab rifiuta letture legittime: sei casi in un giorno, due cause** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#122 Tenant Heuresys: `HS-MGMT` esiste due volte, una per asse, e `HS-PROD` è l'unica unità di tipo TEAM del database** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#123 Leggere `organigramma-bis.html`, ricavarne le situazioni da correggere ed eseguirle** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#124 Mascheratura nel contratto dati: sei celle su otto si chiudono spaccando una classe, due richiedono il meccanismo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#125 22 pagine autenticate irraggiungibili dal menu, e 52 etichette di menu su 52 senza traduzione** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#126 Le quattro tabelle di L7: predizioni e abbinamenti mentore diventano visibili all'interessato, successioni e raccomandazioni retributive no** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#127 Stabilizzazione post-ricostruzione: due codici disallineati e quattro decisioni non registrate** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#128 Il registro delle sessioni diventa una storia completa: nessuna cancellazione automatica, nessuna sessione invisibile** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#115 I test di perimetro descrivono l'organigramma di ieri (24 file, 81 rossi)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#114 L'albero delle posizioni è spezzato in 15 tronconi: il resolver gerarchico non raggiunge più chi ha l'incarico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#112 I cataloghi dei requisiti hanno perso l'aggancio nella ricostruzione dell'organigramma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#113 30 responsabili di unità senza ruolo di comando dopo la ricostruzione dell'organigramma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#99 Domini gerarchici e funzionali: applicare la definizione (8 fasi)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#100 Organigramma incoerente al 66%: ricostruzione (prerequisito delle matrici)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#101 Console segnalazioni offerta a tutti e negata dall'API (menu che mente + 403 travestito da guasto)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#102 Sei incoerenze fra organigramma e dati della persona + promozione di `verifica_incrociata.py`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#103 Organigramma fase 1: tassonomia delle unità (migrazione 000244)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#104 Organigramma fase 2: creazione delle 17 unità nuove (migrazione 000245)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#105 Organigramma fase 3: ristrutturazione (migrazione 000246)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#106 Organigramma fase 4: le 29 nomine dei responsabili (migrazione 000247)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#107 Organigramma fase 5a: posizioni di comando (migrazione 000248)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#108 Organigramma fase 5b: le persone della rete (migrazione 000249)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#109 Organigramma fase 5c: le divisioni centrali (migrazione 000250)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#110 Organigramma fase 6: chiusura e cancelli (migrazione 000251)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#111 Le 545 valutazioni ereditate dall'albero delle posizioni: decidere prima di applicare le otto migrazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#94 Driver zp: budget di costo dinamici per corsa (config = soffitto)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#95 Igiene zp: i tre reperti del collaudo presidiato + pre-check anti-stale** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#96 Canale automatico lab→canonica: installare lab_inbox** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#97 Promozione plancia zp (dashboard + configuratore) in scripts/** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#98 Cinque percorsi formativi di RTL Bank hanno una chiave-macchina al posto del nome** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#89 Contaminazione da tenant legacy mai migrati** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#90 Cruscotto di salute del DBMS — 14 sentinelle mai interrogate** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#91 Bonifica strutturale del DBMS (indici, vincoli, statistiche)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#92 Ciclo di valutazione completo (autovalutazione + calibrazione)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#93 Rimozione della validazione presenze** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#88 Il peso economico delle posizioni e' un campo vuoto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#87 Il genitore di un'unità organizzativa può stare in un altro tenant** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#84 Le rules path-scoped si caricano quando servono?** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#85 AGENTS.md divergente dal CLAUDE.md rifattorizzato** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#86 claude login sul linux-pc (la VM e' risolta)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#24 Autorizzazione bi-assiale (ADR-0027) — resta solo F4 (asse funzionale/attività)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#23 Personal area /me — portale legacy → navtab (programma S1010-S1011)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#201 GTM v1-deferrals (follow-up del primo deliverable)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#17 Wave-3 multi-tenant-onboarding (residuo L2/L3 multi-industry)** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#9/#10/#11 audit forense 100X** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#64 R2 data-completeness (condizione finance-readiness #2)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#65 NACE integrità parent (F-A06)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#77 Storia RTL 36 mesi — popolamento integrale del DBMS** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#78 storia36 C5 — coda dei rilievi adversarial non assorbiti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#80 storia36 C12 — audit finale e chiusura del programma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#81 La scheda di una persona non racconta la persona** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#82 Collaudo di accessibilità intermittente su `/me/inbox`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#66 PR Dependabot in coda (post-S1023)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#68 Fase 4 forense — frontend per-superficie (residuo: esecuzione P2)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#69 Bonifica dei residui `staging.wave1_*` nell'advanced** *(era «Fase 3 Blocco E — chiusura brownfield lato DBMS legacy»; ri-titolato 2026-08-14: lo spegnimento del legacy è uscito dall'item per decisione di Enzo, e ciò che resta sta tutto nel nostro DBMS)* · status: FATTO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#70 RTL — coprire i ruoli chiave vacanti (riassegnando dipendenti esistenti)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#71 RTL — realismo dati via ricerca web focalizzata (retribuzioni CCNL + tabelle di dominio)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#72 Audit coerenza per-user — dimensioni residue (education↔ruolo, KPI/OKR per ruolo, attendance-pattern, anagrafiche satellite)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#67 linux-pc gemello PROD — refresh DB clone (post-S1023)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#73 NACE legacy — verifica currency vs Rev 2.1 o deprecazione controllata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#74 notifications — GET amministrativa per audit dei broadcast (da D-70)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#75 teams — lifecycle API (create/update/membership) (da D-71)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#16 SuccessFactors** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#18 doc-cleanup `is_synthetic`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#19 E2E users-page post-synthetic** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#20 audit QA forense S1006 — il grosso** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#21 residuo tail audit S1006 — a11y + perf** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#22 sidebar IA redesign — 5 sezioni + lingua header + tab-merge** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#146 (ex Z-261) Esposizione MFA in repository pubblico: 7 fattori `e2e-fixture` ancora attivi in produzione** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#147 (ex Z-262) Accesso derivato per tutti gli utenti: chiave madre non propagata a VM e linux-pc** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#148 Rileggere il rendiconto delle chiusure e decidere se la chiusura va riscritta in quattro verbi** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#25 A/L5 — ponte posizione→learning (accende `positions/[id]/learning`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#26 A/L1 — vita dei goal/OKR (updates, check-ins, milestones, comments, alignments)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#27 A/L2 — evidence layer (le prove sotto gli score)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#28 A/L0 — Trust Ledger: read-API provenance (70.972 righe lineage)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#30 A/L4 — gap closure (plans/actions/results)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#31 A/L6 — metrologia KPI (measurements/methods/weighting)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#34 B/B3 — approval effects: nuovi handler (primo flusso approvativo reale)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#35 B/B7 — observability completa (/metrics Prometheus + slow-query + 4 sezioni system-health)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#36 B/B5 — visualization: versioning + export engine** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#37 B/B2 — reward-gate engine sui variable-pay** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#38 B/B6 — inbox push SSE (da polling 30s)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#42 C/C4 — fondazioni frontend (paginazione server-side, refactor shared-types, apiFetch FormData)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#43 C/C2 — editing cataloghi (skills/KPI/learning/job) + nuova `/job-catalog`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#44 C/C1 — editing People & Org (users/positions/org-units)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#83 L'API non impedisce i cicli nell'organigramma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#45 C/C3 — editing tenant & platform** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#46 D/D1 — skill possession per-employee (import wave-2)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#47 D/D2 — engagement/PULSAR history (sblocca flight-risk pieno + fix dual-shape)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#48 D/D3 — goal history GOKMER (gemello di #26)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#49 D/D5 — employee timeline** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#50 Il grafo delle competenze: dare una vista al grafo che abbiamo già** *(era «D/D4 — legacy knowledge graph kg_nodes/kg_edges 139k»; rinominato 2026-08-14 perché il vecchio titolo faceva ricominciare da capo la stessa indagine)* · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#51 E/E1 — whistleblowing (D.Lgs 24/2023) con ruolo custodian dedicato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#53 E/E4 — payroll ops read-extended** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#246 I contratti a termine assegnati a caso a un terzo dell'organico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#55 F/F1 — Essential Capability Ranker** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#56 F/F2 — VRIO scorecard (`/org-director/vrio`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#57 F/F3 — OHI org-health scorecard** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#58 F/F4 — AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#59 F/F5 — ESS self-view FULL (capability + flight-risk con evidenze)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#60 G/G1 — retention & storage (archive `audit.import_validation_results` 547MB)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#61 G/G2 — RBAC hygiene (perm `:delete` dedicati su 27 route; normalizzazione proxy)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#62 G/G3 — integrità preventiva (acyclicity IS_A, warn LIMIT 5000, dual-shape)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#63 G/G5 — archivio script esausti (move-not-delete)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#140 La catena di migrazioni non è stabile: ri-applicarla disfa correzioni già chiuse** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#141 `HS-PROD` è ancora un'unità di tipo «squadra», che S1044 dichiara eliminata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#142 Cruscotti focalizzati per tipologia di utilizzatore** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#143 Una squadra è un progetto: serve il modello, non un puntatore al capo** · status: DONE
+  - ✅ **F4 + F5 CHIUSE (S1094, 2026-09-09) — LA VOCE È COMPLETA, 5/5.** **F4**: modulo API `projects` (7 rotte), mig. `000384` con tre permessi, **9 test verdi in 17 s**. Chiude anche **`#79`**: i 26 progetti e le 174 appartenenze della `000363` erano nel database dal 2026-08-28 e **nessuna API li esponeva** — `chi_sorveglia.py sys_projects` non trovava un modulo, un test, una sentinella. ⭐ **Il confine I18 ha una prova che sa fallire**: il capo vede i membri e di loro *nessun* campo sensibile, e guidare un progetto **non apre il dossier** di un membro (403/404) — col la **controprova** che lo stesso dossier chiesto dal mandato torna **200**, senza la quale il test sarebbe cieco (un 403 lo darebbe anche una rotta inesistente: è il difetto `25 < 26` che `teams` aveva già pagato). **F5**: pagine `/projects` e `/projects/[id]`, voce di menu (mig. `000385`), i18n IT/EN in parità, **E2E 9/9 verdi** con login reali. 🔬 **La dimostrazione**: `paolo.caputo` guida `TM-COMM` **senza mandato HR** e vede **6 progetti** contro i **25** del mandato; di ogni membro esistono **sette campi soli** (`userId, role, email, fullName, startsOn, endsOn, isCurrent`). ⚠ **Cinque volte lo schema o l'ambiente hanno smentito l'assunzione**: nessun unico su (progetto, persona) ma uno *parziale* su un solo LEAD aperto · quattro ruoli membro, non due · nessuno stato `CLOSED` (è `COMPLETED`/`CANCELLED`) · `DEPARTMENT_MANAGER` non è un ruolo di questo sistema (è `MANAGER`) · il campo tradotto è `ui_interface_label`, non `label` — e quest'ultimo l'ha colto **solo la seconda passata** della prova generale. E l'autenticazione E2E falliva col **dev server** (1,5 min a tentativo, `networkidle` che non arriva mai con HMR): con `next build` + `next start` gli stessi setup passano in **3-6 s**
+  - ✅ **F3 CHIUSA (S1092, 2026-09-08)** — `isInFunctionalScope` e `isFunctionalLeader` hanno consumatori reali, e cercarli ha **scoperto un difetto**. ⭐ `resolveActivityScope` sceglieva fra `functional` e `self` con `scope.length > 1`, ma chi guida una squadra **senza membri attivi** ha una lista lunga uno — se stesso — come chi non guida niente: il giornale degli accessi registrava `self` per una persona che un ambito funzionale ce l'ha. L'ambito **non si allarga** (la lista resta quella), cambia l'asse che autorizza e quindi solo l'audit — verificato che i due consumatori (`approvals`, `teams`) guardano `all`/`tenant` e vedono lo stesso esito. È anche la simmetria mancante con l'asse organizzativo, dove `isManagerial` è consultato **prima** di misurare il sotto-albero. ⭐ Secondo consumatore: il dettaglio di un'approvazione materializzava l'intero elenco delle persone in ambito per giudicare **un** record — la domanda giusta per un record solo è «questa persona ci sta?», ed è la firma della funzione. Regola invariata: autore in ambito **oppure** approvatore di un passo, e un autore `null` non è nell'ambito di nessuno. **Sondati uno per volta**: ogni sabotaggio fa cadere esattamente il suo test (1 su 5 · 1 su 7). **44/44 verdi** sul gemello. ⚠ Il caso del capo senza membri **non esiste in produzione** (misurato: zero), quindi il test lo costruisce — e la fixture ha trovato un difetto suo, perché i casi del file condividono la transazione e la squadra viva rendeva `functional` anche il test che vuole `self`. ⏭ Restano **F4** (API progetti/squadre col confine I18) e **F5** (frontend con un capo progetto gerarchicamente inferiore a un suo membro — 3 squadre reali hanno già oggi quella forma)
+  - ✅ **F2 CHIUSA (S1083, 2026-08-28)** — mig. `000363`, prova generale VERDE a due passate sul gemello e applicata in produzione: `26 progetti da 26 squadre · 174 appartenenze da 174 · ogni capo ha un LEAD aperto · sys_teams intatta`. **La decisione che F1 lasciava aperta è presa, e i dati l'hanno imposta**: «capo» aveva due fonti che **divergono davvero** (26 squadre, 26 con `team_lead_user_id`, **25** con un membro LEAD; `DIV-RISK` senza alcun LEAD, `TM-MKT` con **due**). Sopravvive **l'appartenenza** — nei modelli di project management il capo è un membro con un ruolo, l'appartenenza porta la finestra e sa dire «chi era capo quando», e una colonna che duplica un'appartenenza produce esattamente quelle due divergenze. La colonna serve **una volta sola, come arbitro** dei casi storici. 🔬 **Due prove hanno potuto fallire, e sono fallite**: la post-condizione «ogni capo ha un LEAD aperto» ha smentito la prima stesura (il capo di `DIV-RISK` è iscritto come `MEMBER`, veniva saltato da entrambi i rami e restava un progetto senza capo); e la `000304` ha fermato la catena con «1 FK di appartenenza fuori dal registro GDPR» — emersa solo alla **seconda passata**, perché quella migrazione gira prima e alla prima non poteva vedere la tabella nuova. ⚠ **NON ritira `sys_teams`** (4 consumatori; ADR-0035): le entità nuove nascono accanto, con `project_origin_team_id` che conserva la provenienza. ⏭ **F3** dà i primi consumatori veri a `isInFunctionalScope`/`isFunctionalLeader`, oggi codice morto
+  - priority: P1 · effort: ~4-6 sessioni · doc: (direzione di Enzo, 2026-08-05 — registrata qui)
+  - programma: `.programmi/143-squadra-come-progetto.md` — voce multi-sessione: fasi, decisioni gia' prese e punto di ripresa stanno li'. `python docs/kb/tools/programmi.py --id 143`
+  - note: **Distinzione posta da Enzo**: «una filiale è un sotto-albero gerarchico; una squadra è attiva su uno scopo funzionale, ha diversi membri e un team leader che **può essere gerarchicamente inferiore a uno o più membri** — va inteso come capo progetto dello scopo assegnato. Il modello da adottare deve essere simile ai modelli di project management». **Cosa c'è già**: ADR-0027 separa i due assi e **I18** dice già che l'appartenenza a una squadra non apre mai i dati sensibili — la dottrina esiste. **Cosa manca, misurato**: `sys_teams` ha codice, nome, unità, capo, attiva — **nessuno scopo, nessun obiettivo, nessuna data, nessun avanzamento**; non esiste alcuna tabella progetti (verificato: solo `sys_mentorship_programs` e `sys_training_initiatives`, che sono altro); e il codice dell'asse funzionale (`lib/scope/functional.ts`) ha **un solo consumatore di produzione**, mentre `isInFunctionalScope`/`isFunctionalLeader` non ne hanno alcuno. Oggi il sistema non sa nemmeno esprimere che l'autorità del capo progetto è **sul lavoro** e non **sulle persone**. **Proposta tecnica (Claude, da validare)**: (a) **due entità**, progetto (scopo, obiettivo, date, stato) e squadra (chi ci lavora, con ruolo) — un progetto può cambiare squadra, una persona sta su più progetti, e fonderle costa dopo; (b) **appartenenza con decorrenza e scadenza**, senza cui il perimetro non sa dire «chi c'era quando»; (c) il capo progetto vede attività, avanzamento e consegne dei membri **su quel progetto**, mai i loro dati personali (è già I18, va implementato); (d) di conseguenza **non** il cruscotto aziendale ma un **cruscotto di progetto** (→ **#142**). **Chiusura**: un capo progetto legge l'avanzamento del suo progetto e riceve `403`/`masked` su retribuzione e valutazione dei membri, provato con login reali su entrambi i lati.
+  - ✅ **F1 CHIUSA 2026-08-15 (S1062)** — il modello a due entità è **adottato**. La voce era ferma su «validazione con Enzo», ma riletta col mandato di S1062 non era una decisione di prodotto: il *cosa* Enzo lo aveva già dichiarato il 2026-08-05 (squadra su uno scopo, capo progetto che **può stare più in basso** dei membri, modello da project management); restava **come modellarlo**, che è materia tecnica. Tre ragioni, tutte tecniche: *(1)* due entità e non una, perché un progetto può cambiare squadra e una persona sta su più progetti — fonderle è comodo oggi e costoso quando servirà separare dati già scritti; *(2)* appartenenza con **decorrenza e scadenza**, senza cui il perimetro non sa dire «chi c'era quando» — è lo stesso difetto che la delega (`000314`) ha già risolto, e ripeterlo sarebbe ignorare una lezione pagata; *(3)* l'autorità del capo progetto è **sul lavoro, non sulle persone**, che non è una scelta ma **I18** già in vigore. **Resta di Enzo** solo il nome di dominio delle entità (progetto/commessa/iniziativa): è un'etichetta, non uno schema, e non blocca F2.
+  - ⚠ **per chi apre F2**: la nozione di «capo funzionale» ha già **due fonti** in `lib/scope/functional.ts` (`team_lead_user_id` **oppure** un membro con ruolo `LEAD`) — F2 deve decidere quale sopravvive, o restano due verità sullo stesso fatto. E `isInFunctionalScope`/`isFunctionalLeader` sono **codice morto** (zero consumatori di produzione): nessuno le ha mai esercitate, quindi non c'è prova che facciano ciò che dichiarano.
+
+- **#220 Remediation forense W1 — messa in sicurezza: FK a cascata, segreti leggibili, audit e logging spenti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#221 Remediation forense W2 — recuperi: NACE e crosswalk rientrano (decisione Enzo 2026-08-20)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#222 Remediation forense W3 — integrità e contenuti dei cataloghi** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#223 Remediation forense W4 — pipeline, separazione ruoli, prestazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#224 Il check che cambia verdetto a seconda di dove lo lanci, e i sette eventi che lo accendono** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`

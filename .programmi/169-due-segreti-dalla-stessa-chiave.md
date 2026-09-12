@@ -1,7 +1,8 @@
 # 169 — La password e il secondo fattore nascono dalla stessa chiave: chi ha una ha l'altro
 
 > **item**: #169
-> **stato**: IN CORSO
+> **stato**: CHIUSO
+> **chiusa**: S1095 (2026-09-12). La proprietà per cui la voce esisteva — password e secondo fattore non nascono più dalla stessa chiave, e chi ha la chiave madre **non completa** un accesso — è misurata in produzione (vedi F4). ⚠ **Conseguenza da governare, fuori da questa voce**: con l'obbligo acceso (B18) e i segreti casuali mai consegnati (F3c), le persone che entrano dal browser hanno bisogno di un ri-enrollment; `enzo.spenuso@heuresys.com` ha un fattore TOTP casuale e **0 codici di recupero** (misurato 2026-09-12).
 > **sbloccata**: S1079 (2026-08-24) — era `GATED` su `#147`, che risulta `DONE`. Il gate era
 > sciolto e nessuno se n'era accorto: il cancello locale guarda il **diff**, e la chiusura di
 > un'altra voce non produce alcun diff sui file che instradano questa.
@@ -192,7 +193,7 @@ tenant nei test di **autorizzazione**, dove il punto *è* il ruolo di quella per
 popolazione fissa nasconde difetti, e il commento di `personas.ts` documenta un caso reale (un test
 verde solo perché girava su `tommaso.fiore`, che per combinazione aveva zero righe del tipo che
 perdeva). Chi userà quale via è parte del lavoro.
-- [ ] **F3 Il segreto smette di essere derivato** — casuale, cifrato a riposo, consegnato una volta sola. **fatto =** un segreto nuovo non è più ricostruibile dalla chiave madre, misurato provando a ricostruirlo
+- [x] **F3 Il segreto smette di essere derivato** — FATTA 2026-09-08 (S1091 F3b + S1092 F3c, F3a cancellata perché non serviva) · spuntata S1095 (2026-09-12) sull'evidenza già scritta sotto: `pnpm db:verify-separazione-totp` → 159 esaminati, **0 derivabili**; giornale `staging.totp_derivato_undo` 159 righe — casuale, cifrato a riposo, consegnato una volta sola. **fatto =** un segreto nuovo non è più ricostruibile dalla chiave madre, misurato provando a ricostruirlo
 
   ### ✅ F3c ESEGUITA S1092 (2026-09-08) — e la strada era molto più corta di come il piano la temeva
 
@@ -453,7 +454,7 @@ perdeva). Chi userà quale via è parte del lavoro.
   ▸ Resta vero il rilievo qui sotto sul **componente** e sui dati: portare la suite su
   identità di servizio, se un giorno servisse, resta il lavoro che era. Semplicemente non
   serve **per chiudere questa voce**.
-- [~] **F4 La prova che deve poter fallire** — **MISURATA S1093 (2026-09-08): primo corno SUPERATO, secondo corno VIOLATO in produzione, e il blocco e' quantificato.**
+- [x] **F4 La prova che deve poter fallire** — FATTA 2026-09-12 (S1095) · **secondo corno RI-MISURATO con l'obbligo acceso**: B18 (2026-09-09) ha abilitato le due politiche MFA per cliente; `node scripts/verify-derived-login.mjs federica.marchetti@rtl-bank.org https://www.heuresys.com/api` → password derivata: **passo 2, HTTP 401, 0 cookie** (il TOTP ricostruito dalla chiave madre è respinto); password errata: 401 · primo corno già superato in S1093 (0 derivabili). *Cronaca della misura precedente:* **MISURATA S1093 (2026-09-08): primo corno SUPERATO, secondo corno VIOLATO in produzione, e il blocco e' quantificato.**
 
   Lo strumento e' `pnpm db:verify-separazione-totp` (`db/scripts/verify-separazione-totp.ts`),
   uscite `0` separati / `1` violata / `2` NON MISURABILE. Porta una **controprova interna**:
@@ -492,7 +493,7 @@ perdeva). Chi userà quale via è parte del lavoro.
   permanenza**. Cio' che manca non e' dentro `#169`: e' la decisione sull'enforcement, che questa
   sessione ha dotato del numero che le serviva.
 
-- [ ] **F4 (formulazione originale, tenuta per confronto)** — con la chiave madre in mano, **completare** un accesso come amministratore deve risultare **impossibile**, e la suite deve continuare a girare. Le due cose insieme, o la voce non è chiusa: passare la prima rompendo la seconda è il modo ovvio di barare. **fatto =** tentativo eseguito e fallito con evidenza, suite verde
+- [x] **F4 (formulazione originale, tenuta per confronto)** — COPERTA 2026-09-12 dalla riga sopra: il tentativo con la chiave madre è stato eseguito ed è fallito (401 al passo 2), e la suite gira perché legge il segreto dal database (F3c), non dalla chiave — con la chiave madre in mano, **completare** un accesso come amministratore deve risultare **impossibile**, e la suite deve continuare a girare. Le due cose insieme, o la voce non è chiusa: passare la prima rompendo la seconda è il modo ovvio di barare. **fatto =** tentativo eseguito e fallito con evidenza, suite verde
 
 ## Chiuso quando
 

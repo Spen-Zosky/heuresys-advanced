@@ -21,6 +21,7 @@ import {
   Coins,
   Database,
   FileText,
+  FolderKanban,
   Gauge,
   GitBranch,
   GraduationCap,
@@ -34,6 +35,7 @@ import {
   TrendingUp,
   TriangleAlert,
   User,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -55,6 +57,7 @@ const ICON_MAP: Record<string, ReactNode> = {
   Coins: <Coins className={ICON} />,
   Database: <Database className={ICON} />,
   FileText: <FileText className={ICON} />,
+  FolderKanban: <FolderKanban className={ICON} />,
   Gauge: <Gauge className={ICON} />,
   GitBranch: <GitBranch className={ICON} />,
   GraduationCap: <GraduationCap className={ICON} />,
@@ -68,6 +71,7 @@ const ICON_MAP: Record<string, ReactNode> = {
   TrendingUp: <TrendingUp className={ICON} />,
   TriangleAlert: <TriangleAlert className={ICON} />,
   User: <User className={ICON} />,
+  UserPlus: <UserPlus className={ICON} />,
   Users: <Users className={ICON} />,
 };
 

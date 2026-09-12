@@ -3804,3 +3804,441 @@
 - **#223 Remediation forense W4 — pipeline, separazione ruoli, prestazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 
 - **#224 Il check che cambia verdetto a seconda di dove lo lanci, e i sette eventi che lo accendono** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+
+- **#225 Il CLAUDE.md dichiara un difetto risolto come corrente, e cristallizza un numero che cambia** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#226 La storia di RTL diventa scorrevole: l'avanzamento va schedulato, e SOLO dove il database e' quello vero** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#212 `close-propagate` non arma il deploy alla seconda corsa nella stessa sessione, e il rollout resta indietro in silenzio** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#211 La suite E2E completa: i rossi che non sono guasti del prodotto, e i casi che non vengono eseguiti** · status: FATTO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#209 Venti filtri booleani dell'API dicono «tutti» a qualunque domanda — `z.coerce.boolean()` su una querystring** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#217 Il flusso di chiusura è un rito completo dove servirebbe un percorso scelto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#216 Il passaggio di consegne fra sessioni: il menu elenca invece di spiegare, e l'avanzamento vive ricopiato invece che derivato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#215 Lo stesso stato impossibile in altre due tabelle, dove pero' la cura e' l'opposto: righe classificate male, non residui** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#213 Cinque percorsi formativi non hanno titolare e non sono catalogo comune: uno stato che il modello non sa rappresentare** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#210 Le due specie convivono GIA', e non negli indicatori: `learning_modules` e' misto da prima che qualcuno se ne accorgesse** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#202 Il canale duplica i numeri perche' una str.replace non dice se ha sostituito — e la cura NON e' insegnargli a fondere** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#203 Il cancello del rubinetto e' rosso, e lo fa scattare uno strumento che il legacy lo combatte** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#204 La fusione ha lasciato SETTE residui dentro #196 e #198 — i blocchi riscritti sono pronti nella consegna** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#249 La contabilità dei piani va indietro rispetto ai fatti, e il cancello che lo dice non lo interroga nessuno** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#248 Le credenziali git di questa macchina non funzionano piu': un push da Windows si PIANTA invece di fallire** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#207 Il guardiano muore sulla riga del verdetto quando stdout non e' un terminale — e con lui altri due strumenti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#208 ⚠ PRIMA di eseguire #196/#197/#198/#199 leggi il LEGGIMI-PRIMA: sequenza, errori aperti, cosa e' gia' verificato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#199 E24 — il legame fascicolo↔azienda e' permanente, ma oggi `link-tenant` permette di staccarlo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#200 Il register aveva due identificativi doppi, e nessuna delle dieci verifiche li guardava** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#196 Gli indicatori: tutti di piattaforma oggi, ma la prima costruzione ne creerebbe di privati** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#197 Il marchio `materialized_from` non copre tutte le tabelle che lo stesso motore scrive** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#195 L'atlante era fermo a nove giorni prima, e nessuno strumento poteva accorgersene** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#194 `verifica-deploy` ha dichiarato la produzione irraggiungibile mentre era sana** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#193 L'organigramma aziendale non dichiara di mostrare persone — e sistemarlo lo toglierebbe a 117 su 161** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#192 Il diario di sessione non scrive — e la misura ha ridimensionato il difetto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#191 Il rendiconto delle chiusure non sa di quale sessione parla** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#190 Tre skill di questo repo descrivono il progetto legacy — vanno rimosse, e la rimozione è tua** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#189 `--repair-missing` della storia36 non arriva in fondo: un seed chiama una funzione che nessun seed crea** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#188 Le lacune formative non sanno a quale posizione si riferiscono** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#187 L'indice di salute organizzativa misura un clima fermo a gennaio 2025** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#186 Guardia lab: `psql -Atc` rifiutato e `psql -A -t -c` accettato — le opzioni brevi raggruppate non vengono sciolte** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#183 Policy di cancellazione utente: la disattivazione esiste, la cancellazione no** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#184 L'elenco dei file caduti si ferma a 50 senza dirlo: il verdetto tace il proprio troncamento** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#185 La prova che il cancello sa dire rosso e' una tantum: se non e' presidiata, non esiste** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#174 I seed di `rtl-banking-skills` non sono ri-eseguibili: violano i vincoli al secondo giro** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#173 Modalità «gov»: la versione parallela del loop zero-pendenze** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#181 I sette rilievi sul controllo di drift, e le correzioni entrate in main senza verifica** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#182 Due rami «recuperati» contengono lavoro mai entrato in main — e uno è il versante E2E del cluster che abbiamo chiuso** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#177 I tre revisori adversarial vivono in un workflow che sopravvive alla sessione, e i verdetti restano orfani** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#180 Sessantasei prove che nessun cancello esegue — ed è il motivo per cui una batteria è rimasta rossa senza che nessuno lo sapesse** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#179 Gli alberi dei lavoratori si fossilizzano dopo il primo merge** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#178 Il troncamento da budget non è mai stato osservato: il tetto contiene la spesa, ma non si è mai visto tagliare** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#175 Il verdetto verde di `w1` è stato dato con il cancello delle evidenze cieco** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#176 Il punto di rientro di gov esiste in una sola copia, su una sola macchina** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#172 Il clone del database su linux-pc accumula residui: il `DROP SCHEMA staging` fallisce a ogni giro** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#171 Otto vulnerabilita' aperte che nessuna voce registrava** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#170 Gli script dell'ingestione ritirata parlano ancora di uno schema che non esiste** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#168 Cancellare una persona cancella la storia delle sue approvazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#169 Separare i due segreti: la password derivata e il secondo fattore non possono nascere dalla stessa chiave** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#150 Ritrattare le voci del lab alla luce delle correzioni del 2026-08-06** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#229 L'eredita' fra sessioni: rilevare cio' che e' stato interrotto, e leggerlo all'avvio** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#228 Il cancello a tempo: cosa e' marcito mentre non guardavo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#227 Le competenze isolate nel grafo: 4.464 su 14.033 senza un solo arco tassonomico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#231 Consumare i lavori attivi: il ciclo di esecuzione delegato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#241 La CI rossa che teneva la produzione indietro, e i due fascicoli di prova** · status: DONE  ·  ↦ `.programmi/241-ci-rossa-e-fascicoli-di-prova.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#245 Il dominio di una fonte di ricerca e' testo libero, e nessuno controlla che esista** · status: DONE  ·  ↦ `.programmi/245-dominio-fonte-testo-libero.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#243 I due rossi di igiene del cruscotto, e le sette PR Dependabot rimaste** · status: DONE  ·  ↦ `.programmi/243-igiene-e-pr-dependabot.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#242 fastify >= 5.12 ha tolto il `trustProxy` a conteggio di salti: la produzione va migrata alla forma per indirizzo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#239 Il nome del cliente puo' rendere la ricerca impossibile: la guardia si morde la coda** · status: DONE  ·  ↦ `.programmi/239-nome-del-cliente-blocca-la-ricerca.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#238 `verifica-deploy` chiama guasto un clone in corso: i servizi del gemello sono spenti di proposito** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#237 La chiusura costa un quarto di finestra, e non si sa perche'** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#236 I lavori remoti si armano, non si appendono alla sessione** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#235 Le risposte ai sondaggi di clima si leggono fuori dalla catena organizzativa** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#234 Gli otto rossi di `verifica_incrociata`, uno per uno: cura o riclassificazione, mai il silenzio** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#219 Gli otto guasti dietro i rossi della suite E2E integrale** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#218 I residui del legacy senza referente locale: analizzarli tutti, e risolverli uno per uno** · status: FATTO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#156 Perimetri dell'agente: il resolver dall'atlante, poi l'adozione su ogni perimetro con valore** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#157 Le domande di aggregazione sono FUORI dallo scopo del catalogo generico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#161 I 113 piani di carriera non dicono verso quale posizione: l'obiettivo è vuoto su tutte le righe** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#162 Il seed della carriera non è più a delta zero: rieseguirlo scrive 137 righe e ne rompe un check** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#167 Cinque check della custodia RTL erano nascosti dietro `C6c`: review, buste, premi e preposti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#166 L'ambiente non è ricostruibile dalle sole migrazioni: la catena si ferma al 49° file su un database vuoto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#165 La chiusura di sessione dura un'ora perché aspetta la CI: sganciare il deploy e smettere di scoprire in CI ciò che si vede in locale** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#164 Igienizzare il database dal legacy: ritirare l'adattamento brownfield, conservare la tracciabilità** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#163 La storia di un'unità si ferma a un nome che l'unità non porta più, e il modello ammette un solo riordino** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#160 I bacini di successione puntano a mestieri che i candidati non fanno: 27 casi, e nessuno li vedeva** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#158 `deriveUserProfiles` riscrive sempre tutti i 156 profili: l'unico corpus senza salto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#155 I percorsi di carriera sono rimasti indietro dalla ricostruzione dell'organigramma: 207 su 252 puntano a posizioni morte** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#154 Deploy del codice su linux-pc non eseguito: il cancello CI ha retto durante il disservizio GitHub** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#153 La custodia settimanale della storia RTL fallisce da tre giorni e nessuno se n'era accorto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#152 Le suite MFA lasciano fattori residui in produzione: 32 accumulati in 10 giorni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#151 La sentinella dell'organigramma segnala come violazione ogni unita' ritirata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#144 Il settore di Heuresys System e' deciso: ATECO 2025 70.20** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#145 Ordine: #140 prima della revoca dei permessi della parte 1 del Tenant Builder** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#129 Canale lab-canonica: gli id sono confrontati per sottostringa** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#130 Il cancello di verifica butta l'output delle suite** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#131 Tenant Builder P1 — il fascicolo di configurazione di un'azienda** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#132 Tenant Builder P2a — la ricerca che genera il modello del fascicolo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#133 Guardia lab: il ruolo dell'argomento non è considerato nei comandi di copia** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#134 La guardia lab rifiuta una SELECT se una stringa contiene una parola di scrittura** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#135 L'identita' di un'azienda e' dichiarata due volte e per Heuresys le due dissentono** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#136 La pagina delle nomine del lab non è mai stata nominata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#137 Plancia di osservabilità delle sessioni (strumento del lab)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#138 Nessun lucchetto impedisce due suite di test sullo stesso database** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#139 Il tipo «utenza di servizio» esiste e non lo usa nessuno: le utenze tecniche contano come persone** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#116 28 persone su 45 atterrano su un cruscotto che il loro ruolo non può vedere** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#117 Completezza del portale personale: derivarla meccanicamente invece che a mano** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#118 Dieci responsabili passano a Quadro Direttivo (QD3); la posizione di martina.gentile è confermata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#119 D3 e D4: le liste di ruoli scritte a mano che la definizione dei domini esiste per eliminare** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#120 Le dieci posizioni di comando passano a `MG-2`, con collocazione derivata da anzianità e valutazione** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#121 La guardia della sessione lab rifiuta letture legittime: sei casi in un giorno, due cause** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#122 Tenant Heuresys: `HS-MGMT` esiste due volte, una per asse, e `HS-PROD` è l'unica unità di tipo TEAM del database** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#123 Leggere `organigramma-bis.html`, ricavarne le situazioni da correggere ed eseguirle** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#124 Mascheratura nel contratto dati: sei celle su otto si chiudono spaccando una classe, due richiedono il meccanismo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#125 22 pagine autenticate irraggiungibili dal menu, e 52 etichette di menu su 52 senza traduzione** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#126 Le quattro tabelle di L7: predizioni e abbinamenti mentore diventano visibili all'interessato, successioni e raccomandazioni retributive no** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#127 Stabilizzazione post-ricostruzione: due codici disallineati e quattro decisioni non registrate** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#128 Il registro delle sessioni diventa una storia completa: nessuna cancellazione automatica, nessuna sessione invisibile** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#115 I test di perimetro descrivono l'organigramma di ieri (24 file, 81 rossi)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#114 L'albero delle posizioni è spezzato in 15 tronconi: il resolver gerarchico non raggiunge più chi ha l'incarico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#112 I cataloghi dei requisiti hanno perso l'aggancio nella ricostruzione dell'organigramma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#113 30 responsabili di unità senza ruolo di comando dopo la ricostruzione dell'organigramma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#99 Domini gerarchici e funzionali: applicare la definizione (8 fasi)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#100 Organigramma incoerente al 66%: ricostruzione (prerequisito delle matrici)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#101 Console segnalazioni offerta a tutti e negata dall'API (menu che mente + 403 travestito da guasto)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#102 Sei incoerenze fra organigramma e dati della persona + promozione di `verifica_incrociata.py`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#103 Organigramma fase 1: tassonomia delle unità (migrazione 000244)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#104 Organigramma fase 2: creazione delle 17 unità nuove (migrazione 000245)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#105 Organigramma fase 3: ristrutturazione (migrazione 000246)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#106 Organigramma fase 4: le 29 nomine dei responsabili (migrazione 000247)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#107 Organigramma fase 5a: posizioni di comando (migrazione 000248)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#108 Organigramma fase 5b: le persone della rete (migrazione 000249)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#109 Organigramma fase 5c: le divisioni centrali (migrazione 000250)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#110 Organigramma fase 6: chiusura e cancelli (migrazione 000251)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#111 Le 545 valutazioni ereditate dall'albero delle posizioni: decidere prima di applicare le otto migrazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#94 Driver zp: budget di costo dinamici per corsa (config = soffitto)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#95 Igiene zp: i tre reperti del collaudo presidiato + pre-check anti-stale** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#96 Canale automatico lab→canonica: installare lab_inbox** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#97 Promozione plancia zp (dashboard + configuratore) in scripts/** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#98 Cinque percorsi formativi di RTL Bank hanno una chiave-macchina al posto del nome** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#89 Contaminazione da tenant legacy mai migrati** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#90 Cruscotto di salute del DBMS — 14 sentinelle mai interrogate** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#91 Bonifica strutturale del DBMS (indici, vincoli, statistiche)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#92 Ciclo di valutazione completo (autovalutazione + calibrazione)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#93 Rimozione della validazione presenze** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#88 Il peso economico delle posizioni e' un campo vuoto** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#87 Il genitore di un'unità organizzativa può stare in un altro tenant** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#84 Le rules path-scoped si caricano quando servono?** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#85 AGENTS.md divergente dal CLAUDE.md rifattorizzato** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#86 claude login sul linux-pc (la VM e' risolta)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#24 Autorizzazione bi-assiale (ADR-0027) — resta solo F4 (asse funzionale/attività)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#23 Personal area /me — portale legacy → navtab (programma S1010-S1011)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#201 GTM v1-deferrals (follow-up del primo deliverable)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#17 Wave-3 multi-tenant-onboarding (residuo L2/L3 multi-industry)** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#9/#10/#11 audit forense 100X** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#64 R2 data-completeness (condizione finance-readiness #2)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#65 NACE integrità parent (F-A06)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#77 Storia RTL 36 mesi — popolamento integrale del DBMS** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#78 storia36 C5 — coda dei rilievi adversarial non assorbiti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#80 storia36 C12 — audit finale e chiusura del programma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#81 La scheda di una persona non racconta la persona** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#82 Collaudo di accessibilità intermittente su `/me/inbox`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#66 PR Dependabot in coda (post-S1023)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#68 Fase 4 forense — frontend per-superficie (residuo: esecuzione P2)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#69 Bonifica dei residui `staging.wave1_*` nell'advanced** *(era «Fase 3 Blocco E — chiusura brownfield lato DBMS legacy»; ri-titolato 2026-08-14: lo spegnimento del legacy è uscito dall'item per decisione di Enzo, e ciò che resta sta tutto nel nostro DBMS)* · status: FATTO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#70 RTL — coprire i ruoli chiave vacanti (riassegnando dipendenti esistenti)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#71 RTL — realismo dati via ricerca web focalizzata (retribuzioni CCNL + tabelle di dominio)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#72 Audit coerenza per-user — dimensioni residue (education↔ruolo, KPI/OKR per ruolo, attendance-pattern, anagrafiche satellite)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#67 linux-pc gemello PROD — refresh DB clone (post-S1023)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#73 NACE legacy — verifica currency vs Rev 2.1 o deprecazione controllata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#74 notifications — GET amministrativa per audit dei broadcast (da D-70)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#75 teams — lifecycle API (create/update/membership) (da D-71)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#16 SuccessFactors** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#18 doc-cleanup `is_synthetic`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#19 E2E users-page post-synthetic** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#20 audit QA forense S1006 — il grosso** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#21 residuo tail audit S1006 — a11y + perf** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#22 sidebar IA redesign — 5 sezioni + lingua header + tab-merge** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#146 (ex Z-261) Esposizione MFA in repository pubblico: 7 fattori `e2e-fixture` ancora attivi in produzione** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#147 (ex Z-262) Accesso derivato per tutti gli utenti: chiave madre non propagata a VM e linux-pc** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#148 Rileggere il rendiconto delle chiusure e decidere se la chiusura va riscritta in quattro verbi** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#25 A/L5 — ponte posizione→learning (accende `positions/[id]/learning`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#26 A/L1 — vita dei goal/OKR (updates, check-ins, milestones, comments, alignments)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#27 A/L2 — evidence layer (le prove sotto gli score)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#28 A/L0 — Trust Ledger: read-API provenance (70.972 righe lineage)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#30 A/L4 — gap closure (plans/actions/results)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#31 A/L6 — metrologia KPI (measurements/methods/weighting)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#34 B/B3 — approval effects: nuovi handler (primo flusso approvativo reale)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#35 B/B7 — observability completa (/metrics Prometheus + slow-query + 4 sezioni system-health)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#36 B/B5 — visualization: versioning + export engine** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#37 B/B2 — reward-gate engine sui variable-pay** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#38 B/B6 — inbox push SSE (da polling 30s)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#42 C/C4 — fondazioni frontend (paginazione server-side, refactor shared-types, apiFetch FormData)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#43 C/C2 — editing cataloghi (skills/KPI/learning/job) + nuova `/job-catalog`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#44 C/C1 — editing People & Org (users/positions/org-units)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#83 L'API non impedisce i cicli nell'organigramma** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#45 C/C3 — editing tenant & platform** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#46 D/D1 — skill possession per-employee (import wave-2)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#47 D/D2 — engagement/PULSAR history (sblocca flight-risk pieno + fix dual-shape)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#48 D/D3 — goal history GOKMER (gemello di #26)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#49 D/D5 — employee timeline** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#50 Il grafo delle competenze: dare una vista al grafo che abbiamo già** *(era «D/D4 — legacy knowledge graph kg_nodes/kg_edges 139k»; rinominato 2026-08-14 perché il vecchio titolo faceva ricominciare da capo la stessa indagine)* · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#51 E/E1 — whistleblowing (D.Lgs 24/2023) con ruolo custodian dedicato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#53 E/E4 — payroll ops read-extended** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#246 I contratti a termine assegnati a caso a un terzo dell'organico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#54 E/E5 — recruiting/ATS (cluster `/recruiting`)** · status: DONE
+  - ✅ **CHIUSA S1095 (2026-09-12) — F4 fatta: il ciclo intero dal browser, con login reale.** Cinque pagine autenticate (`/recruiting` con il `KanbanBoard` di `@heuresys/ui`, prima volta; requisizioni, annunci, candidati; dettaglio candidatura con colloqui, valutazioni e offerta mascherabile) più la vetrina pubblica `/jobs` (percorso prospect ADR-0026) alimentata dal nuovo `GET /v1/public/job-postings` (filtro nel repository, 4/4 sul gemello, sondato). Mig `000406` (voce di menu) in produzione. `recruiting.spec.ts` **16/16** in modalità prod, drift 0, teardown pulito; tre controlli negativi (senza permesso → errore, non pipeline vuota; REJECTED senza motivo → 409; INTERNAL non compare in vetrina). `check_exposure` 0 lacune. Dettaglio in `.programmi/54-recruiting-ats.md`.
+  - ✅ **F3 CHIUSA (S1092, 2026-09-08) — 7 fette su 7.** Le ultime due: `interview-feedback` (4 rotte, 9 test) e `job-offers` (4 rotte, 11 test), verdi **sul gemello** e sondate col sabotaggio. ⭐ Due reperti che valgono oltre la voce. **(1)** `interview-feedback` è la prima superficie con **due** scavalchi possibili, non uno: colloquio *e* intervistatore — `sys_users` è una tabella sola per tutte le aziende, quindi la firma di un dipendente altrui su un colloquio nostro è una riga valida per PostgreSQL. **(2)** ⭐ **Sciolta la domanda che la mig `000364` aveva lasciato aperta**: la retribuzione di un'offerta **si maschera** come quella di un dipendente — non per analogia (che quella migrazione vietava) ma perché la ragione di ADR-0032 si applica identica: `PLATFORM_ADMIN` è un mandato **tecnico**, non HR. Cambia il soggetto, non il mandato di chi guarda. Si riusa `lib/scope/mask.ts`; `subjectUserId` è `null` perché un candidato non è un utente, e questo spegne da sé I17. Entrambi i presidi **sondati**: sabotandoli cade esattamente un test su 9 e su 11, e il contro-caso HR resta verde. ⚠ Misura d'ambiente: la stessa fetta costa **11 s sul gemello** contro 88-110 s via tunnel, col `beforeAll` che supera l'hookTimeout in modo **intermittente** — un test che sembra fragile può essere un test eseguito nel posto sbagliato. ⏭ Resta **F4** (frontend `/recruiting` + Kanban + E2E con login reale); le sette tabelle sono **vuote** in produzione, quindi la dimostrazione live su dati di dominio è materia di F4
+  - avanzamento-S1087 (2026-09-05): **F3 a 3 fette su 7** — `job-requisitions` (4 rotte, 10 test), `job-postings` (4 rotte, 8 test), `candidates` (4 rotte, 9 test). Mig `000374` per i due permessi che non esistevano (`job-requisition:read`/`:manage`, audience PLATFORM_ADMIN+TENANT_ADMIN+HRMS_MANAGER, col marker `TENANT_ADMIN-ALLOWLIST-EXTEND` senza il quale la `000210` li avrebbe tolti al deploy successivo). **27 test verdi** contro il DB reale, typecheck verde. Restano `applications`, `interviews`, `feedback`, `offers`
+  - ✅ **F2 CHIUSA (S1083, 2026-08-28)** — mig. `000364`, prova generale VERDE a due passate e applicata in produzione: **7 tabelle · 0 FK di persona non dichiarate · 0 righe**, e zero è il valore atteso. Sette entità: `sys_job_requisitions` → `sys_job_postings` → `sys_candidates` → `sys_candidate_applications` → `sys_interviews` → `sys_interview_feedback` → `sys_job_offers`. **Nessun import** dalle 19 tabelle legacy popolate (I12/ADR-0038): il dominio si popolerà con l'uso. ⭐ Il monito di modellazione di F1 ha avuto un effetto concreto — nel legacy lo stesso ciclo è costruito **due volte** e solo la seconda famiglia ha le **offerte**, quindi `sys_job_offers` c'è. Tre scelte da non ri-dedurre: `requisition_position_id` **NOT NULL** perché I1 è un vincolo e non un commento (si copre un *posto*, non si assume una persona) · **un candidato non è un utente**, e il registro GDPR non vedrebbe `sys_candidates`, quindi consenso e scadenza di conservazione sono **colonne con un CHECK** · gli stati contraddittori sono impossibili per vincolo, non «da controllare». Due guardie a monte hanno fermato la catena e avevano ragione entrambe (`000304` GDPR, `000062` classificazione), entrambe visibili solo alla seconda passata. ⏭ **F3** le rotte, **F4** il cluster `/recruiting` col Kanban
+  - priority: P2 · effort: ~5-7 sessioni (fasi con commit atomici) · doc: docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md §E5
+  - programma: `.programmi/54-recruiting-ats.md` — voce multi-sessione: fasi, decisioni gia' prese e punto di ripresa stanno li'. `python docs/kb/tools/programmi.py --id 54`
+  - note: decisione Enzo S1018 — in coda al batch (wave W11). Concept-porting dal cantiere evo, mai codice (I5: no RLS).
+
+- **#55 F/F1 — Essential Capability Ranker** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#56 F/F2 — VRIO scorecard (`/org-director/vrio`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#57 F/F3 — OHI org-health scorecard** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#58 F/F4 — AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#59 F/F5 — ESS self-view FULL (capability + flight-risk con evidenze)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#60 G/G1 — retention & storage (archive `audit.import_validation_results` 547MB)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#61 G/G2 — RBAC hygiene (perm `:delete` dedicati su 27 route; normalizzazione proxy)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#62 G/G3 — integrità preventiva (acyclicity IS_A, warn LIMIT 5000, dual-shape)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#63 G/G5 — archivio script esausti (move-not-delete)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#140 La catena di migrazioni non è stabile: ri-applicarla disfa correzioni già chiuse** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#141 `HS-PROD` è ancora un'unità di tipo «squadra», che S1044 dichiara eliminata** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#142 Cruscotti focalizzati per tipologia di utilizzatore** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#143 Una squadra è un progetto: serve il modello, non un puntatore al capo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#220 Remediation forense W1 — messa in sicurezza: FK a cascata, segreti leggibili, audit e logging spenti** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#221 Remediation forense W2 — recuperi: NACE e crosswalk rientrano (decisione Enzo 2026-08-20)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#222 Remediation forense W3 — integrità e contenuti dei cataloghi** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#223 Remediation forense W4 — pipeline, separazione ruoli, prestazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
+
+- **#224 Il check che cambia verdetto a seconda di dove lo lanci, e i sette eventi che lo accendono** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`

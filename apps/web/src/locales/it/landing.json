@@ -121,5 +121,17 @@
   "footer": {
     "tagline": "Heuresys — Skills & Org Intelligence EU-native.",
     "whistleblowing": "Segnalazioni whistleblowing"
+  },
+  "jobs": {
+    "title": "Posizioni aperte",
+    "subtitle": "Gli annunci pubblici delle aziende che assumono con Heuresys.",
+    "login": "Accedi",
+    "error": "Non e' stato possibile caricare gli annunci.",
+    "emptyTitle": "Nessuna posizione aperta",
+    "emptyDesc": "Al momento non ci sono annunci pubblici.",
+    "count": "{{count}} posizioni",
+    "noLocation": "Sede non indicata",
+    "publishedOn": "pubblicato il {{date}}",
+    "expiresOn": "scade il {{date}}"
   }
 }

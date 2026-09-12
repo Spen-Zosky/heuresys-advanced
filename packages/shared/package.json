@@ -157,6 +157,11 @@
       "heuresys-source": "./src/schemas/public-stats.ts",
       "default": "./dist/schemas/public-stats.js"
     },
+    "./schemas/public-job-postings": {
+      "types": "./dist/schemas/public-job-postings.d.ts",
+      "heuresys-source": "./src/schemas/public-job-postings.ts",
+      "default": "./dist/schemas/public-job-postings.js"
+    },
     "./schemas/learning-modules": {
       "types": "./dist/schemas/learning-modules.d.ts",
       "heuresys-source": "./src/schemas/learning-modules.ts",

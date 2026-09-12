@@ -41,6 +41,12 @@
     "career": {
       "main": "Carriera",
       "readiness": "Readiness successione"
+    },
+    "recruiting": {
+      "pipeline": "Pipeline",
+      "requisitions": "Richieste",
+      "postings": "Annunci",
+      "candidates": "Candidati"
     }
   },
   "session": {

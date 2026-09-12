@@ -299,5 +299,32 @@ export default async function globalTeardown(): Promise<void> {
   // Fallisce sul DRIFT (cresciuto rispetto alla partenza), mai sul totale assoluto:
   // i residui di altri non sono colpa di questa corsa. Un teardown che lancia fa
   // fallire la corsa anche a test verdi — che e' esattamente l'effetto voluto.
+  // #54 F4: recruiting.spec.ts crea richiesta, annuncio, candidato e candidatura con codici
+  // unici per corsa (`E2E<base36>-REQ`, `candidato.e2e-<sigla>@example.org`). Il modulo non
+  // ha una DELETE per scelta (ADR-0035: si porta a CANCELLED/CLOSED, non si cancella), quindi
+  // la pulizia vive qui. Le FK della 000364 sono tutte ON DELETE CASCADE: togliere la
+  // richiesta porta via annunci, candidature, colloqui, valutazioni e offerte; togliere il
+  // candidato porta via le sue candidature. I prefissi non possono toccare dati veri: nessun
+  // codice reale comincia per `E2E` e nessuna persona vera ha un indirizzo `@example.org`.
+  // Best-effort, stesse regole di igiene dei segreti.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH c AS (DELETE FROM sys.sys_candidates WHERE candidate_email LIKE 'candidato.e2e-%@example.org' RETURNING 1), " +
+          "r AS (DELETE FROM sys.sys_job_requisitions WHERE requisition_code LIKE 'E2E%-REQ' RETURNING 1) " +
+          "SELECT (SELECT count(*) FROM c) || ' candidati, ' || (SELECT count(*) FROM r) || ' richieste'",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] #54 recruiting: deleted ${out}`);
+  } catch (err) {
+    console.warn("[e2e teardown] #54 recruiting cleanup skipped:", (err as Error).message);
+  }
+
   verificaDrift(BASELINE_PATH);
 }

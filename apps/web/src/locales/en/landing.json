@@ -121,5 +121,17 @@
   "footer": {
     "tagline": "Heuresys — EU-native Skills & Org Intelligence.",
     "whistleblowing": "Whistleblowing channel"
+  },
+  "jobs": {
+    "title": "Open positions",
+    "subtitle": "Public postings from companies hiring with Heuresys.",
+    "login": "Sign in",
+    "error": "Could not load the postings.",
+    "emptyTitle": "No open positions",
+    "emptyDesc": "There are no public postings right now.",
+    "count": "{{count}} positions",
+    "noLocation": "Location not specified",
+    "publishedOn": "published on {{date}}",
+    "expiresOn": "expires on {{date}}"
   }
 }

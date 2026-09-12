@@ -699,5 +699,193 @@
       "CONTRIBUTOR": "Contributor",
       "OBSERVER": "Observer"
     }
+  },
+  "recruiting": {
+    "title": "Recruiting",
+    "description": "The hiring cycle: requisitions, postings, candidates and applications. A requisition covers a position in the org chart.",
+    "error": "Could not load recruiting.",
+    "summary": {
+      "requisitions": "Open requisitions",
+      "postings": "Published postings",
+      "applications": "Applications",
+      "manage": "Manage",
+      "candidates": "Candidates"
+    },
+    "pipeline": {
+      "open": "Open",
+      "moved": "Application moved to {{stage}}",
+      "moveError": "Move rejected by the server.",
+      "emptyTitle": "No applications",
+      "emptyDesc": "Register a candidate and apply them to a posting: it will show up here as a card."
+    },
+    "stage": {
+      "APPLIED": "Applied",
+      "SCREENING": "Screening",
+      "INTERVIEWING": "Interviewing",
+      "OFFER": "Offer",
+      "HIRED": "Hired",
+      "REJECTED": "Rejected",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "requisitionStatus": {
+      "DRAFT": "Draft",
+      "APPROVED": "Approved",
+      "OPEN": "Open",
+      "ON_HOLD": "On hold",
+      "FILLED": "Filled",
+      "CANCELLED": "Cancelled"
+    },
+    "reason": {
+      "NEW_ROLE": "New role",
+      "REPLACEMENT": "Replacement",
+      "GROWTH": "Growth",
+      "TEMPORARY": "Temporary",
+      "INTERNAL_MOBILITY": "Internal mobility"
+    },
+    "postingStatus": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "CLOSED": "Closed",
+      "EXPIRED": "Expired"
+    },
+    "visibility": {
+      "INTERNAL": "Internal",
+      "EXTERNAL": "External",
+      "PUBLIC": "Public"
+    },
+    "source": {
+      "DIRECT": "Direct",
+      "REFERRAL": "Referral",
+      "AGENCY": "Agency",
+      "JOB_BOARD": "Job board",
+      "INTERNAL": "Internal",
+      "EVENT": "Event"
+    },
+    "candidateStatus": {
+      "ACTIVE": "Active",
+      "HIRED": "Hired",
+      "WITHDRAWN": "Withdrawn",
+      "BLACKLISTED": "Blacklisted",
+      "ARCHIVED": "Archived"
+    },
+    "interviewKind": {
+      "SCREENING": "Screening",
+      "TECHNICAL": "Technical",
+      "BEHAVIORAL": "Behavioral",
+      "PANEL": "Panel",
+      "FINAL": "Final"
+    },
+    "interviewStatus": {
+      "SCHEDULED": "Scheduled",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "NO_SHOW": "No show"
+    },
+    "recommendation": {
+      "STRONG_YES": "Strong yes",
+      "YES": "Yes",
+      "NEUTRAL": "Neutral",
+      "NO": "No",
+      "STRONG_NO": "Strong no"
+    },
+    "offerStatus": {
+      "DRAFT": "Draft",
+      "SENT": "Sent",
+      "ACCEPTED": "Accepted",
+      "DECLINED": "Declined",
+      "EXPIRED": "Expired",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "fields": {
+      "code": "Code",
+      "codeHint": "Uppercase, digits, '-' and '_'",
+      "position": "Position",
+      "choose": "Choose…",
+      "headcount": "Headcount",
+      "reason": "Reason",
+      "targetStart": "Target start",
+      "notes": "Notes",
+      "status": "Status",
+      "requisition": "Requisition",
+      "title": "Title",
+      "visibility": "Visibility",
+      "location": "Location",
+      "expiresOn": "Expires on",
+      "description": "Description",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "source": "Source",
+      "consentGivenOn": "Consent given on",
+      "retentionUntil": "Retain until",
+      "posting": "Posting",
+      "choosePosting": "Choose a posting…",
+      "stage": "Stage",
+      "appliedOn": "Applied on",
+      "rejectReason": "Reject reason",
+      "grossAnnualSalary": "Gross annual salary",
+      "contractType": "Contract type",
+      "chooseInterviewer": "Interviewer…"
+    },
+    "requisitions": {
+      "title": "Job requisitions",
+      "description": "Each requisition covers a position in the org chart. It starts as a draft and changes status by decision.",
+      "newTitle": "New requisition",
+      "submit": "Open requisition",
+      "created": "Requisition {{code}} opened.",
+      "createError": "Requisition rejected by the server.",
+      "statusChanged": "{{code}}: now {{status}}.",
+      "emptyTitle": "No requisitions",
+      "emptyDesc": "Open the first requisition by choosing the position to cover."
+    },
+    "postings": {
+      "title": "Job postings",
+      "description": "A posting is born from a requisition. Only public, published postings appear on the /jobs board.",
+      "newTitle": "New posting",
+      "submit": "Create posting",
+      "created": "Posting {{code}} created.",
+      "createError": "Posting rejected by the server.",
+      "statusChanged": "{{code}}: now {{status}}.",
+      "emptyTitle": "No postings",
+      "emptyDesc": "Create the first posting from a requisition."
+    },
+    "candidates": {
+      "title": "Candidates",
+      "description": "People who are not (yet) in the company: name, contacts and retention consent.",
+      "newTitle": "New candidate",
+      "submit": "Register candidate",
+      "created": "{{name}} registered.",
+      "createError": "Candidate rejected by the server.",
+      "apply": "Apply",
+      "applied": "Application registered: find it in the pipeline.",
+      "applyError": "Application rejected by the server.",
+      "emptyTitle": "No candidates",
+      "emptyDesc": "Register the first candidate."
+    },
+    "application": {
+      "title": "Application",
+      "error": "Could not load the application.",
+      "backToPipeline": "← Pipeline",
+      "stageTitle": "Application stage",
+      "moveTo": "Move to",
+      "rejectHint": "Required to reject",
+      "stageChanged": "Application now in {{stage}}.",
+      "stageError": "Stage change rejected by the server.",
+      "interviewsTitle": "Interviews",
+      "scheduleInterview": "Schedule",
+      "interviewCreated": "Interview scheduled.",
+      "interviewError": "Interview rejected by the server.",
+      "noInterviews": "No interviews yet.",
+      "submitFeedback": "Submit",
+      "feedbackCreated": "Feedback recorded.",
+      "feedbackError": "Feedback rejected by the server (did the interview take place?).",
+      "offerTitle": "Offer",
+      "createOffer": "Prepare offer",
+      "offerCreated": "Offer prepared.",
+      "offerError": "Offer rejected by the server.",
+      "noOffers": "No offers.",
+      "salaryMasked": "amount not visible with your mandate"
+    }
   }
 }

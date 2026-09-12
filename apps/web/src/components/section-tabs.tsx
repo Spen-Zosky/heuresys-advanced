@@ -59,6 +59,15 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
     { href: "/career-succession", key: "career.main" },
     { href: "/insights/succession-readiness", key: "career.readiness" },
   ] },
+  // #54 F4: il cluster del recruiting. La voce di sidebar e' `/recruiting` (mig 000406); le
+  // altre tre sono schede della pagina principale, come vuole la regola S1009 — ed e' cio'
+  // che le rende raggiungibili per `check_pagine_raggiungibili` senza tre voci di menu.
+  { id: "recruiting", tabs: [
+    { href: "/recruiting", key: "recruiting.pipeline" },
+    { href: "/recruiting/requisitions", key: "recruiting.requisitions" },
+    { href: "/recruiting/postings", key: "recruiting.postings" },
+    { href: "/recruiting/candidates", key: "recruiting.candidates" },
+  ] },
 ];
 
 /** Match with a "/" boundary so /analytics/skills does NOT swallow

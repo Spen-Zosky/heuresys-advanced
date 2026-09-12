@@ -15,7 +15,9 @@ const REFRESH_COOKIE = "hrx_refresh";
 // so Product Owner brand review does not require a login.
 // `/whistleblowing` MUST stay public: the D.Lgs 24/2023 channel is anonymous
 // by law — forcing a login would defeat it (#51 E1).
-const PUBLIC_PATHS = ["/login", "/_next", "/api", "/showcase", "/privacy", "/investors", "/demo", "/whistleblowing"];
+// `/jobs` e' la vetrina degli annunci per il prospect (#54 F4, ADR-0026): chi la legge non ha
+// un account, e i dati arrivano da `/v1/public/job-postings`, che filtra da se'.
+const PUBLIC_PATHS = ["/login", "/_next", "/api", "/showcase", "/privacy", "/investors", "/demo", "/whistleblowing", "/jobs"];
 
 function isPublic(pathname: string): boolean {
   if (pathname === "/") return true; // public marketing landing (front door)

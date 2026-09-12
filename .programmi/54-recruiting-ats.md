@@ -1,7 +1,8 @@
 # 54 — E/E5: recruiting / ATS (cluster `/recruiting`)
 
 > **item**: #54 · **priorità**: P2 · **stima register**: ~5-7 sessioni (fasi con commit atomici)
-> **stato**: IN CORSO
+> **stato**: CHIUSO
+> **chiusa**: S1095 (2026-09-12) — quattro fasi su quattro, l'ultima con la dimostrazione live nel browser.
 > **fonti**: `docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md` §E5
 
 ## Decisioni vincolanti (non si ri-chiedono)
@@ -190,7 +191,51 @@
       dimostrazione live su dati di dominio reali non e' possibile oggi e non e' stata
       simulata: le fixture nascono e muoiono dentro la transazione del file, come nelle tre
       fette precedenti. Popolare il ciclo e' materia di F4, non di questa fase.
-- [ ] **F4 — Frontend + E2E con login reale** — cluster `/recruiting`, **componente Kanban di `@heuresys/ui` mai usato** finora, più il posting pubblico (percorso prospect ADR-0026) · budget ~250k
+- [x] **F4 — Frontend + E2E con login reale** — FATTA 2026-09-12 (S1095) · `recruiting.spec.ts` **16/16 verdi** in modalità prod (Node 22, blocco `chromium-3`, 2,5 min), drift **0**, teardown pulito · cluster `/recruiting`, **componente Kanban di `@heuresys/ui` mai usato** finora, più il posting pubblico (percorso prospect ADR-0026) · budget ~250k
+
+  ### ✅ S1095 (2026-09-12) — il ciclo intero, dal browser, con dati che nascono durante la corsa
+
+  **Cosa c'è.** Cinque pagine autenticate e una pubblica:
+  - `/recruiting` — la **pipeline**: `KanbanBoard` di `@heuresys/ui` (prima volta), una colonna
+    per stadio, una carta per candidatura. Il trascinamento manda `PATCH stage`; la tavola si
+    ricostruisce dal re-fetch (`key` = impronta dei dati), mai dallo stato locale;
+  - `/recruiting/requisitions` · `/postings` · `/candidates` — liste + form di creazione + cambio
+    di stato per riga; «candida a» crea la candidatura;
+  - `/recruiting/applications/[id]` — lo stadio (col motivo del rifiuto), i colloqui e le loro
+    valutazioni, l'offerta (importo mascherato se `masked`, ADR-0036);
+  - `/jobs` — la **vetrina pubblica**, senza login, alimentata da `GET /v1/public/job-postings`.
+
+  **La mini-milestone API che serviva** (API-first): modulo `public-job-postings` sotto
+  `/v1/public`, schema `public-job-postings.ts` in shared, filtro **nel repository** (`PUBLISHED`
+  + `PUBLIC` + non scaduto, nome dell'azienda e mai il suo id). Test 4/4 sul gemello, **sondato**:
+  neutralizzato il filtro `PUBLIC` cade esattamente «un annuncio pubblicato ma INTERNAL NON
+  compare» (1/4). Porta nel proxy: `/jobs` in `PUBLIC_PATHS` — senza, la vetrina rimandava al
+  login (misurato alla seconda corsa).
+
+  **Le porte**: mig `000406` (voce `recruiting`, gruppo workforce, permesso `job-requisition/read`,
+  icona `UserPlus` aggiunta alla mappa insieme a `FolderKanban` che mancava per `/projects`);
+  gruppo di schede `recruiting` in `section-tabs.tsx`. `check_pagine_raggiungibili`: ogni pagina
+  autenticata ha una porta (21 schede, da 17).
+
+  🔬 **Due regole del server trovate eseguendo, non leggendo** — e il test le ha rispettate
+  invece di aggirarle: un colloquio **senza data** non può dirsi svolto
+  (`INTERVIEW_COMPLETED_WITHOUT_DATE`, 409); una candidatura va a `REJECTED` **solo con un
+  motivo** — è il controllo negativo della spec. Terzo negativo: `paolo.caputo` (senza permesso)
+  non ha la voce nel menu e la pagina risponde con l'errore, non con una pipeline vuota.
+
+  **La pulizia**: il modulo non ha DELETE (ADR-0035), quindi `global-teardown.ts` toglie richieste
+  `E2E%-REQ` e candidati `candidato.e2e-%@example.org`; le FK della 000364 sono tutte a cascata.
+  Il cancello di drift lo pretende: «9 residue pre-esistenti, nessun residuo aggiunto».
+
+  **Il deposito TOTP** (`pnpm db:deposita-totp-e2e`): con l'obbligo MFA acceso (B18) e i segreti
+  casuali (#169), la suite web deve conoscere il segreto delle persone; in CI lo scrive il seed di
+  collaudo, qui il database è la produzione e quel seed si rifiuta. Lo script fa la stessa lettura
+  della suite API (decifra dal database) e deposita il file gitignored. Non deriva niente dalla
+  chiave madre. ⚠ In locale non è servito: `MFA_ENFORCEMENT_ENABLED=false` nel `.env` di questa
+  macchina spegne il ramo — il deposito è per quando si accende.
+
+  `check_exposure.py`: 73 scritte, 73 lette, **0 lacune** (`#79` F3 sullo stesso lavoro).
+  Typecheck, lint, `i18n:check` (3334 chiavi × 2) verdi. Atlante rigenerato.
 
 ## Esito di F1 — misurato il 2026-08-14
 

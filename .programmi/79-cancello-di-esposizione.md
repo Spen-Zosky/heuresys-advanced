@@ -24,7 +24,7 @@ cui viene creata: trovarla sei sessioni dopo costa il triplo, perché nel fratte
 
 - [x] **F1 Le cinque lacune vere, trovate e colmate** — FATTO 2026-08-06 (S1035) · storia organizzativa · registro GDPR che si scriveva e non si rileggeva · istruttoria e fonti della pipeline · revisione degli obiettivi di carriera. **E una tabella morta scartata**: `sys_auth_sessions` non è usata da nessuna parte (le sessioni vere sono i token di refresh)
 - [x] **F2 La verifica dopo le superfici di `#126`** — FATTO 2026-08-13 (S1057) · `check_exposure.py` → **73 tabelle scritte dal programma, 73 lette da almeno un modulo API, 0 non esposte**, exit 0 letto **sul processo**, non dai messaggi
-- [ ] **F3 Il prossimo lavoro che popola tabelle** — budget ~5k per esecuzione
+- [ ] **F3 Il prossimo lavoro che popola tabelle** — budget ~5k per esecuzione · eseguita 2026-09-12 (S1095) su `#54` F4: `check_exposure.py` → 73 scritte, 73 lette, **0 lacune**, exit 0. Resta aperta per costruzione: si ri-esegue al prossimo lavoro che popola tabelle
 
   ### Esecuzione S1092 (2026-09-08) — dopo #54 F3 e #214 F6
 

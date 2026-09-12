@@ -147,6 +147,7 @@ import { leadsRoutes } from "./modules/leads/routes.js";
 import { whistleblowingRoutes } from "./modules/whistleblowing/routes.js";
 import { gdprRoutes } from "./modules/gdpr/routes.js";
 import { publicStatsRoutes } from "./modules/public-stats/routes.js";
+import { publicJobPostingsRoutes } from "./modules/public-job-postings/routes.js";
 import { tenantMaterializationRoutes } from "./modules/tenant-materialization/routes.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
@@ -531,6 +532,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(whistleblowingRoutes, { prefix: "/v1/whistleblowing" });
   await app.register(gdprRoutes, { prefix: "/v1/gdpr" });
   await app.register(publicStatsRoutes, { prefix: "/v1/public" });
+  await app.register(publicJobPostingsRoutes, { prefix: "/v1/public" });
 
   return app;
 }

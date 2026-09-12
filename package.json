@@ -39,6 +39,7 @@
     "db:provision-collaudo": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/provision-collaudo-access.ts",
     "db:stop-deriving-totp": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/stop-deriving-totp.ts",
     "db:verify-separazione-totp": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/verify-separazione-totp.ts",
+    "db:deposita-totp-e2e": "pnpm --filter @heuresys/api exec tsx scripts/deposita-totp-e2e.mts",
     "embeddings:backfill": "pnpm --filter @heuresys/api exec tsx src/modules/semantic-matching/backfill.ts",
     "i18n:check": "pnpm --filter @heuresys/web run i18n:check",
     "status": "python docs/kb/tools/status_dashboard.py",

@@ -699,5 +699,193 @@
       "CONTRIBUTOR": "Collaboratore",
       "OBSERVER": "Osservatore"
     }
+  },
+  "recruiting": {
+    "title": "Recruiting",
+    "description": "Il ciclo di selezione: richieste di personale, annunci, candidati e candidature. Una richiesta copre un posto dell'organigramma.",
+    "error": "Non e' stato possibile caricare il recruiting.",
+    "summary": {
+      "requisitions": "Richieste aperte",
+      "postings": "Annunci pubblicati",
+      "applications": "Candidature",
+      "manage": "Gestisci",
+      "candidates": "Candidati"
+    },
+    "pipeline": {
+      "open": "Apri",
+      "moved": "Candidatura spostata in {{stage}}",
+      "moveError": "Spostamento rifiutato dal server.",
+      "emptyTitle": "Nessuna candidatura",
+      "emptyDesc": "Registra un candidato e candidalo a un annuncio: comparira' qui come carta."
+    },
+    "stage": {
+      "APPLIED": "Candidato",
+      "SCREENING": "Screening",
+      "INTERVIEWING": "Colloqui",
+      "OFFER": "Offerta",
+      "HIRED": "Assunto",
+      "REJECTED": "Respinto",
+      "WITHDRAWN": "Ritirato"
+    },
+    "requisitionStatus": {
+      "DRAFT": "Bozza",
+      "APPROVED": "Approvata",
+      "OPEN": "Aperta",
+      "ON_HOLD": "Sospesa",
+      "FILLED": "Coperta",
+      "CANCELLED": "Annullata"
+    },
+    "reason": {
+      "NEW_ROLE": "Nuovo ruolo",
+      "REPLACEMENT": "Sostituzione",
+      "GROWTH": "Crescita",
+      "TEMPORARY": "Temporanea",
+      "INTERNAL_MOBILITY": "Mobilita' interna"
+    },
+    "postingStatus": {
+      "DRAFT": "Bozza",
+      "PUBLISHED": "Pubblicato",
+      "CLOSED": "Chiuso",
+      "EXPIRED": "Scaduto"
+    },
+    "visibility": {
+      "INTERNAL": "Interno",
+      "EXTERNAL": "Esterno",
+      "PUBLIC": "Pubblico"
+    },
+    "source": {
+      "DIRECT": "Diretta",
+      "REFERRAL": "Segnalazione",
+      "AGENCY": "Agenzia",
+      "JOB_BOARD": "Portale",
+      "INTERNAL": "Interna",
+      "EVENT": "Evento"
+    },
+    "candidateStatus": {
+      "ACTIVE": "Attivo",
+      "HIRED": "Assunto",
+      "WITHDRAWN": "Ritirato",
+      "BLACKLISTED": "Escluso",
+      "ARCHIVED": "Archiviato"
+    },
+    "interviewKind": {
+      "SCREENING": "Screening",
+      "TECHNICAL": "Tecnico",
+      "BEHAVIORAL": "Comportamentale",
+      "PANEL": "Panel",
+      "FINAL": "Finale"
+    },
+    "interviewStatus": {
+      "SCHEDULED": "Programmato",
+      "COMPLETED": "Svolto",
+      "CANCELLED": "Annullato",
+      "NO_SHOW": "Assente"
+    },
+    "recommendation": {
+      "STRONG_YES": "Si', convinto",
+      "YES": "Si'",
+      "NEUTRAL": "Neutro",
+      "NO": "No",
+      "STRONG_NO": "No, convinto"
+    },
+    "offerStatus": {
+      "DRAFT": "Bozza",
+      "SENT": "Inviata",
+      "ACCEPTED": "Accettata",
+      "DECLINED": "Rifiutata",
+      "EXPIRED": "Scaduta",
+      "WITHDRAWN": "Ritirata"
+    },
+    "fields": {
+      "code": "Codice",
+      "codeHint": "Maiuscole, cifre, '-' e '_'",
+      "position": "Posizione",
+      "choose": "Scegli…",
+      "headcount": "Posti",
+      "reason": "Motivo",
+      "targetStart": "Inizio previsto",
+      "notes": "Note",
+      "status": "Stato",
+      "requisition": "Richiesta",
+      "title": "Titolo",
+      "visibility": "Visibilita'",
+      "location": "Sede",
+      "expiresOn": "Scadenza",
+      "description": "Descrizione",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "email": "Email",
+      "phone": "Telefono",
+      "source": "Provenienza",
+      "consentGivenOn": "Consenso dato il",
+      "retentionUntil": "Conservazione fino al",
+      "posting": "Annuncio",
+      "choosePosting": "Scegli un annuncio…",
+      "stage": "Stadio",
+      "appliedOn": "Candidato il",
+      "rejectReason": "Motivo del rifiuto",
+      "grossAnnualSalary": "RAL lorda",
+      "contractType": "Tipo di contratto",
+      "chooseInterviewer": "Intervistatore…"
+    },
+    "requisitions": {
+      "title": "Richieste di personale",
+      "description": "Ogni richiesta copre un posto dell'organigramma. Nasce in bozza e cambia stato per decisione.",
+      "newTitle": "Nuova richiesta",
+      "submit": "Apri la richiesta",
+      "created": "Richiesta {{code}} aperta.",
+      "createError": "Richiesta rifiutata dal server.",
+      "statusChanged": "{{code}}: ora {{status}}.",
+      "emptyTitle": "Nessuna richiesta",
+      "emptyDesc": "Apri la prima richiesta scegliendo la posizione da coprire."
+    },
+    "postings": {
+      "title": "Annunci",
+      "description": "Un annuncio nasce da una richiesta. Solo gli annunci pubblici e pubblicati compaiono nella vetrina /jobs.",
+      "newTitle": "Nuovo annuncio",
+      "submit": "Crea l'annuncio",
+      "created": "Annuncio {{code}} creato.",
+      "createError": "Annuncio rifiutato dal server.",
+      "statusChanged": "{{code}}: ora {{status}}.",
+      "emptyTitle": "Nessun annuncio",
+      "emptyDesc": "Crea il primo annuncio a partire da una richiesta."
+    },
+    "candidates": {
+      "title": "Candidati",
+      "description": "Persone che non sono (ancora) in azienda: nome, contatti e consenso alla conservazione.",
+      "newTitle": "Nuovo candidato",
+      "submit": "Registra il candidato",
+      "created": "{{name}} registrato.",
+      "createError": "Candidato rifiutato dal server.",
+      "apply": "Candida",
+      "applied": "Candidatura registrata: la trovi nella pipeline.",
+      "applyError": "Candidatura rifiutata dal server.",
+      "emptyTitle": "Nessun candidato",
+      "emptyDesc": "Registra il primo candidato."
+    },
+    "application": {
+      "title": "Candidatura",
+      "error": "Non e' stato possibile caricare la candidatura.",
+      "backToPipeline": "← Pipeline",
+      "stageTitle": "Stadio della candidatura",
+      "moveTo": "Porta a",
+      "rejectHint": "Obbligatorio per respingere",
+      "stageChanged": "Candidatura ora in {{stage}}.",
+      "stageError": "Cambio di stadio rifiutato dal server.",
+      "interviewsTitle": "Colloqui",
+      "scheduleInterview": "Programma",
+      "interviewCreated": "Colloquio programmato.",
+      "interviewError": "Colloquio rifiutato dal server.",
+      "noInterviews": "Nessun colloquio ancora.",
+      "submitFeedback": "Valuta",
+      "feedbackCreated": "Valutazione registrata.",
+      "feedbackError": "Valutazione rifiutata dal server (il colloquio si e' svolto?).",
+      "offerTitle": "Offerta",
+      "createOffer": "Prepara l'offerta",
+      "offerCreated": "Offerta preparata.",
+      "offerError": "Offerta rifiutata dal server.",
+      "noOffers": "Nessuna offerta.",
+      "salaryMasked": "importo non visibile con il tuo mandato"
+    }
   }
 }

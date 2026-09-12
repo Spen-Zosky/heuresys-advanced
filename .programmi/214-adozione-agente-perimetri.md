@@ -125,6 +125,48 @@ sono stati cancellati (divieto): sono diventati rimandi di poche righe a `live-p
       🔬 **Trovata e chiusa una cecità in attesa**: `check_concetti_agente.py` presidiava il caso «parser che non legge più nulla» per `RESOURCE_DATA_CLASS` e **per nessuna delle altre tre**. Cambiando forma, `MULTI` sarebbe tornato `{}` e ogni resource multiclasse sarebbe sparita in silenzio dalla classificazione. Ora la guardia c'è per `MULTI` e per `NO_PERSONE`.
 - [ ] **F6 Consumo della coda dei neutri, un perimetro per volta**
 
+  ### S1096 (2026-09-12) — il TREDICESIMO perimetro, il primo fra i «vocabolari delle persone»
+
+  Coda ri-derivata sull'atlante fresco (da `344cd461`): **108 moduli · 12 aperti · 45 in coda
+  (19 neutri)**. Testa dei neutri: pari a tre, 2 letture · 2 pagine — `enterprise-typing-profiles`
+  (scartato: porta occupata, vale ancora), `job-roles`, `skill-categories`. Chiusa la terna degli
+  intermedi, la scelta cade per la prima volta fra i due che la 000378 aveva messo «più vicini a
+  una persona», e questo piano chiedeva di aprirli **con una motivazione su quella vicinanza**.
+
+  ⭐ **La distanza non è la stessa.** Un **ruolo** è ciò che una persona *ricopre* — da un ruolo
+  si risale a chi lo occupa. Una **categoria di competenza** è ciò che *raggruppa* le competenze
+  (Cognitive, Technical, Leadership…): un livello della tassonomia. Una persona possiede
+  **competenze** (`sys_user_skills`, classe SKILL, chiusa), non categorie: nessuna riga di
+  `sys_skill_categories` si lega a una persona nemmeno in due passaggi. È una classificazione
+  del genere che I21 tiene aperta, e `data-classes.ts` la dichiara «catalogo globale». Quindi
+  **prima le categorie, poi i ruoli**.
+
+  **Cosa è**: `sys_skill_categories`, 7 righe, senza `tenant_id`, otto colonne nessuna soggetto
+  né attore. Due porte, e stavolta **entrambe piene**: `skill_category_metadata` porta su 6/7
+  righe sette chiavi ereditate dal legacy (`weight`, `is_active`, `tenant_id`, `deleted_at`,
+  `sort_order`, `framework_id`, `behavioral_indicators`) **tutte a null** — residuo, non sapere,
+  nessuna nomina una persona; `skill_category_description` è testo libero popolato su 6/7.
+  Misurato prima di aprire: **0 indirizzi di posta** in nessuna delle due porte.
+
+  ⚠ **Aperto con una guardia — mig `000407`**, `sys.v_categoria_di_competenza_con_dato_di_persona`,
+  provata rossa su **entrambe** le porte con post-condizione per impronta — che qui conta doppio:
+  un ripristino che rimettesse `{}` al posto delle sette chiavi a null passerebbe il conteggio e
+  fallirebbe l'impronta.
+
+  🔬 **Evidenza live, in quest'ordine**:
+  - prova generale sul gemello (`ci-rehearsal.sh`) → **VERDE** a due passate, «000407: sentinella
+    installata e provata su entrambe le porte · 7 categorie invariate, contenuto identico per
+    impronta», sentinelle **44/44 a zero** (da 43), catena 16 s;
+  - produzione — `pnpm db:migrate:vm --no-pull` → exit 0, **12 s**, «380 applied, 24 skipped»;
+  - dimostrazione — la sentinella dice **0**; 7 categorie, 6 descrizioni, 6 metadata non vuoti,
+    come prima; `db_health` exit **0** (dopo `VACUUM (ANALYZE)` su
+    `sys_position_skill_requirements`, 51,2% di tuple morte lasciate dalla catena — stesso caso
+    di S1091 e S1095).
+
+  Coda dopo: **13 aperti · 44 in coda (18 neutri)**. Prossimo in testa: `job-roles` (con la
+  motivazione già scritta qui: è il più vicino a una persona fra i neutri, e si apre per ultimo
+  dei tre); `enterprise-typing-profiles` resta indietro finché `decided_by` porta un nome in chiaro.
+
   ### S1095 (2026-09-12) — il DODICESIMO perimetro chiude la terna degli «intermedi»
 
   Coda ri-derivata sull'atlante fresco (da `8b81b12f`): **107 moduli · 11 aperti · 39 in coda

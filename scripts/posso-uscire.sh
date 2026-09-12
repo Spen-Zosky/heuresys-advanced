@@ -127,6 +127,7 @@ verdetto() {
     printf '    Il registro ha%s senza riga finale, ma NESSUN processo vivo: conclusi o persi, non in volo.\n' "$senza"
   fi
   printf '    Niente di locale in volo; deploy e clone armati proseguono senza questa sessione.\n'
+  printf '    I lavori remoti armati NON sono un motivo per aspettare: quelli proseguono.\n'
   return 0
 }
 
@@ -160,7 +161,11 @@ echo "$INTESTAZIONE"
 
 REG_SENZA=""; REG_TOT=0; REG_MIEI=0
 if [ -z "$TASKS" ] || [ ! -d "$TASKS" ]; then
-  riga "registro dei task" "NON MISURABILE (directory dei task non trovata) — il verdetto poggia sui soli processi"
+  # Il registro e' uno dei due occhi: se manca, non si finge di aver guardato con entrambi.
+  riga "registro dei task" "NON MISURABILE (directory dei task non trovata)"
+  printf "\n  VERDETTO: NON-VERIFICATO — non ho potuto guardare il registro dei task locali.\n"
+  printf "  Non e' «a posto»: e' «non lo so». Passare --tasks <dir> per misurare.\n"
+  exit 2
 else
   classifica_registro "$TASKS"
   if [ -n "$REG_SENZA" ]; then
@@ -175,6 +180,12 @@ fi
 #     questo script). Gli ssh in primo piano sono un sottoinsieme: si contano dentro.
 vivi_righe="$(ps -ef 2>/dev/null | grep '[s]hopt -u extglob' | grep -v 'posso-uscire' || true)"
 n_vivi=$(printf '%s' "$vivi_righe" | grep -c . || true); [ -n "$n_vivi" ] || n_vivi=0
+# POSSO_USCIRE_PROCESSI=<n> sostituisce la misura: serve alle PROVE (in CI non c'e' nessuna CLI),
+# e si dichiara nell'uscita perche' un numero finto non deve poter passare per misurato.
+if [ -n "${POSSO_USCIRE_PROCESSI:-}" ]; then
+  n_vivi="$POSSO_USCIRE_PROCESSI"; vivi_righe=""
+  riga "  nota" "processi vivi DICHIARATI da POSSO_USCIRE_PROCESSI=$n_vivi, non misurati (modo di prova)"
+fi
 ssh_vivi=$(printf '%s' "$vivi_righe" | grep -cE 'ssh (-[A-Za-z0-9]+ )*[A-Za-z0-9._:-]*(linux-pc|oracle-vm|mac)' || true); [ -n "$ssh_vivi" ] || ssh_vivi=0
 if [ "$n_vivi" -gt 0 ]; then
   riga "comandi della CLI vivi" "⚠ $n_vivi (ssh in primo piano: $ssh_vivi)"

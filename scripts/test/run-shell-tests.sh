@@ -320,27 +320,35 @@ if [ -f "$PU" ]; then
   # J1: nessun task in volo => USCITA SICURA, exit 0
   printf 'roba\n[exited with code 0]\n' > "$tmpd/a.output"
   printf 'roba\n[killed]\n'             > "$tmpd/b.output"
-  out="$(bash "$PU" --tasks "$tmpd" 2>/dev/null)"; rc=$?
+  out="$(POSSO_USCIRE_PROCESSI=0 bash "$PU" --tasks "$tmpd" 2>/dev/null)"; rc=$?
   if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'USCITA SICURA'; then
     ok "posso-uscire: task tutti conclusi => USCITA SICURA, exit 0"
   else fail "posso-uscire: task conclusi — atteso USCITA SICURA+0, avuto rc=$rc"; fi
-  # J2: IL CASO CHE CONTA — un task senza riga finale e' VIVO, e /exit lo ucciderebbe
+  # J2: IL CASO CHE CONTA (D-90, S1096) — un PROCESSO vivo della CLI, e /exit lo ucciderebbe.
+  #     Il registro dei file e' un dettaglio: la verita' sono i processi. In CI non c'e' nessuna
+  #     CLI, quindi il numero si DICHIARA (POSSO_USCIRE_PROCESSI) e lo strumento lo dice.
   printf 'sto ancora lavorando\n' > "$tmpd/c.output"
-  out="$(bash "$PU" --tasks "$tmpd" 2>/dev/null)"; rc=$?
+  out="$(POSSO_USCIRE_PROCESSI=1 bash "$PU" --tasks "$tmpd" 2>/dev/null)"; rc=$?
   if [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'ATTENDI'; then
-    ok "posso-uscire: un task senza riga finale => ATTENDI, exit 1"
+    ok "posso-uscire: un processo vivo => ATTENDI, exit 1"
   else fail "posso-uscire: task vivo — atteso ATTENDI+1, avuto rc=$rc"; fi
-  # J3: e non deve poter dire USCITA SICURA con un task vivo
+  # J3: e non deve poter dire USCITA SICURA con un processo vivo
   if printf '%s' "$out" | grep -q 'USCITA SICURA'; then
     fail "posso-uscire: un task vivo NON puo' dare USCITA SICURA"
   else ok "posso-uscire: con un task vivo non dice mai USCITA SICURA"; fi
+  # J3-bis: IL REGISTRO NON E' L'INSIEME — un file senza riga finale ma ZERO processi vivi e'
+  #         «concluso o perso», non «in volo»: e' esattamente il falso ATTENDI di D-90
+  out="$(POSSO_USCIRE_PROCESSI=0 bash "$PU" --tasks "$tmpd" 2>/dev/null)"; rc=$?
+  if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'conclusi o persi'; then
+    ok "posso-uscire: file senza fine ma zero processi => USCITA SICURA, e dice «conclusi o persi»"
+  else fail "posso-uscire: file senza fine e zero processi — atteso USCITA SICURA+0 con la ragione, avuto rc=$rc"; fi
   # J4: directory assente => NON-VERIFICATO, exit 2 (mai un verde dal buio)
   out="$(bash "$PU" --tasks "$tmpd/non-esiste" 2>/dev/null)"; rc=$?
   if [ "$rc" = 2 ] && printf '%s' "$out" | grep -q 'NON-VERIFICATO'; then
     ok "posso-uscire: directory dei task assente => NON-VERIFICATO, exit 2"
   else fail "posso-uscire: directory assente — atteso NON-VERIFICATO+2, avuto rc=$rc"; fi
   # J5: i lavori ARMATI non sono un motivo per aspettare — va detto, o il verdetto mente
-  out="$(bash "$PU" --tasks "$tmpd" 2>/dev/null)"
+  out="$(POSSO_USCIRE_PROCESSI=0 bash "$PU" --tasks "$tmpd" 2>/dev/null)"
   if printf '%s' "$out" | grep -q 'NON sono un motivo per aspettare'; then
     ok "posso-uscire: dichiara che deploy e clone armati proseguono comunque"
   else fail "posso-uscire: non dice che i lavori armati non richiedono attesa"; fi

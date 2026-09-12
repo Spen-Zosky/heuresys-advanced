@@ -182,6 +182,12 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
   // information_schema: una richiesta di assunzione e' una POSIZIONE da coprire — posizione,
   // organico, stato, motivo, date, note — e non porta nessun soggetto di persona; `created_by`
   // e' un attore. Le persone del recruiting stanno nei candidati, che hanno la loro classe.
+  // ⚠ #214 F6 (S1097, 2026-09-12) — «hanno la loro classe» era falso per costruzione: la resource
+  // e' UNA e il permesso `job-requisition:read` e' CONDIVISO da tre moduli (job-requisitions,
+  // candidates, candidate-applications). Questa riga e' vera per le requisizioni e basta:
+  // `sys_candidates` porta nome, email, telefono; le candidature hanno per soggetto il
+  // candidato. Persone esterne all'organico, come `leads`: fuori dalla tassonomia dei dipendenti,
+  // e `check_concetti_agente.py` le ESCLUDE dall'agente per nome. Separare il permesso e' di #54.
   "job-requisition": "richiesta di assunzione: una posizione da coprire, non chi la coprira'",
   role: "ruoli RBAC: il permesso, non il titolare",
   mfa_policy: "una politica di tenant è configurazione (misurato in 000315: dichiararla CREDENTIAL toglieva la pagina ai due TENANT_ADMIN reali)",

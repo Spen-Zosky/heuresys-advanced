@@ -125,6 +125,56 @@ sono stati cancellati (divieto): sono diventati rimandi di poche righe a `live-p
       🔬 **Trovata e chiusa una cecità in attesa**: `check_concetti_agente.py` presidiava il caso «parser che non legge più nulla» per `RESOURCE_DATA_CLASS` e **per nessuna delle altre tre**. Cambiando forma, `MULTI` sarebbe tornato `{}` e ogni resource multiclasse sarebbe sparita in silenzio dalla classificazione. Ora la guardia c'è per `MULTI` e per `NO_PERSONE`.
 - [ ] **F6 Consumo della coda dei neutri, un perimetro per volta**
 
+  ### S1097 (2026-09-12) — il QUATTORDICESIMO perimetro, e la testa della coda era un falso
+
+  Coda ri-derivata sull'atlante fresco (da `e818bc8b`): **108 moduli · 13 aperti · 44 in coda
+  (25 neutri)**. In testa ai neutri: `candidate-applications` (2 letture · 3 pagine), poi il pari
+  `enterprise-typing-profiles` / `job-roles`.
+
+  ⚠⚠ **`candidate-applications` — e `candidates` — erano «nessun dato di persona» per un buco del
+  criterio**, la stessa forma di `engagement` (S1083): le loro rotte GET portano
+  `job-requisition:read`, e la resource `job-requisition` sta in `RESOURCE_SENZA_DATI_DI_PERSONA`
+  con una ragione vera **per le requisizioni soltanto**. Il permesso è **condiviso da tre
+  moduli**. Misurato su `information_schema`: `sys_candidates` porta nome, cognome, email,
+  telefono, consenso e conservazione; `sys_candidate_applications` ha per soggetto il candidato
+  (`application_candidate_id`, stadio, motivo di rifiuto). Il criterio mappa modulo → resource →
+  classe, e una dichiarazione scritta per un modulo copriva in silenzio altri due. **Corretto**:
+  i due moduli sono in `ESCLUSI` (V2, elenco esplicito) con la ragione scritta, come `leads` —
+  persone esterne all'organico, fuori dalla tassonomia dei dipendenti; nota accanto alla riga in
+  `data-classes.ts`. Separare il permesso è di `#54`, non di questa apertura.
+
+  Tolti i due, `enterprise-typing-profiles` resta scartato (porta occupata da `decided_by`,
+  vale ancora) e resta **`job-roles`**, l'ultimo dei tre «vocabolari delle persone», con la
+  motivazione già scritta in S1096 (un ruolo è ciò che una persona *ricopre*: si apre per ultimo).
+
+  **Cosa è**: `sys_job_roles`, 176 righe, catalogo delle mansioni; `job_role_tenant_id` (000397)
+  NULL su tutte. Dodici colonne, nessuna soggetto; `created_by`/`updated_by` attori. Due porte
+  **entrambe piene**: `job_role_metadata` non vuoto su 136/176 — 111 con venti chiavi legacy
+  (`salary_min`, `salary_max`, `sap_stell`, `esco_occupation_code`…) **tutte a null**, 25 con
+  `source`/`legacy_job_title`; `job_role_description` popolata su 89/176. Misurato prima di
+  aprire: **0 indirizzi di posta** in nessuna delle due porte.
+
+  ⚠ **Aperto con una guardia — mig `000408`**, `sys.v_ruolo_con_dato_di_persona`, provata rossa
+  su **entrambe** le porte con post-condizione per impronta su 176 righe piene.
+
+  🔬 **Evidenza live, in quest'ordine**:
+  - prova generale sul gemello (`ci-rehearsal.sh`) → **VERDE** a due passate, «000408: sentinella
+    installata e provata su entrambe le porte · 176 ruoli invariati, contenuto identico per
+    impronta», sentinelle **45/45 a zero** (da 44), catena 16 s;
+  - produzione — `pnpm db:migrate:vm --no-pull` → exit 0, **12 s**, «381 applied, 24 skipped»;
+  - dimostrazione — la sentinella dice **0**; 176 ruoli, 89 descrizioni, 136 metadata non vuoti,
+    come prima; `db_health` exit **0**;
+  - mappa rigenerata (`build_derivati.py`): `job-roles` → 2 operazioni (`get`, `get_by_id`,
+    `job_role:read`), `solaLettura: true`; `atlas-resolver.test.ts` 13/13.
+  - ⏳ **non eseguita** la prova col gateway (`live-perimetro.ts`): lo script ha schede per i soli
+    primi quattro perimetri, e dal quinto in poi l'evidenza è quella qui sopra. Dirlo, invece di
+    lasciar credere che le tre domande siano state poste.
+
+  Coda dopo: **14 aperti · 41 in coda (22 neutri)**. Prossimo in testa: `approvals` e `projects`
+  dichiarano ACTIVITY (fuori gara), `enterprise-typing-profiles` resta indietro; i neutri a 1
+  pagina (`activity-classifications`, `advisor`, `blueprint-activations`…) sono la prossima
+  fascia — si ri-deriva all'apertura.
+
   ### S1096 (2026-09-12) — il TREDICESIMO perimetro, il primo fra i «vocabolari delle persone»
 
   Coda ri-derivata sull'atlante fresco (da `344cd461`): **108 moduli · 12 aperti · 45 in coda

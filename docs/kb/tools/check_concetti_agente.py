@@ -117,6 +117,19 @@ ESCLUSI = {
         "superficie di piattaforma: la materializzazione di un tenant",
     "leads":
         "superficie commerciale: contatti raccolti dal sito pubblico, non dato di dominio",
+    # #214 F6 (S1097, 2026-09-12) — la stessa forma del difetto `engagement`: i due moduli
+    # risultavano «nessun dato di persona» perche' le loro rotte GET portano il permesso
+    # `job-requisition:read`, condiviso con le requisizioni, e la dichiarazione in
+    # data-classes.ts e' vera PER LE REQUISIZIONI soltanto. Misurato su information_schema:
+    # `sys_candidates` porta nome, cognome, email, telefono, consenso e conservazione;
+    # `sys_candidate_applications` ha per SOGGETTO il candidato. Persone esterne all'organico,
+    # come `leads`: fuori dalla tassonomia dei dipendenti, e l'agente non le legge.
+    "candidates":
+        "persone esterne all'organico (nome, email, telefono, consenso GDPR): fuori dalla "
+        "tassonomia dei dipendenti come `leads`; il permesso `job-requisition` e' condiviso",
+    "candidate-applications":
+        "candidature: il SOGGETTO e' il candidato (stadio, motivo di rifiuto); stessa ragione "
+        "di `candidates`",
 }
 
 RISERVATE = ("PERSONAL", "COMPENSATION", "SKILL", "EVALUATION")

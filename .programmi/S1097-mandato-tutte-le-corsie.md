@@ -63,8 +63,8 @@ grosso (`#205` F2 → F3 → `#198` T9b); poi `#159` F2 (grosso, standalone, rep
 
 Stato: `[ ]` da fare · `[x]` FATTA con data ed evidenza · `NON FATTA (ragione)`.
 
-- [ ] **F1 Igiene** — **fatto =** `build_derivati.py` verde, staleness check tutto OK
-- [ ] **F2 `#214` F6** — **fatto =** `candidate-applications` misurato (classe corretta se necessario); riga in `agent-perimetri.json`, migrazione in produzione, sentinella a 0, `db_health` verde
+- [x] **F1 Igiene** — **fatto =** `build_derivati.py` verde, staleness check tutto OK — FATTA 2026-09-12 · derivati 3/3 (`696d7022`)
+- [x] **F2 `#214` F6** — **fatto =** `candidate-applications` misurato (classe corretta se necessario); riga in `agent-perimetri.json`, migrazione in produzione, sentinella a 0, `db_health` verde — FATTA 2026-09-12 · `candidates`+`candidate-applications` erano un falso neutro (permesso `job-requisition` condiviso): ESCLUSI nel criterio; quattordicesimo perimetro `job-roles`, mig `000408`; gemello VERDE 45/45; produzione 12 s «381 applied»; sentinella 0; `db_health` exit 0; coda 14 aperti · 41 in coda
 - [ ] **F3 `#149` F4** — **fatto =** `check_verifica_consegne.py` verde e inbox misurata
 - [ ] **F4 `#79` F3** — **fatto =** `check_exposure.py` exit 0 dopo i lavori che popolano
 - [ ] **F5 headline migrazioni** — **fatto =** strumento che ri-deriva la headline in `SOT_STATE §0`, con autoprova, agganciato alla chiusura
@@ -86,6 +86,8 @@ Si scrive qui sotto **prima** di aprire ciascuna voce.
 
 | voce | precondizioni · meccanismo · propagazione · chi · guardia | cosa la misura ha detto |
 |---|---|---|
+| F1 | tunnel su · `build_derivati.py` · commit · io · nessuna scrittura DB | i derivati erano già aggiornati nel contenuto: solo il registro era indietro |
+| F2 | atlante fresco · candidato per rischio crescente + porte misurate + mig con sentinella provata rossa (modello 000407) · gemello → VM → `db_health` · io · post-condizione per impronta; `chi_sorveglia data-classes.ts` = F7 test + `check_concetti_agente` | la testa della coda era un FALSO: tre moduli sotto un permesso solo, e la dichiarazione copriva anche i due che descrivono persone |
 
 ## Fuori da questo ciclo — presentate una volta sola (R24 §5)
 

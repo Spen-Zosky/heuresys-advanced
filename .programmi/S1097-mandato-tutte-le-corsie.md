@@ -73,12 +73,12 @@ Stato: `[ ]` da fare · `[x]` FATTA con data ed evidenza · `NON FATTA (ragione)
 - [x] **F8 `#233`** — **fatto =** `--ingest` idempotente: due corse = un blocco; prova a esiti opposti — FATTA 2026-09-12 · la premessa non era più vera (rifiuto delle proposte di aggiornamento da `7911dde8`, 2026-08-16); aggiunta la prova `lab_inbox.py --selftest` 6/6, sabotata → 1/6 ROSSO; instradata nel cancello (L0). `#233` → DONE (archivio)
 - [x] **F9 `#232`** — **fatto =** colonna di specie nel file che crea + migrazione emendativa, prova generale verde, produzione — FATTA 2026-09-12 · mig `000409` (`kind` + CHECK «una BAND ha un importo», provata a esiti opposti; giornale 29 righe); contratto+filtro; test 19/19 sul gemello (ha colto il service che non inoltrava `kind`); produzione 12 BAND/7 CCNL/22 UNION; `#232` → DONE
 - [ ] **F10 `#76`** — **fatto =** verifica del piano scritta: cluster ancora validi / superati / già fatti, con numeri
-- [ ] **F11 decisioni HOLD** — **fatto =** cinque righe nel register con ragione e data
+- [x] **F11 decisioni HOLD** — **fatto =** cinque righe nel register con ragione e data — FATTA 2026-09-12 · `#206 #4 #8 #39 #52`: HOLD confermati con riga `riesaminata-2026-09-12` e la ragione misurata (trigger non scattati; prezzi e SMTP sono input di Enzo; nessun cliente chiede SSO)
 - [ ] **F12 `#205` F2** — **fatto =** la fase «indirizzi» legge la sitemap/cerca; corsa su `positions` con proposte decise e applicate
 - [ ] **F13 `#205` F3** — **fatto =** frase riconoscibile → zero riscontri nello strato di forma
 - [ ] **F14 `#198` T9b** — **fatto =** azienda non bancaria costruita dal modello generato, prove 11/11 sul gemello poi in produzione
 - [ ] **F15 `#159` F2** — **fatto =** componente pubblicato in `@heuresys/ui`, la console dev lo consuma, secondo consumatore montato
-- [ ] **F16 `#41`** — **fatto =** costo misurato e decisione (esecuzione o WON'T-DO motivato)
+- [x] **F16 `#41`** — **fatto =** costo misurato e decisione (esecuzione o WON'T-DO motivato) — FATTA 2026-09-12 · `cost.json`: 3.931.957 token di input per il run del 2026-07-05; finestra 5h al 31% → un `--update` la porterebbe oltre l'80% da solo. **WON'T-DO**: l'atlante è la SoT, graphify una vista parallela letta dal solo `build_graph_hub.py`; un grafo fresco è lavoro a richiesta, non pendenza
 
 ## Simulazione a 5 domande (R24 §3) — per voce, prima di partire
 
@@ -94,6 +94,8 @@ Si scrive qui sotto **prima** di aprire ciascuna voce.
 | F7 | worktree presenti · `git log main..ramo`, `git diff --stat`, `git status` · register · io; la rimozione è di Enzo · nessuna scrittura | i due commit «unici» sono versioni più vecchie di ciò che main ha già |
 | F8 | HRX_REPO/HRX_LAB onorati da `_radici()` · selftest in processo figlio su lab finto + sabotaggio · verify_gate L0 · io · il selftest scrive solo in un tempdir | il difetto era già corretto da un mese; mancava la prova |
 | F9 | `chi_sorveglia sys_compensation_bands`: 1 sentinella (000325, non toccata), 5 test, 3 seed scrittori, creatore 000019 · ALTER + UPDATE per elenco esplicito + CHECK · gemello → VM · io · guardia ri-verificata al momento (una BAND senza importo fuori elenco blocca), post-condizione per impronta, undo in staging | le 29 righe non hanno consumatori: la specie mancava, non il posto |
+| F11 | register leggibile · riga datata per blocco, lint · commit · io (le decisioni di business restano di Enzo: prezzi, SMTP) · sola scrittura di testo | i cinque trigger sono tutti «manual» o dipendenti da #198: nessuno è scattato |
+| F16 | `cost.json` presente · lettura del costo misurato + `chi_sorveglia graph.json` · register + archivio · io · nessuna esecuzione (costerebbe la finestra 5h) | 3,9M token misurati, non stimati; 5h al 31% |
 | F2 | atlante fresco · candidato per rischio crescente + porte misurate + mig con sentinella provata rossa (modello 000407) · gemello → VM → `db_health` · io · post-condizione per impronta; `chi_sorveglia data-classes.ts` = F7 test + `check_concetti_agente` | la testa della coda era un FALSO: tre moduli sotto un permesso solo, e la dichiarazione copriva anche i due che descrivono persone |
 
 ## Fuori da questo ciclo — presentate una volta sola (R24 §5)

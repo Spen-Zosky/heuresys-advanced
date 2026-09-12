@@ -73,6 +73,7 @@
   - hold-reason: prima si deve poter **sperimentare l'intero processo di creazione** con aziende usa e getta dall'interfaccia web; le persone vere entrano quando il processo regge. Non è un rinvio tecnico né una dipendenza — parole di Enzo: *«mi serve tutto, ma possiamo mettere in attesa "sostituire i segnaposto con le persone vere", per ora»*
   - decided-by: Enzo
   - hold-since: 2026-08-17
+  - riesaminata-2026-09-12 (S1097, mandato «hold» in autonomia): **HOLD confermato**. Il trigger (`#198` T9b) non è scattato — T9b resta ferma perché il modello `MGMT_CONSULTING_SMALL` è vuoto (la ricerca sui domini di contenuto non produce: `#205` F2, S1096). Non è una decisione che posso prendere al posto del trigger: senza il registro dell'origine di una costruzione vera, P4 non ha su cosa lavorare
   - reactivation-trigger: `#198` chiusa (in particolare T9, la prova su un'azienda vera) — da lì P4 ha il registro dell'origine che i suoi T7/T8/T9 pretendono. Oppure, prima: *«riprendi #206»*
   - resta-vero-il-resto: T5 è FATTO (la vista degli scostamenti), e le dipendenze dichiarate non cambiano — T7/T8/T9 di P4 aspettano il registro dell'origine di `#198`, T1-T6 no
   - si-riprende-con: *«riprendi #206»*. Nessun lavoro va rifatto
@@ -379,6 +380,7 @@
   - hold-reason: **non blocca nulla**: la porta pubblica è viva e completa senza pagina prezzi — landing (S1002), one-pager investitori `/investors` e demo guidata `/demo` (S1003) sono **SHIPPED e in produzione**. Ciò che aspettava è **un solo deliverable**, la pagina prezzi, e non si può scrivere senza importi veri: la DoD vieta di chiuderla con numeri finti. Restava in corsia «aspetta te» da **64 giorni** senza che nulla dipendesse da lei
   - decided-by: Claude, su delega esplicita di Enzo (2026-08-25). **La decisione sui prezzi resta di Enzo** — quella non è mia e non lo diventa: qui decido solo che la voce esce dagli elenchi finché quei numeri non esistono
   - hold-since: 2026-08-25
+  - riesaminata-2026-09-12 (S1097, mandato «hold» in autonomia): **HOLD confermato** — l'input mancante sono importi e nomi dei piani, e una delega generica a «decidere per mio conto» non copre il prezzo di vendita: è la decisione di business per eccellenza. Non nomino cifre al posto tuo
   - reactivation-trigger: `{kind: manual}` — Enzo porta importi, nomi dei piani e cosa contiene ciascuno. Da lì la pagina è un deliverable ordinario (stesso flusso di `/investors` e `/demo`), non una voce in attesa
   - resta-eseguibile-e-non-e-in-attesa-di-nessuno: i quattro *v1-deferrals* di `#4` **non** dipendono dai prezzi — interfaccia di gestione dei contatti, osservabilità dell'esca anti-bot, pagina `/privacy`, verifica di accessibilità della landing. Non entrano nel menu (nessuno li ha chiesti) ma si aprono con *«riprendi i deferrals di #4»*. ⚠ Fra questi, `/privacy` è l'unico che vale la pena nominare: il sito **raccoglie contatti** e non ha una pagina privacy — non è un problema di funzionamento, è un problema legale, e la decisione se affrontarlo è di Enzo
   - priority: P1 · effort: per-deliverable · doc: docs/superpowers/specs/2026-06-22-gtm-investor-onepager-and-guided-demo-design.md
@@ -431,6 +433,7 @@
   - **⚠ e soprattutto: l'input che la voce chiedeva non è più ottenibile.** Chiedeva una «app-password Outlook». Microsoft ha ritirato Basic Auth per SMTP sugli account personali `outlook.com` (16 settembre 2024 per i client di terze parti; spegnimento completo di SMTP AUTH **30 aprile 2026**, quattro mesi fa). Le app-password poggiavano su Basic Auth: **non esistono più**. La voce è rimasta 82 sessioni ad aspettare una cosa che nel frattempo aveva smesso di esistere
   - decided-by: Claude, su delega esplicita di Enzo (2026-08-25) — *«se non è bloccante per il funzionamento vorrei non trovarmela più negli elenchi»*
   - hold-since: 2026-08-25
+  - riesaminata-2026-09-12 (S1097, mandato «hold» in autonomia): **HOLD confermato**. Ri-misurato: nessuna pagina web usa ancora `password-reset` (grep su `apps/web/src`: 0 riscontri fuori dal client), e il secondo fattore gira su TOTP (159 fattori, obbligo acceso dal 2026-09-09) senza email. Il mittente SMTP è un segreto che solo tu puoi fornire: WAIT-INPUT sarebbe più onesto di HOLD solo se qualcosa avesse bisogno di spedire — e niente ne ha
   - reactivation-trigger: `{kind: manual}` — il giorno in cui **una funzionalità viva ha bisogno di spedire**: una pagina di recupero password in interfaccia, oppure il digest di `#39`. Non prima: finché nessuno spedisce, configurare un mittente è lavoro senza destinatario
   - quando-si-riprendera-la-domanda-sara-diversa: non più «l'app-password», ma **quale via di invio**. Due strade, e la prima resta «1 mossa» come prometteva la voce originale: **(a)** un servizio di posta transazionale con credenziali SMTP proprie — il transport attuale le accetta così com'è; **(b)** OAuth2 sull'account Microsoft — richiede **prima** di insegnare OAuth2 al mailer, che oggi ha solo `auth: {user, pass}` (`smtp-mailer.ts:125`), quindi non sarebbe più un solo input
   - istruttoria: `.programmi/230-verifica-quattro-attese.md` §V2
@@ -468,14 +471,11 @@
   - **il blocker che portava era anche invecchiato**: diceva «dipende da `#8` (app-password Outlook)», e quella credenziale **Microsoft non la emette più** (Basic Auth SMTP ritirato per gli account personali, spegnimento completo il 30 aprile 2026). Il trigger `«#8 risolto (credenziale fornita da Enzo)»` non poteva più scattare in nessun caso
   - decided-by: Claude, su delega esplicita di Enzo (2026-08-25)
   - hold-since: 2026-08-25
+  - riesaminata-2026-09-12 (S1097): **HOLD confermato**, stessa ragione di `#8`, che la precede
   - reactivation-trigger: `{kind: manual}` — **la stessa cosa che riattiva `#8`**: una funzionalità viva che ha bisogno di spedire. Le due si riprendono insieme, `#8` per prima (serve un mittente prima di avere qualcosa da mandare)
   - resta-vero: transport pronto, chassis testato — nessun lavoro fatto va perso · doc: `docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md` §B4 · effort quando si riprende: ~2h
 - **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
-- **#41 graphify — top-up semantico (26 chunk mancanti)** · status: GATED
-  - blocker: limite di spesa mensile Claude colpito durante il run S1016 (26/52 chunk estratti; ~201 file con estrazione previous-run o solo-AST)
-  - ⚠ **MISURATO S1096 (2026-09-12): il blocco non e' piu' il limite di spesa, e il «top-up di 26 chunk» e' superato.** Dal run del 2026-07-05 sono cambiati **1.433 file** di codice (`git log --since=2026-07-05 --name-only -- apps packages db | sort -u`, 1.401 commit): i 26 chunk mancanti descriverebbero un codice che non esiste piu'. L'unico top-up sensato e' un `--update` intero, che l'ultimo run misura in ~3,9M token di input sul budget dell'abbonamento — cioe' sulla finestra 5h che il guardiano sorveglia (misurata al 28% quando si e' deciso di non lanciarlo). Non e' un lavoro da coda di sessione: e' un lavoro da sessione dedicata con finestra piena, e va deciso sapendo che l'atlante (`build_atlas.py`) e' oggi la SoT interrogabile e graphify una vista parallela (S1016)
-  - unblock-trigger: {kind: manual} — limite di spesa resettato/alzato (claude.ai/settings/usage)
-  - doc: graphify-out/PENDING_SEMANTIC_TOPUP.md · effort post-reset: ~0.5h (chunk fatti = cache; girano solo i mancanti, poi merge+recluster)
+- **#41 graphify — top-up semantico (26 chunk mancanti)** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 
 ### Serie C+D+E+F+G (S1018 — selezione Enzo "includile tutte", dossier `docs/product/DEVELOPMENT_LINES_{C,D,E,F,G}_*.md`)
 
@@ -495,6 +495,7 @@
   - **la voce era anche mal tagliata, e questo è il motivo per cui è rimasta ferma 62 sessioni.** Misurato in S1080: il **modello dati c'è già dalla fondazione** — `sys.sys_auth_identities` (mig `000005`) ammette `LOCAL` / `SSO_OIDC` / `SSO_SAML` per vincolo `CHECK`, con 160 identità attive; l'**implementazione è zero** (`grep -ril "oidc|saml|sso"` su `apps/api/src`, `apps/web/src`, `packages/shared/src` → un solo file, ed è la vetrina statica `showcase/login-page`). L'input di Enzo serviva **solo all'ultimo passo**, la dimostrazione LIVE che la DoD pretende: tutto il lavoro a monte — rotte OIDC, scambio del codice, aggancio a `sys_auth_identities`, provisioning al primo accesso — non era bloccato da niente. La voce stava ferma al 100% per un input che serve al 10% finale
   - decided-by: Claude, su delega esplicita di Enzo (2026-08-25)
   - hold-since: 2026-08-25
+  - riesaminata-2026-09-12 (S1097): **HOLD confermato** — il trigger è un cliente che chiede la federazione, e nel register non ce n'è uno (`sys_leads` non porta richieste di SSO). Non lo invento
   - reactivation-trigger: `{kind: manual}` — un cliente (o un tenant di prospetto) che **chiede di entrare con le identità della propria azienda**. Da lì il fornitore d'identità è **suo**, non una risorsa che Enzo debba procurare: è il committente a portarlo, e il problema dell'input sparisce da sé
   - da-non-riscoprire: quando si riprenderà, il primo passo **non** è procurare un fornitore d'identità — è costruire le rotte contro il modello che già esiste. Un client OAuth Google è gratuito e Azure AD ha un livello gratuito: la dimostrazione finale è il passo meno costoso, non il più
   - priority-quando-tornera: P3 · doc: `docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md` §E2 · istruttoria: `.programmi/230-verifica-quattro-attese.md` §V4

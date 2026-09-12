@@ -57,7 +57,7 @@ Stato: `[ ]` da fare · `[x]` FATTA con data ed evidenza · `NON FATTA (ragione)
 - [x] **F1 Igiene** — **fatto =** `build_derivati.py` verde; RBAC-map in `SOT_STATE §0` = live — FATTA 2026-09-12 · derivati 3/3 (`e7138744`); il drift era un falso del grassetto (`**1015** map`), corretta la forma: staleness check 9/9 OK
 - [x] **F2 `#149` F4 — 4 consegne** — **fatto =** ogni consegna citata porta un esito diverso da NON-VERIFICATO, scritto nel file e letto da `check_verifica_consegne.py` — FATTA 2026-09-12 · 3 CONFERMATO + 1 PARZIALE (p3: smentito «tutte le 70.959 righe OLDDB::»); strumento VERDE exit 0
 - [x] **F3 `#214` F6 — tredicesimo perimetro** — **fatto =** riga in `agent-perimetri.json`, migrazione in produzione, sentinella a 0, `db_health` verde — FATTA 2026-09-12 · `skill-categories`, mig `000407`; gemello VERDE 44/44; produzione 12 s «380 applied»; sentinella 0; `db_health` exit 0; coda 13 aperti · 44 in coda
-- [ ] **F4 `#79` F3 — il buco del cancello** — **fatto =** `check_exposure.py` conta anche le tabelle popolate da migrazione; autoprova a esiti opposti; verde sul processo
+- [x] **F4 `#79` F3 — il buco del cancello** — **fatto =** `check_exposure.py` conta anche le tabelle popolate da migrazione; autoprova a esiti opposti; verde sul processo — FATTA 2026-09-12 · seconda fonte (86 tabelle da migrazione), 3 vie di lettura nuove, autoprova 13 su 13, `exposure_waivers.txt` nato con 7 deroghe motivate; 140 popolate · 133 lette · 7 esentate · 0 scoperte, exit 0
 - [ ] **F5 `#205` F2 — `positions` percorso** — **fatto =** corsa di ricerca eseguita, proposte decise e applicate, registro fonti aggiornato
 - [ ] **F6 `#205` F3 — lo strato di forma** — **fatto =** frase riconoscibile cercata nello strato di forma → zero riscontri
 - [ ] **F7 `#198` T9b** — **fatto =** `sys_blueprint_content_*` > 0; costruzione 11/11 sul gemello; poi in produzione con archiviazione (E28)
@@ -74,7 +74,10 @@ Si scrive qui sotto **prima** di aprire ciascuna voce.
 |---|---|---|
 | F1 | tunnel su · `build_derivati.py` + forma qualificata in §0 · commit · io · nessuna scrittura distruttiva | il drift RBAC era un falso del grassetto |
 | F3 | atlante fresco · candidato per rischio crescente + porte misurate + mig con sentinella provata rossa (modello 000405) · gemello → VM → `db_health` · io · post-condizione per impronta | fra job-roles e skill-categories la distanza da una persona NON è la stessa: la categoria è un livello di tassonomia, il ruolo si ricopre |
+| F4 | cancello verde oggi · seconda fonte + tre vie di lettura + autoprova · commit · io · nessuna scrittura DB; `chi_sorveglia check_exposure.py` = nessuno | 11 scoperte grezze, 3 falsi (costante, funzione, trigger), 1 falso del rollback commentato; 7 deroghe |
 | F2 | 4 file in `inbox/ingerite/` · misura sul vivo + marker letto da `check_verifica_consegne.py` · lab fuori repo, piano #149 nel repo · io · solo scritture di testo | p3 poggiava su un numero falso (OLDDB 64.482/70.959) con conclusione giusta |
 
 ## Fuori da questo ciclo — presentate una volta sola (R24 §5)
+
+- **`sys_valutazione_condivisione_eccezioni` ha 568 righe e nessuna API la espone** (trovato estendendo il cancello #79). Oggi è in deroga come «attestazione di governo»; se HR deve vedere quali valutazioni sono coperte da eccezione, serve un endpoint. Lo vuoi nel prossimo ciclo?
 

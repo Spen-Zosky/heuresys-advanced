@@ -1,0 +1,17 @@
+# Deroghe del cancello di esposizione (#79) — una tabella per riga, col MOTIVO dopo `#`.
+# Una riga senza motivo NON e' una deroga: lo strumento la ignora e la tabella resta scoperta.
+#
+# Nato il 2026-09-12 (#79 F3), quando le migrazioni sono diventate la seconda fonte delle
+# «scritte»: sette tabelle popolate da migrazione senza alcun lettore nell'API. Nessuna e' un
+# dato di prodotto: sono registri della catena, allowlist delle sentinelle e giornali tecnici,
+# letti da viste che `db_health.py` interroga o da strumenti in `docs/kb/tools/`. Il criterio
+# per stare qui: la tabella serve a GOVERNARE il database, non a descrivere l'azienda. Se una
+# di queste diventa contenuto che un utente deve vedere, la riga si toglie e si scrive l'endpoint.
+
+sys_schema_migrations               # registro della catena di migrazione (000039): lo legge il migratore, non un utente
+sys_reconciliation_registry         # registro di riconciliazione degli oggetti (000062): letto da v_reconciliation_status e dal cancello 000062, e' governo dello schema
+sys_tenant_boundary_author_columns  # allowlist delle colonne-autore per la sentinella v_tenant_boundary_violations_full (000386): configura una guardia, non e' un dato
+sys_industry_forbidden_terms        # vocabolario della sentinella v_contenuto_fuori_settore (000388, I21): configura una guardia, non e' un dato
+sys_translatable_field              # registro dei campi traducibili (000190): letto da v_reference_translation_coverage/orphans e da i18n:check; e' metadato dello schema
+sys_auth_mfa_exemption_audit        # giornale di audit scritto dal trigger di sys_auth_mfa_exemptions (000118): si legge con psql in un'indagine di sicurezza, mai dal prodotto
+sys_valutazione_condivisione_eccezioni  # registro di eccezione di governo (000396, decisione di Enzo 2026-09-09): letto da v_valutazione_condivisione_eccezioni_coperte per la sentinella; e' un'attestazione, non contenuto — se dovra' essere visibile in prodotto, questa riga cade e nasce l'endpoint

@@ -45,6 +45,27 @@ cui viene creata: trovarla sei sessioni dopo costa il triplo, perché nel fratte
   Prima ne mancavano due. Non è materia di questo cancello (che parte dai *dati* e cerca
   l'API), ma è la stessa proprietà vista dall'altro capo, e conviene averla scritta il
   giorno in cui è diventata vera.
+      ▸ **Eseguito il 2026-09-12 (S1096) — e il buco dichiarato in S1083 è CHIUSO.** Le
+      migrazioni sono la seconda fonte delle «scritte» (`INSERT INTO`/`COPY` su `sys.sys_*`,
+      etichettate `mig:000NNN`; un `UPDATE` non conta, o ogni backfill diventerebbe una
+      scrittura da esporre). Misurato prima di estendere: **86** tabelle popolate da migrazione,
+      **11** senza `FROM`/`JOIN` nell'API — e **tre erano falsi scoperti**, perché il cancello
+      sapeva leggere in un modo solo. Tre vie di lettura in più, ognuna con un caso che passa e
+      uno che non passa nell'autoprova (`--selftest`, **13 su 13**): ② la costante di tabella
+      (`profilo.ts`: `tabella: "sys.sys_blueprint_content_job_roles"` poi `FROM ${cfg.tabella}`),
+      ③ una funzione/vista SQL invocata dall'API (`sys_blueprint_family_for_activity_class`),
+      ④ il trigger su una tabella letta (`sys_auth_mfa_exemption_eligible_users` via il trigger
+      di `sys_auth_mfa_exemptions`). 🔬 Trovato costruendo: la 000284 porta un blocco di rollback
+      **commentato** con `CREATE OR REPLACE FUNCTION …` e ridefiniva la funzione con un corpo
+      vuoto — le righe `--` si tolgono prima di cercare oggetti, e l'autoprova lo pretende.
+      Le **7** rimaste sono registri della catena, allowlist di sentinelle e giornali tecnici:
+      nasce `exposure_waivers.txt` (il file che il cancello leggeva e che **non esisteva**),
+      una riga per tabella col motivo. Esito: **140 popolate (73 seed · 86 mig) · 133 lette ·
+      7 esentate · 0 scoperte, exit 0** letto sul processo.
+      ⚠ Reperto fuori da questa voce: `sys_valutazione_condivisione_eccezioni` ha **568 righe**
+      (una per valutazione completata mai condivisa, mig 000396) e nessuna API la espone: la
+      deroga lo dichiara «attestazione di governo», ma 568 attestazioni che HR non può vedere
+      dal prodotto sono un candidato all'esposizione, non un dettaglio.
       ▸ **Eseguito il 2026-08-28 (S1083)** dopo le quattro migrazioni del blocco A, di cui **due
       popolano davvero**: `000361` (requisiti formativi delle posizioni del rischio) e `000362`
       (buste paga del tenant di piattaforma). Cancello: **73 tabelle scritte, 73 lette, 0 non

@@ -9,6 +9,7 @@
  * workflow — l'amministratore sa che la valutazione esiste, non cosa dice.
  */
 import { z } from "zod";
+import { queryBoolean } from "./_query-boolean.js";
 
 /**
  * L'ECCEZIONE DI CONDIVISIONE (mig 000396, decisione di Enzo 2026-09-09): una valutazione
@@ -76,7 +77,7 @@ export const PerformanceReviewListQuerySchema = z.object({
   type: z.string().max(32).optional(),
   status: z.string().max(32).optional(),
   /** solo le valutazioni coperte da un'eccezione di condivisione (registro 000396) */
-  soloEccezioni: z.coerce.boolean().optional(),
+  soloEccezioni: queryBoolean().optional(),
   limit: z.coerce.number().int().min(1).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
 });

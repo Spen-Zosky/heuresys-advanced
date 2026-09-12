@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `e818bc8b` (2026-09-12T17:44:01+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `20592aa4` (2026-09-12T22:39:52+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 644 |
 | Pagine web | 129 |
 | Schemi shared | 118 |
-| Tabelle DB | 311 (vuote: 18) |
-| Viste / matview | 58 / 0 |
+| Tabelle DB | 312 (vuote: 18) |
+| Viste / matview | 59 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 280 |
 
 ## Moduli API
@@ -80,7 +80,7 @@
 | organization-unit-kpi-templates | /v1/organization-unit-kpi-templates | 4 | 3 | 3 | 1 |
 | organization-unit-processes | /v1/organization-unit-processes | 4 | 3 | 4 | 2 |
 | organization-units | /v1/organization-units | 5 | 4 | 1 | 1 |
-| performance-reviews | /v1/performance-reviews | 2 | 1 | 2 | 2 |
+| performance-reviews | /v1/performance-reviews | 2 | 1 | 3 | 2 |
 | position-career-paths | /v1/position-career-paths | 4 | 3 | 3 | 1 |
 | position-succession-relevance | /v1/position-succession-relevance | 4 | 3 | 2 | 1 |
 | positions | /v1/positions | 16 | 4 | 12 | 3 |

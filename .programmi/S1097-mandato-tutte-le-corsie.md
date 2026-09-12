@@ -4,7 +4,8 @@
 autonomia e automaticamente prendendo decisioni per mio conto, nell'ordine che ritieni più
 appropriato. l'unico guardiano che comanda è quello della capienza.»*
 
-> **stato**: IN CORSO
+> **stato**: CHIUSO
+> **chiuso**: 2026-09-12 — 12 voci fatte su 16 (F12 PARZIALE: lo strumento sì, la corsa no); le 3 non fatte portano la ragione misurata e vivono nel piano della loro voce. CHIUSO vuol dire «la sessione ha finito», non «il lavoro è finito» (D-92). Misura alla chiusura: guardiano `mancano 193.246 token · 5h: mancano 43.0 punti`; nessuna voce rimasta sta a fase intera nel residuo meno la chiusura.
 > **registro di sessione** — cronaca di ciò che si fa, non il programma di una voce: non
 > dichiara `item` di proposito (D-92). Le fasi che restano aperte a fine sessione vivono già nel
 > piano della loro voce: questo file le nomina, non le possiede.

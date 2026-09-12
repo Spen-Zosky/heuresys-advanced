@@ -13,10 +13,51 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 ### Delta S1093 (2026-09-08/09) — la CI rossa, i tre rimedi all'instabilità, le PR Dependabot
 
-**Numeri ri-derivati dal vivo il 2026-09-12**: migrazioni su disco **404** (max `000407`) · file di test
-API **272** · moduli API **108** · perimetri dell'agente aperti **13** · viste `v_*` **54** · HEAD `e818bc8b`.
+**Numeri ri-derivati dal vivo il 2026-09-12 (sera)**: migrazioni su disco **406** (max `000409`) · file di test
+API **272** · moduli API **108** · perimetri dell'agente aperti **14** · viste `v_*` **55** · HEAD `20592aa4`.
 
 ---
+
+## S1097 (2026-09-12, sera) — il mandato «tutte le corsie»: dodici voci su sedici, un falso neutro nella coda dell'agente, e il piano zero-pendenze finalmente verificato
+
+**Mandato di Enzo** (*«esegui tutti da P1 a P3, #198, #41, hold e fuori registro … l'unico guardiano
+che comanda è quello della capienza»*), registro `.programmi/S1097-mandato-tutte-le-corsie.md`.
+Nove commit da `696d7022` a `20592aa4` (pre-chiusura). Misure ri-derivate alla chiusura: 108 moduli API ·
+**406** migrazioni (`000001..000409`) · 272 file di test API · **55** viste `v_*` · perimetri
+dell'agente **14** · RBAC 14/231/1015 · registro debiti **0 aperti** · register: 6 ACTIVE (con `#76`
+riattivata) · 1 GATED · 2 WAIT-INPUT · 5 HOLD.
+
+- **`#214` F6 — quattordicesimo perimetro `job-roles`** (mig `000408`), ma prima **la testa della coda
+  era un falso**: `candidates` e `candidate-applications` risultavano «senza dato di persona» perché
+  le loro rotte portano il permesso `job-requisition:read`, **condiviso** con le requisizioni, e la
+  dichiarazione in `data-classes.ts` vale per le requisizioni soltanto — `sys_candidates` ha nome,
+  email, telefono. Stessa forma del difetto `engagement` (S1083): esclusi per nome nel criterio, come
+  `leads`. Sentinella `v_ruolo_con_dato_di_persona` su due porte piene (metadata legacy tutto a null
+  su 111 righe), provata rossa con impronta su 176 righe; gemello 45/45, produzione 12 s.
+- **Il registro di eccezione delle valutazioni (000396) è nel prodotto**: `condivisioneEccezione`
+  esce con la valutazione che copre (non mascherato: governo del percorso), filtro `soloEccezioni`,
+  la pagina `/performance` lo mostra; 9/9 sul gemello; deroga `#79` tolta. ⏳ E2E scritto, non
+  eseguito qui: **`next.config.js` in dev proxyava a sé stesso** (corretto: `process.env.PORT` sotto
+  `next dev` è la porta del web) e poi il tunnel di casa era degradato (7,8 s per una `count`).
+- **`#232` DONE** (mig `000409`): la specie di una riga di `sys_compensation_bands` si **dichiara**
+  (`kind` BAND/CCNL/UNION) e una BAND senza importo è impossibile per CHECK, provata a esiti opposti;
+  giornale 29 righe; produzione 12 BAND · 7 CCNL · 22 UNION. Il test nuovo ha colto il `kind` non
+  inoltrato dal service.
+- **`#233` DONE**: la premessa non era più vera dal 2026-08-16; aggiunta la prova (`lab_inbox.py
+  --selftest` 6/6, sabotata 1/6), instradata nel cancello. **`#240` → WAIT-INPUT**: i due worktree
+  gov portano solo contenuto superato da `main`; resta la rimozione, che è tua.
+- **`#76` riattivata**: la sessione preliminare di verifica del piano zero-pendenze è **fatta** — un
+  agente in sola lettura ha verificato i 216 cluster aperti uno per uno: **49 già fatti · 10 superati
+  (I12) · 153 validi = 974 h · 4 non misurabili** (`.programmi/76-verifica-piano-zero-pendenze.md`).
+- **`#41` WON'T-DO** per misura (3,9 M token di input nel run del 2026-07-05; finestra 5h al 31%);
+  **`#206 #4 #8 #39 #52` HOLD confermati** con la ragione datata.
+- **`#205` F2 PARZIALE**: la fase «indirizzi» ora **legge la mappa del sito** delle fonti ammesse
+  (passo ⓪ nell'API, stesso lettore delle pagine, candidati reali al modello, scarto per costruzione
+  nel gateway; unit 17/17) — la corsa su `positions` resta da eseguire.
+- Strumenti nuovi: `aggiorna_numeri_sot.py` (la headline di questa §0 la riscrive lui, chiude la
+  open-Q di S1094-S1096) e due suite L0 nel router del cancello.
+- Non fatte per capienza (misurata): `#159` F2 (~250k; il repo `ux-design-shared` è **libero**: la
+  sessione registrata era un pid riusato), `#205` F3, `#198` T9b.
 
 ## S1096 (2026-09-12) — il mandato «P1→P3, debiti, gated»: sei voci su undici, e la ricerca percorsa fino al suo limite vero
 

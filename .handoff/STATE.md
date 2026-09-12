@@ -1,40 +1,37 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: S1096 (2026-09-12, terza corsa). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: S1097 (2026-09-12, sera). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-Mandato di Enzo: P1→P3, poi i debiti aperti e i due gated, in autonomia col solo guardiano della
-capienza. Registro in `.programmi/S1096-mandato-p1-p3-debiti-gated.md`: **sei voci su undici**.
-`#149` F4 sulle quattro consegne rimaste (una PARZIALE); tredicesimo perimetro dell'agente
-(`skill-categories`, mig `000407`); il buco del cancello di esposizione chiuso (le migrazioni che
-popolano ora si vedono); **D-90 e D-91 risolti** — il registro debiti è a zero. `#205` F2 è stata
-**percorsa davvero** e ha trovato due difetti del motore di ricerca (corretti), ma produce zero
-proposte per la consulenza: la fase «indirizzi» indovina i percorsi. `#198` T9b resta ferma di
-conseguenza; `#41` è superato dai fatti. Il cancello locale è stato **fermato apposta**: la
-verifica lunga si legge dal linux-pc dopo la propagazione.
+Mandato di Enzo: tutte le corsie P1→P3, `#198`, `#41`, i HOLD e i fuori registro, in autonomia
+col solo guardiano della capienza. Registro in `.programmi/S1097-mandato-tutte-le-corsie.md`:
+**dodici voci su sedici**, una parziale. La coda dell'agente aveva in testa un falso neutro
+(`candidates` sotto un permesso condiviso: escluso, poi quattordicesimo perimetro `job-roles`);
+il registro di eccezione delle valutazioni è entrato nel prodotto; `#232` e `#233` chiuse, `#41`
+WON'T-DO per misura, `#76` riattivata dopo la verifica di tutti i 216 cluster (153 validi =
+974 h); la fase «indirizzi» della ricerca ora legge le mappe dei siti, ma la corsa non è stata
+eseguita. Non fatte per capienza: `#159` F2, `#205` F3, `#198` T9b.
 
 ## Top priorities
 
-1. **`#250` — Enzo non entra in produzione dal browser** (WAIT-INPUT): serve la tua conferma a
-   cancellare il tuo fattore TOTP; al login successivo ti ri-iscrivi col tuo authenticator.
-2. **La ricerca deve saper cercare** (`#205` F2 → `#198` T9b): la fase «indirizzi» del gateway
-   indovina gli URL (metà sono 404) e per un settore non bancario non trova pagine utili. Serve
-   uno strumento di ricerca o una sitemap nel gateway, **oppure** le tre corse di proposte-fonte
-   (`7550b570`, `1c830468`, `1fad2338`, sul gemello) presentate a te. E `claude login` su gemello
-   e VM: la sessione OAuth è scaduta su entrambi (misurato).
-3. **`#159` F2** — il componente del ponte in `ux-design-shared` (~250k): repository libero e
-   capienza piena.
+1. **`#159` F2 — il componente del ponte in `ux-design-shared`** (~250k): il repo è **libero**
+   (misurato: la sessione registrata era un pid riusato) e la capienza a inizio sessione è piena.
+2. **`#205` F2 — la corsa su `positions`** con la fase «indirizzi» che ora legge le mappe dei
+   siti: una corsa con `percorri-dominio.mts` (modello su Windows, API+lettore sul gemello via
+   `ssh -R 8790`) e leggere `fonti` nell'esito. Se produce, `#205` F3 e `#198` T9b si sbloccano.
+3. **`#76` F2 — riportare i 59 verdetti nel piano** zero-pendenze (49 già fatti, 10 superati) e
+   ri-contare con `zp_state.py piano` prima di qualunque ondata.
 
-▸ Poi: `#214` F6 (prossimo `job-roles`, con la motivazione già scritta) · `#149` F4 (continuativo,
-oggi tutto verde) · `#41` (GATED: il top-up è superato, serve un `--update` intero) · Bundle Cowork fase 4
-(B13 dossier persona, B15 censimento API↔pagine, B16 scheda cliente: da progettare).
+▸ Poi: `#214` F6 (coda ri-derivata: 22 neutri, i prossimi sono a 1 pagina) · `#149` F4 e `#79` F3
+(continuativi, oggi verdi) · `#240` e `#250` aspettano un tuo sì.
 
 ## Open questions
 
 - ⏳ **SOSPESA (Enzo)**: dove custodire la chiave del collaudo; rotazione di `MFA_ENCRYPTION_KEY`.
-- **`sys_valutazione_condivisione_eccezioni` ha 568 righe e nessuna API la espone**: oggi in
-  deroga come attestazione di governo. Se HR deve vederle dal prodotto, serve un endpoint.
+- **`#240`**: sì o no alla rimozione dei due worktree `gov/w1` `gov/w2` (contenuto superato da main).
+- **Il `claude` del gemello e della VM** ha la sessione OAuth scaduta (S1096): senza, la corsa di
+  `#205` gira solo col modello su Windows. Vuoi ri-loggare le due macchine?
 - **Igiene fuori repo**: `C:\Git\` porta ~29 log di sessioni CLI e
   `.handoff/session-journal.recovered.ndjson` del 6 settembre è già consolidato. Mai cancellati
   senza il tuo sì.
@@ -43,10 +40,10 @@ oggi tutto verde) · `#41` (GATED: il top-up è superato, serve un `--update` in
 
 ```bash
 python docs/kb/tools/session_start.py
-python docs/kb/tools/verify_gate.py check                 # atteso: da verificare (fermato apposta: si legge dal linux-pc)
-python docs/kb/tools/check_exposure.py --selftest         # 13/13 · poi senza flag: 140/133/7/0
-python docs/kb/tools/build_index.py --selftest            # 5/5
-bash scripts/posso-uscire.sh --selftest                   # 7/7
-python docs/kb/tools/check_concetti_agente.py             # 13 aperti · 44 in coda
-bash scripts/verifica-deploy.sh                           # DEPLOYATO/IN-VOLO/CI-ROSSA/DISALLINEATO/NON-VERIFICATO
+python docs/kb/tools/aggiorna_numeri_sot.py --check         # atteso: exit 0 (§0 allineata)
+python docs/kb/tools/check_concetti_agente.py               # atteso: 14 aperti · 41 in coda
+python docs/kb/tools/lab_inbox.py --selftest                 # 6/6
+python docs/kb/tools/check_exposure.py                       # 0 lacune
+cd apps/api && pnpm exec vitest run -c vitest.unit.config.ts test/unit/research-mappa-del-sito.unit.test.ts   # 8/8
+bash scripts/verifica-deploy.sh                              # DEPLOYATO/IN-VOLO/CI-ROSSA/DISALLINEATO/NON-VERIFICATO
 ```

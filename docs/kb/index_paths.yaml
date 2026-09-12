@@ -1,16 +1,16 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-12T15:47:41Z da docs/kb/tools/build_index.py
+# generato: 2026-09-12T20:42:32Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-12T15:47:41Z"
-  total_files: 3438
+  generated_at: "2026-09-12T20:42:32Z"
+  total_files: 3445
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 38
     api-core: 34
-    api-module: 385
+    api-module: 386
     ci: 19
     claude-config: 37
     config: 203
@@ -18,12 +18,12 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 404
+    db-migration: 406
     db-other: 8
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 686
+    doc-canonical: 689
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -31,13 +31,13 @@ meta:
     shared-pkg: 4
     shared-schema: 118
     showcase-source: 13
-    test: 421
+    test: 422
     ux-design-archive: 80
     web-source: 255
   status_counts:
     archive: 593
     external-archive: 50
-    live: 2795
+    live: 2802
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2088,6 +2088,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\research\sorgenti\index.ts'
     root: repo
     rel: 'apps/api/src/modules/research/sorgenti/index.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\research\sorgenti\mappa-del-sito.ts'
+    root: repo
+    rel: 'apps/api/src/modules/research/sorgenti/mappa-del-sito.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -8835,6 +8841,18 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000408_un_ruolo_non_deve_poter_contenere_persone.sql'
+    root: repo
+    rel: 'db/migrations/000408_un_ruolo_non_deve_poter_contenere_persone.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000409_una_tabella_due_specie_la_specie_si_dichiara.sql'
+    root: repo
+    rel: 'db/migrations/000409_una_tabella_due_specie_la_specie_si_dichiara.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -10677,6 +10695,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\76-verifica-piano-zero-pendenze.md'
+    root: repo
+    rel: '.programmi/76-verifica-piano-zero-pendenze.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\79-cancello-di-esposizione.md'
     root: repo
     rel: '.programmi/79-cancello-di-esposizione.md'
@@ -10764,6 +10788,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\S1096-mandato-p1-p3-debiti-gated.md'
     root: repo
     rel: '.programmi/S1096-mandato-p1-p3-debiti-gated.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1097-mandato-tutte-le-corsie.md'
+    root: repo
+    rel: '.programmi/S1097-mandato-tutte-le-corsie.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -12024,6 +12054,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\storia36\DOSSIER_REGISTRY.md'
     root: repo
     rel: 'docs/kb/storia36/DOSSIER_REGISTRY.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\aggiorna_numeri_sot.py'
+    root: repo
+    rel: 'docs/kb/tools/aggiorna_numeri_sot.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -17790,6 +17826,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\unit\research-engine.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/research-engine.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\research-mappa-del-sito.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/research-mappa-del-sito.unit.test.ts'
     category: test
     status: live
     provenance: git-tracked

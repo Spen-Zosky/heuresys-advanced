@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-12T15:47:41Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3438**
+**Generato**: 2026-09-12T20:42:32Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3445**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -10,7 +10,7 @@
 |---|---|
 | ADR | 38 |
 | api-core | 34 |
-| api-module | 385 |
+| api-module | 386 |
 | ci | 19 |
 | claude-config | 37 |
 | config | 203 |
@@ -18,12 +18,12 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 404 |
+| db-migration | 406 |
 | db-other | 8 |
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 686 |
+| doc-canonical | 689 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -31,10 +31,10 @@
 | shared-pkg | 4 |
 | shared-schema | 118 |
 | showcase-source | 13 |
-| test | 421 |
+| test | 422 |
 | ux-design-archive | 80 |
 | web-source | 255 |
-| **TOTALE** | **3438** |
+| **TOTALE** | **3445** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 2795 |
+| live | 2802 |
 
 ## File per categoria
 
@@ -397,6 +397,7 @@
 - `D:\heuresys-advanced\apps\api\src\modules\research\service.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\research\sorgenti\gateway.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\research\sorgenti\index.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\research\sorgenti\mappa-del-sito.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\research\sources.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\research\web-reader.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\review-cycles\repository.ts` · *live* · git-tracked
@@ -1545,6 +1546,8 @@
 - `D:\heuresys-advanced\db\migrations\000405_un_modello_operativo_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000406_il_recruiting_ha_una_voce_di_menu.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000407_una_categoria_di_competenza_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000408_un_ruolo_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000409_una_tabella_due_specie_la_specie_si_dichiara.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1867,6 +1870,7 @@
 - `D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\54-recruiting-ats.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\69-residui-staging-wave1.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\76-verifica-piano-zero-pendenze.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\79-cancello-di-esposizione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\92-ciclo-valutazione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\99-domini-gerarchici-funzionali.md` · *live* · git-tracked
@@ -1882,6 +1886,7 @@
 - `D:\heuresys-advanced\.programmi\S1093-tre-rimedi-instabilita.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1095-mandato-p1-p3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1096-mandato-p1-p3-debiti-gated.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1097-mandato-tutte-le-corsie.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked
@@ -2092,6 +2097,7 @@
 - `D:\heuresys-advanced\docs\kb\storia36\DOMINIO_FORMAZIONE_OBBLIGATORIA.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\storia36\DOMINIO_PREMIO_VARIABILE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\storia36\DOSSIER_REGISTRY.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\aggiorna_numeri_sot.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\atlante_fresco.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\atlas-full-sweep.workflow.js` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\api_c1.yaml` · *live* · git-tracked
@@ -3077,6 +3083,7 @@
 - `D:\heuresys-advanced\apps\api\test\unit\research-difese.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\research-domini-contenuto.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\research-engine.unit.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\unit\research-mappa-del-sito.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\research-ponte.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\research-sorgente-gateway.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\research-sources.unit.test.ts` · *live* · git-tracked

@@ -393,7 +393,8 @@
 - **#9/#10/#11 audit forense 100X** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#64 R2 data-completeness (condizione finance-readiness #2)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#65 NACE integrità parent (F-A06)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
-- **#76 Piano «zero pendenze» — esecuzione a ondate** · status: HOLD
+- **#76 Piano «zero pendenze» — esecuzione a ondate** · status: ACTIVE  ·  ↦ `.programmi/76-verifica-piano-zero-pendenze.md`
+  - riattivata-2026-09-12 (S1097, mandato «hold» in autonomia): **la sessione preliminare di verifica è stata fatta** — non da Enzo, per delega esplicita di quel giorno. Tutti i 216 cluster aperti verificati uno per uno (agente delegato, 345k token, sola lettura): **49 GIÀ-FATTO** (chiusi da lavoro successivo mai riportato nel piano), **10 SUPERATI** (quasi tutti da I12: chiedevano import dal legacy), **153 VALIDI = 974,2 h** (~162 sessioni), **4 NON-MISURABILI** (2 vogliono SSH, 2 una scrittura). Il piano dichiarava 216 aperti/904 h: il residuo vero è più corto di numero e più lungo di ore, perché W6 (437 h, decisioni di business) non si è sbloccato da solo. **Prossimo passo, prima di qualunque ondata**: riportare i 59 verdetti nel piano (F2 del programma) e ri-contare con `zp_state.py piano`
   - hold-reason: **Decisione di Enzo (2026-08-14)** — prima di riprendere le ondate serve una **sessione preliminare di verifiche e aggiustamenti** sul piano stesso. Il piano ha 258+ cluster censiti in S1029 e ri-derivati più volte; non si riparte a eseguire ondate finché quella verifica non è stata fatta. Fuori dal menu delle azioni, in corsia pull.
   - decided-by: Enzo · hold-since: 2026-08-14 (sessione successiva a S1057)
   - reactivation-trigger: Enzo apre la sessione preliminare di verifica/aggiustamento del piano; al termine di quella, #76 torna ACTIVE

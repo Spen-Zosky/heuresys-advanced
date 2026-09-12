@@ -101,6 +101,10 @@ def classify(rel):
     r = rel.replace("\\", "/")
     rules = [
         ("docs/architecture/adr/", "ADR", "live"),
+        # D-91 ① (S1096): docs/archive/ e' cronaca, non SoT (CLAUDE.md: «Historical records live in
+        # docs/archive/ and are NOT SoT»). Senza questa riga cadeva su doc-canonical/live — misurati
+        # 79 file d'archivio dichiarati vivi il 2026-09-09. Sta PRIMA di docs/, o non vale.
+        ("docs/archive/", "doc-archive", "archive"),
         ("docs/", "doc-canonical", "live"),
         ("apps/api/src/modules/", "api-module", "live"),
         ("apps/api/test/", "test", "live"),
@@ -154,7 +158,29 @@ def git_ls_files():
     return [l for l in out.stdout.splitlines() if l.strip()]
 
 
+def selftest():
+    """A esiti opposti: una regola che non sa dire «archivio» e una che non sa dire «vivo» sono
+    entrambe rotte, e un solo caso non le distingue."""
+    attese = [
+        ("docs/archive/HANDOFF.md", ("doc-archive", "archive")),
+        ("docs/archive/sottocartella/x.md", ("doc-archive", "archive")),
+        ("docs/kb/SOT_STATE.md", ("doc-canonical", "live")),
+        ("docs/architecture/adr/0001_x.md", ("ADR", "live")),
+        ("docs/archivedX.md", ("doc-canonical", "live")),   # il prefisso e' docs/archive/, non docs/archive
+    ]
+    rossi = 0
+    for rel, atteso in attese:
+        got = classify(rel)
+        ok = got == atteso
+        rossi += 0 if ok else 1
+        print(f"  [{'ok' if ok else 'FAIL'}] {rel} -> {got}")
+    print(f"  autoprova: {len(attese) - rossi}/{len(attese)}")
+    return 1 if rossi else 0
+
+
 def main():
+    if "--selftest" in sys.argv:
+        return selftest()
     entries = []  # (abspath, root, rel, category, status, provenance)
 
     # 1. repo

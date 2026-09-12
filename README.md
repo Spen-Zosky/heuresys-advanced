@@ -1,6 +1,6 @@
 # Heuresys Advanced — HRMS / BPM Platform v5
 
-Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on PostgreSQL 16, Next.js 15 admin SPA + ESS portal, shared Zod contracts. Multi-tenant via API middleware (no Postgres RLS); RBAC is role × permission × mapping seeded (**live counts: `docs/kb/SOT_STATE.md`**).
+Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on PostgreSQL 16, Next.js 16 admin SPA + ESS portal, shared Zod contracts. Multi-tenant via API middleware (no Postgres RLS); RBAC is role × permission × mapping seeded (**live counts: `docs/kb/SOT_STATE.md`**).
 
 > **Status — `v1.0.0` GA baseline (tag `v1.0.0` on `main`, S957) + post-v1.0 program in flight**
 > MVP-1 → MVP-4 + RBAC/UIX/Perspectives epic **closed**; **v1.0.0 GA released**. The API ships ~75 business modules + auth under `/v1/*`, hitting the real OCI VM PostgreSQL through the SSH tunnel · zero mocks · MFA TOTP login-gating shipped · Brownfield Wave 1 IMPORT · idempotent migrations (run twice → empty `pg_dump` diff, `db:validate` 7/7) · live data on the rebuilt RTL_BANK reference tenant. VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`).
@@ -152,7 +152,7 @@ psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "\dt sys.sys_auth*
 pnpm dev                  # all workspaces in parallel
 # or per-app:
 cd apps/api && pnpm dev   # → :3001  Fastify 5 API
-cd apps/web && pnpm dev   # → :3000  Next.js 15 SPA
+cd apps/web && pnpm dev   # → :3000  Next.js 16 SPA
 cd apps/showcase && pnpm dev  # → :3010  Static brand showcase
 ```
 

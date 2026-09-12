@@ -32,8 +32,8 @@ All reusable UI/UX components live in **`@heuresys/ui`**, una libreria condivisa
 - Re-validation post-`pnpm install`: il check storico `readlink -f node_modules/@heuresys/ui → /d/ux-design-shared/ui` è **obsoleto** (era valido pre-X18). Oggi `readlink -f node_modules/@heuresys/ui` ritorna un path dentro `node_modules/.pnpm/@heuresys+ui@<ver>/node_modules/@heuresys/ui` — è il pattern pnpm standard.
 
 **Apps che consumano `@heuresys/ui`** (allo stato corrente):
-- `apps/web` — admin SPA + ESS portal (Next.js 15, codebase MVP-2a/2b in costruzione).
-- `apps/showcase` — Heuresys brand identity v1, static site GitHub Pages (Next.js 15 static export). Aggiunto post-CLAUDE.md originale.
+- `apps/web` — admin SPA + ESS portal (Next.js 16, codebase MVP-2a/2b in costruzione).
+- `apps/showcase` — Heuresys brand identity v1, static site GitHub Pages (Next.js 16 static export). Aggiunto post-CLAUDE.md originale.
 
 **Note migrazione X18** (storico, leggibile dai commit):
 - Prima della migrazione X18 (2026-05), `@heuresys/ui` era consumato via `link:../ux-design-shared/ui` (live symlink). La sezione precedente di questo file descriveva quella configurazione.

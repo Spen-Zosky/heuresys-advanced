@@ -10,8 +10,8 @@ paths:
 
 ```
 apps/api/       Fastify 5 + Zod + Argon2id + RS256 JWT — moduli business + auth (v1.0.0)
-apps/web/       Next.js 15 App Router — admin SPA + ESS portal
-apps/showcase/  Next.js 15 static export — brand identity, deploy GitHub Pages
+apps/web/       Next.js 16 App Router — admin SPA + ESS portal
+apps/showcase/  Next.js 16 static export — brand identity, deploy GitHub Pages
 packages/shared/  @heuresys/shared — schemi Zod + tipi TS, subpath export per modulo
 db/migrations/  SQL numerati e idempotenti · db/seeds/ · db/scripts/ (coppie PS1+SH)
 ```

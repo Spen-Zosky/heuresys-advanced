@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-12T13:21:04Z da docs/kb/tools/build_index.py
+# generato: 2026-09-12T15:21:37Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-12T13:21:04Z"
-  total_files: 3434
+  generated_at: "2026-09-12T15:21:37Z"
+  total_files: 3438
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,16 +13,17 @@ meta:
     api-module: 385
     ci: 19
     claude-config: 37
-    config: 202
+    config: 203
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 403
+    db-migration: 404
     db-other: 8
     db-script: 55
     db-seed: 114
-    doc-canonical: 769
+    doc-archive: 85
+    doc-canonical: 686
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -34,9 +35,9 @@ meta:
     ux-design-archive: 80
     web-source: 255
   status_counts:
-    archive: 508
+    archive: 593
     external-archive: 50
-    live: 2876
+    live: 2795
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3449,6 +3450,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\export-accessi-csv.mjs'
     root: repo
     rel: 'apps/api/scripts/export-accessi-csv.mjs'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\percorri-dominio.mts'
+    root: repo
+    rel: 'apps/api/scripts/percorri-dominio.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -8822,6 +8829,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000407_una_categoria_di_competenza_non_deve_poter_contenere_persone.sql'
+    root: repo
+    rel: 'db/migrations/000407_una_categoria_di_competenza_non_deve_poter_contenere_persone.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -9884,6 +9897,516 @@ files:
     category: db-seed
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\API_IMPLEMENTATION_PLAN.md'
+    root: repo
+    rel: 'docs/archive/API_IMPLEMENTATION_PLAN.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\BRAND_SESSION_CHARTER.md'
+    root: repo
+    rel: 'docs/archive/BRAND_SESSION_CHARTER.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\FRONTEND_IMPLEMENTATION_PLAN.md'
+    root: repo
+    rel: 'docs/archive/FRONTEND_IMPLEMENTATION_PLAN.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\GOAL_B_REPORT_2026-05-18.md'
+    root: repo
+    rel: 'docs/archive/GOAL_B_REPORT_2026-05-18.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\HANDOFF.md'
+    root: repo
+    rel: 'docs/archive/HANDOFF.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\HANDOFF_BRAND.md'
+    root: repo
+    rel: 'docs/archive/HANDOFF_BRAND.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\HANDOFF_S1068.md'
+    root: repo
+    rel: 'docs/archive/HANDOFF_S1068.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\MANDATO_AUTOCOSCIENZA_S1063.md'
+    root: repo
+    rel: 'docs/archive/MANDATO_AUTOCOSCIENZA_S1063.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\MIGRATION_IMPLEMENTATION_PLAN.md'
+    root: repo
+    rel: 'docs/archive/MIGRATION_IMPLEMENTATION_PLAN.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\MIGRATION_STATUS_2026-05-18.md'
+    root: repo
+    rel: 'docs/archive/MIGRATION_STATUS_2026-05-18.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\MVP_4_ROADMAP.md'
+    root: repo
+    rel: 'docs/archive/MVP_4_ROADMAP.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\NEXT_GENERATION_ENTRY_POINT.md'
+    root: repo
+    rel: 'docs/archive/NEXT_GENERATION_ENTRY_POINT.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_2A.md'
+    root: repo
+    rel: 'docs/archive/NEXT_SESSION_MVP_2A.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md'
+    root: repo
+    rel: 'docs/archive/NEXT_SESSION_MVP_CLOSURE.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\SOT_BACKLOG_CHIUSI.md'
+    root: repo
+    rel: 'docs/archive/SOT_BACKLOG_CHIUSI.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\START_HERE.md'
+    root: repo
+    rel: 'docs/archive/START_HERE.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\README.md'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/README.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\SDBI_RUNBOOK.md'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/SDBI_RUNBOOK.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.ps1'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/scripts/brownfield-wave-1-preflight.ps1'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.sh'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/scripts/brownfield-wave-1-preflight.sh'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\generate_wave1_column_mappings.mjs'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/scripts/generate_wave1_column_mappings.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\generate_wave1_seeds.mjs'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/scripts/generate_wave1_seeds.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-d2-engagement.sh'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/scripts/import-d2-engagement.sh'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-d5-timeline.sh'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/scripts/import-d5-timeline.sh'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-e4-salary-bands.sh'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/scripts/import-e4-salary-bands.sh'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\run-wave1-fullscale.mjs'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/scripts/run-wave1-fullscale.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\01_temp_sdbi_ddl.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/01_temp_sdbi_ddl.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\02_phase3_temp_sdbi_seed.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/02_phase3_temp_sdbi_seed.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\03_phase5_consolidation.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/03_phase5_consolidation.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\01_temp_sdbi_ddl.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/perf_feedback/01_temp_sdbi_ddl.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\02_phase3_temp_sdbi_seed.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/perf_feedback/02_phase3_temp_sdbi_seed.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\03_phase5_consolidation.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/perf_feedback/03_phase5_consolidation.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\00_source_export.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/00_source_export.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\01_source_tables.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/01_source_tables.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\02_source_columns.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/02_source_columns.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\03_table_mappings.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/03_table_mappings.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\04_column_mappings.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/04_column_mappings.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\04_column_mappings_report.md'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/04_column_mappings_report.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\05_job_families_registry.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/05_job_families_registry.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\01_sys_job_roles_mapping_fix.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cascade_fixes/01_sys_job_roles_mapping_fix.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\02_sys_esco_occupation_mappings_fix.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cascade_fixes/02_sys_esco_occupation_mappings_fix.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\03_sys_skill_categories_fix.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cascade_fixes/03_sys_skill_categories_fix.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\04_sys_skill_taxonomy_edges_fix.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cascade_fixes/04_sys_skill_taxonomy_edges_fix.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b32_fix\01_org_level_to_cast_enum.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b32_fix/01_org_level_to_cast_enum.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b35_fix\01_skill_taxonomy_edges_lookup_fks.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b35_fix/01_skill_taxonomy_edges_lookup_fks.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b35_fix\02_skill_taxonomy_edge_kind_mappings.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b35_fix/02_skill_taxonomy_edge_kind_mappings.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b36_fix\01_skill_categories_reclassify.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b36_fix/01_skill_categories_reclassify.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b37_fix\01_skill_learning_reclassify.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b37_fix/01_skill_learning_reclassify.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b39_fix\01_learning_path_steps_reclassify.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b39_fix/01_learning_path_steps_reclassify.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\x9_block_bcd.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/x9_block_bcd.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\04_registry.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/04_registry.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\05_career_paths.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/05_career_paths.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\08_bonus_pools.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/08_bonus_pools.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\29_objective_reward_rules.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/29_objective_reward_rules.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\43_registry_process_kpi_templates_exclude.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/43_registry_process_kpi_templates_exclude.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\55_survey_templates.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/55_survey_templates.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\01_temp_sdbi_ddl.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/01_temp_sdbi_ddl.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\02_phase3_temp_sdbi_seed.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/02_phase3_temp_sdbi_seed.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\03_phase5_consolidation.sql'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/03_phase5_consolidation.sql'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\README.md'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/README.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\mapping_card.template.md'
+    root: repo
+    rel: 'docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/mapping_card.template.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\heuresys-advanced-bootstrap-vm.md'
+    root: repo
+    rel: 'docs/archive/heuresys-advanced-bootstrap-vm.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-analisi-sicurezza-e-remediation.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-gov-analisi-sicurezza-e-remediation.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-fase2-governo-dei-lavoratori.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-gov-fase2-governo-dei-lavoratori.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-modalita-gov.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-modalita-gov.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-plancia-gov.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-plancia-gov.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-corsa-181-sequenza-prevista.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-10-corsa-181-sequenza-prevista.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-ritiro-modalita-gov.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-10-ritiro-modalita-gov.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\piani-sessione\S1092-mandato-p1-p3.md'
+    root: repo
+    rel: 'docs/archive/piani-sessione/S1092-mandato-p1-p3.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\README.md'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/README.md'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\bisect-cw-b59-createctx.ps1'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/bisect-cw-b59-createctx.ps1'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\apply-pending.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/apply-pending.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\finalize-session-2026-05-19.ps1'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/finalize-session-2026-05-19.ps1'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\hooks\pre-commit'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/hooks/pre-commit'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\inbox.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/inbox.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\install-hooks.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/install-hooks.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\locks.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/locks.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\new-goal.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/new-goal.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\notify.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/notify.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\session-end.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/session-end.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\session-start.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/session-start.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\status.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/status.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\validate-naming.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/validate-naming.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\restore-showcase-routes.ps1'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/restore-showcase-routes.ps1'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\s983-mfa-loginraw.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/s983-mfa-loginraw.mjs'
+    category: doc-archive
+    status: archive
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\132-ricerca-genera-il-modello.md'
     root: repo
     rel: '.programmi/132-ricerca-genera-il-modello.md'
@@ -10238,6 +10761,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1096-mandato-p1-p3-debiti-gated.md'
+    root: repo
+    rel: '.programmi/S1096-mandato-p1-p3-debiti-gated.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md'
     root: repo
     rel: '.programmi/Z251-contesa-database-suite.md'
@@ -10589,516 +11118,6 @@ files:
   - path: 'D:\heuresys-advanced\docs\architecture\brand-component-contract.md'
     root: repo
     rel: 'docs/architecture/brand-component-contract.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\API_IMPLEMENTATION_PLAN.md'
-    root: repo
-    rel: 'docs/archive/API_IMPLEMENTATION_PLAN.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\BRAND_SESSION_CHARTER.md'
-    root: repo
-    rel: 'docs/archive/BRAND_SESSION_CHARTER.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\FRONTEND_IMPLEMENTATION_PLAN.md'
-    root: repo
-    rel: 'docs/archive/FRONTEND_IMPLEMENTATION_PLAN.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\GOAL_B_REPORT_2026-05-18.md'
-    root: repo
-    rel: 'docs/archive/GOAL_B_REPORT_2026-05-18.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\HANDOFF.md'
-    root: repo
-    rel: 'docs/archive/HANDOFF.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\HANDOFF_BRAND.md'
-    root: repo
-    rel: 'docs/archive/HANDOFF_BRAND.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\HANDOFF_S1068.md'
-    root: repo
-    rel: 'docs/archive/HANDOFF_S1068.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\MANDATO_AUTOCOSCIENZA_S1063.md'
-    root: repo
-    rel: 'docs/archive/MANDATO_AUTOCOSCIENZA_S1063.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\MIGRATION_IMPLEMENTATION_PLAN.md'
-    root: repo
-    rel: 'docs/archive/MIGRATION_IMPLEMENTATION_PLAN.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\MIGRATION_STATUS_2026-05-18.md'
-    root: repo
-    rel: 'docs/archive/MIGRATION_STATUS_2026-05-18.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\MVP_4_ROADMAP.md'
-    root: repo
-    rel: 'docs/archive/MVP_4_ROADMAP.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\NEXT_GENERATION_ENTRY_POINT.md'
-    root: repo
-    rel: 'docs/archive/NEXT_GENERATION_ENTRY_POINT.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_2A.md'
-    root: repo
-    rel: 'docs/archive/NEXT_SESSION_MVP_2A.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md'
-    root: repo
-    rel: 'docs/archive/NEXT_SESSION_MVP_CLOSURE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\SOT_BACKLOG_CHIUSI.md'
-    root: repo
-    rel: 'docs/archive/SOT_BACKLOG_CHIUSI.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\START_HERE.md'
-    root: repo
-    rel: 'docs/archive/START_HERE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\README.md'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/README.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\SDBI_RUNBOOK.md'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/SDBI_RUNBOOK.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.ps1'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/scripts/brownfield-wave-1-preflight.ps1'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.sh'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/scripts/brownfield-wave-1-preflight.sh'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\generate_wave1_column_mappings.mjs'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/scripts/generate_wave1_column_mappings.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\generate_wave1_seeds.mjs'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/scripts/generate_wave1_seeds.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-d2-engagement.sh'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/scripts/import-d2-engagement.sh'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-d5-timeline.sh'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/scripts/import-d5-timeline.sh'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-e4-salary-bands.sh'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/scripts/import-e4-salary-bands.sh'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\run-wave1-fullscale.mjs'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/scripts/run-wave1-fullscale.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\01_temp_sdbi_ddl.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/01_temp_sdbi_ddl.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\02_phase3_temp_sdbi_seed.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/02_phase3_temp_sdbi_seed.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\03_phase5_consolidation.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/03_phase5_consolidation.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\01_temp_sdbi_ddl.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/perf_feedback/01_temp_sdbi_ddl.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\02_phase3_temp_sdbi_seed.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/perf_feedback/02_phase3_temp_sdbi_seed.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\03_phase5_consolidation.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/perf_feedback/03_phase5_consolidation.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\00_source_export.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/00_source_export.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\01_source_tables.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/01_source_tables.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\02_source_columns.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/02_source_columns.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\03_table_mappings.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/03_table_mappings.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\04_column_mappings.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/04_column_mappings.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\04_column_mappings_report.md'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/04_column_mappings_report.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\05_job_families_registry.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/05_job_families_registry.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\01_sys_job_roles_mapping_fix.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cascade_fixes/01_sys_job_roles_mapping_fix.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\02_sys_esco_occupation_mappings_fix.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cascade_fixes/02_sys_esco_occupation_mappings_fix.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\03_sys_skill_categories_fix.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cascade_fixes/03_sys_skill_categories_fix.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\04_sys_skill_taxonomy_edges_fix.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cascade_fixes/04_sys_skill_taxonomy_edges_fix.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b32_fix\01_org_level_to_cast_enum.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b32_fix/01_org_level_to_cast_enum.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b35_fix\01_skill_taxonomy_edges_lookup_fks.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b35_fix/01_skill_taxonomy_edges_lookup_fks.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b35_fix\02_skill_taxonomy_edge_kind_mappings.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b35_fix/02_skill_taxonomy_edge_kind_mappings.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b36_fix\01_skill_categories_reclassify.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b36_fix/01_skill_categories_reclassify.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b37_fix\01_skill_learning_reclassify.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b37_fix/01_skill_learning_reclassify.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b39_fix\01_learning_path_steps_reclassify.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b39_fix/01_learning_path_steps_reclassify.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\x9_block_bcd.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/x9_block_bcd.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\04_registry.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/04_registry.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\05_career_paths.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/05_career_paths.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\08_bonus_pools.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/08_bonus_pools.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\29_objective_reward_rules.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/29_objective_reward_rules.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\43_registry_process_kpi_templates_exclude.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/43_registry_process_kpi_templates_exclude.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\55_survey_templates.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-reconciliation/55_survey_templates.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\01_temp_sdbi_ddl.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/01_temp_sdbi_ddl.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\02_phase3_temp_sdbi_seed.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/02_phase3_temp_sdbi_seed.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\03_phase5_consolidation.sql'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/03_phase5_consolidation.sql'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\README.md'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/README.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\mapping_card.template.md'
-    root: repo
-    rel: 'docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/mapping_card.template.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\heuresys-advanced-bootstrap-vm.md'
-    root: repo
-    rel: 'docs/archive/heuresys-advanced-bootstrap-vm.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-analisi-sicurezza-e-remediation.md'
-    root: repo
-    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-gov-analisi-sicurezza-e-remediation.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-fase2-governo-dei-lavoratori.md'
-    root: repo
-    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-gov-fase2-governo-dei-lavoratori.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-modalita-gov.md'
-    root: repo
-    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-modalita-gov.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-plancia-gov.md'
-    root: repo
-    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-plancia-gov.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-corsa-181-sequenza-prevista.md'
-    root: repo
-    rel: 'docs/archive/modalita-gov-ritirata/2026-08-10-corsa-181-sequenza-prevista.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-ritiro-modalita-gov.md'
-    root: repo
-    rel: 'docs/archive/modalita-gov-ritirata/2026-08-10-ritiro-modalita-gov.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\piani-sessione\S1092-mandato-p1-p3.md'
-    root: repo
-    rel: 'docs/archive/piani-sessione/S1092-mandato-p1-p3.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\README.md'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/README.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\bisect-cw-b59-createctx.ps1'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/bisect-cw-b59-createctx.ps1'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\apply-pending.mjs'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/apply-pending.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\finalize-session-2026-05-19.ps1'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/finalize-session-2026-05-19.ps1'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\hooks\pre-commit'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/hooks/pre-commit'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\inbox.mjs'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/inbox.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\install-hooks.mjs'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/install-hooks.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\locks.mjs'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/locks.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\new-goal.mjs'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/new-goal.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\notify.mjs'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/notify.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\session-end.mjs'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/session-end.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\session-start.mjs'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/session-start.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\status.mjs'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/status.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\validate-naming.mjs'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/cowork-exchange/validate-naming.mjs'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\restore-showcase-routes.ps1'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/restore-showcase-routes.ps1'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\s983-mfa-loginraw.mjs'
-    root: repo
-    rel: 'docs/archive/scripts-exhausted/s983-mfa-loginraw.mjs'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -12359,6 +12378,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\exposure_columns.py'
     root: repo
     rel: 'docs/kb/tools/exposure_columns.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\exposure_waivers.txt'
+    root: repo
+    rel: 'docs/kb/tools/exposure_waivers.txt'
     category: doc-canonical
     status: live
     provenance: git-tracked

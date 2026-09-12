@@ -2,7 +2,7 @@
 
 ## What this is
 
-**Heuresys Advanced HRMS/BPM Platform v5** — pnpm monorepo (2026-05-16). Backend-heavy: Fastify 5 API on PostgreSQL 16 with a Zod-typed contract layer shared with a Next.js 15 admin SPA + ESS portal.
+**Heuresys Advanced HRMS/BPM Platform v5** — pnpm monorepo (2026-05-16). Backend-heavy: Fastify 5 API on PostgreSQL 16 with a Zod-typed contract layer shared with a Next.js 16 admin SPA + ESS portal.
 
 At **`v1.0.0` GA baseline** (S957, 2026-06-02). MVP-0→4 and the RBAC/UIX/Perspectives epic are closed; admin SPA (MVP-2a) + ESS portal (MVP-2b) + teams scope axis shipped; a static brand showcase deploys to GitHub Pages. The VM runs **production mode** (API tsup bundle `node dist/server.js` + web `next start`).
 

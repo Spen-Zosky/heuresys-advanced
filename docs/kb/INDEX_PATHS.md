@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-12T13:21:04Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3434**
+**Generato**: 2026-09-12T15:21:37Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3438**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,16 +13,17 @@
 | api-module | 385 |
 | ci | 19 |
 | claude-config | 37 |
-| config | 202 |
+| config | 203 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 403 |
+| db-migration | 404 |
 | db-other | 8 |
 | db-script | 55 |
 | db-seed | 114 |
-| doc-canonical | 769 |
+| doc-archive | 85 |
+| doc-canonical | 686 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,15 +34,15 @@
 | test | 421 |
 | ux-design-archive | 80 |
 | web-source | 255 |
-| **TOTALE** | **3434** |
+| **TOTALE** | **3438** |
 
 ## Conteggi per status
 
 | Status | File |
 |---|---|
-| archive | 508 |
+| archive | 593 |
 | external-archive | 50 |
-| live | 2876 |
+| live | 2795 |
 
 ## File per categoria
 
@@ -632,6 +633,7 @@
 - `D:\heuresys-advanced\apps\api\scripts\dev-whoami.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\diagnosi-211.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\export-accessi-csv.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\percorri-dominio.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\profilo-costo-avvio.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-132-f7-corsa-di-ricerca.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-132-f7-due-prove-di-merito.mts` · *live* · git-tracked
@@ -1542,6 +1544,7 @@
 - `D:\heuresys-advanced\db\migrations\000404_le_filiali_hanno_un_permesso.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000405_un_modello_operativo_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000406_il_recruiting_ha_una_voce_di_menu.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000407_una_categoria_di_competenza_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1729,6 +1732,94 @@
 - `D:\heuresys-advanced\db\seeds\storia36\repair\2026-07-28_c5_percorsi_carriera_oneshot.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\survey-assignments-demo.sql` · *live* · git-tracked
 
+### doc-archive
+
+- `D:\heuresys-advanced\docs\archive\API_IMPLEMENTATION_PLAN.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\BRAND_SESSION_CHARTER.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\FRONTEND_IMPLEMENTATION_PLAN.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\GOAL_B_REPORT_2026-05-18.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\HANDOFF.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\HANDOFF_BRAND.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\HANDOFF_S1068.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\MANDATO_AUTOCOSCIENZA_S1063.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\MIGRATION_IMPLEMENTATION_PLAN.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\MIGRATION_STATUS_2026-05-18.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\MVP_4_ROADMAP.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\NEXT_GENERATION_ENTRY_POINT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_2A.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\SOT_BACKLOG_CHIUSI.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\START_HERE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\README.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\SDBI_RUNBOOK.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.ps1` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.sh` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\generate_wave1_column_mappings.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\generate_wave1_seeds.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-d2-engagement.sh` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-d5-timeline.sh` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-e4-salary-bands.sh` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\run-wave1-fullscale.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\01_temp_sdbi_ddl.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\02_phase3_temp_sdbi_seed.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\03_phase5_consolidation.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\01_temp_sdbi_ddl.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\02_phase3_temp_sdbi_seed.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\03_phase5_consolidation.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\00_source_export.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\01_source_tables.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\02_source_columns.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\03_table_mappings.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\04_column_mappings.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\04_column_mappings_report.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\05_job_families_registry.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\01_sys_job_roles_mapping_fix.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\02_sys_esco_occupation_mappings_fix.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\03_sys_skill_categories_fix.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\04_sys_skill_taxonomy_edges_fix.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b32_fix\01_org_level_to_cast_enum.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b35_fix\01_skill_taxonomy_edges_lookup_fks.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b35_fix\02_skill_taxonomy_edge_kind_mappings.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b36_fix\01_skill_categories_reclassify.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b37_fix\01_skill_learning_reclassify.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b39_fix\01_learning_path_steps_reclassify.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\x9_block_bcd.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\04_registry.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\05_career_paths.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\08_bonus_pools.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\29_objective_reward_rules.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\43_registry_process_kpi_templates_exclude.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\55_survey_templates.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\01_temp_sdbi_ddl.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\02_phase3_temp_sdbi_seed.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\03_phase5_consolidation.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\README.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\mapping_card.template.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\heuresys-advanced-bootstrap-vm.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-analisi-sicurezza-e-remediation.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-fase2-governo-dei-lavoratori.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-modalita-gov.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-plancia-gov.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-corsa-181-sequenza-prevista.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-ritiro-modalita-gov.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\piani-sessione\S1092-mandato-p1-p3.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\README.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\bisect-cw-b59-createctx.ps1` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\apply-pending.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\finalize-session-2026-05-19.ps1` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\hooks\pre-commit` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\inbox.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\install-hooks.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\locks.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\new-goal.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\notify.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\session-end.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\session-start.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\status.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\validate-naming.mjs` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\restore-showcase-routes.ps1` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\scripts-exhausted\s983-mfa-loginraw.mjs` · *archive* · git-tracked
+
 ### doc-canonical
 
 - `D:\heuresys-advanced\.programmi\132-ricerca-genera-il-modello.md` · *live* · git-tracked
@@ -1790,6 +1881,7 @@
 - `D:\heuresys-advanced\.programmi\S1093-ricognizione-10-voci-LEGGIMI.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1093-tre-rimedi-instabilita.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1095-mandato-p1-p3.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1096-mandato-p1-p3-debiti-gated.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked
@@ -1849,91 +1941,6 @@
 - `D:\heuresys-advanced\docs\architecture\.keep` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\ADR_INDEX.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\brand-component-contract.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\API_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\BRAND_SESSION_CHARTER.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\FRONTEND_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\GOAL_B_REPORT_2026-05-18.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\HANDOFF.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\HANDOFF_BRAND.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\HANDOFF_S1068.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\MANDATO_AUTOCOSCIENZA_S1063.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\MIGRATION_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\MIGRATION_STATUS_2026-05-18.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\MVP_4_ROADMAP.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\NEXT_GENERATION_ENTRY_POINT.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_2A.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\SOT_BACKLOG_CHIUSI.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\START_HERE.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\README.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\SDBI_RUNBOOK.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.ps1` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\brownfield-wave-1-preflight.sh` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\generate_wave1_column_mappings.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\generate_wave1_seeds.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-d2-engagement.sh` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-d5-timeline.sh` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\import-e4-salary-bands.sh` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\scripts\run-wave1-fullscale.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\01_temp_sdbi_ddl.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\02_phase3_temp_sdbi_seed.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\goals_pilot\03_phase5_consolidation.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\01_temp_sdbi_ddl.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\02_phase3_temp_sdbi_seed.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\sdbi\perf_feedback\03_phase5_consolidation.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\00_source_export.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\01_source_tables.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\02_source_columns.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\03_table_mappings.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\04_column_mappings.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\04_column_mappings_report.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave1\05_job_families_registry.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\01_sys_job_roles_mapping_fix.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\02_sys_esco_occupation_mappings_fix.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\03_sys_skill_categories_fix.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cascade_fixes\04_sys_skill_taxonomy_edges_fix.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b32_fix\01_org_level_to_cast_enum.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b35_fix\01_skill_taxonomy_edges_lookup_fks.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b35_fix\02_skill_taxonomy_edge_kind_mappings.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b36_fix\01_skill_categories_reclassify.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b37_fix\01_skill_learning_reclassify.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\cw_b39_fix\01_learning_path_steps_reclassify.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-brownfield-tree\wave2\x9_block_bcd.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\04_registry.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\05_career_paths.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\08_bonus_pools.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\29_objective_reward_rules.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\43_registry_process_kpi_templates_exclude.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-reconciliation\55_survey_templates.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\01_temp_sdbi_ddl.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\02_phase3_temp_sdbi_seed.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\03_phase5_consolidation.sql` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\README.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\etl-brownfield-ritirato\seeds-sdbi-template-tree\mapping_card.template.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\heuresys-advanced-bootstrap-vm.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-analisi-sicurezza-e-remediation.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-fase2-governo-dei-lavoratori.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-modalita-gov.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-plancia-gov.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-corsa-181-sequenza-prevista.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-ritiro-modalita-gov.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\piani-sessione\S1092-mandato-p1-p3.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\README.md` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\bisect-cw-b59-createctx.ps1` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\apply-pending.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\finalize-session-2026-05-19.ps1` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\hooks\pre-commit` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\inbox.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\install-hooks.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\locks.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\new-goal.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\notify.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\session-end.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\session-start.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\status.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\validate-naming.mjs` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\restore-showcase-routes.ps1` · *live* · git-tracked
-- `D:\heuresys-advanced\docs\archive\scripts-exhausted\s983-mfa-loginraw.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\brownfield\.keep` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\brownfield\BROWNFIELD_ADAPTATION_MAP.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\brownfield\BROWNFIELD_EXCLUSION_REPORT.md` · *live* · git-tracked
@@ -2144,6 +2151,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\dead_columns.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\dump_route_schemas.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\exposure_columns.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\exposure_waivers.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\guardiano.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\handoff_lint.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-commit` · *live* · git-tracked

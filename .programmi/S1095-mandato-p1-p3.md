@@ -43,8 +43,8 @@ che sblocca la lettura dello stato, poi i lavori grossi con la capienza ancora a
 
 Stato: `[ ]` da fare · `[x]` FATTA con data ed evidenza · `NON FATTA (ragione)`.
 
-- [ ] **F1 Igiene** — **fatto =** `build_derivati.py` verde; `check_pagine_raggiungibili.py` con esito misurato
-- [ ] **F2 D-92 — `#246` F4 e `S1093` riconciliato** — **fatto =** la quota a termine è un numero letto da `db_health`; `S1093-mandato` dichiara dove vivono F8-F10; D-92 → RISOLTO
+- [x] **F1 Igiene** — **fatto =** `build_derivati.py` verde; `check_pagine_raggiungibili.py` con esito misurato — FATTA 2026-09-12 · derivati 3/3 rigenerati (`b11520f2`); pagine: 79 autenticate, «ogni pagina autenticata ha una porta» (il NON MISURABILE del boot era un timeout, non un rosso)
+- [x] **F2 D-92 — `#246` F4 e `S1093` riconciliato** — **fatto =** la quota a termine è un numero letto da `db_health`; `S1093-mandato` dichiara dove vivono F8-F10; D-92 → RISOLTO — FATTA 2026-09-12 · `#246` F4 era già fatta (`b17a8135`, mig `000377`) e mai spuntata: spuntata, piano CHIUSO; `S1093` F8/F10 riportate ai piani `#54`/`#159`, F9 caduta (`#143` DONE); D-92 RISOLTO nel registro; `programmi.py --verifica` 51/51 senza difetti
 - [ ] **F3 `#169` — F3 spuntata sull'evidenza esistente, F4 secondo corno rimisurato con enforcement acceso** — **fatto =** login con sola chiave madre **non completa** l'accesso; `verify-separazione-totp` 0 derivabili; suite verde
 - [ ] **F4 `#214` F6 — dodicesimo perimetro** — **fatto =** riga in `agent-perimetri.json`, migrazione in produzione, sentinella a 0, `db_health` verde
 - [ ] **F5 `#54` F4 — frontend `/recruiting` + E2E con login reale** — **fatto =** pagine su dati reali, E2E verde, `check_exposure.py` verde (`#79` F3)

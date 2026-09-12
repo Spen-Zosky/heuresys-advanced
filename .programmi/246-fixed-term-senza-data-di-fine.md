@@ -1,7 +1,8 @@
 # 246 — I contratti a termine assegnati a caso a un terzo dell'organico
 
 > **item**: #246 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: IN CORSO
+> **stato**: CHIUSO
+> **nota S1095 (2026-09-12)**: F4 era FATTA dal 2026-09-06 (commit `b17a8135`) ma mai spuntata qui — il file diceva IN CORSO su un lavoro finito, il rovescio del difetto di D-92. Spuntata sull'evidenza, non rifatta.
 > **chiusa**: S1089 (2026-09-06), e **ri-misurato in produzione il 2026-09-06 (S1090)**:
 > `sys_user_contracts` ACTIVE = **160 `permanent`, zero `fixed_term`**. La regola di Enzo
 > (nessun contratto a termine oltre i 12 mesi di anzianita') e' applicata: 51 su 51 convertiti.
@@ -105,7 +106,7 @@ i 16 mesi dall'assunzione, e non potrà mancare.
       disfacendolo, come la `000373` ha fatto sulle sue quattro porte: una sentinella mai vista
       rossa non è una prova. ⚠ Attenzione al fatto che una vista `sys.v_*` nuova diventa
       automaticamente sentinella a zero (memoria: `new_sys_view_becomes_sentinel`).
-- [ ] **F4 — Il rapporto, scritto** — la quota di contratti a termine sull'organico diventa un
+- [x] **F4 — Il rapporto, scritto** — FATTA S1089 (2026-09-06), mig. `000377` (`b17a8135`): `sys.v_quota_contratti_a_termine`, una riga per azienda, dichiarata informativa in `db_health.py`; ri-letta in produzione il 2026-09-12: RTL Bank 158 attivi · 0 a termine · 0,0% — la quota di contratti a termine sull'organico diventa un
       numero che qualcuno guarda. È la seconda metà della causa: il difetto è sopravvissuto perché
       nessuno l'aveva mai messo su carta.
 

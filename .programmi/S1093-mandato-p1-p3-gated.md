@@ -38,6 +38,7 @@ davanti ciò che sblocca gli altri.
 ## Registro deliverable
 
 > **stato**: CHIUSO
+> **riconciliato S1095 (2026-09-12, D-92)**: CHIUSO vuol dire «la sessione S1093 è finita», non «il lavoro è finito». Le tre fasi non fatte sono ciascuna RIPORTATA all'item che la possiede o CADUTA col motivo — vedi le righe F8-F10.
 > **registro di sessione** — cronaca di cio' che si e' fatto, non il programma di una
 > voce: non dichiara `item` di proposito. Rivendicarne uno faceva mostrare QUESTO file
 > al posto del piano della voce, e su `#169` il menu e' arrivato a scrivere «il piano
@@ -50,9 +51,9 @@ davanti ciò che sblocca gli altri.
 - [x] **F5 `#79` F3 — il cancello di esposizione** — **fatto =** `check_exposure.py` verde — FATTO 2026-09-08 · 73 tabelle scritte, 73 esposte, 0 lacune
 - [x] **F6 `#198` — il gate è ancora vero?** — **fatto =** verdetto misurato con evidenza — FATTO 2026-09-08 · GATE CONFERMATO: `sys_blueprint_content_*` tutte a zero, ri-misurate dalla ricognizione
 - [x] **F7 `#149` F4 — la consegna non verificata** — **fatto =** il secondo ramo dell'innesco misurato — FATTO 2026-09-08 · 5 documenti del lab citati dal register come fonte eseguibile, **nessuno verificato**; era stato dichiarato «nessun bersaglio» cinque volte misurando metà dell'innesco
-- [ ] **F8 `#54` F4 — frontend `/recruiting`** — NON FATTA: voce da ~1-2 sessioni, fuori dal confine dichiarato all'inizio. ⚠ Lascio una misura a chi la riprende: `sys_candidates` ha **1 riga**, non zero
-- [ ] **F9 `#143` F4/F5 — API progetti/squadre** — NON FATTA: stimata ~4-6 sessioni nel register
-- [ ] **F10 `#159` F2 — il ponte gateway↔pagine** — NON FATTA: stimata ~3-4 sessioni
+- [ ] **F8 `#54` F4 — frontend `/recruiting`** — NON FATTA: voce da ~1-2 sessioni, fuori dal confine dichiarato all'inizio. ⚠ Lascio una misura a chi la riprende: `sys_candidates` ha **1 riga**, non zero. ▸ **RIPORTATA (S1095, 2026-09-12)** al suo item: vive come F4 aperta in `.programmi/54-recruiting-ats.md`, voce `#54` ACTIVE nel register — questo registro non la possiede
+- [ ] **F9 `#143` F4/F5 — API progetti/squadre** — NON FATTA: stimata ~4-6 sessioni nel register. ▸ **CADUTA (S1095, 2026-09-12)**: `#143` risulta **DONE** nel register (`SOT_BACKLOG.md`, riga «#143 … status: DONE»), chiusa da un'altra sessione dopo questa — non c'è più un lavoro da riportare
+- [ ] **F10 `#159` F2 — il ponte gateway↔pagine** — NON FATTA: stimata ~3-4 sessioni. ▸ **RIPORTATA (S1095, 2026-09-12)** al suo item: vive come F2 aperta in `.programmi/159-ponte-gateway-pagine.md` (resta la sola metà del componente in `ux-design-shared`), voce `#159` ACTIVE nel register
 
 ### La tabella di partenza, tenuta per cronaca
 

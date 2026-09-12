@@ -61,10 +61,10 @@ Stato: `[ ]` da fare · `[x]` FATTA con data ed evidenza · `NON FATTA (ragione)
 - [ ] **F5 `#205` F2 — `positions` percorso** — **fatto =** corsa di ricerca eseguita, proposte decise e applicate, registro fonti aggiornato — **NON FATTA (ragione misurata)**: percorsa sul gemello (`percorri-dominio.mts`, 2 difetti corretti, 8 fonti registrate) ma `organization_units` e `positions` danno **0 proposte** — la fase «indirizzi» indovina i percorsi (4/8 → 404) e nessuna pagina ammessa descrive una società di consulenza; la fonte di settore non viene riproposta. Dettaglio nel piano `#205`
 - [ ] **F6 `#205` F3 — lo strato di forma** — **NON FATTA**: dipende da F2 (serve una proposta approvata del cliente A)
 - [ ] **F7 `#198` T9b** — **NON FATTA**: il modello `MGMT_CONSULTING_SMALL` resta vuoto perché F5 non produce; costruire oggi = archetipo bancario = «un'altra banca». ⚠ Il trigger del register («`content_units` > 0») è **già scattato** (33/71/132/73 dal bundle fase 4, 2026-09-10) ma per il modello BANCARIO: va riscritto sul modello di destinazione
-- [ ] **F8 D-91** — **fatto =** ①②④ corretti con prova; D-91 → RISOLTO
-- [ ] **F9 D-90** — **fatto =** `posso-uscire.sh` non conta sé stesso e incrocia i pid; D-90 → RISOLTO
-- [ ] **F10 `#41`** — **fatto =** 52/52 chunk o la ragione misurata
-- [ ] **F11 `#159` F2** — fuori confine dichiarato (repo occupato)
+- [x] **F8 D-91** — **fatto =** ①②④ corretti con prova; D-91 → RISOLTO — FATTA 2026-09-12 · `build_index.py` regola `docs/archive/` + selftest 5/5, 85 file da live ad archive; Next.js 15→16 in 4 documenti vivi (misurato 16.3.3); README del gateway per verbo (distribuito: NO, misurato); `2ce836fa`
+- [x] **F9 D-90** — **fatto =** `posso-uscire.sh` non conta sé stesso e incrocia i pid; D-90 → RISOLTO — FATTA 2026-09-12 · verdetto sui processi vivi (involucri della CLI in `ps -ef`), registro come dettaglio, sé stesso dall'intestazione su stdout; selftest 7/7; provato sul vivo ATTENDI(4)→USCITA SICURA; `3af67b80`
+- [ ] **F10 `#41`** — **fatto =** 52/52 chunk o la ragione misurata — **NON FATTA (ragione misurata, scritta nel register)**: dal run del 2026-07-05 sono cambiati 1.433 file di codice, i 26 chunk sono superati; il solo top-up sensato è un `--update` intero (~3,9M token sulla finestra 5h) — lavoro da sessione dedicata, non da coda
+- [ ] **F11 `#159` F2** — **NON FATTA**: fuori confine dichiarato all'inizio (repo `ux-design-shared` occupato da una sessione viva per tutta la sessione) e, alla fine, capienza: guardiano `mancano 227k`, la fase ne chiede ~250k più la chiusura
 
 ## Simulazione a 5 domande (R24 §3) — per voce, prima di partire
 
@@ -76,6 +76,8 @@ Si scrive qui sotto **prima** di aprire ciascuna voce.
 | F3 | atlante fresco · candidato per rischio crescente + porte misurate + mig con sentinella provata rossa (modello 000405) · gemello → VM → `db_health` · io · post-condizione per impronta | fra job-roles e skill-categories la distanza da una persona NON è la stessa: la categoria è un livello di tassonomia, il ruolo si ricopre |
 | F4 | cancello verde oggi · seconda fonte + tre vie di lettura + autoprova · commit · io · nessuna scrittura DB; `chi_sorveglia check_exposure.py` = nessuno | 11 scoperte grezze, 3 falsi (costante, funzione, trigger), 1 falso del rollback commentato; 7 deroghe |
 | F5 | catena ricerca accesa (gemello) · corsa → decisione → apply via API · E27 gemello prima · io · WARNING/FAILED mai approvate a mano | claude di gemello e VM scaduti; DNS di casa; 2 difetti del motore; poi il limite della fase «indirizzi» |
+| F8 | i 3 reperti misurati di nuovo (START_HERE già riscritto; 85 file d'archivio vivi; nessuna unit systemd) · edit + `build_index.py --selftest` · commit · io · — | START_HERE non aveva più il difetto; il numero 79 era cresciuto a 85 |
+| F9 | `posso-uscire.sh` invocato da CHIUSURA.md · processi vivi da `ps -ef` (involucro CLI) + intestazione su stdout · commit · io · selftest a esiti opposti | 4 task MIEI appesi su un prompt di password erano davvero vivi: il registro diceva 5, i processi 4 |
 | F2 | 4 file in `inbox/ingerite/` · misura sul vivo + marker letto da `check_verifica_consegne.py` · lab fuori repo, piano #149 nel repo · io · solo scritture di testo | p3 poggiava su un numero falso (OLDDB 64.482/70.959) con conclusione giusta |
 
 ## Fuori da questo ciclo — presentate una volta sola (R24 §5)

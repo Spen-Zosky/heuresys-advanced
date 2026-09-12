@@ -482,6 +482,7 @@
 - **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#41 graphify — top-up semantico (26 chunk mancanti)** · status: GATED
   - blocker: limite di spesa mensile Claude colpito durante il run S1016 (26/52 chunk estratti; ~201 file con estrazione previous-run o solo-AST)
+  - ⚠ **MISURATO S1096 (2026-09-12): il blocco non e' piu' il limite di spesa, e il «top-up di 26 chunk» e' superato.** Dal run del 2026-07-05 sono cambiati **1.433 file** di codice (`git log --since=2026-07-05 --name-only -- apps packages db | sort -u`, 1.401 commit): i 26 chunk mancanti descriverebbero un codice che non esiste piu'. L'unico top-up sensato e' un `--update` intero, che l'ultimo run misura in ~3,9M token di input sul budget dell'abbonamento — cioe' sulla finestra 5h che il guardiano sorveglia (misurata al 28% quando si e' deciso di non lanciarlo). Non e' un lavoro da coda di sessione: e' un lavoro da sessione dedicata con finestra piena, e va deciso sapendo che l'atlante (`build_atlas.py`) e' oggi la SoT interrogabile e graphify una vista parallela (S1016)
   - unblock-trigger: {kind: manual} — limite di spesa resettato/alzato (claude.ai/settings/usage)
   - doc: graphify-out/PENDING_SEMANTIC_TOPUP.md · effort post-reset: ~0.5h (chunk fatti = cache; girano solo i mancanti, poi merge+recluster)
 

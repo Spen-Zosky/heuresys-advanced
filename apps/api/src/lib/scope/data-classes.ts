@@ -177,6 +177,12 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
   tenant_blueprint: "il fascicolo di configurazione di un tenant",
   bpm_process: "definizioni di processo",
   job_role: "catalogo delle mansioni — la mansione è un posto, non chi lo occupa",
+  // #54 F4 (S1095) — la voce di menu `recruiting` porta questa resource, e il cancello di #99 F7
+  // l'ha vista solo quando il clone del gemello ha ricevuto la 000406 (S1096). Misurato su
+  // information_schema: una richiesta di assunzione e' una POSIZIONE da coprire — posizione,
+  // organico, stato, motivo, date, note — e non porta nessun soggetto di persona; `created_by`
+  // e' un attore. Le persone del recruiting stanno nei candidati, che hanno la loro classe.
+  "job-requisition": "richiesta di assunzione: una posizione da coprire, non chi la coprira'",
   role: "ruoli RBAC: il permesso, non il titolare",
   mfa_policy: "una politica di tenant è configurazione (misurato in 000315: dichiararla CREDENTIAL toglieva la pagina ai due TENANT_ADMIN reali)",
   tenant: "configurazione del tenant e salute di sistema",

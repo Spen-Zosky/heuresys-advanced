@@ -33,18 +33,39 @@
 # chi legge deve saperlo: davanti a un ATTENDI mosso dal solo ssh, si guarda `ps -ef` e si
 # stabilisce di chi e' prima di aspettare.
 #
-# Uso:  bash scripts/posso-uscire.sh [--tasks <dir>] [--breve]
+# ⚠⚠ D-90 (S1093/S1094, RISOLTO S1096): IL REGISTRO NON E' L'INSIEME. Questo strumento leggeva
+# i FILE dei task e concludeva sui PROCESSI: un task ucciso dal sistema (o il cui file l'harness
+# non ha mai chiuso) restava «in volo» per sempre, e lo strumento contava la PROPRIA corsa fra
+# quelli — tre esecuzioni, tre id diversi, sempre un solo «in volo», sempre se stesso. Un
+# ATTENDI permanente e' un cancello che insegna a non guardarlo. Due rimedi, entrambi misurati:
+#   1. la misura dei processi VIVI: ogni comando che la CLI sta eseguendo e' un `bash` con un
+#      involucro riconoscibile (`shopt -u extglob …`) e la riga di comando intera visibile in
+#      `ps -ef` (959 caratteri, misurato). Quelli — tolto questo stesso script — sono i lavori
+#      locali che /exit ucciderebbe. Il registro dei file resta come DETTAGLIO: un file senza
+#      riga finale ma senza nessun processo vivo e' «concluso o perso», non «in volo»;
+#   2. il riconoscimento di se stesso NON dipende piu' dal marcatore su stderr (che sparisce
+#      con `2>/dev/null`, ed e' cosi' che in S1094 non si ritrovava): il file di questa corsa
+#      contiene l'intestazione che questo script stampa su STDOUT, e un file con quella
+#      intestazione e senza riga finale e' una corsa di posso-uscire ancora aperta — questa.
+# Limite che resta, dichiarato: gli involucri sono PER MACCHINA, non per sessione — con due
+# sessioni CLI aperte, i comandi dell'altra contano. Davanti a un ATTENDI si legge l'elenco dei
+# comandi vivi (stampato) e si decide sapendo di chi sono.
+#
+# Uso:  bash scripts/posso-uscire.sh [--tasks <dir>] [--breve] [--selftest]
 # Uscita: 0 = USCITA SICURA · 1 = ATTENDI · 2 = NON-VERIFICATO
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TASKS="${POSSO_USCIRE_TASKS:-}"
 BREVE=0
+SELFTEST=0
+INTESTAZIONE="posso-uscire — cosa muore con /exit, e cosa no"
 while [ $# -gt 0 ]; do
   case "$1" in
     --tasks) TASKS="${2:?--tasks richiede una directory}"; shift 2 ;;
     --breve) BREVE=1; shift ;;
-    *) echo "uso: posso-uscire.sh [--tasks <dir>] [--breve]" >&2; exit 2 ;;
+    --selftest) SELFTEST=1; shift ;;
+    *) echo "uso: posso-uscire.sh [--tasks <dir>] [--breve] [--selftest]" >&2; exit 2 ;;
   esac
 done
 
@@ -74,65 +95,93 @@ if [ -z "$TASKS" ]; then
   # Ripiegare rimetterebbe in gioco esattamente il difetto che queste righe tolgono.
 fi
 
-echo "posso-uscire — cosa muore con /exit, e cosa no"
-
-in_volo=""
-n_task=0
-if [ -z "$TASKS" ] || [ ! -d "$TASKS" ]; then
-  riga "task in background" "NON MISURABILE (directory dei task non trovata)"
-  VERDETTO="NON-VERIFICATO"
-else
-  # ⚠ IL CRITERIO E' LA CODA DEL FILE, non la sua data. Un task che gira da un'ora e non
-  # scrive niente ha un file vecchio ed e' vivissimo; uno finito un secondo fa ha un file
-  # recente ed e' morto. La riga finale la scrive l'harness: `[exited with code N]`
-  # oppure `[killed]`. Un file senza nessuna delle due = lavoro ancora in volo.
-  #
-  # ⚠ E SI ESCLUDE SE STESSO. Alla prima esecuzione questo strumento ha dichiarato ATTENDI
-  # per un task che era **la sua stessa corsa**: l'harness apre un file di output per il
-  # comando in esecuzione, e quel file non ha la riga finale finche' il comando non
-  # finisce — cioe' mai, dal punto di vista di chi lo sta leggendo. Sarebbe stato un
-  # ATTENDI perpetuo, cioe' un allarme che si impara a ignorare.
-  #
-  # Il riconoscimento e' meccanico e non fragile: se dentro il file c'e' l'intestazione di
-  # QUESTO script, quel task e' questa corsa. Non si esclude «il piu' recente» (un altro
-  # lavoro appena partito verrebbe scartato) ne' per data (un task lento che non stampa
-  # niente ha un file vecchio ed e' vivissimo).
-  # Il marcatore va su **stderr**: il file del task raccoglie l'output del comando, e chi
-  # lancia questo script per leggerlo redirige semmai stdout, non entrambi. Misurato: il
-  # file del task contiene davvero lo stdout non rediretto (prova col marcatore, 2026-08-29).
-  IO_STESSO="posso-uscire-marcatore-$$-$(date +%s)"
-  printf '# %s  (marcatore: serve a NON contare questa stessa corsa)\n' "$IO_STESSO" >&2
-  sleep 1                     # l'harness scrive il file con un attimo di ritardo
-  mio=""
-  for f in "$TASKS"/*.output; do
+# --- la classificazione dei file del registro, in una funzione perche' l'autoprova possa darle
+#     una directory finta. Scrive in REG_TOT, REG_SENZA (nomi), REG_MIEI.
+classifica_registro() {
+  local dir="$1" f
+  REG_TOT=0; REG_SENZA=""; REG_MIEI=0
+  for f in "$dir"/*.output; do
     [ -e "$f" ] || continue
-    grep -qF "$IO_STESSO" "$f" 2>/dev/null && { mio="$f"; continue; }
-    n_task=$((n_task + 1))
     if ! tail -3 "$f" 2>/dev/null | grep -qE '^\[(exited with code [0-9-]+|killed)\]'; then
-      in_volo="$in_volo $(basename "$f" .output)"
+      # senza riga finale: o e' in volo, o e' questa stessa corsa (l'intestazione e' su stdout)
+      if grep -qF "$INTESTAZIONE" "$f" 2>/dev/null; then REG_MIEI=$((REG_MIEI + 1)); continue; fi
+      REG_SENZA="$REG_SENZA $(basename "$f" .output)"
     fi
+    REG_TOT=$((REG_TOT + 1))
   done
-  # Se non mi sono ritrovato, l'output e' rediretto e uno dei task «in volo» potrebbe
-  # essere questa stessa corsa. Si DICHIARA invece di indovinare: e' la differenza fra un
-  # allarme e un rumore.
-  if [ -z "$mio" ] && [ -n "$in_volo" ]; then
-    riga "  nota" "non mi sono ritrovato fra i task (output rediretto?): uno di quelli in volo puo' essere questa corsa"
+}
+
+# --- il verdetto dai due numeri: processi vivi (la verita') e registro (il dettaglio).
+#     Stampa e restituisce il codice; e' qui perche' l'autoprova possa chiamarlo con numeri finti.
+verdetto() {
+  local n_vivi="$1" senza="$2" ssh_n="$3"
+  if [ "$n_vivi" -gt 0 ]; then
+    printf "\n  VERDETTO: ATTENDI — %s comandi della CLI girano su QUESTA macchina, e /exit li ucciderebbe.\n" "$n_vivi"
+    [ -n "$senza" ] && printf "    registro senza riga finale:%s\n" "$senza"
+    [ "$ssh_n" -gt 0 ] && printf "    di cui %s con un ssh in primo piano\n" "$ssh_n"
+    printf "    I lavori remoti armati NON sono un motivo per aspettare: quelli proseguono.\n"
+    return 1
   fi
-  if [ -n "$in_volo" ]; then
-    riga "task in background" "⚠ IN VOLO:$in_volo  (su $n_task totali)"
+  printf '\n  VERDETTO: USCITA SICURA — /exit non perde niente.\n'
+  if [ -n "$senza" ]; then
+    printf '    Il registro ha%s senza riga finale, ma NESSUN processo vivo: conclusi o persi, non in volo.\n' "$senza"
+  fi
+  printf '    Niente di locale in volo; deploy e clone armati proseguono senza questa sessione.\n'
+  return 0
+}
+
+if [ "$SELFTEST" = 1 ]; then
+  # A esiti opposti: stessi file, verdetti diversi a seconda dei processi vivi — e' la
+  # differenza fra un registro e l'insieme.
+  d="$(mktemp -d)"
+  printf 'lavoro\n[exited with code 0]\n' > "$d/finito.output"
+  printf 'lavoro\n[killed]\n'             > "$d/ucciso.output"
+  printf 'lavoro senza fine\n'             > "$d/senzafine.output"
+  printf '%s\n  task in background  x\n' "$INTESTAZIONE" > "$d/iostesso.output"
+  classifica_registro "$d"
+  rossi=0
+  chk() { if [ "$1" = "$2" ]; then printf '  [ok] %s\n' "$3"; else printf '  [FAIL] %s (atteso %s, avuto %s)\n' "$3" "$2" "$1"; rossi=$((rossi+1)); fi; }
+  chk "$REG_TOT" 3 "conta i file, tolto se stesso (3 su 4)"
+  chk "$REG_MIEI" 1 "riconosce la PROPRIA corsa dall'intestazione su stdout, non dal marcatore"
+  chk "$(echo $REG_SENZA)" "senzafine" "un file senza riga finale e' segnalato; exited e killed no"
+  out="$(verdetto 0 "$REG_SENZA" 0)"; c=$?
+  chk "$c" 0 "registro con un senza-fine ma ZERO processi vivi -> USCITA SICURA (concluso o perso)"
+  if echo "$out" | grep -q "conclusi o persi"; then chk 1 1 "...e lo dice"; else chk 0 1 "...e lo dice"; fi
+  out="$(verdetto 2 "$REG_SENZA" 1)"; c=$?
+  chk "$c" 1 "due processi vivi -> ATTENDI, qualunque cosa dica il registro"
+  out="$(verdetto 1 "" 0)"; c=$?
+  chk "$c" 1 "un processo vivo e registro pulito -> ATTENDI lo stesso: i processi sono la verita'"
+  rm -rf "$d"
+  printf '  autoprova: %s/7\n' "$((7 - rossi))"
+  exit $rossi
+fi
+
+echo "$INTESTAZIONE"
+
+REG_SENZA=""; REG_TOT=0; REG_MIEI=0
+if [ -z "$TASKS" ] || [ ! -d "$TASKS" ]; then
+  riga "registro dei task" "NON MISURABILE (directory dei task non trovata) — il verdetto poggia sui soli processi"
+else
+  classifica_registro "$TASKS"
+  if [ -n "$REG_SENZA" ]; then
+    riga "registro dei task" "$(echo $REG_SENZA | wc -w) senza riga finale su $REG_TOT:$REG_SENZA"
   else
-    riga "task in background" "nessuno in volo ($n_task conclusi)"
+    riga "registro dei task" "tutti conclusi ($REG_TOT)"
   fi
 fi
 
-# --- 2. gli ssh in primo piano: sono figli di questa shell, e /exit li recide.
-#     `pgrep` non c'e' su Git Bash — si usa ps, che c'e' sempre.
-ssh_vivi="$(ps -ef 2>/dev/null | grep -cE '[s]sh -o BatchMode|[s]sh .*(linux-pc|oracle-vm)' || true)"
-[ -n "$ssh_vivi" ] || ssh_vivi=0
-if [ "$ssh_vivi" -gt 0 ]; then
-  riga "ssh in primo piano" "⚠ $ssh_vivi vivi — un /exit li recide a meta' lavoro"
+# --- 2. I PROCESSI VIVI, che sono la verita'. Ogni comando in corso della CLI e' un bash con
+#     l'involucro `shopt -u extglob`; si toglie questa stessa corsa (la riga porta il nome di
+#     questo script). Gli ssh in primo piano sono un sottoinsieme: si contano dentro.
+vivi_righe="$(ps -ef 2>/dev/null | grep '[s]hopt -u extglob' | grep -v 'posso-uscire' || true)"
+n_vivi=$(printf '%s' "$vivi_righe" | grep -c . || true); [ -n "$n_vivi" ] || n_vivi=0
+ssh_vivi=$(printf '%s' "$vivi_righe" | grep -cE 'ssh (-[A-Za-z0-9]+ )*[A-Za-z0-9._:-]*(linux-pc|oracle-vm|mac)' || true); [ -n "$ssh_vivi" ] || ssh_vivi=0
+if [ "$n_vivi" -gt 0 ]; then
+  riga "comandi della CLI vivi" "⚠ $n_vivi (ssh in primo piano: $ssh_vivi)"
+  # l'involucro finisce con «|| true && eval '…»: si mostra cio' che viene dopo, cioe' il comando
+  printf '%s\n' "$vivi_righe" | sed -e 's/.*|| true && //' -e "s/^eval '//" | cut -c1-96 | sed 's/^/      · /'
 else
-  riga "ssh in primo piano" "nessuno"
+  riga "comandi della CLI vivi" "nessuno (ssh: 0)"
 fi
 
 # --- 3. cio' che NON muore, e va detto perche' e' la meta' che rassicura.
@@ -142,22 +191,6 @@ riga "deploy armato" "prosegue da se' (timer systemd sulla VM e sul gemello)"
 riga "clone armato" "prosegue da se' (heuresys-advanced-clonedb.service, #236 F2)"
 riga "  lo stato dei tre" "bash scripts/verifica-cloni.sh"
 
-# --- 4. il verdetto
-# ⚠ Doppi apici in ogni printf: un apostrofo dentro una stringa a singoli apici la chiude
-# e trasforma il resto in sintassi. Costato un caso negativo verde in S1084, due volte in
-# un giorno — e in un file accanto l'avvertimento c'era gia'.
-if [ "${VERDETTO:-}" = "NON-VERIFICATO" ]; then
-  printf "\n  VERDETTO: NON-VERIFICATO — non ho potuto guardare i task locali.\n"
-  printf "  Non e' «a posto»: e' «non lo so». Passare --tasks <dir> per misurare.\n"
-  exit 2
-fi
-if [ -n "$in_volo" ] || [ "$ssh_vivi" -gt 0 ]; then
-  printf "\n  VERDETTO: ATTENDI — qualcosa gira su QUESTA macchina, e /exit lo ucciderebbe.\n"
-  [ -n "$in_volo" ] && printf "    task in volo:%s\n" "$in_volo"
-  [ "$ssh_vivi" -gt 0 ] && printf "    %s ssh in primo piano\n" "$ssh_vivi"
-  printf "    I lavori remoti armati NON sono un motivo per aspettare: quelli proseguono.\n"
-  exit 1
-fi
-printf '\n  VERDETTO: USCITA SICURA — /exit non perde niente.\n'
-printf '    Niente di locale in volo; deploy e clone armati proseguono senza questa sessione.\n'
-exit 0
+# --- 4. il verdetto: sui processi, col registro come dettaglio.
+verdetto "$n_vivi" "$REG_SENZA" "$ssh_vivi"
+exit $?

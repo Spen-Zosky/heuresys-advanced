@@ -290,6 +290,32 @@ describe("eseguiCorsa — la corsa intera, con un lettore e una sorgente finti",
     expect(aperture).toBe(1);
   });
 
+  it("il mandato porta il PERIMETRO: solo le fonti APPROVED del dominio (o valide per tutti), e vuoto se il dominio non confronta col registro", async () => {
+    let visto: string[] | null = null;
+    const spia: ProposalSource = {
+      chiave: "spia",
+      async proponi(m) { visto = m.fontiAmmesse; return []; },
+    };
+    const registro = [
+      { hostSuffix: "istat.it", label: "Istat", classe: "INSTITUTIONAL", stato: "APPROVED", dominio: null },
+      { hostSuffix: "ilo.org", label: "ILO", classe: "ACCREDITED", stato: "APPROVED", dominio: "positions" },
+      { hostSuffix: "abi.it", label: "ABI", classe: "ACCREDITED", stato: "PROPOSED", dominio: null },
+      { hostSuffix: "istat.it", label: "Istat", classe: "INSTITUTIONAL", stato: "APPROVED", dominio: "organization_units" },
+    ] as const;
+    await eseguiCorsa({
+      dominio: { ...DOMINIO, chiave: "positions", fontiConfrontateColRegistro: true },
+      contesto: CONTESTO, lettore: lettoreFinto({}), sorgente: spia,
+      registroFonti: [...registro], chiaviGiaPresenti: new Set(),
+    });
+    expect([...(visto ?? [])].sort()).toEqual(["ilo.org", "istat.it"]);   // non abi.it (non approvata), non istat|organization_units (altro dominio)
+    await eseguiCorsa({
+      dominio: { ...DOMINIO, fontiConfrontateColRegistro: false },
+      contesto: CONTESTO, lettore: lettoreFinto({}), sorgente: spia,
+      registroFonti: [...registro], chiaviGiaPresenti: new Set(),
+    });
+    expect(visto).toEqual([]);
+  });
+
   it("⚠ il mandato non porta il cliente: solo domande, contesto di categoria e la lettura", async () => {
     const chiavi: string[] = [];
     const spia: ProposalSource = {
@@ -307,6 +333,8 @@ describe("eseguiCorsa — la corsa intera, con un lettore e una sorgente finti",
       registroFonti: [],
       chiaviGiaPresenti: new Set(),
     });
-    expect(chiavi.sort()).toEqual(["contesto", "domande", "dominio", "leggi"]);
+    // `fontiAmmesse` (S1096) e' il perimetro degli host, non il cliente: e' cio' che il
+    // registro ha gia' approvato, ed e' pubblico per costruzione.
+    expect(chiavi.sort()).toEqual(["contesto", "domande", "dominio", "fontiAmmesse", "leggi"]);
   });
 });

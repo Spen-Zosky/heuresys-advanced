@@ -26,6 +26,7 @@ const mandato = (aperte: Record<string, string>, viste: string[] = []): MandatoR
     employeeCount: 24, countryCode: "IT", regulatoryIntensity: "LOW", operatingModelCode: "B2B_SERVICES",
   },
   domande: ["Quali fonti ufficiali descrivono il settore?"],
+  fontiAmmesse: [],
   async leggi(url) {
     viste.push(url);
     const testo = aperte[url];
@@ -64,6 +65,29 @@ describe("la sorgente del gateway", () => {
     const pagine = secondo.pagine as Array<{ url: string; testo: string }>;
     expect(pagine.map((p) => p.url)).toEqual(["https://www.istat.it/x"]);
     expect(out).toHaveLength(1);
+  });
+
+  it("S1096 — con un perimetro, il primo giro lo riceve e un indirizzo FUORI non si legge nemmeno", async () => {
+    const g = gatewayFinto({
+      indirizzi: ["https://www.istat.it/x", "https://www.assoconsult.org/y", "https://dati.istat.it/z"],
+      proposte: [],
+    });
+    const viste: string[] = [];
+    const s = creaSorgenteGateway({ url: "http://gateway.local", token: "segreto", fetchImpl: g.fetchImpl });
+    await s.proponi({ ...mandato({ "https://www.istat.it/x": "a", "https://dati.istat.it/z": "b" }, viste), fontiAmmesse: ["istat.it"] });
+
+    const primo = g.richieste.find((r) => r.fase === "indirizzi")!;
+    expect(primo.fontiAmmesse).toEqual(["istat.it"]);
+    // istat.it e il suo sottodominio si leggono; assoconsult.org no, e non e' un errore: e' il perimetro
+    expect(viste).toEqual(["https://www.istat.it/x", "https://dati.istat.it/z"]);
+  });
+
+  it("S1096 — senza perimetro (dominio che non confronta col registro) si legge tutto, come prima", async () => {
+    const g = gatewayFinto({ indirizzi: ["https://www.istat.it/x", "https://www.assoconsult.org/y"], proposte: [] });
+    const viste: string[] = [];
+    const s = creaSorgenteGateway({ url: "http://gateway.local", token: "segreto", fetchImpl: g.fetchImpl });
+    await s.proponi(mandato({ "https://www.istat.it/x": "a", "https://www.assoconsult.org/y": "b" }, viste));
+    expect(viste).toEqual(["https://www.istat.it/x", "https://www.assoconsult.org/y"]);
   });
 
   it("il testo delle pagine arriva AVVOLTO e dichiarato non fidato", async () => {

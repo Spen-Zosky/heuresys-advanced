@@ -75,6 +75,44 @@ il confronto di somiglianza fra testi · **citare il numero 196**, che non si ri
       funzione davanti.
 - [ ] **F2 Il primo dominio della coda, dichiarato e percorso** — budget ~80k · il gate su F1 è caduto (S1095); la testa della coda è `sys_positions` (dominio `positions`, fonte `ilo.org`). Percorrerlo è una corsa di ricerca sul gateway (abbonamento, `#86`): NON fatta in S1095 per capienza dichiarata
       Deve produrre proposte approvate, non solo comparire in cima a una lista.
+
+  ### ⚠ S1096 (2026-09-12) — percorsa DAVVERO, e la misura dice perché non produce ancora
+
+  **Cosa esiste ora**: `apps/api/scripts/percorri-dominio.mts` — per un dominio: fascicolo (creato
+  se manca, con carta d'identità), corsa, decisione motivata su ogni `PASSED` (rotta del
+  candidato, non il ledger), `apply-research`, esito letto dalla risposta. Girato sul gemello
+  (E27) con il **modello su Windows** — l'unico `claude` autenticato: gemello e VM hanno la
+  sessione OAuth **scaduta** (`claude login` è interattivo: impossibilità tecnica) — e l'API+lettore
+  sul gemello, uniti da `ssh -R 8790` (da Windows il DNS di casa non risolve i siti
+  istituzionali: memoria `home_ipv6_dns_stall`).
+
+  **Due difetti trovati eseguendo, corretti con prove a esiti opposti** (65/65 unit):
+  ① `#245` dal lato della PROPOSTA — `dominioApplicabile` era `z.string().max(64)`: 7 fonti
+  `PASSED` con «statistica_ufficiale», «normativa_statale_vigente»… che il ponte avrebbe rifiutato
+  **dopo** la decisione umana. Ora è `z.enum` delle chiavi di contenuto, e siccome lo schema va al
+  modello come JSON Schema, l'enum è insieme vincolo e istruzione: la corsa dopo ha dato 8/8 chiavi
+  valide. ② **Il perimetro non era nel mandato**: la fase «indirizzi» proponeva siti qualsiasi,
+  l'API li leggeva, e le proposte cadevano su `SOURCES_POLICY` (7/7 in una corsa). Ora
+  `MandatoRicerca.fontiAmmesse` porta le fonti APPROVED del dominio, il prompt le dichiara e il
+  lettore salta gli indirizzi fuori perimetro.
+
+  **Esito sul gemello**: `research_sources` → **8 fonti registrate** (`fontiRegistrate: 8`:
+  cnel.it|positions, confindustria.it|*, inps.it|kpis, ispettorato.gov.it|business_processes,
+  istat.it|kpis, normattiva.it|business_processes, registroimprese.it|organization_units,
+  uni.com|business_processes — tutte INSTITUTIONAL/ACCREDITED, criterio 000379). Poi
+  `organization_units` **0 proposte** (4 lette, 4 inventate → 404) e `positions` **0 proposte**
+  (idem). **Non è un rosso della catena: è il limite della fase «indirizzi»** — il modello non
+  naviga, *indovina* i percorsi (metà sono 404) e le pagine istituzionali che indovina non
+  descrivono come è fatta una società di consulenza; risponde vuoto invece di inventare, che è
+  il comportamento voluto. La fonte che servirebbe (`assoconsult.org`, associazione di categoria)
+  è stata proposta **una** volta (corsa `7550b570`, con la chiave ancora libera) e mai più in
+  due corse successive. **F2 resta aperta**: percorsa, non produttiva. Non si è approvata nessuna
+  fonte a mano (il piano lo vieta).
+
+  **Cosa serve perché produca** (finding, non voce nuova): o la fase «indirizzi» sa *cercare*
+  (una sitemap, o uno strumento di ricerca nel gateway) invece di indovinare, oppure il registro
+  riceve la fonte di settore quando una corsa la propone — e le proposte di fonte si presentano
+  a Enzo, che è chi le approva davvero (S1081). Il driver e le due correzioni restano nel repo.
 - [ ] **F3 Lo strato di forma (2c) e la prova della frase riconoscibile** — budget ~60k
       Prendere una proposta approvata del cliente A con una frase riconoscibile, promuoverla a
       patrimonio, e cercare **quella frase** nello strato di forma: deve dare **zero** riscontri.

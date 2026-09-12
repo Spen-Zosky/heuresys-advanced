@@ -18,6 +18,7 @@
  * Il segreto non compare mai in un messaggio d'errore: se manca, si dice che manca.
  */
 import type { ProposalSource, MandatoRicerca, PropostaGrezza } from "../engine.js";
+import { hostOf, suffissoCopre } from "../sources.js";
 import { risolviDominio } from "../domains/index.js";
 import { avvolgiTestoNonFidato } from "../guardia-domande.js";
 import { SorgenteNonDisponibileError } from "./index.js";
@@ -75,10 +76,19 @@ export function creaSorgenteGateway(cfg: ConfigurazioneGateway): ProposalSource 
         domande: m.domande,
         contesto: m.contesto,
         massimo: cfg.indirizziMassimi ?? 8,
+        fontiAmmesse: m.fontiAmmesse,
       })) as { indirizzi?: unknown };
-      const indirizzi = Array.isArray(passo1.indirizzi)
+      // Un indirizzo fuori dal perimetro non si legge: la proposta che ne nascerebbe cadrebbe
+      // comunque su SOURCES_POLICY, e la lettura sarebbe spesa per essere buttata. Se il
+      // perimetro e' vuoto (dominio che non confronta col registro) si legge tutto.
+      const indirizzi = (Array.isArray(passo1.indirizzi)
         ? passo1.indirizzi.filter((x): x is string => typeof x === "string")
-        : [];
+        : []
+      ).filter((url) => {
+        if (m.fontiAmmesse.length === 0) return true;
+        const h = hostOf(url);
+        return h !== null && m.fontiAmmesse.some((s) => suffissoCopre(s, h));
+      });
 
       // ② l'API apre le pagine: qui passano guardie, limiti e impronta.
       const pagine: Array<{ url: string; testo: string }> = [];

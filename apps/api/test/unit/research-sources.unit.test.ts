@@ -18,6 +18,7 @@ import {
   type FonteRegistrata,
 } from "../../src/modules/research/sources.js";
 import { RESEARCH_SOURCES_DOMAIN } from "../../src/modules/research/domains/index.js";
+import { CHIAVI_DOMINIO_DI_CONTENUTO } from "../../src/modules/research/domains/research-sources.js";
 import { risolviDominio, chiaviDominio } from "../../src/modules/research/domains/index.js";
 import type { ContestoRicerca } from "../../src/modules/research/domain.js";
 
@@ -127,6 +128,25 @@ describe("fonteAmmessa — quattro rifiuti distinti, e un permesso", () => {
   it("la classe del contenuto generato da utenti non e' fra quelle ammesse", () => {
     expect(CLASSI_AMMESSE.has("USER_GENERATED" as never)).toBe(false);
     expect(CLASSI_AMMESSE.size).toBe(3);
+  });
+});
+
+describe("#245 dal lato della proposta — il dominio di una fonte e' una chiave, non una frase", () => {
+  const base = {
+    hostSuffix: "istat.it", label: "Istat", classe: "INSTITUTIONAL" as const, paese: "IT",
+    motivazione: "Istituto nazionale di statistica: classificazioni ufficiali delle imprese.",
+  };
+  it("accetta una chiave dichiarata, e null per «vale per tutti»", () => {
+    expect(RESEARCH_SOURCES_DOMAIN.forma.safeParse({ ...base, dominioApplicabile: "organization_units" }).success).toBe(true);
+    expect(RESEARCH_SOURCES_DOMAIN.forma.safeParse({ ...base, dominioApplicabile: null }).success).toBe(true);
+  });
+  it("respinge il testo del modello («statistica_ufficiale») e un codice ATECO («64.19»)", () => {
+    expect(RESEARCH_SOURCES_DOMAIN.forma.safeParse({ ...base, dominioApplicabile: "statistica_ufficiale" }).success).toBe(false);
+    expect(RESEARCH_SOURCES_DOMAIN.forma.safeParse({ ...base, dominioApplicabile: "64.19" }).success).toBe(false);
+  });
+  it("e le chiavi ammesse sono ESATTAMENTE quelle dei domini di contenuto (mai research_sources)", () => {
+    expect([...CHIAVI_DOMINIO_DI_CONTENUTO].sort()).toEqual(
+      ["business_processes", "kpis", "organization_units", "positions", "skills"]);
   });
 });
 

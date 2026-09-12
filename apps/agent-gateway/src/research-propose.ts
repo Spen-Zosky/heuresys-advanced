@@ -31,6 +31,8 @@ export interface RichiestaIndirizzi {
   contesto: Record<string, unknown>;
   /** Quanti indirizzi al massimo. Il motore ha comunque il proprio tetto. */
   massimo?: number;
+  /** Gli host ammessi per questo dominio (S1096): se non e' vuoto, gli indirizzi si scelgono SOLO li'. */
+  fontiAmmesse?: string[];
 }
 
 export interface RichiestaProposte {
@@ -100,6 +102,12 @@ export async function proponiIndirizzi(r: RichiestaIndirizzi): Promise<string[]>
     "Domande a cui la ricerca deve rispondere:",
     ...r.domande.map((d, i) => `${i + 1}. ${d}`),
     `Elenca al massimo ${massimo} indirizzi web di fonti ISTITUZIONALI, di organismi riconosciuti o di editoria specializzata di reputazione consolidata, che rispondano a quelle domande.`,
+    ...(r.fontiAmmesse && r.fontiAmmesse.length > 0
+      ? [
+          `⚠ PERIMETRO: la piattaforma accetta di imparare, per questo dominio, SOLO da questi host (o loro sottodomini): ${r.fontiAmmesse.join(", ")}.`,
+          "Ogni indirizzo deve stare su uno di quegli host. Un indirizzo altrove verra' scartato senza essere letto: scegli le pagine di quegli host che rispondono meglio alle domande.",
+        ]
+      : []),
     "Solo https. Niente forum, blog, aggregatori o contenuti di provenienza ignota.",
     'Rispondi con: {"indirizzi": ["https://...", "..."]}',
   ].join("\n");

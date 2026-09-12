@@ -56,6 +56,17 @@ export interface MandatoRicerca {
   dominio: string;
   contesto: ContestoRicerca;
   domande: string[];
+  /**
+   * Gli host (suffissi) da cui il dominio accetta di imparare — le fonti APPROVED del
+   * registro per questo dominio. Vuoto per un dominio che non confronta col registro
+   * (`research_sources`): li' si cerca dappertutto, perche' si cercano proprio le fonti.
+   *
+   * Misurato il 2026-09-12 (S1096): senza il perimetro nel mandato, la fase «indirizzi» del
+   * gateway proponeva siti istituzionali QUALSIASI, l'API li leggeva, e ogni proposta cadeva
+   * su SOURCES_POLICY — 7 su 7 in una corsa. Il registro decide DOVE la piattaforma impara:
+   * dirglielo dopo, respingendo, e' pagare la lettura per buttarla.
+   */
+  fontiAmmesse: string[];
   leggi(url: string): Promise<PaginaLetta>;
 }
 
@@ -340,10 +351,16 @@ export async function eseguiCorsa(input: {
     }
   };
 
+  const fontiAmmesse = input.dominio.fontiConfrontateColRegistro
+    ? input.registroFonti
+        .filter((f) => f.stato === "APPROVED" && (f.dominio === null || f.dominio === input.dominio.chiave))
+        .map((f) => f.hostSuffix)
+    : [];
   const grezze = await input.sorgente.proponi({
     dominio: input.dominio.chiave,
     contesto: input.contesto,
     domande,
+    fontiAmmesse,
     leggi,
   });
 

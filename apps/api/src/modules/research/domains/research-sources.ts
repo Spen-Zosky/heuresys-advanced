@@ -19,6 +19,22 @@
 import { z } from "zod";
 import type { ContestoRicerca, DominioRicercabile } from "../domain.js";
 import { hostOf, suffissoCopre } from "../sources.js";
+import { DOMINI_DI_CONTENUTO } from "./contenuto-del-modello.js";
+
+/**
+ * #245, il lato della PROPOSTA. La guardia di S1086 (`RESEARCH_SOURCE_DOMAIN_UNKNOWN`) vive
+ * all'APPLICAZIONE: una fonte con un dominio inventato arrivava fin li' come `PASSED`, e solo
+ * il ponte la rifiutava — dopo la decisione umana, cioe' nel posto piu' caro. Misurato il
+ * 2026-09-12 (S1096): sette proposte di fonte, tutte `PASSED`, con `dominioApplicabile` come
+ * «statistica_ufficiale» e «normativa_statale_vigente» — testo del modello, non una chiave.
+ * La causa: lo schema diceva al modello «una stringa fino a 64», e il modello ha obbedito.
+ *
+ * Qui la forma pretende UNA DELLE CHIAVI DICHIARATE, e siccome lo schema arriva al modello
+ * come JSON Schema (`z.toJSONSchema` in `sorgenti/gateway.ts`), l'`enum` gli dice anche cosa
+ * puo' scrivere — la forma e' insieme il vincolo e l'istruzione. `research_sources` non e'
+ * fra i valori: una fonte non vale «per il dominio delle fonti», vale per un contenuto.
+ */
+export const CHIAVI_DOMINIO_DI_CONTENUTO = DOMINI_DI_CONTENUTO.map((d) => d.chiave) as [string, ...string[]];
 
 /**
  * La stessa forma che il database pretende
@@ -39,8 +55,8 @@ export const FontePropostaSchema = z.object({
     .regex(/^[A-Z]{2}$/)
     .nullable()
     .default(null),
-  /** Il dominio ricercabile per cui vale; `null` = per tutti. */
-  dominioApplicabile: z.string().max(64).nullable().default(null),
+  /** Il dominio ricercabile per cui vale; `null` = per tutti. Una delle chiavi dichiarate, o niente. */
+  dominioApplicabile: z.enum(CHIAVI_DOMINIO_DI_CONTENUTO).nullable().default(null),
   /** Perche' questa fonte e' autorevole. E' cio' che un umano legge per decidere. */
   motivazione: z.string().min(20).max(2000),
 });

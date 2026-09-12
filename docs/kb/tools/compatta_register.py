@@ -118,11 +118,18 @@ def compatta(testo):
         # ritrovate «· ↦ path · ↦ path». Nessun cancello se ne accorgeva, perche'
         # la riga resta formalmente valida — sporca, ma valida.
         riga = righe[i].rstrip()
-        if PUNTATORE not in riga:
+        gia_archiviato = PUNTATORE in riga
+        if not gia_archiviato:
             riga += f"  ·  {PUNTATORE}"
         out.append(riga)
-        pezzi_arch.append("\n".join(righe[i:f]).rstrip())
-        archiviati.append(ident)
+        # ⚠ E IL CORPO SI ARCHIVIA UNA VOLTA SOLA (S1095, 2026-09-12). Una riga-indice e' un
+        # blocco terminale di una riga: fino a oggi ogni corsa la RIAPPENDEVA all'archivio,
+        # che cresceva di ~214 righe-indice a corsa. Misurato: `#121` compariva 4 volte
+        # nell'archivio prima di questa sessione, 6 dopo due corse. Il puntatore nella riga
+        # dice che il corpo e' gia' di la': non c'e' niente da portare.
+        if not gia_archiviato:
+            pezzi_arch.append("\n".join(righe[i:f]).rstrip())
+            archiviati.append(ident)
         cursore = f
     out.extend(righe[cursore:])
     return "\n".join(out), "\n\n".join(pezzi_arch), archiviati, tenuti
@@ -216,6 +223,12 @@ def main(argv):
           f"  (~{term//4:,} token di cronaca gia' chiusa)")
 
     dopo, arch, archiviati, tenuti = compatta(prima)
+    if not archiviati:
+        # Tutti i terminali portano gia' il puntatore: non c'e' niente da spostare, e dirlo
+        # con due post-condizioni rosse («non si ritrovano nell'archivio», «non e' calato»)
+        # sarebbe un allarme senza difetto — cioe' un allarme che si impara a non guardare.
+        print("\n  NIENTE DA COMPATTARE: ogni item terminale e' gia' in archivio.")
+        return 0
     print(f"\n  compattando: {len(archiviati)} item archiviati · {len(tenuti)} tenuti vivi")
     print(f"  register:    {len(prima):,} -> {len(dopo):,} byte "
           f"({100 - 100*len(dopo)//len(prima)}% in meno)")
@@ -309,6 +322,12 @@ def selftest():
     prova("...ma su una riga che non ce l'ha, il puntatore ci finisce",
           d_senza.count(PUNTATORE) == 1)
     prova("il corpo del terminale non e' piu' nel register", "- riga 7 " not in dopo)
+    # S1095: una riga-indice gia' archiviata (#7 porta il puntatore) NON si riappende
+    # all'archivio — prima di questa prova ogni corsa ne aggiungeva una copia.
+    d_i, a_i, _, _ = compatta(f"- **#7 sette** · status: DONE  ·  {PUNTATORE}\n{corpo}\n")
+    prova("una riga-indice gia' archiviata non torna nell'archivio", "#7 sette" not in a_i)
+    d_n, a_n, _, _ = compatta(f"- **#8 otto** · status: DONE\n  - corpo otto\n{corpo}\n")
+    prova("un terminale NON ancora archiviato ci va (controprova)", "#8 otto" in a_n and "corpo otto" in a_n)
     prova("il corpo del terminale E' nell'archivio", arch.count("- riga 7 ") == 2)
     # IL CASO CHE CONTA: cio' che sta sotto la cronaca storica non si tocca due volte
     prova("gli item SOTTO la cronaca storica restano dove sono",

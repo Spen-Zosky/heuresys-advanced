@@ -50,7 +50,7 @@ Stato: `[ ]` da fare · `[x]` FATTA con data ed evidenza · `NON FATTA (ragione)
 - [x] **F5 `#54` F4 — frontend `/recruiting` + E2E con login reale** — **fatto =** pagine su dati reali, E2E verde, `check_exposure.py` verde (`#79` F3) — FATTA 2026-09-12 · 5 pagine + `/jobs` pubblica; API `public-job-postings` 4/4 sul gemello (sondata); mig `000406` in produzione (19 s); `recruiting.spec.ts` **16/16** in prod-mode, drift 0; `check_exposure` 0 lacune; voce `#54` CHIUSA (4/4)
 - [ ] **F6 `#205` F1-F3** — **fatto =** strumento con autoprova a esiti opposti, primo dominio percorso, prova della frase a zero riscontri
 - [ ] **F7 `#159` F2 — il componente** — **fatto =** componente in `@heuresys/ui`, la pagina `dev/agent` lo consuma, typecheck e lint verdi
-- [ ] **F8 `#149` F4** — **fatto =** almeno una consegna citata verificata avversarialmente nel file
+- [x] **F8 `#149` F4** — **fatto =** almeno una consegna citata verificata avversarialmente nel file — FATTA 2026-09-12 · `guardia-psql-opzioni-raggruppate`: 5 affermazioni misurate, esito PARZIALE scritto nel file e letto dallo strumento
 
 ## Simulazione a 5 domande (R24 §3) — per voce, prima di partire
 

@@ -14,9 +14,42 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 ### Delta S1093 (2026-09-08/09) — la CI rossa, i tre rimedi all'instabilità, le PR Dependabot
 
 **Numeri ri-derivati dal vivo il 2026-09-12**: migrazioni su disco **404** (max `000407`) · file di test
-API **272** · moduli API **108** · perimetri dell'agente aperti **12** · HEAD `344cd461`.
+API **272** · moduli API **108** · perimetri dell'agente aperti **13** · viste `v_*` **54** · HEAD `e818bc8b`.
 
 ---
+
+## S1096 (2026-09-12) — il mandato «P1→P3, debiti, gated»: sei voci su undici, e la ricerca percorsa fino al suo limite vero
+
+**Mandato di Enzo** (*«esegui tutti da P1 a P3, poi i debiti aperti e i due gated … l'unico guardiano
+che comanda è quello della capienza»*), registro `.programmi/S1096-mandato-p1-p3-debiti-gated.md`.
+Dieci commit da `e7138744` a `e818bc8b`. Misure ri-derivate alla chiusura: 108 moduli API · **404**
+migrazioni (`000001..000407`) · 272 file di test API · **54** viste `v_*` · perimetri dell'agente
+**13** · RBAC 14/231/1015 · registro debiti **0 aperti**.
+
+- **`#149` F4** — le 4 consegne rimaste `NON-VERIFICATO` misurate: 3 CONFERMATO, p3 **PARZIALE**
+  (smentito «tutte le 70.959 righe di lineage sono `OLDDB::`»: 64.482 + 95 + 6.382 NULL; la
+  conclusione regge per il NOT NULL delle colonne sorgente). `check_verifica_consegne` VERDE.
+- **`#214` F6 — tredicesimo perimetro `skill-categories`** (mig `000407`): primo fra i «vocabolari
+  delle persone», con la motivazione sulla vicinanza — una categoria è un livello della tassonomia,
+  un ruolo si ricopre. Due porte **piene** (metadata legacy a null, descrizioni), sentinella provata
+  rossa su entrambe con impronta; gemello 44/44, produzione 12 s.
+- **`#79` F3 — il buco del cancello chiuso**: `check_exposure.py` conta le tabelle popolate dalle
+  **migrazioni** (86) oltre ai seed (73), legge in quattro modi (FROM, costante di tabella, funzione
+  invocata, trigger su tabella letta), autoprova 13/13; nasce `exposure_waivers.txt` (7 deroghe
+  motivate). Trovato: un rollback **commentato** nella 000284 ridefiniva una funzione a corpo vuoto.
+- **`#205` F2 — percorsa davvero, non produttiva**: `percorri-dominio.mts`; il modello gira su
+  Windows (gemello e VM: OAuth **scaduta**), lettore e DB sul gemello via `ssh -R`. Due difetti del
+  motore corretti (65/65 unit): `dominioApplicabile` a testo libero (#245 dal lato proposta → `z.enum`
+  che arriva al modello come JSON Schema) e **il perimetro delle fonti assente dal mandato** (ogni
+  proposta cadeva su `SOURCES_POLICY`). 8 fonti registrate sul gemello; `organization_units` e
+  `positions` **0 proposte**: la fase «indirizzi» indovina i percorsi (4/8 → 404). `#198` T9b resta
+  ferma di conseguenza; ⚠ il suo trigger «`content_units` > 0» è **già scattato** ma sul modello
+  bancario (33/71/132/73 dal bundle fase 4).
+- **D-91 RISOLTO** (`docs/archive/` archivio nell'indice: 85 file; Next.js 15→16 in 4 documenti vivi;
+  README del gateway per verbo — distribuito: **no**) · **D-90 RISOLTO** (`posso-uscire.sh` decide sui
+  processi vivi, riconosce sé stesso da stdout, selftest 7/7; provato ATTENDI(4)→USCITA SICURA).
+- **`#41`**: il top-up di 26 chunk è superato — 1.433 file cambiati dal run del 2026-07-05.
+- Igiene: il «drift RBAC-map» del boot era un falso del grassetto (`**1015** map`).
 
 ## S1095 (2026-09-12) — il mandato «tutte le P1→P3»: sette voci su otto, e tre strumenti che hanno smentito il piano
 

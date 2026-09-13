@@ -17,7 +17,7 @@
  * no reusable UI primitive is defined in apps/web). Strings live in the existing
  * `admin` i18n namespace under `agentDev.*` (it + en).
  *
- * ⭐ #159 F2 (S1091): il CANALE non vive piu' qui. Stream SSE, stato della corsa e
+ * ⭐ #159 F2 (S1091): il CANALE non vive piu' qui; (S1099) nemmeno la VISTA: e' `AgentPanel` di `@heuresys/ui`. Stream SSE, stato della corsa e
  * approvazioni stanno in `@/lib/use-agent-stream`, cosi' che la prossima pagina idonea
  * non debba ricopiarli da questa — che e' il bersaglio della voce, «il ponte deve valere
  * per le pagine future, non per la prima». Questa pagina resta il PRIMO consumatore, e
@@ -31,18 +31,17 @@
  */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { AgentPanel, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import { AGENT_DEV_ENABLED, useAgentStream } from "@/lib/use-agent-stream";
 
 // L'indirizzo del gateway si mostra a schermo, quindi resta leggibile anche qui: sono
 // i NOMI delle chiavi d'ambiente, mai i valori dei segreti (R10).
 const GATEWAY_URL = (process.env.NEXT_PUBLIC_AGENT_GATEWAY_URL ?? "http://localhost:8790").replace(/\/$/, "");
 
-/** A pending write approval surfaced by an `approval_required` SSE event. */
-/* Tipi e interprete SSE sono usciti da qui: vivono in `@/lib/use-agent-stream`,
-   perche' erano il CANALE e non la vista. Vederli qui dentro era il segno che la
-   prossima pagina avrebbe dovuto ricopiarli. */
-
+/* ⭐ #159 F2 (S1099): anche la VISTA non vive piu' qui. `AgentPanel` e' di `@heuresys/ui`
+   (1.2.0): questa pagina traduce le parole nel proprio namespace, monta il canale e passa
+   stato e callback. La prossima pagina idonea fa lo stesso con il suo namespace e il suo
+   contesto — e non tocca ne' il canale ne' il componente. */
 
 function DisabledNotice() {
   const { t } = useTranslation("admin");
@@ -67,10 +66,9 @@ export default function AgentDevConsolePage() {
   const [prompt, setPrompt] = useState("");
   const { running, lines, approval, notice, run, stop, resolveApproval } = useAgentStream();
 
-  // ⭐ La traduzione avviene QUI, non nell'hook. `notice.code` e' una chiave senza
-  //    namespace: questa pagina la prefissa col proprio (`agentDev.*`), la prossima col suo.
-  //    Se l'hook restituisse una stringa gia' tradotta, ogni consumatore futuro
-  //    erediterebbe le parole di questa console.
+  // ⭐ La traduzione avviene QUI, non nell'hook e non nel componente. `notice.code` e' una
+  //    chiave senza namespace: questa pagina la prefissa col proprio (`agentDev.*`), la
+  //    prossima col suo.
   const noticeText =
     notice === null ? null : t(`agentDev.${notice.code}`, notice.params ?? {});
 
@@ -78,106 +76,38 @@ export default function AgentDevConsolePage() {
   if (!AGENT_DEV_ENABLED) return <DisabledNotice />;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-6 py-8" data-testid="agentdev-page">
-      <Card>
-        <CardHeader>
-          <CardTitle data-testid="agentdev-title">{t("agentDev.title")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">{t("agentDev.description")}</p>
-          <p className="text-xs text-muted-foreground">
-            {t("agentDev.gatewayLabel")}: <code className="font-mono">{GATEWAY_URL}</code>
-          </p>
-
-          <label className="block space-y-1">
-            <span className="text-sm font-medium text-foreground">{t("agentDev.promptLabel")}</span>
-            <textarea
-              data-testid="agentdev-prompt"
-              className="min-h-28 w-full rounded-md border border-input bg-background p-3 text-sm text-foreground"
-              placeholder={t("agentDev.promptPlaceholder")}
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              disabled={running}
-            />
-          </label>
-
-          <div className="flex gap-3">
-            <Button type="button" data-testid="agentdev-run" onClick={() => void run(prompt)} disabled={running || !prompt.trim()}>
-              {running ? t("agentDev.running") : t("agentDev.run")}
-            </Button>
-            {running && (
-              <Button type="button" variant="secondary" data-testid="agentdev-stop" onClick={stop}>
-                {t("agentDev.stop")}
-              </Button>
-            )}
-          </div>
-
-          {notice && (
-            <p
-              data-testid={notice.kind === "ok" ? "agentdev-notice-ok" : "agentdev-notice-err"}
-              className={`text-sm font-medium ${notice.kind === "ok" ? "text-success" : "text-danger"}`}
-              role={notice.kind === "err" ? "alert" : undefined}
-            >
-              {noticeText}
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      {approval && (
-        <Card data-testid="agentdev-approval">
-          <CardHeader>
-            <CardTitle>{t("agentDev.approvalTitle")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">{t("agentDev.approvalDesc")}</p>
-            <div className="space-y-1 text-sm">
-              <span className="font-medium text-foreground">{t("agentDev.approvalTool")}:</span>{" "}
-              <code data-testid="agentdev-approval-tool" className="font-mono break-all">
-                {JSON.stringify(approval.tool)}
-              </code>
-            </div>
-            <div className="space-y-1 text-sm">
-              <span className="font-medium text-foreground">{t("agentDev.approvalInput")}:</span>
-              <pre data-testid="agentdev-approval-input" className="mt-1 max-h-48 overflow-auto rounded bg-muted p-2 font-mono text-xs">
-                {JSON.stringify(approval.input, null, 2)}
-              </pre>
-            </div>
-            <div className="flex gap-3">
-              <Button type="button" data-testid="agentdev-approve-allow" onClick={() => void resolveApproval("allow")}>
-                {t("agentDev.allow")}
-              </Button>
-              <Button type="button" variant="destructive" data-testid="agentdev-approve-deny" onClick={() => void resolveApproval("deny")}>
-                {t("agentDev.deny")}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("agentDev.streamTitle")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {lines.length === 0 ? (
-            <p data-testid="agentdev-stream-empty" className="text-sm text-muted-foreground">
-              {t("agentDev.streamEmpty")}
-            </p>
-          ) : (
-            <ul data-testid="agentdev-stream" className="space-y-1">
-              {lines.map((line) => (
-                <li key={line.id} data-testid="agentdev-stream-line" className="flex items-start gap-2 text-xs">
-                  <Badge variant={line.kind === "error" ? "destructive" : line.kind === "approval_required" ? "secondary" : "outline"}>
-                    {line.kind}
-                  </Badge>
-                  <code className="break-all font-mono text-muted-foreground">{line.text}</code>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+    <div className="mx-auto max-w-4xl px-6 py-8">
+      <AgentPanel
+        testIdPrefix="agentdev"
+        labels={{
+          title: t("agentDev.title"),
+          description: t("agentDev.description"),
+          gatewayLabel: t("agentDev.gatewayLabel"),
+          promptLabel: t("agentDev.promptLabel"),
+          promptPlaceholder: t("agentDev.promptPlaceholder"),
+          run: t("agentDev.run"),
+          running: t("agentDev.running"),
+          stop: t("agentDev.stop"),
+          streamTitle: t("agentDev.streamTitle"),
+          streamEmpty: t("agentDev.streamEmpty"),
+          approvalTitle: t("agentDev.approvalTitle"),
+          approvalDesc: t("agentDev.approvalDesc"),
+          approvalTool: t("agentDev.approvalTool"),
+          approvalInput: t("agentDev.approvalInput"),
+          allow: t("agentDev.allow"),
+          deny: t("agentDev.deny"),
+        }}
+        gatewayUrl={GATEWAY_URL}
+        prompt={prompt}
+        onPromptChange={setPrompt}
+        running={running}
+        onRun={() => void run(prompt)}
+        onStop={stop}
+        lines={lines}
+        approval={approval}
+        onApproval={(d) => void resolveApproval(d)}
+        notice={notice === null || noticeText === null ? null : { kind: notice.kind, text: noticeText }}
+      />
     </div>
   );
 }

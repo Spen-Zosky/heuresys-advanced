@@ -102,6 +102,7 @@ import { blueprintOverridesRoutes } from "./modules/blueprint-overrides/routes.j
 import { processKpiTemplatesRoutes } from "./modules/process-kpi-templates/routes.js";
 import { organizationUnitKpiTemplatesRoutes } from "./modules/organization-unit-kpi-templates/routes.js";
 import { seedAcquisitionRunsRoutes } from "./modules/seed-acquisition-runs/routes.js";
+import { tenantImportRunsRoutes } from "./modules/tenant-import-runs/routes.js";
 import { sorgenteGatewayDaAmbiente } from "./modules/research/sorgenti/gateway.js";
 import { registraSorgente } from "./modules/research/sorgenti/index.js";
 import { seedCandidateRecordsRoutes } from "./modules/seed-candidate-records/routes.js";
@@ -478,6 +479,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // non ha tolto nulla a nessuno. ADR-0023 resta la dottrina sulla PROVENIENZA dei
   // dati; qui se ne va lo strumento che li portava, che aveva finito il suo lavoro.
   await app.register(seedAcquisitionRunsRoutes, { prefix: "/v1/seed-acquisition-runs" });
+  // #206 — Tenant Builder P4: le persone vere entrano nell'azienda costruita da P3.
+  await app.register(tenantImportRunsRoutes, { prefix: "/v1/tenant-import-runs" });
 
   // #132 F4h — chi propone, se questa macchina ce l'ha. Se le variabili non ci sono resta in
   // piedi la sorgente che DICHIARA la propria assenza: una corsa senza fornitore fallisce

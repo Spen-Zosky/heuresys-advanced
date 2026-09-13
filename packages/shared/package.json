@@ -387,6 +387,11 @@
       "heuresys-source": "./src/schemas/seed-acquisition-runs.ts",
       "default": "./dist/schemas/seed-acquisition-runs.js"
     },
+    "./schemas/tenant-import-runs": {
+      "types": "./dist/schemas/tenant-import-runs.d.ts",
+      "heuresys-source": "./src/schemas/tenant-import-runs.ts",
+      "default": "./dist/schemas/tenant-import-runs.js"
+    },
     "./schemas/seed-candidate-records": {
       "types": "./dist/schemas/seed-candidate-records.d.ts",
       "heuresys-source": "./src/schemas/seed-candidate-records.ts",

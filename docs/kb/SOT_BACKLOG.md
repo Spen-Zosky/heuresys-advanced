@@ -69,15 +69,17 @@
   - chiuso-quando: esiste lo strumento che ri-deriva la coda con autoprova a esiti opposti, il primo dominio della coda e' stato dichiarato e ha prodotto proposte approvate, e la prova della frase riconoscibile sullo strato di forma da' zero riscontri
   - lab-id: 2026-08-16-tenant-builder-p2b-p2c-domini-e-patrimonio
 
-- **#206 Tenant Builder P4 — estrattori e ingestori: il dato vero prende il posto del provvisorio** · status: HOLD
-  - hold-reason: prima si deve poter **sperimentare l'intero processo di creazione** con aziende usa e getta dall'interfaccia web; le persone vere entrano quando il processo regge. Non è un rinvio tecnico né una dipendenza — parole di Enzo: *«mi serve tutto, ma possiamo mettere in attesa "sostituire i segnaposto con le persone vere", per ora»*
+- **#206 Tenant Builder P4 — estrattori e ingestori: il dato vero prende il posto del provvisorio** · status: GATED
+  - gated-su: `#198` T9b — la corsa vera in produzione (T9) pretende un'azienda vera costruita da un modello NON bancario generato dalla ricerca; finche' `MGMT_CONSULTING_SMALL` ha 0 unita', T9 non ha su cosa girare. Tutto il resto e' fatto
+  - ✅ RIPRESA-S1098 (2026-09-13, scelta di Enzo dalla corsia HOLD): **T1-T8 FATTI** in un solo commit — mig `000410`, modulo `tenant-import-runs` (5 rotte, nessun permesso nuovo), effetto `TENANT_IMPORT_RUN`, 12 test verdi su un'azienda costruita da P3. Sette correzioni alla consegna del lab, misurate sul DB vivo (in `.programmi/206-*.md`): la corsa vive in `sys_seed_acquisition_runs` e non in `import_runs`; l'impronta di `source_exports` NON era unica; il caso normale e' la posizione VACANTE (0 segnaposto in produzione, E29); T7/T8 non aspettavano `#198` perche' il registro dell'origine esiste dalla `000319`. **Resta T9** (la corsa vera in produzione), che aspetta `#198` T9b: prova sul gemello con `apps/api/scripts/prova-live-206.mts` (E27)
+  - hold-reason-storica (superata dalla ripresa): prima si deve poter **sperimentare l'intero processo di creazione** con aziende usa e getta dall'interfaccia web; le persone vere entrano quando il processo regge. Non è un rinvio tecnico né una dipendenza — parole di Enzo: *«mi serve tutto, ma possiamo mettere in attesa "sostituire i segnaposto con le persone vere", per ora»*
   - decided-by: Enzo
   - hold-since: 2026-08-17
   - riesaminata-2026-09-12 (S1097, mandato «hold» in autonomia): **HOLD confermato**. Il trigger (`#198` T9b) non è scattato — T9b resta ferma perché il modello `MGMT_CONSULTING_SMALL` è vuoto (la ricerca sui domini di contenuto non produce: `#205` F2, S1096). Non è una decisione che posso prendere al posto del trigger: senza il registro dell'origine di una costruzione vera, P4 non ha su cosa lavorare
   - reactivation-trigger: `#198` chiusa (in particolare T9, la prova su un'azienda vera) — da lì P4 ha il registro dell'origine che i suoi T7/T8/T9 pretendono. Oppure, prima: *«riprendi #206»*
   - resta-vero-il-resto: T5 è FATTO (la vista degli scostamenti), e le dipendenze dichiarate non cambiano — T7/T8/T9 di P4 aspettano il registro dell'origine di `#198`, T1-T6 no
   - si-riprende-con: *«riprendi #206»*. Nessun lavoro va rifatto
-  - priority: P2 · effort: ~2 sessioni (T5 da solo: ~2h) · doc: inbox lab-id 2026-08-16-tenant-builder-p4-estrattori-e-ingestori
+  - priority: P2 · effort: T9 resta gated su `#198` T9b (~60k quando il modello non bancario esistera') · doc: inbox lab-id 2026-08-16-tenant-builder-p4-estrattori-e-ingestori
   - spec: D:\heuresys-design-lab\2026-08-16--epic-tenant-builder-p4-estrattori-e-ingestori.md · piano 9 task: D:\heuresys-design-lab\2026-08-16--piano-implementazione-p4-estrattori-e-ingestori.md
   - DECISO-da-Enzo-2026-08-16 (E25): la persona entra SEMPRE; e' la POSIZIONE a restare segnalata. Il segnale e' informazione di governo (dove il modello dichiarato e la realta' non coincidono), non un'accusa alla persona
   - DECISO-da-Enzo-2026-08-16 (E26): si firma l'IMPORTAZIONE, non la persona — «accetto questa corsa, con queste eccezioni elencate»

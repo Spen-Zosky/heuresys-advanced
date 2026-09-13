@@ -78,6 +78,7 @@ export * from "./schemas/research.js";
 export * from "./schemas/process-kpi-templates.js";
 export * from "./schemas/organization-unit-kpi-templates.js";
 export * from "./schemas/seed-acquisition-runs.js";
+export * from "./schemas/tenant-import-runs.js";
 export * from "./schemas/seed-candidate-records.js";
 export * from "./schemas/seed-approval-decisions.js";
 export * from "./schemas/me.js";

@@ -191,6 +191,9 @@ export const tenantImportRunsService = {
       resourceType: TENANT_IMPORT_RUN,
       resourceId: run.runId,
       approverUserIds: approvatori,
+      // E26: si firma la CORSA, e una firma basta. Con ALL_OF ogni detentore del permesso
+      // dovrebbe firmare la stessa importazione — non e' una co-firma, e' un ingorgo.
+      decisionPolicy: "ANY_OF",
       priority: "HIGH",
       metadata: { tenantId: run.tenantId, sourceExportId: run.sourceExportId, referto: run.referto },
     });

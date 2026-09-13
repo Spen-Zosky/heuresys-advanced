@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `2fd383ba` (2026-09-12T23:09:36+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `971ddb77` (2026-09-13T03:46:47+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 108 |
-| Route API | 644 |
+| Moduli API | 109 |
+| Route API | 649 |
 | Pagine web | 129 |
-| Schemi shared | 118 |
-| Tabelle DB | 312 (vuote: 18) |
+| Schemi shared | 119 |
+| Tabelle DB | 313 (vuote: 19) |
 | Viste / matview | 59 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 280 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 284 |
 
 ## Moduli API
 
@@ -110,6 +110,7 @@
 | talent-review | /v1/talent-review | 6 | 1 | 7 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
 | tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 13 | 1 |
+| tenant-import-runs | /v1/tenant-import-runs | 5 | 2 | 15 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 3 | 1 |
 | time-off | /v1/time-off | 3 | 1 | 7 | 2 |
@@ -138,6 +139,7 @@
 
 - `audit.user_self_service_actions`
 - `staging.mig349_esco_consolidamento_undo`
+- `staging.tenant_import_people`
 - `sys.sys_auth_mfa_otp_challenges`
 - `sys.sys_auth_mfa_recovery_codes`
 - `sys.sys_auth_mfa_webauthn_credentials`

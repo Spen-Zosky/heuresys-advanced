@@ -10,6 +10,14 @@
  *
  *   cd apps/api && pnpm exec tsx scripts/prova-live-206.mts http://192.168.1.11:8013 "<settore|ateco-id|fascia-id>"
  *
+ * ⚠ IL MODELLO: misurato il 2026-09-13 sul gemello, l'UNICO modello con contenuto in produzione
+ *   (`REGIONAL_RETAIL_BANK_MEDIUM`) non e' costruibile — l'atto si rifiuta con
+ *   `BLUEPRINT_CONTENT_INCOHERENT` (132 competenze senza categoria). Quindi, con
+ *   `SEMINA_MODELLO=1`, questo script SEMINA nel database bersaglio lo stesso modello di prova
+ *   dei test (`seminaModello`: una piccola manifattura, E29) e lo ancora al fascicolo al posto
+ *   della proposta. Il database e' quello che `POSTGRES_*` dell'ambiente indica: e' cosi' che
+ *   lo script e' sicuro di seminare NELLO STESSO database contro cui gira l'API.
+ *
  * LA CATENA:
  *   1-8. la costruzione di P3 (stessa catena di `prova-live-198-t9.mts`): azienda, fascicolo,
  *        identita', modello, approvazione, applicazione → le righe GENERATED;
@@ -29,6 +37,9 @@
 import * as OTPAuth from "otpauth";
 import { passwordFor } from "../test/helpers/personas.js";
 import { FIXTURE_TOTP_SECRETS } from "../test/helpers/mfa-fixture-secrets.js";
+import { readCollaudoKey, deriveCollaudoPassword } from "./collaudo-access.mjs";
+import { pool } from "../src/db/client.js";
+import { seminaModello } from "../test/helpers/modello-di-prova.js";
 
 const BASE = process.argv[2] ?? "http://localhost:3001";
 const PLATFORM = "enzo.spenuso@heuresys.com";
@@ -43,8 +54,17 @@ function totp(email: string): string | null {
   return new OTPAuth.TOTP({ algorithm: "SHA1", digits: 6, period: 30, secret: OTPAuth.Secret.fromBase32(secret) }).generate();
 }
 
+/** La password: derivata dalla chiave madre per le personas, dalla chiave PROPRIA di collaudo per le tre identita' `@collaudo.invalid` (#169 F4). */
+function passwordDi(email: string): string {
+  if (email.endsWith("@collaudo.invalid")) return deriveCollaudoPassword(readCollaudoKey(), email);
+  // l'amministratore dell'azienda usa-e-getta nasce col provisioning, con la password che
+  // questo stesso script gli ha dato (quella derivata di PLATFORM)
+  if (email.startsWith(`admin.${CODICE.toLowerCase()}@`)) return passwordFor(PLATFORM);
+  return passwordFor(email);
+}
+
 async function accedi(email: string): Promise<Sessione> {
-  const password = passwordFor(email);
+  const password = passwordDi(email);
   const post = (payload: Record<string, unknown>) =>
     fetch(`${BASE}/v1/auth/login`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
   type Body = { status?: string; challengeToken?: string; csrfToken?: string };
@@ -70,13 +90,29 @@ async function chiama(s: Sessione, metodo: string, percorso: string, corpo?: unk
   return { stato: r.status, dati };
 }
 
+/**
+ * Porta a termine una richiesta: decide ogni passo PENDING — il mio con la mia sessione, quelli
+ * di un altro approvatore entrando come lui (i detentori di piattaforma sono personas impersonabili:
+ * la password si deriva). Poi applica.
+ */
 async function firma(s: Sessione, richiestaId: string, che: string): Promise<void> {
   const det = await chiama(s, "GET", `/v1/approvals/${richiestaId}`);
   if (det.stato !== 200) throw new Error(`${che}: la richiesta non si legge (${det.stato})`);
+  const me = await chiama(s, "GET", "/v1/auth/me");
+  const mioId: string | undefined = me.dati?.userId ?? me.dati?.user?.userId;
   const passi: Array<{ approvalStepId: string; status: string; approverUserId?: string | null }> = det.dati?.steps ?? [];
   for (const passo of passi.filter((p) => p.status === "PENDING")) {
-    const d = await chiama(s, "POST", `/v1/approvals/${richiestaId}/steps/${passo.approvalStepId}/decide`, { decision: "APPROVE", comment: `#206 — prova live ${MARCA}` });
+    let sessione = s;
+    if (passo.approverUserId && passo.approverUserId !== mioId) {
+      const u = await chiama(s, "GET", `/v1/users/${passo.approverUserId}`);
+      const email: string | undefined = u.dati?.email;
+      if (!email) throw new Error(`${che}: approvatore ${passo.approverUserId} senza email leggibile`);
+      sessione = await accedi(email);
+    }
+    const d = await chiama(sessione, "POST", `/v1/approvals/${richiestaId}/steps/${passo.approvalStepId}/decide`, { decision: "APPROVE", comment: `#206 — prova live ${MARCA}` });
     if (d.stato !== 200) throw new Error(`${che}: passo non firmato (${d.stato} ${JSON.stringify(d.dati)})`);
+    const stato = await chiama(s, "GET", `/v1/approvals/${richiestaId}`);
+    if (stato.dati?.status === "APPROVED") break;
   }
   const app = await chiama(s, "POST", `/v1/approvals/${richiestaId}/apply`);
   if (app.stato !== 200) throw new Error(`${che}: apply della richiesta fallito (${app.stato} ${JSON.stringify(app.dati)})`);
@@ -126,12 +162,19 @@ async function main(): Promise<void> {
   const link = await chiama(s, "POST", `/v1/tenant-blueprints/${bpId}/link-tenant`, { tenantId });
   if (link.stato !== 200) throw new Error(`link-tenant fallito: ${link.stato}`);
   const ident = await chiama(s, "PATCH", `/v1/tenant-blueprints/${bpId}/versions/1/identity`, {
-    industryClassId, sizeBandId, regulatoryIntensity: "HIGH", countryCode: "IT", employeeCount: 40,
+    industryClassId, sizeBandId, regulatoryIntensity: "HIGH", countryCode: "IT", employeeCount: 120,
   });
   if (ident.stato !== 200) throw new Error(`identita' fallita: ${ident.stato} ${JSON.stringify(ident.dati)}`);
-  const prop = await chiama(s, "GET", `/v1/tenant-blueprints/${bpId}/versions/1/model-proposal`);
-  const variantVersionId: string | undefined = prop.dati?.variantVersionId;
-  if (!variantVersionId) throw new Error(`nessun modello proposto: ${JSON.stringify(prop.dati).slice(0, 200)}`);
+  let variantVersionId: string | undefined;
+  if (process.env.SEMINA_MODELLO === "1") {
+    const modello = await seminaModello(pool, MARCA);
+    variantVersionId = modello.variantVersionId;
+    nota("il modello di prova e' seminato nel database bersaglio (E29: una manifattura)", true, `${modello.label} · variante ${variantVersionId.slice(0, 8)}…`);
+  } else {
+    const prop = await chiama(s, "GET", `/v1/tenant-blueprints/${bpId}/versions/1/model-proposal`);
+    variantVersionId = prop.dati?.variantVersionId;
+  }
+  if (!variantVersionId) throw new Error("nessun modello da ancorare: ne' proposto, ne' seminato (SEMINA_MODELLO=1)");
   const pin = await chiama(s, "PUT", `/v1/tenant-blueprints/${bpId}/versions/1/model`, { variantVersionId });
   if (pin.stato !== 200) throw new Error(`modello non ancorato: ${pin.stato}`);
   const sub = await chiama(s, "POST", `/v1/tenant-blueprints/${bpId}/versions/1/submit`);
@@ -143,7 +186,7 @@ async function main(): Promise<void> {
   if (!richiestaCostruzione) throw new Error(`apply del fascicolo: ${app.stato} ${JSON.stringify(app.dati)}`);
   await firma(s, richiestaCostruzione, "applicazione del fascicolo");
 
-  const posizioni = await tuttiDi<{ positionId: string; positionCode: string; tenantId: string }>(s, "/v1/positions", tenantId);
+  const posizioni = (await tuttiDi<{ positionId: string; code: string; tenantId: string }>(s, "/v1/positions", tenantId)).map((p) => ({ positionId: p.positionId, positionCode: p.code }));
   const competenze = (await tuttiDi<{ skillId: string; code: string; tenantId: string | null }>(s, "/v1/skills", tenantId)).map((k) => ({ skillId: k.skillId, skillCode: k.code }));
   nota("P3 ha costruito l'azienda", posizioni.length > 1 && competenze.length > 0, `${posizioni.length} posizioni · ${competenze.length} competenze`);
   const origini = async () => {
@@ -218,6 +261,7 @@ async function main(): Promise<void> {
   nota("la fonte e' INGESTED: una seconda corsa e' un conflitto", f3.stato === 409 && f3.dati?.error?.code === "SOURCE_NOT_AVAILABLE", `HTTP ${f3.stato} ${f3.dati?.error?.code}`);
 
   console.log(`\n# CODICE AZIENDA: ${CODICE} · TENANT: ${tenantId} · CORSA: ${runId}`);
+  await pool.end();
   const rossi = esiti.filter(([, ok]) => !ok);
   console.log(`${esiti.length - rossi.length}/${esiti.length} verdi`);
   if (rossi.length) { console.log("PROVA ROSSA"); process.exitCode = 1; return; }

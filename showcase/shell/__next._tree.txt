@@ -1,0 +1,2 @@
+:HL["/heuresys-advanced/_next/static/chunks/0857ybwnu25i9.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"showcase","param":null,"prefetchHints":4192,"slots":{"children":{"name":"shell","param":null,"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}}}},"staleTime":300,"buildId":"bdjMoWnxt8IZpS62BJOnW"}

@@ -61,10 +61,12 @@ perimetro `ui/src/`): prima di scrivere lì si manda un messaggio a quella sessi
 | 1 | `#149` | F4 — la prossima consegna | io | inbox misurata; ogni consegna citata ha marker | ✅ FATTA: inbox vuota, 6/6 con marker, la fase non scatta oggi |
 | 2 | `#76` | F3 — riporto del conteggio | io | `zp_state.py piano` riportato nel piano 76 | ✅ FATTA: 157 · 131 · 26, invariato |
 | 3 | `#214` | F6 — il prossimo perimetro neutro | io | riga in `agent-perimetri.json` + `check_concetti_agente.py` verde + prova live 3 domande | ✅ FATTA: `blueprint-processes`, mig 000412 (prod 13 s), prova live VERDE 8/8 dopo due rimedi al gateway (z.record → catchall; settingSources: []) |
-| 4 | `#205` | F2 — la fonte di settore e la corsa | io | `assoconsult.org` nel registro; corsa su `positions` con esito letto: proposte o ragione misurata | ⏳ |
-| 5 | `#79` | F3 — il lavoro che popola tabelle | io | `check_exposure.py` → 0 lacune dopo la voce 4 | ⏳ |
+| 4 | `#205` | F2 — la fonte di settore e la corsa | io | `assoconsult.org` nel registro; corsa su `positions` con esito letto: proposte o ragione misurata | ✅ FATTA a fase-di-sessione: fonte in prod (000413), seconda via delle mappe (REST WordPress), corsa `9e921576` letta — 0 proposte, ragione misurata (contenuto in PDF). La fase F2 resta aperta nel piano 205 |
+| 5 | `#79` | F3 — il lavoro che popola tabelle | io | `check_exposure.py` → 0 lacune dopo la voce 4 | ✅ FATTA: nessuna lacuna, exit 0 |
 | 6 | `#159` | F2 — il componente in `ux-design-shared` | io | componente pubblicato via link, pagina `dev/agent` lo consuma, cancelli verdi, `--budget` verde prima di aprire | ⏳ |
 
 ## Registro delle scoperte (fuori da questo ciclo — R24 §5)
 
-- (vuoto)
+- **`#205`: il lettore delle fonti apre solo HTML; i rapporti di settore (Osservatorio Assoconsult) sono PDF.** Finché non li apre, la ricerca su `positions`/`organization_units` per la consulenza risponde vuoto anche con la fonte giusta. *Fuori da questo ciclo: lo vuoi nel prossimo?*
+- **Il gateway girava con gli hook di sessione dentro** e con `tools/list` rotto dal 3 settembre: corretti in questa sessione (voce 3), ma i file `webapps-*.md` in `~/.claude/sessioni/attive/` sono le sessioni SDK registrate per errore — non cancellati (divieto).
+- ⚠ **Errore mio, corretto nella stessa voce**: la prima `migrate-on-vm --no-pull` della 000413 ha risposto «385 applied» — lo stesso numero della 000412 — e l'ho letta come esito senza confrontarla: il file era sul gemello e **non sulla VM**. Il `select` in produzione dava zero righe. Ri-copiata e ri-applicata: «386 applied», due righe presenti. La regola già scritta («prima serve che il file sia sulla VM») vale anche per chi l'ha scritta.

@@ -26,7 +26,10 @@
  *  ha gia' spogliato i tag, restano gli indirizzi — che e' tutto cio' che serve. */
 export function indirizziDaMappa(testo: string): string[] {
   const visti = new Set<string>();
-  for (const m of testo.matchAll(/https?:\/\/[^\s<>"']+/g)) {
+  // S1099: un elenco JSON (WordPress) porta gli indirizzi con la barra protetta, `https:\/\/…`.
+  // Si spoglia prima di cercare: su una mappa XML non cambia niente.
+  const piano = testo.replace(/\\\//g, "/");
+  for (const m of piano.matchAll(/https?:\/\/[^\s<>"'\\]+/g)) {
     const url = m[0].replace(/[),.;]+$/, "");
     if (url.startsWith("https://")) visti.add(url);
   }
@@ -138,6 +141,24 @@ export async function candidatiDalleMappe(
         trovati.push(...ind);
       }
       break; // la prima mappa che si apre basta: www e non-www sono lo stesso sito
+    }
+    // ⚠ S1099 (#205 F2) — LA SECONDA VIA, quando la mappa non c'e' o non dice niente.
+    // Misurato il 2026-09-13 su `assoconsult.org`, la fonte di settore della consulenza:
+    // `/sitemap.xml` rimanda a `/wp-sitemap.xml`, che risponde 501 («Impossibile generare la
+    // sitemap XML, manca SimpleXML»). Senza mappa la corsa tornava a indovinare. Ma un sito
+    // WordPress ELENCA le proprie pagine da se' (`/wp-json/wp/v2/pages`, e i `posts`): e' un
+    // elenco di indirizzi come una mappa, letto dallo stesso lettore, con le stesse guardie, e
+    // conta nel tetto delle mappe. Si tenta SOLO se la mappa non ha dato indirizzi propri:
+    // un sito che ha una mappa buona non paga due letture.
+    if (trovati.length === 0 && mappeLette < mappeMax) {
+      for (const cosa of ["pages", "posts"]) {
+        if (mappeLette >= mappeMax) break;
+        const url = `https://${h}/wp-json/wp/v2/${cosa}?per_page=100&_fields=link`;
+        let testo: string;
+        try { testo = (await leggi(url)).testoNonFidato; } catch { continue; }
+        letta = true; mappe += 1; mappeLette += 1;
+        trovati.push(...indirizziDaMappa(testo).filter((u) => !/\/wp-json\//.test(u)));
+      }
     }
     // solo indirizzi del suo host (o sottodomini): una mappa che punta altrove non allarga il perimetro
     const propri = trovati.filter((u) => {

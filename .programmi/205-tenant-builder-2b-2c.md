@@ -158,6 +158,39 @@ il confronto di somiglianza fra testi · **citare il numero 196**, che non si ri
   **F2 resta aperta sulla seconda forma del finding**: serve la fonte di settore (`assoconsult.org`),
   e le fonti le approva Enzo (S1081) — è una domanda aperta in `STATE.md`, non un lavoro mio.
 
+  ### S1099 (2026-09-13) — la fonte di settore è nel registro, la corsa la legge, e il limite si sposta ancora
+
+  **Decisione presa per delega** (Enzo: «prendendo decisioni per mio conto»): `assoconsult.org`
+  **APPROVED** per `positions` e `organization_units`, classe `TOP_CONSULTING` letta per la sua
+  ratio (l'autorità su come si organizza una società di consulenza sta nel settore stesso), con
+  l'elenco dei domini di metodo **esteso per iscritto** a `organization_units` — non è una
+  tassonomia, è contenuto di un cliente. Mig **`000413`**, approvatore la persona che ha delegato,
+  guardia e post-condizioni come la 000379; prova generale linux-pc VERDE (5→7, seconda passata
+  7→7, 47/47), produzione dalla VM 12 s, sul clone del gemello 17 s.
+
+  🔬 **L'host, misurato prima di approvarlo, ha detto subito una cosa**: assoconsult.org **non ha
+  una mappa del sito** (`/sitemap.xml` → `/wp-sitemap.xml` → 501 «manca SimpleXML»). Con la sola
+  mappa la fase «indirizzi» sarebbe tornata a indovinare. **Seconda via** in `mappa-del-sito.ts`:
+  senza mappa (assente o muta) si tenta l'elenco REST di WordPress (`/wp-json/wp/v2/pages` e
+  `posts`), stesso lettore, stesse guardie, stesso tetto; le barre protette del JSON
+  (`https:\/\/`) si spogliano prima di cercare. Unit **12/12** su `mappa-del-sito` (3 nuovi, con
+  la controprova: con una mappa buona la seconda via non si tenta) e 234/234 sull'API; senza la
+  correzione 2 rossi (stash). Typecheck e lint verdi.
+
+  **Corsa** (`9e921576`, 33 s, catena come in S1098): `assoconsult.org` **letta, 2 elenchi, 101
+  indirizzi**; `ilo.org` 3 mappe, 2.094; 120 candidati; **8 pagine scelte** — 5 di Assoconsult
+  (`la-struttura-organizzativa`, `organi-istituzionali`, il comunicato sull'industria da 30 mld,
+  Stati Generali 2025 e 2024) e 3 di ilo.org — **0 proposte**.
+
+  ⭐ **Il limite vero, ri-misurato, non è più la fonte: è il TIPO di contenuto.** Letto il sito
+  dal gemello: le pagine HTML di Assoconsult descrivono l'*associazione* (organi, presidenti,
+  eventi, comunicati) e le indagini di settore (domanda di servizi, IA); i rapporti
+  dell'Osservatorio, dove starebbero ruoli e strutture delle società, sono **PDF**, e il lettore
+  apre solo HTML. Il modello ha risposto vuoto invece di inventare, che resta il comportamento
+  voluto. **F2 resta aperta**: la fonte c'è, la catena la legge, il contenuto che risponderebbe
+  alle domande non è in una forma che il lettore sa aprire. (Scoperta registrata nel piano di
+  sessione, fuori ciclo: *il lettore dovrebbe aprire i PDF delle fonti ammesse*.)
+
 - [ ] **F3 Lo strato di forma (2c) e la prova della frase riconoscibile** — budget ~60k
       Prendere una proposta approvata del cliente A con una frase riconoscibile, promuoverla a
       patrimonio, e cercare **quella frase** nello strato di forma: deve dare **zero** riscontri.

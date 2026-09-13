@@ -90,6 +90,39 @@ describe("candidatiDalleMappe", () => {
     expect(out.candidati.length).toBe(4);
   });
 
+  // S1099 — la seconda via: il sito vero di assoconsult.org NON ha una mappa (wp-sitemap.xml
+  // risponde 501), ma elenca le proprie pagine via REST, con le barre protette (`https:\/\/`).
+  const ELENCO_WP = '[{"link":"https:\/\/assoconsult.org\/la-struttura-organizzativa"},' +
+    '{"link":"https:\/\/assoconsult.org\/osservatorio"},{"link":"https:\/\/assoconsult.org\/"}]';
+
+  it("⭐ senza mappa si tenta l'elenco REST di WordPress, e gli indirizzi con la barra protetta si leggono", async () => {
+    const viste: string[] = [];
+    const out = await candidatiDalleMappe(["assoconsult.org"], domande,
+      lettore({ "https://assoconsult.org/wp-json/wp/v2/pages?per_page=100&_fields=link": ELENCO_WP }, viste));
+    expect(out.fonti).toEqual([{ host: "assoconsult.org", mappe: 1, indirizzi: 3, esito: "letta" }]);
+    expect(out.candidati[0]).toBe("https://assoconsult.org/la-struttura-organizzativa");
+    expect(viste).toEqual([
+      "https://assoconsult.org/sitemap.xml", "https://www.assoconsult.org/sitemap.xml",
+      "https://assoconsult.org/wp-json/wp/v2/pages?per_page=100&_fields=link",
+      "https://assoconsult.org/wp-json/wp/v2/posts?per_page=100&_fields=link",
+    ]);
+  });
+
+  it("controprova: con una mappa che DA' indirizzi la seconda via non si tenta (nessuna lettura in piu')", async () => {
+    const viste: string[] = [];
+    await candidatiDalleMappe(["assoconsult.org"], domande,
+      lettore({ "https://assoconsult.org/sitemap.xml": MAPPA_TESTO,
+                "https://assoconsult.org/wp-json/wp/v2/pages?per_page=100&_fields=link": ELENCO_WP }, viste));
+    expect(viste).toEqual(["https://assoconsult.org/sitemap.xml"]);
+  });
+
+  it("una mappa che si apre ma non dice niente (l'errore XML di WordPress) apre la seconda via", async () => {
+    const out = await candidatiDalleMappe(["assoconsult.org"], domande,
+      lettore({ "https://assoconsult.org/sitemap.xml": "WordPress Errore Impossibile generare la sitemap XML",
+                "https://assoconsult.org/wp-json/wp/v2/pages?per_page=100&_fields=link": ELENCO_WP }));
+    expect(out.fonti[0]).toEqual({ host: "assoconsult.org", mappe: 2, indirizzi: 3, esito: "letta" });
+  });
+
   it("un indice apre poche sotto-mappe (le piu' attinenti), e mai oltre il tetto delle mappe", async () => {
     const viste: string[] = [];
     const mappe: Record<string, string> = {

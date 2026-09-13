@@ -79,9 +79,12 @@ describe("la sorgente del gateway", () => {
     const primo = g.richieste.find((r) => r.fase === "indirizzi")!;
     expect(primo.fontiAmmesse).toEqual(["istat.it"]);
     // S1097: prima si TENTA la mappa del sito della fonte (qui non c'e': 404, e non e' un errore);
+    // S1099: senza mappa si tenta anche l'elenco REST di WordPress (qui: 404, e non e' un errore);
     // poi istat.it e il suo sottodominio si leggono; assoconsult.org no — e' il perimetro
     expect(viste).toEqual([
       "https://istat.it/sitemap.xml", "https://www.istat.it/sitemap.xml",
+      "https://istat.it/wp-json/wp/v2/pages?per_page=100&_fields=link",
+      "https://istat.it/wp-json/wp/v2/posts?per_page=100&_fields=link",
       "https://www.istat.it/x", "https://dati.istat.it/z",
     ]);
     expect(primo.candidati, "senza mappa non si mandano candidati: si chiede come prima").toBeUndefined();

@@ -13,8 +13,25 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 ### Delta S1093 (2026-09-08/09) — la CI rossa, i tre rimedi all'instabilità, le PR Dependabot
 
-**Numeri ri-derivati dal vivo il 2026-09-12 (sera)**: migrazioni su disco **406** (max `000409`) · file di test
-API **272** · moduli API **108** · perimetri dell'agente aperti **14** · viste `v_*` **55** · HEAD `20592aa4`.
+**Numeri ri-derivati dal vivo il 2026-09-13 (notte)**: migrazioni su disco **408** (max `000411`) · file di test
+API **274** · moduli API **109** · perimetri dell'agente aperti **15** · viste `v_*` **56** · posizioni **315** · OU **45** · team **26** · HEAD `af8f8f7e`
+(pre-commit di chiusura).
+
+### Delta S1098 (2026-09-13) — Tenant Builder P4 costruito e provato sul gemello, il quindicesimo perimetro, il piano zero-pendenze ri-contato
+
+Ripresa di `#206` dalla corsia HOLD su scelta di Enzo, poi il mandato «tutti da P1 a P3 in autonomia» (registro
+`.programmi/S1098-mandato-p1-p3.md`: 5 voci su 6, `#159` F2 fermata dal guardiano). **`#206` T1-T8**: mig `000410`
+(atterraggio `staging.tenant_import_people` tutto `text` + impronta unica su `source_exports`), modulo
+`tenant-import-runs` (5 rotte, nessun permesso nuovo), effetto `TENANT_IMPORT_RUN` (E26, ANY_OF), 12 test su
+un'azienda costruita da P3, **prova live sul gemello 17/17** via rotte reali. Sette correzioni alla consegna del lab
+misurate sul DB vivo (la corsa vive in `sys_seed_acquisition_runs`, l'impronta non era unica, il caso normale è la
+posizione vacante, il registro dell'origine esisteva già). **Due scoperte per `#198`**: l'unico modello con contenuto
+non è costruibile (`BLUEPRINT_CONTENT_INCOHERENT`, 132 competenze senza categoria) e il motore costruisce unità che
+violano R6/R7 di `v_organization_unit_integrity` (la `000244` si ferma sul gemello). **`#214` F6**: `activity-classifications`
+(mig `000411`), tre falsi neutri dal permesso condiviso `job-requisition:read` esclusi + `tenant-import-runs`.
+**`#76` F2**: 59 verdetti nel piano, 157 aperti (131 autonomi = 558 h). **`#205` F2**: quattro corse, due difetti dello
+strumento corretti (l'esito delle mappe finisce nella corsa; un indice paginato è un indice), 0 proposte per limite della
+fonte `ilo.org` — serve la fonte di settore, che approva Enzo. Verifica lunga: suite API sul gemello **1953 test verdi**.
 
 ---
 

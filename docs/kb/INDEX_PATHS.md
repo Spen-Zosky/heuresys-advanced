@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-12T20:42:32Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3445**
+**Generato**: 2026-09-13T03:33:11Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3459**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -10,31 +10,31 @@
 |---|---|
 | ADR | 38 |
 | api-core | 34 |
-| api-module | 386 |
+| api-module | 391 |
 | ci | 19 |
 | claude-config | 37 |
-| config | 203 |
+| config | 204 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 406 |
+| db-migration | 408 |
 | db-other | 8 |
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 689 |
+| doc-canonical | 691 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
 | session | 12 |
 | shared-pkg | 4 |
-| shared-schema | 118 |
+| shared-schema | 119 |
 | showcase-source | 13 |
-| test | 422 |
+| test | 425 |
 | ux-design-archive | 80 |
 | web-source | 255 |
-| **TOTALE** | **3445** |
+| **TOTALE** | **3459** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 2802 |
+| live | 2816 |
 
 ## File per categoria
 
@@ -146,6 +146,7 @@
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-activation.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-blueprint-application.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-blueprint-approval.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-import-run.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-materialization.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\time-off-request.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\repository.ts` · *live* · git-tracked
@@ -460,6 +461,10 @@
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\tenant-import-runs\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\tenant-import-runs\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\tenant-import-runs\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\tenant-import-runs\validation.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\blueprint-build-source.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\build-plan.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\build-source.ts` · *live* · git-tracked
@@ -656,6 +661,7 @@
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-198-t9-archivio.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-198-t9.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-199.mts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\prova-live-206.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-210.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-50-f3-grafo.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-92-f6.mts` · *live* · git-tracked
@@ -1548,6 +1554,8 @@
 - `D:\heuresys-advanced\db\migrations\000407_una_categoria_di_competenza_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000408_un_ruolo_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000409_una_tabella_due_specie_la_specie_si_dichiara.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000410_le_persone_vere_atterrano_senza_tipi_e_la_fonte_si_riconosce_dall_impronta.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000411_una_classificazione_di_attivita_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1836,6 +1844,7 @@
 - `D:\heuresys-advanced\.programmi\197-marchio-materializzazione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\198-tenant-builder-p3-costruzione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\205-tenant-builder-2b-2c.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\206-tenant-builder-p4-estrattori-ingestori.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\211-suite-e2e-completa.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\214-adozione-agente-perimetri.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\215-stato-impossibile-bande-e-competenze.md` · *live* · git-tracked
@@ -1887,6 +1896,7 @@
 - `D:\heuresys-advanced\.programmi\S1095-mandato-p1-p3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1096-mandato-p1-p3-debiti-gated.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1097-mandato-tutte-le-corsie.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1098-mandato-p1-p3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked
@@ -2769,6 +2779,7 @@
 - `D:\heuresys-advanced\packages\shared\src\schemas\talent-review.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\teams.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\tenant-blueprints.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\tenant-import-runs.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\tenant-materialization.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\tenants.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\time-off.ts` · *live* · git-tracked
@@ -2898,6 +2909,7 @@
 - `D:\heuresys-advanced\apps\api\test\goals.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\actors.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\attori-di-scena.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\helpers\azienda-di-prova-p4.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\build-test-app.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\drift-check.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\industry.ts` · *live* · git-tracked
@@ -3067,6 +3079,8 @@
 - `D:\heuresys-advanced\apps\api\test\tenant-blueprint-application.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\tenant-blueprint-approval.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\tenant-blueprints.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\tenant-import-run-effect.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\tenant-import-runs.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\tenant-materialization.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\tenants.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\time-off.integration.test.ts` · *live* · git-tracked

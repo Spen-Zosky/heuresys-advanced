@@ -1,43 +1,43 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-12T20:42:32Z da docs/kb/tools/build_index.py
+# generato: 2026-09-13T03:33:11Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-12T20:42:32Z"
-  total_files: 3445
+  generated_at: "2026-09-13T03:33:11Z"
+  total_files: 3459
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 38
     api-core: 34
-    api-module: 386
+    api-module: 391
     ci: 19
     claude-config: 37
-    config: 203
+    config: 204
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 406
+    db-migration: 408
     db-other: 8
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 689
+    doc-canonical: 691
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 118
+    shared-schema: 119
     showcase-source: 13
-    test: 422
+    test: 425
     ux-design-archive: 80
     web-source: 255
   status_counts:
     archive: 593
     external-archive: 50
-    live: 2802
+    live: 2816
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -582,6 +582,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-blueprint-approval.ts'
     root: repo
     rel: 'apps/api/src/modules/approvals/effects/tenant-blueprint-approval.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-import-run.ts'
+    root: repo
+    rel: 'apps/api/src/modules/approvals/effects/tenant-import-run.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -2469,6 +2475,30 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-import-runs\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-import-runs/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-import-runs\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-import-runs/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-import-runs\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-import-runs/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-import-runs\validation.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-import-runs/validation.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\blueprint-build-source.ts'
     root: repo
     rel: 'apps/api/src/modules/tenant-materialization/blueprint-build-source.ts'
@@ -3588,6 +3618,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-199.mts'
     root: repo
     rel: 'apps/api/scripts/prova-live-199.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-206.mts'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-206.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -8853,6 +8889,18 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000410_le_persone_vere_atterrano_senza_tipi_e_la_fonte_si_riconosce_dall_impronta.sql'
+    root: repo
+    rel: 'db/migrations/000410_le_persone_vere_atterrano_senza_tipi_e_la_fonte_si_riconosce_dall_impronta.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000411_una_classificazione_di_attivita_non_deve_poter_contenere_persone.sql'
+    root: repo
+    rel: 'db/migrations/000411_una_classificazione_di_attivita_non_deve_poter_contenere_persone.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -10491,6 +10539,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\206-tenant-builder-p4-estrattori-ingestori.md'
+    root: repo
+    rel: '.programmi/206-tenant-builder-p4-estrattori-ingestori.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\211-suite-e2e-completa.md'
     root: repo
     rel: '.programmi/211-suite-e2e-completa.md'
@@ -10794,6 +10848,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\S1097-mandato-tutte-le-corsie.md'
     root: repo
     rel: '.programmi/S1097-mandato-tutte-le-corsie.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1098-mandato-p1-p3.md'
+    root: repo
+    rel: '.programmi/S1098-mandato-p1-p3.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -15981,6 +16041,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\tenant-import-runs.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/tenant-import-runs.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\tenant-materialization.ts'
     root: repo
     rel: 'packages/shared/src/schemas/tenant-materialization.ts'
@@ -16716,6 +16782,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\helpers\attori-di-scena.ts'
     root: repo
     rel: 'apps/api/test/helpers/attori-di-scena.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\helpers\azienda-di-prova-p4.ts'
+    root: repo
+    rel: 'apps/api/test/helpers/azienda-di-prova-p4.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -17730,6 +17802,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\tenant-blueprints.integration.test.ts'
     root: repo
     rel: 'apps/api/test/tenant-blueprints.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\tenant-import-run-effect.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/tenant-import-run-effect.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\tenant-import-runs.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/tenant-import-runs.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

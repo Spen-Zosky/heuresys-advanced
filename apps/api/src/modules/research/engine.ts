@@ -68,6 +68,14 @@ export interface MandatoRicerca {
    */
   fontiAmmesse: string[];
   leggi(url: string): Promise<PaginaLetta>;
+  /**
+   * Un fatto della corsa che la sorgente vuole lasciare scritto nei metadati (S1098): l'esito
+   * per fonte delle mappe del sito («letta»/«assente»/«vuota», quanti indirizzi). Misurato il
+   * 2026-09-13: `candidatiDalleMappe` lo calcolava e il gateway lo BUTTAVA — «leggere `fonti`
+   * nell'esito» era impossibile per costruzione. Facoltativo: una sorgente che non annota
+   * non cambia.
+   */
+  annota?(chiave: string, valore: unknown): void;
 }
 
 export interface ProposalSource {
@@ -292,6 +300,8 @@ export interface EsitoCorsa {
   /** Gli indirizzi che non si sono potuti leggere, col motivo. */
   letturenegate: Array<{ url: string; codice: string; motivo: string }>;
   sorgente: string;
+  /** Le annotazioni della sorgente (`annota`): finiscono nei metadati della corsa. */
+  note: Record<string, unknown>;
 }
 
 export interface OpzioniCorsa {
@@ -356,12 +366,14 @@ export async function eseguiCorsa(input: {
         .filter((f) => f.stato === "APPROVED" && (f.dominio === null || f.dominio === input.dominio.chiave))
         .map((f) => f.hostSuffix)
     : [];
+  const note: Record<string, unknown> = {};
   const grezze = await input.sorgente.proponi({
     dominio: input.dominio.chiave,
     contesto: input.contesto,
     domande,
     fontiAmmesse,
     leggi,
+    annota: (chiave, valore) => { note[chiave] = valore; },
   });
 
   const proposte = valutaProposte({
@@ -379,5 +391,6 @@ export async function eseguiCorsa(input: {
     letture: [...new Set(letture.values())],
     letturenegate: negate,
     sorgente: input.sorgente.chiave,
+    note,
   };
 }

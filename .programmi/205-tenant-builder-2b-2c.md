@@ -140,6 +140,24 @@ il confronto di somiglianza fra testi · **citare il numero 196**, che non si ri
   le mappe istituzionali non portano quelle pagine, resta la seconda forma del finding:
   la fonte di settore (`assoconsult.org`) proposta a te.
 
+  ### S1098 (2026-09-13) — quattro corse, due difetti dello strumento corretti, e il limite resta la fonte
+
+  Catena accesa come in S1096 (gateway su Windows col token del gemello, `ssh -R 8790`, API `:3001`
+  sul gemello, driver sul gemello). **Corsa 1** (`d944ab14`, 18 s): 0 proposte e nei metadati
+  **nessuna traccia delle mappe** — `candidatiDalleMappe` calcolava l'esito per fonte e il gateway
+  lo BUTTAVA: «leggere `fonti` nell'esito» era impossibile per costruzione. Corretto: `MandatoRicerca.annota`
+  → `EsitoCorsa.note` → metadati della corsa (`mappe`, `indirizzi`). **Corsa 2** (`36c6f5b5`): `ilo.org`
+  letta, 1 mappa, **90 indirizzi, 90 candidati, 0 scelti** — l'indice di ilo.org elenca 90 sotto-mappe
+  come `sitemap.xml?page=N`, e `eIndiceDiMappe` non le riconosceva (regex chiusa su `.xml$`): il modello
+  riceveva 90 «pagine» che erano mappe e sceglieva nulla. Corretto (`E_UNA_MAPPA` tollera la coda di
+  interrogazione; unit 18/18 con la controprova). **Corsa 4** (`73f3825f`, 39 s): **3 mappe, 2.094
+  indirizzi, 120 candidati, 8 pagine scelte e lette** (guide di ricerca sul settore privato, pagine
+  Italia, norme del lavoro) — **0 proposte**. Ora è il limite VERO, misurato: l'unica fonte approvata
+  per `positions` è `ilo.org`, un sito di classificazione e norme; nessuna delle sue pagine descrive
+  come è fatta una società di consulenza, e il modello risponde vuoto invece di inventare (voluto).
+  **F2 resta aperta sulla seconda forma del finding**: serve la fonte di settore (`assoconsult.org`),
+  e le fonti le approva Enzo (S1081) — è una domanda aperta in `STATE.md`, non un lavoro mio.
+
 - [ ] **F3 Lo strato di forma (2c) e la prova della frase riconoscibile** — budget ~60k
       Prendere una proposta approvata del cliente A con una frase riconoscibile, promuoverla a
       patrimonio, e cercare **quella frase** nello strato di forma: deve dare **zero** riscontri.

@@ -33,10 +33,18 @@ export function indirizziDaMappa(testo: string): string[] {
   return [...visti];
 }
 
+/**
+ * Un indirizzo che e' una mappa, non una pagina. La coda di interrogazione e' ammessa:
+ * misurato il 2026-09-13 (S1098) su `ilo.org`, il cui indice elenca 90 sotto-mappe come
+ * `sitemap.xml?page=N` — senza questa tolleranza l'indice passava per una mappa di 90
+ * PAGINE, il modello riceveva 90 «candidati» che erano tutti mappe, e sceglieva nulla.
+ */
+export const E_UNA_MAPPA = /sitemap[^/?]*\.xml(\.gz)?(\?[^/]*)?$/i;
+
 /** Una mappa e' un INDICE se i suoi indirizzi sono, in maggioranza, altre mappe. */
 export function eIndiceDiMappe(indirizzi: string[]): boolean {
   if (indirizzi.length === 0) return false;
-  const mappe = indirizzi.filter((u) => /sitemap[^/]*\.xml(\.gz)?$/i.test(u)).length;
+  const mappe = indirizzi.filter((u) => E_UNA_MAPPA.test(u)).length;
   return mappe * 2 >= indirizzi.length;
 }
 
@@ -123,7 +131,7 @@ export async function candidatiDalleMappe(
           try {
             const t2 = (await leggi(sotto)).testoNonFidato;
             mappe += 1; mappeLette += 1;
-            trovati.push(...indirizziDaMappa(t2).filter((u) => !/sitemap[^/]*\.xml/i.test(u)));
+            trovati.push(...indirizziDaMappa(t2).filter((u) => !E_UNA_MAPPA.test(u)));
           } catch { /* una sotto-mappa che non si apre non ferma le altre */ }
         }
       } else {

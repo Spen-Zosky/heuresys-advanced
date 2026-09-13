@@ -39,6 +39,12 @@ describe("eIndiceDiMappe", () => {
     expect(eIndiceDiMappe(indirizziDaMappa(MAPPA_TESTO))).toBe(false);
     expect(eIndiceDiMappe([])).toBe(false);
   });
+  it("un indice paginato (`sitemap.xml?page=N`, ilo.org 2026-09-13) e' un indice, non 90 pagine", () => {
+    const paginato = Array.from({ length: 90 }, (_, i) => `https://www.ilo.org/sitemap.xml?page=${i + 1}`);
+    expect(eIndiceDiMappe(paginato)).toBe(true);
+    // e la controprova: una coda di interrogazione su una PAGINA non la trasforma in mappa
+    expect(eIndiceDiMappe(["https://www.ilo.org/topics/skills?page=2", "https://www.ilo.org/about"])).toBe(false);
+  });
 });
 
 describe("attinenza", () => {

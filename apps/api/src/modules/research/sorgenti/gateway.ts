@@ -22,7 +22,7 @@ import { hostOf, suffissoCopre } from "../sources.js";
 import { risolviDominio } from "../domains/index.js";
 import { avvolgiTestoNonFidato } from "../guardia-domande.js";
 import { SorgenteNonDisponibileError } from "./index.js";
-import { candidatiDalleMappe } from "./mappa-del-sito.js";
+import { candidatiDalleMappe, E_UNA_MAPPA } from "./mappa-del-sito.js";
 import { z } from "zod";
 
 export interface ConfigurazioneGateway {
@@ -77,6 +77,9 @@ export function creaSorgenteGateway(cfg: ConfigurazioneGateway): ProposalSource 
       const mappa = m.fontiAmmesse.length > 0
         ? await candidatiDalleMappe(m.fontiAmmesse, m.domande, m.leggi)
         : { candidati: [], fonti: [] };
+      // L'esito per fonte si LASCIA SCRITTO nella corsa: quante mappe, quanti indirizzi, se
+      // era assente o vuota. Senza, «la fase indirizzi sa cercare» sarebbe una frase.
+      m.annota?.("mappe", { fonti: mappa.fonti, candidati: mappa.candidati.length });
 
       // ① dove guardare
       const passo1 = (await chiama(cfg, {
@@ -100,10 +103,13 @@ export function creaSorgenteGateway(cfg: ConfigurazioneGateway): ProposalSource 
         return h !== null && m.fontiAmmesse.some((s) => suffissoCopre(s, h));
       });
 
+      // …e anche QUALI indirizzi ha scelto il modello: con zero proposte e' l'unico modo di
+      // sapere se ha letto la pagina giusta o una qualsiasi.
+      m.annota?.("indirizzi", indirizzi);
       // ② l'API apre le pagine: qui passano guardie, limiti e impronta. Le mappe gia' lette
       //    non sono pagine di contenuto: si saltano anche se il modello le rimandasse.
       const pagine: Array<{ url: string; testo: string }> = [];
-      for (const url of indirizzi.filter((u) => !/sitemap[^/]*\.xml(\.gz)?$/i.test(u))) {
+      for (const url of indirizzi.filter((u) => !E_UNA_MAPPA.test(u))) {
         try {
           const p = await m.leggi(url);
           pagine.push({ url: p.url, testo: avvolgiTestoNonFidato(p) });

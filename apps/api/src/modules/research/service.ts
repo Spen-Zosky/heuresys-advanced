@@ -184,6 +184,7 @@ export const researchService = {
           pagineLette: esito.letture.length,
           pagineNegate: esito.letturenegate.length,
           letturenegate: esito.letturenegate,
+          ...esito.note,
         });
       });
 

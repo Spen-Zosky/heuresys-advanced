@@ -11,7 +11,7 @@ export type DbConnector = Pool | PoolClient;
 
 interface Row {
   seed_acquisition_run_id: string;
-  seed_acquisition_run_tenant_id: string;
+  seed_acquisition_run_tenant_id: string | null;
   seed_acquisition_run_code: string;
   seed_acquisition_run_prompt_template: string | null;
   seed_acquisition_run_source_registry_payload: unknown[];

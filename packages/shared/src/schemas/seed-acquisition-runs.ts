@@ -13,7 +13,10 @@ export type SeedAcquisitionRunStatus = z.infer<typeof SeedAcquisitionRunStatusSc
 
 export const SeedAcquisitionRunSchema = z.object({
   seedAcquisitionRunId: z.uuid(),
-  tenantId: z.uuid(),
+  /** `null` per una corsa di ricerca su una TRATTATIVA: il fascicolo non e' ancora firmato a un
+   *  tenant (mig 000333, `tenantDelFascicolo`). Misurato in S1099: una sola corsa cosi' nel
+   *  database e la LIST rispondeva 500 per ResponseSerializationError. */
+  tenantId: z.uuid().nullable(),
   code: z.string(),
   promptTemplate: z.string().nullable(),
   sourceRegistryPayload: z.array(z.unknown()),

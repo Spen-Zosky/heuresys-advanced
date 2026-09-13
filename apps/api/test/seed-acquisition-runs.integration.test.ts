@@ -91,6 +91,40 @@ describe("/v1/seed-acquisition-runs/* integration", () => {
     expect(typeof body.total).toBe("number");
   });
 
+  // S1099 — una corsa di RICERCA su una trattativa non ha tenant (mig 000333, il fascicolo non e'
+  // ancora firmato). Con una sola riga cosi' nel database la LIST rispondeva 500
+  // (ResponseSerializationError: `tenantId` expected string, received null) — misurato sul
+  // gemello dal cancello di verifica dopo la corsa `9e921576`. Il contratto ora lo ammette.
+  it("PLATFORM_ADMIN LIST con una corsa di ricerca SENZA tenant → 200, tenantId null (non 500)", async () => {
+    const code = `S1099-TRATTATIVA-${randomUUID().slice(0, 8)}`;
+    // Il vincolo di ambito (`sys_seed_acquisition_run_scope_check`) vuole il tenant O la
+    // versione del fascicolo: la corsa di una trattativa ha la seconda. Si prende una versione
+    // VERA dal database, non un valore scritto a mano.
+    const v = await pool.query<{ id: string }>(
+      `SELECT tenant_blueprint_version_id AS id FROM sys.sys_tenant_blueprint_versions
+        ORDER BY created_at LIMIT 1`,
+    );
+    const versionId = v.rows[0]?.id;
+    expect(versionId, "serve almeno una versione di fascicolo nel database").toBeDefined();
+    await pool.query(
+      `INSERT INTO sys.sys_seed_acquisition_runs
+         (seed_acquisition_run_tenant_id, seed_acquisition_run_blueprint_version_id,
+          seed_acquisition_run_code, seed_acquisition_run_status)
+       VALUES (NULL, $1, $2, 'COMPLETED')`,
+      [versionId, code],
+    );
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/seed-acquisition-runs?limit=100",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as { items: Array<{ code: string; tenantId: string | null }> };
+    const mia = body.items.find((x) => x.code === code);
+    expect(mia).toBeDefined();
+    expect(mia?.tenantId).toBeNull();
+  });
+
   it("TENANT_ADMIN CREATE → 201, GET /:id readback → 200", async () => {
     const code = `${SUITE_PREFIX}_HP`;
     const created = await suite.app.inject({

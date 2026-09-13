@@ -334,7 +334,9 @@ describe("eseguiCorsa — la corsa intera, con un lettore e una sorgente finti",
       chiaviGiaPresenti: new Set(),
     });
     // `fontiAmmesse` (S1096) e' il perimetro degli host, non il cliente: e' cio' che il
-    // registro ha gia' approvato, ed e' pubblico per costruzione.
-    expect(chiavi.sort()).toEqual(["contesto", "domande", "dominio", "fontiAmmesse", "leggi"]);
+    // registro ha gia' approvato, ed e' pubblico per costruzione. `annota` (S1098) e' un
+    // canale IN USCITA — la sorgente lascia scritto l'esito delle mappe nella corsa — e non
+    // porta niente del cliente: e' una funzione, non un dato.
+    expect(chiavi.sort()).toEqual(["annota", "contesto", "domande", "dominio", "fontiAmmesse", "leggi"]);
   });
 });

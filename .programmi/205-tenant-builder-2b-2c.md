@@ -191,6 +191,13 @@ il confronto di somiglianza fra testi · **citare il numero 196**, che non si ri
   alle domande non è in una forma che il lettore sa aprire. (Scoperta registrata nel piano di
   sessione, fuori ciclo: *il lettore dovrebbe aprire i PDF delle fonti ammesse*.)
 
+  🔬 **E la corsa ha fatto scattare un difetto che aspettava la prima corsa vera in
+  produzione** (trovato dal cancello di verifica, `test-api` sul gemello): con una corsa di
+  ricerca senza tenant nel registro — la trattativa non è firmata, tenant NULL per costruzione —
+  `/v1/seed-acquisition-runs` rispondeva **500** (`tenantId` expected string, received null).
+  Corretto in `c13ce76d`: contratto e repository ammettono il null, prova di integrazione che
+  inserisce la corsa senza tenant e pretende 200 (rossa con 500 senza la correzione).
+
 - [ ] **F3 Lo strato di forma (2c) e la prova della frase riconoscibile** — budget ~60k
       Prendere una proposta approvata del cliente A con una frase riconoscibile, promuoverla a
       patrimonio, e cercare **quella frase** nello strato di forma: deve dare **zero** riscontri.

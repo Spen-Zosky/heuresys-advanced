@@ -78,6 +78,14 @@ const SCHEDE: Record<string, { inParole: string; siChiede: string; scritturaDaNo
     siChiede: "quanti documenti esistono e i titoli dei primi tre",
     scritturaDaNominare: "hrx_content_upsert o hrx_content_delete",
   },
+  // #214 F6 (S1099) — sedicesimo perimetro. Le aperture dalla quinta alla quindicesima non hanno
+  // una scheda: la loro evidenza e' la migrazione con la sentinella provata rossa, e il piano lo
+  // dichiara ogni volta. Da qui in poi la scheda si aggiunge insieme all'apertura.
+  "blueprint-processes": {
+    inParole: "il registro dei processi del modello organizzativo (strategia, KYC/AML, credito, tesoreria…)",
+    siChiede: "quanti processi di modello esistono e i nomi dei primi tre",
+    scritturaDaNominare: "hrx_blueprint_processes_upsert o hrx_blueprint_processes_delete",
+  },
 };
 
 // Il concetto sentinella: NON aperto, e classe PERSONAL. Se una lettura su questo passa,
@@ -155,6 +163,12 @@ async function chiedi(cookies: string, prompt: string): Promise<{ strumenti: str
         strumenti.push(m[1]!.replace("mcp__heuresys__", ""));
       }
     }
+  }
+  // S1099 — quando l'agente non invoca NESSUNO strumento, il rosso non dice perche'. Con
+  // LIVE_PERIMETRO_TESTO=1 si stampa cio' che il modello ha detto (redatto dal gateway).
+  if (strumenti.length === 0 && process.env.LIVE_PERIMETRO_TESTO === "1") {
+    console.log(`[agente] testo (nessuno strumento invocato):
+${testo.slice(0, 4000)}`);
   }
   return { strumenti, testo };
 }

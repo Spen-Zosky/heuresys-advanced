@@ -125,6 +125,54 @@ sono stati cancellati (divieto): sono diventati rimandi di poche righe a `live-p
       🔬 **Trovata e chiusa una cecità in attesa**: `check_concetti_agente.py` presidiava il caso «parser che non legge più nulla» per `RESOURCE_DATA_CLASS` e **per nessuna delle altre tre**. Cambiando forma, `MULTI` sarebbe tornato `{}` e ogni resource multiclasse sarebbe sparita in silenzio dalla classificazione. Ora la guardia c'è per `MULTI` e per `NO_PERSONE`.
 - [ ] **F6 Consumo della coda dei neutri, un perimetro per volta**
 
+  ### S1099 (2026-09-13) — il SEDICESIMO perimetro, e le tre domande tornano a essere poste
+
+  Coda ri-derivata sull'atlante fresco (da `af8f8f7e`): **109 moduli · 15 aperti · 37 in coda
+  (18 neutri)**. In testa `approvals`/`projects` (ACTIVITY, fuori gara) ed
+  `enterprise-typing-profiles` (scartato, porta occupata); sotto un pari a **tredici** a 2
+  letture · 1 pagina. Il rischio crescente li ordina per distanza da una persona (dettaglio in
+  `agent-perimetri.json` e nella 000412): i due **processi** sono i più lontani, e fra i due il
+  **registro** precede il legame — `sys_blueprint_process_registry` non ha tenant_id ed è il
+  genitore di `sys_organization_unit_processes`. Aprirlo chiude la famiglia del blueprint
+  (famiglie 000382, varianti 000381, modelli operativi 000405, processi).
+
+  Aperto **`blueprint-processes`** (23 processi di banca retail, senza tenant). Mig **`000412`**:
+  sentinella `sys.v_processo_di_modello_con_dato_di_persona` su **tre** porte — metadata JSONB
+  (`{}` su tutte), descrizione (NULL su tutte) e `blueprint_process_owner_position_code`
+  (varchar(64) senza CHECK: un codice per dichiarazione, un indirizzo di posta ci sta) —
+  provata rossa su tutte e tre con impronta md5. Prova generale sul linux-pc **VERDE** (385
+  applicate, 47/47 sentinelle a zero, 16 s); produzione dalla VM **13 s**, «385 applied, 24
+  skipped»; in produzione la sentinella vale **0**, 23/0/0/0 come prima; `db_health` exit 0.
+  Registro `agent-perimetri.json` + mappa rigenerata (`build_derivati.py`).
+
+  ⭐ **La prova live con le tre domande: VERDE 8/8** — la prima dal quarto perimetro
+  (2026-08-23, ultimo `hrx_*` nel diario). Diario: `concepts_search` → `concept_describe` →
+  `entity_query` consentiti su `blueprint-processes`; `hrx_blueprint_processes_upsert` tentata e
+  **negata**; su `users` un `entity_query` tentato e **negato**. Scheda aggiunta in
+  `live-perimetro.ts` (da qui in poi si aggiunge insieme all'apertura) più `LIVE_PERIMETRO_TESTO=1`
+  per stampare il testo dell'agente quando non invoca nulla.
+
+  ⚠⚠ **Per arrivare al verde sono serviti DUE rimedi al gateway, misurati con la prova stessa**
+  (prima corsa: ROSSO 5/8, l'agente tentava Bash/PowerShell/Read/Grep e mai un `hrx_*`):
+  1. **il server MCP rispondeva a `tools/list` con un'eccezione, e il CLI lo mostrava
+     `connected` con ZERO strumenti.** Causa: dal bump dell'SDK 0.3.220 → 0.3.259 (`#243`,
+     2026-09-03) il convertitore JSON Schema interno all'SDK crasha su `z.record(...)` di zod
+     4.5.4 (`recordProcessor`: «Cannot read properties of undefined (reading 'push')»).
+     Riprodotto in isolamento (un server con un solo `z.record` lancia; `catchall` no).
+     Corretto in `mcp-tools.ts` (`z.object({}).catchall(X)`, stesso JSON Schema) e presidiato
+     da **`test/mcp-tools-list.test.ts`**, che chiama `tools/list` sul server VERO con
+     l'atlante e pretende ogni nome del catalogo, con la controprova sulla forma che rompe.
+     Batteria del gateway **99/99**; senza la correzione il test è rosso (provato con stash).
+  2. **`settingSources: ["project","user"]` faceva del gateway una sessione di sviluppo**: gli
+     hook SessionStart/UserPromptSubmit/Stop della macchina e del repo giravano dentro l'SDK
+     (registro sessioni compreso: i file `webapps-*.md` in `sessioni/attive/` sono quelli), il
+     brief «esegui session_start.py» arrivava al modello, e il plugin che quella riga voleva
+     scoprire (`human-resources-plus`) è **disattivato** nei settings. Ora `settingSources: []`.
+
+  Coda dopo: **16 aperti · 36 in coda (17 neutri)**. Prossimo in testa, tolti ACTIVITY e lo
+  scartato: un pari a dodici; per il rischio crescente `organization-unit-processes` (il
+  legame, con tenant) e poi `blueprint-activations`.
+
   ### S1098 (2026-09-13) — il QUINDICESIMO perimetro, e nel pari c'erano TRE falsi neutri
 
   Coda ri-derivata sull'atlante fresco (da `10be43af`): **109 moduli · 14 aperti · 41 in coda

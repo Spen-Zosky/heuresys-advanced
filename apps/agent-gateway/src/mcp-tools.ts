@@ -37,6 +37,16 @@ export function bindPath(template: string, params: Record<string, unknown>): str
   });
 }
 
+// ⚠ S1099 (#214 F6) — NIENTE `z.record(...)` negli schemi degli strumenti. Dal bump
+// dell'SDK 0.3.220 → 0.3.259 (#243, 2026-09-03) il convertitore JSON Schema che l'SDK porta
+// dentro di se' crasha su un `z.record` di zod 4.5.4 («Cannot read properties of undefined
+// (reading 'push')», `recordProcessor`): `tools/list` lancia, e il CLI — invece di dirlo —
+// mostra il server `connected` con ZERO strumenti. Il modello non vede nessun `hrx_*`, tenta
+// Bash/Read/Grep, il gate li nega, e la prova live dei perimetri e' rossa su un perimetro
+// sano. Misurato il 2026-09-13 con `live-perimetro.ts` e riprodotto in isolamento.
+// `z.object({}).catchall(X)` produce lo stesso JSON Schema (`additionalProperties: X`) e
+// passa. Il test `mcp-tools-list.test.ts` chiama `tools/list` sul server VERO: se torna a
+// lanciare, e' lui a dirlo, non la prova live.
 export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOperationResolver) {
   const ok = (d: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(d) }] });
 
@@ -50,12 +60,12 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
     tool(
       n,
       `Upsert ${base} (WRITE)`,
-      { id: z.string().optional(), payload: z.record(z.string(), z.any()) },
+      { id: z.string().optional(), payload: z.object({}).catchall(z.any()) },
       async (a: { id?: string; payload: Record<string, unknown> }) =>
         ok(await client.call(a.id ? "PATCH" : "POST", a.id ? `${base}/${a.id}` : base, a.payload)),
     );
   const putUp = (n: string, base: string) =>
-    tool(n, `PUT-upsert ${base} (WRITE)`, { payload: z.record(z.string(), z.any()) }, async (a: { payload: Record<string, unknown> }) =>
+    tool(n, `PUT-upsert ${base} (WRITE)`, { payload: z.object({}).catchall(z.any()) }, async (a: { payload: Record<string, unknown> }) =>
       ok(await client.call("PUT", base, a.payload)),
     );
   const del = (n: string, base: string) =>
@@ -111,8 +121,8 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
           {
             conceptId: z.string(),
             operationId: z.string(),
-            params: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
-            query: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
+            params: z.object({}).catchall(z.union([z.string(), z.number(), z.boolean()])).optional(),
+            query: z.object({}).catchall(z.union([z.string(), z.number(), z.boolean()])).optional(),
           },
           async (a: {
             conceptId: string;

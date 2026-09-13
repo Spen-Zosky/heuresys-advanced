@@ -56,7 +56,16 @@ export async function* runHrAgent(
   const iterator = query({
     prompt,
     options: {
-      settingSources: ["project", "user"], // discover the plugin's skills + agents
+      // S1099 (#214 F6) — NIENTE settings ereditati. `["project", "user"]` serviva a
+      // scoprire skill e agenti del plugin `human-resources-plus`, che oggi e' DISATTIVATO
+      // (`~/.claude/settings.json`: `"human-resources-plus@heuresys-plugins": false`). Quel
+      // che portava davvero, misurato il 2026-09-13 con `live-perimetro.ts`: gli hook di
+      // SessionStart/UserPromptSubmit/Stop della macchina e del repo (boot di sessione,
+      // registro sessioni, brief «esegui session_start.py»), il CLAUDE.md intero, e un modello
+      // che — istruito come una sessione di sviluppo — tentava Bash e PowerShell (9 dinieghi
+      // TOOL_NOT_ALLOWLISTED) e non toccava MAI gli strumenti `hrx_*`: 5 criteri su 8 rossi
+      // su un perimetro sano. L'agente HR ragiona sul prompt e sugli strumenti MCP: basta.
+      settingSources: [],
       // CRITICAL (M-2): do NOT put `mcp__heuresys__*` in allowedTools — per the SDK,
       // allowedTools are "auto-allowed without prompting", which BYPASSES canUseTool.
       // That would let WRITE tools execute with no human approval. Instead every

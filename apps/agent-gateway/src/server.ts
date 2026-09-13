@@ -17,7 +17,7 @@
 // DEVE restare il primo import: neutralizza le credenziali API prima che
 // qualunque altro modulo del grafo (incl. l'SDK) possa leggerle.
 import "./subscription-auth.js";
-import { createServer, type IncomingMessage } from "node:http";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { ApprovalRegistry, type ApprovalDecision } from "./approval-bridge.js";
 import { FileAuditSink } from "./audit-sink.js";
 import { HeuresysClient } from "./heuresys-client.js";
@@ -28,6 +28,30 @@ import type { GatePrincipal } from "./write-gate.js";
 
 const PORT = Number(process.env.AGENT_GATEWAY_PORT ?? 8790);
 const HEURESYS_API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
+// S1099 (#159 F2) — L'ORIGINE DEL WEB. La console dell'agente sta su un'altra porta del
+// browser (il web su :3000, il gateway su :8790): senza le intestazioni CORS il browser
+// non consegna nemmeno la richiesta, e la pagina mostra «Failed to fetch» — misurato con
+// la prima prova E2E della pagina, che fino a quel giorno non era mai stata fatta.
+// UNA sola origine ammessa, dichiarata; i cookie viaggiano (credentials) e per questo
+// l'origine non puo' essere `*`. Gli script da terminale non passano di qui.
+const WEB_ORIGIN = (process.env.AGENT_GATEWAY_WEB_ORIGIN ?? "http://localhost:3000").replace(/\/$/, "");
+function cors(req: IncomingMessage, res: ServerResponse): boolean {
+  const origin = req.headers.origin;
+  if (origin !== WEB_ORIGIN) return false;
+  res.setHeader("access-control-allow-origin", WEB_ORIGIN);
+  res.setHeader("access-control-allow-credentials", "true");
+  res.setHeader("vary", "origin");
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, {
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-headers": "content-type, x-csrf-token",
+      "access-control-max-age": "600",
+    });
+    res.end();
+    return true;
+  }
+  return false;
+}
 const APPROVAL_TIMEOUT_MS = Number(process.env.AGENT_GATEWAY_APPROVAL_TIMEOUT_MS ?? 120_000);
 // #132 F4h — il segreto condiviso con l'API per l'endpoint di proposta. Se non c'e',
 // l'endpoint NON esiste: un servizio in ascolto senza autenticazione «perche' tanto e'
@@ -73,6 +97,7 @@ function readBody(req: IncomingMessage): Promise<string> {
 
 const server = createServer(async (req, res) => {
   try {
+    if (cors(req, res)) return; // la sonda preliminare del browser: finisce qui
     if (req.method === "GET" && req.url === "/healthz") {
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ ok: true, service: "agent-gateway", api: HEURESYS_API }));

@@ -4,7 +4,8 @@
 per mio conto, nell'ordine che ritieni più appropriato. l'unico guardiano che comanda è quello
 della capienza.»*
 
-> **stato**: IN CORSO
+> **stato**: CHIUSO
+> **chiuso**: 2026-09-13 — 6 voci fatte su 6. `#205` F2 e le fasi continuative restano aperte nei loro piani per natura (il registro dice cosa manca)
 > **registro di sessione** — cronaca di ciò che si fa, non il programma di una voce: non
 > dichiara `item` di proposito (D-92). Le fasi che restano aperte vivono nel piano della loro
 > voce; questo file le nomina, non le possiede.
@@ -63,7 +64,7 @@ perimetro `ui/src/`): prima di scrivere lì si manda un messaggio a quella sessi
 | 3 | `#214` | F6 — il prossimo perimetro neutro | io | riga in `agent-perimetri.json` + `check_concetti_agente.py` verde + prova live 3 domande | ✅ FATTA: `blueprint-processes`, mig 000412 (prod 13 s), prova live VERDE 8/8 dopo due rimedi al gateway (z.record → catchall; settingSources: []) |
 | 4 | `#205` | F2 — la fonte di settore e la corsa | io | `assoconsult.org` nel registro; corsa su `positions` con esito letto: proposte o ragione misurata | ✅ FATTA a fase-di-sessione: fonte in prod (000413), seconda via delle mappe (REST WordPress), corsa `9e921576` letta — 0 proposte, ragione misurata (contenuto in PDF). La fase F2 resta aperta nel piano 205 |
 | 5 | `#79` | F3 — il lavoro che popola tabelle | io | `check_exposure.py` → 0 lacune dopo la voce 4 | ✅ FATTA: nessuna lacuna, exit 0 |
-| 6 | `#159` | F2 — il componente in `ux-design-shared` | io | componente pubblicato via link, pagina `dev/agent` lo consuma, cancelli verdi, `--budget` verde prima di aprire | ⏳ |
+| 6 | `#159` | F2 — il componente in `ux-design-shared` | io | componente pubblicato via link, pagina `dev/agent` lo consuma, cancelli verdi, `--budget` verde prima di aprire | ✅ FATTA: `AgentPanel` in @heuresys/ui 1.2.0 (npm), pagina a 113 righe, CORS al gateway, E2E live VERDE 7/7. **F2 chiusa nel piano 159** |
 
 ## Registro delle scoperte (fuori da questo ciclo — R24 §5)
 

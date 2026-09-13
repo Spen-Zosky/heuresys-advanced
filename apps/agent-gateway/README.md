@@ -38,6 +38,9 @@ regime intero. I quattro verbi qui sotto sono misurabili, e accanto a ciascuno c
   `~/.research-token` (600) e passa solo nell'ambiente dei due processi — `scripts/avvia-ricerca.sh`.
   Con `ANTHROPIC_API_KEY` presente nell'ambiente l'SDK la preferirebbe: i lanci la tolgono
   (`env -u ANTHROPIC_API_KEY`).
+  `AGENT_GATEWAY_WEB_ORIGIN` (default `http://localhost:3000`) e' l'unica origine del browser
+  ammessa dal CORS (S1099, #159 F2): il web e il gateway stanno su porte diverse, e senza
+  quelle intestazioni la console mostra «Failed to fetch».
 - **Esercitato** — si': le prove live dei perimetri dell'agente con login reale e secondo fattore
   (`apps/api/scripts/live-perimetro.ts <concetto>`, #214, 13 perimetri aperti a oggi) e le corse
   di ricerca vere (#132 F7 sul gemello: 15 + 34 proposte; S1096: `percorri-dominio.mts`, 8

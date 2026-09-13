@@ -36,7 +36,51 @@ adozione su tutte le pagine idonee**. Stima: **~3-4 sessioni**, così ripartite.
   - ⚠ **`P2` è nato con tre falsi negativi, ed è stato il correttivo a valere più del numero**: `/job-catalog` (37 righe), `/skill-taxonomy` (42) e `/me/career` risultavano «pagine mute» perché la chiamata sta nei loro pannelli. Cercare `/v1/` nel solo file della pagina **dichiara muta una pagina che parla per bocca d'altri** — e le pagine sottili sono la forma normale, non l'eccezione. Seguendo un livello di import (`@/…` e relativi `./…`), `P2` passa da 3 a **0**: nessuna pagina autenticata è senza dati.
   - ⚠ **il primo giro dava «0 pagine totali» e non protestava** — un falso verde perfetto, causato dall'esecuzione fuori dalla radice. Lo strumento ora **esce `NON MISURABILE`** invece di stampare zeri sereni.
   - **resta di F1 la sola dimostrazione**: quale delle 83 aprire per prima dipende da **#156** (WAIT-INPUT su Enzo). Il criterio non ne dipende — la lista è già prodotta.
-- [ ] **F2 — Il ponte** — un canale in streaming + un componente riusabile, scritto **fuori** da qualunque pagina (è il rischio nominato) · budget ~250k
+- [x] **F2 — Il ponte** — **FATTA 2026-09-13 (S1099)**: canale in `apps/web/src/lib/use-agent-stream.ts` (S1091), componente `AgentPanel` in `@heuresys/ui` 1.2.0 (S1099), console `dev/agent` primo consumatore, E2E live verde · budget ~250k
+
+  ### ✅ S1099 (2026-09-13) — la METÀ DI LÀ è fatta: `AgentPanel` in `@heuresys/ui` 1.2.0
+
+  La sessione parallela su `ux-design-shared` risultava «viva» nel registro ma il suo pid era
+  stato riciclato da un altro programma (misurato: PowerToys) e non compariva fra i peer: il
+  repo era libero, e il suo albero pulito.
+
+  **Il componente**: `ui/src/components/ai/agent-panel.tsx` (ux-design-shared `ac6445c`,
+  pubblicato come **`@heuresys/ui@1.2.0`** su npm, `+ @heuresys/ui@1.2.0`). È una **vista
+  pura** — non apre canali, non traduce, non sa su quale pagina sta: `labels` arrivano già
+  tradotte dal consumatore (ogni pagina il suo namespace: la decisione (2) di questo piano),
+  il `context` di pagina è un **valore libero** che si mostra e si passa (mai un ramo per tipo
+  di pagina), `testIdPrefix` lascia i `data-testid` a chi ha già prove. Storia con quattro
+  stati, **9 prove unitarie** (tra cui il contesto assente come controprova e **axe** sui tre
+  stati), typecheck e lint verdi, `dist` rigenerato, CHANGELOG 1.2.0 — che porta anche le
+  correzioni a11y e reduced-motion del 5-7 settembre, mai uscite prima.
+
+  **Il consumatore**: `dev/agent/page.tsx` scende a **113 righe** (`60aa0824`) e fa una cosa
+  sola — traduce nel proprio namespace, monta `useAgentStream`, passa stato e callback ad
+  `AgentPanel`. Dipendenza `^1.2.0` su root, web e showcase; il lockfile collassa a UNA
+  versione della libreria (prima 1.0.0 e 1.1.0 convivevano — la web risolveva ancora la
+  1.0.0). Typecheck, lint, vitest verdi su web; typecheck verde su showcase.
+
+  ⚠ **La prova live ha trovato che il ponte non era mai stato intero dal browser**: la prima
+  E2E di questa pagina (non ne esisteva nessuna) ha mostrato «Esecuzione fallita: Failed to
+  fetch» — il web su `:3000` e il gateway su `:8790` sono origini diverse e il gateway **non
+  aveva CORS**: il browser non consegnava nemmeno la richiesta. Il commento della pagina lo
+  diceva a modo suo («renders without a live agent»). Corretto in `server.ts`: una sola
+  origine ammessa (`AGENT_GATEWAY_WEB_ORIGIN`, default `http://localhost:3000`), credenziali
+  sì, preflight 204 — provato a esiti opposti con `curl` (origine del web: intestazioni
+  presenti; `evil.example`: nessuna).
+
+  ⭐ **Dimostrazione live — `tests/e2e/agent-dev-console.spec.ts`, VERDE** (`7 passed`, la
+  prova 32,9 s): login reale come platform admin, `/dev/agent` resa dal componente condiviso
+  (`agentdev-page`, `-title`, `-stream-empty`), una domanda vera al gateway vivo — «quante
+  unità organizzative esistono?» — e lo stream che arriva: 85 righe alla prima corsa, nel
+  diario del gate `hrx_concepts_search` → `hrx_org_units_list` consentiti. La prova ha anche
+  corretto sé stessa: una corsa riuscita **non** produce un avviso (l'hook lo emette solo su
+  errore o approvazione), la fine si legge dal pulsante «Ferma» che sparisce. Prima di questa
+  sessione la pagina non aveva nessuna prova E2E.
+
+  **Cosa resta di F2**: niente. La prossima pagina idonea (F3) monta `AgentPanel` con il
+  proprio namespace e il proprio `context`, e la prova che il ponte è riusabile è che non
+  tocca né `use-agent-stream` né il componente.
 
   ### ✅ S1092 (2026-09-08) — il buco dichiarato da S1091 è chiuso per la parte provabile
 
@@ -132,10 +176,11 @@ adozione su tutte le pagine idonee**. Stima: **~3-4 sessioni**, così ripartite.
 
 ## Da dove si riprende
 
-**F2 — il ponte**, e con un punto di partenza diverso da quello scritto in origine: non si
-costruisce da zero, si **estrae** dalle 300 righe di `(authenticated)/dev/agent/page.tsx`, che
-sono già un ponte funzionante nel posto sbagliato. Il criterio di idoneità è chiuso e
-ri-eseguibile (`python docs/kb/tools/check_idoneita_agente.py` → 83 idonee su 115).
+**F3 — l'adozione**: la prima pagina idonea dopo la console, scelta fra le 83 di
+`check_idoneita_agente.py` (una parametrica, per esercitare `context` con un valore vero,
+es. l'unità organizzativa che si sta guardando). Monta `AgentPanel` col proprio namespace e
+il proprio `context`; il criterio di riuscita è che **non tocca** né `use-agent-stream` né il
+componente. Il gateway va acceso con `AGENT_GATEWAY_WEB_ORIGIN` sull'origine del web.
 
 **#156** resta la dipendenza per la *dimostrazione*, non per il ponte: decide quale superficie
 l'agente sa leggere, cioè su quale delle 83 la si mostra per prima.

@@ -130,6 +130,26 @@ ESCLUSI = {
     "candidate-applications":
         "candidature: il SOGGETTO e' il candidato (stadio, motivo di rifiuto); stessa ragione "
         "di `candidates`",
+    # #214 F6 (S1098, 2026-09-13) — ancora il permesso condiviso `job-requisition:read`, e
+    # ancora tre falsi neutri, misurati su information_schema: `sys_interviews` ha per SOGGETTO
+    # la candidatura di una persona esterna; `sys_interview_feedback` porta score e
+    # raccomandazione su quella persona (una VALUTAZIONE); `sys_job_offers` porta
+    # `offer_gross_annual_salary` (una RETRIBUZIONE offerta a una persona). `job-postings` e
+    # `job-requisitions` restano neutri: descrivono il POSTO, non chi lo chiede.
+    "interviews":
+        "colloqui: il SOGGETTO e' la candidatura di una persona esterna; stessa ragione di "
+        "`candidate-applications`",
+    "interview-feedback":
+        "valutazione di un candidato (score, raccomandazione): EVALUATION su una persona "
+        "esterna; il permesso `job-requisition` e' condiviso",
+    "job-offers":
+        "offerta a un candidato con la retribuzione (offer_gross_annual_salary): COMPENSATION "
+        "su una persona esterna; il permesso `job-requisition` e' condiviso",
+    # #206 (S1098) — la superficie di P4: porta email e nomi delle persone in INGRESSO
+    # nell'azienda (candidate della corsa, righe di atterraggio), come seed-candidate-records.
+    "tenant-import-runs":
+        "superficie di servizio: l'importazione delle persone vere dal sistema del cliente "
+        "(email e nomi in ingresso), come `seed-candidate-records`",
 }
 
 RISERVATE = ("PERSONAL", "COMPENSATION", "SKILL", "EVALUATION")

@@ -125,6 +125,36 @@ sono stati cancellati (divieto): sono diventati rimandi di poche righe a `live-p
       🔬 **Trovata e chiusa una cecità in attesa**: `check_concetti_agente.py` presidiava il caso «parser che non legge più nulla» per `RESOURCE_DATA_CLASS` e **per nessuna delle altre tre**. Cambiando forma, `MULTI` sarebbe tornato `{}` e ogni resource multiclasse sarebbe sparita in silenzio dalla classificazione. Ora la guardia c'è per `MULTI` e per `NO_PERSONE`.
 - [ ] **F6 Consumo della coda dei neutri, un perimetro per volta**
 
+  ### S1098 (2026-09-13) — il QUINDICESIMO perimetro, e nel pari c'erano TRE falsi neutri
+
+  Coda ri-derivata sull'atlante fresco (da `10be43af`): **109 moduli · 14 aperti · 41 in coda
+  (22 neutri)**. `approvals` e `projects` ACTIVITY (non in gara); `enterprise-typing-profiles`
+  scartato (porta occupata, misura 2026-09-08). Sotto, un pari a **diciassette** a 2 letture · 1
+  pagina — e dentro, **tre falsi neutri dal permesso condiviso `job-requisition:read`**, misurati
+  su `information_schema`: `interviews` (soggetto = la candidatura), `interview-feedback`
+  (`feedback_score`, `feedback_recommendation`: EVALUATION), `job-offers`
+  (`offer_gross_annual_salary`: COMPENSATION). **Esclusi (V2)** in `check_concetti_agente.py`;
+  `job-postings` e `job-requisitions` restano neutri (descrivono il posto). Escluso anche
+  `tenant-import-runs` (`#206`, S1098): porta email e nomi delle persone in ingresso, come
+  `seed-candidate-records` — la coda lo dava «nessun dato di persona». Dopo le esclusioni: **18
+  V2 · 37 in coda (18 neutri)**.
+
+  Aperto **`activity-classifications`** (ATECO, 4.304 righe, senza tenant): il più lontano da una
+  persona fra i pari. Mig **`000411`**: sentinella
+  `sys.v_classificazione_di_attivita_con_dato_di_persona` su due porte (metadata JSONB **pieno**
+  su tutte le righe — `title_en`/`title_de`/`ordine`/provenienza —, descrizione vuota), provata
+  rossa su entrambe con post-condizione per impronta md5 su 4.304 righe. Prova generale sul
+  linux-pc **VERDE** (46/46 sentinelle); applicata in produzione dalla VM (14 s); in produzione la
+  sentinella vale **0**. Registro `agent-perimetri.json` + `agent-operations.json` rigenerati.
+
+  ⚠ **Fuori ciclo, per `#198`**: applicando la catena sul gemello, la `000244` si è fermata —
+  «12 unità hanno un nome incoerente col tipo». Sono le unità delle 3 aziende di prova costruite
+  da P3 dal modello di prova (`seminaModello`: «Stabilimento» PLANT sotto GENERAL_MANAGEMENT,
+  «Linea di produzione 1» TEAM sotto PLANT): la costruzione **non verifica le regole R6/R7 di
+  `v_organization_unit_integrity`**, quindi un'azienda costruita da P3 può rendere rossa una
+  sentinella bloccante e fermare il deploy successivo. Il gemello si rimette a posto col
+  rinfresco del clone alla chiusura; il difetto è del motore di costruzione, non di P4.
+
   ### S1097 (2026-09-12) — il QUATTORDICESIMO perimetro, e la testa della coda era un falso
 
   Coda ri-derivata sull'atlante fresco (da `e818bc8b`): **108 moduli · 13 aperti · 44 in coda

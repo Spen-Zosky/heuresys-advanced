@@ -44,14 +44,19 @@ Le stime sono per-cluster e consolidate dalla fonte più motivata fra quelle dis
 ## Ordine di esecuzione
 
 | Ondata | Tema | Cluster | Ore |
-|---|---|---:|---:|
-| **W0** | Sblocco | 11 (10 chiusi, **1 aperto: Z-034**) | 24 |
-| **W1** | Igiene rapida | 82 (32 chiusi) | 102 |
+|---|---:|---:|---:|
+| **W0** | Sblocco | 11 (tutti chiusi dal 2026-09-13) | 24 |
+| **W1** | Igiene rapida | 82 | 102 |
 | **W2** | Debito tecnico, test e CI | 37 | 203 |
 | **W3** | Dati e DB | 36 | 168 |
 | **W4** | Frontend e sicurezza | 39 | 213 |
 | **W5** | Prodotto | 20 | 213 |
 | **W6** | Dipende da input o decisioni tue | 30 | 446 |
+
+⭐ Le colonne «Cluster» e «Ore» sono i totali DICHIARATI al 2026-07-25; **quanti restano aperti,
+per ondata e in ore, non si scrive qui** — si legge con `python docs/kb/tools/zp_state.py piano`
+(il conteggio «chiusi» in questa tabella e' stato tolto il 2026-09-13, `#76` F2, perche' era gia'
+falso: 59 caselle spuntate in un colpo dai verdetti della verifica preliminare).
 
 **Criterio**: prima ciò che è rotto ora (W0), poi ciò che costa poco e toglie rumore (W1), poi la rete di sicurezza che protegge il resto del lavoro (W2), poi il divario dati (W3), le superfici (W4), le nuove capacità (W5). W6 resta fuori dalla mia portata per definizione.
 
@@ -106,7 +111,8 @@ Rossi attivi e rischi operativi: finché sono aperti, tutto il resto lavora su f
 
 ### security (2)
 
-- [ ] **Z-034** (2.0h) — Segreti TOTP: fixture in chiaro nel repo + 7/19 secret plaintext a DB + MFA_ENCRYPTION_KEY da garantire su VM e linux-pc
+- [x] **Z-034** (2.0h) — Segreti TOTP: fixture in chiaro nel repo + 7/19 secret plaintext a DB + MFA_ENCRYPTION_KEY da garantire su VM e linux-pc
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql count=0; fixture .ts letti da Proxy/DB cifrato (Z-262/#169 F3c), 0 hardcoded
   - *chiuso quando*: psql: select count(*) from sys.sys_auth_mfa_factors where auth_mfa_factor_kind='TOTP' and auth_mfa_factor_secret not like 'enc:v1:%' = 0 E grep dei secret di fixture nel repo = 0
   - *assorbe*: `state:TOTP-FIX`, `state:ENC-TOTP`, `code:CODE-6`, `p100x:MFA-KEY-PROD`
 - [x] **Z-053** (1.5h) — dailyaidecheck.service in stato failed su PROD da giorni (file-integrity spento, nessuna notifica)
@@ -128,13 +134,16 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-066** (1.5h) — sys_auth_sessions: tabella morta (0 righe, 0 riferimenti) citata pero' nella mappa GDPR
   - *chiuso quando*: psql: select to_regclass('sys.sys_auth_sessions') is null (droppata) oppure un ADR ne dichiara la riserva e la mappa GDPR non la elenca piu'
   - *assorbe*: `code:CODE-38`, `runtime:RT-11`
-- [ ] **Z-068** (1.5h · dipende da Z-002) — Righe di audit del workflow SDBI mai emesse (marker SDBI_CONSOLIDATION_COMPLETE_V1 assente benche' l'abilitatore esista)
+- [x] **Z-068** (1.5h · dipende da Z-002) — Righe di audit del workflow SDBI mai emesse (marker SDBI_CONSOLIDATION_COMPLETE_V1 assente benche' l'abilitatore esista)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): audit.import_validation_results DROP in mig 000297; nota formale: provenance in sys_source_lineage_records
   - *chiuso quando*: psql: select count(*) from audit.import_validation_results where rule_code like 'SDBI%' = 4, oppure una nota formale dichiara che la provenance vive solo in sys_source_lineage_records
   - *assorbe*: `code:CODE-15`
-- [ ] **Z-078** (1.5h) — engagement_pulse_configs dichiarato out-of-scope m2b e mai importato (3 righe)
+- [x] **Z-078** (1.5h) — engagement_pulse_configs dichiarato out-of-scope m2b e mai importato (3 righe)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): SOT_BACKLOG #7 CHIUSO + SDBI_PHASE2_CLOSURE.md: registry WON'T-DO con motivazione
   - *chiuso quando*: psql: la tabella target ha 3 righe importate, oppure il registry la marca WON'T-DO con motivazione
   - *assorbe*: `code:CODE-29`
-- [ ] **Z-069** (1.0h) — Seed perf_feedback non ri-eseguibile: i path \copy sono placeholder <CSV_DIR>
+- [x] **Z-069** (1.0h) — Seed perf_feedback non ri-eseguibile: i path \copy sono placeholder <CSV_DIR>
+  - ✅ **SUPERATO S1098** — verdetto `SUPERATO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): I12: seed archiviato in docs/archive/etl-brownfield-ritirato, temp_sdbi droppato S954
   - *chiuso quando*: bash db/seeds/brownfield/sdbi/perf_feedback/02_*.sql parametrizzato gira due volte di fila senza edit manuale ed e' idempotente
   - *assorbe*: `code:CODE-16`
 
@@ -191,7 +200,8 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-219** (3.0h) — Atlas curato stale (468 route, 276 tabelle/67 vuote) e counts endpoint/tabelle non derivati da fonte generata
   - *chiuso quando*: python docs/kb/atlas/build_atlas.py rigenera l'atlas e ATLAS_CURATED.md riporta i valori live coincidenti con psql e con il conteggio degli handler
   - *assorbe*: `gapfill:GAP2-5`
-- [ ] **Z-213** (2.0h) — SOT_STATE.md §1-§9 mai ri-derivate: conteggi e HEAD fermi a S1006/S1007 (regressione della governance D-01)
+- [x] **Z-213** (2.0h) — SOT_STATE.md §1-§9 mai ri-derivate: conteggi e HEAD fermi a S1006/S1007 (regressione della governance D-01)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): SOT_STATE §0 ri-derivato a ogni sessione fino a S1096 (2026-09-12); tool aggiorna_numeri_sot.py
   - *chiuso quando*: i valori di SOT_STATE §1-§9 coincidono con git rev-parse --short HEAD, ls db/migrations/*.sql | wc -l, ls apps/api/test/*.test.ts | wc -l e le query RBAC; la ri-derivazione e' automatizzata nella skill handoff
   - *assorbe*: `state:DRIFT-SOT`
 - [ ] **Z-214** (2.0h) — Riconciliare il tracker del programma 100X: TODO_100X (>=18 voci chiuse ancora aperte), MASTER_PLAN §9, FINDINGS README WS-L, BASELINE_METRICS, doc-count della suite, INTERVIEW_LOG, epic S-100X-E
@@ -278,10 +288,12 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-136** (2.0h) — Metrologia KPI: drill-down delle measurements per singolo KPI su /kpis
   - *chiuso quando*: E2E apre il drill di un KPI e vede le measurements servite da :id/measurements
   - *assorbe*: `backlog:L6-drill`, `product:A-L6`
-- [ ] **Z-144** (2.0h) — Secondo duplicato del componente detail-panel/FieldGrid mai promosso a @heuresys/ui
+- [x] **Z-144** (2.0h) — Secondo duplicato del componente detail-panel/FieldGrid mai promosso a @heuresys/ui
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): detail-panel.tsx e' shim re-export da @heuresys/ui (0 duplicazione), pkg dichiara ^1.0.0
   - *chiuso quando*: grep del componente duplicato in apps/web/src = 0 e l'import arriva da @heuresys/ui alla versione bumpata
   - *assorbe*: `state:QW-FG`
-- [ ] **Z-150** (2.0h) — Lead capture mai dimostrata live: sys_leads a 0 righe con LeadForm attivo su /demo e /investors
+- [x] **Z-150** (2.0h) — Lead capture mai dimostrata live: sys_leads a 0 righe con LeadForm attivo su /demo e /investors
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: count(*)=6 righe reali (WEBSITE/DEMO/INVESTOR), admin UI /leads/page.tsx esiste
   - *chiuso quando*: psql: select count(*) from sys.sys_leads > 0 dopo un submit reale in PROD, con il record visibile nella admin UI
   - *assorbe*: `runtime:RT-12`
 - [ ] **Z-135** (1.5h) — Gap closure: tab self dei piani di chiusura su /me/gaps (ESS)
@@ -367,16 +379,19 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 
 ### security (9)
 
-- [ ] **Z-257** (2.0h) — Il gate di copertura GDPR non copre: `apps/api/test/gdpr.integration.test.ts` dichiara «LIVE fk graph — the SoT is `pg_constraint`, never a hardcoded list» e nella query subito sotto restringe con `AND conrelid::regclass::text LIKE 'sys.sys_user\_%'`. Le FK verso `sys_users` sono **248 su 135 tabelle**; dentro quel filtro ne cadono **74**. Effetto: 51 tabelle con FK-soggetto non sono mai confrontate col registro `sys_gdpr_data_map`, e contengono dati veri (`sys_survey_responses` 3.792 · `sys_goals` 1.067 · `sys_performance_reviews` 161 · `sys_time_off_requests` 69). Il test resta verde perché nessuna inizia per `sys_user_`, e l'asserzione è `toBeGreaterThan(20)`, soglia che passa comunque. È un gate di conformità che non gatea (anti-pattern AP-03 in `docs/kb/DATA_PATTERNS.md`)
+- [x] **Z-257** (2.0h) — Il gate di copertura GDPR non copre: `apps/api/test/gdpr.integration.test.ts` dichiara «LIVE fk graph — the SoT is `pg_constraint`, never a hardcoded list» e nella query subito sotto restringe con `AND conrelid::regclass::text LIKE 'sys.sys_user\_%'`. Le FK verso `sys_users` sono **248 su 135 tabelle**; dentro quel filtro ne cadono **74**. Effetto: 51 tabelle con FK-soggetto non sono mai confrontate col registro `sys_gdpr_data_map`, e contengono dati veri (`sys_survey_responses` 3.792 · `sys_goals` 1.067 · `sys_performance_reviews` 161 · `sys_time_off_requests` 69). Il test resta verde perché nessuna inizia per `sys_user_`, e l'asserzione è `toBeGreaterThan(20)`, soglia che passa comunque. È un gate di conformità che non gatea (anti-pattern AP-03 in `docs/kb/DATA_PATTERNS.md`)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): test riscritto su FK graph (confdeltype), #183/mig 000304 (S1055); psql live: missing=[] su 76 subject-FK
   - *chiuso quando*: il test deriva l'insieme dalla **raggiungibilità nel grafo FK** senza filtri sul nome, e fallisce se una tabella con FK-soggetto manca dal registro — provato rimuovendo una riga dal registro e vedendolo diventare rosso
   - **INTERRUPTED (S1032)** — *resume-from*: `git stash@{0}` («Z-257 INTERRUPTED S1032 …»), diff in `.zp/prove/Z-257-diff.txt`, verdetti in `.zp/prove/Z-257-verdetti-adversarial.json`. Il tentativo ha corretto il test (copertura biunivoca `missing`+`orphan`, non degenerabile, **falsificabilità provata**: rimossa `sys_survey_assignments` → rosso col nome esatto) e ha portato il registro da 54 a 249 righe con una colonna `gdpr_map_reference_kind` (SUBJECT/ACTOR). **Tre revisori su tre lo hanno demolito: 15 rilievi, 6 ALTA.** I due che impongono il ridisegno: (a) **fuga di dati** — il registro pilota ANCHE `exportSubjectData`, che fa `SELECT *` su ogni riga senza guardare `referenceKind`: con 155 righe ACTOR l'export self-service (aperto a ogni ruolo, `USER` incluso) restituisce righe intere di fatti altrui — verificato live, `paolo.caputo` riceveva 4 performance review complete di altri, `tommaso.fiore` 8 feedback 360 su 8 colleghi; (b) **il gate si auto-disarma** — `migrate.sh` ri-applica tutti i file a ogni run e il popolamento era un `INSERT … SELECT` vivo su `pg_constraint`, quindi una FK nuova verrebbe auto-classificata al primo deploy e il test non diventerebbe mai rosso: lo stesso difetto di Z-257 in forma nuova. Minori: 16 tabelle con due `data_class`, la regex lascia `owner`/`lead`/`manager` come SUBJECT contraddicendo l'header, il 2° test è tautologico (asserisce un CHECK creato dalla stessa migrazione), `conrelid::regclass::text` non è stabile col `search_path`, e la copertura è sulle FK **dirette** mentre il criterio dice «raggiungibilità» (nessuna chiusura transitiva). **Rollback eseguito** (autorizzato da Enzo): registro riportato a 54 righe, colonna e vincoli rimossi, riga di tracciamento tolta, migrazioni 213, file `000216` non committato — DB verificato allo stato di partenza. **Il prossimo giro decide PRIMA come export/erasure/retention trattano i riferimenti ACTOR, poi popola** (l'ordine inverso è ciò che ha prodotto la fuga); e il popolamento dev'essere uno snapshot scritto, non una query viva.
-- [ ] **Z-261** (2.5h) — 🔴 **URGENTE — l'MFA di 7 account di produzione e' aggirabile da chiunque.** Il repo `Spen-Zosky/heuresys-advanced` e' **PUBBLICO** e `apps/api/test/helpers/mfa-fixture-secrets.ts` contiene **7 segreti TOTP in chiaro** (base32 160-bit); il file e' scaricabile senza autenticazione (`raw.githubusercontent.com` → **200**, verificato 2026-07-26). A quei segreti corrispondono **7 fattori MFA ATTIVI sul DB di produzione** (label `e2e-fixture`, conteggio verificato = 7), su account tutti `ACTIVE`: `admin@heuresys.com` (**PLATFORM_ADMIN**), `federica.marchetti@rtl-bank.org` (**TENANT_ADMIN + CEO**), `andrea.martino@rtl-bank.org` (**WHISTLEBLOWING_CUSTODIAN** — riservatezza tutelata per legge, D.Lgs. 24/2023), `paolo.caputo` (MANAGER), + 3 USER/TEAM. **Non e' compromissione completa**: la password regge — verificato che nessun valore letterale e' committato e che `.env` e' ignorato — ma il secondo fattore, che esiste proprio per il caso in cui la password ceda, e' nullo per questi 7. Una copia gemella dei segreti sta in `apps/web/tests/e2e/mfa-fixture-secrets.ts` (parity-checked), quindi la rotazione deve toccare entrambe. Emerso il 2026-07-26 mentre si valutava come semplificare il login di sviluppo (S1032, richiesta di Enzo)
+- [x] **Z-261** (2.5h) — 🔴 **URGENTE — l'MFA di 7 account di produzione e' aggirabile da chiunque.** Il repo `Spen-Zosky/heuresys-advanced` e' **PUBBLICO** e `apps/api/test/helpers/mfa-fixture-secrets.ts` contiene **7 segreti TOTP in chiaro** (base32 160-bit); il file e' scaricabile senza autenticazione (`raw.githubusercontent.com` → **200**, verificato 2026-07-26). A quei segreti corrispondono **7 fattori MFA ATTIVI sul DB di produzione** (label `e2e-fixture`, conteggio verificato = 7), su account tutti `ACTIVE`: `admin@heuresys.com` (**PLATFORM_ADMIN**), `federica.marchetti@rtl-bank.org` (**TENANT_ADMIN + CEO**), `andrea.martino@rtl-bank.org` (**WHISTLEBLOWING_CUSTODIAN** — riservatezza tutelata per legge, D.Lgs. 24/2023), `paolo.caputo` (MANAGER), + 3 USER/TEAM. **Non e' compromissione completa**: la password regge — verificato che nessun valore letterale e' committato e che `.env` e' ignorato — ma il secondo fattore, che esiste proprio per il caso in cui la password ceda, e' nullo per questi 7. Una copia gemella dei segreti sta in `apps/web/tests/e2e/mfa-fixture-secrets.ts` (parity-checked), quindi la rotazione deve toccare entrambe. Emerso il 2026-07-26 mentre si valutava come semplificare il login di sviluppo (S1032, richiesta di Enzo)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): file non contiene piu' segreti (#169 F3c); psql: 0 fattori label e2e-fixture, 159/159 label derived-access cifrati
   - *chiuso quando*: nessun segreto TOTP e' leggibile da fonte pubblica (il file non contiene piu' valori e la fonte e' configurazione non versionata), i 7 fattori in produzione sono rigenerati con segreti nuovi, un login reale con un codice derivato dal **vecchio** segreto **fallisce**, e uno derivato dal nuovo riesce
   - *nota*: la rotazione tocca l'accesso di Enzo stesso e i fattori MFA in produzione → **piano con comandi esatti prima di eseguire, poi autorizzazione esplicita** (decisione Enzo S1032). La storia in git resta: valutare se i segreti vecchi vadano considerati bruciati per sempre (lo sono) e se serva un rewrite o basti la rotazione (basta la rotazione, se i fattori nuovi non sono piu' derivabili dal repo)
 - [ ] **Z-262** (1.5h) — **Comando `pnpm dev:login <email>`**: il flusso di login per lo sviluppo e' macchinoso (RBAC + JWT + rotazione refresh + MFA TOTP) e ha gia' un costo misurato — la prova live via HTTP di Z-259 e' stata **abbandonata** per questo. Deve funzionare non solo su `localhost` ma anche verso un IP di LAN e verso l'host pubblico (la VM OCI serve `www.heuresys.com`) — requisito di Enzo, S1032. Fa login step-1, genera il TOTP dalla fonte dei segreti, completa step-2, e restituisce cookie + token CSRF pronti (file + riga `curl` formata). **Non tocca il sistema di autenticazione**: nessun bypass, nessuna copia congelata del codice auth (proposta valutata e scartata — un fork in una cartella ignorata diverge da `main`, non passa da typecheck/lint/CI, e su questo progetto esiste **un solo ambiente ed e' produzione**, I15/ADR-0026)
   - *chiuso quando*: `pnpm dev:login federica.marchetti@rtl-bank.org --host https://www.heuresys.com` restituisce una sessione con cui una `curl` autenticata verso un endpoint reale risponde 200, e la stessa cosa funziona verso `localhost:3001`
   - *nota*: **dipende da Z-261** — va costruito sopra la fonte-segreti nuova, non su quella pubblica. Verificare se i cookie di sessione sono `Secure` (non ancora accertato): decide se la sessione sia iniettabile in un browser su `http://<ip>`
-- [ ] **Z-259** (1.5h) — **Fuga preesistente nell'export DSR**: `sys.sys_feedback_360_responses.response_reviewer_user_id` è in `sys_gdpr_data_map` **dal 2026-07-21** (non introdotta da Z-257, che l'ha solo resa visibile). È un riferimento-ATTORE: `exportSubjectData` fa `SELECT *` su quella riga, quindi chi esercita l'accesso Art. 15 si porta via le risposte 360 **di cui è valutatore**, cioè giudizi su altre persone identificate — 8 righe su 8 soggetti diversi per `tommaso.fiore@rtl-bank.org`, che ha il ruolo base `USER`. Art. 15(4): il diritto di copia non lede i diritti altrui. Sopravvive al rollback di Z-257 ed è live adesso
+- [x] **Z-259** (1.5h) — **Fuga preesistente nell'export DSR**: `sys.sys_feedback_360_responses.response_reviewer_user_id` è in `sys_gdpr_data_map` **dal 2026-07-21** (non introdotta da Z-257, che l'ha solo resa visibile). È un riferimento-ATTORE: `exportSubjectData` fa `SELECT *` su quella riga, quindi chi esercita l'accesso Art. 15 si porta via le risposte 360 **di cui è valutatore**, cioè giudizi su altre persone identificate — 8 righe su 8 soggetti diversi per `tommaso.fiore@rtl-bank.org`, che ha il ruolo base `USER`. Art. 15(4): il diritto di copia non lede i diritti altrui. Sopravvive al rollback di Z-257 ed è live adesso
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): repository.ts: guardia ACTOR-skip + projection withholding commentata "Z-259"; psql: reference_kind=ACTOR corretto
   - *chiuso quando*: una chiamata reale a `POST /v1/me/gdpr/export` come `tommaso.fiore@rtl-bank.org` non contiene nessuna riga il cui soggetto sia un'altra persona, e un test lo asserisce fallendo se il filtro viene tolto
   - *nota*: è il sottoinsieme minimo e isolabile del problema che ha interrotto Z-257 — chiuderlo per primo dà anche la decisione di disegno che a Z-257 mancava
 - [ ] **Z-260** (1.0h) — **Dossier di contesto per i revisori adversarial** (impianto `zero-pending-loop`): i 3 revisori ri-derivano ognuno per conto proprio lo stesso contesto — grafo FK, seed delle migrazioni, runner, schema — spendendo ~70 query `psql` sul tunnel per cluster, con parallelismo reale **2** (la macchina ha 4 core: cap `min(16, core-2)`). Su Z-257 sono costati ~21 minuti di orologio. Allegare al diff un dossier di fatti già misurati (come si fa già con `.zp/prove/<ID>-diff.txt`) lascia ai revisori la **controprova mirata** invece dell'esplorazione, senza togliere loro nulla: i numeri restano verificabili con una query sola
@@ -387,7 +402,8 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-256** (1.5h) — `similarPeople` applica l'asse organizzativo al BERSAGLIO ma non alle RIGHE restituite: `GET /v1/matching/users/:id/similar` passa da `canReadOrgTarget` per decidere se la richiesta è ammessa, poi `knnSimilarUsers` costruisce la lista filtrando per `tenant_id` e non per sotto-albero — quindi un attore autorizzato a interrogare un bersaglio riceve persone che stanno fuori dal proprio asse organizzativo, che è la classe di perdita chiusa da D-50 su tutti gli altri moduli F3. **Perdita preesistente**, rilevata dalla review adversarial di `Z-203` (2026-07-26) e non introdotta da esso; nessun altro test la copre perché la suite di scope asserisce solo lo status della richiesta, mai l'appartenenza delle righe
   - *chiuso quando*: un test d'integrazione con una persona reale fuori dal sotto-albero dell'attore verifica che quella persona NON compaia fra le righe restituite, e fallisce se si rimuove il filtro
   - *nota*: stessa forma del rilievo D-50 ma sul contenuto invece che sull'accesso — vale la pena cercarla anche negli altri endpoint che restituiscono liste di persone
-- [ ] **Z-057** (2.0h) — Rate-limit per-IP dietro 2 hop di proxy da calibrare + .env.example lascia TRUST_PROXY=false come default
+- [x] **Z-057** (2.0h) — Rate-limit per-IP dietro 2 hop di proxy da calibrare + .env.example lascia TRUST_PROXY=false come default
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): #242 (S1087): TRUST_PROXY=127.0.0.1,::1 in prod, numeric respinto, .env.example=false, test 5/5
   - *chiuso quando*: un test con XFF a 2 hop distingue correttamente gli IP e grep TRUST_PROXY .env.example mostra il default sicuro
   - *assorbe*: `state:C1-RL`, `gapfill:GAP2-45`
 - [x] **Z-043** (0.5h) — 3 variabili d'ambiente consumate fuori da EnvSchema e non documentate in .env.example
@@ -481,7 +497,8 @@ Copertura, unit layer, pipeline, qualità del codice. Va prima dei dati e del pr
 - [ ] **Z-177** (9.0h · dipende da Z-214) — Residui quick-win CLASS-A del programma 100X mai chiusi (teams N+1, bundle chart, isError, i18n EmptyState, A1/A2/A4, E3/E4, I1-I4)
   - *chiuso quando*: ogni QW residuo ha esito verificato (fatto o WON'T-DO motivato) in TODO_100X.md, ri-misurato uno a uno con comando allegato
   - *assorbe*: `mandates:MAN-54`, `state:QW-100X`
-- [ ] **Z-161** (8.0h) — Duplicazione ActorContext/actor()/isPlatform (749 occorrenze) e cap di paginazione incoerenti: estrarre lib/actor.ts + factory paginationSchema
+- [x] **Z-161** (8.0h) — Duplicazione ActorContext/actor()/isPlatform (749 occorrenze) e cap di paginazione incoerenti: estrarre lib/actor.ts + factory paginationSchema
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): lib/actor.ts esiste, importato da 210 file; paginationFields(max,default) in packages/shared/_pagination.ts
   - *chiuso quando*: apps/api/src/lib/actor.ts esiste ed e' importato dai moduli, packages/shared espone paginationSchema(max) e pnpm typecheck + pnpm test restano verdi
   - *assorbe*: `gapfill:GAP1-62`, `gapfill:GAP2-10`
 - [ ] **Z-168** (6.0h) — me/repository.ts cresciuto a 1625 righe con il fan-in cross-modulo piu' largo del codebase
@@ -532,7 +549,8 @@ Copertura, unit layer, pipeline, qualità del codice. Va prima dei dati e del pr
 - [ ] **Z-023** (3.0h) — PROD traccia origin/main HEAD e non un tag semver: impossibile dire 'PROD e' la vX.Y.Z'
   - *chiuso quando*: curl https://www.heuresys.com/api/readyz (o endpoint equivalente) espone la versione e coincide con git describe --tags del commit deployato
   - *assorbe*: `gapfill:GAP2-52`
-- [ ] **Z-024** (3.0h) — vm-deploy self-modify buffer: le unit systemd nuove non vengono installate al primo deploy
+- [x] **Z-024** (3.0h) — vm-deploy self-modify buffer: le unit systemd nuove non vengono installate al primo deploy
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): vm-deploy.sh:140-155 re-exec guard gia' implementato (commit dd8d0bd, 2026-07-16)
   - *chiuso quando*: aggiungendo una unit nuova in deploy/systemd e lanciando una sola volta scripts/vm-deploy.sh, ssh VM systemctl status <nuova-unit> risponde loaded
   - *assorbe*: `state:D-17`
 - [ ] **Z-025** (3.0h) — Soglie di scale-out non documentate e pgbouncer installato ma non verificato in uso
@@ -547,7 +565,8 @@ Copertura, unit layer, pipeline, qualità del codice. Va prima dei dati e del pr
 - [ ] **Z-124** (9.0h) — QA E2E esaustivo multi-ruolo mai eseguito (un solo flusso utente reale provato: il login)
   - *chiuso quando*: un report web-qa-audit committato copre i 5 profili su tutte le sezioni con esiti per ogni elemento interattivo
   - *assorbe*: `gapfill:GAP1-75`
-- [ ] **Z-105** (8.0h) — Unit-layer API: fondazione creata ma coperta solo su 3 moduli puri su ~217 file integration (+ packages/shared senza unit test)
+- [x] **Z-105** (8.0h) — Unit-layer API: fondazione creata ma coperta solo su 3 moduli puri su ~217 file integration (+ packages/shared senza unit test)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): pnpm test:unit: 24 file, 220/221 test verdi senza tunnel DB (1 fallimento estraneo, in-progress su performance-reviews)
   - *chiuso quando*: cd apps/api && pnpm test:unit copre secret-crypto, resolver di scope, rubric maturity e mapper con >=40 test verdi senza tunnel DB
   - *assorbe*: `backlog:F-A07`, `p100x:F-A07`, `debt:D-64`, `state:UNIT-LAYER`, `code:CODE-11`, `gapfill:GAP2-4`
 - [ ] **Z-108** (8.0h) — Accoppiamento della suite al DB via tunnel SSH: nessun DB effimero locale, tunnel giu' = 0 test
@@ -574,7 +593,8 @@ Copertura, unit layer, pipeline, qualità del codice. Va prima dei dati e del pr
 - [ ] **Z-121** (4.0h) — Nessun eval / golden-set per la qualita' del retrieval kNN (semantic matching)
   - *chiuso quando*: esiste un golden-set con top-K attesi su profili RTL reali e un test misura recall@K, fallendo sotto la soglia dichiarata
   - *assorbe*: `gapfill:GAP1-65`, `gapfill:GAP2-49`
-- [ ] **Z-109** (3.0h) — Flake intermittente 500 nel login MFA step-2 della suite integration
+- [x] **Z-109** (3.0h) — Flake intermittente 500 nel login MFA step-2 della suite integration
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): DEBT_REGISTER D-55 RISOLTO S1029: root-cause deadlock, retry in withTransaction, 8 unit test committati
   - *chiuso quando*: 10 run consecutivi della suite completa senza 500 in login step-2 (o root-cause documentata via x-request-id e fix applicato)
   - *assorbe*: `debt:D-55`, `state:D-55`, `mandates:MAN-58`
 - [ ] **Z-115** (3.0h) — Checklist a11y MANUALE mai eseguita: 19 voci su 19 non spuntate, benche' obbligatoria a ogni release tag
@@ -598,52 +618,65 @@ Tabelle vuote, import mai eseguiti, indici, storia. È il grosso del divario fra
 
 ### db-data (36)
 
-- [ ] **Z-061** (8.0h) — Triage delle 37 tabelle sys.* a 0 righe: riclassificare nel reconciliation registry e decidere per famiglia (censimento F2 stale di +2)
+- [x] **Z-061** (8.0h) — Triage delle 37 tabelle sys.* a 0 righe: riclassificare nel reconciliation registry e decidere per famiglia (censimento F2 stale di +2)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: oggi 16 tabelle a 0 righe (non 37), tutte con resolved_status in v_reconciliation_status, 0 senza verdetto
   - *chiuso quando*: ogni tabella sys.* con 0 righe ha una classificazione esplicita nel registry (query su v_reconciliation_status: 0 righe senza verdetto) e il conteggio nel censimento coincide con psql
   - *assorbe*: `code:CODE-13`, `runtime:RT-5`, `runtime:RT-17`
 - [ ] **Z-087** (8.0h) — 54 colonne JSONB non-metadata mai catalogate (GIN o normalizzazione da decidere)
   - *chiuso quando*: esiste un catalogo committato delle 54 colonne con verdetto per ciascuna e le migration GIN dei candidati caldi sono applicate
   - *assorbe*: `gapfill:GAP2-43`
-- [ ] **Z-065** (7.0h) — Tabelle di storia mai alimentate: sys_organization_unit_history e sys_position_skill_requirement_history vuote e orfane
+- [x] **Z-065** (7.0h) — Tabelle di storia mai alimentate: sys_organization_unit_history e sys_position_skill_requirement_history vuote e orfane
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: sys_organization_unit_history=246, sys_position_skill_requirement_history=181 righe; mig 000280
   - *chiuso quando*: dopo una modifica reale a una OU, psql mostra una riga nuova in sys_organization_unit_history; oppure le due tabelle sono droppate con migration idempotente
   - *assorbe*: `runtime:RT-15`
-- [ ] **Z-063** (6.0h) — Motore seed-acquisition mai eseguito end-to-end: 5 tabelle su 5 vuote, 2 orfane anche nel codice
+- [x] **Z-063** (6.0h) — Motore seed-acquisition mai eseguito end-to-end: 5 tabelle su 5 vuote, 2 orfane anche nel codice
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: sys_seed_acquisition_runs=16, approval_decisions=16, candidate_records=25, evidence=28, validation=140
   - *chiuso quando*: psql: select count(*) from sys.sys_seed_acquisition_runs > 0 dopo un run reale, oppure i 3 moduli sono dichiarati terminali con migration di rimozione applicata
   - *assorbe*: `runtime:RT-7`, `mandates:MAN-46`
-- [ ] **Z-072** (6.0h) — esco_skill_relations: manca il layer di lineage URI->UUID, ~5000-6000 edge non risolti (ammontare da rimisurare)
+- [x] **Z-072** (6.0h) — esco_skill_relations: manca il layer di lineage URI->UUID, ~5000-6000 edge non risolti (ammontare da rimisurare)
+  - ✅ **SUPERATO S1098** — verdetto `SUPERATO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): I12: layer era nel wave-2 brownfield (etl-brownfield-ritirato/wave2), schema ritirato
   - *chiuso quando*: psql: il conteggio degli edge non risolti misurato prima e dopo mostra la riduzione dichiarata, con la query di misura committata
   - *assorbe*: `code:CODE-20`
-- [ ] **Z-073** (6.0h) — CW-B36 e CW-B37: due mapping riclassificati REFERENCE_ONLY con deep-fix rimandato alla macro-area X9
+- [x] **Z-073** (6.0h) — CW-B36 e CW-B37: due mapping riclassificati REFERENCE_ONLY con deep-fix rimandato alla macro-area X9
+  - ✅ **SUPERATO S1098** — verdetto `SUPERATO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): I12: schema 'brownfield' ritirato dall'information_schema, query column_mappings impossibile
   - *chiuso quando*: i due mapping risultano RESOLVED nel registry (query su brownfield.column_mappings) oppure sono dichiarati terminali con motivazione scritta
   - *assorbe*: `code:CODE-21`
-- [ ] **Z-077** (6.0h · dipende da Z-060) — sys_bonus_pools: 8 righe legacy su 14 non importabili per assenza delle crosswalk tenant SmartFood/EcoNova
+- [x] **Z-077** (6.0h · dipende da Z-060) — sys_bonus_pools: 8 righe legacy su 14 non importabili per assenza delle crosswalk tenant SmartFood/EcoNova
+  - ✅ **SUPERATO S1098** — verdetto `SUPERATO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: sys_bonus_pools=6/14; gap richiede crosswalk import legacy tenant, bloccato da I12
   - *chiuso quando*: psql: select count(*) from sys.sys_bonus_pools = 14 dopo le crosswalk tenant, oppure il gap e' dichiarato terminale nel registry
   - *assorbe*: `code:CODE-28`
-- [ ] **Z-085** (6.0h) — 248 FK su 559 senza indice sulla leading column (condizione bloccante #3 dell'audit forense, senza owner)
+- [x] **Z-085** (6.0h) — 248 FK su 559 senza indice sulla leading column (condizione bloccante #3 dell'audit forense, senza owner)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): Backlog: S1042 CHIUSO (248→238 via 9 CONCURRENTLY, 112 su colonne vuote per design)
   - *chiuso quando*: psql: la query di conteggio FK-senza-indice su pg_constraint/pg_index ritorna 0 per le FK non audit-actor, con EXPLAIN prima/dopo allegati
   - *assorbe*: `gapfill:GAP2-3`
 - [ ] **Z-089** (6.0h) — Partitioning di sys_auth_login_events previsto oltre i 50M di righe (oggi 91.590)
   - *chiuso quando*: psql: la tabella e' partizionata oppure esiste una soglia monitorata che fa scattare l'intervento (regola Prometheus)
   - *assorbe*: `gapfill:GAP1-28`
-- [ ] **Z-104** (6.0h) — Pass di query-perf / N+1 per-modulo mai eseguito (verificato solo dashboard)
+- [x] **Z-104** (6.0h) — Pass di query-perf / N+1 per-modulo mai eseguito (verificato solo dashboard)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): Backlog: DONE S1028, GET /v1/observability/slow-queries (pg_stat_statements live) + fix reale 817ms→48ms
   - *chiuso quando*: report committato con i top-20 endpoint per latenza da pg_stat_statements + EXPLAIN, e le regressioni identificate corrette o registrate
   - *assorbe*: `gapfill:GAP2-7`
-- [ ] **Z-064** (5.0h) — Blueprint runtime a zero: 0 attivazioni e 0 override, famiglie e varianti a 1 riga
+- [x] **Z-064** (5.0h) — Blueprint runtime a zero: 0 attivazioni e 0 override, famiglie e varianti a 1 riga
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: sys_blueprint_activations=2, sys_blueprint_overrides=7 (non piu' 0)
   - *chiuso quando*: psql: select count(*) from sys.sys_blueprint_activations > 0 su RTL Bank, con l'attivazione fatta da UI/API con login reale
   - *assorbe*: `runtime:RT-16`, `mandates:MAN-40`
-- [ ] **Z-070** (5.0h) — Backfill live ESCO ~14k skill: codice HTTP scritto ma mai eseguito e mai testato
+- [x] **Z-070** (5.0h) — Backfill live ESCO ~14k skill: codice HTTP scritto ma mai eseguito e mai testato
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): Backlog: T1.1 backfill ESEGUITO S990, skill_group_uri 0→12892/14011
   - *chiuso quando*: psql: la coverage delle skill risolte via HTTP fetcher supera la soglia dichiarata e il run reale e' allegato (comando + output + timestamp)
   - *assorbe*: `code:CODE-17`
-- [ ] **Z-079** (5.0h) — FK dichiarate ma mai applicate: user_skill_evidence_skill_id senza FK + FK late-bound di goals/OKR verso job_roles e organization_units
+- [x] **Z-079** (5.0h) — FK dichiarate ma mai applicate: user_skill_evidence_skill_id senza FK + FK late-bound di goals/OKR verso job_roles e organization_units
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: le 3 FK esistono e convalidated=true
   - *chiuso quando*: psql: select count(*) from pg_constraint where conname in (...) = 3 e VALIDATE CONSTRAINT completa senza orfani
   - *assorbe*: `code:CODE-30`, `code:CODE-31`
-- [ ] **Z-082** (5.0h) — Muri di data-reconciliation ancora NEEDS-DECISION: org-unit template-vs-instance e learning catalog event-sourced
+- [x] **Z-082** (5.0h) — Muri di data-reconciliation ancora NEEDS-DECISION: org-unit template-vs-instance e learning catalog event-sourced
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): SOT_BACKLOG:897-898: "W3 learning-catalog ✅" e "W2 org-unit KPI template ✅" (mig 000061/000064)
   - *chiuso quando*: la vista v_reconciliation_status non riporta piu' i due muri come aperti e la decisione e' scritta in un ADR o nel registry
   - *assorbe*: `state:RECON-ND`
 - [ ] **Z-091** (5.0h) — P99 della vista PIP mai misurato: la regola di promozione a MATERIALIZED VIEW non e' mai stata valutata
   - *chiuso quando*: misura P99 allegata (pg_stat_statements o EXPLAIN ANALYZE ripetuto) con il verdetto: sotto 600ms nessuna azione, sopra la MATVIEW e' creata
   - *assorbe*: `gapfill:GAP1-39`
-- [ ] **Z-093** (5.0h) — ESCO occupation mapping: solo 25 job-role su 137 cablati
+- [x] **Z-093** (5.0h) — ESCO occupation mapping: solo 25 job-role su 137 cablati
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: count(distinct esco_occupation_mapping_job_role_id)=176 su 176 job_roles totali (100%)
   - *chiuso quando*: psql: select count(distinct job_role_id) from sys.sys_esco_occupation_mappings = 137 (o la quota residua e' motivata riga per riga)
   - *assorbe*: `mandates:MAN-32`
 - [ ] **Z-095** (5.0h) — learning-gaps senza ricalcolo: il modulo e' CRUD + import, la formula vive solo nel seed
@@ -652,25 +685,31 @@ Tabelle vuote, import mai eseguiti, indici, storia. È il grosso del divario fra
 - [ ] **Z-096** (5.0h) — mentor match scores importati read-only: nessun matching semantico attivo benche' esistano 25k vettori
   - *chiuso quando*: l'endpoint di match calcola punteggi kNN su embeddings reali (non solo lettura) con test verde e output allegato
   - *assorbe*: `mandates:MAN-35`
-- [ ] **Z-097** (5.0h) — KPI achievement (% su target): nessun servizio ne' endpoint di scorecard, benche' sia input dei gate della rubrica L3/L4
+- [x] **Z-097** (5.0h) — KPI achievement (% su target): nessun servizio ne' endpoint di scorecard, benche' sia input dei gate della rubrica L3/L4
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): grep: GET /v1/analytics/kpi (achievement rollup) con test in analytics.integration.test.ts
   - *chiuso quando*: GET /v1/kpis/.../achievement risponde 200 con valori derivati da targets+measurements e un integration test lo copre
   - *assorbe*: `mandates:MAN-36`
-- [ ] **Z-059** (4.0h · dipende da Z-060) — #69 Chiusura brownfield lato DBMS: drop delle 18 staging.wave1_*, decommission del DB legacy sulla VM, rotazione POSTGRES_PASSWORD
+- [x] **Z-059** (4.0h · dipende da Z-060) — #69 Chiusura brownfield lato DBMS: drop delle 18 staging.wave1_*, decommission del DB legacy sulla VM, rotazione POSTGRES_PASSWORD
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): commit 4251cf27 "#69 CHIUSA"; psql: schema staging ha 51 tabelle, nessuna wave1_
   - *chiuso quando*: psql: select count(*) from information_schema.tables where table_schema='staging' and table_name like 'wave1_%' = 0 E il container heuresys_evo_platform_db non e' piu' in esecuzione (docker ps sulla VM)
   - *assorbe*: `backlog:#69`, `state:#69`, `mandates:MAN-4`, `debt:D-69`, `state:D-69`, `mandates:MAN-60`, `product:G1-res`, `runtime:RT-19`
-- [ ] **Z-062** (4.0h) — Approval runtime a zero: sys_approval_requests/steps vuote nonostante modulo, test e UI attivi (condizione bloccante #2 dell'audit)
+- [x] **Z-062** (4.0h) — Approval runtime a zero: sys_approval_requests/steps vuote nonostante modulo, test e UI attivi (condizione bloccante #2 dell'audit)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: sys_approval_requests=768, sys_approval_steps=880
   - *chiuso quando*: psql: select count(*) from sys.sys_approval_requests > 0 con una richiesta creata da login reale (tommaso -> paolo) e visibile su /approvals
   - *assorbe*: `runtime:RT-6`, `mandates:MAN-41`, `gapfill:GAP2-1`
 - [ ] **Z-067** (4.0h) — 1000 check-in di goal su 1000 attribuiti a un utente admin hardcoded invece del vero dipendente
   - *chiuso quando*: psql: select count(*) from sys.sys_goal_check_ins where check_in_metadata ? 'subject_user_id_placeholder' = 0 e gli id risolti coincidono con la crosswalk LEGACY_EMP::
   - *assorbe*: `code:CODE-14`
-- [ ] **Z-075** (4.0h) — Import legacy gap_analysis_results rinviato per decisione semantica su kind + payload
+- [x] **Z-075** (4.0h) — Import legacy gap_analysis_results rinviato per decisione semantica su kind + payload
+  - ✅ **SUPERATO S1098** — verdetto `SUPERATO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): I12: il criterio chiede import di righe dal legacy, rubinetto chiuso
   - *chiuso quando*: psql: le righe importate dal legacy sono distinguibili per lineage in sys_gap_analysis_results e il registry marca il mapping RESOLVED
   - *assorbe*: `code:CODE-26`
-- [ ] **Z-081** (4.0h) — succession_plans.position_id 100% NULL: derivazione deferita
+- [x] **Z-081** (4.0h) — succession_plans.position_id 100% NULL: derivazione deferita
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: sys.sys_succession_plans non esiste; SOT_BACKLOG "Wave-2/B-50 CHIUSI"
   - *chiuso quando*: psql: select count(*) filter (where position_id is null) from sys.sys_succession_plans = 0 (o la quota residua e' motivata come gap-esplicito nel registry)
   - *assorbe*: `state:SUCC-DEFER`
-- [ ] **Z-083** (4.0h) — Brownfield Wave 1: solo 13/19 target IMPORT popolati, 3 silent-skip mitigati ma non risolti
+- [x] **Z-083** (4.0h) — Brownfield Wave 1: solo 13/19 target IMPORT popolati, 3 silent-skip mitigati ma non risolti
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): Backlog: i 3 silent-skip risolti/EXCLUDE terminale
   - *chiuso quando*: i 3 silent-skip risultano risolti nel registry oppure dichiarati terminali con nota, con query di verifica committata
   - *assorbe*: `state:BF-WAVE1`
 - [ ] **Z-084** (4.0h) — Closure table organizzativa vuota: i roll-up girano in ricorsione su parent_id
@@ -679,7 +718,8 @@ Tabelle vuote, import mai eseguiti, indici, storia. È il grosso del divario fra
 - [ ] **Z-080** (3.5h) — Perf feedback 9-box: la gamba department/org_unit e' rinviata (D6-S5), le viste non si segmentano per unita'
   - *chiuso quando*: la vista 9-box accetta un filtro per organization_unit e restituisce righe coerenti su RTL Bank (query allegata)
   - *assorbe*: `code:CODE-32`
-- [ ] **Z-071** (3.0h) — LOOKUP_FK: il path primario jsonb metadata->>'legacy_id' rimosso dal compilatore ma ancora accettato dal validatore DB
+- [x] **Z-071** (3.0h) — LOOKUP_FK: il path primario jsonb metadata->>'legacy_id' rimosso dal compilatore ma ancora accettato dal validatore DB
+  - ✅ **SUPERATO S1098** — verdetto `SUPERATO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): I12: compilatore non piu' in codice attivo, schema brownfield sparito
   - *chiuso quando*: un test registra un column_mapping con quella forma e il compilatore TS lo emette correttamente (o lo rifiuta con errore esplicito, simmetrico al validatore)
   - *assorbe*: `code:CODE-19`
 - [ ] **Z-086** (3.0h) — Ricerca ILIKE '%x%' su 31 repository con soli 2 indici GIN trgm
@@ -688,22 +728,26 @@ Tabelle vuote, import mai eseguiti, indici, storia. È il grosso del divario fra
 - [ ] **Z-090** (3.0h) — Hard delete delle notifiche scadute e purge di retention sull'audit (scheduled job post-MVP)
   - *chiuso quando*: ssh VM: journalctl del timer mostra l'esecuzione del purge e psql conferma la rimozione delle righe oltre finestra
   - *assorbe*: `gapfill:GAP1-38`
-- [ ] **Z-092** (3.0h) — legacy_mirror non contiene tutte le sorgenti candidate SDBI (solo il subset wave-1 + goals)
+- [x] **Z-092** (3.0h) — legacy_mirror non contiene tutte le sorgenti candidate SDBI (solo il subset wave-1 + goals)
+  - ✅ **SUPERATO S1098** — verdetto `SUPERATO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): I12: estendere l'extract legacy a nuove macro-aree rimette in circolo dati brownfield
   - *chiuso quando*: l'extract e' esteso alla macro-area successiva e le FK risultano coerenti (query di verifica allegata)
   - *assorbe*: `gapfill:GAP1-51`
 - [ ] **Z-094** (3.0h) — job_roles: 111 ruoli su 137 senza famiglia (family_id NULL)
   - *chiuso quando*: psql: select count(*) from sys.sys_job_roles where job_role_family_id is null = 0
   - *assorbe*: `mandates:MAN-33`
-- [ ] **Z-098** (3.0h) — sys_user_target_positions: schema completo, 0 righe, nessun modulo API (ciclo carriera ESS incompleto)
+- [x] **Z-098** (3.0h) — sys_user_target_positions: schema completo, 0 righe, nessun modulo API (ciclo carriera ESS incompleto)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: 255 righe; grep: modulo user-target-positions/routes.ts, 6 endpoint
   - *chiuso quando*: psql: la tabella ha righe create da /me/career con login reale, oppure e' dichiarata terminale nel registry
   - *assorbe*: `mandates:MAN-37`
 - [ ] **Z-099** (3.0h) — successor-readiness: modulo senza alcuno scoring (INSERT con score dal body) e tabella a 0 righe
   - *chiuso quando*: il modulo calcola lo score o e' rimosso; nel primo caso psql mostra righe con score derivato, nel secondo il route non e' piu' registrato in app.ts
   - *assorbe*: `mandates:MAN-38`
-- [ ] **Z-100** (3.0h) — process-kpi-templates: tabella vuota, import gated su un crosswalk processo legacy->registry (overlap 0/25)
+- [x] **Z-100** (3.0h) — process-kpi-templates: tabella vuota, import gated su un crosswalk processo legacy->registry (overlap 0/25)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: v_reconciliation_status.sys_process_kpi_templates resolved_status=POPULATED, has_rows=73
   - *chiuso quando*: psql: la tabella e' popolata dal crosswalk approvato, oppure e' marcata terminale sia nel registry sia nel Ledger prodotto
   - *assorbe*: `mandates:MAN-39`
-- [ ] **Z-102** (3.0h) — position_economic_weight non popolato: la pesatura MLCE gira su fallback COALESCE
+- [x] **Z-102** (3.0h) — position_economic_weight non popolato: la pesatura MLCE gira su fallback COALESCE
+  - ✅ **SUPERATO S1098** — verdetto `SUPERATO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): mig 000227: colonna RITIRATA come base calcolo per decisione (#88)
   - *chiuso quando*: psql: select count(*) from sys.sys_positions where position_economic_weight is null or =0 = 0 e il composite MLCE cambia rispetto alla media semplice
   - *assorbe*: `mandates:MAN-48`
 
@@ -715,13 +759,16 @@ Superfici utente incomplete e hardening applicativo.
 
 ### frontend (24)
 
-- [ ] **Z-131** (15.0h) — C2: admin editing cataloghi (skills+tassonomia, KPI, learning) + nuova pagina /job-catalog
+- [x] **Z-131** (15.0h) — C2: admin editing cataloghi (skills+tassonomia, KPI, learning) + nuova pagina /job-catalog
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): #43 DONE S1038 in SOT_BACKLOG_CHIUSI; job-catalog.spec.ts crea/patch job-role live
   - *chiuso quando*: esiste apps/web/src/app/(authenticated)/job-catalog/page.tsx e un E2E crea/modifica una skill e un job-role con login reale
   - *assorbe*: `backlog:#43`, `product:C2`, `mandates:MAN-21`
-- [ ] **Z-130** (12.0h) — C1: admin editing People & Org (form utenti + role grants, posizioni + requirements, CRUD organization-units)
+- [x] **Z-130** (12.0h) — C1: admin editing People & Org (form utenti + role grants, posizioni + requirements, CRUD organization-units)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): #44 DONE S1038; organization-editing/users-editing/positions-editing.spec.ts fanno CRUD reale con login
   - *chiuso quando*: E2E Playwright con login reale modifica un utente, una posizione e una OU su RTL Bank e il re-fetch mostra il dato aggiornato
   - *assorbe*: `backlog:#44`, `product:C1`, `mandates:MAN-22`
-- [ ] **Z-142** (12.0h) — System-health: LogStream e IncidentTimeline restano spente (nessun backend log applicativo, nessun modulo incident)
+- [x] **Z-142** (12.0h) — System-health: LogStream e IncidentTimeline restano spente (nessun backend log applicativo, nessun modulo incident)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): SystemHealthLive.tsx non le importa; commento dichiara "intentionally absent (no honest backend)"
   - *chiuso quando*: le 2 sezioni mostrano dati reali da endpoint /v1/* con integration test, oppure sono dichiarate WON'T-DO e rimosse dalla pagina
   - *assorbe*: `backlog:B7-off`, `product:B7-res`, `state:SYSHEALTH`, `code:CODE-35`
 - [ ] **Z-155** (10.0h) — Showcase audit Tier 3: residuo del rebuild F7 mai riconciliato pagina-per-pagina
@@ -733,7 +780,8 @@ Superfici utente incomplete e hardening applicativo.
 - [ ] **Z-157** (9.0h) — /admin/roles: CRUD reale di ruoli e permessi (oggi pagina read-only sulla matrice seedata)
   - *chiuso quando*: E2E con PLATFORM_ADMIN crea/modifica un grant e psql conferma la riga in sys_auth_role_permissions
   - *assorbe*: `gapfill:GAP1-37`
-- [ ] **Z-158** (9.0h) — Human approval gate UI per gli import brownfield sensibili (stream MVP-4 §2.2 mai costruito)
+- [x] **Z-158** (9.0h) — Human approval gate UI per gli import brownfield sensibili (stream MVP-4 §2.2 mai costruito)
+  - ✅ **SUPERATO S1098** — verdetto `SUPERATO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): I12: nessun modulo/route "brownfield" esiste piu' in apps/api o apps/web
   - *chiuso quando*: POST /v1/brownfield/import-runs/:id/decisions esiste con test e la rotta /brownfield-adaptation/[runId]/decisions esegue approve/reject verificato da E2E
   - *assorbe*: `gapfill:GAP1-2`
 - [ ] **Z-159** (9.0h) — Programma post-v1.0 Fase 6: 3.6 PWA mai ripresa ne' dichiarata terminale (unico residuo vivo delle Fasi 4-8)
@@ -754,7 +802,8 @@ Superfici utente incomplete e hardening applicativo.
 - [ ] **Z-138** (5.0h) — Essential Capability Ranker: drill per-position su /positions/[positionId]
   - *chiuso quando*: E2E apre il drill su una posizione e i valori sono coerenti con il ranking org-wide, rispettando ADR-0027
   - *assorbe*: `backlog:F1-drill`, `product:F1-res`
-- [ ] **Z-133** (4.0h) — B6: inbox push via SSE al posto del polling 30s
+- [x] **Z-133** (4.0h) — B6: inbox push via SSE al posto del polling 30s
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): #38 DONE S1041 (trigger NOTIFY+SSE); grep INBOX_POLL_MS apps/web/src = 0
   - *chiuso quando*: grep INBOX_POLL_MS apps/web/src = 0 e un E2E verifica che una notifica emessa compare senza reload entro pochi secondi
   - *assorbe*: `backlog:#38`, `product:B6`, `state:#38`, `mandates:MAN-19`
 - [ ] **Z-145** (4.0h) — Gap-CODICE del health-check S1004: 5 binding API<->frontend mai dichiarati chiusi (tenants typing-tab, positions/[id]/kpis, me/kpis, me/learning, blueprints Industry)
@@ -814,7 +863,8 @@ Superfici utente incomplete e hardening applicativo.
 - [ ] **Z-040** (4.0h) — Suite di test security negativi assente (SQL metachar, XFF forgiato, magic-byte, JWT manomesso, CSRF assente)
   - *chiuso quando*: cd apps/api && pnpm exec vitest run test/security.integration.test.ts passa con >=10 casi negativi
   - *assorbe*: `gapfill:GAP1-71`, `gapfill:GAP2-46`
-- [ ] **Z-046** (4.0h) — D-57: grant a tappeto TENANT_ADMIN mitigato con allowlist ma non eliminato alla radice (blocca la perm notification:read)
+- [x] **Z-046** (4.0h) — D-57: grant a tappeto TENANT_ADMIN mitigato con allowlist ma non eliminato alla radice (blocca la perm notification:read)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): rbac-tenant-admin-allowlist.test.ts implementa esattamente il guard (D-57 DONE)
   - *chiuso quando*: un test asserisce che ogni permesso nuovo non finisce automaticamente a TENANT_ADMIN (aggiunta di un permesso fittizio non compare in sys_auth_role_permissions per TENANT_ADMIN)
   - *assorbe*: `backlog:D-57`, `state:D-57`, `code:CODE-24`
 - [ ] **Z-050** (4.0h) — MFA: 4 tabelle di runtime vuote (exemptions, exemption_audit, otp_challenges, recovery_codes) e multi-kind non verificato
@@ -844,22 +894,27 @@ Le linee di sviluppo A-G: nuove capacità, non manutenzione.
 
 ### product (20)
 
-- [ ] **Z-188** (36.0h) — #54/E5 Recruiting/ATS: nuovo cluster /recruiting (requisition->posting->candidate->interview->offer)
+- [x] **Z-188** (36.0h) — #54/E5 Recruiting/ATS: nuovo cluster /recruiting (requisition->posting->candidate->interview->offer)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): #54 DONE; 7 moduli/tabelle (requisitions/candidates/interviews/offers), E2E recruiting.spec.ts, /jobs pubblico
   - *chiuso quando*: E2E percorre il flusso completo con login reale partendo da una posizione vacante e psql mostra le righe create in ogni step
   - *assorbe*: `backlog:#54`, `product:E5`, `mandates:MAN-27`
 - [ ] **Z-208** (18.0h) — Integrazione llm_wiki + human-resources-plus: design approvato, piano di implementazione mai scritto, 8 punti aperti
   - *chiuso quando*: esiste il piano a tappe committato e la Tappa 0 e' dimostrata live (digestione documenti + embeddings locali + collegamento ai dati) con output allegato
   - *assorbe*: `mandates:MAN-50`
-- [ ] **Z-186** (15.0h) — #50/D4 Knowledge graph legacy (kg_edges 139.451 + kg_nodes 17.260): serve prima il destination design
+- [x] **Z-186** (15.0h) — #50/D4 Knowledge graph legacy (kg_edges 139.451 + kg_nodes 17.260): serve prima il destination design
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): #50 DONE (rititolato "vista al grafo che abbiamo gia'"); pagina analytics/skills-graph con KGGraphCanvas
   - *chiuso quando*: esiste l'ADR di destination design e psql mostra i nodi/archi importati con lineage; il componente KGGraphCanvas rende il grafo su una pagina reale
   - *assorbe*: `backlog:#50`, `product:D4`, `mandates:MAN-25`
-- [ ] **Z-191** (15.0h) — #58/F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie, audit persistito prima del display)
+- [x] **Z-191** (15.0h) — #58/F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie, audit persistito prima del display)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: sys_advisor_suggestions=14 righe
   - *chiuso quando*: psql: sys_advisor_suggestions ha righe scritte prima del render e un test verifica che i suggerimenti senza citations risolvibili vengono scartati
   - *assorbe*: `backlog:#58`, `product:F4`, `mandates:MAN-30`
-- [ ] **Z-189** (14.0h) — #56/F2 VRIO scorecard (/org-director/vrio) con evidenze collegate + export print-PDF
+- [x] **Z-189** (14.0h) — #56/F2 VRIO scorecard (/org-director/vrio) con evidenze collegate + export print-PDF
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): #56 DONE; pagina + E2E vrio-scorecard.spec.ts esistono
   - *chiuso quando*: esiste la rotta /org-director/vrio, un E2E la apre con login reale e i punteggi derivano da dati reali (Value da economic_weight, Rarity/Imitability da assessment persistiti)
   - *assorbe*: `backlog:#56`, `product:F2`, `mandates:MAN-28`
-- [ ] **Z-190** (14.0h) — #57/F3 OHI Organizational Health scorecard per OU con trend
+- [x] **Z-190** (14.0h) — #57/F3 OHI Organizational Health scorecard per OU con trend
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): #57 DONE; modulo org-health (api) + pagina org-director/health
   - *chiuso quando*: E2E mostra l'indice per OU su /org-director con re-normalize-on-missing verificato da un test sui componenti mancanti
   - *assorbe*: `backlog:#57`, `product:F3`, `mandates:MAN-29`
 - [ ] **Z-192** (10.0h) — E3 Time & Attendance: console admin /attendance, lifecycle overtime, saldi e maturazione (linea orfana, nessun id nel register)
@@ -868,25 +923,30 @@ Le linee di sviluppo A-G: nuove capacità, non manutenzione.
 - [ ] **Z-206** (10.0h) — WebSocket/SSE real-time per l'editing collaborativo delle visualization
   - *chiuso quando*: due sessioni browser vedono la stessa modifica del grafo senza reload, verificato da un E2E a due contesti
   - *assorbe*: `gapfill:GAP1-31`
-- [ ] **Z-185** (9.0h) — #49/D5 Employee timeline (import analytics_events 5.000 + employee_timeline 4.641 come event-log consultivo)
+- [x] **Z-185** (9.0h) — #49/D5 Employee timeline (import analytics_events 5.000 + employee_timeline 4.641 come event-log consultivo)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): #49 DONE; modulo user-timeline + tabella sys_user_timeline_events
   - *chiuso quando*: psql: la tabella target ha le righe importate con lineage wave=2 e chiave LEGACY_EMP::, e un E2E mostra il tab Timeline popolato su /users/[userId]
   - *assorbe*: `backlog:#49`, `product:D5`, `state:#49`, `mandates:MAN-24`
-- [ ] **Z-187** (9.0h) — #53/E4 Payroll ops read-extended (salary bands, merit cycles, benefits dentro compensation)
+- [x] **Z-187** (9.0h) — #53/E4 Payroll ops read-extended (salary bands, merit cycles, benefits dentro compensation)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): #53 DONE in SOT_BACKLOG_CHIUSI
   - *chiuso quando*: E2E su /compensation-intelligence mostra bands/merit/benefits da /v1/* con dati reali importati
   - *assorbe*: `backlog:#53`, `product:E4`, `mandates:MAN-26`
 - [ ] **Z-197** (9.0h) — WI-D: pilota blueprint-builder banca retail 8 step (generate->plan->apply) mai eseguito
   - *chiuso quando*: il pilota completa gli 8 step con evidenza allegata e psql mostra le righe prodotte da Phase A (catalogo) e Phase B (istanza tenant)
   - *assorbe*: `backlog:WI-D`, `state:WI-D`
-- [ ] **Z-184** (8.0h) — #37/B2 Reward-gate engine sui 121 variable-pay (gates/results/payout curves a 0)
+- [x] **Z-184** (8.0h) — #37/B2 Reward-gate engine sui 121 variable-pay (gates/results/payout curves a 0)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: sys_reward_gate_results=3283 righe
   - *chiuso quando*: psql: select count(*) from sys.sys_reward_gate_results > 0 dopo un run dell'engine sui 121 calcoli, con integration test verde
   - *assorbe*: `backlog:#37`, `product:B2`, `state:#37`, `mandates:MAN-18`, `runtime:RT-9`
 - [ ] **Z-194** (8.0h) — CMS: sys_content_media a 0 + residui P3 (primitive rich-text upstream, object-store, box di ricerca full-text sulla pagina)
   - *chiuso quando*: E2E: un upload reale crea una riga in sys_content_media, l'editor non e' piu' una textarea raw e il box di ricerca chiama GET /v1/content/search
   - *assorbe*: `mandates:MAN-45`, `gapfill:GAP3-4`
-- [ ] **Z-183** (6.0h) — #36/B5 Visualization: versioning dei grafi + motore di export reale (layouts/styles/exports a 0, 8 graph_type su 9 senza dati)
+- [x] **Z-183** (6.0h) — #36/B5 Visualization: versioning dei grafi + motore di export reale (layouts/styles/exports a 0, 8 graph_type su 9 senza dati)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql: sys_visualization_exports=16, sys_visualization_layouts=2
   - *chiuso quando*: psql: sys_visualization_exports e sys_visualization_layouts > 0 dopo un export e un salvataggio layout reali da /visualizations, e il download restituisce un file valido
   - *assorbe*: `backlog:#36`, `product:B5`, `state:#36`, `mandates:MAN-17`, `mandates:MAN-43`, `runtime:RT-8`
-- [ ] **Z-193** (6.0h) — Approval effects: handler oltre TIME_OFF_REQUEST (approvazione goal / compensation change)
+- [x] **Z-193** (6.0h) — Approval effects: handler oltre TIME_OFF_REQUEST (approvazione goal / compensation change)
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): registry effects/ ha gia' tenant-activation/materialization/blueprint-approval handlers
   - *chiuso quando*: il registry effects/ ha >=1 handler nuovo con scrittura atomica nella stessa withTransaction e natural key anti-double-apply, coperto da integration test
   - *assorbe*: `backlog:B3-handlers`, `product:B3-res`
 - [ ] **Z-198** (6.0h) — WI-B.2 agent-gateway: integrazione compliance-guard/hr-verifier, matrice adversarial M-2 completa, rate-limit post-D-28
@@ -946,10 +1006,12 @@ Cluster che nessuna scelta tecnica può sbloccare: credenziali, decisioni di bus
 - [ ] **Z-074** (5.0h · **decisione-business**) — Tassonomia skill: decisione hard/soft (D-34) + 14.010 skill su 14.041 senza categoria + premessa della migration 000051 non realizzata
   - *chiuso quando*: psql: select count(*) from sys.sys_skills where skill_category_id is null scende sotto la soglia decisa e la dimensione hard/soft e' popolata secondo la regola approvata
   - *assorbe*: `debt:D-34`, `code:CODE-23`, `code:CODE-22`, `mandates:MAN-47`
-- [ ] **Z-076** (4.0h · **decisione-business**) — Import legacy succession pools/candidates rinviato (decisione B di Enzo), riattivabile su richiesta
+- [x] **Z-076** (4.0h · **decisione-business**) — Import legacy succession pools/candidates rinviato (decisione B di Enzo), riattivabile su richiesta
+  - ✅ **SUPERATO S1098** — verdetto `SUPERATO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): I12: il criterio chiede import di righe dal legacy, rubinetto chiuso
   - *chiuso quando*: il registry marca il mapping RESOLVED con le righe legacy importate, oppure la riga e' dichiarata WON'T-DO
   - *assorbe*: `code:CODE-27`
-- [ ] **Z-101** (3.0h · **decisione-business**) — RACI di produzione: modello a ruolo singolo e popolazione da seed demo 'NOT production truth'
+- [x] **Z-101** (3.0h · **decisione-business**) — RACI di produzione: modello a ruolo singolo e popolazione da seed demo 'NOT production truth'
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): psql metadata: "Approved production RACI mapping on RTL_BANK ... supersedes S994 demo crosswalk"
   - *chiuso quando*: psql: sys_organization_unit_processes contiene dati dichiarati autoritativi (lineage != seed demo) e la matrice supporta i 4 ruoli RACI
   - *assorbe*: `mandates:MAN-42`
 - [ ] **Z-103** (3.0h · **esterno**) — Crosswalk ISCO-08 <-> CP2021: tabella creata e vuota (serve la corrispondenza ufficiale Istat)
@@ -994,7 +1056,8 @@ Cluster che nessuna scelta tecnica può sbloccare: credenziali, decisioni di bus
 - [ ] **Z-201** (4.0h · **decisione-business**) — agent-gateway non deployato in PROD: serve la decisione su credenziale/provider per l'uso non-interattivo (console dev non pilotabile)
   - *chiuso quando*: ssh VM: systemctl status dell'unit agent-gateway e' active e la console /dev/agent completa un round-trip reale in PROD
   - *assorbe*: `state:AGENT-PROD`, `mandates:MAN-64`, `code:CODE-36`, `gapfill:GAP2-20`
-- [ ] **Z-204** (2.0h · **decisione-business**) — Predictions/'AI-ML': read-model di valori legacy senza engine — riposizionare come explainable rule-based scoring o costruire il modello
+- [x] **Z-204** (2.0h · **decisione-business**) — Predictions/'AI-ML': read-model di valori legacy senza engine — riposizionare come explainable rule-based scoring o costruire il modello
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): BUSINESS_SCOPE_AND_PRD gia' riposizionato: "non ML black-box", "non ML", "no real ML" come wedge esplicito
   - *chiuso quando*: la copy di prodotto (PRD, /investors, UI) non usa piu' 'ML predictions' per euristiche deterministiche, verificato con grep; oppure esiste un engine con eval
   - *assorbe*: `mandates:MAN-68`, `gapfill:GAP1-67`, `gapfill:GAP2-51`
 - [ ] **Z-195** (1.0h · **decisione-business**) — #41 graphify: top-up semantico dei 26 chunk mancanti (limite di spesa Claude colpito nel run S1016)
@@ -1003,7 +1066,8 @@ Cluster che nessuna scelta tecnica può sbloccare: credenziali, decisioni di bus
 - [ ] **Z-180** (0.5h · **segreto**) — #8 EMAIL dormiente: app-password Outlook per SMTP (sblocca EMAIL_OTP e digest)
   - *chiuso quando*: ssh VM: l'invio reale di una mail di prova via SmtpMailer riesce e il messaggio arriva alla casella di destinazione
   - *assorbe*: `backlog:#8`, `state:#8`, `mandates:MAN-13`, `code:CODE-5`
-- [ ] **Z-202** (0.5h · **decisione-business**) — Rubrica Maturity L0-L5: i cutoff numerici non hanno mai avuto il sign-off e la rubrica non e' versionabile/rivedibile
+- [x] **Z-202** (0.5h · **decisione-business**) — Rubrica Maturity L0-L5: i cutoff numerici non hanno mai avuto il sign-off e la rubrica non e' versionabile/rivedibile
+  - ✅ **CHIUSO S1098** — verdetto `GIÀ-FATTO` della verifica preliminare di `#76` F1 (2026-09-12, 216/216 cluster misurati), riportato in F2 (2026-09-13): rubric.ts versionato (RUBRICS registry) + SOT_STATE: v1-full gia' scelta da Enzo
   - *chiuso quando*: rubric_version e' selezionabile e i cutoff correnti sono firmati in un documento committato; un test verifica il supersede senza perdita dati
   - *assorbe*: `backlog:OQ-1`, `mandates:MAN-63`
 

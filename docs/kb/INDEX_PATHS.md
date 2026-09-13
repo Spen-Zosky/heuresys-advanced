@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-13T03:33:11Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3459**
+**Generato**: 2026-09-13T21:24:15Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3464**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,17 +13,17 @@
 | api-module | 391 |
 | ci | 19 |
 | claude-config | 37 |
-| config | 204 |
+| config | 205 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 408 |
+| db-migration | 410 |
 | db-other | 8 |
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 691 |
+| doc-canonical | 692 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -31,10 +31,10 @@
 | shared-pkg | 4 |
 | shared-schema | 119 |
 | showcase-source | 13 |
-| test | 425 |
+| test | 426 |
 | ux-design-archive | 80 |
 | web-source | 255 |
-| **TOTALE** | **3459** |
+| **TOTALE** | **3464** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 2816 |
+| live | 2821 |
 
 ## File per categoria
 
@@ -625,6 +625,7 @@
 - `D:\heuresys-advanced\apps\agent-gateway\test\audit-sink.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\generic-catalogue.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\heuresys-client.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\agent-gateway\test\mcp-tools-list.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\redact.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\subscription-auth.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\write-gate.test.ts` · *live* · git-tracked
@@ -1556,6 +1557,8 @@
 - `D:\heuresys-advanced\db\migrations\000409_una_tabella_due_specie_la_specie_si_dichiara.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000410_le_persone_vere_atterrano_senza_tipi_e_la_fonte_si_riconosce_dall_impronta.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000411_una_classificazione_di_attivita_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000412_un_processo_di_modello_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000413_la_fonte_di_settore_della_consulenza_entra_nel_registro.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1897,6 +1900,7 @@
 - `D:\heuresys-advanced\.programmi\S1096-mandato-p1-p3-debiti-gated.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1097-mandato-tutte-le-corsie.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1098-mandato-p1-p3.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1099-mandato-p1-p3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked
@@ -3139,6 +3143,7 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\admin-pipelines.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\admin-tabs.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\advisor.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\agent-dev-console.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\analytics-attendance.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\analytics-compensation.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\analytics-kpi.spec.ts` · *live* · git-tracked

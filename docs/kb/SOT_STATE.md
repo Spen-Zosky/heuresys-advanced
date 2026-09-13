@@ -33,6 +33,24 @@ violano R6/R7 di `v_organization_unit_integrity` (la `000244` si ferma sul gemel
 strumento corretti (l'esito delle mappe finisce nella corsa; un indice paginato è un indice), 0 proposte per limite della
 fonte `ilo.org` — serve la fonte di settore, che approva Enzo. Verifica lunga: suite API sul gemello **1953 test verdi**.
 
+### Delta S1099 (2026-09-13) — sei voci su sei: `#159` F2 chiusa, il sedicesimo perimetro, la fonte di settore, tre difetti trovati dalle prove
+
+Mandato «tutti da P1 a P3 in autonomia» (registro `.programmi/S1099-mandato-p1-p3.md`, CHIUSO 6/6). **`#214` F6**:
+`blueprint-processes` (mig `000412`, sentinella a tre porte) — e la **prova live delle tre domande VERDE 8/8**, la prima
+dal 23 agosto, dopo due rimedi al gateway: `tools/list` del server MCP lanciava su `z.record` dal bump SDK 0.3.259 e
+il CLI mostrava zero strumenti `hrx_*` (fix `catchall` + `test/mcp-tools-list.test.ts`); `settingSources: []` (gli
+hook di sessione giravano dentro l'agente). **`#205` F2**: `assoconsult.org` APPROVED per `positions` e
+`organization_units` (mig `000413`, decisione per delega); seconda via delle mappe (elenco REST WordPress) nel
+lettore; corsa `9e921576` con 0 proposte — il limite si sposta: i rapporti di settore sono PDF, il lettore apre solo
+HTML. **`#159` F2 CHIUSA**: `AgentPanel` in `ux-design-shared` pubblicato come **`@heuresys/ui@1.2.0`**, console
+`dev/agent` a 113 righe, gateway con CORS per l'origine del web (dal browser il ponte non era mai stato intero),
+**E2E live verde**. Il cancello di verifica ha trovato che `/v1/seed-acquisition-runs` rispondeva **500** con una corsa
+di ricerca senza tenant (contratto reso nullable, prova che è rossa senza). `#149` F4, `#76` F3, `#79` F3 misurati.
+
+**Numeri ri-derivati dal vivo il 2026-09-13 (sera)**: migrazioni su disco **410** (max `000413`) · file di test
+API **274** (+25 unit) · moduli API **109** · perimetri dell'agente aperti **16** · viste `v_*` **57** · posizioni **315** · OU **45** · team **26** · HEAD `8b79ff30`
+(pre-commit di chiusura).
+
 ---
 
 ## S1097 (2026-09-12, sera) — il mandato «tutte le corsie»: dodici voci su sedici, un falso neutro nella coda dell'agente, e il piano zero-pendenze finalmente verificato

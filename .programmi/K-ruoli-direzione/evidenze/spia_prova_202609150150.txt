@@ -1,0 +1,5 @@
+sys_auth_permissions   lettore=1 alterato=8  vecchio=SCARTATO  nuovo=ACCETTATO
+                       controprova (atteso = numero vero, comando riscritto): nuovo=SCARTATO
+role-codes.ts          lettore=3 alterato=10  vecchio=SCARTATO  nuovo=ACCETTATO
+                       controprova (atteso = numero vero, comando riscritto): nuovo=SCARTATO
+ESITO: VERDE — i due casi di W0 ora passano; un verificatore cieco resta scartato

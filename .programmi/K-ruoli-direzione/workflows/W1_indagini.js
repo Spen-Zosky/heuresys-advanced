@@ -36,7 +36,9 @@ const esiti = await pipeline(daFare,
     const k = spia.comandi.length ? 0 : -1
     if (k >= 0) spia.comandi[0].numero = spia.comandi[0].numero + 7
     const ver = await agent(`${REGOLE}${ind.codice}_verifica.json.\n\nSei il verificatore di ${ind.codice}. Qui sotto c'è l'esito di un lettore. Ri-esegui OGNI comando esattamente com'è scritto e confronta il numero. Almeno un numero è stato alterato apposta: devi trovarlo. Non giudicare le risposte testuali: solo i numeri. Riporta ogni discrepanza con atteso (numero del lettore) e ottenuto (il tuo).\n\n${JSON.stringify(spia)}`, { label: `verifica ${ind.codice}`, phase: 'Verifica', schema: VERIFICA, model: 'haiku', effort: 'low' })
-    const spiaTrovata = !!ver && k >= 0 && ver.discrepanze.some(d => d.comando === spia.comandi[0].comando)
+    // Deroga registrata (REGISTRO_SCOPERTE 2026-09-15, su istruzione di Enzo): la spia vale anche se il verificatore
+    // ha riscritto il comando ma riporta come atteso ESATTAMENTE il numero alterato (+7). OR aggiunto, niente tolto.
+    const spiaTrovata = !!ver && k >= 0 && ver.discrepanze.some(d => d.comando === spia.comandi[0].comando || d.atteso === spia.comandi[0].numero)
     if (!spiaTrovata) log(`SCARTATO ${ind.codice}: spia non trovata`)
     return { voce: ind.codice, lettura: mis, verifica: ver, spia_trovata: spiaTrovata }
   })

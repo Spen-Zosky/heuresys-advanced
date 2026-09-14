@@ -23,7 +23,9 @@ const esiti = await pipeline(args.lotti,
     const k = spia.comandi.length ? 0 : -1
     if (k >= 0) spia.comandi[0].numero = spia.comandi[0].numero + 7
     const ver = await agent(`${REGOLE}Scrivi il tuo esito anche in ${args.cartella}/lotto_${i}_verifica.json.\n\nVerificatore del lotto ${i}: ri-esegui ogni comando dell'elenco e confronta il numero; almeno uno è stato alterato apposta e devi trovarlo.\n\n${JSON.stringify(spia.comandi)}`, { label: `verifica lotto ${i}`, phase: 'Verifica', schema: VERIFICA, model: 'haiku', effort: 'low' })
-    const spiaTrovata = !!ver && k >= 0 && ver.discrepanze.some(d => d.comando === spia.comandi[0].comando)
+    // Deroga registrata (REGISTRO_SCOPERTE 2026-09-15, su istruzione di Enzo): la spia vale anche se il verificatore
+    // ha riscritto il comando ma riporta come atteso ESATTAMENTE il numero alterato (+7). OR aggiunto, niente tolto.
+    const spiaTrovata = !!ver && k >= 0 && ver.discrepanze.some(d => d.comando === spia.comandi[0].comando || d.atteso === spia.comandi[0].numero)
     if (!spiaTrovata) log(`SCARTATO lotto ${i}: spia non trovata`)
     return { lotto: i, attese: lotto, righe: res.righe, verifica: ver, spia_trovata: spiaTrovata }
   })

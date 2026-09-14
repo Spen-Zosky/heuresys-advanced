@@ -1,0 +1,44 @@
+[
+ {
+  "oggetto": "sys_auth_permissions",
+  "comandi": [
+   {
+    "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select schemaname, viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_auth_permissions%' order by viewname\"",
+    "numero": 1
+   }
+  ],
+  "discrepanze": [
+   {
+    "comando": "select schemaname, viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_auth_permissions%' order by viewname",
+    "atteso": 8,
+    "ottenuto": 1
+   },
+   {
+    "comando": "rg --no-ignore --hidden -i \"INSERT INTO.*sys_auth_permissions|UPDATE.*sys_auth_permissions\" db/migrations | cut -d: -f1 | sort -u | wc -l",
+    "atteso": 49,
+    "ottenuto": 50
+   }
+  ]
+ },
+ {
+  "oggetto": "role-codes.ts",
+  "comandi": [
+   {
+    "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname from pg_views where schemaname='sys' and definition ilike '%role_code%'\"  ;  python .programmi/K-ruoli-direzione/tools/q.py \"select viewname from pg_views where schemaname='sys' and (definition ilike '%PLATFORM_ADMIN%' or definition ilike '%TENANT_ADMIN%' or definition ilike '%HRMS_MANAGER%' or definition ilike '%BRANCH_MANAGER%' or definition ilike '%WHISTLEBLOWING_CUSTODIAN%')\"",
+    "numero": 3
+   }
+  ],
+  "discrepanze": [
+   {
+    "comando": "sentinelle: python .programmi/K-ruoli-direzione/tools/q.py \"select viewname from pg_views where schemaname='sys' and definition ilike '%role_code%'\" + query2 con ruoli admin",
+    "atteso": 10,
+    "ottenuto": 3
+   },
+   {
+    "comando": "test: rg --no-ignore --hidden -l \"ROLE_CODES|RoleCode|role-codes\" D:/heuresys-advanced/apps/api/test (escludendo cancello role-lists-drift)",
+    "atteso": 10,
+    "ottenuto": 11
+   }
+  ]
+ }
+]

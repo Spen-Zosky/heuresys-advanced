@@ -12,13 +12,7 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
-- **#250 Enzo non può entrare in produzione dal browser: fattore TOTP casuale mai consegnato, obbligo acceso, zero codici di recupero** · status: WAIT-INPUT
-  - priority: P1 · effort: ~10min (una DELETE mirata + un login) · nasce-da: `#169` F3c (segreti casuali, 2026-09-08) + B18 (obbligo MFA acceso, 2026-09-09), misurato in S1095 (2026-09-12)
-  - misurato-S1095: `enzo.spenuso@heuresys.com` ha UN fattore `TOTP` VERIFIED con etichetta `derived-access`, il cui segreto è casuale (`verify-separazione-totp`: 0 derivabili su 159) e non è mai stato consegnato a nessuno; `sys_auth_mfa_recovery_codes` per lui: **0** non usati; le due politiche per cliente sono `enabled=true` dal 2026-09-09. Con la sola password, il login si ferma al passo due e nessun codice lo supera.
-  - input-richiesto: **la conferma a cancellare il tuo fattore TOTP** (una riga di `sys_auth_mfa_factors`, giornale prima della DELETE). Al login successivo la piattaforma ti chiede l'iscrizione e ti mostra il QR per il tuo authenticator: da lì il segreto è tuo e di nessun altro. Alternativa peggiore: decifrare il segreto attuale e consegnartelo — un segreto scritto in chat o in un file è un segreto in più in giro.
-  - perche-solo-tuo: è una cancellazione su un tuo dato di autenticazione (divieto: mai cancellare senza conferma), e la scelta fra ri-iscrizione e consegna del segreto è una scelta di custodia, non tecnica
-  - vale-anche-per: `andrea.spenuso` e `chiara.spenuso` sono già in «iscrizione richiesta» (senza fattore): per loro non serve niente. Le altre 156 persone sono modellate, non entrano dal browser.
-
+- **#250 Enzo non può entrare in produzione dal browser: fattore TOTP casuale mai consegnato, obbligo acceso, zero codici di recupero** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#225 Il CLAUDE.md dichiara un difetto risolto come corrente, e cristallizza un numero che cambia** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#226 La storia di RTL diventa scorrevole: l'avanzamento va schedulato, e SOLO dove il database e' quello vero** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#212 `close-propagate` non arma il deploy alla seconda corsa nella stessa sessione, e il rollout resta indietro in silenzio** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
@@ -236,26 +230,13 @@
 - **#228 Il cancello a tempo: cosa e' marcito mentre non guardavo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#227 Le competenze isolate nel grafo: 4.464 su 14.033 senza un solo arco tassonomico** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#232 Le 29 classificazioni dentro `sys_compensation_bands`: una tabella, due specie** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
-
 - **#233 `lab_inbox --ingest` duplica i blocchi-proposta invece di fonderli** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
-
 - **#231 Consumare i lavori attivi: il ciclo di esecuzione delegato** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#241 La CI rossa che teneva la produzione indietro, e i due fascicoli di prova** · status: DONE  ·  ↦ `.programmi/241-ci-rossa-e-fascicoli-di-prova.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#245 Il dominio di una fonte di ricerca e' testo libero, e nessuno controlla che esista** · status: DONE  ·  ↦ `.programmi/245-dominio-fonte-testo-libero.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#243 I due rossi di igiene del cruscotto, e le sette PR Dependabot rimaste** · status: DONE  ·  ↦ `.programmi/243-igiene-e-pr-dependabot.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#242 fastify >= 5.12 ha tolto il `trustProxy` a conteggio di salti: la produzione va migrata alla forma per indirizzo** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
-- **#240 I due worktree `gov/w1` e `gov/w2`: cosa contengono, e cosa succede al riallineamento** · status: WAIT-INPUT
-  - nasce-da: domanda di Enzo (2026-08-31) — «chi ha creato i rami gov/w1 e gov/w2? ne eri a conoscenza?». **No**: non compaiono in nessuna fonte di stato, e nessuna sessione canonical li nomina
-  - misurato-2026-08-31: creati il **9 agosto alle 03:32:43**, entrambi nello stesso secondo, da `e3efc626`. Vivono in worktree **fuori dal repo** (`D:/heuresys-gov-workers/w1` e `/w2`), **non hanno upstream** (mai pubblicati), e sono **530** e **545** commit indietro rispetto a `main`. Il loro `.claude/` diverge gia' da `main` di **14 file, 1.261 inserzioni e 288 cancellazioni**: sono un ambiente proprio, non una copia
-  - **l'unica divergenza di storia** e' un commit per ramo, `chore: rito di sessione a due livelli` (2026-08-30 19:57), fatto da una sessione parallela. Prima di quello i due rami erano **contenuti in `main` al 100%** (misurato: `main..<ramo>~1` = 0 commit)
-  - ⚠ **la sessione che lo ha fatto ha proposto di annullarlo con `reset --soft`. NON si e' fatto**, e per tre ragioni misurate: ① il `CLAUDE.md` vieta di riscrivere la storia con piu' alberi sullo stesso repo — «nemmeno `--soft` o `--mixed`» — ed e' la regola nata da tre conflitti veri; ② `--soft` lascia i file **in stage**, non «non tracciati come prima»: il rimedio descrive male il proprio effetto; ③ quel commit **protegge contenuto che esiste solo li'** — l'`AVVIO.md` dei gov-workers non e' una copia di quello di `main`, e' scritto per quei worktree («questo albero e' un worktree di `D:\heuresys-advanced` e diverge da esso su due punti»). Annullarlo lo avrebbe reso di nuovo volatile
-  - ✅ **cosa si e' fatto invece**: messo al sicuro l'unico lavoro davvero a rischio — **67 righe** di `docs/MVP_4_ROADMAP.md` in `w2`, tracciate e non committate, **ferme dal 9 agosto alle 22:51**, che un `checkout` avrebbe cancellato senza chiedere. Committate sul loro ramo (`f2c36534`), non su `main`, e senza toccarle nel merito: chi le ha scritte puo' continuare sopra
-  - **cosa aspettarsi al riallineamento**, cosi' non sorprende: se un giorno quei rami venissero **mergiati**, `AVVIO.md` darebbe un conflitto `add/add` (contenuto diverso, storie indipendenti); `CHIUSURA.md` no, e' **identico**. La risposta e' gia' scritta: **su un worktree gov vince la versione gov**. Ma rami a 530 commit indietro di norma non si mergiano: si **ricreano** da `main`, e in quel momento la divergenza sparisce da se'
-  - misurato-2026-09-12 (S1097, mandato «hold» in autonomia): nessuno ha ripreso i gov-workers — alberi puliti (`git status` 0 righe su entrambi), ultimo commit `w1` 2026-08-30, `w2` 2026-08-31. **Tutto ciò che portano è superato da `main`**: il commit «rito di sessione a due livelli» è una versione **più vecchia** di `AVVIO.md`/`CHIUSURA.md` (`main` è avanti di 97 righe e ne ha tolte 57; il contenuto di `main` esiste come `ef115761`); le 67 righe di `docs/MVP_4_ROADMAP.md` in `w2` modificano un file che `main` ha **archiviato** in `docs/archive/` con B20 (`f60b89e6`) con la stessa intenzione («storico e chiuso»). Non c'è un merge da fare e non c'è un lavoro da salvare: resta solo la **rimozione** dei due worktree e dei due rami, che è una cancellazione
-  - input-richiesto: **il tuo sì a rimuovere `D:/heuresys-gov-workers/w1`, `/w2` e i rami `gov/w1`, `gov/w2`** (`git worktree remove` + `git branch -D`, nessun upstream da toccare). In alternativa: lasciarli così, non costano niente e non bloccano nulla
-  - perche-solo-tuo: è una cancellazione (divieto: mai cancellare senza conferma) e i rami li ha creati una sessione «gov» che tu avevi proposto (`#173`): dire che quella linea è chiusa spetta a te
-  - ex-HOLD: hold-reason «niente da fare finché restano fermi» · decided-by Enzo · hold-since 2026-08-31 · trigger scattato con la misura del 2026-09-12 (fermi da 13 giorni, contenuto interamente superato)
-
+- **#240 I due worktree `gov/w1` e `gov/w2`: cosa contengono, e cosa succede al riallineamento** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#239 Il nome del cliente puo' rendere la ricerca impossibile: la guardia si morde la coda** · status: DONE  ·  ↦ `.programmi/239-nome-del-cliente-blocca-la-ricerca.md`  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#238 `verifica-deploy` chiama guasto un clone in corso: i servizi del gemello sono spenti di proposito** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#237 La chiusura costa un quarto di finestra, e non si sa perche'** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
@@ -488,9 +469,6 @@
   - resta-vero: transport pronto, chassis testato — nessun lavoro fatto va perso · doc: `docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md` §B4 · effort quando si riprende: ~2h
 - **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#41 graphify — top-up semantico (26 chunk mancanti)** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
-
-### Serie C+D+E+F+G (S1018 — selezione Enzo "includile tutte", dossier `docs/product/DEVELOPMENT_LINES_{C,D,E,F,G}_*.md`)
-
 - **#42 C/C4 — fondazioni frontend (paginazione server-side, refactor shared-types, apiFetch FormData)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#43 C/C2 — editing cataloghi (skills/KPI/learning/job) + nuova `/job-catalog`** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#44 C/C1 — editing People & Org (users/positions/org-units)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`

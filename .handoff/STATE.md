@@ -10,7 +10,7 @@ posto: **ADR-0040** recepisce la dottrina dell'agente ratificata da Enzo (l'agen
 freno si sposta sull'uso, in persone distinte) e ferma la coda vecchia (`#214` in HOLD); i tre passi del freno sono
 `#251`/`#252`/`#253`, l'apertura `#254` è GATED su di loro; la scorecard di due diligence è `#255`; il cancello fra
 clienti (`#256`) misura un confine perché **M5 era già fatta** dal 10 settembre; chi ripara e chi popola è `#257`
-(WAIT-INPUT). Il canale è dichiarato in un punto solo del `CLAUDE.md` e ha una sentinella nella dashboard di avvio
+(adottato da Enzo a fine sessione: ACTIVE, registro derivato da strumento). Il canale è dichiarato in un punto solo del `CLAUDE.md` e ha una sentinella nella dashboard di avvio
 (`check_canale_cowork.py`: oggi 0 voci non riconciliate, prima della riconciliazione 7 con la più vecchia da 107
 giorni). Fattibilità misurata prima di aprire le voci: le persone si contano dalle risposte senza toccare l'API, lo
 stato vive nella richiesta, **ma il diario del gate è un file senza id di conversazione** — `#253` costa una tabella
@@ -24,13 +24,11 @@ in più, ed è scritto lì.
 3. **`#198` — le due scoperte di S1098 prima di T9b**: modello non costruibile (132 competenze senza categoria) e
    R6/R7 di `v_organization_unit_integrity`. Senza, nessuna azienda vera nasce — `#206` T9 aspetta.
 
-▸ Poi: `#253` (diario in tabella) · `#255` (scorecard su HEAD) · `#205` F2 (il lettore apre solo HTML) · `#256`
+▸ Poi: `#253` (diario in tabella) · `#257` (chi ripara e chi popola — adottato da Enzo, registro derivato) · `#255` (scorecard su HEAD) · `#205` F2 (il lettore apre solo HTML) · `#256`
 (mezza sessione di misura) · `#76` F3 · `#149` F4 e `#79` F3 (continuativi).
 
 ## Open questions
 
-- **`#257` WAIT-INPUT** — adottare o no il registro di chi ripara e chi popola (quattro famiglie di lacune:
-  derivabile · ricerca · cliente · decisione). È come Heuresys fa nascere il contenuto che manca.
 - **La regola globale in `~/.claude/CLAUDE.md`** («se il progetto ha `cowork_code_exchange/`, invoca la skill del
   protocollo») contraddice questo progetto, che ha la cartella congelata. La parte di progetto è fatta (sezione
   «Il canale Cowork ↔ CLI»); **la parte globale è tua**: il testo dovrebbe dire «leggi il canale che il CLAUDE.md

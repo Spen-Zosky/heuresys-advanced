@@ -50,7 +50,7 @@ max 158, 4 catene sopra 40). **Register**: `#251` contatore · `#252` ponte anch
 interrogabile (ACTIVE, P1/P1/P2) · `#254` apertura in una mossa sola (GATED sulle tre) · **`#214` in HOLD** («superata
 dalla dottrina», `agent-perimetri.json` cambia mestiere, non si butta) · `#255` scorecard di due diligence ferma al 17
 giugno (ACTIVE) · `#256` cancello fra clienti — **M5 era già fatta** (B23, `6522c132`, S1095): la voce misura il confine
-dichiarato, non ricostruisce · `#257` chi ripara e chi popola (WAIT-INPUT). A6 (skill di due diligence) fuori
+dichiarato, non ricostruisce · `#257` chi ripara e chi popola (WAIT-INPUT, poi **adottato da Enzo nella stessa sera**: ACTIVE, registro derivato da uno strumento, non tabella a mano). A6 (skill di due diligence) fuori
 perimetro, a Cowork. **Il canale**: dichiarato in un punto solo del `CLAUDE.md` (§Source of Truth: dove scrive Cowork,
 chi riconcilia, cosa non si usa più, e che lo dichiara il progetto — non una cartella); sentinella
 `check_canale_cowork.py` (voci senza `stato: [RICONCILIATA …]`, giorni dalla più vecchia; `--selftest` 7/7 a esiti
@@ -59,7 +59,7 @@ opposti; sul file vero diceva **7 voci, 107 giorni** — la più vecchia del 30 
 entrambe (`cowork-cli-protocol` **e** `cowork-cli-orchestrator`): la seconda contraddizione dell'analisi era
 parzialmente sbagliata; la prima (la regola globale che deduce il rito dalla cartella) resta e **è di Enzo**.
 
-**Numeri ri-derivati dal vivo il 2026-09-14 (S1101)**: register **10 ACTIVE · 3 GATED · 1 WAIT-INPUT · 5 HOLD** ·
+**Numeri ri-derivati dal vivo il 2026-09-14 (S1101)**: register **11 ACTIVE · 3 GATED · 0 WAIT-INPUT · 5 HOLD** ·
 migrazioni **411** (max `000414`, invariate) · sentinelle bloccanti **50** a zero · ADR **38 file, massimo `0040`** · voci del canale
 non riconciliate **0** (`check_canale_cowork.py`).
 

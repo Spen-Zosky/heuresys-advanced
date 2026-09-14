@@ -33,6 +33,21 @@ violano R6/R7 di `v_organization_unit_integrity` (la `000244` si ferma sul gemel
 strumento corretti (l'esito delle mappe finisce nella corsa; un indice paginato è un indice), 0 proposte per limite della
 fonte `ilo.org` — serve la fonte di settore, che approva Enzo. Verifica lunga: suite API sul gemello **1953 test verdi**.
 
+### Delta S1102 (2026-09-14, notte) — mandato K aperto: la Fase 0 a 6/7, e la prova di ripresa lasciata a meta' apposta
+
+**`#259` (mandato K v2, ruoli senza titolare e direzione del dato)** nasce nel register e in `.programmi/K-ruoli-direzione/`
+(stato per voce in `STATO.md`, 43 voci; ripresa con `tools/dove_siamo.py`). Chiuse F0.1, F0.5, F0.6, F0.7, F0.2, F0.3:
+strumenti di stato e misura; `q.py` in sola lettura per gli agenti (controprova a sei casi: anche un INSERT nascosto
+in una CTE lo ferma il server); il comando esatto per applicare una migrazione (catena intera sulla VM, registro
+`sys_schema_migrations`, il runner NON rifiuta i buchi); sei script dei workflow; censimento C1 dei sei oggetti via
+W0 (12 agenti, 6/6 spie trovate, 5 discrepanze ri-misurate in linea); baseline che riproduce il dossier
+(14/231/0/102/160/80/70.959). **Mig `000415`** (vista vuota `sys.v_prova_ripresa_k`, consapevole del ritiro) applicata
+sulla VM e riconosciuta da `dove_siamo.py` nei casi (iii), (i), (ii); F0.4 e K-PROVA restano **SOSPESE di proposito**
+(sezione 3.5: la prova chiude e riapre la sessione). Scoperto misurando: gli orfani del registro di provenienza sono
+**11 tabelle**, non 2; `retired_at`/`revoked_at` non esistono ancora (R-1 passo 0); `heuresys_ro` esiste ma e' NOLOGIN e
+senza `sys_user_pay_slips`. Rapporto per Enzo: `.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-14.md`. Nessun
+ruolo, permesso o dato di persona toccato.
+
 ### Delta S1101 (2026-09-14, sera) — il canale Cowork→CLI riparato, la dottrina dell'agente recepita, cinque perdite con un posto nel register
 
 Mandato di Cowork (`MANDATO_S1101_riallineamento-consolidato.md`; registro `.programmi/S1101-mandato-riallineamento-consolidato.md`).

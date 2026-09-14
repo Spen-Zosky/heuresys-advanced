@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-14T17:42:16Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3481**
+**Generato**: 2026-09-14T21:31:16Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3525**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,17 +13,17 @@
 | api-module | 391 |
 | ci | 19 |
 | claude-config | 37 |
-| config | 205 |
+| config | 238 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 411 |
+| db-migration | 412 |
 | db-other | 8 |
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 706 |
+| doc-canonical | 716 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -34,7 +34,7 @@
 | test | 426 |
 | ux-design-archive | 80 |
 | web-source | 256 |
-| **TOTALE** | **3481** |
+| **TOTALE** | **3525** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 2838 |
+| live | 2882 |
 
 ## File per categoria
 
@@ -592,6 +592,39 @@
 - `D:\heuresys-advanced\.programmi\219-triage-2026-09-05.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\219-triage-2026-09-06-dopo-correzione.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\219-triage-2026-09-06.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.3_controprova.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.5_controprova.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\baseline_202609142235.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\baseline_202609142237.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\baseline_202609142318.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\_LANCIO.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\_VERIFICATO.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\_risultato.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\role-codes.ts_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\role-codes.ts_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_auth_permissions_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_auth_role_permissions_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_auth_role_permissions_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_auth_roles_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_auth_roles_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_source_lineage_records_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_source_lineage_records_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_user_position_assignments_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_user_position_assignments_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\controprova_q.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\dove_siamo.py` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\esito_w0.py` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\estrai_workflows.py` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\misura_k.py` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\pg_dump_pre_k.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\q.py` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\stato.py` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\workflows\W0_censimento.js` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\workflows\W1_indagini.js` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\workflows\W2_classificazione.js` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\workflows\W3_confutazione_adr.js` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\workflows\W4_audit_ruolo.js` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\workflows\W5_presenze.js` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1093-ricognizione-10-voci.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\dossier-catalog-derivation.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\dossier-derivation.sql` · *live* · git-tracked
@@ -1561,6 +1594,7 @@
 - `D:\heuresys-advanced\db\migrations\000412_un_processo_di_modello_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000413_la_fonte_di_settore_della_consulenza_entra_nel_registro.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000414_un_ruolo_chiave_dichiara_la_sua_famiglia_e_il_whistleblowing_ha_una_guardia.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000415_prova_di_ripresa_k.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1896,6 +1930,15 @@
 - `D:\heuresys-advanced\.programmi\92-ciclo-valutazione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\99-domini-gerarchici-funzionali.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\D86-D87-i-due-cancelli-della-chiusura.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\LEGGIMI.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\STATO.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.2_censimento_C1.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.4_ripresa.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.5_sola_lettura.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.6_migrazioni.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-14.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\REGISTRO_SCOPERTE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RISPOSTE_ENZO.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1087-piano-sessione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1088-piano-sessione.md` · *live* · git-tracked
@@ -1914,6 +1957,7 @@
 - `D:\heuresys-advanced\.programmi\S1101-mandato-riallineamento-consolidato.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1101b-mandato-contratto-shared.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\mandati\K-mandato-v2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1084-rossi-237-236.md` · *live* · git-tracked

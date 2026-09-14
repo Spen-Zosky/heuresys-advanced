@@ -1,0 +1,7 @@
+voce: F0.2
+passo: 7
+script: workflows/W0_censimento.js
+args: {"cartella": ".programmi/K-ruoli-direzione/evidenze/wf_F0.2_7_202609142251", "ts": "202609142251"}
+lanciato: 2026-09-14T22:51:45+02:00
+sessione: S1102
+guardiano al lancio: contesto 31.5%, finestra 5h 48%

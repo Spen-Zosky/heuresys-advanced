@@ -17,7 +17,7 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 | F0.6 | CHIUSA | S1102 | 2026-09-14T22:44+02:00 | 6 |  |  | esiti/F0.6_migrazioni.md | runner=catena intera in ordine lessicale, nessun rifiuto dei buchi; registro sys_schema_migrations (411=411); via: scp+prova-idempotenza sul gemello, pg_dump_pre_k.sh sulla VM, push, pnpm db:migrate:vm; nessuna vista sys.v_* con righe |
 | F0.7 | CHIUSA | S1102 | 2026-09-14T22:47+02:00 | 11 |  |  | workflows/W0..W5 (6 file); sintassi provata come corpo async | W0-W4 estratti dal mandato byte per byte (tools/estrai_workflows.py); W5 = W1 con INDAGINI→3 ipotesi e critico→sommatore+verificatore; la prova vera e' il primo lancio di W0 |
 | F0.2 | CHIUSA | S1102 | 2026-09-14T22:51+02:00 | 8 |  |  | evidenze/wf_F0.2_7_202609142251 (_VERIFICATO.txt); esiti/F0.2_censimento_C1.md | W0 12/12 agenti, 6/6 spie trovate (2 accettate su prova numerica), 5 discrepanze ri-misurate in linea; nessuna cella non cercata |
-| F0.3 | PRONTA |  |  |  | 9 |  |  | baseline con misura_k.py; controprova exit 2 |
+| F0.3 | IN CORSO | S1102 | 2026-09-14T23:18+02:00 |  | 9 |  |  | baseline con misura_k.py; controprova exit 2 |
 | F0.4 | BLOCCATA(fase) | | | | 10 | | | controprova della ripresa (3.5): chiude e riapre la sessione per costruzione |
 | K-PROVA | BLOCCATA(fase) | | | | 10 | | | voce finta della simulazione 3.5; finira' RITIRATA |
 

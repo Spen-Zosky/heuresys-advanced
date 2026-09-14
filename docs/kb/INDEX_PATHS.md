@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-13T21:24:15Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3464**
+**Generato**: 2026-09-14T15:15:08Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3468**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,12 +18,12 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 410 |
+| db-migration | 411 |
 | db-other | 8 |
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 692 |
+| doc-canonical | 695 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -34,7 +34,7 @@
 | test | 426 |
 | ux-design-archive | 80 |
 | web-source | 255 |
-| **TOTALE** | **3464** |
+| **TOTALE** | **3468** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 2821 |
+| live | 2825 |
 
 ## File per categoria
 
@@ -1559,6 +1559,7 @@
 - `D:\heuresys-advanced\db\migrations\000411_una_classificazione_di_attivita_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000412_un_processo_di_modello_non_deve_poter_contenere_persone.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000413_la_fonte_di_settore_della_consulenza_entra_nel_registro.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000414_un_ruolo_chiave_dichiara_la_sua_famiglia_e_il_whistleblowing_ha_una_guardia.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1901,6 +1902,7 @@
 - `D:\heuresys-advanced\.programmi\S1097-mandato-tutte-le-corsie.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1098-mandato-p1-p3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1099-mandato-p1-p3.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1100-mandato-cowork-250-240.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked
@@ -2214,6 +2216,7 @@
 - `D:\heuresys-advanced\docs\kb\xtras\DUMP_ARCHIVAL_RUNBOOK.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\PLAN_S1018_BATCH.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\POST_V1_ROADMAP_DOSSIER.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\xtras\RBAC_COME_FUNZIONA_DAVVERO.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\RBAC_UIX_PERSPECTIVES_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\RESUME_S1018_BATCH.md` · *live* · git-tracked
@@ -2223,6 +2226,7 @@
 - `D:\heuresys-advanced\docs\kb\xtras\SESSION_START_FORENSICS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\VISUALIZATION_RENDERERS_CLOSURE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\WAVE2_UNBLOCK_PACKAGE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\xtras\misura-rbac.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\preflight-residual-todo.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\product\BUSINESS_SCOPE_AND_PRD.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\product\COMPETITIVE_SCORECARD.md` · *live* · git-tracked

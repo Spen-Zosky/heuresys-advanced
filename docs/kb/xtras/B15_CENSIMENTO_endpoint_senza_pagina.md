@@ -13,13 +13,13 @@ di cosa fare per prima torna a Enzo.
 
 | | |
 |---|---|
-| Endpoint che **nessuna pagina chiama** | **290** |
-| Endpoint chiamati da almeno una pagina | 179 |
+| Endpoint che **nessuna pagina chiama** | **284** |
+| Endpoint chiamati da almeno una pagina | 191 |
 | Riferimenti di pagina che non trovano una rotta | 2 |
 
 ### Una seconda misura, che cambia la natura della decisione
 
-Dei moduli che compaiono qui, **54** hanno gia' almeno una pagina che li
+Dei moduli che compaiono qui, **61** hanno gia' almeno una pagina che li
 chiama e **il resto no**. Non e' un dettaglio: un endpoint di un modulo gia' servito e'
 l'**ampliamento** di una pagina che esiste — la direzione che Enzo ha dettato, «allargare
 cio' che c'e' senza creare doppioni». Un endpoint di un modulo che nessuna pagina chiama e'
@@ -30,8 +30,8 @@ un **dominio intero senza interfaccia**, e costa un lavoro di un altro ordine. L
 
 | etichetta | quanti | cosa vuol dire |
 |---|---|---|
-| `serve-una-pagina` | **219** | nessuna regola li copre: sono quelli su cui decide Enzo |
-| `non-serve` | 21 | il destinatario non e' una persona: sonde, servizio, amministrazione di piattaforma |
+| `serve-una-pagina` | **214** | nessuna regola li copre: sono quelli su cui decide Enzo |
+| `non-serve` | 20 | il destinatario non e' una persona: sonde, servizio, amministrazione di piattaforma |
 | `serve-altrove` | 50 | li consuma l'agente, un'integrazione o un lavoro programmato |
 
 ## I riferimenti di pagina che non trovano una rotta
@@ -115,10 +115,7 @@ sua prova, e questo blocco e' un censimento. Registrato come scoperta fuori cicl
 | `branches` | — | `/v1/branches/:param` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
 | `calibration-sessions` | — | `/v1/calibration-sessions/:param` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
 | `calibration-sessions` | — | `/v1/calibration-sessions/:param/discussions` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
-| `candidate-applications` | — | `/v1/candidate-applications` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `candidate-applications` | — | `/v1/candidate-applications/:param` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `candidates` | — | `/v1/candidates` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `candidates` | — | `/v1/candidates/:param` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
+| `candidates` | — | `/v1/candidates/:param` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
 | `capability-composition` | — | `/v1/capability/composition/:param/:param` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
 | `capability-composition` | — | `/v1/capability/composition/recompute` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
 | `capability-composition` | — | `/v1/capability/maturity/org-units/:param` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
@@ -172,16 +169,7 @@ sua prova, e questo blocco e' un censimento. Registrato come scoperta fuori cicl
 | `goals` | — | `/v1/goals/:param/updates` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
 | `goals` | — | `/v1/goals/templates` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
 | `insights` | — | `/v1/insights/users/:param/flight-risk` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
-| `interview-feedback` | — | `/v1/interview-feedback` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `interview-feedback` | — | `/v1/interview-feedback/:param` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `interviews` | — | `/v1/interviews` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `interviews` | — | `/v1/interviews/:param` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `job-offers` | — | `/v1/job-offers` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `job-offers` | — | `/v1/job-offers/:param` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `job-postings` | — | `/v1/job-postings` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `job-postings` | — | `/v1/job-postings/:param` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `job-requisitions` | — | `/v1/job-requisitions` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
-| `job-requisitions` | — | `/v1/job-requisitions/:param` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
+| `interview-feedback` | — | `/v1/interview-feedback/:param` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
 | `kpi-definitions` | — | `/v1/kpi-definitions/:param/measurements` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
 | `kpi-definitions` | — | `/v1/kpi-definitions/:param/metrics` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
 | `kpi-definitions` | — | `/v1/kpi-definitions/assessment-methods` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
@@ -262,7 +250,9 @@ sua prova, e questo blocco e' un censimento. Registrato come scoperta fuori cicl
 | `projects` | — | `/v1/projects/:param/members/:param` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
 | `projects` | — | `/v1/projects/:param/progress` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
 | `provenance` | — | `/v1/provenance` | **non-serve** | amplia una pagina | tracciabilita' tecnica dei dati: da dove vengono, non di chi sono |
-| `public-stats` | — | `/v1/public/platform-stats` | **non-serve** | dominio senza interfaccia | statistiche della vetrina pubblica, gia' consumate dalla landing |
+| `public-job-postings` | — | `/v1/public/job-postings` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
+| `public-job-postings` | — | `/v1/public/job-postings/:param` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
+| `public-job-postings` | — | `/v1/public/platform-stats` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
 | `reference-sync` | — | `/v1/reference-sync/runs` | **non-serve** | dominio senza interfaccia | sincronizzazione ISTAT/ATECO/ESCO: lavoro di servizio |
 | `reference-sync` | — | `/v1/reference-sync/runs/:param` | **non-serve** | dominio senza interfaccia | sincronizzazione ISTAT/ATECO/ESCO: lavoro di servizio |
 | `reference-sync` | — | `/v1/reference-sync/sources` | **non-serve** | dominio senza interfaccia | sincronizzazione ISTAT/ATECO/ESCO: lavoro di servizio |
@@ -318,6 +308,10 @@ sua prova, e questo blocco e' un censimento. Registrato come scoperta fuori cicl
 | `tenant-blueprints` | — | `/v1/tenant-blueprints/:param/versions/:param/research` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
 | `tenant-blueprints` | — | `/v1/tenant-blueprints/:param/versions/:param/submit` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
 | `tenant-blueprints` | — | `/v1/tenant-blueprints/research-domains` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
+| `tenant-import-runs` | — | `/v1/tenant-import-runs` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
+| `tenant-import-runs` | — | `/v1/tenant-import-runs/:param` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
+| `tenant-import-runs` | — | `/v1/tenant-import-runs/:param/submit` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
+| `tenant-import-runs` | — | `/v1/tenant-import-runs/sources` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
 | `tenant-materialization` | — | `/v1/tenant-materialization` | **non-serve** | dominio senza interfaccia | costruzione di un cliente: amministrazione di piattaforma |
 | `tenant-materialization` | — | `/v1/tenant-materialization/sources` | **non-serve** | dominio senza interfaccia | costruzione di un cliente: amministrazione di piattaforma |
 | `tenants` | — | `/v1/tenants/provision` | **serve-una-pagina** | amplia una pagina | nessuna regola la copre: la decisione e' di Enzo |
@@ -345,5 +339,5 @@ sua prova, e questo blocco e' un censimento. Registrato come scoperta fuori cicl
 | `visualization-styles` | — | `/v1/visualization-styles` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
 | `visualization-styles` | — | `/v1/visualization-styles/:param` | **serve-una-pagina** | dominio senza interfaccia | nessuna regola la copre: la decisione e' di Enzo |
 
-**Totale righe: 290.** Il censimento e' completo o non e': se questo
+**Totale righe: 284.** Il censimento e' completo o non e': se questo
 numero non coincide con il conteggio in cima, il file e' stale — rilancia lo strumento.

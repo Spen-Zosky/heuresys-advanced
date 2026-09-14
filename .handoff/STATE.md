@@ -1,17 +1,16 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: S1099 (2026-09-13, sera). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: S1100 (2026-09-14). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-Mandato «tutti da P1 a P3 in autonomia»: **sei voci su sei** (`.programmi/S1099-mandato-p1-p3.md`, CHIUSO).
-`#159` F2 è chiusa — `AgentPanel` vive in `ux-design-shared` ed è pubblicato come `@heuresys/ui@1.2.0`,
-la console `dev/agent` lo consuma, e la prima E2E della pagina ha trovato che dal browser il ponte non era
-mai stato intero (gateway senza CORS: corretto, E2E live verde). Sedicesimo perimetro dell'agente
-(`blueprint-processes`) con la prova live delle tre domande di nuovo verde dopo due rimedi al gateway
-(`tools/list` rotto dal bump SDK di inizio settembre, hook di sessione dentro l'agente). Per `#205` la fonte di
-settore è nel registro per delega (`000413`), la corsa la legge, e il limite si è spostato sul tipo di
-contenuto (PDF). Il cancello ha trovato e fatto correggere un 500 sulla LIST delle corse senza tenant.
+Sessione corta su mandato di Cowork (`.programmi/S1100-mandato-cowork-250-240.md`, CHIUSO): le due voci
+che aspettavano un sì di Enzo sono chiuse — `#250` (Enzo è entrato in produzione e il secondo fattore è suo)
+e `#240` (i worktree `gov/*` non ci sono più). La migrazione `000414` scritta da Cowork ha attraversato la
+prova generale ed è in produzione: `BRANCH_MANAGER` ha una famiglia e l'isolamento del whistleblowing è una
+sentinella bloccante (cinquanta a zero). Il giornale MFA di Enzo è stato ritirato, il documento in italiano
+semplice sul controllo degli accessi è nel repo (`docs/kb/xtras/RBAC_COME_FUNZIONA_DAVVERO.md`). Il
+register non ha più voci `WAIT-INPUT`.
 
 ## Top priorities
 
@@ -26,31 +25,34 @@ contenuto (PDF). Il cancello ha trovato e fatto correggere un 500 sulla LIST del
    giusta. È una capacità nuova del lettore, da decidere se aprirla (scoperta fuori ciclo S1099).
 
 ▸ Poi: `#214` F6 (17 neutri in coda; prossimi `organization-unit-processes`, `blueprint-activations`) ·
-`#76` F3 (ondate: il driver, in sessioni dedicate) · `#149` F4 e `#79` F3 (continuativi, oggi verdi) ·
-`#240` e `#250` aspettano un tuo sì.
+`#76` F3 (ondate: il driver, in sessioni dedicate) · `#149` F4 e `#79` F3 (continuativi, verdi al 2026-09-13).
 
 ## Open questions
 
 - ⏳ **SOSPESA (Enzo)**: dove custodire la chiave del collaudo; rotazione di `MFA_ENCRYPTION_KEY`.
-- **`#240`**: sì o no alla rimozione dei due worktree `gov/w1` `gov/w2` (contenuto superato da main).
+- **La password di `enzo.spenuso@heuresys.com` resta derivata dalla chiave madre** (Z-262 / `#139`): il
+  secondo fattore è ora l'unica separazione. Entrare in `REAL_PERSON_EMAILS` e scegliersi una password è
+  un'opzione nominata, non una pendenza.
 - **Il `claude` del gemello e della VM** ha la sessione OAuth scaduta: le corse di `#205` girano solo
   col modello su Windows (`ssh -R 8790`). Vuoi ri-loggare le due macchine?
-- **Igiene fuori repo — causa trovata**: in Git Bash `$TMPDIR` è vuoto, quindi `"$TMPDIR/x"` finisce in
-  `C:\Git\x`: i file lì sono log e messaggi di commit delle sessioni CLI (anche di questa). Mai
-  cancellati senza il tuo sì; d'ora in poi il percorso dello scratchpad va scritto per esteso.
-  `.handoff/session-journal.recovered.ndjson` (del 6 settembre) è già consolidato. Sul gemello resta il fascicolo
-  di prova `PROVA-F7-ALFA` con una corsa di ricerca: lo toglie il rinfresco del clone.
+- **Igiene fuori repo — causa confermata anche in S1100**: nella Bash della CLI `$TMPDIR` e
+  `$CLAUDE_SCRATCH` sono vuoti, quindi `"$VAR/x"` finisce in `C:\Git\x` (36 log lì oggi). Mai cancellati
+  senza il tuo sì; il percorso dello scratchpad va scritto per esteso. Sul gemello resta il fascicolo di
+  prova `PROVA-F7-ALFA`: lo toglie il rinfresco del clone. Copie scp della 000414 messe da parte in
+  `~/scp-aside-<ts>` su gemello e VM (identiche alla versione tracciata).
 - **I file `webapps-*.md` in `~/.claude/sessioni/attive/`** sono sessioni SDK del gateway registrate
-  per errore dagli hook (corretto in S1099 con `settingSources: []`): da ripulire col tuo sì.
+  per errore dagli hook (corretto in S1099): da ripulire col tuo sì.
+- **Cowork non raggiunge più Linux via SSH** dal 2026-09-08 (`device_bash` → `Workspace unavailable`):
+  la prova generale delle migrazioni scritte da Cowork la fa sempre la CLI, prima di applicarle.
 
 ## Verification
 
 ```bash
 python docs/kb/tools/session_start.py
 python docs/kb/tools/aggiorna_numeri_sot.py --check         # atteso: exit 0 (§0 allineata)
-python docs/kb/tools/check_concetti_agente.py               # atteso: 16 aperti · 36 in coda (17 neutri)
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -At -c "select count(*) from sys.v_processo_di_modello_con_dato_di_persona"   # atteso: 0
-cd apps/agent-gateway && pnpm exec vitest run               # atteso: 99/99 (tools/list sul server vero)
-cd apps/web && node scripts/e2e-node22.mjs test tests/e2e/agent-dev-console.spec.ts --project=chromium   # gateway :8790 + NEXT_PUBLIC_ENABLE_AGENT_DEV=1
+python docs/kb/tools/db_health.py                            # atteso: tutto nei limiti, 50 sentinelle a zero
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -At -c "select auth_role_category from sys.sys_auth_roles where auth_role_code='BRANCH_MANAGER'"   # atteso: hierarchical_operational
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -At -c "select count(*) from sys.v_whistleblowing_fuori_dal_custode"   # atteso: 0
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -f docs/kb/xtras/misura-rbac.sql   # i numeri del documento RBAC, rigenerati
 bash scripts/verifica-deploy.sh                              # DEPLOYATO/IN-VOLO/CI-ROSSA/DISALLINEATO/NON-VERIFICATO
 ```

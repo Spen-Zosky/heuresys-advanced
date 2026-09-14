@@ -25,6 +25,7 @@ import { analyticsService } from "./service.js";
 import { toCsv } from "./csv.js";
 import { requirePermission } from "../../middleware/rbac.js";
 import { todayDateOnly } from "../../lib/date-only.js";
+import { z } from "zod";
 
 /** Date stamp (YYYY-MM-DD) for the download filename, taken from the payload's generatedAt. */
 function stampFrom(payload: Record<string, unknown>): string {
@@ -124,6 +125,14 @@ export const analyticsRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: {
         params: AnalyticsExportParamsSchema,
         querystring: AnalyticsExportQuerySchema,
+        // Dichiarato per il listino OpenAPI (R6): il corpo e' un FILE, non JSON, e Fastify non
+        // serializza le stringhe — lo schema qui documenta, non trasforma.
+        response: {
+          200: {
+            description: "La vista esportata come file scaricabile (content-disposition: attachment).",
+            content: { "text/csv": { schema: z.string() }, "application/json": { schema: z.string() } },
+          },
+        },
       },
     },
     async (req, reply) => {

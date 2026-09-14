@@ -13,12 +13,17 @@ import { StatusPill } from "@/components/status-pill";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { apiFetch } from "../../../../../lib/api/fetch";
+import { limiteMassimo } from "../../../../../lib/contratto";
+import { CreateMeSelfAssessmentBodySchema } from "@heuresys/shared";
 
+// I limiti si leggono dal contratto `CreateMeSelfAssessmentBodySchema` (S1101): il form tiene
+// solo cio' che gli e' proprio — il punteggio come testo del campo, prima della conversione.
+const C = CreateMeSelfAssessmentBodySchema.shape;
 const SelfAssessmentSchema = z.object({
   skillId: z.string().uuid(),
-  declaredProficiency: z.string().min(1).max(32),
+  declaredProficiency: z.string().min(1).max(limiteMassimo(C.declaredProficiency, "declaredProficiency")),
   score: z.string().regex(/^$|^\d+(\.\d+)?$/).optional(),
-  comment: z.string().max(4096).optional(),
+  comment: z.string().max(limiteMassimo(C.comment, "comment")).optional(),
 });
 type SelfAssessmentValues = z.infer<typeof SelfAssessmentSchema>;
 

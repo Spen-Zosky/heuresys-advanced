@@ -18,6 +18,7 @@ import {
 } from "@heuresys/shared";
 import { mentorshipService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
+import { z } from "zod";
 
 export const mentorshipRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── Programs ──
@@ -45,8 +46,8 @@ export const mentorshipRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/programs/:id", {
     preHandler: [app.verifyCsrf, requirePermission("mentorship:delete")],
-    schema: { params: MentorshipIdParamSchema },
-  }, async (req, reply) => { await mentorshipService.deleteProgram(actor(req), req.params.id); reply.code(204).send(); });
+    schema: { params: MentorshipIdParamSchema, response: { 204: z.null() } },
+  }, async (req, reply) => { await mentorshipService.deleteProgram(actor(req), req.params.id); reply.code(204).send(null); });
 
   // ── Pairings ──
   app.get("/pairings", {
@@ -73,8 +74,8 @@ export const mentorshipRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/pairings/:id", {
     preHandler: [app.verifyCsrf, requirePermission("mentorship:delete")],
-    schema: { params: MentorshipIdParamSchema },
-  }, async (req, reply) => { await mentorshipService.deleteMentorship(actor(req), req.params.id); reply.code(204).send(); });
+    schema: { params: MentorshipIdParamSchema, response: { 204: z.null() } },
+  }, async (req, reply) => { await mentorshipService.deleteMentorship(actor(req), req.params.id); reply.code(204).send(null); });
 
   // ── Sessions (nested + flat) ──
   app.get("/pairings/:id/sessions", {
@@ -101,8 +102,8 @@ export const mentorshipRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/sessions/:id", {
     preHandler: [app.verifyCsrf, requirePermission("mentorship:delete")],
-    schema: { params: MentorshipIdParamSchema },
-  }, async (req, reply) => { await mentorshipService.deleteSession(actor(req), req.params.id); reply.code(204).send(); });
+    schema: { params: MentorshipIdParamSchema, response: { 204: z.null() } },
+  }, async (req, reply) => { await mentorshipService.deleteSession(actor(req), req.params.id); reply.code(204).send(null); });
 
   // ── Match scores (read-only) ──
   app.get("/match-scores", {

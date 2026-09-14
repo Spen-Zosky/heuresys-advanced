@@ -252,9 +252,6 @@ export type TenantBlueprintDetail = z.infer<typeof TenantBlueprintDetailSchema>;
 export const ProcessDecisionListResponseSchema = z.object({
   items: z.array(ProcessDecisionSchema),
 });
-export const TenantBlueprintVersionListResponseSchema = z.object({
-  items: z.array(TenantBlueprintVersionSchema),
-});
 export const TenantBlueprintIdParamSchema = z.object({ id: z.uuid() });
 export const VersionParamSchema = z.object({
   id: z.uuid(),

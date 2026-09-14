@@ -10,6 +10,7 @@ import {
 } from "@heuresys/shared";
 import { visualizationExportsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
+import { z } from "zod";
 
 export const visualizationExportsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
@@ -33,7 +34,21 @@ export const visualizationExportsRoutes: FastifyPluginAsyncZod = async (app) => 
   // nome file, così il browser lo salva invece di mostrarlo.
   app.get("/:id/download", {
     preHandler: [requirePermission("visualization:read")],
-    schema: { params: VizExportIdParamSchema },
+    schema: {
+      params: VizExportIdParamSchema,
+      // Il listino OpenAPI (R6) deve dire che torna un file: i tre MIME sono quelli di render.ts.
+      // Fastify non serializza le stringhe, quindi lo schema documenta e non trasforma.
+      response: {
+        200: {
+          description: "Il documento esportato (SVG, Mermaid o JSON) come allegato scaricabile.",
+          content: {
+            "image/svg+xml": { schema: z.string() },
+            "text/vnd.mermaid": { schema: z.string() },
+            "application/json": { schema: z.string() },
+          },
+        },
+      },
+    },
   }, async (req, reply) => {
     const doc = await visualizationExportsService.getContent(actor(req), req.params.id);
     reply

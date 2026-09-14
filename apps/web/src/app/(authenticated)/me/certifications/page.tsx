@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { CreateMeCertificationBodySchema } from "@heuresys/shared";
+import { limiteMassimo } from "../../../../lib/contratto";
 import { useTranslation } from "react-i18next";
 import {
   Badge,
@@ -34,16 +36,16 @@ interface MeCertificationsList {
   total: number;
 }
 
-// Mirror of @heuresys/shared CreateMeCertificationBodySchema, kept inline for
-// ergonomic form binding with react-hook-form + Zod. Server is the canonical
-// validator; this client schema only blocks obvious mis-input pre-flight.
-// The validation messages are i18n-resolved, so the schema is built inside the
-// component via the factory below; the form-values type is derived from it.
+// Lo schema del form vive qui perche' i messaggi sono tradotti (costruito dentro il componente);
+// ma i LIMITI dei campi non sono piu' riscritti: si leggono dal contratto condiviso
+// `CreateMeCertificationBodySchema` con `limiteMassimo` (S1101, 2026-09-14). Il server resta il
+// validatore canonico; questo schema blocca solo l'errore evidente prima dell'invio.
 type CertI18n = (key: string) => string;
+const C = CreateMeCertificationBodySchema.shape;
 function buildCertificationSchema(t: CertI18n) {
   return z.object({
-    name: z.string().min(1, t("certifications.validation.required")).max(255),
-    issuer: z.string().min(1, t("certifications.validation.required")).max(255),
+    name: z.string().min(1, t("certifications.validation.required")).max(limiteMassimo(C.name, "name")),
+    issuer: z.string().min(1, t("certifications.validation.required")).max(limiteMassimo(C.issuer, "issuer")),
     issuedDate: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, t("certifications.validation.isoDate"))
@@ -54,10 +56,10 @@ function buildCertificationSchema(t: CertI18n) {
       .regex(/^\d{4}-\d{2}-\d{2}$/, t("certifications.validation.isoDate"))
       .optional()
       .or(z.literal("")),
-    credentialId: z.string().max(255).optional().or(z.literal("")),
+    credentialId: z.string().max(limiteMassimo(C.credentialId, "credentialId")).optional().or(z.literal("")),
     documentUri: z
       .string()
-      .max(4096)
+      .max(limiteMassimo(C.documentUri, "documentUri"))
       .url(t("certifications.validation.url"))
       .optional()
       .or(z.literal("")),

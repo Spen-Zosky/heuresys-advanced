@@ -1,6 +1,6 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: S1101 (2026-09-14, sera). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: S1101 (2026-09-14, sera — due mandati). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
@@ -16,12 +16,21 @@ giorni). Fattibilità misurata prima di aprire le voci: le persone si contano da
 stato vive nella richiesta, **ma il diario del gate è un file senza id di conversazione** — `#253` costa una tabella
 in più, ed è scritto lì.
 
+**Secondo mandato (contratto condiviso `@heuresys/shared`, `.programmi/S1101b-mandato-contratto-shared.md`)**: il
+contratto è esaustivo; le quattro imperfezioni sono chiuse — 13 rotte (non 7) dichiarano la risposta e il listino
+OpenAPI le mostra; 4 pagine derivano i limiti dal contratto invece di riscriverli; lo schema morto è rimosso; la
+regola sui parametri e sulle risposte è nel pattern dei sette passi. Misurando è emerso un difetto vero:
+`/me/career/target` mandava `targetDate` e `notes` che l'API scartava in silenzio — corretto (posizione + orizzonte).
+E una conseguenza di `#250`: i test che entrano come Enzo non possono più farlo, perché ora ha il suo secondo fattore → `#258` (P1); quanti sono lo dice il register.
+
 ## Top priorities
 
-1. **`#251` — il contatore di persone distinte** (~1 sessione): l'unico pezzo nuovo del freno; F1 sceglie quale
+1. **`#258` — la persona di collaudo di piattaforma** (~1 sessione, P1): al prossimo rinfresco del clone il
+   cancello locale `test-api` diventa rosso su ogni tocco ad `apps/api/`. Prima di tutto il resto.
+2. **`#251` — il contatore di persone distinte** (~1 sessione): l'unico pezzo nuovo del freno; F1 sceglie quale
    delle tre misure genera le soglie (`docs/kb/xtras/soglie-agente-persone-distinte.sql`). `#252` subito dopo.
-2. **`#159` F3 — la prima pagina idonea monta `AgentPanel`** (~150k): invariata da S1100.
-3. **`#198` — le due scoperte di S1098 prima di T9b**: modello non costruibile (132 competenze senza categoria) e
+3. **`#159` F3 — la prima pagina idonea monta `AgentPanel`** (~150k): invariata da S1100.
+4. **`#198` — le due scoperte di S1098 prima di T9b**: modello non costruibile (132 competenze senza categoria) e
    R6/R7 di `v_organization_unit_integrity`. Senza, nessuna azienda vera nasce — `#206` T9 aspetta.
 
 ▸ Poi: `#253` (diario in tabella) · `#257` (chi ripara e chi popola — adottato da Enzo, registro derivato) · `#255` (scorecard su HEAD) · `#205` F2 (il lettore apre solo HTML) · `#256`
@@ -47,7 +56,7 @@ in più, ed è scritto lì.
 ## Verification
 
 ```bash
-python docs/kb/tools/session_start.py                        # atteso: #251-#257 nel menu, #214 fra gli HOLD, riga CANALE [OK] 0
+python docs/kb/tools/session_start.py                        # atteso: #251-#258 nel menu, #214 fra gli HOLD, riga CANALE [OK] 0
 python docs/kb/tools/check_canale_cowork.py --selftest       # atteso: selftest verde (7 casi)
 python docs/kb/tools/handoff_lint.py                         # atteso: 0 FAIL
 python docs/kb/tools/programmi.py --verifica                 # atteso: nessun difetto

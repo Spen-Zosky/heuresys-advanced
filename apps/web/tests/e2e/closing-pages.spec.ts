@@ -96,7 +96,7 @@ test.describe("MVP-2a closing pages — live data", () => {
       await expect(page.getByTestId("career-target-page")).toBeVisible();
       await expect(page.getByTestId("career-target-filter")).toBeVisible();
       await expect(page.getByTestId("career-target-position")).toBeVisible();
-      await expect(page.getByTestId("career-target-date")).toBeVisible();
+      await expect(page.getByTestId("career-target-horizon")).toBeVisible();
       await expect(page.getByTestId("career-target-submit")).toBeVisible();
     });
   });

@@ -16,6 +16,7 @@ import {
 } from "@heuresys/shared";
 import { engagementFeedbackService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
+import { z } from "zod";
 
 export const engagementFeedbackRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── Action plans (nested static segment — declared before /:id so the radix router prefers it) ──
@@ -41,8 +42,8 @@ export const engagementFeedbackRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/action-plans/:id", {
     preHandler: [app.verifyCsrf, requirePermission("engagement_feedback:delete")],
-    schema: { params: EngagementFeedbackIdParamSchema },
-  }, async (req, reply) => { await engagementFeedbackService.deleteActionPlan(actor(req), req.params.id); reply.code(204).send(); });
+    schema: { params: EngagementFeedbackIdParamSchema, response: { 204: z.null() } },
+  }, async (req, reply) => { await engagementFeedbackService.deleteActionPlan(actor(req), req.params.id); reply.code(204).send(null); });
 
   // ── Feedback (root) ──
   app.get("/", {
@@ -67,6 +68,6 @@ export const engagementFeedbackRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("engagement_feedback:delete")],
-    schema: { params: EngagementFeedbackIdParamSchema },
-  }, async (req, reply) => { await engagementFeedbackService.deleteFeedback(actor(req), req.params.id); reply.code(204).send(); });
+    schema: { params: EngagementFeedbackIdParamSchema, response: { 204: z.null() } },
+  }, async (req, reply) => { await engagementFeedbackService.deleteFeedback(actor(req), req.params.id); reply.code(204).send(null); });
 };

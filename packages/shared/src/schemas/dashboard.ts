@@ -134,6 +134,10 @@ export const DashboardCatalogResponseSchema = z.object({
 });
 export type DashboardCatalogResponse = z.infer<typeof DashboardCatalogResponseSchema>;
 
+/** Il codice di un cruscotto nel percorso: usato da due rotte (`/catalog/:code`, `/catalog/:code/data`). */
+export const DashboardCodeParamSchema = z.object({ code: z.string().min(1).max(48) });
+export type DashboardCodeParam = z.infer<typeof DashboardCodeParamSchema>;
+
 export const DashboardDetailResponseSchema = z.object({
   code: z.string(),
   name: z.string(),

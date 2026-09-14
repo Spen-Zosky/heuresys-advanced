@@ -575,9 +575,15 @@ export const MeCareerResponseSchema = z.object({
   items: z.array(MeCareerTargetSchema), total: z.number().int().min(0),
 });
 
+/** Gli orizzonti ammessi: il CHECK di `sys_user_target_positions.user_target_position_horizon`
+ *  (RD-08: varchar + CHECK nel DB, discriminatore TS qui). Il form del portale li offre in una select. */
+export const CAREER_TARGET_HORIZON_VALUES = ["SHORT_TERM", "MEDIUM_TERM", "LONG_TERM"] as const;
+export const CareerTargetHorizonSchema = z.enum(CAREER_TARGET_HORIZON_VALUES);
+export type CareerTargetHorizon = z.infer<typeof CareerTargetHorizonSchema>;
+
 export const CreateMeCareerTargetBodySchema = z.object({
   positionId: z.uuid(),
-  horizon: z.string().max(32).nullable().optional(),
+  horizon: CareerTargetHorizonSchema.nullable().optional(),
 });
 export type CreateMeCareerTargetBody = z.infer<typeof CreateMeCareerTargetBodySchema>;
 

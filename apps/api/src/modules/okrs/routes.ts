@@ -11,6 +11,7 @@ import {
 } from "@heuresys/shared";
 import { okrsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
+import { z } from "zod";
 
 export const okrsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
@@ -50,6 +51,6 @@ export const okrsRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("okr:delete")],
-    schema: { params: OkrIdParamSchema },
-  }, async (req, reply) => { await okrsService.deleteOkr(actor(req), req.params.id); reply.code(204).send(); });
+    schema: { params: OkrIdParamSchema, response: { 204: z.null() } },
+  }, async (req, reply) => { await okrsService.deleteOkr(actor(req), req.params.id); reply.code(204).send(null); });
 };

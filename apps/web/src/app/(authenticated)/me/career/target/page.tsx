@@ -8,16 +8,19 @@ import { z } from "zod";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
-import type { Position } from "@heuresys/shared";
+import type { CreateMeCareerTargetBody, Position } from "@heuresys/shared";
+import { CAREER_TARGET_HORIZON_VALUES, CareerTargetHorizonSchema, CreateMeCareerTargetBodySchema } from "@heuresys/shared";
 import { StatusPill } from "@/components/status-pill";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { apiFetch } from "../../../../../lib/api/fetch";
 
-const CareerTargetSchema = z.object({
+// Derivato dal contratto (S1101, 2026-09-14). Prima il form aveva `targetDate` e `notes`, che il
+// contratto `CreateMeCareerTargetBodySchema` non dichiara: l'API scartava le due chiavi in silenzio
+// e l'utente scriveva una nota che non veniva salvata. La tabella ha `horizon` (tre valori, CHECK).
+const CareerTargetSchema = CreateMeCareerTargetBodySchema.extend({
   positionId: z.string().uuid(),
-  targetDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")),
-  notes: z.string().max(2048).optional(),
+  horizon: z.union([CareerTargetHorizonSchema, z.literal("")]),
 });
 type CareerTargetValues = z.infer<typeof CareerTargetSchema>;
 
@@ -39,9 +42,10 @@ export default function MeCareerTargetPage() {
 
   const create = useMutation({
     mutationFn: (body: CareerTargetValues) => {
-      const payload: Record<string, unknown> = { positionId: body.positionId };
-      if (body.targetDate && body.targetDate.length > 0) payload.targetDate = body.targetDate;
-      if (body.notes) payload.notes = body.notes;
+      const payload: CreateMeCareerTargetBody = {
+        positionId: body.positionId,
+        horizon: body.horizon === "" ? null : body.horizon,
+      };
       return apiFetch("/v1/me/career/target-positions", { method: "POST", body: payload });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["me", "career"] }),
@@ -50,7 +54,7 @@ export default function MeCareerTargetPage() {
   const { register, handleSubmit, formState: { isSubmitting, errors } } =
     useForm<CareerTargetValues>({
       resolver: zodResolver(CareerTargetSchema),
-      defaultValues: { positionId: "", targetDate: "", notes: "" },
+      defaultValues: { positionId: "", horizon: "" },
     });
 
   const onSubmit = handleSubmit(async (vals) => { await create.mutateAsync(vals); });
@@ -120,21 +124,18 @@ export default function MeCareerTargetPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="targetDate" className="text-sm font-medium text-foreground">{t("careerTarget.dateLabel")}</label>
-              <Input
-                id="targetDate"
-                data-testid="career-target-date"
-                placeholder={t("careerTarget.datePlaceholder")}
-                {...register("targetDate")}
-              />
-              {errors.targetDate && (
-                <p className="mt-1 text-xs text-danger">{t("careerTarget.dateInvalid")}</p>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="notes" className="text-sm font-medium text-foreground">{t("careerTarget.notesLabel")}</label>
-              <Input id="notes" data-testid="career-target-notes" {...register("notes")} />
+              <label htmlFor="horizon" className="text-sm font-medium text-foreground">{t("careerTarget.horizonLabel")}</label>
+              <select
+                id="horizon"
+                data-testid="career-target-horizon"
+                className="w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                {...register("horizon")}
+              >
+                <option value="">{t("careerTarget.horizonNone")}</option>
+                {CAREER_TARGET_HORIZON_VALUES.map((h) => (
+                  <option key={h} value={h}>{t(`careerTarget.horizon.${h}`)}</option>
+                ))}
+              </select>
             </div>
 
             {create.isError && (

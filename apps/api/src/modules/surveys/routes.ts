@@ -33,6 +33,7 @@ import {
 } from "@heuresys/shared";
 import { surveysService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
+import { z } from "zod";
 
 export const surveysRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── Templates ──
@@ -60,8 +61,8 @@ export const surveysRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/templates/:id", {
     preHandler: [app.verifyCsrf, requirePermission("surveys:delete")],
-    schema: { params: SurveyIdParamSchema },
-  }, async (req, reply) => { await surveysService.deleteTemplate(actor(req), req.params.id); reply.code(204).send(); });
+    schema: { params: SurveyIdParamSchema, response: { 204: z.null() } },
+  }, async (req, reply) => { await surveysService.deleteTemplate(actor(req), req.params.id); reply.code(204).send(null); });
 
   // ── Surveys ──
   app.get("/", {
@@ -88,8 +89,8 @@ export const surveysRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("surveys:delete")],
-    schema: { params: SurveyIdParamSchema },
-  }, async (req, reply) => { await surveysService.deleteSurvey(actor(req), req.params.id); reply.code(204).send(); });
+    schema: { params: SurveyIdParamSchema, response: { 204: z.null() } },
+  }, async (req, reply) => { await surveysService.deleteSurvey(actor(req), req.params.id); reply.code(204).send(null); });
 
   // ── Responses (read-only event log) ──
   app.get("/:id/responses", {

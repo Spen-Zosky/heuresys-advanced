@@ -7,9 +7,9 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { actorFromRequest as actor } from "../../lib/actor.js";
 
-import { z } from "zod";
 import {
   DashboardCatalogResponseSchema,
+  DashboardCodeParamSchema,
   DashboardDataResponseSchema,
   DashboardDetailResponseSchema,
   DashboardWidgetsResponseSchema,
@@ -34,7 +34,7 @@ export const dashboardRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.get("/catalog/:code", {
     schema: {
-      params: z.object({ code: z.string().min(1).max(48) }),
+      params: DashboardCodeParamSchema,
       response: { 200: DashboardDetailResponseSchema },
     },
   }, async (req) => dashboardService.getDashboard(actor(req), req.params.code));
@@ -45,7 +45,7 @@ export const dashboardRoutes: FastifyPluginAsyncZod = async (app) => {
   // lo stesso codice che `requirePermission` userebbe.
   app.get("/catalog/:code/data", {
     schema: {
-      params: z.object({ code: z.string().min(1).max(48) }),
+      params: DashboardCodeParamSchema,
       response: { 200: DashboardDataResponseSchema },
     },
   }, async (req) => dashboardService.getDashboardData(actor(req), req.params.code));

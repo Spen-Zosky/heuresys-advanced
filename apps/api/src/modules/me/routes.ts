@@ -68,6 +68,7 @@ import { env } from "../../config/env.js";
 import { requirePermission, userPermissionCodes } from "../../middleware/rbac.js";
 import { ForbiddenError, UnauthorizedError } from "../../errors/index.js";
 import { subscribeInbox, type InboxEvent } from "../../lib/inbox-stream.js";
+import { z } from "zod";
 
 /**
  * Cadenza del battito sul flusso SSE. Sotto il minuto perché i proxy che chiudono le
@@ -331,6 +332,16 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
    */
   app.get("/inbox/stream", {
     preHandler: [requirePermission("notification:read:self")],
+    // Solo per il listino OpenAPI (R6): la risposta e' un flusso SSE che resta aperto; con
+    // reply.hijack() Fastify non serializza niente, lo schema qui documenta e non trasforma.
+    schema: {
+      response: {
+        200: {
+          description: "Flusso Server-Sent Events delle notifiche personali; resta aperto.",
+          content: { "text/event-stream": { schema: z.string() } },
+        },
+      },
+    },
   }, async (req, reply) => {
     const userId = req.user!.userId;
 
@@ -526,7 +537,18 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
   // nosniff kept; the upload mime-allowlist excludes SVG, so inline is safe.
   app.get("/content/media/:mediaId", {
     preHandler: [requirePermission("me:content:read")],
-    schema: { params: ContentMediaIdParamSchema },
+    schema: {
+      params: ContentMediaIdParamSchema,
+      // Per il listino OpenAPI (R6): il corpo e' il file col SUO mime (immagine inline, il resto
+      // allegato); il flusso passa da reply.send(stream), che Fastify non serializza.
+      response: {
+        200: {
+          description: "Il media pubblicato, servito col proprio content-type e content-disposition.",
+          // z.unknown(): il tipo del provider deve accettare uno stream Node in reply.send.
+          content: { "application/octet-stream": { schema: z.unknown() } },
+        },
+      },
+    },
   }, async (req, reply) => {
     const { row, stream } = await meMediaService.resolveForDownloadPublished(
       meTenant(req),

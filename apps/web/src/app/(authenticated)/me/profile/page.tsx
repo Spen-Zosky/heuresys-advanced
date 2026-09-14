@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { UpdateMeProfileBodySchema } from "@heuresys/shared";
 import type { MeProfileFull, MeTheme, MePalette } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { useMyPreferences, useUpdateMyPreferences } from "../../../../lib/api/auth";
@@ -30,14 +31,13 @@ interface MeProfile {
   linkedinUri: string | null;
 }
 
-const ProfileFormSchema = z.object({
-  displayName: z.string().min(1).max(255),
-  locale: z.string().max(16).optional(),
-  timezone: z.string().max(64).optional(),
-  bio: z.string().max(4096).optional(),
-  phone: z.string().max(64).optional(),
-  linkedinUri: z.string().max(4096).optional(),
-});
+// I limiti dei campi vivono UNA volta sola, nel contratto condiviso: il form li deriva
+// (S1101, 2026-09-14). Prima erano riscritti qui — coincidevano, ma niente li teneva
+// allineati. Il form gestisce sei campi su otto (niente immagine ne' preferenze di contatto:
+// una scelta) e pretende il nome, che il contratto lascia opzionale.
+const ProfileFormSchema = UpdateMeProfileBodySchema
+  .pick({ displayName: true, locale: true, timezone: true, bio: true, phone: true, linkedinUri: true })
+  .required({ displayName: true });
 type ProfileFormValues = z.infer<typeof ProfileFormSchema>;
 
 const THEME_OPTIONS: { value: MeTheme; labelKey: string }[] = [

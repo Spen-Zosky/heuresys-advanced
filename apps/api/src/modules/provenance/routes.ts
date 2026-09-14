@@ -9,11 +9,11 @@
  * not person-level content; access control is RBAC-only (provenance:read →
  * PLATFORM_ADMIN + TENANT_ADMIN, mig 000171) + tenant filter in the service.
  */
-import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { actorFromRequest as actor } from "../../lib/actor.js";
 import {
   ProvenanceListQuerySchema, ProvenanceListResponseSchema,
+  ProvenanceSummaryQuerySchema,
   ProvenanceSummaryResponseSchema,
 } from "@heuresys/shared";
 import { provenanceService } from "./service.js";
@@ -28,7 +28,7 @@ export const provenanceRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/summary", {
     preHandler: [requirePermission("provenance:read")],
     schema: {
-      querystring: z.object({ runId: z.uuid().optional() }),
+      querystring: ProvenanceSummaryQuerySchema,
       response: { 200: ProvenanceSummaryResponseSchema },
     },
   }, async (req) => provenanceService.summary(actor(req), req.query.runId));

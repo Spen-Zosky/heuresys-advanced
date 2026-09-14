@@ -152,14 +152,17 @@
     "selectPlaceholder": "— Seleziona —",
     "moreResults": "Mostrate {{shown}} di {{total}} posizioni — affina la ricerca.",
     "positionRequired": "Posizione richiesta.",
-    "dateLabel": "Data target (YYYY-MM-DD)",
-    "datePlaceholder": "es. 2027-12-31",
-    "dateInvalid": "Formato data non valido.",
-    "notesLabel": "Note",
     "errorSubmit": "Errore durante l'invio.",
     "success": "Obiettivo registrato. Sarà revisionato dal tuo manager.",
     "submit": "Invia richiesta",
-    "submitting": "Invio…"
+    "submitting": "Invio…",
+    "horizonLabel": "Orizzonte",
+    "horizonNone": "— Non indicato —",
+    "horizon": {
+      "SHORT_TERM": "Breve termine",
+      "MEDIUM_TERM": "Medio termine",
+      "LONG_TERM": "Lungo termine"
+    }
   },
   "certifications": {
     "title": "Le mie certificazioni",

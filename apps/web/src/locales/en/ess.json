@@ -131,14 +131,17 @@
     "selectPlaceholder": "— Select —",
     "moreResults": "Showing {{shown}} of {{total}} positions — refine your search.",
     "positionRequired": "Position required.",
-    "dateLabel": "Target date (YYYY-MM-DD)",
-    "datePlaceholder": "e.g. 2027-12-31",
-    "dateInvalid": "Invalid date format.",
-    "notesLabel": "Notes",
     "errorSubmit": "Error during submission.",
     "success": "Goal recorded. It will be reviewed by your manager.",
     "submit": "Submit request",
-    "submitting": "Submitting…"
+    "submitting": "Submitting…",
+    "horizonLabel": "Horizon",
+    "horizonNone": "— Not specified —",
+    "horizon": {
+      "SHORT_TERM": "Short term",
+      "MEDIUM_TERM": "Medium term",
+      "LONG_TERM": "Long term"
+    }
   },
   "certifications": {
     "title": "My certifications",

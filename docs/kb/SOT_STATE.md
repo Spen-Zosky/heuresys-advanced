@@ -59,7 +59,20 @@ opposti; sul file vero diceva **7 voci, 107 giorni** — la più vecchia del 30 
 entrambe (`cowork-cli-protocol` **e** `cowork-cli-orchestrator`): la seconda contraddizione dell'analisi era
 parzialmente sbagliata; la prima (la regola globale che deduce il rito dalla cartella) resta e **è di Enzo**.
 
-**Numeri ri-derivati dal vivo il 2026-09-14 (S1101)**: register **11 ACTIVE · 3 GATED · 0 WAIT-INPUT · 5 HOLD** ·
+**Secondo mandato della stessa sera — il contratto condiviso** (`ANALISI_contratto-shared.md`, `MANDATO_contratto-shared.md`;
+registro `.programmi/S1101b-mandato-contratto-shared.md`). Verdetto dell'istruttoria confermato: 109 moduli, 119 file di
+schema, 0 moduli scoperti, 297 letture web tipizzate. Le misure ri-fatte hanno corretto tre numeri: rotte senza `response`
+**13** (non 7) — 9 DELETE a 204 e 4 file/flusso — tutte dichiarate e viste nell'OpenAPI generato in locale (prima dicevano
+«200 Default Response», cioè promettevano JSON); pagine che riscrivono limiti **4** su 7, ora li derivano
+(`Schema.pick`, `apps/web/src/lib/contratto.ts::limiteMassimo`); querystring sul posto 1 (non 7). **Un difetto vero
+trovato misurando**: `/me/career/target` mandava `targetDate` e `notes`, che il contratto non dichiara e l'API scartava
+in silenzio — il form deriva ora dal contratto (posizione + orizzonte), `horizon` è un enum del CHECK (RD-08). Schema
+morto `TenantBlueprintVersionListResponseSchema` rimosso; `DashboardCodeParamSchema` e `ProvenanceSummaryQuerySchema`
+nel contratto; regola sui parametri e sulle risposte nel pattern dei sette passi. Cancello: `test-api` sul gemello
+**verde** (1163 s). **Conseguenza di `#250` scoperta qui**: 113 file di test entrano come Enzo, che ora ha il suo
+secondo fattore — rossi contro produzione, verdi in CI e sul gemello finché il clone non si rinfresca → **`#258`** (P1).
+
+**Numeri ri-derivati dal vivo il 2026-09-14 (S1101)**: register **12 ACTIVE · 3 GATED · 0 WAIT-INPUT · 5 HOLD** ·
 migrazioni **411** (max `000414`, invariate) · sentinelle bloccanti **50** a zero · ADR **38 file, massimo `0040`** · voci del canale
 non riconciliate **0** (`check_canale_cowork.py`).
 

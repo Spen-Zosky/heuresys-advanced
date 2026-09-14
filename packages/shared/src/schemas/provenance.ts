@@ -63,6 +63,10 @@ export const ProvenanceSummaryRowSchema = z.object({
 });
 export type ProvenanceSummaryRow = z.infer<typeof ProvenanceSummaryRowSchema>;
 
+/** Filtro di `GET /v1/provenance/summary`: una corsa sola, oppure tutte. */
+export const ProvenanceSummaryQuerySchema = z.object({ runId: z.uuid().optional() });
+export type ProvenanceSummaryQuery = z.infer<typeof ProvenanceSummaryQuerySchema>;
+
 export const ProvenanceSummaryResponseSchema = z.object({
   byTable: z.array(ProvenanceSummaryRowSchema),
   totals: z.object({

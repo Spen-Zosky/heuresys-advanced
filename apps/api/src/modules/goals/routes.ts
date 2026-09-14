@@ -15,6 +15,7 @@ import {
 } from "@heuresys/shared";
 import { goalsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
+import { z } from "zod";
 
 export const goalsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
@@ -84,6 +85,6 @@ export const goalsRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("goal:delete")],
-    schema: { params: GoalIdParamSchema },
-  }, async (req, reply) => { await goalsService.deleteGoal(actor(req), req.params.id); reply.code(204).send(); });
+    schema: { params: GoalIdParamSchema, response: { 204: z.null() } },
+  }, async (req, reply) => { await goalsService.deleteGoal(actor(req), req.params.id); reply.code(204).send(null); });
 };

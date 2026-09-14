@@ -18,8 +18,8 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 | F0.7 | CHIUSA | S1102 | 2026-09-14T22:47+02:00 | 11 |  |  | workflows/W0..W5 (6 file); sintassi provata come corpo async | W0-W4 estratti dal mandato byte per byte (tools/estrai_workflows.py); W5 = W1 con INDAGINI→3 ipotesi e critico→sommatore+verificatore; la prova vera e' il primo lancio di W0 |
 | F0.2 | CHIUSA | S1102 | 2026-09-14T22:51+02:00 | 8 |  |  | evidenze/wf_F0.2_7_202609142251 (_VERIFICATO.txt); esiti/F0.2_censimento_C1.md | W0 12/12 agenti, 6/6 spie trovate (2 accettate su prova numerica), 5 discrepanze ri-misurate in linea; nessuna cella non cercata |
 | F0.3 | CHIUSA | S1102 | 2026-09-14T23:18+02:00 | 9 |  |  | evidenze/baseline_202609142318.txt; evidenze/F0.3_controprova.txt (exit 2) | baseline ufficiale: 14/231/0/102/160/80/70959/000414/248 tabelle; guardia vista ROSSA (exit 2, nessun file scritto) e ripristinata |
-| F0.4 | PRONTA |  |  |  | 10 |  |  | controprova della ripresa (3.5): chiude e riapre la sessione per costruzione |
-| K-PROVA | PRONTA |  |  |  | 10 |  |  | voce finta della simulazione 3.5; finira' RITIRATA |
+| F0.4 | IN CORSO | S1102 | 2026-09-14T23:20+02:00 |  | 10 |  |  | controprova della ripresa (3.5): chiude e riapre la sessione per costruzione |
+| K-PROVA | IN CORSO | S1102 | 2026-09-14T23:20+02:00 |  | 10 | 000415 000416 000417 |  | voce finta della simulazione 3.5: 000415 crea sys.v_prova_ripresa_k; 000416 la ritira (rinomina in _ritirata); 000417 nasce incompleta e si completa vuota |
 
 ## F1 — Indagini (nessuna scrittura)
 

@@ -184,6 +184,7 @@ ROUTES: list[tuple[str, list[str]]] = [
     # chi_sorveglia: l'ingestione del lab (#233: non duplica, rifiuta) e la headline di
     # SOT_STATE §0 (F5). Un'autoprova che nessun cancello lancia e' un proposito.
     ("docs/kb/tools/lab_inbox.py", ["lab-inbox-selftest"]),
+    ("docs/kb/tools/check_canale_cowork.py", ["canale-cowork-selftest"]),
     ("docs/kb/tools/aggiorna_numeri_sot.py", ["numeri-sot-selftest"]),
     # ⭐ S1093 — `agent-perimetri.json` E' UNA SoT, e un test la sorveglia.
     # `apps/agent-gateway/test/atlas-resolver.test.ts` confronta i perimetri DECISI in questo
@@ -275,6 +276,7 @@ SUITES: dict[str, tuple[str, str]] = {
     # nessuno la abroghi.
     "chi-sorveglia":      ("L0", "python docs/kb/tools/chi_sorveglia.py --selftest"),
     "lab-inbox-selftest": ("L0", "python docs/kb/tools/lab_inbox.py --selftest"),
+    "canale-cowork-selftest": ("L0", "python docs/kb/tools/check_canale_cowork.py --selftest"),
     "numeri-sot-selftest": ("L0", "python docs/kb/tools/aggiorna_numeri_sot.py --selftest"),
     # I test del gateway, che sono anche i guardiani della coerenza fra i perimetri decisi e
     # la mappa generata. L0 nel costo, L1 nella sostanza: girano senza database.

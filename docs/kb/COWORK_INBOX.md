@@ -36,6 +36,7 @@ Un flag invariante (regola §9 "fermarsi e chiedere"), da confermare prima di im
 Proposta: se Enzo approva, CLI valuta (a) adozione del doc nel repo + (b) apertura item `SOT_BACKLOG.md` "Connettore HRIS esterno (SF/Workday/Zucchetti)" come candidato MVP-4 futuro. Nessuna migration creata/applicata (DDL nel doc è PROPOSED/DO-NOT-APPLY).
 
 stato: pending — [CLI S951: doc committato `c363ef1`; flag 🔴 I12 RITIRATO via ADR-0023 (no-PII globale); resta da decidere (b) adozione connettore come item MVP-4]
+stato: [RICONCILIATA 2026-09-14 S1101] — la (b) e' stata decisa da tempo: `#16 SuccessFactors` e' **WON'T-DO** (S999, in `docs/archive/SOT_BACKLOG_CHIUSI.md`). Marcata oggi perche' la sentinella del canale (`check_canale_cowork.py`) la contava ancora aperta.
 
 
 ### 2026-06-14 | proposta-backlog | #9 Integrazione Agent SDK del plugin human-resources-plus (pilota "blueprint builder" banca retail)
@@ -477,6 +478,8 @@ da gov, utile comunque) come precondizione, non solo il lock per-cluster sui fil
 
 ---
 
+stato: [RICONCILIATA 28cf1514 S1047, marcata S1101] — ingerita il 2026-08-08 («ingerita la proposta gov»); esiti nel register: `#173` modalita' gov **WON'T-DO**, `#176` punto di rientro DONE. Il marcatore mancava: aggiunto il 2026-09-14 quando la sentinella del canale l'ha contata come aperta.
+
 ## [COWORK → CLI] 2026-08-08 — Plance sessioni/zero-pendenze: base condivisa + fusione (NON committato)
 
 **Cosa ho aggiunto** (working tree, zero commit — Enzo ha scelto "preparo i file ma non li committo"):
@@ -700,6 +703,8 @@ e basta; CLI revisiona e committa).
 
 ---
 
+stato: [RICONCILIATA 7903e6f5 S1047, marcata S1101] — le plance sono nel repo (`#137` DONE: `pnpm plancia` :8481, `plancia:zp` :8477, memoria `project_service_webapps_in_scripts`); l'addendum «non committabile» e' stato committato lo stesso giorno. Marcatore aggiunto il 2026-09-14.
+
 ## 2026-09-14 — Cowork: le due voci WAIT-INPUT sono sciolte ed eseguite (#250 e #240)
 
 Enzo ha risposto a entrambe le domande che la dashboard di avvio gli ha presentato: «1. Sì cancella — 2. rimuovere». Le due azioni sono state eseguite in questa sessione Cowork, con censimento preventivo. Niente è stato committato: la CLI revisiona e registra lo stato, come da contratto.
@@ -748,6 +753,8 @@ Il giornale `staging.undo_250_mfa_enzo` ha esaurito la sua ragione d'essere: rei
 
 `device_bash` non parte più su questo PC (errore `Workspace unavailable`, causa attribuita a un aggiornamento Windows dell'8 settembre): da Cowork **non si raggiungono VM Oracle e PC Linux via SSH**. Registrato in `~/.claude/reference/cowork-tooling.md` insieme alla diagnosi dell'estensione Claude in Chrome, che oggi risultava scollegata solo perché non autenticata.
 
+stato: [RICONCILIATA 2026-09-14 S1100] — `#250` e `#240` chiuse e archiviate (`811e7d66`); il giornale `staging.undo_250_mfa_enzo` ritirato; il fatto d'ambiente (Cowork senza SSH verso Linux) e' in `.handoff/STATE.md`.
+
 ### 2026-09-14 — reperti misurati intorno a RBAC e al tenant RTL Bank (Cowork, stessa sessione)
 
 Emersi rispondendo a due domande di Enzo — «voglio entrare come HR manager di RTL» e «perché RTL ha 160 persone?». Tutti misurati sul database vivo il 2026-09-14. Nessun file di `docs/kb/` toccato: questa è la proposta, la CLI decida cosa adottare.
@@ -763,6 +770,8 @@ Emersi rispondendo a due domande di Enzo — «voglio entrare come HR manager di
 **5. Reperto minore: `BRANCH_MANAGER` non ha `auth_role_category`.** È l'unico dei 14 ruoli col campo vuoto (gli altri sono `functional` o `hierarchical_operational`), e lo portano 10 persone. Non è un cancello, quindi non rompe niente, ma è una classificazione mancante su un ruolo tutt'altro che marginale.
 
 **Documento prodotto per Enzo** (non tecnico, in italiano semplice): `C:\Users\enzospenuso\Claude Desktop\heuresys-advanced\sessioni\session_2026-09-14_decisioni-250-240\RBAC_come-funziona-davvero.md` — spiega i due assi, i quattro stati, le quattro eccezioni, con i numeri misurati e il comando per rigenerarli. Se ha valore anche per il progetto, la CLI valuti se adottarlo sotto `docs/` invece di lasciarlo nel workspace di sessione.
+
+stato: [RICONCILIATA 811e7d66 S1100] — il documento RBAC e' adottato in `docs/kb/xtras/RBAC_COME_FUNZIONA_DAVVERO.md` con `misura-rbac.sql` riscritto (l'originale usava una colonna inesistente); i numeri restano datati dentro il documento.
 
 ### 2026-09-14 — CONSEGNA: migrazione `000414` pronta, provata a vuoto, NON applicata e NON committata
 
@@ -781,3 +790,27 @@ Su mandato di Enzo («falla diventare una sentinella e sistemiamo BRANCH_MANAGER
 **Stato della verifica, dichiarato per intero.** L'intero file e' stato eseguito sul database di produzione dentro una transazione chiusa da `ROLLBACK`: esito `UPDATE 1` · `CREATE VIEW` · `COMMENT` · NOTICE «0 violazioni, 2 permessi in custodia, controprova superata» · `ROLLBACK`. Ri-misurato subito dopo: `BRANCH_MANAGER` ha ancora la categoria vuota e la vista non esiste — la prova non ha lasciato niente. **Non e' stata eseguita `ci-rehearsal.sh`**: gira sul gemello, e da Cowork il canale Linux e' fuori uso (`device_bash`, dal 2026-09-08). Chi applica faccia PRIMA la prova generale — e' il cancello che questa migrazione non ha potuto attraversare. Applicazione: `pnpm db:migrate:vm` (17 s sulla VM contro ~80 minuti da Windows).
 
 **Atteso dopo l'applicazione**: sentinelle da 49/49 a **50/50** a zero.
+
+stato: [RICONCILIATA 83af8a80 S1100] — prova generale sul gemello VERDE, applicata in produzione dalla VM (14 s), 50/50 sentinelle a zero; `BRANCH_MANAGER` = `hierarchical_operational`.
+
+### 2026-09-14 (sera) — Censimento del materiale Cowork fuori canale, e mandato di riallineamento
+
+Nasce da una domanda di Enzo: «ho usato Cowork e CLI in parallelo, non so se ho fatto confusione, e il rito non lo ricordo». L'indagine è stata fatta in sola lettura mentre S1100 lavorava. Tre documenti nel workspace: `ANALISI_orchestrazione-cowork-cli.md`, `CENSIMENTO_R2_esito.md`, `MANDATO_S1101_riallineamento-consolidato.md`, in `C:\Users\enzospenuso\Claude Desktop\heuresys-advanced\sessioni\session_2026-09-14_decisioni-250-240\`.
+
+**Il fatto misurato.** Il canale `COWORK_INBOX.md` è stato riconciliato l'ultima volta l'**8 agosto** (commit `7903e6f5`); prima degli append di oggi il file aveva zero righe non committate. Nelle cinque settimane successive la CLI ha aperto **quattordici** sessioni (`.programmi/S*.md`) e Cowork ha prodotto **318 file** nel workspace, di cui 257 in una sola cartella di sessione (2026-09-08, dottrina perimetri agente).
+
+**Il censimento dei 12 documenti di merito di quella cartella: 7 RECEPITI · 5 DA RECEPIRE · 0 da lasciare fuori.** Il travaso è avvenuto per via manuale (Enzo che porta il lavoro alla CLI) e ha prodotto le migrazioni `000384`-`000386`, `000388`-`000394`, `000399`, `000404`. **Ciò che si è perso ha una forma riconoscibile**: è passato tutto ciò che si traduceva in una migrazione, si è perso ciò che era una decisione di metodo o un giudizio.
+
+**Le cinque perdite**, con l'evidenza: (1) la **dottrina dell'agente sui perimetri** — la sostituzione dei «perimetri neutri» con una soglia su persone distinte non è mai entrata, e `#214` ha aperto il 15° e 16° perimetro il 2026-09-13 (`SOT_BACKLOG.md:249-250`, mig `000411`/`000412`) con il metodo vecchio; (2) la **scorecard di due diligence** rivalidata a 58/100 NO-GO, mentre `docs/due-diligence/SCORECARD.md` è fermo al 17 giugno; (3) **M5**, il cancello meccanico sull'isolamento fra clienti; (4) il **registro di chi ripara e chi popola** (quattro famiglie di lacune); (5) le correzioni alla **skill di due diligence**, che vive fuori dal repo e resta a Cowork.
+
+**Il mandato proposto** (file `MANDATO_S1101_...`) non chiede di implementare quei contenuti: chiede di **dargli un posto nel register** — `WAIT-INPUT` dove serve una decisione di Enzo, `ACTIVE` dove il lavoro è chiaro — perché una proposta che diventa una voce non è recepita a metà, è al sicuro. Più due voci sul canale: dichiararlo in un punto solo del CLAUDE.md, e **una sentinella che misura da quanti giorni ci sono voci non riconciliate** (oggi avrebbe detto «trentasette»). E il consolidamento finale **dentro** `.handoff/STATE.md` e `SOT_STATE.md`, senza creare un terzo file di stato, che il CLAUDE.md vieta.
+
+**Una contraddizione che non è del progetto ma lo colpisce**: le istruzioni globali di Enzo dicono «se il progetto ha `cowork_code_exchange/`, invoca la skill del protocollo», e questo progetto quella cartella ce l'ha (197 file, ultimo del 25 luglio) benché sia congelata. La correzione globale è di Enzo; la parte di progetto è la voce B1 del mandato.
+
+**RATIFICA (Enzo, 2026-09-14, sera).** Dopo aver riletto per intero `dottrina-agente-perimetri_20260908.md`, Enzo ha **ratificato la dottrina**: non è più una proposta in attesa, è una decisione da attuare. La voce A1 del mandato è stata riscritta di conseguenza e ora prescrive, in ordine: **A1.0** la verifica dei due punti che il documento dichiara non misurati al §9 — se il conteggio delle persone distinte sia ricavabile dalle risposte dell'API senza toccarla, e dove viva lo stato dato che il gateway è oggi senza stato — perché sono gli unici che possono cambiare il costo dell'intera operazione; **A1.1** un ADR che supersede ADR-0033 §5.2; **A1.2** i tre passi da costruire prima di aprire (contatore di persone distinte, ponte di approvazione esteso alle letture, vista SQL sul diario); **A1.3** l'apertura, `GATED` sui tre passi; **A1.4** `#214` in `HOLD` con ragione dichiarata, perché con la dottrina ratificata aprire il diciassettesimo perimetro col metodo vecchio è lavoro che la dottrina nuova rende inutile.
+
+Due vincoli scritti nel mandato e da non perdere: le soglie **25/40 non vanno scritte come costanti** (sono tarate su RTL Bank — 160 persone, unità più grande a 38 — e su un cliente da 5.000 dipendenti sarebbero sbagliate: vanno scritte come valori iniziali del tenant attuale, accanto al criterio che le genera e al comando che le riderivа), e `agent-perimetri.json` **non si butta**: cambia mestiere, resta la fonte unica per le scritture.
+
+Un elemento nuovo rafforza la parte di sicurezza della dottrina rispetto all'8 settembre: il §6 richiama le quattro eccezioni di ADR-0036 §5 come delimitazione già esistente, e da oggi **la prima delle quattro è misurata** dalla sentinella `sys.v_whistleblowing_fuori_dal_custode` (mig `000414`). L'argomento è passato da dichiarazione a cancello, e questo va scritto nell'ADR.
+
+stato: [RICONCILIATA 2026-09-14 S1101] — mandato eseguito (`.programmi/S1101-mandato-riallineamento-consolidato.md`): ADR-0040 recepisce la dottrina ratificata; `#251`-`#254` (contatore · ponte sulle letture · diario interrogabile · apertura GATED) e `#214` in HOLD; `#255` scorecard, `#256` cancello fra clienti (**M5 era gia' fatta**: B23, `6522c132`), `#257` WAIT-INPUT chi ripara/chi popola; canale dichiarato nel CLAUDE.md; sentinella `check_canale_cowork.py` nella dashboard di avvio. A6 (skill di due diligence) fuori perimetro, a Cowork.

@@ -290,6 +290,10 @@ crescente. Pretende l'**atlante fresco** e si ferma se è superato, invece di mi
 passato: costruendo lo strumento si è scoperto che l'atlante era fermo a 9 giorni prima,
 con 5 moduli invisibili — vedi `#195`, dove il caso è stato meccanizzato.
 
+> ⚠ **Superseduto il 2026-09-14 da ADR-0040** per la parte qui sopra: la coda per rischio
+> crescente si ferma (`#214` in HOLD). L'agente legge ciò che legge la persona; il freno si
+> sposta sull'uso (persone distinte per conversazione). §5.2 — il gate sulle scritture — resta.
+
 ---
 
 ## §7 — What we are NOT doing

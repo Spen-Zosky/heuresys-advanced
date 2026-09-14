@@ -38,6 +38,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_menu  # noqa: E402
 import db_health  # noqa: E402
 import check_istruzioni  # noqa: E402
+import check_canale_cowork  # noqa: E402
 import check_pagine_raggiungibili as check_pagine  # noqa: E402
 import lab_inbox  # noqa: E402
 import programmi  # noqa: E402
@@ -131,6 +132,17 @@ def main():
                         print(f"  [!!] {nome}: {len(rilievi)} — `python docs/kb/tools/check_istruzioni.py --elenco`")
         except Exception as e:  # una vista non deve mai impedire l'avvio
             print(f"\nISTRUZIONI  [? ] non verificate: {e}")
+
+        # Il canale Cowork→CLI e' `docs/kb/COWORK_INBOX.md`, e una voce e' riconciliata quando la
+        # CLI la marca `stato: [RICONCILIATA …]`. Il 2026-09-14 il canale risultava fermo dall'8
+        # agosto — trentasette giorni — e lo ha scoperto un'indagine di mezza giornata, non una
+        # riga. Da qui in poi la riga c'e', a ogni avvio, anche senza database. Nessuna soglia:
+        # il numero si vede, chi legge giudica. Vista, non gate.
+        try:
+            print("\nCANALE COWORK→CLI (voci non riconciliate — check_canale_cowork.py)")
+            print(check_canale_cowork.riga_dashboard())
+        except Exception as e:
+            print(f"\nCANALE  [? ] non verificato: {e}")
 
         # Ogni pagina autenticata deve avere una PORTA — menu, scheda o deroga motivata
         # (#99 F8). Il censimento delle orfane esisteva (#125, 22 nell'agosto 2026) ma viveva

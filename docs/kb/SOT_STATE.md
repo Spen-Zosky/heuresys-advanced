@@ -33,6 +33,38 @@ violano R6/R7 di `v_organization_unit_integrity` (la `000244` si ferma sul gemel
 strumento corretti (l'esito delle mappe finisce nella corsa; un indice paginato è un indice), 0 proposte per limite della
 fonte `ilo.org` — serve la fonte di settore, che approva Enzo. Verifica lunga: suite API sul gemello **1953 test verdi**.
 
+### Delta S1101 (2026-09-14, sera) — il canale Cowork→CLI riparato, la dottrina dell'agente recepita, cinque perdite con un posto nel register
+
+Mandato di Cowork (`MANDATO_S1101_riallineamento-consolidato.md`; registro `.programmi/S1101-mandato-riallineamento-consolidato.md`).
+**Il fatto**: il canale `COWORK_INBOX.md` era fermo dall'8 agosto — 37 giorni — mentre Cowork produceva 318 file nel
+workspace; 7 dei 12 documenti di merito erano entrati per via manuale (migrazioni `000384`-`000404`), 5 decisioni di
+metodo no. **Recepito**: **ADR-0040** (*l'agente legge ciò che legge la persona; il freno si sposta dal tipo di dato
+all'uso*, ratificata da Enzo il 2026-09-14) supersede ADR-0033 **§6.1** — non §5.2 come diceva il mandato: misurato,
+§5.2 è il gate sulle scritture e resta. Fattibilità misurata prima di aprire le voci: (a) le persone distinte si
+ricavano dalle risposte senza toccare l'API (26 nomi `*UserId` negli schemi condivisi, attori di audit da escludere);
+(b) lo stato vive nella richiesta (una conversazione = una `POST /agent`, senza `resume`); (c) **il diario del gate non
+è nel database** (JSONL senza id di conversazione) — il terzo passo costa una tabella e un sink in più, scritto in
+`#253` prima di cominciare. Le soglie 25/40 sono **valori iniziali** con criterio e comando
+(`docs/kb/xtras/soglie-agente-persone-distinte.sql`: posizioni/unità max 38 · persone/unità max 9 · persone/catena
+max 158, 4 catene sopra 40). **Register**: `#251` contatore · `#252` ponte anche sulle letture · `#253` diario
+interrogabile (ACTIVE, P1/P1/P2) · `#254` apertura in una mossa sola (GATED sulle tre) · **`#214` in HOLD** («superata
+dalla dottrina», `agent-perimetri.json` cambia mestiere, non si butta) · `#255` scorecard di due diligence ferma al 17
+giugno (ACTIVE) · `#256` cancello fra clienti — **M5 era già fatta** (B23, `6522c132`, S1095): la voce misura il confine
+dichiarato, non ricostruisce · `#257` chi ripara e chi popola (WAIT-INPUT). A6 (skill di due diligence) fuori
+perimetro, a Cowork. **Il canale**: dichiarato in un punto solo del `CLAUDE.md` (§Source of Truth: dove scrive Cowork,
+chi riconcilia, cosa non si usa più, e che lo dichiara il progetto — non una cartella); sentinella
+`check_canale_cowork.py` (voci senza `stato: [RICONCILIATA …]`, giorni dalla più vecchia; `--selftest` 7/7 a esiti
+opposti; sul file vero diceva **7 voci, 107 giorni** — la più vecchia del 30 maggio con la (b) decisa da mesi — e dice
+**0** dopo la riconciliazione), stampata dalla dashboard di avvio anche senza database. Le tre skill Cowork esistono
+entrambe (`cowork-cli-protocol` **e** `cowork-cli-orchestrator`): la seconda contraddizione dell'analisi era
+parzialmente sbagliata; la prima (la regola globale che deduce il rito dalla cartella) resta e **è di Enzo**.
+
+**Numeri ri-derivati dal vivo il 2026-09-14 (S1101)**: register **10 ACTIVE · 3 GATED · 1 WAIT-INPUT · 5 HOLD** ·
+migrazioni **411** (max `000414`, invariate) · sentinelle bloccanti **50** a zero · ADR **38 file, massimo `0040`** · voci del canale
+non riconciliate **0** (`check_canale_cowork.py`).
+
+---
+
 ### Delta S1100 (2026-09-14) — il lavoro Cowork recepito: `#250` e `#240` chiuse, la 000414 in produzione, cinquanta sentinelle
 
 Mandato di Cowork (sessione `decisioni-250-240`; registro `.programmi/S1100-mandato-cowork-250-240.md`, CHIUSO 6/6).

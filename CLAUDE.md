@@ -60,7 +60,14 @@ Historical records live in `docs/archive/` and are **not** SoT. When state chang
 
 **Chi può scrivere la SoT di stato** (freeze 2026-05-27, S939 — CLI takeover). L'unico writer e committer di `docs/kb/` è **Claude Code CLI**. Cowork e Claude Desktop sono **read-only** su questi file: per proporre un cambiamento di stato fanno append **solo** a `docs/kb/COWORK_INBOX.md`, che la CLI riconcilia e committa. Nessun altro `docs/kb/`, nessun `git commit`/`push` su questo progetto senza coordinamento CLI.
 
-`cowork_code_exchange/` e `cowork_reserved/` sono **archivio read-only**: niente nuovi cicli PROMPT/PLAN/EXEC/REPORT/REVIEW qui, non sono stato vivo. Il protocollo Cowork↔CLI resta valido negli altri progetti (skill `cowork-cli-protocol`), è congelato solo per questo.
+### ⭐ Il canale Cowork ↔ CLI — lo dichiara il progetto, non la presenza di una cartella (2026-09-14)
+
+Quattro righe, in un punto solo, perché finora si ricavavano incrociando il paragrafo qui sopra con uno sul congelamento di `cowork_code_exchange/` — e il 2026-09-14 si è misurato che il canale era fermo dall'8 agosto (37 giorni) mentre Cowork scriveva 318 file nel workspace.
+
+- **Dove scrive Cowork**: in fondo a `docs/kb/COWORK_INBOX.md`, una voce datata (`### YYYY-MM-DD | tipo | titolo`). È l'**unico** file di `docs/kb/` su cui Cowork scrive.
+- **Chi riconcilia e committa**: la CLI. Legge l'inbox a inizio sessione, recepisce nelle SoT, e **marca** la voce `stato: [RICONCILIATA <commit>]` — senza marcatore la voce conta come aperta anche se committata.
+- **Cosa non si usa più**: `cowork_code_exchange/` e `cowork_reserved/` sono **archivio in sola lettura** (niente cicli PROMPT/PLAN/EXEC/REPORT/REVIEW). Le skill `cowork-cli-protocol` / `cowork-cli-orchestrator` insegnano quel rito: **su questo progetto non si invocano**, anche se la cartella esiste. Il canale lo dichiara **questa sezione**, e vince su qualunque regola generale che deduca il rito dalla presenza di una cartella.
+- **La sentinella**: `python docs/kb/tools/check_canale_cowork.py` (`--elenco` · `--selftest`) dice quante voci non sono riconciliate e da quanti giorni; la dashboard di avvio la stampa. Nessuna soglia: il numero si vede.
 
 ## Session start
 

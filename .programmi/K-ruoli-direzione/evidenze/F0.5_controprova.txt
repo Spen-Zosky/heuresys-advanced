@@ -1,0 +1,36 @@
+CONTROPROVA q.py — 2026-09-14T22:42:54+02:00
+
+[0] conteggio PRIMA (psql, non q.py): select count(*) from sys.sys_auth_roles
+14
+
+[1] q.py "delete from sys.sys_auth_roles"   (atteso: exit 3, SOLO SELECT)
+SOLO SELECT: la query non comincia con select/with
+exit=3
+
+[2] q.py "select 1; drop view sys.v_prova"   (atteso: exit 3)
+SOLO SELECT: un `;` seguito da altro testo non e' ammesso
+exit=3
+
+[3] q.py "with x as (select 1) select * from x"   (atteso: exit 0, una riga)
+?column?
+1
+exit=0
+
+[4] q.py "/* c */ -- c'\n  SELECT count(*) from sys.sys_auth_roles"   (commenti tolti: atteso exit 0)
+n
+14
+exit=0
+
+[5] q.py "with x as (insert into sys.sys_auth_roles(auth_role_code,auth_role_name) values ('PROVA_K','x') returning 1) select * from x"
+    (passa la sintassi: comincia con with. Atteso: exit 1, "cannot execute INSERT in a read-only transaction" — e\x27 il server che rifiuta)
+ERRORE SQL: cannot execute SELECT in a read-only transaction
+exit=1
+
+[6] q.py "select pg_sleep(35)"   (atteso: exit 1, statement timeout a 30s)
+ERRORE SQL: canceling statement due to statement timeout
+exit=1
+
+[7] conteggio DOPO (psql): select count(*) from sys.sys_auth_roles
+14
+[7b] nessuna riga PROVA_K: select count(*) from sys.sys_auth_roles where auth_role_code='PROVA_K'
+0

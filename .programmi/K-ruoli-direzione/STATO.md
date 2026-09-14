@@ -13,7 +13,7 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
 | F0.1 | CHIUSA | S1102 | 2026-09-14T22:30 | 4 | | | evidenze/baseline_202609142237.txt (prova di misura_k.py); dove_siamo.py exit 0 | stato e strumenti; dove_siamo.py stampa una PRONTA (post-condizione passo 4) |
-| F0.5 | PRONTA | | | | 5 | | | q.py in sola lettura per gli agenti; controprova rossa obbligatoria |
+| F0.5 | IN CORSO | S1102 | 2026-09-14T22:39+02:00 |  | 5 |  |  | q.py in sola lettura per gli agenti; controprova rossa obbligatoria |
 | F0.6 | BLOCCATA(fase) | | | | 6 | | | indagine: come si applica UNA migrazione, registro, regola sui buchi |
 | F0.7 | BLOCCATA(fase) | | | | 11 | | | i sei script .js dei workflow copiati e committati |
 | F0.2 | BLOCCATA(fase) | | | | 7 | | | censimento C1 dei sei oggetti (WORKFLOW W0) |

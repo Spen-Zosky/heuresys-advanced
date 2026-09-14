@@ -4,24 +4,14 @@
 
 ## Last session brief
 
-Mandato di Cowork «riallineamento consolidato» (`.programmi/S1101-mandato-riallineamento-consolidato.md`): il canale
-`COWORK_INBOX.md` era fermo dall'8 agosto e cinque decisioni di metodo non erano mai entrate nel repo. Ora hanno un
-posto: **ADR-0040** recepisce la dottrina dell'agente ratificata da Enzo (l'agente legge ciò che legge la persona; il
-freno si sposta sull'uso, in persone distinte) e ferma la coda vecchia (`#214` in HOLD); i tre passi del freno sono
-`#251`/`#252`/`#253`, l'apertura `#254` è GATED su di loro; la scorecard di due diligence è `#255`; il cancello fra
-clienti (`#256`) misura un confine perché **M5 era già fatta** dal 10 settembre; chi ripara e chi popola è `#257`
-(adottato da Enzo a fine sessione: ACTIVE, registro derivato da strumento). Il canale è dichiarato in un punto solo del `CLAUDE.md` e ha una sentinella nella dashboard di avvio
-(`check_canale_cowork.py`: oggi 0 voci non riconciliate, prima della riconciliazione 7 con la più vecchia da 107
-giorni). Fattibilità misurata prima di aprire le voci: le persone si contano dalle risposte senza toccare l'API, lo
-stato vive nella richiesta, **ma il diario del gate è un file senza id di conversazione** — `#253` costa una tabella
-in più, ed è scritto lì.
-
-**Secondo mandato (contratto condiviso `@heuresys/shared`, `.programmi/S1101b-mandato-contratto-shared.md`)**: il
-contratto è esaustivo; le quattro imperfezioni sono chiuse — 13 rotte (non 7) dichiarano la risposta e il listino
-OpenAPI le mostra; 4 pagine derivano i limiti dal contratto invece di riscriverli; lo schema morto è rimosso; la
-regola sui parametri e sulle risposte è nel pattern dei sette passi. Misurando è emerso un difetto vero:
-`/me/career/target` mandava `targetDate` e `notes` che l'API scartava in silenzio — corretto (posizione + orizzonte).
-E una conseguenza di `#250`: i test che entrano come Enzo non possono più farlo, perché ora ha il suo secondo fattore → `#258` (P1); quanti sono lo dice il register.
+Due mandati di Cowork nella stessa sera (`.programmi/S1101-…` e `S1101b-…`, entrambi CHIUSI). **Primo**: il canale
+`COWORK_INBOX.md` era fermo dall'8 agosto; ora è dichiarato in un punto solo del `CLAUDE.md`, ha una sentinella
+nella dashboard di avvio (`check_canale_cowork.py`), e le cinque decisioni perse hanno un posto — **ADR-0040**
+(l'agente legge ciò che legge la persona; freno sull'uso, in persone distinte), `#214` in HOLD, `#251`-`#254`
+(freno e apertura), `#255` scorecard, `#256` cancello fra clienti (M5 era già fatta), `#257` chi ripara e chi
+popola (adottato). **Secondo**: il contratto condiviso è esaustivo; 13 rotte dichiarano la risposta, 4 form
+derivano i limiti dal contratto, e `/me/career/target` perdeva dati in silenzio — corretto. Scoperto misurando:
+i test che entrano come Enzo non possono più farlo (`#250` gli ha dato il suo secondo fattore) → **`#258`**, P1.
 
 ## Top priorities
 

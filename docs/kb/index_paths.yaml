@@ -1,14 +1,14 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-14T15:15:08Z da docs/kb/tools/build_index.py
+# generato: 2026-09-14T17:42:16Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-14T15:15:08Z"
-  total_files: 3468
+  generated_at: "2026-09-14T17:42:16Z"
+  total_files: 3481
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 38
+    ADR: 39
     api-core: 34
     api-module: 391
     ci: 19
@@ -23,7 +23,7 @@ meta:
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 695
+    doc-canonical: 706
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -33,11 +33,11 @@ meta:
     showcase-source: 13
     test: 426
     ux-design-archive: 80
-    web-source: 255
+    web-source: 256
   status_counts:
     archive: 593
     external-archive: 50
-    live: 2825
+    live: 2838
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -264,6 +264,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\0039_catalogo_profilo_e_voci_proprie_del_cliente.md'
     root: repo
     rel: 'docs/architecture/adr/0039_catalogo_profilo_e_voci_proprie_del_cliente.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0040_l_agente_legge_cio_che_legge_la_persona.md'
+    root: repo
+    rel: 'docs/architecture/adr/0040_l_agente_legge_cio_che_legge_la_persona.md'
     category: ADR
     status: live
     provenance: git-tracked
@@ -10755,6 +10761,48 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\251-contatore-persone-distinte.md'
+    root: repo
+    rel: '.programmi/251-contatore-persone-distinte.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\252-ponte-anche-sulle-letture.md'
+    root: repo
+    rel: '.programmi/252-ponte-anche-sulle-letture.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\253-diario-interrogabile.md'
+    root: repo
+    rel: '.programmi/253-diario-interrogabile.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\255-scorecard-rivalidata.md'
+    root: repo
+    rel: '.programmi/255-scorecard-rivalidata.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\256-confine-del-cancello-fra-clienti.md'
+    root: repo
+    rel: '.programmi/256-confine-del-cancello-fra-clienti.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\257-chi-ripara-e-chi-popola.md'
+    root: repo
+    rel: '.programmi/257-chi-ripara-e-chi-popola.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\258-persona-di-collaudo-di-piattaforma.md'
+    root: repo
+    rel: '.programmi/258-persona-di-collaudo-di-piattaforma.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md'
     root: repo
     rel: '.programmi/50-knowledge-graph-legacy.md'
@@ -10890,6 +10938,18 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\S1100-mandato-cowork-250-240.md'
     root: repo
     rel: '.programmi/S1100-mandato-cowork-250-240.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1101-mandato-riallineamento-consolidato.md'
+    root: repo
+    rel: '.programmi/S1101-mandato-riallineamento-consolidato.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\S1101b-mandato-contratto-shared.md'
+    root: repo
+    rel: '.programmi/S1101b-mandato-contratto-shared.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -12369,6 +12429,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\check_canale_cowork.py'
+    root: repo
+    rel: 'docs/kb/tools/check_canale_cowork.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\check_completezza_self.py'
     root: repo
     rel: 'docs/kb/tools/check_completezza_self.py'
@@ -12834,6 +12900,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\xtras\misura-rbac.sql'
     root: repo
     rel: 'docs/kb/xtras/misura-rbac.sql'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\soglie-agente-persone-distinte.sql'
+    root: repo
+    rel: 'docs/kb/xtras/soglie-agente-persone-distinte.sql'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -20634,6 +20706,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\lib\api\public-stats.ts'
     root: repo
     rel: 'apps/web/src/lib/api/public-stats.ts'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\lib\contratto.ts'
+    root: repo
+    rel: 'apps/web/src/lib/contratto.ts'
     category: web-source
     status: live
     provenance: git-tracked

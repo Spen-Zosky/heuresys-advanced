@@ -73,8 +73,9 @@ nel contratto; regola sui parametri e sulle risposte nel pattern dei sette passi
 secondo fattore — rossi contro produzione, verdi in CI e sul gemello finché il clone non si rinfresca → **`#258`** (P1).
 
 **Numeri ri-derivati dal vivo il 2026-09-14 (S1101)**: register **12 ACTIVE · 3 GATED · 0 WAIT-INPUT · 5 HOLD** ·
-migrazioni **411** (max `000414`, invariate) · sentinelle bloccanti **50** a zero · ADR **38 file, massimo `0040`** · voci del canale
-non riconciliate **0** (`check_canale_cowork.py`).
+migrazioni **411** (max `000414`, invariate) · sentinelle bloccanti **50** a zero · ADR **38 file, massimo `0040`** · moduli API
+**109** · route **649** · schemi shared **119** (atlante rigenerato) · voci del canale non riconciliate **0**
+(`check_canale_cowork.py`) · HEAD `c05bf951` (pre-commit di chiusura).
 
 ---
 

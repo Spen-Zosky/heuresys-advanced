@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-14T15:15:08Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3468**
+**Generato**: 2026-09-14T17:42:16Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3481**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -8,7 +8,7 @@
 
 | Categoria | File |
 |---|---|
-| ADR | 38 |
+| ADR | 39 |
 | api-core | 34 |
 | api-module | 391 |
 | ci | 19 |
@@ -23,7 +23,7 @@
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 695 |
+| doc-canonical | 706 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,8 +33,8 @@
 | showcase-source | 13 |
 | test | 426 |
 | ux-design-archive | 80 |
-| web-source | 255 |
-| **TOTALE** | **3468** |
+| web-source | 256 |
+| **TOTALE** | **3481** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 2825 |
+| live | 2838 |
 
 ## File per categoria
 
@@ -87,6 +87,7 @@
 - `D:\heuresys-advanced\docs\architecture\adr\0037_user_deletion_is_anonymization.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0038_the_database_is_self_sufficient.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0039_catalogo_profilo_e_voci_proprie_del_cliente.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0040_l_agente_legge_cio_che_legge_la_persona.md` · *live* · git-tracked
 
 ### api-core
 
@@ -1880,6 +1881,13 @@
 - `D:\heuresys-advanced\.programmi\245-dominio-fonte-testo-libero.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\246-fixed-term-senza-data-di-fine.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\249-contabilita-dei-piani-e-cancello-non-interrogato.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\251-contatore-persone-distinte.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\252-ponte-anche-sulle-letture.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\253-diario-interrogabile.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\255-scorecard-rivalidata.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\256-confine-del-cancello-fra-clienti.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\257-chi-ripara-e-chi-popola.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\258-persona-di-collaudo-di-piattaforma.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\54-recruiting-ats.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\69-residui-staging-wave1.md` · *live* · git-tracked
@@ -1903,6 +1911,8 @@
 - `D:\heuresys-advanced\.programmi\S1098-mandato-p1-p3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1099-mandato-p1-p3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1100-mandato-cowork-250-240.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1101-mandato-riallineamento-consolidato.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\S1101b-mandato-contratto-shared.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked
@@ -2149,6 +2159,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\build_menu.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\censimento_endpoint_senza_pagina.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\censimento_riferimenti_orfani.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\check_canale_cowork.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_completezza_self.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_concetti_agente.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_domini_ricercabili.py` · *live* · git-tracked
@@ -2227,6 +2238,7 @@
 - `D:\heuresys-advanced\docs\kb\xtras\VISUALIZATION_RENDERERS_CLOSURE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\WAVE2_UNBLOCK_PACKAGE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\misura-rbac.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\xtras\soglie-agente-persone-distinte.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\preflight-residual-todo.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\product\BUSINESS_SCOPE_AND_PRD.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\product\COMPETITIVE_SCORECARD.md` · *live* · git-tracked
@@ -3557,6 +3569,7 @@
 - `D:\heuresys-advanced\apps\web\src\lib\api\fetch.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\api\observability.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\api\public-stats.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\lib\contratto.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\enum-labels.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\hooks\use-debounced-value.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\hooks\use-paginated-list.ts` · *live* · git-tracked

@@ -25,12 +25,12 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
-| I-A | PRONTA |  |  |  | 12 |  |  | rigenerazione del semilavorato (W1); coda passo 13 in linea su copia |
-| I-B | PRONTA |  |  |  | 14 |  |  | fisica delle famiglie di semilavorato (W1, haiku) |
-| I-C | PRONTA |  |  |  | 15 |  |  | impronta dei controlli per nome (W1); seconda passata passo 16 dopo I-E |
-| I-D | PRONTA |  |  |  | 17 |  |  | registro di provenienza normalizzato + CONTEGGIO CONFLITTI PER D5 (W1, due lettori) |
-| I-F | PRONTA |  |  |  | 18 |  |  | ricetta del custode (W1); controprova rossa passo 19 in linea |
-| I-G | PRONTA |  |  |  | 20 |  |  | porte di piattaforma verso i clienti (W1); serve a R-0 |
+| I-A | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 12 |  |  | rigenerazione del semilavorato (W1); coda passo 13 in linea su copia |
+| I-B | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 14 |  |  | fisica delle famiglie di semilavorato (W1, haiku) |
+| I-C | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 15 |  |  | impronta dei controlli per nome (W1); seconda passata passo 16 dopo I-E |
+| I-D | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 17 |  |  | registro di provenienza normalizzato + CONTEGGIO CONFLITTI PER D5 (W1, due lettori) |
+| I-F | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 18 |  |  | ricetta del custode (W1); controprova rossa passo 19 in linea |
+| I-G | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 20 |  |  | porte di piattaforma verso i clienti (W1); serve a R-0 |
 | I-E | PRONTA |  |  |  | 21 |  |  | classificazione delle tabelle sys.sys_* (W2 a lotti) |
 | D5 | BLOCCATA(fase) | | | | | | | decisione RINVIATA da Enzo: si riapre come ATTESA_ENZO(D5: N conflitti) alla chiusura di I-D; la CLI NON decide |
 

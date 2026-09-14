@@ -1,0 +1,8 @@
+voce: I-A, I-B, I-C, I-D (due lettori: I-D numerica haiku + I-D-codice sonnet), I-F, I-G
+passi: 12, 14, 15, 17, 18, 20 (Fase 1, W1)
+script: workflows/W1_indagini.js (con la correzione spiaTrovata del commit 69a74657)
+args: {"cartella": ".programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148", "ts": "202609150148"}
+ora: 2026-09-15T01:48+02:00
+sessione: S1103
+guardiano al lancio: contesto 24.0% (239.634 token), finestra 5h 6.0%
+modelli: alias haiku/sonnet/opus come nel mandato

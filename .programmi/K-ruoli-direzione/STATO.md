@@ -15,7 +15,7 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 | F0.1 | CHIUSA | S1102 | 2026-09-14T22:30 | 4 | | | evidenze/baseline_202609142237.txt (prova di misura_k.py); dove_siamo.py exit 0 | stato e strumenti; dove_siamo.py stampa una PRONTA (post-condizione passo 4) |
 | F0.5 | CHIUSA | S1102 | 2026-09-14T22:39+02:00 | 5 |  |  | evidenze/F0.5_controprova.txt; esiti/F0.5_sola_lettura.md | q.py: sola lettura per costruzione (READ ONLY dal server), non per privilegio; heuresys senza CREATEROLE; heuresys_ro NOLOGIN e senza pay_slips |
 | F0.6 | CHIUSA | S1102 | 2026-09-14T22:44+02:00 | 6 |  |  | esiti/F0.6_migrazioni.md | runner=catena intera in ordine lessicale, nessun rifiuto dei buchi; registro sys_schema_migrations (411=411); via: scp+prova-idempotenza sul gemello, pg_dump_pre_k.sh sulla VM, push, pnpm db:migrate:vm; nessuna vista sys.v_* con righe |
-| F0.7 | PRONTA |  |  |  | 11 |  |  | i sei script .js dei workflow copiati e committati |
+| F0.7 | IN CORSO | S1102 | 2026-09-14T22:47+02:00 |  | 11 |  |  | i sei script .js dei workflow copiati e committati |
 | F0.2 | BLOCCATA(fase) | | | | 7 | | | censimento C1 dei sei oggetti (WORKFLOW W0) |
 | F0.3 | BLOCCATA(fase) | | | | 9 | | | baseline con misura_k.py; controprova exit 2 |
 | F0.4 | BLOCCATA(fase) | | | | 10 | | | controprova della ripresa (3.5): chiude e riapre la sessione per costruzione |

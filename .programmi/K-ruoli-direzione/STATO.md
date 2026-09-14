@@ -14,7 +14,7 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 |---|---|---|---|---|---|---|---|---|
 | F0.1 | CHIUSA | S1102 | 2026-09-14T22:30 | 4 | | | evidenze/baseline_202609142237.txt (prova di misura_k.py); dove_siamo.py exit 0 | stato e strumenti; dove_siamo.py stampa una PRONTA (post-condizione passo 4) |
 | F0.5 | CHIUSA | S1102 | 2026-09-14T22:39+02:00 | 5 |  |  | evidenze/F0.5_controprova.txt; esiti/F0.5_sola_lettura.md | q.py: sola lettura per costruzione (READ ONLY dal server), non per privilegio; heuresys senza CREATEROLE; heuresys_ro NOLOGIN e senza pay_slips |
-| F0.6 | PRONTA |  |  |  | 6 |  |  | indagine: come si applica UNA migrazione, registro, regola sui buchi |
+| F0.6 | IN CORSO | S1102 | 2026-09-14T22:44+02:00 |  | 6 |  |  | indagine: come si applica UNA migrazione, registro, regola sui buchi |
 | F0.7 | BLOCCATA(fase) | | | | 11 | | | i sei script .js dei workflow copiati e committati |
 | F0.2 | BLOCCATA(fase) | | | | 7 | | | censimento C1 dei sei oggetti (WORKFLOW W0) |
 | F0.3 | BLOCCATA(fase) | | | | 9 | | | baseline con misura_k.py; controprova exit 2 |

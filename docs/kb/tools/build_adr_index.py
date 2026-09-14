@@ -49,8 +49,11 @@ def norm(s: str) -> str:
 
 
 def campo(testa: str, nome: str) -> str:
-    """Legge un campo dell'header nei DUE formati in uso."""
-    for pat in (rf"^\*\*{nome}\*\*:\s*(.+)$", rf"^-\s*\*\*{nome}:\*\*\s*(.+)$"):
+    """Legge un campo dell'header nei TRE formati in uso. Il terzo — `- **Status**: **ACCEPTED**` —
+    e' quello di ADR-0039 e 0040 (2026-09): fino a S1101 l'indice li mostrava con status «—»,
+    cioe' un ADR accettato presentato come senza stato."""
+    for pat in (rf"^\*\*{nome}\*\*:\s*(.+)$", rf"^-\s*\*\*{nome}:\*\*\s*(.+)$",
+                rf"^-\s*\*\*{nome}\*\*:\s*(.+)$"):
         m = re.search(pat, testa, re.MULTILINE | re.IGNORECASE)
         if m:
             return norm(m.group(1))
@@ -74,7 +77,11 @@ def leggi_adr() -> list[dict]:
             titolo = norm(m.group(1)) if m else f.stem
         stato = campo(testa, "Status") or "—"
         # lo stato porta spesso una parentesi esplicativa: nella tabella basta la prima parola
-        stato_breve = stato.split("(")[0].split("—")[0].strip() or "—"
+        # ⚠ `norm` ha gia' trasformato «—» in «-», quindi lo split su «—» non scattava mai
+        # (latente finche' nessuno status portava una coda): si taglia anche su « - » e si
+        # toglie il grassetto, o «**ACCEPTED** - approvato da…» finisce intero nella colonna.
+        stato_breve = (stato.split("(")[0].split("—")[0].split(" - ")[0]
+                       .replace("**", "").strip() or "—")
         voci.append({
             "num": num, "file": f.name, "titolo": titolo,
             "stato": stato_breve, "data": campo(testa, "Date") or "—",

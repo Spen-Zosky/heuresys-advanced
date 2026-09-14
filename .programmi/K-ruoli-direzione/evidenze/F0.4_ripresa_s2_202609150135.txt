@@ -9,3 +9,29 @@ cat .handoff/session-id -> S1103   (alla chiusura di S1102 era S1102: DIVERSO ->
     K-PROVA 000416: FILE ASSENTE -> caso (iii): il numero e' prenotato, il file si scrive
     K-PROVA 000417: FILE ASSENTE -> caso (iii): il numero e' prenotato, il file si scrive
 
+
+## 000416 rollback — prova generale gemello, snapshot, applicazione VM
+OK: 389 migrations applied, 24 skipped (una-tantum gia' applicate).
+OK: 389 migrations applied, 24 skipped (una-tantum gia' applicate).
+[1m=== ESITO: VERDE — catena intera + sentinelle a zero sul database della CI (22s di catena) ===[0m
+snapshot: pg_dump_snapshots/pre-K-K-PROVA-000416_d4e4ad9_20260915_0137.dump (138194172 byte, VM)
+OK: 389 migrations applied, 24 skipped (una-tantum gia' applicate).
+
+## effetto RITIRATO letto da dove_siamo.py (query consapevole del ritiro)
+    K-PROVA 000415: 000415_prova_di_ripresa_k.sql  completo · registrata 2026-09-14T23:38+00:00 · effetto ASSENTE -> caso (i): file completo, effetto assente: si (ri)applica
+               query: select 1 from pg_views where schemaname='sys' and viewname='v_prova_ripresa_k'
+    K-PROVA 000416: 000416_rollback_di_000415.sql  completo · registrata 2026-09-14T23:38+00:00 · effetto ASSENTE -> caso (i): file completo, effetto assente: si (ri)applica
+               query: select 1 from pg_views where schemaname='sys' and viewname='v_prova_ripresa_k'
+
+## viste sul vivo (q.py)
+viewname
+v_prova_ripresa_k_ritirata
+
+## correzione a dove_siamo.py: i file _rollback_di_ si leggono al contrario (misurato: la 000416 era letta «caso (i): si riapplica»)
+    K-PROVA 000415: 000415_prova_di_ripresa_k.sql  completo · registrata 2026-09-14T23:38+00:00 · effetto ASSENTE -> RITIRATA da 000416 (rollback): NON si riapplica
+    K-PROVA 000416: 000416_rollback_di_000415.sql  completo · registrata 2026-09-14T23:38+00:00 · effetto ASSENTE -> ROLLBACK APPLICATO: l'effetto e' ritirato, NON si riapplica
+
+## caso (iv) — 000417 scritta SENZA -- FINE
+python tools/dove_siamo.py -> exit 1
+    K-PROVA 000417: 000417_incompleto_prova.sql  FILE INCOMPLETO (manca `-- FINE 000417`) -> caso (iv): si riscrive per intero  ROSSO
+ ESITO: ROSSO — vedi le righe marcate. Nessuna voce vera parte su un rosso.

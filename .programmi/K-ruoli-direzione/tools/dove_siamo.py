@@ -195,6 +195,12 @@ def main() -> int:
     if not prenotate:
         print("    nessuna voce ha una migrazione prenotata")
     for r in prenotate:
+        numeri = [n for n in re.split(r"[\s,;/]+", r["migrazione_prenotata"]) if re.fullmatch(r"\d{6}", n)]
+        # Un file `_rollback_di_` RITIRA l'effetto della voce: per lui «effetto ASSENTE» e' l'esito
+        # voluto, non un invito a riapplicare. Misurato in F0.4 (S1103): senza questa distinzione la
+        # 000416 veniva letta come «caso (i): si (ri)applica».
+        rollback_completi = [n for n in numeri
+                             if (fp := file_migrazione(n)) and "_rollback_di_" in os.path.basename(fp) and completa(fp, n)]
         for nnn in re.split(r"[\s,;/]+", r["migrazione_prenotata"]):
             if not re.fullmatch(r"\d{6}", nnn):
                 print(f"    {r['voce']}: prenotazione malformata «{nnn}» (atteso 000NNN)  ROSSO")
@@ -233,8 +239,15 @@ def main() -> int:
                         rosso = True
                         con.rollback()
             caso = ""
-            if effetto == "effetto PRESENTE":
+            e_rollback = "_rollback_di_" in nome
+            if e_rollback and effetto == "effetto ASSENTE":
+                caso = " -> ROLLBACK APPLICATO: l'effetto e' ritirato, NON si riapplica"
+            elif e_rollback and effetto == "effetto PRESENTE":
+                caso = " -> rollback NON applicato: l'effetto c'e' ancora, si applica il rollback"
+            elif effetto == "effetto PRESENTE":
                 caso = " -> caso (ii): applicata, passa alla post-condizione"
+            elif effetto == "effetto ASSENTE" and rollback_completi:
+                caso = f" -> RITIRATA da {', '.join(rollback_completi)} (rollback): NON si riapplica"
             elif effetto == "effetto ASSENTE":
                 caso = " -> caso (i): file completo, effetto assente: si (ri)applica"
             print(f"    {r['voce']} {nnn}: {nome}  completo · {registro} · {effetto}{caso}")

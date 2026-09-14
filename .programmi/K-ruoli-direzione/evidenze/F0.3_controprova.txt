@@ -1,0 +1,7 @@
+CONTROPROVA misura_k.py — 2026-09-14T23:19:00+02:00
+modifica: TABELLE_AMMINISTRATIVE[12] = sys_overtime_INESISTENTE_CONTROPROVA (nel file dello script, non nel database)
+baseline presenti prima: 3
+NON MISURABILE: tabella amministrativa inesistente: sys.sys_overtime_INESISTENTE_CONTROPROVA
+baseline NON scritto: un baseline a meta' e' peggio di nessun baseline.
+exit=2
+baseline presenti dopo: 3

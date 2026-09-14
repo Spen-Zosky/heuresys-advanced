@@ -696,3 +696,88 @@ sessione Cowork non ha accesso al browser del PC di Enzo).
 
 Nessun file committato in questo passaggio, come da accordo (Cowork prepara
 e basta; CLI revisiona e committa).
+
+
+---
+
+## 2026-09-14 — Cowork: le due voci WAIT-INPUT sono sciolte ed eseguite (#250 e #240)
+
+Enzo ha risposto a entrambe le domande che la dashboard di avvio gli ha presentato: «1. Sì cancella — 2. rimuovere». Le due azioni sono state eseguite in questa sessione Cowork, con censimento preventivo. Niente è stato committato: la CLI revisiona e registra lo stato, come da contratto.
+
+### #250 — il fattore TOTP di Enzo è stato cancellato
+
+Censimento `chi_sorveglia.py sys_auth_mfa_factors`: tre sentinelle (`v_history_cascade_to_users`, `v_mfa_secrets_in_cleartext`, `v_persona_senza_secondo_fattore`), sei scrittori, dieci migrazioni. Verificato che **nessuna migrazione inserisce fattori MFA** (zero `INSERT INTO sys_auth_mfa_factors` in `db/migrations/`), quindi la catena non disfa la cancellazione al prossimo deploy — ADR-0035 non morde qui.
+
+Riga cancellata: `auth_mfa_factor_id = d41f7022-68f4-4b50-8337-446fcc3f0f85`, TOTP verificato, metadata `{"label": "derived-access"}`, creata 2026-08-07, utente `enzo.spenuso@heuresys.com`. Unico fattore suo.
+
+Giornale prima della DELETE, **dentro il database** e non su file, perché la riga contiene un segreto: `staging.undo_250_mfa_enzo` (una riga, con `COMMENT ON TABLE` che dichiara il rollback). Rollback: `INSERT INTO sys.sys_auth_mfa_factors SELECT * FROM staging.undo_250_mfa_enzo;`.
+
+Guardie e post-condizioni dentro la stessa transazione, tutte passate: giornale a esattamente una riga · fattori a 159 prima (altrimenti stop, lo stato era cambiato sotto) · fattori a 158 dopo · zero fattori residui per Enzo. Esito psql: `DELETE 1`, `COMMIT`.
+
+**Conseguenza da conoscere, transitoria**: `sys.v_persona_senza_secondo_fattore` passa da 2 a 3 righe e mostra `enzo.spenuso@heuresys.com` con `attesa_per_decisione = false`, cioè nella forma di un residuo invece che di un'attesa. La vista è **informativa e non pretende zero righe** (lo dice il suo stesso commento e la 000380 la vuole in `INFORMATIVE` di `db_health.py`), quindi nessun cancello si accende. La riga sparisce da sé quando Enzo completa l'iscrizione al primo login. Se restasse lì a lungo, la cura non è allargare la vista: è che l'iscrizione non è stata fatta.
+
+**Resta da fare a Enzo**: un login su `https://www.heuresys.com` con la sua password. La piattaforma chiede l'iscrizione al secondo fattore e mostra il QR: da lì il segreto è suo. Dopo quel login, `#250` è chiudibile.
+
+### #240 — i due worktree `gov/w1` e `gov/w2` non ci sono più
+
+Il register diceva «contenuto superato»: era un'ipotesi, ed è stata misurata prima di cancellare. I tre commit non presenti in `main` portavano due cose. (a) `.claude/sessione/AVVIO.md` e `CHIUSURA.md`, che **esistono già in main** — quel lavoro è nel ramo principale per altra via. (b) `docs/MVP_4_ROADMAP.md`, che **in main non esiste più**: lo ha archiviato il commit `f60b89e6` («i sette documenti d'ingresso obsoleti archiviati o corretti»), quindi il commit di `w2` emendava un documento già mandato in archivio. Entrambi i worktree erano puliti (zero file modificati), ri-verificato immediatamente prima del comando.
+
+Eseguito: `git worktree remove` su entrambi, poi `git branch -D gov/w1 gov/w2` (`was 0b143623`, `was f2c36534`). `git worktree list` ora mostra solo `D:/heuresys-advanced f20ca534 [main]`; zero rami `gov/*`.
+
+Le due directory fisiche erano rimaste su disco (166.274 file, quasi tutti `node_modules`). Prima di toccarle: confronto dei percorsi relativi di `sessioni/` e `qa_artifacts/` — gli unici contenuti non tracciati che potevano essere unici — contro `D:\heuresys-advanced`: **zero file assenti dal repo principale** (confronto per percorso, non per contenuto). Rimosse entrambe; `D:\heuresys-gov-workers` resta con il solo `.heuresys-session-mode`.
+
+### Fuori da questo ciclo
+
+La dashboard di avvio segnala `derivati: 2/3 superati` → `python docs/kb/tools/build_derivati.py`. Non toccato in questa sessione.
+
+### #250 — CHIUSA: Enzo è entrato, il secondo fattore è suo (2026-09-14, stessa sessione)
+
+Enzo ha completato l'iscrizione. Misurato subito dopo, sul database vivo:
+
+- un fattore `TOTP` **verificato** a suo nome, creato `2026-09-14 13:56:04+00` e **già usato** alle `13:57:20+00` — cioè il codice dell'app ha superato il passo due;
+- fattori totali di nuovo **159** (erano 158 dopo la cancellazione): +1, e nessun altro toccato;
+- `sys.v_persona_senza_secondo_fattore` tornata a **2 righe**, solo `andrea.spenuso` e `chiara.spenuso`, entrambe `attesa_per_decisione = true`. Il nome di Enzo è sparito da sé, come previsto;
+- `sys.v_mfa_secrets_in_cleartext`: **0**;
+- `verify-separazione-totp`: **159 esaminati · 159 cifrati a riposo · 0 non leggibili · 0 ancora derivabili dalla chiave madre**, con la controprova superata. Il segreto nuovo non è ricostruibile da nessuna chiave: è il primo corno di `#169` F4, e regge.
+
+Il giornale `staging.undo_250_mfa_enzo` ha esaurito la sua ragione d'essere: reinserirlo ora ridarebbe a Enzo il vecchio fattore casuale accanto a quello vero. **Non lo cancello io** (Cowork non cancella di iniziativa, e la tabella l'ho creata fuori dalla catena delle migrazioni): la CLI decida se ritirarla e come, sapendo che contiene un segreto ormai morto.
+
+**Nota per chi registra lo stato**: la password di `enzo.spenuso@heuresys.com` resta **derivata** dalla chiave madre (Z-262 / `#139`). Il secondo fattore ora è l'unica cosa che separa quella chiave dal suo account. Enzo è stato informato e ha davanti la scelta — entrare in `REAL_PERSON_EMAILS` e scegliersi una password — ma non l'ha chiesta: non è una pendenza, è un'opzione nominata.
+
+### Un fatto d'ambiente, per chi apre sessioni Cowork
+
+`device_bash` non parte più su questo PC (errore `Workspace unavailable`, causa attribuita a un aggiornamento Windows dell'8 settembre): da Cowork **non si raggiungono VM Oracle e PC Linux via SSH**. Registrato in `~/.claude/reference/cowork-tooling.md` insieme alla diagnosi dell'estensione Claude in Chrome, che oggi risultava scollegata solo perché non autenticata.
+
+### 2026-09-14 — reperti misurati intorno a RBAC e al tenant RTL Bank (Cowork, stessa sessione)
+
+Emersi rispondendo a due domande di Enzo — «voglio entrare come HR manager di RTL» e «perché RTL ha 160 persone?». Tutti misurati sul database vivo il 2026-09-14. Nessun file di `docs/kb/` toccato: questa è la proposta, la CLI decida cosa adottare.
+
+**1. «Utenti attivi di RTL» non è «persone di RTL», e io ho sbagliato la parola.** Avevo scritto «160 persone attive»: la misura contava utenti, non persone. Scomposti per `user_type`: **158 STANDARD + 2 SERVICE**. Enzo ha contestato il numero e aveva ragione. È DIF-4 applicato: la frase era più larga della misura. Dove un conteggio serve a dire «quante persone ha l'azienda cliente», il filtro su `user_type` non è un dettaglio.
+
+**2. Le tre personas di collaudo sono infrastruttura, e la domanda era già stata decisa.** `piattaforma@collaudo.invalid` (Heuresys System, `PLATFORM_ADMIN`), `governo@collaudo.invalid` (RTL Bank, `TENANT_ADMIN`), `persona@collaudo.invalid` (RTL Bank, `USER`) — una per livello di autorità, usate dalle prove live del Tenant Builder (`prova-live-206`, `prova-132-f7-*`, `percorri-dominio`) e nominate da tre migrazioni. La `000360` le aveva già esaminate come sospetti residui il 2026-08-28 e respinte per iscritto: «infrastruttura voluta, non residuo. Non si toccano.» Confermato: servono, e la loro unica conseguenza è il punto 1.
+
+**3. Le due HR manager di RTL non sono intercambiabili.** `valentina.conti` dirige la **Divisione Risorse Umane e Organizzazione** (riporta alla Direzione Generale, 2 livelli sopra di lei, sottoalbero 3 unità / 6 posizioni) e porta **quattro** ruoli: `HRMS_MANAGER` + `ORG_DIRECTOR` + `TEAM_LEADER` + `USER`. `maria.colombo` dirige l'**Ufficio Amministrazione del Personale**, che riporta alla divisione di Valentina (3 livelli sopra, sottoalbero 1 unità / 2 posizioni), e porta solo `HRMS_MANAGER` + `USER`. Sul mandato HR sono equivalenti (I22, tenant-wide); differiscono sugli altri assi.
+
+**4. L'isolamento del whistleblowing è verificabile, non solo dichiarato.** Su 231 permessi, `PLATFORM_ADMIN` ne ha **229**: i due che gli mancano sono esattamente `whistleblowing:read` e `whistleblowing:manage`, appartenenti al solo `WHISTLEBLOWING_CUSTODIAN` (una persona). ADR-0036 §5 regge alla misura. Vale la pena che questa query viva in uno strumento invece che in una chat: è una sentinella naturale.
+
+**5. Reperto minore: `BRANCH_MANAGER` non ha `auth_role_category`.** È l'unico dei 14 ruoli col campo vuoto (gli altri sono `functional` o `hierarchical_operational`), e lo portano 10 persone. Non è un cancello, quindi non rompe niente, ma è una classificazione mancante su un ruolo tutt'altro che marginale.
+
+**Documento prodotto per Enzo** (non tecnico, in italiano semplice): `C:\Users\enzospenuso\Claude Desktop\heuresys-advanced\sessioni\session_2026-09-14_decisioni-250-240\RBAC_come-funziona-davvero.md` — spiega i due assi, i quattro stati, le quattro eccezioni, con i numeri misurati e il comando per rigenerarli. Se ha valore anche per il progetto, la CLI valuti se adottarlo sotto `docs/` invece di lasciarlo nel workspace di sessione.
+
+### 2026-09-14 — CONSEGNA: migrazione `000414` pronta, provata a vuoto, NON applicata e NON committata
+
+Su mandato di Enzo («falla diventare una sentinella e sistemiamo BRANCH_MANAGER perche' e' un ruolo chiave in una organizzazione»). Il file e' nel working tree, non tracciato:
+
+`db/migrations/000414_un_ruolo_chiave_dichiara_la_sua_famiglia_e_il_whistleblowing_ha_una_guardia.sql`
+
+**Cosa fa.** (1) `UPDATE` guardato che dichiara `BRANCH_MANAGER` come `hierarchical_operational` — solo se il campo e' ancora vuoto, così una decisione diversa presa nel frattempo non viene disfatta. (2) `CREATE OR REPLACE VIEW sys.v_whistleblowing_fuori_dal_custode`, sentinella **bloccante** per costruzione (zero righe attese; `db_health.py` raccoglie da `pg_views` e pretende zero da ogni `v_*` non dichiarata `INFORMATIVE`, quindi non serve registrarla altrove).
+
+**Perche' quella famiglia, con evidenza e non per analogia.** Tutte e **dieci** le persone che portano `BRANCH_MANAGER` dirigono esattamente un'unita', e tutte e dieci quelle unita' sono di tipo `BRANCH`. I suoi 13 permessi sono un sottoinsieme perfetto di `MANAGER`, gia' `hierarchical_operational`. E sono quasi tutti `:self` piu' due `branch:*`: il potere del ruolo non sta nei permessi, sta nelle persone che la filiale contiene — cioe' nell'asse gerarchico.
+
+**Perche' NON e' stata emendata la `000272`, che crea il ruolo.** La domanda di ADR-0035 e' stata posta, non saltata. Quella INSERT ha `ON CONFLICT DO NOTHING` e non nomina `auth_role_category`: su un database esistente non tocca nulla, quindi emendarla non curerebbe la produzione; su uno costruito da zero la `000414` gira comunque dopo nella stessa catena e corregge lo stesso. Cambierebbe l'impronta di un file storico senza aggiungere copertura. Verificato che l'impronta **non e' un cancello**: `migrate.ps1` la usa solo per saltare le migrazioni marcate `@migrate: once`, non per rifiutare un file cambiato.
+
+**Le prove, che sanno fallire.** Dentro la migrazione: la sentinella deve nascere verde (altrimenti si starebbe installando un allarme che suona sempre, ed esce in eccezione); il custode deve possedere davvero i permessi (altrimenti il verde nasce dall'assenza della funzione, non dalla protezione — e' il falso verde che la prova esiste per prendere); e una **controprova** su quattro righe finte che pretende **2 violazioni viste e 2 righe legittime non marcate**, perche' una prova che non sa dire di no non e' una prova. Piu' la post-condizione che protegge cio' che non doveva cambiare: zero ruoli senza famiglia dopo l'UPDATE.
+
+**Stato della verifica, dichiarato per intero.** L'intero file e' stato eseguito sul database di produzione dentro una transazione chiusa da `ROLLBACK`: esito `UPDATE 1` · `CREATE VIEW` · `COMMENT` · NOTICE «0 violazioni, 2 permessi in custodia, controprova superata» · `ROLLBACK`. Ri-misurato subito dopo: `BRANCH_MANAGER` ha ancora la categoria vuota e la vista non esiste — la prova non ha lasciato niente. **Non e' stata eseguita `ci-rehearsal.sh`**: gira sul gemello, e da Cowork il canale Linux e' fuori uso (`device_bash`, dal 2026-09-08). Chi applica faccia PRIMA la prova generale — e' il cancello che questa migrazione non ha potuto attraversare. Applicazione: `pnpm db:migrate:vm` (17 s sulla VM contro ~80 minuti da Windows).
+
+**Atteso dopo l'applicazione**: sentinelle da 49/49 a **50/50** a zero.

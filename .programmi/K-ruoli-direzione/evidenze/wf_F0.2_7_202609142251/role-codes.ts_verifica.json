@@ -1,0 +1,97 @@
+{
+  "insiemi": [
+    {
+      "nome": "sentinelle",
+      "comando_1": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname from pg_views where schemaname='sys' and definition ilike '%role_code%'\"",
+      "atteso": 10,
+      "ottenuto_query1": 3,
+      "elementi_query1": [
+        "sys.v_esco_mappature_inaffidabili",
+        "sys.v_residui_di_collaudo_in_produzione",
+        "sys.v_whistleblowing_fuori_dal_custode"
+      ],
+      "comando_2": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname from pg_views where schemaname='sys' and (definition ilike '%PLATFORM_ADMIN%' or definition ilike '%TENANT_ADMIN%' or definition ilike '%HRMS_MANAGER%' or definition ilike '%BRANCH_MANAGER%' or definition ilike '%WHISTLEBLOWING_CUSTODIAN%')\"",
+      "ottenuto_query2": 1,
+      "elementi_query2": [
+        "sys.v_whistleblowing_fuori_dal_custode"
+      ],
+      "unione_deduplicata": 3,
+      "discrepanza": "numero atteso 10, ottenuto 3 (unione deduplicata delle due query)"
+    },
+    {
+      "nome": "cancelli",
+      "comando": "rg --no-ignore --hidden -l \"ROLE_CODES|RoleCode|role-codes\" D:/heuresys-advanced/apps/api/test ; rg --no-ignore --hidden -l \"ROLE_CODES|RoleCode|role-codes\" D:/heuresys-advanced/.github ; rg --no-ignore -n \"ROLE_CODES|RoleCode|role-codes|role-lists-drift\" D:/heuresys-advanced/docs/kb/tools/verify_gate.py D:/heuresys-advanced/db/scripts/ci-rehearsal.sh",
+      "atteso": 1,
+      "ottenuto": 1,
+      "elementi": [
+        "apps/api/test/unit/role-lists-drift.unit.test.ts"
+      ],
+      "risultato": "CONFERMATO"
+    },
+    {
+      "nome": "test",
+      "comando": "rg --no-ignore --hidden -l \"ROLE_CODES|RoleCode|role-codes\" D:/heuresys-advanced/apps/api/test",
+      "atteso": 10,
+      "ottenuto": 12,
+      "totale_file": 12,
+      "escludendo_cancello": 11,
+      "elementi": [
+        "apps/api/test/dashboards-f2.integration.test.ts",
+        "apps/api/test/domains-f6.integration.test.ts",
+        "apps/api/test/delegations.integration.test.ts",
+        "apps/api/test/domain-derived-sections.integration.test.ts",
+        "apps/api/test/domains-f7.integration.test.ts",
+        "apps/api/test/me-interfaces.integration.test.ts",
+        "apps/api/test/scope-audit.integration.test.ts",
+        "apps/api/test/scope-resolver.integration.test.ts",
+        "apps/api/test/scope-peer-isolation.integration.test.ts",
+        "apps/api/test/semantic-matching-self-only.integration.test.ts",
+        "apps/api/test/semantic-matching.integration.test.ts",
+        "apps/api/test/unit/role-lists-drift.unit.test.ts"
+      ],
+      "discrepanza": "numero atteso 10, ottenuto 11 (12 - 1 cancello)"
+    },
+    {
+      "nome": "scrittori",
+      "comando": "rg --no-ignore --hidden -il \"INSERT INTO sys\\.sys_auth_roles\" D:/heuresys-advanced/db/migrations ; rg --no-ignore -n \"RoleCode|insertRoleGrant|revokeRoleGrant\" D:/heuresys-advanced/apps/api/src/modules/users/service.ts ; rg --no-ignore -n \"insert|update\" D:/heuresys-advanced/apps/api/src/modules/users/repository.ts",
+      "atteso": 8,
+      "ottenuto": 8,
+      "elementi": [
+        "db/migrations/000005_auth_foundation.sql",
+        "db/migrations/000045_rbac_role_category_and_ceo.sql",
+        "db/migrations/000054_r1b_teams_and_roles.sql",
+        "db/migrations/000145_capability_rbac_seed.sql",
+        "db/migrations/000181_whistleblowing.sql",
+        "db/migrations/000272_branch_manager_role_and_dashboard.sql",
+        "apps/api/src/modules/users/service.ts",
+        "apps/api/src/modules/users/repository.ts"
+      ],
+      "risultato": "CONFERMATO"
+    },
+    {
+      "nome": "creatore",
+      "comando": "rg --no-ignore -n \"migration 000005|AUTH_SECURITY_PLAN\" D:/heuresys-advanced/packages/shared/src/schemas/role-codes.ts ; rg --no-ignore -n \"CREATE TABLE.*sys_auth_roles\" D:/heuresys-advanced/db/migrations/000005_auth_foundation.sql",
+      "atteso": 1,
+      "ottenuto": 1,
+      "elementi": [
+        "db/migrations/000005_auth_foundation.sql (CREATE TABLE sys.sys_auth_roles — riga 221) + docs/security/AUTH_SECURITY_PLAN.md §2.8"
+      ],
+      "risultato": "CONFERMATO"
+    }
+  ],
+  "discrepanze": [
+    {
+      "comando": "sentinelle (union di due query su pg_views)",
+      "atteso": 10,
+      "ottenuto": 3
+    },
+    {
+      "comando": "test (file in apps/api/test meno cancello)",
+      "atteso": 10,
+      "ottenuto": 11
+    }
+  ],
+  "oggetto": "role-codes.ts (packages/shared/src/schemas/role-codes.ts — ROLE_CODES / RoleCode / RoleCodeSchema)",
+  "data_verifica": "2026-09-14",
+  "verificatore": "Claude Haiku 4.5"
+}

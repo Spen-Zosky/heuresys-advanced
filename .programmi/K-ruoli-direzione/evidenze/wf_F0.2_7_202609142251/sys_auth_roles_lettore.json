@@ -1,0 +1,94 @@
+{
+  "oggetto": "sys.sys_auth_roles",
+  "insiemi": [
+    {
+      "nome": "sentinelle",
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_auth_roles%'\"",
+      "numero": 1,
+      "elementi": [
+        "sys.v_whistleblowing_fuori_dal_custode"
+      ],
+      "output_grezzo": "viewname,definition\nv_whistleblowing_fuori_dal_custode,\" SELECT r.auth_role_code AS ruolo_estraneo,\n    r.auth_role_category AS famiglia_del_ruolo,\n    p.auth_permission_code AS permesso,\n    ( SELECT count(DISTINCT ur.user_auth_role_user_id) AS count\n           FROM sys.sys_user_auth_roles ur\n          WHERE ((ur.user_auth_role_role_id = r.auth_role_id) AND (ur.user_auth_role_revoked_at IS NULL))) AS persone_che_lo_portano\n   FROM ((sys.sys_auth_role_permissions rp\n     JOIN sys.sys_auth_roles r ON ((r.auth_role_id = rp.auth_role_id)))\n     JOIN sys.sys_auth_permissions p ON ((p.auth_permission_id = rp.auth_permission_id)))\n  WHERE (((p.auth_permission_code)::text ~~ 'whistleblowing:%'::text) AND ((r.auth_role_code)::text <> 'WHISTLEBLOWING_CUSTODIAN'::text));\""
+    },
+    {
+      "nome": "cancelli",
+      "comando": "rg --no-ignore --hidden -l \"sys_auth_roles\" apps/api/test apps/api/tests apps/web/test apps/web/tests  |  rg --no-ignore --hidden -l \"sys_auth_roles\" scripts  |  rg --no-ignore --hidden -l \"sys_auth_roles\" audit  |  rg --no-ignore --hidden -l \"sys_auth_roles\" .github/workflows",
+      "numero": 39,
+      "elementi": [
+        "apps/api/test/delegations.integration.test.ts",
+        "apps/api/test/chain-threshold-surfaces.integration.test.ts",
+        "apps/api/test/dashboards-f2.integration.test.ts",
+        "apps/api/test/chain-threshold-pay.integration.test.ts",
+        "apps/api/test/capability-composition-scope.integration.test.ts",
+        "apps/api/test/chain-threshold-analytics.integration.test.ts",
+        "apps/api/test/compensation-scope.integration.test.ts",
+        "apps/api/test/compensation-read.integration.test.ts",
+        "apps/api/test/domains-f7.integration.test.ts",
+        "apps/api/test/evaluation-rbac-perimeter.integration.test.ts",
+        "apps/api/test/insights-scope.integration.test.ts",
+        "apps/api/test/domains-f6.integration.test.ts",
+        "apps/api/test/domain-derived-sections.integration.test.ts",
+        "apps/api/test/hrms-plenipotentiary.integration.test.ts",
+        "apps/api/test/me-interfaces.integration.test.ts",
+        "apps/api/test/me-self-completeness-f5.integration.test.ts",
+        "apps/api/test/helpers/org-actors.ts",
+        "apps/api/test/landing-derivation.integration.test.ts",
+        "apps/api/test/job-roles.integration.test.ts",
+        "apps/api/test/helpers/actors.ts",
+        "apps/api/test/performance-reviews.integration.test.ts",
+        "apps/api/test/provisioning.integration.test.ts",
+        "apps/api/test/rbac-delete-permissions.test.ts",
+        "apps/api/test/rbac-tenant-admin-allowlist.test.ts",
+        "apps/api/test/scope-audit.integration.test.ts",
+        "apps/api/test/semantic-matching-substrate.integration.test.ts",
+        "apps/api/test/semantic-matching-self-only.integration.test.ts",
+        "apps/api/test/scope-peer-isolation.integration.test.ts",
+        "apps/api/test/teams-functional-axis.integration.test.ts",
+        "apps/api/test/scope-resolver.integration.test.ts",
+        "apps/api/test/user-dossier-sections.integration.test.ts",
+        "apps/api/test/whistleblowing.integration.test.ts",
+        "apps/api/test/whistleblowing-isolation.integration.test.ts",
+        "apps/api/test/two-axis-f4-crosstree.integration.test.ts",
+        "audit/vm-deploy3.log [NOTA: log psql di deploy, non un'asserzione — righe NOTICE sulla migrazione 000005/000045, non un vero cancello]",
+        "audit/close-propagate2.log [NOTA: idem]",
+        "audit/close-propagate.log [NOTA: idem]",
+        "audit/vm-deploy2.log [NOTA: idem]",
+        "audit/vm-deploy.log [NOTA: idem]"
+      ],
+      "output_grezzo": "apps/api/tests: Impossibile trovare il file specificato (os error 2, la dir non esiste) | apps/web/test: idem (non esiste) | apps/web/tests: esiste, 0 match | 34 file elencati sotto apps/api/test (comando: rg --no-ignore --hidden -l \"sys_auth_roles\" apps/api/test apps/api/tests apps/web/test apps/web/tests) | scripts/: (Bash completed with no output) → 0 match | .github/workflows: (Bash completed with no output) → 0 match | audit/: vm-deploy3.log, close-propagate2.log, close-propagate.log, vm-deploy2.log, vm-deploy.log — contenuto verificato con `rg --no-ignore --hidden -n \"sys_auth_roles\" audit/vm-deploy.log`: righe tipo '146:psql:.../000005_auth_foundation.sql:228: NOTICE: relation \"sys_auth_roles\" already exists, skipping' — sono log di applicazione migrazioni, non asserzioni di un cancello CI"
+    },
+    {
+      "nome": "test",
+      "comando": "rg --no-ignore --hidden -l \"sys_auth_roles\" --glob \"*test*\" -g \"!apps/api/test/**\" -g \"!db/migrations/**\" -g \"!apps/api/src/**\"",
+      "numero": 0,
+      "elementi": [],
+      "output_grezzo": "(Bash completed with no output) — nessun file di test, oltre a quelli già in 'cancelli' (tutti sotto apps/api/test), nomina sys_auth_roles. Confermato anche puntualmente: rg --no-ignore --hidden -l \"sys_auth_roles\" apps/web → nessun output; rg --no-ignore --hidden -l \"sys_auth_roles\" apps/agent-gateway apps/showcase → nessun output. NOTA: l'insieme 'cancelli' sopra, per come è definito nel mandato (test+CI cercati nelle stesse cartelle), esaurisce di fatto anche questo insieme: i 34 file apps/api/test SONO i cancelli veri (suite vitest che blocca la CI); qui non ne resta nessun altro."
+    },
+    {
+      "nome": "scrittori",
+      "comando": "rg --no-ignore --hidden -l \"INSERT INTO sys\\.sys_auth_roles|UPDATE sys\\.sys_auth_roles\" db/migrations   |   rg --no-ignore --hidden -n \"INSERT INTO sys\\.sys_auth_roles|UPDATE sys\\.sys_auth_roles|UPDATE sys_auth_roles\" apps/api/src",
+      "numero": 7,
+      "elementi": [
+        "db/migrations/000005_auth_foundation.sql",
+        "db/migrations/000045_rbac_role_category_and_ceo.sql",
+        "db/migrations/000054_r1b_teams_and_roles.sql",
+        "db/migrations/000145_capability_rbac_seed.sql",
+        "db/migrations/000181_whistleblowing.sql",
+        "db/migrations/000272_branch_manager_role_and_dashboard.sql",
+        "db/migrations/000414_un_ruolo_chiave_dichiara_la_sua_famiglia_e_il_whistleblowing_ha_una_guardia.sql",
+        "EXTRA fuori dallo scope stretto del mandato (non è né db/migrations né apps/api/src, trovato cercando 'scripts' come chiedeva l'insieme cancelli): db/scripts/populate-reference-translations-governance.sql — scrive con UPDATE sys.sys_auth_roles SET auth_role_name=..., auth_role_description=... WHERE auth_role_code=... (13 righe UPDATE, una per ruolo)"
+      ],
+      "output_grezzo": "db/migrations con INSERT/UPDATE su sys_auth_roles: 000005_auth_foundation.sql, 000045_rbac_role_category_and_ceo.sql, 000054_r1b_teams_and_roles.sql, 000145_capability_rbac_seed.sql, 000181_whistleblowing.sql, 000272_branch_manager_role_and_dashboard.sql, 000414_un_ruolo_chiave_dichiara_la_sua_famiglia_e_il_whistleblowing_ha_una_guardia.sql (7 file, su 66 che lo NOMINANO in totale — comando: rg --no-ignore --hidden -c \"sys_auth_roles\" db/migrations | wc -l → 66) | apps/api/src: rg --no-ignore --hidden -n \"INSERT INTO sys\\.sys_auth_roles|UPDATE sys\\.sys_auth_roles|UPDATE sys_auth_roles\" apps/api/src → (Bash completed with no output): NESSUN file in apps/api/src scrive sys_auth_roles. I 6 file trovati per il solo nome (users/repository.ts, auth/repository.ts, auth/cache-loader.ts, public-stats/repository.ts, tenant-import-runs/repository.ts, middleware/rbac.ts) lo usano SOLO in lettura (JOIN/SELECT), verificato riga per riga. | Trovato in più (fuori scope stretto) grepando 'scripts': db/scripts/populate-reference-translations-governance.sql, righe 8,11,14,17,20,23,26,29,32,35,38,41,44 — 'UPDATE sys.sys_auth_roles SET auth_role_name = ... WHERE auth_role_code = ...'"
+    },
+    {
+      "nome": "creatore",
+      "comando": "rg --no-ignore --hidden -n \"CREATE TABLE.*sys_auth_roles|CREATE TABLE IF NOT EXISTS sys.sys_auth_roles\" db/migrations",
+      "numero": 1,
+      "elementi": [
+        "db/migrations/000005_auth_foundation.sql:221:CREATE TABLE IF NOT EXISTS sys.sys_auth_roles ("
+      ],
+      "output_grezzo": "db/migrations\\000005_auth_foundation.sql:221:CREATE TABLE IF NOT EXISTS sys.sys_auth_roles ("
+    }
+  ],
+  "non_misurato": []
+}

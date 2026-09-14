@@ -1,0 +1,73 @@
+{
+  "oggetto": "role-codes.ts (packages/shared/src/schemas/role-codes.ts — ROLE_CODES / RoleCode / RoleCodeSchema)",
+  "insiemi": [
+    {
+      "nome": "sentinelle",
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname from pg_views where schemaname='sys' and definition ilike '%role_code%'\"  |  python .programmi/K-ruoli-direzione/tools/q.py \"select viewname from pg_views where schemaname='sys' and (definition ilike '%PLATFORM_ADMIN%' or definition ilike '%TENANT_ADMIN%' or definition ilike '%HRMS_MANAGER%' or definition ilike '%BRANCH_MANAGER%' or definition ilike '%WHISTLEBLOWING_CUSTODIAN%')\"",
+      "numero": 3,
+      "elementi": [
+        "sys.v_esco_mappature_inaffidabili",
+        "sys.v_residui_di_collaudo_in_produzione",
+        "sys.v_whistleblowing_fuori_dal_custode"
+      ],
+      "output_grezzo": "query1: viewname / v_esco_mappature_inaffidabili / v_residui_di_collaudo_in_produzione / v_whistleblowing_fuori_dal_custode | query2 (letterali di ruolo): viewname / v_whistleblowing_fuori_dal_custode (unione delle due, deduplicata)"
+    },
+    {
+      "nome": "cancelli",
+      "comando": "rg --no-ignore --hidden -l \"ROLE_CODES|RoleCode|role-codes\" D:/heuresys-advanced/apps/api/test  ;  rg --no-ignore --hidden -l \"ROLE_CODES|RoleCode|role-codes\" D:/heuresys-advanced/.github  ;  rg --no-ignore -n \"ROLE_CODES|RoleCode|role-codes|role-lists-drift\" D:/heuresys-advanced/docs/kb/tools/verify_gate.py D:/heuresys-advanced/db/scripts/ci-rehearsal.sh",
+      "numero": 1,
+      "elementi": [
+        "apps/api/test/unit/role-lists-drift.unit.test.ts"
+      ],
+      "output_grezzo": "apps/api/test/unit/role-lists-drift.unit.test.ts si dichiara nel proprio header 'apps/api/test/unit/role-lists-drift.unit.test.ts — #99 F3 ... Questo cancello legge il sorgente e fallisce quando compare una lista nuova' e contiene il regex DICHIARAZIONE = /(?:ReadonlySet<RoleCode>|:\\s*RoleCode\\[\\])\\s*=\\.../g che scansiona TUTTO il repo per liste RoleCode duplicate. La ricerca su .github non ha prodotto output (nessun workflow CI lo cita per nome); verify_gate.py e ci-rehearsal.sh non lo citano per nome (lo eseguono solo indirettamente, dentro la corsa generica di `pnpm test`)."
+    },
+    {
+      "nome": "test",
+      "comando": "rg --no-ignore --hidden -l \"ROLE_CODES|RoleCode|role-codes\" D:/heuresys-advanced/apps/api/test",
+      "numero": 10,
+      "elementi": [
+        "apps/api/test/dashboards-f2.integration.test.ts",
+        "apps/api/test/domains-f6.integration.test.ts",
+        "apps/api/test/delegations.integration.test.ts",
+        "apps/api/test/domain-derived-sections.integration.test.ts",
+        "apps/api/test/domains-f7.integration.test.ts",
+        "apps/api/test/me-interfaces.integration.test.ts",
+        "apps/api/test/scope-audit.integration.test.ts",
+        "apps/api/test/scope-resolver.integration.test.ts",
+        "apps/api/test/scope-peer-isolation.integration.test.ts",
+        "apps/api/test/semantic-matching-self-only.integration.test.ts",
+        "apps/api/test/semantic-matching.integration.test.ts"
+      ],
+      "output_grezzo": "elenco completo dei file trovati da rg sotto apps/api/test: 12 file totali; escluso role-lists-drift.unit.test.ts (già classificato come cancello), restano gli 11 sopra elencati come 'test' generici che nominano RoleCode/ROLE_CODES incidentalmente. Nessun hit in apps/web/test, apps/web/tests, apps/showcase, packages/shared/src (nessun file di test lì)."
+    },
+    {
+      "nome": "scrittori",
+      "comando": "rg --no-ignore --hidden -il \"INSERT INTO sys\\.sys_auth_roles\" D:/heuresys-advanced/db/migrations  ;  rg --no-ignore -n \"RoleCode|insertRoleGrant|revokeRoleGrant\" D:/heuresys-advanced/apps/api/src/modules/users/service.ts  ;  rg --no-ignore -n \"insert|update\" D:/heuresys-advanced/apps/api/src/modules/users/repository.ts",
+      "numero": 8,
+      "elementi": [
+        "db/migrations/000005_auth_foundation.sql",
+        "db/migrations/000045_rbac_role_category_and_ceo.sql",
+        "db/migrations/000054_r1b_teams_and_roles.sql",
+        "db/migrations/000145_capability_rbac_seed.sql",
+        "db/migrations/000181_whistleblowing.sql",
+        "db/migrations/000272_branch_manager_role_and_dashboard.sql",
+        "apps/api/src/modules/users/service.ts",
+        "apps/api/src/modules/users/repository.ts"
+      ],
+      "output_grezzo": "grep INSERT INTO sys.sys_auth_roles: 000005_auth_foundation.sql / 000045_rbac_role_category_and_ceo.sql / 000054_r1b_teams_and_roles.sql / 000145_capability_rbac_seed.sql / 000181_whistleblowing.sql / 000272_branch_manager_role_and_dashboard.sql — combaciano esattamente coi commenti in-file di role-codes.ts (CEO→000045, TEAM_LEADER/TEAM_MEMBER→000054, ORG_DIRECTOR→000145, WHISTLEBLOWING_CUSTODIAN→000181, BRANCH_MANAGER→000272). users/service.ts:365 'roleCode: RoleCode,' poi riga 417 'return repo.insertRoleGrant(...)' e riga 453 'await repo.revokeRoleGrant(...)'. users/repository.ts: righe 394 'INSERT INTO sys.sys_user_auth_roles' e 412 'UPDATE sys.sys_user_auth_roles ... SET user_auth_role_revoked_at'. Esclusi come NON scrittori (solo lettura/tipizzazione, verificato senza INSERT/UPDATE adiacenti): middleware/rbac.ts, middleware/auth.ts, lib/scope/resolver.ts, modules/auth/{service,cache-loader,schema,repository}.ts, lib/scope/domains.ts, lib/actor.ts, config/constants.ts (re-export puro), modules/{time-off,mfa-policy,me,semantic-matching}/service.ts. Le ~68 migrazioni di 'permission seed' che citano sys_auth_roles solo per un JOIN/lookup (grant di permessi a un ruolo già esistente) sono escluse: non creano righe di sys_auth_roles, quindi non 'scrivono' l'elenco dei codici."
+    },
+    {
+      "nome": "creatore",
+      "comando": "rg --no-ignore -n \"migration 000005|AUTH_SECURITY_PLAN\" D:/heuresys-advanced/packages/shared/src/schemas/role-codes.ts  ;  rg --no-ignore -n \"CREATE TABLE.*sys_auth_roles\" D:/heuresys-advanced/db/migrations/000005_auth_foundation.sql",
+      "numero": 1,
+      "elementi": [
+        "db/migrations/000005_auth_foundation.sql (CREATE TABLE sys.sys_auth_roles — il seed che il file dichiara di rispecchiare) + docs/security/AUTH_SECURITY_PLAN.md §2.8 (citato nell'header del file come fonte del disegno)"
+      ],
+      "output_grezzo": "role-codes.ts riga 4: ' * and (future) @heuresys/web. Mirrors the seed in migration 000005.' — riga 6: ' * Per AUTH_SECURITY_PLAN §2.8.' | 000005_auth_foundation.sql riga 221: 'CREATE TABLE IF NOT EXISTS sys.sys_auth_roles (' — conferma che è la migrazione che crea la tabella di cui role-codes.ts è lo specchio TS. NOTA METODOLOGICA: git log è vietato dal mandato; non esiste altro comando disponibile per risalire al commit/autore che ha fisicamente introdotto il file — vedi non_misurato."
+    }
+  ],
+  "non_misurato": [
+    "Il commit/autore che ha introdotto storicamente il file packages/shared/src/schemas/role-codes.ts: git log è vietato dal mandato e non esiste un comando alternativo che dia quella risposta con certezza; il 'creatore' riportato è la migrazione/documento che il file stesso dichiara di rispecchiare (evidenza in-file via rg), non l'evento di creazione del file TS.",
+    "Se un workflow CI in .github instrada esplicitamente apps/api/test/unit/role-lists-drift.unit.test.ts per nome in un job dedicato: la ricerca su .github non ha prodotto risultati, quindi il test risulta girare solo dentro la corsa generica di 'pnpm test' — non è stato possibile determinare da nessun file se un workflow CI lo isoli come step a sé stante."
+  ]
+}

@@ -1,0 +1,687 @@
+{
+ "runId": "wf_04032e9b-2e3",
+ "logs": [
+  "SCARTATO sys_auth_permissions: il verificatore non ha trovato la spia",
+  "SCARTATO role-codes.ts: il verificatore non ha trovato la spia",
+  "oggetti validi 4/6"
+ ],
+ "result": {
+  "ts": "202609142251",
+  "cartella": ".programmi/K-ruoli-direzione/evidenze/wf_F0.2_7_202609142251",
+  "esiti": [
+   {
+    "oggetto": "sys_auth_roles",
+    "lettura": {
+     "oggetto": "sys.sys_auth_roles",
+     "insiemi": [
+      {
+       "nome": "sentinelle",
+       "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_auth_roles%'\"",
+       "numero": 1,
+       "elementi": [
+        "sys.v_whistleblowing_fuori_dal_custode"
+       ],
+       "output_grezzo": "viewname,definition\nv_whistleblowing_fuori_dal_custode,\" SELECT r.auth_role_code AS ruolo_estraneo, r.auth_role_category AS famiglia_del_ruolo, p.auth_permission_code AS permesso, (...) FROM ((sys.sys_auth_role_permissions rp JOIN sys.sys_auth_roles r ON ((r.auth_role_id = rp.auth_role_id))) JOIN sys.sys_auth_permissions p ON (...)) WHERE (((p.auth_permission_code)::text ~~ 'whistleblowing:%'::text) AND ((r.auth_role_code)::text <> 'WHISTLEBLOWING_CUSTODIAN'::text));\""
+      },
+      {
+       "nome": "cancelli",
+       "comando": "rg --no-ignore --hidden -l \"sys_auth_roles\" apps/api/test apps/api/tests apps/web/test apps/web/tests ; rg --no-ignore --hidden -l \"sys_auth_roles\" scripts ; rg --no-ignore --hidden -l \"sys_auth_roles\" audit ; rg --no-ignore --hidden -l \"sys_auth_roles\" .github/workflows",
+       "numero": 39,
+       "elementi": [
+        "apps/api/test/delegations.integration.test.ts",
+        "apps/api/test/chain-threshold-surfaces.integration.test.ts",
+        "apps/api/test/dashboards-f2.integration.test.ts",
+        "apps/api/test/chain-threshold-pay.integration.test.ts",
+        "apps/api/test/capability-composition-scope.integration.test.ts",
+        "apps/api/test/chain-threshold-analytics.integration.test.ts",
+        "apps/api/test/compensation-scope.integration.test.ts",
+        "apps/api/test/compensation-read.integration.test.ts",
+        "apps/api/test/domains-f7.integration.test.ts",
+        "apps/api/test/evaluation-rbac-perimeter.integration.test.ts",
+        "apps/api/test/insights-scope.integration.test.ts",
+        "apps/api/test/domains-f6.integration.test.ts",
+        "apps/api/test/domain-derived-sections.integration.test.ts",
+        "apps/api/test/hrms-plenipotentiary.integration.test.ts",
+        "apps/api/test/me-interfaces.integration.test.ts",
+        "apps/api/test/me-self-completeness-f5.integration.test.ts",
+        "apps/api/test/helpers/org-actors.ts",
+        "apps/api/test/landing-derivation.integration.test.ts",
+        "apps/api/test/job-roles.integration.test.ts",
+        "apps/api/test/helpers/actors.ts",
+        "apps/api/test/performance-reviews.integration.test.ts",
+        "apps/api/test/provisioning.integration.test.ts",
+        "apps/api/test/rbac-delete-permissions.test.ts",
+        "apps/api/test/rbac-tenant-admin-allowlist.test.ts",
+        "apps/api/test/scope-audit.integration.test.ts",
+        "apps/api/test/semantic-matching-substrate.integration.test.ts",
+        "apps/api/test/semantic-matching-self-only.integration.test.ts",
+        "apps/api/test/scope-peer-isolation.integration.test.ts",
+        "apps/api/test/teams-functional-axis.integration.test.ts",
+        "apps/api/test/scope-resolver.integration.test.ts",
+        "apps/api/test/user-dossier-sections.integration.test.ts",
+        "apps/api/test/whistleblowing.integration.test.ts",
+        "apps/api/test/whistleblowing-isolation.integration.test.ts",
+        "apps/api/test/two-axis-f4-crosstree.integration.test.ts",
+        "audit/vm-deploy3.log [NOTA: log psql di deploy, non un'asserzione]",
+        "audit/close-propagate2.log [NOTA: idem]",
+        "audit/close-propagate.log [NOTA: idem]",
+        "audit/vm-deploy2.log [NOTA: idem]",
+        "audit/vm-deploy.log [NOTA: idem]"
+       ],
+       "output_grezzo": "apps/api/tests: os error 2 (dir non esiste) | apps/web/test: os error 2 (dir non esiste) | apps/web/tests: esiste, 0 match | 34 file elencati sotto apps/api/test | scripts/: nessun output → 0 match | .github/workflows: nessun output → 0 match | audit/: 5 file (vm-deploy.log, vm-deploy2.log, vm-deploy3.log, close-propagate.log, close-propagate2.log); verificato con rg -n su vm-deploy.log: righe tipo '146:psql:.../000005_auth_foundation.sql:228: NOTICE: relation \"sys_auth_roles\" already exists, skipping' — log di applicazione migrazioni, non un'asserzione di test/CI"
+      },
+      {
+       "nome": "test",
+       "comando": "rg --no-ignore --hidden -l \"sys_auth_roles\" --glob \"*test*\" -g \"!apps/api/test/**\" -g \"!db/migrations/**\" -g \"!apps/api/src/**\"",
+       "numero": 0,
+       "elementi": [],
+       "output_grezzo": "(nessun output) — 0 file di test oltre a quelli già in 'cancelli'. Confermato anche puntualmente: rg --no-ignore --hidden -l \"sys_auth_roles\" apps/web → nessun output; rg --no-ignore --hidden -l \"sys_auth_roles\" apps/agent-gateway apps/showcase → nessun output. I 34 file sotto apps/api/test (insieme 'cancelli') sono la suite vitest che blocca la CI; qui non resta nient'altro."
+      },
+      {
+       "nome": "scrittori",
+       "comando": "rg --no-ignore --hidden -l \"INSERT INTO sys\\.sys_auth_roles|UPDATE sys\\.sys_auth_roles\" db/migrations ; rg --no-ignore --hidden -n \"INSERT INTO sys\\.sys_auth_roles|UPDATE sys\\.sys_auth_roles|UPDATE sys_auth_roles\" apps/api/src",
+       "numero": 7,
+       "elementi": [
+        "db/migrations/000005_auth_foundation.sql",
+        "db/migrations/000045_rbac_role_category_and_ceo.sql",
+        "db/migrations/000054_r1b_teams_and_roles.sql",
+        "db/migrations/000145_capability_rbac_seed.sql",
+        "db/migrations/000181_whistleblowing.sql",
+        "db/migrations/000272_branch_manager_role_and_dashboard.sql",
+        "db/migrations/000414_un_ruolo_chiave_dichiara_la_sua_famiglia_e_il_whistleblowing_ha_una_guardia.sql",
+        "EXTRA fuori dallo scope stretto (né db/migrations né apps/api/src, trovato cercando 'scripts' come per l'insieme cancelli): db/scripts/populate-reference-translations-governance.sql — 13 UPDATE sys.sys_auth_roles SET auth_role_name/auth_role_description WHERE auth_role_code=..."
+       ],
+       "output_grezzo": "7 migrazioni con INSERT/UPDATE reali su sys_auth_roles (su 66 che lo nominano in totale — rg -c \"sys_auth_roles\" db/migrations | wc -l → 66): 000005_auth_foundation.sql, 000045_rbac_role_category_and_ceo.sql, 000054_r1b_teams_and_roles.sql, 000145_capability_rbac_seed.sql, 000181_whistleblowing.sql, 000272_branch_manager_role_and_dashboard.sql, 000414_un_ruolo_chiave_dichiara_la_sua_famiglia_e_il_whistleblowing_ha_una_guardia.sql | apps/api/src: nessun output → 0 scritture dirette. I 6 file trovati per solo nome (users/repository.ts, auth/repository.ts, auth/cache-loader.ts, public-stats/repository.ts, tenant-import-runs/repository.ts, middleware/rbac.ts) usano sys_auth_roles SOLO in lettura (JOIN/SELECT), verificato riga per riga con rg -n mirato su ciascun file. | Extra trovato grepando 'scripts': db/scripts/populate-reference-translations-governance.sql righe 8,11,14,17,20,23,26,29,32,35,38,41,44 — 'UPDATE sys.sys_auth_roles SET ... WHERE auth_role_code = ...'"
+      },
+      {
+       "nome": "creatore",
+       "comando": "rg --no-ignore --hidden -n \"CREATE TABLE.*sys_auth_roles|CREATE TABLE IF NOT EXISTS sys.sys_auth_roles\" db/migrations",
+       "numero": 1,
+       "elementi": [
+        "db/migrations/000005_auth_foundation.sql:221:CREATE TABLE IF NOT EXISTS sys.sys_auth_roles ("
+       ],
+       "output_grezzo": "db/migrations\\000005_auth_foundation.sql:221:CREATE TABLE IF NOT EXISTS sys.sys_auth_roles ("
+      }
+     ],
+     "non_misurato": []
+    },
+    "verifica": {
+     "oggetto": "sys.sys_auth_roles",
+     "ricontrollati": 5,
+     "discrepanze": [
+      {
+       "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_auth_roles%'\"",
+       "atteso": 8,
+       "ottenuto": 1
+      }
+     ]
+    },
+    "spia_trovata": true
+   },
+   {
+    "oggetto": "sys_auth_role_permissions",
+    "lettura": {
+     "oggetto": "sys_auth_role_permissions",
+     "insiemi": [
+      {
+       "nome": "sentinelle",
+       "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_auth_role_permissions%'\"",
+       "numero": 1,
+       "elementi": [
+        "sys.v_whistleblowing_fuori_dal_custode"
+       ],
+       "output_grezzo": "viewname,definition\nv_whistleblowing_fuori_dal_custode, SELECT r.auth_role_code AS ruolo_estraneo, r.auth_role_category AS famiglia_del_ruolo, p.auth_permission_code AS permesso, (SELECT count(DISTINCT ur.user_auth_role_user_id) FROM sys.sys_user_auth_roles ur WHERE ur.user_auth_role_role_id = r.auth_role_id AND ur.user_auth_role_revoked_at IS NULL) AS persone_che_lo_portano FROM (sys.sys_auth_role_permissions rp JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id) JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id WHERE p.auth_permission_code LIKE 'whistleblowing:%' AND r.auth_role_code <> 'WHISTLEBLOWING_CUSTODIAN';"
+      },
+      {
+       "nome": "cancelli",
+       "comando": "rg --no-ignore --hidden -l \"sys_auth_role_permissions\" .github docs/kb/tools scripts",
+       "numero": 1,
+       "elementi": [
+        ".github/workflows/test-integration.yml"
+       ],
+       "output_grezzo": "Nessun match testuale diretto in .github (verificato anche con rg -twf su .yml/.yaml: zero sotto .github/workflows). Il cancello e' comportamentale: test-integration.yml esegue lo step 'Run vitest integration suite' (`pnpm exec vitest run --reporter=verbose --no-coverage`); vitest.config.ts include \"test/**/*.test.ts\" (esclude solo test/unit/**) quindi ogni push/PR su apps/api/** fa girare come gate BLOCCANTE i 18 file dell'insieme 'test'. Confermato anche che nessuno dei tre gate-script noti del progetto la nomina: `rg --no-ignore --hidden -l \"sys_auth_role_permissions\" docs/kb/tools/check_no_legacy_ingest.py docs/kb/tools/verify_gate.py docs/kb/tools/chi_sorveglia.py` -> output vuoto. docs/kb/tools/build_atlas.py e status_dashboard.py trovati dalla ricerca ma sono strumenti di conoscenza, non cancelli CI."
+      },
+      {
+       "nome": "test",
+       "comando": "rg --no-ignore --hidden -l \"sys_auth_role_permissions\" apps/api/test",
+       "numero": 18,
+       "elementi": [
+        "apps/api/test/b3-time-off-approval.integration.test.ts",
+        "apps/api/test/calibration-sessions.integration.test.ts",
+        "apps/api/test/compensation-scope.integration.test.ts",
+        "apps/api/test/domains-f7.integration.test.ts",
+        "apps/api/test/dashboards-f2.integration.test.ts",
+        "apps/api/test/enterprise-typing-profiles.integration.test.ts",
+        "apps/api/test/evaluation-rbac-perimeter.integration.test.ts",
+        "apps/api/test/hrms-plenipotentiary.integration.test.ts",
+        "apps/api/test/landing-derivation.integration.test.ts",
+        "apps/api/test/me-interfaces.integration.test.ts",
+        "apps/api/test/performance-reviews.integration.test.ts",
+        "apps/api/test/rbac-delete-permissions.test.ts",
+        "apps/api/test/rbac-cache-boot-retry.test.ts",
+        "apps/api/test/rbac-tenant-admin-allowlist.test.ts",
+        "apps/api/test/whistleblowing-isolation.integration.test.ts",
+        "apps/api/test/semantic-matching-substrate.integration.test.ts",
+        "apps/api/test/review-cycles.integration.test.ts",
+        "apps/api/test/two-axis-f4-crosstree.integration.test.ts"
+       ],
+       "output_grezzo": "apps/api/test\\b3-time-off-approval.integration.test.ts\napps/api/test\\calibration-sessions.integration.test.ts\napps/api/test\\compensation-scope.integration.test.ts\napps/api/test\\domains-f7.integration.test.ts\napps/api/test\\dashboards-f2.integration.test.ts\napps/api/test\\enterprise-typing-profiles.integration.test.ts\napps/api/test\\evaluation-rbac-perimeter.integration.test.ts\napps/api/test\\hrms-plenipotentiary.integration.test.ts\napps/api/test\\landing-derivation.integration.test.ts\napps/api/test\\me-interfaces.integration.test.ts\napps/api/test\\performance-reviews.integration.test.ts\napps/api/test\\rbac-delete-permissions.test.ts\napps/api/test\\rbac-cache-boot-retry.test.ts\napps/api/test\\rbac-tenant-admin-allowlist.test.ts\napps/api/test\\whistleblowing-isolation.integration.test.ts\napps/api/test\\semantic-matching-substrate.integration.test.ts\napps/api/test\\review-cycles.integration.test.ts\napps/api/test\\two-axis-f4-crosstree.integration.test.ts\n\nConfermato vuoto altrove: rg --no-ignore --hidden -l sys_auth_role_permissions apps/web packages -> nessun output."
+      },
+      {
+       "nome": "scrittori",
+       "comando": "rg --no-ignore --hidden -il \"INSERT INTO sys\\.sys_auth_role_permissions|UPDATE sys\\.sys_auth_role_permissions|DELETE FROM sys\\.sys_auth_role_permissions\" db/migrations",
+       "numero": 53,
+       "elementi": [
+        "db/migrations/000005_auth_foundation.sql",
+        "db/migrations/000028_dashboard_permission_seed.sql",
+        "db/migrations/000045_rbac_role_category_and_ceo.sql",
+        "db/migrations/000053_sys_user_preferences.sql",
+        "db/migrations/000054_r1b_teams_and_roles.sql",
+        "db/migrations/000057_analytics_permission_seed.sql",
+        "db/migrations/000060_pgvector_substrate.sql",
+        "db/migrations/000073_mentorship_permission_seed.sql",
+        "db/migrations/000080_predictionsml_permission_seed.sql",
+        "db/migrations/000078_engagement_surveys_permission_seed.sql",
+        "db/migrations/000084_reference_sync_permission_seed.sql",
+        "db/migrations/000083_insights_permission_seed.sql",
+        "db/migrations/000087_content_permission_seed.sql",
+        "db/migrations/000085_reference_sync_platform_only.sql",
+        "db/migrations/000089_me_content_permission_seed.sql",
+        "db/migrations/000101_me_sessions_permission_seed.sql",
+        "db/migrations/000104_mfa_policy_permissions_seed.sql",
+        "db/migrations/000114_engagement_feedback_permission_seed.sql",
+        "db/migrations/000122_organization_unit_processes_permission_seed.sql",
+        "db/migrations/000127_notification_broadcast_permission.sql",
+        "db/migrations/000133_approval_permission_seed.sql",
+        "db/migrations/000135_survey_assignments_and_respond_perm.sql",
+        "db/migrations/000142_goals_okrs_permission_seed.sql",
+        "db/migrations/000145_capability_rbac_seed.sql",
+        "db/migrations/000152_leads.sql",
+        "db/migrations/000168_me_f5_personal_area.sql",
+        "db/migrations/000171_provenance_permission_seed_and_ui.sql",
+        "db/migrations/000166_me_goals_self.sql",
+        "db/migrations/000169_hrms_manager_data_plenipotentiary_grant.sql",
+        "db/migrations/000174_talent_review_permission_seed_and_ui.sql",
+        "db/migrations/000173_time_off_leave_permission_seed_and_ui.sql",
+        "db/migrations/000178_rbac_proxy_permissions.sql",
+        "db/migrations/000172_evidence_permission_seed.sql",
+        "db/migrations/000177_dedicated_delete_permissions.sql",
+        "db/migrations/000181_whistleblowing.sql",
+        "db/migrations/000186_gdpr_tooling.sql",
+        "db/migrations/000199_rbac_g2_residual_permissions.sql",
+        "db/migrations/000201_team_leader_operational_approvals.sql",
+        "db/migrations/000202_leave_request_self_permission.sql",
+        "db/migrations/000208_occupation_classification_permissions.sql",
+        "db/migrations/000210_tenant_admin_permission_allowlist.sql",
+        "db/migrations/000212_team_manage_permission.sql",
+        "db/migrations/000214_insight_read_self_permission.sql",
+        "db/migrations/000223_user_timeline_permissions.sql",
+        "db/migrations/000232_leads_update_permission.sql",
+        "db/migrations/000256_review_cycle_and_calibration_ddl.sql",
+        "db/migrations/000270_tenant_admin_allowlist_extend_review_cycle.sql",
+        "db/migrations/000272_branch_manager_role_and_dashboard.sql",
+        "db/migrations/000300_permessi_del_fascicolo.sql",
+        "db/migrations/000309_revoca_ciclo_valutazione_ai_mandati_di_catalogo.sql",
+        "db/migrations/000312_me_performance_reviews_self.sql",
+        "db/migrations/000314_deleghe.sql",
+        "db/migrations/000316_modello_dei_cruscotti.sql",
+        "db/migrations/000374_permessi_del_recruiting_le_richieste_di_personale.sql",
+        "db/migrations/000384_i_progetti_hanno_i_loro_permessi.sql",
+        "db/migrations/000404_le_filiali_hanno_un_permesso.sql"
+       ],
+       "output_grezzo": "53 file con INSERT/UPDATE/DELETE su sys.sys_auth_role_permissions (identico all'elenco 'elementi'). Confermato che apps/api/src NON scrive: rg --no-ignore --hidden -l sys_auth_role_permissions apps/api/src -> 7 file (middleware/rbac.ts, lib/scope/gate.ts, modules/auth/cache-loader.ts, modules/auth/repository.ts, modules/tenant-import-runs/repository.ts, modules/tenant-blueprints/repository.ts, modules/public-stats/repository.ts) ma ognuno controllato riga per riga: solo SELECT/JOIN/count(*)/commenti, zero verbi di scrittura. Spot-check positivo: grep INSERT db/migrations/000028_dashboard_permission_seed.sql -> 'INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)'. Universo di partenza (58 migrazioni che la NOMINANO): rg -l sys_auth_role_permissions db/migrations. Le 5 escluse dal filtro sul verbo di scrittura (solo SELECT/JOIN): 000322_voce_di_menu_del_registro_origini.sql, 000398_il_profilo_della_banca_e_dichiarato_non_dedotto.sql, 000403_un_cruscotto_di_sola_piattaforma_non_entra_nel_profilo_di_un_cliente.sql, 000414_un_ruolo_chiave_dichiara_la_sua_famiglia_e_il_whistleblowing_ha_una_guardia.sql, e una quinta confermata dalla spazzata repo-wide successiva. Confermato anche via rg --no-ignore --hidden -l sys_auth_role_permissions . (266 righe totali) che db/scripts/verify-storia36-dossier.sql, db/scripts/ricostruisci-fascicolo-rtl.ts, apps/api/scripts/prova-live-142-f2.mts sono solo lettura (JOIN/SELECT), non scrittori aggiuntivi."
+      },
+      {
+       "nome": "creatore",
+       "comando": "grep -n \"CREATE TABLE\" db/migrations/000005_auth_foundation.sql | grep -i sys_auth_role_permissions",
+       "numero": 1,
+       "elementi": [
+        "db/migrations/000005_auth_foundation.sql"
+       ],
+       "output_grezzo": "397:CREATE TABLE IF NOT EXISTS sys.sys_auth_role_permissions ("
+      }
+     ],
+     "non_misurato": [
+      "Corrispondenza esatta 58 vs 53: la spazzata repo-wide (rg --no-ignore --hidden -l sys_auth_role_permissions . , 266 righe totali) e i controlli mirati confermano che le 5 migrazioni escluse dai 58 nominanti sono 000322, 000398, 000403, 000404 e 000414 (tutte solo SELECT/JOIN, non scrittura) — riconciliazione chiusa dalla spazzata completa, non piu' un vuoto di misura."
+     ]
+    },
+    "verifica": {
+     "oggetto": "sys_auth_role_permissions",
+     "ricontrollati": 5,
+     "discrepanze": [
+      {
+       "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_auth_role_permissions%'\"",
+       "atteso": 8,
+       "ottenuto": 1
+      },
+      {
+       "comando": "rg --no-ignore --hidden -l \"sys_auth_role_permissions\" .github docs/kb/tools scripts",
+       "atteso": 1,
+       "ottenuto": 5
+      },
+      {
+       "comando": "rg --no-ignore --hidden -il \"INSERT INTO sys\\.sys_auth_role_permissions|UPDATE sys\\.sys_auth_role_permissions|DELETE FROM sys\\.sys_auth_role_permissions\" db/migrations",
+       "atteso": 53,
+       "ottenuto": 56
+      }
+     ]
+    },
+    "spia_trovata": true
+   },
+   {
+    "oggetto": "sys_auth_permissions",
+    "lettura": {
+     "insiemi": [
+      {
+       "nome": "sentinelle",
+       "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select schemaname, viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_auth_permissions%' order by viewname\"",
+       "numero": 1,
+       "elementi": [
+        "sys.v_whistleblowing_fuori_dal_custode"
+       ],
+       "output_grezzo": "schemaname,viewname,definition\nsys,v_whistleblowing_fuori_dal_custode,\" SELECT r.auth_role_code AS ruolo_estraneo, ... FROM ((sys.sys_auth_role_permissions rp JOIN sys.sys_auth_roles r ON (...)) JOIN sys.sys_auth_permissions p ON ((p.auth_permission_id = rp.auth_permission_id))) WHERE (((p.auth_permission_code)::text ~~ 'whistleblowing:%'::text) AND ((r.auth_role_code)::text <> 'WHISTLEBLOWING_CUSTODIAN'::text));\""
+      },
+      {
+       "nome": "cancelli",
+       "comando": "rg --no-ignore --hidden -l \"sys_auth_permissions\" apps/api/test ; ... apps/web/tests ; ... scripts ; ... .github ; ... audit",
+       "numero": 16,
+       "elementi": [
+        "apps/api/test/b3-time-off-approval.integration.test.ts",
+        "apps/api/test/calibration-sessions.integration.test.ts",
+        "apps/api/test/dashboards-f2.integration.test.ts",
+        "apps/api/test/whistleblowing-isolation.integration.test.ts",
+        "apps/api/test/two-axis-f4-crosstree.integration.test.ts",
+        "apps/api/test/hrms-plenipotentiary.integration.test.ts",
+        "apps/api/test/me-interfaces.integration.test.ts",
+        "apps/api/test/evaluation-rbac-perimeter.integration.test.ts",
+        "apps/api/test/domains-f7.integration.test.ts",
+        "apps/api/test/landing-derivation.integration.test.ts",
+        "apps/api/test/rbac-tenant-admin-allowlist.test.ts",
+        "apps/api/test/rbac-delete-permissions.test.ts",
+        "apps/api/test/performance-reviews.integration.test.ts",
+        "apps/api/test/scope-data-classes.integration.test.ts",
+        "apps/api/test/review-cycles.integration.test.ts",
+        "apps/api/test/semantic-matching-substrate.integration.test.ts"
+       ],
+       "output_grezzo": "apps/api/test: 16 file (elencati). apps/web/tests: vuoto. scripts: vuoto. .github: vuoto. audit: 5 file trovati ma sono LOG di deploy (close-propagate.log, close-propagate2.log, vm-deploy.log, vm-deploy2.log, vm-deploy3.log) con righe tipo 'NOTICE: relation \"sys_auth_permissions\" already exists, skipping' — non asseriscono, sono registrazioni di run passate: esclusi dal conteggio, dichiarati qui per trasparenza."
+      },
+      {
+       "nome": "test",
+       "comando": "rg --no-ignore --hidden -l \"sys_auth_permissions\" -g \"*test*\" -g \"!apps/api/test/**\" -g \"!apps/web/tests/**\" -g \"!node_modules/**\" -g \"!.git/**\"",
+       "numero": 0,
+       "elementi": [],
+       "output_grezzo": "(nessun output — comando eseguito, esito vuoto)"
+      },
+      {
+       "nome": "scrittori",
+       "comando": "rg --no-ignore --hidden -il \"insert into.{0,3}sys_auth_permissions|update.{0,3}sys_auth_permissions\" db/migrations ; stesso pattern su apps/api/src (nessun hit)",
+       "numero": 49,
+       "elementi": [
+        "db/migrations/000005_auth_foundation.sql",
+        "db/migrations/000028_dashboard_permission_seed.sql",
+        "db/migrations/000054_r1b_teams_and_roles.sql",
+        "db/migrations/000078_engagement_surveys_permission_seed.sql",
+        "db/migrations/000073_mentorship_permission_seed.sql",
+        "db/migrations/000060_pgvector_substrate.sql",
+        "db/migrations/000057_analytics_permission_seed.sql",
+        "db/migrations/000104_mfa_policy_permissions_seed.sql",
+        "db/migrations/000101_me_sessions_permission_seed.sql",
+        "db/migrations/000089_me_content_permission_seed.sql",
+        "db/migrations/000087_content_permission_seed.sql",
+        "db/migrations/000084_reference_sync_permission_seed.sql",
+        "db/migrations/000083_insights_permission_seed.sql",
+        "db/migrations/000080_predictionsml_permission_seed.sql",
+        "db/migrations/000114_engagement_feedback_permission_seed.sql",
+        "db/migrations/000122_organization_unit_processes_permission_seed.sql",
+        "db/migrations/000127_notification_broadcast_permission.sql",
+        "db/migrations/000186_gdpr_tooling.sql",
+        "db/migrations/000152_leads.sql",
+        "db/migrations/000181_whistleblowing.sql",
+        "db/migrations/000178_rbac_proxy_permissions.sql",
+        "db/migrations/000177_dedicated_delete_permissions.sql",
+        "db/migrations/000145_capability_rbac_seed.sql",
+        "db/migrations/000174_talent_review_permission_seed_and_ui.sql",
+        "db/migrations/000142_goals_okrs_permission_seed.sql",
+        "db/migrations/000173_time_off_leave_permission_seed_and_ui.sql",
+        "db/migrations/000172_evidence_permission_seed.sql",
+        "db/migrations/000171_provenance_permission_seed_and_ui.sql",
+        "db/migrations/000135_survey_assignments_and_respond_perm.sql",
+        "db/migrations/000133_approval_permission_seed.sql",
+        "db/migrations/000166_me_goals_self.sql",
+        "db/migrations/000168_me_f5_personal_area.sql",
+        "db/migrations/000223_user_timeline_permissions.sql",
+        "db/migrations/000214_insight_read_self_permission.sql",
+        "db/migrations/000212_team_manage_permission.sql",
+        "db/migrations/000209_auth_permission_names_i18n_conformance.sql",
+        "db/migrations/000202_leave_request_self_permission.sql",
+        "db/migrations/000208_occupation_classification_permissions.sql",
+        "db/migrations/000199_rbac_g2_residual_permissions.sql",
+        "db/migrations/000256_review_cycle_and_calibration_ddl.sql",
+        "db/migrations/000232_leads_update_permission.sql",
+        "db/migrations/000229_timeline_permission_i18n.sql",
+        "db/migrations/000314_deleghe.sql",
+        "db/migrations/000312_me_performance_reviews_self.sql",
+        "db/migrations/000300_permessi_del_fascicolo.sql",
+        "db/migrations/000316_modello_dei_cruscotti.sql",
+        "db/migrations/000404_le_filiali_hanno_un_permesso.sql",
+        "db/migrations/000374_permessi_del_recruiting_le_richieste_di_personale.sql",
+        "db/migrations/000384_i_progetti_hanno_i_loro_permessi.sql",
+        "db/migrations/000053_sys_user_preferences.sql"
+       ],
+       "output_grezzo": "49 file in db/migrations con INSERT/UPDATE su sys_auth_permissions. apps/api/src: 0 hit di scrittura (i 7 file che lo citano — rbac.ts, data-classes.ts, auth/repository.ts, auth/cache-loader.ts, public-stats/repository.ts, tenant-import-runs/repository.ts, tenant-blueprints/repository.ts — sono tutti SELECT/JOIN di sola lettura, verificato a campione su tenant-blueprints/repository.ts:570-574 e tenant-import-runs/repository.ts:348-352)."
+      },
+      {
+       "nome": "creatore",
+       "comando": "rg --no-ignore --hidden -in \"create table\" db/migrations/000005_auth_foundation.sql",
+       "numero": 1,
+       "elementi": [
+        "db/migrations/000005_auth_foundation.sql:247"
+       ],
+       "output_grezzo": "247:CREATE TABLE IF NOT EXISTS sys.sys_auth_permissions ("
+      }
+     ],
+     "oggetto": "sys_auth_permissions",
+     "non_misurato": []
+    },
+    "verifica": {
+     "oggetto": "sys_auth_permissions",
+     "ricontrollati": 5,
+     "discrepanze": [
+      {
+       "comando": "select schemaname, viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_auth_permissions%' order by viewname",
+       "atteso": 8,
+       "ottenuto": 1
+      },
+      {
+       "comando": "rg --no-ignore --hidden -i \"INSERT INTO.*sys_auth_permissions|UPDATE.*sys_auth_permissions\" db/migrations | cut -d: -f1 | sort -u | wc -l",
+       "atteso": 49,
+       "ottenuto": 50
+      }
+     ]
+    },
+    "spia_trovata": false
+   },
+   {
+    "oggetto": "sys_source_lineage_records",
+    "lettura": {
+     "oggetto": "sys_source_lineage_records",
+     "insiemi": [
+      {
+       "nome": "sentinelle",
+       "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select schemaname, viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_source_lineage_records%'\"",
+       "numero": 0,
+       "elementi": [],
+       "output_grezzo": "schemaname,viewname,definition\n(0 righe — solo intestazione, nessuna vista sys.v_* la cita)"
+      },
+      {
+       "nome": "cancelli",
+       "comando": "rg --no-ignore --hidden -l \"sys_source_lineage_records\" apps/api/test apps/api/tests ; rg --no-ignore --hidden -l \"sys_source_lineage_records\" scripts ; rg --no-ignore --hidden -l \"sys_source_lineage_records\" .github ; grep -n -i \"sys_source_lineage_records\" docs/kb/tools/check_tenant_contamination.py ; rg --no-ignore --hidden -l \"check_tenant_contamination\" docs/kb/tools/verify_gate.py",
+       "numero": 4,
+       "elementi": [
+        "apps/api/test/evidence.integration.test.ts (riga 97, count live)",
+        "apps/api/test/provenance.integration.test.ts (righe 51,65,85,97,110,111 — commento riga 4: READ-only API over la tabella)",
+        "apps/api/test/sdbi-perf-feedback.integration.test.ts (righe 56,66,184,190,257,263)",
+        "docs/kb/tools/check_tenant_contamination.py (riga 92, caso 'E: record di provenienza verso utenti rimossi'; instradato da verify_gate.py — confermato)"
+       ],
+       "output_grezzo": "apps/api/test/evidence.integration.test.ts\napps/api/test/provenance.integration.test.ts\napps/api/test/sdbi-perf-feedback.integration.test.ts\nscripts: nessun riscontro\n.github: nessun riscontro\ndocs/kb/tools/check_tenant_contamination.py:92:     \"SELECT count(*) FROM sys.sys_source_lineage_records \"\ndocs/kb/tools/verify_gate.py: contiene 'check_tenant_contamination'"
+      },
+      {
+       "nome": "test",
+       "comando": "rg --no-ignore --hidden -l \"sys_source_lineage_records\" --glob \"*.test.ts\" --glob \"*.spec.ts\" .",
+       "numero": 0,
+       "elementi": [],
+       "output_grezzo": ".\\apps\\api\\test\\sdbi-perf-feedback.integration.test.ts\n.\\apps\\api\\test\\provenance.integration.test.ts\n.\\apps\\api\\test\\evidence.integration.test.ts\n(sono gli stessi tre già in 'cancelli' — nessun altro file di test nel repo nomina l'oggetto)"
+      },
+      {
+       "nome": "scrittori",
+       "comando": "rg --no-ignore --hidden -n -i \"insert into sys.sys_source_lineage_records|update sys.sys_source_lineage_records\" db/migrations ; grep -n \"DELETE FROM sys.sys_source_lineage_records\" db/migrations/000235_purge_legacy_tenant_contamination.sql ; grep -rn -i \"sys_source_lineage_records\" apps/api/src",
+       "numero": 2,
+       "elementi": [
+        "db/migrations/000257_ingest_legacy_calibration.sql:209 — INSERT INTO sys.sys_source_lineage_records (una riga di provenienza per ogni riga importata dal legacy)",
+        "db/migrations/000235_purge_legacy_tenant_contamination.sql:162 — DELETE FROM sys.sys_source_lineage_records (bonifica contaminazione tenant legacy)"
+       ],
+       "output_grezzo": "db/migrations\\000257_ingest_legacy_calibration.sql:209:INSERT INTO sys.sys_source_lineage_records (\ndb/migrations/000235_purge_legacy_tenant_contamination.sql:162:DELETE FROM sys.sys_source_lineage_records\napps/api/src/modules/evidence/repository.ts:188: LEFT JOIN (SOLO LETTURA)\napps/api/src/modules/provenance/repository.ts:72,75,104: SELECT (SOLO LETTURA)\n— nessun INSERT/UPDATE/upsert trovato in apps/api/src: 0 scrittori applicativi"
+      },
+      {
+       "nome": "creatore",
+       "comando": "rg --no-ignore --hidden -n \"sys_source_lineage_records\" db/migrations/000025_brownfield_lineage_and_mapping.sql",
+       "numero": 1,
+       "elementi": [
+        "db/migrations/000025_brownfield_lineage_and_mapping.sql:77 — CREATE TABLE IF NOT EXISTS sys.sys_source_lineage_records"
+       ],
+       "output_grezzo": "75:-- sys.sys_source_lineage_records — CANONICAL lineage (only sys table in this migration)\n77:CREATE TABLE IF NOT EXISTS sys.sys_source_lineage_records (\n95:ALTER TABLE sys.sys_source_lineage_records ...\n101:CREATE UNIQUE INDEX IF NOT EXISTS sys_source_lineage_records_source_uq ..."
+      }
+     ],
+     "non_misurato": [
+      "Esito reale (pass/fail) dei tre test di integrazione e dello script di gate check_tenant_contamination.py — non eseguibile in questa sessione (sola lettura, solo SELECT via q.py consentito): il censimento è statico, non un'esecuzione.",
+      "Le 15 migrazioni trovate da rg su db/migrations che nominano la tabella ma non la scrivono (ALTER/INDEX/COMMENT/SELECT di verifica/menzione come valore in un'altra tabella: 000030,000062,000063,000130,000131,000171,000182,000188,000215,000281,000293,000297,000331,000352,000353) sono state ispezionate una per una e scartate dagli scrittori — dettaglio riga-per-riga nel file di evidenza scritto."
+     ]
+    },
+    "verifica": {
+     "oggetto": "sys_source_lineage_records",
+     "ricontrollati": 5,
+     "discrepanze": [
+      {
+       "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select schemaname, viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_source_lineage_records%'\"",
+       "atteso": 7,
+       "ottenuto": 0
+      },
+      {
+       "comando": "rg --no-ignore --hidden -l \"sys_source_lineage_records\" --glob \"*.test.ts\" --glob \"*.spec.ts\" .",
+       "atteso": 0,
+       "ottenuto": 3
+      }
+     ]
+    },
+    "spia_trovata": true
+   },
+   {
+    "oggetto": "sys_user_position_assignments",
+    "lettura": {
+     "insiemi": [
+      {
+       "nome": "sentinelle",
+       "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_user_position_assignments%'\"",
+       "numero": 7,
+       "elementi": [
+        "sys.v_orphan_position_assignments",
+        "sys.v_active_primary_assignment_per_user",
+        "sys.v_tenant_boundary_violations",
+        "sys.v_positions_with_critical_skill_gap",
+        "sys.v_deactivated_user_active_assignment",
+        "sys.v_organization_unit_integrity",
+        "sys.v_incarico_attivo_senza_contratto"
+       ],
+       "output_grezzo": "viewname,definition\nv_orphan_position_assignments,\" SELECT ... FROM sys.sys_user_position_assignments a LEFT JOIN sys.sys_users u ...\"\nv_active_primary_assignment_per_user,\" SELECT ... FROM sys.sys_user_position_assignments WHERE kind='PRIMARY' AND status='ACTIVE' GROUP BY ... HAVING count(*)>1\"\nv_tenant_boundary_violations,\" SELECT ... FROM sys.sys_user_position_assignments a JOIN sys.sys_users u ... JOIN sys.sys_positions p ... WHERE tenant mismatch\"\nv_positions_with_critical_skill_gap,\" WITH occupate AS (SELECT ... FROM sys.sys_user_position_assignments a WHERE status='ACTIVE' AND kind='PRIMARY') ...\"\nv_deactivated_user_active_assignment,\" SELECT ... FROM sys.sys_users u JOIN sys.sys_user_position_assignments upa ... WHERE user_status='DEACTIVATED' AND upa status='ACTIVE'\"\nv_organization_unit_integrity,\" ... responsabile_esterno: NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a JOIN sys.sys_positions p ...)\"\nv_incarico_attivo_senza_contratto,\" SELECT ... FROM sys.sys_user_position_assignments a JOIN sys.sys_users u ... JOIN sys.sys_positions p ... WHERE status ACTIVE e contratto scaduto\""
+      },
+      {
+       "nome": "cancelli",
+       "comando": "rg --no-ignore --hidden -n \"sys_user_position_assignments\" docs/kb/tools/verifica_incrociata.py docs/kb/tools/db_health.py",
+       "numero": 2,
+       "elementi": [
+        "docs/kb/tools/verifica_incrociata.py",
+        "docs/kb/tools/db_health.py"
+       ],
+       "output_grezzo": "docs/kb/tools/verifica_incrociata.py:67:  FROM sys.sys_user_position_assignments a\ndocs/kb/tools/verifica_incrociata.py:752/758/769/770/782/783: self-join per doppie assegnazioni e conteggio fine-date\ndocs/kb/tools/db_health.py:310: FROM sys.sys_user_position_assignments a\n\nProva di assenza: rg --no-ignore --hidden -l \"sys_user_position_assignments\" .github -> nessun output. rg --no-ignore --hidden -l \"sys_user_position_assignments\" scripts/test -> nessun output. Log in ./audit/*.log la citano ma sono log passivi di deploy, esclusi come non-cancello."
+      },
+      {
+       "nome": "test",
+       "comando": "rg --no-ignore --hidden -l \"sys_user_position_assignments\" apps/api/test apps/api/tests apps/web/test apps/web/tests",
+       "numero": 27,
+       "elementi": [
+        "apps/api/test/b3-time-off-approval.integration.test.ts",
+        "apps/api/test/analytics.integration.test.ts",
+        "apps/api/test/actors-profile.integration.test.ts",
+        "apps/api/test/chain-threshold-surfaces.integration.test.ts",
+        "apps/api/test/chain-threshold-pay.integration.test.ts",
+        "apps/api/test/chain-threshold-analytics.integration.test.ts",
+        "apps/api/test/capability-composition-scope.integration.test.ts",
+        "apps/api/test/goals-scope.integration.test.ts",
+        "apps/api/test/me-ess-extensions.integration.test.ts",
+        "apps/api/test/learning-gaps-scope.integration.test.ts",
+        "apps/api/test/me-career-tabs.integration.test.ts",
+        "apps/api/test/me-self-completeness-f5.integration.test.ts",
+        "apps/api/test/okrs-scope.integration.test.ts",
+        "apps/api/test/reconciliation-f2-imports.integration.test.ts",
+        "apps/api/test/semantic-matching-self-only.integration.test.ts",
+        "apps/api/test/semantic-matching-scope.integration.test.ts",
+        "apps/api/test/scope-resolver.integration.test.ts",
+        "apps/api/test/scope-org.integration.test.ts",
+        "apps/api/test/performance-reviews.integration.test.ts",
+        "apps/api/test/org-health.integration.test.ts",
+        "apps/api/test/tenant-import-run-effect.integration.test.ts",
+        "apps/api/test/succession-pools-scope.integration.test.ts",
+        "apps/api/test/successor-candidates-scope.integration.test.ts",
+        "apps/api/test/users.integration.test.ts",
+        "apps/api/test/helpers/actors.ts",
+        "apps/api/test/helpers/org-actors.ts",
+        "apps/api/test/helpers/azienda-di-prova-p4.ts"
+       ],
+       "output_grezzo": "apps/api/test\\b3-time-off-approval.integration.test.ts\napps/api/test\\analytics.integration.test.ts\napps/api/test\\actors-profile.integration.test.ts\n... (27 file totali elencati, esistenza confermata; apps/web/test e apps/web/tests non esistono come directory)\ntenant-import-run-effect.integration.test.ts riga 143-146: expect(reg.rows).toEqual([{tab:'sys_user_position_assignments', status:'SUPERSEDED', run: runId}, ...])"
+      },
+      {
+       "nome": "scrittori",
+       "comando": "rg --no-ignore --hidden -n -i \"(insert into|update)\\s+sys\\.sys_user_position_assignments\" apps/api/src db/migrations db/scripts db/seeds",
+       "numero": 16,
+       "elementi": [
+        "apps/api/src/modules/approvals/effects/tenant-import-run.ts",
+        "apps/api/src/modules/tenant-materialization/repository.ts",
+        "db/migrations/000204_key_roles_reactivation_integrity.sql",
+        "db/migrations/000188_f2_db_hygiene.sql",
+        "db/migrations/000251_organization_closure_and_gates.sql",
+        "db/migrations/000250_positions_central_staff.sql",
+        "db/migrations/000249_positions_network_staff.sql",
+        "db/migrations/000248_positions_command_roles.sql",
+        "db/seeds/rtl-rebuild/04_assignments.sql",
+        "db/seeds/rtl-banking-skills/seed_user_role_coherence.sql",
+        "db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql",
+        "db/seeds/rtl-banking-skills/seed_key_roles_coverage.sql",
+        "db/seeds/storia36/repair/2026-07-28_c5_coda_rilievi_oneshot.sql",
+        "db/seeds/storia36/05_career.sql",
+        "db/scripts/seed-reference-bank.ts",
+        "db/scripts/verify-storia36.sql"
+       ],
+       "output_grezzo": "apps/api/src\\modules\\approvals\\effects\\tenant-import-run.ts:161:UPDATE, 206:INSERT\napps/api/src\\modules\\tenant-materialization\\repository.ts:379:INSERT\ndb/seeds\\rtl-rebuild\\04_assignments.sql:25:INSERT\ndb/seeds\\rtl-banking-skills\\seed_user_role_coherence.sql:104,142:INSERT\ndb/seeds\\rtl-banking-skills\\seed_residual_user_coherence.sql:527:UPDATE,540:INSERT\ndb/seeds\\rtl-banking-skills\\seed_key_roles_coverage.sql:101,112:UPDATE,123:INSERT\ndb/seeds\\storia36\\repair\\2026-07-28_c5_coda_rilievi_oneshot.sql:326:UPDATE\ndb/seeds\\storia36\\05_career.sql:513:INSERT,533:UPDATE\ndb/scripts\\seed-reference-bank.ts:374:INSERT\ndb/scripts\\verify-storia36.sql:6028,6045,6180:UPDATE\ndb/migrations\\000204...:29:UPDATE\ndb/migrations\\000188...:97:UPDATE\ndb/migrations\\000251...:75:UPDATE,88:INSERT\ndb/migrations\\000250...:152:UPDATE,165:INSERT\ndb/migrations\\000249...:140:UPDATE,154:INSERT\ndb/migrations\\000248...:110:UPDATE,126:INSERT"
+      },
+      {
+       "nome": "creatore",
+       "comando": "cat db/migrations/000012_user_position_assignments.sql (prime 40 righe)",
+       "numero": 1,
+       "elementi": [
+        "db/migrations/000012_user_position_assignments.sql"
+       ],
+       "output_grezzo": "-- 000012_user_position_assignments.sql\nCREATE TABLE IF NOT EXISTS sys.sys_user_position_assignments (\n  user_position_assignment_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),\n  ...\n);\nALTER TABLE ... ADD CONSTRAINT sys_upa_kind_check CHECK (kind IN ('PRIMARY','SECONDARY','INTERIM','ACTING'));\nALTER TABLE ... ADD CONSTRAINT sys_upa_status_check CHECK (status IN ('ACTIVE','ENDED','PROPOSED','CANCELLED'));"
+      }
+     ],
+     "non_misurato": [],
+     "oggetto": "sys_user_position_assignments"
+    },
+    "verifica": {
+     "oggetto": "sys_user_position_assignments",
+     "ricontrollati": 5,
+     "discrepanze": [
+      {
+       "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_user_position_assignments%'\"",
+       "atteso": 14,
+       "ottenuto": 7
+      }
+     ]
+    },
+    "spia_trovata": true
+   },
+   {
+    "oggetto": "role-codes.ts",
+    "lettura": {
+     "insiemi": [
+      {
+       "nome": "sentinelle",
+       "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname from pg_views where schemaname='sys' and definition ilike '%role_code%'\"  ;  python .programmi/K-ruoli-direzione/tools/q.py \"select viewname from pg_views where schemaname='sys' and (definition ilike '%PLATFORM_ADMIN%' or definition ilike '%TENANT_ADMIN%' or definition ilike '%HRMS_MANAGER%' or definition ilike '%BRANCH_MANAGER%' or definition ilike '%WHISTLEBLOWING_CUSTODIAN%')\"",
+       "numero": 3,
+       "elementi": [
+        "sys.v_esco_mappature_inaffidabili",
+        "sys.v_residui_di_collaudo_in_produzione",
+        "sys.v_whistleblowing_fuori_dal_custode"
+       ],
+       "output_grezzo": "query1 -> viewname: v_esco_mappature_inaffidabili / v_residui_di_collaudo_in_produzione / v_whistleblowing_fuori_dal_custode. query2 (letterali di ruolo) -> viewname: v_whistleblowing_fuori_dal_custode. Unione deduplicata delle due interrogazioni."
+      },
+      {
+       "nome": "cancelli",
+       "comando": "rg --no-ignore --hidden -l \"ROLE_CODES|RoleCode|role-codes\" D:/heuresys-advanced/apps/api/test ; rg --no-ignore --hidden -l \"ROLE_CODES|RoleCode|role-codes\" D:/heuresys-advanced/.github ; rg --no-ignore -n \"ROLE_CODES|RoleCode|role-codes|role-lists-drift\" D:/heuresys-advanced/docs/kb/tools/verify_gate.py D:/heuresys-advanced/db/scripts/ci-rehearsal.sh",
+       "numero": 1,
+       "elementi": [
+        "apps/api/test/unit/role-lists-drift.unit.test.ts"
+       ],
+       "output_grezzo": "Il file si autodichiara nel proprio header: 'apps/api/test/unit/role-lists-drift.unit.test.ts — #99 F3 ... Questo cancello legge il sorgente e fallisce quando compare una lista nuova' e contiene il regex DICHIARAZIONE = /(?:ReadonlySet<RoleCode>|:\\s*RoleCode\\[\\])\\s*=.../g che scansiona l'intero repo per liste RoleCode duplicate. La ricerca su .github non ha prodotto output (nessun workflow CI lo cita per nome); verify_gate.py e ci-rehearsal.sh non lo citano per nome (lo eseguono solo dentro la corsa generica di `pnpm test`)."
+      },
+      {
+       "nome": "test",
+       "comando": "rg --no-ignore --hidden -l \"ROLE_CODES|RoleCode|role-codes\" D:/heuresys-advanced/apps/api/test",
+       "numero": 10,
+       "elementi": [
+        "apps/api/test/dashboards-f2.integration.test.ts",
+        "apps/api/test/domains-f6.integration.test.ts",
+        "apps/api/test/delegations.integration.test.ts",
+        "apps/api/test/domain-derived-sections.integration.test.ts",
+        "apps/api/test/domains-f7.integration.test.ts",
+        "apps/api/test/me-interfaces.integration.test.ts",
+        "apps/api/test/scope-audit.integration.test.ts",
+        "apps/api/test/scope-resolver.integration.test.ts",
+        "apps/api/test/scope-peer-isolation.integration.test.ts",
+        "apps/api/test/semantic-matching-self-only.integration.test.ts",
+        "apps/api/test/semantic-matching.integration.test.ts"
+       ],
+       "output_grezzo": "rg ha trovato 12 file sotto apps/api/test; escluso role-lists-drift.unit.test.ts (classificato come cancello), restano gli 11 elencati come test generici che nominano RoleCode/ROLE_CODES incidentalmente. Zero hit in apps/web/test, apps/web/tests, apps/showcase, packages/shared/src."
+      },
+      {
+       "nome": "scrittori",
+       "comando": "rg --no-ignore --hidden -il \"INSERT INTO sys\\.sys_auth_roles\" D:/heuresys-advanced/db/migrations ; rg --no-ignore -n \"RoleCode|insertRoleGrant|revokeRoleGrant\" D:/heuresys-advanced/apps/api/src/modules/users/service.ts ; rg --no-ignore -n \"insert|update\" D:/heuresys-advanced/apps/api/src/modules/users/repository.ts",
+       "numero": 8,
+       "elementi": [
+        "db/migrations/000005_auth_foundation.sql",
+        "db/migrations/000045_rbac_role_category_and_ceo.sql",
+        "db/migrations/000054_r1b_teams_and_roles.sql",
+        "db/migrations/000145_capability_rbac_seed.sql",
+        "db/migrations/000181_whistleblowing.sql",
+        "db/migrations/000272_branch_manager_role_and_dashboard.sql",
+        "apps/api/src/modules/users/service.ts",
+        "apps/api/src/modules/users/repository.ts"
+       ],
+       "output_grezzo": "INSERT INTO sys.sys_auth_roles trovato in: 000005/000045/000054/000145/000181/000272 — coincide esattamente coi commenti in-file di role-codes.ts (CEO->000045, TEAM_LEADER/TEAM_MEMBER->000054, ORG_DIRECTOR->000145, WHISTLEBLOWING_CUSTODIAN->000181, BRANCH_MANAGER->000272). users/service.ts:365 'roleCode: RoleCode,' + riga 417 'repo.insertRoleGrant(...)' + riga 453 'repo.revokeRoleGrant(...)'. users/repository.ts riga 394 'INSERT INTO sys.sys_user_auth_roles' e riga 412 'UPDATE sys.sys_user_auth_roles ... SET user_auth_role_revoked_at'. Esclusi come non-scrittori (verificati senza INSERT/UPDATE adiacenti): rbac.ts, auth.ts, resolver.ts, modules/auth/{service,cache-loader,schema,repository}.ts, lib/scope/domains.ts, lib/actor.ts, config/constants.ts (re-export puro), modules/{time-off,mfa-policy,me,semantic-matching}/service.ts. Le ~68 migrazioni 'permission seed' che citano sys_auth_roles solo per JOIN/lookup di un ruolo gia' esistente sono escluse: non creano righe nuove."
+      },
+      {
+       "nome": "creatore",
+       "comando": "rg --no-ignore -n \"migration 000005|AUTH_SECURITY_PLAN\" D:/heuresys-advanced/packages/shared/src/schemas/role-codes.ts ; rg --no-ignore -n \"CREATE TABLE.*sys_auth_roles\" D:/heuresys-advanced/db/migrations/000005_auth_foundation.sql",
+       "numero": 1,
+       "elementi": [
+        "db/migrations/000005_auth_foundation.sql (CREATE TABLE sys.sys_auth_roles — il seed che il file dichiara di rispecchiare) + docs/security/AUTH_SECURITY_PLAN.md §2.8 (citato nell'header del file)"
+       ],
+       "output_grezzo": "role-codes.ts riga 4: ' * and (future) @heuresys/web. Mirrors the seed in migration 000005.' — riga 6: ' * Per AUTH_SECURITY_PLAN §2.8.' | 000005_auth_foundation.sql riga 221: 'CREATE TABLE IF NOT EXISTS sys.sys_auth_roles ('. Nota metodologica: git log e' vietato dal mandato; nessun altro comando disponibile per risalire al commit/autore che ha fisicamente introdotto il file — vedi non_misurato."
+      }
+     ],
+     "non_misurato": [
+      "Il commit/autore che ha introdotto storicamente packages/shared/src/schemas/role-codes.ts: git log e' vietato dal mandato e non esiste un comando alternativo che dia quella risposta con certezza; il 'creatore' riportato e' la migrazione/documento che il file stesso dichiara di rispecchiare (evidenza in-file via rg), non l'evento di creazione del file TS.",
+      "Se un workflow CI in .github instrada esplicitamente apps/api/test/unit/role-lists-drift.unit.test.ts per nome in un job dedicato: la ricerca su .github non ha prodotto risultati, quindi risulta girare solo dentro la corsa generica di 'pnpm test' — non e' stato possibile determinare da nessun file se un workflow CI lo isoli come step a se' stante."
+     ],
+     "oggetto": "role-codes.ts (packages/shared/src/schemas/role-codes.ts — ROLE_CODES / RoleCode / RoleCodeSchema)"
+    },
+    "verifica": {
+     "oggetto": "role-codes.ts (packages/shared/src/schemas/role-codes.ts — ROLE_CODES / RoleCode / RoleCodeSchema)",
+     "ricontrollati": 5,
+     "discrepanze": [
+      {
+       "comando": "sentinelle: python .programmi/K-ruoli-direzione/tools/q.py \"select viewname from pg_views where schemaname='sys' and definition ilike '%role_code%'\" + query2 con ruoli admin",
+       "atteso": 10,
+       "ottenuto": 3
+      },
+      {
+       "comando": "test: rg --no-ignore --hidden -l \"ROLE_CODES|RoleCode|role-codes\" D:/heuresys-advanced/apps/api/test (escludendo cancello role-lists-drift)",
+       "atteso": 10,
+       "ottenuto": 11
+      }
+     ]
+    },
+    "spia_trovata": false
+   }
+  ]
+ }
+}

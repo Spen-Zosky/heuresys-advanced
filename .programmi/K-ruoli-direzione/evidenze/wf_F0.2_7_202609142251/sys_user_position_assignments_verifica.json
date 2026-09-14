@@ -1,0 +1,50 @@
+{
+  "oggetto": "sys_user_position_assignments",
+  "verificatore": "Claude Haiku 4.5 — sola lettura, S1102",
+  "data_verifica": "2026-09-14T22:52:00Z",
+  "insiemi": [
+    {
+      "nome": "sentinelle",
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_user_position_assignments%'\"",
+      "atteso_dal_lettore": 14,
+      "ottenuto_dal_verificatore": 7,
+      "stato": "DISCREPANZA",
+      "note": "Il lettore ha dichiarato 14 sentinelle ma il database ne ritorna solo 7. Viste verificate: v_orphan_position_assignments, v_active_primary_assignment_per_user, v_tenant_boundary_violations, v_positions_with_critical_skill_gap, v_deactivated_user_active_assignment, v_organization_unit_integrity, v_incarico_attivo_senza_contratto"
+    },
+    {
+      "nome": "cancelli",
+      "comando": "rg --no-ignore --hidden -n \"sys_user_position_assignments\" docs/kb/tools/verifica_incrociata.py docs/kb/tools/db_health.py",
+      "atteso_dal_lettore": 2,
+      "ottenuto_dal_verificatore": 2,
+      "stato": "CORRETTO",
+      "file_trovati": ["docs/kb/tools/db_health.py", "docs/kb/tools/verifica_incrociata.py"]
+    },
+    {
+      "nome": "test",
+      "comando": "rg --no-ignore --hidden -l \"sys_user_position_assignments\" apps/api/test apps/api/tests apps/web/test apps/web/tests",
+      "atteso_dal_lettore": 27,
+      "ottenuto_dal_verificatore": 27,
+      "stato": "CORRETTO",
+      "note": "27 file test contengono riferimenti a sys_user_position_assignments"
+    },
+    {
+      "nome": "scrittori",
+      "comando": "rg --no-ignore --hidden -n -i \"(insert into|update)\s+sys\.sys_user_position_assignments\" apps/api/src db/migrations db/scripts db/seeds",
+      "atteso_dal_lettore": 16,
+      "ottenuto_dal_verificatore": 16,
+      "stato": "CORRETTO",
+      "note": "16 file contengono INSERT/UPDATE su sys.sys_user_position_assignments"
+    },
+    {
+      "nome": "creatore",
+      "comando": "cat db/migrations/000012_user_position_assignments.sql (prime 40 righe)",
+      "atteso_dal_lettore": 1,
+      "ottenuto_dal_verificatore": 1,
+      "stato": "CORRETTO",
+      "file": "db/migrations/000012_user_position_assignments.sql"
+    }
+  ],
+  "ricontrollati": 5,
+  "discrepanze_trovate": 1,
+  "sommario": "Il lettore ha alterato il numero delle sentinelle: dichiarato 14 ma il database ne ritorna 7. Gli altri quattro insiemi sono corretti."
+}

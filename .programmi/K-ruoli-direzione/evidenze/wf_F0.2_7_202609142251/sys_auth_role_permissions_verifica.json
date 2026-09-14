@@ -1,0 +1,21 @@
+{
+  "oggetto": "sys_auth_role_permissions",
+  "ricontrollati": 5,
+  "discrepanze": [
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_auth_role_permissions%'\"",
+      "atteso": 8,
+      "ottenuto": 1
+    },
+    {
+      "comando": "rg --no-ignore --hidden -l \"sys_auth_role_permissions\" .github docs/kb/tools scripts",
+      "atteso": 1,
+      "ottenuto": 5
+    },
+    {
+      "comando": "rg --no-ignore --hidden -il \"INSERT INTO sys\\.sys_auth_role_permissions|UPDATE sys\\.sys_auth_role_permissions|DELETE FROM sys\\.sys_auth_role_permissions\" db/migrations",
+      "atteso": 53,
+      "ottenuto": 56
+    }
+  ]
+}

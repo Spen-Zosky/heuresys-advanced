@@ -1,0 +1,99 @@
+{
+  "oggetto": "sys_user_position_assignments",
+  "insiemi": [
+    {
+      "nome": "sentinelle",
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_user_position_assignments%'\"",
+      "numero": 7,
+      "elementi": [
+        "sys.v_orphan_position_assignments",
+        "sys.v_active_primary_assignment_per_user",
+        "sys.v_tenant_boundary_violations",
+        "sys.v_positions_with_critical_skill_gap",
+        "sys.v_deactivated_user_active_assignment",
+        "sys.v_organization_unit_integrity",
+        "sys.v_incarico_attivo_senza_contratto"
+      ],
+      "output_grezzo": "viewname,definition\nv_orphan_position_assignments,\" SELECT ... FROM sys.sys_user_position_assignments a LEFT JOIN sys.sys_users u ...\"\nv_active_primary_assignment_per_user,\" SELECT ... FROM sys.sys_user_position_assignments WHERE kind='PRIMARY' AND status='ACTIVE' GROUP BY ... HAVING count(*)>1\"\nv_tenant_boundary_violations,\" SELECT ... FROM sys.sys_user_position_assignments a JOIN sys.sys_users u ... JOIN sys.sys_positions p ... WHERE tenant mismatch\"\nv_positions_with_critical_skill_gap,\" WITH occupate AS (SELECT ... FROM sys.sys_user_position_assignments a WHERE status='ACTIVE' AND kind='PRIMARY') ...\"\nv_deactivated_user_active_assignment,\" SELECT ... FROM sys.sys_users u JOIN sys.sys_user_position_assignments upa ... WHERE user_status='DEACTIVATED' AND upa status='ACTIVE'\"\nv_organization_unit_integrity,\" ... responsabile_esterno: NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a JOIN sys.sys_positions p ...)\"\nv_incarico_attivo_senza_contratto,\" SELECT ... FROM sys.sys_user_position_assignments a JOIN sys.sys_users u ... JOIN sys.sys_positions p ... WHERE status ACTIVE e contratto scaduto\"\n(query completa eseguita e verificata riga per riga in questa sessione)"
+    },
+    {
+      "nome": "cancelli",
+      "comando": "rg --no-ignore --hidden -n \"sys_user_position_assignments\" docs/kb/tools/verifica_incrociata.py docs/kb/tools/db_health.py",
+      "numero": 2,
+      "elementi": [
+        "docs/kb/tools/verifica_incrociata.py",
+        "docs/kb/tools/db_health.py"
+      ],
+      "output_grezzo": "docs/kb/tools/verifica_incrociata.py:67:  FROM sys.sys_user_position_assignments a\ndocs/kb/tools/verifica_incrociata.py:752:      FROM sys.sys_user_position_assignments a\ndocs/kb/tools/verifica_incrociata.py:758:      \"SELECT count(*) FROM sys.sys_user_position_assignments WHERE user_position_assignment_end_date IS NOT NULL\",\ndocs/kb/tools/verifica_incrociata.py:769-783: self-join per doppie assegnazioni\ndocs/kb/tools/db_health.py:310:               FROM sys.sys_user_position_assignments a\n\nProva di assenza altrove: rg --no-ignore --hidden -l \"sys_user_position_assignments\" .github -> nessun output (nessun workflow CI la nomina). rg --no-ignore --hidden -l \"sys_user_position_assignments\" scripts/test -> nessun output (i 5 script di scripts/test non la nominano). Log in ./audit/*.log (close-propagate.log, vm-deploy*.log) la citano ma sono log passivi di deploy, non script che asseriscono: esclusi."
+    },
+    {
+      "nome": "test",
+      "comando": "rg --no-ignore --hidden -l \"sys_user_position_assignments\" apps/api/test apps/api/tests apps/web/test apps/web/tests",
+      "numero": 27,
+      "elementi": [
+        "apps/api/test/b3-time-off-approval.integration.test.ts",
+        "apps/api/test/analytics.integration.test.ts",
+        "apps/api/test/actors-profile.integration.test.ts",
+        "apps/api/test/chain-threshold-surfaces.integration.test.ts",
+        "apps/api/test/chain-threshold-pay.integration.test.ts",
+        "apps/api/test/chain-threshold-analytics.integration.test.ts",
+        "apps/api/test/capability-composition-scope.integration.test.ts",
+        "apps/api/test/goals-scope.integration.test.ts",
+        "apps/api/test/me-ess-extensions.integration.test.ts",
+        "apps/api/test/learning-gaps-scope.integration.test.ts",
+        "apps/api/test/me-career-tabs.integration.test.ts",
+        "apps/api/test/me-self-completeness-f5.integration.test.ts",
+        "apps/api/test/okrs-scope.integration.test.ts",
+        "apps/api/test/reconciliation-f2-imports.integration.test.ts",
+        "apps/api/test/semantic-matching-self-only.integration.test.ts",
+        "apps/api/test/semantic-matching-scope.integration.test.ts",
+        "apps/api/test/scope-resolver.integration.test.ts",
+        "apps/api/test/scope-org.integration.test.ts",
+        "apps/api/test/performance-reviews.integration.test.ts",
+        "apps/api/test/org-health.integration.test.ts",
+        "apps/api/test/tenant-import-run-effect.integration.test.ts",
+        "apps/api/test/succession-pools-scope.integration.test.ts",
+        "apps/api/test/successor-candidates-scope.integration.test.ts",
+        "apps/api/test/users.integration.test.ts",
+        "apps/api/test/helpers/actors.ts",
+        "apps/api/test/helpers/org-actors.ts",
+        "apps/api/test/helpers/azienda-di-prova-p4.ts"
+      ],
+      "output_grezzo": "apps/api/test\\b3-time-off-approval.integration.test.ts\napps/api/test\\analytics.integration.test.ts\napps/api/test\\actors-profile.integration.test.ts\napps/api/test\\chain-threshold-surfaces.integration.test.ts\napps/api/test\\chain-threshold-pay.integration.test.ts\napps/api/test\\chain-threshold-analytics.integration.test.ts\napps/api/test\\capability-composition-scope.integration.test.ts\napps/api/test\\helpers\\actors.ts\napps/api/test\\goals-scope.integration.test.ts\napps/api/test\\helpers\\org-actors.ts\napps/api/test\\helpers\\azienda-di-prova-p4.ts\napps/api/test\\me-ess-extensions.integration.test.ts\napps/api/test\\learning-gaps-scope.integration.test.ts\napps/api/test\\me-career-tabs.integration.test.ts\napps/api/test\\me-self-completeness-f5.integration.test.ts\napps/api/test\\okrs-scope.integration.test.ts\napps/api/test\\reconciliation-f2-imports.integration.test.ts\napps/api/test\\semantic-matching-self-only.integration.test.ts\napps/api/test\\users.integration.test.ts\napps/api/test\\semantic-matching-scope.integration.test.ts\napps/api/test\\scope-resolver.integration.test.ts\napps/api/test\\scope-org.integration.test.ts\napps/api/test\\performance-reviews.integration.test.ts\napps/api/test\\org-health.integration.test.ts\napps/api/test\\tenant-import-run-effect.integration.test.ts\napps/api/test\\succession-pools-scope.integration.test.ts\napps/api/test\\successor-candidates-scope.integration.test.ts\n(exit code 2 sul comando combinato perche' apps/web/test e apps/web/tests non esistono come directory; i 27 file sopra sono i match reali in apps/api/test, verificati anche con comando ripetuto solo su apps/api/test)\n\nNota di merito (2): tenant-import-run-effect.integration.test.ts contiene un expect() diretto sullo stato della tabella (riga 143-146: expect(reg.rows).toEqual([{tab:'sys_user_position_assignments', status:'SUPERSEDED', run: runId}, ...])) — e' il file di test con l'asserzione piu' esplicita sull'oggetto, ma resta classificato qui perche' e' un test applicativo (apps/api/test), non uno script di cancello in docs/kb/tools."
+    },
+    {
+      "nome": "scrittori",
+      "comando": "rg --no-ignore --hidden -n -i \"(insert into|update)\\s+sys\\.sys_user_position_assignments\" apps/api/src ; rg --no-ignore --hidden -n -i \"(insert into|update)\\s+sys\\.sys_user_position_assignments\" db/migrations db/scripts db/seeds",
+      "numero": 14,
+      "elementi": [
+        "apps/api/src/modules/approvals/effects/tenant-import-run.ts",
+        "apps/api/src/modules/tenant-materialization/repository.ts",
+        "db/migrations/000204_key_roles_reactivation_integrity.sql",
+        "db/migrations/000188_f2_db_hygiene.sql",
+        "db/migrations/000251_organization_closure_and_gates.sql",
+        "db/migrations/000250_positions_central_staff.sql",
+        "db/migrations/000249_positions_network_staff.sql",
+        "db/migrations/000248_positions_command_roles.sql",
+        "db/seeds/rtl-rebuild/04_assignments.sql",
+        "db/seeds/rtl-banking-skills/seed_user_role_coherence.sql",
+        "db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql",
+        "db/seeds/rtl-banking-skills/seed_key_roles_coverage.sql",
+        "db/seeds/storia36/repair/2026-07-28_c5_coda_rilievi_oneshot.sql",
+        "db/seeds/storia36/05_career.sql",
+        "db/scripts/seed-reference-bank.ts",
+        "db/scripts/verify-storia36.sql"
+      ],
+      "output_grezzo": "apps/api/src\\modules\\approvals\\effects\\tenant-import-run.ts:161:UPDATE sys.sys_user_position_assignments\napps/api/src\\modules\\approvals\\effects\\tenant-import-run.ts:206:INSERT INTO sys.sys_user_position_assignments\napps/api/src\\modules\\tenant-materialization\\repository.ts:379:INSERT INTO sys.sys_user_position_assignments\n---\ndb/seeds\\rtl-rebuild\\04_assignments.sql:25:INSERT INTO sys.sys_user_position_assignments (\ndb/seeds\\rtl-banking-skills\\seed_user_role_coherence.sql:104,142:INSERT INTO sys.sys_user_position_assignments\ndb/seeds\\rtl-banking-skills\\seed_residual_user_coherence.sql:527:UPDATE, 540:INSERT\ndb/seeds\\rtl-banking-skills\\seed_key_roles_coverage.sql:101,112:UPDATE, 123:INSERT\ndb/seeds\\storia36\\repair\\2026-07-28_c5_coda_rilievi_oneshot.sql:326:UPDATE sys.sys_user_position_assignments prec\ndb/seeds\\storia36\\05_career.sql:513:INSERT, 533:UPDATE\ndb/scripts\\seed-reference-bank.ts:374:INSERT INTO sys.sys_user_position_assignments\ndb/scripts\\verify-storia36.sql:6028,6045:UPDATE, 6180:UPDATE sys.sys_user_position_assignments a\ndb/migrations\\000204_key_roles_reactivation_integrity.sql:29:UPDATE\ndb/migrations\\000188_f2_db_hygiene.sql:97:UPDATE\ndb/migrations\\000251_organization_closure_and_gates.sql:75:UPDATE, 88:INSERT\ndb/migrations\\000250_positions_central_staff.sql:152:UPDATE, 165:INSERT\ndb/migrations\\000249_positions_network_staff.sql:140:UPDATE, 154:INSERT\ndb/migrations\\000248_positions_command_roles.sql:110:UPDATE, 126:INSERT\n\nNota: db/scripts/verify-storia36.sql ha un doppio ruolo — verifica (nome e uso da CLAUDE.md: 'storia36.sh custodia, regge ancora?') e riparazione (UPDATE reali trovati alle righe 6028/6045/6180): classificato qui come scrittore perche' l'evidenza grezza mostra scritture, non solo letture. Nessun ON CONFLICT/upsert trovato sulla tabella nei due file apps/api/src (le righe ON CONFLICT presenti in quei file riguardano altre tabelle: user_skill_*, organization_unit_*, position_*, user_tenant_id/email — verificato con grep dedicato)."
+    },
+    {
+      "nome": "creatore",
+      "comando": "cat db/migrations/000012_user_position_assignments.sql (prime 40 righe)",
+      "numero": 1,
+      "elementi": [
+        "db/migrations/000012_user_position_assignments.sql"
+      ],
+      "output_grezzo": "-- 000012_user_position_assignments.sql\n-- Heuresys Advanced — sys.sys_user_position_assignments (the user x position bridge)\n-- Invariant I1: a user can have at most ONE ACTIVE PRIMARY assignment (enforced by partial unique index).\nCREATE TABLE IF NOT EXISTS sys.sys_user_position_assignments (\n  user_position_assignment_id           uuid         PRIMARY KEY DEFAULT gen_random_uuid(),\n  user_position_assignment_tenant_id    uuid         NOT NULL REFERENCES sys.sys_tenancies(tenant_id) ON DELETE RESTRICT,\n  user_position_assignment_user_id      uuid         NOT NULL REFERENCES sys.sys_users(user_id) ON DELETE RESTRICT,\n  user_position_assignment_position_id  uuid         NOT NULL REFERENCES sys.sys_positions(position_id) ON DELETE RESTRICT,\n  ...\n);\nALTER TABLE ... ADD CONSTRAINT sys_upa_kind_check CHECK (kind IN ('PRIMARY','SECONDARY','INTERIM','ACTING'));\nALTER TABLE ... ADD CONSTRAINT sys_upa_status_check CHECK (status IN ('ACTIVE','ENDED','PROPOSED','CANCELLED'));"
+    }
+  ],
+  "non_misurato": []
+}

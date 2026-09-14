@@ -1,0 +1,12 @@
+{
+  "oggetto": "sys.sys_auth_roles",
+  "ricontrollati": 5,
+  "discrepanze": [
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_auth_roles%'\"",
+      "atteso": 8,
+      "ottenuto": 1
+    }
+  ],
+  "note": "Una sola vista trovata: v_whistleblowing_fuori_dal_custode. Tutti gli altri numeri confermati: cancelli 39, test 0, scrittori 7 migrazioni, creatore 1 (000005_auth_foundation.sql:221)."
+}

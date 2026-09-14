@@ -1,0 +1,22 @@
+runId: wf_04032e9b-2e3
+verificato: 2026-09-14T23:20+02:00 da S1102 (sezione 3.6, passo W3)
+agenti: 12/12 completati, 0 errori, 0 vuoti, 1.218.588 token fuori contesto, 22 min
+
+ACCETTATI (6/6): sys_auth_roles, sys_auth_role_permissions, sys_auth_permissions, sys_source_lineage_records, sys_user_position_assignments, role-codes.ts
+  - spia (+7 sul primo insieme) trovata dal verificatore su tutti e sei: discrepanze 8->1, 8->1, 8->1, 7->0, 14->7, 10->3
+  - su sys_auth_permissions e role-codes.ts lo script ha loggato SCARTATO: confronta la STRINGA del comando e il
+    verificatore l'aveva riscritta. Il numero prova che la spia e' stata trovata: accettati sulla prova numerica.
+SCARTATI: nessuno
+
+DISCREPANZE VERE, ri-misurate in linea (vince la sessione principale; comando in esiti/F0.2_censimento_C1.md):
+  sys_auth_role_permissions/cancelli   lettore 1  verificatore 5  in linea 5
+  sys_auth_role_permissions/scrittori  lettore 53 verificatore 56 in linea 55 (regex esatta del lettore)
+  sys_auth_permissions/scrittori       lettore 49 verificatore 50 in linea 50
+  sys_source_lineage_records/test      lettore 0  verificatore 3  in linea 3
+  role-codes.ts/test                   lettore 10 verificatore 11 in linea 12
+
+FILE: _LANCIO.txt, _risultato.json (esito strutturato del run: e' LA fonte), <oggetto>_lettore.json e
+<oggetto>_verifica.json scritti dagli agenti (materiale grezzo; sys_auth_permissions_verifica.json non
+e' JSON valido per un \escape spurio, e sys_user_position_assignments_lettore.json dice 14 scrittori
+dove l'esito strutturato dice 16: si usa l'esito strutturato).
+ESITO: esiti/F0.2_censimento_C1.md

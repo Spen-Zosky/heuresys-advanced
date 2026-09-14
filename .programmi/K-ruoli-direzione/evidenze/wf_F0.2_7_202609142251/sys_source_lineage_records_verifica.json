@@ -1,0 +1,75 @@
+{
+  "oggetto": "sys_source_lineage_records",
+  "insiemi": [
+    {
+      "nome": "sentinelle",
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select schemaname, viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_source_lineage_records%'\"",
+      "numero_atteso": 7,
+      "numero_ottenuto": 0,
+      "output_grezzo": "schemaname,viewname,definition\n(0 righe — nessuna vista sys.v_* cita sys_source_lineage_records)",
+      "discrepanza": true,
+      "note": "Il lettore ha dichiarato numero:7 ma l'output mostra solo intestazione, zero righe. Il numero corretto è 0 (zero viste)."
+    },
+    {
+      "nome": "cancelli",
+      "comando": "rg --no-ignore --hidden -l \"sys_source_lineage_records\" apps/api/test ; rg --no-ignore --hidden -l \"sys_source_lineage_records\" scripts ; rg --no-ignore --hidden -l \"sys_source_lineage_records\" .github ; grep -n -i \"sys_source_lineage_records\" docs/kb/tools/check_tenant_contamination.py ; rg --no-ignore --hidden -l \"check_tenant_contamination\" docs/kb/tools/verify_gate.py",
+      "numero_atteso": 4,
+      "numero_ottenuto": 4,
+      "elementi": [
+        "apps/api/test/evidence.integration.test.ts",
+        "apps/api/test/provenance.integration.test.ts",
+        "apps/api/test/sdbi-perf-feedback.integration.test.ts",
+        "docs/kb/tools/check_tenant_contamination.py (riga 92)"
+      ],
+      "discrepanza": false,
+      "note": "Confermato: 4 elementi (3 test file + 1 check_tenant_contamination.py)"
+    },
+    {
+      "nome": "test",
+      "comando": "rg --no-ignore --hidden -l \"sys_source_lineage_records\" --glob \"*.test.ts\" --glob \"*.spec.ts\" .",
+      "numero_atteso": 0,
+      "numero_ottenuto": 3,
+      "output_grezzo": ".\\apps\\api\\test\\sdbi-perf-feedback.integration.test.ts\n.\\apps\\api\\test\\provenance.integration.test.ts\n.\\apps\\api\\test\\evidence.integration.test.ts",
+      "discrepanza": true,
+      "note": "Il lettore ha dichiarato numero:0 ma ha elencato 3 file di test nell'output_grezzo. Il numero corretto è 3 (tre file .integration.test.ts)."
+    },
+    {
+      "nome": "scrittori",
+      "comando": "rg --no-ignore --hidden -n -i \"insert into sys.sys_source_lineage_records|update sys.sys_source_lineage_records\" db/migrations ; grep -n \"DELETE FROM sys.sys_source_lineage_records\" db/migrations/000235_purge_legacy_tenant_contamination.sql ; grep -rn -i \"sys_source_lineage_records\" apps/api/src",
+      "numero_atteso": 2,
+      "numero_ottenuto": 2,
+      "elementi": [
+        "db/migrations/000257_ingest_legacy_calibration.sql:209 — INSERT",
+        "db/migrations/000235_purge_legacy_tenant_contamination.sql:162 — DELETE"
+      ],
+      "discrepanza": false,
+      "note": "Confermato: 2 file (1 INSERT in 000257, 1 DELETE in 000235). Nessun scrittore in apps/api/src (solo SELECT)."
+    },
+    {
+      "nome": "creatore",
+      "comando": "rg --no-ignore --hidden -n \"sys_source_lineage_records\" db/migrations/000025_brownfield_lineage_and_mapping.sql",
+      "numero_atteso": 1,
+      "numero_ottenuto": 1,
+      "file_creatore": "db/migrations/000025_brownfield_lineage_and_mapping.sql:77 — CREATE TABLE",
+      "discrepanza": false,
+      "note": "Confermato: 1 file di creazione (CREATE TABLE alla riga 77 in 000025)."
+    }
+  ],
+  "discrepanze_totali": 2,
+  "discrepanze_trovate": [
+    {
+      "insieme": "sentinelle",
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select schemaname, viewname, definition from pg_views where schemaname='sys' and definition ilike '%sys_source_lineage_records%'\"",
+      "atteso": 7,
+      "ottenuto": 0
+    },
+    {
+      "insieme": "test",
+      "comando": "rg --no-ignore --hidden -l \"sys_source_lineage_records\" --glob \"*.test.ts\" --glob \"*.spec.ts\" .",
+      "atteso": 0,
+      "ottenuto": 3
+    }
+  ],
+  "date": "2026-09-14",
+  "session": "verificatore_sys_source_lineage_records"
+}

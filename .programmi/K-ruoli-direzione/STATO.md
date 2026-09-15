@@ -39,7 +39,7 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
 | S-1 | PRONTA |  |  |  | 24 |  |  | vista permessi solo-plenipotenziari + allowlist (migrazione) |
-| S-2 | PRONTA |  |  |  | 26 |  |  | test unitario permessi senza rotta + allowlist dei 34 |
+| S-2 | CHIUSA | S1103 | 2026-09-15T16:36+02:00 | 26 |  |  | evidenze/S-2_202609151636.txt; apps/api/test/permessi-senza-rotta.{integration.test.ts,allowlist.json} | 34 permessi senza rotta congelati con motivo (5 user_position_assignment:* in attesa di G-1); test visto ROSSO (riga tolta) e VERDE; d'integrazione perche' il catalogo e' il DB (deviazione dichiarata) |
 | S-5 | PRONTA |  |  |  | 29 |  |  | cricchetto sui controlli per nome (dopo I-C) |
 | S-3 | PRONTA |  |  |  | 27 |  |  | vista registro provenienza orfano (dopo I-D); nasce ROSSA, INFORMATIVE |
 | S-4 | PRONTA |  |  |  | 28 |  |  | prova cross-tenant sui sinonimi; it.skip «attivo dopo R-3» |

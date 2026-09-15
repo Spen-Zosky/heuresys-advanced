@@ -1,0 +1,13 @@
+# S-2 — permessi senza rotta (S1103, 2026-09-15T16:36+02:00)
+test: apps/api/test/permessi-senza-rotta.integration.test.ts (d'integrazione: il catalogo e' sys.sys_auth_permissions, nessuna lista in packages/shared) + allowlist apps/api/test/permessi-senza-rotta.allowlist.json
+catalogo 231 · chiesti da almeno una rotta 197 (196 letterali + tenant_blueprint:read/write via costanti READ/WRITE) · SENZA ROTTA 34 (= il dossier), di cui 5 user_position_assignment:* «in attesa di G-1»
+difetto trovato e corretto strada facendo: la regex escludeva il trattino nel primo segmento (job-requisition, performance-review, review-cycle): prima 38, poi 34
+
+## VERDE (locale via tunnel, sola lettura)
+      Tests  2 passed (2)
+
+## ROSSO (controprova: tolta bpm_process:read dall'allowlist) -> exit 1
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: permessi SENZA ROTTA non in allowlist (un permesso nasce con la sua rotta, o entra in allowlist con motivo): expected [ 'bpm_process:read' ] to deeply equal []
+      Tests  1 failed | 1 passed (2)
+allowlist ripristinata: 34 righe

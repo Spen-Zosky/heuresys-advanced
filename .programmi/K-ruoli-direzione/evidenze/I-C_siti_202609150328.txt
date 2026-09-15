@@ -1,0 +1,82 @@
+apps/api/src/modules/auth/service.ts:707: const isPlatform = input.actorRoles.includes("PLATFORM_ADMIN");
+apps/api/src/modules/auth/service.ts:738: const isPlatform = input.actorRoles.includes("PLATFORM_ADMIN");
+apps/api/src/modules/candidate-applications/service.ts:32: if (isPlatform(actor)) {
+apps/api/src/modules/candidate-applications/service.ts:56: return isPlatform(actor) || a.tenantId === actor.tenantId;
+apps/api/src/modules/candidate-applications/service.ts:71: const args = isPlatform(actor)
+apps/api/src/modules/candidates/service.ts:30: if (isPlatform(actor)) {
+apps/api/src/modules/candidates/service.ts:54: return isPlatform(actor) || c.tenantId === actor.tenantId;
+apps/api/src/modules/candidates/service.ts:69: const args = isPlatform(actor)
+apps/api/src/modules/delegations/service.ts:81: if (body.scope === "FULL" && !isPlatform(actor)) {
+apps/api/src/modules/gdpr/service.ts:43: if (isPlatform(actor)) return;
+apps/api/src/modules/gdpr/service.ts:157: if (!isPlatform(actor)) {
+apps/api/src/modules/generated-origins/service.ts:21: if (isPlatform(a)) return undefined;
+apps/api/src/modules/interview-feedback/service.ts:33: if (isPlatform(actor)) {
+apps/api/src/modules/interview-feedback/service.ts:57: return isPlatform(actor) || f.tenantId === actor.tenantId;
+apps/api/src/modules/interview-feedback/service.ts:62: const args = isPlatform(actor)
+apps/api/src/modules/interviews/service.ts:27: if (isPlatform(actor)) {
+apps/api/src/modules/interviews/service.ts:48: return isPlatform(actor) || i.tenantId === actor.tenantId;
+apps/api/src/modules/interviews/service.ts:53: const args = isPlatform(actor)
+apps/api/src/modules/job-offers/service.ts:49: if (isPlatform(actor)) {
+apps/api/src/modules/job-offers/service.ts:70: return isPlatform(actor) || o.tenantId === actor.tenantId;
+apps/api/src/modules/job-offers/service.ts:87: const args = isPlatform(actor)
+apps/api/src/modules/job-postings/service.ts:33: return isPlatform(actor) || p.tenantId === actor.tenantId;
+apps/api/src/modules/job-postings/service.ts:38: const args = isPlatform(actor)
+apps/api/src/modules/job-postings/service.ts:55: if (!isPlatform(actor) && tenantId !== actor.tenantId) {
+apps/api/src/modules/job-postings/service.ts:58: if (isPlatform(actor) && !tenantId) {
+apps/api/src/modules/job-requisitions/service.ts:30: if (isPlatform(actor)) {
+apps/api/src/modules/job-requisitions/service.ts:55: return isPlatform(actor) || r.tenantId === actor.tenantId;
+apps/api/src/modules/job-requisitions/service.ts:60: const args = isPlatform(actor)
+apps/api/src/modules/mfa-policy/service.ts:35: const isPlatform = a.roles.includes("PLATFORM_ADMIN");
+apps/api/src/modules/mfa-policy/service.ts:48: const isPlatform = a.roles.includes("PLATFORM_ADMIN");
+apps/api/src/modules/notifications/service.ts:20: const isPlatform = (a: ActorContext): boolean => a.roles.includes("PLATFORM_ADMIN");
+apps/api/src/modules/notifications/service.ts:29: const recipients = isPlatform(actor)
+apps/api/src/modules/notifications/service.ts:56: isPlatform: isPlatform(actor),
+apps/api/src/modules/provenance/service.ts:16: if (isPlatform(a)) return undefined;
+apps/api/src/modules/seed-acquisition-runs/service.ts:17: if (isPlatform(a)) return true;
+apps/api/src/modules/seed-acquisition-runs/service.ts:23: const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+apps/api/src/modules/seed-acquisition-runs/service.ts:33: if (isPlatform(actor)) {
+apps/api/src/modules/seed-approval-decisions/service.ts:17: const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+apps/api/src/modules/seed-approval-decisions/service.ts:23: if (!isPlatform(actor)) {
+apps/api/src/modules/seed-approval-decisions/service.ts:32: if (!isPlatform(actor) && ct !== actor.tenantId) {
+apps/api/src/modules/seed-candidate-records/service.ts:13: if (isPlatform(a)) return true;
+apps/api/src/modules/seed-candidate-records/service.ts:19: const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+apps/api/src/modules/skill-aliases/service.ts:25: return isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+apps/api/src/modules/skill-aliases/service.ts:31: if (isPlatform(actor)) return;
+apps/api/src/modules/skill-categories/service.ts:31: if (!actor.roles.includes("PLATFORM_ADMIN")) {
+apps/api/src/modules/skill-families/service.ts:35: if (!actor.roles.includes("PLATFORM_ADMIN")) {
+apps/api/src/modules/skill-taxonomy-edges/service.ts:21: if (!isPlatform(actor)) {
+apps/api/src/modules/skill-taxonomy-edges/service.ts:30: return isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+apps/api/src/modules/skills/service.ts:31: if (isPlatform(actor)) return true;
+apps/api/src/modules/skills/service.ts:55: const visibili = isPlatform(actor)
+apps/api/src/modules/skills/service.ts:89: const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+apps/api/src/modules/skills/service.ts:109: if (isPlatform(actor)) {
+apps/api/src/modules/skills/service.ts:148: if (target.isGlobal && !isPlatform(actor)) {
+apps/api/src/modules/skills/service.ts:154: if (!target.isGlobal && !isPlatform(actor)) {
+apps/api/src/modules/tenant-blueprints/service.ts:273: origine: OrigineModifica = isPlatform(a) ? "PLATFORM" : "CLIENTE",
+apps/api/src/modules/tenant-import-runs/repository.ts:366: WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE' AND u.user_tenant_id IS NOT NULL
+apps/api/src/modules/tenant-import-runs/service.ts:37: return isPlatform(a) || (a.tenantId !== null && r.tenantId === a.tenantId);
+apps/api/src/modules/tenant-import-runs/service.ts:41: if (isPlatform(a)) {
+apps/api/src/modules/tenant-import-runs/service.ts:136: const tenantId = isPlatform(a) ? undefined : a.tenantId ?? undefined;
+apps/api/src/modules/tenant-materialization/service.ts:38: if (!actor.roles.includes("PLATFORM_ADMIN")) {
+apps/api/src/modules/tenants/provisioning.ts:89: for (const roleCode of ["TENANT_ADMIN", "USER"] as const) {
+apps/api/src/modules/tenants/service.ts:30: function isPlatformAdmin(actor: ActorContext): boolean {
+apps/api/src/modules/tenants/service.ts:31: return actor.roles.includes("PLATFORM_ADMIN");
+apps/api/src/modules/tenants/service.ts:70: const ownTenantOnly = isPlatformAdmin(actor) ? undefined : requireOwnTenant(actor);
+apps/api/src/modules/tenants/service.ts:75: if (!isPlatformAdmin(actor) && requireOwnTenant(actor) !== id) {
+apps/api/src/modules/tenants/service.ts:101: if (!isPlatformAdmin(actor) && requireOwnTenant(actor) !== id) {
+apps/api/src/modules/users/service.ts:62: function isPlatformAdmin(a: ActorContext): boolean {
+apps/api/src/modules/users/service.ts:63: return a.roles.includes("PLATFORM_ADMIN");
+apps/api/src/modules/users/service.ts:65: function isTenantAdmin(a: ActorContext): boolean {
+apps/api/src/modules/users/service.ts:66: return a.roles.includes("TENANT_ADMIN");
+apps/api/src/modules/users/service.ts:102: if (isPlatformAdmin(actor)) return true;
+apps/api/src/modules/users/service.ts:104: return isTenantAdmin(actor);
+apps/api/src/modules/users/service.ts:112: if (isPlatformAdmin(actor) || isTenantAdmin(actor)) return;
+apps/api/src/modules/users/service.ts:215: isPlatform(actor);
+apps/api/src/modules/users/service.ts:246: if (isPlatformAdmin(actor)) {
+apps/api/src/modules/users/service.ts:355: if (!(isPlatformAdmin(actor) || isTenantAdmin(actor) || isSelf)) {
+apps/api/src/modules/users/service.ts:370: if (!isPlatformAdmin(actor) && !isTenantAdmin(actor)) {
+apps/api/src/modules/users/service.ts:373: if (!isPlatformAdmin(actor) && target.tenantId !== actor.tenantId) {
+apps/api/src/modules/users/service.ts:386: if (isPlatformAdmin(actor)) {
+apps/api/src/modules/users/service.ts:430: if (!isPlatformAdmin(actor) && !isTenantAdmin(actor)) {
+apps/api/src/modules/users/service.ts:442: if (!isPlatformAdmin(actor)) {
+-- 81 siti

@@ -1,0 +1,7 @@
+voce: I-E (passo 22, W2 a lotti) — RILANCIO DA CAPO (W5): il primo lancio wf_fdd26207-9df e' morto per rete (6/7 agenti ENOTFOUND/ConnectionRefused)
+script: workflows/W2_classificazione.js (invariato)
+args: cartella=.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b, ts=202609151507, lotti = evidenze/I-E_lotti_202609150331.json (stessi 6 lotti, 245 tabelle)
+ora: 2026-09-15T15:07+02:00
+sessione: S1103 (ripresa alle 15:00)
+guardiano al lancio: contesto 46.0% (459.767 token), finestra 5h 0%
+nota: il gemello linux-pc e' irraggiungibile in questo momento; W2 non lo usa

@@ -1,0 +1,1 @@
+no verificato: 6/7 agenti morti per rete (ENOTFOUND / ConnectionRefused), lotti_validi 0/6; solo lotto_0_lettore.json scritto. Cartella lasciata come materiale grezzo, non si riprende (V11: resumeFromRunId non attraversa la ripresa; comunque rilancio da capo in _b)

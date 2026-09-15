@@ -1,0 +1,64 @@
+{
+  "voce": "I-D-codice",
+  "comandi": [
+    {
+      "comando": "rg --no-ignore --hidden -n \"source_lineage\" apps/api/src",
+      "numero": 60,
+      "output_grezzo": "apps/api/src\\modules\\provenance\\repository.ts:3: * Raw parameterized SQL over sys.sys_source_lineage_records (70k+ rows):\napps/api/src\\modules\\provenance\\repository.ts:19:  source_lineage_target_table_name: string; ...\napps/api/src\\modules\\evidence\\repository.ts:188:const PROV_JOIN = `LEFT JOIN sys.sys_source_lineage_records l\napps/api/src\\modules\\evidence\\repository.ts:189:  ON l.source_lineage_target_table_name = ev.source_table\n(60 righe totali corrispondenti)"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -n \"sys_source_lineage_records\" apps/api/src",
+      "numero": 5,
+      "output_grezzo": "apps/api/src\\modules\\evidence\\repository.ts:188:const PROV_JOIN = `LEFT JOIN sys.sys_source_lineage_records l\napps/api/src\\modules\\provenance\\repository.ts:3: * Raw parameterized SQL over sys.sys_source_lineage_records (70k+ rows):\napps/api/src\\modules\\provenance\\repository.ts:72:    `SELECT count(*)::text AS total FROM sys.sys_source_lineage_records ${wc}`, params);\napps/api/src\\modules\\provenance\\repository.ts:75:    `SELECT * FROM sys.sys_source_lineage_records ${wc}\napps/api/src\\modules\\provenance\\repository.ts:104:       FROM sys.sys_source_lineage_records ${wc}"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -ni \"insert into.*source_lineage|INSERT INTO sys_source_lineage|insertLineage|createLineage|writeLineage\" apps/api/src",
+      "numero": 0,
+      "output_grezzo": "(nessun riscontro)"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -ni \"lineage\" apps/api/src -l",
+      "numero": 12,
+      "output_grezzo": "apps/api/src\\modules\\evidence\\repository.ts\napps/api/src\\modules\\provenance\\service.ts\napps/api/src\\modules\\provenance\\routes.ts\napps/api/src\\modules\\provenance\\repository.ts\napps/api/src\\modules\\predictions\\service.ts\napps/api/src\\modules\\capability-composition\\service.ts\napps/api/src\\modules\\capability-composition\\routes.ts\napps/api/src\\modules\\capability-composition\\repository.ts\napps/api/src\\modules\\capability-composition\\recompute-cli.ts\napps/api/src\\modules\\calibration-sessions\\repository.ts\napps/api/src\\modules\\reference-sync\\service.ts\napps/api/src\\modules\\reference-sync\\routes.ts\napps/api/src\\modules\\reference-sync\\repository.ts"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select count(*) from sys.sys_source_lineage_records\"",
+      "numero": 70959,
+      "output_grezzo": "count\n70959"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select distinct source_lineage_target_table_name from sys.sys_source_lineage_records order by 1\"",
+      "numero": 34,
+      "output_grezzo": "source_lineage_target_table_name\nsys.sys_attendance\nsys.sys_leave_accrual_rules\nsys.sys_leave_balance_transactions\nsys.sys_overtime\nsys.sys_time_off_balances\nsys.sys_time_off_requests\nsys.sys_users\nsys_activity_classifications\nsys_calibration_discussions\n... (34 valori distinti in totale: 7 con prefisso 'sys.', 27 senza)"
+    }
+  ],
+  "risposte": [
+    {
+      "domanda": "Chi scrive (INSERT/UPDATE) su sys.sys_source_lineage_records dentro apps/api/src, e con quale convenzione (con o senza prefisso sys.) su target_table_name?",
+      "risposta": "NESSUNO SCRITTORE TROVATO in apps/api/src. `rg --no-ignore --hidden` su 'source_lineage' e su 'sys_source_lineage_records' in apps/api/src restituisce solo LETTORI: apps/api/src/modules/provenance/repository.ts (SELECT count/list/aggregate, righe 72, 75, 104-105) e apps/api/src/modules/evidence/repository.ts (LEFT JOIN in lettura, righe 188-190). Non compare alcuna istruzione INSERT/UPDATE su questa tabella nel codice API. La popolazione delle 70.959 righe (misurata con q.py) avviene fuori da apps/api/src (migrazioni/seed del brownfield — fuori scope di questa indagine di codice). Il dato di fatto verificabile in apps/api/src è quindi: DUE convenzioni COESISTONO nei dati letti dall'API — misurato con q.py, 7 valori distinti di target_table_name portano il prefisso 'sys.' (sys.sys_attendance, sys.sys_leave_accrual_rules, sys.sys_leave_balance_transactions, sys.sys_overtime, sys.sys_time_off_balances, sys.sys_time_off_requests, sys.sys_users) mentre i restanti 27 ne sono privi (es. sys_compensation_bands, sys_skills, sys_goals) — ma nessun file in apps/api/src impone o normalizza questa scelta in scrittura.",
+      "file_riga": [
+        "apps/api/src/modules/provenance/repository.ts:3",
+        "apps/api/src/modules/provenance/repository.ts:72",
+        "apps/api/src/modules/provenance/repository.ts:75",
+        "apps/api/src/modules/provenance/repository.ts:104",
+        "apps/api/src/modules/evidence/repository.ts:188"
+      ]
+    },
+    {
+      "domanda": "Quali consumatori del registro leggono target_table_name SENZA normalizzare (senza togliere/uniformare il prefisso sys.)?",
+      "risposta": "Entrambi i lettori del registro in apps/api/src leggono source_lineage_target_table_name a valore grezzo, senza alcun replace()/regexp_replace() o normalizzazione applicativa: (1) apps/api/src/modules/provenance/repository.ts riga 53 — filtro `source_lineage_target_table_name = $${params.length}` costruito da query.targetTable passato dal chiamante, confronto di uguaglianza diretta; riga 95/105 — SELECT/GROUP BY su source_lineage_target_table_name grezzo, restituito al chiamante come `target_table` senza trasformazioni (riga 36: `targetTableName: r.source_lineage_target_table_name`). (2) apps/api/src/modules/evidence/repository.ts righe 189-190 — il JOIN `l.source_lineage_target_table_name = ev.source_table` confronta il valore grezzo del registro con i letterali di ev.source_table, che nel codice (righe 32-143) sono TUTTI scritti SENZA prefisso 'sys.' (es. 'sys_performance_review_competency_ratings', 'sys_feedback_360_responses'). Conseguenza verificata: per le 7 tabelle il cui target_table_name porta il prefisso 'sys.' (elenco sopra), un eventuale filtro per nome nudo in provenance/repository.ts o un futuro letterale di evidenza con quello stesso nome non troverebbe corrispondenza, perché nessuno dei due file normalizza il prefisso prima del confronto. Nessuna funzione `replace(target_table_name,'sys.','')` esiste in apps/api/src (verificato: nessun riscontro cercando 'replace(' vicino a target_table_name).",
+      "file_riga": [
+        "apps/api/src/modules/provenance/repository.ts:53",
+        "apps/api/src/modules/provenance/repository.ts:95",
+        "apps/api/src/modules/provenance/repository.ts:105",
+        "apps/api/src/modules/evidence/repository.ts:189",
+        "apps/api/src/modules/evidence/repository.ts:190",
+        "apps/api/src/modules/evidence/repository.ts:32"
+      ]
+    }
+  ],
+  "non_misurato": [
+    "Chi scrive/popola sys.sys_source_lineage_records fuori da apps/api/src (migrazioni, seed, script di importazione) — fuori dal perimetro di questa indagine (limitata a apps/api/src)",
+    "Se un normalizzatore esiste in packages/shared o in query SQL lato migrazione (non cercato: mandato limita la ricerca al codice a apps/api/src)"
+  ]
+}

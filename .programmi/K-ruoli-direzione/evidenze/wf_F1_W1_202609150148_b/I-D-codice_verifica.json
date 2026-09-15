@@ -1,0 +1,16 @@
+{
+  "voce": "I-D-codice",
+  "ricontrollati": 5,
+  "discrepanze": [
+    {
+      "comando": "rg --no-ignore --hidden -n \"source_lineage\" apps/api/src",
+      "atteso": 67,
+      "ottenuto": 57
+    },
+    {
+      "comando": "select count(distinct source_lineage_target_table_name) from sys.sys_source_lineage_records",
+      "atteso": 34,
+      "ottenuto": 36
+    }
+  ]
+}

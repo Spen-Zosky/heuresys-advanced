@@ -1,0 +1,27 @@
+{
+  "voce": "I-B",
+  "stato": "VERIFICATO",
+  "ricontrollati": 17,
+  "discrepanze": [
+    {
+      "comando": "SELECT column_name FROM information_schema.columns WHERE table_schema='sys' AND table_name='sys_skill_families' ORDER BY ordinal_position",
+      "atteso": 14,
+      "ottenuto": 7,
+      "note": "Colonne reali: skill_family_id, skill_family_code, skill_family_name, skill_family_description, skill_family_metadata, created_at, updated_at (7, non 14)"
+    },
+    {
+      "comando": "SELECT COUNT(*) as n FROM sys.sys_skills WHERE skill_tenant_id IS NULL",
+      "atteso": 14031,
+      "ottenuto": 14003,
+      "note": "Skills a livello piattaforma: 14003"
+    },
+    {
+      "comando": "SELECT COUNT(*) as n FROM sys.sys_skills WHERE skill_tenant_id IS NOT NULL",
+      "atteso": 0,
+      "ottenuto": 28,
+      "note": "Skills a livello tenant: 28. Il lettore ha omesso questa popolazione."
+    }
+  ],
+  "verifica_eseguita": "2026-09-15T00:00:00Z",
+  "verificatore": "I-B-verifica"
+}

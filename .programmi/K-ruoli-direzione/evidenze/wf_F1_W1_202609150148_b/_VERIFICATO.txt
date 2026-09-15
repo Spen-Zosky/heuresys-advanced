@@ -1,0 +1,8 @@
+runId: wf_b6661daf-dc0
+verificato: 2026-09-15T03:07+02:00 da S1103 (sezione 3.6, passo W3) — rilancio parziale args.solo=[I-B, I-G, I-D-codice]
+agenti: 7/7 completati, 0 errori, 0 vuoti, 775.969 token fuori contesto, 22 min
+
+ACCETTATI (3/3): I-B, I-G, I-D-codice — spia trovata
+DISCREPANZE VERE: I-B sys_skills piattaforma/cliente 14031/0 vs verificatore 14003/28 (ri-misurata in linea in esiti/I-B.md); I-D-codice distinct 34 vs 36 (ri-misurata: 36 = 29+7, esiti/I-D.md §1); I-G 79 vs 82 file service.ts con isPlatform( (ri-misurata in esiti/I-G.md); 6 discrepanze I-G con atteso != numero del lettore: il verificatore ha scambiato i campi, si ri-misurano in linea
+CRITICO: fase_puo_chiudere=false, 12 mancanze -> lavorate in linea nei file di esito
+FILE: _LANCIO.txt, _risultato.json (fonte), grezzi degli agenti, critico.json

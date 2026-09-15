@@ -1,0 +1,11 @@
+runId: wf_27e05a72-709
+verificato: 2026-09-15T03:07+02:00 da S1103 (sezione 3.6, passo W3)
+agenti: 15/15 completati, 0 errori, 0 vuoti, 1.693.336 token fuori contesto, 44 min
+
+ACCETTATI (5/7): I-A, I-B*, I-C, I-D, I-F — spia (+7 su comandi[0]) trovata dal verificatore
+  * I-B accettata per spia ma SOSTITUITA dal rilancio _b: aveva misurato 4 tabelle sbagliate (sys_surveys, sys_goals, sys_organization_units, sys_engagement_surveys al posto delle *_templates) — critico
+SCARTATI (2/7): I-G (verificatore non ha ricontrollato comandi[0], che era un grep -n = numero di riga), I-D-codice (verificatore ha invertito atteso/ottenuto) -> rilanciati in wf_F1_W1_202609150148_b
+
+DISCREPANZE VERE ri-misurate in linea: vedi esiti/<voce>.md di ciascuna indagine (sezione «ri-misurato in linea»)
+CRITICO (opus): fase_puo_chiudere=false, 18 mancanze -> lavorate in linea nei file di esito; i 6 rilievi su I-B del primo lancio sono superati dal rilancio
+FILE: _LANCIO.txt, _risultato.json (fonte), <voce>_lettore.json / _verifica.json (grezzi degli agenti), critico.json

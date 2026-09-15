@@ -1,0 +1,201 @@
+# I-D — ri-misure in linea (S1103, 2026-09-15T03:00) — transazione READ ONLY
+
+## (1) Le due convenzioni del registro
+
+### righe e tabelle per convenzione (prefisso 'sys.' si/no)
+```sql
+select (source_lineage_target_table_name like 'sys.%') as con_prefisso,
+       count(*) as righe, count(distinct source_lineage_target_table_name) as tabelle_distinte,
+       count(*) filter (where source_lineage_source_natural_key is null) as senza_natural_key,
+       count(*) filter (where source_lineage_source_record_id is null) as senza_source_record_id
+  from sys.sys_source_lineage_records group by 1 order by 1
+```
+  False | 64577 | 29 | 0 | 0
+  True | 6382 | 7 | 6382 | 0
+
+### grafie distinte vs tabelle normalizzate (se uguali a 36 = nessuna tabella in entrambe le grafie)
+```sql
+select count(distinct source_lineage_target_table_name) as grafie,
+       count(distinct replace(source_lineage_target_table_name,'sys.','')) as tabelle_normalizzate from sys.sys_source_lineage_records
+```
+  36 | 36
+
+### le tabelle scritte CON prefisso
+```sql
+select source_lineage_target_table_name, count(*) from sys.sys_source_lineage_records
+  where source_lineage_target_table_name like 'sys.%' group by 1 order by 2 desc
+```
+  sys.sys_attendance | 5199
+  sys.sys_time_off_balances | 498
+  sys.sys_overtime | 380
+  sys.sys_users | 162
+  sys.sys_time_off_requests | 99
+  sys.sys_leave_balance_transactions | 24
+  sys.sys_leave_accrual_rules | 20
+
+## (2) Registro per tabella normalizzata vs righe reali → ORFANI (registro > tabella)
+
+### registro per tabella normalizzata
+```sql
+select replace(source_lineage_target_table_name,'sys.','') as tabella, count(*) as nel_registro,
+       count(distinct source_lineage_target_record_id) as id_distinti from sys.sys_source_lineage_records group by 1 order by 1
+```
+  sys_activity_classifications | 3276 | 3276
+  sys_attendance | 5199 | 5199
+  sys_calibration_discussions | 40 | 40
+  sys_calibration_participants | 20 | 20
+  sys_calibration_sessions | 35 | 35
+  sys_compensation_bands | 75 | 75
+  sys_continuous_feedback | 474 | 474
+  sys_esco_occupation_mappings | 7645 | 7645
+  sys_feedback_360_responses | 390 | 390
+  sys_goal_alignments | 100 | 100
+  sys_goal_check_ins | 1000 | 1000
+  sys_goal_comments | 856 | 856
+  sys_goal_milestones | 1000 | 1000
+  sys_goal_templates | 40 | 40
+  sys_goal_updates | 1811 | 1811
+  sys_goals | 1067 | 1067
+  sys_job_families | 27 | 27
+  sys_job_roles | 231 | 202
+  sys_learning_modules | 4959 | 4959
+  sys_learning_paths | 3294 | 3294
+  sys_leave_accrual_rules | 20 | 20
+  sys_leave_balance_transactions | 24 | 24
+  sys_okr_check_ins | 25 | 25
+  sys_okr_key_results | 20 | 20
+  sys_okrs | 20 | 20
+  sys_overtime | 380 | 380
+  sys_performance_review_competency_ratings | 465 | 465
+  sys_performance_reviews | 161 | 161
+  sys_skill_aliases | 80 | 80
+  sys_skill_categories | 32 | 6
+  sys_skill_families | 77 | 77
+  sys_skill_taxonomy_edges | 17593 | 11965
+  sys_skills | 19764 | 19764
+  sys_time_off_balances | 498 | 498
+  sys_time_off_requests | 99 | 99
+  sys_users | 162 | 162
+
+### confronto con la tabella reale: per ogni tabella `select count(*) from sys.<t>` e id del registro che NON esistono piu' nella tabella
+  tabella | nel_registro | righe_reali | orfani(registro-tabella) | id_registro_non_in_tabella
+  sys_activity_classifications | 3276 | 4304 |  | 3276
+  sys_attendance | 5199 | 121491 |  | 2154
+  sys_calibration_discussions | 40 | 40 |  | 0
+  sys_calibration_participants | 20 | 20 |  | 0
+  sys_calibration_sessions | 35 | 35 |  | 0
+  sys_compensation_bands | 75 | 41 | 34 | 46
+  sys_continuous_feedback | 474 | 474 |  | 0
+  sys_esco_occupation_mappings | 7645 | 7826 |  | 0
+  sys_feedback_360_responses | 390 | 776 |  | 0
+  sys_goal_alignments | 100 | 100 |  | 0
+  sys_goal_check_ins | 1000 | 7567 |  | 0
+  sys_goal_comments | 856 | 500 | 356 | 356
+  sys_goal_milestones | 1000 | 1000 |  | 0
+  sys_goal_templates | 40 | 40 |  | 0
+  sys_goal_updates | 1811 | 1075 | 736 | 736
+  sys_goals | 1067 | 2189 |  | 441
+  sys_job_families | 27 | 16 | 11 | 11
+  sys_job_roles | 231 | 176 | 55 | 91
+  sys_learning_modules | 4959 | 92 | 4867 | 4959
+  sys_learning_paths | 3294 | 66 | 3228 | 3230
+  sys_leave_accrual_rules | 20 | 20 |  | 0
+  sys_leave_balance_transactions | 24 | 20 | 4 | 4
+  sys_okr_check_ins | 25 | 25 |  | 0
+  sys_okr_key_results | 20 | 20 |  | 0
+  sys_okrs | 20 | 15 | 5 | 5
+  sys_overtime | 380 | 12061 |  | 202
+  sys_performance_review_competency_ratings | 465 | 1710 |  | 0
+  sys_performance_reviews | 161 | 570 |  | 4
+  sys_skill_aliases | 80 | 80 |  | 0
+  sys_skill_categories | 32 | 7 | 25 | 0
+  sys_skill_families | 77 | 77 |  | 0
+  sys_skill_taxonomy_edges | 17593 | 18438 |  | 1
+  sys_skills | 19764 | 14031 | 5733 | 5758
+  sys_time_off_balances | 498 | 1886 |  | 4
+  sys_time_off_requests | 99 | 2210 |  | 30
+  sys_users | 162 | 164 |  | 3
+
+  TABELLE CON ORFANI (registro > tabella): 11 · orfani totali 15054
+  Definizione di «orfano» per S-3: per tabella normalizzata, max(0, righe_registro - righe_reali); la colonna id_registro_non_in_tabella e' la definizione PER RIGA (id del registro che non trova la riga bersaglio) e vale anche dove il totale non supera la tabella.
+
+## (3) Presenze (sys_attendance)
+
+### presenze: totale, registro, per identificativo, per nome, con/senza provenienza
+```sql
+select (select count(*) from sys.sys_attendance) as presenze,
+       (select count(*) from sys.sys_source_lineage_records where replace(source_lineage_target_table_name,'sys.','')='sys_attendance') as nel_registro,
+       (select count(*) from sys.sys_source_lineage_records where replace(source_lineage_target_table_name,'sys.','')='sys_attendance' and source_lineage_target_record_id is not null) as per_identificativo,
+       (select count(*) from sys.sys_source_lineage_records where replace(source_lineage_target_table_name,'sys.','')='sys_attendance' and source_lineage_source_natural_key is not null) as per_nome,
+       (select count(*) from sys.sys_attendance a where exists (select 1 from sys.sys_source_lineage_records l where replace(source_lineage_target_table_name,'sys.','')='sys_attendance' and l.source_lineage_target_record_id = a.attendance_id)) as presenze_con_provenienza,
+       (select count(*) from sys.sys_attendance a where not exists (select 1 from sys.sys_source_lineage_records l where replace(source_lineage_target_table_name,'sys.','')='sys_attendance' and l.source_lineage_target_record_id = a.attendance_id)) as presenze_senza_provenienza
+```
+  121491 | 5199 | 5199 | 0 | 3045 | 118446
+
+## (4) CONFLITTI PER D5 — quattro tabelle ibride
+Definizione ESEGUITA (euristica, perche' la colonna di origine X-2 non esiste ancora): una riga e' «in conflitto» se
+  (a) esiste nel registro di provenienza (e' stata importata) E (b) la tabella bersaglio ha updated_at > created_at del registro (e' stata modificata DOPO la corsa di importazione).
+Il confronto e' bersaglio.updated_at > registro.created_at, NON un confronto interno al registro.
+
+### sys_time_off_balances
+```sql
+select count(*) as righe_totali,
+       count(*) filter (where l.source_lineage_record_id is not null) as importate_nel_registro,
+       count(*) filter (where l.source_lineage_record_id is null) as native_senza_registro,
+       count(*) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at) as in_conflitto,
+       count(*) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at + interval '1 hour') as in_conflitto_oltre_1h,
+       count(distinct b.balance_subject_user_id) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at) as persone_o_tenant_coinvolti
+  from sys.sys_time_off_balances b
+  left join sys.sys_source_lineage_records l on l.source_lineage_target_record_id = b.balance_id and replace(source_lineage_target_table_name,'sys.','') = 'sys_time_off_balances'
+```
+  1886 | 494 | 1392 | 422 | 422 | 158
+
+### sys_time_off_requests
+```sql
+select count(*) as righe_totali,
+       count(*) filter (where l.source_lineage_record_id is not null) as importate_nel_registro,
+       count(*) filter (where l.source_lineage_record_id is null) as native_senza_registro,
+       count(*) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at) as in_conflitto,
+       count(*) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at + interval '1 hour') as in_conflitto_oltre_1h,
+       count(distinct b.request_subject_user_id) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at) as persone_o_tenant_coinvolti
+  from sys.sys_time_off_requests b
+  left join sys.sys_source_lineage_records l on l.source_lineage_target_record_id = b.request_id and replace(source_lineage_target_table_name,'sys.','') = 'sys_time_off_requests'
+```
+  2210 | 69 | 2141 | 62 | 62 | 52
+
+### sys_overtime
+```sql
+select count(*) as righe_totali,
+       count(*) filter (where l.source_lineage_record_id is not null) as importate_nel_registro,
+       count(*) filter (where l.source_lineage_record_id is null) as native_senza_registro,
+       count(*) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at) as in_conflitto,
+       count(*) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at + interval '1 hour') as in_conflitto_oltre_1h,
+       count(distinct b.overtime_subject_user_id) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at) as persone_o_tenant_coinvolti
+  from sys.sys_overtime b
+  left join sys.sys_source_lineage_records l on l.source_lineage_target_record_id = b.overtime_id and replace(source_lineage_target_table_name,'sys.','') = 'sys_overtime'
+```
+  12061 | 178 | 11883 | 178 | 178 | 111
+
+### sys_leave_accrual_rules
+```sql
+select count(*) as righe_totali,
+       count(*) filter (where l.source_lineage_record_id is not null) as importate_nel_registro,
+       count(*) filter (where l.source_lineage_record_id is null) as native_senza_registro,
+       count(*) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at) as in_conflitto,
+       count(*) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at + interval '1 hour') as in_conflitto_oltre_1h,
+       count(distinct b.accrual_rule_tenant_id) filter (where l.source_lineage_record_id is not null and b.updated_at > l.created_at) as persone_o_tenant_coinvolti
+  from sys.sys_leave_accrual_rules b
+  left join sys.sys_source_lineage_records l on l.source_lineage_target_record_id = b.accrual_rule_id and replace(source_lineage_target_table_name,'sys.','') = 'sys_leave_accrual_rules'
+```
+  20 | 20 | 0 | 20 | 20 | 1
+
+  CONFLITTI TOTALI (definizione eseguita sopra): 682
+
+## (5) I 682 sono gesti di persone o lavori automatici? (distribuzione degli istanti di updated_at)
+query per tabella: with c as (select b.updated_at from sys.<t> b join sys.sys_source_lineage_records l on l.source_lineage_target_record_id=b.<id> and replace(l.source_lineage_target_table_name,'sys.','')='<t>' where b.updated_at > l.created_at), g as (select updated_at, count(*) n from c group by 1) select sum(n) filter (where n=1) righe_con_istante_unico, sum(n) filter (where n>1) righe_in_blocco, count(*) filter (where n>1) blocchi from g
+  sys_time_off_balances: istante_unico 1 · in_blocco 421 · blocchi 22 (232 righe il 2026-07-27 in 5 istanti; poi 42/25/19/17/10… un istante per giorno: 08-15, 08-24, 08-29, 09-05, 09-09 = lavoro notturno)
+  sys_time_off_requests: istante_unico 0 · in_blocco 62 · blocchi 3 (tutti il 2026-07-27)
+  sys_overtime: istante_unico 0 · in_blocco 178 · blocchi 1 (2026-07-29, un solo istante)
+  sys_leave_accrual_rules: istante_unico 0 · in_blocco 20 · blocchi 1 (2026-07-27)
+  l'unica riga con istante unico: balance_year 2026, updated_at 2026-07-27 19:04:37 (stesso giorno dei blocchi; nessuna colonna updated_by per attribuirla)
+  LETTURA: 681 su 682 sono state modificate in blocco (26 blocchi), cioe' da migrazioni/bonifiche di fine luglio e dal lavoro notturno della storia; 1 e' ambigua. Gesti individuali di persone identificabili: 0.

@@ -1,0 +1,184 @@
+{
+  "voce": "I-G",
+  "comandi": [
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\" apps/api/src/lib/actor.ts",
+      "numero": 2,
+      "output_grezzo": "apps/api/src/lib/actor.ts:2"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\" apps/api/src/lib/scope/domains.ts",
+      "numero": 5,
+      "output_grezzo": "apps/api/src/lib/scope/domains.ts:5"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select count(*) from sys.sys_auth_roles where auth_role_is_platform = true\"",
+      "numero": 1,
+      "output_grezzo": "count\n1"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\\(\" apps/api/src/modules/provenance/service.ts",
+      "numero": 1,
+      "output_grezzo": "apps/api/src/modules/provenance/service.ts:1"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\\(\" apps/api/src/modules/generated-origins/service.ts",
+      "numero": 1,
+      "output_grezzo": "apps/api/src/modules/generated-origins/service.ts:1"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\\(\" apps/api/src/modules/tenant-import-runs/service.ts",
+      "numero": 3,
+      "output_grezzo": "apps/api/src/modules/tenant-import-runs/service.ts:3"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\\(\" apps/api/src/modules/tenant-blueprints/service.ts",
+      "numero": 1,
+      "output_grezzo": "apps/api/src/modules/tenant-blueprints/service.ts:1"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\\(\" apps/api/src/modules/observability/service.ts",
+      "numero": 0,
+      "output_grezzo": "(nessun output: nessun match, exit 1 di rg)"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\\(\" apps/api/src/modules/leads/service.ts",
+      "numero": 0,
+      "output_grezzo": "(nessun output: nessun match, exit 1 di rg)"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -ic \"tenant\" apps/api/src/modules/observability/repository.ts",
+      "numero": 14,
+      "output_grezzo": "14"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"getTenantFleet\" apps/api/src/modules/observability/repository.ts",
+      "numero": 1,
+      "output_grezzo": "apps/api/src/modules/observability/repository.ts:1"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -l \"isPlatform\\(\" apps/api/src --glob \"*service.ts\" | wc -l",
+      "numero": 79,
+      "output_grezzo": "79 file service.ts nell'intero apps/api/src usano isPlatform( -- la maggior parte governa lo scoping PER-TENANT-a-scelta (isPlatform=filtro tenant facoltativo), non il ritorno di dati DI PIU' tenant in una sola risposta. I 6 moduli sotto sono quelli nominati dal mandato e la cui semantica di lista e' stata letta riga per riga."
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select table_name from information_schema.tables where table_schema in ('sys','staging','reference_sync','audit') and (table_name ilike '%user_tenant%' or table_name ilike '%tenant_user%' or table_name ilike '%platform_user%' or table_name ilike '%user_tenants%')\"",
+      "numero": 0,
+      "output_grezzo": "table_name\n(nessuna riga)"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select is_nullable from information_schema.columns where table_schema='sys' and table_name='sys_users' and column_name='user_tenant_id'\"",
+      "numero": 0,
+      "output_grezzo": "is_nullable\nNO   -- 0 = colonna NOT NULL, nessun utente (nemmeno PLATFORM_ADMIN) ha tenant_id nullo a livello di riga utente"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select count(*) as tot, count(distinct ur.user_auth_role_user_id) as utenti, count(ur.user_auth_role_tenant_id) as con_tenant_id from sys.sys_user_auth_roles ur join sys.sys_auth_roles r on r.auth_role_id=ur.user_auth_role_role_id where r.auth_role_code='PLATFORM_ADMIN' and ur.user_auth_role_revoked_at is null\"",
+      "numero": 2,
+      "output_grezzo": "tot,utenti,con_tenant_id\n2,2,1"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"user_auth_role_tenant_id\" apps/api/src/modules/auth/repository.ts apps/api/src/modules/users/repository.ts",
+      "numero": 11,
+      "output_grezzo": "apps/api/src/modules/auth/repository.ts:1\napps/api/src/modules/users/repository.ts:10"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select p.auth_permission_code, r.auth_role_code from sys.sys_auth_role_permissions rp join sys.sys_auth_permissions p on p.auth_permission_id=rp.auth_permission_id join sys.sys_auth_roles r on r.auth_role_id=rp.auth_role_id where p.auth_permission_code in ('observability:read','leads:read','tenant_blueprint:read') order by 1,2\"",
+      "numero": 3,
+      "output_grezzo": "auth_permission_code,auth_role_code\nleads:read,PLATFORM_ADMIN\nobservability:read,PLATFORM_ADMIN\ntenant_blueprint:read,PLATFORM_ADMIN"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"app\\.get\\(\" apps/api/src/modules/provenance/routes.ts",
+      "numero": 2,
+      "output_grezzo": "apps/api/src/modules/provenance/routes.ts:2"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"app\\.get\\(\" apps/api/src/modules/generated-origins/routes.ts",
+      "numero": 2,
+      "output_grezzo": "apps/api/src/modules/generated-origins/routes.ts:2"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"app\\.get\\(\" apps/api/src/modules/tenant-import-runs/routes.ts",
+      "numero": 2,
+      "output_grezzo": "apps/api/src/modules/tenant-import-runs/routes.ts:2"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"app\\.get\\(\" apps/api/src/modules/observability/routes.ts",
+      "numero": 3,
+      "output_grezzo": "apps/api/src/modules/observability/routes.ts:3"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"app\\.get\\(\" apps/api/src/modules/leads/routes.ts",
+      "numero": 1,
+      "output_grezzo": "apps/api/src/modules/leads/routes.ts:1"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"app\\.get\\(\" apps/api/src/modules/tenant-blueprints/routes.ts",
+      "numero": 7,
+      "output_grezzo": "apps/api/src/modules/tenant-blueprints/routes.ts:7"
+    }
+  ],
+  "risposte": [
+    {
+      "domanda": "(1) Come un attore di piattaforma ottiene il perimetro 'tutti i tenant'?",
+      "risposta": "Un unico punto: apps/api/src/lib/actor.ts, funzione isPlatform(a) (righe 28-30) restituisce a.roles.includes('PLATFORM_ADMIN'). La funzione viene consumata in due punti decisionali di apps/api/src/lib/scope/domains.ts: riga 126, activeDomainsOf() aggiunge il dominio 'platform_mandate' se isPlatform(actor); riga 322, la funzione che decide il ScopeTier ritorna { tier: 'PLATFORM', role: 'PLATFORM_ADMIN' } se isPlatform(actor), PRIMA di guardare i mandati tenant-wide. A valle, ogni servizio che vuole diventare cross-tenant ripete lo stesso if isPlatform(a) per decidere se azzerare il filtro tenantId nella propria query (pattern 'tenantFilter'): non è un secondo punto di decisione architetturale, è la stessa decisione ripetuta 79 volte nei service.ts del repo (rg -l). A livello di dati: auth_role_is_platform=true è una colonna di sys.sys_auth_roles e oggi la porta SOLO PLATFORM_ADMIN (count=1): il commento nel codice ('PLATFORM_ADMIN e' l'unico ruolo con auth_role_is_platform = true') e' confermato dal database vivo, non solo dal commento.",
+      "file_riga": [
+        "apps/api/src/lib/actor.ts:28-30",
+        "apps/api/src/lib/scope/domains.ts:126",
+        "apps/api/src/lib/scope/domains.ts:319-322"
+      ]
+    },
+    {
+      "domanda": "(2) Tutte le rotte che restituiscono dati di PIÙ tenant a un attore di piattaforma, nei moduli indicati dal mandato (avviamento/tenant-blueprints, observability, provenance, generated-origins, leads)",
+      "risposta": "Nove rotte GET, in sei moduli, restituiscono oggi a PLATFORM_ADMIN dati che attraversano tenant diversi senza nessun filtro di assegnazione (solo il permesso di rotta, sempre riservato a PLATFORM_ADMIN sul vivo — vedi query permessi qui sopra): (a) provenance: GET / e GET /summary (routes.ts:23,28) — il gate è service.ts:16 tenantFilter(a): 'if (isPlatform(a)) return undefined' e la query gira senza filtro tenant; (b) generated-origins: GET / e GET /summary (routes.ts:23,31) — stesso pattern, gate a service.ts:21; (c) tenant-import-runs: GET / lista (routes.ts:36) — service.ts:136 'const tenantId = isPlatform(a) ? undefined : a.tenantId', e GET /:id (routes.ts:41) — service.ts:37 canReadRun() lascia passare isPlatform(a) su QUALUNQUE run di QUALUNQUE tenant, quindi anche questa rotta a record singolo è oggi raggiungibile su ogni cliente senza controllo di assegnazione; (d) observability: GET /system-health (routes.ts:25) — repository.ts:30-49 getTenantFleet() produce UNA RIGA PER TENANT (nome, codice, stato, utenti attivi, ultimo login): è l'elenco commerciale completo dei clienti descritto in D9, non un dettaglio tecnico; le altre due rotte del modulo (slow-queries, request-series) NON hanno nessuna colonna tenant nelle loro query (0 occorrenze di 'tenant' in tutto service.ts) e sono metriche di sistema, non dati di cliente: escluse dal perimetro di R-0; (e) tenant-blueprints: GET / lista (routes.ts:47) — service.ts:115-119 list() non riceve nemmeno l'actor, quindi non filtra per tenant in nessun caso: ogni fascicolo di ogni cliente è nella stessa lista; le altre sei rotte GET del modulo sono tutte scoped a un singolo :id/:number (un solo blueprint, non una lista cross-tenant) o restituiscono una tassonomia statica (research-domains) e sono escluse; (f) leads: GET / lista (routes.ts:31) — il modulo non ha nessun concetto di tenant nel codice (0 occorrenze in service.ts/routes.ts: i prospect non sono ancora clienti, ADR-0026), quindi tecnicamente non è 'dati di più tenant' in senso stretto, ma è l'unica rotta di leads:read (permesso oggi solo di PLATFORM_ADMIN) e il mandato la nomina esplicitamente: la includo con la riserva scritta in non_misurato.",
+      "file_riga": [
+        "apps/api/src/modules/provenance/routes.ts:23,28",
+        "apps/api/src/modules/provenance/service.ts:16",
+        "apps/api/src/modules/generated-origins/routes.ts:23,31",
+        "apps/api/src/modules/generated-origins/service.ts:21",
+        "apps/api/src/modules/tenant-import-runs/routes.ts:36,41",
+        "apps/api/src/modules/tenant-import-runs/service.ts:37,136",
+        "apps/api/src/modules/observability/routes.ts:25",
+        "apps/api/src/modules/observability/repository.ts:30-49",
+        "apps/api/src/modules/observability/service.ts:5 (commento: 'No tenant scoping — PLATFORM_ADMIN-only')",
+        "apps/api/src/modules/tenant-blueprints/routes.ts:47",
+        "apps/api/src/modules/tenant-blueprints/service.ts:115-119",
+        "apps/api/src/modules/leads/routes.ts:31"
+      ]
+    },
+    {
+      "domanda": "(3) Esiste già una tabella che lega un utente a più tenant, o l'utente di piattaforma ha tenant_id nullo?",
+      "risposta": "Nessuna delle due cose esiste oggi. Nessuna tabella utente↔più-tenant: la ricerca su information_schema.tables nei quattro schemi sys/staging/reference_sync/audit per nomi tipo user_tenant/tenant_user/platform_user/user_tenants non trova NESSUNA riga. E l'utente di piattaforma NON ha tenant_id nullo a livello di riga: sys.sys_users.user_tenant_id è NOT NULL (misurato su information_schema.columns), quindi anche i 2 utenti PLATFORM_ADMOIN oggi vivi appartengono comunque a UN tenant 'di casa'. L'unico frammento che assomiglia a un legame utente↔tenant diverso dal proprio è la colonna sys.sys_user_auth_roles.user_auth_role_tenant_id (nullable), che oggi su 2 concessioni PLATFORM_ADMIN attive ne ha 1 valorizzata: MA il codice la usa solo come metadato del gesto di concessione/revoca di un ruolo (apps/api/src/modules/users/repository.ts, 10 occorrenze: lista i ruoli di un utente, filtra per 'concesso in quel tenant o globalmente' quando si REVOCA/RILEGGE il ruolo) — nessuna riga di resolver.ts o domains.ts la legge per decidere il perimetro di lettura dei dati. Non è oggi un asse di scoping funzionante: è una colonna di audit del grant, non l'asse che R-0 deve costruire. R-0 parte quindi da zero: nessuna tabella e nessun riuso possibile di questa colonna senza cambiarne il consumo.",
+      "file_riga": [
+        "sys.sys_users.user_tenant_id (information_schema, NOT NULL)",
+        "sys.sys_user_auth_roles.user_auth_role_tenant_id (information_schema, nullable)",
+        "apps/api/src/modules/users/repository.ts:316,325,337,370,371,396,400,427,431,439",
+        "apps/api/src/modules/auth/repository.ts:104"
+      ]
+    },
+    {
+      "domanda": "(4) Il numero di rotte che R-0 dovrà filtrare",
+      "risposta": "9 rotte GET, in 6 moduli, restituiscono oggi dati cross-tenant a PLATFORM_ADMIN senza alcun controllo di assegnazione: provenance / e /summary (2), generated-origins / e /summary (2), tenant-import-runs / e /:id (2), observability /system-health (1), tenant-blueprints / (1), leads / (1) = 9. Sul totale delle rotte GET degli stessi 6 moduli (2+2+2+3+1+7=17), 8 restano fuori dal perimetro di R-0 perché o già scoped a un singolo oggetto/tenant (tenant-blueprints /:id e derivate, tenant-import-runs le POST) o non toccano affatto dati di tenant (observability /slow-queries, /request-series). Questo conteggio guarda SOLO i 6 moduli che il mandato nomina per I-G: non è un censimento di TUTTE le rotte dell'intero prodotto raggiungibili da PLATFORM_ADMIN (sarebbero le 79 di isPlatform( sui service.ts, un insieme molto più largo e in gran parte non cross-tenant per costruzione — è il numero riportato al comando 'rg -l isPlatform\\( --glob *service.ts | wc -l' sopra, tenuto separato apposta per non confonderlo con questo).",
+      "file_riga": [
+        "apps/api/src/modules/provenance/routes.ts",
+        "apps/api/src/modules/generated-origins/routes.ts",
+        "apps/api/src/modules/tenant-import-runs/routes.ts",
+        "apps/api/src/modules/observability/routes.ts",
+        "apps/api/src/modules/tenant-blueprints/routes.ts",
+        "apps/api/src/modules/leads/routes.ts"
+      ]
+    },
+    {
+      "domanda": "Punto UNICO del resolver dove mettere il filtro di R-0 (utile a chi eseguirà R-0, non richiesto esplicitamente dal passo 20 ma discende dalla domanda 1)",
+      "risposta": "Il punto architetturale è apps/api/src/lib/scope/domains.ts, la funzione che decide lo ScopeTier (riga 322: 'if (isPlatform(actor)) return { tier: \"PLATFORM\", role: \"PLATFORM_ADMIN\" }'). Oggi quel ritorno è incondizionato: R-0 dovrebbe intercettare qui il caso 'PLATFORM_ADMIN assegnato solo a certi tenant' e restituire un tier più stretto (o un insieme di tenant ammessi) invece di 'PLATFORM' pieno. MA a valle di questo, i 9 servizi delle 9 rotte NON leggono lo ScopeTier da domains.ts: leggono direttamente isPlatform(a) nel proprio service.ts (tenantFilter locale). Quindi il filtro di R-0, per essere davvero UNICO e non un decimo posto duplicato, deve o (i) sostituire tutte le chiamate dirette a isPlatform(a) nei 9 siti con una funzione nuova che consulta l'asse di R-0, oppure (ii) introdurre in actor.ts una isPlatform(a) arricchita che tenga conto dei tenant assegnati e che i 9 siti già chiamano — la seconda opzione tocca UN file (actor.ts) invece di 9, ma cambia la firma logica di una funzione oggi booleana pura in qualcosa che deve sapere anche 'per quale tenant'. Questa è una scelta di progettazione di R-0, non una misura: la registro come raccomandazione, non come fatto.",
+      "file_riga": [
+        "apps/api/src/lib/scope/domains.ts:322",
+        "apps/api/src/lib/actor.ts:28-30"
+      ]
+    }
+  ],
+  "non_misurato": [
+    "Se 'leads' vada davvero contato fra le 'porte di piattaforma verso i clienti': i lead sono prospect pre-cliente (ADR-0026) e il modulo non ha alcun concetto di tenant nel codice (0 occorrenze). È incluso nel conteggio di 9 solo perché il mandato nomina esplicitamente il modulo leads e la rotta è oggi riservata a PLATFORM_ADMIN; la decisione se rientri nel perimetro di R-0 è un giudizio di prodotto, non una misura, e la lascio a chi chiuderà R-0.",
+    "Se esistano rotte cross-tenant equivalenti nei moduli blueprint-* (blueprint-activations, blueprint-families, blueprint-overrides, blueprint-processes, blueprint-variants, content-blueprint-links) che affiancano tenant-blueprints: tutti compaiono nell'elenco dei 79 file con isPlatform( ma NON sono stati letti riga per riga in questa indagine (il mandato al passo 20 nomina esplicitamente solo 'i moduli di avviamento, observability, provenance, generated-origins, leads, tenant-blueprints', e ho trattato 'avviamento' come sinonimo dei moduli tenant-import-runs/tenant-blueprints già misurati; se 'avviamento' intende ANCHE i sei moduli blueprint-*, quello è lavoro non fatto qui e va aggiunto a R-0 come indagine supplementare, non assunto SBLOCCATO).",
+    "Se ci sia una tabella di assegnazione utente↔tenant fuori dai quattro schemi cercati (sys, staging, reference_sync, audit): la ricerca ha coperto TUTTI gli schemi applicativi dichiarati in CLAUDE.md (I3/I4), non l'intero catalogo di information_schema.tables senza filtro di schema (che includerebbe anche schemi di sistema Postgres irrilevanti); non rimisurato senza il filtro perché il filtro è già la definizione corretta di 'schema applicativo' del progetto."
+  ]
+}

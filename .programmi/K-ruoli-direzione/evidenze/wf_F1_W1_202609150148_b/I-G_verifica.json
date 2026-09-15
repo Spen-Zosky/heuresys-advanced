@@ -1,0 +1,41 @@
+{
+  "voce": "I-G",
+  "ricontrollati": 19,
+  "discrepanze": [
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\" apps/api/src/lib/actor.ts",
+      "atteso": 8,
+      "ottenuto": 2
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\" apps/api/src/lib/scope/domains.ts",
+      "atteso": 2,
+      "ottenuto": 5
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\\(\" apps/api/src/modules/provenance/service.ts",
+      "atteso": 4,
+      "ottenuto": 1
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\\(\" apps/api/src/modules/generated-origins/service.ts",
+      "atteso": 5,
+      "ottenuto": 1
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\\(\" apps/api/src/modules/tenant-import-runs/service.ts",
+      "atteso": 6,
+      "ottenuto": 3
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\\(\" apps/api/src/modules/tenant-blueprints/service.ts",
+      "atteso": 7,
+      "ottenuto": 1
+    },
+    {
+      "comando": "rg --no-ignore --hidden -l \"isPlatform\\(\" apps/api/src --glob \"*service.ts\" | wc -l",
+      "atteso": 79,
+      "ottenuto": 82
+    }
+  ]
+}

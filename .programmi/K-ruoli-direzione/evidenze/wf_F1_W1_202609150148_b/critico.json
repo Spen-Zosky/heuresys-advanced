@@ -1,0 +1,73 @@
+{
+  "voce": "critico",
+  "ts": "2026-09-15",
+  "perimetro": "rilancio parziale args.solo = I-B, I-G, I-D-codice (I-A, I-C, I-D, I-F valide dal primo lancio; I-E in W2 e code in linea fuori da questo giudizio)",
+  "manca": [
+    {
+      "voce": "I-B",
+      "cosa": "Le sei distribuzioni piattaforma/cliente lasciate in non_misurato (sys_job_roles, sys_tenant_blueprints, sys_survey_templates, sys_goal_templates, sys_engagement_survey_templates, sys_organization_unit_kpi_templates) sono una delle cinque colonne della tabella famiglie×5 del passo 14 e si misurano con un group by per tabella. Misurate qui: q.py \"select job_role_tenant_id, count(*) from sys.sys_job_roles group by 1\" -> (NULL,176); q.py union su 5 tabelle -> tenant_blueprints RTL_BANK 1; survey_templates RTL_BANK 1 + HEURESYS 1; goal_templates RTL_BANK 40; engagement_survey_templates RTL_BANK 5; organization_unit_kpi_templates NULL 100 (tenant id: 86ba7a65=RTL_BANK, 8bc5bc59=HEURESYS da sys.sys_tenancies).",
+      "perche": "Senza queste sei righe la tabella famiglie×5 ha sei celle vuote e il verdetto SBLOCCA K1-ADR (quale modo è canonico, quali eccezioni) non è sostenuto da numeri; i sei numeri esistevano a un comando di distanza."
+    },
+    {
+      "voce": "I-B",
+      "cosa": "La risposta su sys_skills dice «piattaforma 14031, cliente 0»; la verifica e la mia rimisura dicono 14003 / 28: q.py \"select count(*) filter (where skill_tenant_id is null), count(*) filter (where skill_tenant_id is not null), count(*) filter (where skill_is_global), count(*) from sys.sys_skills\" -> 14003,28,14003,14031; le 28 sono tutte RTL_BANK con skill_is_global=false. La risposta va riscritta con i numeri verificati.",
+      "perche": "È l'unica famiglia che realizza la catena con la bandiera, e il testo dice che il ramo cliente è vuoto quando non lo è: il K1-ADR nascerebbe su un fatto falso."
+    },
+    {
+      "voce": "I-B",
+      "cosa": "«NO legame a sys_generated_record_origins» è dichiarato per tutte e 13 le tabelle senza il comando che lo prova. Il legame non è una FK ma per nome: sys_generated_record_origins ha le colonne generated_record_origin_target_table + generated_record_origin_target_record_id (q.py su information_schema.columns, 11 colonne); il registro oggi ha 0 righe: q.py \"select generated_record_origin_target_table, count(*) from sys.sys_generated_record_origins group by 1\" -> nessuna riga. La risposta deve dire il meccanismo (per nome) e il conteggio (0), non «NO».",
+      "perche": "La colonna «legame a sys_generated_record_origins» della tabella famiglie×5 è vuota per costruzione se si cerca una FK che non può esistere; il K1-ADR deve sapere che il legame è per nome e oggi non è esercitato."
+    },
+    {
+      "voce": "I-B",
+      "cosa": "Manca il verdetto richiesto dal passo 14: la tabella famiglie×5 consolidata e la frase «la catena del semilavorato è realizzata in N modi; il modo canonico è …». Dai numeri disponibili i modi fisici sono almeno tre (tenant_id nullable + bandiera: sys_skills; tenant_id senza bandiera: job_roles, tenant_blueprints, survey/goal/engagement/ou_kpi templates; nessuna colonna tenant: skill_families, skill_categories, skill_taxonomy_edges, job_families, organization_unit_templates, process_kpi_templates), ma la frase non è scritta.",
+      "perche": "Il mandato dice che un'indagine senza verdetto non è chiusa; SBLOCCA K1-ADR è proprio quella frase."
+    },
+    {
+      "voce": "I-B",
+      "cosa": "Il file I-B_lettore.json non è nella cartella evidenze: ls .programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/ -> _LANCIO.txt, I-B_verifica.json, I-D-codice_lettore.json, I-D-codice_verifica.json, I-G_lettore.json, I-G_verifica.json. I comandi e gli output grezzi dei numeri di I-B esistono solo nel risultato del workflow, non su disco.",
+      "perche": "La regola del lettore («ogni numero ha accanto il comando ESATTO e le prime righe dell'output grezzo», scritto in <cartella>/I-B_lettore.json) non è rispettata: i 13 conteggi di I-B non sono ricontrollabili da chi legge le evidenze."
+    },
+    {
+      "voce": "I-B",
+      "cosa": "sys_organization_unit_templates «tutte di piattaforma (associate ai blueprint, non ai tenant)» senza il comando che prova di chi è il blueprint puntato. Misurato: LEFT JOIN su sys.sys_tenant_blueprints per organization_unit_template_blueprint_id -> 225 righe senza corrispondenza (tenant NULL), cioè il blueprint_id NON punta a sys_tenant_blueprints; la tabella referenziata va nominata (information_schema.referential_constraints) e la sua proprietà misurata.",
+      "perche": "L'attribuzione «piattaforma» di 225 righe poggia su un'ipotesi non provata; è un insieme dichiarato senza il comando."
+    },
+    {
+      "voce": "I-D-codice",
+      "cosa": "La domanda del passo 17 «le due convenzioni corrispondono a due scrittori distinti? file:riga di ciascuno» resta senza risposta. La ricerca in apps/api/src è corretta ed esaurita (rg --no-ignore --hidden -c \"source_lineage\" apps/api/src -> evidence/repository.ts:9, provenance/repository.ts:48 = 57, tutte letture), ma gli scrittori vivono altrove: rg --no-ignore --hidden -il \"sys_source_lineage_records\" db scripts apps packages -> 20 file in db/migrations (000025 crea, 000030, 000257 con INSERT INTO esplicito, 000281, …), 2 schemi in packages/shared, 3 test. Servono i file:riga degli INSERT per convenzione (con 'sys.' / senza) fra quei 20 file.",
+      "perche": "Il verdetto per X-3 (chi normalizza e chi no) e per S-3 (definizione di orfano) presuppone di sapere DOVE nascono le due grafie; oggi l'esito dice solo dove NON nascono."
+    },
+    {
+      "voce": "I-D-codice",
+      "cosa": "Il numero «27 valori distinti senza prefisso» è errato: q.py \"select count(distinct source_lineage_target_table_name), count(distinct …) filter (where … like 'sys.%'), count(distinct …) filter (where … not like 'sys.%'), count(distinct replace(…,'sys.','')) from sys.sys_source_lineage_records\" -> 36,7,29,36. Quindi 7 con prefisso + 29 senza = 36, e normalizzati 36: nessun nome compare in entrambe le grafie. La discrepanza 34/36 del verificatore è reale e la risposta va corretta (27 -> 29).",
+      "perche": "Il divario fra grafie è il cuore di X-3; un conteggio sbagliato di 2 tabelle nella lista dei consumatori/bersagli cambia l'elenco che X-3 deve normalizzare."
+    },
+    {
+      "voce": "I-G",
+      "cosa": "La domanda (1) del passo 20 nomina apps/api/src/lib/scope/resolver.ts E domains.ts: la risposta non contiene alcun file:riga di resolver.ts. Misurato: rg --no-ignore --hidden -n \"PLATFORM_ADMIN|isPlatform\" apps/api/src/lib/scope/resolver.ts -> righe 62, 87, 140, 200 (tre `actor.roles.includes(\"PLATFORM_ADMIN\")` che aprono il perimetro, una `audit(true, \"platform\")`). Inoltre «unico punto sorgente actor.ts:28-30» è falsificato: rg --no-ignore --hidden -c \"function isPlatformAdmin\\(|includes\\(\\\"PLATFORM_ADMIN\\\"\\)|includes\\('PLATFORM_ADMIN'\\)\" apps/api/src -> 20 file, fra cui tenants/service.ts:30 (definizione locale), tenant-materialization/service.ts, content-blueprint-links/service.ts, middleware/tenantContext.ts:22.",
+      "perche": "Il verdetto SBLOCCA R-0 richiede «il punto UNICO del resolver dove mettere il filtro»: se il controllo per nome è ridefinito in 20 file, actor.ts non è unico e resolver.ts:87/140/200 sono i siti che il mandato chiedeva per primi."
+    },
+    {
+      "voce": "I-G",
+      "cosa": "Il conteggio «9 rotte in 6 moduli» copre 2 dei 7 moduli dell'avviamento (passo 55: «7 moduli dell'avviamento, 45 rotte, tutte oggi PLATFORM_ADMIN»). Non letti: tenants (rg -c \"app\\.get\\(\" routes.ts -> 3, tutte `tenant:read`; service.ts:70 `ownTenantOnly = isPlatformAdmin(actor) ? undefined : requireOwnTenant(actor)` = elenco di TUTTI i tenant, il primo esempio del passo 20), tenant-materialization (1 GET), blueprint-activations/families/overrides/processes/variants (2 GET ciascuno, isPlatform( 3/3/2/3/3 nei service.ts), content-blueprint-links (3 GET): 17 rotte GET non esaminate riga per riga.",
+      "perche": "La lista file:riga delle porte da filtrare e il numero per la soglia 40 (1 o 2 sessioni per R-0) non sono decidibili su 2 moduli di 7; il lettore lo ha messo in non_misurato, ma il verdetto lo pretende."
+    },
+    {
+      "voce": "I-G",
+      "cosa": "Il numero 79 (file service.ts con isPlatform() è citato due volte nelle risposte; il verificatore e la mia rimisura danno 82: rg --no-ignore --hidden -l \"isPlatform\\(\" apps/api/src --glob \"*service.ts\" > file; wc -l -> 82. Da correggere nel testo.",
+      "perche": "È l'unico numero della risposta che il verificatore ha davvero confutato con un valore proprio; lasciarlo a 79 contraddice la verifica agli atti."
+    },
+    {
+      "voce": "I-G",
+      "cosa": "Il ricontrollo dei conteggi non è una prova: 6 delle 7 discrepanze in I-G_verifica.json hanno un «atteso» che non è il numero del lettore (es. domains.ts: lettore 5, verificatore atteso 2 ottenuto 5; provenance/service.ts: lettore 1, atteso 4 ottenuto 1). Solo la spia (actor.ts 2+7) e il 79/82 sono confronti veri. I numeri di I-G reggono oggi sulla sola parola del lettore e sulla mia rimisura di 4 comandi.",
+      "perche": "La sezione 3.6 del mandato pretende numeri VERIFICATI; una verifica con atteso/ottenuto scambiati non lo è, anche se il workflow l'ha accettata per la deroga sulla spia."
+    },
+    {
+      "voce": "F1",
+      "cosa": "Nessun file esiti/I-B.md, esiti/I-D.md, esiti/I-G.md esiste: ls .programmi/K-ruoli-direzione/esiti/ -> F0.2_censimento_C1.md, F0.4_ripresa.md, F0.5_sola_lettura.md, F0.6_migrazioni.md, RAPPORTO_2026-09-14.md, REGISTRO_SCOPERTE.md, RISPOSTE_ENZO.md. Il mandato (sezione 6, apertura) chiude ogni indagine solo con esiti/<codice>.md contenente comandi, numeri verificati e verdetto SBLOCCA/RITIRA per voce a valle.",
+      "perche": "È la definizione di «indagine chiusa» data dal mandato; è lavoro della sessione 2 di F1, non aggiunto qui, ma finché non esiste la fase non può chiudere."
+    }
+  ],
+  "fase_puo_chiudere": false
+}

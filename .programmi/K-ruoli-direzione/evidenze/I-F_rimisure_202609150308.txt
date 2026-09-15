@@ -1,0 +1,43 @@
+# I-F ri-misure in linea (S1103, 2026-09-15T03:08+02:00)
+
+## rg --no-ignore --hidden -l WHISTLEBLOWING_CUSTODIAN . --glob "!node_modules" --glob "!.next" --glob "!dist" --glob "!docs/**" --glob "!.programmi/**" --glob "!.git" --glob "!cowork_*/**" --glob "!.codex*/**"
+.\.secrets\accessi.csv
+.\.storia36\PROGRESS.md
+.\apps\api\scripts\prova-live-99-f7.mts
+.\apps\api\src\lib\scope\domains.ts
+.\apps\api\src\modules\whistleblowing\routes.ts
+.\apps\api\src\modules\whistleblowing\service.ts
+.\apps\api\test\domains-f7.integration.test.ts
+.\apps\api\test\unit\role-lists-drift.unit.test.ts
+.\apps\api\test\whistleblowing.integration.test.ts
+.\apps\api\test\whistleblowing-isolation.integration.test.ts
+.\apps\web\src\app\(authenticated)\users\[userId]\_components\roles-editor.tsx
+.\apps\web\src\app\(authenticated)\whistleblowing-console\page.tsx
+.\apps\web\src\lib\role-precedence.ts
+.\apps\web\src\locales\en\shell.json
+.\apps\web\src\locales\it\shell.json
+.\apps\web\tests\e2e\fixtures.ts
+.\db\migrations\000181_whistleblowing.sql
+.\db\migrations\000205_whistleblowing_custodian_and_console.sql
+.\db\migrations\000389_un_ruolo_di_cliente_non_si_concede_senza_cliente.sql
+.\db\migrations\000414_un_ruolo_chiave_dichiara_la_sua_famiglia_e_il_whistleblowing_ha_una_guardia.sql
+.\db\scripts\populate-reference-translations-governance.sql
+.\db\scripts\verify-storia36.sql
+.\db\seeds\storia36\10_security_privacy.sql
+.\packages\shared\src\schemas\auth.ts
+.\packages\shared\src\schemas\role-codes.ts
+.\packages\shared\src\schemas\whistleblowing.ts
+.\qa_artifacts\runs\f4-sweep\report-9956.json
+.\qa_artifacts\schema_snapshot_after.sql
+.\qa_artifacts\schema_snapshot_before.sql
+
+## colonne di ritiro sul vivo
+table_name,column_name
+(0 righe dati = nessuna colonna di ritiro: R-1 passo 0 la aggiunge)
+
+## passo 19 — controprova rossa del test di deriva (IN LINEA)
+baseline: cd apps/api && pnpm exec vitest run -c vitest.unit.config.ts role-lists-drift -> exit 0, Tests 3 passed (3)
+con PROVA_K_RUOLO_FINTO aggiunto a packages/shared/src/schemas/role-codes.ts (riga 36): stesso comando -> exit 0, Tests 3 passed (3)   <-- NON SCATTA
+ripristino: cp dell'originale, git diff --stat vuoto, 0 occorrenze residue
+test che confrontano role-codes.ts con altre liste: rg -l su apps/api/test apps/web/tests packages/shared (*.test.ts) -> 0 file
+i 4 file attesi dal mandato citano il codice SOLO in commento: auth.ts r.91, role-lists-drift.unit.test.ts r.42, fixtures.ts r.130-132, whistleblowing-console/page.tsx r.5

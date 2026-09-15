@@ -29,7 +29,7 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 | I-B | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 14 |  |  | fisica delle famiglie di semilavorato (W1, haiku) |
 | I-C | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 15 |  |  | impronta dei controlli per nome (W1); seconda passata passo 16 dopo I-E |
 | I-D | CHIUSA | S1103 | 2026-09-15T01:48+02:00 | 17 |  |  | esiti/I-D.md; evidenze/I-D_rimisure_202609150300.txt; wf_F1_W1_202609150148(_b) | 682 righe importate poi modificate (tutte in blocco, 0 gesti individuali); divario presenze 3.045/5.199 SPIEGATO (2.154 id spariti); 11 tabelle con orfani (15.054); SBLOCCA S-3 e X-3; X-6 eredita 118.446 presenze senza provenienza |
-| I-F | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 18 |  |  | ricetta del custode (W1); controprova rossa passo 19 in linea |
+| I-F | CHIUSA | S1103 | 2026-09-15T01:48+02:00 | 19 |  |  | esiti/I-F.md; evidenze/I-F_rimisure_202609150308.txt | ricetta 29 file (8 sempre + 4 persona + test); test di deriva NON scatta su role-codes.ts (provato) -> prima voce di F4 = ripararlo; nessuna colonna di ritiro (R-1 passo 0 confermato) e cache RBAC caricata all'avvio senza WHERE |
 | I-G | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 20 |  |  | porte di piattaforma verso i clienti (W1); serve a R-0 |
 | I-E | PRONTA |  |  |  | 21 |  |  | classificazione delle tabelle sys.sys_* (W2 a lotti) |
 | D5 | ATTESA_ENZO(D5: 682 righe importate e poi modificate in blocco, 0 gesti individuali; opzioni A/B/C) | S1103 | 2026-09-15T03:07+02:00 |  |  |  | esiti/I-D.md (in cima); esiti/RAPPORTO_2026-09-15.md | Enzo risponde in esiti/RISPOSTE_ENZO.md: D5 | data | A/B/C. Sblocca X-4 e X-5 |

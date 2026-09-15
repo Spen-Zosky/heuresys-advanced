@@ -76,8 +76,8 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 | X-1 | BLOCCATA(fase) | | | | 59 | | | classificazione ratificata (D6=A); righe dubbie → ATTESA_ENZO |
 | X-2 | BLOCCATA(fase) | | | | 61 | | | colonna origine_dato sulle 11 tabelle; sys_attendance → ATTESA_ENZO |
 | X-3 | BLOCCATA(fase) | | | | 63 | | | registro riconciliato PER VISTA (dopo I-D, S-3) |
-| X-4 | BLOCCATA(D5) | | | | 64 | | | regola degli ibridi: aspetta la risposta di Enzo a D5 |
-| X-5 | BLOCCATA(D5) | | | | 65 | | | sentinella della direzione (dopo X-2, X-4) |
+| X-4 | BLOCCATA(fase) |  |  |  | 64 |  |  | regola degli ibridi: D5=C (Enzo 2026-09-15). Dopo X-1, X-2 |
+| X-5 | BLOCCATA(fase) |  |  |  | 65 |  |  | sentinella della direzione (dopo X-2, X-4); D5=C recepita |
 | X-6 | BLOCCATA(fase) | | | | 66 | | | indagine presenze senza provenienza (W5) |
 
 ## F6 — Il gesto

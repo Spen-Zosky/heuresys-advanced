@@ -25,7 +25,7 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
-| I-A | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 12 |  |  | rigenerazione del semilavorato (W1); coda passo 13 in linea su copia |
+| I-A | CHIUSA | S1103 | 2026-09-15T01:48+02:00 | 13 |  |  | esiti/I-A.md; evidenze/I-A_passo13_202609150323.txt; test K I-A/13 in tenant-blueprint-application.integration.test.ts | le personalizzazioni SI CONSERVANO per assenza di tocco (0 occorrenze di override nella materializzazione; solo CASCADE puo' toglierle); registro generato a 0 righe; prova su copia verde 5/5 e rossa con sabotaggio; SBLOCCA K1-ADR |
 | I-B | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 14 |  |  | fisica delle famiglie di semilavorato (W1, haiku) |
 | I-C | IN CORSO | S1103 | 2026-09-15T01:48+02:00 |  | 15 |  |  | impronta dei controlli per nome (W1); seconda passata passo 16 dopo I-E |
 | I-D | CHIUSA | S1103 | 2026-09-15T01:48+02:00 | 17 |  |  | esiti/I-D.md; evidenze/I-D_rimisure_202609150300.txt; wf_F1_W1_202609150148(_b) | 682 righe importate poi modificate (tutte in blocco, 0 gesti individuali); divario presenze 3.045/5.199 SPIEGATO (2.154 id spariti); 11 tabelle con orfani (15.054); SBLOCCA S-3 e X-3; X-6 eredita 118.446 presenze senza provenienza |

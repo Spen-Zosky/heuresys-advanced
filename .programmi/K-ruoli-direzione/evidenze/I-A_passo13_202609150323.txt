@@ -1,0 +1,14 @@
+# I-A passo 13 — prova su copia (S1103, 2026-09-15T03:23+02:00)
+copia = isolamento transazionale per file (D-52) sul database heuresys_ci del gemello (linux-pc), via db/scripts/prova-api-sul-gemello.sh: niente resta scritto
+test: apps/api/test/tenant-blueprint-application.integration.test.ts — due it nuove attorno all'applicazione pulita (K I-A/13 prima / dopo)
+
+## VERDE (override inserito prima, applicazione, override identico dopo, padri vivi, 0 righe di registro sul target sys_blueprint_overrides)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[prova-api] durata 9s  esito=0
+
+## ROSSO (controprova: DELETE dell'override dentro la transazione del test, prima della misura) -> exit 1
+     × K I-A/13 — dopo l'applicazione: l'override c'è ancora, identico, con i suoi padri vivi 21ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 4 passed (5)
+sabotaggio rimosso: grep -c SABOTAGGIO -> 0; il file committato e' quello verde

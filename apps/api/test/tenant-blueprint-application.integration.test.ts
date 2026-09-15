@@ -138,6 +138,39 @@ describe("#198 T5 — l'applicazione del fascicolo", () => {
     expect(v.rows[0]!.applied, "il fascicolo risulta applicato dopo un fallimento").toBeNull();
   });
 
+  // Mandato K, I-A passo 13 (S1103): una personalizzazione del cliente (override) inserita PRIMA
+  // dell'applicazione deve esserci ancora DOPO, identica. La prova gira dentro l'isolamento
+  // transazionale per file (D-52): copia usa-e-getta per costruzione, niente resta sul database.
+  // Le due `it` sono in coppia attorno all'applicazione pulita qui sotto: la prima semina, la
+  // seconda misura. Se la rigenerazione toccasse gli override, la seconda sarebbe ROSSA.
+  let overrideId = "";
+  it("K I-A/13 — prima dell'applicazione: nasce un override del cliente su un processo del modello", async () => {
+    const p = await pool.query<{ id: string }>(
+      `INSERT INTO sys.sys_blueprint_process_registry
+         (blueprint_process_variant_id, blueprint_process_variant_version_id, blueprint_process_code,
+          blueprint_process_name, blueprint_process_ordinal, blueprint_process_is_optional, blueprint_process_metadata)
+       VALUES ($1, $2, $3, $4, 1, false, '{}'::jsonb) RETURNING blueprint_process_id AS id`,
+      [modello.variantId, modello.variantVersionId, `PROC-K13-${MARCA}`, `Processo di prova K I-A/13 ${MARCA}`],
+    );
+    const a = await pool.query<{ id: string }>(
+      `INSERT INTO sys.sys_blueprint_activations
+         (blueprint_activation_tenant_id, blueprint_activation_variant_id, blueprint_activation_status,
+          blueprint_activation_effective_from, blueprint_activation_metadata)
+       VALUES ($1, $2, 'ACTIVE', current_date, '{}'::jsonb) RETURNING blueprint_activation_id AS id`,
+      [tenantId, modello.variantId],
+    );
+    const o = await pool.query<{ id: string }>(
+      `INSERT INTO sys.sys_blueprint_overrides
+         (blueprint_override_activation_id, blueprint_override_process_id, blueprint_override_inclusion,
+          blueprint_override_rationale, blueprint_override_metadata)
+       VALUES ($1, $2, 'OUT', 'mandato K, I-A passo 13: deve sopravvivere alla rigenerazione', '{}'::jsonb)
+       RETURNING blueprint_override_id AS id`,
+      [a.rows[0]!.id, p.rows[0]!.id],
+    );
+    overrideId = o.rows[0]!.id;
+    expect(overrideId).not.toBe("");
+  });
+
   it("senza sabotaggio: applica, costruisce e registra OGNI riga creata", async () => {
     // Niente BEGIN qui: l'isolamento transazionale per FILE (D-52) avvolge già tutto e
     // rollbacka a fine file. Aprirne un'altra a mano interferisce coi savepoint dell'helper.
@@ -191,6 +224,29 @@ describe("#198 T5 — l'applicazione del fascicolo", () => {
     } finally {
       client.release();
     }
+  });
+
+  it("K I-A/13 — dopo l'applicazione: l'override c'è ancora, identico, con i suoi padri vivi", async () => {
+    const o = await pool.query<{ inclusione: string; ragione: string; attivazione: string | null; processo: string | null }>(
+      `SELECT o.blueprint_override_inclusion AS inclusione, o.blueprint_override_rationale AS ragione,
+              a.blueprint_activation_id::text AS attivazione, p.blueprint_process_id::text AS processo
+         FROM sys.sys_blueprint_overrides o
+         LEFT JOIN sys.sys_blueprint_activations a ON a.blueprint_activation_id = o.blueprint_override_activation_id
+         LEFT JOIN sys.sys_blueprint_process_registry p ON p.blueprint_process_id = o.blueprint_override_process_id
+        WHERE o.blueprint_override_id = $1`,
+      [overrideId],
+    );
+    expect(o.rows.length, "l'override e' sparito con la rigenerazione").toBe(1);
+    expect(o.rows[0]!.inclusione).toBe("OUT");
+    expect(o.rows[0]!.ragione).toContain("passo 13");
+    expect(o.rows[0]!.attivazione, "l'attivazione padre e' stata cancellata (CASCADE)").not.toBeNull();
+    expect(o.rows[0]!.processo, "il processo padre e' stato cancellato (CASCADE)").not.toBeNull();
+    // e il registro del generato non ha marchiato l'override come proprio: e' del cliente
+    const reg = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_generated_record_origins
+        WHERE generated_record_origin_target_table = 'sys_blueprint_overrides'`,
+    );
+    expect(Number(reg.rows[0]!.n)).toBe(0);
   });
 
   it("un fascicolo GIÀ applicato non si riapplica (l'UPDATE è guardato)", async () => {

@@ -1,0 +1,18 @@
+# S-4 - prova cross-tenant sui sinonimi (S1103, 2026-09-15T18:38+02:00)
+test: apps/api/test/skill-aliases-isolation.integration.test.ts (locale via tunnel, rollback per file D-52); competenza di A (Heuresys System), globale e alias seminati via SQL perche' enzo.spenuso ha un fattore TOTP senza etichetta derived-access (loginRaw non lo autentica)
+
+## VERDE
+      Tests  6 passed | 1 skipped (7)
+(1 skipped = USER -> 403, attivo dopo R-3, D1=B)
+
+## ROSSO (controprova - tenant A = RTL Bank, cioe' la competenza e' di B) -> exit 1
+     × B crea un alias su una competenza di A → 404 (anti-enumerazione: non 403) 642ms
+     × B modifica un alias di A → 404 675ms
+     × B cancella un alias di A → 404, e l'alias esiste ancora 464ms
+     × B non vede nemmeno l'alias di A nell'elenco → 0 righe per quella competenza 172ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  4 failed | 2 passed | 1 skipped (7)
+ripristinato (3 occorrenze di Heuresys System)
+
+## residui in produzione (atteso 0)
+0

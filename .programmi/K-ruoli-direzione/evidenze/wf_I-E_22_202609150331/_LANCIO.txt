@@ -1,0 +1,6 @@
+voce: I-E (passo 22, W2 a lotti)
+script: workflows/W2_classificazione.js (con la correzione spiaTrovata del commit 69a74657)
+args: cartella=.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331, ts=202609150331, lotti = evidenze/I-E_lotti_202609150331.json (6 lotti: 40+41+41+41+41+41 = 245 tabelle BASE TABLE sys.sys_*)
+ora: 2026-09-15T03:31+02:00
+sessione: S1103
+guardiano al lancio: contesto 42.1% (420.529 token), finestra 5h 27%

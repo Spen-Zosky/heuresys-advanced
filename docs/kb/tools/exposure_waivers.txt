@@ -14,3 +14,4 @@ sys_tenant_boundary_author_columns  # allowlist delle colonne-autore per la sent
 sys_industry_forbidden_terms        # vocabolario della sentinella v_contenuto_fuori_settore (000388, I21): configura una guardia, non e' un dato
 sys_translatable_field              # registro dei campi traducibili (000190): letto da v_reference_translation_coverage/orphans e da i18n:check; e' metadato dello schema
 sys_auth_mfa_exemption_audit        # giornale di audit scritto dal trigger di sys_auth_mfa_exemptions (000118): si legge con psql in un'indagine di sicurezza, mai dal prodotto
+sys_permessi_plenipotenziari_ammessi  # allowlist della sentinella v_permessi_solo_plenipotenziari (000418, mandato K S-1): congela i 102 permessi il cui unico titolare e' un plenipotenziario; F4 la fa scendere con data_ritiro. Configura una guardia, non e' un dato

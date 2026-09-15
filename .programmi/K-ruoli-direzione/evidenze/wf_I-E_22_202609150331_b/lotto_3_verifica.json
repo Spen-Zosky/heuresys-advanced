@@ -1,0 +1,10 @@
+{
+  "ricontrollati": 42,
+  "discrepanze": [
+    {
+      "atteso": 7,
+      "comando": "select count(*) from sys.sys_occupation_classification_mappings",
+      "ottenuto": 0
+    }
+  ]
+}

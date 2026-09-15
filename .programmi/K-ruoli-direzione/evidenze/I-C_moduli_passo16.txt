@@ -1,0 +1,15 @@
+branches
+calibration-sessions
+candidate-applications
+candidates
+content-blueprint-links
+dashboard
+interview-feedback
+interviews
+job-offers
+job-postings
+job-requisitions
+performance-reviews
+process-kpi-templates
+review-cycles
+surveys

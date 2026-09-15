@@ -27,22 +27,22 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 |---|---|---|---|---|---|---|---|---|
 | I-A | CHIUSA | S1103 | 2026-09-15T01:48+02:00 | 13 |  |  | esiti/I-A.md; evidenze/I-A_passo13_202609150323.txt; test K I-A/13 in tenant-blueprint-application.integration.test.ts | le personalizzazioni SI CONSERVANO per assenza di tocco (0 occorrenze di override nella materializzazione; solo CASCADE puo' toglierle); registro generato a 0 righe; prova su copia verde 5/5 e rossa con sabotaggio; SBLOCCA K1-ADR |
 | I-B | CHIUSA | S1103 | 2026-09-15T01:48+02:00 | 14 |  |  | esiti/I-B.md; evidenze/I-B_famiglie_202609150326.txt | 4 modi fisici su 13 tabelle; canonico = B (tenant_id nullable + is_global) realizzato solo da sys_skills (14.003/28); A 6 cataloghi, C 2 da completare, D 4 template gia' del tenant; registro generato vuoto; SBLOCCA K1-ADR |
-| I-C | IN CORSO | S1103 | 2026-09-15T01:48+02:00 | 15 | 16 |  | esiti/I-C.md; evidenze/I-C_siti_202609150328.txt; esiti/controlli-per-nome.baseline.json | 81 siti sui moduli dei ruoli nuovi: ~19 (b) + 8 copie locali del predicato + ~54 (c); baseline S-5 = 102 file / 327 controlli; passo 16 dopo I-E |
+| I-C | CHIUSA | S1103 | 2026-09-15T01:48+02:00 | 16 |  |  | esiti/I-C.md; evidenze/I-C_siti_202609150328.txt; esiti/controlli-per-nome.baseline.json | 81 siti (passo 15) + 12 (passo 16, moduli di PEOPLE_MANAGER/DATA_STEWARD da I-E) = 93; (b) ~21, copie locali 9, (c) ~63; baseline S-5 = 102 file / 327; SBLOCCA R-1 |
 | I-D | CHIUSA | S1103 | 2026-09-15T01:48+02:00 | 17 |  |  | esiti/I-D.md; evidenze/I-D_rimisure_202609150300.txt; wf_F1_W1_202609150148(_b) | 682 righe importate poi modificate (tutte in blocco, 0 gesti individuali); divario presenze 3.045/5.199 SPIEGATO (2.154 id spariti); 11 tabelle con orfani (15.054); SBLOCCA S-3 e X-3; X-6 eredita 118.446 presenze senza provenienza |
 | I-F | CHIUSA | S1103 | 2026-09-15T01:48+02:00 | 19 |  |  | esiti/I-F.md; evidenze/I-F_rimisure_202609150308.txt | ricetta 29 file (8 sempre + 4 persona + test); test di deriva NON scatta su role-codes.ts (provato) -> prima voce di F4 = ripararlo; nessuna colonna di ritiro (R-1 passo 0 confermato) e cache RBAC caricata all'avvio senza WHERE |
 | I-G | CHIUSA | S1103 | 2026-09-15T01:48+02:00 | 20 |  |  | esiti/I-G.md; wf_F1_W1_202609150148_b | 24 porte GET in 10 moduli (<40: R-0 = 1 sessione); nessun asse utente-clienti (sys_users.tenant_id NOT NULL); nessun punto unico: 20 file + resolver 87/140/200 -> R-0 lo costruisce in actor.ts; tenant-blueprints 7 porte senza filtro |
-| I-E | IN CORSO | S1103 | 2026-09-15T03:31+02:00 | 21 | 22 |  | evidenze/I-E_tabelle_202609150331.txt (245 BASE TABLE; il 248 del baseline include 3 viste sys_*); evidenze/I-E_lotti_202609150331.json | classificazione delle tabelle sys.sys_* (W2 a lotti) |
+| I-E | CHIUSA | S1103 | 2026-09-15T03:31+02:00 | 23 |  |  | esiti/I-E.md; evidenze/wf_I-E_22_202609150331_b (_VERIFICATO.txt); evidenze/I-E_rimisure_202609151627.txt | 245/245 tabelle: nativo 28, importato 88, ibrido 97, infrastruttura 32; 103 dubbie per X-1 (ATTESA_ENZO in F5); righe_con_provenienza ri-misurata in linea (i lettori davano 0); SBLOCCA X-0, X-1 |
 | D5 | ATTESA_ENZO(D5: 682 righe importate e poi modificate in blocco, 0 gesti individuali; opzioni A/B/C) | S1103 | 2026-09-15T03:07+02:00 |  |  |  | esiti/I-D.md (in cima); esiti/RAPPORTO_2026-09-15.md | Enzo risponde in esiti/RISPOSTE_ENZO.md: D5 | data | A/B/C. Sblocca X-4 e X-5 |
 
 ## F2 — Sentinelle e cancelli che sanno fallire
 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
-| S-1 | BLOCCATA(fase) | | | | 24 | | | vista permessi solo-plenipotenziari + allowlist (migrazione) |
-| S-2 | BLOCCATA(fase) | | | | 26 | | | test unitario permessi senza rotta + allowlist dei 34 |
-| S-5 | BLOCCATA(fase) | | | | 29 | | | cricchetto sui controlli per nome (dopo I-C) |
-| S-3 | BLOCCATA(fase) | | | | 27 | | | vista registro provenienza orfano (dopo I-D); nasce ROSSA, INFORMATIVE |
-| S-4 | BLOCCATA(fase) | | | | 28 | | | prova cross-tenant sui sinonimi; it.skip «attivo dopo R-3» |
+| S-1 | PRONTA |  |  |  | 24 |  |  | vista permessi solo-plenipotenziari + allowlist (migrazione) |
+| S-2 | PRONTA |  |  |  | 26 |  |  | test unitario permessi senza rotta + allowlist dei 34 |
+| S-5 | PRONTA |  |  |  | 29 |  |  | cricchetto sui controlli per nome (dopo I-C) |
+| S-3 | PRONTA |  |  |  | 27 |  |  | vista registro provenienza orfano (dopo I-D); nasce ROSSA, INFORMATIVE |
+| S-4 | PRONTA |  |  |  | 28 |  |  | prova cross-tenant sui sinonimi; it.skip «attivo dopo R-3» |
 
 ## F3 — ADR e invariante
 

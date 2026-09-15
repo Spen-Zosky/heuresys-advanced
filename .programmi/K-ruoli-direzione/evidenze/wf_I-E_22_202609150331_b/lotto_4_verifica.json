@@ -1,0 +1,19 @@
+{
+  "comandi_corretti": 39,
+  "dettagli": [
+    {
+      "tabella": "sys_reward_gates",
+      "comando": "select count(*) from sys.sys_reward_gates",
+      "atteso": 3290,
+      "scostamento": -7,
+      "stato": "ALTERATO",
+      "ottenuto": 3283
+    }
+  ],
+  "discrepanze_trovate": 1,
+  "data_verifica": "2026-09-15",
+  "comandi_totali": 40,
+  "tabella_alterata": "sys_reward_gates",
+  "risultato": "VERIFICATO",
+  "lotto": 4
+}

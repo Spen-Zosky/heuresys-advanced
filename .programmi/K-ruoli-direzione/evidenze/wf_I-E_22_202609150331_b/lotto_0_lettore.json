@@ -1,0 +1,531 @@
+{
+  "righe": [
+    {
+      "tabella": "sys_activity_classification_mappings",
+      "scrittori_api": ["apps/api/src/modules/activity-classification-mappings/repository.ts:81"],
+      "scrittori_import": [
+        "db/migrations/000112_populate_ateco_nace_crosswalk.sql:26",
+        "db/migrations/000112_populate_ateco_nace_crosswalk.sql:43",
+        "db/migrations/000341_il_nace_si_deriva_dall_ateco_non_si_reimporta.sql:167"
+      ],
+      "colonna_origine": "",
+      "righe": 3257,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittori API (CRUD mapping) E scrittori di importazione/materializzazione (migrazioni crosswalk ATECO/NACE): regola meccanica (API+import) -> dubbia"
+    },
+    {
+      "tabella": "sys_activity_classifications",
+      "scrittori_api": ["apps/api/src/modules/activity-classifications/repository.ts:83"],
+      "scrittori_import": ["apps/api/src/modules/reference-sync/repository.ts:83 (sync ISTAT/ATECO/ESCO, ADR-0038 non e' brownfield)"],
+      "colonna_origine": "",
+      "righe": 4304,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittori API E scrittori di importazione (reference-sync): regola meccanica -> dubbia. Nota fuori-mandato per I-D/S-3: 3.276 righe del registro di provenienza citano questa tabella (query: select count(distinct source_lineage_target_record_id) from sys.sys_source_lineage_records where source_lineage_target_table_name='sys_activity_classifications') ma la JOIN con gli id reali della tabella da' 0 (id orfani)"
+    },
+    {
+      "tabella": "sys_advisor_suggestions",
+      "scrittori_api": ["apps/api/src/modules/advisor/repository.ts:42"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 14,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "solo scrittore API (suggerimenti generati a runtime), nessuna importazione trovata in db/migrations o db/seeds"
+    },
+    {
+      "tabella": "sys_approval_requests",
+      "scrittori_api": [
+        "apps/api/src/modules/approvals/repository.ts:178",
+        "apps/api/src/modules/approvals/repository.ts:401",
+        "apps/api/src/modules/approvals/repository.ts:413"
+      ],
+      "scrittori_import": ["db/seeds/storia36/07_approvals.sql:84", "db/seeds/storia36/07_approvals.sql:167", "db/seeds/storia36/07_approvals.sql:249"],
+      "colonna_origine": "",
+      "righe": 768,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittori API (workflow approvazioni) E scrittori di seed/materializzazione (storia36): regola meccanica -> dubbia"
+    },
+    {
+      "tabella": "sys_approval_steps",
+      "scrittori_api": [
+        "apps/api/src/modules/approvals/repository.ts:214",
+        "apps/api/src/modules/approvals/repository.ts:350",
+        "apps/api/src/modules/approvals/sla.ts:96"
+      ],
+      "scrittori_import": ["db/seeds/storia36/07_approvals.sql:113", "db/seeds/storia36/07_approvals.sql:192", "db/seeds/storia36/07_approvals.sql:274"],
+      "colonna_origine": "",
+      "righe": 880,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittori API E scrittori di seed (storia36): regola meccanica -> dubbia"
+    },
+    {
+      "tabella": "sys_assessment_methods",
+      "scrittori_api": [],
+      "scrittori_import": ["db/migrations/000021_seed_reference_bank.sql:76"],
+      "colonna_origine": "",
+      "righe": 5,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "catalogo statico di metodi di valutazione, seminato una sola volta in migrazione; nessun writer applicativo (solo SELECT in assessment-methods/repository.ts): registro/catalogo di piattaforma, non dato del cliente"
+    },
+    {
+      "tabella": "sys_assessment_results",
+      "scrittori_api": ["apps/api/src/modules/assessment-results/repository.ts:123"],
+      "scrittori_import": ["db/seeds/rtl-rebuild/06_skills_certs.sql:144"],
+      "colonna_origine": "",
+      "righe": 1560,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittore API E scrittore di seed rtl-rebuild: regola meccanica -> dubbia"
+    },
+    {
+      "tabella": "sys_assessments",
+      "scrittori_api": ["apps/api/src/modules/assessments/repository.ts:143", "apps/api/src/modules/assessments/repository.ts:197"],
+      "scrittori_import": ["db/seeds/rtl-rebuild/06_skills_certs.sql:134", "db/seeds/rtl-rebuild/06_skills_certs.sql:157"],
+      "colonna_origine": "",
+      "righe": 615,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittore API E scrittore di seed rtl-rebuild: regola meccanica -> dubbia"
+    },
+    {
+      "tabella": "sys_attendance",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/storia36/01_attendance_timeoff.sql:279",
+        "db/seeds/storia36/13_avanzamento.sql:458",
+        "db/seeds/rtl-rebuild/07_attendance_topup.sql:52"
+      ],
+      "colonna_origine": "",
+      "righe": 121647,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuno scrittore applicativo trovato in apps/api/src (solo SELECT in analytics/insights/org-health/me); popolata solo da script di seed/materializzazione: non scatta 'righe>0 e nessuno scrittore' perche' lo scrittore di importazione esiste. Nota fuori-mandato per I-D/S-3: 5.199 righe del registro di provenienza citano questa tabella per la convenzione 'sys.sys_attendance' (query: select count(distinct source_lineage_target_record_id) from sys.sys_source_lineage_records where source_lineage_target_table_name='sys.sys_attendance') ma la JOIN con gli id reali della tabella da' 0 — combacia con il numero 5.199 gia' citato nel dossier come 'presenze per nome'"
+    },
+    {
+      "tabella": "sys_auth_credentials",
+      "scrittori_api": ["apps/api/src/modules/auth/repository.ts:169", "apps/api/src/modules/auth/repository.ts:127", "apps/api/src/modules/auth/repository.ts:140"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 671,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "credenziali di autenticazione, non dato di business del cliente"
+    },
+    {
+      "tabella": "sys_auth_identities",
+      "scrittori_api": ["apps/api/src/modules/auth/repository.ts:154"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 163,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "identita' di autenticazione, infrastruttura auth"
+    },
+    {
+      "tabella": "sys_auth_login_events",
+      "scrittori_api": ["apps/api/src/modules/auth/repository.ts:389"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 95354,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "registro eventi di login, infrastruttura/audit"
+    },
+    {
+      "tabella": "sys_auth_mfa_exemption_audit",
+      "scrittori_api": [],
+      "scrittori_import": ["db/migrations/000118_mfa_exemption_service_only_audit.sql:67 (trigger DB sys_auth_mfa_exemption_audit_fn, non scrittura applicativa)"],
+      "colonna_origine": "",
+      "righe": 3,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "popolata da un TRIGGER di database, non da codice applicativo ne' da importazione in senso proprio; registro di audit"
+    },
+    {
+      "tabella": "sys_auth_mfa_exemption_eligible_users",
+      "scrittori_api": [],
+      "scrittori_import": ["db/migrations/000284_mfa_exemption_explicit_allowlist.sql:132"],
+      "colonna_origine": "",
+      "righe": 3,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "allowlist esplicita seminata in migrazione, configurazione di sicurezza, non dato del cliente"
+    },
+    {
+      "tabella": "sys_auth_mfa_exemptions",
+      "scrittori_api": [],
+      "scrittori_import": ["db/migrations/000284_mfa_exemption_explicit_allowlist.sql:120", "db/migrations/000284_mfa_exemption_explicit_allowlist.sql:134"],
+      "colonna_origine": "",
+      "righe": 3,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "esenzioni MFA seminate in migrazione, configurazione di sicurezza"
+    },
+    {
+      "tabella": "sys_auth_mfa_factors",
+      "scrittori_api": ["apps/api/src/modules/auth/mfa-repository.ts:84", "apps/api/src/modules/auth/mfa-repository.ts:114"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 159,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "fattori MFA (TOTP/webauthn), infrastruttura auth"
+    },
+    {
+      "tabella": "sys_auth_mfa_otp_challenges",
+      "scrittori_api": ["apps/api/src/modules/auth/mfa-repository.ts:268", "apps/api/src/modules/auth/mfa-repository.ts:302"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "sfide OTP transitorie, infrastruttura auth, 0 righe (dato che scade)"
+    },
+    {
+      "tabella": "sys_auth_mfa_policies",
+      "scrittori_api": ["apps/api/src/modules/mfa-policy/repository.ts:79"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 2,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "policy MFA a livello piattaforma, configurazione non dato del cliente"
+    },
+    {
+      "tabella": "sys_auth_mfa_recovery_codes",
+      "scrittori_api": ["apps/api/src/modules/auth/mfa-repository.ts:337", "apps/api/src/modules/auth/mfa-repository.ts:350"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "codici di recupero MFA, infrastruttura auth, 0 righe"
+    },
+    {
+      "tabella": "sys_auth_mfa_webauthn_credentials",
+      "scrittori_api": ["apps/api/src/modules/auth/webauthn-repository.ts:85", "apps/api/src/modules/auth/webauthn-repository.ts:143"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "credenziali WebAuthn, infrastruttura auth, 0 righe"
+    },
+    {
+      "tabella": "sys_auth_password_reset_tokens",
+      "scrittori_api": ["apps/api/src/modules/auth/repository.ts:450", "apps/api/src/modules/auth/repository.ts:501"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "token di reset password, infrastruttura auth, 0 righe"
+    },
+    {
+      "tabella": "sys_auth_permissions",
+      "scrittori_api": [],
+      "scrittori_import": ["db/migrations/000005_auth_foundation.sql (+ 49 altre migrazioni: rg -c 'insert.*sys_auth_permissions' db/migrations = 50 file)"],
+      "colonna_origine": "",
+      "righe": 231,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "catalogo permessi RBAC, seminato incrementalmente da 50 migrazioni, mai da API; registro di piattaforma"
+    },
+    {
+      "tabella": "sys_auth_refresh_tokens",
+      "scrittori_api": [
+        "apps/api/src/modules/auth/repository.ts:212",
+        "apps/api/src/modules/auth/repository.ts:281",
+        "apps/api/src/modules/auth/repository.ts:297",
+        "apps/api/src/modules/auth/repository.ts:313",
+        "apps/api/src/modules/auth/repository.ts:335"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 1283,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "token di sessione/refresh, infrastruttura auth"
+    },
+    {
+      "tabella": "sys_auth_role_permissions",
+      "scrittori_api": [],
+      "scrittori_import": ["db/migrations (80 file con INSERT: rg -c 'insert.*sys_auth_role_permissions' db/migrations = 80; prima nota 000005_auth_foundation.sql)"],
+      "colonna_origine": "",
+      "righe": 1015,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "mappa ruolo<->permesso, seminata incrementalmente da 80 migrazioni, catalogo RBAC di piattaforma"
+    },
+    {
+      "tabella": "sys_auth_roles",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000005_auth_foundation.sql:233",
+        "db/migrations/000045_rbac_role_category_and_ceo.sql:40",
+        "db/migrations/000054_r1b_teams_and_roles.sql:95",
+        "db/migrations/000145_capability_rbac_seed.sql:18",
+        "db/migrations/000181_whistleblowing.sql:32",
+        "db/migrations/000272_branch_manager_role_and_dashboard.sql:55"
+      ],
+      "colonna_origine": "",
+      "righe": 14,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "catalogo ruoli RBAC, seminato da 6 migrazioni, mai da API; registro di piattaforma"
+    },
+    {
+      "tabella": "sys_auth_sessions",
+      "scrittori_api": [],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "0 righe e NESSUNO scrittore trovato in tutto il repository (rg --no-ignore --hidden -ni 'insert' su apps, db/migrations, db/seeds = 0 risultati): tabella creata ma mai scritta, possibile residuo infrastrutturale morto. La regola meccanica non scatta (righe=0), segnalato per completezza"
+    },
+    {
+      "tabella": "sys_behavioral_assessments",
+      "scrittori_api": [],
+      "scrittori_import": ["db/seeds/reconciliation/27_behavioral_assessments.sql:5"],
+      "colonna_origine": "",
+      "righe": 465,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuno scrittore applicativo (solo SELECT in evidence/repository.ts), solo seed di riconciliazione: non scatta 'nessuno scrittore' perche' il seed esiste"
+    },
+    {
+      "tabella": "sys_blueprint_activations",
+      "scrittori_api": ["apps/api/src/modules/blueprint-activations/repository.ts:88", "apps/api/src/modules/blueprint-activations/repository.ts:121"],
+      "scrittori_import": ["db/seeds/storia36/06_reorg.sql:157", "db/migrations/000400_heuresys_ha_un_profilo_suo_e_non_quello_della_banca.sql:161"],
+      "colonna_origine": "",
+      "righe": 2,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittori API E scrittori di seed/migrazione: regola meccanica -> dubbia"
+    },
+    {
+      "tabella": "sys_blueprint_content_dashboards",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000403_un_cruscotto_di_sola_piattaforma_non_entra_nel_profilo_di_un_cliente.sql:218",
+        "db/migrations/000400_heuresys_ha_un_profilo_suo_e_non_quello_della_banca.sql:127",
+        "db/migrations/000398_il_profilo_della_banca_e_dichiarato_non_dedotto.sql:170",
+        "db/migrations/000397_il_profilo_di_un_cliente_dice_quali_ruoli_e_quali_dashboard.sql:308"
+      ],
+      "colonna_origine": "",
+      "righe": 11,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "contenuto del profilo dichiarato di un cliente (dashboard), scritto solo da migrazioni (nessuna rotta API costruita: solo lettura di configurazione in lib/scope/profilo.ts); righe>0 con scrittore trovato, non scatta 'nessuno scrittore'"
+    },
+    {
+      "tabella": "sys_blueprint_content_job_roles",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000400_heuresys_ha_un_profilo_suo_e_non_quello_della_banca.sql:100",
+        "db/migrations/000398_il_profilo_della_banca_e_dichiarato_non_dedotto.sql:105",
+        "db/migrations/000397_il_profilo_di_un_cliente_dice_quali_ruoli_e_quali_dashboard.sql:286",
+        "db/migrations/000397_il_profilo_di_un_cliente_dice_quali_ruoli_e_quali_dashboard.sql:292"
+      ],
+      "colonna_origine": "",
+      "righe": 145,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "contenuto del profilo dichiarato di un cliente (ruoli), scritto solo da migrazioni, nessuna rotta API"
+    },
+    {
+      "tabella": "sys_blueprint_content_kpis",
+      "scrittori_api": ["apps/api/src/modules/research/repository.ts:677"],
+      "scrittori_import": ["db/migrations/000401_i_contenuti_kpi_del_modello_bancario_entrano_nella_catena.sql:140"],
+      "colonna_origine": "",
+      "righe": 73,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittore API (generazione via modulo research) E scrittore di migrazione: regola meccanica -> dubbia"
+    },
+    {
+      "tabella": "sys_blueprint_content_positions",
+      "scrittori_api": ["apps/api/src/modules/research/repository.ts:646"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 71,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "scritta solo dal modulo research (generazione contenuto blueprint), nessuna importazione trovata"
+    },
+    {
+      "tabella": "sys_blueprint_content_skills",
+      "scrittori_api": ["apps/api/src/modules/research/repository.ts:662"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 132,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "scritta solo dal modulo research, nessuna importazione trovata"
+    },
+    {
+      "tabella": "sys_blueprint_content_units",
+      "scrittori_api": ["apps/api/src/modules/research/repository.ts:629"],
+      "scrittori_import": [],
+      "colonna_origine": "",
+      "righe": 33,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "scritta solo dal modulo research, nessuna importazione trovata"
+    },
+    {
+      "tabella": "sys_blueprint_families",
+      "scrittori_api": ["apps/api/src/modules/blueprint-families/repository.ts:60", "apps/api/src/modules/blueprint-families/repository.ts:81"],
+      "scrittori_import": ["db/migrations/000021_seed_reference_bank.sql:87", "db/migrations/000400_heuresys_ha_un_profilo_suo_e_non_quello_della_banca.sql:51"],
+      "colonna_origine": "",
+      "righe": 2,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittori API E scrittori di migrazione (seed catalogo + profilo banca): regola meccanica -> dubbia"
+    },
+    {
+      "tabella": "sys_blueprint_family_activity_classes",
+      "scrittori_api": [],
+      "scrittori_import": ["db/migrations/000301_settore_e_famiglia_di_modelli.sql:140", "db/migrations/000400_heuresys_ha_un_profilo_suo_e_non_quello_della_banca.sql:62"],
+      "colonna_origine": "",
+      "righe": 3,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "mappa attivita'<->famiglia di modello, tassonomia di piattaforma seminata da migrazioni, nessuna rotta API"
+    },
+    {
+      "tabella": "sys_blueprint_overrides",
+      "scrittori_api": ["apps/api/src/modules/blueprint-overrides/repository.ts:94"],
+      "scrittori_import": ["db/seeds/storia36/06_reorg.sql:174"],
+      "colonna_origine": "",
+      "righe": 7,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittore API E scrittore di seed: regola meccanica -> dubbia"
+    },
+    {
+      "tabella": "sys_blueprint_process_registry",
+      "scrittori_api": [
+        "apps/api/src/modules/blueprint-processes/repository.ts:81",
+        "apps/api/src/modules/blueprint-processes/repository.ts:106",
+        "apps/api/src/modules/research/repository.ts:694"
+      ],
+      "scrittori_import": ["db/migrations/000021_seed_reference_bank.sql:137"],
+      "colonna_origine": "",
+      "righe": 23,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittori API (2 moduli) E scrittore di migrazione: regola meccanica -> dubbia"
+    },
+    {
+      "tabella": "sys_blueprint_variant_versions",
+      "scrittori_api": [],
+      "scrittori_import": ["db/migrations/000298_versioni_dei_modelli_di_settore.sql:81", "db/migrations/000298_versioni_dei_modelli_di_settore.sql:100"],
+      "colonna_origine": "",
+      "righe": 2,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "versionamento del catalogo di modelli di settore, seminato solo da migrazione, nessuna rotta API; bookkeeping strutturale di piattaforma, non contenuto del cliente"
+    },
+    {
+      "tabella": "sys_blueprint_variants",
+      "scrittori_api": ["apps/api/src/modules/blueprint-variants/repository.ts:79", "apps/api/src/modules/blueprint-variants/repository.ts:102"],
+      "scrittori_import": ["db/migrations/000021_seed_reference_bank.sql:91", "db/migrations/000400_heuresys_ha_un_profilo_suo_e_non_quello_della_banca.sql:74"],
+      "colonna_origine": "",
+      "righe": 2,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "ha scrittore API E scrittori di migrazione (seed catalogo + profilo banca): regola meccanica -> dubbia"
+    }
+  ],
+  "comandi": [
+    {"tabella": "sys_activity_classification_mappings", "comando": "select count(*) from sys.sys_activity_classification_mappings", "numero": 3257},
+    {"tabella": "sys_activity_classifications", "comando": "select count(*) from sys.sys_activity_classifications", "numero": 4304},
+    {"tabella": "sys_advisor_suggestions", "comando": "select count(*) from sys.sys_advisor_suggestions", "numero": 14},
+    {"tabella": "sys_approval_requests", "comando": "select count(*) from sys.sys_approval_requests", "numero": 768},
+    {"tabella": "sys_approval_steps", "comando": "select count(*) from sys.sys_approval_steps", "numero": 880},
+    {"tabella": "sys_assessment_methods", "comando": "select count(*) from sys.sys_assessment_methods", "numero": 5},
+    {"tabella": "sys_assessment_results", "comando": "select count(*) from sys.sys_assessment_results", "numero": 1560},
+    {"tabella": "sys_assessments", "comando": "select count(*) from sys.sys_assessments", "numero": 615},
+    {"tabella": "sys_attendance", "comando": "select count(*) from sys.sys_attendance", "numero": 121647},
+    {"tabella": "sys_auth_credentials", "comando": "select count(*) from sys.sys_auth_credentials", "numero": 671},
+    {"tabella": "sys_auth_identities", "comando": "select count(*) from sys.sys_auth_identities", "numero": 163},
+    {"tabella": "sys_auth_login_events", "comando": "select count(*) from sys.sys_auth_login_events", "numero": 95354},
+    {"tabella": "sys_auth_mfa_exemption_audit", "comando": "select count(*) from sys.sys_auth_mfa_exemption_audit", "numero": 3},
+    {"tabella": "sys_auth_mfa_exemption_eligible_users", "comando": "select count(*) from sys.sys_auth_mfa_exemption_eligible_users", "numero": 3},
+    {"tabella": "sys_auth_mfa_exemptions", "comando": "select count(*) from sys.sys_auth_mfa_exemptions", "numero": 3},
+    {"tabella": "sys_auth_mfa_factors", "comando": "select count(*) from sys.sys_auth_mfa_factors", "numero": 159},
+    {"tabella": "sys_auth_mfa_otp_challenges", "comando": "select count(*) from sys.sys_auth_mfa_otp_challenges", "numero": 0},
+    {"tabella": "sys_auth_mfa_policies", "comando": "select count(*) from sys.sys_auth_mfa_policies", "numero": 2},
+    {"tabella": "sys_auth_mfa_recovery_codes", "comando": "select count(*) from sys.sys_auth_mfa_recovery_codes", "numero": 0},
+    {"tabella": "sys_auth_mfa_webauthn_credentials", "comando": "select count(*) from sys.sys_auth_mfa_webauthn_credentials", "numero": 0},
+    {"tabella": "sys_auth_password_reset_tokens", "comando": "select count(*) from sys.sys_auth_password_reset_tokens", "numero": 0},
+    {"tabella": "sys_auth_permissions", "comando": "select count(*) from sys.sys_auth_permissions", "numero": 231},
+    {"tabella": "sys_auth_refresh_tokens", "comando": "select count(*) from sys.sys_auth_refresh_tokens", "numero": 1283},
+    {"tabella": "sys_auth_role_permissions", "comando": "select count(*) from sys.sys_auth_role_permissions", "numero": 1015},
+    {"tabella": "sys_auth_roles", "comando": "select count(*) from sys.sys_auth_roles", "numero": 14},
+    {"tabella": "sys_auth_sessions", "comando": "select count(*) from sys.sys_auth_sessions", "numero": 0},
+    {"tabella": "sys_behavioral_assessments", "comando": "select count(*) from sys.sys_behavioral_assessments", "numero": 465},
+    {"tabella": "sys_blueprint_activations", "comando": "select count(*) from sys.sys_blueprint_activations", "numero": 2},
+    {"tabella": "sys_blueprint_content_dashboards", "comando": "select count(*) from sys.sys_blueprint_content_dashboards", "numero": 11},
+    {"tabella": "sys_blueprint_content_job_roles", "comando": "select count(*) from sys.sys_blueprint_content_job_roles", "numero": 145},
+    {"tabella": "sys_blueprint_content_kpis", "comando": "select count(*) from sys.sys_blueprint_content_kpis", "numero": 73},
+    {"tabella": "sys_blueprint_content_positions", "comando": "select count(*) from sys.sys_blueprint_content_positions", "numero": 71},
+    {"tabella": "sys_blueprint_content_skills", "comando": "select count(*) from sys.sys_blueprint_content_skills", "numero": 132},
+    {"tabella": "sys_blueprint_content_units", "comando": "select count(*) from sys.sys_blueprint_content_units", "numero": 33},
+    {"tabella": "sys_blueprint_families", "comando": "select count(*) from sys.sys_blueprint_families", "numero": 2},
+    {"tabella": "sys_blueprint_family_activity_classes", "comando": "select count(*) from sys.sys_blueprint_family_activity_classes", "numero": 3},
+    {"tabella": "sys_blueprint_overrides", "comando": "select count(*) from sys.sys_blueprint_overrides", "numero": 7},
+    {"tabella": "sys_blueprint_process_registry", "comando": "select count(*) from sys.sys_blueprint_process_registry", "numero": 23},
+    {"tabella": "sys_blueprint_variant_versions", "comando": "select count(*) from sys.sys_blueprint_variant_versions", "numero": 2},
+    {"tabella": "sys_blueprint_variants", "comando": "select count(*) from sys.sys_blueprint_variants", "numero": 2},
+    {"tabella": "sys_activity_classifications", "comando": "select count(*) from sys.sys_source_lineage_records l join sys.sys_activity_classifications t on t.activity_classification_id=l.source_lineage_target_record_id where l.source_lineage_target_table_name='sys_activity_classifications'", "numero": 0},
+    {"tabella": "sys_attendance", "comando": "select count(*) from sys.sys_source_lineage_records l join sys.sys_attendance t on t.attendance_id=l.source_lineage_target_record_id where l.source_lineage_target_table_name='sys.sys_attendance'", "numero": 0}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "lotto": 1,
+  "data_verifica": "2026-09-15",
+  "stato": "COMPLETATO",
+  "totale_comandi": 38,
+  "ricontrollati": 38,
+  "discrepanze": [
+    {
+      "comando": "select count(*) from sys.sys_bonus_pools",
+      "atteso": 13,
+      "ottenuto": 6
+    }
+  ],
+  "risultato": "UNA DISCREPANZA TROVATA"
+}

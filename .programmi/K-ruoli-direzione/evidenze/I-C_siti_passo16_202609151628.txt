@@ -1,0 +1,13 @@
+apps/api/src/modules/branches/service.ts:31: if (isPlatform(a)) return null;
+apps/api/src/modules/calibration-sessions/service.ts:29: return isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+apps/api/src/modules/calibration-sessions/service.ts:46: if (!session || (!isPlatform(actor) && session.tenantId !== actor.tenantId)) {
+apps/api/src/modules/calibration-sessions/service.ts:59: if (!session || (!isPlatform(actor) && session.tenantId !== actor.tenantId)) {
+apps/api/src/modules/content-blueprint-links/service.ts:25: const isPlatform = a.roles.includes("PLATFORM_ADMIN");
+apps/api/src/modules/process-kpi-templates/service.ts:23: if (!isPlatform(actor)) throw new ForbiddenError("PLATFORM_ADMIN required");
+apps/api/src/modules/process-kpi-templates/service.ts:29: if (!isPlatform(actor)) throw new ForbiddenError("PLATFORM_ADMIN required");
+apps/api/src/modules/review-cycles/service.ts:24: return isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+apps/api/src/modules/review-cycles/service.ts:35: if (!cycle || (!isPlatform(actor) && cycle.tenantId !== actor.tenantId)) {
+apps/api/src/modules/surveys/service.ts:24: if (isPlatform(a)) return undefined;
+apps/api/src/modules/surveys/service.ts:30: if (isPlatform(a)) return;
+apps/api/src/modules/surveys/service.ts:46: if (isPlatform(a)) {
+-- 12 siti

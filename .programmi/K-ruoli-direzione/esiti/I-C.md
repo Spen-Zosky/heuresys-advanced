@@ -44,11 +44,20 @@ Tutti gli altri siti del file di evidenza: i **22 del recruiting** (idioma ident
 
 `tenant-blueprints/service.ts:273` e `notifications/service.ts:56` (campi informativi di audit, `isPlatform: …`), `tenant-import-runs/repository.ts:366` (`WHERE r.auth_role_code='PLATFORM_ADMIN'` in una query di reportistica), `tenants/provisioning.ts` (assegna il ruolo iniziale al provisioning: è dato, non gate).
 
-## Passo 16 (dopo I-E)
+## Passo 16 (dopo I-E) — ESEGUITO
 
-I moduli di PEOPLE_MANAGER e DATA_STEWARD si conoscono solo dalla classificazione delle tabelle (I-E → X-1). **Da eseguire quando I-E è chiusa**: `python tools/controlli_per_nome.py --siti <moduli delle tabelle native e importate>`, stesso metodo. La baseline S-5 copre già **tutto** `apps/api/src`, quindi il cricchetto non dipende dal passo 16.
+Da I-E: 110 tabelle `nativo`/`importato` non dubbie → 15 moduli con cartella omonima (`evidenze/I-C_moduli_passo16.txt`), di cui 7 già contati al passo 15 (recruiting). Sugli **8 nuovi** (branches, calibration-sessions, content-blueprint-links, dashboard, performance-reviews, process-kpi-templates, review-cycles, surveys): **12 siti** (`evidenze/I-C_siti_passo16_202609151628.txt`), classificati dalla sessione principale:
+
+| sito | classe | nota |
+|---|---|---|
+| `process-kpi-templates/service.ts:23,29` | **(b)** | `if (!isPlatform(actor)) throw Forbidden`: ripete il permesso di rotta → `haMandatoPiattaforma` |
+| `content-blueprint-links/service.ts:25` | copia locale | `a.roles.includes("PLATFORM_ADMIN")` (già in I-G §1) |
+| `branches/service.ts:31`, `calibration-sessions/service.ts:29,46,59`, `review-cycles/service.ts:24,35`, `surveys/service.ts:24,30,46` | **(c)** | perimetro locale (`isPlatform ? undefined : tenantId`, o «stesso tenant o piattaforma») → resolver / `perimetroClienti` |
+| dashboard, performance-reviews | 0 siti | nessun controllo per nome |
+
+Totale sui moduli dei ruoli nuovi **più** quelli di PEOPLE_MANAGER/DATA_STEWARD: **93 siti** (81 + 12): (b) ~21, copie locali 9, (c) ~63. La baseline di S-5 non cambia (copre già tutto `apps/api/src`).
 
 ## Verdetto
 
 - **SBLOCCA R-1** con la lista (b) qui sopra (grantRole in testa) e la lista (c) nel file di evidenza; **fissa la baseline di S-5** (`esiti/controlli-per-nome.baseline.json`, 102 file / 327).
-- Passo 16: **aperto**, dipende da I-E (la voce I-C resta `IN CORSO` con `ultimo_passo_chiuso=15`).
+- Passo 16: **eseguito** (12 siti sugli 8 moduli nuovi). I-C **CHIUSA**.

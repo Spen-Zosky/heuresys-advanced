@@ -1,0 +1,798 @@
+{
+  "righe": [
+    {
+      "tabella": "sys_occupation_classification_mappings",
+      "scrittori_api": [],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "0 scrittori API (rg su apps/api/src: 0 riscontri) e 0 scrittori di importazione trovati (rg su db/migrations e db/seeds: 0 riscontri INSERT); righe=0 quindi la regola meccanica (righe>0 E nessuno scrittore) non scatta. Tabella creata in db/migrations/000206_occupation_classifications.sql ma mai popolata: proposto importato (mapping fra classificazioni, natura da reference_sync) perche' vuota e senza scrittore, non dubbia per la regola."
+    },
+    {
+      "tabella": "sys_occupation_classifications",
+      "scrittori_api": [
+        "apps/api/src/modules/occupation-classifications/repository.ts:84 (INSERT)",
+        "apps/api/src/modules/occupation-classifications/repository.ts:110 (UPDATE)"
+      ],
+      "scrittori_import": [
+        "db/scripts/populate-occupation-classifications.sql:38 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 2121,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittori API (occupation-classifications/repository.ts) E scrittori di importazione (populate-occupation-classifications.sql) -> dubbia"
+    },
+    {
+      "tabella": "sys_occupation_skill_requirements",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/reconciliation/52_occupation_skill_requirements.sql:75 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 126051,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuno scrittore API trovato (solo 1 lettura in public-stats/repository.ts:12); scrittore di importazione presente (seed reconciliation); righe>0 con scrittore trovato -> non dubbia"
+    },
+    {
+      "tabella": "sys_okr_check_ins",
+      "scrittori_api": [],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 25,
+      "righe_con_provenienza": 25,
+      "stato_proposto": "importato",
+      "dubbia": true,
+      "motivo": "regola meccanica: righe>0 (25) E nessuno scrittore trovato (rg su apps/api/src: solo letture, il codice dichiara esplicitamente 'READ-only, sys.sys_okr_check_ins' a okrs/repository.ts:138; rg su db/migrations e db/seeds per INSERT INTO sys.sys_okr_check_ins: 0 riscontri) -> dubbia"
+    },
+    {
+      "tabella": "sys_okr_key_results",
+      "scrittori_api": [],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 20,
+      "righe_con_provenienza": 20,
+      "stato_proposto": "importato",
+      "dubbia": true,
+      "motivo": "regola meccanica: righe>0 (20) E nessuno scrittore trovato (apps/api/src/modules/okrs/repository.ts ha solo SELECT su sys_okr_key_results; rg su db/migrations e db/seeds per INSERT INTO sys.sys_okr_key_results: 0 riscontri) -> dubbia"
+    },
+    {
+      "tabella": "sys_okrs",
+      "scrittori_api": [
+        "apps/api/src/modules/okrs/repository.ts:71 (INSERT)",
+        "apps/api/src/modules/okrs/repository.ts:100 (UPDATE)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000357_un_okr_di_reparto_o_ha_un_reparto_o_e_di_un_altra_azienda.sql:238 (INSERT, dentro la funzione di rollback staging.mig357_okr_reparti_undo_apply)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 15,
+      "righe_con_provenienza": 20,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittori API E almeno uno scrittore in db/migrations -> dubbia. Nota per Enzo/X-1: l'unico riscontro di importazione e' dentro la funzione di UNDO/rollback della migrazione 000357 (ripristina righe cancellate, non e' una pipeline di importazione corrente): possibile falso positivo della regola meccanica. Anomalia ulteriore: righe=15 ma righe_con_provenienza=20 (il registro di provenienza ha piu' righe della tabella)"
+    },
+    {
+      "tabella": "sys_operating_model_catalog",
+      "scrittori_api": [
+        "apps/api/src/modules/operating-models/repository.ts:40 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000021_seed_reference_bank.sql:33 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 6,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittore API (operating-models/repository.ts) E scrittore di importazione/seed (000021_seed_reference_bank.sql) -> dubbia"
+    },
+    {
+      "tabella": "sys_organization_unit_history",
+      "scrittori_api": [
+        "apps/api/src/modules/organization-unit-history/repository.ts:125 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000280_register_august_2026_reorganization_events.sql:80 (INSERT)",
+        "db/migrations/000280_register_august_2026_reorganization_events.sql:116 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 286,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittore API E scrittori di importazione/backfill storico (migrazione 000280, eventi di riorganizzazione agosto 2026) -> dubbia"
+    },
+    {
+      "tabella": "sys_organization_unit_kpi_templates",
+      "scrittori_api": [
+        "apps/api/src/modules/organization-unit-kpi-templates/repository.ts:89 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/seeds/reconciliation/40_org_unit_kpi_templates.sql:106 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 100,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittore API E scrittore di importazione (seed reconciliation) -> dubbia"
+    },
+    {
+      "tabella": "sys_organization_unit_processes",
+      "scrittori_api": [
+        "apps/api/src/modules/organization-unit-processes/repository.ts:105 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/seeds/reconciliation/54_raci_demo_rtl_s994.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 96,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittore API E scrittore di importazione (seed RACI demo RTL) -> dubbia"
+    },
+    {
+      "tabella": "sys_organization_unit_templates",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/reconciliation/40_org_unit_kpi_templates.sql:43 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 225,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "0 scrittori API (rg su apps/api/src e apps/web/src: 0 riscontri, nessun modulo la referenzia nemmeno in lettura); scrittore di importazione presente -> non dubbia"
+    },
+    {
+      "tabella": "sys_organization_unit_types",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000021_seed_reference_bank.sql:45 (INSERT)",
+        "db/migrations/000244_organization_unit_taxonomy.sql:56 (INSERT)",
+        "db/migrations/000244_organization_unit_taxonomy.sql:66 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 10,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo letture da API (tenant-materialization/repository.ts:80, research/repository.ts:596: SELECT), nessun INSERT/UPDATE da codice API; scrittori di importazione/seed presenti -> non dubbia"
+    },
+    {
+      "tabella": "sys_organization_units",
+      "scrittori_api": [
+        "apps/api/src/modules/organization-units/repository.ts:136 (INSERT)",
+        "apps/api/src/modules/organization-units/repository.ts:193 (UPDATE)",
+        "apps/api/src/modules/organization-units/repository.ts:232 (UPDATE)"
+      ],
+      "scrittori_import": [
+        "apps/api/src/modules/tenant-materialization/repository.ts:153 (INSERT, materializzazione da blueprint)",
+        "db/migrations/000245_organization_unit_new_units.sql:123 (INSERT)",
+        "db/migrations/000245_organization_unit_new_units.sql:180 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 45,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittori API (CRUD org units) E scrittori di importazione/materializzazione (tenant-materialization crea le unita' dal blueprint al provisioning del tenant, piu' seed storico in migrazione 000245) -> dubbia"
+    },
+    {
+      "tabella": "sys_overtime",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000399_le_ore_lavorate_prima_del_2025_12_12_sono_autorizzate.sql:109 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 12070,
+      "righe_con_provenienza": 380,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "0 scrittori API trovati (apps/api/src: solo letture in analytics/repository.ts e me/repository.ts; nessun modulo 'overtime' con rotta di scrittura); scrittore di importazione presente -> non dubbia per la regola. Nota per D5/X-4: il passo 17 del mandato elenca sys_overtime fra le 'quattro tabelle ibride' per definizione (gesto nativo + saldo importato), ma la misura odierna non trova NESSUNA rotta API nativa che scriva su questa tabella: il lato 'nativo' dell'ibrido non esiste ancora nel codice."
+    },
+    {
+      "tabella": "sys_payout_curves",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/storia36/03_compensation.sql:93 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 3,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura da API (compensation/repository.ts:955: SELECT), nessun writer API; scrittore di importazione presente -> non dubbia"
+    },
+    {
+      "tabella": "sys_payroll_handoff_records",
+      "scrittori_api": [
+        "apps/api/src/modules/compensation/repository.ts:423 (INSERT, esposta da routes.ts:90 come POST -> 201)"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/03_compensation.sql:307 (INSERT)",
+        "db/seeds/storia36/13_avanzamento.sql:812 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 37,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittore API (rotta POST reale, compensation/routes.ts:90) E scrittori di importazione (seed storia36) -> dubbia"
+    },
+    {
+      "tabella": "sys_performance_review_competency_ratings",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/storia36/02_performance.sql:415 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 1710,
+      "righe_con_provenienza": 465,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura da API (evidence/repository.ts:105: SELECT), nessun writer; scrittore di importazione presente -> non dubbia"
+    },
+    {
+      "tabella": "sys_performance_reviews",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/storia36/02_performance.sql:339 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 570,
+      "righe_con_provenienza": 161,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura da API (performance-reviews/repository.ts, commento 'SQL parametrizzato su sys.sys_performance_reviews (548 valutazioni storiche)': nessun INSERT/UPDATE nel file); scrittore di importazione presente -> non dubbia"
+    },
+    {
+      "tabella": "sys_person_evidence_records",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/reconciliation/28_person_evidence_records.sql:5 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 237,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura da API (evidence/repository.ts:146: SELECT), nessun writer; scrittore di importazione presente -> non dubbia"
+    },
+    {
+      "tabella": "sys_position_career_paths",
+      "scrittori_api": [
+        "apps/api/src/modules/position-career-paths/repository.ts:131 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000277_realign_career_paths_and_targets.sql:303 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 231,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittore API E scrittore di importazione/riallineamento (migrazione 000277) -> dubbia"
+    },
+    {
+      "tabella": "sys_position_compensation_profiles",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/rtl-banking-skills/seed_comp_dates.sql (INSERT)",
+        "db/seeds/rtl-banking-skills/seed_key_roles_coverage.sql (INSERT)",
+        "db/seeds/rtl-rebuild/05_compensation.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 160,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": true,
+      "motivo": "D6: una delle quattro tabelle (profili retributivi di posizione) che per decisione di Enzo (D6=A) sono 'importate, porta non ancora costruita' -> dubbia=true con motivo D6, indipendentemente dai soli scrittori di importazione misurati (0 scrittori API confermato: solo letture in analytics/repository.ts, capability-composition/repository.ts, insights/repository.ts, compensation/repository.ts)"
+    },
+    {
+      "tabella": "sys_position_economic_weight",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/reconciliation/35_position_economic_weight.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 24,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura da API (compensation/repository.ts:869,877: SELECT); scrittore di importazione presente -> non dubbia"
+    },
+    {
+      "tabella": "sys_position_kpi_requirements",
+      "scrittori_api": [
+        "apps/api/src/modules/positions/repository.ts:513 (INSERT)",
+        "apps/api/src/modules/positions/repository.ts:543 (UPDATE)"
+      ],
+      "scrittori_import": [
+        "db/seeds/reconciliation/41_position_kpi_requirements.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 168,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittori API E scrittore di importazione (seed reconciliation) -> dubbia"
+    },
+    {
+      "tabella": "sys_position_learning_requirements",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000361_una_posizione_ricoperta_deve_dire_cosa_si_deve_saper_fare.sql (INSERT)",
+        "db/seeds/reconciliation/11_position_learning_requirements.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 1886,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura da API (positions/repository.ts:605: SELECT); scrittori di importazione presenti -> non dubbia"
+    },
+    {
+      "tabella": "sys_position_skill_requirement_history",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/storia36/05_career.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 181,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura da API (positions/repository.ts:705: SELECT); scrittore di importazione presente -> non dubbia"
+    },
+    {
+      "tabella": "sys_position_skill_requirements",
+      "scrittori_api": [
+        "apps/api/src/modules/positions/repository.ts:401 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000096_derive_position_skill_requirements.sql (INSERT)",
+        "db/seeds/rtl-banking-skills/seed_banking_skills.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 1434,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittore API E scrittori di importazione/derivazione (migrazione 000096 + seed rtl-banking-skills) -> dubbia"
+    },
+    {
+      "tabella": "sys_position_succession_relevance",
+      "scrittori_api": [
+        "apps/api/src/modules/position-succession-relevance/repository.ts:116 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000278_reattach_critical_roles_to_real_positions.sql (INSERT)",
+        "db/seeds/reconciliation/14_position_succession_relevance.sql (INSERT)",
+        "db/seeds/storia36/repair/2026-07-28_c5_coda_rilievi_oneshot.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 21,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittore API E scrittori di importazione/riparazione (migrazione 000278, seed reconciliation, repair storia36) -> dubbia"
+    },
+    {
+      "tabella": "sys_positions",
+      "scrittori_api": [
+        "apps/api/src/modules/positions/repository.ts:163 (INSERT)",
+        "apps/api/src/modules/positions/repository.ts:237 (UPDATE)",
+        "apps/api/src/modules/positions/repository.ts:252 (UPDATE)"
+      ],
+      "scrittori_import": [
+        "apps/api/src/modules/tenant-materialization/repository.ts:190 (INSERT, materializzazione da blueprint)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 315,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittori API (CRUD posizioni) E scrittore di importazione/materializzazione (tenant-materialization crea le posizioni dal blueprint al provisioning) -> dubbia"
+    },
+    {
+      "tabella": "sys_predictive_models",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/reconciliation/47_predictionsml.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 4,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura da API (predictions/repository.ts:48,51,55: SELECT); scrittore di importazione presente -> non dubbia"
+    },
+    {
+      "tabella": "sys_process_kpi_templates",
+      "scrittori_api": [
+        "apps/api/src/modules/process-kpi-templates/repository.ts:73 (INSERT)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 73,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "scrittore API presente (process-kpi-templates/repository.ts:73); 0 scrittori di importazione trovati (rg su db/migrations e db/seeds: 0 riscontri INSERT) -> non dubbia (un solo tipo di scrittore)"
+    },
+    {
+      "tabella": "sys_process_participants",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000184_seed_process_participants_ruleb.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 845,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "0 scrittori API trovati (solo letture/EXISTS in lib/scope/functional.ts, lib/scope/domains.ts, me/repository.ts: la tabella e' l'asse funzionale 'processes' del resolver RBAC, letto non scritto); scrittore di importazione presente (migrazione seed 000184) -> non dubbia. Nota: nessuna rotta API 'aggiungi partecipante al processo' oggi, nonostante il ruolo RBAC che ne dipende"
+    },
+    {
+      "tabella": "sys_project_members",
+      "scrittori_api": [
+        "apps/api/src/modules/projects/repository.ts:294 (UPDATE)",
+        "apps/api/src/modules/projects/repository.ts:305 (INSERT)",
+        "apps/api/src/modules/projects/repository.ts:319 (UPDATE)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000363_una_squadra_e_un_progetto_il_modello.sql:277 (INSERT)",
+        "db/migrations/000363_una_squadra_e_un_progetto_il_modello.sql:305 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 174,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittori API E scrittori di importazione/seed nella migrazione che crea la tabella (000363) -> dubbia"
+    },
+    {
+      "tabella": "sys_projects",
+      "scrittori_api": [
+        "apps/api/src/modules/projects/repository.ts:219 (INSERT)",
+        "apps/api/src/modules/projects/repository.ts:240 (UPDATE)",
+        "apps/api/src/modules/projects/repository.ts:261 (UPDATE)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000363_una_squadra_e_un_progetto_il_modello.sql:260 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 26,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: ha scrittori API E scrittore di importazione/seed nella migrazione che crea la tabella (000363) -> dubbia"
+    },
+    {
+      "tabella": "sys_pulse_checks",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/reconciliation/48_engagement_normalized.sql (INSERT)",
+        "db/seeds/reconciliation/_gen_m2b.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 2834,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "codice dichiara esplicitamente 'engagement/repository.ts: sys_pulse_checks. READ-ONLY' (riga 4); 0 scrittori API; scrittori di importazione presenti -> non dubbia"
+    },
+    {
+      "tabella": "sys_readiness_scores",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/reconciliation/23_readiness_scores.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 89,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura da API (talent-review/repository.ts:243,251: SELECT); scrittore di importazione presente -> non dubbia"
+    },
+    {
+      "tabella": "sys_reconciliation_registry",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/reconciliation/45_mentorship.sql:326 (INSERT)",
+        "db/seeds/reconciliation/46_engagement_surveys.sql:935 (INSERT)",
+        "db/seeds/reconciliation/47_predictionsml.sql:567 (INSERT)",
+        "e altri file in db/seeds/reconciliation/ (elenco parziale, misurato con rg -l)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 153,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "0 riscontri in apps/api/src (rg --no-ignore --hidden: 0 file); scritta solo da script di importazione/riconciliazione storica. E' il registro del PROCESSO di riconciliazione brownfield (bucket A/B/C), non un dato di business del cliente -> proposto infrastruttura, non dubbia per la regola (un solo tipo di scrittore)"
+    },
+    {
+      "tabella": "sys_reference_translations",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/scripts/populate-occupation-classifications.sql:65 (INSERT)"
+      ],
+      "colonna_origine": "source (valori misurati: ESCO=29013, HARVEST=5399, LLM=2284, MANUAL=128 — select source, count(*) from sys.sys_reference_translations group by 1)",
+      "righe": 36824,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura da API (lib/i18n/localize.ts:32: SELECT, con commento esplicito 'fonte sys.sys_reference_translations'); scrittore di importazione presente; ha gia' una colonna di origine propria (source) -> non dubbia"
+    },
+    {
+      "tabella": "sys_research_sources",
+      "scrittori_api": [
+        "apps/api/src/modules/research/repository.ts:562 (INSERT)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 7,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "scrittore API presente (research/repository.ts:562, con workflow di approvazione: colonne research_source_approved_by/approved_at); 0 scrittori di importazione trovati -> non dubbia"
+    },
+    {
+      "tabella": "sys_review_cycles",
+      "scrittori_api": [
+        "apps/api/src/modules/review-cycles/repository.ts:80 (INSERT)",
+        "apps/api/src/modules/review-cycles/repository.ts:125 (UPDATE)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 1,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "scrittori API presenti; 0 scrittori di importazione trovati (rg su db/migrations e db/seeds per INSERT INTO sys.sys_review_cycles: 0 riscontri, solo la DDL di creazione in migrazione 000256) -> non dubbia"
+    },
+    {
+      "tabella": "sys_reward_gate_catalog",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000021_seed_reference_bank.sql (INSERT)",
+        "db/migrations/000400_heuresys_ha_un_profilo_suo_e_non_quello_della_banca.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 11,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura/JOIN da API (compensation/repository.ts: righe 219,258,1051); scrittori di importazione presenti -> non dubbia"
+    },
+    {
+      "tabella": "sys_reward_gate_results",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/storia36/03_compensation.sql (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 3283,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo lettura/JOIN da API (compensation/repository.ts: righe 221,260,292,1053); scrittore di importazione presente -> non dubbia"
+    }
+  ],
+  "comandi": [
+    {
+      "tabella": "sys_occupation_classification_mappings",
+      "comando": "select count(*) from sys.sys_occupation_classification_mappings",
+      "numero": 0
+    },
+    {
+      "tabella": "sys_occupation_classifications",
+      "comando": "select count(*) from sys.sys_occupation_classifications",
+      "numero": 2121
+    },
+    {
+      "tabella": "sys_occupation_skill_requirements",
+      "comando": "select count(*) from sys.sys_occupation_skill_requirements",
+      "numero": 126051
+    },
+    {
+      "tabella": "sys_okr_check_ins",
+      "comando": "select count(*) from sys.sys_okr_check_ins",
+      "numero": 25
+    },
+    {
+      "tabella": "sys_okr_key_results",
+      "comando": "select count(*) from sys.sys_okr_key_results",
+      "numero": 20
+    },
+    {
+      "tabella": "sys_okrs",
+      "comando": "select count(*) from sys.sys_okrs",
+      "numero": 15
+    },
+    {
+      "tabella": "sys_operating_model_catalog",
+      "comando": "select count(*) from sys.sys_operating_model_catalog",
+      "numero": 6
+    },
+    {
+      "tabella": "sys_organization_unit_history",
+      "comando": "select count(*) from sys.sys_organization_unit_history",
+      "numero": 286
+    },
+    {
+      "tabella": "sys_organization_unit_kpi_templates",
+      "comando": "select count(*) from sys.sys_organization_unit_kpi_templates",
+      "numero": 100
+    },
+    {
+      "tabella": "sys_organization_unit_processes",
+      "comando": "select count(*) from sys.sys_organization_unit_processes",
+      "numero": 96
+    },
+    {
+      "tabella": "sys_organization_unit_templates",
+      "comando": "select count(*) from sys.sys_organization_unit_templates",
+      "numero": 225
+    },
+    {
+      "tabella": "sys_organization_unit_types",
+      "comando": "select count(*) from sys.sys_organization_unit_types",
+      "numero": 10
+    },
+    {
+      "tabella": "sys_organization_units",
+      "comando": "select count(*) from sys.sys_organization_units",
+      "numero": 45
+    },
+    {
+      "tabella": "sys_overtime",
+      "comando": "select count(*) from sys.sys_overtime",
+      "numero": 12070
+    },
+    {
+      "tabella": "sys_payout_curves",
+      "comando": "select count(*) from sys.sys_payout_curves",
+      "numero": 3
+    },
+    {
+      "tabella": "sys_payroll_handoff_records",
+      "comando": "select count(*) from sys.sys_payroll_handoff_records",
+      "numero": 37
+    },
+    {
+      "tabella": "sys_performance_review_competency_ratings",
+      "comando": "select count(*) from sys.sys_performance_review_competency_ratings",
+      "numero": 1710
+    },
+    {
+      "tabella": "sys_performance_reviews",
+      "comando": "select count(*) from sys.sys_performance_reviews",
+      "numero": 570
+    },
+    {
+      "tabella": "sys_person_evidence_records",
+      "comando": "select count(*) from sys.sys_person_evidence_records",
+      "numero": 237
+    },
+    {
+      "tabella": "sys_position_career_paths",
+      "comando": "select count(*) from sys.sys_position_career_paths",
+      "numero": 231
+    },
+    {
+      "tabella": "sys_position_compensation_profiles",
+      "comando": "select count(*) from sys.sys_position_compensation_profiles",
+      "numero": 160
+    },
+    {
+      "tabella": "sys_position_economic_weight",
+      "comando": "select count(*) from sys.sys_position_economic_weight",
+      "numero": 24
+    },
+    {
+      "tabella": "sys_position_kpi_requirements",
+      "comando": "select count(*) from sys.sys_position_kpi_requirements",
+      "numero": 168
+    },
+    {
+      "tabella": "sys_position_learning_requirements",
+      "comando": "select count(*) from sys.sys_position_learning_requirements",
+      "numero": 1886
+    },
+    {
+      "tabella": "sys_position_skill_requirement_history",
+      "comando": "select count(*) from sys.sys_position_skill_requirement_history",
+      "numero": 181
+    },
+    {
+      "tabella": "sys_position_skill_requirements",
+      "comando": "select count(*) from sys.sys_position_skill_requirements",
+      "numero": 1434
+    },
+    {
+      "tabella": "sys_position_succession_relevance",
+      "comando": "select count(*) from sys.sys_position_succession_relevance",
+      "numero": 21
+    },
+    {
+      "tabella": "sys_positions",
+      "comando": "select count(*) from sys.sys_positions",
+      "numero": 315
+    },
+    {
+      "tabella": "sys_predictive_models",
+      "comando": "select count(*) from sys.sys_predictive_models",
+      "numero": 4
+    },
+    {
+      "tabella": "sys_process_kpi_templates",
+      "comando": "select count(*) from sys.sys_process_kpi_templates",
+      "numero": 73
+    },
+    {
+      "tabella": "sys_process_participants",
+      "comando": "select count(*) from sys.sys_process_participants",
+      "numero": 845
+    },
+    {
+      "tabella": "sys_project_members",
+      "comando": "select count(*) from sys.sys_project_members",
+      "numero": 174
+    },
+    {
+      "tabella": "sys_projects",
+      "comando": "select count(*) from sys.sys_projects",
+      "numero": 26
+    },
+    {
+      "tabella": "sys_pulse_checks",
+      "comando": "select count(*) from sys.sys_pulse_checks",
+      "numero": 2834
+    },
+    {
+      "tabella": "sys_readiness_scores",
+      "comando": "select count(*) from sys.sys_readiness_scores",
+      "numero": 89
+    },
+    {
+      "tabella": "sys_reconciliation_registry",
+      "comando": "select count(*) from sys.sys_reconciliation_registry",
+      "numero": 153
+    },
+    {
+      "tabella": "sys_reference_translations",
+      "comando": "select count(*) from sys.sys_reference_translations",
+      "numero": 36824
+    },
+    {
+      "tabella": "sys_research_sources",
+      "comando": "select count(*) from sys.sys_research_sources",
+      "numero": 7
+    },
+    {
+      "tabella": "sys_review_cycles",
+      "comando": "select count(*) from sys.sys_review_cycles",
+      "numero": 1
+    },
+    {
+      "tabella": "sys_reward_gate_catalog",
+      "comando": "select count(*) from sys.sys_reward_gate_catalog",
+      "numero": 11
+    },
+    {
+      "tabella": "sys_reward_gate_results",
+      "comando": "select count(*) from sys.sys_reward_gate_results",
+      "numero": 3283
+    }
+  ]
+}

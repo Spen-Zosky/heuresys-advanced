@@ -1,0 +1,938 @@
+{
+  "righe": [
+    {
+      "tabella": "sys_ui_interface_data_classes",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000394_la_voce_progetti_dichiara_la_sua_classe.sql:16",
+        "db/migrations/000366_le_risposte_di_clima_sono_un_dato_della_persona.sql:33",
+        "db/migrations/000326_le_otto_famiglie_di_cruscotto_hanno_una_pagina.sql:111",
+        "db/migrations/000317_organigramma_rubrica_aziendale.sql:72",
+        "db/migrations/000315_classi_di_dato_delle_voci_di_menu.sql:54"
+      ],
+      "colonna_origine": "assente",
+      "righe": 43,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "solo migrazioni scrivono questo registro di configurazione UI (quali classi di dato espone ogni voce di menu); nessuna rotta CRUD applicativa, nessun writer di importazione dati-cliente; non e' dato business del cliente"
+    },
+    {
+      "tabella": "sys_ui_interfaces",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000050_sys_ui_interfaces_registry.sql:51",
+        "db/migrations/000163_sidebar_five_sections_taxonomy.sql:78 (UPDATE)",
+        "db/migrations/000271_dashboard_interface_declares_its_permission.sql:46 (UPDATE)",
+        "db/migrations/000306_nessuna_pagina_irraggiungibile.sql:62",
+        "altre ~35 migrazioni, una per voce di menu introdotta (rg --no-ignore --hidden -c \"insert into sys\\.sys_ui_interfaces\" db/migrations = 41 file)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 85,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "registro delle voci di menu/interfaccia, scritto solo da migrazioni (una per feature che nasce); nessuna rotta API di scrittura; non e' dato business del cliente"
+    },
+    {
+      "tabella": "sys_user_addresses",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/rtl-rebuild/14_user_anagraphic_satellites.generated.sql:833 (+279 righe simili, INSERT...ON CONFLICT DO UPDATE)",
+        "db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql:358 (UPDATE)",
+        "db/scripts/gen-anagraphic-seed.sql:57 (template INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 171,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta di scrittura in apps/api/src (solo SELECT in me/repository.ts:229); tutte le 171 righe generate dal seed anagrafico rtl-rebuild/gen-anagraphic-seed"
+    },
+    {
+      "tabella": "sys_user_assessment_evidence",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/rtl-rebuild/12_user_satellites.sql:141 (INSERT)",
+        "db/seeds/storia36/12_registration_dates.sql:205 (UPDATE date-shift)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 1560,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "solo SELECT in apps/api/src (evidence/repository.ts:35); scritta solo da seed rtl-rebuild e dal meccanismo di avanzamento storia36"
+    },
+    {
+      "tabella": "sys_user_auth_roles",
+      "scrittori_api": [
+        "apps/api/src/modules/users/repository.ts:394 (INSERT grant ruolo)",
+        "apps/api/src/modules/users/repository.ts:412 (UPDATE revoke ruolo)"
+      ],
+      "scrittori_import": [
+        "db/scripts/seed-service-user.ts:178",
+        "db/scripts/provision-collaudo-access.ts:214",
+        "db/seeds/rtl-rebuild/13_teams_from_org.sql:58,74",
+        "db/seeds/rtl-rebuild/08_rbac_role_grants.sql:29",
+        "db/migrations/000295_platform_admin_is_the_owner.sql:65",
+        "db/migrations/000272_branch_manager_role_and_dashboard.sql:70",
+        "db/migrations/000259_command_roles_for_unit_managers.sql:73",
+        "db/migrations/000205_whistleblowing_custodian_and_console.sql:20",
+        "db/migrations/000155_grant_user_role_to_functional_employees.sql:25",
+        "db/migrations/000150_org_director_grant_valentina.sql:19",
+        "db/migrations/000111_import_chiara_spenuso_heuresys.sql:44",
+        "db/migrations/000049_r2_assign_holderless_functional_roles.sql:23"
+      ],
+      "colonna_origine": "assente",
+      "righe": 399,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API (grant/revoke ruoli in users/repository.ts) E scrittori di importazione (script di provisioning, seed onboarding, migrazioni di grant) coesistono"
+    },
+    {
+      "tabella": "sys_user_bank_details",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/rtl-rebuild/14_user_anagraphic_satellites.generated.sql:1113 (+263 righe simili)",
+        "db/scripts/gen-anagraphic-seed.sql:70"
+      ],
+      "colonna_origine": "assente",
+      "righe": 156,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta di scrittura (solo SELECT in me/repository.ts:249); generata dal seed anagrafico"
+    },
+    {
+      "tabella": "sys_user_career_plans",
+      "scrittori_api": [
+        "apps/api/src/modules/user-career-plans/repository.ts:161 (INSERT)",
+        "apps/api/src/modules/user-career-plans/repository.ts:207 (UPDATE)",
+        "apps/api/src/modules/user-career-plans/repository.ts:216 (DELETE)"
+      ],
+      "scrittori_import": [
+        "db/seeds/reconciliation/06_user_career_plans.sql:22"
+      ],
+      "colonna_origine": "assente",
+      "righe": 113,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: CRUD nativo completo E scrittore di importazione (seed di riconciliazione) coesistono"
+    },
+    {
+      "tabella": "sys_user_certifications",
+      "scrittori_api": [
+        "apps/api/src/modules/me/repository.ts:1773 (INSERT self-service)"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/repair/2026-07-28_c4_rui_sezione_d_oneshot.sql:54",
+        "db/seeds/storia36/repair/2026-07-28_c4_certs_monotonia_oneshot.sql:57",
+        "db/seeds/storia36/13_avanzamento.sql:647",
+        "db/seeds/storia36/04_learning.sql:429",
+        "db/seeds/storia36/04b_safety.sql:117",
+        "db/scripts/verify-storia36.sql:5185",
+        "db/seeds/rtl-rebuild/06_skills_certs.sql:108",
+        "db/seeds/rtl-banking-skills/seed_comp_dates.sql:319",
+        "db/migrations/000292_emergency_team_coverage_per_branch.sql:86",
+        "db/migrations/000291_preposti_safety_training_for_new_supervisors.sql:61"
+      ],
+      "colonna_origine": "assente",
+      "righe": 1062,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API (aggiunta certificazione self-service) E numerosi scrittori di importazione (seed storia36, rtl-rebuild, migrazioni) coesistono"
+    },
+    {
+      "tabella": "sys_user_consents",
+      "scrittori_api": [
+        "apps/api/src/modules/gdpr/repository.ts:345 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/10_security_privacy.sql:91",
+        "db/scripts/verify-storia36.sql:6878 (UPDATE date-shift)",
+        "db/migrations/000372_chi_ha_un_account_ha_espresso_le_sue_scelte.sql:72"
+      ],
+      "colonna_origine": "consent_source (valori misurati: ADMIN=8, ESS=9, IMPORT=632 -- select consent_source, count(*) from sys.sys_user_consents group by 1)",
+      "righe": 649,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API (consenso GDPR via ESS/ADMIN) E scrittori di importazione coesistono; confermato dalla colonna consent_source, 632/649 righe sono IMPORT"
+    },
+    {
+      "tabella": "sys_user_contracts",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/rtl-rebuild/15_user_contracts.generated.sql:4 (+267 righe simili)",
+        "db/seeds/rtl-banking-skills/seed_user_role_coherence.sql:42",
+        "db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql:566",
+        "db/seeds/rtl-banking-skills/seed_key_roles_coverage.sql:150",
+        "db/seeds/rtl-banking-skills/seed_comp_dates.sql:224",
+        "db/seeds/rtl-banking-skills/seed_ccnl_floors.sql:38",
+        "db/seeds/storia36/00_repair_g4_contracts.sql:27",
+        "db/scripts/verify-storia36.sql:4819",
+        "db/scripts/gen-contracts-seed.sql:20",
+        "db/migrations/000376_le_due_sentinelle_dei_contratti_a_termine.sql:109",
+        "db/migrations/000375_nessun_contratto_a_termine_a_chi_ha_piu_di_dodici_mesi.sql:82",
+        "db/migrations/000371_il_rinnovo_dei_contratti_smette_di_essere_una_fotografia.sql:115",
+        "db/migrations/000311_nessuno_lavora_con_un_contratto_scaduto.sql:73",
+        "db/migrations/000307_due_direzioni_di_vertice_a_dirigente.sql:136",
+        "db/migrations/000289_contracts_in_force_and_ccnl_floor.sql:78",
+        "db/migrations/000264_ten_unit_managers_to_qd3_and_mg2.sql:122",
+        "db/migrations/000188_f2_db_hygiene.sql:78"
+      ],
+      "colonna_origine": "assente",
+      "righe": 160,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": true,
+      "motivo": "D6"
+    },
+    {
+      "tabella": "sys_user_delegations",
+      "scrittori_api": [
+        "apps/api/src/modules/delegations/repository.ts:132 (INSERT)",
+        "apps/api/src/modules/delegations/repository.ts:160 (UPDATE revoca)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "unico scrittore e' l'API (modulo delegations, mig 000314); nessuno scrittore di importazione trovato in db/ ne' in docs/archive; 0 righe oggi"
+    },
+    {
+      "tabella": "sys_user_demographics",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/rtl-rebuild/14_user_anagraphic_satellites.generated.sql:3,4 (+righe simili)",
+        "db/scripts/gen-anagraphic-seed.sql:30",
+        "db/seeds/rtl-banking-skills/seed_user_role_coherence.sql:72",
+        "db/seeds/rtl-banking-skills/seed_comp_dates.sql:202,213"
+      ],
+      "colonna_origine": "assente",
+      "righe": 160,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta di scrittura (solo SELECT in me/repository.ts:220); generata dal seed anagrafico"
+    },
+    {
+      "tabella": "sys_user_documents",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/reconciliation/07_user_documents.sql:23"
+      ],
+      "colonna_origine": "assente",
+      "righe": 657,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta di scrittura (solo SELECT in me/repository.ts:1832); unico scrittore e' il seed di riconciliazione"
+    },
+    {
+      "tabella": "sys_user_education_records",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/rtl-rebuild/12_user_satellites.sql:83",
+        "db/seeds/storia36/repair/2026-07-28_c5_education_durata_oneshot.sql:35,53",
+        "db/seeds/storia36/12_registration_dates.sql:442,493",
+        "db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql:147,190",
+        "db/scripts/verify-storia36.sql:5535"
+      ],
+      "colonna_origine": "assente",
+      "righe": 160,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta di scrittura (solo SELECT in me/repository.ts:244); scritta da seed rtl-rebuild e meccanismo storia36"
+    },
+    {
+      "tabella": "sys_user_employment",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/rtl-rebuild/14_user_anagraphic_satellites.generated.sql:1377,1378",
+        "db/scripts/gen-anagraphic-seed.sql:77",
+        "db/seeds/rtl-banking-skills/seed_user_role_coherence.sql:78,183",
+        "db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql:577",
+        "db/seeds/rtl-banking-skills/seed_comp_dates.sql:177,193",
+        "db/migrations/000307_due_direzioni_di_vertice_a_dirigente.sql:141,166",
+        "db/migrations/000264_ten_unit_managers_to_qd3_and_mg2.sql:190,200",
+        "db/migrations/000188_f2_db_hygiene.sql:74"
+      ],
+      "colonna_origine": "assente",
+      "righe": 160,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta di scrittura (solo SELECT in me/repository.ts:269); scritta da seed anagrafico e da migrazioni di riorganizzazione"
+    },
+    {
+      "tabella": "sys_user_family_members",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/rtl-rebuild/14_user_anagraphic_satellites.generated.sql:1648,1649",
+        "db/scripts/gen-anagraphic-seed.sql:89",
+        "db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql:369,377"
+      ],
+      "colonna_origine": "assente",
+      "righe": 150,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta di scrittura (solo SELECT in me/repository.ts:236); generata dal seed anagrafico"
+    },
+    {
+      "tabella": "sys_user_identity_documents",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/scripts/gen-anagraphic-seed.sql:41,46",
+        "db/seeds/rtl-rebuild/14_user_anagraphic_satellites.generated.sql:273,274",
+        "db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql:415,426"
+      ],
+      "colonna_origine": "assente",
+      "righe": 332,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": true,
+      "motivo": "D6"
+    },
+    {
+      "tabella": "sys_user_kpi_evidence",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "apps/api/src/modules/tenant-materialization/repository.ts:454 (INSERT, materializzazione onboarding tenant)",
+        "db/seeds/reconciliation/19_user_kpi_evidence.sql:5",
+        "db/seeds/storia36/12_registration_dates.sql:125 (UPDATE)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 248,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta CRUD utente (solo SELECT/JOIN in insights, capability-maturity, me); unico scrittore in codice e' l'effetto di materializzazione onboarding tenant, oltre a seed/riconciliazione"
+    },
+    {
+      "tabella": "sys_user_learning_assignments",
+      "scrittori_api": [
+        "apps/api/src/modules/me/repository.ts:1200 (INSERT, iscrizione self-service)"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/04_learning.sql:300",
+        "db/seeds/reconciliation/15_user_learning_assignments.sql:16"
+      ],
+      "colonna_origine": "assente",
+      "righe": 3061,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API (iscrizione self-service a un percorso) E scrittori di importazione (seed storia36, riconciliazione) coesistono"
+    },
+    {
+      "tabella": "sys_user_learning_evidence",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/storia36/04_learning.sql:274,399",
+        "db/seeds/rtl-rebuild/12_user_satellites.sql:113",
+        "db/seeds/reconciliation/38_user_learning_evidence.sql:48",
+        "db/scripts/verify-storia36.sql:5206,5332 (UPDATE)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 3882,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta di scrittura (solo SELECT in evidence/repository.ts:63); scritta da seed storia36/rtl-rebuild/riconciliazione"
+    },
+    {
+      "tabella": "sys_user_pay_slips",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/storia36/03_compensation.sql:240",
+        "db/seeds/storia36/01_attendance_timeoff.sql:525",
+        "db/seeds/storia36/repair/2026-07-28_c3_slips_floor_oneshot.sql:19",
+        "db/seeds/storia36/repair/2026-07-28_c3_fixups_oneshot.sql:65,100",
+        "db/seeds/storia36/13_avanzamento.sql:757",
+        "db/seeds/rtl-rebuild/16_user_pay_slips.generated.sql:3,4",
+        "db/seeds/rtl-banking-skills/seed_comp_dates.sql:291",
+        "db/scripts/verify-storia36.sql:5086,5140",
+        "db/scripts/gen-pay-slips-seed.sql:22",
+        "db/migrations/000362_un_contratto_attivo_deve_avere_una_busta_paga_recente.sql:175",
+        "db/migrations/000296_sentinelle_segreti_e_paghe.sql:197",
+        "db/migrations/000290_variable_pay_at_current_level_and_paid_in_june.sql:104,142",
+        "db/migrations/000289_contracts_in_force_and_ccnl_floor.sql:104,150"
+      ],
+      "colonna_origine": "assente",
+      "righe": 5818,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": true,
+      "motivo": "D6"
+    },
+    {
+      "tabella": "sys_user_position_assignments",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "apps/api/src/modules/approvals/effects/tenant-import-run.ts:161 (UPDATE), 206 (INSERT)",
+        "apps/api/src/modules/tenant-materialization/repository.ts:379 (INSERT)",
+        "db/seeds/storia36/05_career.sql:513,533",
+        "db/seeds/rtl-rebuild/04_assignments.sql:25",
+        "db/seeds/rtl-banking-skills/seed_user_role_coherence.sql:104,142",
+        "db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql:527,540",
+        "db/seeds/rtl-banking-skills/seed_key_roles_coverage.sql:101,112,123",
+        "db/scripts/seed-reference-bank.ts:374",
+        "db/migrations/000251_organization_closure_and_gates.sql:75,88",
+        "db/migrations/000250_positions_central_staff.sql:152,165",
+        "db/migrations/000249_positions_network_staff.sql:140,154",
+        "db/migrations/000248_positions_command_roles.sql:110,126",
+        "db/migrations/000204_key_roles_reactivation_integrity.sql:29",
+        "db/migrations/000188_f2_db_hygiene.sql:97"
+      ],
+      "colonna_origine": "assente",
+      "righe": 329,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta CRUD nativa trovata (il gesto assegnazione persona-posizione non e' ancora costruito: e' G-1, fase F6 del mandato); gli unici scrittori in apps/api/src sono effetti di importazione/materializzazione (tenant-import-run.ts, tenant-materialization/repository.ts), non rotte utente"
+    },
+    {
+      "tabella": "sys_user_preferences",
+      "scrittori_api": [
+        "apps/api/src/modules/me/repository.ts:1881 (INSERT/UPSERT self-service tema/lingua)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 6,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "unico scrittore e' l'API self-service (preferenze tema/palette/lingua); nessun writer di importazione trovato"
+    },
+    {
+      "tabella": "sys_user_professional_experiences",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/storia36/05_career.sql:102",
+        "db/seeds/storia36/repair/2026-07-28_c5_coda_rilievi_oneshot.sql:302",
+        "db/scripts/verify-storia36.sql:5463,5563,5585,5602,5956,5978,5994"
+      ],
+      "colonna_origine": "assente",
+      "righe": 255,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta di scrittura (solo SELECT in me/repository.ts:2017); scritta da seed storia36 e dal meccanismo di avanzamento"
+    },
+    {
+      "tabella": "sys_user_profile_embeddings",
+      "scrittori_api": [
+        "apps/api/src/modules/semantic-matching/repository.ts:140 (INSERT, chiamato da backfill.ts::runBackfill, esposto via POST /reindex con permesso matching:admin)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 156,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "unico scrittore e' la rotta POST /reindex (matching:admin) che ricalcola gli embedding dalle evidenze di competenza; nessun writer di importazione dati-cliente trovato: e' un derivato calcolato dalla piattaforma, non un dato dal gestionale esterno"
+    },
+    {
+      "tabella": "sys_user_profiles",
+      "scrittori_api": [
+        "apps/api/src/modules/me/repository.ts:164 (INSERT/UPSERT self-service bio/contatti)"
+      ],
+      "scrittori_import": [
+        "db/seeds/rtl-rebuild/12_user_satellites.sql:61"
+      ],
+      "colonna_origine": "assente",
+      "righe": 157,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API (self-service bio/contatti) E scrittore di importazione (seed rtl-rebuild) coesistono"
+    },
+    {
+      "tabella": "sys_user_skill_evidence",
+      "scrittori_api": [
+        "apps/api/src/modules/me/repository.ts:837 (INSERT self/manager assessment)"
+      ],
+      "scrittori_import": [
+        "apps/api/src/modules/tenant-materialization/repository.ts:437 (INSERT, source='MANAGER_ASSESSMENT', materializzazione onboarding)",
+        "db/seeds/rtl-rebuild/06_skills_certs.sql:84",
+        "db/seeds/storia36/12_registration_dates.sql:406 (UPDATE)",
+        "db/migrations/000351_una_competenza_e_una_sola_anche_fra_globale_e_tenant.sql:194",
+        "db/migrations/000196_restore_skill_natural_key_uq.sql:109",
+        "db/migrations/000189_dedup_skill_names.sql:120"
+      ],
+      "colonna_origine": "user_skill_evidence_source (valori misurati: MANAGER_ASSESSMENT=312, SELF_ASSESSMENT=590 -- select user_skill_evidence_source, count(*) from sys.sys_user_skill_evidence group by 1)",
+      "righe": 902,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API (autovalutazione/valutazione manager via me/repository.ts) E scrittore di importazione/materializzazione (onboarding tenant, seed) coesistono"
+    },
+    {
+      "tabella": "sys_user_skills",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "apps/api/src/modules/approvals/effects/tenant-import-run.ts:219 (INSERT, effetto di importazione approvata)",
+        "db/scripts/import-d1-user-skills.sh:102",
+        "db/seeds/rtl-banking-skills/seed_banking_skills.sql:315",
+        "db/seeds/storia36/12_registration_dates.sql:417 (UPDATE)",
+        "db/migrations/000351_una_competenza_e_una_sola_anche_fra_globale_e_tenant.sql:149",
+        "db/migrations/000196_restore_skill_natural_key_uq.sql:85",
+        "db/migrations/000189_dedup_skill_names.sql:96"
+      ],
+      "colonna_origine": "user_skill_source (valori: MANAGER_OVERRIDE=814, SELF_DECLARATION=537 -- select user_skill_source, count(*) from sys.sys_user_skills group by 1; ma SELF_DECLARATION non compare mai come letterale scritto da codice applicativo: e' il DEFAULT di colonna, non un valore scelto attivamente da una rotta)",
+      "righe": 1351,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta CRUD nativa trovata nel codice applicativo (l'unico scrittore in apps/api/src e' l'effetto di importazione tenant-import-run.ts); il resto sono script/seed di importazione"
+    },
+    {
+      "tabella": "sys_user_target_positions",
+      "scrittori_api": [
+        "apps/api/src/modules/user-target-positions/repository.ts:151 (INSERT)",
+        "apps/api/src/modules/user-target-positions/repository.ts:194 (UPDATE)",
+        "apps/api/src/modules/user-target-positions/repository.ts:215 (UPDATE review)",
+        "apps/api/src/modules/user-target-positions/repository.ts:230 (DELETE)",
+        "apps/api/src/modules/me/repository.ts:1330 (INSERT self-service)"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/05_career.sql:213",
+        "db/scripts/verify-storia36.sql:5497,5659",
+        "db/migrations/000277_realign_career_paths_and_targets.sql:160,242,295"
+      ],
+      "colonna_origine": "assente",
+      "righe": 255,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: CRUD nativo completo (modulo dedicato + self-service) E scrittori di importazione (seed storia36, migrazione di riallineamento) coesistono"
+    },
+    {
+      "tabella": "sys_user_timeline_events",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "docs/archive/etl-brownfield-ritirato/scripts/import-d5-timeline.sh:92 (RITIRATO, #170)"
+      ],
+      "colonna_origine": "user_timeline_event_source_table / user_timeline_event_source_id (riferimento polimorfico all'entita' di origine dell'evento, non e' una colonna di provenienza dati nel senso di I23)",
+      "righe": 2682,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "il repository stesso lo dichiara in testa (apps/api/src/modules/user-timeline/repository.ts:2-4): 'Sola lettura: la tabella si popola dall'import (...import-d5-timeline.sh, ritirato #170), mai dall'API'; nessuna rotta scrive oggi, l'unico scrittore mai esistito e' l'import ritirato"
+    },
+    {
+      "tabella": "sys_users",
+      "scrittori_api": [
+        "apps/api/src/modules/users/repository.ts:163 (INSERT)",
+        "apps/api/src/modules/users/repository.ts:220,235 (UPDATE)",
+        "apps/api/src/modules/me/repository.ts:160 (UPDATE self-service)",
+        "apps/api/src/modules/gdpr/repository.ts:250 (UPDATE, cancellazione/anonimizzazione)"
+      ],
+      "scrittori_import": [
+        "apps/api/src/modules/approvals/effects/tenant-import-run.ts:169 (UPDATE deactivate), 197 (INSERT)",
+        "apps/api/src/modules/tenant-materialization/repository.ts:347 (INSERT)",
+        "db/seeds/rtl-banking-skills/seed_user_role_coherence.sql:132",
+        "db/scripts/verify-storia36.sql:6414",
+        "db/scripts/seed-service-user.ts:106",
+        "db/scripts/seed-reference-bank.ts:348",
+        "db/scripts/provision-collaudo-access.ts:199",
+        "db/migrations/000356_un_account_di_servizio_non_e_una_persona_senza_posizione.sql:170",
+        "db/migrations/000287_user_census_158_plus_3.sql:50",
+        "db/migrations/000285_platform_admin_false_legacy_origin.sql:44",
+        "db/migrations/000284_mfa_exemption_explicit_allowlist.sql:115",
+        "db/migrations/000218_person_display_name_placeholder.sql:15",
+        "db/migrations/000204_key_roles_reactivation_integrity.sql:24",
+        "db/migrations/000154_retire_synthetic_user_flag.sql:27",
+        "db/migrations/000111_import_chiara_spenuso_heuresys.sql:21",
+        "db/migrations/000046_rekey_external_code_employee_centric.sql:33"
+      ],
+      "colonna_origine": "assente (user_external_code e' chiave di raccordo per il crosswalk legacy, non colonna di provenienza dati)",
+      "righe": 164,
+      "righe_con_provenienza": 162,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittori API (creazione/modifica utente da admin, self-service, GDPR) E scrittori di importazione/materializzazione (onboarding tenant, seed, migrazioni) coesistono; unica tabella del lotto con provenienza nel registro (162/164 -- select replace(source_lineage_target_table_name,'sys.','') t, count(*) from sys.sys_source_lineage_records where t='sys_users')"
+    },
+    {
+      "tabella": "sys_valutazione_condivisione_eccezioni",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000396_le_valutazioni_non_condivise_hanno_un_registro_di_eccezione.sql:45 (INSERT di backfill nella migrazione che crea il registro)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 568,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta di scrittura applicativa trovata (solo SELECT in performance-reviews/repository.ts:19,22,97); le 568 righe sono il backfill fatto dalla migrazione 000396 che ha creato il registro delle eccezioni ADR-0036 (valutazioni non comunicate); nessuno scrittore ricorrente da allora"
+    },
+    {
+      "tabella": "sys_variable_pay_calculations",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/storia36/12_registration_dates.sql:170 (UPDATE)",
+        "db/seeds/storia36/03_compensation.sql:184",
+        "db/seeds/reconciliation/24_variable_pay_calculations.sql:5",
+        "db/scripts/verify-storia36.sql:5105",
+        "db/migrations/000290_variable_pay_at_current_level_and_paid_in_june.sql:80,138"
+      ],
+      "colonna_origine": "assente",
+      "righe": 182,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta di scrittura (solo SELECT in compensation/repository.ts:562,570,1003); scritta da seed storia36/riconciliazione e dalla migrazione di allineamento"
+    },
+    {
+      "tabella": "sys_visualization_edges",
+      "scrittori_api": [
+        "apps/api/src/modules/visualization-edges/repository.ts:69 (INSERT)",
+        "apps/api/src/modules/visualization-graphs/repository.ts:256 (INSERT bulk)"
+      ],
+      "scrittori_import": [
+        "db/seeds/org_chart_rtl_demo.sql:55"
+      ],
+      "colonna_origine": "edge_source_node_id (riferimento al nodo sorgente dell'arco nel grafo, non e' provenienza dati)",
+      "righe": 314,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: modulo CRUD nativo dedicato E seed demo organigramma coesistono"
+    },
+    {
+      "tabella": "sys_visualization_exports",
+      "scrittori_api": [
+        "apps/api/src/modules/visualization-exports/repository.ts:70 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/11_platform_config.sql:151",
+        "db/migrations/000373_un_export_di_visualizzazione_non_deve_poter_contenere_persone.sql:136,144,149,156,161,168 (UPDATE, redazione persone)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 16,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: modulo CRUD nativo E seed/migrazione di redazione coesistono"
+    },
+    {
+      "tabella": "sys_visualization_graphs",
+      "scrittori_api": [
+        "apps/api/src/modules/visualization-graphs/repository.ts:136 (INSERT)",
+        "apps/api/src/modules/visualization-graphs/repository.ts:161 (UPDATE)",
+        "apps/api/src/modules/visualization-graphs/repository.ts:205 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/seeds/org_chart_rtl_demo.sql:36"
+      ],
+      "colonna_origine": "graph_source_query (la query usata per generare il grafo, non e' provenienza dati)",
+      "righe": 2,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: CRUD nativo E seed demo organigramma coesistono"
+    },
+    {
+      "tabella": "sys_visualization_layouts",
+      "scrittori_api": [
+        "apps/api/src/modules/visualization-layouts/repository.ts:60 (INSERT)",
+        "apps/api/src/modules/visualization-layouts/repository.ts:80 (UPDATE)",
+        "apps/api/src/modules/visualization-graphs/repository.ts:291 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/11_platform_config.sql:97"
+      ],
+      "colonna_origine": "assente",
+      "righe": 2,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: CRUD nativo E seed di configurazione piattaforma coesistono"
+    },
+    {
+      "tabella": "sys_visualization_node_layouts",
+      "scrittori_api": [
+        "apps/api/src/modules/visualization-node-layouts/repository.ts:93 (INSERT)",
+        "apps/api/src/modules/visualization-graphs/repository.ts:304 (INSERT bulk)"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/11_platform_config.sql:109"
+      ],
+      "colonna_origine": "assente",
+      "righe": 316,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: CRUD nativo E seed di configurazione piattaforma coesistono"
+    },
+    {
+      "tabella": "sys_visualization_nodes",
+      "scrittori_api": [
+        "apps/api/src/modules/visualization-nodes/repository.ts:63 (INSERT)",
+        "apps/api/src/modules/visualization-nodes/repository.ts:86 (UPDATE)",
+        "apps/api/src/modules/visualization-graphs/repository.ts:244 (INSERT bulk)"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/11_platform_config.sql:78 (UPDATE)",
+        "db/seeds/org_chart_rtl_demo.sql:48",
+        "db/migrations/000373_un_export_di_visualizzazione_non_deve_poter_contenere_persone.sql:173",
+        "db/scripts/verify-storia36.sql:7029 (UPDATE)"
+      ],
+      "colonna_origine": "node_source_entity_id / node_source_entity_type (l'entita' di business che il nodo rappresenta, non e' provenienza dati)",
+      "righe": 316,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: CRUD nativo E seed/migrazione coesistono"
+    },
+    {
+      "tabella": "sys_visualization_styles",
+      "scrittori_api": [
+        "apps/api/src/modules/visualization-styles/repository.ts:56 (INSERT)",
+        "apps/api/src/modules/visualization-graphs/repository.ts:335 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/11_platform_config.sql:138",
+        "db/migrations/000276_backfill_graph_version_styles.sql:35"
+      ],
+      "colonna_origine": "assente",
+      "righe": 6,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: CRUD nativo E seed/migrazione di backfill coesistono"
+    },
+    {
+      "tabella": "sys_whistleblowing_reports",
+      "scrittori_api": [
+        "apps/api/src/modules/whistleblowing/repository.ts:48 (INSERT, invio segnalazione)",
+        "apps/api/src/modules/whistleblowing/repository.ts:117 (UPDATE, custode)"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/10_security_privacy.sql:162",
+        "db/scripts/verify-storia36.sql:6930,6948"
+      ],
+      "colonna_origine": "assente",
+      "righe": 2,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API (invio segnalazione whistleblowing) E scrittore di importazione (seed storia36) coesistono"
+    }
+  ],
+  "comandi": [
+    {
+      "tabella": "sys_ui_interface_data_classes",
+      "comando": "select count(*) from sys.sys_ui_interface_data_classes",
+      "numero": 43
+    },
+    {
+      "tabella": "sys_ui_interfaces",
+      "comando": "select count(*) from sys.sys_ui_interfaces",
+      "numero": 85
+    },
+    {
+      "tabella": "sys_user_addresses",
+      "comando": "select count(*) from sys.sys_user_addresses",
+      "numero": 171
+    },
+    {
+      "tabella": "sys_user_assessment_evidence",
+      "comando": "select count(*) from sys.sys_user_assessment_evidence",
+      "numero": 1560
+    },
+    {
+      "tabella": "sys_user_auth_roles",
+      "comando": "select count(*) from sys.sys_user_auth_roles",
+      "numero": 399
+    },
+    {
+      "tabella": "sys_user_bank_details",
+      "comando": "select count(*) from sys.sys_user_bank_details",
+      "numero": 156
+    },
+    {
+      "tabella": "sys_user_career_plans",
+      "comando": "select count(*) from sys.sys_user_career_plans",
+      "numero": 113
+    },
+    {
+      "tabella": "sys_user_certifications",
+      "comando": "select count(*) from sys.sys_user_certifications",
+      "numero": 1062
+    },
+    {
+      "tabella": "sys_user_consents",
+      "comando": "select count(*) from sys.sys_user_consents",
+      "numero": 649
+    },
+    {
+      "tabella": "sys_user_contracts",
+      "comando": "select count(*) from sys.sys_user_contracts",
+      "numero": 160
+    },
+    {
+      "tabella": "sys_user_delegations",
+      "comando": "select count(*) from sys.sys_user_delegations",
+      "numero": 0
+    },
+    {
+      "tabella": "sys_user_demographics",
+      "comando": "select count(*) from sys.sys_user_demographics",
+      "numero": 160
+    },
+    {
+      "tabella": "sys_user_documents",
+      "comando": "select count(*) from sys.sys_user_documents",
+      "numero": 657
+    },
+    {
+      "tabella": "sys_user_education_records",
+      "comando": "select count(*) from sys.sys_user_education_records",
+      "numero": 160
+    },
+    {
+      "tabella": "sys_user_employment",
+      "comando": "select count(*) from sys.sys_user_employment",
+      "numero": 160
+    },
+    {
+      "tabella": "sys_user_family_members",
+      "comando": "select count(*) from sys.sys_user_family_members",
+      "numero": 150
+    },
+    {
+      "tabella": "sys_user_identity_documents",
+      "comando": "select count(*) from sys.sys_user_identity_documents",
+      "numero": 332
+    },
+    {
+      "tabella": "sys_user_kpi_evidence",
+      "comando": "select count(*) from sys.sys_user_kpi_evidence",
+      "numero": 248
+    },
+    {
+      "tabella": "sys_user_learning_assignments",
+      "comando": "select count(*) from sys.sys_user_learning_assignments",
+      "numero": 3061
+    },
+    {
+      "tabella": "sys_user_learning_evidence",
+      "comando": "select count(*) from sys.sys_user_learning_evidence",
+      "numero": 3882
+    },
+    {
+      "tabella": "sys_user_pay_slips",
+      "comando": "select count(*) from sys.sys_user_pay_slips",
+      "numero": 5818
+    },
+    {
+      "tabella": "sys_user_position_assignments",
+      "comando": "select count(*) from sys.sys_user_position_assignments",
+      "numero": 329
+    },
+    {
+      "tabella": "sys_user_preferences",
+      "comando": "select count(*) from sys.sys_user_preferences",
+      "numero": 6
+    },
+    {
+      "tabella": "sys_user_professional_experiences",
+      "comando": "select count(*) from sys.sys_user_professional_experiences",
+      "numero": 255
+    },
+    {
+      "tabella": "sys_user_profile_embeddings",
+      "comando": "select count(*) from sys.sys_user_profile_embeddings",
+      "numero": 156
+    },
+    {
+      "tabella": "sys_user_profiles",
+      "comando": "select count(*) from sys.sys_user_profiles",
+      "numero": 157
+    },
+    {
+      "tabella": "sys_user_skill_evidence",
+      "comando": "select count(*) from sys.sys_user_skill_evidence",
+      "numero": 902
+    },
+    {
+      "tabella": "sys_user_skills",
+      "comando": "select count(*) from sys.sys_user_skills",
+      "numero": 1351
+    },
+    {
+      "tabella": "sys_user_target_positions",
+      "comando": "select count(*) from sys.sys_user_target_positions",
+      "numero": 255
+    },
+    {
+      "tabella": "sys_user_timeline_events",
+      "comando": "select count(*) from sys.sys_user_timeline_events",
+      "numero": 2682
+    },
+    {
+      "tabella": "sys_users",
+      "comando": "select count(*) from sys.sys_users",
+      "numero": 164
+    },
+    {
+      "tabella": "sys_valutazione_condivisione_eccezioni",
+      "comando": "select count(*) from sys.sys_valutazione_condivisione_eccezioni",
+      "numero": 568
+    },
+    {
+      "tabella": "sys_variable_pay_calculations",
+      "comando": "select count(*) from sys.sys_variable_pay_calculations",
+      "numero": 182
+    },
+    {
+      "tabella": "sys_visualization_edges",
+      "comando": "select count(*) from sys.sys_visualization_edges",
+      "numero": 314
+    },
+    {
+      "tabella": "sys_visualization_exports",
+      "comando": "select count(*) from sys.sys_visualization_exports",
+      "numero": 16
+    },
+    {
+      "tabella": "sys_visualization_graphs",
+      "comando": "select count(*) from sys.sys_visualization_graphs",
+      "numero": 2
+    },
+    {
+      "tabella": "sys_visualization_layouts",
+      "comando": "select count(*) from sys.sys_visualization_layouts",
+      "numero": 2
+    },
+    {
+      "tabella": "sys_visualization_node_layouts",
+      "comando": "select count(*) from sys.sys_visualization_node_layouts",
+      "numero": 316
+    },
+    {
+      "tabella": "sys_visualization_nodes",
+      "comando": "select count(*) from sys.sys_visualization_nodes",
+      "numero": 316
+    },
+    {
+      "tabella": "sys_visualization_styles",
+      "comando": "select count(*) from sys.sys_visualization_styles",
+      "numero": 6
+    },
+    {
+      "tabella": "sys_whistleblowing_reports",
+      "comando": "select count(*) from sys.sys_whistleblowing_reports",
+      "numero": 2
+    }
+  ]
+}

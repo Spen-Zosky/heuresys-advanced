@@ -1,0 +1,13 @@
+{
+  "ricontrollati": 40,
+  "data_verifica": "2026-09-15",
+  "discrepanze": [
+    {
+      "ottenuto": 43,
+      "atteso": 50,
+      "comando": "select count(*) from sys.sys_ui_interface_data_classes"
+    }
+  ],
+  "verificatore": "Claude Haiku 4.5",
+  "lotto": 5
+}

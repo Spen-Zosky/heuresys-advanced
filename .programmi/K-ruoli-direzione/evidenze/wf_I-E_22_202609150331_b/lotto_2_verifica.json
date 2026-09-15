@@ -1,0 +1,17 @@
+{
+  "lotto": 2,
+  "timestamp": "2026-09-15T08:00:00Z",
+  "totale_verificati": 40,
+  "discrepanze": [
+    {
+      "comando": "select count(*) from sys.sys_gdpr_requests",
+      "tabella": "sys_gdpr_requests",
+      "atteso": 15,
+      "ottenuto": 8,
+      "differenza": -7
+    }
+  ],
+  "totale_discrepanze": 1,
+  "stato": "COMPLETATO - 1 alterazione rilevata",
+  "verificatore": "Claude Haiku 4.5"
+}

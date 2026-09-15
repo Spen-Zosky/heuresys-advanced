@@ -1,0 +1,18 @@
+{
+  "lotto": 0,
+  "verificatore": "Claude Haiku 4.5",
+  "data_verifica": "2026-09-15",
+  "ricontrollati": 42,
+  "discrepanze": [
+    {
+      "comando": "select count(*) from sys.sys_activity_classification_mappings",
+      "atteso": 3264,
+      "ottenuto": 3257
+    },
+    {
+      "comando": "select count(*) from sys.sys_source_lineage_records l join sys.sys_attendance t on t.attendance_id=l.source_lineage_target_record_id where l.source_lineage_target_table_name='sys.sys_attendance'",
+      "atteso": 0,
+      "ottenuto": 3045
+    }
+  ]
+}

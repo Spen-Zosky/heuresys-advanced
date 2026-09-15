@@ -1,0 +1,821 @@
+{
+  "righe": [
+    {
+      "tabella": "sys_gdpr_requests",
+      "scrittori_api": [
+        "apps/api/src/modules/gdpr/repository.ts:323"
+      ],
+      "scrittori_import": [
+        "db/seeds/storia36/10_security_privacy.sql:133",
+        "db/scripts/verify-storia36.sql:6913"
+      ],
+      "colonna_origine": "assente",
+      "righe": 8,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API (creazione nativa richiesta GDPR) E scrittore di importazione (seed storia36 popola richieste sintetiche, verify-storia36 le aggiorna) coesistono"
+    },
+    {
+      "tabella": "sys_generated_record_origins",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000319_registro_origine_righe_generate.sql:120,127 (backfill INSERT)",
+        "apps/api/src/modules/approvals/effects/tenant-import-run.ts:178,262,271 (UPDATE)",
+        "apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts:154 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "e' il registro tecnico dell'origine delle righe generate da import-run/blueprint-application; non e' dato di business del cliente. Unico tipo di scrittore e' import/effetto (nessuna rotta CRUD utente): non dubbia"
+    },
+    {
+      "tabella": "sys_goal_alignments",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/03_phase5_consolidation.sql:127"
+      ],
+      "colonna_origine": "assente",
+      "righe": 100,
+      "righe_con_provenienza": 100,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuno scrittore in apps/api/src (solo SELECT in goals/repository.ts:276); trovato in docs/archive/etl-brownfield-ritirato (pipeline brownfield ritirata, I12) che ha inserito le 100 righe, tutte con provenienza in sys_source_lineage_records (100/100)"
+    },
+    {
+      "tabella": "sys_goal_check_ins",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/scripts/verify-storia36.sql:4989,5052 (UPDATE date-shift avanzamento)",
+        "db/seeds/storia36/repair/2026-07-28_c2_legacy_oneshot.sql",
+        "db/seeds/storia36/repair/2026-07-28_c2_fixups_oneshot.sql",
+        "db/seeds/storia36/02_performance.sql",
+        "docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/03_phase5_consolidation.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 7567,
+      "righe_con_provenienza": 1000,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura (goals/repository.ts:172,177 solo SELECT); scritta da seed storia36, dal meccanismo di avanzamento (verify-storia36.sql) e dalla pipeline brownfield ritirata; 1000/7567 righe con provenienza in registro"
+    },
+    {
+      "tabella": "sys_goal_comments",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/03_phase5_consolidation.sql:113",
+        "db/migrations/000235_purge_legacy_tenant_contamination.sql:135 (DELETE)",
+        "db/seeds/storia36/repair/2026-07-28_c2_fixups_oneshot.sql:41 (DELETE)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 500,
+      "righe_con_provenienza": 500,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura (goals/repository.ts:240,246 solo SELECT); popolata dalla pipeline brownfield ritirata, poi ripulita da migrazioni di purge e da un oneshot di repair; 500/500 righe con provenienza"
+    },
+    {
+      "tabella": "sys_goal_milestones",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/03_phase5_consolidation.sql:55"
+      ],
+      "colonna_origine": "assente",
+      "righe": 1000,
+      "righe_con_provenienza": 1000,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura (goals/repository.ts:202,207 solo SELECT); popolata dalla pipeline brownfield ritirata (I12), non trovata in db/ ma in docs/archive/etl-brownfield-ritirato; 1000/1000 righe con provenienza"
+    },
+    {
+      "tabella": "sys_goal_templates",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/03_phase5_consolidation.sql:13",
+        "db/scripts/populate-reference-translations-governance.sql:758-875 (UPDATE traduzioni)",
+        "db/migrations/000190_reference_translations_i18n.sql:80-81"
+      ],
+      "colonna_origine": "assente",
+      "righe": 40,
+      "righe_con_provenienza": 40,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura (goals/repository.ts:301,317 e service.ts:193 solo lettura/localizzazione); popolata dalla pipeline brownfield ritirata, tradotta da script di governance; 40/40 righe con provenienza"
+    },
+    {
+      "tabella": "sys_goal_updates",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/03_phase5_consolidation.sql:96",
+        "db/migrations/000235_purge_legacy_tenant_contamination.sql:132 (DELETE)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 1075,
+      "righe_con_provenienza": 1075,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura (goals/repository.ts:140,145 solo SELECT); popolata dalla pipeline brownfield ritirata e ripulita da una migrazione di purge; 1075/1075 righe con provenienza"
+    },
+    {
+      "tabella": "sys_goals",
+      "scrittori_api": [
+        "apps/api/src/modules/goals/repository.ts:79 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000166_me_goals_self.sql",
+        "db/scripts/verify-storia36.sql",
+        "db/seeds/storia36/02_performance.sql",
+        "db/seeds/storia36/repair/2026-07-28_c2_fixups_oneshot.sql",
+        "db/seeds/storia36/repair/2026-07-28_c2_legacy_oneshot.sql",
+        "docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/goals_pilot/03_phase5_consolidation.sql:34"
+      ],
+      "colonna_origine": "assente",
+      "righe": 2189,
+      "righe_con_provenienza": 626,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale (creazione obiettivo via POST) E molteplici scrittori di importazione (storia36, brownfield ritirato, migrazione self-goals) coesistono; 626/2189 righe con provenienza"
+    },
+    {
+      "tabella": "sys_inbox_notifications",
+      "scrittori_api": [
+        "apps/api/src/lib/notifications/emit.ts:72,152 (INSERT)",
+        "apps/api/src/modules/approvals/repository.ts:425 (UPDATE mark-as-read)",
+        "apps/api/src/modules/me/repository.ts:1453 (UPDATE mark-as-read)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 106,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "infrastruttura",
+      "dubbia": false,
+      "motivo": "e' una coda tecnica di notifiche in-app generata come effetto collaterale di azioni native (approvals, eventi), non un dato di business proprio del cliente; unico tipo di scrittore e' API: non dubbia"
+    },
+    {
+      "tabella": "sys_industry_codes",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000305_identita_di_settore_per_costruzione.sql",
+        "db/migrations/000350_un_settore_puo_essere_una_divisione_e_il_confronto_lo_capisce.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 12,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata; tassonomia di settore popolata da migrazioni (I21: tassonomia aperta a ogni industry)"
+    },
+    {
+      "tabella": "sys_industry_forbidden_terms",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000388_il_contenuto_di_un_tenant_deve_essere_del_suo_settore.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 2,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata; lista di governance popolata da migrazione"
+    },
+    {
+      "tabella": "sys_interview_feedback",
+      "scrittori_api": [
+        "apps/api/src/modules/interview-feedback/repository.ts:165 (INSERT)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "unico scrittore e' la rotta API; nessun writer di importazione; 0 righe (funzionalita' non ancora esercitata)"
+    },
+    {
+      "tabella": "sys_interviews",
+      "scrittori_api": [
+        "apps/api/src/modules/interviews/repository.ts:120 (INSERT)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "unico scrittore e' la rotta API; nessun writer di importazione; 0 righe"
+    },
+    {
+      "tabella": "sys_job_families",
+      "scrittori_api": [
+        "apps/api/src/modules/job-families/repository.ts:83 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000360_una_corsa_di_collaudo_non_lascia_residui_in_produzione.sql:267 (INSERT)",
+        "db/scripts/populate-reference-translations-governance.sql:99-177 (UPDATE traduzioni)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 16,
+      "righe_con_provenienza": 16,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale E scrittori di importazione/traduzione coesistono; 16/16 righe con provenienza"
+    },
+    {
+      "tabella": "sys_job_offers",
+      "scrittori_api": [
+        "apps/api/src/modules/job-offers/repository.ts:152 (INSERT)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "unico scrittore e' la rotta API; 0 righe"
+    },
+    {
+      "tabella": "sys_job_postings",
+      "scrittori_api": [
+        "apps/api/src/modules/job-postings/repository.ts:139 (INSERT)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "unico scrittore e' la rotta API; 0 righe"
+    },
+    {
+      "tabella": "sys_job_requisitions",
+      "scrittori_api": [
+        "apps/api/src/modules/job-requisitions/repository.ts:144 (INSERT)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "unico scrittore e' la rotta API; 0 righe"
+    },
+    {
+      "tabella": "sys_job_role_embeddings",
+      "scrittori_api": [
+        "apps/api/src/modules/semantic-matching/repository.ts:103 (INSERT, dietro POST /reindex, permesso matching:admin)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 176,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "unico scrittore e' una rotta API (reindex, permesso tecnico matching:admin, non un gesto di people management in senso stretto); nessun writer di importazione. Segnalato per la revisione di X-0 se rientra nell'invariante come dato di business o come artefatto tecnico derivato"
+    },
+    {
+      "tabella": "sys_job_roles",
+      "scrittori_api": [
+        "apps/api/src/modules/job-roles/repository.ts:173 (INSERT), :220 (UPDATE)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000048_b51_rederive_position_titles_and_job_roles.sql",
+        "db/migrations/000115_job_roles_cleanup_families_esco.sql",
+        "db/migrations/000252_job_roles_for_reconstructed_positions.sql",
+        "db/migrations/000349_un_ruolo_e_la_sua_occupazione_si_legano_in_un_posto_solo.sql",
+        "db/migrations/000360_una_corsa_di_collaudo_non_lascia_residui_in_produzione.sql",
+        "db/migrations/000397_il_profilo_di_un_cliente_dice_quali_ruoli_e_quali_dashboard.sql",
+        "db/migrations/000408_un_ruolo_non_deve_poter_contenere_persone.sql",
+        "db/seeds/rtl-rebuild/11_rederive_b51_titles_roles.py",
+        "db/seeds/rtl-banking-skills/seed_org_completion.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 176,
+      "righe_con_provenienza": 111,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale (CRUD) E numerose migrazioni/seed di ricostruzione storica coesistono; 111/176 righe con provenienza"
+    },
+    {
+      "tabella": "sys_kpi_assessment_methods",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000021_seed_reference_bank.sql:59 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 5,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata; catalogo di riferimento popolato da migrazione seed"
+    },
+    {
+      "tabella": "sys_kpi_assessment_results",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/reconciliation/17_kpi_assessment_results.sql",
+        "db/seeds/storia36/12_registration_dates.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 248,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata; popolata da seed di riconciliazione e storia36"
+    },
+    {
+      "tabella": "sys_kpi_definitions",
+      "scrittori_api": [
+        "apps/api/src/modules/kpi-definitions/repository.ts:126 (INSERT, rotte POST/PATCH/DELETE reali)"
+      ],
+      "scrittori_import": [
+        "apps/api/src/modules/tenant-materialization/repository.ts:316 (INSERT, effetto di materializzazione)",
+        "db/migrations/000156_g01_kpi_names_it.sql",
+        "db/seeds/reconciliation/02_kpi_catalog_unification.sql",
+        "db/seeds/reconciliation/01_kpi_definitions.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 233,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale (CRUD via routes.ts POST/PATCH/DELETE) E scrittore di materializzazione/seed coesistono"
+    },
+    {
+      "tabella": "sys_kpi_measurements",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/scripts/verify-storia36.sql",
+        "db/seeds/storia36/12_registration_dates.sql",
+        "db/seeds/reconciliation/18_kpi_measurements.sql"
+      ],
+      "colonna_origine": "kpi_measurement_source (valorizzata 'LEGACY_IMPORT' per tutte le righe misurate)",
+      "righe": 248,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata (solo lettura in apps/api); la colonna kpi_measurement_source dichiara essa stessa l'origine LEGACY_IMPORT"
+    },
+    {
+      "tabella": "sys_kpi_metric_definitions",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/reconciliation/30_kpi_metric_definitions.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 199,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata; popolata da seed di riconciliazione"
+    },
+    {
+      "tabella": "sys_kpi_targets",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql",
+        "db/seeds/reconciliation/03_kpi_targets.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 301,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata (solo lettura in analytics/repository.ts e me/repository.ts); popolata da seed"
+    },
+    {
+      "tabella": "sys_kpi_weighting_rules",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000021_seed_reference_bank.sql:67 (INSERT)"
+      ],
+      "colonna_origine": "assente",
+      "righe": 3,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata; catalogo di riferimento popolato da migrazione seed"
+    },
+    {
+      "tabella": "sys_leads",
+      "scrittori_api": [
+        "apps/api/src/modules/leads/repository.ts:15 (INSERT), :86 (UPDATE)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000153_lead_source_enum.sql:10 (UPDATE normalizzazione)",
+        "db/seeds/storia36/11_platform_config.sql:172 (INSERT)"
+      ],
+      "colonna_origine": "assente (lead_source esiste ma indica il canale di marketing/acquisizione, non la provenienza del dato)",
+      "righe": 6,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale (cattura lead pubblica, ADR-0026) E scrittore di importazione (seed storia36 lead sintetici) coesistono"
+    },
+    {
+      "tabella": "sys_learning_gaps",
+      "scrittori_api": [
+        "apps/api/src/modules/learning-gaps/repository.ts:243 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000196_restore_skill_natural_key_uq.sql",
+        "db/migrations/000351_una_competenza_e_una_sola_anche_fra_globale_e_tenant.sql",
+        "db/seeds/storia36/12_registration_dates.sql",
+        "db/seeds/reconciliation/20_learning_gaps.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 270,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale E scrittori di importazione/seed coesistono"
+    },
+    {
+      "tabella": "sys_learning_modules",
+      "scrittori_api": [
+        "apps/api/src/modules/learning-modules/repository.ts:127 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000061_learning_catalog_rehome.sql",
+        "db/migrations/000360_una_corsa_di_collaudo_non_lascia_residui_in_produzione.sql",
+        "db/scripts/verify-storia36.sql",
+        "db/seeds/storia36/04_learning.sql",
+        "db/seeds/rtl-banking-skills/seed_banking_learning_catalog.sql",
+        "db/seeds/reconciliation/37_learning_catalog_import.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 92,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale E numerosi scrittori di importazione/seed coesistono; 0/92 righe risultano con provenienza (il registro ha 4959 record per questa tabella ma nessuno combacia con gli id attuali: orfani del registro, oggetto di I-D, non I-E)"
+    },
+    {
+      "tabella": "sys_learning_path_steps",
+      "scrittori_api": [
+        "apps/api/src/modules/learning-path-steps/repository.ts:124 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/seeds/reconciliation/37_learning_catalog_import.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 31,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale E scrittore di importazione (seed reconciliation) coesistono"
+    },
+    {
+      "tabella": "sys_learning_paths",
+      "scrittori_api": [
+        "apps/api/src/modules/learning-paths/repository.ts:115 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/migrations/000235_purge_legacy_tenant_contamination.sql",
+        "db/migrations/000254_name_learning_paths_in_use.sql",
+        "db/migrations/000321_percorsi_formativi_senza_titolare.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 66,
+      "righe_con_provenienza": 64,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale E migrazioni di purge/riparazione coesistono; 64/66 righe con provenienza"
+    },
+    {
+      "tabella": "sys_leave_accrual_rules",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/seeds/storia36/repair/2026-07-27_c1_legacy_oneshot.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 20,
+      "righe_con_provenienza": 20,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata; popolata da un oneshot di repair storia36; 20/20 righe con provenienza"
+    },
+    {
+      "tabella": "sys_leave_balance_transactions",
+      "scrittori_api": [
+        "apps/api/src/modules/time-off/repository.ts:467 (INSERT)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 20,
+      "righe_con_provenienza": 20,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "unico scrittore trovato per nome (rg su apps/api/src, db/migrations, db/scripts, db/seeds, docs/archive/etl-brownfield-ritirato) e' la rotta API; nessun import writer individuato nonostante 20/20 righe abbiano provenienza in sys_source_lineage_records: anomalia segnalata per la revisione di X-1/I-D, ma la regola meccanica del passo 22 non la marca dubbia perche' uno scrittore (API) e' stato trovato e non ne coesiste un secondo di tipo import"
+    },
+    {
+      "tabella": "sys_mentor_match_scores",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000189_dedup_skill_names.sql",
+        "db/migrations/000196_restore_skill_natural_key_uq.sql",
+        "db/migrations/000351_una_competenza_e_una_sola_anche_fra_globale_e_tenant.sql",
+        "db/seeds/reconciliation/45_mentorship.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 30,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata (solo lettura in mentorship/repository.ts e me/repository.ts); popolata da migrazioni e seed di riconciliazione"
+    },
+    {
+      "tabella": "sys_mentorship_programs",
+      "scrittori_api": [
+        "apps/api/src/modules/mentorship/repository.ts:68 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/seeds/reconciliation/45_mentorship.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 5,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale E scrittore di importazione (seed reconciliation) coesistono"
+    },
+    {
+      "tabella": "sys_mentorship_sessions",
+      "scrittori_api": [
+        "apps/api/src/modules/mentorship/repository.ts:216 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/seeds/reconciliation/45_mentorship.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 150,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale E scrittore di importazione (seed reconciliation) coesistono"
+    },
+    {
+      "tabella": "sys_mentorships",
+      "scrittori_api": [
+        "apps/api/src/modules/mentorship/repository.ts:153 (INSERT)"
+      ],
+      "scrittori_import": [
+        "db/seeds/reconciliation/45_mentorship.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 63,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "ibrido",
+      "dubbia": true,
+      "motivo": "regola meccanica: scrittore API reale E scrittore di importazione (seed reconciliation) coesistono"
+    },
+    {
+      "tabella": "sys_model_predictions",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "db/migrations/000308_le_predizioni_ritrovano_il_loro_modello.sql",
+        "db/seeds/reconciliation/47_predictionsml.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 468,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata; predizioni ML popolate da seed di riconciliazione"
+    },
+    {
+      "tabella": "sys_notification_preferences",
+      "scrittori_api": [
+        "apps/api/src/modules/me/repository.ts:1424 (INSERT/UPSERT)"
+      ],
+      "scrittori_import": [],
+      "colonna_origine": "assente",
+      "righe": 0,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "nativo",
+      "dubbia": false,
+      "motivo": "unico scrittore e' la rotta API self-service (/v1/me); 0 righe (nessun utente ha ancora personalizzato le preferenze)"
+    },
+    {
+      "tabella": "sys_objective_reward_rules",
+      "scrittori_api": [],
+      "scrittori_import": [
+        "docs/archive/etl-brownfield-ritirato/seeds-reconciliation/29_objective_reward_rules.sql"
+      ],
+      "colonna_origine": "assente",
+      "righe": 6,
+      "righe_con_provenienza": 0,
+      "stato_proposto": "importato",
+      "dubbia": false,
+      "motivo": "nessuna rotta API di scrittura trovata (solo lettura in compensation/repository.ts:799,807); nessuno scrittore in db/ ma trovato in docs/archive/etl-brownfield-ritirato (pipeline ritirata, I12) che ha inserito le 6 righe"
+    }
+  ],
+  "comandi": [
+    {
+      "tabella": "sys_gdpr_requests",
+      "comando": "select count(*) from sys.sys_gdpr_requests",
+      "numero": 8
+    },
+    {
+      "tabella": "sys_generated_record_origins",
+      "comando": "select count(*) from sys.sys_generated_record_origins",
+      "numero": 0
+    },
+    {
+      "tabella": "sys_goal_alignments",
+      "comando": "select count(*) from sys.sys_goal_alignments",
+      "numero": 100
+    },
+    {
+      "tabella": "sys_goal_check_ins",
+      "comando": "select count(*) from sys.sys_goal_check_ins",
+      "numero": 7567
+    },
+    {
+      "tabella": "sys_goal_comments",
+      "comando": "select count(*) from sys.sys_goal_comments",
+      "numero": 500
+    },
+    {
+      "tabella": "sys_goal_milestones",
+      "comando": "select count(*) from sys.sys_goal_milestones",
+      "numero": 1000
+    },
+    {
+      "tabella": "sys_goal_templates",
+      "comando": "select count(*) from sys.sys_goal_templates",
+      "numero": 40
+    },
+    {
+      "tabella": "sys_goal_updates",
+      "comando": "select count(*) from sys.sys_goal_updates",
+      "numero": 1075
+    },
+    {
+      "tabella": "sys_goals",
+      "comando": "select count(*) from sys.sys_goals",
+      "numero": 2189
+    },
+    {
+      "tabella": "sys_inbox_notifications",
+      "comando": "select count(*) from sys.sys_inbox_notifications",
+      "numero": 106
+    },
+    {
+      "tabella": "sys_industry_codes",
+      "comando": "select count(*) from sys.sys_industry_codes",
+      "numero": 12
+    },
+    {
+      "tabella": "sys_industry_forbidden_terms",
+      "comando": "select count(*) from sys.sys_industry_forbidden_terms",
+      "numero": 2
+    },
+    {
+      "tabella": "sys_interview_feedback",
+      "comando": "select count(*) from sys.sys_interview_feedback",
+      "numero": 0
+    },
+    {
+      "tabella": "sys_interviews",
+      "comando": "select count(*) from sys.sys_interviews",
+      "numero": 0
+    },
+    {
+      "tabella": "sys_job_families",
+      "comando": "select count(*) from sys.sys_job_families",
+      "numero": 16
+    },
+    {
+      "tabella": "sys_job_offers",
+      "comando": "select count(*) from sys.sys_job_offers",
+      "numero": 0
+    },
+    {
+      "tabella": "sys_job_postings",
+      "comando": "select count(*) from sys.sys_job_postings",
+      "numero": 0
+    },
+    {
+      "tabella": "sys_job_requisitions",
+      "comando": "select count(*) from sys.sys_job_requisitions",
+      "numero": 0
+    },
+    {
+      "tabella": "sys_job_role_embeddings",
+      "comando": "select count(*) from sys.sys_job_role_embeddings",
+      "numero": 176
+    },
+    {
+      "tabella": "sys_job_roles",
+      "comando": "select count(*) from sys.sys_job_roles",
+      "numero": 176
+    },
+    {
+      "tabella": "sys_kpi_assessment_methods",
+      "comando": "select count(*) from sys.sys_kpi_assessment_methods",
+      "numero": 5
+    },
+    {
+      "tabella": "sys_kpi_assessment_results",
+      "comando": "select count(*) from sys.sys_kpi_assessment_results",
+      "numero": 248
+    },
+    {
+      "tabella": "sys_kpi_definitions",
+      "comando": "select count(*) from sys.sys_kpi_definitions",
+      "numero": 233
+    },
+    {
+      "tabella": "sys_kpi_measurements",
+      "comando": "select count(*) from sys.sys_kpi_measurements",
+      "numero": 248
+    },
+    {
+      "tabella": "sys_kpi_metric_definitions",
+      "comando": "select count(*) from sys.sys_kpi_metric_definitions",
+      "numero": 199
+    },
+    {
+      "tabella": "sys_kpi_targets",
+      "comando": "select count(*) from sys.sys_kpi_targets",
+      "numero": 301
+    },
+    {
+      "tabella": "sys_kpi_weighting_rules",
+      "comando": "select count(*) from sys.sys_kpi_weighting_rules",
+      "numero": 3
+    },
+    {
+      "tabella": "sys_leads",
+      "comando": "select count(*) from sys.sys_leads",
+      "numero": 6
+    },
+    {
+      "tabella": "sys_learning_gaps",
+      "comando": "select count(*) from sys.sys_learning_gaps",
+      "numero": 270
+    },
+    {
+      "tabella": "sys_learning_modules",
+      "comando": "select count(*) from sys.sys_learning_modules",
+      "numero": 92
+    },
+    {
+      "tabella": "sys_learning_path_steps",
+      "comando": "select count(*) from sys.sys_learning_path_steps",
+      "numero": 31
+    },
+    {
+      "tabella": "sys_learning_paths",
+      "comando": "select count(*) from sys.sys_learning_paths",
+      "numero": 66
+    },
+    {
+      "tabella": "sys_leave_accrual_rules",
+      "comando": "select count(*) from sys.sys_leave_accrual_rules",
+      "numero": 20
+    },
+    {
+      "tabella": "sys_leave_balance_transactions",
+      "comando": "select count(*) from sys.sys_leave_balance_transactions",
+      "numero": 20
+    },
+    {
+      "tabella": "sys_mentor_match_scores",
+      "comando": "select count(*) from sys.sys_mentor_match_scores",
+      "numero": 30
+    },
+    {
+      "tabella": "sys_mentorship_programs",
+      "comando": "select count(*) from sys.sys_mentorship_programs",
+      "numero": 5
+    },
+    {
+      "tabella": "sys_mentorship_sessions",
+      "comando": "select count(*) from sys.sys_mentorship_sessions",
+      "numero": 150
+    },
+    {
+      "tabella": "sys_mentorships",
+      "comando": "select count(*) from sys.sys_mentorships",
+      "numero": 63
+    },
+    {
+      "tabella": "sys_model_predictions",
+      "comando": "select count(*) from sys.sys_model_predictions",
+      "numero": 468
+    },
+    {
+      "tabella": "sys_notification_preferences",
+      "comando": "select count(*) from sys.sys_notification_preferences",
+      "numero": 0
+    },
+    {
+      "tabella": "sys_objective_reward_rules",
+      "comando": "select count(*) from sys.sys_objective_reward_rules",
+      "numero": 6
+    }
+  ]
+}

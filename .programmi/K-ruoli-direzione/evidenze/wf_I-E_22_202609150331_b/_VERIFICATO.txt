@@ -1,0 +1,9 @@
+runId: wf_9072810b-8e5
+verificato: 2026-09-15T16:28+02:00 da S1103 (sezione 3.6, passo W3)
+agenti: 12/12 completati, 0 errori, 0 vuoti, 1.906.779 token fuori contesto, 68 min
+
+ACCETTATI (6/6 lotti): spia (+7 su comandi[0]) trovata da tutti i verificatori
+DISCREPANZE VERE: 1 — lotto 0, sys_attendance con provenienza: lettore 0, verificatore 3045 (giusto). Causa: i lettori hanno fatto il join sul registro senza normalizzare il nome/id -> righe_con_provenienza a 0 dappertutto. RI-MISURATA IN LINEA per tutte le 245 tabelle (tools/esito_ie.py): 10 tabelle differiscono dal lettore, vince la sessione principale. righe (count(*)): 245/245 uguali.
+DIF-4: set(elenco passo 21) - set(esito) = vuoto; in piu' = vuoto.
+FILE: _LANCIO.txt, _risultato.json (fonte), lotto_<i>_lettore.json / _verifica.json (grezzi degli agenti), _flat.json e _build_lotto5.py (scritti da un agente: materiale grezzo, non usati)
+ESITO: esiti/I-E.md (245 righe, 103 dubbie per X-1)

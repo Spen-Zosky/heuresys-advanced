@@ -44,6 +44,12 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 | S-3 | CHIUSA | S1103 | 2026-09-15T20:21+02:00 | 27 |  | 000419 | evidenze/S-3_202609152117.txt; db/migrations/000419 | nasce ROSSA con 11 tabelle (= I-D), INFORMATIVE in db_health con motivo X-6; controprova: riga finta verso sys_job_families 11->12 orfani; applicata in produzione con 000418 |
 | S-4 | CHIUSA | S1103 | 2026-09-15T18:38+02:00 | 28 |  |  | evidenze/S-4_202609151838.txt; apps/api/test/skill-aliases-isolation.integration.test.ts | 6 prove verdi (404 anti-enumerazione su create/patch/delete/list, 403 GLOBAL_SKILL_ALIAS_ADMIN_ONLY, controllo positivo 201) + it.skip USER->403 attivo dopo R-3; rossa con tenant A sabotato; il buco annunciato non c'e' |
 
+## F4.0 — Riparazione del test di deriva (eseguita fuori sequenza su istruzione di Enzo, 2026-09-16: prima di F3, perche' e' la rete di sicurezza su cui poggia F4)
+
+| K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
+|---|---|---|---|---|---|---|---|---|
+| F4.0 | IN CORSO | S1104 | 2026-09-16T00:35+02:00 |  |  |  |  | I-F ha provato che role-lists-drift.unit.test.ts NON scatta su un ruolo aggiunto solo a role-codes.ts; nessuna voce di F4 parte finche' non e' riparato e provato ROSSO-poi-VERDE con un ruolo finto |
+
 ## F3 — ADR e invariante
 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |

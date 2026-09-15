@@ -1,0 +1,37 @@
+# S-3 - vista orfani del registro di provenienza (S1103, 2026-09-15T21:17+02:00)
+migrazione 000419 (funzione + vista, nome normalizzato, orfani per totale e per riga)
+
+## prova in transazione con ROLLBACK su produzione
+=== ROSSA per costruzione: righe della vista sul vivo (attese 11)
+            tabella             | nel_registro | righe_reali | orfani_totale | orfani_per_riga 
+--------------------------------+--------------+-------------+---------------+-----------------
+ sys_skills                     |        19764 |       14031 |          5733 |            5758
+ sys_learning_modules           |         4959 |          92 |          4867 |            4959
+ sys_learning_paths             |         3294 |          66 |          3228 |            3230
+ sys_goal_updates               |         1811 |        1075 |           736 |             736
+ sys_goal_comments              |          856 |         500 |           356 |             356
+ sys_job_roles                  |          231 |         176 |            55 |              91
+ sys_compensation_bands         |           75 |          41 |            34 |              46
+ sys_skill_categories           |           32 |           7 |            25 |               0
+ sys_job_families               |           27 |          16 |            11 |              11
+ sys_okrs                       |           20 |          15 |             5 |               5
+ sys_leave_balance_transactions |           24 |          20 |             4 |               4
+(11 rows)
+=== controprova: una riga di registro finta verso sys_job_families -> 12 righe, job_families 12 orfani
+ righe_vista | job_families_orfani 
+-------------+---------------------
+          11 |                  12
+(1 row)
+=== dopo ROLLBACK (attesi 0 e 0)
+ count 
+-------
+     0
+(1 row)
+ count 
+-------
+     0
+(1 row)
+
+## prova generale gemello: prima ROSSA solo perche' db_health.py del gemello non aveva la dichiarazione INFORMATIVE (11 righe); dopo la copia del file: VERDE 50/50 (prova_418_419.log, prova_418_419b.log)
+## applicata con 000418 (stesso snapshot, stessa corsa); dove_siamo: S-3 000419 completo, registrata, effetto PRESENTE
+## sul vivo dopo: 11 righe = I-D; db_health: [i ] v_registro_provenienza_orfano 11 (INFORMATIVE, motivo: orfani noti, da spiegare in X-6) - ESITO tutto nei limiti

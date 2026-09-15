@@ -1,0 +1,29 @@
+# S-1 - vista permessi solo-plenipotenziari (S1103, 2026-09-15T21:17+02:00)
+migrazione 000418 (allowlist ESPLICITA di 102 codici, misura viva = baseline F0.3)
+
+## prova della logica in transazione con ROLLBACK su produzione (nessuna scrittura resta)
+=== VERDE atteso: righe della vista sul vivo (0)
+ righe_vista 
+-------------
+           0
+(1 row)
+=== controprova: permesso finto prova:k_s1 concesso solo a PLATFORM_ADMIN
+=== ROSSO atteso: 1 riga
+ permission_code |      ruoli       
+-----------------+------------------
+ prova:k_s1      | {PLATFORM_ADMIN}
+(1 row)
+=== dopo ROLLBACK: la vista non esiste (atteso 0)
+ count 
+-------
+     0
+(1 row)
+ prova_residua 
+---------------
+             0
+(1 row)
+
+## prova generale gemello: VERDE (392 applied x2, 50/50 sentinelle a zero, 29s) - prova_418_419b.log
+## snapshot VM: pg_dump_snapshots/pre-K-S-1-S-3_ea7417e_20260915_2112.dump (138 MB)
+## applicata: pnpm db:migrate:vm OK 392 applied; dove_siamo: S-1 000418 completo, registrata 19:13 UTC, effetto PRESENTE
+## sul vivo dopo: vista 0 righe, allowlist 102 vive; db_health: [ok] v_permessi_solo_plenipotenziari 0 - ESITO tutto nei limiti

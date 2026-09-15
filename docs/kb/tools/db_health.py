@@ -78,6 +78,11 @@ INFORMATIVE = {
         "vera — misurato su RTL: 60 persone su 97, peggior caso 2 — quindi righe qui NON sono un "
         "difetto, sono informazione di governo. Porta la colonna `cieca` per distinguere «nessuno "
         "scostamento» da «non c'era niente da controllare»",
+    "v_registro_provenienza_orfano":
+        "mandato K S-3 (mig 000419): tabelle in cui il registro di provenienza ha PIU' righe della "
+        "tabella (orfani noti: 11 tabelle, 15.054 righe il 2026-09-15 — righe importate e poi "
+        "cancellate). Nasce ROSSA per costruzione ed e' qui finche' X-6 non spiega gli orfani; poi "
+        "si toglie da INFORMATIVE e deve stare a zero. Non si riscrive il registro (V5)",
 }
 
 # Soglie: superate = allarme. Derivano dalla misura del 2026-08-03, non da teoria.

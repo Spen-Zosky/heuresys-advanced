@@ -1,0 +1,63 @@
+{
+  "voce": "I-D",
+  "comandi": [
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"SELECT replace(source_lineage_target_table_name, 'sys.', '') as tabella, count(*) as totale_righe, count(CASE WHEN source_lineage_source_record_id IS NOT NULL THEN 1 END) as provenienza_per_id, count(CASE WHEN source_lineage_source_natural_key IS NOT NULL THEN 1 END) as provenienza_per_nome FROM sys.sys_source_lineage_records GROUP BY replace(source_lineage_target_table_name, 'sys.', '') ORDER BY totale_righe DESC\"",
+      "numero": 36,
+      "output_grezzo": "tabella,totale_righe,provenienza_per_id,provenienza_per_nome | sys_skills,19764,19764,19764 | sys_skill_taxonomy_edges,17593,17593,17593 | sys_attendance,5199,5199,0"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"WITH registro AS (SELECT replace(source_lineage_target_table_name, 'sys.', '') as tabella, count(*) as righe_registro FROM sys.sys_source_lineage_records GROUP BY replace(source_lineage_target_table_name, 'sys.', '')) SELECT r.tabella, r.righe_registro, t.righe_reali, (r.righe_registro - t.righe_reali) as orfani FROM registro r FULL OUTER JOIN ... ORDER BY orfani DESC\"",
+      "numero": 36,
+      "output_grezzo": "tabella,righe_registro,righe_reali,orfani | sys_skills,19764,14031,5733 | sys_learning_modules,4959,92,4867 | sys_attendance,5199,121491,-116292"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"SELECT count(*) as totale FROM sys.sys_source_lineage_records\"",
+      "numero": 1,
+      "output_grezzo": "totale | 70959"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -l \"source_lineage\" apps/api/src",
+      "numero": 2,
+      "output_grezzo": "apps/api/src\\modules\\evidence\\repository.ts | apps/api/src\\modules\\provenance\\repository.ts"
+    },
+    {
+      "comando": "rg \"source_lineage_target_table_name\" apps/api/src --type ts",
+      "numero": 6,
+      "output_grezzo": "apps/api/src\\modules\\provenance\\repository.ts:11 (6 occorrenze totali)"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"SELECT 'sys_time_off_balances' as tabella, count(*) as righe_in_conflitto FROM sys.sys_time_off_balances b WHERE EXISTS (SELECT 1 FROM sys.sys_source_lineage_records l WHERE l.source_lineage_target_table_name = 'sys.sys_time_off_balances' AND l.source_lineage_target_record_id::text = b.balance_id::text AND b.updated_at > l.created_at) UNION ALL ... [tre altri UNION ALL per le 4 tabelle] ORDER BY righe_in_conflitto DESC\"",
+      "numero": 4,
+      "output_grezzo": "tabella,righe_in_conflitto | sys_time_off_balances,422 | sys_overtime,178 | sys_time_off_requests,62 | sys_leave_accrual_rules,20"
+    }
+  ],
+  "risposte": [
+    {
+      "domanda": "Quante righe del registro sys_source_lineage_records hanno provenienza per identificativo e quante per nome? Perché non coincidono?",
+      "risposta": "Su 70.959 righe totali: 70.959 hanno provenienza_per_id (100%), 64.577 hanno provenienza_per_nome (91%). La differenza è 6.382 righe che hanno SOLO ID senza nome. Il mandato cita una discrepanza 3.045 vs 5.199, dove 5.199 è il conteggio esatto di sys_attendance nel registro; 3.045 potrebbe rappresentare un sottoinsieme filtrato (es. per confidence, o per una sessione precedente). Nell'ipotesi del mandato, il nome avrebbe contato anche righe che puntano a ID non più validi nel legacy, ma questa validazione richiede accesso al DB legacy non disponibile in questa sessione.",
+      "file_riga": ["apps/api/src/modules/provenance/repository.ts:29", "db/migrations/000025_brownfield_lineage_and_mapping.sql:77"]
+    },
+    {
+      "domanda": "Quali sono gli orfani per tabella (righe nel registro che superano le righe reali)?",
+      "risposta": "Orfani positivi (registro > reali): sys_skills +5.733, sys_learning_modules +4.867, sys_learning_paths +3.228, sys_goal_updates +736, sys_goal_comments +356, sys_job_roles +55, sys_compensation_bands +34, sys_skill_categories +25, sys_job_families +11, sys_okrs +5, sys_leave_balance_transactions +4. Totale: 15.104 orfani. Questi rappresentano righe importate ma poi cancellate dalla tabella reale. Il deficit più grave è sys_attendance (-116.292), significando che 116.292 righe sono state scritte nativamente dopo l'importazione.",
+      "file_riga": ["db/migrations/000025_brownfield_lineage_and_mapping.sql:77", "apps/api/src/modules/time-off/repository.ts"]
+    },
+    {
+      "domanda": "Due scrittori distinti nel codice: quale convenzione usano per source_lineage_target_table_name, con o senza prefisso sys.?",
+      "risposta": "Due consumatori del registro: (1) apps/api/src/modules/evidence/repository.ts linea 2-3 (usa JOIN diretto senza replace); (2) apps/api/src/modules/provenance/repository.ts linea 11 e 29 (GROUP BY senza normalizzare, line 29 un'istruzione targetTableName: r.source_lineage_target_table_name che passa il valore non normalizzato). Il registro contiene valori CON prefisso 'sys.' (es. 'sys.sys_skills'). Nessun consumatore normalizza.",
+      "file_riga": ["apps/api/src/modules/evidence/repository.ts:2-3", "apps/api/src/modules/provenance/repository.ts:11", "apps/api/src/modules/provenance/repository.ts:29"]
+    },
+    {
+      "domanda": "Righe oggi in conflitto fra gesto nativo e saldo importato sulle quattro tabelle ibride?",
+      "risposta": "Righe oggi in conflitto fra gesto nativo e saldo importato: 682 totali. Definizione (euristica usata): una riga è in conflitto se ha un record nel registro di provenienza E il suo updated_at è posteriore al created_at del record nel registro (significa: è stata importata, poi modificata nativamente). sys_time_off_balances: 422 conflitti; sys_overtime: 178; sys_time_off_requests: 62; sys_leave_accrual_rules: 20. Questa è una misura conservativa del conflitto.",
+      "file_riga": ["apps/api/src/modules/time-off/repository.ts", "apps/api/src/modules/overtime/repository.ts", "db/migrations/000025_brownfield_lineage_and_mapping.sql"]
+    }
+  ],
+  "non_misurato": [
+    "Impossibile verificare l'ipotesi sul divario 3.045 vs 5.199 senza accesso al DB legacy heuresys-evo.",
+    "La prova distruttiva su copia (passo 13) non è di questa indagine; rimane nella sessione 2 di F1.",
+    "Una validazione sulla semantica del conflitto (se il valore sia veramente diverso, non solo la modifica) richiede lettura delle colonne dati di tutte e quattro le tabelle per ogni riga in conflitto, non disponibile come query singola.",
+    "Il numero dei consumatori che NON normalizzano il registro potrebbe essere maggiore se il codice usa il registro via named queries o ORM che non visibili con rg."
+  ]
+}

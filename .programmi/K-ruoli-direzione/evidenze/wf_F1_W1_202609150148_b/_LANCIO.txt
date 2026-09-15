@@ -1,0 +1,7 @@
+voce: I-B, I-G, I-D-codice (rilancio parziale, args.solo)
+motivo: I-G e I-D-codice SCARTATE al primo lancio (spia non trovata: I-G verificatore non ha ricontrollato comandi[0] che era un grep -n; I-D-codice verificatore ha invertito atteso/ottenuto); I-B aveva misurato 4 tabelle sbagliate (critico) — prompt corretto con i 13 nomi esatti
+script: workflows/W1_indagini.js (I-B: nomi esatti; I-G: comandi[0] deve essere un conteggio — deroghe registrate)
+args: {"cartella": ".programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b", "ts": "202609150235", "solo": ["I-B","I-G","I-D-codice"]}
+ora: 2026-09-15T02:35+02:00
+sessione: S1103
+primo lancio: wf_27e05a72-709, cartella evidenze/wf_F1_W1_202609150148 (I-A, I-C, I-D, I-F valide)

@@ -1,0 +1,11 @@
+{
+  "voce": "I-F",
+  "ricontrollati": 8,
+  "discrepanze": [
+    {
+      "comando": "rg --no-ignore --hidden -l \"WHISTLEBLOWING_CUSTODIAN\" D:/heuresys-advanced",
+      "atteso": 1,
+      "ottenuto": 8
+    }
+  ]
+}

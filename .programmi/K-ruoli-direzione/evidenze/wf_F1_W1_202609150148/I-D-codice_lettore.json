@@ -1,0 +1,69 @@
+{
+  "indagine": "I-D-codice",
+  "passo_mandato": 17,
+  "oggetto": "scrittori e consumatori di source_lineage in apps/api/src",
+  "comandi": [
+    {
+      "numero": 1,
+      "comando": "rg --no-ignore --hidden -n \"source_lineage\" apps/api/src",
+      "scopo": "censire ogni occorrenza di source_lineage nel codice API"
+    },
+    {
+      "numero": 2,
+      "comando": "rg --no-ignore --hidden -n \"INSERT INTO.*source_lineage|sys_source_lineage_records\" apps/api/src",
+      "scopo": "cercare scrittori (INSERT/UPDATE) della tabella"
+    },
+    {
+      "numero": 3,
+      "comando": "rg --no-ignore --hidden -n \"targetTableName|target_table_name|targetTable\\b\" apps/api/src",
+      "scopo": "elencare i consumatori del campo target_table_name"
+    },
+    {
+      "numero": 4,
+      "comando": "rg --no-ignore --hidden -n \"source_table\" apps/api/src/modules/evidence/repository.ts",
+      "scopo": "verificare la convenzione usata da ev.source_table nel join"
+    },
+    {
+      "numero": 5,
+      "comando": "rg --no-ignore --hidden -in \"sourceLineage|source_lineage\" apps/api/src -l",
+      "scopo": "confermare l'elenco completo dei file coinvolti"
+    },
+    {
+      "numero": 6,
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select source_lineage_target_table_name, count(*) from sys.sys_source_lineage_records group by 1 order by 2 desc limit 20\"",
+      "scopo": "misurare sul DB vivo quali convenzioni di nome tabella sono realmente presenti",
+      "output_grezzo": "source_lineage_target_table_name,count\nsys_skills,19764\nsys_skill_taxonomy_edges,17593\nsys_esco_occupation_mappings,7645\nsys.sys_attendance,5199\nsys_learning_modules,4959\nsys_learning_paths,3294\nsys_activity_classifications,3276\nsys_goal_updates,1811\nsys_goals,1067\nsys_goal_milestones,1000\nsys_goal_check_ins,1000\nsys_goal_comments,856\nsys.sys_time_off_balances,498\nsys_continuous_feedback,474\nsys_performance_review_competency_ratings,465\nsys_feedback_360_responses,390\nsys.sys_overtime,380\nsys_job_roles,231\nsys.sys_users,162\nsys_performance_reviews,161"
+    },
+    {
+      "numero": 7,
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select count(*) filter (where source_lineage_target_table_name like 'sys.%') as con_prefisso, count(*) filter (where source_lineage_target_table_name not like 'sys.%') as senza_prefisso from sys.sys_source_lineage_records\"",
+      "scopo": "quantificare l'estensione della doppia convenzione su tutte le 70.959 righe",
+      "output_grezzo": "con_prefisso,senza_prefisso\n6382,64577"
+    }
+  ],
+  "risposte": [
+    {
+      "domanda": "Chi scrive source_lineage in apps/api/src, e con quale convenzione (con o senza prefisso sys.)?",
+      "risposta": "NESSUNO SCRITTORE trovato dentro apps/api/src. I due soli file che toccano source_lineage in quella cartella (evidence/repository.ts e provenance/repository.ts) fanno solo SELECT/JOIN — nessun INSERT o UPDATE sulla tabella sys.sys_source_lineage_records. La popolazione della tabella avviene fuori da apps/api/src (probabilmente ingestione/seed non indagati in questa voce). Misurato sul database vivo (comando 6/7): la colonna source_lineage_target_table_name contiene di fatto DUE convenzioni miste — 64.577 righe SENZA prefisso 'sys.' (es. 'sys_skills', 'sys_learning_modules') e 6.382 righe CON prefisso 'sys.' (es. 'sys.sys_attendance', 'sys.sys_users', 'sys.sys_overtime', 'sys.sys_time_off_balances') — su un totale di 70.959 righe. Non essendoci uno scrittore in apps/api/src, non si può attribuire a QUESTO codice quale delle due convenzioni 'usa': l'incoerenza è nei dati/nel produttore esterno, non nel layer API.",
+      "file_riga": [
+        "apps/api/src/modules/evidence/repository.ts:188-196",
+        "apps/api/src/modules/provenance/repository.ts:15-105"
+      ]
+    },
+    {
+      "domanda": "Quali consumatori del registro leggono target_table_name SENZA normalizzare?",
+      "risposta": "Entrambi i consumatori leggono il valore grezzo, senza alcuna normalizzazione (nessun lower(), nessun strip del prefisso 'sys.', nessun replace). (1) apps/api/src/modules/evidence/repository.ts riga 189: il JOIN 'ON l.source_lineage_target_table_name = ev.source_table' confronta il valore grezzo della colonna con ev.source_table, che nel CTE (righe 32-143) è sempre scritto SENZA prefisso (es. 'sys_user_assessment_evidence'::text). Conseguenza diretta e verificata sui dati: le 6.382 righe con prefisso 'sys.' (es. verso sys.sys_attendance, sys.sys_users, sys.sys_overtime, sys.sys_time_off_balances) NON POSSONO MAI fare match in questo JOIN, quindi quella provenance risulta invisibilmente persa per l'endpoint evidence — non per un bug esplicito, ma per la mancata normalizzazione. (2) apps/api/src/modules/provenance/repository.ts: la funzione di mappatura (righe 15-43) copia target_table_name in targetTableName senza trasformazioni; il filtro per query.targetTable (riga 53, 'source_lineage_target_table_name = $N') fa un confronto esatto — un chiamante che passa 'sys_attendance' non troverà le righe salvate come 'sys.sys_attendance' e viceversa; anche l'aggregazione per targetTable (righe 95-108, GROUP BY source_lineage_target_table_name) produce due gruppi distinti per la stessa tabella reale quando compaiono entrambe le grafie (misurato: succede per almeno sys_attendance, sys_users, sys_overtime, sys_time_off_balances).",
+      "file_riga": [
+        "apps/api/src/modules/evidence/repository.ts:188-190",
+        "apps/api/src/modules/provenance/repository.ts:36",
+        "apps/api/src/modules/provenance/repository.ts:53",
+        "apps/api/src/modules/provenance/repository.ts:95-108"
+      ]
+    }
+  ],
+  "non_misurato": [
+    "Chi scrive effettivamente sys.sys_source_lineage_records (script di import/seed) — la ricerca era limitata a apps/api/src per mandato di questa voce; uno scrittore potrebbe stare in db/seeds, in uno script di ingestione, o altrove fuori da apps/api/src, non indagato qui",
+    "Se generated-origins/repository.ts (generated_record_origin_target_table) soffre della stessa doppia convenzione: individuato come consumatore analogo (righe 36, 65, 120) ma non misurato sul DB in questa voce perché il mandato riguardava source_lineage, non generated_record_origin",
+    "L'elenco completo delle tabelle affette dalla doppia grafia oltre alle 4 osservate nel campione delle prime 20 righe (query LIMIT 20): non è stata eseguita una query esaustiva su tutti i target_table_name distinti con e senza prefisso"
+  ]
+}

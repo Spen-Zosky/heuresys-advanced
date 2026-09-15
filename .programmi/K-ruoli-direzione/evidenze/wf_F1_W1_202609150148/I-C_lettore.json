@@ -1,0 +1,185 @@
+{
+  "voce": "I-C",
+  "comandi": [
+    {
+      "comando": "rg -c --no-ignore --hidden -e 'isPlatformAdmin\\(|isTenantAdmin\\(|isPlatform\\(|isHrmsManager\\(' apps/api/src/modules/candidates apps/api/src/modules/candidate-applications apps/api/src/modules/interviews apps/api/src/modules/interview-feedback apps/api/src/modules/job-postings apps/api/src/modules/job-offers apps/api/src/modules/job-requisitions",
+      "numero": 22,
+      "output_grezzo": "apps/api/src/modules/interview-feedback\\service.ts:3\napps/api/src/modules/candidates\\service.ts:3\napps/api/src/modules/interviews\\service.ts:3\napps/api/src/modules/candidate-applications\\service.ts:3\napps/api/src/modules/job-postings\\service.ts:4\napps/api/src/modules/job-requisitions\\service.ts:3\napps/api/src/modules/job-offers\\service.ts:3"
+    },
+    {
+      "comando": "rg -c --no-ignore --hidden -e \"'PLATFORM_ADMIN'|'TENANT_ADMIN'|'BLUEPRINT_MANAGER'|'HRMS_MANAGER'|'PROCESS_OWNER'|'READ_ONLY'|'WHISTLEBLOWING_CUSTODIAN'|'BRANCH_MANAGER'|'CEO'|'TEAM_LEADER'|'TEAM_MEMBER'|'ORG_DIRECTOR'\" apps/api/src/modules/candidates apps/api/src/modules/candidate-applications apps/api/src/modules/interviews apps/api/src/modules/interview-feedback apps/api/src/modules/job-postings apps/api/src/modules/job-offers apps/api/src/modules/job-requisitions",
+      "numero": 0,
+      "output_grezzo": "(nessuna riga)"
+    },
+    {
+      "comando": "rg -n --no-ignore --hidden -e 'isPlatformAdmin\\(|isTenantAdmin\\(|isPlatform\\(|isHrmsManager\\(' apps/api/src/modules/candidates/service.ts apps/api/src/modules/candidate-applications/service.ts apps/api/src/modules/interviews/service.ts apps/api/src/modules/interview-feedback/service.ts apps/api/src/modules/job-postings/service.ts apps/api/src/modules/job-offers/service.ts apps/api/src/modules/job-requisitions/service.ts",
+      "numero": 22,
+      "output_grezzo": "apps/api/src/modules/candidate-applications/service.ts:32:  if (isPlatform(actor)) {\napps/api/src/modules/candidate-applications/service.ts:56:  return isPlatform(actor) || a.tenantId === actor.tenantId;\napps/api/src/modules/candidate-applications/service.ts:71:    const args = isPlatform(actor)\n... (elenco completo nelle risposte)"
+    },
+    {
+      "comando": "rg -c --no-ignore --hidden -e 'isPlatformAdmin\\(|isTenantAdmin\\(|isPlatform\\(|isHrmsManager\\(' apps/api/src/modules/gdpr apps/api/src/modules/skills apps/api/src/modules/skill-categories apps/api/src/modules/skill-families apps/api/src/modules/skill-proficiency-levels apps/api/src/modules/skill-taxonomy-edges",
+      "numero": 10,
+      "output_grezzo": "apps/api/src/modules/skills\\service.ts:6\napps/api/src/modules/gdpr\\service.ts:2\napps/api/src/modules/skill-taxonomy-edges\\service.ts:2"
+    },
+    {
+      "comando": "rg -c --no-ignore --hidden -e 'isPlatformAdmin\\(|isTenantAdmin\\(|isPlatform\\(|isHrmsManager\\(' apps/api/src/modules/auth apps/api/src/modules/mfa-policy apps/api/src/modules/delegations",
+      "numero": 1,
+      "output_grezzo": "apps/api/src/modules/delegations\\service.ts:1"
+    },
+    {
+      "comando": "rg -c --no-ignore --hidden -e '\\.roles\\.includes\\(' apps/api/src/modules/candidates apps/api/src/modules/candidate-applications apps/api/src/modules/interviews apps/api/src/modules/interview-feedback apps/api/src/modules/job-postings apps/api/src/modules/job-offers apps/api/src/modules/job-requisitions apps/api/src/modules/gdpr apps/api/src/modules/skills apps/api/src/modules/skill-categories apps/api/src/modules/skill-families apps/api/src/modules/skill-proficiency-levels apps/api/src/modules/skill-taxonomy-edges apps/api/src/modules/auth apps/api/src/modules/mfa-policy apps/api/src/modules/delegations",
+      "numero": 4,
+      "output_grezzo": "apps/api/src/modules/skill-families\\service.ts:1\napps/api/src/modules/skill-categories\\service.ts:1\napps/api/src/modules/mfa-policy\\service.ts:2"
+    },
+    {
+      "comando": "rg -c --no-ignore --hidden -e 'isPlatformAdmin\\(|isTenantAdmin\\(|isPlatform\\(|isHrmsManager\\(' apps/api/src/modules/tenant-blueprints apps/api/src/modules/tenant-import-runs apps/api/src/modules/tenant-materialization apps/api/src/modules/tenants apps/api/src/modules/seed-acquisition-runs apps/api/src/modules/seed-approval-decisions apps/api/src/modules/seed-candidate-records",
+      "numero": 16,
+      "output_grezzo": "apps/api/src/modules/tenants\\service.ts:4\napps/api/src/modules/tenant-import-runs\\service.ts:3\napps/api/src/modules/tenant-blueprints\\service.ts:1\napps/api/src/modules/seed-approval-decisions\\service.ts:3\napps/api/src/modules/seed-candidate-records\\service.ts:2\napps/api/src/modules/seed-acquisition-runs\\service.ts:3\n(tenant-materialization: 0)"
+    },
+    {
+      "comando": "rg -c --no-ignore --hidden -e '\\.roles\\.includes\\(' apps/api/src/modules/tenant-blueprints apps/api/src/modules/tenant-import-runs apps/api/src/modules/tenant-materialization apps/api/src/modules/tenants apps/api/src/modules/seed-acquisition-runs apps/api/src/modules/seed-approval-decisions apps/api/src/modules/seed-candidate-records apps/api/src/modules/observability apps/api/src/modules/provenance apps/api/src/modules/generated-origins apps/api/src/modules/notifications apps/api/src/modules/leads apps/api/src/modules/users apps/api/src/modules/auth",
+      "numero": 4,
+      "output_grezzo": "apps/api/src/modules/tenants\\service.ts:1\napps/api/src/modules/tenant-materialization\\service.ts:1\napps/api/src/modules/notifications\\service.ts:1\napps/api/src/modules/users\\service.ts:2"
+    },
+    {
+      "comando": "rg -c --no-ignore --hidden -e 'isPlatformAdmin\\(|isTenantAdmin\\(|isPlatform\\(|isHrmsManager\\(' apps/api/src/modules/observability apps/api/src/modules/provenance apps/api/src/modules/generated-origins apps/api/src/modules/notifications apps/api/src/modules/leads apps/api/src/modules/users",
+      "numero": 17,
+      "output_grezzo": "apps/api/src/modules/notifications\\service.ts:2\napps/api/src/modules/generated-origins\\service.ts:1\napps/api/src/modules/provenance\\service.ts:1\napps/api/src/modules/users\\service.ts:13\n(observability: 0, leads: 0)"
+    },
+    {
+      "comando": "rg -c --no-ignore --hidden -e \"'PLATFORM_ADMIN'|'TENANT_ADMIN'|'BLUEPRINT_MANAGER'|'HRMS_MANAGER'|'PROCESS_OWNER'|'READ_ONLY'|'WHISTLEBLOWING_CUSTODIAN'|'BRANCH_MANAGER'|'CEO'|'TEAM_LEADER'|'TEAM_MEMBER'|'ORG_DIRECTOR'\" apps/api/src/modules/observability apps/api/src/modules/provenance apps/api/src/modules/generated-origins apps/api/src/modules/notifications apps/api/src/modules/leads apps/api/src/modules/users apps/api/src/modules/auth apps/api/src/modules/tenant-materialization apps/api/src/modules/gdpr apps/api/src/modules/skills apps/api/src/modules/skill-categories apps/api/src/modules/skill-families apps/api/src/modules/skill-proficiency-levels apps/api/src/modules/skill-taxonomy-edges apps/api/src/modules/mfa-policy apps/api/src/modules/delegations apps/api/src/modules/tenants apps/api/src/modules/tenant-import-runs apps/api/src/modules/tenant-blueprints apps/api/src/modules/seed-acquisition-runs apps/api/src/modules/seed-approval-decisions apps/api/src/modules/seed-candidate-records",
+      "numero": 1,
+      "output_grezzo": "apps/api/src/modules/tenant-import-runs/repository.ts:366:      WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE' AND u.user_tenant_id IS NOT NULL"
+    }
+  ],
+  "risposte": [
+    {
+      "domanda": "Elenco dei 30 moduli misurati (recruiting 7 + gdpr + tassonomia 5 + auth + mfa-policy + delegations + avviamento 7 + observability + provenance + generated-origins + notifications + leads + users) e conteggio totale grezzo",
+      "risposta": "candidates(3), candidate-applications(3), interviews(3), interview-feedback(3), job-postings(4), job-offers(3), job-requisitions(3) = 22 nel gruppo recruiting; gdpr(2), skills(6), skill-taxonomy-edges(2) = 10; skill-categories(0 diretti ma 1 roles.includes), skill-families(0 diretti ma 1 roles.includes); auth(0), mfa-policy(0 diretti ma 2 roles.includes), delegations(1); tenants(4), tenant-import-runs(3), tenant-blueprints(1), seed-approval-decisions(3), seed-candidate-records(2), seed-acquisition-runs(3), tenant-materialization(0 diretti ma 1 roles.includes) = 16; observability(0), provenance(1), generated-origins(1), notifications(2 diretti + 1 def roles.includes), leads(0), users(13 diretti + 2 def gia' inclusi). Nessuna stringa di codice ruolo tra virgolette trovata fuori da una query SQL (tenant-import-runs/repository.ts:366, non un gate applicativo).",
+      "file_riga": []
+    },
+    {
+      "domanda": "Gruppo recruiting (7 moduli) — classe e motivo per ogni sito",
+      "risposta": "Tutti e 20+2 i siti sono lo stesso idioma ripetuto: `isPlatform(actor) || x.tenantId === actor.tenantId` (o equivalente per costruire il filtro di query), importato correttamente da lib/actor.js ma la DECISIONE del perimetro (quale tenant vede la riga) e' presa localmente in ciascun modulo invece che nel resolver di lib/scope/. Classe (c) per tutti.",
+      "file_riga": [
+        "candidate-applications/service.ts:32 if (isPlatform(actor)) — (c) apre il perimetro cross-tenant nel branch di query",
+        "candidate-applications/service.ts:56 return isPlatform(actor) || a.tenantId === actor.tenantId — (c) check di visibilita' riga per riga",
+        "candidate-applications/service.ts:71 const args = isPlatform(actor) — (c) costruzione filtro tenant",
+        "candidates/service.ts:30,54,69 — stesso pattern, (c)",
+        "interviews/service.ts:27,48,53 — stesso pattern, (c)",
+        "interview-feedback/service.ts:33,57,62 — stesso pattern, (c)",
+        "job-offers/service.ts:49,70,87 — stesso pattern, (c)",
+        "job-requisitions/service.ts:30,55,60 — stesso pattern, (c)",
+        "job-postings/service.ts:33,38,55 — stesso pattern, (c)",
+        "job-postings/service.ts:58 if (isPlatform(actor) && !tenantId) — (c) valida che un platform senza tenantId esplicito non crei righe orfane, ma resta decisione di perimetro locale"
+      ]
+    },
+    {
+      "domanda": "gdpr/service.ts — classe e motivo",
+      "risposta": "Due siti distinti: uno di perimetro (c), uno di capacita' operativa (b).",
+      "file_riga": [
+        "gdpr/service.ts:43 assertTenantScope: if (isPlatform(actor)) return — (c) tenant guard locale, duplica cio' che il resolver dovrebbe decidere",
+        "gdpr/service.ts:157 runRetention: if (!isPlatform(actor)) throw 'Retention sweep is platform-level' — (b) e' un controllo di CAPACITA' (chi puo' eseguire la bonifica cross-tenant), non di perimetro; andrebbe un permesso dedicato (es. gdpr:retention:run) invece dell'if inline"
+      ]
+    },
+    {
+      "domanda": "skills/service.ts (6 siti) e skill-taxonomy-edges/service.ts (2 siti) — classe e motivo",
+      "risposta": "skills mescola perimetro (chi vede/filtra per tenant) e capacita' (chi puo' toccare una skill GLOBALE, il tema di D1/skill_alias). skill-taxonomy-edges separa le due cose in due funzioni.",
+      "file_riga": [
+        "skills/service.ts:31 if (isPlatform(actor)) return true — (c) visibilita' riga",
+        "skills/service.ts:55 const visibili = isPlatform(actor) — (c) filtro lista",
+        "skills/service.ts:89 const tenantId = isPlatform(actor) ? undefined : actor.tenantId — (c) filtro tenant",
+        "skills/service.ts:109 if (isPlatform(actor)) { ... isGlobal branch ... } — (b) decide chi puo' creare una skill GLOBALE: e' esattamente il tema di D1 (skill_alias:manage), oggi deciso da isPlatform invece che da un permesso dedicato",
+        "skills/service.ts:148 if (target.isGlobal && !isPlatform(actor)) throw 'Only PLATFORM_ADMIN may edit global skills' — (b) stesso motivo di :109",
+        "skills/service.ts:154 if (!target.isGlobal && !isPlatform(actor)) { tenant match } — (c) qui torna perimetro (verifica che la skill di tenant appartenga al tenant dell'attore)",
+        "skill-taxonomy-edges/service.ts:21 ensurePlatformAdmin: if (!isPlatform(actor)) throw 'Only PLATFORM_ADMIN may manage skill taxonomy edges' — (b) capacita' inline, candidato a diventare un permesso",
+        "skill-taxonomy-edges/service.ts:30 tenantFilterFor: isPlatform(actor) ? undefined : actor.tenantId — (c) perimetro"
+      ]
+    },
+    {
+      "domanda": "skill-categories e skill-families (1 sito ciascuno, via .roles.includes) — classe e motivo",
+      "risposta": "Entrambi reimplementano inline il controllo invece di chiamare isPlatform di lib/actor.js: e' un controllo di capacita' (chi puo' toccare la tassonomia), stesso tema di D1/R-3.",
+      "file_riga": [
+        "skill-categories/service.ts:31 if (!actor.roles.includes(\"PLATFORM_ADMIN\")) — (b), e in piu' e' un duplicato locale del predicato invece di importare isPlatform",
+        "skill-families/service.ts:35 if (!actor.roles.includes(\"PLATFORM_ADMIN\")) — (b), stesso duplicato"
+      ]
+    },
+    {
+      "domanda": "delegations/service.ts:81 — classe e motivo",
+      "risposta": "if (body.scope === \"FULL\" && !isPlatform(actor)) throw 'ambito FULL non concedibile' — (b): e' una regola di capacita' su un valore di enum, non un perimetro; potrebbe diventare un permesso dedicato ma oggi e' un if isolato, non ripete un controllo di rotta esistente in modo ovvio (giudizio meno netto degli altri (b)).",
+      "file_riga": ["delegations/service.ts:81"]
+    },
+    {
+      "domanda": "auth e mfa-policy — quanti siti e classe",
+      "risposta": "auth/: 0 occorrenze di isXxx( e 0 di roles.includes( e 0 stringhe di ruolo — nessun sito da classificare in questo modulo. mfa-policy/: 0 isXxx( ma 2 roles.includes( che reimplementano isPlatform localmente invece di importarlo.",
+      "file_riga": [
+        "mfa-policy/service.ts:35 const isPlatform = a.roles.includes(\"PLATFORM_ADMIN\") (in list) — (c) filtro tenant sulle policy visibili, con duplicato locale del predicato",
+        "mfa-policy/service.ts:48 const isPlatform = a.roles.includes(\"PLATFORM_ADMIN\") (in upsert) — (b)/(c) misto: decide sia se puo' scrivere policy fuori dal proprio tenant (capacita') sia il tenant di destinazione (perimetro); prevale la lettura (c) perche' l'atto e' 'quale tenant posso scrivere', non 'posso scrivere policy in generale'"
+      ]
+    },
+    {
+      "domanda": "Gruppo avviamento (7 moduli: tenant-blueprints, tenant-import-runs, tenant-materialization, tenants, seed-acquisition-runs, seed-approval-decisions, seed-candidate-records) — classe e motivo",
+      "risposta": "tenant-materialization: 0 siti isXxx/roles.includes rilevanti per l'autorizzazione (l'unico .roles.includes trovato e' descritto sotto e non decide ne' perimetro ne' capacita' di lettura/scrittura di riga, ma un vincolo di processo interno: da verificare meglio, segnato in non_misurato). tenants/service.ts ha una PROPRIA funzione locale isPlatformAdmin duplicata (non importa isPlatform di lib/actor.js). tenant-blueprints/service.ts:273 NON e' un controllo di accesso: e' una scelta di metadato (origine='PLATFORM'|'CLIENTE' per audit), esplicitamente commentata nel codice come 'non e' il permesso'. Le altre righe sono perimetro (c).",
+      "file_riga": [
+        "tenants/service.ts:30 function isPlatformAdmin(actor){ return actor.roles.includes(\"PLATFORM_ADMIN\") } — duplicato locale del predicato centrale, da unificare; il SITO in se' non decide nulla (e' la definizione)",
+        "tenants/service.ts:70 const ownTenantOnly = isPlatformAdmin(actor) ? undefined : requireOwnTenant(actor) — (c) perimetro lista",
+        "tenants/service.ts:75 if (!isPlatformAdmin(actor) && requireOwnTenant(actor) !== id) — (c) visibilita' di un singolo tenant",
+        "tenants/service.ts:101 stesso pattern di :75 — (c)",
+        "tenant-import-runs/service.ts:37 function visibile: isPlatform(a) || (a.tenantId!==null && r.tenantId===a.tenantId) — (c)",
+        "tenant-import-runs/service.ts:41 tenantDiDestinazione: if (isPlatform(a)) { ... } — (c) sceglie il tenant di destinazione di una scrittura, non una capacita' generale",
+        "tenant-import-runs/service.ts:136 const tenantId = isPlatform(a) ? undefined : a.tenantId — (c)",
+        "tenant-blueprints/service.ts:273 origine: OrigineModifica = isPlatform(a) ? \"PLATFORM\" : \"CLIENTE\" — FUORI CLASSIFICAZIONE: non e' un gate di autorizzazione (il commento nel codice lo dice esplicitamente: 'non e' il permesso, quello lo decide RBAC'), e' provenienza per audit",
+        "seed-approval-decisions/service.ts:17,32 filtro/ match tenant — (c)",
+        "seed-approval-decisions/service.ts:23 if (!isPlatform(actor)) { lookup tenant candidato } — (c)",
+        "seed-candidate-records/service.ts:13 function visible — (c)",
+        "seed-candidate-records/service.ts:19 const tenantId = isPlatform(actor) ? undefined : actor.tenantId — (c)",
+        "seed-acquisition-runs/service.ts:17 function visible — (c)",
+        "seed-acquisition-runs/service.ts:23,33 filtro tenant/branch di trigger — (c)"
+      ]
+    },
+    {
+      "domanda": "observability, provenance, generated-origins, notifications, leads — classe e motivo",
+      "risposta": "observability e leads: ZERO occorrenze misurate di isXxx(, roles.includes( o stringhe di ruolo — nessun sito da classificare (misurato, non presunto). provenance e generated-origins: un solo sito ciascuno, entrambi (c), stesso idioma tenantFilter. notifications: un sito reimplementa il predicato centrale (duplicato locale invece di importare isPlatform da lib/actor.js), un sito e' perimetro (c), un sito e' metadato informativo per audit (come tenant-blueprints:273, non un gate).",
+      "file_riga": [
+        "provenance/service.ts:16 tenantFilter: if (isPlatform(a)) return undefined — (c)",
+        "generated-origins/service.ts:21 tenantFilter: if (isPlatform(a)) return undefined — (c)",
+        "notifications/service.ts:20 const isPlatform = (a) => a.roles.includes(\"PLATFORM_ADMIN\") — duplicato locale del predicato centrale (shadowing del nome canonico), da unificare",
+        "notifications/service.ts:29 const recipients = isPlatform(actor) ? res.rows : res.rows.filter(...) — (c) filtro destinatari cross-tenant",
+        "notifications/service.ts:56 isPlatform: isPlatform(actor) (nel payload di listBroadcasts) — FUORI CLASSIFICAZIONE: e' un campo informativo restituito all'audit, non decide visibilita' ne' capacita' in questo punto (la visibilita' vera e' gia' filtrata a monte da tenantId nella query)"
+      ]
+    },
+    {
+      "domanda": "users/service.ts (13 siti, incluso il caso nominato dal mandato: grantRole) — classe e motivo",
+      "risposta": "Il modulo ha DUE funzioni locali duplicate (isPlatformAdmin, isTenantAdmin, righe 62 e 65) che reimplementano `.roles.includes(...)` invece di importare i predicati centrali. I suoi 11 siti d'uso si dividono fra capacita' (b) e perimetro (c); grantRole (riga 370) e' esattamente il caso citato dal mandato come classe (b) da sostituire con un predicato di mandato.",
+      "file_riga": [
+        "users/service.ts:62 function isPlatformAdmin — duplicato locale, non e' un sito d'uso ma la definizione da unificare",
+        "users/service.ts:65 function isTenantAdmin — duplicato locale, stessa nota",
+        "users/service.ts:102-104 (canActOnTarget, intent=delete): if(isPlatformAdmin) return true; ... return isTenantAdmin(actor) — MISTO: capacita' di cancellare (b) + verifica tenant (c); prevale (b) perche' la domanda e' 'chi puo' cancellare', non 'quale tenant vede'",
+        "users/service.ts:112 ensureFieldsAllowed: if (isPlatformAdmin(actor) || isTenantAdmin(actor)) return — (b) chi puo' modificare campi privilegiati",
+        "users/service.ts:215 const readsPriv = actor.userId===id || actor.roles.some(HR_MANDATED_ROLES) || isPlatform(actor) — NOTA: qui il modulo usa il predicato CENTRALE isPlatform (import da lib/actor.js), diverso dal locale isPlatformAdmin; e' una regola di mascheramento dati sensibili (I18/I20), non perimetro ne' capacita' di rotta in senso stretto — FUORI CLASSIFICAZIONE a/b/c, ma e' un sito che aggiunge un ruolo nuovo (PEOPLE_MANAGER) dovrebbe toccare tramite HR_MANDATED_ROLES, non tramite isPlatform",
+        "users/service.ts:246 create: if (isPlatformAdmin(actor)) { ... branch sul tenant di destinazione } — (c) perimetro di scrittura",
+        "users/service.ts:355 listRoleGrantsForUser: if (!(isPlatformAdmin(actor) || isTenantAdmin(actor) || isSelf)) throw NotFound — (b) capacita' di vedere le concessioni di ruolo altrui",
+        "users/service.ts:370 grantRole: if (!isPlatformAdmin(actor) && !isTenantAdmin(actor)) throw 'Insufficient privileges to grant roles' — (b), IL CASO NOMINATO DAL MANDATO (R-1 passo 34): ripete inline cio' che un permesso di rotta (es. user:grant-role) dovrebbe gia' decidere; da sostituire con un predicato di mandato",
+        "users/service.ts:373 grantRole: if (!isPlatformAdmin(actor) && target.tenantId !== actor.tenantId) throw NotFound — (c) perimetro sul target",
+        "users/service.ts:386 grantRole: if (isPlatformAdmin(actor)) { risoluzione grantTenantId } — (c) perimetro/scelta del tenant di concessione",
+        "users/service.ts:430 revokeRole: if (!isPlatformAdmin(actor) && !isTenantAdmin(actor)) throw 'Insufficient privileges to revoke roles' — (b) stesso schema di :370, stesso motivo",
+        "users/service.ts:442 revokeRole: if (!isPlatformAdmin(actor)) { ... grant.tenantId===null -> solo platform } — (c) perimetro sul tipo di concessione (platform-scoped vs tenant-scoped)"
+      ]
+    },
+    {
+      "domanda": "La stringa 'PLATFORM_ADMIN' trovata in tenant-import-runs/repository.ts:366 — classe?",
+      "risposta": "FUORI CLASSIFICAZIONE: e' un letterale dentro una query SQL (WHERE r.auth_role_code = 'PLATFORM_ADMIN') che seleziona utenti con quel ruolo per un calcolo di reportistica, non un gate applicativo isPlatform/isTenantAdmin sull'attore che chiama l'endpoint. Segnalato per completezza, non e' un sito (a)/(b)/(c).",
+      "file_riga": ["apps/api/src/modules/tenant-import-runs/repository.ts:366"]
+    },
+    {
+      "domanda": "Riepilogo numerico per il verdetto (siti fuori da lib/scope/ da classificare, esclusi i 2 casi 'fuori classificazione' e le 2 definizioni duplicate pure)",
+      "risposta": "Classe (c) — perimetro locale da sostituire col resolver: 22 (recruiting) + 1 (gdpr:43) + 2 (skills:31,55 + skills:154 = 3) + 1 (skill-taxonomy-edges:30) + 4 (tenants:70,75,101 + def) + 3 (tenant-import-runs) + 3 (seed-approval-decisions) + 2 (seed-candidate-records) + 3 (seed-acquisition-runs) + 1 (provenance) + 1 (generated-origins) + 1 (notifications:29) + 1 (mfa-policy:35) + alcuni siti misti in users (373,386,442) + users:246 = totale nell'ordine di 45-50 siti (contare esattamente e' compito di R-1, che deve produrre la lista definitiva file:riga da sostituire uno per uno). Classe (b) — capacita' che ripete/anticipa un permesso di rotta: gdpr:157, skills:109+148, skill-taxonomy-edges:21, skill-categories:31, skill-families:35, mfa-policy:48(parte), delegations:81, users:102/104, users:112, users:355, users:370 (IL CASO NOMINATO), users:430 — 13 siti. Nessun sito trovato di classe (a) fuori da lib/scope/ per costruzione (la classe (a) vive solo dentro lib/scope/resolver.ts e domains.ts).",
+      "file_riga": []
+    }
+  ],
+  "non_misurato": [
+    "Il numero ESATTO e definitivo dei siti (b)+(c) non e' stato ridotto a un intero unico riproducibile con un solo comando rg, perche' la classificazione (b) vs (c) e' un giudizio per sito e non un pattern regex separabile; il conteggio del passo 16 (seconda passata, dopo I-E, per i moduli di PEOPLE_MANAGER e DATA_STEWARD) non e' stato eseguito qui: e' IN LINEA e dipende da I-E, fuori dal perimetro di questo I-C_lettore",
+    "tenant-materialization/service.ts:38 (unico .roles.includes trovato) non e' stato riportato come sito a/b/c perche' il suo ruolo esatto nel flusso di materializzazione non e' stato letto per intero in questa passata (solo la riga isolata); va verificato se decide capacita' o perimetro prima di includerlo nella lista di R-1",
+    "Non e' stato verificato con `git log`/`git blame` (vietato dalle regole di questa indagine) se le funzioni locali duplicate (tenants:30, users:62/65, notifications:20, mfa-policy:35/48, skill-categories:31, skill-families:35) sono nate PRIMA o DOPO isPlatform in lib/actor.js: l'ordine cronologico della duplicazione non e' misurato, solo la sua esistenza attuale"
+  ]
+}

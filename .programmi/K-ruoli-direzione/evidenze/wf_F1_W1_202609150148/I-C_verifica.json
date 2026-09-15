@@ -1,0 +1,16 @@
+{
+  "voce": "I-C",
+  "ricontrollati": 11,
+  "discrepanze": [
+    {
+      "ottenuto": 22,
+      "atteso": 29,
+      "comando": "rg -c --no-ignore --hidden -e 'isPlatformAdmin\\(|isTenantAdmin\\(|isPlatform\\(|isHrmsManager\\(' apps/api/src/modules/candidates apps/api/src/modules/candidate-applications apps/api/src/modules/interviews apps/api/src/modules/interview-feedback apps/api/src/modules/job-postings apps/api/src/modules/job-offers apps/api/src/modules/job-requisitions"
+    },
+    {
+      "ottenuto": 5,
+      "atteso": 4,
+      "comando": "rg -c --no-ignore --hidden -e '\\.roles\\.includes\\(' apps/api/src/modules/tenant-blueprints apps/api/src/modules/tenant-import-runs apps/api/src/modules/tenant-materialization apps/api/src/modules/tenants apps/api/src/modules/seed-acquisition-runs apps/api/src/modules/seed-approval-decisions apps/api/src/modules/seed-candidate-records apps/api/src/modules/observability apps/api/src/modules/provenance apps/api/src/modules/generated-origins apps/api/src/modules/notifications apps/api/src/modules/leads apps/api/src/modules/users apps/api/src/modules/auth"
+    }
+  ]
+}

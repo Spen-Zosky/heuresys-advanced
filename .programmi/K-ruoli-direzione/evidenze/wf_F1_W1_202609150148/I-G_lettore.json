@@ -1,0 +1,80 @@
+{
+  "voce": "I-G",
+  "comandi": [
+    {
+      "comando": "grep -n \"export function isPlatform\" apps/api/src/lib/actor.ts",
+      "numero": 28,
+      "output_grezzo": "28:export function isPlatform(a: ActorContext): boolean {"
+    },
+    {
+      "comando": "grep -n 'PLATFORM_ADMIN\\|kind: \"all\"' apps/api/src/lib/scope/resolver.ts",
+      "numero": 4,
+      "output_grezzo": "87:  if (actor.roles.includes(\"PLATFORM_ADMIN\")) {\n89:    return { kind: \"all\" };\n140:  if (actor.roles.includes(\"PLATFORM_ADMIN\")) {\n142:    return { kind: \"all\" };\n200:  if (actor.roles.includes(\"PLATFORM_ADMIN\")) return audit(true, \"platform\");"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c \"isPlatform\\([^)]*\\)\\s*\\?\\s*undefined|isPlatform\\([^)]*\\)\\)\\s*return\\s*undefined\" apps/api/src/modules -g \"service.ts\" | wc -l",
+      "numero": 48,
+      "output_grezzo": "48   (numero di FILE service.ts distinti che contengono almeno una riga del pattern)"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -n \"isPlatform\\([^)]*\\)\\s*\\?\\s*undefined|isPlatform\\([^)]*\\)\\)\\s*return\\s*undefined\" apps/api/src/modules -g \"service.ts\" | wc -l",
+      "numero": 58,
+      "output_grezzo": "58   (numero di RIGHE/funzioni con il pattern 'isPlatform bypassa il filtro tenant a undefined')"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -c 'isPlatform\\(' apps/api/src/modules -g \"service.ts\" | wc -l",
+      "numero": 82,
+      "output_grezzo": "82   (file service.ts che citano isPlatform( per QUALSIASI motivo, non solo bypass di lista: soprainsieme del precedente, non tutti sono porte di lettura multi-tenant)"
+    },
+    {
+      "comando": "rg --no-ignore --hidden -l 'sys_user_tenants|sys_platform_tenant|user_tenant_assignment|platform_tenant_assignment|tenant_assignment' db/migrations apps packages",
+      "numero": 0,
+      "output_grezzo": "nessun file in db/migrations, apps, packages. Unico riscontro nel repo e' testuale, in docs/kb/COWORK_INBOX.md riga 934, dove si NOMINA il nome futuro 'sys_platform_user_tenant_assignments' come voce da costruire (mandato precedente), non una tabella esistente."
+    }
+  ],
+  "risposte": [
+    {
+      "domanda": "Come un attore di piattaforma ottiene il perimetro 'tutti i tenant' — file:riga della decisione",
+      "risposta": "Il perimetro 'tutti i tenant' nasce da un unico predicato, isPlatform(actor) = actor.roles.includes('PLATFORM_ADMIN') (apps/api/src/lib/actor.ts:28-30), controllato da resolver.ts in tre punti distinti (resolveOrgReadScope, resolveActivityScope, canReadOrgTarget) che ritornano { kind: 'all' } o bypassano l'audit come 'platform'. Nei singoli moduli di business, lo stesso predicato isPlatform() e' RI-USATO localmente (non richiamando il resolver) per decidere se il filtro tenantId passato al repository e' 'undefined' (nessun filtro = tutte le righe di tutti i tenant) invece del tenantId dell'attore. Il punto UNICO strutturale e' actor.ts:28 (la definizione del predicato) + resolver.ts (l'unico posto dove il PERIMETRO ORGANIZZATIVO/ATTIVITA' e' deciso); ma il filtro PER LISTA nei moduli business e' invece deciso in modo RIPETUTO, riga per riga, dentro ogni service.ts (58 punti in 48 file), non da un unico varco: e' esattamente il difetto che R-0 deve correggere, portando anche questi punti a un'unica decisione.",
+      "file_riga": [
+        "apps/api/src/lib/actor.ts:28",
+        "apps/api/src/lib/scope/resolver.ts:87-89",
+        "apps/api/src/lib/scope/resolver.ts:140-142",
+        "apps/api/src/lib/scope/resolver.ts:200"
+      ]
+    },
+    {
+      "domanda": "Tutte le rotte che restituiscono dati di piu' tenant a un attore di piattaforma",
+      "risposta": "Cercando 'allTenants' non c'e' nessun riscontro nel repo (0 righe). Il vero pattern usato ovunque e' 'isPlatform(actor) ? undefined : <tenantId dell'attore>' passato come filtro al repository: quando l'attore e' PLATFORM_ADMIN il filtro tenant diventa undefined e la query di lista non filtra per tenant, restituendo righe di TUTTI i tenant. Ho misurato 58 occorrenze di questo esatto pattern in 48 file service.ts distinti (elenco completo nel comando sopra); ciascuna occorrenza alimenta tipicamente UNA rotta GET di lista del modulo (verificato a campione su okrs: routes.ts:17 GET '/' usa service.ts:35 listTenantFilter). Sei moduli nominati esplicitamente dal mandato (generated-origins, leads, observability, provenance, tenant-blueprints; 'avviamento' non esiste come modulo a se': il piu' vicino e' tenant-import-runs) sono TUTTI dentro l'elenco tranne leads e observability, che restituiscono dati che NON sono record-per-tenant (leads = prospect pubblici non ancora clienti; observability = metriche di sistema, non righe di business) e osservability/leads NON usano isPlatform in questo modo — quindi non contano come 'porte multi-tenant' nel senso della domanda, restano pero' PLATFORM_ADMIN-only per RBAC. Non ho verificato uno per uno, modulo per modulo, quante rotte GET distinte (oltre alla lista principale '/') consumano ciascuna delle 58 funzioni: e' un lavoro modulo-per-modulo che segnalo come non_misurato per il numero ESATTO di rotte (vedi sotto la stima con il floor verificato).",
+      "file_riga": [
+        "apps/api/src/modules/okrs/service.ts:35",
+        "apps/api/src/modules/okrs/routes.ts:17",
+        "apps/api/src/modules/compensation/service.ts:93,175,180",
+        "apps/api/src/modules/semantic-matching/service.ts:93,104,119,167,185",
+        "apps/api/src/modules/talent-review/service.ts:110,116",
+        "apps/api/src/modules/learning-gaps/service.ts:156,163",
+        "apps/api/src/modules/kpi-definitions/service.ts:40,148",
+        "apps/api/src/modules/generated-origins/service.ts:21",
+        "apps/api/src/modules/provenance/service.ts:16",
+        "apps/api/src/modules/tenant-import-runs/service.ts:136"
+      ]
+    },
+    {
+      "domanda": "Esiste gia' una tabella utente <-> piu' tenant?",
+      "risposta": "NO. Cercato con rg su db/migrations, apps, packages i nomi sys_user_tenants, sys_platform_tenant*, user_tenant_assignment, platform_tenant_assignment, tenant_assignment: zero file. L'unico riscontro nel repo e' testuale, in docs/kb/COWORK_INBOX.md riga 934, dove una nota del ciclo precedente NOMINA il nome futuro 'sys_platform_user_tenant_assignments' come tabella da costruire per D9=B, non come tabella esistente. Oggi l'utente di piattaforma non ha un legame esplicito a piu' tenant: PLATFORM_ADMIN e' cross-tenant per definizione di ruolo (isPlatform), senza alcuna riga di assegnazione; R-0 dovra' crearla da zero.",
+      "file_riga": [
+        "docs/kb/COWORK_INBOX.md:934"
+      ]
+    },
+    {
+      "domanda": "Il numero di rotte che R-0 dovra' filtrare",
+      "risposta": "MISURATO come FLOOR verificato: 58 punti di codice (in 48 file service.ts distinti) dove isPlatform() sostituisce il filtro tenant con 'undefined', piu' i 3 punti strutturali del resolver (resolver.ts:87-89, 140-142, 200) che decidono il perimetro 'tutti i tenant' per l'asse organizzativo/attivita'. Il numero ESATTO di ROTTE HTTP (non di funzioni di servizio) e' superiore o uguale a 48 (una rotta di lista per modulo, verificata a campione) ma NON e' stato contato modulo per modulo per le rotte aggiuntive (es. '/summary', '/:id/key-results') che alcuni moduli derivano dalla stessa funzione: quel conteggio esatto e' in non_misurato. In ogni caso 58 (e a fortiori il numero di rotte, che e' >= 48) supera ampiamente la soglia di 40 porte scritta nel mandato al passo 20/37: R-0 vale quindi 2 SESSIONI, non 1, e la sessione 1 deve limitarsi a migrazione + filtro nel resolver + test unitario (come gia' previsto dal passo 38), rimandando alla sessione 2 il porting delle porte verso il resolver.",
+      "file_riga": []
+    }
+  ],
+  "non_misurato": [
+    "Numero ESATTO di rotte HTTP (distinte da funzioni service.ts) che consumano le 58 funzioni di bypass: richiede lettura di tutti i 48 file routes.ts, fatto solo a campione (okrs). Il numero reale di rotte e' quindi dichiarato come >= 48 e <= (624 rotte totali del repository), non un valore puntuale.",
+      "Verifica sul database live (information_schema.tables per sys/staging/reference_sync/audit, e conteggio righe di sys_auth_roles/permessi) NON eseguibile in questa sessione: il tunnel su localhost:5433 e' up in ascolto ma le query vanno in timeout (misurato tre volte con q.py e una volta con psql diretto, tutte 'connection ... timeout expired'). E' il sintomo gia' registrato in memoria come 'tunnel degradato che finge un DB irraggiungibile': non e' stato possibile né confermarlo né escluderlo senza poter ricreare il tunnel, azione fuori dal perimetro di sola lettura di questo agente.",
+    "Se i 3 ruoli di piattaforma nuovi previsti da D9 (IMPLEMENTATION_CONSULTANT, PLATFORM_OPERATOR, SALES) userebbero lo stesso isPlatform() o un predicato nuovo: non esistono ancora nel codice (R-1 li crea), quindi non misurabile ora."
+  ]
+}

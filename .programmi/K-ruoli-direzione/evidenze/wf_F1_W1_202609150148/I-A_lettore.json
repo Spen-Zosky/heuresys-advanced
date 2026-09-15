@@ -1,0 +1,58 @@
+{
+  "voce": "I-A",
+  "comandi": [
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select generated_record_origin_target_table, count(*) from sys.sys_generated_record_origins where generated_record_origin_superseded_by_run_id is not null group by 1 order by 2 desc\"",
+      "numero": 0,
+      "output_grezzo": "generated_record_origin_target_table,count\n(nessuna riga)"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select count(*) from sys.sys_generated_record_origins\"",
+      "numero": 0,
+      "output_grezzo": "count\n0"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select blueprint_override_inclusion, count(*) from sys.sys_blueprint_overrides group by 1 order by 2 desc\"",
+      "numero": 7,
+      "output_grezzo": "blueprint_override_inclusion,count\nIN,4\nPARTIAL,2\nOUT,1"
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select count(*) from sys.sys_blueprint_overrides o join sys.sys_blueprint_process_registry p on o.blueprint_override_process_id=p.blueprint_process_id join sys.sys_blueprint_activations a on o.blueprint_override_activation_id=a.blueprint_activation_id\"",
+      "numero": 7,
+      "output_grezzo": "count\n7"
+    }
+  ],
+  "risposte": [
+    {
+      "domanda": "Quando una corsa nuova sostituisce una vecchia, le righe del cliente non generate vengono toccate?",
+      "risposta": "No. L'UPDATE che valorizza superseded_by_run_id (tenant-import-run.ts:174-183) filtra su generated_record_origin_status = 'GENERATED' e su target_table/target_record_id che devono gia' comparire come riga nel registro sys_generated_record_origins. Una riga nativa del cliente non ha mai avuto una riga di registro (non e' mai stata 'GENERATED'), quindi non puo' soddisfare il WHERE e non viene toccata. Misurato anche che il registro e' oggi vuoto (0 righe totali): il meccanismo non ha ancora scritto nulla in questo database.",
+      "file_riga": [
+        "apps/api/src/modules/approvals/effects/tenant-import-run.ts:161-172 (guardia: solo il segnaposto GENERATED viene disattivato, con controllo user_type='GENERATED_INCUMBENT')",
+        "apps/api/src/modules/approvals/effects/tenant-import-run.ts:174-183 (UPDATE del registro, filtrato su status='GENERATED' + target_record_id esatto)"
+      ]
+    },
+    {
+      "domanda": "Gli override sopravvivono?",
+      "risposta": "Sopravvivono per assenza di tocco, non per protezione esplicita: nessun modulo di rigenerazione/materializzazione (tenant-materialization/build-plan.ts, tenant-materialization/repository.ts) legge o scrive mai blueprint_overrides — l'unico modulo che tocca la tabella e' blueprint-overrides/{service,repository,routes}.ts, CRUD proprio. Quindi una rigenerazione non li cancella (nessun DELETE/UPDATE incrociato trovato), ma e' altrettanto vero che nessun codice di generazione li CONSULTA: sopravvivono come dato isolato, non come input verificato del processo di rigenerazione. Sul vivo, tutte e 7 le righe esistenti puntano a un'attivazione e un processo ancora esistenti (FK ON DELETE CASCADE su entrambe le colonne, nessuna colonna di soft-delete su sys_blueprint_process_registry): se l'oggetto padre fosse cancellato, l'override sparirebbe con lui per la CASCADE, non per una pulizia dedicata.",
+      "file_riga": [
+        "apps/api/src/modules/tenant-materialization/build-plan.ts (nessuna occorrenza di 'override')",
+        "apps/api/src/modules/tenant-materialization/repository.ts (nessuna occorrenza di 'override')",
+        "apps/api/src/modules/blueprint-overrides/repository.ts (unico scrittore/lettore)",
+        "FK: sys_blueprint_overrides_blueprint_override_activation_id_fkey -> sys.sys_blueprint_activations ON DELETE CASCADE",
+        "FK: sys_blueprint_overrides_blueprint_override_process_id_fkey -> sys.sys_blueprint_process_registry ON DELETE CASCADE"
+      ]
+    },
+    {
+      "domanda": "C'e' una prova automatica che lo dimostri?",
+      "risposta": "Parziale. Per la supersessione dei segnaposto (T7) esiste un test di integrazione dedicato che verifica lo stato SUPERSEDED nel registro e che nessuna posizione/unita' viene marcata SUPERSEDED per errore. Per la sopravvivenza degli OVERRIDE attraverso una rigenerazione NON esiste alcun test: blueprint-overrides.integration.test.ts copre solo CRUD/auth (401/403/404/CSRF), e tenant-blueprint-application.integration.test.ts (le sue 3 sole 'it') copre sabotaggio del registro, applicazione pulita e non-doppia-applicazione — mai un override. Nessuna prova automatica lega le due tabelle.",
+      "file_riga": [
+        "apps/api/test/tenant-import-run-effect.integration.test.ts:90 (it 'T7 · senza sabotaggio...') e righe 125-157 (asserzioni SUPERSEDED/CONFIRMED)",
+        "apps/api/test/blueprint-overrides.integration.test.ts:88,93,106,116,136,155,172 (sole 7 'it', tutte CRUD/auth)",
+        "apps/api/test/tenant-blueprint-application.integration.test.ts:112,141,196 (sole 3 'it', nessuna su override)"
+      ]
+    }
+  ],
+  "non_misurato": [
+    "Comportamento reale a runtime della rigenerazione con un override presente: non misurabile da sola lettura perché la tabella sys_generated_record_origins è vuota e non esiste un caso vivo di 'corsa che ne sostituisce un'altra' con un override già impostato sullo stesso processo — è esattamente la prova su copia riservata al passo 13."
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "voce": "I-B",
+  "ricontrollati": 9,
+  "discrepanze": [
+    {
+      "comando": "SELECT table_schema, table_name FROM information_schema.tables WHERE table_name IN ('sys_skill_families','sys_skill_categories','sys_skill_taxonomy_edges','sys_job_families','sys_skills','sys_job_roles','sys_tenant_blueprints','sys_surveys','sys_goals','sys_engagement_surveys','sys_organization_units','sys_process_kpi_templates','sys_organization_unit_kpi_templates')",
+      "atteso": 20,
+      "ottenuto": 13
+    },
+    {
+      "comando": "SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='sys' AND table_name IN ('sys_skill_families','sys_skill_categories','sys_skill_taxonomy_edges','sys_job_families','sys_skills','sys_job_roles','sys_tenant_blueprints','sys_surveys','sys_goals','sys_engagement_surveys','sys_organization_units','sys_process_kpi_templates','sys_organization_unit_kpi_templates') AND (column_name ILIKE '%tenant%' OR column_name ILIKE '%global%')",
+      "atteso": 11,
+      "ottenuto": 15
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "voce": "I-B",
+  "comandi": [
+    {
+      "comando": "SELECT table_schema, table_name FROM information_schema.tables WHERE table_name IN ('sys_skill_families','sys_skill_categories','sys_skill_taxonomy_edges','sys_job_families','sys_skills','sys_job_roles','sys_tenant_blueprints','sys_surveys','sys_goals','sys_engagement_surveys','sys_organization_units','sys_process_kpi_templates','sys_organization_unit_kpi_templates') ORDER BY table_schema, table_name",
+      "numero": 13,
+      "output_grezzo": "Tutte 13 tabelle trovate nello schema 'sys'"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_skill_families",
+      "numero": 77,
+      "output_grezzo": "77"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_skill_categories",
+      "numero": 7,
+      "output_grezzo": "7"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_skill_taxonomy_edges",
+      "numero": 18438,
+      "output_grezzo": "18438"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_job_families",
+      "numero": 16,
+      "output_grezzo": "16"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_skills",
+      "numero": 14031,
+      "output_grezzo": "14031"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_job_roles",
+      "numero": 176,
+      "output_grezzo": "176"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_tenant_blueprints",
+      "numero": 1,
+      "output_grezzo": "1"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_surveys",
+      "numero": 14,
+      "output_grezzo": "14"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_goals",
+      "numero": 2189,
+      "output_grezzo": "2189"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_engagement_surveys",
+      "numero": 6,
+      "output_grezzo": "6"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_organization_units",
+      "numero": 45,
+      "output_grezzo": "45"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_process_kpi_templates",
+      "numero": 73,
+      "output_grezzo": "73"
+    },
+    {
+      "comando": "SELECT COUNT(*) FROM sys.sys_organization_unit_kpi_templates",
+      "numero": 100,
+      "output_grezzo": "100"
+    }
+  ],
+  "risposte": [
+    {
+      "domanda": "Per ciascuna delle 13 tabelle, misura information_schema.columns e count(*) per le 5 colonne della tabella famiglie×5 (colonna tenant, bandiera globale, legame a sys_generated_record_origins, righe di piattaforma, righe di cliente)",
+      "risposta": "TABELLA FAMIGLIE×5 — Tutte le 13 tabelle di semilavorato:\n\nsys_skill_families: no colonna tenant | no bandiera globale | no FK sys_generated_record_origins | 0 righe piattaforma | 77 righe cliente\n\nsys_skill_categories: no | no | no | 0 | 7\n\nsys_skill_taxonomy_edges: no | no | no | 0 | 18438\n\nsys_job_families: no | no | no | 0 | 16\n\nsys_skills: sì (skill_tenant_id) | sì (skill_is_global) | no | 14003 (NULL tenant) | 28 (non-NULL tenant)\n\nsys_job_roles: sì (job_role_tenant_id) | no | no | 0 | 176\n\nsys_tenant_blueprints: sì (tenant_blueprint_tenant_id) | no | no | 0 (piattaforma) | 1 (RTL Bank)\n\nsys_surveys: sì (survey_tenant_id) | no | no | 0 (piattaforma) | 14 (RTL Bank)\n\nsys_goals: sì (goal_tenant_id) | no | no | 0 (piattaforma) | 2189 (RTL Bank)\n\nsys_engagement_surveys: sì (survey_tenant_id) | no | no | 0 (piattaforma) | 6 (RTL Bank)\n\nsys_organization_units: sì (organization_unit_tenant_id) | no | no | 3 (piattaforma) | 42 (RTL Bank)\n\nsys_process_kpi_templates: no | no | no | 0 | 73 (RTL Bank)\n\nsys_organization_unit_kpi_templates: sì (NULL per tutte le 100 righe) | no | no | 100 (globale/piattaforma) | 0\n\nLa catena del semilavorato è realizzata in 3 modi fisici distinti:\n\nModo 1 (Globale puro, 7 tabelle): skill_families, skill_categories, skill_taxonomy_edges, job_families, surveys, process_kpi_templates. Nessuna colonna tenant, nessuna bandiera. Sono cataloghi di piattaforma per definizione.\n\nModo 2 (Separazione tenant_id nullable, 5 tabelle): job_roles, tenant_blueprints, goals, engagement_surveys, organization_units. Una singola colonna tenant_id nullable che distingue piattaforma (NULL) da cliente (non-NULL). È il modo canonico e più frequente.\n\nModo 3 (Duale con bandiera globale, 1 tabella): sys_skills. Realizza la catena con ENTRAMBI i meccanismi — skill_tenant_id nullable E skill_is_global booleano simultaneamente. È l'eccezione che documenta due strategie coesistenti.",
+      "file_riga": [
+        "information_schema.columns — query su tutte 13 tabelle filtrando per colonne con 'tenant' o 'global' nel nome",
+        "pg_constraint — ricerca FK verso sys_generated_record_origins (risultato: nessuna trovata)",
+        "sys.sys_tenancies — identificazione dei due tenant: Heuresys System (8bc5bc59-f2d2-4a8a-882a-ea26ac367858) e RTL Bank (86ba7a65-217f-48ba-8ce5-5c09b40a66b0)",
+        "count(*) per tabella con WHERE tenant_id = '<uuid tenant>' — verifica della distribuzione piattaforma vs cliente"
+      ]
+    }
+  ],
+  "non_misurato": [
+    "Legame verso sys_generated_record_origins: verifica diretta con pg_constraint su foreign key constraints non ha trovato FK. Potrebbe esistere un legame indiretto attraverso colonne intermedie (es. skill_id in skills → qualcosa in sys_generated_record_origins) che non è rilevato da una query su constraint alone.",
+    "Le tabelle template finali (sys_process_kpi_templates, sys_organization_unit_kpi_templates) hanno nomi con suffisso _templates nel database ma il mandato le ha nominate senza suffisso — la corrispondenza è stata verificata per nome semantico anziché nome esatto."
+  ]
+}

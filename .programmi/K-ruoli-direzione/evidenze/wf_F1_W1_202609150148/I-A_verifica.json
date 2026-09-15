@@ -1,0 +1,39 @@
+{
+  "voce": "I-A",
+  "verificatore": "Claude Haiku 4.5 (verifica automatica)",
+  "data_esecuzione": "2026-09-15",
+  "comandi_rieseguiti": [
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select generated_record_origin_target_table, count(*) from sys.sys_generated_record_origins where generated_record_origin_superseded_by_run_id is not null group by 1 order by 2 desc\"",
+      "numero_lettore": 7,
+      "numero_ottenuto": 0,
+      "output_grezzo_ottenuto": "generated_record_origin_target_table,count\n",
+      "discrepanza": true,
+      "nota": "Il lettore riporta numero=7, ma output_grezzo dichiara '(nessuna riga restituita)'. Il numero corretto è 0 (zero righe con superseded_by_run_id non null). Coerente con il fatto che sys_generated_record_origins è completamente vuota (verificato con query 2)."
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select count(*) from sys.sys_generated_record_origins\"",
+      "numero_lettore": 0,
+      "numero_ottenuto": 0,
+      "output_grezzo_ottenuto": "count\n0",
+      "discrepanza": false
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select blueprint_override_inclusion, count(*) from sys.sys_blueprint_overrides group by 1 order by 2 desc\"",
+      "numero_lettore": 7,
+      "numero_ottenuto": 7,
+      "output_grezzo_ottenuto": "blueprint_override_inclusion,count\nIN,4\nPARTIAL,2\nOUT,1",
+      "discrepanza": false,
+      "nota": "Totale righe: 4+2+1 = 7. Match perfetto."
+    },
+    {
+      "comando": "python .programmi/K-ruoli-direzione/tools/q.py \"select count(*) from sys.sys_blueprint_overrides o join sys.sys_blueprint_process_registry p on o.blueprint_override_process_id=p.blueprint_process_id join sys.sys_blueprint_activations a on o.blueprint_override_activation_id=a.blueprint_activation_id\"",
+      "numero_lettore": 7,
+      "numero_ottenuto": 7,
+      "output_grezzo_ottenuto": "count\n7",
+      "discrepanza": false
+    }
+  ],
+  "discrepanze_trovate": 1,
+  "dettaglio": "Una discrepanza trovata nel primo comando: il lettore ha riportato numero=7 quando il numero corretto è 0. L'output grezzo stessa (nessuna riga restituita) è coerente con 0 righe, non 7. Questa è l'alterazione apposta che il mandato prevedeva di individuare."
+}

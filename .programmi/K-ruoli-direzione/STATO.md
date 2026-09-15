@@ -40,7 +40,7 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 |---|---|---|---|---|---|---|---|---|
 | S-1 | PRONTA |  |  |  | 24 |  |  | vista permessi solo-plenipotenziari + allowlist (migrazione) |
 | S-2 | CHIUSA | S1103 | 2026-09-15T16:36+02:00 | 26 |  |  | evidenze/S-2_202609151636.txt; apps/api/test/permessi-senza-rotta.{integration.test.ts,allowlist.json} | 34 permessi senza rotta congelati con motivo (5 user_position_assignment:* in attesa di G-1); test visto ROSSO (riga tolta) e VERDE; d'integrazione perche' il catalogo e' il DB (deviazione dichiarata) |
-| S-5 | PRONTA |  |  |  | 29 |  |  | cricchetto sui controlli per nome (dopo I-C) |
+| S-5 | CHIUSA | S1103 | 2026-09-15T16:40+02:00 | 29 |  |  | evidenze/S-5_202609151640.txt; apps/api/test/unit/controlli-per-nome.ratchet.unit.test.ts + baseline.json | baseline 102 file / 327 controlli; uguaglianza stretta per file (sopra = rosso, sotto = aggiorna baseline); visto ROSSO (controllo aggiunto in leads) e VERDE |
 | S-3 | PRONTA |  |  |  | 27 |  |  | vista registro provenienza orfano (dopo I-D); nasce ROSSA, INFORMATIVE |
 | S-4 | PRONTA |  |  |  | 28 |  |  | prova cross-tenant sui sinonimi; it.skip «attivo dopo R-3» |
 

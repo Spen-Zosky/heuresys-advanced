@@ -1,0 +1,614 @@
+{
+ "lib/actor.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 4
+ },
+ "middleware/tenantContext.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 2
+ },
+ "modules/activity-classification-mappings/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/activity-classifications/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/advisor/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/approvals/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/assessment-results/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/assessments/repository.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/assessments/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/auth/service.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 2,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/blueprint-activations/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/blueprint-families/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/blueprint-overrides/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/blueprint-processes/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/blueprint-variants/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/branches/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/calibration-sessions/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/candidate-applications/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/candidates/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/capability-composition/recompute-cli.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/capability-composition/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/capability-maturity/recompute-cli.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/capability-maturity/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/career-path-steps/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/career-paths/service.ts": {
+  "predicati": 7,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 7
+ },
+ "modules/compensation/service.ts": {
+  "predicati": 6,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 6
+ },
+ "modules/content-blueprint-links/service.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 2
+ },
+ "modules/content/media-service.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 2
+ },
+ "modules/content/service.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 2,
+  "roles_includes": 2,
+  "totale": 4
+ },
+ "modules/delegations/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/engagement-feedback/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/engagement/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 4
+ },
+ "modules/enterprise-size-bands/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/enterprise-typing-profiles/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/gdpr/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/generated-origins/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/goals/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/insights/recompute-cli.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/interview-feedback/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/interviews/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/job-families/service.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 2
+ },
+ "modules/job-offers/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/job-postings/service.ts": {
+  "predicati": 4,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 4
+ },
+ "modules/job-requisitions/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/job-roles/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/kpi-definitions/service.ts": {
+  "predicati": 8,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 8
+ },
+ "modules/learning-gaps/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/learning-modules/service.ts": {
+  "predicati": 7,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 7
+ },
+ "modules/learning-path-steps/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/learning-paths/service.ts": {
+  "predicati": 7,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 7
+ },
+ "modules/mentorship/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/mfa-policy/service.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 2,
+  "roles_includes": 2,
+  "totale": 4
+ },
+ "modules/notifications/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 4
+ },
+ "modules/occupation-classifications/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/okrs/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/operating-models/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/org-health/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/organization-unit-history/service.ts": {
+  "predicati": 4,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 4
+ },
+ "modules/organization-unit-kpi-templates/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/organization-unit-processes/service.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 2
+ },
+ "modules/organization-units/service.ts": {
+  "predicati": 4,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 4
+ },
+ "modules/position-career-paths/service.ts": {
+  "predicati": 4,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 4
+ },
+ "modules/position-succession-relevance/service.ts": {
+  "predicati": 4,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 4
+ },
+ "modules/positions/service.ts": {
+  "predicati": 8,
+  "stringhe_ruolo": 5,
+  "roles_includes": 2,
+  "totale": 15
+ },
+ "modules/predictions/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/process-kpi-templates/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/projects/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/provenance/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/review-cycles/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/seed-acquisition-runs/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/seed-approval-decisions/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/seed-candidate-records/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/semantic-matching/service.ts": {
+  "predicati": 10,
+  "stringhe_ruolo": 4,
+  "roles_includes": 1,
+  "totale": 15
+ },
+ "modules/skill-aliases/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/skill-categories/service.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 2
+ },
+ "modules/skill-families/service.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 2
+ },
+ "modules/skill-taxonomy-edges/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/skills/service.ts": {
+  "predicati": 6,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 6
+ },
+ "modules/succession-pools/service.ts": {
+  "predicati": 4,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 4
+ },
+ "modules/successor-candidates/service.ts": {
+  "predicati": 4,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 4
+ },
+ "modules/successor-readiness/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/surveys/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/talent-review/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/teams/service.ts": {
+  "predicati": 5,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 5
+ },
+ "modules/tenant-blueprints/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/tenant-import-runs/repository.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/tenant-import-runs/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/tenant-materialization/service.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 2
+ },
+ "modules/tenants/provisioning.ts": {
+  "predicati": 0,
+  "stringhe_ruolo": 2,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/tenants/service.ts": {
+  "predicati": 4,
+  "stringhe_ruolo": 1,
+  "roles_includes": 1,
+  "totale": 6
+ },
+ "modules/time-off/service.ts": {
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
+ },
+ "modules/training-initiatives/service.ts": {
+  "predicati": 4,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 4
+ },
+ "modules/user-career-plans/service.ts": {
+  "predicati": 3,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 3
+ },
+ "modules/user-target-positions/service.ts": {
+  "predicati": 4,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 4
+ },
+ "modules/users/service.ts": {
+  "predicati": 17,
+  "stringhe_ruolo": 2,
+  "roles_includes": 2,
+  "totale": 21
+ },
+ "modules/visualization-edges/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/visualization-exports/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/visualization-graphs/service.ts": {
+  "predicati": 4,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 4
+ },
+ "modules/visualization-layouts/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/visualization-node-layouts/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/visualization-nodes/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
+ "modules/visualization-styles/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ }
+}

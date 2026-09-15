@@ -1,0 +1,12 @@
+# S-5 — cricchetto sui controlli per nome (S1103, 2026-09-15T16:40+02:00)
+test: apps/api/test/unit/controlli-per-nome.ratchet.unit.test.ts · baseline: apps/api/test/unit/controlli-per-nome.baseline.json (copia di esiti/controlli-per-nome.baseline.json scritta da I-C, 102 file / 327 controlli)
+stesse tre regex dello script Python controlli_per_nome.py - il test TS conta uguale (verde alla prima corsa senza ritocchi)
+
+## VERDE - cd apps/api && pnpm exec vitest run -c vitest.unit.config.ts controlli-per-nome
+      Tests  2 passed (2)
+
+## ROSSO (controprova - isPlatformAdmin(actor) aggiunto in coda a modules/leads/service.ts) -> exit 1
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++   "modules/leads/service.ts: nuovo file con 1 controlli per nome (baseline: assente)",
+      Tests  1 failed | 1 passed (2)
+ripristinato - git diff --stat su apps/api/src vuoto, 0 residui

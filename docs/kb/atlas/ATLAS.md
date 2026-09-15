@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `6e3b7cc2` (2026-09-14T23:27:52+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `ee57ddb1` (2026-09-15T21:59:29+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 649 |
 | Pagine web | 129 |
 | Schemi shared | 119 |
-| Tabelle DB | 313 (vuote: 19) |
-| Viste / matview | 63 / 0 |
+| Tabelle DB | 314 (vuote: 19) |
+| Viste / matview | 65 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 284 |
 
 ## Moduli API
@@ -67,7 +67,7 @@
 | learning-modules | /v1/learning-modules | 5 | 4 | 1 | 1 |
 | learning-path-steps | /v1/learning-path-steps | 5 | 4 | 3 | 1 |
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
-| me | /v1/me | 65 | 32 | 63 | 40 |
+| me | /v1/me | 65 | 32 | 63 | 41 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 2 | 2 | 2 | 1 |
 | notifications | /v1/notifications | 2 | 1 | 2 | 0 |
@@ -97,7 +97,7 @@
 | seed-approval-decisions | /v1/seed-approval-decisions | 3 | 2 | 2 | 1 |
 | seed-candidate-records | /v1/seed-candidate-records | 5 | 2 | 3 | 1 |
 | semantic-matching | /v1/matching | 10 | 2 | 10 | 5 |
-| skill-aliases | /v1/skill-aliases | 5 | 3 | 2 | 1 |
+| skill-aliases | /v1/skill-aliases | 5 | 3 | 2 | 2 |
 | skill-categories | /v1/skill-categories | 5 | 3 | 3 | 1 |
 | skill-families | /v1/skill-families | 5 | 3 | 2 | 1 |
 | skill-proficiency-levels | /v1/skill-proficiency-levels | 1 | 0 | 1 | 1 |

@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-14T21:31:16Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3525**
+**Generato**: 2026-09-15T20:38:27Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3611**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,17 +13,17 @@
 | api-module | 391 |
 | ci | 19 |
 | claude-config | 37 |
-| config | 238 |
+| config | 306 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 412 |
+| db-migration | 416 |
 | db-other | 8 |
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 716 |
+| doc-canonical | 725 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -31,10 +31,10 @@
 | shared-pkg | 4 |
 | shared-schema | 119 |
 | showcase-source | 13 |
-| test | 426 |
+| test | 431 |
 | ux-design-archive | 80 |
 | web-source | 256 |
-| **TOTALE** | **3525** |
+| **TOTALE** | **3611** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 2882 |
+| live | 2968 |
 
 ## File per categoria
 
@@ -592,11 +592,30 @@
 - `D:\heuresys-advanced\.programmi\219-triage-2026-09-05.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\219-triage-2026-09-06-dopo-correzione.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\219-triage-2026-09-06.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\controlli-per-nome.baseline.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.3_controprova.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.4_ripresa_s2_202609150135.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.5_controprova.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-A_passo13_202609150323.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-B_famiglie_202609150326.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-C_moduli_passo16.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-C_siti_202609150328.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-C_siti_passo16_202609151628.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-D_rimisure_202609150300.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-E_lotti_202609150331.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-E_rimisure_202609151627.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-E_tabelle_202609150331.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-F_rimisure_202609150308.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\S-1_202609152117.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\S-2_202609151636.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\S-3_202609152117.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\S-4_202609151838.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\S-5_202609151640.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\baseline_202609142235.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\baseline_202609142237.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\baseline_202609142318.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\spia_casi_w0.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\spia_prova_202609150150.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\_LANCIO.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\_VERIFICATO.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\_risultato.json` · *live* · git-tracked
@@ -611,12 +630,61 @@
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_source_lineage_records_verifica.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_user_position_assignments_lettore.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F0.2_7_202609142251\sys_user_position_assignments_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-A_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-A_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-B_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-B_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-C_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-C_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-D-codice_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-D_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-F_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-F_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-G_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\_LANCIO.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\_VERIFICATO.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\_risultato.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\critico.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\I-B_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\I-D-codice_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\I-D-codice_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\I-G_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\I-G_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\_LANCIO.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\_VERIFICATO.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\_risultato.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\critico.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331\_ABBANDONATO.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331\_LANCIO.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\_LANCIO.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\_VERIFICATO.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\_build_lotto5.py` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\_flat.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\_risultato.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_0_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_0_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_1_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_1_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_2_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_2_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_3_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_3_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_4_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_4_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_5_lettore.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_5_verifica.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\controlli_per_nome.py` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\controprova_q.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\dove_siamo.py` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\esito_ie.py` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\esito_w0.py` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\esito_w1.py` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\estrai_workflows.py` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\misura_ib.py` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\misura_id.py` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\misura_k.py` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\pg_dump_pre_k.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\prova_spia.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\q.py` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\stato.py` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\workflows\W0_censimento.js` · *live* · git-tracked
@@ -1595,6 +1663,10 @@
 - `D:\heuresys-advanced\db\migrations\000413_la_fonte_di_settore_della_consulenza_entra_nel_registro.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000414_un_ruolo_chiave_dichiara_la_sua_famiglia_e_il_whistleblowing_ha_una_guardia.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000415_prova_di_ripresa_k.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000416_rollback_di_000415.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000417_incompleto_prova.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000418_s1_permessi_solo_plenipotenziari_sentinella.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000419_s3_registro_provenienza_orfano_sentinella.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1922,6 +1994,7 @@
 - `D:\heuresys-advanced\.programmi\256-confine-del-cancello-fra-clienti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\257-chi-ripara-e-chi-popola.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\258-persona-di-collaudo-di-piattaforma.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\259-mandato-k-ruoli-direzione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\54-recruiting-ats.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\69-residui-staging-wave1.md` · *live* · git-tracked
@@ -1936,7 +2009,15 @@
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.4_ripresa.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.5_sola_lettura.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.6_migrazioni.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-A.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-B.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-C.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-D.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-E.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-F.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-G.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-14.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-15.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\REGISTRO_SCOPERTE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RISPOSTE_ENZO.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\README.md` · *live* · git-tracked
@@ -3065,6 +3146,8 @@
 - `D:\heuresys-advanced\apps\api\test\organization-units.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\per-person-mask.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\performance-reviews.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\permessi-senza-rotta.allowlist.json` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\permessi-senza-rotta.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\pg-pool-resilience.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\position-career-paths.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\position-succession-relevance.integration.test.ts` · *live* · git-tracked
@@ -3118,6 +3201,7 @@
 - `D:\heuresys-advanced\apps\api\test\semantic-matching-substrate.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\semantic-matching.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\session-cache.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\skill-aliases-isolation.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\skill-aliases.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\skill-categories.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\skill-families.integration.test.ts` · *live* · git-tracked
@@ -3152,6 +3236,8 @@
 - `D:\heuresys-advanced\apps\api\test\trust-proxy.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\two-axis-f4-crosstree.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\build-source.unit.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\unit\controlli-per-nome.baseline.json` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\unit\controlli-per-nome.ratchet.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\date-only.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\locale.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\login-rate-limit.unit.test.ts` · *live* · git-tracked

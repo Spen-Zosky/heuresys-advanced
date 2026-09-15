@@ -48,8 +48,8 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
-| X-0 | BLOCCATA(fase) | | | | 30 | | | ADR direzione del dato + I23 (D7=A); confutazione W3; poi ATTESA_ENZO |
-| K1-ADR | BLOCCATA(fase) | | | | 31 | | | ADR catena del semilavorato (dopo I-A, I-B); confutazione W3; poi ATTESA_ENZO |
+| X-0 | PRONTA |  |  |  | 30 |  |  | ADR direzione del dato + I23 (D7=A); confutazione W3; poi ATTESA_ENZO |
+| K1-ADR | PRONTA |  |  |  | 31 |  |  | ADR catena del semilavorato (dopo I-A, I-B); confutazione W3; poi ATTESA_ENZO |
 
 ## F4 — I ruoli, uno per migrazione
 

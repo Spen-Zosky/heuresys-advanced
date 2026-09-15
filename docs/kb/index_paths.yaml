@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-14T21:31:16Z da docs/kb/tools/build_index.py
+# generato: 2026-09-15T20:38:27Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-14T21:31:16Z"
-  total_files: 3525
+  generated_at: "2026-09-15T20:38:27Z"
+  total_files: 3611
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,17 +13,17 @@ meta:
     api-module: 391
     ci: 19
     claude-config: 37
-    config: 238
+    config: 306
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 412
+    db-migration: 416
     db-other: 8
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 716
+    doc-canonical: 725
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -31,13 +31,13 @@ meta:
     shared-pkg: 4
     shared-schema: 119
     showcase-source: 13
-    test: 426
+    test: 431
     ux-design-archive: 80
     web-source: 256
   status_counts:
     archive: 593
     external-archive: 50
-    live: 2882
+    live: 2968
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3207,15 +3207,117 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\controlli-per-nome.baseline.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/controlli-per-nome.baseline.json'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.3_controprova.txt'
     root: repo
     rel: '.programmi/K-ruoli-direzione/evidenze/F0.3_controprova.txt'
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.4_ripresa_s2_202609150135.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/F0.4_ripresa_s2_202609150135.txt'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.5_controprova.txt'
     root: repo
     rel: '.programmi/K-ruoli-direzione/evidenze/F0.5_controprova.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-A_passo13_202609150323.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/I-A_passo13_202609150323.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-B_famiglie_202609150326.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/I-B_famiglie_202609150326.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-C_moduli_passo16.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/I-C_moduli_passo16.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-C_siti_202609150328.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/I-C_siti_202609150328.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-C_siti_passo16_202609151628.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/I-C_siti_passo16_202609151628.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-D_rimisure_202609150300.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/I-D_rimisure_202609150300.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-E_lotti_202609150331.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/I-E_lotti_202609150331.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-E_rimisure_202609151627.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/I-E_rimisure_202609151627.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-E_tabelle_202609150331.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/I-E_tabelle_202609150331.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-F_rimisure_202609150308.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/I-F_rimisure_202609150308.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\S-1_202609152117.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/S-1_202609152117.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\S-2_202609151636.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/S-2_202609151636.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\S-3_202609152117.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/S-3_202609152117.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\S-4_202609151838.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/S-4_202609151838.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\S-5_202609151640.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/S-5_202609151640.txt'
     category: config
     status: live
     provenance: git-tracked
@@ -3234,6 +3336,18 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\baseline_202609142318.txt'
     root: repo
     rel: '.programmi/K-ruoli-direzione/evidenze/baseline_202609142318.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\spia_casi_w0.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/spia_casi_w0.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\spia_prova_202609150150.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/spia_prova_202609150150.txt'
     category: config
     status: live
     provenance: git-tracked
@@ -3321,6 +3435,270 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-A_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/I-A_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-A_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/I-A_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-B_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/I-B_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-B_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/I-B_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-C_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/I-C_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-C_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/I-C_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-D-codice_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/I-D-codice_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-D_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/I-D_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-F_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/I-F_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-F_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/I-F_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\I-G_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/I-G_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\_LANCIO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/_LANCIO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\_VERIFICATO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/_VERIFICATO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\_risultato.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/_risultato.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148\critico.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/critico.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\I-B_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/I-B_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\I-D-codice_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/I-D-codice_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\I-D-codice_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/I-D-codice_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\I-G_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/I-G_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\I-G_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/I-G_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\_LANCIO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/_LANCIO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\_VERIFICATO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/_VERIFICATO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\_risultato.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/_risultato.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F1_W1_202609150148_b\critico.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/critico.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331\_ABBANDONATO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331/_ABBANDONATO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331\_LANCIO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331/_LANCIO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\_LANCIO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/_LANCIO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\_VERIFICATO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/_VERIFICATO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\_build_lotto5.py'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/_build_lotto5.py'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\_flat.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/_flat.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\_risultato.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/_risultato.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_0_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_0_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_0_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_0_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_1_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_1_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_1_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_1_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_2_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_2_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_2_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_2_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_3_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_3_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_3_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_3_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_4_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_4_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_4_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_4_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_5_lettore.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_5_lettore.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331_b\lotto_5_verifica.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/lotto_5_verifica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\controlli_per_nome.py'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/tools/controlli_per_nome.py'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\controprova_q.sh'
     root: repo
     rel: '.programmi/K-ruoli-direzione/tools/controprova_q.sh'
@@ -3333,15 +3711,39 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\esito_ie.py'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/tools/esito_ie.py'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\esito_w0.py'
     root: repo
     rel: '.programmi/K-ruoli-direzione/tools/esito_w0.py'
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\esito_w1.py'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/tools/esito_w1.py'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\estrai_workflows.py'
     root: repo
     rel: '.programmi/K-ruoli-direzione/tools/estrai_workflows.py'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\misura_ib.py'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/tools/misura_ib.py'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\misura_id.py'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/tools/misura_id.py'
     category: config
     status: live
     provenance: git-tracked
@@ -3354,6 +3756,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\pg_dump_pre_k.sh'
     root: repo
     rel: '.programmi/K-ruoli-direzione/tools/pg_dump_pre_k.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\prova_spia.mjs'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/tools/prova_spia.mjs'
     category: config
     status: live
     provenance: git-tracked
@@ -9135,6 +9543,30 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000416_rollback_di_000415.sql'
+    root: repo
+    rel: 'db/migrations/000416_rollback_di_000415.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000417_incompleto_prova.sql'
+    root: repo
+    rel: 'db/migrations/000417_incompleto_prova.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000418_s1_permessi_solo_plenipotenziari_sentinella.sql'
+    root: repo
+    rel: 'db/migrations/000418_s1_permessi_solo_plenipotenziari_sentinella.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000419_s3_registro_provenienza_orfano_sentinella.sql'
+    root: repo
+    rel: 'db/migrations/000419_s3_registro_provenienza_orfano_sentinella.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -11007,6 +11439,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\259-mandato-k-ruoli-direzione.md'
+    root: repo
+    rel: '.programmi/259-mandato-k-ruoli-direzione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md'
     root: repo
     rel: '.programmi/50-knowledge-graph-legacy.md'
@@ -11091,9 +11529,57 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-A.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/I-A.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-B.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/I-B.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-C.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/I-C.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-D.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/I-D.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-E.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/I-E.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-F.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/I-F.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-G.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/I-G.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-14.md'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-14.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-15.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-15.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -17721,6 +18207,18 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\permessi-senza-rotta.allowlist.json'
+    root: repo
+    rel: 'apps/api/test/permessi-senza-rotta.allowlist.json'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\permessi-senza-rotta.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/permessi-senza-rotta.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\pg-pool-resilience.test.ts'
     root: repo
     rel: 'apps/api/test/pg-pool-resilience.test.ts'
@@ -18039,6 +18537,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\skill-aliases-isolation.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/skill-aliases-isolation.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\skill-aliases.integration.test.ts'
     root: repo
     rel: 'apps/api/test/skill-aliases.integration.test.ts'
@@ -18240,6 +18744,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\unit\build-source.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/build-source.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\controlli-per-nome.baseline.json'
+    root: repo
+    rel: 'apps/api/test/unit/controlli-per-nome.baseline.json'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\controlli-per-nome.ratchet.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/controlli-per-nome.ratchet.unit.test.ts'
     category: test
     status: live
     provenance: git-tracked

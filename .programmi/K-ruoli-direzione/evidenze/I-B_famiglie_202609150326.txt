@@ -1,0 +1,26 @@
+# I-B — famiglie×5 ri-misurata in linea (S1103, 2026-09-15T03:26) — READ ONLY
+tenant: Heuresys System=8bc5bc59-f2d2-4a8a-882a-ea26ac367858 · RTL Bank=86ba7a65-217f-48ba-8ce5-5c09b40a66b0
+colonna tenant = information_schema.columns con column_name like '%tenant_id'; bandiera globale = column_name like '%is_global%'
+legame al registro del generato = per NOME: select count(*) from sys.sys_generated_record_origins where generated_record_origin_target_table = '<t>' (non esiste FK: registro oggi a 0 righe)
+
+| tabella | colonna tenant | bandiera globale | righe | tenant NULL | Heuresys System | RTL Bank | nel registro generato | MODO |
+|---|---|---|---|---|---|---|---|---|
+| sys_skill_families | - | - | 77 | - | - | - | 0 | A |
+| sys_skill_categories | - | - | 7 | - | - | - | 0 | A |
+| sys_skill_taxonomy_edges | - | - | 18438 | - | - | - | 0 | A |
+| sys_job_families | - | - | 16 | - | - | - | 0 | A |
+| sys_skills | skill_tenant_id | skill_is_global | 14031 | 14003 | 0 | 28 | 0 | B |
+| sys_job_roles | job_role_tenant_id | - | 176 | 176 | 0 | 0 | 0 | C |
+| sys_tenant_blueprints | tenant_blueprint_tenant_id | - | 1 | 0 | 0 | 1 | 0 | D |
+| sys_survey_templates | survey_template_tenant_id | - | 2 | 0 | 1 | 1 | 0 | D |
+| sys_goal_templates | template_tenant_id | - | 40 | 0 | 0 | 40 | 0 | D |
+| sys_engagement_survey_templates | template_tenant_id | - | 5 | 0 | 0 | 5 | 0 | D |
+| sys_organization_unit_templates | - | - | 225 | - | - | - | 0 | A |
+| sys_process_kpi_templates | - | - | 73 | - | - | - | 0 | A |
+| sys_organization_unit_kpi_templates | organization_unit_kpi_template_tenant_id | - | 100 | 100 | 0 | 0 | 0 | C |
+
+## I modi fisici trovati
+- **A: catalogo di piattaforma senza tenant (nessuna copia di cliente possibile)** → 6: sys_skill_families, sys_skill_categories, sys_skill_taxonomy_edges, sys_job_families, sys_organization_unit_templates, sys_process_kpi_templates
+- **B: tenant_id nullable + bandiera is_global nella stessa tabella** → 1: sys_skills
+- **C: tenant_id presente ma tutto NULL (di fatto catalogo di piattaforma)** → 2: sys_job_roles, sys_organization_unit_kpi_templates
+- **D: tenant_id obbligatorio, ogni riga e' di un tenant (Heuresys System = piattaforma)** → 4: sys_tenant_blueprints, sys_survey_templates, sys_goal_templates, sys_engagement_survey_templates

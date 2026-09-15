@@ -38,10 +38,10 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
-| S-1 | PRONTA |  |  |  | 24 |  |  | vista permessi solo-plenipotenziari + allowlist (migrazione) |
+| S-1 | IN CORSO | S1103 | 2026-09-15T20:21+02:00 | 24 | 25 | 000418 | misura di partenza: 102 solo-plenipotenziari (C:/Users/ENZOSP~1/AppData/Local/Temp/claude/D--heuresys-advanced/c8873c8b-4af9-44bc-b501-bd6b34d6eec4/scratchpad/solo_pleni.txt -> nella migrazione) | vista permessi solo-plenipotenziari + allowlist (migrazione) |
 | S-2 | CHIUSA | S1103 | 2026-09-15T16:36+02:00 | 26 |  |  | evidenze/S-2_202609151636.txt; apps/api/test/permessi-senza-rotta.{integration.test.ts,allowlist.json} | 34 permessi senza rotta congelati con motivo (5 user_position_assignment:* in attesa di G-1); test visto ROSSO (riga tolta) e VERDE; d'integrazione perche' il catalogo e' il DB (deviazione dichiarata) |
 | S-5 | CHIUSA | S1103 | 2026-09-15T16:40+02:00 | 29 |  |  | evidenze/S-5_202609151640.txt; apps/api/test/unit/controlli-per-nome.ratchet.unit.test.ts + baseline.json | baseline 102 file / 327 controlli; uguaglianza stretta per file (sopra = rosso, sotto = aggiorna baseline); visto ROSSO (controllo aggiunto in leads) e VERDE |
-| S-3 | PRONTA |  |  |  | 27 |  |  | vista registro provenienza orfano (dopo I-D); nasce ROSSA, INFORMATIVE |
+| S-3 | IN CORSO | S1103 | 2026-09-15T20:21+02:00 |  | 27 | 000419 |  | vista registro provenienza orfano (dopo I-D); nasce ROSSA, INFORMATIVE |
 | S-4 | CHIUSA | S1103 | 2026-09-15T18:38+02:00 | 28 |  |  | evidenze/S-4_202609151838.txt; apps/api/test/skill-aliases-isolation.integration.test.ts | 6 prove verdi (404 anti-enumerazione su create/patch/delete/list, 403 GLOBAL_SKILL_ALIAS_ADMIN_ONLY, controllo positivo 201) + it.skip USER->403 attivo dopo R-3; rossa con tenant A sabotato; il buco annunciato non c'e' |
 
 ## F3 — ADR e invariante

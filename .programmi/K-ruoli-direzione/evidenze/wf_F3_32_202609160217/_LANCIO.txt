@@ -1,0 +1,5 @@
+voce: F3 (X-0, K1-ADR)
+passo: 32
+script: workflows/W3_confutazione_adr.js
+args.adr: [docs/architecture/adr/0041_direzione_del_dato.md, docs/architecture/adr/0042_catena_del_semilavorato.md]
+ora: 2026-09-16T02:41+02:00

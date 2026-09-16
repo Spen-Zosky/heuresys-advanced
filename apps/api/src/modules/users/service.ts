@@ -33,6 +33,7 @@ import * as repo from "./repository.js";
 // possono divergere.
 import * as meRepo from "../me/repository.js";
 import { resolveOrgReadScope, canReadOrgTarget, HR_MANDATED_ROLES } from "../../lib/scope/resolver.js";
+import { puoConcedereRuoli } from "../../lib/scope/mandati.js";
 import { masksUnderPlatformMandate, masksTopOfChainPay, maskFields } from "../../lib/scope/mask.js";
 import { chainLevelOf } from "../../lib/scope/org.js";
 import { isPlatform } from "../../lib/actor.js";
@@ -367,7 +368,10 @@ export const usersService = {
   ): Promise<RoleGrant> {
     const target = await repo.findUserById(pool, id);
     if (!target) throw new NotFoundError("User");
-    if (!isPlatformAdmin(actor) && !isTenantAdmin(actor)) {
+    // Mandato K, R-1 passo 34 — la capacità "posso concedere ruoli" viene dal mandato
+    // (lib/scope/mandati.ts), non da un elenco di nomi ripetuto qui: era la stessa domanda
+    // che la rotta chiede già con `role:assign`, riscritta in casa (I-C, sito nominato).
+    if (!puoConcedereRuoli(actor)) {
       throw new ForbiddenError("Insufficient privileges to grant roles");
     }
     if (!isPlatformAdmin(actor) && target.tenantId !== actor.tenantId) {
@@ -427,7 +431,8 @@ export const usersService = {
     userId: string,
     grantId: string,
   ): Promise<void> {
-    if (!isPlatformAdmin(actor) && !isTenantAdmin(actor)) {
+    // Mandato K, R-1 passo 34 — stesso predicato di grantRole, stesso motivo.
+    if (!puoConcedereRuoli(actor)) {
       throw new ForbiddenError("Insufficient privileges to revoke roles");
     }
     const grant = await repo.findGrantById(pool, grantId);

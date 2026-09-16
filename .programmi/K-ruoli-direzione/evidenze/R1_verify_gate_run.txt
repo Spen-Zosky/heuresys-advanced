@@ -1,0 +1,11 @@
+46 file modificati → suite: programmi, typecheck, test-api, lint, migrate-idempotent, handoff-lint, db-health, no-contamination
+  riuso (verdi, contenuto invariato): lint
+  [L1] programmi            exit=0 (1.8s)
+  [L0] typecheck            exit=0 (32.8s)
+  [L2] test-api             exit=1 (166.9s) · 1 falliti
+  [L2] migrate-idempotent   exit=0 (74.6s)
+  [L1] handoff-lint         exit=1 (1.1s) · 1 falliti
+  [L2] db-health            exit=1 (3.5s)
+  [L2] no-contamination     exit=0 (13.6s)
+
+verdetto: RED → .zp\verify-verdict.json

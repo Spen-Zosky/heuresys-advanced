@@ -1,0 +1,6 @@
+50 file modificati → suite: programmi, typecheck, test-api, lint, handoff-lint
+  riuso (verdi, contenuto invariato): typecheck, lint, handoff-lint
+  [L1] programmi            exit=0 (0.4s)
+  [L2] test-api             exit=0 (1333.3s)
+
+verdetto: GREEN → .zp\verify-verdict.json

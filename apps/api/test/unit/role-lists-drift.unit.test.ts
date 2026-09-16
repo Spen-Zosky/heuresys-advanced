@@ -29,6 +29,13 @@ const AMMESSE: ReadonlyArray<{ file: string; perche: string }> = [
     perche: "è la fonte: qui i mandati si DICHIARANO, altrove si compongono",
   },
   {
+    file: join("lib", "scope", "mandati.ts"),
+    perche:
+      "mandato K, R-1 — stessa ragione di resolver.ts: è la fonte dei mandati che " +
+      "resolver.ts non copre (concessione ruoli, GDPR, piattaforma assegnata). Un " +
+      "ruolo nuovo entra qui e SOLO qui, non nei siti che chiamano i predicati",
+  },
+  {
     file: join("modules", "dashboard", "service.ts"),
     perche:
       "decide un'ETICHETTA («il ruolo più alto» da mostrare), non un accesso: " +

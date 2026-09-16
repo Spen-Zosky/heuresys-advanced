@@ -564,10 +564,10 @@
   "totale": 4
  },
  "modules/users/service.ts": {
-  "predicati": 17,
+  "predicati": 13,
   "stringhe_ruolo": 2,
   "roles_includes": 2,
-  "totale": 21
+  "totale": 17
  },
  "modules/visualization-edges/service.ts": {
   "predicati": 2,

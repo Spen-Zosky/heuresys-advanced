@@ -55,12 +55,19 @@ export async function loadRolePermissionCacheWithRetry(
 }
 
 export async function loadRolePermissionCache(): Promise<CacheLoadResult> {
+  // Mandato K, R-1 (passo 0): `rp.revoked_at`/`r.retired_at` esistono dalla migrazione 000420.
+  // `requirePermission` non legge mai il database — legge SOLO questa cache, popolata una
+  // volta all'avvio (I-F l'ha misurato: un ritiro senza questo filtro E senza riavvio del
+  // server non avrebbe alcun effetto). Ritirare non è cancellare (ADR-0035): la riga resta,
+  // il filtro la esclude dalla cache dal momento del ritiro in poi.
   const result = await pool.query<{ role_code: string; permission_code: string }>(`
     SELECT r.auth_role_code        AS role_code,
            p.auth_permission_code  AS permission_code
       FROM sys.sys_auth_role_permissions rp
       JOIN sys.sys_auth_roles       r ON r.auth_role_id       = rp.auth_role_id
       JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+     WHERE rp.revoked_at IS NULL
+       AND r.retired_at IS NULL
   `);
 
   const map = new Map<RoleCode, Set<string>>();

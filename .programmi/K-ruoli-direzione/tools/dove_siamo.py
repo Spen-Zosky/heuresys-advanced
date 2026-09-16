@@ -46,7 +46,8 @@ EFFETTI: dict[str, str] = {
     # F2
     "S-1": "select 1 from pg_views where schemaname='sys' and viewname='v_permessi_solo_plenipotenziari'",
     "S-3": "select 1 from pg_views where schemaname='sys' and viewname='v_registro_provenienza_orfano'",
-    # F4 (le query su retired_at si dichiarano quando R-1 passo 0 crea la colonna)
+    # F4
+    "R-1": "select 1 from information_schema.columns where table_schema='sys' and table_name='sys_auth_role_permissions' and column_name='revoked_at'",
     "R-0": "select 1 from information_schema.tables where table_schema='sys' and table_name='sys_platform_user_tenant_assignments'",
     # F5
     "X-1": "select 1 from information_schema.tables where table_schema='sys' and table_name='sys_classificazione_direzione_dato'",

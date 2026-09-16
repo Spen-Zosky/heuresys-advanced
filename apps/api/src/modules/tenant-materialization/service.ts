@@ -23,6 +23,7 @@
  */
 import { pool, withTransaction } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
+import { haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 
 export type { ActorContext };
 import { ForbiddenError, NotFoundError } from "../../errors/index.js";
@@ -35,7 +36,7 @@ import { BlueprintBuildSource, listBuildSources } from "./blueprint-build-source
 import * as repo from "./repository.js";
 
 function ensurePlatformAdmin(actor: ActorContext): void {
-  if (!actor.roles.includes("PLATFORM_ADMIN")) {
+  if (!haMandatoPiattaforma(actor)) {
     throw new ForbiddenError("Only PLATFORM_ADMIN may materialize tenants", "TENANT_MATERIALIZE_ADMIN_ONLY");
   }
 }

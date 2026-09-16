@@ -11,6 +11,7 @@
  */
 import { z } from "zod";
 import { paginationFields } from "./_pagination.js";
+import { queryBoolean } from "./_query-boolean.js";
 
 export const PlatformTenantAssignmentSchema = z.object({
   assignmentId: z.uuid(),
@@ -35,7 +36,7 @@ export const PlatformTenantAssignmentListQuerySchema = z.object({
   userId: z.uuid().optional(),
   tenantId: z.uuid().optional(),
   /** Default true: le revocate sono storia, non l'elenco operativo. */
-  activeOnly: z.coerce.boolean().optional().default(true),
+  activeOnly: queryBoolean().optional().default(true),
   ...paginationFields(200, 50),
 });
 export type PlatformTenantAssignmentListQuery = z.infer<

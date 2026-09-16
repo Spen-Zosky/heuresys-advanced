@@ -5,6 +5,7 @@
 
 import { pool } from "../../db/client.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 import { localize, localizeOne } from "../../lib/i18n/localize.js";
 import type { Locale } from "../../middleware/locale.js";
 
@@ -106,7 +107,7 @@ export const skillsService = {
     // their own tenant (isGlobal forced to false).
     let tenantId: string | null;
     let isGlobal = body.isGlobal;
-    if (isPlatform(actor)) {
+    if (haMandatoPiattaforma(actor)) {
       if (isGlobal) {
         tenantId = null;
       } else {
@@ -145,7 +146,7 @@ export const skillsService = {
     if (!target) throw new NotFoundError("Skill");
     // Only PLATFORM_ADMIN may edit global skills; others may edit only
     // skills in their own tenant.
-    if (target.isGlobal && !isPlatform(actor)) {
+    if (target.isGlobal && !haMandatoPiattaforma(actor)) {
       throw new ForbiddenError(
         "Only PLATFORM_ADMIN may edit global skills",
         "GLOBAL_SKILL_EDIT_FORBIDDEN",

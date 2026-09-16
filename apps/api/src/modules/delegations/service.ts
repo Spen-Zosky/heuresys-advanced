@@ -8,7 +8,8 @@
  * amministrativi può compiere (I18).
  */
 import { pool } from "../../db/client.js";
-import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import type { ActorContext } from "../../lib/actor.js";
+import { haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 // `UnprocessableEntityError` e non `ValidationError`: quest'ultima ha il codice FISSO a
 // `VALIDATION_ERROR` (il suo primo argomento sono i *details*, non il messaggio), e un
 // vincolo di dominio violato merita un codice che dica QUALE — chi chiama deve poter
@@ -78,7 +79,7 @@ export const delegationsService = {
     }
     // `FULL` non si concede dall'API: esiste nel vincolo perché un giorno servirà, ma
     // aprirlo è una decisione, non un valore da accettare perché il tipo lo ammette.
-    if (body.scope === "FULL" && !isPlatform(actor)) {
+    if (body.scope === "FULL" && !haMandatoPiattaforma(actor)) {
       throw new ForbiddenError(
         "L'ambito FULL non è concedibile da questa superficie",
         "PERMISSION_DENIED",

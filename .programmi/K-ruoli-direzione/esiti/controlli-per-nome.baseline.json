@@ -53,12 +53,6 @@
   "roles_includes": 0,
   "totale": 2
  },
- "modules/auth/service.ts": {
-  "predicati": 0,
-  "stringhe_ruolo": 2,
-  "roles_includes": 0,
-  "totale": 2
- },
  "modules/blueprint-activations/service.ts": {
   "predicati": 3,
   "stringhe_ruolo": 0,
@@ -155,12 +149,6 @@
   "roles_includes": 0,
   "totale": 6
  },
- "modules/content-blueprint-links/service.ts": {
-  "predicati": 0,
-  "stringhe_ruolo": 1,
-  "roles_includes": 1,
-  "totale": 2
- },
  "modules/content/media-service.ts": {
   "predicati": 0,
   "stringhe_ruolo": 1,
@@ -172,12 +160,6 @@
   "stringhe_ruolo": 2,
   "roles_includes": 2,
   "totale": 4
- },
- "modules/delegations/service.ts": {
-  "predicati": 1,
-  "stringhe_ruolo": 0,
-  "roles_includes": 0,
-  "totale": 1
  },
  "modules/engagement-feedback/service.ts": {
   "predicati": 3,
@@ -202,12 +184,6 @@
   "stringhe_ruolo": 0,
   "roles_includes": 0,
   "totale": 3
- },
- "modules/gdpr/service.ts": {
-  "predicati": 2,
-  "stringhe_ruolo": 0,
-  "roles_includes": 0,
-  "totale": 2
  },
  "modules/generated-origins/service.ts": {
   "predicati": 1,
@@ -389,12 +365,6 @@
   "roles_includes": 0,
   "totale": 2
  },
- "modules/process-kpi-templates/service.ts": {
-  "predicati": 2,
-  "stringhe_ruolo": 0,
-  "roles_includes": 0,
-  "totale": 2
- },
  "modules/projects/service.ts": {
   "predicati": 3,
   "stringhe_ruolo": 0,
@@ -443,18 +413,6 @@
   "roles_includes": 0,
   "totale": 2
  },
- "modules/skill-categories/service.ts": {
-  "predicati": 0,
-  "stringhe_ruolo": 1,
-  "roles_includes": 1,
-  "totale": 2
- },
- "modules/skill-families/service.ts": {
-  "predicati": 0,
-  "stringhe_ruolo": 1,
-  "roles_includes": 1,
-  "totale": 2
- },
  "modules/skill-taxonomy-edges/service.ts": {
   "predicati": 2,
   "stringhe_ruolo": 0,
@@ -462,10 +420,10 @@
   "totale": 2
  },
  "modules/skills/service.ts": {
-  "predicati": 6,
+  "predicati": 4,
   "stringhe_ruolo": 0,
   "roles_includes": 0,
-  "totale": 6
+  "totale": 4
  },
  "modules/succession-pools/service.ts": {
   "predicati": 4,
@@ -520,12 +478,6 @@
   "stringhe_ruolo": 0,
   "roles_includes": 0,
   "totale": 3
- },
- "modules/tenant-materialization/service.ts": {
-  "predicati": 0,
-  "stringhe_ruolo": 1,
-  "roles_includes": 1,
-  "totale": 2
  },
  "modules/tenants/provisioning.ts": {
   "predicati": 0,

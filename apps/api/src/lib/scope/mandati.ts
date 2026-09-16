@@ -64,6 +64,14 @@ export function haMandatoPiattaforma(actor: ActorContext): boolean {
   return actor.roles.some((r) => PLATFORM_MANDATE_ROLES.has(r));
 }
 
+/**
+ * Variante di `haMandatoPiattaforma` per i siti che non hanno un `ActorContext` completo
+ * (es. `auth/service.ts`, che riceve solo `actorRoles: RoleCode[]` nel suo input tipizzato).
+ */
+export function ruoliHannoMandatoPiattaforma(roles: readonly RoleCode[]): boolean {
+  return roles.some((r) => PLATFORM_MANDATE_ROLES.has(r));
+}
+
 export function haMandatoPiattaformaAssegnato(actor: ActorContext): boolean {
   return actor.roles.some((r) => PLATFORM_ASSIGNED_MANDATE_ROLES.has(r));
 }

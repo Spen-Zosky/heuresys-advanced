@@ -8,6 +8,7 @@
 
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
+import { haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 import { localize, localizeOne } from "../../lib/i18n/localize.js";
 import type { Locale } from "../../middleware/locale.js";
 
@@ -28,7 +29,7 @@ import type {
 import * as repo from "./repository.js";
 
 function ensurePlatformAdmin(actor: ActorContext): void {
-  if (!actor.roles.includes("PLATFORM_ADMIN")) {
+  if (!haMandatoPiattaforma(actor)) {
     throw new ForbiddenError(
       "Only PLATFORM_ADMIN may manage skill categories",
       "SKILL_CATEGORY_ADMIN_ONLY",

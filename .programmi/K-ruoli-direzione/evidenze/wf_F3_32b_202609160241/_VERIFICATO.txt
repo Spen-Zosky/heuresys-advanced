@@ -1,0 +1,50 @@
+Verifica in linea di W3, secondo giro (sezione 3.6 del mandato) — run wf_50eced5c-8f8, 2026-09-16.
+
+6 agenti, 0 errori, 9 confutazioni riportate (4 su ADR-0041, 5 su ADR-0042), 0 mancanti.
+
+Tutte e 9 ri-eseguite in linea col comando indicato. Tutte CONFERMATE (nessuna respinta).
+Dettaglio:
+
+ADR-0041 (X-0):
+1. [database] "dodici tabelle amministrative... undici su dodici" non verificabile —
+   CONFERMATA (COWORK_INBOX.md:878 ne nomina solo 7; nessun altro file ne enumera 12).
+   Corretto: dichiarate le 7 tabelle nominabili e il fatto misurato su quelle (6/7 senza
+   colonna di origine), tolto il totale non ricostruibile.
+2. [codice] "nessuna rotta di scrittura esiste" non copre la cancellazione GDPR —
+   CONFERMATA. POST /v1/gdpr/users/:userId/erasure esegue DELETE su
+   sys_user_identity_documents (gdpr_map_erasure_strategy='DELETE'). Corretto: aggiunta
+   come eccezione nominata, non una violazione dell'invariante (cancellare non rende
+   nativo) ma un limite alla frase "zero rotte di scrittura".
+3. [codice] HRMS_MANAGER ha gdpr:erase, quindi la porta è raggiungibile da un ruolo HR
+   oggi — CONFERMATA (stessa correzione di #2).
+4. [decisioni] SECURITY_ADMIN (R-7) elencato per errore fra i ruoli di
+   haMandatoPiattaformaAssegnato, che contiene invece BLUEPRINT_MANAGER/R-5 (omesso) —
+   CONFERMATA (mandato riga 453: solo PLATFORM_OPERATOR, SALES, IMPLEMENTATION_CONSULTANT,
+   BLUEPRINT_MANAGER). Corretto: R-7 tolto dall'elenco, R-5 aggiunto, R-0 chiarito come
+   tabella dell'asse e non un ruolo.
+
+ADR-0042 (K1-ADR):
+5. [database] Conseguenze punto 2 al presente indicativo per permessi che non esistono
+   ancora nel DB (TAXONOMY_STEWARD 0 righe, tenant_blueprint:write solo PLATFORM_ADMIN) —
+   CONFERMATA. Corretto: riscritto al futuro, dichiarato esplicitamente "lavoro futuro di
+   Fase 4, non un assetto in vigore".
+6. [codice] Il test T7 citato come prova di supersessione appartiene a un dominio diverso
+   (tenant-import-run, zero occorrenze di "blueprint") — CONFERMATA. Corretto: tolta la
+   citazione di T7, lasciata solo l'evidenza di codice (assenza di WHERE che tocchi righe
+   native).
+7. [codice] "R-5 scrive tenant_blueprint:write" ignora che la migrazione 000300 vieta
+   ESPLICITAMENTE (RAISE EXCEPTION) che un ruolo diverso da PLATFORM_ADMIN lo detenga, e
+   000418 lo ri-conferma — CONFERMATA. Corretto: aggiunto come debito esplicito che la
+   migrazione di R-5 deve emendare la guardia di 000300 (ADR-0035), non solo concedere.
+8. [codice] duplicato di #5 sul lato R-3 (TAXONOMY_STEWARD/skill_taxonomy_tenant non
+   esistono in nessun file di codice) — CONFERMATA, stessa correzione.
+9. [decisioni] la citazione "sezione 2, conseguenza a" copre solo R-3, non R-5 (la cui
+   fonte è il passo 51/D9) — CONFERMATA. Corretto: citazioni separate per R-3 e R-5.
+
+Nessuna confutazione respinta. File toccati:
+- docs/architecture/adr/0041_direzione_del_dato.md
+- docs/architecture/adr/0042_catena_del_semilavorato.md
+
+Due giri di W3, 22 confutazioni totali, tutte confermate e corrette. Nessuna terza
+confutazione sopravvissuta nel secondo giro su punti non toccati dal primo: i due ADR
+procedono verso ATTESA_ENZO.

@@ -29,6 +29,19 @@ traccia di quel gesto — `INSERT sys_leave_balance_transactions` (`time-off/rep
 (`compensation/repository.ts:348`); (5) la consegna verso il gestionale esterno, cioè il confine
 stesso — `INSERT sys_payroll_handoff_records` (`compensation/repository.ts:423`).
 
+⚠ **Un'eccezione reale e già raggiungibile, non ipotetica**: `POST /v1/gdpr/users/:userId/erasure`
+(`gdpr/routes.ts:69-71`, permesso `gdpr:erase`) esegue `DELETE FROM "<schema>"."<table>"`
+(`gdpr/repository.ts:226`) su ogni tabella del registro `sys.sys_gdpr_data_map` con strategia
+`DELETE` — e `sys_user_identity_documents` ce l'ha (`sys_user_contracts` e `sys_user_pay_slips`
+hanno invece `RETAIN`). `gdpr:erase` è concesso oggi a `PLATFORM_ADMIN`, `TENANT_ADMIN` **e
+`HRMS_MANAGER`** (misurato sul vivo): un ruolo di people management può, oggi, cancellare righe
+di una tabella `importato`. Non è la stessa cosa di scrivere o modificare un dato — è una
+cancellazione per diritto GDPR, orizzontale a tutte le tabelle mappate, indipendente da I23 — ma
+la frase «zero rotte di scrittura» va letta per quello che è: zero rotte di creazione o modifica
+**ordinaria**. La cancellazione GDPR resta fuori da questo invariante e non lo contraddice
+(cancellare una riga importata non la rende nativa), ma questo ADR la nomina invece di lasciarla
+implicita in un «mai» che non è letteralmente vero.
+
 > *«Il People Management governa tutti i dati che nascono e si evolvono dentro questa
 > piattaforma e che non sono importati da gestionali esterni. Buste paga e dati economici sono
 > gestiti fuori ed entrano per altri obiettivi: analisi retributiva interna, configurazione di
@@ -39,9 +52,18 @@ stesso — `INSERT sys_payroll_handoff_records` (`compensation/repository.ts:423
 Un'abitudine non è una proprietà: **niente impedisce che domani qualcuno scriva una rotta che
 modifichi una busta paga.** Il mandato K (`I-E`, indagine di classificazione) ha misurato che la
 piattaforma oggi rispetta la regola pressoché ovunque, ma anche che nessuna riga sa dichiarare da
-dove viene, che il registro di provenienza è spaccato in due convenzioni di nome che non si
-parlano, e che undici tabelle amministrative non hanno alcuna colonna di origine. La regola era
-vera per caso; questo ADR la rende vera per costruzione.
+dove viene e che il registro di provenienza è spaccato in due convenzioni di nome che non si
+parlano. La regola era vera per caso; questo ADR la rende vera per costruzione.
+
+⚠ **Il numero «dodici tabelle amministrative» del dossier che precede questo mandato non è
+verificabile**: la sola fonte che lo scrive (`docs/kb/COWORK_INBOX.md:878`) ne nomina
+esplicitamente solo sette — `sys_user_contracts`, `sys_attendance`, `sys_user_pay_slips`,
+`sys_user_identity_documents`, `sys_compensation_bands`, `sys_position_compensation_profiles`,
+`sys_leave_accrual_rules` — e nessun file del mandato K enumera le altre cinque. Su queste sette,
+ri-misurato: **solo `sys_attendance` ha colonne che dichiarano l'origine**
+(`attendance_source`/`attendance_source_reference`); le altre sei no. Questo ADR non ripete
+«undici su dodici»: dichiara le sette tabelle verificabili e il fatto misurato su quelle, non un
+totale che nessun documento sa ricostruire.
 
 ## Decisione
 
@@ -50,7 +72,7 @@ vera per caso; questo ADR la rende vera per costruzione.
 | stato | definizione operativa | chi scrive |
 |---|---|---|
 | **nativo** | scritta da rotte API sotto il permesso di un ruolo di people management | l'interfaccia, dall'azione di una persona |
-| **importato** | scritta **solo** da corse di importazione, materializzazione o seed; **nessuna rotta di scrittura esiste**; la colonna di origine è obbligatoria | l'importazione, mai un'interfaccia |
+| **importato** | scritta **solo** da corse di importazione, materializzazione o seed; **nessuna rotta di creazione o modifica ordinaria esiste** (la cancellazione GDPR è l'eccezione nominata sopra); la colonna di origine è obbligatoria | l'importazione, mai un'interfaccia |
 | **ibrido** | il gesto nasce qui (una rotta API scrive), il saldo o il valore che quel gesto muove viene anche da un'importazione | entrambi, su parti dichiarate; la regola del conflitto è **X-4** (mandato K, Fase 5) |
 
 Una quarta etichetta, **infrastruttura**, esiste nella classificazione (`I-E`) ma **è fuori da
@@ -119,23 +141,27 @@ database sono **X-4** e **X-5** (Fase 5), non questo ADR.
 
 1. **`X-1`** deposita la classificazione come dato interrogabile (non un commento in un file),
    con le righe dubbie ratificate da Enzo.
-2. **`X-2`** aggiunge la colonna di origine (`origine_dato`) alle tabelle importate/ibride che ne
-   sono prive — undici su dodici amministrative, secondo il dossier che precede questo ADR.
+2. **`X-2`** aggiunge la colonna di origine (`origine_dato`) a ogni tabella importata/ibrida che
+   ne è priva — l'elenco esatto lo misura `X-2` sul vivo (le 88 importate e le 97 ibride di
+   `I-E`), non un conteggio del dossier: sulle sette amministrative nominabili, sei ne sono
+   prive oggi (sopra).
 3. **`X-5`** è la sentinella che tiene vera la regola: nessuna tabella `importato` riceve righe
    `origine_dato='NATIVO'`, nessuna `nativo` riceve `'IMPORT'`, nessun conflitto ibrido resta
    aperto oltre 30 giorni.
 4. **I ruoli di people management di Fase 4** ereditano questo confine: `PEOPLE_MANAGER` (R-6)
    riceve scrittura sulle tabelle `nativo`, lettura sulle `importato`, mai una rotta di scrittura
    su queste ultime — perché quella rotta non esiste, non perché un permesso gliela neghi.
-   ⚠ Questo vale per i ruoli sotto il mandato HR (`HR_MANDATED_ROLES`), **non** per i ruoli di
-   piattaforma nati da D9 (`R-0`, `R-7` `SECURITY_ADMIN`, `R-8` `IMPLEMENTATION_CONSULTANT`, `R-9`
-   `PLATFORM_OPERATOR`/`SALES`): quelli vedono e scrivono per **assegnazione-cliente**
-   (`haMandatoPiattaformaAssegnato`, asse ortogonale I16), con lettura mascherata per
-   ADR-0032/I20 — un asse diverso, deciso a parte, che questo ADR non estende e non vincola.
-   `SECURITY_ADMIN` in particolare è un ruolo di **cliente** (non esce dal tenant, non usa
-   l'asse di R-0): il mandato lo dichiara esplicitamente (sezione 2, conseguenza c). Se e come
-   I23 si applica ai ruoli di piattaforma è una domanda che questo ADR lascia aperta, non
-   decisa per estensione implicita.
+   ⚠ Questo vale per i ruoli sotto il mandato HR (`HR_MANDATED_ROLES`), **non** per i tre ruoli
+   che il mandato mette in `haMandatoPiattaformaAssegnato` — `R-5` `BLUEPRINT_MANAGER`, `R-8`
+   `IMPLEMENTATION_CONSULTANT`, `R-9` `PLATFORM_OPERATOR`/`SALES` (misurato sul testo del
+   mandato, non a memoria: l'insieme contiene esattamente questi quattro codici, non altri).
+   Quelli vedono e scrivono per **assegnazione-cliente** (asse ortogonale I16, la tabella di
+   `R-0`), con lettura mascherata per ADR-0032/I20 — un asse diverso, deciso a parte, che questo
+   ADR non estende e non vincola. `R-0` non è un ruolo, è la tabella dell'asse; `SECURITY_ADMIN`
+   (`R-7`) **non** è in questo insieme: è un ruolo di **cliente** (non esce dal tenant, non usa
+   l'asse di `R-0`, entra invece in `puoConcedereRuoli`) — il mandato lo dichiara esplicitamente
+   (sezione 2, conseguenza c). Se e come I23 si applica ai tre ruoli di piattaforma è una domanda
+   che questo ADR lascia aperta, non decisa per estensione implicita.
 5. **`DATA_STEWARD`** (R-6) nasce come il titolare naturale di ciò che questo ADR chiama
    `importato` e `ibrido`: le corse di importazione, il registro di provenienza, i conflitti
    sugli ibridi.

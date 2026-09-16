@@ -54,8 +54,13 @@ un aggiornamento che potrebbe un giorno sovrascrivere qualcosa.
 
 La prova automatica che oggi manca sul caso generale (supersessione di una corsa con override
 presente, non solo applicazione pulita) resta un limite dichiarato di `I-A`, non colmato da
-questo ADR: la supersessione è dimostrata dal codice (nessun `WHERE` la farebbe toccare una riga
-nativa) e dal test T7 esistente, non da una seconda prova con override.
+questo ADR: nessun `WHERE` negli scrittori di `tenant-materialization/` farebbe toccare una riga
+nativa o un override, e questo è dimostrato dal codice — non dal test T7
+(`tenant-import-run-effect.integration.test.ts`), che appartiene a un dominio diverso
+(l'importazione dati esterni via `approvals/effects/tenant-import-run.ts`, non l'applicazione di
+un fascicolo: zero occorrenze della parola «blueprint» in quel file). Citarlo come prova della
+supersessione di un fascicolo sarebbe importare evidenza da un sistema diverso: questo ADR non lo
+fa più.
 
 ### 2. La catena fisica esiste in QUATTRO modi diversi sulle tredici tabelle che il mandato ha censito — e lo stesso schema fisico ricorre anche fuori da quel censimento
 
@@ -127,18 +132,29 @@ questo ADR:
 1. **Ogni tabella nuova pensata per ospitare sia contenuto di piattaforma sia personalizzazioni
    di cliente adotta il modo B** (`tenant_id` nullable + bandiera `is_global`), salvo una
    ragione scritta per l'eccezione.
-2. **`R-3` (`TAXONOMY_STEWARD`) e `R-5` (`BLUEPRINT_MANAGER`) NON hanno lo stesso rapporto con
-   questo ADR** — il mandato li tiene deliberatamente separati (sezione 2, conseguenza a; R-3
-   passo 45), e questo ADR lo eredita invece di appiattirlo:
-   - `R-3` riceve **solo** permessi lato cliente (`skill_taxonomy_tenant:*`, `skill_alias:manage`
-     — governa la propria copia, `tenant_id` valorizzato). La parte che genera con `tenant_id
-     NULL` **resta a `PLATFORM_ADMIN`**, non toccata da questo mandato:
-     `PLATFORM_TAXONOMY_STEWARD` non nasce qui.
-   - `R-5` è un ruolo di **piattaforma** (asse `haMandatoPiattaformaAssegnato`, D9=B — R-0, non
-     I23): scrive `tenant_blueprint:write` su un fascicolo che è **già** del cliente assegnato,
-     non genera una riga `tenant_id NULL`. Coerente con la riclassificazione sopra:
-     `sys_tenant_blueprints` è modo C (tenant nullable, oggi sempre valorizzato quando esiste),
-     non modo B — R-5 non esercita mai il lato «genera» della catena su questa tabella.
+2. **`R-3` (`TAXONOMY_STEWARD`) e `R-5` (`BLUEPRINT_MANAGER` completato) sono lavoro FUTURO di
+   Fase 4, non un assetto già in vigore** — nessuno dei due esiste oggi nel database:
+   `TAXONOMY_STEWARD` non è un ruolo (0 righe in `sys_auth_roles`), `skill_taxonomy_tenant:*` e
+   `skill_alias:manage` non sono permessi seminati da nessuna migrazione, e
+   `tenant_blueprint:write` è oggi concesso **solo** a `PLATFORM_ADMIN` (`STATO.md` classifica
+   entrambe le voci `BLOCCATA(fase)`). Questo ADR descrive **come questo mandato li costruirà**,
+   non lo stato presente — le due voci del mandato che li governano hanno fonti diverse, non
+   un'unica «conseguenza (a)»:
+   - `R-3` (mandato, passo 45): riceverà **solo** permessi lato cliente
+     (`skill_taxonomy_tenant:*`, `skill_alias:manage` — governa la propria copia, `tenant_id`
+     valorizzato). La parte che genera con `tenant_id NULL` **resta a `PLATFORM_ADMIN`**:
+     `PLATFORM_TAXONOMY_STEWARD` non nasce in questo mandato (sezione 2, conseguenza a).
+   - `R-5` (mandato, passo 51 — non la conseguenza a, che parla solo di R-3): ruolo di
+     **piattaforma** (`haMandatoPiattaformaAssegnato`, D9=B — asse `R-0`, non I23) che riceverà
+     `tenant_blueprint:write` su un fascicolo **già** del cliente assegnato, non su una riga
+     `tenant_id NULL` — coerente con la riclassificazione sopra (`sys_tenant_blueprints` è modo
+     C). ⚠ **Un debito che R-5 eredita**: la migrazione `000300_permessi_del_fascicolo.sql`
+     (righe 87-96) solleva `RAISE EXCEPTION` se un ruolo diverso da `PLATFORM_ADMIN` detiene
+     anche un solo permesso `tenant_blueprint:*` — e `000418` (S-1, 2026-09-15) lo ri-conferma
+     nell'allowlist dei solo-plenipotenziari. La migrazione di R-5 **deve emendare quella guardia**
+     (ADR-0035: si emenda la fonte, non si aggira), non solo concedere il permesso: senza
+     l'emendamento, R-5 applicata romperebbe il vincolo che 000300 impone a ogni riapplicazione
+     della catena.
 3. **Nessuna rigenerazione del semilavorato tocca un'attivazione o un processo esistente** — non
    li aggiorna, non li ricrea, non li legge: l'assenza è totale, verificata sopra. Un cambiamento
    futuro a questo comportamento (per esempio, far scrivere la rigenerazione su quelle tabelle) è

@@ -54,8 +54,8 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
-| X-0 | IN CORSO | S1104 | 2026-09-16T02:35+02:00 | 30 | 32 |  | docs/architecture/adr/0041_direzione_del_dato.md; I23 in CLAUDE.md | ADR scritto, PROPOSTO. Prossimo: confutazione W3 (con K1-ADR) |
-| K1-ADR | IN CORSO | S1104 | 2026-09-16T02:35+02:00 | 31 | 32 |  | docs/architecture/adr/0042_catena_del_semilavorato.md | ADR scritto, PROPOSTO. Prossimo: confutazione W3 (con X-0) |
+| X-0 | ATTESA_ENZO(ratifica ADR: leggere solo la sezione «Decisione» e «Conseguenze» di ADR-0041) | S1104 | 2026-09-16T03:10+02:00 | 32 |  |  | docs/architecture/adr/0041_direzione_del_dato.md; I23 in CLAUDE.md; wf_F3_32_202609160217, wf_F3_32b_202609160241 (_VERIFICATO.txt) | 2 giri di W3 (13+9=22 confutazioni, tutte confermate e corrette, nessuna respinta). Terzo giro NON lanciato: guardiano oltre il 50% al momento di lanciarlo (regola V4). Onestà dichiarata: non è "zero confutazioni ottenute", è "22 corrette in 2 giri, un 3° servirebbe idealmente" |
+| K1-ADR | ATTESA_ENZO(ratifica ADR: leggere solo la sezione «Decisione» e «Conseguenze» di ADR-0042) | S1104 | 2026-09-16T03:10+02:00 | 32 |  |  | docs/architecture/adr/0042_catena_del_semilavorato.md; wf_F3_32_202609160217, wf_F3_32b_202609160241 (_VERIFICATO.txt) | stessa nota di X-0: 2 giri W3, 22 confutazioni corrette, 3° non lanciato per guardiano >50% |
 
 ## F4 — I ruoli, uno per migrazione
 

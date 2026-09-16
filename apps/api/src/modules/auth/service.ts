@@ -17,6 +17,7 @@ import {
 } from "../../config/constants.js";
 import { UnauthorizedError, NotFoundError, ForbiddenError, ApiError } from "../../errors/index.js";
 import { pool, withTransaction } from "../../db/client.js";
+import { ruoliHannoMandatoPiattaforma } from "../../lib/scope/mandati.js";
 
 import { hashPassword, verifyPassword } from "./password.js";
 import { generateOpaqueToken, sha256Hex } from "./tokens.js";
@@ -704,7 +705,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       // may only revoke users in their own tenant. The route preHandler
       // already gates by 'auth:revoke_user' permission — here we enforce
       // the per-target tenant scope filter.
-      const isPlatform = input.actorRoles.includes("PLATFORM_ADMIN");
+      const isPlatform = ruoliHannoMandatoPiattaforma(input.actorRoles);
       if (!isPlatform) {
         if (input.actorTenantId === null) {
           throw new ForbiddenError("Tenant context required to revoke users");
@@ -735,7 +736,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       // already gates by 'auth:revoke_user' permission (reusing the perm —
       // see AUTH_SECURITY_PLAN §6 matrix; viewing sessions is a strict subset
       // of being able to revoke them, so no new permission code is needed).
-      const isPlatform = input.actorRoles.includes("PLATFORM_ADMIN");
+      const isPlatform = ruoliHannoMandatoPiattaforma(input.actorRoles);
       if (!isPlatform) {
         if (input.actorTenantId === null) {
           throw new ForbiddenError("Tenant context required to list sessions");

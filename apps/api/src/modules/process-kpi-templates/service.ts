@@ -3,7 +3,8 @@
  * PLATFORM_ADMIN only for writes (catalog-level).
  */
 import { pool } from "../../db/client.js";
-import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import type { ActorContext } from "../../lib/actor.js";
+import { haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 
 export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
@@ -20,13 +21,13 @@ export const processKpiTemplatesService = {
     return t;
   },
   async upsert(actor: ActorContext, body: UpsertProcessKpiTemplateBody): Promise<ProcessKpiTemplate> {
-    if (!isPlatform(actor)) throw new ForbiddenError("PLATFORM_ADMIN required");
+    if (!haMandatoPiattaforma(actor)) throw new ForbiddenError("PLATFORM_ADMIN required");
     if (!(await repo.processExists(pool, body.processId))) throw new NotFoundError("BlueprintProcess");
     if (!(await repo.kpiExists(pool, body.kpiId))) throw new NotFoundError("KpiDefinition");
     return repo.upsertTemplate(pool, body);
   },
   async delete(actor: ActorContext, id: string): Promise<void> {
-    if (!isPlatform(actor)) throw new ForbiddenError("PLATFORM_ADMIN required");
+    if (!haMandatoPiattaforma(actor)) throw new ForbiddenError("PLATFORM_ADMIN required");
     const ok = await repo.deleteTemplate(pool, id);
     if (!ok) throw new NotFoundError("ProcessKpiTemplate");
   },

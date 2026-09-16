@@ -4,7 +4,7 @@
  * blueprint:activate also for PATCH status, blueprint:override for other patches.
  */
 import { pool } from "../../db/client.js";
-import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { isPlatform, perimetroClienti, puoVedereCliente, type ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
@@ -15,14 +15,13 @@ import type {
 import * as repo from "./repository.js";
 
 function visible(a: ActorContext, x: BlueprintActivation): boolean {
-  if (isPlatform(a)) return true;
-  return a.tenantId !== null && x.tenantId === a.tenantId;
+  return puoVedereCliente(a, x.tenantId);
 }
 
 export const blueprintActivationsService = {
   async list(actor: ActorContext, query: BlueprintActivationListQuery) {
-    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listActivations(pool, { tenantId, query });
+    const tenantIds = perimetroClienti(actor);
+    return repo.listActivations(pool, { tenantIds, query });
   },
   async getById(actor: ActorContext, id: string): Promise<BlueprintActivation> {
     const t = await repo.findActivationById(pool, id);

@@ -16,7 +16,7 @@
  * appena costruita non ha ancora nessuno che possa fare nulla).
  */
 import { pool, withTransaction } from "../../db/client.js";
-import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { isPlatform, perimetroClienti, puoVedereCliente, type ActorContext } from "../../lib/actor.js";
 import { ConflictError, ForbiddenError, NotFoundError } from "../../errors/index.js";
 import type {
   CreateTenantImportRunBody,
@@ -34,7 +34,7 @@ import * as repo from "./repository.js";
 import { valutaPersona } from "./validation.js";
 
 function visibile(a: ActorContext, r: TenantImportRun): boolean {
-  return isPlatform(a) || (a.tenantId !== null && r.tenantId === a.tenantId);
+  return puoVedereCliente(a, r.tenantId);
 }
 
 function tenantDiDestinazione(a: ActorContext, richiesto: string | undefined): string {
@@ -133,8 +133,8 @@ export const tenantImportRunsService = {
   },
 
   async list(a: ActorContext, query: TenantImportRunListQuery) {
-    const tenantId = isPlatform(a) ? undefined : a.tenantId ?? undefined;
-    return repo.listRuns(pool, { tenantId, query });
+    const tenantIds = perimetroClienti(a);
+    return repo.listRuns(pool, { tenantIds, query });
   },
 
   async dettaglio(a: ActorContext, id: string): Promise<TenantImportRunDetail> {

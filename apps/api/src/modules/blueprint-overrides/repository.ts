@@ -38,10 +38,14 @@ function toOv(r: Row): BlueprintOverride {
 }
 
 export async function listOverrides(
-  q: DbConnector, filter: { tenantId?: string; query: BlueprintOverrideListQuery },
+  q: DbConnector,
+  filter: { tenantIds?: ReadonlySet<string>; query: BlueprintOverrideListQuery },
 ): Promise<{ items: BlueprintOverride[]; total: number }> {
   const where: string[] = []; const params: unknown[] = [];
-  if (filter.tenantId) { params.push(filter.tenantId); where.push(`a.blueprint_activation_tenant_id = $${params.length}`); }
+  if (filter.tenantIds !== undefined) {
+    params.push([...filter.tenantIds]);
+    where.push(`a.blueprint_activation_tenant_id = ANY($${params.length})`);
+  }
   if (filter.query.activationId) { params.push(filter.query.activationId); where.push(`o.blueprint_override_activation_id = $${params.length}`); }
   if (filter.query.processId) { params.push(filter.query.processId); where.push(`o.blueprint_override_process_id = $${params.length}`); }
   if (filter.query.inclusion) { params.push(filter.query.inclusion); where.push(`o.blueprint_override_inclusion = $${params.length}`); }

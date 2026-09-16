@@ -220,10 +220,14 @@ export async function findRunById(db: DbConnector, id: string): Promise<TenantIm
 }
 
 export async function listRuns(
-  db: DbConnector, filter: { tenantId?: string; query: TenantImportRunListQuery },
+  db: DbConnector,
+  filter: { tenantIds?: ReadonlySet<string>; query: TenantImportRunListQuery },
 ): Promise<{ items: TenantImportRun[]; total: number }> {
   const where: string[] = [RUN_WHERE_KIND]; const params: unknown[] = [];
-  if (filter.tenantId) { params.push(filter.tenantId); where.push(`r.seed_acquisition_run_tenant_id = $${params.length}`); }
+  if (filter.tenantIds !== undefined) {
+    params.push([...filter.tenantIds]);
+    where.push(`r.seed_acquisition_run_tenant_id = ANY($${params.length})`);
+  }
   if (filter.query.status) { params.push(filter.query.status); where.push(`r.seed_acquisition_run_status = $${params.length}`); }
   const w = `WHERE ${where.join(" AND ")}`;
   const tr = await db.query<{ total: string }>(`SELECT count(*)::text AS total FROM sys.sys_seed_acquisition_runs r ${w}`, params);

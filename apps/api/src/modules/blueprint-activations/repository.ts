@@ -42,10 +42,14 @@ function toAct(r: Row): BlueprintActivation {
 }
 
 export async function listActivations(
-  q: DbConnector, filter: { tenantId?: string; query: BlueprintActivationListQuery },
+  q: DbConnector,
+  filter: { tenantIds?: ReadonlySet<string>; query: BlueprintActivationListQuery },
 ): Promise<{ items: BlueprintActivation[]; total: number }> {
   const where: string[] = []; const params: unknown[] = [];
-  if (filter.tenantId) { params.push(filter.tenantId); where.push(`blueprint_activation_tenant_id = $${params.length}`); }
+  if (filter.tenantIds !== undefined) {
+    params.push([...filter.tenantIds]);
+    where.push(`blueprint_activation_tenant_id = ANY($${params.length})`);
+  }
   if (filter.query.variantId) { params.push(filter.query.variantId); where.push(`blueprint_activation_variant_id = $${params.length}`); }
   if (filter.query.status) { params.push(filter.query.status); where.push(`blueprint_activation_status = $${params.length}`); }
   const w = where.length ? `WHERE ${where.join(" AND ")}` : "";

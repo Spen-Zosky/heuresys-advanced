@@ -45,12 +45,12 @@ function mappa(r: Riga): GeneratedOrigin {
 }
 
 /**
- * Il filtro di tenant arriva dal service ed è `undefined` solo per un attore di
- * piattaforma. Resta un parametro `$n`, mai interpolato.
+ * Il filtro di tenant arriva dal service ed è `undefined` solo per un attore senza
+ * restrizione (PLATFORM_ADMIN). Resta un parametro `$n`, mai interpolato.
  */
 export async function listOrigins(
   db: Db,
-  tenantFilter: string | undefined,
+  tenantFilter: ReadonlySet<string> | undefined,
   q: GeneratedOriginListQuery,
 ): Promise<{ items: GeneratedOrigin[]; total: number }> {
   const where: string[] = [];
@@ -60,7 +60,7 @@ export async function listOrigins(
     where.push(sql.replace("$?", `$${params.length}`));
   };
 
-  if (tenantFilter) push("generated_record_origin_tenant_id = $?", tenantFilter);
+  if (tenantFilter !== undefined) push("generated_record_origin_tenant_id = ANY($?)", [...tenantFilter]);
   else if (q.tenantId) push("generated_record_origin_tenant_id = $?", q.tenantId);
   if (q.targetTable) push("generated_record_origin_target_table = $?", q.targetTable);
   if (q.blueprintVersionId) push("generated_record_origin_blueprint_version_id = $?", q.blueprintVersionId);
@@ -90,7 +90,7 @@ export async function listOrigins(
 /** I conteggi per tabella e per stato — la risposta a «quanto di questa azienda è inventato». */
 export async function summarize(
   db: Db,
-  tenantFilter: string | undefined,
+  tenantFilter: ReadonlySet<string> | undefined,
   tenantId?: string,
   blueprintVersionId?: string,
 ): Promise<GeneratedOriginSummaryResponse> {
@@ -100,7 +100,7 @@ export async function summarize(
     params.push(v);
     where.push(sql.replace("$?", `$${params.length}`));
   };
-  if (tenantFilter) push("generated_record_origin_tenant_id = $?", tenantFilter);
+  if (tenantFilter !== undefined) push("generated_record_origin_tenant_id = ANY($?)", [...tenantFilter]);
   else if (tenantId) push("generated_record_origin_tenant_id = $?", tenantId);
   if (blueprintVersionId) push("generated_record_origin_blueprint_version_id = $?", blueprintVersionId);
   const filtro = where.length ? `WHERE ${where.join(" AND ")}` : "";

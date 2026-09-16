@@ -7,15 +7,16 @@
  * data-class decision is documented in routes.ts.
  */
 import { pool } from "../../db/client.js";
-import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { isPlatform, perimetroClienti, type ActorContext } from "../../lib/actor.js";
 import { ForbiddenError } from "../../errors/index.js";
 import type { ProvenanceListQuery } from "@heuresys/shared";
 import * as repo from "./repository.js";
 
-function tenantFilter(a: ActorContext): string | undefined {
-  if (isPlatform(a)) return undefined;
-  if (!a.tenantId) throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
-  return a.tenantId;
+function tenantFilter(a: ActorContext): ReadonlySet<string> | undefined {
+  if (!isPlatform(a) && a.assignedTenantIds === undefined && !a.tenantId) {
+    throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
+  }
+  return perimetroClienti(a);
 }
 
 export const provenanceService = {

@@ -46,10 +46,13 @@ function toRecord(r: LineageRow): ProvenanceRecord {
 }
 
 function buildWhere(
-  tenantId: string | undefined, query: ProvenanceListQuery,
+  tenantIds: ReadonlySet<string> | undefined, query: ProvenanceListQuery,
 ): { wc: string; params: unknown[] } {
   const where: string[] = []; const params: unknown[] = [];
-  if (tenantId) { params.push(tenantId); where.push(`source_lineage_tenant_id = $${params.length}`); }
+  if (tenantIds !== undefined) {
+    params.push([...tenantIds]);
+    where.push(`source_lineage_tenant_id = ANY($${params.length})`);
+  }
   if (query.targetTable) { params.push(query.targetTable); where.push(`source_lineage_target_table_name = $${params.length}`); }
   if (query.sourceTable) { params.push(query.sourceTable); where.push(`source_lineage_source_table = $${params.length}`); }
   if (query.runId) { params.push(query.runId); where.push(`source_lineage_import_run_id = $${params.length}`); }
@@ -65,9 +68,9 @@ function buildWhere(
 }
 
 export async function listRecords(
-  q: DbConnector, tenantId: string | undefined, query: ProvenanceListQuery,
+  q: DbConnector, tenantIds: ReadonlySet<string> | undefined, query: ProvenanceListQuery,
 ): Promise<{ items: ProvenanceRecord[]; total: number }> {
-  const { wc, params } = buildWhere(tenantId, query);
+  const { wc, params } = buildWhere(tenantIds, query);
   const totalRow = await q.query<{ total: string }>(
     `SELECT count(*)::text AS total FROM sys.sys_source_lineage_records ${wc}`, params);
   params.push(query.limit); const lim = params.length; params.push(query.offset); const off = params.length;
@@ -85,10 +88,13 @@ interface SummaryRow {
 }
 
 export async function summarize(
-  q: DbConnector, tenantId: string | undefined, runId?: string,
+  q: DbConnector, tenantIds: ReadonlySet<string> | undefined, runId?: string,
 ): Promise<ProvenanceSummaryResponse> {
   const where: string[] = []; const params: unknown[] = [];
-  if (tenantId) { params.push(tenantId); where.push(`source_lineage_tenant_id = $${params.length}`); }
+  if (tenantIds !== undefined) {
+    params.push([...tenantIds]);
+    where.push(`source_lineage_tenant_id = ANY($${params.length})`);
+  }
   if (runId) { params.push(runId); where.push(`source_lineage_import_run_id = $${params.length}`); }
   const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
   const res = await q.query<SummaryRow>(

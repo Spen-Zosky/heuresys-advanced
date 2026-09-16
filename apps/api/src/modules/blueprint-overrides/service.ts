@@ -4,7 +4,7 @@
  * Process must belong to the activation's variant.
  */
 import { pool } from "../../db/client.js";
-import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { perimetroClienti, puoVedereCliente, type ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
@@ -16,13 +16,13 @@ import * as repo from "./repository.js";
 async function ensureActivationVisible(actor: ActorContext, activationId: string): Promise<void> {
   const t = await repo.getActivationTenant(pool, activationId);
   if (!t) throw new NotFoundError("BlueprintActivation");
-  if (!isPlatform(actor) && t !== actor.tenantId) throw new NotFoundError("BlueprintActivation");
+  if (!puoVedereCliente(actor, t)) throw new NotFoundError("BlueprintActivation");
 }
 
 export const blueprintOverridesService = {
   async list(actor: ActorContext, query: BlueprintOverrideListQuery) {
-    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listOverrides(pool, { tenantId, query });
+    const tenantIds = perimetroClienti(actor);
+    return repo.listOverrides(pool, { tenantIds, query });
   },
   async getById(actor: ActorContext, id: string): Promise<BlueprintOverride> {
     const t = await repo.findOverrideById(pool, id);

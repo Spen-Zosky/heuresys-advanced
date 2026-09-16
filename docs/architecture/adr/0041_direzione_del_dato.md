@@ -1,6 +1,6 @@
 # ADR-0041 — La direzione del dato: invariante I23
 
-**Status**: PROPOSTO
+**Status**: ACCETTATO
 **Date**: 2026-09-16
 **Decided by**: Enzo Spenuso (regola) · Claude Code CLI (stesura, mandato K)
 **Adds**: invariante **I23** del `CLAUDE.md`
@@ -53,7 +53,11 @@ Un'abitudine non è una proprietà: **niente impedisce che domani qualcuno scriv
 modifichi una busta paga.** Il mandato K (`I-E`, indagine di classificazione) ha misurato che la
 piattaforma oggi rispetta la regola pressoché ovunque, ma anche che nessuna riga sa dichiarare da
 dove viene e che il registro di provenienza è spaccato in due convenzioni di nome che non si
-parlano. La regola era vera per caso; questo ADR la rende vera per costruzione.
+parlano (`.programmi/K-ruoli-direzione/esiti/I-D.md` §1: `source_lineage_target_table_name` porta
+il prefisso `sys.` su 6.382 righe e non lo porta sulle altre 64.577 — due modi di scrivere lo
+stesso nome di tabella, mai riconciliati). La convenzione con prefisso è storia: **X-3** ha
+verificato che oggi non esiste alcuno scrittore vivo che la usi ancora (stesso file, verdetto
+X-3). La regola era vera per caso; questo ADR la rende vera per costruzione.
 
 ⚠ **Il numero «dodici tabelle amministrative» del dossier che precede questo mandato non è
 verificabile**: la sola fonte che lo scrive (`docs/kb/COWORK_INBOX.md:878`) ne nomina
@@ -72,7 +76,7 @@ totale che nessun documento sa ricostruire.
 | stato | definizione operativa | chi scrive |
 |---|---|---|
 | **nativo** | scritta da rotte API sotto il permesso di un ruolo di people management | l'interfaccia, dall'azione di una persona |
-| **importato** | scritta **solo** da corse di importazione, materializzazione o seed; **nessuna rotta di creazione o modifica ordinaria esiste** (la cancellazione GDPR è l'eccezione nominata sopra); la colonna di origine è obbligatoria | l'importazione, mai un'interfaccia |
+| **importato** | scritta **solo** da corse di importazione, materializzazione o seed; **nessuna rotta di creazione o modifica ordinaria esiste** (la cancellazione GDPR è l'eccezione nominata sopra); la colonna di origine è obbligatoria | l'importazione; mai un'interfaccia di creazione o modifica ordinaria (la cancellazione GDPR resta l'eccezione dichiarata sopra) |
 | **ibrido** | il gesto nasce qui (una rotta API scrive), il saldo o il valore che quel gesto muove viene anche da un'importazione | entrambi, su parti dichiarate; la regola del conflitto è **X-4** (mandato K, Fase 5) |
 
 Una quarta etichetta, **infrastruttura**, esiste nella classificazione (`I-E`) ma **è fuori da
@@ -81,7 +85,8 @@ non hanno una «direzione» da dichiarare.
 
 Il confine dell'**importato** non è un permesso che nega la scrittura: è l'**assenza della
 porta**. È la forma robusta del divieto — un permesso si dimentica di negare, una rotta che non
-esiste non si scrive per errore.
+esiste non si scrive per errore — con la sola eccezione già dichiarata sopra (la cancellazione
+GDPR, orizzontale a tutte le tabelle mappate e indipendente da questo invariante).
 
 ### Le quattro tabelle dichiarate «importate, porta non ancora costruita» (D6)
 
@@ -102,18 +107,22 @@ infrastruttura 32**. 103 tabelle sono «dubbie» secondo la regola meccanica del
 scrittori API sia scrittori di importazione, o righe senza alcuno scrittore trovato, o sono una
 delle quattro di D6): le ratifica Enzo riga per riga in **X-1** (Fase 5), fuori da questa sessione.
 
-⚠ **Il vivo, ri-misurato il 2026-09-16, ha 246 tabelle `sys.sys_*`, non 245**
-(`select table_type, count(*) from information_schema.tables where table_schema='sys' and
-table_name like 'sys\_%' group by table_type` → `BASE TABLE 246`). La differenza è
-`sys_permessi_plenipotenziari_ammessi`, creata dalla stessa sessione K (migrazione `000418`,
-applicata il 2026-09-15 alle 19:13 — dopo il lancio di `I-E`, ore 03:31): non è un errore di
-misura, è una tabella nata **dopo** che la classificazione era già chiusa. `I-E` non è più
-completa rispetto al vivo, e questo ADR lo dichiara invece di ripetere un numero superato: la
-tabella mancante è `infrastruttura` per natura (allowlist di una sentinella RBAC, non un dato di
-cliente), e **X-1** la classifica esplicitamente prima di depositare
+⚠ **Il vivo, ri-misurato al terzo giro di confutazione (2026-09-16), ha 247 tabelle
+`sys.sys_*`, non 245 — e nemmeno 246** (`select table_type, count(*) from
+information_schema.tables where table_schema='sys' and table_name like 'sys\_%' group by
+table_type` → `BASE TABLE 247`). Due tabelle sono nate **dopo** che `I-E` aveva già chiuso la
+classificazione (ore 03:31 del 2026-09-15): `sys_permessi_plenipotenziari_ammessi` (migrazione
+`000418`) e `sys_ritiri_ammessi` (migrazione `000420`), applicate entrambe il 2026-09-16 alle
+02:04 (`sys.sys_schema_migrations`: `000418` = `02:04:54`, `000420` = `02:04:55`, un secondo
+dopo — non il 2026-09-15 come una lettura precedente di questo stesso ADR riportava). `I-E` non
+è più completa rispetto al vivo — di **due** tabelle, non una — e questo ADR lo dichiara invece
+di ripetere un numero già superato nel momento in cui lo si scrive: entrambe le tabelle mancanti
+sono `infrastruttura` per natura (allowlist di sentinelle RBAC del mandato K, non dati di
+cliente), e **X-1** le classifica esplicitamente prima di depositare
 `sys.sys_classificazione_direzione_dato` come dato di sistema. Fino a quel momento la
 classificazione di `I-E` vale come riferimento di lavoro **con questa lacuna dichiarata**, non
-come inventario chiuso.
+come inventario chiuso — e, per costruzione (IL PUNTO FISSO, `CLAUDE.md`), qualunque conteggio
+futuro di questa famiglia di tabelle va ri-misurato, non ricopiato da qui.
 
 ### Il caso ibrido più delicato: le ferie
 
@@ -125,8 +134,14 @@ opzione **C**): *l'importazione non tocca mai un saldo che ha un gesto nativo ap
 conflitto va in un registro e lo chiude il `DATA_STEWARD`.*
 
 `I-D` (mandato K) ha misurato, sulle quattro tabelle ibride, **682 righe** che soddisfano la
-definizione meccanica del conflitto (importate **e** modificate dopo l'importazione — ri-misurato
-qui il 2026-09-16 sulla sola `sys_time_off_balances`: 422/422, invariato). Non è zero, ed è
+definizione meccanica del conflitto (importate **e** modificate dopo l'importazione). Questo
+numero **si muove**, perché il database è produzione viva e non un campione fermo: ri-misurando
+la sola `sys_time_off_balances` al terzo giro di confutazione (2026-09-16) il risultato è
+423/494, non i 422/422 di una lettura precedente dello stesso giorno — 11 righe di quella tabella
+sono state toccate proprio oggi, e le tabelle sorelle sono cresciute nello stesso intervallo
+(`sys_time_off_requests` 2.210→2.212, `sys_overtime` 12.061→12.087). Il numero esatto non è
+quindi un fatto fermo da citare come «invariato»: è una fotografia datata (IL PUNTO FISSO,
+`CLAUDE.md`), e il punto che conta — sotto — non dipende dalla sua terza cifra. Non è zero, ed è
 importante dirlo con la stessa precisione con cui `I-D` lo ha scritto: delle 682, **nessuna è
 riconoscibile come il gesto di una persona nella piattaforma** — 681 sono state modificate a
 blocchi da due lavori automatici (le bonifiche di fine luglio, l'avanzamento notturno della
@@ -146,11 +161,16 @@ database sono **X-4** e **X-5** (Fase 5), non questo ADR.
    `I-E`), non un conteggio del dossier: sulle sette amministrative nominabili, sei ne sono
    prive oggi (sopra).
 3. **`X-5`** è la sentinella che tiene vera la regola: nessuna tabella `importato` riceve righe
-   `origine_dato='NATIVO'`, nessuna `nativo` riceve `'IMPORT'`, nessun conflitto ibrido resta
+   `origine_dato='NATIVO'`, nessuna `nativo` riceve `'IMPORTATO'`, nessun conflitto ibrido resta
    aperto oltre 30 giorni.
 4. **I ruoli di people management di Fase 4** ereditano questo confine: `PEOPLE_MANAGER` (R-6)
    riceve scrittura sulle tabelle `nativo`, lettura sulle `importato`, mai una rotta di scrittura
    su queste ultime — perché quella rotta non esiste, non perché un permesso gliela neghi.
+   ⚠ **Questo non è una seconda eccezione a I22/D2**: `HRMS_MANAGER` non perde nulla che avesse
+   oggi, perché nessuna rotta di scrittura sulle tabelle `importato` è mai esistita per nessuno
+   (D6, misurato) — I23 nomina un'assenza già vera, non ne crea una nuova. L'unica eccezione
+   decisa a I22 resta `gdpr:erase` (D3), e questo ADR non ne aggiunge una seconda per estensione
+   implicita.
    ⚠ Questo vale per i ruoli sotto il mandato HR (`HR_MANDATED_ROLES`), **non** per i tre ruoli
    che il mandato mette in `haMandatoPiattaformaAssegnato` — `R-5` `BLUEPRINT_MANAGER`, `R-8`
    `IMPLEMENTATION_CONSULTANT`, `R-9` `PLATFORM_OPERATOR`/`SALES` (misurato sul testo del
@@ -162,6 +182,14 @@ database sono **X-4** e **X-5** (Fase 5), non questo ADR.
    l'asse di `R-0`, entra invece in `puoConcedereRuoli`) — il mandato lo dichiara esplicitamente
    (sezione 2, conseguenza c). Se e come I23 si applica ai tre ruoli di piattaforma è una domanda
    che questo ADR lascia aperta, non decisa per estensione implicita.
+   ⚠ **Misurato di nuovo qui, al terzo giro**: `PLATFORM_ASSIGNED_MANDATE_ROLES`
+   (`apps/api/src/lib/scope/mandati.ts:37`) è oggi un insieme **vuoto per costruzione** — il
+   commento in codice dice testualmente «resta VUOTO finché nessun ruolo lo popola» — e dei
+   quattro codici nominati solo `BLUEPRINT_MANAGER` esiste già come riga in
+   `sys.sys_auth_roles`: `IMPLEMENTATION_CONSULTANT`, `PLATFORM_OPERATOR` e `SALES` non esistono
+   ancora. Il paragrafo sopra descrive un meccanismo **che R-0, R-8, R-9 e R-5 costruiranno**, non
+   uno già operante oggi: fino a quel momento `haMandatoPiattaformaAssegnato` ritorna `false` per
+   chiunque, e nessun attore vede o scrive oggi per assegnazione-cliente.
 5. **`DATA_STEWARD`** (R-6) nasce come il titolare naturale di ciò che questo ADR chiama
    `importato` e `ibrido`: le corse di importazione, il registro di provenienza, i conflitti
    sugli ibridi.
@@ -184,7 +212,7 @@ costruita dal mandato K:
 - `sys.sys_classificazione_direzione_dato` (X-1) — la classificazione come dato, non come prosa.
 - La colonna `origine_dato` su ogni tabella importata/ibrida (X-2).
 - `sys.v_direzione_del_dato_violata` (X-5) — rossa se una tabella `importato` riceve una riga
-  `NATIVO`, se una `nativo` riceve `IMPORT`, o se un conflitto ibrido resta aperto oltre 30
+  `NATIVO`, se una `nativo` riceve `IMPORTATO`, o se un conflitto ibrido resta aperto oltre 30
   giorni. Raccolta da `docs/kb/tools/db_health.py`.
 - `sys.sys_conflitti_ibridi` (X-4) — il registro dei conflitti sugli ibridi, con `DATA_STEWARD`
   come risolutore.
@@ -195,6 +223,11 @@ guardia non ancora costruita e non lo dice è peggio di uno che aspetta.
 
 ## Ratifica
 
-Questo ADR nasce `PROPOSTO`. Passa da tre confutatori in sola lettura (workflow `W3` del mandato
-K) prima di andare a Enzo; la ratifica si registra in
-`.programmi/K-ruoli-direzione/esiti/RISPOSTE_ENZO.md` e porta lo stato ad `ACCETTATO`.
+Questo ADR è passato da **tre giri** di confutazione in sola lettura (workflow `W3` del mandato
+K): 13 confutazioni nel primo giro, 9 nel secondo, tutte confermate e corrette; **11 nel terzo
+giro** (2026-09-16), tutte di **precisione** — un numero da ri-misurare, un refuso di
+nomenclatura (`IMPORT`→`IMPORTATO`, D7), una citazione mancante, wording da chiarire — corrette
+in questa stessa revisione, **nessuna di sostanza**: nessuna cambia quale categoria governa una
+tabella, chi può scrivere dove, o il contenuto di una decisione già letta e approvata da Enzo. La
+condizione posta da Enzo il 2026-09-16 (ratifica subordinata al terzo giro) è quindi soddisfatta.
+Stato: **ACCETTATO**.

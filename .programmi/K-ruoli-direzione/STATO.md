@@ -54,8 +54,8 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
-| X-0 | ATTESA_ENZO(ratifica ADR: leggere solo la sezione «Decisione» e «Conseguenze» di ADR-0041) | S1104 | 2026-09-16T03:10+02:00 | 32 |  |  | docs/architecture/adr/0041_direzione_del_dato.md; I23 in CLAUDE.md; wf_F3_32_202609160217, wf_F3_32b_202609160241 (_VERIFICATO.txt) | 2 giri di W3 (13+9=22 confutazioni, tutte confermate e corrette, nessuna respinta). Terzo giro NON lanciato: guardiano oltre il 50% al momento di lanciarlo (regola V4). Onestà dichiarata: non è "zero confutazioni ottenute", è "22 corrette in 2 giri, un 3° servirebbe idealmente" |
-| K1-ADR | ATTESA_ENZO(ratifica ADR: leggere solo la sezione «Decisione» e «Conseguenze» di ADR-0042) | S1104 | 2026-09-16T03:10+02:00 | 32 |  |  | docs/architecture/adr/0042_catena_del_semilavorato.md; wf_F3_32_202609160217, wf_F3_32b_202609160241 (_VERIFICATO.txt) | stessa nota di X-0: 2 giri W3, 22 confutazioni corrette, 3° non lanciato per guardiano >50% |
+| X-0 | CHIUSA | S1104 | 2026-09-16T22:55+02:00 | 32 |  |  | docs/architecture/adr/0041_direzione_del_dato.md (ACCETTATO); I23 in CLAUDE.md; wf_F3_32_202609160217, wf_F3_32b_202609160241, wf_F3_32c_202609162236 (tutte _VERIFICATO.txt); esiti/F3_terzo_giro_W3.md | 3 giri di W3 (13+9+11=33 confutazioni, tutte confermate e corrette, zero di sostanza). Terzo giro lanciato con guardiano sotto il 50% (16.8%/7.0%), per istruzione di Enzo del 2026-09-16. RATIFICATO |
+| K1-ADR | CHIUSA | S1104 | 2026-09-16T22:55+02:00 | 32 |  |  | docs/architecture/adr/0042_catena_del_semilavorato.md (ACCETTATO); wf_F3_32_202609160217, wf_F3_32b_202609160241, wf_F3_32c_202609162236 (tutte _VERIFICATO.txt); esiti/F3_terzo_giro_W3.md | stessa nota di X-0: 3 giri W3, 33 confutazioni corrette, zero di sostanza. RATIFICATO |
 
 ## F4 — I ruoli, uno per migrazione
 

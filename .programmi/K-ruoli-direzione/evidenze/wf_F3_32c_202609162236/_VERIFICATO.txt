@@ -1,0 +1,12 @@
+runId: wf_3bcfc1eb-5af
+agenti: 6/6 completati, 0 errori
+esiti accettati: 11/11 confutazioni (nessuna scartata; W3 non usa spia numerica come W0/W1/W2,
+verifica in linea dalla sessione principale contro il codice/DB/mandato)
+verificato di persona (in linea, non solo dall'agente):
+  - conteggio tabelle sys.sys_* = 247 (q.py, ripetuto uguale)
+  - PLATFORM_ASSIGNED_MANDATE_ROLES vuoto (mandati.ts:37, rg ripetuto uguale)
+  - testo esatto del mandato passo 51 (grep sul file MANDATO_K_v2, riga 483)
+  - citazione I-D.md §1 (grep sul file, righe 13-15)
+esito: .programmi/K-ruoli-direzione/esiti/F3_terzo_giro_W3.md
+correzioni applicate a: docs/architecture/adr/0041_direzione_del_dato.md,
+docs/architecture/adr/0042_catena_del_semilavorato.md (stato ACCETTATO)

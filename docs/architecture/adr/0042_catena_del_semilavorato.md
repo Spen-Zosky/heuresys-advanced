@@ -1,6 +1,6 @@
 # ADR-0042 — La catena del semilavorato: la piattaforma genera, il cliente possiede
 
-**Status**: PROPOSTO
+**Status**: ACCETTATO
 **Date**: 2026-09-16
 **Decided by**: Enzo Spenuso (la regola, già in produzione) · Claude Code CLI (stesura, mandato K)
 **Relates to**: ADR-0041 (I23, direzione del dato) — questo ADR guarda il semilavorato di
@@ -74,8 +74,21 @@ da una sola tabella su tredici: `sys_skills` (14.003 righe di piattaforma, 28 di
 |---|---|---|
 | **B — canonico** | `sys_skills` (1) | la catena completa: generato E personalizzato, distinguibili in una colonna |
 | **A — catalogo senza tenant** | `sys_skill_families`, `sys_skill_categories`, `sys_skill_taxonomy_edges`, `sys_job_families`, `sys_organization_unit_templates`, `sys_process_kpi_templates` (6) | solo piattaforma; nessuna copia di cliente è possibile oggi |
-| **C — B incompleto** | `sys_job_roles`, `sys_organization_unit_kpi_templates` (2) | ha la colonna tenant nullable ma **non** la bandiera: non distingue «globale» da «senza padrone» |
+| **C — B incompleto** | `sys_job_roles`, `sys_organization_unit_kpi_templates`, `sys_tenant_blueprints` (3, dopo la riclassificazione sotto) | ha la colonna tenant nullable ma **non** la bandiera: non distingue «globale» da «senza padrone» |
 | **D — tenant nullable, oggi sempre valorizzato** | `sys_survey_templates`, `sys_goal_templates`, `sys_engagement_survey_templates` (3) | ogni riga oggi è del tenant; il «generato» si distingue solo dal registro di provenienza (oggi vuoto) |
+
+⚠ **Le 28 righe di `sys_skills` del tenant RTL, ri-verificate al terzo giro di confutazione, non
+portano la firma della catena generativa appena descritta.** `tenant-materialization/repository.ts`
+marca ogni riga che genera con `skill_metadata->>'materialized_from'` valorizzato; interrogate le
+28 righe con `skill_tenant_id` non nullo, **tutte e 28** hanno quel campo `NULL`. Coerentemente,
+`sys.sys_generated_record_origins` ha **zero righe in totale** (nessuna corsa di applicazione di
+un fascicolo è mai arrivata al passo che scrive il registro): le 28 righe sono nate dal CRUD
+ordinario del modulo `skills` (`skills/repository.ts:154-159`), non dalla materializzazione. Il
+modo **B** è confermato a livello di **schema** — la coppia di colonne esiste e la tabella la usa
+— ma questo caso non dimostra che la catena piattaforma-genera→cliente-personalizza abbia mai
+prodotto dati **per quella via**: oggi non c'è una sola riga generata e poi personalizzata di cui
+si possa seguire la traccia dall'inizio alla fine. È lo stesso limite già dichiarato sotto per il
+modo D (registro vuoto), esteso qui al presunto caso canonico.
 
 ⚠ **`sys_tenant_blueprints` è stata riclassificata**, fuori dal modo D dov'era finita: a livello
 di schema `tenant_blueprint_tenant_id` è **nullable**, senza alcun vincolo `NOT NULL` (verificato:
@@ -144,11 +157,16 @@ questo ADR:
      (`skill_taxonomy_tenant:*`, `skill_alias:manage` — governa la propria copia, `tenant_id`
      valorizzato). La parte che genera con `tenant_id NULL` **resta a `PLATFORM_ADMIN`**:
      `PLATFORM_TAXONOMY_STEWARD` non nasce in questo mandato (sezione 2, conseguenza a).
-   - `R-5` (mandato, passo 51 — non la conseguenza a, che parla solo di R-3): ruolo di
-     **piattaforma** (`haMandatoPiattaformaAssegnato`, D9=B — asse `R-0`, non I23) che riceverà
-     `tenant_blueprint:write` su un fascicolo **già** del cliente assegnato, non su una riga
-     `tenant_id NULL` — coerente con la riclassificazione sopra (`sys_tenant_blueprints` è modo
-     C). ⚠ **Un debito che R-5 eredita**: la migrazione `000300_permessi_del_fascicolo.sql`
+   - `R-5` (mandato, passo 51 — non la conseguenza a, che parla solo di R-3) è **due grant nella
+     stessa migrazione**, non uno solo: `tenant_blueprint:read/write` a `BLUEPRINT_MANAGER` —
+     ruolo di **piattaforma** (`haMandatoPiattaformaAssegnato`, D9=B — asse `R-0`, non I23) — su
+     un fascicolo **già** del cliente assegnato, non su una riga `tenant_id NULL` — coerente con
+     la riclassificazione sopra (`sys_tenant_blueprints` è modo C); **e**
+     `tenant_blueprint:read/approve` a `TENANT_ADMIN` — il cliente approva e possiede, coerente
+     col titolo di questo ADR e con la stessa regola delle «due versioni» che il mandato impone
+     per `R-3` (K1-ADR, passo 31). `TENANT_ADMIN` è un ruolo di **cliente**, scoperto per tenant
+     come sempre: non passa dall'asse di `R-0` e D9 non lo riguarda. ⚠ **Un debito che R-5
+     eredita**: la migrazione `000300_permessi_del_fascicolo.sql`
      (righe 87-96) solleva `RAISE EXCEPTION` se un ruolo diverso da `PLATFORM_ADMIN` detiene
      anche un solo permesso `tenant_blueprint:*` — e `000418` (S-1, 2026-09-15) lo ri-conferma
      nell'allowlist dei solo-plenipotenziari. La migrazione di R-5 **deve emendare quella guardia**
@@ -175,6 +193,11 @@ questo ADR:
 
 ## Ratifica
 
-Nasce `PROPOSTO`. Passa da tre confutatori in sola lettura (workflow `W3` del mandato K) prima di
-andare a Enzo; la ratifica si registra in
-`.programmi/K-ruoli-direzione/esiti/RISPOSTE_ENZO.md` e porta lo stato ad `ACCETTATO`.
+Questo ADR è passato da **tre giri** di confutazione in sola lettura (workflow `W3` del mandato
+K): 13 confutazioni nel primo giro, 9 nel secondo, tutte confermate e corrette; **11 nel terzo
+giro** (2026-09-16), tutte di **precisione** — un conteggio di tabella da correggere, un caso
+d'uso citato come prova che non porta la firma del meccanismo descritto, un grant mancante nella
+descrizione di R-5 — corrette in questa stessa revisione, **nessuna di sostanza**: nessuna
+cambia quale categoria governa una tabella, chi può scrivere dove, o il contenuto di una
+decisione già letta e approvata da Enzo. La condizione posta da Enzo il 2026-09-16 (ratifica
+subordinata al terzo giro) è quindi soddisfatta. Stato: **ACCETTATO**.

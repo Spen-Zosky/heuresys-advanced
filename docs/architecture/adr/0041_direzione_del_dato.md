@@ -16,11 +16,18 @@ configurazione di fisso/variabile, attribuzione premi, metriche. Non li **produc
 
 Questa distinzione non era mai stata scritta come regola. Esisteva **per abitudine**: misurato
 sulle dodici tabelle amministrative del dossier che ha preceduto questo mandato, **nessuna
-interfaccia** scrive contratti, presenze, buste paga o documenti d'identità — zero rotte di
-scrittura trovate. Le uniche cinque scritture native su quell'area sono esattamente quelle che la
-regola, non ancora scritta, avrebbe già preteso: la richiesta di ferie (gesto della persona), il
-movimento del saldo che ne consegue, la raccomandazione retributiva interna, la consegna verso il
-gestionale esterno.
+interfaccia** scrive contratti, presenze, buste paga o documenti d'identità (`sys_user_contracts`,
+`sys_user_pay_slips`, `sys_user_identity_documents`, `sys_position_compensation_profiles`) — zero
+rotte di scrittura, verificato di nuovo qui con perimetro dichiarato: `rg --no-ignore --hidden`
+su `apps/api/src` **e** `apps/web/src`, file gitignored inclusi. Le uniche cinque scritture
+native su quell'area sono esattamente quelle che la regola, non ancora scritta, avrebbe già
+preteso: (1) la richiesta di ferie nasce qui — `INSERT sys_time_off_requests`
+(`time-off/repository.ts:408`); (2) il saldo si muove quando la richiesta è approvata —
+`UPDATE sys_time_off_balances` (`time-off/repository.ts:441`); (3) il movimento resta come
+traccia di quel gesto — `INSERT sys_leave_balance_transactions` (`time-off/repository.ts:467`);
+(4) l'analisi retributiva interna — `INSERT sys_compensation_recommendations`
+(`compensation/repository.ts:348`); (5) la consegna verso il gestionale esterno, cioè il confine
+stesso — `INSERT sys_payroll_handoff_records` (`compensation/repository.ts:423`).
 
 > *«Il People Management governa tutti i dati che nascono e si evolvono dentro questa
 > piattaforma e che non sono importati da gestionali esterni. Buste paga e dati economici sono
@@ -66,14 +73,25 @@ un formato e rifarlo dopo. Non è un mandato aperto: è una classificazione dich
 
 ### La classificazione di oggi (allegato)
 
-La classificazione completa delle 245 tabelle `sys.sys_*` — misurata, con scrittori file:riga per
-ciascuna — è in `.programmi/K-ruoli-direzione/esiti/I-E.md`. In una riga: **nativo 28 · importato
-88 · ibrido 97 · infrastruttura 32**. 103 tabelle sono «dubbie» secondo la regola meccanica del
-mandato (hanno sia scrittori API sia scrittori di importazione, o righe senza alcuno scrittore
-trovato, o sono una delle quattro di D6): le ratifica Enzo riga per riga in **X-1** (Fase 5),
-fuori da questa sessione. Fino alla ratifica, la classificazione **proposta** da `I-E` vale come
-riferimento di lavoro, non come dato di sistema — `X-1` la deposita come tale
-(`sys.sys_classificazione_direzione_dato`).
+`I-E` (mandato K, 2026-09-15 03:31) ha classificato **245 tabelle su 245 attese in quel
+momento**, con scrittori file:riga per ciascuna — l'esito completo è in
+`.programmi/K-ruoli-direzione/esiti/I-E.md`. In una riga: **nativo 28 · importato 88 · ibrido 97 ·
+infrastruttura 32**. 103 tabelle sono «dubbie» secondo la regola meccanica del mandato (hanno sia
+scrittori API sia scrittori di importazione, o righe senza alcuno scrittore trovato, o sono una
+delle quattro di D6): le ratifica Enzo riga per riga in **X-1** (Fase 5), fuori da questa sessione.
+
+⚠ **Il vivo, ri-misurato il 2026-09-16, ha 246 tabelle `sys.sys_*`, non 245**
+(`select table_type, count(*) from information_schema.tables where table_schema='sys' and
+table_name like 'sys\_%' group by table_type` → `BASE TABLE 246`). La differenza è
+`sys_permessi_plenipotenziari_ammessi`, creata dalla stessa sessione K (migrazione `000418`,
+applicata il 2026-09-15 alle 19:13 — dopo il lancio di `I-E`, ore 03:31): non è un errore di
+misura, è una tabella nata **dopo** che la classificazione era già chiusa. `I-E` non è più
+completa rispetto al vivo, e questo ADR lo dichiara invece di ripetere un numero superato: la
+tabella mancante è `infrastruttura` per natura (allowlist di una sentinella RBAC, non un dato di
+cliente), e **X-1** la classifica esplicitamente prima di depositare
+`sys.sys_classificazione_direzione_dato` come dato di sistema. Fino a quel momento la
+classificazione di `I-E` vale come riferimento di lavoro **con questa lacuna dichiarata**, non
+come inventario chiuso.
 
 ### Il caso ibrido più delicato: le ferie
 
@@ -82,9 +100,20 @@ maturazione arrivano tutte da fuori (contrattuali, CCNL); la richiesta di ferie 
 saldo è ibrido — la giacenza iniziale importata, i movimenti dalle approvazioni fatte qui si
 sommano. Enzo ha già risposto alla domanda «chi vince in caso di conflitto» (D5, 2026-09-15,
 opzione **C**): *l'importazione non tocca mai un saldo che ha un gesto nativo aperto; il
-conflitto va in un registro e lo chiude il `DATA_STEWARD`.* La misura di `I-D` (mandato K) dice
-che oggi quei conflitti sono **zero**: la regola nasce verde. La sentinella e la migrazione che la
-rendono vera sul database sono **X-4** e **X-5** (Fase 5), non questo ADR.
+conflitto va in un registro e lo chiude il `DATA_STEWARD`.*
+
+`I-D` (mandato K) ha misurato, sulle quattro tabelle ibride, **682 righe** che soddisfano la
+definizione meccanica del conflitto (importate **e** modificate dopo l'importazione — ri-misurato
+qui il 2026-09-16 sulla sola `sys_time_off_balances`: 422/422, invariato). Non è zero, ed è
+importante dirlo con la stessa precisione con cui `I-D` lo ha scritto: delle 682, **nessuna è
+riconoscibile come il gesto di una persona nella piattaforma** — 681 sono state modificate a
+blocchi da due lavori automatici (le bonifiche di fine luglio, l'avanzamento notturno della
+storia di RTL), una sola ha un istante proprio ma dello stesso giorno dei blocchi. **Zero gesti
+individuali sono in conflitto**, pur essendoci 682 righe che la definizione meccanica marca come
+tali. La regola nasce verde nel senso che conta: nessuna persona ha mai visto la propria richiesta
+sovrascritta da un'importazione. Il caso vero nascerà con il primo cliente che importa saldi e usa
+la piattaforma insieme, non prima. La sentinella e la migrazione che rendono la regola vera sul
+database sono **X-4** e **X-5** (Fase 5), non questo ADR.
 
 ## Conseguenze
 
@@ -95,10 +124,18 @@ rendono vera sul database sono **X-4** e **X-5** (Fase 5), non questo ADR.
 3. **`X-5`** è la sentinella che tiene vera la regola: nessuna tabella `importato` riceve righe
    `origine_dato='NATIVO'`, nessuna `nativo` riceve `'IMPORT'`, nessun conflitto ibrido resta
    aperto oltre 30 giorni.
-4. **Ogni ruolo nuovo di Fase 4** che scrive dati del cliente eredita questo confine: un ruolo di
-   people management (`PEOPLE_MANAGER`, R-6) riceve scrittura sulle tabelle `nativo`, lettura
-   sulle `importato`, mai una rotta di scrittura su queste ultime — perché quella rotta non
-   esiste, non perché un permesso gliela neghi.
+4. **I ruoli di people management di Fase 4** ereditano questo confine: `PEOPLE_MANAGER` (R-6)
+   riceve scrittura sulle tabelle `nativo`, lettura sulle `importato`, mai una rotta di scrittura
+   su queste ultime — perché quella rotta non esiste, non perché un permesso gliela neghi.
+   ⚠ Questo vale per i ruoli sotto il mandato HR (`HR_MANDATED_ROLES`), **non** per i ruoli di
+   piattaforma nati da D9 (`R-0`, `R-7` `SECURITY_ADMIN`, `R-8` `IMPLEMENTATION_CONSULTANT`, `R-9`
+   `PLATFORM_OPERATOR`/`SALES`): quelli vedono e scrivono per **assegnazione-cliente**
+   (`haMandatoPiattaformaAssegnato`, asse ortogonale I16), con lettura mascherata per
+   ADR-0032/I20 — un asse diverso, deciso a parte, che questo ADR non estende e non vincola.
+   `SECURITY_ADMIN` in particolare è un ruolo di **cliente** (non esce dal tenant, non usa
+   l'asse di R-0): il mandato lo dichiara esplicitamente (sezione 2, conseguenza c). Se e come
+   I23 si applica ai ruoli di piattaforma è una domanda che questo ADR lascia aperta, non
+   decisa per estensione implicita.
 5. **`DATA_STEWARD`** (R-6) nasce come il titolare naturale di ciò che questo ADR chiama
    `importato` e `ibrido`: le corse di importazione, il registro di provenienza, i conflitti
    sugli ibridi.

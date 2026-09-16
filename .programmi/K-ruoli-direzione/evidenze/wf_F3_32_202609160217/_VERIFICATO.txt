@@ -1,0 +1,53 @@
+Verifica in linea di W3 (sezione 3.6 del mandato) — run wf_596aafb3-411, 2026-09-16.
+
+6 agenti, 0 errori, 13 confutazioni riportate (7 su ADR-0041, 6 su ADR-0042), 0 mancanti.
+
+Ognuna delle 13 è stata ri-eseguita in linea con il comando indicato dal confutatore.
+Tutte e 13 sono state CONFERMATE (nessuna respinta) e hanno portato a una correzione
+del testo dell'ADR corrispondente. Dettaglio:
+
+ADR-0041 (X-0):
+1. [database] 245 vs 246 tabelle sys.sys_* — CONFERMATA. sys_permessi_plenipotenziari_ammessi
+   (mig. 000418, applicata dopo il lancio di I-E) manca dalla classificazione. Corretto:
+   dichiarata la lacuna con data e causa, non più "245 completa".
+2. [database] "conflitti D5 = zero" — CONFERMATA. I-D misura 682 righe che soddisfano la
+   definizione meccanica; "zero" valeva solo per i gesti individuali. Corretto: riportata
+   la cifra 682 con la distinzione esatta (zero gesti individuali, non zero righe).
+3. [codice] duplicato di #1 — CONFERMATA, stessa correzione.
+4. [codice] nessuna citazione file:riga per "zero rotte di scrittura" — CONFERMATA
+   (rg sull'ADR: zero citazioni). Corretto: aggiunte le 5 citazioni file:riga.
+5. [codice] perimetro di ricerca non dichiarato per le 4 tabelle D6 — CONFERMATA
+   (rg senza --no-ignore --hidden non è il comando che l'ADR pretende di aver eseguito).
+   Corretto: dichiarato il comando esatto e il perimetro (apps/api/src + apps/web/src,
+   gitignored inclusi), ri-verificato a zero.
+6. [decisioni] Conseguenza 4 non riconcilia con l'asse D9/R-0 dei ruoli di piattaforma —
+   CONFERMATA (mandato sezione 2, conseguenza c). Corretto: la conseguenza è ora esplicita
+   sul fatto che vale per i ruoli HR, non per quelli di piattaforma.
+7. [decisioni] "cinque scritture" ma l'elenco ne conta quattro — CONFERMATA (rg sul file).
+   Corretto: le cinque voci sono ora enumerate una per una con file:riga.
+
+ADR-0042 (K1-ADR):
+8. [database] censimento "1/13" incompleto — CONFERMATA. La query is_global trova altre 7
+   tabelle fuori dal censimento di I-B. Corretto: dichiarato il confine del censimento di
+   I-B e aggiunta la nota sulle sette tabelle, coi numeri reali, senza classificarle (fuori
+   scopo dichiarato).
+9. [database] sys_tenant_blueprints come "D" — CONFERMATA (nullable, nessun NOT NULL, 1
+   riga sola). Corretto: riclassificata come modo C.
+10. [codice] "aggiorna in posto" senza file:riga — CONFERMATA (zero occorrenze nei file di
+    rigenerazione; gli INSERT esistenti sono ON CONFLICT DO NOTHING, mai UPDATE). Corretto:
+    sostituito con "non tocca affatto", verbo coerente col codice.
+11. [codice] duplicato di #9 — CONFERMATA, stessa correzione.
+12. [decisioni] R-3 descritto come genesi tenant_id NULL — CONFERMATA (mandato: R-3 riceve
+    solo permessi lato cliente, PLATFORM_TAXONOMY_STEWARD non nasce in questo mandato).
+    Corretto: Conseguenza 2 riscritta, R-3 e R-5 separati.
+13. [decisioni] stesso errore per R-5 — CONFERMATA (contraddiceva la classificazione D
+    dell'ADR stesso). Corretto nella stessa riscrittura.
+
+Nessuna confutazione respinta. File toccati:
+- docs/architecture/adr/0041_direzione_del_dato.md
+- docs/architecture/adr/0042_catena_del_semilavorato.md
+
+Prossimo passo: rilancio di W3 come run NUOVO (non resumeFromRunId — il prompt degli
+agenti referenzia il path del file, non il suo contenuto, quindi un resume riuserebbe la
+cache anche se i file sono cambiati: non verificherebbe nulla) per confermare che le 13
+correzioni reggano.

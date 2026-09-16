@@ -13,7 +13,8 @@
  * and retention run.
  */
 import { pool, withTransaction } from "../../db/client.js";
-import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import type { ActorContext } from "../../lib/actor.js";
+import { haMandatoGdpr } from "../../lib/scope/mandati.js";
 import { ForbiddenError, NotFoundError, ConflictError } from "../../errors/index.js";
 import * as repo from "./repository.js";
 import type {
@@ -40,7 +41,7 @@ async function findSubject(userId: string): Promise<SubjectRow | null> {
 
 /** Tenant guard: non-platform actors only reach subjects of their own tenant. */
 function assertTenantScope(actor: ActorContext, subject: SubjectRow): void {
-  if (isPlatform(actor)) return;
+  if (haMandatoGdpr(actor)) return;
   if (!actor.tenantId || subject.user_tenant_id !== actor.tenantId) {
     throw new ForbiddenError("Subject is outside your tenant", "TENANT_SCOPE_VIOLATION");
   }
@@ -154,7 +155,7 @@ export const gdprService = {
   /** F4 retention sweep over every registry window (platform-wide data). */
   async runRetention(actor: ActorContext, dryRun: boolean): Promise<GdprRetentionReport> {
     // Retention deletes across ALL tenants' rows — platform-level operation.
-    if (!isPlatform(actor)) {
+    if (!haMandatoGdpr(actor)) {
       throw new ForbiddenError("Retention sweep is platform-level", "PLATFORM_ONLY");
     }
     const entries = await repo.listDataMap(pool);

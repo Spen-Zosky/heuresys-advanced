@@ -232,6 +232,11 @@
       "heuresys-source": "./src/schemas/delegations.ts",
       "default": "./dist/schemas/delegations.js"
     },
+    "./schemas/platform-tenant-assignments": {
+      "types": "./dist/schemas/platform-tenant-assignments.d.ts",
+      "heuresys-source": "./src/schemas/platform-tenant-assignments.ts",
+      "default": "./dist/schemas/platform-tenant-assignments.js"
+    },
     "./schemas/career-paths": {
       "types": "./dist/schemas/career-paths.d.ts",
       "heuresys-source": "./src/schemas/career-paths.ts",

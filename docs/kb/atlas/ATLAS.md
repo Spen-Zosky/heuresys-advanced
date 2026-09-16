@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `c6c98e90` (2026-09-16T23:24:56+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `c99dae09` (2026-09-17T00:22:25+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 109 |
-| Route API | 649 |
+| Moduli API | 110 |
+| Route API | 652 |
 | Pagine web | 129 |
-| Schemi shared | 119 |
-| Tabelle DB | 315 (vuote: 19) |
+| Schemi shared | 120 |
+| Tabelle DB | 316 (vuote: 20) |
 | Viste / matview | 66 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 284 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 286 |
 
 ## Moduli API
 
@@ -67,7 +67,7 @@
 | learning-modules | /v1/learning-modules | 5 | 4 | 1 | 1 |
 | learning-path-steps | /v1/learning-path-steps | 5 | 4 | 3 | 1 |
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
-| me | /v1/me | 65 | 32 | 63 | 41 |
+| me | /v1/me | 65 | 32 | 63 | 42 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 2 | 2 | 2 | 1 |
 | notifications | /v1/notifications | 2 | 1 | 2 | 0 |
@@ -81,6 +81,7 @@
 | organization-unit-processes | /v1/organization-unit-processes | 4 | 3 | 4 | 2 |
 | organization-units | /v1/organization-units | 5 | 4 | 1 | 1 |
 | performance-reviews | /v1/performance-reviews | 2 | 1 | 3 | 2 |
+| platform-tenant-assignments | /v1/platform-tenant-assignments | 3 | 1 | 3 | 1 |
 | position-career-paths | /v1/position-career-paths | 4 | 3 | 3 | 1 |
 | position-succession-relevance | /v1/position-succession-relevance | 4 | 3 | 2 | 1 |
 | positions | /v1/positions | 16 | 4 | 12 | 3 |
@@ -155,6 +156,7 @@
 - `sys.sys_job_requisitions`
 - `sys.sys_notification_preferences`
 - `sys.sys_occupation_classification_mappings`
+- `sys.sys_platform_user_tenant_assignments`
 - `sys.sys_user_delegations`
 
 ## Key counts live
@@ -164,8 +166,8 @@
 - positions: **315**
 - org_units: **45**
 - roles: **14**
-- permissions: **231**
-- role_permission_mappings: **1015**
+- permissions: **232**
+- role_permission_mappings: **1016**
 - ui_interfaces_active: **76**
 - skills: **14031**
 

@@ -1,0 +1,5 @@
+voce: X-0 + K1-ADR (passo 32, terzo giro di confutazione)
+script: workflows/W3_confutazione_adr.js
+args.adr: ["docs/architecture/adr/0041_direzione_del_dato.md", "docs/architecture/adr/0042_catena_del_semilavorato.md"]
+ora: 2026-09-16T22:36:34+0200
+motivo: Enzo (2026-09-16) ha subordinato la ratifica al terzo giro di confutazione, non lanciato nei giri precedenti perche' il guardiano era oltre il 50%. Guardiano ora: contesto 16.8%, finestra 5h 7.0% -> si lancia.

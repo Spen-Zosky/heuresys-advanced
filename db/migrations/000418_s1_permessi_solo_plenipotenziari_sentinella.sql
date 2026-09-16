@@ -140,6 +140,17 @@ SELECT v.code, 'stato di partenza 2026-09, da ridurre con F4 (mandato K)', DATE 
   ) AS v(code)
 ON CONFLICT (permission_code) DO NOTHING;
 
+-- [mandato K, R-0] platform_tenant_assignment:manage (mig 000421) e' nato DOPO questo elenco,
+-- ma la vista sotto rivede l'intero schema corrente: stessa ragione gia' scritta per 000062 e
+-- 000304. A differenza delle 102 righe sopra (stato di partenza da RIDURRE con F4), questo
+-- permesso e' solo-plenipotenziario PER DECISIONE (D9=B): nessun altro ruolo deve mai
+-- assegnare clienti a un utente di piattaforma. Non e' un debito, e' la regola.
+INSERT INTO sys.sys_permessi_plenipotenziari_ammessi (permission_code, motivo, data)
+VALUES ('platform_tenant_assignment:manage',
+        'D9=B (mandato K, R-0): solo PLATFORM_ADMIN assegna clienti a un ruolo di piattaforma. Non e'' uno stato di partenza da ridurre, e'' la regola stessa.',
+        DATE '2026-09-16')
+ON CONFLICT (permission_code) DO NOTHING;
+
 CREATE OR REPLACE VIEW sys.v_permessi_solo_plenipotenziari AS
 WITH titolari AS (
   SELECT p.auth_permission_code AS permission_code,

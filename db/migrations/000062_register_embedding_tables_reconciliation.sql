@@ -117,7 +117,16 @@ VALUES
   ('sys_interview_feedback', 'D', 'EXCLUDE', NULL,
    '[S1083] La valutazione di chi ha condotto un colloquio (#54 F2, mig 000364). La FK verso sys_users e'' quella dell''INTERVISTATORE, dichiarata nel registro GDPR come incarico funzionale. Il legacy ha interview_feedback e non si importa (I12).'),
   ('sys_job_offers', 'D', 'EXCLUDE', NULL,
-   '[S1083] L''offerta su una candidatura (#54 F2, mig 000364). E'' l''entita'' che la prima versione del ciclo legacy non aveva e che la seconda ha dovuto aggiungere: e'' il segno che serve davvero. Il legacy ha recruiting_offers e non si importa (I12).')
+   '[S1083] L''offerta su una candidatura (#54 F2, mig 000364). E'' l''entita'' che la prima versione del ciclo legacy non aveva e che la seconda ha dovuto aggiungere: e'' il segno che serve davvero. Il legacy ha recruiting_offers e non si importa (I12).'),
+
+  -- [mandato K, R-0] L'asse "utente di piattaforma assegnato a certi clienti" (mig 000421).
+  -- Stessa ragione di tutte le righe qui sopra: il controllo che pretende 0 UNCLASSIFIED gira
+  -- in QUESTO file, quindi una tabella nuova va registrata qui e non dopo la migrazione che la
+  -- crea. Intercettata dalla prova generale sul gemello, alla SECONDA passata (la prima, sulla
+  -- copia gia' migrata di heuresys_ci, non l'avrebbe vista: la tabella esisteva gia' dalla
+  -- prima applicazione).
+  ('sys_platform_user_tenant_assignments', 'D', 'EXCLUDE', NULL,
+   '[mandato K, R-0, D9=B] Quali clienti un ruolo di piattaforma ASSEGNATO (non PLATFORM_ADMIN) puo'' vedere (mig 000421). Dato governato dalla piattaforma stessa (chi assegna chi a chi): nessuna sorgente legacy esiste ne'' puo'' esistere, perche'' il legacy non ha alcuna nozione di ruolo di piattaforma con perimetro per-cliente.')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

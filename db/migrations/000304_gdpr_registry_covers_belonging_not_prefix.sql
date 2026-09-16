@@ -187,6 +187,24 @@ SET gdpr_map_data_class       = EXCLUDED.gdpr_map_data_class,
     gdpr_map_legal_basis      = EXCLUDED.gdpr_map_legal_basis,
     updated_at                = now();
 
+-- [mandato K, R-0] sys_platform_user_tenant_assignments (mig 000421) e' nata DOPO le 27 righe
+-- di questo file, ma il controllo (a) sotto gira in QUESTO file e vede l'intero schema: stessa
+-- ragione gia' scritta per la registrazione delle tabelle in 000062. La colonna
+-- platform_user_tenant_assignment_assigned_by e' esclusa dal controllo per costruzione (finisce
+-- per "_by"): e' l'attore che assegna, non il soggetto. Solo la colonna "utente assegnato" e'
+-- una FK di appartenenza. Stessa classificazione di sys_user_auth_roles (AUTH_SECURITY/RETAIN/
+-- SUBJECT): e' un registro di accountability — chi ha potuto vedere quale cliente e da quando —
+-- non un dato personale del soggetto.
+INSERT INTO sys.sys_gdpr_data_map (
+  gdpr_map_table_schema, gdpr_map_table_name, gdpr_map_subject_fk,
+  gdpr_map_data_class, gdpr_map_erasure_strategy, gdpr_map_reference_kind,
+  gdpr_map_legal_basis
+) VALUES
+  ('sys','sys_platform_user_tenant_assignments','platform_user_tenant_assignment_user_id',
+   'AUTH_SECURITY','RETAIN','SUBJECT',
+   'Registro di chi ha potuto vedere quale cliente in qualita'' di ruolo di piattaforma assegnato (D9=B): accountability di accesso, non contenuto personale.')
+ON CONFLICT (gdpr_map_table_schema, gdpr_map_table_name, gdpr_map_subject_fk) DO NOTHING;
+
 -- ============================================================================
 -- POST-CONDIZIONI — la migrazione verifica se stessa e fallisce forte.
 -- Proteggono anche cio' che NON doveva cambiare, non solo cio' che doveva.

@@ -1,9 +1,9 @@
 {
  "lib/actor.ts": {
-  "predicati": 2,
+  "predicati": 4,
   "stringhe_ruolo": 1,
   "roles_includes": 1,
-  "totale": 4
+  "totale": 6
  },
  "middleware/tenantContext.ts": {
   "predicati": 0,
@@ -54,22 +54,16 @@
   "totale": 2
  },
  "modules/blueprint-activations/service.ts": {
-  "predicati": 3,
+  "predicati": 1,
   "stringhe_ruolo": 0,
   "roles_includes": 0,
-  "totale": 3
+  "totale": 1
  },
  "modules/blueprint-families/service.ts": {
   "predicati": 3,
   "stringhe_ruolo": 0,
   "roles_includes": 0,
   "totale": 3
- },
- "modules/blueprint-overrides/service.ts": {
-  "predicati": 2,
-  "stringhe_ruolo": 0,
-  "roles_includes": 0,
-  "totale": 2
  },
  "modules/blueprint-processes/service.ts": {
   "predicati": 3,
@@ -474,10 +468,10 @@
   "totale": 1
  },
  "modules/tenant-import-runs/service.ts": {
-  "predicati": 3,
+  "predicati": 1,
   "stringhe_ruolo": 0,
   "roles_includes": 0,
-  "totale": 3
+  "totale": 1
  },
  "modules/tenants/provisioning.ts": {
   "predicati": 0,
@@ -486,10 +480,10 @@
   "totale": 2
  },
  "modules/tenants/service.ts": {
-  "predicati": 4,
-  "stringhe_ruolo": 1,
-  "roles_includes": 1,
-  "totale": 6
+  "predicati": 1,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 1
  },
  "modules/time-off/service.ts": {
   "predicati": 1,

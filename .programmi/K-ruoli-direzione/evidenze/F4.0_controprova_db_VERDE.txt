@@ -1,0 +1,15 @@
+
+ RUN  v4.1.11 D:/heuresys-advanced/apps/api
+
+◇ injected env (24) from ..\..\.env // tip: ⌘ override existing { override: true }
+[drift] baseline: 9 righe residue PRE-ESISTENTI (non le lascia questa corsa), su 795 colonne ispezionate:
+         sys_content_documents.document_title: 4
+         sys_content_versions.version_title: 5
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  00:32:05
+   Duration  4.42s (transform 886ms, setup 233ms, import 1.16s, tests 1.06s, environment 0ms)
+
+◇ injected env (0) from ..\..\.env // tip: ◈ encrypted .env [www.dotenvx.com]
+[drift] nessun residuo aggiunto da questa corsa (totale invariato: 9).

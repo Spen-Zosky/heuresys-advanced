@@ -1,0 +1,11 @@
+30 file modificati → suite: programmi, typecheck, test-api, lint, db-health, no-contamination, migrate-idempotent, router-selftest
+  riuso (verdi, contenuto invariato): lint
+  [L1] programmi            exit=0 (1.0s)
+  [L0] typecheck            exit=0 (42.0s)
+  [L2] test-api             exit=1 (313.0s)
+  [L2] db-health            exit=0 (20.5s)
+  [L2] no-contamination     exit=0 (20.5s)
+  [L2] migrate-idempotent   exit=0 (53.6s)
+  [L0] router-selftest      exit=0 (3.6s)
+
+verdetto: RED → .zp\verify-verdict.json

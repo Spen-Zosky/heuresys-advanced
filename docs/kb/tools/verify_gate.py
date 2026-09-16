@@ -126,6 +126,17 @@ ROUTES: list[tuple[str, list[str]]] = [
     # proprio ai file piu' delicati. Aggiungere, non sostituire.
     ("apps/api/test/helpers/drift-check.ts", ["typecheck", "test-api", "drift-lock"]),
     ("apps/api/vitest.config.ts",            ["typecheck", "test-api", "drift-lock"]),
+    # Mandato K, F4.0 (2026-09-16) — `role-codes-drift.unit.test.ts` vive in `apps/api/`
+    # ma LEGGE questi due file di `apps/web/` come testo, per accorgersi di un ruolo
+    # aggiunto a `role-codes.ts` e dimenticato nel menu a tendina o nella precedenza.
+    # Senza questa rotta, un tocco SOLO a uno di questi due file cadrebbe sulla rotta
+    # generica di `apps/web/` (typecheck+lint) e `test-api` non girerebbe mai: la prova
+    # che deve accorgersi della deriva non scatterebbe proprio nel caso che la genera
+    # per davvero — misurato qui: `roles-editor.tsx` mancava `BRANCH_MANAGER` da quando
+    # la migrazione 000272 l'ha creato, e nessun cancello se n'era accorto.
+    ("apps/web/src/lib/role-precedence.ts", ["typecheck", "lint", "test-api"]),
+    ("apps/web/src/app/(authenticated)/users/[userId]/_components/roles-editor.tsx",
+     ["typecheck", "lint", "test-api"]),
     ("apps/api/",        ["typecheck", "test-api"]),
     ("packages/shared/", ["typecheck", "test-api"]),
     ("apps/web/",        ["typecheck", "lint"]),

@@ -1,0 +1,7 @@
+27 file modificati → suite: programmi, typecheck, test-api, lint
+  [L1] programmi            exit=0 (0.7s)
+  [L0] typecheck            exit=0 (53.1s)
+  [L2] test-api             exit=1 (390.8s) · 1 falliti
+  [L0] lint                 exit=0 (403.7s)
+
+verdetto: RED → .zp\verify-verdict.json

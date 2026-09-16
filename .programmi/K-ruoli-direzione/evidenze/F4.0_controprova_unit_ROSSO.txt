@@ -1,0 +1,35 @@
+
+ RUN  v4.1.11 D:/heuresys-advanced/apps/api
+
+ ❯ test/unit/role-codes-drift.unit.test.ts (3 tests | 1 failed) 26ms
+     × roles-editor.tsx elenca ESATTAMENTE gli stessi codici di ROLE_CODES 19ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/unit/role-codes-drift.unit.test.ts > mandato K F4.0 — role-codes.ts non diverge da role-precedence.ts e roles-editor.tsx > roles-editor.tsx elenca ESATTAMENTE gli stessi codici di ROLE_CODES
+AssertionError: ruoli in ROLE_CODES assenti dal menu a tendina di roles-editor.tsx: nessuno puo' assegnarli dall'interfaccia: expected [ 'RUOLO_FINTO_K_F40' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "RUOLO_FINTO_K_F40",
++ ]
+
+ ❯ test/unit/role-codes-drift.unit.test.ts:92:7
+     90|       mancantiNelWeb,
+     91|       "ruoli in ROLE_CODES assenti dal menu a tendina di roles-editor.…
+     92|     ).toEqual([]);
+       |       ^
+     93|     expect(spuriNelWeb, "codici in roles-editor.tsx che non esistono (…
+     94|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  00:31:21
+   Duration  6.26s (transform 2.30s, setup 0ms, import 5.20s, tests 26ms, environment 0ms)
+

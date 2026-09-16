@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 D:/heuresys-advanced/apps/api
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  00:31:59
+   Duration  4.38s (transform 1.44s, setup 0ms, import 3.87s, tests 8ms, environment 0ms)
+

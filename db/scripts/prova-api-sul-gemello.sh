@@ -66,12 +66,31 @@ REPO_LOCALE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 # `verify_gate.py`: se una rotta nuova instrada questa suite, va aggiunta qui,
 # altrimenti la suite girerebbe su un contenuto che non ho propagato — cioe'
 # esattamente il difetto che questo script esiste per chiudere.
-PERCORSI=(apps/api packages/shared)
+#
+# Mandato K, F4.0 (2026-09-16): i due file di `apps/web/` che
+# `role-codes-drift.unit.test.ts` legge come testo (non li importa: sono
+# codice Next.js, non pacchetto condiviso). Senza propagarli, il gemello
+# proverebbe la SUA copia — quella che `align-clones.sh` gli ha lasciato
+# l'ultima volta — e un fix locale a uno di questi due file risulterebbe
+# verde sul gemello anche se non e' ancora la' (misurato: e' successo con
+# `roles-editor.tsx` proprio scrivendo questa riga).
+PERCORSI=(apps/api packages/shared
+  apps/web/src/lib/role-precedence.ts
+  "apps/web/src/app/(authenticated)/users/[userId]/_components/roles-editor.tsx")
 
 export MSYS_NO_PATHCONV=1
 cd "$REPO_LOCALE" || exit 1
 
 rosso() { printf '\n[prova-api] ROSSO — %s\n' "$1" >&2; }
+
+# I comandi remoti passano da SSH come UNA stringa: `${PERCORSI[*]}` senza quote
+# la spezza per spazi e lascia i metacaratteri di shell liberi. Finche' i
+# percorsi erano `apps/api`/`packages/shared` non si vedeva; con
+# `roles-editor.tsx` — che ha `(authenticated)` e `[userId]` nel path — la
+# subshell remota li interpretava come sintassi bash e l'impronta usciva vuota
+# o diversa: guardia rossa su codice identico (misurato F4.0, 2026-09-16).
+# `%q` quota ogni elemento per la SUA shell di destinazione (bash sul gemello).
+PERCORSI_REMOTI="$(printf '%q ' "${PERCORSI[@]}")"
 
 # --- 1. l'host risponde? ------------------------------------------------------
 if ! ssh -o ConnectTimeout=15 -o BatchMode=yes "$HOST" true 2>/dev/null; then
@@ -144,7 +163,7 @@ fi
 # Questa e' la ragione per cui lo script esiste. Senza, sarebbe solo «la stessa
 # suite altrove», che e' precisamente cio' che `verify_gate.py` rifiutava di fare.
 IMPRONTA_REMOTA="$(ssh -o ConnectTimeout=30 "$HOST" \
-  "cd ~/$REPO_REMOTO && git ls-files -co --exclude-standard -- ${PERCORSI[*]} \
+  "cd ~/$REPO_REMOTO && git ls-files -co --exclude-standard -- $PERCORSI_REMOTI \
      | LC_ALL=C sort \
      | while IFS= read -r f; do [ -f \"\$f\" ] && printf '%s  %s\\n' \"\$(sha256sum \"\$f\" | cut -d' ' -f1)\" \"\$f\"; done \
      | sha256sum | cut -d' ' -f1" 2>/dev/null)"
@@ -163,12 +182,12 @@ if [ "$IMPRONTA_LOCALE" != "$IMPRONTA_REMOTA" ]; then
   Causa quasi certa: un file esiste ancora sul gemello ma qui e' stato cancellato
   o rinominato — il tar aggiunge, non toglie. Per vedere quali:
 
-    ssh $HOST 'cd ~/$REPO_REMOTO && git status --short -- ${PERCORSI[*]}'
+    ssh $HOST 'cd ~/$REPO_REMOTO && git status --short -- $PERCORSI_REMOTI'
 
   Rimedio, da eseguire a mano perche' cancella (mai in automatico, mai in una
   corsa non presidiata):
 
-    ssh $HOST 'cd ~/$REPO_REMOTO && git checkout -- ${PERCORSI[*]} && git clean -fd ${PERCORSI[*]}'
+    ssh $HOST 'cd ~/$REPO_REMOTO && git checkout -- $PERCORSI_REMOTI && git clean -fd $PERCORSI_REMOTI'
 
   poi rilancia: la propagazione ricopre il resto.
 EOF
@@ -203,7 +222,7 @@ echo "[prova-api] durata ${DURATA}s  esito=$ESITO"
 # Non lo pulisco: lo dichiaro. Un working tree remoto sporco scoperto tre giorni
 # dopo e' peggio di uno dichiarato adesso.
 SPORCO="$(ssh -o ConnectTimeout=15 "$HOST" \
-  "cd ~/$REPO_REMOTO && git status --porcelain -- ${PERCORSI[*]} | wc -l" 2>/dev/null || echo '?')"
+  "cd ~/$REPO_REMOTO && git status --porcelain -- $PERCORSI_REMOTI | wc -l" 2>/dev/null || echo '?')"
 if [ "$SPORCO" != "0" ] && [ "$SPORCO" != "?" ]; then
   echo "[prova-api] nota: $SPORCO file restano modificati su $HOST (cio' che ho propagato)."
   echo "[prova-api]       spariscono al prossimo 'align-clones.sh linuxpc' (reset --hard)."

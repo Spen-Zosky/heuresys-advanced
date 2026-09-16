@@ -48,7 +48,7 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
-| F4.0 | IN CORSO | S1104 | 2026-09-16T00:35+02:00 |  |  |  |  | I-F ha provato che role-lists-drift.unit.test.ts NON scatta su un ruolo aggiunto solo a role-codes.ts; nessuna voce di F4 parte finche' non e' riparato e provato ROSSO-poi-VERDE con un ruolo finto |
+| F4.0 | CHIUSA | S1104 | 2026-09-16T02:15+02:00 | 0 |  |  | apps/api/test/unit/role-codes-drift.unit.test.ts; apps/api/test/role-codes-db-drift.integration.test.ts; evidenze/F4.0_controprova_*_{ROSSO,VERDE}.txt; evidenze/F4.0_verify_gate_run{,2,3}.txt (RED→RED→GREEN) | Due test nuovi (role-codes.ts ↔ role-precedence.ts+roles-editor.tsx, in linea; role-codes.ts ↔ sys_auth_roles, via q.py+pool). Controprova (ruolo finto RUOLO_FINTO_K_F40 solo in role-codes.ts): ROSSO su entrambi, VERDE dopo il ripristino. Trovata e riparata una deriva VERA preesistente: roles-editor.tsx non aveva BRANCH_MANAGER (mig. 000272) da settimane, nessun cancello se n'era accorto. Trovato e riparato un buco nel guardiano stesso: ne' verify_gate.py instradava test-api su un tocco ai soli due file web, ne' prova-api-sul-gemello.sh li propagava al gemello (PERCORSI), ne' la quotatura del comando remoto reggeva un path con `(` `)` `[` `]` (fix: printf '%q'). Batteria intera verify_gate.py: GREEN (test-api 1330.8s sul gemello, 8 suite instradate) |
 
 ## F3 — ADR e invariante
 

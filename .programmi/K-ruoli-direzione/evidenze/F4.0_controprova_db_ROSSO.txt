@@ -1,0 +1,50 @@
+
+ RUN  v4.1.11 D:/heuresys-advanced/apps/api
+
+◇ injected env (24) from ..\..\.env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+[drift] baseline: 9 righe residue PRE-ESISTENTI (non le lascia questa corsa), su 795 colonne ispezionate:
+         sys_content_documents.document_title: 4
+         sys_content_versions.version_title: 5
+stdout | test/role-codes-db-drift.integration.test.ts
+◇ injected env (0) from ..\..\.env // tip: ⌘ suppress logs { quiet: true }
+
+stdout | test/role-codes-db-drift.integration.test.ts
+◇ injected env (0) from ..\..\.env // tip: ⌘ suppress logs { quiet: true }
+
+stdout | test/role-codes-db-drift.integration.test.ts
+{"level":"info","phase":"pg-pool","msg":"identita di connessione","user":"heuresys","separata":false}
+
+ ❯ test/role-codes-db-drift.integration.test.ts (2 tests | 1 failed) 748ms
+     × ogni codice di ROLE_CODES ha una riga in sys_auth_roles, e viceversa 202ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/role-codes-db-drift.integration.test.ts > mandato K F4.0 — role-codes.ts non diverge da sys.sys_auth_roles > ogni codice di ROLE_CODES ha una riga in sys_auth_roles, e viceversa
+AssertionError: codici dichiarati in ROLE_CODES senza riga in sys_auth_roles: un ruolo nato a meta', dichiarato ma mai migrato: expected [ 'RUOLO_FINTO_K_F40' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "RUOLO_FINTO_K_F40",
++ ]
+
+ ❯ test/role-codes-db-drift.integration.test.ts:41:7
+     39|       soloNelCodice,
+     40|       "codici dichiarati in ROLE_CODES senza riga in sys_auth_roles: u…
+     41|     ).toEqual([]);
+       |       ^
+     42|     expect(
+     43|       soloNelDb,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  00:31:37
+   Duration  5.45s (transform 1.25s, setup 298ms, import 1.70s, tests 748ms, environment 0ms)
+
+◇ injected env (0) from ..\..\.env // tip: ⌘ enable debugging { debug: true }
+[drift] nessun residuo aggiunto da questa corsa (totale invariato: 9).

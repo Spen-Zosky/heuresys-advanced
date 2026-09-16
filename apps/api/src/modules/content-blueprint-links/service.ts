@@ -9,6 +9,7 @@
  */
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
+import { haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 
 export type { ActorContext };
 import { NotFoundError, ConflictError } from "../../errors/index.js";
@@ -22,7 +23,7 @@ import * as repo from "./repository.js";
 import { findDocumentById, type ScopeFilter } from "../content/repository.js";
 
 function buildScope(a: ActorContext): ScopeFilter {
-  const isPlatform = a.roles.includes("PLATFORM_ADMIN");
+  const isPlatform = haMandatoPiattaforma(a);
   return { isPlatform, tenantId: isPlatform ? null : a.tenantId };
 }
 

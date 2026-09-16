@@ -9,6 +9,7 @@
 
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
+import { isPlatform, perimetroClienti, puoVedereCliente } from "../../lib/actor.js";
 
 export type { ActorContext };
 import {
@@ -26,10 +27,6 @@ import type {
   IndustryCode,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-function isPlatformAdmin(actor: ActorContext): boolean {
-  return actor.roles.includes("PLATFORM_ADMIN");
-}
 
 /**
  * For non-platform actors a tenantId is required to enforce ownership; if
@@ -67,12 +64,16 @@ export const tenantsService = {
   },
 
   async list(actor: ActorContext, query: TenantListQuery): Promise<TenantListResponse> {
-    const ownTenantOnly = isPlatformAdmin(actor) ? undefined : requireOwnTenant(actor);
-    return repo.listTenants(pool, { ownTenantOnly, query });
+    // Attore ordinario senza tenantId (JWT anomalo): stesso 403 difensivo di prima.
+    // Un ruolo di piattaforma assegnato con zero clienti è un caso valido (lista vuota),
+    // non un errore — perimetroClienti lo distingue da assignedTenantIds.
+    if (!isPlatform(actor) && actor.assignedTenantIds === undefined) requireOwnTenant(actor);
+    const restrictToTenantIds = perimetroClienti(actor);
+    return repo.listTenants(pool, { restrictToTenantIds, query });
   },
 
   async getById(actor: ActorContext, id: string): Promise<Tenant> {
-    if (!isPlatformAdmin(actor) && requireOwnTenant(actor) !== id) {
+    if (!puoVedereCliente(actor, id)) {
       // 404 (not 403) to avoid tenant-existence enumeration (AUTH §7.3 /
       // TenantBoundaryViolation envelope).
       throw new NotFoundError("Tenant");
@@ -98,7 +99,7 @@ export const tenantsService = {
   },
 
   async update(actor: ActorContext, id: string, patch: UpdateTenantBody): Promise<Tenant> {
-    if (!isPlatformAdmin(actor) && requireOwnTenant(actor) !== id) {
+    if (!puoVedereCliente(actor, id)) {
       throw new NotFoundError("Tenant");
     }
     if (patch.tenantIndustryCode !== undefined) {

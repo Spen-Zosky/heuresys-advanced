@@ -54,8 +54,12 @@ const TENANT_COLUMNS = `tenant_id, tenant_code, tenant_name, tenant_legal_name,
 /* --- Read --------------------------------------------------------------- */
 
 export interface ListFilter {
-  /** When set, restrict result set to this single tenant (own-tenant scope). */
-  ownTenantOnly?: string;
+  /**
+   * When set, restrict the result to these tenant ids — own-tenant scope (one id) or a
+   * platform-assigned perimeter (mandato K, R-0, D9=B; zero or more ids). `undefined` = no
+   * filter (PLATFORM_ADMIN); an empty array means "sees no tenant", never "sees all".
+   */
+  restrictToTenantIds?: ReadonlySet<string>;
   query: TenantListQuery;
 }
 
@@ -66,9 +70,9 @@ export async function listTenants(
   const where: string[] = [];
   const params: unknown[] = [];
 
-  if (filter.ownTenantOnly) {
-    params.push(filter.ownTenantOnly);
-    where.push(`tenant_id = $${params.length}`);
+  if (filter.restrictToTenantIds !== undefined) {
+    params.push([...filter.restrictToTenantIds]);
+    where.push(`tenant_id = ANY($${params.length})`);
   }
   if (filter.query.status) {
     params.push(filter.query.status);

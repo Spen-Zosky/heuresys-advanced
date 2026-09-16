@@ -29,6 +29,10 @@ export interface AuthUser {
 declare module "fastify" {
   interface FastifyRequest {
     tenantId?: string;
+    /** Mandato K, R-0 (D9=B). Popolato da tenantContext.ts SOLO per un ruolo di piattaforma
+     *  assegnato (`PLATFORM_ASSIGNED_MANDATE_ROLES`, oggi vuoto): l'elenco dei clienti attivi
+     *  in sys_platform_user_tenant_assignments. Assente per chiunque altro. */
+    assignedTenantIds?: readonly string[];
   }
 }
 

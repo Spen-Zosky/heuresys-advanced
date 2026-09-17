@@ -13,7 +13,7 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
 | A0 | ATTESA_ENZO(margine: proposto 1 punto percentuale) | S1105 | 2026-09-17T02:20+02:00 | A0.3 |  |  | esiti/A0_margine_del_pavimento.md; evidenze/A0_output_202609170*.txt | 90° percentile aggregato dei salti su 4 transcript K reali (d6e7f53b/c8873c8b/218d2692/abbcdb70) = 2.880 tok = 0,29% → arrotondato per eccesso 1 punto. Non si applica da solo: si prosegue con A2 senza aspettare |
-| A2 | PRONTA | | | | A2.1 |  |  | terzo momento di misura in V4 (prima di ogni operazione lunga) + regola «la chiusura è l'ultimo atto»; non dipende da Enzo |
+| A2 | CHIUSA | S1105 | 2026-09-17T02:35+02:00 | A2.3 |  |  | .programmi/mandati/K-mandato-v2.md, riga V4 emendata | terzo momento di misura aggiunto a V4 (prima di ogni operazione che si sa lunga: verify_gate/batteria prove, allineamento gemello, ciclo di correzioni, applicazione migrazione) + regola «se il guardiano dice di chiudere, la chiusura è l'ultimo atto»; nota che cita il caso del 17/9 (74,8%→87,3% in 48 min senza misura) |
 | A3 | BLOCCATA(A1) | | | | A3.1 |  |  | propagazione della fonte emendata alla copia di heuresys-advanced; heuresys-datastore NON si tocca |
 | A5 | BLOCCATA(prima voce di ruolo Parte B) | | | | A5.1 |  |  | costo vero di una voce di ruolo, misurato alla chiusura della prima; corregge la riga 17 del mandato K (falsa: ~150k invece di 750k soglia/1M finestra) |
 | A1 | ATTESA_ENZO(margine A0) | | | | A1.1 |  |  | il margine dentro guardiano.py, verdetto a tre stati; SOLO dopo risposta di Enzo su A0 |

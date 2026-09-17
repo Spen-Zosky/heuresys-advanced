@@ -16,15 +16,22 @@ import { REPO, MASTER_PATH, toBase32 } from "./derive-access.mjs";
 export const COLLAUDO_PATH = join(REPO, ".secrets", "collaudo-access.key");
 
 /**
- * Le tre identità (progetto in .programmi/169-due-segreti-dalla-stessa-chiave.md):
+ * Le identità (progetto in .programmi/169-due-segreti-dalla-stessa-chiave.md, nato con TRE):
  * SERVICE su dominio .invalid (RFC 2606 — non instradabile, e a colpo d'occhio
  * non è una persona), MANDATI VERI e non ruoli-ombra (ADR-0036: nessuna lista
  * di ruoli locale decide una vista; un COLLAUDO_* sarebbe un mandato ombra).
+ *
+ * Mandato K, R-9 (2026-09-17): due in più, per i primi ruoli di piattaforma che non sono
+ * PLATFORM_ADMIN (D9=B) — tenantCode HEURESYS come piattaforma@collaudo.invalid, perché
+ * "creati come utenti, non come persone di RTL" (mandato, passo 53). L'assegnazione a RTL
+ * Bank via sys_platform_user_tenant_assignments (R-0) è un atto separato, fatto con l'API.
  */
 export const COLLAUDO_IDENTITIES = [
   { email: "piattaforma@collaudo.invalid", displayName: "Collaudo Piattaforma",  tenantCode: "HEURESYS", roleCode: "PLATFORM_ADMIN" },
   { email: "governo@collaudo.invalid",     displayName: "Collaudo Governo",      tenantCode: "RTL_BANK", roleCode: "TENANT_ADMIN" },
   { email: "persona@collaudo.invalid",     displayName: "Collaudo Persona",      tenantCode: "RTL_BANK", roleCode: "USER" },
+  { email: "platform-operator@collaudo.invalid", displayName: "Collaudo Platform Operator", tenantCode: "HEURESYS", roleCode: "PLATFORM_OPERATOR" },
+  { email: "sales@collaudo.invalid",             displayName: "Collaudo Sales",             tenantCode: "HEURESYS", roleCode: "SALES" },
 ];
 
 export function isCollaudoIdentity(email) {

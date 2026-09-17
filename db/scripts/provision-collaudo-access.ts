@@ -1,6 +1,8 @@
 /**
  * db/scripts/provision-collaudo-access.ts
- * #169 F2 — crea le TRE utenze di collaudo (direttiva Enzo 2026-08-25, S1080):
+ * #169 F2 — crea le utenze di collaudo (direttiva Enzo 2026-08-25, S1080; nato con TRE,
+ * mandato K R-9 2026-09-17 ne aggiunge due per i primi ruoli di piattaforma non-admin —
+ * l'elenco vero è COLLAUDO_IDENTITIES, non un numero scritto qui):
  * identità `SERVICE` su dominio `.invalid`, mandati VERI (mai ruoli-ombra,
  * ADR-0036), credenziali derivate da una chiave PROPRIA (.secrets/collaudo-
  * access.key — mai la chiave madre delle persone), esenzione dal secondo

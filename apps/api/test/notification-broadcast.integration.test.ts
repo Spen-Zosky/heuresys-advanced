@@ -5,6 +5,9 @@
  * count, inbox delivery, and the non-admin 403. D-23: afterAll deletes the rows.
  * #74 (ex D-70) — GET /v1/notifications/broadcasts: audit of sent broadcasts
  * (one row per event, recipients/readCount aggregated, I5 tenant scoping).
+ * Mandato K, R-9 (2026-09-17): the GET gate is notification:read, split off
+ * notification:create so a read-only role (PLATFORM_OPERATOR) can audit
+ * without being able to send.
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
@@ -73,7 +76,7 @@ describe("3.4 SYSTEM broadcast — POST /v1/notifications (live)", () => {
     expect(n.rows[0]!.n).toBe(1);
   });
 
-  it("#74 GET /broadcasts — USER (no notification:create) → 403", async () => {
+  it("#74 GET /broadcasts — USER (no notification:read) → 403", async () => {
     const r = await suite.app.inject({
       method: "GET",
       url: "/v1/notifications/broadcasts",

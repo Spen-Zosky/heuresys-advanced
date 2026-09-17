@@ -33,6 +33,11 @@ export const ROLE_CODES = [
   // che la decisione chiede di rispettare (una filiale e' una catena gerarchica; una
   // squadra ha uno SCOPO e il suo capo puo' essere gerarchicamente sotto un membro).
   "BRANCH_MANAGER",
+  // Mandato K, R-9 (D9=B, 2026-09-17): ruoli di piattaforma che vedono/scrivono solo sui
+  // clienti a cui sono stati assegnati (sys_platform_user_tenant_assignments, migration
+  // 000422) — mai tutti i clienti come PLATFORM_ADMIN. Sola lettura sui rispettivi moduli.
+  "PLATFORM_OPERATOR",
+  "SALES",
 ] as const;
 
 export type RoleCode = (typeof ROLE_CODES)[number];

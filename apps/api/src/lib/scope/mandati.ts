@@ -34,7 +34,10 @@ export const PLATFORM_MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
  * (`BLUEPRINT_MANAGER`). `SECURITY_ADMIN` (R-7) NON entra qui: è un ruolo di cliente
  * (mandato, sezione 2, conseguenza c).
  */
-export const PLATFORM_ASSIGNED_MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([]);
+export const PLATFORM_ASSIGNED_MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
+  "PLATFORM_OPERATOR",
+  "SALES",
+]);
 
 /**
  * Chi può concedere o revocare un ruolo a un'altra persona (`users/service.ts` `grantRole` /

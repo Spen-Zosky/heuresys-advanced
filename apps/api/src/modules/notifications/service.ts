@@ -6,6 +6,7 @@
  */
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
+import { perimetroClienti } from "../../lib/actor.js";
 
 export type { ActorContext };
 import { emitNotificationsBulk } from "../../lib/notifications/emit.js";
@@ -17,18 +18,20 @@ import type {
   ListBroadcastsResponse,
 } from "@heuresys/shared";
 
-const isPlatform = (a: ActorContext): boolean => a.roles.includes("PLATFORM_ADMIN");
-
 export const notificationsService = {
   async broadcast(actor: ActorContext, body: BroadcastNotificationBody): Promise<BroadcastNotificationResponse> {
-    // Resolve recipients + their tenant; drop cross-tenant targets for non-platform actors (I5).
+    // Resolve recipients + their tenant; drop out-of-perimeter targets (I5; mandato K R-9,
+    // D9=B: generalizzato da isPlatform-only a perimetroClienti, che copre anche i ruoli di
+    // piattaforma assegnati a un sottoinsieme di clienti).
     const res = await pool.query<{ user_id: string; tenant: string | null }>(
       `SELECT user_id, user_tenant_id AS tenant FROM sys.sys_users WHERE user_id = ANY($1)`,
       [body.userIds],
     );
-    const recipients = isPlatform(actor)
-      ? res.rows
-      : res.rows.filter((r) => r.tenant === actor.tenantId);
+    const perimetro = perimetroClienti(actor);
+    const recipients =
+      perimetro === undefined
+        ? res.rows
+        : res.rows.filter((r) => r.tenant !== null && perimetro.has(r.tenant));
 
     // QW-B1 (WS-B F-WS-B-1): set-based bulk emit — opt-out lookup + one unnest
     // INSERT, a fixed 3 queries total (recipients + opt-out + insert) regardless
@@ -49,11 +52,12 @@ export const notificationsService = {
   },
 
   /** #74 (ex D-70) — audit of sent SYSTEM broadcasts, one row per event.
-   *  I5: non-platform actors see only broadcasts that reached their tenant. */
+   *  I5: an actor sees only broadcasts that reached a tenant in its perimeter
+   *  (mandato K R-9: perimetroClienti, undefined = no filter for PLATFORM_ADMIN). */
   async listBroadcasts(actor: ActorContext, query: ListBroadcastsQuery): Promise<ListBroadcastsResponse> {
+    const perimetro = perimetroClienti(actor);
     return listBroadcastAudit(pool, query, {
-      tenantId: actor.tenantId,
-      isPlatform: isPlatform(actor),
+      tenantIds: perimetro === undefined ? undefined : [...perimetro],
     });
   },
 };

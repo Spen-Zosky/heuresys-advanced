@@ -10,6 +10,12 @@
  * I5 tenant scoping happens BEFORE grouping: a non-platform actor sees only
  * broadcasts that reached their own tenant, with counts limited to the rows of
  * that tenant (never cross-tenant recipient counts).
+ *
+ * Mandato K, R-9 (D9=B, 2026-09-17): `scope.tenantIds` generalizes the old
+ * single-tenant/isPlatform pair to the perimeter shape used across R-0 —
+ * `undefined` = no filter (PLATFORM_ADMIN), an array (possibly empty) = only
+ * those tenants. A `PLATFORM_OPERATOR` assigned to one tenant now sees that
+ * tenant's broadcasts, not the tenant it happens to belong to (Heuresys System).
  */
 import type { Pool } from "pg";
 import type { ListBroadcastsQuery, BroadcastAuditItem } from "@heuresys/shared";
@@ -31,14 +37,14 @@ interface BroadcastAuditRow {
 export async function listBroadcastAudit(
   pool: Pool,
   q: ListBroadcastsQuery,
-  scope: { tenantId: string | null; isPlatform: boolean },
+  scope: { tenantIds: readonly string[] | undefined },
 ): Promise<{ items: BroadcastAuditItem[]; total: number }> {
   const params: unknown[] = [];
   const where: string[] = [`n.notification_type = 'SYSTEM'`];
 
-  if (!scope.isPlatform) {
-    params.push(scope.tenantId);
-    where.push(`n.notification_tenant_id = $${params.length}`);
+  if (scope.tenantIds !== undefined) {
+    params.push(scope.tenantIds);
+    where.push(`n.notification_tenant_id = ANY($${params.length})`);
   }
   if (q.from) {
     params.push(q.from);

@@ -946,3 +946,122 @@ Seconda revisione avversariale su modello Fable, chiesta da Enzo insieme al requ
 **Dichiarato NON MISURATO dal revisore e trasformato in voci di Fase 0 con esito** (nuove F0.5, F0.6, F0.7): se l'identificativo di sessione sia stabile fra riavvii, quale sia il runner delle migrazioni, se l'utente `heuresys` abbia il privilegio per creare un utente di sola lettura, e se un workflow sopravviva alla chiusura della CLI.
 
 stato: [RICONCILIATA 2026-09-14 S1102] — recepita nel mandato K: register `#259`, testo operativo `.programmi/mandati/K-mandato-v2.md` (la v2 e' quella eseguita; la «definitiva» e le Parti K/K2/K3 restano cronaca, con la RETTIFICA che le corregge), stato in `.programmi/K-ruoli-direzione/STATO.md`. Fase 0 eseguita in S1102 (6/7 voci); nessuna decisione della sezione 2 rinegoziata.
+
+### 2026-09-15 (notte) — Fasi 0, 1 e 2 chiuse e verificate. Enzo conferma: i ruoli da creare sono TUTTI E DIECI.
+
+Verifica di chiusura fatta da Cowork alle 23:47 del 2026-09-15, dopo che la sessione S1103 ha eseguito chiusura completa, deploy e allineamento. **Esito: verde su tutti i controlli.** Locale e remoto allineati (0 commit non pushati, 0 non tirati; `HEAD` = `34200d86`). Le due sentinelle nuove sono vive sul database di produzione: `sys.v_permessi_solo_plenipotenziari` a **0 righe** (verde) e `sys.v_registro_provenienza_orfano` a **11 righe** (INFORMATIVE, previsto — sono le undici tabelle scoperte da I-D, non le due del dossier iniziale). Totale viste `sys.v_*`: 61. `dove_siamo.py` esce con codice 0, non segnala nessuna voce aperta, e indica come prossima `X-0`. Avanzamento: **20 voci CHIUSE su 43**, zero IN CORSO, zero SOSPESA, 5 in ATTESA_ENZO, 2 RITIRATE.
+
+**DECISIONE DI ENZO (2026-09-15): i ruoli da creare in Fase 4 sono tutti e dieci, nessuna potatura**, nemmeno delle voci piccole come `SALES`. Enzo l'ha confermato **dopo** aver saputo che l'indagine I-F ha alzato il costo da 8 a **29 file per ruolo**, cioe' un fattore quattro sulla stima della Fase 4, che porta il totale del mandato sopra le trenta sessioni. La decisione e' registrata nel prompt della sessione successiva e non va rinegoziata dalla CLI: se durante la Fase 4 sembra che un ruolo vada tolto, si scrive in `esiti/` e si chiede a Enzo, mettendo la voce in `ATTESA_ENZO`.
+
+⚠ **UN FALSO ALLARME MIO, registrato perche' e' il quinto errore della stessa famiglia in questa conversazione.** Nella verifica avevo scritto che le persone erano passate da 162 a 164 e stavo per segnalarlo come anomalia. **E' falso**: la baseline di F0.3 conta le persone che hanno il ruolo `USER` (riga 19: `USER ... persone=162`), la mia misura contava le persone distinte con un ruolo QUALSIASI. I due in piu' sono `piattaforma@collaudo.invalid` (solo `PLATFORM_ADMIN`) e `governo@collaudo.invalid` (solo `TENANT_ADMIN`), che non hanno `USER`; e la riga 199 della baseline lo dice gia': `sys_users registro=162 tabella=164`. **E' DIF-4: ho confrontato due misure diverse chiamandole entrambe «persone».** Chi riusa quei numeri dichiari sempre QUALE insieme conta: «persone con ruolo USER» e «persone con un ruolo attivo» sono due cose, e differiscono di due.
+
+**Il prompt per la sessione successiva e' pronto**: `PROMPT_per_la_CLI_fase3-4.md`, nella cartella di sessione e in `outputs\`. Perimetro: **Fase 3 completa piu' la sola voce R-1**; nessun ruolo viene creato in quella sessione. L'ordine imposto mette al primo posto una cosa che NON e' nel mandato ma viene da I-F: **il test che dovrebbe accorgersi di un ruolo creato a meta' non scatta** (provato aggiungendo un ruolo finto: tutto verde). Era la rete di sicurezza su cui poggia l'intera Fase 4, e va riparata e provata rossa-poi-verde prima di qualunque altra cosa, registrandola in `STATO.md` come voce nuova. Il prompt porta anche le altre due cose che le indagini hanno trovato e che gli ADR devono dichiarare: le personalizzazioni del cliente oggi si conservano **per fortuna e non per regola** (I-A l'ha provato sul vivo su copia), e la catena del semilavorato e' realizzata in **quattro modi diversi su tredici tabelle** di cui quello giusto lo usa una sola tabella — gli altri tre vanno dichiarati come eccezioni con nome. Infine, per R-1: la mappa dei permessi si carica **una volta sola all'avvio del server**, quindi un ritiro senza riavvio non ha effetto, e una post-condizione che non ne tiene conto risulterebbe verde per la ragione sbagliata.
+
+**Resta fuori mandato, presentato una volta sola**: il clone notturno del gemello cancella ogni notte il fattore di prova di `enzo.spenuso@heuresys.com` e rimette rosso il cancello dei test; la via pulita e' che il clone ri-esegua `provision-access` dopo il ripristino. Piu' le cose gia' nel `REGISTRO_SCOPERTE.md`: due file scritti da agenti fuori dalla loro cartella, una tabella con molte righe morte, un file finito in `C:\Git`, e le sette bozze `esiti/_bozza_*.md` (materiale grezzo, non deliverable). Nessuna di queste e' stata cancellata: V1 vale sempre, e la cancellazione la decide Enzo.
+
+stato: [RICONCILIATA S1105]
+
+### 2026-09-16 (sera) — Le due ratifiche: Enzo le subordina entrambe al TERZO GIRO di confutazione
+
+Enzo ha letto le sezioni «Decisione» e «Conseguenze» di ADR-0041 (direzione del dato, invariante I23) e ADR-0042 (catena del semilavorato), presentategli da Cowork in italiano semplice. **Risposta su entrambi: ratifica SUBORDINATA al terzo giro di confutazione.** Nessun punto dei due documenti e' stato contestato nel merito: la ragione e' un'altra, e va registrata perche' e' una decisione di metodo. La sessione S1104 aveva dichiarato onestamente nella nota di STATO.md: *«non e' "zero confutazioni ottenute", e' "22 corrette in 2 giri, un 3° servirebbe idealmente"»*, e che il terzo giro non era stato lanciato perche' il guardiano era oltre il 50% (regola V4). Enzo ha deciso che quel giro si fa **prima** di mettere le regole in vigore.
+
+**La regola di chiusura, scritta nel prompt della sessione successiva**: se il terzo giro produce **zero** confutazioni di sostanza, i due ADR si considerano **RATIFICATI** senza tornare da Enzo — la sua ratifica era subordinata solo a questo — e `X-0` e `K1-ADR` si chiudono. Se ne produce anche **una sola** di sostanza, le due voci restano `ATTESA_ENZO` e gli viene scritta la domanda in italiano semplice. La distinzione fra precisione e sostanza e' dichiarata nel prompt: correggere «88 tabelle» in «87» e' precisione e si fa; cambiare quale categoria governa una tabella, o chi puo' scrivere dove, e' sostanza e si chiede.
+
+⚠ **Vincolo esplicito sul terzo giro**: si lancia SOLO con il guardiano sotto il 50%. Se la sessione e' sopra, **non forza e non salta** — e' esattamente la scorciatoia che ha reso necessaria questa decisione, e ripeterla la vanificherebbe: in quel caso la voce va in `SOSPESA` con la nota e lo fa una sessione fresca.
+
+**Perimetro della sessione successiva**: terzo giro, correzioni che ne derivano, poi **R-0** (l'asse «utente di piattaforma assegnato a certi clienti», D9=B). Prompt pronto in `PROMPT_per_la_CLI_terzo-giro-e-R0.md`, cartella di sessione e `outputs\`. Per R-0 il prompt riporta le misure di I-G (24 punti in 10 moduli, sotto la soglia di 40, quindi una sessione sola; oggi non esistono ne' la tabella ne' un punto unico per il filtro; la porta piu' delicata e' l'elenco dei clienti, la piu' larga quella dei fascicoli che non filtra per nessuno) e **il debito che ADR-0042 dichiara e che R-0 non deve ignorare**: la migrazione `000300_permessi_del_fascicolo.sql` (righe 87-96) solleva eccezione se un ruolo diverso da `PLATFORM_ADMIN` detiene un permesso `tenant_blueprint:*`, e `000418` lo ri-conferma nell'allowlist — la migrazione di `R-5` dovra' **emendare** quella guardia (ADR-0035), non aggirarla, e costruire l'asse di R-0 senza tenerne conto romperebbe R-5 a valle.
+
+**Una nota di metodo che vale oltre questo mandato.** La richiesta del terzo giro nasce da una frase che la sessione ha scritto invece di lasciare implicita. Se un'ammissione di quel tipo non cambiasse niente, la prossima volta nessuno la scriverebbe: dare seguito a una dichiarazione di limite e' il modo di tenerla viva come pratica.
+
+stato: [RICONCILIATA S1105]
+
+### 2026-09-17 — Il guardiano non ha fermato la sessione a 74,8%, e il mandato K ha un errore di dimensionamento di un fattore cinque
+
+Diagnosi chiesta da Enzo dopo la chiusura di S1104. **Lo strumento funziona**: lanciato dalla cartella del progetto da' `exit 3` e «⛔ SOGLIA RAGGIUNTA — contesto 87,3% >= 75%». Il difetto e' altrove, ed e' doppio.
+
+**Difetto 1 — un buco nella regola V4.** Cronologia misurata dai commit: alle 01:06 la sessione misura **74,8%**, mette `R-0` in `SOSPESA` e apre la chiusura (commit `chore(K): chiusura sessione S1104 — R-0 SOSPESA ... (guardiano 74.8%)`); poi lavora **altri 48 minuti** — allineamento del gemello, `verify_gate` da quasi duemila prove, tre correzioni — e chiude `R-0` all'01:54; misurato dopo: **87,3%**. Fra i due momenti **nessuna misura**, e non per negligenza: V4 dice «all'inizio di ogni voce e prima di ogni workflow», e in quei 48 minuti non e' stata aperta nessuna voce ne' lanciato nessun workflow. Il lavoro piu' pesante della giornata e' passato in un intervallo che la regola non copriva.
+
+**Difetto 2 — una regola che c'era e non e' stata applicata.** La dottrina del guardiano dice che il contesto e' «un pavimento, non un soffitto» e che «a ridosso di una soglia la si considera raggiunta, non si tira». 74,8 e' a ridosso di 75. E' stato letto come «sotto». La regola c'era, scritta a parole, ed era interpretabile: **e' esattamente il modo in cui un rimedio solo testuale fallisce**.
+
+**Dettaglio minore ma utile**: `context-window.json` contiene gia' `used_pct` e `used_tokens` (misurati: 87%, 873.262 token), ma il guardiano ne legge solo `size` per il denominatore e prende il numeratore dal transcript. Non e' sbagliato — il transcript e' la fonte piu' solida — ma significa che se il transcript non si trova il guardiano si dichiara cieco pur avendo un numero valido a portata. Succede lanciandolo da una cartella diversa da quella del progetto: cerca in `~/.claude/projects/<slug della cwd>/`.
+
+**Enzo ha approvato due rimedi il 2026-09-17**: (a) fissare per iscritto e **dentro lo strumento** che cosa vuol dire «a ridosso», (b) aggiungere un terzo momento di misura, **dentro** una voce lunga e non solo alla sua apertura.
+
+⚠ **ERRORE DI DIMENSIONAMENTO NEL MANDATO K, trovato perche' Enzo ha chiesto «perche' solo 2 ruoli?».** La riga 17 del mandato dice «una sessione utile vale circa 150k token prima che il guardiano intervenga». **E' falso di un fattore cinque**: misurato il 2026-09-17, la finestra dichiarata da `context-window.json` e' **1.000.000 di token**, la soglia del 75% cade a **750.000**, e la sola S1104 ne ha consumati **873.262**. Tutte le stime per voce del mandato K sono scritte su quel metro (`R-9` «1 sessione ~70k», `R-2` «~80k», `R-1` «2 sessioni ~120k»): 120k non sono due sessioni, sono un sesto di una sessione. **Ogni numero di dimensionamento del mandato K e' inaffidabile**, e con esso la stima complessiva delle trenta sessioni.
+
+**Due conseguenze, entrambe nel mandato S1105** (`MANDATO_S1105_guardiano-e-primi-ruoli.md`, 151 righe, cartella di sessione e `outputs\`): (1) **il perimetro di sessione e' un ORDINE, non un conteggio** — le voci si fanno nell'ordine dichiarato e ci si ferma quando lo dice il guardiano, non prima per prudenza ne' dopo per ostinazione; la prima versione del mandato diceva «due ruoli» ed era prudenza mia moltiplicata per una stima falsa, cioe' un cancello inventato, che DIF-1 vieta. (2) Nasce la voce **A5**, che misura quanto costa davvero una voce di ruolo (contesto all'apertura, alla chiusura, differenza) e corregge la riga 17 — **senza riscrivere tutte le stime**, perche' i dati per farlo non ci sono e inventarle ripeterebbe l'errore.
+
+**Il mandato S1105 in breve**: parte A — A0 misura il margine dal novantesimo percentile dei salti di contesto su tre transcript reali (il numero resta una **proposta in ATTESA_ENZO**: le soglie sono sue e un margine le stringe); A1 lo mette nello strumento come verdetto a **tre stati**, dove «a ridosso» esce con lo **stesso exit 3** della soglia piena perche' in corsa non presidiata un avviso che non ferma non e' un avviso, piu' quattro casi di selftest **visti rossi prima**; A2 emenda V4 col terzo momento di misura (elenco chiuso di operazioni lunghe) e con la regola che mancava — **se il guardiano dice di chiudere, la chiusura e' l'ultimo atto**; A3 propaga alle due copie identiche e **lascia stare** quella di `heuresys-datastore` (41.758 byte, ferma al 30/08, altro progetto); A4 emenda la fonte di verita' di Enzo col timbro aggiornato e avvisa che **il campo Cowork non si aggiorna da solo**. Parte B — i ruoli nell'ordine `R-9`, `R-2`, `R-7`, `R-3`, `R-8`, `R-5`, `R-10+R-4`; `R-6` resta fuori perche' aspetta la ratifica di `X-1` (Fase 5) e `R-11` perche' aspetta che tutti i ruoli esistano.
+
+stato: [RICONCILIATA S1105]
+
+### 2026-09-17 (notte) — Enzo fissa il margine del pavimento a 1 punto percentuale: A1 e A4 si sbloccano
+
+La voce `A0` della sessione S1105 ha misurato, invece di stimare, quanto puo' crescere il contesto fra due misure consecutive del guardiano. Lo script replica esattamente la logica di `campiona()` e gira su **quattro transcript reali gia' conclusi** del ciclo K: 1.632 salti positivi, mediana **648 token (0,06 punti)**, novantesimo percentile **2.880 token (0,29 punti)**, massimo osservato **34.701 token (3,47 punti)**. La proposta di A0 era il novantesimo percentile arrotondato per eccesso al punto intero.
+
+**Risposta di Enzo, raccolta il 2026-09-17 alle 02:40: 1 punto percentuale, come proposto.** Depositata in `esiti/RISPOSTE_ENZO.md` senza commit — l'unico committer resta la CLI (V7) — cosi' la sessione in corso la trova da sola alla prossima ripresa, senza essere interrotta. La fascia «⚠ A RIDOSSO» e' quindi **74-75%** per il contesto e **79-80%** per la finestra 5 ore, e nella fascia si esce con lo **stesso exit 3** della soglia piena: in corsa non presidiata un avviso che non ferma non e' un avviso.
+
+**La ragione della scelta va nel commento della costante in `guardiano.py`**, perche' senza di essa il numero fra sei mesi sembra arbitrario e qualcuno lo cambia. Il margine copre **il ritardo di UNA misura**, non un intervallo senza misure: il caso del 16-17 settembre (74,8% → 87,3% in 48 minuti) e' coperto da questo margine per la parte iniziale — a 74,8% la sessione si sarebbe fermata — e dal **terzo momento di misura di A2** per il resto. Sono due rimedi a due difetti distinti, e nessuno dei due sostituisce l'altro.
+
+**Cosa resta deliberatamente fuori, dichiarato a Enzo prima che scegliesse.** Il turno pesante raro da 3,47 punti puo' scavalcare l'intera fascia senza mai attraversarla: e' successo una volta su 1.295 misure, proprio nella sessione S1104. Inseguirlo avrebbe richiesto un margine di 4 punti, cioe' una soglia effettiva al 71,5% e circa **40.000 token di capienza buttati a ogni sessione** per un evento su mille. Enzo ha scelto di non pagarlo, sapendolo: non e' una svista, e' un rischio residuo accettato.
+
+**Effetto sul mandato S1105**: la voce del margine esce da `ATTESA_ENZO` e **`A1` e `A4` si sbloccano**. Nessun'altra voce cambia; l'ordine della parte B resta `R-9`, `R-2`, `R-7`, `R-3`, `R-8`, `R-5`, `R-10+R-4`.
+
+⚠ **Promemoria per Enzo, quando A4 avra' emendato `~/.claude/CLAUDE.md`**: il campo «Istruzioni globali» di Cowork e' una **copia incollata a mano** e non si aggiorna da solo. Dopo A4 il file avra' un timbro `SoT-versione` nuovo e il campo restera' a quello vecchio: va ri-incollato, altrimenti le sessioni Cowork successive lavoreranno sulla dottrina di ieri credendola di oggi.
+
+stato: [RICONCILIATA S1105]
+
+### 2026-09-17 (notte) — Le sessioni CLI nascono senza Remote Control: la riga di avvio non ha mai portato il flag
+
+Enzo ha chiesto perche' non trova la sessione S1105 sotto `/rc`. **La sessione e' viva e sta lavorando** (processo `claude.exe` PID 18844 avviato alle 01:59:39, figlio della finestra PowerShell di Enzo; diario di sessione cresciuto di ~80 KB fra le 02:46:56 e le 02:48:00; commit `256e6be5` di `R-9` gia' depositato). Il difetto non e' nella sessione, e' in come viene aperta.
+
+**La causa, misurata.** La riga di avvio nei tre file di prompt che abbiamo consegnato finora e' identica e non porta il flag:
+
+```
+PROMPT_per_la_CLI_mandato-K.md:13      claude --model sonnet
+PROMPT_per_la_CLI_fase3-4.md:13        claude --model sonnet
+PROMPT_per_la_CLI_terzo-giro-e-R0.md:13  claude --model sonnet
+```
+
+La dottrina in `~/.claude/CLAUDE.md` dice da tempo che «le sessioni nascono con `--remote-control <nome>`». **Non era vero di nessuna di esse**: era una regola scritta e mai eseguita, perche' il posto dove avrebbe dovuto agire — la riga che Enzo incolla — non l'ha mai contenuta. Verificato il nome del flag sull'aiuto della CLI stessa, non a memoria: `--remote-control [name]  Start an interactive session with Remote Control enabled (optionally named)`.
+
+⚠ **Un errore DIF-4 mio, commesso e corretto nello stesso quarto d'ora, che vale la pena registrare perche' e' il quinto della stessa famiglia.** Ho prima affermato a Enzo che «il registro delle sessioni e' vuoto» appoggiandomi a `claude agents --json`, che risponde `[]`. Ma quel comando, come dichiara l'aiuto della CLI (`agents — Manage background agents`), elenca gli **agenti in background**: non sa niente delle sessioni Remote Control. La frase era piu' larga della misura. La conclusione regge — la sessione non e' sotto `/rc` — ma regge per la riga di avvio, non per quel comando, ed e' esattamente la distinzione che DIF-4 impone di fare prima di scrivere la frase, non dopo.
+
+**Decisione di Enzo: si corregge solo quando non si perde lavoro.** Rilanciare adesso costerebbe tutto il contesto accumulato su `R-9`, e il canale oggi non serve a niente che il deposito in `RISPOSTE_ENZO.md` non faccia gia' (ha appena funzionato per il margine, senza interrompere la sessione). Quindi: **nessuna azione ora**, e la riga di avvio della prossima sessione porta il flag.
+
+**La riga corretta, da usare in ogni prompt d'ora in poi:**
+
+```bash
+cd /d/heuresys-advanced
+claude --model sonnet --remote-control S1106
+```
+
+**Che cosa si guadagna e che cosa no, per non promettere piu' di quel che da'.** Con il flag Enzo vede la sessione sotto `/rc` dal suo Claude Code e puo' agganciarla. **Cowork continua a non poterle parlare**: da qui `ListAgents` vede solo il contenitore in cloud, non il PC. E' il buco strutturale dietro DIF-3, e lo chiude il cockpit delle sessioni (fase 3) quando sapra' consegnare un mandato a una sessione gia' accesa, non questo flag.
+
+stato: [RICONCILIATA S1105]
+
+### 2026-09-17 (notte) — `dove_siamo.py` si spegne a meta' elenco su console Windows, e sotto ci sono tre ROSSI
+
+**Il difetto dello strumento, misurato.** Lanciato da PowerShell, `dove_siamo.py` esce con codice 1 dopo aver stampato la PRIMA voce aperta, e non dice perche':
+
+```
+UnicodeEncodeError: 'charmap' codec can't encode character '→'
+  File dove_siamo.py, line 172, in main
+    print(f"    {'':<16} nota: {r['nota']}")
+```
+
+La nota della voce `A0` contiene una freccia `→`. La console Windows usa cp1252, che non sa codificarla, e il programma **muore li'**: tutto cio' che viene dopo — le altre tre voci aperte, la voce IN CORSO, le migrazioni, il guardiano e la riga di esito — non viene mai stampato. **Chi legge crede che l'elenco sia completo.** E' la forma DIF-4 cotta dentro uno strumento: l'uscita sembra una risposta su «tutte le voci aperte» e copre solo quelle prima dello schianto. Io stesso stavo per riferire a Enzo che l'unica voce aperta era `A0`.
+
+Dalla sessione CLI, che gira in Git Bash con UTF-8, il difetto **non si manifesta**: e' per questo che nessuno l'aveva visto. Si manifesta solo da Cowork, cioe' esattamente dove serve per sorvegliare.
+
+**Rimedio provvisorio in uso da Cowork**: `python -X utf8 ...`. **Rimedio durevole, da fare quando lo strumento non e' in mano a una sessione viva**: `sys.stdout.reconfigure(encoding="utf-8", errors="replace")` in cima a `main()`, piu' un selftest che passi una nota con un carattere fuori da cp1252 e la veda uscire.
+
+**I tre ROSSI che erano nascosti sotto lo schianto** (misurati alle 02:59, esito complessivo `ROSSO — nessuna voce vera parte su un rosso`):
+
+1. **`R-9 000422`: migrazione registrata ma NON DICHIARATA** — manca la query in `EFFETTI` che ne verifica l'effetto. E' la migrazione della voce **attualmente IN CORSO**.
+2. **`R-0`: prenotazione malformata, sei righe rosse** — la cella della migrazione contiene testo libero (`000421 (applicata in produzione E sul gemello)`) invece del solo numero, e il controllo prova a leggere `(applicata`, `in`, `produzione`, `E`, `sul`, `gemello)` come sei numeri di migrazione. Bookkeeping della sessione precedente, la voce e' CHIUSA.
+3. **`R-9`: `presa_il = 2026-09-17T03:20+02:00`**, cioe' venti minuti nel futuro rispetto alla misura. Lo strumento calcola un'eta' negativa (`-0.3 h fa`). Errore di timbro, non di lavoro.
+
+**Le misure di capienza, che invece sono larghe**: contesto **46,3%** (463.307 su 1.000.000, soglia 75%), finestra 5 ore **9,0%** (soglia 80%). ⚠ Ma la **finestra 7 giorni e' all'89%**, ed e' l'unica delle tre senza una soglia scritta nella dottrina: e' il budget che si esaurisce per primo, e oggi non lo sorveglia nessuno.
+
+stato: [RICONCILIATA S1105]

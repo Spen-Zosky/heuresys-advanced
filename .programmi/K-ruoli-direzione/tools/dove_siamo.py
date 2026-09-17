@@ -49,6 +49,7 @@ EFFETTI: dict[str, str] = {
     # F4
     "R-1": "select 1 from information_schema.columns where table_schema='sys' and table_name='sys_auth_role_permissions' and column_name='revoked_at'",
     "R-0": "select 1 from information_schema.tables where table_schema='sys' and table_name='sys_platform_user_tenant_assignments'",
+    "R-9": "select 1 from sys.sys_auth_roles where auth_role_code in ('PLATFORM_OPERATOR','SALES') and retired_at is null having count(*) = 2",
     # F5
     "X-1": "select 1 from information_schema.tables where table_schema='sys' and table_name='sys_classificazione_direzione_dato'",
     "X-3": "select 1 from pg_views where schemaname='sys' and viewname='v_source_lineage_normalizzata'",
@@ -133,6 +134,11 @@ def completa(path: str, nnn: str) -> bool:
 
 
 def main() -> int:
+    # Scoperto da Cowork (S1105, 2026-09-17): lanciato da PowerShell/console Windows (cp1252),
+    # una nota con un carattere fuori da cp1252 (es. una freccia "→") fa uscire con
+    # UnicodeEncodeError a meta' stampa — chi legge crede che l'elenco sia completo, e non lo
+    # e'. Da Git Bash (UTF-8) il difetto non si manifesta, per questo era invisibile alla CLI.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     rosso = False
     righe = leggi_stato()
     per_voce = {r["voce"]: r for r in righe}

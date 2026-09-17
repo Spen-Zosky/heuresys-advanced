@@ -130,6 +130,35 @@ SOGLIA_CHIUSURA = 0.90
 STOP_CONTESTO = 0.75
 STOP_5H = 0.80
 
+# Il MARGINE DEL PAVIMENTO (Enzo, 2026-09-17 — voce A0 del mandato S1105).
+#
+# Il contesto si legge dal transcript, che si scrive a FINE turno: la misura e' sempre
+# indietro di uno. Il numero letto e' quindi un pavimento, mai un soffitto, e fra due
+# misure consecutive il valore vero e' gia' piu' alto di quello stampato.
+#
+# Quanto piu' alto e' stato MISURATO, non stimato: 1.632 salti positivi fra misure
+# consecutive su quattro transcript K reali gia' conclusi (d6e7f53b, c8873c8b, 218d2692,
+# abbcdb70). Mediana 648 token (0,06 punti); 90mo percentile 2.880 token (0,29 punti);
+# massimo osservato 34.701 token (3,47 punti). Il margine e' il 90mo percentile
+# arrotondato per eccesso al punto intero.
+#
+# ⚠ COSA COPRE, e cosa no — serve a non leggerlo un domani come insufficiente:
+# copre il ritardo di UNA misura, NON un intervallo in cui non si misura affatto. Il
+# caso del 16-17 settembre (74,8% -> 87,3% in 48 minuti senza rimisurare) e' coperto da
+# questo margine solo all'inizio — a 74,8% la sessione si ferma — e per il resto dal
+# terzo momento di misura aggiunto a V4 del mandato (voce A2). Sono due rimedi a due
+# difetti distinti: alzare questo numero non sostituisce quello.
+#
+# ⚠ IL RISCHIO RESIDUO E' ACCETTATO CONSAPEVOLMENTE: il turno pesante raro (3,47 punti,
+# uno su 1.295 misure) puo' scavalcare la fascia senza mai attraversarla. Coprirlo
+# avrebbe richiesto 4 punti, cioe' soglia effettiva al 71,5% e ~40.000 token di
+# capienza buttati a OGNI sessione per un evento su mille. Enzo ha scelto di non
+# pagarlo, con questo numero davanti. Non e' una svista: non "correggerlo" in silenzio.
+#
+# Nella fascia si esce con lo STESSO exit 3 della soglia piena: in una corsa non
+# presidiata un avviso che non ferma non e' un avviso, e' rumore.
+MARGINE_PAVIMENTO = 0.01
+
 # Oltre quanti minuti il dato delle 5 ore e' da buttare. La riga di stato si ridisegna
 # a ogni giro, quindi in una sessione viva il file ha pochi secondi. Un file di
 # mezz'ora fa vuol dire che la riga di stato non gira: meglio dire «non misurato».
@@ -475,7 +504,7 @@ def sorveglia(m_ctx: dict, m_5h: dict,
     — e chi legge deve saperlo, perche' un «tutto bene» che nasce dal buio e' identico
     a uno che nasce da una misura, ed e' la peggiore delle risposte.
     """
-    scatti, misurati = [], 0
+    scatti, ridosso, misurati = [], [], 0
     # ⚠ Il ramo contesto vale SOLO se vale anche il denominatore. Una percentuale con
     # una finestra indovinata non e' una misura imprecisa: e' un numero inventato che
     # ha la faccia di una misura. Misurato il 2026-08-25 su una sessione il cui modello
@@ -489,13 +518,25 @@ def sorveglia(m_ctx: dict, m_5h: dict,
         misurati += 1
         if m_ctx["frazione"] >= stop_ctx:
             scatti.append(f"contesto {m_ctx['percento']:.1f}% >= {stop_ctx:.0%}")
+        elif m_ctx["frazione"] >= stop_ctx - MARGINE_PAVIMENTO:
+            ridosso.append(f"contesto {m_ctx['percento']:.1f}% a ridosso di "
+                           f"{stop_ctx:.0%} (margine {MARGINE_PAVIMENTO:.0%})")
     if m_5h.get("ok"):
         misurati += 1
         if m_5h["frazione"] >= stop_5h:
             scatti.append(f"finestra 5h {m_5h['percento']:.1f}% >= {stop_5h:.0%}")
+        elif m_5h["frazione"] >= stop_5h - MARGINE_PAVIMENTO:
+            ridosso.append(f"finestra 5h {m_5h['percento']:.1f}% a ridosso di "
+                           f"{stop_5h:.0%} (margine {MARGINE_PAVIMENTO:.0%})")
+    # ⚠ La fascia chiude come la soglia piena: stesso `chiudi`, stesso exit 3. Un
+    # avviso che non ferma, in una corsa non presidiata, non lo legge nessuno (Enzo,
+    # 2026-09-17). Restano DUE campi distinti perche' la STAMPA deve poter dire quale
+    # dei due casi e': «a ridosso» e «raggiunta» chiedono la stessa azione ma non sono
+    # lo stesso fatto, e confonderli rifarebbe il difetto che il margine corregge.
     return {
-        "chiudi": bool(scatti),
+        "chiudi": bool(scatti) or bool(ridosso),
         "motivi": scatti,
+        "ridosso": ridosso,
         "rami_misurati": misurati,
         "cieco": misurati == 0,
     }
@@ -520,7 +561,14 @@ def stampa_guardiano(m_ctx: dict, m_5h: dict, v: dict,
         print("  ⚠ GUARDIANO CIECO: nessuna delle due misure e' disponibile. "
               "Non e' un 'tutto bene'.")
     elif v["chiudi"]:
-        print(f"  ⛔ SOGLIA RAGGIUNTA — {' e '.join(v['motivi'])}")
+        if v["motivi"]:
+            print(f"  ⛔ SOGLIA RAGGIUNTA — {' e '.join(v['motivi'])}")
+        else:
+            # Nessuna soglia superata, ma siamo dentro la fascia del margine. Si chiude
+            # lo stesso, e si dice PERCHE': il numero letto e' indietro di un turno.
+            print(f"  ⚠ A RIDOSSO — {' e '.join(v.get('ridosso', []))}")
+            print("     Si chiude come alla soglia piena: la misura e' indietro di un")
+            print("     turno, quindi il numero letto e' un pavimento, non un soffitto.")
         print(f"     {PROCEDURA}")
     else:
         manca_ctx = (f"contesto: mancano {max(0, int(stop_ctx * m_ctx['finestra']) - m_ctx['contesto']):,} token"
@@ -835,8 +883,31 @@ def selftest() -> int:
         check("verdetto: 50/50 si continua", False, sorveglia(OK_CTX(0.50), OK_5H(0.50))["chiudi"])
         check("verdetto: contesto 76% chiude", True, sorveglia(OK_CTX(0.76), OK_5H(0.10))["chiudi"])
         check("verdetto: 5h 85% chiude (ramo nuovo)", True, sorveglia(OK_CTX(0.10), OK_5H(0.85))["chiudi"])
-        check("verdetto: 5h 79% NON chiude", False, sorveglia(OK_CTX(0.10), OK_5H(0.79))["chiudi"])
-        check("verdetto: contesto 74% NON chiude", False, sorveglia(OK_CTX(0.74), OK_5H(0.10))["chiudi"])
+        # --- la fascia del margine (Enzo, 2026-09-17: 1 punto) ------------------
+        # ⚠ Questi due casi erano l'OPPOSTO prima del margine: 79% e 74% erano «NON
+        # chiude». Il margine li sposta dentro la fascia, e la fascia chiude. Se un
+        # domani qualcuno rimette il verde su «NON chiude», ha tolto il margine senza
+        # accorgersene.
+        v79 = sorveglia(OK_CTX(0.10), OK_5H(0.79))
+        check("fascia: 5h 79% CHIUDE (era il vecchio 'non chiude')", True, v79["chiudi"])
+        check("fascia: 79% e' 'a ridosso', non 'soglia raggiunta'", (True, False),
+              (bool(v79["ridosso"]), bool(v79["motivi"])))
+        v74 = sorveglia(OK_CTX(0.74), OK_5H(0.10))
+        check("fascia: contesto 74% CHIUDE (era il vecchio 'non chiude')", True, v74["chiudi"])
+        check("fascia: 74% e' 'a ridosso', non 'soglia raggiunta'", (True, False),
+              (bool(v74["ridosso"]), bool(v74["motivi"])))
+        # NEGATIVI: appena sotto la fascia NON si chiude, altrimenti il margine non e'
+        # un punto ma «tutto cio' che sta sotto», e la soglia si sposterebbe a caso.
+        check("sotto la fascia: contesto 73.9% NON chiude", False,
+              sorveglia(OK_CTX(0.739), OK_5H(0.10))["chiudi"])
+        check("sotto la fascia: 5h 78.9% NON chiude", False,
+              sorveglia(OK_CTX(0.10), OK_5H(0.789))["chiudi"])
+        # oltre la soglia piena resta «raggiunta», non degrada a «a ridosso»
+        v76 = sorveglia(OK_CTX(0.76), OK_5H(0.10))
+        check("oltre la soglia: resta 'raggiunta', non 'a ridosso'", (True, False),
+              (bool(v76["motivi"]), bool(v76["ridosso"])))
+        # il margine e' quello deciso da Enzo, non un altro numero
+        check("il margine e' 1 punto", 0.01, MARGINE_PAVIMENTO)
         # un ramo cieco non impedisce all'altro di far scattare la chiusura
         check("verdetto: contesto cieco, 5h 85% -> chiude", True, sorveglia(NO, OK_5H(0.85))["chiudi"])
         check("verdetto: 5h cieca, contesto 76% -> chiude", True, sorveglia(OK_CTX(0.76), NO)["chiudi"])

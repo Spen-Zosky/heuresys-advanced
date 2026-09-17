@@ -8,6 +8,17 @@ Stati ammessi: `BLOCCATA(Dn)` · `BLOCCATA(fase)` · `PRONTA` · `IN CORSO` · `
 `presa_da` = contenuto di `.handoff/session-id`. `ultimo_passo_chiuso` = numero univoco del passo nel mandato.
 L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima `PRONTA` dall'alto.
 
+## S1105 — Parte A: i due rimedi al guardiano (precede F0, mandato `MANDATO_S1105_guardiano-e-primi-ruoli.md`)
+
+| K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
+|---|---|---|---|---|---|---|---|---|
+| A0 | ATTESA_ENZO(margine: proposto 1 punto percentuale) | S1105 | 2026-09-17T02:20+02:00 | A0.3 |  |  | esiti/A0_margine_del_pavimento.md; evidenze/A0_output_202609170*.txt | 90° percentile aggregato dei salti su 4 transcript K reali (d6e7f53b/c8873c8b/218d2692/abbcdb70) = 2.880 tok = 0,29% → arrotondato per eccesso 1 punto. Non si applica da solo: si prosegue con A2 senza aspettare |
+| A2 | PRONTA | | | | A2.1 |  |  | terzo momento di misura in V4 (prima di ogni operazione lunga) + regola «la chiusura è l'ultimo atto»; non dipende da Enzo |
+| A3 | BLOCCATA(A1) | | | | A3.1 |  |  | propagazione della fonte emendata alla copia di heuresys-advanced; heuresys-datastore NON si tocca |
+| A5 | BLOCCATA(prima voce di ruolo Parte B) | | | | A5.1 |  |  | costo vero di una voce di ruolo, misurato alla chiusura della prima; corregge la riga 17 del mandato K (falsa: ~150k invece di 750k soglia/1M finestra) |
+| A1 | ATTESA_ENZO(margine A0) | | | | A1.1 |  |  | il margine dentro guardiano.py, verdetto a tre stati; SOLO dopo risposta di Enzo su A0 |
+| A4 | ATTESA_ENZO(margine A0) | | | | A4.1 |  |  | emendare la sezione IL GUARDIANO di ~/.claude/CLAUDE.md; SOLO dopo A1 e A2 |
+
 ## F0 — Fondazione
 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |

@@ -1,0 +1,29 @@
+== d6e7f53b-6cc2-41a1-a045-4d94215e031b.jsonl ==
+  campioni: 1295  picco: 873262 (87.3%)
+  salti totali: 1294  salti positivi: 771
+  salto mediano:     386 token  (0.04%)
+  salto 90-esimo pc: 2027 token  (0.20%)
+  salto massimo:     34701 token  (3.47%)
+== c8873c8b-4af9-44bc-b501-bd6b34d6eec4.jsonl ==
+  campioni: 558  picco: 689835 (69.0%)
+  salti totali: 557  salti positivi: 325
+  salto mediano:     1039 token  (0.10%)
+  salto 90-esimo pc: 3739 token  (0.37%)
+  salto massimo:     22532 token  (2.25%)
+== 218d2692-52ca-4b91-96d6-04b9ba9d2e3d.jsonl ==
+  campioni: 722  picco: 703316 (70.3%)
+  salti totali: 721  salti positivi: 374
+  salto mediano:     778 token  (0.08%)
+  salto 90-esimo pc: 3564 token  (0.36%)
+  salto massimo:     24985 token  (2.50%)
+== abbcdb70-a248-451f-88cf-37867c67f055.jsonl ==
+  campioni: 284  picco: 402553 (40.3%)
+  salti totali: 283  salti positivi: 162
+  salto mediano:     865 token  (0.09%)
+  salto 90-esimo pc: 3531 token  (0.35%)
+  salto massimo:     25349 token  (2.53%)
+== AGGREGATO su tutti i transcript ==
+  n=1632
+  salto mediano:     648 token  (0.06%)
+  salto 90-esimo pc: 2880 token  (0.29%)
+  salto massimo:     34701 token  (3.47%)

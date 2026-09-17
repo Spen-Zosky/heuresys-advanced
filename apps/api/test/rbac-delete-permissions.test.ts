@@ -56,6 +56,18 @@ const PROXY_TO_SOURCE: Record<string, string> = {
 };
 
 /**
+ * Deliberate, DOCUMENTED extensions of a de-proxied permission's audience made AFTER the
+ * S1028 de-proxy event — never a silent drift. The invariant above ("audience did not move")
+ * describes the moment of de-proxying; a role born later that is meant to hold the permission
+ * is a real product decision, not a regression, and belongs here with its reason.
+ */
+const PROXY_EXTENDED_AUDIENCE: Record<string, readonly string[]> = {
+  // Mandato K, R-9 (D9=B, 2026-09-17): PLATFORM_OPERATOR is the first non-admin platform
+  // role and is meant to read observability — that is the whole point of the role.
+  "observability:read": ["PLATFORM_OPERATOR"],
+};
+
+/**
  * G2 residuals (000199) → audience source. Same contract again: job_family:*
  * and skill_taxonomy:* had NO honest route gate (service ensurePlatformAdmin
  * was the real check, or worse — the route promised `skill:*` holders a power
@@ -153,12 +165,13 @@ describe("#61 G2 — DELETE routes carry a dedicated :delete permission", () => 
     }
   });
 
-  it("each de-proxied permission keeps the audience of the cross-area gate it replaced", async () => {
+  it("each de-proxied permission keeps the audience of the cross-area gate it replaced, plus only documented extensions", async () => {
     for (const [newCode, sourceCode] of Object.entries(PROXY_TO_SOURCE)) {
       const [newRoles, sourceRoles] = await Promise.all([rolesFor(newCode), rolesFor(sourceCode)]);
 
       expect(sourceRoles.length, `${sourceCode} non ha grant — codice rinominato?`).toBeGreaterThan(0);
-      expect(newRoles, `${newCode} deve avere l'audience di ${sourceCode}`).toEqual(sourceRoles);
+      const expected = [...sourceRoles, ...(PROXY_EXTENDED_AUDIENCE[newCode] ?? [])].sort();
+      expect(newRoles, `${newCode} deve avere l'audience di ${sourceCode} + le estensioni dichiarate`).toEqual(expected);
     }
   });
 

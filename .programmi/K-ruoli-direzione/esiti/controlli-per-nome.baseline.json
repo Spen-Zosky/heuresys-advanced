@@ -281,12 +281,6 @@
   "roles_includes": 2,
   "totale": 4
  },
- "modules/notifications/service.ts": {
-  "predicati": 2,
-  "stringhe_ruolo": 1,
-  "roles_includes": 1,
-  "totale": 4
- },
  "modules/occupation-classifications/service.ts": {
   "predicati": 3,
   "stringhe_ruolo": 0,

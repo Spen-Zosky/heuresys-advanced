@@ -103,6 +103,16 @@ SELECT 'sys_auth_permissions', p.auth_permission_id, x.campo, 'en', x.testo, 'LL
   ) AS x(codice, campo, testo) ON x.codice = p.auth_permission_code
 ON CONFLICT DO NOTHING;
 
+-- La 000210 ha reso esplicito ogni permesso di TENANT_ADMIN dopo il CROSS JOIN implicito
+-- della 000005 (D-57): un permesso nuovo che gli arriva senza questo marker e' un assorbimento
+-- silenzioso, e il test di guardia lo rifiuta. TENANT_ADMIN aveva gia' notification:create
+-- (000005 in bianco): notification:read e' la stessa audience, dichiarata qui come estensione
+-- voluta — stessa forma della 000404 per branch:list/read.
+-- TENANT_ADMIN-ALLOWLIST-EXTEND
+CREATE TEMP TABLE _ta_extend_000422(code text PRIMARY KEY);
+INSERT INTO _ta_extend_000422(code) VALUES
+    ('notification:read');
+
 -- 6. notification:read a chi aveva gia' notification:create (nessun RITIRO: solo
 --    un'aggiunta, cosi' l'audit che gia' avevano resta invariato dopo lo spezzamento).
 INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)

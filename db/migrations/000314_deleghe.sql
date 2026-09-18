@@ -122,12 +122,20 @@ BEGIN
    WHERE auth_permission_code IN ('delegation:read', 'delegation:manage');
   IF n_perm <> 2 THEN RAISE EXCEPTION '000314: i permessi sono % invece di 2', n_perm; END IF;
 
+  -- Scoperto da mandato K, R-7 (mig. 000425, 2026-09-19): un conteggio GLOBALE qui
+  -- si rompe non appena un ruolo AGGIUNTIVO riceve delegation:*/manage altrove (e' un
+  -- grant legittimo, non un problema di QUESTA migrazione) — falso rosso alla seconda
+  -- passata della catena. La post-condizione deve verificare cio' che QUESTA migrazione
+  -- ha fatto (i tre ruoli originari), non lo stato globale del permesso: scoperto sulla
+  -- pelle di un rosso vero, emendato qui (ADR-0035 — il file che crea si emenda).
   SELECT count(*) INTO n_grant
     FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
-   WHERE p.auth_permission_code IN ('delegation:read', 'delegation:manage');
+    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+   WHERE p.auth_permission_code IN ('delegation:read', 'delegation:manage')
+     AND r.auth_role_code IN ('PLATFORM_ADMIN', 'TENANT_ADMIN', 'HRMS_MANAGER');
   IF n_grant <> 6 THEN
-    RAISE EXCEPTION '000314: le concessioni sono % invece di 6 (2 permessi x 3 ruoli)', n_grant;
+    RAISE EXCEPTION '000314: le concessioni ai tre ruoli originari sono % invece di 6 (2 permessi x 3 ruoli)', n_grant;
   END IF;
 
   SELECT count(*) INTO n_trad FROM sys.sys_reference_translations t

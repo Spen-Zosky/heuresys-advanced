@@ -1,0 +1,109 @@
+
+ RUN  v4.1.11 D:/heuresys-advanced/apps/api
+
+◇ injected env (24) from ..\..\.env // tip: ⌘ enable debugging { debug: true }
+[drift] baseline: 9 righe residue PRE-ESISTENTI (non le lascia questa corsa), su 799 colonne ispezionate:
+         sys_content_documents.document_title: 4
+         sys_content_versions.version_title: 5
+(node:27504) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"level":30,"time":1789768882169,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-1","req":{"method":"POST","url":"/v1/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1789768883192,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-1","res":{"statusCode":200},"responseTime":1022.1994999999988,"msg":"request completed"}
+{"level":30,"time":1789768883194,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-2","req":{"method":"POST","url":"/v1/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1789768886911,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-2","res":{"statusCode":200},"responseTime":3715.9704999999976,"msg":"request completed"}
+{"level":30,"time":1789768887192,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-3","req":{"method":"POST","url":"/v1/gdpr/users/a5e1d8ab-192a-414d-9294-ccb69aeca7d3/erasure","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1789768887471,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-3","res":{"statusCode":409},"responseTime":278.7585999999974,"msg":"request completed"}
+{"level":30,"time":1789768887486,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-4","req":{"method":"POST","url":"/v1/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1789768888603,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-4","res":{"statusCode":401},"responseTime":1116.5743999999977,"msg":"request completed"}
+{"level":30,"time":1789768888606,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-5","req":{"method":"POST","url":"/v1/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1789768889740,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-5","res":{"statusCode":401},"responseTime":1134.1412999999993,"msg":"request completed"}
+{"level":30,"time":1789768889742,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-6","req":{"method":"POST","url":"/v1/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1789768890784,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-6","res":{"statusCode":401},"responseTime":1040.984199999999,"msg":"request completed"}
+{"level":30,"time":1789768890786,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-7","req":{"method":"GET","url":"/v1/compensation/bands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1789768891311,"pid":27504,"hostname":"DESKTOP-KH728P2","reqId":"req-7","res":{"statusCode":200},"responseTime":524.5782999999974,"msg":"request completed"}
+stdout | test/dpo.integration.test.ts
+◇ injected env (0) from ..\..\.env // tip: ⌘ suppress logs { quiet: true }
+
+stdout | test/dpo.integration.test.ts
+◇ injected env (0) from ..\..\.env // tip: ⌘ suppress logs { quiet: true }
+
+stdout | test/dpo.integration.test.ts
+{"level":"info","phase":"pg-pool","msg":"identita di connessione","user":"heuresys","separata":false}
+
+ ❯ test/dpo.integration.test.ts (5 tests | 4 failed) 11782ms
+     × D3=A — HRMS_MANAGER non ha più gdpr:erase (ritirato a favore di DPO, mig. 000423) 295ms
+     × DPO su /v1/gdpr/* → 200 (data-map, export) 1120ms
+     × DPO su /v1/gdpr/users/:id/erasure → 200 (il permesso che HRMS_MANAGER ha perso) 1136ms
+     × DPO fuori dal GDPR: /v1/compensation/bands → 403 (nessun mandato sensibile nuovo, I18/I20 intatti) 1043ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/dpo.integration.test.ts > mandato K, R-2 — DPO (nucleo GDPR, D3=A) > D3=A — HRMS_MANAGER non ha più gdpr:erase (ritirato a favore di DPO, mig. 000423)
+AssertionError: expected 409 to be 403 // Object.is equality
+
+- Expected
++ Received
+
+- 403
++ 409
+
+ ❯ test/dpo.integration.test.ts:77:26
+     75|       payload: { dryRun: true },
+     76|     });
+     77|     expect(r.statusCode).toBe(403);
+       |                          ^
+     78|   });
+     79|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  test/dpo.integration.test.ts > mandato K, R-2 — DPO (nucleo GDPR, D3=A) > DPO su /v1/gdpr/* → 200 (data-map, export)
+Error: login dpo@collaudo.invalid: 401
+ ❯ loginRaw test/helpers/login.ts:108:36
+    106|
+    107|   const r1 = await app.inject({ method: "POST", url: "/v1/auth/login",…
+    108|   if (r1.statusCode !== 200) throw new Error(`login ${email}: ${r1.sta…
+       |                                    ^
+    109|   const b1 = r1.json() as { status?: string; challengeToken?: string };
+    110|   if (b1.status === "success" || b1.status === undefined) {
+ ❯ login test/dpo.integration.test.ts:35:13
+ ❯ test/dpo.integration.test.ts:82:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  test/dpo.integration.test.ts > mandato K, R-2 — DPO (nucleo GDPR, D3=A) > DPO su /v1/gdpr/users/:id/erasure → 200 (il permesso che HRMS_MANAGER ha perso)
+Error: login dpo@collaudo.invalid: 401
+ ❯ loginRaw test/helpers/login.ts:108:36
+    106|
+    107|   const r1 = await app.inject({ method: "POST", url: "/v1/auth/login",…
+    108|   if (r1.statusCode !== 200) throw new Error(`login ${email}: ${r1.sta…
+       |                                    ^
+    109|   const b1 = r1.json() as { status?: string; challengeToken?: string };
+    110|   if (b1.status === "success" || b1.status === undefined) {
+ ❯ login test/dpo.integration.test.ts:35:13
+ ❯ test/dpo.integration.test.ts:102:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  test/dpo.integration.test.ts > mandato K, R-2 — DPO (nucleo GDPR, D3=A) > DPO fuori dal GDPR: /v1/compensation/bands → 403 (nessun mandato sensibile nuovo, I18/I20 intatti)
+Error: login dpo@collaudo.invalid: 401
+ ❯ loginRaw test/helpers/login.ts:108:36
+    106|
+    107|   const r1 = await app.inject({ method: "POST", url: "/v1/auth/login",…
+    108|   if (r1.statusCode !== 200) throw new Error(`login ${email}: ${r1.sta…
+       |                                    ^
+    109|   const b1 = r1.json() as { status?: string; challengeToken?: string };
+    110|   if (b1.status === "success" || b1.status === undefined) {
+ ❯ login test/dpo.integration.test.ts:35:13
+ ❯ test/dpo.integration.test.ts:117:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed (5)
+   Start at  00:01:10
+   Duration  21.13s (transform 3.41s, setup 221ms, import 6.37s, tests 11.78s, environment 0ms)
+
+◇ injected env (0) from ..\..\.env // tip: ⌁ auth for agents [www.vestauth.com]
+[drift] nessun residuo aggiunto da questa corsa (totale invariato: 9).

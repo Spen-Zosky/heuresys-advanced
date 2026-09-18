@@ -32,6 +32,10 @@ export const COLLAUDO_IDENTITIES = [
   { email: "persona@collaudo.invalid",     displayName: "Collaudo Persona",      tenantCode: "RTL_BANK", roleCode: "USER" },
   { email: "platform-operator@collaudo.invalid", displayName: "Collaudo Platform Operator", tenantCode: "HEURESYS", roleCode: "PLATFORM_OPERATOR" },
   { email: "sales@collaudo.invalid",             displayName: "Collaudo Sales",             tenantCode: "HEURESYS", roleCode: "SALES" },
+  // Mandato K, R-2 (2026-09-18): DPO e' un ruolo di CLIENTE (tenant-scoped, come
+  // TENANT_ADMIN/HRMS_MANAGER — non entra in GDPR_MANDATE_ROLES), quindi la persona
+  // di collaudo nasce su RTL_BANK come governo@collaudo.invalid, non su HEURESYS.
+  { email: "dpo@collaudo.invalid",               displayName: "Collaudo DPO",               tenantCode: "RTL_BANK", roleCode: "DPO" },
 ];
 
 export function isCollaudoIdentity(email) {

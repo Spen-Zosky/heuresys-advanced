@@ -38,6 +38,11 @@ export const ROLE_CODES = [
   // 000422) — mai tutti i clienti come PLATFORM_ADMIN. Sola lettura sui rispettivi moduli.
   "PLATFORM_OPERATOR",
   "SALES",
+  // Mandato K, R-2 (2026-09-18, decisione C di Enzo): il nucleo GDPR — gdpr:read,
+  // gdpr:export, gdpr:erase, gdpr:retention — e il ritiro di gdpr:erase a
+  // HRMS_MANAGER (D3=A, guardia G-D2, migration 000423). La lettura mascherata
+  // del dossier (I18/I20) resta fuori: voce separata, BLOCCATA(Enzo).
+  "DPO",
 ] as const;
 
 export type RoleCode = (typeof ROLE_CODES)[number];

@@ -32,6 +32,7 @@ export const ROLE_PRECEDENCE: readonly string[] = [
   "PLATFORM_OPERATOR",
   "SALES",
   "WHISTLEBLOWING_CUSTODIAN",
+  "DPO",
   "CEO",
   "MANAGER",
   "TEAM_LEADER",

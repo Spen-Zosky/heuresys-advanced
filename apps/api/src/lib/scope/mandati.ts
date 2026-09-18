@@ -16,7 +16,12 @@
  * `haMandatoPiattaformaAssegnato` e `haMandatoGdpr` nascono con l'insieme di OGGI (misurato,
  * non indovinato): il primo vuoto perché il ruolo che lo popola non esiste ancora
  * (D9=B — lo riempiono R-9, R-8, R-5); il secondo con `PLATFORM_ADMIN`, perché è quello che
- * `gdpr/service.ts:43` controlla oggi con `isPlatform(actor)` — `DPO` (R-2) vi entra dopo.
+ * `gdpr/service.ts:43` controlla oggi con `isPlatform(actor)`.
+ *
+ * `DPO` (R-2, migration 000423) NON entra in `GDPR_MANDATE_ROLES`: decisione C di Enzo
+ * (2026-09-18, esiti/RISPOSTE_ENZO.md) — resta tenant-scoped come TENANT_ADMIN/HRMS_MANAGER,
+ * che hanno lo stesso permesso RBAC `gdpr:retention` ma lo stesso 403 `PLATFORM_ONLY` da
+ * `runRetention` (difetto preesistente, registrato in REGISTRO_SCOPERTE, non risolto qui).
  */
 
 import type { ActorContext } from "../actor.js";
@@ -52,8 +57,9 @@ export const CAN_GRANT_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
 
 /**
  * Il mandato GDPR (`gdpr/service.ts`). Oggi = ciò che `isPlatform(actor)` già copriva
- * (misurato: `gdpr/service.ts:43,157`); `DPO` (R-2) vi entra quando nasce, e la stessa
- * migrazione toglie `gdpr:erase` a `HRMS_MANAGER` (D3=A, guardia G-D2).
+ * (misurato: `gdpr/service.ts:43,157`). `DPO` (R-2, migration 000423) NON vi entra —
+ * decisione C di Enzo, 2026-09-18: resta tenant-scoped come TENANT_ADMIN/HRMS_MANAGER.
+ * La migrazione 000423 toglie `gdpr:erase` a `HRMS_MANAGER` (D3=A, guardia G-D2).
  */
 export const GDPR_MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>(["PLATFORM_ADMIN"]);
 

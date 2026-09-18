@@ -36,6 +36,9 @@ export const COLLAUDO_IDENTITIES = [
   // TENANT_ADMIN/HRMS_MANAGER — non entra in GDPR_MANDATE_ROLES), quindi la persona
   // di collaudo nasce su RTL_BANK come governo@collaudo.invalid, non su HEURESYS.
   { email: "dpo@collaudo.invalid",               displayName: "Collaudo DPO",               tenantCode: "RTL_BANK", roleCode: "DPO" },
+  // Mandato K, R-7 (2026-09-19): SECURITY_ADMIN e' un ruolo di CLIENTE (tenant-scoped,
+  // stesso vincolo di TENANT_ADMIN su grantRole/revokeRole/listRoles), quindi RTL_BANK.
+  { email: "security-admin@collaudo.invalid",    displayName: "Collaudo Security Admin",    tenantCode: "RTL_BANK", roleCode: "SECURITY_ADMIN" },
 ];
 
 export function isCollaudoIdentity(email) {

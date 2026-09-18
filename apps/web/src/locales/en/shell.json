@@ -79,6 +79,7 @@
     "PLATFORM_OPERATOR": "Platform operator",
     "SALES": "Sales",
     "DPO": "Data Protection Officer",
+    "SECURITY_ADMIN": "Security administrator",
     "hr_mandate": "HR mandate",
     "platform_mandate": "Platform mandate",
     "line_management": "Line manager",

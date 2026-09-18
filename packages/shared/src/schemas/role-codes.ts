@@ -43,6 +43,12 @@ export const ROLE_CODES = [
   // HRMS_MANAGER (D3=A, guardia G-D2, migration 000423). La lettura mascherata
   // del dossier (I18/I20) resta fuori: voce separata, BLOCCATA(Enzo).
   "DPO",
+  // Mandato K, R-7 (2026-09-19): ruolo di cliente per l'amministrazione della
+  // sicurezza — permessi di `auth` (role_matrix:read, auth:sessions_read,
+  // auth:revoke_user), `mfa-policy`, `delegations`, più `role:assign` (entra in
+  // CAN_GRANT_ROLES con lo stesso vincolo di TENANT_ADMIN: non concede ruoli di
+  // piattaforma, non esce dal tenant — migration 000425).
+  "SECURITY_ADMIN",
 ] as const;
 
 export type RoleCode = (typeof ROLE_CODES)[number];

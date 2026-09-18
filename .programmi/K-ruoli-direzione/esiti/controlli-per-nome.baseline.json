@@ -504,10 +504,10 @@
   "totale": 4
  },
  "modules/users/service.ts": {
-  "predicati": 13,
+  "predicati": 11,
   "stringhe_ruolo": 2,
   "roles_includes": 2,
-  "totale": 17
+  "totale": 15
  },
  "modules/visualization-edges/service.ts": {
   "predicati": 2,

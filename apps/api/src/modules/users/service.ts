@@ -349,11 +349,14 @@ export const usersService = {
 
   async listRoles(actor: ActorContext, id: string): Promise<RoleGrant[]> {
     // Reading another user's roles requires admin-level scope. MANAGER/USER
-    // can read only their own roles.
+    // can read only their own roles. Stesso predicato di grantRole/revokeRole
+    // (mandato K, R-7): chi può concedere un ruolo può vederne l'elenco — un
+    // sottoinsieme logico, non un permesso a parte (puoConcedereRuoli copre già
+    // PLATFORM_ADMIN e TENANT_ADMIN; SECURITY_ADMIN vi entra con loro).
     const target = await repo.findUserById(pool, id);
     if (!target) throw new NotFoundError("User");
     const isSelf = target.userId === actor.userId;
-    if (!(isPlatformAdmin(actor) || isTenantAdmin(actor) || isSelf)) {
+    if (!(puoConcedereRuoli(actor) || isSelf)) {
       // Hide existence.
       throw new NotFoundError("User");
     }

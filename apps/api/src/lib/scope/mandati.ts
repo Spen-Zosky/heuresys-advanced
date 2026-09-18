@@ -46,13 +46,16 @@ export const PLATFORM_ASSIGNED_MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<Ro
 
 /**
  * Chi può concedere o revocare un ruolo a un'altra persona (`users/service.ts` `grantRole` /
- * `revokeRole`). Oggi identico a `TENANT_WIDE_MANDATE_ROLES` meno `PLATFORM_ADMIN`... non:
- * è il suo proprio insieme, perché `SECURITY_ADMIN` (R-7) vi entrerà con un vincolo di
- * tenant che `TENANT_ADMIN` già ha e `PLATFORM_ADMIN` no (mandato, passo 54).
+ * `revokeRole`, e `listRoles` che ne condivide il predicato). `SECURITY_ADMIN` (R-7, migration
+ * 000425) vi entra col vincolo di tenant che `TENANT_ADMIN` già ha e `PLATFORM_ADMIN` no:
+ * `grantRole` distingue i due casi con `isPlatformAdmin(actor)` (letterale su
+ * `roles.includes("PLATFORM_ADMIN")`), quindi `SECURITY_ADMIN` cade da solo nel ramo
+ * tenant-scoped — nessun altro sito da toccare per questo vincolo.
  */
 export const CAN_GRANT_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
   "PLATFORM_ADMIN",
   "TENANT_ADMIN",
+  "SECURITY_ADMIN",
 ]);
 
 /**

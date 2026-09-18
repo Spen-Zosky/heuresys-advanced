@@ -158,6 +158,7 @@ describe("/v1/me/surveys — rivedere le proprie risposte (Enzo, 2026-08-13)", (
          FROM sys.sys_users u
         WHERE u.user_tenant_id = $2
           AND u.user_status = 'ACTIVE'
+          AND u.user_type IS DISTINCT FROM 'SERVICE'
           AND NOT EXISTS (SELECT 1 FROM sys.sys_survey_responses r
                            WHERE r.survey_response_survey_id = $1
                              AND r.survey_response_subject_user_id = u.user_id)

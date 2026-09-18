@@ -102,4 +102,7 @@ EOF
   exit 1
 fi
 
-exec ssh -o ConnectTimeout=30 "$HOST" "cd $REPO && bash db/scripts/ci-rehearsal.sh"
+# CI_REHEARSAL_TEMPLATE passa al remoto se valorizzata QUI: ssh non eredita l'ambiente
+# locale da solo. Vuota o assente -> il remoto usa il suo default (heuresys_ci),
+# comportamento identico a prima di questa riga.
+exec ssh -o ConnectTimeout=30 "$HOST" "cd $REPO && CI_REHEARSAL_TEMPLATE='${CI_REHEARSAL_TEMPLATE:-}' bash db/scripts/ci-rehearsal.sh"

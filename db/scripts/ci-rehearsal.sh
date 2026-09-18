@@ -130,6 +130,36 @@ if [ "$MODE" = "like-ci" ]; then
   log "copia di $TEMPLATE_DB -> $DB (copia di file, l'originale non si tocca)"
   t_copy0=$(date +%s)
   sudo -u postgres createdb -p "$PGPORT_LOCAL" -O "$ROLE" -T "$TEMPLATE_DB" "$DB"
+  # `createdb --template` copia le RIGHE, non l'ACL del database: `pg_database.datacl`
+  # e' una proprieta' della riga catalogo del database, e la copia ne parte con quella
+  # di default (nessuna esplicita = PUBLIC puo' connettersi), non con quella del
+  # modello. Una migrazione come 000340 (revoca CONNECT a PUBLIC, lo ridà per nome a
+  # ruoli espliciti) diventa quindi irriproducibile fedelmente: sulla copia i ruoli
+  # nominati (es. `codex_auditor`, `gov_worker`, se esistono nel cluster) non hanno
+  # mai avuto quel GRANT, e la post-condizione della migrazione — che verifica non
+  # solo "PUBLIC e' fuori" ma anche "chi doveva restare dentro e' rimasto dentro" —
+  # si accende su un fatto vero (misurato: la VM ha `codex_auditor`/`gov_worker` nel
+  # cluster, linux-pc no — per questo il difetto non si era mai visto lanciando la
+  # prova solo li'). Si replica qui l'ACL del modello, riga per riga, cosi' la copia
+  # riparte con lo STESSO permesso del database vero — la fedeltà che questo script
+  # promette (riga 25-26 sopra).
+  sudo -u postgres psql -p "$PGPORT_LOCAL" -qc "
+    DO \$\$
+    DECLARE g record;
+    BEGIN
+      FOR g IN
+        SELECT a.grantee, a.privilege_type
+          FROM pg_database d, LATERAL aclexplode(coalesce(d.datacl, acldefault('d', d.datdba))) a
+         WHERE d.datname = '$TEMPLATE_DB'
+      LOOP
+        IF g.grantee = 0 THEN
+          EXECUTE format('GRANT %s ON DATABASE %I TO PUBLIC', g.privilege_type, '$DB');
+        ELSE
+          EXECUTE format('GRANT %s ON DATABASE %I TO %I', g.privilege_type, '$DB',
+                          (SELECT rolname FROM pg_roles WHERE oid = g.grantee));
+        END IF;
+      END LOOP;
+    END \$\$;"
   say "copia fatta in $(( $(date +%s) - t_copy0 ))s"
 else
   log "database vergine: $DB (ruolo $ROLE, porta $PGPORT_LOCAL)"

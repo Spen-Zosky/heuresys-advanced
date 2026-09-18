@@ -208,11 +208,28 @@ CMD_SUITE="pnpm --filter @heuresys/api test"
 if [ $# -gt 0 ]; then
   CMD_SUITE="pnpm --filter @heuresys/api exec vitest run $*"
 fi
-echo "[prova-api] eseguo: $CMD_SUITE"
+
+# Override EFFIMERI, solo per questa invocazione — non toccano il .env remoto ne'
+# il servizio systemd in esecuzione. Servono SOLO quando HOST non e' linux-pc:
+# li' il .env e' quello vero di TEST_ENV_HOST (misurato: quando HOST e' la VM
+# `oracle-vm-default`, il .env e' quello REALE di produzione, con
+# AUTH_LOGIN_RATELIMIT_MAX=10 e PROM_METRICS_ENABLED=true). `test/helpers/setup.ts`
+# alza il budget di login a 10000 SOLO se la variabile non e' gia' valorizzata
+# (usa `??`, non `||`): su un .env che la valorizza gia' per davvero, quel rialzo
+# non scatta mai, e la suite esaurisce il budget di sicurezza (10 login/5 min) alle
+# prime decine di test. Stessa cosa per PROM_METRICS_ENABLED: il test che verifica
+# il default OFF non ha senso contro un .env che l'ha acceso di proposito.
+# Esportarle QUI (env di shell, prima che dotenv legga il .env sul remoto) le fa
+# vincere su dotenv, che per convenzione non sovrascrive una variabile gia' presente.
+OVERRIDE_REMOTI=""
+[ -n "${AUTH_LOGIN_RATELIMIT_MAX:-}" ] && OVERRIDE_REMOTI="$OVERRIDE_REMOTI AUTH_LOGIN_RATELIMIT_MAX=$AUTH_LOGIN_RATELIMIT_MAX"
+[ -n "${PROM_METRICS_ENABLED:-}" ] && OVERRIDE_REMOTI="$OVERRIDE_REMOTI PROM_METRICS_ENABLED=$PROM_METRICS_ENABLED"
+
+echo "[prova-api] eseguo:${OVERRIDE_REMOTI:+ $OVERRIDE_REMOTI}${OVERRIDE_REMOTI:+ (override effimeri)} $CMD_SUITE"
 INIZIO=$(date +%s)
 
 ssh -o ConnectTimeout=30 "$HOST" \
-  "export NVM_DIR=\"\$HOME/.nvm\"; [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\" >/dev/null 2>&1; cd ~/$REPO_REMOTO && $CMD_SUITE"
+  "export NVM_DIR=\"\$HOME/.nvm\"; [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\" >/dev/null 2>&1; cd ~/$REPO_REMOTO &&$OVERRIDE_REMOTI $CMD_SUITE"
 ESITO=$?
 
 DURATA=$(( $(date +%s) - INIZIO ))

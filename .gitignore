@@ -279,3 +279,15 @@ apps/web/esiti-e2e.json
 .scratch_*
 _zp_verify_tmp/
 .programmi/_zp_verify_tmp/
+
+# Spazi di lavoro di altri strumenti, non contenuto del progetto (Cowork/Enzo, 2026-09-19).
+.agents/
+.codex/
+.codex-review/
+
+# La decisione che la nota qui sopra lasciava aperta ("se debbano stare nella storia del
+# progetto è una decisione del progetto, da prendere una volta") è stata presa (Cowork/Enzo,
+# 2026-09-19): risultati rigenerabili di prove già concluse e bozze superate dai documenti
+# finali in esiti/. I file restano sul disco, ignorarli non li cancella.
+.programmi/K-ruoli-direzione/evidenze/wf_*/
+.programmi/K-ruoli-direzione/esiti/_bozza_*

@@ -14,6 +14,19 @@
 -- Self-healing: l'audience viene riportata ESATTAMENTE a questa lista a ogni
 -- re-run (000212 > 000005 blanket > 000210 allowlist — ordine auto-riparante).
 --
+-- QUARTO TITOLARE (mandato K, R-6, mig. 000432, 2026-09-19): PEOPLE_MANAGER e'
+-- lo stesso mandato HR tenant-wide di TENANT_ADMIN/HRMS_MANAGER (HR_MANDATED_
+-- ROLES) — gestisce operativamente le persone, e il lifecycle dei team e'
+-- parte del suo mestiere (000432 lo grant esplicitamente). Senza questa
+-- emenda il self-healing qui sotto lo strappava a ogni riapplicazione della
+-- catena: misurato S1110, PEOPLE_MANAGER passava da 88 a 87 permessi dopo un
+-- run completo, con team:manage mancante e nessuna riga (nemmeno revocata) in
+-- sys_auth_role_permissions — la reinserzione di 000432 falliva a valle sulla
+-- propria post-condizione (allora ancora tarata su 78, non sui derivati self/
+-- mirror) e la transazione andava in rollback. Emendato QUI (ADR-0035, e' il
+-- file che crea il comportamento self-healing), stessa forma della 000404 per
+-- branch:list/branch:read.
+--
 -- i18n dati (gate 000207): name IT-canonical in-row + overlay EN nella stessa
 -- migration — coverage resta 0 gap.
 --
@@ -47,7 +60,7 @@ INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
 SELECT r.auth_role_id, p.auth_permission_id
   FROM sys.sys_auth_roles r
   JOIN sys.sys_auth_permissions p ON p.auth_permission_code = 'team:manage'
- WHERE r.auth_role_code IN ('PLATFORM_ADMIN', 'TENANT_ADMIN', 'HRMS_MANAGER')
+ WHERE r.auth_role_code IN ('PLATFORM_ADMIN', 'TENANT_ADMIN', 'HRMS_MANAGER', 'PEOPLE_MANAGER')
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
 -- Self-healing: nessun altro ruolo trattiene team:manage (000005 blanket ecc.)
@@ -56,7 +69,7 @@ DELETE FROM sys.sys_auth_role_permissions rp
  WHERE p.auth_permission_code = 'team:manage'
    AND rp.auth_permission_id = p.auth_permission_id
    AND rp.auth_role_id = r.auth_role_id
-   AND r.auth_role_code NOT IN ('PLATFORM_ADMIN', 'TENANT_ADMIN', 'HRMS_MANAGER');
+   AND r.auth_role_code NOT IN ('PLATFORM_ADMIN', 'TENANT_ADMIN', 'HRMS_MANAGER', 'PEOPLE_MANAGER');
 
 DROP TABLE _ta_extend_000212;
 
@@ -72,7 +85,7 @@ BEGIN
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
     JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
    WHERE p.auth_permission_code = 'team:manage';
-  IF n <> 3 THEN RAISE EXCEPTION '000212: audience team:manage attesa 3 ruoli, trovati %', n; END IF;
+  IF n <> 4 THEN RAISE EXCEPTION '000212: audience team:manage attesa 4 ruoli, trovati %', n; END IF;
 
   SELECT count(*) INTO n
     FROM sys.sys_reference_translations t
@@ -81,5 +94,5 @@ BEGIN
      AND t.entity_table = 'sys_auth_permissions' AND t.field = 'name' AND t.locale = 'en';
   IF n <> 1 THEN RAISE EXCEPTION '000212: overlay EN mancante per team:manage'; END IF;
 
-  RAISE NOTICE '000212: team:manage attiva (PLATFORM_ADMIN, TENANT_ADMIN, HRMS_MANAGER)';
+  RAISE NOTICE '000212: team:manage attiva (PLATFORM_ADMIN, TENANT_ADMIN, HRMS_MANAGER, PEOPLE_MANAGER)';
 END $$;

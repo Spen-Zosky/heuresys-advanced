@@ -149,16 +149,97 @@ ON CONFLICT (entity_table, entity_id, field, locale)
   DO UPDATE SET text = EXCLUDED.text, source = 'MANUAL', updated_at = now();
 
 -- 4. Post-condizione: la migrazione fallisce se qualcosa non torna.
+--
+-- ⚠ IL CONTO VERO NON E' 78 (misurato S1109→S1110: una riapplicazione COMPLETA
+-- della catena porta PEOPLE_MANAGER a 88, non 78). Due meccanismi self-healing
+-- del progetto aggiungono permessi che questa migrazione non concede
+-- direttamente, e sono LEGITTIMI, non un difetto:
+--   (a) I17 universal ESS floor — 9 permessi `:self` concessi a OGNI ruolo da
+--       migrazioni dedicate (es. 000186 per gdpr:export:self/consent:manage:
+--       self, un CROSS JOIN su sys_auth_roles SENZA filtro di ruolo);
+--   (b) il mirror di 000177 — `skill:delete` eredita l'audience di
+--       `skill:update` ("chi ha update riceve anche delete", stessa logica di
+--       ogni <area>:delete dedicato), e PEOPLE_MANAGER ha skill:update fra i
+--       78 espliciti sopra.
+-- L'elenco degli 88 e' ESPLICITO nei due sensi (regola 4 del metodo di
+-- bonifica: mai un jolly): l'82° codice diventa un allarme reale, non un
+-- numero indovinato.
+CREATE TEMP TABLE _pm_attesi(code text PRIMARY KEY);
+INSERT INTO _pm_attesi(code) VALUES
+  -- i 78 espliciti di questa migrazione (elenco sopra, invariato)
+  ('analytics:view'),('approval:create'),('approval:decide'),('assessment:create'),
+  ('assessment:update'),('branch:list'),('branch:read'),('capability:read'),
+  ('career_succession:create'),('career_succession:delete'),('career_succession:read'),
+  ('career_succession:update'),('compensation_intelligence:read'),
+  ('compensation_intelligence:update'),('content:create'),('content:delete'),
+  ('content:publish'),('content:update'),('dashboard:view'),
+  ('engagement_feedback:create'),('engagement_feedback:delete'),
+  ('engagement_feedback:update'),('evidence:read'),('gap_analysis:create'),
+  ('gap_analysis:delete'),('gap_analysis:read'),('gap_analysis:update'),
+  ('goal:create'),('goal:delete'),('goal:read'),('goal:update'),('insights:view'),
+  ('job_role:create'),('job_role:update'),('kpi:create'),('kpi:delete'),('kpi:read'),
+  ('kpi:update'),('learning:create'),('learning:delete'),('learning:update'),
+  ('leave:read'),('mentorship:create'),('mentorship:delete'),('mentorship:read'),
+  ('mentorship:update'),('okr:create'),('okr:delete'),('okr:update'),
+  ('org_director:read'),('organization_unit:create'),('organization_unit:delete'),
+  ('organization_unit:update'),('organization_unit_processes:create'),
+  ('organization_unit_processes:delete'),('position:create'),('position:delete'),
+  ('position:read'),('position:update'),('predictions:read'),('skill:create'),
+  ('skill:self_assess'),('skill:update'),('surveys:create'),('surveys:delete'),
+  ('surveys:read'),('surveys:update'),('talent:read'),('team:manage'),
+  ('timeline:read'),('training_initiative:create'),('training_initiative:update'),
+  ('user:create'),('user:delete'),('user:update'),('visualization:create'),
+  ('visualization:delete'),('visualization:update_layout'),
+  -- (a) I17 universal ESS floor — 9 permessi `:self`, ogni ruolo li ha
+  ('consent:manage:self'),('gdpr:export:self'),('leave:request:self'),
+  ('me:content:read'),('me:preferences:read'),('me:preferences:update'),
+  ('me:sessions:manage'),('surveys:respond:self'),('team:read:self'),
+  -- (b) mirror 000177: skill:delete eredita l'audience di skill:update
+  ('skill:delete');
+
 DO $$
 DECLARE
   n_pm int; n_vietati int; n_senza_cat int; n_platform_true int; n_hrms int;
+  n_attesi int; n_inattesi int; n_mancanti int;
 BEGIN
   SELECT count(*) INTO n_pm
     FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
    WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL;
-  IF n_pm <> 78 THEN
-    RAISE EXCEPTION '000432: PEOPLE_MANAGER deve avere 78 permessi, ne ha %', n_pm;
+  IF n_pm <> 88 THEN
+    RAISE EXCEPTION '000432: PEOPLE_MANAGER deve avere 88 permessi (78 espliciti + 9 self-floor I17 + 1 mirror skill:delete), ne ha %', n_pm;
+  END IF;
+
+  SELECT count(*) INTO n_attesi FROM _pm_attesi;
+  IF n_attesi <> 88 THEN
+    RAISE EXCEPTION '000432: l''elenco _pm_attesi ha % righe, attese 88 (duplicato interno?)', n_attesi;
+  END IF;
+
+  -- ogni codice live DEVE stare nell'elenco atteso: un codice fuori e' un
+  -- self-healing nuovo o un errore, non si scopre da un totale che coincide per caso.
+  SELECT count(*) INTO n_inattesi
+    FROM sys.sys_auth_role_permissions rp
+    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+    JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+   WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL
+     AND p.auth_permission_code NOT IN (SELECT code FROM _pm_attesi);
+  IF n_inattesi <> 0 THEN
+    RAISE EXCEPTION '000432: PEOPLE_MANAGER ha % permessi fuori dall''elenco atteso (nuovo self-healing da investigare)', n_inattesi;
+  END IF;
+
+  -- e ogni codice atteso DEVE essere davvero live: un mancante e' un self-healing
+  -- che non e' scattato (es. team:manage strappato da un'allowlist non emendata).
+  SELECT count(*) INTO n_mancanti
+    FROM _pm_attesi a
+   WHERE NOT EXISTS (
+     SELECT 1 FROM sys.sys_auth_role_permissions rp
+       JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+       JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+      WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL
+        AND p.auth_permission_code = a.code
+   );
+  IF n_mancanti <> 0 THEN
+    RAISE EXCEPTION '000432: % permessi attesi mancano davvero a PEOPLE_MANAGER (self-healing altrove li ha strappati — cercare in allowlist self-healing tipo 000212/000210)', n_mancanti;
   END IF;
 
   -- I domini esclusi non devono comparire, per costruzione (typo guard sulla revisione).
@@ -174,7 +255,11 @@ BEGIN
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL
      AND (
-       p.auth_permission_code LIKE 'blueprint:%' OR p.auth_permission_code LIKE 'gdpr:%'
+       p.auth_permission_code LIKE 'blueprint:%'
+       -- gdpr:export:self ESCLUSO: e' il floor universale I17 (ogni ruolo lo ha,
+       -- 000186 lo concede senza filtro di ruolo), non un permesso del dominio
+       -- GDPR gestionale (gdpr:read/export/erase/retention restano vietati).
+       OR (p.auth_permission_code LIKE 'gdpr:%' AND p.auth_permission_code <> 'gdpr:export:self')
        OR p.auth_permission_code = 'role:assign' OR p.auth_permission_code LIKE 'seed_acquisition:%'
        OR p.auth_permission_code LIKE 'tenant:%' OR p.auth_permission_code = 'tenant_materialization:execute'
        OR p.auth_permission_code LIKE 'skill_taxonomy:%' OR p.auth_permission_code = 'skill_alias:manage'
@@ -214,10 +299,11 @@ BEGIN
     RAISE EXCEPTION '000432: auth_role_is_platform=true deve restare su UN solo ruolo (PLATFORM_ADMIN), ne ha %', n_platform_true;
   END IF;
 
-  RAISE NOTICE '000432: PEOPLE_MANAGER creato (78 permessi, revisione a mano); 0 permessi di altri domini; HRMS_MANAGER intatto (% permessi); G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.', n_hrms;
+  RAISE NOTICE '000432: PEOPLE_MANAGER creato (88 permessi: 78 rivisti a mano + 9 self-floor I17 + 1 mirror skill:delete); 0 permessi di altri domini; HRMS_MANAGER intatto (% permessi); G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.', n_hrms;
 END $$;
 
 DROP TABLE _hrms_prima;
+DROP TABLE _pm_attesi;
 
 COMMIT;
 

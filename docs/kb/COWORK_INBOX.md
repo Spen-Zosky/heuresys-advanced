@@ -1065,3 +1065,42 @@ Dalla sessione CLI, che gira in Git Bash con UTF-8, il difetto **non si manifest
 **Le misure di capienza, che invece sono larghe**: contesto **46,3%** (463.307 su 1.000.000, soglia 75%), finestra 5 ore **9,0%** (soglia 80%). ⚠ Ma la **finestra 7 giorni e' all'89%**, ed e' l'unica delle tre senza una soglia scritta nella dottrina: e' il budget che si esaurisce per primo, e oggi non lo sorveglia nessuno.
 
 stato: [RICONCILIATA S1105]
+
+### 2026-09-19 — La meta' rimandata della decisione C non esiste come voce aperta: sparisce dal radar
+
+**Il fatto, misurato alle 09:5x del 19/09.** `R-2` risulta `CHIUSA` e la nota dentro la sua riga dice che la lettura mascherata del dossier e' rimandata. Ma la decisione C di Enzo, depositata il 18/09 in `RISPOSTE_ENZO.md`, diceva testualmente: *«La lettura mascherata del dossier NON si fa adesso: diventa una voce D-nuova separata, con la sua decisione, e resta BLOCCATA finche' Enzo non la riprende»* e, in chiusura, *«La voce D-nuova nasce BLOCCATA(Enzo)»*.
+
+Quella voce **non e' stata creata**. Grep su `STATO.md`: nessuna riga `D-…`, l'ultima voce e' `R-11`. La sola traccia e' il testo dentro la riga di `R-2`, che e' CHIUSA.
+
+⚠ **Perche' conta, e perche' e' un difetto strutturale e non una svista di trascrizione.** `dove_siamo.py` elenca le voci il cui stato inizia con `IN CORSO`, `SOSPESA` o `ATTESA_ENZO`: una nota dentro una riga `CHIUSA` **non e' visibile a nessuno degli strumenti di sorveglianza**. Oggi lo stato dice «nessuna voce aperta, nessuna PRONTA», e da quella frase un lettore — o una sessione nuova — conclude che del DPO non resta niente da fare. Invece resta la meta' che Enzo ha deliberatamente rimandato, con la sua condizione di riapertura gia' scritta.
+
+E' la stessa forma di DIF-4 applicata al deposito invece che alla misura: **l'informazione e' giusta, ma sta in un insieme che nessuno interroga.** Una decisione registrata dove il sorvegliante non guarda equivale a una decisione non registrata.
+
+**Cosa va fatto** (lo fa la CLI, non Cowork: V7):
+1. Creare in `STATO.md`, dopo `R-11`, la voce **`D-12`** — o il codice che la convenzione del mandato impone — con stato `BLOCCATA(Enzo)` e nota: «lettura mascherata del dossier per il DPO: serve un terzo stato "tenant-wide ma mascherato" che oggi non esiste; tocca I18/I20, HR_MANDATED_ROLES e mask.ts. Tre opzioni in `esiti/R-2_domanda_masking.md`, Enzo ha scelto C = rimandare».
+2. Riportare nella nota **la condizione di riapertura** che Enzo ha accettato insieme alla scelta, e che oggi non e' scritta in `STATO.md`: *se l'obiettivo diventa chiudere la fase dei ruoli COMPLETA per una dimostrazione o una certificazione, l'opzione A e' l'unica che la chiude davvero, e questa voce torna in cima invece di restare in fondo.*
+3. Lasciare `R-2` CHIUSA: il nucleo GDPR e' stato fatto davvero e la chiusura e' corretta. Qui non si riapre niente, si rende visibile cio' che e' stato rimandato.
+
+**Nota di metodo, da valutare fuori da questo ciclo.** Vale la pena che `dove_siamo.py` sappia dire anche «decisioni rimandate senza una voce che le tenga»: oggi una voce chiusa con dentro un rinvio e' un punto cieco dello strumento, e questo e' il primo caso in cui l'abbiamo visto. Proposta, non prescrizione.
+
+stato: [DA RICONCILIARE]
+
+### 2026-09-19 — Censimento dei punti di arresto su tutto cio' che resta, prima di lanciare una corsa non presidiata
+
+Enzo ha dato una regola nuova, che vale da oggi in poi: **l'obiettivo e' arrivare in fondo al mandato, e il lavoro deve potersi svolgere senza il suo presidio — quindi le incoerenze e le informazioni mancanti che fermerebbero una sessione si trovano e si risolvono PRIMA di lanciarla, non si incontrano durante la corsa.** Questo blocco e' il censimento fatto su quella regola, sulle 14 voci rimaste.
+
+**Sei punti di arresto trovati. Quattro risolti adesso, due dipendono dalle macchine.**
+
+**1. X-1, passo 59 — 103 righe dubbie che fermavano la voce in ATTESA_ENZO. RISOLTO.** Le 103 non sono state portate a Enzo una per una: sono state raggruppate per CAUSA del dubbio e chiuse con quattro decisioni. La regola e le 103 righe generate stanno in `esiti/RISPOSTE_ENZO.md` sotto la chiave `X-1`. ⚠ La sessione deve **rigenerarle** applicando la regola a `esiti/I-E.md` e confrontare: se non torna 76 ibrido / 23 nativo / 4 importato, vince il file.
+
+**2. X-2, passo 61 — `sys_attendance` ferma la voce in ATTESA_ENZO prima della migrazione.** NON risolto da Cowork, e con una ragione: il mandato chiede di proporre la corrispondenza fra i valori di `attendance_source` e i tre stati, e quei valori **non li ho potuti misurare** — il mio shell non raggiunge il database. Proporre una corrispondenza senza aver guardato i dati sarebbe esattamente il difetto che DIF-4 vieta. **Cosa deve fare la sessione**: misurare `select attendance_source, count(*) from sys_attendance group by 1`, scrivere la proposta in `esiti/X-2_attendance.md`, e **procedere con le altre dieci tabelle senza fermarsi**; solo la migrazione di `sys_attendance` aspetta la ratifica. Cosi' la corsa non si blocca su una tabella sola.
+
+**3. R-6 dipende da X-1, che sta nella fase DOPO. RISOLTO da Enzo il 2026-09-19: X-1 si esegue PRIMA di R-6.** Il mandato colloca R-6 in F4 e X-1 in F5, ma la riga di R-6 dice «dopo X-1 ratificata» e il passo 56 **genera** la lista dei permessi dalla classificazione di X-1. Eseguito l'ordine alla lettera, la sessione arriva a R-6 e si ferma su qualcosa che per sequenza viene dopo. Non e' un difetto di chi ha scritto il mandato: e' una dipendenza vera che attraversa due fasi. L'ordine nuovo delle voci di F4 e' quindi: **R-3, R-10, R-4, R-5, R-8, [X-1], R-6, R-11**.
+
+**4. Lo strumento che R-6 richiede NON ESISTE. RISOLTO come voce nuova.** Il passo 56 dice che la lista dei permessi di PEOPLE_MANAGER «si GENERA da X-1 con `tools/permessi_da_classificazione.py` e si rivede a mano, non si scrive a mano». Quel file non esiste: cercato in tutto il repository, nessun riscontro. Senza, la sessione o si ferma o scrive la lista a mano — cioe' fa proprio la cosa che il mandato vieta. **Va creata una voce nuova, prima di R-6**, che costruisce lo strumento: legge `sys.sys_classificazione_direzione_dato`, emette l'elenco dei permessi di scrittura sulle tabelle native piu' la lettura delle importate, e ha una controprova che sa fallire (una tabella spostata da nativo a importato deve cambiare l'elenco).
+
+**5. Il gemello era spento. RISOLTO il 2026-09-19.** Enzo l'ha acceso; verificato: `enzo-S550CM` risponde, SSH entra (exit 0), node 22.19.0, pnpm 9.15.0, Postgres accetta connessioni, 89 GB liberi. Era fermo a `5e4eea61` (17/09): **allineato con `git pull --ff-only` a `78b40e72`, zero commit indietro da origin, nessun file modificato**. Stavolta il rumore CRLF delle tre sessioni precedenti non si e' presentato: l'unica cosa non tracciata era `.auto-memory/`.
+
+**6. Il bundle in produzione e' fermo al 14 settembre. NON risolto, ed e' il piu' importante.** Scoperto dalla sessione S1106. R-9, R-2 e R-7 esistono nel database ma il programma in esecuzione non li conosce: sono chiusi sulla carta e non funzionanti per le persone vere. ⚠ **Conseguenza sul mandato che nessuno ha ancora scritto**: `R-11` (prove negative trasversali) verifica che ogni ruolo NON possa fare cio' che non deve — ma se il programma in esecuzione non conosce i ruoli nuovi, quella matrice sta provando il programma sbagliato e uscirebbe verde per la ragione sbagliata. **R-11 non va eseguita finche' la produzione non e' allineata.** Adesso che il gemello e' acceso, il deploy e' sbloccato.
+
+stato: [DA RICONCILIARE]

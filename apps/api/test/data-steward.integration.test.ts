@@ -30,9 +30,14 @@ import type { TenantImportRunDetail, TenantImportSource, TenantImportRow } from 
 senzaCacheDiSessione();
 
 const DATA_STEWARD_EMAIL = "data-steward@collaudo.invalid";
-// Controprova: una persona REALE con HRMS_MANAGER su RTL_BANK (stesso criterio del test
-// gemello di R-6 s1: il ruolo e' storico, non nato in questo mandato).
+// Controprova per (a)/(c)/(d) — obiettivo, dominio nativo (I22): una persona REALE con
+// HRMS_MANAGER su RTL_BANK (stesso criterio del test gemello di R-6 s1).
 const HRMS_MANAGER_EMAIL = "maria.colombo@rtl-bank.org";
+// Controprova per la mascheratura — dominio tenant-import-runs: misurato sul vivo,
+// HRMS_MANAGER NON detiene seed_acquisition:read (solo PLATFORM_ADMIN/TENANT_ADMIN/
+// DATA_STEWARD/IMPLEMENTATION_CONSULTANT). TENANT_ADMIN e' il plenipotenziario giusto
+// per questo modulo, collaudo gia' esistente su RTL_BANK.
+const TENANT_ADMIN_EMAIL = "governo@collaudo.invalid";
 
 interface S { cookies: Map<string, string>; csrfToken: string; userId: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
@@ -49,6 +54,7 @@ let suite: TestApp;
 let hrmsManager: S;
 let dataSteward: S;
 let peopleManager: S;
+let tenantAdmin: S;
 
 describe("mandato K, R-6 s2 — DATA_STEWARD", () => {
   beforeAll(async () => {
@@ -57,6 +63,7 @@ describe("mandato K, R-6 s2 — DATA_STEWARD", () => {
     hrmsManager = await login(suite, HRMS_MANAGER_EMAIL, TEST_PERSONA_PASSWORD);
     dataSteward = await login(suite, DATA_STEWARD_EMAIL, deriveCollaudoPassword(key, DATA_STEWARD_EMAIL));
     peopleManager = await login(suite, "people-manager@collaudo.invalid", deriveCollaudoPassword(key, "people-manager@collaudo.invalid"));
+    tenantAdmin = await login(suite, TENANT_ADMIN_EMAIL, deriveCollaudoPassword(key, TENANT_ADMIN_EMAIL));
   });
 
   afterAll(async () => {
@@ -84,9 +91,22 @@ describe("mandato K, R-6 s2 — DATA_STEWARD", () => {
     const SCRITTURA_RE = /\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+sys\.(sys_[a-z0-9_]+)\b/gi;
     const ROTTA_RE = /app\.(get|post|patch|put|delete)\(\s*["']([^"']*)["']/gi;
     const SCRITTURA_METODI = new Set(["post", "patch", "put", "delete"]);
+    // ECCEZIONE MISURATA (non assunta): `tenant-materialization` scrive su
+    // sys_user_kpi_evidence (classificata 'importato'), ma X-1 lo dichiara nel
+    // proprio campo `motivo` — "unico scrittore in codice e' l'effetto di
+    // materializzazione onboarding tenant". La materializzazione (X-2) e' un
+    // TERZO valore di origine, distinto da IMPORT: semina lo stato iniziale di
+    // un tenant appena costruito, non importa da un sistema HR esterno (D6). La
+    // rotta POST / e' comunque gia' PLATFORM_ADMIN-only (#132 E29) — nessun
+    // ruolo di questo mandato, DATA_STEWARD incluso, vi accede. Trovato da
+    // questa stessa prova (prima misura strutturale, non a occhio); registrato
+    // in REGISTRO_SCOPERTE come «fuori da questo ciclo», non un difetto da
+    // correggere qui.
+    const MODULI_MATERIALIZZAZIONE = new Set(["tenant-materialization"]);
 
     const violazioni: string[] = [];
     for (const modulo of readdirSync(MODULI)) {
+      if (MODULI_MATERIALIZZAZIONE.has(modulo)) continue;
       const moduloDir = join(MODULI, modulo);
       if (!statSync(moduloDir).isDirectory()) continue;
 
@@ -154,7 +174,7 @@ describe("mandato K, R-6 s2 — DATA_STEWARD", () => {
     expect(sync.statusCode, sync.body).toBe(200);
   });
 
-  it("lettura mascherata dei dati personali — GET /:id nasconde i candidati a DATA_STEWARD, li mostra intatti a HRMS_MANAGER", async () => {
+  it("lettura mascherata dei dati personali — GET /:id nasconde i candidati a DATA_STEWARD, li mostra intatti a TENANT_ADMIN", async () => {
     const tenant = await pool.query<{ id: string }>(
       "SELECT tenant_id AS id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'",
     );
@@ -189,12 +209,12 @@ describe("mandato K, R-6 s2 — DATA_STEWARD", () => {
     expect(corsaMascherata.runId).toBe(runId);
     expect(corsaMascherata.referto.persone).toBe(1);
 
-    const perHrmsManager = await suite.app.inject({
+    const perTenantAdmin = await suite.app.inject({
       method: "GET", url: `/v1/tenant-import-runs/${runId}`,
-      headers: { cookie: ch(hrmsManager.cookies) },
+      headers: { cookie: ch(tenantAdmin.cookies) },
     });
-    expect(perHrmsManager.statusCode, perHrmsManager.body).toBe(200);
-    const corsaIntatta = perHrmsManager.json() as TenantImportRunDetail;
+    expect(perTenantAdmin.statusCode, perTenantAdmin.body).toBe(200);
+    const corsaIntatta = perTenantAdmin.json() as TenantImportRunDetail;
     expect(corsaIntatta.candidates).toHaveLength(1);
     expect(corsaIntatta.candidates![0]!.email).toBe(`mario.rossi.${marca}@cliente.invalid`);
     expect((corsaIntatta as unknown as { masked?: string[] }).masked).toBeUndefined();

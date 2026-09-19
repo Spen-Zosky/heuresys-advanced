@@ -1104,3 +1104,63 @@ Enzo ha dato una regola nuova, che vale da oggi in poi: **l'obiettivo e' arrivar
 **6. Il bundle in produzione e' fermo al 14 settembre. NON risolto, ed e' il piu' importante.** Scoperto dalla sessione S1106. R-9, R-2 e R-7 esistono nel database ma il programma in esecuzione non li conosce: sono chiusi sulla carta e non funzionanti per le persone vere. ⚠ **Conseguenza sul mandato che nessuno ha ancora scritto**: `R-11` (prove negative trasversali) verifica che ogni ruolo NON possa fare cio' che non deve — ma se il programma in esecuzione non conosce i ruoli nuovi, quella matrice sta provando il programma sbagliato e uscirebbe verde per la ragione sbagliata. **R-11 non va eseguita finche' la produzione non e' allineata.** Adesso che il gemello e' acceso, il deploy e' sbloccato.
 
 stato: [RICONCILIATA 955aa06a S1106] — 1 (X-1) e 3 (ordine R-6) e 4 (tool mancante) recepiti in STATO.md; 2 (sys_attendance) recepito nella nota di X-2; 5 (gemello acceso) confermato in sessione (raggiungibile, pull ff-only pulito a 78b40e72); 6 (bundle fermo) — chiusura completa eseguita nella stessa sessione: `close-propagate.sh --full --deploy` ha armato `origin/prod` a `78b40e72`, CI in volo al momento dell'armamento (3 verdi/1 in corso), VM e linux-pc allineati (repo+payload+memoria+ecosistema, entrambi verify CLEAN), clone-DB di linux-pc riarmato via systemd. `heuresys-advanced-deploy-watch.timer` completera' il rollout sui due host da solo quando la CI risulta verde. R-11 resta in attesa di quel rollout, come indicato.
+
+## 2026-09-19 04:50 — [DA RICONCILIARE] guardiano.py --session cerca solo nel progetto della cwd
+
+Misurato adesso, governando S1107 dall'esterno. `guardiano.py --session <id>` risolve la cartella dei transcript dalla **cwd del processo**, non dall'id: lanciato da `C:\Users\enzospenuso` con l'id di una sessione di `D:\heuresys-advanced` risponde `"errore": "nessun transcript in C:\\...\\projects\\C--Users-enzospenuso"` e il ramo contesto resta `ok: false`, cioe' **rami_misurati=1**. Il verdetto esce comunque `chiudi: false`, quindi un governante che non guarda il campo `errore` crede di aver misurato il contesto della sessione sorvegliata e invece ha misurato niente: e' la forma di DIF-4 applicata al guardiano stesso.
+
+Rimedio usato adesso: `Set-Location D:\heuresys-advanced` prima della chiamata → misura buona (S1107: contesto 29,3% su 1M, modello claude-sonnet-5, 5h 14,0%, fresco).
+
+Proposta per il CLI (non la applico io, non e' il mio canale di scrittura sul tool): quando `--session` e' passato ed e' un id valido, cercare il file in **tutte** le cartelle sotto `~/.claude/projects/` invece che solo in quella della cwd; e in ogni caso, se `--session` e' stato chiesto e il file non si trova, uscire con codice diverso da 0 invece di limitarsi a `ok: false` dentro il JSON.
+
+stato: [RICONCILIATA 21f9d923 S1108] — e' dottrina/hook a livello utente (`~/.claude/tools/`), fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md` come proposta per Enzo, non applicata qui.
+
+## 2026-09-19 05:35 — [DA RICONCILIARE] dove_siamo.py tace sulle 14 voci BLOCCATA(fase): il silenzio si legge come «campo libero»
+
+Misurato adesso, e mi ha fatto sbagliare una frase a Enzo, quindi lo deposito con la diagnosi completa.
+
+**I fatti.** `STATO.md` ha 51 voci: 34 CHIUSA, **14 BLOCCATA(fase)**, 2 RITIRATA, 1 ATTESA_ENZO (D11). Le 14 sono R-3, R-10, R-4, R-5, R-8, R-6, R-11, X-1, X-2, X-3, X-4, X-5, X-6, G-1 — cioè tutto il lavoro residuo del mandato K, l'elenco che Enzo ha chiesto per nome il 19/9.
+
+**Cosa stampa `dove_siamo.py` in questa situazione.** Sezione (2) `STATI_APERTI = ("IN CORSO", "SOSPESA", "ATTESA_ENZO")` (riga 62, filtro alla riga 172): `BLOCCATA(fase)` non c'è, quindi delle 14 non compare nulla e la sezione mostra la sola D11. Sezione (3) `pronte = [r for r in righe if r["stato"] == "PRONTA"]` (riga 184): `PRONTA` è uno **stato scritto a mano**, non una condizione calcolata dalle dipendenze, quindi finché nessuno promuove la voce successiva stampa `nessuna PRONTA`. Il ripiego della riga 192 guarda `ATTESA_ENZO` e `BLOCCATA(D`, non `BLOCCATA(fase)`. Risultato: `nessuna PRONTA` + `ESITO: nessun rosso`, e le 14 voci non sono nominate da nessuna parte dell'uscita.
+
+**Perché è un difetto e non una definizione.** Chi legge l'uscita — una sessione che si autogoverna, o io che sorveglio dall'esterno — conclude che il campo è libero. Alle 05:26 ho scritto a Enzo «resta una voce aperta su 51»: vero secondo la definizione del tool, falso come quadro, perché 14 voci sono da fare. È la stessa famiglia di D11 (un rinvio deciso ma non sorvegliato equivale a non deciso) e la stessa di DIF-4 (la misura non copriva la frase). Il tool nato per impedire quell'errore lo produce.
+
+**Correzione proposta, piccola e sufficiente:** una sezione (2-bis) che stampi sempre `BLOCCATA(fase): N voci` e, nell'ordine del file, la prima con la sua dipendenza dichiarata; e, quando non esiste nessuna PRONTA **ma esistono BLOCCATA(fase)**, che l'ESITO dica «nessuna voce pronta: N bloccate di fase, la promozione a PRONTA è manuale» invece di `nessun rosso`. Così il silenzio non può più significare due cose opposte.
+
+**Nota operativa per chi raccoglie il testimone**: il generatore `tools/permessi_da_classificazione.py`, che il passo 56 di R-6 dichiara obbligatorio, **continua a non esistere** (verificato adesso: `Test-Path` falso, e l'elenco di `tools/` non lo contiene). R-6 non si può chiudere prima di averlo costruito — è la Voce 4 del mandato S1107.
+
+stato: [RICONCILIATA 21f9d923 S1108] — aggiunta sezione (3-bis) in `dove_siamo.py` che elenca sempre le `BLOCCATA(fase)` con la prima in ordine; l'ESITO finale distingue "nessuna voce pronta - N bloccate" da "nessun rosso". Verificato: 13 voci mostrate.
+
+## 2026-09-19 06:36 — [DA RICONCILIARE] una sessione che ha dichiarato la chiusura continua a girare, e blocca la staffetta
+
+Misurato governando S1107 dall'esterno, e vale come difetto di dottrina più che come difetto di codice.
+
+**I fatti, con l'ora accanto.** 06:24 R-3 marcata CHIUSA. 06:27 commit `6001574a` (R-3). 06:28 commit `9b2657d1`, il rapporto, con chiusura binaria dichiarata «CICLO NON CHIUSO — 2/6 voci fatte» e il guardiano a 74,6%, dentro la fascia del margine. 06:29 il guardiano misurato dall'esterno dà 76,9%, exit 3. 06:34 il diario è ancora scritto **nello stesso secondo** della misura, cresciuto a 8,51 MB, e il contesto è al **78,4%**, in salita. `HEAD` fermo a `9b2657d1`, unico file modificato `docs/kb/COWORK_INBOX.md` (deposito di Cowork). Alle 06:34 l'ultima riga del transcript è una chiamata a `ReadNotifications`.
+
+**Quindi**: la sessione non ha ripreso il lavoro del mandato — su quello la misura è netta, `HEAD` non si muove — ma continua a consumare contesto e finestra 5 ore in una coda post-chiusura, oltre la soglia che il suo stesso mandato dichiara terminale («se dice di chiudere, la chiusura è l'ULTIMO ATTO: non si riprende il lavoro sospeso nella stessa sessione»).
+
+**La conseguenza che conta**, e che nessuno aveva previsto: il freno del canale legge il perimetro per cartella e rifiuta di aprire la sessione successiva — «PERIMETRO OCCUPATO … con due sessioni sullo stesso repository l'indice di git è condiviso». Cioè **una sessione che ha finito impedisce a quella che deve subentrare di partire**. In una corsa non presidiata questo è un blocco silenzioso: il testimone c'è, il mandato c'è, il freno è giusto, e la catena si ferma comunque.
+
+**Proposta, da decidere con Enzo, non applicata da me.** Il perimetro non dovrebbe guardare solo «esiste un processo su quella cartella», ma «quel processo ha ancora un mandato aperto». Il segnale esiste già ed è scritto nel repository: un rapporto di chiusura committato con la formula binaria. Un perimetro che considera libero un processo il cui ultimo commit è una chiusura dichiarata — o che almeno lo dica in chiaro invece di limitarsi a «OCCUPATO» — sbloccherebbe la staffetta senza indebolire la protezione dell'indice, che serve contro i **commit concorrenti** e non contro la presenza di un processo.
+
+**Nota di metodo, perché è la parte che mi riguarda.** Stavo per concludere che il freno vedesse un fantasma e per forzare l'apertura con `--insieme`. Ho misurato il diario prima di dirlo: scritto zero minuti prima. L'inferenza «ha chiuso, quindi è ferma» era falsa, e forzare su quella inferenza avrebbe messo due sessioni vive sullo stesso indice — il difetto costato tre conflitti e 890 righe nel commit sbagliato (`REGISTRO_CONFLITTI.md`, CFL-03).
+
+stato: [RICONCILIATA 21f9d923 S1108] — dottrina del canale/hook di sessioni parallele (livello utente), fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md` come proposta per Enzo, non applicata qui.
+
+## 2026-09-19 07:06 — [DA RICONCILIARE] il guardiano misura e non ferma: exit 3 da mezz'ora, e la sessione continua
+
+Il difetto più grosso misurato stanotte, e riguarda la dottrina, non il codice di un singolo strumento.
+
+**La cronologia, con le misure.** 06:28 S1107 onora il guardiano: si ferma a **74,6%**, dentro la fascia del margine di un punto, scrive `esiti/RAPPORTO_2026-09-19-S1107.md` e committa `9b2657d1` con la chiusura binaria «CICLO NON CHIUSO — 2/6 voci fatte». Fin qui la regola ha funzionato in modo esemplare, e il margine ha dimostrato di servire: al 76,9% (misurato dall'esterno alle 06:29) era già oltre la soglia piena, quindi senza il punto di margine la scrittura del rapporto non ci sarebbe stata dentro.
+
+Poi **riprende**. 06:53 commit `9f63c954` (fix del marker `TENANT_ADMIN-ALLOWLIST-EXTEND` per `skill_alias:manage`, R-3). 06:55 commit `93f16f44` (rigenerazione dell'atlante). 07:04: processo vivo, diario a 11,05 MB e in crescita, contesto **89,0%**, cioè **quattordici punti oltre la soglia**, con commit veri spediti sul repository.
+
+**Il punto non è la sessione, è il meccanismo.** `guardiano.py --sorveglia` esce con codice **3** correttamente e continuamente da mezz'ora. Nessuno raccoglie quel codice. La soglia che il CLAUDE.md descrive come meccanica — «non valuta se conviene, non propone: interrompi» — in realtà è **consultiva**: la esegue la buona volontà della sessione che la legge, e quando quella cede non c'è nulla dietro. È la stessa forma del difetto trovato stanotte nel rito di questo progetto: `verify_gate.py` senza sottocomando usciva con la riga d'uso e codice 2, un cancello che non sbarrava. Un exit 3 che nessuno raccoglie è un cancello che non sbarra.
+
+**Tre rimedi possibili, in ordine di costo, da decidere con Enzo — non ne applico nessuno.** (i) Un hook di sessione che esegua `--sorveglia` e, su exit 3, rifiuti di proseguire: il meccanismo esiste già nel CLI, è il posto naturale. (ii) Per le sessioni aperte dal canale, il supervisore misura da fuori e chiude col rito quando il guardiano esce 3 — protegge solo quelle governate, ma le protegge davvero. (iii) Rendere il rapporto di chiusura un fatto **terminale** anche per la sessione stessa: dopo averlo committato, ogni ulteriore lavoro va scritto come sessione nuova. Oggi il rapporto è un documento, non un cancello.
+
+**Nota sull'effetto collaterale che ha bloccato la notte**: finché quel processo gira, il freno del perimetro del canale rifiuta di aprire la staffetta sulla stessa cartella. Quindi una sessione che ha dichiarato di aver finito, e che continua oltre la soglia, impedisce alla successiva di partire. Le due segnalazioni (questa e quella delle 06:36) hanno la stessa radice e conviene risolverle insieme.
+
+**Cosa NON ho fatto, di proposito.** Non ho chiuso il processo, benché tutto fosse pushato e non si sarebbe perso niente: la sessione sta riparando proprio il marker della migrazione 000426 che avevo segnalato, e ucciderla per aprirne una che deve riparare lo stesso difetto è agitazione, non governo. Il rosso su `000426` resta però acceso — «NON registrata · NON DICHIARATA (manca la query in EFFETTI)» — perché il fix del marker non è la dichiarazione in EFFETTI.
+
+stato: [RICONCILIATA 21f9d923 S1108] — dottrina/hook a livello CLI/utente sul guardiano, fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md` come proposta per Enzo (tre rimedi in ordine di costo), non applicata qui. Il rosso su 000426 e' stato chiuso separatamente in questa sessione (commit `6cd92d09`): query EFFETTI aggiunta e migrazione applicata in produzione VM.

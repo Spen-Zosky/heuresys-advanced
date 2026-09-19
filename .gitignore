@@ -265,3 +265,17 @@ docs/kb/atlas/concepts-vectors.json
 
 # Referto JSON della suite E2E (#219, S1081): sopravvive alla corsa, non si versiona
 apps/web/esiti-e2e.json
+
+
+# Scarto di lavoro delle sessioni: appunti per i messaggi di commit e file di verifica
+# usa-e-getta. Depositato da Cowork il 2026-09-19 (V7: Cowork non committa, committa la
+# sessione CLI). Ragione misurata: dei 90 file non tracciati che sporcavano `git status`,
+# 43 erano appunti `.commit_msg_*` — e uno stato illeggibile e' il motivo per cui due
+# stash con lavoro non integrato (uno del 26 luglio, GDPR) sono rimasti invisibili per
+# settimane. Qui dentro va SOLO cio' che e' inequivocabilmente scarto: le evidenze
+# `evidenze/wf_*` e le bozze `esiti/_bozza_*` NON sono ignorate, perche' se debbano
+# stare nella storia del progetto e' una decisione del progetto, da prendere una volta.
+.commit_msg_*
+.scratch_*
+_zp_verify_tmp/
+.programmi/_zp_verify_tmp/

@@ -103,7 +103,7 @@ L'ORDINE DELLE RIGHE E' L'ORDINE DI ESECUZIONE: `dove_siamo.py` prende la prima 
 
 | K-codice | stato | presa_da | presa_il | ultimo_passo_chiuso | prossimo_passo | migrazione_prenotata | evidenza | nota |
 |---|---|---|---|---|---|---|---|---|
-| G-1 | BLOCCATA(fase) | | | | 67 | | | assegnazione persona↔posizione via approvazioni (D4=B; dopo R-6, X-2) |
+| G-1 | IN CORSO | S1105 | 2026-09-19T19:58+02:00 | | 67 | | | assegnazione persona↔posizione via approvazioni (D4=B; dopo R-6, X-2). Sbloccata: R-6 CHIUSA (S1110), X-2 CHIUSA (12/13; sys_attendance ATTESA_ENZO non riguarda G-1) |
 
 ## Perimetro di sessione dichiarato
 

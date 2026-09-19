@@ -60,6 +60,10 @@ export const COLLAUDO_IDENTITIES = [
   // Mandato K, R-6 (2026-09-19): PEOPLE_MANAGER e' un ruolo di CLIENTE (tenant-scoped,
   // mandato HR tenant-wide come TENANT_ADMIN/HRMS_MANAGER), quindi RTL_BANK.
   { email: "people-manager@collaudo.invalid",     displayName: "Collaudo People Manager",     tenantCode: "RTL_BANK", roleCode: "PEOPLE_MANAGER" },
+  // Mandato K, R-6 sessione 2 (2026-09-19, passo 57): DATA_STEWARD e' un ruolo di CLIENTE
+  // (tenant-scoped, come PEOPLE_MANAGER — non un ruolo di piattaforma assegnato), quindi
+  // RTL_BANK.
+  { email: "data-steward@collaudo.invalid",       displayName: "Collaudo Data Steward",       tenantCode: "RTL_BANK", roleCode: "DATA_STEWARD" },
 ];
 
 export function isCollaudoIdentity(email) {

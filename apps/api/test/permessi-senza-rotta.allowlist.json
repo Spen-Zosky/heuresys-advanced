@@ -1,6 +1,7 @@
 {
  "_nota": "S-2 mandato K: permessi del catalogo sys.sys_auth_permissions che NESSUNA rotta chiede (requirePermission letterale o costante locale). Puo' solo scendere: quando un permesso prende una rotta, la riga si toglie nello stesso commit.",
  "permessi": {
+  "conflitto_ibrido:resolve": "senza rotta dal 2026-09-19 (mandato K, R-6 sessione 2, mig. 000449): X-4 (mig. 000446) ha creato la tabella sys_conflitti_ibridi e la funzione di registrazione, dichiarando esplicitamente che 'la funzione e' pronta per il primo connettore reale, non e' un modulo esistente da modificare' — nessuna rotta esiste ancora. Concesso a DATA_STEWARD, che risolvera' i conflitti quando il modulo nascera'",
   "bpm_process:delete": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "bpm_process:read": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "bpm_process:update": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",

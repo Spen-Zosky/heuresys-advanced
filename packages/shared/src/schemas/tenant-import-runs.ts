@@ -161,7 +161,11 @@ export const TenantImportRunSchema = z.object({
 export type TenantImportRun = z.infer<typeof TenantImportRunSchema>;
 
 export const TenantImportRunDetailSchema = TenantImportRunSchema.extend({
-  candidates: z.array(TenantImportCandidateSchema),
+  // Opzionale per la MASCHERATURA (mandato K, R-6 s2, passo 57): DATA_STEWARD legge la
+  // corsa (stato, referto, conteggi) ma non i dati personali dei candidati — il campo
+  // manca e viene dichiarato in `masked` (mask.ts, #124), mai sostituito da un array vuoto.
+  candidates: z.array(TenantImportCandidateSchema).optional(),
+  masked: z.array(z.string()).optional(),
 });
 export type TenantImportRunDetail = z.infer<typeof TenantImportRunDetailSchema>;
 

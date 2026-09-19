@@ -107,7 +107,7 @@ describe("/v1/tenant-import-runs — #206", () => {
     expect(corsa.referto).toEqual({ persone: 5, ammesse: 1, conScostamento: 1, cieche: 1, escluse: 2 });
     expect(corsa.candidates).toHaveLength(5);
 
-    const perRiga = new Map(corsa.candidates.map((c) => [c.rowNo, c]));
+    const perRiga = new Map(corsa.candidates!.map((c) => [c.rowNo, c]));
     const regola = (rowNo: number, code: string) => perRiga.get(rowNo)!.validations.find((v) => v.ruleCode === code)!;
 
     // 1 — copre tutti i CRITICAL

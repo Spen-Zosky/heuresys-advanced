@@ -85,6 +85,18 @@ ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 --    testa al file). Nessun ritiro corrispondente: si aggiungono al fianco di
 --    skill:create/update/delete, che restano intatti (governano anche le competenze,
 --    non solo gli alias).
+--
+-- La 000210 ha reso esplicito ogni permesso di TENANT_ADMIN dopo il CROSS JOIN implicito
+-- della 000005 (D-57): un permesso nuovo che gli arriva senza questo marker e' un
+-- assorbimento silenzioso, e il test di guardia lo rifiuta (misurato: rbac-tenant-admin-
+-- allowlist.test.ts, "permessi assorbiti da TENANT_ADMIN fuori allowlist"). TENANT_ADMIN
+-- riceve skill_alias:manage per decisione esplicita D1 — stessa forma della 000422 per
+-- notification:read.
+-- TENANT_ADMIN-ALLOWLIST-EXTEND
+CREATE TEMP TABLE _ta_extend_000426(code text PRIMARY KEY);
+INSERT INTO _ta_extend_000426(code) VALUES
+    ('skill_alias:manage');
+
 INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
 SELECT r.auth_role_id, p.auth_permission_id
   FROM sys.sys_auth_roles r

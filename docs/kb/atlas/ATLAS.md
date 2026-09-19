@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `9f63c954` (2026-09-19T06:53:59+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `a61e2da9` (2026-09-19T16:57:07+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 652 |
 | Pagine web | 129 |
 | Schemi shared | 120 |
-| Tabelle DB | 316 (vuote: 20) |
-| Viste / matview | 66 / 0 |
+| Tabelle DB | 318 (vuote: 21) |
+| Viste / matview | 70 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 286 |
 
 ## Moduli API
@@ -34,8 +34,8 @@
 | blueprint-variants | /v1/blueprint-variants | 5 | 4 | 3 | 1 |
 | branches | /v1/branches | 2 | 2 | 1 | 2 |
 | calibration-sessions | /v1/calibration-sessions | 3 | 1 | 4 | 1 |
-| candidate-applications | /v1/candidate-applications | 4 | 2 | 3 | 1 |
-| candidates | /v1/candidates | 4 | 2 | 2 | 3 |
+| candidate-applications | /v1/candidate-applications | 4 | 2 | 5 | 1 |
+| candidates | /v1/candidates | 4 | 2 | 6 | 3 |
 | capability-composition | /v1/capability | 5 | 2 | 15 | 2 |
 | capability-maturity | /v1/capability | 3 | 2 | 8 | 2 |
 | career-path-steps | /v1/career-path-steps | 5 | 4 | 3 | 1 |
@@ -54,11 +54,11 @@
 | generated-origins | /v1/generated-origins | 2 | 1 | 1 | 1 |
 | goals | /v1/goals | 12 | 4 | 7 | 4 |
 | insights | /v1/insights | 7 | 2 | 15 | 5 |
-| interview-feedback | /v1/interview-feedback | 4 | 2 | 3 | 1 |
-| interviews | /v1/interviews | 4 | 2 | 2 | 1 |
+| interview-feedback | /v1/interview-feedback | 4 | 1 | 7 | 1 |
+| interviews | /v1/interviews | 4 | 1 | 5 | 1 |
 | job-families | /v1/job-families | 5 | 3 | 1 | 2 |
-| job-offers | /v1/job-offers | 4 | 2 | 2 | 1 |
-| job-postings | /v1/job-postings | 4 | 2 | 2 | 2 |
+| job-offers | /v1/job-offers | 4 | 1 | 2 | 1 |
+| job-postings | /v1/job-postings | 4 | 2 | 3 | 2 |
 | job-requisitions | /v1/job-requisitions | 4 | 2 | 2 | 1 |
 | job-roles | /v1/job-roles | 4 | 3 | 2 | 1 |
 | kpi-definitions | /v1/kpi-definitions | 9 | 4 | 5 | 1 |
@@ -67,7 +67,7 @@
 | learning-modules | /v1/learning-modules | 5 | 4 | 1 | 1 |
 | learning-path-steps | /v1/learning-path-steps | 5 | 4 | 3 | 1 |
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
-| me | /v1/me | 65 | 32 | 63 | 42 |
+| me | /v1/me | 65 | 32 | 63 | 43 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 2 | 2 | 2 | 1 |
 | notifications | /v1/notifications | 2 | 2 | 2 | 0 |
@@ -110,7 +110,7 @@
 | surveys | /v1/surveys | 12 | 4 | 3 | 4 |
 | talent-review | /v1/talent-review | 6 | 1 | 7 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
-| tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 13 | 1 |
+| tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 14 | 1 |
 | tenant-import-runs | /v1/tenant-import-runs | 5 | 2 | 15 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 3 | 1 |
@@ -147,6 +147,7 @@
 - `sys.sys_auth_password_reset_tokens`
 - `sys.sys_auth_sessions`
 - `sys.sys_candidate_applications`
+- `sys.sys_conflitti_ibridi`
 - `sys.sys_content_media`
 - `sys.sys_generated_record_origins`
 - `sys.sys_interview_feedback`
@@ -162,12 +163,12 @@
 ## Key counts live
 
 - tenants_active: **2**
-- users: **168**
+- users: **174**
 - positions: **315**
 - org_units: **45**
-- roles: **18**
-- permissions: **233**
-- role_permission_mappings: **1063**
+- roles: **23**
+- permissions: **240**
+- role_permission_mappings: **1224**
 - ui_interfaces_active: **76**
 - skills: **14031**
 

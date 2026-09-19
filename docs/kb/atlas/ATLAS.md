@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `a61e2da9` (2026-09-19T16:57:07+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `4f56a495` (2026-09-19T21:58:13+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 110 |
-| Route API | 652 |
+| Moduli API | 111 |
+| Route API | 657 |
 | Pagine web | 129 |
-| Schemi shared | 120 |
+| Schemi shared | 121 |
 | Tabelle DB | 318 (vuote: 21) |
 | Viste / matview | 70 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 286 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 290 |
 
 ## Moduli API
 
@@ -67,7 +67,7 @@
 | learning-modules | /v1/learning-modules | 5 | 4 | 1 | 1 |
 | learning-path-steps | /v1/learning-path-steps | 5 | 4 | 3 | 1 |
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
-| me | /v1/me | 65 | 32 | 63 | 43 |
+| me | /v1/me | 65 | 32 | 63 | 44 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 2 | 2 | 2 | 1 |
 | notifications | /v1/notifications | 2 | 2 | 2 | 0 |
@@ -117,6 +117,7 @@
 | time-off | /v1/time-off | 3 | 1 | 7 | 2 |
 | training-initiatives | /v1/training-initiatives | 4 | 4 | 3 | 1 |
 | user-career-plans | /v1/user-career-plans | 5 | 4 | 4 | 2 |
+| user-position-assignments | /v1/user-position-assignments | 5 | 4 | 6 | 0 |
 | user-target-positions | /v1/user-target-positions | 6 | 4 | 3 | 1 |
 | user-timeline | /v1/user-timeline | 2 | 1 | 1 | 1 |
 | users | /v1/users | 10 | 5 | 3 | 1 |
@@ -168,7 +169,7 @@
 - org_units: **45**
 - roles: **23**
 - permissions: **240**
-- role_permission_mappings: **1224**
+- role_permission_mappings: **1229**
 - ui_interfaces_active: **76**
 - skills: **14031**
 

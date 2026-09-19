@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-19T17:32:16Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3718**
+**Generato**: 2026-09-19T20:11:12Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3726**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -10,15 +10,15 @@
 |---|---|
 | ADR | 41 |
 | api-core | 36 |
-| api-module | 394 |
+| api-module | 398 |
 | ci | 19 |
 | claude-config | 37 |
-| config | 335 |
+| config | 336 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 443 |
+| db-migration | 444 |
 | db-other | 8 |
 | db-script | 55 |
 | db-seed | 114 |
@@ -29,12 +29,12 @@
 | script | 6 |
 | session | 12 |
 | shared-pkg | 4 |
-| shared-schema | 120 |
+| shared-schema | 121 |
 | showcase-source | 13 |
-| test | 446 |
+| test | 447 |
 | ux-design-archive | 80 |
 | web-source | 258 |
-| **TOTALE** | **3718** |
+| **TOTALE** | **3726** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 3075 |
+| live | 3083 |
 
 ## File per categoria
 
@@ -147,6 +147,7 @@
 - `D:\heuresys-advanced\apps\api\src\modules\analytics\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\analytics\service.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\index.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\position-assignment.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\registry.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-activation.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-blueprint-application.ts` · *live* · git-tracked
@@ -492,6 +493,9 @@
 - `D:\heuresys-advanced\apps\api\src\modules\user-career-plans\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\user-career-plans\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\user-career-plans\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\user-position-assignments\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\user-position-assignments\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\user-position-assignments\service.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\user-target-positions\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\user-target-positions\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\user-target-positions\service.ts` · *live* · git-tracked
@@ -614,6 +618,7 @@
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F4.0_verify_gate_run.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F4.0_verify_gate_run2.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F4.0_verify_gate_run3.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\G-1_passo67_sentinelle_202609192000.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-A_passo13_202609150323.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-B_famiglie_202609150326.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\I-C_moduli_passo16.txt` · *live* · git-tracked
@@ -1730,6 +1735,7 @@
 - `D:\heuresys-advanced\db\migrations\000445_x3_registro_riconciliato_per_vista.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000446_x4_regola_degli_ibridi.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000447_x5_sentinella_della_direzione.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000448_g1_porta_nativa_user_position_assignments.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -3021,6 +3027,7 @@
 - `D:\heuresys-advanced\packages\shared\src\schemas\training-initiatives.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\user-career-plans.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\user-dossier.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\user-position-assignments.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\user-target-positions.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\user-timeline.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\users.ts` · *live* · git-tracked
@@ -3137,6 +3144,7 @@
 - `D:\heuresys-advanced\apps\api\test\export-serializers.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\exposure-gate.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\functional-scope.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\g1-position-assignment.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\gap-closure.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\gdpr.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\generated-origins.integration.test.ts` · *live* · git-tracked

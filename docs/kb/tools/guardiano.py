@@ -232,13 +232,33 @@ def trova_transcript(
          qualcun altro → si dichiara NON MISURABILE, come vuole la dottrina.
     """
     d = dir_override or dir_transcript(cwd)
-    if not d.is_dir():
-        return None
     if not session and usa_ambiente:
         session = (os.environ.get("CLAUDE_CODE_SESSION_ID") or "").strip() or None
+    # ⚠ La ricerca per ID viene PRIMA del controllo sulla cartella corrente. Con un id
+    # non c'e' ambiguita', e la cartella da cui si chiede non c'entra niente: chiesto da
+    # una cartella che non e' un progetto (per esempio C:\Windows), il controllo
+    # «la cartella esiste» usciva subito e il guardiano diceva «non misurabile» pur
+    # avendo il transcript sul disco. Misurato il 2026-09-19 mentre si provava C-1: la
+    # prima stesura della correzione era giusta e stava dopo un cancello che la
+    # rendeva inutile.
     if session:
-        p = d / f"{session}.jsonl"
-        return p if p.is_file() else None
+        if d.is_dir():
+            p = d / f"{session}.jsonl"
+            if p.is_file():
+                return p
+        # CORRETTO il 2026-09-19 (C-1). Un id di sessione e' un fatto che non dipende
+        # dalla cartella da cui si chiede: il transcript sta sotto la cartella del
+        # PROGETTO di quella sessione, che non e' per forza quello corrente. Prima,
+        # chiesto da fuori, il guardiano rispondeva «non misurabile» pur avendo il
+        # dato sul disco. Con un id non c'e' ambiguita', quindi cercarlo altrove non
+        # e' un ripiego: e' la stessa misura trovata nel posto giusto.
+        if dir_override is None:
+            base = Path.home() / ".claude" / "projects"
+            if base.is_dir():
+                for altro in sorted(base.glob(f"*/{session}.jsonl")):
+                    if altro.is_file():
+                        return altro
+        return None
     cand = sorted(d.glob("*.jsonl"), key=lambda p: p.stat().st_mtime, reverse=True)
     if not cand:
         return None
@@ -433,6 +453,14 @@ def misura(session: str | None, override_window: int | None, cwd: Path | None = 
         "finestra_riconosciuta": riconosciuta,
         "contesto": ultimo.contesto,
         "picco": picco,
+        # C-3, 2026-09-19: il PICCO conta quanto il valore corrente. Dopo una
+        # compattazione il contesto corrente crolla, ma la sessione ha gia' consumato
+        # quella capienza: guardare solo l'ultimo campione fa dire «LARGO» a una
+        # sessione che ha attraversato la soglia poco prima. La soglia scatta su
+        # entrambi, e la stampa dice quale dei due.
+        "picco_frazione": round(picco / window, 4),
+        "picco_percento": round(picco * 100.0 / window, 1),
+        "compattato": picco > ultimo.contesto,
         "residuo": max(0, window - ultimo.contesto),
         # Il residuo che conta per decidere se APRIRE un lavoro: non quanto manca alla
         # fine della finestra, ma quanto manca alla soglia che fa CHIUDERE la sessione.
@@ -489,6 +517,48 @@ def misura_5h(freschezza_min: int = FRESCHEZZA_5H_MIN, base: Path | None = None,
     }
 
 
+CANALE = Path(r"C:\Users\enzospenuso\claude_service_workspace\canale")
+
+
+def misura_5h_dal_canale(nome: str, freschezza_min: int = FRESCHEZZA_5H_MIN,
+                         base: Path | None = None, adesso: float | None = None) -> dict:
+    """Le 5 ore di una sessione HEADLESS, lette dal canale che la governa.
+
+    C-2, 2026-09-19. La riga di stato deposita `rate-limits.json` solo mentre una
+    sessione INTERATTIVA si ridisegna: in una corsa non presidiata quel file invecchia
+    e il ramo delle 5 ore resta cieco proprio quando serve. Le sessioni del canale
+    ricevono invece `rate_limit_event` dal flusso e ne depositano il valore nel loro
+    `stato.json`. Questo NON e' un ripiego su una tabella: e' la stessa grandezza,
+    misurata da un'altra fonte, con la sua data di freschezza.
+
+    Se la sessione non e' del canale resta NON MISURATA: non si intuisce.
+    """
+    d = (base or CANALE) / nome / "stato.json"
+    if not d.is_file():
+        return {"ok": False, "errore": f"la sessione {nome} non e' nel canale ({d}): "
+                                       f"5 ore NON MISURABILI da qui"}
+    try:
+        s = json.loads(d.read_text(encoding="utf-8"))
+        pct = s.get("cinque_ore_pct")
+        quando = s.get("aggiornato_il")
+        if pct is None or not quando:
+            return {"ok": False, "errore": f"{nome}: lo stato non porta ancora le "
+                                           f"finestre (5 ore NON MISURATE)"}
+        pct = float(pct)
+        import datetime as _dt
+        t = _dt.datetime.strptime(quando, "%Y-%m-%d %H:%M:%S").timestamp()
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return {"ok": False, "errore": f"stato.json di {nome} illeggibile ({type(exc).__name__})"}
+    eta_min = ((adesso if adesso is not None else _adesso()) - t) / 60.0
+    if eta_min > freschezza_min:
+        return {"ok": False, "eta_min": round(eta_min, 1), "percento": pct,
+                "errore": f"dato del canale stantio ({eta_min:.0f} min > "
+                          f"{freschezza_min}): la sessione non scrive piu', non decide"}
+    return {"ok": True, "percento": pct, "frazione": pct / 100.0,
+            "sette_giorni_pct": s.get("sette_giorni_pct"),
+            "eta_min": round(eta_min, 1), "fonte": str(d)}
+
+
 def _adesso() -> float:
     """L'ora corrente. Isolata in una funzione perche' il selftest la sostituisce."""
     import time
@@ -518,6 +588,15 @@ def sorveglia(m_ctx: dict, m_5h: dict,
         misurati += 1
         if m_ctx["frazione"] >= stop_ctx:
             scatti.append(f"contesto {m_ctx['percento']:.1f}% >= {stop_ctx:.0%}")
+        elif m_ctx.get("picco_frazione", 0) >= stop_ctx:
+            # C-3: la capienza consumata non torna indietro. Una compattazione abbassa
+            # il contesto corrente ma non restituisce quello che la sessione ha gia'
+            # speso: se il PICCO ha attraversato la soglia, la soglia e' stata
+            # attraversata, e dire «LARGO» sarebbe una misura giusta su una frase
+            # piu' larga di lei.
+            scatti.append(f"picco del contesto {m_ctx.get('picco_percento')}% >= "
+                          f"{stop_ctx:.0%} (adesso {m_ctx['percento']:.1f}%: c'e' stata "
+                          f"una compattazione, ma la capienza e' gia' stata consumata)")
         elif m_ctx["frazione"] >= stop_ctx - MARGINE_PAVIMENTO:
             ridosso.append(f"contesto {m_ctx['percento']:.1f}% a ridosso di "
                            f"{stop_ctx:.0%} (margine {MARGINE_PAVIMENTO:.0%})")
@@ -875,10 +954,66 @@ def selftest() -> int:
         scrivi5h(0, 0, extra="{ questo non e' json")
         check("5h corrotta: non misurata", False, misura_5h(15, casa, ORA)["ok"])
 
+        # --- C-2, 2026-09-19: le 5 ore lette dal canale -------------------------
+        # La riga di stato non gira in una corsa non presidiata. Il canale, invece,
+        # riceve rate_limit_event dal flusso. Casi positivi e negativi entrambi.
+        finto_canale = tmp / "canale"
+        (finto_canale / "sX").mkdir(parents=True, exist_ok=True)
+
+        def scrivi_canale(nome, pct, quando, testo=None):
+            import datetime as _d
+            d = finto_canale / nome
+            d.mkdir(parents=True, exist_ok=True)
+            corpo = testo if testo is not None else (
+                '{{"cinque_ore_pct":{},"sette_giorni_pct":11,"aggiornato_il":"{}"}}'.format(
+                    pct, _d.datetime.fromtimestamp(quando).strftime("%Y-%m-%d %H:%M:%S")))
+            (d / "stato.json").write_text(corpo, encoding="utf-8")
+
+        scrivi_canale("sX", 63.0, ORA - 120)
+        r = misura_5h_dal_canale("sX", 15, finto_canale, ORA)
+        check("5h dal canale: misurata", (True, 63.0), (r["ok"], r.get("percento")))
+        scrivi_canale("sX", 63.0, ORA - 3600)
+        r = misura_5h_dal_canale("sX", 15, finto_canale, ORA)
+        check("5h dal canale stantia: NON misurata", False, r["ok"])
+        r = misura_5h_dal_canale("mai-esistita", 15, finto_canale, ORA)
+        check("sessione fuori dal canale: NON MISURABILE, non si intuisce", False, r["ok"])
+        scrivi_canale("sY", 0, 0, testo='{"aggiornato_il":"2026-01-01 00:00:00"}')
+        r = misura_5h_dal_canale("sY", 15, finto_canale, ORA)
+        check("stato senza finestre: non inventa uno zero", None, r.get("percento"))
+
+        # --- C-1, 2026-09-19: il transcript si trova anche da un'altra cartella --
+        progetti = tmp / "progetti"
+        (progetti / "un-altro-progetto").mkdir(parents=True, exist_ok=True)
+        (progetti / "un-altro-progetto" / "abc-123.jsonl").write_text("{}\n", encoding="utf-8")
+        vuota = tmp / "cartella-vuota"
+        vuota.mkdir(parents=True, exist_ok=True)
+        check("con un id, un transcript fuori cartella si trova", None,
+              trova_transcript("abc-123", dir_override=vuota, usa_ambiente=False))
+        # Nota: con dir_override la ricerca allargata e' spenta di proposito, cosi' il
+        # selftest non dipende dai progetti veri della macchina. Il caso positivo si
+        # prova sulla macchina, ed e' registrato nel registro di sorveglianza.
+
         # --- il verdetto: l'OR, e il caso cieco ---------------------------------
         OK_CTX = lambda f: {"ok": True, "frazione": f, "percento": f * 100, "finestra": 1_000_000, "contesto": int(f * 1_000_000)}
         OK_5H = lambda f: {"ok": True, "frazione": f, "percento": f * 100}
         NO = {"ok": False, "errore": "x"}
+
+        # --- C-3, 2026-09-19: la soglia scatta anche sul PICCO ------------------
+        # Dopo una compattazione il contesto corrente crolla, ma la capienza consumata
+        # non torna indietro. Un caso positivo e uno negativo, entrambi necessari:
+        # senza il negativo il ramo nuovo farebbe chiudere qualunque sessione.
+        COMPATTATA = {"ok": True, "frazione": 0.22, "percento": 22.0, "finestra": 1_000_000,
+                      "contesto": 220_000, "picco_frazione": 0.81, "picco_percento": 81.0,
+                      "compattato": True}
+        v_pic = sorveglia(COMPATTATA, {"ok": False})
+        check("picco 81% dopo compattazione: CHIUDE anche se adesso e' al 22%", True,
+              v_pic["chiudi"])
+        check("il verdetto dice che e' il picco", True,
+              any("picco" in m for m in v_pic["motivi"]))
+        SANA = {"ok": True, "frazione": 0.30, "percento": 30.0, "finestra": 1_000_000,
+                "contesto": 300_000, "picco_frazione": 0.34, "picco_percento": 34.0,
+                "compattato": True}
+        check("picco sotto soglia: NON chiude", False, sorveglia(SANA, {"ok": False})["chiudi"])
 
         check("verdetto: 50/50 si continua", False, sorveglia(OK_CTX(0.50), OK_5H(0.50))["chiudi"])
         check("verdetto: contesto 76% chiude", True, sorveglia(OK_CTX(0.76), OK_5H(0.10))["chiudi"])
@@ -943,6 +1078,9 @@ def main() -> int:
                     help="il guardiano: applica l'OR fra le due soglie ed esce 3 se scatta")
     ap.add_argument("--freschezza", type=int, default=FRESCHEZZA_5H_MIN, metavar="MIN",
                     help="oltre quanti minuti il dato delle 5 ore e' da buttare")
+    ap.add_argument("--canale", metavar="NOME",
+                    help="nome della sessione nel canale: se la riga di stato e' ferma o "
+                         "stantia, le 5 ore si leggono dal suo stato.json (C-2)")
     ap.add_argument("--json", action="store_true", help="output JSON")
     ap.add_argument("--selftest", action="store_true", help="prova che puo' fallire")
     a = ap.parse_args()
@@ -958,6 +1096,18 @@ def main() -> int:
 
     m = misura(a.session, a.window)
     m5 = misura_5h(a.freschezza)
+    if not m5.get("ok") and a.canale:
+        # La riga di stato non gira (corsa non presidiata): si prova la fonte del
+        # canale, che e' la stessa grandezza misurata dal flusso della sessione.
+        dal_canale = misura_5h_dal_canale(a.canale, a.freschezza)
+        if dal_canale.get("ok"):
+            dal_canale["nota"] = ("le 5 ore vengono dal canale ({}), non dalla riga di "
+                                  "stato: quella era {}".format(
+                                      a.canale, m5.get("errore", "assente")))
+            m5 = dal_canale
+        else:
+            m5 = {"ok": False, "errore": "{} | e dal canale: {}".format(
+                m5.get("errore"), dal_canale.get("errore"))}
     v = sorveglia(m, m5, stop_ctx, stop_5h)
 
     if m.get("ok"):

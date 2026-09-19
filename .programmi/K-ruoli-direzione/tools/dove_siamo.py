@@ -56,7 +56,7 @@ EFFETTI: dict[str, str] = {
     "R-10": "select 1 from sys.sys_auth_permissions where auth_permission_code='requisition:manage'",
     "R-4": "select 1 from sys.sys_auth_roles where auth_role_code='RECRUITER' and retired_at is null",
     # F5
-    "X-1": "select 1 from information_schema.tables where table_schema='sys' and table_name='sys_classificazione_direzione_dato'",
+    "X-1": "select 1 from sys.sys_classificazione_direzione_dato where tabella='sys_classificazione_direzione_dato'",
     "X-3": "select 1 from pg_views where schemaname='sys' and viewname='v_source_lineage_normalizzata'",
     "X-4": "select 1 from information_schema.tables where table_schema='sys' and table_name='sys_conflitti_ibridi'",
     "X-5": "select 1 from pg_views where schemaname='sys' and viewname='v_direzione_del_dato_violata'",

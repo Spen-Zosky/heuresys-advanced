@@ -195,6 +195,18 @@ def main() -> int:
             print("    -> caso R3(e): niente da fare, in attesa di Enzo su "
                   + ", ".join(r["voce"] for r in solo_attese))
 
+    # (3-bis) BLOCCATA(fase): il silenzio di (2)/(3) su queste voci si legge come
+    # "campo libero" e non lo e' — segnalato da Cowork il 2026-09-19, COWORK_INBOX.md.
+    bloccate_fase = [r for r in righe if r["stato"] == "BLOCCATA(fase)"]
+    print("\n(3-bis) VOCI BLOCCATA(fase) — non PRONTE, ma NON e' campo libero")
+    if not bloccate_fase:
+        print("    nessuna")
+    else:
+        print(f"    {len(bloccate_fase)} voci, ordine del file: "
+              + ", ".join(r["voce"] for r in bloccate_fase))
+        primo = bloccate_fase[0]
+        print(f"    prima in ordine: {primo['voce']} — prossimo passo {primo['prossimo_passo'] or '?'} — {primo['nota']}")
+
     # (4) migrazioni prenotate
     print("\n(4) MIGRAZIONI PRENOTATE — file / completezza / registro / effetto")
     con, err = connetti()
@@ -300,6 +312,10 @@ def main() -> int:
     if not db_ok:
         print(" ESITO: NON MISURATO — il database non ha risposto; registro ed effetti non sono stati guardati.")
         return 4
+    if not pronte and bloccate_fase:
+        print(f" ESITO: nessuna voce pronta — {len(bloccate_fase)} BLOCCATA(fase), "
+              "la promozione a PRONTA e' manuale: il silenzio non vuol dire niente da fare.")
+        return 0
     print(" ESITO: nessun rosso.")
     return 0
 

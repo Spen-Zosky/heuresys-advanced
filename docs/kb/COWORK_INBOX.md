@@ -1083,7 +1083,7 @@ E' la stessa forma di DIF-4 applicata al deposito invece che alla misura: **l'in
 
 **Nota di metodo, da valutare fuori da questo ciclo.** Vale la pena che `dove_siamo.py` sappia dire anche «decisioni rimandate senza una voce che le tenga»: oggi una voce chiusa con dentro un rinvio e' un punto cieco dello strumento, e questo e' il primo caso in cui l'abbiamo visto. Proposta, non prescrizione.
 
-stato: [DA RICONCILIARE]
+stato: [RICONCILIATA 955aa06a S1106] — voce D11 creata in STATO.md, stato ATTESA_ENZO (non BLOCCATA: e' l'unico stato che dove_siamo.py sorveglia come aperto), con la condizione di riapertura di Enzo riportata per intero. La nota di metodo su dove_siamo.py resta proposta, non eseguita.
 
 ### 2026-09-19 — Censimento dei punti di arresto su tutto cio' che resta, prima di lanciare una corsa non presidiata
 
@@ -1103,4 +1103,4 @@ Enzo ha dato una regola nuova, che vale da oggi in poi: **l'obiettivo e' arrivar
 
 **6. Il bundle in produzione e' fermo al 14 settembre. NON risolto, ed e' il piu' importante.** Scoperto dalla sessione S1106. R-9, R-2 e R-7 esistono nel database ma il programma in esecuzione non li conosce: sono chiusi sulla carta e non funzionanti per le persone vere. ⚠ **Conseguenza sul mandato che nessuno ha ancora scritto**: `R-11` (prove negative trasversali) verifica che ogni ruolo NON possa fare cio' che non deve — ma se il programma in esecuzione non conosce i ruoli nuovi, quella matrice sta provando il programma sbagliato e uscirebbe verde per la ragione sbagliata. **R-11 non va eseguita finche' la produzione non e' allineata.** Adesso che il gemello e' acceso, il deploy e' sbloccato.
 
-stato: [DA RICONCILIARE]
+stato: [RICONCILIATA 955aa06a S1106] — 1 (X-1) e 3 (ordine R-6) e 4 (tool mancante) recepiti in STATO.md; 2 (sys_attendance) recepito nella nota di X-2; 5 (gemello acceso) confermato in sessione (raggiungibile, pull ff-only pulito a 78b40e72); 6 (bundle fermo) — chiusura completa eseguita nella stessa sessione: `close-propagate.sh --full --deploy` ha armato `origin/prod` a `78b40e72`, CI in volo al momento dell'armamento (3 verdi/1 in corso), VM e linux-pc allineati (repo+payload+memoria+ecosistema, entrambi verify CLEAN), clone-DB di linux-pc riarmato via systemd. `heuresys-advanced-deploy-watch.timer` completera' il rollout sui due host da solo quando la CI risulta verde. R-11 resta in attesa di quel rollout, come indicato.

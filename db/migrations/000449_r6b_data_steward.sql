@@ -209,7 +209,10 @@ BEGIN
        OR p.auth_permission_code LIKE 'mentorship:%' OR p.auth_permission_code LIKE 'engagement_feedback:%'
        OR p.auth_permission_code LIKE 'training_initiative:%' OR p.auth_permission_code LIKE 'user:%'
        OR p.auth_permission_code LIKE 'gap_analysis:%' OR p.auth_permission_code LIKE 'assessment:%'
-       OR p.auth_permission_code LIKE 'gdpr:%' OR p.auth_permission_code = 'role:assign'
+       -- gdpr:export:self ESCLUSO: e' il floor universale I17 (ogni ruolo lo ha, 000186 lo
+       -- concede senza filtro di ruolo), non un permesso del dominio GDPR gestionale.
+       OR (p.auth_permission_code LIKE 'gdpr:%' AND p.auth_permission_code <> 'gdpr:export:self')
+       OR p.auth_permission_code = 'role:assign'
        OR p.auth_permission_code = 'whistleblowing:manage' OR p.auth_permission_code = 'delegation:manage'
        OR p.auth_permission_code IN ('candidate:write','interview:feedback','offer:manage','requisition:manage')
        OR p.auth_permission_code = 'tenant_materialization:execute'

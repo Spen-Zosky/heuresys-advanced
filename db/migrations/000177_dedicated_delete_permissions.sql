@@ -59,6 +59,13 @@ ON CONFLICT (auth_permission_code) DO NOTHING;
 -- Emendato QUI (ADR-0035, il file che crea il comportamento), non con una
 -- DELETE a valle in 000431: la catena riapplicata per intero lo cancellerebbe
 -- al giro dopo.
+--
+-- SECONDA ECCEZIONE (mandato K, R-6 sessione 2, mig. 000449, 2026-09-19):
+-- DATA_STEWARD ha `seed_acquisition:trigger` (registra fonti, apre corse) MA
+-- DELIBERATAMENTE NON `seed_acquisition:delete` — stessa separazione dei
+-- compiti di IMPLEMENTATION_CONSULTANT sopra: il custode del dato che arriva
+-- non cancella un'intera corsa di acquisizione. Trovato dalla prova generale
+-- (seconda passata) mentre si applicava 000449, non dedotto a priori.
 WITH mapping(new_code, source_code) AS (
   VALUES
     ('enterprise_typing:delete', 'enterprise_typing:update'),
@@ -77,19 +84,19 @@ SELECT rp.auth_role_id, np.auth_permission_id
   JOIN sys.sys_auth_role_permissions rp ON rp.auth_permission_id = sp.auth_permission_id
   JOIN sys.sys_auth_permissions np ON np.auth_permission_code = m.new_code
   JOIN sys.sys_auth_roles ar ON ar.auth_role_id = rp.auth_role_id
- WHERE NOT (m.new_code = 'seed_acquisition:delete' AND ar.auth_role_code = 'IMPLEMENTATION_CONSULTANT')
+ WHERE NOT (m.new_code = 'seed_acquisition:delete' AND ar.auth_role_code IN ('IMPLEMENTATION_CONSULTANT', 'DATA_STEWARD'))
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
 -- Il WHERE sopra ferma solo le concessioni FUTURE: una riapplicazione precedente
 -- (prima di questo emendamento) puo' aver gia' concesso seed_acquisition:delete a
--- IMPLEMENTATION_CONSULTANT — self-healing simmetrico, rimozione mirata per nome
--- (mai un jolly), non una DELETE a valle di un file diverso da quello che crea
--- il comportamento (ADR-0035: qui e' la stessa fonte che lo genera).
+-- IMPLEMENTATION_CONSULTANT/DATA_STEWARD — self-healing simmetrico, rimozione
+-- mirata per nome (mai un jolly), non una DELETE a valle di un file diverso da
+-- quello che crea il comportamento (ADR-0035: qui e' la stessa fonte che lo genera).
 DELETE FROM sys.sys_auth_role_permissions rp
  USING sys.sys_auth_roles r, sys.sys_auth_permissions p
  WHERE rp.auth_role_id = r.auth_role_id
    AND rp.auth_permission_id = p.auth_permission_id
-   AND r.auth_role_code = 'IMPLEMENTATION_CONSULTANT'
+   AND r.auth_role_code IN ('IMPLEMENTATION_CONSULTANT', 'DATA_STEWARD')
    AND p.auth_permission_code = 'seed_acquisition:delete';
 
 DO $$

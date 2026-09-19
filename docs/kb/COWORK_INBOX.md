@@ -1180,3 +1180,103 @@ Misurato su S1108, aperta dal canale alle 07:37 (`claude -p`, nessuna riga di st
 **Nota a margine, difetto minore ma della stessa famiglia**: alle 07:53 `canale.py stato --nome s1108` riportava `turni: 0 | costo 0.0$` e come ultimo evento «SILENZIO: nessun segno di vita da 15 minuti mentre risulta al lavoro», mentre la sessione aveva **già fatto due commit** (`21f9d923` e `f1e31c3c`, quest'ultimo alle 07:45) e il suo diario era a 1,47 MB scritto pochi secondi prima. Il contatore dei turni e il rilevatore di silenzio guardano i confini di turno, non l'attività: un primo turno lungo — e con un mandato di 157 righe il primo turno è lungo — viene letto come sessione morta. Chi governa rischia di riavviare una sessione sana.
 
 stato: [RICONCILIATA 14656f3b S1108] — dottrina/hook a livello utente (guardiano, canale), fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md` come proposta per Enzo, non applicata qui.
+
+## 2026-09-19 09:08 — [DA RICONCILIARE] ⛔ LA COMPATTAZIONE AZZERA LA SOGLIA DEL GUARDIANO: è il difetto più grave misurato stanotte
+
+Misurato su S1107 (`73bed50e`), e spiega da sé tutto il suo comportamento anomalo delle ultime tre ore.
+
+**La misura, presa alle 09:07 con `guardiano.py --session 73bed50e... --json`:**
+
+```
+"contesto": 287564,      → 28,8%   "giudizio": "LARGO — nessun vincolo di capienza"
+"picco":    967585,      → 96,8%
+"campioni": 4163
+```
+
+**Che cosa è successo.** S1107 ha onorato il guardiano alle 06:28 fermandosi a 74,6% e scrivendo il rapporto di chiusura. Poi ha ripreso, ha superato il 75%, ha continuato fino a **96,8%** — e a quel punto il CLI ha **compattato** la conversazione. La compattazione riduce il contesto utile a 287k token, cioè al 28,8%. Dal quel momento il guardiano, che calcola il verdetto sul campo `contesto`, risponde **«LARGO — nessun vincolo di capienza»**, e la soglia del 75% **non scatterà mai più**. La sessione ha continuato a lavorare per un'altra ora e mezza, e sta lavorando adesso.
+
+**Perché è il difetto più grave.** Gli altri trovati stanotte fanno sbagliare chi legge una misura. Questo **disarma la regola**: la soglia del 75% non è più aggirabile solo dalla buona volontà di una sessione (exit 3 che nessuno raccoglie, segnalato alle 07:06), è aggirata **automaticamente** dal meccanismo del CLI. Una sessione che non si ferma alla soglia non viene fermata da niente: arriva al 96%, compatta, e riparte con la fedina pulita. Non c'è nessun limite superiore al tempo in cui può restare in volo.
+
+**Il costo, misurato, non ipotetico.** Il rapporto di S1108 dichiara: *«L'ultima voce (R-5) è pronta ma non completamente collaudata: un'altra sessione stava usando lo stesso ambiente di prova nello stesso momento, e non ho potuto far girare l'ultimo test»*. Quella «altra sessione» è S1107, viva grazie alla compattazione. Quindi **R-5 è rimasta SOSPESA per colpa di una sessione che secondo la dottrina sarebbe dovuta essere chiusa da tre ore**. Il beneficio c'è stato (S1107 ha trovato un buco vero nel lavoro di S1108: i due ruoli nuovi mancanti in una pagina web), ma non l'ha deciso nessuno: è stato un effetto collaterale.
+
+**Il rimedio è già a portata, perché il dato serve ed è dentro lo strumento.** `guardiano.py` misura e stampa `picco`, ma il verdetto guarda solo `contesto`. Tre proposte, in ordine di costo, da decidere con Enzo — non applicate:
+1. **Il verdetto usa il picco, non il valore corrente.** Se `picco >= soglia`, la sessione ha già attraversato la soglia e deve chiudere, compattazione o no. È una riga in `sorveglia()` e rende la regola immune.
+2. **Dichiarare la compattazione.** Quando `picco` supera `contesto` di un margine largo (per esempio il doppio), il guardiano stampa «COMPATTATA: il contesto corrente non è confrontabile con la soglia, il picco dice N%». Oggi non lo dice, e chi legge vede solo «LARGO».
+3. **Contare le compattazioni come confini di sessione.** Una sessione compattata ha perso il proprio ragionamento e tiene solo un riassunto: trattarla come una sessione nuova *senza mandato* è più onesto che trattarla come la stessa sessione con contesto libero.
+
+stato: [RICONCILIATA cc48542c S1111] — dottrina `guardiano.py` a livello utente, fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md` come proposta per Enzo, non applicata qui.
+
+**Nota sull'identità, perché anche questa è una misura.** Il rapporto di S1108 ipotizza che la sessione parallela fosse «probabilmente la S1107 ripresa con un nome diverso». Misurato: è la stessa S1107, stesso identificativo `73bed50e`, stesso processo pid 27972 avviato alle 04:16:44, diario passato da 12,77 MB (07:26) a 15,29 MB (09:06). Nessun nome nuovo: solo una sessione che non è mai finita.
+
+## 2026-09-19 11:00 — [EMENDAMENTO alla voce delle 07:56] il guardiano è più onesto di come l'ho descritto
+
+Rettifico una mia imprecisione, misurata adesso. Nella voce delle 07:56 ho scritto che il guardiano «legge un file stantio e riporta 44%» senza accorgersene. Non è del tutto vero, e la differenza sta in quale modo lo si interroga:
+
+- `guardiano.py --json` restituisce il numero grezzo delle 5 ore **accompagnato da `eta_min`**, l'età del dato: è chi legge che deve guardare l'età, e io nelle prime misure della notte non l'ho fatto.
+- `guardiano.py --sorveglia`, cioè il percorso che emette il verdetto, **applica la regola della freschezza**: misurato alle 10:55 con il file vecchio di oltre quindici minuti, stampa `5h: non misurata (⚠ un ramo su due e' cieco)`. Dichiara la cecità invece di inventare un numero.
+
+Quindi la proposta (ii) di quella voce — «dichiarare la compattazione / dichiarare il dato stantio» — per le 5 ore **è già implementata nel verdetto**, e il merito è dello strumento. Quello che resta valido, e che resta da fare, è solo la prima metà: **nessuno scrive `rate-limits.json` per una sessione headless**, quindi quel ramo per il canale è cieco per costruzione e il rimedio è che il supervisore depositi i numeri freschi che già stampa in `canale.py stato`.
+
+Nota di metodo, la stessa che uso sugli allarmi: stavo per attribuire a S1109 il merito di aver implementato la mia segnalazione, perché il messaggio nuovo compariva proprio dopo che lei aveva letto l'inbox. Ho verificato con `git log -- docs/kb/tools/guardiano.py`: l'ultimo commit su quel file è di ieri, non di stanotte. La spiegazione vera era un'altra — la regola c'era già e è scattata perché il file ha superato i quindici minuti. Un merito attribuito per correlazione temporale è sbagliato quanto una colpa attribuita così.
+
+stato: [RICONCILIATA cc48542c S1111] — correzione di descrizione, nessuna azione di codice richiesta: registrata in `esiti/REGISTRO_SCOPERTE.md`.
+
+### [DA RICONCILIARE] 2026-09-19 12:56 — EMENDAMENTO alla voce delle 07:56: la finestra 5 ore di una sessione headless si PUO' misurare
+
+Alle 07:56 ho depositato che per una sessione headless il numero delle 5 ore «non esiste in nessun file». **Era falso, e la correzione vale piu' della voce originale.**
+
+Il numero esiste, nel flusso stesso della sessione. La CLI headless emette eventi `rate_limit_event` con `rate_limit_info.unifiedWindows.five_hour.utilization`; il supervisore del canale li legge (`claude_service_workspace\canale\bin\supervisore.py`, righe 245-249) e li deposita in `claude_service_workspace\canale\<nome>\stato.json` come `cinque_ore_pct`, accanto a `sette_giorni_pct`.
+
+Misurato su S1110 alle 12:52:49: `"cinque_ore_pct": 50.0`, `"sette_giorni_pct": 18.0`, file riscritto lo stesso secondo. Nello stesso momento `guardiano.py --session <id> --sorveglia` dichiarava «finestra 5h NON MISURATA — dato stantio (222 min)», perche' guarda solo `~/.claude/rate-limits.json`, che nessuno scrive quando non gira una riga di stato interattiva.
+
+Nel transcript JSONL il numero **non** c'e' (`unifiedWindows`: 0 occorrenze su `1f8dbf0b….jsonl`), quindi il guardiano non puo' ricavarlo da dove ricava il contesto.
+
+**La correzione, in una riga:** quando il guardiano riceve `--session <id>`, cerchi il `stato.json` del canale corrispondente a quella sessione e legga `cinque_ore_pct` con il suo `aggiornato_il` come data di freschezza; la regola dei 15 minuti resta identica, cambia solo la fonte. Cosi' il ramo cieco si chiude senza scrivere un nuovo meccanismo: il dato lo raccoglie gia' qualcuno.
+
+Due avvertenze per chi implementa: (a) la regola di freschezza va applicata a `aggiornato_il`, non all'ora di lettura, perche' un supervisore morto lascia il file fermo con un numero che sembra valido; (b) se la sessione non e' stata aperta dal canale, il file non esiste e allora NON MISURATA e' la risposta giusta — non si ripiega su una tabella.
+
+stato: [RICONCILIATA cc48542c S1111] — dottrina `guardiano.py` a livello utente, fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md`. Per S1111 il valore fresco e' stato letto a mano dal proprio `stato.json`.
+
+### [DA RICONCILIARE] 2026-09-19 12:56 — aspettare un lavoro remoto a colpi di ssh costa un turno per colpo
+
+Misurato su S1110, `canale\s1110\stato.json` alle 12:52:46: `GIRO-IN-TONDO: lo stesso comando e' stato rifatto 12 volte in questo turno: ssh linux-pc "ps -o etime= -C node …"`, con `giri_in_tondo: 3`. La sessione aspettava — legittimamente — un `vitest run` che sul gemello era in volo da 13 minuti e 57 secondi (verificato: pid 797356). Il lavoro era vero; il modo di aspettarlo no.
+
+Il costo di una sessione segue i **turni**, non l'orologio. Un'attesa di quaranta minuti condotta con un ssh per turno costa decine di turni e non produce una riga di codice; la stessa attesa condotta con **un solo comando bloccante** (il test lanciato in primo piano con il suo timeout, oppure un `while kill -0 <pid>; do sleep 60; done` dentro **una** chiamata) costa un turno. E' probabilmente la ragione principale per cui i tetti di spesa si esauriscono con il mandato a metà: si paga l'attesa, non il lavoro.
+
+**Proposta, per il mandato della prossima sessione e non solo:** quando si lancia un lavoro lungo su una macchina remota, lo si attende dentro la stessa chiamata. Il polling a turni si usa solo se il lavoro puo' durare piu' del tetto di tempo della singola chiamata, e allora con un `sleep` dentro il comando, non fra i turni.
+
+Il canale **rileva** già questo difetto (`GIRO-IN-TONDO`, contatore `giri_in_tondo`) ma si limita a scriverlo in `stato.json`, dove nessuno lo legge se non va a cercarlo: valutare se al terzo giro in tondo il supervisore debba iniettare nella sessione un avviso, che e' l'unica forma di correzione che arriva a chi sta sbagliando.
+
+stato: [RICONCILIATA cc48542c S1111] — regola operativa di conduzione sessioni, non codice: recepita nel comportamento di questa sessione (mandato la impone esplicitamente). Registrata in `esiti/REGISTRO_SCOPERTE.md`.
+
+### [DA RICONCILIARE] 2026-09-19 12:56 — i contatori `turni` e `costo_usd` del canale sono a zero su una sessione al centesimo turno
+
+`canale\s1110\stato.json` riporta `"turni": 0` e `"costo_usd": 0.0` su una sessione aperta alle 11:16:17 e ancora al lavoro alle 12:52, mentre `guardiano.py` conta 256 misure di output sullo stesso transcript. Lo stesso zero compare in `canale.py stato --nome s1110`.
+
+Conseguenza operativa, non estetica: **chi sorveglia non puo' vedere arrivare il tetto di spesa**. Il tetto lo applica la CLI da se', quindi la sessione si ferma comunque, ma la sua chiusura arriva come un fatto compiuto invece che come una previsione — e una staffetta che non si vede arrivare e' una staffetta che perde tempo. Da guardare accanto al punto precedente: turni e costo sono la stessa misura vista da due lati.
+
+stato: [RICONCILIATA cc48542c S1111] — dottrina canale/supervisore a livello utente, fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md` come proposta per Enzo.
+
+### [DA RICONCILIARE] 2026-09-19 13:16 — l'allarme SILENZIO del canale e' falso per costruzione, e ha gridato al lupo sette volte su una sessione sana
+
+Misurato su `claude_service_workspace\canale\s1110\eventi.md`: SILENZIO «nessun segno di vita da 15 minuti mentre risulta al lavoro» alle 11:31, 11:46, 12:01, 12:16, 12:31, 12:46 e 13:11 — sette volte, a intervalli esatti di quindici minuti, a partire da quindici minuti dopo l'apertura. Nelle stesse due ore la sessione ha chiuso R-6 (commit `ba8a2d75`), fatto girare il cancello di verifica, lanciato due campagne di test sul gemello e corretto un difetto in `findApprovers`.
+
+**La causa.** Il supervisore non riconosce come segno di vita gli eventi che una chiamata lunga emette mentre lavora: nel giornale ci sono righe `{"type": "tool_progress", "tool_name": "Agent", "heartbeat": true, "elapsed_time_seconds": 5100, …}` e righe `{"type": "system", "subtype": "task_progress"…}`, e arrivano regolarmente. Il contatore del silenzio evidentemente guarda solo i messaggi `assistant`/`user`, che in una sessione dentro un subagente in primo piano non arrivano per ore.
+
+**La correzione, e viene gratis.** Contare `tool_progress` e `system/task_progress` come segni di vita, e usare `elapsed_time_seconds` — che il battito porta con se' — per dire la cosa giusta: non «nessun segno di vita da 15 minuti», ma «dentro una sola chiamata da 85 minuti». Le due frasi portano a decisioni opposte: la prima invita a uccidere una sessione che lavora, la seconda dice a chi governa che c'e' una chiamata lunga da sorvegliare. Un allarme che si ripete ogni quindici minuti senza essere mai vero e' peggio di nessun allarme, perche' insegna a ignorarlo — e il giorno in cui e' vero verra' ignorato anche quello.
+
+stato: [RICONCILIATA cc48542c S1111] — dottrina canale/supervisore a livello utente, fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md`. Coerente con la regola di questa sessione: niente subagenti lunghi in foreground.
+
+### [DA RICONCILIARE] 2026-09-19 13:16 — il diario JSONL di una sessione NON e' un segno di vita, e il giornale del canale si'
+
+Due fatti misurati sulla stessa sessione S1110, e vanno letti insieme perche' da soli portano fuori strada.
+
+**Il diario JSONL (`~\.claude\projects\<progetto>\<id>.jsonl`) si ferma quando la sessione entra in un subagente in primo piano.** Ultima entrata `user`/`assistant`: 11:50:03, cioe' la chiamata `Agent` con `run_in_background: false`. Dopo, per un'ora e mezza, il file e' cresciuto solo di righe di servizio (`queue-operation`, `last-prompt`, `atis-latch`). Quindi la sua **data di modifica** sembra fresca mentre il contenuto e' fermo: e' la trappola peggiore, perche' la misura facile (`LastWriteTime`) dice vivo e la misura giusta (ultima entrata utile) dice fermo da 90 minuti. Ne ho abboccato io stesso alle 13:04, dichiarando la sessione viva sulla base della data del file.
+
+**Il giornale del canale (`canale\<nome>\giornale.jsonl`) invece registra tutto**, subagenti e battiti compresi. Misurato: 3,2 MB, 2.512 righe, cresciuto di 363 byte in dieci secondi. E' l'unico strumento che alle 13:15 sapeva rispondere a «cosa sta facendo adesso»: dalla sua coda si leggeva lo `scp` dei due file di `tenant-blueprints` sul gemello, il `vitest run` sui due test di integrazione, e un compito annidato completato.
+
+**Per chi sorveglia, la gerarchia e' questa e in questo ordine:** `giornale.jsonl` che cresce = la sessione produce; `stato.json` campo `battito` = il supervisore e' vivo; ultima entrata utile del diario JSONL = l'ultimo turno **chiuso**; `ultimo_evento_il` = l'ultima cosa notevole, che non e' liveness. La data di modifica del diario non entra nella gerarchia: non misura niente.
+
+Da valutare per il cockpit delle sessioni (fase 3): la coda del giornale, decodificata, e' la finestra di sorveglianza che mancava — vale piu' di qualunque conteggio di processi, perche' un subagente non e' un processo del sistema operativo e nessun elenco di processi lo vedra' mai.
+
+stato: [RICONCILIATA cc48542c S1111] — dottrina canale/supervisore a livello utente, fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md`.

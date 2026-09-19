@@ -25,6 +25,7 @@
   "role:create": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "role:read": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "role:update": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
+  "skill:delete": "senza rotta dal 2026-09-19 (mandato K, R-3, mig. 000426): gatava skill-ALIAS delete, non skill delete (skills module non ha una rotta DELETE) - mislabeling da prima di 000177. R-3 sposta la delete degli alias su skill_alias:manage (D1=B); skills module non ha ancora una rotta di cancellazione vera",
   "tenant:list": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "tenant_blueprint:approve": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "user:list": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",

@@ -34,7 +34,11 @@ const DELETE_TO_SOURCE: Record<string, string> = {
   "enterprise_typing:delete": "enterprise_typing:update",
   "blueprint:delete": "blueprint:override",
   "career_succession:delete": "career_succession:update",
-  "skill:delete": "skill:update",
+  // "skill:delete" REMOVED (mandato K, R-3, mig. 000426, 2026-09-19): it never gated a real
+  // skill-deletion route (skills module has none) — it gated skill-ALIAS deletion, a
+  // mislabeling from before 000177. R-3 moves alias deletion to its own permission
+  // (skill_alias:manage, see JUSTIFIED_EXCEPTIONS above); skill:delete is now a legitimately
+  // routeless permission (frozen in permessi-senza-rotta.allowlist.json with that reason).
   "seed_acquisition:delete": "seed_acquisition:trigger",
   "bpm_process:delete": "bpm_process:update",
   "gap_analysis:delete": "gap_analysis:update",
@@ -100,6 +104,9 @@ const G2_RESIDUAL_TO_SOURCE: Record<string, string> = {
 const JUSTIFIED_EXCEPTIONS: Record<string, string> = {
   me: "self-scope session revocation (I17) — me:sessions:manage",
   users: "revokes a ROLE GRANT, not the user — role:assign",
+  "skill-aliases": "one deliberate permission for the whole surface — skill_alias:manage " +
+    "(D1=B, mandato K R-3, mig. 000426): \"i sinonimi li governa chi governa le competenze\", " +
+    "not a create/update/delete split for a governance-only sub-resource",
 };
 
 function rolesFor(code: string): Promise<string[]> {

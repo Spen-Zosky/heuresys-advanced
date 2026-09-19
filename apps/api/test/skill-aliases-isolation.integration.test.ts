@@ -6,8 +6,9 @@
  * a chi non e' del tenant della competenza, 403 `GLOBAL_SKILL_ALIAS_ADMIN_ONLY` a chi non e' piattaforma
  * su una competenza globale. Questo file rende quella misura una prova che gira a ogni corsa.
  *
- * Il caso «USER del tenant A → 403» (D1=B, permesso `skill_alias:manage`) e' scritto ORA come `it.skip`
- * con motivo «attivo dopo R-3»: la prova esiste prima del ritiro e la si vedra' fallire prima (regola 5).
+ * Il caso «USER del tenant A → 403» (D1=B, permesso `skill_alias:manage`, mandato K R-3, mig. 000426):
+ * misurato che USER non ha mai avuto `skill:create` — la prova era gia' verde prima della migrazione
+ * e resta verde dopo, per un motivo strutturale diverso (guardia `skill_alias:manage` invece di `skill:create`).
  *
  * Isolamento transazionale per file (D-52): tutto cio' che nasce qui viene rollbackato.
  */
@@ -107,10 +108,13 @@ describe("S-4 — un attore del tenant B non tocca i sinonimi delle competenze d
     expect((r.json() as { error: { code: string } }).error.code).toBe("GLOBAL_SKILL_ALIAS_ADMIN_ONLY");
   });
 
-  // D1=B: i sinonimi li governa chi governa le competenze. Oggi USER ha `skill:create` e questa rotta
-  // risponde 201; dopo R-3 (permesso `skill_alias:manage`) deve rispondere 403. Si attiva in R-3 e la si
-  // vede ROSSA prima della migrazione, VERDE dopo.
-  it.skip("attivo dopo R-3 — USER del tenant A crea un alias → 403", async () => {
+  // D1=B: i sinonimi li governa chi governa le competenze. Misurato PRIMA di R-3
+  // (mandato K, S1107, 2026-09-19): USER non ha mai avuto `skill:create` (solo
+  // `skill:read`, `skill:read:self`, `skill:self_assess`) — la rotta rispondeva gia'
+  // 403 sotto la vecchia guardia. Dopo R-3 (migrazione 000426, guardia
+  // `skill_alias:manage`) risponde 403 per lo stesso motivo strutturale: USER non ha
+  // ne' l'una ne' l'altra. Prova di REGRESSIONE, non di transizione 201->403.
+  it("USER del tenant A crea un alias → 403 (D1=B, nessun accesso ne' prima ne' dopo R-3)", async () => {
     const user = await login(suite, "paolo.caputo@rtl-bank.org");
     const r = await suite.app.inject({ method: "POST", url: "/v1/skill-aliases", headers: hdr(user), payload: { skillId: skillDiB, label: `${PREFIX} da USER`, locale: "it" } });
     expect(r.statusCode, r.body).toBe(403);

@@ -39,6 +39,9 @@ export const COLLAUDO_IDENTITIES = [
   // Mandato K, R-7 (2026-09-19): SECURITY_ADMIN e' un ruolo di CLIENTE (tenant-scoped,
   // stesso vincolo di TENANT_ADMIN su grantRole/revokeRole/listRoles), quindi RTL_BANK.
   { email: "security-admin@collaudo.invalid",    displayName: "Collaudo Security Admin",    tenantCode: "RTL_BANK", roleCode: "SECURITY_ADMIN" },
+  // Mandato K, R-3 (2026-09-19): TAXONOMY_STEWARD e' un ruolo di CLIENTE (governo lato
+  // cliente della tassonomia di competenze/ruoli professionali), quindi RTL_BANK.
+  { email: "taxonomy-steward@collaudo.invalid",  displayName: "Collaudo Taxonomy Steward",  tenantCode: "RTL_BANK", roleCode: "TAXONOMY_STEWARD" },
 ];
 
 export function isCollaudoIdentity(email) {

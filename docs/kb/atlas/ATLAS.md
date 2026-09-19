@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `3a2b865b` (2026-09-19T02:24:56+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `9ac0393d` (2026-09-19T04:57:16+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -98,7 +98,7 @@
 | seed-approval-decisions | /v1/seed-approval-decisions | 3 | 2 | 2 | 1 |
 | seed-candidate-records | /v1/seed-candidate-records | 5 | 2 | 3 | 1 |
 | semantic-matching | /v1/matching | 10 | 2 | 10 | 5 |
-| skill-aliases | /v1/skill-aliases | 5 | 3 | 2 | 2 |
+| skill-aliases | /v1/skill-aliases | 5 | 1 | 2 | 2 |
 | skill-categories | /v1/skill-categories | 5 | 3 | 3 | 1 |
 | skill-families | /v1/skill-families | 5 | 3 | 2 | 1 |
 | skill-proficiency-levels | /v1/skill-proficiency-levels | 1 | 0 | 1 | 1 |

@@ -49,6 +49,12 @@ export const ROLE_CODES = [
   // CAN_GRANT_ROLES con lo stesso vincolo di TENANT_ADMIN: non concede ruoli di
   // piattaforma, non esce dal tenant — migration 000425).
   "SECURITY_ADMIN",
+  // Mandato K, R-3 (2026-09-19): ruolo di cliente per il governo lato cliente della
+  // tassonomia — competenze e ruoli professionali del proprio tenant, piu' i sinonimi
+  // (skill_alias:manage, D1=B: "i sinonimi li governa chi governa le competenze").
+  // La parte di piattaforma (skill_taxonomy:*, job_family:*) resta a PLATFORM_ADMIN
+  // (migration 000426).
+  "TAXONOMY_STEWARD",
 ] as const;
 
 export type RoleCode = (typeof ROLE_CODES)[number];

@@ -1,0 +1,35 @@
+R-3 — TAXONOMY_STEWARD lato cliente — permessi dichiarati PRIMA della migrazione (passo 45)
+Scritto S1107, 2026-09-19. Confrontare con la migrazione 000426 via diff (non a occhio).
+
+TAXONOMY_STEWARD (7 permessi):
+  skill:create
+  skill:update
+  skill:read
+  job_role:create
+  job_role:update
+  job_role:read
+  skill_alias:manage        [NUOVO — D1=B]
+
+skill_alias:manage esiste gia' anche per:
+  HRMS_MANAGER               [estensione — D1]
+  TENANT_ADMIN                [estensione — D1]
+  PLATFORM_ADMIN               [grant ESPLICITO nella migrazione — misurato dal vivo:
+                                 il blanket CROSS JOIN di 000005 non si riapplica su un DB
+                                 gia' migrato (skip per sha invariato), quindi un permesso
+                                 nato dopo non viene assorbito senza un grant dedicato]
+
+DEVIAZIONE DAL TESTO LETTERALE DEL MANDATO (misurata, non a memoria — dichiarata qui prima
+di applicare, non dopo):
+  Il mandato (passo 45) parla di permessi "skill_taxonomy_tenant:*" NUOVI che "governano
+  sys_skills (skill_tenant_id = il proprio) e sys_job_roles". Misurato sul codice vivo
+  (apps/api/src/modules/skills/service.ts:104-172, job-roles/service.ts:47-84): le rotte
+  esistenti `skill:create/update` e `job_role:create/update` GIA' tenant-scopano
+  correttamente un attore non-platform (tenantId = actor.tenantId, isGlobal forzato a
+  false per skill; proprietario = actor.tenantId per job_role) — non esiste alcun buco che
+  "skill_taxonomy_tenant:*" chiuderebbe. Inventare permessi paralleli che NESSUNA rotta
+  controlla violerebbe S-2 (ogni permesso e' chiesto da almeno una rotta) senza aggiungere
+  sicurezza: sarebbero permessi morti, o andrebbero aggiunti a un'allowlist senza motivo
+  reale. Decisione tecnica (mia, per "Claude decide le decisioni tecniche"): TAXONOMY_STEWARD
+  riceve gli STESSI permessi tenant-scoped gia' provati (skill:*, job_role:*), non un
+  duplicato. L'INTENTO del passo 45 (governo lato cliente della tassonomia di competenze e
+  ruoli, senza toccare la parte di piattaforma) e' rispettato per intero.

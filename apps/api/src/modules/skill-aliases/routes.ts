@@ -28,7 +28,7 @@ export const skillAliasesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => skillAliasesService.getById(actor(req), req.params.id));
 
   app.post("/", {
-    preHandler: [app.verifyCsrf, requirePermission("skill:create")],
+    preHandler: [app.verifyCsrf, requirePermission("skill_alias:manage")],
     schema: { body: CreateSkillAliasBodySchema, response: { 201: SkillAliasSchema } },
   }, async (req, reply) => {
     const a = await skillAliasesService.create(actor(req), req.body);
@@ -36,12 +36,12 @@ export const skillAliasesRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   app.patch("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("skill:update")],
+    preHandler: [app.verifyCsrf, requirePermission("skill_alias:manage")],
     schema: { params: SkillAliasIdParamSchema, body: UpdateSkillAliasBodySchema, response: { 200: SkillAliasSchema } },
   }, async (req) => skillAliasesService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("skill:delete")],
+    preHandler: [app.verifyCsrf, requirePermission("skill_alias:manage")],
     schema: { params: SkillAliasIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillAliasesService.delete(actor(req), req.params.id);

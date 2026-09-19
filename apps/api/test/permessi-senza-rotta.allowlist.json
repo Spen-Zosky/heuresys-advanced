@@ -31,11 +31,7 @@
   "tenant:list": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "tenant_blueprint:approve": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "user:list": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
-  "user_position_assignment:create": "in attesa di G-1 (il gesto assegna/sposta/termina non esiste ancora come rotta: D4=B, Fase 6)",
-  "user_position_assignment:delete": "in attesa di G-1 (il gesto assegna/sposta/termina non esiste ancora come rotta: D4=B, Fase 6)",
-  "user_position_assignment:list": "in attesa di G-1 (il gesto assegna/sposta/termina non esiste ancora come rotta: D4=B, Fase 6)",
-  "user_position_assignment:read": "in attesa di G-1 (il gesto assegna/sposta/termina non esiste ancora come rotta: D4=B, Fase 6)",
-  "user_position_assignment:update": "in attesa di G-1 (il gesto assegna/sposta/termina non esiste ancora come rotta: D4=B, Fase 6)",
+  "user_position_assignment:delete": "mai (mandato K, G-1, mig. 000448): I1 vieta la cancellazione - terminare/trasferire un incarico chiude un intervallo (end_date), non cancella la riga. Le tre operazioni del modulo (assegna/termina/trasferisci) usano create/update; nessuna rotta DELETE e' prevista",
   "user_profile:read": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "user_profile:update": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)"
  }

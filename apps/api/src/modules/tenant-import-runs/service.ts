@@ -18,7 +18,7 @@
 import { pool, withTransaction } from "../../db/client.js";
 import { perimetroClienti, puoVedereCliente, type ActorContext } from "../../lib/actor.js";
 import { ConflictError, ForbiddenError, NotFoundError } from "../../errors/index.js";
-import { maskFields } from "../../lib/scope/mask.js";
+import { maskFields, masksTenantImportCandidates } from "../../lib/scope/mask.js";
 import type {
   CreateTenantImportRunBody,
   RegisterTenantImportSourceBody,
@@ -38,23 +38,6 @@ function visibile(a: ActorContext, r: TenantImportRun): boolean {
   return puoVedereCliente(a, r.tenantId);
 }
 
-/**
- * Mandato K, R-6 s2 (passo 57): DATA_STEWARD legge una corsa "mascherato dei dati
- * personali" — chi puo' gia' leggere questo modulo per un altro motivo (plenipotenziari,
- * IMPLEMENTATION_CONSULTANT che avvia l'azienda) non perde visibilita' solo perche' porta
- * ANCHE il ruolo DATA_STEWARD. Locale a questo servizio: non tocca I16/I18/I20.
- */
-const RUOLI_CHE_VEDONO_I_CANDIDATI_IN_CHIARO = new Set<ActorContext["roles"][number]>([
-  "PLATFORM_ADMIN",
-  "TENANT_ADMIN",
-  "HRMS_MANAGER",
-  "IMPLEMENTATION_CONSULTANT",
-]);
-
-function deveMascherareICandidati(a: ActorContext): boolean {
-  if (!a.roles.includes("DATA_STEWARD")) return false;
-  return !a.roles.some((r) => RUOLI_CHE_VEDONO_I_CANDIDATI_IN_CHIARO.has(r));
-}
 
 function tenantDiDestinazione(a: ActorContext, richiesto: string | undefined): string {
   const perimetro = perimetroClienti(a);
@@ -179,7 +162,7 @@ export const tenantImportRunsService = {
     // message/payload. Mascherare i soli campi non basterebbe (l'email resterebbe leggibile
     // nel payload di una regola): si maschera l'intero campo `candidates` (mask.ts,
     // per-FIELD/DICHIARATO/STABILE) — la corsa resta visibile, la lista delle persone no.
-    if (deveMascherareICandidati(a)) {
+    if (masksTenantImportCandidates(a)) {
       return maskFields({ ...run, candidates }, ["candidates"]) as TenantImportRunDetail;
     }
     return { ...run, candidates };

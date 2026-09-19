@@ -119,6 +119,35 @@ export function maskFields<T extends Record<string, unknown>>(
   return out as Masked<T>;
 }
 
+/* ── mandato K, R-6 s2 — DATA_STEWARD legge le corse di importazione, mascherate ── */
+
+/**
+ * Chi legge gia' i candidati di una corsa di importazione IN CHIARO per un mandato
+ * diverso da DATA_STEWARD — un plenipotenziario, o IMPLEMENTATION_CONSULTANT che
+ * avvia l'azienda. Portare ANCHE il ruolo DATA_STEWARD non deve togliere visibilita'
+ * a chi gia' ce l'ha da un altro mandato (stesso principio di `masksUnderPlatformMandate`:
+ * la mascheratura risponde a una domanda che, per loro, non e' mai stata posta).
+ */
+const VEDONO_I_CANDIDATI_IMPORTATI_IN_CHIARO: ReadonlySet<ActorContext["roles"][number]> = new Set([
+  "PLATFORM_ADMIN",
+  "TENANT_ADMIN",
+  "HRMS_MANAGER",
+  "IMPLEMENTATION_CONSULTANT",
+]);
+
+/**
+ * DATA_STEWARD (mandato K, R-6 s2, passo 57) legge una corsa di importazione
+ * `tenant-import-runs` (stato, referto, conteggi) ma NON i candidati: email,
+ * displayName e le sei regole di validazione (PERSON_EMAIL, POSITION_VACANT...)
+ * portano dati personali anche nei loro `message`/`payload`. Mascherare i soli
+ * campi non basterebbe — si maschera l'intero campo `candidates` (per-FIELD:
+ * l'unita' qui e' il campo del contratto, non la singola colonna).
+ */
+export function masksTenantImportCandidates(actor: ActorContext): boolean {
+  if (!actor.roles.includes("DATA_STEWARD")) return false;
+  return !actor.roles.some((r) => VEDONO_I_CANDIDATI_IMPORTATI_IN_CHIARO.has(r));
+}
+
 /* ── #99 F4 — secondo qualificatore di cella: la SOGLIA DI CATENA ──────────── */
 
 /**

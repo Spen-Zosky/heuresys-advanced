@@ -150,10 +150,10 @@ ON CONFLICT (entity_table, entity_id, field, locale)
 
 -- 4. Post-condizione: la migrazione fallisce se qualcosa non torna.
 --
--- ⚠ IL CONTO VERO NON E' 78 (misurato S1109→S1110: una riapplicazione COMPLETA
--- della catena porta PEOPLE_MANAGER a 88, non 78). Due meccanismi self-healing
--- del progetto aggiungono permessi che questa migrazione non concede
--- direttamente, e sono LEGITTIMI, non un difetto:
+-- ⚠ IL CONTO VERO NON E' SEMPRE 78 (misurato S1109→S1110: una riapplicazione
+-- COMPLETA della catena porta PEOPLE_MANAGER a 88, non 78). Due meccanismi
+-- self-healing del progetto aggiungono permessi che questa migrazione non
+-- concede direttamente, e sono LEGITTIMI, non un difetto:
 --   (a) I17 universal ESS floor — 9 permessi `:self` concessi a OGNI ruolo da
 --       migrazioni dedicate (es. 000186 per gdpr:export:self/consent:manage:
 --       self, un CROSS JOIN su sys_auth_roles SENZA filtro di ruolo);
@@ -161,12 +161,22 @@ ON CONFLICT (entity_table, entity_id, field, locale)
 --       `skill:update` ("chi ha update riceve anche delete", stessa logica di
 --       ogni <area>:delete dedicato), e PEOPLE_MANAGER ha skill:update fra i
 --       78 espliciti sopra.
--- L'elenco degli 88 e' ESPLICITO nei due sensi (regola 4 del metodo di
--- bonifica: mai un jolly): l'82° codice diventa un allarme reale, non un
--- numero indovinato.
-CREATE TEMP TABLE _pm_attesi(code text PRIMARY KEY);
-INSERT INTO _pm_attesi(code) VALUES
-  -- i 78 espliciti di questa migrazione (elenco sopra, invariato)
+-- ⚠ SECONDO FATTO MISURATO (produzione, primo apply reale, S1110): questi due
+-- meccanismi vivono in migrazioni NUMERATE PRIMA di questa (000186, 000177 <
+-- 000432). Sul primissimo giro in cui la catena intera gira in un ambiente
+-- dove PEOPLE_MANAGER non e' mai esistita, quelle migrazioni eseguono PRIMA
+-- che il ruolo nasca: il floor/il mirror non lo vedono ancora, e il conto vero
+-- e' 78, non 88. Solo dal SECONDO giro completo in poi (il ruolo ormai esiste
+-- quando 000186/000177 rigirano) il conto sale a 88 e ci resta. Un "atteso 88"
+-- letterale fallisce sempre al primissimo apply — stesso difetto gia' pagato
+-- da 000212/team:manage e da 000404/branch:* con un'audience fissa.
+-- La post-condizione quindi non pretende gli 88: pretende che i 78 ESPLICITI
+-- (concessi qui, ora, incondizionatamente) ci siano SEMPRE, e che nessun
+-- codice FUORI dall'unione 78+10 sia mai presente — i 10 derivati possono
+-- mancare (primo giro) o esserci tutti (giri successivi), mai in mezzo per un
+-- motivo diverso da questi due meccanismi noti.
+CREATE TEMP TABLE _pm_espliciti(code text PRIMARY KEY);
+INSERT INTO _pm_espliciti(code) VALUES
   ('analytics:view'),('approval:create'),('approval:decide'),('assessment:create'),
   ('assessment:update'),('branch:list'),('branch:read'),('capability:read'),
   ('career_succession:create'),('career_succession:delete'),('career_succession:read'),
@@ -189,8 +199,12 @@ INSERT INTO _pm_attesi(code) VALUES
   ('surveys:read'),('surveys:update'),('talent:read'),('team:manage'),
   ('timeline:read'),('training_initiative:create'),('training_initiative:update'),
   ('user:create'),('user:delete'),('user:update'),('visualization:create'),
-  ('visualization:delete'),('visualization:update_layout'),
-  -- (a) I17 universal ESS floor — 9 permessi `:self`, ogni ruolo li ha
+  ('visualization:delete'),('visualization:update_layout');
+
+CREATE TEMP TABLE _pm_derivati(code text PRIMARY KEY);
+INSERT INTO _pm_derivati(code) VALUES
+  -- (a) I17 universal ESS floor — 9 permessi `:self`, ogni ruolo li ha (arrivano
+  -- dal secondo giro completo in poi, vedi nota sopra)
   ('consent:manage:self'),('gdpr:export:self'),('leave:request:self'),
   ('me:content:read'),('me:preferences:read'),('me:preferences:update'),
   ('me:sessions:manage'),('surveys:respond:self'),('team:read:self'),
@@ -200,47 +214,67 @@ INSERT INTO _pm_attesi(code) VALUES
 DO $$
 DECLARE
   n_pm int; n_vietati int; n_senza_cat int; n_platform_true int; n_hrms int;
-  n_attesi int; n_inattesi int; n_mancanti int;
+  n_espliciti int; n_derivati_attesi int; n_mancanti_espliciti int;
+  n_derivati_presenti int; n_fuori_elenco int;
 BEGIN
-  SELECT count(*) INTO n_pm
-    FROM sys.sys_auth_role_permissions rp
-    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
-   WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL;
-  IF n_pm <> 88 THEN
-    RAISE EXCEPTION '000432: PEOPLE_MANAGER deve avere 88 permessi (78 espliciti + 9 self-floor I17 + 1 mirror skill:delete), ne ha %', n_pm;
+  SELECT count(*) INTO n_espliciti FROM _pm_espliciti;
+  IF n_espliciti <> 78 THEN
+    RAISE EXCEPTION '000432: l''elenco _pm_espliciti ha % righe, attese 78 (duplicato interno?)', n_espliciti;
+  END IF;
+  SELECT count(*) INTO n_derivati_attesi FROM _pm_derivati;
+  IF n_derivati_attesi <> 10 THEN
+    RAISE EXCEPTION '000432: l''elenco _pm_derivati ha % righe, attese 10 (duplicato interno?)', n_derivati_attesi;
   END IF;
 
-  SELECT count(*) INTO n_attesi FROM _pm_attesi;
-  IF n_attesi <> 88 THEN
-    RAISE EXCEPTION '000432: l''elenco _pm_attesi ha % righe, attese 88 (duplicato interno?)', n_attesi;
-  END IF;
-
-  -- ogni codice live DEVE stare nell'elenco atteso: un codice fuori e' un
-  -- self-healing nuovo o un errore, non si scopre da un totale che coincide per caso.
-  SELECT count(*) INTO n_inattesi
-    FROM sys.sys_auth_role_permissions rp
-    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
-    JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
-   WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL
-     AND p.auth_permission_code NOT IN (SELECT code FROM _pm_attesi);
-  IF n_inattesi <> 0 THEN
-    RAISE EXCEPTION '000432: PEOPLE_MANAGER ha % permessi fuori dall''elenco atteso (nuovo self-healing da investigare)', n_inattesi;
-  END IF;
-
-  -- e ogni codice atteso DEVE essere davvero live: un mancante e' un self-healing
-  -- che non e' scattato (es. team:manage strappato da un'allowlist non emendata).
-  SELECT count(*) INTO n_mancanti
-    FROM _pm_attesi a
+  -- i 78 espliciti DEVONO esserci SEMPRE: li concede questa stessa migrazione,
+  -- incondizionatamente, un riga sopra.
+  SELECT count(*) INTO n_mancanti_espliciti
+    FROM _pm_espliciti e
    WHERE NOT EXISTS (
      SELECT 1 FROM sys.sys_auth_role_permissions rp
        JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
        JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
       WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL
-        AND p.auth_permission_code = a.code
+        AND p.auth_permission_code = e.code
    );
-  IF n_mancanti <> 0 THEN
-    RAISE EXCEPTION '000432: % permessi attesi mancano davvero a PEOPLE_MANAGER (self-healing altrove li ha strappati — cercare in allowlist self-healing tipo 000212/000210)', n_mancanti;
+  IF n_mancanti_espliciti <> 0 THEN
+    RAISE EXCEPTION '000432: % permessi ESPLICITI mancano a PEOPLE_MANAGER (dovrebbero esserci sempre, concessi da questa stessa migrazione)', n_mancanti_espliciti;
   END IF;
+
+  -- nessun codice FUORI dall'unione 78+10: un codice fuori e' un self-healing
+  -- nuovo o un errore, non si scopre da un totale che coincide per caso.
+  SELECT count(*) INTO n_fuori_elenco
+    FROM sys.sys_auth_role_permissions rp
+    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+    JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+   WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL
+     AND p.auth_permission_code NOT IN (SELECT code FROM _pm_espliciti
+                                         UNION ALL SELECT code FROM _pm_derivati);
+  IF n_fuori_elenco <> 0 THEN
+    RAISE EXCEPTION '000432: PEOPLE_MANAGER ha % permessi fuori dall''unione espliciti+derivati (nuovo self-healing da investigare)', n_fuori_elenco;
+  END IF;
+
+  -- i 10 derivati sono informativi: 0 al primo giro (nessun self-healing li ha
+  -- ancora visti), 10 dai giri successivi — mai un numero in mezzo per un
+  -- motivo diverso da questi due meccanismi noti, ma non e' una condizione di
+  -- fallimento: e' lo stato di transizione atteso.
+  SELECT count(*) INTO n_derivati_presenti
+    FROM _pm_derivati d
+   WHERE EXISTS (
+     SELECT 1 FROM sys.sys_auth_role_permissions rp
+       JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+       JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+      WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL
+        AND p.auth_permission_code = d.code
+   );
+  IF n_derivati_presenti NOT IN (0, 10) THEN
+    RAISE EXCEPTION '000432: % derivati su 10 presenti — un self-healing e'' scattato a meta'' (atteso 0 al primo giro, 10 dai successivi)', n_derivati_presenti;
+  END IF;
+
+  SELECT count(*) INTO n_pm
+    FROM sys.sys_auth_role_permissions rp
+    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+   WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL;
 
   -- I domini esclusi non devono comparire, per costruzione (typo guard sulla revisione).
   -- job_family:* e organization_unit_kpi_template:*/process_kpi_template:* sono anch'essi
@@ -299,11 +333,12 @@ BEGIN
     RAISE EXCEPTION '000432: auth_role_is_platform=true deve restare su UN solo ruolo (PLATFORM_ADMIN), ne ha %', n_platform_true;
   END IF;
 
-  RAISE NOTICE '000432: PEOPLE_MANAGER creato (88 permessi: 78 rivisti a mano + 9 self-floor I17 + 1 mirror skill:delete); 0 permessi di altri domini; HRMS_MANAGER intatto (% permessi); G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.', n_hrms;
+  RAISE NOTICE '000432: PEOPLE_MANAGER creato (% permessi live: 78 espliciti + % derivati su 10 self-floor/mirror); 0 permessi di altri domini; HRMS_MANAGER intatto (% permessi); G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.', n_pm, n_derivati_presenti, n_hrms;
 END $$;
 
 DROP TABLE _hrms_prima;
-DROP TABLE _pm_attesi;
+DROP TABLE _pm_espliciti;
+DROP TABLE _pm_derivati;
 
 COMMIT;
 

@@ -75,17 +75,31 @@ DROP TABLE _ta_extend_000212;
 
 -- Post-condition (fail-loud)
 DO $$
-DECLARE n int;
+DECLARE n int; n_esistenti int;
 BEGIN
   SELECT count(*) INTO n FROM sys.sys_auth_permissions WHERE auth_permission_code = 'team:manage';
   IF n <> 1 THEN RAISE EXCEPTION '000212: permission team:manage mancante'; END IF;
+
+  -- ⚠ NON un letterale fisso: PEOPLE_MANAGER nasce in 000432, NUMERATA DOPO questo
+  -- file. Sul PRIMISSIMO giro completo della catena (produzione da zero, o un
+  -- ambiente dove 000432 non e' mai girata prima) questo file esegue PRIMA che
+  -- PEOPLE_MANAGER esista: un "attesi 4" letterale fallisce sempre in quel caso
+  -- (misurato S1110: produzione, primo apply reale, n=3, non 4). Il confronto e'
+  -- con quanti dei 4 titolari ESISTONO ORA: 3 finche' PEOPLE_MANAGER non e' nata,
+  -- 4 da quel momento in poi (compreso ogni giro successivo, quando 000432 gira
+  -- prima di questo file nella STESSA riapplicazione di una catena gia' avanzata).
+  SELECT count(*) INTO n_esistenti
+    FROM sys.sys_auth_roles
+   WHERE auth_role_code IN ('PLATFORM_ADMIN', 'TENANT_ADMIN', 'HRMS_MANAGER', 'PEOPLE_MANAGER');
 
   SELECT count(*) INTO n
     FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
     JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
    WHERE p.auth_permission_code = 'team:manage';
-  IF n <> 4 THEN RAISE EXCEPTION '000212: audience team:manage attesa 4 ruoli, trovati %', n; END IF;
+  IF n <> n_esistenti THEN
+    RAISE EXCEPTION '000212: audience team:manage attesa % ruoli (quelli dei 4 titolari gia'' esistenti), trovati %', n_esistenti, n;
+  END IF;
 
   SELECT count(*) INTO n
     FROM sys.sys_reference_translations t

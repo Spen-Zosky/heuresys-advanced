@@ -96,7 +96,7 @@ COMMIT;
 -- LE POST-CONDIZIONI
 -- ============================================================================================
 DO $post$
-DECLARE n_perm bigint; n_grant bigint; n_bm bigint; n_filiali bigint;
+DECLARE n_perm bigint; n_grant bigint; n_bm bigint; n_filiali bigint; n_ruoli_esistenti bigint;
 BEGIN
   SELECT count(*) INTO n_perm FROM sys.sys_auth_permissions
    WHERE auth_permission_resource = 'branch';
@@ -104,12 +104,25 @@ BEGIN
     RAISE EXCEPTION '000404: i permessi della risorsa branch sono % invece di 2', n_perm;
   END IF;
 
+  -- ⚠ NON un letterale fisso (misurato S1110): PEOPLE_MANAGER nasce in 000432,
+  -- NUMERATA DOPO questo file. Sul primo giro completo della catena (produzione
+  -- da zero) questo file esegue PRIMA che PEOPLE_MANAGER esista, quindi "14"
+  -- (7 ruoli x 2) fallisce sempre in quel momento — stesso difetto gia' pagato
+  -- da 000212/team:manage con l'audience fissa. Il confronto e' con quanti dei
+  -- 7 titolari ESISTONO ORA: 6*2=12 finche' PEOPLE_MANAGER non e' nata, 14 da
+  -- quel momento in poi.
+  SELECT count(*) INTO n_ruoli_esistenti
+    FROM sys.sys_auth_roles
+   WHERE auth_role_code IN ('PLATFORM_ADMIN', 'TENANT_ADMIN', 'HRMS_MANAGER',
+                            'CEO', 'MANAGER', 'BRANCH_MANAGER', 'PEOPLE_MANAGER');
+
   SELECT count(*) INTO n_grant FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    WHERE p.auth_permission_resource = 'branch';
-  IF n_grant <> 14 THEN
-    RAISE EXCEPTION '000404: le concessioni sui permessi branch sono % invece di 14 '
-      '(7 ruoli x 2 permessi, PEOPLE_MANAGER incluso da R-6 mig. 000432)', n_grant;
+  IF n_grant <> n_ruoli_esistenti * 2 THEN
+    RAISE EXCEPTION '000404: le concessioni sui permessi branch sono % invece di % '
+      '(% ruoli titolari gia'' esistenti x 2 permessi; PEOPLE_MANAGER incluso da R-6 mig. 000432 quando esiste)',
+      n_grant, n_ruoli_esistenti * 2, n_ruoli_esistenti;
   END IF;
 
   -- Chi fa il mestiere deve avere il permesso: senza BRANCH_MANAGER questa voce non servirebbe

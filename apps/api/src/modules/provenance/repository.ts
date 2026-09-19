@@ -53,7 +53,7 @@ function buildWhere(
     params.push([...tenantIds]);
     where.push(`source_lineage_tenant_id = ANY($${params.length})`);
   }
-  if (query.targetTable) { params.push(query.targetTable); where.push(`source_lineage_target_table_name = $${params.length}`); }
+  if (query.targetTable) { params.push(query.targetTable); where.push(`tabella_norm = replace($${params.length}, 'sys.', '')`); }
   if (query.sourceTable) { params.push(query.sourceTable); where.push(`source_lineage_source_table = $${params.length}`); }
   if (query.runId) { params.push(query.runId); where.push(`source_lineage_import_run_id = $${params.length}`); }
   if (query.validationStatus) { params.push(query.validationStatus); where.push(`source_lineage_validation_status = $${params.length}`); }
@@ -72,10 +72,10 @@ export async function listRecords(
 ): Promise<{ items: ProvenanceRecord[]; total: number }> {
   const { wc, params } = buildWhere(tenantIds, query);
   const totalRow = await q.query<{ total: string }>(
-    `SELECT count(*)::text AS total FROM sys.sys_source_lineage_records ${wc}`, params);
+    `SELECT count(*)::text AS total FROM sys.v_source_lineage_normalizzata ${wc}`, params);
   params.push(query.limit); const lim = params.length; params.push(query.offset); const off = params.length;
   const res = await q.query<LineageRow>(
-    `SELECT * FROM sys.sys_source_lineage_records ${wc}
+    `SELECT * FROM sys.v_source_lineage_normalizzata ${wc}
       ORDER BY created_at DESC, source_lineage_record_id
       LIMIT $${lim} OFFSET $${off}`, params);
   return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toRecord) };
@@ -98,7 +98,7 @@ export async function summarize(
   if (runId) { params.push(runId); where.push(`source_lineage_import_run_id = $${params.length}`); }
   const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
   const res = await q.query<SummaryRow>(
-    `SELECT source_lineage_target_table_name AS target_table,
+    `SELECT tabella_norm AS target_table,
             count(*)::text AS total,
             avg(source_lineage_mapping_confidence)::text AS avg_confidence,
             count(*) FILTER (WHERE source_lineage_validation_status = 'VALID')::text AS valid,
@@ -107,8 +107,8 @@ export async function summarize(
             count(*) FILTER (WHERE source_lineage_validation_status = 'REJECTED')::text AS rejected,
             count(*) FILTER (WHERE source_lineage_sdbi_ai_model_id IS NOT NULL)::text AS ai_assisted,
             count(*) FILTER (WHERE source_lineage_sdbi_human_approver IS NOT NULL)::text AS human_approved
-       FROM sys.sys_source_lineage_records ${wc}
-      GROUP BY source_lineage_target_table_name
+       FROM sys.v_source_lineage_normalizzata ${wc}
+      GROUP BY tabella_norm
       ORDER BY count(*) DESC`, params);
   const byTable: ProvenanceSummaryRow[] = res.rows.map((r) => ({
     targetTable: r.target_table,

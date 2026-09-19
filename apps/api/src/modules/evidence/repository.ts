@@ -185,8 +185,8 @@ function toItem(r: EvidenceRow): EvidenceItem {
   };
 }
 
-const PROV_JOIN = `LEFT JOIN sys.sys_source_lineage_records l
-  ON l.source_lineage_target_table_name = ev.source_table
+const PROV_JOIN = `LEFT JOIN sys.v_source_lineage_normalizzata l
+  ON l.tabella_norm = ev.source_table
  AND l.source_lineage_target_record_id = ev.source_record_id`;
 const PROV_COLS = `l.source_lineage_source_system AS lin_system,
   l.source_lineage_mapping_confidence AS lin_confidence,

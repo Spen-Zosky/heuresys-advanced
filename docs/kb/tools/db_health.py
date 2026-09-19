@@ -83,6 +83,12 @@ INFORMATIVE = {
         "tabella (orfani noti: 11 tabelle, 15.054 righe il 2026-09-15 — righe importate e poi "
         "cancellate). Nasce ROSSA per costruzione ed e' qui finche' X-6 non spiega gli orfani; poi "
         "si toglie da INFORMATIVE e deve stare a zero. Non si riscrive il registro (V5)",
+    "v_source_lineage_normalizzata":
+        "mandato K X-3 (mig 000445): il registro di provenienza INTERO, con tabella_norm = "
+        "replace(target_table_name,'sys.',''). Conta stato (righe del registro), non anomalie — "
+        "e' l'intera tabella sys_source_lineage_records riesposta con un nome normalizzato, non "
+        "una sonda su un difetto. La sentinella vera di X-3 e' l'altra vista nata dalla stessa "
+        "migrazione, v_registro_provenienza_prefisso_nuovo, che quella si' deve stare a zero.",
 }
 
 # Soglie: superate = allarme. Derivano dalla misura del 2026-08-03, non da teoria.

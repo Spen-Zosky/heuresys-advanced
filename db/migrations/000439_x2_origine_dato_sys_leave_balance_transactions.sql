@@ -39,3 +39,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000439 OK — sys_leave_balance_transactions: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000439

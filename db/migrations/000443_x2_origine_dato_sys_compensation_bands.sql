@@ -36,3 +36,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000443 OK — sys_compensation_bands: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000443

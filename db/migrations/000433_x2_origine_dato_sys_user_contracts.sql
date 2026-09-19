@@ -44,3 +44,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000433 OK — sys_user_contracts: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000433

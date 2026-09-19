@@ -41,3 +41,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000434 OK — sys_user_pay_slips: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000434

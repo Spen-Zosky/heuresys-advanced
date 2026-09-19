@@ -38,3 +38,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000444 OK — sys_overtime: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000444

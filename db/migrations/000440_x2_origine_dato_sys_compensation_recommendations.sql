@@ -39,3 +39,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000440 OK — sys_compensation_recommendations: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000440

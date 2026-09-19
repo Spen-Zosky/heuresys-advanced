@@ -43,3 +43,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000437 OK — sys_time_off_requests: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000437

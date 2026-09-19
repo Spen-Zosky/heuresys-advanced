@@ -36,3 +36,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000442 OK — sys_leave_accrual_rules: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000442

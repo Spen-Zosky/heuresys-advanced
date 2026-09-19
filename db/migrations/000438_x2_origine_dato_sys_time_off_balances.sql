@@ -37,3 +37,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000438 OK — sys_time_off_balances: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000438

@@ -36,3 +36,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000435 OK — sys_user_identity_documents: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000435

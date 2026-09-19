@@ -38,3 +38,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000441 OK — sys_payroll_handoff_records: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000441

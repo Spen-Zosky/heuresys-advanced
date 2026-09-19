@@ -38,3 +38,5 @@ BEGIN
   END IF;
   RAISE NOTICE '000436 OK — sys_position_compensation_profiles: % righe, origine_dato uniforme', v_righe;
 END $$;
+
+-- FINE 000436

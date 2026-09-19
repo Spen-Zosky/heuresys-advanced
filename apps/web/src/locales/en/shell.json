@@ -81,6 +81,8 @@
     "DPO": "Data Protection Officer",
     "SECURITY_ADMIN": "Security administrator",
     "TAXONOMY_STEWARD": "Taxonomy steward",
+    "RECRUITER": "Recruiter",
+    "HIRING_MANAGER": "Hiring manager",
     "hr_mandate": "HR mandate",
     "platform_mandate": "Platform mandate",
     "line_management": "Line manager",

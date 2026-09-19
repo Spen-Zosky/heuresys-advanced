@@ -15,6 +15,7 @@
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { isPlatform } from "../../lib/actor.js";
+import { resolveRecruitingOrgScope } from "../../lib/scope/recruiting.js";
 
 export type { ActorContext };
 import { ConflictError, ForbiddenError, NotFoundError } from "../../errors/index.js";
@@ -62,11 +63,20 @@ export const interviewFeedbackService = {
     const args = isPlatform(actor)
       ? { ...query }
       : { ...query, tenantId: actor.tenantId ?? undefined };
-    return repo.listFeedback(pool, args);
+    const orgScope = await resolveRecruitingOrgScope(pool, actor);
+    return repo.listFeedback(pool, {
+      ...args,
+      organizationUnitIds: orgScope.kind === "org-units" ? orgScope.unitIds : undefined,
+    });
   },
 
   async getById(actor: ActorContext, id: string): Promise<InterviewFeedback> {
-    const target = await repo.findFeedbackById(pool, id);
+    const orgScope = await resolveRecruitingOrgScope(pool, actor);
+    const target = await repo.findFeedbackById(
+      pool,
+      id,
+      orgScope.kind === "org-units" ? orgScope.unitIds : undefined,
+    );
     if (!target || !visibile(actor, target)) throw new NotFoundError("InterviewFeedback");
     return target;
   },
@@ -129,7 +139,12 @@ export const interviewFeedbackService = {
     id: string,
     patch: InterviewFeedbackUpdateBody,
   ): Promise<InterviewFeedback> {
-    const target = await repo.findFeedbackById(pool, id);
+    const orgScope = await resolveRecruitingOrgScope(pool, actor);
+    const target = await repo.findFeedbackById(
+      pool,
+      id,
+      orgScope.kind === "org-units" ? orgScope.unitIds : undefined,
+    );
     if (!target || !visibile(actor, target)) throw new NotFoundError("InterviewFeedback");
 
     const aggiornato = await repo.updateFeedbackPartial(pool, id, patch, actor.userId);

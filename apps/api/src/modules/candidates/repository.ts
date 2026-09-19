@@ -61,26 +61,47 @@ const SELECT_BASE = `
          c.candidate_hired_user_id, c.candidate_metadata, c.created_at, c.updated_at
     FROM sys.sys_candidates c`;
 
+/** Un candidato appartiene a un'unita' organizzativa SOLO tramite le sue candidature
+ *  (candidate_applications -> posting -> requisition -> position). Mandato K, R-4 (D8=A). */
+const ESISTE_CANDIDATURA_NEL_PERIMETRO = `
+  EXISTS (
+    SELECT 1 FROM sys.sys_candidate_applications ca
+      JOIN sys.sys_job_postings po ON po.posting_id = ca.application_posting_id
+      JOIN sys.sys_job_requisitions r ON r.requisition_id = po.posting_requisition_id
+      JOIN sys.sys_positions p ON p.position_id = r.requisition_position_id
+     WHERE ca.application_candidate_id = c.candidate_id
+       AND p.position_organization_unit_id = ANY($ORG)
+  )`;
+
 export interface ListArgs extends CandidateListQuery {
   /** Filtro tenant — `undefined` = nessun filtro (PLATFORM_ADMIN cross-tenant). */
   tenantId?: string;
+  /** Mandato K, R-4 (D8=A): filtro di unita' organizzativa via le candidature. */
+  organizationUnitIds?: string[];
 }
 
 export async function listCandidates(
   db: Db,
   args: ListArgs,
 ): Promise<{ items: Candidate[]; total: number }> {
-  // $1 tenant, $2 status, $3 source, $4 limit, $5 offset
+  // $1 tenant, $2 status, $3 source, $4 organizationUnitIds, $5 limit, $6 offset
+  const orgClause = args.organizationUnitIds
+    ? `AND ${ESISTE_CANDIDATURA_NEL_PERIMETRO.replace("$ORG", "$4")}`
+    : "";
   const dove = `
     WHERE ($1::uuid IS NULL OR c.candidate_tenant_id = $1)
       AND ($2::varchar IS NULL OR c.candidate_status = $2)
-      AND ($3::varchar IS NULL OR c.candidate_source = $3)`;
-  const parametri = [args.tenantId ?? null, args.status ?? null, args.source ?? null];
+      AND ($3::varchar IS NULL OR c.candidate_source = $3)
+      ${orgClause}`;
+  const parametri: unknown[] = [args.tenantId ?? null, args.status ?? null, args.source ?? null];
+  if (args.organizationUnitIds) parametri.push(args.organizationUnitIds);
+  const iLimit = parametri.length + 1;
+  const iOffset = parametri.length + 2;
 
   const righe = await db.query<Row>(
     `${SELECT_BASE} ${dove}
       ORDER BY c.created_at DESC, c.candidate_last_name ASC
-      LIMIT $4 OFFSET $5`,
+      LIMIT $${iLimit} OFFSET $${iOffset}`,
     [...parametri, args.limit, args.offset],
   );
   const totale = await db.query<{ count: string }>(
@@ -93,8 +114,16 @@ export async function listCandidates(
   };
 }
 
-export async function findCandidateById(db: Db, id: string): Promise<Candidate | null> {
-  const r = await db.query<Row>(`${SELECT_BASE} WHERE c.candidate_id = $1`, [id]);
+export async function findCandidateById(
+  db: Db,
+  id: string,
+  organizationUnitIds?: string[],
+): Promise<Candidate | null> {
+  const dove = organizationUnitIds
+    ? `WHERE c.candidate_id = $1 AND ${ESISTE_CANDIDATURA_NEL_PERIMETRO.replace("$ORG", "$2")}`
+    : `WHERE c.candidate_id = $1`;
+  const parametri = organizationUnitIds ? [id, organizationUnitIds] : [id];
+  const r = await db.query<Row>(`${SELECT_BASE} ${dove}`, parametri);
   return r.rows[0] ? mappa(r.rows[0]) : null;
 }
 

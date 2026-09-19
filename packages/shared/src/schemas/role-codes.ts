@@ -55,6 +55,13 @@ export const ROLE_CODES = [
   // La parte di piattaforma (skill_taxonomy:*, job_family:*) resta a PLATFORM_ADMIN
   // (migration 000426).
   "TAXONOMY_STEWARD",
+  // Mandato K, R-10 + R-4 (2026-09-19): i due ruoli del recruiting. RECRUITER conduce
+  // l'intero ciclo (tutti e sei i permessi granulari nati da R-10), perimetro tenant.
+  // HIRING_MANAGER legge le richieste e i candidati e da' il feedback dei colloqui,
+  // MAI le offerte, perimetro = sotto-albero organizzativo (MANAGERIAL_ROLES/
+  // isOrgUnitManager, D8=A) via `position_organization_unit_id` (migration 000428).
+  "RECRUITER",
+  "HIRING_MANAGER",
 ] as const;
 
 export type RoleCode = (typeof ROLE_CODES)[number];

@@ -61,38 +61,47 @@ const SELECT_BASE = `
          to_char(s.posting_expires_on,   'YYYY-MM-DD') AS posting_expires_on,
          s.posting_location, s.posting_metadata, s.created_at, s.updated_at
     FROM sys.sys_job_postings s
-    LEFT JOIN sys.sys_job_requisitions r ON r.requisition_id = s.posting_requisition_id`;
+    LEFT JOIN sys.sys_job_requisitions r ON r.requisition_id = s.posting_requisition_id
+    LEFT JOIN sys.sys_positions p ON p.position_id = r.requisition_position_id`;
 
 export interface ListArgs extends JobPostingListQuery {
   /** Filtro tenant — `undefined` = nessun filtro (PLATFORM_ADMIN cross-tenant). */
   tenantId?: string;
+  /** Mandato K, R-4 (D8=A): filtro di unita' organizzativa, via la catena
+   *  posting -> requisition -> position. `undefined` = nessun filtro. */
+  organizationUnitIds?: string[];
 }
 
 export async function listPostings(
   db: Db,
   args: ListArgs,
 ): Promise<{ items: JobPosting[]; total: number }> {
-  // $1 tenant, $2 status, $3 visibility, $4 requisitionId, $5 limit, $6 offset
+  // $1 tenant, $2 status, $3 visibility, $4 requisitionId, $5 organizationUnitIds, $6 limit, $7 offset
   const dove = `
     WHERE ($1::uuid IS NULL OR s.posting_tenant_id = $1)
       AND ($2::varchar IS NULL OR s.posting_status = $2)
       AND ($3::varchar IS NULL OR s.posting_visibility = $3)
-      AND ($4::uuid IS NULL OR s.posting_requisition_id = $4)`;
+      AND ($4::uuid IS NULL OR s.posting_requisition_id = $4)
+      AND ($5::uuid[] IS NULL OR p.position_organization_unit_id = ANY($5))`;
   const parametri = [
     args.tenantId ?? null,
     args.status ?? null,
     args.visibility ?? null,
     args.requisitionId ?? null,
+    args.organizationUnitIds ?? null,
   ];
 
   const righe = await db.query<Row>(
     `${SELECT_BASE} ${dove}
       ORDER BY s.created_at DESC, s.posting_code ASC
-      LIMIT $5 OFFSET $6`,
+      LIMIT $6 OFFSET $7`,
     [...parametri, args.limit, args.offset],
   );
   const totale = await db.query<{ count: string }>(
-    `SELECT count(*)::text AS count FROM sys.sys_job_postings s ${dove}`,
+    `SELECT count(*)::text AS count FROM sys.sys_job_postings s
+       LEFT JOIN sys.sys_job_requisitions r ON r.requisition_id = s.posting_requisition_id
+       LEFT JOIN sys.sys_positions p ON p.position_id = r.requisition_position_id
+       ${dove}`,
     parametri,
   );
   return {
@@ -101,8 +110,16 @@ export async function listPostings(
   };
 }
 
-export async function findPostingById(db: Db, id: string): Promise<JobPosting | null> {
-  const r = await db.query<Row>(`${SELECT_BASE} WHERE s.posting_id = $1`, [id]);
+export async function findPostingById(
+  db: Db,
+  id: string,
+  organizationUnitIds?: string[],
+): Promise<JobPosting | null> {
+  const dove = organizationUnitIds
+    ? `WHERE s.posting_id = $1 AND p.position_organization_unit_id = ANY($2)`
+    : `WHERE s.posting_id = $1`;
+  const parametri = organizationUnitIds ? [id, organizationUnitIds] : [id];
+  const r = await db.query<Row>(`${SELECT_BASE} ${dove}`, parametri);
   return r.rows[0] ? mappa(r.rows[0]) : null;
 }
 

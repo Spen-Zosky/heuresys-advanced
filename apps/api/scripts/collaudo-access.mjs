@@ -42,6 +42,12 @@ export const COLLAUDO_IDENTITIES = [
   // Mandato K, R-3 (2026-09-19): TAXONOMY_STEWARD e' un ruolo di CLIENTE (governo lato
   // cliente della tassonomia di competenze/ruoli professionali), quindi RTL_BANK.
   { email: "taxonomy-steward@collaudo.invalid",  displayName: "Collaudo Taxonomy Steward",  tenantCode: "RTL_BANK", roleCode: "TAXONOMY_STEWARD" },
+  // Mandato K, R-4 (2026-09-19): RECRUITER e HIRING_MANAGER sono ruoli di CLIENTE
+  // (perimetro tenant/organigramma, mai piattaforma), quindi RTL_BANK. HIRING_MANAGER
+  // diventa manager di un'unita' organizzativa di prova SOLO dentro la transazione del
+  // file di test (D-52): qui nasce solo l'identita', il perimetro lo costruisce il test.
+  { email: "recruiter@collaudo.invalid",         displayName: "Collaudo Recruiter",         tenantCode: "RTL_BANK", roleCode: "RECRUITER" },
+  { email: "hiring-manager@collaudo.invalid",    displayName: "Collaudo Hiring Manager",    tenantCode: "RTL_BANK", roleCode: "HIRING_MANAGER" },
 ];
 
 export function isCollaudoIdentity(email) {

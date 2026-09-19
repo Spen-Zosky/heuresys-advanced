@@ -55,8 +55,21 @@ const SELECT_BASE = `
          a.created_at, a.updated_at
     FROM sys.sys_candidate_applications a`;
 
+/** Mandato K, R-4 (D8=A): la catena posting -> requisition -> position per il perimetro
+ *  organizzativo di HIRING_MANAGER. */
+const ORG_UNIT_DELLA_CANDIDATURA = `
+  EXISTS (
+    SELECT 1 FROM sys.sys_job_postings po
+      JOIN sys.sys_job_requisitions r ON r.requisition_id = po.posting_requisition_id
+      JOIN sys.sys_positions p ON p.position_id = r.requisition_position_id
+     WHERE po.posting_id = a.application_posting_id
+       AND p.position_organization_unit_id = ANY($?)
+  )`;
+
 export interface ListArgs extends CandidateApplicationListQuery {
   tenantId?: string | undefined;
+  /** `undefined` = nessun filtro di unita' (RECRUITER/plenipotenziari). */
+  organizationUnitIds?: string[] | undefined;
 }
 
 export async function listApplications(
@@ -74,6 +87,7 @@ export async function listApplications(
   if (args.stage) aggiungi("a.application_stage = $?", args.stage);
   if (args.candidateId) aggiungi("a.application_candidate_id = $?", args.candidateId);
   if (args.postingId) aggiungi("a.application_posting_id = $?", args.postingId);
+  if (args.organizationUnitIds) aggiungi(ORG_UNIT_DELLA_CANDIDATURA, args.organizationUnitIds);
 
   const where = cond.length ? `WHERE ${cond.join(" AND ")}` : "";
 
@@ -95,8 +109,13 @@ export async function listApplications(
 export async function findApplicationById(
   db: Db,
   id: string,
+  organizationUnitIds?: string[],
 ): Promise<CandidateApplication | null> {
-  const r = await db.query<Row>(`${SELECT_BASE} WHERE a.application_id = $1`, [id]);
+  const dove = organizationUnitIds
+    ? `WHERE a.application_id = $1 AND ${ORG_UNIT_DELLA_CANDIDATURA.replace("$?", "$2")}`
+    : `WHERE a.application_id = $1`;
+  const parametri = organizationUnitIds ? [id, organizationUnitIds] : [id];
+  const r = await db.query<Row>(`${SELECT_BASE} ${dove}`, parametri);
   return r.rows[0] ? mappa(r.rows[0]) : null;
 }
 

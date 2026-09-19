@@ -71,27 +71,38 @@ const SELECT_BASE = `
 export interface ListArgs extends JobRequisitionListQuery {
   /** Filtro tenant — `undefined` = nessun filtro (PLATFORM_ADMIN cross-tenant). */
   tenantId?: string;
+  /** Mandato K, R-4 (D8=A): HIRING_MANAGER vede solo le richieste il cui posto appartiene
+   *  a una di queste unita'. `undefined` = nessun filtro di unita' (RECRUITER/plenipotenziari). */
+  organizationUnitIds?: string[];
 }
 
 export async function listRequisitions(
   db: Db,
   args: ListArgs,
 ): Promise<{ items: JobRequisition[]; total: number }> {
-  // $1 tenant, $2 status, $3 positionId, $4 limit, $5 offset
+  // $1 tenant, $2 status, $3 positionId, $4 organizationUnitIds, $5 limit, $6 offset
   const dove = `
     WHERE ($1::uuid IS NULL OR r.requisition_tenant_id = $1)
       AND ($2::varchar IS NULL OR r.requisition_status = $2)
-      AND ($3::uuid IS NULL OR r.requisition_position_id = $3)`;
-  const parametri = [args.tenantId ?? null, args.status ?? null, args.positionId ?? null];
+      AND ($3::uuid IS NULL OR r.requisition_position_id = $3)
+      AND ($4::uuid[] IS NULL OR p.position_organization_unit_id = ANY($4))`;
+  const parametri = [
+    args.tenantId ?? null,
+    args.status ?? null,
+    args.positionId ?? null,
+    args.organizationUnitIds ?? null,
+  ];
 
   const righe = await db.query<Row>(
     `${SELECT_BASE} ${dove}
       ORDER BY r.created_at DESC, r.requisition_code ASC
-      LIMIT $4 OFFSET $5`,
+      LIMIT $5 OFFSET $6`,
     [...parametri, args.limit, args.offset],
   );
   const totale = await db.query<{ count: string }>(
-    `SELECT count(*)::text AS count FROM sys.sys_job_requisitions r ${dove}`,
+    `SELECT count(*)::text AS count FROM sys.sys_job_requisitions r
+       LEFT JOIN sys.sys_positions p ON p.position_id = r.requisition_position_id
+       ${dove}`,
     parametri,
   );
   return {
@@ -100,8 +111,16 @@ export async function listRequisitions(
   };
 }
 
-export async function findRequisitionById(db: Db, id: string): Promise<JobRequisition | null> {
-  const r = await db.query<Row>(`${SELECT_BASE} WHERE r.requisition_id = $1`, [id]);
+export async function findRequisitionById(
+  db: Db,
+  id: string,
+  organizationUnitIds?: string[],
+): Promise<JobRequisition | null> {
+  const dove = organizationUnitIds
+    ? `WHERE r.requisition_id = $1 AND p.position_organization_unit_id = ANY($2)`
+    : `WHERE r.requisition_id = $1`;
+  const parametri = organizationUnitIds ? [id, organizationUnitIds] : [id];
+  const r = await db.query<Row>(`${SELECT_BASE} ${dove}`, parametri);
   return r.rows[0] ? mappa(r.rows[0]) : null;
 }
 

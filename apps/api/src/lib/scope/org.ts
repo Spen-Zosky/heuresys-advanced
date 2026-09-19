@@ -66,6 +66,35 @@ export async function orgSubtreeUserIds(q: DbConnector, actorUserId: string): Pr
 }
 
 /**
+ * Organization unit ids in the actor's sub-tree — the units they directly manage PLUS every
+ * descendant unit, transitively. Same recursion as {@link orgSubtreeUserIds}, stopped one step
+ * earlier (before joining to position assignments): useful when the gated resource belongs to a
+ * UNIT (mandato K, R-4: a job requisition hangs off a position, which hangs off a unit — not off
+ * a person), not to a person directly. Empty array = the actor manages no unit.
+ */
+export async function orgSubtreeUnitIds(q: DbConnector, actorUserId: string): Promise<string[]> {
+  const res = await q.query<{ ou_id: string }>(
+    `WITH RECURSIVE my_units AS (
+       SELECT o.organization_unit_id AS ou_id
+         FROM sys.sys_organization_units o
+        WHERE o.organization_unit_manager_user_id = $1
+          AND o.organization_unit_is_active
+     ),
+     subtree AS (
+       SELECT ou_id FROM my_units
+       UNION
+       SELECT o.organization_unit_id
+         FROM sys.sys_organization_units o
+         JOIN subtree s ON o.organization_unit_parent_id = s.ou_id
+        WHERE o.organization_unit_is_active
+     )
+     SELECT ou_id::text AS ou_id FROM subtree`,
+    [actorUserId],
+  );
+  return res.rows.map((r) => r.ou_id);
+}
+
+/**
  * User ids ABOVE the given user in the org chart — their transitive managers (NOT including self).
  * The mirror of {@link orgSubtreeUserIds}; useful for "who may see MY sensitive data".
  */

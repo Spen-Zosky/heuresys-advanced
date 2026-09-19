@@ -72,8 +72,22 @@ const SELECT_BASE = `
          f.created_at, f.updated_at
     FROM sys.sys_interview_feedback f`;
 
+/** Mandato K, R-4 (D8=A): la catena interview -> application -> posting -> requisition ->
+ *  position per il perimetro organizzativo di HIRING_MANAGER. */
+const ORG_UNIT_DELLA_VALUTAZIONE = `
+  EXISTS (
+    SELECT 1 FROM sys.sys_interviews iv
+      JOIN sys.sys_candidate_applications a2 ON a2.application_id = iv.interview_application_id
+      JOIN sys.sys_job_postings po ON po.posting_id = a2.application_posting_id
+      JOIN sys.sys_job_requisitions r ON r.requisition_id = po.posting_requisition_id
+      JOIN sys.sys_positions p ON p.position_id = r.requisition_position_id
+     WHERE iv.interview_id = f.feedback_interview_id
+       AND p.position_organization_unit_id = ANY($?)
+  )`;
+
 export interface ListArgs extends InterviewFeedbackListQuery {
   tenantId?: string | undefined;
+  organizationUnitIds?: string[] | undefined;
 }
 
 export async function listFeedback(
@@ -93,6 +107,7 @@ export async function listFeedback(
     aggiungi("f.feedback_interviewer_user_id = $?", args.interviewerUserId);
   }
   if (args.recommendation) aggiungi("f.feedback_recommendation = $?", args.recommendation);
+  if (args.organizationUnitIds) aggiungi(ORG_UNIT_DELLA_VALUTAZIONE, args.organizationUnitIds);
 
   const where = cond.length ? `WHERE ${cond.join(" AND ")}` : "";
 
@@ -113,8 +128,16 @@ export async function listFeedback(
   return { items: righe.rows.map(mappa), total: Number(conteggio.rows[0]!.n) };
 }
 
-export async function findFeedbackById(db: Db, id: string): Promise<InterviewFeedback | null> {
-  const r = await db.query<Row>(`${SELECT_BASE} WHERE f.feedback_id = $1`, [id]);
+export async function findFeedbackById(
+  db: Db,
+  id: string,
+  organizationUnitIds?: string[],
+): Promise<InterviewFeedback | null> {
+  const dove = organizationUnitIds
+    ? `WHERE f.feedback_id = $1 AND ${ORG_UNIT_DELLA_VALUTAZIONE.replace("$?", "$2")}`
+    : `WHERE f.feedback_id = $1`;
+  const parametri = organizationUnitIds ? [id, organizationUnitIds] : [id];
+  const r = await db.query<Row>(`${SELECT_BASE} ${dove}`, parametri);
   return r.rows[0] ? mappa(r.rows[0]) : null;
 }
 

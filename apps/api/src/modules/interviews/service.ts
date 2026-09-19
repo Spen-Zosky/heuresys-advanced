@@ -12,6 +12,7 @@
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { isPlatform } from "../../lib/actor.js";
+import { resolveRecruitingOrgScope } from "../../lib/scope/recruiting.js";
 
 export type { ActorContext };
 import { ConflictError, ForbiddenError, NotFoundError } from "../../errors/index.js";
@@ -53,11 +54,20 @@ export const interviewsService = {
     const args = isPlatform(actor)
       ? { ...query }
       : { ...query, tenantId: actor.tenantId ?? undefined };
-    return repo.listInterviews(pool, args);
+    const orgScope = await resolveRecruitingOrgScope(pool, actor);
+    return repo.listInterviews(pool, {
+      ...args,
+      organizationUnitIds: orgScope.kind === "org-units" ? orgScope.unitIds : undefined,
+    });
   },
 
   async getById(actor: ActorContext, id: string): Promise<Interview> {
-    const target = await repo.findInterviewById(pool, id);
+    const orgScope = await resolveRecruitingOrgScope(pool, actor);
+    const target = await repo.findInterviewById(
+      pool,
+      id,
+      orgScope.kind === "org-units" ? orgScope.unitIds : undefined,
+    );
     if (!target || !visibile(actor, target)) throw new NotFoundError("Interview");
     return target;
   },
@@ -85,7 +95,12 @@ export const interviewsService = {
     id: string,
     patch: InterviewUpdateBody,
   ): Promise<Interview> {
-    const target = await repo.findInterviewById(pool, id);
+    const orgScope = await resolveRecruitingOrgScope(pool, actor);
+    const target = await repo.findInterviewById(
+      pool,
+      id,
+      orgScope.kind === "org-units" ? orgScope.unitIds : undefined,
+    );
     if (!target || !visibile(actor, target)) throw new NotFoundError("Interview");
 
     // Un colloquio SVOLTO deve dire quando. Il controllo sta qui e non nello schema, che

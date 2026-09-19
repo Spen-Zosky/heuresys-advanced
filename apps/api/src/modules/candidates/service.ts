@@ -15,6 +15,7 @@
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { isPlatform } from "../../lib/actor.js";
+import { resolveRecruitingOrgScope } from "../../lib/scope/recruiting.js";
 
 export type { ActorContext };
 import { ConflictError, ForbiddenError, NotFoundError } from "../../errors/index.js";
@@ -69,11 +70,20 @@ export const candidatesService = {
     const args = isPlatform(actor)
       ? { ...query }
       : { ...query, tenantId: actor.tenantId ?? undefined };
-    return repo.listCandidates(pool, args);
+    const orgScope = await resolveRecruitingOrgScope(pool, actor);
+    return repo.listCandidates(pool, {
+      ...args,
+      organizationUnitIds: orgScope.kind === "org-units" ? orgScope.unitIds : undefined,
+    });
   },
 
   async getById(actor: ActorContext, id: string): Promise<Candidate> {
-    const target = await repo.findCandidateById(pool, id);
+    const orgScope = await resolveRecruitingOrgScope(pool, actor);
+    const target = await repo.findCandidateById(
+      pool,
+      id,
+      orgScope.kind === "org-units" ? orgScope.unitIds : undefined,
+    );
     if (!target || !visibile(actor, target)) throw new NotFoundError("Candidate");
     return target;
   },

@@ -56,7 +56,11 @@ const DELETE_RESTRICTED_AUDIENCE: Record<string, readonly string[]> = {
   // ha seed_acquisition:trigger (conduce le corse di ricerca) ma MAI seed_acquisition:delete
   // (un consulente esterno lancia, non cancella — separazione dei compiti dichiarata in
   // esiti/R-6_permessi_people_manager.md e nella migrazione stessa).
-  "seed_acquisition:delete": ["IMPLEMENTATION_CONSULTANT"],
+  // Mandato K, R-6 sessione 2 (2026-09-19, mig. 000449 + secondo emendamento a 000177):
+  // DATA_STEWARD ha seed_acquisition:trigger (registra fonti, apre corse) ma MAI
+  // seed_acquisition:delete — stessa separazione dei compiti di IMPLEMENTATION_CONSULTANT
+  // sopra: il custode del dato non cancella un'intera corsa di acquisizione.
+  "seed_acquisition:delete": ["IMPLEMENTATION_CONSULTANT", "DATA_STEWARD"],
 };
 
 /**

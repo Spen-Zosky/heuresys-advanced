@@ -473,6 +473,12 @@
   "roles_includes": 0,
   "totale": 3
  },
+ "modules/user-position-assignments/service.ts": {
+  "predicati": 2,
+  "stringhe_ruolo": 0,
+  "roles_includes": 0,
+  "totale": 2
+ },
  "modules/user-target-positions/service.ts": {
   "predicati": 4,
   "stringhe_ruolo": 0,

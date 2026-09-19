@@ -24,7 +24,9 @@ const PEOPLE_MANAGER_EMAIL = "people-manager@collaudo.invalid";
 // Approvatore: titolare reale di user_position_assignment:update su RTL_BANK (HRMS_MANAGER,
 // plenipotenziario, I22) — diverso dal proponente, come "un approvatore approva" presuppone.
 const HRMS_MANAGER_EMAIL = "maria.colombo@rtl-bank.org";
-const TEAM_LEADER_EMAIL = "valentina.conti@rtl-bank.org"; // nessun permesso user_position_assignment:*
+// TEAM_LEADER "puro" (nessun ruolo plenipotenziario in aggiunta — misurato: molte persone RTL
+// portano piu' ruoli insieme, es. valentina.conti ha ANCHE HRMS_MANAGER).
+const TEAM_LEADER_EMAIL = "marco.rinaldi@rtl-bank.org"; // nessun permesso user_position_assignment:*
 
 interface S { cookies: Map<string, string>; csrfToken: string; userId: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
@@ -46,11 +48,15 @@ let teamLeader: S;
 const RTL_BANK = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
 const HEURESYS_POSITION_OUT_OF_TENANT = "2e535a31-2f47-4a1b-8fca-f9fba45a79d7"; // CEO & Founder, HEURESYS
 
-async function totalePrimaryActive(): Promise<number> {
+/** Conteggio TOTALE delle righe (ogni stato, ogni kind) — il mandato lo chiama "il conteggio
+ *  totale": I1 non cancella mai, quindi sale di 1 a ogni scrittura reale (assegna/trasferisci)
+ *  e MAI scende. Diverso, apposta, da "quanti PRIMARY ACTIVE ci sono ORA": un TRASFERIMENTO
+ *  chiude una riga e ne apre un'altra, quindi quel sotto-conteggio resta invariato per
+ *  costruzione — misurato qui, non presunto, dopo un primo giro che lo confondeva col totale. */
+async function totaleRighe(): Promise<number> {
   const r = await pool.query<{ n: string }>(
     `SELECT count(*)::text AS n FROM sys.sys_user_position_assignments
-      WHERE user_position_assignment_tenant_id = $1
-        AND user_position_assignment_kind = 'PRIMARY' AND user_position_assignment_status = 'ACTIVE'`,
+      WHERE user_position_assignment_tenant_id = $1`,
     [RTL_BANK],
   );
   return Number(r.rows[0]!.n);
@@ -133,7 +139,7 @@ describe("mandato K, G-1 — assegna/termina/trasferisci via approvazioni (D4=B)
   it("(a) PEOPLE_MANAGER propone il trasferimento, HRMS_MANAGER approva: riga vecchia chiusa, nuova aperta, totale +1", async () => {
     const persona = await assignmentAttivo("alberto.colombo@rtl-bank.org");
     const nuova = await posizioneLibera([persona.positionId]);
-    const prima = await totalePrimaryActive();
+    const prima = await totaleRighe();
 
     const apply = await proponiApprovaApplica(
       `/v1/user-position-assignments/${persona.id}/transfer`,
@@ -159,8 +165,8 @@ describe("mandato K, G-1 — assegna/termina/trasferisci via approvazioni (D4=B)
     expect(Number(nuovaRiga.rows[0]!.n)).toBe(1);
     expect(nuovaRiga.rows[0]!.origine).toBe("NATIVO");
 
-    expect(await totalePrimaryActive(), "DIF-4: totale ORA, non un letterale").toBe(prima + 1);
-  });
+    expect(await totaleRighe(), "DIF-4: totale ORA, non un letterale").toBe(prima + 1);
+  }, 60_000);
 
   it("(b) TEAM_LEADER non ha il permesso: 403 (non 404, non un errore di route)", async () => {
     const r = await suite.app.inject({
@@ -182,7 +188,7 @@ describe("mandato K, G-1 — assegna/termina/trasferisci via approvazioni (D4=B)
   it("(d) una proposta non approvata non scrive nulla: totale +0", async () => {
     const persona = await assignmentAttivo("alberto.messina@rtl-bank.org");
     const nuova = await posizioneLibera([persona.positionId]);
-    const prima = await totalePrimaryActive();
+    const prima = await totaleRighe();
 
     const submit = await suite.app.inject({
       method: "POST", url: `/v1/user-position-assignments/${persona.id}/transfer`,
@@ -190,19 +196,19 @@ describe("mandato K, G-1 — assegna/termina/trasferisci via approvazioni (D4=B)
     });
     expect(submit.statusCode).toBe(201);
     // Nessuna decisione, nessun apply: la riga resta esattamente com'era.
-    expect(await totalePrimaryActive()).toBe(prima);
+    expect(await totaleRighe()).toBe(prima);
     const ancoraAttiva = await pool.query(
       `SELECT 1 FROM sys.sys_user_position_assignments
         WHERE user_position_assignment_id = $1 AND user_position_assignment_status = 'ACTIVE'`,
       [persona.id],
     );
     expect(ancoraAttiva.rowCount).toBe(1);
-  });
+  }, 30_000);
 
   it("controprova — con l'effetto sabotato (chiude senza aprire) il totale NON sale: la prova sa fallire", async () => {
     const persona = await assignmentAttivo("alessandro.gatti@rtl-bank.org");
     const nuova = await posizioneLibera([persona.positionId]);
-    const prima = await totalePrimaryActive();
+    const prima = await totaleRighe();
 
     guasti.transferNonApre = true;
     try {
@@ -216,9 +222,19 @@ describe("mandato K, G-1 — assegna/termina/trasferisci via approvazioni (D4=B)
       guasti.transferNonApre = false;
     }
 
-    // Se l'effetto fosse quello vero (come nel test (a)), qui il totale sarebbe prima+1.
-    // Sabotato, resta prima+0: la persona e' rimasta SENZA incarico — il difetto peggiore
-    // possibile, e la prova del conteggio lo rivela invece di darlo per buono.
-    expect(await totalePrimaryActive(), "controprova: il sabotaggio doveva far restare il totale invariato").toBe(prima);
-  });
+    // Se l'effetto fosse quello vero (come nel test (a)), qui il totale sarebbe prima+1
+    // (una riga NUOVA nasce, I1: mai una DELETE). Sabotato, la vecchia riga si chiude con un
+    // UPDATE (non aggiunge una riga) e la nuova non nasce mai (INSERT saltato): il totale
+    // resta esattamente prima — la persona e' rimasta SENZA incarico attivo (misurato sotto),
+    // il difetto peggiore possibile, e la prova del conteggio lo avrebbe mancato se avesse
+    // guardato solo "il totale non e' sceso": qui deve VEDERE che non e' salito.
+    expect(await totaleRighe(), "controprova: il sabotaggio doveva lasciare il totale invariato (nessuna riga nuova nata)").toBe(prima);
+
+    const ancoraAttiva = await pool.query(
+      `SELECT 1 FROM sys.sys_user_position_assignments
+        WHERE user_position_assignment_user_id = (SELECT user_id FROM sys.sys_users WHERE user_email = 'alessandro.gatti@rtl-bank.org')
+          AND user_position_assignment_kind = 'PRIMARY' AND user_position_assignment_status = 'ACTIVE'`,
+    );
+    expect(ancoraAttiva.rowCount, "la persona e' rimasta senza alcun incarico attivo: e' questo il difetto che la controprova rivela").toBe(0);
+  }, 60_000);
 });

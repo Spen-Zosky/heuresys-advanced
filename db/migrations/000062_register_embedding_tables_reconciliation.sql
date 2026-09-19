@@ -126,7 +126,15 @@ VALUES
   -- copia gia' migrata di heuresys_ci, non l'avrebbe vista: la tabella esisteva gia' dalla
   -- prima applicazione).
   ('sys_platform_user_tenant_assignments', 'D', 'EXCLUDE', NULL,
-   '[mandato K, R-0, D9=B] Quali clienti un ruolo di piattaforma ASSEGNATO (non PLATFORM_ADMIN) puo'' vedere (mig 000421). Dato governato dalla piattaforma stessa (chi assegna chi a chi): nessuna sorgente legacy esiste ne'' puo'' esistere, perche'' il legacy non ha alcuna nozione di ruolo di piattaforma con perimetro per-cliente.')
+   '[mandato K, R-0, D9=B] Quali clienti un ruolo di piattaforma ASSEGNATO (non PLATFORM_ADMIN) puo'' vedere (mig 000421). Dato governato dalla piattaforma stessa (chi assegna chi a chi): nessuna sorgente legacy esiste ne'' puo'' esistere, perche'' il legacy non ha alcuna nozione di ruolo di piattaforma con perimetro per-cliente.'),
+
+  -- [mandato K, X-4, D5=C] Il registro dei conflitti fra gesto nativo e valore importato
+  -- (mig 000446). Stessa ragione di tutte le righe sopra: il controllo che pretende 0
+  -- UNCLASSIFIED gira in QUESTO file, quindi una tabella nuova va registrata qui e non dopo
+  -- la migrazione che la crea. Trovata dalla prova generale sul gemello, alla SECONDA
+  -- passata (la prima, sulla copia gia' migrata, non l'avrebbe vista).
+  ('sys_conflitti_ibridi', 'D', 'EXCLUDE', NULL,
+   '[mandato K, X-4, D5=C] Registro dei conflitti fra un gesto nativo e un valore importato sulle tabelle ibride (mig 000446). Dato generato dalla piattaforma nel momento in cui un futuro connettore di importazione trova un valore diverso da quello nativo: nessuna sorgente legacy esiste ne'' puo'' esistere, perche'' il legacy non ha alcuna nozione della distinzione nativo/importato.')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

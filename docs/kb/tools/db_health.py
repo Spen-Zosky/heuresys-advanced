@@ -89,6 +89,14 @@ INFORMATIVE = {
         "e' l'intera tabella sys_source_lineage_records riesposta con un nome normalizzato, non "
         "una sonda su un difetto. La sentinella vera di X-3 e' l'altra vista nata dalla stessa "
         "migrazione, v_registro_provenienza_prefisso_nuovo, che quella si' deve stare a zero.",
+    "v_direzione_del_dato_violata":
+        "mandato K X-5 (mig 000447): nasce con 20 righe su sys_leave_balance_transactions "
+        "(classificata 'nativo' in X-1, ma le sue 20 righe di oggi sono TUTTE seed storico — "
+        "verificato in X-2, 'dire il vero' — non un vero scrittore di importazione che viola "
+        "la direzione dichiarata). Resta INFORMATIVE finche' quelle 20 non sono l'unica "
+        "spiegazione: una violazione su QUALUNQUE altra tabella, o un conteggio diverso da 20 "
+        "su questa, e' un progresso o un regresso vero da guardare (post-condizione della "
+        "000447 lo verifica gia' alla nascita).",
 }
 
 # Soglie: superate = allarme. Derivano dalla misura del 2026-08-03, non da teoria.

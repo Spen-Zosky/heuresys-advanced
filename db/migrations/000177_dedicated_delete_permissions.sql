@@ -49,6 +49,16 @@ ON CONFLICT (auth_permission_code) DO NOTHING;
 -- Grant each new permission to exactly the audience of the permission the route
 -- used to run under. Derived from sys_auth_role_permissions itself, so the
 -- audiences cannot drift from reality.
+--
+-- ECCEZIONE (mandato K, R-8, mig. 000431, 2026-09-19): IMPLEMENTATION_CONSULTANT
+-- ha `seed_acquisition:trigger` MA DELIBERATAMENTE NON `seed_acquisition:delete`
+-- (separazione dei compiti — un consulente esterno lancia ricerche, non le
+-- cancella). Il mirroring "chi ha trigger riceve anche delete" era vero per
+-- ogni ruolo esistente quando questa migrazione fu scritta (2026-07-19): un
+-- ruolo nuovo con la stessa audience-mismatch voluta rompe quell'assunzione.
+-- Emendato QUI (ADR-0035, il file che crea il comportamento), non con una
+-- DELETE a valle in 000431: la catena riapplicata per intero lo cancellerebbe
+-- al giro dopo.
 WITH mapping(new_code, source_code) AS (
   VALUES
     ('enterprise_typing:delete', 'enterprise_typing:update'),
@@ -66,7 +76,21 @@ SELECT rp.auth_role_id, np.auth_permission_id
   JOIN sys.sys_auth_permissions sp ON sp.auth_permission_code = m.source_code
   JOIN sys.sys_auth_role_permissions rp ON rp.auth_permission_id = sp.auth_permission_id
   JOIN sys.sys_auth_permissions np ON np.auth_permission_code = m.new_code
+  JOIN sys.sys_auth_roles ar ON ar.auth_role_id = rp.auth_role_id
+ WHERE NOT (m.new_code = 'seed_acquisition:delete' AND ar.auth_role_code = 'IMPLEMENTATION_CONSULTANT')
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
+
+-- Il WHERE sopra ferma solo le concessioni FUTURE: una riapplicazione precedente
+-- (prima di questo emendamento) puo' aver gia' concesso seed_acquisition:delete a
+-- IMPLEMENTATION_CONSULTANT — self-healing simmetrico, rimozione mirata per nome
+-- (mai un jolly), non una DELETE a valle di un file diverso da quello che crea
+-- il comportamento (ADR-0035: qui e' la stessa fonte che lo genera).
+DELETE FROM sys.sys_auth_role_permissions rp
+ USING sys.sys_auth_roles r, sys.sys_auth_permissions p
+ WHERE rp.auth_role_id = r.auth_role_id
+   AND rp.auth_permission_id = p.auth_permission_id
+   AND r.auth_role_code = 'IMPLEMENTATION_CONSULTANT'
+   AND p.auth_permission_code = 'seed_acquisition:delete';
 
 DO $$
 DECLARE n int;

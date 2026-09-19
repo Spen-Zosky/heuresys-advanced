@@ -46,6 +46,20 @@ const DELETE_TO_SOURCE: Record<string, string> = {
 };
 
 /**
+ * Deliberate, DOCUMENTED restrictions of a mirrored :delete permission's audience —
+ * symmetric to PROXY_EXTENDED_AUDIENCE, but subtracting instead of adding. A role born
+ * AFTER 000177 that holds the source permission but must NOT inherit the mirrored
+ * :delete is a real separation-of-duties decision, not a drift.
+ */
+const DELETE_RESTRICTED_AUDIENCE: Record<string, readonly string[]> = {
+  // Mandato K, R-8 (2026-09-19, mig. 000431 + emendamento a 000177): IMPLEMENTATION_CONSULTANT
+  // ha seed_acquisition:trigger (conduce le corse di ricerca) ma MAI seed_acquisition:delete
+  // (un consulente esterno lancia, non cancella — separazione dei compiti dichiarata in
+  // esiti/R-6_permessi_people_manager.md e nella migrazione stessa).
+  "seed_acquisition:delete": ["IMPLEMENTATION_CONSULTANT"],
+};
+
+/**
  * De-proxied permissions (000178) → the cross-area permission they replaced.
  * Same contract as the deletes: the matrix became readable, the audience did not
  * move. `tenant_materialization:execute` had no route gate at all (the service's
@@ -162,13 +176,15 @@ describe("#61 G2 — DELETE routes carry a dedicated :delete permission", () => 
     expect(offenders, `DELETE senza permesso :delete dedicato:\n${offenders.join("\n")}`).toEqual([]);
   });
 
-  it("each :delete permission is held by exactly the audience of the permission it replaced", async () => {
+  it("each :delete permission is held by exactly the audience of the permission it replaced, minus only documented restrictions", async () => {
     for (const [deleteCode, sourceCode] of Object.entries(DELETE_TO_SOURCE)) {
       const [deleteRoles, sourceRoles] = await Promise.all([rolesFor(deleteCode), rolesFor(sourceCode)]);
 
       // Guard against the assertion passing vacuously if a code is ever renamed.
       expect(sourceRoles.length, `${sourceCode} non ha grant — codice rinominato?`).toBeGreaterThan(0);
-      expect(deleteRoles, `${deleteCode} deve avere l'audience di ${sourceCode}`).toEqual(sourceRoles);
+      const restricted = DELETE_RESTRICTED_AUDIENCE[deleteCode] ?? [];
+      const expected = sourceRoles.filter((r) => !restricted.includes(r));
+      expect(deleteRoles, `${deleteCode} deve avere l'audience di ${sourceCode} meno le restrizioni dichiarate`).toEqual(expected);
     }
   });
 

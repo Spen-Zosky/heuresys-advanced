@@ -1,0 +1,4 @@
+Nota (S1108, 2026-09-19): l'incidente disciplinare di R-10 (migrazione 000427 applicata
+la prima volta con psql diretto sulla produzione, prima della prova generale) e' documentato
+per intero nella riga R-10 di STATO.md, non qui. Questo file resta come pointer perche' e'
+gia' stato creato per errore in sessione (V1: non si cancella nulla in regime non presidiato).

@@ -409,9 +409,10 @@ export async function insertApprovedTimeOffRequest(
        (request_tenant_id, request_natural_key, request_subject_user_id, request_leave_type,
         request_start_date, request_end_date, request_days_requested,
         request_half_day_start, request_half_day_end, request_reason,
-        request_status, request_approver_user_id, request_approved_at, request_metadata)
+        request_status, request_approver_user_id, request_approved_at, request_metadata,
+        origine_dato)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'APPROVED', $11, now(),
-             jsonb_build_object('approvalRequestId', $12::text))
+             jsonb_build_object('approvalRequestId', $12::text), 'NATIVO')
      RETURNING request_id`,
     [
       input.tenantId,
@@ -440,7 +441,8 @@ export async function applyUsageToBalance(
   const res = await client.query(
     `UPDATE sys.sys_time_off_balances
         SET balance_used_days = balance_used_days + $2,
-            updated_at = now()
+            updated_at = now(),
+            origine_dato = 'NATIVO'
       WHERE balance_id = $1
         AND balance_total_days + balance_carryover_days + balance_adjustment_days - balance_used_days >= $2`,
     [balanceId, days],
@@ -467,8 +469,9 @@ export async function insertUsageTransaction(
     `INSERT INTO sys.sys_leave_balance_transactions
        (transaction_tenant_id, transaction_natural_key, transaction_balance_id,
         transaction_type, transaction_days_amount, transaction_reference_type,
-        transaction_reference_id, transaction_description, transaction_performed_by_user_id)
-     VALUES ($1, $2, $3, 'USAGE', $4, 'TIME_OFF_REQUEST', $5, $6, $7)`,
+        transaction_reference_id, transaction_description, transaction_performed_by_user_id,
+        origine_dato)
+     VALUES ($1, $2, $3, 'USAGE', $4, 'TIME_OFF_REQUEST', $5, $6, $7, 'NATIVO')`,
     [
       input.tenantId,
       `LBT::APPROVAL::${input.approvalRequestId}`,

@@ -354,8 +354,9 @@ export async function insertCompensationRecommendation(
         compensation_recommendation_signal,
         compensation_recommendation_amount_eur,
         compensation_recommendation_narrative,
-        compensation_recommendation_payload
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
+        compensation_recommendation_payload,
+        origine_dato
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, 'NATIVO')
       RETURNING
         compensation_recommendation_id,
         compensation_recommendation_tenant_id,
@@ -426,8 +427,9 @@ export async function insertPayrollHandoffRecord(
         payroll_handoff_record_period_end,
         payroll_handoff_record_recipient_system,
         payroll_handoff_record_payload,
-        payroll_handoff_record_status
-      ) VALUES ($1, $2, $3, $4, $5::jsonb, $6)
+        payroll_handoff_record_status,
+        origine_dato
+      ) VALUES ($1, $2, $3, $4, $5::jsonb, $6, 'NATIVO')
       RETURNING
         payroll_handoff_record_id,
         payroll_handoff_record_tenant_id,

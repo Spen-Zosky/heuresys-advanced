@@ -584,6 +584,12 @@ export async function findSnapshot(
  * — corretto, non un difetto: nessuno dovrebbe poter approvare l'accordo di un'altra azienda.
  */
 export async function findApprovers(db: Db, tenantId: string | null): Promise<Array<{ userId: string }>> {
+  // Un ruolo DI PIATTAFORMA (auth_role_is_platform, oggi solo PLATFORM_ADMIN) resta
+  // approvatore per QUALUNQUE tenant a prescindere dal proprio user_tenant_id "di casa"
+  // (I-G #35: e' lo stesso difetto gia' corretto per IMPLEMENTATION_CONSULTANT in R-8 —
+  // il tenant di residenza di un ruolo di piattaforma non e' il perimetro su cui opera).
+  // Un ruolo DI TENANT (es. TENANT_ADMIN, R-5) resta filtrato per user_tenant_id = $1:
+  // e' li' che serve il confine "cross-tenant approvers" che questa funzione difende.
   const r = await db.query<{ user_id: string }>(
     `SELECT DISTINCT u.user_id
        FROM sys.sys_users u
@@ -591,9 +597,10 @@ export async function findApprovers(db: Db, tenantId: string | null): Promise<Ar
          ON ur.user_auth_role_user_id = u.user_id AND ur.user_auth_role_revoked_at IS NULL
        JOIN sys.sys_auth_role_permissions rp ON rp.auth_role_id = ur.user_auth_role_role_id
        JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+       JOIN sys.sys_auth_roles role ON role.auth_role_id = ur.user_auth_role_role_id
       WHERE p.auth_permission_code = 'tenant_blueprint:approve'
         AND u.user_status = 'ACTIVE'
-        AND u.user_tenant_id = $1
+        AND (role.auth_role_is_platform OR u.user_tenant_id = $1)
       ORDER BY u.user_id`,
     [tenantId],
   );

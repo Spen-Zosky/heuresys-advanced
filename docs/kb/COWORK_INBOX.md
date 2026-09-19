@@ -1164,3 +1164,19 @@ Poi **riprende**. 06:53 commit `9f63c954` (fix del marker `TENANT_ADMIN-ALLOWLIS
 **Cosa NON ho fatto, di proposito.** Non ho chiuso il processo, benché tutto fosse pushato e non si sarebbe perso niente: la sessione sta riparando proprio il marker della migrazione 000426 che avevo segnalato, e ucciderla per aprirne una che deve riparare lo stesso difetto è agitazione, non governo. Il rosso su `000426` resta però acceso — «NON registrata · NON DICHIARATA (manca la query in EFFETTI)» — perché il fix del marker non è la dichiarazione in EFFETTI.
 
 stato: [RICONCILIATA 21f9d923 S1108] — dottrina/hook a livello CLI/utente sul guardiano, fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md` come proposta per Enzo (tre rimedi in ordine di costo), non applicata qui. Il rosso su 000426 e' stato chiuso separatamente in questa sessione (commit `6cd92d09`): query EFFETTI aggiunta e migrazione applicata in produzione VM.
+
+## 2026-09-19 07:56 — [DA RICONCILIARE] per una sessione headless il ramo delle 5 ore del guardiano è STRUTTURALMENTE cieco
+
+Misurato su S1108, aperta dal canale alle 07:37 (`claude -p`, nessuna riga di stato).
+
+**I fatti.** `~/.claude/rate-limits.json` risulta scritto alle **07:24:50**, cioè 29 minuti prima della misura, e il suo contenuto dichiara `"session_id":"73bed50e"` — la sessione **precedente**, quella interattiva, la cui riga di stato ha smesso di disegnare quando si è fermata alle 07:28. Il guardiano lanciato ora su S1108 legge quel file e riporta `5 ore 44%`. Il canale, che legge i numeri dal flusso della sessione, riporta `5 ore 50%`. Due fonti, due numeri, e il dato del guardiano ha 29 minuti: per la regola scritta nel CLAUDE.md — «un dato delle 5 ore più vecchio di 15 minuti è stantio e non si usa per decidere» — quel ramo **non è utilizzabile**.
+
+**Perché è strutturale e non un caso.** Il file lo deposita `~/.claude/statusline-command.sh` a ogni disegno della riga di stato. Una sessione headless non ha riga di stato, quindi **non lo scrive mai**. Ne segue che per ogni sessione aperta dal canale il ramo delle 5 ore è cieco per costruzione: leggerà per sempre l'ultimo valore lasciato da una sessione interattiva, o niente. Il ramo del contesto invece funziona benissimo (misurato su S1108: 25,1%, modello `claude-sonnet-5`), perché legge il transcript.
+
+**La conseguenza sulla dottrina**: delle due soglie di Enzo, per una sessione non presidiata aperta dal canale **solo quella sul contesto è applicabile**. Quella sull'80% della finestra 5 ore non lo è, e il guardiano non può accorgersene da sé perché il file c'è e sembra valido — è la trappola del dato stantio che il guardiano stesso descrive, verificatasi in campo.
+
+**Il rimedio è a portata di mano**: il supervisore del canale ha già i numeri freschi (li stampa in `canale.py stato`: 5 ore 50%, 7 giorni 12%), quindi basta che li depositi nello stesso formato di `rate-limits.json` — o in un file per sessione che il guardiano sappia preferire quando è più recente. Da decidere con Enzo, non applicato.
+
+**Nota a margine, difetto minore ma della stessa famiglia**: alle 07:53 `canale.py stato --nome s1108` riportava `turni: 0 | costo 0.0$` e come ultimo evento «SILENZIO: nessun segno di vita da 15 minuti mentre risulta al lavoro», mentre la sessione aveva **già fatto due commit** (`21f9d923` e `f1e31c3c`, quest'ultimo alle 07:45) e il suo diario era a 1,47 MB scritto pochi secondi prima. Il contatore dei turni e il rilevatore di silenzio guardano i confini di turno, non l'attività: un primo turno lungo — e con un mandato di 157 righe il primo turno è lungo — viene letto come sessione morta. Chi governa rischia di riavviare una sessione sana.
+
+stato: [RICONCILIATA 14656f3b S1108] — dottrina/hook a livello utente (guardiano, canale), fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md` come proposta per Enzo, non applicata qui.

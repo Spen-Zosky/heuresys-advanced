@@ -51,6 +51,7 @@ EFFETTI: dict[str, str] = {
     "R-0": "select 1 from information_schema.tables where table_schema='sys' and table_name='sys_platform_user_tenant_assignments'",
     "R-9": "select 1 from sys.sys_auth_roles where auth_role_code in ('PLATFORM_OPERATOR','SALES') and retired_at is null having count(*) = 2",
     "R-2": "select 1 from sys.sys_auth_roles where auth_role_code='DPO' and retired_at is null",
+    "R-7": "select 1 from sys.sys_auth_roles where auth_role_code='SECURITY_ADMIN' and retired_at is null",
     # F5
     "X-1": "select 1 from information_schema.tables where table_schema='sys' and table_name='sys_classificazione_direzione_dato'",
     "X-3": "select 1 from pg_views where schemaname='sys' and viewname='v_source_lineage_normalizzata'",

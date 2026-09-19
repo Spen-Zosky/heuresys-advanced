@@ -1280,3 +1280,37 @@ Due fatti misurati sulla stessa sessione S1110, e vanno letti insieme perche' da
 Da valutare per il cockpit delle sessioni (fase 3): la coda del giornale, decodificata, e' la finestra di sorveglianza che mancava — vale piu' di qualunque conteggio di processi, perche' un subagente non e' un processo del sistema operativo e nessun elenco di processi lo vedra' mai.
 
 stato: [RICONCILIATA cc48542c S1111] — dottrina canale/supervisore a livello utente, fuori da questo repo: registrata in `esiti/REGISTRO_SCOPERTE.md`.
+
+### [DA RICONCILIARE] 2026-09-19 16:00 — X-2 / sys_attendance: la misura c'e', e la ratifica di Enzo diventa banale
+
+**Prima una correzione a me stesso.** Nella nota che avevo depositato per X-2 avevo scritto che la corrispondenza `attendance_source`→stato «non e' proposta (nessun accesso al DB da Cowork)». **Era falso, e non l'avevo provato**: sul PC di Enzo `psql` e `pg_dump` sono installati, e da Cowork si arriva al gemello via ssh. Verificato: `select 1` risponde `1`. Una dichiarazione di incapacita' non misurata e' un difetto della stessa famiglia di una misura piu' stretta della frase.
+
+**Misurato adesso sul gemello** (`linux-pc`, database `heuresys_advanced` — **NON la produzione**, e chi chiude la voce deve rifare la misura lato produzione prima di applicare la migrazione):
+
+`attendance_source` ha **un solo valore distinto**:
+
+| attendance_source | righe |
+|---|---|
+| IMPORT | 122.115 |
+
+`attendance_status` ne ha **sette**, non tre:
+
+| attendance_status | righe |
+|---|---|
+| PRESENT | 98.629 |
+| REMOTE | 10.915 |
+| VACATION | 7.778 |
+| SICK | 2.668 |
+| TRAINING | 1.180 |
+| PAID_LEAVE | 928 |
+| ABSENT | 17 |
+
+Il taglio incrociato conferma che ogni combinazione ha `attendance_source = IMPORT`: le sette righe del cross-tab coincidono con le sette dello stato.
+
+**Conseguenza per la ratifica.** La domanda posta a Enzo era la corrispondenza fra i valori di `attendance_source` e i tre stati di `origine_dato`. Con **un solo valore presente nei dati**, tutte le 122.115 righe ricadono nello stesso stato — quello che corrisponde a un dato importato. Non c'e' una corrispondenza ambigua da ratificare: l'ambiguita' esisteva solo perche' nessuno aveva guardato. Resta a Enzo una sola domanda, e vale la pena porla in una riga invece che come una scelta fra tre: *«va bene che tutte le presenze esistenti risultino di origine IMPORTATA?»*
+
+**Un difetto trovato per strada, che riguarda X-3 piu' di X-2.** `attendance_source_reference` e' **vuoto su tutte e 122.115 le righe** (`count(attendance_source_reference) = 0`). L'importazione non ha registrato da dove veniva il dato. X-3 e' il registro di provenienza riconciliato per vista: una colonna di riferimento della fonte vuota al 100% e' esattamente il genere di buco che quel registro dovrebbe dichiarare invece di ereditare in silenzio. Da guardare quando si chiude X-3, non da ignorare.
+
+**Nota di metodo, perche' e' costata tre tentativi.** Le virgolette annidate su quattro livelli (PowerShell → ssh → bash → psql) si rompono in silenzio: il primo tentativo ha prodotto «argomento aggiuntivo della riga di comando ignorato». La forma che funziona e' un file `.sql` passato allo standard input: `Get-Content query.sql -Raw | ssh linux-pc "psql … -f - 2>&1"`. E' la stessa regola che la dottrina di Enzo ha gia' per PowerShell: quando le virgolette si annidano, si scrive un file.
+
+stato: [RICONCILIATA S1112] — misura confermata indipendentemente su produzione (122.271 righe contro le 122.115 del gemello, stesso unico valore IMPORT), riportata in `esiti/X-2_attendance.md` con la domanda riformulata per Enzo. Il difetto di `attendance_source_reference` vuoto era gia' stato trovato in questa sessione durante X-6 (`esiti/X-6.md`): stessa osservazione, non duplicata. X-2 sulle altre 12 tabelle gia' chiusa e applicata in produzione; questa singola tabella resta ATTESA_ENZO come da mandato.

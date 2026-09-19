@@ -57,6 +57,9 @@ export const COLLAUDO_IDENTITIES = [
   // l'assegnazione a RTL Bank via sys_platform_user_tenant_assignments (R-0) e' un
   // atto separato, fatto dal test.
   { email: "implementation-consultant@collaudo.invalid", displayName: "Collaudo Implementation Consultant", tenantCode: "HEURESYS", roleCode: "IMPLEMENTATION_CONSULTANT" },
+  // Mandato K, R-6 (2026-09-19): PEOPLE_MANAGER e' un ruolo di CLIENTE (tenant-scoped,
+  // mandato HR tenant-wide come TENANT_ADMIN/HRMS_MANAGER), quindi RTL_BANK.
+  { email: "people-manager@collaudo.invalid",     displayName: "Collaudo People Manager",     tenantCode: "RTL_BANK", roleCode: "PEOPLE_MANAGER" },
 ];
 
 export function isCollaudoIdentity(email) {

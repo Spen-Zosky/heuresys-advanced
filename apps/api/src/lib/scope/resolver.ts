@@ -27,6 +27,12 @@ import { recordScopeAccess, type ScopeAxis } from "./audit.js";
 export const HR_MANDATED_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
   "TENANT_ADMIN",
   "HRMS_MANAGER",
+  // Mandato K, R-6 (2026-09-19, mig. 000432): stesso perimetro organizzativo di
+  // TENANT_ADMIN/HRMS_MANAGER (I18, tutto il tenant) — i permessi RBAC restano
+  // piu' stretti (scrittura solo su nativo/ibrido, mai GDPR/avviamento/recruiting/
+  // tassonomia/whistleblowing), ma l'asse organizzativo non li distingue: dice
+  // SU CHI, non COSA (ADR-0036).
+  "PEOPLE_MANAGER",
 ]);
 
 /** The organizational read scope. `userIdAllowList` (when present) is the exact set of subject

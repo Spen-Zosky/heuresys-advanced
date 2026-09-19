@@ -67,6 +67,13 @@ export const ROLE_CODES = [
   // fascicoli sui soli clienti a cui e' stato assegnato (D9=B), mai tutti come
   // PLATFORM_ADMIN. Non approva candidati ne' concede ruoli (migration 000431).
   "IMPLEMENTATION_CONSULTANT",
+  // Mandato K, R-6 (2026-09-19): ruolo di cliente per la gestione operativa delle
+  // persone — scrittura su tutte le tabelle NATIVE/IBRIDE di X-1 (obiettivi,
+  // competenze, formazione, carriera, engagement, KPI, posizioni, organigramma) +
+  // lettura sulle tabelle IMPORTATE. Mandato HR tenant-wide (HR_MANDATED_ROLES),
+  // come TENANT_ADMIN/HRMS_MANAGER. Elenco permessi rivisto a mano,
+  // esiti/R-6_permessi_people_manager.md (migration 000432).
+  "PEOPLE_MANAGER",
 ] as const;
 
 export type RoleCode = (typeof ROLE_CODES)[number];

@@ -38,14 +38,12 @@ export const seedAcquisitionRunsService = {
       const c = body.tenantId ?? actor.tenantId;
       if (!c) throw new ForbiddenError("PLATFORM_ADMIN must supply body.tenantId", "TENANT_ID_REQUIRED");
       tenantId = c;
-    } else if (actor.tenantId) {
-      // TENANT_ADMIN e simili: sempre e solo il proprio tenant.
-      tenantId = actor.tenantId;
-    } else {
-      // Ruolo di piattaforma assegnato (es. IMPLEMENTATION_CONSULTANT, D9=B):
-      // deve indicare un tenant nel proprio perimetro. 404 (non 403) sul tenant
-      // fuori perimetro, per non confermarne l'esistenza (stesso criterio di
-      // puoVedereCliente altrove).
+    } else if (actor.assignedTenantIds !== undefined) {
+      // Ruolo di piattaforma assegnato (es. IMPLEMENTATION_CONSULTANT, D9=B): il
+      // proprio tenant "di casa" (actor.tenantId, sempre valorizzato — I-G #35)
+      // NON e' il perimetro. Deve indicare un tenant fra quelli assegnati. 404
+      // (non 403) sul tenant fuori perimetro, per non confermarne l'esistenza
+      // (stesso criterio di puoVedereCliente altrove).
       const c = body.tenantId;
       if (!c) {
         throw new ForbiddenError("Serve indicare tenantId", "TENANT_ID_REQUIRED");
@@ -54,6 +52,10 @@ export const seedAcquisitionRunsService = {
         throw new NotFoundError("Tenant");
       }
       tenantId = c;
+    } else {
+      // TENANT_ADMIN e simili: sempre e solo il proprio tenant.
+      if (!actor.tenantId) throw new ForbiddenError("Tenant context required");
+      tenantId = actor.tenantId;
     }
     return repo.insertRun(pool, tenantId, body, actor.userId);
   },

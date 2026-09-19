@@ -45,19 +45,22 @@ function tenantDiDestinazione(a: ActorContext, richiesto: string | undefined): s
     if (!t) throw new ForbiddenError("PLATFORM_ADMIN deve indicare tenantId", "TENANT_ID_REQUIRED");
     return t;
   }
-  if (a.tenantId) {
-    // TENANT_ADMIN e simili: sempre e solo il proprio tenant.
-    if (richiesto && richiesto !== a.tenantId) {
-      throw new ForbiddenError("Si importa solo nella propria azienda", "CROSS_TENANT_IMPORT");
-    }
-    return a.tenantId;
+  if (a.assignedTenantIds !== undefined) {
+    // Ruolo di piattaforma assegnato (es. IMPLEMENTATION_CONSULTANT, D9=B): il
+    // proprio tenant "di casa" (a.tenantId, sempre valorizzato — I-G #35) NON e'
+    // il perimetro. Deve indicare un tenant fra quelli assegnati. 404 sul tenant
+    // fuori perimetro, per non confermarne l'esistenza (stesso criterio di
+    // puoVedereCliente altrove).
+    if (!richiesto) throw new ForbiddenError("Serve indicare tenantId", "TENANT_ID_REQUIRED");
+    if (!perimetro.has(richiesto)) throw new NotFoundError("Tenant");
+    return richiesto;
   }
-  // Ruolo di piattaforma assegnato (es. IMPLEMENTATION_CONSULTANT, D9=B): deve
-  // indicare un tenant nel proprio perimetro. 404 sul tenant fuori perimetro,
-  // per non confermarne l'esistenza (stesso criterio di puoVedereCliente altrove).
-  if (!richiesto) throw new ForbiddenError("Serve indicare tenantId", "TENANT_ID_REQUIRED");
-  if (!perimetro.has(richiesto)) throw new NotFoundError("Tenant");
-  return richiesto;
+  // TENANT_ADMIN e simili: sempre e solo il proprio tenant.
+  if (!a.tenantId) throw new ForbiddenError("Serve un contesto di azienda");
+  if (richiesto && richiesto !== a.tenantId) {
+    throw new ForbiddenError("Si importa solo nella propria azienda", "CROSS_TENANT_IMPORT");
+  }
+  return a.tenantId;
 }
 
 export const tenantImportRunsService = {

@@ -36,6 +36,23 @@ WHERE r.auth_role_code = 'PLATFORM_ADMIN'
     WHERE rp.auth_role_id = r.auth_role_id AND rp.auth_permission_id = p.auth_permission_id
   );
 
+-- Mandato K, R-9 (000422, 2026-09-17): SALES legge i lead — e' il senso stesso del ruolo.
+-- E' un'ESTENSIONE DICHIARATA dell'audience (LEADS_READ_EXTENDED_AUDIENCE), non
+-- un'assorbimento silenzioso: 000422 la concede gia', ma la DELETE qui sotto — pensata
+-- per il solo CROSS JOIN a tappeto di 000005 — non sapeva distinguerla da quello e la
+-- cancellava a ogni ri-applicazione di 000152 (misurato su heuresys_ci, mandato K R-3,
+-- S1107 2026-09-19: SALES aveva leads:update ma non leads:read). Si ri-concede QUI,
+-- cosi' una ri-applicazione di 000152 la ripristina invece di limitarsi a non toglierla.
+INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
+SELECT r.auth_role_id, p.auth_permission_id
+FROM sys.sys_auth_roles r
+JOIN sys.sys_auth_permissions p ON p.auth_permission_code = 'leads:read'
+WHERE r.auth_role_code = 'SALES'
+  AND NOT EXISTS (
+    SELECT 1 FROM sys.sys_auth_role_permissions rp
+    WHERE rp.auth_role_id = r.auth_role_id AND rp.auth_permission_id = p.auth_permission_id
+  );
+
 -- Reconciliation registry: app-authored, no legacy source.
 INSERT INTO sys.sys_reconciliation_registry
   (reconciliation_registry_table_name, reconciliation_registry_bucket,
@@ -49,17 +66,23 @@ ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 -- 000005 grants TENANT_ADMIN every permission EXCEPT a hardcoded platform-only NOT-IN
 -- list; a chain RE-RUN (with leads:read already present) therefore grants leads:read to
 -- TENANT_ADMIN, which a fresh rebuild does not. leads = platform-level prospect PII →
--- PLATFORM_ADMIN only. 000152 runs last, so strip any non-PLATFORM_ADMIN leads:read mapping.
+-- PLATFORM_ADMIN (+ SALES, declared extension above) only. 000152 runs last among the
+-- unextended migrations, so strip any other mapping — but SALES is a DECLARED exception,
+-- not the silent absorption this DELETE exists to undo (LEADS_READ_EXTENDED_AUDIENCE).
 DELETE FROM sys.sys_auth_role_permissions rp
 USING sys.sys_auth_permissions p, sys.sys_auth_roles r
 WHERE rp.auth_permission_id = p.auth_permission_id
   AND rp.auth_role_id = r.auth_role_id
   AND p.auth_permission_code = 'leads:read'
-  AND r.auth_role_code <> 'PLATFORM_ADMIN';
+  AND r.auth_role_code NOT IN ('PLATFORM_ADMIN', 'SALES');
 
 DO $$
-DECLARE n_total int; n_pa int;
+DECLARE n_total int; n_pa int; n_sales_expected int; n_sales int;
 BEGIN
+  -- SALES potrebbe non esistere ancora (catena fresca, prima di 000422): l'attesa si
+  -- adatta invece di assumere che esista sempre (guardia 2026-09-19, mandato K R-3).
+  SELECT count(*) INTO n_sales_expected FROM sys.sys_auth_roles WHERE auth_role_code = 'SALES';
+
   SELECT count(*) INTO n_total FROM sys.sys_auth_role_permissions rp
    JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    WHERE p.auth_permission_code = 'leads:read';
@@ -67,8 +90,12 @@ BEGIN
    JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
    WHERE p.auth_permission_code = 'leads:read' AND r.auth_role_code = 'PLATFORM_ADMIN';
-  IF n_total <> 1 OR n_pa <> 1 THEN
-    RAISE EXCEPTION '000152: expected leads:read mapped to exactly 1 role (PLATFORM_ADMIN), found total=% pa=%', n_total, n_pa;
+  SELECT count(*) INTO n_sales FROM sys.sys_auth_role_permissions rp
+   JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+   JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+   WHERE p.auth_permission_code = 'leads:read' AND r.auth_role_code = 'SALES';
+  IF n_total <> (1 + n_sales_expected) OR n_pa <> 1 OR n_sales <> n_sales_expected THEN
+    RAISE EXCEPTION '000152: expected leads:read on PLATFORM_ADMIN (+ SALES if it exists), found total=% pa=% sales=% (sales_expected=%)', n_total, n_pa, n_sales, n_sales_expected;
   END IF;
-  RAISE NOTICE '000152: sys_leads + leads:read (PLATFORM_ADMIN only) + registry EXCLUDE.';
+  RAISE NOTICE '000152: sys_leads + leads:read (PLATFORM_ADMIN + SALES if present) + registry EXCLUDE.';
 END $$;

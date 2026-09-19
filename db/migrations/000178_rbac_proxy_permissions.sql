@@ -85,6 +85,26 @@ ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 -- invertire quella strategia (allowlist curata invece di "tutto meno 7") cambia
 -- l'accesso di TENANT_ADMIN su larga scala e non e' una scelta tecnica isolata.
 -- ---------------------------------------------------------------------------
+-- Mandato K, R-9 (000422, 2026-09-17): PLATFORM_OPERATOR legge observability — e' il
+-- senso stesso del ruolo (sola lettura sui 4 moduli di audit). E' un'ESTENSIONE
+-- DICHIARATA dell'audience (PROXY_EXTENDED_AUDIENCE, stesso nome della guardia in
+-- rbac-delete-permissions.test.ts), non l'assorbimento silenzioso che la DELETE qui
+-- sotto esiste per annullare — ma quella DELETE non lo sapeva distinguere, e ha tolto
+-- il grant a ogni ri-applicazione di 000178 dopo la 000422 (misurato su heuresys_ci,
+-- mandato K R-3, S1107 2026-09-19: PLATFORM_OPERATOR aveva provenance:read e
+-- notification:read ma non observability:read). Il test aveva gia' la dottrina giusta;
+-- questa migrazione — la fonte che DAVVERO cancella — no. Si ri-concede QUI, cosi' una
+-- ri-applicazione di 000178 la ripristina invece di limitarsi a non toglierla.
+INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
+SELECT r.auth_role_id, p.auth_permission_id
+  FROM sys.sys_auth_roles r
+  JOIN sys.sys_auth_permissions p ON p.auth_permission_code = 'observability:read'
+ WHERE r.auth_role_code = 'PLATFORM_OPERATOR'
+   AND NOT EXISTS (
+     SELECT 1 FROM sys.sys_auth_role_permissions rp
+      WHERE rp.auth_role_id = r.auth_role_id AND rp.auth_permission_id = p.auth_permission_id
+   );
+
 WITH mapping(new_code, source_code) AS (
   VALUES
     ('observability:read',             'tenant:create'),
@@ -93,16 +113,20 @@ WITH mapping(new_code, source_code) AS (
     ('tenant_materialization:execute', 'tenant:create')
 )
 DELETE FROM sys.sys_auth_role_permissions rp
- USING mapping m
-  JOIN sys.sys_auth_permissions np ON np.auth_permission_code = m.new_code
- WHERE rp.auth_permission_id = np.auth_permission_id
+ USING mapping m, sys.sys_auth_permissions np, sys.sys_auth_roles rr
+ WHERE np.auth_permission_code = m.new_code
+   AND rr.auth_role_id = rp.auth_role_id
+   AND rp.auth_permission_id = np.auth_permission_id
    AND NOT EXISTS (
      SELECT 1
        FROM sys.sys_auth_role_permissions srp
        JOIN sys.sys_auth_permissions sp ON sp.auth_permission_id = srp.auth_permission_id
       WHERE sp.auth_permission_code = m.source_code
         AND srp.auth_role_id = rp.auth_role_id
-   );
+   )
+   -- PROXY_EXTENDED_AUDIENCE: PLATFORM_OPERATOR/observability:read e' dichiarato, non
+   -- assorbito — vedi commento sopra.
+   AND NOT (m.new_code = 'observability:read' AND rr.auth_role_code = 'PLATFORM_OPERATOR');
 
 DO $$
 DECLARE n int; extra int;
@@ -111,18 +135,21 @@ BEGIN
    WHERE auth_permission_code IN
      ('observability:read','role_matrix:read','auth:sessions_read','tenant_materialization:execute');
 
-  -- post-condizione: nessuno dei 4 permessi puo' avere ruoli oltre la sorgente
+  -- post-condizione: nessuno dei 4 permessi puo' avere ruoli oltre la sorgente, tranne
+  -- le estensioni dichiarate (PROXY_EXTENDED_AUDIENCE: PLATFORM_OPERATOR/observability:read).
   SELECT count(*) INTO extra
     FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_permissions np ON np.auth_permission_id = rp.auth_permission_id
+    JOIN sys.sys_auth_roles rr ON rr.auth_role_id = rp.auth_role_id
    WHERE np.auth_permission_code IN ('observability:read','tenant_materialization:execute')
      AND rp.auth_role_id NOT IN (
        SELECT srp.auth_role_id FROM sys.sys_auth_role_permissions srp
        JOIN sys.sys_auth_permissions sp ON sp.auth_permission_id = srp.auth_permission_id
-       WHERE sp.auth_permission_code = 'tenant:create');
+       WHERE sp.auth_permission_code = 'tenant:create')
+     AND NOT (np.auth_permission_code = 'observability:read' AND rr.auth_role_code = 'PLATFORM_OPERATOR');
   IF extra > 0 THEN
-    RAISE EXCEPTION '000178: % grant oltre l''audience sorgente — il grant a tappeto ha vinto', extra;
+    RAISE EXCEPTION '000178: % grant oltre l''audience sorgente (estensioni dichiarate escluse) — il grant a tappeto ha vinto', extra;
   END IF;
 
-  RAISE NOTICE '000178: % permessi de-proxy presenti, audience allineate alla sorgente.', n;
+  RAISE NOTICE '000178: % permessi de-proxy presenti, audience allineate alla sorgente (+ PLATFORM_OPERATOR/observability:read dichiarato).', n;
 END $$;

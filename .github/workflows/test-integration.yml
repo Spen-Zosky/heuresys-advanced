@@ -114,6 +114,15 @@ jobs:
       - name: Seed test personas (idempotent, login-only)
         run: pnpm db:seed-test-admin
 
+      # Mandato K, R-3 (S1107, 2026-09-19): le identita' di collaudo
+      # (platform-operator@/sales@/dpo@/security-admin@collaudo.invalid, usate dai
+      # test di R-9/R-7/R-2) non erano mai state provisionate su heuresys_ci — solo
+      # sulla VM/gemello a mano da ogni sessione. Le tre suite fallivano con login
+      # 401 (misurato: run 35413279596). COLLAUDO_ACCESS_KEY_B64 viene dal drop-in
+      # systemd del runner (chiave dedicata a CI, isolata da quella di produzione).
+      - name: Seed collaudo-access identities (idempotent)
+        run: pnpm db:provision-collaudo
+
       # S1027: the occupation axis (mig 000206) ships its dataset as VERSIONED
       # CSVs + an idempotent fail-loud loader (db/data/occupations/) — unlike
       # the gitignored ESCO dump, heuresys_ci can carry the real catalog, so

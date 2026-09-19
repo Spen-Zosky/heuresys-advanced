@@ -16,7 +16,7 @@
  * appena costruita non ha ancora nessuno che possa fare nulla).
  */
 import { pool, withTransaction } from "../../db/client.js";
-import { isPlatform, perimetroClienti, puoVedereCliente, type ActorContext } from "../../lib/actor.js";
+import { perimetroClienti, puoVedereCliente, type ActorContext } from "../../lib/actor.js";
 import { ConflictError, ForbiddenError, NotFoundError } from "../../errors/index.js";
 import type {
   CreateTenantImportRunBody,
@@ -38,16 +38,26 @@ function visibile(a: ActorContext, r: TenantImportRun): boolean {
 }
 
 function tenantDiDestinazione(a: ActorContext, richiesto: string | undefined): string {
-  if (isPlatform(a)) {
+  const perimetro = perimetroClienti(a);
+  if (perimetro === undefined) {
+    // PLATFORM_ADMIN: nessun filtro, indica il tenant.
     const t = richiesto ?? a.tenantId;
     if (!t) throw new ForbiddenError("PLATFORM_ADMIN deve indicare tenantId", "TENANT_ID_REQUIRED");
     return t;
   }
-  if (!a.tenantId) throw new ForbiddenError("Serve un contesto di azienda");
-  if (richiesto && richiesto !== a.tenantId) {
-    throw new ForbiddenError("Si importa solo nella propria azienda", "CROSS_TENANT_IMPORT");
+  if (a.tenantId) {
+    // TENANT_ADMIN e simili: sempre e solo il proprio tenant.
+    if (richiesto && richiesto !== a.tenantId) {
+      throw new ForbiddenError("Si importa solo nella propria azienda", "CROSS_TENANT_IMPORT");
+    }
+    return a.tenantId;
   }
-  return a.tenantId;
+  // Ruolo di piattaforma assegnato (es. IMPLEMENTATION_CONSULTANT, D9=B): deve
+  // indicare un tenant nel proprio perimetro. 404 sul tenant fuori perimetro,
+  // per non confermarne l'esistenza (stesso criterio di puoVedereCliente altrove).
+  if (!richiesto) throw new ForbiddenError("Serve indicare tenantId", "TENANT_ID_REQUIRED");
+  if (!perimetro.has(richiesto)) throw new NotFoundError("Tenant");
+  return richiesto;
 }
 
 export const tenantImportRunsService = {

@@ -44,10 +44,10 @@ function toRun(r: Row): SeedAcquisitionRun {
 }
 
 export async function listRuns(
-  q: DbConnector, filter: { tenantId?: string; query: SeedAcquisitionRunListQuery },
+  q: DbConnector, filter: { tenantIds?: string[]; query: SeedAcquisitionRunListQuery },
 ): Promise<{ items: SeedAcquisitionRun[]; total: number }> {
   const where: string[] = []; const params: unknown[] = [];
-  if (filter.tenantId) { params.push(filter.tenantId); where.push(`seed_acquisition_run_tenant_id = $${params.length}`); }
+  if (filter.tenantIds) { params.push(filter.tenantIds); where.push(`seed_acquisition_run_tenant_id = ANY($${params.length})`); }
   if (filter.query.status) { params.push(filter.query.status); where.push(`seed_acquisition_run_status = $${params.length}`); }
   if (filter.query.search) { params.push(`%${filter.query.search}%`); where.push(`seed_acquisition_run_code ILIKE $${params.length}`); }
   const w = where.length ? `WHERE ${where.join(" AND ")}` : "";

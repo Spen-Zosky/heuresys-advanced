@@ -52,6 +52,11 @@ export const COLLAUDO_IDENTITIES = [
   // PLATFORM_OPERATOR/SALES di R-9): nasce su HEURESYS, l'assegnazione a RTL Bank via
   // sys_platform_user_tenant_assignments (R-0) e' un atto separato, fatto dal test.
   { email: "blueprint-manager@collaudo.invalid", displayName: "Collaudo Blueprint Manager", tenantCode: "HEURESYS", roleCode: "BLUEPRINT_MANAGER" },
+  // Mandato K, R-8 (2026-09-19): IMPLEMENTATION_CONSULTANT e' un ruolo di PIATTAFORMA
+  // (stesso schema di PLATFORM_OPERATOR/SALES/BLUEPRINT_MANAGER): nasce su HEURESYS,
+  // l'assegnazione a RTL Bank via sys_platform_user_tenant_assignments (R-0) e' un
+  // atto separato, fatto dal test.
+  { email: "implementation-consultant@collaudo.invalid", displayName: "Collaudo Implementation Consultant", tenantCode: "HEURESYS", roleCode: "IMPLEMENTATION_CONSULTANT" },
 ];
 
 export function isCollaudoIdentity(email) {

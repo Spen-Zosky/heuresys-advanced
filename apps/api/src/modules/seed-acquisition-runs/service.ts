@@ -3,7 +3,7 @@
  * Tenant-scoped. seed_acquisition:trigger for POST/PATCH.
  */
 import { pool } from "../../db/client.js";
-import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { perimetroClienti, puoVedereCliente, type ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
@@ -14,14 +14,16 @@ import type {
 import * as repo from "./repository.js";
 
 function visible(a: ActorContext, r: SeedAcquisitionRun): boolean {
-  if (isPlatform(a)) return true;
-  return a.tenantId !== null && r.tenantId === a.tenantId;
+  // Una corsa senza tenant (nata prima che l'azienda esistesse) e' visibile
+  // solo a chi non ha filtro (PLATFORM_ADMIN) — stesso criterio di tenant-blueprints (R-5).
+  if (r.tenantId === null) return perimetroClienti(a) === undefined;
+  return puoVedereCliente(a, r.tenantId);
 }
 
 export const seedAcquisitionRunsService = {
   async list(actor: ActorContext, query: SeedAcquisitionRunListQuery) {
-    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listRuns(pool, { tenantId, query });
+    const perimetro = perimetroClienti(actor);
+    return repo.listRuns(pool, { tenantIds: perimetro ? [...perimetro] : undefined, query });
   },
   async getById(actor: ActorContext, id: string): Promise<SeedAcquisitionRun> {
     const t = await repo.findRunById(pool, id);
@@ -29,14 +31,29 @@ export const seedAcquisitionRunsService = {
     return t;
   },
   async trigger(actor: ActorContext, body: CreateSeedAcquisitionRunBody): Promise<SeedAcquisitionRun> {
+    const perimetro = perimetroClienti(actor);
     let tenantId: string;
-    if (isPlatform(actor)) {
+    if (perimetro === undefined) {
+      // PLATFORM_ADMIN: nessun filtro, indica il tenant.
       const c = body.tenantId ?? actor.tenantId;
       if (!c) throw new ForbiddenError("PLATFORM_ADMIN must supply body.tenantId", "TENANT_ID_REQUIRED");
       tenantId = c;
-    } else {
-      if (!actor.tenantId) throw new ForbiddenError("Tenant context required");
+    } else if (actor.tenantId) {
+      // TENANT_ADMIN e simili: sempre e solo il proprio tenant.
       tenantId = actor.tenantId;
+    } else {
+      // Ruolo di piattaforma assegnato (es. IMPLEMENTATION_CONSULTANT, D9=B):
+      // deve indicare un tenant nel proprio perimetro. 404 (non 403) sul tenant
+      // fuori perimetro, per non confermarne l'esistenza (stesso criterio di
+      // puoVedereCliente altrove).
+      const c = body.tenantId;
+      if (!c) {
+        throw new ForbiddenError("Serve indicare tenantId", "TENANT_ID_REQUIRED");
+      }
+      if (!perimetro.has(c)) {
+        throw new NotFoundError("Tenant");
+      }
+      tenantId = c;
     }
     return repo.insertRun(pool, tenantId, body, actor.userId);
   },

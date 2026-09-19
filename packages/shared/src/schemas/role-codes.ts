@@ -62,6 +62,11 @@ export const ROLE_CODES = [
   // isOrgUnitManager, D8=A) via `position_organization_unit_id` (migration 000428).
   "RECRUITER",
   "HIRING_MANAGER",
+  // Mandato K, R-8 (2026-09-19): ruolo di piattaforma per il consulente esterno di
+  // avviamento — conduce le corse di ricerca (seed acquisition) e consulta i
+  // fascicoli sui soli clienti a cui e' stato assegnato (D9=B), mai tutti come
+  // PLATFORM_ADMIN. Non approva candidati ne' concede ruoli (migration 000431).
+  "IMPLEMENTATION_CONSULTANT",
 ] as const;
 
 export type RoleCode = (typeof ROLE_CODES)[number];

@@ -44,10 +44,10 @@ function toRow(r: Row): SeedCandidateRecord {
 }
 
 export async function listCandidates(
-  q: DbConnector, filter: { tenantId?: string; query: SeedCandidateRecordListQuery },
+  q: DbConnector, filter: { tenantIds?: string[]; query: SeedCandidateRecordListQuery },
 ): Promise<{ items: SeedCandidateRecord[]; total: number }> {
   const where: string[] = []; const params: unknown[] = [];
-  if (filter.tenantId) { params.push(filter.tenantId); where.push(`seed_candidate_record_tenant_id = $${params.length}`); }
+  if (filter.tenantIds) { params.push(filter.tenantIds); where.push(`seed_candidate_record_tenant_id = ANY($${params.length})`); }
   if (filter.query.runId) { params.push(filter.query.runId); where.push(`seed_candidate_record_run_id = $${params.length}`); }
   if (filter.query.domain) { params.push(filter.query.domain); where.push(`seed_candidate_record_domain = $${params.length}`); }
   if (filter.query.validationStatus) { params.push(filter.query.validationStatus); where.push(`seed_candidate_record_validation_status = $${params.length}`); }

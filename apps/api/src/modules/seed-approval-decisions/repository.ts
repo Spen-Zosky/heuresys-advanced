@@ -37,12 +37,12 @@ function toDec(r: Row): SeedApprovalDecision {
 }
 
 export async function listDecisions(
-  q: DbConnector, filter: { tenantId?: string; query: SeedApprovalDecisionListQuery },
+  q: DbConnector, filter: { tenantIds?: string[]; query: SeedApprovalDecisionListQuery },
 ): Promise<{ items: SeedApprovalDecision[]; total: number }> {
   const where: string[] = []; const params: unknown[] = [];
-  if (filter.tenantId) {
-    params.push(filter.tenantId);
-    where.push(`c.seed_candidate_record_tenant_id = $${params.length}`);
+  if (filter.tenantIds) {
+    params.push(filter.tenantIds);
+    where.push(`c.seed_candidate_record_tenant_id = ANY($${params.length})`);
   }
   if (filter.query.candidateId) { params.push(filter.query.candidateId); where.push(`d.seed_approval_decision_candidate_id = $${params.length}`); }
   if (filter.query.status) { params.push(filter.query.status); where.push(`d.seed_approval_decision_status = $${params.length}`); }

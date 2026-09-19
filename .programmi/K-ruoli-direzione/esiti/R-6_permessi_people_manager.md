@@ -13,8 +13,9 @@ del passo 56, più `compensation_intelligence:update` esplicito).
 L'euristica associa a UNA tabella TUTTI i permessi di scrittura/lettura del MODULO che la
 tocca — se un `repository.ts` scrive su piu' tabelle con classificazione diversa, o un
 `routes.ts` ha rotte per azioni molto diverse fra loro, l'unione porta dentro permessi che
-non appartengono al dominio "gestione operativa delle persone". **39 permessi ESCLUSI**, con
-motivo:
+non appartengono al dominio "gestione operativa delle persone". **46 permessi ESCLUSI**
+(39 dalla prima revisione + 7 trovati dal cancello di guardia al primo giro della
+migrazione — vedi nota sotto), con motivo:
 
 | permessi esclusi | dominio reale | perche' non a PEOPLE_MANAGER |
 |---|---|---|
@@ -33,8 +34,10 @@ motivo:
 | `tenant:create/delete/read/update` | piattaforma | gestione anagrafica clienti, non persone |
 | `tenant_materialization:execute` | avviamento, atto irreversibile | PLATFORM_ADMIN-only (#132 E29) |
 | `whistleblowing:manage` | **isolamento assoluto** | ADR-0036 §5: solo WHISTLEBLOWING_CUSTODIAN, **mai** la piattaforma — invariante non negoziabile |
+| `job_family:create/update/delete` | residuo G2 (000199) | l'audience di questo permesso DEVE essere identica a quella del suo sorgente (`tenant:create`, PLATFORM_ADMIN-only) — `rbac-delete-permissions.test.ts` lo verifica letteralmente. **Trovato dal test, non dalla revisione iniziale**: il primo giro della migrazione sul gemello e' andato rosso su questo esatto controllo |
+| `organization_unit_kpi_template:*`, `process_kpi_template:*` | residuo G2 (000199) | stesso meccanismo: sorgente `bpm_process:*`, che PEOPLE_MANAGER non detiene — stessa causa, stesso test, corretto nello stesso giro |
 
-## Elenco finale — 85 permessi
+## Elenco finale — 78 permessi
 
 ```
 analytics:view, approval:create, approval:decide, assessment:create, assessment:update,
@@ -44,17 +47,14 @@ compensation_intelligence:update, content:create, content:delete, content:publis
 content:update, dashboard:view, engagement_feedback:create, engagement_feedback:delete,
 engagement_feedback:update, evidence:read, gap_analysis:create, gap_analysis:delete,
 gap_analysis:read, gap_analysis:update, goal:create, goal:delete, goal:read, goal:update,
-insights:view, job_family:create, job_family:delete, job_family:update, job_role:create,
-job_role:update, kpi:create, kpi:delete, kpi:read, kpi:update, learning:create,
-learning:delete, learning:update, leave:read, mentorship:create, mentorship:delete,
-mentorship:read, mentorship:update, okr:create, okr:delete, okr:update, org_director:read,
-organization_unit:create, organization_unit:delete, organization_unit:update,
-organization_unit_kpi_template:delete, organization_unit_kpi_template:update,
+insights:view, job_role:create, job_role:update, kpi:create, kpi:delete, kpi:read, kpi:update,
+learning:create, learning:delete, learning:update, leave:read, mentorship:create,
+mentorship:delete, mentorship:read, mentorship:update, okr:create, okr:delete, okr:update,
+org_director:read, organization_unit:create, organization_unit:delete, organization_unit:update,
 organization_unit_processes:create, organization_unit_processes:delete, position:create,
-position:delete, position:read, position:update, predictions:read,
-process_kpi_template:delete, process_kpi_template:update, skill:create, skill:self_assess,
-skill:update, surveys:create, surveys:delete, surveys:read, surveys:update, talent:read,
-team:manage, timeline:read, training_initiative:create, training_initiative:update,
+position:delete, position:read, position:update, predictions:read, skill:create,
+skill:self_assess, skill:update, surveys:create, surveys:delete, surveys:read, surveys:update,
+talent:read, team:manage, timeline:read, training_initiative:create, training_initiative:update,
 user:create, user:delete, user:update, visualization:create, visualization:delete,
 visualization:update_layout
 ```

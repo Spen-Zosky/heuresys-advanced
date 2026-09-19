@@ -47,7 +47,7 @@ ON CONFLICT (auth_role_code) DO UPDATE
   SET auth_role_category = EXCLUDED.auth_role_category,
       auth_role_is_platform = EXCLUDED.auth_role_is_platform;
 
--- 2. Grant: gli 85 permessi rivisti a mano (esiti/R-6_permessi_people_manager.md).
+-- 2. Grant: i 78 permessi rivisti a mano (esiti/R-6_permessi_people_manager.md).
 INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
 SELECT r.auth_role_id, p.auth_permission_id
   FROM sys.sys_auth_roles r
@@ -86,9 +86,6 @@ SELECT r.auth_role_id, p.auth_permission_id
     ('goal:read'),
     ('goal:update'),
     ('insights:view'),
-    ('job_family:create'),
-    ('job_family:delete'),
-    ('job_family:update'),
     ('job_role:create'),
     ('job_role:update'),
     ('kpi:create'),
@@ -110,8 +107,6 @@ SELECT r.auth_role_id, p.auth_permission_id
     ('organization_unit:create'),
     ('organization_unit:delete'),
     ('organization_unit:update'),
-    ('organization_unit_kpi_template:delete'),
-    ('organization_unit_kpi_template:update'),
     ('organization_unit_processes:create'),
     ('organization_unit_processes:delete'),
     ('position:create'),
@@ -119,8 +114,6 @@ SELECT r.auth_role_id, p.auth_permission_id
     ('position:read'),
     ('position:update'),
     ('predictions:read'),
-    ('process_kpi_template:delete'),
-    ('process_kpi_template:update'),
     ('skill:create'),
     ('skill:self_assess'),
     ('skill:update'),
@@ -151,11 +144,17 @@ BEGIN
     FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
    WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL;
-  IF n_pm <> 85 THEN
-    RAISE EXCEPTION '000432: PEOPLE_MANAGER deve avere 85 permessi, ne ha %', n_pm;
+  IF n_pm <> 78 THEN
+    RAISE EXCEPTION '000432: PEOPLE_MANAGER deve avere 78 permessi, ne ha %', n_pm;
   END IF;
 
   -- I domini esclusi non devono comparire, per costruzione (typo guard sulla revisione).
+  -- job_family:* e organization_unit_kpi_template:*/process_kpi_template:* sono anch'essi
+  -- esclusi: sono residui G2 (000199) la cui audience DEVE essere identica a quella del
+  -- permesso sorgente (tenant:create / bpm_process:*, rispettivamente) — concederli a
+  -- PEOPLE_MANAGER senza concedere ANCHE il sorgente romperebbe quell'invariante
+  -- (rbac-delete-permissions.test.ts, "each G2-residual permission keeps the audience of
+  -- its source"), misurato in sessione dopo un primo giro rosso su job_family:create.
   SELECT count(*) INTO n_vietati
     FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
@@ -168,9 +167,12 @@ BEGIN
        OR p.auth_permission_code LIKE 'skill_taxonomy:%' OR p.auth_permission_code = 'skill_alias:manage'
        OR p.auth_permission_code = 'whistleblowing:manage' OR p.auth_permission_code = 'delegation:manage'
        OR p.auth_permission_code IN ('candidate:write','interview:feedback','offer:manage','requisition:manage','leads:update')
+       OR p.auth_permission_code LIKE 'job_family:%'
+       OR p.auth_permission_code LIKE 'organization_unit_kpi_template:%'
+       OR p.auth_permission_code LIKE 'process_kpi_template:%'
      );
   IF n_vietati <> 0 THEN
-    RAISE EXCEPTION '000432: PEOPLE_MANAGER non deve avere permessi di altri domini (avviamento/GDPR/recruiting/tassonomia/whistleblowing/commerciale), ne ha %', n_vietati;
+    RAISE EXCEPTION '000432: PEOPLE_MANAGER non deve avere permessi di altri domini (avviamento/GDPR/recruiting/tassonomia/whistleblowing/commerciale/G2-residui), ne ha %', n_vietati;
   END IF;
 
   -- HRMS_MANAGER resta intatto: nessun ritiro in questa migrazione (confronto
@@ -199,7 +201,7 @@ BEGIN
     RAISE EXCEPTION '000432: auth_role_is_platform=true deve restare su UN solo ruolo (PLATFORM_ADMIN), ne ha %', n_platform_true;
   END IF;
 
-  RAISE NOTICE '000432: PEOPLE_MANAGER creato (85 permessi, revisione a mano); 0 permessi di altri domini; HRMS_MANAGER intatto (% permessi); G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.', n_hrms;
+  RAISE NOTICE '000432: PEOPLE_MANAGER creato (78 permessi, revisione a mano); 0 permessi di altri domini; HRMS_MANAGER intatto (% permessi); G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.', n_hrms;
 END $$;
 
 DROP TABLE _hrms_prima;

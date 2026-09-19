@@ -17,7 +17,9 @@ import { senzaCacheDiSessione } from "./helpers/session-cache.js";
 senzaCacheDiSessione();
 
 const PEOPLE_MANAGER_EMAIL = "people-manager@collaudo.invalid";
-const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
+// Controprova: una persona REALE con HRMS_MANAGER su RTL_BANK (measured live —
+// non una persona di collaudo dedicata, il ruolo e' storico e non nato in R-6).
+const HRMS_MANAGER_EMAIL = "maria.colombo@rtl-bank.org";
 
 interface S { cookies: Map<string, string>; csrfToken: string; userId: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
@@ -31,14 +33,14 @@ async function login(t: TestApp, email: string, password: string): Promise<S> {
 }
 
 let suite: TestApp;
-let admin: S;
+let hrmsManager: S;
 let peopleManager: S;
 
 describe("mandato K, R-6 — PEOPLE_MANAGER", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     const key = readCollaudoKey();
-    admin = await login(suite, ADMIN_EMAIL, TEST_PERSONA_PASSWORD);
+    hrmsManager = await login(suite, HRMS_MANAGER_EMAIL, TEST_PERSONA_PASSWORD);
     peopleManager = await login(suite, PEOPLE_MANAGER_EMAIL, deriveCollaudoPassword(key, PEOPLE_MANAGER_EMAIL));
   });
 
@@ -70,8 +72,8 @@ describe("mandato K, R-6 — PEOPLE_MANAGER", () => {
 
   it("PEOPLE_MANAGER non ha permessi di avviamento/GDPR/recruiting/tassonomia/whistleblowing -> 403", async () => {
     const gdpr = await suite.app.inject({
-      method: "POST", url: "/v1/gdpr/retention/run",
-      headers: { cookie: ch(peopleManager.cookies), "x-csrf-token": peopleManager.csrfToken },
+      method: "GET", url: "/v1/gdpr/data-map",
+      headers: { cookie: ch(peopleManager.cookies) },
     });
     expect(gdpr.statusCode).toBe(403);
 
@@ -87,8 +89,8 @@ describe("mandato K, R-6 — PEOPLE_MANAGER", () => {
     const r = await suite.app.inject({
       method: "POST",
       url: "/v1/goals",
-      headers: { cookie: ch(admin.cookies), "x-csrf-token": admin.csrfToken },
-      payload: { title: "Obiettivo di controprova (PLATFORM_ADMIN)" },
+      headers: { cookie: ch(hrmsManager.cookies), "x-csrf-token": hrmsManager.csrfToken },
+      payload: { title: "Obiettivo di controprova (HRMS_MANAGER)" },
     });
     expect(r.statusCode).toBe(201);
   });

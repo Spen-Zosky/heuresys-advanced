@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**38 ADR** in `docs/architecture/adr/`.
+**40 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -46,6 +46,8 @@
 | [0038](adr/0038_the_database_is_self_sufficient.md) | Il database è autosufficiente: il brownfield è storia, non una fonte | ACCEPTED | Il database è autosufficiente: il brownfield è storia, non una fonte *(dal titolo)* | 2026-08-14 |
 | [0039](adr/0039_catalogo_profilo_e_voci_proprie_del_cliente.md) | Catalogo, profilo, voci proprie: dove vive ciò che un cliente può farsi su misura | ACCEPTED | Catalogo, profilo, voci proprie: dove vive ciò che un cliente può farsi su misura *(dal titolo)* | 2026-09-09 |
 | [0040](adr/0040_l_agente_legge_cio_che_legge_la_persona.md) | L'agente legge ciò che legge la persona; il freno si sposta dal tipo di dato all'uso | ACCEPTED | L'agente legge ciò che legge la persona; il freno si sposta dal tipo di dato all'uso *(dal titolo)* | 2026-09-14 |
+| [0041](adr/0041_direzione_del_dato.md) | La direzione del dato: invariante I23 | ACCETTATO | La direzione del dato: invariante I23 *(dal titolo)* | 2026-09-16 |
+| [0042](adr/0042_catena_del_semilavorato.md) | La catena del semilavorato: la piattaforma genera, il cliente possiede | ACCETTATO | La catena del semilavorato: la piattaforma genera, il cliente possiede *(dal titolo)* | 2026-09-16 |
 
 ## Conventions
 

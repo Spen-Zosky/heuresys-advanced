@@ -1,0 +1,82 @@
+{
+  "_nota": "Mandato K, passo 58, R-11 — matrice ruolo -> permessi, ground truth misurata sul database di produzione il 2026-09-19 (query reale, non ri-derivata qui). Ogni array e' VERBATIM dai codici concessi al ruolo, ESCLUSI i 9 permessi self-floor universali I17 (consent:manage:self, gdpr:export:self, leave:request:self, me:content:read, me:preferences:read, me:preferences:update, me:sessions:manage, surveys:respond:self, team:read:self) e, per PEOPLE_MANAGER, skill:delete (mirror self-healing da mig. 000177) — nessuno dei due e' una decisione del mandato K. Il test ruoli-nuovi-negativi.integration.test.ts legge SOLO da questo file per decidere atteso 403 vs non-403.",
+  "BLUEPRINT_MANAGER": [
+    "analytics:view", "approval:decide", "approval:read",
+    "blueprint:activate", "blueprint:delete", "blueprint:override", "blueprint:read",
+    "bpm_process:delete", "bpm_process:read", "bpm_process:update",
+    "content:read", "dashboard:view", "engagement_feedback:read",
+    "enterprise_typing:create", "enterprise_typing:delete", "enterprise_typing:read", "enterprise_typing:update",
+    "evidence:read", "goal:read", "insights:view", "job_role:read", "kpi:read", "learning:read", "leave:read",
+    "matching:read", "mentorship:read", "occupation_classification:read", "okr:read",
+    "operating_model:delete", "operating_model:read", "operating_model:update",
+    "organization_unit:list", "organization_unit:read",
+    "organization_unit_kpi_template:delete", "organization_unit_kpi_template:read", "organization_unit_kpi_template:update",
+    "organization_unit_processes:read", "position:list", "position:read", "predictions:read",
+    "process_kpi_template:delete", "process_kpi_template:read", "process_kpi_template:update",
+    "process_owner:read", "skill:read", "surveys:read", "talent:read", "tenant:read",
+    "tenant_blueprint:read", "tenant_blueprint:write", "timeline:read",
+    "training_initiative:list", "training_initiative:read", "user:list", "user:read",
+    "user_position_assignment:list", "user_position_assignment:read",
+    "visualization:create", "visualization:delete", "visualization:read", "visualization:update_layout"
+  ],
+  "DPO": [
+    "gdpr:erase", "gdpr:export", "gdpr:read", "gdpr:retention"
+  ],
+  "HIRING_MANAGER": [
+    "candidate:read", "interview:feedback", "requisition:read"
+  ],
+  "IMPLEMENTATION_CONSULTANT": [
+    "seed_acquisition:read", "seed_acquisition:trigger", "tenant:read", "tenant_blueprint:read"
+  ],
+  "PEOPLE_MANAGER": [
+    "analytics:view", "approval:create", "approval:decide",
+    "assessment:create", "assessment:update",
+    "branch:list", "branch:read", "capability:read",
+    "career_succession:create", "career_succession:delete", "career_succession:read", "career_succession:update",
+    "compensation_intelligence:read", "compensation_intelligence:update",
+    "content:create", "content:delete", "content:publish", "content:update",
+    "dashboard:view",
+    "engagement_feedback:create", "engagement_feedback:delete", "engagement_feedback:update",
+    "evidence:read",
+    "gap_analysis:create", "gap_analysis:delete", "gap_analysis:read", "gap_analysis:update",
+    "goal:create", "goal:delete", "goal:read", "goal:update",
+    "insights:view", "job_role:create", "job_role:update",
+    "kpi:create", "kpi:delete", "kpi:read", "kpi:update",
+    "learning:create", "learning:delete", "learning:update",
+    "leave:read",
+    "mentorship:create", "mentorship:delete", "mentorship:read", "mentorship:update",
+    "okr:create", "okr:delete", "okr:update",
+    "org_director:read",
+    "organization_unit:create", "organization_unit:delete", "organization_unit:update",
+    "organization_unit_processes:create", "organization_unit_processes:delete",
+    "position:create", "position:delete", "position:read", "position:update",
+    "predictions:read",
+    "skill:create", "skill:self_assess", "skill:update",
+    "surveys:create", "surveys:delete", "surveys:read", "surveys:update",
+    "talent:read", "team:manage", "timeline:read",
+    "training_initiative:create", "training_initiative:update",
+    "user:create", "user:delete", "user:update",
+    "visualization:create", "visualization:delete", "visualization:update_layout"
+  ],
+  "PLATFORM_OPERATOR": [
+    "notification:read", "observability:read", "provenance:read"
+  ],
+  "RECRUITER": [
+    "candidate:read", "candidate:write", "interview:feedback", "offer:manage",
+    "requisition:manage", "requisition:read"
+  ],
+  "SALES": [
+    "leads:read", "leads:update"
+  ],
+  "SECURITY_ADMIN": [
+    "auth:revoke_user", "auth:sessions_read",
+    "delegation:manage", "delegation:read",
+    "mfa_policy:manage", "mfa_policy:read",
+    "role:assign", "role_matrix:read"
+  ],
+  "TAXONOMY_STEWARD": [
+    "job_role:create", "job_role:read", "job_role:update",
+    "skill:create", "skill:delete", "skill:read", "skill:update",
+    "skill_alias:manage"
+  ]
+}

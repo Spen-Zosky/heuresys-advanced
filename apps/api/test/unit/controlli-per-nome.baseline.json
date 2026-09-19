@@ -371,24 +371,6 @@
   "roles_includes": 0,
   "totale": 2
  },
- "modules/seed-acquisition-runs/service.ts": {
-  "predicati": 3,
-  "stringhe_ruolo": 0,
-  "roles_includes": 0,
-  "totale": 3
- },
- "modules/seed-approval-decisions/service.ts": {
-  "predicati": 3,
-  "stringhe_ruolo": 0,
-  "roles_includes": 0,
-  "totale": 3
- },
- "modules/seed-candidate-records/service.ts": {
-  "predicati": 2,
-  "stringhe_ruolo": 0,
-  "roles_includes": 0,
-  "totale": 2
- },
  "modules/semantic-matching/service.ts": {
   "predicati": 10,
   "stringhe_ruolo": 4,
@@ -458,12 +440,6 @@
  "modules/tenant-import-runs/repository.ts": {
   "predicati": 0,
   "stringhe_ruolo": 1,
-  "roles_includes": 0,
-  "totale": 1
- },
- "modules/tenant-import-runs/service.ts": {
-  "predicati": 1,
-  "stringhe_ruolo": 0,
   "roles_includes": 0,
   "totale": 1
  },

@@ -15,6 +15,8 @@
   "dashboard_org:view": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "dashboard_platform:view": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "dashboard_process:view": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
+  "job-requisition:manage": "senza rotta dal 2026-09-19 (mandato K, R-10, mig. 000427): spezzato in requisition:manage/candidate:write/interview:feedback/offer:manage su 28 rotte; resta concesso ai plenipotenziari per compatibilita', nessuna rotta lo controlla piu'",
+  "job-requisition:read": "senza rotta dal 2026-09-19 (mandato K, R-10, mig. 000427): spezzato in requisition:read/candidate:read/interview:feedback su 28 rotte; resta concesso ai plenipotenziari per compatibilita', nessuna rotta lo controlla piu'",
   "dashboard_tenant:view": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "document:upload:self": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",
   "learning:browse_catalogue": "senza rotta al 2026-09-15 (stato di partenza congelato da S-2; da ritirare o da dotare di rotta in F4/F5)",

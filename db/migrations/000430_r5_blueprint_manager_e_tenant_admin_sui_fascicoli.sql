@@ -44,6 +44,14 @@ SELECT r.auth_role_id, p.auth_permission_id
    AND p.auth_permission_code IN ('tenant_blueprint:read', 'tenant_blueprint:write')
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
+-- Estensione allowlist TENANT_ADMIN (D-57, guardia rbac-tenant-admin-allowlist): la 000210
+-- cancella ogni grant a TENANT_ADMIN fuori allowlist a ogni riapplicazione della catena.
+-- TENANT_ADMIN-ALLOWLIST-EXTEND
+CREATE TEMP TABLE _ta_extend_000430(code text PRIMARY KEY);
+INSERT INTO _ta_extend_000430(code) VALUES
+    ('tenant_blueprint:read'),
+    ('tenant_blueprint:approve');
+
 INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
 SELECT r.auth_role_id, p.auth_permission_id
   FROM sys.sys_auth_roles r
@@ -51,6 +59,8 @@ SELECT r.auth_role_id, p.auth_permission_id
  WHERE r.auth_role_code = 'TENANT_ADMIN'
    AND p.auth_permission_code IN ('tenant_blueprint:read', 'tenant_blueprint:approve')
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
+
+DROP TABLE _ta_extend_000430;
 
 -- Self-healing: BLUEPRINT_MANAGER MAI tenant_blueprint:approve; TENANT_ADMIN MAI
 -- tenant_blueprint:write (E1/E3, il cliente approva e possiede, non scrive il contenuto).

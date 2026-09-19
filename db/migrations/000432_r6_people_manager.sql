@@ -26,6 +26,16 @@
 
 BEGIN;
 
+-- 0. Misura PRIMA di toccare nulla: HRMS_MANAGER non deve calare (nessun ritiro
+-- in questa migrazione). Confronto prima/dopo, non una soglia assoluta — misurato
+-- sul vivo il 2026-09-19: HRMS_MANAGER ha 167 permessi, non ">200" come una prima
+-- stesura di questa post-condizione assumeva senza aver misurato.
+CREATE TEMP TABLE _hrms_prima AS
+SELECT count(*) AS n
+  FROM sys.sys_auth_role_permissions rp
+  JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+ WHERE r.auth_role_code = 'HRMS_MANAGER' AND rp.revoked_at IS NULL;
+
 -- 1. Il ruolo, famiglia dichiarata subito (000414 la pretende).
 INSERT INTO sys.sys_auth_roles
   (auth_role_code, auth_role_name, auth_role_description, auth_role_is_platform, auth_role_category)
@@ -163,13 +173,14 @@ BEGIN
     RAISE EXCEPTION '000432: PEOPLE_MANAGER non deve avere permessi di altri domini (avviamento/GDPR/recruiting/tassonomia/whistleblowing/commerciale), ne ha %', n_vietati;
   END IF;
 
-  -- HRMS_MANAGER resta intatto: nessun ritiro in questa migrazione.
+  -- HRMS_MANAGER resta intatto: nessun ritiro in questa migrazione (confronto
+  -- prima/dopo dentro la stessa transazione, non una soglia assoluta).
   SELECT count(*) INTO n_hrms
     FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
    WHERE r.auth_role_code = 'HRMS_MANAGER' AND rp.revoked_at IS NULL;
-  IF n_hrms < 200 THEN
-    RAISE EXCEPTION '000432: HRMS_MANAGER sembra aver perso permessi (ne ha %, atteso >200) — questa migrazione non deve ritirare nulla', n_hrms;
+  IF n_hrms <> (SELECT n FROM _hrms_prima) THEN
+    RAISE EXCEPTION '000432: HRMS_MANAGER e'' cambiato (era %, ora %) — questa migrazione non deve ritirare ne'' aggiungere nulla', (SELECT n FROM _hrms_prima), n_hrms;
   END IF;
 
   IF EXISTS (SELECT 1 FROM sys.v_permessi_ritirati_a_ruoli_preesistenti) THEN
@@ -190,6 +201,8 @@ BEGIN
 
   RAISE NOTICE '000432: PEOPLE_MANAGER creato (85 permessi, revisione a mano); 0 permessi di altri domini; HRMS_MANAGER intatto (% permessi); G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.', n_hrms;
 END $$;
+
+DROP TABLE _hrms_prima;
 
 COMMIT;
 

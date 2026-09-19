@@ -294,7 +294,8 @@ VALUES
   ('sys_visualization_nodes', 'nativo', 'RATIFICATA X-1 (2026-09-19, regola ''il secondo scrittore conta solo se continua a scrivere''): regola meccanica: CRUD nativo E seed/migrazione coesistono'),
   ('sys_visualization_styles', 'nativo', 'RATIFICATA X-1 (2026-09-19, regola ''il secondo scrittore conta solo se continua a scrivere''): regola meccanica: CRUD nativo E seed/migrazione di backfill coesistono'),
   ('sys_whistleblowing_reports', 'ibrido', 'RATIFICATA X-1 (2026-09-19, regola ''il secondo scrittore conta solo se continua a scrivere''): regola meccanica: scrittore API (invio segnalazione whistleblowing) E scrittore di importazione (seed storia36) coesistono'),
-  ('sys_classificazione_direzione_dato', 'infrastruttura', 'NUOVA in questa stessa migrazione (000429): la tabella che dichiara la direzione del dato e'' essa stessa infrastruttura RBAC/governance, non dato del cliente — si classifica per non violare la propria invariante (I23), la vista v_tabelle_non_classificate la troverebbe altrimenti scoperta')
+  ('sys_classificazione_direzione_dato', 'infrastruttura', 'NUOVA in questa stessa migrazione (000429): la tabella che dichiara la direzione del dato e'' essa stessa infrastruttura RBAC/governance, non dato del cliente — si classifica per non violare la propria invariante (I23), la vista v_tabelle_non_classificate la troverebbe altrimenti scoperta'),
+  ('sys_conflitti_ibridi', 'infrastruttura', 'EMENDATO per X-4 (mandato K, mig 000446, D5=C): registro dei conflitti fra gesto nativo e valore importato. Governance RBAC, non dato del cliente: il controllo di QUESTO file gira PRIMA di ogni migrazione successiva (stesso motivo della riga sys_classificazione_direzione_dato sopra), quindi la tabella nuova va classificata qui e non dopo la 000446 che la crea')
 ON CONFLICT (tabella) DO UPDATE SET stato = EXCLUDED.stato, motivo = EXCLUDED.motivo;
 
 CREATE OR REPLACE VIEW sys.v_tabelle_non_classificate AS
@@ -311,8 +312,8 @@ DECLARE
   n_tot int; n_non_class int; n_ibrido int; n_nativo int; n_importato int; n_infra int;
 BEGIN
   SELECT count(*) INTO n_tot FROM sys.sys_classificazione_direzione_dato;
-  IF n_tot <> 252 THEN
-    RAISE EXCEPTION '000429: attese 252 righe di classificazione, trovate %', n_tot;
+  IF n_tot <> 253 THEN
+    RAISE EXCEPTION '000429: attese 253 righe di classificazione, trovate %', n_tot;
   END IF;
 
   SELECT count(*) INTO n_non_class FROM sys.v_tabelle_non_classificate;
@@ -324,12 +325,12 @@ BEGIN
   SELECT count(*) FILTER (WHERE stato = 'nativo')   INTO n_nativo   FROM sys.sys_classificazione_direzione_dato;
   SELECT count(*) FILTER (WHERE stato = 'importato') INTO n_importato FROM sys.sys_classificazione_direzione_dato;
   SELECT count(*) FILTER (WHERE stato = 'infrastruttura') INTO n_infra FROM sys.sys_classificazione_direzione_dato;
-  IF n_ibrido <> 76 OR n_nativo <> 51 OR n_importato <> 86 OR n_infra <> 39 THEN
-    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/51/86/39)',
+  IF n_ibrido <> 76 OR n_nativo <> 51 OR n_importato <> 86 OR n_infra <> 40 THEN
+    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/51/86/40)',
       n_ibrido, n_nativo, n_importato, n_infra;
   END IF;
 
-  RAISE NOTICE '000429: 252 tabelle classificate (76 ibrido, 51 nativo, 86 importato, 39 infrastruttura); v_tabelle_non_classificate a zero.';
+  RAISE NOTICE '000429: 253 tabelle classificate (76 ibrido, 51 nativo, 86 importato, 40 infrastruttura); v_tabelle_non_classificate a zero.';
 END $$;
 
 COMMIT;

@@ -48,6 +48,10 @@ export const COLLAUDO_IDENTITIES = [
   // file di test (D-52): qui nasce solo l'identita', il perimetro lo costruisce il test.
   { email: "recruiter@collaudo.invalid",         displayName: "Collaudo Recruiter",         tenantCode: "RTL_BANK", roleCode: "RECRUITER" },
   { email: "hiring-manager@collaudo.invalid",    displayName: "Collaudo Hiring Manager",    tenantCode: "RTL_BANK", roleCode: "HIRING_MANAGER" },
+  // Mandato K, R-5 (2026-09-19): BLUEPRINT_MANAGER e' un ruolo di PIATTAFORMA (E1, come
+  // PLATFORM_OPERATOR/SALES di R-9): nasce su HEURESYS, l'assegnazione a RTL Bank via
+  // sys_platform_user_tenant_assignments (R-0) e' un atto separato, fatto dal test.
+  { email: "blueprint-manager@collaudo.invalid", displayName: "Collaudo Blueprint Manager", tenantCode: "HEURESYS", roleCode: "BLUEPRINT_MANAGER" },
 ];
 
 export function isCollaudoIdentity(email) {

@@ -42,6 +42,9 @@ export const PLATFORM_MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
 export const PLATFORM_ASSIGNED_MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
   "PLATFORM_OPERATOR",
   "SALES",
+  // Mandato K, R-5 (2026-09-19, mig. 000430): vede solo i tenant_blueprint dei clienti
+  // a cui e' assegnato (D9=B), non tutti come PLATFORM_ADMIN.
+  "BLUEPRINT_MANAGER",
 ]);
 
 /**

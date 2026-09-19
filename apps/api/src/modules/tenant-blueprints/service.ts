@@ -2,15 +2,16 @@
  * apps/api/src/modules/tenant-blueprints/service.ts
  * #131 Tenant Builder P1, T5 — le regole del fascicolo.
  *
- * SUL MODELLO DI AUTORIZZAZIONE. Questo modulo non ha un filtro di scope per
- * tenant, e non e' una dimenticanza: i tre permessi `tenant_blueprint:*` sono
- * concessi al SOLO `PLATFORM_ADMIN` (decisioni E1 ed E6, migrazione 000300, che
- * lo verifica sulla riga intera e non solo sul ruolo appena servito). Il
- * permesso E' il cancello. Un fascicolo, per giunta, nasce PRIMA dell'azienda:
- * un filtro per tenant non avrebbe niente su cui filtrare durante una
- * trattativa. Il giorno in cui un ruolo di cliente ottenesse uno di questi
- * permessi, servirebbe qui uno scope — e quel giorno e' P2, dove nasce l'attore
- * che puo' vederli.
+ * SUL MODELLO DI AUTORIZZAZIONE. Fino al mandato K, R-5 (2026-09-19, mig. 000430) i tre
+ * permessi `tenant_blueprint:*` erano concessi al SOLO `PLATFORM_ADMIN` (decisioni E1 ed
+ * E6, migrazione 000300): il permesso ERA il cancello, senza bisogno di uno scope perche'
+ * nessun ruolo di cliente li aveva ancora. R-5 li estende a BLUEPRINT_MANAGER
+ * (`tenant_blueprint:read/write`, perimetro = clienti assegnati, D9=B) e TENANT_ADMIN
+ * (`tenant_blueprint:read/approve`, perimetro = il proprio tenant): `perimetroClienti(actor)`
+ * (I-G) filtra entrambi con la stessa funzione che gia' usa per PLATFORM_ADMIN (nessun
+ * filtro). Un fascicolo SENZA tenant (`linked=no`, nato prima dell'azienda, durante una
+ * trattativa) resta visibile solo a PLATFORM_ADMIN: non appartiene a nessun cliente
+ * assegnabile.
  *
  * Ogni rifiuto porta il suo codice: mai un errore nudo (§9 della specifica).
  */
@@ -22,7 +23,7 @@ import {
   UnprocessableEntityError,
   ValidationError,
 } from "../../errors/index.js";
-import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { isPlatform, perimetroClienti, type ActorContext } from "../../lib/actor.js";
 import * as repo from "./repository.js";
 import { proposeModel, isPublishedVariantVersion } from "./derivation.js";
 import { diffVersions, diffAgainstModelLatest } from "./diff.js";
@@ -113,14 +114,21 @@ async function esisteFascicolo(id: string): Promise<TenantBlueprint> {
 
 export const tenantBlueprintsService = {
   async list(
-    _a: ActorContext,
+    a: ActorContext,
     query: TenantBlueprintListQuery,
   ): Promise<{ items: TenantBlueprint[]; total: number }> {
-    return repo.listBlueprints(pool, query);
+    const perimetro = perimetroClienti(a);
+    return repo.listBlueprints(pool, query, perimetro ? [...perimetro] : undefined);
   },
 
-  async getById(_a: ActorContext, id: string): Promise<TenantBlueprintDetail> {
+  async getById(a: ActorContext, id: string): Promise<TenantBlueprintDetail> {
     const b = await esisteFascicolo(id);
+    const perimetro = perimetroClienti(a);
+    // Un fascicolo senza tenant non appartiene a nessun cliente assegnabile: fuori
+    // perimetro per chiunque non sia PLATFORM_ADMIN. 404, non 403 (I-G).
+    if (perimetro && (!b.tenantId || !perimetro.has(b.tenantId))) {
+      throw new NotFoundError("Fascicolo non trovato");
+    }
     const versions = await repo.listVersions(pool, id);
     return { ...b, versions };
   },

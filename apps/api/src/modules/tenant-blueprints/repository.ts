@@ -116,6 +116,10 @@ function toVersion(r: VersionRow): TenantBlueprintVersion {
 export async function listBlueprints(
   db: Db,
   q: TenantBlueprintListQuery,
+  /** Mandato K, R-5 (D9=B): perimetro di clienti dell'attore — `undefined` = nessun
+   *  filtro (PLATFORM_ADMIN). Un fascicolo senza tenant (`linked=no`) resta fuori dal
+   *  perimetro di chi non e' PLATFORM_ADMIN: non appartiene a nessun cliente assegnabile. */
+  tenantIds?: string[],
 ): Promise<{ items: TenantBlueprint[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
@@ -126,6 +130,10 @@ export async function listBlueprints(
   if (q.tenantId) {
     params.push(q.tenantId);
     where.push(`tenant_blueprint_tenant_id = $${params.length}`);
+  }
+  if (tenantIds) {
+    params.push(tenantIds);
+    where.push(`tenant_blueprint_tenant_id = ANY($${params.length})`);
   }
   if (q.linked === "yes") where.push(`tenant_blueprint_tenant_id IS NOT NULL`);
   if (q.linked === "no") where.push(`tenant_blueprint_tenant_id IS NULL`);

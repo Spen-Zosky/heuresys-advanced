@@ -1,43 +1,43 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-15T20:38:27Z da docs/kb/tools/build_index.py
+# generato: 2026-09-19T17:32:16Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-15T20:38:27Z"
-  total_files: 3611
+  generated_at: "2026-09-19T17:32:16Z"
+  total_files: 3718
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 39
-    api-core: 34
-    api-module: 391
+    ADR: 41
+    api-core: 36
+    api-module: 394
     ci: 19
     claude-config: 37
-    config: 306
+    config: 335
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 416
+    db-migration: 443
     db-other: 8
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 725
+    doc-canonical: 751
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 119
+    shared-schema: 120
     showcase-source: 13
-    test: 431
+    test: 446
     ux-design-archive: 80
-    web-source: 256
+    web-source: 258
   status_counts:
     archive: 593
     external-archive: 50
-    live: 2968
+    live: 3075
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -273,6 +273,18 @@ files:
     category: ADR
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0041_direzione_del_dato.md'
+    root: repo
+    rel: 'docs/architecture/adr/0041_direzione_del_dato.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0042_catena_del_semilavorato.md'
+    root: repo
+    rel: 'docs/architecture/adr/0042_catena_del_semilavorato.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\app.ts'
     root: repo
     rel: 'apps/api/src/app.ts'
@@ -399,6 +411,12 @@ files:
     category: api-core
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\mandati.ts'
+    root: repo
+    rel: 'apps/api/src/lib/scope/mandati.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\mask.ts'
     root: repo
     rel: 'apps/api/src/lib/scope/mask.ts'
@@ -420,6 +438,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\profilo.ts'
     root: repo
     rel: 'apps/api/src/lib/scope/profilo.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\recruiting.ts'
+    root: repo
+    rel: 'apps/api/src/lib/scope/recruiting.ts'
     category: api-core
     status: live
     provenance: git-tracked
@@ -1845,6 +1869,24 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\platform-tenant-assignments\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/platform-tenant-assignments/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\platform-tenant-assignments\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/platform-tenant-assignments/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\platform-tenant-assignments\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/platform-tenant-assignments/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\position-career-paths\repository.ts'
     root: repo
     rel: 'apps/api/src/modules/position-career-paths/repository.ts'
@@ -3207,9 +3249,33 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-11_matrice.json'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-11_matrice.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-3_permessi_dichiarati.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-3_permessi_dichiarati.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\REGISTRO_SCOPERTE_addendum_r10.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/REGISTRO_SCOPERTE_addendum_r10.txt'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\controlli-per-nome.baseline.json'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/controlli-per-nome.baseline.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\A0_output_202609170220.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/A0_output_202609170220.txt'
     category: config
     status: live
     provenance: git-tracked
@@ -3228,6 +3294,48 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.5_controprova.txt'
     root: repo
     rel: '.programmi/K-ruoli-direzione/evidenze/F0.5_controprova.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F4.0_controprova_db_ROSSO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/F4.0_controprova_db_ROSSO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F4.0_controprova_db_VERDE.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/F4.0_controprova_db_VERDE.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F4.0_controprova_unit_ROSSO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/F4.0_controprova_unit_ROSSO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F4.0_controprova_unit_VERDE.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/F4.0_controprova_unit_VERDE.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F4.0_verify_gate_run.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/F4.0_verify_gate_run.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F4.0_verify_gate_run2.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/F4.0_verify_gate_run2.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F4.0_verify_gate_run3.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/F4.0_verify_gate_run3.txt'
     category: config
     status: live
     provenance: git-tracked
@@ -3291,6 +3399,48 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\R-2_202609190000\passo40_ROSSO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/R-2_202609190000/passo40_ROSSO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\R-2_202609190000\rollback_pronto_000424.sql'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/R-2_202609190000/rollback_pronto_000424.sql'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\R1_passo34_test_api_full_202609161343.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/R1_passo34_test_api_full_202609161343.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\R1_verify_gate_run.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/R1_verify_gate_run.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\R1_verify_gate_run2.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/R1_verify_gate_run2.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\R1_verify_gate_run3.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/R1_verify_gate_run3.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\R1_verify_gate_run4.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/R1_verify_gate_run4.txt'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\S-1_202609152117.txt'
     root: repo
     rel: '.programmi/K-ruoli-direzione/evidenze/S-1_202609152117.txt'
@@ -3336,6 +3486,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\baseline_202609142318.txt'
     root: repo
     rel: '.programmi/K-ruoli-direzione/evidenze/baseline_202609142318.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\baseline_202609191456.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/baseline_202609191456.txt'
     category: config
     status: live
     provenance: git-tracked
@@ -3579,6 +3735,42 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F3_32_202609160217\_LANCIO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F3_32_202609160217/_LANCIO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F3_32_202609160217\_VERIFICATO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F3_32_202609160217/_VERIFICATO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F3_32b_202609160241\_LANCIO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F3_32b_202609160241/_LANCIO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F3_32b_202609160241\_VERIFICATO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F3_32b_202609160241/_VERIFICATO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F3_32c_202609162236\_LANCIO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F3_32c_202609162236/_LANCIO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_F3_32c_202609162236\_VERIFICATO.txt'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/evidenze/wf_F3_32c_202609162236/_VERIFICATO.txt'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\wf_I-E_22_202609150331\_ABBANDONATO.txt'
     root: repo
     rel: '.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331/_ABBANDONATO.txt'
@@ -3735,6 +3927,18 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\misura_a0_margine.py'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/tools/misura_a0_margine.py'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\misura_i_b.py'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/tools/misura_i_b.py'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\misura_ib.py'
     root: repo
     rel: '.programmi/K-ruoli-direzione/tools/misura_ib.py'
@@ -3750,6 +3954,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\misura_k.py'
     root: repo
     rel: '.programmi/K-ruoli-direzione/tools/misura_k.py'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\tools\permessi_da_classificazione.py'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/tools/permessi_da_classificazione.py'
     category: config
     status: live
     provenance: git-tracked
@@ -4056,6 +4266,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\package.json'
     root: repo
     rel: 'apps/api/package.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\collaudo-access.d.mts'
+    root: repo
+    rel: 'apps/api/scripts/collaudo-access.d.mts'
     category: config
     status: live
     provenance: git-tracked
@@ -9567,6 +9783,168 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000420_r1_colonne_di_ritiro_e_guardia_gd2.sql'
+    root: repo
+    rel: 'db/migrations/000420_r1_colonne_di_ritiro_e_guardia_gd2.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000421_r0_asse_utente_di_piattaforma_assegnato.sql'
+    root: repo
+    rel: 'db/migrations/000421_r0_asse_utente_di_piattaforma_assegnato.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000422_r9_platform_operator_e_sales.sql'
+    root: repo
+    rel: 'db/migrations/000422_r9_platform_operator_e_sales.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000423_r2_dpo_nucleo_gdpr.sql'
+    root: repo
+    rel: 'db/migrations/000423_r2_dpo_nucleo_gdpr.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000425_r7_security_admin.sql'
+    root: repo
+    rel: 'db/migrations/000425_r7_security_admin.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000426_r3_taxonomy_steward.sql'
+    root: repo
+    rel: 'db/migrations/000426_r3_taxonomy_steward.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000427_r10_permessi_recruiting_granulari.sql'
+    root: repo
+    rel: 'db/migrations/000427_r10_permessi_recruiting_granulari.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000428_r4_recruiter_e_hiring_manager.sql'
+    root: repo
+    rel: 'db/migrations/000428_r4_recruiter_e_hiring_manager.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000429_x1_classificazione_direzione_dato.sql'
+    root: repo
+    rel: 'db/migrations/000429_x1_classificazione_direzione_dato.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000430_r5_blueprint_manager_e_tenant_admin_sui_fascicoli.sql'
+    root: repo
+    rel: 'db/migrations/000430_r5_blueprint_manager_e_tenant_admin_sui_fascicoli.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000431_r8_implementation_consultant.sql'
+    root: repo
+    rel: 'db/migrations/000431_r8_implementation_consultant.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000432_r6_people_manager.sql'
+    root: repo
+    rel: 'db/migrations/000432_r6_people_manager.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000433_x2_origine_dato_sys_user_contracts.sql'
+    root: repo
+    rel: 'db/migrations/000433_x2_origine_dato_sys_user_contracts.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000434_x2_origine_dato_sys_user_pay_slips.sql'
+    root: repo
+    rel: 'db/migrations/000434_x2_origine_dato_sys_user_pay_slips.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000435_x2_origine_dato_sys_user_identity_documents.sql'
+    root: repo
+    rel: 'db/migrations/000435_x2_origine_dato_sys_user_identity_documents.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000436_x2_origine_dato_sys_position_compensation_profiles.sql'
+    root: repo
+    rel: 'db/migrations/000436_x2_origine_dato_sys_position_compensation_profiles.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000437_x2_origine_dato_sys_time_off_requests.sql'
+    root: repo
+    rel: 'db/migrations/000437_x2_origine_dato_sys_time_off_requests.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000438_x2_origine_dato_sys_time_off_balances.sql'
+    root: repo
+    rel: 'db/migrations/000438_x2_origine_dato_sys_time_off_balances.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000439_x2_origine_dato_sys_leave_balance_transactions.sql'
+    root: repo
+    rel: 'db/migrations/000439_x2_origine_dato_sys_leave_balance_transactions.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000440_x2_origine_dato_sys_compensation_recommendations.sql'
+    root: repo
+    rel: 'db/migrations/000440_x2_origine_dato_sys_compensation_recommendations.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000441_x2_origine_dato_sys_payroll_handoff_records.sql'
+    root: repo
+    rel: 'db/migrations/000441_x2_origine_dato_sys_payroll_handoff_records.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000442_x2_origine_dato_sys_leave_accrual_rules.sql'
+    root: repo
+    rel: 'db/migrations/000442_x2_origine_dato_sys_leave_accrual_rules.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000443_x2_origine_dato_sys_compensation_bands.sql'
+    root: repo
+    rel: 'db/migrations/000443_x2_origine_dato_sys_compensation_bands.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000444_x2_origine_dato_sys_overtime.sql'
+    root: repo
+    rel: 'db/migrations/000444_x2_origine_dato_sys_overtime.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000445_x3_registro_riconciliato_per_vista.sql'
+    root: repo
+    rel: 'db/migrations/000445_x3_registro_riconciliato_per_vista.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000446_x4_regola_degli_ibridi.sql'
+    root: repo
+    rel: 'db/migrations/000446_x4_regola_degli_ibridi.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000447_x5_sentinella_della_direzione.sql'
+    root: repo
+    rel: 'db/migrations/000447_x5_sentinella_della_direzione.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -11505,6 +11883,18 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\A0_margine_del_pavimento.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/A0_margine_del_pavimento.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\A5_costo_di_un_ruolo.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/A5_costo_di_un_ruolo.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.2_censimento_C1.md'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/F0.2_censimento_C1.md'
@@ -11526,6 +11916,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.6_migrazioni.md'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/F0.6_migrazioni.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F3_terzo_giro_W3.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/F3_terzo_giro_W3.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11571,6 +11967,72 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\INVENTARIO_stash.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/INVENTARIO_stash.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-0.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-0.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-0_porte.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-0_porte.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-10_rotte.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-10_rotte.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-1_passo34.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-1_passo34.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-2.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-2.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-2_domanda_masking.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-2_domanda_masking.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-3.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-3.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-6_permessi_people_manager.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-6_permessi_people_manager.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-7.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-7.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-9.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-9.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-14.md'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-14.md'
@@ -11583,6 +12045,54 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-16.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-16.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-17-S1105.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-17-S1105.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-17.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-17.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-18-S1106.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-18-S1106.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-19-S1107.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-19-S1107.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-19-S1108.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-19-S1108.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-19-S1109.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-19-S1109.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-19-S1112.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-19-S1112.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\REGISTRO_SCOPERTE.md'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/REGISTRO_SCOPERTE.md'
@@ -11592,6 +12102,24 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RISPOSTE_ENZO.md'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/RISPOSTE_ENZO.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\X-2_attendance.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/X-2_attendance.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\X-2_tabelle.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/X-2_tabelle.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\X-6.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/X-6.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11826,6 +12354,12 @@ files:
   - path: 'D:\heuresys-advanced\.zp\PROGRESS.md'
     root: repo
     rel: '.zp/PROGRESS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\AGENTS.md'
+    root: repo
+    rel: 'AGENTS.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -16725,6 +17259,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\platform-tenant-assignments.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/platform-tenant-assignments.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\position-career-paths.ts'
     root: repo
     rel: 'packages/shared/src/schemas/position-career-paths.ts'
@@ -17101,6 +17641,12 @@ files:
     root: repo
     rel: 'apps/showcase/tsconfig.json'
     category: showcase-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\_helpers\r11-route-registry.ts'
+    root: repo
+    rel: 'apps/api/test/_helpers/r11-route-registry.ts'
+    category: test
     status: live
     provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\activity-classification-mappings.integration.test.ts'
@@ -17499,6 +18045,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\dpo.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/dpo.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\drift-check.integration.test.ts'
     root: repo
     rel: 'apps/api/test/drift-check.integration.test.ts'
@@ -17742,6 +18294,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\hrms-plenipotentiary.integration.test.ts'
     root: repo
     rel: 'apps/api/test/hrms-plenipotentiary.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\implementation-consultant.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/implementation-consultant.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -18195,6 +18753,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\people-manager.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/people-manager.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\per-person-mask.integration.test.ts'
     root: repo
     rel: 'apps/api/test/per-person-mask.integration.test.ts'
@@ -18222,6 +18786,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\pg-pool-resilience.test.ts'
     root: repo
     rel: 'apps/api/test/pg-pool-resilience.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\platform-operator-and-sales.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/platform-operator-and-sales.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\platform-tenant-assignments.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/platform-tenant-assignments.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -18315,6 +18891,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\r5-blueprint-manager-tenant-admin.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/r5-blueprint-manager-tenant-admin.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\rbac-cache-boot-retry.test.ts'
     root: repo
     rel: 'apps/api/test/rbac-cache-boot-retry.test.ts'
@@ -18324,6 +18906,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\rbac-delete-permissions.test.ts'
     root: repo
     rel: 'apps/api/test/rbac-delete-permissions.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\rbac-revoked-permission-filter.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/rbac-revoked-permission-filter.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -18393,6 +18981,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\recruiting-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/recruiting-scope.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\reference-sync-esco-skill-hierarchy.integration.test.ts'
     root: repo
     rel: 'apps/api/test/reference-sync-esco-skill-hierarchy.integration.test.ts'
@@ -18426,6 +19020,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\review-cycles.integration.test.ts'
     root: repo
     rel: 'apps/api/test/review-cycles.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\role-codes-db-drift.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/role-codes-db-drift.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\ruoli-nuovi-negativi.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/ruoli-nuovi-negativi.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -18474,6 +19080,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\section-tabs-drift.test.ts'
     root: repo
     rel: 'apps/api/test/section-tabs-drift.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\security-admin.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/security-admin.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -18663,6 +19275,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\taxonomy-steward.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/taxonomy-steward.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\teams-functional-axis.integration.test.ts'
     root: repo
     rel: 'apps/api/test/teams-functional-axis.integration.test.ts'
@@ -18789,6 +19407,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\perimetro-clienti.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/perimetro-clienti.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\unit\query-boolean-filters.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/query-boolean-filters.unit.test.ts'
@@ -18846,6 +19470,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\unit\reward-engine.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/reward-engine.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\role-codes-drift.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/role-codes-drift.unit.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -20184,6 +20814,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\.gitkeep'
     root: repo
     rel: 'apps/web/.gitkeep'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\AGENTS.md'
+    root: repo
+    rel: 'apps/web/AGENTS.md'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\CLAUDE.md'
+    root: repo
+    rel: 'apps/web/CLAUDE.md'
     category: web-source
     status: live
     provenance: git-tracked

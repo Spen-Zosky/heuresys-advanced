@@ -91,9 +91,10 @@ BEGIN
     FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
-   WHERE p.auth_permission_resource = 'tenant_blueprint' AND r.auth_role_code <> 'PLATFORM_ADMIN';
+   WHERE p.auth_permission_resource = 'tenant_blueprint'
+     AND r.auth_role_code NOT IN ('PLATFORM_ADMIN', 'BLUEPRINT_MANAGER', 'TENANT_ADMIN');
   IF n_altri <> 0 THEN
-    RAISE EXCEPTION '000300: % concessioni di tenant_blueprint fuori da PLATFORM_ADMIN', n_altri;
+    RAISE EXCEPTION '000300: % concessioni di tenant_blueprint fuori da PLATFORM_ADMIN/BLUEPRINT_MANAGER/TENANT_ADMIN (R-5, mig 000430)', n_altri;
   END IF;
 
   -- L'effetto della revoca lo produce la 000210; QUI si verifica che sia

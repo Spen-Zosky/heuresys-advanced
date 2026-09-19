@@ -43,13 +43,16 @@ ON CONFLICT (auth_permission_code) DO NOTHING;
 -- I ruoli: quelli che gia' vedono il cruscotto delle filiali, piu' quelli che governano
 -- l'organizzazione del cliente. Derivati, non elencati a caso — e la post-condizione verifica
 -- che BRANCH_MANAGER ci sia, perche' senza di lui il permesso non servirebbe a chi lo usa.
+-- Mandato K, R-6 (mig. 000432): PEOPLE_MANAGER e' lo stesso mandato HR tenant-wide di
+-- TENANT_ADMIN/HRMS_MANAGER — governa l'organizzazione del cliente, legge le squadre — quindi
+-- e' un settimo titolare legittimo, non un'estensione fuori dominio. Emendato QUI (ADR-0035).
 INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
 SELECT r.auth_role_id, p.auth_permission_id
   FROM sys.sys_auth_roles r
   CROSS JOIN sys.sys_auth_permissions p
  WHERE p.auth_permission_code IN ('branch:list', 'branch:read')
    AND r.auth_role_code IN ('PLATFORM_ADMIN', 'TENANT_ADMIN', 'HRMS_MANAGER',
-                            'CEO', 'MANAGER', 'BRANCH_MANAGER')
+                            'CEO', 'MANAGER', 'BRANCH_MANAGER', 'PEOPLE_MANAGER')
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
 -- ── L'ALLOWLIST DI TENANT_ADMIN, che NON e' una formalita' ──────────────────────────────
@@ -104,9 +107,9 @@ BEGIN
   SELECT count(*) INTO n_grant FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    WHERE p.auth_permission_resource = 'branch';
-  IF n_grant <> 12 THEN
-    RAISE EXCEPTION '000404: le concessioni sui permessi branch sono % invece di 12 '
-      '(6 ruoli x 2 permessi)', n_grant;
+  IF n_grant <> 14 THEN
+    RAISE EXCEPTION '000404: le concessioni sui permessi branch sono % invece di 14 '
+      '(7 ruoli x 2 permessi, PEOPLE_MANAGER incluso da R-6 mig. 000432)', n_grant;
   END IF;
 
   -- Chi fa il mestiere deve avere il permesso: senza BRANCH_MANAGER questa voce non servirebbe
@@ -133,7 +136,7 @@ BEGIN
 
   -- CIO' CHE NON DOVEVA CAMBIARE: le filiali non si toccano, questo file crea permessi.
   SELECT count(*) INTO n_filiali FROM sys.sys_branches;
-  RAISE NOTICE '000404 ok — 2 permessi branch, % concessioni su 6 ruoli, % filiali intatte, '
+  RAISE NOTICE '000404 ok — 2 permessi branch, % concessioni su 7 ruoli, % filiali intatte, '
     'copertura EN a zero.', n_grant, n_filiali;
 END
 $post$;

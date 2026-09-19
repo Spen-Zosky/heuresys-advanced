@@ -135,7 +135,20 @@ SELECT r.auth_role_id, p.auth_permission_id
    )
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
--- 3. Post-condizione: la migrazione fallisce se qualcosa non torna.
+-- 3. Le traduzioni inglesi (guardia 000255: copertura EN totale su ruoli/permessi; qui
+--    nessun permesso nuovo, solo il ruolo).
+INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+SELECT 'sys_auth_roles', r.auth_role_id, x.campo, 'en', x.testo, 'LLM'
+  FROM sys.sys_auth_roles r
+  JOIN (VALUES
+    ('PEOPLE_MANAGER', 'name', 'People Manager'),
+    ('PEOPLE_MANAGER', 'description',
+     'Operational people management: write access to every NATIVE/HYBRID table of the X-1 classification (goals, skills, learning, career, engagement, KPIs, positions, org chart...) + read access to IMPORTED tables from the legacy system. Tenant-wide HR mandate (HR_MANDATED_ROLES), like TENANT_ADMIN/HRMS_MANAGER. Does not grant roles, does not touch GDPR/onboarding/recruiting/taxonomy/whistleblowing (other roles'' domains). Born mandato K, R-6, 2026-09-19.')
+  ) AS x(codice, campo, testo) ON x.codice = r.auth_role_code
+ON CONFLICT (entity_table, entity_id, field, locale)
+  DO UPDATE SET text = EXCLUDED.text, source = 'MANUAL', updated_at = now();
+
+-- 4. Post-condizione: la migrazione fallisce se qualcosa non torna.
 DO $$
 DECLARE
   n_pm int; n_vietati int; n_senza_cat int; n_platform_true int; n_hrms int;

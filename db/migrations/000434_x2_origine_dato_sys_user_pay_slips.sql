@@ -11,7 +11,7 @@
 -- Idempotente. Rollback: nullable + commento "ritirata", mai DROP (ADR-0035).
 
 ALTER TABLE sys.sys_user_pay_slips
-  ADD COLUMN IF NOT EXISTS origine_dato varchar(16) NOT NULL DEFAULT 'MATERIALIZZAZIONE';
+  ADD COLUMN IF NOT EXISTS origine_dato varchar(32) NOT NULL DEFAULT 'MATERIALIZZAZIONE';
 
 DO $$
 BEGIN

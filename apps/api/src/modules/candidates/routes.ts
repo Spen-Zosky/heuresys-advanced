@@ -2,8 +2,10 @@
  * apps/api/src/modules/candidates/routes.ts
  * 4 rotte sotto /v1/candidates (#54 F3, terza fetta).
  *
- * Permessi riusati dalla richiesta (`job-requisition:read` / `:manage`): il recruiting e'
- * un ciclo solo, e chi lo conduce lo conduce per intero. Separarli dopo e' additivo.
+ * Permessi propri del dominio candidato (`candidate:read` / `candidate:write`), separati da
+ * `job-requisition:*` (mandato K, R-10, 2026-09-19, mig. 000427): il ciclo del recruiting
+ * restava un permesso solo per costruzione, non per necessita' — l'estensione era gia'
+ * dichiarata additiva quando questo modulo e' nato.
  *
  * ⚠ Nessuna DELETE, e qui la ragione e' piu' forte che altrove: cancellare un candidato
  * cancellerebbe le sue candidature, i suoi colloqui e i giudizi che li accompagnano. La
@@ -29,7 +31,7 @@ export const candidatesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/",
     {
-      preHandler: [requirePermission("job-requisition:read")],
+      preHandler: [requirePermission("candidate:read")],
       schema: {
         querystring: CandidateListQuerySchema,
         response: { 200: CandidateListResponseSchema },
@@ -41,7 +43,7 @@ export const candidatesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/:id",
     {
-      preHandler: [requirePermission("job-requisition:read")],
+      preHandler: [requirePermission("candidate:read")],
       schema: { params: CandidateIdParamSchema, response: { 200: CandidateSchema } },
     },
     async (req) => candidatesService.getById(actor(req), req.params.id),
@@ -50,7 +52,7 @@ export const candidatesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
     "/",
     {
-      preHandler: [app.verifyCsrf, requirePermission("job-requisition:manage")],
+      preHandler: [app.verifyCsrf, requirePermission("candidate:write")],
       schema: { body: CandidateCreateBodySchema, response: { 201: CandidateSchema } },
     },
     async (req, reply) => {
@@ -62,7 +64,7 @@ export const candidatesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.patch(
     "/:id",
     {
-      preHandler: [app.verifyCsrf, requirePermission("job-requisition:manage")],
+      preHandler: [app.verifyCsrf, requirePermission("candidate:write")],
       schema: {
         params: CandidateIdParamSchema,
         body: CandidateUpdateBodySchema,

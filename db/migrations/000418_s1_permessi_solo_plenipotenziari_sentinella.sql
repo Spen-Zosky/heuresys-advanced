@@ -151,6 +151,23 @@ VALUES ('platform_tenant_assignment:manage',
         DATE '2026-09-16')
 ON CONFLICT (permission_code) DO NOTHING;
 
+-- [mandato K, R-10, mig 000427] job-requisition:read/:manage (gia' in allowlist sopra) sono
+-- stati spezzati in sei permessi di dominio: requisition:read/:manage, candidate:read/:write,
+-- interview:feedback, offer:manage. Sono FIGLI diretti dello stato di partenza del 2026-09-15
+-- (stessa audience, stesso motivo), non un potere nuovo: la loro riduzione arriva con R-4/R-6/
+-- R-8/R-11 quando RECRUITER/HIRING_MANAGER/PEOPLE_MANAGER nascono e ricevono i permessi giusti.
+INSERT INTO sys.sys_permessi_plenipotenziari_ammessi (permission_code, motivo, data)
+SELECT v.code, 'figlio di job-requisition:read/:manage (stato di partenza 2026-09-15), spezzato da R-10 (mandato K) — da ridurre con R-4/R-6/R-8/R-11', DATE '2026-09-19'
+  FROM (VALUES
+  ('requisition:read'),
+  ('requisition:manage'),
+  ('candidate:read'),
+  ('candidate:write'),
+  ('interview:feedback'),
+  ('offer:manage')
+  ) AS v(code)
+ON CONFLICT (permission_code) DO NOTHING;
+
 CREATE OR REPLACE VIEW sys.v_permessi_solo_plenipotenziari AS
 WITH titolari AS (
   SELECT p.auth_permission_code AS permission_code,
@@ -174,7 +191,7 @@ DECLARE n_allow int; n_vista int;
 BEGIN
   SELECT count(*) INTO n_allow FROM sys.sys_permessi_plenipotenziari_ammessi WHERE data_ritiro IS NULL;
   SELECT count(*) INTO n_vista FROM sys.v_permessi_solo_plenipotenziari;
-  IF n_allow < 102 THEN RAISE EXCEPTION '000418: allowlist con % righe vive, attese almeno 102', n_allow; END IF;
+  IF n_allow < 108 THEN RAISE EXCEPTION '000418: allowlist con % righe vive, attese almeno 108', n_allow; END IF;
   IF n_vista <> 0 THEN RAISE EXCEPTION '000418: la vista nasce con % righe, attese 0 (allowlist incompleta)', n_vista; END IF;
 END $$;
 

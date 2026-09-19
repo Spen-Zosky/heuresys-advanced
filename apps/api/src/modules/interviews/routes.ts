@@ -2,8 +2,8 @@
  * apps/api/src/modules/interviews/routes.ts
  * 4 rotte sotto /v1/interviews (#54 F3, quinta fetta).
  *
- * Permessi riusati dalla richiesta (`job-requisition:read` / `:manage`), come nelle quattro
- * fette precedenti: il recruiting è un ciclo solo, e chi lo conduce lo conduce per intero.
+ * Permesso proprio del dominio colloquio (`interview:feedback`, un solo verbo per lettura E
+ * scrittura — mandato K, R-10, 2026-09-19, mig. 000427), separato da `job-requisition:*`.
  *
  * ⚠ Nessuna DELETE. Un colloquio annullato è `CANCELLED` e uno disertato è `NO_SHOW`: sono
  * **esiti**, e dicono cose diverse che una riga cancellata non direbbe più. Il vocabolario
@@ -28,7 +28,7 @@ export const interviewsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/",
     {
-      preHandler: [requirePermission("job-requisition:read")],
+      preHandler: [requirePermission("interview:feedback")],
       schema: {
         querystring: InterviewListQuerySchema,
         response: { 200: InterviewListResponseSchema },
@@ -40,7 +40,7 @@ export const interviewsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/:id",
     {
-      preHandler: [requirePermission("job-requisition:read")],
+      preHandler: [requirePermission("interview:feedback")],
       schema: { params: InterviewIdParamSchema, response: { 200: InterviewSchema } },
     },
     async (req) => interviewsService.getById(actor(req), req.params.id),
@@ -49,7 +49,7 @@ export const interviewsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
     "/",
     {
-      preHandler: [app.verifyCsrf, requirePermission("job-requisition:manage")],
+      preHandler: [app.verifyCsrf, requirePermission("interview:feedback")],
       schema: { body: InterviewCreateBodySchema, response: { 201: InterviewSchema } },
     },
     async (req, reply) => {
@@ -61,7 +61,7 @@ export const interviewsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.patch(
     "/:id",
     {
-      preHandler: [app.verifyCsrf, requirePermission("job-requisition:manage")],
+      preHandler: [app.verifyCsrf, requirePermission("interview:feedback")],
       schema: {
         params: InterviewIdParamSchema,
         body: InterviewUpdateBodySchema,

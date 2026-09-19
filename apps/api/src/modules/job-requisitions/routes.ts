@@ -25,7 +25,7 @@ export const jobRequisitionsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/",
     {
-      preHandler: [requirePermission("job-requisition:read")],
+      preHandler: [requirePermission("requisition:read")],
       schema: {
         querystring: JobRequisitionListQuerySchema,
         response: { 200: JobRequisitionListResponseSchema },
@@ -37,7 +37,7 @@ export const jobRequisitionsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/:id",
     {
-      preHandler: [requirePermission("job-requisition:read")],
+      preHandler: [requirePermission("requisition:read")],
       schema: { params: JobRequisitionIdParamSchema, response: { 200: JobRequisitionSchema } },
     },
     async (req) => jobRequisitionsService.getById(actor(req), req.params.id),
@@ -46,7 +46,7 @@ export const jobRequisitionsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
     "/",
     {
-      preHandler: [app.verifyCsrf, requirePermission("job-requisition:manage")],
+      preHandler: [app.verifyCsrf, requirePermission("requisition:manage")],
       schema: { body: JobRequisitionCreateBodySchema, response: { 201: JobRequisitionSchema } },
     },
     async (req, reply) => {
@@ -58,7 +58,7 @@ export const jobRequisitionsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.patch(
     "/:id",
     {
-      preHandler: [app.verifyCsrf, requirePermission("job-requisition:manage")],
+      preHandler: [app.verifyCsrf, requirePermission("requisition:manage")],
       schema: {
         params: JobRequisitionIdParamSchema,
         body: JobRequisitionUpdateBodySchema,

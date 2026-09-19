@@ -2,9 +2,9 @@
  * apps/api/src/modules/candidate-applications/routes.ts
  * 4 rotte sotto /v1/candidate-applications (#54 F3, quarta fetta).
  *
- * Permessi riusati dalla richiesta (`job-requisition:read` / `:manage`), come nelle tre
- * fette precedenti: il recruiting è un ciclo solo, e chi lo conduce lo conduce per intero.
- * Separarli in seguito è additivo.
+ * Permessi propri del dominio candidato (`candidate:read` / `candidate:write`), separati da
+ * `job-requisition:*` (mandato K, R-10, 2026-09-19, mig. 000427), stesso dominio di
+ * `candidates/routes.ts`.
  *
  * ⚠ Nessuna DELETE. Una candidatura è **il fatto che una persona si è presentata**, e quel
  * fatto non si disfa: si chiude con `WITHDRAWN` (ritirata da lei) o `REJECTED` con il suo
@@ -31,7 +31,7 @@ export const candidateApplicationsRoutes: FastifyPluginAsyncZod = async (app) =>
   app.get(
     "/",
     {
-      preHandler: [requirePermission("job-requisition:read")],
+      preHandler: [requirePermission("candidate:read")],
       schema: {
         querystring: CandidateApplicationListQuerySchema,
         response: { 200: CandidateApplicationListResponseSchema },
@@ -43,7 +43,7 @@ export const candidateApplicationsRoutes: FastifyPluginAsyncZod = async (app) =>
   app.get(
     "/:id",
     {
-      preHandler: [requirePermission("job-requisition:read")],
+      preHandler: [requirePermission("candidate:read")],
       schema: {
         params: CandidateApplicationIdParamSchema,
         response: { 200: CandidateApplicationSchema },
@@ -55,7 +55,7 @@ export const candidateApplicationsRoutes: FastifyPluginAsyncZod = async (app) =>
   app.post(
     "/",
     {
-      preHandler: [app.verifyCsrf, requirePermission("job-requisition:manage")],
+      preHandler: [app.verifyCsrf, requirePermission("candidate:write")],
       schema: {
         body: CandidateApplicationCreateBodySchema,
         response: { 201: CandidateApplicationSchema },
@@ -70,7 +70,7 @@ export const candidateApplicationsRoutes: FastifyPluginAsyncZod = async (app) =>
   app.patch(
     "/:id",
     {
-      preHandler: [app.verifyCsrf, requirePermission("job-requisition:manage")],
+      preHandler: [app.verifyCsrf, requirePermission("candidate:write")],
       schema: {
         params: CandidateApplicationIdParamSchema,
         body: CandidateApplicationUpdateBodySchema,

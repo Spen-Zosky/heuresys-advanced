@@ -2,8 +2,8 @@
  * apps/api/src/modules/job-offers/routes.ts
  * 4 rotte sotto /v1/job-offers (#54 F3, settima e ultima fetta).
  *
- * Permessi riusati dalla richiesta (`job-requisition:read` / `:manage`), come nelle sei
- * fette precedenti: il recruiting è un ciclo solo, e chi lo conduce lo conduce per intero.
+ * Permesso proprio del dominio offerta (`offer:manage`, un solo verbo per lettura E scrittura
+ * — mandato K, R-10, 2026-09-19, mig. 000427), separato da `job-requisition:*`.
  *
  * ⚠ Nessuna DELETE. Un'offerta si ritira (`WITHDRAWN`) o scade (`EXPIRED`), e i due dicono
  * cose diverse: la prima è una decisione dell'azienda, la seconda il passare del tempo.
@@ -29,7 +29,7 @@ export const jobOffersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/",
     {
-      preHandler: [requirePermission("job-requisition:read")],
+      preHandler: [requirePermission("offer:manage")],
       schema: {
         querystring: JobOfferListQuerySchema,
         response: { 200: JobOfferListResponseSchema },
@@ -41,7 +41,7 @@ export const jobOffersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/:id",
     {
-      preHandler: [requirePermission("job-requisition:read")],
+      preHandler: [requirePermission("offer:manage")],
       schema: { params: JobOfferIdParamSchema, response: { 200: JobOfferSchema } },
     },
     async (req) => jobOffersService.getById(actor(req), req.params.id),
@@ -50,7 +50,7 @@ export const jobOffersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
     "/",
     {
-      preHandler: [app.verifyCsrf, requirePermission("job-requisition:manage")],
+      preHandler: [app.verifyCsrf, requirePermission("offer:manage")],
       schema: { body: JobOfferCreateBodySchema, response: { 201: JobOfferSchema } },
     },
     async (req, reply) => {
@@ -62,7 +62,7 @@ export const jobOffersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.patch(
     "/:id",
     {
-      preHandler: [app.verifyCsrf, requirePermission("job-requisition:manage")],
+      preHandler: [app.verifyCsrf, requirePermission("offer:manage")],
       schema: {
         params: JobOfferIdParamSchema,
         body: JobOfferUpdateBodySchema,

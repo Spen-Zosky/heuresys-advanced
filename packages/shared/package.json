@@ -497,6 +497,11 @@
       "heuresys-source": "./src/schemas/time-off.ts",
       "default": "./dist/schemas/time-off.js"
     },
+    "./schemas/user-position-assignments": {
+      "types": "./dist/schemas/user-position-assignments.d.ts",
+      "heuresys-source": "./src/schemas/user-position-assignments.ts",
+      "default": "./dist/schemas/user-position-assignments.js"
+    },
     "./schemas/user-timeline": {
       "types": "./dist/schemas/user-timeline.d.ts",
       "heuresys-source": "./src/schemas/user-timeline.ts",

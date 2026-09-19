@@ -211,6 +211,16 @@ INSERT INTO _pm_derivati(code) VALUES
   -- (b) mirror 000177: skill:delete eredita l'audience di skill:update
   ('skill:delete');
 
+-- Permessi concessi a PEOPLE_MANAGER da migrazioni SUCCESSIVE a questa (ADR-0035: si emenda
+-- il file che verifica, non se ne aggiunge un altro). Non sono self-healing: sono titolarita'
+-- decise altrove, sulla stessa persona. Un codice qui NON e' "fuori dall'unione".
+CREATE TEMP TABLE _pm_concessi_altrove(code text PRIMARY KEY, migrazione text);
+INSERT INTO _pm_concessi_altrove(code, migrazione) VALUES
+  -- Mandato K, G-1 (000448, D4=B): la porta nativa assegna/termina/trasferisci.
+  ('user_position_assignment:create', '000448'), ('user_position_assignment:delete', '000448'),
+  ('user_position_assignment:list', '000448'), ('user_position_assignment:read', '000448'),
+  ('user_position_assignment:update', '000448');
+
 DO $$
 DECLARE
   n_pm int; n_vietati int; n_senza_cat int; n_platform_true int; n_hrms int;
@@ -249,7 +259,8 @@ BEGIN
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    WHERE r.auth_role_code = 'PEOPLE_MANAGER' AND rp.revoked_at IS NULL
      AND p.auth_permission_code NOT IN (SELECT code FROM _pm_espliciti
-                                         UNION ALL SELECT code FROM _pm_derivati);
+                                         UNION ALL SELECT code FROM _pm_derivati
+                                         UNION ALL SELECT code FROM _pm_concessi_altrove);
   IF n_fuori_elenco <> 0 THEN
     RAISE EXCEPTION '000432: PEOPLE_MANAGER ha % permessi fuori dall''unione espliciti+derivati (nuovo self-healing da investigare)', n_fuori_elenco;
   END IF;
@@ -339,6 +350,7 @@ END $$;
 DROP TABLE _hrms_prima;
 DROP TABLE _pm_espliciti;
 DROP TABLE _pm_derivati;
+DROP TABLE _pm_concessi_altrove;
 
 COMMIT;
 

@@ -206,9 +206,9 @@ export async function applyTenantImportRun(client: PoolClient, request: Approval
       `INSERT INTO sys.sys_user_position_assignments
          (user_position_assignment_tenant_id, user_position_assignment_user_id, user_position_assignment_position_id,
           user_position_assignment_kind, user_position_assignment_fte, user_position_assignment_start_date,
-          user_position_assignment_status, user_position_assignment_metadata)
+          user_position_assignment_status, user_position_assignment_metadata, origine_dato)
        VALUES ($1, $2, $3, 'PRIMARY', 1.000, coalesce($4::date, CURRENT_DATE), 'ACTIVE',
-               jsonb_build_object('tenantImportRunId', $5::text, 'sourceExportId', $6::text))`,
+               jsonb_build_object('tenantImportRunId', $5::text, 'sourceExportId', $6::text), 'IMPORT')`,
       [tenantId, userId, p.positionId, p.hireDate, runId, sourceExportId],
     );
     // Le competenze DICHIARATE dal cliente: solo quelle che il catalogo conosce, come

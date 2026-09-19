@@ -380,8 +380,8 @@ export async function materialize(
                (user_position_assignment_tenant_id, user_position_assignment_user_id,
                 user_position_assignment_position_id, user_position_assignment_kind,
                 user_position_assignment_fte, user_position_assignment_start_date,
-                user_position_assignment_status)
-             VALUES ($1, $2, $3, 'PRIMARY', 1.000, '2024-01-01', 'ACTIVE')
+                user_position_assignment_status, origine_dato)
+             VALUES ($1, $2, $3, 'PRIMARY', 1.000, '2024-01-01', 'ACTIVE', 'MATERIALIZZAZIONE')
              RETURNING user_position_assignment_id`,
             [tenantId, userId, posId],
           );

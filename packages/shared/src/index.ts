@@ -123,5 +123,6 @@ export * from "./schemas/job-postings.js";
 export * from "./schemas/job-requisitions.js";
 export * from "./schemas/tenant-materialization.js";
 export * from "./schemas/time-off.js";
+export * from "./schemas/user-position-assignments.js";
 export * from "./schemas/user-timeline.js";
 export * from "./schemas/talent-review.js";

@@ -1,0 +1,45 @@
+viewname,definition
+v_active_primary_assignment_per_user," SELECT user_position_assignment_user_id,
+    count(*) AS n_active_primary
+   FROM sys.sys_user_position_assignments
+  WHERE (((user_position_assignment_kind)::text = 'PRIMARY'::text) AND ((user_position_assignment_status)::text = 'ACTIVE'::text))
+  GROUP BY user_position_assignment_user_id
+ HAVING (count(*) > 1);"
+v_deactivated_user_active_assignment," SELECT u.user_id,
+    u.user_email,
+    upa.user_position_assignment_id,
+    upa.user_position_assignment_position_id
+   FROM (sys.sys_users u
+     JOIN sys.sys_user_position_assignments upa ON ((upa.user_position_assignment_user_id = u.user_id)))
+  WHERE (((u.user_status)::text = 'DEACTIVATED'::text) AND ((upa.user_position_assignment_status)::text = 'ACTIVE'::text));"
+v_incarico_attivo_senza_contratto," SELECT a.user_position_assignment_user_id AS user_id,
+    u.user_email AS email,
+    u.user_tenant_id AS tenant_id,
+    p.position_title AS posizione,
+    ( SELECT max(c.user_contract_end_date) AS max
+           FROM sys.sys_user_contracts c
+          WHERE (c.user_contract_user_id = a.user_position_assignment_user_id)) AS scaduto_il,
+    'SCADUTO_E_NON_RINNOVATO'::text AS caso
+   FROM ((sys.sys_user_position_assignments a
+     JOIN sys.sys_users u ON ((u.user_id = a.user_position_assignment_user_id)))
+     JOIN sys.sys_positions p ON ((p.position_id = a.user_position_assignment_position_id)))
+  WHERE (((a.user_position_assignment_status)::text = 'ACTIVE'::text) AND ((u.user_status)::text = 'ACTIVE'::text) AND (EXISTS ( SELECT 1
+           FROM sys.sys_user_contracts c
+          WHERE (c.user_contract_user_id = a.user_position_assignment_user_id))) AND (NOT (EXISTS ( SELECT 1
+           FROM sys.sys_user_contracts c
+          WHERE ((c.user_contract_user_id = a.user_position_assignment_user_id) AND ((c.user_contract_end_date IS NULL) OR (c.user_contract_end_date >= CURRENT_DATE)))))));"
+v_orphan_position_assignments," SELECT a.user_position_assignment_id,
+    a.user_position_assignment_user_id,
+    a.user_position_assignment_position_id
+   FROM ((sys.sys_user_position_assignments a
+     LEFT JOIN sys.sys_users u ON ((u.user_id = a.user_position_assignment_user_id)))
+     LEFT JOIN sys.sys_positions p ON ((p.position_id = a.user_position_assignment_position_id)))
+  WHERE ((u.user_id IS NULL) OR (p.position_id IS NULL));"
+v_tenant_boundary_violations," SELECT a.user_position_assignment_id,
+    a.user_position_assignment_tenant_id AS assignment_tenant,
+    u.user_tenant_id AS user_tenant,
+    p.position_tenant_id AS position_tenant
+   FROM ((sys.sys_user_position_assignments a
+     JOIN sys.sys_users u ON ((u.user_id = a.user_position_assignment_user_id)))
+     JOIN sys.sys_positions p ON ((p.position_id = a.user_position_assignment_position_id)))
+  WHERE ((a.user_position_assignment_tenant_id <> u.user_tenant_id) OR (a.user_position_assignment_tenant_id <> p.position_tenant_id));"

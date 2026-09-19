@@ -61,6 +61,10 @@ EFFETTI: dict[str, str] = {
     "X-3": "select 1 from pg_views where schemaname='sys' and viewname='v_source_lineage_normalizzata'",
     "X-4": "select 1 from information_schema.tables where table_schema='sys' and table_name='sys_conflitti_ibridi'",
     "X-5": "select 1 from pg_views where schemaname='sys' and viewname='v_direzione_del_dato_violata'",
+    # F4 — R-8 CHIUSA (S1109); query dichiarata nel commento di 000431 stesso.
+    "R-8": "select 1 from sys.sys_auth_role_permissions rp join sys.sys_auth_roles r on r.auth_role_id=rp.auth_role_id join sys.sys_auth_permissions p on p.auth_permission_id=rp.auth_permission_id where r.auth_role_code='IMPLEMENTATION_CONSULTANT' and p.auth_permission_code='seed_acquisition:trigger' and rp.revoked_at is null",
+    # F4 — R-6 SOSPESA (S1109); query dichiarata nel commento di 000432 stesso.
+    "R-6": "select 1 from sys.sys_auth_roles where auth_role_code='PEOPLE_MANAGER' and retired_at is null",
 }
 
 STATI_APERTI = ("IN CORSO", "SOSPESA", "ATTESA_ENZO")

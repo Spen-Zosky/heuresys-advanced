@@ -51,6 +51,7 @@ const ROLE_CODES: readonly RoleCode[] = [
   "HIRING_MANAGER",
   "IMPLEMENTATION_CONSULTANT",
   "PEOPLE_MANAGER",
+  "DATA_STEWARD",
 ];
 
 const fmtDate = (v: string | null | undefined): string =>

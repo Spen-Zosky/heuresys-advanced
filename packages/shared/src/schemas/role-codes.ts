@@ -74,6 +74,13 @@ export const ROLE_CODES = [
   // come TENANT_ADMIN/HRMS_MANAGER. Elenco permessi rivisto a mano,
   // esiti/R-6_permessi_people_manager.md (migration 000432).
   "PEOPLE_MANAGER",
+  // Mandato K, R-6 sessione 2 (2026-09-19, passo 57): ruolo di cliente per il
+  // custode del dato che ARRIVA da fuori — lettura/scrittura sui moduli
+  // tenant-import-runs, reference-sync, provenance, generated-origins e sul
+  // registro dei conflitti ibridi (conflitto_ibrido:resolve, X-4). NIENTE
+  // scrittura sui dati nativi: il confine e' l'assenza della rotta, come
+  // PEOPLE_MANAGER sulle tabelle importate (migration 000449).
+  "DATA_STEWARD",
 ] as const;
 
 export type RoleCode = (typeof ROLE_CODES)[number];

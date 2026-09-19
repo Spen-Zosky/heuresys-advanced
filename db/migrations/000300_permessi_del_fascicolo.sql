@@ -86,15 +86,19 @@ BEGIN
   END IF;
 
   -- Decisione E1, verificata sulla RIGA intera e non solo sul ruolo appena
-  -- servito: nessun altro ruolo detiene i permessi del fascicolo.
+  -- servito: nessun altro ruolo detiene i permessi del fascicolo. Mandato K,
+  -- R-8 (mig 000431): IMPLEMENTATION_CONSULTANT legge il fascicolo (sola
+  -- lettura) sui clienti a cui e' assegnato — emendato QUI (ADR-0035, il file
+  -- che crea il controllo) e non con un patch a valle, altrimenti la catena
+  -- riapplicata per intero lo cancellerebbe al giro dopo.
   SELECT count(*) INTO n_altri
     FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    WHERE p.auth_permission_resource = 'tenant_blueprint'
-     AND r.auth_role_code NOT IN ('PLATFORM_ADMIN', 'BLUEPRINT_MANAGER', 'TENANT_ADMIN');
+     AND r.auth_role_code NOT IN ('PLATFORM_ADMIN', 'BLUEPRINT_MANAGER', 'TENANT_ADMIN', 'IMPLEMENTATION_CONSULTANT');
   IF n_altri <> 0 THEN
-    RAISE EXCEPTION '000300: % concessioni di tenant_blueprint fuori da PLATFORM_ADMIN/BLUEPRINT_MANAGER/TENANT_ADMIN (R-5, mig 000430)', n_altri;
+    RAISE EXCEPTION '000300: % concessioni di tenant_blueprint fuori da PLATFORM_ADMIN/BLUEPRINT_MANAGER/TENANT_ADMIN/IMPLEMENTATION_CONSULTANT (R-5 mig 000430, R-8 mig 000431)', n_altri;
   END IF;
 
   -- L'effetto della revoca lo produce la 000210; QUI si verifica che sia

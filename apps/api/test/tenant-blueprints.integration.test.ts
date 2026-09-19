@@ -169,19 +169,19 @@ describe("fascicoli di configurazione", () => {
     expect((r.json() as { tenantId: string | null }).tenantId).toBeNull();
   });
 
-  it("un amministratore di tenant non vede nemmeno l'elenco", async () => {
+  it("un amministratore di tenant VEDE l'elenco (R-5, mig 000430: tenant_blueprint:read)", async () => {
+    // Storico: fino a R-5 (mandato K, mig 000430, S1109) TENANT_ADMIN non aveva
+    // alcun permesso `tenant_blueprint:*` e questo test si aspettava 403. R-5 ha
+    // concesso deliberatamente `tenant_blueprint:read` + `tenant_blueprint:approve`
+    // a TENANT_ADMIN (mai `:write`, mai lo stesso permesso di BLUEPRINT_MANAGER) —
+    // verificato 5/5 dal test dedicato `r5-blueprint-manager-tenant-admin.
+    // integration.test.ts`. Questo test copriva il "prima"; ora copre il "dopo".
     const r = await t.app.inject({
       method: "GET",
       url: "/v1/tenant-blueprints",
       headers: hdr(cliente),
     });
-    expect(r.statusCode).toBe(403);
-    // `FORBIDDEN` e non `PERMISSION_DENIED`: e' il codice che `requirePermission`
-    // emette per un permesso mancante su 520 rotte delle 532 che esistono
-    // (misurato). Le 12 eccezioni portano codici del tipo `*_ADMIN_ONLY`, e
-    // nessuna usa `PERMISSION_DENIED`. Dare a questo modulo un codice tutto suo
-    // spezzerebbe un contratto uniforme per allinearlo a una riga di piano.
-    expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
+    expect(r.statusCode).toBe(200);
   });
 
   it("una decisione senza motivazione è rifiutata", async () => {
@@ -336,45 +336,62 @@ describe("fascicoli di configurazione", () => {
     );
   });
 
-  it("nessuno dei 15 endpoint è raggiungibile da un amministratore di tenant", async () => {
+  it("solo le 9 scritture sono negate a un amministratore di tenant; le 6 letture sono concesse (R-5, mig 000430)", async () => {
+    // Storico: fino a R-5, TENANT_ADMIN non aveva NESSUN permesso `tenant_blueprint:*`
+    // e tutti e 15 gli endpoint rispondevano 403. R-5 (mig 000430, S1109) ha concesso
+    // `tenant_blueprint:read` (mai `:write`) — verificato 5/5 dal test dedicato
+    // `r5-blueprint-manager-tenant-admin.integration.test.ts`. Il confine reale oggi
+    // e' quello del `preHandler` di ciascuna rotta (`READ`/`WRITE` in
+    // `tenant-blueprints/routes.ts`), non piu' un blocco totale: le 6 letture
+    // passano (200/404 — un id sintetico che non esiste e' un diniego lecito, non
+    // un leak, perche' il PERMESSO c'e' davvero), le 9 scritture restano 403.
     const uuid = "00000000-0000-4000-8000-000000000000";
     const base = `/v1/tenant-blueprints`;
     // Il corpo, dove serve, e' VALIDO di proposito. Con un corpo storto la
     // risposta sarebbe 400 — perche' Fastify valida lo schema PRIMA dei
     // `preHandler` — e il caso sarebbe verde senza aver mai messo alla prova il
     // permesso. Stessa ragione per cui il token CSRF si passa buono.
-    const endpoints: Array<[string, string, Record<string, unknown> | undefined]> = [
-      ["GET", base, undefined],
-      ["POST", base, { code: "NON_DEVE_NASCERE", name: "Non deve nascere" }],
-      ["GET", `${base}/${uuid}`, undefined],
-      ["PATCH", `${base}/${uuid}`, { name: "Non deve cambiare" }],
-      ["POST", `${base}/${uuid}/link-tenant`, { tenantId: uuid }],
-      ["GET", `${base}/${uuid}/versions/1`, undefined],
-      ["POST", `${base}/${uuid}/versions`, undefined],
-      ["PATCH", `${base}/${uuid}/versions/1/identity`, { employeeCount: 1 }],
-      ["GET", `${base}/${uuid}/versions/1/model-proposal`, undefined],
-      ["PUT", `${base}/${uuid}/versions/1/model`, { variantVersionId: uuid }],
-      ["GET", `${base}/${uuid}/versions/1/processes`, undefined],
+    const endpoints: Array<[string, string, Record<string, unknown> | undefined, "read" | "write"]> = [
+      ["GET", base, undefined, "read"],
+      ["POST", base, { code: "NON_DEVE_NASCERE", name: "Non deve nascere" }, "write"],
+      ["GET", `${base}/${uuid}`, undefined, "read"],
+      ["PATCH", `${base}/${uuid}`, { name: "Non deve cambiare" }, "write"],
+      ["POST", `${base}/${uuid}/link-tenant`, { tenantId: uuid }, "write"],
+      ["GET", `${base}/${uuid}/versions/1`, undefined, "read"],
+      ["POST", `${base}/${uuid}/versions`, undefined, "write"],
+      ["PATCH", `${base}/${uuid}/versions/1/identity`, { employeeCount: 1 }, "write"],
+      ["GET", `${base}/${uuid}/versions/1/model-proposal`, undefined, "read"],
+      ["PUT", `${base}/${uuid}/versions/1/model`, { variantVersionId: uuid }, "write"],
+      ["GET", `${base}/${uuid}/versions/1/processes`, undefined, "read"],
       [
         "PUT",
         `${base}/${uuid}/versions/1/processes/${uuid}`,
         { inclusion: "IN", rationale: "non deve essere registrata" },
+        "write",
       ],
-      ["DELETE", `${base}/${uuid}/versions/1/processes/${uuid}`, undefined],
-      ["POST", `${base}/${uuid}/versions/1/submit`, undefined],
-      ["GET", `${base}/${uuid}/versions/1/diff?against=MODEL_LATEST`, undefined],
+      ["DELETE", `${base}/${uuid}/versions/1/processes/${uuid}`, undefined, "write"],
+      ["POST", `${base}/${uuid}/versions/1/submit`, undefined, "write"],
+      ["GET", `${base}/${uuid}/versions/1/diff?against=MODEL_LATEST`, undefined, "read"],
     ];
     expect(endpoints).toHaveLength(15);
-    for (const [method, url, payload] of endpoints) {
+    expect(endpoints.filter(([, , , kind]) => kind === "read")).toHaveLength(6);
+    expect(endpoints.filter(([, , , kind]) => kind === "write")).toHaveLength(9);
+    for (const [method, url, payload, kind] of endpoints) {
       const r = await t.app.inject({
         method: method as "GET",
         url,
         headers: hdr(cliente),
         ...(payload === undefined ? {} : { payload }),
       });
-      // 403 e non 404: il diniego deve arrivare PRIMA che si sappia se la
-      // risorsa esiste, altrimenti l'esistenza trapela dal codice di stato.
-      expect(`${method} ${url} → ${r.statusCode}`).toBe(`${method} ${url} → 403`);
+      if (kind === "write") {
+        // Scrittura: 403 e non 404, il diniego deve arrivare PRIMA che si sappia
+        // se la risorsa esiste, altrimenti l'esistenza trapela dal codice di stato.
+        expect(`${method} ${url} → ${r.statusCode}`).toBe(`${method} ${url} → 403`);
+      } else {
+        // Lettura: il permesso c'e' davvero, quindi MAI 403. Un 404 sull'id
+        // sintetico e' legittimo (la risorsa non esiste), non e' un diniego.
+        expect(`${method} ${url} → ${r.statusCode}`).not.toBe(`${method} ${url} → 403`);
+      }
     }
     // Il fascicolo che la POST avrebbe creato NON deve esistere: un 403 che
     // arriva dopo la scrittura non e' un diniego, e' un incidente raccontato

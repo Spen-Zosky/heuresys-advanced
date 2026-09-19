@@ -107,6 +107,14 @@ describe("#92 F4 — il perimetro del ciclo di valutazione", () => {
          JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
         WHERE r.auth_role_code = ANY($1)
           AND u.user_status = 'ACTIVE'
+          -- Mandato K ha provisionato persone di collaudo (*@collaudo.invalid, es.
+          -- blueprint-manager@collaudo.invalid da R-5) che ora possono precedere in
+          -- ordine alfabetico una persona vera. La loro password si deriva con una
+          -- chiave diversa (collaudo-access.mjs), non con passwordFor(): senza
+          -- questa esclusione la query pesca una di loro e il login qui sotto (che
+          -- usa la derivazione standard) fallisce con 401 — non e' un difetto RBAC,
+          -- e' la selezione che ha smesso di trovare "una persona vera che bussa".
+          AND u.user_email NOT LIKE '%@collaudo.invalid'
           AND NOT EXISTS (
             SELECT 1 FROM sys.sys_user_auth_roles ur2
               JOIN sys.sys_auth_roles r2 ON r2.auth_role_id = ur2.user_auth_role_role_id

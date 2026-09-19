@@ -456,7 +456,7 @@ export const tenantBlueprintsService = {
       );
     }
 
-    const approvatori = await repo.findApprovers(pool);
+    const approvatori = await repo.findApprovers(pool, fascicolo.tenantId);
     if (approvatori.length === 0) {
       throw new ConflictError(
         "Nessun utente puo' firmare un fascicolo: manca chi detiene tenant_blueprint:approve",
@@ -623,7 +623,7 @@ export const tenantBlueprintsService = {
       );
     }
 
-    const approvatori = await repo.findApprovers(pool);
+    const approvatori = await repo.findApprovers(pool, fascicolo.tenantId);
     if (approvatori.length === 0) {
       throw new ConflictError(
         "Nessun utente puo' firmare la costruzione: manca chi detiene tenant_blueprint:approve",

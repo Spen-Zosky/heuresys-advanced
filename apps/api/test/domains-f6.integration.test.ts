@@ -86,7 +86,14 @@ beforeAll(async () => {
                        JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
                       WHERE ur.user_auth_role_user_id = u.user_id
                         AND ur.user_auth_role_revoked_at IS NULL
-                        AND r.auth_role_code IN ('HRMS_MANAGER','TENANT_ADMIN','PLATFORM_ADMIN'))
+                        -- PEOPLE_MANAGER aggiunto qui il 2026-09-19: mandato K, R-6 (mig
+                        -- 000432) lo ha messo in HR_MANDATED_ROLES (lib/scope/resolver.ts) —
+                        -- stesso perimetro organizzativo I18 di TENANT_ADMIN/HRMS_MANAGER.
+                        -- Senza questa riga il "prima" resta congelato a prima di R-6 e il
+                        -- confronto vede un falso "+1" per ogni titolare di PEOPLE_MANAGER,
+                        -- collaudo o reale — non e' una regressione, e' l'oracolo rimasto
+                        -- indietro rispetto a un cambiamento gia' chiuso e verificato altrove.
+                        AND r.auth_role_code IN ('HRMS_MANAGER','TENANT_ADMIN','PLATFORM_ADMIN','PEOPLE_MANAGER'))
         )`,
   );
 }, 120_000);

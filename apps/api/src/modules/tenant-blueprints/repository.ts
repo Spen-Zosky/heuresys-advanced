@@ -569,8 +569,21 @@ export async function findSnapshot(
   return row ? { payload: row.payload, contentHash: row.hash } : null;
 }
 
-/** Gli utenti che possono firmare un fascicolo: chi detiene `tenant_blueprint:approve`. */
-export async function findApprovers(db: Db): Promise<Array<{ userId: string }>> {
+/**
+ * Gli utenti che possono firmare un fascicolo: chi detiene `tenant_blueprint:approve`.
+ *
+ * `tenantId` filtra a chi appartiene DAVVERO quel fascicolo. Prima di R-5 (mig 000430,
+ * mandato K) `tenant_blueprint:approve` stava solo su ruoli di piattaforma e un elenco
+ * globale non creava ambiguita'. R-5 lo ha concesso anche a `TENANT_ADMIN` — un ruolo
+ * PER TENANT — quindi un elenco senza filtro può restituire gli amministratori di PIÙ
+ * aziende diverse: `approvalService.createRequest` rifiuta correttamente un elenco del
+ * genere ("Cross-tenant approvers"), perché un amministratore di un'altra azienda non ha
+ * alcun titolo a firmare questo fascicolo. Un fascicolo senza azienda (`tenantId: null`,
+ * una trattativa) non ha NESSUN titolare fra i `TENANT_ADMIN`: nessuno di loro possiede
+ * quella trattativa, quindi l'elenco è vuoto e il chiamante riceve `BLUEPRINT_NO_APPROVER`
+ * — corretto, non un difetto: nessuno dovrebbe poter approvare l'accordo di un'altra azienda.
+ */
+export async function findApprovers(db: Db, tenantId: string | null): Promise<Array<{ userId: string }>> {
   const r = await db.query<{ user_id: string }>(
     `SELECT DISTINCT u.user_id
        FROM sys.sys_users u
@@ -580,8 +593,9 @@ export async function findApprovers(db: Db): Promise<Array<{ userId: string }>> 
        JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
       WHERE p.auth_permission_code = 'tenant_blueprint:approve'
         AND u.user_status = 'ACTIVE'
-        AND u.user_tenant_id IS NOT NULL
+        AND u.user_tenant_id = $1
       ORDER BY u.user_id`,
+    [tenantId],
   );
   return r.rows.map((x) => ({ userId: x.user_id }));
 }

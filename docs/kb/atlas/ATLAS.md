@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `c99dae09` (2026-09-17T00:22:25+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `3a2b865b` (2026-09-19T02:24:56+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -70,7 +70,7 @@
 | me | /v1/me | 65 | 32 | 63 | 42 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 2 | 2 | 2 | 1 |
-| notifications | /v1/notifications | 2 | 1 | 2 | 0 |
+| notifications | /v1/notifications | 2 | 2 | 2 | 0 |
 | observability | /v1/observability | 3 | 1 | 5 | 2 |
 | occupation-classifications | /v1/occupation-classifications | 5 | 4 | 1 | 1 |
 | okrs | /v1/okrs | 7 | 4 | 3 | 3 |
@@ -162,12 +162,12 @@
 ## Key counts live
 
 - tenants_active: **2**
-- users: **164**
+- users: **168**
 - positions: **315**
 - org_units: **45**
-- roles: **14**
-- permissions: **232**
-- role_permission_mappings: **1016**
+- roles: **18**
+- permissions: **233**
+- role_permission_mappings: **1063**
 - ui_interfaces_active: **76**
 - skills: **14031**
 

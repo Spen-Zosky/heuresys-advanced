@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 """permessi_da_classificazione.py — mandato K, R-6 passo 56.
 
-Genera l'elenco dei permessi RBAC da concedere a PEOPLE_MANAGER (TUTTI i permessi di
-SCRITTURA sulle tabelle NATIVE/IBRIDE di X-1, `sys.sys_classificazione_direzione_dato`)
-e a DATA_STEWARD (permessi di LETTURA sulle tabelle IMPORTATE), incrociando la
-classificazione con le rotte reali dei moduli API. Le tabelle `infrastruttura` sono
-escluse: non sono dato di cliente (I23).
+Genera l'elenco dei permessi RBAC di PEOPLE_MANAGER (passo 56, testo esatto): "TUTTI
+i permessi di scrittura sulle tabelle NATIVE della classificazione X-1
+(`sys.sys_classificazione_direzione_dato`) + lettura degli importati +
+compensation_intelligence:update". E' UN SOLO ruolo, con permessi da DUE fonti unite
+(scrittura sul nativo, lettura sull'importato) — non due ruoli separati.
+DATA_STEWARD (passo 57) e' un elenco DIVERSO, per moduli nominati a mano
+(tenant-import-runs, reference-sync, provenance, generated-origins): questo
+strumento non lo genera. Le tabelle `infrastruttura` sono escluse: non sono dato
+di cliente (I23).
 
-Il mandato lo dice esplicitamente (passo 56): l'elenco "si GENERA... e si rivede a
-mano, non si scrive a mano". Questo strumento e' il punto di partenza misurato, non
-una fonte di verita' perfetta — un modulo con una relazione insolita fra tabella e
+Il mandato lo dice esplicitamente: l'elenco "si GENERA... e si rivede a mano, non
+si scrive a mano". Questo strumento e' il punto di partenza misurato, non una
+fonte di verita' perfetta — un modulo con una relazione insolita fra tabella e
 rotta (join, vista, funzione) puo' sfuggire all'euristica per-file qui sotto.
 
 METODO, per ogni modulo (`apps/api/src/modules/<modulo>/`):
@@ -20,9 +24,8 @@ METODO, per ogni modulo (`apps/api/src/modules/<modulo>/`):
      `requirePermission("codice")` nel blocco fino alla rotta successiva. GET => rotta
      di lettura; le altre quattro => rotta di scrittura.
   3. Una tabella NATIVA o IBRIDA i cui scrittori appartengono al modulo M aggiunge i
-     permessi di SCRITTURA di M all'elenco di PEOPLE_MANAGER. Una tabella IMPORTATA i
-     cui lettori appartengono al modulo M aggiunge i permessi di LETTURA di M
-     all'elenco di DATA_STEWARD.
+     permessi di SCRITTURA di M all'elenco. Una tabella IMPORTATA i cui lettori
+     appartengono al modulo M aggiunge i permessi di LETTURA di M allo stesso elenco.
 
 Uso:
   python .programmi/K-ruoli-direzione/tools/permessi_da_classificazione.py
@@ -112,28 +115,42 @@ def classificazione(cur) -> dict[str, str]:
     return dict(cur.fetchall())
 
 
-def deriva(cur) -> tuple[list[str], list[str], list[str]]:
-    """Ritorna (permessi PEOPLE_MANAGER, permessi DATA_STEWARD, tabelle senza porta trovata)."""
+COMPENSATION_INTELLIGENCE_UPDATE = "compensation_intelligence:update"
+
+
+def deriva(cur) -> tuple[list[str], list[str]]:
+    """Ritorna (permessi di PEOPLE_MANAGER, tabelle senza porta trovata).
+
+    Passo 56, testo esatto: "TUTTI i permessi di scrittura sulle tabelle NATIVE
+    della classificazione X-1 + lettura degli importati + compensation_intelligence:update".
+    E' UN SOLO ruolo con DUE fonti unite (scrittura sul nativo, lettura sull'importato),
+    non due ruoli separati — DATA_STEWARD (passo 57) e' un elenco DIVERSO, per moduli
+    nominati a mano, non derivato dalla classificazione: questo strumento non lo tocca.
+
+    L'IBRIDO entra nella scrittura insieme al nativo (non e' nel testo letterale del
+    passo, ma e' una scelta tecnica dichiarata, non silenziosa — I23: un ibrido ha
+    comunque un gesto nativo di scrittura nell'applicazione; senza il permesso,
+    PEOPLE_MANAGER non potrebbe compierlo).
+    """
     classi = classificazione(cur)
     scrittori, lettori = costruisci_mappe()
-    people_manager: set[str] = set()
-    data_steward: set[str] = set()
+    permessi: set[str] = {COMPENSATION_INTELLIGENCE_UPDATE}
     senza_porta: list[str] = []
     for tabella, stato in classi.items():
         if stato in ("nativo", "ibrido"):
             trovati = scrittori.get(tabella)
             if trovati:
-                people_manager |= trovati
+                permessi |= trovati
             else:
                 senza_porta.append(f"{tabella} ({stato}, nessuno scrittore trovato)")
         elif stato == "importato":
             trovati = lettori.get(tabella)
             if trovati:
-                data_steward |= trovati
+                permessi |= trovati
             else:
                 senza_porta.append(f"{tabella} (importato, nessun lettore trovato)")
         # infrastruttura: esclusa (I23)
-    return sorted(people_manager), sorted(data_steward), sorted(senza_porta)
+    return sorted(permessi), sorted(senza_porta)
 
 
 def connetti():
@@ -179,20 +196,20 @@ def selftest() -> int:
             return 3
         tabella = row[0]
 
-        pm_prima, ds_prima, _ = deriva(cur)
+        pm_prima, _ = deriva(cur)
         cur.execute(
             "UPDATE sys.sys_classificazione_direzione_dato SET stato = 'importato' WHERE tabella = %s",
             (tabella,),
         )
-        pm_dopo, ds_dopo, _ = deriva(cur)
+        pm_dopo, _ = deriva(cur)
 
-        cambiato = pm_prima != pm_dopo or ds_prima != ds_dopo
+        cambiato = pm_prima != pm_dopo
         con.rollback()
 
         # Controprova che la stessa query, DOPO il rollback, torna come prima
         # (la modifica non e' sopravvissuta — prova che il ROLLBACK ha funzionato).
-        pm_ripristinato, ds_ripristinato, _ = deriva(cur)
-        ripristinato_ok = pm_ripristinato == pm_prima and ds_ripristinato == ds_prima
+        pm_ripristinato, _ = deriva(cur)
+        ripristinato_ok = pm_ripristinato == pm_prima
 
         if cambiato and ripristinato_ok:
             print(f"SELFTEST VERDE — spostando '{tabella}' nativo->importato l'elenco cambia; dopo ROLLBACK torna identico.")
@@ -218,12 +235,11 @@ def main() -> int:
         return 4
     con.set_session(readonly=True, autocommit=True)
     cur = con.cursor()
-    pm, ds, senza_porta = deriva(cur)
+    pm, senza_porta = deriva(cur)
     cur.close()
     con.close()
 
-    stampa("PEOPLE_MANAGER — permessi di scrittura (tabelle nativo+ibrido)", pm)
-    stampa("DATA_STEWARD — permessi di lettura (tabelle importato)", ds)
+    stampa("PEOPLE_MANAGER — scrittura su nativo+ibrido, lettura su importato (passo 56)", pm)
     if senza_porta:
         print(f"\n⚠ {len(senza_porta)} tabelle senza porta trovata dall'euristica (rivedere a mano):")
         for t in senza_porta:

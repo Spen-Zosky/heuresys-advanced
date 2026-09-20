@@ -1,13 +1,26 @@
 {
   "_": "Regole di QUESTO progetto per il plugin enzo-guard (D:\\claude-imbracatura\\plugin\\enzo-guard, README con lo schema). Il DB vivo si riconosce per nome ovunque (Windows dietro il tunnel :5433, VM localhost:5432) e per porta qui.",
   "db": {
-    "names": ["heuresys_advanced"],
-    "ports": [5433],
-    "resetCommands": ["pnpm db:reset"],
+    "names": [
+      "heuresys_advanced"
+    ],
+    "ports": [
+      5433
+    ],
+    "resetCommands": [
+      "pnpm db:reset"
+    ],
     "migrateCommand": "\\bpnpm\\s+db:migrate(:sh)?(\\s|$)",
     "migrateInstead": "pnpm db:migrate:vm (prova prima sul gemello: bash db/scripts/prova-idempotenza.sh)"
   },
-  "protectedPaths": [".secrets/", "docs/source_bundle/brownfield/extracted/", "docs/brownfield/_inspection_artifacts/"],
+  "protectedPaths": [
+    ".secrets/",
+    "docs/source_bundle/brownfield/extracted/",
+    "docs/brownfield/_inspection_artifacts/"
+  ],
   "launchers": [],
-  "denyAddAll": false
+  "denyAddAll": false,
+  "sessionMode": {
+    "script": "scripts/hooks/session_mode.py"
+  }
 }

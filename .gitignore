@@ -294,3 +294,4 @@ _zp_verify_tmp/
 
 # hooks-audit: artefatti di lavoro della skill, non versionati
 /tmp/
+/.claude/types/

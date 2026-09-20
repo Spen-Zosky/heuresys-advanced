@@ -12,7 +12,7 @@
     "gitGuard": {
       "type": "boolean",
       "default": true,
-      "description": "nega push --force, --no-verify, reset --hard, add -A; --amend, checkout . e restore . chiedono",
+      "description": "nega push --force, --no-verify, reset --hard; --amend, checkout . e restore . chiedono; add -A negato solo con altre sessioni vive",
       "title": "Divieti git"
     },
     "secretsGuard": {

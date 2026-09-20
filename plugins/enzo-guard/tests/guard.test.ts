@@ -43,15 +43,34 @@ test('python: un comando senza python non si tocca; uno già con PYTHONUTF8 nemm
 })
 
 // ──────────────────────────────────────── 2. Divieti git
-test('git: push --force, --no-verify, reset --hard, add -A negati; --force-with-lease e add con path passano', async ($, on) => {
+test('git: push --force, --no-verify, reset --hard negati; --force-with-lease e add con path passano', async ($, on) => {
   let ran = 0
   on('tool.call', { tool: 'Bash' }, () => { ran++; return { result: 'ok' } })
-  for (const c of ['git push --force origin main', 'git push origin main -f', 'git commit -m x --no-verify', 'git reset --hard HEAD~1', 'git add -A', 'git add .', 'git add --all'])
+  for (const c of ['git push --force origin main', 'git push origin main -f', 'git commit -m x --no-verify', 'git reset --hard HEAD~1'])
     expect(denyOf(await $.tool.call(bash(c)))).toMatch(/Regola/)
   expect(ran).toBe(0)
   for (const c of ['git push --force-with-lease origin feat', 'git add src/a.ts docs/b.md', 'git status'])
     expect(denyOf(await $.tool.call(bash(c)))).toBeUndefined()
   expect(ran).toBe(3)
+})
+test('git add -A: passa da soli, negato con un\'altra sessione viva, negato se non misurabile', async ($, on) => {
+  world(on)
+  on('session.cwd', () => ({ value: 'D:\\heuresys-datastore' }))
+  on('session.id', () => ({ value: 'abcdef12-0000' }))
+  let vive = '0\n'; let argv: readonly string[] = []
+  on('process.run', (_$, e) => { argv = e.argv; return { value: { exitCode: 0, stdout: vive, stderr: '' } } })
+  on('tool.call', { tool: 'Bash' }, () => ({ result: 'ok' }))
+  await $.session.start({ cwd: 'D:/heuresys-datastore', surface: 'terminal', isInteractive: true })
+  expect(denyOf(await $.tool.call(bash('git add -A')))).toBeUndefined()
+  expect(argv[1]).toMatch(/sessioni_vive\.py$/)
+  expect(argv[2]).toBe('heuresys-datastore')
+  expect(argv[3]).toBe('abcdef12')
+  vive = '1\n'
+  await $.session.start({ cwd: 'D:/heuresys-datastore', surface: 'terminal', isInteractive: true })   // ricarica: azzera la cache
+  expect(denyOf(await $.tool.call(bash('git add .')))).toMatch(/1 altra sessione viva/)
+  vive = 'boom'
+  await $.session.start({ cwd: 'D:/heuresys-datastore', surface: 'terminal', isInteractive: true })
+  expect(denyOf(await $.tool.call(bash('git add --all')))).toMatch(/non ho potuto misurare/)
 })
 test('git: --amend, checkout . e restore . senza dialogo (corsa -p) sono negati; checkout -- <path> passa', async ($, on) => {
   on('tool.call', { tool: 'Bash' }, () => ({ result: 'ok' }))

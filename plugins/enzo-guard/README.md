@@ -23,7 +23,7 @@ macchine senza il plugin (Mac, VM, linux-pc) non eseguono plugin e continuano a 
 | # | Nome (`/config`) | Evento | Cosa fa | Regola / segnale d'origine | Beneficio misurato (60 gg) |
 |---|---|---|---|---|---|
 | 1 | `pythonUtf8` | `tool.call` Bash/PowerShell | `python3` → `python` (solo Windows); `export PYTHONUTF8=1;` in testa se manca | globale «python3 = stub Store»; storico | 40 errori `charmap` in 11 sessioni, 128 prefissi scritti a mano |
-| 2 | `gitGuard` | `tool.call` Bash/PowerShell | **nega** `push --force` (senza `--force-with-lease`), `commit --no-verify`, `reset --hard`, `add -A/--all/.`; `--amend`, `checkout .`, `restore .` **chiedono** | globale §Divieti «Git»; progetto (mai `-A`) | 24 occorrenze |
+| 2 | `gitGuard` | `tool.call` Bash/PowerShell | **nega** `push --force` (senza `--force-with-lease`), `commit --no-verify`, `reset --hard`, `--amend`, `checkout .`, `restore .` **chiedono**; `add -A/.` **negato solo con un'altra sessione viva** sul progetto (registro `~/.claude/sessioni/attive`, pid verificato da `hooks/sessioni_vive.py`; non misurabile = negato) | globale §Divieti «Git»; progetto (mai `-A`) | 24 occorrenze |
 | 3 | `secretsGuard` | `tool.call` Read/Edit/Write/Bash | **nega** lettura/scrittura di `.env*` (non `.example`), `.secrets/`, `*.pem|key|p12|pfx`, `*credentials*.json`; nega `git add` che li include | globale §Divieti «Segreti»; progetto «What NOT to touch» | 3 `cat .env` |
 | 4 | `commitSecrets` | `tool.call` Bash (pre `git commit`) | legge `git diff --cached` **più** i percorsi che lo stesso comando aggiunge/committa (anche file nuovi); **nega** su chiave privata, `sk-…`, JWT, token GitHub/Slack/AWS, connection string con password; logga le assegnazioni `password|secret|token = "…"` | globale §Divieti «prima di un commit, grep sullo staged diff» — il pre-commit git del repo **non** lo fa | 622 commit |
 | 5 | `deleteGuard` | `tool.call` Bash/PowerShell | `rm`, `rmdir`, `del`, `Remove-Item`, `git clean -f`, `git rm`, `find -delete`: **chiede**; senza dialogo (corsa `-p`) **nega** e propone la cartella nuova | globale §Divieti «mai cancellare senza conferma» + «non presidiato: MAI» | 81 `rm` in 22 sessioni |
@@ -42,7 +42,7 @@ un errore interno degrada a «lascia passare» e lo scrive nel debug log (`[enzo
 ```bash
 claude plugin validate plugins/enzo-guard                       # il motore vede 12 hook e le chiamate $.…
 npx -y -p typescript@5 tsc -p plugins/enzo-guard/tsconfig.json  # zero output = ok (tipi in .claude/types, rigenerati con /plugin-types)
-claude plugin test plugins/enzo-guard                           # 16 prove con il mondo (fs/process/env/ui) mockato sotto il plugin
+claude plugin test plugins/enzo-guard                           # 17 prove con il mondo (fs/process/env/ui) mockato sotto il plugin
 ```
 
 Collaudo a runtime del 2026-09-20 (headless, bersagli finti): 8 hook su 8 esercitabili in `-p` hanno

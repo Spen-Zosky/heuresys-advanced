@@ -24,6 +24,25 @@ function segments(cmd: string): string[] {
 }
 const firstWord = (seg: string) => (seg.match(/^(?:sudo\s+|env\s+(?:[A-Z_]+=\S*\s+)*|MSYS_NO_PATHCONV=1\s+|[A-Z_]+=\S*\s+)*(\S+)/)?.[1] ?? '')
 
+let sessionId = ''
+let altreVive: { n: number; at: number } | null = null
+
+// Quante ALTRE sessioni vive sullo stesso progetto (registro ~/.claude/sessioni/attive,
+// pid verificato dal SO da hooks/sessioni_vive.py). Cache 60 s. Null = non misurabile.
+async function altreSessioniVive($: EngineInterface): Promise<number | null> {
+  const now = Date.now()
+  if (altreVive && now - altreVive.at < 60_000) return altreVive.n
+  try {
+    const cwd = await $.session.cwd()
+    const progetto = cwd.replace(/[\\/]+$/, '').split(/[\\/]/).pop() ?? ''
+    const r = await $.process.run(['python', `${$.plugin.root}/hooks/sessioni_vive.py`, progetto, sessionId.slice(0, 8)], { timeoutMs: 10_000 })
+    const n = Number.parseInt(r.stdout.trim(), 10)
+    if (r.exitCode !== 0 || Number.isNaN(n)) return null
+    altreVive = { n, at: now }
+    return n
+  } catch { return null }
+}
+
 export const register: Register = (on, options) => {
   const opt = (k: string, dflt = true) => (typeof options[k] === 'boolean' ? (options[k] as boolean) : dflt)
 
@@ -32,9 +51,10 @@ export const register: Register = (on, options) => {
   let interactive = false
   let guardianoArgv: string[] | null = null
   let guardianoLine: string | undefined
-
   on('session.start', async ($, e, next) => {
     interactive = e.isInteractive
+    try { sessionId = await $.session.id() } catch { sessionId = '' }
+    altreVive = null
     // Ogni passo nel suo try: un fallimento su uno non deve spegnere gli altri.
     try { isWindows = (await $.env.get('OS')) === 'Windows_NT' } catch { isWindows = false }
     if (opt('guardianoBar')) {
@@ -73,12 +93,11 @@ export const register: Register = (on, options) => {
   // ─────────────────────────────────────────────── 2. Divieti git (A + B)
   // Globale §Divieti: mai push --force su main senza avviso, mai reset --hard
   // senza status, mai --amend su commit pushato / con due sessioni, mai
-  // --no-verify. Progetto: mai `git add -A` (file della sessione dream).
+  // --no-verify. `git add -A` solo con un'altra sessione viva (vedi sotto).
   const GIT_DENY: Array<[RegExp, string]> = [
     [/\bgit\s+push\b(?![^|;&]*--force-with-lease)[^|;&]*(--force\b|\s-f\b)/, 'Regola 🔒 (Divieti git): niente `git push --force`. Se serve davvero, fermati e chiedi a Enzo; con più sessioni sullo stesso tree la storia non si riscrive. Alternativa: nuovo commit, o `--force-with-lease` SOLO dopo conferma esplicita.'],
     [/\bgit\s+commit\b[^|;&]*--no-verify\b/, 'Regola 🔒 (Divieti git): mai `--no-verify` per aggirare un hook che fallisce. Indaga la causa del fallimento e correggila.'],
     [/\bgit\s+reset\s+--hard\b/, 'Regola 🔒 (Divieti git): niente `git reset --hard` (mai senza `git status` verificato e conferma di Enzo; mai con due sessioni sullo stesso tree). Preferisci `git stash`, `git checkout <ref> -- <path>` o un nuovo commit.'],
-    [/\bgit\s+add\s+(-A\b|--all\b|\.(\s|$))/, 'Regola 🔒: `git add` SOLO con percorsi espliciti (mai `-A`, `--all`, `.`): l\'indice è condiviso con altre sessioni e i file di una sessione dream/lab non entrano nei commit altrui. Elenca i file: `git add <path> <path>`.'],
   ]
   on('tool.call', { tool: ['Bash', 'PowerShell'] }, async ($, e, next) => {
     if (!opt('gitGuard')) return next(e)
@@ -86,6 +105,13 @@ export const register: Register = (on, options) => {
       const cmd = e.command
       if (!/\bgit\s/.test(cmd)) return next(e)
       for (const [re, why] of GIT_DENY) if (re.test(cmd)) return { deny: why }
+      // `git add -A/--all/.`: vietato SOLO con due sessioni sullo stesso working tree
+      // (globale «I percorsi vanno sul commit, non sull'add»). Da soli passa: in
+      // heuresys-datastore è la forma normale (166 volte in 60 gg, misurato).
+      if (/\bgit\s+add\s+(-A\b|--all\b|\.(\s|$))/.test(cmd)) {
+        const n = await altreSessioniVive($)
+        if (n === null || n > 0) return { deny: `Regola 🔒: ${n === null ? 'non ho potuto misurare se ci sono altre sessioni vive, e' : `c'è ${n} altra sessione viva su questo progetto, e`} l'indice git è condiviso: \`git add -A/.\` metterebbe in stage anche il lavoro altrui (e i file di una sessione dream/lab). Elenca i file: \`git add <path> <path>\` e \`git commit -F <msg> -- <gli stessi path>\`.` }
+      }
       if (/\bgit\s+commit\b[^|;&]*--amend\b/.test(cmd)) {
         const ok = await confirm($, `\`git commit --amend\` riscrive l'ultimo commit (vietato se già pushato o con due sessioni sul tree): ${short(cmd)} — autorizzi?`, 'Amend', 'Annulla', 'Git 🔒')
         if (!ok) return { deny: 'Amend non autorizzato (nessuna conferma, o corsa non presidiata): crea un NUOVO commit; un messaggio sbagliato si lascia com\'è.' }

@@ -291,3 +291,6 @@ _zp_verify_tmp/
 # finali in esiti/. I file restano sul disco, ignorarli non li cancella.
 .programmi/K-ruoli-direzione/evidenze/wf_*/
 .programmi/K-ruoli-direzione/esiti/_bozza_*
+
+# hooks-audit: artefatti di lavoro della skill, non versionati
+/tmp/

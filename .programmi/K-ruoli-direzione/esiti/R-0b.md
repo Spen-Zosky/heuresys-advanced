@@ -33,7 +33,7 @@ Risultato:
 | a) tenant-blueprints | 7 | SÌ — `tenant_blueprint` è per-tenant | SÌ — `BLUEPRINT_MANAGER`/`IMPLEMENTATION_CONSULTANT` hanno `tenant_blueprint:*` | **GIÀ COLLEGATE**. `grep -n "perimetroClienti" apps/api/src/modules/tenant-blueprints/service.ts` → righe 120, 126: usa il punto unico. Nessuna azione: dichiarato e verificato |
 | b) tenant-materialization | 1 | SÌ (in teoria — materializza un tenant specifico) | **NO** — `tenant_materialization:execute` è del solo `PLATFORM_ADMIN`, che non ha mai perimetro ristretto (`isPlatform(a)` → `perimetroClienti` torna `undefined`) | **RESTA CHIUSA PER COSTRUZIONE**. La condizione di R-0 non è avverata qui: nessuna richiesta reale userebbe un filtro che scriverei. Non toccato codice |
 | c) observability | 1 (3 rotte) | **PARZIALE** — `/system-health` sì per `tenantFleet` (una riga per tenant, `repository.ts` `getTenantFleet`) e `auditFeed` (`tenant_code` per evento, `getAuditFeed`); `/slow-queries` e `/request-series` NO — sono aggregati DB-wide (`pg_stat_statements`, nessun tenant per query normalizzata) e in-memory su tutte le richieste HTTP (`metrics-store.ts`, nessun tenant per bucket) | SÌ — `PLATFORM_OPERATOR` ha `observability:read` ed è in `PLATFORM_ASSIGNED_MANDATE_ROLES` | **SCOLLEGATA → ESEGUITA (R0b-2)**. Vedi sotto |
-| d) content-blueprint-links | 3 | SÌ — il link eredita `tenantId` dal documento (`content-blueprint-links/service.ts:25`, `buildScope`) | SÌ — `BLUEPRINT_MANAGER` ha sia `content:read` che `blueprint:read` | **CONDIZIONE AVVERATA ma FERMO SU R0b-3** — misura sotto: toccare `ScopeFilter` condiviso impatta moduli fuori scope |
+| d) content-blueprint-links | 3 | SÌ — il link eredita `tenantId` dal documento (`content-blueprint-links/service.ts:25`, `buildScope`) | SÌ — `BLUEPRINT_MANAGER` ha sia `content:read` che `blueprint:read` | **CONDIZIONE AVVERATA, DEBITO DICHIARATO** (decisione di Enzo, 2026-09-23) — misura sotto: toccare `ScopeFilter` condiviso impatta moduli fuori scope; condizione di riapertura in `esiti/RISPOSTE_ENZO.md` |
 
 ## R0b-2 — observability, eseguita
 
@@ -64,7 +64,9 @@ Censimento (`chi_sorveglia.py content/repository.ts` → NON MISURATO sul lato s
 
 **Perché mi fermo**: cambiare `ScopeFilter.tenantId: string | null` in una forma che accetti un insieme (per `ANY($N)`) tocca — anche se in modo logicamente equivalente per i ruoli con un solo tenant — **10 query condivise con `content` e `media-service`**, moduli che questa voce non ha il mandato di riverificare end-to-end. È esattamente il caso per cui R-0 stesso si fermò (`esiti/R-0.md`, righe 73-77: «cambiarne la forma [...] toccherebbe moduli che I-G non ha mai contato fra le 24 porte»), e la condizione che R-0 scrisse per riaprirla (un ruolo assegnato con `content:read`+`blueprint:read`) **si è avverata** — ma la misura del costo resta la stessa di allora: non è una porta isolata, è un tipo condiviso da 3 moduli e 5 suite di test.
 
-**Non toccato codice.** `content-blueprint-links` resta con `haMandatoPiattaforma` (predicato di mandato, non perimetro) come lasciato da R-0/R-1: un `BLUEPRINT_MANAGER` assegnato a un solo cliente vede oggi i link del **proprio tenant intero** (comportamento invariato, non peggiorato — nessuna regressione), non ancora ristretto al sotto-insieme dei clienti assegnati. **Decisione per Enzo**: autorizzare l'estensione di `ScopeFilter` a un insieme (impatto: 10 query + 3 service + 5 test file) o lasciare questa porta con lo stesso debito dichiarato da R-0.
+**Non toccato codice.** `content-blueprint-links` resta con `haMandatoPiattaforma` (predicato di mandato, non perimetro) come lasciato da R-0/R-1: un `BLUEPRINT_MANAGER` assegnato a un solo cliente vede oggi i link del **proprio tenant intero** (comportamento invariato, non peggiorato — nessuna regressione), non ancora ristretto al sotto-insieme dei clienti assegnati.
+
+**Decisione di Enzo (2026-09-23, raccolta da Cowork — testo in `esiti/RISPOSTE_ENZO.md`, riga R-0b)**: «Lasciala cosi', debito dichiarato». Non un rinvio silenzioso — una decisione presa e scritta, con la sua condizione di riapertura: la porta torna in cima il giorno in cui serve chiudere la fase dei ruoli COMPLETA per una dimostrazione o una certificazione, oppure il giorno in cui `ScopeFilter` va toccato per un altro motivo — allora si fa insieme e il costo condiviso (10 query + 3 service + 5 test file) si paga una volta sola. Fino ad allora resta debito dichiarato, non dimenticanza.
 
 ## Riepilogo
 
@@ -73,4 +75,4 @@ Censimento (`chi_sorveglia.py content/repository.ts` → NON MISURATO sul lato s
 | a) tenant-blueprints (7) | sì | già collegate (fatte da R-5/R-8) |
 | b) tenant-materialization (1) | NO | resta chiusa per costruzione |
 | c) observability (1 porta, 3 rotte — 2 con dimensione cliente) | sì (parziale) | collegata dove esiste la dimensione (`tenantFleet`, `auditFeed`) |
-| d) content-blueprint-links (3) | sì | condizione avverata, ma costo condiviso misurato → fermo, decisione a Enzo |
+| d) content-blueprint-links (3) | sì | condizione avverata, ma costo condiviso misurato → decisione di Enzo (2026-09-23): debito dichiarato, con condizione di riapertura |

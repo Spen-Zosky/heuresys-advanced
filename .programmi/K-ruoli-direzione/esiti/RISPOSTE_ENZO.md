@@ -28,6 +28,14 @@ Ragione della scelta, spiegata a Enzo in italiano semplice prima che scegliesse:
 NON si tocca HR_MANDATED_ROLES, non si tocca mask.ts, non nasce nessun predicato nuovo: sono la fonte diretta di I18 e I20.
 R-2 (nucleo) si sblocca ORA. La voce D-nuova nasce BLOCCATA(Enzo).
 
+R-0b | 2026-09-23 | Lasciala cosi', debito dichiarato
+
+Risposta di Enzo, raccolta da Cowork il 2026-09-23 e depositata qui senza commit (l'unico committer resta la CLI, V7).
+Domanda posta a Enzo, con la misura di R0b-3 accanto: la porta `content-blueprint-links` (3 permessi) ha la sua condizione di riapertura avverata (BLUEPRINT_MANAGER, ruolo assegnato, ha sia `content:read` che `blueprint:read`), ma collegarla al perimetro clienti richiede estendere `ScopeFilter` — un tipo condiviso da 10 query di `content/repository.ts`, 3 service (`content/service.ts`, `content/media-service.ts`, `content-blueprint-links/service.ts`) e 5 suite di test di integrazione. Tre opzioni poste: estendere ora (costo condiviso pagato subito), rimandare senza dichiarazione, o lasciarla com'e' come debito dichiarato.
+Scelta di Enzo: «Lasciala cosi', debito dichiarato». Non e' un rinvio silenzioso — e' una decisione, scritta qui perche' un rinvio dentro una riga chiusa e' invisibile a `dove_siamo.py` (e' cosi' che sono nati D11 e R-6b).
+Condizione di riapertura (parole di Enzo per un caso identico, R-2 riga 27 sopra): la porta torna in cima il giorno in cui serve chiudere la fase dei ruoli COMPLETA per una dimostrazione o una certificazione, oppure il giorno in cui `ScopeFilter` va toccato per un altro motivo — allora si fa insieme e il costo condiviso si paga una volta sola.
+`content-blueprint-links` resta con `haMandatoPiattaforma` (comportamento invariato, nessuna regressione): un `BLUEPRINT_MANAGER` assegnato a un solo cliente vede oggi i link del proprio tenant intero, non ancora ristretto al sotto-insieme assegnato.
+
 X-1 | 2026-09-19 | le 103 righe dubbie, risolte in blocco con una regola
 
 Risposta di Enzo, raccolta da Cowork il 2026-09-19 e depositata qui senza commit (l'unico committer resta la CLI, V7).

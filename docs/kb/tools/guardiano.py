@@ -202,8 +202,15 @@ def trova_transcript(
     *,
     dir_override: Path | None = None,
     usa_ambiente: bool = True,
+    nota_out: dict | None = None,
 ) -> Path | None:
     """Il transcript di QUESTA sessione, non l'ultimo che ha scritto.
+
+    `nota_out`, se passato, viene RIEMPITO quando il match e' avvenuto per PREFISSO
+    (id abbreviato) invece che per nome esatto: {'prefisso': True, 'candidati': N,
+    'scelto': <path>}. Chi chiama puo' cosi' DICHIARARE la scelta invece di lasciarla
+    silenziosa — un id troncato che becca il file sbagliato sarebbe lo stesso difetto
+    del "mtime piu' recente" con due sessioni vive, solo travestito da funzionalita'.
 
     `dir_override` e `usa_ambiente` esistono per il selftest: senza poter
     iniettare una directory finta e spegnere la lettura dell'ambiente, il ramo
@@ -258,6 +265,30 @@ def trova_transcript(
                 for altro in sorted(base.glob(f"*/{session}.jsonl")):
                     if altro.is_file():
                         return altro
+        # ⚠ CORRETTO 2026-09-23 (C-1-bis, giro di governo GRD-C). Il match ESATTO qui
+        # sopra pretende il nome file intero: un id ABBREVIATO (`--session 536d656f`
+        # invece dell'UUID completo) non lo trova mai, ne' nella cartella corrente ne'
+        # nella ricerca allargata — perche' entrambe cercano `{session}.jsonl` alla
+        # lettera. Il guardiano tornava «nessun transcript» e «GUARDIANO CIECO» pur
+        # avendo il file sul disco, misurato da due cartelle diverse lo stesso giorno.
+        # Qui si prova un match per PREFISSO: se piu' file iniziano con lo stesso testo
+        # si prende il PIU' RECENTE e lo si DICHIARA in `nota_out`, mai in silenzio —
+        # e' la stessa cautela della ricerca «due sessioni vive» qui sopra, applicata a
+        # un id parziale invece che a un id assente.
+        base_pref = dir_override if dir_override is not None else Path.home() / ".claude" / "projects"
+        if base_pref.is_dir():
+            pattern = f"{session}*.jsonl" if dir_override is not None else f"*/{session}*.jsonl"
+            prefissi = sorted(
+                (p for p in base_pref.glob(pattern) if p.is_file()),
+                key=lambda p: p.stat().st_mtime,
+                reverse=True,
+            )
+            if prefissi:
+                if nota_out is not None:
+                    nota_out["prefisso"] = True
+                    nota_out["candidati"] = len(prefissi)
+                    nota_out["scelto"] = str(prefissi[0])
+                return prefissi[0]
         return None
     cand = sorted(d.glob("*.jsonl"), key=lambda p: p.stat().st_mtime, reverse=True)
     if not cand:
@@ -417,8 +448,9 @@ def misura(session: str | None, override_window: int | None, cwd: Path | None = 
     contro il codice VERO — e una prova che ricalcola la logica invece di
     chiamarla resta verde anche togliendo il ramo. E' successo, ed e' il motivo
     per cui questi due parametri ci sono."""
+    nota_prefisso: dict = {}
     path = trova_transcript(session, cwd, dir_override=dir_override,
-                            usa_ambiente=dir_override is None)
+                            usa_ambiente=dir_override is None, nota_out=nota_prefisso)
     if path is None:
         return {"ok": False, "errore": f"nessun transcript in {dir_transcript(cwd)}"}
     camp = campiona(path)
@@ -475,6 +507,9 @@ def misura(session: str | None, override_window: int | None, cwd: Path | None = 
         "output_totale": sum(c.output for c in camp),
         "giudizio": giudizio(frazione),
         "ritardo": "un turno (quello in corso non e' ancora scritto): il numero e' un pavimento",
+        # id ABBREVIATO risolto per prefisso (C-1-bis): mai in silenzio, sempre dichiarato.
+        "id_abbreviato": bool(nota_prefisso.get("prefisso")),
+        "id_abbreviato_candidati": nota_prefisso.get("candidati"),
     }
 
 
@@ -696,6 +731,10 @@ def stampa(m: dict, budget: int | None) -> int:
         print(f"  giudizio    {m['giudizio']}")
     print(f"  ritardo     {m['ritardo']}")
     print(f"  fonte       {m['transcript']}")
+    if m.get("id_abbreviato"):
+        n = m.get("id_abbreviato_candidati")
+        print(f"  ⚠ id ABBREVIATO: {n} transcript iniziano con lo stesso prefisso, preso "
+              f"il PIU' RECENTE (dichiarato, non indovinato in silenzio)")
     if budget:
         # Si misura contro la SOGLIA, non contro la fine della finestra: aprire un lavoro
         # che arriva al 75% significa aprirlo sapendo che va interrotto a meta'.
@@ -992,6 +1031,40 @@ def selftest() -> int:
         # Nota: con dir_override la ricerca allargata e' spenta di proposito, cosi' il
         # selftest non dipende dai progetti veri della macchina. Il caso positivo si
         # prova sulla macchina, ed e' registrato nel registro di sorveglianza.
+
+        # --- C-1-bis, 2026-09-23 (giro di governo GRD-C): ID ABBREVIATO ----------
+        # Misurato dal governo, non da me: `--session 536d656f` (il prefisso corto,
+        # non l'UUID intero) tornava «nessun transcript» e «GUARDIANO CIECO» da DUE
+        # cartelle diverse, pur avendo il file sul disco — il match esatto qui sopra
+        # pretende il nome file completo. Tre casi, e sono quelli che il governo ha
+        # chiesto esplicitamente: prefisso univoco, prefisso ambiguo (piu' recente +
+        # dichiarato), prefisso che non trova nulla.
+        pu = tmp / "prefisso-univoco"
+        pu.mkdir(parents=True, exist_ok=True)
+        (pu / "536d656f-aaaa-bbbb-cccc-dddddddddddd.jsonl").write_text("{}\n", encoding="utf-8")
+        check("id abbreviato univoco: trovato per prefisso", "536d656f-aaaa-bbbb-cccc-dddddddddddd.jsonl",
+              getattr(trova_transcript("536d656f", dir_override=pu, usa_ambiente=False), "name", None))
+
+        pa = tmp / "prefisso-ambiguo"
+        pa.mkdir(parents=True, exist_ok=True)
+        vecchio_amb = pa / "536d656f-vecchio-1111111111111111.jsonl"
+        nuovo_amb = pa / "536d656f-nuovo-2222222222222222.jsonl"
+        vecchio_amb.write_text("{}\n", encoding="utf-8")
+        nuovo_amb.write_text("{}\n", encoding="utf-8")
+        os.utime(vecchio_amb, (1_000_000, 1_000_000))
+        os.utime(nuovo_amb, (2_000_000, 2_000_000))
+        nota: dict = {}
+        trovato = trova_transcript("536d656f", dir_override=pa, usa_ambiente=False, nota_out=nota)
+        check("id abbreviato ambiguo: prende il PIU' RECENTE", nuovo_amb.name,
+              getattr(trovato, "name", None))
+        check("id abbreviato ambiguo: la scelta e' DICHIARATA (2 candidati)", (True, 2),
+              (nota.get("prefisso"), nota.get("candidati")))
+
+        pn = tmp / "prefisso-nessuno"
+        pn.mkdir(parents=True, exist_ok=True)
+        (pn / "un-altro-id-completamente-diverso.jsonl").write_text("{}\n", encoding="utf-8")
+        check("id abbreviato senza match: NON pesca a caso, resta None", None,
+              trova_transcript("536d656f", dir_override=pn, usa_ambiente=False))
 
         # --- il verdetto: l'OR, e il caso cieco ---------------------------------
         OK_CTX = lambda f: {"ok": True, "frazione": f, "percento": f * 100, "finestra": 1_000_000, "contesto": int(f * 1_000_000)}

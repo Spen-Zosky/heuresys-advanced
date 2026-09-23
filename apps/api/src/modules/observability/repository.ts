@@ -29,7 +29,14 @@ export async function getServerMaxConnections(q: DbConnector): Promise<number> {
  */
 export async function getTenantFleet(
   q: DbConnector,
+  tenantIds: ReadonlySet<string> | undefined,
 ): Promise<ObservabilityTenantFleetEntry[]> {
+  const params: unknown[] = [];
+  let tenantFilter = "";
+  if (tenantIds !== undefined) {
+    params.push([...tenantIds]);
+    tenantFilter = ` WHERE t.tenant_id = ANY($${params.length})`;
+  }
   const r = await q.query<{
     code: string;
     name: string;
@@ -45,8 +52,9 @@ export async function getTenantFleet(
             (SELECT max(le.created_at) FROM sys.sys_auth_login_events le
               WHERE le.auth_login_event_tenant_id = t.tenant_id
                 AND le.auth_login_event_type = 'LOGIN_SUCCESS') AS last_activity
-       FROM sys.sys_tenancies t
+       FROM sys.sys_tenancies t${tenantFilter}
       ORDER BY t.tenant_code`,
+    params,
   );
 
   return r.rows.map((row) => ({
@@ -158,7 +166,14 @@ export async function getSchemaCounts(
 export async function getAuditFeed(
   q: DbConnector,
   limit: number,
+  tenantIds: ReadonlySet<string> | undefined,
 ): Promise<ObservabilityAuditEvent[]> {
+  const params: unknown[] = [limit];
+  let tenantFilter = "";
+  if (tenantIds !== undefined) {
+    params.push([...tenantIds]);
+    tenantFilter = ` AND a.action_tenant_id = ANY($${params.length})`;
+  }
   const r = await q.query<{
     action_id: string;
     action_type: string;
@@ -178,9 +193,10 @@ export async function getAuditFeed(
        FROM audit.user_self_service_actions a
        JOIN sys.sys_tenancies t ON t.tenant_id = a.action_tenant_id
        JOIN sys.sys_users    u ON u.user_id   = a.action_user_id
+      WHERE true${tenantFilter}
       ORDER BY a.created_at DESC
       LIMIT $1`,
-    [limit],
+    params,
   );
 
   return r.rows.map((row) => ({

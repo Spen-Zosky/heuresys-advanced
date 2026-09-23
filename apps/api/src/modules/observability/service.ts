@@ -2,12 +2,16 @@
  * apps/api/src/modules/observability/service.ts
  * Platform-wide system-health aggregator. Assembles the SystemHealthResponse
  * from in-process probes (pg.Pool live counters + in-memory RBAC cache) and
- * read-only DB reads. No tenant scoping — PLATFORM_ADMIN-only (gated at the
- * route via requirePermission). All data is live; nothing is fabricated.
+ * read-only DB reads. Gated via requirePermission("observability:read"),
+ * held by PLATFORM_ADMIN (unfiltered) and PLATFORM_OPERATOR (mandato K, R-0b:
+ * `tenantFleet`/`auditFeed` carry a per-tenant dimension and are filtered by
+ * `perimetroClienti` — a PLATFORM_OPERATOR sees only its assigned tenants,
+ * never all). `pool`/`rbac`/`schemaCounts` and the two B7 endpoints below stay
+ * platform-wide by construction: DB/process-wide aggregates, no tenant per row.
  */
 
 import { pool } from "../../db/client.js";
-import type { ActorContext } from "../../lib/actor.js";
+import { perimetroClienti, type ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
 import { rbacCacheStats } from "../../middleware/rbac.js";
@@ -32,7 +36,7 @@ const POOL_MAX_CLIENTS = 20;
 const AUDIT_FEED_LIMIT = 20;
 
 export const observabilityService = {
-  async getSystemHealth(_actor: ActorContext): Promise<SystemHealthResponse> {
+  async getSystemHealth(actor: ActorContext): Promise<SystemHealthResponse> {
     // In-process probes (synchronous reads from live in-memory state).
     const rbac = rbacCacheStats();
     const poolTotal = pool.totalCount;
@@ -46,6 +50,10 @@ export const observabilityService = {
       .recentErrors()
       .map((e) => ({ route: e.route, status: e.status }));
 
+    // R-0b: undefined = no filter (PLATFORM_ADMIN); a Set (even empty) = only
+    // those tenants (PLATFORM_OPERATOR, mandato K, D9=B).
+    const perimetro = perimetroClienti(actor);
+
     // Read-only DB reads (parallelised).
     const [
       serverMaxConnections,
@@ -55,10 +63,10 @@ export const observabilityService = {
       auditFeed,
     ] = await Promise.all([
       repo.getServerMaxConnections(pool),
-      repo.getTenantFleet(pool),
+      repo.getTenantFleet(pool, perimetro),
       repo.getAuthIntegrity(pool),
       repo.getSchemaCounts(pool),
-      repo.getAuditFeed(pool, AUDIT_FEED_LIMIT),
+      repo.getAuditFeed(pool, AUDIT_FEED_LIMIT, perimetro),
     ]);
 
     return {

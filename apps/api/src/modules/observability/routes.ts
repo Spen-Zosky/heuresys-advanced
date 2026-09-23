@@ -3,9 +3,11 @@
  * GET /system-health · GET /slow-queries · GET /request-series (#35 B7) —
  * all platform-only.
  *
- * Gate: `observability:read` (000178, #61 G2 — PLATFORM_ADMIN-only audience;
- * historically proxied on `tenant:create` before the matrix had a dedicated
- * code). Read-only GETs → NO app.verifyCsrf.
+ * Gate: `observability:read` (000178, #61 G2 — historically proxied on
+ * `tenant:create` before the matrix had a dedicated code). Held by
+ * PLATFORM_ADMIN (unfiltered) and, since mandato K R-9, PLATFORM_OPERATOR
+ * (perimeter-filtered on the tenant-carrying parts of /system-health — R-0b).
+ * Read-only GETs → NO app.verifyCsrf.
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";

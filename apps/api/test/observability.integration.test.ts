@@ -10,8 +10,9 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
-import { closePool } from "../src/db/client.js";
+import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { readCollaudoKey, deriveCollaudoPassword } from "../scripts/collaudo-access.mjs";
 
 const PWD = TEST_PERSONA_PASSWORD;
 
@@ -70,7 +71,6 @@ describe("GET /v1/observability/system-health integration", () => {
 
   afterAll(async () => {
     await suite.app.close();
-    await closePool();
   });
 
   it("PLATFORM_ADMIN gets 200 with the full snapshot shape", async () => {
@@ -264,5 +264,126 @@ describe("GET /v1/observability/system-health integration", () => {
       const r = await suite.app.inject({ method: "GET", url, headers: { cookie: ch(tenantS.cookies) } });
       expect(r.statusCode).toBe(403);
     }
+  });
+});
+
+/**
+ * mandato K, R-0b — la condizione di R-0 per `observability` si è avverata (R-9 ha dato a
+ * PLATFORM_OPERATOR il permesso `observability:read` con perimetro assegnato, D9=B): il
+ * `tenantFleet` e l'`auditFeed` di /system-health portano una dimensione cliente (una riga
+ * per tenant / `tenant_code` per evento) e vanno filtrati con `perimetroClienti`. `pool`,
+ * `rbac`, `schemaCounts`, `/slow-queries` e `/request-series` restano platform-wide per
+ * costruzione: sono aggregati sull'intero DB/processo, senza un tenant per riga da filtrare.
+ */
+describe("mandato K, R-0b — observability filtrato per perimetro cliente (PLATFORM_OPERATOR)", () => {
+  const OPERATOR_EMAIL = "platform-operator@collaudo.invalid";
+  let opSuite: TestApp;
+  let admin2: S;
+  let operator: S & { csrfToken: string; userId: string };
+  let rtlId = "";
+  let assignmentId = "";
+
+  beforeAll(async () => {
+    opSuite = await buildTestApp();
+    const key = readCollaudoKey();
+    admin2 = await login(opSuite, "enzo.spenuso@heuresys.com");
+    const opRaw = await loginRaw(opSuite.app, OPERATOR_EMAIL, deriveCollaudoPassword(key, OPERATOR_EMAIL));
+    const opCookies = new Map<string, string>();
+    for (const c of opRaw.cookies) opCookies.set(c.name, c.value);
+    const opBody = opRaw.json() as { csrfToken: string; user: { userId: string } };
+    operator = { cookies: opCookies, csrfToken: opBody.csrfToken, userId: opBody.user.userId };
+
+    const rtl = await pool.query<{ id: string }>(`SELECT tenant_id AS id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'`);
+    rtlId = rtl.rows[0]!.id;
+  });
+
+  afterAll(async () => {
+    await opSuite.app.close();
+    await closePool();
+  });
+
+  // Serve un admin per creare/revocare l'assegnazione: riusa un login proprio (il helper
+  // `login` del file sopra non espone csrfToken/userId, che qui servono).
+  async function loginAdmin(t: TestApp, email: string): Promise<{ cookies: Map<string, string>; csrfToken: string }> {
+    const r = await loginRaw(t.app, email, PWD);
+    const cookies = new Map<string, string>();
+    for (const c of r.cookies) cookies.set(c.name, c.value);
+    const b = r.json() as { csrfToken: string };
+    return { cookies, csrfToken: b.csrfToken };
+  }
+
+  it("PLATFORM_OPERATOR senza assegnazione — tenantFleet vuoto (nessuna assegnazione, non 'tutti')", async () => {
+    const r = await opSuite.app.inject({
+      method: "GET", url: "/v1/observability/system-health",
+      headers: { cookie: ch(operator.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as SystemHealthBody;
+    expect(body.tenantFleet).toEqual([]);
+  });
+
+  it("assegnato a RTL_BANK — vede SOLO RTL_BANK in tenantFleet e auditFeed, mai HEURESYS", async () => {
+    const adm = await loginAdmin(opSuite, "enzo.spenuso@heuresys.com");
+    const create = await opSuite.app.inject({
+      method: "POST", url: "/v1/platform-tenant-assignments",
+      headers: { cookie: ch(adm.cookies), "x-csrf-token": adm.csrfToken },
+      payload: { userId: operator.userId, tenantId: rtlId },
+    });
+    expect(create.statusCode).toBe(201);
+    assignmentId = (create.json() as { assignmentId: string }).assignmentId;
+
+    const r = await opSuite.app.inject({
+      method: "GET", url: "/v1/observability/system-health",
+      headers: { cookie: ch(operator.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as SystemHealthBody;
+
+    expect(body.tenantFleet.length).toBe(1);
+    expect(body.tenantFleet[0]!.code).toBe("RTL_BANK");
+    expect(body.tenantFleet.some((t) => t.code === "HEURESYS")).toBe(false);
+
+    for (const ev of body.auditFeed) {
+      expect(ev.tenantCode).toBe("RTL_BANK");
+    }
+  });
+
+  it("revocata l'assegnazione, torna a non vedere nessun tenant", async () => {
+    const adm = await loginAdmin(opSuite, "enzo.spenuso@heuresys.com");
+    const revoke = await opSuite.app.inject({
+      method: "POST", url: `/v1/platform-tenant-assignments/${assignmentId}/revoke`,
+      headers: { cookie: ch(adm.cookies), "x-csrf-token": adm.csrfToken },
+    });
+    expect(revoke.statusCode).toBe(200);
+
+    const r = await opSuite.app.inject({
+      method: "GET", url: "/v1/observability/system-health",
+      headers: { cookie: ch(operator.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    expect((r.json() as SystemHealthBody).tenantFleet).toEqual([]);
+  });
+
+  it("controprova — PLATFORM_ADMIN vede sempre entrambi i tenant, assegnazione o no", async () => {
+    const r = await opSuite.app.inject({
+      method: "GET", url: "/v1/observability/system-health",
+      headers: { cookie: ch(admin2.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const codes = (r.json() as SystemHealthBody).tenantFleet.map((t) => t.code).sort();
+    expect(codes).toEqual(["HEURESYS", "RTL_BANK"]);
+  });
+
+  it("/slow-queries e /request-series restano platform-wide anche per un operator assegnato (nessuna dimensione cliente da filtrare)", async () => {
+    const sq = await opSuite.app.inject({
+      method: "GET", url: "/v1/observability/slow-queries?limit=1&minCalls=1",
+      headers: { cookie: ch(operator.cookies) },
+    });
+    expect(sq.statusCode).toBe(200);
+    const rs = await opSuite.app.inject({
+      method: "GET", url: "/v1/observability/request-series?windowMinutes=5&stepMinutes=1",
+      headers: { cookie: ch(operator.cookies) },
+    });
+    expect(rs.statusCode).toBe(200);
   });
 });

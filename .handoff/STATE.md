@@ -1,27 +1,29 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: S1107 (2026-09-23), mandato Cowork GRD-C (passaggio 4 del piano
-`PIANO_collaudo-e-correzioni-governo_2026-09-19`). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: S1107 (2026-09-23), mandato Cowork GRD-C, secondo giro di governo. I
+numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-**GRD-C — nessun codice toccato: il lavoro richiesto era già stato fatto il 2026-09-19.** Il
-mandato chiedeva tre correzioni al guardiano (`docs/kb/tools/guardiano.py`): trovare il
-transcript da qualunque cartella, leggere le 5 ore dal canale quando la riga di stato non
-gira, far scattare la soglia anche sul picco dopo una compattazione. Misurato sul vivo: tutte
-e tre già implementate e committate (`0d92c1af`, 2026-09-19 19:08:48), 4 giorni prima che il
-mandato arrivasse. Riverificate senza ricostruire: stesso session-id da tre cartelle diverse
-(133.431 token identici, inclusa `C:\`, dove il difetto originale si manifestava), `--canale`
-positivo/negativo, transcript compattato sintetico positivo/negativo, selftest tutto verde. Le
-due copie (utente + repo) identiche, `verify_gate.py run` GREEN. Esito completo con comandi e
-output in `.programmi/K-ruoli-direzione/esiti/GRD-C.md`, committato (`9ee6676d`).
-**Non eseguita nessuna propagazione/deploy**: vietato esplicitamente dal mandato ("la chiusura,
-la propagazione ai cloni e il rilascio li conduce il governo"). Questa chiusura è dichiarata
-"passo 1 di 2" da Cowork — il passo 2 (propagazione) è demandato a chi governa.
+**GRD-C — un difetto reale trovato dal governo e corretto.** Primo giro: verificato che C-2
+(5 ore dal canale) e C-3 (soglia sul picco) erano già fatte il 2026-09-19 (`0d92c1af`); avevo
+dichiarato anche C-1 (transcript da qualunque cartella) già fatta, ma il governo ha misurato
+che era vero **solo con l'UUID completo** — con un id **abbreviato** (`--session 536d656f`)
+il guardiano tornava "GUARDIANO CIECO" pur avendo il file sul disco. Corretto in
+`docs/kb/tools/guardiano.py` (`trova_transcript`): match per prefisso quando l'esatto fallisce,
+il più recente in caso di ambiguità, sempre **dichiarato** (`id_abbreviato` nel risultato).
+Verificato con lo stesso id abbreviato da tre cartelle diverse (stesso numero di contesto in
+tutte e tre) e col negativo (id inesistente resta non misurabile). Selftest 61→65 casi verdi.
+Le due copie (utente + repo) riallineate e identiche; la terza copia (altro progetto) non
+toccata. `verify_gate.py run` GREEN tre volte (dopo ciascun commit). Esito completo in
+`.programmi/K-ruoli-direzione/esiti/GRD-C.md` (`399f04d5`, `ddff1607`).
+**Nessuna propagazione/deploy eseguita**: vietato esplicitamente dal mandato, anche quando il
+profilo di chiusura del progetto lo prescriverebbe (`origin/main` è avanti di 118 commit su
+`origin/prod`, invariato a `78b40e72`).
 
 ## Top priorities
 
-1. **`#258` — la persona di collaudo di piattaforma** (~1 sessione, P1): invariata da S1106.
+1. **`#258` — la persona di collaudo di piattaforma** (~1 sessione, P1): invariata.
 2. **`#251` → `#252`** (contatore persone distinte, poi il ponte sulle letture): invariate.
 3. **`#149` F4** e **`#159` F3**: invariate.
 
@@ -29,11 +31,10 @@ la propagazione ai cloni e il rilascio li conduce il governo"). Questa chiusura 
 
 ## Open questions
 
-- **`#259` mandato K — tre decisioni di Enzo, nessun lavoro CLI residuo**: invariata da S1106
-  (D11, `sys_attendance`, D12 — risposte in `esiti/RISPOSTE_ENZO.md`).
-- **Propagazione ai cloni NON eseguita in questa chiusura** — per mandato esplicito di Cowork
-  (GRD-C). `origin/main` è avanti di 115 commit su `origin/prod` (`refs/heads/prod` ancora a
-  `78b40e72`): il "passo 2" annunciato da Cowork è presumibilmente questo.
+- **`#259` mandato K — tre decisioni di Enzo, nessun lavoro CLI residuo**: invariata (D11,
+  `sys_attendance`, D12 — risposte in `esiti/RISPOSTE_ENZO.md`).
+- **Propagazione ai cloni ancora NON eseguita** — per mandato esplicito di Cowork (GRD-C, due
+  giri). `refs/heads/prod` resta a `78b40e72`, `main` a `ddff1607`: 118 commit di scarto.
 - **Due file non tracciati, lavoro in corso di Enzo, non toccarli**: `scripts/align-claude-ecosystem.sh`
   (modificato) e `scripts/align-codex-ecosystem.sh` (nuovo) — ancora intoccati.
 - Le due file scritti da agenti fuori cartella e le sette bozze `esiti/_bozza_*.md`: si
@@ -47,6 +48,7 @@ la propagazione ai cloni e il rilascio li conduce il governo"). Questa chiusura 
 python docs/kb/tools/session_start.py                        # atteso: #259 in WAIT-INPUT, nessun P1 nuovo
 python docs/kb/tools/handoff_lint.py                         # atteso: 0 FAIL
 python docs/kb/tools/aggiorna_numeri_sot.py --check          # atteso: exit 0
-python docs/kb/tools/guardiano.py --selftest                 # atteso: 61/61 verdi (GRD-C)
-git ls-remote origin refs/heads/prod refs/heads/main          # prod ancora indietro di 115 commit
+python docs/kb/tools/guardiano.py --selftest                 # atteso: 65/65 verdi (GRD-C1 incluso)
+python docs/kb/tools/guardiano.py --session <id-abbreviato>  # atteso: trovato da qualunque cartella
+git ls-remote origin refs/heads/prod refs/heads/main          # prod ancora indietro di 118 commit
 ```

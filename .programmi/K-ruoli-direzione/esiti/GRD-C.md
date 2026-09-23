@@ -143,9 +143,14 @@ correzione non ha richiesto toccare nessun altro file.
 
 ```
 $ python docs/kb/tools/verify_gate.py run
+2 file modificati → suite: shell-tests, programmi
+  riuso (verdi, contenuto invariato): shell-tests
+  [L1] programmi            exit=0 (0.3s)
+
+verdetto: GREEN → .zp\verify-verdict.json
 ```
 
-Esito appeso qui sotto, lanciato una volta sola a fine ciclo.
+**GREEN.** Lanciato una volta sola, a fine ciclo, dopo push.
 
 ## Chiusura GRD-C
 

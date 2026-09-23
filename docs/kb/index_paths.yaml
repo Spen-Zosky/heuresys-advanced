@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-23T01:24:10Z da docs/kb/tools/build_index.py
+# generato: 2026-09-23T02:38:16Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-23T01:24:10Z"
-  total_files: 3731
+  generated_at: "2026-09-23T02:38:16Z"
+  total_files: 3732
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -23,7 +23,7 @@ meta:
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 753
+    doc-canonical: 754
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -37,7 +37,7 @@ meta:
   status_counts:
     archive: 593
     external-archive: 50
-    live: 3088
+    live: 3089
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -11970,6 +11970,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F3_terzo_giro_W3.md'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/F3_terzo_giro_W3.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\GRD-C.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/GRD-C.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

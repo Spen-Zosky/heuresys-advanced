@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-23T01:24:10Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3731**
+**Generato**: 2026-09-23T02:38:16Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3732**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -23,7 +23,7 @@
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 753 |
+| doc-canonical | 754 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -34,7 +34,7 @@
 | test | 448 |
 | ux-design-archive | 80 |
 | web-source | 258 |
-| **TOTALE** | **3731** |
+| **TOTALE** | **3732** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 3088 |
+| live | 3089 |
 
 ## File per categoria
 
@@ -2083,6 +2083,7 @@
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.5_sola_lettura.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.6_migrazioni.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F3_terzo_giro_W3.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\GRD-C.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-A.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-B.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\I-C.md` · *live* · git-tracked

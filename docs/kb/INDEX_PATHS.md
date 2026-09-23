@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-19T20:11:12Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3726**
+**Generato**: 2026-09-23T01:24:10Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3731**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -12,18 +12,18 @@
 | api-core | 36 |
 | api-module | 398 |
 | ci | 19 |
-| claude-config | 37 |
+| claude-config | 38 |
 | config | 336 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 444 |
+| db-migration | 445 |
 | db-other | 8 |
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 751 |
+| doc-canonical | 753 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -31,10 +31,10 @@
 | shared-pkg | 4 |
 | shared-schema | 121 |
 | showcase-source | 13 |
-| test | 447 |
+| test | 448 |
 | ux-design-archive | 80 |
 | web-source | 258 |
-| **TOTALE** | **3726** |
+| **TOTALE** | **3731** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 3083 |
+| live | 3088 |
 
 ## File per categoria
 
@@ -555,6 +555,7 @@
 
 ### claude-config
 
+- `D:\heuresys-advanced\.claude\enzo-guard.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\launch.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\rules\api-module-pattern.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\rules\db-migrations.md` · *live* · git-tracked
@@ -1736,6 +1737,7 @@
 - `D:\heuresys-advanced\db\migrations\000446_x4_regola_degli_ibridi.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000447_x5_sentinella_della_direzione.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000448_g1_porta_nativa_user_position_assignments.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000449_r6b_data_steward.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -2091,12 +2093,14 @@
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\INVENTARIO_stash.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-0.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-0_porte.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-0b.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-10_rotte.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-1_passo34.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-2_domanda_masking.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-6_permessi_people_manager.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-6b_DATA_STEWARD.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-7.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-9.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-14.md` · *live* · git-tracked
@@ -3122,6 +3126,7 @@
 - `D:\heuresys-advanced\apps\api\test\dashboard.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\dashboards-f2.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\dashboards-f3b.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\data-steward.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\delegations.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\domain-derived-sections.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\domains-f6.integration.test.ts` · *live* · git-tracked

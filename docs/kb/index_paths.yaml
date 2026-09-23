@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-19T20:11:12Z da docs/kb/tools/build_index.py
+# generato: 2026-09-23T01:24:10Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-19T20:11:12Z"
-  total_files: 3726
+  generated_at: "2026-09-23T01:24:10Z"
+  total_files: 3731
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -12,18 +12,18 @@ meta:
     api-core: 36
     api-module: 398
     ci: 19
-    claude-config: 37
+    claude-config: 38
     config: 336
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 444
+    db-migration: 445
     db-other: 8
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 751
+    doc-canonical: 753
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -31,13 +31,13 @@ meta:
     shared-pkg: 4
     shared-schema: 121
     showcase-source: 13
-    test: 447
+    test: 448
     ux-design-archive: 80
     web-source: 258
   status_counts:
     archive: 593
     external-archive: 50
-    live: 3083
+    live: 3088
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3001,6 +3001,12 @@ files:
     root: repo
     rel: '.github/workflows/typecheck.yml'
     category: ci
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\enzo-guard.json'
+    root: repo
+    rel: '.claude/enzo-guard.json'
+    category: claude-config
     status: live
     provenance: git-tracked
   - path: 'D:\heuresys-advanced\.claude\launch.json'
@@ -9981,6 +9987,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000449_r6b_data_steward.sql'
+    root: repo
+    rel: 'db/migrations/000449_r6b_data_steward.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -12021,6 +12033,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-0b.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-0b.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-10_rotte.md'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/R-10_rotte.md'
@@ -12054,6 +12072,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-6_permessi_people_manager.md'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/R-6_permessi_people_manager.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\R-6b_DATA_STEWARD.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/R-6b_DATA_STEWARD.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -18060,6 +18084,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\dashboards-f3b.integration.test.ts'
     root: repo
     rel: 'apps/api/test/dashboards-f3b.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\data-steward.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/data-steward.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

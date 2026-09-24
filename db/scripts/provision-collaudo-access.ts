@@ -86,6 +86,11 @@ const UNDO_REASON =
   "#169 F3b (S1091, 2026-09-07): rimosso perche' derivato dalla CHIAVE MADRE invece che " +
   "dalla chiave di collaudo. Misurato live: password di collaudo 401, password da chiave " +
   "madre 200 su tutte e tre. Introdotto il 2026-08-31 da provision-derived-access --solo=.";
+const DISALLINEO_REASON =
+  "D11-0 (2026-09-24): ruotata dalla VERIFICA automatica, non da --riallinea. L'hash corrente " +
+  "non verifica contro la password derivata dalla chiave di collaudo di questa macchina: la " +
+  "credenziale era nata da un'altra chiave (misurato in CI, corsa 36052896981: login 401 su " +
+  "cinque identita' create il 19/09 fra le 04:44 e le 05:04).";
 const EXEMPTION_REASON =
   "collaudo-access (#169 F2, direttiva Enzo 2026-08-25): utenza di collaudo SERVICE, " +
   "verifiche funzionali e frontend senza il rito di login delle persone reali";
@@ -153,14 +158,19 @@ async function main(): Promise<void> {
 
     const stats = {
       utenti: 0, ruoli: 0, identita: 0, credenziali: 0, iscrizioni: 0, esenzioni: 0,
-      riallineate: 0, fattoriRimossi: 0, invariati: 0,
+      riallineate: 0, disallineate: 0, fattoriRimossi: 0, invariati: 0,
     };
 
     await db.query("BEGIN");
 
     // (d) il giornale del rollback, creato PRIMA di qualunque scrittura. Vive in `staging`,
     //     che e' lo schema ausiliario dichiarato per questa materia (I3/I4).
-    if (RIALLINEA && !DRY) {
+    //
+    // D11-0 (2026-09-24): non piu' solo per `--riallinea`. La verifica automatica qui sotto
+    // puo' ruotare una credenziale disallineata anche senza il flag, e una rotazione senza
+    // giornale sarebbe una scrittura senza rollback dichiarato. Resta un CREATE TABLE IF
+    // NOT EXISTS: su un database che non ha mai avuto disallineamenti nasce vuota e basta.
+    if (!DRY) {
       await db.query(`
         CREATE TABLE IF NOT EXISTS staging.collaudo_riallineo_undo (
           undo_id      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -234,14 +244,41 @@ async function main(): Promise<void> {
         }
       }
       if (identityId) {
-        const cred = await db.query<{ n: string }>(
-          `SELECT count(*)::text AS n FROM sys.sys_auth_credentials
+        const cred = await db.query<{ n: string; h: string | null }>(
+          `SELECT count(*)::text AS n, max(auth_credential_hash) AS h
+             FROM sys.sys_auth_credentials
             WHERE auth_credential_identity_id = $1 AND auth_credential_is_current`, [identityId]);
-        // --riallinea: la credenziale corrente NON viene dalla chiave di collaudo (lo dice la
-        // prova live: 401 con la propria, 200 con la madre). Si archivia nel giornale e si
-        // ruota, cosi' il ramo qui sotto la ricrea dalla chiave giusta.
-        if (RIALLINEA && cred.rows[0]!.n !== "0") {
+        /**
+         * D11-0 (2026-09-24) — LA VERIFICA, non piu' un flag da ricordarsi.
+         *
+         * C3 del CLAUDE.md di progetto: «un seed porta a uno STATO DICHIARATO, non negozia
+         * con quello che trova». Lo stato dichiarato qui e': la credenziale corrente deriva
+         * dalla chiave di collaudo di QUESTA macchina. Fino a oggi lo script verificava solo
+         * che una credenziale ESISTESSE — e una credenziale nata da un'altra chiave passava
+         * per «gia' a posto», con il login a 401 e nessuno strumento che lo dicesse.
+         *
+         * Misurato quel giorno (corsa CI 36052896981, 6 file rossi da due giorni): su
+         * heuresys_ci le cinque identita' create il 19/09 fra le 04:44 e le 05:04 portavano
+         * l'hash della chiave `.secrets/collaudo-access.key` del PC/gemello, mentre il runner
+         * deriva dalla PROPRIA chiave (drop-in systemd, impronte diverse: a4191764 vs
+         * 591962ed). Le identita' create dalle 08:59 in poi — quelle nate dentro la CI —
+         * erano verdi. Il taglio nei timestamp e' netto e non lascia altra lettura.
+         *
+         * Costo: una `argon2.verify` per identita' (~14), a fronte di una CI rossa che senza
+         * questa riga si ripresenta ogni volta che una chiave cambia o una credenziale nasce
+         * altrove. La rotazione resta protetta dalle stesse quattro cose di `--riallinea`:
+         * giornale PRIMA, elenco esplicito, post-condizioni in coda.
+         */
+        let disallineata = false;
+        if (cred.rows[0]!.n !== "0" && cred.rows[0]!.h) {
+          disallineata = !(await argon2.verify(
+            cred.rows[0]!.h, deriveCollaudoPassword(key, c.email)));
+        }
+        // --riallinea: rotazione INCONDIZIONATA (resta, per il caso in cui si voglia ruotare
+        // anche una credenziale che verifica). `disallineata`: rotazione MISURATA.
+        if ((RIALLINEA || disallineata) && cred.rows[0]!.n !== "0") {
           stats.riallineate++; touched = true;
+          if (disallineata && !RIALLINEA) stats.disallineate++;
           if (!DRY) {
             await db.query(
               `INSERT INTO staging.collaudo_riallineo_undo
@@ -249,7 +286,7 @@ async function main(): Promise<void> {
                SELECT $1, 'credenziale', auth_credential_hash, $2
                  FROM sys.sys_auth_credentials
                 WHERE auth_credential_identity_id = $3 AND auth_credential_is_current`,
-              [c.email, UNDO_REASON, identityId]);
+              [c.email, disallineata && !RIALLINEA ? DISALLINEO_REASON : UNDO_REASON, identityId]);
             await db.query(
               `UPDATE sys.sys_auth_credentials
                   SET auth_credential_is_current = false, rotated_at = now()
@@ -260,7 +297,7 @@ async function main(): Promise<void> {
         // dry-run «credenziali create 0» mentre l'esecuzione vera ne avrebbe create 3. Un
         // giro a vuoto che sottostima e' peggio che inutile — e' la stessa lezione gia'
         // scritta nel gemello di questo script.
-        if (cred.rows[0]!.n === "0" || RIALLINEA) {
+        if (cred.rows[0]!.n === "0" || RIALLINEA || disallineata) {
           stats.credenziali++; touched = true;
           if (!DRY) {
             const hash = await argon2.hash(deriveCollaudoPassword(key, c.email), ARGON2_PARAMS);
@@ -373,6 +410,7 @@ ${DRY ? "DRY-RUN (nessuna scrittura)" : "ESEGUITO"}
   iscrizioni all'elenco (000284)  ${stats.iscrizioni}
   esenzioni MFA ................. ${stats.esenzioni}
   credenziali RIALLINEATE ....... ${stats.riallineate}   [#169 F3b: ruotate perche' non dalla chiave di collaudo]
+  di cui DISALLINEATE misurate .. ${stats.disallineate}   [D11-0: l'hash non verifica contro la password derivata]
   fattori MFA rimossi ........... ${stats.fattoriRimossi}   [un segreto di troppo su un'utenza esente]
   gia' a posto (invariati) ...... ${stats.invariati}
   rollback dichiarato ........... pnpm db:provision-collaudo --undo  (le 3 email, mai un jolly)

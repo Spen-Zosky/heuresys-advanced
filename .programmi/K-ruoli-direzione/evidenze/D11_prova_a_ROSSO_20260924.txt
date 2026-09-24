@@ -1,0 +1,69 @@
+[prova-api] host=linux-pc  repo=~/heuresys-advanced
+[prova-api] contenuto: 944 file sotto apps/api packages/shared apps/web/src/lib/role-precedence.ts apps/web/src/app/(authenticated)/users/[userId]/_components/roles-editor.tsx  impronta=23631a9ec843
+[prova-api] propago il contenuto...
+[prova-api] guardia OK — il contenuto sul gemello combacia byte per byte
+[prova-api] eseguo: pnpm --filter @heuresys/api exec vitest run test/dpo-dossier-mascherato.integration.test.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/home/enzo/heuresys-advanced/apps/api[39m
+
+◇ injected env (24) from ../../.env // tip: ⌁ auth for agents [www.vestauth.com]
+[drift] baseline: 9 righe residue PRE-ESISTENTI (non le lascia questa corsa), su 821 colonne ispezionate:
+         sys_content_documents.document_title: 4
+         sys_content_versions.version_title: 5
+[90mstdout[2m | test/dpo-dossier-mascherato.integration.test.ts
+[22m[39m◇ injected env (0) from ../../.env // tip: ⌘ override existing { override: true }
+
+[90mstdout[2m | test/dpo-dossier-mascherato.integration.test.ts
+[22m[39m◇ injected env (0) from ../../.env // tip: ◈ secrets for agents [www.dotenvx.com]
+
+[90mstdout[2m | test/dpo-dossier-mascherato.integration.test.ts
+[22m[39m{"level":"info","phase":"pg-pool","msg":"identita di connessione","user":"heuresys","separata":false}
+
+(node:881018) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"level":30,"time":1790285035954,"pid":881018,"hostname":"enzo-S550CM","name":"scope-audit","evt":"scope.access","op":"target","actorUserId":"74137e05-4dd6-4b06-a15a-c1c14d50f5ee","tenantId":"86ba7a65-217f-48ba-8ce5-5c09b40a66b0","targetUserId":"01da8b8e-f5cf-4258-8a84-a3e4d16331c5","granted":false,"axis":"denied","msg":"scope target denied via denied"}
+{"level":30,"time":1790285035967,"pid":881018,"hostname":"enzo-S550CM","name":"scope-audit","evt":"scope.access","op":"target","actorUserId":"15c601d0-c78e-4b86-8eb6-5f664c7046d1","tenantId":"86ba7a65-217f-48ba-8ce5-5c09b40a66b0","targetUserId":"01da8b8e-f5cf-4258-8a84-a3e4d16331c5","granted":true,"axis":"hr_mandate","msg":"scope target granted via hr_mandate"}
+{"level":30,"time":1790285036032,"pid":881018,"hostname":"enzo-S550CM","name":"scope-audit","evt":"scope.access","op":"target","actorUserId":"0281ede2-04fe-43fe-b8da-b75c5e320d85","tenantId":"86ba7a65-217f-48ba-8ce5-5c09b40a66b0","targetUserId":"01da8b8e-f5cf-4258-8a84-a3e4d16331c5","granted":false,"axis":"denied","msg":"scope target denied via denied"}
+(node:881018) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+{"level":30,"time":1790285036035,"pid":881018,"hostname":"enzo-S550CM","name":"scope-audit","evt":"scope.access","op":"target","actorUserId":"74137e05-4dd6-4b06-a15a-c1c14d50f5ee","tenantId":"86ba7a65-217f-48ba-8ce5-5c09b40a66b0","targetUserId":"2d356d62-e6fa-4e32-98b3-18814bd4e988","granted":false,"axis":"denied","msg":"scope target denied via denied"}
+{"level":30,"time":1790285036058,"pid":881018,"hostname":"enzo-S550CM","reqId":"req-1","req":{"method":"POST","url":"/v1/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790285036238,"pid":881018,"hostname":"enzo-S550CM","reqId":"req-1","res":{"statusCode":200},"responseTime":178.1806400000005,"msg":"request completed"}
+{"level":30,"time":1790285036242,"pid":881018,"hostname":"enzo-S550CM","reqId":"req-2","req":{"method":"GET","url":"/v1/whistleblowing/reports","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790285036249,"pid":881018,"hostname":"enzo-S550CM","reqId":"req-2","res":{"statusCode":403},"responseTime":6.717451999998957,"msg":"request completed"}
+ [31m❯[39m test/dpo-dossier-mascherato.integration.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1420[2mms[22m[39m
+     [32m✓[39m gira su un universo dove PUÒ fallire: DPO, un soggetto con buste e valutazioni, un mandato HR, un estraneo, un altro tenant[32m 6[2mms[22m[39m
+[31m     [31m×[31m (a) il DPO apre il dossier di una persona del suo tenant fuori dalla propria catena: la riga c'è, gli importi e i giudizi no[39m[32m 17[2mms[22m[39m
+     [32m✓[39m (b) HRMS_MANAGER sullo stesso dossier legge IN CHIARO: I20 non è stato toccato[32m 63[2mms[22m[39m
+     [32m✓[39m (c) una persona senza mandato non vede quel dossier: il terzo stato non ha aperto niente a nessun altro[32m 5[2mms[22m[39m
+     [32m✓[39m (d) il DPO NON vede il dossier di una persona di un ALTRO tenant[32m 2[2mms[22m[39m
+     [32m✓[39m (e) una segnalazione whistleblowing resta invisibile al DPO (isolamento assoluto, ADR-0036 §5)[32m 214[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/dpo-dossier-mascherato.integration.test.ts[2m > [22mmandato K, D11 — il DPO legge il dossier del suo tenant, mascherato[2m > [22m(a) il DPO apre il dossier di una persona del suo tenant fuori dalla propria catena: la riga c'è, gli importi e i giudizi no
+[31m[1mNotFoundError[22m: User not found[39m
+[36m [2m❯[22m Object.getDossier src/modules/users/service.ts:[2m157:13[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 23:23:45
+[2m   Duration [22m 10.72s[2m (transform 4.06s, setup 275ms, import 7.23s, tests 1.42s, environment 0ms)[22m
+
+◇ injected env (0) from ../../.env // tip: ⌘ suppress logs { quiet: true }
+    [90m155|[39m     [35mif[39m ([33m![39mtarget) [35mthrow[39m [35mnew[39m [33mNotFoundError[39m([32m"User"[39m)[33m;[39m
+    [90m156|[39m     [35mif[39m ([33m![39m([35mawait[39m [34mcanActOnTarget[39m(actor[33m,[39m target[33m,[39m [32m"read"[39m))) {
+    [90m157|[39m       [35mthrow[39m [35mnew[39m [33mNotFoundError[39m([32m"User"[39m)[33m;[39m
+    [90m   |[39m             [31m^[39m
+    [90m158|[39m     }
+    [90m159|[39m
+[90m [2m❯[22m test/dpo-dossier-mascherato.integration.test.ts:[2m161:15[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+[drift] nessun residuo aggiunto da questa corsa (totale invariato: 9).
+undefined
+/home/enzo/heuresys-advanced/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/dpo-dossier-mascherato.integration.test.ts
+[prova-api] durata 14s  esito=1
+[prova-api] nota: 204 file restano modificati su linux-pc (cio' che ho propagato).
+[prova-api]       spariscono al prossimo 'align-clones.sh linuxpc' (reset --hard).

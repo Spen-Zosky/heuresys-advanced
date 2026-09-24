@@ -42,7 +42,7 @@
  */
 
 import { isPlatform, type ActorContext } from "../actor.js";
-import { HR_MANDATED_ROLES } from "./resolver.js";
+import { HR_MANDATED_ROLES, haPerimetroTenantMascherato } from "./resolver.js";
 import type { DataClass } from "./data-classes.js";
 import { classiMascherateDa } from "./matrix.js";
 
@@ -88,6 +88,64 @@ export function masksUnderPlatformMandate(
   if (subjectUserId !== null && subjectUserId === actor.userId) return false; // I17
   if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) return false; // I20
   return isPlatform(actor);
+}
+
+/**
+ * ⭐ D11 — la stessa mascheratura, per il perimetro tenant-wide mascherato.
+ *
+ * Mandato K, D11 (Enzo, 2026-09-24, opzione A): il DPO legge il dossier di chiunque nel
+ * proprio tenant, e `COMPENSATION`/`EVALUATION` gli arrivano assenti e dichiarate in
+ * `masked` — esattamente come a `PLATFORM_ADMIN` senza mandato HR (I20, ADR-0032). La
+ * sola differenza fra i due è il PERIMETRO, e il perimetro non si decide qui: lo decide
+ * `resolver.ts` (`TENANT_WIDE_MASKED_ROLES`). Qui si decide solo COSA arriva.
+ *
+ * L'insieme delle classi è lo stesso — `MASKED_UNDER_PLATFORM_MANDATE`, derivato dalla
+ * riga `platform_mandate` di M1 — e non una seconda lista: due liste dello stesso fatto
+ * divergono, e la seconda invecchia senza che niente fallisca (è la ragione per cui la
+ * prima fu derivata dalla matrice, #99 F7). Se un domani il trattamento delle due dovesse
+ * distinguersi, serve una riga NUOVA in M1, non un `Set` scritto a mano qui.
+ *
+ * Le due precedenze di `masksUnderPlatformMandate` valgono identiche, e per le stesse
+ * ragioni: la riga propria non si maschera mai (**I17**), e un mandato HR posseduto
+ * ACCANTO al ruolo mascherato apre in chiaro (**I20**) — quest'ultima è già dentro
+ * `haPerimetroTenantMascherato`, che per chi ha un mandato HR risponde `false`.
+ */
+export function masksUnderTenantWideMandate(
+  actor: ActorContext,
+  dataClass: DataClass,
+  subjectUserId: string | null,
+): boolean {
+  if (!MASKED_UNDER_PLATFORM_MANDATE.has(dataClass)) return false;
+  if (subjectUserId !== null && subjectUserId === actor.userId) return false; // I17
+  return haPerimetroTenantMascherato(actor);
+}
+
+/**
+ * Il predicato da chiamare nei moduli: «questa classe sensibile va mascherata a questo
+ * attore, per uno QUALSIASI dei mandati che la mascherano?».
+ *
+ * Esiste perché un modulo non deve sapere QUALE mandato sta mascherando — deve sapere SE.
+ * I due predicati sotto restano esportati e provati singolarmente (una prova che non sa
+ * distinguere i due casi non saprebbe dire quale dei due si è rotto), ma un chiamante che
+ * ne usa uno solo è, da oggi, un chiamante che maschera a metà.
+ *
+ * ⚠ I moduli che oggi chiamano ancora `masksUnderPlatformMandate` direttamente NON sono
+ * stati convertiti in blocco: il mandato di D11 dice che devono cambiare **solo** le
+ * superfici in cui il DPO legge un'altra persona, e oggi l'unica raggiungibile è il
+ * dossier (misurato: il DPO non porta nessuno degli altri permessi RBAC che aprono quei
+ * moduli). Convertirli tutti sarebbe stato invisibile nel comportamento e visibile in 19
+ * file. Chi concede al DPO un permesso nuovo converta il modulo che apre, e questo commento
+ * gli dice perché.
+ */
+export function masksSensitiveClass(
+  actor: ActorContext,
+  dataClass: DataClass,
+  subjectUserId: string | null,
+): boolean {
+  return (
+    masksUnderPlatformMandate(actor, dataClass, subjectUserId) ||
+    masksUnderTenantWideMandate(actor, dataClass, subjectUserId)
+  );
 }
 
 /** A row that has been through the mask carries the list of what was taken. */
@@ -165,7 +223,7 @@ export const LIVELLO_VERTICE = 2;
  *
  * ADR-0036 §5, terza eccezione al mandato HR: **visibile solo a pari livello o
  * superiore**. È il qualificatore che delimita perfino `HRMS_MANAGER`, che I22 dichiara
- * plenipotenziario sui dati business — «plenipotenziario» con quattro eccezioni, e
+ * plenipotenziario sui dati business — «plenipotenziario» con cinque eccezioni, e
  * questa è una di esse. Effetto reale, misurato: il direttore HR sta al livello 3 e
  * smette di vedere lo stipendio del CEO e dei direttori di divisione; il CEO, al
  * livello 1, continua a vedere tutto.

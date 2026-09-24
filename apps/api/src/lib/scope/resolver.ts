@@ -35,6 +35,40 @@ export const HR_MANDATED_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
   "PEOPLE_MANAGER",
 ]);
 
+/**
+ * ⭐ IL TERZO STATO — perimetro dell'intero tenant, dati sensibili MASCHERATI.
+ *
+ * Mandato K, D11 (decisione di Enzo del 2026-09-24, `esiti/RISPOSTE_ENZO.md` riga
+ * «D11 | 2026-09-24 | A»): **quinta eccezione dichiarata ad ADR-0036 §5**.
+ *
+ * Fino a qui l'asse organizzativo conosceva due modi di arrivare all'intero tenant, e
+ * nessuno dei due serviva al DPO:
+ *  - `HR_MANDATED_ROLES` → tenant-wide **in chiaro** (I20). Metterci il DPO gli darebbe
+ *    stipendi e valutazioni leggibili: il contrario di ciò che la decisione chiede.
+ *  - `isPlatform` + `mask.ts` → tutto mascherato, ma **cross-tenant** (ADR-0032): il DPO
+ *    è un ruolo di CLIENTE, il suo perimetro è il SUO tenant e non tutti.
+ *
+ * Questo insieme è il terzo modo: **stesso perimetro del mandato HR, stesso trattamento
+ * del mandato di piattaforma**. Chi sta qui vede la riga, il soggetto, il periodo e lo
+ * stato di qualunque persona del proprio tenant, e NON vede i campi di `COMPENSATION` ed
+ * `EVALUATION`, che arrivano assenti e dichiarati in `masked` (`lib/scope/mask.ts`).
+ *
+ * ⚠ Deliberatamente **fuori** da `TENANT_WIDE_MANDATE_ROLES` e da `ORG_BROWSE_ROLES`:
+ * quei due insiemi rispondono ad altre domande (chi è un mandato pieno, chi sfoglia
+ * l'organizzazione) e allargarli porterebbe il terzo stato su superfici che la decisione
+ * di Enzo non nomina. Le quattro eccezioni già enumerate da ADR-0036 §5 — whistleblowing,
+ * `SPECIAL_CATEGORY`, retribuzione dei vertici, valutazioni non comunicate — restano tutte
+ * vere anche qui: questa è una quinta eccezione, non una deroga alle altre quattro.
+ */
+export const TENANT_WIDE_MASKED_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>(["DPO"]);
+
+/** Vero se l'attore ha il perimetro tenant-wide MASCHERATO e nessun mandato HR che lo
+ *  aprirebbe in chiaro (I20 vince: chi ha entrambi legge senza maschera). */
+export function haPerimetroTenantMascherato(actor: ActorContext): boolean {
+  if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) return false;
+  return actor.roles.some((r) => TENANT_WIDE_MASKED_ROLES.has(r));
+}
+
 /** The organizational read scope. `userIdAllowList` (when present) is the exact set of subject
  *  user ids the actor may read; `all` = cross-tenant; `tenant` = the whole tenant. */
 export type OrgReadScope =
@@ -98,6 +132,13 @@ export async function resolveOrgReadScope(q: DbConnector, actor: ActorContext): 
   if (!tenantId) throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
   if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) {
     audit("hr_mandate", tenantId);
+    return { kind: "tenant", tenantId };
+  }
+  // D11 — il terzo stato: stesso perimetro, asse diverso. La forma del valore di ritorno è
+  // identica a quella del mandato HR ed è voluta: l'asse dice SU CHI, non COSA — la
+  // mascheratura vive a valle, in mask.ts, come per il mandato di piattaforma (ADR-0032).
+  if (haPerimetroTenantMascherato(actor)) {
+    audit("tenant_masked", tenantId);
     return { kind: "tenant", tenantId };
   }
   // Org sub-tree ONLY for explicit managerial roles — not for any employee who merely has reports
@@ -207,6 +248,9 @@ export async function canReadOrgTarget(
   if (!actor.tenantId || targetTenantId !== actor.tenantId) return audit(false, "denied");
   if (actor.userId === targetUserId) return audit(true, "self"); // self (I17)
   if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) return audit(true, "hr_mandate"); // HR mandate (I20)
+  // D11 — il terzo stato: il DPO raggiunge chiunque nel proprio tenant (il confine di tenant
+  // è già stato imposto due righe sopra), e ciò che legge arriva mascherato.
+  if (haPerimetroTenantMascherato(actor)) return audit(true, "tenant_masked");
   if (!(await isManagerial(q, actor))) return audit(false, "denied"); // non-managerial → self only (F1 constraint)
   const inTree = await isInOrgSubtree(q, actor.userId, targetUserId); // org sub-tree (I18) — transitive
   return audit(inTree, inTree ? "org_subtree" : "denied");

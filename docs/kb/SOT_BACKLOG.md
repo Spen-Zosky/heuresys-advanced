@@ -50,7 +50,7 @@
 - **#254 L'apertura di tutti i perimetri in una mossa sola: il risolutore smette di filtrare le letture** · status: GATED
   - blocker: `#251`, `#252`, `#253` — il freno prima dell'apertura (ADR-0040 §5). Il buco esiste gia' (tetto per chiamata): aprire prima del freno lo allargherebbe
   - unblock-trigger: le tre voci chiuse. Poi: `atlas-resolver.ts` e `mcp-tools.ts` non filtrano piu' le letture su `agent-perimetri.json`; il file **resta la fonte unica per le scritture** e la cronaca datata delle sedici aperture; `check_concetti_agente.py` da coda di apertura diventa misura
-  - cosa-resta-chiuso: tutto cio' che RBAC nega alla persona, e le quattro eccezioni di ADR-0036 §5 — la prima misurata da `sys.v_whistleblowing_fuori_dal_custode` (mig `000414`)
+  - cosa-resta-chiuso: tutto cio' che RBAC nega alla persona, e le cinque eccezioni di ADR-0036 §5 (la quinta dal 2026-09-24, D11) — la prima misurata da `sys.v_whistleblowing_fuori_dal_custode` (mig `000414`)
   - prova-finale: `live-perimetro.ts` con una persona reale e il secondo fattore, quattro domande: le tre di sempre piu' «oltre la soglia si ferma»
   - priority: P1 · effort: ~1 sessione dopo le tre · doc: ADR-0040
 - **#255 La scorecard di due diligence e' ferma al 17 giugno: rivalidarla su HEAD e aggiornare i tre documenti** · status: ACTIVE

@@ -32,9 +32,11 @@ import * as repo from "./repository.js";
 // per ogni dimensione, cosi' la vista di se' e quella di chi ha titolo non
 // possono divergere.
 import * as meRepo from "../me/repository.js";
-import { resolveOrgReadScope, canReadOrgTarget, HR_MANDATED_ROLES } from "../../lib/scope/resolver.js";
+import {
+  resolveOrgReadScope, canReadOrgTarget, HR_MANDATED_ROLES, haPerimetroTenantMascherato,
+} from "../../lib/scope/resolver.js";
 import { puoConcedereRuoli } from "../../lib/scope/mandati.js";
-import { masksUnderPlatformMandate, masksTopOfChainPay, maskFields } from "../../lib/scope/mask.js";
+import { masksSensitiveClass, masksTopOfChainPay, maskFields } from "../../lib/scope/mask.js";
 import { chainLevelOf } from "../../lib/scope/org.js";
 import { isPlatform } from "../../lib/actor.js";
 import { DOSSIER_PRIV_SECTIONS, type UserDossierProfile } from "@heuresys/shared";
@@ -185,7 +187,10 @@ export const usersService = {
     if (!profile) throw new NotFoundError("User");
 
     // ADR-0032: il mandato piattaforma da solo non apre COMPENSATION/EVALUATION.
-    const masksEval = masksUnderPlatformMandate(actor, "EVALUATION", id);
+    // D11 — `masksSensitiveClass` e non più il solo mandato di piattaforma: il dossier è
+    // la superficie in cui si vede il terzo stato (tenant-wide mascherato, ADR-0036 §5,
+    // quinta eccezione). Per ogni altro attore il predicato risponde esattamente come prima.
+    const masksEval = masksSensitiveClass(actor, "EVALUATION", id);
 
     /* #99 F4 — la soglia di catena arriva anche QUI, e non era un dettaglio.
      *
@@ -203,16 +208,23 @@ export const usersService = {
       chainLevelOf(pool, id),
     ]);
     const masksComp =
-      masksUnderPlatformMandate(actor, "COMPENSATION", id) ||
+      masksSensitiveClass(actor, "COMPENSATION", id) ||
       masksTopOfChainPay(actor, id, livelloAttore, livelloSoggetto);
 
     // #124 D2 — strato 1: la sfera PRIVATA dell'anagrafica (matrice dei domini,
     // cella line_management/IDENTITY = mask) va a self, mandato HR e mandato
     // piattaforma; il manager di linea riceve il professionale + la
     // dichiarazione di cosa è stato trattenuto.
+    // D11 — il perimetro tenant-wide mascherato entra QUI accanto agli altri tre, e non è
+    // un allargamento silenzioso: il mandato di D11 lo dice per iscritto — «PERSONAL e SKILL
+    // non toccate dal mascheramento», che per il DPO è il proprio mestiere (una richiesta di
+    // accesso o di cancellazione si istruisce sull'anagrafica, non sugli stipendi). Ciò che
+    // resta tolto sono le due classi che la quinta eccezione di ADR-0036 §5 nomina, ed è
+    // `masksComp`/`masksEval` a toglierle, non questa riga.
     const readsPriv =
       actor.userId === id ||
       actor.roles.some((r) => HR_MANDATED_ROLES.has(r)) ||
+      haPerimetroTenantMascherato(actor) ||
       isPlatform(actor);
     let outProfile: UserDossierProfile = profile;
     if (!readsPriv) {

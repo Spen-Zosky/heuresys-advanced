@@ -74,14 +74,15 @@ I dati sensibili di un'altra persona — chi è, quanto guadagna, come è stata 
 
 L'unica deroga è per mandato esplicito: i ruoli **HR** (`TENANT_ADMIN`, `HRMS_MANAGER`) tengono l'accesso sensibile su tutta l'azienda cliente perché è il loro mestiere. `HRMS_MANAGER` in particolare è **plenipotenziario sui dati business del tenant**: CRUD completo, per mandato tuo esplicito.
 
-## Le quattro porte chiuse anche agli onnipotenti
+## Le cinque porte chiuse anche agli onnipotenti
 
-Nemmeno il mandato HR apre tutto. Restano quattro eccezioni dichiarate:
+Nemmeno il mandato HR apre tutto. Restano cinque eccezioni dichiarate:
 
 1. **Le segnalazioni whistleblowing** — isolamento assoluto: solo il custode, nemmeno la piattaforma.
 2. **Le categorie particolari di dati** — una classe tenuta deliberatamente vuota e presidiata.
 3. **Le retribuzioni dei vertici** — protette da una soglia sulla catena.
 4. **Le valutazioni non ancora comunicate** — finché non sono state condivise con l'interessato, non si leggono.
+5. **Il perimetro di chi vede tutti ma non tutto** (dal 2026-09-24) — c'è un modo di stare dentro l'intera azienda cliente e vedere, di ogni persona, la sua scheda **senza** stipendi e senza giudizi: la riga c'è, il periodo c'è, l'importo no, e la scheda dichiara per iscritto che cosa è stato tolto. Oggi lo porta il **responsabile della protezione dei dati** (DPO): deve poter istruire una richiesta di accesso o di cancellazione su chiunque, e per farlo non gli serve sapere quanto guadagna né come è stato valutato.
 
 Il primo punto non è un proposito: **è misurabile**. Sui 231 permessi della piattaforma, `PLATFORM_ADMIN` ne possiede 229. I due che non ha sono esattamente `whistleblowing:read` e `whistleblowing:manage`, e appartengono a un solo ruolo, `WHISTLEBLOWING_CUSTODIAN`, che ha una sola persona. La regola più delicata del sistema è verificabile con una query di tre righe — ed è così che dovrebbe essere ogni regola importante.
 
@@ -97,7 +98,7 @@ Serve a vedere i due assi che lavorano insieme, su persone vere.
 | livelli sopra di lei | 2 | 3 |
 | sottoalbero | 3 unità, 6 posizioni | 1 unità, 2 posizioni |
 
-**Sul primo asse sono uguali**: entrambe hanno `HRMS_MANAGER`, quindi entrambe possono, sui dati business, tutto ciò che quel mandato consente — su tutte le 158 persone di RTL Bank, con le quattro eccezioni di cui sopra.
+**Sul primo asse sono uguali**: entrambe hanno `HRMS_MANAGER`, quindi entrambe possono, sui dati business, tutto ciò che quel mandato consente — su tutte le 158 persone di RTL Bank, con le cinque eccezioni di cui sopra.
 
 **Sul secondo asse sono diverse**, e la differenza conta per gli *altri* ruoli di Valentina: il suo `ORG_DIRECTOR` e il suo `TEAM_LEADER` agiscono sulla sua catena, che è più alta e più larga di quella di Maria — la quale, di fatto, le riporta.
 

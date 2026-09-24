@@ -21,6 +21,13 @@ import { pino } from "pino";
 export type ScopeAxis =
   | "platform"
   | "hr_mandate"
+  /**
+   * `tenant_masked` (D11, ADR-0036 §5 quinta eccezione) = perimetro dell'intero tenant, MA
+   * con le classi sensibili mascherate. E' un asse suo, e non un `hr_mandate` con una nota:
+   * chi rilegge il registro deve poter distinguere «ha letto in chiaro per mandato HR» da
+   * «ha visto la riga senza i campi», che sono due accessi diversi allo stesso dato.
+   */
+  | "tenant_masked"
   | "org_subtree"
   | "functional"
   | "self"

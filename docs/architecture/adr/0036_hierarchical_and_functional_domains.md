@@ -55,7 +55,9 @@ Two disjoint vocabularies exist today — `data-classes.ts` (5 classes, keyed by
 2. `platform_mandate`/`CONTRACT_PAY` and `/EVALUATION` = **`mask`** confirmed (= ADR-0032). As of S1053 applied to: recommendations, assessment-results, the user dossier (payslips, employment pay, contracts pay, performance), variable-pay (+evaluation), reward-gates (payload + per-person score), bonus-pools, position-economic-weight, handoff-records.
 3. `SPECIAL_CATEGORY` = **`none`** for every domain except `self`; the medical-cert flag seen by the approver is **parked**, not resolved — a dedicated session decides it.
 
-## §5 — The four exceptions to the HR mandate (C6)
+## §5 — The five exceptions to the HR mandate (C6)
+
+*Four until 2026-09-24; the fifth is the D11 amendment at the end of this section.*
 
 | Exception | Mechanism | Real support (re-measured 2026-08-10) |
 |---|---|---|
@@ -64,7 +66,55 @@ Two disjoint vocabularies exist today — `data-classes.ts` (5 classes, keyed by
 | Top-of-chain pay | **chain threshold**: visible only at equal or higher level of the unit tree | unit-tree levels 1–2; `pay_scale_level`, `ccnl_level` populated |
 | Uncommunicated evaluations | **communication status**: invisible until communicated to the subject | criterion: `review_shared_at IS NOT NULL OR review_acknowledged_at IS NOT NULL` → **546 of 548** communicated (0 have `shared_at`, 546 have `acknowledged_at`; applying `shared_at` alone would hide them ALL, subjects included) |
 
-The first two are expressible as class + domain; the last two are **cell qualifiers** alongside `edit`/`read`/`mask`/`none` — #99 F5 owns their implementation.
+The first two are expressible as class + domain; the third and fourth are **cell qualifiers** alongside `edit`/`read`/`mask`/`none` — #99 F5 owns their implementation. The fifth is a **perimeter**, and is described below.
+
+### The fifth exception — tenant-wide perimeter, masked sensitive classes (D11, 2026-09-24)
+
+**Decision**: Enzo, 2026-09-24, `.programmi/K-ruoli-direzione/esiti/RISPOSTE_ENZO.md`, line
+«D11 | 2026-09-24 | A» — option A of `esiti/R-2_domanda_masking.md`. It supersedes the
+option C of 2026-09-18 (defer), whose written reopening condition Enzo exercised.
+
+| Exception | Mechanism | Real support (measured 2026-09-24) |
+|---|---|---|
+| Tenant-wide perimeter, masked classes | **third state**: the whole tenant on the hierarchical axis, `COMPENSATION`/`EVALUATION` absent and declared in `masked` | `TENANT_WIDE_MASKED_ROLES` = `DPO` (`lib/scope/resolver.ts`); `masksUnderTenantWideMandate` (`lib/scope/mask.ts`); audit axis `tenant_masked` |
+
+**Why it needed a fifth exception rather than an existing mechanism.** The organizational
+axis knew two ways to reach the whole tenant, and neither fits a DPO:
+
+- `HR_MANDATED_ROLES` → tenant-wide **in the clear** (I20). Putting the DPO there hands
+  them salaries and evaluations readable — the opposite of what the decision asks.
+- `isPlatform` + `mask.ts` → everything masked, but **cross-tenant** (ADR-0032). The DPO is
+  a CUSTOMER role: their perimeter is *their* tenant, not all of them.
+
+The third state is the composition that did not exist: **the HR mandate's perimeter with the
+platform mandate's treatment**. The row, the subject, the period and the status stay visible;
+the fields of the two classes are absent and named in `masked`, so the interface can say
+«nascosto per il tuo profilo» instead of rendering a zero. `PERSONAL` and `SKILL` are NOT
+touched by the masking — a DPO instructs an access or erasure request on the person's record,
+not on their pay — and `self` (I17) always wins.
+
+**It does not weaken the other four.** A role in `TENANT_WIDE_MASKED_ROLES` still meets
+whistleblowing isolation (only custody, enforced by the blocking sentinel
+`sys.v_whistleblowing_fuori_dal_custode`, mig `000414`), `SPECIAL_CATEGORY`, the chain
+threshold on top-of-chain pay, and the communication status of evaluations. And I20 still
+wins over it: an actor holding an HR mandate *alongside* the masked role reads in the clear
+(`haPerimetroTenantMascherato` returns false for them).
+
+**Deliberately narrow.** `TENANT_WIDE_MASKED_ROLES` is kept OUT of
+`TENANT_WIDE_MANDATE_ROLES` and `ORG_BROWSE_ROLES`: those sets answer other questions (who
+is a full mandate, who browses the organization), and widening them would carry the third
+state onto surfaces the decision does not name.
+
+**What is NOT yet live, and is a decision for Enzo, not an implementation detail.** The
+dossier route `GET /v1/users/:userId/dossier` is gated by `requirePermission("user:read")`,
+and the DPO does not hold it (measured 2026-09-24: 13 permissions, `gdpr:*` plus the ESS
+floor). `requirePermission` takes a single code, and the same code also opens
+`GET /v1/users`, `GET /v1/users/:id` and `GET /v1/users/:id/roles`. Granting it is therefore
+a decision about three more surfaces; the alternative — a dedicated permission — means
+teaching the middleware to accept alternatives, which touches the boot org-gate assertion
+that maps each route to one RBAC resource. Until that decision is taken, the third state is
+live in the service layer and proven there (`apps/api/test/dpo-dossier-mascherato.integration.test.ts`),
+and unreachable over HTTP.
 
 ## §6 — Invariants (rewritten in CLAUDE.md by this ADR)
 
@@ -72,8 +122,8 @@ The first two are expressible as class + domain; the last two are **cell qualifi
 - **I17** — Universal ESS floor + **binding completeness of `self`** (C4): every person-referencing table is reachable self-scope or its exclusion is declared and motivated; the exposure gate enforces it mechanically.
 - **I18** — Sensitive personal data travels the organizational chain only (unchanged cardinal rule of ADR-0027).
 - **I19** — Chain principle (C5): cascade below, nothing across siblings, the apex by construction.
-- **I20** — Organizational prevalence + HR mandate by explicit mandate with the **four declared exceptions** (§5); `platform_mandate` reads `CONTRACT_PAY`/`EVALUATION` masked (ADR-0032).
-- **I22** *(new — I21 is taken by industry coherence)* — `HRMS_MANAGER` is **plenipotentiary on business data**: full CRUD on every business datum of the tenant by explicit mandate (Enzo). The four exceptions of §5 bound it; technical/platform surfaces stay out.
+- **I20** — Organizational prevalence + HR mandate by explicit mandate with the **five declared exceptions** (§5, the fifth added by D11 on 2026-09-24); `platform_mandate` reads `CONTRACT_PAY`/`EVALUATION` masked (ADR-0032), and so does the tenant-wide masked perimeter.
+- **I22** *(new — I21 is taken by industry coherence)* — `HRMS_MANAGER` is **plenipotentiary on business data**: full CRUD on every business datum of the tenant by explicit mandate (Enzo). The five exceptions of §5 bound it; technical/platform surfaces stay out.
 
 ## §7 — Implementation state and consequences
 

@@ -6,7 +6,7 @@
  * ADR-0036 §5, terza eccezione al mandato HR: la retribuzione dei vertici è visibile
  * **solo a pari livello o superiore** nell'albero delle unità. È il limite che delimita
  * perfino `HRMS_MANAGER`, che I22 dichiara plenipotenziario sui dati business —
- * plenipotenziario *con quattro eccezioni*, e questa è una.
+ * plenipotenziario *con cinque eccezioni* (la quinta dal 2026-09-24, D11), e questa è una.
  *
  * L'universo è reale e misurato (2026-08-14): l'albero ha 5 livelli, i vertici (1-2) sono
  * 19 persone, e il direttore HR sta al livello 3. Quindi il caso non è teorico: c'è
@@ -95,7 +95,7 @@ describe("#99 F4 — soglia di catena sulla retribuzione dei vertici", () => {
       hrSottoSoglia!.livello,
       vertice!.livello,
     );
-    // È il punto della regola: «plenipotenziario» ha quattro eccezioni, e questa è una.
+    // È il punto della regola: «plenipotenziario» ha cinque eccezioni, e questa è una.
     expect(nascosta).toBe(true);
   });
 

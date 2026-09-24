@@ -70,6 +70,10 @@ EFFETTI: dict[str, str] = {
     "X-2/000442": "select 1 from information_schema.columns where table_schema='sys' and table_name='sys_leave_accrual_rules' and column_name='origine_dato'",
     "X-2/000443": "select 1 from information_schema.columns where table_schema='sys' and table_name='sys_compensation_bands' and column_name='origine_dato'",
     "X-2/000444": "select 1 from information_schema.columns where table_schema='sys' and table_name='sys_overtime' and column_name='origine_dato'",
+    # X-2/D12 — sys_attendance, la 13/13 (ATTESA_ENZO fino a D12=A, 2026-09-24). Prenotata
+    # una sola volta sotto X-2 (coerente con le altre 12 tabelle di questa voce); la riga D12
+    # non ripete il numero nella colonna migrazione_prenotata, solo nel testo della nota.
+    "X-2/000450": "select 1 from information_schema.columns where table_schema='sys' and table_name='sys_attendance' and column_name='origine_dato'",
     "R-5": "select 1 from sys.sys_auth_role_permissions rp join sys.sys_auth_roles r on r.auth_role_id=rp.auth_role_id join sys.sys_auth_permissions p on p.auth_permission_id=rp.auth_permission_id where r.auth_role_code='BLUEPRINT_MANAGER' and p.auth_permission_code='tenant_blueprint:write' and rp.revoked_at is null",
     "X-3": "select 1 from pg_views where schemaname='sys' and viewname='v_source_lineage_normalizzata'",
     "X-4": "select 1 from information_schema.tables where table_schema='sys' and table_name='sys_conflitti_ibridi'",

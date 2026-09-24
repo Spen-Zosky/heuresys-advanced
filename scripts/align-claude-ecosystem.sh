@@ -209,6 +209,14 @@ trap cleanup EXIT
 # MSYS path conversion mangles POSIX-looking values (args AND env vars) passed to the
 # native jq.exe — so the transforms run jq with MSYS_NO_PATHCONV=1 and a cygpath'd input file.
 transform_settings() {  # $1 = RHOME
+  # Notification/Stop/UserPromptSubmit/SessionEnd sul SoT Windows invocano
+  # powershell.exe su script sotto C:\Users\...\personal_scripts\claude\*.ps1
+  # (sistema "sessioni-parallele" di stato/staffetta) — nessuna controparte bash
+  # esiste (verificato: grep su scripts/ e skills/sessioni-parallele/, 2026-09-22).
+  # Propagarli su un host Unix li renderebbe comandi rotti ad ogni sessione
+  # (SessionStart/Notification/Stop/UserPromptSubmit/SessionEnd falliti in loop).
+  # permissions.additionalDirectories="D:\\" e' un drive Windows, privo di senso
+  # altrove. Entrambi si tolgono qui, stesso principio di CLAUDE_CODE_GIT_BASH_PATH.
   MSYS_NO_PATHCONV=1 jq --arg home "$1" '
     .env = ((.env // {})
             | del(.CLAUDE_CODE_GIT_BASH_PATH)
@@ -216,8 +224,12 @@ transform_settings() {  # $1 = RHOME
     | .hooks.SessionStart = [{matcher:"startup|resume|clear", hooks:[
         {type:"command",
          command:("bash " + $home + "/.claude/scripts/session-bootstrap.sh \"$CLAUDE_PROJECT_DIR\"")}]}]
+    | .hooks |= del(.Notification, .Stop, .UserPromptSubmit, .SessionEnd)
     | .statusLine.command = ("bash " + $home + "/.claude/statusline-command.sh")
     | .additionalDirectories = []
+    | .permissions.additionalDirectories = []
+    | .defaultShell = "bash"
+    | .env |= del(.CLAUDE_CODE_USE_POWERSHELL_TOOL)
   ' "$(cygpath -m "$SRC/settings.json")"
 }
 

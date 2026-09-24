@@ -157,3 +157,16 @@ X-1 | sys_visualization_node_layouts | nativo
 X-1 | sys_visualization_nodes | nativo
 X-1 | sys_visualization_styles | nativo
 X-1 | sys_whistleblowing_reports | ibrido
+
+D11 | 2026-09-24 | A
+
+Risposta di Enzo, raccolta da Cowork il 2026-09-24 alle 21:58 e depositata qui senza commit (l'unico committer resta la CLI, V7).
+Opzione A di `esiti/R-2_domanda_masking.md`: si costruisce il terzo stato «tenant-wide ma mascherato» per il DPO — una QUINTA eccezione dichiarata ad ADR-0036 §5, con un predicato nuovo in `lib/scope/mask.ts` / `lib/scope/resolver.ts`, SENZA aggiungere DPO a `HR_MANDATED_ROLES` (che gli darebbe accesso in chiaro). Il DPO apre il dossier di qualunque persona del proprio tenant; COMPENSATION ed EVALUATION restano mascherati e dichiarati via `masked`, come per PLATFORM_ADMIN (I20, ADR-0032). Prova attesa, dal passo 44 del mandato: «DPO su profilo di una persona -> campi retributivi mascherati», con la controprova che HRMS_MANAGER continua a leggere in chiaro e che un ruolo senza mandato continua a vedere solo la propria catena.
+La scelta del 2026-09-18 (C, rimandare) e' superata: la condizione di riapertura scritta allora e' stata esercitata da Enzo.
+D11 si sblocca.
+
+D12 | 2026-09-24 | A
+
+Risposta di Enzo, raccolta da Cowork il 2026-09-24 alle 21:58 e depositata qui senza commit (l'unico committer resta la CLI, V7).
+Opzione A: la provenienza delle presenze si dichiara per SCRITTORE, non riga per riga — una riga di classificazione «MATERIALIZZAZIONE senza tracciamento riga-per-riga» per ciascuno degli scrittori vivi di `sys_attendance` misurati da X-6, coerente con il linguaggio di D6/X-2. Le righe storiche non si toccano; il numero delle presenze senza provenienza smette di essere una lacuna perche' diventa una dichiarazione.
+D12 si sblocca.

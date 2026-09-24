@@ -9,18 +9,15 @@
  * `EVALUATION` gli arrivano assenti e dichiarate in `masked`, come a `PLATFORM_ADMIN` senza
  * mandato HR (I20, ADR-0032); `PERSONAL` e `SKILL` non sono toccate dal mascheramento.
  *
- * ⚠ PERCHÉ IL LIVELLO DI PROVA È IL SERVICE E NON LA ROTTA, per le due prove che leggono
- * il dossier. `GET /v1/users/:userId/dossier` è protetta da `requirePermission("user:read")`,
- * e il DPO non porta quel permesso (misurato in produzione: i suoi 13 permessi sono
- * `gdpr:*` più il pavimento ESS). Concederglielo aprirebbe ANCHE `GET /v1/users`,
- * `GET /v1/users/:id` e `GET /v1/users/:id/roles`, perché `requirePermission` accetta un
- * codice solo e quelle quattro rotte condividono lo stesso: è un effetto su superfici che
- * la decisione di Enzo non nomina, e il mandato di D11 dice esplicitamente di fermarsi e
- * chiedere invece di deciderlo in una corsa non presidiata. La domanda è aperta in
- * `esiti/D11.md`. Il terzo stato però ESISTE ed è qui provato dove vive — nel service, che
- * è anche il posto in cui `chain-threshold-surfaces.integration.test.ts` prova la regola
- * gemella della soglia di catena. Il giorno in cui il permesso viene concesso, queste due
- * prove non cambiano di una riga e se ne aggiunge una sola, via HTTP.
+ * DUE LIVELLI DI PROVA, e la ragione per cui ci sono entrambi. Le prove (a)-(d) chiamano il
+ * SERVICE: è lì che il terzo stato vive, ed è dove si vede che a decidere è il perimetro e
+ * non il permesso. La (f) chiama la ROTTA: `GET /v1/users/:userId/dossier` è protetta da
+ * `requirePermission("user:read")`, che il DPO ha ricevuto con la migrazione `000451`
+ * (Enzo, 2026-09-25 — `esiti/RISPOSTE_ENZO.md`, riga «D11-permesso | 2026-09-25 | 1»).
+ * La (f) è stata scritta e vista ROSSA prima di quella migrazione — `expected 403 to be 200`,
+ * evidenza in `evidenze/D11_prova_f_ROSSA_20260925.txt` — e verde dopo, senza che una riga
+ * di `lib/scope/` cambiasse: è la separazione fra il «se» (RBAC) e il «su chi e come»
+ * (i domini, ADR-0036) che si vede all'opera.
  *
  * I protagonisti si DERIVANO dai dati vivi, mai per nome: se l'organigramma cambia, la
  * prova sceglie altre persone invece di misurare il caso sbagliato — e se un giorno non
@@ -214,6 +211,47 @@ describe("mandato K, D11 — il DPO legge il dossier del suo tenant, mascherato"
     await expect(
       usersService.getDossier(attore(dpo!, ["DPO"]), altroTenant!.id),
     ).rejects.toThrow();
+  });
+
+  /* (f) LA PORTA HTTP — la prova che mancava finché il permesso non è stato deciso.
+   *
+   * Enzo, 2026-09-25 (`esiti/RISPOSTE_ENZO.md`, riga «D11-permesso | 2026-09-25 | 1»): al DPO
+   * si concede `user:read`, il permesso che già protegge questa rotta. Vista ROSSA prima della
+   * migrazione `000451` (403 dal middleware RBAC: il permesso non c'era) e verde dopo, senza
+   * cambiare una riga di `lib/scope/` — che è esattamente ciò che la separazione fra il «se»
+   * (RBAC) e il «su chi/cosa» (i domini, ADR-0036) promette. */
+  it("(f) via HTTP: il DPO fa login e apre GET /v1/users/:userId/dossier → 200, con gli importi mascherati", async () => {
+    const key = readCollaudoKey();
+    const r1 = await loginRaw(t.app, DPO_EMAIL, deriveCollaudoPassword(key, DPO_EMAIL));
+    expect(r1.statusCode, `login ${DPO_EMAIL}`).toBe(200);
+    const cookies = new Map<string, string>();
+    for (const c of r1.cookies) cookies.set(c.name, c.value);
+    const cookie = [...cookies.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
+
+    const r = await t.app.inject({
+      method: "GET",
+      url: `/v1/users/${soggetto!.id}/dossier`,
+      headers: { cookie },
+    });
+    expect(
+      r.statusCode,
+      "403 qui vuol dire che il DPO non ha `user:read`: la migrazione 000451 non è applicata su questo database",
+    ).toBe(200);
+
+    const d = r.json() as {
+      paySlips: Array<Record<string, unknown>>;
+      performance: Array<Record<string, unknown>>;
+    };
+    expect(d.paySlips.length, "il soggetto ha buste paga: devono arrivare come RIGHE").toBeGreaterThan(0);
+    for (const b of d.paySlips) {
+      expect(b["grossPay"], "l'importo lordo è uscito dalla rotta HTTP").toBeUndefined();
+      expect((b["masked"] as string[] | undefined) ?? []).toContain("grossPay");
+    }
+    for (const v of d.performance) {
+      const masked = (v["masked"] as string[] | undefined) ?? [];
+      expect(masked.length, "una valutazione letta dal DPO deve dichiarare cosa è stato trattenuto").toBeGreaterThan(0);
+      for (const campo of masked) expect(v[campo]).toBeUndefined();
+    }
   });
 
   /* (e) controprova: la prima delle quattro eccezioni già enumerate resta intatta. */

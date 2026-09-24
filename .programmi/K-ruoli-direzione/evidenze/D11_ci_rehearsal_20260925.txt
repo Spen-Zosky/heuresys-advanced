@@ -1,0 +1,85 @@
+
+[1m=== copia di heuresys_ci -> heuresys_rehearsal_20260924_224250_998653 (copia di file, l'originale non si tocca) ===[0m
+[rehearsal] copia fatta in 3s
+[rehearsal] estensioni ricavate dalla catena: pgcrypto pg_trgm uuid-ossp vector 
+NOTIFICA:  l'estensione "pgcrypto" esiste già, saltata
+NOTIFICA:  l'estensione "pg_trgm" esiste già, saltata
+NOTIFICA:  l'estensione "uuid-ossp" esiste già, saltata
+NOTIFICA:  l'estensione "vector" esiste già, saltata
+[rehearsal] catena dall'albero di lavoro: 447 file
+
+[1m=== applico la catena (modo: like-ci) ===[0m
+COMMIT
+DO
+[migrate] applying 000450_d12_origine_dato_sys_attendance.sql (sha256=a085c035b971)
+         set_config          
+-----------------------------
+ 2026-09-25 00:43:12.7354+02
+(1 riga)
+
+BEGIN
+psql:<stdin>:76294: NOTIFICA:  la colonna "origine_dato" della relazione "sys_attendance" esiste già, saltata
+ALTER TABLE
+DO
+COMMENT
+psql:<stdin>:76323: NOTIFICA:  000450 OK — sys_attendance: 121023 righe, origine_dato uniforme (MATERIALIZZAZIONE)
+DO
+COMMIT
+DO
+[migrate] applying 000451_d11_dpo_apre_il_dossier.sql (sha256=ea993306b3a3)
+          set_config           
+-------------------------------
+ 2026-09-25 00:43:12.811228+02
+(1 riga)
+
+BEGIN
+psql:<stdin>:76404: ATTENZIONE:  c'è già una transazione in corso
+BEGIN
+SELECT 1
+DO
+INSERT 0 1
+UPDATE 0
+UPDATE 1
+UPDATE 1
+psql:<stdin>:76546: NOTIFICA:  000451 ok: DPO ha user:read (ruoli con user:read: 9 -> 10), nucleo GDPR intatto (4), zero scritture su user
+DO
+COMMIT
+psql:<stdin>:76550: ATTENZIONE:  non c'è alcuna transazione in corso
+COMMIT
+DO
+
+OK: 423 migrations applied, 24 skipped (una-tantum gia' applicate).
+[rehearsal] durata catena: 18s
+
+[1m=== seconda passata (una catena si applica due volte, o non si applica) ===[0m
+COMMIT
+DO
+[migrate] applying 000451_d11_dpo_apre_il_dossier.sql (sha256=ea993306b3a3)
+          set_config           
+-------------------------------
+ 2026-09-25 00:43:31.290841+02
+(1 riga)
+
+BEGIN
+psql:<stdin>:76404: ATTENZIONE:  c'è già una transazione in corso
+BEGIN
+SELECT 1
+DO
+INSERT 0 0
+UPDATE 0
+UPDATE 1
+UPDATE 1
+psql:<stdin>:76546: NOTIFICA:  000451 ok: DPO ha user:read (ruoli con user:read: 10 -> 10), nucleo GDPR intatto (4), zero scritture su user
+DO
+COMMIT
+psql:<stdin>:76550: ATTENZIONE:  non c'è alcuna transazione in corso
+COMMIT
+DO
+
+OK: 423 migrations applied, 24 skipped (una-tantum gia' applicate).
+[rehearsal] durata seconda passata: 19s
+
+[1m=== sentinelle (docs/kb/tools/db_health.py sul database di prova) ===[0m
+  [OK] sentinelle  53/53 a zero
+
+[1m=== ESITO: VERDE — catena intera + sentinelle a zero sul database della CI (18s di catena) ===[0m

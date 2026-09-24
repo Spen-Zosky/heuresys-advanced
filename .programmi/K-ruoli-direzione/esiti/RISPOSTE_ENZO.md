@@ -170,3 +170,11 @@ D12 | 2026-09-24 | A
 Risposta di Enzo, raccolta da Cowork il 2026-09-24 alle 21:58 e depositata qui senza commit (l'unico committer resta la CLI, V7).
 Opzione A: la provenienza delle presenze si dichiara per SCRITTORE, non riga per riga — una riga di classificazione «MATERIALIZZAZIONE senza tracciamento riga-per-riga» per ciascuno degli scrittori vivi di `sys_attendance` misurati da X-6, coerente con il linguaggio di D6/X-2. Le righe storiche non si toccano; il numero delle presenze senza provenienza smette di essere una lacuna perche' diventa una dichiarazione.
 D12 si sblocca.
+
+D11-permesso | 2026-09-25 | 1
+
+Risposta di Enzo, raccolta da Cowork il 2026-09-25 alle 00:3x e depositata qui senza commit (l'unico committer resta la CLI, V7).
+Strada 1 delle due poste in `esiti/D11.md`: al DPO si concede **`user:read`**, cioe' il permesso che gia' protegge la rotta del dossier — la raccomandazione della CLI. Le tre letture in piu' che quel permesso porta con se' (l'elenco degli utenti del tenant, la scheda anagrafica di una persona, i ruoli di una persona) sono state descritte a Enzo in italiano semplice PRIMA che scegliesse: sono tutte letture, tutte filtrate dallo stesso perimetro organizzativo che D11 ha appena definito per il DPO, e l'unica informazione davvero nuova rispetto al dossier e' quale ruolo porta una persona.
+Ragione della scelta: l'alternativa (un permesso dedicato `user:dossier:read`) comprava zero effetti collaterali al prezzo di insegnare a `requirePermission` ad accettare piu' codici — il che tocca l'asserzione di boot che mappa ogni rotta a UN permesso (D-51) — e lasciava per sempre un debito di manutenzione: da quel giorno chiunque conceda `user:read` a un ruolo dovrebbe ricordarsi del gemello. Un debito su RBAC non si vede finche' non fa danni.
+Cio' che NON cambia, ed e' la ragione per cui la strada 1 e' sicura: `user:read` e' una LETTURA (nessuna scrittura sulle persone per il DPO), e sui dati sensibili di un'altra persona il DPO legge MASCHERATO — e' il terzo stato di D11, quinta eccezione di ADR-0036 §5. Le quattro eccezioni preesistenti restano tutte vere anche per lui.
+D11 si chiude con questa riga: la migrazione e' `000451`.

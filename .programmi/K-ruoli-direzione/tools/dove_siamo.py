@@ -84,6 +84,10 @@ EFFETTI: dict[str, str] = {
     "R-6": "select 1 from sys.sys_auth_roles where auth_role_code='PEOPLE_MANAGER' and retired_at is null",
     # F4 — R-6b (mandato Cowork 2026-09-19, sessione 2 di R-6): query dichiarata nel commento di 000449 stesso.
     "R-6b": "select 1 from sys.sys_auth_roles where auth_role_code='DATA_STEWARD' and retired_at is null",
+    # F4 — D11 (S1108, 2026-09-25): il terzo stato. La post-condizione e' il PERMESSO che apre
+    # la porta HTTP del dossier, non il ruolo (che esisteva gia' da R-2/000423): e' quello che
+    # la 000451 concede, ed e' consapevole del ritiro (`revoked_at is null`).
+    "D11": "select 1 from sys.sys_auth_role_permissions rp join sys.sys_auth_roles r on r.auth_role_id=rp.auth_role_id join sys.sys_auth_permissions p on p.auth_permission_id=rp.auth_permission_id where r.auth_role_code='DPO' and p.auth_permission_code='user:read' and rp.revoked_at is null",
     # F6 — G-1 CHIUSA (S1105): colonna origine_dato E PEOPLE_MANAGER titolare dei 5 permessi.
     "G-1": "select 1 from information_schema.columns c where c.table_schema='sys' and c.table_name='sys_user_position_assignments' and c.column_name='origine_dato' and exists (select 1 from sys.sys_auth_role_permissions rp join sys.sys_auth_roles r on r.auth_role_id=rp.auth_role_id join sys.sys_auth_permissions p on p.auth_permission_id=rp.auth_permission_id where r.auth_role_code='PEOPLE_MANAGER' and p.auth_permission_code='user_position_assignment:create' and rp.revoked_at is null)",
 }

@@ -1,0 +1,44 @@
+
+> heuresys-advanced@1.0.0 db:migrate:vm D:\heuresys-advanced
+> bash db/scripts/migrate-on-vm.sh
+
+[migrate-on-vm] host=oracle-vm-default  repo=~/heuresys-advanced  pull=1
+From https://github.com/Spen-Zosky/heuresys-advanced
+   e5e0337d..2ba7711e  main       -> origin/main
+Updating 70fc813e..2ba7711e
+Fast-forward
+ .programmi/K-ruoli-direzione/STATO.md              |   6 +-
+ .programmi/K-ruoli-direzione/esiti/D11.md          | 287 +++++++++++++++++++++
+ .programmi/K-ruoli-direzione/esiti/D12.md          |  59 ++++-
+ .../K-ruoli-direzione/esiti/R-11_matrice.json      | 225 ++++++++++++----
+ .../K-ruoli-direzione/esiti/REGISTRO_SCOPERTE.md   |   1 +
+ .../K-ruoli-direzione/esiti/RISPOSTE_ENZO.md       |  21 ++
+ .../evidenze/D11_ci_rehearsal_20260925.txt         |  85 ++++++
+ .../evidenze/D11_prova_a_ROSSO_20260924.txt        |  69 +++++
+ .../evidenze/D11_prova_f_ROSSA_20260925.txt        |  80 ++++++
+ .../evidenze/D11_prove_VERDI_20260924.txt          |  44 ++++
+ .programmi/K-ruoli-direzione/tools/dove_siamo.py   |   4 +
+ CLAUDE.md                                          |   4 +-
+ apps/api/src/lib/scope/audit.ts                    |   7 +
+ apps/api/src/lib/scope/mask.ts                     |  62 ++++-
+ apps/api/src/lib/scope/resolver.ts                 |  44 ++++
+ apps/api/src/modules/users/service.ts              |  20 +-
+ .../test/chain-threshold-pay.integration.test.ts   |   4 +-
+ .../dpo-dossier-mascherato.integration.test.ts     | 276 ++++++++++++++++++++
+ db/migrations/000451_d11_dpo_apre_il_dossier.sql   | 204 +++++++++++++++
+ db/scripts/provision-collaudo-access.ts            |  58 ++++-
+ .../0036_hierarchical_and_functional_domains.md    |  58 ++++-
+ ...0040_l_agente_legge_cio_che_legge_la_persona.md |   4 +-
+ docs/kb/SOT_BACKLOG.md                             |   2 +-
+ docs/kb/xtras/RBAC_COME_FUNZIONA_DAVVERO.md        |   7 +-
+ 24 files changed, 1543 insertions(+), 88 deletions(-)
+ create mode 100644 .programmi/K-ruoli-direzione/esiti/D11.md
+ create mode 100644 .programmi/K-ruoli-direzione/evidenze/D11_ci_rehearsal_20260925.txt
+ create mode 100644 .programmi/K-ruoli-direzione/evidenze/D11_prova_a_ROSSO_20260924.txt
+ create mode 100644 .programmi/K-ruoli-direzione/evidenze/D11_prova_f_ROSSA_20260925.txt
+ create mode 100644 .programmi/K-ruoli-direzione/evidenze/D11_prove_VERDI_20260924.txt
+ create mode 100644 apps/api/test/dpo-dossier-mascherato.integration.test.ts
+ create mode 100644 db/migrations/000451_d11_dpo_apre_il_dossier.sql
+[migrate-on-vm] migrazioni sul disco remoto: 447
+[migrate-on-vm] exit=0 durata=21s
+OK: 423 migrations applied, 24 skipped (una-tantum gia' applicate).

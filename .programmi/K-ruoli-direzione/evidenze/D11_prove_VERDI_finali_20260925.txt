@@ -1,0 +1,50 @@
+[prova-api] host=linux-pc  repo=~/heuresys-advanced
+[prova-api] contenuto: 944 file sotto apps/api packages/shared apps/web/src/lib/role-precedence.ts apps/web/src/app/(authenticated)/users/[userId]/_components/roles-editor.tsx  impronta=2a017e8728aa
+[prova-api] propago il contenuto...
+[prova-api] guardia OK — il contenuto sul gemello combacia byte per byte
+[prova-api] eseguo: pnpm --filter @heuresys/api exec vitest run test/dpo-dossier-mascherato.integration.test.ts
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/home/enzo/heuresys-advanced/apps/api[39m
+
+◇ injected env (24) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+[drift] baseline: 9 righe residue PRE-ESISTENTI (non le lascia questa corsa), su 822 colonne ispezionate:
+         sys_content_documents.document_title: 4
+         sys_content_versions.version_title: 5
+[90mstdout[2m | test/dpo-dossier-mascherato.integration.test.ts
+[22m[39m◇ injected env (0) from ../../.env // tip: ⌘ enable debugging { debug: true }
+
+[90mstdout[2m | test/dpo-dossier-mascherato.integration.test.ts
+[22m[39m◇ injected env (0) from ../../.env // tip: ⌘ override existing { override: true }
+
+[90mstdout[2m | test/dpo-dossier-mascherato.integration.test.ts
+[22m[39m{"level":"info","phase":"pg-pool","msg":"identita di connessione","user":"heuresys","separata":false}
+
+(node:1019484) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"level":30,"time":1790290144266,"pid":1019484,"hostname":"enzo-S550CM","name":"scope-audit","evt":"scope.access","op":"target","actorUserId":"74137e05-4dd6-4b06-a15a-c1c14d50f5ee","tenantId":"86ba7a65-217f-48ba-8ce5-5c09b40a66b0","targetUserId":"01da8b8e-f5cf-4258-8a84-a3e4d16331c5","granted":true,"axis":"tenant_masked","msg":"scope target granted via tenant_masked"}
+(node:1019484) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+{"level":30,"time":1790290144367,"pid":1019484,"hostname":"enzo-S550CM","name":"scope-audit","evt":"scope.access","op":"target","actorUserId":"15c601d0-c78e-4b86-8eb6-5f664c7046d1","tenantId":"86ba7a65-217f-48ba-8ce5-5c09b40a66b0","targetUserId":"01da8b8e-f5cf-4258-8a84-a3e4d16331c5","granted":true,"axis":"hr_mandate","msg":"scope target granted via hr_mandate"}
+{"level":30,"time":1790290144438,"pid":1019484,"hostname":"enzo-S550CM","name":"scope-audit","evt":"scope.access","op":"target","actorUserId":"0281ede2-04fe-43fe-b8da-b75c5e320d85","tenantId":"86ba7a65-217f-48ba-8ce5-5c09b40a66b0","targetUserId":"01da8b8e-f5cf-4258-8a84-a3e4d16331c5","granted":false,"axis":"denied","msg":"scope target denied via denied"}
+{"level":30,"time":1790290144444,"pid":1019484,"hostname":"enzo-S550CM","name":"scope-audit","evt":"scope.access","op":"target","actorUserId":"74137e05-4dd6-4b06-a15a-c1c14d50f5ee","tenantId":"86ba7a65-217f-48ba-8ce5-5c09b40a66b0","targetUserId":"2d356d62-e6fa-4e32-98b3-18814bd4e988","granted":false,"axis":"denied","msg":"scope target denied via denied"}
+{"level":30,"time":1790290144467,"pid":1019484,"hostname":"enzo-S550CM","reqId":"req-1","req":{"method":"POST","url":"/v1/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790290144770,"pid":1019484,"hostname":"enzo-S550CM","reqId":"req-1","res":{"statusCode":200},"responseTime":300.283535999999,"msg":"request completed"}
+{"level":30,"time":1790290144789,"pid":1019484,"hostname":"enzo-S550CM","name":"scope-audit","evt":"scope.access","op":"target","actorUserId":"74137e05-4dd6-4b06-a15a-c1c14d50f5ee","tenantId":"86ba7a65-217f-48ba-8ce5-5c09b40a66b0","targetUserId":"01da8b8e-f5cf-4258-8a84-a3e4d16331c5","granted":true,"axis":"tenant_masked","msg":"scope target granted via tenant_masked"}
+{"level":30,"time":1790290144775,"pid":1019484,"hostname":"enzo-S550CM","reqId":"req-2","req":{"method":"GET","url":"/v1/users/01da8b8e-f5cf-4258-8a84-a3e4d16331c5/dossier","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790290144920,"pid":1019484,"hostname":"enzo-S550CM","reqId":"req-2","res":{"statusCode":200},"responseTime":144.3524070000003,"msg":"request completed"}
+{"level":30,"time":1790290144938,"pid":1019484,"hostname":"enzo-S550CM","reqId":"req-3","req":{"method":"POST","url":"/v1/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790290145203,"pid":1019484,"hostname":"enzo-S550CM","reqId":"req-3","res":{"statusCode":200},"responseTime":264.05640799999856,"msg":"request completed"}
+{"level":30,"time":1790290145204,"pid":1019484,"hostname":"enzo-S550CM","reqId":"req-4","req":{"method":"GET","url":"/v1/whistleblowing/reports","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1790290145210,"pid":1019484,"hostname":"enzo-S550CM","reqId":"req-4","res":{"statusCode":403},"responseTime":5.343002999999953,"msg":"request completed"}
+ [32m✓[39m test/dpo-dossier-mascherato.integration.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 2757[2mms[22m[39m
+     [33m[2m✓[22m[39m (f) via HTTP: il DPO fa login e apre GET /v1/users/:userId/dossier → 200, con gli importi mascherati [33m 491[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 00:48:51
+[2m   Duration [22m 13.52s[2m (transform 5.42s, setup 278ms, import 8.77s, tests 2.76s, environment 0ms)[22m
+
+◇ injected env (0) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+[drift] nessun residuo aggiunto da questa corsa (totale invariato: 9).
+[prova-api] durata 18s  esito=0
+[prova-api] nota: 205 file restano modificati su linux-pc (cio' che ho propagato).
+[prova-api]       spariscono al prossimo 'align-clones.sh linuxpc' (reset --hard).

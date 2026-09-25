@@ -116,7 +116,22 @@ fetch() {
     fi
     cat "$CI_GATE_FIXTURE"; return
   fi
-  curl -fsS -m 15 -H 'Accept: application/vnd.github+json' "$1"
+  # CHIUSURA-C3: senza token il pubblico limita a 60 chiamate/ora per IP, e
+  # deploy-watch ne fa una per commit della finestra armata — con una finestra
+  # larga il tetto si esaurisce e il gate fallisce CHIUSO (R3) anche a CI verde.
+  # Un token alza il tetto a 5000/h. MAI sulla riga di comando di curl (visibile
+  # a chiunque con `ps`): lo si passa come header via `-K -` (config da stdin).
+  local token=""
+  token="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
+  if [ -z "$token" ] && command -v gh >/dev/null 2>&1; then
+    token="$(gh auth token 2>/dev/null || true)"
+  fi
+  if [ -n "$token" ]; then
+    printf 'header = "Authorization: Bearer %s"\nheader = "Accept: application/vnd.github+json"\nurl = "%s"\n' \
+      "$token" "$1" | curl -fsS -m 15 -K -
+  else
+    curl -fsS -m 15 -H 'Accept: application/vnd.github+json' "$1"
+  fi
 }
 
 if [ "$MODO_ESITI" = 1 ]; then

@@ -211,3 +211,90 @@ un'identità il cui ruolo il bundle del 14 settembre non conosce. È l'effetto c
 descriveva come «ruoli senza permessi effettivi in produzione», visto dal lato dell'utente.
 
 Il quadro dopo il rilascio è più avanti, nella stessa forma.
+
+---
+
+## Si riprende da qui — stato vero al 2026-09-25 ore 04:15 (misurato, non ricordato)
+
+Scritto su richiesta del governo (Cowork): finestra 5 ore misurata dal canale al **75%**, in salita di
+circa un punto al minuto; soglia di Enzo 80%, fascia di chiusura dal 79%. Questa sezione esiste
+perché il punto di ripresa non dipenda dal fatto che la sessione arrivi in fondo.
+
+### Fatto, e provato
+
+| voce | stato | prova |
+|---|---|---|
+| **C2-1** — #28 SIGPIPE in `align-claude-ecosystem.sh` | **FATTO** | causa riprodotta (`exit=141`) e corretta (`\|\| true`, righe 601 e 554); commit `7ee357ee`. Provato **sul vivo**: il secondo giro di `close-propagate --delta` ha superato il punto in cui moriva e ha completato entrambi i canali |
+| **C2-2** — GitHub | **FATTO** | 10 allarmi CodeQL corretti (commit `1b319322`); gli altri 151 censiti con gravità e motivo; Dependabot 0, secret scanning 0. **Atlas freshness: verde** sull'HEAD rilasciato, dopo sei rossi consecutivi |
+| **CI su `b07143c8`** | **9 verdi su 10** | State lint, Lint, Shell tests, Typecheck, i18n parity, CodeQL, Atlas freshness, Build (web), Playwright smoke. In corso: `Test (api integration)` |
+| **Allineamento delle due macchine** | **FATTO** | entrambi i canali (`align-clones` e `align-claude-ecosystem`), entrambi gli host, **verify CLEAN**: `drift-vm-20260925T015929Z.md` e `drift-linuxpc-20260925T015929Z.md`. VM e linux-pc sono a `b07143c8` |
+| **C2-3, armamento** | **FATTO** | `origin/prod` portato da `78b40e72` a **`b07143c8`** — 139 commit, il primo rilascio da giorni. Riga testuale dello script: `armato b07143c8 — il deploy parte da se' entro ~5 minuti dal verde della CI (sorvegliante: heuresys-advanced-deploy-watch.timer su VM e linux-pc)` |
+| **C2-5, clone del DB del gemello** | **FATTO una volta, ri-armato** | primo giro concluso `Result=success`, exit 0, con la riga `[clone-vm-db] done (scambiato: in nessun istante heuresys_advanced e' rimasto senza dati)`. Il secondo giro di `close-propagate` lo ha **ri-innescato** (MainPID 1253352) perché i path `db/migrations\|seeds` risultano cambiati: gira sotto systemd, quindi **sopravvive alla chiusura di questa sessione** |
+| **C2-4, misura PRIMA** | **FATTO** | 8 asserzioni rosse in produzione, con l'output allegato più sopra: login delle utenze di collaudo a **500** mentre una password sbagliata risponde **401** — il bundle fermo al 14/9, visto dall'utente |
+
+### Manca — e questo è il punto di ripresa
+
+1. **`Test (api integration)` sull'HEAD `b07143c8`**: era ancora in corso. Comando:
+   `gh run list --limit 12 --json name,conclusion,headSha`. Se rossa, si corregge (non si restituisce).
+2. **`bash scripts/verifica-deploy.sh`** finché non dichiara **DEPLOYATO**. Subito dopo l'armamento
+   dirà quasi certamente **IN-VOLO**, ed è giusto così: il rollout lo fa il timer entro ~5 minuti dal
+   verde della CI. `NON-VERIFICATO` **non** vuol dire «a posto».
+3. **La prova live DOPO il rilascio**: `cd apps/api && node --dns-result-order=ipv4first
+   scripts/prova-live-chiusura-c2.mjs`. Attesa: VERDE, cioè login a 200, dossier del DPO a 200 con
+   `grossPay` in `masked`, PLATFORM_OPERATOR 200/403 e SALES 200/403. Se resta ROSSA **dopo** che
+   `verifica-deploy.sh` dice DEPLOYATO, allora #30 non è chiusa dal rilascio e va indagata a parte.
+4. **L'esito del clone ri-innescato**:
+   `ssh linux-pc 'systemctl show -p Result --value heuresys-advanced-clonedb.service'`.
+5. **La verifica lunga di chiusura sul linux-pc**: `bash db/scripts/prova-api-sul-gemello.sh`
+   (~16 minuti lì contro ~31 su Windows). Da fare **dopo** il clone, mai prima.
+6. **Handoff**: `.handoff/STATE.md` e `docs/kb/SOT_STATE.md` con la skill `handoff`, **senza**
+   rieseguire il rilascio già fatto.
+
+### Le voci APERTE di TRG.md che restano per domani, nell'ordine di TRG-3
+
+Delle 18 APERTE censite ieri, **due sono chiuse stanotte**: `#28` (corretta qui) e — se il punto 3
+qui sopra torna verde — `#30`. Le altre, nell'ordine di impatto che TRG-3 aveva già deciso:
+
+**Alto** — nessuna residua, se `#30` si chiude col rilascio.
+
+**Medio**
+1. `[piano F-1/F-3]` `00_STATO_ORA_heuresys-advanced.md` stantio di 5-6 giorni, perché niente lo
+   riscrive da sé. Chi: Cowork.
+2. `[piano F-2]` nessuna attività pianificata «all'accesso» rilancia una sessione interrotta dopo un
+   riavvio. Chi: Cowork.
+3. `[piano H-3]` `uscita_sicura.py` non distingue scarto noto da lavoro non salvato. Chi: Cowork.
+4. `[registro #2]` `seed_acquisition:read`/`trigger` concedono accesso a tre moduli oltre a
+   `tenant-import-runs`: granularità per famiglia invece che per modulo. Chi: sessione CLI, ed è un
+   mandato nuovo (una migrazione di granularità), non un emendamento.
+
+**Basso**
+5. `[piano A-1, A-4, A-5, A-6, A-7]` cinque sezioni mancanti nella skill e nella copia durevole.
+6. `[piano G-6, G-7]` la regola sul controllo degli strumenti non è nella skill, e l'inventario non
+   si rigenera a ogni ripresa.
+7. `[piano D-3]` `verifica_ciclo.py` non ha una prova di fiducia (caso negativo provocato).
+8. `[piano A-9 / F-2 duplicato]` riconciliazione dei tre file `00_*` con la skill.
+9. `[piano B-4]` iniezione dell'avviso al terzo giro in tondo, non implementata di proposito.
+10. `[registro #16]` la regola «non creare file fuori dalla cartella designata» non è nel testo
+    REGOLE degli script dei workflow.
+
+**Non misurate, e restano tali**: `#18`, `#21` (richiedono `git stash list`/`git log` sul gemello),
+`#37` (ACL di `heuresys_ci` sulla VM).
+
+### Le DECISIONI-DI-ENZO, a parte — nessuna azione presa, nessuna presa qui
+
+Sono 19 e stanno per esteso in `TRG.md` §«Decisioni-di-Enzo». Le quattro che toccano il prodotto e
+che converrebbe sciogliere per prime: `#3` (come distinguere MATERIALIZZAZIONE da IMPORT nel confine
+strutturale), `#23` (allineare `GDPR_MANDATE_ROLES` al permesso RBAC, o restringere il permesso),
+`#26/#42` (costruire il gesto applicativo che scrive gli OKR check-in), `#27` (superficie self per
+`sys_platform_user_tenant_assignments`, o esclusione motivata). `#20` è la più urgente sul piano
+operativo: il clone notturno del gemello cancella ogni notte il fattore TOTP di collaudo, e le tre
+vie (a/b/c) sono ancora tutte aperte.
+
+### Lo stato vero delle macchine, adesso
+
+| macchina | repo | database | servizi |
+|---|---|---|---|
+| **Windows** (qui) | `b07143c8`, albero pulito, pari con origin | tunnel `:5433` su produzione, vivo | — |
+| **VM Oracle** (produzione) | `b07143c8`, ecosistema CLEAN | produzione | vivi: `/api/readyz` 200 in 0,55 s, `/login` 200 in 0,81 s. **Bundle ancora quello vecchio** finché il timer non deploya |
+| **linux-pc** (gemello) | `b07143c8`, ecosistema CLEAN | clone rinfrescato una volta con successo, secondo giro in corso sotto systemd | api e web riavviati dal clone |
+| `origin/prod` | **`b07143c8`** (armato stanotte, era `78b40e72`) | — | il rollout lo esegue `heuresys-advanced-deploy-watch.timer` |

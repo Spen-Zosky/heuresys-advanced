@@ -298,3 +298,42 @@ vie (a/b/c) sono ancora tutte aperte.
 | **VM Oracle** (produzione) | `b07143c8`, ecosistema CLEAN | produzione | vivi: `/api/readyz` 200 in 0,55 s, `/login` 200 in 0,81 s. **Bundle ancora quello vecchio** finché il timer non deploya |
 | **linux-pc** (gemello) | `b07143c8`, ecosistema CLEAN | clone rinfrescato una volta con successo, secondo giro in corso sotto systemd | api e web riavviati dal clone |
 | `origin/prod` | **`b07143c8`** (armato stanotte, era `78b40e72`) | — | il rollout lo esegue `heuresys-advanced-deploy-watch.timer` |
+
+---
+
+## INTERRUZIONE — 2026-09-25 ore 04:14, per soglia del guardiano
+
+Il governo (Cowork) ha misurato dal canale la **finestra 5 ore all'82%**: soglia di Enzo (80%)
+raggiunta, e non si rinegozia. La sessione si interrompe qui. Nessun passo è rimasto a metà:
+l'unica attività in corso era l'**attesa passiva** della CI, che non lascia nulla di incompleto.
+
+*(Nota sulla misura: il ramo 5 ore di `guardiano.py` è cieco in sessione headless — il dato è
+stantio di oltre 8000 minuti. Il numero che decide viene dal canale, non da qui, e lo si registra
+come tale invece di fingere di averlo misurato.)*
+
+### Aggiornamento allo stato vero di questo minuto
+
+| fatto | stato |
+|---|---|
+| `origin/prod` | **`b07143c8`** — armato. Era `78b40e72`: 139 commit, il primo rilascio da giorni |
+| chi lo rilascia | **`heuresys-advanced-deploy-watch.timer`**, su VM e linux-pc, da solo, entro ~5 minuti dal verde della CI. **Non dipende da questa sessione** |
+| CI su `b07143c8` | **9 verdi su 10**; `Test (api integration)` era ancora in corso all'interruzione. Zero rosse |
+| `verifica-deploy.sh` | ultimo verdetto letto: **IN-VOLO — CI ancora in corso (1)**. Entrambi gli host fermi su `9f62c7a1`, servizi `active/active`, produzione `readyz=200 login=200` |
+| allineamento macchine | **completo**, entrambi i canali, entrambi gli host, `verify CLEAN` |
+| clone del DB del gemello | **success** due volte (`Result=success`, `ActiveState=inactive`) |
+| albero locale | pulito, pari con origin |
+
+### Cosa resta, nell'ordine in cui va ripreso
+
+1. `gh run list` — `Test (api integration)` su `b07143c8`: se rossa, si corregge.
+2. `bash scripts/verifica-deploy.sh` finché non dice **DEPLOYATO**. Se resta IN-VOLO oltre ~10
+   minuti dal verde: `ssh <host> 'journalctl -u heuresys-advanced-deploy-watch -n 50'`, che dice
+   sempre **perché** non ha deployato.
+3. `cd apps/api && node --dns-result-order=ipv4first scripts/prova-live-chiusura-c2.mjs` — la prova
+   live di C2-4. Prima del rilascio: 8 rosse. Attesa dopo: VERDE. **Se resta rossa a deploy
+   avvenuto, #30 non è chiusa dal rilascio** e diventa una voce a sé.
+4. `bash db/scripts/prova-api-sul-gemello.sh` — la verifica lunga di chiusura, sul linux-pc.
+5. La skill `handoff`, **senza** rieseguire il rilascio.
+
+Il resto — le voci APERTE di TRG.md, le DECISIONI-DI-ENZO, lo stato delle macchine — è nella
+sezione «Si riprende da qui» qui sopra, e non si ripete.

@@ -134,6 +134,14 @@ fetch() {
   # con whitespace (un usage-text sfuggito, un errore multilinea) finirebbe nel
   # file di config di curl e lo romperebbe — o vi inietterebbe altre direttive.
   case "$token" in *[[:space:]]*) token="" ;; esac
+  # CHIUSURA-C3, terzo giro: su linux-pc `gh` resta 2.4.0 (nessuna versione piu'
+  # nuova disponibile lì) e `auth token` non esistera' mai. Il token e' comunque
+  # sul disco, in chiaro, nel file che ogni versione di gh scrive e legge — lo
+  # si estrae direttamente, evitando la dipendenza dal sottocomando.
+  if [ -z "$token" ] && [ -f "$HOME/.config/gh/hosts.yml" ]; then
+    token="$(awk -F': *' '/^[[:space:]]*oauth_token:/ {print $2; exit}' "$HOME/.config/gh/hosts.yml" 2>/dev/null)"
+    case "$token" in *[[:space:]]*) token="" ;; esac
+  fi
   if [ -n "$token" ]; then
     printf 'header = "Authorization: Bearer %s"\nheader = "Accept: application/vnd.github+json"\nurl = "%s"\n' \
       "$token" "$1" | curl -fsS -m 15 -K -

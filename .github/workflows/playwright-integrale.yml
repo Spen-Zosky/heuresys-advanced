@@ -43,6 +43,11 @@ name: Playwright integrale (suite E2E completa, a fasi)
 on:
   workflow_dispatch: {}
 
+permissions:
+  # CodeQL actions/missing-workflow-permissions: il token di corsa non deve poter
+  # scrivere. Questi workflow fanno solo checkout + verifica (upload-artifact usa il
+  # token di runtime, non GITHUB_TOKEN), quindi la sola lettura basta.
+  contents: read
 concurrency:
   group: playwright-integrale-${{ github.ref }}
   cancel-in-progress: false

@@ -36,6 +36,11 @@ on:
       - "apps/web/src/locales/**"
   workflow_dispatch: {}
 
+permissions:
+  # CodeQL actions/missing-workflow-permissions: il token di corsa non deve poter
+  # scrivere. Questi workflow fanno solo checkout + verifica (upload-artifact usa il
+  # token di runtime, non GITHUB_TOKEN), quindi la sola lettura basta.
+  contents: read
 concurrency:
   group: i18n-parity-${{ github.ref }}
   cancel-in-progress: true

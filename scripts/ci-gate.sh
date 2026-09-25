@@ -124,8 +124,16 @@ fetch() {
   local token=""
   token="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
   if [ -z "$token" ] && command -v gh >/dev/null 2>&1; then
-    token="$(gh auth token 2>/dev/null || true)"
+    # CHIUSURA-C3, secondo giro: su gh 2.4.0 (linux-pc) `auth token` non esiste, e
+    # l'errore va su STDOUT (il testo di usage), non su stderr — con `|| true` il
+    # comando "riesce" comunque e quel testo diventa il "token". Onorare l'exit
+    # code (non solo la non-vacuita') e' l'unico modo per scartarlo.
+    token="$(gh auth token 2>/dev/null)" || token=""
   fi
+  # Difesa in profondita': un token e' una riga sola senza spazi. Qualunque cosa
+  # con whitespace (un usage-text sfuggito, un errore multilinea) finirebbe nel
+  # file di config di curl e lo romperebbe — o vi inietterebbe altre direttive.
+  case "$token" in *[[:space:]]*) token="" ;; esac
   if [ -n "$token" ]; then
     printf 'header = "Authorization: Bearer %s"\nheader = "Accept: application/vnd.github+json"\nurl = "%s"\n' \
       "$token" "$1" | curl -fsS -m 15 -K -

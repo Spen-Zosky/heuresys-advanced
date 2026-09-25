@@ -373,3 +373,79 @@ Verificato: `git ls-remote origin refs/heads/prod` torna `8fe1b0a8`.
 `b07143c8`, che resta comunque 10/10 verde). Al momento della scrittura: Typecheck, Lint e State
 lint verdi, `Test (api integration)` in corso. **E la regola da tenere a mente: da qui in avanti non
 si committa piu su `main` finche il deploy non e avvenuto** — ogni commit rimanda il rilascio.
+
+---
+
+## C3 — 2026-09-25 sera / 2026-09-26 notte — mandato Cowork CHIUSURA-C3
+
+Voce di governo, sessione S1110 proseguita. Diagnosi di partenza (misurata da Cowork): `refs/heads/prod`
+= `6609802d`, CI verde 4/4 su quello sha, ma VM e linux-pc fermi su `9f62c7a1` — il sorvegliante
+(`heuresys-advanced-deploy-watch.timer`) falliva ogni 5 minuti con *«IMPOSSIBILE LEGGERE la CI —
+non deployo nel dubbio (R3)»*.
+
+### C3-1 — la riparazione di `ci-gate.sh`, tre giri
+
+Il difetto vero era uno solo (rate limit GitHub pubblico, 60/h per IP, esaurito da
+`deploy-watch.sh` che interroga `--esiti` per ogni commit della finestra armata), ma la
+riparazione si e' rivelata a strati — ogni giro scoperto misurando sul vivo, non per deduzione:
+
+1. **Primo giro** (`50947c8a`) — `fetch()` usa un token quando c'e' (`GH_TOKEN` →
+   `GITHUB_TOKEN` → `gh auth token`), passato via `curl -K -` (mai sulla riga di comando,
+   visibile con `ps`). Provato: header `Authorization` arriva davvero a un server di eco locale.
+2. **Secondo giro** (`ef096f6e`) — su gh 2.4.0 (linux-pc) `auth token` non esiste, e l'errore va
+   su STDOUT (testo di usage), non su stderr: con `|| true` il comando "riesce" comunque e quel
+   testo diventa il "token", spedito come header — GitHub risponde **401**. Corretto onorando
+   l'exit code (`token="$(gh auth token 2>/dev/null)" || token=""`) piu' una difesa in profondita'
+   (`case "$token" in *[[:space:]]*) token="" ;; esac` — un token e' una riga sola senza spazi).
+3. **Terzo giro** (`a8f60932`) — anche cosi', su linux-pc (gh 2.4.0, nessuna versione piu' nuova
+   disponibile) `auth token` semplicemente non esiste: nessun token da nessuna parte. Il token
+   e' pero' sul disco in chiaro in `~/.config/gh/hosts.yml` (ogni versione di gh lo scrive e
+   legge da li'). Aggiunto come ultimo fallback, con la stessa difesa in profondita'.
+
+Ogni giro provato isolando la sola logica di selezione del token (mock del comando `gh` che
+riproduce esattamente il comportamento reale, nessuna chiamata di rete), poi con la batteria
+completa (`run-shell-tests.sh` — **258/258** dopo ognuno dei tre commit) e infine sul vivo (VM e
+linux-pc, `journalctl -u heuresys-advanced-deploy-watch`).
+
+**Incidente collaterale, corretto**: due corse concorrenti di `verify_gate.py run` (una mia
+duplicata) hanno fatto scattare la race sul file di stato condiviso `.zp/verify-verdict.json`,
+producendo un rosso fittizio (`programmi` con exit Windows 0xC0000142 — crash da teardown di
+processo, non un difetto reale). Risolto terminando il duplicato (C4: mai due corse concorrenti
+su una risorsa condivisa) e rilanciando pulito.
+
+### C3-2 — il rilascio vero, completato
+
+Armato tre volte (una per ogni fix, perche' ogni commit successivo invalidava l'armamento
+precedente — la stessa dinamica gia' vista in C2): infine `origin/prod` → **`a8f60932`**.
+
+`bash scripts/verifica-deploy.sh` (ATTESA_MAX=900, ripassa da solo):
+
+```
+VERDETTO: DEPLOYATO — 2 host su a8f60932, servizi attivi, produzione 200
+```
+
+VM e linux-pc entrambi allineati, servizi `active/active`, `readyz=200`, `login=200`.
+
+### C3-3 — la prova live D11, DOPO il rilascio
+
+```
+$ cd apps/api && node --dns-result-order=ipv4first scripts/prova-live-chiusura-c2.mjs
+(a) D11 — ok login dpo@collaudo.invalid → 200; dossier → 200; buste=37 RIGHE;
+    masked=[deductions, grossPay, netPay]; ogni campo masked davvero ASSENTE
+(b) #30 — ok PLATFORM_OPERATOR 200/403; SALES 200/403 (controprove incluse)
+
+VERDETTO: VERDE — tutte le asserzioni reggono
+```
+
+Il rilascio ha chiuso sia D11 (dossier masked) sia #30 (ruoli senza permessi effettivi in
+produzione): entrambi erano sintomi dello stesso bundle fermo al 14/9, ora sostituito.
+
+### C3-4 — linux-pc
+
+`clone-vm-db.sh` armato dentro `close-propagate` (misurato: `db/migrations|seeds` cambiati
+`58b159c3..HEAD`): `systemctl show -p Result` → **`success`**.
+
+Verifica lunga di chiusura in corso (`db/scripts/prova-api-sul-gemello.sh`, lanciato da Windows —
+**non** via ssh diretto: il primo tentativo, fatto ssh-ando prima dentro linux-pc e lanciando lo
+script li', ha fallito perche' lo script stesso fa `ssh linux-pc` e da dentro linux-pc quell'alias
+non risolve a se stesso). Esito a seguire in questa stessa sezione.

@@ -1,26 +1,16 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: S1108 (2026-09-25), mandato Cowork D11, passaggio 3 del ciclo 2. I
-numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: S1109 (2026-09-25), mandato Cowork TRG, passaggio 4 del ciclo 2 (governo,
+non prodotto). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-**D11 chiusa, e con lei il mandato K: 53 voci CHIUSE, 2 RITIRATE, nessuna aperta.** Nasce il
-**terzo stato** dell'autorizzazione — perimetro dell'intero tenant sull'asse gerarchico con
-retribuzione e valutazioni assenti e dichiarate in `masked`, **quinta eccezione ad ADR-0036 §5**.
-Oggi lo porta il solo `DPO`. `HR_MANDATED_ROLES` non è stato toccato (aprirebbe in chiaro) e I20
-continua a vincere su chi porta entrambi.
-
-**La CI rossa da due giorni non era il runner condiviso**, come l'aveva registrata la sessione
-prima: sul linux-pc convivono **due chiavi di collaudo** e il processo del runner non usa quella
-del proprio drop-in (mai riavviato). Il moltiplicatore però era nello strumento — il provisioning
-diceva «già a posto» a qualunque credenziale esistente senza guardare da quale chiave venisse.
-Ora lo verifica e ripara da sé, in qualunque verso; l'ambiguità sulla chiave è `#260`.
-
-**Una domanda posta invece di una decisione presa**: il dossier si apre con `user:read`, che apre
-anche tre altre letture del modulo `users`. Fermata, due strade con il loro costo, Enzo ha scelto
-la prima → mig. `000451`. Le prove sono state **viste rosse prima due volte** (terzo stato spento;
-permesso assente) e sono tutte verdi dopo. Le corse CI sono verdi, il cancello è GREEN.
+**TRG (governo, ciclo 2 passo 4): 102 scoperte/correzioni del mandato K misurate una per una**,
+nessuna corretta qui — 18 restano aperte (4 di rilievo anche per il prodotto: bundle produzione fermo da prima
+del 17 settembre senza i permessi di 3 ruoli, granularità `seed_acquisition:*`, SIGPIPE di
+`close-propagate --delta`). Dettaglio in `.programmi/K-ruoli-direzione/esiti/TRG.md`. Il mandato K
+stesso resta chiuso da D11 (sessione precedente: 53 voci CHIUSE, 2 RITIRATE — terzo stato
+dell'autorizzazione, quinta eccezione ADR-0036 §5, solo `DPO`).
 
 ## Top priorities
 

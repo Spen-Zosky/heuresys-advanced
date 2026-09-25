@@ -9,6 +9,60 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1108 (2026-09-24/25) — il terzo stato dell'autorizzazione, e una CI rossa che non era del runner
+
+**Mandato Cowork D11, passaggio 3 del ciclo 2. Il mandato K e' finito**: 53 voci CHIUSE, 2 RITIRATE,
+nessuna aperta (`#259` DONE).
+
+**La CI era rossa da due giorni, e l'ipotesi ereditata era sbagliata.** Sei file e tre test, sempre gli
+stessi, sempre `login <persona>@collaudo.invalid: 401`. La sessione precedente l'aveva registrata come
+«runner condiviso, corse che si calpestano»; tre corse rosse identiche la rendevano debole, e la misura
+l'ha smentita: sul linux-pc convivono **due chiavi di collaudo**, quella del drop-in systemd del runner
+(scritta il 19/09 alle 04:42) e quella di `.secrets/collaudo-access.key`. Il processo del runner usa la
+seconda perche' il servizio non e' mai stato riavviato; le cinque identita' provisionate due minuti dopo
+il drop-in erano nate con la prima. Verifica `argon2.verify` read-only su `heuresys_ci`: con la chiave
+che la CI usa davvero risultavano disallineate **esattamente le cinque** dei test rossi. Il moltiplicatore
+pero' era nello strumento — `provision-collaudo-access.ts` dichiarava «gia' a posto» qualunque credenziale
+**esistente**, senza guardare da quale chiave venisse: la verifica viveva solo dietro il flag
+`--riallinea`, cioe' dietro il ricordarsene (violazione di C3). Ora la rotazione e' **misurata**: hash
+confrontato con la password derivata, giornale `staging.collaudo_riallineo_undo` prima di toccare, e
+riparazione automatica in qualunque verso. La corsa CI l'ha confermato stampando `di cui DISALLINEATE
+misurate .. 5` e poi `290 passed (290)`. L'ambiguita' sulla chiave resta e ha una voce sua: `#260`.
+
+**Il terzo stato — quinta eccezione dichiarata ad ADR-0036 §5.** Decisione di Enzo del 2026-09-24
+(opzione A di `esiti/R-2_domanda_masking.md`, che supera il rinvio del 18/09). L'asse organizzativo
+conosceva due modi di arrivare all'intero tenant e nessuno serviva a un DPO: `HR_MANDATED_ROLES` porta li'
+**in chiaro** (I20), `isPlatform` + `mask.ts` maschera ma e' **cross-tenant** (ADR-0032). Nasce la
+composizione mancante — il perimetro del mandato HR con il trattamento del mandato di piattaforma:
+`TENANT_WIDE_MASKED_ROLES` + `haPerimetroTenantMascherato` in `lib/scope/resolver.ts`, un asse di audit
+proprio (`tenant_masked`, perche' «ha letto in chiaro» e «ha visto la riga senza i campi» sono due accessi
+diversi allo stesso dato), `masksUnderTenantWideMandate` e il predicato unificato `masksSensitiveClass` in
+`lib/scope/mask.ts` — che **riusa** `MASKED_UNDER_PLATFORM_MANDATE` invece di dichiarare una seconda lista
+delle stesse classi. `HR_MANDATED_ROLES` non e' stato toccato e I20 continua a vincere su chi porta
+entrambi. L'effetto fuori dal dossier e' **misurato zero**: dei moduli che il DPO raggiunge oggi (`gdpr/`
+e `me/`) nessuno chiama il resolver organizzativo.
+
+**Una domanda posta invece di una decisione presa.** La rotta del dossier e' protetta da `user:read`, che
+apre anche tre altre letture del modulo `users`: superfici che la decisione di Enzo non nominava. La
+sessione si e' fermata li' e ha portato le due strade con il loro costo; Enzo ha scelto la prima il
+2026-09-25 (`esiti/RISPOSTE_ENZO.md`, riga «D11-permesso»). Migrazione **`000451`** con le quattro cose
+di ogni scrittura — e la post-condizione che protegge cio' che **non** doveva cambiare: i ruoli con
+`user:read` salgono di esattamente uno, il nucleo GDPR resta completo, il DPO resta con **zero** scritture
+su `user`. Prova generale su copia usa-e-getta VERDE (423 migrazioni, due passate, 53/53 sentinelle),
+produzione applicata con `pnpm db:migrate:vm` in 21 s e verificata dal vivo.
+
+**Le prove sono state viste rosse prima, due volte**: la (a) con il terzo stato spento (`NotFoundError` da
+`canReadOrgTarget`) e la (f) con il permesso assente (`expected 403 to be 200`). Sette verdi dopo
+(`apps/api/test/dpo-dossier-mascherato.integration.test.ts`), protagonisti derivati dai dati vivi e mai
+per nome. **Cinque corse CI verdi**, cancello `verify_gate.py run` **GREEN** su tutte e sette le suite.
+
+**Numeri ri-derivati il 2026-09-25**: migrazioni su disco **447** (max `000451`) · mappature RBAC **1246**
+(24 ruoli / 241 permessi) · tabelle `sys.*` **250** · atlante 111 moduli API / 657 rotte / 129 pagine web.
+
+⚠ **Nessuna propagazione, nessun deploy**: vietati esplicitamente dal mandato Cowork, anche dove il profilo
+di chiusura li prescriverebbe. Conseguenza da conoscere: in produzione il permesso e' nel database ma
+l'API lo vedra' **al prossimo riavvio**, perche' la mappa RBAC si carica all'avvio.
+
 ### Delta S1092 (2026-09-08) — quattro fasi chiuse, il decimo perimetro, e i segreti che smettono di essere derivati
 
 ### Delta S1093 (2026-09-08/09) — la CI rossa, i tre rimedi all'instabilità, le PR Dependabot

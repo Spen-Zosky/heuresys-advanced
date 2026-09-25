@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-23T02:52:38Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3732**
+**Generato**: 2026-09-25T00:28:01Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3744**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,17 +13,17 @@
 | api-module | 398 |
 | ci | 19 |
 | claude-config | 38 |
-| config | 336 |
+| config | 343 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 445 |
+| db-migration | 447 |
 | db-other | 8 |
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 754 |
+| doc-canonical | 756 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -31,10 +31,10 @@
 | shared-pkg | 4 |
 | shared-schema | 121 |
 | showcase-source | 13 |
-| test | 448 |
+| test | 449 |
 | ux-design-archive | 80 |
 | web-source | 258 |
-| **TOTALE** | **3732** |
+| **TOTALE** | **3744** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 3089 |
+| live | 3101 |
 
 ## File per categoria
 
@@ -609,6 +609,12 @@
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\REGISTRO_SCOPERTE_addendum_r10.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\controlli-per-nome.baseline.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\A0_output_202609170220.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\D11_ci_rehearsal_20260925.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\D11_migrate_vm_20260925.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\D11_prova_a_ROSSO_20260924.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\D11_prova_f_ROSSA_20260925.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\D11_prove_VERDI_20260924.txt` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\D11_prove_VERDI_finali_20260925.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.3_controprova.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.4_ripresa_s2_202609150135.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\evidenze\F0.5_controprova.txt` · *live* · git-tracked
@@ -867,6 +873,7 @@
 - `D:\heuresys-advanced\pnpm-workspace.yaml` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\align-claude-ecosystem.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\align-clones.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\align-codex-ecosystem.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\archive-dumps.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\arma-clone.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\arma-deploy.sh` · *live* · git-tracked
@@ -1738,6 +1745,8 @@
 - `D:\heuresys-advanced\db\migrations\000447_x5_sentinella_della_direzione.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000448_g1_porta_nativa_user_position_assignments.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000449_r6b_data_steward.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000450_d12_origine_dato_sys_attendance.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000451_d11_dpo_apre_il_dossier.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -2078,6 +2087,8 @@
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\STATO.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\A0_margine_del_pavimento.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\A5_costo_di_un_ruolo.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\D11.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\D12.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.2_censimento_C1.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.4_ripresa.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.5_sola_lettura.md` · *live* · git-tracked
@@ -3132,6 +3143,7 @@
 - `D:\heuresys-advanced\apps\api\test\domain-derived-sections.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\domains-f6.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\domains-f7.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\dpo-dossier-mascherato.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\dpo.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\drift-check.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\e2e-drift-prefissi.test.ts` · *live* · git-tracked

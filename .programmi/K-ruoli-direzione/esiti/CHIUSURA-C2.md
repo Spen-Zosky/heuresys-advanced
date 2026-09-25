@@ -337,3 +337,39 @@ come tale invece di fingere di averlo misurato.)*
 
 Il resto — le voci APERTE di TRG.md, le DECISIONI-DI-ENZO, lo stato delle macchine — è nella
 sezione «Si riprende da qui» qui sopra, e non si ripete.
+
+---
+
+## SCOPERTA DOPO L INTERRUZIONE — l armamento si invalida se main avanza
+
+Trovata leggendo le macchine invece di fidarmi del verdetto. `verifica-deploy.sh` diceva
+**IN-VOLO — CI verde, 0/2 host allineati — il sorvegliante propaga entro ~5 min**, e il rollout non
+partiva. Il giornale del sorvegliante sulla VM dice perche, e non e quello che il verdetto lasciava
+credere:
+
+```
+$ ssh oracle-vm-default "journalctl -u heuresys-advanced-deploy-watch -n 12 --no-pager -o cat"
+[deploy-watch] armato b07143c8 ma origin/main e 826ea1ca — la punta non e piu quella autorizzata, non deployo
+[deploy-watch] armato b07143c8 ma origin/main e 8fe1b0a8 — la punta non e piu quella autorizzata, non deployo
+[deploy-watch] armato b07143c8 ma origin/main e 8fe1b0a8 — la punta non e piu quella autorizzata, non deployo
+```
+
+**I due commit di documentazione che ho fatto DOPO larmamento hanno invalidato larmamento.** Il
+sorvegliante, per costruzione, deploya solo se lo sha armato e ancora la punta di `origin/main`: e
+una guardia giusta — non vuole mettere in produzione uno stato che non e piu quello autorizzato — ma
+significa che **qualunque commit successivo allarmamento, anche di soli documenti, ferma il
+rilascio in silenzio**. Senza guardare il giornale, la sessione si sarebbe chiusa credendo di aver
+rilasciato, e la produzione sarebbe rimasta al 14 settembre.
+
+**`verifica-deploy.sh` non vede questa causa**: dice IN-VOLO, che e indistinguibile da «il timer
+non e ancora passato». E un difetto del verdetto, non del sorvegliante — e va aggiunto alle voci
+aperte: *«IN-VOLO deve saper distinguere non e ancora passato da non deployera mai»*.
+
+**Rimedio applicato**: `git push origin main:prod` — fast-forward da `b07143c8` a **`8fe1b0a8`**,
+nessun force. E lo stesso atto gia autorizzato da Enzo per stanotte, solo sullo sha giusto.
+Verificato: `git ls-remote origin refs/heads/prod` torna `8fe1b0a8`.
+
+**Conseguenza sulla ripresa**: il rilascio ora aspetta la CI verde su **`8fe1b0a8`** (non piu su
+`b07143c8`, che resta comunque 10/10 verde). Al momento della scrittura: Typecheck, Lint e State
+lint verdi, `Test (api integration)` in corso. **E la regola da tenere a mente: da qui in avanti non
+si committa piu su `main` finche il deploy non e avvenuto** — ogni commit rimanda il rilascio.

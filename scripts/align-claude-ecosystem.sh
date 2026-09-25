@@ -551,7 +551,7 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
     rline="$(rssh "$HOST" '
       d="$(find "$HOME/.claude/projects" -maxdepth 1 -type d -name "*heuresys-advanced*" 2>/dev/null | head -1)"
       if [ -n "$d" ] && [ -d "$d/memory" ]; then echo "MEMCOUNT=$(ls -1 "$d/memory" 2>/dev/null | grep -c .)"; else echo "MEMCOUNT=0"; fi
-    ' 2>/dev/null | grep "^MEMCOUNT=" | tail -1)"
+    ' 2>/dev/null | grep "^MEMCOUNT=" | tail -1 || true)"
     if [ -z "$rline" ]; then
       echo "project_memory: win=$lc remote=? SKIP (host non risponde al check — non un DRIFT)"
     else
@@ -598,7 +598,7 @@ align_host() {  # $1 = kind
   # sa distinguere «finito» da «cominciato».
   if [ "$DELTA" = 1 ] && [ -f "$MARKER" ]; then
     local changed
-    changed="$(find "$SRC/CLAUDE.md" "$SRC/skills" "$SRC/commands" "$SRC/statusline-command.sh" "$SRC/settings.json" "$BOOTSTRAP_SRC" "$CLAUDE_MEM_SRC" -newer "$MARKER" 2>/dev/null | head -1)"
+    changed="$(find "$SRC/CLAUDE.md" "$SRC/skills" "$SRC/commands" "$SRC/statusline-command.sh" "$SRC/settings.json" "$BOOTSTRAP_SRC" "$CLAUDE_MEM_SRC" -newer "$MARKER" 2>/dev/null | head -1 || true)"
     if [ -z "$changed" ] && rssh "$HOST" '[ -f "$HOME/.claude/.ecosystem-align.json" ]'; then
       if rssh "$HOST" '[ -f "$HOME/.claude/.ecosystem-align.INCORSO" ]'; then
         warn "[$kind] delta: nessun cambiamento, MA l'host porta un allineamento lasciato a meta' — NON lo salto"

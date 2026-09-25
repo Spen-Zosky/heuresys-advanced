@@ -1,11 +1,8 @@
-# #260 — Il runner della CI porta una chiave di collaudo che non usa
+# 260 — Il runner della CI porta una chiave di collaudo che non usa: due chiavi per le stesse quattordici utenze
 
-**Aperta**: S1108, 2026-09-25 (scoperta durante D11-0, fuori dal suo scope).
-**Stato**: ACTIVE · P2 · effort: pochi minuti, ma l'atto è **sulla macchina**, non sul repo.
-**Origine**: `.programmi/K-ruoli-direzione/esiti/D11.md` (sezione D11-0) e
-`.programmi/K-ruoli-direzione/esiti/REGISTRO_SCOPERTE.md`, riga 2026-09-24.
-
----
+> **item**: #260 · **priorità**: P2 · **stima**: pochi minuti, ma l'atto è **sulla macchina**, non sul repo
+> **stato**: NON AVVIATO
+> **nasce-da**: S1108 (2026-09-25), durante D11-0 e fuori dal suo scope — indagando perché la CI fosse rossa da due giorni. Dettaglio in `.programmi/K-ruoli-direzione/esiti/D11.md` (sezione D11-0) e `esiti/REGISTRO_SCOPERTE.md`, riga 2026-09-24.
 
 ## Il fatto, misurato
 
@@ -27,9 +24,9 @@ Le cinque identità provisionate nella finestra 04:44–05:04 di quel giorno —
 con la chiave **nuova**, mentre ogni corsa CI da allora derivava con la **vecchia**: login `401`,
 sei file di test rossi per due giorni (corse `9ee6676d`, `ddff1607`, `8034b85e`).
 
-Verifica che lo dimostra (read-only, nessun segreto stampato, solo `OK`/`DISALLINEATA`): con la
-chiave `.secrets` risultano disallineate esattamente quelle cinque; con la chiave del drop-in,
-le altre nove — cioè quelle che in CI **passano**.
+La verifica che lo dimostra (read-only, nessun segreto stampato, solo `OK`/`DISALLINEATA`): con la
+chiave `.secrets` risultano disallineate esattamente quelle cinque; con la chiave del drop-in, le
+altre nove — cioè quelle che in CI **passano**.
 
 ## Perché non è più urgente
 
@@ -40,19 +37,23 @@ corrente derivi dalla chiave in uso, e se non deriva la archivia nel giornale
 riavviato e passasse alla chiave del drop-in, la corsa successiva riparerebbe da sé invece di
 tornare rossa.
 
-Quindi il sintomo è spento. Resta l'**ambiguità su un segreto**, che è la cosa da chiudere.
+Il sintomo è quindi spento. Resta l'**ambiguità su un segreto**, che è la cosa da chiudere.
 
-## Cosa resta da decidere, e sono due sole strade
+## Decisioni da prendere (sono due strade, non di più)
 
-1. **Riavviare il servizio del runner** — il drop-in diventa effettivo e la chiave buona è
-   `a4191764`. La prima corsa CI dopo il riavvio riallineerà da sé le nove identità nate con
-   l'altra chiave.
-2. **Allineare il drop-in** a `.secrets/collaudo-access.key` — la chiave buona resta `591962ed`,
-   e non cambia niente per nessuno (è già quella in uso).
+- **Riavviare il servizio del runner** — il drop-in diventa effettivo e la chiave buona è
+  `a4191764`. La prima corsa CI dopo il riavvio riallineerà da sé le nove identità nate con
+  l'altra chiave. Onora l'intenzione di chi ha scritto il drop-in; va fatto con nessuna corsa in volo.
+- **Allineare il drop-in** a `.secrets/collaudo-access.key` — la chiave buona resta `591962ed` e
+  non cambia niente per nessuno, perché è già quella in uso. È la meno invasiva.
 
-La (2) è la meno invasiva e non tocca il runner mentre una corsa è in volo; la (1) è quella che
-onora l'intenzione di chi ha scritto il drop-in. È una decisione di Enzo: riguarda una macchina e
-un segreto, non il codice.
+Riguarda una macchina e un segreto, non il codice: la sceglie Enzo.
+
+## Fasi
+
+- [ ] **F1 — La misura, rifatta** — ri-leggere le due impronte (comandi in coda a questo file) prima di toccare qualunque cosa: fra oggi e quel giorno il drop-in o il servizio potrebbero essere cambiati, e una decisione presa su impronte vecchie sceglie la strada sbagliata. **fatto =** le due impronte sono scritte nell'esito con la data di oggi, e si sa se sono ancora due o già una.
+- [ ] **F2 — La decisione, e l'atto sulla macchina** — Enzo sceglie fra riavvio del runner e allineamento del drop-in; la CLI esegue la parte che le compete e dichiara quella che non le compete. Guardia: nessuna corsa CI in volo al momento dell'atto (`gh run list --workflow=test-integration.yml --limit 3`). **fatto =** una sola chiave risulta in uso, e la decisione è depositata dove le altre.
+- [ ] **F3 — La prova che non serve più riparare** — una corsa CI completa in cui il provisioning non riallinea nulla. **fatto =** nel log dello step «Seed collaudo-access identities» compare `di cui DISALLINEATE misurate .. 0`, e la corsa è verde.
 
 ## Chiuso quando
 
@@ -69,7 +70,4 @@ ssh linux-pc "grep -o 'COLLAUDO_ACCESS_KEY_B64=[A-Za-z0-9+/=\"]*' \
 
 # impronta della chiave del repo
 ssh linux-pc "sha256sum ~/heuresys-advanced/.secrets/collaudo-access.key | cut -c1-16"
-
-# e la prova che conta: una corsa CI in cui il provisioning non riallinea nulla
-#   atteso nel log: «di cui DISALLINEATE misurate .. 0»
 ```

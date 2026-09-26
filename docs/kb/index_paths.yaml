@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-26T06:29:43Z da docs/kb/tools/build_index.py
+# generato: 2026-09-26T08:27:06Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-26T06:29:43Z"
-  total_files: 3749
+  generated_at: "2026-09-26T08:27:06Z"
+  total_files: 3757
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,7 +13,7 @@ meta:
     api-module: 398
     ci: 19
     claude-config: 38
-    config: 344
+    config: 349
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -23,7 +23,7 @@ meta:
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 760
+    doc-canonical: 763
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -37,7 +37,7 @@ meta:
   status_counts:
     archive: 593
     external-archive: 50
-    live: 3106
+    live: 3114
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -4167,6 +4167,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\scripts\live-persone-distinte.ts'
+    root: repo
+    rel: 'apps/agent-gateway/scripts/live-persone-distinte.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\scripts\live-read-acceptance.ts'
     root: repo
     rel: 'apps/agent-gateway/scripts/live-read-acceptance.ts'
@@ -4233,6 +4239,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\src\persone-distinte.ts'
+    root: repo
+    rel: 'apps/agent-gateway/src/persone-distinte.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\src\redact.ts'
     root: repo
     rel: 'apps/agent-gateway/src/redact.ts'
@@ -4254,6 +4266,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\agent-gateway\src\server.ts'
     root: repo
     rel: 'apps/agent-gateway/src/server.ts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\src\soglie-persone.ts'
+    root: repo
+    rel: 'apps/agent-gateway/src/soglie-persone.ts'
     category: config
     status: live
     provenance: git-tracked
@@ -4305,9 +4323,21 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\test\persone-distinte.test.ts'
+    root: repo
+    rel: 'apps/agent-gateway/test/persone-distinte.test.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\test\redact.test.ts'
     root: repo
     rel: 'apps/agent-gateway/test/redact.test.ts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\test\soglie-persone.test.ts'
+    root: repo
+    rel: 'apps/agent-gateway/test/soglie-persone.test.ts'
     category: config
     status: live
     provenance: git-tracked
@@ -12387,6 +12417,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-ciclo3\251.md'
+    root: repo
+    rel: '.programmi/esiti-ciclo3/251.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\esiti-ciclo3\258.md'
     root: repo
     rel: '.programmi/esiti-ciclo3/258.md'
@@ -13287,6 +13323,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\agent-soglie-persone.json'
+    root: repo
+    rel: 'docs/kb/agent-soglie-persone.json'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\atlas\ATLAS.md'
     root: repo
     rel: 'docs/kb/atlas/ATLAS.md'
@@ -13860,6 +13902,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\build_menu.py'
     root: repo
     rel: 'docs/kb/tools/build_menu.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\build_soglie_agente.py'
+    root: repo
+    rel: 'docs/kb/tools/build_soglie_agente.py'
     category: doc-canonical
     status: live
     provenance: git-tracked

@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-26T06:29:43Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3749**
+**Generato**: 2026-09-26T08:27:06Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3757**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,7 +13,7 @@
 | api-module | 398 |
 | ci | 19 |
 | claude-config | 38 |
-| config | 344 |
+| config | 349 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
@@ -23,7 +23,7 @@
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 760 |
+| doc-canonical | 763 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -34,7 +34,7 @@
 | test | 449 |
 | ux-design-archive | 80 |
 | web-source | 258 |
-| **TOTALE** | **3749** |
+| **TOTALE** | **3757** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 3106 |
+| live | 3114 |
 
 ## File per categoria
 
@@ -752,6 +752,7 @@
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-perimetro-positions.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-perimetro-tenant-blueprints.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-perimetro.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\agent-gateway\scripts\live-persone-distinte.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-read-acceptance.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-skills-acceptance.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\scripts\live-tenant-materialization-acceptance.ts` · *live* · git-tracked
@@ -763,10 +764,12 @@
 - `D:\heuresys-advanced\apps\agent-gateway\src\heuresys-client.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\src\mcp-tool-names.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\src\mcp-tools.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\agent-gateway\src\persone-distinte.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\src\redact.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\src\research-propose.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\src\sdk-agent.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\src\server.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\agent-gateway\src\soglie-persone.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\src\subscription-auth.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\src\write-gate.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\approval-bridge.test.ts` · *live* · git-tracked
@@ -775,7 +778,9 @@
 - `D:\heuresys-advanced\apps\agent-gateway\test\generic-catalogue.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\heuresys-client.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\mcp-tools-list.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\agent-gateway\test\persone-distinte.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\redact.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\agent-gateway\test\soglie-persone.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\subscription-auth.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\write-gate.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\tsconfig.json` · *live* · git-tracked
@@ -2152,6 +2157,7 @@
 - `D:\heuresys-advanced\.programmi\S1101-mandato-riallineamento-consolidato.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1101b-mandato-contratto-shared.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\esiti-ciclo3\251.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\esiti-ciclo3\258.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\K-mandato-v2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
@@ -2302,6 +2308,7 @@
 - `D:\heuresys-advanced\docs\kb\SOT_BACKLOG.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\SOT_STATE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\agent-perimetri.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\agent-soglie-persone.json` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\atlas\ATLAS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\atlas\ATLAS_CURATED.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\atlas\agent-operations.json` · *live* · git-tracked
@@ -2398,6 +2405,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\build_index.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_linked_manifest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_menu.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\build_soglie_agente.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\censimento_endpoint_senza_pagina.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\censimento_riferimenti_orfani.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_canale_cowork.py` · *live* · git-tracked

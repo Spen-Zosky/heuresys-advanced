@@ -1,336 +1,117 @@
-# CLAUDE.md
+# CLAUDE.md — heuresys-advanced
 
-## What this is
+## Che cos'è
 
-**Heuresys Advanced HRMS/BPM Platform v5** — pnpm monorepo (2026-05-16). Backend-heavy: Fastify 5 API on PostgreSQL 16 with a Zod-typed contract layer shared with a Next.js 16 admin SPA + ESS portal.
+Heuresys Advanced HRMS/BPM Platform v5: monorepo pnpm. API Fastify 5 su PostgreSQL 16 con contratti Zod condivisi con l'SPA di amministrazione Next.js 16 e il portale ESS. Baseline `v1.0.0` GA dal 2026-06-02. La VM gira in modalità produzione (API `node dist/server.js`, web `next start`).
 
-At **`v1.0.0` GA baseline** (S957, 2026-06-02). MVP-0→4 and the RBAC/UIX/Perspectives epic are closed; admin SPA (MVP-2a) + ESS portal (MVP-2b) + teams scope axis shipped; a static brand showcase deploys to GitHub Pages. The VM runs **production mode** (API tsup bundle `node dist/server.js` + web `next start`).
+I conteggi (moduli, migrazioni, endpoint, test, permessi) non stanno qui perché cambiano: si ricavano da `docs/kb/SOT_STATE.md`, che li rigenera. Lo stesso vale per ogni dato che varia: prima di usarlo si misura, e nei documenti si scrive il comando che lo produce, non il numero.
 
-**No running count is hardcoded here** (modules / migrations / endpoints / tests / RBAC mappings) — they live in `docs/kb/SOT_STATE.md`, re-derived every session. They drifted before (D-01).
+I dati sono produzione reale. Esiste un solo ambiente, di produzione, con due tenant: RTL Bank (un cliente modello, con il dataset popolato) e Heuresys System (piattaforma) — ADR-0026. L'ingestione dal vecchio `heuresys-evo` è chiusa dal 2026-08-14 (ADR-0038): ciò che manca si costruisce o si ricava da `sys.*`; il legacy si consulta per i concetti, mai per le righe (`python docs/kb/tools/check_no_legacy_ingest.py`). Un dato si descrive per ciò che è (una busta paga, un IBAN), senza etichette rassicuranti tipo «sintetico» o «senza PII».
 
----
+## Quando un lavoro è finito
 
-## ⭐ IL PUNTO FISSO — sopraordinato, e non è negoziabile
+Un passo si chiude solo con una dimostrazione dal vivo su dati reali: comando, output, percorso e orario (ADR-0026). Un test verde o un mock che funziona significano «in corso». Per le pagine autenticate la dimostrazione è un login con una persona reale del tenant e l'uso secondo il suo profilo. Se manca un input che solo Enzo può dare, lo stato è `blocked-on-Enzo: <cosa, perché>`. Nessun mock, fixture o endpoint finto nel frontend: ogni dato arriva da una chiamata `/v1/*` reale.
 
-> **Un dato che per sua natura può variare si MISURA prima di prenderlo per buono.**
-> *(Enzo, 2026-08-14 — enunciato una volta sola perché era già scritto sei volte in questo stesso file, ognuna per il suo caso, e nessuna che lo dicesse in generale. È per questo che è stato violato.)*
+## Fonti di verità
 
-Due corollari, che sono la stessa cosa vista dai due lati:
+- Stato: `.handoff/STATE.md` (vista rapida) e `docs/kb/SOT_STATE.md` (dettaglio), riscritti dalla skill `handoff` a fine sessione. Backlog: `docs/kb/SOT_BACKLOG.md`. Debiti: `docs/kb/DEBT_REGISTER.md`. Percorsi: `docs/kb/INDEX_PATHS.md`. Prodotto: `docs/product/`. Non si creano altri file di stato.
+- Stati di una voce (insieme chiuso): `ACTIVE`, `GATED`, `WAIT-INPUT`, `HOLD`, `INTERRUPTED`, `DONE`/`FATTO`/`WON'T-DO`. Il controllo di integrità è `docs/kb/tools/handoff_lint.py`.
+- Chi scrive: l'unico che scrive e committa `docs/kb/` è Claude Code CLI. Cowork scrive solo in fondo a `docs/kb/COWORK_INBOX.md` (una voce datata `### YYYY-MM-DD | tipo | titolo`); la CLI la riconcilia e la marca `stato: [RICONCILIATA <commit>]`. Su questo progetto non si usano `cowork_code_exchange/` né le skill `cowork-cli-protocol`/`cowork-cli-orchestrator`. Voci aperte: `python docs/kb/tools/check_canale_cowork.py`.
 
-1. **Non si assume.** Nessuna affermazione su uno stato che cambia — quanti, quanto grande, quanto pieno, se esiste ancora, se è ancora vero — vale finché non è stata misurata **in questa sessione**. Vale anche per le affermazioni **positive**, non solo per quelle negative: «la tabella è popolata», «il documento è aggiornato», «quel campo esiste» sono ipotesi esattamente come i loro contrari.
-2. **Non si cristallizza.** Una misura variabile non si scrive come fatto in nessun documento — ADR, register, piano, README. Si scrive **il comando che la produce**. Un numero del genere è vero il giorno in cui lo scrivi e falso poco dopo, e chi lo rilegge non ha modo di accorgersene.
+## Avvio di sessione
 
-**Unica eccezione**: una misura **datata e dichiarata tale** dentro un'istruttoria o un messaggio di commit. Lì è *evidenza di quel momento*, non un'affermazione sul presente, e il contesto lo dice da sé.
+Il primo messaggio sceglie la modalità (`docs/kb/xtras/SESSION_MODES.md`): `avvia sessione` apre una sessione canonica; `avvia sessione lab` una sessione di sola analisi in parallelo, con scritture bloccate e artefatti in `<cartella superiore>/heuresys-design-lab/`, senza menu. Qualunque altro messaggio vale come canonica.
 
-**Le regole che seguono in questo file non sono sei regole diverse: sono questo principio applicato a sei materie.** Se una situazione non ricade in nessuna di esse, ricade comunque **qui**.
+In una sessione canonica, se il primo messaggio non nomina già un compito, costruisci il menu con `python docs/kb/tools/session_start.py` (menu dal register e cruscotto di salute), aggiungi i debiti e le voci di roadmap che il register non copre, metti in cima le voci `INTERRUPTED` e chiedi: «Scegli #, aggrega (es. 1+4), o nuovo». Non leggere interi `SOT_BACKLOG.md`, `SOT_STATE.md` e `DEBT_REGISTER.md` all'avvio: lo script li riassume, e si aprono solo sulla voce scelta.
 
-| Applicazione | Dove | Materia |
+Il programma `project-dream` (`docs/vision/**`) e i `.programmi/**` hanno sessioni dedicate: una sessione con un altro mandato non li prende in carico; se un controllo segnala un rosso nato da quei file, manda un messaggio alla sessione dedicata e prosegui nel tuo perimetro.
+
+## Dove si esegue il lavoro sul database
+
+Il database di produzione è sulla VM Oracle; il linux-pc ne tiene una copia (il gemello); Windows ci arriva via tunnel, quindi da qui i lavori pesanti costano due ordini di grandezza in più.
+
+| lavoro | dove | comando |
 |---|---|---|
-| I conteggi del progetto non stanno qui, si ri-derivano | riga sopra + `SOT_STATE.md` | moduli, migrazioni, endpoint, test, RBAC |
-| Il guardiano: **misurati, mai stimati**; ciò che non si misura è **`NON MISURABILE`** | §Canonical commands · §Working conventions | contesto e finestra 5h |
-| **Misura prima, sul vivo** — il piano è un'ipotesi, il sistema che gira è la verità | §Metodo di bonifica ①  | dati e codice |
-| **Le prove devono poter fallire** | §Metodo di bonifica ⑤ | strumenti e test |
-| Ogni consegna del lab è **non verificata** finché non la misuri | `#149` nel register | documenti in arrivo |
-| **Test-before-claim**, e «quando non sai, dillo e verifica» | `~/.claude/CLAUDE.md` | ogni asserzione |
+| provare una migrazione | gemello, su copia usa-e-getta | `bash db/scripts/prova-idempotenza.sh` |
+| prova generale della CI, prima di pushare un tocco a `db/` | gemello | `ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh'` (circa 26 s) |
+| applicare alla produzione | VM | `pnpm db:migrate:vm` |
+| validare lo schema | gemello | `pnpm db:validate:vm` |
+| test di integrazione API | gemello | `pnpm test:api:vm` |
+| altro lavoro pesante | gemello o VM | `bash db/scripts/sul-gemello.sh '<cmd>'` (`HOST=oracle-vm-default` per la VM) |
+| leggere, interrogare, diagnosticare | Windows, via tunnel | `psql`, `db_health.py`, i `check_*.py` |
 
-**Caso che ha prodotto l'enunciato**: «disco VM all'86%» finì in un dossier di inizio agosto e fu poi ripreso come stato di fatto. Misurato il 2026-08-14 era tutt'altro — e nel correggerlo stavo per cristallizzare il numero nuovo esattamente allo stesso modo, dentro il register, come argomento di una decisione.
+Questi comandi escono rossi se l'host non risponde e non ripiegano su Windows. Se un'operazione sul database è molto più lenta del previsto, chiediti se la stai eseguendo nel posto sbagliato. Tunnel: `ssh -fN -L 5433:localhost:5432 oracle-vm-default`; il runtime attivo è l'opzione B di `.env.example` (VM, tunnel 5433).
 
----
+## Comandi non ovvi
 
-**Data provenance** (**ADR-0038**, che supersede ADR-0023): le tabelle business di `sys.*` **sono state** popolate da un'ingestione brownfield deterministica a partire dal DB legacy `heuresys-evo`. **Quella fase è chiusa**: dal 2026-08-14 il database è **autosufficiente** e nessun dato del brownfield viene più rimesso in circolo — ciò che manca si costruisce o si deriva da `sys.*` (cancello: `python docs/kb/tools/check_no_legacy_ingest.py`). Il legacy resta consultabile per i **concetti**, mai per le righe. Invariati: i dati sono **produzione reale**; `sys.*` è l'**autorità strutturale**.
-
-> **OUTPUT RULE (S1011, Enzo — vincolante)**: the "no-PII / synthetic / ADR-0023 / safe-to-publish" qualifier is **RETIRED as a descriptor**. Never append it as reassurance in messages, commits, docs, ADRs or questions; describe a datum for what it **is** (a payslip, an IBAN, an address), never for what it "isn't". The architectural facts stand (no anonymization layer, treat-as-real) — what's banned is the reflexive label.
-
-## Definition of Done — live E2E con dati reali (VINCOLANTE, cross-sessione · ADR-0026)
-
-**Nessuno step si chiude su mock / placeholder / green-test.** Il mock è solo impalcatura transitoria DENTRO uno step; ogni step si chiude SOLO con una **dimostrazione LIVE su dati reali** — output reale allegato (comando + output + path assoluto + timestamp). "Green test" o "il mock funziona" = **in-progress**, non *done*. Unica attesa ammessa: un input che solo Enzo può fornire (secret/credenziale, approval umana) → stato = **`blocked-on-Enzo: <cosa, perché>`**, MAI "done". Scritture eseguite sui **due tenant di produzione correnti** — **RTL Bank** (customer-example) e **Heuresys System** (platform/system) — **trattati come dati reali**: un solo ambiente prod-grade, **nessun «tenant di TEST», nessun «mai produzione»** (→ **ADR-0026**). Per le pagine autenticate la dimostrazione LIVE = **login con una persona reale** (es. `federica.marchetti@rtl-bank.org`, `paolo.caputo@rtl-bank.org`) e uso secondo profilo.
-
-*Regola di Enzo recepita 2026-06-15. Vale per OGNI work-item.*
-
-## Source of Truth (single per domain — do not duplicate)
-
-- **Current state — two handoff-governed views**, disjoint, no number duplicated between them: `.handoff/STATE.md` (rapid — priorities + open questions) and `docs/kb/SOT_STATE.md` (granular — versions, counts, architecture, milestone narrative). Both rewritten by the `handoff` skill at session close. **Do NOT create other state/handoff/entry-point files.**
-- **Open backlog** → `docs/kb/SOT_BACKLOG.md` · **Technical debts** → `docs/kb/DEBT_REGISTER.md`
-- **Durable rules / architecture** → this file · **Path index** → `docs/kb/INDEX_PATHS.md` · Public overview → `README.md`
-- **Product level** (business scope / PRD / competitive scorecard / latent-capability catalog / product work-item specs) → `docs/product/` (SoT for the product domain, S997). Disjoint from `docs/kb/` (technical state) and `docs/due-diligence/`. ⚠️ The "latent capabilities" the catalog declares are **wiki-derived and partly describe legacy `heuresys-evo`** — re-verify on the *advanced* schema before committing to roadmap.
-
-**Item status vocabulary** (closed set): `ACTIVE` · `GATED` (dependency-blocked) · `WAIT-INPUT` (blocked on an input only Enzo provides) · `HOLD` (parked → pull lane, out of the menu, shown as a count) · `INTERRUPTED` (work in flight, stopped involuntarily — top of menu, `resume-from`) · `DONE`/`FATTO`/`WON'T-DO` (terminal). Menu items are structured blocks in the tagged **Action register** of `SOT_BACKLOG.md`; integrity verified by `docs/kb/tools/handoff_lint.py` (10 blocking checks), menu generated by `build_menu.py`.
-
-Historical records live in `docs/archive/` and are **not** SoT. When state changes, update the relevant SoT above — never spawn a new file.
-
-**Chi può scrivere la SoT di stato** (freeze 2026-05-27, S939 — CLI takeover). L'unico writer e committer di `docs/kb/` è **Claude Code CLI**. Cowork e Claude Desktop sono **read-only** su questi file: per proporre un cambiamento di stato fanno append **solo** a `docs/kb/COWORK_INBOX.md`, che la CLI riconcilia e committa. Nessun altro `docs/kb/`, nessun `git commit`/`push` su questo progetto senza coordinamento CLI.
-
-### ⭐ Il canale Cowork ↔ CLI — lo dichiara il progetto, non la presenza di una cartella (2026-09-14)
-
-Quattro righe, in un punto solo, perché finora si ricavavano incrociando il paragrafo qui sopra con uno sul congelamento di `cowork_code_exchange/` — e il 2026-09-14 si è misurato che il canale era fermo dall'8 agosto (37 giorni) mentre Cowork scriveva 318 file nel workspace.
-
-- **Dove scrive Cowork**: in fondo a `docs/kb/COWORK_INBOX.md`, una voce datata (`### YYYY-MM-DD | tipo | titolo`). È l'**unico** file di `docs/kb/` su cui Cowork scrive.
-- **Chi riconcilia e committa**: la CLI. Legge l'inbox a inizio sessione, recepisce nelle SoT, e **marca** la voce `stato: [RICONCILIATA <commit>]` — senza marcatore la voce conta come aperta anche se committata.
-- **Cosa non si usa più**: `cowork_code_exchange/` e `cowork_reserved/` sono **archivio in sola lettura** (niente cicli PROMPT/PLAN/EXEC/REPORT/REVIEW). Le skill `cowork-cli-protocol` / `cowork-cli-orchestrator` insegnano quel rito: **su questo progetto non si invocano**, anche se la cartella esiste. Il canale lo dichiara **questa sezione**, e vince su qualunque regola generale che deduca il rito dalla presenza di una cartella.
-- **La sentinella**: `python docs/kb/tools/check_canale_cowork.py` (`--elenco` · `--selftest`) dice quante voci non sono riconciliate e da quanti giorni; la dashboard di avvio la stampa. Nessuna soglia: il numero si vede.
-
-## Session start
-
-**Two modes, declared by the user's first message** (`docs/kb/xtras/SESSION_MODES.md`):
-
-- **`avvia sessione`** → `canonical`. Everything below applies unchanged.
-- **`avvia sessione lab`** → `lab`. Read-only analysis session, meant to run **in parallel** to a development one: verify gate skipped for that session alone, writes blocked at the tool layer, artifacts go to `<parent of repo>/heuresys-design-lab/`. Reading is unrestricted — a blocked read is a guard defect. Authenticated browsing is allowed (Chrome first). **Do not present the action menu**: it is not a development session.
-- Anything else → `canonical`. Fail-safe: forgetting the command, or mistyping it, never opens a hole.
-
-The mode is state on disk keyed by `session_id`, written by a `UserPromptSubmit` hook before the model sees the message — it does not depend on remembering to activate it.
-
-**⭐ project-dream = sessioni dedicate (Enzo, 2026-08-25, S1081 — permanente).** I programmi e le attività legati alla skill `project-dream` (cicli DREAM, `docs/vision/**`) **non si prendono in carico** nelle sessioni canonical o lab ordinarie: li gestiscono **sessioni dedicate**, eventualmente già in esecuzione parallela, con cui ci si scambia **messaggi informativi** (ListAgents/SendMessage). Conseguenze operative: le voci DREAM si escludono dal piano dichiarandolo; `docs/vision/**` non si tocca; i file della sessione dream in working tree non entrano nei commit delle altre sessioni (`git add` con path espliciti, mai `-A`).
-
-**Vale identico il verso opposto (stessa istruzione di Enzo, stesso giorno).** I `.programmi/**` e le attività di sviluppo canonico sono di **sessioni dedicate**: una sessione con un altro mandato (dream, lab, analisi, servizio) **non li prende in carico e non ne tiene conto nel proprio piano** — nemmeno quando un cancello o un hook segnala un rosso originato da quei file mentre la sessione dedicata li sta lavorando: si instrada un **messaggio informativo** alla sessione dedicata, si riesegue il cancello dopo la sua correzione, e si prosegue nel proprio perimetro.
-
----
-
-After the infra hooks (tunnel/db/branch), **before** asking what to do or starting work, build the action menu from all live sources — never from memory. ONE command, ONE model round:
-
-```bash
-python docs/kb/tools/session_start.py      # --no-db se il tunnel è giù · --show-hold · --net
-```
-
-Prints the register-driven action menu **plus** the offline-fast health dashboard. **Do NOT read `SOT_BACKLOG.md` / `SOT_STATE.md` / `DEBT_REGISTER.md` raw at boot** (they are the three largest documents in the repo and they grow every session — the script already distills them into menu + debts + decisions + drift). Open a source raw **only in drill-down**, for the item the user chooses. The small `.handoff/STATE.md` is fine to read for the narrative: the `handoff` skill keeps it to a rapid view, and its size is a fraction of the three above.
-
-Then **add only what the register doesn't cover** (debts not-`RISOLTO`, SOT roadmap/gated items) with judgment on impact: **P1** high-impact/unblocking · **P2** quality/debt · **P3** roadmap/gated. Put `INTERRUPTED` items at the **top**. Present, then: *"Scegli #, aggrega (es. 1+4), o nuovo."*
-
-**Do NOT start work before presenting the menu and getting the choice** — unless the user's first message already names a specific task.
-
-Full live health on demand (~5s of network, NOT at boot): `python docs/kb/tools/status_dashboard.py` (alias `pnpm status`) or `session_start.py --net` — adds git sync vs origin, last CI conclusion per workflow, PROD `/login`+`/api/readyz`. It never trusts a cached number; tunnel/offline degrade to `[? ]`, never to a stale guess.
-
-## Canonical commands
-
-Standard workspace scripts (`install`, `dev`, `build`, `typecheck`, `lint`, `test`, `db:*`, `i18n:check`) are in `package.json` — read them there. Only the non-obvious ones live here:
-
-| Task | Command |
+| cosa | comando |
 |---|---|
-| Single test file | `cd apps/api && pnpm exec vitest run test/<name>.integration.test.ts` |
-| Single test by name | `cd apps/api && pnpm exec vitest run -t "<pattern>"` |
-| **Full E2E web suite** — the only supported full-run mode (D-24) | `cd apps/web && pnpm test:e2e:prod`. The dev config (`test:e2e`) is per-spec iteration only: auth sessions live 15 min. **On Node ≥23** (e.g. Windows Node 24) Playwright 1.61 crashes at import time (D-36) → use `pnpm test:e2e:prod:node22` / `test:e2e:node22` (wrapper runs Playwright under a Node 22 portable; passthrough on Node ≤22, so CI/Mac/VM are unaffected) |
-| Typecheck test files | `cd apps/api && pnpm typecheck:test` (uses `tsconfig.test.json`) |
-| DB reset (destructive) | `pnpm db:reset` — **ask user before running** (il plugin `enzo-guard` lo chiede da sé, e nega in corsa non presidiata) |
-| **Prova generale della CI, prima di pushare** (#165) | `ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh'` — copia `heuresys_ci`, riapplica l'intera catena, interroga le sentinelle. **~26 s** contro i 20-30 min di un giro CI. Lanciala **sempre** dopo aver toccato `db/migrations/**`: le post-condizioni che contano righe sono verdi in locale e rosse in CI (→ memoria `ci_clone_lacks_script_imported_data`). `--migrations-from <ref>` prova la catena com'era; `--from-zero` è il modo severo (oggi si ferma alla 000049) |
-| ⭐ **Applicare le migrazioni alla produzione — SI ESEGUE SULLA VM, non da qui** (Enzo, 2026-08-27) | **`pnpm db:migrate:vm`** (→ `db/scripts/migrate-on-vm.sh`; `--no-pull` per provare prima del push, `HOST=linux-pc` per il gemello). **Misurato lo stesso giorno, stesso script e stesso esito (`334 applied, 21 skipped`): 17 secondi sulla VM contro ~80 minuti da Windows** — un fattore ~280. Non è una differenza di potenza: da Windows il database **non c'è**, e le ~60.000 righe della catena attraversano una per una il tunnel SSH fino a Oracle Cloud; sulla VM il `.env` dichiara `POSTGRES_HOST=localhost` e non c'è rete di mezzo. **`pnpm db:migrate` / `db:migrate:sh` da Windows restano validi e a volte necessari** (nessun accesso SSH, diagnosi locale), ma non sono la via normale: chi li lancia deve sapere che sta pagando quel fattore. ⚠ Prima serve che il file sia **sulla VM** (`git pull` lì dopo il push, oppure `scp` del solo `.sql` quando si prova prima di pushare) |
-| Storia RTL 36 mesi | `bash db/scripts/storia36.sh custodia` (regge ancora?) · `... avanzamento` (portala a ieri) · `... custodia --repair-missing`. Triage e trappole nella skill `storia36-custodia`; stato in `.storia36/PROGRESS.md`. **Due** timer la presidiano su VM e linux-pc: `avanzamento` giornaliero alle 03:45 (**scrive**, e gira solo dove il `.env` dichiara `STORIA36_AVANZAMENTO=1` — altrove esce 0 senza scrivere) e `custodia` settimanale lunedi 04:30. La custodia verifica **proprieta'**, non freschezza: e' verde anche con le presenze ferme (misurato 2026-08-24) — la freschezza la sorveglia `db_health.py` |
-| **Il guardiano** — contesto e finestra 5h, misurati mai stimati | `python docs/kb/tools/guardiano.py` · `--sorveglia` (exit 3 = si chiude) · `--budget N` (exit 2 = non ci sta) · `--selftest`. **Regola: contesto ≥ 75% OPPURE finestra 5h ≥ 80% → interrompi, registra, committa E PUSHA, chiudi.** I numeri vengono dai token che l'**API** riporta nel transcript e da `rate_limits.five_hour` che Claude Code passa alla riga di stato (depositato in `~/.claude/rate-limits.json`). Il boot li stampa già in cima alla dashboard, in **entrambe** le modalità. Copia a livello utente in `~/.claude/tools/guardiano.py` |
-| **Il rubinetto del brownfield è chiuso** — e questo lo tiene chiuso (ADR-0038) | `python docs/kb/tools/check_no_legacy_ingest.py` · `--elenco` · `--selftest` (deve uscire tutto verde). Esce **1** se compare un artefatto **nuovo** che prende righe dal DB legacy. Gli storici sono congelati in `legacy_ingest_allowlist.txt` — quanti siano lo dice lo strumento, non questa riga (⭐ IL PUNTO FISSO: l'allowlist cresce ogni volta che un artefatto storico viene riconosciuto); `reference_sync` (ISTAT/ATECO/ESCO) **non** è brownfield e non fa scattare nulla |
-| **L'atlante non deve poter invecchiare** (Enzo, 2026-08-16 · `#195`) | *«l'atlante deve essere sempre aggiornato e mai fermo a qualcosa di superato o incompleto»*. È la **SoT interrogabile** (S1016): se è superato, ogni strumento che vi si appoggia misura il passato senza saperlo. Si rigenera con `python docs/kb/tools/build_atlas.py`. Non dipende dal ricordarsene: `atlas_freshness()` lo controlla **a ogni avvio** dentro lo STALENESS SELF-CHECK. Il test **non** è `commit == HEAD` — sarebbe rosso a ogni commit di documenti, cioè un allarme che insegna a non guardarlo (`#194`) — è: *dei file che l'atlante descrive (moduli API, pagine web, schemi, migrazioni) ne è cambiato qualcuno dopo?* |
-| **I perimetri dell'agente** — la coda di adozione, non una scelta (`#156`) | `python docs/kb/tools/check_concetti_agente.py` · `--riservati`. Dottrina di Enzo (2026-08-16): **l'agente va su qualunque perimetro dove porta valore aggiunto** — la domanda è l'ordine, non quale. Tre prove meccaniche (V1 ha una lettura · V2 non è presidio · V3 almeno una pagina mostra quei dati), poi ordine per rischio crescente. Pretende l'atlante fresco. Gemello per le *pagine*: `check_idoneita_agente.py` (`#159`) — due universi diversi, non confonderli |
-| **Session start** (menu + health, ONE round) | `python docs/kb/tools/session_start.py` — canonical boot command |
-| Status dashboard (full live health, on demand) | `python docs/kb/tools/status_dashboard.py` / `pnpm status` |
-| **Plancia** — cruscotto in una pagina web (webapp di servizio) | `pnpm plancia` → `:8481`. **Un processo solo, e basta per guardare**: mostra sessioni *e* zero-pendenze insieme, perché legge da sé i dati dell'altro (ne importa la sola funzione di lettura). `pnpm plancia:sessioni` è la sola vista sessioni. **`pnpm plancia:zp` (:8477) NON è una variante**: è l'unico che **agisce** — lancia il driver, tira il freno, crea/cancella attività pianificate Windows. Quelle azioni non sono duplicate nella plancia, per non avere due posti da cui mutare lo stesso stato. **Nessuno dei due si avvia da solo** (verificato: né attività pianificate, né hook, né servizi) e non ripartono dopo un riavvio. Stato di runtime e chiave d'accesso in `.panel/`, fuori dal repo |
-| Session mode — diagnostica e autodiagnosi | `sh scripts/hooks/hook.sh mode <session_id>` · `... selftest` · `... gc` (→ `docs/kb/xtras/SESSION_MODES.md`) |
+| un file di test | `cd apps/api && pnpm exec vitest run test/<name>.integration.test.ts` |
+| suite E2E web completa | `cd apps/web && pnpm test:e2e:prod` (su Node ≥ 23: `pnpm test:e2e:prod:node22`) |
+| typecheck dei test | `cd apps/api && pnpm typecheck:test` |
+| reset del DB (distruttivo) | `pnpm db:reset`, solo con il sì di Enzo |
+| storia RTL 36 mesi | `bash db/scripts/storia36.sh custodia` / `avanzamento` (skill `storia36-custodia`) |
+| rigenerare l'atlante | `python docs/kb/tools/build_atlas.py` |
+| perimetri dell'agente | `python docs/kb/tools/check_concetti_agente.py` |
+| cruscotto completo | `pnpm status` |
+| plancia web | `pnpm plancia` (:8481); `pnpm plancia:zp` (:8477) è l'unica che agisce |
 
-PowerShell scripts are the Windows canonical; `.sh` siblings exist for bash/SSH-to-VM use. Every `db/scripts/*.{ps1,sh}` is idempotent and safe to re-run.
+Gli script PowerShell sono quelli canonici su Windows; i gemelli `.sh` servono in bash e via SSH. Gli script in `db/scripts/` sono idempotenti.
 
-### ⭐ DOVE si esegue un lavoro sul database — tre macchine, tre mestieri (Enzo, 2026-08-27)
+## Invarianti
 
-*Nasce da un errore reale di quel giorno: ho applicato una migrazione alla produzione **da Windows**, misurando la lentezza mentre accadeva senza chiedermi dove convenisse eseguirla. Ottanta minuti per un lavoro da diciassette secondi.*
+Si cambiano solo con un nuovo ADR. Se un requisito sembra contraddirli, fermati e chiedi.
 
-**Il database non è su questa macchina.** Windows ospita il codice; il database di produzione vive sulla **VM Oracle** e ci si arriva via tunnel; il **linux-pc** ne tiene una **copia**. Da qui ogni istruzione SQL attraversa la rete: su una catena di ~60.000 righe la differenza non è marginale, è di due ordini di grandezza. Quindi la domanda da porsi **prima** di lanciare un lavoro sul database non è «qual è il comando», è **«su quale macchina va eseguito»**.
+- I1: il modello è centrato sulla posizione, non sul dipendente; proprietario della posizione e titolare sono distinti.
+- I3/I4: le tabelle di business stanno in `sys.sys_<plurale>`; gli schemi ausiliari sono `staging`, `reference_sync`, `audit`.
+- I5: isolamento dei tenant con FK e filtro nel middleware dell'API; mai RLS.
+- I7: l'autenticazione è separata da `sys.sys_users`, nelle tabelle `sys.sys_auth_*`.
+- I9: il PIP è una VIEW o MATERIALIZED VIEW, mai un blob JSONB (ADR-0008).
+- I13: PostgreSQL 16 nativo, niente Docker nel runtime (ADR-0004, ADR-0010).
+- RD-08: campi categorici `varchar(N) + CHECK`, mai ENUM di PostgreSQL. RD-09: `date` per le sole date, `timestamptz` solo quando serve l'ora.
+- I12: niente import dal legacy (ADR-0038). I14: nel legacy l'entità persona è `employees`, non `users` (ADR-0024, `docs/brownfield/EMPLOYEE_CENTRIC_MAPPING_DOCTRINE.md`).
+- ADR-0011: l'ESS (`/me/*`, `/v1/me/*`) vive in un modulo dedicato.
+- I15: un solo ambiente di produzione con due tenant (ADR-0026).
+- I16–I20, I22: accesso come intersezione di perimetro gerarchico (albero delle unità) e modalità funzionale `edit/read/mask/none`; ognuno vede i propri dati; i dati sensibili altrui solo per catena organizzativa; chi è a capo di una catena vede tutto ciò che le sta sotto e niente delle catene sorelle; i mandati HR (`TENANT_ADMIN`, `HRMS_MANAGER`) vedono tutto il tenant salvo le cinque eccezioni di ADR-0036 §5; `PLATFORM_ADMIN` è un mandato tecnico e vede `COMPENSATION`/`EVALUATION` mascherate (`apps/api/src/lib/scope/mask.ts`); `DPO` ha il perimetro tenant-wide mascherato. Dettaglio in ADR-0036 e ADR-0032.
+- I21: i dati che derivano dall'industria di un tenant sono coerenti con essa; le tassonomie (ESCO, ISCO, NACE, ATECO, CCNL, modelli operativi) restano aperte a tutte le industrie.
+- I23: ogni tabella di dati del cliente è nativa, importata o ibrida (ADR-0041).
 
-| lavoro | dove | comando | misurato (stesso comando, stesso esito) |
-|---|---|---|---|
-| **Provare** una migrazione | **gemello**, su copia usa-e-getta | `bash db/scripts/prova-idempotenza.sh` | **13 s** · da qui: ~80 min ×2 |
-| **Applicare** alla produzione | **VM**, unico posto col DB vero | `pnpm db:migrate:vm` | **17 s** · da qui: **~80 min** |
-| **Validare** lo schema (7 viste + twice-run) | **gemello** | `pnpm db:validate:vm` | **20 s** · da qui: **>10 min, non ha finito** |
-| **Test di integrazione API** | **gemello** | `pnpm test:api:vm` | un file: **14 s** · da qui: 83 s |
-| **Qualunque altro lavoro pesante** | **gemello** o VM | `bash db/scripts/sul-gemello.sh '<cmd>'` (`HOST=oracle-vm-default` per la VM) | — |
-| **Leggere, interrogare, diagnosticare** | **Windows**, via tunnel | `psql`, `db_health.py`, i `check_*.py` | poche query: il tunnel non pesa, e qui c'è il contesto |
-| **Verifica lunga di chiusura** | **linux-pc** (già regola S1054) | — | stessa ragione: lì il DB non è dall'altra parte di una rete |
+## Lavorare sui dati e sul codice
 
-**Tutti questi comandi escono ROSSI se l'host non risponde, e NON ripiegano su questa macchina**: ripiegare rimetterebbe il lavoro sul tunnel, cioè il difetto che esistono per togliere. Un controllo che non ha potuto misurare deve dirlo — «non ho potuto guardare» non è «va bene».
+Il database e il codice portano strati di due anni di costruzione, e il residuo va bonificato: servono strumenti per modificare in profondità, con prudenza e possibilità di tornare indietro.
 
-**Il corollario che vale anche fuori dal database**: una misura di lentezza è essa stessa un dato. Se un'operazione sta impiegando molto più del previsto, la domanda giusta non è «quanto manca» ma **«la sto eseguendo nel posto sbagliato?»**. Il cancello locale `verify_gate` instrada `migrate-idempotent` **su questa macchina** e ne paga il costo due volte: è un difetto noto dell'instradamento, non una necessità.
+- Prima di toccare un oggetto condiviso (tabella, colonna, vista, script, seed, anche un database di collaudo) esegui `python docs/kb/tools/chi_sorveglia.py <nome>`: elenca sentinelle, cancelli, test, altri scrittori e il file che lo crea. Dice chi guarda, non se puoi toccarlo.
+- Ritirare non è cancellare (ADR-0035): la catena delle migrazioni si riapplica a ogni deploy, quindi si emenda il file che crea l'oggetto (o lo si marca `-- @migrate: once`) e solo in aggiunta si rimuove l'esemplare esistente.
+- Una scrittura di massa porta la misura prima, una guardia che ricontrolla la precondizione al momento dell'esecuzione, una post-condizione su ciò che non doveva cambiare e un rollback dichiarato (giornale `staging.*_undo` o la ragione per cui non c'è). Quando si cancella, l'elenco è esplicito.
+- Le prove che cancellano, sovrascrivono o rigenerano girano su una copia usa-e-getta, mai sull'originale: `heuresys_ci` è il database della CI e può avere una corsa in volo.
+- Un seed porta a uno stato dichiarato, invece di adattarsi a ciò che trova; un seed che impone uno stato ha una guardia a due condizioni (l'ambiente lo dichiara e il nome del database dice che è di collaudo).
+- Una prova nuova si vede rossa prima e verde dopo. Quando correggi un rosso in una batteria, rilanciala: spesso ne compare un altro che il primo nascondeva.
 
-## Infrastructure
+Frontend: i componenti UI riutilizzabili e le dipendenze UI di runtime (Radix, framer-motion, recharts…) vivono nel repo `ux-design-shared` (`@heuresys/ui`), non qui. Dottrina in `.claude/rules/design-system-ui.md` e `.claude/rules/frontend-live-data.md`.
 
-The SessionStart hook (`scripts/session-boot.ps1`) already checks tunnel, pgpass, DB, branch, dirty tree, unpushed and lint at every session start, and prints the result. Re-establish by hand only if it reports a piece down:
+TypeScript: `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters` attivi (i parametri inutilizzati si prefissano con `_`); `exactOptionalPropertyTypes` è spento di proposito. Il lavoro su un modulo API segue il pattern in 7 passi con un commit atomico. Stile dei commit: `feat(api): …`, `chore(db): …`, `docs(handoff): …`, `test(api): …`.
 
-```bash
-ssh -fN -L 5433:localhost:5432 oracle-vm-default              # tunnel OCI VM :5433 → :5432
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "\dt sys.sys_auth*"
-cd apps/api && pnpm dev                                        # look for "RBAC permission cache loaded"
-```
+## Git, CI e rilascio
 
-`.env` is **gitignored but real**; `.env.example` has three runtime blocks (A localhost / B OCI VM / C OCI Managed). **Option B (OCI VM, tunnel 5433) is the active runtime** (RD-25, ADR-0010). Never commit `.env`, `.secrets/`, `*.pem`.
+- Commit e push su `main` sono autorizzati in ogni sessione: pubblicare ogni pezzo chiuso lo mette al sicuro e fa partire la CI, e non tocca la produzione, perche' il deploy parte solo da `refs/heads/prod`. Muovere `refs/heads/prod` e propagare restano decisioni di Enzo.
+- Una CI rossa si corregge; `gh run list` e `gh run watch` danno l'evidenza.
+- Il rilascio lo decide Enzo. `scripts/close-propagate.sh` arma il deploy (`refs/heads/prod`) e ritorna; il rollout lo fa `heuresys-advanced-deploy-watch.timer` quando la CI è verde (ADR-0028). Dopo la chiusura si dice «armato», non «deployato», e si legge l'esito con `scripts/verifica-deploy.sh` (DEPLOYATO, IN-VOLO, CI-ROSSA, DISALLINEATO, NON-VERIFICATO). La verifica lunga di chiusura gira sul linux-pc: propaga, rinfresca il clone (`scripts/clone-vm-db.sh`), verifica lì (skill `full-alignment-deploy`).
+- `.codex/`, `.codex-review/`, `.agents/` e `AGENTS.md` sono il canale di audit di Codex: non sono file da pulire né da mantenere, e non si usano le sue credenziali (`.codex-review/service/access/`).
 
-## Codex read-only audit channel
+## Cosa non toccare
 
-Codex has a separate least-privilege audit channel for this repo and the OCI database. Broker, access map and operating notes: `.codex-review/service/access/`. The DB identity is `codex_auditor`, read-only by default. **Claude remains autonomous**: do not reuse, rotate or copy the Codex credential, and do not treat `.codex-review` as product source or state SoT. Coordination: `.codex-review/service/access/CLAUDE_INTEGRATION.md`.
-
-Least privilege is **verified, not asserted** (measured S1034, 2026-07-28; re-check with `SELECT * FROM pg_roles WHERE rolname='codex_auditor'` + `information_schema.role_table_grants`): login but not superuser, no `CREATEDB`/`CREATEROLE`/`BYPASSRLS`, `default_transaction_read_only=on` pinned at role level, `statement_timeout=30s`, `lock_timeout=2s`, `idle_in_transaction_session_timeout=60s`, only grant is `SELECT` on `sys` and `audit`.
-
-**Working-tree consequence**: `.codex/`, `.codex-review/`, `.agents/` (Codex's skill path — the user-level twin is `~/.agents/skills/`; the in-repo copy holds Codex's own imports of the project skills, and Codex tracks it as its surface to govern) and the root `AGENTS.md` (Codex's own equivalent of this file) legitimately appear as untracked. They are **not** stray files to clean up, they are **not** Claude's to maintain, and `align-clones` / `close-propagate` do not carry them — the two channels stay separate by design.
-
-## Non-negotiable invariants
-
-These are enforced architecturally and cannot be revisited without a new ADR / decision-log entry. They override "common patterns" you may want to apply from other projects.
-
-- **I1 Position-centric** model, not Employee-centric. Position owner ≠ Incumbent.
-- **I3/I4 Schema discipline**: business tables live in `sys.sys_<plural>`. Aux schemas are `staging`, `reference_sync`, `audit`. **Never** `usr_*` / `br_*` / etc. (`brownfield` **ritirato** da #164 F4, mig. `000297`: le tre tabelle vive — `source_exports`, `import_runs`, `source_watermarks` — sono traslocate in `reference_sync`, che è la casa della sincronizzazione ISTAT/ATECO/ESCO; il 90% delle corse era già sua.)
-- **I5 Tenant isolation = FK + API middleware filter. NEVER RLS.** Postgres RLS is not used anywhere.
-- **I7 Auth is separate from `sys.sys_users`** — 11 dedicated `sys.sys_auth_*` tables.
-- **I9 PIP** (Position Intelligence Profile) is a **VIEW / MATERIALIZED VIEW**, never a JSONB blob (ADR-0008).
-- **I13 PostgreSQL 16 NATIVE. NO DOCKER.** (ADR-0004 hard policy.) Runtime location is OCI VM via SSH tunnel (ADR-0010 Option B / RD-25). NO-DOCKER governs the advanced **runtime** only — the read-only legacy `heuresys-evo` Docker DB consulted during extract/import is a data **source**, not a runtime dependency, and does not violate this (ADR-0004 source-vs-runtime note; ADR-0023).
-- **RD-08 Categorical fields = `varchar(N) + CHECK`. NEVER PostgreSQL ENUM.** Enum-like values are TS-side discriminators.
-- **RD-09** Use `date` for date-only columns; `timestamptz` only where time-of-day precision is required.
-- **I12 — ⛔ IL RUBINETTO È CHIUSO** (Enzo, 2026-08-14 — **supera la formulazione precedente**). *«Nessun dato riferito al brownfield deve essere rimesso in circolo. Tutto va ricostruito con il DBMS attuale.»* **Non si importa più nulla dal legacy.** Ciò che manca si **costruisce o si deriva dai dati che `sys.*` già contiene**; il legacy resta consultabile come fonte di **concetti** (quali entità esistono, come si legano, cosa è servito davvero all'uso) — **mai** come fonte di righe. Vale per ogni voce futura: un piano che prevede un import è un piano da riscrivere, non da eseguire. *Formulazione superata, tenuta per storia*: «il legacy è la fonte canonica autoritativa che popola `sys.*` via `brownfield.column_mappings`» — è ciò che **è avvenuto** fino a questa data, e spiega la provenienza dei dati oggi presenti; non è più ciò che deve avvenire. Restano validi: `sys.*` è l'**autorità strutturale**; l'ingestione storica non ha avuto alcuno strato di anonimizzazione (`pii_disposition=NONE` su tutte le `column_mappings`) e i dati si trattano come **produzione reale**. → **ADR-0023** (che descrive l'ingestione storica) e la **OUTPUT RULE** qui sopra restano leggibili come cronaca, non come mandato.
-- **I14 Legacy ingestion is EMPLOYEE-centric** (ADR-0024). In the legacy Docker DB the **person/business entity is `employees`** (95 cols; **207 FK** hang off it — bio, job, org, kpi, learning, skills, compensation), **NOT `users`** (16-col auth shell; only **45 FK**, all audit-actor; `users.employee_id → employees.id` makes `users` subordinate). Therefore: legacy `employees` ⟹ `sys.sys_users` + `sys.sys_user_*` satellites; legacy `users` ⟹ `sys.sys_auth_*` (credentials only, never the person). The canonical crosswalk key is **`user_external_code = 'LEGACY_EMP::' || employees.id`** (or email cross-check), **never** `'LEGACY:' || users.id`. Coverage is driven by `employees` (an employee with no `users` row is still a credential-less person, not skipped). The `sys.sys_users` ↔ legacy `users` name collision is a **false friend**. Full map: `docs/brownfield/EMPLOYEE_CENTRIC_MAPPING_DOCTRINE.md`.
-- **ADR-0011** ESS (Employee Self-Service) is **MVP-2b** — 13 pages `/me/*` + 18 `/v1/me/*` endpoints with 19 self-scope permissions. Don't add `/me/*` routes to existing modules; they get a dedicated module.
-- **I15 Single production-grade environment, two current tenants** (ADR-0026). There is **one** environment and it is **production** (prod runtime, TLS, native DB — ADR-0010). **RTL Bank** (customer-example tenant — the populated business dataset, 162 users) and **Heuresys System** (platform/system tenant) are the **current production tenants**, NOT "test" tenants. Data is **treated as real production data** (quality, referential coherence, governance, idempotent/reversible writes); the legacy is only the data *source* (ADR-0023). Two access paths: **public prospect** (unauthenticated landing → `/demo`·`/investors` → lead capture) and **authenticated production app** (login → use per RBAC profile). The phrases "tenant di TEST" / "mai produzione" are **retired**. Business-data writes target RTL Bank by *role* (it models a customer company), never as a test/prod split.
-- **I21 Industry-coherent tenant data, industry-open taxonomies** (Enzo, 2026-08-03). Data that **derives from a tenant's industry** must be coherent with it: **Heuresys System = Consulenza Direzionale** (`MGMT_CONSULTING`, ATECO 70.20) · **RTL Bank = Banche e Assicurazioni** (`FIN_BANKING`, ATECO 64.19), both declared in `sys.sys_tenancies` (mig 000242). Tables that define **taxonomies and ontologies** — Industry, ESCO, ISCO, NACE, ATECO, operating-model catalog, CCNL/union reference bands — stay **open to every industry**: without them the platform could no longer create new blueprints, tenants, org structures or processes. The test has **two questions, in order**. First: does the table define a **classification** (ESCO/ISCO/NACE/ATECO/CCNL/operating models) or **product content** (KPI definitions, learning catalog, blueprint content)? A classification stays open to every industry — that is the whole point. Content does not get a pass just for being global: it must serve an industry the platform actually hosts. Second, for content: a row **carrying `tenant_id`** must match that tenant's industry. Worked examples: `BP-SF-*` purged (named SmartFood) · the 35 food/energy learning paths purged (content, no industry hosting them — mig 000241) · `HACCP-COMPLIANCE` and `ENERGY-SAVINGS` purged (mig 000243 — **"global" was not enough**: a KPI is content, not a classification) · the 37 food/energy **ESCO skills kept**, because ESCO is the European skills taxonomy and falls squarely inside what the invariant keeps open.
-- **I16 Domini ortogonali** (**ADR-0036**, supersede ADR-0027). L'accesso è l'**intersezione** di un perimetro **gerarchico** (*su quali persone* — fonte canonica: l'albero delle **unità**, `organization_unit_parent_id` + `organization_unit_manager_user_id`, ed **è su quell'albero che il resolver gerarchico gira** — dal 2026-08-14, `#99` F3 (`63c0c7e8`). *Storia*: fino a quella data percorreva l'albero delle posizioni, e il rammendo `#114` ne riallineava i tronconi; entrambe le voci sono chiuse) e di una modalità **funzionale** (*quali dati e come* — dichiarata per classe nella matrice M1: 11 domini funzionali × 7 classi, modalità `edit/read/mask/none`). Un dominio gerarchico **non ha modalità**; nessuna lista di ruoli decide una vista. RBAC resta il *se* (permesso); i domini il *su chi/cosa*.
-- **I17 Universal ESS floor + completezza vincolante di `self`** (C4, ADR-0036). Every user is at least `USER`: guaranteed the Employee Portal (`/v1/me/*`) + full access to their OWN data. Self-scope overrides every axis. In più: ogni tabella che referenzia una persona è raggiungibile self-scope, o la sua esclusione è **dichiarata una per una, motivata** (M2; cancello meccanico → #117).
-- **I18 Sensitive data is organizational-only.** Another user's `PERSONAL`/`COMPENSATION`/`SKILL`/`EVALUATION` data is accessible ONLY via the organizational chain. Functional (team/process) membership NEVER unlocks sensitive data. (Regola cardinale di ADR-0027, confermata invariata da ADR-0036.)
-- **I19 Principio della catena** (C5, ADR-0036). Chi è a capo di una catena organizzativa accede a tutto ciò che gli sta sotto, in cascata a ogni livello, e a **niente** delle catene sorelle — anche da manager, anche se l'altra persona è un semplice impiegato. Il vertice vede tutto perché la sua catena È l'azienda, non per eccezione.
-- **I20 Organizational prevalence (absolute for sensitive data).** When axes concur, the org chain prevails for sensitive data. **HR**-mandated roles (`TENANT_ADMIN`, `HRMS_MANAGER`) keep tenant-wide sensitive access by explicit mandate — con **cinque eccezioni dichiarate** (ADR-0036 §5): segnalazioni whistleblowing (isolamento assoluto: solo la custodia, nemmeno il platform), `SPECIAL_CATEGORY` (classe vuota e presidiata), retribuzione dei vertici (soglia di catena), valutazioni non comunicate (stato di comunicazione: `shared_at OR acknowledged_at`), e — dal 2026-09-24, D11 — il **perimetro tenant-wide mascherato** (`TENANT_WIDE_MASKED_ROLES` in `lib/scope/resolver.ts`: perimetro dell'intero tenant sull'asse gerarchico, `COMPENSATION`/`EVALUATION` assenti e dichiarate in `masked`, `PERSONAL`/`SKILL` intatte; oggi lo porta `DPO`). **`PLATFORM_ADMIN` is a *technical* mandate, not an HR one** (ADR-0032, Enzo 2026-08-04): it does **not** open `COMPENSATION` and `EVALUATION` — those fields are withheld and declared via `masked` (`apps/api/src/lib/scope/mask.ts`) su **tutta** la superficie delle due classi (S1053: dossier incluso), while the row, subject, period and status stay visible. `PERSONAL`/`SKILL` are unaffected; I17 always wins; an actor holding an HR mandate *alongside* `PLATFORM_ADMIN` reads unmasked. This is the **fourth authorization state** (`mask`).
-
-- **I22 `HRMS_MANAGER` plenipotenziario sui dati business** (Enzo; formalizzato da ADR-0036 — il numero I21 è occupato dalla coerenza di industry). CRUD completo su ogni dato business del tenant per mandato esplicito; lo delimitano le sole cinque eccezioni di ADR-0036 §5; le superfici tecniche/di piattaforma restano fuori dal mandato.
-- **I23 La direzione del dato** (Enzo, 2026-09-14 — ADR-0041, mandato K). Ogni tabella `sys.sys_*` che rappresenta un dato del cliente sta in uno e un solo stato: **nativo** (scritta da rotte API sotto un mandato di people management), **importato** (scritta SOLO da corse di importazione/materializzazione/seed — nessuna rotta di scrittura esiste, è l'assenza della porta a far rispettare il confine, non un permesso che nega), **ibrido** (il gesto nasce qui, il saldo viene anche da fuori — regola di conflitto in X-4/D5=C: l'importazione non tocca mai un saldo con gesto nativo aperto). Una quarta etichetta, **infrastruttura** (registri tecnici, code, cataloghi RBAC), non è dato di cliente e resta fuori dall'invariante. Sorvegliata da `sys.sys_classificazione_direzione_dato` (X-1), la colonna `origine_dato` (X-2) e la sentinella `sys.v_direzione_del_dato_violata` (X-5) — finché quelle tre non sono chiuse l'invariante è dichiarato ma non ancora sorvegliato sul vivo.
-
-When a new requirement seems to conflict with these, **stop and ask** rather than working around.
-
-## What NOT to touch
-
-- `.env`, `.secrets/`, any `*.pem` or `*.key` — gitignored secrets.
-- `docs/source_bundle/brownfield/extracted/` and `docs/brownfield/_inspection_artifacts/` — gitignored generated dump/inspection artifacts. **Never commit** — repo hygiene (large, reproducible from the pipeline), not a privacy gate. They **may** be read for ingestion/seed authoring; just don't paste absolute legacy-source paths into committed files.
-- `node_modules/`, `dist/`, `.next/`, `*.tsbuildinfo` — generated.
-- Legacy codebase at `D:\evo.heuresys.com\` (Win) and `/home/ubuntu/heuresys-evo` (OCI VM) — read-only enrichment source. Authorized for inspection but **don't commit absolute paths to it**; reference via `docs/brownfield/BROWNFIELD_IMPORT_PLAN.md`.
-
-## Frontend — due divieti che restano sempre carichi
-
-- **NEVER** create reusable UI components in `apps/web`, `apps/showcase` o `packages/*` di questo repo. Vanno nel repo `ux-design-shared` (→ `@heuresys/ui`).
-- **NEVER** aggiungere UI runtime deps (Radix, framer-motion, recharts, ecc.) ai `package.json` di questo repo. Appartengono a `@heuresys/ui` e arrivano come transitive deps.
-- **No mock data / demo fixtures / placeholder hard-codes / stubbed endpoints.** Ogni cella, grafico, tabella, form è alimentato da una chiamata `/v1/*` reale; API-first, wiring completo fino al Playwright E2E verde, o non è *done*.
-
-Dottrina completa: `.claude/rules/design-system-ui.md` (design system) e `.claude/rules/frontend-live-data.md` (live-data E2E) — si caricano da sé lavorando su `apps/web/**` o `apps/showcase/**`.
-
-## Metodo di bonifica (S1049, Enzo — VINCOLANTE)
-
-> **«Siamo noi a governare la piattaforma, non il contrario.»** Il database e il codice portano gli strati di due anni di costruzione — import legacy, ricostruzioni, correzioni, ritiri. **Il residuo è lo stato normale, e va bonificato.** Il fallimento da evitare non è «ho rotto qualcosa»: è **«non l'ho toccato perché non avevo lo strumento»** o **«l'ho dichiarato immutabile»**. Devo sempre avere strumenti per modificare in profondità dati, codice e ogni altro oggetto del repo — con prudenza e possibilità di rollback.
-
-Sei regole. **Ognuna nasce da un errore reale**, non da teoria:
-
-1. **Misura prima, sul vivo.** Il piano, il registro e le consegne sono **ipotesi**; il database e il sistema che gira sono la verità. In S1049 la misura ha smentito il piano **quattro volte** — tabelle «vuote e inerti» che erano l'ingresso di uno strumento vivo; una pulizia da 30 minuti che era una decisione di sicurezza; 490 valutazioni la cui causa non era quella che avevo scritto io; tre tabelle «residuo» che erano la casa di una funzionalità attiva. **Verifica anche le affermazioni positive**, non solo quelle negative.
-2. **Prova generale prima della produzione.** Ogni tocco a `db/**` passa da `bash db/scripts/ci-rehearsal.sh` (copia di `heuresys_ci`, **due passate**, ~26 s). Ha già intercettato quattro difetti che sarebbero stati CI rossa 25 minuti dopo il push — e uno che aveva già rotto la produzione.
-3. **Ritirare non è cancellare** → **ADR-0035**. La catena si ri-applica per intero a ogni deploy: una `DELETE` a valle viene disfatta al giro dopo. Si emenda **il file che crea** l'oggetto (o lo si marca `-- @migrate: once`), e solo *in aggiunta* si rimuove l'esemplare esistente. Il costo di un ritiro si misura **in file da emendare**, e va stimato prima di iniziare.
-4. **Ogni scrittura di massa porta quattro cose**: (a) la misura **prima**; (b) una **guardia** che ri-verifica la precondizione *al momento dell'esecuzione*, mai ereditata; (c) una **post-condizione che protegge ciò che NON doveva cambiare**, non solo ciò che doveva; (d) un **rollback dichiarato** — un giornale `staging.*_undo` con la funzione che lo applica, oppure la ragione scritta per cui non esiste. Elenco esplicito, **mai un carattere jolly**, quando si cancella.
-5. **Le prove devono poter fallire.** Un controllo che non si è mai visto rosso non è una prova. In S1049 tre miei strumenti hanno prodotto **falsi verdi** (una variabile occupata dal `.env`, un esito letto dai messaggi invece che dal codice d'uscita, un `trap` che restituiva 1 su un verde): ogni volta lo strumento misurava sé stesso.
-6. **Una batteria che si ferma al primo rosso nasconde tutti gli altri** — **sei** occorrenze in due sessioni, una perfino dentro la stessa funzione. Quando ne correggi uno, **rilancia**: quasi sempre ne compare un altro che era lì da mesi.
-
-## ⭐ LA CATENA, NON IL PEZZO — tre regole definitive (Enzo, 2026-09-08 · VINCOLANTI)
-
-*Nascono da una contestazione precisa: «i risultati del tuo lavoro sono sempre aleatori e
-raramente hanno lo stesso esito quando ripetuti. Non c'è stabilità delle correzioni, non c'è
-stabilità dei seed, Playwright fallisce ripetutamente, le durate cambiano anche del 1000%.
-Evidentemente quando lavori non verifichi tutta l'intera catena delle azioni e degli oggetti che
-tocchi, così succede che a una correzione si crea un nuovo errore nello stesso contesto.»*
-
-**Non sono un suggerimento e non sono una buona pratica: sono una regola definitiva.** Enzo ha
-chiesto esplicitamente che vivessero qui, dove ogni sessione le rilegge.
-
-**Il caso che le ha generate**, misurato lo stesso giorno: ho modificato `seed-test-admin.ts`
-perché scrivesse i segreti TOTP **in chiaro**. Funzionava. Ma dal 2026-08-08 esiste la sentinella
-`v_mfa_secrets_in_cleartext`, che pretende **zero** segreti in chiaro. È scattata un'ora dopo, e
-**solo perché nel frattempo avevo toccato anche una migrazione**. Toccando il solo seed, il
-cancello sarebbe stato verde e il rosso sarebbe comparso in CI, a push fatto.
-
-### C1 — Prima di toccare un oggetto, censisci chi lo sorveglia
-
-```bash
-python docs/kb/tools/chi_sorveglia.py <tabella|colonna|vista|file|script>
-```
-
-Elenca in una riga: le **sentinelle** che lo interrogano (lette dal database vivo, non dedotte
-dalle migrazioni), i **cancelli** che possono fermarti, i **test** che asseriscono su di lui, gli
-**scrittori** che gli mettono le mani addosso, le **migrazioni** che lo creano — e il file che lo
-**crea** è quello da emendare, non l'ultimo che lo tocca (ADR-0035). Cerca con `--no-ignore`,
-perché un file gitignored è esattamente dove un difetto si nasconde, e marca quei riscontri invece
-di tacerli. `--selftest` per la prova, che ha casi negativi e una controprova.
-
-**Non dice se puoi toccarlo: dice chi guarda.** La decisione resta tua, ma presa sapendo. Un
-elenco vuoto è un'informazione, non un permesso; se il database non risponde dichiara **NON
-MISURATO**, perché «non ho potuto guardare» non è «non c'è niente».
-
-### C2 — La prova generale copre TUTTO `db/`, non solo le migrazioni
-
-Era già scritto qui — *«ogni tocco a `db/**` passa da `ci-rehearsal.sh`»* — ma
-`verify_gate.py` la instradava **solo** su `db/migrations/`: `db/scripts/` e `db/seeds/` cadevano
-sulla rotta generica, che non la chiedeva. Una regola che si applica a memoria è un proposito.
-**Corretto il 2026-09-08**: `("db/", [… "migrate-idempotent"])`, con `verify_gate.py selftest` che
-lo prova su otto casi — positivi **e negativi** — e che il router instrada su sé stesso.
-
-⚠ **`db-health` non copre lo stesso caso, e sembra di sì**: interroga la **produzione** via
-tunnel, mentre la prova generale lavora su una **copia usa-e-getta** di `heuresys_ci`. Uno vede ciò
-che è in produzione, l'altro ciò che il tuo codice **produce**. Un seed sbagliato non tocca la
-produzione: il primo è cieco su di lui per costruzione.
-
-### C4 — Una prova distruttiva gira su una COPIA, mai sull'originale — e un database di collaudo È un oggetto condiviso
-
-*Aggiunta il 2026-09-08, poche ore dopo C1, perché **l'ho violata mentre costruivo C1**.*
-
-Per dimostrare che il seed fosse deterministico ho fatto `DELETE` dei fattori TOTP su
-`heuresys_ci` e li ho ricreati — due volte. `heuresys_ci` non è un mio banco di prova: è **il
-database vero della CI**, e in quel momento una corsa era in volo. `Test (api integration)` è
-passata da **success** (su `4cfc4c14`, ore 15:37) a **failure** (su `aa4235e9`, ore 16:21) con
-l'errore *«the fixture TOTP factor is missing»*, cioè esattamente ciò che avevo appena cancellato.
-
-**La regola**: qualunque prova che *cancella, sovrascrive o rigenera* gira su una **copia
-usa-e-getta**, mai sull'originale. È già il modo in cui lavora `ci-rehearsal.sh` — copia
-`heuresys_ci` e prova sulla copia — e la ragione per cui esiste era proprio questa. Il difetto
-non è stato non sapere: è stato non applicare a me stesso lo strumento che avevo appena scritto.
-
-⚠ **Un database non sembra un «oggetto» finché non lo si tratta come tale.** Il censimento di C1
-funziona anche sui nomi di database: `chi_sorveglia.py heuresys_ci` elenca **tre workflow CI** che
-lo usano, `test-integration.yml` con dieci riscontri. Una riga, prima del `DELETE`, e l'incidente
-non sarebbe successo.
-
-### C3 — Un seed porta a uno STATO DICHIARATO, non negozia con quello che trova
-
-*«È scritto con logiche del tipo "inserisci solo se non c'è già": con lo stesso comando, se la riga
-c'è si comporta in un modo, se non c'è in un altro. L'instabilità è dentro lo strumento,
-progettata lì dentro, non nell'esecuzione.»* (Enzo, stesso giorno.)
-
-Un seed che si adatta allo stato di partenza — su un database che è una **copia della produzione**,
-e che quindi parte da uno stato diverso ogni volta — produce esiti diversi dallo stesso comando.
-Quell'aleatorietà **non è dell'esecuzione, è del progetto dello strumento**.
-
-Quindi: un seed dichiara lo stato a cui porta, e ce lo porta. ⚠ E siccome imporre uno stato su un
-database di produzione fa danni veri, ogni seed che impone pretende una **guardia a due
-condizioni** — l'ambiente lo dichiara **e** il database si dichiara di collaudo dal proprio nome —
-**provata a esiti opposti**: che si apra dove deve, e che **si rifiuti** dove non deve.
-
----
-
-## Working conventions
-
-- **TS strict quirks**: `tsconfig.base.json` ha `noUncheckedIndexedAccess: true` più `noUnusedLocals` / `noUnusedParameters`. L'accesso per indice e `Map.get()` ritornano `T | undefined` — restringi esplicitamente. I parametri inutilizzati vanno prefissati `_`. `exactOptionalPropertyTypes` è intenzionalmente **off** per non rovinare l'ergonomia dei tipi inferiti da Zod.
-- **Il lavoro su un modulo segue il pattern in 7 passi + commit atomico.** Non spezzare un modulo su più commit.
-- Stile dei commit già stabilito: `feat(api): MVP-1 5.1.X — <module> module (...)`, `chore(db): seed — ...`, `docs(handoff): ...`, `test(api): ...`.
-- **Mai `git push`** senza richiesta esplicita. I commit locali su `main` sono pre-autorizzati per questo progetto; i push no. L'autorizzazione al push è **session-scoped**: una volta concessa vale fino a revoca, e **una sessione nuova torna a "chiedi"**.
-- **Un CI rosso è un errore che Claude DEVE correggere**, mai restituire all'utente — `gh run list` / `gh run watch` come evidenza.
-- **La verifica lunga di chiusura si esegue sul linux-pc, non su Windows** (S1054, Enzo — **standard di chiusura**). Ordine obbligato: **propaga → rinfresca il clone (`clone-vm-db.sh`) → verifica lì**. Il cancello locale (`verify_gate`) resta il guardiano di fine turno per il lavoro in corso. Misure, causa e due leve già provate e scartate → skill `full-alignment-deploy`.
-- **La chiusura di sessione non aspetta più la CI** (#165, S1049). `close-propagate.sh` **arma** il deploy (`refs/heads/prod`) e ritorna; il rollout lo esegue `heuresys-advanced-deploy-watch.timer` quando la CI diventa verde (ADR-0028, emendamento S1049). Non annunciare mai «deployato» alla chiusura: annuncia «armato». **La chiusura finisce leggendo dalle macchine**: `scripts/verifica-deploy.sh` dichiara con vocabolario chiuso **DEPLOYATO · IN-VOLO · CI-ROSSA · DISALLINEATO · NON-VERIFICATO**; `NON-VERIFICATO` **non** vuol dire «a posto», vuol dire che non si è potuto guardare. Dettaglio operativo → skill `full-alignment-deploy`.
-- **Il verdetto di uno strumento si incolla, non si parafrasa** (Enzo, 2026-08-14 — nasce da un errore reale di quel giorno). Avevo appena chiesto `guardiano.py --budget 250000`, che aveva risposto **«si continua»**, e nella frase successiva ho scritto che quel lavoro «finirebbe col restare a metà» — rinunciandoci. Tre regole, che sono la stessa cosa vista da tre lati:
-  1. **La riga di esito dello strumento si riporta testualmente** accanto alla propria frase. Una contraddizione fra le due diventa visibile a occhio; dentro una parafrasi non lo è.
-  2. **Una stima non batte mai una misura.** Il costo di una voce (`budget ~250k` in `.programmi/`) è un'ipotesi scritta tempo prima; il residuo è misurato adesso. Quando i due sono vicini **si parte e si ri-misura strada facendo** — non si rinuncia in anticipo sulla base del numero più debole.
-  3. **Ogni rinuncia porta tre numeri**: residuo misurato · costo stimato · verdetto dello strumento. Senza i tre non è una valutazione tecnica, è un'opinione — e cade sotto la DECISION AUTHORITY, che vieta il «non è eseguibile» unilaterale.
-- **Il guardiano: contesto ≥ 75% OPPURE finestra 5h ≥ 80% → si chiude** (Enzo, 2026-08-13 — vale in **ogni** sessione, canonical e lab; la regola sta anche nel `~/.claude/CLAUDE.md` globale). Non «valuta»: **interrompi, registra il progresso, committa E PUSHA tutto, chiudi**. Nessuna frase sui limiti — «si stringe», «siamo al limite», «meglio chiudere» — senza l'output di `guardiano.py` accanto. Il contesto è un **pavimento** (il turno in corso non è ancora nel transcript), quindi a ridosso di una soglia la si considera raggiunta, non si tira; un dato 5h più vecchio di 15 min è **stantio** e non decide. Ciò che non si misura si dichiara **NON MISURABILE** e non si torna a intuire — se entrambi i rami sono ciechi il guardiano lo dice, perché un «tutto bene» nato dal buio è identico a uno nato da una misura. Fuori dalle due soglie, misurare **non** è decidere: la chiusura resta di Enzo.
-- Il repo gira su Windows: valgono i vincoli PowerShell del CLAUDE.md globale.
-
-Autonomia operativa: vale la regola globale. Specifiche di progetto (tool preferiti per task, runner CI self-hosted, gestione tunnel, livello di verifica dei test) → `docs/kb/xtras/AUTONOMY_R23_PROJECT.md`.
+`.env`, `.secrets/`, `*.pem`, `*.key` (segreti, gitignored); `docs/source_bundle/brownfield/extracted/` e `docs/brownfield/_inspection_artifacts/` (generati, non si committano); `node_modules/`, `dist/`, `.next/`, `*.tsbuildinfo`; il codice legacy in `D:\evo.heuresys.com\` e `/home/ubuntu/heuresys-evo` (solo lettura, senza committare percorsi assoluti).
 
 ## Dove sta il resto
 
-| Cosa | Dove | Quando si carica |
-|---|---|---|
-| Pattern dei moduli API, plugin chain, error handling | `.claude/rules/api-module-pattern.md` | lavorando in `apps/api/**` o `packages/shared/**` |
-| Modello di sicurezza (Argon2id, JWT, refresh rotation, CSRF, ruoli, personas) | `.claude/rules/security-auth.md` | lavorando su auth/rbac |
-| Migrazioni DB | `.claude/rules/db-migrations.md` | lavorando in `db/**` |
-| Test: Vitest, isolamento transazionale, tunnel | `.claude/rules/tests.md` | lavorando sui test |
-| Design system `@heuresys/ui` (setup, workflow, React peer) | `.claude/rules/design-system-ui.md` | lavorando in `apps/web/**`, `apps/showcase/**`, `packages/**` |
-| Dottrina live-data E2E del frontend (no mock, API-first, wiring) | `.claude/rules/frontend-live-data.md` | lavorando in `apps/web/**` o `apps/showcase/**` |
-| Dottrina di allineamento cloni e deploy — **più** le misure della verifica lunga su linux-pc e il dettaglio di `verifica-deploy.sh` | skill `full-alignment-deploy` | su invocazione |
-| 🔒 **Regole fatte rispettare dal motore, non ricordate** — divieti git, segreti (lettura e pre-commit), cancellazioni, scritture sul DB vivo (`psql :5433`, `db:reset`, `db:migrate` da Windows), Python UTF-8, guardiano in riga di stato, file GENERATO, tool MCP di invio | plugin `enzo-guard`, che vive nel repo dell'imbracatura (`D:\claude-imbracatura\plugin\enzo-guard\`, README con la tabella degli hook, `/config` per spegnerne uno, come tornare indietro) e si installa con `bash installa.sh`; **le regole di questo progetto** (DB vivo per nome e porta, path protetti) stanno in `.claude/enzo-guard.json` | in ogni sessione dove l'imbracatura è installata; **non** in Cowork, Codex, cron — lì valgono le righe di questo file |
+| cosa | dove |
+|---|---|
+| pattern dei moduli API | `.claude/rules/api-module-pattern.md` (si carica in `apps/api/**`, `packages/shared/**`) |
+| sicurezza e autenticazione | `.claude/rules/security-auth.md` |
+| migrazioni | `.claude/rules/db-migrations.md` |
+| test | `.claude/rules/tests.md` |
+| design system e dati vivi nel frontend | `.claude/rules/design-system-ui.md`, `.claude/rules/frontend-live-data.md` |
+| allineamento cloni e deploy | skill `full-alignment-deploy` |
+| autonomia specifica del progetto | `docs/kb/xtras/AUTONOMY_R23_PROJECT.md` |
+| regole fatte rispettare dal motore (git, segreti, cancellazioni, scritture sul DB vivo) | plugin `enzo-guard` (`D:\claude-imbracatura\plugin\enzo-guard\`), regole del progetto in `.claude/enzo-guard.json`; non vale in Cowork |
+| perché esistono queste regole | `docs/kb/xtras/PERCHE_LE_REGOLE.md` |

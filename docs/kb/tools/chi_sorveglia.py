@@ -82,7 +82,12 @@ AREE: list[tuple[str, str, list[str]]] = [
     ("④ SCRITTORI (script e seed che lo modificano)",   "scrittori",  ["db/scripts", "db/seeds"]),
     ("⑤ MIGRAZIONI (chi lo crea, chi lo emenda)",       "migrazioni", ["db/migrations"]),
     ("⑥ CI (workflow che lo nominano)",                 "ci",         [".github/workflows"]),
+    # ⚠ `apps/agent-gateway/src` aggiunto il 2026-09-26 (S1112, #251): mancava, e il
+    # censimento usciva «nessuno» su `heuresys-client`, `audit-sink`, `write-gate` e
+    # `sdk-agent` mentre `server.ts`, `sdk-agent.ts` e `mcp-tools.ts` li importano tutti.
+    # La copertura delle radici e' ora un caso del `--selftest`, visto rosso prima.
     ("⑦ CODICE (moduli che lo leggono o scrivono)",     "codice",     ["apps/api/src", "apps/web/src",
+                                                                      "apps/agent-gateway/src",
                                                                       "packages"]),
 ]
 
@@ -264,11 +269,28 @@ def selftest() -> int:
     if nessuno:
         errori.append("controprova: trova un termine inventato")
 
+    # ⚠ LA COPERTURA DELLE AREE, non solo la capacita' di cercare. I casi qui sopra passano
+    # `radice` direttamente a `cerca`, quindi restano verdi anche se quella radice NON e' fra
+    # le AREE che il rapporto interroga: provano il cercatore, non il censimento. Il difetto
+    # e' stato misurato il 2026-09-26 (S1112, #251): `apps/agent-gateway/src` non era fra le
+    # radici di ⑦, e il censimento diceva «nessuno» su quattro file che tre moduli di quella
+    # cartella importano. Un censimento cieco su una cartella di sorgenti e' peggio di nessun
+    # censimento: autorizza a toccare dicendo che nessuno guarda.
+    radici_note = {r for _, _, rr in AREE for r in rr}
+    for sorgente in ("apps/api/src", "apps/web/src", "apps/agent-gateway/src", "packages"):
+        if not (REPO / sorgente).exists():
+            continue
+        coperta = sorgente in radici_note
+        print(f"  [{'ok ' if coperta else 'ROSSO'}] copertura AREE: «{sorgente}» "
+              f"{'interrogata' if coperta else 'NON interrogata dal rapporto'}")
+        if not coperta:
+            errori.append(f"copertura: {sorgente} fuori dalle AREE")
+
     if errori:
         print(f"\nSELFTEST — ROSSO ({len(errori)}): " + " · ".join(errori))
         return 1
     print(f"\nSELFTEST — verde ({len(CASI)} casi, positivi e negativi, piu' la controprova "
-          f"che il cercatore discrimini)")
+          f"che il cercatore discrimini e la copertura delle radici sorgente)")
     return 0
 
 

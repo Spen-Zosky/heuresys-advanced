@@ -1,7 +1,7 @@
 # 251 — Il contatore di persone distinte per conversazione dell'agente
 
 > **item**: #251 · **priorità**: P1 · **stima**: ~1 sessione
-> **stato**: NON AVVIATO
+> **stato**: **FATTO** (S1112, 2026-09-26) — esito in `.programmi/esiti-ciclo3/251.md`
 > **nasce-da**: ADR-0040 (dottrina ratificata da Enzo il 2026-09-14), primo dei tre passi che precedono l'apertura `#254`. Include **M7** del piano di miglioramento del 2026-09-08.
 
 ## Decisioni già prese (non si ri-chiedono)
@@ -17,12 +17,31 @@
 
 ## Fasi
 
-- [ ] **F1 — Decidere quale misura genera i valori** — le tre stampate dal file SQL (posizioni per unità 38 · persone per unità 9 · persone per catena 158, p90 21,4, al 2026-09-14). Il criterio dell'ADR dice «l'unità più grande»: la fase sceglie la lettura e la scrive nel codice come funzione che legge il dato, non come numero. **fatto =** la funzione esiste e restituisce 25/40 su RTL Bank oggi, con il test che lo dimostra.
-- [ ] **F2 — L'aggancio in `call`** — un raccoglitore che percorre il JSON di risposta e aggiunge a un `Set<string>` gli UUID sotto i nomi `*UserId` **meno** gli attori di audit; l'elenco delle esclusioni è una costante dichiarata con la ragione. **fatto =** test a esiti opposti: una risposta con `createdByUserId` non conta; una con `subjectUserId` conta; un `userId` ripetuto conta una volta.
-- [ ] **F3 — Il livello per conversazione** — `runHrAgent` crea l'insieme e lo espone al gate (`#252` lo legge) e al diario: ogni voce del diario porta `persone_distinte` al momento della decisione. **fatto =** una corsa che legge 1 · 7 · 38 · 160 persone (le quattro domande della dottrina) stampa quei numeri nel diario, e `pnpm test` del gateway è verde.
-- [ ] **F4 — La prova che può fallire** — sabotaggio dichiarato: contando anche gli attori di audit, il test di F2 va rosso; ripristinato, verde. **fatto =** la coppia rosso/verde è nella cronaca.
+- [x] **F1 — Decidere quale misura genera i valori** — le tre stampate dal file SQL (posizioni per unità 38 · persone per unità 9 · persone per catena 158, p90 21,4, al 2026-09-14). Il criterio dell'ADR dice «l'unità più grande»: la fase sceglie la lettura e la scrive nel codice come funzione che legge il dato, non come numero. **fatto =** la funzione esiste e restituisce 25/40 su RTL Bank oggi, con il test che lo dimostra.
+- [x] **F2 — L'aggancio in `call`** — un raccoglitore che percorre il JSON di risposta e aggiunge a un `Set<string>` gli UUID sotto i nomi `*UserId` **meno** gli attori di audit; l'elenco delle esclusioni è una costante dichiarata con la ragione. **fatto =** test a esiti opposti: una risposta con `createdByUserId` non conta; una con `subjectUserId` conta; un `userId` ripetuto conta una volta.
+- [x] **F3 — Il livello per conversazione** — `runHrAgent` crea l'insieme e lo espone al gate (`#252` lo legge) e al diario: ogni voce del diario porta `persone_distinte` al momento della decisione. **fatto =** una corsa che legge 1 · 7 · 38 · 160 persone (le quattro domande della dottrina) stampa quei numeri nel diario, e `pnpm test` del gateway è verde.
+- [x] **F4 — La prova che può fallire** — sabotaggio dichiarato: contando anche gli attori di audit, il test di F2 va rosso; ripristinato, verde. **fatto =** la coppia rosso/verde è nella cronaca.
 
 ## Cronaca
+
+**S1112 (2026-09-26) — FATTO.** Tutte le fasi chiuse, piu' una F0b non prevista e una F5 di
+dimostrazione. Commit `020e3a94` (F0b), `75bb5f4e` (F1-F4), `c6ab81e9` (F5). L'esito completo,
+coi comandi che ri-producono tutto e i limiti dichiarati, sta in `.programmi/esiti-ciclo3/251.md`.
+
+Quattro cose che vale la pena ricordare, perche' non si rifacciano a memoria:
+
+1. **Il criterio dell'ADR §3 ammette due letture, e solo una riproduce 25/40.** La frase «il
+   livello silenzioso copre l'unita' piu' grande» letta alla lettera darebbe soglia bassa ≥ 38,
+   che contraddice i valori iniziali dell'ADR stesso (25). La lettura che regge è quella della
+   tabella: «coprono qualunque unita' e il 90% delle catene» — cioè il regime **senza fermata**
+   copre l'unita' piu' grande (40 ≥ 38) e la conferma scatta appena sopra. Da qui D1.
+2. **La misura (2) dell'ADR non puo' generare la soglia**: max 9 persone con incarico attivo per
+   unita' metterebbe il freno sotto l'uso normale. Scartata, con la ragione scritta nel codice.
+3. **Il gate audita PRIMA di eseguire**, quindi il numero dell'ultima lettura non comparirebbe in
+   nessuna voce di decisione: serve la voce di chiusura. Scoperto ragionando sul chiuso-quando
+   («la stessa conversazione ... stampa quei numeri»), non a valle.
+4. **Il buco è gia' aperto, e ora è misurato**: 55 persone distinte in una conversazione sui soli
+   sedici perimetri gia' aperti — oltre la soglia alta, oggi, senza `#254`.
 
 ---
 

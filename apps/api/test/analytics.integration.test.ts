@@ -289,12 +289,33 @@ describe("GET /v1/analytics/* integration", () => {
     const tecnico = await getJson<CompensationBody>("/v1/analytics/compensation", platformS);
     expect(tecnico.scope.kind).toBe("PLATFORM");
     expect(tecnico.scope.tenantId).toBeNull();
-    const expectedProfiles = await num(`SELECT count(*)::text AS n ${BANDED_JOIN}`);
-    expect(tecnico.totalProfiles).toBe(expectedProfiles);
+    // #258 (2026-09-26): platformS e' senza posizione (prima era Enzo, al vertice
+    // reale) — la soglia di catena (#99 F4, ADR-0036 §5) esclude le posizioni delle
+    // unita' di vertice per chi non ha posizione, stessa CTE di unitaEntroLivello().
+    const expectedProfilesTecnico = await num(`
+      WITH RECURSIVE albero AS (
+        SELECT organization_unit_id AS ou, 1 AS livello
+          FROM sys.sys_organization_units
+         WHERE organization_unit_parent_id IS NULL AND organization_unit_is_active
+        UNION ALL
+        SELECT o.organization_unit_id, a.livello + 1
+          FROM sys.sys_organization_units o
+          JOIN albero a ON o.organization_unit_parent_id = a.ou
+         WHERE o.organization_unit_is_active
+      ), vertice AS (SELECT DISTINCT ou FROM albero WHERE livello <= 2)
+      SELECT count(*)::text AS n
+        ${BANDED_JOIN}
+        JOIN sys.sys_positions p ON p.position_id = pcp.position_id
+       WHERE p.position_organization_unit_id IS NULL
+          OR p.position_organization_unit_id NOT IN (SELECT ou FROM vertice)`);
+    expect(tecnico.totalProfiles).toBe(expectedProfilesTecnico);
     expect(tecnico.scatter).toBeUndefined();
 
+    // tenantS ha una posizione (nessuna esclusione di soglia): vede il conteggio
+    // grezzo, che e' quello che il BANDED_JOIN senza filtro produce da sempre.
+    const expectedProfilesConVertice = await num(`SELECT count(*)::text AS n ${BANDED_JOIN}`);
     const body = await getJson<CompensationBody>("/v1/analytics/compensation", tenantS);
-    expect(body.totalProfiles).toBe(expectedProfiles);
+    expect(body.totalProfiles).toBe(expectedProfilesConVertice);
     // Restringere una volta sola, e con un'asserzione: se il mandato HR NON
     // ricevesse questi campi, il test deve dirlo qui invece di morire piu' sotto
     // con un errore di tipo che sembrerebbe un difetto della prova.
@@ -330,7 +351,21 @@ describe("GET /v1/analytics/* integration", () => {
     const tenants = await num(
       `SELECT count(DISTINCT pcp.position_compensation_profile_tenant_id)::text AS n ${BANDED_JOIN}`,
     );
-    if (tenants === 1) {
+    // #258 (2026-09-26): platformS e' ora una persona di collaudo SENZA posizione
+    // nell'organigramma — prima era enzo.spenuso@heuresys.com, al vertice reale
+    // dell'azienda. La soglia di catena (#99 F4, ADR-0036 §5) esclude le unita' di
+    // vertice per chi non ha posizione (chainLevelOf → null), indipendentemente dal
+    // suo essere PLATFORM_ADMIN: e' la stessa esclusione che vale per un mandato HR
+    // sotto soglia, applicata qui a un mandato tecnico senza posizione affatto.
+    // "equals platform when single-tenant" restava vero SOLO perche' Enzo era anche
+    // al vertice (I19) — una coincidenza del suo profilo, non dello scope PLATFORM.
+    const platformHaPosizione =
+      (await num(
+        `SELECT count(*)::text AS n FROM sys.sys_positions p
+           JOIN sys.sys_users u ON u.user_id = p.position_owner_user_id
+          WHERE u.user_email = 'platform-test-admin@collaudo.invalid'`,
+      )) > 0;
+    if (tenants === 1 && platformHaPosizione) {
       // Il confronto e' sui CONTEGGI: `bandingByOu` non e' piu' servito al
       // mandato tecnico (#124), quindi confrontarne la lunghezza misurerebbe la
       // maschera, non lo scope — che e' cio' che questo test vuole misurare.
@@ -338,7 +373,10 @@ describe("GET /v1/analytics/* integration", () => {
       expect(body.ouCount).toBe(platformBody.ouCount);
       expect(platformBody.bandingByOu).toBeUndefined();
     } else {
-      expect(body.totalProfiles).toBeLessThanOrEqual(platformBody.totalProfiles);
+      // Senza posizione, platformS puo' vedere MENO di tenantS (soglia di catena
+      // sui vertici) anche a parita' di tenant — la disuguaglianza e' l'invariante
+      // vero, l'uguaglianza era un caso speciale del profilo di Enzo.
+      expect(body.totalProfiles).toBeGreaterThanOrEqual(platformBody.totalProfiles);
     }
   });
 

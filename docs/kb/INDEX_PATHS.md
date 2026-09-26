@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-26T11:15:32Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3760**
+**Generato**: 2026-09-26T16:41:32Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3762**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -23,7 +23,7 @@
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 764 |
+| doc-canonical | 766 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -34,7 +34,7 @@
 | test | 449 |
 | ux-design-archive | 80 |
 | web-source | 258 |
-| **TOTALE** | **3760** |
+| **TOTALE** | **3762** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 3117 |
+| live | 3119 |
 
 ## File per categoria
 
@@ -2162,6 +2162,7 @@
 - `D:\heuresys-advanced\.programmi\esiti-ciclo3\251.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\esiti-ciclo3\252.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\esiti-ciclo3\258.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\esiti-regole\REGOLE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\K-mandato-v2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked
@@ -2477,6 +2478,7 @@
 - `D:\heuresys-advanced\docs\kb\xtras\DATA_RECONCILIATION_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\DESIGN_SYSTEM_UI.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\DUMP_ARCHIVAL_RUNBOOK.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\xtras\PERCHE_LE_REGOLE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\PLAN_S1018_BATCH.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\POST_V1_ROADMAP_DOSSIER.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\RBAC_COME_FUNZIONA_DAVVERO.md` · *live* · git-tracked

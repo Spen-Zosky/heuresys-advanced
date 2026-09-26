@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-26T11:15:32Z da docs/kb/tools/build_index.py
+# generato: 2026-09-26T16:41:32Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-26T11:15:32Z"
-  total_files: 3760
+  generated_at: "2026-09-26T16:41:32Z"
+  total_files: 3762
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -23,7 +23,7 @@ meta:
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 764
+    doc-canonical: 766
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -37,7 +37,7 @@ meta:
   status_counts:
     archive: 593
     external-archive: 50
-    live: 3117
+    live: 3119
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -12447,6 +12447,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-regole\REGOLE.md'
+    root: repo
+    rel: '.programmi/esiti-regole/REGOLE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\mandati\K-mandato-v2.md'
     root: repo
     rel: '.programmi/mandati/K-mandato-v2.md'
@@ -14334,6 +14340,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\xtras\DUMP_ARCHIVAL_RUNBOOK.md'
     root: repo
     rel: 'docs/kb/xtras/DUMP_ARCHIVAL_RUNBOOK.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\PERCHE_LE_REGOLE.md'
+    root: repo
+    rel: 'docs/kb/xtras/PERCHE_LE_REGOLE.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

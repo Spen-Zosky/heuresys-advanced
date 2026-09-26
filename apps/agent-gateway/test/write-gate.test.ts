@@ -10,11 +10,26 @@ import {
 } from "../src/write-gate.js";
 import { MemoryAuditSink } from "../src/audit-sink.js";
 import { REDACTED } from "../src/redact.js";
+import type { LettoreContatore } from "../src/persone-distinte.js";
+import type { LivelloPersone } from "../src/soglie-persone.js";
 
-/** All gate tests inject a MemoryAuditSink so nothing touches the filesystem. */
+/** Un lettore che dichiara numero e livello, per provare i rami senza costruire risposte JSON. */
+function lettore(quante: number, livello: LivelloPersone): LettoreContatore {
+  return { conta: () => quante, livello: () => livello };
+}
+
+/**
+ * All gate tests inject a MemoryAuditSink so nothing touches the filesystem.
+ *
+ * ⭐ E un CONTATORE SOTTO SOGLIA di default (`#252`): senza contatore il gate non sa quante
+ * persone ha letto, e da `#252` «non lo so» fa chiedere conferma (D7). Le prove che misurano
+ * altro — l'allowlist, la classificazione, il diario — non devono inciampare in quel ramo;
+ * quelle che lo misurano passano il proprio lettore. È esattamente il contrario di un default
+ * di comodo: il default *permissivo* sta nei test, il default *fail-closed* in produzione.
+ */
 function gate(approve: Parameters<typeof makeCanUseTool>[0], opts: Parameters<typeof makeCanUseTool>[1] = {}) {
   const audit = new MemoryAuditSink();
-  const canUseTool = makeCanUseTool(approve, { audit, ...opts });
+  const canUseTool = makeCanUseTool(approve, { audit, persone: lettore(0, "silenzioso"), ...opts });
   return { canUseTool, audit };
 }
 

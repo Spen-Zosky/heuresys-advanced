@@ -5,7 +5,10 @@
  * (GDPR Art. 22 / EU AI Act human oversight). Three layers, in order:
  *   1. ALLOWLIST (M-3, I8 defense-in-depth): deny-by-default — an unknown / unlisted
  *      tool name is denied BEFORE the read/write branch, regardless of model output.
- *   2. READ vs WRITE: allowlisted reads auto-allow; allowlisted writes need a human.
+ *   2. READ vs WRITE: allowlisted writes need a human; allowlisted reads auto-allow **fino alla
+ *      soglia alta di persone distinte** — oltre quella, e quando il conto non è misurabile, la
+ *      lettura si ferma e chiede anche lei (#252, ADR-0040 R2). Non è un tetto: chi conferma
+ *      legge tutto il suo tenant (I22), e l'assenso vale per il resto della conversazione.
  *   3. HITL + DENY-BY-DEFAULT (M-2): a write requires a human approval round-trip;
  *      timeout or approver error fails CLOSED.
  *
@@ -21,6 +24,7 @@ import {
 } from "./audit-sink.js";
 import { bareToolName, DEFAULT_TOOL_ALLOWLIST } from "./mcp-tool-names.js";
 import type { LettoreContatore } from "./persone-distinte.js";
+import type { LivelloPersone } from "./soglie-persone.js";
 
 /** Verbs that mutate platform state — the MCP tool naming is `hrx.<domain>.<verb>`
  *  (or snake-case `hrx_<domain>_<verb>`). A tool is a WRITE if its name carries any. */
@@ -85,7 +89,24 @@ export function classifyCall(
   return WRITE_METHODS.has(metodo.toUpperCase()) ? "write" : "read";
 }
 
-export type ApprovalRequest = { tool: string; input: unknown };
+/**
+ * Ciò che il ponte di approvazione umana riceve. `tool` e `input` c'erano già; i tre campi
+ * di `#252` dicono **perché** si sta chiedendo, e sono ciò che il pannello mostra in una riga.
+ *
+ * ⚠ Identificatori e numeri, MAI dati: `personeDistinte` è un conteggio, non un elenco di
+ * persone. Il redattore (`redact.ts`) copre `input`; qui non c'è nulla da redigere perché non
+ * c'è nulla di personale — e questo è un requisito, non una coincidenza.
+ */
+export type ApprovalRequest = {
+  tool: string;
+  input: unknown;
+  /** `write` (come sempre) oppure `read` oltre la soglia alta (`#252`). */
+  classe?: CallClass;
+  /** Quante persone distinte la conversazione ha già toccato quando si è chiesto. */
+  personeDistinte?: number;
+  /** Il livello in cui cade quel numero, o `non-misurato` se il conto non è affidabile. */
+  livello?: LivelloPersone;
+};
 export type ApproveFn = (req: ApprovalRequest) => Promise<boolean>;
 
 /** Mirrors the SDK PermissionResult: updatedInput must be a Record (not unknown). */
@@ -125,17 +146,29 @@ export interface GateOptions {
   operations?: OperationResolver;
   /**
    * Il contatore di persone distinte della conversazione (#251, ADR-0040 R2). Il gate lo LEGGE
-   * e lo scrive nel diario a ogni decisione; **non** decide ancora niente su di lui: la
-   * fermata oltre la soglia alta è `#252`, che si aggancia qui.
+   * a ogni decisione, lo scrive nel diario, e da `#252` **ci decide sopra**: oltre la soglia
+   * alta una lettura si ferma e chiede (vedi `canUseTool`, ramo 2b).
    *
-   * ⚠ Assente = il diario non porta il numero. Non si scrive uno zero: «nessuna persona letta»
-   * e «non l'ho misurato» sono due affermazioni diverse, e confonderle è il modo in cui un
-   * freno cieco si legge come un freno verde.
+   * ⚠ ASSENTE NON È «VA BENE» (D7 di `#252`). Il diario non porta il numero — «nessuna persona
+   * letta» e «non l'ho misurato» sono due affermazioni diverse, e confonderle è il modo in cui
+   * un freno cieco si legge come un freno verde — e **le letture chiedono conferma**, come se
+   * il livello fosse `non-misurato`. In produzione il contatore c'è sempre (`sdk-agent.ts` lo
+   * costruisce per ogni conversazione): questo ramo copre chi monta il gate a mano.
    */
   persone?: LettoreContatore;
 }
 
 const DENY_NOT_APPROVED = "write not approved (compliance gate)";
+/**
+ * Il messaggio arriva AL MODELLO, non a un registro: dice perché si è fermato e che non è un
+ * divieto sul dato. Senza la seconda metà un agente onesto concluderebbe «non ho i permessi» e
+ * lo riferirebbe alla persona — cioè racconterebbe una cosa falsa (I22: chi conferma legge
+ * tutto il suo tenant).
+ */
+const DENY_READ_OVER_THRESHOLD =
+  "read paused: this conversation has already touched more distinct people than the tenant's " +
+  "high threshold (ADR-0040 R2) and the human confirmation was not granted. Not a permission " +
+  "denial: ask the person to confirm, then retry.";
 const DENY_NOT_ALLOWLISTED = "tool not in allowlist (defense-in-depth)";
 const DENY_UNRESOLVED_OPERATION =
   "operation could not be resolved to an HTTP method (ADR-0033 §5.2 fail-closed)";
@@ -154,9 +187,15 @@ async function withTimeout<T>(p: Promise<T>, ms: number, onTimeout: T): Promise<
 
 /**
  * Builds the SDK `canUseTool` callback. Unlisted tools are denied (allowlist, M-3);
- * allowlisted reads pass automatically; allowlisted writes are routed to `approve`
- * (the webapp HITL round-trip). Any non-true outcome — explicit refusal, timeout, or a
- * thrown approver — results in DENY (fail-closed). Every outcome is audited (M-4).
+ * allowlisted writes are routed to `approve` (the webapp HITL round-trip), and so are
+ * allowlisted reads **once the conversation has passed the high distinct-people threshold**
+ * (#252). Any non-true outcome — explicit refusal, timeout, or a thrown approver — results in
+ * DENY (fail-closed). Every outcome is audited (M-4).
+ *
+ * ⚠ UNA ISTANZA PER CONVERSAZIONE, e non è un'indicazione di stile: il consenso alle letture
+ * (D5) vive in questa chiusura. Riusare lo stesso `canUseTool` per due conversazioni
+ * porterebbe il consenso di una nell'altra — cioè un umano che approva per sé e sblocca un
+ * altro. `sdk-agent.ts` lo costruisce dentro `runHrAgent`, che è il confine giusto.
  */
 export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
   const timeoutMs = opts.approvalTimeoutMs ?? 120_000;
@@ -164,27 +203,81 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
   const allowlist = opts.allowlist ?? DEFAULT_TOOL_ALLOWLIST;
   const who = opts.principal ?? { principal: "unknown" as AuditPrincipal };
 
+  /**
+   * #251 — il numero si legge AL MOMENTO della decisione, non a fine corsa: il diario deve dire
+   * quante persone erano già state toccate quando questa chiamata è stata consentita. Un totale
+   * finale non distinguerebbe la prima lettura dalla trentesima.
+   *
+   * ⚠ Non deve poter ALZARE (un lettore iniettato da un test potrebbe): un guasto del contatore
+   * non è una ragione per far esplodere il gate. Da `#252` questa lettura decide anche, quindi
+   * il suo esito vuoto ha un significato preciso — vedi il ramo 2b.
+   */
+  const leggiPersone = (): { quante?: number; livello?: LivelloPersone } => {
+    try {
+      return { quante: opts.persone?.conta(), livello: opts.persone?.livello() };
+    } catch {
+      return {};
+    }
+  };
+
+  /**
+   * #252 — IL CONSENSO VALE PER LA CONVERSAZIONE (D5), e la richiesta è UNA SOLA (D6).
+   *
+   * Questo stato vive qui e non in un registro globale perché `makeCanUseTool` è costruito
+   * **una volta per conversazione** (`sdk-agent.ts`, una `runHrAgent` = una `POST /agent`):
+   * lo stesso confine su cui vive il contatore di `#251`. Una mappa per id di conversazione
+   * sarebbe infrastruttura in più per coprire esattamente ciò che già esiste.
+   *
+   * ⚠ ASIMMETRIA VOLUTA: l'assenso si ricorda, il diniego no. Fra i dinieghi c'è il **timeout**,
+   * che non è un atto umano: ricordarlo trasformerebbe un guasto di rete in una conversazione
+   * sigillata. Ricordare l'assenso, invece, lo impone I22 — chi conferma legge tutto il tenant,
+   * e ri-chiedere a ogni lettura sarebbe il tetto che ADR-0040 §6 ha scartato.
+   */
+  let consensoLetture = false;
+  let richiestaInVolo: Promise<boolean> | undefined;
+
+  const chiediPerLettura = (
+    tool: string,
+    input: unknown,
+    quante: number | undefined,
+    livello: LivelloPersone | undefined,
+  ): Promise<boolean> => {
+    if (richiestaInVolo) return richiestaInVolo;
+    const nuova = async (): Promise<boolean> => {
+      try {
+        return await withTimeout(
+          approve({
+            tool,
+            input,
+            classe: "read",
+            ...(quante !== undefined ? { personeDistinte: quante } : {}),
+            ...(livello !== undefined ? { livello } : {}),
+          }),
+          timeoutMs,
+          false,
+        );
+      } catch {
+        return false; // l'approvatore alza → si nega (fail-closed, come per le scritture)
+      }
+    };
+    richiestaInVolo = nuova()
+      .then((ok) => {
+        if (ok) consensoLetture = true;
+        return ok;
+      })
+      .finally(() => {
+        richiestaInVolo = undefined;
+      });
+    return richiestaInVolo;
+  };
+
   const auditDecision = (
     tool: string,
     args: unknown,
     decision: ToolDecision,
     reason: string,
   ): void => {
-    // #251 — il numero si legge AL MOMENTO della decisione, non a fine corsa: il diario deve
-    // dire quante persone erano già state toccate quando questa chiamata è stata consentita.
-    // Un totale finale non distinguerebbe la prima lettura dalla trentesima.
-    const persone = opts.persone;
-    // Attenzione a `let` + due `?.`: leggere il contatore non deve poter alzare (un lettore
-    // iniettato da un test potrebbe), altrimenti un guasto del diario negherebbe la lettura.
-    let quante: number | undefined;
-    let livello: ReturnType<LettoreContatore["livello"]> | undefined;
-    try {
-      quante = persone?.conta();
-      livello = persone?.livello();
-    } catch {
-      quante = undefined;
-      livello = undefined;
-    }
+    const { quante, livello } = leggiPersone();
     // Audit is best-effort and MUST NOT change the gate decision: swallow sink errors.
     void audit
       .record({
@@ -223,17 +316,58 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
       return d;
     }
 
-    // 2b. Lettura → auto-allow.
+    // 2b. Lettura. Fino alla soglia alta passa da sé, come è sempre stato. OLTRE la soglia —
+    //     e quando il conto non è misurabile — si FERMA e chiede (#252, ADR-0040 R2): è lo
+    //     stesso ponte delle scritture, con lo stesso evento `approval_required` che il web
+    //     già gestisce. Non è un tetto: chi conferma legge tutto il suo tenant (I22), e
+    //     l'assenso vale per il resto della conversazione.
     if (classe === "read") {
-      const d: ToolDecision = { behavior: "allow", updatedInput: input as Record<string, unknown> };
-      auditDecision(name, input, d, "READ_AUTO_ALLOW");
+      const { quante, livello } = leggiPersone();
+      // TRE casi fanno chiedere, e sono tre affermazioni diverse con la stessa conseguenza:
+      //   · `confermato`  → il conto ha superato la soglia alta: il caso per cui esiste;
+      //   · `non-misurato`→ soglie illeggibili o contatore guasto (D2/D4 di `#251`);
+      //   · livello assente → il gate non è cablato al contatore (D7): «non l'ho guardato».
+      const oltreLaSoglia =
+        livello === undefined || livello === "confermato" || livello === "non-misurato";
+      if (!oltreLaSoglia) {
+        const d: ToolDecision = { behavior: "allow", updatedInput: input as Record<string, unknown> };
+        auditDecision(name, input, d, "READ_AUTO_ALLOW");
+        return d;
+      }
+      // L'assenso già dato in questa conversazione non si ri-chiede (D5) — ma si scrive nel
+      // diario con una ragione propria, perché «è passata senza chiedere» e «è passata perché
+      // un umano aveva già acconsentito» sono due fatti diversi, e a posteriori contano.
+      if (consensoLetture) {
+        const d: ToolDecision = { behavior: "allow", updatedInput: input as Record<string, unknown> };
+        auditDecision(name, input, d, "READ_OVER_THRESHOLD_CONSENTED");
+        return d;
+      }
+      const consentito = await chiediPerLettura(name, input, quante, livello);
+      const d: ToolDecision = consentito
+        ? { behavior: "allow", updatedInput: input as Record<string, unknown> }
+        : { behavior: "deny", message: DENY_READ_OVER_THRESHOLD };
+      auditDecision(
+        name, input, d,
+        consentito ? "READ_OVER_THRESHOLD_APPROVED" : "READ_OVER_THRESHOLD_DENIED",
+      );
       return d;
     }
 
     // 3. Allowlisted write → HITL with deny-by-default on timeout/throw.
     let approved = false;
     try {
-      approved = await withTimeout(approve({ tool: name, input }), timeoutMs, false);
+      const { quante, livello } = leggiPersone();
+      approved = await withTimeout(
+        approve({
+          tool: name,
+          input,
+          classe: "write",
+          ...(quante !== undefined ? { personeDistinte: quante } : {}),
+          ...(livello !== undefined ? { livello } : {}),
+        }),
+        timeoutMs,
+        false,
+      );
     } catch {
       approved = false; // approver threw → fail closed
     }

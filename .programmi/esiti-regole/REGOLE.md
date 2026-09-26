@@ -1,0 +1,64 @@
+# Esito — mandato REGOLE (2026-09-26, sessione S1114, non presidiata)
+
+Mandato: regole snelle per Claude 5 e due controlli che smettono di girare a vuoto. Tre lavori, eseguiti in ordine. Sessione senza rito di apertura, per decisione di Cowork/Enzo del 2026-09-26.
+
+## 1. CLAUDE.md del progetto — fatto
+
+Sostituito `CLAUDE.md` con il testo di `03_CLAUDE_heuresys-advanced_bozza.md`, tolto il solo paragrafo "Bozza del 2026-09-26...". Il testo precedente (337 righe, letto dal file prima della sostituzione) è archiviato integralmente in `docs/kb/xtras/PERCHE_LE_REGOLE.md`, con due righe di testa che ne spiegano lo scopo.
+
+Ho verificato uno per uno tutti i riferimenti a file/comandi/script citati nella bozza (24 percorsi, più tre script `pnpm db:*` letti da `package.json`). Un riferimento era sbagliato: la bozza cita `db/scripts/clone-vm-db.sh` per il rinfresco del clone sul linux-pc, ma lo script esiste a `scripts/clone-vm-db.sh` (senza `db/`). Corretto nel testo committato. Tutti gli altri 23 riferimenti sono stati verificati esistenti sul disco.
+
+Commit: `d72582fa` (`docs(kb): REGOLE #1 — CLAUDE.md snellito secondo le guide Claude 5, storico archiviato`), pushato su `main`.
+
+Non ho toccato il CLAUDE.md globale (`~/.claude/CLAUDE.md`): non è nel perimetro di questo progetto, e il mandato non lo chiedeva. Il boot di questa sessione segnalava `[ERR] R24 GUARD-RAIL ASSENTE` su quel file con la SoT-versione datata 2026-09-26 — coerente con una riscrittura fatta lo stesso giorno di questo mandato, non con una corruzione. Non ho eseguito il ripristino che l'avviso suggeriva (`git checkout` su un commit precedente), perché avrebbe annullato una riscrittura verosimilmente già approvata da Enzo nello stesso ciclo di lavoro di questo mandato. Segnalo il fatto, senza averlo potuto verificare oltre questa osservazione: **da controllare da chi ha accesso a `~/.claude`**.
+
+## 2. Il cancello di fine turno — fatto
+
+`cmd_stop_gate` in `scripts/hooks/session_mode.py` inoltrava il verdetto di `verify_gate.py check --hook` a OGNI fine turno (Stop e SubagentStop), anche a quelli intermedi di una sessione che sta aspettando qualcosa — misurato dal mandato: 27 giri a vuoto in 20 minuti il 2026-09-26.
+
+Corretto: il turno si respinge SOLO se l'ultimo messaggio dell'assistente nel transcript contiene la stringa `@COWORK FATTO`. Ho aggiunto due funzioni — `ultimo_testo_assistant()` (ricostruisce il testo dell'ultimo messaggio assistant dal file JSONL del transcript, raggruppando i blocchi che condividono lo stesso `message.id`) e `dichiara_fine_lavoro()` — e ho condizionato l'inoltro del verdetto a quella dichiarazione. Se il gate non ha niente da dire (verde), non cambia nulla: resta silenzioso come prima.
+
+Tre prove nuove in `scripts/test/run-shell-tests.sh`, viste rosse prima della correzione e verdi dopo:
+- turno qualunque (verdetto del cancello bloccante) senza `@COWORK FATTO` → il turno passa (silenzioso);
+- turno con `@COWORK FATTO` → il verdetto torna identico a una chiamata diretta a `verify_gate.py check --hook` (l'equivalenza preesistente, ora condizionata alla dichiarazione);
+- turno con `@COWORK FATTO` e cancello forzato verde (freno `.zp/verify-off`, ripristinato subito dopo) → passa silenzioso.
+
+Nel costruire la seconda prova ho trovato e corretto un difetto nella prova stessa, non nel codice: `mktemp -d` sotto Git Bash produce un path in stile MSYS (`/tmp/...`), ma l'interprete Python che legge l'hook su Windows è quello nativo, che non traduce quel path e non trova il file — la lettura falliva in silenzio e il test passava per il motivo sbagliato quando il cancello era già verde (`""` == `""`). Corretto convertendo il path con `cygpath -w` (con fallback al path originale dove `cygpath` non esiste, cioè su Linux) e scappando i backslash per l'incapsulamento JSON. Non è un difetto di produzione: Claude Code, nel payload vero, passa già un path nel formato nativo del proprio sistema operativo.
+
+Batteria completa (`bash scripts/test/run-shell-tests.sh`): **260 ok, 0 falliti**.
+
+Commit: `95c12337` (`fix(hooks): REGOLE #2 — il cancello di fine turno respinge solo su @COWORK FATTO`), pushato su `main`.
+
+## 3. Dove girano `test-api` e `migrate-idempotent` — nessuna modifica necessaria, verificato dal vivo
+
+Il mandato descriveva `test-api` e `migrate-idempotent` come suite che oggi girano su Windows via tunnel, citando una misura del 2026-09-26 (test-api 1485 s) e la frase del CLAUDE.md «difetto noto dell'instradamento».
+
+Misurato prima di agire, come vuole il punto fisso del progetto: leggendo `docs/kb/tools/verify_gate.py` (righe 259 e 277 della tabella `SUITES`), entrambe le suite sono GIÀ instradate su script che girano sul gemello, non su Windows:
+- `test-api` → `bash db/scripts/prova-api-sul-gemello.sh` (commento datato 2026-09-09);
+- `migrate-idempotent` → `bash db/scripts/prova-idempotenza.sh` (commento datato 2026-08-27).
+
+Entrambi gli script controllano la raggiungibilità dell'host PRIMA di fare qualunque cosa (`ssh -o ConnectTimeout=15 ... true`) ed escono rossi SENZA ripiegare su questa macchina se l'host non risponde — esattamente la proprietà che il mandato chiedeva di costruire. La frase «difetto noto dell'instradamento» nel vecchio CLAUDE.md (ora in `PERCHE_LE_REGOLE.md`) descriveva lo stato di `migrate-idempotent` PRIMA del 2026-08-27, e non è mai stata tolta dopo la correzione — è la citazione stessa a essere invecchiata, non il codice.
+
+Prova dal vivo, oggi: il gemello (`linux-pc`, 192.168.1.11) è risultato **irraggiungibile** da questa macchina (`ssh -o ConnectTimeout=8 linux-pc true` → *Connection timed out*). Ho forzato una corsa vera:
+
+```
+python docs/kb/tools/verify_gate.py run --suite test-api --suite migrate-idempotent
+```
+
+Esito reale: `test-api` rosso in **15,6 s**, `migrate-idempotent` rosso in **15,4 s** — non 1485 s, non un'ora. Nessun fallback su Windows: entrambi si sono fermati sul controllo di raggiungibilità con il messaggio «l'host non risponde, la suite NON È STATA ESEGUITA». Questo è il comportamento corretto e voluto, non un guasto di questa verifica.
+
+`python docs/kb/tools/verify_gate.py selftest` → verde (12 casi, positivi e negativi, più la controprova, più 4 casi sull'impronta).
+
+**Prima e dopo**, come richiesto — ma qui coincidono, perché non c'era un "prima" da correggere: la tabella di instradamento era già quella giusta. Nessun commit di codice per questo punto. Segnalo comunque due fatti che restano da guardare, non bloccanti per questa chiusura:
+- il linux-pc non risponde in questo momento da questa rete — vale la pena controllare se è spento o se è un problema di rete di casa (memoria `reference_degraded_tunnel_fakes_unreachable_db.md` parla di tunnel degradati, non di host del tutto irraggiungibile: qui `ssh` va in *timeout*, non in *connection refused*, quindi sembra proprio l'host spento o non in rete);
+- il file `.zp/verify-verdict.json` è rimasto per un momento popolato dai valori sentinella `"in-prova"` di `scripts/test/verify-gate-tests.py` (una corsa di quel test-fixture non aveva ripristinato lo stato reale) — non è un difetto che ho introdotto io, l'ho trovato così a inizio sessione; la mia stessa corsa `verify_gate.py run` di verifica lo ha già sovrascritto con un verdetto reale, quindi non richiede altro intervento.
+
+## Chiusura
+
+**CI su GitHub, ultimo commit di codice (`95c12337`)**: tutti i job VERDI — Shell tests (34s), Typecheck (2m36s), Lint (4m12s), Test api integration (**21m17s**, con la sua catena reale di migrazioni/seed contro il proprio database). Verificato con `gh run list --branch main --limit 6`.
+
+**`verify_gate.py run` locale, sullo stesso HEAD**: ROSSO, ma solo su `test-api` e `migrate-idempotent` — le stesse due suite del punto 3, e per lo stesso motivo: il gemello `linux-pc` è irraggiungibile da questa rete (`ssh` va in *timeout*, non in *connection refused* — misurato di nuovo subito prima di questa chiusura, stesso esito). Nessuna delle due è instradata dai file che questa sessione ha toccato (`CLAUDE.md`, `docs/kb/xtras/*`, `scripts/hooks/session_mode.py`, `scripts/test/run-shell-tests.sh`, `.programmi/esiti-regole/*`): sono rimaste nell'obbligo di verifica perché il mio stesso accertamento del punto 3 (`run --suite test-api --suite migrate-idempotent`, eseguito a proposito per misurare il punto 3) le ha registrate rosse in `.zp/verify-verdict.json`, e per progetto (D-88) un rosso resta dovuto finché non ripassa verde — indipendentemente dal diff che l'ha originato. `programmi` e `shell-tests`, le due suite che il mio diff instrada davvero, sono verdi (rispettivamente 0.4s e 385.8s, quest'ultima le stesse 260 prove del punto 2).
+
+Non dichiaro quindi "verde" un cancello che non lo è: il verdetto locale di oggi è rosso su due suite che dipendono da una macchina fisica irraggiungibile in questo momento, non su alcun file toccato da questo mandato. La CI — che gira su un'altra macchina e non passa da `linux-pc` — è la prova indipendente che il codice consegnato è corretto. Segnalo la cosa a Enzo perché possa controllare se il linux-pc è spento o isolato dalla rete; quando tornerà raggiungibile, un `verify_gate.py run` locale rimetterà verdi anche le ultime due suite senza bisogno di altro intervento.
+
+Nessuna voce nuova nel register (`docs/kb/SOT_BACKLOG.md`): questo è un mandato di manutenzione delle regole e degli strumenti, non un work-item di prodotto o tecnico tracciato in quel register — i tre commit ne sono l'evidenza durevole.

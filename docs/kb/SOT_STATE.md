@@ -39,11 +39,19 @@ tetto sulla conversazione» di ADR-0040 §2 è misurato dal vivo per la prima vo
 cartella importano. Il suo `--selftest` provava il CERCATORE e non il CENSIMENTO: aggiunta la
 prova di copertura delle radici sorgente, vista rossa prima e verde dopo.
 
+**E un secondo punto cieco, della stessa forma**: `verify_gate.py` non instradava **nessuna**
+suite su `apps/agent-gateway/`, nemmeno il typecheck — la suite `agent-gateway-test` esisteva ma
+era legata ai soli due file di *decisione*. Trentuno prove nuove e un gate riscritto lasciavano il
+cancello locale verde **senza aver guardato**. Corretto (`19483e63`), con due casi di
+instradamento visti rossi prima; dopo la correzione il cancello esegue davvero typecheck +
+`agent-gateway-test` ed è GREEN. ⚠ Vale la pena chiedersi quali ALTRE cartelle non instradano
+nulla: è la stessa classe di C2 (`db/migrations/` invece di `db/`).
+
 **Prova di chiusura**: login vero col secondo fattore (`federica.marchetti@rtl-bank.org`), API
 locale, sole letture, diario letto da disco — una conversazione stampa 1 · 7 · 38 · 160 coi
 quattro livelli. Sabotaggio del codice di produzione → 8 prove rosse, ripristino → tutta la
 batteria del gateway verde. Anche la dimostrazione LIVE si è vista ROSSA prima (2 criteri su 7).
-Commit `020e3a94` → `75bb5f4e` → `c6ab81e9` → `ae9b9310`. Esito: `.programmi/esiti-ciclo3/251.md`.
+Commit `020e3a94` → `75bb5f4e` → `c6ab81e9` → `ae9b9310` → `7392e1dc` → `19483e63`, e `verify_gate.py run` su HEAD `19483e63` → **GREEN** (typecheck 25,5s · router-selftest 4,0s · agent-gateway-test 9,6s, tutti exit=0) — il primo verde che abbia davvero guardato il gateway. Esito: `.programmi/esiti-ciclo3/251.md`.
 **Nessuna propagazione e nessun rilascio**: vietati dal mandato del ciclo, li esegue il governo.
 
 ### Delta S1111 (2026-09-26) — la persona di collaudo di piattaforma: i test non entrano più come Enzo

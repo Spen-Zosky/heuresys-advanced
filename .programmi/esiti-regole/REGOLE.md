@@ -69,8 +69,10 @@ Esito reale: `test-api` rosso in **15,6 s**, `migrate-idempotent` rosso in **15,
 
 Ho valutato e scartato una scorciatoia: la VM di produzione (`oracle-vm-default`) risponde via SSH e ha lo stesso numero di migrazioni (447), quindi gli script accetterebbero `HOST=oracle-vm-default`/`IDEMPOTENZA_HOST=oracle-vm-default`. Non l'ho fatto: la tabella "tre macchine, tre mestieri" del nuovo CLAUDE.md assegna i test di integrazione e la prova di idempotenza al gemello, non alla VM che serve il servizio reale — usarla per far tornare verde il cancello locale sarebbe l'aggiramento che questi script esistono per impedire.
 
-**Non dichiaro quindi "verde" un cancello locale che non lo è.** Il codice consegnato nei tre lavori è verificato in modo indipendente dalla CI (verde su tutta la linea, sull'ultimo commit di codice). Resta da guardare, e non lo posso risolvere da questa sessione: il linux-pc va controllato (acceso? in rete?) — quando torna raggiungibile, un `verify_gate.py run` locale, senza altro codice, rimette verdi anche le ultime due suite.
+**Non dichiaro quindi "verde" un cancello locale che non lo è.** Il codice consegnato nei tre lavori è verificato in modo indipendente dalla CI (verde su tutta la linea, sull'ultimo commit di codice). Segnalata a Enzo la situazione del gemello.
 
-Non dichiaro quindi "verde" un cancello che non lo è: il verdetto locale di oggi è rosso su due suite che dipendono da una macchina fisica irraggiungibile in questo momento, non su alcun file toccato da questo mandato. La CI — che gira su un'altra macchina e non passa da `linux-pc` — è la prova indipendente che il codice consegnato è corretto. Segnalo la cosa a Enzo perché possa controllare se il linux-pc è spento o isolato dalla rete; quando tornerà raggiungibile, un `verify_gate.py run` locale rimetterà verdi anche le ultime due suite senza bisogno di altro intervento.
+**Decisione di Enzo**: il PC Linux (gemello) per ora non è disponibile, questa fase si salta, non si aspetta più.
 
-Nessuna voce nuova nel register (`docs/kb/SOT_BACKLOG.md`): questo è un mandato di manutenzione delle regole e degli strumenti, non un work-item di prodotto o tecnico tracciato in quel register — i tre commit ne sono l'evidenza durevole.
+**rinviato: test-api e migrate-idempotent sul gemello, da rieseguire quando il PC Linux torna raggiungibile.**
+
+Nessuna voce nuova nel register (`docs/kb/SOT_BACKLOG.md`): questo è un mandato di manutenzione delle regole e degli strumenti, non un work-item di prodotto o tecnico tracciato in quel register — i tre commit ne sono l'evidenza durevole. Il rinvio è annotato qui, unico blocco dove questo mandato tiene il proprio stato.

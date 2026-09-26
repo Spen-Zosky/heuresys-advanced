@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-26T08:27:06Z da docs/kb/tools/build_index.py
+# generato: 2026-09-26T11:15:32Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-26T08:27:06Z"
-  total_files: 3757
+  generated_at: "2026-09-26T11:15:32Z"
+  total_files: 3760
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,7 +13,7 @@ meta:
     api-module: 398
     ci: 19
     claude-config: 38
-    config: 349
+    config: 351
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -23,7 +23,7 @@ meta:
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 763
+    doc-canonical: 764
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -37,7 +37,7 @@ meta:
   status_counts:
     archive: 593
     external-archive: 50
-    live: 3114
+    live: 3117
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -4347,6 +4347,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\test\write-gate-soglia-letture.test.ts'
+    root: repo
+    rel: 'apps/agent-gateway/test/write-gate-soglia-letture.test.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\test\write-gate.test.ts'
     root: repo
     rel: 'apps/agent-gateway/test/write-gate.test.ts'
@@ -4356,6 +4362,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\agent-gateway\tsconfig.json'
     root: repo
     rel: 'apps/agent-gateway/tsconfig.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\tsconfig.scripts.json'
+    root: repo
+    rel: 'apps/agent-gateway/tsconfig.scripts.json'
     category: config
     status: live
     provenance: git-tracked
@@ -12420,6 +12432,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\esiti-ciclo3\251.md'
     root: repo
     rel: '.programmi/esiti-ciclo3/251.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-ciclo3\252.md'
+    root: repo
+    rel: '.programmi/esiti-ciclo3/252.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

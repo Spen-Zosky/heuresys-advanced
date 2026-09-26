@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-26T08:27:06Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3757**
+**Generato**: 2026-09-26T11:15:32Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3760**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,7 +13,7 @@
 | api-module | 398 |
 | ci | 19 |
 | claude-config | 38 |
-| config | 349 |
+| config | 351 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
@@ -23,7 +23,7 @@
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 763 |
+| doc-canonical | 764 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -34,7 +34,7 @@
 | test | 449 |
 | ux-design-archive | 80 |
 | web-source | 258 |
-| **TOTALE** | **3757** |
+| **TOTALE** | **3760** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 3114 |
+| live | 3117 |
 
 ## File per categoria
 
@@ -782,8 +782,10 @@
 - `D:\heuresys-advanced\apps\agent-gateway\test\redact.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\soglie-persone.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\subscription-auth.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\agent-gateway\test\write-gate-soglia-letture.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\write-gate.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\tsconfig.json` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\agent-gateway\tsconfig.scripts.json` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\vitest.config.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\package.json` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\collaudo-access.d.mts` · *live* · git-tracked
@@ -2158,6 +2160,7 @@
 - `D:\heuresys-advanced\.programmi\S1101b-mandato-contratto-shared.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\esiti-ciclo3\251.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\esiti-ciclo3\252.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\esiti-ciclo3\258.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\K-mandato-v2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked

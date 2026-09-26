@@ -9,6 +9,58 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1113 (2026-09-26) — il freno si chiude: oltre la soglia anche una LETTURA si ferma e chiede
+
+**`#252` DONE** (ADR-0040 R2, secondo dei tre passi che precedono `#254`). Il ponte di approvazione
+umana esisteva solo per le scritture: una lettura era `READ_AUTO_ALLOW` **sempre**, qualunque fosse
+il conto di persone distinte di `#251`. Ora il ramo delle letture di `canUseTool` legge quel livello
+e, oltre la soglia alta, instrada la lettura **allo stesso ponte** con lo stesso evento
+`approval_required` che il web già gestiva. **Non è un tetto** (I22): chi conferma legge tutto il
+suo tenant, e l'assenso vale per il resto della conversazione.
+
+**Tre casi fanno chiedere**, e sono tre affermazioni diverse con la stessa conseguenza: livello
+`confermato`; livello `non-misurato` (soglie illeggibili o contatore guasto, contratto D2 di
+`#251`); **contatore assente** — «non l'ho guardato» non è «va bene», e nessun interruttore lo
+disattiva. In produzione il contatore c'è sempre: `sdk-agent.ts` lo costruisce per conversazione.
+
+**Asimmetria dichiarata fra assenso e diniego**: l'assenso si ricorda per la conversazione (I22
+lo impone), il diniego no — fra i dinieghi c'è il **timeout**, che non è un atto umano, e
+ricordarlo trasformerebbe un guasto di rete in una conversazione sigillata. Il payload che arriva
+all'umano porta classe, numero di persone e livello — conteggi, mai dati — **anche sulle
+scritture**; il pannello di `@heuresys/ui` non è stato toccato, è la pagina a comporre la frase.
+
+**Dimostrazione LIVE** (login vero col secondo fattore, `federica.marchetti@rtl-bank.org`,
+TENANT_ADMIN): la quarta domanda di `live-perimetro.ts` è **due conversazioni con la stessa
+domanda** — negata, l'agente si ferma a 55 persone (`READ_OVER_THRESHOLD_DENIED` nel diario);
+confermata a 56, la lettura **riprende**. **14 criteri su 14**, fra cui il corno anti-vacuità: 34
+letture sono passate da sé nella stessa corsa, quindi non è il verde di un gate che nega tutto.
+
+**Cinque rossi visti, due non cercati**: 4 prove storiche che costruivano il gate senza contatore
+· 12 prove nuove su 17 col freno spento nel codice di produzione · 3 su 8 del parser col numero non
+validato · **1 criterio della prova LIVE**, perché provare i due esiti in UNA conversazione non
+funziona: ricevuto il diniego l'agente **si ferma e non richiede**, cioè fa il suo dovere · **5
+criteri** col sabotaggio dell'unità più grande portata da 38 a 1000 nelle misure generate.
+
+**Terza occorrenza della stessa forma di difetto nel presidio** (dopo C2 e `#251` F0b/F0c): il
+`typecheck` del gateway **non includeva `scripts/`**, quindi usciva 0 su un errore di tipo dentro
+l'unico strumento che dimostra il freno sul vivo. Controprova misurata: iniettato
+`const x: number = "stringa"`, `tsconfig.json` esce **0** e il nuovo `tsconfig.scripts.json` esce
+**1**. Allargare l'`include` del progetto di build non si poteva (otto `TS6059`: gli script
+importano le fixture di `apps/api`, fuori dalla `rootDir` di un progetto che emette). Il
+`typecheck` del pacchetto esegue ora entrambi i progetti.
+
+⚠ **La prova LIVE gira contro il database VIVO**, perché «in locale» su questo repo significa
+opzione B (API locale → tunnel → VM). Che cosa le tre corse hanno scritto è **misurato e
+dichiarato** nell'esito della voce: 3 righe in `sys_auth_login_events` + 3 in
+`sys_auth_refresh_tokens` (i tre login reali, orari combacianti); le 12 righe di
+`sys_approval_steps` **non** sono delle corse — lo sweep SLA gira solo da CLI e il suo timer è
+`OnCalendar=*-*-* *:20:00`, e sovrascrive `updated_at` sulle stesse 12 righe. **Nessun dato di
+dominio modificato**, e il tentativo di scrittura dell'agente è `deny` nel diario. Misurate 268
+tabelle su 318; per le altre 50 l'esito è **NON MISURATO**. Nessuna pulizia: le righe restano.
+
+Nuove prove: `apps/agent-gateway/test/write-gate-soglia-letture.test.ts` (17) e +8 su
+`use-agent-stream.test.ts` → batteria del gateway **147** (erano 130).
+
 ### Delta S1112 (2026-09-26) — il contatore di persone distinte: il freno dell'agente ha un numero, e il buco è misurato
 
 **`#251` DONE** (ADR-0040 R2, primo dei tre passi che precedono `#254`). L'agente conta le

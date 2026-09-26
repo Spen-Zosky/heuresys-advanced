@@ -141,6 +141,12 @@ ROUTES: list[tuple[str, list[str]]] = [
     ("packages/shared/", ["typecheck", "test-api"]),
     ("apps/web/",        ["typecheck", "lint"]),
     ("apps/showcase/",   ["typecheck", "lint"]),
+    # ⚠ 2026-09-26 (#251) — il gateway dell'agente non instradava NIENTE, nemmeno il
+    # typecheck: la suite `agent-gateway-test` esisteva ma era legata ai soli due file di
+    # DECISIONE (`agent-perimetri.json`, `agent-operations.json`). Conseguenza misurata:
+    # aggiungere 31 prove e riscrivere il gate lasciava il cancello locale verde, perche'
+    # non aveva guardato. La copertura e' ora un caso del `selftest`, visto rosso prima.
+    ("apps/agent-gateway/", ["typecheck", "agent-gateway-test"]),
     # `handoff-lint` c'e' perche' verifica anche il CONTEGGIO delle migrazioni sul
     # disco contro la headline di SOT_STATE (check D3). Legarlo ai soli file di
     # stato era un buco: aggiungere una migrazione cambia cio' che quel lint
@@ -855,6 +861,13 @@ CASI_ROUTER: list[tuple[str, list[str], list[str]]] = [
     ("docs/kb/tools/chi_sorveglia.py",     ["chi-sorveglia"],        ["migrate-idempotent"]),
     # aprire un perimetro deve far girare il test che confronta decisi e mappa
     ("docs/kb/agent-perimetri.json",       ["agent-gateway-test"],   ["migrate-idempotent"]),
+    # ⚠ 2026-09-26 (#251): e toccare il CODICE del gateway pure. La suite esisteva ed era
+    # instradata SOLO sui due file di decisione: cambiare `write-gate.ts` o aggiungere 31
+    # prove non ne faceva girare nessuna, e il cancello locale usciva verde avendo guardato
+    # altrove. Stesso difetto di C2 (la prova generale che copriva `db/migrations` e non
+    # `db/`): la regola c'era, il router non la applicava dove il codice vive.
+    ("apps/agent-gateway/src/write-gate.ts", ["agent-gateway-test", "typecheck"], []),
+    ("apps/agent-gateway/test/persone-distinte.test.ts", ["agent-gateway-test"], []),
 ]
 
 

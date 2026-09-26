@@ -1,0 +1,26 @@
+{
+  // Typecheck degli SCRIPT di accettazione live (#252 F3).
+  //
+  // ⚠ PERCHÉ UN FILE A PARTE E NON `include` IN `tsconfig.json`. Misurato il 2026-09-26:
+  // aggiungendo `scripts/**/*.ts` al tsconfig di build, tsc esce 2 con otto TS6059 — gli script
+  // importano le fixture di `apps/api` (`mfa-fixture-secrets`, `personas`), che stanno fuori
+  // dalla `rootDir` del pacchetto. Non sono errori di tipo: sono la conseguenza di far emettere
+  // `dist/` a un programma che legge fuori dal proprio albero. Qui `noEmit` toglie la ragione
+  // del vincolo, e `rootDir` non serve a chi non emette nulla.
+  //
+  // ⭐ COSA COPRIVA IL VERDE PRIMA DI QUESTO FILE: niente di `scripts/`. `tsc -p tsconfig.json`
+  // usciva 0 con un errore di tipo dentro `live-perimetro.ts`, perché quel file non era nel
+  // programma. È la stessa forma del difetto corretto da `#251` F0c (il cancello verde senza
+  // aver guardato) e di C2 nel CLAUDE.md: la regola c'era, non copriva il posto dove il codice
+  // vive. Gli script di accettazione live sono l'unica prova che dimostra il freno sul vivo:
+  // lasciarli fuori dal typecheck significa scoprirne i difetti a metà di una corsa reale.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node"]
+  },
+  "include": ["scripts/**/*.ts", "src/**/*.ts"],
+  "exclude": ["dist", "node_modules"]
+}

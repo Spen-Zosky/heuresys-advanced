@@ -37,3 +37,22 @@
 - **D6 — una sola richiesta in volo per conversazione.** Due letture concorrenti oltre soglia attendono la **stessa** promessa: altrimenti l'umano vedrebbe due pannelli per un solo superamento. È anche il «ponte interpellato una volta» di F1.
 - **D7 — contatore assente = si chiede.** Stessa dottrina di `AtlasOperationResolver` (l'ignoto non è un permesso) e stessa forma del difetto che `#251` F0c ha corretto: un cancello verde *senza aver guardato*. Nessun interruttore per disattivarlo.
 - **D8 — la ragione `READ_AUTO_ALLOW` non cambia sotto soglia.** Il livello è già un campo proprio del diario (`livelloPersone`, `#251`): arricchire la stringa duplicherebbe il dato in una forma non interrogabile.
+
+## Cronaca S1113 (2026-09-26)
+
+- **F1 fatto** (`44a9bdd0`). Il ramo 2b di `canUseTool` legge il livello e, oltre la soglia alta,
+  instrada la lettura al ponte. Tre casi fanno chiedere: `confermato`, `non-misurato`, e
+  **contatore assente** (D7). Due rossi visti: 4 prove storiche (senza contatore) e 12 prove nuove
+  col freno spento nel codice di produzione. 147/147 verde dopo il ripristino (erano 130).
+- **F2 fatto** (`0b57f906`). Il payload di `approval_required` porta classe, persone e livello; il
+  filtro è uscito dall'hook in `parseApprovalPayload` — una funzione pura, quindi provabile — e la
+  pagina compone la descrizione, senza toccare `AgentPanel` in `@heuresys/ui`. Sabotando il parser
+  (numero non validato, assente→0) tre prove su otto vanno rosse.
+- **F3 — un punto cieco trovato per strada, e chiuso**: `tsc -p tsconfig.json` del gateway **non
+  include `scripts/`**, quindi il typecheck era verde su un errore di tipo dentro
+  `live-perimetro.ts`. Controprova misurata: iniettando `const x: number = "stringa"` alla riga
+  103, il tsconfig di build esce **0** e il nuovo `tsconfig.scripts.json` esce **1**. Non si è
+  potuto semplicemente allargare l'`include`: otto `TS6059` (gli script importano le fixture di
+  `apps/api`, fuori dalla `rootDir` di un progetto che emette `dist/`). Il typecheck del gateway
+  ora esegue entrambi i progetti, così il cancello già instradato su `apps/agent-gateway/` copre
+  anche gli script senza una suite nuova.

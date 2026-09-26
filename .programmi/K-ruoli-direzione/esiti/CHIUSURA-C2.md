@@ -445,7 +445,50 @@ produzione): entrambi erano sintomi dello stesso bundle fermo al 14/9, ora sosti
 `clone-vm-db.sh` armato dentro `close-propagate` (misurato: `db/migrations|seeds` cambiati
 `58b159c3..HEAD`): `systemctl show -p Result` → **`success`**.
 
-Verifica lunga di chiusura in corso (`db/scripts/prova-api-sul-gemello.sh`, lanciato da Windows —
+Verifica lunga di chiusura (`db/scripts/prova-api-sul-gemello.sh`, lanciato da Windows —
 **non** via ssh diretto: il primo tentativo, fatto ssh-ando prima dentro linux-pc e lanciando lo
 script li', ha fallito perche' lo script stesso fa `ssh linux-pc` e da dentro linux-pc quell'alias
-non risolve a se stesso). Esito a seguire in questa stessa sezione.
+non risolve a se stesso):
+
+```
+Test Files  291 passed (291)
+     Tests  2054 passed (2054)
+  Duration  1113.47s
+[prova-api] durata 1125s  esito=0
+```
+
+Tutta la suite passata, esito 0.
+
+### C3-5 — chiusura
+
+Skill `handoff` eseguita (senza ri-eseguire il rilascio gia' fatto): `.handoff/STATE.md` e
+`docs/kb/SOT_STATE.md` riscritti, `TRG.md` aggiornato (`#28` e `#30` → RISOLTA con l'evidenza di
+sopra), `handoff_lint.py` → 0 FAIL, commit `340f10cc`, propagato con `close-propagate.sh`.
+
+Il commit di chiusura (solo documenti) ha fatto avanzare `main` oltre l'armamento precedente — la
+stessa dinamica gia' vista in C2 e nel primo giro di C3 — e il sorvegliante ha ri-armato e
+ri-deployato da solo, stavolta senza intervento manuale:
+
+```
+VERDETTO: DEPLOYATO — 2 host su 340f10cc, servizi attivi, produzione 200
+```
+
+`git ls-remote origin refs/heads/prod refs/heads/main` → **entrambi `340f10cc`**. Albero locale
+pulito, pari con origin. `bash scripts/posso-uscire.sh` → **USCITA SICURA** (un task residuo di
+un test isolato di stanotte, fermato con `TaskStop`).
+
+**Le due voci [!!] segnalate dal cancello a tempo** (`check_completezza_self`, `check_exposure`)
+durante le propagazioni di stanotte: lette, non indagate — restano per il prossimo ciclo.
+
+**Verdetti finali, in un colpo d'occhio**:
+
+| verdetto | esito |
+|---|---|
+| cancello locale (`verify_gate.py run`) | GREEN su HEAD `340f10cc` |
+| CI (`gh run list`) | 4 corse · 4 verdi · 0 rosse su `340f10cc` |
+| `verifica-deploy.sh` | DEPLOYATO — 2 host su `340f10cc`, servizi attivi, produzione 200 |
+| linux-pc (`prova-api-sul-gemello.sh`) | 291 file, 2054 test, tutti passati, esito 0 |
+| prova live D11 (produzione) | VERDE — dossier masked corretto, ruoli #30 con permessi giusti |
+
+@COWORK FATTO CHIUSURA-C3 — HEAD `340f10cc` = prod `340f10cc` · cancello GREEN · CI 4/4 verde ·
+verifica-deploy DEPLOYATO (2/2 host) · linux-pc 2054/2054 test passati · D11 VERDE in produzione.

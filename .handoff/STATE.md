@@ -1,24 +1,30 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: S1111 (2026-09-26), mandato Cowork ciclo 3 passaggio 1 — `#258` chiusa: i
-test API smettono di impersonare Enzo. I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: S1112 (2026-09-26), mandato Cowork ciclo 3 passaggio 2 — `#251` chiusa: il
+contatore di persone distinte per conversazione dell'agente. I numeri stanno in
+`docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-**`#258` DONE**: molti file di `apps/api/test`+`apps/web/tests` impersonavano `enzo.spenuso@heuresys.com`
-per la sfida MFA come PLATFORM_ADMIN; `#250` gli aveva dato il suo secondo fattore VERO. Nuova
-persona `platform-test-admin@collaudo.invalid` (SERVICE, PLATFORM_ADMIN con vero grant di
-piattaforma, fattore `derived-access` reale) creata in produzione e verificata dal vivo; email
-sostituita ovunque; `enzo.spenuso@heuresys.com` torna protetta in `REAL_PERSON_EMAILS`. Scoperto e
-corretto un secondo difetto: la soglia di catena sui vertici (ADR-0036 §5) si applica alla nuova
-persona (senza posizione) diversamente che a Enzo (che era al vertice reale) — un test derivava
-l'atteso presupponendo l'uguaglianza. Prova di chiusura: clone del gemello rinfrescato DOPO il
-provisioning, `verify_gate.py run` GREEN su HEAD `82dfb4be`. **Nessuna propagazione/deploy in
-questa sessione** — vietati dal mandato del ciclo (li esegue il governo a fine ciclo).
+**`#251` DONE** (ADR-0040 R2, primo dei tre passi che precedono `#254`). L'agente ora conta
+**quante persone diverse** ha letto in una conversazione e lo scrive nel diario del gate
+(`personeDistinte` + `livelloPersone`), piu' una voce di **chiusura** col totale — necessaria
+perche' il gate audita PRIMA di eseguire. Le soglie **non sono numeri nel codice**: un generatore
+misura il tenant piu' grande e il codice ri-deriva le due soglie dal criterio di ADR-0040 §3. Prova
+LIVE con login reale e secondo fattore: una conversazione con quattro letture annidate stampa
+1 · 7 · 38 · 160 nel diario, coi quattro livelli. Sabotaggio del codice di produzione visto
+ROSSO (8 prove) e poi VERDE su tutta la batteria del gateway; anche la dimostrazione LIVE si e' vista rossa prima.
+
+⭐ **Da leggere prima di pianificare `#252`**: sui soli sedici perimetri **gia' aperti** — quelli
+scelti perche' parlano poco di persone — quattro letture toccano **55 persone distinte**, cioe'
+**oltre la soglia alta OGGI**, senza `#254`. Il freno non dipende dall'apertura.
+
+**Nessuna propagazione/deploy in questa sessione** — vietati dal mandato del ciclo (li esegue il
+governo a fine ciclo).
 
 ## Top priorities
 
-1. **`#251` → `#252`** (contatore persone distinte, poi il ponte sulle letture): invariate.
+1. **`#252`** (il ponte di approvazione anche sulle letture): `#251` e' chiusa, quindi non e' piu' bloccata. Si aggancia a `GateOptions.persone` in `write-gate.ts`; `non-misurato` va trattato come «oltre la soglia».
 2. **`#260` — le due chiavi di collaudo sul linux-pc** (P2, pochi minuti sulla macchina): invariata.
 3. Poi: `#149` F4 · `#159` F3 · `#253` · `#257` · `#255` · `#205` F2 · `#256` · `#76` F3 · `#79` F3.
 

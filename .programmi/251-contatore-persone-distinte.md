@@ -1,7 +1,8 @@
 # 251 — Il contatore di persone distinte per conversazione dell'agente
 
 > **item**: #251 · **priorità**: P1 · **stima**: ~1 sessione
-> **stato**: **FATTO** (S1112, 2026-09-26) — esito in `.programmi/esiti-ciclo3/251.md`
+> **stato**: CHIUSO
+> **chiusa**: S1112 (2026-09-26) — esito in `.programmi/esiti-ciclo3/251.md`
 > **nasce-da**: ADR-0040 (dottrina ratificata da Enzo il 2026-09-14), primo dei tre passi che precedono l'apertura `#254`. Include **M7** del piano di miglioramento del 2026-09-08.
 
 ## Decisioni già prese (non si ri-chiedono)
@@ -17,10 +18,10 @@
 
 ## Fasi
 
-- [x] **F1 — Decidere quale misura genera i valori** — le tre stampate dal file SQL (posizioni per unità 38 · persone per unità 9 · persone per catena 158, p90 21,4, al 2026-09-14). Il criterio dell'ADR dice «l'unità più grande»: la fase sceglie la lettura e la scrive nel codice come funzione che legge il dato, non come numero. **fatto =** la funzione esiste e restituisce 25/40 su RTL Bank oggi, con il test che lo dimostra.
-- [x] **F2 — L'aggancio in `call`** — un raccoglitore che percorre il JSON di risposta e aggiunge a un `Set<string>` gli UUID sotto i nomi `*UserId` **meno** gli attori di audit; l'elenco delle esclusioni è una costante dichiarata con la ragione. **fatto =** test a esiti opposti: una risposta con `createdByUserId` non conta; una con `subjectUserId` conta; un `userId` ripetuto conta una volta.
-- [x] **F3 — Il livello per conversazione** — `runHrAgent` crea l'insieme e lo espone al gate (`#252` lo legge) e al diario: ogni voce del diario porta `persone_distinte` al momento della decisione. **fatto =** una corsa che legge 1 · 7 · 38 · 160 persone (le quattro domande della dottrina) stampa quei numeri nel diario, e `pnpm test` del gateway è verde.
-- [x] **F4 — La prova che può fallire** — sabotaggio dichiarato: contando anche gli attori di audit, il test di F2 va rosso; ripristinato, verde. **fatto =** la coppia rosso/verde è nella cronaca.
+- [x] **F1 — Decidere quale misura genera i valori** — le tre stampate dal file SQL (posizioni per unità 38 · persone per unità 9 · persone per catena 158, p90 21,4, al 2026-09-14). Il criterio dell'ADR dice «l'unità più grande»: la fase sceglie la lettura e la scrive nel codice come funzione che legge il dato, non come numero. **fatto =** la funzione esiste e restituisce 25/40 su RTL Bank oggi, con il test che lo dimostra. — **FATTO 2026-09-26 · evidenza: `soglie-persone.ts` + `build_soglie_agente.py`; 9 prove in `test/soglie-persone.test.ts`; sulle misure di oggi il criterio da' 25/40; commit `75bb5f4e`**
+- [x] **F2 — L'aggancio in `call`** — un raccoglitore che percorre il JSON di risposta e aggiunge a un `Set<string>` gli UUID sotto i nomi `*UserId` **meno** gli attori di audit; l'elenco delle esclusioni è una costante dichiarata con la ragione. **fatto =** test a esiti opposti: una risposta con `createdByUserId` non conta; una con `subjectUserId` conta; un `userId` ripetuto conta una volta. — **FATTO 2026-09-26 · evidenza: `persone-distinte.ts`; 9 prove a esiti opposti (soggetto contato, attore no, ripetizione una volta sola); commit `75bb5f4e`**
+- [x] **F3 — Il livello per conversazione** — `runHrAgent` crea l'insieme e lo espone al gate (`#252` lo legge) e al diario: ogni voce del diario porta `persone_distinte` al momento della decisione. **fatto =** una corsa che legge 1 · 7 · 38 · 160 persone (le quattro domande della dottrina) stampa quei numeri nel diario, e `pnpm test` del gateway è verde. — **FATTO 2026-09-26 · evidenza: `collegaContatore` + `sdk-agent.ts` + voce di chiusura; 13 prove; LIVE `F5-live-2.txt` stampa 1 · 7 · 38 · 160 nel diario; commit `75bb5f4e` e `c6ab81e9`**
+- [x] **F4 — La prova che può fallire** — sabotaggio dichiarato: contando anche gli attori di audit, il test di F2 va rosso; ripristinato, verde. **fatto =** la coppia rosso/verde è nella cronaca. — **FATTO 2026-09-26 · evidenza: sabotaggio del codice di produzione → 8 prove rosse (`.zp/msg_commit/251/F4-sabotaggio-ROSSO.txt`), ripristino → 130/130 verde (`F4-ripristino-VERDE.txt`)**
 
 ## Cronaca
 

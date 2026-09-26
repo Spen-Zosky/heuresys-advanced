@@ -9,6 +9,43 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1112 (2026-09-26) — il contatore di persone distinte: il freno dell'agente ha un numero, e il buco è misurato
+
+**`#251` DONE** (ADR-0040 R2, primo dei tre passi che precedono `#254`). L'agente conta le
+**persone distinte** che legge in una conversazione, e ogni voce del diario del gate porta
+`personeDistinte` + `livelloPersone`; in più una voce di **chiusura** col totale, necessaria
+perché `canUseTool` audita PRIMA di eseguire — senza di lei il numero dell'ultima lettura, cioè
+il più grande, non comparirebbe. Raccolta in un punto solo (`HeuresysClient.call`), per FORMA
+del nome (`*UserId`) e soli UUID, con i sei attori di audit esclusi e l'elenco che **non si
+allarga a mano**: sovrastimare fa scattare il freno prima, cioè il verso sicuro.
+
+**Le soglie non sono numeri nel codice.** `docs/kb/tools/build_soglie_agente.py` misura il tenant
+più grande e scrive le MISURE in `docs/kb/agent-soglie-persone.json`;
+`apps/agent-gateway/src/soglie-persone.ts` ri-deriva le soglie a ogni caricamento dal criterio di
+ADR-0040 §3 (alta = unità più grande arrotondata al multiplo di 5 · bassa = p90 delle persone
+per catena, idem). Sui dati di RTL Bank di oggi escono i valori iniziali dell'ADR. Soglie
+illeggibili o contatore guasto → livello `non-misurato`, che `#252` tratta come «oltre la
+soglia»: l'ignoto non è un permesso.
+
+⭐ **La misura che pesa su `#252`, e da leggere prima di pianificarla**: la dimostrazione LIVE
+gira anche col risolutore, il catalogo e l'allowlist **di produzione**, sui soli sedici perimetri
+già aperti — quelli scelti proprio perché parlano poco di persone. Quattro letture (posizioni,
+unità, ruoli, contenuti) toccano **55 persone distinte su 342 righe**, cioè il livello
+**`confermato`**, oltre la soglia alta, **oggi e senza `#254`**. Il «tetto per chiamata e nessun
+tetto sulla conversazione» di ADR-0040 §2 è misurato dal vivo per la prima volta.
+
+**Un difetto nel censimento, corretto per strada**: `chi_sorveglia.py` non interrogava
+`apps/agent-gateway/src`, quindi usciva «nessuno» su quattro file che tre moduli di quella
+cartella importano. Il suo `--selftest` provava il CERCATORE e non il CENSIMENTO: aggiunta la
+prova di copertura delle radici sorgente, vista rossa prima e verde dopo.
+
+**Prova di chiusura**: login vero col secondo fattore (`federica.marchetti@rtl-bank.org`), API
+locale, sole letture, diario letto da disco — una conversazione stampa 1 · 7 · 38 · 160 coi
+quattro livelli. Sabotaggio del codice di produzione → 8 prove rosse, ripristino → tutta la
+batteria del gateway verde. Anche la dimostrazione LIVE si è vista ROSSA prima (2 criteri su 7).
+Commit `020e3a94` → `75bb5f4e` → `c6ab81e9` → `ae9b9310`. Esito: `.programmi/esiti-ciclo3/251.md`.
+**Nessuna propagazione e nessun rilascio**: vietati dal mandato del ciclo, li esegue il governo.
+
 ### Delta S1111 (2026-09-26) — la persona di collaudo di piattaforma: i test non entrano più come Enzo
 
 **`#258` DONE, passaggio 1 del ciclo 3 governato da Cowork.** 113 (poi 141) file di

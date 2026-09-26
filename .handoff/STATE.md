@@ -30,6 +30,17 @@ governo a fine ciclo).
 
 ## Open questions
 
+- ⚠⚠ **Il cancello locale è in BLOCCO a fine S1112, e la ragione è misurata — non lanciarlo alla
+  cieca.** `verify_gate.py run` era **GREEN** su `3897943a` (l'HEAD che porta tutto il lavoro di
+  `#251`, esiti su file). Poi un `run` **senza nulla da verificare** ha riscritto
+  `.zp/verify-verdict.json` con `routed: []`, `results: []`, `verdict: "not-measured"` — è il
+  comportamento dichiarato da S1054 (mai un verde per assenza di misura), ma **cancella anche il
+  registro per-suite dei verdi precedenti**. Conseguenza: `check` ora pretende **tutte** le suite,
+  `migrate-idempotent` inclusa — e quella **applica la catena delle migrazioni alla produzione**,
+  da Windows, cioè il difetto già in memoria. Il lavoro di `#251` non è meno verificato di prima:
+  è il libro contabile del cancello che è stato azzerato da una corsa a vuoto. Prima di eseguirlo,
+  decidere se `run` a vuoto deve **preservare** i verdi registrati.
+
 - **`verifica-deploy.sh` non distingue «il sorvegliante fallisce» da «non è ancora passato il
   timer»** (da S1110, invariata): entrambi dicono IN-VOLO. Voce nuova, non ancora in un registro
   strutturato.

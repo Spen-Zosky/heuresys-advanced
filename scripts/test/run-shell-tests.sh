@@ -1316,7 +1316,7 @@ if [ -f "$HK" ]; then
   printf '{"message":{"id":"m1","role":"assistant","content":[{"type":"text","text":"lavoro in corso, nessuna fine dichiarata"}]}}\n' \
     > "$TR_NOFATTO"
   TR_FATTO="$TRD/transcript-fatto.jsonl"
-  printf '{"message":{"id":"m1","role":"assistant","content":[{"type":"text","text":"tutto pronto. @COWORK FATTO TEST"}]}}\n' \
+  printf '{"message":{"id":"m1","role":"assistant","content":[{"type":"text","text":"tutto pronto.\\n\\n@COWORK FATTO TEST"}]}}\n' \
     > "$TR_FATTO"
   # `mktemp -d` sotto Git Bash da' un path in stile MSYS (/tmp/...): l'interprete
   # Python che legge l'hook e' quello NATIVO di Windows (session_mode.py, via
@@ -1348,6 +1348,23 @@ if [ -f "$HK" ]; then
   [ "$CANOUT_FATTO" = "$DIRECT" ] \
       && ok "stop gate: con @COWORK FATTO il verdetto è verify_gate verbatim (no behaviour drift)" \
       || fail "stop gate drift con @COWORK FATTO — wrapper='$CANOUT_FATTO' direct='$DIRECT'"
+
+  # Citare il marcatore dentro una frase NON e' dichiararlo — misurato dal vivo
+  # il 2026-09-26: un turno che stava chiedendo qualcosa (`@COWORK DOMANDA`) e
+  # spiegava «ho dichiarato `@COWORK FATTO` mentre...» e' stato letto come una
+  # dichiarazione di fine dalla prima versione del controllo (sottostringa
+  # nuda, non riga che comincia col marcatore).
+  TR_MENZIONE="$TRD/transcript-menzione.jsonl"
+  printf '{"message":{"id":"m1","role":"assistant","content":[{"type":"text","text":"ho dichiarato `@COWORK FATTO` per errore, ma qui sto chiedendo una cosa.\\n\\n@COWORK DOMANDA TEST: procedo?"}]}}\n' \
+    > "$TR_MENZIONE"
+  if command -v cygpath >/dev/null 2>&1; then
+    TR_MENZIONE="$(cygpath -w "$TR_MENZIONE")"
+  fi
+  TR_MENZIONE_JSON="$(printf '%s' "$TR_MENZIONE" | sed 's/\\/\\\\/g')"
+  CANOUT_MENZIONE="$(printf '{"session_id":"%s","hook_event_name":"Stop","transcript_path":"%s"}' "$SC" "$TR_MENZIONE_JSON" | sh "$HK" stop-gate 2>/dev/null)"
+  [ -z "$CANOUT_MENZIONE" ] \
+      && ok "stop gate: citare @COWORK FATTO dentro una frase non e' dichiararlo (non respinge)" \
+      || fail "stop gate ha letto una citazione come dichiarazione di fine: $CANOUT_MENZIONE"
 
   # Ramo verde forzato in modo deterministico (freno .zp/verify-off), indipendente
   # dallo stato reale del working tree: "@COWORK FATTO + cancello verde: passa".

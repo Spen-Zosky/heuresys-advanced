@@ -1069,8 +1069,18 @@ def ultimo_testo_assistant(transcript_path: str) -> str:
 
 
 def dichiara_fine_lavoro(data: dict) -> bool:
-    """Vero solo se l'ultimo messaggio dell'assistente dichiara la fine del turno."""
-    return COWORK_DONE_MARK in ultimo_testo_assistant(data.get("transcript_path") or "")
+    """Vero solo se l'ultimo messaggio dell'assistente dichiara la fine del turno.
+
+    Una RIGA che comincia col marcatore, non una sottostringa ovunque nel testo:
+    un sottostringa nudo scatta anche quando il marcatore compare fra backtick
+    dentro una frase che lo spiega o lo cita (es. «ho dichiarato `@COWORK FATTO`
+    mentre...») — misurato dal vivo il 2026-09-26, mandato REGOLE: un turno che
+    stava CHIEDENDO qualcosa (`@COWORK DOMANDA`) e citava la propria azione
+    precedente e' stato letto come una dichiarazione di fine, e il cancello ha
+    bloccato un turno che non stava affatto dichiarando finito il lavoro.
+    """
+    testo = ultimo_testo_assistant(data.get("transcript_path") or "")
+    return any(riga.strip().startswith(COWORK_DONE_MARK) for riga in testo.splitlines())
 
 
 def cmd_stop_gate() -> int:

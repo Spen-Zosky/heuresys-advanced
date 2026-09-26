@@ -1040,6 +1040,30 @@ def main() -> int:
             print("nessuna modifica che richieda verifica — niente da eseguire")
             print("  (per misurare comunque una suite: --suite <nome>)")
             VERDICT.parent.mkdir(parents=True, exist_ok=True)
+            # ⚠ 2026-09-26 (S1112) — UNA CORSA A VUOTO NON DISTRUGGE IL REGISTRO.
+            #
+            # Il ramo scriveva `results: []`, e la ragione era giusta a meta': mai un verde
+            # per ASSENZA di misura (S1054). Ma azzerava anche i risultati PER SUITE gia'
+            # registrati, e l'effetto misurato e' l'opposto di quello voluto: `check`
+            # ricominciava a pretendere TUTTE le suite — quindici, `test-api` e
+            # `migrate-idempotent` comprese — non perche' qualcosa fosse cambiato, ma perche'
+            # il libro contabile era stato cancellato da una corsa che non aveva fatto niente.
+            # Un verde inventato e un obbligo inventato sono lo stesso difetto visto dai due
+            # lati: in entrambi i casi il cancello dice una cosa che non ha misurato.
+            #
+            # Portare avanti i risultati NON puo' fabbricare un verde: ogni voce porta
+            # l'impronta del contenuto su cui e' stata misurata (D-88 ①), e `check` la
+            # ri-confronta. Se quel contenuto e' cambiato, la voce scade da se'.
+            #
+            # E una corsa a vuoto e' un NO-OP anche sul file: se un verdetto esiste, si lascia
+            # intatto. Riscriverlo con `head` e `generated_at` nuovi lo farebbe sembrare
+            # appena misurato senza esserlo.
+            precedente = load_verdict()
+            if precedente and precedente.get("results"):
+                print(f"  verdetto precedente lasciato intatto "
+                      f"({len(precedente['results'])} suite registrate): una corsa a vuoto "
+                      f"non misura e non cancella")
+                return 0
             # `not-measured`, MAI `green`: qui non e' stato eseguito niente, e un
             # file che dicesse verde cancellerebbe un rosso precedente senza aver
             # misurato nulla.

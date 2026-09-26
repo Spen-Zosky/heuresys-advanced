@@ -30,29 +30,19 @@ governo a fine ciclo).
 
 ## Open questions
 
-- ⚠⚠ **Il cancello locale è in BLOCCO a fine S1112, e la ragione è misurata — non lanciarlo alla
-  cieca.** `verify_gate.py run` era **GREEN** su `3897943a` (l'HEAD che porta tutto il lavoro di
-  `#251`, esiti su file). Poi un `run` **senza nulla da verificare** ha riscritto
-  `.zp/verify-verdict.json` con `routed: []`, `results: []`, `verdict: "not-measured"` — è il
-  comportamento dichiarato da S1054 (mai un verde per assenza di misura), ma **cancella anche il
-  registro per-suite dei verdi precedenti**. Conseguenza: `check` ora pretende **tutte** le suite,
-  `migrate-idempotent` inclusa — e quella **applica la catena delle migrazioni alla produzione**,
-  da Windows, cioè il difetto già in memoria. Il lavoro di `#251` non è meno verificato di prima:
-  è il libro contabile del cancello che è stato azzerato da una corsa a vuoto. Prima di eseguirlo,
-  decidere se `run` a vuoto deve **preservare** i verdi registrati.
-
-- **`verifica-deploy.sh` non distingue «il sorvegliante fallisce» da «non è ancora passato il
-  timer»** (da S1110, invariata): entrambi dicono IN-VOLO. Voce nuova, non ancora in un registro
-  strutturato.
-- **`check_completezza_self` e `check_exposure`** segnalati `[!!]` durante la propagazione di
-  S1110 (letture, non azioni) — non indagati, restano da guardare.
-- Uno `git stash` ("CRLF residue pre-258") è rimasto sul working tree del clone del linux-pc: lo
-  ha creato la CLI per sbloccare un `git pull` bloccato da differenze CRLF/LF preesistenti (non
-  legate a `#258`). Si vede con `git stash list` sul gemello; sparisce da sé al prossimo
-  `align-clones.sh linuxpc` (`reset --hard`).
-- Due file non tracciati, lavoro in corso di Enzo, non toccarli: `scripts/align-claude-ecosystem.sh`
-  (modificato) e `scripts/align-codex-ecosystem.sh` (nuovo).
-- Il `claude` del gemello e della VM ha la sessione OAuth scaduta (invariato).
+- **Il cancello locale: un difetto trovato e corretto a chiusura, e una mia affermazione
+  sbagliata da non ereditare.** Un `verify_gate.py run` **a vuoto** riscriveva
+  `.zp/verify-verdict.json` con `results: []` (comportamento di S1054: mai un verde per assenza
+  di misura) e così **azzerava il registro per-suite dei verdi**: `check` ricominciava a
+  pretendere tutte le suite non perché qualcosa fosse cambiato, ma perché il libro contabile era
+  stato cancellato da una corsa che non aveva fatto niente. Corretto: una corsa a vuoto ora
+  lascia il verdetto **intatto** (portare avanti una voce non può fabbricare un verde — ogni voce
+  porta l'impronta del contenuto su cui è stata misurata, e `check` la ri-confronta).
+  ⚠ **Da correggere nella memoria di chi legge**: avevo scritto che `migrate-idempotent` applica
+  le migrazioni alla produzione da Windows. **È falso dal 2026-08-27**: la suite esegue
+  `db/scripts/prova-idempotenza.sh`, che lancia `ci-rehearsal.sh` **sul gemello, su una copia
+  usa-e-getta**, in 12-26 secondi, ed esce **rosso** se il gemello non risponde invece di
+  ripiegare in locale. Il cancello si esegue senza toccare la produzione.
 
 ## Verification
 

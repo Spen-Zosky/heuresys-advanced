@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-25T00:28:01Z da docs/kb/tools/build_index.py
+# generato: 2026-09-26T06:29:43Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-25T00:28:01Z"
-  total_files: 3744
+  generated_at: "2026-09-26T06:29:43Z"
+  total_files: 3749
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,7 +13,7 @@ meta:
     api-module: 398
     ci: 19
     claude-config: 38
-    config: 343
+    config: 344
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -23,7 +23,7 @@ meta:
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 756
+    doc-canonical: 760
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -37,7 +37,7 @@ meta:
   status_counts:
     archive: 593
     external-archive: 50
-    live: 3101
+    live: 3106
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -4560,6 +4560,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-B5-okr-fuori-settore.mts'
     root: repo
     rel: 'apps/api/scripts/prova-live-B5-okr-fuori-settore.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\prova-live-chiusura-c2.mjs'
+    root: repo
+    rel: 'apps/api/scripts/prova-live-chiusura-c2.mjs'
     category: config
     status: live
     provenance: git-tracked
@@ -11925,6 +11931,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\260-due-chiavi-di-collaudo.md'
+    root: repo
+    rel: '.programmi/260-due-chiavi-di-collaudo.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md'
     root: repo
     rel: '.programmi/50-knowledge-graph-legacy.md'
@@ -11994,6 +12006,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\A5_costo_di_un_ruolo.md'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/A5_costo_di_un_ruolo.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\CHIUSURA-C2.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/CHIUSURA-C2.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -12237,6 +12255,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\TRG.md'
+    root: repo
+    rel: '.programmi/K-ruoli-direzione/esiti/TRG.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\X-2_attendance.md'
     root: repo
     rel: '.programmi/K-ruoli-direzione/esiti/X-2_attendance.md'
@@ -12360,6 +12384,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md'
     root: repo
     rel: '.programmi/Z251-contesa-database-suite.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-ciclo3\258.md'
+    root: repo
+    rel: '.programmi/esiti-ciclo3/258.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

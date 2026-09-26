@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-25T00:28:01Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3744**
+**Generato**: 2026-09-26T06:29:43Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3749**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,7 +13,7 @@
 | api-module | 398 |
 | ci | 19 |
 | claude-config | 38 |
-| config | 343 |
+| config | 344 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
@@ -23,7 +23,7 @@
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 756 |
+| doc-canonical | 760 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -34,7 +34,7 @@
 | test | 449 |
 | ux-design-archive | 80 |
 | web-source | 258 |
-| **TOTALE** | **3744** |
+| **TOTALE** | **3749** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 3101 |
+| live | 3106 |
 
 ## File per categoria
 
@@ -818,6 +818,7 @@
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-92-f6.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-99-f7.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\prova-live-B5-okr-fuori-settore.mts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\prova-live-chiusura-c2.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\verify-collaudo-login.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\scripts\verify-derived-login.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\tsconfig.json` · *live* · git-tracked
@@ -2075,6 +2076,7 @@
 - `D:\heuresys-advanced\.programmi\257-chi-ripara-e-chi-popola.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\258-persona-di-collaudo-di-piattaforma.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\259-mandato-k-ruoli-direzione.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\260-due-chiavi-di-collaudo.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\54-recruiting-ats.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\69-residui-staging-wave1.md` · *live* · git-tracked
@@ -2087,6 +2089,7 @@
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\STATO.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\A0_margine_del_pavimento.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\A5_costo_di_un_ruolo.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\CHIUSURA-C2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\D11.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\D12.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.2_censimento_C1.md` · *live* · git-tracked
@@ -2127,6 +2130,7 @@
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RAPPORTO_2026-09-19-S1112.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\REGISTRO_SCOPERTE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\RISPOSTE_ENZO.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\TRG.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\X-2_attendance.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\X-2_tabelle.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\X-6.md` · *live* · git-tracked
@@ -2148,6 +2152,7 @@
 - `D:\heuresys-advanced\.programmi\S1101-mandato-riallineamento-consolidato.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\S1101b-mandato-contratto-shared.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\Z251-contesa-database-suite.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\esiti-ciclo3\258.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\K-mandato-v2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\S1083-corsa-integrale.md` · *live* · git-tracked

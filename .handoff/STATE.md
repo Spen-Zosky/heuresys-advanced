@@ -1,39 +1,38 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: S1110 (2026-09-26), mandato Cowork CHIUSURA-C3 — riparato il sorvegliante
-del deploy e completato il rilascio che era rimasto bloccato da giorni. I numeri stanno in
-`docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: S1111 (2026-09-26), mandato Cowork ciclo 3 passaggio 1 — `#258` chiusa: i
+test API smettono di impersonare Enzo. I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-**CHIUSURA-C3: il deploy era bloccato da `ci-gate.sh` a corto di rate limit GitHub**, non dal
-bundle in sé. Tre correzioni in strati (VM aveva `gh` moderno e bastava un token; linux-pc ha
-`gh` 2.4.0 senza il sottocomando `auth token`, poi anche senza garanzia sull'exit code; alla fine
-letto direttamente da `~/.config/gh/hosts.yml`). Rilascio completato: **`origin/prod` = `a8f60932`
-su VM e linux-pc**, `verifica-deploy.sh` → DEPLOYATO. Prova live in produzione VERDE su D11
-(dossier del DPO, importi mascherati) e sul registro `#30` (permessi effettivi PLATFORM_OPERATOR/
-SALES). Verifica lunga sul linux-pc: tutta la suite passata, esito 0. `#28` e `#30` di `TRG.md`
-marcate RISOLTE con l'evidenza di stanotte.
+**`#258` DONE**: molti file di `apps/api/test`+`apps/web/tests` impersonavano `enzo.spenuso@heuresys.com`
+per la sfida MFA come PLATFORM_ADMIN; `#250` gli aveva dato il suo secondo fattore VERO. Nuova
+persona `platform-test-admin@collaudo.invalid` (SERVICE, PLATFORM_ADMIN con vero grant di
+piattaforma, fattore `derived-access` reale) creata in produzione e verificata dal vivo; email
+sostituita ovunque; `enzo.spenuso@heuresys.com` torna protetta in `REAL_PERSON_EMAILS`. Scoperto e
+corretto un secondo difetto: la soglia di catena sui vertici (ADR-0036 §5) si applica alla nuova
+persona (senza posizione) diversamente che a Enzo (che era al vertice reale) — un test derivava
+l'atteso presupponendo l'uguaglianza. Prova di chiusura: clone del gemello rinfrescato DOPO il
+provisioning, `verify_gate.py run` GREEN su HEAD `82dfb4be`. **Nessuna propagazione/deploy in
+questa sessione** — vietati dal mandato del ciclo (li esegue il governo a fine ciclo).
 
 ## Top priorities
 
-1. **`#258` — la persona di collaudo di piattaforma** (~1 sessione, P1): invariata.
-2. **`#251` → `#252`** (contatore persone distinte, poi il ponte sulle letture): invariate.
-3. **`#260` — le due chiavi di collaudo sul linux-pc** (P2, pochi minuti sulla macchina): invariata.
-
-▸ Poi: `#149` F4 · `#159` F3 · `#253` · `#257` · `#255` · `#205` F2 · `#256` · `#76` F3 · `#79` F3.
+1. **`#251` → `#252`** (contatore persone distinte, poi il ponte sulle letture): invariate.
+2. **`#260` — le due chiavi di collaudo sul linux-pc** (P2, pochi minuti sulla macchina): invariata.
+3. Poi: `#149` F4 · `#159` F3 · `#253` · `#257` · `#255` · `#205` F2 · `#256` · `#76` F3 · `#79` F3.
 
 ## Open questions
 
 - **`verifica-deploy.sh` non distingue «il sorvegliante fallisce» da «non è ancora passato il
-  timer»**: entrambi dicono IN-VOLO. Scoperto stanotte (armamento su `b07143c8` invalidato da
-  commit successivi, il sorvegliante si fermava in silenzio e il verdetto non lo diceva). Voce
-  nuova, non ancora in un registro strutturato.
-- **`check_completezza_self` e `check_exposure`** segnalati `[!!]` dal cancello a tempo durante la
-  propagazione di stanotte (letture, non azioni) — non indagati in questa sessione, restano da
-  guardare.
-- Le 18 voci APERTE residue di `TRG.md` (ora 16 con `#28`/`#30` chiuse): dettaglio in
-  `.programmi/K-ruoli-direzione/esiti/TRG.md`.
+  timer»** (da S1110, invariata): entrambi dicono IN-VOLO. Voce nuova, non ancora in un registro
+  strutturato.
+- **`check_completezza_self` e `check_exposure`** segnalati `[!!]` durante la propagazione di
+  S1110 (letture, non azioni) — non indagati, restano da guardare.
+- Uno `git stash` ("CRLF residue pre-258") è rimasto sul working tree del clone del linux-pc: lo
+  ha creato la CLI per sbloccare un `git pull` bloccato da differenze CRLF/LF preesistenti (non
+  legate a `#258`). Si vede con `git stash list` sul gemello; sparisce da sé al prossimo
+  `align-clones.sh linuxpc` (`reset --hard`).
 - Due file non tracciati, lavoro in corso di Enzo, non toccarli: `scripts/align-claude-ecosystem.sh`
   (modificato) e `scripts/align-codex-ecosystem.sh` (nuovo).
 - Il `claude` del gemello e della VM ha la sessione OAuth scaduta (invariato).
@@ -44,6 +43,6 @@ marcate RISOLTE con l'evidenza di stanotte.
 python docs/kb/tools/session_start.py
 python docs/kb/tools/handoff_lint.py                      # atteso: 0 FAIL
 python docs/kb/tools/aggiorna_numeri_sot.py --check       # atteso: exit 0
-bash scripts/verifica-deploy.sh                            # atteso: DEPLOYATO su a8f60932 (o piu' avanti)
-git ls-remote origin refs/heads/prod refs/heads/main       # atteso: uguali
+grep -rn "enzo.spenuso@heuresys.com" apps/api/test apps/web/tests  # atteso: 0 righe
+python docs/kb/tools/verify_gate.py run                    # atteso: GREEN
 ```

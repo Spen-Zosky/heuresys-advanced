@@ -44,6 +44,11 @@ governo a fine ciclo).
   usa-e-getta**, in 12-26 secondi, ed esce **rosso** se il gemello non risponde invece di
   ripiegare in locale. Il cancello si esegue senza toccare la produzione.
 
+- **Il baseline è misurato per intero, non per campione**: a chiusura di S1112 il cancello locale
+  ha eseguito **tutte** le suite instradabili su `17fa1899`, nessuna esclusa e nessuna riusata dal
+  ricordo — verdetto GREEN, `test-api` compresa (sul gemello). I numeri stanno nell'esito della
+  voce e in `.zp/msg_commit/251/cancello-integrale.txt`. Chi apre la prossima sessione parte da qui.
+
 ## Verification
 
 ```bash

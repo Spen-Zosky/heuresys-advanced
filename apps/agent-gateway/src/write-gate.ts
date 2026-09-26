@@ -20,6 +20,7 @@ import {
   type AuditSink,
 } from "./audit-sink.js";
 import { bareToolName, DEFAULT_TOOL_ALLOWLIST } from "./mcp-tool-names.js";
+import type { LettoreContatore } from "./persone-distinte.js";
 
 /** Verbs that mutate platform state — the MCP tool naming is `hrx.<domain>.<verb>`
  *  (or snake-case `hrx_<domain>_<verb>`). A tool is a WRITE if its name carries any. */
@@ -122,6 +123,16 @@ export interface GateOptions {
    * che dovrà sorvegliare, non dopo.
    */
   operations?: OperationResolver;
+  /**
+   * Il contatore di persone distinte della conversazione (#251, ADR-0040 R2). Il gate lo LEGGE
+   * e lo scrive nel diario a ogni decisione; **non** decide ancora niente su di lui: la
+   * fermata oltre la soglia alta è `#252`, che si aggancia qui.
+   *
+   * ⚠ Assente = il diario non porta il numero. Non si scrive uno zero: «nessuna persona letta»
+   * e «non l'ho misurato» sono due affermazioni diverse, e confonderle è il modo in cui un
+   * freno cieco si legge come un freno verde.
+   */
+  persone?: LettoreContatore;
 }
 
 const DENY_NOT_APPROVED = "write not approved (compliance gate)";
@@ -159,6 +170,21 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
     decision: ToolDecision,
     reason: string,
   ): void => {
+    // #251 — il numero si legge AL MOMENTO della decisione, non a fine corsa: il diario deve
+    // dire quante persone erano già state toccate quando questa chiamata è stata consentita.
+    // Un totale finale non distinguerebbe la prima lettura dalla trentesima.
+    const persone = opts.persone;
+    // Attenzione a `let` + due `?.`: leggere il contatore non deve poter alzare (un lettore
+    // iniettato da un test potrebbe), altrimenti un guasto del diario negherebbe la lettura.
+    let quante: number | undefined;
+    let livello: ReturnType<LettoreContatore["livello"]> | undefined;
+    try {
+      quante = persone?.conta();
+      livello = persone?.livello();
+    } catch {
+      quante = undefined;
+      livello = undefined;
+    }
     // Audit is best-effort and MUST NOT change the gate decision: swallow sink errors.
     void audit
       .record({
@@ -166,6 +192,8 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
         tenant: who.tenant ?? "unknown",
         tool,
         args,
+        ...(quante !== undefined ? { personeDistinte: quante } : {}),
+        ...(livello !== undefined ? { livelloPersone: livello } : {}),
         decision: decision.behavior,
         reason,
       })

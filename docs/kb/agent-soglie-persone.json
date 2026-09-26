@@ -1,0 +1,10 @@
+{
+  "_": "GENERATO da docs/kb/tools/build_soglie_agente.py — NON si modifica a mano. Contiene le MISURE, non le soglie: le soglie le ri-deriva il codice (apps/agent-gateway/src/soglie-persone.ts) applicando il criterio di ADR-0040 §3.",
+  "misuratoIl": "2026-09-26",
+  "comando": "python docs/kb/tools/build_soglie_agente.py  (le stesse tre misure di docs/kb/xtras/soglie-agente-persone-distinte.sql)",
+  "tenantPiuGrande": "RTL_BANK",
+  "massimoPosizioniPerUnita": 38,
+  "p90PersonePerCatena": 21.4,
+  "massimoPersonePerCatena": 158,
+  "catene": 43
+}

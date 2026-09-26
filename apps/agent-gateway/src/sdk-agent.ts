@@ -13,7 +13,9 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import { buildHeuresysMcp } from "./mcp-tools.js";
 import { AtlasOperationResolver } from "./atlas-resolver.js";
 import { makeCanUseTool, type ApproveFn, type GatePrincipal } from "./write-gate.js";
-import type { AuditSink } from "./audit-sink.js";
+import { FileAuditSink, registraChiusuraConversazione, type AuditSink } from "./audit-sink.js";
+import { ContatorePersone } from "./persone-distinte.js";
+import { caricaSoglie } from "./soglie-persone.js";
 import type { HeuresysClient } from "./heuresys-client.js";
 
 export interface RunHrAgentOptions {
@@ -31,6 +33,12 @@ export interface RunHrAgentOptions {
    * iniettano uno costruito in memoria, per non dipendere da un file che cambia.
    */
   operations?: AtlasOperationResolver;
+  /**
+   * Il contatore di persone distinte della conversazione (#251). Di default se ne crea uno con
+   * le soglie ri-derivate dalle misure generate; i test ne iniettano uno con soglie dichiarate,
+   * per non dipendere da un file che cambia quando il tenant cresce.
+   */
+  contatore?: ContatorePersone;
 }
 
 export async function* runHrAgent(
@@ -45,10 +53,25 @@ export async function* runHrAgent(
   // impedire. Una fonte sola, letta una volta.
   const operations = opts.operations ?? AtlasOperationResolver.load();
   const heuresys = buildHeuresysMcp(client, operations);
+
+  // #251 — IL CONTATORE DI PERSONE DISTINTE, uno per conversazione. Vive qui e non nel client
+  // perche' una conversazione e' UNA runHrAgent (ADR-0040 §4b), mentre il client nasce per
+  // richiesta in server.ts. LO STESSO oggetto va al client (che lo alimenta a ogni risposta) e
+  // al gate (che lo legge e lo scrive nel diario): due contatori diversi renderebbero il
+  // numero del diario diverso da quello che il freno guarda — lo stesso divario che il
+  // commento sul resolver qui sopra esiste per impedire.
+  const contatore = opts.contatore ?? new ContatorePersone(caricaSoglie());
+  client.collegaContatore(contatore);
+
+  // Il diario si risolve QUI e non dentro il gate: serve anche alla voce di chiusura, e due
+  // sink distinti scriverebbero la conversazione in due posti.
+  const audit: AuditSink = opts.audit ?? new FileAuditSink();
+
   const canUseTool = makeCanUseTool(opts.approve, {
     operations,
+    audit,
+    persone: contatore,
     ...(opts.approvalTimeoutMs !== undefined ? { approvalTimeoutMs: opts.approvalTimeoutMs } : {}),
-    ...(opts.audit !== undefined ? { audit: opts.audit } : {}),
     ...(opts.allowlist !== undefined ? { allowlist: opts.allowlist } : {}),
     ...(opts.principal !== undefined ? { principal: opts.principal } : {}),
   });
@@ -79,5 +102,16 @@ export async function* runHrAgent(
     },
   });
 
-  for await (const event of iterator) yield event; // stream to the webapp
+  // `finally`, non «dopo il ciclo»: la webapp puo' chiudere la connessione a meta' risposta, e
+  // una conversazione interrotta e' esattamente quella su cui si vuole sapere quante persone
+  // erano state lette. Senza il `finally` il freno sarebbe cieco proprio sull'abbandono.
+  try {
+    for await (const event of iterator) yield event; // stream to the webapp
+  } finally {
+    await registraChiusuraConversazione(
+      audit,
+      opts.principal ?? { principal: "unknown" },
+      contatore,
+    );
+  }
 }

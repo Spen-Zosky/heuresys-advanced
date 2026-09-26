@@ -64,6 +64,14 @@ export const COLLAUDO_IDENTITIES = [
   // (tenant-scoped, come PEOPLE_MANAGER — non un ruolo di piattaforma assegnato), quindi
   // RTL_BANK.
   { email: "data-steward@collaudo.invalid",       displayName: "Collaudo Data Steward",       tenantCode: "RTL_BANK", roleCode: "DATA_STEWARD" },
+  // #258 (2026-09-26): a differenza di OGNI altra riga di questo elenco, questa identita'
+  // NON e' esente dal secondo fattore. 113 file di test impersonavano
+  // enzo.spenuso@heuresys.com per superare la sfida MFA come PLATFORM_ADMIN — e #250 ha reso
+  // il fattore di Enzo SUO, non piu' di collaudo. Questa persona porta un fattore
+  // 'derived-access' vero, come le cinque persone RTL, e cammina l'intera sfida a due passi
+  // esattamente come loro: `mfaExempt: false` e' il segnale che dice a
+  // provision-collaudo-access.ts di NON iscriverla all'esenzione e di darle invece il fattore.
+  { email: "platform-test-admin@collaudo.invalid", displayName: "Collaudo Platform Test Admin", tenantCode: "HEURESYS", roleCode: "PLATFORM_ADMIN", mfaExempt: false },
 ];
 
 export function isCollaudoIdentity(email) {

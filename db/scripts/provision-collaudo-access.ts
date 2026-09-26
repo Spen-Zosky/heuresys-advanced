@@ -36,6 +36,9 @@ import {
   deriveCollaudoPassword,
   COLLAUDO_IDENTITIES,
 } from "../../apps/api/scripts/collaudo-access.mjs";
+import { segretoTotpCasuale } from "../../apps/api/scripts/derive-access.mjs";
+import { encryptSecret } from "../../apps/api/src/modules/auth/secret-crypto.js";
+import { E2E_FIXTURE_LABEL } from "../../apps/api/test/helpers/mfa-fixture-secrets.js";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 dotenvConfig({ path: resolve(repoRoot, ".env"), quiet: true });
@@ -158,7 +161,7 @@ async function main(): Promise<void> {
 
     const stats = {
       utenti: 0, ruoli: 0, identita: 0, credenziali: 0, iscrizioni: 0, esenzioni: 0,
-      riallineate: 0, disallineate: 0, fattoriRimossi: 0, invariati: 0,
+      riallineate: 0, disallineate: 0, fattoriRimossi: 0, fattoriCreatiMfa: 0, invariati: 0,
     };
 
     await db.query("BEGIN");
@@ -214,7 +217,13 @@ async function main(): Promise<void> {
           userId = ins.rows[0]!.user_id;
         }
       }
-      if (!userId) { stats.ruoli++; stats.identita++; stats.credenziali++; stats.esenzioni++; continue; } // dry-run su utente nuovo
+      if (!userId) {
+        // dry-run su utente nuovo: nessun userId da interrogare, la stima segue lo stesso
+        // ramo (esente vs #258) che seguirebbe l'esecuzione vera.
+        stats.ruoli++; stats.identita++; stats.credenziali++;
+        if (c.mfaExempt === false) stats.fattoriCreatiMfa++; else stats.esenzioni++;
+        continue;
+      }
 
       const hasRole = await db.query(
         `SELECT 1 FROM sys.sys_user_auth_roles
@@ -310,59 +319,95 @@ async function main(): Promise<void> {
         }
       } else if (DRY) { stats.credenziali++; }
 
-      // #139 / mig 000284: l'esenzione pretende TRE atti distinti — SERVICE,
-      // iscrizione nominativa, esenzione. Questo e' il secondo: l'atto
-      // deliberato e' la direttiva di Enzo del 2026-08-25 (register #169),
-      // e la ragione la cita per iscritto.
-      const eligible = await db.query(
-        `SELECT 1 FROM sys.sys_auth_mfa_exemption_eligible_users
-          WHERE auth_mfa_eligible_user_id = $1`, [userId]);
-      if (eligible.rowCount === 0) {
-        stats.iscrizioni++; touched = true;
-        if (!DRY) await db.query(
-          `INSERT INTO sys.sys_auth_mfa_exemption_eligible_users
-             (auth_mfa_eligible_user_id, auth_mfa_eligible_reason)
-           VALUES ($1, $2) ON CONFLICT (auth_mfa_eligible_user_id) DO NOTHING`,
-          [userId, EXEMPTION_REASON]);
-      }
+      // #258: questa identita' NON e' esente (mfaExempt: false) — cammina l'MFA vera come le
+      // cinque persone RTL, e non deve MAI entrare nell'elenco di esenzione. I due rami sono
+      // speculari apposta: uno garantisce l'assenza di un fattore, l'altro la sua presenza.
+      const mfaExempt = c.mfaExempt !== false;
 
-      const exemption = await db.query(
-        `SELECT 1 FROM sys.sys_auth_mfa_exemptions WHERE auth_mfa_exemption_user_id = $1
-           AND auth_mfa_exemption_enabled`, [userId]);
-      if (exemption.rowCount === 0) {
-        stats.esenzioni++; touched = true;
-        // il trigger della 000118 RI-VERIFICA qui che l'utente sia SERVICE:
-        // la guardia vive nel database, non in questa riga.
-        if (!DRY) await db.query(
-          `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason)
-           VALUES ($1, $2)
-           ON CONFLICT (auth_mfa_exemption_user_id)
-           DO UPDATE SET auth_mfa_exemption_enabled = true, auth_mfa_exemption_reason = EXCLUDED.auth_mfa_exemption_reason`,
-          [userId, EXEMPTION_REASON]);
-      }
+      if (mfaExempt) {
+        // #139 / mig 000284: l'esenzione pretende TRE atti distinti — SERVICE,
+        // iscrizione nominativa, esenzione. Questo e' il secondo: l'atto
+        // deliberato e' la direttiva di Enzo del 2026-08-25 (register #169),
+        // e la ragione la cita per iscritto.
+        const eligible = await db.query(
+          `SELECT 1 FROM sys.sys_auth_mfa_exemption_eligible_users
+            WHERE auth_mfa_eligible_user_id = $1`, [userId]);
+        if (eligible.rowCount === 0) {
+          stats.iscrizioni++; touched = true;
+          if (!DRY) await db.query(
+            `INSERT INTO sys.sys_auth_mfa_exemption_eligible_users
+               (auth_mfa_eligible_user_id, auth_mfa_eligible_reason)
+             VALUES ($1, $2) ON CONFLICT (auth_mfa_eligible_user_id) DO NOTHING`,
+            [userId, EXEMPTION_REASON]);
+        }
 
-      // un fattore TOTP su un'utenza di collaudo sarebbe un segreto di troppo
-      const fac = await db.query<{ n: string }>(
-        `SELECT count(*)::text AS n FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`,
-        [userId]);
-      if (fac.rows[0]!.n !== "0") {
-        // Senza `--riallinea` ci si FERMA, ed e' giusto cosi': un fattore che non dovrebbe
-        // esserci e' un fatto da guardare, non da assorbire in silenzio. Con `--riallinea`
-        // lo si toglie, ma prima lo si scrive nel giornale: il segreto rimosso e' l'unica
-        // cosa che rende lo stato precedente ricostruibile.
-        if (!RIALLINEA) fail(`${c.email} ha ${fac.rows[0]!.n} fattori MFA: non previsto, fermati e guarda`);
-        stats.fattoriRimossi += Number(fac.rows[0]!.n); touched = true;
-        if (!DRY) {
-          await db.query(
-            `INSERT INTO staging.collaudo_riallineo_undo
-               (undo_email, undo_specie, undo_valore, undo_ragione)
-             SELECT $1, 'fattore-' || lower(auth_mfa_factor_kind), auth_mfa_factor_secret, $2
-               FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $3`,
-            [c.email, UNDO_REASON, userId]);
-          // elenco esplicito: si cancella per user_id di UNA delle tre email dichiarate in
-          // COLLAUDO_IDENTITIES, gia' verificata SERVICE piu' sopra. Mai un carattere jolly.
-          await db.query(
-            `DELETE FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`, [userId]);
+        const exemption = await db.query(
+          `SELECT 1 FROM sys.sys_auth_mfa_exemptions WHERE auth_mfa_exemption_user_id = $1
+             AND auth_mfa_exemption_enabled`, [userId]);
+        if (exemption.rowCount === 0) {
+          stats.esenzioni++; touched = true;
+          // il trigger della 000118 RI-VERIFICA qui che l'utente sia SERVICE:
+          // la guardia vive nel database, non in questa riga.
+          if (!DRY) await db.query(
+            `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason)
+             VALUES ($1, $2)
+             ON CONFLICT (auth_mfa_exemption_user_id)
+             DO UPDATE SET auth_mfa_exemption_enabled = true, auth_mfa_exemption_reason = EXCLUDED.auth_mfa_exemption_reason`,
+            [userId, EXEMPTION_REASON]);
+        }
+
+        // un fattore TOTP su un'utenza di collaudo esente sarebbe un segreto di troppo
+        const fac = await db.query<{ n: string }>(
+          `SELECT count(*)::text AS n FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`,
+          [userId]);
+        if (fac.rows[0]!.n !== "0") {
+          // Senza `--riallinea` ci si FERMA, ed e' giusto cosi': un fattore che non dovrebbe
+          // esserci e' un fatto da guardare, non da assorbire in silenzio. Con `--riallinea`
+          // lo si toglie, ma prima lo si scrive nel giornale: il segreto rimosso e' l'unica
+          // cosa che rende lo stato precedente ricostruibile.
+          if (!RIALLINEA) fail(`${c.email} ha ${fac.rows[0]!.n} fattori MFA: non previsto, fermati e guarda`);
+          stats.fattoriRimossi += Number(fac.rows[0]!.n); touched = true;
+          if (!DRY) {
+            await db.query(
+              `INSERT INTO staging.collaudo_riallineo_undo
+                 (undo_email, undo_specie, undo_valore, undo_ragione)
+               SELECT $1, 'fattore-' || lower(auth_mfa_factor_kind), auth_mfa_factor_secret, $2
+                 FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $3`,
+              [c.email, UNDO_REASON, userId]);
+            // elenco esplicito: si cancella per user_id di UNA delle identita' dichiarate in
+            // COLLAUDO_IDENTITIES, gia' verificata SERVICE piu' sopra. Mai un carattere jolly.
+            await db.query(
+              `DELETE FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`, [userId]);
+          }
+        }
+      } else {
+        // #258 — ramo speculare: MAI iscritta, MAI esente. Se lo fosse (un errore di dati
+        // precedente, o una migrazione futura che tocca l'allowlist), e' un fatto da guardare,
+        // non da assorbire: un PLATFORM_ADMIN che i test usano per provare la sfida MFA non
+        // deve poter risultare esente da essa.
+        const giaEsente = await db.query(
+          `SELECT 1 FROM sys.sys_auth_mfa_exemptions WHERE auth_mfa_exemption_user_id = $1
+             AND auth_mfa_exemption_enabled`, [userId]);
+        if ((giaEsente.rowCount ?? 0) > 0) {
+          fail(`${c.email} e' dichiarata mfaExempt:false ma risulta ESENTE dal secondo fattore: fermati e guarda`);
+        }
+
+        const fac = await db.query<{ n: string }>(
+          `SELECT count(*)::text AS n FROM sys.sys_auth_mfa_factors
+             WHERE auth_mfa_factor_user_id = $1 AND auth_mfa_factor_kind = 'TOTP'
+               AND auth_mfa_factor_metadata->>'label' = $2`,
+          [userId, E2E_FIXTURE_LABEL]);
+        if (fac.rows[0]!.n === "0") {
+          stats.fattoriCreatiMfa++; touched = true;
+          if (!DRY) {
+            const secret = segretoTotpCasuale();
+            await db.query(
+              `INSERT INTO sys.sys_auth_mfa_factors
+                 (auth_mfa_factor_user_id, auth_mfa_factor_kind, auth_mfa_factor_secret,
+                  auth_mfa_factor_metadata, auth_mfa_factor_verified)
+               VALUES ($1, 'TOTP', $2, jsonb_build_object('label', $3::text), true)`,
+              [userId, encryptSecret(secret), E2E_FIXTURE_LABEL]);
+          }
         }
       }
 
@@ -412,8 +457,9 @@ ${DRY ? "DRY-RUN (nessuna scrittura)" : "ESEGUITO"}
   credenziali RIALLINEATE ....... ${stats.riallineate}   [#169 F3b: ruotate perche' non dalla chiave di collaudo]
   di cui DISALLINEATE misurate .. ${stats.disallineate}   [D11-0: l'hash non verifica contro la password derivata]
   fattori MFA rimossi ........... ${stats.fattoriRimossi}   [un segreto di troppo su un'utenza esente]
+  fattori MFA creati (#258) ..... ${stats.fattoriCreatiMfa}   [identita' non esente: cammina l'MFA vera]
   gia' a posto (invariati) ...... ${stats.invariati}
-  rollback dichiarato ........... pnpm db:provision-collaudo --undo  (le 3 email, mai un jolly)
+  rollback dichiarato ........... pnpm db:provision-collaudo --undo  (elenco esplicito, mai un jolly)
 `);
   } finally {
     await db.end();

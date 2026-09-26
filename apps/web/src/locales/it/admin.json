@@ -910,6 +910,8 @@
     "approvalTitle": "Approvazione richiesta",
     "approvalDesc": "L'agente vuole eseguire una scrittura. Tool e input sono già oscurati dal gateway.",
     "approvalTool": "Tool",
+    "approvalDescRead": "L'assistente ha già consultato dati di {{persone}} persone diverse in questa richiesta, più di quante ne conti il reparto più grande dell'azienda. Vuoi che continui a leggere? Non è un divieto: se confermi, procede.",
+    "approvalDescReadUnknown": "L'assistente sta per leggere altri dati, ma quante persone abbia consultato finora non risulta misurato. Vuoi che continui?",
     "approvalInput": "Input (oscurato)",
     "allow": "Consenti",
     "deny": "Nega",

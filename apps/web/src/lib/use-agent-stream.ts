@@ -42,6 +42,17 @@ export interface PendingApproval {
   tool: unknown;
   /** Già redatto dal gateway. */
   input: unknown;
+  /**
+   * #252 — PERCHÉ si sta chiedendo. `write` è il caso di sempre; `read` esiste da `#252`:
+   * la conversazione ha superato la soglia alta di persone distinte, e la lettura si è fermata.
+   * ⚠ Assenti sui gateway che non portano ancora i tre campi: chi li mostra deve reggere
+   * `undefined` invece di stampare «0 persone», che sarebbe un'affermazione falsa.
+   */
+  classe?: "read" | "write" | "unresolved";
+  /** Quante persone distinte la conversazione aveva toccato quando si è chiesto. */
+  personeDistinte?: number;
+  /** Il livello di quel numero: `silenzioso` · `dichiarato` · `confermato` · `non-misurato`. */
+  livello?: string;
 }
 
 /** Una riga dello stream (blocco SSE grezzo, con un tetto). */
@@ -61,6 +72,47 @@ export interface AgentNotice {
   kind: "ok" | "err";
   code: "approvalResolved" | "noSession" | "errorRun";
   params?: Record<string, string>;
+}
+
+/**
+ * Interpreta il `data:` di un evento `approval_required`. `null` se non è una richiesta
+ * utilizzabile (JSON rotto, o senza `approvalId`: senza quello non c'è niente da risolvere).
+ *
+ * ⭐ FUORI DALL'HOOK PERCHÉ DEVE ESSERE PROVABILE (#252). Il filtro sui tre campi nuovi è la
+ * parte che può sbagliare in silenzio, e dentro una `useCallback` si proverebbe solo montando
+ * un componente. Qui è una funzione pura con i suoi casi limite.
+ *
+ * ⚠ I tre campi si accettano SOLO nella forma attesa. Un `personeDistinte: "molte"` non deve
+ * arrivare al pannello come numero, e **assente non è zero**: chi non dichiara il numero fa dire
+ * al pannello «non risulta misurato», non «0 persone».
+ */
+export function parseApprovalPayload(data: string): PendingApproval | null {
+  let parsed: {
+    approvalId?: unknown;
+    tool?: unknown;
+    input?: unknown;
+    classe?: unknown;
+    personeDistinte?: unknown;
+    livello?: unknown;
+  };
+  try {
+    parsed = JSON.parse(data) as typeof parsed;
+  } catch {
+    return null; // payload malformato: si ignora, la riga resta nello stream
+  }
+  if (typeof parsed.approvalId !== "string" || !parsed.approvalId) return null;
+  return {
+    approvalId: parsed.approvalId,
+    tool: parsed.tool,
+    input: parsed.input,
+    ...(parsed.classe === "read" || parsed.classe === "write" || parsed.classe === "unresolved"
+      ? { classe: parsed.classe }
+      : {}),
+    ...(typeof parsed.personeDistinte === "number" && Number.isFinite(parsed.personeDistinte)
+      ? { personeDistinte: parsed.personeDistinte }
+      : {}),
+    ...(typeof parsed.livello === "string" ? { livello: parsed.livello } : {}),
+  };
 }
 
 /** Interpreta un blocco SSE («event: x\n data: {...}») in tipo + testo. */
@@ -109,18 +161,8 @@ export function useAgentStream(): UseAgentStream {
       if (!block.trim()) return;
       const { kind, data } = parseSseBlock(block);
       if (kind === "approval_required") {
-        try {
-          const parsed = JSON.parse(data) as {
-            approvalId?: string;
-            tool?: unknown;
-            input?: unknown;
-          };
-          if (parsed.approvalId) {
-            setApproval({ approvalId: parsed.approvalId, tool: parsed.tool, input: parsed.input });
-          }
-        } catch {
-          /* payload di approvazione malformato: si ignora, la riga resta nello stream */
-        }
+        const richiesta = parseApprovalPayload(data);
+        if (richiesta) setApproval(richiesta);
       }
       pushLine(kind, data.replace(/\s+/g, " ").slice(0, 600));
     },

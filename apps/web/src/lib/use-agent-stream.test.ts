@@ -19,7 +19,7 @@
 
 import { describe, it, expect } from "vitest";
 
-import { parseSseBlock } from "./use-agent-stream.js";
+import { parseApprovalPayload, parseSseBlock } from "./use-agent-stream.js";
 
 describe("parseSseBlock — l'interprete dei blocchi SSE", () => {
   it("legge tipo e dati da un blocco completo", () => {
@@ -71,5 +71,75 @@ describe("parseSseBlock — l'interprete dei blocchi SSE", () => {
     // a ogni chiave, e tagliare sul primo separatore trovato distruggerebbe ogni payload.
     const r = parseSseBlock('event: chunk\ndata: {"ora":"12:30","dove":"qui"}');
     expect(r.data).toBe('{"ora":"12:30","dove":"qui"}');
+  });
+});
+
+/**
+ * #252 — la richiesta di conferma porta ora anche PERCHÉ si sta chiedendo: la classe della
+ * chiamata, quante persone distinte la conversazione ha toccato, e in quale livello cade.
+ *
+ * Il caso che questa suite esiste per impedire è il più silenzioso di tutti: un payload che non
+ * dichiara il numero, e un pannello che scrive «0 persone». «Non l'ho misurato» e «nessuna
+ * persona» sono due frasi diverse, e la prima detta come la seconda è una bugia dello strumento.
+ */
+describe("parseApprovalPayload — la richiesta di conferma, e i suoi tre campi nuovi", () => {
+  it("porta classe, numero e livello quando il gateway li dichiara", () => {
+    const r = parseApprovalPayload(
+      '{"approvalId":"a1","tool":"hrx_positions_list","input":{"limit":100},' +
+        '"classe":"read","personeDistinte":55,"livello":"confermato"}',
+    );
+    expect(r).toEqual({
+      approvalId: "a1",
+      tool: "hrx_positions_list",
+      input: { limit: 100 },
+      classe: "read",
+      personeDistinte: 55,
+      livello: "confermato",
+    });
+  });
+
+  it("una scrittura resta una scrittura: `classe` arriva, e il numero c'è comunque", () => {
+    const r = parseApprovalPayload(
+      '{"approvalId":"a2","tool":"hrx_positions_upsert","classe":"write","personeDistinte":3,"livello":"silenzioso"}',
+    );
+    expect(r?.classe).toBe("write");
+    expect(r?.personeDistinte).toBe(3);
+  });
+
+  it("⭐ ASSENTE NON È ZERO: un gateway che non dichiara il numero non lo inventa", () => {
+    const r = parseApprovalPayload('{"approvalId":"a3","tool":"hrx_org_units_upsert"}');
+    expect(r?.approvalId).toBe("a3");
+    expect(r?.personeDistinte).toBeUndefined();
+    expect(r?.classe).toBeUndefined();
+    expect(r?.livello).toBeUndefined();
+  });
+
+  it("un numero che non è un numero si scarta, non si mostra", () => {
+    const r = parseApprovalPayload('{"approvalId":"a4","personeDistinte":"molte","classe":"read"}');
+    expect(r?.personeDistinte).toBeUndefined();
+    expect(r?.classe).toBe("read");
+  });
+
+  it("un numero non finito (NaN/Infinity via JSON) non passa", () => {
+    // `JSON.parse('{"n":1e999}')` dà `Infinity`: un valore numerico per `typeof`, inutile da
+    // mostrare a un umano. Il controllo su `Number.isFinite` esiste per questo.
+    const r = parseApprovalPayload('{"approvalId":"a5","personeDistinte":1e999}');
+    expect(r?.personeDistinte).toBeUndefined();
+  });
+
+  it("una classe inventata si scarta: il pannello non deve parlare di casi che non esistono", () => {
+    const r = parseApprovalPayload('{"approvalId":"a6","classe":"qualcosa"}');
+    expect(r?.classe).toBeUndefined();
+  });
+
+  it("senza `approvalId` non c'è richiesta: `null`, perché non ci sarebbe niente da risolvere", () => {
+    expect(parseApprovalPayload('{"tool":"x","classe":"read","personeDistinte":99}')).toBeNull();
+    expect(parseApprovalPayload('{"approvalId":""}')).toBeNull();
+    expect(parseApprovalPayload('{"approvalId":42}')).toBeNull();
+  });
+
+  it("un payload malformato non alza: `null`, e la riga resta visibile nello stream", () => {
+    expect(parseApprovalPayload("{non-json")).toBeNull();
+    expect(parseApprovalPayload("")).toBeNull();
   });
 });

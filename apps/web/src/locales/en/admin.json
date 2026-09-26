@@ -910,6 +910,8 @@
     "approvalTitle": "Approval required",
     "approvalDesc": "The agent wants to perform a write. Tool and input are already redacted by the gateway.",
     "approvalTool": "Tool",
+    "approvalDescRead": "The assistant has already read data about {{persone}} different people in this request — more than the largest department in the company. Let it keep reading? This is not a ban: confirm and it proceeds.",
+    "approvalDescReadUnknown": "The assistant is about to read more data, but how many people it has read so far is not measured. Let it continue?",
     "approvalInput": "Input (redacted)",
     "allow": "Allow",
     "deny": "Deny",

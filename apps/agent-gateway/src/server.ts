@@ -24,7 +24,7 @@ import { HeuresysClient } from "./heuresys-client.js";
 import { redact } from "./redact.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
-import type { GatePrincipal } from "./write-gate.js";
+import type { ApprovalRequest, GatePrincipal } from "./write-gate.js";
 
 const PORT = Number(process.env.AGENT_GATEWAY_PORT ?? 8790);
 const HEURESYS_API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
@@ -196,13 +196,24 @@ const server = createServer(async (req, res) => {
       // M-2 HITL bridge: each write registers a pending approval, emits an
       // `approval_required` SSE event with the REDACTED tool/args, and awaits the
       // human's decision via POST /agent/approve (deny-by-default on timeout).
+      //
+      // #252 — e da qui non solo le scritture: anche una LETTURA oltre la soglia alta di
+      // persone distinte passa da questo ponte. Perciò il payload porta `classe`,
+      // `personeDistinte` e `livello`: senza quei tre campi il pannello direbbe «l'agente vuole
+      // eseguire una scrittura» davanti a una lettura, cioè chiederebbe di approvare una cosa
+      // raccontandone un'altra. Sono numeri e identificatori: niente da redigere, per requisito.
       const principal: GatePrincipal = { principal: "user" };
-      const approve = async (reqApprove: { tool: string; input: unknown }): Promise<boolean> => {
+      const approve = async (reqApprove: ApprovalRequest): Promise<boolean> => {
         const { approvalId, decided } = approvals.create();
         const payload = {
           approvalId,
           tool: redact(reqApprove.tool),
           input: redact(reqApprove.input),
+          ...(reqApprove.classe !== undefined ? { classe: reqApprove.classe } : {}),
+          ...(reqApprove.personeDistinte !== undefined
+            ? { personeDistinte: reqApprove.personeDistinte }
+            : {}),
+          ...(reqApprove.livello !== undefined ? { livello: reqApprove.livello } : {}),
         };
         res.write(`event: approval_required\ndata: ${JSON.stringify(payload)}\n\n`);
         return decided; // resolves allow/deny; false on timeout / unknown id

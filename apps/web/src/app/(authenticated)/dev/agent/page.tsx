@@ -72,6 +72,18 @@ export default function AgentDevConsolePage() {
   const noticeText =
     notice === null ? null : t(`agentDev.${notice.code}`, notice.params ?? {});
 
+  // ⭐ #252 — LA DESCRIZIONE LA COMPONE LA PAGINA, non il pannello. `AgentPanel` vive in
+  //    `@heuresys/ui` e riceve `approvalDesc` come etichetta già pronta: il numero di persone
+  //    entra da qui, senza toccare il design system (che serve anche ad altri prodotti).
+  //    Tre casi, e il terzo non è un dettaglio: se il gateway non dichiara il numero non si
+  //    scrive «0 persone» — «non l'ho misurato» è un'altra frase, e il pannello deve dirla.
+  const approvalDesc =
+    approval?.classe === "read"
+      ? approval.personeDistinte === undefined
+        ? t("agentDev.approvalDescReadUnknown")
+        : t("agentDev.approvalDescRead", { persone: approval.personeDistinte })
+      : t("agentDev.approvalDesc");
+
   // Feature-gate: render a soft notice, never a hard 404 (project rule).
   if (!AGENT_DEV_ENABLED) return <DisabledNotice />;
 
@@ -91,7 +103,7 @@ export default function AgentDevConsolePage() {
           streamTitle: t("agentDev.streamTitle"),
           streamEmpty: t("agentDev.streamEmpty"),
           approvalTitle: t("agentDev.approvalTitle"),
-          approvalDesc: t("agentDev.approvalDesc"),
+          approvalDesc,
           approvalTool: t("agentDev.approvalTool"),
           approvalInput: t("agentDev.approvalInput"),
           allow: t("agentDev.allow"),

@@ -1018,6 +1018,61 @@ def cmd_prompt_hook() -> int:
     return 0
 
 
+COWORK_DONE_MARK = "@COWORK FATTO"
+
+
+def ultimo_testo_assistant(transcript_path: str) -> str:
+    """Il testo dell'ultimo messaggio dell'assistente nel transcript.
+
+    Il transcript e' JSONL, e un messaggio arriva spezzato su piu' righe (un
+    blocco `thinking`/`tool_use`/`text` per riga), tutte con lo stesso
+    `message.id`. Si accumulano i blocchi `text` finche' l'id resta lo stesso,
+    e si ricomincia da capo a ogni cambio d'id: cio' che resta alla fine e' il
+    testo dell'ULTIMO messaggio assistant del file, che e' quello che ha appena
+    chiuso il turno e fatto scattare `Stop`.
+
+    Vuoto — mai un'eccezione — se il file manca, e' illeggibile, o l'ultimo
+    messaggio non porta testo (es. finisce con una tool_use): un turno che non
+    dichiara nulla non deve MAI essere letto come se dichiarasse la fine.
+    """
+    if not transcript_path:
+        return ""
+    try:
+        righe = Path(transcript_path).read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return ""
+    ultimo_id = None
+    pezzi: list[str] = []
+    for riga in righe:
+        riga = riga.strip()
+        if not riga:
+            continue
+        try:
+            o = json.loads(riga)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        msg = o.get("message")
+        if not isinstance(msg, dict) or msg.get("role") != "assistant":
+            continue
+        content = msg.get("content")
+        if not isinstance(content, list):
+            continue
+        mid = msg.get("id")
+        if mid != ultimo_id:
+            ultimo_id = mid
+            pezzi = []
+        pezzi.extend(
+            b.get("text", "") for b in content
+            if isinstance(b, dict) and b.get("type") == "text"
+        )
+    return "\n".join(pezzi)
+
+
+def dichiara_fine_lavoro(data: dict) -> bool:
+    """Vero solo se l'ultimo messaggio dell'assistente dichiara la fine del turno."""
+    return COWORK_DONE_MARK in ultimo_testo_assistant(data.get("transcript_path") or "")
+
+
 def cmd_stop_gate() -> int:
     data = payload()
     record_shape(data.get("hook_event_name") or "Stop", data)
@@ -1039,9 +1094,17 @@ def cmd_stop_gate() -> int:
         )
     except (OSError, subprocess.SubprocessError):
         return 0
-    if proc.stdout:
-        sys.stdout.buffer.write(proc.stdout)
-        sys.stdout.buffer.flush()
+    if not proc.stdout:
+        return 0                      # gia' verde: nessun output, nessun blocco
+    # Il cancello respinge la fine del turno SOLO quando l'assistente ha appena
+    # dichiarato di aver finito. Negli altri turni — quelli che stanno aspettando
+    # qualcosa, o che proseguono su un passo successivo — il verdetto non blocca:
+    # bloccarli tutti produceva giri a vuoto (misurato il 2026-09-26: 27 giri in
+    # 20 minuti su un comando vuoto, in una sessione `-p` in attesa).
+    if not dichiara_fine_lavoro(data):
+        return 0
+    sys.stdout.buffer.write(proc.stdout)
+    sys.stdout.buffer.flush()
     return 0
 
 

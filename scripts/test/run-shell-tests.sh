@@ -1304,13 +1304,62 @@ if [ -f "$HK" ]; then
   [ -z "$LABOUT" ] && ok "stop gate: silent for a lab session (turn can close)" \
                    || fail "stop gate must not block lab: $LABOUT"
 
+  # --- stop gate: in canonical, il turno si respinge SOLO se l'ultimo messaggio
+  # dell'assistente dichiara la fine del lavoro (mandato REGOLE #2, S1114). Un
+  # cancello che respinge ogni turno intermedio produce giri a vuoto (misurato
+  # il 2026-09-26: 27 giri in 20 minuti su un comando vuoto).
+  # Cartella propria, non il `$T` globale: a questo punto dello script e' gia'
+  # stato riassegnato (e ripulito) da sezioni precedenti — riusarlo qui produce
+  # "No such file or directory" sul file che si crede di scrivere.
+  TRD="$(mktemp -d)"
+  TR_NOFATTO="$TRD/transcript-nofatto.jsonl"
+  printf '{"message":{"id":"m1","role":"assistant","content":[{"type":"text","text":"lavoro in corso, nessuna fine dichiarata"}]}}\n' \
+    > "$TR_NOFATTO"
+  TR_FATTO="$TRD/transcript-fatto.jsonl"
+  printf '{"message":{"id":"m1","role":"assistant","content":[{"type":"text","text":"tutto pronto. @COWORK FATTO TEST"}]}}\n' \
+    > "$TR_FATTO"
+  # `mktemp -d` sotto Git Bash da' un path in stile MSYS (/tmp/...): l'interprete
+  # Python che legge l'hook e' quello NATIVO di Windows (session_mode.py, via
+  # hook.sh) e un path simile lo cerca sotto la unita' corrente, non lo trova, e
+  # la lettura fallisce in silenzio (`except OSError: return ""`) — indistinguibile
+  # da un transcript assente. Claude Code, nel payload vero, passa gia' un path
+  # nel formato nativo del suo SO: qui si riproduce quella condizione con
+  # `cygpath -w`, dov'e' disponibile.
+  if command -v cygpath >/dev/null 2>&1; then
+    TR_NOFATTO="$(cygpath -w "$TR_NOFATTO")"
+    TR_FATTO="$(cygpath -w "$TR_FATTO")"
+  fi
+  # Il path in stile Windows porta backslash: nudi dentro una stringa JSON non
+  # sono validi (falliscono il parsing, che e' di nuovo lo stesso sintomo).
+  TR_NOFATTO_JSON="$(printf '%s' "$TR_NOFATTO" | sed 's/\\/\\\\/g')"
+  TR_FATTO_JSON="$(printf '%s' "$TR_FATTO" | sed 's/\\/\\\\/g')"
+
   # Equivalence, not a hardcoded verdict: whatever the gate says today, a
-  # canonical session must say exactly the same thing it said before this change.
-  CANOUT="$(printf '{"session_id":"%s","hook_event_name":"Stop"}' "$SC" | sh "$HK" stop-gate 2>/dev/null)"
+  # canonical session che dichiara la fine deve avere ESATTAMENTE lo stesso
+  # verdetto di una chiamata diretta a verify_gate — nessuna deriva.
   DIRECT="$(python docs/kb/tools/verify_gate.py check --hook 2>/dev/null || true)"
-  [ "$CANOUT" = "$DIRECT" ] \
-      && ok "stop gate: canonical session gets verify_gate verbatim (no behaviour drift)" \
-      || fail "stop gate drift — wrapper='$CANOUT' direct='$DIRECT'"
+
+  CANOUT_NOFATTO="$(printf '{"session_id":"%s","hook_event_name":"Stop","transcript_path":"%s"}' "$SC" "$TR_NOFATTO_JSON" | sh "$HK" stop-gate 2>/dev/null)"
+  [ -z "$CANOUT_NOFATTO" ] \
+      && ok "stop gate: senza @COWORK FATTO il turno non è mai respinto (verdetto odierno: $([ -n "$DIRECT" ] && echo bloccante || echo verde))" \
+      || fail "stop gate deve tacere senza @COWORK FATTO: $CANOUT_NOFATTO"
+
+  CANOUT_FATTO="$(printf '{"session_id":"%s","hook_event_name":"Stop","transcript_path":"%s"}' "$SC" "$TR_FATTO_JSON" | sh "$HK" stop-gate 2>/dev/null)"
+  [ "$CANOUT_FATTO" = "$DIRECT" ] \
+      && ok "stop gate: con @COWORK FATTO il verdetto è verify_gate verbatim (no behaviour drift)" \
+      || fail "stop gate drift con @COWORK FATTO — wrapper='$CANOUT_FATTO' direct='$DIRECT'"
+
+  # Ramo verde forzato in modo deterministico (freno .zp/verify-off), indipendente
+  # dallo stato reale del working tree: "@COWORK FATTO + cancello verde: passa".
+  BRAKE="$ROOT/.zp/verify-off"; BRAKE_ESISTEVA=0
+  [ -e "$BRAKE" ] && BRAKE_ESISTEVA=1
+  [ "$BRAKE_ESISTEVA" = 0 ] && : > "$BRAKE"
+  CANOUT_FATTO_VERDE="$(printf '{"session_id":"%s","hook_event_name":"Stop","transcript_path":"%s"}' "$SC" "$TR_FATTO_JSON" | sh "$HK" stop-gate 2>/dev/null)"
+  [ "$BRAKE_ESISTEVA" = 0 ] && rm -f "$BRAKE"
+  [ -z "$CANOUT_FATTO_VERDE" ] \
+      && ok "stop gate: @COWORK FATTO con cancello verde passa (silenzioso)" \
+      || fail "stop gate deve tacere a cancello verde anche con @COWORK FATTO: $CANOUT_FATTO_VERDE"
+  rm -rf "$TRD"
 
   # --- prompt parsing writes the marker deterministically (not model-dependent)
   SP='__shelltest_prompt__'

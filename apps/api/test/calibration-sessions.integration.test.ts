@@ -11,7 +11,7 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 
 const HR_EMAIL = "federica.marchetti@rtl-bank.org";
-const PLATFORM_EMAIL = "enzo.spenuso@heuresys.com";
+const PLATFORM_EMAIL = "platform-test-admin@collaudo.invalid";
 
 const DISCUSSION_JUDGMENT = [
   "adjustmentReason", "calibratedPotential", "calibratedRating",

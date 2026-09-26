@@ -47,7 +47,7 @@ let userS: S;
 describe("/v1/visualization-edges/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "enzo.spenuso@heuresys.com");
+    platformS = await login(suite, "platform-test-admin@collaudo.invalid");
     userS = await login(suite, "tommaso.fiore@rtl-bank.org"); // USER: lacks visualization:create
   });
 

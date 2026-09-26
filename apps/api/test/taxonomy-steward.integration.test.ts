@@ -22,7 +22,7 @@ const STEWARD_EMAIL = "taxonomy-steward@collaudo.invalid";
 // PLATFORM_ADMIN reale (non l'identita' di collaudo `piattaforma@collaudo.invalid`, la
 // cui credenziale su heuresys_ci puo' essere stata provisionata con una chiave diversa
 // dalla propria sessione: stesso attore usato dalla controprova di R-9, gia' provato).
-const PLATFORM_ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
+const PLATFORM_ADMIN_EMAIL = "platform-test-admin@collaudo.invalid";
 const USER_RTL = "paolo.caputo@rtl-bank.org"; // TEAM_LEADER+TEAM_MEMBER+MANAGER+USER, mai TAXONOMY_STEWARD
 
 interface Auth { cookies: Map<string, string>; csrfToken: string }

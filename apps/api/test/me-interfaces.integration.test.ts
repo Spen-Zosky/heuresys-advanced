@@ -198,7 +198,7 @@ async function emailSenzaDeleghe(): Promise<string> {
 describe("/v1/me/interfaces", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    adminC = await login(suite, "enzo.spenuso@heuresys.com");
+    adminC = await login(suite, "platform-test-admin@collaudo.invalid");
     managerC = await login(suite, "paolo.caputo@rtl-bank.org");
     userEmail = await emailSenzaDeleghe();
     userC = await login(suite, userEmail);
@@ -219,8 +219,8 @@ describe("/v1/me/interfaces", () => {
     // passed only because the gate never evaluated that permission. Now the expectation is
     // derived from the permissions the role actually holds — which also makes this test the
     // guard for "the platform admin cannot read the whistleblowing reports either".
-    const adminPerms = await permsForEmail("enzo.spenuso@heuresys.com");
-    const m1Admin = await passaM1("enzo.spenuso@heuresys.com", registry);
+    const adminPerms = await permsForEmail("platform-test-admin@collaudo.invalid");
+    const m1Admin = await passaM1("platform-test-admin@collaudo.invalid", registry);
     const atteso = registry.filter(
       (r) => (r.reqPair === null || adminPerms.has(r.reqPair)) && m1Admin.has(r.code));
     expect(allCodes(b).sort()).toEqual(atteso.map((r) => r.code).sort());

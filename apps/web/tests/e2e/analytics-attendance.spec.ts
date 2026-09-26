@@ -8,7 +8,7 @@
  * GET /v1/analytics/attendance payload the page itself fetches at runtime, so
  * the UI values are verified against the real API response, not constants.
  *
- * Persona: platformAdmin (enzo.spenuso@heuresys.com → PLATFORM scope). `analytics:view`
+ * Persona: platformAdmin (platform-test-admin@collaudo.invalid → PLATFORM scope). `analytics:view`
  * is granted to the admin roles by migration 000057. Auth is the persisted
  * storageState from auth.setup.ts (no inline login).
  */

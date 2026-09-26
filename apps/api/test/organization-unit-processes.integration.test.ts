@@ -51,7 +51,7 @@ async function assign(s: S, ouId: string, processId: string, role?: string): Pro
 
 beforeAll(async () => {
   suite = await buildTestApp();
-  admin = await login(suite, "enzo.spenuso@heuresys.com");
+  admin = await login(suite, "platform-test-admin@collaudo.invalid");
   author = await login(suite, "federica.marchetti@rtl-bank.org");
   manager = await login(suite, "paolo.caputo@rtl-bank.org");
   plainUser = await login(suite, "tommaso.fiore@rtl-bank.org");

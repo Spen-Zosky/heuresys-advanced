@@ -37,7 +37,7 @@ let bankTenantId: string;
 describe("/v1/branches — B14", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platform = await login(suite, "enzo.spenuso@heuresys.com");
+    platform = await login(suite, "platform-test-admin@collaudo.invalid");
     bankAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
     const t = await pool.query<{ id: string }>(
       `SELECT tenant_id AS id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'`,

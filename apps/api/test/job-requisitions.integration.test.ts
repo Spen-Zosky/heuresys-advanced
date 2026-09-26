@@ -58,7 +58,7 @@ const creati: string[] = [];
 describe("/v1/job-requisitions/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platform = await login(suite, "enzo.spenuso@heuresys.com");
+    platform = await login(suite, "platform-test-admin@collaudo.invalid");
     tenant = await login(suite, "federica.marchetti@rtl-bank.org");
     semplice = await login(suite, "tommaso.fiore@rtl-bank.org");
 

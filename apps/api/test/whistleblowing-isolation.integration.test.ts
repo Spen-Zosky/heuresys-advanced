@@ -72,7 +72,7 @@ describe("#99 F4 — isolamento assoluto delle segnalazioni", () => {
   });
 
   it("LIVE: il mandato tecnico bussa alla console e non entra", async () => {
-    const login = await loginRaw(t.app, "enzo.spenuso@heuresys.com");
+    const login = await loginRaw(t.app, "platform-test-admin@collaudo.invalid");
     const cookie = login.cookies
       .map((c: { name: string; value: string }) => `${c.name}=${c.value}`)
       .join("; ");

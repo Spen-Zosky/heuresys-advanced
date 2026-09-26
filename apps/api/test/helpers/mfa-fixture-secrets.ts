@@ -114,7 +114,10 @@ export function totpSecretFor(email: string): string {
  * (un amministratore, un manager con riporti, un dipendente, un estraneo alla linea).
  */
 export const FIXTURE_PERSONA_EMAILS = [
-  "enzo.spenuso@heuresys.com",
+  // #258 (2026-09-26): platform-test-admin@collaudo.invalid sostituisce l'email
+  // personale di Enzo (rimossa da questo elenco — #250 gli ha dato il suo secondo
+  // fattore VERO, non piu' di collaudo).
+  "platform-test-admin@collaudo.invalid",
   "federica.marchetti@rtl-bank.org",
   "paolo.caputo@rtl-bank.org",
   "tommaso.fiore@rtl-bank.org",

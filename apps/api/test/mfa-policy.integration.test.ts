@@ -13,7 +13,7 @@ import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 const PASSWORD = TEST_PERSONA_PASSWORD;
-const PLATFORM = "enzo.spenuso@heuresys.com";
+const PLATFORM = "platform-test-admin@collaudo.invalid";
 const TENANT_ADMIN = "federica.marchetti@rtl-bank.org";
 const MANAGER = "paolo.caputo@rtl-bank.org";
 

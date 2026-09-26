@@ -27,7 +27,7 @@ import { senzaCacheDiSessione } from "./helpers/session-cache.js";
 senzaCacheDiSessione();
 
 const PWD = TEST_PERSONA_PASSWORD;
-const PLATFORM_EMAIL = "enzo.spenuso@heuresys.com";
+const PLATFORM_EMAIL = "platform-test-admin@collaudo.invalid";
 const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
 const MANAGER_EMAIL = "paolo.caputo@rtl-bank.org";
 /**

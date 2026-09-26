@@ -37,7 +37,7 @@ let skillDiB: string; // competenza del tenant B (RTL), creata dal suo admin via
 let skillGlobale: string; // competenza globale (skill_tenant_id NULL, is_global true), seminata via SQL
 let aliasDiA: string; // alias sulla competenza di A, seminato via SQL
 
-// Perche' SQL e non l'API di piattaforma: `enzo.spenuso@heuresys.com` ha un fattore TOTP senza etichetta
+// Perche' SQL e non l'API di piattaforma: `platform-test-admin@collaudo.invalid` ha un fattore TOTP senza etichetta
 // `derived-access` (misurato 2026-09-15), quindi `loginRaw` non lo sa autenticare. La semina diretta e'
 // rollbackata a fine file (D-52) e non dipende da nessuna persona di piattaforma.
 beforeAll(async () => {

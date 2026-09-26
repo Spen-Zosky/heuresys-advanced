@@ -90,8 +90,12 @@ export function storageStateFor(persona: PersonaKey): string {
 }
 
 export const PERSONAS = {
+  // #258 (2026-09-26): Enzo's personal email REMOVED from this list — #250 gave him
+  // his own MFA factor. platform-test-admin@collaudo.invalid is the platform-admin
+  // test persona now (SERVICE, PLATFORM_ADMIN, real derived-access TOTP factor —
+  // not MFA-exempt).
   platformAdmin: {
-    email: "enzo.spenuso@heuresys.com",
+    email: "platform-test-admin@collaudo.invalid",
     expectedLandingPath: "/dashboard",
   },
   tenantAdmin: {

@@ -147,13 +147,19 @@ jobs:
       - name: Seed test personas (idempotent, login-only)
         run: pnpm db:seed-test-admin
 
+      # #258 (2026-09-26): platformAdmin e' ora platform-test-admin@collaudo.invalid
+      # (SERVICE, MFA vera) — enzo.spenuso@heuresys.com ha il suo secondo fattore
+      # RESO SUO da #250. COLLAUDO_ACCESS_KEY_B64 dal drop-in systemd del runner.
+      - name: Seed collaudo-access identities (idempotent)
+        run: pnpm db:provision-collaudo
+
       - name: Verify test admin + personas seeded
         run: |
           psql -h localhost -p 5432 -U $POSTGRES_USER -d $POSTGRES_DATABASE \
-            -c "SELECT user_email FROM sys.sys_users WHERE user_email IN ('enzo.spenuso@heuresys.com','federica.marchetti@rtl-bank.org','paolo.caputo@rtl-bank.org','tommaso.fiore@rtl-bank.org','antonio.parisi@rtl-bank.org','marco.rinaldi@rtl-bank.org','andrea.martino@rtl-bank.org')" \
+            -c "SELECT user_email FROM sys.sys_users WHERE user_email IN ('platform-test-admin@collaudo.invalid','federica.marchetti@rtl-bank.org','paolo.caputo@rtl-bank.org','tommaso.fiore@rtl-bank.org','antonio.parisi@rtl-bank.org','marco.rinaldi@rtl-bank.org','andrea.martino@rtl-bank.org')" \
             -tA | sort > /tmp/seeded.txt
           test $(wc -l < /tmp/seeded.txt) -eq 7 || \
-            { echo "test personas not seeded — pnpm db:seed-test-admin failed?"; exit 1; }
+            { echo "test personas not seeded — pnpm db:seed-test-admin / db:provision-collaudo failed?"; exit 1; }
 
       - name: Boot API server (background)
         working-directory: apps/api

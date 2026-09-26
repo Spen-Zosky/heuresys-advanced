@@ -28,7 +28,7 @@ import { senzaCacheDiSessione } from "./helpers/session-cache.js";
 senzaCacheDiSessione();
 
 // L'ATTORE TECNICO e L'ATTORE UMANO sono due cose diverse, e dal 000287 il test deve
-// distinguerle. `enzo.spenuso@heuresys.com` e' un'utenza di SERVIZIO (user_type='SERVICE'):
+// distinguerle. `platform-test-admin@collaudo.invalid` e' un'utenza di SERVIZIO (user_type='SERVICE'):
 // serve per accedere e costruire la sessione, ma NON puo' piu' fare da esempio di
 // «persona», perche' passerebbe il primo lucchetto e verrebbe respinto dal secondo —
 // il test resterebbe verde provando qualcos'altro.
@@ -36,7 +36,7 @@ senzaCacheDiSessione();
 // dalla popolazione RTL: le tre persone di Heuresys (Enzo, Chiara, Andrea) NON sono
 // impersonabili per principio (Z-262, `isRealPerson`) — la loro password la scelgono
 // loro. Qui non si accede come lei, si legge soltanto il suo identificativo.
-const ADMIN = "enzo.spenuso@heuresys.com";            // utenza tecnica: accede e apre la sessione
+const ADMIN = "platform-test-admin@collaudo.invalid";            // utenza tecnica: accede e apre la sessione
 const HUMAN = "federica.marchetti@rtl-bank.org"; // persona (non-SERVICE) -> NOT exemptable
 const PASSWORD = passwordFor(ADMIN);
 const SVC_EMAIL = "wi-a-svc-test@heuresys.local"; // throwaway SERVICE -> exemptable

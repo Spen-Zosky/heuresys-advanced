@@ -20,7 +20,7 @@ import { readCollaudoKey, deriveCollaudoPassword } from "../scripts/collaudo-acc
 const SECURITY_ADMIN_EMAIL = "security-admin@collaudo.invalid";
 const TEAM_LEADER_RTL = "alberto.serra@rtl-bank.org"; // controprova: NON è in CAN_GRANT_ROLES
 const TARGET_RTL_NO_TL = "alberto.colombo@rtl-bank.org"; // RTL_BANK, senza TEAM_LEADER
-const TARGET_HEURESYS = "enzo.spenuso@heuresys.com"; // tenant B (Heuresys System)
+const TARGET_HEURESYS = "platform-test-admin@collaudo.invalid"; // tenant B (Heuresys System)
 
 interface Auth {
   cookies: Map<string, string>;

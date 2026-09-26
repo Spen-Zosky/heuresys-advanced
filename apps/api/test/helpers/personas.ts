@@ -21,6 +21,7 @@
  * gitignored da cui ogni password si ricalcola.
  */
 import { readMaster, derivePassword, isRealPerson } from "../../scripts/derive-access.mjs";
+import { readCollaudoKey, deriveCollaudoPassword, isCollaudoIdentity } from "../../scripts/collaudo-access.mjs";
 
 let masterCache: Buffer | null = null;
 function master(): Buffer {
@@ -28,7 +29,21 @@ function master(): Buffer {
   return masterCache;
 }
 
-/** La password di QUALUNQUE utente impersonabile, ricalcolata al momento. */
+let collaudoKeyCache: Buffer | null = null;
+function collaudoKey(): Buffer {
+  collaudoKeyCache ??= readCollaudoKey();
+  return collaudoKeyCache;
+}
+
+/**
+ * La password di QUALUNQUE utente impersonabile, ricalcolata al momento.
+ *
+ * #258 (2026-09-26): un'identita' di collaudo (`*@collaudo.invalid`) non ha una password
+ * derivata dalla chiave madre delle persone — ce l'ha dalla chiave DI COLLAUDO, propria e
+ * separata (#169 F2). Prima di questa riga ogni chiamante che voleva loggare una di quelle
+ * identita' doveva derivare la password a mano con `deriveCollaudoPassword`; ora
+ * `platformAdmin()` (e chiunque altro passi da qui) funziona per costruzione.
+ */
 export function passwordFor(email: string): string {
   if (isRealPerson(email)) {
     throw new Error(
@@ -36,6 +51,7 @@ export function passwordFor(email: string): string {
         `I test non devono impersonarla — usa un altro utente.`,
     );
   }
+  if (isCollaudoIdentity(email)) return deriveCollaudoPassword(collaudoKey(), email);
   return derivePassword(master(), email);
 }
 

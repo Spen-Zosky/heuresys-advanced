@@ -54,7 +54,7 @@ let famiglie: { code: string; permesso: string | null; viste: number }[];
 
 beforeAll(async () => {
   app = await buildTestApp();
-  platform = await login(app, "enzo.spenuso@heuresys.com");
+  platform = await login(app, "platform-test-admin@collaudo.invalid");
   tenant = await login(app, "federica.marchetti@rtl-bank.org");
   const manager = await unManagerConPosizioniAttive(pool);
   const fuori = await unEstraneoOrganizzativo(pool, manager.userId);

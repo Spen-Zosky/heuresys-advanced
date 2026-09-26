@@ -25,7 +25,7 @@ let cookie = "";
 describe("skills/graph — il grafo ha due famiglie di arco (#50 F2)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    const r = await loginRaw(suite.app, "enzo.spenuso@heuresys.com", TEST_PERSONA_PASSWORD);
+    const r = await loginRaw(suite.app, "platform-test-admin@collaudo.invalid", TEST_PERSONA_PASSWORD);
     cookie = r.cookies.map((c) => `${c.name}=${c.value}`).join("; ");
   });
 

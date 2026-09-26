@@ -65,7 +65,7 @@ let tenantS: S;
 describe("GET /v1/observability/system-health integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "enzo.spenuso@heuresys.com");
+    platformS = await login(suite, "platform-test-admin@collaudo.invalid");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
   });
 
@@ -286,7 +286,7 @@ describe("mandato K, R-0b — observability filtrato per perimetro cliente (PLAT
   beforeAll(async () => {
     opSuite = await buildTestApp();
     const key = readCollaudoKey();
-    admin2 = await login(opSuite, "enzo.spenuso@heuresys.com");
+    admin2 = await login(opSuite, "platform-test-admin@collaudo.invalid");
     const opRaw = await loginRaw(opSuite.app, OPERATOR_EMAIL, deriveCollaudoPassword(key, OPERATOR_EMAIL));
     const opCookies = new Map<string, string>();
     for (const c of opRaw.cookies) opCookies.set(c.name, c.value);
@@ -323,7 +323,7 @@ describe("mandato K, R-0b — observability filtrato per perimetro cliente (PLAT
   });
 
   it("assegnato a RTL_BANK — vede SOLO RTL_BANK in tenantFleet e auditFeed, mai HEURESYS", async () => {
-    const adm = await loginAdmin(opSuite, "enzo.spenuso@heuresys.com");
+    const adm = await loginAdmin(opSuite, "platform-test-admin@collaudo.invalid");
     const create = await opSuite.app.inject({
       method: "POST", url: "/v1/platform-tenant-assignments",
       headers: { cookie: ch(adm.cookies), "x-csrf-token": adm.csrfToken },
@@ -349,7 +349,7 @@ describe("mandato K, R-0b — observability filtrato per perimetro cliente (PLAT
   });
 
   it("revocata l'assegnazione, torna a non vedere nessun tenant", async () => {
-    const adm = await loginAdmin(opSuite, "enzo.spenuso@heuresys.com");
+    const adm = await loginAdmin(opSuite, "platform-test-admin@collaudo.invalid");
     const revoke = await opSuite.app.inject({
       method: "POST", url: `/v1/platform-tenant-assignments/${assignmentId}/revoke`,
       headers: { cookie: ch(adm.cookies), "x-csrf-token": adm.csrfToken },

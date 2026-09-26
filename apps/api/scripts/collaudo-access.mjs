@@ -71,7 +71,14 @@ export const COLLAUDO_IDENTITIES = [
   // 'derived-access' vero, come le cinque persone RTL, e cammina l'intera sfida a due passi
   // esattamente come loro: `mfaExempt: false` e' il segnale che dice a
   // provision-collaudo-access.ts di NON iscriverla all'esenzione e di darle invece il fattore.
-  { email: "platform-test-admin@collaudo.invalid", displayName: "Collaudo Platform Test Admin", tenantCode: "HEURESYS", roleCode: "PLATFORM_ADMIN", mfaExempt: false },
+  // `platformGrant: true` (misurato oggi, 2026-09-26): un VERO PLATFORM_ADMIN ha il ruolo
+  // concesso con tenant_id NULL (issueLoginBundle lo riconosce come "isPlatform" e mette
+  // jwtTenantId=null) — non tenant-scoped su HEURESYS. Le altre identita' HEURESYS di questo
+  // elenco (piattaforma@, platform-operator@, sales@, ecc.) portano lo stesso tenant_id
+  // non-null: e' un difetto preesistente, mai emerso perche' nessun test generico le
+  // usava per verificare tenantId NULL. Questa voce lo evita per costruzione, senza
+  // toccare le altre (fuori scope #258).
+  { email: "platform-test-admin@collaudo.invalid", displayName: "Collaudo Platform Test Admin", tenantCode: "HEURESYS", roleCode: "PLATFORM_ADMIN", mfaExempt: false, platformGrant: true },
 ];
 
 export function isCollaudoIdentity(email) {

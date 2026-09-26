@@ -43,7 +43,7 @@ let paoloSubtree: string[];
 describe("#29 A/L3 talent-review 9-box read", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    admin = await login(suite, "enzo.spenuso@heuresys.com");
+    admin = await login(suite, "platform-test-admin@collaudo.invalid");
     federica = await login(suite, "federica.marchetti@rtl-bank.org"); // TENANT_ADMIN (HR mandate)
     paolo = await login(suite, "paolo.caputo@rtl-bank.org"); // MANAGER
     tommaso = await login(suite, "tommaso.fiore@rtl-bank.org"); // USER (paolo's report, no talent:read)
@@ -108,7 +108,7 @@ describe("#29 A/L3 talent-review 9-box read", () => {
 
   // #124 D4 (S1054): questa prova riguarda la DERIVAZIONE delle bande dai punteggi,
   // e va fatta con un attore che ha titolo per leggerli. Girava con `admin`
-  // (`enzo.spenuso@heuresys.com`, PLATFORM_ADMIN) ed e' diventata rossa nel momento
+  // (`platform-test-admin@collaudo.invalid`, PLATFORM_ADMIN) ed e' diventata rossa nel momento
   // in cui ADR-0032 ha smesso di mostrargli il giudizio: non un difetto, ma
   // l'invariante nuovo che mordeva un oracolo scritto quando non esisteva ancora.
   // Con `federica` (TENANT_ADMIN, mandato HR — I20) la proprieta' resta verificata

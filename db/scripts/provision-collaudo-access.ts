@@ -31,17 +31,72 @@ import argon2 from "argon2";
 import { config as dotenvConfig } from "dotenv";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import {
   readCollaudoKey,
   deriveCollaudoPassword,
   COLLAUDO_IDENTITIES,
 } from "../../apps/api/scripts/collaudo-access.mjs";
 import { segretoTotpCasuale } from "../../apps/api/scripts/derive-access.mjs";
-import { encryptSecret } from "../../apps/api/src/modules/auth/secret-crypto.js";
+import { encryptSecret, decryptSecret } from "../../apps/api/src/modules/auth/secret-crypto.js";
 import { E2E_FIXTURE_LABEL } from "../../apps/api/test/helpers/mfa-fixture-secrets.js";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 dotenvConfig({ path: resolve(repoRoot, ".env"), quiet: true });
+
+/**
+ * #258 — LA STESSA GUARDIA A DUE CONDIZIONI di `seed-test-admin.ts` (S1093), duplicata qui
+ * apposta: imporre uno stato su un database di produzione fa danni veri, e ogni seed che
+ * deposita segreti su disco pretende la stessa doppia condizione — mai una sola.
+ * `NODE_ENV==='test'` da sola non basta (questa macchina punta a produzione via tunnel anche
+ * con quella variabile distratta); il nome del database deve dichiararsi di collaudo.
+ */
+function eDiCollaudo(): boolean {
+  if (process.env.NODE_ENV !== "test") return false;
+  const db = process.env.POSTGRES_DB;
+  if (!db) return false;
+  return db === "heuresys_ci" || /_(ci|test)$/.test(db);
+}
+
+/** Stesso file che scrive seed-test-admin.ts: Playwright legge un deposito solo, non due. */
+const PERCORSO_SEGRETI_MFA = resolve(repoRoot, "apps", "web", "tests", ".auth", "totp-secrets.json");
+
+/**
+ * Aggiunge i segreti delle identita' #258 (mfaExempt:false) al deposito che Playwright legge —
+ * senza cancellare quelli che `seed-test-admin.ts` ha gia' scritto per le sei persone RTL. I due
+ * scrittori dello stesso file esistono perche' governano popolazioni diverse (persone reali vs
+ * identita' di collaudo); il merge-e-riscrivi e' quello che li tiene compatibili.
+ */
+function aggiungiSegretiMfaAlDeposito(nuovi: Record<string, string>): void {
+  if (Object.keys(nuovi).length === 0) return;
+  let esistente: { database?: unknown; segreti?: Record<string, string> } = {};
+  if (existsSync(PERCORSO_SEGRETI_MFA)) {
+    try {
+      esistente = JSON.parse(readFileSync(PERCORSO_SEGRETI_MFA, "utf8")) as typeof esistente;
+    } catch {
+      esistente = {};
+    }
+  }
+  const segreti = { ...(esistente.segreti ?? {}), ...nuovi };
+  mkdirSync(dirname(PERCORSO_SEGRETI_MFA), { recursive: true });
+  writeFileSync(
+    PERCORSO_SEGRETI_MFA,
+    `${JSON.stringify(
+      {
+        avvertenza:
+          "Segreti TOTP del solo ambiente di COLLAUDO. Rigenerati a ogni seed/provisioning, " +
+          "gitignored, mai propagati. Scritti solo con NODE_ENV=test (seed-test-admin.ts + " +
+          "provision-collaudo-access.ts, #258).",
+        database: process.env.POSTGRES_DB ?? esistente.database ?? null,
+        segreti,
+      },
+      null,
+      2,
+    )}\n`,
+    { encoding: "utf8", mode: 0o600 },
+  );
+  console.log(`  totp-collaudo (#258): ${Object.keys(nuovi).length} segreti aggiunti al deposito Playwright`);
+}
 
 /** Stessi parametri del server (ADR-0005). Non "simili": gli stessi. */
 const ARGON2_PARAMS = {
@@ -163,6 +218,10 @@ async function main(): Promise<void> {
       utenti: 0, ruoli: 0, identita: 0, credenziali: 0, iscrizioni: 0, esenzioni: 0,
       riallineate: 0, disallineate: 0, fattoriRimossi: 0, fattoriCreatiMfa: 0, invariati: 0,
     };
+    // #258 — solo per le identita' mfaExempt:false, e solo se l'ambiente e' di collaudo:
+    // il segreto (nuovo o gia' esistente) va depositato dove Playwright lo legge.
+    const segretiMfaDaDepositare: Record<string, string> = {};
+    const ambienteDiCollaudo = eDiCollaudo();
 
     await db.query("BEGIN");
 
@@ -225,15 +284,28 @@ async function main(): Promise<void> {
         continue;
       }
 
-      const hasRole = await db.query(
-        `SELECT 1 FROM sys.sys_user_auth_roles
+      // #258 — un VERO platform grant ha tenant_id NULL (issueLoginBundle lo riconosce come
+      // "isPlatform" → jwtTenantId=null). `platformGrant: true` e' l'unica identita' che lo
+      // chiede oggi; le altre restano tenant-scoped su HEURESYS come sempre.
+      const grantTenantId = c.platformGrant ? null : tenantId;
+      const hasRole = await db.query<{ user_auth_role_tenant_id: string | null }>(
+        `SELECT user_auth_role_tenant_id FROM sys.sys_user_auth_roles
           WHERE user_auth_role_user_id = $1 AND user_auth_role_role_id = $2
             AND user_auth_role_revoked_at IS NULL`, [userId, roleId]);
       if (hasRole.rowCount === 0) {
         stats.ruoli++; touched = true;
         if (!DRY) await db.query(
           `INSERT INTO sys.sys_user_auth_roles (user_auth_role_user_id, user_auth_role_role_id, user_auth_role_tenant_id)
-           VALUES ($1, $2, $3)`, [userId, roleId, tenantId]);
+           VALUES ($1, $2, $3)`, [userId, roleId, grantTenantId]);
+      } else if (hasRole.rows[0]!.user_auth_role_tenant_id !== grantTenantId) {
+        // Stato dichiarato (C3): il grant c'e' ma non nella forma voluta — corregge,
+        // non lascia lo scostamento. Oggi tocca solo la riga appena creata da una
+        // corsa precedente a questa correzione.
+        stats.ruoli++; touched = true;
+        if (!DRY) await db.query(
+          `UPDATE sys.sys_user_auth_roles SET user_auth_role_tenant_id = $3
+            WHERE user_auth_role_user_id = $1 AND user_auth_role_role_id = $2
+              AND user_auth_role_revoked_at IS NULL`, [userId, roleId, grantTenantId]);
       }
 
       const ident = await db.query<{ auth_identity_id: string }>(
@@ -392,23 +464,31 @@ async function main(): Promise<void> {
           fail(`${c.email} e' dichiarata mfaExempt:false ma risulta ESENTE dal secondo fattore: fermati e guarda`);
         }
 
-        const fac = await db.query<{ n: string }>(
-          `SELECT count(*)::text AS n FROM sys.sys_auth_mfa_factors
-             WHERE auth_mfa_factor_user_id = $1 AND auth_mfa_factor_kind = 'TOTP'
-               AND auth_mfa_factor_metadata->>'label' = $2`,
+        const fac = await db.query<{ n: string; secret: string | null }>(
+          `SELECT count(*)::text AS n, max(auth_mfa_factor_secret) AS secret
+             FROM sys.sys_auth_mfa_factors
+            WHERE auth_mfa_factor_user_id = $1 AND auth_mfa_factor_kind = 'TOTP'
+              AND auth_mfa_factor_metadata->>'label' = $2`,
           [userId, E2E_FIXTURE_LABEL]);
+        let secretInChiaro: string | null = null;
         if (fac.rows[0]!.n === "0") {
           stats.fattoriCreatiMfa++; touched = true;
           if (!DRY) {
-            const secret = segretoTotpCasuale();
+            secretInChiaro = segretoTotpCasuale();
             await db.query(
               `INSERT INTO sys.sys_auth_mfa_factors
                  (auth_mfa_factor_user_id, auth_mfa_factor_kind, auth_mfa_factor_secret,
                   auth_mfa_factor_metadata, auth_mfa_factor_verified)
                VALUES ($1, 'TOTP', $2, jsonb_build_object('label', $3::text), true)`,
-              [userId, encryptSecret(secret), E2E_FIXTURE_LABEL]);
+              [userId, encryptSecret(secretInChiaro), E2E_FIXTURE_LABEL]);
           }
+        } else if (fac.rows[0]!.secret) {
+          // Gia' presente: il segreto non e' mai stato in chiaro nella memoria di QUESTA
+          // corsa, ma e' decifrabile con la stessa chiave del server — non serve ricordarlo,
+          // basta rileggerlo (come fa test/helpers/mfa-fixture-secrets.ts lato API).
+          secretInChiaro = decryptSecret(fac.rows[0]!.secret);
         }
+        if (ambienteDiCollaudo && secretInChiaro) segretiMfaDaDepositare[c.email] = secretInChiaro;
       }
 
       if (!touched) stats.invariati++;
@@ -445,6 +525,10 @@ async function main(): Promise<void> {
       }
     }
     await db.query(DRY ? "ROLLBACK" : "COMMIT");
+
+    // Deposito DOPO il COMMIT (stessa ragione di seed-test-admin.ts): un file che promette
+    // segreti che un ROLLBACK ha appena disfatto sarebbe peggio di nessun file.
+    if (!DRY && ambienteDiCollaudo) aggiungiSegretiMfaAlDeposito(segretiMfaDaDepositare);
 
     console.log(`
 ${DRY ? "DRY-RUN (nessuna scrittura)" : "ESEGUITO"}

@@ -28,7 +28,7 @@ import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD, passwordFor } from "./helpers/personas.js";
 
 const PREFISSO = `it-offer-${randomUUID().slice(0, 8)}`;
-const PLATFORM_EMAIL = "enzo.spenuso@heuresys.com";
+const PLATFORM_EMAIL = "platform-test-admin@collaudo.invalid";
 
 interface S {
   cookies: Map<string, string>;

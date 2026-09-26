@@ -25,7 +25,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { closePool } from "../src/db/client.js";
 
-const PLATFORM_EMAIL = "enzo.spenuso@heuresys.com";
+const PLATFORM_EMAIL = "platform-test-admin@collaudo.invalid";
 const HR_MANDATE_EMAIL = "federica.marchetti@rtl-bank.org";
 
 interface Session { cookies: Map<string, string> }

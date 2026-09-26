@@ -27,7 +27,7 @@ import { pool, closePool } from "../src/db/client.js";
 import { unSottopostoOrganizzativo, type Attore } from "./helpers/org-actors.js";
 
 const HR_MANDATE_EMAIL = "federica.marchetti@rtl-bank.org"; // TENANT_ADMIN — I20
-const PLATFORM_EMAIL = "enzo.spenuso@heuresys.com";
+const PLATFORM_EMAIL = "platform-test-admin@collaudo.invalid";
 
 /** Le sezioni della sfera privata, in ordine alfabetico (il contratto le dichiara così). */
 const PRIV_SECTIONS = [

@@ -12,7 +12,7 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
+const ADMIN_EMAIL = "platform-test-admin@collaudo.invalid";
 const NON_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
 
 interface LoginResult { cookies: Map<string, string>; csrfToken: string }

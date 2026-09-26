@@ -190,6 +190,14 @@ jobs:
       - name: Seed test personas (idempotent, login-only)
         run: pnpm db:seed-test-admin
 
+      # #258 (2026-09-26): la persona platformAdmin degli E2E e' ora
+      # platform-test-admin@collaudo.invalid (SERVICE, PLATFORM_ADMIN, MFA vera —
+      # enzo.spenuso@heuresys.com aveva il suo secondo fattore RESO SUO da #250).
+      # COLLAUDO_ACCESS_KEY_B64 viene dal drop-in systemd del runner, come in
+      # test-integration.yml (stesso runner label [self-hosted, off-prod]).
+      - name: Seed collaudo-access identities (idempotent)
+        run: pnpm db:provision-collaudo
+
       - name: Ricostruisci il fascicolo di RTL (dato creato da script, non da migrazione)
         working-directory: apps/api
         # ⚠ Sesto giro (34050172629), 1 rosso: `tenant-blueprints.spec.ts` cercava la

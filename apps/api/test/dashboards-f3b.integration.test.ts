@@ -40,7 +40,7 @@ interface Dati {
 }
 
 /** PLATFORM_ADMIN: mandato TECNICO — ADR-0032 gli maschera COMPENSATION ed EVALUATION. */
-const MANDATO_TECNICO = "enzo.spenuso@heuresys.com";
+const MANDATO_TECNICO = "platform-test-admin@collaudo.invalid";
 /** HRMS_MANAGER: mandato HR — I22 lo dichiara plenipotenziario sui dati business. */
 const MANDATO_HR = "valentina.conti@rtl-bank.org";
 /** Nessun dominio: solo il pavimento universale (I17). */

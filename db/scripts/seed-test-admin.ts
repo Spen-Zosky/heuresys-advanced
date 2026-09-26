@@ -12,7 +12,8 @@
  *   ┌───────────────┬─────────────────────────────────┬──────────────────────────────┐
  *   │ persona       │ real user                       │ role / scope                  │
  *   ├───────────────┼─────────────────────────────────┼──────────────────────────────┤
- *   │ platformAdmin │ enzo.spenuso@heuresys.com              │ PLATFORM_ADMIN (native)       │
+ *   │ platformAdmin │ platform-test-admin@collaudo    │ PLATFORM_ADMIN (#258, seeded  │
+ *   │               │ .invalid                        │ by provision-collaudo-access) │
  *   │ tenantAdmin   │ federica.marchetti@rtl-bank.org │ TENANT_ADMIN  (RTL_BANK)      │
  *   │ manager       │ paolo.caputo@rtl-bank.org       │ MANAGER (manages tommaso)     │
  *   │ employee      │ tommaso.fiore@rtl-bank.org      │ USER (paolo's subordinate)    │
@@ -65,9 +66,13 @@ dotenvConfig({ path: resolve(repoRoot, ".env") });
 
 /** The six E2E/integration personas, by real email. Order = display order.
  *  marco.rinaldi (TEAM_LEADER, r1b) joined the fixture set in S983 WS-E —
- *  the mandatory-MFA total coverage gates every login-capable persona. */
+ *  the mandatory-MFA total coverage gates every login-capable persona.
+ *  #258 (2026-09-26): enzo.spenuso@heuresys.com REMOVED — #250 gave him his OWN
+ *  MFA factor, and this script would otherwise stamp a fresh 'derived-access'
+ *  factor on his real account. The platform-admin test persona is now
+ *  platform-test-admin@collaudo.invalid, provisioned by
+ *  db/scripts/provision-collaudo-access.ts (pnpm db:provision-collaudo), not here. */
 const PERSONA_EMAILS: readonly string[] = [
-  "enzo.spenuso@heuresys.com",
   "federica.marchetti@rtl-bank.org",
   "paolo.caputo@rtl-bank.org",
   "tommaso.fiore@rtl-bank.org",

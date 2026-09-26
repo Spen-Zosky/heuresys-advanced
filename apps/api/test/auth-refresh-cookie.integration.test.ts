@@ -12,7 +12,7 @@
  *   - logout clears the refresh cookie on BOTH the live path ("/") and the
  *     legacy "/v1/auth" path (pre-D-26 cookies in the wild).
  *
- * Live DB dependency: enzo.spenuso@heuresys.com seeded via `pnpm db:seed-test-admin`.
+ * Live DB dependency: platform-test-admin@collaudo.invalid seeded via `pnpm db:seed-test-admin`.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -33,7 +33,7 @@ import { senzaCacheDiSessione } from "./helpers/session-cache.js";
 // chiedendo. Qui i login sono veri, sempre.
 senzaCacheDiSessione();
 
-const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
+const ADMIN_EMAIL = "platform-test-admin@collaudo.invalid";
 const ADMIN_PASSWORD = TEST_PERSONA_PASSWORD;
 
 /** light-my-request parsed Set-Cookie entry (attributes included). */

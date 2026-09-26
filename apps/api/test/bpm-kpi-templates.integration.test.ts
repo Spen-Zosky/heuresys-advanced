@@ -36,7 +36,7 @@ let ouKtId: string;
 describe("/v1/process-kpi-templates + /v1/organization-unit-kpi-templates", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "enzo.spenuso@heuresys.com");
+    platformS = await login(suite, "platform-test-admin@collaudo.invalid");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
 
     const f = await suite.app.inject({

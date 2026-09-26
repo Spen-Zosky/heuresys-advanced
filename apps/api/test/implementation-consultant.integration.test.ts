@@ -21,7 +21,7 @@ import { senzaCacheDiSessione } from "./helpers/session-cache.js";
 senzaCacheDiSessione();
 
 const CONSULTANT_EMAIL = "implementation-consultant@collaudo.invalid";
-const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
+const ADMIN_EMAIL = "platform-test-admin@collaudo.invalid";
 
 interface S { cookies: Map<string, string>; csrfToken: string; userId: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");

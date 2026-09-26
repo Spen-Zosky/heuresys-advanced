@@ -53,6 +53,11 @@ export const MASTER_PATH = join(REPO, ".secrets", "dev-access-master.key");
 export const REAL_PERSON_EMAILS = [
   "chiara.spenuso@heuresys.com",
   "andrea.spenuso@heuresys.com",
+  // #258 (2026-09-26): la deroga del 2026-08-08 e' RITIRATA. #250 ha dato a Enzo il suo
+  // secondo fattore VERO (non piu' di collaudo): i test devono smettere di impersonarlo, come
+  // gia' vale per Chiara e Andrea. La persona di collaudo con mandato di piattaforma e' ora
+  // platform-test-admin@collaudo.invalid (apps/api/scripts/collaudo-access.mjs).
+  "enzo.spenuso@heuresys.com",
 ];
 
 export function isRealPerson(email) {

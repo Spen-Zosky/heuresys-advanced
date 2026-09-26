@@ -41,8 +41,18 @@ const toActor = (r: Row): Actor => ({
   tenantId: r.user_tenant_id,
 });
 
-/** Gli utenti impersonabili: attivi e non persone fisiche. */
-const IMPERSONABLE = `u.user_status = 'ACTIVE'`;
+/**
+ * Gli utenti impersonabili: attivi, non persone fisiche, e NON esenti dal secondo fattore.
+ *
+ * #258 (2026-09-26): un utente esente (le identita' `*@collaudo.invalid` diverse da
+ * `platform-test-admin@collaudo.invalid`, mig 000116/000118/000284) non cammina mai la sfida
+ * MFA — un test che lo pescasse per un ruolo generico (`userWithRole`) userebbe un attore che
+ * non prova nulla sul secondo fattore, e lo farebbe in silenzio. L'esclusione e' sulla
+ * PROPRIETA' (esente sì/no), non su un elenco di email: vale per qualunque identita' futura.
+ */
+const IMPERSONABLE = `u.user_status = 'ACTIVE' AND NOT EXISTS (
+  SELECT 1 FROM sys.sys_auth_mfa_exemptions e
+   WHERE e.auth_mfa_exemption_user_id = u.user_id AND e.auth_mfa_exemption_enabled)`;
 
 function requireRow(rows: Row[], what: string, how: string): Actor {
   const usable = rows.find((r) => !isRealPerson(r.user_email));

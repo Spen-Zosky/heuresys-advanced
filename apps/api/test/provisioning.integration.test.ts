@@ -17,7 +17,7 @@ import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { anIndustryCode } from "./helpers/industry.js";
 import { env } from "../src/config/env.js";
 
-const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
+const ADMIN_EMAIL = "platform-test-admin@collaudo.invalid";
 const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
 const MARCA_MODELLO = `PROV-${Date.now()}`;
 let modello: ModelloDiProva;

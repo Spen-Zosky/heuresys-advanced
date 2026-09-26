@@ -8,7 +8,7 @@
  * asserted against the SAME live GET /v1/analytics/skills-group-share payload the
  * page fetches at runtime (the ESCO group distribution, backfilled live S990).
  *
- * Persona: platformAdmin (enzo.spenuso@heuresys.com → PLATFORM scope). `analytics:view`
+ * Persona: platformAdmin (platform-test-admin@collaudo.invalid → PLATFORM scope). `analytics:view`
  * is granted to the admin roles by migration 000057; the catalogue is global.
  */
 

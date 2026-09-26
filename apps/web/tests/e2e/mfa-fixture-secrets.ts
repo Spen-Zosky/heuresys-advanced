@@ -39,6 +39,7 @@ import path from "node:path";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { readMaster, derivePassword } from "../../../api/scripts/derive-access.mjs";
+import { readCollaudoKey, deriveCollaudoPassword, isCollaudoIdentity } from "../../../api/scripts/collaudo-access.mjs";
 
 /** Etichetta dei fattori creati dal provisioning derivato (Z-262). */
 export const E2E_FIXTURE_LABEL = "derived-access";
@@ -47,6 +48,12 @@ let masterCache: Buffer | null = null;
 function master(): Buffer {
   masterCache ??= readMaster();
   return masterCache;
+}
+
+let collaudoKeyCache: Buffer | null = null;
+function collaudoKey(): Buffer {
+  collaudoKeyCache ??= readCollaudoKey();
+  return collaudoKeyCache;
 }
 
 /** Il deposito che il seed di collaudo scrive (gitignored, per-macchina, rigenerato a ogni corsa).
@@ -122,8 +129,13 @@ export function totpSecretFor(email: string): string {
  * ogni persona e i sei setup di autenticazione andavano in timeout, con la suite
  * intera a cascata. La derivazione è la stessa del lato API — una sola
  * implementazione, non una copia da tenere allineata.
+ *
+ * #258 (2026-09-26): la persona di collaudo `platformAdmin` (platform-test-admin@collaudo.invalid)
+ * ha la password dalla chiave DI COLLAUDO, non dalla chiave madre delle persone (#169 F2) — sono
+ * due segreti separati apposta. Il ramo e' lo stesso aggiunto lato API in test/helpers/personas.ts.
  */
 export function passwordFor(email: string): string {
+  if (isCollaudoIdentity(email)) return deriveCollaudoPassword(collaudoKey(), email);
   return derivePassword(master(), email);
 }
 

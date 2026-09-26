@@ -36,7 +36,7 @@ let employee: Map<string, string>;
 describe("3.4 SYSTEM broadcast — POST /v1/notifications (live)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    admin = await login(suite.app, "enzo.spenuso@heuresys.com");
+    admin = await login(suite.app, "platform-test-admin@collaudo.invalid");
     employee = await login(suite.app, "tommaso.fiore@rtl-bank.org");
   });
 
@@ -120,7 +120,7 @@ describe("3.4 SYSTEM broadcast — POST /v1/notifications (live)", () => {
     expect(events[0]!.recipients).toBe(2);
     expect(events[0]!.readCount).toBe(0);
     expect(events[0]!.priority).toBe("MEDIUM");
-    expect(events[0]!.createdByEmail).toBe("enzo.spenuso@heuresys.com");
+    expect(events[0]!.createdByEmail).toBe("platform-test-admin@collaudo.invalid");
     expect(body.total).toBeGreaterThanOrEqual(1);
 
     // cleanup of this test's own event (D-23 idiom)
@@ -132,7 +132,7 @@ describe("3.4 SYSTEM broadcast — POST /v1/notifications (live)", () => {
     // event reaching BOTH tenants: 1 RTL user + 1 HEURESYS user (derived live)
     const targets = await pool.query<{ user_id: string; user_email: string }>(
       `SELECT user_id, user_email FROM sys.sys_users
-        WHERE user_email IN ('antonio.parisi@rtl-bank.org', 'enzo.spenuso@heuresys.com')`,
+        WHERE user_email IN ('antonio.parisi@rtl-bank.org', 'platform-test-admin@collaudo.invalid')`,
     );
     expect(targets.rows).toHaveLength(2);
     const crossSubject = `${SUBJECT} cross-tenant`;

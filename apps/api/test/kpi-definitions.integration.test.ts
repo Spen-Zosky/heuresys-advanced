@@ -30,7 +30,7 @@ const createdIds: string[] = [];
 describe("/v1/kpi-definitions/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "enzo.spenuso@heuresys.com");
+    platformS = await login(suite, "platform-test-admin@collaudo.invalid");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
   });
 

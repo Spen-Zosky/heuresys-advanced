@@ -46,7 +46,7 @@ let runId = "";
 
 beforeAll(async () => {
   suite = await buildTestApp();
-  platform = await login(suite, "enzo.spenuso@heuresys.com");
+  platform = await login(suite, "platform-test-admin@collaudo.invalid");
   utente = await login(suite, "tommaso.fiore@rtl-bank.org"); // USER: non detiene seed_acquisition:*
   az = await costruisciAziendaP4(pool, MARCA);
 }, 120_000);

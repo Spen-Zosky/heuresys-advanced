@@ -13,6 +13,15 @@ the read-only Cowork design in the plugin repo (`docs/MCP_TOOL_CATALOG.md`,
   (reads auto-allow; writes → human approval; **deny-by-default on timeout/error**, M-2).
 - `src/heuresys-client.ts` — `/v1` client: hybrid session (forwarded user cookie /
   service-user session), **CSRF double-submit on writes**, single-flight refresh (M-5).
+- `src/persone-distinte.ts` — il **contatore di persone distinte** per conversazione (#251,
+  ADR-0040 R2): raccoglie gli UUID sotto i nomi `*UserId` delle risposte, **meno** i sei attori
+  di audit, e dice il livello. Il freno dell'agente si misura in persone, non in righe.
+- `src/soglie-persone.ts` — il **criterio** delle soglie, non i numeri: legge le misure generate
+  in `docs/kb/agent-soglie-persone.json` (`docs/kb/tools/build_soglie_agente.py`) e le ri-deriva
+  a ogni caricamento. Misure illeggibili → livello `non-misurato`, che `#252` tratta come «oltre
+  la soglia»: l'ignoto non è un permesso.
+- `scripts/live-persone-distinte.ts` — la dimostrazione LIVE del contatore (login vero col
+  secondo fattore, sole letture, verdetto letto dal diario).
 - `src/mcp-tools.ts` — MCP tool catalogue over `/v1` (real permission codes; reads
   auto, writes gated; `job-families` + `blueprint-*` use the service principal).
 - `src/sdk-agent.ts` — `query()` wiring (loads the plugin, attaches the MCP server,

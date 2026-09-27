@@ -121,6 +121,12 @@ ESCLUSIONI: dict[str, str] = {
     "sys_schema_migrations": "[TECNICA] registro delle migrazioni applicate.",
     "sys_reference_translations": "[TECNICA] registro delle traduzioni, non dato personale.",
     "sys_ui_interfaces": "[PIATTAFORMA] voci di menu.",
+    "sys_platform_user_tenant_assignments":
+        "[PIATTAFORMA] #262, 2026-09-28: quali clienti un utente di piattaforma puo' vedere "
+        "(mig 000421, R-0). E' un'assegnazione di ACCESSO (chi puo' amministrare quale "
+        "tenant), non un dato che descrive la persona nel suo lavoro — la stessa ragione "
+        "per cui `sys_auth_*` resta fuori dal portale self (I7). Letta dal modulo "
+        "`platform-tenant-assignments` per gli amministratori, mai dal proprietario stesso.",
     "sys_gdpr_registry": "[PIATTAFORMA] mappa GDPR delle tabelle; il fascicolo dell'art. 15 "
                          "si esercita con la rotta dedicata, non leggendo la mappa.",
     "sys_industry_codes": "[TECNICA] catalogo dei settori (mig 000305).",

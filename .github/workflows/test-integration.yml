@@ -48,10 +48,15 @@ jobs:
     # churn — DEBT_REGISTER D-09). Push events have no PR context → run.
     if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
     runs-on: [self-hosted, off-prod]
-    # 25min: the full vitest suite takes ~13-14min on the off-prod twin (2-core
-    # x86) + ~2-4min setup/install — the old 15min budget killed a PASSING run
-    # at the post-steps (S1023, reported as "cancelled" by GitHub).
-    timeout-minutes: 25
+    # 35min (raised from 25, S1115): the suite has grown from 153 to 292 files since
+    # S1023's 13-14min measurement — 5 PASSING runs on 2026-09-26 measured 21-23min
+    # job time (checkout→vitest), living 2-4min under the old 25min ceiling. One more
+    # test file (Z-123) tipped it over: 6 CONSECUTIVE runs killed at exactly ~25m20s,
+    # "Run vitest integration suite" never finishing — a real budget problem, not the
+    # home-network flakiness that looked like the cause at first (ruled out: the same
+    # suite ran clean end-to-end in 20m24s directly on the twin, network notwithstanding).
+    # 35min gives the current ~21-23min job a real margin instead of living at the edge.
+    timeout-minutes: 35
     env:
       # POSTGRES_* (except the DB name) + JWT_PRIVATE_KEY/JWT_PUBLIC_KEY +
       # COOKIE_SECRET + MFA_ENCRYPTION_KEY come from runner EnvironmentFile.

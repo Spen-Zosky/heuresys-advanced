@@ -1,7 +1,7 @@
 # 260 — Il runner della CI porta una chiave di collaudo che non usa: due chiavi per le stesse quattordici utenze
 
 > **item**: #260 · **priorità**: P2 · **stima**: pochi minuti, ma l'atto è **sulla macchina**, non sul repo
-> **stato**: NON AVVIATO
+> **stato**: CHIUSO (2026-09-27)
 > **nasce-da**: S1108 (2026-09-25), durante D11-0 e fuori dal suo scope — indagando perché la CI fosse rossa da due giorni. Dettaglio in `.programmi/K-ruoli-direzione/esiti/D11.md` (sezione D11-0) e `esiti/REGISTRO_SCOPERTE.md`, riga 2026-09-24.
 
 ## Il fatto, misurato
@@ -51,14 +51,15 @@ Riguarda una macchina e un segreto, non il codice: la sceglie Enzo.
 
 ## Fasi
 
-- [ ] **F1 — La misura, rifatta** — ri-leggere le due impronte (comandi in coda a questo file) prima di toccare qualunque cosa: fra oggi e quel giorno il drop-in o il servizio potrebbero essere cambiati, e una decisione presa su impronte vecchie sceglie la strada sbagliata. **fatto =** le due impronte sono scritte nell'esito con la data di oggi, e si sa se sono ancora due o già una.
-- [ ] **F2 — La decisione, e l'atto sulla macchina** — Enzo sceglie fra riavvio del runner e allineamento del drop-in; la CLI esegue la parte che le compete e dichiara quella che non le compete. Guardia: nessuna corsa CI in volo al momento dell'atto (`gh run list --workflow=test-integration.yml --limit 3`). **fatto =** una sola chiave risulta in uso, e la decisione è depositata dove le altre.
-- [ ] **F3 — La prova che non serve più riparare** — una corsa CI completa in cui il provisioning non riallinea nulla. **fatto =** nel log dello step «Seed collaudo-access identities» compare `di cui DISALLINEATE misurate .. 0`, e la corsa è verde.
+- [x] **F1 — La misura, rifatta** (2026-09-27) — ri-misurate le due impronte: ancora due (`a4191764` nel drop-in, `591962ed` nel repo). **Scoperta non prevista**: il servizio del runner risultava riavviato il 2026-09-26 21:03 (dopo la scrittura del drop-in del 19/9), quindi il PROCESSO in esecuzione derivava già da `a4191764` — non più da `591962ed` come misurato in S1108. Verificato leggendo `/proc/<pid>/environ` del processo reale.
+- [x] **F2 — La decisione, e l'atto sulla macchina** (2026-09-27) — Enzo ha scelto: allineare il repo alla chiave ora viva (`a4191764`), non tornare indietro con un secondo riavvio. Eseguito con `/tmp/allinea-collaudo.sh` (script senza segreti nel testo, verifica l'impronta attesa prima di scrivere, backup del valore precedente in `.secrets/collaudo-access.key.bak-20260927-2`). **Incidente in corsa**: un primo tentativo via comando SSH inline da PowerShell si è rotto per virgolette annidate e ha lasciato il file a 0 byte per una manciata di secondi — corretto subito dal backup fatto in apertura, nessuna perdita: la lezione è usare uno script su file per operazioni con segreti da PowerShell, mai un one-liner con quote nidificate.
+- [x] **F3 — La prova che non serve più riparare** (2026-09-27, run `36328679968`) — log dello step «Seed collaudo-access identities»: `credenziali RIALLINEATE ....... 0`, corsa verde.
 
 ## Chiuso quando
 
 Una sola chiave di collaudo risulta in uso sul linux-pc, e l'impronta del drop-in coincide con
-quella che il processo del runner deriva davvero.
+quella che il processo del runner deriva davvero. ✅ **VERO dal 2026-09-27**: drop-in, processo e
+`.secrets/collaudo-access.key` derivano tutti e tre `a4191764e85bdde4`.
 
 ## Come si ri-misura
 

@@ -1,7 +1,7 @@
 # 255 — La scorecard di due diligence è ferma al 17 giugno: rivalidarla su HEAD e aggiornare i tre documenti
 
 > **item**: #255 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: NON AVVIATO
+> **stato**: CHIUSO
 > **nasce-da**: censimento Cowork del 2026-09-14 (perdita n. 2 del canale). La rivalidazione dell'8 settembre vive fuori repo (`Claude Desktop\heuresys-advanced\sessioni\session_2026-09-08_dottrina-perimetri-agente\`).
 
 ## Il fatto
@@ -16,8 +16,8 @@
 
 ## Fasi
 
-- [ ] **F1 — Rivalidare i 16 pilastri su HEAD** — un `WS-*.md` per pilastro aggiornato con HEAD, data e le evidenze (comando + output), pesi invariati salvo ragione scritta. **fatto =** ogni score della scorecard nuova ha un ancoraggio in un `WS-*.md` con data ≥ quella della sessione.
-- [ ] **F2 — Riscrivere i tre documenti** — `SCORECARD.md`, `EXECUTIVE_SUMMARY.md`, `REPORT.md` con HEAD e data nuovi; il precedente del 17 giugno resta leggibile in `docs/archive/` o come sezione storica datata. **fatto =** `grep -n "2026-06-17" docs/due-diligence/{SCORECARD,EXECUTIVE_SUMMARY,REPORT}.md` trova solo la citazione storica.
-- [ ] **F3 — Il confronto con l'8 settembre** — una riga per pilastro: giugno · settembre (fuori repo) · oggi, con la ragione di ogni scarto sopra 10 punti. **fatto =** la tabella è nel REPORT e nessuno scarto è senza ragione.
+- [x] **F1 — Rivalidare i 16 pilastri su HEAD** — FATTO 2026-09-28 · 5 analisti indipendenti (P1-P4, T1-T4, T5-T7, T8-T9, X1-X3), ogni `WS-*.md` riscritto con HEAD `5faa2bc2`, data odierna, evidenza comando+output.
+- [x] **F2 — Riscrivere i tre documenti** — FATTO 2026-09-28 · `SCORECARD.md`, `EXECUTIVE_SUMMARY.md`, `REPORT.md` riscritti con HEAD/data nuovi; il precedente del 17/6 resta leggibile in `SCORECARD.md` §Storico. Verificato: `grep -n "2026-06-17" docs/due-diligence/{SCORECARD,EXECUTIVE_SUMMARY,REPORT}.md` → 0 righe (nessun formato data storico letterale usato, solo prosa "17 giugno").
+- [x] **F3 — Il confronto con l'8 settembre** — FATTO 2026-09-28 · tabella in `REPORT.md` §11: colonna giugno/oggi misurata per tutti e 16 i pilastri, colonna 8-settembre limitata all'aggregato (58/100, dichiarato non ri-derivabile da questo repo) con nota di onestà metodologica esplicita. Due scarti >10 punti (T3 +14, T8 +17), entrambi con ragione scritta.
 
 ## Cronaca

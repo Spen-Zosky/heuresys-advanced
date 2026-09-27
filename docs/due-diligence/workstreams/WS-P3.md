@@ -1,60 +1,73 @@
 # WS-P3 — Business model & economics
-
-> Pilastro P3 (peso 11). Analista: Product/Market (avversariale). HEAD `ce26608` (S994), 2026-06-17. Info finanziarie non-discoverable → assunzioni Q1-Q8 (01_DISCOVERY.md) dichiarate + domande founder.
+Agente: Product/Market (avversariale) | Modello: Sonnet 5 | Data: 2026-09-28
+HEAD: `5faa2bc2ca78c40bec603e77df9da176c6971337`
 
 ## Sintesi
 
-**Non esiste un business model implementato.** Verificato nel codice: zero billing, zero pricing, zero subscription management, zero metering, zero signup/provisioning self-service. heuresys è oggi un **prodotto, non un'azienda**: pre-revenue, 0 clienti paganti (assunzione Q1, coerente con 0 tenant reali), burn ≈ costo infra OCI free-tier ARM (~€0) + tempo del founder (Q2). Questo ha due letture opposte e bisogna tenerle entrambe. (1) **Positiva**: il rischio capitale bruciato è quasi nullo — è stato costruito un HRMS completo a costo infra ~€0, segnale di capital-efficiency estrema. (2) **Negativa e più pesante per l'investitore**: l'infra free-tier ARM è un **giocattolo da dimostrazione, non un'infrastruttura commerciale** — single-VM, single-DB, CI runner = la stessa VM di prod (SPOF confessato D-08/C6), nessun backup off-host fino a poco fa, nessuna isolation multi-tenant a livello infra, nessun SLA possibile. Il momento in cui arriva il primo cliente reale, *tutta* l'economia cambia: serve infra pagante, billing, provisioning, GDPR tooling, supporto. Il "cost-to-GA-commerciale" non è incrementale, è un nuovo stadio. Le unit economics sono **non calcolabili** (no pricing, no CAC, no clienti) → qualunque cifra è speculativa.
+**Il verdetto centrale di giugno regge: non esiste un business model implementato.** `grep` odierno su `apps/api/src`+`apps/web/src` per stripe/billing/subscription/pricing/checkout/invoice/payment dà zero riscontri funzionali (solo campi `payment_frequency`/`payment_date` dei cedolini e copy di showcase). Zero clienti paganti, zero piani tariffari, zero metering. Ma tre pezzi del percorso a GA-commerciale che a giugno erano *gap dichiarati* oggi sono **codice shippato e provato live**: il GDPR tooling (D-14, export/erasure reali su PROD), un motore di provisioning tenant transazionale (`POST /v1/tenants/provision`, D-14) e un secondo runner CI fuori dalla VM di produzione (D-08 F2-F5) con backup off-host. Questo sposta la lettura da "prodotto, non azienda" a "prodotto con alcuni prerequisiti di go-to-market già rimossi, ma senza ancora un solo meccanismo di ricavo". Contestualmente è emerso un rischio economico **nuovo**, non visto a giugno: l'intera capacità AI del prodotto (agent-gateway, ADR-0040) gira su un **abbonamento Claude Max personale** (`AGENT_GATEWAY_SUBSCRIPTION_AUTH=1`), condiviso da tutti i tenant, senza metering né attribuzione di costo per cliente — un'architettura di costo che non è pensata per scalare a clienti paganti multipli e che pone un tema di termini contrattuali quando l'uso diventa commerciale a terzi. Il Tenant Builder (le 4 parti che dovrebbero rendere ripetibile l'onboarding di un cliente reale) resta **provato solo su un'industria** (banking, RTL Bank): P1/P2a chiuse, P2b/2c/P3/P4 ancora ACTIVE/GATED — replicare l'onboarding su un settore diverso dal banking non è ancora dimostrato end-to-end.
 
 ## Claim del venditore rivalidati
 
 | Claim | Esito | Evidenza |
 |---|---|---|
-| "Nessun pricing/billing nel codice" | **CONFERMATO** | `grep -riE "stripe|billing|subscription|pricing|checkout|invoice|payment"` su `apps/api/src`+`apps/web/src` → 0 match funzionali (solo `AGENT_GATEWAY_SUBSCRIPTION_AUTH` + showcase copy). PROD live: nessun CTA signup/pricing |
-| "Gira su OCI free-tier ARM ≈ €0 infra" | **CONFERMATO** | 01_DISCOVERY + memoria progetto: OCI Free Tier ARM Ubuntu, api:8013/web:3013 systemd, DB nativo localhost:5432, CI self-hosted sulla stessa VM |
-| C10 "GDPR tooling gated al primo tenant" | **CONFERMATO** | ADR-0023 no-PII by-design; GDPR/retention assenti by-design (roadmap 3.9 gated su 3.1) → prerequisito non-negoziabile al primo dato reale |
-| "v1.0.0 = pronto a monetizzare" | **SMENTITO (implicito)** | nessuno strato di monetizzazione esiste; la GA è tecnica (vedi P1-001) |
+| "Nessun pricing/billing nel codice" | **CONFERMATO** | `grep -riE "stripe\|billing\|subscription\|pricing\|checkout\|invoice\|payment"` su `apps/api/src`+`apps/web/src` (2026-09-28): 0 match funzionali — solo `payment_frequency`/`payment_date` (campi cedolino, `apps/api/src/modules/me/repository.ts:359-409`), showcase copy (`apps/web/src/app/showcase/landing-page/page.tsx:44`), e `AGENT_GATEWAY_SUBSCRIPTION_AUTH` |
+| "Gira su OCI free-tier ARM ≈ €0 infra" | **CONFERMATO (nessuna evidenza di cambiamento)** | Nessun riferimento nel repo a un upgrade di tier OCI o a hosting a pagamento; unico costo osservato è Voyage embeddings, ~$0 reale (SOT_STATE.md:3417: "Costo reale $0 (~1,2M token entro i 200M gratis)") |
+| C10 "GDPR tooling gated al primo tenant" | **SMENTITO — ora SHIPPED** | `docs/kb/SOT_STATE.md` (delta S1023, 2026-07-21): mig `000186`, registry `sys_gdpr_data_map` (54 righe), `sys_user_consents`, `sys_gdpr_requests`; endpoint `/me/gdpr/export`+`/me/consents`; **demo LIVE PROD**: login reale federica → export tommaso "54 tabelle/37 con dati" + erasure E2E provata |
+| "v1.0.0 = pronto a monetizzare" | **SMENTITO (invariato)** | Nessuno strato di monetizzazione esiste oggi; GA resta tecnica |
+| (nuovo) "Onboarding di un nuovo tenant è possibile" | **PARZIALE** | `apps/api/src/modules/tenants/provisioning.ts` (D-14): `provisionTenant()` transazionale, admin-gated (`tenant:create`=PLATFORM_ADMIN), crea tenant+admin+ruoli+policy MFA in una tx, 409 idempotente su `tenantCode` duplicato. Ma resta **assisted, non self-service** (nessun signup pubblico, nessun collegamento a un pagamento), e il modello dati per un'azienda NON bancaria (Tenant Builder P2b/2c/P3/P4) non è ancora dimostrato end-to-end — `docs/kb/SOT_BACKLOG.md:150,187` (#206 P4 GATED, #198 P3 GATED) |
 
 ## Finding
 
 **P3-001 · Zero infrastruttura di monetizzazione: non è un business, è un prodotto · High · functional-debt**
-Evidenza: 0 match billing/pricing/subscription/signup nel codice; PROD login-only; 0 clienti. Nessun tenant-lifecycle self-service, nessun metering uso/seat, nessun piano.
-Impatto: tra "prodotto demo-completo" e "prima fattura emessa" c'è un intero stadio di costruzione (signup→provisioning→billing→dunning→supporto). Per l'investitore, il cost-to-revenue è interamente futuro e non stimato dal venditore.
+Evidenza: `grep -riE "stripe|billing|subscription|pricing|checkout|invoice|payment"` su `apps/api/src`+`apps/web/src` (2026-09-28) → 0 match funzionali. Nessuna tabella `sys_plan*`/`billing_plan*`/`pricing_tier*`/`subscription_plan*` nelle migrazioni (`grep -ril` su `db/migrations` → 0 risultati). 2 tenant ACTIVE in produzione (RTL Bank + Heuresys System stesso, ADR-0026/I15), invariato da giugno.
+Impatto: identico a giugno — tra "prodotto demo-completo" e "prima fattura emessa" manca l'intero strato commerciale (piani, metering, dunning, supporto contrattuale). Il cost-to-revenue resta interamente futuro.
 GA-blocker: **sì** (per GA commerciale).
-Remediation: billing+subscription (Stripe/Paddle) + self-service provisioning + plan/metering. Effort **L-XL**. Confidence: Alta.
+Remediation: billing+subscription (Stripe/Paddle) + piano/metering. Effort **L-XL**. Confidence: Alta.
 
-**P3-002 · Infra free-tier ARM è capital-efficiency estrema MA non è infrastruttura commerciale · High · risk**
-Evidenza: single OCI free-tier VM ospita API+web+DB+CI runner; CI SPOF e fork-PR ACE su host prod confessati (D-08/C6, peso T8). Nessuna ridondanza, nessun multi-AZ, nessun managed-DB, backup off-host solo recente (R5/QW-C3).
-Impatto duplice: (+) costruire un HRMS completo a ~€0 infra è un segnale fortissimo di efficienza; (−) questa infra non regge un solo cliente con aspettative di SLA/uptime/DR. La migrazione a infra commerciale (managed Postgres, runtime ridondato, CI isolata) è un costo e un rischio reali al go-live.
-GA-blocker: no per demo; **sì** per servire clienti.
-Remediation: piano infra commerciale (managed DB, runtime HA, CI isolata da prod). Effort **L**. Confidence: Alta.
+**P3-002 · Prerequisiti infra/compliance al go-live in parte RIMOSSI dal 17 giugno · Medium (era High) · risk (con componente strength)**
+Evidenza: D-08 F2-F5 (SOT_STATE.md, delta S1023): secondo runner CI self-hosted `linux-pc-runner` off-prod, i 3 workflow pesanti (`test-integration`, `playwright-smoke`, `build-web`) retargati fuori dalla VM di produzione; deploy-gate `ci-gate.sh` fail-closed; backup con "archivio off-host su linux-pc" già presente da S1029. GDPR tooling SHIPPED (vedi claim sopra). Resta però: singola VM OCI, singolo DB Postgres nativo (I13, niente Docker/managed-DB), nessun multi-AZ — architettura ancora non ridondata per un SLA commerciale.
+Impatto: il salto di stadio per servire un cliente pagante reale è oggi più piccolo di giugno (CI non è più sullo stesso host di prod, GDPR export/erasure funzionano) ma **l'infra di runtime resta una singola VM free-tier**: un solo punto di guasto per API+web+DB. Non è più "un giocattolo da demo" ma non è ancora "infrastruttura commerciale con SLA".
+GA-blocker: no per demo; **sì** per un contratto con SLA/uptime.
+Remediation: piano infra commerciale (managed DB o failover, runtime ridondato). Effort **L** (ridotto da giugno, parte del lavoro preparatorio è fatto). Confidence: Alta.
 
 **P3-003 · Unit economics non calcolabili — qualunque cifra è speculativa · Medium · risk**
-Evidenza: no pricing (P3-001), 0 clienti, 0 CAC osservato, 0 churn. Benchmark di mercato (P2): €7.60-20/dip/mese.
-Impatto: ARPA, LTV, CAC, payback, gross margin sono tutti ipotetici. Il gross margin *teorico* di un SaaS HRMS è alto (>70%) ma non dimostrato. L'investitore non può sottoscrivere alcun modello finanziario; deve trattarlo come scommessa pre-seed.
+Evidenza: nessun pricing (P3-001), 0 clienti esterni paganti, 0 CAC osservato, 0 churn. Invariato rispetto a giugno.
+Impatto: ARPA, LTV, CAC, payback, gross margin restano ipotetici. L'investitore non può sottoscrivere alcun modello finanziario.
 GA-blocker: no.
-Remediation: pilota a prezzo reale per generare i primi data-point. Effort **M** (gated su P1-001). Confidence: Bassa (per assenza di dati, non per incertezza di analisi).
+Remediation: pilota a prezzo reale per generare i primi data-point (gated su P3-001/billing). Effort **M**. Confidence: Bassa (per assenza di dati).
 
-**P3-004 · Costo-a-GA-commerciale ≈ programma post-v1 completo, non incrementale · Medium · risk**
-Evidenza: POST_V1_ROADMAP §1-3 — provisioning (3.1, L), GDPR tooling (3.9, M), billing (non in roadmap, L-XL), BPM runtime se si vende "BPM" (3.3, L), notification email (3.4, S), security audit/pentest (3.2, M). Sommando le fasi additive dichiarate + il billing mancante, il cammino a un'azienda vendibile è multi-mese full-time.
-Impatto: l'investitore finanzia *il percorso a revenue*, non *il completamento del prodotto* (che è già avanzato). Il use-of-funds è chiaro (team + GTM + infra + compliance), ma sostanziale.
+**P3-004 · Costo AI per-tenant non misurato, e l'architettura di costo non scala a molti clienti paganti · High · risk (nuovo, non presente nel rapporto di giugno)**
+Evidenza: `.env.example:284-292` e `apps/agent-gateway/src/subscription-auth.ts:6,33` — `AGENT_GATEWAY_SUBSCRIPTION_AUTH=1` fa girare l'intera capacità AI (agent-gateway, ricerca web, matching) su un **abbonamento Claude Max personale** invece che su una API key a consumo; `apps/agent-gateway/src/soglie-persone.ts` (ADR-0040) introduce soglie di conferma calibrate sul tenant più grande (RTL Bank, 25/40 misurati 2026-09-08) ma **non introduce metering né attribuzione di costo per tenant** — è un freno di sicurezza (quante persone tocca una conversazione), non uno strumento di costo.
+Impatto: oggi, con 2 tenant di cui uno interno, il costo marginale dell'AI è ≈0 (positivo per il burn attuale). Ma è un'architettura a **capacità condivisa e non misurata**: (a) i rate-limit dell'abbonamento sono globali, non per-cliente — clienti paganti concorrenti si limiterebbero a vicenda senza che nessuno lo sappia; (b) non esiste un modo di sapere quanto costa l'AI per-cliente, quindi non è possibile né prezzare né includere l'AI in un piano tariffario con margine dimostrabile; (c) usare un abbonamento personale per servire terzi paganti è una questione di termini contrattuali da verificare con il fornitore prima di vendere, non solo tecnica.
+GA-blocker: **sì**, per qualunque go-to-market che includa più di un cliente pagante concorrente sull'AI.
+Remediation: introdurre metering per-tenant (anche solo un contatore di chiamate/token in audit log, che già esiste via `agent-audit.jsonl` per altri scopi) + valutare un piano a consumo/API key per il traffico commerciale, separato dall'abbonamento di sviluppo. Effort **M**. Confidence: Media (l'assenza di metering è verificata nel codice; l'impatto commerciale/contrattuale è una stima, non un fatto legale verificato).
+
+**P3-005 · Motore di provisioning tenant: da zero a un'API transazionale, ma resta assisted non self-service · Medium (miglioramento da giugno) · functional-debt**
+Evidenza: `apps/api/src/modules/tenants/provisioning.ts` (D-14 FASE 1+2): `provisionTenant()` crea tenant+primo TENANT_ADMIN+ruoli+policy MFA in un'unica transazione, con rollback atomico su qualunque fallimento; gated dietro il permesso `tenant:create` (solo PLATFORM_ADMIN) e dietro il kill-switch `TENANT_PROVISION_ENABLED` (`apps/api/src/config/env.ts:301`). Tenant Builder (le 4 parti che generano il modello dati di un'azienda dalla ricerca web) è avanzato ma non chiuso: P1/P2a **DONE**, P2b/2c **ACTIVE** (#205), P3 **GATED** (#198, aspetta una decisione di Enzo sulle fonti approvate), P4 **GATED** (#206, aspetta che P3 T9 produca un'azienda reale non bancaria) — `docs/kb/SOT_BACKLOG.md:114-187`.
+Impatto: onboardare un nuovo cliente **bancario** oggi richiede un'API interna (non un form self-service) più il fascicolo già costruito per RTL Bank come riferimento. Onboardare un cliente di un **altro settore** richiede completare P2b/2c/P3/P4, oggi non provato end-to-end su un'azienda reale non bancaria. Questo riduce ma non chiude il gap di "cost-to-onboard" segnalato a giugno.
+GA-blocker: no per un secondo cliente bancario; **sì** per un cliente di settore diverso finché il Tenant Builder non è chiuso.
+Remediation: completare #198 (decisione di Enzo sulle fonti approvate) e #206 T9. Effort **L** (dipendenze incrociate dichiarate nel backlog). Confidence: Alta (stato letto direttamente dal backlog e dal codice).
+
+**P3-006 · Costo-a-GA-commerciale resta un programma multi-mese, ma più corto di giugno · Medium · risk**
+Evidenza: rispetto a giugno, GDPR (P3-004 di giugno) e provisioning (parte di P3-001 di giugno) sono usciti dal residuo. Resta: billing (P3-001, non in alcuna roadmap concreta), metering AI (P3-004 nuovo), Tenant Builder multi-industry (P3-005), SLA/ridondanza infra (P3-002).
+Impatto: il "use-of-funds" per un investitore resta sostanziale ma più preciso e più corto che a giugno: billing+metering+multi-industry+infra ridondata, non più "l'intero programma post-v1".
 GA-blocker: n/a (è il cost-to-GA stesso).
-Remediation: roadmap GTM finanziata. Effort **XL** (programma). Confidence: Media.
+Remediation: roadmap GTM finanziata, ora scriva-bile con voci più concrete (billing, metering AI, secondo settore). Effort **XL** (programma). Confidence: Media.
 
-**P3-005 · Burn ~€0 + IP 100% founder = rischio capitale minimo finora · Medium · strength**
-Evidenza: infra free-tier ~€0 (Q2); sole-coder, repo proprio, IP 100% founder (Q5, da confermare); deps OSS prevalentemente MIT/Apache (X2). `pnpm audit --prod` = 0 vulnerabilità.
-Impatto: ciò che esiste è stato creato con capitale quasi nullo → l'investimento non sana perdite pregresse, finanzia crescita. Downside del capitale già speso ≈ 0. Bus-factor 1 resta il rischio chiave (X3).
+**P3-007 · Burn ~€0 + capital-efficiency confermata, nessuna evidenza di cambiamento · Medium · strength**
+Evidenza: nessun segnale nel repo di un upgrade di tier infra o di spesa cloud a pagamento; unico costo di terze parti osservato (Voyage embeddings) è ~$0 reale entro il tier gratuito. `pnpm audit` non ri-eseguito in questa sessione (non nel perimetro di questo fork) — invariato per assunzione.
+Impatto: il downside del capitale già speso resta ≈0; un investimento finanzierebbe crescita, non recupero perdite. Bus-factor 1 (sole coder) resta il rischio strutturale, fuori dal perimetro di questo pilastro.
 GA-blocker: no (plus).
-Remediation: n/a; de-risk via assunzioni post-funding (use-of-funds). Confidence: Media (finanziari assunti, non documentati — domande Q1/Q2/Q5/Q7 al founder).
+Remediation: n/a. Confidence: Media (finanziari assunti, non ri-verificati con Enzo in questa sessione).
 
-## Domande al founder (P3-critiche)
-- Q1 Revenue/ARR/clienti paganti reali? (assunto: 0)
-- Q2 Funding ask, runway, burn mensile? (assunto: bootstrap, burn ≈ infra €0 + tempo)
-- Q3 Pricing/packaging previsto? (assunto: non definito)
-- Q7 Piano di hiring post-funding (chi possiede HOW se il founder esce)?
+## Assunzioni aperte (da confermare con Enzo — non derivabili dal repo)
+- Revenue/ARR/clienti paganti reali (assunto: 0, invariato da giugno).
+- Funding ask, runway, burn mensile reale (assunto: bootstrap, burn ≈ infra quasi-zero + tempo founder).
+- Pricing/packaging previsto (assunto: non definito).
+- Se e come l'abbonamento Claude Max personale (P3-004) possa/debba restare l'architettura di costo AI quando arriva un primo cliente pagante esterno — è una decisione di prodotto/contratto, non tecnica.
 
 ## Score del pilastro
 
-**Score: 38 / 100 (Critico, limite alto) · Confidence: Media**
+**Score: 43 / 100 (Debole, limite basso) · Confidence: Media**
 
-Motivazione: questo è il pilastro più debole della mia direttrice, e a ragione. Il business model non esiste come implementazione (P3-001): zero monetizzazione, zero clienti, unit economics non calcolabili (P3-003). L'infra a ~€0 è un'arma a doppio taglio che, per il *business*, pesa più sul lato negativo: è una demo, non un'infrastruttura commerciale, e il go-live impone un cambio di stadio costoso (P3-002, P3-004). Tengo il punteggio al limite alto del "Critico" (38, non sotto 30) per un motivo sostanziale e non di cortesia: la capital-efficiency dimostrata è genuina (P3-005) — un HRMS completo costruito a capitale quasi nullo significa che il downside del capitale già impiegato è ~0 e che l'eventuale investimento finanzia crescita, non recupero perdite. Ma il pilastro misura *business model & economics*, e di business model non ce n'è. Non posso assegnare "Debole" (≥40) a un'entità che non ha alcun meccanismo di ricavo né un solo data-point economico reale. Confidence Media: l'assenza degli strati di monetizzazione è verificata nel codice (Alta su quello), ma i numeri finanziari sono assunti (Bassa su quelli) → media.
+Motivazione: il verdetto di fondo di giugno non è cambiato — zero monetizzazione, zero clienti, unit economics non calcolabili (P3-001, P3-003) — quindi il pilastro resta debole per definizione: qui si misura un *business model*, e di business model in senso stretto (un meccanismo che trasforma uso in ricavo) non ce n'è ancora uno. Alzo il punteggio da 38 a 43, sopra la soglia "Critico", per un motivo puntuale e verificato nel codice, non per cortesia: due dei prerequisiti che a giugno erano gap dichiarati e bloccanti (GDPR tooling, provisioning tenant) sono oggi **shippati e provati live**, e l'infrastruttura CI/backup è meno fragile (D-08 F2-F5). Questo accorcia realmente il percorso a un go-to-market. Contro questo miglioramento pesa una scoperta nuova e non banale (P3-004): l'intera capacità AI del prodotto gira su un abbonamento personale condiviso, senza metering per-tenant — un'architettura di costo che introduce un rischio economico e potenzialmente contrattuale non presente nel rapporto di giugno, e che tocca anche il pilastro P4. Confidence Media: l'assenza di billing e la presenza di GDPR/provisioning sono verificate nel codice con alta confidenza; i numeri finanziari (burn, runway) restano assunti, non riconfermati con Enzo in questa sessione.

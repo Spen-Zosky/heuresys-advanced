@@ -1,57 +1,58 @@
-# Executive Summary — Due Diligence heuresys-advanced — 2026-06-17
+# Executive Summary — Due Diligence heuresys-advanced — 2026-09-28 (rivalidata)
 
-**Score globale: 61/100 — Verdetto: CONDITIONAL-GO**
+**Score globale: 66/100 — Verdetto: CONDITIONAL-GO**
 
-(HEAD `ce26608` · v1.0.0 GA tecnica · DD forense indipendente su 16 pilastri · postura avversariale)
+(HEAD `5faa2bc2` · rivalidazione della DD del 17/6/2026 (61/100) — voce #255 · 16 pilastri, 5 analisti indipendenti · postura avversariale. Il 58/100 NO-GO dell'8 settembre, fuori repo, è citato in `REPORT.md` §11 come precedente, mai copiato)
 
 ## Razionale del verdetto
 
-heuresys-advanced è un **asset di ingegneria genuinamente forte** (direttrice tecnica 69% del peso disponibile) attaccato a un **business che non esiste ancora** (direttrice product/business 48%). La verifica indipendente ha **confermato** la sostanza tecnica — typecheck pulito, 0 vulnerabilità prod, 1012 test su DB reale, 0 SQL-injection/IDOR, security self-built solida (T6 78), asset-dati ESCO raro (T5 72) — e ha persino trovato che **il venditore sottostima sé stesso** (feature dichiarate assenti che esistono; l'unico difetto "CRITICAL" emerso era già fixato). Ma non c'è monetizzazione, né clienti, né infra commerciale, né strato di compliance, e tutto poggia su **un solo sviluppatore**. Non è un prodotto difettoso da riparare: è una **fondazione sana cui manca interamente lo strato di go-to-market**. Per questo non è NO-GO (zero showstopper, 1 solo pilastro <40, base eccellente) ma neanche GO (manca tutto il business). → **CONDITIONAL-GO**: investibile come *acqui-hire / technical-asset acquisition*, oppure come seed a tesi "fund-to-commercial-GA", **a condizione** di neutralizzare il key-person risk e finanziare il layer commerciale/enterprise.
+Tre mesi dopo, il profilo non è cambiato di natura ma si è approfondito: heuresys-advanced resta un **asset di ingegneria che continua a maturare** (direttrice tecnica 76,8% del peso disponibile, era 69%) attaccato a un **business che il mercato ha reso più difficile, non più facile, da costruire** (direttrice product/business 49,6%, era 48%). La rivalidazione indipendente ha **confermato e in parte migliorato** la sostanza tecnica — 66 sentinelle di integrità a zero (erano 7), i due finding gravi di giugno su debito tecnico risolti con evidenza in codice, security passata da Forte-basso a Forte-alto (T6 85, era 78), verifica live vera contro produzione con un'identità di servizio autenticata — e ha trovato **due difetti concreti nuovi** (un endpoint di metriche osservabile pubblicamente contro il proprio commento nel codice; un permesso RBAC del DPO respinto dal service). Sul lato business, zero clienti paganti e zero pricing restano invariati, e l'unico competitor diretto rilevante (365Talents) è stato acquisito da un attore con distribuzione europea nel banking (Docebo) — il wedge competitivo va ripensato, non solo atteso. Il bus factor resta 1. Per questo il verdetto resta **CONDITIONAL-GO**, con lo score che sale da 61 a 66: non un prodotto difettoso da riparare, ma una fondazione tecnica più solida a cui manca ancora, interamente, lo strato di go-to-market.
 
 ## Top 5 punti di forza
 
-1. **Security forense verificata** (T6 78/100): auth self-built fatto bene, 0 falle trovate, supply-chain SHA-pinned, TOTP cifrato at-rest.
-2. **Qualità ingegneristica sopra-media per lo stadio** (T1 72 / T2 74 / T9 79): architettura pulita, 1012 test su DB reale, 0 mock, 130 migration idempotenti, PROD live verificato.
-3. **Asset dati / knowledge-layer difendibile** (T5 / P4): tassonomia ESCO completa (21.939 skill, 126k occupation-skill) + embeddings pgvector operativi — difficile da replicare.
-4. **Trasparenza e disciplina eccezionali** (X3 meta-finding): DEBT_REGISTER auto-espone i CRITICAL, 23 ADR, under-promise sistematico. Il rischio-frode/sorpresa è basso.
-5. **Capital-efficiency reale** (P3 strength): burn ≈ €0, IP 100% del founder, 0 licenze copyleft virali, spiegabilità AI = plus AI-Act.
+1. **Security ora Forte-alta** (T6 85/100, era 78): password di test derivate per-email, revoca cross-tenant bloccata, 0 finding Critical.
+2. **Sei pilastri tecnici in banda Forte** (T1 78 / T2 78 / T3 76 / T5 79 / T8 79 / T9 82): il debito operativo di giugno (CI-SPOF, backup, rollback, osservabilità) è in gran parte chiuso con evidenza verificata dal vivo.
+3. **BPM ora ha un runtime reale** (X1 68, era 60): motore di approvazione (state machine + SLA + 6 handler) usato su 12 richieste vere di RTL Bank — il gap più citato a giugno non c'è più.
+4. **GDPR passato da zero a reale** (X2 71, era 66): export, erasure transazionale, retention nel codice, non solo nel design.
+5. **Verifica live più credibile** (T9 82): sessione autenticata vera contro produzione, non solo suite di test via tunnel — coerente con l'architettura a singolo ambiente del progetto.
 
 ## Top 5 rischi (con severità e GA-blocker)
 
-1. **Nessun business / zero monetizzazione** — P3 38 Critico (peso 11). High. GA-blocker commerciale. *Il fattore che prezza tutto.*
-2. **Bus factor = 1 / key-person** — X3-001 Critical. Infra in parte personale (agent-gateway su abbonamento MAX del founder). Da prezzare con retention + clausole.
-3. **Infra non-enterprise** — T4-002/T8 (HIGH): OCI free-tier single-VM, no HA, CI-runner = VM-PROD (SPOF), no observability. GA-blocker SLA.
-4. **Compliance enterprise da costruire** — X2-001 / T3-005 (HIGH cond.): zero GDPR operativo, AI Act high-risk non formalizzato. GA-blocker al primo tenant EU reale.
-5. **Promessa "BPM" non mantenuta** — X1-001 (HIGH): nessun runtime di processo. Erode il claim di prodotto.
+1. **Nessun business, mercato più difficile** — P2 41 / P3 43, entrambi Debole (pesi 9+11=20). High. GA-blocker commerciale invariato, aggravato dall'uscita di 365Talents dal mercato indipendente.
+2. **Bus factor = 1** — X3 63, un finding Critical su bus factor (misurato oggi con `git shortlog`: 0 secondi sviluppatori). Da prezzare con retention + clausole.
+3. **AI su abbonamento personale, ora anche un limite di business model** — P3/P4/T7: nessun metering per tenant, non solo un vincolo di licenza Anthropic. GA-blocker pre-commerciale.
+4. **`/api/metrics` pubblicamente osservabile** — T8 F-T8-09 (MEDIUM, scoperta nuova): il rewrite Next.js aggira il controllo di loopback. GA-blocker condizionale (hardening pre-enterprise).
+5. **Infra ancora single-node** — T4 63 (Adeguato, invariato): managed-DB/HA resta da fare, anche se backup e DR-drill sono ora verificati.
 
 ## GA-blocker (finding che bloccano il rilascio commerciale)
 
-> **Nessun difetto tecnico CRITICAL aperto.** I GA-blocker sono **condizionali** ("scattano al primo cliente reale / multi-tenant / SLA"), cioè layer da costruire, non codice rotto:
-- **Commerciale**: assenza totale di signup/pricing/billing/onboarding (P1-001/P3-001).
-- **Infra/SLA**: free-tier non-HA + CI=PROD + no-observability + no-rollback-1cmd (T4-002/T4-003/T1-003/T8).
-- **Compliance EU**: GDPR tooling + classificazione AI Act assenti (X2-001/T3-005).
-- **Licensing AI**: agent-gateway su abbonamento personale, vietato per serving commerciale (T7-001).
-- **Multi-tenant reale**: cross-tenant revoke latente (T6-002) + auth-token bloat (T5-001) da chiudere prima di onboardare un tenant reale.
+> **Nessun difetto tecnico CRITICAL aperto**, su nessuno dei 16 pilastri. I GA-blocker restano prevalentemente **condizionali**, e due di quelli di giugno (T3 debito tecnico, X1 BPM) non lo sono più:
+- **Commerciale**: assenza totale di signup/pricing/billing/onboarding (invariato).
+- **Licensing/costo AI**: abbonamento personale senza metering per tenant — ora anche un vincolo di unit economics, non solo di ToS.
+- **Infra/SLA**: single-node OCI free-tier (invariato); CI ancora parzialmente su VM-PROD (6/12 workflow, era 7/8).
+- **Hardening perimetrale**: `/api/metrics` pubblico (nuovo, Medio, basso costo di chiusura).
+- **Compliance EU**: AI Act meno urgente (scadenza dic-2027), ma non formalizzato; un bug puntuale sul permesso DPO da correggere.
 
 ## Condizioni di remediation (sbloccano l'investimento — CONDITIONAL-GO)
 
 | # | Condizione | Effort | Priorità |
 |---|---|---|---|
-| C1 | De-personalizzare l'infra: managed-DB + app HA, 2° CI runner (separa CI/PROD), rollback ≤1 cmd, backup off-host, observability, agent-gateway → API key commerciale | 6-10 ww | **P0** |
-| C2 | Neutralizzare il key-person: hire 2° dev senior + CONTRIBUTING/ONBOARDING + founder-retention con clausole | continuo | **P0** |
-| C3 | Costruire il layer commerciale: signup/provisioning multi-tenant + pricing/billing + onboarding | 5-8 ww | **P1** |
-| C4 | Chiudere i blocker multi-tenant reali: auth-token retention/famiglie (T5-001) + cross-tenant revoke scope-check (T6-002) | S-M | **P1** (prima del 1° tenant) |
-| C5 | Strato compliance EU: GDPR tooling + classificazione formale AI Act high-risk | 4-6 ww | **P1** (gate primo tenant EU) |
-| C6 | Validare la domanda: 1 pilota cliente reale firmato entro F2 (kill-criteria) | — | **P1** |
+| C1 | Chiudere `/api/metrics` pubblico (T8-09) e il bug del permesso DPO (X2) | S | **P0** (basso costo, alta visibilità per un audit esterno) |
+| C2 | Migrare l'agent-gateway a una API key commerciale con metering per tenant, prima del primo cliente pagante | S-M | **P0** |
+| C3 | De-personalizzare l'infra residua: managed-DB + app HA, ultimi 6 workflow CI fuori dalla VM-PROD | 4-7 ww | **P0** |
+| C4 | Neutralizzare il key-person: hire 2° dev senior + CONTRIBUTING/ONBOARDING + founder-retention con clausole | continuo | **P0** |
+| C5 | Costruire il layer commerciale: signup/provisioning multi-tenant + pricing/billing + onboarding | 5-8 ww | **P1** |
+| C6 | Formalizzare la classificazione AI Act (scadenza dic-2027, non più urgente come a giugno) | 2-4 ww | **P1** |
+| C7 | Ripensare il wedge competitivo dopo l'uscita di 365Talents dal mercato indipendente + validare la domanda con un pilota reale | — | **P1** |
 
-**Effort totale verso GA commerciale: ~27-45 person-week** (~3-5 mesi con team 2-3 dev). Nessun rewrite — costruzione additiva su base sana.
+**Effort totale residuo verso GA commerciale: ~19-34 person-week** (era 27-45 a giugno; il trimestre ha già consegnato una parte reale del percorso). Nessun rewrite — costruzione additiva su base sana.
 
 ## Tesi d'investimento (sintesi)
 
-- **Come asset technical/acqui-hire**: forte. Codice, dati e security valgono; il founder è il moltiplicatore (e il rischio). Prezzare sul valore di sostituzione della codebase + dell'asset-dati ESCO + retention del founder.
-- **Come seed-to-GA**: condizionato. La tecnica non è il rischio; il rischio è **commercializzazione non provata + key-person + tempo-a-revenue**. Strutturare il funding in tranche legate ai kill-criteria (C2→pilota reale→compliance).
-- **Red flag occulti**: nessuno trovato. La sorpresa, in DD, è stata **positiva** (più prodotto del dichiarato).
+- **Come asset technical/acqui-hire**: più forte di giugno. Sei pilastri tecnici ora in banda Forte; il founder resta il moltiplicatore e il rischio.
+- **Come seed-to-GA**: condizionato, con un rischio di mercato nuovo da prezzare (365Talents/Docebo) oltre a key-person e tempo-a-revenue invariati.
+- **Red flag occulti**: nessuno strutturale. Le due scoperte nuove (metrics pubblico, permesso DPO) sono difetti puntuali, fixabili in giorni, trovati perché cercati — non nascosti né negati.
 
 ## Assunzioni aperte / domande al founder (da confermare prima del closing)
 
-Financials/runway/funding-ask (assunto pre-revenue, burn ≈€0) · pricing/ICP/target (assunto HR/BPM EU-IT) · titolarità IP e diritto d'uso del legacy `heuresys-evo` (assunto sole-owner) · piano di hiring post-funding · timeline GA-commerciale e impegno di full-time del founder. Dettaglio: `01_DISCOVERY.md` §domande founder.
+Invariate da giugno (financials/runway/funding-ask, pricing/ICP/target, titolarità IP del legacy, piano di hiring, timeline GA-commerciale e impegno full-time del founder), più due nuove emerse in questa rivalidazione: **riattivare o no l'enforcement MFA in produzione** (capacità tecnica pronta, decisione sospesa da luglio); **come ridefinire il wedge competitivo** ora che l'unico competitor diretto è stato acquisito da un attore con distribuzione bancaria europea. Dettaglio per pilastro nei singoli `workstreams/WS-*.md`.

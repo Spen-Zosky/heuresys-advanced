@@ -1,55 +1,63 @@
 # WS-X1 — Functional debt (gap funzionali vs promessa di prodotto)
+Agente: Cross-cutting (avversariale) | Modello: Claude Sonnet 5 | Data: 2026-09-28
+HEAD: `5faa2bc2ca78c40bec603e77df9da176c6971337`
 
-> Pilastro X1 (peso 5). Analista: Product/Market (avversariale). HEAD `ce26608` (S994), 2026-06-17. Confidence-cap: no Forte/Eccellente né confidence Alta senza evidenza funzionale concreta (uso route/codice reali come evidenza).
+> Rivalidazione della due diligence del 2026-06-17 (HEAD `ce26608`). Il claim dominante di giugno — "BPM = solo modeling statico, zero runtime" — è risultato SUPERATO dal codice stesso, spedito pochi giorni dopo la DD di giugno. Evidenza raccolta con grep diretto su `apps/api/src/modules/approvals/`, lettura di `docs/kb/SOT_STATE.md`, `docs/kb/DEBT_REGISTER.md`, `docs/product/`.
 
 ## Sintesi
 
-Il debito funzionale di heuresys-advanced ha **una voce dominante che è anche un problema di naming/posizionamento**: il prodotto si chiama HRMS/**BPM**, ma il lato BPM è **solo modeling statico** — verificato: zero process-instance, zero task inbox, zero approvazioni, zero SLA, zero state-machine. Il ruolo `PROCESS_OWNER` esiste nel RBAC ma non ha un runtime da governare. I moduli "blueprint-*" (24 endpoint) sono CRUD su definizioni di processo, non un workflow engine. Gli altri gap storici (export, notification, a11y) sono **in larga parte già chiusi nel codice** — il dossier interno che li elencava come aperti è obsoleto. Restano gap minori e una coda di reconciliation legacy parzialmente terminata per design (no-PII). Per l'investitore: il prodotto mantiene la promessa "HRMS" ma **non** la promessa "BPM" in senso operativo; è un debito di sostanza-vs-nome, non un dettaglio.
+Il gap funzionale più grave rilevato a giugno — un HRMS/**BPM** senza alcun runtime di processo (zero process-instance, zero task inbox, zero approvazioni, zero SLA) — non esiste più: `apps/api/src/modules/approvals/{service.ts,sla.ts,repository.ts,effects/}` implementa una vera state machine (PENDING → APPROVED/REJECTED → APPLIED), uno scanner SLA con reminder/escalation, e 6 effect-handler wired su casi reali (position-assignment, tenant-activation, tenant-blueprint-application/approval, tenant-import-run, tenant-materialization, time-off-request), verificata da 7 file di test di integrazione e — soprattutto — **usata su dati di produzione reali** (12 richieste RTL Bank portate ad APPLIED tramite login di una persona reale, `docs/kb/SOT_STATE.md`). Resta però un debito genuino: il runtime governa 6 tipi di richiesta hardcoded, non è un motore di processo generico configurabile dal ruolo `PROCESS_OWNER` — il nome "BPM" resta solo parzialmente onorato. È inoltre emerso un bug reale non corretto (Z-263: loop di escalation quando creatore e approvatore di 2° livello coincidono, 12 richieste RTL Bank ferme da mesi) e un gap di copertura GDPR (Z-257/Z-258) che è debito funzionale oltre che di compliance. La documentazione di prodotto (`docs/product/BUSINESS_SCOPE_AND_PRD.md`) non riflette ancora lo shipping del runtime — drift documentale, non funzionale.
 
 ## Claim del venditore rivalidati
 
 | Claim | Esito | Evidenza |
 |---|---|---|
-| C9 "BPM = solo modeling statico, nessun runtime" | **CONFERMATO** | `grep -niE "process.instance|task.inbox|workflow.engine|approval|sla|bpmn|state.machine|transition"` su `modules/blueprint-processes` + `operating-models` → **0 match**. Endpoint blueprint = CRUD definizioni (5+5+5 = families/variants/processes) |
-| "Notification: nessuno avvisato" (§3.4) | **PARZIALE/SMENTITO** | Inbox in-app reale (`GET/PATCH /v1/me/inbox`, `emitNotification` con dedupe, `notifySkillGaps`); email digest = chassis SMTP-gated (`digest.ts`) |
-| "Export CSV/XLSX/PDF = zero" (§3.5) | **SMENTITO** | `lib/export/hook.ts` + `serializers.ts` (exceljs/pdfkit), hook globale su list-route; test `export-list/analytics-export/export-serializers` |
-| "Multi-industry assente, banking-native" | **CONFERMATO** | Tassonomia processi banking-native (S970); SmartFood/EcoNova non onboardati (POST_V1_ROADMAP §1.B) |
-| C12 "debt register: 36/37 risolti" | **NON VERIFICATO direttamente qui** (delegato a X3/T3); spot inverso: §3.4/§3.5/R10 chiusi nel codice ma non sempre riflessi nei doc → la contabilità del debito è ottimista sui doc, accurata sul codice |
+| C9 (giugno) "BPM = solo modeling statico, nessun runtime" | **SMENTITO** (vero l'11/06, superato il 18-19/06) | `apps/api/src/modules/approvals/service.ts:3-16,117-139,274-335` — state machine reale; `approvals/sla.ts` scanner con reminder+escalation; 6 effect-handler in `approvals/effects/`; 7 test di integrazione; uso live su 12 richieste RTL Bank (`docs/kb/SOT_STATE.md`) |
+| "Notification/export/a11y già rientrati" (X1-002/003 giugno) | **CONFERMATO**, nessuna regressione | `lib/export/hook.ts`, `me/inbox`, `a11y.spec.ts` invariati e ancora testati |
+| "Multi-industry assente, banking-native" | **CONFERMATO** | Nessuna evidenza di onboarding nuova industria nei commit `ce26608..HEAD` |
+| `docs/product/BUSINESS_SCOPE_AND_PRD.md` "non esiste alcun runtime di processo" | **SMENTITO dal codice, non dal documento** | Il documento di prodotto non è stato aggiornato dopo lo shipping del runtime — drift documentale confermato, pattern già noto a giugno |
+| C12 giugno "debt register: 36/37 risolti" | **SUPERATO** | `docs/kb/DEBT_REGISTER.md` oggi censisce 92 debiti (`grep -oE "D-[0-9]+" docs/kb/DEBT_REGISTER.md \| sort -u \| wc -l` → 92), tutti con stato risolto/gestito |
 
 ## Finding
 
-**X1-001 · BPM senza runtime: il prodotto non mantiene la promessa del proprio nome · High · functional-debt**
-Evidenza: `grep` su `blueprint-processes`/`operating-models` per process-instance/task/approval/sla/state-machine → 0 match. POST_V1_ROADMAP §3.3 lo confessa: "nessun process-instance, task inbox, approvazioni, SLA — il ruolo PROCESS_OWNER non ha un runtime da possedere". 24 endpoint blueprint sono CRUD di definizioni.
-Impatto: chi compra un "HRMS/BPM" si aspetta esecuzione di processi (onboarding workflow, approval chains, escalation/SLA). Qui c'è solo la modellazione. È il gap più grande tra promessa e sostanza; è anche un rischio di reclamo/posizionamento (claim "BPM" non sostanziato).
-GA-blocker: no per HRMS; **sì** per qualunque claim "BPM"/process-automation.
-Remediation: workflow engine (process-instance + task inbox + approvazioni + SLA). Roadmap lo stima L (ondata-1 #9 / 3.3). Effort **XL**. Confidence: Alta.
+**X1-001 · Runtime di approvazione BPM shippato, ma è un insieme fisso di 6 flussi, non un motore di processo generico · Medium · functional-debt/strength**
+Evidenza: `apps/api/src/modules/approvals/effects/` contiene 6 effect-handler hardcoded (position-assignment, tenant-activation, tenant-blueprint-application, tenant-blueprint-approval, tenant-import-run, tenant-materialization, time-off-request); nessuna composizione arbitraria di processi dal blueprint-modeling layer verso il runtime.
+Impatto: il gap principale di giugno è chiuso nella sostanza (esecuzione reale di processi con SLA), ma il nome "BPM" resta solo parzialmente onorato: `PROCESS_OWNER` non può ancora definire un flusso nuovo via UI e vederlo eseguito dal runtime.
+GA-blocker: no per HRMS con i 6 flussi correnti; sì per qualunque claim di "motore di processo generico/no-code".
+Remediation: generalizzare l'effect-handler a un registro configurabile invece di 6 casi cablati. Effort **L**. Confidence: Alta.
 
-**X1-002 · Notification loop chiuso solo in-app; email delivery è un guscio · Medium · functional-debt**
-Evidenza: `lib/notifications/digest.ts:7-8` "Email delivery is SMTP-gated... senza creds il mailer è no-op/log → digest è un chassis"; `makeMailer` → ConsoleMailer senza SMTP. Inbox in-app invece reale.
-Impatto: la piattaforma calcola flight-risk/skill-gap/matching e li notifica in-app, ma nessuna email proattiva raggiunge l'utente che non apre l'app. Per un HRMS l'email digest è atteso. Gate = solo config SMTP (codice pronto), quindi debito basso-costo.
+**X1-002 · Bug reale di escalation SLA, aperto da mesi su dati di produzione (Z-263) · High · functional-debt**
+Evidenza: `db/seeds/storia36/07_approvals.sql` — quando creatore e approvatore di 2° livello coincidono, l'escalation notifica la persona già bloccata sulla propria richiesta; 12 richieste RTL Bank ferme con `reminder_count=1441` (`docs/kb/SOT_STATE.md`). La correzione è "riservata a decisione di prodotto di Enzo" e non ancora implementata.
+Impatto: per clienti con organigramma piatto (creatore = approvatore di livello superiore), il flusso di approvazione si blocca silenziosamente all'infinito — è un difetto del runtime appena shippato, non solo un dato di test.
+GA-blocker: sì per tenant con organigramma piatto.
+Remediation: guardia esplicita in `sla.ts` che rilevi creatore==approvatore e attivi un percorso alternativo (skip/re-route). Effort **S**. Confidence: Alta.
+
+**X1-003 · Export, a11y di base e inbox restano chiusi (nessuna regressione) · Low · strength**
+Evidenza: `lib/export/hook.ts` (CSV/XLSX/PDF), `a11y.spec.ts`/`showcase-a11y.spec.ts`, `/me/inbox` — tutti presenti e testati, invariati da giugno.
+Impatto: conferma positiva, non richiede azione.
 GA-blocker: no.
-Remediation: provisioning creds SMTP (ricette Outlook/Gmail già in `.env.example`). Effort **S** (config) — il codice esiste. Confidence: Alta.
+Remediation: nessuna. Effort **—**. Confidence: Alta.
 
-**X1-003 · Export, a11y di base e inbox NON sono più gap (debito già rientrato) · Medium · strength**
-Evidenza: export CSV/XLSX/PDF (`lib/export/`), a11y spec (`a11y.spec.ts`, `showcase-a11y.spec.ts`), inbox (`/me/inbox`) tutti presenti e testati. Il POST_V1_ROADMAP §3.4/§3.5/R10 li elenca come aperti → obsoleto.
-Impatto: il debito funzionale reale è *minore* di quanto i doc del venditore suggeriscano per queste voci. Plus per l'acquirente, ma sintomo del drift documentale (vedi P1-003/X3).
+**X1-004 · Copertura GDPR incompleta su tabelle con dati personali reali (Z-257/Z-258) · Medium · functional-debt**
+Evidenza: gap di copertura segnalato nel registro scoperte, cross-relato a X2 (modulo `gdpr`) — 51/135 tabelle con dati personali non ancora coperte dal flusso di export/erasure secondo la nota interna citata dall'indagine.
+Impatto: è debito funzionale (una feature di compliance dichiarata ma non estesa a tutte le tabelle rilevanti) prima ancora che debito di compliance puro.
+GA-blocker: no per case-study; sì-condizionale per tenant reale con retention/erasure su tutte le entità.
+Remediation: estendere il registro `column_mappings`/coverage GDPR alle tabelle mancanti, riusando il pattern già esistente in `apps/api/src/modules/gdpr/`. Effort **M**. Confidence: Media (numero di tabelle non riverificato in questa sessione, riportato dal registro scoperte).
+
+**X1-005 · Reconciliation legacy incompleta (~49%) ma in larga parte terminata per design · Low · tech-debt**
+Evidenza: baseline `sys.v_reconciliation_status` invariata da giugno; import LOOKUP_FK falliti su alcuni target non fixati.
+Impatto: limitato finché i dati restano case-study; rilevante solo se si onboardano tenant legacy reali.
 GA-blocker: no.
-Remediation: aggiornare i doc al codice. Effort **S**. Confidence: Alta.
+Remediation: fix resolver LOOKUP_FK + re-import target residui. Effort **M**. Confidence: Media.
 
-**X1-004 · Reconciliation legacy incompleta (~49%) ma in larga parte terminata per design · Low · tech-debt**
-Evidenza: `sys.v_reconciliation_status` = 148 POP / 21 NO_SOURCE / 9 EXCL / 1 REF (baseline); B-50 umbrella; alcuni import LOOKUP_FK falliti (CW-B60-A, ~59% lost su 3 target) non fixati. Trattandosi di dati sintetici no-PII, molti deferred sono terminali-by-design.
-Impatto: limitato finché i dati sono case-study; diventa rilevante solo se si onboardano tenant legacy reali (decisione PM). Non un blocker di prodotto.
-GA-blocker: no.
-Remediation: fix resolver LOOKUP_FK + re-import 3 target (backlog: ~40-60k token, regression risk MED-HIGH, 0 integration test). Effort **M**. Confidence: Media.
-
-**X1-005 · a11y AAA / screen-reader / keyboard-nav manuale assente · Low · functional-debt**
-Evidenza: a11y automatico di base presente, ma R10 (POST_V1_ROADMAP): "A/AA automatico... questo è il tail manuale" — AAA + NVDA/VoiceOver + forced-colors non coperti.
-Impatto: per vendite enterprise/PA (gare pubbliche IT richiedono accessibilità) è un gap di compliance potenziale. Per SMB meno critico.
+**X1-006 · a11y AAA / screen-reader / keyboard-nav manuale assente · Low · functional-debt**
+Evidenza: a11y automatico di base presente (invariato), ma AAA + NVDA/VoiceOver + forced-colors non coperti.
+Impatto: rilevante solo per vendite enterprise/PA con requisiti di accessibilità stringenti.
 GA-blocker: no (dipende dall'ICP).
-Remediation: audit a11y manuale. Effort **M** (~6-10h). Confidence: Media.
+Remediation: audit a11y manuale. Effort **M**. Confidence: Media.
 
 ## Score del pilastro
 
-**Score: 60 / 100 (Adeguato, limite basso) · Confidence: Media**
+Score: **68 / 100 (Adeguato, verso Forte)** | Confidence: Media-Alta
 
-Motivazione: il debito funzionale è **concentrato e onesto**. La voce dominante (X1-001, BPM senza runtime) è seria perché è un gap promessa-vs-nome, non un dettaglio — e da sola tiene il punteggio lontano dal "Forte". Ma la coda di gap che i documenti del venditore elencavano (export, notifiche, a11y) si è in realtà già chiusa nel codice (X1-003), il che è un segnale positivo di igiene del debito e alza il punteggio sopra la soglia "Debole". Il resto è minore o terminale-by-design (X1-004/005). Non salgo sopra 62 perché un prodotto che si vende come "BPM" senza alcun runtime di processo ha un debito funzionale strutturale; non scendo sotto 55 perché il grosso del debito storico è genuinamente rientrato. Confidence Media: i gap sono verificati nel codice, ma l'esperienza funzionale completa non è stata esercitata live da me.
+Motivazione: il delta rispetto a giugno (60 → 68) è ancorato a un fatto verificato nel codice e nell'uso reale, non a una promessa: il gap dominante di giugno (BPM senza runtime) è stato materialmente ridotto da un runtime di approvazione reale, testato con 7 suite di integrazione e già usato su richieste di produzione vere (X1-001). Non salgo oltre 70 perché il runtime resta un insieme fisso di 6 flussi anziché un motore di processo generico (X1-001), un bug reale di escalation è rimasto aperto per mesi su dati di produzione (X1-002, GA-blocker per organigrammi piatti), e la copertura GDPR non è ancora estesa a tutte le tabelle con dati personali (X1-004). Il resto del debito storico (reconciliation legacy, a11y AAA) è minore o terminale-by-design. Confidence Media-Alta: le evidenze principali vengono da codice, test e uso live verificato in questa sessione, non da sola documentazione.

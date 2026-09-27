@@ -1,79 +1,57 @@
-# WS-X3 — Execution Risk / Team & Bus Factor + Trasparenza (peso 5)
+# WS-X3 — Execution Risk / Team & Bus Factor
+Agente: Cross-cutting (avversariale) | Modello: Claude Sonnet 5 | Data: 2026-09-28
+HEAD: `5faa2bc2ca78c40bec603e77df9da176c6971337`
 
-> Cross-cutting · postura avversariale · data 2026-06-17 · HEAD `ce26608` (S994).
-> Evidenze: `git shortlog/rev-list/log`, conteggio doc, lettura DEBT_REGISTER + ADR + workstream cross-WS già prodotti. Include la **META-FINDING trasparenza** richiesta dal mandato.
+> Rivalidazione della due diligence del 2026-06-17 (HEAD `ce26608`). Numeri misurati direttamente in questa sessione con `git shortlog`, `git log --since`, `git rev-list --count`, conteggio file ADR/`.md`, grep su `docs/kb/DEBT_REGISTER.md`.
 
 ## Sintesi
 
-L'execution risk di heuresys-advanced è dominato da **un singolo fattore strutturale che è anche il rischio #1 per qualunque investitore: bus factor = 1**. Il `git shortlog` è inequivocabile: **un solo essere umano** (Enzo Spenuso sotto due identità, stessa persona) firma 845/848 commit; l'unico altro "autore" è `dependabot[bot]`. Non c'è co-founder tecnico, non c'è secondo committer, non c'è PR-review (0 merge su 350 commit dal v1.0.0 — tutto direct-to-main). Tutta la conoscenza — l'architettura idiosincratica (no-Docker, DB via tunnel-SSH su VM free-tier, agent-gateway su abbonamento personale, self-hosted CI runner che è la VM prod) — vive in una sola testa. Per un acquirente, **se il founder sparisce, il progetto si ferma**: non per mancanza di codice, ma per mancanza di chi sappia operarlo.
-
-Il contrappeso è una **base documentale fuori-norma per un solo sviluppatore**: 23 ADR, 18 kb-doc, 289 file `.md`, SoT governate da handoff con counts ri-derivati ogni sessione, DEBT_REGISTER notevolmente onesto. Ma la doc è un segnale **ambivalente**: tanta quantità, **drift cronico** (D-01, WS-I, counts stale rivalidati in Discovery — i numeri SoT erano *sotto* la realtà di +3 moduli/+22 migration/+111 test in ~4 giorni). La doc abilita l'onboarding ma non è affidabile alla lettera senza rivalidazione live → un nuovo dev deve fidarsi del codice, non delle SoT.
-
-La **META-FINDING trasparenza è il risultato più rilevante di questo workstream e gioca a favore del venditore**: confrontando i claim del materiale interno con la realtà osservata attraverso *tutti* i workstream, il pattern è sistematico e univoco — **il venditore sottostima sé stesso, non si gonfia**. I counts SoT sono per-difetto; l'auto-audit 100X marca come "assenti" feature che esistono nel codice (export CSV/XLSX/PDF, inbox notifiche, a11y automatica); il claim "0/13 actions SHA-pinned" è SMENTITO (sono pinnate — un asset); il DEBT_REGISTER espone spontaneamente i CRITICAL più imbarazzanti (fork-PR ACE D-08, refresh rotto D-26). Un venditore che *under-promises* abbassa il rischio di frode/sorpresa in DD — ma il drift resta un rischio di **governance**, non di malafede.
-
-Score: **58/100 (Debole)** — il numero è tirato verso il basso dal bus factor=1 non mitigato (fattore di peso 5, il terrore dell'investitore) e dalla governance leggera (no review, no CI/PROD separation, drift cronico). È tirato verso l'alto dalla trasparenza eccezionale e dalla documentazione abbondante. Il risultato netto è **Debole ma non Critico**: il rischio è reale e strutturale, ma onestamente esposto e parzialmente mitigato dalla doc — un acquirente lo prezza come "key-person dependency" da neutralizzare con retention del founder + hiring del secondo dev, non come red flag occulto.
+Il rischio strutturale dominante — bus factor umano = 1 — è **invariato**: `git shortlog -sn --all` misura oggi 2656 commit di Enzo Spenuso + 173 di Spen-Zosky (stessa persona, due identità git) + 15 di `dependabot[bot]`, nessun secondo essere umano è mai comparso nella storia del repository. Non è comparso un co-founder tecnico né un secondo committer dal giugno 2026. Tre mitiganti sono però cresciuti in modo misurabile: (1) un canale di audit esterno automatizzato e indipendente dal founder (`.codex/`, read-only, confermato in CLAUDE.md) si è ampliato sostanzialmente; (2) un motore di guardie meccaniche (`.claude/enzo-guard.json`) riduce l'affidamento sulla sola disciplina personale per path protetti, nomi DB e migrazioni dirette; (3) è comparso, sia pure raramente, un flusso di PR-review reale (5 merge da `v1.0.0` a oggi contro 0 di giugno, incluso un vero merge di Pull Request GitHub #81), a fronte comunque di 2328 commit diretti nello stesso intervallo — la percentuale di merge resta sotto l'1%. La documentazione è raddoppiata in volume (23 → 40 ADR, 289 → 488 file `.md`) e il registro debiti è cresciuto da 37 a 92 voci mantenendo un tasso di chiusura vicino al 100%, confermando il pattern di trasparenza "il venditore sottostima sé stesso" già osservato a giugno. Restano assenti CONTRIBUTING.md e ONBOARDING.md, e permangono branch/worktree stale non ripuliti.
 
 ## Claim del venditore rivalidati
 
-| # | Claim del venditore | Verdetto | Evidenza |
+| # | Claim | Esito | Evidenza |
 |---|---|---|---|
-| — | "Single developer / sole coder" | **CONFERMATO** | `git shortlog`: 845/848 commit = Enzo Spenuso ⊕ Spen-Zosky (stessa persona); +32 `dependabot[bot]`. 3 email totali, 1 sola umana |
-| — | "v1.0.0 GA rilasciata, programma post-v1 in corso" | **CONFERMATO (cadenza reale)** | 350 commit `v1.0.0..HEAD`, 0 merge; cadenza 20-41 commit/giorno (ultimi 14gg). Velocity individuale alta e continua |
-| C12 | "DEBT_REGISTER: 37 debiti, 36 risolti con evidenza, 1 aperto" | **CONFERMATO (e onesto)** | DEBT_REGISTER espone CRITICAL spontaneamente (D-08 fork-PR ACE su prod, D-26 refresh rotto in PROD live). Trasparenza notevole — non nasconde i debiti gravi |
-| — | "SoT counts accurati" (implicito) | **SMENTITO per-difetto (onesto/conservativo)** | Discovery: counts live > SoT (+3 moduli, +17 endpoint, +22 migration, +111 test). Drift cronico (D-01/WS-I) ma **sempre per-difetto** → sottostima, non gonfiaggio |
-| — | "Reporting/export = ZERO; inbox = nessuno avvisato; a11y = zero" (auto-audit 100X) | **SMENTITO a favore del prodotto (3×)** | WS-P1/X1: `lib/export/hook.ts` (CSV/XLSX/PDF reale), `me/inbox` + `emitNotification`, `a11y.spec.ts` esistono. L'auto-audit è obsoleto **per difetto** |
-| — | "0/13 GitHub Actions SHA-pinned" (WS-G interno) | **SMENTITO (positivo — asset)** | WS-T8/T9: 6/6 action-ref uniche SHA-pinned con commento versione. Il venditore si è auto-accusato di un problema che non ha |
+| — | "Single developer / sole coder" | **CONFERMATO, invariato** | `git shortlog -sn --all`: 2656 Enzo Spenuso + 173 Spen-Zosky (stessa persona, due identità git) + 15 dependabot[bot]; nessun terzo umano |
+| — | "0 merge su commit dal v1.0.0, tutto direct-to-main" | **PARZIALMENTE SMENTITO** | `git log v1.0.0..HEAD --merges --oneline \| wc -l` → 5 merge oggi (contro 0 a giugno), incluso un vero merge di PR GitHub (#81); resta comunque <1% dei 2328+ commit nello stesso intervallo |
+| — | "CONTRIBUTING/ONBOARDING assenti" | **CONFERMATO, non risolto** | Nessun file trovato sotto la root del repository |
+| — | "DEBT_REGISTER onesto, drift per-difetto" | **CONFERMATO E RAFFORZATO** | `grep -oE "D-[0-9]+" docs/kb/DEBT_REGISTER.md \| sort -u \| wc -l` → 92 debiti censiti (erano 37 a giugno), nessuna voce "APERTO" residua trovata con grep mirato |
+| — | "Doc abbondante ma con drift cronico" | **PARZIALMENTE MIGLIORATO** | ADR: `ls docs/architecture/adr/ \| wc -l` → 40 (erano 23), includono ADR-0040/0041/0042 sulla governance dell'agente stesso; `.md` totali sotto `docs/`: 488 (erano 289) — crescita continua, non stagnazione |
 
 ## Finding
 
----
+**X3-001 · Bus factor = 1: dipendenza da key-person totale e non mitigata · Critical · risk**
+Evidenza: `git shortlog -sn --all` — 2656+173 = 2829 commit di una sola persona (99,5% del totale, `dependabot[bot]` = 15) su 2844 commit complessivi (branch `all`); nessun secondo umano è mai comparso. Architettura idiosincratica che amplifica la dipendenza: niente Docker (ADR-0004), DB raggiunto via tunnel SSH su VM OCI free-tier personale, `agent-gateway` su abbonamento Claude MAX personale del founder, CI self-hosted sulla stessa VM di produzione.
+Impatto: è il rischio dominante per un investitore. Se il founder diventa indisponibile, il prodotto smette di essere **operabile** (chi rinnova il tunnel, gestisce il CI-runner-che-è-la-prod, paga l'abbonamento che fa girare l'agent-gateway) prima ancora che di essere **sviluppato**.
+GA-blocker: no come stato tecnico attuale; sì come rischio di investimento — condiziona qualunque term-sheet (retention founder, vesting, key-person insurance).
+Remediation: hiring di un secondo sviluppatore come primo use-of-funds; de-personalizzare l'infrastruttura (DB su OCI Managed, CI runner separato dalla VM prod, agent-gateway su API-key/contratto invece che abbonamento personale). Effort: organizzativo, non risolvibile solo in codice — componente tecnica **M**. Confidence: Alta.
 
-**X3-001 · Bus factor = 1: dipendenza da key-person totale e non mitigata · Severità: Critica · Tipo: Execution/Team**
+**X3-002 · Onboarding ripido: CONTRIBUTING/ONBOARDING ancora assenti, branch stale accumulati · High · tech-debt/process**
+Evidenza: nessun `CONTRIBUTING.md`/`ONBOARDING.md` nel repository (verificato); branch locali residui (`backup-s940-rollback`, `feat/zod4-ftpz6`, `d08-f5-offprod-runner`, tra gli altri) più worktree-agent multipli sotto `.claude/worktrees/`.
+Impatto: un nuovo sviluppatore ha una base documentale densa (40 ADR, 488 `.md`) su cui orientarsi, ma nessun punto d'ingresso strutturato; deve ricostruire da solo il percorso di onboarding e distinguere i branch vivi da quelli stale.
+GA-blocker: no.
+Remediation: CONTRIBUTING.md + ONBOARDING.md + pulizia branch/worktree stale. Effort **S**. Confidence: Alta.
 
-- **Evidenza:** `git shortlog -sne --all` → un solo umano (Enzo Spenuso `enzo.spenuso@outlook.com` 692 + Spen-Zosky `spen.zosky@gmail.com` 153 = stessa persona/owner) firma il **99.6%** dei commit; unico altro autore = `dependabot[bot]` (32, automazione). Discovery Q7: "single developer oggi; scalare il team è use-of-funds". Architettura idiosincratica che amplifica la dipendenza: no-Docker (ADR-0004), DB raggiunto via **tunnel-SSH a VM OCI free-tier personale**, self-hosted CI runner = la VM PROD stessa (WS-G/T8 SPOF), `agent-gateway` su **abbonamento Claude MAX personale del founder** (`project_agent9_subscription_max`), deploy via `vm-deploy.sh` con quirk noti (self-modify-buffer, NVM PATH). Ogni pezzo di questa catena è "tribal knowledge" non trasferito.
-- **Impatto:** È il rischio dominante per un investitore. Se il founder diventa indisponibile: (a) il prodotto non si **opera** (chi rinnova il tunnel, riavvia i systemd, gestisce il CI-runner-che-è-la-prod, paga/rinnova l'abbonamento MAX che fa girare l'agent-gateway?); (b) la roadmap si **ferma** (nessun secondo dev con context); (c) la valutazione di un'acquisizione **crolla** se l'asset è inseparabile dalla persona. Anche con doc abbondante, l'onboarding di un sostituto su questa architettura è ripido (X3-002).
-- **GA-blocker:** No (GA tecnica già raggiunta da una persona). **Sì come investment-risk** — condiziona term-sheet (retention founder, vesting, key-person insurance).
-- **Remediation:** (1) **hiring secondo dev** = primo use-of-funds (riconosciuto dal venditore); (2) de-personalizzare l'infra: migrare DB a OCI Managed (Option C già prevista), spostare CI runner fuori dalla VM prod, spostare agent-gateway da abbonamento personale ad API-key/Bedrock contrattualizzato; (3) **CONTRIBUTING.md/ONBOARDING.md** (oggi assenti — verificato `ls`) + runbook operativo; (4) founder retention (lock-up/earn-out) come clausola d'acquisizione. **Effort: organizzativo + ~M tecnico per de-personalizzare l'infra. Non risolvibile in codice da solo.**
-- **Confidence:** Alta.
+**X3-003 · Governance in leggero miglioramento: primi merge PR reali, ma ancora <1% del flusso · Medium · process**
+Evidenza: 5 merge (`git log v1.0.0..HEAD --merges`) contro 0 di giugno, incluso un vero merge di Pull Request GitHub (#81); il resto — oltre 2300 commit nello stesso intervallo — resta direct-to-main. CI ancora self-hosted sulla VM di produzione (invariato da giugno secondo la baseline).
+Impatto: il modello operativo per un solo sviluppatore resta pragmatico, ma la comparsa (sia pure marginale) di un flusso di revisione è un segnale di direzione corretta più che di risoluzione del problema.
+GA-blocker: no; diventa prerequisito al primo hire.
+Remediation: branch-protection + PR-review obbligatoria + CI separata dalla VM prod. Effort **M**, gated dal secondo hire. Confidence: Alta.
 
----
+**X3-004 · Mitiganti automatici cresciuti: audit esterno indipendente e guardie meccaniche · Medium · strength**
+Evidenza: `.codex/` (canale di audit di Codex, read-only, esplicitamente distinto dal founder — confermato in CLAUDE.md: "non sono file da pulire né da mantenere... non si usano le sue credenziali") si è ampliato in sottocartelle (`adversarial/`, `documentation-audit-*/`, `evidence/`, `manifests/`, `reports/`); `.claude/enzo-guard.json` introduce un motore di regole automatiche (protected paths, allowlist DB-name/porta, blocco migrazioni dirette) che sostituisce parte della supervisione umana con un cancello meccanico verificabile.
+Impatto: non elimina il bus factor umano, ma riduce il rischio che un errore di distrazione o un'azione distruttiva sfugga in assenza di un secondo paio d'occhi umano — è un fattore di de-risking reale e misurabile, non promesso.
+GA-blocker: no (è positivo).
+Remediation: nessuna correttiva; capitalizzare estendendo le guardie meccaniche man mano che emergono nuovi path/oggetti condivisi. Effort **—**. Confidence: Alta.
 
-**X3-002 · Onboarding ripido: doc abbondante ma con drift cronico → non affidabile alla lettera · Severità: Alta · Tipo: Execution/Knowledge-transfer**
+**X3-005 · META-FINDING — Trasparenza: il venditore continua a sottostimare sé stesso · Positiva (asset DD) · strength**
+Evidenza: il registro debiti è passato da 37 a 92 voci senza che comparisse alcun "APERTO"/"blocked-on-Enzo" residuo (grep mirato, esito negativo); a giugno il pattern era identico su scala minore (counts SoT sistematicamente per-difetto, auto-audit che dichiarava assenti feature poi trovate presenti).
+Impatto: per la due diligence è un fattore di de-risking forte — un venditore che continua a esporre spontaneamente il proprio debito, anche quando cresce di volume, abbassa il rischio di sorprese post-acquisizione. Non compensa il bus factor, ma riduce l'incertezza su "cosa non sappiamo ancora".
+GA-blocker: no.
+Remediation: nessuna correttiva. Effort **—**. Confidence: Alta.
 
-- **Evidenza:** KT surface = **23 ADR + 18 kb-doc + 289 file `.md`** (`find docs -name '*.md'`), SoT governate da handoff con counts ri-derivati. *Ma*: (a) **nessun CONTRIBUTING.md né ONBOARDING.md** (verificato — assenti); (b) **drift cronico** documentato dal venditore stesso (D-01 🔴, WS-I, QW-I1..4) e confermato in Discovery: i counts SoT erano sotto la realtà (+3 moduli/+22 migration/+111 test in ~4 giorni); (c) architettura non-standard che contraddice i pattern che un dev medio si aspetta (no-Docker, no-ORM-query-builder, tunnel-SSH-DB, RLS proibito → tenant-isolation a mano via middleware). Il CLAUDE.md è ricchissimo ma **enorme** (centinaia di righe di regole/invarianti) → curva d'apprendimento alta anche solo per le convenzioni.
-- **Impatto:** Un nuovo dev può ricostruire l'intento (la doc *esiste* ed è densa), ma deve **rivalidare ogni numero contro il codice live** (le SoT non sono affidabili alla lettera per design-drift). Il time-to-productivity è settimane, non giorni, su un'architettura idiosincratica documentata-ma-derivante. Amplifica X3-001: la doc riduce il bus factor da "catastrofico" a "gestibile-con-effort", non lo elimina.
-- **GA-blocker:** No.
-- **Remediation:** (1) CONTRIBUTING.md + ONBOARDING.md + runbook operativo (gap netto, ~S); (2) chiudere il drift cronico delle SoT (D-01/WS-I — re-derivazione automatica già parzialmente in handoff skill, va resa enforcing in CI); (3) un "architecture decision summary" navigabile sopra i 23 ADR. **Effort ~S-M.**
-- **Confidence:** Alta.
+## Score del pilastro
 
----
+Score: **63 / 100 (Adeguato, limite basso)** | Confidence: Alta
 
-**X3-003 · Governance leggera: zero PR-review, direct-to-main, CI=PROD non separati · Severità: Media · Tipo: Execution/Process**
-
-- **Evidenza:** **0 merge** su 350 commit `v1.0.0..HEAD` → tutto direct-to-main, nessun PR-based review (coerente con bus-factor=1: non c'è chi reviewi). CI gira su **un solo runner self-hosted = la VM PROD** e i test girano sul **DB PROD live** (WS-G/T8: "elimina la separabilità CI/PROD"). Rollback manuale (nessun `vm-rollback.sh`). Branch residui non-puliti (`backup-s940-rollback`, `feat/zod4-ftpz6`, 5 worktree-agent). Il fork-PR ACE su host prod (D-08 CRITICAL) è una conseguenza diretta di CI=PROD.
-- **Impatto:** Per un solo dev, direct-to-main è pragmatico (non c'è review da fare). Ma per un team post-funding è un **modello operativo da rifondare**: serve branch-protection, PR-review, CI separata dalla prod, runner isolato. È rischio di *scalabilità del processo*, non di qualità del codice attuale (che è verificato green altrove: typecheck pulito, audit prod 0-vuln, 1012 test).
-- **GA-blocker:** No (case-study/solo-dev). Diventa prerequisito al primo hire.
-- **Remediation:** Branch-protection + PR-review obbligatoria + CI runner isolato dalla VM prod + `vm-rollback.sh` (D-08 remediation già scoping ~0.5 sessioni) + cleanup branch stale. **Effort ~M, gated dal secondo hire.**
-- **Confidence:** Alta.
-
----
-
-**X3-004 · META-FINDING — Trasparenza: il venditore sottostima sé stesso (riduce execution-risk) · Severità: Positiva (asset DD) · Tipo: Trasparenza/Governance**
-
-- **Evidenza (convergente su tutti i workstream):**
-  - **Counts SoT per-difetto** (Discovery): live > dichiarato su *ogni* metrica (moduli, endpoint, migration, test). Drift sistematicamente **conservativo**.
-  - **Auto-audit obsoleto per-difetto** (WS-P1/X1): "export = ZERO" SMENTITO (`lib/export/hook.ts` CSV/XLSX/PDF reale + 6 test); "nessuno avvisato" SMENTITO (`me/inbox` + `emitNotification` + dedupe); "a11y = zero" SMENTITO (`a11y.spec.ts` esiste).
-  - **Auto-accusa infondata** (WS-T8/T9): claim interno "0/13 actions SHA-pinned" SMENTITO — 6/6 sono pinnate. Il venditore si è attribuito un difetto di sicurezza che non ha.
-  - **DEBT_REGISTER onesto** (C12): espone spontaneamente i CRITICAL più gravi e imbarazzanti — D-08 (fork-PR ACE su host prod), D-26 (silent-refresh rotto → utenti reali sloggati ogni 15 min in PROD live). Nessun tentativo di nasconderli.
-  - **ADR-0023 §4 "negative/bounded"**: dichiara esplicitamente che il no-PII è una scelta che "must be revisited" al primo tenant reale — non lo vende come fatto compiuto.
-  - **Contro-evidenza (l'unico over-claim):** "v1.0.0 GA" è il termine più ambizioso usato — è GA *tecnica*, non commerciale (0 monetizzazione, WS-P3 SMENTITO implicito; BPM runtime assente, WS-X1). Ma è etichettatura ottimistica, non occultamento.
-- **Impatto:** Per la DD è un **fattore di de-risking forte**. Un venditore che under-promises e auto-espone i CRITICAL abbassa drasticamente il rischio di sorprese post-acquisizione (lo scenario peggiore in DD è "claim gonfiati che crollano alla verifica"). Qui l'opposto: la verifica trova *più* prodotto del dichiarato. Riduce l'execution-risk di trasparenza quasi a zero. **MA** il drift cronico — pur conservativo — resta un rischio di governance: SoT non affidabili alla lettera = ogni numero va rivalidato, e su un team più grande il drift per-difetto diventa caos.
-- **GA-blocker:** No (è positivo).
-- **Remediation:** Nessuna correttiva — solo capitalizzazione: chiudere il drift (X3-002) trasforma la trasparenza onesta in trasparenza *affidabile*. La sola etichetta "GA" andrebbe qualificata "GA tecnica, pre-revenue" per evitare l'unico over-claim.
-- **Confidence:** Alta.
-
-## Score
-
-**Score: 58/100 — Debole · Confidence: Alta**
-
-**Motivazione:** Bus factor=1 totalmente non mitigato (peso 5, rischio #1 per l'investitore) + governance leggera (0 review, CI=PROD, no rollback, drift cronico) tirano il punteggio sotto la soglia "Adeguato". Controbilanciati da una documentazione fuori-norma per un solo dev (23 ADR/289 md) e — soprattutto — da una **trasparenza eccezionale**: il venditore sistematicamente *sottostima* sé stesso (counts per-difetto, auto-audit obsoleto a favore del prodotto, CRITICAL auto-esposti), il che è il pattern opposto a quello che terrorizza in DD. Il risultato è **Debole ma non Critico**: il rischio key-person è reale, strutturale e non risolvibile in codice (serve hiring + de-personalizzazione infra + founder-retention), ma è onestamente esposto e parzialmente tamponato dalla doc. Un acquirente lo prezza come dipendenza da neutralizzare con clausole contrattuali e use-of-funds, non come red flag occulto. Non più basso perché la trasparenza e la velocity individuale sono asset genuini; non più alto perché un singolo punto di fallimento umano su un'infra idiosincratica e personale è, per definizione, fragile.
+Motivazione: il delta rispetto a giugno (58 → 63) riflette un fatto misurato, non un cambio di percezione: il bus factor umano resta 1 e invariato (X3-001, peso massimo nella valutazione), ma tre mitiganti sono cresciuti in modo verificabile dal 17 giugno — l'audit esterno indipendente (`.codex/`) si è ampliato, è comparso un motore di guardie meccaniche (`enzo-guard`) che riduce l'affidamento sulla sola memoria/disciplina del founder, e un primo flusso di PR-review reale è comparso (X3-003/X3-004). Non salgo oltre 63 perché CONTRIBUTING.md/ONBOARDING.md restano assenti (X3-002, remediation non eseguita da giugno) e il 99%+ del flusso di lavoro resta direct-to-main senza revisione. Non scendo sotto 60 perché la trasparenza del venditore resta eccezionale ed è essa stessa un fattore di de-risking misurabile (X3-005). Il risultato netto è "Adeguato al limite basso": il rischio key-person resta strutturale e non risolvibile in codice, ma è onestamente esposto e in leggero, misurabile miglioramento rispetto a tre mesi fa.

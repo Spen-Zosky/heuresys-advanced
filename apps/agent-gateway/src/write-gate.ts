@@ -121,6 +121,8 @@ export interface GatePrincipal {
   subject?: string;
   /** Tenant the call runs against (implicit from JWT upstream; "unknown" if unbound). */
   tenant?: string;
+  /** #253 — l'identificativo di conversazione generato da `runHrAgent`, per il diario. */
+  conversationId?: string;
 }
 
 export interface GateOptions {
@@ -281,6 +283,7 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
     // Audit is best-effort and MUST NOT change the gate decision: swallow sink errors.
     void audit
       .record({
+        ...(who.conversationId !== undefined ? { conversationId: who.conversationId } : {}),
         who: { principal: who.principal, ...(who.subject !== undefined ? { subject: who.subject } : {}) },
         tenant: who.tenant ?? "unknown",
         tool,

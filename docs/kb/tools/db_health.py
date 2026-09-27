@@ -97,6 +97,12 @@ INFORMATIVE = {
         "spiegazione: una violazione su QUALUNQUE altra tabella, o un conteggio diverso da 20 "
         "su questa, e' un progresso o un regresso vero da guardare (post-condizione della "
         "000447 lo verifica gia' alla nascita).",
+    "v_agente_persone_per_conversazione":
+        "#253 (mig 000452): una riga per conversazione CHIUSA dell'agente, col totale finale "
+        "di persone distinte lette (ADR-0040 R2, #251/#252). Conta stato, non anomalie: zero "
+        "righe e' l'atteso finche' il gateway non scrive nel database (FileAuditSink resta il "
+        "fallback, server.ts sceglie in base a POSTGRES_HOST); righe con numeri alti non sono "
+        "un difetto, sono il freno di #252 che ha gia' fatto il suo lavoro se serviva.",
 }
 
 # Soglie: superate = allarme. Derivano dalla misura del 2026-08-03, non da teoria.

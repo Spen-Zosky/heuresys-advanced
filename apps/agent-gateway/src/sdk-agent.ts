@@ -9,6 +9,7 @@
  * published API and are pinned to the installed version. The gate decision lives in
  * write-gate.ts (SDK-free, unit-tested); here it is only bridged to the SDK.
  */
+import { randomUUID } from "node:crypto";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { buildHeuresysMcp } from "./mcp-tools.js";
 import { AtlasOperationResolver } from "./atlas-resolver.js";
@@ -67,13 +68,19 @@ export async function* runHrAgent(
   // sink distinti scriverebbero la conversazione in due posti.
   const audit: AuditSink = opts.audit ?? new FileAuditSink();
 
+  // #253 — UN identificativo per conversazione, generato QUI perche' una `runHrAgent` e' UNA
+  // conversazione (ADR-0040 §4b, lo stesso confine del contatore sopra). Si fonde nel principal
+  // cosi' arriva a ENTRAMBI i punti che scrivono nel diario (le decisioni del gate e la voce di
+  // chiusura) senza un terzo parametro da tenere sincronizzato.
+  const principal: GatePrincipal = { ...(opts.principal ?? { principal: "unknown" }), conversationId: randomUUID() };
+
   const canUseTool = makeCanUseTool(opts.approve, {
     operations,
     audit,
     persone: contatore,
+    principal,
     ...(opts.approvalTimeoutMs !== undefined ? { approvalTimeoutMs: opts.approvalTimeoutMs } : {}),
     ...(opts.allowlist !== undefined ? { allowlist: opts.allowlist } : {}),
-    ...(opts.principal !== undefined ? { principal: opts.principal } : {}),
   });
 
   const iterator = query({
@@ -108,10 +115,6 @@ export async function* runHrAgent(
   try {
     for await (const event of iterator) yield event; // stream to the webapp
   } finally {
-    await registraChiusuraConversazione(
-      audit,
-      opts.principal ?? { principal: "unknown" },
-      contatore,
-    );
+    await registraChiusuraConversazione(audit, principal, contatore);
   }
 }

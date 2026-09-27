@@ -19,7 +19,8 @@
 import "./subscription-auth.js";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { ApprovalRegistry, type ApprovalDecision } from "./approval-bridge.js";
-import { FileAuditSink } from "./audit-sink.js";
+import { DbAuditSink, FileAuditSink, type AuditSink } from "./audit-sink.js";
+import { auditPool } from "./db-pool.js";
 import { HeuresysClient } from "./heuresys-client.js";
 import { redact } from "./redact.js";
 import { runHrAgent } from "./sdk-agent.js";
@@ -60,9 +61,14 @@ const RESEARCH_TOKEN = process.env.AGENT_GATEWAY_RESEARCH_TOKEN ?? "";
 
 // Module-level singletons (one per server process):
 //  - the HITL approval registry bridges the SSE stream ↔ POST /agent/approve;
-//  - the file audit sink leaves a tamper-evident trail of EVERY gate decision (M-4).
+//  - the audit sink leaves a tamper-evident trail of EVERY gate decision (M-4).
+// #253 — il diario diventa interrogabile QUANDO c'e' un database configurato
+// (`POSTGRES_HOST`): `DbAuditSink` scrive in `audit.agent_gateway_decisions`. Dove
+// non c'e' (dev senza tunnel, un test che non lo imposta) si ricade sul file — la
+// decisione presa in #253 ("il file resta come fallback"), non un errore silenzioso.
 const approvals = new ApprovalRegistry({ approvalTimeoutMs: APPROVAL_TIMEOUT_MS });
-const auditSink = new FileAuditSink();
+const pool = auditPool();
+const auditSink: AuditSink = pool ? new DbAuditSink(pool) : new FileAuditSink();
 
 // #9 §A.1 — subscription auth: with AGENT_GATEWAY_SUBSCRIPTION_AUTH=1 do NOT forward
 // an ANTHROPIC_API_KEY to the SDK, so query() falls back to the machine's logged-in

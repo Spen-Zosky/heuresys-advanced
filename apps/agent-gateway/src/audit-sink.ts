@@ -31,6 +31,13 @@ export type AuditPrincipal = "user" | "service" | "unknown";
 export interface AuditEntry {
   /** ISO-8601 UTC timestamp. */
   ts: string;
+  /**
+   * #253 — l'identificativo della CONVERSAZIONE (una `runHrAgent` = una `POST /agent`,
+   * ADR-0040 §4b). Generato in `sdk-agent.ts` con `randomUUID()`, uguale per ogni voce
+   * della stessa conversazione, compresa quella di chiusura. Assente solo per chi monta
+   * il gate a mano senza passare da `runHrAgent` (test che non lo iniettano).
+   */
+  conversationId?: string;
   /** Who: the principal kind + an opaque subject id (never PII — a user/session id). */
   who: { principal: AuditPrincipal; subject?: string };
   /** Tenant the call ran against (implicit from JWT upstream; "unknown" if unbound). */
@@ -90,6 +97,8 @@ export interface AuditEntry {
 
 /** Fields the caller supplies; ts + argsHash are derived by the sink. */
 export interface AuditInput {
+  /** #253 — vedi `AuditEntry.conversationId`. */
+  conversationId?: string;
   who: { principal: AuditPrincipal; subject?: string };
   tenant: string;
   tool: string;
@@ -128,6 +137,7 @@ export function targetOf(args: unknown): { concept?: string; operation?: string 
 export function toEntry(input: AuditInput): AuditEntry {
   return {
     ts: new Date().toISOString(),
+    ...(input.conversationId !== undefined ? { conversationId: input.conversationId } : {}),
     who: input.who,
     tenant: input.tenant,
     tool: input.tool,
@@ -169,6 +179,53 @@ export class FileAuditSink implements AuditSink {
 }
 
 /**
+ * #253 — il minimo che `DbAuditSink` pretende da un pool: una `query` parametrizzata.
+ * Non e' `pg.Pool` per intero apposta, cosi' un test puo' iniettare un finto senza
+ * installare `pg` ne' aprire una connessione vera.
+ */
+export interface AuditQueryable {
+  query(text: string, params?: unknown[]): Promise<unknown>;
+}
+
+/**
+ * Scrive il diario in `audit.agent_gateway_decisions` (mig. `000452`, I3/I4: schema
+ * ausiliario). SEAM invariato: stesso `AuditSink`, stesso `toEntry`. Il file
+ * (`FileAuditSink`) resta il fallback dove non c'e' un database configurato — la
+ * scelta fra i due e' del chiamante (`server.ts`), non di questa classe.
+ *
+ * Best-effort come il file: un errore di scrittura del diario non deve mai far
+ * fallire una decisione del gate (`write-gate.ts` ingoia gia' l'eccezione).
+ */
+export class DbAuditSink implements AuditSink {
+  constructor(private readonly db: AuditQueryable) {}
+
+  async record(input: AuditInput): Promise<void> {
+    const entry = toEntry(input);
+    await this.db.query(
+      `INSERT INTO audit.agent_gateway_decisions
+         (conversation_id, ts, principal_kind, principal_subject, tenant, tool, args_hash,
+          concept, operation, persone_distinte, livello_persone, decision, reason)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+      [
+        entry.conversationId ?? null,
+        entry.ts,
+        entry.who.principal,
+        entry.who.subject ?? null,
+        entry.tenant,
+        entry.tool,
+        entry.argsHash,
+        entry.concept ?? null,
+        entry.operation ?? null,
+        entry.personeDistinte ?? null,
+        entry.livelloPersone ?? null,
+        entry.decision,
+        entry.reason,
+      ],
+    );
+  }
+}
+
+/**
  * In-memory sink for tests (and a no-IO default). Keeps the entries array so a test
  * can assert the redacted args-hash + decision without touching the filesystem.
  */
@@ -203,11 +260,12 @@ export const RAGIONE_CHIUSURA = "CONVERSAZIONE_CHIUSA";
  */
 export async function registraChiusuraConversazione(
   sink: AuditSink,
-  who: { principal: AuditPrincipal; subject?: string; tenant?: string },
+  who: { principal: AuditPrincipal; subject?: string; tenant?: string; conversationId?: string },
   persone: { conta(): number; livello(): LivelloPersone },
 ): Promise<void> {
   try {
     await sink.record({
+      ...(who.conversationId !== undefined ? { conversationId: who.conversationId } : {}),
       who: { principal: who.principal, ...(who.subject !== undefined ? { subject: who.subject } : {}) },
       tenant: who.tenant ?? "unknown",
       tool: VOCE_CONVERSAZIONE,

@@ -9,12 +9,15 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  DbAuditSink,
   FileAuditSink,
   MemoryAuditSink,
   hashArgs,
+  registraChiusuraConversazione,
   targetOf,
   toEntry,
   type AuditInput,
+  type AuditQueryable,
 } from "../src/audit-sink.js";
 
 const baseInput: AuditInput = {
@@ -114,6 +117,87 @@ describe("FileAuditSink", () => {
  * risultava rossa su un criterio che, per i perimetri senza strumenti di dominio omonimi,
  * era impossibile da soddisfare.
  */
+/**
+ * #253 — IL DIARIO DIVENTA INTERROGABILE: ogni voce porta l'identificativo della
+ * conversazione che l'ha generata, cosi' una query SQL puo' raggruppare le decisioni
+ * per conversazione invece di leggerle una riga JSONL alla volta.
+ */
+describe("conversationId — #253", () => {
+  it("toEntry lo porta quando il chiamante lo dà", () => {
+    const e = toEntry({ ...baseInput, conversationId: "11111111-1111-4111-8111-111111111111" });
+    expect(e.conversationId).toBe("11111111-1111-4111-8111-111111111111");
+  });
+
+  it("resta assente quando il chiamante non lo dà (non e' uno zero, e' un non-misurato)", () => {
+    const e = toEntry(baseInput);
+    expect(e).not.toHaveProperty("conversationId");
+  });
+
+  it("registraChiusuraConversazione lo porta nella voce di chiusura", async () => {
+    const sink = new MemoryAuditSink();
+    await registraChiusuraConversazione(
+      sink,
+      { principal: "user", tenant: "RTL_BANK", conversationId: "22222222-2222-4222-8222-222222222222" },
+      { conta: () => 7, livello: () => "dichiarato" },
+    );
+    expect(sink.entries[0]!.conversationId).toBe("22222222-2222-4222-8222-222222222222");
+  });
+});
+
+/**
+ * #253 — `DbAuditSink` scrive la stessa forma di `toEntry` in `audit.agent_gateway_decisions`
+ * (mig. 000452). Un finto `AuditQueryable` basta: la prova non ha bisogno di un database vero
+ * per dimostrare CHE COSA il sink scrive, solo la connessione reale (provata sul gemello) per
+ * dimostrare che la tabella la accetta.
+ */
+describe("DbAuditSink — #253", () => {
+  it("scrive un INSERT su audit.agent_gateway_decisions coi 13 campi nell'ordine dichiarato", async () => {
+    const calls: { text: string; params: unknown[] }[] = [];
+    const fakeDb: AuditQueryable = {
+      query: async (text, params) => {
+        calls.push({ text, params: params ?? [] });
+        return undefined;
+      },
+    };
+    const sink = new DbAuditSink(fakeDb);
+    await sink.record({
+      ...baseInput,
+      conversationId: "33333333-3333-4333-8333-333333333333",
+      personeDistinte: 7,
+      livelloPersone: "dichiarato",
+    });
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.text).toContain("audit.agent_gateway_decisions");
+    expect(calls[0]!.text).toContain("INSERT INTO");
+    const params = calls[0]!.params;
+    expect(params[0]).toBe("33333333-3333-4333-8333-333333333333"); // conversation_id
+    expect(params[2]).toBe("user"); // principal_kind
+    expect(params[3]).toBe("sess-1"); // principal_subject
+    expect(params[4]).toBe("RTL_BANK"); // tenant
+    expect(params[5]).toBe("hrx_org_units_upsert"); // tool
+    expect(params[9]).toBe(7); // persone_distinte
+    expect(params[10]).toBe("dichiarato"); // livello_persone
+    expect(params[11]).toBe("deny"); // decision
+    expect(params[12]).toBe("WRITE_DENIED_OR_TIMEOUT"); // reason
+  });
+
+  it("i campi assenti diventano null, non 'undefined' letterale (il driver pg li rifiuterebbe)", async () => {
+    const calls: unknown[][] = [];
+    const fakeDb: AuditQueryable = {
+      query: async (_text, params) => {
+        calls.push(params ?? []);
+        return undefined;
+      },
+    };
+    await new DbAuditSink(fakeDb).record(baseInput); // niente conversationId/personeDistinte/livello
+    const params = calls[0]!;
+    expect(params[0]).toBeNull(); // conversation_id
+    expect(params[9]).toBeNull(); // persone_distinte
+    expect(params[10]).toBeNull(); // livello_persone
+  });
+});
+
 describe("targetOf — il bersaglio della decisione, senza portarsi dietro i dati", () => {
   it("estrae concetto e operazione dagli argomenti degli strumenti parametrici", () => {
     expect(targetOf({ conceptId: "content", operationId: "get_search" }))

@@ -60,7 +60,7 @@
   - priority: P2 · effort: ~1 sessione (voce + sink + migrazione + vista informativa raccolta da `db_health`) · doc: `.programmi/253-diario-interrogabile.md`
   - chiuso-quando: `select conversazione, persone_distinte from sys.v_agente_persone_per_conversazione` risponde sul vivo, e la vista e' dichiarata **informativa** (misura, non zero atteso) per non rendere rossa la prova generale
 - **#254 L'apertura di tutti i perimetri in una mossa sola: il risolutore smette di filtrare le letture** · status: GATED
-  - blocker: `#253` — il freno prima dell'apertura (ADR-0040 §5). `#251` e `#252` sono DONE (verificato S1115); resta solo questa. Il buco esiste gia' (tetto per chiamata): aprire prima del freno lo allargherebbe
+  - blocker: `#253` — il freno prima dell'apertura (ADR-0040 §5); le altre due voci del terzetto originale sono terminali (verificato S1115). Il buco esiste gia' (tetto per chiamata): aprire prima del freno lo allargherebbe
   - unblock-trigger: `#253` chiusa. Poi: `atlas-resolver.ts` e `mcp-tools.ts` non filtrano piu' le letture su `agent-perimetri.json`; il file **resta la fonte unica per le scritture** e la cronaca datata delle sedici aperture; `check_concetti_agente.py` da coda di apertura diventa misura
   - cosa-resta-chiuso: tutto cio' che RBAC nega alla persona, e le cinque eccezioni di ADR-0036 §5 (la quinta dal 2026-09-24, D11) — la prima misurata da `sys.v_whistleblowing_fuori_dal_custode` (mig `000414`)
   - prova-finale: `live-perimetro.ts` con una persona reale e il secondo fattore, quattro domande: le tre di sempre piu' «oltre la soglia si ferma»

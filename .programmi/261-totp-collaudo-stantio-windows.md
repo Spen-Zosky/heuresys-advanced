@@ -22,10 +22,10 @@ quindi non rinfresca nulla per questo caso.
 
 ## Fasi
 
-- [ ] **F1 — Trovare chi dovrebbe depositare il segreto TOTP delle identità di collaudo su una
-  macchina** — cercare in `provision-collaudo-access.ts` se il deposito avviene solo quando crea un
-  fattore NUOVO (non quando lo trova invariato), o se manca uno script dedicato mai eseguito su
-  Windows. **fatto =** il meccanismo è nominato con file:riga.
+- [ ] **F1 — Trovare chi dovrebbe depositare il segreto TOTP di collaudo** — cercare in
+  `provision-collaudo-access.ts` se il deposito avviene solo quando crea un fattore NUOVO (non
+  quando lo trova invariato), o se manca uno script dedicato mai eseguito su Windows. **fatto =** il
+  meccanismo è nominato con file:riga.
 - [ ] **F2 — Rideposita e verifica dal vivo** — `verify_gate.py run` (o solo la suite `test-api`)
   torna verde su Windows, oppure si decide di instradare `test-api` sul gemello anche in locale
   (coerente con «il lavoro sul DB si esegue dove il DB vive»).

@@ -45,7 +45,7 @@ import {
 import { config as dotenvConfig } from "dotenv";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 // ⭐ S1093 — il segreto si scrive CIFRATO, come lo scriverebbe il repository. Scriverlo in
 // chiaro «funziona» (decryptSecret e' self-identifying e lo rileggerebbe as-is) ma accende la
 // sentinella `v_mfa_secrets_in_cleartext`, che pretende zero: l'ha vista rossa la prova
@@ -223,6 +223,14 @@ const PERCORSO_SEGRETI = resolve(repoRoot, "apps", "web", "tests", ".auth", "tot
  * Chiamata SOLO dietro la guardia `NODE_ENV === "test"`. Non è un canale di distribuzione:
  * il file è per-macchina, si riscrive a ogni seed, non entra nel repository e non viaggia
  * con `align-clones.sh`. In CI nasce e muore dentro il job.
+ *
+ * #261 — MERGE, non sovrascrittura. Lo stesso file lo scrive anche
+ * `db/scripts/provision-collaudo-access.ts` (identità `@collaudo.invalid`), che da sempre
+ * fonde col contenuto esistente proprio per convivere con questo scrittore. Prima di questa
+ * correzione questa funzione faceva un `writeFileSync` nudo: chiunque dei due girasse per
+ * ultimo cancellava i segreti dell'altro, in silenzio — misurato S1116 (2026-09-28):
+ * `platform-test-admin@collaudo.invalid` non passava più il secondo fattore perché il file
+ * portava solo le 6 persone RTL di QUESTO script, non più il suo segreto.
  */
 function depositaSegretiDiCollaudo(segreti: Record<string, string>): void {
   const quanti = Object.keys(segreti).length;
@@ -230,6 +238,15 @@ function depositaSegretiDiCollaudo(segreti: Record<string, string>): void {
     console.log("  totp-collaudo: nessun segreto da depositare");
     return;
   }
+  let esistente: { database?: unknown; segreti?: Record<string, string> } = {};
+  if (existsSync(PERCORSO_SEGRETI)) {
+    try {
+      esistente = JSON.parse(readFileSync(PERCORSO_SEGRETI, "utf8")) as typeof esistente;
+    } catch {
+      esistente = {};
+    }
+  }
+  const fusi = { ...(esistente.segreti ?? {}), ...segreti };
   // ⭐ S1093 — L'IMPRONTA, e perché costa una riga e vale un giro di CI intero.
   // Il primo tentativo di correzione ha lasciato la CI rossa con un errore DIVERSO: la
   // fixture forniva un codice e il server rispondeva «Codice MFA non valido o scaduto». Da
@@ -248,9 +265,10 @@ function depositaSegretiDiCollaudo(segreti: Record<string, string>): void {
       {
         avvertenza:
           "Segreti TOTP del solo ambiente di COLLAUDO. Rigenerati a ogni seed, gitignored, " +
-          "mai propagati. Scritti solo con NODE_ENV=test (db/scripts/seed-test-admin.ts).",
-        database: process.env.POSTGRES_DB ?? null,
-        segreti,
+          "mai propagati. Scritti solo con NODE_ENV=test (db/scripts/seed-test-admin.ts + " +
+          "provision-collaudo-access.ts, #261: i due si fondono, non si sovrascrivono).",
+        database: process.env.POSTGRES_DB ?? esistente.database ?? null,
+        segreti: fusi,
       },
       null,
       2,

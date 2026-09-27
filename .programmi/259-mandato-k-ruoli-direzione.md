@@ -1,7 +1,11 @@
 # 259 — Mandato K: ruoli senza titolare e direzione del dato (I23)
 
 > **item**: #259 · **priorità**: P1 · **stima**: 26-28 sessioni (sezione 12 del mandato)
-> **stato**: IN CORSO
+> **stato**: DONE — chiuso S1108 (2026-09-25): tutte le voci terminali (53 CHIUSE, 2 RITIRATE, 0
+> aperte, verificato contando gli stati in `STATO.md`), register `docs/kb/SOT_BACKLOG.md` #259.
+> Questo puntatore era rimasto IN CORSO per un mancato aggiornamento a chiusura; corretto S1116
+> (2026-09-28), nessun lavoro nuovo. Le ultime tre decisioni di Enzo (D11, D12, `sys_attendance`/X-2)
+> sono arrivate ed eseguite il 2026-09-24/25.
 > **nasce-da**: le decisioni di Enzo del 2026-09-14 (nove, otto chiuse, D5 rinviata) sul dossier PARTE_K/K2/K3 di Cowork; testo operativo `.programmi/mandati/K-mandato-v2.md`.
 
 ## Questo file è un PUNTATORE, non lo stato
@@ -15,13 +19,13 @@ D1=B (sinonimi governati da chi governa le competenze, nasce `skill_alias:manage
 ## Fasi
 
 - [x] **F0a — Fondazione: stato, strumenti, sola lettura, migrazioni, workflow, censimento, baseline** — 2026-09-14 S1102 — evidenza: `.programmi/K-ruoli-direzione/STATO.md` (F0.1, F0.5, F0.6, F0.7, F0.2, F0.3 = CHIUSA), `esiti/F0.2_censimento_C1.md`, `evidenze/baseline_202609142318.txt`, `evidenze/F0.5_controprova.txt`.
-- [ ] **F0b — Fondazione: la prova di ripresa (F0.4, K-PROVA)** — INTERROTTO al passo 10 di proposito (sezione 3.5: la prova chiude e riapre la sessione) — 2026-09-14: `000415` applicata e riconosciuta a caldo; la sessione 2 legge il caso (ii) a freddo, scrive `000416` e `000417`. **fatto =** cancello d'uscita di F0 superato, K-PROVA RITIRATA.
-- [ ] **F1 — Indagini** — W1 + W2 + tre code in linea; **fatto =** sei file in `esiti/` con verdetti, D5 in `ATTESA_ENZO` col numero dei conflitti (fermata obbligatoria: rapporto a Enzo).
-- [ ] **F2 — Sentinelle e cancelli** — S-1..S-5; **fatto =** cinque evidenze rosse e cinque verdi. Fermata obbligatoria dopo F2 (Enzo legge le indagini prima che F4 cambi permessi a persone vive).
-- [ ] **F3 — I due ADR** — X-0, K1-ADR con confutazione W3; **fatto =** ratificati da Enzo in `esiti/RISPOSTE_ENZO.md`.
-- [ ] **F4 — I ruoli, uno per migrazione** — R-1, R-0, R-9, R-2, R-3, R-7, R-10, R-4, R-5, R-8, R-6, R-11; **fatto =** cancello per ruolo (migrazione, persona di collaudo, deriva verde, prove negative, W4, G-D2 vuota).
-- [ ] **F5 — Direzione del dato** — X-1..X-6; **fatto =** tre sentinelle nuove vigilate da `db_health.py`.
-- [ ] **F6 — Il gesto** — G-1; **fatto =** spostamento di persona via proposta approvata, storia conservata.
+- [x] **F0b — Fondazione: la prova di ripresa (F0.4, K-PROVA)** — RITIRATA, cancello d'uscita di F0 superato.
+- [x] **F1 — Indagini** — chiusa, D5 rientrata (vedi decisioni sezione 2 sopra).
+- [x] **F2 — Sentinelle e cancelli** — S-1..S-5 chiuse.
+- [x] **F3 — I due ADR** — X-0, K1-ADR ratificati da Enzo (`esiti/RISPOSTE_ENZO.md`).
+- [x] **F4 — I ruoli, uno per migrazione** — R-1..R-11 chiusi, ultimo D-STEWARD/R-6b nel ciclo di governo 1.
+- [x] **F5 — Direzione del dato** — X-1..X-6 chiuse, incluso X-2/`sys_attendance` (D12, mig. `000450`).
+- [x] **F6 — Il gesto** — G-1 chiuso.
 
 ## Cronaca
 

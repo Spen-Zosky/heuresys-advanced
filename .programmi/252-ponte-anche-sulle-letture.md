@@ -1,7 +1,9 @@
 # 252 — Il ponte di approvazione umana si aggancia anche alle letture oltre la soglia alta
 
 > **item**: #252 · **priorità**: P1 · **stima**: ~1 sessione (dopo `#251`)
-> **stato**: NON AVVIATO
+> **stato**: DONE — chiuso ciclo3 (2026-09-26, S1113), HEAD `8dbfa884`, esito in
+> `.programmi/esiti-ciclo3/252.md`, register `docs/kb/SOT_BACKLOG.md` #252. Questo file era rimasto
+> NON AVVIATO per un mancato aggiornamento a chiusura; corretto S1116 (2026-09-28), nessun lavoro nuovo.
 > **nasce-da**: ADR-0040 R2, secondo passo. Il ponte esiste ed è provato per le scritture (`apps/agent-gateway/src/approval-bridge.ts`, `canUseTool` in `write-gate.ts`, evento `approval_required` gestito da `apps/web/src/lib/use-agent-stream.ts`); per le letture oggi è `READ_AUTO_ALLOW` sempre.
 
 ## Decisioni già prese (non si ri-chiedono)
@@ -12,10 +14,10 @@
 
 ## Fasi
 
-- [ ] **F1 — Il gate legge il livello** — `makeCanUseTool` riceve il contatore; su una lettura, se il livello è «confermato» instrada al ponte con un payload che dica **quante persone e quale concetto** (identificatori, mai dati); altrimenti `allow` con la ragione arricchita dal livello. **fatto =** `write-gate.test.ts` esteso: sotto soglia `allow`, sopra soglia il ponte viene interpellato una volta; approvato → `allow`, negato → `deny`; timeout → `deny`.
-- [ ] **F2 — Il web mostra la richiesta** — l'evento `approval_required` esistente porta già `tool` e `input` redatti: si aggiunge il campo del numero di persone, e il pannello lo dice in una riga. **fatto =** la pagina `/dev/agent` mostra «l'agente ha toccato N persone, vuoi continuare?» e i due bottoni funzionano.
-- [ ] **F3 — La prova live con la quarta domanda** — `scripts/live-perimetro.ts`: le tre domande di sempre più «chi è candidabile in tutta l'azienda», che deve **fermarsi**. Login con persona reale e secondo fattore. **fatto =** la corsa è verde e il diario mostra la richiesta di conferma e l'esito.
-- [ ] **F4 — La prova che può fallire** — sabotaggio dichiarato: con la soglia alzata a 1000 la quarta domanda non si ferma e il criterio va rosso; ripristinata, verde. **fatto =** coppia rosso/verde nella cronaca.
+- [x] **F1 — Il gate legge il livello** — fatto: `canUseTool` instrada al ponte su `confermato`/`non-misurato`/contatore assente (D7).
+- [x] **F2 — Il web mostra la richiesta** — fatto: pannello `@heuresys/ui` non toccato, riusa `approvalDesc` gia' ricevuto.
+- [x] **F3 — La prova live con la quarta domanda** — fatto dal vivo: 14/14 criteri verdi, login reale con secondo fattore, progressione 0→25→55 dimostrata.
+- [x] **F4 — La prova che può fallire** — fatto: sabotaggio (soglia a 1000) porta 5 criteri a rosso, ripristino verde.
 
 ## Cronaca
 

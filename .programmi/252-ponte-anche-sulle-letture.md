@@ -1,10 +1,11 @@
 # 252 — Il ponte di approvazione umana si aggancia anche alle letture oltre la soglia alta
 
 > **item**: #252 · **priorità**: P1 · **stima**: ~1 sessione (dopo `#251`)
-> **stato**: DONE — chiuso ciclo3 (2026-09-26, S1113), HEAD `8dbfa884`, esito in
-> `.programmi/esiti-ciclo3/252.md`, register `docs/kb/SOT_BACKLOG.md` #252. Questo file era rimasto
-> NON AVVIATO per un mancato aggiornamento a chiusura; corretto S1116 (2026-09-28), nessun lavoro nuovo.
+> **stato**: CHIUSO
 > **nasce-da**: ADR-0040 R2, secondo passo. Il ponte esiste ed è provato per le scritture (`apps/agent-gateway/src/approval-bridge.ts`, `canUseTool` in `write-gate.ts`, evento `approval_required` gestito da `apps/web/src/lib/use-agent-stream.ts`); per le letture oggi è `READ_AUTO_ALLOW` sempre.
+> **chiuso ciclo3, 2026-09-26 (S1113)**: HEAD `8dbfa884`, esito in `.programmi/esiti-ciclo3/252.md`,
+> register `docs/kb/SOT_BACKLOG.md` #252. Questo file era rimasto `NON AVVIATO` per un mancato
+> aggiornamento a chiusura; corretto S1116 (2026-09-28), nessun lavoro nuovo.
 
 ## Decisioni già prese (non si ri-chiedono)
 
@@ -14,10 +15,10 @@
 
 ## Fasi
 
-- [x] **F1 — Il gate legge il livello** — fatto: `canUseTool` instrada al ponte su `confermato`/`non-misurato`/contatore assente (D7).
-- [x] **F2 — Il web mostra la richiesta** — fatto: pannello `@heuresys/ui` non toccato, riusa `approvalDesc` gia' ricevuto.
-- [x] **F3 — La prova live con la quarta domanda** — fatto dal vivo: 14/14 criteri verdi, login reale con secondo fattore, progressione 0→25→55 dimostrata.
-- [x] **F4 — La prova che può fallire** — fatto: sabotaggio (soglia a 1000) porta 5 criteri a rosso, ripristino verde.
+- [x] **F1 — Il gate legge il livello** — FATTO 2026-09-26 · `canUseTool` instrada al ponte su `confermato`/`non-misurato`/contatore assente (D7).
+- [x] **F2 — Il web mostra la richiesta** — FATTO 2026-09-26 · pannello `@heuresys/ui` non toccato, riusa `approvalDesc` gia' ricevuto.
+- [x] **F3 — La prova live con la quarta domanda** — FATTO 2026-09-26 · dal vivo: 14/14 criteri verdi, login reale con secondo fattore, progressione 0→25→55 dimostrata.
+- [x] **F4 — La prova che può fallire** — FATTO 2026-09-26 · sabotaggio (soglia a 1000) porta 5 criteri a rosso, ripristino verde.
 
 ## Cronaca
 

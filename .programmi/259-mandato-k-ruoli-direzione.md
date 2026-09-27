@@ -1,12 +1,13 @@
 # 259 — Mandato K: ruoli senza titolare e direzione del dato (I23)
 
 > **item**: #259 · **priorità**: P1 · **stima**: 26-28 sessioni (sezione 12 del mandato)
-> **stato**: DONE — chiuso S1108 (2026-09-25): tutte le voci terminali (53 CHIUSE, 2 RITIRATE, 0
-> aperte, verificato contando gli stati in `STATO.md`), register `docs/kb/SOT_BACKLOG.md` #259.
-> Questo puntatore era rimasto IN CORSO per un mancato aggiornamento a chiusura; corretto S1116
+> **stato**: CHIUSO
+> **nasce-da**: le decisioni di Enzo del 2026-09-14 (nove, otto chiuse, D5 rinviata) sul dossier PARTE_K/K2/K3 di Cowork; testo operativo `.programmi/mandati/K-mandato-v2.md`.
+> **chiuso S1108 (2026-09-25)**: tutte le voci terminali (53 CHIUSE, 2 RITIRATE, 0 aperte,
+> verificato contando gli stati in `STATO.md`), register `docs/kb/SOT_BACKLOG.md` #259. Questo
+> puntatore era rimasto `IN CORSO` per un mancato aggiornamento a chiusura; corretto S1116
 > (2026-09-28), nessun lavoro nuovo. Le ultime tre decisioni di Enzo (D11, D12, `sys_attendance`/X-2)
 > sono arrivate ed eseguite il 2026-09-24/25.
-> **nasce-da**: le decisioni di Enzo del 2026-09-14 (nove, otto chiuse, D5 rinviata) sul dossier PARTE_K/K2/K3 di Cowork; testo operativo `.programmi/mandati/K-mandato-v2.md`.
 
 ## Questo file è un PUNTATORE, non lo stato
 
@@ -19,13 +20,13 @@ D1=B (sinonimi governati da chi governa le competenze, nasce `skill_alias:manage
 ## Fasi
 
 - [x] **F0a — Fondazione: stato, strumenti, sola lettura, migrazioni, workflow, censimento, baseline** — 2026-09-14 S1102 — evidenza: `.programmi/K-ruoli-direzione/STATO.md` (F0.1, F0.5, F0.6, F0.7, F0.2, F0.3 = CHIUSA), `esiti/F0.2_censimento_C1.md`, `evidenze/baseline_202609142318.txt`, `evidenze/F0.5_controprova.txt`.
-- [x] **F0b — Fondazione: la prova di ripresa (F0.4, K-PROVA)** — RITIRATA, cancello d'uscita di F0 superato.
-- [x] **F1 — Indagini** — chiusa, D5 rientrata (vedi decisioni sezione 2 sopra).
-- [x] **F2 — Sentinelle e cancelli** — S-1..S-5 chiuse.
-- [x] **F3 — I due ADR** — X-0, K1-ADR ratificati da Enzo (`esiti/RISPOSTE_ENZO.md`).
-- [x] **F4 — I ruoli, uno per migrazione** — R-1..R-11 chiusi, ultimo D-STEWARD/R-6b nel ciclo di governo 1.
-- [x] **F5 — Direzione del dato** — X-1..X-6 chiuse, incluso X-2/`sys_attendance` (D12, mig. `000450`).
-- [x] **F6 — Il gesto** — G-1 chiuso.
+- [x] **F0b — Fondazione: la prova di ripresa (F0.4, K-PROVA)** — FATTO 2026-09-14 · RITIRATA, cancello d'uscita di F0 superato.
+- [x] **F1 — Indagini** — FATTO 2026-09-25 · chiusa, D5 rientrata (vedi decisioni sezione 2 sopra).
+- [x] **F2 — Sentinelle e cancelli** — FATTO 2026-09-25 · S-1..S-5 chiuse.
+- [x] **F3 — I due ADR** — FATTO 2026-09-25 · X-0, K1-ADR ratificati da Enzo (`esiti/RISPOSTE_ENZO.md`).
+- [x] **F4 — I ruoli, uno per migrazione** — FATTO 2026-09-25 · R-1..R-11 chiusi, ultimo D-STEWARD/R-6b nel ciclo di governo 1.
+- [x] **F5 — Direzione del dato** — FATTO 2026-09-25 · X-1..X-6 chiuse, incluso X-2/`sys_attendance` (D12, mig. `000450`).
+- [x] **F6 — Il gesto** — FATTO 2026-09-25 · G-1 chiuso.
 
 ## Cronaca
 

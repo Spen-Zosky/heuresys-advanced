@@ -1,10 +1,11 @@
 # 258 — I test API entrano come Enzo, e dal 2026-09-14 Enzo ha il suo secondo fattore: contro produzione e gemello muoiono al login
 
 > **item**: #258 · **priorità**: P1 · **stima**: ~1 sessione
-> **stato**: DONE — chiuso ciclo3 (2026-09-26), esito in `.programmi/esiti-ciclo3/258.md`, register in
-> `docs/archive/SOT_BACKLOG_CHIUSI.md`. Questo file era rimasto NON AVVIATO per un mancato
-> aggiornamento a chiusura; corretto S1116 (2026-09-28), nessun lavoro nuovo.
+> **stato**: CHIUSO
 > **nasce-da**: S1101 (2026-09-14), misurando i test di `#V2` del mandato sul contratto condiviso: 8 file su 11 rossi al login. Conseguenza non prevista di `#250` (S1100), che ha reso il secondo fattore di Enzo suo e non più di collaudo.
+> **chiuso ciclo3, 2026-09-26**: esito in `.programmi/esiti-ciclo3/258.md`, register spostato in
+> `docs/archive/SOT_BACKLOG_CHIUSI.md`. Questo file era rimasto `NON AVVIATO` per un mancato
+> aggiornamento a chiusura; corretto S1116 (2026-09-28), nessun lavoro nuovo.
 
 ## Il fatto
 
@@ -20,8 +21,8 @@
 
 ## Fasi
 
-- [x] **F1 — La persona** — commit `9dec9321`: persona `platform-test-admin@collaudo.invalid`, login MFA a due passi riuscito dal vivo.
-- [x] **F2 — I test** — commit `43d3705c` (141 file, non 113) + fix `82dfb4be`. Grep di chiusura `enzo.spenuso@heuresys.com` in `apps/api/test apps/web/tests` → 0.
-- [x] **F3 — La prova sul clone rinfrescato** — `bash db/scripts/prova-api-sul-gemello.sh` su HEAD `82dfb4be`, clone rinfrescato dopo F1: GREEN (typecheck 24.9s, test-api 1640.7s).
+- [x] **F1 — La persona** — FATTO 2026-09-26 · commit `9dec9321`: persona `platform-test-admin@collaudo.invalid`, login MFA a due passi riuscito dal vivo.
+- [x] **F2 — I test** — FATTO 2026-09-26 · commit `43d3705c` (141 file, non 113) + fix `82dfb4be`. Grep di chiusura `enzo.spenuso@heuresys.com` in `apps/api/test apps/web/tests` → 0.
+- [x] **F3 — La prova sul clone rinfrescato** — FATTO 2026-09-26 · `bash db/scripts/prova-api-sul-gemello.sh` su HEAD `82dfb4be`, clone rinfrescato dopo F1: GREEN (typecheck 24.9s, test-api 1640.7s).
 
 ## Cronaca

@@ -1,7 +1,7 @@
 # 260 — Il runner della CI porta una chiave di collaudo che non usa: due chiavi per le stesse quattordici utenze
 
 > **item**: #260 · **priorità**: P2 · **stima**: pochi minuti, ma l'atto è **sulla macchina**, non sul repo
-> **stato**: CHIUSO (2026-09-27)
+> **stato**: CHIUSO
 > **nasce-da**: S1108 (2026-09-25), durante D11-0 e fuori dal suo scope — indagando perché la CI fosse rossa da due giorni. Dettaglio in `.programmi/K-ruoli-direzione/esiti/D11.md` (sezione D11-0) e `esiti/REGISTRO_SCOPERTE.md`, riga 2026-09-24.
 
 ## Il fatto, misurato

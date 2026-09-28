@@ -11,8 +11,8 @@ diceva CHI deve colmarle. **Adottato da Enzo il 2026-09-14 (S1101)**, nella form
 piccola: un quarto strumento che RI-DERIVA le lacune dai tre esistenti e assegna la famiglia
 con regole meccaniche — mai una tabella `sys.*` scritta a mano (invecchierebbe).
 
-Le quattro famiglie (decise da Enzo, non si ri-chiedono)
----------------------------------------------------------
+Le cinque famiglie (decise da Enzo, non si ri-chiedono — la quinta aggiunta il 2026-09-28)
+--------------------------------------------------------------------------------------------
   ① DERIVABILE  — colmabile dal codice: la colonna/tabella vuota ha una FK verso una tabella
                   gia' popolata (es. un `_user_id` di audit -> il codice conosce l'attore della
                   richiesta; una FK di contenuto -> un legame gia' presente permette di derivare).
@@ -23,6 +23,10 @@ Le quattro famiglie (decise da Enzo, non si ri-chiedono)
   ③ CLIENTE     — dati della persona o dell'azienda (utenti, incarichi, retribuzioni,
                   presenze): bloccata da M6 (la porta d'ingresso dei dati del cliente non
                   esiste). Questo registro la NOMINA, non la risolve.
+  ⑤ USO-PRODOTTO — tabella vuota il cui modulo ha GIA' una rotta di scrittura raggiungibile
+                  (`app.post`/`app.put` nel `routes.ts`) e un `INSERT INTO` reale nel proprio
+                  `repository.ts`: non manca un dato da procurarsi, manca solo l'USO del
+                  prodotto (OKR, survey, ...). Nessuno la ripara: si popola vivendo.
   ④ DECISIONE   — cio' che nessuna regola classifica. Elenco finito, letto da Enzo: chi lo
                   guarda decide se serve una regola nuova o una scelta di prodotto.
 
@@ -47,10 +51,10 @@ sa dire "non torna" non e' un registro, e' un elenco con una funzione davanti.
 
 F2 — LE REGOLE (dichiarative, in `REGOLE`, non in `if` sparsi)
 ------------------------------------------------------------------
-`--selftest` verifica tre casi REALI a esito noto e diverso (uno per DERIVABILE/RICERCA/
-CLIENTE) piu' un quarto che nessuna regola tocca (DECISIONE), poi SABOTA la regola che ha
-prodotto il primo esito e pretende che quel caso, e SOLO quello, diventi rosso — la prova che
-la regola e' responsabile dell'esito, non un `else` che indovina.
+`--selftest` verifica quattro casi REALI a esito noto e diverso (uno per DERIVABILE/RICERCA/
+CLIENTE/USO-PRODOTTO) piu' un quinto che nessuna regola tocca (DECISIONE), poi SABOTA la regola
+che ha prodotto il primo esito e pretende che quel caso, e SOLO quello, diventi rosso — la prova
+che la regola e' responsabile dell'esito, non un `else` che indovina.
 
 Uso
 ---
@@ -66,6 +70,7 @@ Uscite: 0 misura pulita · 1 selftest o post-condizione rossa · 2 database non 
 from __future__ import annotations
 
 import argparse
+import collections
 import json
 import os
 import re
@@ -78,6 +83,7 @@ QUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, QUI)
 import completezza_tenant as ct  # noqa: E402 — riuso, non reinvento (RIFERIMENTO, misura, confronta)
 import check_domini_ricercabili as cdr  # noqa: E402 — riuso, il gemello python di chiaviDominio()
+import check_exposure as ce  # noqa: E402 — riuso di RADICE/API/_leggi_dir per la famiglia ⑤
 
 PSQL = ["psql", "-h", os.environ.get("PGHOST", "localhost"),
         "-p", os.environ.get("PGPORT", "5433"),
@@ -210,17 +216,48 @@ def verifica_fonti(lacune: list[Lacuna]) -> tuple[bool, list[str]]:
 
 # ── F2 — LE REGOLE, DICHIARATIVE ──────────────────────────────────────────────────────────
 
+RE_ROTTA_SCRITTURA = re.compile(r"\bapp\.(?:post|put)\s*\(", re.I)
+RE_INSERT_TABELLA = re.compile(r"\bINSERT\s+INTO\s+sys\.(sys_\w+)", re.I)
+
+
+def _tabelle_uso_prodotto(radice: str | None = None) -> dict[str, set[str]]:
+    """Famiglia ⑤ — tabella -> {moduli} il cui `repository.ts` ha un `INSERT INTO` reale su di
+    lei E il cui `routes.ts` GEMELLO registra almeno una rotta `app.post`/`app.put`: le due
+    condizioni insieme, non una sola — un `INSERT` senza rotta non e' raggiungibile dal
+    prodotto (e' esattamente la lezione di `#262`: leggere il codice non basta, serve la porta).
+    """
+    cartella_moduli = os.path.join(ce.API, "modules")
+    esito: dict[str, set[str]] = collections.defaultdict(set)
+    if not os.path.isdir(cartella_moduli):
+        return esito
+    for modulo in sorted(os.listdir(cartella_moduli)):
+        base = os.path.join(cartella_moduli, modulo)
+        repo_p = os.path.join(base, "repository.ts")
+        routes_p = os.path.join(base, "routes.ts")
+        if not (os.path.isfile(repo_p) and os.path.isfile(routes_p)):
+            continue
+        repo_testo = open(repo_p, encoding="utf-8", errors="replace").read()
+        routes_testo = open(routes_p, encoding="utf-8", errors="replace").read()
+        if not RE_ROTTA_SCRITTURA.search(routes_testo):
+            continue
+        for m in RE_INSERT_TABELLA.finditer(repo_testo):
+            esito[m.group(1)].add(modulo)
+    return esito
+
+
 @dataclass
 class Contesto:
     esito_205: dict            # tabella -> {r1, r3, soggetti, dominio, ...} (check_domini_ricercabili)
     dest_domain: dict          # tabella -> chiave dominio #205 (solo domini dichiarati)
     fk_map: dict                # (tabella, colonna) -> (tabella_riferita, righe_riferita)
+    uso_prodotto: dict          # tabella -> {moduli} con INSERT + rotta di scrittura (famiglia ⑤)
 
 
 def costruisci_contesto() -> Contesto:
     esito, _senza_dest, _fonti = cdr.misura()
     chiavi = cdr.domini_dichiarati()
     dest_domain = {tab: chiave for chiave, tab in cdr.DESTINAZIONE.items() if chiave in chiavi}
+    uso_prodotto = _tabelle_uso_prodotto()
 
     righe = q("""
         SELECT r.relname, a.attname, f.relname, coalesce(t.n_live_tup, 0)
@@ -236,7 +273,7 @@ def costruisci_contesto() -> Contesto:
     for tab, col, rif_tab, rif_righe in righe:
         fk_map.setdefault((tab, col), (rif_tab, int(rif_righe)))
 
-    return Contesto(esito_205=esito, dest_domain=dest_domain, fk_map=fk_map)
+    return Contesto(esito_205=esito, dest_domain=dest_domain, fk_map=fk_map, uso_prodotto=uso_prodotto)
 
 
 def _di_persona(ctx: Contesto, tabella: str) -> bool:
@@ -281,6 +318,15 @@ def motivo_contenuto_settore(l: Lacuna, ctx: Contesto) -> str:
     return f"contenuto di settore, dominio ricercabile #205 `{ctx.dest_domain[l.tabella]}` (chiaviDominio())"
 
 
+def regola_uso_prodotto(l: Lacuna, ctx: Contesto) -> bool:
+    return l.fonte == "completezza_tenant" and l.tabella in ctx.uso_prodotto
+
+
+def motivo_uso_prodotto(l: Lacuna, ctx: Contesto) -> str:
+    moduli = ", ".join(sorted(ctx.uso_prodotto[l.tabella]))
+    return f"tabella vuota ma con una rotta di scrittura gia' raggiungibile (modulo `{moduli}`): si popola usando il prodotto, non riparando"
+
+
 def regola_tabella_persona(l: Lacuna, ctx: Contesto) -> bool:
     return l.fonte == "completezza_tenant" and _di_persona(ctx, l.tabella)
 
@@ -298,6 +344,7 @@ REGOLE: list[tuple[str, str, Callable[[Lacuna, Contesto], bool], Callable[[Lacun
     ("fuori-settore",              "RICERCA",    regola_fuori_settore,      motivo_fuori_settore),
     ("colonna-soggetto-persona",   "CLIENTE",    regola_colonna_soggetto,   motivo_colonna_soggetto),
     ("contenuto-di-settore-vuoto", "RICERCA",    regola_contenuto_settore,  motivo_contenuto_settore),
+    ("uso-prodotto",               "USO-PRODOTTO", regola_uso_prodotto,     motivo_uso_prodotto),
     ("tabella-di-persona-vuota",   "CLIENTE",    regola_tabella_persona,    motivo_tabella_persona),
     ("fk-a-tabella-popolata",      "DERIVABILE", regola_fk_popolata,        motivo_fk_popolata),
 ]
@@ -319,7 +366,7 @@ def classifica_tutte(lacune: list[Lacuna], ctx: Contesto) -> list[Lacuna]:
 
 # ── F3 — LA CODA DI LAVORO PER FAMIGLIA ───────────────────────────────────────────────────
 
-FAMIGLIE = ["DERIVABILE", "RICERCA", "CLIENTE", "DECISIONE"]
+FAMIGLIE = ["DERIVABILE", "RICERCA", "CLIENTE", "USO-PRODOTTO", "DECISIONE"]
 
 
 def per_famiglia(lacune: list[Lacuna]) -> dict[str, list[Lacuna]]:
@@ -349,9 +396,14 @@ def stampa_per_famiglia(lacune: list[Lacuna]) -> None:
         dove = f"tenant {l.tenant}" if l.tenant else (l.colonna or "-")
         print(f"    {l.tabella}  ({dove})  —  {l.motivo}")
 
+    print(f"\n⑤ USO-PRODOTTO — si popola vivendo, nessuno la ripara ({len(gruppi['USO-PRODOTTO'])})")
+    for l in gruppi["USO-PRODOTTO"]:
+        dove = f"tenant {l.tenant}" if l.tenant else "-"
+        print(f"    {l.tabella}  ({dove})  —  {l.motivo}")
+
     print(f"\n④ DECISIONE — la legge Enzo, elenco finito ({len(gruppi['DECISIONE'])})")
     if not gruppi["DECISIONE"]:
-        print("    (nessuna: ogni lacuna misurata oggi rientra in una delle prime tre famiglie)")
+        print("    (nessuna: ogni lacuna misurata oggi rientra in una delle altre famiglie)")
     for l in gruppi["DECISIONE"]:
         colonna = f".{l.colonna}" if l.colonna else ""
         dove = f" (tenant {l.tenant})" if l.tenant else ""
@@ -372,7 +424,7 @@ def riga_dashboard() -> str:
     gruppi = per_famiglia(lacune)
     return (f"  [i ] lacune      {len(lacune)} — DERIVABILE {len(gruppi['DERIVABILE'])} · "
             f"RICERCA {len(gruppi['RICERCA'])} · CLIENTE {len(gruppi['CLIENTE'])} · "
-            f"DECISIONE {len(gruppi['DECISIONE'])}")
+            f"USO-PRODOTTO {len(gruppi['USO-PRODOTTO'])} · DECISIONE {len(gruppi['DECISIONE'])}")
 
 
 # ── --selftest (F2): esiti opposti su casi reali, poi si sabota la regola che ha deciso ────
@@ -385,6 +437,8 @@ CASI = [
      "contenuto-di-settore-vuoto", "dominio #205 `skills`, tabella vuota per HEURESYS"),
     ("CLIENTE", "sys_attendance", None, "HEURESYS",
      "tabella-di-persona-vuota", "presenze: dato della persona, vuota per HEURESYS"),
+    ("USO-PRODOTTO", "sys_okrs", None, "HEURESYS",
+     "uso-prodotto", "modulo okrs: INSERT reale + rotta POST gia' raggiungibile"),
     ("DECISIONE", "sys_activity_classifications", "activity_classification_description", None,
      "nessuna-regola", "nessuna FK, nessun soggetto, non e' un dominio #205"),
 ]
@@ -475,6 +529,7 @@ def main() -> int:
             print(f"  ① DERIVABILE (il codice)              {len(gruppi['DERIVABILE']):>5}")
             print(f"  ② RICERCA (macchina della ricerca #205) {len(gruppi['RICERCA']):>5}")
             print(f"  ③ CLIENTE (bloccata da M6)             {len(gruppi['CLIENTE']):>5}")
+            print(f"  ⑤ USO-PRODOTTO (si popola vivendo)     {len(gruppi['USO-PRODOTTO']):>5}")
             print(f"  ④ DECISIONE (la legge Enzo)            {len(gruppi['DECISIONE']):>5}")
             print("=" * 96)
             print("  `--per-famiglia` per la coda dettagliata, `--verifica-fonti` per la post-condizione di F1.")

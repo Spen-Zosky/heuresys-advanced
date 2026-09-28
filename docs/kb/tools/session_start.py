@@ -116,9 +116,10 @@ def main():
             print("\nSENTINELLE DBMS (viste v_* — db_health.py)")
             sys.argv = ["db_health", "--sentinelle", "--compatto"]
             db_health.main()
-        # #257: chi ripara e chi popola una lacuna, in quattro famiglie meccaniche (DERIVABILE
-        # il codice, RICERCA la macchina di #205, CLIENTE bloccata da M6, DECISIONE la legge
-        # Enzo). Nessuna soglia: il numero si stampa, chi legge giudica. Salta con --no-db: la
+        # #257: chi ripara e chi popola una lacuna, in cinque famiglie meccaniche (DERIVABILE
+        # il codice, RICERCA la macchina di #205, CLIENTE bloccata da M6, USO-PRODOTTO si popola
+        # vivendo (rotta di scrittura gia' raggiungibile), DECISIONE la legge Enzo). Nessuna
+        # soglia: il numero si stampa, chi legge giudica. Salta con --no-db: la
         # misura riusa completezza_tenant.py + check_domini_ricercabili.py e costa alcune query
         # in piu' sul tunnel, non ha senso tentarla se il chiamante ha gia' detto che il DB e' giu'.
         if not args.no_db:

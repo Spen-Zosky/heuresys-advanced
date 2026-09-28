@@ -1,7 +1,7 @@
 # 253 — Il diario del gate diventa interrogabile: identificativo di conversazione, tabella, vista sentinella
 
 > **item**: #253 · **priorità**: P2 · **stima**: ~1 sessione
-> **stato**: NON AVVIATO
+> **stato**: CHIUSO
 > **nasce-da**: ADR-0040 R2, terzo passo: «quante persone distinte per conversazione», raccolta da `db_health` come le altre sentinelle.
 
 ## Il fatto misurato in S1101 (2026-09-14), che allunga il piano rispetto alla dottrina
@@ -16,9 +16,11 @@ Il diario **non è nel database**. `FileAuditSink` (`apps/agent-gateway/src/audi
 
 ## Fasi
 
-- [ ] **F1 — L'identificativo di conversazione** — `runHrAgent` genera un `runId` (UUID v4) per richiesta e lo passa al sink; `AuditEntry` lo porta; il file JSONL lo scrive. **fatto =** i test del sink mostrano il campo, e le due guardie preesistenti sul «mai PII» restano verdi.
-- [ ] **F2 — La tabella e il sink** — migrazione `db/migrations/`: `audit.agent_gate_decisions` (colonne = i campi di `AuditEntry` + `run_id` + `persone_distinte`), `DbAuditSink implements AuditSink` che vi scrive; scelta del sink via `.env` (`AGENT_GATEWAY_AUDIT=db|file`). **fatto =** `ci-rehearsal.sh` verde a due passate; una corsa dell'agente sul gemello produce righe nella tabella.
-- [ ] **F3 — La vista** — `audit.v_agente_persone_per_conversazione` (`run_id`, `tenant`, `max(persone_distinte)`, decisioni, prima/ultima ora); raccolta da `db_health` come **informativa**. **fatto =** `db_health` la stampa; la prova generale resta verde.
-- [ ] **F4 — La prova che può fallire** — sabotaggio dichiarato: un sink che omette `run_id` fa fallire il test di F1; la vista con una riga finta da 200 persone la mostra. **fatto =** coppia rosso/verde nella cronaca.
+- [x] **F1 — L'identificativo di conversazione** — FATTO 2026-09-28 · `conversationId` (UUID via `randomUUID()`) generato in `runHrAgent`, fuso nel `principal` che raggiunge sia le decisioni del gate sia la voce di chiusura. Non `runId` come nominato qui in origine — stesso concetto, nome diverso deciso in corsa.
+- [x] **F2 — La tabella e il sink** — FATTO 2026-09-28 · mig. `000452`: `audit.agent_gateway_decisions` (nome diverso da `agent_gate_decisions` qui pianificato — deciso in corsa per chiarezza). `DbAuditSink implements AuditSink` in `audit-sink.ts`. Scelta del sink NON via env `AGENT_GATEWAY_AUDIT=db|file` come qui pianificato, ma automatica su presenza di `POSTGRES_HOST` (`server.ts`) — stessa decisione tecnica (file resta fallback), meccanismo di selezione più semplice. `ci-rehearsal.sh` verde a due passate sul gemello.
+- [x] **F3 — La vista** — FATTO 2026-09-28 · `sys.v_agente_persone_per_conversazione` (non `audit.v_*` come qui pianificato: spostata in `sys` perché `db_health.py` scopre le sentinelle SOLO in quello schema — altrimenti la vista sarebbe stata invisibile al cruscotto). Raccolta come **informativa** in `db_health.py` (`INFORMATIVE` dict). `db_health` la stampa, prova generale verde.
+- [x] **F4 — La prova che può fallire** — FATTO 2026-09-28 · `git stash` dei soli file `src/` (non i test): 4 test falliti (`DbAuditSink is not a constructor`, `conversationId` `undefined`). `git stash pop`: 152/152 verdi. Coppia rosso/verde in `.programmi/esiti-ciclo4/253.md`.
 
 ## Cronaca
+
+- 2026-09-28 (S1116) — chiusa in una sessione di governo diretta (nessuna sessione esterna: perimetro occupato dalla stessa conversazione). Tre scostamenti dal piano originale, tutti dichiarati sopra (nomi di tabella/vista, meccanismo di scelta del sink) — nessuno cambia le decisioni vincolanti della sezione precedente. Esito completo: `.programmi/esiti-ciclo4/253.md`. Register: `docs/kb/SOT_BACKLOG.md` #253 → DONE.

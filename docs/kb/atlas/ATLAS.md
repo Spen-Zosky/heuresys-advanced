@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `b05c9c7f` (2026-09-28T02:27:42+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `7607042c` (2026-09-28T04:43:50+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 111 |
-| Route API | 657 |
+| Moduli API | 112 |
+| Route API | 658 |
 | Pagine web | 129 |
-| Schemi shared | 121 |
+| Schemi shared | 122 |
 | Tabelle DB | 319 (vuote: 22) |
 | Viste / matview | 71 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 290 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 291 |
 
 ## Moduli API
 
@@ -44,6 +44,7 @@
 | content | /v1/content | 20 | 5 | 4 | 5 |
 | content-blueprint-links | /v1/content-blueprint-links | 5 | 4 | 4 | 1 |
 | dashboard | /v1/dashboard | 4 | 1 | 25 | 4 |
+| data-classification | /v1/data-classification | 1 | 1 | 1 | 1 |
 | delegations | /v1/delegations | 4 | 2 | 2 | 1 |
 | engagement | /v1/engagement | 4 | 1 | 5 | 2 |
 | engagement-feedback | /v1/engagement-feedback | 10 | 4 | 2 | 1 |
@@ -169,8 +170,8 @@
 - positions: **315**
 - org_units: **45**
 - roles: **24**
-- permissions: **241**
-- role_permission_mappings: **1246**
+- permissions: **242**
+- role_permission_mappings: **1247**
 - ui_interfaces_active: **76**
 - skills: **14031**
 

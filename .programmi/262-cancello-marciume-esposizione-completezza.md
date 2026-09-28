@@ -1,7 +1,7 @@
 # 262 — Il cancello a tempo e' rosso: 3 tabelle non esposte, 1 non raggiungibile dal self-portal
 
 > **item**: #262 · **priorità**: P2 · **stima**: da stimare (indagine per tabella + endpoint o deroga; probabile ~1 sessione per le quattro)
-> **stato**: IN CORSO
+> **stato**: DONE — chiuso S1116 (2026-09-28), esito in `.programmi/esiti-ciclo4/262.md`
 > **nasce-da**: S1116 (2026-09-28), eredità della chiusura S1115 (`marciume:fallito` tre volte di fila, stesso esito).
 
 ## Il fatto, misurato
@@ -29,15 +29,14 @@ decisione di design, non un tampone da sessione di governo.
 
 ## Fasi
 
-- [ ] **F1 — `sys_classificazione_direzione_dato`**: decidere endpoint o deroga motivata. **fatto =**
-  `check_exposure.py` non la elenca più fra le SCOPERTE. RESTA APERTA: tocca la direzione del dato,
-  decisione di design non presa in questa sessione di governo.
+- [x] **F1 — `sys_classificazione_direzione_dato`** — FATTO 2026-09-28 · decisione di Enzo: endpoint
+  API. `GET /v1/data-classification` (permesso `data_classification:read`, mig. `000453`, grant a
+  `DATA_STEWARD`). `check_exposure.py` non la elenca più fra le SCOPERTE.
 - [x] **F2 — `sys_conflitti_ibridi` e `sys_ritiri_ammessi`** — FATTO 2026-09-28 · derogate in
   `exposure_waivers.txt` (registri di una guardia, stesso criterio delle righe già presenti).
 - [x] **F3 — `sys_platform_user_tenant_assignments`** — FATTO 2026-09-28 · esclusa in
   `check_completezza_self.py` ([PIATTAFORMA]: assegnazione di accesso, non dato personale).
-- [ ] **F4 — verifica**: `check_marciume.py` esce senza `[!!]`. Resta rosso su
-  `sys_classificazione_direzione_dato` (F1), tutto il resto verde.
+- [x] **F4 — verifica** — FATTO 2026-09-28 · `check_marciume.py`: «niente e' marcito».
 
 ## Chiuso quando
 

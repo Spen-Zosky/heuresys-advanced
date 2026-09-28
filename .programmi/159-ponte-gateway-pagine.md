@@ -172,15 +172,65 @@ adozione su tutte le pagine idonee**. Stima: **~3-4 sessioni**, così ripartite.
   è la sola metà di qui. La metà di là ha il suo ciclo — pubblicazione del pacchetto, bump della
   versione, allineamento — e va dichiarata prima di cominciare, non scoperta a metà.
 - [ ] **F3 — Adozione su tutte le pagine idonee** — la prova che il ponte è riusabile è che la seconda pagina non lo tocca · budget ~250k
+
+  ### 🟡 S1116 (2026-09-28) — prima pagina parametrica dopo la console: `/approvals/[id]`
+
+  Ri-misurato `check_idoneita_agente.py` prima di scegliere: **96 IDONEE oggi** (20
+  parametriche + 76 d'insieme, non più 83 — la lista cresce con le pagine nuove del
+  progetto), 26 `P1`, 0 `P2`, 7 `P4`. Fra le sei parametriche candidate indicate
+  (`/approvals/[id]`, `/blueprints/[variantId]`, `/content/[id]`, `/engagement/[surveyId]`,
+  `/dashboard/[famiglia]`, `/me/handbook/[id]`) la scelta è **`/approvals/[id]`**: è la
+  pagina dove «sto guardando l'approvazione X» è un contesto che un umano formulerebbe
+  davvero, e la pagina ha già un test E2E gemello (`approvals.spec.ts`) che sapeva già
+  creare una richiesta vera con un titolo e un id reali — nessuna scelta di prodotto
+  ambigua, non è stato necessario fermarsi a chiedere.
+
+  **Cosa è stato montato**: `AgentPanel` (`@heuresys/ui` 1.2.0) e `useAgentStream`
+  (`apps/web/src/lib/use-agent-stream.ts`) — **esattamente gli stessi** della console,
+  non toccati. Il `context` è `t("approvals.detail.agent.context", { title: d.title, id })`
+  — titolo e id VERI della richiesta di approvazione aperta, presi da `useParams<{ id
+  }>()` e dalla query already in pagina, mai un placeholder. Namespace i18n proprio:
+  `approvals.detail.agent.*` in `admin.json` (IT+EN, 24 chiavi), così questa pagina non
+  eredita le stringhe `agentDev.*` della console. Il pannello resta dietro lo stesso
+  flag `NEXT_PUBLIC_ENABLE_AGENT_DEV` della console (l'agente è ancora uno strumento di
+  sviluppo, non una funzione servita ai clienti — nessun ADR l'ha cambiato in questa
+  sessione) e si monta solo quando la richiesta è caricata (`d` esiste), sotto lo step
+  ledger esistente.
+
+  **Non toccato, verificato leggendo il diff**: `apps/web/src/lib/use-agent-stream.ts` e
+  il componente `AgentPanel` in `ux-design-shared` — zero modifiche in nessuno dei due.
+  Il criterio di riuscita della fase regge.
+
+  **Prova live — `apps/web/tests/e2e/approvals-agent-detail.spec.ts`, VERDE** (7/7,
+  1m 24s, nessun residuo aggiunto): login reale come `federica.marchetti@rtl-bank.org`
+  (tenantAdmin), crea una richiesta di approvazione vera (`E2E Approval Agent
+  <timestamp>`), apre `/approvals/[id]`, verifica che `approval-agent-context` contenga
+  **sia il titolo sia l'id reali** (la prova fallirebbe con un placeholder), poi una
+  domanda vera al gateway vivo («Quante unità organizzative esistono?») produce lo
+  stream — stesso esito della console. Ambiente acceso a mano per la corsa: API dev
+  su :3001, agent-gateway su :8790 (`AGENT_GATEWAY_SUBSCRIPTION_AUTH=1`,
+  `AGENT_GATEWAY_WEB_ORIGIN=http://localhost:3000` — confermato: è per **origine**, non
+  per pagina, nessun cambiamento richiesto rispetto a F2), web su :3000 con
+  `NEXT_PUBLIC_ENABLE_AGENT_DEV=1`; tutti fermati a fine prova. `pnpm typecheck` e
+  `pnpm lint` di `apps/web` verdi; `i18n:check` verde (parity IT/EN).
+
+  **Cosa NON è stato fatto, dichiarato invece che lasciato intendere**: questa è **una**
+  pagina su 96 idonee misurate oggi (95 restano, la console esclusa per costruzione).
+  F3 resta aperta.
+
 - [ ] **F4 — Dimostrazione live** — login reale, agente attivo su almeno due schede idonee di natura diversa · budget ~120k
 
 ## Da dove si riprende
 
-**F3 — l'adozione**: la prima pagina idonea dopo la console, scelta fra le 83 di
-`check_idoneita_agente.py` (una parametrica, per esercitare `context` con un valore vero,
-es. l'unità organizzativa che si sta guardando). Monta `AgentPanel` col proprio namespace e
-il proprio `context`; il criterio di riuscita è che **non tocca** né `use-agent-stream` né il
-componente. Il gateway va acceso con `AGENT_GATEWAY_WEB_ORIGIN` sull'origine del web.
+**F3 — l'adozione, prossimo incremento**: la prossima pagina idonea fra le **95 rimanenti**
+di `check_idoneita_agente.py` (`/approvals/[id]` è la prima fatta, S1116). Le altre cinque
+parametriche già scelte come candidate dalla sessione precedente e non ancora prese
+(`/blueprints/[variantId]`, `/content/[id]`, `/engagement/[surveyId]`,
+`/dashboard/[famiglia]`, `/me/handbook/[id]`) restano un punto di partenza naturale, ma
+non un obbligo: qualunque pagina idonea va bene, l'importante è **non ripetere sempre lo
+stesso tipo** (F4 vuole due schede di natura diversa). Stesso schema: monta `AgentPanel`
+col proprio namespace e il proprio `context`; il criterio di riuscita resta che **non
+tocca** né `use-agent-stream` né il componente.
 
 **#156** resta la dipendenza per la *dimostrazione*, non per il ponte: decide quale superficie
-l'agente sa leggere, cioè su quale delle 83 la si mostra per prima.
+l'agente sa leggere, cioè su quale delle pagine idonee la si mostra per prima in F4.

@@ -65,7 +65,31 @@
       "apply": "Applica la decisione",
       "ledgerTitle": "Passi di approvazione",
       "decideSuccess": "Decisione registrata.",
-      "applySuccess": "Richiesta applicata."
+      "applySuccess": "Richiesta applicata.",
+      "agent": {
+        "title": "Assistente su questa richiesta",
+        "description": "Strumento di sviluppo: chiedi all'agente qualcosa su questa richiesta di approvazione. Tool e input di eventuali scritture sono già oscurati dal gateway.",
+        "contextLabel": "Contesto",
+        "context": "Richiesta di approvazione «{{title}}» ({{id}})",
+        "promptLabel": "Prompt",
+        "promptPlaceholder": "Es. Riassumi lo stato di questa richiesta di approvazione.",
+        "run": "Esegui",
+        "running": "In esecuzione…",
+        "stop": "Interrompi",
+        "streamTitle": "Stream eventi",
+        "streamEmpty": "Nessun evento ancora. Invia un prompt per avviare l'agente.",
+        "approvalTitle": "Approvazione richiesta",
+        "approvalDesc": "L'agente vuole eseguire una scrittura. Tool e input sono già oscurati dal gateway.",
+        "approvalDescRead": "L'assistente ha già consultato dati di {{persone}} persone diverse in questa richiesta, più di quante ne conti il reparto più grande dell'azienda. Vuoi che continui a leggere? Non è un divieto: se confermi, procede.",
+        "approvalDescReadUnknown": "L'assistente sta per leggere altri dati, ma quante persone abbia consultato finora non risulta misurato. Vuoi che continui?",
+        "approvalTool": "Tool",
+        "approvalInput": "Input (oscurato)",
+        "allow": "Consenti",
+        "deny": "Nega",
+        "approvalResolved": "Decisione inviata: {{decision}}",
+        "errorRun": "Esecuzione fallita: {{message}}",
+        "noSession": "Nessuna sessione: effettua il login per inoltrare i cookie al gateway."
+      }
     }
   },
   "engagement": {

@@ -65,7 +65,31 @@
       "apply": "Apply the decision",
       "ledgerTitle": "Approval steps",
       "decideSuccess": "Decision recorded.",
-      "applySuccess": "Request applied."
+      "applySuccess": "Request applied.",
+      "agent": {
+        "title": "Assistant on this request",
+        "description": "Developer tool: ask the agent something about this approval request. Tool and input for any write are already redacted by the gateway.",
+        "contextLabel": "Context",
+        "context": "Approval request \"{{title}}\" ({{id}})",
+        "promptLabel": "Prompt",
+        "promptPlaceholder": "e.g. Summarize the status of this approval request.",
+        "run": "Run",
+        "running": "Running…",
+        "stop": "Stop",
+        "streamTitle": "Event stream",
+        "streamEmpty": "No events yet. Send a prompt to start the agent.",
+        "approvalTitle": "Approval required",
+        "approvalDesc": "The agent wants to perform a write. Tool and input are already redacted by the gateway.",
+        "approvalDescRead": "The assistant has already read data about {{persone}} different people in this request — more than the largest department in the company. Let it keep reading? This is not a ban: confirm and it proceeds.",
+        "approvalDescReadUnknown": "The assistant is about to read more data, but how many people it has read so far is not measured. Let it continue?",
+        "approvalTool": "Tool",
+        "approvalInput": "Input (redacted)",
+        "allow": "Allow",
+        "deny": "Deny",
+        "approvalResolved": "Decision sent: {{decision}}",
+        "errorRun": "Run failed: {{message}}",
+        "noSession": "No session: log in so the cookies are forwarded to the gateway."
+      }
     }
   },
   "engagement": {

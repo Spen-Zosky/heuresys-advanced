@@ -102,6 +102,7 @@ export * from "./schemas/predictions.js";
 export * from "./schemas/semantic-matching.js";
 export * from "./schemas/insights.js";
 export * from "./schemas/capability-composition.js";
+export * from "./schemas/data-classification.js";
 export * from "./schemas/capability-maturity.js";
 export * from "./schemas/essential-capability.js";
 export * from "./schemas/vrio-scorecard.js";

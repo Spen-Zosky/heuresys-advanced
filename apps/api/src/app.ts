@@ -123,6 +123,7 @@ import { goalsRoutes } from "./modules/goals/routes.js";
 import { okrsRoutes } from "./modules/okrs/routes.js";
 import { generatedOriginsRoutes } from "./modules/generated-origins/routes.js";
 import { provenanceRoutes } from "./modules/provenance/routes.js";
+import { dataClassificationRoutes } from "./modules/data-classification/routes.js";
 import { evidenceRoutes } from "./modules/evidence/routes.js";
 import { timeOffRoutes } from "./modules/time-off/routes.js";
 import { userPositionAssignmentsRoutes } from "./modules/user-position-assignments/routes.js";
@@ -510,6 +511,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(goalsRoutes, { prefix: "/v1/goals" });
   await app.register(okrsRoutes, { prefix: "/v1/okrs" });
   await app.register(provenanceRoutes, { prefix: "/v1/provenance" }); // #28 Trust Ledger (S1018)
+  await app.register(dataClassificationRoutes, { prefix: "/v1/data-classification" }); // #262 I23/ADR-0041
   // #198 T6 — il registro dell'origine: cosa di un'azienda e' stato generato da un fascicolo.
   // Sola lettura; chi scrive e' l'atto di applicazione, dentro la sua transazione.
   await app.register(generatedOriginsRoutes, { prefix: "/v1/generated-origins" });

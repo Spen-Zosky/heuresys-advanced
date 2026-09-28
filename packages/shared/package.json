@@ -487,6 +487,11 @@
       "heuresys-source": "./src/schemas/provenance.ts",
       "default": "./dist/schemas/provenance.js"
     },
+    "./schemas/data-classification": {
+      "types": "./dist/schemas/data-classification.d.ts",
+      "heuresys-source": "./src/schemas/data-classification.ts",
+      "default": "./dist/schemas/data-classification.js"
+    },
     "./schemas/evidence": {
       "types": "./dist/schemas/evidence.d.ts",
       "heuresys-source": "./src/schemas/evidence.ts",

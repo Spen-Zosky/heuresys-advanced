@@ -76,6 +76,22 @@ SELECT r.auth_role_id, p.auth_permission_id
    AND p.auth_permission_code = 'data_classification:read'
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
+-- 1b. La traduzione EN — `sys_auth_permissions` e' nel registro dei campi traducibili
+--     (`sys_translatable_field`) per nome E descrizione, e la guardia della 000255 pretende
+--     copertura EN totale: un permesso nuovo senza traduzione ferma l'INTERA catena di
+--     migrazioni (misurato: «Copertura EN: restano 2 traduzioni mancanti», stesso inciampo
+--     gia' pagato dalla 000272/000404/000449).
+INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+SELECT 'sys_auth_permissions', p.auth_permission_id, x.campo, 'en', x.testo, 'LLM'
+  FROM sys.sys_auth_permissions p
+  JOIN (VALUES
+    ('data_classification:read', 'name', 'Read data direction registry'),
+    ('data_classification:read', 'description',
+     'Reads sys.sys_classificazione_direzione_dato (I23/ADR-0041): the data direction for every sys.sys_* table of client data. Read-only, no write via API: the registry is ratified by migration (X-1), not at runtime. Born #262, 2026-09-28.')
+  ) AS x(codice, campo, testo) ON x.codice = p.auth_permission_code
+ON CONFLICT (entity_table, entity_id, field, locale)
+  DO UPDATE SET text = EXCLUDED.text, source = 'MANUAL', updated_at = now();
+
 -- 2b. Riapertura se la riga esisteva revocata (rollback + nuovo deploy).
 UPDATE sys.sys_auth_role_permissions rp
    SET revoked_at = NULL, revoked_by_migration = NULL

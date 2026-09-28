@@ -1,7 +1,8 @@
 # 261 — Il deposito locale dei segreti TOTP di collaudo su Windows è stantio
 
 > **item**: #261 · **priorità**: P2 · **stima**: da stimare (indagine breve + un comando, probabile <1h)
-> **stato**: SOSPESO
+> **stato**: DONE — chiuso S1116 (2026-09-28), decisione di Enzo: ridisegnare la guardia.
+> Esito in `.programmi/esiti-ciclo4/261.md`
 > **nasce-da**: S1115 (2026-09-27), scoperta mentre si rinfrescava `verify_gate.py` a chiusura di sessione.
 
 ## Il fatto, misurato
@@ -23,10 +24,10 @@ quindi non rinfresca nulla per questo caso.
 ## Fasi
 
 - [x] **F1 — Trovare chi dovrebbe depositare il segreto TOTP di collaudo** — FATTO 2026-09-28 · trovato con file:riga, e trovato PERCHÉ non deposita mai da qui (non era la domanda giusta). Dettaglio sotto: «La scoperta vera».
-- [ ] **F2 — Rideposita e verifica dal vivo** — BLOCCATA (vedi sotto): non è un comando mancante,
-  è una guardia di sicurezza che nega il deposito per costruzione su QUALUNQUE database chiamato
-  `heuresys_advanced` — gemello incluso. Serve una decisione di design prima di poter chiudere,
-  non un comando.
+- [x] **F2 — Rideposita e verifica dal vivo** — FATTO 2026-09-28 · decisione di Enzo: ridisegnare
+  la guardia (opzione 2 sotto). Consolidata in `apps/api/scripts/collaudo-guard.mjs`, dimostrata
+  dal vivo sul gemello reale (`hostname()`=`enzo-S550CM`, porta nativa 5432 → `true`; stessa
+  macchina con la porta 5433 del tunnel verso la VM → `false`).
 - [x] **F3 (nuova, non pianificata) — riparato un bug reale trovato per strada** — FATTO 2026-09-28 · `depositaSegretiDiCollaudo` in `seed-test-admin.ts` sovrascriveva il file invece di fonderlo col contenuto esistente, a differenza del suo gemello in `provision-collaudo-access.ts`: chi dei due girava per ultimo cancellava i segreti dell'altro. Ora fondono entrambi. Non chiude la voce (la guardia sotto blocca comunque), ma è un difetto vero, indipendente, e resta corretto.
 
 ## La scoperta vera (F1), file:riga

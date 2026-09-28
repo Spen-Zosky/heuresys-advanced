@@ -1,43 +1,43 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-09-26T16:41:32Z da docs/kb/tools/build_index.py
+# generato: 2026-09-28T08:53:07Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-09-26T16:41:32Z"
-  total_files: 3762
+  generated_at: "2026-09-28T08:53:07Z"
+  total_files: 3783
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 41
     api-core: 36
-    api-module: 398
+    api-module: 401
     ci: 19
     claude-config: 38
-    config: 351
+    config: 354
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 447
+    db-migration: 449
     db-other: 8
     db-script: 55
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 766
+    doc-canonical: 774
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 121
+    shared-schema: 122
     showcase-source: 13
-    test: 449
+    test: 453
     ux-design-archive: 80
     web-source: 258
   status_counts:
     archive: 593
     external-archive: 50
-    live: 3119
+    live: 3140
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -1182,6 +1182,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\dashboard\service.ts'
     root: repo
     rel: 'apps/api/src/modules/dashboard/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\data-classification\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/data-classification/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\data-classification\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/data-classification/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\data-classification\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/data-classification/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -4221,6 +4239,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\src\db-pool.ts'
+    root: repo
+    rel: 'apps/agent-gateway/src/db-pool.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\src\heuresys-client.ts'
     root: repo
     rel: 'apps/agent-gateway/src/heuresys-client.ts'
@@ -4392,6 +4416,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\scripts\collaudo-access.mjs'
     root: repo
     rel: 'apps/api/scripts/collaudo-access.mjs'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\collaudo-guard.d.mts'
+    root: repo
+    rel: 'apps/api/scripts/collaudo-guard.d.mts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\scripts\collaudo-guard.mjs'
+    root: repo
+    rel: 'apps/api/scripts/collaudo-guard.mjs'
     category: config
     status: live
     provenance: git-tracked
@@ -10095,6 +10131,18 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000452_diario_del_gate_interrogabile.sql'
+    root: repo
+    rel: 'db/migrations/000452_diario_del_gate_interrogabile.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000453_data_classification_endpoint.sql'
+    root: repo
+    rel: 'db/migrations/000453_data_classification_endpoint.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -11943,6 +11991,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\254-apertura-perimetri-una-mossa.md'
+    root: repo
+    rel: '.programmi/254-apertura-perimetri-una-mossa.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\255-scorecard-rivalidata.md'
     root: repo
     rel: '.programmi/255-scorecard-rivalidata.md'
@@ -11976,6 +12030,18 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\260-due-chiavi-di-collaudo.md'
     root: repo
     rel: '.programmi/260-due-chiavi-di-collaudo.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\261-totp-collaudo-stantio-windows.md'
+    root: repo
+    rel: '.programmi/261-totp-collaudo-stantio-windows.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\262-cancello-marciume-esposizione-completezza.md'
+    root: repo
+    rel: '.programmi/262-cancello-marciume-esposizione-completezza.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -12444,6 +12510,30 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\esiti-ciclo3\258.md'
     root: repo
     rel: '.programmi/esiti-ciclo3/258.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-ciclo4\253.md'
+    root: repo
+    rel: '.programmi/esiti-ciclo4/253.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-ciclo4\257-quinta-regola.md'
+    root: repo
+    rel: '.programmi/esiti-ciclo4/257-quinta-regola.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-ciclo4\261.md'
+    root: repo
+    rel: '.programmi/esiti-ciclo4/261.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-ciclo4\262.md'
+    root: repo
+    rel: '.programmi/esiti-ciclo4/262.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -14040,6 +14130,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\check_verifica_consegne.py'
     root: repo
     rel: 'docs/kb/tools/check_verifica_consegne.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\chi_ripara.py'
+    root: repo
+    rel: 'docs/kb/tools/chi_ripara.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -17259,6 +17355,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\data-classification.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/data-classification.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\delegations.ts'
     root: repo
     rel: 'packages/shared/src/schemas/delegations.ts'
@@ -18171,6 +18273,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\collaudo-guard.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/collaudo-guard.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\compensation-mask.integration.test.ts'
     root: repo
     rel: 'apps/api/test/compensation-mask.integration.test.ts'
@@ -18264,6 +18372,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\dashboards-f3b.integration.test.ts'
     root: repo
     rel: 'apps/api/test/dashboards-f3b.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\data-classification.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/data-classification.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -19407,6 +19521,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\server-boot-cache-wiring.test.ts'
+    root: repo
+    rel: 'apps/api/test/server-boot-cache-wiring.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\session-cache.integration.test.ts'
     root: repo
     rel: 'apps/api/test/session-cache.integration.test.ts'
@@ -20016,6 +20136,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\analytics-workforce.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/analytics-workforce.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\approvals-agent-detail.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/approvals-agent-detail.spec.ts'
     category: test
     status: live
     provenance: git-tracked

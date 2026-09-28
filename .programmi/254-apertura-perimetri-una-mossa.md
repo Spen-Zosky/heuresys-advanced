@@ -1,7 +1,8 @@
 # 254 — L'apertura di tutti i perimetri in una mossa sola
 
 > **item**: #254 · **priorità**: P1 · **stima**: ~1 sessione dopo le tre
-> **stato**: NON AVVIATO — sbloccata S1116 (2026-09-28): `#253` (ultima del terzetto ADR-0040 §5) è DONE
+> **stato**: NON AVVIATO
+> **sbloccata**: S1116 (2026-09-28) — `#253` (ultima del terzetto ADR-0040 §5) è CHIUSA
 > **nasce-da**: ADR-0040 (dottrina ratificata da Enzo il 2026-09-14). Terzo e ultimo passo dopo
 > `#251` (contatore persone distinte, DONE) e `#252` (ponte anche sulle letture, DONE).
 

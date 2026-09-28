@@ -1,8 +1,8 @@
 # 261 — Il deposito locale dei segreti TOTP di collaudo su Windows è stantio
 
 > **item**: #261 · **priorità**: P2 · **stima**: da stimare (indagine breve + un comando, probabile <1h)
-> **stato**: DONE — chiuso S1116 (2026-09-28), decisione di Enzo: ridisegnare la guardia.
-> Esito in `.programmi/esiti-ciclo4/261.md`
+> **stato**: CHIUSO
+> **chiuso**: S1116 (2026-09-28), decisione di Enzo: ridisegnare la guardia — esito in `.programmi/esiti-ciclo4/261.md`
 > **nasce-da**: S1115 (2026-09-27), scoperta mentre si rinfrescava `verify_gate.py` a chiusura di sessione.
 
 ## Il fatto, misurato

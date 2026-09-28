@@ -1,7 +1,8 @@
 # 262 — Il cancello a tempo e' rosso: 3 tabelle non esposte, 1 non raggiungibile dal self-portal
 
 > **item**: #262 · **priorità**: P2 · **stima**: da stimare (indagine per tabella + endpoint o deroga; probabile ~1 sessione per le quattro)
-> **stato**: DONE — chiuso S1116 (2026-09-28), esito in `.programmi/esiti-ciclo4/262.md`
+> **stato**: CHIUSO
+> **chiuso**: S1116 (2026-09-28) — esito in `.programmi/esiti-ciclo4/262.md`
 > **nasce-da**: S1116 (2026-09-28), eredità della chiusura S1115 (`marciume:fallito` tre volte di fila, stesso esito).
 
 ## Il fatto, misurato

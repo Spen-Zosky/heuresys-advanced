@@ -145,6 +145,37 @@ SELECT 'sys_kpi_definitions', k.kpi_definition_id, 'name', 'en', e.nome_en, 'LLM
   FROM en_kpi e JOIN sys.sys_kpi_definitions k ON k.kpi_definition_code = e.codice
 ON CONFLICT DO NOTHING;
 
+-- ═══════════════════════════════════════════════════════════════════════════════
+-- EMENDAMENTO S1116 (2026-09-28) — data_classification:read (#262).
+--
+-- IL FATTO, misurato con `bash db/scripts/ci-rehearsal.sh`: la catena si e' fermata QUI con
+-- «Copertura EN: restano 2 traduzioni mancanti». La 000453 (#262, numero MAGGIORE di questo
+-- file) crea il permesso `data_classification:read` e la SUA copia di
+-- `sys.sys_reference_translations` — ma quella copia arriva troppo tardi per la prova che
+-- gira qui: su `heuresys_ci` (e su produzione) il permesso esiste gia' dalla prima corsa
+-- della 000453, con la traduzione mancante per un difetto nella INSERT originale (corretto
+-- nel file stesso da allora, commit `b5a12110` — ma un file emendato non si ri-applica su un
+-- database che lo ha gia' segnato applicato, ADR-0035); la `ci-rehearsal.sh` in modo
+-- «like-ci» ri-passa l'intera catena SULLA STESSA COPIA, quindi vede quel permesso gia'
+-- presente quando arriva qui, a 000255, e la prova esce rossa. Stessa forma, stesso motivo,
+-- degli emendamenti sopra (34 KPI, 000272, 000404, 000449): la prova che pretende «copertura
+-- EN a zero» gira in QUESTO file, quindi nessuna migrazione di numero maggiore fa in tempo a
+-- scriverla prima che la prova la controlli.
+--
+-- Su un clone davvero vuoto (nessuna 000453 ancora applicata) questo INSERT scrive zero
+-- righe — il JOIN non trova il permesso — ed e' l'esito legittimo, uguale al caso dei KPI.
+-- ═══════════════════════════════════════════════════════════════════════════════
+INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+SELECT 'sys_auth_permissions', p.auth_permission_id, x.campo, 'en', x.testo, 'LLM'
+  FROM sys.sys_auth_permissions p
+  JOIN (VALUES
+    ('data_classification:read', 'name', 'Read data direction registry'),
+    ('data_classification:read', 'description',
+     'Reads sys.sys_classificazione_direzione_dato (I23/ADR-0041): the data direction for every sys.sys_* table of client data. Read-only, no write via API: the registry is ratified by migration (X-1), not at runtime. Born #262, 2026-09-28.')
+  ) AS x(codice, campo, testo) ON x.codice = p.auth_permission_code
+ON CONFLICT (entity_table, entity_id, field, locale)
+  DO UPDATE SET text = EXCLUDED.text, source = 'MANUAL', updated_at = now();
+
 -- ───────────────────────────────────────────────────────────────────────────────
 -- AUTO-VERIFICA
 -- ───────────────────────────────────────────────────────────────────────────────

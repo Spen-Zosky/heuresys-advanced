@@ -132,11 +132,25 @@ INSERT INTO _ds_derivati(code) VALUES
   ('me:content:read'),('me:preferences:read'),('me:preferences:update'),
   ('me:sessions:manage'),('surveys:respond:self'),('team:read:self');
 
+-- EMENDAMENTO S1116 (2026-09-28) — #262, data_classification:read.
+--
+-- Stessa forma del difetto gia' pagato da 000255 (KPI di B30): la 000453 (numero MAGGIORE di
+-- questo file) concede a DATA_STEWARD un permesso nuovo, `data_classification:read` — scelta
+-- di Enzo (endpoint sul registro di direzione del dato, I23/ADR-0041, `#262`). Su un clone
+-- davvero vuoto non esiste ancora quando questo file gira (0, esito legittimo); su
+-- `heuresys_ci`/produzione gia' migrati oltre la 000453, il permesso c'e' gia' quando la
+-- `ci-rehearsal.sh` in modo «like-ci» ripassa l'intera catena, e senza questa riga il
+-- controllo qui sotto lo vedrebbe come un self-healing/mirror mai visto — non lo e': e' un
+-- grant esplicito, deciso e datato, di una migrazione successiva.
+CREATE TEMP TABLE _ds_posteriori(code text PRIMARY KEY);
+INSERT INTO _ds_posteriori(code) VALUES
+  ('data_classification:read');
+
 DO $$
 DECLARE
   n_ds int; n_senza_cat int; n_platform_true int;
   n_espliciti int; n_derivati_attesi int; n_mancanti_espliciti int;
-  n_derivati_presenti int; n_fuori_elenco int; n_vietati int;
+  n_derivati_presenti int; n_fuori_elenco int; n_vietati int; n_posteriori_presenti int;
 BEGIN
   SELECT count(*) INTO n_espliciti FROM _ds_espliciti;
   IF n_espliciti <> 6 THEN
@@ -145,6 +159,21 @@ BEGIN
   SELECT count(*) INTO n_derivati_attesi FROM _ds_derivati;
   IF n_derivati_attesi <> 9 THEN
     RAISE EXCEPTION '000449: l''elenco _ds_derivati ha % righe, attese 9 (duplicato interno?)', n_derivati_attesi;
+  END IF;
+
+  -- i posteriori (grant di migrazioni successive, oggi solo #262) sono 0 su un clone che
+  -- non e' ancora arrivato alla 000453, 1 da li' in poi. Un numero diverso e' un difetto.
+  SELECT count(*) INTO n_posteriori_presenti
+    FROM _ds_posteriori pt
+   WHERE EXISTS (
+     SELECT 1 FROM sys.sys_auth_role_permissions rp
+       JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+       JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+      WHERE r.auth_role_code = 'DATA_STEWARD' AND rp.revoked_at IS NULL
+        AND p.auth_permission_code = pt.code
+   );
+  IF n_posteriori_presenti NOT IN (0, 1) THEN
+    RAISE EXCEPTION '000449: % posteriori su 1 presenti — atteso 0 prima della 000453, 1 da li'' in poi', n_posteriori_presenti;
   END IF;
 
   -- i 6 espliciti DEVONO esserci SEMPRE: li concede questa stessa migrazione,
@@ -170,7 +199,8 @@ BEGIN
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    WHERE r.auth_role_code = 'DATA_STEWARD' AND rp.revoked_at IS NULL
      AND p.auth_permission_code NOT IN (SELECT code FROM _ds_espliciti
-                                         UNION ALL SELECT code FROM _ds_derivati);
+                                         UNION ALL SELECT code FROM _ds_derivati
+                                         UNION ALL SELECT code FROM _ds_posteriori);
   IF n_fuori_elenco <> 0 THEN
     RAISE EXCEPTION '000449: DATA_STEWARD ha % permessi fuori dall''unione espliciti+derivati (nuovo self-healing/mirror da investigare)', n_fuori_elenco;
   END IF;

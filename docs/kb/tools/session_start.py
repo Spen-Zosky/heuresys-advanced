@@ -36,6 +36,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_menu  # noqa: E402
+import chi_ripara  # noqa: E402
 import db_health  # noqa: E402
 import check_istruzioni  # noqa: E402
 import check_canale_cowork  # noqa: E402
@@ -115,6 +116,18 @@ def main():
             print("\nSENTINELLE DBMS (viste v_* — db_health.py)")
             sys.argv = ["db_health", "--sentinelle", "--compatto"]
             db_health.main()
+        # #257: chi ripara e chi popola una lacuna, in quattro famiglie meccaniche (DERIVABILE
+        # il codice, RICERCA la macchina di #205, CLIENTE bloccata da M6, DECISIONE la legge
+        # Enzo). Nessuna soglia: il numero si stampa, chi legge giudica. Salta con --no-db: la
+        # misura riusa completezza_tenant.py + check_domini_ricercabili.py e costa alcune query
+        # in piu' sul tunnel, non ha senso tentarla se il chiamante ha gia' detto che il DB e' giu'.
+        if not args.no_db:
+            try:
+                print("\nLACUNE (chi ripara e chi popola — chi_ripara.py, #257)")
+                print(chi_ripara.riga_dashboard())
+            except Exception as e:
+                print(f"\nLACUNE  [? ] non misurate: {e}")
+
         # I file che ISTRUISCONO devono combaciare col progetto reale (check_istruzioni.py).
         # Nasce dal ciclo di autocoscienza del 2026-08-15: tre skill di questo repo
         # descrivevano il legacy heuresys-evo — una raccomandava RLS, che I5 vieta — e

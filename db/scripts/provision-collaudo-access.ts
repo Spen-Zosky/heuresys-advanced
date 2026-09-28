@@ -32,12 +32,14 @@ import { config as dotenvConfig } from "dotenv";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
+import { hostname } from "node:os";
 import {
   readCollaudoKey,
   deriveCollaudoPassword,
   COLLAUDO_IDENTITIES,
 } from "../../apps/api/scripts/collaudo-access.mjs";
 import { segretoTotpCasuale } from "../../apps/api/scripts/derive-access.mjs";
+import { eDiCollaudoDa } from "../../apps/api/scripts/collaudo-guard.mjs";
 import { encryptSecret, decryptSecret } from "../../apps/api/src/modules/auth/secret-crypto.js";
 import { E2E_FIXTURE_LABEL } from "../../apps/api/test/helpers/mfa-fixture-secrets.js";
 
@@ -45,17 +47,21 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 dotenvConfig({ path: resolve(repoRoot, ".env"), quiet: true });
 
 /**
- * #258 — LA STESSA GUARDIA A DUE CONDIZIONI di `seed-test-admin.ts` (S1093), duplicata qui
- * apposta: imporre uno stato su un database di produzione fa danni veri, e ogni seed che
- * deposita segreti su disco pretende la stessa doppia condizione — mai una sola.
- * `NODE_ENV==='test'` da sola non basta (questa macchina punta a produzione via tunnel anche
- * con quella variabile distratta); il nome del database deve dichiararsi di collaudo.
+ * #258 — LA STESSA GUARDIA di `seed-test-admin.ts` (S1093), ridisegnata #261 (S1116):
+ * imporre uno stato su un database di produzione fa danni veri, e ogni seed che deposita
+ * segreti su disco pretende la stessa doppia condizione — mai una sola. Logica consolidata
+ * in `apps/api/scripts/collaudo-guard.mjs` (una sola implementazione, importata da entrambi):
+ * la guardia distingue ora la MACCHINA, non solo il nome del database — vedi il commento di
+ * testa di quel file.
  */
 function eDiCollaudo(): boolean {
-  if (process.env.NODE_ENV !== "test") return false;
-  const db = process.env.POSTGRES_DB;
-  if (!db) return false;
-  return db === "heuresys_ci" || /_(ci|test)$/.test(db);
+  return eDiCollaudoDa({
+    nodeEnv: process.env.NODE_ENV,
+    postgresDb: process.env.POSTGRES_DB,
+    hostname: hostname(),
+    postgresHost: process.env.POSTGRES_HOST,
+    postgresPort: process.env.POSTGRES_PORT,
+  });
 }
 
 /** Stesso file che scrive seed-test-admin.ts: Playwright legge un deposito solo, non due. */

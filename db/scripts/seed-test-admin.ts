@@ -46,6 +46,10 @@ import { config as dotenvConfig } from "dotenv";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { hostname } from "node:os";
+// #261: la guardia distingue la macchina, non solo il nome del database — una sola
+// implementazione, importata anche da provision-collaudo-access.ts.
+import { eDiCollaudoDa } from "../../apps/api/scripts/collaudo-guard.mjs";
 // ⭐ S1093 — il segreto si scrive CIFRATO, come lo scriverebbe il repository. Scriverlo in
 // chiaro «funziona» (decryptSecret e' self-identifying e lo rileggerebbe as-is) ma accende la
 // sentinella `v_mfa_secrets_in_cleartext`, che pretende zero: l'ha vista rossa la prova
@@ -179,34 +183,31 @@ async function ensureTotpFactor(
 }
 
 /**
- * ⭐ S1093 — LA GUARDIA. È il punto più delicato di questo script: se sbaglia, **rigenera i
- * secondi fattori veri delle persone in produzione** e li deposita su disco.
- *
- * Serve che siano vere **entrambe** le condizioni, perché una sola non basta:
- *  1. `NODE_ENV === "test"` — l'ambiente lo dichiara. Da sola è **insufficiente**: su questa
- *     macchina il `.env` punta alla produzione via tunnel, quindi un `NODE_ENV=test` distratto
- *     scriverebbe lì. È il caso limite che ha fatto riscrivere questa guardia.
- *  2. il **database** si dichiara di collaudo dal proprio nome (`heuresys_ci`, o un qualunque
- *     `*_ci` / `*_test`). La produzione è `heuresys_advanced` e non corrisponde mai.
- *
- * È negativa per difetto in ogni ramo cieco: `NODE_ENV` assente non è `"test"`; `POSTGRES_DB`
- * assente non corrisponde ad alcun criterio. Nessun ramo «se non so, esporto».
- *
- * Se un giorno la CI rinomina il proprio database, questa guardia la fa tornare **rossa** con
- * un messaggio esplicito invece di aprirsi: è il verso giusto in cui sbagliare.
+ * ⭐ S1093, ridisegnata #261 (S1116) — LA GUARDIA. È il punto più delicato di questo script:
+ * se sbaglia, **rigenera i secondi fattori veri delle persone in produzione** e li deposita
+ * su disco. Logica consolidata in `apps/api/scripts/collaudo-guard.mjs` (una sola
+ * implementazione, importata anche da `provision-collaudo-access.ts`): la guardia distingue
+ * ora la MACCHINA, non solo il nome del database — vedi il commento di testa di quel file per
+ * il perché e per il caso reale che ha fatto scoprire il buco (il gemello ha un clone col
+ * NOME IDENTICO alla produzione).
  */
 function eDiCollaudo(): boolean {
-  if (process.env.NODE_ENV !== "test") return false;
   const db = process.env.POSTGRES_DB;
-  if (!db) return false;
-  const collaudo = db === "heuresys_ci" || /_(ci|test)$/.test(db);
-  if (!collaudo) {
+  const collaudo = eDiCollaudoDa({
+    nodeEnv: process.env.NODE_ENV,
+    postgresDb: db,
+    hostname: hostname(),
+    postgresHost: process.env.POSTGRES_HOST,
+    postgresPort: process.env.POSTGRES_PORT,
+  });
+  if (process.env.NODE_ENV === "test" && !collaudo) {
     // Dirlo forte: chi ha scritto NODE_ENV=test si aspetta l'export, e un rifiuto silenzioso
     // lo manderebbe a cercare il guasto dentro Playwright invece che nella propria riga di
     // comando. Il rifiuto è corretto; ciò che non deve essere è muto.
     console.warn(
-      `  ⚠ NODE_ENV=test ma il database e' '${db}': NON e' un database di collaudo, ` +
-        `quindi i segreti TOTP non vengono ne' rigenerati ne' depositati (guardia S1093).`,
+      `  ⚠ NODE_ENV=test ma questa non e' una postazione di collaudo riconosciuta ` +
+        `(database '${db}', macchina '${hostname()}'): i segreti TOTP non vengono ne' ` +
+        `rigenerati ne' depositati (guardia S1093/#261).`,
     );
   }
   return collaudo;

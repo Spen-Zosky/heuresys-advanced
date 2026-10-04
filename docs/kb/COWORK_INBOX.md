@@ -1373,12 +1373,12 @@ Enzo ha chiesto di segnalare questo elenco e di fare il confronto fra prototipo 
 
 **Non verificato.** Se i livelli dichiarati sono usati da qualche parte dell'applicazione (viste, menu, calcoli) non l'ho controllato: il cambiamento potrebbe avere effetti che qui non si vedono.
 
-stato: [APERTA]
+stato: [APERTA] — misura S1117 in `.programmi/K-ruoli-direzione/esiti/COWORK_2026-10-05_livelli_RTL.md`; la scrittura attende il si di Enzo.
 ### 2026-10-04 | nota | Livelli e gradi di RTL_BANK: Enzo decide che anche advanced si adegua al metodo
 
 Complemento alla segnalazione di oggi sui livelli di RTL_BANK. Regole decise da Enzo: il livello e' la posizione nella gerarchia (vertice = 1, Divisione = 2); il responsabile del livello 2 e' dirigente di rango sotto il Direttore Generale; il tipo unita' si ricava dal livello (livello 2 con caselle sotto = DIVISION, livello 3 = DEPARTMENT, filiale = BRANCH); un centro operativo e' una Divisione al livello 2, come la Divisione Operations. **Non e' stato scritto nulla in questo repository ne' nel database.** Il contratto dati non ha un campo per il grado aziendale: da proporre. Specifica: `D:\heuresys-design-lab\banco-prototipo\SPEC_tabella-livelli-organizzativi_20261004.md`.
 
-stato: [APERTA]
+stato: [APERTA] — misura S1117 in `.programmi/K-ruoli-direzione/esiti/COWORK_2026-10-05_livelli_RTL.md`; la scrittura attende il si di Enzo.
 
 ### 2026-10-04 | proposta-backlog | Il pacchetto v0.2 non basta ad attivare un blueprint su un tenant: sei lacune e che cosa fa il banco dal suo lato
 
@@ -1425,11 +1425,11 @@ Analisi in sola lettura delle 154 tabelle in cui RTL_BANK ha righe. **Non è sta
 
 **Evidenza**: `D:\heuresys-design-lab\banco-prototipo\ANALISI_copertura_C-tabelle-RTL_20261004.md` (una riga per tabella).
 
-stato: [APERTA]
+stato: [RICONCILIATA S1117] — voce informativa, nessuna azione richiesta; letta e registrata.
 
 ### 2026-10-05 | proposta-backlog | Principio gerarchia-livelli: chi sta sopra non ha mai un livello contrattuale inferiore a chi sta sotto
 
-**Stato**: [APERTA] — principio generale dichiarato da Enzo il 2026-10-05, valido per ogni tenant e ogni prototipo. **Non è stato scritto nulla in questo repository né nel database.**
+**Stato**: [APERTA] — punto 3 misurato S1117 su RTL_BANK (clone): 0 inversioni su 42 unita' (`.programmi/K-ruoli-direzione/esiti/COWORK_2026-10-05_livelli_RTL.md`); punti 1-2 restano lavoro di prodotto, attendono Enzo. — principio generale dichiarato da Enzo il 2026-10-05, valido per ogni tenant e ogni prototipo. **Non è stato scritto nulla in questo repository né nel database.**
 
 **Il principio, nelle parole di Enzo.** Fra due persone dello stesso livello contrattuale può esserci dipendenza gerarchica: un QD2 può essere il capo di un'unità in cui ci sono altri QD2. Non è mai possibile che una persona abbia nell'organizzazione un livello gerarchico superiore a chi ha un livello contrattuale più alto: un QD2 non può essere il capo di un'unità in cui ci sono QD3 o QD4.
 

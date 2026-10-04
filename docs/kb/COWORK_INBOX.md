@@ -1357,7 +1357,7 @@ Complemento alla voce «Contratto dati con il datastore v0.1 approvato da Enzo»
 
 **Cosa si chiede.** Rivedere la migrazione, assegnarle il numero vero e provarla sul gemello con `bash db/scripts/prova-idempotenza.sh` prima di un eventuale `prova-generale`; decidere sulle forme di A1-A11 (la migrazione ne e' una proposta concreta) e sul dominio degli obiettivi di modello. I due database locali di prova si possono eliminare quando non servono piu'.
 
-stato: [APERTA]
+stato: [RICONCILIATA S1117] — migrazione numerata 000454 (+ registro riconciliazione e classificazione 000429 emendata a 282), prova generale sul gemello VERDE, committata `0fb8faaf`; non applicata alla produzione: la applica il deploy armato da Enzo. Ripristino della proposta resta in design-lab.
 
 ### 2026-10-04 | segnalazione | Livelli organizzativi del tenant RTL_BANK incoerenti: 24 unita' su 42
 
@@ -1373,12 +1373,12 @@ Enzo ha chiesto di segnalare questo elenco e di fare il confronto fra prototipo 
 
 **Non verificato.** Se i livelli dichiarati sono usati da qualche parte dell'applicazione (viste, menu, calcoli) non l'ho controllato: il cambiamento potrebbe avere effetti che qui non si vedono.
 
-stato: [APERTA] — misura S1117 in `.programmi/K-ruoli-direzione/esiti/COWORK_2026-10-05_livelli_RTL.md`; la scrittura attende il si di Enzo.
+stato: [RICONCILIATA S1117] — org_level riallineato dalla migrazione 000455 (21 unita su 42, giornale undo, provata prima/dopo/rollback sul gemello), commit `20b0b661`; si applica col deploy. Restano decisioni di Enzo: Direzioni di controllo sotto la radice, Divisione Risk & Compliance duplicata.
 ### 2026-10-04 | nota | Livelli e gradi di RTL_BANK: Enzo decide che anche advanced si adegua al metodo
 
 Complemento alla segnalazione di oggi sui livelli di RTL_BANK. Regole decise da Enzo: il livello e' la posizione nella gerarchia (vertice = 1, Divisione = 2); il responsabile del livello 2 e' dirigente di rango sotto il Direttore Generale; il tipo unita' si ricava dal livello (livello 2 con caselle sotto = DIVISION, livello 3 = DEPARTMENT, filiale = BRANCH); un centro operativo e' una Divisione al livello 2, come la Divisione Operations. **Non e' stato scritto nulla in questo repository ne' nel database.** Il contratto dati non ha un campo per il grado aziendale: da proporre. Specifica: `D:\heuresys-design-lab\banco-prototipo\SPEC_tabella-livelli-organizzativi_20261004.md`.
 
-stato: [APERTA] — misura S1117 in `.programmi/K-ruoli-direzione/esiti/COWORK_2026-10-05_livelli_RTL.md`; la scrittura attende il si di Enzo.
+stato: [RICONCILIATA S1117] — livelli in 000455; tipo unita derivato dal livello e grado aziendale non toccati (il contratto non ha il campo grado: da proporre).
 
 ### 2026-10-04 | proposta-backlog | Il pacchetto v0.2 non basta ad attivare un blueprint su un tenant: sei lacune e che cosa fa il banco dal suo lato
 

@@ -1314,3 +1314,130 @@ Il taglio incrociato conferma che ogni combinazione ha `attendance_source = IMPO
 **Nota di metodo, perche' e' costata tre tentativi.** Le virgolette annidate su quattro livelli (PowerShell → ssh → bash → psql) si rompono in silenzio: il primo tentativo ha prodotto «argomento aggiuntivo della riga di comando ignorato». La forma che funziona e' un file `.sql` passato allo standard input: `Get-Content query.sql -Raw | ssh linux-pc "psql … -f - 2>&1"`. E' la stessa regola che la dottrina di Enzo ha gia' per PowerShell: quando le virgolette si annidano, si scrive un file.
 
 stato: [RICONCILIATA S1112] — misura confermata indipendentemente su produzione (122.271 righe contro le 122.115 del gemello, stesso unico valore IMPORT), riportata in `esiti/X-2_attendance.md` con la domanda riformulata per Enzo. Il difetto di `attendance_source_reference` vuoto era gia' stato trovato in questa sessione durante X-6 (`esiti/X-6.md`): stessa osservazione, non duplicata. X-2 sulle altre 12 tabelle gia' chiusa e applicata in produzione; questa singola tabella resta ATTESA_ENZO come da mandato.
+
+### 2026-10-01 | proposta-backlog | Contratto dati con il datastore v0.1 approvato da Enzo: ospitare sedi, organico, obiettivi, CCNL e il resto (A1-A11)
+
+Contesto: sessione Cowork del 2026-09-30/10-01 sul banco di prova dei prototipi (`D:\heuresys-design-lab\banco-prototipo`). Enzo ha approvato il 2026-10-01 lo schema v0.1 del pacchetto di prototipo d'impresa che `heuresys-datastore` produce e che advanced deve poter ospitare, le corrispondenze dei vocabolari e la sequenza di lavoro. Non è stato scritto nulla in questo repository: tutte le letture sul database sono in sola lettura.
+
+**Cosa c'è.** Fonte unica dello schema: `D:\heuresys-design-lab\contratto-dati\v0.1\` (`prototipo-pacchetto.schema.json`, `vocabolari.json`, `docs\`: CONTRATTO, MATRICE dei campi, PROPOSTA, PERCORSO-INVERSO, CONFRONTO). Il caso reale (impresa metalmeccanica automotive, 240 addetti) esportato nel pacchetto è valido e coerente: 511 prove, 2 sedi, 29 unità, 93 posizioni, 412 competenze, 26 processi, 295 indicatori, 187 obiettivi.
+
+**Misurato (sola lettura, database `heuresys_advanced` via tunnel 5433, 2026-09-30).**
+- `sys_activity_classifications` ha l'albero ATECO 2025 completo (3.257 codici, compreso `29.32.00`) e la NACE Rev. 2.1; il contesto della ricerca usa invece `sys_industry_codes` (12 voci, una sola manifatturiera).
+- 389 su 412 URI ESCO delle competenze del caso esistono già in `sys_skills` come voci globali (`skill_tenant_id` nullo): si collegano per URI, se ne creano 23.
+- I tipi di unità di `sys_organization_unit_types` sono 10 (AREA, BRANCH, DEPARTMENT, DIVISION, GENERAL_MANAGEMENT, HEADQUARTERS, OFFICE, PLANT, TEAM, WAREHOUSE); il datastore usa DIREZIONE, AREA, FUNZIONE, REPARTO, LINEA, MAGAZZINO e la corrispondenza è in `vocabolari.json`.
+- `sys_compensation_bands` ha 7 righe di tipo CCNL senza minimi (`CCNL_METMEC_2024` compreso); `sys_leave_accrual_rules` ha regole per tipo di CCNL, oggi quasi tutte del Commercio.
+- Il motore di ricerca di advanced, eseguito in memoria sullo stesso caso con la sua sorgente vera (`sorgenti/gateway.ts`), produce zero proposte: la mappa di `bancaditalia.it` risulta vuota, l'unica fonte approvata per i processi.
+
+**Cosa si chiede (backlog, in ordine di peso).**
+- A1 organico previsto sul contenuto delle posizioni, materializzato in posti al fascicolo; A2 sedi di modello e codice sede sulle unità (verso `sys_branches` e unità HEADQUARTERS/BRANCH); A3 categoria contrattuale dei ruoli (distinta dalla seniority) e occupazione ESCO sulle posizioni.
+- A4 livello e criticità delle competenze per posizione sul contenuto, e collegamento per URI alle voci globali; A5 indicatori con formula, frequenza, fonte del dato, riferimento e bersaglio nel contenuto; A6 sesto dominio di contenuto per gli obiettivi (terna processo-unità-ruolo) materializzato in `sys_goal_templates`; A7 processi con tipo e codice PCF e legame unità-processo con funzione.
+- A8 far puntare il contesto di ricerca all'albero ATECO 2025 già presente e definire la corrispondenza fra le classi dimensionali del datastore e le 5 fasce; A9 riconoscere il datastore come fornitore di prove (le fonti già firmate con impronta e data non si riconfrontano col registro dei siti approvati, che vale per ciò che advanced ricerca da solo; l'approvazione umana resta); A10 tabelle di corrispondenza versionate per i vocabolari; A11 nome inglese facoltativo nelle proposte di ricerca, completato dal livello di traduzione con origine dichiarata.
+- Poi, come secondo tempo, i domini CCNL (livelli con minimi e istituti), obblighi normativi, formazione, carriere, incentivi e commesse.
+
+**Vincoli dichiarati.** Italiano lingua di base e inglese come livello di traduzione con origine (`sys_reference_translations.source`: aggiungere il valore del datastore, o usare ESCO/LLM/MANUAL), coerente con il gate di copertura EN delle voci del 2026-07-22. Un pacchetto solo italiano deve poter entrare. Migrazioni idempotenti (ADR-0035) e coerenti con ADR-0039 (cataloghi di piattaforma senza cliente). Prima prova su gemello o database locale di prova, mai sulla produzione; il caso metalmeccanica va usato come prova di accoglienza. Nuovo valore `DATASTORE` per `origine_dato` (14 tabelle).
+
+**Non verificato.** Non ho letto il ponte di costruzione (F6) né la materializzazione del fascicolo: non so come le nuove colonne si comporterebbero alla creazione del tenant. Non ho letto il codice che oggi confronta le buste con il minimo contrattuale di livello (migrazione 000289) e non so da dove prenda i minimi.
+
+stato: [APERTA]
+
+
+### 2026-10-01 | nota | Migrazione proposta per il contratto dati provata su database locale di prova: 29 tabelle, 27 colonne, caricamento misurato
+
+Complemento alla voce «Contratto dati con il datastore v0.1 approvato da Enzo» di oggi. Enzo ha approvato lo schema v0.1 e la sequenza; nel seguito il banco ha prodotto lo schema v0.2 e il lato advanced e' stato provato. **Non e' stato scritto nulla in questo repository ne' nel database di produzione**: la prova e' su due database locali (PostgreSQL 5435, `heuresys_advanced_prova_contratto` e `heuresys_advanced_prova_pulito`) creati da un dump di sola struttura di 21 tabelle reali del modello e dei cataloghi, presi in sola lettura via tunnel 5433.
+
+**File** (in `D:\heuresys-design-lab\contratto-dati\v0.2\advanced\`): `PROPOSTA_000454_il_pacchetto_del_datastore_trova_casa.sql` e `_ripristino.sql` (il numero 000454 e' il primo libero al 2026-10-01: da riassegnare), `definizione.mjs` (unica fonte di tabelle, colonne e mappatura), `genera-migrazioni.mjs`, `accogli.mjs` (caricatore di prova con verifica), `MAPPATURA_pacchetto-advanced_v0.2.md` (in `..\docs\`). Il pacchetto di esempio e' in `..\esempio\`.
+
+**Cosa fa la migrazione.** Stessa forma della 000327: righe per versione di variante, chiave naturale (versione, codice), legami per codice, tabelle di piattaforma senza `tenant_id`, `varchar` piu' `CHECK`, idempotente. 29 tabelle nuove (contesto, pacchetto, sedi, posizione-processo, occupazioni ESCO, requisiti di competenza per posizione, unita'-processo, processo-sede, obiettivi, CCNL con livelli, istituti e condizioni, obblighi e posizioni, formazione, carriere, incentivi, commesse, prove con esito di lettura e impronta, derivazioni, vuoti), 27 colonne aggiunte a `sys_blueprint_content_units`, `_positions`, `_skills`, `_kpis` e `sys_blueprint_process_registry`, `blueprint_content_kpi_unit` allargata da 32 a 96 caratteri (6 unita' del caso arrivano a 44), e `sys_reference_translations_source_check` esteso con `ISTAT` e `DATASTORE`.
+
+**Misurato.** Applicata una sola volta a una copia pulita: 1 secondo, da 21 a 50 tabelle, nessun errore; riapplicata una seconda volta: nessun errore. Caricamento del caso (impresa metalmeccanica, 240 addetti): 3.955 righe inserite in 32 domini e rilette tutte identiche; 2.615 traduzioni in inglese in `sys_reference_translations` (ESCO 685, ISTAT 1, LLM 1.929); 1.241 collegamenti a prove; zero riferimenti orfani per codice; `planned_headcount` 240 sulle unita' e 240 sulle posizioni; 247 campi su 247 del pacchetto con una destinazione (misurato registrando le letture del caricatore). L'italiano sta nelle colonne base e l'inglese nel livello di traduzione.
+
+**Da sapere.** Il datastore e il suo pacchetto non dipendono da advanced e viceversa: lo schema e' un file. Il rapporto completo, con i difetti trovati e i limiti, e' in `..\docs\ALLINEAMENTO_datastore-advanced_20261001.md`.
+
+**Non verificato.** La prova e' su una copia parziale dello schema (21 tabelle su 250), non su una copia intera ne' sul gemello: i `CHECK` e le chiavi esterne verso le altre tabelle non sono stati provati. Non ho letto ne' provato il ponte di costruzione del fascicolo (F6): non so come le nuove tabelle e colonne si comporterebbero alla creazione del tenant. I legami fra formazione e competenze (`sys_blueprint_content_training_skills`) sono vuoti perche' il datastore non li produce.
+
+**Cosa si chiede.** Rivedere la migrazione, assegnarle il numero vero e provarla sul gemello con `bash db/scripts/prova-idempotenza.sh` prima di un eventuale `prova-generale`; decidere sulle forme di A1-A11 (la migrazione ne e' una proposta concreta) e sul dominio degli obiettivi di modello. I due database locali di prova si possono eliminare quando non servono piu'.
+
+stato: [APERTA]
+
+### 2026-10-04 | segnalazione | Livelli organizzativi del tenant RTL_BANK incoerenti: 24 unita' su 42
+
+Enzo ha chiesto di segnalare questo elenco e di fare il confronto fra prototipo e RTL_BANK solo dopo l'allineamento. **Non e' stato scritto nulla in questo repository ne' nel database: lettura sola.**
+
+**Cosa e' stato misurato.** Sull'albero delle unita' del tenant RTL_BANK (sys.sys_organization_units) il livello dichiarato nei metadati (org_level) e la profondita' reale non coincidono. Le Divisioni dichiarano livello 2, ma 7 su 8 stanno a profondita' 3 perche' fra la radice RTL Bank S.p.A. e le Divisioni c'e' la Direzione Generale, senza livello dichiarato. Due Direzioni di livello dichiarato 3 sono appese direttamente alla radice. Tre filiali dichiarano livello 4 e stanno a profondita' 5. Molte unita' non hanno nessun livello dichiarato: 2 Aree regionali, 7 filiali, 7 direzioni, 2 uffici. La Divisione Risk & Compliance e' un duplicato vuoto appeso alla radice, accanto alle Direzioni Risk Management, Compliance e Antiriciclaggio.
+
+**La regola decisa da Enzo.** Il livello e' la posizione nella gerarchia, da 1 a n, uguale per ogni casella e per ogni sede. Azienda e Direzione Generale stanno insieme al livello 1; la Divisione e' il secondo livello. Il nome di ogni livello dipende dal tipo di prototipo (per una banca Divisione, Direzione, Ufficio/Filiale). Il grado del responsabile (inquadramento e retribuzione) e' distinto dal livello: il direttore di una Direzione sotto una Divisione ha di norma un grado piu' alto del direttore di una filiale. Il meccanismo e' proposto al datastore come tabella (PROPOSTA-027) e va riversato anche sui tenant reali.
+
+**File**: D:\heuresys-design-lab\banco-prototipo\RTL_BANK_allineamento-livelli_20261004.md (una riga per unita': tipo, livello dichiarato, profondita', livello proposto, nota) e la specifica SPEC_tabella-livelli-organizzativi_20261004.md nella stessa cartella.
+
+**Cosa si chiede.** Rivedere l'elenco e decidere se e come allineare RTL_BANK (livelli dichiarati, posizione delle Direzioni di controllo sotto la radice, Divisione Risk & Compliance da togliere o riempire). Il database non l'ho toccato e non lo tocco.
+
+**Non verificato.** Se i livelli dichiarati sono usati da qualche parte dell'applicazione (viste, menu, calcoli) non l'ho controllato: il cambiamento potrebbe avere effetti che qui non si vedono.
+
+stato: [APERTA]
+### 2026-10-04 | nota | Livelli e gradi di RTL_BANK: Enzo decide che anche advanced si adegua al metodo
+
+Complemento alla segnalazione di oggi sui livelli di RTL_BANK. Regole decise da Enzo: il livello e' la posizione nella gerarchia (vertice = 1, Divisione = 2); il responsabile del livello 2 e' dirigente di rango sotto il Direttore Generale; il tipo unita' si ricava dal livello (livello 2 con caselle sotto = DIVISION, livello 3 = DEPARTMENT, filiale = BRANCH); un centro operativo e' una Divisione al livello 2, come la Divisione Operations. **Non e' stato scritto nulla in questo repository ne' nel database.** Il contratto dati non ha un campo per il grado aziendale: da proporre. Specifica: `D:\heuresys-design-lab\banco-prototipo\SPEC_tabella-livelli-organizzativi_20261004.md`.
+
+stato: [APERTA]
+
+### 2026-10-04 | proposta-backlog | Il pacchetto v0.2 non basta ad attivare un blueprint su un tenant: sei lacune e che cosa fa il banco dal suo lato
+
+Un'analisi in sola lettura del codice di advanced e del database ha cercato che cosa serve per attivare su un tenant un blueprint nato dal pacchetto v0.2 del datastore. **Non è stato scritto nulla in questo repository ne' nel database.**
+
+**Esito.** Con l'accoglienza v0.2 così com'è, advanced rifiuterebbe il modello prima di costruire qualsiasi cosa. Quando l'attivazione funziona scrive nel tenant solo unità, posizioni, competenze e indicatori (con il fascicolo anche il registro di origine e l'identità dell'azienda). Il resto del pacchetto (CCNL, obblighi, formazione, obiettivi, bersagli, carriere, incentivi, commesse, sedi, requisiti, prove, traduzioni) oggi non è letto da nessun codice di advanced, e le 29 tabelle nuove non esistono ancora sul database reale (la migrazione 000454 è una proposta). Anche il modello di RTL_BANK oggi non è costruibile: 132 competenze su 132 sono senza categoria.
+
+**Lacune, con il file che le prova.**
+
+**M1, blocca la costruzione: la categoria delle competenze.** Advanced la esige (`blueprint-build-source.ts` riga 233, `tenant-materialization/repository.ts` riga 253) e il pacchetto non la portava. **Il banco la fornisce da oggi**: campo `categoria` (Cognitive, External, Interpersonal, Leadership, Performance, Personal, Technical) ricavato dal gruppo ESCO con una tabella dichiarata e da confermare (`contratto\categorie-competenze.json`), più `categoriaOrigine` (regola o ripiego). La mappatura scrive la colonna `blueprint_content_skill_category`, che esiste già nella tabella dei contenuti.
+
+**M2, blocca l'uso: ruoli di catalogo e cruscotti** (`sys_blueprint_content_job_roles` e `_dashboards`, letti da `profilo.ts` righe 86-100). Il pacchetto non ha il dominio: senza, gli utenti del cliente vedono zero ruoli. Decisione di advanced su come derivarli (le occupazioni ESCO delle posizioni sono il materiale più vicino).
+
+**M3, blocca la prova generale: le porte di ricompensa della variante** (`sys_reward_gate_catalog`, richieste dalla vista `v_reward_gate_completeness`, migrazione 000023). Gli incentivi del pacchetto non vengono tradotti in porte.
+
+**M4, blocca l'attivazione: una variante pubblicata.** L'accoglienza crea una versione DRAFT senza chiave di costruzione e senza aggancio al settore (`accogli.mjs` righe 36-39); servono `build_source_key = BLUEPRINT_CONTENT`, stato PUBLISHED e una famiglia agganciata alla classe ATECO. Esistono famiglie solo per le classi 64 e 70.
+
+**M5, non blocca: peso economico delle posizioni.** Tutte nascerebbero con peso 0 (riga 258 di `blueprint-build-source.ts`). Il pacchetto non lo porta e il banco non ha una fonte per calcolarlo.
+
+**M6, non blocca: identità del fascicolo.** Intensità regolatoria e fatturato; nessun codice porta il contesto del pacchetto (ATECO, fascia, addetti, paese) dentro il fascicolo. Il banco già fornisce l'intensità regolatoria per le divisioni 64, 65, 66.
+
+**Cambi del contratto dal lato del banco (additivi, schema ancora 0.2).** `livello` delle unità ora parte da 1 (vertice = 1, come la regola decisa da Enzo; prima il vertice era 0). Nuovo campo opzionale `gradoAziendale` sulle posizioni dei responsabili di unità (distinto dall'inquadramento). Nuovi campi opzionali `categoria` e `categoriaOrigine` sulle competenze. Nota: ogni consumatore che legga `level` dal pacchetto deve sapere che ora è 1-based.
+
+**Cosa si chiede.** Decidere come chiudere M2, M3 e M4 (sono lavoro di advanced, non del banco), se M5 e M6 servono, e confermare o correggere la tabella delle categorie delle competenze.
+
+**Non verificato.** I campi obbligatori del fascicolo (`tenant-blueprints/service.ts` e `repository.ts` non letti per intero) e l'abbinamento fra i 24 passi del banco e i domini del pacchetto (ricavato dai nomi).
+
+**Evidenza**: `D:\heuresys-design-lab\banco-prototipo\ANALISI_copertura_A-attivazione_20261004.md`.
+
+stato: [APERTA]
+### 2026-10-04 | nota | Tabelle di RTL_BANK: 25 su 154 sono materia di un prototipo, e tre domini mancano al contratto
+
+Analisi in sola lettura delle 154 tabelle in cui RTL_BANK ha righe. **Non è stato scritto nulla in questo repository ne' nel database.** I dati personali non sono stati riportati.
+
+**Classificazione.** Struttura e configurazione che un prototipo dovrebbe fornire: 25 tabelle (9 coperte dal pacchetto v0.2, 13 in parte, 3 non coperte). Personalizzazioni del cliente: 15. Persone e operatività: 96. Tecniche: 18.
+
+**Non coperti dal contratto.** Percorsi formativi (`sys_learning_paths` e i passi), modelli di questionario (`sys_engagement_survey_templates`), curve di erogazione (`sys_payout_curves`), cancelli di premio (`sys_reward_gate_catalog`), flussi di approvazione (in advanced non esiste una tabella di configurazione, ci sono solo le richieste). Coperti in parte: KPI di posizione con peso, regole di maturazione delle assenze (mancano le regole derivate dagli istituti CCNL), fasce e profili retributivi, regole premio strutturate, ruoli professionali, requisiti formativi su percorsi.
+
+**Una posizione per persona.** In advanced le posizioni sono 312 per 158 dipendenti, con `legacy_employee_id` nel metadata; il pacchetto descrive ruoli con organico previsto. Serve una regola per passare dal ruolo ai posti.
+
+**Due segnalazioni sui dati, senza valori.** Il metadata di `position_compensation_profiles` contiene retribuzioni individuali. `objective_reward_rules` contiene piani bonus legacy datati, cioè materiale da personalizzazione dentro una tabella di regole.
+
+**Livelli dell'albero delle unità.** `org_level` manca su 19 unità su 42 e su 22 delle 23 che lo hanno non corrisponde alla profondità (già segnalato in forma di elenco).
+
+**Evidenza**: `D:\heuresys-design-lab\banco-prototipo\ANALISI_copertura_C-tabelle-RTL_20261004.md` (una riga per tabella).
+
+stato: [APERTA]
+
+### 2026-10-05 | proposta-backlog | Principio gerarchia-livelli: chi sta sopra non ha mai un livello contrattuale inferiore a chi sta sotto
+
+**Stato**: [APERTA] — principio generale dichiarato da Enzo il 2026-10-05, valido per ogni tenant e ogni prototipo. **Non è stato scritto nulla in questo repository né nel database.**
+
+**Il principio, nelle parole di Enzo.** Fra due persone dello stesso livello contrattuale può esserci dipendenza gerarchica: un QD2 può essere il capo di un'unità in cui ci sono altri QD2. Non è mai possibile che una persona abbia nell'organizzazione un livello gerarchico superiore a chi ha un livello contrattuale più alto: un QD2 non può essere il capo di un'unità in cui ci sono QD3 o QD4.
+
+**Come lo applica il banco.** Per ogni unità, il livello del responsabile deve essere pari o superiore a quello di ogni altra persona dell'unità e di ogni responsabile delle unità sotto; per transitività vale su tutta la catena. Il pacchetto v0.2 riporta le violazioni nel rapporto (`gerarchiaLivelli`) e una violazione lo rende non valido.
+
+**Che cosa si propone ad advanced.**
+1. Una verifica con la stessa regola all'attivazione di un blueprint: un modello che la viola non si attiva, oppure si attiva con l'avviso esplicito.
+2. La stessa verifica quando sul tenant si cambia il livello contrattuale di una persona, il suo posto o il riporto di un'unità: un cambio che crea la violazione va bloccato o segnalato a chi lo fa.
+3. Un controllo di RTL_BANK con questa regola, insieme all'allineamento di livelli e gradi già deciso il 2026-10-04: elenco dei casi in cui un capo ha un livello inferiore a un suo sottoposto.
+
+Riferimenti nel banco: `banco-prototipo\datastore\livelli.mjs` (confrontaLivelli, inversioniGerarchia, correggiGerarchia) e `contratto-dati\v0.2\docs\CAMBIAMENTI_additivi_20261004.md`.

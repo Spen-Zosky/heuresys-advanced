@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-09-28T08:53:07Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3783**
+**Generato**: 2026-10-05T00:52:57Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3786**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,12 +18,12 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 449 |
+| db-migration | 451 |
 | db-other | 8 |
 | db-script | 55 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 774 |
+| doc-canonical | 775 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -34,7 +34,7 @@
 | test | 453 |
 | ux-design-archive | 80 |
 | web-source | 258 |
-| **TOTALE** | **3783** |
+| **TOTALE** | **3786** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 3140 |
+| live | 3143 |
 
 ## File per categoria
 
@@ -1763,6 +1763,8 @@
 - `D:\heuresys-advanced\db\migrations\000451_d11_dpo_apre_il_dossier.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000452_diario_del_gate_interrogabile.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000453_data_classification_endpoint.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000454_pacchetto_datastore_trova_casa.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000455_rtl_bank_livelli_organizzativi_allineati.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -2108,6 +2110,7 @@
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\A0_margine_del_pavimento.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\A5_costo_di_un_ruolo.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\CHIUSURA-C2.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\COWORK_2026-10-05_livelli_RTL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\D11.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\D12.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\K-ruoli-direzione\esiti\F0.2_censimento_C1.md` · *live* · git-tracked

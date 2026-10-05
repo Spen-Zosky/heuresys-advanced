@@ -1,55 +1,32 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: S1116 (2026-09-28). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: S1117 (2026-10-05). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-**Eredità di S1115 chiuse**: file estraneo spostato fuori dal repo, causa di `marciume:fallito`
-isolata e risolta, 5 memorie indicizzate. Poi **tutto il ciclo di governo** (P1/P2/P3 + fuori-menu)
-processato: **#253** (diario del gate interrogabile da database), **#255** (scorecard due diligence
-rivalidata, verdetto CONDITIONAL-GO — punteggio in `docs/due-diligence/SCORECARD.md`), **#256**
-(isolamento clienti: confine sufficiente), **#257**
-(nuovo `chi_ripara.py`, poi quinta famiglia USO-PRODOTTO su richiesta di Enzo), **#79** (cancello
-esposizione riapplicato), **#159** F3 avviata (assistente su una pagina in più).
+**Mandati di Cowork letti ed eseguiti dove erano già decisi.** Sette voci in `COWORK_INBOX.md`: quattro riconciliate, tre aperte (#263, #264, #265, vedi backlog). Misura sola lettura su RTL_BANK: **0 inversioni** del principio gerarchia-livelli su 42 unità; 19 unità su 42 senza `org_level`.
 
-**Tre decisioni di Enzo eseguite**: **#262** endpoint `GET /v1/data-classification` (non deroga);
-**#261** guardia di collaudo ridisegnata per distinguere la MACCHINA (hostname + porta nativa 5432)
-invece del nome del database — dimostrata dal vivo sul gemello reale; **#257** quinta regola
-meccanica, USO-PRODOTTO (conteggio in `docs/kb/SOT_BACKLOG.md`).
+**Due migrazioni scritte, provate sul gemello, pushate, NON in produzione**: `000454` (pacchetto del datastore, 29 tabelle + 27 colonne; ha richiesto di emendare `000429` a 282 tabelle e di registrare le tabelle nel registro di riconciliazione) e `000455` (riallinea `org_level` di 21 unità di RTL Bank, con giornale undo; prima/dopo/rollback con impronta identica). **Il deploy che le porta in produzione non è armato**: lo arma Enzo.
 
-**Effetto collaterale scoperto e corretto**: il nuovo permesso di `#262` faceva fallire la catena a
-ogni fresh-rebuild della CI (due checkpoint precedenti, `000255`/`000449`, non lo conoscevano) —
-emendati, CI reale verificata verde.
-
-**Incidente di governo, per onestà**: un fork delegato per l'esecuzione ha aperto 12 sub-agenti
-paralleli per una sola voce (#255) — oltre quanto avrei autorizzato; registrato, non ripetere. Due
-tentativi di delega sono anche falliti con 0 azioni reali (eco dello stato invece di eseguire) prima
-di funzionare al terzo giro.
-
-**Non eseguita per scelta corretta**: `#205` (serve una fonte di settore che solo Enzo approva, non
-un comando mancante).
+**Tunnel `:5433` ricreato** con keepalive. Il blocco di `psql` non era il tunnel ma `-h 127.0.0.1`: `~/.pgpass` ha solo `localhost`, e `psql` aspetta la password su stdin. Usare `-h localhost` o `-w`.
 
 ## Top priorities
 
-1. **`#254`** (apertura di tutti i perimetri in una mossa) — P1, sbloccata (`#253` è DONE), NON
-   ancora avviata: cambia il risolutore RBAC, `.programmi/254-apertura-perimetri-una-mossa.md`.
-2. **`#159`** F3 — 95 pagine su 96 restano, lavoro continuo per natura.
-3. **`#149`** F4 · **`#76`** F3 (prossima ondata zero-pendenze) · **`#205`** F2 (bloccata su fonte
-   di settore, decisione di Enzo).
+1. **Armare il deploy** di `000454`/`000455` (decisione di Enzo, `scripts/close-propagate.sh`).
+2. **#266** struttura albero RTL (Direzioni di controllo, Divisione Risk & Compliance duplicata) · **#263/#264/#265** decisioni di prodotto sul datastore e sulla gerarchia dei livelli, tutte WAIT-INPUT.
+3. **#254** apertura dei perimetri in una mossa (P1, non avviata) · **#159** F3.
 
 ## Open questions
 
-- Il destinatario dell'escalation quando creatore=approvatore (Z-263): decisione di prodotto,
-  proporla con un'opzione sola quando si riprende quella voce.
-- Il `[ERR] R24 GUARD-RAIL ASSENTE` sul CLAUDE.md **globale** segnalato al boot di S1114, mai
-  verificato oltre l'osservazione.
+- Ordine dei livelli QD assunto crescente (QD4 più alto) e posto di «Quadro» generico: da confermare.
+- `github.com` non risolveva a metà sessione (singhiozzo di rete): un `git fetch` fallito non prova che `origin/main` sia fermo.
 
 ## Verification
 
 ```bash
 python docs/kb/tools/session_start.py
 python docs/kb/tools/handoff_lint.py                      # atteso: 0 FAIL
-python docs/kb/tools/check_marciume.py                     # atteso: niente e' marcito
+python docs/kb/tools/check_canale_cowork.py               # atteso: 3 voci aperte (#263 #264 #265)
 python docs/kb/tools/aggiorna_numeri_sot.py --check       # atteso: exit 0
-bash scripts/verifica-deploy.sh                            # esito dell'armamento di questa sessione
+bash scripts/verifica-deploy.sh                            # esito dell'armamento (se armato)
 ```

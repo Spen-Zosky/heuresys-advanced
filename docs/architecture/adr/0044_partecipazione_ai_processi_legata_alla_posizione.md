@@ -1,8 +1,8 @@
 # ADR-0044 — La partecipazione ai processi si lega alla posizione, non alla persona
 
-- **Status**: PROPOSTO — da approvare da Enzo Spenuso; finché non è approvato non si scrive nessuna migrazione
+- **Status**: ACCETTATO il 2026-10-12 da Enzo Spenuso (approvazione data in chat alle 00:37, ora di Roma)
 - **Date**: 2026-10-11
-- **Decided by**: Enzo Spenuso (decisione 7 dell'11 ottobre 2026: sì, in tre passi, con giornale di ritorno e senza indovinare i casi dubbi) · approvazione di questo testo: in attesa
+- **Decided by**: Enzo Spenuso (decisione 7 dell'11 ottobre 2026: sì, in tre passi, con giornale di ritorno e senza indovinare i casi dubbi) · approvazione di questo testo: data il 2026-10-12
 - **Redatto da**: Claude Code CLI, mandato W0-A2 (onda 0 del piano di adesione completa)
 - **Relates to**: invariante **I1** (il modello è centrato sulla posizione), ADR-0036 (domini gerarchici e funzionali), ADR-0035 (ritirare si fa emendando la fonte), ADR-0041 (direzione del dato), ADR-0037 (cancellare una persona è anonimizzarla)
 - **Misura**: `.programmi/esiti-onda0/lavoro/partecipanti_misura.sql`, `partecipanti_misura_2.sql`, `partecipanti_misura_3.sql` con i loro `*_esito.txt` (gemello, sola lettura, 2026-10-11)

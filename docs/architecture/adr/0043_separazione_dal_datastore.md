@@ -1,8 +1,8 @@
 # ADR-0043 — La separazione dal datastore: la piattaforma tiene i cataloghi e genera i modelli, advanced tiene il tenant
 
-- **Status**: PROPOSTO — da approvare da Enzo Spenuso; finché non è approvato non è regola e non si esegue nessun passo che toglie qualcosa
+- **Status**: ACCETTATO il 2026-10-12 da Enzo Spenuso (approvazione data in chat alle 00:37, ora di Roma)
 - **Date**: 2026-10-11
-- **Decided by**: Enzo Spenuso (il criterio dei due domini e le sei regole, decisioni dell'11 ottobre 2026, punti 5 e criterio) · approvazione di questo testo: in attesa
+- **Decided by**: Enzo Spenuso (il criterio dei due domini e le sei regole, decisioni dell'11 ottobre 2026, punti 5 e criterio) · approvazione di questo testo: data il 2026-10-12
 - **Redatto da**: Claude Code CLI, mandato W0-A2 (onda 0 del piano di adesione completa, passo S2 della separazione)
 - **Supersedes in part**: ADR-0039, regole 1 e 4 (il catalogo di piattaforma vive dentro advanced e chi amministra o costruisce un cliente lo vede intero)
 - **Amends**: invariante **I21** (le tassonomie restano aperte a tutte le industrie, ma nel datastore)

@@ -1,10 +1,12 @@
 # STATE — vista rapida
 
-**Updated**: 2026-10-11 (S1118 — W0-A1: giunzione col pacchetto del datastore provata su copia, 000454 completa, #265 costruito, censimento della separazione depositato)
+**Updated**: 2026-10-11 (S1118 — W0-A2: ADR-0043 e ADR-0044 scritti in stato PROPOSTO; prima W0-A1: giunzione provata su copia, 000454 completa, #265 costruito, censimento depositato)
 
 *Ultimo aggiornamento: S1118 (2026-10-11), mandato W0-A1 (onda 0 del piano di adesione). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
+
+**W0-A2 eseguito (chiusura leggera).** Due ADR in stato PROPOSTO, da approvare da Enzo: `0043_separazione_dal_datastore.md` (sei regole, sostituisce in parte ADR-0039, corregge I21, sequenza S3-S6 con archivio, prova di ripristino e sentinella) e `0044_partecipazione_ai_processi_legata_alla_posizione.md` (tre passi con giornale). Misura sul gemello: delle 845 partecipazioni solo 185 hanno oggi la posizione certa; tutti i 57 OWNER riguardano persone non piu' nell'unita'. Register: #267 e #268 in WAIT-INPUT. Nessun codice, nessuna migrazione. Esito: `.programmi/esiti-onda0/W0-A2.md`.
 
 **W0-A1 eseguito (chiusura leggera, nessuna propagazione).** La `000454` porta dentro la direzione del dato delle sue tabelle ed è provata sul gemello insieme alla `000455` (`ci-rehearsal.sh` e `prova-idempotenza.sh` verdi): rilascio pronto, **non armato**. Il caricatore del pacchetto del datastore è nel repository (`db/scripts/pacchetto/`) e ha dimostrato la giunzione su una copia usa-e-getta del gemello: il pacchetto della banca entra senza perdite (257 percorsi su 257) e si costruisce come modello in un tenant della copia.
 
@@ -14,7 +16,8 @@
 
 1. **Armare il deploy** di `000454`/`000455` (decisione di Enzo, `scripts/close-propagate.sh`).
 2. **#264** attende il pacchetto con ruoli, cruscotti, porte, variante pubblicata (datastore). **#265** resta l'aggancio alle modifiche di posto e riporto e la scelta sul livello contrattuale (nessuna rotta lo scrive). **#263** resta il tipo delle tre date della `000454` (RD-09).
-3. **#266** struttura albero RTL (WAIT-INPUT, non toccata) · **#254** apertura dei perimetri (P1, non avviata).
+3. **#267 / #268** approvazione di ADR-0043 e ADR-0044 e scelta sui gruppi dubbi delle partecipazioni (Enzo).
+4. **#266** struttura albero RTL (WAIT-INPUT, non toccata) · **#254** apertura dei perimetri (P1, non avviata).
 
 ## Open questions
 

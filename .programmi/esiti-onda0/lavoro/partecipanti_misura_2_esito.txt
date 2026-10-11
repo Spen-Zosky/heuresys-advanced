@@ -1,0 +1,12 @@
+C-relazione|CONTRIBUTOR|era-assegnata-nella-unita-ora-chiusa|390
+C-relazione|CONTRIBUTOR|nessun-legame-con-la-unita|12
+C-relazione|CONTRIBUTOR|posizione-corrente-in-unita-sottostante|201
+C-relazione|OWNER|era-assegnata-nella-unita-ora-chiusa|25
+C-relazione|OWNER|posizione-corrente-in-unita-sottostante|32
+== assegnazioni ACTIVE modificate dopo la creazione delle partecipazioni (2026-07-20)
+assegnazioni-active-toccate-dopo|142
+assegnazioni-active-iniziate-dopo|138
+== posizioni con piu di un titolare ACTIVE
+posizioni-con-piu-titolari|0
+== persone con piu di una assegnazione ACTIVE
+persone-con-piu-posizioni|0

@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**40 ADR** in `docs/architecture/adr/`.
+**42 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -48,6 +48,8 @@
 | [0040](adr/0040_l_agente_legge_cio_che_legge_la_persona.md) | L'agente legge ciò che legge la persona; il freno si sposta dal tipo di dato all'uso | ACCEPTED | L'agente legge ciò che legge la persona; il freno si sposta dal tipo di dato all'uso *(dal titolo)* | 2026-09-14 |
 | [0041](adr/0041_direzione_del_dato.md) | La direzione del dato: invariante I23 | ACCETTATO | La direzione del dato: invariante I23 *(dal titolo)* | 2026-09-16 |
 | [0042](adr/0042_catena_del_semilavorato.md) | La catena del semilavorato: la piattaforma genera, il cliente possiede | ACCETTATO | La catena del semilavorato: la piattaforma genera, il cliente possiede *(dal titolo)* | 2026-09-16 |
+| [0043](adr/0043_separazione_dal_datastore.md) | La separazione dal datastore: la piattaforma tiene i cataloghi e genera i modelli, advanced tiene il tenant | PROPOSTO | La separazione dal datastore: la piattaforma tiene i cataloghi e genera i modelli, advanced tiene il tenant *(dal titolo)* | 2026-10-11 |
+| [0044](adr/0044_partecipazione_ai_processi_legata_alla_posizione.md) | La partecipazione ai processi si lega alla posizione, non alla persona | PROPOSTO | La partecipazione ai processi si lega alla posizione, non alla persona *(dal titolo)* | 2026-10-11 |
 
 ## Conventions
 

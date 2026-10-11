@@ -1,0 +1,22 @@
+== 1. righe totali, per tenant, ruolo, attivita, origine della derivazione
+totale|845
+tenant|RTL_BANK|845
+ruolo|CONTRIBUTOR|t|788
+ruolo|OWNER|t|57
+derivazione|RULE-B|845
+processi-di-unita|96
+persone-distinte|138
+ultima-modifica|2026-08-04|2026-07-20
+== 2. classificazione di ogni riga: quante assegnazioni ACTIVE ha la persona su posizioni attive della unita del processo
+classe|A-una-posizione-nella-unita|CONTRIBUTOR|t|185
+classe|C-assegnata-altrove|CONTRIBUTOR|t|603
+classe|C-assegnata-altrove|OWNER|t|57
+== 3. assegnazioni ACTIVE con data di fine passata (stato e calendario non concordano)
+attiva-ma-scaduta|0
+stati-assegnazione|ACTIVE|PRIMARY|161
+stati-assegnazione|ENDED|PRIMARY|168
+== 4. OWNER: la posizione di cui la persona e titolare nella unita coincide con quella di cui e proprietaria?
+owner|possiede-una-posizione-ma-titolare-di-altra|57
+== 5. processi di unita senza alcun OWNER fra i partecipanti
+processi-senza-owner|75
+processi-di-unita-totali|96

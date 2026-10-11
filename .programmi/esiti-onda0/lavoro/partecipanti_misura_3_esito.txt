@@ -1,0 +1,5 @@
+posizione-alla-data-di-creazione|CONTRIBUTOR|nessuna|136
+posizione-alla-data-di-creazione|CONTRIBUTOR|una|467
+posizione-alla-data-di-creazione|OWNER|nessuna|28
+posizione-alla-data-di-creazione|OWNER|una|29
+assegnazioni-create-dopo-le-partecipazioni|171

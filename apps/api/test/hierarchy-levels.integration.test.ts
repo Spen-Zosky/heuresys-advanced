@@ -16,7 +16,12 @@ let cookie = "";
 let versionId = "";
 const CODICE_FAMIGLIA = `TEST_GERARCHIA_${randomUUID().slice(0, 8).toUpperCase()}`;
 
-describe("/v1/hierarchy-levels integration", () => {
+// I contenuti di modello con i contratti collettivi nascono dalla migrazione 000454: su un database che non l'ha ancora (il clone del
+// gemello prima del deploy) la prova non puo' girare, e lo dice a voce alta invece di fingere di passare. In CI (catena applicata) gira.
+const schemaPresente = (await pool.query<{ ok: boolean }>(`SELECT to_regclass('sys.sys_blueprint_content_ccnl_levels') IS NOT NULL AS ok`)).rows[0]?.ok === true;
+if (!schemaPresente) console.warn("[hierarchy-levels] PROVA NON ESEGUITA: manca sys.sys_blueprint_content_ccnl_levels (migrazione 000454 non applicata a questo database)");
+
+describe.skipIf(!schemaPresente)("/v1/hierarchy-levels integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     const r = await loginRaw(suite.app, "federica.marchetti@rtl-bank.org", TEST_PERSONA_PASSWORD);

@@ -10,6 +10,10 @@ import type { Scala, Unita } from "./logic.js";
 /** I livelli dei contratti collettivi di queste versioni di modello, dal più basso (minimo annuo) al più alto. */
 export async function scalaDaVersioni(q: DbConnector, versionIds: readonly string[]): Promise<Scala> {
   if (versionIds.length === 0) return { ordine: [] };
+  // L'avviso e' accessorio: se la tabella dei livelli del contratto (mig. 000454) non c'e' ancora su questo database, non c'e' un
+  // ordine da cui giudicare e si risponde «nessuna scala», senza far fallire l'anteprima di attivazione che lo ospita.
+  const presente = await q.query<{ ok: boolean }>(`SELECT to_regclass('sys.sys_blueprint_content_ccnl_levels') IS NOT NULL AS ok`);
+  if (!presente.rows[0]?.ok) return { ordine: [] };
   const r = await q.query<{ code: string }>(
     `SELECT blueprint_content_ccnl_level_code AS code
        FROM sys.sys_blueprint_content_ccnl_levels

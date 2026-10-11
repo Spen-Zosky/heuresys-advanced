@@ -1,5 +1,7 @@
 # STATE — vista rapida
 
+**Updated**: 2026-10-11 (S1118 — W0-A1: giunzione col pacchetto del datastore provata su copia, 000454 completa, #265 costruito, censimento della separazione depositato)
+
 *Ultimo aggiornamento: S1118 (2026-10-11), mandato W0-A1 (onda 0 del piano di adesione). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief

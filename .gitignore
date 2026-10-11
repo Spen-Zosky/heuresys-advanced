@@ -295,3 +295,9 @@ _zp_verify_tmp/
 # hooks-audit: artefatti di lavoro della skill, non versionati
 /tmp/
 /.claude/types/
+
+# W0-A1 (2026-10-11): materiale che non e' del repository.
+# _da_eliminare/ e' dove si sposta cio' che va tolto (si decide a mano); "Claude outputs/" e' l'uscita di Cowork; il pacchetto della banca e' un artefatto del datastore di 1,2 MB che si rigenera con estrai_pacchetto.sh.
+/_da_eliminare/
+/Claude outputs/
+/.programmi/esiti-onda0/lavoro/pacchetto_banca.json

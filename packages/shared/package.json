@@ -257,6 +257,11 @@
       "heuresys-source": "./src/schemas/user-target-positions.ts",
       "default": "./dist/schemas/user-target-positions.js"
     },
+    "./schemas/hierarchy-levels": {
+      "types": "./dist/schemas/hierarchy-levels.d.ts",
+      "heuresys-source": "./src/schemas/hierarchy-levels.ts",
+      "default": "./dist/schemas/hierarchy-levels.js"
+    },
     "./schemas/organization-unit-history": {
       "types": "./dist/schemas/organization-unit-history.d.ts",
       "heuresys-source": "./src/schemas/organization-unit-history.ts",

@@ -18,6 +18,7 @@
  */
 import { z } from "zod";
 import { paginationFields } from "./_pagination.js";
+import { AvvisoGerarchiaSchema } from "./hierarchy-levels.js";
 
 /**
  * Lo stato di una riga generata. `GENERATED` = provvisoria, l'ha creata la costruzione ·
@@ -110,6 +111,12 @@ export const BuildPlanPreviewSchema = z.object({
     skillEvidence: z.number().int(),
     kpiEvidence: z.number().int(),
   }),
+  /**
+   * Avvisi del principio gerarchia-livelli (#265) sul modello che si sta per attivare, con la motivazione scritta.
+   * Non bloccano: chi firma li legge prima di firmare. Vuoto = nessuna violazione, oppure nessun contratto collettivo
+   * caricato nel modello da cui ricavare l'ordine dei livelli.
+   */
+  warnings: z.array(AvvisoGerarchiaSchema).default([]),
 });
 export type BuildPlanPreview = z.infer<typeof BuildPlanPreviewSchema>;
 

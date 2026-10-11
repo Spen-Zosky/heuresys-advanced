@@ -37,6 +37,7 @@ import {
 } from "./campi-bloccanti.js";
 import { resolveBuildSource } from "../tenant-materialization/blueprint-build-source.js";
 import { materialize } from "../tenant-materialization/repository.js";
+import { avvisiDelModello } from "../hierarchy-levels/service.js";
 import type {
   TenantBlueprint,
   TenantBlueprintDetail,
@@ -585,6 +586,8 @@ export const tenantBlueprintsService = {
         kpiEvidence: conteggi.kpiEvidence,
       },
       alreadyThere,
+      // #265: avvisi (non blocchi) del principio gerarchia-livelli sul modello che si sta per attivare, con motivazione scritta.
+      warnings: v.variantVersionId ? await avvisiDelModello(pool, v.variantVersionId) : [],
     };
   },
 

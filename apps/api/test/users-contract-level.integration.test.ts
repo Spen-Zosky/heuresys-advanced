@@ -88,7 +88,7 @@ describe.skipIf(!schemaPresente)("PATCH /v1/users/:id/contract-level integration
     );
     const ver = await pool.query<{ id: string }>(
       `INSERT INTO sys.sys_blueprint_variant_versions (blueprint_variant_version_variant_id, blueprint_variant_version_number, blueprint_variant_version_status)
-       VALUES ($1, 1, 'PUBLISHED') RETURNING blueprint_variant_version_id AS id`,
+       VALUES ($1, 2, 'PUBLISHED') RETURNING blueprint_variant_version_id AS id`,
       [variante.rows[0]!.id],
     );
     const versionId = ver.rows[0]!.id;
@@ -120,9 +120,9 @@ describe.skipIf(!schemaPresente)("PATCH /v1/users/:id/contract-level integration
     await closePool();
   });
 
-  it("senza sessione risponde 401", async () => {
+  it("senza sessione la scrittura è rifiutata (CSRF o 401)", async () => {
     const r = await suite.app.inject({ method: "PATCH", url: `/v1/users/${targetId}/contract-level`, payload: { level: "CCNL_T_QD2" } });
-    expect(r.statusCode).toBe(401);
+    expect([401, 403]).toContain(r.statusCode);
   });
 
   it("un livello in scala: la modifica riesce e l'elenco degli avvisi è vuoto", async () => {

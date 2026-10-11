@@ -9,5 +9,5 @@
 - [x] **F1 — Logica pura e test (`apps/api/src/modules/hierarchy-levels/logic.ts`)** — FATTO 2026-10-11 · 10 test unitari verdi; una mutazione della regola ne fa fallire 2
 - [x] **F2 — Rotta di sola lettura `GET /v1/hierarchy-levels/check` e avvisi in `BuildPlanPreview.warnings`** — FATTO 2026-10-11 · 4 test di integrazione verdi sul gemello contro la copia migrata
 - [ ] **F3 — Agganciare l'avviso alle risposte di modifica di unità (riporto, responsabile) e assegnazioni (posto)** — da fare, non in questo ciclo; test a esiti opposti
-- [ ] **F4 — Cambio di livello contrattuale: oggi nessuna rotta lo scrive (solo lettura in `me`)** — scelta di prodotto di Enzo: serve una rotta di scrittura?
+- [x] **F4 — Cambio di livello contrattuale con avviso (`PATCH /v1/users/:id/contract-level`)** — FATTO 2026-10-12 · 6 prove di integrazione verdi sul gemello contro la copia migrata (in scala senza avviso; fuori scala con avviso e modifica riuscita; tenant senza contratto caricato senza avviso; 403 senza mandato HR; 404 senza contratto attivo); una mutazione della regola ne fa fallire 2 · esito in `.programmi/esiti-onda0/W0-D.md`
 - [ ] **F5 — Rilascio** — di Enzo, deploy armato

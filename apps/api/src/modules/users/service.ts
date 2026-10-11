@@ -38,7 +38,7 @@ import * as meRepo from "../me/repository.js";
 import {
   resolveOrgReadScope, canReadOrgTarget, HR_MANDATED_ROLES, haPerimetroTenantMascherato,
 } from "../../lib/scope/resolver.js";
-import { puoConcedereRuoli } from "../../lib/scope/mandati.js";
+import { puoConcedereRuoli, haMandatoHr, haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 import { masksSensitiveClass, masksTopOfChainPay, maskFields } from "../../lib/scope/mask.js";
 import { chainLevelOf } from "../../lib/scope/org.js";
 import { isPlatform } from "../../lib/actor.js";
@@ -323,7 +323,7 @@ export const usersService = {
     body: ChangeContractLevelBody,
   ): Promise<ChangeContractLevelResponse> {
     // il mandato si controlla per primo: dipende dal solo ruolo, quindi non rivela se la persona esiste
-    if (!isPlatformAdmin(actor) && !actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) {
+    if (!haMandatoPiattaforma(actor) && !haMandatoHr(actor)) {
       throw new ForbiddenError("Contract level can be changed only by an HR mandate", "FIELD_NOT_ALLOWED");
     }
     const target = await repo.findUserById(pool, id);

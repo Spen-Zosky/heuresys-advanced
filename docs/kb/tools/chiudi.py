@@ -118,7 +118,9 @@ def leggero(a, sess: str) -> tuple[list[str], list[str], list[str]]:
         esiti[nome] = dettaglio
         if not ok:
             rossi.append(f"{nome}: {dettaglio} -> {rimedio}")
-    ok, sec, coda = cancello("check")
+    # All'onda il cancello `run` (piu' sotto) rinfresca e giudica: il `check` prima di lui
+    # leggerebbe il verdetto scaduto e darebbe un rosso che il `run` subito dopo smentisce.
+    ok, sec, coda = cancello("check") if a.livello == "leggero" else (True, 0.0, "rimandato a `run` (onda)")
     registra(sess, "cancello-check", "eseguito" if ok else "fallito", f"{coda}; {sec:.0f} s")
     if not ok:
         rossi.append(f"cancello: {coda}")

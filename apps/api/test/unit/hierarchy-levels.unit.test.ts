@@ -3,7 +3,7 @@
  * Ogni caso e' uno scenario detto da Enzo il 2026-10-05: un QD2 puo' guidare altri QD2, non un QD3 ne' un QD4.
  */
 import { describe, it, expect } from "vitest";
-import { motivazioneFuoriScala, rango, verifica, type Scala, type Unita } from "../../src/modules/hierarchy-levels/logic.js";
+import { rango, verifica, type Scala, type Unita } from "../../src/modules/hierarchy-levels/logic.js";
 
 const SCALA: Scala = {
   ordine: [
@@ -74,13 +74,5 @@ describe("verifica", () => {
   });
   it("unita senza responsabile: nessun avviso", () => {
     expect(verifica([unita("u", null, null, null, [["a", "QD4"]])], SCALA).avvisi).toEqual([]);
-  });
-});
-
-describe("motivazioneFuoriScala", () => {
-  it("nomina il livello e la scala del contratto", () => {
-    const m = motivazioneFuoriScala("ZZ9", SCALA);
-    expect(m).toContain("ZZ9");
-    for (const l of SCALA.ordine) expect(m).toContain(l);
   });
 });

@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `e678fa27` (2026-10-12T01:03:18+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `60e0f8ca` (2026-10-11T18:28:45+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
 | Moduli API | 113 |
-| Route API | 660 |
+| Route API | 659 |
 | Pagine web | 129 |
 | Schemi shared | 123 |
 | Tabelle DB | 319 (vuote: 22) |
 | Viste / matview | 71 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 293 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 292 |
 
 ## Moduli API
 
@@ -122,7 +122,7 @@
 | user-position-assignments | /v1/user-position-assignments | 5 | 4 | 6 | 0 |
 | user-target-positions | /v1/user-target-positions | 6 | 4 | 3 | 1 |
 | user-timeline | /v1/user-timeline | 2 | 1 | 1 | 1 |
-| users | /v1/users | 11 | 5 | 4 | 2 |
+| users | /v1/users | 10 | 5 | 3 | 1 |
 | visualization-edges | /v1/visualization-edges | 4 | 3 | 3 | 1 |
 | visualization-exports | /v1/visualization-exports | 4 | 2 | 2 | 1 |
 | visualization-graphs | /v1/visualization-graphs | 9 | 4 | 6 | 1 |

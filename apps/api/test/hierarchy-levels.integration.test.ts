@@ -48,8 +48,8 @@ describe("/v1/hierarchy-levels integration", () => {
         `INSERT INTO sys.sys_blueprint_content_ccnl_levels
            (blueprint_content_ccnl_level_version_id, blueprint_content_ccnl_level_ccnl_code, blueprint_content_ccnl_level_code,
             blueprint_content_ccnl_level_name, blueprint_content_ccnl_level_annual_minimum_eur)
-         VALUES ($1, 'CCNL_T', $2, $2, $3)`,
-        [versionId, codice, minimo],
+         VALUES ($1, 'CCNL_T', $2, $4, $3)`,
+        [versionId, codice, minimo, `Livello ${codice}`],
       );
     }
     await pool.query(

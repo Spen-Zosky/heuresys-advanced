@@ -578,4 +578,40 @@ VALUES
    '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore, mig 000454). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
+-- Delta del datastore (PIANO-034 voce 1): due colonne che la rilettura del pacchetto perdeva + classificazione della direzione del dato (I23, ADR-0041) delle 29 tabelle.
+ALTER TABLE sys.sys_blueprint_content_positions ADD COLUMN IF NOT EXISTS blueprint_content_position_company_grade text;
+ALTER TABLE sys.sys_blueprint_content_skills ADD COLUMN IF NOT EXISTS blueprint_content_skill_category_origin varchar(16);
+
+INSERT INTO sys.sys_classificazione_direzione_dato (tabella, stato, motivo) VALUES
+  ('sys_blueprint_content_packages', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_context', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_sites', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_position_processes', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_position_occupations', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_position_skill_requirements', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_unit_processes', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_process_sites', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_goals', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_ccnl', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_ccnl_levels', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_ccnl_institutes', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_ccnl_conditions', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_obligations', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_obligation_positions', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_training', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_training_positions', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_training_skills', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_career_paths', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_career_steps', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_incentives', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_incentive_links', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_engagements', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_engagement_links', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_evidence', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_evidence_links', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_evidence_gaps', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_derivations', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API'),
+  ('sys_blueprint_content_gaps', 'importato', 'contenuto di modello scritto solo dall''accoglienza del pacchetto del datastore (mig. 000454): nessuna rotta API')
+ON CONFLICT (tabella) DO NOTHING;
+
 COMMIT;

@@ -16,11 +16,14 @@
  *        [--pubblica-sulla-copia] [--costruisci <codice-tenant>]
  */
 import fs from "node:fs";
-import pg from "pg";
+import path from "node:path";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 
 import { BLUEPRINT_CONTENT_KEY, BlueprintBuildSource } from "../../../apps/api/src/modules/tenant-materialization/blueprint-build-source.js";
 import { materialize } from "../../../apps/api/src/modules/tenant-materialization/repository.js";
 
+const pg = createRequire(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../apps/api/package.json"))("pg");
 const [DB, VERSIONE, OUT, ...opz] = process.argv.slice(2);
 if (!DB || !VERSIONE || !OUT) throw new Error("uso: <database> <versioneId> <uscita.json> [--pubblica-sulla-copia] [--costruisci <codice-tenant>]");
 if (!/_prova\d*$/.test(DB)) throw new Error(`rifiuto: ${DB} non e' una copia di prova`);

@@ -1338,7 +1338,7 @@ Contesto: sessione Cowork del 2026-09-30/10-01 sul banco di prova dei prototipi 
 
 **Non verificato.** Non ho letto il ponte di costruzione (F6) né la materializzazione del fascicolo: non so come le nuove colonne si comporterebbero alla creazione del tenant. Non ho letto il codice che oggi confronta le buste con il minimo contrattuale di livello (migrazione 000289) e non so da dove prenda i minimi.
 
-stato: [APERTA]
+stato: [RICONCILIATA S1118 8307debe] — #263: forme A1-A11 confermate da Enzo (2026-10-11); la 000454 porta ora la classificazione della direzione del dato e le due colonne del datastore, provata sul gemello (ci-rehearsal e prova-idempotenza verdi); il caricatore del pacchetto e' in db/scripts/pacchetto/. Resta il rilascio, di Enzo. Esito: .programmi/esiti-onda0/W0-A1.md
 
 
 ### 2026-10-01 | nota | Migrazione proposta per il contratto dati provata su database locale di prova: 29 tabelle, 27 colonne, caricamento misurato
@@ -1408,7 +1408,7 @@ Un'analisi in sola lettura del codice di advanced e del database ha cercato che 
 
 **Evidenza**: `D:\heuresys-design-lab\banco-prototipo\ANALISI_copertura_A-attivazione_20261004.md`.
 
-stato: [APERTA]
+stato: [RICONCILIATA S1118 ebd47302] — #264: decisione di Enzo (2026-10-11), lo produce il datastore. Rilette le sei lacune: reggono (M1 gia' chiusa). Richiesta puntuale al datastore: .programmi/esiti-onda0/RICHIESTA_datastore_attivazione.md. La voce #264 e' GATED sul pacchetto con le sezioni nuove.
 ### 2026-10-04 | nota | Tabelle di RTL_BANK: 25 su 154 sono materia di un prototipo, e tre domini mancano al contratto
 
 Analisi in sola lettura delle 154 tabelle in cui RTL_BANK ha righe. **Non è stato scritto nulla in questo repository ne' nel database.** I dati personali non sono stati riportati.
@@ -1442,6 +1442,8 @@ stato: [RICONCILIATA S1117] — voce informativa, nessuna azione richiesta; lett
 
 Riferimenti nel banco: `banco-prototipo\datastore\livelli.mjs` (confrontaLivelli, inversioniGerarchia, correggiGerarchia) e `contratto-dati\v0.2\docs\CAMBIAMENTI_additivi_20261004.md`.
 
+stato: [RICONCILIATA S1118 ebd47302] — #265: avviso con motivazione scritta (non blocco) costruito: modulo hierarchy-levels, rotta GET /v1/hierarchy-levels/check, avvisi nell'anteprima di attivazione; ordine QD dal contratto caricato (QD4 > QD3 > QD2 > QD1); RTL Bank 0 avvisi su 40 unita'. Restano l'aggancio alle modifiche di posto e riporto (265.3) e la scelta sul livello contrattuale, che oggi non ha rotta di scrittura (265.4).
+
 ### 2026-10-11 | mandato | Piano di adesione completa: onda 0 (giunzione, censimento della separazione, decisioni #263 #264 #265)
 
 Origine: decisioni dell'Amministratore di Sistema dell'11 ottobre 2026, prese una alla volta in conversazione con Cowork. Il piano intero e il verbale delle decisioni sono fuori dal repository, nella cartella di sessione di Cowork `heuresys-pietre-di-paragone_20261011` (file `PIANO_adesione-completa-heuresys_20261011.md` e `DECISIONI_piano-adesione_20261011.md`), con copia nella posta del datastore. Con questa voce non è stato scritto nient'altro in questo repository né nel database.
@@ -1461,3 +1463,5 @@ Origine: decisioni dell'Amministratore di Sistema dell'11 ottobre 2026, prese un
 4. Bozza di un ADR per legare la partecipazione ai processi alla posizione invece che alla persona, in tre passi: colonna nuova, riempimento dalle righe di `sys_process_participants` con giornale di ritorno e senza indovinare i casi dubbi, spegnimento della scrittura vecchia solo a letture commutate. In quest'onda solo l'ADR e la misura dei casi dubbi.
 
 **Chiusura dell'onda.** Un pacchetto v0.2 del caso banca entra nella copia di prova e si attiva come modello; il confronto con RTL Bank è depositato; censimento e due ADR in bozza sono nel repository.
+
+stato: [RICONCILIATA S1118 ebd47302] — W0-A1 eseguito: voce committata, 000454 completa e provata, #263 #264 #265 eseguiti secondo le decisioni, giunzione dimostrata su copia, censimento depositato, registro compattato. Esito: .programmi/esiti-onda0/W0-A1.md. Restano ad altri mandati le due bozze ADR (punti 3 e 4 della voce).

@@ -1,0 +1,29 @@
+{
+ "database": "heuresys_advanced_w0a1_prova1",
+ "tenant": "RTL_BANK",
+ "scala": [
+  "CCNL_CREDITO_AREAUNIFICATA",
+  "CCNL_CREDITO_3AREA_L1",
+  "CCNL_CREDITO_3AREA_L2",
+  "CCNL_CREDITO_3AREA_L3",
+  "CCNL_CREDITO_3AREA_L4",
+  "CCNL_CREDITO_QD1",
+  "CCNL_CREDITO_QD2",
+  "CCNL_CREDITO_QD3",
+  "CCNL_CREDITO_QD4",
+  "CCNL_CREDITO_DIRIGENTI_DIR"
+ ],
+ "unitaControllate": 40,
+ "avvisi": 0,
+ "elencoAvvisi": [],
+ "nonValutabili": [],
+ "livelliNelTenant": {
+  "QD3": 28,
+  "Dirigente": 12,
+  "3A4L": 41,
+  "3A2L": 8,
+  "3A3L": 45,
+  "QD4": 3,
+  "3A1L": 22
+ }
+}

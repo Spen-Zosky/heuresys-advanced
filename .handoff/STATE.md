@@ -1,32 +1,30 @@
 # STATE — vista rapida
 
-*Ultimo aggiornamento: S1117 (2026-10-05). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
+*Ultimo aggiornamento: S1118 (2026-10-11), mandato W0-A1 (onda 0 del piano di adesione). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-**Mandati di Cowork letti ed eseguiti dove erano già decisi.** Sette voci in `COWORK_INBOX.md`: quattro riconciliate, tre aperte (#263, #264, #265, vedi backlog). Misura sola lettura su RTL_BANK: **0 inversioni** del principio gerarchia-livelli su 42 unità; 19 unità su 42 senza `org_level`.
+**W0-A1 eseguito (chiusura leggera, nessuna propagazione).** La `000454` porta dentro la direzione del dato delle sue tabelle ed è provata sul gemello insieme alla `000455` (`ci-rehearsal.sh` e `prova-idempotenza.sh` verdi): rilascio pronto, **non armato**. Il caricatore del pacchetto del datastore è nel repository (`db/scripts/pacchetto/`) e ha dimostrato la giunzione su una copia usa-e-getta del gemello: il pacchetto della banca entra senza perdite (257 percorsi su 257) e si costruisce come modello in un tenant della copia.
 
-**Due migrazioni scritte, provate sul gemello, pushate, NON in produzione**: `000454` (pacchetto del datastore, 29 tabelle + 27 colonne; ha richiesto di emendare `000429` a 282 tabelle e di registrare le tabelle nel registro di riconciliazione) e `000455` (riallinea `org_level` di 21 unità di RTL Bank, con giornale undo; prima/dopo/rollback con impronta identica). **Il deploy che le porta in produzione non è armato**: lo arma Enzo.
-
-**Tunnel `:5433` ricreato** con keepalive. Il blocco di `psql` non era il tunnel ma `-h 127.0.0.1`: `~/.pgpass` ha solo `localhost`, e `psql` aspetta la password su stdin. Usare `-h localhost` o `-w`.
+**#265 costruito**: modulo `hierarchy-levels` (avviso con motivazione, rotta di sola lettura, avvisi nell'anteprima di attivazione). **#264 in attesa del datastore** (richiesta in `.programmi/esiti-onda0/RICHIESTA_datastore_attivazione.md`). Censimento della separazione in `.programmi/esiti-onda0/CENSIMENTO_separazione.md`. Esito intero: `.programmi/esiti-onda0/W0-A1.md`.
 
 ## Top priorities
 
 1. **Armare il deploy** di `000454`/`000455` (decisione di Enzo, `scripts/close-propagate.sh`).
-2. **#266** struttura albero RTL (Direzioni di controllo, Divisione Risk & Compliance duplicata) · **#263/#264/#265** decisioni di prodotto sul datastore e sulla gerarchia dei livelli, tutte WAIT-INPUT.
-3. **#254** apertura dei perimetri in una mossa (P1, non avviata) · **#159** F3.
+2. **#264** attende il pacchetto con ruoli, cruscotti, porte, variante pubblicata (datastore). **#265** resta l'aggancio alle modifiche di posto e riporto e la scelta sul livello contrattuale (nessuna rotta lo scrive). **#263** resta il tipo delle tre date della `000454` (RD-09).
+3. **#266** struttura albero RTL (WAIT-INPUT, non toccata) · **#254** apertura dei perimetri (P1, non avviata).
 
 ## Open questions
 
-- Ordine dei livelli QD assunto crescente (QD4 più alto) e posto di «Quadro» generico: da confermare.
-- `github.com` non risolveva a metà sessione (singhiozzo di rete): un `git fetch` fallito non prova che `origin/main` sia fermo.
+- La copia di prova `heuresys_advanced_w0a1_prova1` resta sul gemello (non si cancella da sola): si toglie su richiesta.
+- Il gesto «pubblica la versione» del modello caricato è oggi dell'operatore, solo sulle copie (in attesa dello schema 0.3 del pacchetto).
 
 ## Verification
 
 ```bash
 python docs/kb/tools/session_start.py
 python docs/kb/tools/handoff_lint.py                      # atteso: 0 FAIL
-python docs/kb/tools/check_canale_cowork.py               # atteso: 3 voci aperte (#263 #264 #265)
-python docs/kb/tools/aggiorna_numeri_sot.py --check       # atteso: exit 0
+python docs/kb/tools/check_canale_cowork.py               # atteso: 0 voci aperte
+python docs/kb/tools/verify_gate.py check
 bash scripts/verifica-deploy.sh                            # esito dell'armamento (se armato)
 ```

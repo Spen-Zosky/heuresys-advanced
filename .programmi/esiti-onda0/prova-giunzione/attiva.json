@@ -1,0 +1,35 @@
+{
+ "database": "heuresys_advanced_w0a1_prova1",
+ "versione": "c269f5b2-49c5-4ae7-a11d-a49741c29149",
+ "avviato": "2026-10-11T15:30:56.650Z",
+ "prima": {
+  "stato": "DRAFT",
+  "chiave": null,
+  "famiglia": "PACCHETTO_DATASTORE",
+  "variante": "p20261010010521tjb"
+ },
+ "pubblicata_sulla_copia": true,
+ "piano": {
+  "accettato": true,
+  "etichetta": "PACCHETTO_DATASTORE/p20261010010521tjb v2",
+  "unita": 31,
+  "posizioni": 109,
+  "competenze": 443,
+  "indicatori": 327,
+  "pesoEconomicoZero": 109
+ },
+ "costruzione": {
+  "tenantId": "dd4d5e9a-2d86-4f72-b880-874e8650a08e",
+  "orgUnits": 31,
+  "positions": 109,
+  "users": 0,
+  "assignments": 0,
+  "skills": 443,
+  "kpis": 327,
+  "skillEvidence": 0,
+  "kpiEvidence": 0,
+  "righeRegistrate": 910
+ },
+ "esito": "ok",
+ "finito": "2026-10-11T15:30:58.584Z"
+}

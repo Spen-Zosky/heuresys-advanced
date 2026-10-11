@@ -1,0 +1,89 @@
+{
+ "comando": "rileggi",
+ "database": "heuresys_advanced_w0a1_prova1",
+ "pacchetto": "/tmp/pacchetto_banca_w0a1.json",
+ "avviato": "2026-10-11T15:30:11.447Z",
+ "versione": "c269f5b2-49c5-4ae7-a11d-a49741c29149",
+ "percorsi_nel_pacchetto": 257,
+ "percorsi_ricostruiti": 257,
+ "percorsi_con_differenze": 0,
+ "differenze": [],
+ "sezioni": [
+  {
+   "sezione": "ccnl",
+   "uguale": true
+  },
+  {
+   "sezione": "meta",
+   "uguale": true
+  },
+  {
+   "sezione": "sedi",
+   "uguale": true
+  },
+  {
+   "sezione": "prove",
+   "uguale": true
+  },
+  {
+   "sezione": "unita",
+   "uguale": true
+  },
+  {
+   "sezione": "vuoti",
+   "uguale": true
+  },
+  {
+   "sezione": "carriere",
+   "uguale": true
+  },
+  {
+   "sezione": "commesse",
+   "uguale": true
+  },
+  {
+   "sezione": "contesto",
+   "uguale": true
+  },
+  {
+   "sezione": "obblighi",
+   "uguale": true
+  },
+  {
+   "sezione": "processi",
+   "uguale": true
+  },
+  {
+   "sezione": "incentivi",
+   "uguale": true
+  },
+  {
+   "sezione": "obiettivi",
+   "uguale": true
+  },
+  {
+   "sezione": "posizioni",
+   "uguale": true
+  },
+  {
+   "sezione": "competenze",
+   "uguale": true
+  },
+  {
+   "sezione": "formazione",
+   "uguale": true
+  },
+  {
+   "sezione": "indicatori",
+   "uguale": true
+  },
+  {
+   "sezione": "derivazioni",
+   "uguale": true
+  }
+ ],
+ "pacchetto_ricostruito_uguale": true,
+ "valori_foglia": 31389,
+ "esito": "ok",
+ "finito": "2026-10-11T15:30:12.839Z"
+}

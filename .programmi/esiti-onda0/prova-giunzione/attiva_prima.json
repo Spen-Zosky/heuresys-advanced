@@ -1,0 +1,22 @@
+{
+ "database": "heuresys_advanced_w0a1_prova1",
+ "versione": "c269f5b2-49c5-4ae7-a11d-a49741c29149",
+ "avviato": "2026-10-11T15:30:55.063Z",
+ "prima": {
+  "stato": "DRAFT",
+  "chiave": null,
+  "famiglia": "PACCHETTO_DATASTORE",
+  "variante": "p20261010010521tjb"
+ },
+ "piano": {
+  "accettato": true,
+  "etichetta": "PACCHETTO_DATASTORE/p20261010010521tjb v2",
+  "unita": 31,
+  "posizioni": 109,
+  "competenze": 443,
+  "indicatori": 327,
+  "pesoEconomicoZero": 109
+ },
+ "esito": "ok",
+ "finito": "2026-10-11T15:30:55.180Z"
+}

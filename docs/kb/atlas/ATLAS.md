@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `ff3533e5` (2026-10-05T00:57:33+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `ebd47302` (2026-10-11T17:48:37+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 112 |
-| Route API | 658 |
+| Moduli API | 113 |
+| Route API | 659 |
 | Pagine web | 129 |
-| Schemi shared | 122 |
+| Schemi shared | 123 |
 | Tabelle DB | 319 (vuote: 22) |
 | Viste / matview | 71 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 291 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 292 |
 
 ## Moduli API
 
@@ -54,6 +54,7 @@
 | gdpr | /v1/gdpr | 5 | 4 | 4 | 1 |
 | generated-origins | /v1/generated-origins | 2 | 1 | 1 | 1 |
 | goals | /v1/goals | 12 | 4 | 7 | 4 |
+| hierarchy-levels | /v1/hierarchy-levels | 1 | 1 | 10 | 1 |
 | insights | /v1/insights | 7 | 2 | 15 | 5 |
 | interview-feedback | /v1/interview-feedback | 4 | 1 | 7 | 1 |
 | interviews | /v1/interviews | 4 | 1 | 5 | 1 |

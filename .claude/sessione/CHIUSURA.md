@@ -8,6 +8,18 @@ Il core resta valido in tutto ciò che qui non è nominato. Dove questo file dic
 
 ---
 
+## Il comando `chiudi` e i suoi tre livelli (W0-A3, 2026-10-11)
+
+```bash
+python docs/kb/tools/chiudi.py                                   # leggero: a ogni sessione
+python docs/kb/tools/chiudi.py --livello onda --dimostrazioni "<cmd>" ...   # al cancello di un'onda
+python docs/kb/tools/chiudi.py --livello rilascio                # legge un rilascio armato; senza, non fa niente
+```
+
+Il livello **leggero è la chiusura normale**: restano i Passi A, B, D e E di questo file per scrivere stato e registro (giudizio di chi ha lavorato), poi `chiudi` misura e dice SI o NO in cinque righe (`VERIFICA`, `DEPOSITO`, `PROPAGAZIONE`, `PROVE`, `ROSSI`) e accoda una riga a `.handoff/close-log.ndjson`. I Passi F (propagazione), G (lettura dalle macchine) e l'armamento **non fanno parte** di leggero né di onda: sono del rilascio, e il rilascio è di Enzo. `chiudi` non esegue mai `scripts/close-propagate.sh`, non arma e non muove `refs/heads/prod`. La prova rosso/verde è `python docs/kb/tools/test_chiudi.py`.
+
+---
+
 ## Fonti di stato di questo progetto
 
 Oltre a `.handoff/STATE.md` (vista rapida, governata dal core), qui esistono tre viste disgiunte:

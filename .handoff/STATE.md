@@ -1,10 +1,12 @@
 # STATE — vista rapida
 
-**Updated**: 2026-10-11 (S1118 — W0-A1 e W0-A2 dell'onda 0 del piano di adesione: giunzione provata su copia, 000454 completa, #265 costruito, censimento, ADR-0043 e ADR-0044 proposti)
+**Updated**: 2026-10-11 (S1119 — W0-A3: `chiudi` a tre livelli; prima S1118, W0-A1 e W0-A2, 000454 e 000455 non in produzione)
 
 *Ultimo aggiornamento: S1118 (2026-10-11). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
+
+**S1119, W0-A3**: esiste `python docs/kb/tools/chiudi.py` (livelli `leggero`, `onda`, `rilascio`), esito in cinque righe e registro in `.handoff/close-log.ndjson`; non propaga e non arma. Esito in `.programmi/esiti-onda0/W0-A3.md`.
 
 **Stato intermedio dichiarato.** `000454` e `000455` sono provate sul gemello ma NON in produzione: rilascio pronto, **non armato** (gesto di Enzo). La giunzione col pacchetto del datastore è dimostrata su una copia usa-e-getta del gemello, non su produzione: quindi «in corso». Esiti: `.programmi/esiti-onda0/W0-A1.md` e `W0-A2.md`.
 

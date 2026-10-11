@@ -1,0 +1,188 @@
+// Caricatore del pacchetto del datastore (voce #263, W0-A1). Portato da heuresys-datastore/scripts/piano034/accogli_pacchetto.mjs.
+//
+// Uso:  node db/scripts/pacchetto/accogli-pacchetto.mjs carica   <database> <pacchetto.json> <uscita.json> [famiglia]
+//       node db/scripts/pacchetto/accogli-pacchetto.mjs rileggi  <database> <pacchetto.json> <uscita.json> [famiglia]
+//       node db/scripts/pacchetto/accogli-pacchetto.mjs scarica  <database> <pacchetto.json> <uscita.json> [famiglia]
+//
+// carica   fa SOLO inserimenti, in una transazione: una famiglia nuova, una variante con il codice del prototipo, la sua versione 2 in
+//          DRAFT (la 1 la crea il trigger sys_blueprint_variant_ensure_version), le righe di ogni dominio, le traduzioni inglesi, i
+//          legami con le prove e le definizioni di indicatore di piattaforma. Nessun TRUNCATE, nessun UPDATE. Se la famiglia c'e' gia', si ferma.
+// rileggi  ricostruisce il pacchetto dalle sole righe e lo confronta con il file, percorso per percorso e per intero.
+// scarica  toglie le sole righe caricate (traduzioni, definizioni di indicatore, famiglia: il resto va a cascata).
+//
+// Guardia: rifiuta un database il cui nome non finisce con _prova<N> (copia usa-e-getta). Collegamento: PGHOST, PGPORT, PGUSER (default
+// localhost, 5432, postgres); la password la legge il client dal pgpass di sistema, mai da qui.
+import fs from "node:fs";
+import path from "node:path";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+const pg = createRequire(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../apps/api/package.json"))("pg");
+import { DOMINI, fissi, ORIGINE, ORIGINE_INVERSA, INDICATORI_DI_PIATTAFORMA } from "./definizione-pacchetto.mjs";
+
+const [cmd, DB, FILE, OUT, FAMIGLIA_ARG] = process.argv.slice(2);
+if (!["carica", "rileggi", "scarica"].includes(cmd) || !DB || !FILE || !OUT) throw new Error("uso: carica|rileggi|scarica <database> <pacchetto.json> <uscita.json> [famiglia]");
+if (!/_prova\d*$/.test(DB)) throw new Error("rifiuto: " + DB + " non è una copia di prova");
+const FAMIGLIA = FAMIGLIA_ARG ?? "PACCHETTO_DATASTORE";
+const raw = JSON.parse(fs.readFileSync(FILE, "utf8"));
+pg.types.setTypeParser(1700, (v) => (v === null ? null : Number(v))); // numeric
+pg.types.setTypeParser(20, (v) => (v === null ? null : Number(v))); // bigint
+const cli = new pg.Client({ host: process.env.PGHOST ?? "localhost", port: Number(process.env.PGPORT ?? 5432), user: process.env.PGUSER ?? "postgres", database: DB, application_name: "accogli_pacchetto" });
+await cli.connect();
+const q = async (s, a = []) => (await cli.query(s, a)).rows;
+const D = (k) => DOMINI.find((d) => d.chiave === k);
+const esito = { comando: cmd, database: DB, pacchetto: FILE, avviato: new Date().toISOString() };
+
+const versione = async () => {
+  const r = await q(`SELECT v.blueprint_variant_id AS var, vv.blueprint_variant_version_id AS ver FROM sys.sys_blueprint_families f
+    JOIN sys.sys_blueprint_variants v ON v.blueprint_variant_family_id = f.blueprint_family_id
+    JOIN sys.sys_blueprint_variant_versions vv ON vv.blueprint_variant_version_variant_id = v.blueprint_variant_id AND vv.blueprint_variant_version_number = 2
+    WHERE f.blueprint_family_code = $1 AND v.blueprint_variant_code = $2`, [FAMIGLIA, raw.meta.prototipoId]);
+  return r[0] ? { varianteId: r[0].var, versionId: r[0].ver } : null;
+};
+
+async function carica() {
+  await cli.query("BEGIN");
+  if ((await q("SELECT 1 FROM sys.sys_blueprint_families WHERE blueprint_family_code = $1", [FAMIGLIA])).length) throw new Error("la famiglia " + FAMIGLIA + " c'è già: niente si sovrascrive");
+  const fam = (await q(`INSERT INTO sys.sys_blueprint_families (blueprint_family_code, blueprint_family_name, blueprint_family_description) VALUES ($1, 'Pacchetto del datastore', 'Famiglia che accoglie il pacchetto v0.2 di un prototipo del datastore') RETURNING blueprint_family_id`, [FAMIGLIA]))[0].blueprint_family_id;
+  const banda = (await q("SELECT enterprise_size_band_id FROM sys.sys_enterprise_size_bands WHERE enterprise_size_band_code = $1", [raw.contesto.fasciaAdvanced]))[0]?.enterprise_size_band_id ?? null;
+  const varId = (await q(`INSERT INTO sys.sys_blueprint_variants (blueprint_variant_family_id, blueprint_variant_code, blueprint_variant_name, blueprint_variant_description, blueprint_variant_size_band_id) VALUES ($1,$2,$3,$4,$5) RETURNING blueprint_variant_id`, [fam, raw.meta.prototipoId, raw.contesto.descrizione.it.slice(0, 250), raw.contesto.descrizione.it, banda]))[0].blueprint_variant_id;
+  const verId = (await q(`INSERT INTO sys.sys_blueprint_variant_versions (blueprint_variant_version_variant_id, blueprint_variant_version_number, blueprint_variant_version_status, blueprint_variant_version_notes) VALUES ($1, 2, 'DRAFT', $2) RETURNING blueprint_variant_version_id`, [varId, "Accoglienza del pacchetto " + raw.meta.schema]))[0].blueprint_variant_version_id;
+  const c = { versionId: verId, varianteId: varId };
+  const ids = {}; const conti = {}; let trad = 0; const orig = {}; let legami = 0, vuoti = 0;
+  for (const d of DOMINI) {
+    ids[d.chiave] = new Map(); const rr = d.righe(raw);
+    for (const r of rr) {
+      const v = { ...fissi(d, c), ...Object.fromEntries(Object.entries(r.v).filter(([, x]) => x !== undefined)) };
+      const cols = Object.keys(v);
+      const id = (await q(`INSERT INTO sys.${d.t} (${cols.map((x) => d.p + x).join(", ")}) VALUES (${cols.map((_, i) => "$" + (i + 1)).join(", ")}) RETURNING ${d.p}id AS id`, cols.map((x) => v[x])))[0].id;
+      ids[d.chiave].set(r.k, id);
+      for (const t of r.tr ?? []) {
+        const src = ORIGINE[t.origine]; if (!src) throw new Error(`origine sconosciuta ${t.origine} in ${d.chiave} ${r.k}`);
+        await q("INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source) VALUES ($1,$2,$3,'en',$4,$5)", [d.t, id, t.campo, t.en, src]);
+        trad++; orig[src] = (orig[src] ?? 0) + 1;
+      }
+      if (r.ev) {
+        const lega = async (pid, ruolo) => { await q(`INSERT INTO sys.sys_blueprint_content_evidence_links (blueprint_content_evidence_link_version_id, blueprint_content_evidence_link_entity_kind, blueprint_content_evidence_link_entity_code, blueprint_content_evidence_link_proof_code, blueprint_content_evidence_link_role) VALUES ($1,$2,$3,$4,$5)`, [verId, r.ev.kind, r.ev.code, pid, ruolo]); legami++; };
+        for (const pid of r.ev.fonti) await lega(pid, "SOURCE");
+        for (const pid of r.ev.proveOrg ?? []) await lega(pid, "HEADCOUNT");
+        if (r.ev.senza) { await q(`INSERT INTO sys.sys_blueprint_content_evidence_gaps (blueprint_content_evidence_gap_version_id, blueprint_content_evidence_gap_entity_kind, blueprint_content_evidence_gap_entity_code) VALUES ($1,$2,$3)`, [verId, r.ev.kind, r.ev.code]); vuoti++; }
+      }
+    }
+    conti[d.t] = rr.length;
+  }
+  // gli indicatori come definizioni di piattaforma, legati al loro processo (indicatore → obiettivo → processo)
+  const pre = INDICATORI_DI_PIATTAFORMA.prefisso(raw.meta.prototipoId);
+  const processoDi = new Map(raw.obiettivi.map((o) => [o.codice, o.processoCodice]));
+  const perProcesso = new Map();
+  for (const i of raw.indicatori) { const pc = processoDi.get(i.obiettivoCodice); perProcesso.set(pc, [...(perProcesso.get(pc) ?? []), i]); }
+  let defs = 0, modelli = 0;
+  for (const [pc, ii] of perProcesso) {
+    const procId = ids.processes.get(pc); if (!procId) throw new Error("indicatore legato a un processo che non c'è: " + pc);
+    for (const i of ii) {
+      const kid = (await q(`INSERT INTO sys.sys_kpi_definitions (kpi_definition_tenant_id, kpi_definition_code, kpi_definition_name, kpi_definition_description, kpi_definition_formula, kpi_definition_unit, kpi_definition_polarity, kpi_definition_is_global, kpi_definition_metadata) VALUES (NULL,$1,$2,$3,$4,$5,$6,true,$7) RETURNING kpi_definition_id`,
+        [pre + i.codice, i.nome.it, i.riferimento?.it ?? null, i.formula?.it ?? null, i.unita, i.direzioneAdvanced, JSON.stringify({ origine: "datastore", prototipo: raw.meta.prototipoId, pacchetto: raw.meta.schema, indicatore: i.codice })]))[0].kpi_definition_id;
+      defs++;
+      const bersaglio = i.bersaglio ? { minimo: i.bersaglio.minimo, obiettivo: i.bersaglio.obiettivo, massimo: i.bersaglio.massimo } : {};
+      await q(`INSERT INTO sys.sys_process_kpi_templates (process_kpi_template_process_id, process_kpi_template_kpi_id, process_kpi_template_default_weight, process_kpi_template_default_target, process_kpi_template_metadata) VALUES ($1,$2,$3,$4,$5)`,
+        [procId, kid, INDICATORI_DI_PIATTAFORMA.peso(ii.length), JSON.stringify({ unita: i.unita, direzione: i.direzioneAdvanced, ...bersaglio }), JSON.stringify({ origine: "datastore " + raw.meta.prototipoId, obiettivo: i.obiettivoCodice })]);
+      modelli++;
+    }
+  }
+  await cli.query("COMMIT");
+  // le statistiche delle tabelle appena riempite: senza, db_health conta le tabelle popolate e mai analizzate
+  const toccate = [...new Set([...DOMINI.map((d) => d.t), "sys_blueprint_families", "sys_blueprint_variants", "sys_blueprint_variant_versions", "sys_reference_translations", "sys_blueprint_content_evidence_links", "sys_blueprint_content_evidence_gaps", "sys_kpi_definitions", "sys_process_kpi_templates"])];
+  for (const t of toccate) await cli.query(`ANALYZE sys.${t}`);
+  Object.assign(esito, { famiglia: FAMIGLIA, variante: varId, versione: verId, righe_per_tabella: conti, righe: Object.values(conti).reduce((a, b) => a + b, 0), traduzioni: trad, origini: orig, legami_con_prove: legami, senza_riscontro: vuoti, definizioni_di_indicatore: defs, modelli_di_indicatore_per_processo: modelli, tabelle_analizzate: toccate.length });
+}
+
+// ---- rilettura: dal database al pacchetto
+const T = (itv, t) => (itv === null && !t ? undefined : { it: itv, ...(t ? { en: t.text, enOrigine: ORIGINE_INVERSA[t.source] } : {}) });
+const togliVuoti = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined));
+async function ricostruisci(c) {
+  const righe = async (d) => q(`SELECT * FROM sys.${d.t} WHERE ${Object.keys(fissi(d, c)).map((x, i) => `${d.p}${x} = $${i + 1}`).join(" AND ")}`, Object.values(fissi(d, c)));
+  const R = {}; const tutti = [];
+  for (const d of DOMINI) { R[d.chiave] = (await righe(d)).map((r) => { const o = { _id: r[d.p + "id"] }; for (const [k, v] of Object.entries(r)) if (k.startsWith(d.p)) o[k.slice(d.p.length)] = v; return o; }); tutti.push(...R[d.chiave].map((x) => x._id)); }
+  const trs = await q("SELECT entity_id, field, text, source FROM sys.sys_reference_translations WHERE locale = 'en' AND entity_id = ANY($1::uuid[])", [tutti]);
+  const TR = new Map(trs.map((t) => [`${t.entity_id}|${t.field}`, t]));
+  const t = (r, campo) => TR.get(`${r._id}|${campo}`);
+  const lk = await q("SELECT blueprint_content_evidence_link_entity_kind k, blueprint_content_evidence_link_entity_code c, blueprint_content_evidence_link_proof_code p, blueprint_content_evidence_link_role r FROM sys.sys_blueprint_content_evidence_links WHERE blueprint_content_evidence_link_version_id = $1", [c.versionId]);
+  const gp = new Set((await q("SELECT blueprint_content_evidence_gap_entity_kind k, blueprint_content_evidence_gap_entity_code c FROM sys.sys_blueprint_content_evidence_gaps WHERE blueprint_content_evidence_gap_version_id = $1", [c.versionId])).map((x) => `${x.k}|${x.c}`));
+  const fonti = (k, code, ruolo = "SOURCE") => lk.filter((x) => x.k === k && x.c === code && x.r === ruolo).map((x) => x.p);
+  const ev = (k, code) => ({ fonti: fonti(k, code), ...(gp.has(`${k}|${code}`) ? { senzaRiscontro: true } : {}) });
+  const per = (chiave, campo, val) => R[chiave].filter((x) => x[campo] === val);
+  const data = (d) => (d === null ? null : d instanceof Date ? d.toISOString() : d);
+  const pk = R.packages[0]; const cx = R.context[0];
+  return {
+    meta: { lingue: pk.languages, schema: pk.schema_version, creatoIl: pk.source_created_at, generatoDa: pk.generator, lingueBase: pk.base_language, prototipoId: pk.prototype_ref },
+    contesto: togliVuoti({ addetti: cx.employees, ateco: { codice: cx.ateco_code, nome: T(cx.ateco_name, t(cx, "ateco_name")), schema: cx.ateco_scheme }, classeDimensionale: cx.size_class, descrizione: T(cx.description, t(cx, "description")), fasciaAdvanced: cx.size_band_code, intensitaRegolatoria: cx.regulatory_intensity ?? undefined, modelloOperativo: cx.operating_model ?? undefined, paese: cx.country, sedi: R.sites.map((s) => s.code) }),
+    sedi: R.sites.map((s) => togliVuoti({ codice: s.code, tipo: s.kind, nome: T(s.name, t(s, "name")), note: T(s.note, t(s, "note")), addetti: s.headcount ?? undefined, indirizzo: s.address ?? undefined })),
+    unita: R.units.map((u) => togliVuoti({ codice: u.code, nome: T(u.name, t(u, "name")), padre: u.parent_code, tipoAdvanced: u.type, livello: u.level, sedeCodice: u.site_code, organicoPrevisto: u.planned_headcount, tipo: u.source_kind, motivazioneOrganico: T(u.headcount_note, t(u, "headcount_note")), ...ev("UNIT", u.code), proveOrganico: fonti("UNIT", u.code, "HEADCOUNT") })),
+    posizioni: R.positions.map((x) => togliVuoti({ codice: x.code, titolo: T(x.title, t(x, "title")), unitaCodice: x.unit_code, criticita: x.criticality ?? undefined, riportaA: x.reports_to_code, categoriaContrattuale: x.contract_category, livelloCcnl: x.ccnl_level_code, organicoPrevisto: x.planned_headcount, responsabileUnita: x.is_unit_head, criticitaMotivo: T(x.criticality_note, t(x, "criticality_note")), gradoAziendale: x.company_grade ?? undefined, processiCodici: per("position_processes", "position_code", x.code).map((y) => y.process_code), occupazioniEsco: per("position_occupations", "position_code", x.code).map((o) => ({ uri: o.esco_uri, nome: T(o.name, t(o, "name")) })), ...ev("POSITION", x.code) })),
+    competenze: R.skills.map((s) => togliVuoti({ codice: s.code, nome: T(s.name, t(s, "name")), tipo: s.kind ?? undefined, categoria: s.category ?? undefined, categoriaOrigine: s.category_origin ?? undefined, escoUri: s.esco_uri, tipoOrigine: s.kind_origin ?? undefined, requisiti: per("position_skill_requirements", "skill_code", s.code).map((r) => ({ posizioneCodice: r.position_code, livello: r.source_level, livelloAdvanced: r.proficiency, criticita: r.source_criticality, criticitaAdvanced: r.criticality })), ...ev("SKILL", s.code) })),
+    processi: R.processes.map((x) => togliVuoti({ codice: x.code, nome: T(x.name, t(x, "name")), ordine: x.ordinal, descrizione: T(x.description, t(x, "description")), responsabilePosizioneCodice: x.owner_position_code, tipo: x.kind, pcf: x.pcf_code, specifico: x.is_specific, motivazione: T(x.rationale, t(x, "rationale")), collegamentiUnita: per("unit_processes", "process_code", x.code).map((l) => ({ unitaCodice: l.unit_code, funzione: l.source_role, funzioneAdvanced: l.role })), sediCodici: per("process_sites", "process_code", x.code).map((s) => s.site_code), ...ev("PROCESS", x.code) })),
+    indicatori: R.kpis.map((i) => togliVuoti({ codice: i.code, nome: T(i.name, t(i, "name")), unita: i.unit, direzioneAdvanced: i.direction, direzione: i.source_direction, formula: T(i.formula, t(i, "formula")), frequenza: i.frequency, frequenzaNota: i.frequency_note, fonteDato: T(i.data_source, t(i, "data_source")), riferimento: T(i.reference_text, t(i, "reference_text")), obiettivoCodice: i.goal_code, bersaglio: [i.target_min, i.target_value, i.target_max, i.target_note].every((v) => v === null) ? undefined : togliVuoti({ minimo: i.target_min, obiettivo: i.target_value, massimo: i.target_max, nota: i.target_note ?? undefined }), ...ev("KPI", i.code) })),
+    obiettivi: R.goals.map((o) => togliVuoti({ codice: o.code, titolo: T(o.title, t(o, "title")), orizzonte: o.horizon, durataGiorni: o.duration_days, dimensione: o.dimension, processoCodice: o.process_code, unitaCodice: o.unit_code, posizioneCodice: o.position_code, peso: o.weight ?? undefined, pesoOrigine: o.weight_origin ?? undefined, ...ev("GOAL", o.code) })),
+    ccnl: R.ccnl.map((x) => togliVuoti({ codice: x.code, nome: T(x.name, t(x, "name")), ambito: T(x.scope, t(x, "scope")), parti: T(x.parties, t(x, "parties")), decorrenza: x.effective ?? undefined, ...ev("CCNL", x.code),
+      livelli: per("ccnl_levels", "ccnl_code", x.code).map((l) => togliVuoti({ codice: l.code, nome: T(l.name, t(l, "name")), categoria: l.category ?? undefined, minimoAnnuoEur: l.annual_minimum_eur, notaMinimo: T(l.minimum_note, t(l, "minimum_note")), mansioni: T(l.duties, t(l, "duties")) })),
+      istituti: per("ccnl_institutes", "ccnl_code", x.code).sort((a, b) => a.ordinal - b.ordinal).map((i) => { const cond = R.ccnl_conditions.filter((k) => k.ccnl_code === x.code && k.institute_ordinal === i.ordinal).sort((a, b) => a.ordinal - b.ordinal); return togliVuoti({ tipo: i.kind, descrizione: T(i.description, t(i, "description")), valore: i.value, unita: i.unit ?? undefined, validoDal: i.valid_from ?? undefined, condizioni: cond.length ? cond.map((k) => togliVuoti({ ambito: k.scope, descrizione: T(k.description, t(k, "description")), valore: k.value, unita: k.unit ?? undefined })) : undefined }); }) })),
+    obblighi: R.obligations.map((o) => togliVuoti({ codice: o.code, norma: T(o.norm, t(o, "norm")), ambito: o.scope, soggetto: T(o.subject, t(o, "subject")), formazioneRichiesta: T(o.training_required, t(o, "training_required")), periodicita: o.periodicity, ruoloMancante: T(o.missing_role, t(o, "missing_role")), posizioniCodici: per("obligation_positions", "obligation_code", o.code).map((y) => y.position_code), ...ev("OBLIGATION", o.code) })),
+    formazione: R.training.map((m) => togliVuoti({ codice: m.code, titolo: T(m.title, t(m, "title")), tipo: m.kind, modalita: m.delivery ?? undefined, durataMinuti: m.duration_minutes, obbligoCodice: m.obligation_code, posizioniCodici: per("training_positions", "training_code", m.code).map((y) => y.position_code), competenzeCodici: per("training_skills", "training_code", m.code).map((y) => y.skill_code), ...ev("TRAINING", m.code) })),
+    carriere: R.career_paths.map((x) => ({ codice: x.code, nome: T(x.name, t(x, "name")), tipo: x.kind, passi: per("career_steps", "path_code", x.code).sort((a, b) => a.step_order - b.step_order).map((s) => ({ ordine: s.step_order, posizioneCodice: s.position_code })), ...ev("CAREER", x.code) })),
+    incentivi: R.incentives.map((x) => { const l = (k) => R.incentive_links.filter((y) => y.incentive_code === x.code && y.link_kind === k).map((y) => y.link_code); return { codice: x.code, nome: T(x.name, t(x, "name")), tipo: x.kind, regola: T(x.rule, t(x, "rule")), posizioniCodici: l("POSITION"), obiettiviCodici: l("GOAL"), categorie: l("CATEGORY"), dimensioni: l("DIMENSION"), ...ev("INCENTIVE", x.code) }; }),
+    commesse: R.engagements.map((x) => { const l = (k) => R.engagement_links.filter((y) => y.engagement_code === x.code && y.link_kind === k).map((y) => y.link_code); return { codice: x.code, nome: T(x.name, t(x, "name")), tipo: x.kind, descrizione: T(x.description, t(x, "description")), unitaCodici: l("UNIT"), posizioniCodici: l("POSITION"), ...ev("ENGAGEMENT", x.code) }; }),
+    prove: R.evidence.map((x) => togliVuoti({ id: x.proof_code, url: x.url, titolo: x.title, estratto: x.excerpt, tipo: x.kind, esito: x.read_outcome, lettura: x.read_at === null && x.http_status === null && x.bytes === null && x.sha256 === null ? undefined : togliVuoti({ quando: data(x.read_at) ?? undefined, status: x.http_status ?? undefined, byte: x.bytes ?? undefined, sha256: x.sha256 ?? undefined }), motivo: x.read_note ?? undefined })),
+    derivazioni: R.derivations.map((x) => ({ campo: x.field, regola: T(x.rule, t(x, "rule")) })),
+    vuoti: R.gaps.map((x) => ({ dominio: x.domain, motivo: T(x.reason, t(x, "reason")) })),
+  };
+}
+
+// confronto: per percorso (multinsieme dei valori foglia, e contenitori vuoti) e per intero (elenchi ordinati in forma canonica)
+const foglie = (n, p, acc) => {
+  const a = (k) => (acc[k] ??= new Map());
+  const add = (k, v) => a(k).set(v, (a(k).get(v) ?? 0) + 1);
+  if (Array.isArray(n)) { if (!n.length) add(p + "[]", "<vuoto>"); for (const x of n) foglie(x, p + "[]", acc); }
+  else if (n && typeof n === "object") { if (!Object.keys(n).length) add(p, "<vuoto>"); for (const [k, v] of Object.entries(n)) foglie(v, p ? `${p}.${k}` : k, acc); }
+  else add(p, JSON.stringify(n));
+};
+const canonico = (n) => Array.isArray(n) ? n.map(canonico).map((x) => JSON.stringify(x)).sort().map((s) => JSON.parse(s)) : n && typeof n === "object" ? Object.fromEntries(Object.keys(n).sort().map((k) => [k, canonico(n[k])])) : n;
+async function rileggi() {
+  const c = await versione(); if (!c) throw new Error("niente da rileggere: la prova non è caricata");
+  const ric = await ricostruisci(c);
+  const A = {}, B = {}; foglie(raw, "", A); foglie(ric, "", B);
+  const percorsi = [...new Set([...Object.keys(A), ...Object.keys(B)])].sort();
+  const diff = [];
+  for (const p of percorsi) {
+    const a = A[p] ?? new Map(), b = B[p] ?? new Map(); let persi = 0, inPiu = 0, valori = 0;
+    for (const [v, n] of a) { valori += n; const m = b.get(v) ?? 0; if (m < n) persi += n - m; }
+    for (const [v, n] of b) { const m = a.get(v) ?? 0; if (n > m) inPiu += n - m; }
+    if (persi || inPiu || !A[p]) diff.push({ percorso: p, nel_pacchetto: valori, persi, in_piu: inPiu, esempio: [...a.keys()].find((v) => (b.get(v) ?? 0) < a.get(v))?.slice(0, 120) ?? [...b.keys()].find((v) => (a.get(v) ?? 0) < b.get(v))?.slice(0, 120) });
+  }
+  const uguale = JSON.stringify(canonico(raw)) === JSON.stringify(canonico(ric));
+  const sez = Object.keys(raw).map((k) => ({ sezione: k, uguale: JSON.stringify(canonico(raw[k])) === JSON.stringify(canonico(ric[k])) }));
+  Object.assign(esito, { versione: c.versionId, percorsi_nel_pacchetto: Object.keys(A).length, percorsi_ricostruiti: Object.keys(B).length, percorsi_con_differenze: diff.length, differenze: diff, sezioni: sez, pacchetto_ricostruito_uguale: uguale, valori_foglia: [...Object.values(A)].reduce((s, m) => s + [...m.values()].reduce((x, y) => x + y, 0), 0) });
+  fs.writeFileSync(OUT.replace(/\.json$/, "_ricostruito.json"), JSON.stringify(ric, null, 1));
+}
+
+async function scarica() {
+  const c = await versione(); if (!c) throw new Error("niente da scaricare: la prova non è caricata");
+  await cli.query("BEGIN");
+  const tutti = [];
+  for (const d of DOMINI) tutti.push(...(await q(`SELECT ${d.p}id AS id FROM sys.${d.t} WHERE ${Object.keys(fissi(d, c)).map((x, i) => `${d.p}${x} = $${i + 1}`).join(" AND ")}`, Object.values(fissi(d, c)))).map((r) => r.id));
+  const trad = (await cli.query("DELETE FROM sys.sys_reference_translations WHERE entity_id = ANY($1::uuid[]) AND entity_table LIKE 'sys_blueprint_%'", [tutti])).rowCount;
+  // le definizioni di indicatore della prova (i loro modelli per processo vanno via a cascata)
+  const defs = (await cli.query("DELETE FROM sys.sys_kpi_definitions WHERE kpi_definition_tenant_id IS NULL AND kpi_definition_code LIKE $1 AND kpi_definition_metadata->>'prototipo' = $2", [INDICATORI_DI_PIATTAFORMA.prefisso(raw.meta.prototipoId) + "%", raw.meta.prototipoId])).rowCount;
+  const fam = (await cli.query("DELETE FROM sys.sys_blueprint_families WHERE blueprint_family_code = $1", [FAMIGLIA])).rowCount;
+  const resto = Number((await q("SELECT count(*) n FROM sys.sys_blueprint_variant_versions WHERE blueprint_variant_version_id = $1", [c.versionId]))[0].n);
+  if (fam !== 1 || resto !== 0) throw new Error("scarico incompleto: famiglie " + fam + ", versione rimasta " + resto);
+  await cli.query("COMMIT");
+  Object.assign(esito, { versione: c.versionId, righe_di_contenuto: tutti.length, traduzioni_tolte: trad, definizioni_di_indicatore_tolte: defs, famiglie_tolte: fam });
+}
+
+try { await { carica, rileggi, scarica }[cmd](); esito.esito = "ok"; }
+catch (e) { esito.esito = "errore"; esito.errore = e.message; try { await cli.query("ROLLBACK"); } catch {} }
+await cli.end();
+esito.finito = new Date().toISOString();
+fs.writeFileSync(OUT, JSON.stringify(esito, null, 1));
+const { differenze, ...corto } = esito;
+console.log(JSON.stringify({ ...corto, differenze: differenze?.slice(0, 15) }, null, 1));
+process.exitCode = esito.esito === "ok" && (cmd !== "rileggi" || (esito.percorsi_con_differenze === 0 && esito.pacchetto_ricostruito_uguale)) ? 0 : 1;

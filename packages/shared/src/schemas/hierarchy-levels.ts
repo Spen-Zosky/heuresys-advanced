@@ -45,3 +45,33 @@ export const HierarchyLevelsCheckResponseSchema = z.object({
   nonValutabili: z.array(LivelloNonValutabileSchema),
 });
 export type HierarchyLevelsCheckResponse = z.infer<typeof HierarchyLevelsCheckResponseSchema>;
+
+/**
+ * F4 — il cambio di livello contrattuale di una persona (PATCH /v1/users/:id/contract-level).
+ * Avvisa, non blocca: se il livello scelto è fuori dalla scala del contratto caricato, o rompe il principio, la modifica riesce
+ * e la risposta porta l'avviso con la motivazione scritta. Dove nessun contratto è caricato (`scala.fonte` ASSENTE) non si giudica.
+ */
+export const ChangeContractLevelBodySchema = z.object({
+  level: z.string().trim().min(1).max(64),
+  /** Il contratto da modificare; se manca, il contratto attivo più recente della persona. */
+  contractId: z.uuid().optional(),
+});
+export type ChangeContractLevelBody = z.infer<typeof ChangeContractLevelBodySchema>;
+
+export const AvvisoLivelloSchema = z.object({
+  tipo: z.enum(["FUORI_SCALA", "GERARCHIA"]),
+  motivazione: z.string(),
+  /** Presente solo per `GERARCHIA`: il caso di unità e posti che la logica di F1 ha trovato. */
+  dettaglio: AvvisoGerarchiaSchema.nullable(),
+});
+export type AvvisoLivello = z.infer<typeof AvvisoLivelloSchema>;
+
+export const ChangeContractLevelResponseSchema = z.object({
+  userId: z.uuid(),
+  contractId: z.uuid(),
+  livelloPrecedente: z.string().nullable(),
+  livello: z.string(),
+  scala: z.object({ fonte: z.enum(SCALA_FONTE_VALUES), livelli: z.array(z.string()) }),
+  avvisi: z.array(AvvisoLivelloSchema),
+});
+export type ChangeContractLevelResponse = z.infer<typeof ChangeContractLevelResponseSchema>;

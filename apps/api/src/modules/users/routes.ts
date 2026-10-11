@@ -22,7 +22,7 @@ import {
   GrantIdParamSchema,
   EmptyResponseSchema,
 } from "@heuresys/shared";
-import { UserDossierParamSchema, UserDossierSchema } from "@heuresys/shared";
+import { UserDossierParamSchema, UserDossierSchema, ChangeContractLevelBodySchema, ChangeContractLevelResponseSchema } from "@heuresys/shared";
 import { usersService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
 
@@ -92,6 +92,21 @@ export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (req) =>
       usersService.update(actorFromReq(req), req.params.id, req.body),
+  );
+
+  /* --- PATCH /v1/users/:id/contract-level (#265 F4: avviso, non blocco) --- */
+  app.patch(
+    "/:id/contract-level",
+    {
+      preHandler: [app.verifyCsrf, requirePermission("user:update")],
+      schema: {
+        params: UserIdParamSchema,
+        body: ChangeContractLevelBodySchema,
+        response: { 200: ChangeContractLevelResponseSchema },
+      },
+    },
+    async (req) =>
+      usersService.changeContractLevel(actorFromReq(req), req.params.id, req.body),
   );
 
   /* --- DELETE /v1/users/:id (soft → DEACTIVATED) ------------------- */

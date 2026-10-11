@@ -79,6 +79,14 @@ export function rango(codice: string | null, scala: Scala): number | null {
   return null;
 }
 
+/** La motivazione scritta di un livello che non rientra nella scala del contratto caricato. */
+export function motivazioneFuoriScala(livello: string, scala: Scala): string {
+  return (
+    `Il livello «${livello}» non rientra nella scala del contratto collettivo caricato (${scala.ordine.join(", ")}): ` +
+    `la modifica è stata registrata, ma il principio gerarchia-livelli non può giudicare questo livello.`
+  );
+}
+
 /** Tutte le unità sotto `radice` (esclusa), per padre. */
 function discendenti(radice: string, perPadre: Map<string, Unita[]>): Unita[] {
   const fuori: Unita[] = [];

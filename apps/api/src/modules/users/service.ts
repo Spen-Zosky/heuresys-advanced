@@ -6,7 +6,7 @@
  * non-privileged actors on PATCH.
  */
 
-import { pool } from "../../db/client.js";
+import { pool, withTransaction } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
@@ -19,6 +19,8 @@ import type { RoleCode } from "../../config/constants.js";
 import type {
   User,
   UserDossier,
+  ChangeContractLevelBody,
+  ChangeContractLevelResponse,
   UserListQuery,
   UserListResponse,
   CreateUserBody,
@@ -27,6 +29,7 @@ import type {
 } from "@heuresys/shared";
 import { NON_PRIVILEGED_UPDATABLE_FIELDS } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { avvisiDelCambioDiLivello } from "../hierarchy-levels/service.js";
 // #81 — il dossier non riscrive le letture per-persona: riusa QUELLE del portale
 // personale, che sono gia' parametrizzate sull'utente. Una sola implementazione
 // per ogni dimensione, cosi' la vista di se' e quella di chi ha titolo non
@@ -306,6 +309,40 @@ export const usersService = {
     const updated = await repo.updateUserPartial(pool, id, patch);
     if (!updated) throw new NotFoundError("User");
     return updated;
+  },
+
+  /**
+   * #265 F4 — cambia il livello contrattuale di una persona, CON L'AVVISO (avviso, non blocco).
+   * Stessa porta di `update` (la persona deve essere raggiungibile da chi scrive) e stesso confine dei campi privilegiati: il livello
+   * contrattuale lo cambia solo il mandato HR o l'amministrazione. La modifica riesce sempre; gli avvisi li calcola la logica di F1
+   * sull'organigramma già col livello nuovo, nella stessa transazione.
+   */
+  async changeContractLevel(
+    actor: ActorContext,
+    id: string,
+    body: ChangeContractLevelBody,
+  ): Promise<ChangeContractLevelResponse> {
+    // il mandato si controlla per primo: dipende dal solo ruolo, quindi non rivela se la persona esiste
+    if (!isPlatformAdmin(actor) && !actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) {
+      throw new ForbiddenError("Contract level can be changed only by an HR mandate", "FIELD_NOT_ALLOWED");
+    }
+    const target = await repo.findUserById(pool, id);
+    if (!target) throw new NotFoundError("User");
+    if (!(await canActOnTarget(actor, target, "update"))) throw new NotFoundError("User");
+    return withTransaction(async (client) => {
+      const contratto = await repo.findContractForLevel(client, id, body.contractId);
+      if (!contratto) throw new NotFoundError("Contract");
+      await repo.updateContractLevel(client, contratto.contractId, body.level, actor.userId);
+      const esito = await avvisiDelCambioDiLivello(client, contratto.tenantId, id, body.level);
+      return {
+        userId: id,
+        contractId: contratto.contractId,
+        livelloPrecedente: contratto.level,
+        livello: body.level,
+        scala: esito.scala,
+        avvisi: esito.avvisi,
+      };
+    });
   },
 
   async deactivate(actor: ActorContext, id: string): Promise<void> {

@@ -6,9 +6,9 @@
 import { pool } from "../../db/client.js";
 import { ForbiddenError, NotFoundError } from "../../errors/index.js";
 import type { ActorContext } from "../../lib/actor.js";
-import type { HierarchyLevelsCheckQuery, HierarchyLevelsCheckResponse } from "@heuresys/shared";
+import type { AvvisoLivello, HierarchyLevelsCheckQuery, HierarchyLevelsCheckResponse } from "@heuresys/shared";
 import type { DbConnector } from "../tenant-materialization/build-source.js";
-import { verifica, type Avviso, type Scala, type Unita } from "./logic.js";
+import { motivazioneFuoriScala, rango, verifica, type Avviso, type Scala, type Unita } from "./logic.js";
 import * as repo from "./repository.js";
 
 export type { ActorContext };
@@ -31,6 +31,30 @@ export async function avvisiDelModello(q: DbConnector, versionId: string): Promi
   const scala = await repo.scalaDaVersioni(q, [versionId]);
   if (scala.ordine.length === 0) return [];
   return verifica(await repo.unitaDelModello(q, versionId), scala).avvisi;
+}
+
+/**
+ * Gli avvisi di un cambio di livello contrattuale (F4): da chiamare DOPO la scrittura, nella stessa transazione, così l'organigramma
+ * letto porta già il livello nuovo. Riusa `verifica` di F1 e tiene solo gli avvisi che riguardano la persona. Dove il tenant non ha
+ * un contratto caricato non giudica: nessun avviso, nessun errore.
+ */
+export async function avvisiDelCambioDiLivello(
+  q: DbConnector,
+  tenantId: string,
+  userId: string,
+  livello: string,
+): Promise<{ scala: { fonte: "ATTIVAZIONI" | "ASSENTE"; livelli: string[] }; avvisi: AvvisoLivello[] }> {
+  const scala = await repo.scalaDaVersioni(q, await repo.versioniAttiveDelTenant(q, tenantId));
+  if (scala.ordine.length === 0) return { scala: { fonte: "ASSENTE", livelli: [] }, avvisi: [] };
+  const avvisi: AvvisoLivello[] = [];
+  if (rango(livello, scala) === null) {
+    avvisi.push({ tipo: "FUORI_SCALA", motivazione: motivazioneFuoriScala(livello, scala), dettaglio: null });
+  }
+  const r = verifica(await repo.unitaDelTenant(q, tenantId), scala);
+  for (const a of r.avvisi) {
+    if (a.responsabileId === userId || a.sottopostoId === userId) avvisi.push({ tipo: "GERARCHIA", motivazione: a.motivazione, dettaglio: a });
+  }
+  return { scala: { fonte: "ATTIVAZIONI", livelli: [...scala.ordine] }, avvisi };
 }
 
 export const hierarchyLevelsService = {

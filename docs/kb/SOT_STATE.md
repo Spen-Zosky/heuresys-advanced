@@ -357,6 +357,8 @@ API **274** (+25 unit) · moduli API **109** · perimetri dell'agente aperti **1
 
 Fatto: caricatore del pacchetto in `db/scripts/pacchetto/` (257 percorsi su 257 senza perdite); modello della banca costruito in un tenant della copia; modulo `hierarchy-levels` con rotta `GET /v1/hierarchy-levels/check`; censimento, confronto RTL e richiesta al datastore in `.programmi/esiti-onda0/`; registro compattato; canale Cowork a 0 voci aperte. Cancello `verify_gate.py run` verde. Esito: `.programmi/esiti-onda0/W0-A1.md`.
 
+**W0-A2 (stesso giorno): due ADR in stato PROPOSTO, nessun codice, nessuna migrazione.** ADR-0043 (separazione dal datastore: sei regole, sostituisce in parte ADR-0039, propone il nuovo testo di I21, sequenza S3-S6 con archivio, impronta, prova di ripristino e sentinella) e ADR-0044 (partecipazione ai processi legata alla posizione, tre passi con giornale). Indice ADR: `python docs/kb/tools/build_adr_index.py` (0001..0044). Misura delle partecipazioni sul gemello: `.programmi/esiti-onda0/lavoro/partecipanti_misura*.sql` (al 2026-10-11: 845 righe, 185 con posizione certa, 496 deducibili dalla storia, 164 senza). Register #267 e #268 WAIT-INPUT. Esito: `.programmi/esiti-onda0/W0-A2.md`.
+
 ## S1097 (2026-09-12, sera) — il mandato «tutte le corsie»: dodici voci su sedici, un falso neutro nella coda dell'agente, e il piano zero-pendenze finalmente verificato
 
 **Mandato di Enzo** (*«esegui tutti da P1 a P3, #198, #41, hold e fuori registro … l'unico guardiano

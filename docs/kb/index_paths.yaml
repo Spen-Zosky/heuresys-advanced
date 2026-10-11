@@ -1,43 +1,43 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-10-05T00:52:57Z da docs/kb/tools/build_index.py
+# generato: 2026-10-11T19:17:37Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-10-05T00:52:57Z"
-  total_files: 3786
+  generated_at: "2026-10-11T19:17:37Z"
+  total_files: 3821
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 41
+    ADR: 43
     api-core: 36
-    api-module: 401
+    api-module: 405
     ci: 19
     claude-config: 38
-    config: 354
+    config: 368
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
     db-migration: 451
     db-other: 8
-    db-script: 55
+    db-script: 60
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 775
+    doc-canonical: 782
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 122
+    shared-schema: 123
     showcase-source: 13
-    test: 453
+    test: 455
     ux-design-archive: 80
     web-source: 258
   status_counts:
     archive: 593
     external-archive: 50
-    live: 3143
+    live: 3178
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -282,6 +282,18 @@ files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\0042_catena_del_semilavorato.md'
     root: repo
     rel: 'docs/architecture/adr/0042_catena_del_semilavorato.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0043_separazione_dal_datastore.md'
+    root: repo
+    rel: 'docs/architecture/adr/0043_separazione_dal_datastore.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0044_partecipazione_ai_processi_legata_alla_posizione.md'
+    root: repo
+    rel: 'docs/architecture/adr/0044_partecipazione_ai_processi_legata_alla_posizione.md'
     category: ADR
     status: live
     provenance: git-tracked
@@ -1362,6 +1374,30 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\goals\service.ts'
     root: repo
     rel: 'apps/api/src/modules/goals/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\hierarchy-levels\logic.ts'
+    root: repo
+    rel: 'apps/api/src/modules/hierarchy-levels/logic.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\hierarchy-levels\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/hierarchy-levels/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\hierarchy-levels\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/hierarchy-levels/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\hierarchy-levels\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/hierarchy-levels/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -4116,6 +4152,90 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\S1093-ricognizione-10-voci.json'
     root: repo
     rel: '.programmi/S1093-ricognizione-10-voci.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\lavoro\censimento_lettori.py'
+    root: repo
+    rel: '.programmi/esiti-onda0/lavoro/censimento_lettori.py'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\lavoro\censimento_query.sql'
+    root: repo
+    rel: '.programmi/esiti-onda0/lavoro/censimento_query.sql'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\lavoro\lettori_per_tabella.json'
+    root: repo
+    rel: '.programmi/esiti-onda0/lavoro/lettori_per_tabella.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\lavoro\partecipanti_misura.sql'
+    root: repo
+    rel: '.programmi/esiti-onda0/lavoro/partecipanti_misura.sql'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\lavoro\partecipanti_misura_2.sql'
+    root: repo
+    rel: '.programmi/esiti-onda0/lavoro/partecipanti_misura_2.sql'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\lavoro\partecipanti_misura_2_esito.txt'
+    root: repo
+    rel: '.programmi/esiti-onda0/lavoro/partecipanti_misura_2_esito.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\lavoro\partecipanti_misura_3.sql'
+    root: repo
+    rel: '.programmi/esiti-onda0/lavoro/partecipanti_misura_3.sql'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\lavoro\partecipanti_misura_3_esito.txt'
+    root: repo
+    rel: '.programmi/esiti-onda0/lavoro/partecipanti_misura_3_esito.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\lavoro\partecipanti_misura_esito.txt'
+    root: repo
+    rel: '.programmi/esiti-onda0/lavoro/partecipanti_misura_esito.txt'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\prova-giunzione\attiva.json'
+    root: repo
+    rel: '.programmi/esiti-onda0/prova-giunzione/attiva.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\prova-giunzione\attiva_prima.json'
+    root: repo
+    rel: '.programmi/esiti-onda0/prova-giunzione/attiva_prima.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\prova-giunzione\carica.json'
+    root: repo
+    rel: '.programmi/esiti-onda0/prova-giunzione/carica.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\prova-giunzione\livelli_rtl.json'
+    root: repo
+    rel: '.programmi/esiti-onda0/prova-giunzione/livelli_rtl.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\prova-giunzione\rileggi.json'
+    root: repo
+    rel: '.programmi/esiti-onda0/prova-giunzione/rileggi.json'
     category: config
     status: live
     provenance: git-tracked
@@ -10341,6 +10461,36 @@ files:
     category: db-script
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\accogli-pacchetto.mjs'
+    root: repo
+    rel: 'db/scripts/pacchetto/accogli-pacchetto.mjs'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\attiva-modello.mts'
+    root: repo
+    rel: 'db/scripts/pacchetto/attiva-modello.mts'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\definizione-pacchetto.mjs'
+    root: repo
+    rel: 'db/scripts/pacchetto/definizione-pacchetto.mjs'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\prova-giunzione.sh'
+    root: repo
+    rel: 'db/scripts/pacchetto/prova-giunzione.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\verifica-livelli.mts'
+    root: repo
+    rel: 'db/scripts/pacchetto/verifica-livelli.mts'
+    category: db-script
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\populate-en-from-esco.sql'
     root: repo
     rel: 'db/scripts/populate-en-from-esco.sql'
@@ -12057,6 +12207,18 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\263-giunzione-pacchetto-datastore.md'
+    root: repo
+    rel: '.programmi/263-giunzione-pacchetto-datastore.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\265-gerarchia-livelli-avviso.md'
+    root: repo
+    rel: '.programmi/265-gerarchia-livelli-avviso.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md'
     root: repo
     rel: '.programmi/50-knowledge-graph-legacy.md'
@@ -12552,6 +12714,36 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\esiti-ciclo4\262.md'
     root: repo
     rel: '.programmi/esiti-ciclo4/262.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\CENSIMENTO_separazione.md'
+    root: repo
+    rel: '.programmi/esiti-onda0/CENSIMENTO_separazione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\CONFRONTO_RTL_giunzione.md'
+    root: repo
+    rel: '.programmi/esiti-onda0/CONFRONTO_RTL_giunzione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\RICHIESTA_datastore_attivazione.md'
+    root: repo
+    rel: '.programmi/esiti-onda0/RICHIESTA_datastore_attivazione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\W0-A1.md'
+    root: repo
+    rel: '.programmi/esiti-onda0/W0-A1.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\W0-A2.md'
+    root: repo
+    rel: '.programmi/esiti-onda0/W0-A2.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -17439,6 +17631,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\hierarchy-levels.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/hierarchy-levels.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\insights.ts'
     root: repo
     rel: 'packages/shared/src/schemas/insights.ts'
@@ -18687,6 +18885,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\hierarchy-levels.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/hierarchy-levels.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\hrms-plenipotentiary.integration.test.ts'
     root: repo
     rel: 'apps/api/test/hrms-plenipotentiary.integration.test.ts'
@@ -19782,6 +19986,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\unit\date-only.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/date-only.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\hierarchy-levels.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/hierarchy-levels.unit.test.ts'
     category: test
     status: live
     provenance: git-tracked

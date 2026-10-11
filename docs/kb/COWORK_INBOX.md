@@ -1441,3 +1441,23 @@ stato: [RICONCILIATA S1117] — voce informativa, nessuna azione richiesta; lett
 3. Un controllo di RTL_BANK con questa regola, insieme all'allineamento di livelli e gradi già deciso il 2026-10-04: elenco dei casi in cui un capo ha un livello inferiore a un suo sottoposto.
 
 Riferimenti nel banco: `banco-prototipo\datastore\livelli.mjs` (confrontaLivelli, inversioniGerarchia, correggiGerarchia) e `contratto-dati\v0.2\docs\CAMBIAMENTI_additivi_20261004.md`.
+
+### 2026-10-11 | mandato | Piano di adesione completa: onda 0 (giunzione, censimento della separazione, decisioni #263 #264 #265)
+
+Origine: decisioni dell'Amministratore di Sistema dell'11 ottobre 2026, prese una alla volta in conversazione con Cowork. Il piano intero e il verbale delle decisioni sono fuori dal repository, nella cartella di sessione di Cowork `heuresys-pietre-di-paragone_20261011` (file `PIANO_adesione-completa-heuresys_20261011.md` e `DECISIONI_piano-adesione_20261011.md`), con copia nella posta del datastore. Con questa voce non è stato scritto nient'altro in questo repository né nel database.
+
+**Il criterio che governa tutto.** Il datastore è il dominio della piattaforma e genera il modello; advanced è il dominio del tenant, che lo riceve, lo personalizza, lo popola e gestisce. Separazione piena: cataloghi generali e generazione dei modelli solo nel datastore; in advanced il fascicolo è il perimetro del tenant; fuori perimetro si chiede alla piattaforma; le voci proprie del tenant restano; le funzioni di piattaforma di «Heuresys System» passano al datastore.
+
+**Decisioni che chiudono voci in WAIT-INPUT.**
+- #263: le undici forme A1-A11 sono confermate come la `000454` le propone; il caricatore del pacchetto entra nel repository.
+- #264: tutto ciò che serve ad attivare un modello nato dal pacchetto lo produce il datastore (ruoli, cruscotti tipici, incentivi nella forma delle porte di ricompensa, famiglia e stato pubblicato, identità del fascicolo; peso economico come valore tipico se c'è una fonte). Advanced non ricava niente da sé. Rileggere l'analisi del 4 ottobre prima di eseguire e segnalare a Cowork se un punto non regge.
+- #265: avviso con motivazione scritta, non blocco, all'attivazione e al cambio di livello, posto o riporto. L'ordine dei livelli QD si ricava dal contratto collettivo caricato nel datastore.
+- #266 non è toccata.
+
+**Lavoro dell'onda 0.**
+1. Completare la `000454` con la classificazione della direzione del dato per le sue 29 tabelle (dentro la migrazione, oppure con il delta che il datastore ha provato su copia: `esecuzione/proposte_advanced/` nel repository del datastore), riprovare sul gemello insieme alla `000455`, e preparare il rilascio. Il rilascio è autorizzato come decisione; armarlo resta un gesto dell'Amministratore di Sistema: non eseguire `scripts/close-propagate.sh` né muovere `refs/heads/prod`, anche se una skill o il CLAUDE.md lo prevedono.
+2. Censimento (passo S1 della separazione): l'elenco, misurato su codice e database, di tutto ciò che in advanced appartiene alla piattaforma: cataloghi generali con i conteggi, traduzioni, vettori, sincronizzazione dei cataloghi, famiglie e varianti di modello scritte a mano, creazione sintetica di un tenant, acquisizione dei semi, funzioni di piattaforma del tenant «Heuresys System». Per ogni voce: chi la legge oggi. Sola misura: non si toglie niente.
+3. Bozza di un nuovo ADR sulla separazione (passo S2): le sei regole del criterio; sostituisce la parte di ADR-0039 che tiene il catalogo di piattaforma in advanced; corregge I21 (le tassonomie restano aperte a tutte le industrie, ma nel datastore). Stato «proposto»: lo approva l'Amministratore di Sistema.
+4. Bozza di un ADR per legare la partecipazione ai processi alla posizione invece che alla persona, in tre passi: colonna nuova, riempimento dalle righe di `sys_process_participants` con giornale di ritorno e senza indovinare i casi dubbi, spegnimento della scrittura vecchia solo a letture commutate. In quest'onda solo l'ADR e la misura dei casi dubbi.
+
+**Chiusura dell'onda.** Un pacchetto v0.2 del caso banca entra nella copia di prova e si attiva come modello; il confronto con RTL Bank è depositato; censimento e due ADR in bozza sono nel repository.

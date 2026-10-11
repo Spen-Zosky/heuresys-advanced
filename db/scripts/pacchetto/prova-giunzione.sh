@@ -37,6 +37,6 @@ echo "== rileggi"; node "$ACC" rileggi "$COPIA" "$PKG" "$OUT/rileggi.json" > "$O
 VER="$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).versione)' "$OUT/carica.json")"
 echo "== attiva (versione $VER)"
 cd "$ROOT/apps/api"
-pnpm exec tsx "$ROOT/db/scripts/pacchetto/attiva-modello.ts" "$COPIA" "$VER" "$OUT/attiva_prima.json" > "$OUT/attiva_prima.out" 2>&1 || true
-pnpm exec tsx "$ROOT/db/scripts/pacchetto/attiva-modello.ts" "$COPIA" "$VER" "$OUT/attiva.json" --pubblica-sulla-copia --costruisci W0A1_PROVA > "$OUT/attiva.out" 2>&1 || { cat "$OUT/attiva.out"; exit 1; }
+pnpm exec tsx "$ROOT/db/scripts/pacchetto/attiva-modello.mts" "$COPIA" "$VER" "$OUT/attiva_prima.json" > "$OUT/attiva_prima.out" 2>&1 || true
+pnpm exec tsx "$ROOT/db/scripts/pacchetto/attiva-modello.mts" "$COPIA" "$VER" "$OUT/attiva.json" --pubblica-sulla-copia --costruisci W0A1_PROVA > "$OUT/attiva.out" 2>&1 || { cat "$OUT/attiva.out"; exit 1; }
 echo "copia: $COPIA  versione: $VER"

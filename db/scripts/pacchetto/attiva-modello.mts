@@ -1,5 +1,5 @@
 /**
- * db/scripts/pacchetto/attiva-modello.ts — la giunzione, dal pacchetto caricato al modello attivato (W0-A1).
+ * db/scripts/pacchetto/attiva-modello.mts — la giunzione, dal pacchetto caricato al modello attivato (W0-A1).
  *
  * Prende la versione di variante che `accogli-pacchetto.mjs carica` ha scritto e la porta fin dove il
  * codice di advanced la sa portare, su una COPIA usa-e-getta:
@@ -12,7 +12,7 @@
  *   4. (opzionale, `--costruisci`) costruisce il modello in un tenant nuovo della copia, in una transazione.
  * Scrive il risultato in JSON. Guardia: il database deve finire con _prova<N>.
  *
- * Uso: PGHOST=… PGPORT=… PGUSER=… PGPASSWORD=… tsx db/scripts/pacchetto/attiva-modello.ts <database> <versioneId> <uscita.json>
+ * Uso: PGHOST=… PGPORT=… PGUSER=… PGPASSWORD=… tsx db/scripts/pacchetto/attiva-modello.mts <database> <versioneId> <uscita.json>
  *        [--pubblica-sulla-copia] [--costruisci <codice-tenant>]
  */
 import fs from "node:fs";

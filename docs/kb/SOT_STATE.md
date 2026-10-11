@@ -351,6 +351,10 @@ API **274** (+25 unit) · moduli API **109** · perimetri dell'agente aperti **1
 
 ---
 
+## S1119 (2026-10-11) — W0-A3, onda 0: la chiusura a tre livelli
+
+Nasce `docs/kb/tools/chiudi.py` (livelli `leggero`, `onda`, `rilascio`; esito in cinque righe; registro `.handoff/close-log.ndjson`; prova `docs/kb/tools/test_chiudi.py`, vista rossa 5/5 poi verde 5/5). Riusa `chiudi_leggero.py`, non propaga, non arma, non muove `refs/heads/prod`. Esito e misura prima/dopo in `.programmi/esiti-onda0/W0-A3.md`. **Stato intermedio ereditato e non toccato**: `000454` e `000455` sono provate sul gemello ma non in produzione, rilascio non armato (gesto di Enzo).
+
 ## S1118 (2026-10-11) — W0-A1, onda 0 del piano di adesione: giunzione col pacchetto del datastore, #265 costruito, censimento della separazione
 
 **Stato intermedio dichiarato, non una catena chiusa.** `000454` (completata con la direzione del dato) e `000455` sono provate sul gemello ma NON in produzione: il rilascio e' di Enzo. #264 e' GATED sul datastore; #265 ha l'avviso ma non l'aggancio alle modifiche di posto e riporto. La giunzione e' dimostrata su una copia usa-e-getta del gemello, non su dati di produzione (ADR-0026: quindi «in corso», non «finito»).

@@ -1,10 +1,12 @@
 # STATE — vista rapida
 
-**Updated**: 2026-10-11 (S1119 — W0-A3: `chiudi` a tre livelli; prima S1118, W0-A1 e W0-A2, 000454 e 000455 non in produzione)
+**Updated**: 2026-10-12 (S1119 — W0-D: #265 F4 sospesa; prima W0-A3, `chiudi` a tre livelli; prima S1118, W0-A1 e W0-A2, 000454 e 000455 non in produzione)
 
 *Ultimo aggiornamento: S1118 (2026-10-11). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
+
+**S1119, W0-D (12 ottobre)**: la rotta `PATCH /v1/users/:id/contract-level` con avviso (#265 F4) è costruita e provata sul gemello ma tolta da `main` con un revert: `sys_user_contracts` è «importato» (X-1) e nessuna rotta può scriverla. Lavoro sul ramo `f4-livello-contrattuale`. **Stato intermedio dichiarato**: serve la scelta di Enzo (riclassificare «ibrido» o tenere il livello solo da importazione). Esito in `.programmi/esiti-onda0/W0-D.md`.
 
 **S1119, W0-A3**: esiste `python docs/kb/tools/chiudi.py` (livelli `leggero`, `onda`, `rilascio`), esito in cinque righe e registro in `.handoff/close-log.ndjson`; non propaga e non arma. Esito in `.programmi/esiti-onda0/W0-A3.md`.
 
@@ -16,13 +18,13 @@
 
 1. **Armare il deploy** di `000454`/`000455` (decisione di Enzo, `scripts/close-propagate.sh`).
 2. **#267 / #268**: approvazione di ADR-0043 e ADR-0044 e scelta sui gruppi dubbi delle partecipazioni (Enzo). Dopo l'approvazione: I21 in `CLAUDE.md` e stato di ADR-0039.
-3. **#264** attende il pacchetto con ruoli, cruscotti, porte, variante pubblicata (datastore). **#265** resta l'aggancio alle modifiche di posto e riporto e la scelta sul livello contrattuale. **#263** resta il tipo delle tre date della `000454` (RD-09).
+3. **#264** attende il pacchetto con ruoli, cruscotti, porte, variante pubblicata (datastore). **#265** resta l'aggancio alle modifiche di posto e riporto e la scelta sul livello contrattuale (F4 in attesa della scelta di Enzo, vedi sopra). **#263** resta il tipo delle tre date della `000454` (RD-09).
 4. **#266** struttura albero RTL (WAIT-INPUT, non toccata) · **#254** apertura dei perimetri (P1, non avviata).
 
 ## Open questions
 
 - I 57 OWNER delle partecipazioni ai processi riguardano persone non più nell'unità del processo e danno loro visibilità funzionale sulle attività: si corregge col passo 3 di ADR-0044, oppure prima con una disattivazione a parte (scelta di Enzo).
-- La copia di prova `heuresys_advanced_w0a1_prova1` resta sul gemello: si toglie su richiesta.
+- Le copie di prova `heuresys_advanced_w0a1_prova1` e `heuresys_advanced_w0d_prova1` restano sul gemello: si tolgono su richiesta.
 - Il gesto «pubblica la versione» del modello caricato è oggi dell'operatore, solo sulle copie (in attesa dello schema 0.3).
 
 ## Verification

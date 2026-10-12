@@ -44,7 +44,9 @@ classify() {  # stdin: GitHub actions/runs JSON → one classification line
   python3 -c '
 import json, sys
 d = json.load(sys.stdin)
-runs = d.get("workflow_runs", [])
+# Le corse Dependabot (event "dynamic") non sono CI del progetto: ogni aggiornamento ha un nome
+# suo, quindi un loro rosso non puo mai essere superato da una corsa piu recente.
+runs = [r for r in d.get("workflow_runs", []) if r.get("event") != "dynamic"]
 pending = [r for r in runs if r.get("status") in ("queued", "in_progress", "waiting", "pending", "requested")]
 fails = sorted({r.get("name", "?") for r in runs if r.get("status") == "completed"
                 and r.get("conclusion") in ("failure", "timed_out", "startup_failure")})
@@ -68,6 +70,7 @@ FAIL    = ("failure", "timed_out", "startup_failure")
 RANK = {"RED": 3, "PENDING": 2, "GREEN": 1}
 best = {}
 for r in json.load(sys.stdin).get("workflow_runs", []):
+    if r.get("event") == "dynamic":                                   continue  # Dependabot: non e CI del progetto
     n = r.get("name", "?")
     if r.get("status") in PENDING:                                     s = "PENDING"
     elif r.get("status") == "completed" and r.get("conclusion") == "success": s = "GREEN"

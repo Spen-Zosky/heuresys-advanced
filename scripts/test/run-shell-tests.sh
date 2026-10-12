@@ -446,6 +446,12 @@ if [ -f "$CG" ]; then
   [ "$(cgc "$N")" = "NOSIGNAL" ] && ok "NOSIGNAL when only cancelled runs (fallback path)" || fail "classify NOSIGNAL"
   E='{"workflow_runs":[]}'
   [ "$(cgc "$E")" = "NOSIGNAL" ] && ok "NOSIGNAL on zero runs (docs-only push)" || fail "classify empty"
+  # Dependabot (event dynamic) non e CI del progetto: un suo rosso non blocca il cancello
+  D='{"workflow_runs":[{"name":"npm_and_yarn - Update #1","event":"dynamic","status":"completed","conclusion":"failure"},{"name":"b","event":"push","status":"completed","conclusion":"success"}]}'
+  [ "$(cgc "$D")" = "GREEN:1" ] && ok "Dependabot run (event dynamic) ignorata dal cancello" || fail "classify dynamic"
+  [ "$(printf '%s' "$D" | bash "$CG" --classify)" != "RED:npm_and_yarn - Update #1" ] && ok "rosso Dependabot non tinge il cancello" || fail "dynamic red"
+  X='{"workflow_runs":[{"name":"a","event":"push","status":"completed","conclusion":"failure"}]}'
+  [ "$(cgc "$X")" = "RED:a" ] && ok "un rosso vero (event push) resta rosso" || fail "push red"
   if DEPLOY_REQUIRE_CI=0 bash "$CG" deadbeef >/dev/null 2>&1; then
     ok "DEPLOY_REQUIRE_CI=0 bypass exits 0 without network"
   else fail "bypass DEPLOY_REQUIRE_CI=0"; fi

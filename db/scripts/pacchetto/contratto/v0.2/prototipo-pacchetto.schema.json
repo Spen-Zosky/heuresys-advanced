@@ -1,0 +1,1465 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:heuresys:contratto:prototipo-pacchetto:0.2",
+  "title": "Pacchetto prototipo d'impresa (datastore verso advanced) v0.2",
+  "type": "object",
+  "required": [
+    "meta",
+    "contesto",
+    "prove",
+    "sedi",
+    "ccnl",
+    "unita",
+    "posizioni",
+    "competenze",
+    "processi",
+    "indicatori",
+    "obiettivi",
+    "obblighi",
+    "formazione",
+    "carriere",
+    "incentivi",
+    "commesse",
+    "vuoti",
+    "derivazioni"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "prototipoId",
+        "creatoIl",
+        "lingueBase",
+        "lingue"
+      ],
+      "properties": {
+        "schema": {
+          "const": "heuresys.prototipo.pacchetto/0.2"
+        },
+        "prototipoId": {
+          "type": "string"
+        },
+        "creatoIl": {
+          "type": "string"
+        },
+        "lingueBase": {
+          "const": "it"
+        },
+        "lingue": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "it",
+              "en"
+            ]
+          }
+        },
+        "generatoDa": {
+          "type": "string"
+        }
+      }
+    },
+    "contesto": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "descrizione",
+        "ateco",
+        "classeDimensionale",
+        "fasciaAdvanced",
+        "addetti",
+        "paese",
+        "sedi"
+      ],
+      "properties": {
+        "descrizione": {
+          "$ref": "#/$defs/testo"
+        },
+        "ateco": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "codice",
+            "nome"
+          ],
+          "properties": {
+            "schema": {
+              "enum": [
+                "ATECO_2025"
+              ]
+            },
+            "codice": {
+              "type": "string"
+            },
+            "nome": {
+              "$ref": "#/$defs/testo"
+            }
+          }
+        },
+        "classeDimensionale": {
+          "enum": [
+            "MICRO",
+            "SMALL",
+            "MEDIUM",
+            "LARGE"
+          ]
+        },
+        "fasciaAdvanced": {
+          "enum": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL"
+          ]
+        },
+        "addetti": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "paese": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "modelloOperativo": {
+          "enum": [
+            "MANUFACTURING",
+            "RETAIL",
+            "WHOLESALE",
+            "MIXED",
+            "B2B_SERVICES",
+            "PUBLIC_SECTOR"
+          ]
+        },
+        "intensitaRegolatoria": {
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "EXTREME"
+          ]
+        },
+        "sedi": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "prove": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "url",
+          "titolo",
+          "estratto",
+          "tipo",
+          "esito"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/provaId"
+          },
+          "url": {
+            "type": "string",
+            "pattern": "^https?://"
+          },
+          "titolo": {
+            "type": "string"
+          },
+          "estratto": {
+            "type": "string"
+          },
+          "tipo": {
+            "enum": [
+              "html",
+              "pdf",
+              "json",
+              "altro"
+            ]
+          },
+          "lettura": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "quando",
+              "status",
+              "byte",
+              "sha256"
+            ],
+            "properties": {
+              "quando": {
+                "type": "string"
+              },
+              "status": {
+                "type": "integer"
+              },
+              "byte": {
+                "type": "integer"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          },
+          "esito": {
+            "enum": [
+              "LETTA",
+              "NON_TESTUALE",
+              "BLOCCATA",
+              "NON_RAGGIUNGIBILE"
+            ]
+          },
+          "motivo": {
+            "type": "string"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "esito": {
+                  "enum": [
+                    "LETTA",
+                    "NON_TESTUALE"
+                  ]
+                }
+              },
+              "required": [
+                "esito"
+              ]
+            },
+            "then": {
+              "required": [
+                "lettura"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "sedi": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "codice",
+          "tipo",
+          "nome"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "tipo": {
+            "enum": [
+              "SEDE_CENTRALE",
+              "FILIALE",
+              "STABILIMENTO",
+              "MAGAZZINO",
+              "UFFICIO"
+            ]
+          },
+          "nome": {
+            "$ref": "#/$defs/testo"
+          },
+          "note": {
+            "$ref": "#/$defs/testo"
+          },
+          "addetti": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "indirizzo": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "via": {
+                "type": "string"
+              },
+              "citta": {
+                "type": "string"
+              },
+              "cap": {
+                "type": "string"
+              },
+              "provincia": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "ccnl": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "nome",
+          "livelli",
+          "istituti"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "nome": {
+            "$ref": "#/$defs/testo"
+          },
+          "ambito": {
+            "$ref": "#/$defs/testo"
+          },
+          "livelli": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "codice",
+                "nome"
+              ],
+              "properties": {
+                "codice": {
+                  "$ref": "#/$defs/codice"
+                },
+                "nome": {
+                  "$ref": "#/$defs/testo"
+                },
+                "categoria": {
+                  "enum": [
+                    "DIRIGENTE",
+                    "QUADRO",
+                    "IMPIEGATO",
+                    "OPERAIO"
+                  ]
+                },
+                "minimoAnnuoEur": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "mansioni": {
+                  "$ref": "#/$defs/testo"
+                },
+                "notaMinimo": {
+                  "$ref": "#/$defs/testo"
+                }
+              }
+            }
+          },
+          "istituti": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "tipo",
+                "descrizione"
+              ],
+              "properties": {
+                "tipo": {
+                  "enum": [
+                    "ORE_SETTIMANALI",
+                    "FERIE",
+                    "PERMESSI_ROL",
+                    "MENSILITA",
+                    "STRAORDINARIO",
+                    "PROVA",
+                    "PREAVVISO",
+                    "MALATTIA",
+                    "ALTRO"
+                  ]
+                },
+                "descrizione": {
+                  "$ref": "#/$defs/testo"
+                },
+                "valore": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "unita": {
+                  "type": "string"
+                },
+                "validoDal": {
+                  "type": "string"
+                },
+                "condizioni": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "ambito",
+                      "descrizione"
+                    ],
+                    "properties": {
+                      "ambito": {
+                        "enum": [
+                          "DIMENSIONE_IMPRESA",
+                          "LIVELLO",
+                          "ANZIANITA",
+                          "ALTRO"
+                        ]
+                      },
+                      "descrizione": {
+                        "$ref": "#/$defs/testo"
+                      },
+                      "valore": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "unita": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "parti": {
+            "$ref": "#/$defs/testo"
+          },
+          "decorrenza": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "unita": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "nome",
+          "tipo",
+          "tipoAdvanced",
+          "livello",
+          "padre",
+          "sedeCodice",
+          "organicoPrevisto"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "nome": {
+            "$ref": "#/$defs/testo"
+          },
+          "tipo": {
+            "enum": [
+              "DIREZIONE",
+              "AREA",
+              "FUNZIONE",
+              "REPARTO",
+              "LINEA",
+              "MAGAZZINO"
+            ]
+          },
+          "tipoAdvanced": {
+            "enum": [
+              "AREA",
+              "BRANCH",
+              "DEPARTMENT",
+              "DIVISION",
+              "GENERAL_MANAGEMENT",
+              "HEADQUARTERS",
+              "OFFICE",
+              "PLANT",
+              "TEAM",
+              "WAREHOUSE"
+            ]
+          },
+          "livello": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 13,
+            "description": "Posizione nella gerarchia: 1 = vertice, uguale per ogni casella e per ogni sede (dal 2026-10-04; prima era 0 = vertice)."
+          },
+          "padre": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/codice"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sedeCodice": {
+            "$ref": "#/$defs/codice"
+          },
+          "organicoPrevisto": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "motivazioneOrganico": {
+            "$ref": "#/$defs/testo"
+          },
+          "proveOrganico": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/provaId"
+            }
+          }
+        }
+      }
+    },
+    "posizioni": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "titolo",
+          "unitaCodice",
+          "riportaA",
+          "categoriaContrattuale",
+          "organicoPrevisto",
+          "responsabileUnita"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "titolo": {
+            "$ref": "#/$defs/testo"
+          },
+          "unitaCodice": {
+            "$ref": "#/$defs/codice"
+          },
+          "riportaA": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/codice"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "categoriaContrattuale": {
+            "enum": [
+              "DIRIGENTE",
+              "QUADRO",
+              "IMPIEGATO",
+              "OPERAIO"
+            ]
+          },
+          "livelloCcnl": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/codice"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "organicoPrevisto": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "responsabileUnita": {
+            "type": "boolean"
+          },
+          "criticita": {
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "CRITICAL",
+              null
+            ]
+          },
+          "occupazioniEsco": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "uri",
+                "nome"
+              ],
+              "properties": {
+                "uri": {
+                  "type": "string"
+                },
+                "nome": {
+                  "$ref": "#/$defs/testo"
+                }
+              }
+            }
+          },
+          "processiCodici": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/codice"
+            }
+          },
+          "criticitaMotivo": {
+            "$ref": "#/$defs/testo"
+          },
+          "gradoAziendale": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Grado aziendale del responsabile di unita' secondo lo schema dei livelli del tipo di prototipo; distinto dall'inquadramento del contratto collettivo."
+          }
+        }
+      }
+    },
+    "competenze": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "nome",
+          "escoUri",
+          "requisiti"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "nome": {
+            "$ref": "#/$defs/testo"
+          },
+          "escoUri": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tipo": {
+            "enum": [
+              "SKILL",
+              "KNOWLEDGE",
+              "COMPETENCE",
+              "BEHAVIOR",
+              "OTHER",
+              null
+            ]
+          },
+          "requisiti": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "posizioneCodice",
+                "livello",
+                "livelloAdvanced",
+                "criticita",
+                "criticitaAdvanced"
+              ],
+              "properties": {
+                "posizioneCodice": {
+                  "$ref": "#/$defs/codice"
+                },
+                "livello": {
+                  "enum": [
+                    "BASE",
+                    "INTERMEDIO",
+                    "AVANZATO"
+                  ]
+                },
+                "livelloAdvanced": {
+                  "enum": [
+                    "NOVICE",
+                    "BASIC",
+                    "COMPETENT",
+                    "PROFICIENT",
+                    "EXPERT",
+                    "MASTER"
+                  ]
+                },
+                "criticita": {
+                  "enum": [
+                    "ESSENZIALE",
+                    "UTILE"
+                  ]
+                },
+                "criticitaAdvanced": {
+                  "enum": [
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH",
+                    "CRITICAL"
+                  ]
+                }
+              }
+            }
+          },
+          "tipoOrigine": {
+            "enum": [
+              "REGOLA",
+              "ESCO",
+              "LLM",
+              "MANUAL"
+            ]
+          },
+          "categoria": {
+            "enum": [
+              "Cognitive",
+              "External",
+              "Interpersonal",
+              "Leadership",
+              "Performance",
+              "Personal",
+              "Technical",
+              null
+            ],
+            "description": "Categoria che advanced esige per la competenza (sys_skill_categories)."
+          },
+          "categoriaOrigine": {
+            "enum": [
+              "REGOLA",
+              "RIPIEGO"
+            ],
+            "description": "REGOLA: dal gruppo ESCO secondo la tabella dichiarata; RIPIEGO: gruppo non in tabella."
+          }
+        }
+      }
+    },
+    "processi": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "nome",
+          "ordine",
+          "tipo",
+          "specifico",
+          "sediCodici",
+          "responsabilePosizioneCodice",
+          "collegamentiUnita"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "nome": {
+            "$ref": "#/$defs/testo"
+          },
+          "ordine": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tipo": {
+            "enum": [
+              "DIREZIONALE",
+              "CORE",
+              "DI_SUPPORTO"
+            ]
+          },
+          "pcf": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "specifico": {
+            "type": "boolean"
+          },
+          "sediCodici": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/codice"
+            }
+          },
+          "responsabilePosizioneCodice": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/codice"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descrizione": {
+            "$ref": "#/$defs/testo"
+          },
+          "motivazione": {
+            "$ref": "#/$defs/testo"
+          },
+          "collegamentiUnita": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "unitaCodice",
+                "funzione",
+                "funzioneAdvanced"
+              ],
+              "properties": {
+                "unitaCodice": {
+                  "$ref": "#/$defs/codice"
+                },
+                "funzione": {
+                  "enum": [
+                    "RESPONSABILE",
+                    "ESECUTRICE",
+                    "CONSULTATA"
+                  ]
+                },
+                "funzioneAdvanced": {
+                  "enum": [
+                    "OWNER",
+                    "CONTRIBUTOR",
+                    "CONSULTED",
+                    "INFORMED"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "indicatori": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "nome",
+          "direzione",
+          "direzioneAdvanced",
+          "unita",
+          "formula",
+          "frequenza",
+          "obiettivoCodice"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "nome": {
+            "$ref": "#/$defs/testo"
+          },
+          "direzione": {
+            "enum": [
+              "AUMENTARE",
+              "RIDURRE",
+              "MANTENERE"
+            ]
+          },
+          "direzioneAdvanced": {
+            "enum": [
+              "HIGHER_IS_BETTER",
+              "LOWER_IS_BETTER",
+              "TARGET_RANGE"
+            ]
+          },
+          "unita": {
+            "type": "string"
+          },
+          "formula": {
+            "$ref": "#/$defs/testo"
+          },
+          "frequenza": {
+            "enum": [
+              "GIORNALIERA",
+              "SETTIMANALE",
+              "MENSILE",
+              "TRIMESTRALE",
+              "ANNUALE",
+              "PER_EVENTO",
+              "ALTRO"
+            ]
+          },
+          "frequenzaNota": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fonteDato": {
+            "$ref": "#/$defs/testo"
+          },
+          "riferimento": {
+            "$ref": "#/$defs/testo"
+          },
+          "obiettivoCodice": {
+            "$ref": "#/$defs/codice"
+          },
+          "bersaglio": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "minimo": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "obiettivo": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "massimo": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "nota": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "obiettivi": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "titolo",
+          "orizzonte",
+          "durataGiorni",
+          "dimensione",
+          "processoCodice",
+          "unitaCodice",
+          "posizioneCodice"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "titolo": {
+            "$ref": "#/$defs/testo"
+          },
+          "orizzonte": {
+            "enum": [
+              "ANNUALE",
+              "TRIMESTRALE"
+            ]
+          },
+          "durataGiorni": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "dimensione": {
+            "enum": [
+              "CRESCITA",
+              "EFFICIENZA",
+              "SERVIZIO",
+              "QUALITA",
+              "CONFORMITA",
+              "COSTO"
+            ]
+          },
+          "processoCodice": {
+            "$ref": "#/$defs/codice"
+          },
+          "unitaCodice": {
+            "$ref": "#/$defs/codice"
+          },
+          "posizioneCodice": {
+            "$ref": "#/$defs/codice"
+          },
+          "peso": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "pesoOrigine": {
+            "enum": [
+              "REGOLA",
+              "RICERCA",
+              "PERSONA"
+            ]
+          }
+        }
+      }
+    },
+    "obblighi": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "norma",
+          "ambito",
+          "posizioniCodici"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "norma": {
+            "$ref": "#/$defs/testo"
+          },
+          "ambito": {
+            "enum": [
+              "SICUREZZA",
+              "PRIVACY",
+              "WHISTLEBLOWING",
+              "QUALITA",
+              "AMBIENTE",
+              "RESPONSABILITA_AMMINISTRATIVA",
+              "ALTRO"
+            ]
+          },
+          "soggetto": {
+            "$ref": "#/$defs/testo"
+          },
+          "posizioniCodici": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/codice"
+            }
+          },
+          "formazioneRichiesta": {
+            "$ref": "#/$defs/testo"
+          },
+          "periodicita": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ruoloMancante": {
+            "$ref": "#/$defs/testo"
+          }
+        }
+      }
+    },
+    "formazione": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "titolo",
+          "tipo",
+          "posizioniCodici"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "titolo": {
+            "$ref": "#/$defs/testo"
+          },
+          "tipo": {
+            "enum": [
+              "CORSO",
+              "AFFIANCAMENTO",
+              "CERTIFICAZIONE",
+              "ALTRO"
+            ]
+          },
+          "modalita": {
+            "enum": [
+              "IN_AULA",
+              "ONLINE",
+              "SUL_CAMPO"
+            ]
+          },
+          "durataMinuti": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "posizioniCodici": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/codice"
+            }
+          },
+          "competenzeCodici": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/codice"
+            }
+          },
+          "obbligoCodice": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/codice"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "carriere": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "nome",
+          "tipo",
+          "passi"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "nome": {
+            "$ref": "#/$defs/testo"
+          },
+          "tipo": {
+            "enum": [
+              "VERTICAL",
+              "CROSS_FUNCTIONAL"
+            ]
+          },
+          "passi": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "ordine",
+                "posizioneCodice"
+              ],
+              "properties": {
+                "ordine": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "posizioneCodice": {
+                  "$ref": "#/$defs/codice"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "incentivi": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "nome",
+          "tipo"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "nome": {
+            "$ref": "#/$defs/testo"
+          },
+          "tipo": {
+            "enum": [
+              "PREMIO_RISULTATO",
+              "MBO",
+              "ALTRO"
+            ]
+          },
+          "posizioniCodici": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/codice"
+            }
+          },
+          "obiettiviCodici": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/codice"
+            }
+          },
+          "regola": {
+            "$ref": "#/$defs/testo"
+          },
+          "categorie": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "DIRIGENTE",
+                "QUADRO",
+                "IMPIEGATO",
+                "OPERAIO"
+              ]
+            }
+          },
+          "dimensioni": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "CRESCITA",
+                "EFFICIENZA",
+                "SERVIZIO",
+                "QUALITA",
+                "CONFORMITA",
+                "COSTO"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "commesse": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/riscontro"
+          }
+        ],
+        "required": [
+          "codice",
+          "nome",
+          "tipo"
+        ],
+        "properties": {
+          "codice": {
+            "$ref": "#/$defs/codice"
+          },
+          "nome": {
+            "$ref": "#/$defs/testo"
+          },
+          "tipo": {
+            "enum": [
+              "PROGETTAZIONE_PROPRIA",
+              "SU_DISEGNO_CLIENTE",
+              "ALTRO"
+            ]
+          },
+          "unitaCodici": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/codice"
+            }
+          },
+          "posizioniCodici": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/codice"
+            }
+          },
+          "descrizione": {
+            "$ref": "#/$defs/testo"
+          }
+        }
+      }
+    },
+    "vuoti": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dominio",
+          "motivo"
+        ],
+        "properties": {
+          "dominio": {
+            "type": "string"
+          },
+          "motivo": {
+            "$ref": "#/$defs/testo"
+          }
+        }
+      }
+    },
+    "derivazioni": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "campo",
+          "regola"
+        ],
+        "properties": {
+          "campo": {
+            "type": "string"
+          },
+          "regola": {
+            "$ref": "#/$defs/testo"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "codice": {
+      "type": "string",
+      "pattern": "^[A-Z0-9][A-Z0-9_.-]{1,63}$"
+    },
+    "provaId": {
+      "type": "string",
+      "pattern": "^PR[0-9]{4,}$"
+    },
+    "testo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "it"
+      ],
+      "properties": {
+        "it": {
+          "type": "string",
+          "minLength": 1
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enOrigine": {
+          "enum": [
+            "ESCO",
+            "ISTAT",
+            "LLM",
+            "MANUAL",
+            "FONTE"
+          ]
+        }
+      },
+      "dependentRequired": {
+        "en": [
+          "enOrigine"
+        ]
+      }
+    },
+    "riscontro": {
+      "type": "object",
+      "required": [
+        "fonti"
+      ],
+      "properties": {
+        "fonti": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/provaId"
+          }
+        },
+        "senzaRiscontro": {
+          "type": "boolean"
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "fonti": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "required": [
+            "senzaRiscontro"
+          ],
+          "properties": {
+            "senzaRiscontro": {
+              "const": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}

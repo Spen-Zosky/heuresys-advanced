@@ -1,0 +1,82 @@
+[prova-o2-02] copie heuresys_o2_02_nuovo_prova3 e heuresys_o2_02_vecchio_prova3 da heuresys_o2_01_prova4; esiti in /tmp/tmp.c47hW6xqoN
+== 1. v0.2 (banca del 10 ottobre): come prima
+  OK    v02nuovo: carica esce 0
+  OK    v02nuovo: rileggi esce 0
+  OK    v02nuovo: pacchetto ricostruito uguale al file
+  OK    v02nuovo: percorsi con differenze
+  OK    v02nuovo: conteggio righe per tabella uguale al JSON
+  OK    v02: stessi conteggi per tabella del caricatore vecchio
+  OK    v02: nessuna riga nelle tabelle nuove
+  OK    v02nuovo: scarica esce 0
+  OK    v02nuovo: dopo lo scarico ogni tabella torna al conteggio di prima
+  OK    v02vecchio: scarica esce 0
+  OK    v02vecchio: dopo lo scarico ogni tabella torna al conteggio di prima
+== 2. v0.3: pieno, vuoto, perimetro senza voci
+  OK    pieno: carica esce 0
+  OK    pieno: rileggi esce 0
+  OK    pieno: pacchetto ricostruito uguale al file
+  OK    pieno: percorsi con differenze
+  OK    pieno: conteggio righe per tabella uguale al JSON
+  OK    pieno: regole che marcano riportate (priorita oltre,impresa oltre,decisioni c/s/p,ore oltre,marcate)
+  OK    pieno: scarica esce 0
+  OK    pieno: dopo lo scarico ogni tabella torna al conteggio di prima
+  OK    vuoto: carica esce 0
+  OK    vuoto: rileggi esce 0
+  OK    vuoto: pacchetto ricostruito uguale al file
+  OK    vuoto: percorsi con differenze
+  OK    vuoto: conteggio righe per tabella uguale al JSON
+  OK    vuoto: regole che marcano riportate (priorita oltre,impresa oltre,decisioni c/s/p,ore oltre,marcate)
+  OK    vuoto: nessuna riga in nessuna tabella nuova
+  OK    vuoto: scarica esce 0
+  OK    vuoto: dopo lo scarico ogni tabella torna al conteggio di prima
+  OK    senzavoci: carica esce 0
+  OK    senzavoci: rileggi esce 0
+  OK    senzavoci: pacchetto ricostruito uguale al file
+  OK    senzavoci: percorsi con differenze
+  OK    senzavoci: conteggio righe per tabella uguale al JSON
+  OK    senzavoci: regole che marcano riportate (priorita oltre,impresa oltre,decisioni c/s/p,ore oltre,marcate)
+  OK    senzavoci: il fascicolo c'e' (dossier_version) ma lo stato resta NON_RILASCIATO
+  OK    senzavoci: scarica esce 0
+  OK    senzavoci: dopo lo scarico ogni tabella torna al conteggio di prima
+== 3. rosso prima: il caricatore vecchio sui pacchetti v0.3
+  OK    vecchio + v0.3 pieno: carica NON riesce (nessuna casa per i campi nuovi)
+  OK    vecchio + v0.3 vuoto: rileggi NON esce 0
+  OK    vecchio + v0.3 vuoto: ricostruito diverso dal file (le sezioni nuove si perdono)
+== 4. rifiuti: il pacchetto che non passa lo schema o i limiti non scrive niente
+  OK    rifiuto leva-fuori-vocabolario: carica esce con errore
+  OK    rifiuto leva-fuori-vocabolario: il messaggio dice che e' rifiutato
+  OK    rifiuto leva-fuori-vocabolario: nessuna famiglia scritta
+  OK    rifiuto sezione-mancante: carica esce con errore
+  OK    rifiuto sezione-mancante: il messaggio dice che e' rifiutato
+  OK    rifiuto sezione-mancante: nessuna famiglia scritta
+  OK    rifiuto ore-oltre-168: carica esce con errore
+  OK    rifiuto ore-oltre-168: il messaggio dice che e' rifiutato
+  OK    rifiuto ore-oltre-168: nessuna famiglia scritta
+  OK    rifiuto impronta-non-esadecimale: carica esce con errore
+  OK    rifiuto impronta-non-esadecimale: il messaggio dice che e' rifiutato
+  OK    rifiuto impronta-non-esadecimale: nessuna famiglia scritta
+  OK    rifiuto schema-sconosciuto: carica esce con errore
+  OK    rifiuto schema-sconosciuto: il messaggio dice che e' rifiutato
+  OK    rifiuto schema-sconosciuto: nessuna famiglia scritta
+  OK    rifiuto due-sedi-due-entita: carica esce con errore
+  OK    rifiuto due-sedi-due-entita: il messaggio dice che e' rifiutato
+  OK    rifiuto due-sedi-due-entita: nessuna famiglia scritta
+  OK    rifiuto valore-fuori-vocabolario-fase: carica esce con errore
+  OK    rifiuto valore-fuori-vocabolario-fase: il messaggio dice che e' rifiutato
+  OK    rifiuto valore-fuori-vocabolario-fase: nessuna famiglia scritta
+== 5. mutazioni del caricatore: ogni colonna tolta deve far diventare rosso il giro
+  OK    mutante work_nature: la mutazione e' stata applicata
+  OK    mutante work_nature: il giro diventa rosso
+  OK    mutante capacity_share: la mutazione e' stata applicata
+  OK    mutante capacity_share: il giro diventa rosso
+  OK    mutante nature_commessa: la mutazione e' stata applicata
+  OK    mutante nature_commessa: il giro diventa rosso
+  OK    mutante null_esplicito: la mutazione e' stata applicata
+  OK    mutante null_esplicito: il giro diventa rosso
+  OK    mutante used_by_model: la mutazione e' stata applicata
+  OK    mutante used_by_model: il giro diventa rosso
+  OK    mutante stato_perimetro: la mutazione e' stata applicata
+  OK    mutante stato_perimetro: il giro diventa rosso
+  OK    mutante conta_decide: la mutazione e' stata applicata
+  OK    mutante conta_decide: il giro diventa rosso
+[prova-o2-02] ok=111 rossi=0 copie=heuresys_o2_02_nuovo_prova3,heuresys_o2_02_vecchio_prova3 esiti in /tmp/tmp.c47hW6xqoN

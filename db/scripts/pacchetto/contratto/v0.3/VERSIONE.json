@@ -1,0 +1,19 @@
+{
+ "versione": "0.3",
+ "schema": "heuresys.prototipo.pacchetto/0.3",
+ "id": "urn:heuresys:contratto:prototipo-pacchetto:0.3",
+ "stato": "APPROVATA",
+ "approvazione": "approvata dall'Amministratore di Sistema il 2026-10-17 (D1 del piano delle pendenze, D-79); la v0.2 non è più in vigore per i pacchetti nuovi e resta valida per i vecchi",
+ "dataApprovazione": "2026-10-17",
+ "origine": "heuresys-datastore, piano 111 (PE-1), costruita da scripts/contratto_v03_costruisci.mjs a partire dalla v0.2 approvata il 2026-10-06",
+ "regola": "Non si modifica a mano: si cambia lo script e si rigenera. Dopo l'approvazione si copia nella cartella neutra heuresys-design-lab/contratto-dati/v0.3 e non si cambia più.",
+ "validatore": "Ajv 8.20.0, dialetto JSON Schema 2020-12, come per la v0.2",
+ "impronte": {
+  "GLOSSARIO_dieci-oggetti.md": "5a129742ab3cfc79ecf07e12247841b498028f7f5f1a818e9b3751c410b8cb23",
+  "MAPPATURA_pacchetto-advanced_v0.3.md": "5b9f62a0c23193ddc461ab61c6d2ee7e7a019a1c742dd8b65458f80e618c8e64",
+  "MATRICE_requisiti_v0.3.md": "1c9580fd013646549d2e9f3efca2fb699542414b94730e72dd62efcdab8ad658",
+  "mappatura-advanced.json": "b611d10c7177ed344d3efe71d139891464bd5f973f5d75535403b9141a4a5d9c",
+  "prototipo-pacchetto.schema.json": "484fa4d2644feab74aa6eb95de96c997c9cfd74fc1482e7d3b7f775fa2549f54",
+  "vocabolari.json": "4d568736601e70dd2f3ccae83091c1cd1586a5155732157c9767950994e2ba3b"
+ }
+}

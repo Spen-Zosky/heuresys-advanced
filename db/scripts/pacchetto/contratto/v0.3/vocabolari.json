@@ -1,0 +1,300 @@
+{
+ "versione": "0.3",
+ "nota": "Corrispondenze fra il vocabolario del datastore e quello di advanced. Le voci della v0.2 restano come erano; le voci nuove della v0.3 non hanno ancora una casa in advanced (onda 2): dove _advanced è null, il valore passa tale e quale in una colonna con vincolo, mai ENUM.",
+ "tipoUnita": {
+  "DIREZIONE": "GENERAL_MANAGEMENT",
+  "AREA": "AREA",
+  "FUNZIONE": "DEPARTMENT",
+  "REPARTO": "DEPARTMENT",
+  "LINEA": "TEAM",
+  "MAGAZZINO": "WAREHOUSE",
+  "_advanced": [
+   "AREA",
+   "BRANCH",
+   "DEPARTMENT",
+   "DIVISION",
+   "GENERAL_MANAGEMENT",
+   "HEADQUARTERS",
+   "OFFICE",
+   "PLANT",
+   "TEAM",
+   "WAREHOUSE"
+  ],
+  "_stato": "proposta"
+ },
+ "livelloCompetenza": {
+  "BASE": "BASIC",
+  "INTERMEDIO": "COMPETENT",
+  "AVANZATO": "EXPERT",
+  "_advanced": [
+   "NOVICE",
+   "BASIC",
+   "COMPETENT",
+   "PROFICIENT",
+   "EXPERT",
+   "MASTER"
+  ],
+  "_stato": "proposta: il datastore ha tre livelli, advanced sei; PROFICIENT e MASTER restano inutilizzati"
+ },
+ "criticitaCompetenza": {
+  "ESSENZIALE": "HIGH",
+  "UTILE": "MEDIUM",
+  "_advanced": [
+   "LOW",
+   "MEDIUM",
+   "HIGH",
+   "CRITICAL"
+  ],
+  "_stato": "proposta: CRITICAL resta riservato a cio' che la norma impone"
+ },
+ "funzioneInProcesso": {
+  "RESPONSABILE": "OWNER",
+  "ESECUTRICE": "CONTRIBUTOR",
+  "CONSULTATA": "CONSULTED",
+  "_advanced": [
+   "OWNER",
+   "CONTRIBUTOR",
+   "CONSULTED",
+   "INFORMED"
+  ],
+  "_stato": "corrispondenza diretta"
+ },
+ "direzioneIndicatore": {
+  "AUMENTARE": "HIGHER_IS_BETTER",
+  "RIDURRE": "LOWER_IS_BETTER",
+  "MANTENERE": "TARGET_RANGE",
+  "_advanced": [
+   "HIGHER_IS_BETTER",
+   "LOWER_IS_BETTER",
+   "TARGET_RANGE"
+  ],
+  "_stato": "corrispondenza diretta"
+ },
+ "classeDimensionale": {
+  "MICRO": "XS",
+  "SMALL": "S",
+  "MEDIUM": "M",
+  "LARGE": "L",
+  "_xl": "LARGE con addetti >= 1000 corrisponde a XL",
+  "_advanced": [
+   "XS",
+   "S",
+   "M",
+   "L",
+   "XL"
+  ],
+  "_stato": "corrispondenza diretta sulle soglie 10, 50, 250, 1000"
+ },
+ "orizzonteObiettivo": {
+  "TRIMESTRALE": 90,
+  "ANNUALE": 365,
+  "_unita": "giorni (sys_goal_templates.suggested_duration_days)",
+  "_stato": "proposta"
+ },
+ "frequenzaIndicatore": [
+  "GIORNALIERA",
+  "SETTIMANALE",
+  "MENSILE",
+  "TRIMESTRALE",
+  "ANNUALE",
+  "PER_EVENTO",
+  "ALTRO"
+ ],
+ "categoriaContrattuale": [
+  "DIRIGENTE",
+  "QUADRO",
+  "IMPIEGATO",
+  "OPERAIO"
+ ],
+ "lingue": {
+  "base": "it",
+  "supportate": [
+   "it",
+   "en"
+  ],
+  "origineTraduzione": [
+   "ESCO",
+   "ISTAT",
+   "LLM",
+   "MANUAL",
+   "FONTE"
+  ],
+  "_advanced": "testo base italiano nelle colonne; traduzioni in sys_reference_translations con lingua e origine (oggi en: ESCO 29.013, HARVEST 5.399, LLM 2.320, MANUAL 136)"
+ },
+ "esitoProva": [
+  "LETTA",
+  "NON_TESTUALE",
+  "BLOCCATA",
+  "NON_RAGGIUNGIBILE"
+ ],
+ "condizioniIstituto": [
+  "DIMENSIONE_IMPRESA",
+  "LIVELLO",
+  "ANZIANITA",
+  "ALTRO"
+ ],
+ "origineCampoDerivato": [
+  "REGOLA",
+  "ESCO",
+  "LLM",
+  "MANUAL",
+  "RICERCA",
+  "PERSONA"
+ ],
+ "modelloOperativoDaAteco": {
+  "_regola": "divisioni ATECO 10-33 = MANUFACTURING",
+  "_stato": "regola dichiarata; le altre divisioni non sono coperte"
+ },
+ "_approvazione": "Le corrispondenze della v0.1 sono approvate dall'Amministratore di Sistema il 2026-10-01; le aggiunte della v0.2 sono proposte; le aggiunte della v0.3 sono proposte e aspettano l'approvazione dello schema (D1).",
+ "livelloObiettivo": {
+  "valori": [
+   "IMPRESA",
+   "PROCESSO",
+   "UNITA",
+   "RUOLO"
+  ],
+  "_advanced": null,
+  "_stato": "advanced ha il padre (sys_goals) ma non il livello: colonna nuova proposta"
+ },
+ "famigliaIndicatore": {
+  "valori": [
+   "RISULTATO",
+   "QUALITA",
+   "RISCHIO",
+   "CARICO"
+  ],
+  "_advanced": null,
+  "_stato": "colonna nuova proposta su sys_blueprint_content_kpis"
+ },
+ "naturaCapability": {
+  "valori": [
+   "DISTINTIVA",
+   "NECESSARIA",
+   "DI_SUPPORTO"
+  ],
+  "_advanced": null,
+  "_stato": "oggetto nuovo in advanced (onda 2)"
+ },
+ "dirittoDecisionale": {
+  "valori": [
+   "PROPONE",
+   "CONTRIBUISCE",
+   "ASSENSO",
+   "DECIDE",
+   "ESEGUE"
+  ],
+  "_advanced": null,
+  "_stato": "oggetto nuovo in advanced (onda 2); sys_approval_* resta il flusso delle approvazioni, non il catalogo delle decisioni"
+ },
+ "tipoResponsabilita": {
+  "valori": [
+   "GERARCHICA",
+   "FUNZIONALE",
+   "DI_PROCESSO",
+   "DI_PRODOTTO",
+   "DI_COMMESSA",
+   "DI_CONTROLLO"
+  ],
+  "_advanced": null,
+  "_stato": "colonna nuova proposta"
+ },
+ "naturaLavoro": {
+  "valori": [
+   "PERSONA",
+   "ASSISTITO_AI",
+   "AUTOMATIZZABILE",
+   "AGENTE_SUPERVISIONATO"
+  ],
+  "_advanced": null,
+  "_stato": "colonna nuova proposta sulle attività del processo"
+ },
+ "erogazione": {
+  "valori": [
+   "INTERNO",
+   "SERVIZIO_CONDIVISO",
+   "ESTERNO"
+  ],
+  "_advanced": null,
+  "_stato": "colonna nuova proposta"
+ },
+ "centroBudget": {
+  "valori": [
+   "COSTO",
+   "RICAVO",
+   "PROFITTO",
+   "INVESTIMENTO"
+  ],
+  "_advanced": null,
+  "_stato": "colonna nuova proposta su sys_blueprint_content_units"
+ },
+ "naturaTeam": {
+  "COMMESSA": "ENGAGEMENT",
+  "PROGETTO": "PROJECT",
+  "TEAM_STABILE": "TEAM",
+  "_advanced": [
+   "sys_blueprint_content_engagements",
+   "sys_projects",
+   "sys_teams"
+  ],
+  "_stato": "proposta: nel modello resta in engagements con la natura; il tenant istanzia progetti e team"
+ },
+ "levaCompetitiva": {
+  "valori": [
+   "COSTO",
+   "QUALITA",
+   "INNOVAZIONE",
+   "PERSONALIZZAZIONE",
+   "SERVIZIO"
+  ],
+  "_advanced": null,
+  "_stato": "tipico del tipo d'impresa; la scelta dell'azienda si scrive in advanced all'inizializzazione (onda 3)"
+ },
+ "ambitoPrincipio": {
+  "valori": [
+   "CENTRALIZZAZIONE",
+   "AUTONOMIA",
+   "SPECIALIZZAZIONE",
+   "COORDINAMENTO",
+   "ALTRO"
+  ],
+  "_advanced": null,
+  "_stato": "tabella nuova proposta"
+ },
+ "tipoAgente": {
+  "valori": [
+   "ASSISTENTE",
+   "ESECUTORE",
+   "ANALISTA",
+   "CONTROLLORE",
+   "COORDINATORE",
+   "ALTRO"
+  ],
+  "_advanced": null,
+  "_stato": "proposta del datastore: il piano chiede i tipi di agente senza elencarli; colonna nuova su sys_blueprint_content_agents"
+ },
+ "tipoAttore": {
+  "valori": [
+   "POSIZIONE",
+   "RUOLO",
+   "AGENTE"
+  ],
+  "_advanced": null,
+  "_stato": "nei legami nuovi l'attore è una posizione, un ruolo o un agente, mai una persona"
+ },
+ "schemaCatalogo": {
+  "valori": [
+   "CP2021",
+   "ISCO_08",
+   "ESCO_OCCUPAZIONE",
+   "ESCO_COMPETENZA",
+   "APQC_PCF",
+   "ATECO_2025",
+   "NACE_2_1",
+   "CCNL_CNEL",
+   "INDICATORE_DATASTORE",
+   "ALTRO"
+  ],
+  "_advanced": null,
+  "_stato": "le voci del perimetro citano il catalogo per codice"
+ }
+}

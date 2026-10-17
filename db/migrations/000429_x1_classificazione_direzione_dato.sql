@@ -324,7 +324,21 @@ VALUES
   ('sys_blueprint_content_evidence_links', 'importato', 'EMENDATO per la mig 000454 (pacchetto datastore): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
   ('sys_blueprint_content_evidence_gaps', 'importato', 'EMENDATO per la mig 000454 (pacchetto datastore): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
   ('sys_blueprint_content_derivations', 'importato', 'EMENDATO per la mig 000454 (pacchetto datastore): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
-  ('sys_blueprint_content_gaps', 'importato', 'EMENDATO per la mig 000454 (pacchetto datastore): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API')
+  ('sys_blueprint_content_gaps', 'importato', 'EMENDATO per la mig 000454 (pacchetto datastore): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_strategies', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_strategy_items', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_capabilities', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_capability_links', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_job_role_links', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_decisions', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_decision_rights', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_legal_entities', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_agents', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_agent_links', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_design_principles', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_perimeters', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_process_steps', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
+  ('sys_blueprint_content_position_responsibilities', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API')
 ON CONFLICT (tabella) DO UPDATE SET stato = EXCLUDED.stato, motivo = EXCLUDED.motivo;
 
 CREATE OR REPLACE VIEW sys.v_tabelle_non_classificate AS
@@ -341,8 +355,8 @@ DECLARE
   n_tot int; n_non_class int; n_ibrido int; n_nativo int; n_importato int; n_infra int;
 BEGIN
   SELECT count(*) INTO n_tot FROM sys.sys_classificazione_direzione_dato;
-  IF n_tot <> 282 THEN
-    RAISE EXCEPTION '000429: attese 282 righe di classificazione, trovate %', n_tot;
+  IF n_tot <> 296 THEN
+    RAISE EXCEPTION '000429: attese 296 righe di classificazione, trovate %', n_tot;
   END IF;
 
   SELECT count(*) INTO n_non_class FROM sys.v_tabelle_non_classificate;
@@ -354,12 +368,12 @@ BEGIN
   SELECT count(*) FILTER (WHERE stato = 'nativo')   INTO n_nativo   FROM sys.sys_classificazione_direzione_dato;
   SELECT count(*) FILTER (WHERE stato = 'importato') INTO n_importato FROM sys.sys_classificazione_direzione_dato;
   SELECT count(*) FILTER (WHERE stato = 'infrastruttura') INTO n_infra FROM sys.sys_classificazione_direzione_dato;
-  IF n_ibrido <> 76 OR n_nativo <> 51 OR n_importato <> 115 OR n_infra <> 40 THEN
-    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/51/115/40)',
+  IF n_ibrido <> 76 OR n_nativo <> 51 OR n_importato <> 129 OR n_infra <> 40 THEN
+    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/51/129/40)',
       n_ibrido, n_nativo, n_importato, n_infra;
   END IF;
 
-  RAISE NOTICE '000429: 282 tabelle classificate (76 ibrido, 51 nativo, 115 importato, 40 infrastruttura); v_tabelle_non_classificate a zero.';
+  RAISE NOTICE '000429: 296 tabelle classificate (76 ibrido, 51 nativo, 129 importato, 40 infrastruttura); v_tabelle_non_classificate a zero.';
 END $$;
 
 COMMIT;

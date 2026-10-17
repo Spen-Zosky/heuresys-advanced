@@ -134,7 +134,37 @@ VALUES
   -- la migrazione che la crea. Trovata dalla prova generale sul gemello, alla SECONDA
   -- passata (la prima, sulla copia gia' migrata, non l'avrebbe vista).
   ('sys_conflitti_ibridi', 'D', 'EXCLUDE', NULL,
-   '[mandato K, X-4, D5=C] Registro dei conflitti fra un gesto nativo e un valore importato sulle tabelle ibride (mig 000446). Dato generato dalla piattaforma nel momento in cui un futuro connettore di importazione trova un valore diverso da quello nativo: nessuna sorgente legacy esiste ne'' puo'' esistere, perche'' il legacy non ha alcuna nozione della distinzione nativo/importato.')
+   '[mandato K, X-4, D5=C] Registro dei conflitti fra un gesto nativo e un valore importato sulle tabelle ibride (mig 000446). Dato generato dalla piattaforma nel momento in cui un futuro connettore di importazione trova un valore diverso da quello nativo: nessuna sorgente legacy esiste ne'' puo'' esistere, perche'' il legacy non ha alcuna nozione della distinzione nativo/importato.'),
+
+  -- [onda 2, O2-01] Le 14 tabelle del contenuto v0.3 del modello (mig 000458): stessa ragione di tutte le righe sopra.
+  ('sys_blueprint_content_strategies', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_strategy_items', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_capabilities', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_capability_links', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_job_role_links', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_decisions', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_decision_rights', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_legal_entities', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_agents', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_agent_links', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_design_principles', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_perimeters', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_process_steps', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_blueprint_content_position_responsibilities', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

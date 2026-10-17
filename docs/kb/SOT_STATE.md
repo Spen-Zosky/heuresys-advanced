@@ -351,6 +351,12 @@ API **274** (+25 unit) · moduli API **109** · perimetri dell'agente aperti **1
 
 ---
 
+## S1119 (2026-10-17) — O2-01: la 000458, il contenuto v0.3 del modello trova casa
+
+Migrazione `000458` (14 tabelle di piattaforma `sys_blueprint_content_*`, 11 colonne sul pacchetto, colonne e vincoli su 8 tabelle del modello, `engagement_links.link_kind` allargato), inversa fuori catena `db/scripts/onda2/000458-inversa.sql` che si rifiuta se c'è contenuto, prova `db/scripts/onda2/prova-000458.sh` (andata, idempotenza, ritorno esatto, mutazioni, rifiuti dell'inversa) su copia usa-e-getta del gemello. La classificazione `importato` sta in `000429`, che conta le righe, e il registro di riconciliazione in `000062`: sono i due file di numero minore che la seconda passata della catena vede. Nove punti in cui lo schema JSON v0.3 vince sul disegno: `.programmi/onda2/esiti/O2-01.md`. Stato: provata sul gemello, NON applicata in produzione, non armata. Conteggi ri-derivati con `aggiorna_numeri_sot.py`.
+
+---
+
 ## S1119 (2026-10-17) — PE-6.1: il disegno dell'onda 2 e ADR-0046
 
 Solo disegno: nessuna migrazione, nessuna scrittura su database, nessun accesso alla produzione (vincolo del mandato); per questo i conteggi della §0 non sono stati ri-derivati in questa sessione e restano quelli misurati il 2026-10-17 prima di PE-6.1 (la catena non è cambiata: ultima migrazione `000457`). Prodotti: `docs/architecture/adr/0046_perimetro_del_tenant.md` (PROPOSTO), `.programmi/onda2/DISEGNO_tabelle-onda2.md`, `.programmi/onda2/PIANO_passo3-partecipazione.md`, `.programmi/onda2/README.md` con i mandati `O2-01` … `O2-10`, piano del ciclo `.programmi/onda2/PIANO_PE-6.1.md`. ADR indicizzati 0001..0046 (`build_adr_index.py`). Commit `8f8f84d4`.

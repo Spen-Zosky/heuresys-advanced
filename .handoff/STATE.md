@@ -1,10 +1,12 @@
 # STATE — vista rapida
 
-**Updated**: 2026-10-17 (S1119 — O2-01: migrazione 000458, contenuto v0.3 del modello; esito in `.programmi/onda2/esiti/O2-01.md`)
+**Updated**: 2026-10-17 (S1119 — O2-02: il caricatore porta il pacchetto v0.3 nelle tabelle del modello; esito in `.programmi/onda2/esiti/O2-02.md`)
 
 *I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
+
+**S1119, O2-02 (17 ottobre)**: il caricatore del pacchetto (`db/scripts/pacchetto/`) scrive e rilegge per codice ogni sezione e campo v0.3 nelle tabelle della `000458` e accetta ancora il v0.2; convalida il pacchetto (schema, impronte, limiti delle colonne) prima di toccare il database, riporta senza fermarsi le regole che marcano. Prova su copia del gemello: 111 controlli, zero rossi (v0.2 come prima, tre pacchetti v0.3 riletti uguali, sette rifiuti, sette mutazioni rosse). **`WAIT-INPUT`: il pacchetto v0.3 vero della banca non è depositato dal datastore**; la prova ha girato su un pacchetto di prova costruito dal v0.2 e dallo schema, dichiarato tale. Lavoro NON applicato in produzione.
 
 **S1119, O2-01 (17 ottobre)**: scritta la migrazione `000458` (14 tabelle `sys_blueprint_content_*` di piattaforma, colonne sul pacchetto e su 8 tabelle del modello), con inversa fuori catena e prova su copia del gemello (`db/scripts/onda2/`). Righe di classificazione in `000429` (282 diventa 296) e registro in `000062`. Dove lo schema JSON v0.3 contraddice il disegno vince lo schema: 9 casi nell'esito. Prova generale e cancello verdi; commit `1330d70d` e `303e75a8` su `main`. **Stato**: lavoro dimostrato sul gemello e su copia, NON applicato in produzione e non armato; non è una catena a metà (O2-02 scrive nelle tabelle nuove, ma la 000458 sta in piedi da sola).
 
@@ -14,7 +16,7 @@
 
 1. **Rilascio** di `000454`…`000458` e corsa del passo 2 di PE-4 in produzione (Amministratore di Sistema): è la precondizione del passo 3 (#270).
 2. **Decisioni dell'onda 2**: approvazione di ADR-0046 (#269) e delle tre scelte sul passo 3 (#270). Senza, `O2-07`…`O2-10` non partono.
-3. **Onda 2 (#271)**: `O2-01` fatta; `O2-03` (struttura del tenant) può partire; `O2-02` (caricatore) può usare le tabelle della 000458 e attende il pacchetto v0.3 della banca.
+3. **Onda 2 (#271)**: `O2-01` e `O2-02` fatte (`O2-02` con `WAIT-INPUT` sul pacchetto v0.3 vero della banca: va rifatta la prova quando il datastore lo deposita); `O2-03` (struttura del tenant) può partire.
 
 ## Open questions
 

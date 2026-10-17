@@ -351,6 +351,12 @@ API **274** (+25 unit) · moduli API **109** · perimetri dell'agente aperti **1
 
 ---
 
+## S1119 (2026-10-17) — O2-02: il caricatore porta il pacchetto v0.3 nelle tabelle del modello
+
+Il caricatore del pacchetto del datastore (`db/scripts/pacchetto/`) scrive e rilegge per codice ogni sezione e campo v0.3 nelle tabelle della `000458` e accetta ancora il v0.2. Prima di toccare il database convalida il pacchetto (`convalida-pacchetto.mjs`: schema della versione con Ajv e impronte del contratto copiato in `contratto/`, più i limiti delle colonne più stretti dello schema); una sezione dichiarata vuota produce zero righe; `perimeter_status` è DICHIARATO solo se il perimetro ha voci (ADR-0046 §1); la rilettura riporta senza fermarsi le regole che marcano (`regole-di-ritorno.mjs`). Prova `db/scripts/pacchetto/prova-o2-02.sh` su copia del gemello: ok=111 rossi=0 (v0.2 come prima, tre pacchetti v0.3 riletti uguali, conteggi per tabella uguali al JSON, sette rifiuti, sette mutazioni rosse, rosso prima col caricatore vecchio). Il pacchetto v0.3 vero della banca non è depositato dal datastore: `WAIT-INPUT`, la prova ha girato su un pacchetto costruito dal v0.2 e dallo schema. Non applicato in produzione. Esito: `.programmi/onda2/esiti/O2-02.md`.
+
+---
+
 ## S1119 (2026-10-17) — O2-01: la 000458, il contenuto v0.3 del modello trova casa
 
 Migrazione `000458` (14 tabelle di piattaforma `sys_blueprint_content_*`, 11 colonne sul pacchetto, colonne e vincoli su 8 tabelle del modello, `engagement_links.link_kind` allargato), inversa fuori catena `db/scripts/onda2/000458-inversa.sql` che si rifiuta se c'è contenuto, prova `db/scripts/onda2/prova-000458.sh` (andata, idempotenza, ritorno esatto, mutazioni, rifiuti dell'inversa) su copia usa-e-getta del gemello. La classificazione `importato` sta in `000429`, che conta le righe, e il registro di riconciliazione in `000062`: sono i due file di numero minore che la seconda passata della catena vede. Nove punti in cui lo schema JSON v0.3 vince sul disegno: `.programmi/onda2/esiti/O2-01.md`. Stato: provata sul gemello, NON applicata in produzione, non armata. Conteggi ri-derivati con `aggiorna_numeri_sot.py`.

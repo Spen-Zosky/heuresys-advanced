@@ -351,6 +351,12 @@ API **274** (+25 unit) · moduli API **109** · perimetri dell'agente aperti **1
 
 ---
 
+## S1119 (2026-10-17) — PE-5b: il glossario v0.3 del contratto dati entra in `docs/kb/`
+
+`docs/kb/GLOSSARIO_dieci-oggetti_v0.3.md` è copia senza modifiche dell'originale del datastore (`src/contratto/v0.3/`, v0.3 approvata il 2026-10-17); impronta SHA-256 uguale a quella in `VERSIONE.json`. Documento di riferimento, nessun codice né migrazione; produzione non toccata. Commit `29a02a1c`, pubblicato su `main`.
+
+---
+
 ## S1119 (2026-10-12) — W0-D, #265 F4: il livello contrattuale con avviso, costruito e sospeso
 
 `PATCH /v1/users/:id/contract-level` (avviso FUORI_SCALA e GERARCHIA riusando la logica di F1) è costruita e provata sul gemello (6 prove di integrazione, una mutazione ne fa fallire 2) ma NON è su `main`: `sys_user_contracts` è classificata «importato» (X-1, mig. 000429) e la prova DIF-4 di `data-steward.integration.test.ts` vieta le rotte di scrittura su tabelle importate. Revert su `main`, lavoro sul ramo `f4-livello-contrattuale`. **Stato intermedio dichiarato**: F4 sospesa in attesa di Enzo (riclassificare «ibrido» con una migrazione come la 000448, bozza provata VERDE in `claude_service_workspace\[Plans]`, oppure tenere il livello solo da importazione). Esito in `.programmi/esiti-onda0/W0-D.md`. Produzione invariata, nessun deploy armato.

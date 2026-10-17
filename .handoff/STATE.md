@@ -1,10 +1,12 @@
 # STATE — vista rapida
 
-**Updated**: 2026-10-17 (S1119 — PE-5b: glossario v0.3 in `docs/kb/`; prima PE-4: passi 1 e 2 di ADR-0044 provati su copia del gemello, non in produzione; esito `.programmi/esiti-onda0/PE-4.md`; prima PE-3: I21/ADR-0039/indice, migrazione 000456 (263.4) e avviso gerarchia-livelli nelle modifiche (265.3), non in produzione; esito `.programmi/esiti-onda0/PE-3.md`; prima W0-D: #265 F4 sospesa; prima W0-A3, `chiudi` a tre livelli; prima S1118, W0-A1 e W0-A2, 000454 e 000455 non in produzione)
+**Updated**: 2026-10-17 (S1119 — PE-6.1: disegno dell'onda 2, ADR-0046 PROPOSTO, dieci mandati Sonnet in `.programmi/onda2/`; prima PE-5b: glossario v0.3 in `docs/kb/`; prima PE-4: passi 1 e 2 di ADR-0044 provati su copia del gemello, non in produzione; esito `.programmi/esiti-onda0/PE-4.md`; prima PE-3: I21/ADR-0039/indice, migrazione 000456 (263.4) e avviso gerarchia-livelli nelle modifiche (265.3), non in produzione; esito `.programmi/esiti-onda0/PE-3.md`; prima W0-D: #265 F4 sospesa; prima W0-A3, `chiudi` a tre livelli; prima S1118, W0-A1 e W0-A2, 000454 e 000455 non in produzione)
 
 *Ultimo aggiornamento: S1118 (2026-10-11). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
+
+**S1119, PE-6.1 (17 ottobre)**: solo disegno, nessuna migrazione, nessuna scrittura su database, nessun accesso alla produzione. Prodotti: `docs/architecture/adr/0046_perimetro_del_tenant.md` (perimetro S4, PROPOSTO, da approvare dall'Amministratore di Sistema); `.programmi/onda2/DISEGNO_tabelle-onda2.md` (tabelle e colonne dell'onda 2 con inversa); `.programmi/onda2/PIANO_passo3-partecipazione.md` (passo 3 di ADR-0044: chiede le decisioni D-P3-1, D-P3-2, D-P3-3 e uno scostamento sul vincolo del passo 3b); `.programmi/onda2/README.md` e i mandati `O2-01` … `O2-10` (Sonnet, tetti 6-10 USD, somma 84). Piano del ciclo `.programmi/onda2/PIANO_PE-6.1.md`. Verdetto USCITA-SICURA.
 
 **S1119, PE-5b (17 ottobre)**: copiato senza modifiche `docs/kb/GLOSSARIO_dieci-oggetti_v0.3.md` dal datastore (v0.3 approvata 2026-10-17); impronta SHA-256 `5a129742…b8cb23` uguale a quella in `VERSIONE.json`. Indice percorsi rigenerato con `build_index.py`. Nessun codice, nessuna migrazione, nessun rilascio. Verdetto USCITA-SICURA.
 
@@ -23,7 +25,8 @@
 1. **Armare il deploy** di `000454`/`000455`/`000457` (decisione di Enzo, `scripts/close-propagate.sh`).
 2. **#267 / #268**: approvazione di ADR-0043 e ADR-0044 e scelta sui gruppi dubbi delle partecipazioni (Enzo). Dopo l'approvazione: I21 in `CLAUDE.md` e stato di ADR-0039.
 3. **#264** attende il pacchetto con ruoli, cruscotti, porte, variante pubblicata (datastore). **#265** resta l'aggancio alle modifiche di posto e riporto e la scelta sul livello contrattuale (F4 in attesa della scelta di Enzo, vedi sopra). **#263** resta il tipo delle tre date della `000454` (RD-09).
-4. **#266** struttura albero RTL (WAIT-INPUT, non toccata) · **#254** apertura dei perimetri (P1, non avviata).
+4. **Onda 2 (PE-6)**: approvazione di ADR-0046 (blocca O2-07/O2-08) e decisioni D-P3-1, D-P3-2, D-P3-3 del passo 3 (blocca O2-09/O2-10); O2-01 e O2-03 possono partire subito. Sequenza in `.programmi/onda2/README.md`.
+5. **#266** struttura albero RTL (WAIT-INPUT, non toccata) · **#254** apertura dei perimetri (P1, non avviata).
 
 ## Open questions
 

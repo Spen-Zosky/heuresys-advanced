@@ -26,6 +26,8 @@ const FAMIGLIA = FAMIGLIA_ARG ?? "PACCHETTO_DATASTORE";
 const raw = JSON.parse(fs.readFileSync(FILE, "utf8"));
 pg.types.setTypeParser(1700, (v) => (v === null ? null : Number(v))); // numeric
 pg.types.setTypeParser(20, (v) => (v === null ? null : Number(v))); // bigint
+pg.types.setTypeParser(1082, (v) => v); // date: resta la stringa AAAA-MM-GG, senza passare dal fuso del processo (mig. 000456)
+pg.types.setTypeParser(1184, (v) => (v === null ? null : new Date(v.replace(" ", "T").replace(/([+-]\d\d)$/, "$1:00")).toISOString())); // timestamptz: istante ISO in UTC (mig. 000456)
 const cli = new pg.Client({ host: process.env.PGHOST ?? "localhost", port: Number(process.env.PGPORT ?? 5432), user: process.env.PGUSER ?? "postgres", database: DB, application_name: "accogli_pacchetto" });
 await cli.connect();
 const q = async (s, a = []) => (await cli.query(s, a)).rows;

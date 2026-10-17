@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-10-17T14:40:30Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3839**
+**Generato**: 2026-10-17T15:51:02Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3855**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -8,7 +8,7 @@
 
 | Categoria | File |
 |---|---|
-| ADR | 44 |
+| ADR | 45 |
 | api-core | 36 |
 | api-module | 405 |
 | ci | 19 |
@@ -23,7 +23,7 @@
 | db-script | 67 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 788 |
+| doc-canonical | 803 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -34,7 +34,7 @@
 | test | 457 |
 | ux-design-archive | 80 |
 | web-source | 258 |
-| **TOTALE** | **3839** |
+| **TOTALE** | **3855** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 3196 |
+| live | 3212 |
 
 ## File per categoria
 
@@ -93,6 +93,7 @@
 - `D:\heuresys-advanced\docs\architecture\adr\0043_separazione_dal_datastore.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0044_partecipazione_ai_processi_legata_alla_posizione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0045_dati_contrattuali_restano_importati.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0046_perimetro_del_tenant.md` · *live* · git-tracked
 
 ### api-core
 
@@ -2238,6 +2239,20 @@
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1074-prompt-ripresa.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-S1077-corsa-autonoma.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\mandati\mandato-consegne-lab-2026-08-16.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\DISEGNO_tabelle-onda2.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\O2-01_contenuto-modello-v03.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\O2-02_caricatore-pacchetto-v03.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\O2-03_struttura-tenant.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\O2-04_strategia-decisioni-entita.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\O2-05_colonne-tenant-ed-esposizione.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\O2-06_materializzazione-v03-e-catena.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\O2-07_perimetro-risolutore-e-cancello.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\O2-08_perimetro-ricerche-agente-liste.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\O2-09_partecipazione-passo3a.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\O2-10_partecipazione-passo3b.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\PIANO_PE-6.1.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\PIANO_passo3-partecipazione.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\PROGRESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-macchina-stati.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-misura.md` · *live* · git-tracked
@@ -2369,6 +2384,7 @@
 - `D:\heuresys-advanced\docs\kb\COWORK_INBOX.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\DATA_PATTERNS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\DEBT_REGISTER.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\GLOSSARIO_dieci-oggetti_v0.3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\INDEX_PATHS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\NEXT_SESSION_DB_FRONTEND_FORENSICS_KICKOFF.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\NEXT_SESSION_EPICS_KICKOFF.md` · *live* · git-tracked

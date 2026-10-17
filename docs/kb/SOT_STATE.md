@@ -351,6 +351,12 @@ API **274** (+25 unit) · moduli API **109** · perimetri dell'agente aperti **1
 
 ---
 
+## S1119 (2026-10-17) — PE-6.1: il disegno dell'onda 2 e ADR-0046
+
+Solo disegno: nessuna migrazione, nessuna scrittura su database, nessun accesso alla produzione (vincolo del mandato); per questo i conteggi della §0 non sono stati ri-derivati in questa sessione e restano quelli misurati il 2026-10-17 prima di PE-6.1 (la catena non è cambiata: ultima migrazione `000457`). Prodotti: `docs/architecture/adr/0046_perimetro_del_tenant.md` (PROPOSTO), `.programmi/onda2/DISEGNO_tabelle-onda2.md`, `.programmi/onda2/PIANO_passo3-partecipazione.md`, `.programmi/onda2/README.md` con i mandati `O2-01` … `O2-10`, piano del ciclo `.programmi/onda2/PIANO_PE-6.1.md`. ADR indicizzati 0001..0046 (`build_adr_index.py`). Commit `8f8f84d4`.
+
+---
+
 ## S1119 (2026-10-17) — PE-5b: il glossario v0.3 del contratto dati entra in `docs/kb/`
 
 `docs/kb/GLOSSARIO_dieci-oggetti_v0.3.md` è copia senza modifiche dell'originale del datastore (`src/contratto/v0.3/`, v0.3 approvata il 2026-10-17); impronta SHA-256 uguale a quella in `VERSIONE.json`. Documento di riferimento, nessun codice né migrazione; produzione non toccata. Commit `29a02a1c`, pubblicato su `main`.

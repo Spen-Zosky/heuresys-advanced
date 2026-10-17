@@ -1,14 +1,14 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-10-17T14:40:30Z da docs/kb/tools/build_index.py
+# generato: 2026-10-17T15:51:02Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-10-17T14:40:30Z"
-  total_files: 3839
+  generated_at: "2026-10-17T15:51:02Z"
+  total_files: 3855
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 44
+    ADR: 45
     api-core: 36
     api-module: 405
     ci: 19
@@ -23,7 +23,7 @@ meta:
     db-script: 67
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 788
+    doc-canonical: 803
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -37,7 +37,7 @@ meta:
   status_counts:
     archive: 593
     external-archive: 50
-    live: 3196
+    live: 3212
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -300,6 +300,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\0045_dati_contrattuali_restano_importati.md'
     root: repo
     rel: 'docs/architecture/adr/0045_dati_contrattuali_restano_importati.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0046_perimetro_del_tenant.md'
+    root: repo
+    rel: 'docs/architecture/adr/0046_perimetro_del_tenant.md'
     category: ADR
     status: live
     provenance: git-tracked
@@ -12903,6 +12909,90 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\DISEGNO_tabelle-onda2.md'
+    root: repo
+    rel: '.programmi/onda2/DISEGNO_tabelle-onda2.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\O2-01_contenuto-modello-v03.md'
+    root: repo
+    rel: '.programmi/onda2/O2-01_contenuto-modello-v03.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\O2-02_caricatore-pacchetto-v03.md'
+    root: repo
+    rel: '.programmi/onda2/O2-02_caricatore-pacchetto-v03.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\O2-03_struttura-tenant.md'
+    root: repo
+    rel: '.programmi/onda2/O2-03_struttura-tenant.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\O2-04_strategia-decisioni-entita.md'
+    root: repo
+    rel: '.programmi/onda2/O2-04_strategia-decisioni-entita.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\O2-05_colonne-tenant-ed-esposizione.md'
+    root: repo
+    rel: '.programmi/onda2/O2-05_colonne-tenant-ed-esposizione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\O2-06_materializzazione-v03-e-catena.md'
+    root: repo
+    rel: '.programmi/onda2/O2-06_materializzazione-v03-e-catena.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\O2-07_perimetro-risolutore-e-cancello.md'
+    root: repo
+    rel: '.programmi/onda2/O2-07_perimetro-risolutore-e-cancello.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\O2-08_perimetro-ricerche-agente-liste.md'
+    root: repo
+    rel: '.programmi/onda2/O2-08_perimetro-ricerche-agente-liste.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\O2-09_partecipazione-passo3a.md'
+    root: repo
+    rel: '.programmi/onda2/O2-09_partecipazione-passo3a.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\O2-10_partecipazione-passo3b.md'
+    root: repo
+    rel: '.programmi/onda2/O2-10_partecipazione-passo3b.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\PIANO_PE-6.1.md'
+    root: repo
+    rel: '.programmi/onda2/PIANO_PE-6.1.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\PIANO_passo3-partecipazione.md'
+    root: repo
+    rel: '.programmi/onda2/PIANO_passo3-partecipazione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\README.md'
+    root: repo
+    rel: '.programmi/onda2/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.storia36\PROGRESS.md'
     root: repo
     rel: '.storia36/PROGRESS.md'
@@ -13686,6 +13776,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\DEBT_REGISTER.md'
     root: repo
     rel: 'docs/kb/DEBT_REGISTER.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\GLOSSARIO_dieci-oggetti_v0.3.md'
+    root: repo
+    rel: 'docs/kb/GLOSSARIO_dieci-oggetti_v0.3.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

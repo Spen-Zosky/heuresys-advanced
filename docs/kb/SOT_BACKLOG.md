@@ -12,6 +12,17 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
+- **#269 ADR-0046 PROPOSTO — il perimetro del tenant (passo S4): ricerche, liste di scelta e agente leggono solo dentro il fascicolo** · status: WAIT-INPUT
+  - PE-6.1 (2026-10-17): `docs/architecture/adr/0046_perimetro_del_tenant.md`. Blocca i mandati `O2-07` e `O2-08` di `.programmi/onda2/`.
+  - input-richiesto: approvare, correggere o respingere ADR-0046
+  - perche-solo-tuo: decisione architetturale che cambia che cosa vede ogni tenant
+- **#270 Passo 3 della partecipazione per posizione: tre decisioni sul RACI e uno scostamento dal vincolo di ADR-0044** · status: WAIT-INPUT
+  - PE-6.1 (2026-10-17): `.programmi/onda2/PIANO_passo3-partecipazione.md` sezioni 2 e 4. Dopo il passo 3a nessuno dei 57 OWNER si risolve in una persona (le 496 posizioni della classe H sono disattivate); il vincolo del passo 3b scritto nell'ADR non si valida per le 164 righe disattivate. Blocca `O2-09` e `O2-10`, che richiedono anche la `000457` e il passo 2 in produzione.
+  - input-richiesto: D-P3-1 (OWNER = posizione del responsabile dell'unità, raccomandato), D-P3-2 (disattivare le partecipazioni su posizioni disattivate, raccomandato), D-P3-3 (posizioni attive dell'unità come CONTRIBUTOR, raccomandato), vincolo condizionato all'attività
+  - perche-solo-tuo: chi partecipa a quale processo lo decide l'Amministratore di Sistema (controllo C7d)
+- **#271 Onda 2 in advanced (PE-6): dieci sessioni Sonnet** · status: ACTIVE
+  - priority: P1 · effort: 10 sessioni, tetti 6-10 USD (somma 84) · doc: `.programmi/onda2/README.md`
+  - `O2-01` e `O2-03` possono partire subito; gli altri seguono le dipendenze del README.
 - **#267 ADR-0043 PROPOSTO — la separazione dal datastore (passo S2): sei regole, sostituisce in parte ADR-0039, corregge I21** · status: WAIT-INPUT
   - W0-A2 (2026-10-11): bozza scritta, stato PROPOSTO: `docs/architecture/adr/0043_separazione_dal_datastore.md`. Per ogni voce del censimento dice dove va e con quale passo (S3 parita', S4 perimetro, S5 commutazione, S6 ritiro con archivio, impronta, prova di ripristino sul gemello e sentinella). In questo ciclo non si toglie niente; `CLAUDE.md` (I21) e lo stato di ADR-0039 si aggiornano solo all'approvazione.
   - input-richiesto: approvare, correggere o respingere ADR-0043

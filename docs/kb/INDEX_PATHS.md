@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-10-17T15:51:02Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3855**
+**Generato**: 2026-10-17T20:33:17Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3872**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,17 +13,17 @@
 | api-module | 405 |
 | ci | 19 |
 | claude-config | 38 |
-| config | 368 |
+| config | 369 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 453 |
+| db-migration | 454 |
 | db-other | 8 |
-| db-script | 67 |
+| db-script | 79 |
 | db-seed | 114 |
 | doc-archive | 85 |
-| doc-canonical | 803 |
+| doc-canonical | 806 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -34,7 +34,7 @@
 | test | 457 |
 | ux-design-archive | 80 |
 | web-source | 258 |
-| **TOTALE** | **3855** |
+| **TOTALE** | **3872** |
 
 ## Conteggi per status
 
@@ -42,7 +42,7 @@
 |---|---|
 | archive | 593 |
 | external-archive | 50 |
-| live | 3212 |
+| live | 3229 |
 
 ## File per categoria
 
@@ -766,6 +766,7 @@
 - `D:\heuresys-advanced\.programmi\esiti-onda0\prova-giunzione\carica.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\esiti-onda0\prova-giunzione\livelli_rtl.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\esiti-onda0\prova-giunzione\rileggi.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\esiti\O2-02_prova.txt` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\dossier-catalog-derivation.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\dossier-derivation.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\dossier-derivation.txt` · *live* · git-tracked
@@ -1789,6 +1790,7 @@
 - `D:\heuresys-advanced\db\migrations\000455_rtl_bank_livelli_organizzativi_allineati.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000456_pacchetto_date_e_istante_tipizzati.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000457_pe4_passo1_posizione_nelle_partecipazioni.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000458_pacchetto_v03_contenuto_modello_trova_casa.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1826,13 +1828,25 @@
 - `D:\heuresys-advanced\db\scripts\migrate-on-vm.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\onda2\000458-inversa.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\onda2\prova-000458.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\pacchetto\accogli-pacchetto.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\pacchetto\attiva-modello.mts` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\pacchetto\conta-righe-v03.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\pacchetto\contratto\v0.2\prototipo-pacchetto.schema.json` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\pacchetto\contratto\v0.3\VERSIONE.json` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\pacchetto\contratto\v0.3\prototipo-pacchetto.schema.json` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\pacchetto\contratto\v0.3\vocabolari.json` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\pacchetto\convalida-pacchetto.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\pacchetto\costruisci-pacchetto-prova-v03.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\pacchetto\definizione-pacchetto.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\pacchetto\guasta-pacchetto.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\pacchetto\inversa-000456.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\pacchetto\prova-000456.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\pacchetto\prova-caricatore-000456.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\pacchetto\prova-giunzione.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\pacchetto\prova-o2-02.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\pacchetto\regole-di-ritorno.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\pacchetto\verifica-livelli.mts` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\pe4-passo1-inversa.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\pe4-passo2-inversa.sql` · *live* · git-tracked
@@ -2135,6 +2149,7 @@
 - `D:\heuresys-advanced\.programmi\262-cancello-marciume-esposizione-completezza.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\263-giunzione-pacchetto-datastore.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\265-gerarchia-livelli-avviso.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\271-onda2-advanced.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\54-recruiting-ats.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\69-residui-staging-wave1.md` · *live* · git-tracked
@@ -2253,6 +2268,8 @@
 - `D:\heuresys-advanced\.programmi\onda2\PIANO_PE-6.1.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\onda2\PIANO_passo3-partecipazione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.programmi\onda2\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\esiti\O2-01.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.programmi\onda2\esiti\O2-02.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\PROGRESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-macchina-stati.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\c2-misura.md` · *live* · git-tracked

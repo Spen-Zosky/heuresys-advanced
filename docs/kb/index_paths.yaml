@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-10-17T15:51:02Z da docs/kb/tools/build_index.py
+# generato: 2026-10-17T20:33:17Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-10-17T15:51:02Z"
-  total_files: 3855
+  generated_at: "2026-10-17T20:33:17Z"
+  total_files: 3872
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,17 +13,17 @@ meta:
     api-module: 405
     ci: 19
     claude-config: 38
-    config: 368
+    config: 369
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 453
+    db-migration: 454
     db-other: 8
-    db-script: 67
+    db-script: 79
     db-seed: 114
     doc-archive: 85
-    doc-canonical: 803
+    doc-canonical: 806
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -37,7 +37,7 @@ meta:
   status_counts:
     archive: 593
     external-archive: 50
-    live: 3212
+    live: 3229
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -4248,6 +4248,12 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\esiti-onda0\prova-giunzione\rileggi.json'
     root: repo
     rel: '.programmi/esiti-onda0/prova-giunzione/rileggi.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\esiti\O2-02_prova.txt'
+    root: repo
+    rel: '.programmi/onda2/esiti/O2-02_prova.txt'
     category: config
     status: live
     provenance: git-tracked
@@ -10299,6 +10305,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000458_pacchetto_v03_contenuto_modello_trova_casa.sql'
+    root: repo
+    rel: 'db/migrations/000458_pacchetto_v03_contenuto_modello_trova_casa.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -10485,6 +10497,18 @@ files:
     category: db-script
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\onda2\000458-inversa.sql'
+    root: repo
+    rel: 'db/scripts/onda2/000458-inversa.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\onda2\prova-000458.sh'
+    root: repo
+    rel: 'db/scripts/onda2/prova-000458.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\pacchetto\accogli-pacchetto.mjs'
     root: repo
     rel: 'db/scripts/pacchetto/accogli-pacchetto.mjs'
@@ -10497,9 +10521,57 @@ files:
     category: db-script
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\conta-righe-v03.mjs'
+    root: repo
+    rel: 'db/scripts/pacchetto/conta-righe-v03.mjs'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\contratto\v0.2\prototipo-pacchetto.schema.json'
+    root: repo
+    rel: 'db/scripts/pacchetto/contratto/v0.2/prototipo-pacchetto.schema.json'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\contratto\v0.3\VERSIONE.json'
+    root: repo
+    rel: 'db/scripts/pacchetto/contratto/v0.3/VERSIONE.json'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\contratto\v0.3\prototipo-pacchetto.schema.json'
+    root: repo
+    rel: 'db/scripts/pacchetto/contratto/v0.3/prototipo-pacchetto.schema.json'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\contratto\v0.3\vocabolari.json'
+    root: repo
+    rel: 'db/scripts/pacchetto/contratto/v0.3/vocabolari.json'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\convalida-pacchetto.mjs'
+    root: repo
+    rel: 'db/scripts/pacchetto/convalida-pacchetto.mjs'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\costruisci-pacchetto-prova-v03.mjs'
+    root: repo
+    rel: 'db/scripts/pacchetto/costruisci-pacchetto-prova-v03.mjs'
+    category: db-script
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\pacchetto\definizione-pacchetto.mjs'
     root: repo
     rel: 'db/scripts/pacchetto/definizione-pacchetto.mjs'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\guasta-pacchetto.mjs'
+    root: repo
+    rel: 'db/scripts/pacchetto/guasta-pacchetto.mjs'
     category: db-script
     status: live
     provenance: git-tracked
@@ -10524,6 +10596,18 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\pacchetto\prova-giunzione.sh'
     root: repo
     rel: 'db/scripts/pacchetto/prova-giunzione.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\prova-o2-02.sh'
+    root: repo
+    rel: 'db/scripts/pacchetto/prova-o2-02.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\pacchetto\regole-di-ritorno.mjs'
+    root: repo
+    rel: 'db/scripts/pacchetto/regole-di-ritorno.mjs'
     category: db-script
     status: live
     provenance: git-tracked
@@ -12285,6 +12369,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\271-onda2-advanced.md'
+    root: repo
+    rel: '.programmi/271-onda2-advanced.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.programmi\50-knowledge-graph-legacy.md'
     root: repo
     rel: '.programmi/50-knowledge-graph-legacy.md'
@@ -12990,6 +13080,18 @@ files:
   - path: 'D:\heuresys-advanced\.programmi\onda2\README.md'
     root: repo
     rel: '.programmi/onda2/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\esiti\O2-01.md'
+    root: repo
+    rel: '.programmi/onda2/esiti/O2-01.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.programmi\onda2\esiti\O2-02.md'
+    root: repo
+    rel: '.programmi/onda2/esiti/O2-02.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

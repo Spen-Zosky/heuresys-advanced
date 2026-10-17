@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `6325d2c7` (2026-10-12T01:38:13+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `d2e2bc39` (2026-10-17T05:49:00+02:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,7 +10,7 @@
 | Route API | 659 |
 | Pagine web | 129 |
 | Schemi shared | 123 |
-| Tabelle DB | 319 (vuote: 22) |
+| Tabelle DB | 349 (vuote: 51) |
 | Viste / matview | 71 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 292 |
 
@@ -54,7 +54,7 @@
 | gdpr | /v1/gdpr | 5 | 4 | 4 | 1 |
 | generated-origins | /v1/generated-origins | 2 | 1 | 1 | 1 |
 | goals | /v1/goals | 12 | 4 | 7 | 4 |
-| hierarchy-levels | /v1/hierarchy-levels | 1 | 1 | 10 | 1 |
+| hierarchy-levels | /v1/hierarchy-levels | 1 | 1 | 10 | 2 |
 | insights | /v1/insights | 7 | 2 | 15 | 5 |
 | interview-feedback | /v1/interview-feedback | 4 | 1 | 7 | 1 |
 | interviews | /v1/interviews | 4 | 1 | 5 | 1 |
@@ -150,6 +150,35 @@
 - `sys.sys_auth_mfa_webauthn_credentials`
 - `sys.sys_auth_password_reset_tokens`
 - `sys.sys_auth_sessions`
+- `sys.sys_blueprint_content_career_paths`
+- `sys.sys_blueprint_content_career_steps`
+- `sys.sys_blueprint_content_ccnl_conditions`
+- `sys.sys_blueprint_content_ccnl_institutes`
+- `sys.sys_blueprint_content_ccnl_levels`
+- `sys.sys_blueprint_content_ccnl`
+- `sys.sys_blueprint_content_context`
+- `sys.sys_blueprint_content_derivations`
+- `sys.sys_blueprint_content_engagement_links`
+- `sys.sys_blueprint_content_engagements`
+- `sys.sys_blueprint_content_evidence_gaps`
+- `sys.sys_blueprint_content_evidence_links`
+- `sys.sys_blueprint_content_evidence`
+- `sys.sys_blueprint_content_gaps`
+- `sys.sys_blueprint_content_goals`
+- `sys.sys_blueprint_content_incentive_links`
+- `sys.sys_blueprint_content_incentives`
+- `sys.sys_blueprint_content_obligation_positions`
+- `sys.sys_blueprint_content_obligations`
+- `sys.sys_blueprint_content_packages`
+- `sys.sys_blueprint_content_position_occupations`
+- `sys.sys_blueprint_content_position_processes`
+- `sys.sys_blueprint_content_position_skill_requirements`
+- `sys.sys_blueprint_content_process_sites`
+- `sys.sys_blueprint_content_sites`
+- `sys.sys_blueprint_content_training_positions`
+- `sys.sys_blueprint_content_training_skills`
+- `sys.sys_blueprint_content_training`
+- `sys.sys_blueprint_content_unit_processes`
 - `sys.sys_candidate_applications`
 - `sys.sys_conflitti_ibridi`
 - `sys.sys_content_media`

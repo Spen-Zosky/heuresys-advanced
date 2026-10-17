@@ -19,6 +19,7 @@ import type {
 import * as repo from "./repository.js";
 import { approvalService } from "../approvals/service.js";
 import { USER_POSITION_ASSIGNMENT } from "../approvals/effects/position-assignment.js";
+import { avvisiDiUnaAssegnazione } from "../hierarchy-levels/service.js";
 
 function tenantOf(actor: ActorContext): string {
   if (!actor.tenantId) throw new ForbiddenError("Tenant context required");
@@ -76,7 +77,9 @@ export const userPositionAssignmentsService = {
         notes: body.notes ?? null,
       },
     });
-    return { approvalRequestId: richiesta.approvalRequestId, status: richiesta.status, action: "ASSIGN" as const };
+    // Principio gerarchia-livelli (#265): cosa succederebbe all'organigramma se la proposta fosse approvata. Avvisa, non blocca.
+    const avvisiGerarchiaLivelli = await avvisiDiUnaAssegnazione(tenantId, { userId: body.userId, positionId: body.positionId });
+    return { approvalRequestId: richiesta.approvalRequestId, status: richiesta.status, action: "ASSIGN" as const, avvisiGerarchiaLivelli };
   },
 
   /** Propone la chiusura dell'intervallo (I1: mai una DELETE). */
@@ -95,7 +98,8 @@ export const userPositionAssignmentsService = {
       approverUserIds: approvatori,
       metadata: { action: "TERMINATE", assignmentId: riga.assignmentId, endDate: body.endDate, notes: body.notes ?? null },
     });
-    return { approvalRequestId: richiesta.approvalRequestId, status: richiesta.status, action: "TERMINATE" as const };
+    // Terminare un incarico non può introdurre un livello più alto sotto uno più basso: nessun avviso da calcolare.
+    return { approvalRequestId: richiesta.approvalRequestId, status: richiesta.status, action: "TERMINATE" as const, avvisiGerarchiaLivelli: [] };
   },
 
   /** Propone: termina la riga corrente, apre la nuova (kind/fte ereditati dalla riga corrente). */
@@ -124,6 +128,7 @@ export const userPositionAssignmentsService = {
         notes: body.notes ?? null,
       },
     });
-    return { approvalRequestId: richiesta.approvalRequestId, status: richiesta.status, action: "TRANSFER" as const };
+    const avvisiGerarchiaLivelli = await avvisiDiUnaAssegnazione(tenantId, { userId: riga.userId, positionId: body.newPositionId, trasferimento: true });
+    return { approvalRequestId: richiesta.approvalRequestId, status: richiesta.status, action: "TRANSFER" as const, avvisiGerarchiaLivelli };
   },
 };

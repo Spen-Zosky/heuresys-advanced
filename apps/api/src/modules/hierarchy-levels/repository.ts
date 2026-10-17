@@ -126,3 +126,26 @@ export async function unitaDelTenant(q: DbConnector, tenantId: string): Promise<
     };
   });
 }
+
+/**
+ * Il posto in cui una persona verrebbe messa da un'assegnazione proposta: titolo della posizione, unità, e il livello del contratto
+ * attivo della persona (letto, mai scritto: i dati contrattuali restano importati, ADR-0045). Null se la posizione non è del tenant.
+ */
+export async function postoPerAssegnazione(
+  q: DbConnector,
+  tenantId: string,
+  userId: string,
+  positionId: string,
+): Promise<{ unitaId: string | null; posto: string; livello: string | null } | null> {
+  const r = await q.query<{ unit_id: string | null; title: string; level: string | null }>(
+    `SELECT p.position_organization_unit_id AS unit_id, p.position_title AS title,
+            (SELECT c.user_contract_ccnl_level FROM sys.sys_user_contracts c
+              WHERE c.user_contract_user_id = $2 AND c.user_contract_status = 'ACTIVE'
+              ORDER BY c.user_contract_start_date DESC LIMIT 1) AS level
+       FROM sys.sys_positions p
+      WHERE p.position_id = $3 AND p.position_tenant_id = $1`,
+    [tenantId, userId, positionId],
+  );
+  const riga = r.rows[0];
+  return riga ? { unitaId: riga.unit_id, posto: riga.title, livello: riga.level } : null;
+}

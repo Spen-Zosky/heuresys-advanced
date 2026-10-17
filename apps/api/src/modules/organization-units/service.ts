@@ -10,11 +10,13 @@ export type { ActorContext };
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
 import type {
   OrganizationUnit,
+  OrganizationUnitConAvvisi,
   OrganizationUnitListQuery,
   CreateOrganizationUnitBody,
   UpdateOrganizationUnitBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { conAvvisiDellaModifica } from "../hierarchy-levels/service.js";
 
 function requireOwnTenant(a: ActorContext): string {
   if (!a.tenantId) throw new ForbiddenError("Tenant context required");
@@ -66,7 +68,7 @@ export const organizationUnitsService = {
     return target;
   },
 
-  async create(actor: ActorContext, body: CreateOrganizationUnitBody): Promise<OrganizationUnit> {
+  async create(actor: ActorContext, body: CreateOrganizationUnitBody): Promise<OrganizationUnitConAvvisi> {
     let tenantId: string;
     if (isPlatform(actor)) {
       tenantId = body.tenantId ?? actor.tenantId ?? "";
@@ -82,10 +84,16 @@ export const organizationUnitsService = {
         "OU_CODE_CONFLICT",
       );
     }
-    return repo.insertOu(pool, tenantId, body, actor.userId);
+    // Principio gerarchia-livelli (#265): se l'unità nasce con un riporto o un responsabile, la risposta porta gli avvisi che introduce.
+    // Avvisa, non blocca: l'unità viene creata comunque.
+    const tocca = Boolean(body.parentId) || Boolean(body.managerUserId);
+    const { risultato, avvisi } = tocca
+      ? await conAvvisiDellaModifica(tenantId, () => repo.insertOu(pool, tenantId, body, actor.userId))
+      : { risultato: await repo.insertOu(pool, tenantId, body, actor.userId), avvisi: [] };
+    return { ...risultato, avvisiGerarchiaLivelli: avvisi };
   },
 
-  async update(actor: ActorContext, id: string, patch: UpdateOrganizationUnitBody): Promise<OrganizationUnit> {
+  async update(actor: ActorContext, id: string, patch: UpdateOrganizationUnitBody): Promise<OrganizationUnitConAvvisi> {
     const target = await repo.findOuById(pool, id);
     if (!target) throw new NotFoundError("OrganizationUnit");
     await ensureSameTenant(actor, target);
@@ -99,9 +107,14 @@ export const organizationUnitsService = {
         );
       }
     }
-    const updated = await repo.updateOuPartial(pool, id, patch, actor.userId);
+    // Principio gerarchia-livelli (#265): cambiare il riporto o il responsabile può mettere un livello più alto sotto uno più basso.
+    // La modifica si applica sempre; la risposta porta la motivazione scritta degli avvisi che essa introduce.
+    const tocca = patch.parentId !== undefined || patch.managerUserId !== undefined;
+    const { risultato: updated, avvisi } = tocca
+      ? await conAvvisiDellaModifica(target.tenantId, () => repo.updateOuPartial(pool, id, patch, actor.userId))
+      : { risultato: await repo.updateOuPartial(pool, id, patch, actor.userId), avvisi: [] };
     if (!updated) throw new NotFoundError("OrganizationUnit");
-    return updated;
+    return { ...updated, avvisiGerarchiaLivelli: avvisi };
   },
 
   async softDelete(actor: ActorContext, id: string): Promise<void> {

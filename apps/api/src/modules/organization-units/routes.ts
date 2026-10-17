@@ -8,6 +8,7 @@ import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import {
   OrganizationUnitSchema,
+  OrganizationUnitConAvvisiSchema,
   OrganizationUnitListQuerySchema,
   OrganizationUnitListResponseSchema,
   CreateOrganizationUnitBodySchema,
@@ -31,7 +32,7 @@ export const organizationUnitsRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.post("/", {
     preHandler: [app.verifyCsrf, requirePermission("organization_unit:create")],
-    schema: { body: CreateOrganizationUnitBodySchema, response: { 201: OrganizationUnitSchema } },
+    schema: { body: CreateOrganizationUnitBodySchema, response: { 201: OrganizationUnitConAvvisiSchema } },
   }, async (req, reply) => {
     const ou = await organizationUnitsService.create(actor(req), req.body);
     reply.code(201).send(ou);
@@ -39,7 +40,7 @@ export const organizationUnitsRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.patch("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("organization_unit:update")],
-    schema: { params: OrganizationUnitIdParamSchema, body: UpdateOrganizationUnitBodySchema, response: { 200: OrganizationUnitSchema } },
+    schema: { params: OrganizationUnitIdParamSchema, body: UpdateOrganizationUnitBodySchema, response: { 200: OrganizationUnitConAvvisiSchema } },
   }, async (req) => organizationUnitsService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {

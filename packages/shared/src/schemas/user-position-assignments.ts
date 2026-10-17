@@ -9,6 +9,7 @@
  */
 import { z } from "zod";
 import { paginationFields } from "./_pagination.js";
+import { AvvisoGerarchiaSchema } from "./hierarchy-levels.js";
 
 export const UserPositionAssignmentKindEnum = z.enum(["PRIMARY", "SECONDARY", "INTERIM", "ACTING"]);
 export const UserPositionAssignmentStatusEnum = z.enum(["ACTIVE", "ENDED"]);
@@ -80,5 +81,7 @@ export const PositionAssignmentProposalSubmittedSchema = z.object({
   approvalRequestId: z.uuid(),
   status: z.string(),
   action: z.enum(["ASSIGN", "TERMINATE", "TRANSFER"]),
+  /** Gli avvisi gerarchia-livelli che l'assegnazione introdurrebbe se fosse approvata (#265): avvisa, non blocca; sempre presente, vuoto se nessuno. */
+  avvisiGerarchiaLivelli: z.array(AvvisoGerarchiaSchema),
 });
 export type PositionAssignmentProposalSubmitted = z.infer<typeof PositionAssignmentProposalSubmittedSchema>;

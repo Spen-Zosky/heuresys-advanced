@@ -3,7 +3,7 @@
  * Ogni caso e' uno scenario detto da Enzo il 2026-10-05: un QD2 puo' guidare altri QD2, non un QD3 ne' un QD4.
  */
 import { describe, it, expect } from "vitest";
-import { rango, verifica, type Scala, type Unita } from "../../src/modules/hierarchy-levels/logic.js";
+import { avvisiNuovi, conAssegnazione, rango, verifica, type Scala, type Unita } from "../../src/modules/hierarchy-levels/logic.js";
 
 const SCALA: Scala = {
   ordine: [
@@ -74,5 +74,43 @@ describe("verifica", () => {
   });
   it("unita senza responsabile: nessun avviso", () => {
     expect(verifica([unita("u", null, null, null, [["a", "QD4"]])], SCALA).avvisi).toEqual([]);
+  });
+});
+
+describe("avvisiNuovi (F3: cio' che QUESTA modifica introduce)", () => {
+  const prima = verifica([unita("u1", null, "capo", "QD2", [["a", "QD3"]])], SCALA).avvisi;
+  it("un avviso che c'era gia' non si ripete", () => {
+    expect(avvisiNuovi(prima, prima)).toEqual([]);
+  });
+  it("un avviso che compare con la modifica e' nuovo", () => {
+    const dopo = verifica([unita("u1", null, "capo", "QD2", [["a", "QD3"], ["b", "QD4"]])], SCALA).avvisi;
+    expect(avvisiNuovi(prima, dopo).map((x) => x.sottopostoId)).toEqual(["b"]);
+  });
+  it("un avviso che sparisce non produce niente", () => {
+    expect(avvisiNuovi(prima, [])).toEqual([]);
+  });
+});
+
+describe("conAssegnazione (F3: l'organigramma dopo un'assegnazione proposta)", () => {
+  const base = [unita("u1", null, "capo", "QD2", [["a", "QD1"]]), unita("u2", null, "altro", "QD4", [["x", "QD2"]])];
+  const nuovo = persona("n", "QD3");
+  it("mette la persona nell'unita' indicata e non modifica l'originale", () => {
+    const dopo = conAssegnazione(base, nuovo, "u1");
+    expect(dopo[0]!.persone.map((p) => p.id)).toEqual(["a", "n"]);
+    expect(base[0]!.persone.map((p) => p.id)).toEqual(["a"]);
+    expect(verifica(dopo, SCALA).avvisi.map((x) => x.sottopostoId)).toEqual(["n"]);
+  });
+  it("esito opposto: la stessa persona sotto un responsabile piu' alto non da' avvisi", () => {
+    expect(verifica(conAssegnazione(base, nuovo, "u2"), SCALA).avvisi).toEqual([]);
+  });
+  it("un trasferimento toglie la persona dal posto di prima", () => {
+    const partenza = [unita("u1", null, "capo", "QD2", [["n", "QD3"]]), unita("u2", null, "altro", "QD4", [])];
+    const dopo = conAssegnazione(partenza, nuovo, "u2", "n");
+    expect(dopo[0]!.persone).toEqual([]);
+    expect(dopo[1]!.persone.map((p) => p.id)).toEqual(["n"]);
+    expect(avvisiNuovi(verifica(partenza, SCALA).avvisi, verifica(dopo, SCALA).avvisi)).toEqual([]);
+  });
+  it("chi e' gia' il responsabile dell'unita' non viene aggiunto fra le persone", () => {
+    expect(conAssegnazione(base, persona("capo", "QD2"), "u1")[0]!.persone.map((p) => p.id)).toEqual(["a"]);
   });
 });

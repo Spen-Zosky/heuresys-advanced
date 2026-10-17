@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
 import { queryBoolean } from "./_query-boolean.js";
+import { AvvisoGerarchiaSchema } from "./hierarchy-levels.js";
 export const OrganizationUnitSchema = z.object({
   organizationUnitId: z.uuid(),
   tenantId: z.uuid(),
@@ -32,6 +33,10 @@ export const OrganizationUnitSchema = z.object({
   updatedAt: z.iso.datetime(),
 });
 export type OrganizationUnit = z.infer<typeof OrganizationUnitSchema>;
+
+/** Risposta di creazione e modifica: l'unità più gli avvisi gerarchia-livelli che QUESTA modifica introduce (#265, non blocca mai). */
+export const OrganizationUnitConAvvisiSchema = OrganizationUnitSchema.extend({ avvisiGerarchiaLivelli: z.array(AvvisoGerarchiaSchema) });
+export type OrganizationUnitConAvvisi = z.infer<typeof OrganizationUnitConAvvisiSchema>;
 
 export const OrganizationUnitListQuerySchema = z.object({
   isActive: queryBoolean().optional(),

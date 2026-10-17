@@ -148,3 +148,28 @@ export function verifica(unita: readonly Unita[], scala: Scala): Esito {
   }
   return { avvisi, nonValutabili: [...nonVal.values()] };
 }
+
+/** La chiave di un avviso: lo stesso caso (unità, sottoposto) è lo stesso avviso prima e dopo una modifica. */
+const chiave = (a: Avviso): string => `${a.unitaId}|${a.sottopostoId}`;
+
+/**
+ * Gli avvisi che una modifica INTRODUCE: quelli di `dopo` che non c'erano in `prima`. Un avviso che c'era già non è colpa di questa
+ * modifica e non va ripetuto a chi la fa (resta visibile in `GET /v1/hierarchy-levels/check`).
+ */
+export function avvisiNuovi(prima: readonly Avviso[], dopo: readonly Avviso[]): Avviso[] {
+  const gia = new Set(prima.map(chiave));
+  return dopo.filter((a) => !gia.has(chiave(a)));
+}
+
+/**
+ * L'organigramma com'è DOPO un'assegnazione proposta: la persona (`persona`) siede nell'unità `unitaId`; se `togliDaPersonaId` è
+ * valorizzato (trasferimento) la stessa persona esce prima da dove sedeva. Non modifica `unita`. Chi è già il responsabile
+ * dell'unità non viene aggiunto fra le persone: lo è già.
+ */
+export function conAssegnazione(unita: readonly Unita[], persona: Persona, unitaId: string, togliDaPersonaId?: string): Unita[] {
+  return unita.map((u) => {
+    const senza = togliDaPersonaId === undefined ? u.persone : u.persone.filter((p) => p.id !== togliDaPersonaId);
+    if (u.id !== unitaId || u.responsabile?.id === persona.id || senza.some((p) => p.id === persona.id)) return { ...u, persone: senza };
+    return { ...u, persone: [...senza, persona] };
+  });
+}

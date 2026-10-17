@@ -1,10 +1,12 @@
 # STATE — vista rapida
 
-**Updated**: 2026-10-17 (S1119 — PE-4: passi 1 e 2 di ADR-0044 provati su copia del gemello, non in produzione; esito `.programmi/esiti-onda0/PE-4.md`; prima PE-3: I21/ADR-0039/indice, migrazione 000456 (263.4) e avviso gerarchia-livelli nelle modifiche (265.3), non in produzione; esito `.programmi/esiti-onda0/PE-3.md`; prima W0-D: #265 F4 sospesa; prima W0-A3, `chiudi` a tre livelli; prima S1118, W0-A1 e W0-A2, 000454 e 000455 non in produzione)
+**Updated**: 2026-10-17 (S1119 — PE-5b: glossario v0.3 in `docs/kb/`; prima PE-4: passi 1 e 2 di ADR-0044 provati su copia del gemello, non in produzione; esito `.programmi/esiti-onda0/PE-4.md`; prima PE-3: I21/ADR-0039/indice, migrazione 000456 (263.4) e avviso gerarchia-livelli nelle modifiche (265.3), non in produzione; esito `.programmi/esiti-onda0/PE-3.md`; prima W0-D: #265 F4 sospesa; prima W0-A3, `chiudi` a tre livelli; prima S1118, W0-A1 e W0-A2, 000454 e 000455 non in produzione)
 
 *Ultimo aggiornamento: S1118 (2026-10-11). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
+
+**S1119, PE-5b (17 ottobre)**: copiato senza modifiche `docs/kb/GLOSSARIO_dieci-oggetti_v0.3.md` dal datastore (v0.3 approvata 2026-10-17); impronta SHA-256 `5a129742…b8cb23` uguale a quella in `VERSIONE.json`. Indice percorsi rigenerato con `build_index.py`. Nessun codice, nessuna migrazione, nessun rilascio. Verdetto USCITA-SICURA.
 
 **S1119, PE-4 (17 ottobre)**: ADR-0044 passi 1 e 2 scritti e provati a andata e ritorno su copie del gemello: migrazione `000457` (colonna della posizione) e script fuori catena `db/scripts/pe4-passo2-*.sql` (riempimento con giornale e registro dei dubbi). **Stato intermedio dichiarato**: committati su `main` ma NON in produzione, non armati, non propagati; il passo 2 sulla produzione si lancia a mano dopo la `000457` e disattiva 164 partecipazioni (cambia la visibilità funzionale). Il passo 3 (letture) non è fatto. Copie di prova sul gemello elencate nell'esito.
 

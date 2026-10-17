@@ -73,7 +73,7 @@ Si cambiano solo con un nuovo ADR. Se un requisito sembra contraddirli, fermati 
 - ADR-0011: l'ESS (`/me/*`, `/v1/me/*`) vive in un modulo dedicato.
 - I15: un solo ambiente di produzione con due tenant (ADR-0026).
 - I16–I20, I22: accesso come intersezione di perimetro gerarchico (albero delle unità) e modalità funzionale `edit/read/mask/none`; ognuno vede i propri dati; i dati sensibili altrui solo per catena organizzativa; chi è a capo di una catena vede tutto ciò che le sta sotto e niente delle catene sorelle; i mandati HR (`TENANT_ADMIN`, `HRMS_MANAGER`) vedono tutto il tenant salvo le cinque eccezioni di ADR-0036 §5; `PLATFORM_ADMIN` è un mandato tecnico e vede `COMPENSATION`/`EVALUATION` mascherate (`apps/api/src/lib/scope/mask.ts`); `DPO` ha il perimetro tenant-wide mascherato. Dettaglio in ADR-0036 e ADR-0032.
-- I21: i dati che derivano dall'industria di un tenant sono coerenti con essa; le tassonomie (ESCO, ISCO, NACE, ATECO, CCNL, modelli operativi) restano aperte a tutte le industrie.
+- I21: i dati che derivano dall'industria di un tenant sono coerenti con essa; le tassonomie (ESCO, ISCO, NACE, ATECO, CCNL, modelli operativi) restano aperte a tutte le industrie nel datastore; in advanced un tenant ne vede solo il proprio perimetro (ADR-0043).
 - I23: ogni tabella di dati del cliente è nativa, importata o ibrida (ADR-0041).
 
 ## Lavorare sui dati e sul codice

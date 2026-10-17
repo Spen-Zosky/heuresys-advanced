@@ -1,6 +1,6 @@
 # ADR-0039 — Catalogo, profilo, voci proprie: dove vive ciò che un cliente può farsi su misura
 
-- **Status**: **ACCEPTED** — approvato da Enzo Spenuso il 2026-09-09
+- **Status**: **ACCEPTED** — approvato da Enzo Spenuso il 2026-09-09 · **Superseded in part by ADR-0043** (2026-10-12): regole 1 e 4, seconda frase; restano in vigore le regole 2 e 3 e la prima frase della regola 4
 - **Date**: 2026-09-09
 - **Amends**: invariante **I5** (isolamento fra clienti), per la parte che riguarda i cataloghi di piattaforma
 - **Decided by**: Enzo Spenuso — decisione presa e ADR approvato il 2026-09-09

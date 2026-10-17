@@ -1,6 +1,6 @@
 # STATE — vista rapida
 
-**Updated**: 2026-10-12 (S1119 — W0-D: #265 F4 sospesa; prima W0-A3, `chiudi` a tre livelli; prima S1118, W0-A1 e W0-A2, 000454 e 000455 non in produzione)
+**Updated**: 2026-10-17 (S1119 — PE-3: I21/ADR-0039/indice, migrazione 000456 (263.4) e avviso gerarchia-livelli nelle modifiche (265.3), non in produzione; esito `.programmi/esiti-onda0/PE-3.md`; prima W0-D: #265 F4 sospesa; prima W0-A3, `chiudi` a tre livelli; prima S1118, W0-A1 e W0-A2, 000454 e 000455 non in produzione)
 
 *Ultimo aggiornamento: S1118 (2026-10-11). I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 

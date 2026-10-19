@@ -112,7 +112,7 @@ WINDOWS: dict[str, int] = {
     "claude-opus-5": 1_000_000,
     "claude-opus-5[1m]": 1_000_000,
     "claude-sonnet-5": 1_000_000,
-    "claude-fable-5": 200_000,
+    "claude-fable-5": 1_000_000,
     "claude-haiku-4-5-20251001": 200_000,
 }
 DEFAULT_WINDOW = 1_000_000
@@ -407,6 +407,35 @@ def finestra_misurata(
     return size
 
 
+APPRESE_PATH = Path.home() / ".claude" / "finestre-apprese.json"
+
+
+def finestre_apprese(path: Path | None = None) -> dict:
+    """Finestre per modello gia' MISURATE in una corsa precedente (`--window` o la
+    dichiarazione di Claude Code). E' cio' che permette di riconoscere una famiglia
+    nuova dopo la prima misura, senza una tabella scritta a mano."""
+    try:
+        o = json.loads((path or APPRESE_PATH).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, ValueError):
+        return {}
+    return o if isinstance(o, dict) else {}
+
+
+def impara_finestra(model: str, window: int, picco: int, path: Path | None = None) -> None:
+    """Salva solo una finestra plausibile (>= del picco visto) da fonte misurata."""
+    if not model or window <= 0 or window < picco:
+        return
+    p = path or APPRESE_PATH
+    d = finestre_apprese(p)
+    if d.get(model) == window:
+        return
+    d[model] = window
+    try:
+        p.write_text(json.dumps(d, indent=1, sort_keys=True), encoding="utf-8")
+    except OSError:
+        pass
+
+
 def finestra_per(
     model: str,
     override: int | None,
@@ -426,8 +455,18 @@ def finestra_per(
     misurata = finestra_misurata(session, ctx_path, adesso)
     if misurata:
         return misurata, True
+    appresa = finestre_apprese().get(model)
+    if isinstance(appresa, int) and appresa > 0:
+        return appresa, True
     if model in WINDOWS:
         return WINDOWS[model], True
+    # Una versione nuova della stessa famiglia (`claude-sonnet-5-5` dopo
+    # `claude-sonnet-5`) eredita la finestra col prefisso piu' lungo. Resta un
+    # ripiego: la prova dell'impossibile in `misura` lo smentisce se sbaglia.
+    base = model.split("[")[0]
+    cand = [k for k in WINDOWS if base.startswith(k.split("[")[0] + "-")]
+    if cand:
+        return WINDOWS[max(cand, key=len)], True
     return DEFAULT_WINDOW, False
 
 
@@ -463,6 +502,8 @@ def misura(session: str | None, override_window: int | None, cwd: Path | None = 
     sess = session or path.stem
     window, riconosciuta = finestra_per(ultimo.model, override_window, sess, ctx_path)
     frazione = ultimo.contesto / window
+    if dir_override is None and (override_window or finestra_misurata(sess, ctx_path)):
+        impara_finestra(ultimo.model, window, picco)
     # ⚠ LA PROVA DEL NOVE, e vale piu' di ogni tabella: una frazione oltre 1.0 e'
     # IMPOSSIBILE. Se il contesto avesse davvero superato la finestra, l'API avrebbe
     # rifiutato la richiesta e quel blocco `usage` non esisterebbe. Quindi non e' il
@@ -907,26 +948,26 @@ def selftest() -> int:
         fctx = d3 / "context-window.json"
         fctx.write_text(json.dumps({"size": 1_000_000, "epoch": 500,
                                     "session_id": "abc12345"}), encoding="utf-8")
-        w, ric = finestra_per("claude-fable-5", None, "abc12345", fctx, adesso=600.0)
+        w, ric = finestra_per("claude-haiku-4-5-20251001", None, "abc12345", fctx, adesso=600.0)
         check("la finestra misurata batte la tabella", (1_000_000, True), (w, ric))
         # NEGATIVO: se il file e' di UN'ALTRA sessione non si usa (stesso difetto del
         # transcript, e lo stesso rimedio: il file e' globale, quindi porta session_id).
-        w, ric = finestra_per("claude-fable-5", None, "zzz99999", fctx, adesso=600.0)
+        w, ric = finestra_per("claude-haiku-4-5-20251001", None, "zzz99999", fctx, adesso=600.0)
         check("finestra di un'altra sessione: ignorata", (200_000, True), (w, ric))
         # NEGATIVO: stantia -> si ripiega, non si usa un numero vecchio.
-        w, ric = finestra_per("claude-fable-5", None, "abc12345", fctx, adesso=500_000.0)
+        w, ric = finestra_per("claude-haiku-4-5-20251001", None, "abc12345", fctx, adesso=500_000.0)
         check("finestra stantia: ignorata", (200_000, True), (w, ric))
 
         # 3-quinquies — NEGATIVO: una frazione OLTRE 1.0 smentisce il denominatore,
         #     anche quando viene dalla tabella. Terzo giro sullo stesso difetto
         #     (2026-08-25): le due correzioni precedenti non bastavano, perche'
         #     `finestra_per` marca «riconosciuta» pure un valore di tabella — e la
-        #     tabella invecchia. Una sessione `claude-fable-5` in tabella a 200.000,
+        #     tabella invecchia. Una sessione `claude-haiku-4-5-20251001` in tabella a 200.000,
         #     finestra vera 1.000.000: 242.421 token -> «121.2% -> exit 3» su una
         #     sessione che stava al 24%. Il segnale c'era ed era inequivocabile.
         #     La prova sa fallire: togliendo `if frazione > 1.0: riconosciuta = False`
         #     da `misura`, la prima riga qui sotto diventa rossa.
-        pf = _scrivi(tmp / "oltre1", "sess", [_riga("claude-fable-5", 1, 0, 242_420, 10)])
+        pf = _scrivi(tmp / "oltre1", "sess", [_riga("claude-haiku-4-5-20251001", 1, 0, 242_420, 10)])
         mo = misura("sess", None, dir_override=pf.parent, ctx_path=tmp / "non-esiste.json")
         check("frazione impossibile: finestra NON riconosciuta", False,
               mo["finestra_riconosciuta"])
@@ -936,7 +977,7 @@ def selftest() -> int:
               sorveglia(mo, {"ok": False}, STOP_CONTESTO, STOP_5H)["cieco"])
         # POSITIVO che rende la prova non banale: una frazione plausibile resta valida
         # e la soglia scatta come deve.
-        pf2 = _scrivi(tmp / "oltre2", "sess", [_riga("claude-fable-5", 1, 0, 180_000, 10)])
+        pf2 = _scrivi(tmp / "oltre2", "sess", [_riga("claude-haiku-4-5-20251001", 1, 0, 180_000, 10)])
         mp = misura("sess", None, dir_override=pf2.parent, ctx_path=tmp / "non-esiste.json")
         check("frazione plausibile: finestra riconosciuta", True, mp["finestra_riconosciuta"])
         check("frazione plausibile: la soglia scatta (90% > 75%)", True,

@@ -5,7 +5,7 @@
   "description": "Heuresys Advanced — Next.js 15 App Router admin console (MVP-2a) + Employee Self-Service Portal (MVP-2b), bilingual it/en",
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start -p 3000",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",

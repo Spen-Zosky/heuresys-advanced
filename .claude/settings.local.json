@@ -25,19 +25,5 @@
       "Read(//tmp/**)",
       "Bash(pnpm exec *)"
     ]
-  },
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup|resume|clear",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && command -v powershell.exe >/dev/null 2>&1 && powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/session-boot.ps1 -ProjectRoot \"$CLAUDE_PROJECT_DIR\" || true"
-          }
-        ]
-      }
-    ]
-  },
-  "outputStyle": "Concise"
+  }
 }

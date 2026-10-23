@@ -15,6 +15,7 @@ Ogni verifica: comando o procedura, ambiente, data e ora (UTC), esito **PASS / F
 | V-07 | 2026-10-23 | Datastore, tipi | container | `tsc --noEmit` (radice, comprende `apps/api`) e `tsc --noEmit -p qa` | PASS; `apps/web` FAIL preesistente (`globals.css`), identico su `origin/main` | — |
 | V-08 | 2026-10-23 | Datastore, sezione 21 del rito (vocabolario dei verbi contro le rotte) rifatta a mano | container | la pipeline `sed`/`awk`/`comm` della sezione 21 | PASS: 106 rotte, coincidono | — |
 | V-09 | 2026-10-23 | C1 advanced: verifica della consegna (caso d'impronta condiviso, copie allineate, consegna intatta, pacchetto cambiato, manifesto fuori forma, R-54) | container, node 24, Ajv 8.20 del datastore via `NODE_PATH` (advanced non ha `node_modules` qui) | `node --test db/scripts/pacchetto/manifesto-consegna.test.mjs` | PASS 6/6; rosso visto con 4 mutazioni (chiavi non ordinate, niente convalida, niente confronto d'impronta, copia dello schema diversa) | questa riga |
+| V-10 | 2026-10-23 | C13: collegamenti dalla posizione alle tre sotto-pagine; conteggi scritti a mano tolti da `/investors` (resta il solo blocco dal vivo); prova E2E nuova in `position-sub.spec.ts` | container | analisi sintattica TypeScript dei tre file | sintassi PASS; `tsc` di `apps/web` ed E2E NON ESEGUITI: in questo container advanced non ha `node_modules` e `@heuresys/ui` vive in un altro repository. Resta «in corso» finché la CI o una corsa E2E sulla VM non lo mostra con un login reale | — |
 
 ## Preesistenti (non introdotti da questo programma)
 

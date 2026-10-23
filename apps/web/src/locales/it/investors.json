@@ -13,7 +13,6 @@
     "tagline": "Ogni numero è tracciabile alla sua fonte.",
     "liveLabel": "live",
     "loading": "—",
-    "asOf": "dati di codebase al 9 settembre 2026",
     "live": {
       "skills": "Competenze ESCO (tassonomia)",
       "occupationSkillEdges": "Collegamenti occupazione→competenza",
@@ -25,14 +24,6 @@
       "rolePermissionMappings": "Mappature ruolo×permesso (RBAC)",
       "uiInterfaces": "Interfacce UI gated da RBAC",
       "activeTenancies": "Tenant attivi"
-    },
-    "static": {
-      "modules": "Moduli business (API)",
-      "endpoints": "Endpoint /v1/*",
-      "migrations": "Migrazioni DB idempotenti",
-      "apiTests": "Test di integrazione API (DB reale)",
-      "e2e": "Test E2E Playwright",
-      "pages": "Pagine web (admin + ESS)"
     }
   },
   "wedges": {

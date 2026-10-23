@@ -20,6 +20,17 @@ async function getFirstPositionId(page: import("@playwright/test").Page): Promis
 }
 
 test.describe("MVP-2a position sub-resources — live data", () => {
+  test("/positions/[id] links its three sub-pages, and each link opens its page (consolidamento C13)", async ({ page }) => {
+    const positionId = await getFirstPositionId(page);
+    for (const [k, pageId] of [["skills", "position-skills-page"], ["kpis", "position-kpis-page"], ["learning", "position-learning-page"]] as const) {
+      await page.goto(`/positions/${positionId}`);
+      const link = page.getByTestId(`position-subpage-${k}`);
+      await expect(link).toHaveAttribute("href", `/positions/${positionId}/${k}`);
+      await link.click();
+      await expect(page.getByTestId(pageId)).toBeVisible();
+    }
+  });
+
   test("/positions/[id]/skills renders requirements list (empty state OK)", async ({ page }) => {
     const positionId = await getFirstPositionId(page);
     await page.goto(`/positions/${positionId}/skills`);

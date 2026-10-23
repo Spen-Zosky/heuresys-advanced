@@ -76,6 +76,15 @@ export default function PositionDetailPage() {
         }
       />
 
+      {/* Le tre sotto-pagine della posizione: senza questi collegamenti non le raggiungeva nessuno (consolidamento C13, R-33). */}
+      <nav data-testid="position-subpages" className="flex flex-wrap gap-4 text-sm">
+        {(["skills", "kpis", "learning"] as const).map((k) => (
+          <Link key={k} href={`/positions/${positionId}/${k}`} data-testid={`position-subpage-${k}`} className="underline-offset-2 hover:underline">
+            {t(`positions.${k}.title`)}
+          </Link>
+        ))}
+      </nav>
+
       <Card>
         <CardHeader><CardTitle>{t("positions.detail.cardTitle")}</CardTitle></CardHeader>
         <CardContent>

@@ -11,21 +11,6 @@ const LIVE_KEYS: (keyof PlatformStatsResponse)[] = [
   "organizationUnits", "teams", "rolePermissionMappings", "uiInterfaces", "activeTenancies",
 ];
 
-// Numeri statici al 9 settembre 2026 (M2.2 del bundle 2026-09-09 — erano scaduti da S1011,
-// alcuni quasi dimezzati). "Statico" qui significa "scritto a mano", non "vero per sempre":
-// datati e dichiarati tali in `proof.asOf`, cosi' come vuole IL PUNTO FISSO del CLAUDE.md.
-// Comandi di ri-misura, uno per riga:
-//   modules    find apps/api/src/modules -maxdepth 1 -mindepth 1 -type d | wc -l
-//   endpoints  grep -rhE '^\s*(app|fastify|server)\.(get|post|put|patch|delete)\(' apps/api/src/modules/*/routes.ts | wc -l
-//   migrations git ls-files 'db/migrations/*.sql' | wc -l
-//   apiTests   grep -rhE '^\s*(it|test)\(' apps/api/test/*.ts | wc -l
-//   e2e        grep -rhE '^\s*test\(' apps/web/tests/e2e/*.ts | wc -l
-//   pages      git ls-files 'apps/web/src/app/**/page.tsx' | wc -l
-const STATIC_FACTS = [
-  { key: "modules", value: 106 }, { key: "endpoints", value: 615 }, { key: "migrations", value: 384 },
-  { key: "apiTests", value: 1871 }, { key: "e2e", value: 239 }, { key: "pages", value: 122 },
-] as const;
-
 export default function InvestorsPage() {
   const { t } = useTranslation("investors");
   const { data } = usePlatformStats();
@@ -65,17 +50,6 @@ export default function InvestorsPage() {
             </Card>
           ))}
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {STATIC_FACTS.map((f) => (
-            <Card key={f.key} data-print-card>
-              <CardContent className="p-5">
-                <span className="text-2xl font-semibold tabular-nums">{f.value.toLocaleString("it")}</span>
-                <p className="mt-1 text-sm text-muted-foreground">{t(`proof.static.${f.key}`)}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <p className="mt-3 text-center text-xs text-muted-foreground">{t("proof.asOf")}</p>
       </section>
 
       <section data-testid="investors-wedges" className="mx-auto max-w-6xl px-6 py-12">

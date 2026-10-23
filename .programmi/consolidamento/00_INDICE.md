@@ -31,7 +31,7 @@ Fuori perimetro, dichiarato all'inizio: S5 e S6 (gesti di Enzo dopo la parità),
 | A — ricognizione e baseline | fatta sui repository; baseline dei database della VM in corso (sessione sulla VM, sola lettura) | sezione «Baseline» qui sotto |
 | B — diagnosi e progetto | fatta; revisione indipendente: «APPROVABILE CON CORREZIONI», correzioni applicate a 01-03 | `lavoro/G_revisione_indipendente.md` |
 | Approvazione complessiva | **approvata il 2026-10-23 in forza della delega notturna di Enzo** (messaggi delle 02:06 e 02:07 UTC: «prendere tu le migliori decisioni (quelle che mi vengono raccomandate) al posto mio», «ti delego anche quelle»), alle condizioni riportate dal coordinatore: revisione indipendente prima, niente scritture in produzione senza backup verificato e ritorno provato, niente cancellazioni, niente spese. L'approvazione copre **il piano**; ADR-0046 (correzione), ADR-0047 e ADR-0048 restano **PROPOSTI** per Enzo, perché emendano decisioni già prese (raccomandazione della revisione indipendente, R-53) | questo file |
-| C — implementazione | iniziata con gli incrementi che non scrivono in produzione | `04_VERIFICHE.md` |
+| C — implementazione | in corso: C0, C1 (datastore e advanced) e C2 nel codice fatti; bozze di ADR-0047 e ADR-0048 scritte (PROPOSTO); le prove sul database del datastore chieste alla sessione sulla VM | `04_VERIFICHE.md` |
 | D — validazione e consegna | non iniziata | — |
 
 ## Migrazioni prenotate

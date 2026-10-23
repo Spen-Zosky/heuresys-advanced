@@ -1,8 +1,8 @@
 # ADR-0047 — Il contratto del fascicolo: consegna per file, identità della versione, versione fissata sull'attivazione
 
-- **Status**: PROPOSTO (in attesa dell'approvazione dell'Amministratore di Sistema)
+- **Status**: ACCETTATO il 2026-10-23 da Enzo Spenuso (approvazione data in chat alle 15:19 UTC, 17:19 ora di Roma, con le raccomandazioni del riepilogo del mattino)
 - **Date**: 2026-10-23
-- **Decided by**: da decidere (Amministratore di Sistema)
+- **Decided by**: Enzo Spenuso, 2026-10-23
 - **Redatto da**: Claude Code, programma di consolidamento advanced ↔ datastore (`.programmi/consolidamento/`), Fase C
 - **Completa**: ADR-0043 (accettato), ADR-0046 (proposto)
 - **Emenda**: niente su chi produce lo stato «pubblicato»: la domanda 1 è stata decisa nella forma A, che lascia ADR-0043 voce 14 e D-72 come sono
@@ -13,7 +13,7 @@
 > 2. Advanced lo riceve leggendo quella cartella e ricalcolando l'impronta. Nessun collegamento fra i due database, in nessuno dei due versi.
 > 3. Una versione si riconosce da due cose: il codice del prototipo e il numero del pacchetto nel datastore.
 > 4. Il tenant non segue da solo l'ultima versione pubblicata: la sua attivazione dice quale versione usa, e il passaggio a una nuova è un gesto per quel tenant, dopo aver visto le differenze.
-> 5. Resta da decidere a te chi dichiara che una versione è «pubblicata»: il datastore, come dicono ADR-0043 e D-72, oppure advanced.
+> 5. Chi dichiara che una versione è «pubblicata» resta il datastore, come dicono ADR-0043 e D-72.
 
 ---
 
@@ -36,7 +36,7 @@ La revisione indipendente della Fase B ha trovato due difetti di disegno che que
 6. **Flusso inverso**: il datastore non legge il database di advanced. Ciò che gli serve del tenant arriva da una proiezione con un elenco chiuso di colonne ammesse, prodotta da uno script di piattaforma di advanced; le letture dirette di oggi si ritirano (R-20).
 7. **Correzione di ADR-0043**: voce 3, `sys_industry_codes` si trasforma e non si ritira; voce 17, l'esito della misura pagina per pagina è in `.programmi/consolidamento/lavoro/F_webapp.md`.
 
-## Domande per te
+## Domande, decise il 2026-10-23
 
 1. **Chi registra lo stato «pubblicato» di una versione** (M-04, R-53).
    - **A — il datastore, come oggi deciso** (ADR-0043 voce 14, D-72): il manifesto porta lo stato «pubblicabile», advanced lo registra così com'è e non ha un gesto «pubblica». Non emenda niente.
@@ -44,6 +44,7 @@ La revisione indipendente della Fase B ha trovato due difetti di disegno che que
    - Raccomandazione: **A**, perché non emenda decisioni già prese e il gesto per tenant del punto 5 dà già il controllo che B cercava.
    - **Decisa il 2026-10-23 alle 14:57 UTC dall'Amministratore di Sistema: A.** Lo stato «pubblicato» resta al datastore: il manifesto lo dichiara e advanced lo registra così com'è, senza un gesto «pubblica» proprio. ADR-0043 voce 14 e D-72 non cambiano.
 2. **ADR-0046, riga 42**: approvarlo con la formulazione «il perimetro di un tenant è quello della versione fissata dalle sue attivazioni ACTIVE nella finestra di validità; dove l'attivazione non fissa una versione vale, in via transitoria, la regola di oggi». Raccomandazione: sì.
+   - **Decisa il 2026-10-23 alle 15:19 UTC da Enzo Spenuso: sì**, con questa formulazione (ADR-0046, §1).
 
 ## Conseguenze
 

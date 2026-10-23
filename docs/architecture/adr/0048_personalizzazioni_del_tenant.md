@@ -1,8 +1,8 @@
 # ADR-0048 — Le personalizzazioni del tenant all'arrivo di una versione nuova del modello
 
-- **Status**: PROPOSTO (in attesa dell'approvazione dell'Amministratore di Sistema)
+- **Status**: ACCETTATO il 2026-10-23 da Enzo Spenuso (approvazione data in chat alle 15:19 UTC, 17:19 ora di Roma, con le raccomandazioni del riepilogo del mattino)
 - **Date**: 2026-10-23
-- **Decided by**: da decidere (Amministratore di Sistema)
+- **Decided by**: Enzo Spenuso, 2026-10-23
 - **Redatto da**: Claude Code, programma di consolidamento advanced ↔ datastore (`.programmi/consolidamento/`), Fase C
 - **Dipende da**: ADR-0047 (versione fissata sull'attivazione)
 - **Relates to**: ADR-0042 (la piattaforma genera, il cliente possiede), ADR-0041 (direzione del dato), invariante I23
@@ -35,10 +35,12 @@ Per ogni famiglia di dato che nasce dal modello (ruoli, competenze, processi, in
 - Nessuna voce si cancella al passaggio; il ritorno alla versione precedente riporta l'attivazione, non le righe.
 - Per sapere se una voce è ereditata o conservata serve il riferimento alla versione da cui è nata e un'impronta del suo contenuto d'origine: è il lavoro dell'incremento C6.
 
-## Domande per te
+## Domande, decise il 2026-10-23
 
 1. **Chi può far passare un tenant a una versione nuova**: solo la piattaforma, oppure anche `HRMS_MANAGER` del tenant? Raccomandazione: entrambi, perché il tenant possiede i suoi dati (ADR-0042) e l'anteprima rende il gesto consapevole.
+   - **Decisa il 2026-10-23 alle 15:19 UTC da Enzo Spenuso: entrambi.**
 2. **Una voce segnalata blocca il passaggio?** Raccomandazione: no; il passaggio avviene, la segnalazione resta aperta finché qualcuno sceglie fra la propria versione e quella del modello.
+   - **Decisa il 2026-10-23 alle 15:19 UTC da Enzo Spenuso: non blocca.**
 
 ## Conseguenze
 

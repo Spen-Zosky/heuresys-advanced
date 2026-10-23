@@ -1,8 +1,8 @@
 # ADR-0046 — Il perimetro del tenant: ricerche, liste di scelta e agente leggono solo dentro il fascicolo
 
-- **Status**: PROPOSTO (in attesa dell'approvazione dell'Amministratore di Sistema)
+- **Status**: ACCETTATO il 2026-10-23 da Enzo Spenuso (approvazione data in chat alle 15:19 UTC, 17:19 ora di Roma, con le raccomandazioni del riepilogo del mattino)
 - **Date**: 2026-10-17
-- **Decided by**: da decidere (Amministratore di Sistema)
+- **Decided by**: Enzo Spenuso, 2026-10-23
 - **Redatto da**: Claude Code CLI, mandato PE-6.1 (onda 2 del piano di adesione completa, passo S4 della separazione)
 - **Attua**: ADR-0043, regole 2, 4 e 5, passo S4
 - **Relates to**: ADR-0039 (profilo del cliente sopra il catalogo; regola 4, prima frase), ADR-0040 (l'agente legge ciò che legge la persona), ADR-0041 (direzione del dato), ADR-0042 (la piattaforma genera, il cliente possiede), invariante I5 (isolamento per tenant nel middleware, mai RLS), I21 come emendato da ADR-0043
@@ -39,7 +39,7 @@ Il pacchetto v0.3 porta la sezione `perimetro` (R48, R49): una riga per voce di 
 ### 1. Dove sta il perimetro
 
 - Il perimetro appartiene alla **versione del modello**, come il resto del contenuto: tabella di piattaforma `sys.sys_blueprint_content_perimeters` (senza `tenant_id`, come le altre `sys_blueprint_content_*`; disegno in `.programmi/onda2/DISEGNO_tabelle-onda2.md`, tabella M1.14), scritta solo dal caricatore del pacchetto.
-- Il perimetro **di un tenant** è l'unione dei perimetri delle versioni PUBLISHED delle sue attivazioni ACTIVE nella finestra di validità: la stessa catena che `profilo.ts` percorre già. Non si copia in una tabella del tenant: quando la versione attiva cambia, il perimetro cambia nello stesso istante, senza una seconda verità da riallineare.
+- Il perimetro **di un tenant** è quello della versione fissata dalle sue attivazioni ACTIVE nella finestra di validità (ADR-0047, punto 5); dove l'attivazione non fissa una versione vale, in via transitoria, la regola di oggi, cioè l'unione dei perimetri delle versioni PUBLISHED della variante, la stessa catena che `profilo.ts` percorre già. Formulazione approvata il 2026-10-23. Non si copia in una tabella del tenant: quando la versione attiva cambia, il perimetro cambia nello stesso istante, senza una seconda verità da riallineare.
 - Il pacchetto dichiara se il perimetro c'è: colonna `blueprint_content_package_perimeter_status` (`DICHIARATO` | `NON_RILASCIATO`, disegno M1.1). Un pacchetto convertito con la sezione `perimetro` dichiarata vuota vale `NON_RILASCIATO`, non «perimetro vuoto».
 
 ### 2. Lo stato del tenant e la transizione

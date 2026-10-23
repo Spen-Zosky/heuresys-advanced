@@ -127,11 +127,6 @@ BEGIN
                                                -- derivazione — che ignora le colonne di attore — non la vede.
                                                -- Una fonte non e' il dato di una persona: e' un permesso di
                                                -- lettura verso l'esterno, con chi l'ha firmato accanto.
-    ('sys_blueprint_content_job_roles'),       -- gemelle delle quattro `blueprint_content_*` qui sopra
-    ('sys_blueprint_content_dashboards'),      -- (mig 000397, ADR-0039 regola 2): ruoli e dashboard del
-                                               -- profilo di un modello di settore. Unica FK verso
-                                               -- `sys_blueprint_variant_versions`, zero FK entranti: e' il
-                                               -- modello prima che diventi l'azienda di qualcuno.
     ('sys_tenant_boundary_author_columns'),    -- elenco delle colonne di attore che la sentinella del confine
                                                -- fra clienti ignora (mig 000386): configurazione di un
                                                -- controllo, nessuna FK, nessuna riga di un cliente.
@@ -154,11 +149,35 @@ BEGIN
     SELECT c.relname AS tbl
     FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE n.nspname = 'sys' AND c.relkind = 'r'
+  ),
+  -- MODELLO: il contenuto di una versione di variante (ADR-0039; mig 000327, 000397,
+  -- 000454, 000458). I pacchetti del datastore lo fanno crescere a famiglie intere
+  -- (45 tabelle al 2026-10-22), e una riga di allowlist per tabella diventava rossa a
+  -- ogni pacchetto senza che niente fosse fuori posto. Non e' un prefisso che zittisce:
+  -- una `sys_blueprint_content_*` ci sta SOLO se tutte le sue FK (anche di attore)
+  -- restano dentro il piano del modello — `sys_blueprint_variant_versions` o un'altra
+  -- `sys_blueprint_content_*` — e nessuna tabella fuori dal piano la referenzia. Una
+  -- FK verso un tenant, una persona o un catalogo la fa uscire, e torna rossa qui.
+  modello_cand AS (
+    SELECT tbl FROM alltab WHERE tbl LIKE 'sys\_blueprint\_content\_%'
+  ),
+  modello AS (
+    SELECT m.tbl FROM modello_cand m
+    WHERE NOT EXISTS (
+            SELECT 1 FROM fk
+            WHERE fk.child = m.tbl
+              AND fk.parent <> 'sys_blueprint_variant_versions'
+              AND fk.parent NOT IN (SELECT tbl FROM modello_cand))
+      AND NOT EXISTS (
+            SELECT 1 FROM fk
+            WHERE fk.parent = m.tbl
+              AND fk.child NOT IN (SELECT tbl FROM modello_cand))
   )
   SELECT string_agg(a.tbl, ', ' ORDER BY a.tbl) INTO v_unmapped
   FROM alltab a
   WHERE a.tbl NOT IN (SELECT tbl FROM member)
     AND a.tbl NOT IN (SELECT tbl FROM refd)
+    AND a.tbl NOT IN (SELECT tbl FROM modello)
     AND a.tbl NOT IN (SELECT al.tbl COLLATE "C" FROM allowlist al);
 
   IF v_unmapped IS NOT NULL THEN

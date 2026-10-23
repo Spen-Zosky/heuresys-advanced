@@ -5,7 +5,7 @@
 - **Decided by**: da decidere (Amministratore di Sistema)
 - **Redatto da**: Claude Code, programma di consolidamento advanced ↔ datastore (`.programmi/consolidamento/`), Fase C
 - **Completa**: ADR-0043 (accettato), ADR-0046 (proposto)
-- **Emenda, se approvato nella forma B della domanda 1**: ADR-0043 tabella voce 14 e la decisione D-72 del datastore (chi produce lo stato «pubblicato»)
+- **Emenda**: niente su chi produce lo stato «pubblicato»: la domanda 1 è stata decisa nella forma A, che lascia ADR-0043 voce 14 e D-72 come sono
 - **Poggia su**: `.programmi/consolidamento/02_ARCHITETTURA.md` §3, `01_RILIEVI.md` (R-01, R-02, R-12, R-20, R-50, R-51, R-52, R-53, R-54), `lavoro/G_revisione_indipendente.md` (M-03, M-04); datastore `src/contratto/impronta.ts`, `src/contratto/consegna/`, `src/fascicoli/consegna.ts`; advanced `db/scripts/pacchetto/manifesto-consegna.mjs`
 
 > **In parole semplici.**
@@ -42,6 +42,7 @@ La revisione indipendente della Fase B ha trovato due difetti di disegno che que
    - **A — il datastore, come oggi deciso** (ADR-0043 voce 14, D-72): il manifesto porta lo stato «pubblicabile», advanced lo registra così com'è e non ha un gesto «pubblica». Non emenda niente.
    - **B — advanced**: il datastore consegna, una persona con mandato di piattaforma in advanced pubblica dopo l'anteprima. Emenda ADR-0043 voce 14 e D-72.
    - Raccomandazione: **A**, perché non emenda decisioni già prese e il gesto per tenant del punto 5 dà già il controllo che B cercava.
+   - **Decisa il 2026-10-23 alle 14:57 UTC dall'Amministratore di Sistema: A.** Lo stato «pubblicato» resta al datastore: il manifesto lo dichiara e advanced lo registra così com'è, senza un gesto «pubblica» proprio. ADR-0043 voce 14 e D-72 non cambiano.
 2. **ADR-0046, riga 42**: approvarlo con la formulazione «il perimetro di un tenant è quello della versione fissata dalle sue attivazioni ACTIVE nella finestra di validità; dove l'attivazione non fissa una versione vale, in via transitoria, la regola di oggi». Raccomandazione: sì.
 
 ## Conseguenze

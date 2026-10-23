@@ -1,0 +1,150 @@
+id	progetto	classe	oggetto	colonna	evidenza
+SENZA_PK-001	advanced	SENZA_PK	audit.activity_class_mapping_legacy_archive		crea 000211_deprecate_legacy_activity_schemes; unique: nessuno; CREATE TABLE AS; 1 colonne
+SENZA_PK-002	advanced	SENZA_PK	audit.activity_classification_legacy_archive		crea 000211_deprecate_legacy_activity_schemes; unique: nessuno; CREATE TABLE AS; 1 colonne
+SENZA_PK-003	advanced	SENZA_PK	audit.career_paths_junk_archive		crea 000198_career_paths_test_residue_purge; unique: nessuno; 0 colonne
+SENZA_PK-004	advanced	SENZA_PK	audit.learning_junk_archive		crea 000197_learning_catalog_junk_purge; unique: nessuno; 0 colonne
+SENZA_PK-005	advanced	SENZA_PK	audit.learning_modules_junk_archive		crea 000200_training_initiatives_test_residue_purge; unique: nessuno; 0 colonne
+SENZA_PK-006	advanced	SENZA_PK	audit.skill_dedup_archive		crea 000189_dedup_skill_names; unique: nessuno; 1 colonne
+SENZA_PK-007	advanced	SENZA_PK	audit.skills_junk_archive		crea 000160_cleanup_junk_skills; unique: nessuno; 1 colonne
+SENZA_PK-008	advanced	SENZA_PK	audit.training_initiatives_junk_archive		crea 000200_training_initiatives_test_residue_purge; unique: nessuno; 0 colonne
+RIFERIMENTO_SENZA_FK-001	advanced	RIFERIMENTO_SENZA_FK	sys.sys_advisor_suggestions	advisor_suggestion_subject_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-002	advanced	RIFERIMENTO_SENZA_FK	sys.sys_approval_requests	approval_request_resource_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-003	advanced	RIFERIMENTO_SENZA_FK	sys.sys_auth_refresh_tokens	auth_refresh_token_family_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-004	advanced	RIFERIMENTO_SENZA_FK	sys.sys_capability_score_lineage	capability_score_lineage_parent_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-005	advanced	RIFERIMENTO_SENZA_FK	sys.sys_capability_score_lineage	capability_score_lineage_child_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-006	advanced	RIFERIMENTO_SENZA_FK	sys.sys_capability_scores	capability_score_subject_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-007	advanced	RIFERIMENTO_SENZA_FK	sys.sys_conflitti_ibridi	conflitto_ibrido_riga_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-008	advanced	RIFERIMENTO_SENZA_FK	sys.sys_engagement_action_plans	action_plan_source_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-009	advanced	RIFERIMENTO_SENZA_FK	sys.sys_generated_record_origins	generated_record_origin_target_record_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-010	advanced	RIFERIMENTO_SENZA_FK	sys.sys_generated_record_origins	generated_record_origin_superseded_by_run_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-011	advanced	RIFERIMENTO_SENZA_FK	sys.sys_inbox_notifications	notification_resource_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-012	advanced	RIFERIMENTO_SENZA_FK	sys.sys_leave_balance_transactions	transaction_reference_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-013	advanced	RIFERIMENTO_SENZA_FK	sys.sys_organization_unit_templates	organization_unit_template_blueprint_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-014	advanced	RIFERIMENTO_SENZA_FK	sys.sys_person_evidence_records	person_evidence_resource_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-015	advanced	RIFERIMENTO_SENZA_FK	sys.sys_reference_translations	entity_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-016	advanced	RIFERIMENTO_SENZA_FK	sys.sys_source_lineage_records	source_lineage_target_record_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-017	advanced	RIFERIMENTO_SENZA_FK	sys.sys_user_timeline_events	user_timeline_event_source_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+RIFERIMENTO_SENZA_FK-018	advanced	RIFERIMENTO_SENZA_FK	sys.sys_visualization_nodes	node_source_entity_id	uuid senza FK: riferimento polimorfico o verso un oggetto non dichiarato
+LEGAME_PER_CODICE_MODELLO-001	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_agent_links	blueprint_content_agent_link_kpi_code	varchar(64); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-002	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_ccnl	blueprint_content_ccnl_code	varchar(64); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-003	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_ccnl_conditions	blueprint_content_ccnl_condition_ccnl_code	varchar(64); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-004	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_ccnl_institutes	blueprint_content_ccnl_institute_ccnl_code	varchar(64); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-005	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_ccnl_levels	blueprint_content_ccnl_level_ccnl_code	varchar(64); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-006	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_context	blueprint_content_context_ateco_code	varchar(16); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-007	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_job_role_links	blueprint_content_job_role_link_skill_code	text; nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-008	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_job_roles	blueprint_content_job_role_esco_uri	text; nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-009	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_job_roles	blueprint_content_job_role_cp2021_code	varchar(16); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-010	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_kpis	blueprint_content_kpi_code	varchar(64); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-011	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_position_occupations	blueprint_content_position_occupation_esco_uri	text; nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-012	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_position_skill_requirements	blueprint_content_psr_skill_code	varchar(64); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-013	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_positions	blueprint_content_position_ccnl_code	varchar(64); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-014	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_skills	blueprint_content_skill_code	varchar(64); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-015	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_skills	blueprint_content_skill_esco_uri	text; nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-016	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_strategy_items	blueprint_content_strategy_item_skill_code	text; nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE_MODELLO-017	advanced	LEGAME_PER_CODICE_MODELLO	sys.sys_blueprint_content_training_skills	blueprint_content_training_skill_skill_code	varchar(64); nessuna FK possibile verso un catalogo per codice (contenuto di modello: per disegno, C1 del DISEGNO onda 2)
+LEGAME_PER_CODICE-001	advanced	LEGAME_PER_CODICE	sys.sys_blueprint_process_registry	blueprint_process_pcf_code	varchar(32); nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-002	advanced	LEGAME_PER_CODICE	sys.sys_esco_occupation_embeddings	esco_uri	text; nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-003	advanced	LEGAME_PER_CODICE	sys.sys_esco_occupation_embeddings	isco_code	text; nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-004	advanced	LEGAME_PER_CODICE	sys.sys_esco_occupation_mappings	esco_occupation_mapping_esco_uri	text; nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-005	advanced	LEGAME_PER_CODICE	sys.sys_esco_occupation_mappings	esco_occupation_mapping_isco_code	varchar(16); nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-006	advanced	LEGAME_PER_CODICE	sys.sys_industry_codes	industry_code	varchar(32); nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-007	advanced	LEGAME_PER_CODICE	sys.sys_industry_codes	industry_ateco_code	varchar(16); nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-008	advanced	LEGAME_PER_CODICE	sys.sys_leave_accrual_rules	accrual_rule_ccnl_type	varchar(100); nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-009	advanced	LEGAME_PER_CODICE	sys.sys_occupation_skill_requirements	occupation_skill_req_occupation_uri	text; nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-010	advanced	LEGAME_PER_CODICE	sys.sys_occupation_skill_requirements	occupation_skill_req_skill_esco_uri	text; nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-011	advanced	LEGAME_PER_CODICE	sys.sys_positions	position_esco_occupation_uri	text; nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-012	advanced	LEGAME_PER_CODICE	sys.sys_skill_groups	skill_group_esco_uri	text; nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-013	advanced	LEGAME_PER_CODICE	sys.sys_skills	skill_code	varchar(128); nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-014	advanced	LEGAME_PER_CODICE	sys.sys_skills	skill_esco_uri	text; nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-015	advanced	LEGAME_PER_CODICE	sys.sys_tenancies	tenant_industry_code	varchar(64); nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-016	advanced	LEGAME_PER_CODICE	sys.sys_user_contracts	user_contract_ccnl_type	varchar(64); nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-017	advanced	LEGAME_PER_CODICE	sys.sys_user_contracts	user_contract_ccnl_level	varchar(64); nessuna FK possibile verso un catalogo per codice
+LEGAME_PER_CODICE-018	datastore	LEGAME_PER_CODICE	datastore_model.datastore_bench_metric	bench_metric_code	text; nessuna FK verso il catalogo
+LEGAME_PER_CODICE-019	datastore	LEGAME_PER_CODICE	datastore_model.datastore_bench_role	bench_role_esco_occupation_uri	text; nessuna FK verso il catalogo
+LEGAME_PER_CODICE-020	datastore	LEGAME_PER_CODICE	datastore_model.datastore_bench_role_skill	bench_role_skill_skill_code	text; nessuna FK verso il catalogo
+LEGAME_PER_CODICE-021	datastore	LEGAME_PER_CODICE	datastore_model.datastore_bench_scope_item	bench_scope_item_uri	text; nessuna FK verso il catalogo
+LEGAME_PER_CODICE-022	datastore	LEGAME_PER_CODICE	datastore_model.datastore_bench_skill	bench_skill_code	text; nessuna FK verso il catalogo
+LEGAME_PER_CODICE-023	datastore	LEGAME_PER_CODICE	datastore_model.datastore_bench_skill	bench_skill_esco_uri	text; nessuna FK verso il catalogo
+NESSUN_RIFERIMENTO_NEL_CODICE-001	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	audit.activity_class_mapping_legacy_archive		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-002	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	audit.activity_classification_legacy_archive		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-003	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	audit.catalog_changes		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-004	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	audit.learning_junk_archive		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-005	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	audit.learning_modules_junk_archive		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-006	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	audit.skill_dedup_archive		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-007	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	audit.skills_junk_archive		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-008	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	audit.training_initiatives_junk_archive		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-009	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_auth_sessions		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-010	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_agent_links		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 3
+NESSUN_RIFERIMENTO_NEL_CODICE-011	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_agents		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 5
+NESSUN_RIFERIMENTO_NEL_CODICE-012	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_capabilities		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 3
+NESSUN_RIFERIMENTO_NEL_CODICE-013	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_capability_links		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 4
+NESSUN_RIFERIMENTO_NEL_CODICE-014	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_career_paths		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-015	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_career_steps		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-016	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_ccnl_conditions		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-017	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_ccnl_institutes		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 4
+NESSUN_RIFERIMENTO_NEL_CODICE-018	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_context		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-019	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_decision_rights		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 5
+NESSUN_RIFERIMENTO_NEL_CODICE-020	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_decisions		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 4
+NESSUN_RIFERIMENTO_NEL_CODICE-021	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_derivations		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-022	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_design_principles		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 3
+NESSUN_RIFERIMENTO_NEL_CODICE-023	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_engagement_links		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 3
+NESSUN_RIFERIMENTO_NEL_CODICE-024	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_engagements		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 3
+NESSUN_RIFERIMENTO_NEL_CODICE-025	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_evidence		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-026	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_evidence_gaps		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-027	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_evidence_links		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-028	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_gaps		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-029	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_goals		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 4
+NESSUN_RIFERIMENTO_NEL_CODICE-030	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_incentive_links		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-031	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_incentives		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-032	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_job_role_links		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 4
+NESSUN_RIFERIMENTO_NEL_CODICE-033	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_legal_entities		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 4
+NESSUN_RIFERIMENTO_NEL_CODICE-034	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_obligation_positions		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-035	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_obligations		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-036	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_packages		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 7
+NESSUN_RIFERIMENTO_NEL_CODICE-037	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_perimeters		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 4
+NESSUN_RIFERIMENTO_NEL_CODICE-038	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_position_occupations		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-039	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_position_processes		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 4
+NESSUN_RIFERIMENTO_NEL_CODICE-040	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_position_responsibilities		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 3
+NESSUN_RIFERIMENTO_NEL_CODICE-041	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_position_skill_requirements		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-042	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_process_sites		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-043	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_process_steps		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 4
+NESSUN_RIFERIMENTO_NEL_CODICE-044	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_sites		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 2
+NESSUN_RIFERIMENTO_NEL_CODICE-045	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_strategies		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 4
+NESSUN_RIFERIMENTO_NEL_CODICE-046	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_strategy_items		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 4
+NESSUN_RIFERIMENTO_NEL_CODICE-047	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_training		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-048	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_training_positions		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-049	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_training_skills		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-050	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_content_unit_processes		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-051	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_blueprint_family_activity_classes		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-052	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_industry_forbidden_terms		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-053	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_occupation_classification_mappings		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-054	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_permessi_plenipotenziari_ammessi		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-055	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_ritiri_ammessi		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-056	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_schema_migrations		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 7
+NESSUN_RIFERIMENTO_NEL_CODICE-057	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_tenant_boundary_author_columns		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-058	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_translatable_field		TABLE; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-059	advanced	NESSUN_RIFERIMENTO_NEL_CODICE	sys.sys_esco_isco_resolved		VIEW; 0 file in apps/+packages/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-060	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_derived.datastore_concept_ancestor		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 2
+NESSUN_RIFERIMENTO_NEL_CODICE-061	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_derived.datastore_concept_vector_hash		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-062	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_meta.datastore_audit_0105		TABLE; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-063	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_meta.datastore_environment		TABLE; 0 file in apps/+src/; altrove (script/seed/prove): 2
+NESSUN_RIFERIMENTO_NEL_CODICE-064	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_meta.datastore_protection		TABLE; 0 file in apps/+src/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-065	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_meta.datastore_function_activity		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-066	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_meta.datastore_load_bersagli		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-067	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_meta.datastore_protection_gap		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-068	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_meta.datastore_source_freshness		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-069	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_model.datastore_family_activity_class		TABLE; 0 file in apps/+src/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-070	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_model.datastore_family_excluded_process		TABLE; 0 file in apps/+src/; altrove (script/seed/prove): 1
+NESSUN_RIFERIMENTO_NEL_CODICE-071	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_agent_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-072	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_capability_process_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-073	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_capability_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-074	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_design_principle_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-075	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_governance_decision_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-076	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_governance_right_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-077	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_legal_entity_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-078	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_role_skill_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-079	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_role_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-080	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_scope_item_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-081	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_strategy_item_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-082	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_bench_strategy_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 0
+NESSUN_RIFERIMENTO_NEL_CODICE-083	datastore	NESSUN_RIFERIMENTO_NEL_CODICE	datastore_pub.datastore_org_level_matrix_v1		VIEW; 0 file in apps/+src/; altrove (script/seed/prove): 1

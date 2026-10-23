@@ -1,0 +1,674 @@
+progetto	schema	oggetto	tipo	file_codice	file_script_seed_prove	primi_file_codice
+advanced	audit	fn_catalog_change	FUNCTION	0	0	
+advanced	audit	activity_class_mapping_legacy_archive	TABLE	0	0	
+advanced	audit	activity_classification_legacy_archive	TABLE	0	0	
+advanced	audit	agent_gateway_decisions	TABLE	3	0	apps/agent-gateway/src/audit-sink.ts; apps/agent-gateway/src/server.ts; apps/agent-gateway/test/audit-sink.test.ts
+advanced	audit	career_paths_junk_archive	TABLE	1	0	apps/api/test/reconciliation-f2-imports.integration.test.ts
+advanced	audit	catalog_changes	TABLE	0	0	
+advanced	audit	learning_junk_archive	TABLE	0	0	
+advanced	audit	learning_modules_junk_archive	TABLE	0	0	
+advanced	audit	position_requirements_stale_archive	TABLE	2	0	apps/api/test/reconciliation-f3-imports.integration.test.ts; apps/api/test/reconciliation-s970-kpi-bridge.integration.test.ts
+advanced	audit	skill_dedup_archive	TABLE	0	0	
+advanced	audit	skills_junk_archive	TABLE	0	1	
+advanced	audit	training_initiatives_junk_archive	TABLE	0	0	
+advanced	audit	user_self_service_actions	TABLE	3	2	apps/api/src/modules/observability/repository.ts; apps/api/test/users.integration.test.ts; packages/shared/src/schemas/observability.ts
+advanced	pg_temp	h155	FUNCTION	0	0	
+advanced	reference_sync	import_runs	TABLE	5	0	apps/api/src/modules/dashboard/blocchi.ts; apps/api/src/modules/reference-sync/repository.ts; apps/api/src/modules/reference-sync/sync-cli.ts; apps/api/src/modules/tenant-import-runs/repository.ts; packages/shared/src/schemas/reference-sync.ts
+advanced	reference_sync	source_exports	TABLE	5	1	apps/api/src/modules/approvals/effects/tenant-import-run.ts; apps/api/src/modules/reference-sync/repository.ts; apps/api/src/modules/tenant-import-runs/repository.ts; apps/api/test/tenant-import-run-effect.integration.test.ts; packages/shared/src/schemas/reference-sync.ts
+advanced	reference_sync	source_watermarks	TABLE	4	1	apps/api/src/modules/reference-sync/repository.ts; apps/api/test/reference-sync-esco-skill-hierarchy.integration.test.ts; apps/api/test/reference-sync.integration.test.ts; packages/shared/src/schemas/reference-sync.ts
+advanced	staging	contratti_rinnova_scaduti	FUNCTION	0	1	
+advanced	staging	contratti_ripristina_migrazione	FUNCTION	0	0	
+advanced	staging	contratti_scaduti_ripristina	FUNCTION	0	0	
+advanced	staging	contratti_scaduti_ripristina_ric	FUNCTION	0	0	
+advanced	staging	disfa_archi_di	FUNCTION	0	0	
+advanced	staging	mig264_employment_undo_apply	FUNCTION	0	0	
+advanced	staging	mig307_dirigenti_undo_apply	FUNCTION	0	0	
+advanced	staging	mig308_predictions_undo_apply	FUNCTION	0	0	
+advanced	staging	mig344_annulla	FUNCTION	0	0	
+advanced	staging	mig346_annulla	FUNCTION	0	0	
+advanced	staging	mig347_annulla	FUNCTION	0	0	
+advanced	staging	mig349_annulla	FUNCTION	0	0	
+advanced	staging	mig357_okr_reparti_undo_apply	FUNCTION	0	0	
+advanced	staging	mig359_ledger_fantasma_undo_apply	FUNCTION	0	0	
+advanced	staging	mig360_residui_collaudo_undo_apply	FUNCTION	0	0	
+advanced	staging	mig361_requisiti_rischio_undo_apply	FUNCTION	0	0	
+advanced	staging	mig362_buste_heuresys_undo_apply	FUNCTION	0	0	
+advanced	staging	mig363_progetti_undo_apply	FUNCTION	0	0	
+advanced	staging	mig364_selezione_undo_apply	FUNCTION	0	0	
+advanced	staging	mig365_grafo_undo_apply	FUNCTION	0	0	
+advanced	staging	mig455_rtl_livelli_undo_apply	FUNCTION	0	0	
+advanced	staging	rbac_valutazione_ripristina	FUNCTION	0	0	
+advanced	staging	rilevazione_clima_rinnova	FUNCTION	0	1	
+advanced	staging	rilevazione_clima_ripristina	FUNCTION	0	0	
+advanced	staging	ripristina_skill_ritirata	FUNCTION	0	0	
+advanced	staging	skill_merge_undo_apply	FUNCTION	0	0	
+advanced	staging	storia36_155_rollback	FUNCTION	1	0	apps/api/test/reconciliation-f3-imports.integration.test.ts
+advanced	staging	storia36_160_rollback	FUNCTION	2	0	apps/api/test/reconciliation-registry.integration.test.ts; apps/api/test/reconciliation-wave2-succession-branches.integration.test.ts
+advanced	staging	storia36_167_c3c_rollback	FUNCTION	0	0	
+advanced	staging	storia36_167_c3d_rollback	FUNCTION	0	0	
+advanced	staging	storia36_167_c4h_rollback	FUNCTION	0	0	
+advanced	staging	storia36_167_rollback	FUNCTION	0	0	
+advanced	staging	approvazioni_b9_undo	TABLE	0	0	
+advanced	staging	compensation_bands_specie_undo	TABLE	0	0	
+advanced	staging	competenze_orfane_rimosse_undo	TABLE	0	0	
+advanced	staging	contratti_scaduti_undo	TABLE	0	0	
+advanced	staging	cruscotti_fuori_profilo_undo	TABLE	0	0	
+advanced	staging	learning_paths_undo_s1068	TABLE	0	0	
+advanced	staging	mig264_employment_undo	TABLE	0	0	
+advanced	staging	mig307_dirigenti_undo	TABLE	0	0	
+advanced	staging	mig308_predictions_undo	TABLE	0	0	
+advanced	staging	mig344_skill_group_uri_undo	TABLE	0	0	
+advanced	staging	mig346_esco_uri_undo	TABLE	0	0	
+advanced	staging	mig347_broader_uri_undo	TABLE	0	0	
+advanced	staging	mig349_chiavi_vuote_undo	TABLE	0	0	
+advanced	staging	mig349_esco_consolidamento_undo	TABLE	0	0	
+advanced	staging	mig357_okr_reparti_undo	TABLE	0	0	
+advanced	staging	mig359_ledger_fantasma_undo	TABLE	0	0	
+advanced	staging	mig360_residui_collaudo_undo	TABLE	0	0	
+advanced	staging	mig361_requisiti_rischio_undo	TABLE	1	0	apps/api/test/reconciliation-f3-imports.integration.test.ts
+advanced	staging	mig362_buste_heuresys_undo	TABLE	0	0	
+advanced	staging	mig455_rtl_livelli_undo	TABLE	0	0	
+advanced	staging	rbac_valutazione_undo	TABLE	0	0	
+advanced	staging	rilevazione_clima_undo	TABLE	0	0	
+advanced	staging	sanatoria_straordinari_9410_undo	TABLE	0	0	
+advanced	staging	skill_archi_undo	TABLE	0	0	
+advanced	staging	skill_merge_undo	TABLE	0	0	
+advanced	staging	skill_ritirate_undo	TABLE	0	0	
+advanced	staging	storia36_155_undo	TABLE	1	0	apps/api/test/reconciliation-f3-imports.integration.test.ts
+advanced	staging	storia36_160_undo	TABLE	2	0	apps/api/test/reconciliation-registry.integration.test.ts; apps/api/test/reconciliation-wave2-succession-branches.integration.test.ts
+advanced	staging	storia36_167_buste_undo	TABLE	0	0	
+advanced	staging	storia36_167_contratti_undo	TABLE	0	0	
+advanced	staging	storia36_167_premi_undo	TABLE	0	0	
+advanced	staging	storia36_167_undo	TABLE	0	0	
+advanced	staging	storia36_c2g_fuso_undo	TABLE	0	0	
+advanced	staging	tenant_import_people	TABLE	3	0	apps/api/src/modules/tenant-import-runs/repository.ts; apps/api/test/tenant-import-runs.integration.test.ts; packages/shared/src/schemas/tenant-import-runs.ts
+advanced	sys	f_direzione_del_dato_violazioni	FUNCTION	0	0	
+advanced	sys	f_registra_conflitto_ibrido	FUNCTION	0	0	
+advanced	sys	f_registro_provenienza_orfani	FUNCTION	0	0	
+advanced	sys	fn_cruscotto_e_di_sola_piattaforma	FUNCTION	0	0	
+advanced	sys	fn_notify_inbox_change	FUNCTION	0	0	
+advanced	sys	fn_organization_integrity_violations	FUNCTION	0	2	
+advanced	sys	fn_reconciliation_status	FUNCTION	2	0	apps/api/test/reconciliation-registry.integration.test.ts; apps/api/test/sdbi-perf-feedback.integration.test.ts
+advanced	sys	fn_reference_translation_coverage	FUNCTION	0	0	
+advanced	sys	fn_reference_translation_orphans	FUNCTION	0	0	
+advanced	sys	fn_skill_graph_edges	FUNCTION	1	0	apps/api/src/modules/skills/repository.ts
+advanced	sys	fn_skill_graph_nodes	FUNCTION	1	0	apps/api/src/modules/skills/repository.ts
+advanced	sys	fn_tenant_boundary_violations_full	FUNCTION	0	0	
+advanced	sys	fn_traduzioni_senza_soggetto	FUNCTION	0	0	
+advanced	sys	fn_user_auth_roles_richiede_tenant_se_non_piattaforma	FUNCTION	0	0	
+advanced	sys	research_url_host	FUNCTION	1	0	apps/api/src/modules/research/sources.ts
+advanced	sys	sys_auth_mfa_exemption_audit_fn	FUNCTION	0	0	
+advanced	sys	sys_auth_mfa_exemption_eligibility	FUNCTION	0	0	
+advanced	sys	sys_blueprint_family_for_activity_class	FUNCTION	1	2	apps/api/src/modules/tenant-blueprints/derivation.ts
+advanced	sys	sys_blueprint_process_fill_version	FUNCTION	0	0	
+advanced	sys	sys_blueprint_size_band_coherence_fn	FUNCTION	0	0	
+advanced	sys	sys_blueprint_variant_ensure_version	FUNCTION	2	1	apps/api/test/blueprint-build-source.integration.test.ts; apps/api/test/helpers/modello-di-prova.ts
+advanced	sys	sys_seed_candidate_tenant_matches_run	FUNCTION	0	0	
+advanced	sys	sys_set_updated_at	FUNCTION	0	0	
+advanced	sys	sys_tenant_blueprint_snapshot_immutable	FUNCTION	0	0	
+advanced	sys	sys_activity_classification_mappings	TABLE	3	1	apps/api/src/modules/activity-classification-mappings/repository.ts; apps/api/test/activity-classification-mappings.integration.test.ts; apps/api/test/enterprise-typing.integration.test.ts
+advanced	sys	sys_activity_classifications	TABLE	14	2	apps/api/src/modules/activity-classification-mappings/repository.ts; apps/api/src/modules/activity-classifications/repository.ts; apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts; apps/api/src/modules/reference-sync/istat-ateco-connector.ts; apps/api/src/modules/reference-sync/repository.ts; apps/api/src/modules/research/repository.ts
+advanced	sys	sys_advisor_suggestions	TABLE	2	0	apps/api/src/modules/advisor/repository.ts; apps/api/test/advisor-suggestions.integration.test.ts
+advanced	sys	sys_approval_requests	TABLE	15	3	apps/api/src/modules/approvals/effects/tenant-materialization.ts; apps/api/src/modules/approvals/repository.ts; apps/api/src/modules/approvals/sla.ts; apps/api/src/modules/dashboard/blocchi.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/tenant-import-runs/repository.ts
+advanced	sys	sys_approval_steps	TABLE	12	2	apps/api/src/lib/scope/domains.ts; apps/api/src/modules/approvals/effects/tenant-blueprint-approval.ts; apps/api/src/modules/approvals/effects/tenant-import-run.ts; apps/api/src/modules/approvals/effects/time-off-request.ts; apps/api/src/modules/approvals/repository.ts; apps/api/src/modules/approvals/sla.ts
+advanced	sys	sys_assessment_methods	TABLE	2	0	apps/api/src/modules/assessment-methods/repository.ts; apps/api/test/assessments.integration.test.ts
+advanced	sys	sys_assessment_results	TABLE	5	4	apps/api/src/modules/assessment-results/repository.ts; apps/api/test/assessment-mask.integration.test.ts; apps/api/test/assessment-results-scope.integration.test.ts; apps/api/test/assessment-results.integration.test.ts; apps/api/test/notification-producers.integration.test.ts
+advanced	sys	sys_assessments	TABLE	11	5	apps/api/src/modules/assessment-results/repository.ts; apps/api/src/modules/assessment-results/service.ts; apps/api/src/modules/assessments/repository.ts; apps/api/src/modules/dashboard/blocchi.ts; apps/api/src/modules/me/repository.ts; apps/api/test/assessment-results-scope.integration.test.ts
+advanced	sys	sys_attendance	TABLE	7	18	apps/api/src/modules/analytics/repository.ts; apps/api/src/modules/insights/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/org-health/repository.ts; apps/api/test/analytics.integration.test.ts; apps/web/tests/e2e/me-myhr-tabs.spec.ts
+advanced	sys	sys_auth_credentials	TABLE	10	7	apps/api/src/modules/auth/repository.ts; apps/api/src/modules/dashboard/blocchi.ts; apps/api/test/auth-mfa-exemption.integration.test.ts; apps/api/test/calibration-sessions.integration.test.ts; apps/api/test/helpers/org-actors.ts; apps/api/test/performance-reviews.integration.test.ts
+advanced	sys	sys_auth_identities	TABLE	11	6	apps/api/src/modules/auth/repository.ts; apps/api/test/auth-mfa-exemption.integration.test.ts; apps/api/test/calibration-sessions.integration.test.ts; apps/api/test/gdpr.integration.test.ts; apps/api/test/helpers/org-actors.ts; apps/api/test/me-interfaces.integration.test.ts
+advanced	sys	sys_auth_login_events	TABLE	7	5	apps/api/src/modules/auth/repository.ts; apps/api/src/modules/observability/repository.ts; apps/api/test/auth-mfa-mandatory.integration.test.ts; apps/api/test/auth-mfa.integration.test.ts; apps/api/test/auth.integration.test.ts; apps/api/test/gdpr.integration.test.ts
+advanced	sys	sys_auth_mfa_exemption_audit	TABLE	1	0	apps/api/test/auth-mfa-exemption.integration.test.ts
+advanced	sys	sys_auth_mfa_exemption_eligible_users	TABLE	1	2	apps/api/test/auth-mfa-exemption.integration.test.ts
+advanced	sys	sys_auth_mfa_exemptions	TABLE	4	3	apps/api/src/modules/auth/repository.ts; apps/api/src/modules/auth/service.ts; apps/api/test/auth-mfa-exemption.integration.test.ts; apps/api/test/helpers/actors.ts
+advanced	sys	sys_auth_mfa_factors	TABLE	24	7	apps/api/src/config/env.ts; apps/api/src/modules/auth/mfa-repository.ts; apps/api/src/modules/auth/secret-crypto.ts; apps/api/src/modules/auth/webauthn-repository.ts; apps/api/test/actors-profile.integration.test.ts; apps/api/test/auth-mfa-enforcement-switch.integration.test.ts
+advanced	sys	sys_auth_mfa_otp_challenges	TABLE	3	0	apps/api/src/modules/auth/mfa-repository.ts; apps/api/test/auth-mfa.integration.test.ts; apps/web/tests/e2e/mfa-enroll.spec.ts
+advanced	sys	sys_auth_mfa_policies	TABLE	6	0	apps/api/src/modules/auth/repository.ts; apps/api/src/modules/mfa-policy/repository.ts; apps/api/test/auth-mfa-enforcement-switch.integration.test.ts; apps/api/test/auth-mfa-mandatory.integration.test.ts; apps/api/test/mfa-policy.integration.test.ts; apps/api/test/provisioning.integration.test.ts
+advanced	sys	sys_auth_mfa_recovery_codes	TABLE	2	0	apps/api/src/modules/auth/mfa-repository.ts; apps/api/test/mfa-recovery-codes.integration.test.ts
+advanced	sys	sys_auth_mfa_webauthn_credentials	TABLE	2	0	apps/api/src/modules/auth/webauthn-repository.ts; apps/api/test/webauthn.integration.test.ts
+advanced	sys	sys_auth_password_reset_tokens	TABLE	2	0	apps/api/src/modules/auth/repository.ts; apps/api/src/modules/auth/tokens.ts
+advanced	sys	sys_auth_permissions	TABLE	27	5	apps/api/src/lib/scope/data-classes.ts; apps/api/src/middleware/rbac.ts; apps/api/src/modules/auth/cache-loader.ts; apps/api/src/modules/auth/repository.ts; apps/api/src/modules/public-stats/repository.ts; apps/api/src/modules/tenant-blueprints/repository.ts
+advanced	sys	sys_auth_refresh_tokens	TABLE	7	3	apps/api/src/modules/auth/repository.ts; apps/api/src/modules/auth/tokens.ts; apps/api/src/modules/observability/repository.ts; apps/api/test/auth.integration.test.ts; apps/api/test/helpers/session-cache.ts; apps/showcase/src/components/SystemHealthDashboard.tsx
+advanced	sys	sys_auth_role_permissions	TABLE	29	4	apps/api/src/lib/scope/gate.ts; apps/api/src/middleware/rbac.ts; apps/api/src/modules/auth/cache-loader.ts; apps/api/src/modules/auth/repository.ts; apps/api/src/modules/public-stats/repository.ts; apps/api/src/modules/tenant-blueprints/repository.ts
+advanced	sys	sys_auth_roles	TABLE	47	21	apps/api/scripts/dev-whoami.mjs; apps/api/scripts/export-accessi-csv.mjs; apps/api/src/middleware/rbac.ts; apps/api/src/modules/auth/cache-loader.ts; apps/api/src/modules/auth/repository.ts; apps/api/src/modules/public-stats/repository.ts
+advanced	sys	sys_auth_sessions	TABLE	0	1	
+advanced	sys	sys_behavioral_assessments	TABLE	2	2	apps/api/src/modules/evidence/repository.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts
+advanced	sys	sys_blueprint_activations	TABLE	13	3	apps/api/src/lib/scope/profilo.ts; apps/api/src/modules/blueprint-activations/repository.ts; apps/api/src/modules/blueprint-overrides/repository.ts; apps/api/src/modules/dashboard/repository.ts; apps/api/src/modules/hierarchy-levels/repository.ts; apps/api/src/modules/tenants/provisioning.ts
+advanced	sys	sys_blueprint_content_agent_links	TABLE	0	3	
+advanced	sys	sys_blueprint_content_agents	TABLE	0	5	
+advanced	sys	sys_blueprint_content_capabilities	TABLE	0	3	
+advanced	sys	sys_blueprint_content_capability_links	TABLE	0	4	
+advanced	sys	sys_blueprint_content_career_paths	TABLE	0	1	
+advanced	sys	sys_blueprint_content_career_steps	TABLE	0	1	
+advanced	sys	sys_blueprint_content_ccnl	TABLE	2	3	apps/api/test/hierarchy-levels-modifiche.integration.test.ts; apps/api/test/hierarchy-levels.integration.test.ts
+advanced	sys	sys_blueprint_content_ccnl_conditions	TABLE	0	1	
+advanced	sys	sys_blueprint_content_ccnl_institutes	TABLE	0	4	
+advanced	sys	sys_blueprint_content_ccnl_levels	TABLE	3	2	apps/api/src/modules/hierarchy-levels/repository.ts; apps/api/test/hierarchy-levels-modifiche.integration.test.ts; apps/api/test/hierarchy-levels.integration.test.ts
+advanced	sys	sys_blueprint_content_context	TABLE	0	1	
+advanced	sys	sys_blueprint_content_dashboards	TABLE	1	0	apps/api/src/lib/scope/profilo.ts
+advanced	sys	sys_blueprint_content_decision_rights	TABLE	0	5	
+advanced	sys	sys_blueprint_content_decisions	TABLE	0	4	
+advanced	sys	sys_blueprint_content_derivations	TABLE	0	1	
+advanced	sys	sys_blueprint_content_design_principles	TABLE	0	3	
+advanced	sys	sys_blueprint_content_engagement_links	TABLE	0	3	
+advanced	sys	sys_blueprint_content_engagements	TABLE	0	3	
+advanced	sys	sys_blueprint_content_evidence	TABLE	0	1	
+advanced	sys	sys_blueprint_content_evidence_gaps	TABLE	0	1	
+advanced	sys	sys_blueprint_content_evidence_links	TABLE	0	1	
+advanced	sys	sys_blueprint_content_gaps	TABLE	0	1	
+advanced	sys	sys_blueprint_content_goals	TABLE	0	4	
+advanced	sys	sys_blueprint_content_incentive_links	TABLE	0	1	
+advanced	sys	sys_blueprint_content_incentives	TABLE	0	1	
+advanced	sys	sys_blueprint_content_job_role_links	TABLE	0	4	
+advanced	sys	sys_blueprint_content_job_roles	TABLE	5	3	apps/api/src/lib/scope/profilo.ts; apps/api/test/helpers/modello-di-prova.ts; apps/api/test/job-roles.integration.test.ts; apps/api/test/provisioning.integration.test.ts; apps/api/test/semantic-matching.integration.test.ts
+advanced	sys	sys_blueprint_content_kpis	TABLE	4	5	apps/api/src/modules/research/repository.ts; apps/api/src/modules/tenant-materialization/blueprint-build-source.ts; apps/api/test/blueprint-build-source.integration.test.ts; apps/api/test/helpers/modello-di-prova.ts
+advanced	sys	sys_blueprint_content_legal_entities	TABLE	0	4	
+advanced	sys	sys_blueprint_content_obligation_positions	TABLE	0	1	
+advanced	sys	sys_blueprint_content_obligations	TABLE	0	1	
+advanced	sys	sys_blueprint_content_packages	TABLE	0	7	
+advanced	sys	sys_blueprint_content_perimeters	TABLE	0	4	
+advanced	sys	sys_blueprint_content_position_occupations	TABLE	0	1	
+advanced	sys	sys_blueprint_content_position_processes	TABLE	0	4	
+advanced	sys	sys_blueprint_content_position_responsibilities	TABLE	0	3	
+advanced	sys	sys_blueprint_content_position_skill_requirements	TABLE	0	1	
+advanced	sys	sys_blueprint_content_positions	TABLE	6	4	apps/api/src/modules/hierarchy-levels/repository.ts; apps/api/src/modules/research/repository.ts; apps/api/src/modules/tenant-materialization/blueprint-build-source.ts; apps/api/test/blueprint-build-source.integration.test.ts; apps/api/test/helpers/modello-di-prova.ts; apps/api/test/hierarchy-levels.integration.test.ts
+advanced	sys	sys_blueprint_content_process_sites	TABLE	0	1	
+advanced	sys	sys_blueprint_content_process_steps	TABLE	0	4	
+advanced	sys	sys_blueprint_content_sites	TABLE	0	2	
+advanced	sys	sys_blueprint_content_skills	TABLE	4	2	apps/api/src/modules/research/repository.ts; apps/api/src/modules/tenant-materialization/blueprint-build-source.ts; apps/api/test/blueprint-build-source.integration.test.ts; apps/api/test/helpers/modello-di-prova.ts
+advanced	sys	sys_blueprint_content_strategies	TABLE	0	4	
+advanced	sys	sys_blueprint_content_strategy_items	TABLE	0	4	
+advanced	sys	sys_blueprint_content_training	TABLE	0	1	
+advanced	sys	sys_blueprint_content_training_positions	TABLE	0	1	
+advanced	sys	sys_blueprint_content_training_skills	TABLE	0	1	
+advanced	sys	sys_blueprint_content_unit_processes	TABLE	0	1	
+advanced	sys	sys_blueprint_content_units	TABLE	7	4	apps/api/src/modules/hierarchy-levels/repository.ts; apps/api/src/modules/research/repository.ts; apps/api/src/modules/tenant-materialization/blueprint-build-source.ts; apps/api/test/blueprint-build-source.integration.test.ts; apps/api/test/helpers/modello-di-prova.ts; apps/api/test/hierarchy-levels.integration.test.ts
+advanced	sys	sys_blueprint_families	TABLE	14	3	apps/api/src/modules/blueprint-families/repository.ts; apps/api/src/modules/blueprint-variants/repository.ts; apps/api/src/modules/tenant-blueprints/derivation.ts; apps/api/src/modules/tenant-materialization/blueprint-build-source.ts; apps/api/test/blueprint-build-source.integration.test.ts; apps/api/test/blueprint-families.integration.test.ts
+advanced	sys	sys_blueprint_family_activity_classes	TABLE	0	1	
+advanced	sys	sys_blueprint_overrides	TABLE	4	3	apps/api/src/modules/blueprint-overrides/repository.ts; apps/api/test/blueprint-overrides.integration.test.ts; apps/api/test/blueprints.integration.test.ts; apps/api/test/tenant-blueprint-application.integration.test.ts
+advanced	sys	sys_blueprint_process_registry	TABLE	23	8	apps/api/src/modules/approvals/effects/tenant-blueprint-approval.ts; apps/api/src/modules/blueprint-overrides/repository.ts; apps/api/src/modules/blueprint-processes/repository.ts; apps/api/src/modules/content-blueprint-links/repository.ts; apps/api/src/modules/dashboard/blocchi.ts; apps/api/src/modules/me/repository.ts
+advanced	sys	sys_blueprint_variant_versions	TABLE	19	4	apps/api/src/lib/scope/profilo.ts; apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts; apps/api/src/modules/hierarchy-levels/repository.ts; apps/api/src/modules/hierarchy-levels/service.ts; apps/api/src/modules/research/repository.ts; apps/api/src/modules/tenant-blueprints/derivation.ts
+advanced	sys	sys_blueprint_variants	TABLE	18	3	apps/api/src/modules/blueprint-activations/repository.ts; apps/api/src/modules/blueprint-families/repository.ts; apps/api/src/modules/blueprint-processes/repository.ts; apps/api/src/modules/blueprint-variants/repository.ts; apps/api/src/modules/content-blueprint-links/repository.ts; apps/api/src/modules/dashboard/repository.ts
+advanced	sys	sys_bonus_pools	TABLE	5	2	apps/api/src/modules/compensation/repository.ts; apps/api/test/compensation-read.integration.test.ts; apps/api/test/compensation-residual-mask.integration.test.ts; apps/api/test/reconciliation-f2-imports.integration.test.ts; packages/shared/src/schemas/compensation-read.ts
+advanced	sys	sys_branches	TABLE	6	6	apps/api/src/modules/branches/repository.ts; apps/api/src/modules/branches/service.ts; apps/api/test/branches.integration.test.ts; apps/api/test/reconciliation-registry.integration.test.ts; apps/api/test/reconciliation-wave2-succession-branches.integration.test.ts; packages/shared/src/schemas/branches.ts
+advanced	sys	sys_calibration_discussions	TABLE	2	0	apps/api/src/modules/calibration-sessions/repository.ts; apps/api/test/calibration-sessions.integration.test.ts
+advanced	sys	sys_calibration_participants	TABLE	2	1	apps/api/src/modules/calibration-sessions/repository.ts; apps/api/test/calibration-sessions.integration.test.ts
+advanced	sys	sys_calibration_sessions	TABLE	2	1	apps/api/src/modules/calibration-sessions/repository.ts; apps/api/test/calibration-sessions.integration.test.ts
+advanced	sys	sys_candidate_applications	TABLE	12	1	apps/api/src/modules/candidate-applications/repository.ts; apps/api/src/modules/candidates/repository.ts; apps/api/src/modules/interview-feedback/repository.ts; apps/api/src/modules/interviews/repository.ts; apps/api/src/modules/job-offers/repository.ts; apps/api/test/candidate-applications.integration.test.ts
+advanced	sys	sys_candidates	TABLE	15	2	apps/api/src/lib/scope/data-classes.ts; apps/api/src/modules/candidate-applications/repository.ts; apps/api/src/modules/candidates/repository.ts; apps/api/src/modules/candidates/service.ts; apps/api/test/candidate-applications.integration.test.ts; apps/api/test/candidates.integration.test.ts
+advanced	sys	sys_capability_maturity_scores	TABLE	4	0	apps/api/src/modules/capability-maturity/repository.ts; apps/api/src/modules/org-health/repository.ts; apps/api/test/capability-maturity.integration.test.ts; packages/shared/src/schemas/capability-maturity.ts
+advanced	sys	sys_capability_score_lineage	TABLE	1	2	apps/api/src/modules/capability-composition/repository.ts
+advanced	sys	sys_capability_scores	TABLE	7	2	apps/api/src/modules/advisor/repository.ts; apps/api/src/modules/capability-composition/repository.ts; apps/api/src/modules/capability-maturity/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/test/capability-composition-scope.integration.test.ts; apps/api/test/capability-composition.integration.test.ts
+advanced	sys	sys_career_path_steps	TABLE	5	3	apps/api/src/modules/career-path-steps/repository.ts; apps/api/src/modules/career-paths/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/test/career-path-steps.integration.test.ts; apps/api/test/reconciliation-f3-imports.integration.test.ts
+advanced	sys	sys_career_paths	TABLE	10	6	apps/api/src/modules/career-path-steps/repository.ts; apps/api/src/modules/career-paths/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/position-career-paths/repository.ts; apps/api/src/modules/user-career-plans/repository.ts; apps/api/test/career-path-steps.integration.test.ts
+advanced	sys	sys_classificazione_direzione_dato	TABLE	4	2	apps/api/src/modules/data-classification/repository.ts; apps/api/test/data-classification.integration.test.ts; apps/api/test/data-steward.integration.test.ts; packages/shared/src/schemas/data-classification.ts
+advanced	sys	sys_compensation_bands	TABLE	10	5	apps/api/src/modules/analytics/repository.ts; apps/api/src/modules/capability-composition/repository.ts; apps/api/src/modules/compensation/repository.ts; apps/api/src/modules/insights/repository.ts; apps/api/test/analytics.integration.test.ts; apps/api/test/capability-composition.integration.test.ts
+advanced	sys	sys_compensation_recommendations	TABLE	8	5	apps/api/src/modules/compensation/repository.ts; apps/api/src/modules/dashboard/repository.ts; apps/api/test/compensation-mask.integration.test.ts; apps/api/test/compensation-read.integration.test.ts; apps/api/test/compensation.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts
+advanced	sys	sys_conflitti_ibridi	TABLE	1	0	apps/api/test/permessi-senza-rotta.allowlist.json
+advanced	sys	sys_content_blueprint_links	TABLE	2	0	apps/api/src/modules/content-blueprint-links/repository.ts; packages/shared/src/schemas/content-blueprint-links.ts
+advanced	sys	sys_content_categories	TABLE	2	2	apps/api/src/modules/content/repository.ts; apps/api/test/content.integration.test.ts
+advanced	sys	sys_content_documents	TABLE	7	3	apps/api/src/modules/content-blueprint-links/repository.ts; apps/api/src/modules/content/repository.ts; apps/api/test/content-blueprint-links.integration.test.ts; apps/api/test/content.integration.test.ts; apps/api/test/helpers/drift-check.ts; apps/web/tests/e2e/e2e-drift.ts
+advanced	sys	sys_content_media	TABLE	2	1	apps/api/src/modules/content/media-repository.ts; apps/api/test/content-media.integration.test.ts
+advanced	sys	sys_content_versions	TABLE	3	3	apps/api/src/modules/content/repository.ts; apps/api/test/helpers/drift-check.ts; apps/web/tests/e2e/e2e-drift.ts
+advanced	sys	sys_continuous_feedback	TABLE	2	1	apps/api/src/modules/evidence/repository.ts; apps/api/test/sdbi-perf-feedback.integration.test.ts
+advanced	sys	sys_critical_positions	TABLE	4	5	apps/api/src/modules/talent-review/repository.ts; apps/api/test/reconciliation-f3-imports.integration.test.ts; apps/api/test/talent-review.integration.test.ts; packages/shared/src/schemas/talent-review.ts
+advanced	sys	sys_critical_role_coverage_status	TABLE	4	1	apps/api/src/modules/talent-review/repository.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; apps/api/test/talent-review.integration.test.ts; packages/shared/src/schemas/talent-review.ts
+advanced	sys	sys_dashboard_block_data_classes	TABLE	3	1	apps/api/src/modules/dashboard/repository.ts; apps/api/test/dashboards-f2.integration.test.ts; packages/shared/src/schemas/dashboard.ts
+advanced	sys	sys_dashboard_blocks	TABLE	4	1	apps/api/src/modules/dashboard/repository.ts; apps/api/test/dashboard-catalog.integration.test.ts; apps/api/test/dashboards-f2.integration.test.ts; packages/shared/src/schemas/dashboard.ts
+advanced	sys	sys_dashboards	TABLE	6	1	apps/api/src/modules/dashboard/repository.ts; apps/api/test/dashboard-catalog.integration.test.ts; apps/api/test/dashboards-f2.integration.test.ts; apps/web/src/app/(authenticated)/dashboard/[famiglia]/page.tsx; apps/web/tests/e2e/dashboard-famiglie.spec.ts; packages/shared/src/schemas/dashboard.ts
+advanced	sys	sys_employee_position_fit_scores	TABLE	4	4	apps/api/src/modules/talent-review/repository.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; apps/api/test/talent-review.integration.test.ts; packages/shared/src/schemas/talent-review.ts
+advanced	sys	sys_engagement_action_plans	TABLE	3	4	apps/api/src/modules/engagement-feedback/repository.ts; apps/api/test/engagement-feedback.integration.test.ts; packages/shared/src/schemas/engagement-feedback.ts
+advanced	sys	sys_engagement_feedback	TABLE	5	3	apps/api/src/lib/scope/data-classes.ts; apps/api/src/modules/engagement-feedback/repository.ts; apps/api/test/engagement-feedback.integration.test.ts; apps/api/test/scope-data-classes.integration.test.ts; packages/shared/src/schemas/engagement-feedback.ts
+advanced	sys	sys_engagement_survey_responses	TABLE	8	3	apps/api/src/lib/scope/data-classes.ts; apps/api/src/modules/insights/repository.ts; apps/api/src/modules/org-health/repository.ts; apps/api/src/modules/surveys/repository.ts; apps/api/test/insights.integration.test.ts; apps/api/test/org-health.integration.test.ts
+advanced	sys	sys_engagement_survey_templates	TABLE	3	2	apps/api/src/modules/surveys/repository.ts; apps/api/test/surveys.integration.test.ts; packages/shared/src/schemas/surveys.ts
+advanced	sys	sys_engagement_surveys	TABLE	3	3	apps/api/src/modules/surveys/repository.ts; apps/api/test/surveys-scope.integration.test.ts; packages/shared/src/schemas/surveys.ts
+advanced	sys	sys_enterprise_size_bands	TABLE	9	2	apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts; apps/api/src/modules/blueprint-variants/repository.ts; apps/api/src/modules/enterprise-size-bands/repository.ts; apps/api/src/modules/research/repository.ts; apps/api/src/modules/tenant-blueprints/derivation.ts; apps/api/src/modules/tenant-blueprints/repository.ts
+advanced	sys	sys_enterprise_typing_profiles	TABLE	5	3	apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts; apps/api/src/modules/enterprise-typing-profiles/repository.ts; apps/api/test/enterprise-typing-profiles.integration.test.ts; apps/api/test/enterprise-typing.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts
+advanced	sys	sys_esco_occupation_embeddings	TABLE	3	2	apps/api/src/modules/semantic-matching/repository.ts; apps/api/test/semantic-matching-substrate.integration.test.ts; apps/api/test/semantic-matching.integration.test.ts
+advanced	sys	sys_esco_occupation_mappings	TABLE	6	3	apps/api/src/modules/public-stats/repository.ts; apps/api/src/modules/reference-sync/repository.ts; apps/api/src/modules/semantic-matching/repository.ts; apps/api/test/reference-sync.integration.test.ts; packages/shared/src/schemas/occupation-classifications.ts; packages/shared/src/schemas/reference-sync.ts
+advanced	sys	sys_feedback_360_responses	TABLE	3	4	apps/api/src/modules/evidence/repository.ts; apps/api/test/evidence.integration.test.ts; apps/api/test/sdbi-perf-feedback.integration.test.ts
+advanced	sys	sys_flight_risk_scores	TABLE	12	1	apps/api/src/modules/evidence/repository.ts; apps/api/src/modules/insights/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/org-health/repository.ts; apps/api/test/evidence-mask.integration.test.ts; apps/api/test/evidence.integration.test.ts
+advanced	sys	sys_gap_analysis_results	TABLE	3	4	apps/api/src/modules/learning-gaps/repository.ts; apps/api/test/gap-closure.integration.test.ts; apps/api/test/reconciliation-f2-imports.integration.test.ts
+advanced	sys	sys_gap_closure_actions	TABLE	3	5	apps/api/src/modules/learning-gaps/repository.ts; apps/api/test/gap-closure.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts
+advanced	sys	sys_gap_closure_plans	TABLE	3	4	apps/api/src/modules/learning-gaps/repository.ts; apps/api/test/gap-closure.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts
+advanced	sys	sys_gdpr_data_map	TABLE	3	2	apps/api/src/modules/gdpr/repository.ts; apps/api/test/gdpr.integration.test.ts; packages/shared/src/schemas/gdpr.ts
+advanced	sys	sys_gdpr_requests	TABLE	5	2	apps/api/src/modules/gdpr/repository.ts; apps/api/src/modules/gdpr/routes.ts; apps/api/src/modules/gdpr/service.ts; apps/api/src/modules/me/routes.ts; apps/api/test/gdpr.integration.test.ts
+advanced	sys	sys_generated_record_origins	TABLE	9	2	apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts; apps/api/src/modules/approvals/effects/tenant-import-run.ts; apps/api/src/modules/generated-origins/repository.ts; apps/api/src/modules/tenant-materialization/build-plan.ts; apps/api/src/modules/tenant-materialization/repository.ts; apps/api/test/generated-origins.integration.test.ts
+advanced	sys	sys_goal_alignments	TABLE	2	0	apps/api/src/modules/goals/repository.ts; apps/api/test/goals-life.integration.test.ts
+advanced	sys	sys_goal_check_ins	TABLE	3	6	apps/api/src/modules/goals/repository.ts; apps/api/test/goals-life.integration.test.ts; apps/api/test/goals-okrs-mask.integration.test.ts
+advanced	sys	sys_goal_comments	TABLE	3	1	apps/api/src/modules/goals/repository.ts; apps/api/test/goals-life.integration.test.ts; apps/api/test/goals-okrs-mask.integration.test.ts
+advanced	sys	sys_goal_milestones	TABLE	2	1	apps/api/src/modules/goals/repository.ts; apps/api/test/goals-life.integration.test.ts
+advanced	sys	sys_goal_templates	TABLE	3	2	apps/api/src/modules/goals/repository.ts; apps/api/src/modules/goals/service.ts; apps/api/test/goals-life.integration.test.ts
+advanced	sys	sys_goal_updates	TABLE	2	2	apps/api/src/modules/goals/repository.ts; apps/api/test/goals-life.integration.test.ts
+advanced	sys	sys_goals	TABLE	13	10	apps/api/src/modules/goals/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/org-health/repository.ts; apps/api/test/goals-life.integration.test.ts; apps/api/test/goals-okrs-mask.integration.test.ts; apps/api/test/goals-scope.integration.test.ts
+advanced	sys	sys_inbox_notifications	TABLE	19	2	apps/api/src/lib/notifications/cleanup.ts; apps/api/src/lib/notifications/digest.ts; apps/api/src/lib/notifications/emit.ts; apps/api/src/modules/approvals/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/notifications/repository.ts
+advanced	sys	sys_industry_codes	TABLE	8	1	apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts; apps/api/src/modules/research/repository.ts; apps/api/src/modules/tenants/repository.ts; apps/api/src/modules/tenants/service.ts; apps/api/test/helpers/industry.ts; apps/api/test/tenants.integration.test.ts
+advanced	sys	sys_industry_forbidden_terms	TABLE	0	0	
+advanced	sys	sys_interview_feedback	TABLE	3	2	apps/api/src/modules/interview-feedback/repository.ts; apps/api/test/interview-feedback.integration.test.ts; packages/shared/src/schemas/interview-feedback.ts
+advanced	sys	sys_interviews	TABLE	6	1	apps/api/src/modules/interview-feedback/repository.ts; apps/api/src/modules/interviews/repository.ts; apps/api/test/interview-feedback.integration.test.ts; apps/api/test/interviews.integration.test.ts; apps/api/test/recruiting-scope.integration.test.ts; packages/shared/src/schemas/interviews.ts
+advanced	sys	sys_job_families	TABLE	8	2	apps/api/src/modules/job-families/repository.ts; apps/api/src/modules/job-families/service.ts; apps/api/src/modules/job-roles/repository.ts; apps/api/test/job-families-and-roles.integration.test.ts; apps/api/test/job-families.integration.test.ts; apps/web/tests/e2e/global-teardown.ts
+advanced	sys	sys_job_offers	TABLE	3	1	apps/api/src/modules/job-offers/repository.ts; apps/api/test/job-offers.integration.test.ts; packages/shared/src/schemas/job-offers.ts
+advanced	sys	sys_job_postings	TABLE	14	0	apps/api/src/modules/candidate-applications/repository.ts; apps/api/src/modules/candidates/repository.ts; apps/api/src/modules/interview-feedback/repository.ts; apps/api/src/modules/interviews/repository.ts; apps/api/src/modules/job-postings/repository.ts; apps/api/src/modules/public-job-postings/repository.ts
+advanced	sys	sys_job_requisitions	TABLE	16	0	apps/api/src/modules/candidate-applications/repository.ts; apps/api/src/modules/candidates/repository.ts; apps/api/src/modules/interview-feedback/repository.ts; apps/api/src/modules/interviews/repository.ts; apps/api/src/modules/job-postings/repository.ts; apps/api/src/modules/job-requisitions/repository.ts
+advanced	sys	sys_job_role_embeddings	TABLE	6	2	apps/api/src/modules/insights/repository.ts; apps/api/src/modules/semantic-matching/repository.ts; apps/api/test/semantic-matching-substrate.integration.test.ts; apps/api/test/semantic-matching.integration.test.ts; apps/web/tests/e2e/me-pages.spec.ts; packages/shared/src/schemas/semantic-matching.ts
+advanced	sys	sys_job_roles	TABLE	10	11	apps/api/src/lib/scope/gate.ts; apps/api/src/modules/job-families/service.ts; apps/api/src/modules/job-roles/repository.ts; apps/api/src/modules/semantic-matching/repository.ts; apps/api/test/helpers/modello-di-prova.ts; apps/api/test/job-families-and-roles.integration.test.ts
+advanced	sys	sys_kpi_assessment_methods	TABLE	2	0	apps/api/src/modules/kpi-definitions/repository.ts; apps/api/test/kpi-metrology.integration.test.ts
+advanced	sys	sys_kpi_assessment_results	TABLE	2	3	apps/api/src/modules/evidence/repository.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts
+advanced	sys	sys_kpi_definitions	TABLE	20	21	apps/api/src/modules/analytics/repository.ts; apps/api/src/modules/evidence/repository.ts; apps/api/src/modules/kpi-definitions/repository.ts; apps/api/src/modules/kpi-definitions/service.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/organization-unit-kpi-templates/repository.ts
+advanced	sys	sys_kpi_measurements	TABLE	4	4	apps/api/src/modules/kpi-definitions/repository.ts; apps/api/test/kpi-metrology.integration.test.ts; apps/api/test/per-person-mask.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts
+advanced	sys	sys_kpi_metric_definitions	TABLE	3	1	apps/api/src/modules/kpi-definitions/repository.ts; apps/api/test/kpi-metrology.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts
+advanced	sys	sys_kpi_targets	TABLE	5	4	apps/api/src/modules/analytics/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/test/analytics.integration.test.ts; apps/api/test/me-self-completeness-f5.integration.test.ts; packages/shared/src/schemas/me.ts
+advanced	sys	sys_kpi_weighting_rules	TABLE	2	1	apps/api/src/modules/kpi-definitions/repository.ts; apps/api/test/kpi-metrology.integration.test.ts
+advanced	sys	sys_leads	TABLE	5	4	apps/api/src/modules/leads/repository.ts; apps/api/test/leads.integration.test.ts; apps/web/src/app/privacy/page.tsx; apps/web/tests/e2e/global-teardown.ts; apps/web/tests/e2e/leads-management.spec.ts
+advanced	sys	sys_learning_gaps	TABLE	10	6	apps/api/src/modules/dashboard/repository.ts; apps/api/src/modules/evidence/repository.ts; apps/api/src/modules/learning-gaps/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/test/gap-closure.integration.test.ts; apps/api/test/learning-gaps-position.integration.test.ts
+advanced	sys	sys_learning_modules	TABLE	15	11	apps/api/src/modules/evidence/repository.ts; apps/api/src/modules/learning-modules/repository.ts; apps/api/src/modules/learning-path-steps/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/positions/repository.ts; apps/api/src/modules/training-initiatives/repository.ts
+advanced	sys	sys_learning_path_steps	TABLE	5	2	apps/api/src/modules/learning-path-steps/repository.ts; apps/api/src/modules/learning-paths/repository.ts; apps/api/test/learning-path-steps.integration.test.ts; apps/api/test/reconciliation-learning-rehome.integration.test.ts; apps/web/tests/e2e/global-teardown.ts
+advanced	sys	sys_learning_paths	TABLE	11	8	apps/api/src/modules/dashboard/repository.ts; apps/api/src/modules/learning-path-steps/repository.ts; apps/api/src/modules/learning-paths/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/positions/repository.ts; apps/api/test/learning-path-steps.integration.test.ts
+advanced	sys	sys_leave_accrual_rules	TABLE	3	1	apps/api/src/modules/time-off/repository.ts; apps/api/test/time-off.integration.test.ts; packages/shared/src/schemas/time-off.ts
+advanced	sys	sys_leave_balance_transactions	TABLE	4	1	apps/api/src/modules/time-off/repository.ts; apps/api/test/b3-time-off-approval.integration.test.ts; apps/api/test/time-off.integration.test.ts; packages/shared/src/schemas/time-off.ts
+advanced	sys	sys_mentor_match_scores	TABLE	7	2	apps/api/src/modules/me/repository.ts; apps/api/src/modules/mentorship/repository.ts; apps/api/test/me-algorithmic-self.integration.test.ts; apps/api/test/mentorship-data.integration.test.ts; apps/api/test/mentorship-scope.integration.test.ts; packages/shared/src/schemas/me.ts
+advanced	sys	sys_mentorship_programs	TABLE	4	2	apps/api/src/modules/mentorship/repository.ts; apps/api/test/mentorship-data.integration.test.ts; apps/api/test/mentorship.integration.test.ts; packages/shared/src/schemas/mentorship.ts
+advanced	sys	sys_mentorship_sessions	TABLE	3	1	apps/api/src/modules/mentorship/repository.ts; apps/api/test/mentorship-data.integration.test.ts; packages/shared/src/schemas/mentorship.ts
+advanced	sys	sys_mentorships	TABLE	8	3	apps/api/src/lib/scope/domains.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/mentorship/repository.ts; apps/api/test/domains-f6.integration.test.ts; apps/api/test/me-self-completeness-f5.integration.test.ts; apps/api/test/mentorship-data.integration.test.ts
+advanced	sys	sys_model_predictions	TABLE	7	3	apps/api/src/modules/me/repository.ts; apps/api/src/modules/predictions/repository.ts; apps/api/test/me-algorithmic-self.integration.test.ts; apps/api/test/predictions-mask.integration.test.ts; apps/api/test/predictions-scope.integration.test.ts; packages/shared/src/schemas/me.ts
+advanced	sys	sys_notification_preferences	TABLE	6	0	apps/api/src/lib/notifications/digest.ts; apps/api/src/lib/notifications/emit.ts; apps/api/src/modules/me/repository.ts; apps/api/test/notification-digest.integration.test.ts; apps/api/test/notification-preferences.integration.test.ts; packages/shared/src/schemas/notifications.ts
+advanced	sys	sys_objective_reward_rules	TABLE	4	0	apps/api/src/modules/compensation/repository.ts; apps/api/test/compensation-read.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; packages/shared/src/schemas/compensation-read.ts
+advanced	sys	sys_occupation_classification_mappings	TABLE	0	1	
+advanced	sys	sys_occupation_classifications	TABLE	4	2	apps/api/src/modules/occupation-classifications/repository.ts; apps/api/src/modules/occupation-classifications/service.ts; apps/api/test/occupation-classifications.integration.test.ts; packages/shared/src/schemas/occupation-classifications.ts
+advanced	sys	sys_occupation_skill_requirements	TABLE	2	1	apps/api/src/modules/public-stats/repository.ts; apps/api/test/occupation-skill-requirements.integration.test.ts
+advanced	sys	sys_okr_check_ins	TABLE	3	2	apps/api/src/modules/okrs/repository.ts; apps/api/test/goals-life.integration.test.ts; packages/shared/src/schemas/okrs.ts
+advanced	sys	sys_okr_key_results	TABLE	3	1	apps/api/src/modules/okrs/repository.ts; apps/api/test/goals-okrs-mask.integration.test.ts; packages/shared/src/schemas/okrs.ts
+advanced	sys	sys_okrs	TABLE	6	3	apps/api/src/modules/okrs/repository.ts; apps/api/test/goals-okrs-mask.integration.test.ts; apps/api/test/okrs-scope.integration.test.ts; apps/api/test/okrs.integration.test.ts; apps/web/tests/e2e/goals.spec.ts; packages/shared/src/schemas/okrs.ts
+advanced	sys	sys_operating_model_catalog	TABLE	5	2	apps/api/src/modules/operating-models/repository.ts; apps/api/src/modules/research/repository.ts; apps/api/test/enterprise-typing.integration.test.ts; apps/api/test/operating-models.integration.test.ts; apps/api/test/research.integration.test.ts
+advanced	sys	sys_organization_unit_history	TABLE	2	3	apps/api/src/modules/organization-unit-history/repository.ts; apps/api/test/organization-unit-history.integration.test.ts
+advanced	sys	sys_organization_unit_kpi_templates	TABLE	4	2	apps/api/src/modules/organization-unit-kpi-templates/repository.ts; apps/api/test/bpm-kpi-templates.integration.test.ts; apps/api/test/organization-unit-kpi-templates.integration.test.ts; apps/api/test/reconciliation-org-unit-kpi-templates.integration.test.ts
+advanced	sys	sys_organization_unit_processes	TABLE	9	4	apps/api/src/lib/scope/functional.ts; apps/api/src/modules/dashboard/blocchi.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/organization-unit-processes/repository.ts; apps/api/test/organization-unit-processes-raci-demo.integration.test.ts; apps/api/test/organization-unit-processes.integration.test.ts
+advanced	sys	sys_organization_unit_templates	TABLE	1	2	apps/api/test/reconciliation-org-unit-kpi-templates.integration.test.ts
+advanced	sys	sys_organization_unit_types	TABLE	5	4	apps/api/src/modules/research/repository.ts; apps/api/src/modules/tenant-materialization/blueprint-build-source.ts; apps/api/src/modules/tenant-materialization/build-plan.ts; apps/api/src/modules/tenant-materialization/repository.ts; apps/api/test/reconciliation-org-unit-kpi-templates.integration.test.ts
+advanced	sys	sys_organization_units	TABLE	57	26	apps/api/scripts/dev-whoami.mjs; apps/api/scripts/export-accessi-csv.mjs; apps/api/scripts/prova-live-chiusura-c2.mjs; apps/api/src/lib/scope/data-classes.ts; apps/api/src/lib/scope/domains.ts; apps/api/src/lib/scope/org.ts
+advanced	sys	sys_overtime	TABLE	4	8	apps/api/src/modules/analytics/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/test/analytics.integration.test.ts; packages/shared/src/schemas/analytics.ts
+advanced	sys	sys_payout_curves	TABLE	7	4	apps/api/src/modules/compensation/repository.ts; apps/api/src/modules/compensation/reward-engine.ts; apps/api/test/compensation-read.integration.test.ts; apps/api/test/exposure-gate.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; apps/api/test/reconciliation-registry.integration.test.ts
+advanced	sys	sys_payroll_handoff_records	TABLE	6	4	apps/api/src/modules/compensation/repository.ts; apps/api/test/compensation-read.integration.test.ts; apps/api/test/compensation-residual-mask.integration.test.ts; apps/api/test/compensation.integration.test.ts; packages/shared/src/schemas/compensation-read.ts; packages/shared/src/schemas/compensation.ts
+advanced	sys	sys_performance_review_competency_ratings	TABLE	2	3	apps/api/src/modules/evidence/repository.ts; apps/api/test/sdbi-perf-feedback.integration.test.ts
+advanced	sys	sys_performance_reviews	TABLE	10	7	apps/api/scripts/prova-live-chiusura-c2.mjs; apps/api/src/modules/me/repository.ts; apps/api/src/modules/org-health/repository.ts; apps/api/src/modules/performance-reviews/repository.ts; apps/api/test/dpo-dossier-mascherato.integration.test.ts; apps/api/test/me-performance-reviews.integration.test.ts
+advanced	sys	sys_permessi_plenipotenziari_ammessi	TABLE	0	0	
+advanced	sys	sys_person_evidence_records	TABLE	2	3	apps/api/src/modules/evidence/repository.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts
+advanced	sys	sys_platform_user_tenant_assignments	TABLE	9	1	apps/api/scripts/collaudo-access.mjs; apps/api/src/lib/actor.ts; apps/api/src/middleware/auth.ts; apps/api/src/middleware/tenantContext.ts; apps/api/src/modules/platform-tenant-assignments/repository.ts; apps/api/test/implementation-consultant.integration.test.ts
+advanced	sys	sys_position_career_paths	TABLE	4	5	apps/api/src/modules/me/repository.ts; apps/api/src/modules/position-career-paths/repository.ts; apps/api/test/position-career-paths.integration.test.ts; apps/api/test/reconciliation-f3-imports.integration.test.ts
+advanced	sys	sys_position_compensation_profiles	TABLE	10	6	apps/api/src/modules/analytics/repository.ts; apps/api/src/modules/capability-composition/repository.ts; apps/api/src/modules/compensation/repository.ts; apps/api/src/modules/insights/repository.ts; apps/api/test/analytics.integration.test.ts; apps/api/test/capability-composition.integration.test.ts
+advanced	sys	sys_position_economic_weight	TABLE	5	2	apps/api/src/modules/compensation/repository.ts; apps/api/test/compensation-read.integration.test.ts; apps/api/test/compensation-residual-mask.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; packages/shared/src/schemas/compensation-read.ts
+advanced	sys	sys_position_kpi_requirements	TABLE	5	6	apps/api/src/modules/me/repository.ts; apps/api/src/modules/positions/repository.ts; apps/api/test/me-ess-extensions.integration.test.ts; apps/api/test/me-self-completeness-f5.integration.test.ts; apps/api/test/reconciliation-s970-kpi-bridge.integration.test.ts
+advanced	sys	sys_position_learning_requirements	TABLE	4	3	apps/api/src/modules/positions/repository.ts; apps/api/test/positions-learning.integration.test.ts; apps/api/test/reconciliation-f3-imports.integration.test.ts; packages/shared/src/schemas/positions.ts
+advanced	sys	sys_position_skill_requirement_history	TABLE	2	4	apps/api/src/modules/positions/repository.ts; apps/api/test/exposure-gate.integration.test.ts
+advanced	sys	sys_position_skill_requirements	TABLE	11	7	apps/api/src/modules/capability-composition/repository.ts; apps/api/src/modules/positions/repository.ts; apps/api/src/modules/tenant-import-runs/validation.ts; apps/api/test/exposure-gate.integration.test.ts; apps/api/test/helpers/azienda-di-prova-p4.ts; apps/api/test/positions-learning.integration.test.ts
+advanced	sys	sys_position_succession_relevance	TABLE	3	4	apps/api/src/modules/position-succession-relevance/repository.ts; apps/api/test/position-succession-relevance.integration.test.ts; apps/api/test/reconciliation-f3-imports.integration.test.ts
+advanced	sys	sys_positions	TABLE	99	54	apps/api/scripts/dev-whoami.mjs; apps/api/scripts/export-accessi-csv.mjs; apps/api/scripts/prova-live-chiusura-c2.mjs; apps/api/src/lib/scope/org.ts; apps/api/src/modules/analytics/repository.ts; apps/api/src/modules/approvals/effects/position-assignment.ts
+advanced	sys	sys_predictive_models	TABLE	4	1	apps/api/src/modules/me/repository.ts; apps/api/src/modules/predictions/repository.ts; apps/api/test/me-algorithmic-self.integration.test.ts; packages/shared/src/schemas/predictions.ts
+advanced	sys	sys_process_kpi_templates	TABLE	5	5	apps/api/src/modules/process-kpi-templates/repository.ts; apps/api/test/bpm-kpi-templates.integration.test.ts; apps/api/test/process-kpi-templates.integration.test.ts; apps/api/test/reconciliation-registry.integration.test.ts; apps/api/test/reconciliation-s970-process-kpi-exclude.integration.test.ts
+advanced	sys	sys_process_participants	TABLE	12	7	apps/api/src/lib/scope/data-classes.ts; apps/api/src/lib/scope/domains.ts; apps/api/src/lib/scope/functional.ts; apps/api/src/modules/me/repository.ts; apps/api/test/domain-derived-sections.integration.test.ts; apps/api/test/domains-f6.integration.test.ts
+advanced	sys	sys_project_members	TABLE	3	1	apps/api/src/modules/projects/repository.ts; apps/api/test/projects.integration.test.ts; packages/shared/src/schemas/projects.ts
+advanced	sys	sys_projects	TABLE	3	1	apps/api/src/modules/projects/repository.ts; apps/api/test/projects.integration.test.ts; packages/shared/src/schemas/projects.ts
+advanced	sys	sys_pulse_checks	TABLE	7	5	apps/api/src/modules/engagement/repository.ts; apps/api/src/modules/insights/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/test/engagement.integration.test.ts; apps/api/test/insights.integration.test.ts; apps/api/test/me-algorithmic-self.integration.test.ts
+advanced	sys	sys_readiness_scores	TABLE	4	5	apps/api/src/modules/talent-review/repository.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; apps/api/test/talent-review.integration.test.ts; packages/shared/src/schemas/talent-review.ts
+advanced	sys	sys_reconciliation_registry	TABLE	6	12	apps/api/test/occupation-skill-requirements.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; apps/api/test/reconciliation-registry.integration.test.ts; apps/api/test/reconciliation-s970-kpi-bridge.integration.test.ts; apps/api/test/reconciliation-s970-process-kpi-exclude.integration.test.ts; apps/api/test/sdbi-perf-feedback.integration.test.ts
+advanced	sys	sys_reference_translations	TABLE	3	10	apps/api/src/lib/i18n/localize.ts; apps/api/test/occupation-classifications.integration.test.ts; apps/api/test/skills-i18n.integration.test.ts
+advanced	sys	sys_research_sources	TABLE	3	4	apps/api/src/modules/research/ponte.ts; apps/api/src/modules/research/repository.ts; apps/api/test/research.integration.test.ts
+advanced	sys	sys_review_cycles	TABLE	4	0	apps/api/src/modules/review-cycles/repository.ts; apps/api/test/review-cycles.integration.test.ts; apps/web/src/app/(authenticated)/performance/page.tsx; apps/web/tests/e2e/performance-cycle.spec.ts
+advanced	sys	sys_reward_gate_catalog	TABLE	3	1	apps/api/src/modules/compensation/repository.ts; apps/api/test/compensation-scope.integration.test.ts; apps/api/test/compensation.integration.test.ts
+advanced	sys	sys_reward_gate_results	TABLE	6	7	apps/api/src/modules/compensation/repository.ts; apps/api/src/modules/compensation/reward-engine.ts; apps/api/test/compensation.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; apps/api/test/reconciliation-registry.integration.test.ts; packages/shared/src/schemas/compensation.ts
+advanced	sys	sys_reward_gates	TABLE	4	5	apps/api/src/modules/compensation/repository.ts; apps/api/test/compensation-scope.integration.test.ts; apps/api/test/compensation.integration.test.ts; packages/shared/src/schemas/compensation.ts
+advanced	sys	sys_ritiri_ammessi	TABLE	0	0	
+advanced	sys	sys_schema_migrations	TABLE	0	7	
+advanced	sys	sys_seed_acquisition_runs	TABLE	9	3	apps/api/src/modules/approvals/effects/tenant-import-run.ts; apps/api/src/modules/research/repository.ts; apps/api/src/modules/seed-acquisition-runs/repository.ts; apps/api/src/modules/tenant-import-runs/repository.ts; apps/api/test/research.integration.test.ts; apps/api/test/seed-acquisition-runs.integration.test.ts
+advanced	sys	sys_seed_approval_decisions	TABLE	7	3	apps/api/src/modules/approvals/effects/tenant-import-run.ts; apps/api/src/modules/research/engine.ts; apps/api/src/modules/research/repository.ts; apps/api/src/modules/seed-approval-decisions/repository.ts; apps/api/test/seed-acquisition.integration.test.ts; apps/api/test/seed-approval-decisions.integration.test.ts
+advanced	sys	sys_seed_candidate_records	TABLE	10	3	apps/api/src/modules/approvals/effects/tenant-import-run.ts; apps/api/src/modules/research/repository.ts; apps/api/src/modules/seed-approval-decisions/repository.ts; apps/api/src/modules/seed-candidate-records/repository.ts; apps/api/src/modules/tenant-import-runs/repository.ts; apps/api/test/research.integration.test.ts
+advanced	sys	sys_seed_source_evidence	TABLE	3	2	apps/api/src/modules/research/repository.ts; apps/api/src/modules/seed-candidate-records/repository.ts; apps/api/test/seed-candidate-records.integration.test.ts
+advanced	sys	sys_seed_validation_results	TABLE	6	2	apps/api/src/modules/approvals/effects/tenant-import-run.ts; apps/api/src/modules/research/domain.ts; apps/api/src/modules/research/repository.ts; apps/api/src/modules/seed-candidate-records/repository.ts; apps/api/src/modules/tenant-import-runs/repository.ts; apps/api/test/seed-candidate-records.integration.test.ts
+advanced	sys	sys_skill_aliases	TABLE	4	0	apps/api/src/modules/skill-aliases/repository.ts; apps/api/test/skill-aliases-isolation.integration.test.ts; apps/api/test/skill-aliases.integration.test.ts; packages/shared/src/schemas/skill-aliases.ts
+advanced	sys	sys_skill_categories	TABLE	12	4	apps/api/src/modules/analytics/repository.ts; apps/api/src/modules/skill-categories/repository.ts; apps/api/src/modules/skill-categories/service.ts; apps/api/src/modules/skill-families/service.ts; apps/api/src/modules/tenant-materialization/build-plan.ts; apps/api/src/modules/tenant-materialization/repository.ts
+advanced	sys	sys_skill_embeddings	TABLE	3	2	apps/api/src/modules/semantic-matching/repository.ts; apps/api/test/semantic-matching-substrate.integration.test.ts; apps/api/test/semantic-matching.integration.test.ts
+advanced	sys	sys_skill_families	TABLE	8	1	apps/api/src/modules/skill-categories/repository.ts; apps/api/src/modules/skill-categories/service.ts; apps/api/src/modules/skill-families/repository.ts; apps/api/src/modules/skill-families/service.ts; apps/api/test/skill-categories.integration.test.ts; apps/api/test/skill-families.integration.test.ts
+advanced	sys	sys_skill_gap_scores	TABLE	8	2	apps/api/src/modules/capability-maturity/repository.ts; apps/api/src/modules/evidence/repository.ts; apps/api/src/modules/insights/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/test/insights-p2.integration.test.ts; apps/api/test/insights-recompute-cli.integration.test.ts
+advanced	sys	sys_skill_groups	TABLE	2	3	apps/api/src/modules/capability-composition/repository.ts; apps/api/test/vrio-scorecard.integration.test.ts
+advanced	sys	sys_skill_learning_mappings	TABLE	4	6	apps/api/src/modules/positions/repository.ts; apps/api/test/positions-learning.integration.test.ts; apps/api/test/reconciliation-learning-rehome.integration.test.ts; packages/shared/src/schemas/positions.ts
+advanced	sys	sys_skill_proficiency_levels	TABLE	8	4	apps/api/src/modules/capability-composition/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/skill-proficiency-levels/repository.ts; apps/api/src/modules/skill-proficiency-levels/service.ts; apps/api/test/essential-capability.integration.test.ts; apps/api/test/me-skill-possession.integration.test.ts
+advanced	sys	sys_skill_taxonomy_edges	TABLE	4	1	apps/api/src/modules/skill-taxonomy-edges/repository.ts; apps/api/test/skill-taxonomy-edges.integration.test.ts; packages/shared/src/schemas/skill-taxonomy-edges.ts; packages/shared/src/schemas/skills.ts
+advanced	sys	sys_skills	TABLE	49	23	apps/api/src/lib/scope/data-classes.ts; apps/api/src/modules/advisor/engine.ts; apps/api/src/modules/analytics/repository.ts; apps/api/src/modules/approvals/effects/tenant-import-run.ts; apps/api/src/modules/capability-composition/repository.ts; apps/api/src/modules/dashboard/blocchi.ts
+advanced	sys	sys_source_lineage_records	TABLE	6	3	apps/api/src/modules/provenance/repository.ts; apps/api/test/evidence.integration.test.ts; apps/api/test/provenance.integration.test.ts; apps/api/test/sdbi-perf-feedback.integration.test.ts; packages/shared/src/schemas/evidence.ts; packages/shared/src/schemas/provenance.ts
+advanced	sys	sys_succession_pools	TABLE	12	6	apps/api/src/modules/succession-pools/repository.ts; apps/api/src/modules/successor-candidates/repository.ts; apps/api/test/reconciliation-f3-imports.integration.test.ts; apps/api/test/reconciliation-registry.integration.test.ts; apps/api/test/reconciliation-s970-kpi-bridge.integration.test.ts; apps/api/test/reconciliation-wave2-succession-branches.integration.test.ts
+advanced	sys	sys_succession_readiness_scores	TABLE	8	1	apps/api/src/modules/capability-maturity/repository.ts; apps/api/src/modules/evidence/repository.ts; apps/api/src/modules/insights/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/test/insights-p2.integration.test.ts; apps/api/test/insights-recompute-cli.integration.test.ts
+advanced	sys	sys_succession_scores	TABLE	4	4	apps/api/src/modules/talent-review/repository.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; apps/api/test/talent-review.integration.test.ts; packages/shared/src/schemas/talent-review.ts
+advanced	sys	sys_successor_candidates	TABLE	12	8	apps/api/src/modules/succession-pools/repository.ts; apps/api/src/modules/successor-candidates/repository.ts; apps/api/src/modules/successor-readiness/repository.ts; apps/api/test/reconciliation-f3-imports.integration.test.ts; apps/api/test/reconciliation-registry.integration.test.ts; apps/api/test/reconciliation-s970-kpi-bridge.integration.test.ts
+advanced	sys	sys_successor_readiness	TABLE	5	3	apps/api/src/modules/successor-readiness/repository.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; apps/api/test/reconciliation-registry.integration.test.ts; apps/api/test/successor-readiness-scope.integration.test.ts; apps/api/test/successor-readiness.integration.test.ts
+advanced	sys	sys_survey_assignments	TABLE	4	3	apps/api/src/modules/me/repository.ts; apps/api/test/me-surveys-review.integration.test.ts; apps/api/test/me-surveys.integration.test.ts; apps/web/tests/e2e/global-teardown.ts
+advanced	sys	sys_survey_questions	TABLE	7	4	apps/api/src/modules/engagement/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/org-health/repository.ts; apps/api/test/engagement.integration.test.ts; apps/api/test/me-surveys-review.integration.test.ts; apps/api/test/me-surveys.integration.test.ts
+advanced	sys	sys_survey_responses	TABLE	10	5	apps/api/src/modules/engagement/repository.ts; apps/api/src/modules/insights/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/org-health/repository.ts; apps/api/test/engagement.integration.test.ts; apps/api/test/insights.integration.test.ts
+advanced	sys	sys_survey_templates	TABLE	2	0	apps/api/src/modules/engagement/repository.ts; apps/api/src/modules/engagement/routes.ts
+advanced	sys	sys_surveys	TABLE	8	6	apps/api/src/modules/engagement/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/org-health/repository.ts; apps/api/test/engagement.integration.test.ts; apps/api/test/me-surveys-review.integration.test.ts; apps/api/test/me-surveys.integration.test.ts
+advanced	sys	sys_talent_scores	TABLE	5	5	apps/api/src/modules/talent-review/repository.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; apps/api/test/talent-review-mask.integration.test.ts; apps/api/test/talent-review.integration.test.ts; packages/shared/src/schemas/talent-review.ts
+advanced	sys	sys_team_members	TABLE	11	4	apps/api/src/lib/scope/domains.ts; apps/api/src/lib/scope/functional.ts; apps/api/src/modules/teams/repository.ts; apps/api/test/actors-profile.integration.test.ts; apps/api/test/domains-f6.integration.test.ts; apps/api/test/functional-scope.integration.test.ts
+advanced	sys	sys_teams	TABLE	15	9	apps/api/src/lib/scope/domains.ts; apps/api/src/lib/scope/functional.ts; apps/api/src/modules/public-stats/repository.ts; apps/api/src/modules/teams/repository.ts; apps/api/test/domain-derived-sections.integration.test.ts; apps/api/test/domains-f6.integration.test.ts
+advanced	sys	sys_tenancies	TABLE	62	24	apps/api/scripts/dev-whoami.mjs; apps/api/scripts/export-accessi-csv.mjs; apps/api/src/modules/approvals/effects/tenant-activation.ts; apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts; apps/api/src/modules/approvals/effects/tenant-import-run.ts; apps/api/src/modules/capability-composition/repository.ts
+advanced	sys	sys_tenant_blueprint_process_decisions	TABLE	2	2	apps/api/src/modules/approvals/effects/tenant-blueprint-approval.ts; apps/api/src/modules/tenant-blueprints/repository.ts
+advanced	sys	sys_tenant_blueprint_snapshots	TABLE	3	1	apps/api/src/modules/approvals/effects/tenant-blueprint-approval.ts; apps/api/src/modules/tenant-blueprints/repository.ts; apps/api/test/tenant-blueprint-approval.integration.test.ts
+advanced	sys	sys_tenant_blueprint_versions	TABLE	11	4	apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts; apps/api/src/modules/approvals/effects/tenant-blueprint-approval.ts; apps/api/src/modules/research/repository.ts; apps/api/src/modules/tenant-blueprints/repository.ts; apps/api/test/generated-origins.integration.test.ts; apps/api/test/helpers/azienda-di-prova-p4.ts
+advanced	sys	sys_tenant_blueprints	TABLE	12	4	apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts; apps/api/src/modules/dashboard/blocchi.ts; apps/api/src/modules/research/repository.ts; apps/api/src/modules/tenant-blueprints/repository.ts; apps/api/test/generated-origins.integration.test.ts; apps/api/test/helpers/azienda-di-prova-p4.ts
+advanced	sys	sys_tenant_boundary_author_columns	TABLE	0	0	
+advanced	sys	sys_time_off_balances	TABLE	6	5	apps/api/src/modules/me/repository.ts; apps/api/src/modules/time-off/repository.ts; apps/api/test/b3-time-off-approval.integration.test.ts; apps/api/test/time-off.integration.test.ts; apps/web/tests/e2e/me-myhr-tabs.spec.ts; packages/shared/src/schemas/time-off.ts
+advanced	sys	sys_time_off_requests	TABLE	7	9	apps/api/src/modules/approvals/effects/time-off-request.ts; apps/api/src/modules/dashboard/blocchi.ts; apps/api/src/modules/time-off/repository.ts; apps/api/test/b3-time-off-approval.integration.test.ts; apps/api/test/time-off.integration.test.ts; packages/shared/src/schemas/me.ts
+advanced	sys	sys_training_initiatives	TABLE	5	4	apps/api/src/modules/me/repository.ts; apps/api/src/modules/training-initiatives/repository.ts; apps/api/test/me.integration.test.ts; apps/api/test/training-initiatives.integration.test.ts; packages/shared/src/schemas/training-initiatives.ts
+advanced	sys	sys_translatable_field	TABLE	0	1	
+advanced	sys	sys_ui_interface_data_classes	TABLE	5	1	apps/api/src/lib/scope/data-classes.ts; apps/api/src/modules/me/repository.ts; apps/api/test/dashboards-f2.integration.test.ts; apps/api/test/domains-f7.integration.test.ts; apps/api/test/me-interfaces.integration.test.ts
+advanced	sys	sys_ui_interfaces	TABLE	13	5	apps/api/src/lib/scope/data-classes.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/public-stats/repository.ts; apps/api/test/dashboards-f2.integration.test.ts; apps/api/test/domain-derived-sections.integration.test.ts; apps/api/test/domains-f7.integration.test.ts
+advanced	sys	sys_user_addresses	TABLE	2	3	apps/api/src/modules/me/repository.ts; apps/api/test/user-dossier-sections.integration.test.ts
+advanced	sys	sys_user_assessment_evidence	TABLE	4	3	apps/api/src/modules/evidence/repository.ts; apps/api/test/employee-centric-doctrine.integration.test.ts; apps/api/test/evidence-mask.integration.test.ts; apps/api/test/evidence.integration.test.ts
+advanced	sys	sys_user_auth_roles	TABLE	43	19	apps/api/scripts/dev-whoami.mjs; apps/api/scripts/export-accessi-csv.mjs; apps/api/src/modules/auth/repository.ts; apps/api/src/modules/tenant-blueprints/repository.ts; apps/api/src/modules/tenant-import-runs/repository.ts; apps/api/src/modules/user-position-assignments/repository.ts
+advanced	sys	sys_user_bank_details	TABLE	2	2	apps/api/src/modules/me/repository.ts; apps/api/test/user-dossier-sections.integration.test.ts
+advanced	sys	sys_user_career_plans	TABLE	6	1	apps/api/src/modules/me/repository.ts; apps/api/src/modules/user-career-plans/repository.ts; apps/api/test/me-career-tabs.integration.test.ts; apps/api/test/reconciliation-f2-imports.integration.test.ts; apps/api/test/user-career-plans-scope.integration.test.ts; apps/api/test/user-career-plans.integration.test.ts
+advanced	sys	sys_user_certifications	TABLE	3	9	apps/api/src/modules/me/repository.ts; apps/api/test/me-ess-extensions.integration.test.ts; apps/web/tests/e2e/global-teardown.ts
+advanced	sys	sys_user_consents	TABLE	2	2	apps/api/src/modules/gdpr/repository.ts; apps/api/test/gdpr.integration.test.ts
+advanced	sys	sys_user_contracts	TABLE	4	17	apps/api/src/modules/hierarchy-levels/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/test/chain-threshold-surfaces.integration.test.ts; apps/api/test/hierarchy-levels-modifiche.integration.test.ts
+advanced	sys	sys_user_delegations	TABLE	2	0	apps/api/src/lib/scope/domains.ts; apps/api/src/modules/delegations/repository.ts
+advanced	sys	sys_user_demographics	TABLE	2	8	apps/api/src/modules/me/repository.ts; apps/api/test/user-dossier-sections.integration.test.ts
+advanced	sys	sys_user_documents	TABLE	4	1	apps/api/src/modules/me/repository.ts; apps/api/test/me-ess-extensions.integration.test.ts; apps/api/test/reconciliation-f2-imports.integration.test.ts; packages/shared/src/schemas/content.ts
+advanced	sys	sys_user_education_records	TABLE	2	5	apps/api/src/modules/me/repository.ts; apps/api/test/employee-centric-doctrine.integration.test.ts
+advanced	sys	sys_user_employment	TABLE	3	18	apps/api/src/modules/me/repository.ts; apps/api/test/me-profile-full.integration.test.ts; apps/api/test/user-dossier-mask.integration.test.ts
+advanced	sys	sys_user_family_members	TABLE	1	4	apps/api/src/modules/me/repository.ts
+advanced	sys	sys_user_identity_documents	TABLE	1	3	apps/api/src/modules/me/repository.ts
+advanced	sys	sys_user_kpi_evidence	TABLE	9	5	apps/api/src/modules/capability-maturity/repository.ts; apps/api/src/modules/capability-maturity/service.ts; apps/api/src/modules/insights/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/tenant-materialization/repository.ts; apps/api/test/data-steward.integration.test.ts
+advanced	sys	sys_user_learning_assignments	TABLE	5	5	apps/api/src/modules/dashboard/blocchi.ts; apps/api/src/modules/me/repository.ts; apps/api/test/me.integration.test.ts; apps/api/test/notification-producers.integration.test.ts; apps/api/test/reconciliation-f3-imports.integration.test.ts
+advanced	sys	sys_user_learning_evidence	TABLE	3	9	apps/api/src/modules/evidence/repository.ts; apps/api/test/employee-centric-doctrine.integration.test.ts; apps/api/test/reconciliation-learning-rehome.integration.test.ts
+advanced	sys	sys_user_pay_slips	TABLE	8	15	apps/api/scripts/prova-live-chiusura-c2.mjs; apps/api/src/modules/dashboard/blocchi.ts; apps/api/src/modules/me/repository.ts; apps/api/test/chain-threshold-surfaces.integration.test.ts; apps/api/test/dpo-dossier-mascherato.integration.test.ts; apps/api/test/me-pay-slips.integration.test.ts
+advanced	sys	sys_user_position_assignments	TABLE	53	28	apps/api/scripts/dev-whoami.mjs; apps/api/scripts/export-accessi-csv.mjs; apps/api/scripts/prova-live-chiusura-c2.mjs; apps/api/src/lib/scope/org.ts; apps/api/src/modules/analytics/repository.ts; apps/api/src/modules/approvals/effects/position-assignment.ts
+advanced	sys	sys_user_preferences	TABLE	6	0	apps/api/src/modules/me/repository.ts; apps/api/test/csrf-origin.integration.test.ts; apps/api/test/me-preferences.integration.test.ts; apps/web/src/app/(authenticated)/layout.tsx; apps/web/src/components/language-switcher.tsx; apps/web/tests/e2e/i18n-en.spec.ts
+advanced	sys	sys_user_professional_experiences	TABLE	3	5	apps/api/src/modules/me/repository.ts; apps/api/test/employee-centric-doctrine.integration.test.ts; apps/api/test/exposure-gate.integration.test.ts
+advanced	sys	sys_user_profile_embeddings	TABLE	4	2	apps/api/src/modules/insights/repository.ts; apps/api/src/modules/semantic-matching/repository.ts; apps/api/test/semantic-matching-substrate.integration.test.ts; apps/api/test/semantic-matching.integration.test.ts
+advanced	sys	sys_user_profiles	TABLE	2	1	apps/api/src/modules/me/repository.ts; apps/api/test/employee-centric-doctrine.integration.test.ts
+advanced	sys	sys_user_skill_evidence	TABLE	11	5	apps/api/src/modules/analytics/repository.ts; apps/api/src/modules/capability-composition/repository.ts; apps/api/src/modules/evidence/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/semantic-matching/repository.ts; apps/api/src/modules/tenant-materialization/repository.ts
+advanced	sys	sys_user_skills	TABLE	12	6	apps/api/src/modules/approvals/effects/tenant-import-run.ts; apps/api/src/modules/capability-composition/repository.ts; apps/api/src/modules/dashboard/blocchi.ts; apps/api/src/modules/gdpr/repository.ts; apps/api/src/modules/me/repository.ts; apps/api/src/modules/me/routes.ts
+advanced	sys	sys_user_target_positions	TABLE	8	3	apps/api/src/modules/me/repository.ts; apps/api/src/modules/user-target-positions/repository.ts; apps/api/test/notification-producers.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; apps/api/test/reconciliation-registry.integration.test.ts; apps/api/test/user-target-positions.integration.test.ts
+advanced	sys	sys_user_timeline_events	TABLE	3	1	apps/api/src/modules/dashboard/blocchi.ts; apps/api/src/modules/user-timeline/repository.ts; apps/api/test/user-timeline.integration.test.ts
+advanced	sys	sys_users	TABLE	202	99	apps/api/scripts/dev-whoami.mjs; apps/api/scripts/export-accessi-csv.mjs; apps/api/scripts/prova-live-chiusura-c2.mjs; apps/api/src/lib/notifications/digest.ts; apps/api/src/lib/scope/data-classes.ts; apps/api/src/modules/analytics/repository.ts
+advanced	sys	sys_valutazione_condivisione_eccezioni	TABLE	2	0	apps/api/src/modules/performance-reviews/repository.ts; apps/api/test/performance-reviews.integration.test.ts
+advanced	sys	sys_variable_pay_calculations	TABLE	6	8	apps/api/src/modules/compensation/repository.ts; apps/api/src/modules/compensation/reward-engine.ts; apps/api/test/compensation-read.integration.test.ts; apps/api/test/compensation-residual-mask.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts; packages/shared/src/schemas/compensation-read.ts
+advanced	sys	sys_visualization_edges	TABLE	2	1	apps/api/src/modules/visualization-edges/repository.ts; apps/api/src/modules/visualization-graphs/repository.ts
+advanced	sys	sys_visualization_exports	TABLE	2	1	apps/api/src/modules/visualization-exports/repository.ts; apps/api/test/visualization-exports.integration.test.ts
+advanced	sys	sys_visualization_graphs	TABLE	13	3	apps/api/src/modules/visualization-edges/repository.ts; apps/api/src/modules/visualization-exports/repository.ts; apps/api/src/modules/visualization-graphs/repository.ts; apps/api/src/modules/visualization-layouts/repository.ts; apps/api/src/modules/visualization-node-layouts/repository.ts; apps/api/src/modules/visualization-nodes/repository.ts
+advanced	sys	sys_visualization_layouts	TABLE	4	2	apps/api/src/modules/visualization-graphs/repository.ts; apps/api/src/modules/visualization-layouts/repository.ts; apps/api/src/modules/visualization-node-layouts/repository.ts; apps/api/test/visualization-layouts.integration.test.ts
+advanced	sys	sys_visualization_node_layouts	TABLE	2	2	apps/api/src/modules/visualization-graphs/repository.ts; apps/api/src/modules/visualization-node-layouts/repository.ts
+advanced	sys	sys_visualization_nodes	TABLE	5	4	apps/api/src/modules/visualization-edges/repository.ts; apps/api/src/modules/visualization-graphs/repository.ts; apps/api/src/modules/visualization-node-layouts/repository.ts; apps/api/src/modules/visualization-nodes/repository.ts; apps/api/test/visualization-nodes.integration.test.ts
+advanced	sys	sys_visualization_styles	TABLE	3	2	apps/api/src/modules/visualization-graphs/repository.ts; apps/api/src/modules/visualization-styles/repository.ts; apps/api/test/visualization-styles.integration.test.ts
+advanced	sys	sys_whistleblowing_reports	TABLE	3	3	apps/api/src/modules/whistleblowing/repository.ts; apps/api/test/whistleblowing-isolation.integration.test.ts; apps/api/test/whistleblowing.integration.test.ts
+advanced	sys	sys_esco_isco_resolved	VIEW	0	1	
+advanced	sys	sys_nine_box_grid	VIEW	1	0	apps/api/test/sdbi-perf-feedback.integration.test.ts
+advanced	sys	sys_position_intelligence_profiles_v	VIEW	1	0	apps/api/src/modules/positions/repository.ts
+advanced	sys	v_active_primary_assignment_per_user	VIEW	1	3	apps/api/src/modules/approvals/effects/position-assignment.ts
+advanced	sys	v_activity_classification_parent_orphans	VIEW	1	0	apps/api/test/nace-parent-integrity.integration.test.ts
+advanced	sys	v_agente_persone_per_conversazione	VIEW	0	1	
+advanced	sys	v_banda_dimensionale_con_dato_di_persona	VIEW	0	0	
+advanced	sys	v_blueprint_size_band_mismatch	VIEW	1	0	apps/api/test/research.integration.test.ts
+advanced	sys	v_busta_paga_periodo_malformato	VIEW	0	0	
+advanced	sys	v_canonical_outside_sys	VIEW	0	3	
+advanced	sys	v_categoria_di_competenza_con_dato_di_persona	VIEW	0	0	
+advanced	sys	v_classificazione_di_attivita_con_dato_di_persona	VIEW	0	0	
+advanced	sys	v_content_blueprint_link_con_dato_di_persona	VIEW	0	0	
+advanced	sys	v_contenuto_fuori_settore	VIEW	0	1	
+advanced	sys	v_contratto_a_termine_durata_incoerente	VIEW	0	0	
+advanced	sys	v_contratto_a_termine_fuori_ammissibilita	VIEW	0	0	
+advanced	sys	v_cruscotti_di_piattaforma_nei_profili	VIEW	0	0	
+advanced	sys	v_dashboard_class_drift	VIEW	1	0	apps/api/test/dashboards-f2.integration.test.ts
+advanced	sys	v_deactivated_user_active_assignment	VIEW	0	0	
+advanced	sys	v_direzione_del_dato_violata	VIEW	0	1	
+advanced	sys	v_embedding_impronta_non_combacia	VIEW	0	0	
+advanced	sys	v_export_di_visualizzazione_con_dato_di_persona	VIEW	0	0	
+advanced	sys	v_famiglia_di_fascicoli_con_dato_di_persona	VIEW	0	0	
+advanced	sys	v_grafo_con_nodo_di_persona	VIEW	0	0	
+advanced	sys	v_history_cascade_to_users	VIEW	0	0	
+advanced	sys	v_inbox_resource_consistency	VIEW	2	3	apps/api/src/lib/notifications/cleanup.ts; apps/api/test/inbox-consistency.integration.test.ts
+advanced	sys	v_incarico_attivo_senza_contratto	VIEW	0	0	
+advanced	sys	v_learning_paths_senza_titolare	VIEW	0	0	
+advanced	sys	v_mfa_secrets_in_cleartext	VIEW	1	3	apps/api/test/helpers/mfa-fixture-secrets.ts
+advanced	sys	v_modello_operativo_con_dato_di_persona	VIEW	0	0	
+advanced	sys	v_organization_unit_integrity	VIEW	0	2	
+advanced	sys	v_orphan_position_assignments	VIEW	0	3	
+advanced	sys	v_payslip_contract_mismatch	VIEW	0	0	
+advanced	sys	v_permessi_ritirati_a_ruoli_preesistenti	VIEW	0	0	
+advanced	sys	v_permessi_solo_plenipotenziari	VIEW	0	0	
+advanced	sys	v_persona_senza_secondo_fattore	VIEW	0	2	
+advanced	sys	v_pip_completeness	VIEW	0	3	
+advanced	sys	v_positions_with_critical_skill_gap	VIEW	2	1	apps/api/src/modules/tenant-import-runs/validation.ts; apps/api/test/tenant-import-run-effect.integration.test.ts
+advanced	sys	v_positions_without_job_role	VIEW	0	1	
+advanced	sys	v_processo_di_modello_con_dato_di_persona	VIEW	0	0	
+advanced	sys	v_prova_ripresa_k_ritirata	VIEW	0	0	
+advanced	sys	v_quota_contratti_a_termine	VIEW	0	1	
+advanced	sys	v_reconciliation_status	VIEW	12	3	apps/api/test/mentorship-data.integration.test.ts; apps/api/test/occupation-skill-requirements.integration.test.ts; apps/api/test/psr-derivation.integration.test.ts; apps/api/test/reconciliation-f2-imports.integration.test.ts; apps/api/test/reconciliation-f3-imports.integration.test.ts; apps/api/test/reconciliation-f4-bucketc.integration.test.ts
+advanced	sys	v_reference_translation_coverage	VIEW	0	5	
+advanced	sys	v_reference_translation_orphans	VIEW	0	3	
+advanced	sys	v_reference_translations_senza_soggetto	VIEW	0	0	
+advanced	sys	v_registro_provenienza_orfano	VIEW	0	1	
+advanced	sys	v_registro_provenienza_prefisso_nuovo	VIEW	0	1	
+advanced	sys	v_research_evidence_source_not_approved	VIEW	1	0	apps/api/src/modules/research/sources.ts
+advanced	sys	v_residui_di_collaudo_in_produzione	VIEW	0	0	
+advanced	sys	v_reward_gate_completeness	VIEW	0	1	
+advanced	sys	v_righe_senza_titolare_e_non_globali	VIEW	0	0	
+advanced	sys	v_ruolo_con_dato_di_persona	VIEW	0	0	
+advanced	sys	v_skill_isolate_residue	VIEW	0	0	
+advanced	sys	v_source_lineage_normalizzata	VIEW	2	1	apps/api/src/modules/evidence/repository.ts; apps/api/src/modules/provenance/repository.ts
+advanced	sys	v_staging_wave1_residue	VIEW	0	0	
+advanced	sys	v_straordinari_non_autorizzati	VIEW	0	2	
+advanced	sys	v_tabelle_non_classificate	VIEW	0	1	
+advanced	sys	v_tenant_boundary_violations	VIEW	1	4	apps/api/src/modules/approvals/effects/position-assignment.ts
+advanced	sys	v_tenant_boundary_violations_full	VIEW	1	0	apps/api/src/lib/scope/gate.ts
+advanced	sys	v_tenant_industry_incoerente	VIEW	1	0	apps/api/src/modules/approvals/effects/tenant-blueprint-application.ts
+advanced	sys	v_tenant_metadata_con_dato_di_persona	VIEW	0	0	
+advanced	sys	v_user_census_deviation	VIEW	0	1	
+advanced	sys	v_valutazione_completata_non_condivisa	VIEW	0	0	
+advanced	sys	v_valutazione_condivisione_eccezioni_coperte	VIEW	0	1	
+advanced	sys	v_variante_di_fascicolo_con_dato_di_persona	VIEW	0	0	
+advanced	sys	v_visualization_node_in_canonical_node	VIEW	0	3	
+advanced	sys	v_whistleblowing_fuori_dal_custode	VIEW	0	0	
+datastore	datastore_core	datastore_fn_confronta_livelli	FUNCTION	0	1	
+datastore	datastore_core	datastore_fn_minimo_su_livello_contrattuale	FUNCTION	0	0	
+datastore	datastore_core	datastore_fn_settore_e_un_settore	FUNCTION	0	0	
+datastore	datastore_core	datastore_activity_agreement	TABLE	2	3	src/checks/batteria.ts; src/cli/deriva_ccnl.ts
+datastore	datastore_core	datastore_agreement_level_category	TABLE	1	1	src/carico/categorie_livelli.ts
+datastore	datastore_core	datastore_agreement_level_rank	TABLE	4	1	src/carico/banco_pacchetto.ts; src/carico/gerarchia_pacchetto.ts; src/carico/rango_livelli.ts; src/checks/controlli.ts
+datastore	datastore_core	datastore_agreement_profile	TABLE	5	3	src/carico/ccnl.ts; src/carico/ccnl_dirigenti.ts; src/carico/rango_livelli.ts; src/carico/settori.ts; src/checks/batteria.ts
+datastore	datastore_core	datastore_agreement_site_head_threshold	TABLE	1	0	src/carico/soglie_preposti.ts
+datastore	datastore_core	datastore_agreement_tranche	TABLE	2	1	src/carico/ccnl.ts; src/checks/batteria.ts
+datastore	datastore_core	datastore_agreement_wage	TABLE	5	4	src/carico/ccnl.ts; src/carico/ccnl_dirigenti.ts; src/carico/rango_livelli.ts; src/checks/batteria.ts; src/cli/carica_ccnl_dirigenti_terziario.ts
+datastore	datastore_core	datastore_classification	TABLE	32	34	src/carico/apqc.ts; src/carico/apqc_equivalenze.ts; src/carico/apqc_misure.ts; src/carico/ateco.ts; src/carico/banco_pacchetto.ts; src/carico/categorie_livelli.ts
+datastore	datastore_core	datastore_classification_level	TABLE	11	11	apps/api/src/servizio.ts; apps/web/src/app/concetto.tsx; src/carico/apqc.ts; src/carico/ateco.ts; src/carico/ccnl.ts; src/carico/ccnl_dirigenti.ts
+datastore	datastore_core	datastore_classification_version	TABLE	33	33	src/carico/apqc.ts; src/carico/apqc_equivalenze.ts; src/carico/apqc_misure.ts; src/carico/ateco.ts; src/carico/banco_pacchetto.ts; src/carico/categorie_livelli.ts
+datastore	datastore_core	datastore_collection	TABLE	4	0	src/carico/collezioni.ts; src/checks/batteria.ts; src/pubblica/referto.ts; src/vettori/ricerca.ts
+datastore	datastore_core	datastore_concept	TABLE	42	37	src/carico/apqc.ts; src/carico/apqc_equivalenze.ts; src/carico/apqc_misure.ts; src/carico/ateco.ts; src/carico/banco_pacchetto.ts; src/carico/categorie_livelli.ts
+datastore	datastore_core	datastore_concept_collection	TABLE	4	0	src/carico/collezioni.ts; src/checks/batteria.ts; src/pubblica/referto.ts; src/vettori/ricerca.ts
+datastore	datastore_core	datastore_concept_description	TABLE	10	4	src/carico/apqc.ts; src/carico/classi_dimensionali.ts; src/carico/descrizioni.ts; src/carico/descrizioni_catalogo.ts; src/carico/scrivi_ereditate.ts; src/carico/settori.ts
+datastore	datastore_core	datastore_concept_green_share	TABLE	1	0	src/carico/quota_verde.ts
+datastore	datastore_core	datastore_concept_label	TABLE	18	10	src/carico/apqc.ts; src/carico/apqc_equivalenze.ts; src/carico/ateco.ts; src/carico/ccnl.ts; src/carico/ccnl_dirigenti.ts; src/carico/classi_dimensionali.ts
+datastore	datastore_core	datastore_concept_link	TABLE	10	12	src/carico/apqc_equivalenze.ts; src/carico/derivazioni.ts; src/carico/esco.ts; src/carico/nace.ts; src/checks/batteria.ts; src/cli/deriva_descrizioni_nace.ts
+datastore	datastore_core	datastore_concept_metric	TABLE	2	2	apps/api/src/servizio.ts; src/carico/apqc_misure.ts
+datastore	datastore_core	datastore_concept_occupation	TABLE	3	5	src/carico/derivazioni.ts; src/carico/esco.ts; src/checks/batteria.ts
+datastore	datastore_core	datastore_concept_size_class	TABLE	2	2	src/carico/classi_dimensionali.ts; src/checks/batteria.ts
+datastore	datastore_core	datastore_concept_skill	TABLE	1	3	src/carico/esco.ts
+datastore	datastore_core	datastore_mapping_release	TABLE	3	3	src/carico/derivazioni.ts; src/carico/esco.ts; src/checks/batteria.ts
+datastore	datastore_core	datastore_agreement_gap	VIEW	3	1	src/checks/batteria.ts; src/checks/controlli.ts; src/cli/carica_ccnl_dirigenti.ts
+datastore	datastore_derived	datastore_antenati_di	FUNCTION	2	1	apps/api/src/servizio.ts; src/carico/prototipi.ts
+datastore	datastore_derived	datastore_vector_coverage	MATERIALIZED VIEW	6	2	src/checks/archivio.ts; src/checks/batteria.ts; src/checks/iniezioni.ts; src/cli/copertura.ts; src/pubblica/referto.ts; src/vettori/archivio.ts
+datastore	datastore_derived	datastore_concept_embedding	TABLE	6	3	src/checks/archivio.ts; src/checks/batteria.ts; src/checks/iniezioni.ts; src/derivati/stato.ts; src/pubblica/referto.ts; src/vettori/archivio.ts
+datastore	datastore_derived	datastore_link_coverage	TABLE	4	4	src/carico/derivazioni.ts; src/checks/batteria.ts; src/checks/controlli.ts; src/derivati/stato.ts
+datastore	datastore_derived	datastore_link_derivation	TABLE	3	3	src/carico/derivazioni.ts; src/checks/batteria.ts; src/checks/controlli.ts
+datastore	datastore_derived	datastore_concept_ancestor	VIEW	0	2	
+datastore	datastore_derived	datastore_concept_vector_hash	VIEW	0	1	
+datastore	datastore_derived	datastore_concept_vector_source	VIEW	1	3	src/pubblica/referto.ts
+datastore	datastore_meta	datastore_bersagli_di	FUNCTION	0	2	
+datastore	datastore_meta	datastore_fn_audit	FUNCTION	0	0	
+datastore	datastore_meta	datastore_fn_audit_crea_partizione	FUNCTION	0	2	
+datastore	datastore_meta	datastore_fn_audit_manutieni	FUNCTION	0	1	
+datastore	datastore_meta	datastore_fn_audit_sola_aggiunta	FUNCTION	0	0	
+datastore	datastore_meta	datastore_fn_audit_truncate	FUNCTION	0	0	
+datastore	datastore_meta	datastore_fn_documento_da_sorgente_che_da_file	FUNCTION	0	0	
+datastore	datastore_meta	datastore_fn_identita_del_concetto	FUNCTION	0	0	
+datastore	datastore_meta	datastore_fn_senza_nome_proprio	FUNCTION	0	0	
+datastore	datastore_meta	datastore_fn_sorveglianza_senza_documenti	FUNCTION	0	0	
+datastore	datastore_meta	datastore_fn_verifica_identita	FUNCTION	0	0	
+datastore	datastore_meta	datastore_fn_verifica_identita_dei_concetti	FUNCTION	0	0	
+datastore	datastore_meta	datastore_fn_verifica_livello_figli	FUNCTION	0	0	
+datastore	datastore_meta	datastore_fn_verifica_livello_padre	FUNCTION	0	0	
+datastore	datastore_meta	datastore_suffissi_di_provenienza	FUNCTION	0	0	
+datastore	datastore_meta	datastore_verifica_audit	FUNCTION	0	1	
+datastore	datastore_meta	datastore_verifica_provenienza	FUNCTION	0	0	
+datastore	datastore_meta	datastore_sorveglia	PROCEDURE	0	0	
+datastore	datastore_meta	datastore_audit	TABLE	2	6	src/checks/archivio.ts; src/pubblica/referto.ts
+datastore	datastore_meta	datastore_audit_0105	TABLE	0	0	
+datastore	datastore_meta	datastore_call	TABLE	1	2	apps/api/src/involucro.ts
+datastore	datastore_meta	datastore_environment	TABLE	0	2	
+datastore	datastore_meta	datastore_load	TABLE	18	25	src/carico/apqc.ts; src/carico/ateco.ts; src/carico/banco_corse.ts; src/carico/ccnl.ts; src/carico/ccnl_dirigenti.ts; src/carico/collezioni.ts
+datastore	datastore_meta	datastore_model_telemetry	TABLE	2	5	apps/api/src/banco_regia.ts; src/modello/telemetria.ts
+datastore	datastore_meta	datastore_protection	TABLE	0	1	
+datastore	datastore_meta	datastore_publication	TABLE	2	3	src/cli/pubblica.ts; src/pubblica/referto.ts
+datastore	datastore_meta	datastore_source	TABLE	14	5	src/carico/apqc.ts; src/carico/ateco.ts; src/carico/categorie_livelli.ts; src/carico/ccnl.ts; src/carico/ccnl_dirigenti.ts; src/carico/collezioni.ts
+datastore	datastore_meta	datastore_source_document	TABLE	16	5	src/carico/ateco.ts; src/carico/collezioni.ts; src/carico/documenti.ts; src/carico/esco.ts; src/carico/isco.ts; src/carico/isco_titoli.ts
+datastore	datastore_meta	datastore_function_activity	VIEW	0	1	
+datastore	datastore_meta	datastore_load_bersagli	VIEW	0	0	
+datastore	datastore_meta	datastore_load_documenti	VIEW	1	0	src/checks/controlli.ts
+datastore	datastore_meta	datastore_protection_gap	VIEW	0	1	
+datastore	datastore_meta	datastore_source_freshness	VIEW	0	1	
+datastore	datastore_meta	datastore_v_model_telemetry	VIEW	2	1	apps/api/src/banco.ts; src/modello/telemetria.ts
+datastore	datastore_model	datastore_fn_classe_governa	FUNCTION	0	0	
+datastore	datastore_model	datastore_fn_famiglia_del_concetto	FUNCTION	2	1	src/passi/archivio_dei_passi.ts; src/regole/verifica_pacchetto.ts
+datastore	datastore_model	datastore_fn_famiglia_e_un_attivita	FUNCTION	0	0	
+datastore	datastore_model	datastore_fn_inversioni_gerarchia	FUNCTION	0	1	
+datastore	datastore_model	datastore_fn_processi_del_prototipo	FUNCTION	3	2	apps/api/src/servizio.ts; src/passi/archivio_dei_passi.ts; src/passi/passo_processi.ts
+datastore	datastore_model	datastore_fn_prototipo_e_un_ateco	FUNCTION	0	0	
+datastore	datastore_model	datastore_fn_schema_del_prototipo	FUNCTION	0	1	
+datastore	datastore_model	datastore_fn_soglia_del_processo	FUNCTION	0	1	
+datastore	datastore_model	datastore_fn_stato_prototipo	FUNCTION	1	1	src/carico/prototipi.ts
+datastore	datastore_model	datastore_fn_tipo_unita	FUNCTION	0	1	
+datastore	datastore_model	datastore_bench_agent	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_agreement	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_agreement_level	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_archive	TABLE	1	0	src/carico/banco_corse.ts
+datastore	datastore_model	datastore_bench_capability	TABLE	1	1	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_capability_process	TABLE	1	1	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_copy	TABLE	2	0	apps/api/src/servizio.ts; src/carico/banco_corse.ts
+datastore	datastore_model	datastore_bench_decision	TABLE	1	0	src/carico/banco_corse.ts
+datastore	datastore_model	datastore_bench_design_principle	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_event	TABLE	1	0	src/carico/banco_corse.ts
+datastore	datastore_model	datastore_bench_evidence	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_execution	TABLE	1	0	src/carico/banco_corse.ts
+datastore	datastore_model	datastore_bench_governance_decision	TABLE	1	1	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_governance_right	TABLE	1	1	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_item	TABLE	1	1	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_legal_entity	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_log_cut	TABLE	1	0	src/carico/banco_corse.ts
+datastore	datastore_model	datastore_bench_metric	TABLE	1	1	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_objective	TABLE	1	2	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_package	TABLE	2	5	src/carico/banco_pacchetto.ts; src/fascicoli/estensione.ts
+datastore	datastore_model	datastore_bench_position	TABLE	1	1	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_process	TABLE	1	1	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_process_unit	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_prototype	TABLE	3	8	src/carico/banco_corse.ts; src/carico/banco_pacchetto.ts; src/fascicoli/estensione.ts
+datastore	datastore_model	datastore_bench_role	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_role_skill	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_scope_item	TABLE	1	1	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_site	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_skill	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_skill_requirement	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_step_version	TABLE	2	3	apps/api/src/banco_regia.ts; src/carico/banco_corse.ts
+datastore	datastore_model	datastore_bench_strategy	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_strategy_item	TABLE	1	0	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_bench_telemetry	TABLE	1	0	src/carico/banco_corse.ts
+datastore	datastore_model	datastore_bench_unit	TABLE	1	1	src/carico/banco_pacchetto.ts
+datastore	datastore_model	datastore_blueprint_edition	TABLE	1	1	src/carico/edizioni.ts
+datastore	datastore_model	datastore_evidence	TABLE	1	2	src/carico/ricerche.ts
+datastore	datastore_model	datastore_family_activity_class	TABLE	0	1	
+datastore	datastore_model	datastore_family_excluded_process	TABLE	0	1	
+datastore	datastore_model	datastore_org_level	TABLE	2	1	src/carico/livelli_organizzativi.ts; src/regole/verifica_pacchetto.ts
+datastore	datastore_model	datastore_org_naming_schema	TABLE	3	1	src/carico/livelli_organizzativi.ts; src/passi/archivio_dei_passi.ts; src/regole/verifica_pacchetto.ts
+datastore	datastore_model	datastore_org_schema_family	TABLE	2	1	src/carico/livelli_organizzativi.ts; src/regole/verifica_pacchetto.ts
+datastore	datastore_model	datastore_org_site	TABLE	4	3	src/carico/prototipi.ts; src/carico/ricerche.ts; src/checks/batteria.ts; src/checks/controlli.ts
+datastore	datastore_model	datastore_org_site_evidence	TABLE	2	1	src/carico/ricerche.ts; src/checks/batteria.ts
+datastore	datastore_model	datastore_org_unit	TABLE	3	10	src/carico/processi_di_riferimento.ts; src/carico/ricerche.ts; src/checks/batteria.ts
+datastore	datastore_model	datastore_org_unit_evidence	TABLE	2	1	src/carico/ricerche.ts; src/checks/batteria.ts
+datastore	datastore_model	datastore_org_unit_type_exception	TABLE	2	1	src/carico/livelli_organizzativi.ts; src/passi/archivio_dei_passi.ts
+datastore	datastore_model	datastore_position	TABLE	4	4	apps/api/src/lacune.ts; src/carico/ricerche.ts; src/checks/batteria.ts; src/checks/controlli.ts
+datastore	datastore_model	datastore_position_evidence	TABLE	2	2	src/carico/ricerche.ts; src/checks/batteria.ts
+datastore	datastore_model	datastore_process	TABLE	4	5	src/carico/processi_di_riferimento.ts; src/carico/ricerche.ts; src/checks/batteria.ts; src/cli/carica_processi_riferimento.ts
+datastore	datastore_model	datastore_process_evidence	TABLE	2	1	src/carico/ricerche.ts; src/checks/batteria.ts
+datastore	datastore_model	datastore_process_participation	TABLE	2	2	src/carico/processi_di_riferimento.ts; src/carico/ricerche.ts
+datastore	datastore_model	datastore_process_size_rule	TABLE	2	1	src/passi/archivio_dei_passi.ts; src/passi/passo_processi.ts
+datastore	datastore_model	datastore_process_step	TABLE	2	2	src/carico/ricerche.ts; src/checks/batteria.ts
+datastore	datastore_model	datastore_process_step_evidence	TABLE	2	0	src/carico/ricerche.ts; src/checks/batteria.ts
+datastore	datastore_model	datastore_prototype	TABLE	5	9	src/carico/edizioni.ts; src/carico/prototipi.ts; src/carico/ricerche.ts; src/checks/batteria.ts; src/cli/carica_processi_riferimento.ts
+datastore	datastore_model	datastore_research_request	TABLE	2	5	src/carico/proposta_ricerca.ts; src/carico/ricerche.ts
+datastore	datastore_model	datastore_sector_family	TABLE	3	2	src/carico/livelli_organizzativi.ts; src/passi/archivio_dei_passi.ts; src/regole/verifica_pacchetto.ts
+datastore	datastore_model	datastore_family_characteristic_process	VIEW	2	1	src/carico/apqc.ts; src/passi/archivio_dei_passi.ts
+datastore	datastore_pub	datastore_uri_pubblico	FUNCTION	4	2	src/carico/ricerche.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts; src/vettori/ricerca.ts
+datastore	datastore_pub	datastore_activity_agreement_v1	VIEW	5	0	apps/api/src/servizio.ts; src/passi/archivio_dei_passi.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_agreement_gap_v1	VIEW	3	0	apps/api/src/servizio.ts; src/pubblica/referto.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_agreement_level_category_v1	VIEW	2	1	apps/api/src/categorie.ts; src/passi/archivio_dei_passi.ts
+datastore	datastore_pub	datastore_agreement_v1	VIEW	6	2	apps/api/src/servizio.ts; src/passi/archivio_dei_passi.ts; src/passi/passo_condizioni.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_bench_agent_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_agreement_level_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_archive_v1	VIEW	1	0	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_capability_process_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_capability_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_copy_v1	VIEW	2	1	apps/api/src/banco.ts; apps/api/src/banco_regia.ts
+datastore	datastore_pub	datastore_bench_decision_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_design_principle_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_event_v1	VIEW	1	0	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_evidence_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_execution_v1	VIEW	1	0	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_governance_decision_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_governance_right_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_item_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_legal_entity_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_metric_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_objective_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_overview_v1	VIEW	1	3	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_package_v1	VIEW	1	2	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_position_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_process_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_prototype_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_role_skill_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_role_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_scope_item_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_site_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_skill_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_step_version_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_bench_strategy_item_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_strategy_v1	VIEW	0	0	
+datastore	datastore_pub	datastore_bench_telemetry_v1	VIEW	4	1	apps/api/src/banco.ts; apps/api/src/banco_interfaccia.ts; apps/banco/viste/esporta-xlsx.mjs; apps/banco/viste/misure.mjs
+datastore	datastore_pub	datastore_bench_unit_v1	VIEW	1	1	apps/api/src/banco.ts
+datastore	datastore_pub	datastore_blueprint_edition_v1	VIEW	5	1	apps/api/src/servizio.ts; src/carico/edizioni.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_bridge_v1	VIEW	2	1	apps/api/src/servizio.ts; apps/web/src/app/tipi.ts
+datastore	datastore_pub	datastore_classification_v1	VIEW	6	1	apps/api/src/servizio.ts; apps/web/src/app/lingua.ts; apps/web/src/app/servizio.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_concept_v1	VIEW	8	9	apps/api/src/esco.ts; apps/api/src/servizio.ts; src/carico/descrizioni.ts; src/carico/ricerche.ts; src/passi/archivio_dei_passi.ts; src/pubblica/referto.ts
+datastore	datastore_pub	datastore_coverage_v1	VIEW	3	2	src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_derivation_v1	VIEW	1	1	apps/api/src/servizio.ts
+datastore	datastore_pub	datastore_description_v1	VIEW	1	1	apps/api/src/servizio.ts
+datastore	datastore_pub	datastore_evidence_link_v1	VIEW	5	0	apps/api/src/fonti.ts; apps/api/src/servizio.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_evidence_v1	VIEW	4	0	apps/api/src/servizio.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_hierarchy_inversion_v1	VIEW	1	0	src/checks/controlli.ts
+datastore	datastore_pub	datastore_isolated_v1	VIEW	1	2	apps/api/src/servizio.ts
+datastore	datastore_pub	datastore_label_v1	VIEW	6	2	apps/api/src/esco.ts; apps/api/src/servizio.ts; src/passi/archivio_dei_passi.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_link_v1	VIEW	5	5	apps/api/src/esco.ts; apps/api/src/servizio.ts; src/passi/archivio_dei_passi.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_metric_v1	VIEW	4	2	apps/api/src/servizio.ts; src/passi/archivio_dei_passi.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_occupation_v1	VIEW	1	1	apps/api/src/esco.ts
+datastore	datastore_pub	datastore_org_level_matrix_v1	VIEW	0	1	
+datastore	datastore_pub	datastore_org_level_v1	VIEW	1	1	src/passi/archivio_dei_passi.ts
+datastore	datastore_pub	datastore_org_site_v1	VIEW	5	0	apps/api/src/fonti.ts; apps/api/src/servizio.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_org_unit_v1	VIEW	6	0	apps/api/src/fonti.ts; apps/api/src/servizio.ts; src/carico/proposta_ricerca.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_position_v1	VIEW	3	1	apps/api/src/servizio.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_process_participation_v1	VIEW	3	1	apps/api/src/servizio.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_process_step_v1	VIEW	5	1	apps/api/src/fonti.ts; apps/api/src/servizio.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_process_v1	VIEW	5	2	apps/api/src/fonti.ts; apps/api/src/servizio.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_proposed_process_v1	VIEW	2	1	apps/api/src/servizio.ts; src/carico/proposta_ricerca.ts
+datastore	datastore_pub	datastore_prototype_origin_v1	VIEW	1	1	apps/api/src/servizio.ts
+datastore	datastore_pub	datastore_prototype_v1	VIEW	10	9	apps/api/src/servizio.ts; src/carico/edizioni.ts; src/carico/proposta_ricerca.ts; src/carico/prototipi.ts; src/carico/ricerche.ts; src/checks/controlli.ts
+datastore	datastore_pub	datastore_research_request_v1	VIEW	5	2	src/carico/proposta_ricerca.ts; src/carico/ricerche.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_size_class_v1	VIEW	2	0	apps/api/src/servizio.ts; src/passi/archivio_dei_passi.ts
+datastore	datastore_pub	datastore_skill_v1	VIEW	2	1	apps/api/src/esco.ts; src/passi/archivio_dei_passi.ts
+datastore	datastore_pub	datastore_tranche_v1	VIEW	4	0	apps/api/src/servizio.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts
+datastore	datastore_pub	datastore_wage_v1	VIEW	5	2	apps/api/src/servizio.ts; src/passi/archivio_dei_passi.ts; src/pubblica/referto.ts; src/pubblica/skos.ts; src/pubblica/superficie.ts

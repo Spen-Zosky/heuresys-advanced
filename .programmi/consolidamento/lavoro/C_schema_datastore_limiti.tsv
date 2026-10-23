@@ -1,0 +1,5 @@
+migrazione	riga	motivo	istruzione
+0039_l_osservabilita_dentro_le_funzioni	49	DDL dinamico non risolto (EXECUTE format)	execute format('alter database %I set track_functions = ''all''', current_database())
+0115_l_impronta_e_uno_sha256	235	DDL dinamico non risolto (EXECUTE format)	execute format( 'alter table %I.%I add constraint %I check (%I ~ ''^[0-9a-f]{64}$'')', r.schema, r.tabella, 'ck_' || r.colonna || '_impronta', r.colonna)
+0125_l_indice_percorre_finche_bastano_i_candidati	109	DDL dinamico non risolto (EXECUTE format)	execute format('alter database %I set hnsw.iterative_scan = ''strict_order''', current_database())
+0134_il_prezzo_del_disco_e_quello_di_uno_stato_solido	68	DDL dinamico non risolto (EXECUTE format)	execute format('alter database %I set random_page_cost = 1.1', current_database())

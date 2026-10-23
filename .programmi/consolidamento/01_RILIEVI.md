@@ -1,0 +1,69 @@
+# Consolidamento — registro dei rilievi
+
+Fasi A e B, 2026-10-23. Ogni rilievo ha un'evidenza (file:riga, esito depositato o misura) e una classe: **V** fatto verificato (codice letto o misura eseguita), **I** inferenza, **N** non disponibile. Gravità: **ALTA** (può far perdere dati, rompe un invariante o espone dati personali), **MEDIA** (rende inaffidabile un percorso o una prova), **BASSA** (igiene, documenti).
+
+Le fonti di dettaglio sono in `lavoro/`: `A_contratto_gap.md` (contratto), `B_capacita.md` (capacità e contraddizioni K1-K13), `D_schede_riconciliazione.md` (famiglie omologhe S01-S15 e anomalie A-01…A-14), `F_webapp.md` (pagine e rotte), `E_api.tsv` (797 rotte), `C_*.tsv` (schemi ricostruiti dalle migrazioni). I rilievi con l'evidenza «verificato dal coordinatore» sono stati riletti nel codice anche da chi ha compilato questo registro.
+
+Stato: **APERTO** finché un incremento del piano (`03_PIANO.md`) non lo chiude con la sua prova.
+
+## Contratto e distribuzione
+
+| id | gravità | rilievo | evidenza | classe | incremento |
+|---|---|---|---|---|---|
+| R-01 | ALTA | Non esiste un canale definito che porti il fascicolo dal datastore ad advanced: il caricatore prende un percorso di file, il datastore espone `GET /v1/banco/pacchetto`, nessuno dei due conosce l'altro; la «porta a consumo» è rimandata all'onda 4 | `db/scripts/pacchetto/accogli-pacchetto.mjs:28`; datastore `apps/api/src/servizio.ts:3531`; `esecuzione/DOMANDE_APERTE.md` (coda D-69…D-78) | V | C2 |
+| R-02 | ALTA | Il pacchetto non porta la propria identità d'istanza: né numero di versione (`bench_package_version_no` resta nel datastore) né impronta del contenuto; advanced non può verificare di aver ricevuto proprio il pacchetto registrato. Manca anche il manifesto delle edizioni di catalogo da cui dipende (ESCO 1.2.1, ATECO 2025…) | schema v0.3 `meta.required`; datastore `src/carico/banco_pacchetto.ts:496-541` | V | C1 |
+| R-03 | ALTA | Il caricatore non ha una strada di produzione (rifiuta ogni database che non finisce in `_prova<N>`), non sa aggiungere una versione a una variante esistente (si ferma se la famiglia c'è e scrive sempre la versione 2 in DRAFT), non è idempotente, non è in nessuna CI | `accogli-pacchetto.mjs:30`, `:57`, `:61` (verificato dal coordinatore) | V | C3 |
+| R-04 | ALTA | Il caricatore scrive indicatori di piattaforma senza tenant (`sys_kpi_definitions` con `tenant_id NULL`, `is_global=true`) a ogni pacchetto: fa crescere in advanced il catalogo che ADR-0043 vuole ritirare, e la parità S3 si sposta mentre la si misura | `accogli-pacchetto.mjs:86-95` (verificato dal coordinatore); ADR-0043 voce 8 | V | C3 |
+| R-05 | ALTA | Lo stato PUBLISHED non nasce da un gesto di pubblicazione: lo scrivono il trigger `sys_blueprint_variant_ensure_version` (versione 1 PUBLISHED, vuota, a ogni variante nuova, quindi anche al caricamento) e la migrazione 000400 a ogni deploy; il caricatore mette il contenuto nella versione 2 DRAFT, che si pubblica solo con un gesto a mano su una copia. In più la costruzione del tenant accetta una versione DRAFT. *Corretto dopo la revisione indipendente: la prima stesura diceva «non lo scrive nessuno».* | `db/migrations/000298:78-95`; `000400:88-95`; `db/scripts/pacchetto/attiva-modello.mts:46-60`; `.programmi/esiti-onda0/prova-giunzione/attiva_prima.json` | V | C3a, C4 |
+| R-06 | ALTA | Il profilo del tenant unisce **tutte** le versioni PUBLISHED della variante attiva, non quella in vigore: una voce tolta in una versione nuova resta visibile; ADR-0046 eredita lo stesso schema («unione dei perimetri delle versioni PUBLISHED») | `apps/api/src/lib/scope/profilo.ts:87-101` (verificato dal coordinatore); ADR-0046 §1 | V | C4 |
+| R-07 | ALTA | Nessuna politica per le personalizzazioni del tenant all'arrivo di una versione nuova del fascicolo: `ON CONFLICT DO NOTHING` fa sì che una voce cambiata non arrivi mai e una tolta resti; l'impatto è dichiarato «non calcolabile» | `tenant-materialization/repository.ts:158,194,260`; `tenant-blueprints/diff.ts:24-30`; ADR-0042 §2 | V | C6 (ADR-0048) |
+| R-08 | MEDIA | Tre strade di materializzazione (rotta diretta, approvazione, provisioning), una sola registra `sys_generated_record_origins`, che ADR-0042 chiama «fonte vera» | `tenant-materialization/service.ts:77-94`; `approvals/effects/tenant-blueprint-application.ts:154`; `tenants/provisioning.ts:115,140` | V | C5 |
+| R-09 | MEDIA | 19 sezioni v0.3 su 26 si fermano nelle tabelle di modello: la materializzazione legge solo unità, posizioni, competenze, indicatori; il perimetro è caricato e letto da nessuno (`perimetro.ts` non esiste, ADR-0046 PROPOSTO) | `blueprint-build-source.ts:187-195`; `A_contratto_gap.md` tabella finale | V | C7, C9 |
+| R-10 | MEDIA | D-72 (decisione presa) promette cruscotti, porte di ricompensa, famiglia e stato pubblicato, peso economico; lo schema v0.3 approvato non li ha: tre oggetti che advanced legge non li produce nessuno (#264 GATED) | `.programmi/esiti-onda0/RICHIESTA_datastore_attivazione.md`; schema v0.3 | V | C1 |
+| R-11 | MEDIA | Due insiemi di regole di validazione con semantica diversa: il datastore marca (V3-00…V3-14), advanced rifiuta e ricalcola solo V3-01, V3-03, V3-06 | datastore `src/contratto/regole_v03.ts`; `db/scripts/pacchetto/regole-di-ritorno.mjs:1-12` | V | C1 |
+| R-12 | MEDIA | Nessun identificativo di correlazione fra la corsa del datastore che produce il pacchetto, il file e il caricamento in advanced; il datastore non ha `x-request-id` | `A_contratto_gap.md` §7 | V | C2 |
+| R-13 | BASSA | `fascicoloVersione`/`estendeVersione` interi nello schema, `varchar(32)` nella migrazione 000458 | `db/migrations/000458_*.sql:35-36` | V | C3 |
+
+## Dati e confini
+
+| id | gravità | rilievo | evidenza | classe | incremento |
+|---|---|---|---|---|---|
+| R-20 | ALTA | Il datastore legge direttamente il database di advanced (anche `sys_users.user_display_name` e livello e CCNL dei contratti delle persone di RTL Bank) e lo serve sulla porta 3104; con `DATASTORE_RTL_FONTE=produzione` legge la produzione. Peggio: `scripts/piano034/dump_produzione_20261010.sh` fa un `pg_dump` **dell'intera produzione**, e il motore del datastore tiene database interi `heuresys_advanced_20260819` e `_20261010` con credenziali (`sys_auth_credentials`, fattori MFA, codici di recupero, token di reset) e anagrafiche con IBAN. È materia di credenziali e GDPR, non solo di confine | datastore `apps/api/src/servizio_rtl.ts:21-58`, `rtl_lettura.ts:113-164`, `src/config/config.ts:417-422`, `scripts/piano034/dump_produzione_20261010.sh` | V (codice); N (presenza attuale delle copie, il PC non è raggiungibile) | C8 |
+| R-21 | ALTA | Informazione che esiste solo in advanced e che un ritiro S6 «per voce fuori perimetro» perderebbe: CP2021, ruoli di catalogo e famiglie professionali con i loro vettori e le mappature con confidenza, moduli e percorsi formativi, legami competenza→modulo, porte di ricompensa, famiglie/categorie/alias/livelli delle competenze, traduzioni LLM e MANUAL, metodi e pesature dei KPI | `D_schede_riconciliazione.md` S01, S02, S05, S08, S09, S10 | V (da migrazioni) | C10 |
+| R-22 | ALTA | Tre vocabolari per lo stesso schema di classificazione in advanced (`NACE_REV_2_1` / `NACE_2_1`, `CP_2021` / `CP2021`…) contro codice+versione nel datastore: la prova di parità S3 «per chiave naturale» darebbe falsi mancanti | CHECK in 000007, 000032, 000206, 000458; `vocabolari.json` `schemaCatalogo` | V | C10 |
+| R-23 | MEDIA | Identità ESCO: unica in assoluto in advanced, unica per versione nel datastore; advanced non registra la versione ESCO | 000343; datastore 0013 | V | C1, C10 |
+| R-24 | MEDIA | KPI: le chiavi naturali non si possono confrontare (codici propri in advanced, codici dell'editore per processo nel datastore) | `D_schede_riconciliazione.md` S05 | V | C10 |
+| R-25 | MEDIA | La regola 4 di ADR-0043 (voci proprie nella stessa tabella) non regge dove manca la colonna del tenant (famiglie e categorie delle competenze, famiglie professionali, tipi di unità, modelli operativi, metodi KPI) e su `sys_learning_modules`/`sys_learning_paths`, che hanno anche `UNIQUE(code)` globale: un tenant non può usare un codice già usato altrove, e il rifiuto rivela che esiste | 000237 righe 66-75 | V | C11 |
+| R-26 | MEDIA | `sys_compensation_bands` mescola tre specie (BAND del tenant, CCNL e UNION di catalogo); i CCNL dei contratti delle persone sono testo libero senza legame (`varchar(64)` e `varchar(100)`) | 000409; `C_tipi_omologhi.tsv` | V | C10 |
+| R-27 | MEDIA | L'omologo di `sys_industry_codes` + `sys_blueprint_families` non è ATECO/NACE ma `datastore_sector_family`; `sys_industry_codes` è bersaglio di una FK del tenant e della sentinella I21: va trasformato in vocabolario alimentato dal fascicolo, non ritirato (ADR-0043 voce 3 va precisata) | `D_schede_riconciliazione.md` S03 | V | ADR-0047 |
+| R-28 | BASSA | Il disegno dell'onda 2 cita `sys.sys_tenants`, che non esiste (`sys.sys_tenancies`) | `.programmi/onda2/DISEGNO_tabelle-onda2.md`; 000053 | V | C0 |
+| R-29 | BASSA | Tipi diversi per colonne omologhe (`text` contro `varchar(N)`; minimo annuo `numeric(14,2)` contro `numeric(12,2)`): rischio di troncamento al caricamento, da misurare con `max(length(...))` | `C_tipi_omologhi.tsv` | V | C3 |
+
+## API, sicurezza e interfacce
+
+| id | gravità | rilievo | evidenza | classe | incremento |
+|---|---|---|---|---|---|
+| R-30 | MEDIA | Sei letture di catalogo senza alcun `requirePermission` (`job-families`, `skill-families`, `skill-categories`, `skill-taxonomy-edges`, `skill-aliases`, `skill-proficiency-levels`) e 14 rotte `catalogGate: open`: ogni utente autenticato legge il catalogo intero | `apps/api/src/modules/*/routes.ts` (verificato dal coordinatore) | V | C7 |
+| R-31 | MEDIA | La misura pagina per pagina della voce 17 di ADR-0043 dà un esito diverso dall'ADR: escono solo `skill-taxonomy/` e `seed-acquisition/`; `blueprints/`, `tenant-blueprints/`, `job-catalog/` si riprogettano; `generated-origins/`, `provenance/`, `tenants/`, `system-health/` restano; `leads/` è una scelta di prodotto | `F_webapp.md` §4 | V (da codice e migrazioni) | ADR-0047, C12 |
+| R-32 | MEDIA | `tenant-import-runs` usa le tabelle `sys_seed_*` della piattaforma ma serve all'ingresso delle persone vere nel tenant: il ritiro delle tabelle dei semi lo romperebbe se non si separa prima | `F_webapp.md` §4 | V | C12 |
+| R-33 | BASSA | Tre sotto-pagine di `/positions/[id]` (`skills`, `kpis`, `learning`) non sono raggiungibili da nessun link; `/investors` mostra sei conteggi scritti nel codice; `/app` è un redirect orfano | `F_webapp.md` §0 | V | C13 |
+| R-34 | BASSA | 300 rotte di advanced su 667 non hanno consumatori letterali nel frontend (parte sono chiamate con percorsi costruiti): `mentorship` 17/17, `surveys` 12/12, `engagement-feedback` 10/10, `gdpr` 5/5… Ogni rotta va legata a un attore e a un processo o dichiarata API-only | `E_api.tsv` colonna `n_consumatori` | V (limite lessicale dichiarato) | C13 |
+| R-35 | MEDIA | Tre interfacce nel datastore (`apps/web` 3102, `apps/banco` 3103/3104, `apps/console` 3107 sul ramo `interfaccia-unica` non unito) per lo stesso attore | `F_webapp.md` §1, §7 | V | C12 |
+
+## Stato dei documenti
+
+| id | gravità | rilievo | evidenza | classe | incremento |
+|---|---|---|---|---|---|
+| R-40 | BASSA | Il registro del programma #271 dice aperte F1 e F2, gli esiti le dicono chiuse | `.programmi/271-onda2-advanced.md:10-11` contro `.programmi/onda2/esiti/O2-01.md`, `O2-02.md` | V | C0 |
+| R-41 | BASSA | Il documento 31 del datastore dice «PROPOSTA» e regole fino a V3-08; `VERSIONE.json` è APPROVATA e le regole arrivano a V3-14 | datastore `docs/04_impianto/31_IL_CONTRATTO_DATI_V03.md` | V | C0 |
+| R-42 | BASSA | La vista rapida del datastore dice «nessuna domanda aspetta Enzo» mentre D-85 è aperta | datastore `esecuzione/STATO_CORRENTE.md` punto 2; `DOMANDE_APERTE.md` D-85 | V | C0 |
+| R-43 | BASSA | Due «contratti» con lo stesso nome: il documento 17 del datastore regola le viste dei cataloghi e il Turtle, non il fascicolo; manca un documento unico del contratto del fascicolo (trasporto, versione, impronta, ritiro) | datastore `docs/04_impianto/17_IL_CONTRATTO_DI_PUBBLICAZIONE.md` | V | C1 |
+
+## Rilievi aggiunti dalla revisione indipendente
+
+| id | gravità | rilievo | evidenza | classe | incremento |
+|---|---|---|---|---|---|
+| R-50 | ALTA | La migrazione 000400, che si riesegue a ogni deploy, esige **esattamente 2** versioni PUBLISHED in tutto il database: il primo caricamento di un pacchetto in produzione (che crea una variante, e il trigger le dà la versione 1 PUBLISHED) farebbe fallire il deploy successivo | `db/migrations/000400_*.sql:238-247` (verificato dal coordinatore) | V (codice); la prova rossa su una copia è da fare | C3a |
+| R-51 | ALTA | Le migrazioni 000398, 000400, 000401 scrivono contenuto nelle versioni PUBLISHED a ogni deploy, risolvendole per stato: una «versione ricevuta immutabile» oggi non esiste, e pubblicare una versione nuova cambierebbe il bersaglio di quelle scritture | `G_revisione_indipendente.md` M-02 | V | C3a |
+| R-52 | ALTA | L'attivazione di un tenant punta alla variante, non alla versione: pubblicare una versione nuova cambierebbe nello stesso istante il profilo (e domani il perimetro) di tutti i tenant su quella variante, RTL Bank compresa | `db/migrations/000008:75`; `lib/scope/profilo.ts:87-101` | V | C4 |
+| R-53 | MEDIA | ADR-0043 (voce 14) e D-72 assegnano lo stato «pubblicato» al datastore; ogni proposta che lo assegna ad advanced emenda una decisione presa | ADR-0043 tabella voce 14; datastore `esecuzione/DOMANDE_APERTE.md` D-72 | V | ADR-0047 (decisione di Enzo) |

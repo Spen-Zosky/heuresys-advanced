@@ -18,6 +18,7 @@ Ogni verifica: comando o procedura, ambiente, data e ora (UTC), esito **PASS / F
 | V-10 | 2026-10-23 | C13: collegamenti dalla posizione alle tre sotto-pagine; conteggi scritti a mano tolti da `/investors` (resta il solo blocco dal vivo); prova E2E nuova in `position-sub.spec.ts` | container | analisi sintattica TypeScript dei tre file | sintassi PASS; `tsc` di `apps/web` ed E2E NON ESEGUITI: in questo container advanced non ha `node_modules` e `@heuresys/ui` vive in un altro repository. Resta «in corso» finché la CI o una corsa E2E sulla VM non lo mostra con un login reale | — |
 | V-11 | 2026-10-23 03:43 | CI della PR bozza #104 sul commit `c377b17` | GitHub Actions | controlli della PR | PASS: typecheck, lint, CodeQL (13 rilievi del primo giro corretti, uscite degli strumenti identiche per SHA-256), Analyze, i18n-parity, shell-tests, state-lint. In coda alle 03:43: build-web, playwright-smoke, test-integration | https://github.com/Spen-Zosky/heuresys-advanced/pull/104 |
 | V-12 | 2026-10-23 02:56 | Baseline della VM, in sola lettura | VM | `systemctl`, `ss`, `psql` di sola lettura | PASS, riportata in `00_INDICE.md` §Baseline. Alle 03:43 l'esito non era ancora arrivato a questo thread; è arrivato dopo | `~/consolidamento_vm_20261023.md` sulla VM |
+| V-13 | 2026-10-23 12:00 | Rilettura delle prove dei fascicoli sul commit `754cdcf` del datastore, dopo la correzione della prova di estensione | VM, `heuresys_datastore_prova_2696491` creato dal modello ed eliminato | `pnpm run prove` sui quattro file | PASS 23/23: estensione 6/6, consegna 5/5, deposito 4/4, manifesto 8/8 | `~/ds-consolidamento-prove-754cdcf.log` sulla VM |
 
 ## Preesistenti (non introdotti da questo programma)
 
@@ -28,6 +29,6 @@ Tutti i rilievi di `01_RILIEVI.md` sono preesistenti al programma. Preesistenti 
 - **Ramo**: `claude/project-thread-adoo53` in entrambi i repository.
 - **Fatto**: Fasi A e B; approvazione del piano (vedi `00_INDICE.md`).
 - **Fatto in Fase C**: C0, C1 (datastore e advanced), C2 nel codice (datastore commit `a6a1a5c`).
-- **In corso**: rilettura sulla VM della prova di estensione corretta. CI della PR #104 tutta verde alle 05:25.
+- **Stato al 2026-10-23 12:40**: prove dei fascicoli verdi sulla VM (V-13); CI della PR #104 tutta verde. In attesa delle decisioni di Enzo (`/mnt/project-files/consolidamento/RIEPILOGO_MATTINO_20261023.md`).
 - **Bloccato**: le prove su database di advanced (C3a, C3, C4, C5, C11) chiedono una copia usa-e-getta dello schema di produzione: il gemello storico (linux-pc) non esiste più e sulla VM l'unico cluster di advanced è la produzione.
 - **Prossima azione eseguibile**: vedi l'ultima riga del registro qui sopra e la tabella di `03_PIANO.md`.

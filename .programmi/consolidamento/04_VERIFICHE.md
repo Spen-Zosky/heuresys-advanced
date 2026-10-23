@@ -1,0 +1,35 @@
+# Consolidamento — verifiche e ripresa
+
+Ogni verifica: comando o procedura, ambiente, data e ora (UTC), esito **PASS / FAIL / NON ESEGUITO**, evidenza. I problemi preesistenti stanno nella sezione «Preesistenti», separati dalle regressioni.
+
+## Verifiche
+
+| # | data | verifica | ambiente | comando | esito | evidenza |
+|---|---|---|---|---|---|---|
+| V-01 | 2026-10-23 | Revisione indipendente della Fase B (11 rilievi ricontrollati nel codice: 8 confermati, 3 parziali, 0 smentiti) | container, sola lettura | revisore Opus | PASS con correzioni | `lavoro/G_revisione_indipendente.md` |
+| V-02 | 2026-10-23 | Post-condizione di 000400 sul conteggio globale delle PUBLISHED (R-50) | container, lettura del file | `sed -n 238,247p db/migrations/000400_*.sql` | confermato nel codice; prova rossa su copia NON ESEGUITA (manca un gemello: il linux-pc non esiste più) | questo registro |
+| V-03 | 2026-10-23 | C1 datastore: impronta canonica unica e manifesto `heuresys.fascicolo.consegna/1` | container, node 24, senza database | `node --test tests/fascicolo_manifesto.test.ts` | PASS 8/8; rosso visto con 3 mutazioni | datastore `esecuzione/_misure/CONSOLIDAMENTO_C1_ROSSO_VISTO.txt`, commit `a6a1a5c` |
+| V-04 | 2026-10-23 | C2 datastore: deposito della consegna (prima scrittura, seconda idempotente, impronta diversa 409, codice che non diventa percorso) | container, node 24, senza database | `node --test tests/fascicolo_consegna_deposito.test.ts` | PASS 4/4; rosso visto con 3 mutazioni | datastore `esecuzione/_misure/CONSOLIDAMENTO_C2_ROSSO_VISTO.txt` |
+| V-05 | 2026-10-23 02:53 | C2 datastore: il verbo sul database (5 casi: 201, 200, 404, 422, 400), più manifesto, deposito ed estensione | VM, `heuresys_datastore_prova_2618055` creato dal modello ed eliminato; worktree `~/ds-consolidamento` su `a6a1a5c`, node 24.22.0 | `pnpm run prove` sui quattro file | PASS 22/23: consegna 5/5, deposito 4/4, manifesto 8/8. Estensione 5/6, con un FAIL preesistente identico su `origin/main`: la prova contava il perimetro di tutti i pacchetti alla versione 2, 3595 invece di 7. Corretto con un filtro sul prototipo nel commit successivo del datastore; la rilettura sulla VM è da fare | `~/consolidamento_vm_20261023.md` sulla VM |
+| V-06 | 2026-10-23 | Datastore, prove pure intere sul ramo | container, node 24 | `node --test` sulle 47 prove pure di `tests/_mappa.json` | PASS 757/761; i 2 FAIL (`macchina.test.ts`, `pdf.test.ts`) sono preesistenti, identici su `origin/main` | output del comando in questa sessione |
+| V-07 | 2026-10-23 | Datastore, tipi | container | `tsc --noEmit` (radice, comprende `apps/api`) e `tsc --noEmit -p qa` | PASS; `apps/web` FAIL preesistente (`globals.css`), identico su `origin/main` | — |
+| V-08 | 2026-10-23 | Datastore, sezione 21 del rito (vocabolario dei verbi contro le rotte) rifatta a mano | container | la pipeline `sed`/`awk`/`comm` della sezione 21 | PASS: 106 rotte, coincidono | — |
+| V-09 | 2026-10-23 | C1 advanced: verifica della consegna (caso d'impronta condiviso, copie allineate, consegna intatta, pacchetto cambiato, manifesto fuori forma, R-54) | container, node 24, Ajv 8.20 del datastore via `NODE_PATH` (advanced non ha `node_modules` qui) | `node --test db/scripts/pacchetto/manifesto-consegna.test.mjs` | PASS 6/6; rosso visto con 4 mutazioni (chiavi non ordinate, niente convalida, niente confronto d'impronta, copia dello schema diversa) | questa riga |
+| V-10 | 2026-10-23 | C13: collegamenti dalla posizione alle tre sotto-pagine; conteggi scritti a mano tolti da `/investors` (resta il solo blocco dal vivo); prova E2E nuova in `position-sub.spec.ts` | container | analisi sintattica TypeScript dei tre file | sintassi PASS; `tsc` di `apps/web` ed E2E NON ESEGUITI: in questo container advanced non ha `node_modules` e `@heuresys/ui` vive in un altro repository. Resta «in corso» finché la CI o una corsa E2E sulla VM non lo mostra con un login reale | — |
+| V-11 | 2026-10-23 03:43 | CI della PR bozza #104 sul commit `c377b17` | GitHub Actions | controlli della PR | PASS: typecheck, lint, CodeQL (13 rilievi del primo giro corretti, uscite degli strumenti identiche per SHA-256), Analyze, i18n-parity, shell-tests, state-lint. In coda alle 03:43: build-web, playwright-smoke, test-integration | https://github.com/Spen-Zosky/heuresys-advanced/pull/104 |
+| V-12 | 2026-10-23 02:56 | Baseline della VM, in sola lettura | VM | `systemctl`, `ss`, `psql` di sola lettura | PASS, riportata in `00_INDICE.md` §Baseline. Alle 03:43 l'esito non era ancora arrivato a questo thread; è arrivato dopo | `~/consolidamento_vm_20261023.md` sulla VM |
+| V-13 | 2026-10-23 12:00 | Rilettura delle prove dei fascicoli sul commit `754cdcf` del datastore, dopo la correzione della prova di estensione | VM, `heuresys_datastore_prova_2696491` creato dal modello ed eliminato | `pnpm run prove` sui quattro file | PASS 23/23: estensione 6/6, consegna 5/5, deposito 4/4, manifesto 8/8 | `~/ds-consolidamento-prove-754cdcf.log` sulla VM |
+| V-14 | 2026-10-23 15:33–15:50 UTC | Copia usa-e-getta di advanced ripristinata dal dump notturno `heuresys_advanced_20261023T013416Z.dump` e catena delle migrazioni del ramo `07a8bed` riapplicata due volte di fila | VM, cluster utente `~/pg-prova-advanced` (initdb senza sudo, porta 5436 solo 127.0.0.1), database `heuresys_advanced_prova`; produzione solo letta | `pg_restore -j 3`, poi `bash db/scripts/migrate.sh <env della copia>` | Ripristino in 64 s, 13 errori nessuno sui dati (8 ruolo `postgres` assente, poi riapplicati; 5 `transaction_timeout`). Contro la produzione: oggetti per schema, 1629 vincoli e 1026 indici identici, ultima migrazione 000458 in tutti e due; differiscono solo `sys_attendance` (+156) e `sys_auth_login_events` (−4), attività dopo l'01:34. Catena: VERDE dopo aver replicato i permessi CONNECT del database (che pg_restore non porta), 429 applicate e 25 una-tantum saltate per giro; schema identico fra i giri (sha256 di `pg_dump --schema-only`), righe di 363 tabelle identiche tranne `audit.catalog_changes` (+8 per giro, R-55). Prova anche che il backup notturno si ripristina | `~/pg-prova-advanced/log` sulla VM |
+
+## Preesistenti (non introdotti da questo programma)
+
+Tutti i rilievi di `01_RILIEVI.md` sono preesistenti al programma. Preesistenti anche i FAIL di V-06 e V-07.
+
+## Ripresa
+
+- **Ramo**: `claude/project-thread-adoo53` in entrambi i repository.
+- **Fatto**: Fasi A e B; approvazione del piano (vedi `00_INDICE.md`).
+- **Fatto in Fase C**: C0, C1 (datastore e advanced), C2 nel codice (datastore commit `a6a1a5c`).
+- **Stato al 2026-10-23 15:50**: ADR-0046, ADR-0047 e ADR-0048 accettati da Enzo (15:19 UTC); ramo del datastore unito in main (PR #1); copia usa-e-getta di advanced pronta e catena delle migrazioni verde due volte (V-14).
+- **Sbloccato il 2026-10-23**: le prove su database di advanced (C3a, C3, C4, C5, C11) hanno ora una copia usa-e-getta sulla VM, `~/pg-prova-advanced` sulla 5436 (V-14), ripristinabile dal dump notturno.
+- **Prossima azione eseguibile**: vedi l'ultima riga del registro qui sopra e la tabella di `03_PIANO.md`.

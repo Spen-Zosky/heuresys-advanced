@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**44 ADR** in `docs/architecture/adr/`.
+**46 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -51,7 +51,9 @@
 | [0043](adr/0043_separazione_dal_datastore.md) | La separazione dal datastore: la piattaforma tiene i cataloghi e genera i modelli, advanced tiene il tenant | ACCETTATO il 2026-10-12 da Enzo Spenuso | La separazione dal datastore: la piattaforma tiene i cataloghi e genera i modelli, advanced tiene il tenant *(dal titolo)* | 2026-10-11 |
 | [0044](adr/0044_partecipazione_ai_processi_legata_alla_posizione.md) | La partecipazione ai processi si lega alla posizione, non alla persona | ACCETTATO il 2026-10-12 da Enzo Spenuso | La partecipazione ai processi si lega alla posizione, non alla persona *(dal titolo)* | 2026-10-11 |
 | [0045](adr/0045_dati_contrattuali_restano_importati.md) | I dati contrattuali del personale restano «importati»: Heuresys avvisa e rinvia al sistema esterno | ACCETTATO il 2026-10-12 da Enzo Spenuso | I dati contrattuali del personale restano «importati»: Heuresys avvisa e rinvia al sistema esterno *(dal titolo)* | 2026-10-12 |
-| [0046](adr/0046_perimetro_del_tenant.md) | Il perimetro del tenant: ricerche, liste di scelta e agente leggono solo dentro il fascicolo | PROPOSTO | Il perimetro del tenant: ricerche, liste di scelta e agente leggono solo dentro il fascicolo *(dal titolo)* | 2026-10-17 |
+| [0046](adr/0046_perimetro_del_tenant.md) | Il perimetro del tenant: ricerche, liste di scelta e agente leggono solo dentro il fascicolo | ACCETTATO il 2026-10-23 da Enzo Spenuso | Il perimetro del tenant: ricerche, liste di scelta e agente leggono solo dentro il fascicolo *(dal titolo)* | 2026-10-17 |
+| [0047](adr/0047_contratto_del_fascicolo.md) | Il contratto del fascicolo: consegna per file, identità della versione, versione fissata sull'attivazione | ACCETTATO il 2026-10-23 da Enzo Spenuso | Il contratto del fascicolo: consegna per file, identità della versione, versione fissata sull'attivazione *(dal titolo)* | 2026-10-23 |
+| [0048](adr/0048_personalizzazioni_del_tenant.md) | Le personalizzazioni del tenant all'arrivo di una versione nuova del modello | ACCETTATO il 2026-10-23 da Enzo Spenuso | Le personalizzazioni del tenant all'arrivo di una versione nuova del modello *(dal titolo)* | 2026-10-23 |
 
 ## Conventions
 

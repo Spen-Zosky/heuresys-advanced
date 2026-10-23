@@ -1,0 +1,668 @@
+{
+  "meta": {
+    "schema": "heuresys.prototipo.pacchetto/0.3",
+    "prototipoId": "pprova0000001",
+    "creatoIl": "2026-10-05T00:00:00Z",
+    "lingueBase": "it",
+    "lingue": [
+      "it",
+      "en"
+    ],
+    "origine": {
+      "schema": "heuresys.prototipo.pacchetto/0.2",
+      "convertitoIl": "2026-10-17T00:00:00.000Z",
+      "convertitore": "heuresys-datastore/converti_v03"
+    },
+    "completezza": {
+      "completo": true,
+      "passiAccettati": 31,
+      "passiCascata": 31
+    }
+  },
+  "contesto": {
+    "descrizione": {
+      "it": "impresa di prova",
+      "en": "impresa di prova",
+      "enOrigine": "MANUAL"
+    },
+    "ateco": {
+      "schema": "ATECO_2025",
+      "codice": "29.32",
+      "nome": {
+        "it": "Fabbricazione di prova",
+        "en": "Fabbricazione di prova",
+        "enOrigine": "MANUAL"
+      }
+    },
+    "classeDimensionale": "MEDIUM",
+    "fasciaAdvanced": "M",
+    "addetti": 10,
+    "paese": "IT",
+    "sedi": [
+      "SEDE"
+    ]
+  },
+  "prove": [
+    {
+      "id": "PR0001",
+      "url": "https://esempio.it",
+      "titolo": "fonte",
+      "estratto": "estratto",
+      "tipo": "html",
+      "esito": "LETTA",
+      "lettura": {
+        "quando": "2026-10-05T00:00:00Z",
+        "status": 200,
+        "byte": 1000,
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  ],
+  "sedi": [
+    {
+      "codice": "SEDE",
+      "tipo": "SEDE_CENTRALE",
+      "nome": {
+        "it": "Sede",
+        "en": "Sede",
+        "enOrigine": "MANUAL"
+      }
+    }
+  ],
+  "ccnl": [
+    {
+      "codice": "CCNL_X",
+      "nome": {
+        "it": "Contratto",
+        "en": "Contratto",
+        "enOrigine": "MANUAL"
+      },
+      "livelli": [
+        {
+          "codice": "CCNL_X_L1",
+          "nome": {
+            "it": "L1",
+            "en": "L1",
+            "enOrigine": "MANUAL"
+          },
+          "categoria": "IMPIEGATO",
+          "minimoAnnuoEur": 20000
+        }
+      ],
+      "istituti": [
+        {
+          "tipo": "ORE_SETTIMANALI",
+          "descrizione": {
+            "it": "orario"
+          },
+          "valore": 40,
+          "unita": "ore"
+        }
+      ],
+      "fonti": [
+        "PR0001"
+      ]
+    }
+  ],
+  "unita": [
+    {
+      "codice": "U01",
+      "nome": {
+        "it": "Direzione",
+        "en": "Direzione",
+        "enOrigine": "MANUAL"
+      },
+      "tipo": "DIREZIONE",
+      "tipoAdvanced": "GENERAL_MANAGEMENT",
+      "livello": 1,
+      "padre": null,
+      "sedeCodice": "SEDE",
+      "organicoPrevisto": 2,
+      "fonti": [
+        "PR0001"
+      ],
+      "mandato": {
+        "it": "Guidare l'impresa"
+      },
+      "budget": {
+        "centro": "COSTO"
+      }
+    },
+    {
+      "codice": "U02",
+      "nome": {
+        "it": "Ufficio",
+        "en": "Ufficio",
+        "enOrigine": "MANUAL"
+      },
+      "tipo": "FUNZIONE",
+      "tipoAdvanced": "OFFICE",
+      "livello": 2,
+      "padre": "U01",
+      "sedeCodice": "SEDE",
+      "organicoPrevisto": 3,
+      "fonti": [],
+      "senzaRiscontro": true
+    }
+  ],
+  "posizioni": [
+    {
+      "codice": "R001",
+      "titolo": {
+        "it": "Direttore",
+        "en": "Direttore",
+        "enOrigine": "MANUAL"
+      },
+      "unitaCodice": "U01",
+      "riportaA": null,
+      "categoriaContrattuale": "DIRIGENTE",
+      "livelloCcnl": null,
+      "organicoPrevisto": 1,
+      "responsabileUnita": true,
+      "occupazioniEsco": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/x",
+          "nome": {
+            "it": "dir",
+            "en": "dir",
+            "enOrigine": "MANUAL"
+          }
+        }
+      ],
+      "processiCodici": [
+        "P01"
+      ],
+      "fonti": [
+        "PR0001"
+      ],
+      "ruoloCodice": "RUO1"
+    },
+    {
+      "codice": "R002",
+      "titolo": {
+        "it": "Addetto",
+        "en": "Addetto",
+        "enOrigine": "MANUAL"
+      },
+      "unitaCodice": "U02",
+      "riportaA": "R001",
+      "categoriaContrattuale": "IMPIEGATO",
+      "livelloCcnl": "CCNL_X_L1",
+      "organicoPrevisto": 3,
+      "responsabileUnita": false,
+      "fonti": [],
+      "senzaRiscontro": true,
+      "ruoloCodice": "RUO1",
+      "riportoFunzionale": "R001",
+      "ccnlCodice": "CCNL_X",
+      "tipiResponsabilita": [
+        "DI_PROCESSO"
+      ],
+      "oreProcessi": [
+        {
+          "processoCodice": "P01",
+          "oreSettimanali": 30
+        }
+      ]
+    }
+  ],
+  "competenze": [
+    {
+      "codice": "ESCO_K1",
+      "nome": {
+        "it": "contabilità",
+        "en": "contabilità",
+        "enOrigine": "MANUAL"
+      },
+      "escoUri": "http://data.europa.eu/esco/skill/k1",
+      "tipo": "KNOWLEDGE",
+      "requisiti": [
+        {
+          "posizioneCodice": "R002",
+          "livello": "BASE",
+          "livelloAdvanced": "BASIC",
+          "criticita": "ESSENZIALE",
+          "criticitaAdvanced": "HIGH"
+        }
+      ],
+      "fonti": [],
+      "senzaRiscontro": true
+    }
+  ],
+  "processi": [
+    {
+      "codice": "P01",
+      "nome": {
+        "it": "Amministrazione",
+        "en": "Amministrazione",
+        "enOrigine": "MANUAL"
+      },
+      "ordine": 0,
+      "tipo": "DI_SUPPORTO",
+      "pcf": "8.1",
+      "specifico": false,
+      "sediCodici": [
+        "SEDE"
+      ],
+      "responsabilePosizioneCodice": "R001",
+      "collegamentiUnita": [
+        {
+          "unitaCodice": "U02",
+          "funzione": "RESPONSABILE",
+          "funzioneAdvanced": "OWNER"
+        }
+      ],
+      "fonti": [
+        "PR0001"
+      ],
+      "capabilityCodici": [
+        "CAP1"
+      ],
+      "fasi": [
+        {
+          "codice": "F1",
+          "nome": {
+            "it": "Registrare"
+          },
+          "ordine": 0,
+          "ingresso": {
+            "it": "fatture"
+          },
+          "uscita": {
+            "it": "prima nota"
+          },
+          "esecutore": {
+            "tipo": "POSIZIONE",
+            "codice": "R002"
+          },
+          "naturaLavoro": "ASSISTITO_AI",
+          "erogazione": "INTERNO",
+          "oreTipichePerCiclo": 2
+        }
+      ]
+    },
+    {
+      "codice": "P02",
+      "nome": {
+        "it": "Tesoreria"
+      },
+      "ordine": 1,
+      "tipo": "DI_SUPPORTO",
+      "pcf": "8.1",
+      "specifico": false,
+      "sediCodici": [
+        "SEDE"
+      ],
+      "responsabilePosizioneCodice": "R001",
+      "collegamentiUnita": [
+        {
+          "unitaCodice": "U02",
+          "funzione": "RESPONSABILE",
+          "funzioneAdvanced": "OWNER"
+        }
+      ],
+      "fonti": [
+        "PR0001"
+      ],
+      "capabilityCodici": [
+        "CAP1"
+      ],
+      "fasi": [
+        {
+          "codice": "F1",
+          "nome": {
+            "it": "Registrare"
+          },
+          "ordine": 0,
+          "ingresso": {
+            "it": "fatture"
+          },
+          "uscita": {
+            "it": "prima nota"
+          },
+          "esecutore": {
+            "tipo": "AGENTE",
+            "codice": "AG1"
+          },
+          "naturaLavoro": "AGENTE_SUPERVISIONATO",
+          "erogazione": "INTERNO",
+          "oreTipichePerCiclo": 2
+        }
+      ]
+    }
+  ],
+  "indicatori": [
+    {
+      "codice": "M001",
+      "nome": {
+        "it": "Giorni di chiusura",
+        "en": "Giorni di chiusura",
+        "enOrigine": "MANUAL"
+      },
+      "direzione": "RIDURRE",
+      "direzioneAdvanced": "LOWER_IS_BETTER",
+      "unita": "giorni",
+      "formula": {
+        "it": "giorni",
+        "en": "giorni",
+        "enOrigine": "MANUAL"
+      },
+      "frequenza": "MENSILE",
+      "obiettivoCodice": "O001",
+      "bersaglio": {
+        "minimo": null,
+        "obiettivo": 4,
+        "massimo": null,
+        "periodo": {
+          "dal": "2026-01-01",
+          "al": null
+        }
+      },
+      "fonti": [],
+      "senzaRiscontro": true,
+      "perimetro": {
+        "it": "tutte le chiusure"
+      },
+      "baseline": {
+        "valore": 6,
+        "data": "2026-01-01"
+      },
+      "responsabilePosizioneCodice": "R001",
+      "esclusioni": {
+        "it": "chiusure straordinarie"
+      },
+      "famiglia": "RISULTATO"
+    }
+  ],
+  "obiettivi": [
+    {
+      "codice": "O000",
+      "titolo": {
+        "it": "Crescere"
+      },
+      "orizzonte": "ANNUALE",
+      "durataGiorni": 365,
+      "dimensione": "CRESCITA",
+      "processoCodice": null,
+      "unitaCodice": null,
+      "posizioneCodice": null,
+      "livello": "IMPRESA",
+      "fonti": [
+        "PR0001"
+      ]
+    },
+    {
+      "codice": "O001",
+      "titolo": {
+        "it": "Chiudere prima",
+        "en": "Chiudere prima",
+        "enOrigine": "MANUAL"
+      },
+      "orizzonte": "ANNUALE",
+      "durataGiorni": 365,
+      "dimensione": "EFFICIENZA",
+      "processoCodice": "P01",
+      "unitaCodice": "U02",
+      "posizioneCodice": "R002",
+      "peso": 100,
+      "pesoOrigine": "REGOLA",
+      "fonti": [],
+      "senzaRiscontro": true,
+      "livello": "PROCESSO",
+      "padre": "O000",
+      "capabilityCodice": "CAP1"
+    }
+  ],
+  "obblighi": [
+    {
+      "codice": "OBB_1",
+      "norma": {
+        "it": "D.Lgs. 81/2008",
+        "en": "D.Lgs. 81/2008",
+        "enOrigine": "MANUAL"
+      },
+      "ambito": "SICUREZZA",
+      "posizioniCodici": [
+        "R001"
+      ],
+      "fonti": [
+        "PR0001"
+      ]
+    }
+  ],
+  "formazione": [],
+  "carriere": [],
+  "incentivi": [],
+  "commesse": [],
+  "vuoti": [
+    {
+      "dominio": "commesse",
+      "motivo": {
+        "it": "non pertinente"
+      }
+    }
+  ],
+  "derivazioni": [
+    {
+      "campo": "riporto",
+      "regola": {
+        "it": "dalla gerarchia",
+        "en": "dalla gerarchia",
+        "enOrigine": "MANUAL"
+      }
+    }
+  ],
+  "strategia": {
+    "leva": {
+      "prevalente": "QUALITA",
+      "fonti": [
+        "PR0001"
+      ]
+    },
+    "priorita": [
+      {
+        "codice": "PRI1",
+        "nome": {
+          "it": "Chiudere prima"
+        },
+        "obiettivoCodice": "O000",
+        "fonti": [
+          "PR0001"
+        ]
+      }
+    ]
+  },
+  "capability": [
+    {
+      "codice": "CAP1",
+      "nome": {
+        "it": "Amministrare"
+      },
+      "natura": "NECESSARIA",
+      "processiCodici": [
+        "P01"
+      ],
+      "fonti": [
+        "PR0001"
+      ]
+    }
+  ],
+  "ruoli": [
+    {
+      "codice": "RUO1",
+      "nome": {
+        "it": "Contabile"
+      },
+      "missione": {
+        "it": "Tenere i conti"
+      },
+      "attivita": [
+        {
+          "processoCodice": "P01",
+          "faseCodice": "F1"
+        }
+      ],
+      "competenze": [
+        {
+          "competenzaCodice": "ESCO_K1",
+          "livello": "BASE",
+          "processoCodice": "P01"
+        }
+      ],
+      "professioneCp2021": "3.3.1.2.1",
+      "fonti": [
+        "PR0001"
+      ]
+    }
+  ],
+  "decisioni": [
+    {
+      "codice": "DEC1",
+      "processoCodice": "P01",
+      "descrizione": {
+        "it": "Approvare il bilancio"
+      },
+      "diritti": [
+        {
+          "diritto": "PROPONE",
+          "attore": {
+            "tipo": "POSIZIONE",
+            "codice": "R001"
+          }
+        },
+        {
+          "diritto": "DECIDE",
+          "attore": {
+            "tipo": "POSIZIONE",
+            "codice": "R002"
+          }
+        }
+      ],
+      "escalation": {
+        "soglia": {
+          "it": "oltre 10.000 euro"
+        },
+        "saleA": {
+          "tipo": "POSIZIONE",
+          "codice": "R001"
+        }
+      },
+      "fonti": [
+        "PR0001"
+      ]
+    }
+  ],
+  "entita": [
+    {
+      "codice": "ENT1",
+      "nome": {
+        "it": "Impresa di prova"
+      },
+      "paese": "IT",
+      "sediCodici": [
+        "SEDE"
+      ],
+      "fonti": [
+        "PR0001"
+      ]
+    }
+  ],
+  "agenti": [
+    {
+      "codice": "AG1",
+      "nome": {
+        "it": "Riconciliatore"
+      },
+      "tipo": "ESECUTORE",
+      "attivita": [
+        {
+          "processoCodice": "P01",
+          "faseCodice": "F1"
+        },
+        {
+          "processoCodice": "P02",
+          "faseCodice": "F1"
+        }
+      ],
+      "responsabile": {
+        "tipo": "RUOLO",
+        "codice": "RUO1"
+      },
+      "misure": [
+        "M001"
+      ],
+      "fonti": [
+        "PR0001"
+      ]
+    }
+  ],
+  "principi": [
+    {
+      "codice": "PRN1",
+      "ambito": "AUTONOMIA",
+      "enunciato": {
+        "it": "Le filiali decidono il prezzo"
+      },
+      "fonti": [
+        "PR0001"
+      ]
+    }
+  ],
+  "perimetro": {
+    "fascicoloVersione": 1,
+    "voci": {
+      "professioni": [
+        {
+          "schema": "CP2021",
+          "codice": "3.3.1.2.1",
+          "usataDalModello": true
+        },
+        {
+          "schema": "ESCO_OCCUPAZIONE",
+          "codice": "dir",
+          "uri": "http://data.europa.eu/esco/occupation/x",
+          "usataDalModello": true
+        },
+        {
+          "schema": "CP2021",
+          "codice": "2.1.1.1.1",
+          "usataDalModello": false
+        }
+      ],
+      "competenze": [
+        {
+          "schema": "ESCO_COMPETENZA",
+          "codice": "k1",
+          "uri": "http://data.europa.eu/esco/skill/k1",
+          "usataDalModello": true
+        }
+      ],
+      "processi": [
+        {
+          "schema": "APQC_PCF",
+          "codice": "8.1",
+          "usataDalModello": true
+        },
+        {
+          "schema": "APQC_PCF",
+          "codice": "9.9",
+          "usataDalModello": false
+        }
+      ],
+      "attivitaEconomiche": [
+        {
+          "schema": "ATECO_2025",
+          "codice": "29.32",
+          "usataDalModello": true
+        }
+      ],
+      "contratti": [
+        {
+          "schema": "CCNL_CNEL",
+          "codice": "CCNL_X",
+          "usataDalModello": true
+        }
+      ]
+    }
+  }
+}

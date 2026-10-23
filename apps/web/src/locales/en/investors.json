@@ -13,7 +13,6 @@
     "tagline": "Every number traces back to its source.",
     "liveLabel": "live",
     "loading": "—",
-    "asOf": "codebase data as of September 9, 2026",
     "live": {
       "skills": "ESCO skills (taxonomy)",
       "occupationSkillEdges": "Occupation→skill links",
@@ -25,14 +24,6 @@
       "rolePermissionMappings": "Role×permission mappings (RBAC)",
       "uiInterfaces": "RBAC-gated UI interfaces",
       "activeTenancies": "Active tenancies"
-    },
-    "static": {
-      "modules": "Business modules (API)",
-      "endpoints": "/v1/* endpoints",
-      "migrations": "Idempotent DB migrations",
-      "apiTests": "API integration tests (real DB)",
-      "e2e": "Playwright E2E tests",
-      "pages": "Web pages (admin + ESS)"
     }
   },
   "wedges": {

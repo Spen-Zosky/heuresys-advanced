@@ -30,8 +30,16 @@
    crosswalk non ancora agganciati, RBAC platform-global, leads GTM, gdpr_data_map,
    reconciliation_registry, ui_interfaces, kpi_weighting_rules, skill_proficiency_levels
    che è agganciato via `varchar+CHECK` RD-08 e non via FK).
+6. **MODELLO** (famiglia derivata, dal 2026-10-23): le `sys_blueprint_content_*`, il
+   contenuto di una versione di variante (ADR-0039) prima che diventi l'azienda di un
+   cliente. Ne fa parte una tabella solo se tutte le sue FK restano nel piano del modello
+   (`sys_blueprint_variant_versions` o un'altra `sys_blueprint_content_*`) e nessuna
+   tabella fuori dal piano la referenzia; una FK verso un tenant la porta nel dossier
+   TENANT, una verso altro la rende rossa. Nasce perché i pacchetti del datastore
+   (mig 000454, 000458) hanno aggiunto la famiglia a decine di tabelle per volta e la
+   allowlist riga per riga era rossa dal 2026-09-23 senza niente fuori posto.
 
-**Check di completezza (falsificabile)**: ogni tabella `sys.*` ∈ membri ∪ CATALOGO ∪
+**Check di completezza (falsificabile)**: ogni tabella `sys.*` ∈ membri ∪ CATALOGO ∪ MODELLO ∪
 allowlist, ricalcolato dal catalogo di sistema a ogni esecuzione — una tabella nuova non
 classificata rende il registro ROSSO (self-test al C0: tabella orfana iniettata in
 transazione → il check DEVE scattare → rollback).

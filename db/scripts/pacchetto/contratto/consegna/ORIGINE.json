@@ -1,0 +1,8 @@
+{
+  "origine": "heuresys-datastore, ramo claude/project-thread-adoo53, commit a6a1a5c (consolidamento C1, C2)",
+  "regola": "Copia, non fonte: si ricopia dal datastore e si aggiornano le impronte. manifesto-consegna.mjs rifiuta di lavorare se una copia diverge.",
+  "impronte": {
+    "manifesto.schema.json": { "datastore": "src/contratto/consegna/manifesto.schema.json", "sha256": "bbdece224f601eb1070d5172cb177fcb9e88b7e3271308b5d9a218289ba2a6e3" },
+    "caso_impronta.json": { "datastore": "tests/dati/consegna/caso_impronta.json", "sha256": "17986e975f86223201297106981c7e584659b79aef6b52f9bfb143c39d8ba609" }
+  }
+}

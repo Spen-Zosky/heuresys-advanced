@@ -67,3 +67,9 @@ Stato: **APERTO** finché un incremento del piano (`03_PIANO.md`) non lo chiude 
 | R-51 | ALTA | Le migrazioni 000398, 000400, 000401 scrivono contenuto nelle versioni PUBLISHED a ogni deploy, risolvendole per stato: una «versione ricevuta immutabile» oggi non esiste, e pubblicare una versione nuova cambierebbe il bersaglio di quelle scritture | `G_revisione_indipendente.md` M-02 | V | C3a |
 | R-52 | ALTA | L'attivazione di un tenant punta alla variante, non alla versione: pubblicare una versione nuova cambierebbe nello stesso istante il profilo (e domani il perimetro) di tutti i tenant su quella variante, RTL Bank compresa | `db/migrations/000008:75`; `lib/scope/profilo.ts:87-101` | V | C4 |
 | R-53 | MEDIA | ADR-0043 (voce 14) e D-72 assegnano lo stato «pubblicato» al datastore; ogni proposta che lo assegna ad advanced emenda una decisione presa | ADR-0043 tabella voce 14; datastore `esecuzione/DOMANDE_APERTE.md` D-72 | V | ADR-0047 (decisione di Enzo) |
+
+## Rilievi aggiunti in Fase C
+
+| # | gravità | rilievo | evidenza | classe | chiude |
+|---|---|---|---|---|---|
+| R-54 | BASSA | Advanced è più severo dello schema v0.3: `limiti()` di `convalida-pacchetto.mjs` rifiuta `meta.origine.convertitoIl` senza millisecondi, che lo schema del datastore accetta. Il convertitore vero scrive `toISOString()` (con millisecondi) e passa; un pacchetto con l'istante passato a mano senza millisecondi sarebbe valido per il datastore, consegnato, e rifiutato da advanced | `db/scripts/pacchetto/convalida-pacchetto.mjs:52`; datastore `src/contratto/converti_v03.ts:53`; prova `manifesto-consegna.test.mjs` (caso R-54) | V (prova) | C3: il ricevimento lo dichiara come rifiuto motivato; in alternativa il verbo di consegna applica gli stessi limiti prima di scrivere |

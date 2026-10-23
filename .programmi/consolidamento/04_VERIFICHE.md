@@ -8,15 +8,23 @@ Ogni verifica: comando o procedura, ambiente, data e ora (UTC), esito **PASS / F
 |---|---|---|---|---|---|---|
 | V-01 | 2026-10-23 | Revisione indipendente della Fase B (11 rilievi ricontrollati nel codice: 8 confermati, 3 parziali, 0 smentiti) | container, sola lettura | revisore Opus | PASS con correzioni | `lavoro/G_revisione_indipendente.md` |
 | V-02 | 2026-10-23 | Post-condizione di 000400 sul conteggio globale delle PUBLISHED (R-50) | container, lettura del file | `sed -n 238,247p db/migrations/000400_*.sql` | confermato nel codice; prova rossa su copia NON ESEGUITA (manca un gemello: il linux-pc non esiste più) | questo registro |
+| V-03 | 2026-10-23 | C1 datastore: impronta canonica unica e manifesto `heuresys.fascicolo.consegna/1` | container, node 24, senza database | `node --test tests/fascicolo_manifesto.test.ts` | PASS 8/8; rosso visto con 3 mutazioni | datastore `esecuzione/_misure/CONSOLIDAMENTO_C1_ROSSO_VISTO.txt`, commit `a6a1a5c` |
+| V-04 | 2026-10-23 | C2 datastore: deposito della consegna (prima scrittura, seconda idempotente, impronta diversa 409, codice che non diventa percorso) | container, node 24, senza database | `node --test tests/fascicolo_consegna_deposito.test.ts` | PASS 4/4; rosso visto con 3 mutazioni | datastore `esecuzione/_misure/CONSOLIDAMENTO_C2_ROSSO_VISTO.txt` |
+| V-05 | 2026-10-23 | C2 datastore: il verbo sul database (5 casi: 201, 200, 404, 422, 400) | VM, database delle prove | `pnpm run prove` su un worktree del ramo | NON ESEGUITO: il container non ha un database del datastore migrato; richiesta alla sessione sulla VM | — |
+| V-06 | 2026-10-23 | Datastore, prove pure intere sul ramo | container, node 24 | `node --test` sulle 47 prove pure di `tests/_mappa.json` | PASS 757/761; i 2 FAIL (`macchina.test.ts`, `pdf.test.ts`) sono preesistenti, identici su `origin/main` | output del comando in questa sessione |
+| V-07 | 2026-10-23 | Datastore, tipi | container | `tsc --noEmit` (radice, comprende `apps/api`) e `tsc --noEmit -p qa` | PASS; `apps/web` FAIL preesistente (`globals.css`), identico su `origin/main` | — |
+| V-08 | 2026-10-23 | Datastore, sezione 21 del rito (vocabolario dei verbi contro le rotte) rifatta a mano | container | la pipeline `sed`/`awk`/`comm` della sezione 21 | PASS: 106 rotte, coincidono | — |
+| V-09 | 2026-10-23 | C1 advanced: verifica della consegna (caso d'impronta condiviso, copie allineate, consegna intatta, pacchetto cambiato, manifesto fuori forma, R-54) | container, node 24, Ajv 8.20 del datastore via `NODE_PATH` (advanced non ha `node_modules` qui) | `node --test db/scripts/pacchetto/manifesto-consegna.test.mjs` | PASS 6/6; rosso visto con 4 mutazioni (chiavi non ordinate, niente convalida, niente confronto d'impronta, copia dello schema diversa) | questa riga |
 
 ## Preesistenti (non introdotti da questo programma)
 
-Tutti i rilievi di `01_RILIEVI.md` sono preesistenti al programma.
+Tutti i rilievi di `01_RILIEVI.md` sono preesistenti al programma. Preesistenti anche i FAIL di V-06 e V-07.
 
 ## Ripresa
 
 - **Ramo**: `claude/project-thread-adoo53` in entrambi i repository.
 - **Fatto**: Fasi A e B; approvazione del piano (vedi `00_INDICE.md`).
-- **In corso**: baseline della VM; incrementi senza scrittura in produzione.
+- **Fatto in Fase C**: C0, C1 (datastore e advanced), C2 nel codice (datastore commit `a6a1a5c`).
+- **In corso**: baseline della VM; prova sul database di C2 (V-05) sulla VM.
 - **Bloccato**: le prove su database di advanced (C3a, C3, C4, C5, C11) chiedono una copia usa-e-getta dello schema di produzione: il gemello storico (linux-pc) non esiste più e sulla VM l'unico cluster di advanced è la produzione.
 - **Prossima azione eseguibile**: vedi l'ultima riga del registro qui sopra e la tabella di `03_PIANO.md`.

@@ -14,7 +14,7 @@ const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const RADICE = path.resolve(AQUI, "../../..");
 
 // Ajv 8 non e' una dipendenza diretta di nessun pacchetto del monorepo: arriva dallo store pnpm (la versione e' quella del datastore, 8.20.0)
-const trovaAjv = () => {
+export const trovaAjv = () => {
   const candidati = [() => createRequire(path.join(RADICE, "apps/api/package.json")).resolve("ajv/dist/2020.js")];
   const store = path.join(RADICE, "node_modules/.pnpm");
   candidati.push(() => {

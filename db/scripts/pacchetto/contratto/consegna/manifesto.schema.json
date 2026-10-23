@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:heuresys:contratto:fascicolo-consegna:1",
+  "title": "Manifesto della consegna di un fascicolo dal datastore ad advanced",
+  "description": "Accompagna il file del pacchetto nella cartella di consegna. Porta l'identità dell'istanza (prototipo e versione del pacchetto nel datastore) e l'impronta del contenuto, che chi riceve ricalcola. Il pacchetto resta quello del suo contratto (0.2 o 0.3): il manifesto non lo cambia.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "prototipo", "versione", "contratto", "impronta", "fascicoloVersione", "edizioni", "correlazione", "consegnatoIl", "consegnatoDa", "file"],
+  "properties": {
+    "schema": { "const": "heuresys.fascicolo.consegna/1" },
+    "prototipo": { "type": "string", "pattern": "^p[0-9a-z_]{6,60}$", "description": "Il codice del prototipo del banco: meta.prototipoId del pacchetto" },
+    "versione": { "type": "integer", "minimum": 1, "description": "Il numero del pacchetto nel datastore (bench_package_version_no): è l'identità dell'istanza, e la sola numerazione che advanced registra" },
+    "contratto": { "enum": ["heuresys.prototipo.pacchetto/0.2", "heuresys.prototipo.pacchetto/0.3"], "description": "meta.schema del pacchetto" },
+    "impronta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algoritmo", "valore"],
+      "properties": {
+        "algoritmo": { "const": "sha256-json-canonico" },
+        "valore": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "fascicoloVersione": { "type": ["integer", "null"], "minimum": 1, "description": "perimetro.fascicoloVersione del pacchetto, copiato per chi legge: è la versione del perimetro (R49), non l'identità del pacchetto. Null per un pacchetto 0.2" },
+    "edizioni": {
+      "type": "array",
+      "description": "Le edizioni dei cataloghi da cui dipendono le voci del pacchetto: chi riceve sa con quale ESCO, ATECO, NACE è stato composto",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["schema", "edizione"],
+        "properties": {
+          "schema": { "type": "string", "minLength": 1 },
+          "edizione": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "correlazione": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", "description": "Lega la chiamata del datastore che ha consegnato al caricamento in advanced" },
+    "consegnatoIl": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "description": "Istante UTC in forma ISO 8601, come lo scrive toISOString()" },
+    "consegnatoDa": { "type": "string", "minLength": 1, "description": "L'identità che mette l'involucro, mai il corpo della richiesta" },
+    "file": { "const": "pacchetto.json" }
+  }
+}

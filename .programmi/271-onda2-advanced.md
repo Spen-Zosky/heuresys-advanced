@@ -7,8 +7,8 @@
 ## Fasi
 
 - [x] **F0 — Disegno: ADR-0046, tabelle e colonne con inversa, piano del passo 3, mandati** — FATTO 2026-10-17 (PE-6.1) · commit `8f8f84d4`
-- [ ] **F1 — O2-01 contenuto del modello v0.3** — `.programmi/onda2/O2-01_contenuto-modello-v03.md`
-- [ ] **F2 — O2-02 caricatore del pacchetto v0.3** — attende il pacchetto v0.3 della banca dal datastore
+- [x] **F1 — O2-01 contenuto del modello v0.3** — FATTO 2026-10-17 (S1119, «CICLO CHIUSO — 7/7» in `.programmi/onda2/esiti/O2-01.md`) · commit `1330d70d`, `303e75a8`
+- [x] **F2 — O2-02 caricatore del pacchetto v0.3** — FATTO 2026-10-17 (S1119, «CICLO CHIUSO — 11/11» in `.programmi/onda2/esiti/O2-02.md`) con `WAIT-INPUT` sul pacchetto v0.3 vero della banca: la prova va ripetuta quando arriva. Allineato il 2026-10-23 dal consolidamento (R-40)
 - [ ] **F3 — O2-03 struttura del tenant** — `.programmi/onda2/O2-03_struttura-tenant.md`
 - [ ] **F4 — O2-04 strategia, decisioni, entità** — dopo F3
 - [ ] **F5 — O2-05 colonne del tenant ed esposizione** — dopo F3 e F4

@@ -6,7 +6,7 @@ Fonti lette: la mappatura v0.3 e i vocabolari del contratto (`D:\heuresys-datast
 
 ## 0. Regole comuni (valgono per ogni riga di questo file)
 
-- **C1, due domini (ADR-0043).** Le tabelle `sys_blueprint_content_*` sono di **piattaforma**: contengono il tipo d'impresa come è arrivato dal datastore, non hanno `tenant_id`, appartengono a una versione di variante (`..._version_id uuid NOT NULL REFERENCES sys.sys_blueprint_variant_versions(blueprint_variant_version_id) ON DELETE CASCADE`), si legano per codice e portano `origine_dato varchar(32) NOT NULL DEFAULT 'DATASTORE'`, come in `000454`. Le tabelle del **tenant** portano `<prefisso>_tenant_id uuid NOT NULL REFERENCES sys.sys_tenants(tenant_id)` (I5), una chiave naturale `UNIQUE (<prefisso>_tenant_id, <prefisso>_code)` dove esiste un codice, `origine_dato varchar(32) NOT NULL DEFAULT 'MATERIALIZZAZIONE' CHECK (origine_dato IN ('IMPORT','NATIVO','MATERIALIZZAZIONE'))` come in `000433`, e `created_at`, `created_by`, `updated_at`, `updated_by`.
+- **C1, due domini (ADR-0043).** Le tabelle `sys_blueprint_content_*` sono di **piattaforma**: contengono il tipo d'impresa come è arrivato dal datastore, non hanno `tenant_id`, appartengono a una versione di variante (`..._version_id uuid NOT NULL REFERENCES sys.sys_blueprint_variant_versions(blueprint_variant_version_id) ON DELETE CASCADE`), si legano per codice e portano `origine_dato varchar(32) NOT NULL DEFAULT 'DATASTORE'`, come in `000454`. Le tabelle del **tenant** (nota del 2026-10-23, consolidamento R-28: la tabella dei tenant si chiama `sys.sys_tenancies`, non `sys_tenants`, che non esiste; i riferimenti qui sotto sono corretti) portano `<prefisso>_tenant_id uuid NOT NULL REFERENCES sys.sys_tenancies(tenant_id)` (I5), una chiave naturale `UNIQUE (<prefisso>_tenant_id, <prefisso>_code)` dove esiste un codice, `origine_dato varchar(32) NOT NULL DEFAULT 'MATERIALIZZAZIONE' CHECK (origine_dato IN ('IMPORT','NATIVO','MATERIALIZZAZIONE'))` come in `000433`, e `created_at`, `created_by`, `updated_at`, `updated_by`.
 - **C2, nomi.** `sys.sys_<plurale>`; ogni colonna porta il prefisso del singolare della tabella; chiave primaria `<singolare>_id uuid PRIMARY KEY DEFAULT gen_random_uuid()`. La mappatura del datastore propone alcuni nomi al singolare (`sys_blueprint_content_strategy`, `..._perimeter`): qui sono al plurale secondo I3/I4.
 - **C3, categorici (RD-08).** `varchar(N) + CHECK`, mai ENUM; i valori sono quelli di `vocabolari.json` v0.3, riportati qui. Dove il vocabolario non c'è (lo dice la riga), il campo è testo libero e la sessione verifica nello schema `prototipo-pacchetto.schema.json` se un elenco esiste.
 - **C4, date (RD-09).** `date` per le date, `timestamptz` solo per gli istanti.
@@ -215,7 +215,7 @@ Oggi il processo del tenant è un processo del modello agganciato a un'unità (`
 | colonna | tipo | vincolo |
 |---|---|---|
 | `tenant_process_id` | uuid PK | |
-| `tenant_process_tenant_id` | uuid NOT NULL | FK `sys_tenants` |
+| `tenant_process_tenant_id` | uuid NOT NULL | FK `sys_tenancies` |
 | `tenant_process_code` | varchar(64) NOT NULL | `UNIQUE (tenant_id, code)` |
 | `tenant_process_name` | varchar(255) NOT NULL | |
 | `tenant_process_description` | text | |
@@ -236,7 +236,7 @@ Inversa della migrazione: rifiuto se `sys_tenant_processes` ha righe o la colonn
 | colonna | tipo | vincolo |
 |---|---|---|
 | `tenant_process_step_id` | uuid PK | |
-| `tenant_process_step_tenant_id` | uuid NOT NULL | FK `sys_tenants` |
+| `tenant_process_step_tenant_id` | uuid NOT NULL | FK `sys_tenancies` |
 | `tenant_process_step_process_id` | uuid NOT NULL | FK `sys_tenant_processes` CASCADE |
 | `tenant_process_step_code` | varchar(64) NOT NULL | `UNIQUE (process_id, code)` |
 | `tenant_process_step_name` | text NOT NULL | |
@@ -255,7 +255,7 @@ Inversa della migrazione: rifiuto se `sys_tenant_processes` ha righe o la colonn
 
 ### T3 `sys_job_role_activities` (NUOVA) — R15, R29; legame ruolo-attività
 
-`job_role_activity_id` uuid PK; `job_role_activity_tenant_id` NOT NULL FK `sys_tenants`; `job_role_activity_job_role_id` NOT NULL FK `sys_job_roles` RESTRICT (ruolo di catalogo o proprio: la riga del legame è comunque del tenant); `job_role_activity_process_step_id` NOT NULL FK `sys_tenant_process_steps` CASCADE; `origine_dato` + audit; `UNIQUE (job_role_id, process_step_id, tenant_id)`. Sentinella C6 sul passo; un ruolo proprio di un altro tenant è coperto dalla stessa sentinella.
+`job_role_activity_id` uuid PK; `job_role_activity_tenant_id` NOT NULL FK `sys_tenancies`; `job_role_activity_job_role_id` NOT NULL FK `sys_job_roles` RESTRICT (ruolo di catalogo o proprio: la riga del legame è comunque del tenant); `job_role_activity_process_step_id` NOT NULL FK `sys_tenant_process_steps` CASCADE; `origine_dato` + audit; `UNIQUE (job_role_id, process_step_id, tenant_id)`. Sentinella C6 sul passo; un ruolo proprio di un altro tenant è coperto dalla stessa sentinella.
 
 ### T4 `sys_business_capabilities` (NUOVA) — R06
 

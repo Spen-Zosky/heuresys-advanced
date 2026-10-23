@@ -1,0 +1,34 @@
+{
+  "descrizione": "Caso di prova condiviso dell'impronta canonica (consolidamento C1): il datastore e advanced devono ricalcolare lo stesso valore. Se uno dei due cambia algoritmo, questo caso diventa rosso da una parte.",
+  "algoritmo": "sha256-json-canonico",
+  "oggetto": {
+    "meta": {
+      "schema": "heuresys.prototipo.pacchetto/0.3",
+      "prototipoId": "pcaso000001",
+      "lingue": [
+        "it",
+        "en"
+      ]
+    },
+    "z": {
+      "b": 2,
+      "a": 1.5,
+      "c": [
+        3,
+        {
+          "y": null,
+          "x": true
+        }
+      ]
+    },
+    "testo": "Più qualità, perché è già così — «virgolette» è",
+    "numeri": [
+      0,
+      -1,
+      1e+21,
+      0.1
+    ]
+  },
+  "canonico": "{\"meta\":{\"lingue\":[\"it\",\"en\"],\"prototipoId\":\"pcaso000001\",\"schema\":\"heuresys.prototipo.pacchetto/0.3\"},\"numeri\":[0,-1,1e+21,0.1],\"testo\":\"Più qualità, perché è già così — «virgolette» è\",\"z\":{\"a\":1.5,\"b\":2,\"c\":[3,{\"x\":true,\"y\":null}]}}",
+  "impronta": "4369e02722e0b40cf33ea5a3eaa7a0417108449350bf9bc5d4ed19c64857f0fa"
+}

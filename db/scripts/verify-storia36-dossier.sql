@@ -119,7 +119,7 @@ BEGIN
                                                -- modello PRIMA che diventi l'azienda di qualcuno — quando lo
                                                -- diventa, le righe che nascono sono in `sys.*` tenant-scoped
                                                -- e ricadono nel dossier TENANT per la loro strada.
-    ('sys_research_sources')                   -- registro delle fonti ammesse alla ricerca (mig 000333, #132
+    ('sys_research_sources'),                  -- registro delle fonti ammesse alla ricerca (mig 000333, #132
                                                -- F4): dice da quali domini si puo' leggere, cioe' e' governo
                                                -- della piattaforma. Le sue uniche FK vanno a `sys_users` come
                                                -- ATTORE (created_by / updated_by / approved_by): sono di
@@ -127,16 +127,57 @@ BEGIN
                                                -- derivazione — che ignora le colonne di attore — non la vede.
                                                -- Una fonte non e' il dato di una persona: e' un permesso di
                                                -- lettura verso l'esterno, con chi l'ha firmato accanto.
+    ('sys_tenant_boundary_author_columns'),    -- elenco delle colonne di attore che la sentinella del confine
+                                               -- fra clienti ignora (mig 000386): configurazione di un
+                                               -- controllo, nessuna FK, nessuna riga di un cliente.
+    ('sys_industry_forbidden_terms'),          -- termini che un settore non ospita (mig 000388, I21): una
+                                               -- dichiarazione per settore, non per tenant; nessuna FK.
+    ('sys_permessi_plenipotenziari_ammessi'),  -- allowlist dei permessi riservati ai plenipotenziari (mig
+                                               -- 000418, S-1): governo RBAC di piattaforma, chiave testuale.
+    ('sys_ritiri_ammessi'),                    -- eccezioni ammesse alla guardia G-D2 (mig 000420, R-1):
+                                               -- governo RBAC di piattaforma, chiave testuale.
+    ('sys_classificazione_direzione_dato'),    -- direzione del dato di ogni tabella sys.* (mig 000429, I23,
+                                               -- ADR-0041): metadato sulle tabelle, come sys_gdpr_data_map.
+    ('sys_conflitti_ibridi')                   -- registro dei conflitti nativo/importato sulle tabelle ibride
+                                               -- (mig 000446, X-4): governo delle importazioni, indirizza le
+                                               -- righe per (tabella, id) senza FK, come il registro delle
+                                               -- riconciliazioni. Nota: porta valori di righe di un cliente
+                                               -- senza una FK al tenant; se un giorno si popola, il suo posto
+                                               -- e' il dossier TENANT con quella FK, non questa lista.
   ),
   alltab AS (
     SELECT c.relname AS tbl
     FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE n.nspname = 'sys' AND c.relkind = 'r'
+  ),
+  -- MODELLO: il contenuto di una versione di variante (ADR-0039; mig 000327, 000397,
+  -- 000454, 000458). I pacchetti del datastore lo fanno crescere a famiglie intere
+  -- (45 tabelle al 2026-10-22), e una riga di allowlist per tabella diventava rossa a
+  -- ogni pacchetto senza che niente fosse fuori posto. Non e' un prefisso che zittisce:
+  -- una `sys_blueprint_content_*` ci sta SOLO se tutte le sue FK (anche di attore)
+  -- restano dentro il piano del modello — `sys_blueprint_variant_versions` o un'altra
+  -- `sys_blueprint_content_*` — e nessuna tabella fuori dal piano la referenzia. Una
+  -- FK verso un tenant, una persona o un catalogo la fa uscire, e torna rossa qui.
+  modello_cand AS (
+    SELECT tbl FROM alltab WHERE tbl LIKE 'sys\_blueprint\_content\_%'
+  ),
+  modello AS (
+    SELECT m.tbl FROM modello_cand m
+    WHERE NOT EXISTS (
+            SELECT 1 FROM fk
+            WHERE fk.child = m.tbl
+              AND fk.parent <> 'sys_blueprint_variant_versions'
+              AND fk.parent NOT IN (SELECT tbl FROM modello_cand))
+      AND NOT EXISTS (
+            SELECT 1 FROM fk
+            WHERE fk.parent = m.tbl
+              AND fk.child NOT IN (SELECT tbl FROM modello_cand))
   )
   SELECT string_agg(a.tbl, ', ' ORDER BY a.tbl) INTO v_unmapped
   FROM alltab a
   WHERE a.tbl NOT IN (SELECT tbl FROM member)
     AND a.tbl NOT IN (SELECT tbl FROM refd)
+    AND a.tbl NOT IN (SELECT tbl FROM modello)
     AND a.tbl NOT IN (SELECT al.tbl COLLATE "C" FROM allowlist al);
 
   IF v_unmapped IS NOT NULL THEN

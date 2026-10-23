@@ -6344,14 +6344,27 @@ BEGIN
   -- C7 — APPROVAZIONI E WORKFLOW
   -- ==========================================================================
 
-  -- ST-C7a: chiudere una richiesta lasciando un approvatore in attesa
+  -- ST-C7a: chiudere una richiesta lasciando un approvatore in attesa.
+  -- La violazione si costruisce da se': una richiesta sintetica APPROVED con un
+  -- passo ancora PENDING. Prima si prendeva un passo PENDING gia' presente in RTL,
+  -- e quando l'avanzamento li ha decisi tutti l'UPDATE non toccava niente e il
+  -- selftest diventava rosso senza che il check fosse rotto (dal 2026-09-23).
   v_fired := false;
   BEGIN
-    UPDATE sys.sys_approval_requests SET approval_request_status = 'APPROVED'
-     WHERE approval_request_id = (
-       SELECT s.approval_step_request_id FROM sys.sys_approval_steps s
-        WHERE s.approval_step_status = 'PENDING'
-          AND s.approval_step_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    DECLARE
+      st_req uuid;
+    BEGIN
+      INSERT INTO sys.sys_approval_requests
+        (approval_request_tenant_id, approval_request_title, approval_request_status)
+      VALUES ('86ba7a65-217f-48ba-8ce5-5c09b40a66b0',
+              'ST-C7a — richiesta sintetica', 'APPROVED')
+      RETURNING approval_request_id INTO st_req;
+      INSERT INTO sys.sys_approval_steps
+        (approval_step_request_id, approval_step_tenant_id, approval_step_status,
+         approval_step_approver_snapshot)
+      VALUES (st_req, '86ba7a65-217f-48ba-8ce5-5c09b40a66b0', 'PENDING',
+              'st-c7a@selftest.local');
+    END;
     PERFORM staging.storia36_check_c7a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN

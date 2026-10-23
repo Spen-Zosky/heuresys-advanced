@@ -1,0 +1,448 @@
+{
+ "schema": "cruscotto-stato/1",
+ "progetto": "heuresys-advanced",
+ "aggiornato_il": "2026-10-21",
+ "aggiornato_da": "semina iniziale dal cruscotto (Claude, 21/10/2026)",
+ "fase": "Dopo la GA v1.0.0: adesione al contratto dati del datastore, onda 2 in corso",
+ "stato": "giallo",
+ "stato_motivo": "produzione attiva e allineata a main, ma 5 voci aspettano una tua decisione, le migrazioni 000454-000458 risultano non applicate in produzione (STATE.md del 17/10), la CI 'Atlas freshness' è rossa e restano vulnerabilità Dependabot da riesaminare.",
+ "avanzamento": null,
+ "decisioni_attese": [
+  {
+   "id": "REL-454",
+   "titolo": "Rilascio in produzione delle migrazioni 000454..000458 e del passo 2 di PE-4: verificare se il deploy del 19/10 le ha già applicate",
+   "dal": "2026-10-17",
+   "blocca": "onde successive del contratto dati",
+   "raccomandazione": "",
+   "fonte": ".handoff/STATE.md"
+  },
+  {
+   "id": "#269",
+   "titolo": "Approvare ADR-0046, perimetro del tenant (#269): sblocca O2-07 e O2-08",
+   "dal": "2026-10-17",
+   "blocca": "O2-07 e O2-08",
+   "raccomandazione": "",
+   "fonte": "SOT_BACKLOG.md #269"
+  },
+  {
+   "id": "#270",
+   "titolo": "Tre scelte sul passo 3 della partecipazione ai processi (#270): nessuno dei 57 OWNER si risolve in una persona; sblocca O2-09 e O2-10",
+   "dal": "2026-10-17",
+   "blocca": "O2-09 e O2-10",
+   "raccomandazione": "raccomandazioni già scritte in SOT_BACKLOG #270",
+   "fonte": "SOT_BACKLOG.md #270"
+  },
+  {
+   "id": "#265",
+   "titolo": "#265 F4 sospesa sul ramo f4-livello-contrattuale, in attesa di decisione",
+   "dal": "2026-10-12",
+   "blocca": "livello contrattuale F4",
+   "raccomandazione": "",
+   "fonte": "SOT_STATE.md"
+  },
+  {
+   "id": "OWNER-3a",
+   "titolo": "Regola per gli OWNER dopo il passo 3a, senza la quale la visibilità per processo diventa vuota per tutti",
+   "dal": "2026-10-17",
+   "blocca": "visibilità per processo",
+   "raccomandazione": "",
+   "fonte": ".handoff/STATE.md"
+  },
+  {
+   "id": "PUB-STATS",
+   "titolo": "Decidere cosa pubblica public-stats (rimandato a S6)",
+   "dal": "2026-10-17",
+   "blocca": "",
+   "raccomandazione": "",
+   "fonte": ".handoff/STATE.md"
+  }
+ ],
+ "pendenze": [
+  {
+   "id": "P-04",
+   "titolo": "Onda 2 (#271): 10 sessioni previste, tetto complessivo 84 USD; O2-01 e O2-02 fatte, O2-03 può partire",
+   "priorita": "alta",
+   "chi": "claude",
+   "fonte": "SOT_BACKLOG.md #271"
+  },
+  {
+   "id": "P-05",
+   "titolo": "Pacchetto v0.3 vero della banca non ancora depositato dal datastore",
+   "priorita": "media",
+   "chi": "esterno",
+   "fonte": ".handoff/STATE.md"
+  },
+  {
+   "id": "P-06",
+   "titolo": "CI 'Atlas freshness' rossa; sul commit di correzione non risulta nessuna corsa",
+   "priorita": "media",
+   "chi": "claude",
+   "fonte": ".handoff/STATE.md"
+  },
+  {
+   "id": "P-07",
+   "titolo": "Vulnerabilità Dependabot aperte da riesaminare",
+   "priorita": "media",
+   "chi": "claude",
+   "fonte": ".handoff/STATE.md"
+  },
+  {
+   "id": "P-10",
+   "titolo": "Albero unità di RTL_BANK (#266): Divisione Risk & Compliance duplicata e vuota",
+   "priorita": "bassa",
+   "chi": "claude",
+   "fonte": "SOT_BACKLOG.md #266"
+  },
+  {
+   "id": "P-12",
+   "titolo": "Voci in HOLD: pagina prezzi (#4), email (#8, #39), SSO enterprise (#52)",
+   "priorita": "bassa",
+   "chi": "enzo",
+   "fonte": "SOT_BACKLOG.md"
+  },
+  {
+   "id": "P-13",
+   "titolo": "Registro disallineato: #267 e #268 accettati nei commit ma ancora 'in attesa' in STATE e backlog",
+   "priorita": "bassa",
+   "chi": "claude",
+   "fonte": "git log; SOT_BACKLOG.md"
+  }
+ ],
+ "rischi": [
+  {
+   "id": "R-01",
+   "titolo": "Un solo ambiente di produzione con dati reali: un errore di migrazione colpisce direttamente i clienti",
+   "impatto": "alto",
+   "mitigazione": "",
+   "fonte": "CLAUDE.md (ADR-0026, ADR-0035)"
+  },
+  {
+   "id": "R-02",
+   "titolo": "Servizi storia36 (custodia, avanzamento) e heuresys-app in stato 'failed' sulla VM",
+   "impatto": "medio",
+   "mitigazione": "",
+   "fonte": "systemctl --failed"
+  },
+  {
+   "id": "R-03",
+   "titolo": "Lavoro dimostrato solo su copia: le onde successive dipendono da migrazioni non in produzione",
+   "impatto": "medio",
+   "mitigazione": "",
+   "fonte": ".handoff/STATE.md"
+  },
+  {
+   "id": "R-04",
+   "titolo": "MFA non obbligatoria in produzione",
+   "impatto": "medio",
+   "mitigazione": "",
+   "fonte": "SOT_STATE.md (S1029)"
+  },
+  {
+   "id": "R-05",
+   "titolo": "Dipendenze con CVE: restano avvisi Dependabot e rami di aggiornamento aperti",
+   "impatto": "medio",
+   "mitigazione": "",
+   "fonte": "git log; git branch -a"
+  },
+  {
+   "id": "R-06",
+   "titolo": "Dipendenza dal datastore: pacchetto v0.3 mancante, l'onda 2 non si chiude senza",
+   "impatto": "medio",
+   "mitigazione": "",
+   "fonte": "SOT_BACKLOG.md #264"
+  },
+  {
+   "id": "R-07",
+   "titolo": "CI rossa che può nascondere altri errori; il deploy parte solo a CI verde",
+   "impatto": "medio",
+   "mitigazione": "",
+   "fonte": ".handoff/STATE.md"
+  },
+  {
+   "id": "R-08",
+   "titolo": "Turbopack non compila i font Google su aarch64: build forzato su webpack",
+   "impatto": "basso",
+   "mitigazione": "",
+   "fonte": "git log 19/10"
+  },
+  {
+   "id": "R-09",
+   "titolo": "Documentazione di stato molto voluminosa (SOT_STATE circa 528 KB) con incoerenze già emerse",
+   "impatto": "basso",
+   "mitigazione": "",
+   "fonte": "wc -c"
+  },
+  {
+   "id": "R-10",
+   "titolo": "Node della shell SSH (20) diverso da quello del servizio (22)",
+   "impatto": "basso",
+   "mitigazione": "",
+   "fonte": "node -v; unit systemd"
+  }
+ ],
+ "tappe": [
+  {
+   "data": "2026-05-16",
+   "titolo": "Primo commit del repository",
+   "tipo": "milestone",
+   "fonte": "git log"
+  },
+  {
+   "data": "2026-05-17",
+   "titolo": "Tag v0.2.0-mvp2 e v0.3.0-mvp3",
+   "tipo": "release",
+   "fonte": "git tag"
+  },
+  {
+   "data": "2026-05-20",
+   "titolo": "Tag v0.4.0-brand-v1 (identità di marca v1)",
+   "tipo": "release",
+   "fonte": "git tag"
+  },
+  {
+   "data": "2026-05-24",
+   "titolo": "v0.2.1-mvp2a-final e v0.3.1-mvp3-final",
+   "tipo": "release",
+   "fonte": "git tag"
+  },
+  {
+   "data": "2026-05-26",
+   "titolo": "v0.4.0-mvp4-ready, v0.3.4-p0-closed e checkpoint S937",
+   "tipo": "milestone",
+   "fonte": "git tag"
+  },
+  {
+   "data": "2026-05-27",
+   "titolo": "v0.4.1-housekeeping-closed",
+   "tipo": "release",
+   "fonte": "git tag"
+  },
+  {
+   "data": "2026-06-02",
+   "titolo": "Rilascio GA v1.0.0 (S957)",
+   "tipo": "release",
+   "fonte": "git tag v1.0.0; SOT_STATE.md"
+  },
+  {
+   "data": "2026-06-20",
+   "titolo": "ADR-0026: un solo ambiente di produzione con due tenant",
+   "tipo": "decisione",
+   "fonte": "SOT_STATE.md (S1004)"
+  },
+  {
+   "data": "2026-06-21",
+   "titolo": "Landing www.heuresys.com e lead capture GDPR (S1002); investor one-pager e demo (S1003)",
+   "tipo": "milestone",
+   "fonte": "SOT_STATE.md"
+  },
+  {
+   "data": "2026-06-24",
+   "titolo": "Audit QA E2E su 74 pagine: 98 rilievi, circa 20 correzioni in produzione (S1006)",
+   "tipo": "milestone",
+   "fonte": "SOT_STATE.md"
+  },
+  {
+   "data": "2026-07-04",
+   "titolo": "Audit forense S1014: credenziali admin committate chiuse, password ruotate",
+   "tipo": "incidente",
+   "fonte": "SOT_STATE.md; docs/kb/full-forensic-audit/"
+  },
+  {
+   "data": "2026-07-05",
+   "titolo": "Registro dei debiti tecnici a 0 aperti (S1015)",
+   "tipo": "milestone",
+   "fonte": "SOT_STATE.md"
+  },
+  {
+   "data": "2026-07-21",
+   "titolo": "Ontologia competenze ESCO al 100% (ADR-0030)",
+   "tipo": "milestone",
+   "fonte": "git log"
+  },
+  {
+   "data": "2026-08-04",
+   "titolo": "Organigramma di RTL Bank ricostruito con 10 migrazioni",
+   "tipo": "milestone",
+   "fonte": "git log"
+  },
+  {
+   "data": "2026-08-14",
+   "titolo": "Chiusa l'ingestione dal vecchio heuresys-evo (ADR-0038)",
+   "tipo": "decisione",
+   "fonte": "CLAUDE.md; git log"
+  },
+  {
+   "data": "2026-08-20",
+   "titolo": "Configurazione dichiarata di PostgreSQL e dei tre ruoli di accesso",
+   "tipo": "milestone",
+   "fonte": "deploy/postgres/README.md"
+  },
+  {
+   "data": "2026-09-06",
+   "titolo": "Suite di test integrale in CI, verde (#219)",
+   "tipo": "milestone",
+   "fonte": "git log"
+  },
+  {
+   "data": "2026-09-08",
+   "titolo": "Ciclo di recruiting con l'offerta (#54 F3)",
+   "tipo": "milestone",
+   "fonte": "git log"
+  },
+  {
+   "data": "2026-09-16",
+   "titolo": "ADR-0041 (direzione del dato) e ADR-0042 (catena del semilavorato)",
+   "tipo": "decisione",
+   "fonte": "git log"
+  },
+  {
+   "data": "2026-09-19",
+   "titolo": "Mandato K chiuso (ruoli e direzione) in produzione",
+   "tipo": "milestone",
+   "fonte": "git log"
+  },
+  {
+   "data": "2026-10-11",
+   "titolo": "Onda 0: caricatore del pacchetto datastore e chiusura a tre livelli",
+   "tipo": "milestone",
+   "fonte": ".handoff/STATE.md"
+  },
+  {
+   "data": "2026-10-12",
+   "titolo": "ADR-0043 e ADR-0044 accettati; ADR-0045: i dati contrattuali restano importati",
+   "tipo": "decisione",
+   "fonte": "git log"
+  },
+  {
+   "data": "2026-10-12",
+   "titolo": "#265 F4 sospesa: la rotta contract-level contraddice la classificazione X-1",
+   "tipo": "incidente",
+   "fonte": "git log (revert)"
+  },
+  {
+   "data": "2026-10-17",
+   "titolo": "Migrazione 000458 (O2-01) e caricatore v0.3 (O2-02) provati sul gemello",
+   "tipo": "milestone",
+   "fonte": ".handoff/STATE.md"
+  },
+  {
+   "data": "2026-10-17",
+   "titolo": "Proposto ADR-0046 (perimetro del tenant)",
+   "tipo": "decisione",
+   "fonte": "docs/architecture/adr/0046"
+  },
+  {
+   "data": "2026-10-19",
+   "titolo": "Aggiornamenti di sicurezza Next 16.3.8 e Fastify 5.12.5; build web passato a webpack",
+   "tipo": "incidente",
+   "fonte": "git log"
+  }
+ ],
+ "aree": [
+  {
+   "nome": "Base HRMS (organigramma, posizioni, persone, ruoli RBAC)",
+   "stato": "fatto",
+   "nota": "Baseline v1.0.0 GA. SOT_STATE del 17/10: 161 persone, 161 posizioni attive, 43 unità organizzative, 26 team, RBAC con 24 ruoli e 242 permessi."
+  },
+  {
+   "nome": "Autenticazione e sicurezza (JWT RS256, MFA TOTP/WebAuthn)",
+   "stato": "in corso",
+   "nota": "MFA disponibile (25 fattori registrati) ma non obbligatoria per tua decisione. Remediation audit S1014 F-001..F-013 chiusa."
+  },
+  {
+   "nome": "Portale dipendente ESS (/me/*)",
+   "stato": "fatto",
+   "nota": "Circa 46 rotte /v1/me/* (carriera, profilo, cedolini, analytics, approvazioni)."
+  },
+  {
+   "nome": "Pannello di amministrazione web",
+   "stato": "fatto",
+   "nota": "MVP-2a e menu in 5 sezioni (S1009); 296 pagine in apps/web."
+  },
+  {
+   "nome": "Analisi BI, matching AI delle competenze, intelligence",
+   "stato": "fatto",
+   "nota": "BI analytics, AI matching, Gap#1 (maturità L0-L5). Catalogo di 14.031 competenze ESCO."
+  },
+  {
+   "nome": "Storia RTL Bank su 36 mesi",
+   "stato": "fatto",
+   "nota": "Ricostruita (S1034-S1037) con custodia settimanale e avanzamento giornaliero via timer. I due servizi storia36 risultano però 'failed' sulla VM."
+  },
+  {
+   "nome": "Selezione e recruiting (ciclo offerta)",
+   "stato": "fatto",
+   "nota": "F3 chiusa del #54 l'8/09."
+  },
+  {
+   "nome": "Go-to-market (landing, lead capture GDPR, investor page, demo)",
+   "stato": "in corso",
+   "nota": "Consegnati in S1002-S1003. Resta in HOLD la pagina prezzi (#4)."
+  },
+  {
+   "nome": "Contratto dati con il datastore (pacchetto v0.2/v0.3)",
+   "stato": "in corso",
+   "nota": "#263: caricatore e migrazioni 000454-000458 provati sul gemello, non in produzione. Manca il pacchetto v0.3 vero della banca."
+  },
+  {
+   "nome": "Tenant Builder (costruzione di un'azienda dal fascicolo)",
+   "stato": "in corso",
+   "nota": "#205 attivo; #198 e #206 bloccati da prerequisiti."
+  },
+  {
+   "nome": "Partecipazione ai processi legata alla posizione (ADR-0044)",
+   "stato": "in corso",
+   "nota": "Passi 1 e 2 provati su copia; il passo 3 (#270) aspetta tre decisioni sul RACI."
+  },
+  {
+   "nome": "Perimetro del tenant (ADR-0046)",
+   "stato": "da fare",
+   "nota": "Proposto il 17/10 (#269), attende te. Blocca O2-07 e O2-08."
+  },
+  {
+   "nome": "Agente AI (agent-gateway) con perimetri",
+   "stato": "in corso",
+   "nota": "Usa @anthropic-ai/claude-agent-sdk. #214 in HOLD; #159, ponte gateway-pagine, attivo."
+  },
+  {
+   "nome": "Email, notifiche digest e SSO enterprise",
+   "stato": "da fare",
+   "nota": "#8, #39 e #52 in HOLD."
+  }
+ ],
+ "prossimi_passi": [
+  "Decidere su ADR-0046 (#269) e sulle tre scelte del passo 3 (#270): sbloccano O2-07..O2-10",
+  "Decidere sul rilascio delle migrazioni 000454..000458 e del passo 2 di PE-4",
+  "Sollecitare il datastore per il pacchetto v0.3 vero della banca",
+  "Far partire O2-03 (struttura del tenant), senza bloccanti",
+  "Correggere la CI 'Atlas freshness' e riesaminare Dependabot",
+  "Indagare i servizi storia36 'failed' sulla VM",
+  "Decidere su #265 F4 e riconciliare il registro #267/#268"
+ ],
+ "ambienti": [
+  {
+   "nome": "Produzione",
+   "dove": "VM Oracle Cloud: API e web, unico ambiente di produzione (ADR-0026) con due tenant, RTL Bank e Heuresys System",
+   "indirizzo": "www.heuresys.com, web 3013, API 8013",
+   "note": "Servizi attivi. Deploy da prod, innescato da deploy-watch a CI verde. prod e main coincidono su 8795d576."
+  },
+  {
+   "nome": "Gemello",
+   "dove": "linux-pc (192.168.1.11): clone di produzione con DB locale",
+   "indirizzo": "",
+   "note": "Per prove di migrazione, CI di rehearsal e test API. Non è uno staging in senso stretto."
+  },
+  {
+   "nome": "Sviluppo",
+   "dove": "PC Windows con tunnel SSH verso la VM",
+   "indirizzo": "tunnel 5433, web 3000",
+   "note": "Il runtime di sviluppo punta al DB della VM via tunnel."
+  },
+  {
+   "nome": "Showcase",
+   "dove": "GitHub Pages (apps/showcase, export statico)",
+   "indirizzo": "spen-zosky.github.io/ux-design-shared",
+   "note": "Storybook del design system."
+  }
+ ]
+}

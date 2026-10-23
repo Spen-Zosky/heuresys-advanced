@@ -281,3 +281,7 @@ Lo strumento esclude se stesso dal conteggio e, se non riesce a riconoscersi per
 - Il prossimo avvio non legge solo `STATE.md`: esegue il protocollo `## Session start` del `CLAUDE.md`,
   che aggrega STATE + backlog aperto + debiti aperti + roadmap di `SOT_STATE` in un menu per fasce di
   priorità. La chiusura deve registrare **tutto ciò che è affrontabile**, o quel menu sarà incompleto.
+
+## Cruscotto di Enzo (dal 21/10/2026)
+
+Prima del commit di chiusura si aggiorna `cruscotto/stato.json` secondo `cruscotto/SCHEMA.md`: le decisioni prese escono da `decisioni_attese`, le pendenze chiuse escono da `pendenze`, le tappe nuove si aggiungono, e `aggiornato_il` porta la data di oggi. Il file entra nello stesso commit di chiusura.

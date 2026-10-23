@@ -14,7 +14,7 @@ Un passo si chiude solo con una dimostrazione dal vivo su dati reali: comando, o
 
 ## Fonti di verità
 
-- Stato: `.handoff/STATE.md` (vista rapida) e `docs/kb/SOT_STATE.md` (dettaglio), riscritti dalla skill `handoff` a fine sessione. Backlog: `docs/kb/SOT_BACKLOG.md`. Debiti: `docs/kb/DEBT_REGISTER.md`. Percorsi: `docs/kb/INDEX_PATHS.md`. Prodotto: `docs/product/`. Non si creano altri file di stato.
+- Stato: `.handoff/STATE.md` (vista rapida) e `docs/kb/SOT_STATE.md` (dettaglio), riscritti dalla skill `handoff` a fine sessione. Backlog: `docs/kb/SOT_BACKLOG.md`. Debiti: `docs/kb/DEBT_REGISTER.md`. Percorsi: `docs/kb/INDEX_PATHS.md`. Prodotto: `docs/product/`. Non si creano altri file di stato (eccezione dichiarata: `cruscotto/stato.json`, vista per il cruscotto di Enzo, vedi sezione in coda).
 - Stati di una voce (insieme chiuso): `ACTIVE`, `GATED`, `WAIT-INPUT`, `HOLD`, `INTERRUPTED`, `DONE`/`FATTO`/`WON'T-DO`. Il controllo di integrità è `docs/kb/tools/handoff_lint.py`.
 - Chi scrive: l'unico che scrive e committa `docs/kb/` è Claude Code CLI. Cowork scrive solo in fondo a `docs/kb/COWORK_INBOX.md` (una voce datata `### YYYY-MM-DD | tipo | titolo`); la CLI la riconcilia e la marca `stato: [RICONCILIATA <commit>]`. Su questo progetto non si usano `cowork_code_exchange/` né le skill `cowork-cli-protocol`/`cowork-cli-orchestrator`. Voci aperte: `python docs/kb/tools/check_canale_cowork.py`.
 
@@ -116,3 +116,7 @@ TypeScript: `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters` a
 | autonomia specifica del progetto | `docs/kb/xtras/AUTONOMY_R23_PROJECT.md` |
 | regole fatte rispettare dal motore (git, segreti, cancellazioni, scritture sul DB vivo) | plugin `enzo-guard` (`D:\claude-imbracatura\plugin\enzo-guard\`), regole del progetto in `.claude/enzo-guard.json`; non vale in Cowork |
 | perché esistono queste regole | `docs/kb/xtras/PERCHE_LE_REGOLE.md` |
+
+## Cruscotto di Enzo
+
+`cruscotto/stato.json` alimenta il Cruscotto progetti di Enzo, che lo legge ogni mattina in sola lettura senza interpretarlo. A fine sessione si aggiorna insieme agli altri file di stato (fase e stato, decisioni che aspettano Enzo, pendenze, rischi, tappe) e si committa con il resto. Schema e regole: `cruscotto/SCHEMA.md`. Se nella sessione non è cambiato niente di ciò che descrive, basta aggiornare `aggiornato_il`. È una vista per il cruscotto, non una fonte di verità alternativa: se diverge dai file di stato del progetto, valgono questi ultimi e il cruscotto va riallineato.

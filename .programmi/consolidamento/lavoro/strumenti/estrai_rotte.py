@@ -4,8 +4,8 @@ estrai_rotte.py - censimento statico delle rotte HTTP di heuresys-advanced e heu
 
 USO
     python3 estrai_rotte.py [--advanced DIR] [--datastore DIR] [--out DIR]
-Predefiniti: /home/user/heuresys-advanced, /home/user/heuresys-datastore,
-             /mnt/project-files/consolidamento/lavoro
+Predefiniti: il deposito di advanced che contiene questo file (git rev-parse --show-toplevel),
+             il datastore accanto a lui, e la cartella lavoro/ sopra strumenti/
 Scrive:  <out>/E_api.tsv        (una riga per rotta)
          <out>/strumenti/rotte.json  (stesso dato + tabelle e consumatori, per estrai_pagine.py)
 Sola lettura sui repository. Nessun avvio di server, nessun database.
@@ -37,7 +37,7 @@ LIMITI DICHIARATI
   6. La classificazione tenant/piattaforma/catalogo/prodotto e' una regola esplicita (tabelle
      CLASSE_MODULO e PERMESSI_*) e va riletta: e' una proposta, non un dato.
 """
-import argparse, json, os, re, sys
+import argparse, json, os, re, subprocess, sys
 from collections import defaultdict
 
 METODI = ("get", "post", "put", "patch", "delete", "head", "options")
@@ -364,9 +364,11 @@ def file_con_prefisso(prefisso, corpi, radice):
 # ---------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--advanced", default="/home/user/heuresys-advanced")
-    ap.add_argument("--datastore", default="/home/user/heuresys-datastore")
-    ap.add_argument("--out", default="/mnt/project-files/consolidamento/lavoro")
+    qui = os.path.dirname(os.path.abspath(__file__))
+    adv = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=qui, capture_output=True, text=True, check=True).stdout.strip()
+    ap.add_argument("--advanced", default=adv)
+    ap.add_argument("--datastore", default=os.path.join(os.path.dirname(adv), "heuresys-datastore"))
+    ap.add_argument("--out", default=os.path.dirname(qui))
     a = ap.parse_args()
     righe = []
 
@@ -416,7 +418,6 @@ def main():
         tabs = sorted(t for t in tabelle_ds(g, idx_ds) if t != "datastore_meta.datastore_call")
         cons, n = consumatori(full, corp_ds, a.datastore)
         cons2, n2 = consumatori(full, corp_ds_altri, a.datastore)
-        w = r["metodo"] != "GET"
         if full.startswith("/banco") and not full.startswith("/banco/api") : classe = "prodotto"
         elif re.search(r"/(cataloghi|concetti|cerca|contratti|classi-dimensionali|ponti|distribuzione|fonti|edizioni|spiegazione)", full): classe = "catalogo"
         elif re.search(r"/(prototipi|ricerche|passi|banco|fascicoli|blueprint|archivio)", full): classe = "piattaforma"

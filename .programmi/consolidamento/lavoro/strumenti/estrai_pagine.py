@@ -27,13 +27,15 @@ LIMITI
   La chiusura degli import include componenti condivisi: una chiamata puo' venire da un componente usato da
   molte pagine ('via_condivisi'). La pagina /showcase di advanced contiene dati dimostrativi per disegno.
 """
-import json, os, re, sys, collections
+import json, os, re, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from estrai_rotte import toglie_commenti, leggi, camminata
 
-ADV = "/home/user/heuresys-advanced"
-DS = "/home/user/heuresys-datastore"
-OUT = "/mnt/project-files/consolidamento/lavoro/strumenti"
+# Niente percorsi assoluti: advanced è il deposito che contiene questo file, il datastore gli sta accanto,
+# l'uscita è questa cartella. Le variabili d'ambiente li cambiano.
+ADV = os.environ.get("HEURESYS_ADVANCED") or subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=os.path.dirname(os.path.abspath(__file__)), capture_output=True, text=True, check=True).stdout.strip()
+DS = os.environ.get("HEURESYS_DATASTORE") or os.path.join(os.path.dirname(ADV), "heuresys-datastore")
+OUT = os.environ.get("CONSOLIDAMENTO_OUT") or os.path.dirname(os.path.abspath(__file__))
 
 EST = (".tsx", ".ts", ".jsx", ".js", ".mjs")
 RE_IMP = re.compile(r"(?:import|export)\s+(?:type\s+)?(?:[^'\"]*?\sfrom\s+)?[\"']([^\"']+)[\"']")
@@ -123,7 +125,7 @@ def parse_menu():
             cols = [c.strip() for c in mi.group(1).split(",")]
             fine = t_nc.find(";", mi.end())
             blocco = t_nc[mi.end():fine if fine > 0 else None]
-            for tu in re.finditer(r"\(([^()]*(?:'[^']*'[^()]*)*)\)", blocco):
+            for tu in re.finditer(r"\(((?:[^()']|'[^']*')*)\)", blocco):
                 parti = [x.strip() for x in re.split(r",(?=(?:[^']*'[^']*')*[^']*$)", tu.group(1))]
                 if len(parti) != len(cols): continue
                 row = dict(zip(cols, parti))
@@ -191,7 +193,6 @@ def analizza_web(nome, radice, rotte, menu=None):
         rt = p["route"]
         stat = re.sub(r"/\[[^/]+\]", "", rt) or "/"
         if rt == "/": p["raggiungibilita"] = "radice"; continue
-        cand = [stat]
         rx_t = re.compile(r"[\"'`]" + re.escape(stat) + r"(?:[\"'`/?#]|\$\{)")
         rx_d = None
         if "[" in rt:
@@ -232,14 +233,16 @@ def banco_ds():
     return sorted(chiam), segn
 
 def main():
-    rotte = json.load(open(os.path.join(OUT, "rotte.json")))["rotte"]
+    with open(os.path.join(OUT, "rotte.json"), encoding="utf-8") as f:
+        rotte = json.load(f)["rotte"]
     menu = parse_menu()
     LETT.update(menu_letterali())
     pa, tutti_a = analizza_web("advanced", ADV, rotte, menu)
     pd, tutti_d = analizza_web("datastore", DS, rotte, None)
     bch, bsegn = banco_ds()
     # rotte senza pagina (advanced): n_consumatori==0
-    json.dump(dict(advanced=pa, datastore=pd, menu=menu, banco_chiamate=bch, banco_segni=bsegn), open(os.path.join(OUT, "pagine.json"), "w"), ensure_ascii=False, indent=1)
+    with open(os.path.join(OUT, "pagine.json"), "w", encoding="utf-8") as f:
+        json.dump(dict(advanced=pa, datastore=pd, menu=menu, banco_chiamate=bch, banco_segni=bsegn), f, ensure_ascii=False, indent=1)
     print("pagine advanced", len(pa), "datastore", len(pd), "voci di menu ricostruite", len(menu), "attive", sum(1 for v in menu.values() if v["active"]))
 
 if __name__ == "__main__":

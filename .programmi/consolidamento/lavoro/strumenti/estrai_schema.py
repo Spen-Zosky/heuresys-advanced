@@ -38,7 +38,6 @@ import csv
 import json
 import os
 import re
-import sys
 from collections import OrderedDict
 
 # ---------------------------------------------------------------------------
@@ -255,12 +254,9 @@ def parse_column_def(d: str):
         return None
     name = unq(m.group(1))
     rest = m.group(2)
-    toks = []
-    i = 0
     s = rest
     # leggi il tipo fino alla prima parola di vincolo a livello zero
     depth = 0
-    word = ""
     out = []
     j = 0
     while j < len(s):
@@ -613,8 +609,6 @@ class Interp:
                         self.S.stats["execute_risolti"] += 1
                         self.run_statement(o, mig, line, "EXECUTE")
                     done = True
-                    if not envs:
-                        pass
             if not done:
                 self.S.stats["execute_non_risolti"] += 1
                 self.S.limit(mig, line, "DDL dinamico non risolto (EXECUTE format)", t)
@@ -642,12 +636,12 @@ class Interp:
                 o = self.S.sch.get(name)
                 if o and o.dropped is None:
                     o.dropped = mig; o.drop_history.append(mig)
-                if True:  # se DROP SCHEMA riesce, nello schema non resta nulla (CASCADE o RESTRICT)
-                    for store in (self.S.rel, self.S.func, self.S.trig, self.S.typ):
-                        for k, ob in store.items():
-                            if ob.schema == name and ob.dropped is None:
-                                ob.dropped = mig; ob.drop_history.append(mig)
-                                ob.extra["ritirato_da"] = f"DROP SCHEMA {name}"
+                # se DROP SCHEMA riesce, nello schema non resta nulla (CASCADE o RESTRICT)
+                for store in (self.S.rel, self.S.func, self.S.trig, self.S.typ):
+                    for k, ob in store.items():
+                        if ob.schema == name and ob.dropped is None:
+                            ob.dropped = mig; ob.drop_history.append(mig)
+                            ob.extra["ritirato_da"] = f"DROP SCHEMA {name}"
             return
         # ---------------- EXTENSION
         m = re.match(rf"^create\s+extension\s+(?:if\s+not\s+exists\s+)?({IDENT})", s, re.I)
@@ -723,7 +717,6 @@ class Interp:
             self.S.indexes[(schema, iname)] = (schema, tname)
             if o:
                 o.indexes += 1
-                o.touch(mig) if False else None
                 if m.group(1):
                     rest = m.group(5)
                     if rest.startswith("("):

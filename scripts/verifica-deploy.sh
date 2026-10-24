@@ -51,8 +51,29 @@ fi
 SHORT="${SHA:0:8}"
 ATTESA_MAX="${ATTESA_MAX:-0}"
 PROD_URL="${PROD_URL:-https://www.heuresys.com}"
-HOSTS="${HOSTS:-oracle-vm-default linux-pc}"
+HOSTS="${HOSTS:-oracle-vm-default}"
+# Il gemello e' FACOLTATIVO dal 2026-10-24: si lavora solo sulla VM, e dalla VM il gemello
+# (oggi enzo-s550cm, raggiungibile solo via Tailscale) non accetta la chiave. Se risponde
+# conta come gli altri host; se tace lo si dice, ma non rende la lettura NON-VERIFICATO.
+HOSTS_FACOLTATIVI="${HOSTS_FACOLTATIVI:-linux-pc}"
 SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=8)
+
+# Un host che risolve a un indirizzo di QUESTA macchina si legge in locale: misurato il
+# 2026-10-24, la VM non entra in ssh su se stessa (Permission denied), e senza questo la
+# verifica lanciata dalla VM dava sempre NON-VERIFICATO.
+host_locale() {
+  local nome ip l
+  nome="$(ssh -G "$1" 2>/dev/null | awk '/^hostname /{print $2; exit}')"
+  ip="$(getent hosts "${nome:-$1}" 2>/dev/null | awk '{print $1; exit}')"
+  [ -n "$ip" ] || ip="${nome:-$1}"
+  for l in $(hostname -I 2>/dev/null) $(tailscale ip 2>/dev/null); do
+    [ "$l" = "$ip" ] && return 0
+  done
+  return 1
+}
+su_host() {
+  if host_locale "$1"; then bash -c "$2"; else ssh "${SSH_OPTS[@]}" "$1" "$2"; fi
+}
 VERDETTO=""
 
 esito() { printf '  %-22s %s\n' "$1" "$2"; }
@@ -71,7 +92,7 @@ ci_conta() {
 # perfettamente sano, cioè un falso allarme che somiglia a un guasto (misurato
 # scrivendo questo script: la prima stesura diceva esattamente quello).
 sha_host() {
-  ssh "${SSH_OPTS[@]}" "$1"     "find ~/heuresys-advanced -maxdepth 3 -name LAST_GOOD_SHA -print0 2>/dev/null        | xargs -0 -r cat 2>/dev/null | head -1" 2>/dev/null
+  su_host "$1" "find ~/heuresys-advanced -maxdepth 3 -name LAST_GOOD_SHA -print0 2>/dev/null        | xargs -0 -r cat 2>/dev/null | head -1" 2>/dev/null
 }
 # Un clone in corso ferma api e web DI PROPOSITO e li riaccende a lavoro finito
 # (`ExecStopPost` di heuresys-advanced-clonedb.service). Misurato in S1084: clone concluso
@@ -83,7 +104,7 @@ sha_host() {
 # fatto, quindi si legge la stessa variabile d'ambiente (#238).
 CLONE_UNIT="${CLONE_ARM_UNIT:-heuresys-advanced-clonedb.service}"
 servizi_host() {
-  ssh "${SSH_OPTS[@]}" "$1" "printf '%s/%s %s' \
+  su_host "$1" "printf '%s/%s %s' \
     \"\$(systemctl is-active heuresys-advanced-api.service 2>/dev/null)\" \
     \"\$(systemctl is-active heuresys-advanced-web.service 2>/dev/null)\" \
     \"\$(systemctl is-active '$CLONE_UNIT' 2>/dev/null)\"" 2>/dev/null
@@ -107,10 +128,16 @@ giro() {
     fi
   fi
 
-  for h in $HOSTS; do
+  for h in $HOSTS $HOSTS_FACOLTATIVI; do
+    local s sv sv_raw clone clone_nota="" facoltativo=""
+    case " $HOSTS_FACOLTATIVI " in *" $h "*) facoltativo=1 ;; esac
+    s="$(sha_host "$h")"
+    if [ -z "$s" ] && [ -n "$facoltativo" ]; then
+      esito "$h" "non raggiungibile (facoltativo: non conta nel verdetto)"
+      continue
+    fi
     host_tot=$((host_tot + 1))
-    local s sv sv_raw clone clone_nota=""
-    s="$(sha_host "$h")"; sv_raw="$(servizi_host "$h")"
+    sv_raw="$(servizi_host "$h")"
     # `printf '%s/%s %s'` -> "api/web clone". Se la risposta e' vuota o senza il terzo campo
     # (host giu', systemd muto), `clone` resta vuoto e NON si nasconde nessun allarme.
     sv="${sv_raw%% *}"; clone="${sv_raw##* }"
@@ -192,7 +219,7 @@ giro() {
   esac
 }
 
-echo "verifica-deploy — sha atteso $SHORT ($SHA_ORIGINE) · host: $HOSTS"
+echo "verifica-deploy — sha atteso $SHORT ($SHA_ORIGINE) · host: $HOSTS${HOSTS_FACOLTATIVI:+ (facoltativi: $HOSTS_FACOLTATIVI)}"
 # Se HEAD e' andato avanti senza essere armato, lo si dice. Ma NON si dice se quei commit
 # riguardino o no la produzione senza averlo guardato (#212, S1067): la riga stampava
 # «non riguardano la produzione» in modo INCONDIZIONATO, cioe' una rassicurazione data per

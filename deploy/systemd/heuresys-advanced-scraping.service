@@ -16,7 +16,9 @@ After=network-online.target postgresql.service
 Wants=network-online.target
 # 2026-10-25: ESCO was behind the EC maintenance page for hours and the run failed until
 # the next weekly tick. An upstream outage now gets retried every 2 h (Restart= below),
-# at most 6 starts per day; OnFailure= fires only once the retries are exhausted.
+# at most 6 starts per day. RestartMode=direct (systemd >= 254) keeps the unit out of the
+# failed state between attempts, so OnFailure= fires once, when the retries are exhausted
+# (measured on the VM, systemd 255: without it OnFailure= fired at every attempt).
 StartLimitIntervalSec=1d
 StartLimitBurst=6
 
@@ -34,4 +36,5 @@ Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
 ExecStart=@@NODE_BIN@@/pnpm reference-sync:run
 TimeoutStartSec=900
 Restart=on-failure
+RestartMode=direct
 RestartSec=2h

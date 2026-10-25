@@ -3,6 +3,9 @@ import {
   fetchAllEscoOccupations,
   normalizeEscoResults,
   ESCO_MAX_PAGE,
+  ESCO_UNAVAILABLE_ATTEMPTS,
+  EscoUnavailableError,
+  HttpEscoFetcher,
   type EscoFetcher,
   type EscoPage,
   type RawEscoResult,
@@ -90,5 +93,59 @@ describe("ESCO connector — full-catalogue fetch (P1)", () => {
     const out = normalizeEscoResults(mixed);
     expect(out).toHaveLength(1);
     expect(out[0]!.escoUri).toBe("http://data.europa.eu/esco/occupation/A");
+  });
+});
+
+// 2026-10-25: the EC put ESCO behind its maintenance page (307 → https://sorry.ec.europa.eu/,
+// HTML "Server temporarily unavailable"); the run died on JSON.parse("<!DOCTYPE"). The
+// fetcher must name the outage, retry a little, and still fail (no silent skip).
+describe("ESCO connector — upstream unavailable", () => {
+  const sorry = (): Response =>
+    new Response(null, { status: 307, headers: { location: "https://sorry.ec.europa.eu/" } });
+  const ok = (): Response =>
+    new Response(JSON.stringify({ total: 1, _embedded: { results: [{ uri: "u1", title: "t", code: "1" }] } }), {
+      status: 200,
+      headers: { "content-type": "application/json;charset=UTF-8" },
+    });
+
+  it("a redirect to the maintenance page fails as EscoUnavailableError after the retries", async () => {
+    let calls = 0;
+    const f = new HttpEscoFetcher(async (_url, init) => {
+      calls++;
+      expect(init.redirect).toBe("manual");
+      return sorry();
+    }, 0);
+    await expect(f.fetchPage(0, 1)).rejects.toThrow(EscoUnavailableError);
+    await expect(new HttpEscoFetcher(async () => sorry(), 0).fetchPage(0, 1)).rejects.toThrow(/sorry\.ec\.europa\.eu/);
+    expect(calls).toBe(ESCO_UNAVAILABLE_ATTEMPTS);
+  });
+
+  it("an HTML body served with 200 is not parsed as JSON", async () => {
+    const f = new HttpEscoFetcher(
+      async () => new Response("<!DOCTYPE html><title>Server temporarily unavailable</title>", {
+        status: 200,
+        headers: { "content-type": "text/html" },
+      }),
+      0,
+    );
+    await expect(f.fetchPage(0, 1)).rejects.toThrow(/instead of JSON/);
+  });
+
+  it("recovers when ESCO comes back within the retries", async () => {
+    let calls = 0;
+    const f = new HttpEscoFetcher(async () => (++calls === 1 ? sorry() : ok()), 0);
+    const page = await f.fetchPage(0, 1);
+    expect(page.total).toBe(1);
+    expect(calls).toBe(2);
+  });
+
+  it("a 4xx is a plain failure, not retried", async () => {
+    let calls = 0;
+    const f = new HttpEscoFetcher(async () => {
+      calls++;
+      return new Response("bad", { status: 400 });
+    }, 0);
+    await expect(f.fetchPage(0, 1)).rejects.toThrow(/HTTP 400/);
+    expect(calls).toBe(1);
   });
 });

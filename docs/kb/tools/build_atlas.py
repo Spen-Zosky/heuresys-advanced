@@ -50,9 +50,9 @@ SHARED_PKG_JSON = os.path.join(REPO, "packages", "shared", "package.json")
 OUT_DIR = os.path.join(REPO, "docs", "kb", "atlas")
 
 PSQL_BIN = shutil.which("psql") or r"C:\Program Files\PostgreSQL\16\bin\psql.exe"
-# Host e porta si scelgono con ATLAS_PGHOST/ATLAS_PGPORT: sul PC il tunnel 5433, sulla VM il motore locale.
+# Host, porta, utente e database si scelgono con ATLAS_PGHOST/ATLAS_PGPORT/ATLAS_PGUSER/ATLAS_PGDATABASE: sul PC il tunnel 5433, sulla VM il motore locale.
 PSQL = [PSQL_BIN, "-h", os.environ.get("ATLAS_PGHOST", "localhost"), "-p", os.environ.get("ATLAS_PGPORT", "5433"),
-        "-U", os.environ.get("ATLAS_PGUSER", "heuresys"), "-d", "heuresys_advanced", "-tAc"]
+        "-U", os.environ.get("ATLAS_PGUSER", "heuresys"), "-d", os.environ.get("ATLAS_PGDATABASE", "heuresys_advanced"), "-tAc"]
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")

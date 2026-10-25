@@ -46,6 +46,13 @@ DO $mig$
 DECLARE
   c_rtl     constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   c_riordino constant date := DATE '2026-08-04';
+  -- Il giorno del riordino e' un giorno di Roma, non della sessione (corretto 2026-10-26).
+  -- Con `c_riordino::timestamptz` e `effective_at::date` sia l'istante scritto sia la
+  -- guardia dipendevano dal TimeZone della sessione: gli eventi registrati ad agosto da una
+  -- sessione Europe/Rome stanno a 2026-08-03 22:00+00, e una catena rieseguita in UTC (VM,
+  -- CI, copia di prova) non li riconosceva e ne scriveva 20 doppi a 2026-08-04 00:00+00.
+  -- Ora istante e guardia sono fissati a Europe/Rome e non dipendono piu' dalla sessione.
+  c_istante  constant timestamptz := DATE '2026-08-04'::timestamp AT TIME ZONE 'Europe/Rome';
   v_actor   uuid;
   v_ins     bigint;
   v_tot     bigint := 0;
@@ -85,7 +92,7 @@ BEGIN
   SELECT o.organization_unit_id, c_rtl, 'RENAMED',
          jsonb_build_object('name', r.prima),
          jsonb_build_object('name', o.organization_unit_name),
-         c_riordino::timestamptz, v_actor, r.nota
+         c_istante, v_actor, r.nota
     FROM r
     JOIN sys.sys_organization_units o
       ON o.organization_unit_code = r.codice AND o.organization_unit_tenant_id = c_rtl
@@ -93,7 +100,7 @@ BEGIN
      AND NOT EXISTS (SELECT 1 FROM sys.sys_organization_unit_history h
                       WHERE h.organization_unit_history_unit_id = o.organization_unit_id
                         AND h.organization_unit_history_change_type = 'RENAMED'
-                        AND h.organization_unit_history_effective_at::date = c_riordino);
+                        AND (h.organization_unit_history_effective_at AT TIME ZONE 'Europe/Rome')::date = c_riordino);
   GET DIAGNOSTICS v_ins = ROW_COUNT; v_tot := v_tot + v_ins;
   RAISE NOTICE '000280: rinomine registrate: %', v_ins;
 
@@ -121,7 +128,7 @@ BEGIN
   SELECT o.organization_unit_id, c_rtl, 'MOVED',
          jsonb_build_object('parent_name', pp.organization_unit_name),
          jsonb_build_object('parent_name', pd.organization_unit_name),
-         c_riordino::timestamptz, v_actor, m.nota
+         c_istante, v_actor, m.nota
     FROM m
     JOIN sys.sys_organization_units o  ON o.organization_unit_code  = m.codice      AND o.organization_unit_tenant_id  = c_rtl
     JOIN sys.sys_organization_units pp ON pp.organization_unit_code = m.padre_prima AND pp.organization_unit_tenant_id = c_rtl
@@ -131,7 +138,7 @@ BEGIN
      AND NOT EXISTS (SELECT 1 FROM sys.sys_organization_unit_history h
                       WHERE h.organization_unit_history_unit_id = o.organization_unit_id
                         AND h.organization_unit_history_change_type = 'MOVED'
-                        AND h.organization_unit_history_effective_at::date = c_riordino);
+                        AND (h.organization_unit_history_effective_at AT TIME ZONE 'Europe/Rome')::date = c_riordino);
   GET DIAGNOSTICS v_ins = ROW_COUNT; v_tot := v_tot + v_ins;
   RAISE NOTICE '000280: spostamenti registrati: %', v_ins;
 

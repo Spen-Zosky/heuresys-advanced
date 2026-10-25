@@ -58,16 +58,63 @@ export interface EscoFetcher {
   fetchPage(offset: number, limit: number): Promise<EscoPage>;
 }
 
+/**
+ * Raised when the ESCO host answers with something that is not the API: the European
+ * Commission's maintenance page (a 307 to https://sorry.ec.europa.eu/ that serves a
+ * "Server temporarily unavailable" HTML page with status 200), a 5xx, or any non-JSON
+ * body. It names the cause instead of surfacing a JSON.parse SyntaxError on "<!DOCTYPE".
+ */
+export class EscoUnavailableError extends Error {
+  constructor(detail: string) {
+    super(`ESCO upstream unavailable: ${detail} (the run is retried; the watermark is not advanced)`);
+    this.name = "EscoUnavailableError";
+  }
+}
+
+/** Attempts per page when ESCO is unavailable (1 + retries); the wait doubles each time. */
+export const ESCO_UNAVAILABLE_ATTEMPTS = 3;
+export const ESCO_UNAVAILABLE_BACKOFF_MS = 30_000;
+
+type FetchLike = (url: string, init: RequestInit) => Promise<Response>;
+
 /** Production fetcher — the real ESCO published API. Polite UA; full=false flat rows. */
 export class HttpEscoFetcher implements EscoFetcher {
+  constructor(
+    private readonly fetchImpl: FetchLike = (url, init) => fetch(url, init),
+    private readonly backoffMs: number = ESCO_UNAVAILABLE_BACKOFF_MS,
+  ) {}
+
   async fetchPage(offset: number, limit: number): Promise<EscoPage> {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await this.fetchOnce(offset, limit);
+      } catch (err) {
+        if (!(err instanceof EscoUnavailableError) || attempt >= ESCO_UNAVAILABLE_ATTEMPTS) throw err;
+        await new Promise((r) => setTimeout(r, this.backoffMs * 2 ** (attempt - 1)));
+      }
+    }
+  }
+
+  private async fetchOnce(offset: number, limit: number): Promise<EscoPage> {
     // full=false → flat rows (uri/title/code); full=true breaks the response at scale.
     const url = `${ESCO_SEARCH_URL}?type=occupation&language=en&full=false&limit=${limit}&offset=${offset}`;
-    const res = await fetch(url, {
+    // redirect: "manual" — the API never redirects; a redirect is the maintenance page.
+    const res = await this.fetchImpl(url, {
+      redirect: "manual",
       headers: { accept: "application/json", "user-agent": "heuresys-advanced reference-sync (ESCO refresh)" },
     });
+    if (res.status >= 300 && res.status < 400) {
+      throw new EscoUnavailableError(`HTTP ${res.status} redirect to ${res.headers.get("location") ?? "?"}`);
+    }
+    if (res.status >= 500) {
+      throw new EscoUnavailableError(`HTTP ${res.status} at offset ${offset} limit ${limit}`);
+    }
     if (!res.ok) {
       throw new Error(`ESCO fetch failed: HTTP ${res.status} at offset ${offset} limit ${limit}`);
+    }
+    const contentType = res.headers.get("content-type") ?? "";
+    if (!contentType.includes("json")) {
+      throw new EscoUnavailableError(`HTTP ${res.status} with content-type "${contentType}" instead of JSON`);
     }
     const json = (await res.json()) as { total?: number; _embedded?: { results?: RawEscoResult[] } };
     return { results: json._embedded?.results ?? [], total: json.total ?? 0 };

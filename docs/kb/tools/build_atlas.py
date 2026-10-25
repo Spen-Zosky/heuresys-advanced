@@ -40,7 +40,7 @@ import subprocess
 import sys
 from collections import OrderedDict
 
-REPO = r"D:\heuresys-advanced"
+REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 API_MODULES = os.path.join(REPO, "apps", "api", "src", "modules")
 API_APP = os.path.join(REPO, "apps", "api", "src", "app.ts")
 API_TESTS = os.path.join(REPO, "apps", "api", "test")
@@ -50,8 +50,9 @@ SHARED_PKG_JSON = os.path.join(REPO, "packages", "shared", "package.json")
 OUT_DIR = os.path.join(REPO, "docs", "kb", "atlas")
 
 PSQL_BIN = shutil.which("psql") or r"C:\Program Files\PostgreSQL\16\bin\psql.exe"
-PSQL = [PSQL_BIN, "-h", "localhost", "-p", "5433", "-U", "heuresys",
-        "-d", "heuresys_advanced", "-tAc"]
+# Host e porta si scelgono con ATLAS_PGHOST/ATLAS_PGPORT: sul PC il tunnel 5433, sulla VM il motore locale.
+PSQL = [PSQL_BIN, "-h", os.environ.get("ATLAS_PGHOST", "localhost"), "-p", os.environ.get("ATLAS_PGPORT", "5433"),
+        "-U", os.environ.get("ATLAS_PGUSER", "heuresys"), "-d", "heuresys_advanced", "-tAc"]
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")

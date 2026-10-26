@@ -832,8 +832,8 @@ export const MeProcessParticipationSchema = z.object({
   organizationUnitName: z.string().nullable(),
   role: z.string(),
   isActive: z.boolean(),
-  /** ADR-0044: il posto da cui si partecipa. Nullo solo sul ramo di ripiego (riga senza
-   *  posizione), che si toglie al passo 3b. */
+  /** ADR-0044: il posto da cui si partecipa. Dal passo 3b c'e' sempre; resta annullabile
+   *  nel contratto per non rompere chi lo legge (aggiunta, nessun campo tolto). */
   positionId: z.uuid().nullable(),
   positionTitle: z.string().nullable(),
 });

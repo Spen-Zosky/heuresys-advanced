@@ -26,6 +26,15 @@
 -- IDEMPOTENTE: ON CONFLICT (org_unit_process_id, user_id) DO NOTHING sul
 -- unique index sys_process_participants_process_user_uq. Additivo, reversibile
 -- (DELETE WHERE metadata->>'derived'='RULE-B'). Authored: 2026-07-20 (S1022).
+--
+-- EMENDATA 2026-10-26 (ADR-0044 passo 3b, O2-10; ADR-0035 forma 1). La catena si
+-- riapplica a ogni deploy: questa regola PER PERSONA, rigirando, inseriva una
+-- partecipazione attiva SENZA POSIZIONE per ogni persona arrivata in un'unita' dopo
+-- l'ultima corsa — proprio cio' che il vincolo del passo 3b vieta. Da quando esiste la
+-- colonna della posizione (000457) non scrive piu' niente: le partecipazioni nuove le
+-- scrive la regola per posto (db/scripts/pe4-passo3-regole.sql, D-P3-3). Su un database
+-- nuovo gira ancora prima della 000457, e la migrazione del passo 3b porta quelle righe
+-- allo stato della produzione.
 -- ============================================================================
 
 INSERT INTO sys.sys_process_participants (
@@ -61,5 +70,8 @@ SELECT DISTINCT
                      'rule', 'position_owner->OWNER else CONTRIBUTOR')
 FROM sys.sys_organization_unit_processes oup
 JOIN members m ON m.org_unit_id = oup.org_unit_process_org_unit_id
+WHERE NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_schema = 'sys' AND table_name = 'sys_process_participants'
+                     AND column_name = 'process_participant_position_id')
 ON CONFLICT (process_participant_org_unit_process_id, process_participant_user_id)
   DO NOTHING;

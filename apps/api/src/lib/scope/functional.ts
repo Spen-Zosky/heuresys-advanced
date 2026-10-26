@@ -39,10 +39,11 @@ export type DbConnector = Pool | PoolClient;
  * colonne `participant_id, tenant_id, org_unit_process_id, role, is_active, position_id,
  * user_id`.
  *
- * RAMO DI RIPIEGO, con data di fine: una riga senza posizione usa ancora la persona
- * scritta sulla riga. Dopo il passo 2 di PE-4 le righe ATTIVE senza posizione sono zero;
- * il ramo resta come difesa e si toglie al rilascio del passo 3b (O2-10), quando il
- * vincolo `NOT is_active OR position_id IS NOT NULL` lo rende inutile.
+ * Dal passo 3b (O2-10, migrazione 000459) una partecipazione attiva ha sempre una
+ * posizione (vincolo `sys_process_participants_active_has_position`, sentinella
+ * `sys.v_process_participants_active_without_position`): il ramo di ripiego che leggeva
+ * la persona scritta sulla riga non serve piu' ed e' stato tolto. La colonna della persona
+ * resta nella tabella finche' non si ritira con archivio (ADR-0035), ma nessuno la legge.
  */
 export const PARTECIPANTI_OGGI_SQL = `(
   SELECT pp.process_participant_id                  AS participant_id,
@@ -63,13 +64,6 @@ export const PARTECIPANTI_OGGI_SQL = `(
      AND upa.user_position_assignment_start_date <= current_date
      AND (upa.user_position_assignment_end_date IS NULL
           OR upa.user_position_assignment_end_date >= current_date)
-  UNION ALL
-  -- ripiego fino al passo 3b (O2-10): la riga senza posizione usa la persona
-  SELECT pp.process_participant_id, pp.process_participant_tenant_id,
-         pp.process_participant_org_unit_process_id, pp.process_participant_role,
-         pp.process_participant_is_active, NULL::uuid, pp.process_participant_user_id
-    FROM sys.sys_process_participants pp
-   WHERE pp.process_participant_position_id IS NULL
 )`;
 
 /**

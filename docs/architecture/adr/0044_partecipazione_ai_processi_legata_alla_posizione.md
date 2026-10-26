@@ -5,6 +5,7 @@
 - **Decided by**: Enzo Spenuso (decisione 7 dell'11 ottobre 2026: sì, in tre passi, con giornale di ritorno e senza indovinare i casi dubbi) · approvazione di questo testo: data il 2026-10-12
 - **Redatto da**: Claude Code CLI, mandato W0-A2 (onda 0 del piano di adesione completa)
 - **Relates to**: invariante **I1** (il modello è centrato sulla posizione), ADR-0036 (domini gerarchici e funzionali), ADR-0035 (ritirare si fa emendando la fonte), ADR-0041 (direzione del dato), ADR-0037 (cancellare una persona è anonimizzarla)
+- **Emendamento del 2026-10-26** (approvato dall'Amministratore di Sistema): il vincolo del passo 3b è `CHECK (NOT process_participant_is_active OR process_participant_position_id IS NOT NULL)` e non `CHECK (process_participant_position_id IS NOT NULL)`, perché le righe disattivate dal passo 2 (classe N) restano senza posizione; per le righe che contano dice la stessa cosa. Motivo e prova in `.programmi/onda2/PIANO_passo3-partecipazione.md` §4 e `.programmi/onda2/esiti/O2-10.md`; migrazione `000459`.
 - **Misura**: `.programmi/esiti-onda0/lavoro/partecipanti_misura.sql`, `partecipanti_misura_2.sql`, `partecipanti_misura_3.sql` con i loro `*_esito.txt` (gemello, sola lettura, 2026-10-11)
 
 > **In parole semplici, per Enzo.**

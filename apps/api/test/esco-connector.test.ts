@@ -3,7 +3,6 @@ import {
   fetchAllEscoOccupations,
   normalizeEscoResults,
   ESCO_MAX_PAGE,
-  ESCO_UNAVAILABLE_ATTEMPTS,
   EscoUnavailableError,
   HttpEscoFetcher,
   type EscoFetcher,
@@ -114,11 +113,12 @@ describe("ESCO connector — upstream unavailable", () => {
       calls++;
       expect(init.redirect).toBe("manual");
       return sorry();
-    }, 0);
+    }, [0, 0]);
     await expect(f.fetchPage(0, 1)).rejects.toThrow(EscoUnavailableError);
-    await expect(new HttpEscoFetcher(async () => sorry(), 0).fetchPage(0, 1)).rejects.toThrow(/sorry\.ec\.europa\.eu/);
-    expect(calls).toBe(ESCO_UNAVAILABLE_ATTEMPTS);
+    await expect(new HttpEscoFetcher(async () => sorry(), []).fetchPage(0, 1)).rejects.toThrow(/sorry\.ec\.europa\.eu/);
+    expect(calls).toBe(3);
   });
+
 
   it("an HTML body served with 200 is not parsed as JSON", async () => {
     const f = new HttpEscoFetcher(
@@ -126,14 +126,14 @@ describe("ESCO connector — upstream unavailable", () => {
         status: 200,
         headers: { "content-type": "text/html" },
       }),
-      0,
+      [],
     );
     await expect(f.fetchPage(0, 1)).rejects.toThrow(/instead of JSON/);
   });
 
   it("recovers when ESCO comes back within the retries", async () => {
     let calls = 0;
-    const f = new HttpEscoFetcher(async () => (++calls === 1 ? sorry() : ok()), 0);
+    const f = new HttpEscoFetcher(async () => (++calls === 1 ? sorry() : ok()), [0]);
     const page = await f.fetchPage(0, 1);
     expect(page.total).toBe(1);
     expect(calls).toBe(2);
@@ -144,7 +144,7 @@ describe("ESCO connector — upstream unavailable", () => {
     const f = new HttpEscoFetcher(async () => {
       calls++;
       return new Response("bad", { status: 400 });
-    }, 0);
+    }, [0, 0]);
     await expect(f.fetchPage(0, 1)).rejects.toThrow(/HTTP 400/);
     expect(calls).toBe(1);
   });

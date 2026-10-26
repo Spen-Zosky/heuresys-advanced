@@ -71,9 +71,9 @@ export class EscoUnavailableError extends Error {
   }
 }
 
-/** Attempts per page when ESCO is unavailable (1 + retries); the wait doubles each time. */
-export const ESCO_UNAVAILABLE_ATTEMPTS = 3;
-export const ESCO_UNAVAILABLE_BACKOFF_MS = 30_000;
+/** Waits between attempts on one page while ESCO is unavailable: rides out a blip.
+ *  Longer outages are retried by the CLI (sync-cli.ts), outside the source lock. */
+export const ESCO_UNAVAILABLE_WAITS_MS: readonly number[] = [30_000, 60_000];
 
 type FetchLike = (url: string, init: RequestInit) => Promise<Response>;
 
@@ -81,16 +81,18 @@ type FetchLike = (url: string, init: RequestInit) => Promise<Response>;
 export class HttpEscoFetcher implements EscoFetcher {
   constructor(
     private readonly fetchImpl: FetchLike = (url, init) => fetch(url, init),
-    private readonly backoffMs: number = ESCO_UNAVAILABLE_BACKOFF_MS,
+    private readonly waitsMs: readonly number[] = ESCO_UNAVAILABLE_WAITS_MS,
   ) {}
 
   async fetchPage(offset: number, limit: number): Promise<EscoPage> {
-    for (let attempt = 1; ; attempt++) {
+    for (let attempt = 0; ; attempt++) {
       try {
         return await this.fetchOnce(offset, limit);
       } catch (err) {
-        if (!(err instanceof EscoUnavailableError) || attempt >= ESCO_UNAVAILABLE_ATTEMPTS) throw err;
-        await new Promise((r) => setTimeout(r, this.backoffMs * 2 ** (attempt - 1)));
+        const waitMs = this.waitsMs[attempt];
+        if (!(err instanceof EscoUnavailableError) || waitMs === undefined) throw err;
+        console.warn(JSON.stringify({ connector: "esco", phase: "unavailable", attempt: attempt + 1, retryInMs: waitMs, cause: err.message }));
+        await new Promise((r) => setTimeout(r, waitMs));
       }
     }
   }

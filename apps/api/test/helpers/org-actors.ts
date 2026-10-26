@@ -48,6 +48,7 @@
 
 import type { Pool } from "pg";
 import { MANAGERIAL_ROLES, HR_MANDATED_ROLES } from "../../src/lib/scope/resolver.js";
+import { PARTECIPANTI_OGGI_SQL } from "../../src/lib/scope/functional.js";
 
 /** Chi recita nel test: serve l'id per le asserzioni sui perimetri e l'indirizzo per
  *  i test che fanno login davvero. */
@@ -180,11 +181,11 @@ export async function unEstraneoAEntrambiGliAssi(pool: Pool, manager: string): P
              AND m.team_member_user_id = u.user_id)
         -- e fuori dai processi in cui il manager è partecipante (metà processi)
         AND NOT EXISTS (
-          SELECT 1 FROM sys.sys_process_participants pp1
-            JOIN sys.sys_process_participants pp2
-              ON pp2.process_participant_org_unit_process_id = pp1.process_participant_org_unit_process_id
-           WHERE pp1.process_participant_user_id = $1
-             AND pp2.process_participant_user_id = u.user_id)
+          SELECT 1 FROM ${PARTECIPANTI_OGGI_SQL} pp1
+            JOIN ${PARTECIPANTI_OGGI_SQL} pp2
+              ON pp2.org_unit_process_id = pp1.org_unit_process_id
+           WHERE pp1.user_id = $1
+             AND pp2.user_id = u.user_id)
         -- e non è a sua volta un capo funzionale: il test gli chiede uno scope pari
         -- a «solo se stesso», e chi guida una squadra o possiede un processo ne ha
         -- uno più largo. Le tre condizioni sono quelle di isFunctionalLeader.
@@ -193,10 +194,10 @@ export async function unEstraneoAEntrambiGliAssi(pool: Pool, manager: string): P
         AND NOT EXISTS (SELECT 1 FROM sys.sys_team_members tm
                          WHERE tm.team_member_user_id = u.user_id
                            AND tm.team_member_role = 'LEAD' AND tm.team_member_is_active)
-        AND NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
-                         WHERE pp.process_participant_user_id = u.user_id
-                           AND pp.process_participant_role = 'OWNER'
-                           AND pp.process_participant_is_active)
+        AND NOT EXISTS (SELECT 1 FROM ${PARTECIPANTI_OGGI_SQL} pp
+                         WHERE pp.user_id = u.user_id
+                           AND pp.role = 'OWNER'
+                           AND pp.is_active)
         ${STESSO_TENANT} ${PUO_ENTRARE} ${SENZA_MANDATO}
       ORDER BY u.user_email
       LIMIT 1`,

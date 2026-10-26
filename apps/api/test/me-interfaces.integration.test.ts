@@ -29,6 +29,7 @@ import { dominiCheApronoUnaSuperficie } from "../src/lib/scope/domains.js";
 import { almenoUnaCellaAperta } from "../src/lib/scope/matrix.js";
 import type { DataClass } from "../src/lib/scope/data-classes.js";
 import type { RoleCode } from "../src/config/constants.js";
+import { PARTECIPANTI_OGGI_SQL } from "../src/lib/scope/functional.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 
@@ -176,10 +177,10 @@ async function emailSenzaDeleghe(): Promise<string> {
                          WHERE o.organization_unit_manager_user_id = u.user_id
                            AND o.organization_unit_is_active)
         AND NOT EXISTS (SELECT 1 FROM sys.sys_teams t WHERE t.team_lead_user_id = u.user_id)
-        AND NOT EXISTS (SELECT 1 FROM sys.sys_process_participants p
-                         WHERE p.process_participant_user_id = u.user_id
-                           AND p.process_participant_role = 'OWNER'
-                           AND p.process_participant_is_active)
+        AND NOT EXISTS (SELECT 1 FROM ${PARTECIPANTI_OGGI_SQL} p
+                         WHERE p.user_id = u.user_id
+                           AND p.role = 'OWNER'
+                           AND p.is_active)
         AND NOT EXISTS (SELECT 1 FROM sys.sys_user_auth_roles ur
                           JOIN sys.sys_auth_roles rr ON rr.auth_role_id = ur.user_auth_role_role_id
                          WHERE ur.user_auth_role_user_id = u.user_id

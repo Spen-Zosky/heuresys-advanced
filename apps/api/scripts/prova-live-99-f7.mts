@@ -17,6 +17,7 @@
 import * as OTPAuth from "otpauth";
 import { readMaster, derivePassword, deriveTotpSecret } from "./derive-access.mjs";
 import { pool, closePool } from "../src/db/client.js";
+import { PARTECIPANTI_OGGI_SQL } from "../src/lib/scope/functional.js";
 
 const BASE = process.argv[2] ?? "http://localhost:3001";
 const master = readMaster();
@@ -68,9 +69,9 @@ const SENZA_DOMINI = `
      AND NOT EXISTS (SELECT 1 FROM sys.sys_organization_units o
                       WHERE o.organization_unit_manager_user_id = u.user_id AND o.organization_unit_is_active)
      AND NOT EXISTS (SELECT 1 FROM sys.sys_teams t WHERE t.team_lead_user_id = u.user_id)
-     AND NOT EXISTS (SELECT 1 FROM sys.sys_process_participants p
-                      WHERE p.process_participant_user_id = u.user_id
-                        AND p.process_participant_role = 'OWNER' AND p.process_participant_is_active)
+     AND NOT EXISTS (SELECT 1 FROM ${PARTECIPANTI_OGGI_SQL} p
+                      WHERE p.user_id = u.user_id
+                        AND p.role = 'OWNER' AND p.is_active)
      AND NOT EXISTS (SELECT 1 FROM sys.sys_user_auth_roles ur
                        JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
                       WHERE ur.user_auth_role_user_id = u.user_id AND ur.user_auth_role_revoked_at IS NULL

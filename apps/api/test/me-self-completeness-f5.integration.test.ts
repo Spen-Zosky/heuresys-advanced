@@ -27,6 +27,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool, closePool } from "../src/db/client.js";
 import { loginRaw } from "./helpers/login.js";
+import { PARTECIPANTI_OGGI_SQL } from "../src/lib/scope/functional.js";
 
 let t: TestApp;
 
@@ -77,8 +78,8 @@ beforeAll(async () => {
   conProcessi = await scegli(
     `SELECT u.user_email AS email, count(*)::text AS n
        FROM sys.sys_users u
-       JOIN sys.sys_process_participants p
-         ON p.process_participant_user_id = u.user_id AND p.process_participant_tenant_id = u.user_tenant_id
+       JOIN ${PARTECIPANTI_OGGI_SQL} p
+         ON p.user_id = u.user_id AND p.tenant_id = u.user_tenant_id
       WHERE u.user_status = 'ACTIVE'
       GROUP BY 1 ORDER BY 2 DESC LIMIT 1`,
   );

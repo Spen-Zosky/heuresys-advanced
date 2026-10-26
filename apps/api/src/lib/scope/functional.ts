@@ -28,6 +28,51 @@ import type { Pool, PoolClient } from "pg";
 export type DbConnector = Pool | PoolClient;
 
 /**
+ * ADR-0044 passo 3a — CHI partecipa oggi a un processo: la persona si ricava dalla
+ * POSIZIONE, non dalla riga. Una partecipazione appartiene a un posto; chi lo occupa oggi
+ * (assegnazione ACTIVE, in corso alla data di oggi, su una posizione attiva) è la persona
+ * che partecipa. Una posizione vacante partecipa ma non dà nessuna persona.
+ *
+ * È l'UNICO posto in cui questa clausola è scritta: lo usano `functionalScopeUserIds`,
+ * `isFunctionalLeader`, il dominio `process_owner` (`domains.ts`) e «i miei processi»
+ * (`me/repository.ts`). Si usa come tabella: `FROM ${PARTECIPANTI_OGGI_SQL} pp`, con le
+ * colonne `participant_id, tenant_id, org_unit_process_id, role, is_active, position_id,
+ * user_id`.
+ *
+ * RAMO DI RIPIEGO, con data di fine: una riga senza posizione usa ancora la persona
+ * scritta sulla riga. Dopo il passo 2 di PE-4 le righe ATTIVE senza posizione sono zero;
+ * il ramo resta come difesa e si toglie al rilascio del passo 3b (O2-10), quando il
+ * vincolo `NOT is_active OR position_id IS NOT NULL` lo rende inutile.
+ */
+export const PARTECIPANTI_OGGI_SQL = `(
+  SELECT pp.process_participant_id                  AS participant_id,
+         pp.process_participant_tenant_id           AS tenant_id,
+         pp.process_participant_org_unit_process_id AS org_unit_process_id,
+         pp.process_participant_role                AS role,
+         pp.process_participant_is_active           AS is_active,
+         pp.process_participant_position_id         AS position_id,
+         upa.user_position_assignment_user_id       AS user_id
+    FROM sys.sys_process_participants pp
+    JOIN sys.sys_positions pos
+      ON pos.position_id = pp.process_participant_position_id
+     AND pos.position_is_active
+    JOIN sys.sys_user_position_assignments upa
+      ON upa.user_position_assignment_position_id = pp.process_participant_position_id
+     AND upa.user_position_assignment_tenant_id = pp.process_participant_tenant_id
+     AND upa.user_position_assignment_status = 'ACTIVE'
+     AND upa.user_position_assignment_start_date <= current_date
+     AND (upa.user_position_assignment_end_date IS NULL
+          OR upa.user_position_assignment_end_date >= current_date)
+  UNION ALL
+  -- ripiego fino al passo 3b (O2-10): la riga senza posizione usa la persona
+  SELECT pp.process_participant_id, pp.process_participant_tenant_id,
+         pp.process_participant_org_unit_process_id, pp.process_participant_role,
+         pp.process_participant_is_active, NULL::uuid, pp.process_participant_user_id
+    FROM sys.sys_process_participants pp
+   WHERE pp.process_participant_position_id IS NULL
+)`;
+
+/**
  * User ids whose ACTIVITIES the actor may see/manage — the members of every team
  * they lead and the participants of every process they own — INCLUDING self (I17).
  *
@@ -57,16 +102,16 @@ export async function functionalScopeUserIds(
           )
         )
      UNION
-     -- participants of processes the actor owns
-     SELECT DISTINCT pp.process_participant_user_id AS user_id
-       FROM sys.sys_process_participants pp
-      WHERE pp.process_participant_is_active
-        AND pp.process_participant_org_unit_process_id IN (
-          SELECT mine.process_participant_org_unit_process_id
-            FROM sys.sys_process_participants mine
-           WHERE mine.process_participant_user_id = $1
-             AND mine.process_participant_role = 'OWNER'
-             AND mine.process_participant_is_active
+     -- participants of processes the actor owns (ADR-0044: through the positions held today)
+     SELECT DISTINCT pp.user_id
+       FROM ${PARTECIPANTI_OGGI_SQL} pp
+      WHERE pp.is_active
+        AND pp.org_unit_process_id IN (
+          SELECT mine.org_unit_process_id
+            FROM ${PARTECIPANTI_OGGI_SQL} mine
+           WHERE mine.user_id = $1
+             AND mine.role = 'OWNER'
+             AND mine.is_active
         )
      UNION
      SELECT $1::uuid`,
@@ -94,10 +139,10 @@ export async function isFunctionalLeader(q: DbConnector, actorUserId: string): P
             AND tm.team_member_is_active
        )
        OR EXISTS (
-         SELECT 1 FROM sys.sys_process_participants pp
-          WHERE pp.process_participant_user_id = $1
-            AND pp.process_participant_role = 'OWNER'
-            AND pp.process_participant_is_active
+         SELECT 1 FROM ${PARTECIPANTI_OGGI_SQL} pp
+          WHERE pp.user_id = $1
+            AND pp.role = 'OWNER'
+            AND pp.is_active
        )
      ) AS hit`,
     [actorUserId],

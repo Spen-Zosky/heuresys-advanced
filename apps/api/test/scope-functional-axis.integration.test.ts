@@ -241,6 +241,30 @@ describe("ADR-0027 F4 — functional (team/process) axis", () => {
     // `sys_process_participants_process_user_uq` e il test moriva su una
     // collisione invece che su cio' che voleva misurare. Con dati reali che
     // cambiano, "il primo che capita" e' una fixture che decade da sola.
+    //
+    // ADR-0044 passo 3a: la partecipazione appartiene al POSTO. La fixture scrive la
+    // posizione che ciascuno occupa oggi (e, finche' la colonna e' obbligatoria, anche la
+    // persona); il processo scelto non deve avere ne' quelle persone ne' quei posti.
+    const posto = async (userId: string): Promise<string> => {
+      const r = await pool.query<{ position_id: string }>(
+        `SELECT a.user_position_assignment_position_id AS position_id
+           FROM sys.sys_user_position_assignments a
+           JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+          WHERE a.user_position_assignment_user_id = $1
+            AND a.user_position_assignment_status = 'ACTIVE'
+            AND a.user_position_assignment_start_date <= current_date
+            AND (a.user_position_assignment_end_date IS NULL OR a.user_position_assignment_end_date >= current_date)
+            AND p.position_is_active
+          ORDER BY (a.user_position_assignment_kind = 'PRIMARY') DESC, a.user_position_assignment_position_id
+          LIMIT 1`,
+        [userId],
+      );
+      const pos = r.rows[0]?.position_id;
+      if (!pos) throw new Error(`${userId} non occupa oggi nessuna posizione attiva: fixture impossibile`);
+      return pos;
+    };
+    const postoPaolo = await posto(ids.paolo);
+    const postoAntonio = await posto(ids.antonio);
     const proc = await pool.query<{ id: string }>(
       `SELECT p.organization_unit_process_id AS id
          FROM sys.sys_organization_unit_processes p
@@ -248,10 +272,11 @@ describe("ADR-0027 F4 — functional (team/process) axis", () => {
           AND NOT EXISTS (
             SELECT 1 FROM sys.sys_process_participants pp
              WHERE pp.process_participant_org_unit_process_id = p.organization_unit_process_id
-               AND pp.process_participant_user_id = ANY($2::uuid[]))
+               AND (pp.process_participant_user_id = ANY($2::uuid[])
+                    OR pp.process_participant_position_id = ANY($3::uuid[])))
         ORDER BY p.organization_unit_process_id
         LIMIT 1`,
-      [rtlTenantId, [ids.paolo, ids.antonio]],
+      [rtlTenantId, [ids.paolo, ids.antonio], [postoPaolo, postoAntonio]],
     );
     const processId = proc.rows[0]?.id;
     expect(
@@ -266,9 +291,9 @@ describe("ADR-0027 F4 — functional (team/process) axis", () => {
     await pool.query(
       `INSERT INTO sys.sys_process_participants
          (process_participant_tenant_id, process_participant_org_unit_process_id,
-          process_participant_user_id, process_participant_role)
-       VALUES ($1,$2,$3,'OWNER'), ($1,$2,$4,'CONTRIBUTOR')`,
-      [rtlTenantId, processId, ids.paolo, ids.antonio],
+          process_participant_user_id, process_participant_position_id, process_participant_role)
+       VALUES ($1,$2,$3,$5,'OWNER'), ($1,$2,$4,$6,'CONTRIBUTOR')`,
+      [rtlTenantId, processId, ids.paolo, ids.antonio, postoPaolo, postoAntonio],
     );
 
     expect(await isInFunctionalScope(pool, ids.paolo, ids.antonio)).toBe(true); // activities ✅

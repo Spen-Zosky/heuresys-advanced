@@ -66,13 +66,12 @@ let processoNuovo: string; // un processo di B, con la partecipazione del posto 
 
 /**
  * Un processo dell'unita' a cui il posto partecipa (riga ATTIVA gia' presente), oppure, se
- * non ce n'e', uno su cui la riga del posto si puo' scrivere senza urtare gli indici unici
- * (processo, posto) e (processo, persona). Ritorna anche se la riga va scritta.
+ * non ce n'e', uno su cui la riga del posto si puo' scrivere senza urtare l'indice unico
+ * (processo, posto). Ritorna anche se la riga va scritta.
  */
 async function processoDelPosto(
   unitId: string,
   positionId: string,
-  userId: string,
 ): Promise<{ id: string; daScrivere: boolean }> {
   const r = await pool.query<{ id: string; ha_riga: boolean }>(
     `SELECT oup.organization_unit_process_id AS id,
@@ -88,24 +87,24 @@ async function processoDelPosto(
                         AND pp.process_participant_is_active)
              OR NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
                              WHERE pp.process_participant_org_unit_process_id = oup.organization_unit_process_id
-                               AND (pp.process_participant_position_id = $2
-                                    OR pp.process_participant_user_id = $3)))
+                               AND pp.process_participant_position_id = $2))
       ORDER BY 2 DESC, 1
       LIMIT 1`,
-    [unitId, positionId, userId],
+    [unitId, positionId],
   );
   const row = r.rows[0];
   if (!row) throw new Error(`nessun processo dell'unita' ${unitId} utilizzabile per il posto ${positionId}: fixture impossibile`);
   return { id: row.id, daScrivere: !row.ha_riga };
 }
 
-async function scriviRiga(tenantId: string, processId: string, o: { user_id: string; position_id: string }, role: string) {
+/** Dal passo 3b una partecipazione si scrive col solo posto: la persona e' chi lo occupa. */
+async function scriviRiga(tenantId: string, processId: string, o: { position_id: string }, role: string) {
   await pool.query(
     `INSERT INTO sys.sys_process_participants
        (process_participant_tenant_id, process_participant_org_unit_process_id,
-        process_participant_user_id, process_participant_position_id, process_participant_role)
-     VALUES ($1, $2, $3, $4, $5)`,
-    [tenantId, processId, o.user_id, o.position_id, role],
+        process_participant_position_id, process_participant_role)
+     VALUES ($1, $2, $3, $4)`,
+    [tenantId, processId, o.position_id, role],
   );
 }
 
@@ -122,12 +121,11 @@ describe("ADR-0044 passo 3a — la partecipazione segue il posto", () => {
     if (!x || !y) throw new Error("servono due occupanti unici di posti unici in due unita' diverse: fixture impossibile");
     chiParte = x;
     chiEsce = y;
-    const vecchio = await processoDelPosto(x.unit_id, x.position_id, x.user_id);
-    const nuovo = await processoDelPosto(y.unit_id, y.position_id, y.user_id);
+    const vecchio = await processoDelPosto(x.unit_id, x.position_id);
+    const nuovo = await processoDelPosto(y.unit_id, y.position_id);
     processoVecchio = vecchio.id;
     processoNuovo = nuovo.id;
     // Le partecipazioni si scrivono UNA volta, prima del cambio di posto, solo se mancano.
-    // La persona sulla riga e' chi occupa il posto oggi (colonna obbligatoria fino al 3b).
     if (vecchio.daScrivere) await scriviRiga(x.tenant_id, processoVecchio, x, "CONTRIBUTOR");
     if (nuovo.daScrivere) await scriviRiga(y.tenant_id, processoNuovo, y, "CONTRIBUTOR");
 
@@ -139,8 +137,8 @@ describe("ADR-0044 passo 3a — la partecipazione segue il posto", () => {
       const libero = await pool.query(
         `SELECT 1 FROM sys.sys_process_participants
           WHERE process_participant_org_unit_process_id = $1
-            AND (process_participant_user_id = $2 OR process_participant_position_id = $3)`,
-        [processoNuovo, c.user_id, c.position_id],
+            AND process_participant_position_id = $2`,
+        [processoNuovo, c.position_id],
       );
       if (libero.rowCount) continue;
       if (await isInFunctionalScope(pool, c.user_id, x.user_id)) continue;

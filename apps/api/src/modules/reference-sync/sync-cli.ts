@@ -14,25 +14,46 @@
 import type { ReferenceSyncSourceKey } from "@heuresys/shared";
 import { pool } from "../../db/client.js";
 import { referenceSyncService } from "./service.js";
+import { EscoUnavailableError } from "./esco-connector.js";
 
 const log = (o: Record<string, unknown>): void => console.log(JSON.stringify({ cli: "reference-sync", ...o }));
 
 /** All registered sources, refreshed in sequence (per-source try/catch: one
  *  failing upstream must not starve the others; any failure → exit 1). */
-const SOURCES: ReferenceSyncSourceKey[] = ["ESCO", "ATECO_2025"];
+// ATECO first: while ESCO is unavailable its fetcher waits up to ~6 h in-process.
+const SOURCES: ReferenceSyncSourceKey[] = ["ATECO_2025", "ESCO"];
+
+/**
+ * An upstream outage (ESCO behind the EC maintenance page, 25/10/2026) is retried here,
+ * every 30 minutes for about 5.5 hours, each attempt a whole runSync that takes and
+ * releases the source lock. Not a systemd Restart=: on the VM every `daemon-reload`
+ * fired the pending restart at once and the day's attempts were gone in ten minutes.
+ * The unit's TimeoutStartSec must cover this (heuresys-advanced-scraping.service).
+ */
+const OUTAGE_RETRY_EVERY_MS = 30 * 60_000;
+const OUTAGE_RETRIES = 11;
 
 export async function runReferenceSyncCli(): Promise<void> {
   const failures: string[] = [];
   for (const source of SOURCES) {
     const started = Date.now();
-    try {
-      // System actor: no human userId → recorded as a NULL initiator in import_runs.
-      const result = await referenceSyncService.runSync({ userId: null }, source);
-      log({ phase: "done", ...result, ms: Date.now() - started });
-    } catch (err) {
-      failures.push(source);
-      log({ phase: "failed", source, ms: Date.now() - started });
-      console.error(`reference-sync ${source} FAILED:`, err);
+    for (let retry = 0; ; retry++) {
+      try {
+        // System actor: no human userId → recorded as a NULL initiator in import_runs.
+        const result = await referenceSyncService.runSync({ userId: null }, source);
+        log({ phase: "done", ...result, retries: retry, ms: Date.now() - started });
+        break;
+      } catch (err) {
+        if (err instanceof EscoUnavailableError && retry < OUTAGE_RETRIES) {
+          log({ phase: "unavailable", source, retry: retry + 1, of: OUTAGE_RETRIES, retryInMs: OUTAGE_RETRY_EVERY_MS });
+          await new Promise((r) => setTimeout(r, OUTAGE_RETRY_EVERY_MS));
+          continue;
+        }
+        failures.push(source);
+        log({ phase: "failed", source, retries: retry, ms: Date.now() - started });
+        console.error(`reference-sync ${source} FAILED:`, err);
+        break;
+      }
     }
   }
   if (failures.length > 0) {

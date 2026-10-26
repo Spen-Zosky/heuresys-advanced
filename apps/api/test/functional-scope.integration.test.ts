@@ -35,6 +35,7 @@ import {
   isInFunctionalScope,
 } from "../src/lib/scope/functional.js";
 import { unMembroDiSquadra, unFuoriSquadra } from "./helpers/org-actors.js";
+import { PARTECIPANTI_OGGI_SQL } from "../src/lib/scope/functional.js";
 
 interface Scena {
   capo: string;
@@ -113,10 +114,10 @@ describe("#143 F3 — l'asse funzionale fa cio' che dichiara", () => {
           AND NOT EXISTS (SELECT 1 FROM sys.sys_team_members m
                            WHERE m.team_member_user_id = u.user_id
                              AND m.team_member_role = 'LEAD' AND m.team_member_is_active)
-          AND NOT EXISTS (SELECT 1 FROM sys.sys_process_participants p
-                           WHERE p.process_participant_user_id = u.user_id
-                             AND p.process_participant_role = 'OWNER'
-                             AND p.process_participant_is_active)
+          AND NOT EXISTS (SELECT 1 FROM ${PARTECIPANTI_OGGI_SQL} p
+                           WHERE p.user_id = u.user_id
+                             AND p.role = 'OWNER'
+                             AND p.is_active)
         ORDER BY u.user_email
         LIMIT 1`,
     );

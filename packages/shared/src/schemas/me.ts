@@ -832,6 +832,10 @@ export const MeProcessParticipationSchema = z.object({
   organizationUnitName: z.string().nullable(),
   role: z.string(),
   isActive: z.boolean(),
+  /** ADR-0044: il posto da cui si partecipa. Nullo solo sul ramo di ripiego (riga senza
+   *  posizione), che si toglie al passo 3b. */
+  positionId: z.uuid().nullable(),
+  positionTitle: z.string().nullable(),
 });
 export type MeProcessParticipation = z.infer<typeof MeProcessParticipationSchema>;
 export const MeProcessParticipationsResponseSchema = z.object({

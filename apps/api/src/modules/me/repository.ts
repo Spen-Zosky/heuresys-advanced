@@ -20,6 +20,7 @@ import type { z } from "zod";
 import { toDateOnly } from "../../lib/date-only.js";
 import type { DataClass } from "../../lib/scope/data-classes.js";
 import { normalizzaCompetenze } from "../learning-gaps/repository.js";
+import { PARTECIPANTI_OGGI_SQL } from "../../lib/scope/functional.js";
 
 export type DbConnector = Pool | PoolClient;
 type SkillEvidence = z.infer<typeof MeSkillEvidenceSchema>;
@@ -1630,45 +1631,57 @@ export async function listMyMentorships(
 /** I processi aziendali a cui partecipo, col ruolo che vi ho.
  *
  *  845 righe che nessun modulo API leggeva — non «non esposte al portale personale»:
- *  invisibili ovunque, il caso che il cancello di esposizione (#79) esiste per trovare. */
+ *  invisibili ovunque, il caso che il cancello di esposizione (#79) esiste per trovare.
+ *
+ *  ADR-0044 passo 3a: sono le partecipazioni delle POSIZIONI che occupo oggi (frammento
+ *  unico `PARTECIPANTI_OGGI_SQL`), non le righe che portano il mio nome. Chi cambia posto
+ *  vede i processi del posto nuovo, senza che nessuno riscriva le partecipazioni. */
 export async function listMyProcessParticipations(
   q: DbConnector,
   userId: string,
   tenantId: string,
 ): Promise<{ items: MeProcessParticipation[]; total: number }> {
   const res = await q.query<{
-    process_participant_id: string;
-    process_participant_org_unit_process_id: string;
+    participant_id: string;
+    org_unit_process_id: string;
     process_name: string | null;
     organization_unit_name: string | null;
-    process_participant_role: string;
-    process_participant_is_active: boolean;
+    role: string;
+    is_active: boolean;
+    position_id: string | null;
+    position_title: string | null;
   }>(
-    `SELECT pp.process_participant_id,
-            pp.process_participant_org_unit_process_id,
+    `SELECT pp.participant_id,
+            pp.org_unit_process_id,
             bpr.blueprint_process_name  AS process_name,
             ou.organization_unit_name,
-            pp.process_participant_role,
-            pp.process_participant_is_active
-       FROM sys.sys_process_participants pp
+            pp.role,
+            pp.is_active,
+            pp.position_id,
+            pos.position_title
+       FROM ${PARTECIPANTI_OGGI_SQL} pp
+       LEFT JOIN sys.sys_positions pos
+              ON pos.position_id = pp.position_id
        LEFT JOIN sys.sys_organization_unit_processes oup
-              ON oup.organization_unit_process_id = pp.process_participant_org_unit_process_id
+              ON oup.organization_unit_process_id = pp.org_unit_process_id
        LEFT JOIN sys.sys_blueprint_process_registry bpr
               ON bpr.blueprint_process_id = oup.org_unit_process_blueprint_process_id
        LEFT JOIN sys.sys_organization_units ou
               ON ou.organization_unit_id = oup.org_unit_process_org_unit_id
-      WHERE pp.process_participant_user_id = $1
-        AND pp.process_participant_tenant_id = $2
-      ORDER BY pp.process_participant_is_active DESC, bpr.blueprint_process_name NULLS LAST`,
+      WHERE pp.user_id = $1
+        AND pp.tenant_id = $2
+      ORDER BY pp.is_active DESC, bpr.blueprint_process_name NULLS LAST, pp.participant_id`,
     [userId, tenantId],
   );
   const items: MeProcessParticipation[] = res.rows.map((r) => ({
-    participationId: r.process_participant_id,
-    organizationUnitProcessId: r.process_participant_org_unit_process_id,
+    participationId: r.participant_id,
+    organizationUnitProcessId: r.org_unit_process_id,
     processName: r.process_name,
     organizationUnitName: r.organization_unit_name,
-    role: r.process_participant_role,
-    isActive: r.process_participant_is_active,
+    role: r.role,
+    isActive: r.is_active,
+    positionId: r.position_id,
+    positionTitle: r.position_title,
   }));
   return { items, total: items.length };
 }

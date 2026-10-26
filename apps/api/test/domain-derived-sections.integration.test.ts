@@ -22,6 +22,7 @@ import { pool, closePool } from "../src/db/client.js";
 import { meService } from "../src/modules/me/service.js";
 import { scopeTierOf, activeDomainsOf, NoScopeTierError } from "../src/lib/scope/domains.js";
 import type { RoleCode } from "../src/config/constants.js";
+import { PARTECIPANTI_OGGI_SQL } from "../src/lib/scope/functional.js";
 
 /** The seven role names the retired `UI_ADMIN_ROLES` listed — named ONLY so the
  *  test can select the population the list would have excluded. */
@@ -47,9 +48,9 @@ const DOMAIN_PREDICATE = `(
      EXISTS (SELECT 1 FROM sys.sys_organization_units o
               WHERE o.organization_unit_manager_user_id = u.user_id AND o.organization_unit_is_active)
   OR EXISTS (SELECT 1 FROM sys.sys_teams t WHERE t.team_lead_user_id = u.user_id)
-  OR EXISTS (SELECT 1 FROM sys.sys_process_participants p
-              WHERE p.process_participant_user_id = u.user_id
-                AND p.process_participant_role = 'OWNER' AND p.process_participant_is_active)
+  OR EXISTS (SELECT 1 FROM ${PARTECIPANTI_OGGI_SQL} p
+              WHERE p.user_id = u.user_id
+                AND p.role = 'OWNER' AND p.is_active)
   OR EXISTS (SELECT 1 FROM sys.sys_user_auth_roles ur
                JOIN sys.sys_auth_roles rr ON rr.auth_role_id = ur.user_auth_role_role_id
               WHERE ur.user_auth_role_user_id = u.user_id AND ur.user_auth_role_revoked_at IS NULL

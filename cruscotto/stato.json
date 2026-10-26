@@ -1,7 +1,7 @@
 {
  "schema": "cruscotto-stato/1",
  "progetto": "heuresys-advanced",
- "aggiornato_il": "2026-10-21",
+ "aggiornato_il": "2026-10-26",
  "aggiornato_da": "semina iniziale dal cruscotto (Claude, 21/10/2026)",
  "fase": "Dopo la GA v1.0.0: adesione al contratto dati del datastore, onda 2 in corso",
  "stato": "giallo",
@@ -9,28 +9,20 @@
  "avanzamento": null,
  "decisioni_attese": [
   {
-   "id": "REL-454",
-   "titolo": "Rilascio in produzione delle migrazioni 000454..000458 e del passo 2 di PE-4: verificare se il deploy del 19/10 le ha già applicate",
-   "dal": "2026-10-17",
-   "blocca": "onde successive del contratto dati",
-   "raccomandazione": "",
-   "fonte": ".handoff/STATE.md"
+   "id": "#270-PROD",
+   "titolo": "Permesso per la corsa in produzione del passo 2 e delle regole del passo 3 e per armare il rilascio del 3a: il controllo dei permessi della sessione l'ha negata il 26/10",
+   "dal": "2026-10-26",
+   "blocca": "passo 3a in produzione, poi O2-10",
+   "raccomandazione": "concedere: backup verificato del 26/10 e ritorno provato su copia",
+   "fonte": ".programmi/onda2/esiti/O2-09.md"
   },
   {
-   "id": "#269",
-   "titolo": "Approvare ADR-0046, perimetro del tenant (#269): sblocca O2-07 e O2-08",
-   "dal": "2026-10-17",
-   "blocca": "O2-07 e O2-08",
-   "raccomandazione": "",
-   "fonte": "SOT_BACKLOG.md #269"
-  },
-  {
-   "id": "#270",
-   "titolo": "Tre scelte sul passo 3 della partecipazione ai processi (#270): nessuno dei 57 OWNER si risolve in una persona; sblocca O2-09 e O2-10",
-   "dal": "2026-10-17",
-   "blocca": "O2-09 e O2-10",
-   "raccomandazione": "raccomandazioni già scritte in SOT_BACKLOG #270",
-   "fonte": "SOT_BACKLOG.md #270"
+   "id": "#270-3B",
+   "titolo": "Passo 3b: la 000184 si riapplica a ogni deploy e la CI ha partecipazioni attive senza posizione, il vincolo la fermerebbe",
+   "dal": "2026-10-26",
+   "blocca": "O2-10",
+   "raccomandazione": "emendare la 000184 e portare in catena la parte certa del passo 2 prima del vincolo",
+   "fonte": ".programmi/onda2/esiti/O2-10.md"
   },
   {
    "id": "#265",
@@ -39,14 +31,6 @@
    "blocca": "livello contrattuale F4",
    "raccomandazione": "",
    "fonte": "SOT_STATE.md"
-  },
-  {
-   "id": "OWNER-3a",
-   "titolo": "Regola per gli OWNER dopo il passo 3a, senza la quale la visibilità per processo diventa vuota per tutti",
-   "dal": "2026-10-17",
-   "blocca": "visibilità per processo",
-   "raccomandazione": "",
-   "fonte": ".handoff/STATE.md"
   },
   {
    "id": "PUB-STATS",

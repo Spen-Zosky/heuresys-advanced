@@ -36,6 +36,7 @@ import type { DbConnector } from "./org.js";
 import { isPlatform, type ActorContext } from "../actor.js";
 import { HR_MANDATED_ROLES } from "./resolver.js";
 import { roleGrantSize } from "../../middleware/rbac.js";
+import { PARTECIPANTI_OGGI_SQL } from "./functional.js";
 import type { RoleCode } from "../../config/constants.js";
 // `matrix.ts` importa da qui solo il TIPO `Domain`, che sparisce in compilazione: la
 // dipendenza a runtime e' quindi a senso unico, non un ciclo.
@@ -142,10 +143,11 @@ export async function activeDomainsOf(
                   AND o.organization_unit_is_active)          AS line_management,
        EXISTS (SELECT 1 FROM sys.sys_teams t
                 WHERE t.team_lead_user_id = $1)               AS team_lead,
-       EXISTS (SELECT 1 FROM sys.sys_process_participants p
-                WHERE p.process_participant_user_id = $1
-                  AND p.process_participant_role = 'OWNER'
-                  AND p.process_participant_is_active)        AS process_owner,
+       -- ADR-0044: owner e' chi OCCUPA OGGI una posizione OWNER, non chi e' scritto sulla riga
+       EXISTS (SELECT 1 FROM ${PARTECIPANTI_OGGI_SQL} p
+                WHERE p.user_id = $1
+                  AND p.role = 'OWNER'
+                  AND p.is_active)                            AS process_owner,
        -- #99 F6 — i tre domini che ADR-0036 dichiarava e nessuno calcolava.
        -- Ciascuno esce dalla tabella che lo DEFINISCE, non da una lista di ruoli.
        EXISTS (SELECT 1 FROM sys.sys_mentorships m

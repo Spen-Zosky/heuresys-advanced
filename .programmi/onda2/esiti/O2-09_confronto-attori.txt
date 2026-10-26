@@ -1,0 +1,71 @@
+persone attive di RTL Bank: 167; con differenze: 24
+process_owner prima: 12; dopo: 14
+  aggiunti (partecipante oggi di un processo di cui e' owner per D-P3-1): 18
+  process_owner acquisito: 12
+  process_owner perso: 10
+  tolti (non piu' partecipante di un processo posseduto, o processo non piu' posseduto): 379
+differenze NON spiegate: 0
+
+0281ede2-04fe-43fe-b8da-b75c5e320d85: perimetro 39 -> 1 (tolti 38, aggiunti 0), process_owner True -> False
+  tolti: righe OWNER di prima in classe N; i tolti erano partecipanti dei processi che possedeva per persona
+  process_owner True -> False: le sue righe OWNER erano in classe N (passo 2) e non e' responsabile di un'unita' di governo
+103fc1aa-525b-4282-a372-cd8a3f1cee8b: perimetro 33 -> 1 (tolti 32, aggiunti 0), process_owner True -> False
+  tolti: righe OWNER di prima in classe H; i tolti erano partecipanti dei processi che possedeva per persona
+  process_owner True -> False: le sue righe OWNER erano in classe H (passo 2) e non e' responsabile di un'unita' di governo
+124a8636-30bf-4d3b-b75a-516b8e0febc0: perimetro 2 -> 4 (tolti 0, aggiunti 2), process_owner False -> True
+  aggiunti: titolari di oggi dei posti che partecipano ai 1 processi di cui e' owner (D-P3-1)
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+15c601d0-c78e-4b86-8eb6-5f664c7046d1: perimetro 1 -> 1 (tolti 0, aggiunti 0), process_owner False -> True
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+28b3232a-2201-4020-9c0c-cb01ad608da6: perimetro 39 -> 1 (tolti 38, aggiunti 0), process_owner True -> False
+  tolti: righe OWNER di prima in classe N; i tolti erano partecipanti dei processi che possedeva per persona
+  process_owner True -> False: le sue righe OWNER erano in classe N (passo 2) e non e' responsabile di un'unita' di governo
+35debc04-d8a5-420e-a628-8246010008fa: perimetro 1 -> 6 (tolti 0, aggiunti 5), process_owner False -> True
+  aggiunti: titolari di oggi dei posti che partecipano ai 1 processi di cui e' owner (D-P3-1)
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+4713beaf-b74d-46d7-8b79-13805cb43f3e: perimetro 11 -> 11 (tolti 0, aggiunti 0), process_owner False -> True
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+4e4e3982-9466-4e3a-9891-fb7667ad62fc: perimetro 39 -> 1 (tolti 38, aggiunti 0), process_owner True -> False
+  tolti: righe OWNER di prima in classe N; i tolti erano partecipanti dei processi che possedeva per persona
+  process_owner True -> False: le sue righe OWNER erano in classe N (passo 2) e non e' responsabile di un'unita' di governo
+5bba6e68-9fe8-4005-85ce-72669ad17029: perimetro 39 -> 1 (tolti 38, aggiunti 0), process_owner True -> False
+  tolti: righe OWNER di prima in classe N; i tolti erano partecipanti dei processi che possedeva per persona
+  process_owner True -> False: le sue righe OWNER erano in classe N (passo 2) e non e' responsabile di un'unita' di governo
+688941e4-c258-41b9-b7e3-97da2aed540d: perimetro 1 -> 9 (tolti 0, aggiunti 8), process_owner False -> True
+  aggiunti: titolari di oggi dei posti che partecipano ai 1 processi di cui e' owner (D-P3-1)
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+72f6458d-f1f7-43a6-915b-b2eefac29433: perimetro 39 -> 1 (tolti 38, aggiunti 0), process_owner True -> False
+  tolti: righe OWNER di prima in classe N; i tolti erano partecipanti dei processi che possedeva per persona
+  process_owner True -> False: le sue righe OWNER erano in classe N (passo 2) e non e' responsabile di un'unita' di governo
+7469f887-163d-4dce-ac22-e4105325e9b1: perimetro 44 -> 44 (tolti 0, aggiunti 0), process_owner False -> True
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+87254baa-6802-4fe1-96be-4c9b17363b39: perimetro 33 -> 1 (tolti 32, aggiunti 0), process_owner True -> False
+  tolti: righe OWNER di prima in classe H; i tolti erano partecipanti dei processi che possedeva per persona
+  process_owner True -> False: le sue righe OWNER erano in classe H (passo 2) e non e' responsabile di un'unita' di governo
+8ad063af-4b84-48e9-a3e3-50ca80074d71: perimetro 21 -> 1 (tolti 20, aggiunti 0), process_owner True -> False
+  tolti: righe OWNER di prima in classe H; i tolti erano partecipanti dei processi che possedeva per persona
+  process_owner True -> False: le sue righe OWNER erano in classe H (passo 2) e non e' responsabile di un'unita' di governo
+992de2a7-0e45-4574-aba7-486b0c32e6bb: perimetro 5 -> 5 (tolti 0, aggiunti 0), process_owner False -> True
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+9f018d3b-438c-490f-85d3-dfb0723b6426: perimetro 1 -> 1 (tolti 0, aggiunti 0), process_owner False -> True
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+9f35467d-1261-4484-a6e2-4c38d81e48c3: perimetro 1 -> 1 (tolti 0, aggiunti 0), process_owner False -> True
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+ad1887ab-8a83-4c01-93c8-62eaf358cb98: perimetro 9 -> 9 (tolti 0, aggiunti 0), process_owner False -> True
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+ad432f1a-42c3-41e7-a4b2-99c118acc683: perimetro 1 -> 3 (tolti 0, aggiunti 2), process_owner False -> True
+  aggiunti: titolari di oggi dei posti che partecipano ai 2 processi di cui e' owner (D-P3-1)
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+b0f41f94-5b8f-4105-bb00-c73e2072a4bc: perimetro 33 -> 1 (tolti 32, aggiunti 0), process_owner True -> True
+  tolti: righe OWNER di prima in classe H; i tolti erano partecipanti dei processi che possedeva per persona
+b3e18813-b36d-4349-a048-b2dc415b0062: perimetro 22 -> 22 (tolti 0, aggiunti 0), process_owner False -> True
+  process_owner False -> True: D-P3-1: oggi e' il process owner (responsabile dell'unita' di governo)
+e2e3aaca-3966-4317-ab62-db89eb7b184d: perimetro 33 -> 1 (tolti 32, aggiunti 0), process_owner True -> False
+  tolti: righe OWNER di prima in classe H; i tolti erano partecipanti dei processi che possedeva per persona
+  process_owner True -> False: le sue righe OWNER erano in classe H (passo 2) e non e' responsabile di un'unita' di governo
+f2ef1443-7752-4a99-949a-d13e31785cf1: perimetro 39 -> 37 (tolti 3, aggiunti 1), process_owner True -> True
+  tolti: righe OWNER di prima in classe N; i tolti erano partecipanti dei processi che possedeva per persona
+  aggiunti: titolari di oggi dei posti che partecipano ai 1 processi di cui e' owner (D-P3-1)
+feeef7b8-aa4e-4d20-bae9-8220d5a5d03b: perimetro 39 -> 1 (tolti 38, aggiunti 0), process_owner True -> False
+  tolti: righe OWNER di prima in classe N; i tolti erano partecipanti dei processi che possedeva per persona
+  process_owner True -> False: le sue righe OWNER erano in classe N (passo 2) e non e' responsabile di un'unita' di governo

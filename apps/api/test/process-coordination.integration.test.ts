@@ -24,7 +24,7 @@ import { loginRaw } from "./helpers/login.js";
 import { listProcessCollaborators } from "../src/modules/me/repository.js";
 import { functionalScopeUserIds } from "../src/lib/scope/functional.js";
 import { activeDomainsOf } from "../src/lib/scope/domains.js";
-import { isRealPerson } from "../scripts/derive-access.mjs";
+import { isRealPerson, REAL_PERSON_EMAILS } from "../scripts/derive-access.mjs";
 
 /** Chi occupa OGGI ciascun posto: scritto qui da capo, non preso dal frammento condiviso. */
 const OCCUPANTI_OGGI = `
@@ -81,8 +81,82 @@ async function cookieDi(email: string): Promise<string> {
     .join("; ");
 }
 
+/**
+ * Un owner e un collaboratore di un'ALTRA unità sullo stesso processo, scritti nella
+ * transazione del file (D-52) se il dato non li ha già.
+ *
+ * Misurato alla prima corsa della CI (2026-10-27): il database di collaudo non ha nessuna
+ * partecipazione OWNER con un posto occupato — il riempimento del passo 2 è uno script
+ * passato sulla produzione, non una migrazione. Senza questa scena la prova non avrebbe
+ * nessuno su cui girare. In produzione la scena non serve: gli owner veri ci sono, e la
+ * prova li percorre tutti accanto a quello scritto qui.
+ */
+async function scenaSeManca(): Promise<void> {
+  const gia = await pool.query(
+    `SELECT 1 FROM (${OCCUPANTI_OGGI}) o
+       JOIN sys.sys_organization_unit_processes mine ON mine.organization_unit_process_id = o.oup_id
+       JOIN sys.sys_organization_unit_processes other
+         ON other.org_unit_process_tenant_id = mine.org_unit_process_tenant_id
+        AND other.org_unit_process_blueprint_process_id = mine.org_unit_process_blueprint_process_id
+        AND other.org_unit_process_org_unit_id <> mine.org_unit_process_org_unit_id
+       JOIN (${OCCUPANTI_OGGI}) c ON c.oup_id = other.organization_unit_process_id
+      WHERE o.role = 'OWNER' LIMIT 1`,
+  );
+  if (gia.rowCount) return;
+
+  // Due unità-processo dello stesso modello in due unità diverse, ciascuna con un posto
+  // occupato oggi che su quella riga non ha ancora una partecipazione (indice unico).
+  const posto = `
+    SELECT oup.organization_unit_process_id AS oup_id,
+           oup.org_unit_process_tenant_id   AS tenant_id,
+           oup.org_unit_process_blueprint_process_id AS bp,
+           oup.org_unit_process_org_unit_id AS unit_id,
+           pos.position_id,
+           upa.user_position_assignment_user_id AS user_id
+      FROM sys.sys_organization_unit_processes oup
+      JOIN sys.sys_positions pos
+        ON pos.position_organization_unit_id = oup.org_unit_process_org_unit_id AND pos.position_is_active
+      JOIN sys.sys_user_position_assignments upa
+        ON upa.user_position_assignment_position_id = pos.position_id
+       AND upa.user_position_assignment_tenant_id = oup.org_unit_process_tenant_id
+       AND upa.user_position_assignment_status = 'ACTIVE'
+       AND upa.user_position_assignment_start_date <= current_date
+       AND coalesce(upa.user_position_assignment_end_date, current_date) >= current_date
+      JOIN sys.sys_users u ON u.user_id = upa.user_position_assignment_user_id AND u.user_status = 'ACTIVE'
+       -- le persone vere di Heuresys non si impersonano (Z-262): la scena entra come owner
+       AND lower(u.user_email) <> ALL($1::text[])
+     WHERE NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
+                        WHERE pp.process_participant_org_unit_process_id = oup.organization_unit_process_id
+                          AND pp.process_participant_position_id = pos.position_id)`;
+  const coppia = (
+    await pool.query<{ a_oup: string; a_pos: string; b_oup: string; b_pos: string; tenant_id: string }>(
+      `WITH p AS (${posto})
+       SELECT a.oup_id AS a_oup, a.position_id AS a_pos, b.oup_id AS b_oup, b.position_id AS b_pos,
+              a.tenant_id
+         FROM p a
+         JOIN p b ON b.tenant_id = a.tenant_id AND b.bp = a.bp
+                 AND b.unit_id <> a.unit_id AND b.user_id <> a.user_id
+        ORDER BY a.oup_id, a.position_id, b.oup_id, b.position_id
+        LIMIT 1`,
+      [REAL_PERSON_EMAILS],
+    )
+  ).rows[0];
+  if (!coppia) throw new Error("nessun processo con due unità e posti occupati: fixture impossibile");
+  const scrivi = (oup: string, pos: string, role: string) =>
+    pool.query(
+      `INSERT INTO sys.sys_process_participants
+         (process_participant_tenant_id, process_participant_org_unit_process_id,
+          process_participant_position_id, process_participant_role)
+       VALUES ($1, $2, $3, $4)`,
+      [coppia.tenant_id, oup, pos, role],
+    );
+  await scrivi(coppia.a_oup, coppia.a_pos, "OWNER");
+  await scrivi(coppia.b_oup, coppia.b_pos, "CONTRIBUTOR");
+}
+
 beforeAll(async () => {
   t = await buildTestApp();
+  await scenaSeManca();
   possessi = (
     await pool.query<Possesso>(
       `SELECT DISTINCT o.user_id, o.tenant_id, o.oup_id,

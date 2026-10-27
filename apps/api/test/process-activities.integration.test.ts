@@ -210,8 +210,9 @@ async function scrivi(): Promise<Scena> {
         `INSERT INTO sys.sys_approval_requests
            (approval_request_tenant_id, approval_request_title, approval_request_body, approval_request_resource_type,
             approval_request_status, approval_request_tenant_process_id, approval_request_tenant_process_step_id)
-         VALUES ($1, $2, $2, $3, $4, $5, $6) RETURNING approval_request_id AS id`,
-        [o.tenant_id, `${SEGRETO} ${tipo}`, tipo, stato, proc, step],
+         VALUES ($1, $2, $7, $3, $4, $5, $6) RETURNING approval_request_id AS id`,
+        // Titolo (varchar) e corpo (text) in due parametri: uno solo avrebbe due tipi (42P08).
+        [o.tenant_id, `${SEGRETO} ${tipo}`, tipo, stato, proc, step, `${SEGRETO} ${tipo}`],
       )
     ).rows[0]!.id;
   const regola = [

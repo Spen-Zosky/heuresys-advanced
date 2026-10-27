@@ -104,44 +104,76 @@ async function scenaSeManca(): Promise<void> {
   );
   if (gia.rowCount) return;
 
-  // Due unità-processo dello stesso modello in due unità diverse, ciascuna con un posto
-  // occupato oggi che su quella riga non ha ancora una partecipazione (indice unico).
-  const posto = `
-    SELECT oup.organization_unit_process_id AS oup_id,
-           oup.org_unit_process_tenant_id   AS tenant_id,
-           oup.org_unit_process_blueprint_process_id AS bp,
-           oup.org_unit_process_org_unit_id AS unit_id,
-           pos.position_id,
+  // Un posto occupato oggi, in un'unità che ha almeno un processo, e senza ancora una
+  // partecipazione su quella riga (indice unico processo-posto). Le persone vere di Heuresys
+  // non si impersonano (Z-262): la scena entra come owner.
+  const occupati = `
+    SELECT pos.position_id,
+           pos.position_organization_unit_id AS unit_id,
+           pos.position_tenant_id            AS tenant_id,
            upa.user_position_assignment_user_id AS user_id
-      FROM sys.sys_organization_unit_processes oup
-      JOIN sys.sys_positions pos
-        ON pos.position_organization_unit_id = oup.org_unit_process_org_unit_id AND pos.position_is_active
+      FROM sys.sys_positions pos
       JOIN sys.sys_user_position_assignments upa
         ON upa.user_position_assignment_position_id = pos.position_id
-       AND upa.user_position_assignment_tenant_id = oup.org_unit_process_tenant_id
+       AND upa.user_position_assignment_tenant_id = pos.position_tenant_id
        AND upa.user_position_assignment_status = 'ACTIVE'
        AND upa.user_position_assignment_start_date <= current_date
        AND coalesce(upa.user_position_assignment_end_date, current_date) >= current_date
       JOIN sys.sys_users u ON u.user_id = upa.user_position_assignment_user_id AND u.user_status = 'ACTIVE'
-       -- le persone vere di Heuresys non si impersonano (Z-262): la scena entra come owner
-       AND lower(u.user_email) <> ALL($1::text[])
-     WHERE NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
-                        WHERE pp.process_participant_org_unit_process_id = oup.organization_unit_process_id
-                          AND pp.process_participant_position_id = pos.position_id)`;
-  const coppia = (
-    await pool.query<{ a_oup: string; a_pos: string; b_oup: string; b_pos: string; tenant_id: string }>(
-      `WITH p AS (${posto})
-       SELECT a.oup_id AS a_oup, a.position_id AS a_pos, b.oup_id AS b_oup, b.position_id AS b_pos,
-              a.tenant_id
-         FROM p a
-         JOIN p b ON b.tenant_id = a.tenant_id AND b.bp = a.bp
-                 AND b.unit_id <> a.unit_id AND b.user_id <> a.user_id
-        ORDER BY a.oup_id, a.position_id, b.oup_id, b.position_id
-        LIMIT 1`,
+     WHERE pos.position_is_active
+       AND lower(u.user_email) <> ALL($1::text[])`;
+  const a = (
+    await pool.query<{ oup_id: string; bp: string; position_id: string; unit_id: string; tenant_id: string; user_id: string }>(
+      `SELECT oup.organization_unit_process_id AS oup_id,
+              oup.org_unit_process_blueprint_process_id AS bp,
+              o.position_id, o.unit_id, o.tenant_id, o.user_id
+         FROM (${occupati}) o
+         JOIN sys.sys_organization_unit_processes oup
+           ON oup.org_unit_process_org_unit_id = o.unit_id
+          AND oup.org_unit_process_tenant_id = o.tenant_id
+        WHERE NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
+                           WHERE pp.process_participant_org_unit_process_id = oup.organization_unit_process_id
+                             AND pp.process_participant_position_id = o.position_id)
+        ORDER BY 1, 3 LIMIT 1`,
       [REAL_PERSON_EMAILS],
     )
   ).rows[0];
-  if (!coppia) throw new Error("nessun processo con due unità e posti occupati: fixture impossibile");
+  if (!a) throw new Error("nessun posto occupato in un'unità con processi: fixture impossibile");
+
+  // Il collaboratore: un altro posto occupato da un'altra persona, in un'ALTRA unità dello
+  // stesso tenant. Se quella unità non collabora ancora al processo, la riga dell'unità si
+  // scrive qui (CONTRIBUTOR): misurato alla seconda corsa della CI, il database di collaudo
+  // non ha nessun processo condiviso fra due unità con posti occupati.
+  const b = (
+    await pool.query<{ position_id: string; unit_id: string; oup_id: string | null }>(
+      `SELECT o.position_id, o.unit_id, oup.organization_unit_process_id AS oup_id
+         FROM (${occupati}) o
+         LEFT JOIN sys.sys_organization_unit_processes oup
+           ON oup.org_unit_process_org_unit_id = o.unit_id
+          AND oup.org_unit_process_blueprint_process_id = $3
+        WHERE o.tenant_id = $2 AND o.unit_id <> $4 AND o.user_id <> $5
+          AND NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
+                           WHERE pp.process_participant_org_unit_process_id = oup.organization_unit_process_id
+                             AND pp.process_participant_position_id = o.position_id)
+        ORDER BY (oup.organization_unit_process_id IS NULL), 1 LIMIT 1`,
+      [REAL_PERSON_EMAILS, a.tenant_id, a.bp, a.unit_id, a.user_id],
+    )
+  ).rows[0];
+  if (!b) throw new Error("nessun secondo posto occupato in un'altra unità: fixture impossibile");
+  let bOup = b.oup_id;
+  if (!bOup) {
+    bOup = (
+      await pool.query<{ id: string }>(
+        `INSERT INTO sys.sys_organization_unit_processes
+           (org_unit_process_tenant_id, org_unit_process_org_unit_id,
+            org_unit_process_blueprint_process_id, org_unit_process_role)
+         VALUES ($1, $2, $3, 'CONTRIBUTOR')
+         RETURNING organization_unit_process_id AS id`,
+        [a.tenant_id, b.unit_id, a.bp],
+      )
+    ).rows[0]!.id;
+  }
+  const coppia = { tenant_id: a.tenant_id, a_oup: a.oup_id, a_pos: a.position_id, b_oup: bOup, b_pos: b.position_id };
   const scrivi = (oup: string, pos: string, role: string) =>
     pool.query(
       `INSERT INTO sys.sys_process_participants

@@ -24,7 +24,7 @@ import { loginRaw } from "./helpers/login.js";
 import { listProcessCollaborators } from "../src/modules/me/repository.js";
 import { functionalScopeUserIds } from "../src/lib/scope/functional.js";
 import { activeDomainsOf } from "../src/lib/scope/domains.js";
-import { isRealPerson, REAL_PERSON_EMAILS } from "../scripts/derive-access.mjs";
+import { isRealPerson } from "../scripts/derive-access.mjs";
 
 /** Chi occupa OGGI ciascun posto: scritto qui da capo, non preso dal frammento condiviso. */
 const OCCUPANTI_OGGI = `
@@ -107,39 +107,49 @@ async function scenaSeManca(): Promise<void> {
   // Un posto occupato oggi, in un'unità che ha almeno un processo, e senza ancora una
   // partecipazione su quella riga (indice unico processo-posto). Le persone vere di Heuresys
   // non si impersonano (Z-262): la scena entra come owner.
+  // Stessa selezione di process-participation-position (che sul database di collaudo trova
+  // i suoi occupanti): il tenant si prende dall'assegnazione, non dalla posizione.
   const occupati = `
-    SELECT pos.position_id,
-           pos.position_organization_unit_id AS unit_id,
-           pos.position_tenant_id            AS tenant_id,
-           upa.user_position_assignment_user_id AS user_id
-      FROM sys.sys_positions pos
-      JOIN sys.sys_user_position_assignments upa
-        ON upa.user_position_assignment_position_id = pos.position_id
-       AND upa.user_position_assignment_tenant_id = pos.position_tenant_id
-       AND upa.user_position_assignment_status = 'ACTIVE'
-       AND upa.user_position_assignment_start_date <= current_date
-       AND coalesce(upa.user_position_assignment_end_date, current_date) >= current_date
-      JOIN sys.sys_users u ON u.user_id = upa.user_position_assignment_user_id AND u.user_status = 'ACTIVE'
-     WHERE pos.position_is_active
-       AND lower(u.user_email) <> ALL($1::text[])`;
-  const a = (
-    await pool.query<{ oup_id: string; bp: string; position_id: string; unit_id: string; tenant_id: string; user_id: string }>(
+    SELECT a.user_position_assignment_position_id  AS position_id,
+           p.position_organization_unit_id         AS unit_id,
+           a.user_position_assignment_tenant_id    AS tenant_id,
+           a.user_position_assignment_user_id      AS user_id,
+           u.user_email                            AS email
+      FROM sys.sys_user_position_assignments a
+      JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+      JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id
+     WHERE a.user_position_assignment_status = 'ACTIVE'
+       AND a.user_position_assignment_start_date <= current_date
+       AND (a.user_position_assignment_end_date IS NULL OR a.user_position_assignment_end_date >= current_date)
+       AND p.position_is_active
+       AND u.user_status = 'ACTIVE'`;
+  const candidatiA = (
+    await pool.query<{ oup_id: string; bp: string; position_id: string; unit_id: string; tenant_id: string; user_id: string; email: string | null }>(
       `SELECT oup.organization_unit_process_id AS oup_id,
               oup.org_unit_process_blueprint_process_id AS bp,
-              o.position_id, o.unit_id, o.tenant_id, o.user_id
+              o.position_id, o.unit_id, o.tenant_id, o.user_id, o.email
          FROM (${occupati}) o
          JOIN sys.sys_organization_unit_processes oup
            ON oup.org_unit_process_org_unit_id = o.unit_id
-          AND oup.org_unit_process_tenant_id = o.tenant_id
         WHERE NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
                            WHERE pp.process_participant_org_unit_process_id = oup.organization_unit_process_id
                              AND pp.process_participant_position_id = o.position_id
                              AND pp.process_participant_is_active)
-        ORDER BY 1, 3 LIMIT 1`,
-      [REAL_PERSON_EMAILS],
+        ORDER BY 1, 3`,
     )
-  ).rows[0];
-  if (!a) throw new Error("nessun posto occupato in un'unità con processi: fixture impossibile");
+  ).rows;
+  const a = candidatiA.find((x) => x.email !== null && !isRealPerson(x.email));
+  console.log(JSON.stringify({ scena: "process-coordination", candidati: candidatiA.length, scelto: a?.oup_id ?? null }));
+  if (!a) {
+    // Una scena impossibile dice PERCHÉ: ogni giro della CI costa venti minuti.
+    const conta = async (sql: string) => Number((await pool.query<{ n: string }>(`SELECT count(*)::text AS n FROM (${sql}) x`)).rows[0]?.n);
+    throw new Error(
+      "nessun posto occupato in un'unità con processi: fixture impossibile — " +
+        `occupati=${await conta(occupati)}, candidati=${candidatiA.length}, ` +
+        `unita_processo=${await conta("SELECT 1 FROM sys.sys_organization_unit_processes")}, ` +
+        `partecipazioni_attive=${await conta("SELECT 1 FROM sys.sys_process_participants WHERE process_participant_is_active")}`,
+    );
+  }
 
   // Il collaboratore: un altro posto occupato da un'altra persona, in un'ALTRA unità dello
   // stesso tenant. Se quella unità non collabora ancora al processo, la riga dell'unità si
@@ -151,14 +161,14 @@ async function scenaSeManca(): Promise<void> {
          FROM (${occupati}) o
          LEFT JOIN sys.sys_organization_unit_processes oup
            ON oup.org_unit_process_org_unit_id = o.unit_id
-          AND oup.org_unit_process_blueprint_process_id = $3
-        WHERE o.tenant_id = $2 AND o.unit_id <> $4 AND o.user_id <> $5
+          AND oup.org_unit_process_blueprint_process_id = $2
+        WHERE o.tenant_id = $1 AND o.unit_id <> $3 AND o.user_id <> $4
           AND NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
                            WHERE pp.process_participant_org_unit_process_id = oup.organization_unit_process_id
                              AND pp.process_participant_position_id = o.position_id
                              AND pp.process_participant_is_active)
         ORDER BY (oup.organization_unit_process_id IS NULL), 1 LIMIT 1`,
-      [REAL_PERSON_EMAILS, a.tenant_id, a.bp, a.unit_id, a.user_id],
+      [a.tenant_id, a.bp, a.unit_id, a.user_id],
     )
   ).rows[0];
   if (!b) throw new Error("nessun secondo posto occupato in un'altra unità: fixture impossibile");

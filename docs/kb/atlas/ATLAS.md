@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `6f39e3cc` (2026-10-27T05:35:53+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `b24497f7` (2026-10-27T16:51:08+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
 | Moduli API | 113 |
-| Route API | 660 |
+| Route API | 661 |
 | Pagine web | 129 |
 | Schemi shared | 123 |
-| Tabelle DB | 368 (vuote: 66) |
-| Viste / matview | 72 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 293 |
+| Tabelle DB | 373 (vuote: 67) |
+| Viste / matview | 77 / 0 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 294 |
 
 ## Moduli API
 
@@ -69,7 +69,7 @@
 | learning-modules | /v1/learning-modules | 5 | 4 | 1 | 1 |
 | learning-path-steps | /v1/learning-path-steps | 5 | 4 | 3 | 1 |
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
-| me | /v1/me | 66 | 32 | 62 | 44 |
+| me | /v1/me | 67 | 32 | 64 | 44 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 2 | 2 | 2 | 1 |
 | notifications | /v1/notifications | 2 | 2 | 2 | 0 |
@@ -143,6 +143,7 @@
 
 - `audit.agent_gateway_decisions`
 - `audit.user_self_service_actions`
+- `staging.attivita_processi_dubbi`
 - `staging.mig349_esco_consolidamento_undo`
 - `staging.process_participants_regole_esclusi`
 - `staging.tenant_import_people`

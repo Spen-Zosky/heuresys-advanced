@@ -12,7 +12,7 @@ import type {
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
   MeKpiTarget, MeCertification, CreateMeCertificationBody, MeDocument,
-  MeMentorship, MeProcessParticipation, MeSkillGapScore,
+  MeMentorship, MeProcessParticipation, MeProcessCollaborator, MeSkillGapScore,
   UserPreference, UpdateUserPreferenceBody,
 } from "@heuresys/shared";
 import { ME_PREFERENCE_DEFAULTS } from "@heuresys/shared";
@@ -1684,6 +1684,110 @@ export async function listMyProcessParticipations(
     positionTitle: r.position_title,
   }));
   return { items, total: items.length };
+}
+
+/** Chi lavora a un processo che possiedo, in tutte le unità che vi collaborano.
+ *
+ *  ADR-0036 §8, dominio `process_coordination` (scelta B di Enzo, 2026-10-27). Il punto di
+ *  partenza è UNA MIA partecipazione: l'unità-processo indicata deve essere una in cui oggi
+ *  occupo un posto OWNER. Se non lo è si restituisce `null`, e il chiamante risponde 404 —
+ *  «non è tuo» e «non esiste» non si distinguono.
+ *
+ *  Il processo è il modello (`blueprint_process_id`) di quella riga; le unità che vi
+ *  collaborano sono tutte le righe dello stesso tenant con lo stesso modello, qualunque sia
+ *  il loro ruolo RACI. Le persone si ricavano dai posti (`PARTECIPANTI_OGGI_SQL`, ADR-0044):
+ *  una posizione vacante partecipa ma non porta nessun nome.
+ *
+ *  ⚠ Cosa NON fa, ed è la metà della decisione: non allarga `functionalScopeUserIds`. Le
+ *  attività di queste persone (approvazioni, squadre, progetti) non portano il processo a cui
+ *  appartengono, quindi allargare l'asse funzionale aprirebbe all'owner TUTTE le loro
+ *  attività — proprio ciò che la scelta B esclude. */
+export async function listProcessCollaborators(
+  q: DbConnector,
+  ownerUserId: string,
+  tenantId: string,
+  organizationUnitProcessId: string,
+): Promise<{
+  organizationUnitProcessId: string;
+  processName: string | null;
+  items: MeProcessCollaborator[];
+  total: number;
+} | null> {
+  const mio = await q.query<{ blueprint_process_id: string; process_name: string | null }>(
+    `SELECT oup.org_unit_process_blueprint_process_id AS blueprint_process_id,
+            bpr.blueprint_process_name               AS process_name
+       FROM sys.sys_organization_unit_processes oup
+       LEFT JOIN sys.sys_blueprint_process_registry bpr
+              ON bpr.blueprint_process_id = oup.org_unit_process_blueprint_process_id
+      WHERE oup.organization_unit_process_id = $1
+        AND oup.org_unit_process_tenant_id = $2
+        AND EXISTS (SELECT 1 FROM ${PARTECIPANTI_OGGI_SQL} mine
+                     WHERE mine.org_unit_process_id = oup.organization_unit_process_id
+                       AND mine.user_id = $3
+                       AND mine.role = 'OWNER'
+                       AND mine.is_active)`,
+    [organizationUnitProcessId, tenantId, ownerUserId],
+  );
+  const processo = mio.rows[0];
+  if (!processo) return null;
+
+  const res = await q.query<{
+    participant_id: string;
+    org_unit_process_id: string;
+    organization_unit_name: string | null;
+    unit_role: string;
+    participant_role: string;
+    position_id: string;
+    position_title: string | null;
+    user_id: string;
+    person_name: string | null;
+  }>(
+    `SELECT pp.participant_id,
+            pp.org_unit_process_id,
+            ou.organization_unit_name,
+            oup.org_unit_process_role AS unit_role,
+            pp.role                   AS participant_role,
+            pp.position_id,
+            pos.position_title,
+            pp.user_id,
+            nullif(trim(coalesce(u.user_first_name, '') || ' ' || coalesce(u.user_last_name, '')), '')
+              AS person_name
+       FROM ${PARTECIPANTI_OGGI_SQL} pp
+       JOIN sys.sys_organization_unit_processes oup
+         ON oup.organization_unit_process_id = pp.org_unit_process_id
+       LEFT JOIN sys.sys_organization_units ou
+              ON ou.organization_unit_id = oup.org_unit_process_org_unit_id
+       LEFT JOIN sys.sys_positions pos
+              ON pos.position_id = pp.position_id
+       LEFT JOIN sys.sys_users u
+              ON u.user_id = pp.user_id
+      WHERE pp.is_active
+        AND pp.tenant_id = $1
+        AND oup.org_unit_process_tenant_id = $1
+        AND oup.org_unit_process_blueprint_process_id = $2
+      ORDER BY CASE oup.org_unit_process_role
+                 WHEN 'OWNER' THEN 0 WHEN 'CONTRIBUTOR' THEN 1
+                 WHEN 'CONSULTED' THEN 2 ELSE 3 END,
+               ou.organization_unit_name NULLS LAST, person_name NULLS LAST, pp.participant_id`,
+    [tenantId, processo.blueprint_process_id],
+  );
+  const items: MeProcessCollaborator[] = res.rows.map((r) => ({
+    participationId: r.participant_id,
+    organizationUnitProcessId: r.org_unit_process_id,
+    organizationUnitName: r.organization_unit_name,
+    unitRole: r.unit_role,
+    participantRole: r.participant_role,
+    positionId: r.position_id,
+    positionTitle: r.position_title,
+    userId: r.user_id,
+    personName: r.person_name,
+  }));
+  return {
+    organizationUnitProcessId,
+    processName: processo.process_name,
+    items,
+    total: items.length,
+  };
 }
 
 /** Il punteggio di divario di competenze calcolato su di me.

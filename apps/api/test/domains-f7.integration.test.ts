@@ -319,7 +319,7 @@ describe("#99 F7 — la voce di menu discende dalla matrice", () => {
     ).toEqual([]);
   });
 
-  /** La matrice è totale: 10 domini × 7 classi, nessuna cella dimenticata. */
+  /** La matrice è totale: 11 domini × 7 classi, nessuna cella dimenticata. */
   it("dichiara ogni cella di ogni dominio", () => {
     const classi: DataClass[] = ["PERSONAL", "COMPENSATION", "SKILL", "EVALUATION",
                                  "ACTIVITY", "CREDENTIAL", "SPECIAL_CATEGORY"];

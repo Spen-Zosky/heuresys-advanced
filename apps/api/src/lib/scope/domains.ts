@@ -60,6 +60,7 @@ export type Domain =
   | "line_management"
   | "team_lead"
   | "process_owner"
+  | "process_coordination"
   | "mentor"
   | "approver"
   | "team_peer"
@@ -132,6 +133,7 @@ export async function activeDomainsOf(
     line_management: boolean;
     team_lead: boolean;
     process_owner: boolean;
+    process_coordination: boolean;
     mentor: boolean;
     approver: boolean;
     team_peer: boolean;
@@ -148,6 +150,20 @@ export async function activeDomainsOf(
                 WHERE p.user_id = $1
                   AND p.role = 'OWNER'
                   AND p.is_active)                            AS process_owner,
+       -- ADR-0036 §8 (scelta B, 2026-10-27): l'owner di un processo a cui collabora almeno
+       -- un'ALTRA unita'. Non apre una superficie generale (non sta in
+       -- DOMINI_CHE_APRONO_UNA_SUPERFICIE): dichiara la cella con cui l'owner guarda chi
+       -- lavora al processo fuori dalla propria unita' (/v1/me/processes/:id/participants).
+       EXISTS (SELECT 1 FROM ${PARTECIPANTI_OGGI_SQL} p
+                 JOIN sys.sys_organization_unit_processes mine
+                   ON mine.organization_unit_process_id = p.org_unit_process_id
+                 JOIN sys.sys_organization_unit_processes other
+                   ON other.org_unit_process_tenant_id = mine.org_unit_process_tenant_id
+                  AND other.org_unit_process_blueprint_process_id = mine.org_unit_process_blueprint_process_id
+                  AND other.org_unit_process_org_unit_id <> mine.org_unit_process_org_unit_id
+                WHERE p.user_id = $1
+                  AND p.role = 'OWNER'
+                  AND p.is_active)                            AS process_coordination,
        -- #99 F6 — i tre domini che ADR-0036 dichiarava e nessuno calcolava.
        -- Ciascuno esce dalla tabella che lo DEFINISCE, non da una lista di ruoli.
        EXISTS (SELECT 1 FROM sys.sys_mentorships m
@@ -177,6 +193,7 @@ export async function activeDomainsOf(
   if (r?.line_management) domains.add("line_management");
   if (r?.team_lead) domains.add("team_lead");
   if (r?.process_owner) domains.add("process_owner");
+  if (r?.process_coordination) domains.add("process_coordination");
   if (r?.mentor) domains.add("mentor");
   if (r?.approver) domains.add("approver");
   if (r?.team_peer) domains.add("team_peer");

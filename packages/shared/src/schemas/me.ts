@@ -844,6 +844,37 @@ export const MeProcessParticipationsResponseSchema = z.object({
 });
 
 /**
+ * Chi lavora a un processo che possiedo, in TUTTE le unità che vi collaborano (ADR-0036
+ * §8, dominio `process_coordination`, scelta B di Enzo del 2026-10-27).
+ *
+ * Il contratto è chiuso apposta (`strict`): nome, posto, unità e i due ruoli RACI, e niente
+ * altro. È la cella `PERSONAL = mask` della matrice: l'identità professionale — la stessa
+ * che l'organigramma mostra già a chiunque lavori nel tenant (#193) — e nessun dato privato,
+ * economico, valutativo o di competenza (I18).
+ */
+export const MeProcessCollaboratorSchema = z.object({
+  participationId: z.uuid(),
+  organizationUnitProcessId: z.uuid(),
+  organizationUnitName: z.string().nullable(),
+  /** Il ruolo RACI dell'UNITÀ nel processo (OWNER, CONTRIBUTOR, CONSULTED, INFORMED). */
+  unitRole: z.string(),
+  /** Il ruolo RACI della PARTECIPAZIONE, cioè del posto. */
+  participantRole: z.string(),
+  positionId: z.uuid(),
+  positionTitle: z.string().nullable(),
+  userId: z.uuid(),
+  personName: z.string().nullable(),
+}).strict();
+export type MeProcessCollaborator = z.infer<typeof MeProcessCollaboratorSchema>;
+export const MeProcessCollaboratorsResponseSchema = z.object({
+  organizationUnitProcessId: z.uuid(),
+  processName: z.string().nullable(),
+  items: z.array(MeProcessCollaboratorSchema),
+  total: z.number().int().min(0),
+});
+export const MeOrgUnitProcessIdParamSchema = z.object({ organizationUnitProcessId: z.uuid() });
+
+/**
  * Il punteggio di divario di competenze calcolato sulla persona.
  *
  * Stessa natura di `sys_model_predictions`, che Enzo ha dichiarato visibile

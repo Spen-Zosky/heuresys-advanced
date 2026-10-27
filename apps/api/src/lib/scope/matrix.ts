@@ -39,7 +39,7 @@ import type { Domain } from "./domains.js";
 export type AccessMode = "edit" | "read" | "mask" | "none";
 
 /**
- * M1 — 10 domini × 7 classi.
+ * M1 — 11 domini × 7 classi.
  *
  * DUE ASSENZE DICHIARATE, perché un'assenza non spiegata è un difetto travestito:
  *
@@ -83,6 +83,17 @@ export const M1: Readonly<Record<Domain, Readonly<Record<DataClass, AccessMode>>
   process_owner: {
     PERSONAL: "mask", COMPENSATION: "none", SKILL: "read", EVALUATION: "none",
     ACTIVITY: "edit", CREDENTIAL: "none", SPECIAL_CATEGORY: "none",
+  },
+  // ADR-0036 §8 (scelta B di Enzo, 2026-10-27): l'owner guarda chi lavora al SUO processo
+  // nelle altre unita' che vi collaborano. Identita' professionale sì (nome, posto, unita',
+  // ruolo RACI — la stessa dell'organigramma, #193), competenze no: e' l'unica cella che lo
+  // separa da `process_owner`, che la competenza la vede solo nella propria unita'.
+  // ACTIVITY `read`, non `edit`: le attivita' del processo si guardano, non si governano —
+  // e oggi nessuna attivita' porta il processo a cui appartiene, quindi la cella e'
+  // dichiarata e non ancora esercitata (§8).
+  process_coordination: {
+    PERSONAL: "mask", COMPENSATION: "none", SKILL: "none", EVALUATION: "none",
+    ACTIVITY: "read", CREDENTIAL: "none", SPECIAL_CATEGORY: "none",
   },
   mentor: {
     PERSONAL: "mask", COMPENSATION: "none", SKILL: "read", EVALUATION: "none",

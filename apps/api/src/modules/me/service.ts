@@ -511,6 +511,16 @@ export const meService = {
     return repo.listMyProcessParticipations(pool, actor.userId, requireTenant(actor));
   },
 
+  /** ADR-0036 §8 — chi lavora a un processo che possiedo, in tutte le unità collaboranti.
+   *  Fuori dal mio possesso è 404, non 403: un 403 direbbe che la riga esiste. */
+  async listProcessCollaborators(actor: SelfActor, organizationUnitProcessId: string) {
+    const out = await repo.listProcessCollaborators(
+      pool, actor.userId, requireTenant(actor), organizationUnitProcessId,
+    );
+    if (!out) throw new NotFoundError("Process");
+    return out;
+  },
+
   async listSkillGapScores(actor: SelfActor) {
     return repo.listMySkillGapScores(pool, actor.userId, requireTenant(actor));
   },

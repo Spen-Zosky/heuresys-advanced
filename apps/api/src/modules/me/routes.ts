@@ -33,6 +33,7 @@ import {
   MeKpisResponseSchema,
   MeMentorshipsResponseSchema,
   MeProcessParticipationsResponseSchema,
+  MeProcessCollaboratorsResponseSchema, MeOrgUnitProcessIdParamSchema,
   MeSkillGapScoresResponseSchema,
   MeDelegationsResponseSchema,
   MeCertificationsResponseSchema, MeCertificationSchema, CreateMeCertificationBodySchema,
@@ -442,6 +443,14 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("team:read:self")],
     schema: { response: { 200: MeProcessParticipationsResponseSchema } },
   }, async (req) => meService.listProcessParticipations(selfActor(req)));
+
+  // ADR-0036 §8 (scelta B, 2026-10-27) — chi lavora a un processo che POSSIEDO, in tutte le
+  // unità che vi collaborano: nome, posto, unità, ruoli RACI. Il punto d'appoggio è una mia
+  // partecipazione OWNER, non un `:userId`: il contratto del modulo resta intatto.
+  app.get("/processes/:organizationUnitProcessId/participants", {
+    preHandler: [requirePermission("team:read:self")],
+    schema: { params: MeOrgUnitProcessIdParamSchema, response: { 200: MeProcessCollaboratorsResponseSchema } },
+  }, async (req) => meService.listProcessCollaborators(selfActor(req), req.params.organizationUnitProcessId));
 
   // Il punteggio di divario calcolato su di me, con modello e data: la prescrizione che
   // Enzo ha dato per le predizioni il 2026-08-04, applicata a un dato della stessa specie.

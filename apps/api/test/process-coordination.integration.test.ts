@@ -123,32 +123,54 @@ async function scenaSeManca(): Promise<void> {
        AND (a.user_position_assignment_end_date IS NULL OR a.user_position_assignment_end_date >= current_date)
        AND p.position_is_active
        AND u.user_status = 'ACTIVE'`;
-  const candidatiA = (
-    await pool.query<{ oup_id: string; bp: string; position_id: string; unit_id: string; tenant_id: string; user_id: string; email: string | null }>(
-      `SELECT oup.organization_unit_process_id AS oup_id,
-              oup.org_unit_process_blueprint_process_id AS bp,
-              o.position_id, o.unit_id, o.tenant_id, o.user_id, o.email
+  // Qualunque posto occupato da una persona non vera va bene: la riga della sua
+  // partecipazione, se c'è già (anche attiva, con un altro ruolo), si riscrive come OWNER.
+  // Misurato alla quinta corsa: 161 posti occupati e nessuno senza riga attiva sui processi
+  // della propria unità — filtrare per «senza riga» lasciava zero candidati.
+  const posti = (
+    await pool.query<{ position_id: string; unit_id: string; tenant_id: string; user_id: string; email: string | null; oup_id: string | null; bp: string | null }>(
+      `SELECT o.position_id, o.unit_id, o.tenant_id, o.user_id, o.email,
+              oup.organization_unit_process_id AS oup_id,
+              oup.org_unit_process_blueprint_process_id AS bp
          FROM (${occupati}) o
-         JOIN sys.sys_organization_unit_processes oup
+         LEFT JOIN sys.sys_organization_unit_processes oup
            ON oup.org_unit_process_org_unit_id = o.unit_id
-        WHERE NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
-                           WHERE pp.process_participant_org_unit_process_id = oup.organization_unit_process_id
-                             AND pp.process_participant_position_id = o.position_id
-                             AND pp.process_participant_is_active)
-        ORDER BY 1, 3`,
+        ORDER BY (oup.organization_unit_process_id IS NULL), 1, 6`,
     )
   ).rows;
-  const a = candidatiA.find((x) => x.email !== null && !isRealPerson(x.email));
-  console.log(JSON.stringify({ scena: "process-coordination", candidati: candidatiA.length, scelto: a?.oup_id ?? null }));
-  if (!a) {
+  const scelto = posti.find((x) => x.email !== null && !isRealPerson(x.email));
+  console.log(JSON.stringify({ scena: "process-coordination", posti: posti.length, scelto: scelto?.oup_id ?? null }));
+  if (!scelto) {
     // Una scena impossibile dice PERCHÉ: ogni giro della CI costa venti minuti.
     const conta = async (sql: string) => Number((await pool.query<{ n: string }>(`SELECT count(*)::text AS n FROM (${sql}) x`)).rows[0]?.n);
     throw new Error(
-      "nessun posto occupato in un'unità con processi: fixture impossibile — " +
-        `occupati=${await conta(occupati)}, candidati=${candidatiA.length}, ` +
-        `unita_processo=${await conta("SELECT 1 FROM sys.sys_organization_unit_processes")}, ` +
-        `partecipazioni_attive=${await conta("SELECT 1 FROM sys.sys_process_participants WHERE process_participant_is_active")}`,
+      "nessun posto occupato da una persona non vera: fixture impossibile — " +
+        `occupati=${await conta(occupati)}, ` +
+        `unita_processo=${await conta("SELECT 1 FROM sys.sys_organization_unit_processes")}`,
     );
+  }
+  let a = { ...scelto, oup_id: scelto.oup_id ?? "", bp: scelto.bp ?? "" };
+  if (!scelto.oup_id) {
+    // L'unità non ha ancora processi: le si dà un processo del modello preso dal tenant.
+    const bp = (
+      await pool.query<{ bp: string }>(
+        `SELECT org_unit_process_blueprint_process_id AS bp FROM sys.sys_organization_unit_processes
+          ORDER BY (org_unit_process_tenant_id = $1) DESC, 1 LIMIT 1`,
+        [scelto.tenant_id],
+      )
+    ).rows[0];
+    if (!bp) throw new Error("nessun processo del modello nel database: fixture impossibile");
+    const id = (
+      await pool.query<{ id: string }>(
+        `INSERT INTO sys.sys_organization_unit_processes
+           (org_unit_process_tenant_id, org_unit_process_org_unit_id,
+            org_unit_process_blueprint_process_id, org_unit_process_role)
+         VALUES ($1, $2, $3, 'CONTRIBUTOR')
+         RETURNING organization_unit_process_id AS id`,
+        [scelto.tenant_id, scelto.unit_id, bp.bp],
+      )
+    ).rows[0]!.id;
+    a = { ...a, oup_id: id, bp: bp.bp };
   }
 
   // Il collaboratore: un altro posto occupato da un'altra persona, in un'ALTRA unità dello
@@ -163,10 +185,6 @@ async function scenaSeManca(): Promise<void> {
            ON oup.org_unit_process_org_unit_id = o.unit_id
           AND oup.org_unit_process_blueprint_process_id = $2
         WHERE o.tenant_id = $1 AND o.unit_id <> $3 AND o.user_id <> $4
-          AND NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
-                           WHERE pp.process_participant_org_unit_process_id = oup.organization_unit_process_id
-                             AND pp.process_participant_position_id = o.position_id
-                             AND pp.process_participant_is_active)
         ORDER BY (oup.organization_unit_process_id IS NULL), 1 LIMIT 1`,
       [a.tenant_id, a.bp, a.unit_id, a.user_id],
     )

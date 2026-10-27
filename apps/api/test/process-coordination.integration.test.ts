@@ -133,7 +133,8 @@ async function scenaSeManca(): Promise<void> {
           AND oup.org_unit_process_tenant_id = o.tenant_id
         WHERE NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
                            WHERE pp.process_participant_org_unit_process_id = oup.organization_unit_process_id
-                             AND pp.process_participant_position_id = o.position_id)
+                             AND pp.process_participant_position_id = o.position_id
+                             AND pp.process_participant_is_active)
         ORDER BY 1, 3 LIMIT 1`,
       [REAL_PERSON_EMAILS],
     )
@@ -154,7 +155,8 @@ async function scenaSeManca(): Promise<void> {
         WHERE o.tenant_id = $2 AND o.unit_id <> $4 AND o.user_id <> $5
           AND NOT EXISTS (SELECT 1 FROM sys.sys_process_participants pp
                            WHERE pp.process_participant_org_unit_process_id = oup.organization_unit_process_id
-                             AND pp.process_participant_position_id = o.position_id)
+                             AND pp.process_participant_position_id = o.position_id
+                             AND pp.process_participant_is_active)
         ORDER BY (oup.organization_unit_process_id IS NULL), 1 LIMIT 1`,
       [REAL_PERSON_EMAILS, a.tenant_id, a.bp, a.unit_id, a.user_id],
     )
@@ -174,14 +176,26 @@ async function scenaSeManca(): Promise<void> {
     ).rows[0]!.id;
   }
   const coppia = { tenant_id: a.tenant_id, a_oup: a.oup_id, a_pos: a.position_id, b_oup: bOup, b_pos: b.position_id };
-  const scrivi = (oup: string, pos: string, role: string) =>
-    pool.query(
+  // Il posto può avere già una riga SPENTA su quella unità-processo (indice unico
+  // processo-posto): misurato alla terza corsa, nel database di collaudo ogni posto occupato
+  // ce l'ha. Allora la riga si riaccende col ruolo della scena, invece di scriverne un'altra.
+  const scrivi = async (oup: string, pos: string, role: string) => {
+    const acceso = await pool.query(
+      `UPDATE sys.sys_process_participants
+          SET process_participant_is_active = true, process_participant_role = $3
+        WHERE process_participant_org_unit_process_id = $1
+          AND process_participant_position_id = $2`,
+      [oup, pos, role],
+    );
+    if (acceso.rowCount) return;
+    await pool.query(
       `INSERT INTO sys.sys_process_participants
          (process_participant_tenant_id, process_participant_org_unit_process_id,
           process_participant_position_id, process_participant_role)
        VALUES ($1, $2, $3, $4)`,
       [coppia.tenant_id, oup, pos, role],
     );
+  };
   await scrivi(coppia.a_oup, coppia.a_pos, "OWNER");
   await scrivi(coppia.b_oup, coppia.b_pos, "CONTRIBUTOR");
 }

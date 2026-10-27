@@ -1,12 +1,12 @@
 # STATE — vista rapida
 
-**Updated**: 2026-10-26 (O2-09 dal thread di progetto: decisioni del passo 3 prese, passo 3a e regole pronti su copia; produzione ferma sul permesso; esiti in `.programmi/onda2/esiti/O2-09.md` e `O2-10.md`)
+**Updated**: 2026-10-27 (O2-09 e O2-10 dal thread di progetto: passo 3 della partecipazione per posizione DEPLOYATO su `3a323bde`; esiti in `.programmi/onda2/esiti/O2-09.md` e `O2-10.md`)
 
 *I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-**O2-09 (26 ottobre, thread di progetto sulla VM)**: l'Amministratore di Sistema ha deciso D-P3-1 (corretta: un solo process owner per processo, il responsabile dell'unità di governo), D-P3-2, D-P3-3 e il vincolo condizionato del 3b. ADR-0046 risultava già accettato il 23/10: #269 chiusa. Su copia della produzione: passo 2 verde con ritorno byte per byte; script delle regole con inversa e prova verde (un owner per ogni processo); codice del 3a con frammento unico e test del cambio di posto rosso prima e verde dopo; confronto attori senza differenze non spiegate. **Non in produzione**: la corsa del passo 2 è stata negata dal controllo dei permessi della sessione, quindi né il passo 2, né le regole, né il rilascio del 3a sono stati eseguiti. Il 3b (O2-10) è bloccato da una scoperta: la `000184` si riapplica a ogni deploy e la CI ha partecipazioni attive senza posizione. Backup della produzione del 26/10 in `pg_dump_snapshots/` (VM). Datastore: partizione di dicembre dell'audit creata (D-66, PR del datastore).
+**O2-09 e O2-10 (26-27 ottobre, thread di progetto sulla VM)**: decisioni dell'Amministratore di Sistema sul passo 3 (D-P3-1 corretta: un solo process owner per processo, il responsabile dell'unità di governo; D-P3-2; D-P3-3; vincolo condizionato). In produzione, con backup verificato prima di ogni passo: passo 2 di PE-4, regole (un process owner per ognuno dei processi), D-P3-2. Codice del 3a e del 3b con `000459` e `000184` emendata: **DEPLOYATO su `3a323bde`** (CI 9/9), prova dal vivo registrata. Sbloccati lungo la strada due rossi di CI già presenti su `main` (atlante non rigenerato; font di Google, passeggero). Datastore: partizione di dicembre dell'audit creata (D-66, PR #7 del datastore da unire). ADR-0046 accettato il 23/10: #269 chiusa; #270 chiusa.
 
 **S1119, O2-02 (17 ottobre)**: il caricatore del pacchetto (`db/scripts/pacchetto/`) scrive e rilegge per codice ogni sezione e campo v0.3 nelle tabelle della `000458` e accetta ancora il v0.2; convalida il pacchetto (schema, impronte, limiti delle colonne) prima di toccare il database, riporta senza fermarsi le regole che marcano. Prova su copia del gemello: 111 controlli, zero rossi (v0.2 come prima, tre pacchetti v0.3 riletti uguali, sette rifiuti, sette mutazioni rosse). **`WAIT-INPUT`: il pacchetto v0.3 vero della banca non è depositato dal datastore**; la prova ha girato su un pacchetto di prova costruito dal v0.2 e dallo schema, dichiarato tale. Lavoro NON applicato in produzione.
 
@@ -16,8 +16,8 @@
 
 ## Top priorities
 
-1. **Permesso dell'Amministratore di Sistema** per la corsa in produzione del passo 2 e delle regole e per armare il rilascio del 3a (#270, `O2-09.md`); la `000457` è già in produzione (DEPLOYATO su `bb97ea3b`).
-2. **Decisione sul 3b** (#270, `O2-10.md`): emendare la `000184` e portare in catena la parte certa del passo 2 prima del vincolo. `O2-07` e `O2-08` possono partire (ADR-0046 accettato).
+1. **Onda 2 (#271)**: `O2-03` (struttura del tenant) può partire; `O2-07` e `O2-08` sono sbloccati (ADR-0046 accettato).
+2. **Registro di O2-09**: estendere il perimetro del process owner alle righe delle altre unità dello stesso processo? (decisione dell'Amministratore di Sistema).
 3. **Onda 2 (#271)**: `O2-01` e `O2-02` fatte (`O2-02` con `WAIT-INPUT` sul pacchetto v0.3 vero della banca: va rifatta la prova quando il datastore lo deposita); `O2-03` (struttura del tenant) può partire.
 
 ## Open questions

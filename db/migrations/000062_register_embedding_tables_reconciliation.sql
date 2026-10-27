@@ -164,7 +164,13 @@ VALUES
   ('sys_blueprint_content_process_steps', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
   ('sys_blueprint_content_position_responsibilities', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]')
+   '[sign-off: EXCLUDE — contenuto di modello (pacchetto datastore v0.3, mig 000458, onda 2 O2-01). Righe di una versione di variante, prodotte dall''accoglienza del pacchetto del datastore: modello di piattaforma, non dati di un cliente ne'' righe importate dal legacy. Registrata qui e non in 000458: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_tenant_processes', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — struttura del processo del tenant (mig 000462, ADR-0049, onda 2). Righe nuove, scritte dal riempimento fuori catena a partire dal modello e dalle fasi del datastore: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000462: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_tenant_process_steps', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — struttura del processo del tenant (mig 000462, ADR-0049, onda 2). Righe nuove, scritte dal riempimento fuori catena a partire dal modello e dalle fasi del datastore: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000462: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_tenant_process_activity_rules', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — struttura del processo del tenant (mig 000462, ADR-0049, onda 2). Righe nuove, scritte dal riempimento fuori catena a partire dal modello e dalle fasi del datastore: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000462: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

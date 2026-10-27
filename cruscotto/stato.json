@@ -1,7 +1,7 @@
 {
  "schema": "cruscotto-stato/1",
  "progetto": "heuresys-advanced",
- "aggiornato_il": "2026-10-26",
+ "aggiornato_il": "2026-10-27",
  "aggiornato_da": "semina iniziale dal cruscotto (Claude, 21/10/2026)",
  "fase": "Dopo la GA v1.0.0: adesione al contratto dati del datastore, onda 2 in corso",
  "stato": "giallo",
@@ -9,20 +9,12 @@
  "avanzamento": null,
  "decisioni_attese": [
   {
-   "id": "#270-PROD",
-   "titolo": "Permesso per la corsa in produzione del passo 2 e delle regole del passo 3 e per armare il rilascio del 3a: il controllo dei permessi della sessione l'ha negata il 26/10",
+   "id": "OWNER-PERIMETRO",
+   "titolo": "Il process owner vede solo i partecipanti della riga della sua unità: estenderlo alle altre unità che collaborano allo stesso processo?",
    "dal": "2026-10-26",
-   "blocca": "passo 3a in produzione, poi O2-10",
-   "raccomandazione": "concedere: backup verificato del 26/10 e ritorno provato su copia",
+   "blocca": "",
+   "raccomandazione": "",
    "fonte": ".programmi/onda2/esiti/O2-09.md"
-  },
-  {
-   "id": "#270-3B",
-   "titolo": "Passo 3b: la 000184 si riapplica a ogni deploy e la CI ha partecipazioni attive senza posizione, il vincolo la fermerebbe",
-   "dal": "2026-10-26",
-   "blocca": "O2-10",
-   "raccomandazione": "emendare la 000184 e portare in catena la parte certa del passo 2 prima del vincolo",
-   "fonte": ".programmi/onda2/esiti/O2-10.md"
   },
   {
    "id": "#265",

@@ -24,8 +24,15 @@
 -- non toccate da questa corsa sono identiche a prima; le richieste toccate cambiano solo nelle due
 -- colonne nuove; le cinque sentinelle della 000462 a zero.
 -- IDEMPOTENTE: una seconda passata non trova niente da creare o collegare e non scrive nel giornale.
+-- DATA DI MODIFICA: collegare una richiesta al suo processo non la modifica per chi la legge, quindi gli
+-- inneschi `*_set_updated_at` delle richieste e delle unita' di processo si spengono DENTRO la transazione
+-- (ALTER TABLE e' transazionale: un errore li riaccende col rollback) e si riaccendono prima del COMMIT.
+-- Misurato il 2026-10-27 sulla copia: senza, la post-condizione sulle richieste diventa rossa.
 -- ============================================================================
 BEGIN;
+
+ALTER TABLE sys.sys_approval_requests DISABLE TRIGGER sys_approval_requests_set_updated_at;
+ALTER TABLE sys.sys_organization_unit_processes DISABLE TRIGGER sys_organization_unit_processes_set_updated_at;
 
 CREATE TABLE IF NOT EXISTS staging.attivita_processi_undo (
   undo_id      bigserial PRIMARY KEY,
@@ -334,5 +341,8 @@ BEGIN
     (SELECT count(*) FROM staging.attivita_processi_undo WHERE run_id = v_run AND tabella = 'sys_tenant_process_activity_rules'),
     (SELECT count(*) FROM staging.attivita_processi_undo WHERE run_id = v_run AND tabella = 'sys_approval_requests');
 END $$;
+
+ALTER TABLE sys.sys_approval_requests ENABLE TRIGGER sys_approval_requests_set_updated_at;
+ALTER TABLE sys.sys_organization_unit_processes ENABLE TRIGGER sys_organization_unit_processes_set_updated_at;
 
 COMMIT;

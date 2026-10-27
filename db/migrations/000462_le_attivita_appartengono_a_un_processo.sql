@@ -189,13 +189,21 @@ END $$;
 -- Un indicato esplicito vince: la regola e' il caso comune, non un divieto.
 CREATE OR REPLACE FUNCTION sys.fn_approval_request_process_from_rule() RETURNS trigger
 LANGUAGE plpgsql AS $$
+DECLARE r record;
 BEGIN
-  IF NEW.approval_request_tenant_process_id IS NULL AND NEW.approval_request_resource_type IS NOT NULL THEN
-    SELECT r.tenant_process_activity_rule_process_id, r.tenant_process_activity_rule_step_id
-      INTO NEW.approval_request_tenant_process_id, NEW.approval_request_tenant_process_step_id
-      FROM sys.sys_tenant_process_activity_rules r
-     WHERE r.tenant_process_activity_rule_tenant_id = NEW.approval_request_tenant_id
-       AND r.tenant_process_activity_rule_resource_type = NEW.approval_request_resource_type;
+  -- Solo quando chi crea la richiesta non indica ne' processo ne' attivita'. Un SELECT INTO
+  -- direttamente su NEW, senza regola, azzerava un'attivita' indicata a mano e la richiesta
+  -- passava il CHECK: visto dalla prova d'integrazione il 2026-10-27.
+  IF NEW.approval_request_tenant_process_id IS NULL AND NEW.approval_request_tenant_process_step_id IS NULL
+     AND NEW.approval_request_resource_type IS NOT NULL THEN
+    SELECT tenant_process_activity_rule_process_id AS p, tenant_process_activity_rule_step_id AS s INTO r
+      FROM sys.sys_tenant_process_activity_rules
+     WHERE tenant_process_activity_rule_tenant_id = NEW.approval_request_tenant_id
+       AND tenant_process_activity_rule_resource_type = NEW.approval_request_resource_type;
+    IF FOUND THEN
+      NEW.approval_request_tenant_process_id := r.p;
+      NEW.approval_request_tenant_process_step_id := r.s;
+    END IF;
   END IF;
   RETURN NEW;
 END $$;

@@ -43,6 +43,9 @@ Per non avere due sessioni che scrivono lo stesso numero (onda 2 e consolidament
 | advanced `000459` | C4 — versione fissata sull'attivazione | prenotato |
 | advanced `000460` | C3 — registro dei ricevimenti e unicità `(prototipo, versione)` | prenotato |
 | advanced `000461` | C11 — esemplare del vincolo globale sui formativi (la fonte si emenda in `000237`) | prenotato |
+| advanced `000462` | ADR-0049 — le attività appartengono a un processo (T1 e T2 dell'onda 2, regole, legame delle richieste) | scritto il 2026-10-27, thread «Collegare le attività ai processi» |
+
+Nota del 2026-10-27: il numero `000459` è stato preso da `000459_pe4_passo3b_partecipazione_attiva_ha_posizione.sql`, quindi C4 deve prendere un altro numero.
 
 Una sessione dell'onda 2 che deve scrivere una migrazione prende il primo numero libero dopo questi, oppure aggiorna questa tabella.
 

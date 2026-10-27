@@ -875,6 +875,42 @@ export const MeProcessCollaboratorsResponseSchema = z.object({
 export const MeOrgUnitProcessIdParamSchema = z.object({ organizationUnitProcessId: z.uuid() });
 
 /**
+ * Le attività di un processo che possiedo, e quanto lavoro vi appartiene (ADR-0049, cella
+ * `ACTIVITY = read` del dominio `process_coordination`, ADR-0036 §8).
+ *
+ * Il contratto è chiuso apposta (`strict`). Le attività dicono che cosa si fa e quale unità lo
+ * fa; le richieste sono soltanto CONTATE per tipo, stato e attività. Nessun titolo, nessun corpo,
+ * nessuna persona: il titolo di una richiesta retributiva porta l'importo, e questa è una cella
+ * ACTIVITY, non COMPENSATION (I18).
+ */
+export const MeProcessActivitySchema = z.object({
+  stepId: z.uuid(),
+  code: z.string(),
+  name: z.string(),
+  ordinal: z.number().int().min(1),
+  organizationUnitName: z.string().nullable(),
+  /** Vero quando l'unità che esegue l'attività è quella della riga OWNER su cui mi appoggio. */
+  isOwnerUnit: z.boolean(),
+  requestCount: z.number().int().min(0),
+}).strict();
+export type MeProcessActivity = z.infer<typeof MeProcessActivitySchema>;
+export const MeProcessRequestCountSchema = z.object({
+  resourceType: z.string().nullable(),
+  status: z.string(),
+  stepCode: z.string().nullable(),
+  count: z.number().int().min(0),
+}).strict();
+export type MeProcessRequestCount = z.infer<typeof MeProcessRequestCountSchema>;
+export const MeProcessActivitiesResponseSchema = z.object({
+  organizationUnitProcessId: z.uuid(),
+  tenantProcessId: z.uuid().nullable(),
+  processName: z.string().nullable(),
+  activities: z.array(MeProcessActivitySchema),
+  requests: z.array(MeProcessRequestCountSchema),
+  requestTotal: z.number().int().min(0),
+}).strict();
+
+/**
  * Il punteggio di divario di competenze calcolato sulla persona.
  *
  * Stessa natura di `sys_model_predictions`, che Enzo ha dichiarato visibile

@@ -33,7 +33,7 @@ import {
   MeKpisResponseSchema,
   MeMentorshipsResponseSchema,
   MeProcessParticipationsResponseSchema,
-  MeProcessCollaboratorsResponseSchema, MeOrgUnitProcessIdParamSchema,
+  MeProcessCollaboratorsResponseSchema, MeOrgUnitProcessIdParamSchema, MeProcessActivitiesResponseSchema,
   MeSkillGapScoresResponseSchema,
   MeDelegationsResponseSchema,
   MeCertificationsResponseSchema, MeCertificationSchema, CreateMeCertificationBodySchema,
@@ -451,6 +451,13 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("team:read:self")],
     schema: { params: MeOrgUnitProcessIdParamSchema, response: { 200: MeProcessCollaboratorsResponseSchema } },
   }, async (req) => meService.listProcessCollaborators(selfActor(req), req.params.organizationUnitProcessId));
+
+  // ADR-0049 — le attività di un processo che POSSIEDO, con l'unità che le esegue, e i conteggi
+  // delle richieste che gli appartengono. Stesso appoggio della rotta dei partecipanti.
+  app.get("/processes/:organizationUnitProcessId/activities", {
+    preHandler: [requirePermission("team:read:self")],
+    schema: { params: MeOrgUnitProcessIdParamSchema, response: { 200: MeProcessActivitiesResponseSchema } },
+  }, async (req) => meService.listProcessActivities(selfActor(req), req.params.organizationUnitProcessId));
 
   // Il punteggio di divario calcolato su di me, con modello e data: la prescrizione che
   // Enzo ha dato per le predizioni il 2026-08-04, applicata a un dato della stessa specie.

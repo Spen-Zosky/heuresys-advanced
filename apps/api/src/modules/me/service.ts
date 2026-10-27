@@ -521,6 +521,16 @@ export const meService = {
     return out;
   },
 
+  /** ADR-0049 — le attività di un processo che possiedo e i conteggi delle sue richieste.
+   *  Fuori dal mio possesso è 404, come per i partecipanti. */
+  async listProcessActivities(actor: SelfActor, organizationUnitProcessId: string) {
+    const out = await repo.listProcessActivities(
+      pool, actor.userId, requireTenant(actor), organizationUnitProcessId,
+    );
+    if (!out) throw new NotFoundError("Process");
+    return out;
+  },
+
   async listSkillGapScores(actor: SelfActor) {
     return repo.listMySkillGapScores(pool, actor.userId, requireTenant(actor));
   },

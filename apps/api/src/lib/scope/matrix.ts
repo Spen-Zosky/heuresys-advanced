@@ -88,9 +88,10 @@ export const M1: Readonly<Record<Domain, Readonly<Record<DataClass, AccessMode>>
   // nelle altre unita' che vi collaborano. Identita' professionale sì (nome, posto, unita',
   // ruolo RACI — la stessa dell'organigramma, #193), competenze no: e' l'unica cella che lo
   // separa da `process_owner`, che la competenza la vede solo nella propria unita'.
-  // ACTIVITY `read`, non `edit`: le attivita' del processo si guardano, non si governano —
-  // e oggi nessuna attivita' porta il processo a cui appartiene, quindi la cella e'
-  // dichiarata e non ancora esercitata (§8).
+  // ACTIVITY `read`, non `edit`: le attivita' del processo si guardano, non si governano.
+  // Dal 2026-10-27 (ADR-0049, 000462) le attivita' e le richieste portano il processo: la
+  // cella si esercita in /v1/me/processes/:id/activities, che CONTA le richieste e non ne
+  // mostra titolo, corpo o persone.
   process_coordination: {
     PERSONAL: "mask", COMPENSATION: "none", SKILL: "none", EVALUATION: "none",
     ACTIVITY: "read", CREDENTIAL: "none", SPECIAL_CATEGORY: "none",

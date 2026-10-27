@@ -4,6 +4,8 @@ Modello: `claude-sonnet-5-5`. Tetto di spesa: 8 USD. Onda 2, sessione 3 di 10 (`
 
 ## Contesto
 
+> **Aggiornamento del 2026-10-27 (ADR-0049, migrazione `000462`).** T1 (`sys_tenant_processes`) e T2 (`sys_tenant_process_steps`, con in più l'unità che esegue l'attività) sono fatti sul disegno di questo mandato, insieme alle regole che legano le richieste di approvazione al processo. Il mandato resta per T3-T8.
+
 Oggi il processo del tenant è un processo del modello agganciato a un'unità (`sys_organization_unit_processes`, `000121`): il tenant non ha un processo suo, né attività, né il legame con capability, ruoli e ore. Il disegno è nella sezione 2 di `.programmi/onda2/DISEGNO_tabelle-onda2.md` (T1-T8).
 
 ## Leggi

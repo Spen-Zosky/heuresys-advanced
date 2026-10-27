@@ -12,7 +12,7 @@ import type {
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
   MeKpiTarget, MeCertification, CreateMeCertificationBody, MeDocument,
-  MeMentorship, MeProcessParticipation, MeProcessCollaborator, MeSkillGapScore,
+  MeMentorship, MeProcessParticipation, MeProcessCollaborator, MeProcessActivity, MeProcessRequestCount, MeSkillGapScore,
   UserPreference, UpdateUserPreferenceBody,
 } from "@heuresys/shared";
 import { ME_PREFERENCE_DEFAULTS } from "@heuresys/shared";
@@ -1787,6 +1787,108 @@ export async function listProcessCollaborators(
     processName: processo.process_name,
     items,
     total: items.length,
+  };
+}
+
+/** Le attività di un processo che possiedo, e quanto lavoro vi appartiene (ADR-0049).
+ *
+ *  Stesso appoggio di `listProcessCollaborators`: l'unità-processo indicata deve essere una in cui
+ *  oggi occupo un posto OWNER, altrimenti `null` e il chiamante risponde 404. Il processo è quello
+ *  del tenant (`org_unit_process_tenant_process_id`, 000462); finché il riempimento non l'ha
+ *  scritto la riga non ne ha, e la risposta lo dice con `tenantProcessId = null` e liste vuote.
+ *
+ *  Le richieste si CONTANO e basta: tipo, stato, attività. È la cella ACTIVITY = read di
+ *  `process_coordination`; titolo, corpo e persone delle richieste restano fuori (I18). */
+export async function listProcessActivities(
+  q: DbConnector,
+  ownerUserId: string,
+  tenantId: string,
+  organizationUnitProcessId: string,
+): Promise<{
+  organizationUnitProcessId: string;
+  tenantProcessId: string | null;
+  processName: string | null;
+  activities: MeProcessActivity[];
+  requests: MeProcessRequestCount[];
+  requestTotal: number;
+} | null> {
+  const mio = await q.query<{ tenant_process_id: string | null; process_name: string | null; org_unit_id: string }>(
+    `SELECT oup.org_unit_process_tenant_process_id AS tenant_process_id,
+            coalesce(tp.tenant_process_name, bpr.blueprint_process_name) AS process_name,
+            oup.org_unit_process_org_unit_id AS org_unit_id
+       FROM sys.sys_organization_unit_processes oup
+       LEFT JOIN sys.sys_tenant_processes tp
+              ON tp.tenant_process_id = oup.org_unit_process_tenant_process_id
+             AND tp.tenant_process_tenant_id = oup.org_unit_process_tenant_id
+       LEFT JOIN sys.sys_blueprint_process_registry bpr
+              ON bpr.blueprint_process_id = oup.org_unit_process_blueprint_process_id
+      WHERE oup.organization_unit_process_id = $1
+        AND oup.org_unit_process_tenant_id = $2
+        AND EXISTS (SELECT 1 FROM ${PARTECIPANTI_OGGI_SQL} mine
+                     WHERE mine.org_unit_process_id = oup.organization_unit_process_id
+                       AND mine.user_id = $3
+                       AND mine.role = 'OWNER'
+                       AND mine.is_active)`,
+    [organizationUnitProcessId, tenantId, ownerUserId],
+  );
+  const processo = mio.rows[0];
+  if (!processo) return null;
+  if (!processo.tenant_process_id) {
+    return {
+      organizationUnitProcessId, tenantProcessId: null, processName: processo.process_name,
+      activities: [], requests: [], requestTotal: 0,
+    };
+  }
+
+  const passi = await q.query<{
+    step_id: string; code: string; name: string; ordinal: number;
+    unit_id: string | null; unit_name: string | null; request_count: string;
+  }>(
+    `SELECT s.tenant_process_step_id AS step_id, s.tenant_process_step_code AS code,
+            s.tenant_process_step_name AS name, s.tenant_process_step_ordinal AS ordinal,
+            s.tenant_process_step_org_unit_id AS unit_id, ou.organization_unit_name AS unit_name,
+            (SELECT count(*) FROM sys.sys_approval_requests a
+              WHERE a.approval_request_tenant_id = $2
+                AND a.approval_request_tenant_process_step_id = s.tenant_process_step_id) AS request_count
+       FROM sys.sys_tenant_process_steps s
+       LEFT JOIN sys.sys_organization_units ou
+              ON ou.organization_unit_id = s.tenant_process_step_org_unit_id
+             AND ou.organization_unit_tenant_id = $2
+      WHERE s.tenant_process_step_process_id = $1
+        AND s.tenant_process_step_tenant_id = $2
+      ORDER BY s.tenant_process_step_ordinal, s.tenant_process_step_code`,
+    [processo.tenant_process_id, tenantId],
+  );
+  const conti = await q.query<{ resource_type: string | null; status: string; step_code: string | null; n: string }>(
+    `SELECT a.approval_request_resource_type AS resource_type, a.approval_request_status AS status,
+            s.tenant_process_step_code AS step_code, count(*) AS n
+       FROM sys.sys_approval_requests a
+       LEFT JOIN sys.sys_tenant_process_steps s
+              ON s.tenant_process_step_id = a.approval_request_tenant_process_step_id
+      WHERE a.approval_request_tenant_id = $2
+        AND a.approval_request_tenant_process_id = $1
+      GROUP BY 1, 2, 3
+      ORDER BY 1 NULLS LAST, 2, 3 NULLS FIRST`,
+    [processo.tenant_process_id, tenantId],
+  );
+  const requests: MeProcessRequestCount[] = conti.rows.map((r) => ({
+    resourceType: r.resource_type, status: r.status, stepCode: r.step_code, count: Number(r.n),
+  }));
+  return {
+    organizationUnitProcessId,
+    tenantProcessId: processo.tenant_process_id,
+    processName: processo.process_name,
+    activities: passi.rows.map((r) => ({
+      stepId: r.step_id,
+      code: r.code,
+      name: r.name,
+      ordinal: r.ordinal,
+      organizationUnitName: r.unit_name,
+      isOwnerUnit: r.unit_id !== null && r.unit_id === processo.org_unit_id,
+      requestCount: Number(r.request_count),
+    })),
+    requests,
+    requestTotal: requests.reduce((t, r) => t + r.count, 0),
   };
 }
 

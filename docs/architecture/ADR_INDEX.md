@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**46 ADR** in `docs/architecture/adr/`.
+**47 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -54,6 +54,7 @@
 | [0046](adr/0046_perimetro_del_tenant.md) | Il perimetro del tenant: ricerche, liste di scelta e agente leggono solo dentro il fascicolo | ACCETTATO il 2026-10-23 da Enzo Spenuso | Il perimetro del tenant: ricerche, liste di scelta e agente leggono solo dentro il fascicolo *(dal titolo)* | 2026-10-17 |
 | [0047](adr/0047_contratto_del_fascicolo.md) | Il contratto del fascicolo: consegna per file, identità della versione, versione fissata sull'attivazione | ACCETTATO il 2026-10-23 da Enzo Spenuso | Il contratto del fascicolo: consegna per file, identità della versione, versione fissata sull'attivazione *(dal titolo)* | 2026-10-23 |
 | [0048](adr/0048_personalizzazioni_del_tenant.md) | Le personalizzazioni del tenant all'arrivo di una versione nuova del modello | ACCETTATO il 2026-10-23 da Enzo Spenuso | Le personalizzazioni del tenant all'arrivo di una versione nuova del modello *(dal titolo)* | 2026-10-23 |
+| [0049](adr/0049_le_attivita_appartengono_a_un_processo.md) | Le attività appartengono a un processo | PROPOSTO il 2026-10-27; si applica sulla raccomandazione, con la delega dell'Amministratore di Sistema del 2026-10-23 sulle decisioni raccomandate | Le attività appartengono a un processo *(dal titolo)* | 2026-10-27 |
 
 ## Conventions
 

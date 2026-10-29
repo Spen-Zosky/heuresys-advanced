@@ -1,31 +1,36 @@
 # STATE — vista rapida
 
-**Updated**: 2026-10-27 (O2-09 e O2-10 dal thread di progetto: passo 3 della partecipazione per posizione DEPLOYATO su `3a323bde`; esiti in `.programmi/onda2/esiti/O2-09.md` e `O2-10.md`)
+**Updated**: 2026-10-29 (riallineamento del registro allo stato vero: ADR-0043, 0044, 0046, 0047, 0048 accettati; `refs/heads/prod` = `main` = `0c3088c3`, misurato con `git ls-remote`)
 
 *I numeri stanno in `docs/kb/SOT_STATE.md`, non qui.*
 
 ## Last session brief
 
-**O2-09 e O2-10 (26-27 ottobre, thread di progetto sulla VM)**: decisioni dell'Amministratore di Sistema sul passo 3 (D-P3-1 corretta: un solo process owner per processo, il responsabile dell'unità di governo; D-P3-2; D-P3-3; vincolo condizionato). In produzione, con backup verificato prima di ogni passo: passo 2 di PE-4, regole (un process owner per ognuno dei processi), D-P3-2. Codice del 3a e del 3b con `000459` e `000184` emendata: **DEPLOYATO su `3a323bde`** (CI 9/9), prova dal vivo registrata. Sbloccati lungo la strada due rossi di CI già presenti su `main` (atlante non rigenerato; font di Google, passeggero). Datastore: partizione di dicembre dell'audit creata (D-66, PR #7 del datastore da unire). ADR-0046 accettato il 23/10: #269 chiusa; #270 chiusa.
+**Riallineamento del 29 ottobre (thread di progetto, solo documenti)**: il registro diceva ancora in attesa di te due decisioni già prese. `#267` (ADR-0043) e `#268` (ADR-0044) erano `WAIT-INPUT`, ma i due ADR sono ACCETTATI dal 12 ottobre: chiuse e archiviate. ADR-0046, 0047 e 0048 sono ACCETTATI dal 23 ottobre. `ADR_INDEX.md` rigenerato: ora elenca anche ADR-0049. Misurato con `git ls-remote origin refs/heads/prod refs/heads/main`: produzione e `main` coincidono su `0c3088c3`, DEPLOYATO il sera del 27 ottobre (registro del thread «Collegare le attività ai processi»); la CI «Atlas freshness» è verde su quel commit (corsa manuale del 27 ottobre). Le migrazioni `000454`…`000458` sono nella catena del rilascio `bb97ea3` del 25 ottobre, quindi in produzione: lo stato «NON in produzione» scritto qui sotto il 17 ottobre è superato.
+
+**27 ottobre, PR #116 e #117 (DEPLOYATE su `61b1a82a`)**: l'owner di un processo vede chi lavora al processo in tutte le unità collaboranti (ADR-0036 §8, rotta `GET /v1/me/processes/:oupId/participants`); prova dal vivo superata. Scioglie la domanda aperta di O2-09 sul perimetro dell'owner.
+
+**27 ottobre, PR #118 (DEPLOYATA su `0c3088c3`)**: le attività appartengono a un processo (ADR-0049, migrazione `000462`, rotta `GET /v1/me/processes/:oupId/activities`); riempimento in produzione con giornale e inversa, prova dal vivo superata. ADR-0049 è ancora PROPOSTO nel suo file: è stato applicato con la delega sulle decisioni raccomandate, l'accettazione formale resta tua.
+
+**O2-09 e O2-10 (26-27 ottobre, thread di progetto sulla VM)**: decisioni dell'Amministratore di Sistema sul passo 3 (D-P3-1 corretta: un solo process owner per processo, il responsabile dell'unità di governo; D-P3-2; D-P3-3; vincolo condizionato). In produzione, con backup verificato prima di ogni passo: passo 2 di PE-4, regole (un process owner per ognuno dei processi), D-P3-2. Codice del 3a e del 3b con `000459` e `000184` emendata: **DEPLOYATO su `3a323bde`** (CI 9/9), prova dal vivo registrata. Sbloccati lungo la strada due rossi di CI già presenti su `main` (atlante non rigenerato; font di Google, passeggero). Datastore: partizione di dicembre dell'audit creata (D-66, PR #7 del datastore da unire). ADR-0046 accettato il 23 ottobre: #269 chiusa; #270 chiusa.
 
 **S1119, O2-02 (17 ottobre)**: il caricatore del pacchetto (`db/scripts/pacchetto/`) scrive e rilegge per codice ogni sezione e campo v0.3 nelle tabelle della `000458` e accetta ancora il v0.2; convalida il pacchetto (schema, impronte, limiti delle colonne) prima di toccare il database, riporta senza fermarsi le regole che marcano. Prova su copia del gemello: 111 controlli, zero rossi (v0.2 come prima, tre pacchetti v0.3 riletti uguali, sette rifiuti, sette mutazioni rosse). **`WAIT-INPUT`: il pacchetto v0.3 vero della banca non è depositato dal datastore**; la prova ha girato su un pacchetto di prova costruito dal v0.2 e dallo schema, dichiarato tale. Lavoro NON applicato in produzione.
 
 **S1119, O2-01 (17 ottobre)**: scritta la migrazione `000458` (14 tabelle `sys_blueprint_content_*` di piattaforma, colonne sul pacchetto e su 8 tabelle del modello), con inversa fuori catena e prova su copia del gemello (`db/scripts/onda2/`). Righe di classificazione in `000429` (282 diventa 296) e registro in `000062`. Dove lo schema JSON v0.3 contraddice il disegno vince lo schema: 9 casi nell'esito. Prova generale e cancello verdi; commit `1330d70d` e `303e75a8` su `main`. **Stato**: lavoro dimostrato sul gemello e su copia, NON applicato in produzione e non armato; non è una catena a metà (O2-02 scrive nelle tabelle nuove, ma la 000458 sta in piedi da sola).
 
-**Stati intermedi ereditati, dichiarati e invariati**: `000454`…`000457` committate e provate sul gemello, NON in produzione; il passo 2 di PE-4 provato su copia e non eseguito in produzione; #265 F4 sospesa sul ramo `f4-livello-contrattuale` (ADR-0045). Esiti in `.programmi/esiti-onda0/`.
+**Stati intermedi ereditati**: superati il 25 e 26 ottobre — `000454`…`000458` in produzione con `bb97ea3`, il passo 2 di PE-4 eseguito in produzione in O2-09. Resta #265 F4 sospesa sul ramo `f4-livello-contrattuale` (ADR-0045). Esiti in `.programmi/esiti-onda0/`.
 
 ## Top priorities
 
-1. **Onda 2 (#271)**: `O2-03` (struttura del tenant) può partire; `O2-07` e `O2-08` sono sbloccati (ADR-0046 accettato).
-2. **Registro di O2-09**: estendere il perimetro del process owner alle righe delle altre unità dello stesso processo? (decisione dell'Amministratore di Sistema).
-3. **Onda 2 (#271)**: `O2-01` e `O2-02` fatte (`O2-02` con `WAIT-INPUT` sul pacchetto v0.3 vero della banca: va rifatta la prova quando il datastore lo deposita); `O2-03` (struttura del tenant) può partire.
+1. **Onda 2 (#271)**: `O2-01`, `O2-02`, `O2-09`, `O2-10` fatte; `O2-03` (struttura del tenant) può partire; `O2-07` e `O2-08` sono sbloccati (ADR-0046 accettato).
+2. **#263**: rifare la prova del caricatore quando il datastore deposita il pacchetto v0.3 vero della banca.
+3. **ADR-0049**: accettazione formale (decisione tua; è già in produzione).
 
 ## Open questions
 
-- L'owner di un processo vede solo i partecipanti della riga della sua unità, non delle altre unità che collaborano al processo: da decidere se estendere (registro di `O2-09.md`).
+- ADR-0049 è PROPOSTO nel file ma applicato in produzione: va accettato o corretto.
 - `public-stats` resta dichiarato di piattaforma fino a S6: la decisione su che cosa pubblica è rimandata (ADR-0046 §8).
-- Il workflow CI "Atlas freshness" è rosso su `1330d70d` e già su `2d0cfd7a`; sul commit di correzione `303e75a8` non risulta nessuna corsa: da leggere.
-- Al push del 2026-10-17 GitHub segnala vulnerabilità Dependabot aperte sul ramo principale: da riesaminare (`gh api repos/Spen-Zosky/heuresys-advanced/dependabot/alerts`).
+- Vulnerabilità Dependabot e la PR #119 (fastify) con la CI rossa: da riesaminare (`gh api repos/Spen-Zosky/heuresys-advanced/dependabot/alerts`).
 
 ## Verification
 

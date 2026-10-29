@@ -200,7 +200,7 @@ if [ "${PREDEPLOY_BACKUP:-run}" != "skip" ]; then
   log "db: pre-deploy snapshot (pg_dump -Fc, rollback net)"
   PD_DB="${DB_NAME:-${POSTGRES_DB:-heuresys_advanced}}"
   PD_DIR="${PREDEPLOY_DIR:-$REPO_DIR/pg_dump_snapshots/pre-deploy}"
-  PD_RETAIN="${PREDEPLOY_RETAIN:-10}"
+  PD_RETAIN="${PREDEPLOY_RETAIN:-3}"   # 3, not 10 (Enzo, 29/10/2026): the rollback net needs the latest ones
   mkdir -p "$PD_DIR"
   pd_out="$PD_DIR/${PD_DB}_predeploy_$(date -u +%Y%m%dT%H%M%SZ).dump"
   sudo -u postgres pg_dump -Fc "$PD_DB" > "$pd_out"

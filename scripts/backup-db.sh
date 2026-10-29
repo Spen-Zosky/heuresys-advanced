@@ -23,7 +23,8 @@ ENV_FILE="${ENV_FILE:-$ROOT/.env}"
 
 DB_NAME="${DB_NAME:-${POSTGRES_DB:-heuresys_advanced}}"
 BACKUP_DIR="${BACKUP_DIR:-$ROOT/pg_dump_snapshots/scheduled}"
-RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-14}"
+# 3 days on the VM (Enzo, 29/10/2026): the longer history lives in restic (VM 7 daily, Drive 14+4+3), fed by backup_restic_hr.sh.
+RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-3}"
 
 mkdir -p "$BACKUP_DIR"
 ts="$(date -u +%Y%m%dT%H%M%SZ)"

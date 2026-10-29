@@ -1,21 +1,13 @@
 {
  "schema": "cruscotto-stato/1",
  "progetto": "heuresys-advanced",
- "aggiornato_il": "2026-10-27",
- "aggiornato_da": "semina iniziale dal cruscotto (Claude, 21/10/2026)",
+ "aggiornato_il": "2026-10-29",
+ "aggiornato_da": "Claude, thread «Riallineare lo stato di advanced» (29/10/2026)",
  "fase": "Dopo la GA v1.0.0: adesione al contratto dati del datastore, onda 2 in corso",
  "stato": "giallo",
- "stato_motivo": "produzione attiva e allineata a main, ma 5 voci aspettano una tua decisione, le migrazioni 000454-000458 risultano non applicate in produzione (STATE.md del 17/10), la CI 'Atlas freshness' è rossa e restano vulnerabilità Dependabot da riesaminare.",
+ "stato_motivo": "produzione attiva e allineata a main su 0c3088c3 (git ls-remote, 29/10), CI 'Atlas freshness' verde; restano da riesaminare le vulnerabilità Dependabot e il pacchetto v0.3 vero della banca dal datastore.",
  "avanzamento": null,
  "decisioni_attese": [
-  {
-   "id": "OWNER-PERIMETRO",
-   "titolo": "Il process owner vede solo i partecipanti della riga della sua unità: estenderlo alle altre unità che collaborano allo stesso processo?",
-   "dal": "2026-10-26",
-   "blocca": "",
-   "raccomandazione": "",
-   "fonte": ".programmi/onda2/esiti/O2-09.md"
-  },
   {
    "id": "#265",
    "titolo": "#265 F4 sospesa sul ramo f4-livello-contrattuale, in attesa di decisione",
@@ -36,7 +28,7 @@
  "pendenze": [
   {
    "id": "P-04",
-   "titolo": "Onda 2 (#271): 10 sessioni previste, tetto complessivo 84 USD; O2-01 e O2-02 fatte, O2-03 può partire",
+   "titolo": "Onda 2 (#271): O2-01, O2-02, O2-09, O2-10 fatte; O2-03 può partire; O2-07 e O2-08 sbloccati",
    "priorita": "alta",
    "chi": "claude",
    "fonte": "SOT_BACKLOG.md #271"
@@ -49,18 +41,11 @@
    "fonte": ".handoff/STATE.md"
   },
   {
-   "id": "P-06",
-   "titolo": "CI 'Atlas freshness' rossa; sul commit di correzione non risulta nessuna corsa",
-   "priorita": "media",
-   "chi": "claude",
-   "fonte": ".handoff/STATE.md"
-  },
-  {
    "id": "P-07",
-   "titolo": "Vulnerabilità Dependabot aperte da riesaminare",
+   "titolo": "Vulnerabilità Dependabot aperte da riesaminare; PR #119 (fastify 5.12.6) con la CI rossa",
    "priorita": "media",
    "chi": "claude",
-   "fonte": ".handoff/STATE.md"
+   "fonte": "GitHub Actions, corse del 28/10"
   },
   {
    "id": "P-10",
@@ -75,13 +60,6 @@
    "priorita": "bassa",
    "chi": "enzo",
    "fonte": "SOT_BACKLOG.md"
-  },
-  {
-   "id": "P-13",
-   "titolo": "Registro disallineato: #267 e #268 accettati nei commit ma ancora 'in attesa' in STATE e backlog",
-   "priorita": "bassa",
-   "chi": "claude",
-   "fonte": "git log; SOT_BACKLOG.md"
   }
  ],
  "rischi": [
@@ -98,13 +76,6 @@
    "impatto": "medio",
    "mitigazione": "",
    "fonte": "systemctl --failed"
-  },
-  {
-   "id": "R-03",
-   "titolo": "Lavoro dimostrato solo su copia: le onde successive dipendono da migrazioni non in produzione",
-   "impatto": "medio",
-   "mitigazione": "",
-   "fonte": ".handoff/STATE.md"
   },
   {
    "id": "R-04",
@@ -129,10 +100,10 @@
   },
   {
    "id": "R-07",
-   "titolo": "CI rossa che può nascondere altri errori; il deploy parte solo a CI verde",
+   "titolo": "Una PR di soli documenti non fa partire la CI: l'atlante può invecchiare senza che nessuno se ne accorga",
    "impatto": "medio",
    "mitigazione": "",
-   "fonte": ".handoff/STATE.md"
+   "fonte": "memoria di progetto, 27/10"
   },
   {
    "id": "R-08",
@@ -312,6 +283,42 @@
    "titolo": "Aggiornamenti di sicurezza Next 16.3.8 e Fastify 5.12.5; build web passato a webpack",
    "tipo": "incidente",
    "fonte": "git log"
+  },
+  {
+   "data": "2026-10-23",
+   "titolo": "Accettati ADR-0046, ADR-0047, ADR-0048",
+   "tipo": "decisione",
+   "fonte": "docs/architecture/ADR_INDEX.md"
+  },
+  {
+   "data": "2026-10-25",
+   "titolo": "Rilascio bb97ea3: migrazioni 000454-000458 in produzione",
+   "tipo": "release",
+   "fonte": "git merge-base --is-ancestor"
+  },
+  {
+   "data": "2026-10-26",
+   "titolo": "Rilascio 3a323bde: passo 3 della partecipazione per posizione (PR #109, #112-#114)",
+   "tipo": "release",
+   "fonte": ".programmi/onda2/esiti/O2-09.md"
+  },
+  {
+   "data": "2026-10-27",
+   "titolo": "Rilascio 61b1a82a: l'owner vede le unità collaboranti (PR #116, #117)",
+   "tipo": "release",
+   "fonte": "git log"
+  },
+  {
+   "data": "2026-10-27",
+   "titolo": "Rilascio 0c3088c3: le attività appartengono a un processo (ADR-0049, PR #118)",
+   "tipo": "release",
+   "fonte": "git ls-remote origin refs/heads/prod"
+  },
+  {
+   "data": "2026-10-29",
+   "titolo": "Accettato ADR-0049 (le attività appartengono a un processo)",
+   "tipo": "decisione",
+   "fonte": "docs/architecture/adr/0049_le_attivita_appartengono_a_un_processo.md"
   }
  ],
  "aree": [
@@ -358,7 +365,7 @@
   {
    "nome": "Contratto dati con il datastore (pacchetto v0.2/v0.3)",
    "stato": "in corso",
-   "nota": "#263: caricatore e migrazioni 000454-000458 provati sul gemello, non in produzione. Manca il pacchetto v0.3 vero della banca."
+   "nota": "#263: caricatore e migrazioni 000454-000458 in produzione dal 25/10. Manca il pacchetto v0.3 vero della banca."
   },
   {
    "nome": "Tenant Builder (costruzione di un'azienda dal fascicolo)",
@@ -367,13 +374,13 @@
   },
   {
    "nome": "Partecipazione ai processi legata alla posizione (ADR-0044)",
-   "stato": "in corso",
-   "nota": "Passi 1 e 2 provati su copia; il passo 3 (#270) aspetta tre decisioni sul RACI."
+   "stato": "fatto",
+   "nota": "ADR-0044 accettato; passi 1, 2 e 3 in produzione dal 26/10 (#270); l'owner vede le unità collaboranti (PR #116)."
   },
   {
    "nome": "Perimetro del tenant (ADR-0046)",
-   "stato": "da fare",
-   "nota": "Proposto il 17/10 (#269), attende te. Blocca O2-07 e O2-08."
+   "stato": "in corso",
+   "nota": "ADR-0046 accettato il 23/10 (#269 chiusa). O2-07 e O2-08 sbloccati."
   },
   {
    "nome": "Agente AI (agent-gateway) con perimetri",
@@ -384,23 +391,26 @@
    "nome": "Email, notifiche digest e SSO enterprise",
    "stato": "da fare",
    "nota": "#8, #39 e #52 in HOLD."
+  },
+  {
+   "nome": "Attività dei processi (ADR-0049)",
+   "stato": "fatto",
+   "nota": "In produzione su 0c3088c3 dal 27/10 con riempimento e prova dal vivo; ADR accettato il 29/10."
   }
  ],
  "prossimi_passi": [
-  "Decidere su ADR-0046 (#269) e sulle tre scelte del passo 3 (#270): sbloccano O2-07..O2-10",
-  "Decidere sul rilascio delle migrazioni 000454..000458 e del passo 2 di PE-4",
-  "Sollecitare il datastore per il pacchetto v0.3 vero della banca",
   "Far partire O2-03 (struttura del tenant), senza bloccanti",
-  "Correggere la CI 'Atlas freshness' e riesaminare Dependabot",
+  "Sollecitare il datastore per il pacchetto v0.3 vero della banca",
+  "Riesaminare Dependabot e la PR #119",
   "Indagare i servizi storia36 'failed' sulla VM",
-  "Decidere su #265 F4 e riconciliare il registro #267/#268"
+  "Decidere su #265 F4"
  ],
  "ambienti": [
   {
    "nome": "Produzione",
    "dove": "VM Oracle Cloud: API e web, unico ambiente di produzione (ADR-0026) con due tenant, RTL Bank e Heuresys System",
    "indirizzo": "www.heuresys.com, web 3013, API 8013",
-   "note": "Servizi attivi. Deploy da prod, innescato da deploy-watch a CI verde. prod e main coincidono su 8795d576."
+   "note": "Servizi attivi. Deploy da prod, innescato da deploy-watch a CI verde. prod e main coincidono su 0c3088c3 (git ls-remote, 29/10)."
   },
   {
    "nome": "Gemello",

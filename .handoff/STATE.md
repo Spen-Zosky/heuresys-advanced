@@ -6,11 +6,11 @@
 
 ## Last session brief
 
-**Riallineamento del 29 ottobre (thread di progetto, solo documenti)**: il registro diceva ancora in attesa di te due decisioni già prese. `#267` (ADR-0043) e `#268` (ADR-0044) erano `WAIT-INPUT`, ma i due ADR sono ACCETTATI dal 12 ottobre: chiuse e archiviate. ADR-0046, 0047 e 0048 sono ACCETTATI dal 23 ottobre. `ADR_INDEX.md` rigenerato: ora elenca anche ADR-0049. Misurato con `git ls-remote origin refs/heads/prod refs/heads/main`: produzione e `main` coincidono su `0c3088c3`, DEPLOYATO il sera del 27 ottobre (registro del thread «Collegare le attività ai processi»); la CI «Atlas freshness» è verde su quel commit (corsa manuale del 27 ottobre). Le migrazioni `000454`…`000458` sono nella catena del rilascio `bb97ea3` del 25 ottobre, quindi in produzione: lo stato «NON in produzione» scritto qui sotto il 17 ottobre è superato.
+**Riallineamento del 29 ottobre (thread di progetto, solo documenti)**: il registro diceva ancora in attesa di te due decisioni già prese. `#267` (ADR-0043) e `#268` (ADR-0044) erano `WAIT-INPUT`, ma i due ADR sono ACCETTATI dal 12 ottobre: chiuse e archiviate. ADR-0046, 0047 e 0048 sono ACCETTATI dal 23 ottobre, ADR-0049 dal 29 ottobre. `ADR_INDEX.md` rigenerato: ora elenca anche ADR-0049. Misurato con `git ls-remote origin refs/heads/prod refs/heads/main`: produzione e `main` coincidono su `0c3088c3`, DEPLOYATO il sera del 27 ottobre (registro del thread «Collegare le attività ai processi»); la CI «Atlas freshness» è verde su quel commit (corsa manuale del 27 ottobre). Le migrazioni `000454`…`000458` sono nella catena del rilascio `bb97ea3` del 25 ottobre, quindi in produzione: lo stato «NON in produzione» scritto qui sotto il 17 ottobre è superato.
 
 **27 ottobre, PR #116 e #117 (DEPLOYATE su `61b1a82a`)**: l'owner di un processo vede chi lavora al processo in tutte le unità collaboranti (ADR-0036 §8, rotta `GET /v1/me/processes/:oupId/participants`); prova dal vivo superata. Scioglie la domanda aperta di O2-09 sul perimetro dell'owner.
 
-**27 ottobre, PR #118 (DEPLOYATA su `0c3088c3`)**: le attività appartengono a un processo (ADR-0049, migrazione `000462`, rotta `GET /v1/me/processes/:oupId/activities`); riempimento in produzione con giornale e inversa, prova dal vivo superata. ADR-0049 è ancora PROPOSTO nel suo file: è stato applicato con la delega sulle decisioni raccomandate, l'accettazione formale resta tua.
+**27 ottobre, PR #118 (DEPLOYATA su `0c3088c3`)**: le attività appartengono a un processo (ADR-0049, migrazione `000462`, rotta `GET /v1/me/processes/:oupId/activities`); riempimento in produzione con giornale e inversa, prova dal vivo superata. ADR-0049, applicato con la delega sulle decisioni raccomandate, è ACCETTATO dal 29 ottobre.
 
 **O2-09 e O2-10 (26-27 ottobre, thread di progetto sulla VM)**: decisioni dell'Amministratore di Sistema sul passo 3 (D-P3-1 corretta: un solo process owner per processo, il responsabile dell'unità di governo; D-P3-2; D-P3-3; vincolo condizionato). In produzione, con backup verificato prima di ogni passo: passo 2 di PE-4, regole (un process owner per ognuno dei processi), D-P3-2. Codice del 3a e del 3b con `000459` e `000184` emendata: **DEPLOYATO su `3a323bde`** (CI 9/9), prova dal vivo registrata. Sbloccati lungo la strada due rossi di CI già presenti su `main` (atlante non rigenerato; font di Google, passeggero). Datastore: partizione di dicembre dell'audit creata (D-66, PR #7 del datastore da unire). ADR-0046 accettato il 23 ottobre: #269 chiusa; #270 chiusa.
 
@@ -24,11 +24,9 @@
 
 1. **Onda 2 (#271)**: `O2-01`, `O2-02`, `O2-09`, `O2-10` fatte; `O2-03` (struttura del tenant) può partire; `O2-07` e `O2-08` sono sbloccati (ADR-0046 accettato).
 2. **#263**: rifare la prova del caricatore quando il datastore deposita il pacchetto v0.3 vero della banca.
-3. **ADR-0049**: accettazione formale (decisione tua; è già in produzione).
 
 ## Open questions
 
-- ADR-0049 è PROPOSTO nel file ma applicato in produzione: va accettato o corretto.
 - `public-stats` resta dichiarato di piattaforma fino a S6: la decisione su che cosa pubblica è rimandata (ADR-0046 §8).
 - Vulnerabilità Dependabot e la PR #119 (fastify) con la CI rossa: da riesaminare (`gh api repos/Spen-Zosky/heuresys-advanced/dependabot/alerts`).
 

@@ -5,17 +5,9 @@
  "aggiornato_da": "Claude, thread «Riallineare lo stato di advanced» (29/10/2026)",
  "fase": "Dopo la GA v1.0.0: adesione al contratto dati del datastore, onda 2 in corso",
  "stato": "giallo",
- "stato_motivo": "produzione attiva e allineata a main su 0c3088c3 (git ls-remote, 29/10), CI 'Atlas freshness' verde; restano da riesaminare le vulnerabilità Dependabot, ADR-0049 da accettare formalmente e il pacchetto v0.3 vero della banca dal datastore.",
+ "stato_motivo": "produzione attiva e allineata a main su 0c3088c3 (git ls-remote, 29/10), CI 'Atlas freshness' verde; restano da riesaminare le vulnerabilità Dependabot e il pacchetto v0.3 vero della banca dal datastore.",
  "avanzamento": null,
  "decisioni_attese": [
-  {
-   "id": "ADR-0049",
-   "titolo": "Accettare formalmente ADR-0049 (le attività appartengono a un processo): è già in produzione con la delega",
-   "dal": "2026-10-27",
-   "blocca": "",
-   "raccomandazione": "accettarlo così com'è",
-   "fonte": "docs/architecture/adr/0049_le_attivita_appartengono_a_un_processo.md"
-  },
   {
    "id": "#265",
    "titolo": "#265 F4 sospesa sul ramo f4-livello-contrattuale, in attesa di decisione",
@@ -321,6 +313,12 @@
    "titolo": "Rilascio 0c3088c3: le attività appartengono a un processo (ADR-0049, PR #118)",
    "tipo": "release",
    "fonte": "git ls-remote origin refs/heads/prod"
+  },
+  {
+   "data": "2026-10-29",
+   "titolo": "Accettato ADR-0049 (le attività appartengono a un processo)",
+   "tipo": "decisione",
+   "fonte": "docs/architecture/adr/0049_le_attivita_appartengono_a_un_processo.md"
   }
  ],
  "aree": [
@@ -397,11 +395,10 @@
   {
    "nome": "Attività dei processi (ADR-0049)",
    "stato": "fatto",
-   "nota": "In produzione su 0c3088c3 dal 27/10 con riempimento e prova dal vivo; l'ADR aspetta l'accettazione formale."
+   "nota": "In produzione su 0c3088c3 dal 27/10 con riempimento e prova dal vivo; ADR accettato il 29/10."
   }
  ],
  "prossimi_passi": [
-  "Accettare formalmente ADR-0049",
   "Far partire O2-03 (struttura del tenant), senza bloccanti",
   "Sollecitare il datastore per il pacchetto v0.3 vero della banca",
   "Riesaminare Dependabot e la PR #119",

@@ -1,6 +1,6 @@
 # ADR-0049 — Le attività appartengono a un processo
 
-- **Status**: PROPOSTO il 2026-10-27; si applica sulla raccomandazione, con la delega dell'Amministratore di Sistema del 2026-10-23 sulle decisioni raccomandate
+- **Status**: ACCETTATO il 2026-10-29 da Enzo Spenuso (approvazione data in chat alle 04:25 UTC, 05:25 ora di Roma: «accettalo così com'è»); proposto il 2026-10-27 e applicato in produzione con la delega del 2026-10-23 sulle decisioni raccomandate
 - **Date**: 2026-10-27
 - **Redatto da**: Claude Code, thread «Collegare le attività ai processi»
 - **Richiesta**: Amministratore di Sistema, 2026-10-27 17:21 ora di Roma: «Le attività del processo non si possono ancora mostrare, perché nessuna attività registra a quale processo appartiene. Questa mi sembra una carenza grave che deve essere colmata.»

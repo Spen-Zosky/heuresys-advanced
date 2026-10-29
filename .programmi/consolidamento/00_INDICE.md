@@ -40,7 +40,7 @@ Per non avere due sessioni che scrivono lo stesso numero (onda 2 e consolidament
 
 | numero | incremento | stato |
 |---|---|---|
-| advanced `000459` | C4 — versione fissata sull'attivazione | prenotato |
+| ~~advanced `000459`~~ | C4 — versione fissata sull'attivazione: il numero è stato preso da un altro lavoro, C4 ne prenota uno nuovo quando parte | da riprenotare |
 | advanced `000460` | C3 — registro dei ricevimenti e unicità `(prototipo, versione)` | prenotato |
 | advanced `000461` | C11 — esemplare del vincolo globale sui formativi (la fonte si emenda in `000237`) | prenotato |
 | advanced `000462` | ADR-0049 — le attività appartengono a un processo (T1 e T2 dell'onda 2, regole, legame delle richieste) | scritto il 2026-10-27, thread «Collegare le attività ai processi» |

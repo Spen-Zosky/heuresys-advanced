@@ -42,8 +42,16 @@
 
 BEGIN;
 
--- La versione di modello attiva per la banca. Si RISOLVE, non si scrive a mano: un uuid
+-- La versione di modello della banca. Si RISOLVE, non si scrive a mano: un uuid
 -- cablato in un file e' vero il giorno in cui lo scrivi e falso al primo ricostruito.
+--
+-- ⚠ EMENDATO 2026-10-29 (consolidamento C3a, R-51). La prima stesura la risolveva per STATO
+-- («la PUBLISHED della variante attivata»): il giorno in cui la banca avesse una seconda
+-- versione pubblicata — il caricatore di C3 ne crea una nuova sulla variante esistente — la
+-- guardia qui sotto si sarebbe fermata a ogni deploy, e se la prima fosse stata ritirata
+-- questo file avrebbe scritto il profilo nella versione nuova, che e' contenuto ricevuto e
+-- non si tocca. Ora si risolve per VARIANTE E NUMERO: la variante attivata dalla banca, la
+-- versione 1, quella che questo file popola dal 2026-09-10 (la stessa che la `000401` usa).
 CREATE TEMP TABLE versione_banca ON COMMIT DROP AS
 SELECT vv.blueprint_variant_version_id AS id
   FROM sys.sys_blueprint_activations a
@@ -53,7 +61,7 @@ SELECT vv.blueprint_variant_version_id AS id
     ON vv.blueprint_variant_version_variant_id = v.blueprint_variant_id
  WHERE t.tenant_code = 'RTL_BANK'
    AND a.blueprint_activation_status = 'ACTIVE'
-   AND vv.blueprint_variant_version_status = 'PUBLISHED';
+   AND vv.blueprint_variant_version_number = 1;
 
 -- I ruoli che B11 ha marcato come di un altro settore. Elenco esplicito, mai un jolly.
 CREATE TEMP TABLE fuori_settore ON COMMIT DROP AS
@@ -68,7 +76,7 @@ DECLARE
 BEGIN
   SELECT count(*) INTO n_versione FROM versione_banca;
   IF n_versione <> 1 THEN
-    RAISE EXCEPTION '000398 guardia: la banca ha % versioni di modello attive e pubblicate, '
+    RAISE EXCEPTION '000398 guardia: la banca ha % versioni 1 su varianti attive, '
       'ne era attesa 1 — il profilo non si popola al buio', n_versione;
   END IF;
 
@@ -191,8 +199,23 @@ ANALYZE sys.sys_blueprint_content_dashboards;
 -- ============================================================================================
 DO $post$
 DECLARE
+  v_banca uuid;
   n_profilo bigint; n_catalogo bigint; n_dash bigint; n_scoperti bigint; n_fuori_dentro bigint;
 BEGIN
+  -- ⚠ EMENDATO 2026-10-29 (C3a, R-50/R-51): ogni conteggio guarda la SOLA versione che questo
+  -- file popola. La prima stesura contava su tutte le versioni del database: un pacchetto
+  -- ricevuto che portasse uno dei 34 ruoli di un altro settore — e' proprio il suo mestiere,
+  -- per un cliente di quel settore — avrebbe reso rossa questa migrazione a ogni deploy.
+  -- (La tabella temporanea della guardia e' sparita con il COMMIT: si risolve di nuovo, uguale.)
+  SELECT vv.blueprint_variant_version_id INTO v_banca
+    FROM sys.sys_blueprint_activations a
+    JOIN sys.sys_tenancies t ON t.tenant_id = a.blueprint_activation_tenant_id
+    JOIN sys.sys_blueprint_variant_versions vv
+      ON vv.blueprint_variant_version_variant_id = a.blueprint_activation_variant_id
+   WHERE t.tenant_code = 'RTL_BANK'
+     AND a.blueprint_activation_status = 'ACTIVE'
+     AND vv.blueprint_variant_version_number = 1;
+
   SELECT count(*) INTO n_catalogo FROM sys.sys_job_roles;
   IF n_catalogo < 176 THEN
     RAISE EXCEPTION '000398: il catalogo e'' sceso a % ruoli — non si svuota MAI (ADR-0039, '
@@ -200,12 +223,7 @@ BEGIN
   END IF;
 
   SELECT count(*) INTO n_profilo FROM sys.sys_blueprint_content_job_roles r
-   JOIN sys.sys_blueprint_activations a ON true
-   JOIN sys.sys_tenancies t ON t.tenant_id = a.blueprint_activation_tenant_id
-                           AND t.tenant_code = 'RTL_BANK'
-   JOIN sys.sys_blueprint_variant_versions vv
-     ON vv.blueprint_variant_version_id = r.blueprint_content_job_role_version_id
-    AND vv.blueprint_variant_version_variant_id = a.blueprint_activation_variant_id;
+   WHERE r.blueprint_content_job_role_version_id = v_banca;
   IF n_profilo = 0 THEN
     RAISE EXCEPTION '000398: il profilo della banca e'' rimasto vuoto';
   END IF;
@@ -219,7 +237,8 @@ BEGIN
     JOIN sys.sys_job_roles jr ON jr.job_role_id = p.position_job_role_id
    WHERE NOT EXISTS (
      SELECT 1 FROM sys.sys_blueprint_content_job_roles r
-      WHERE r.blueprint_content_job_role_code = jr.job_role_code);
+      WHERE r.blueprint_content_job_role_version_id = v_banca
+        AND r.blueprint_content_job_role_code = jr.job_role_code);
   IF n_scoperti <> 0 THEN
     RAISE EXCEPTION '000398: % ruoli usati da posizioni di RTL non sono nel suo profilo', n_scoperti;
   END IF;
@@ -228,7 +247,8 @@ BEGIN
   SELECT count(*) INTO n_fuori_dentro
     FROM sys.sys_blueprint_content_job_roles r
     JOIN sys.sys_job_roles jr ON jr.job_role_code = r.blueprint_content_job_role_code
-   WHERE jr.job_role_id IN (
+   WHERE r.blueprint_content_job_role_version_id = v_banca
+     AND jr.job_role_id IN (
      SELECT DISTINCT esco_occupation_mapping_job_role_id FROM sys.sys_esco_occupation_mappings
       WHERE esco_occupation_mapping_metadata->>'motivo' LIKE '%non nel profilo della banca%');
   IF n_fuori_dentro <> 0 THEN
@@ -236,7 +256,8 @@ BEGIN
       n_fuori_dentro;
   END IF;
 
-  SELECT count(*) INTO n_dash FROM sys.sys_blueprint_content_dashboards;
+  SELECT count(*) INTO n_dash FROM sys.sys_blueprint_content_dashboards
+   WHERE blueprint_content_dashboard_version_id = v_banca;
   RAISE NOTICE '000398 ok — profilo della banca: % ruoli su % di catalogo, % dashboard, '
     '0 posizioni scoperte, 0 ruoli di altro settore dentro.', n_profilo, n_catalogo, n_dash;
 END

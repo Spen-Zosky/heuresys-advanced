@@ -62,9 +62,17 @@ BEGIN
     --    intercettato dalla prova generale sul clone di CI (2026-08-19).
     --    Il difetto che questa post-condizione esiste per intercettare resta coperto: un
     --    backfill che non trova il suo bersaglio conta ZERO, non uno.
+    -- ⚠ EMENDATA 2026-10-29 (consolidamento C3a, R-50): contava in tutto il database le versioni
+    --    con una di queste due chiavi. Una versione ricevuta dal datastore e pubblicata porta
+    --    anche lei `BLUEPRINT_CONTENT` (e' cio' che la rende costruibile), e da quel momento la
+    --    catena si sarebbe fermata qui a ogni deploy. Il bersaglio del backfill e' uno solo, la
+    --    versione 1 della banca: si guarda quello.
     SELECT count(*) INTO n_marcate
-      FROM sys.sys_blueprint_variant_versions
-     WHERE blueprint_variant_version_build_source_key IN ('BLUEPRINT_CONTENT', 'RETAIL_BANK_REFERENCE');
+      FROM sys.sys_blueprint_variant_versions vv
+      JOIN sys.sys_blueprint_variants v ON v.blueprint_variant_id = vv.blueprint_variant_version_variant_id
+     WHERE v.blueprint_variant_code = 'REGIONAL_RETAIL_BANK_MEDIUM'
+       AND vv.blueprint_variant_version_number = 1
+       AND vv.blueprint_variant_version_build_source_key IN ('BLUEPRINT_CONTENT', 'RETAIL_BANK_REFERENCE');
 
     IF n_marcate <> 1 THEN
         RAISE EXCEPTION '000320: attesa 1 versione con una sorgente di costruzione dichiarata, trovate %. Il backfill non ha trovato il suo bersaglio (o ne ha trovati troppi)', n_marcate;

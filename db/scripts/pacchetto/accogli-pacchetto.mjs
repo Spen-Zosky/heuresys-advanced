@@ -94,6 +94,13 @@ async function carica() {
       const kid = (await q(`INSERT INTO sys.sys_kpi_definitions (kpi_definition_tenant_id, kpi_definition_code, kpi_definition_name, kpi_definition_description, kpi_definition_formula, kpi_definition_unit, kpi_definition_polarity, kpi_definition_is_global, kpi_definition_metadata) VALUES (NULL,$1,$2,$3,$4,$5,$6,true,$7) RETURNING kpi_definition_id`,
         [pre + i.codice, i.nome.it, i.riferimento?.it ?? null, i.formula?.it ?? null, i.unita, i.direzioneAdvanced, JSON.stringify({ origine: "datastore", prototipo: raw.meta.prototipoId, pacchetto: raw.meta.schema, indicatore: i.codice })]))[0].kpi_definition_id;
       defs++;
+      // il nome inglese della definizione: senza, la guardia di copertura della 000255 ferma la catena al deploy successivo
+      for (const [campo, testo] of [["name", i.nome], ["description", i.riferimento]]) {
+        if (!testo?.en) continue;
+        const src = ORIGINE[testo.enOrigine]; if (!src) throw new Error(`origine sconosciuta ${testo.enOrigine} nell'indicatore ${i.codice}`);
+        await q("INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source) VALUES ('sys_kpi_definitions',$1,$2,'en',$3,$4)", [kid, campo, testo.en, src]);
+        trad++; orig[src] = (orig[src] ?? 0) + 1;
+      }
       const bersaglio = i.bersaglio ? { minimo: i.bersaglio.minimo, obiettivo: i.bersaglio.obiettivo, massimo: i.bersaglio.massimo } : {};
       await q(`INSERT INTO sys.sys_process_kpi_templates (process_kpi_template_process_id, process_kpi_template_kpi_id, process_kpi_template_default_weight, process_kpi_template_default_target, process_kpi_template_metadata) VALUES ($1,$2,$3,$4,$5)`,
         [procId, kid, INDICATORI_DI_PIATTAFORMA.peso(ii.length), JSON.stringify({ unita: i.unita, direzione: i.direzioneAdvanced, ...bersaglio }), JSON.stringify({ origine: "datastore " + raw.meta.prototipoId, obiettivo: i.obiettivoCodice })]);
@@ -243,7 +250,8 @@ async function scarica() {
   const tutti = [];
   for (const d of DOMINI) tutti.push(...(await q(`SELECT ${d.p}id AS id FROM sys.${d.t} WHERE ${Object.keys(fissi(d, c)).map((x, i) => `${d.p}${x} = $${i + 1}`).join(" AND ")}`, Object.values(fissi(d, c)))).map((r) => r.id));
   const trad = (await cli.query("DELETE FROM sys.sys_reference_translations WHERE entity_id = ANY($1::uuid[]) AND entity_table LIKE 'sys_blueprint_%'", [tutti])).rowCount;
-  // le definizioni di indicatore della prova (i loro modelli per processo vanno via a cascata)
+  // le definizioni di indicatore della prova (i loro modelli per processo vanno via a cascata), e prima i loro nomi inglesi
+  await cli.query("DELETE FROM sys.sys_reference_translations WHERE entity_table = 'sys_kpi_definitions' AND entity_id IN (SELECT kpi_definition_id FROM sys.sys_kpi_definitions WHERE kpi_definition_tenant_id IS NULL AND kpi_definition_code LIKE $1 AND kpi_definition_metadata->>'prototipo' = $2)", [INDICATORI_DI_PIATTAFORMA.prefisso(raw.meta.prototipoId) + "%", raw.meta.prototipoId]);
   const defs = (await cli.query("DELETE FROM sys.sys_kpi_definitions WHERE kpi_definition_tenant_id IS NULL AND kpi_definition_code LIKE $1 AND kpi_definition_metadata->>'prototipo' = $2", [INDICATORI_DI_PIATTAFORMA.prefisso(raw.meta.prototipoId) + "%", raw.meta.prototipoId])).rowCount;
   const fam = (await cli.query("DELETE FROM sys.sys_blueprint_families WHERE blueprint_family_code = $1", [FAMIGLIA])).rowCount;
   const resto = Number((await q("SELECT count(*) n FROM sys.sys_blueprint_variant_versions WHERE blueprint_variant_version_id = $1", [c.versionId]))[0].n);

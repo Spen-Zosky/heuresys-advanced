@@ -182,14 +182,19 @@ DECLARE
   v_versione uuid; n_ruoli bigint; n_usati bigint; n_scoperti bigint;
   n_dash bigint; n_att bigint; n_catalogo bigint; n_gate bigint; n_banca bigint;
 BEGIN
+  -- ⚠ EMENDATO 2026-10-29 (C3a, R-51): la versione si risolve per NUMERO, come fanno le
+  -- scritture qui sopra, e non per stato — con due versioni pubblicate della stessa variante
+  -- `SELECT ... INTO` ne avrebbe presa una a caso. Che sia PUBLISHED e' la cosa da verificare,
+  -- non il modo di trovarla.
   SELECT vv.blueprint_variant_version_id INTO v_versione
     FROM sys.sys_blueprint_variant_versions vv
     JOIN sys.sys_blueprint_variants v
       ON v.blueprint_variant_id = vv.blueprint_variant_version_variant_id
    WHERE v.blueprint_variant_code = 'MGMT_CONSULTING_SMALL'
+     AND vv.blueprint_variant_version_number = 1
      AND vv.blueprint_variant_version_status = 'PUBLISHED';
   IF v_versione IS NULL THEN
-    RAISE EXCEPTION '000400: la versione pubblicata di MGMT_CONSULTING_SMALL non esiste';
+    RAISE EXCEPTION '000400: la versione 1 di MGMT_CONSULTING_SMALL non esiste o non e'' pubblicata';
   END IF;
 
   -- Il profilo contiene ESATTAMENTE i ruoli che le posizioni di HEURESYS usano. La guardia
@@ -230,22 +235,15 @@ BEGIN
       'ricompensa — v_reward_gate_completeness si accenderebbe', n_gate;
   END IF;
 
-  -- ⭐ IL CONTEGGIO ESATTO DELLE VERSIONI PUBBLICATE VIVE QUI, e non piu' nella `000301`.
-  -- Quella lo portava come post-condizione («doveva restare 1 sola»), ed e' diventata rossa
-  -- quando questo file ne ha aggiunta una legittima: la `000301` non tocca le versioni, quindi
-  -- prometteva piu' di cio' che fa. Emendata alla propria responsabilita' (>= 1); il numero
-  -- esatto e' responsabilita' di chi le crea, cioe' di questo file — ed e' esattamente cio'
-  -- che la `000394` chiedeva a chi sarebbe venuto dopo di lei.
-  DECLARE n_versioni bigint;
-  BEGIN
-    SELECT count(*) INTO n_versioni FROM sys.sys_blueprint_variant_versions
-     WHERE blueprint_variant_version_status = 'PUBLISHED';
-    IF n_versioni <> 2 THEN
-      RAISE EXCEPTION '000400: le versioni di modello pubblicate sono % invece di 2 (la banca '
-        'e HEURESYS) — se e'' un''aggiunta legittima, il conteggio esatto va spostato nella '
-        'migrazione che la introduce', n_versioni;
-    END IF;
-  END;
+  -- ⚠ EMENDATO 2026-10-29 (consolidamento C3a, R-50). Qui viveva il conteggio ESATTO delle
+  -- versioni pubblicate in tutto il database («devono essere 2: la banca e HEURESYS»). Era la
+  -- stessa promessa eccessiva che la `000301` aveva fatto prima di questo file, spostata un
+  -- passo piu' in la': il primo pacchetto del datastore caricato in produzione crea una
+  -- variante, il trigger le da' la versione 1 PUBLISHED, e da quel momento ogni deploy si
+  -- sarebbe fermato qui. Le versioni che questo file crea sono UNA — la 1 di
+  -- MGMT_CONSULTING_SMALL — e la sua esistenza e il suo stato li verifica gia' la risoluzione
+  -- in testa a questo blocco. Le versioni degli altri non sono responsabilita' di questo file:
+  -- quelle ricevute le conta il registro dei ricevimenti (C3), non una migrazione.
 
   -- CIO' CHE NON DOVEVA CAMBIARE: il catalogo dei ruoli e il profilo della banca.
   SELECT count(*) INTO n_catalogo FROM sys.sys_job_roles WHERE job_role_tenant_id IS NULL;

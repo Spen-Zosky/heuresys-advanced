@@ -221,9 +221,17 @@ BEGIN
   -- (4) Post-condizioni che proteggono cio' che NON doveva cambiare. Questo file
   --     tocca solo una tabella nuova, quindi il catalogo dei modelli e la
   --     popolazione dei tenant devono essere esattamente come prima.
-  SELECT count(*) INTO n FROM sys.sys_blueprint_process_registry;
+  -- ⚠ EMENDATA 2026-10-29 (consolidamento C3a, R-50): contava TUTTO il registro («23 righe»).
+  --   Il primo pacchetto ricevuto dal datastore aggiunge i processi della propria variante, e la
+  --   catena riapplicata al deploy successivo si fermava qui (visto sulla copia di prova della VM:
+  --   25 righe dopo un pacchetto di 2 processi). Cio' che questo file non deve cambiare sono i
+  --   processi della banca, che esistevano quando e' nato: si contano quelli.
+  SELECT count(*) INTO n
+    FROM sys.sys_blueprint_process_registry p
+    JOIN sys.sys_blueprint_variants v ON v.blueprint_variant_id = p.blueprint_process_variant_id
+   WHERE v.blueprint_variant_code = 'REGIONAL_RETAIL_BANK_MEDIUM';
   IF n <> 23 THEN
-    RAISE EXCEPTION '000301: il registro dei processi doveva restare a 23 righe, ne ha %', n;
+    RAISE EXCEPTION '000301: i processi della banca nel registro dovevano restare 23, sono %', n;
   END IF;
 
   -- ⚠ EMENDATA S1096 (2026-09-10, C1) — era `n <> 1`, cioe' il conteggio esatto delle

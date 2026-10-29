@@ -7,8 +7,8 @@
 // C3 (consolidamento): `ricevi` accoglie una CONSEGNA (cartella con manifesto.json e pacchetto.json, ADR-0047). Prima del database
 //   verifica il manifesto e l'impronta (manifesto-consegna.mjs): una consegna che non si verifica non scrive niente. Poi, sotto un blocco
 //   consultivo per prototipo: stessa identita' (prototipo, numero del pacchetto) e stessa impronta = GIA_PRESENTE, zero righe nuove;
-//   stessa identita' e impronta diversa = RIFIUTATO; altrimenti la versione successiva sulla variante del prototipo (creata solo la
-//   prima volta), in DRAFT. Ogni esito lascia una riga in sys_blueprint_content_receipts (000460). Non scrive definizioni di indicatore
+//   stessa identita' e impronta diversa = RIFIUTATO; un prototipo nuovo entra come variante nuova, versione 2 in DRAFT; un numero nuovo
+//   di un prototipo gia' ricevuto e' RIFIUTATO finche' C4 non porta l'unicita' dei processi sulla versione (R-58). Ogni esito lascia una riga in sys_blueprint_content_receipts (000460). Non scrive definizioni di indicatore
 //   senza tenant: gli indicatori stanno nel contenuto del modello (sys_blueprint_content_kpis), e la costruzione del tenant li porta li'.
 //
 // Uso:  node db/scripts/pacchetto/accogli-pacchetto.mjs carica   <database> <pacchetto.json> <uscita.json> [famiglia]
@@ -173,6 +173,18 @@ async function ricevi() {
   }
   if (gia) {
     const motivo = `il pacchetto ${m.versione} del prototipo ${m.prototipo} c'è già con un'altra impronta (${gia.h}): advanced non lo sovrascrive, il datastore deve consegnare un numero nuovo`;
+    await registra("RIFIUTATO", null, motivo);
+    await cli.query("COMMIT");
+    esito.ricevimento = "RIFIUTATO";
+    throw new Error(motivo);
+  }
+  // una versione nuova di un prototipo gia' ricevuto non entra ancora: il registro dei processi e' unico per (variante, codice)
+  // (indice di 000008, bersaglio dell'ON CONFLICT di 000021), quindi i processi della versione 2 urterebbero quelli della 1.
+  // Diventa possibile con C4, che fissa la versione sull'attivazione e porta l'unicita' dei processi sulla versione (R-58).
+  const precedente = (await q(`SELECT p.blueprint_content_package_package_version AS n FROM sys.sys_blueprint_content_packages p
+    WHERE p.blueprint_content_package_prototype_ref = $1 ORDER BY p.blueprint_content_package_package_version DESC NULLS LAST LIMIT 1`, [m.prototipo]))[0];
+  if (precedente) {
+    const motivo = `il prototipo ${m.prototipo} ha gia' un pacchetto (${precedente.n ?? "senza numero"}): una versione nuova dello stesso prototipo si riceve dopo C4 (R-58), finche' il registro dei processi e' unico per variante`;
     await registra("RIFIUTATO", null, motivo);
     await cli.query("COMMIT");
     esito.ricevimento = "RIFIUTATO";

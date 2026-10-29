@@ -13,7 +13,8 @@
 # Che cosa fa, sulla sola copia:
 #   0. la catena sulla copia appena fatta: deve essere verde (altrimenti la prova non dice niente);
 #   A. carica il pacchetto (accogli-pacchetto.mjs carica): nasce una variante, e il trigger le da' la versione 1 PUBLISHED;
-#      poi la catena di nuovo — prima dell'emendamento la 000400 si ferma («versioni pubblicate 3 invece di 2»);
+#      la versione 2 ricevuta si pubblica con la chiave BLUEPRINT_CONTENT, come fa attiva-modello.mts;
+#      poi la catena di nuovo — prima dell'emendamento si fermano la 000301 (processi), la 000320 (chiavi) e la 000400 (versioni);
 #   B. pubblica una versione 2 sulla variante della banca (cio' che C3 fara' ricevendo una versione nuova di un prototipo gia' noto);
 #      poi la catena di nuovo — prima dell'emendamento la 000398 si ferma («la banca ha 2 versioni»);
 #   C. la catena una terza volta, e il conteggio delle righe delle tabelle sys_blueprint_* non cambia (idempotenza).
@@ -55,6 +56,12 @@ catena 0_catena; esito "0. catena sulla copia appena fatta" "$?" 0
 
 node "$AQUI/accogli-pacchetto.mjs" carica "$COPIA" "$PKG" "$OUT/A_carica.json" > "$OUT/A_carica.out" 2>&1
 esito "A. il pacchetto si carica" "$?" 0
+# la versione ricevuta si pubblica come la pubblica attiva-modello.mts: PUBLISHED e chiave BLUEPRINT_CONTENT (e' cio' che la rende costruibile)
+VER="$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).versione ?? "")' "$OUT/A_carica.json" 2>/dev/null)"
+"${P[@]}" -d "$COPIA" -c "UPDATE sys.sys_blueprint_variant_versions SET blueprint_variant_version_status = 'PUBLISHED',
+  blueprint_variant_version_published_at = now(), blueprint_variant_version_build_source_key = 'BLUEPRINT_CONTENT'
+  WHERE blueprint_variant_version_id = '$VER'" > "$OUT/A_pubblica.out" 2>&1
+esito "A. la versione ricevuta si pubblica" "$(cat "$OUT/A_pubblica.out")" "UPDATE 1"
 echo "        versioni pubblicate nel database: $(pubblicate)"
 catena A_catena; esito "A. catena dopo il caricamento" "$?" 0
 

@@ -19,7 +19,7 @@ const coppie = new Set();
 for (const c of P.capability ?? []) for (const p of c.processiCodici) coppie.add(`${c.codice}|${p}`);
 for (const p of P.processi) for (const c of p.capabilityCodici ?? []) coppie.add(`${c}|${p.codice}`);
 const posProc = new Set();
-for (const x of P.posizioni) { for (const p of x.processiCodici) posProc.add(`${x.codice}|${p}`); for (const o of x.oreProcessi ?? []) posProc.add(`${x.codice}|${o.processoCodice}`); }
+for (const x of P.posizioni) { for (const p of x.processiCodici ?? []) posProc.add(`${x.codice}|${p}`); for (const o of x.oreProcessi ?? []) posProc.add(`${x.codice}|${o.processoCodice}`); }
 const legami = new Set();
 for (const x of P.commesse) { for (const c of x.unitaCodici) legami.add(`${x.codice}|UNIT|${c}`); for (const c of x.posizioniCodici) legami.add(`${x.codice}|POSITION|${c}`); for (const a of x.composizione ?? []) legami.add(`${x.codice}|${{ POSIZIONE: "POSITION", RUOLO: "ROLE", AGENTE: "AGENT" }[a.attore.tipo]}|${a.attore.codice}`); for (const c of x.obiettiviCodici ?? []) legami.add(`${x.codice}|GOAL|${c}`); }
 const voci = Object.values(P.perimetro?.voci ?? {}).reduce((t, l) => t + l.length, 0);

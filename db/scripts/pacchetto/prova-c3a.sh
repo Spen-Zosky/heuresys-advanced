@@ -32,6 +32,11 @@ P=(psql -X -At -v ON_ERROR_STOP=1)
 [ "$("${P[@]}" -d postgres -c "select count(*) from pg_database where datname='$COPIA'")" = 0 ] \
   || { echo "la copia $COPIA c'e' gia': scegli un altro N (niente si cancella)" >&2; exit 2; }
 createdb -T "$SRC" "$COPIA" || exit 2
+# createdb -T non copia i permessi del database: senza questa riga la 000340 si ferma gia' al passo 0 (i ruoli che devono restare
+# dentro hanno perso CONNECT sulla copia). Si concede a chi la 000340 nomina, se esiste sul cluster.
+for r in gov_worker codex_auditor; do
+  [ "$("${P[@]}" -d postgres -c "select count(*) from pg_roles where rolname='$r'")" = 1 ] && "${P[@]}" -d postgres -c "GRANT CONNECT ON DATABASE \"$COPIA\" TO $r" >/dev/null
+done
 ENVT="$OUT/copia.env"; grep -v '^POSTGRES_DB=' "$ENV_SRC" > "$ENVT"; echo "POSTGRES_DB=$COPIA" >> "$ENVT"; chmod 600 "$ENVT"
 [ -d "$HOME/.nvm/versions/node" ] && export PATH="$(ls -d "$HOME"/.nvm/versions/node/v22*/bin | tail -1):$PATH"
 echo "[prova-c3a] copia $COPIA da $SRC, catena di $RADICE ($(git -C "$RADICE" rev-parse --short HEAD 2>/dev/null || echo '?')), esiti in $OUT"

@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `05a641e9` (2026-10-27T20:38:40+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `ea63d232` (2026-10-29T19:59:04+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,7 +10,7 @@
 | Route API | 661 |
 | Pagine web | 129 |
 | Schemi shared | 123 |
-| Tabelle DB | 373 (vuote: 67) |
+| Tabelle DB | 374 (vuote: 68) |
 | Viste / matview | 77 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 294 |
 
@@ -188,6 +188,7 @@
 - `sys.sys_blueprint_content_position_skill_requirements`
 - `sys.sys_blueprint_content_process_sites`
 - `sys.sys_blueprint_content_process_steps`
+- `sys.sys_blueprint_content_receipts`
 - `sys.sys_blueprint_content_sites`
 - `sys.sys_blueprint_content_strategies`
 - `sys.sys_blueprint_content_strategy_items`

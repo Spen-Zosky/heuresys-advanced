@@ -4,7 +4,15 @@
 //                una sezione dichiarata vuota (null o []) produce zero righe; perimeter_status e' DICHIARATO solo se la sezione perimetro ha voci (ADR-0046 §1).
 //   - rileggi    ricostruisce anche le sezioni v0.3, confronta, e RIPORTA le regole che marcano senza rifiutare (regole-di-ritorno.mjs): non cambia l'esito.
 //
+// C3 (consolidamento): `ricevi` accoglie una CONSEGNA (cartella con manifesto.json e pacchetto.json, ADR-0047). Prima del database
+//   verifica il manifesto e l'impronta (manifesto-consegna.mjs): una consegna che non si verifica non scrive niente. Poi, sotto un blocco
+//   consultivo per prototipo: stessa identita' (prototipo, numero del pacchetto) e stessa impronta = GIA_PRESENTE, zero righe nuove;
+//   stessa identita' e impronta diversa = RIFIUTATO; un prototipo nuovo entra come variante nuova, versione 2 in DRAFT; un numero nuovo
+//   di un prototipo gia' ricevuto e' RIFIUTATO finche' C4 non porta l'unicita' dei processi sulla versione (R-58). Ogni esito lascia una riga in sys_blueprint_content_receipts (000460). Non scrive definizioni di indicatore
+//   senza tenant: gli indicatori stanno nel contenuto del modello (sys_blueprint_content_kpis), e la costruzione del tenant li porta li'.
+//
 // Uso:  node db/scripts/pacchetto/accogli-pacchetto.mjs carica   <database> <pacchetto.json> <uscita.json> [famiglia]
+//       node db/scripts/pacchetto/accogli-pacchetto.mjs ricevi   <database> <cartella_consegna> <uscita.json> [famiglia] [--produzione]
 //       node db/scripts/pacchetto/accogli-pacchetto.mjs rileggi  <database> <pacchetto.json> <uscita.json> [famiglia]
 //       node db/scripts/pacchetto/accogli-pacchetto.mjs scarica  <database> <pacchetto.json> <uscita.json> [famiglia]
 //
@@ -14,7 +22,8 @@
 // rileggi  ricostruisce il pacchetto dalle sole righe e lo confronta con il file, percorso per percorso e per intero.
 // scarica  toglie le sole righe caricate (traduzioni, definizioni di indicatore, famiglia: il resto va a cascata).
 //
-// Guardia: rifiuta un database il cui nome non finisce con _prova<N> (copia usa-e-getta). Collegamento: PGHOST, PGPORT, PGUSER (default
+// Guardia a due condizioni: un database il cui nome non finisce con _prova<N> (copia usa-e-getta) si tocca solo con `ricevi`, cioe' con
+// un manifesto verificato, E con l'opzione esplicita --produzione (che si da' dopo un backup verificato). Collegamento: PGHOST, PGPORT, PGUSER (default
 // localhost, 5432, postgres); la password la legge il client dal pgpass di sistema, mai da qui.
 import fs from "node:fs";
 import path from "node:path";
@@ -24,12 +33,24 @@ const pg = createRequire(path.resolve(path.dirname(fileURLToPath(import.meta.url
 import { DOMINI, fissi, ORIGINE, ORIGINE_INVERSA, INDICATORI_DI_PIATTAFORMA, versione3, LIVELLO_INVERSO, LEGAME_ATTORE_INVERSO } from "./definizione-pacchetto.mjs";
 import { convalida } from "./convalida-pacchetto.mjs";
 import { regoleMarcano } from "./regole-di-ritorno.mjs";
+import { verificaConsegna, improntaJson } from "./manifesto-consegna.mjs";
 
-const [cmd, DB, FILE, OUT, FAMIGLIA_ARG] = process.argv.slice(2);
-if (!["carica", "rileggi", "scarica"].includes(cmd) || !DB || !FILE || !OUT) throw new Error("uso: carica|rileggi|scarica <database> <pacchetto.json> <uscita.json> [famiglia]");
-if (!/_prova\d*$/.test(DB)) throw new Error("rifiuto: " + DB + " non è una copia di prova");
+const ARGV = process.argv.slice(2);
+const PRODUZIONE = ARGV.includes("--produzione");
+const [cmd, DB, FILE, OUT, FAMIGLIA_ARG] = ARGV.filter((a) => a !== "--produzione");
+if (!["carica", "ricevi", "rileggi", "scarica"].includes(cmd) || !DB || !FILE || !OUT) throw new Error("uso: carica|ricevi|rileggi|scarica <database> <pacchetto.json | cartella_consegna> <uscita.json> [famiglia] [--produzione]");
+const PROVA = /_prova\d*$/.test(DB);
+if (PRODUZIONE && cmd !== "ricevi") throw new Error("rifiuto: --produzione vale solo per «ricevi», che verifica il manifesto");
+if (!PROVA && !(cmd === "ricevi" && PRODUZIONE)) throw new Error("rifiuto: " + DB + " non è una copia di prova (fuori dalle copie si entra solo con «ricevi» e --produzione, dopo un backup)");
 const FAMIGLIA = FAMIGLIA_ARG ?? "PACCHETTO_DATASTORE";
-const raw = JSON.parse(fs.readFileSync(FILE, "utf8"));
+// la consegna si verifica PRIMA di aprire il database: se non regge, non si scrive niente, nemmeno nel registro
+const consegna = cmd === "ricevi" ? verificaConsegna(FILE) : null;
+if (consegna && !consegna.ok) {
+  fs.writeFileSync(OUT, JSON.stringify({ comando: cmd, database: DB, consegna: FILE, esito: "rifiutato", ricevimento: "NON_VERIFICATO", errori: consegna.errori, finito: new Date().toISOString() }, null, 1));
+  console.log(JSON.stringify({ esito: "rifiutato", ricevimento: "NON_VERIFICATO", errori: consegna.errori }, null, 1));
+  process.exit(1);
+}
+const raw = consegna ? consegna.pacchetto : JSON.parse(fs.readFileSync(FILE, "utf8"));
 pg.types.setTypeParser(1700, (v) => (v === null ? null : Number(v))); // numeric
 pg.types.setTypeParser(20, (v) => (v === null ? null : Number(v))); // bigint
 pg.types.setTypeParser(1082, (v) => v); // date: resta la stringa AAAA-MM-GG, senza passare dal fuso del processo (mig. 000456)
@@ -40,25 +61,34 @@ const q = async (s, a = []) => (await cli.query(s, a)).rows;
 const D = (k) => DOMINI.find((d) => d.chiave === k);
 const esito = { comando: cmd, database: DB, pacchetto: FILE, avviato: new Date().toISOString() };
 
+// la versione che porta QUESTO pacchetto: quella con la sua impronta, se c'e' (C3), altrimenti la piu' recente che porta un pacchetto
 const versione = async () => {
   const r = await q(`SELECT v.blueprint_variant_id AS var, vv.blueprint_variant_version_id AS ver FROM sys.sys_blueprint_families f
     JOIN sys.sys_blueprint_variants v ON v.blueprint_variant_family_id = f.blueprint_family_id
-    JOIN sys.sys_blueprint_variant_versions vv ON vv.blueprint_variant_version_variant_id = v.blueprint_variant_id AND vv.blueprint_variant_version_number = 2
-    WHERE f.blueprint_family_code = $1 AND v.blueprint_variant_code = $2`, [FAMIGLIA, raw.meta.prototipoId]);
+    JOIN sys.sys_blueprint_variant_versions vv ON vv.blueprint_variant_version_variant_id = v.blueprint_variant_id
+    JOIN sys.sys_blueprint_content_packages p ON p.blueprint_content_package_version_id = vv.blueprint_variant_version_id
+    WHERE f.blueprint_family_code = $1 AND v.blueprint_variant_code = $2
+    ORDER BY (p.blueprint_content_package_hash = $3) DESC NULLS LAST, vv.blueprint_variant_version_number DESC LIMIT 1`, [FAMIGLIA, raw.meta.prototipoId, improntaJson(raw)]);
   return r[0] ? { varianteId: r[0].var, versionId: r[0].ver } : null;
 };
 
-async function carica() {
+async function carica(op = {}) {
   // prima del database: il pacchetto deve passare lo schema della sua versione e i limiti delle colonne (convalida-pacchetto.mjs)
   const cv = convalida(raw);
   esito.convalida = { schema: cv.schema, ok: cv.ok };
   if (!cv.ok) throw new Error(`pacchetto rifiutato (${cv.schema}), niente e' stato scritto: ` + cv.errori.join(" | "));
-  await cli.query("BEGIN");
-  if ((await q("SELECT 1 FROM sys.sys_blueprint_families WHERE blueprint_family_code = $1", [FAMIGLIA])).length) throw new Error("la famiglia " + FAMIGLIA + " c'è già: niente si sovrascrive");
-  const fam = (await q(`INSERT INTO sys.sys_blueprint_families (blueprint_family_code, blueprint_family_name, blueprint_family_description) VALUES ($1, 'Pacchetto del datastore', 'Famiglia che accoglie il pacchetto v0.2 di un prototipo del datastore') RETURNING blueprint_family_id`, [FAMIGLIA]))[0].blueprint_family_id;
+  if (!op.ricevimento) await cli.query("BEGIN"); // ricevi apre la transazione da se', con il blocco consultivo
+  const famEsistente = (await q("SELECT blueprint_family_id AS id FROM sys.sys_blueprint_families WHERE blueprint_family_code = $1", [FAMIGLIA]))[0]?.id;
+  if (famEsistente && !op.ricevimento) throw new Error("la famiglia " + FAMIGLIA + " c'è già: niente si sovrascrive");
+  const fam = famEsistente ?? (await q(`INSERT INTO sys.sys_blueprint_families (blueprint_family_code, blueprint_family_name, blueprint_family_description) VALUES ($1, 'Pacchetto del datastore', 'Famiglia che accoglie i pacchetti dei prototipi del datastore') RETURNING blueprint_family_id`, [FAMIGLIA]))[0].blueprint_family_id;
   const banda = (await q("SELECT enterprise_size_band_id FROM sys.sys_enterprise_size_bands WHERE enterprise_size_band_code = $1", [raw.contesto.fasciaAdvanced]))[0]?.enterprise_size_band_id ?? null;
-  const varId = (await q(`INSERT INTO sys.sys_blueprint_variants (blueprint_variant_family_id, blueprint_variant_code, blueprint_variant_name, blueprint_variant_description, blueprint_variant_size_band_id) VALUES ($1,$2,$3,$4,$5) RETURNING blueprint_variant_id`, [fam, raw.meta.prototipoId, raw.contesto.descrizione.it.slice(0, 250), raw.contesto.descrizione.it, banda]))[0].blueprint_variant_id;
-  const verId = (await q(`INSERT INTO sys.sys_blueprint_variant_versions (blueprint_variant_version_variant_id, blueprint_variant_version_number, blueprint_variant_version_status, blueprint_variant_version_notes) VALUES ($1, 2, 'DRAFT', $2) RETURNING blueprint_variant_version_id`, [varId, "Accoglienza del pacchetto " + raw.meta.schema]))[0].blueprint_variant_version_id;
+  // la variante e' il prototipo: si crea al primo pacchetto, e i successivi diventano versioni nuove della stessa (C3)
+  const varEsistente = op.ricevimento ? (await q("SELECT blueprint_variant_id AS id, blueprint_variant_family_id AS fam FROM sys.sys_blueprint_variants WHERE blueprint_variant_code = $1", [raw.meta.prototipoId]))[0] : undefined;
+  if (varEsistente && varEsistente.fam !== fam) throw new Error(`la variante ${raw.meta.prototipoId} esiste in un'altra famiglia: niente si sposta`);
+  const varId = varEsistente?.id ?? (await q(`INSERT INTO sys.sys_blueprint_variants (blueprint_variant_family_id, blueprint_variant_code, blueprint_variant_name, blueprint_variant_description, blueprint_variant_size_band_id) VALUES ($1,$2,$3,$4,$5) RETURNING blueprint_variant_id`, [fam, raw.meta.prototipoId, raw.contesto.descrizione.it.slice(0, 250), raw.contesto.descrizione.it, banda]))[0].blueprint_variant_id;
+  // la versione 1 la crea il trigger alla nascita della variante: il contenuto entra sempre in una versione nuova, la prima e' la 2
+  const numero = Number((await q("SELECT coalesce(max(blueprint_variant_version_number), 1) + 1 AS n FROM sys.sys_blueprint_variant_versions WHERE blueprint_variant_version_variant_id = $1", [varId]))[0].n);
+  const verId = (await q(`INSERT INTO sys.sys_blueprint_variant_versions (blueprint_variant_version_variant_id, blueprint_variant_version_number, blueprint_variant_version_status, blueprint_variant_version_notes) VALUES ($1, $2, 'DRAFT', $3) RETURNING blueprint_variant_version_id`, [varId, numero, "Accoglienza del pacchetto " + raw.meta.schema]))[0].blueprint_variant_version_id;
   const c = { versionId: verId, varianteId: varId };
   const ids = {}; const conti = {}; let trad = 0; const orig = {}; let legami = 0, vuoti = 0;
   for (const d of DOMINI) {
@@ -88,7 +118,7 @@ async function carica() {
   const perProcesso = new Map();
   for (const i of raw.indicatori) { const pc = processoDi.get(i.obiettivoCodice); perProcesso.set(pc, [...(perProcesso.get(pc) ?? []), i]); }
   let defs = 0, modelli = 0;
-  for (const [pc, ii] of perProcesso) {
+  for (const [pc, ii] of op.ricevimento ? [] : perProcesso) { // C3: niente definizioni senza tenant al ricevimento
     const procId = ids.processes.get(pc); if (!procId) throw new Error("indicatore legato a un processo che non c'è: " + pc);
     for (const i of ii) {
       const kid = (await q(`INSERT INTO sys.sys_kpi_definitions (kpi_definition_tenant_id, kpi_definition_code, kpi_definition_name, kpi_definition_description, kpi_definition_formula, kpi_definition_unit, kpi_definition_polarity, kpi_definition_is_global, kpi_definition_metadata) VALUES (NULL,$1,$2,$3,$4,$5,$6,true,$7) RETURNING kpi_definition_id`,
@@ -107,11 +137,61 @@ async function carica() {
       modelli++;
     }
   }
+  if (op.ricevimento) {
+    const m = consegna.manifesto;
+    const n = (await cli.query(`UPDATE sys.sys_blueprint_content_packages SET blueprint_content_package_package_version = $2, blueprint_content_package_hash = $3 WHERE blueprint_content_package_version_id = $1`, [verId, m.versione, m.impronta.valore])).rowCount;
+    if (n !== 1) throw new Error("la riga del pacchetto non c'è: il ricevimento non si registra al buio");
+    await op.registra("CARICATO", verId, null);
+  }
   await cli.query("COMMIT");
   // le statistiche delle tabelle appena riempite: senza, db_health conta le tabelle popolate e mai analizzate
-  const toccate = [...new Set([...DOMINI.map((d) => d.t), "sys_blueprint_families", "sys_blueprint_variants", "sys_blueprint_variant_versions", "sys_reference_translations", "sys_blueprint_content_evidence_links", "sys_blueprint_content_evidence_gaps", "sys_kpi_definitions", "sys_process_kpi_templates"])];
+  const toccate = [...new Set([...DOMINI.map((d) => d.t), "sys_blueprint_families", "sys_blueprint_variants", "sys_blueprint_variant_versions", "sys_reference_translations", "sys_blueprint_content_evidence_links", "sys_blueprint_content_evidence_gaps", "sys_kpi_definitions", "sys_process_kpi_templates", ...(op.ricevimento ? ["sys_blueprint_content_receipts"] : [])])];
   for (const t of toccate) await cli.query(`ANALYZE sys.${t}`);
-  Object.assign(esito, { famiglia: FAMIGLIA, variante: varId, versione: verId, righe_per_tabella: conti, righe: Object.values(conti).reduce((a, b) => a + b, 0), traduzioni: trad, origini: orig, legami_con_prove: legami, senza_riscontro: vuoti, definizioni_di_indicatore: defs, modelli_di_indicatore_per_processo: modelli, tabelle_analizzate: toccate.length });
+  Object.assign(esito, { famiglia: FAMIGLIA, variante: varId, versione: verId, numero_di_versione: numero, righe_per_tabella: conti, righe: Object.values(conti).reduce((a, b) => a + b, 0), traduzioni: trad, origini: orig, legami_con_prove: legami, senza_riscontro: vuoti, definizioni_di_indicatore: defs, modelli_di_indicatore_per_processo: modelli, tabelle_analizzate: toccate.length });
+}
+
+// ---- ricevimento di una consegna (C3)
+async function ricevi() {
+  const m = consegna.manifesto;
+  esito.consegna = { prototipo: m.prototipo, versione_del_pacchetto: m.versione, impronta: m.impronta.valore, correlazione: m.correlazione, produzione: !PROVA };
+  const registra = (esitoR, ver, motivo) => q(`INSERT INTO sys.sys_blueprint_content_receipts
+      (blueprint_content_receipt_prototype_ref, blueprint_content_receipt_package_version, blueprint_content_receipt_hash, blueprint_content_receipt_schema_version,
+       blueprint_content_receipt_variant_version_id, blueprint_content_receipt_outcome, blueprint_content_receipt_reason, blueprint_content_receipt_correlation,
+       blueprint_content_receipt_delivered_at, blueprint_content_receipt_delivered_by, blueprint_content_receipt_metadata)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+    [m.prototipo, m.versione, m.impronta.valore, m.contratto, ver, esitoR, motivo, m.correlazione, m.consegnatoIl, m.consegnatoDa,
+     JSON.stringify({ fascicoloVersione: m.fascicoloVersione, edizioni: m.edizioni, famiglia: FAMIGLIA, caricatore: "accogli-pacchetto.mjs ricevi" })]);
+  await cli.query("BEGIN");
+  await q("SELECT pg_advisory_xact_lock(hashtext($1))", ["ricevimento-pacchetto:" + m.prototipo]);
+  const gia = (await q(`SELECT blueprint_content_package_hash AS h, blueprint_content_package_version_id AS ver FROM sys.sys_blueprint_content_packages
+    WHERE blueprint_content_package_prototype_ref = $1 AND blueprint_content_package_package_version = $2`, [m.prototipo, m.versione]))[0];
+  if (gia && gia.h === m.impronta.valore) {
+    await registra("GIA_PRESENTE", gia.ver, null);
+    await cli.query("COMMIT");
+    Object.assign(esito, { ricevimento: "GIA_PRESENTE", versione: gia.ver });
+    return;
+  }
+  if (gia) {
+    const motivo = `il pacchetto ${m.versione} del prototipo ${m.prototipo} c'è già con un'altra impronta (${gia.h}): advanced non lo sovrascrive, il datastore deve consegnare un numero nuovo`;
+    await registra("RIFIUTATO", null, motivo);
+    await cli.query("COMMIT");
+    esito.ricevimento = "RIFIUTATO";
+    throw new Error(motivo);
+  }
+  // una versione nuova di un prototipo gia' ricevuto non entra ancora: il registro dei processi e' unico per (variante, codice)
+  // (indice di 000008, bersaglio dell'ON CONFLICT di 000021), quindi i processi della versione 2 urterebbero quelli della 1.
+  // Diventa possibile con C4, che fissa la versione sull'attivazione e porta l'unicita' dei processi sulla versione (R-58).
+  const precedente = (await q(`SELECT p.blueprint_content_package_package_version AS n FROM sys.sys_blueprint_content_packages p
+    WHERE p.blueprint_content_package_prototype_ref = $1 ORDER BY p.blueprint_content_package_package_version DESC NULLS LAST LIMIT 1`, [m.prototipo]))[0];
+  if (precedente) {
+    const motivo = `il prototipo ${m.prototipo} ha gia' un pacchetto (${precedente.n ?? "senza numero"}): una versione nuova dello stesso prototipo si riceve dopo C4 (R-58), finche' il registro dei processi e' unico per variante`;
+    await registra("RIFIUTATO", null, motivo);
+    await cli.query("COMMIT");
+    esito.ricevimento = "RIFIUTATO";
+    throw new Error(motivo);
+  }
+  await carica({ ricevimento: true, registra });
+  esito.ricevimento = "CARICATO";
 }
 
 // ---- rilettura: dal database al pacchetto
@@ -260,7 +340,7 @@ async function scarica() {
   Object.assign(esito, { versione: c.versionId, righe_di_contenuto: tutti.length, traduzioni_tolte: trad, definizioni_di_indicatore_tolte: defs, famiglie_tolte: fam });
 }
 
-try { await { carica, rileggi, scarica }[cmd](); esito.esito = "ok"; }
+try { await { carica: () => carica(), ricevi, rileggi, scarica }[cmd](); esito.esito = "ok"; }
 catch (e) { esito.esito = "errore"; esito.errore = e.message; try { await cli.query("ROLLBACK"); } catch {} }
 await cli.end();
 esito.finito = new Date().toISOString();

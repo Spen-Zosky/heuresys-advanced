@@ -1,6 +1,6 @@
 # Agente di consolidamento del tenant — disegno tecnico
 
-Versione 1 del 2026-10-30, PROPOSTA: aspetta il via di Enzo sulle decisioni del §10. Attua la specifica confermata da Enzo il 2026-10-30 alle 19:33 UTC (20:33 ora di Roma), copiata accanto a questo file in `00_SPECIFICA.md`. Il piano di lavoro che ne discende è `06_PIANO.md`. Ogni affermazione sullo stato del codice porta il file da cui viene; ciò che non ho potuto misurare in questa sessione è scritto come tale.
+Versione 1 del 2026-10-30, APPROVATA da Enzo il 2026-10-30 alle 20:53 UTC (21:53 ora di Roma), con le cinque raccomandazioni del §10. Attua la specifica confermata da Enzo il 2026-10-30 alle 19:33 UTC (20:33 ora di Roma), copiata accanto a questo file in `00_SPECIFICA.md`. Il piano di lavoro che ne discende è `06_PIANO.md`. Ogni affermazione sullo stato del codice porta il file da cui viene; ciò che non ho potuto misurare in questa sessione è scritto come tale.
 
 ## 1. In parole semplici
 
@@ -130,7 +130,9 @@ La pagina dei vuoti resta lo strumento di Enzo per controllare la qualità del p
 
 Un fatto da tenere presente, misurato in questa sessione: oggi la pagina dei vuoti legge RTL Bank dalla produzione di advanced attraverso il servizio 3104 (`apps/api/src/rtl_lettura.ts` del datastore, toccato dalla PR #17). È una lettura diretta del database di advanced, che ADR-0047 punto 6 e C8 hanno già deciso di ritirare. Non la cambia questo disegno; la segnalo perché il ritorno di AC-14 la renderà superflua.
 
-## 10. Le decisioni che servono a Enzo
+## 10. Le decisioni di Enzo
+
+Decise il 2026-10-30 alle 20:53 UTC: Enzo ha scelto «Sì, tutte e cinque» sulla scheda di decisione del thread «Progettare l'agente di consolidamento in advanced». Valgono quindi le cinque raccomandazioni qui sotto. La voce 3 (agente in servizio sulla VM) resta legata a AC-12: il suo via sulla produzione si chiede con una frase scritta quando AC-12 è pronta.
 
 1. **L'architettura a tre pezzi del §3**, con il giudice senza strumenti. Raccomandazione: sì; è lo schema già in uso per la ricerca, e rende impossibile una scrittura del modello.
 2. **Niente Voyage per ora**: candidati con `pg_trgm` e giudizio del modello sull'abbonamento. Raccomandazione: sì; costo zero, nessuna chiave nuova; gli embedding si riconsiderano solo se la prima prova mostra che i candidati per nome mancano corrispondenze.

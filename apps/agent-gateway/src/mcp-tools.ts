@@ -46,7 +46,8 @@ export function bindPath(template: string, params: Record<string, unknown>): str
 // sano. Misurato il 2026-09-13 con `live-perimetro.ts` e riprodotto in isolamento.
 // `z.object({}).catchall(X)` produce lo stesso JSON Schema (`additionalProperties: X`) e
 // passa. Il test `mcp-tools-list.test.ts` chiama `tools/list` sul server VERO: se torna a
-// lanciare, e' lui a dirlo, non la prova live.
+// lanciare, e' lui a dirlo, non la prova live. Dal 2026-10-30 (SDK 0.3.314, zod 4.6.7) il
+// crash non si riproduce piu' e la controprova lo verifica; qui si resta su `catchall`.
 export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOperationResolver) {
   const ok = (d: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(d) }] });
 

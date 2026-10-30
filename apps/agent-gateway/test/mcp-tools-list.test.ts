@@ -9,8 +9,9 @@
  *
  * Qui si chiama `tools/list` sul server costruito da `buildHeuresysMcp`, come fa il CLI, e si
  * pretende che risponda con TUTTI i nomi del catalogo. La CONTROPROVA e' la forma che rompeva:
- * un server con `z.record` deve ancora lanciare — se un giorno non lancera' piu', la nota in
- * `mcp-tools.ts` potra' essere ritirata sapendolo.
+ * fino all'SDK 0.3.250 con zod 4.5.4 un server con `z.record` faceva lanciare `tools/list`; dal
+ * 2026-10-30 (SDK 0.3.314, zod 4.6.7) non lancia piu', e la controprova lo pretende: se torna a
+ * lanciare, la nota in `mcp-tools.ts` torna a valere come divieto.
  */
 import { describe, it, expect } from "vitest";
 import { createSdkMcpServer, tool } from "@anthropic-ai/claude-agent-sdk";
@@ -48,11 +49,12 @@ describe("il server MCP del gateway elenca i propri strumenti", () => {
     for (const t of r.tools) expect(() => JSON.stringify(t.inputSchema)).not.toThrow();
   });
 
-  it("controprova: un `z.record` nello schema fa ancora lanciare tools/list (la ragione della nota)", async () => {
+  it("controprova: un `z.record` nello schema non fa piu' lanciare tools/list (SDK 0.3.314, zod 4.6.7)", async () => {
     const rotto = createSdkMcpServer({
       name: "rotto",
       tools: [tool("t", "d", { p: z.record(z.string(), z.any()) }, async () => ({ content: [] }))],
     });
-    await expect(toolsList(rotto)).rejects.toThrow();
+    const r = await toolsList(rotto);
+    expect(r.tools.map((t) => t.name)).toEqual(["t"]);
   });
 });

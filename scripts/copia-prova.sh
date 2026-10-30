@@ -105,12 +105,19 @@ apri() {
 chiudi() {
   local nome="${1:-}" dir motivi=() cestino p
   [ -n "$nome" ] || uso
+  [[ "$nome" =~ ^[a-z0-9][a-z0-9-]*$ ]] || { echo "nome non valido: solo minuscole, cifre e trattini" >&2; exit 2; }
   [ -d "$REG/$nome" ] || { echo "la copia '$nome' non e' nel registro" >&2; elenco >&2; exit 2; }
   dir="$SEDE/$nome"
   if [ -d "$dir" ]; then
-    [ -z "$(git -C "$dir" status --porcelain)" ] || motivi+=("modifiche non committate (git -C $dir status)")
-    [ -z "$(git -C "$dir" log --oneline --branches --not --remotes)" ] || motivi+=("commit non pubblicati (git -C $dir log --branches --not --remotes)")
-    [ -z "$(git -C "$dir" stash list)" ] || motivi+=("uno stash")
+    # un errore di git non vale «pulita»: se git non risponde, non si sposta niente
+    [ "$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null)" = "$dir" ] \
+      || { echo "RIFIUTATO: $dir non e' la radice di una copia git" >&2; exit 5; }
+    local st lg sh
+    st="$(git -C "$dir" status --porcelain)" && lg="$(git -C "$dir" log --oneline --branches --not --remotes)" \
+      && sh="$(git -C "$dir" stash list)" || { echo "RIFIUTATO: git non risponde in $dir" >&2; exit 5; }
+    [ -z "$st" ] || motivi+=("modifiche non committate (git -C $dir status)")
+    [ -z "$lg" ] || motivi+=("commit non pubblicati (git -C $dir log --branches --not --remotes)")
+    [ -z "$sh" ] || motivi+=("uno stash")
     for p in /proc/[0-9]*; do
       case "$(readlink "$p/cwd" 2>/dev/null)" in
         "$dir"|"$dir"/*) [ "${p#/proc/}" = "$$" ] || { motivi+=("processo ${p#/proc/} dentro la copia"); break; } ;;

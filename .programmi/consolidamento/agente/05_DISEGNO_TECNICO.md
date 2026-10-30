@@ -54,7 +54,7 @@ Le deleghe per gruppo si fanno estendendo quella che c'è, non con una tabella n
 
 Il legame finale fra una voce del tenant e la voce del prototipo si scrive dove advanced già lo cerca: nel registro dell'origine (`sys_generated_record_origins`, con uno stato in più `LINKED` per una riga che il tenant aveva già) e nell'origine di C6 (versione e impronta). Così, all'arrivo di una versione nuova, ADR-0048 sa da sé che cosa è ereditato e che cosa è conservato, e non serve una seconda verità.
 
-I gruppi e le tabelle del tenant che toccano, da confermare in AC-0 con lo schema vero:
+I gruppi e le tabelle del tenant che toccano. La tabella era un'ipotesi; la misura di AC-0 che la corregge è subito dopo:
 
 | gruppo (ordine fisso, R-6) | tabelle del tenant | chiavi comuni note |
 |---|---|---|
@@ -63,6 +63,22 @@ I gruppi e le tabelle del tenant che toccano, da confermare in AC-0 con lo schem
 | 3 competenze | `sys_skills` e i legami con ruoli e posizioni | indirizzo ESCO (12 in comune su 443 e 61, misura del 2026-10-30) |
 | 4 processi | processi delle unità (`sys_organization_unit_processes`), attività (ADR-0049, `000462`) | nessuna: 0 nomi uguali su 30 e 23 |
 | 5 indicatori e obiettivi | `sys_kpi_definitions`, modelli di KPI di unità e processo, `sys_goals`, `sys_okrs` | nessuna nota |
+
+**Misura di AC-0**, 2026-10-30 sera, in sola lettura sulla copia di advanced della VM (cluster 5436, database `heuresys_advanced_prova`, ripristinato dal dump del 29/10, senza la `000463`). Esito e comandi in `~/esiti-consolidamento/ac0_20261030/AC0_MISURE.md` sulla VM, con i file `.sql` usati.
+
+| gruppo | che cosa c'è per RTL Bank | che cosa cambia per il disegno |
+|---|---|---|
+| 1 organizzazione | 42 unità; il tipo sta in `organization_unit_type_id` e `organization_unit_type`; il livello non ha una colonna, sta in `metadata.org_level` (valori da 1 a 4) | il giro zero legge il livello dal metadata |
+| 2 posizioni e ruoli | 312 posizioni, nessuna con occupazione ESCO; 0 ruoli propri del tenant: le posizioni usano 65 ruoli di piattaforma, con l'ESCO solo in `job_role_metadata.esco_occupation_code` | la chiave ESCO delle posizioni passa dal ruolo di piattaforma; i ruoli non sono voci del tenant da collegare, sono catalogo |
+| 3 competenze | 28 competenze del tenant e 61 richieste dalle posizioni (33 con ESCO); 1.434 legami posizione–competenza | — |
+| 4 processi | 23 processi e 131 attività (ADR-0049), 96 legami unità–processo | — |
+| 5 indicatori e obiettivi | 0 KPI del tenant (233 globali; 168 legami KPI–posizione su 4 KPI); 0 modelli di KPI di unità; 2.189 obiettivi, 15 OKR, 20 risultati chiave | gli obiettivi sono dati di gestione, non struttura del prototipo: il gruppo 5 abbina gli indicatori e i modelli di obiettivo, non i 2.189 obiettivi |
+
+Il prototipo ricevuto vive nelle tabelle `sys_blueprint_content_*` legate a `sys_blueprint_variant_versions`; la chiave stabile di una voce è il suo codice (indice unico versione più codice). Eccezione da risolvere prima di AC-3: `sys_blueprint_process_registry` è unico per variante, non per versione. Sulla copia c'è un solo contenuto, `REGIONAL_RETAIL_BANK_MEDIUM` v1, attivo per RTL Bank, e nessun pacchetto ricevuto con la strada della `000460`.
+
+La provenienza (I23): la classe sta in `sys_classificazione_direzione_dato`; la colonna `origine_dato` esiste solo nelle tre tabelle dei processi della `000462` (tutte `MATERIALIZZAZIONE`). Altrove una riga importata si riconosce solo dal registro di lineage (per esempio 626 obiettivi e 15 OKR) o dalle chiavi `legacy_*` nel metadata. `sys_generated_record_origins` è vuoto per RTL Bank: il collegamento parte da zero.
+
+Le utenze `HRMS_MANAGER` di RTL Bank sono 2, entrambe attive. Quale usi Enzo non si ricava dal database: glielo si chiede.
 
 ## 5. Il percorso di un gruppo
 

@@ -6,6 +6,8 @@
 
 ## Last session brief
 
+**Riallineamento del 30 ottobre (thread di progetto, solo documenti)**: il programma di `#263` chiedeva ancora di applicare `000454` e `000455` alla produzione, che invece le ha dal 25 ottobre con `bb97ea3` (misura: `git merge-base --is-ancestor 1a6231b origin/prod`, con `origin/prod` = `0c3088c3`). F3 è segnata fatta e il menu riprende ora da F5, la prova con il pacchetto v0.3 vero della banca, che aspetta il datastore.
+
 **Riallineamento del 29 ottobre (thread di progetto, solo documenti)**: il registro diceva ancora in attesa di te due decisioni già prese. `#267` (ADR-0043) e `#268` (ADR-0044) erano `WAIT-INPUT`, ma i due ADR sono ACCETTATI dal 12 ottobre: chiuse e archiviate. ADR-0046, 0047 e 0048 sono ACCETTATI dal 23 ottobre, ADR-0049 dal 29 ottobre. `ADR_INDEX.md` rigenerato: ora elenca anche ADR-0049. Misurato con `git ls-remote origin refs/heads/prod refs/heads/main`: produzione e `main` coincidono su `0c3088c3`, DEPLOYATO il sera del 27 ottobre (registro del thread «Collegare le attività ai processi»); la CI «Atlas freshness» è verde su quel commit (corsa manuale del 27 ottobre). Le migrazioni `000454`…`000458` sono nella catena del rilascio `bb97ea3` del 25 ottobre, quindi in produzione: lo stato «NON in produzione» scritto qui sotto il 17 ottobre è superato.
 
 **27 ottobre, PR #116 e #117 (DEPLOYATE su `61b1a82a`)**: l'owner di un processo vede chi lavora al processo in tutte le unità collaboranti (ADR-0036 §8, rotta `GET /v1/me/processes/:oupId/participants`); prova dal vivo superata. Scioglie la domanda aperta di O2-09 sul perimetro dell'owner.

@@ -1,7 +1,7 @@
 {
  "schema": "cruscotto-stato/1",
  "progetto": "heuresys-advanced",
- "aggiornato_il": "2026-10-29",
+ "aggiornato_il": "2026-10-30",
  "aggiornato_da": "Claude, thread «Riallineare lo stato di advanced» (29/10/2026)",
  "fase": "Dopo la GA v1.0.0: adesione al contratto dati del datastore, onda 2 in corso",
  "stato": "giallo",

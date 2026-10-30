@@ -18,9 +18,10 @@ import { queryBoolean } from "./_query-boolean.js";
  *
  * `APPROVALS` è il caso reale (757 passi di approvazione, 29 approvatori). `FULL` esiste
  * nel vincolo del database ma **nessun endpoint lo concede**: c'è perché il giorno che
- * servirà sarà una riga di codice e non una migrazione.
+ * servirà sarà una riga di codice e non una migrazione. `CONSOLIDATION` (mig `000465`) è la delega
+ * del Direttore HR sul consolidamento del tenant, limitata ai gruppi di `groups`.
  */
-export const DELEGATION_SCOPE_VALUES = ["APPROVALS", "FULL"] as const;
+export const DELEGATION_SCOPE_VALUES = ["APPROVALS", "FULL", "CONSOLIDATION"] as const;
 export const DelegationScopeSchema = z.enum(DELEGATION_SCOPE_VALUES);
 export type DelegationScope = z.infer<typeof DelegationScopeSchema>;
 
@@ -39,6 +40,8 @@ export const DelegationSchema = z.object({
   delegateUserId: z.uuid(),
   delegateName: z.string().nullable(),
   scope: DelegationScopeSchema,
+  /** Per una delega CONSOLIDATION, i gruppi di dati su cui il delegato decide; `null` per gli altri. */
+  groups: z.array(z.string()).nullable(),
   startsOn: z.string(),
   /** `null` = a tempo indeterminato, che è diverso da «scaduta». */
   endsOn: z.string().nullable(),
@@ -71,6 +74,8 @@ export const CreateDelegationBodySchema = z.object({
   delegatorUserId: z.uuid(),
   delegateUserId: z.uuid(),
   scope: DelegationScopeSchema.optional().default("APPROVALS"),
+  /** Obbligatorio per CONSOLIDATION, vietato per gli altri ambiti (lo controlla anche il CHECK della 000465). */
+  groups: z.array(z.enum(["ORGANIZATION", "POSITIONS_ROLES", "SKILLS", "PROCESSES", "INDICATORS_GOALS"])).min(1).max(5).optional(),
   startsOn: z.string(),
   endsOn: z.string().nullable().optional(),
   reason: z.string().max(500).nullable().optional(),

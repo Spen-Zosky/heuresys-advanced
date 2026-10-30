@@ -342,7 +342,13 @@ VALUES
   ('sys_tenant_processes', 'importato', 'EMENDATO per la mig 000462 (ADR-0049, onda 2 T1): processo del tenant scritto solo dal riempimento fuori catena (db/scripts/attivita/), nessuna rotta API di scrittura'),
   ('sys_tenant_process_steps', 'importato', 'EMENDATO per la mig 000462 (ADR-0049, onda 2 T2): attivita'' del processo del tenant, dalle fasi del datastore, scritte solo dal riempimento fuori catena, nessuna rotta API di scrittura'),
   ('sys_tenant_process_activity_rules', 'importato', 'EMENDATO per la mig 000462 (ADR-0049): regole tipo di richiesta -> processo, scritte solo dal riempimento fuori catena, nessuna rotta API di scrittura'),
-  ('sys_blueprint_content_receipts', 'infrastruttura', 'EMENDATO per la mig 000460 (consolidamento C3): registro tecnico dei ricevimenti dei pacchetti del datastore, scritto solo dal caricatore, non dato del cliente')
+  ('sys_blueprint_content_receipts', 'infrastruttura', 'EMENDATO per la mig 000460 (consolidamento C3): registro tecnico dei ricevimenti dei pacchetti del datastore, scritto solo dal caricatore, non dato del cliente'),
+  ('sys_tenant_consolidations', 'nativo', 'EMENDATO per la mig 000464 (agente di consolidamento AC-3): registro del consolidamento del tenant, scritto solo dall''API (modulo tenant-consolidation), nessuno scrittore di importazione'),
+  ('sys_tenant_consolidation_rounds', 'nativo', 'EMENDATO per la mig 000464 (agente di consolidamento AC-3): registro del consolidamento del tenant, scritto solo dall''API (modulo tenant-consolidation), nessuno scrittore di importazione'),
+  ('sys_tenant_consolidation_working_items', 'nativo', 'EMENDATO per la mig 000464 (agente di consolidamento AC-3): registro del consolidamento del tenant, scritto solo dall''API (modulo tenant-consolidation), nessuno scrittore di importazione'),
+  ('sys_tenant_consolidation_proposals', 'nativo', 'EMENDATO per la mig 000464 (agente di consolidamento AC-3): registro del consolidamento del tenant, scritto solo dall''API (modulo tenant-consolidation), nessuno scrittore di importazione'),
+  ('sys_tenant_consolidation_decisions', 'nativo', 'EMENDATO per la mig 000464 (agente di consolidamento AC-3): registro del consolidamento del tenant, scritto solo dall''API (modulo tenant-consolidation), nessuno scrittore di importazione'),
+  ('sys_platform_vocabulary_equivalences', 'infrastruttura', 'EMENDATO per la mig 000464 (AC-3): vocabolario comune di piattaforma, nessun dato di un tenant, scritto solo dall''API')
 ON CONFLICT (tabella) DO UPDATE SET stato = EXCLUDED.stato, motivo = EXCLUDED.motivo;
 
 CREATE OR REPLACE VIEW sys.v_tabelle_non_classificate AS

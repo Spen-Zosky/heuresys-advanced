@@ -1,0 +1,8 @@
+:HL["/heuresys-advanced/_next/static/chunks/1x8-8xzhe6jxk.css","style"]
+:HL["/heuresys-advanced/_next/static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/heuresys-advanced/_next/static/media/a626ed2fbe2db1bf-s.p.342nhdmq3f7um.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/heuresys-advanced/_next/static/chunks/3gdygn7zavj7w.css","style"]
+3:[["children",{"s":"__PAGE__","h":160}]]
+2:[["children",{"s":"typography","h":96,"c":"$Q3"}]]
+1:[["children",{"s":"showcase","h":96,"c":"$Q2"}]]
+0:{"b":"s9Idloct8ZUzqyx8x2RA2","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

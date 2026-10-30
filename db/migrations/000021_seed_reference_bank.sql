@@ -163,4 +163,11 @@ CROSS JOIN (VALUES
   ('22', 'Data & Analytics',                 22)
 ) AS procs(code, name, ordinal)
 WHERE bv.blueprint_variant_code = 'REGIONAL_RETAIL_BANK_MEDIUM'
-ON CONFLICT (blueprint_process_variant_id, blueprint_process_code) DO NOTHING;
+  -- EMENDATO 2026-10-30 (consolidamento C4, R-58, ADR-0035): era `ON CONFLICT (blueprint_process_variant_id,
+  -- blueprint_process_code) DO NOTHING`, che pretende l'unicità di (variante, codice). Dalla 000463 l'unicità
+  -- sta sulla versione, quindi la stessa regola si scrive qui: un codice che la banca ha già, in qualunque
+  -- versione, non si reinserisce.
+  AND NOT EXISTS (
+    SELECT 1 FROM sys.sys_blueprint_process_registry r
+     WHERE r.blueprint_process_variant_id = bv.blueprint_variant_id
+       AND r.blueprint_process_code = procs.code);

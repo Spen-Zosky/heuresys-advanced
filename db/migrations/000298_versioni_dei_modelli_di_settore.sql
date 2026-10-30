@@ -109,12 +109,17 @@ SELECT v.blueprint_variant_id, 1, 'PUBLISHED', v.created_at,
     WHERE vv.blueprint_variant_version_variant_id = v.blueprint_variant_id
       AND vv.blueprint_variant_version_number = 1);
 
+-- EMENDATO 2026-10-30 (consolidamento C4, ADR-0035): il riempimento tocca solo le
+-- righe ancora senza versione. Prima riportava sulla versione 1 OGNI processo a
+-- ogni giro della catena, anche quelli di una versione ricevuta dopo (C3): con
+-- l'unicita' per (versione, codice) della 000463 il secondo giro falliva sul
+-- duplicato, e senza di essa spostava in silenzio i processi della versione 2.
 UPDATE sys.sys_blueprint_process_registry p
    SET blueprint_process_variant_version_id = vv.blueprint_variant_version_id
   FROM sys.sys_blueprint_variant_versions vv
  WHERE vv.blueprint_variant_version_variant_id = p.blueprint_process_variant_id
    AND vv.blueprint_variant_version_number = 1
-   AND p.blueprint_process_variant_version_id IS DISTINCT FROM vv.blueprint_variant_version_id;
+   AND p.blueprint_process_variant_version_id IS NULL;
 
 -- ── PERCHE' SERVE UN TRIGGER PRIMA DI RENDERE LA COLONNA OBBLIGATORIA ────────
 -- Trovato dalla prova generale (`ci-rehearsal.sh`, seconda passata): la

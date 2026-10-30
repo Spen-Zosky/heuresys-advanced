@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `ea63d232` (2026-10-29T19:59:04+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `eaa191d5` (2026-10-30T12:24:49+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -27,10 +27,10 @@
 | assessment-results | /v1/assessment-results | 3 | 2 | 2 | 2 |
 | assessments | /v1/assessments | 4 | 3 | 2 | 2 |
 | auth | /v1/auth, /v1/auth/mfa | 31 | 3 | 16 | 7 |
-| blueprint-activations | /v1/blueprint-activations | 5 | 3 | 2 | 1 |
+| blueprint-activations | /v1/blueprint-activations | 5 | 3 | 3 | 1 |
 | blueprint-families | /v1/blueprint-families | 5 | 4 | 2 | 1 |
 | blueprint-overrides | /v1/blueprint-overrides | 4 | 3 | 3 | 1 |
-| blueprint-processes | /v1/blueprint-processes | 5 | 4 | 2 | 1 |
+| blueprint-processes | /v1/blueprint-processes | 5 | 4 | 3 | 1 |
 | blueprint-variants | /v1/blueprint-variants | 5 | 4 | 3 | 1 |
 | branches | /v1/branches | 2 | 2 | 1 | 2 |
 | calibration-sessions | /v1/calibration-sessions | 3 | 1 | 4 | 1 |

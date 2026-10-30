@@ -14,7 +14,8 @@
 #      il ricevimento non toglie fedelta'. Le differenze del pacchetto di prova, che e' rado, sono R-59;
 #   3. la stessa consegna di nuovo: GIA_PRESENTE, zero righe nuove nel modello, una riga in piu' nel registro;
 #   4. manifesto alterato (impronta cambiata): rifiutato senza scrivere niente, registro compreso;
-#   5. versione 2 dello stesso prototipo: RIFIUTATO finche' C4 non porta i processi sulla versione (R-58), solo la riga del registro;
+#   5. versione 2 dello stesso prototipo: CARICATO come versione successiva della stessa variante (dal 2026-10-30, C4 e R-58;
+#      prima era RIFIUTATO perche' i processi erano unici per variante);
 #   6. la versione 1 con un contenuto diverso: RIFIUTATO, scrive solo la riga del registro;
 #   7. guardia: su un database che non e' una copia di prova, senza --produzione rifiuta prima di collegarsi; con --produzione carica;
 #   8. la catena una seconda volta sulla copia: verde, e le righe del modello non cambiano.
@@ -109,10 +110,10 @@ esito "4. niente scritto nel modello" "$([ "$(modello)" = "$M1" ] && echo uguali
 esito "4. niente scritto nel registro" "$(registro)" 2
 
 "${ACC[@]}" ricevi "$COPIA" "$OUT/consegna_B" "$OUT/5_ricevi.json" > "$OUT/5_ricevi.out" 2>&1
-esito "5. versione 2 del pacchetto: esce 1" "$?" 1
-esito "5. versione 2: RIFIUTATO (R-58, arriva con C4)" "$(campo "$OUT/5_ricevi.json" ricevimento)" RIFIUTATO
-esito "5. niente scritto nel modello" "$([ "$(modello)" = "$M1" ] && echo uguali || echo diverse)" uguali
-esito "5. solo la riga del registro" "$(registro)" 3
+esito "5. versione 2 del pacchetto: esce 0" "$?" 0
+esito "5. versione 2: CARICATO (C4, R-58)" "$(campo "$OUT/5_ricevi.json" ricevimento)" CARICATO
+esito "5. versione 2: e' la versione 3 della stessa variante" "$(campo "$OUT/5_ricevi.json" numero_di_versione)" 3
+esito "5. una riga in piu' nel registro" "$(registro)" 3
 
 M5="$(modello)"
 "${ACC[@]}" ricevi "$COPIA" "$OUT/consegna_C" "$OUT/6_ricevi.json" > "$OUT/6_ricevi.out" 2>&1
@@ -120,7 +121,7 @@ esito "6. versione 1 con un altro contenuto: esce 1" "$?" 1
 esito "6. RIFIUTATO" "$(campo "$OUT/6_ricevi.json" ricevimento)" RIFIUTATO
 esito "6. niente scritto nel modello" "$([ "$(modello)" = "$M5" ] && echo uguali || echo diverse)" uguali
 esito "6. solo la riga del registro" "$(registro)" 4
-esito "6. gli esiti del registro, in ordine" "$("${P[@]}" -d "$COPIA" -c "select string_agg(blueprint_content_receipt_outcome, ',' order by blueprint_content_receipt_received_at, blueprint_content_receipt_id) from sys.sys_blueprint_content_receipts")" "CARICATO,GIA_PRESENTE,RIFIUTATO,RIFIUTATO"
+esito "6. gli esiti del registro, in ordine" "$("${P[@]}" -d "$COPIA" -c "select string_agg(blueprint_content_receipt_outcome, ',' order by blueprint_content_receipt_received_at, blueprint_content_receipt_id) from sys.sys_blueprint_content_receipts")" "CARICATO,GIA_PRESENTE,CARICATO,RIFIUTATO"
 
 # la guardia: una copia del database PRIMA dei caricamenti, con un nome che non e' di prova
 nuova_copia "$GUARDIA" "$SRC"

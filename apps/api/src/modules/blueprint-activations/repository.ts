@@ -13,6 +13,7 @@ export type DbConnector = Pool | PoolClient;
 interface Row {
   blueprint_activation_id: string; blueprint_activation_tenant_id: string;
   blueprint_activation_variant_id: string;
+  blueprint_activation_variant_version_id: string | null;
   blueprint_activation_status: BlueprintActivationStatus;
   blueprint_activation_effective_from: Date;
   blueprint_activation_effective_to: Date | null;
@@ -23,7 +24,7 @@ interface Row {
 import { toDateOnly } from "../../lib/date-only.js";
 
 const COLS = `blueprint_activation_id, blueprint_activation_tenant_id,
-  blueprint_activation_variant_id, blueprint_activation_status,
+  blueprint_activation_variant_id, blueprint_activation_variant_version_id, blueprint_activation_status,
   blueprint_activation_effective_from, blueprint_activation_effective_to,
   blueprint_activation_metadata, created_at, updated_at`;
 
@@ -32,6 +33,7 @@ function toAct(r: Row): BlueprintActivation {
     blueprintActivationId: r.blueprint_activation_id,
     tenantId: r.blueprint_activation_tenant_id,
     variantId: r.blueprint_activation_variant_id,
+    variantVersionId: r.blueprint_activation_variant_version_id,
     status: r.blueprint_activation_status,
     effectiveFrom: toDateOnly(r.blueprint_activation_effective_from)!,
     effectiveTo: toDateOnly(r.blueprint_activation_effective_to),
@@ -85,6 +87,22 @@ export async function variantExists(q: DbConnector, id: string): Promise<boolean
   return res.rows.length > 0;
 }
 
+/**
+ * Lo stato di una versione e la sua variante, per verificare un'adozione prima di scriverla (C4).
+ * L'innesco della 000463 rifiuta comunque una versione non PUBLISHED: questo serve a rispondere 409 con un nome.
+ */
+export async function findVariantVersion(
+  q: DbConnector, id: string,
+): Promise<{ variantId: string; status: string } | null> {
+  const res = await q.query<{ variant_id: string; status: string }>(
+    `SELECT blueprint_variant_version_variant_id AS variant_id, blueprint_variant_version_status AS status
+       FROM sys.sys_blueprint_variant_versions WHERE blueprint_variant_version_id = $1`,
+    [id],
+  );
+  const r = res.rows[0];
+  return r ? { variantId: r.variant_id, status: r.status } : null;
+}
+
 export async function insertActivation(
   q: DbConnector, tenantId: string, body: CreateBlueprintActivationBody, createdBy: string,
 ): Promise<BlueprintActivation> {
@@ -92,12 +110,13 @@ export async function insertActivation(
     `INSERT INTO sys.sys_blueprint_activations (
         blueprint_activation_tenant_id, blueprint_activation_variant_id,
         blueprint_activation_status, blueprint_activation_effective_from,
-        blueprint_activation_effective_to, blueprint_activation_metadata, created_by
-      ) VALUES ($1, $2, $3, COALESCE($4::date, current_date), $5::date, $6::jsonb, $7)
+        blueprint_activation_effective_to, blueprint_activation_metadata, created_by,
+        blueprint_activation_variant_version_id
+      ) VALUES ($1, $2, $3, COALESCE($4::date, current_date), $5::date, $6::jsonb, $7, $8)
       RETURNING ${COLS}`,
     [tenantId, body.variantId, body.status ?? "PROPOSED",
      body.effectiveFrom ?? null, body.effectiveTo ?? null,
-     JSON.stringify(body.metadata ?? {}), createdBy],
+     JSON.stringify(body.metadata ?? {}), createdBy, body.variantVersionId ?? null],
   );
   return toAct(res.rows[0]!);
 }
@@ -108,6 +127,7 @@ export async function updateActivationPartial(
   const sets: string[] = []; const params: unknown[] = [];
   const add = (col: string, v: unknown) => { params.push(v); sets.push(`${col} = $${params.length}`); };
   if (patch.status !== undefined) add("blueprint_activation_status", patch.status);
+  if (patch.variantVersionId !== undefined) add("blueprint_activation_variant_version_id", patch.variantVersionId);
   if (patch.effectiveFrom !== undefined) {
     params.push(patch.effectiveFrom);
     sets.push(`blueprint_activation_effective_from = $${params.length}::date`);

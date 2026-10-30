@@ -15,6 +15,8 @@ export const BlueprintActivationSchema = z.object({
   blueprintActivationId: z.uuid(),
   tenantId: z.uuid(),
   variantId: z.uuid(),
+  /** C4 (000463): la versione del modello in vigore per il tenant; nulla solo se la variante non ne ha una pubblicata. */
+  variantVersionId: z.uuid().nullable(),
   status: BlueprintActivationStatusSchema,
   effectiveFrom: DateOnlySchema,
   effectiveTo: DateOnlySchema.nullable(),
@@ -37,6 +39,8 @@ export const BlueprintActivationListResponseSchema = z.object({
 
 export const CreateBlueprintActivationBodySchema = z.object({
   variantId: z.uuid(),
+  /** Una versione PUBLISHED della variante; se manca, la PUBLISHED più alta (C4). */
+  variantVersionId: z.uuid().optional(),
   status: BlueprintActivationStatusSchema.optional().default("PROPOSED"),
   effectiveFrom: DateOnlySchema.optional(),
   effectiveTo: DateOnlySchema.nullable().optional(),
@@ -47,6 +51,8 @@ export type CreateBlueprintActivationBody = z.infer<typeof CreateBlueprintActiva
 
 export const UpdateBlueprintActivationBodySchema = z.object({
   status: BlueprintActivationStatusSchema.optional(),
+  /** Il passaggio del tenant a un'altra versione PUBLISHED della stessa variante: un gesto per tenant (C4). */
+  variantVersionId: z.uuid().optional(),
   effectiveFrom: DateOnlySchema.optional(),
   effectiveTo: DateOnlySchema.nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),

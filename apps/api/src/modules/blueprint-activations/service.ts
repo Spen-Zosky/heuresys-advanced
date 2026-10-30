@@ -18,6 +18,27 @@ function visible(a: ActorContext, x: BlueprintActivation): boolean {
   return puoVedereCliente(a, x.tenantId);
 }
 
+/**
+ * C4: un tenant adotta una versione PUBLISHED della variante che ha attivato. Una bozza non si adotta
+ * (non ha superato la revisione), una ritirata non si adotta più, una di un'altra variante non è sua.
+ */
+async function verificaAdozione(variantId: string, variantVersionId: string): Promise<void> {
+  const v = await repo.findVariantVersion(pool, variantVersionId);
+  if (!v) throw new NotFoundError("BlueprintVariantVersion", "VARIANT_VERSION_NOT_FOUND");
+  if (v.variantId !== variantId) {
+    throw new ConflictError(
+      "La versione appartiene a un'altra variante",
+      "BLUEPRINT_ACTIVATION_VERSION_OTHER_VARIANT",
+    );
+  }
+  if (v.status !== "PUBLISHED") {
+    throw new ConflictError(
+      `La versione è ${v.status}: un tenant adotta solo una versione PUBLISHED`,
+      "BLUEPRINT_ACTIVATION_VERSION_NOT_PUBLISHED",
+    );
+  }
+}
+
 export const blueprintActivationsService = {
   async list(actor: ActorContext, query: BlueprintActivationListQuery) {
     const tenantIds = perimetroClienti(actor);
@@ -39,6 +60,7 @@ export const blueprintActivationsService = {
       tenantId = actor.tenantId;
     }
     if (!(await repo.variantExists(pool, body.variantId))) throw new NotFoundError("BlueprintVariant");
+    if (body.variantVersionId !== undefined) await verificaAdozione(body.variantId, body.variantVersionId);
     if ((body.status ?? "PROPOSED") === "ACTIVE") {
       const cur = await repo.findActiveByTenant(pool, tenantId);
       if (cur) {
@@ -61,6 +83,9 @@ export const blueprintActivationsService = {
           "BLUEPRINT_ACTIVATION_ACTIVE_CONFLICT",
         );
       }
+    }
+    if (patch.variantVersionId !== undefined && patch.variantVersionId !== t.variantVersionId) {
+      await verificaAdozione(t.variantId, patch.variantVersionId);
     }
     const u = await repo.updateActivationPartial(pool, id, patch, actor.userId);
     if (!u) throw new NotFoundError("BlueprintActivation");

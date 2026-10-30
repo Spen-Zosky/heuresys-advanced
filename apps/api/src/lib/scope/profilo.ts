@@ -10,8 +10,14 @@
  *
  * LA CATENA, che è la stessa che il motore di materializzazione percorre già:
  *   cliente → `sys_blueprint_activations` (ACTIVE, nella finestra di validità)
- *           → variante → `sys_blueprint_variant_versions` (PUBLISHED)
+ *           → la versione fissata sull'attivazione (000463, C4)
  *           → `sys_blueprint_content_<dominio>` → i CODICI del profilo.
+ *
+ * ⚠ LA VERSIONE È QUELLA DELL'ATTIVAZIONE, non «tutte le pubblicate della variante» (C4, 2026-10-30).
+ * Quando una variante ha due versioni pubblicate, la regola vecchia sommava i loro contenuti e una
+ * pubblicazione nuova cambiava il profilo di tutti i tenant insieme. Ora ogni tenant legge la propria, e
+ * passa a una nuova con un gesto suo. Dove la colonna è nulla (la variante non aveva ancora una versione
+ * pubblicata quando l'attivazione è nata) vale la regola di prima: è il ripiego dichiarato del piano.
  *
  * ⚠ SI RISOLVE PER CODICE, non per uuid, ed è il disegno già scelto dal progetto (mig. 000327:
  * «una proposta nomina "la direzione commerciale", non un identificativo che non conosce»).
@@ -64,6 +70,16 @@ const CONTENUTO: Record<DominioDiProfilo, { tabella: string; codice: string; ver
 };
 
 /**
+ * La condizione che lega un'attivazione `a` alla versione `vv` in vigore per il suo tenant (C4).
+ * La versione fissata sull'attivazione; se manca, la regola di prima (le PUBLISHED della variante).
+ * Una stringa costante, senza input: la usano anche i livelli di gerarchia, perché le due letture non divergano.
+ */
+export const VERSIONE_IN_VIGORE_SQL = `vv.blueprint_variant_version_variant_id = a.blueprint_activation_variant_id
+        AND (vv.blueprint_variant_version_id = a.blueprint_activation_variant_version_id
+             OR (a.blueprint_activation_variant_version_id IS NULL
+                 AND vv.blueprint_variant_version_status = 'PUBLISHED'))`;
+
+/**
  * Cosa un attore può vedere di un catalogo.
  *
  * `tutto` — il catalogo intero (chi amministra la piattaforma, o chi costruisce un cliente).
@@ -76,7 +92,7 @@ export type PerimetroDiCatalogo =
 
 /**
  * Risolve i codici che il profilo di un cliente dichiara per un dominio.
- * Un cliente senza attivazione, o con un'attivazione senza versione pubblicata, torna [].
+ * Un cliente senza attivazione, o con un'attivazione senza versione in vigore, torna [].
  */
 export async function codiciDelProfilo(
   q: DbConnector,
@@ -89,9 +105,8 @@ export async function codiciDelProfilo(
        FROM ${c.tabella} ct
        JOIN sys.sys_blueprint_variant_versions vv
          ON vv.blueprint_variant_version_id = ct.${c.versione}
-        AND vv.blueprint_variant_version_status = 'PUBLISHED'
        JOIN sys.sys_blueprint_activations a
-         ON a.blueprint_activation_variant_id = vv.blueprint_variant_version_variant_id
+         ON ${VERSIONE_IN_VIGORE_SQL}
         AND a.blueprint_activation_status = 'ACTIVE'
         AND a.blueprint_activation_effective_from <= current_date
         AND (a.blueprint_activation_effective_to IS NULL

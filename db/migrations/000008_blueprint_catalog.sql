@@ -60,8 +60,11 @@ CREATE TABLE IF NOT EXISTS sys.sys_blueprint_process_registry (
   updated_at                     timestamptz  NOT NULL DEFAULT now()
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS sys_blueprint_process_registry_variant_code_uq
-  ON sys.sys_blueprint_process_registry (blueprint_process_variant_id, blueprint_process_code);
+-- EMENDATO 2026-10-30 (consolidamento C4, R-58, ADR-0035): qui nasceva l'unicità di (variante, codice),
+-- `sys_blueprint_process_registry_variant_code_uq`. Una variante con due versioni ha gli stessi codici in
+-- entrambe, quindi l'unicità sta sulla versione: la crea la 000463, che toglie l'esemplare vecchio. Lasciarla
+-- qui la ricreerebbe a ogni deploy, e la catena si fermerebbe sulla prima variante con due versioni. Il suo
+-- unico consumatore, l'`ON CONFLICT` della 000021, è emendato nello stesso incremento.
 
 CREATE INDEX IF NOT EXISTS sys_blueprint_process_registry_variant_idx
   ON sys.sys_blueprint_process_registry (blueprint_process_variant_id, blueprint_process_ordinal);

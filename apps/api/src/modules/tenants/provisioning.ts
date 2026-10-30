@@ -142,6 +142,8 @@ export async function provisionTenant(
           tenant.tenantId,
           {
             variantId,
+            // C4: il tenant nasce sulla versione da cui è stato costruito, non sulla più recente.
+            variantVersionId: body.variantVersionId!,
             status: "ACTIVE",
             metadata: { origine: "D-14 provision-engine", adr: "ADR-0039 B24" },
           },

@@ -286,11 +286,19 @@ export class BlueprintBuildSource implements BuildSource {
     };
   }
 
-  /** `famiglia/variante v<n>` — ciò che chi legge il registro dell'origine vedrà scritto. */
+  /**
+   * `famiglia/variante v<n>` — ciò che chi legge il registro dell'origine vedrà scritto.
+   *
+   * ⚠ UNA BOZZA NON SI COSTRUISCE (C4, 2026-10-30). Un pacchetto ricevuto dal datastore entra come
+   * versione DRAFT (C3): finché qualcuno non la pubblica, il suo contenuto non ha superato nessuna
+   * revisione, e costruirci un tenant vorrebbe dire saltarla. Si rifiuta qui, prima di leggere il
+   * contenuto, perché anteprima e costruzione passano entrambe da `plan()`.
+   */
   private async etichetta(): Promise<string> {
-    const r = await this.db.query<{ etichetta: string }>(
+    const r = await this.db.query<{ etichetta: string; stato: string }>(
       `SELECT f.blueprint_family_code || '/' || v.blueprint_variant_code
-              || ' v' || vv.blueprint_variant_version_number AS etichetta
+              || ' v' || vv.blueprint_variant_version_number AS etichetta,
+              vv.blueprint_variant_version_status AS stato
          FROM sys.sys_blueprint_variant_versions vv
          JOIN sys.sys_blueprint_variants v
            ON v.blueprint_variant_id = vv.blueprint_variant_version_variant_id
@@ -304,6 +312,12 @@ export class BlueprintBuildSource implements BuildSource {
       throw new ConflictError(
         `La versione di modello ${this.variantVersionId} non esiste`,
         "BLUEPRINT_CONTENT_MISSING",
+      );
+    }
+    if (r.rows[0]?.stato === "DRAFT") {
+      throw new ConflictError(
+        `Il modello ${e} è una bozza: si costruisce solo da una versione pubblicata`,
+        "BLUEPRINT_VERSION_DRAFT",
       );
     }
     return e;

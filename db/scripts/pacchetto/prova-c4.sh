@@ -52,6 +52,7 @@ modello() { sql "select string_agg(format('%s=%s', relname, n), ' ' order by rel
     from pg_class c join pg_namespace s on s.oid = c.relnamespace
    where s.nspname = 'sys' and c.relkind = 'r' and c.relname like 'sys_blueprint%' and c.relname <> 'sys_blueprint_content_receipts') x"; }
 attivazioni() { sql "select string_agg(blueprint_activation_id || ':' || coalesce(blueprint_activation_variant_version_id::text, '-'), ' ' order by blueprint_activation_id) from sys.sys_blueprint_activations"; }
+processi() { sql "select md5(string_agg(blueprint_process_variant_version_id || ':' || blueprint_process_code, ' ' order by blueprint_process_variant_version_id, blueprint_process_code)) from sys.sys_blueprint_process_registry"; }
 banca() { sql "select count(*) from sys.sys_blueprint_process_registry r join sys.sys_blueprint_variants v on v.blueprint_variant_id = r.blueprint_process_variant_id where v.blueprint_variant_code = 'REGIONAL_RETAIL_BANK_MEDIUM'"; }
 campo() { node -e 'const j=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); const v=process.argv[2].split(".").reduce((a,k)=>a?.[k],j); console.log(v ?? "")' "$1" "$2"; }
 ACC=(node "$AQUI/accogli-pacchetto.mjs")
@@ -94,7 +95,7 @@ PROC2="$(sql "select string_agg(blueprint_process_code, ',' order by blueprint_p
 esito "2. la versione 3 ha gli stessi codici di processo della 2 (e ne ha)" "$(sql "select string_agg(blueprint_process_code, ',' order by blueprint_process_code) from sys.sys_blueprint_process_registry where blueprint_process_variant_version_id = '$V3'")" "$PROC2"
 [ -n "$PROC2" ] || { echo "  ROSSO 2. il pacchetto di prova non ha processi: la prova di R-58 non dice niente"; ko=$((ko+1)); }
 
-esito "3. il database rifiuta un'attivazione fissata su una bozza" "$(sql "begin; insert into sys.sys_blueprint_activations (blueprint_activation_tenant_id, blueprint_activation_variant_id, blueprint_activation_variant_version_id, blueprint_activation_status) select tenant_id, '$VAR', '$V3', 'PROPOSED' from sys.sys_tenancies where tenant_code = 'RTL_BANK'; rollback;" > "$OUT/3_bozza.out" 2>&1; echo $?)/$(grep -c 'non è adottabile' "$OUT/3_bozza.out")" "3/1"
+esito "3. il database rifiuta un'attivazione fissata su una bozza" "$(sql "begin; insert into sys.sys_blueprint_activations (blueprint_activation_tenant_id, blueprint_activation_variant_id, blueprint_activation_variant_version_id, blueprint_activation_status) select tenant_id, '$VAR', '$V3', 'PROPOSED' from sys.sys_tenancies where tenant_code = 'RTL_BANK'; rollback;" > "$OUT/3_bozza.out" 2>&1; echo $?)/$(grep -c 'non è adottabile' "$OUT/3_bozza.out")" "1/1"
 
 # 4: le versioni 2 e 3 si pubblicano (sulla copia), la 3 riceve un ruolo solo suo; poi, in una transazione che si annulla, RTL va
 #    sulla 2 e HEURESYS sulla 3 della stessa variante, e si confrontano la regola di prima e la versione fissata.
@@ -127,12 +128,13 @@ esito "4. regola di prima: anche il tenant sulla versione 2 vede il ruolo della 
 esito "4. versione fissata: solo il tenant sulla versione 3 lo vede" "$(grep '^dopo_' "$OUT/4_profili.out" | tr '\n' ' ')" "dopo_HEURESYS=true dopo_RTL_BANK=false "
 esito "4. la transazione si e' annullata: attivazioni come prima" "$(sql "select count(*) from sys.sys_blueprint_activations where blueprint_activation_variant_id = '$VAR'")" 0
 
-M5="$(modello)"; A5="$(attivazioni)"
+M5="$(modello)"; A5="$(attivazioni)"; P5="$(processi)"
 catena 5_catena "$COPIA"; esito "5. catena una seconda volta" "$?" 0
 catena 5_catena_bis "$COPIA"; esito "5. catena una terza volta" "$?" 0
 esito "5. righe del modello invariate" "$([ "$(modello)" = "$M5" ] && echo uguali || echo diverse)" uguali
 esito "5. attivazioni e versioni fissate invariate" "$([ "$(attivazioni)" = "$A5" ] && echo uguali || echo diverse)" uguali
 esito "5. i processi della banca restano 23" "$(banca)" 23
+esito "5. ogni processo resta sulla sua versione (la 000298 non li riporta sulla 1)" "$([ "$(processi)" = "$P5" ] && echo uguali || echo diverse)" uguali
 
 "${P[@]}" -d "$COPIA" -f "$AQUI/inversa-000463.sql" > "$OUT/6_inversa_rifiuta.out" 2>&1
 esito "6. l'inversa rifiuta dove una variante ha due versioni con gli stessi processi" "$([ $? != 0 ] && echo rifiuta || echo procede)/$(grep -c 'non si torna indietro' "$OUT/6_inversa_rifiuta.out")" "rifiuta/1"

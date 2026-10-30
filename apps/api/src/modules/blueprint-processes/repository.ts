@@ -63,9 +63,17 @@ export async function findProcessById(q: DbConnector, id: string): Promise<Bluep
 export async function findProcessByVariantCode(
   q: DbConnector, variantId: string, code: string,
 ): Promise<BlueprintProcess | null> {
+  // C4 (000463): il codice è unico per VERSIONE, non per variante. Si guarda la versione in cui
+  // `insertProcess` scriverebbe, scelta dall'innesco della 000298 con la stessa regola: la PUBLISHED più
+  // alta, e in mancanza la più alta esistente.
   const res = await q.query<Row>(
     `SELECT ${COLS} FROM sys.sys_blueprint_process_registry
-      WHERE blueprint_process_variant_id = $1 AND blueprint_process_code = $2`,
+      WHERE blueprint_process_variant_id = $1 AND blueprint_process_code = $2
+        AND blueprint_process_variant_version_id = (
+          SELECT vv.blueprint_variant_version_id FROM sys.sys_blueprint_variant_versions vv
+           WHERE vv.blueprint_variant_version_variant_id = $1
+           ORDER BY (vv.blueprint_variant_version_status = 'PUBLISHED') DESC, vv.blueprint_variant_version_number DESC
+           LIMIT 1)`,
     [variantId, code],
   );
   return res.rows[0] ? toProc(res.rows[0]) : null;

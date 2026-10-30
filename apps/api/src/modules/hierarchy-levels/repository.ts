@@ -6,6 +6,7 @@
  */
 import type { DbConnector } from "../tenant-materialization/build-source.js";
 import type { Scala, Unita } from "./logic.js";
+import { VERSIONE_IN_VIGORE_SQL } from "../../lib/scope/profilo.js";
 
 /** I livelli dei contratti collettivi di queste versioni di modello, dal più basso (minimo annuo) al più alto. */
 export async function scalaDaVersioni(q: DbConnector, versionIds: readonly string[]): Promise<Scala> {
@@ -26,14 +27,13 @@ export async function scalaDaVersioni(q: DbConnector, versionIds: readonly strin
   return { ordine: r.rows.map((x) => x.code) };
 }
 
-/** Le versioni pubblicate dei modelli che il tenant ha attivi oggi (stessa regola di `codiciDelProfilo`). */
+/** Le versioni in vigore dei modelli che il tenant ha attivi oggi (stessa regola di `codiciDelProfilo`, C4). */
 export async function versioniAttiveDelTenant(q: DbConnector, tenantId: string): Promise<string[]> {
   const r = await q.query<{ id: string }>(
     `SELECT DISTINCT vv.blueprint_variant_version_id AS id
        FROM sys.sys_blueprint_activations a
        JOIN sys.sys_blueprint_variant_versions vv
-         ON vv.blueprint_variant_version_variant_id = a.blueprint_activation_variant_id
-        AND vv.blueprint_variant_version_status = 'PUBLISHED'
+         ON ${VERSIONE_IN_VIGORE_SQL}
       WHERE a.blueprint_activation_tenant_id = $1
         AND a.blueprint_activation_status = 'ACTIVE'
         AND a.blueprint_activation_effective_from <= current_date

@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS sys.sys_user_delegations (
   user_delegation_delegate_id   uuid NOT NULL REFERENCES sys.sys_users(user_id),
   user_delegation_scope         varchar(16) NOT NULL DEFAULT 'APPROVALS'
                                   -- EMENDATO per la 000465 (AC-4): CONSOLIDATION, la delega del Direttore HR per gruppi di dati
-                                  CHECK (user_delegation_scope IN ('APPROVALS', 'FULL', 'CONSOLIDATION')),
+                                  -- EMENDATO per la 000468 (ADR-0051): PROCESS_STEP, la delega di un'attività di processo
+                                  CHECK (user_delegation_scope IN ('APPROVALS', 'FULL', 'CONSOLIDATION', 'PROCESS_STEP')),
   user_delegation_starts_on     date NOT NULL,
   user_delegation_ends_on       date,
   user_delegation_status        varchar(16) NOT NULL DEFAULT 'ACTIVE'

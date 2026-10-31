@@ -1,6 +1,6 @@
 # ADR-0051 — Le attività delegate lungo la catena
 
-- **Status**: PROPOSTO il 2026-10-31, in attesa del sì di Enzo Spenuso. Niente si implementa prima del sì.
+- **Status**: ACCETTATO il 2026-10-31 da Enzo Spenuso (in chat alle 18:12 ora di Roma: «sì, ADR-0051»); proposto lo stesso giorno alle 17:30
 - **Date**: 2026-10-31
 - **Redatto da**: Claude Code, thread «Portare nel progetto le attività delegate»
 - **Richiesta**: Enzo Spenuso, 2026-10-31 17:23 ora di Roma: «c'è un altro principio fondamentale che non è ancora stato implementato e iniettato nel progetto: attività delegate. Questo disciplina il principio in base al quale un capo (genericamente parlando) può delegare attività proprie anche ad un suo collaboratore dipendente all'interno della catena organizzativa di cui il capo è il vertice (quindi si applica a chi non è il responsabile di una Unità Organizzativa ma che comunque è referente/responsabile di altri user presenti nella medesima catena».
@@ -93,15 +93,17 @@ Un agente **non riceve deleghe** finché gli agenti non hanno un'identità propr
 - Il CHECK su `FULL` e la delega `CONSOLIDATION` del Direttore HR.
 - Le deleghe esistenti: in produzione la tabella è vuota (misurato il 2026-10-31).
 
-## Implementazione (dopo il sì, su copia)
+## Implementazione
 
-1. Migrazione: ambito `PROCESS_STEP` nel CHECK, colonne `user_delegation_kind` (`CHAIN|MANDATE`), `user_delegation_request_type` e `user_delegation_tenant_process_step_id`, con i CHECK di coerenza; `acting_delegation_id` sui passi di approvazione e sull'audit. Idempotente, misura prima e dopo.
-2. `apps/api/src/lib/scope/org.ts`: `delegationChainUserIds` (unità più riporti fra posizioni), con prova che inietta una divergenza come in #99 F3.
-3. Servizio deleghe: vincolo di catena alla creazione; validità a ogni uso; rotte `/v1/me/delegations` (creare, revocare le proprie, vedere date e ricevute).
-4. Approvazioni: il delegato vede e decide i passi del delegante, con firma «per conto di»; prova rossa prima e verde dopo.
-5. Pagina web «Le mie deleghe» nell'area personale, con dati veri da `/v1/me/delegations`.
-6. Agente: proposta di delega su assenza approvata, con conferma umana.
-7. Prove su copia del dump notturno, poi rilascio con backup verificato e ritorno provato; dimostrazione dal vivo con un capo reale di RTL che delega le approvazioni ferie a un suo collaboratore.
+Fatta il 2026-10-31 sul ramo del thread, con queste precisazioni rispetto alla bozza:
+
+1. Migrazione `000468`: ambito `PROCESS_STEP` nel CHECK (emendato alla fonte in `000314`; `000465` ora cerca il CHECK per nome), colonne `user_delegation_request_type` e `user_delegation_tenant_process_step_id` con il CHECK di coerenza, `approval_step_acting_delegation_id` sui passi di approvazione, la voce di menu `/me/delegations` con l'etichetta inglese. **Il tipo di delega non è una colonna**: si legge dall'ambito (APPROVALS e PROCESS_STEP sono di catena, CONSOLIDATION e FULL di mandato), perché una colonna in più sarebbe una seconda verità.
+2. `apps/api/src/lib/scope/org.ts`: `delegationChainUserIds` (unità più riporti fra posizioni) e `ownUnitIds` (le unità di cui un'attività è «propria»).
+3. Servizio deleghe: vincolo di catena alla creazione, dalle due vie; validità rimisurata a ogni uso e mostrata come `inChain`; rotte `/v1/me/delegations` (conferire, revocare le proprie, candidati, casella, decisione, proposte). Il pavimento delle rotte è `approval:read:self`, del ruolo base: il diritto di delegare lo misura la catena, non un ruolo.
+4. Approvazioni: il delegato decide i passi del delegante dalla propria casella; ogni condizione si ri-verifica dentro la transazione della decisione; il passo resta del delegante, `decided_by` è il delegato e la delega è il titolo. Il delegante riceve un avviso per ogni decisione presa a suo nome. **I tipi delegabili sono un elenco chiuso per inclusione** (ferie e permessi, iniziative formative): un tipo nuovo non diventa delegabile da sé, e le richieste senza tipo restano fuori.
+5. Una delega `PROCESS_STEP` ha effetto sulle richieste che appartengono a quell'attività (ADR-0049): oggi l'attività di processo non ha altro lavoro registrato su cui agire.
+6. Pagina «Deleghe» nell'area personale (`apps/web/src/app/(authenticated)/me/delegations/page.tsx`).
+7. Proposta dell'agente: oggi è una **regola**, non un modello linguistico. Un'assenza approvata che comincia entro 30 giorni, con passi di approvazione aperti e senza una delega che la copra, produce una proposta con la spiegazione; suggerisce l'ultima persona a cui si è delegato, se è ancora nella catena. La persona conferma con un gesto.
 
 ## Prove
 

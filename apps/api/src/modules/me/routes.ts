@@ -55,6 +55,11 @@ import {
   GdprExportBundleSchema, ConsentStateResponseSchema,
   ConsentEventBodySchema, ConsentEventResponseSchema,
 } from "@heuresys/shared";
+import {
+  CreateMyDelegationBodySchema, DelegationSchema, DelegationIdParamSchema, RevokeDelegationBodySchema,
+  DelegationCandidatesResponseSchema, DelegatedApprovalsResponseSchema, DelegatedApprovalParamsSchema,
+  DelegationProposalsResponseSchema, DecideApprovalStepBodySchema, ApprovalStepSchema,
+} from "@heuresys/shared";
 import { meService, type SelfActor } from "./service.js";
 import { gdprService } from "../gdpr/service.js";
 import { actorFromRequest } from "../../lib/actor.js";
@@ -473,6 +478,47 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("approval:read:self")],
     schema: { response: { 200: MeDelegationsResponseSchema } },
   }, async (req) => delegationsService.listMine(actorFromRequest(req)));
+
+  // ADR-0051 — la delega di CATENA dall'area personale. Il pavimento è lo stesso permesso di
+  // sola persona (`approval:read:self`, del ruolo base USER): il diritto di delegare non viene da
+  // un ruolo ma dall'essere capo, e lo misura il servizio con la catena (§1, §4). Chi non ha
+  // nessuno nella catena riceve un elenco vuoto di candidati e un 422 se prova a delegare.
+  app.get("/delegations/candidates", {
+    preHandler: [requirePermission("approval:read:self")],
+    schema: { response: { 200: DelegationCandidatesResponseSchema } },
+  }, async (req) => delegationsService.candidates(actorFromRequest(req)));
+
+  app.get("/delegations/proposals", {
+    preHandler: [requirePermission("approval:read:self")],
+    schema: { response: { 200: DelegationProposalsResponseSchema } },
+  }, async (req) => delegationsService.proposals(actorFromRequest(req)));
+
+  app.post("/delegations", {
+    preHandler: [app.verifyCsrf, requirePermission("approval:read:self")],
+    schema: { body: CreateMyDelegationBodySchema, response: { 201: DelegationSchema } },
+  }, async (req, reply) => {
+    const creata = await delegationsService.createMine(actorFromRequest(req), req.body);
+    return reply.code(201).send(creata);
+  });
+
+  app.post("/delegations/:id/revoke", {
+    preHandler: [app.verifyCsrf, requirePermission("approval:read:self")],
+    schema: { params: DelegationIdParamSchema, body: RevokeDelegationBodySchema, response: { 200: DelegationSchema } },
+  }, async (req) => delegationsService.revokeMine(actorFromRequest(req), req.params.id, req.body.reason ?? null));
+
+  // §3 e §5 — la casella del delegato e la decisione «per conto di». Non serve `approval:decide`:
+  // il titolo è la delega, e ogni sua condizione si ri-verifica dentro la transazione.
+  app.get("/delegations/approvals", {
+    preHandler: [requirePermission("approval:read:self")],
+    schema: { response: { 200: DelegatedApprovalsResponseSchema } },
+  }, async (req) => delegationsService.delegatedApprovals(actorFromRequest(req)));
+
+  app.post("/delegations/approvals/:requestId/steps/:stepId/decide", {
+    preHandler: [app.verifyCsrf, requirePermission("approval:read:self")],
+    schema: { params: DelegatedApprovalParamsSchema, body: DecideApprovalStepBodySchema, response: { 200: ApprovalStepSchema } },
+  }, async (req) => delegationsService.decideOnBehalf(
+    actorFromRequest(req), req.params.requestId, req.params.stepId, req.body,
+  ));
 
   app.get("/certifications", {
     preHandler: [requirePermission("certification:read:self")],

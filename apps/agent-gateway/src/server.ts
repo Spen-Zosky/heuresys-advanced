@@ -200,9 +200,12 @@ const server = createServer(async (req, res) => {
         res.writeHead(200, { "content-type": "application/json" });
         res.end(JSON.stringify(esito));
       } catch (err) {
+        // Il motivo di un lotto rifiutato è nostro e si dice; un guasto del modello resta nel log,
+        // non nella risposta (CodeQL: nessuna traccia d'errore verso chi chiama).
         const rifiuto = err instanceof LottoNonValido;
+        if (!rifiuto) console.error("[consolidation/propose]", err);
         res.writeHead(rifiuto ? 422 : 502, { "content-type": "application/json" });
-        res.end(JSON.stringify({ error: rifiuto ? "BAD_BATCH" : "PROPOSE_FAILED", message: String(err) }));
+        res.end(JSON.stringify(rifiuto ? { error: "BAD_BATCH", message: err.message } : { error: "PROPOSE_FAILED" }));
       }
       return;
     }

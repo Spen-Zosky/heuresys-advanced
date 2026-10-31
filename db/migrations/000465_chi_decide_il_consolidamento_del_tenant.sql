@@ -80,13 +80,24 @@ BEGIN
   END IF;
 END $$;
 
--- i gruppi: solo per una delega CONSOLIDATION, almeno uno, presi dall'elenco chiuso dei cinque
+-- i gruppi: solo per una delega CONSOLIDATION, almeno uno, presi dall'elenco chiuso dei cinque.
+-- `IS NOT NULL` esplicito: un CHECK che vale NULL lascia passare la riga, e cardinality(NULL) è
+-- NULL (visto sulla copia della VM il 2026-10-31: una delega CONSOLIDATION senza gruppi passava).
+-- Un esemplare nato senza quella clausola si sostituisce.
 DO $$
+DECLARE def text;
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_user_delegations_groups_ck') THEN
+  SELECT pg_get_constraintdef(oid) INTO def FROM pg_constraint
+   WHERE conrelid = 'sys.sys_user_delegations'::regclass AND conname = 'sys_user_delegations_groups_ck';
+  IF def IS NOT NULL AND def NOT LIKE '%user_delegation_groups IS NOT NULL%' THEN
+    ALTER TABLE sys.sys_user_delegations DROP CONSTRAINT sys_user_delegations_groups_ck;
+    def := NULL;
+  END IF;
+  IF def IS NULL THEN
     ALTER TABLE sys.sys_user_delegations ADD CONSTRAINT sys_user_delegations_groups_ck CHECK (
       (user_delegation_scope <> 'CONSOLIDATION' AND user_delegation_groups IS NULL)
       OR (user_delegation_scope = 'CONSOLIDATION'
+          AND user_delegation_groups IS NOT NULL
           AND cardinality(user_delegation_groups) > 0
           AND user_delegation_groups <@ ARRAY['ORGANIZATION', 'POSITIONS_ROLES', 'SKILLS', 'PROCESSES', 'INDICATORS_GOALS']::text[]));
   END IF;
@@ -147,6 +158,11 @@ BEGIN
      AND (conname = 'sys_user_delegations_groups_ck'
           OR (contype = 'c' AND pg_get_constraintdef(oid) LIKE '%CONSOLIDATION%' AND pg_get_constraintdef(oid) LIKE '%APPROVALS%'));
   IF n_ck <> 2 THEN RAISE EXCEPTION '000465: i CHECK della delega CONSOLIDATION sono % invece di 2', n_ck; END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_user_delegations_groups_ck'
+                  AND pg_get_constraintdef(oid) LIKE '%user_delegation_groups IS NOT NULL%') THEN
+    RAISE EXCEPTION '000465: il CHECK dei gruppi non respinge una delega CONSOLIDATION senza gruppi';
+  END IF;
 
   SELECT n INTO n_prima FROM _deleghe_prima_000465;
   SELECT count(*) INTO n_dopo FROM sys.sys_user_delegations;

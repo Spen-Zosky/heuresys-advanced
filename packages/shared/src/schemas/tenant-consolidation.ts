@@ -216,3 +216,33 @@ export const GroupProgressSchema = z.object({
   pending: z.number().int(),
 });
 export type GroupProgress = z.infer<typeof GroupProgressSchema>;
+
+export const ConsolidationIdParamSchema = z.object({ id: z.uuid() });
+export const ConsolidationListResponseSchema = z.object({ items: z.array(TenantConsolidationSchema) });
+export const ConsolidationProposalListQuerySchema = z.object({ group: ConsolidationGroupSchema.optional() });
+export const ConsolidationProposalListResponseSchema = z.object({ items: z.array(ConsolidationProposalSchema) });
+export const ConsolidationProgressResponseSchema = z.object({ groups: z.array(GroupProgressSchema) });
+export const ConfirmCertainResponseSchema = z.object({ confirmed: z.number().int(), skipped: z.array(z.uuid()) });
+
+/** Chi chiama e su che cosa decide: il Direttore su tutti i gruppi, un delegato sui suoi. */
+export const ConsolidationAccessSchema = z.object({
+  canRun: z.boolean(),
+  decidesAs: z.enum(["DIRETTORE", "DELEGATO"]).nullable(),
+  groups: z.array(ConsolidationGroupSchema),
+});
+export type ConsolidationAccess = z.infer<typeof ConsolidationAccessSchema>;
+
+/* ── Il vocabolario comune (approvato dalla piattaforma) ───────────────────────────────── */
+
+export const VOCABULARY_STATUS_VALUES = ["PROPOSTA", "APPROVATA", "RITIRATA"] as const;
+export const VocabularyEquivalenceSchema = z.object({
+  equivalenceId: z.uuid(),
+  group: ConsolidationGroupSchema,
+  tenantTerm: z.string(),
+  prototypeTerm: z.string(),
+  status: z.enum(VOCABULARY_STATUS_VALUES),
+  approvedAt: z.iso.datetime().nullable(),
+});
+export type VocabularyEquivalence = z.infer<typeof VocabularyEquivalenceSchema>;
+export const VocabularyListResponseSchema = z.object({ items: z.array(VocabularyEquivalenceSchema) });
+export const VocabularyDecideBodySchema = z.object({ status: z.enum(["APPROVATA", "RITIRATA"]) }).strict();

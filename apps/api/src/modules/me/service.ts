@@ -6,6 +6,7 @@
 import { pool, withTransaction } from "../../db/client.js";
 import { dominiCheApronoUnaSuperficie } from "../../lib/scope/domains.js";
 import { almenoUnaCellaAperta } from "../../lib/scope/matrix.js";
+import { MANDATI_FUNZIONALI_CON_SUPERFICIE } from "../../lib/scope/mandati.js";
 import type { RoleCode } from "../../config/constants.js";
 import { NotFoundError, ForbiddenError, ConflictError, UnprocessableEntityError } from "../../errors/index.js";
 import type {
@@ -108,12 +109,32 @@ function isUniqueViolation(err: unknown): boolean {
   return typeof err === "object" && err !== null && (err as { code?: string }).code === "23505";
 }
 
+/**
+ * I mandati funzionali che aprono le PROPRIE superfici amministrative (analisi interfacce
+ * del 2026-10-31, D-17; ADR-0050, «il ruolo segue il lavoro»).
+ *
+ * Il pavimento (`requiresAdmin`) e la cascata M1 decidono le voci di governo a partire dai
+ * domini organizzativi; DPO e SECURITY_ADMIN non ne hanno uno, per costruzione: il loro
+ * mandato è conferito, non dedotto dall'organigramma. Risultato misurato: il DPO apriva
+ * /users senza averne la voce, SECURITY_ADMIN apriva /admin/roles e la policy MFA senza
+ * vederle nel menu. Qui la voce compare solo se la coppia permesso dichiarata dalla voce
+ * è concessa DAL MANDATO STESSO, non da un altro ruolo della persona: il menu segue il
+ * lavoro conferito, e i dati restano filtrati e mascherati dall'API come prima.
+ *
+ * Non entrano in `DOMINI_CHE_APRONO_UNA_SUPERFICIE` apposta: lì darebbero un livello di
+ * ampiezza su cruscotti e analisi che a questi mandati non spetta (stessa ragione di
+ * `custody`, domains.ts). L'insieme vive in `lib/scope/mandati.ts`.
+ */
+
 export const meService = {
   /** Sidebar registry filtered to the caller (U1). ESS items are always visible; admin items
    *  require an admin-class role AND the per-item permission. All 5 sections are always
    *  returned (an empty one renders an honest empty-state in the UI). */
   async getInterfaces(actor: SelfActor): Promise<MeInterfacesResponse> {
     const permSet = new Set(userPermissionCodes({ roles: actor.roles }));
+    const permessiDaMandato = new Set(
+      userPermissionCodes({ roles: actor.roles.filter((r) => MANDATI_FUNZIONALI_CON_SUPERFICIE.has(r as RoleCode)) }),
+    );
     const ctx = {
       userId: actor.userId,
       tenantId: actor.tenantId,
@@ -137,6 +158,9 @@ export const meService = {
       // permesso era inerte per la stessa ragione.
       if (i.requiredResource !== null && i.requiredAction !== null
           && !permSet.has(`${i.requiredResource}:${i.requiredAction}`)) return false;
+      // ── D-17: la voce che un mandato funzionale conferisce da sé (vedi sopra).
+      if (i.requiredResource !== null && i.requiredAction !== null
+          && permessiDaMandato.has(`${i.requiredResource}:${i.requiredAction}`)) return true;
       // ── il pavimento: invariato da #119. Una voce amministrativa esige un dominio che
       //    apra una superficie oltre il proprio record.
       if (i.requiresAdmin && !hasAdminRole) return false;

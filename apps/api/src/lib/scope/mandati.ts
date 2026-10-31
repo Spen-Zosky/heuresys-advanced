@@ -102,3 +102,24 @@ export function puoConcedereRuoli(actor: ActorContext): boolean {
 export function haMandatoGdpr(actor: ActorContext): boolean {
   return actor.roles.some((r) => GDPR_MANDATE_ROLES.has(r));
 }
+
+/**
+ * Il ruolo di ogni utente (regola di Enzo del 2026-10-31, invariante I17): «il ruolo user è
+ * comune a ogni user e con /me ogni user accede a tutti i suoi dati». La risoluzione dei
+ * ruoli al login lo aggiunge quando manca la riga di assegnazione
+ * (`modules/auth/repository.ts`, `getUserRoleGrants`): sta qui perché il nome di un ruolo
+ * che decide una capacità vive in `lib/scope/` e solo qui (cricchetto S-5).
+ */
+export const RUOLO_DI_OGNI_UTENTE: RoleCode = "USER";
+
+/**
+ * I mandati funzionali che aprono le PROPRIE superfici amministrative nel menu (analisi
+ * interfacce del 2026-10-31, D-17; ADR-0050, «il ruolo segue il lavoro»): DPO e
+ * SECURITY_ADMIN non hanno un dominio organizzativo, per costruzione, e la voce compare
+ * solo se la coppia permesso dichiarata è concessa dal mandato stesso
+ * (`modules/me/service.ts`, `getInterfaces`).
+ */
+export const MANDATI_FUNZIONALI_CON_SUPERFICIE: ReadonlySet<RoleCode> = new Set<RoleCode>([
+  "DPO",
+  "SECURITY_ADMIN",
+]);

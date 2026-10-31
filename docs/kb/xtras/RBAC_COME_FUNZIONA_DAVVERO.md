@@ -72,7 +72,7 @@ I dati sensibili di un'altra persona — chi è, quanto guadagna, come è stata 
 
 È il motivo per cui il tuo modello regge alla domanda difficile: *«un capo progetto può vedere lo stipendio di chi lavora nel suo progetto?»* No, se quella persona non gli riporta organizzativamente. La sua autorità è funzionale, non gerarchica, e il sensibile passa solo dalla gerarchia.
 
-L'unica deroga è per mandato esplicito: i ruoli **HR** (`TENANT_ADMIN`, `HRMS_MANAGER`) tengono l'accesso sensibile su tutta l'azienda cliente perché è il loro mestiere. `HRMS_MANAGER` in particolare è **plenipotenziario sui dati business del tenant**: CRUD completo, per mandato tuo esplicito.
+L'unica deroga è per mandato esplicito: i ruoli **HR** (`TENANT_ADMIN`, `HRMS_MANAGER` e, dal 2026-09-19, `PEOPLE_MANAGER`) tengono l'accesso sensibile su tutta l'azienda cliente perché è il loro mestiere. `HRMS_MANAGER` in particolare è **plenipotenziario sui dati business del tenant**: CRUD completo, per mandato tuo esplicito. `PEOPLE_MANAGER` è un ruolo **funzionale di vertice HR**, non gerarchico: vede tutto il tenant per mandato (Mandato K, R-6, migrazione 000432; `HR_MANDATED_ROLES` in `apps/api/src/lib/scope/resolver.ts`), e il 2026-10-31 hai confermato che è il comportamento voluto (vedi la sezione in fondo).
 
 ## Le cinque porte chiuse anche agli onnipotenti
 
@@ -126,13 +126,27 @@ psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -f docs/kb/xtras/misu
 
 Il file `misura-rbac.sql` sta in questa stessa cartella (`docs/kb/xtras/`) e produce anche la tabella delle famiglie, la porta del whistleblowing e i permessi che mancano a `PLATFORM_ADMIN`. La regola che vale più dei numeri è quella che hai scritto tu nel CLAUDE.md del progetto: un dato che può variare si misura prima di prenderlo per buono, e non si cristallizza in un documento — si scrive il comando che lo produce.
 
+## Aggiornamento del 2026-10-31: i ruoli funzionali nati dopo, e tre correzioni
+
+La tabella dei 14 ruoli è del 2026-09-14. Dopo, il Mandato K ha aggiunto altri ruoli, tutti dichiarati `functional` nel database: `DPO` (000423), `SECURITY_ADMIN` (000425), `RECRUITER` e `HIRING_MANAGER` (000428), `PEOPLE_MANAGER` (000432), `DATA_STEWARD` (000449) e altri. L'elenco aggiornato, con famiglia, permessi e persone, non si copia qui: si rigenera con il comando qui sopra (`misura-rbac.sql`).
+
+Tre di questi ruoli si leggono male se si applica la regola della catena, e l'analisi delle interfacce del 2026-10-31 ci è cascata una volta:
+
+- **`PEOPLE_MANAGER`** è un mandato HR come `TENANT_ADMIN` e `HRMS_MANAGER`: vede retribuzioni e valutazioni di tutto il tenant anche senza una catena sotto di sé. Non è un difetto: è la tua decisione del 2026-10-31, coerente con ADR-0036. Restano più stretti i suoi permessi (niente GDPR, avviamento, recruiting, tassonomia, segnalazioni).
+- **`DPO`** sta nel terzo stato: tutto il tenant, ma retribuzioni e valutazioni mascherate (la quinta porta qui sopra).
+- **`SECURITY_ADMIN`** governa l'accesso (sessioni, revoche, deleghe, policy MFA, lettura della matrice dei ruoli), non i dati delle persone.
+
+**Il pavimento non è solo `USER`.** Oltre a `USER`, che apre il portale del dipendente, **ogni ruolo** porta nove permessi `:self` che servono a qualunque persona collegata: preferenze, sessioni, consensi, esportazione dei propri dati, richiesta di ferie, contenuti, sondaggi, il proprio team (`consent:manage:self`, `gdpr:export:self`, `leave:request:self`, `me:content:read`, `me:preferences:read`, `me:preferences:update`, `me:sessions:manage`, `surveys:respond:self`, `team:read:self`). Il 2026-10-31 si è misurato che `RECRUITER` e `HIRING_MANAGER` non li avevano: la loro migrazione (000428) li toglieva a ogni giro della catena, e chi aveva solo quel ruolo non apriva nessuna pagina, perché la cornice legge le preferenze a ogni pagina. La 000428 è stata emendata e li conserva.
+
+**Il menu segue il lavoro conferito.** Le voci di governo si decidono dai domini organizzativi (ADR-0036 F7), e `DPO` e `SECURITY_ADMIN` per costruzione non ne hanno uno: aprivano le proprie pagine (il DPO `/users`, `SECURITY_ADMIN` `/admin/roles` e la policy MFA) senza vederne la voce. Dal 2026-10-31 una voce compare anche quando il permesso che dichiara è concesso proprio da uno di questi due mandati (`MANDATI_FUNZIONALI_CON_SUPERFICIE` in `apps/api/src/modules/me/service.ts`). I dati restano filtrati e mascherati dall'API come prima: cambia il menu, non l'accesso. Nello stesso giro la voce «Ruoli» chiede il permesso che la sua pagina usa davvero (`role_matrix:read`, migrazione 000467) e la voce «Recruiting» il permesso nuovo delle sue rotte (`requisition:read`, emendamento della 000406).
+
 ## Dove sta scritto tutto questo, nelle tue fonti
 
 | cosa | dove |
 |---|---|
 | i due assi, la matrice dei domini, le quattro eccezioni | ADR-0036 (supersede ADR-0027) |
 | `PLATFORM_ADMIN` è tecnico, non HR; il quarto stato `mask` | ADR-0032, invariante I20 |
-| il pavimento garantito a ogni persona | invariante I17 |
+| il pavimento garantito a ogni persona | invariante I17; i nove permessi `:self` di ogni ruolo in `db/migrations/000432_r6_people_manager.sql` |
 | il sensibile solo dalla catena organizzativa | invariante I18 |
 | il principio della catena e delle catene sorelle | invariante I19 |
 | `HRMS_MANAGER` plenipotenziario sui dati business | invariante I22 |

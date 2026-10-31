@@ -15,7 +15,7 @@ export type DbConnector = Pool | PoolClient;
 
 interface Row {
   skill_category_id: string;
-  skill_category_family_id: string;
+  skill_category_family_id: string | null;
   skill_category_code: string;
   skill_category_name: string;
   skill_category_description: string | null;

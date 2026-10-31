@@ -229,6 +229,27 @@ async function main(): Promise<void> {
     const segretiMfaDaDepositare: Record<string, string> = {};
     const ambienteDiCollaudo = eDiCollaudo();
 
+    // D-02 (2026-10-31) — fuori dal collaudo le utenze stanno SPENTE (db/scripts/sospendi-collaudo.ts).
+    // Questo script, rilanciato su un database che non si dichiara di collaudo, riaccenderebbe
+    // l'esenzione dal secondo fattore (il ramo ON CONFLICT DO UPDATE SET enabled = true qui sotto)
+    // senza che nessuno l'abbia chiesto. Si ferma e dice qual e' la strada giusta.
+    if (!ambienteDiCollaudo) {
+      const spente = await db.query<{ user_email: string }>(
+        `SELECT u.user_email FROM sys.sys_users u
+           JOIN sys.sys_auth_identities i ON i.auth_identity_user_id = u.user_id
+                                         AND i.auth_identity_provider = 'LOCAL'
+          WHERE u.user_email = ANY($1) AND NOT i.auth_identity_is_active
+          ORDER BY u.user_email`,
+        [emails],
+      );
+      if (spente.rows.length > 0) {
+        fail(
+          `${spente.rows.length} utenze di collaudo sono SOSPESE in questo database (${spente.rows.map((r) => r.user_email).join(", ")}): ` +
+            `non le riaccendo da qui. Per un giro dichiarato: pnpm db:sospendi-collaudo --riattiva --motivo "<giro>"`,
+        );
+      }
+    }
+
     await db.query("BEGIN");
 
     // (d) il giornale del rollback, creato PRIMA di qualunque scrittura. Vive in `staging`,

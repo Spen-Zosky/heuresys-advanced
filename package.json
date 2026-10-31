@@ -37,6 +37,7 @@
     "dev:whoami": "pnpm --filter @heuresys/api exec node scripts/dev-whoami.mjs",
     "db:provision-access": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/provision-derived-access.ts",
     "db:provision-collaudo": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/provision-collaudo-access.ts",
+    "db:sospendi-collaudo": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/sospendi-collaudo.ts",
     "db:stop-deriving-totp": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/stop-deriving-totp.ts",
     "db:verify-separazione-totp": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/verify-separazione-totp.ts",
     "db:deposita-totp-e2e": "pnpm --filter @heuresys/api exec tsx scripts/deposita-totp-e2e.mts",

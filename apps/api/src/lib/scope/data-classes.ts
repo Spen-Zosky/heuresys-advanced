@@ -174,6 +174,11 @@ export const RESOURCE_MULTICLASSE: Readonly<Record<string, ResourceMulticlasse>>
  */
 export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = {
   blueprint: "modelli organizzativi: struttura, non persone",
+  // AC-10 (000466): il registro del consolidamento confronta voci di struttura del tenant con
+  // il prototipo — unità, posizioni, competenze, processi, indicatori — per nome e codice, e le
+  // sorgenti hanno un elenco CHIUSO di colonne senza identificativi di persona (specifica §7,
+  // `modules/tenant-consolidation/sorgenti.ts`). Chi decide è un attore, non un soggetto.
+  consolidation: "consolidamento col prototipo: voci di struttura, mai persone",
   tenant_blueprint: "il fascicolo di configurazione di un tenant",
   bpm_process: "definizioni di processo",
   job_role: "catalogo delle mansioni — la mansione è un posto, non chi lo occupa",

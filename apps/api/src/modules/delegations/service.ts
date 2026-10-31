@@ -13,7 +13,7 @@
  * La catena si misura alla creazione E a ogni uso (§2): se l'organigramma cambia, la delega resta
  * registrata ma non ha effetto finché il delegato non torna nella catena. Revocare è un atto.
  */
-import { pool } from "../../db/client.js";
+import { pool, withTransaction } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 import { delegationChainUserIds, isInDelegationChain, ownUnitIds } from "../../lib/scope/org.js";
@@ -447,32 +447,36 @@ async function conferisci(
     }
   }
 
-  const creata = await repo.createDelegation(pool, tenantId, {
-    delegatorUserId: dati.delegatorUserId,
-    delegateUserId: dati.delegateUserId,
-    scope: dati.scope,
-    groups: dati.groups,
-    requestType: dati.requestType,
-    tenantProcessStepId: dati.tenantProcessStepId,
-    startsOn: dati.startsOn,
-    endsOn: dati.endsOn,
-    reason: dati.reason,
-    actorId,
-  });
-  // Chi riceve la delega lo sa subito, con quello che gli è stato affidato.
-  await emitNotification(pool, {
-    tenantId,
-    userId: creata.delegateUserId,
-    type: "SYSTEM",
-    subject: `${creata.delegatorName ?? "Il tuo responsabile"} ti ha delegato ${
-      creata.scope === "PROCESS_STEP" ? `l'attività «${creata.tenantProcessStepName ?? ""}»` : "le sue approvazioni"
-    } dal ${creata.startsOn}${creata.endsOn ? ` al ${creata.endsOn}` : ""}`,
-    body: creata.reason,
-    priority: "INFO",
-    resourceType: "DELEGATION",
-    resourceId: creata.delegationId,
-    actionUrl: "/me/delegations",
-    createdBy: actorId,
+  // Delega e avviso nella stessa transazione: una delega senza il suo avviso, o un avviso
+  // senza la delega, non devono poter esistere.
+  const creata = await withTransaction(async (client) => {
+    const d = await repo.createDelegation(client, tenantId, {
+      delegatorUserId: dati.delegatorUserId,
+      delegateUserId: dati.delegateUserId,
+      scope: dati.scope,
+      groups: dati.groups,
+      requestType: dati.requestType,
+      tenantProcessStepId: dati.tenantProcessStepId,
+      startsOn: dati.startsOn,
+      endsOn: dati.endsOn,
+      reason: dati.reason,
+      actorId,
+    });
+    // Chi riceve la delega lo sa subito, con quello che gli è stato affidato. Nessun
+    // `resourceType`: il CHECK degli avvisi non conosce le deleghe, e il collegamento basta.
+    await emitNotification(client, {
+      tenantId,
+      userId: d.delegateUserId,
+      type: "SYSTEM",
+      subject: `${d.delegatorName ?? "Il tuo responsabile"} ti ha delegato ${
+        d.scope === "PROCESS_STEP" ? `l'attività «${d.tenantProcessStepName ?? ""}»` : "le sue approvazioni"
+      } dal ${d.startsOn}${d.endsOn ? ` al ${d.endsOn}` : ""}`,
+      body: d.reason,
+      priority: "INFO",
+      actionUrl: "/me/delegations",
+      createdBy: actorId,
+    });
+    return d;
   });
   return (await conCatena([creata]))[0]!;
 }

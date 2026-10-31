@@ -108,21 +108,30 @@ describe("ADR-0051 §1 — la catena di delega", () => {
     const prima = await delegationChainUserIds(pool, sotto.userId);
     expect(prima, "la scena parte già con l'estraneo nella catena: non misurerebbe niente").not.toContain(estraneo.userId);
 
+    const riportoPrima = await pool.query<{ p: string | null }>(
+      `SELECT position_reports_to_position_id AS p FROM sys.sys_positions WHERE position_id = $1`, [s],
+    );
     await pool.query(`UPDATE sys.sys_positions SET position_reports_to_position_id = $1 WHERE position_id = $2`, [r, s]);
+    try {
+      expect(await delegationChainUserIds(pool, sotto.userId), "il riporto fra posizioni non entra nella catena")
+        .toContain(estraneo.userId);
+      expect(await orgSubtreeUserIds(pool, sotto.userId), "il riporto fra posizioni ha allargato il perimetro dei dati sensibili")
+        .not.toContain(estraneo.userId);
 
-    expect(await delegationChainUserIds(pool, sotto.userId), "il riporto fra posizioni non entra nella catena")
-      .toContain(estraneo.userId);
-    expect(await orgSubtreeUserIds(pool, sotto.userId), "il riporto fra posizioni ha allargato il perimetro dei dati sensibili")
-      .not.toContain(estraneo.userId);
-
-    // E il referente delega davvero, da sé.
-    const d = await chiama(sotto.email, "POST", "/v1/me/delegations", {
-      delegateUserId: estraneo.userId, scope: "APPROVALS", startsOn: oggi(), endsOn: fra(7),
-    });
-    expect(d.statusCode, `delega del referente: ${d.statusCode} ${d.body.slice(0, 300)}`).toBe(201);
-    expect((d.json() as { kind: string; inChain: boolean }).inChain).toBe(true);
-
-    await pool.query(`UPDATE sys.sys_positions SET position_reports_to_position_id = NULL WHERE position_id = $1`, [s]);
+      // E il referente delega davvero, da sé.
+      const d = await chiama(sotto.email, "POST", "/v1/me/delegations", {
+        delegateUserId: estraneo.userId, scope: "APPROVALS", startsOn: oggi(), endsOn: fra(7),
+      });
+      expect(d.statusCode, `delega del referente: ${d.statusCode} ${d.body.slice(0, 300)}`).toBe(201);
+      const creata = d.json() as { delegationId: string; inChain: boolean };
+      expect(creata.inChain).toBe(true);
+      // Revocata subito: le scene dopo questa vogliono un estraneo senza deleghe.
+      await chiama(sotto.email, "POST", `/v1/me/delegations/${creata.delegationId}/revoke`, {});
+    } finally {
+      // La scena si smonta comunque: le prove che seguono vogliono l'estraneo FUORI dalla catena.
+      await pool.query(`UPDATE sys.sys_positions SET position_reports_to_position_id = $1 WHERE position_id = $2`,
+        [riportoPrima.rows[0]?.p ?? null, s]);
+    }
   });
 });
 
@@ -171,15 +180,27 @@ describe("ADR-0051 §2-§4 — chi delega, a chi, che cosa", () => {
 
   it("un'attività di processo si delega solo se è del delegante", async () => {
     const mie = await ownUnitIds(pool, capo.userId);
-    const altrui = await pool.query<{ id: string }>(
-      `SELECT tenant_process_step_id AS id FROM sys.sys_tenant_process_steps
-        WHERE tenant_process_step_tenant_id = (SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1)
-          AND (tenant_process_step_org_unit_id IS NULL OR NOT (tenant_process_step_org_unit_id = ANY($2::uuid[])))
-        LIMIT 1`,
+    if (mie.length === 0) throw new Error("il capo non ha unità proprie: verifica cieca");
+    // La scena si scrive qui: un processo e un'attività eseguita da un'unità che NON è del capo.
+    // Le attività di processo si caricano fuori catena (ADR-0049) e la copia della CI può non averle.
+    const scena = await pool.query<{ id: string }>(
+      `WITH t AS (SELECT user_tenant_id AS tid FROM sys.sys_users WHERE user_id = $1),
+            altra AS (SELECT o.organization_unit_id AS uid FROM sys.sys_organization_units o, t
+                       WHERE o.organization_unit_tenant_id = t.tid AND o.organization_unit_is_active
+                         AND NOT (o.organization_unit_id = ANY($2::uuid[])) LIMIT 1),
+            pr AS (INSERT INTO sys.sys_tenant_processes (tenant_process_tenant_id, tenant_process_code, tenant_process_name)
+                   SELECT tid, 'PROVA-ADR-0051', 'Processo di prova ADR-0051' FROM t
+                   RETURNING tenant_process_id, tenant_process_tenant_id)
+       INSERT INTO sys.sys_tenant_process_steps
+         (tenant_process_step_tenant_id, tenant_process_step_process_id, tenant_process_step_code,
+          tenant_process_step_name, tenant_process_step_ordinal, tenant_process_step_org_unit_id)
+       SELECT pr.tenant_process_tenant_id, pr.tenant_process_id, 'PROVA-1', 'Attività di prova ADR-0051', 1, altra.uid
+         FROM pr, altra
+       RETURNING tenant_process_step_id AS id`,
       [capo.userId, mie],
     );
-    const passo = altrui.rows[0]?.id;
-    if (!passo) throw new Error("nessuna attività di processo fuori dalle unità del capo: verifica cieca");
+    const passo = scena.rows[0]?.id;
+    if (!passo) throw new Error("nessuna unità fuori da quelle del capo: verifica cieca");
 
     const no = await chiama(capo.email, "POST", "/v1/me/delegations", {
       delegateUserId: sotto.userId, scope: "PROCESS_STEP", tenantProcessStepId: passo, startsOn: oggi(),

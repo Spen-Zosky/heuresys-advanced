@@ -59,6 +59,8 @@ Heuresys è una piattaforma agentica (regola di Enzo del 2026-10-31): un agente 
 
 **D7 — Separazione dei compiti.** Il custode delle segnalazioni non porta mandati HR né `SECURITY_ADMIN`; `SECURITY_ADMIN` non è `TENANT_ADMIN` sulla stessa persona; `DPO` non porta un mandato HR in chiaro (già ADR-0036 §5, quinta eccezione). Il controllo sta nella stessa funzione di D4.
 
+**D8 — Il ruolo segue il lavoro.** Principio generale e trasversale fissato dall'Amministratore di Sistema il 2026-10-31 alle 17:18 ora di Roma: «concordo sulla tua raccomandazione che il ruolo segua il lavoro. è un principio generale e trasversale, quindi lo applichiamo e controlliamo». Un ruolo, e soprattutto un ruolo funzionale con mandato, si concede solo perché lo richiede lo scopo del lavoro della posizione della persona, mai per comodità o per eredità. Due persone con scopi di lavoro diversi non portano lo stesso mandato soltanto perché stanno nella stessa area. La concessione (D4) cita la posizione che la giustifica. Un controllo periodico confronta i ruoli con le posizioni e segnala le concessioni senza giustificazione e quelle rimaste dopo un cambio di posizione.
+
 ## Conseguenze
 
 - I mandati tenant-wide oggi tenuti solo da utenze di collaudo restano scoperti quando quelle utenze vengono sospese: prima di applicare D2, Enzo (o il TENANT_ADMIN del tenant) assegna ogni mandato a una persona vera con secondo fattore. Le assegnazioni sono un dato del tenant e non stanno in questo ADR.

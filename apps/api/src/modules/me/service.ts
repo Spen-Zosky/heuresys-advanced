@@ -6,6 +6,7 @@
 import { pool, withTransaction } from "../../db/client.js";
 import { dominiCheApronoUnaSuperficie } from "../../lib/scope/domains.js";
 import { almenoUnaCellaAperta } from "../../lib/scope/matrix.js";
+import { MANDATI_FUNZIONALI_CON_SUPERFICIE } from "../../lib/scope/mandati.js";
 import type { RoleCode } from "../../config/constants.js";
 import { NotFoundError, ForbiddenError, ConflictError, UnprocessableEntityError } from "../../errors/index.js";
 import type {
@@ -122,9 +123,8 @@ function isUniqueViolation(err: unknown): boolean {
  *
  * Non entrano in `DOMINI_CHE_APRONO_UNA_SUPERFICIE` apposta: lì darebbero un livello di
  * ampiezza su cruscotti e analisi che a questi mandati non spetta (stessa ragione di
- * `custody`, domains.ts).
+ * `custody`, domains.ts). L'insieme vive in `lib/scope/mandati.ts`.
  */
-const MANDATI_FUNZIONALI_CON_SUPERFICIE: ReadonlySet<string> = new Set(["DPO", "SECURITY_ADMIN"]);
 
 export const meService = {
   /** Sidebar registry filtered to the caller (U1). ESS items are always visible; admin items
@@ -133,7 +133,7 @@ export const meService = {
   async getInterfaces(actor: SelfActor): Promise<MeInterfacesResponse> {
     const permSet = new Set(userPermissionCodes({ roles: actor.roles }));
     const permessiDaMandato = new Set(
-      userPermissionCodes({ roles: actor.roles.filter((r) => MANDATI_FUNZIONALI_CON_SUPERFICIE.has(r)) }),
+      userPermissionCodes({ roles: actor.roles.filter((r) => MANDATI_FUNZIONALI_CON_SUPERFICIE.has(r as RoleCode)) }),
     );
     const ctx = {
       userId: actor.userId,

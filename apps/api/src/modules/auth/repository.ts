@@ -12,6 +12,7 @@
 
 import type { Pool, PoolClient } from "pg";
 import type { RoleCode } from "../../config/constants.js";
+import { RUOLO_DI_OGNI_UTENTE } from "../../lib/scope/mandati.js";
 import { recordAuthEvent } from "../observability/prometheus.js";
 
 /** Query connector — pool for autocommit, client for in-transaction work. */
@@ -115,7 +116,7 @@ export async function getUserRoleGrants(
     UNION ALL
     SELECT r.auth_role_code, r.auth_role_is_platform, u.user_tenant_id
       FROM sys.sys_users u
-      JOIN sys.sys_auth_roles r ON r.auth_role_code = 'USER'
+      JOIN sys.sys_auth_roles r ON r.auth_role_code = $2
      WHERE u.user_id = $1
        AND NOT EXISTS (
          SELECT 1 FROM sys.sys_user_auth_roles uar
@@ -123,7 +124,7 @@ export async function getUserRoleGrants(
             AND uar.user_auth_role_role_id = r.auth_role_id
             AND uar.user_auth_role_revoked_at IS NULL)
     `,
-    [userId],
+    [userId, RUOLO_DI_OGNI_UTENTE],
   );
 
   return rows.map((r) => ({

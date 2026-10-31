@@ -342,7 +342,13 @@ VALUES
   ('sys_tenant_processes', 'importato', 'EMENDATO per la mig 000462 (ADR-0049, onda 2 T1): processo del tenant scritto solo dal riempimento fuori catena (db/scripts/attivita/), nessuna rotta API di scrittura'),
   ('sys_tenant_process_steps', 'importato', 'EMENDATO per la mig 000462 (ADR-0049, onda 2 T2): attivita'' del processo del tenant, dalle fasi del datastore, scritte solo dal riempimento fuori catena, nessuna rotta API di scrittura'),
   ('sys_tenant_process_activity_rules', 'importato', 'EMENDATO per la mig 000462 (ADR-0049): regole tipo di richiesta -> processo, scritte solo dal riempimento fuori catena, nessuna rotta API di scrittura'),
-  ('sys_blueprint_content_receipts', 'infrastruttura', 'EMENDATO per la mig 000460 (consolidamento C3): registro tecnico dei ricevimenti dei pacchetti del datastore, scritto solo dal caricatore, non dato del cliente')
+  ('sys_blueprint_content_receipts', 'infrastruttura', 'EMENDATO per la mig 000460 (consolidamento C3): registro tecnico dei ricevimenti dei pacchetti del datastore, scritto solo dal caricatore, non dato del cliente'),
+  ('sys_tenant_consolidations', 'nativo', 'EMENDATO per la mig 000464 (agente di consolidamento AC-3): registro del consolidamento del tenant, scritto solo dall''API (modulo tenant-consolidation), nessuno scrittore di importazione'),
+  ('sys_tenant_consolidation_rounds', 'nativo', 'EMENDATO per la mig 000464 (agente di consolidamento AC-3): registro del consolidamento del tenant, scritto solo dall''API (modulo tenant-consolidation), nessuno scrittore di importazione'),
+  ('sys_tenant_consolidation_working_items', 'nativo', 'EMENDATO per la mig 000464 (agente di consolidamento AC-3): registro del consolidamento del tenant, scritto solo dall''API (modulo tenant-consolidation), nessuno scrittore di importazione'),
+  ('sys_tenant_consolidation_proposals', 'nativo', 'EMENDATO per la mig 000464 (agente di consolidamento AC-3): registro del consolidamento del tenant, scritto solo dall''API (modulo tenant-consolidation), nessuno scrittore di importazione'),
+  ('sys_tenant_consolidation_decisions', 'nativo', 'EMENDATO per la mig 000464 (agente di consolidamento AC-3): registro del consolidamento del tenant, scritto solo dall''API (modulo tenant-consolidation), nessuno scrittore di importazione'),
+  ('sys_platform_vocabulary_equivalences', 'infrastruttura', 'EMENDATO per la mig 000464 (AC-3): vocabolario comune di piattaforma, nessun dato di un tenant, scritto solo dall''API')
 ON CONFLICT (tabella) DO UPDATE SET stato = EXCLUDED.stato, motivo = EXCLUDED.motivo;
 
 CREATE OR REPLACE VIEW sys.v_tabelle_non_classificate AS
@@ -359,8 +365,8 @@ DECLARE
   n_tot int; n_non_class int; n_ibrido int; n_nativo int; n_importato int; n_infra int;
 BEGIN
   SELECT count(*) INTO n_tot FROM sys.sys_classificazione_direzione_dato;
-  IF n_tot <> 300 THEN
-    RAISE EXCEPTION '000429: attese 300 righe di classificazione, trovate %', n_tot;
+  IF n_tot <> 306 THEN
+    RAISE EXCEPTION '000429: attese 306 righe di classificazione, trovate %', n_tot;
   END IF;
 
   SELECT count(*) INTO n_non_class FROM sys.v_tabelle_non_classificate;
@@ -372,12 +378,12 @@ BEGIN
   SELECT count(*) FILTER (WHERE stato = 'nativo')   INTO n_nativo   FROM sys.sys_classificazione_direzione_dato;
   SELECT count(*) FILTER (WHERE stato = 'importato') INTO n_importato FROM sys.sys_classificazione_direzione_dato;
   SELECT count(*) FILTER (WHERE stato = 'infrastruttura') INTO n_infra FROM sys.sys_classificazione_direzione_dato;
-  IF n_ibrido <> 76 OR n_nativo <> 51 OR n_importato <> 132 OR n_infra <> 41 THEN
-    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/51/132/41)',
+  IF n_ibrido <> 76 OR n_nativo <> 56 OR n_importato <> 132 OR n_infra <> 42 THEN
+    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/56/132/42)',
       n_ibrido, n_nativo, n_importato, n_infra;
   END IF;
 
-  RAISE NOTICE '000429: 300 tabelle classificate (76 ibrido, 51 nativo, 132 importato, 41 infrastruttura); v_tabelle_non_classificate a zero.';
+  RAISE NOTICE '000429: 306 tabelle classificate (76 ibrido, 56 nativo, 132 importato, 42 infrastruttura); v_tabelle_non_classificate a zero.';
 END $$;
 
 COMMIT;

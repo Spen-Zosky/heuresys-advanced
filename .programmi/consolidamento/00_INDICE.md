@@ -23,6 +23,9 @@ Fuori perimetro, dichiarato all'inizio: S5 e S6 (gesti di Enzo dopo la parità),
 | `lavoro/G_revisione_indipendente.md` | revisione indipendente della Fase B |
 | `lavoro/E_api.tsv`, `lavoro/C_*.tsv` | inventari granulari (797 rotte; schemi ricostruiti dalle migrazioni) |
 | `lavoro/strumenti/` | gli script che rigenerano gli inventari (comandi nelle intestazioni) |
+| `agente/00_SPECIFICA.md` | specifica dell'agente di consolidamento del tenant, confermata da Enzo il 2026-10-30 alle 19:33 UTC (copia del file del progetto) |
+| `agente/05_DISEGNO_TECNICO.md` | disegno tecnico dell'agente: motore nell'API, giudice senza strumenti nel gateway, pagine del Direttore HR; il gradino 3 della pagina dei vuoti ritirato |
+| `agente/06_PIANO.md` | piano AC-0…AC-15 con la simulazione di ogni voce |
 
 ## Stato del programma
 
@@ -45,6 +48,8 @@ Per non avere due sessioni che scrivono lo stesso numero (onda 2 e consolidament
 | advanced `000461` | C11 — esemplare del vincolo globale sui formativi (la fonte si emenda in `000237`) | prenotato |
 | advanced `000462` | ADR-0049 — le attività appartengono a un processo (T1 e T2 dell'onda 2, regole, legame delle richieste) | scritto il 2026-10-27, thread «Collegare le attività ai processi» |
 | advanced `000463` | C4 — versione del modello fissata sull'attivazione, processi unici per versione (R-58); emenda `000008` e `000021` | scritto il 2026-10-30 |
+| advanced `000464` | AC-3 — le tabelle dell'agente di consolidamento del tenant (`agente/05_DISEGNO_TECNICO.md` §4) | prenotato il 2026-10-30 |
+| advanced `000465` | AC-4 — permessi `consolidation:*` e `vocabulary:approve`, delega `CONSOLIDATION` per gruppi; emenda `000314` | prenotato il 2026-10-30 |
 
 Nota del 2026-10-27: il numero `000459` è stato preso da `000459_pe4_passo3b_partecipazione_attiva_ha_posizione.sql`, quindi C4 deve prendere un altro numero.
 

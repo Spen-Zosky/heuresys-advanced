@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS sys.sys_user_delegations (
   -- chi riceve, ed e' la persona che acquisisce il dominio `delegation`
   user_delegation_delegate_id   uuid NOT NULL REFERENCES sys.sys_users(user_id),
   user_delegation_scope         varchar(16) NOT NULL DEFAULT 'APPROVALS'
-                                  CHECK (user_delegation_scope IN ('APPROVALS', 'FULL')),
+                                  -- EMENDATO per la 000465 (AC-4): CONSOLIDATION, la delega del Direttore HR per gruppi di dati
+                                  CHECK (user_delegation_scope IN ('APPROVALS', 'FULL', 'CONSOLIDATION')),
   user_delegation_starts_on     date NOT NULL,
   user_delegation_ends_on       date,
   user_delegation_status        varchar(16) NOT NULL DEFAULT 'ACTIVE'

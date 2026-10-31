@@ -85,12 +85,23 @@ export const delegationsService = {
         "PERMISSION_DENIED",
       );
     }
+    // CONSOLIDATION (mig 000465): la delega del Direttore HR porta sempre i gruppi su cui vale;
+    // gli altri ambiti non ne portano. Lo stesso vincolo sta nel CHECK della tabella.
+    const gruppi = body.groups && body.groups.length > 0 ? [...new Set(body.groups)] : null;
+    if ((body.scope === "CONSOLIDATION") !== (gruppi !== null)) {
+      throw new UnprocessableEntityError(
+        { groups: body.scope === "CONSOLIDATION" ? "obbligatori" : "ammessi solo per CONSOLIDATION" },
+        "I gruppi di dati valgono solo, e sempre, per una delega di consolidamento",
+        "DELEGATION_GROUPS_INVALID",
+      );
+    }
     await verificaPersone(tenantId, body.delegatorUserId, body.delegateUserId);
 
     return repo.createDelegation(pool, tenantId, {
       delegatorUserId: body.delegatorUserId,
       delegateUserId: body.delegateUserId,
       scope: body.scope,
+      groups: gruppi,
       startsOn: body.startsOn,
       endsOn: body.endsOn ?? null,
       reason: body.reason ?? null,

@@ -232,6 +232,11 @@
       "heuresys-source": "./src/schemas/delegations.ts",
       "default": "./dist/schemas/delegations.js"
     },
+    "./schemas/tenant-consolidation": {
+      "types": "./dist/schemas/tenant-consolidation.d.ts",
+      "heuresys-source": "./src/schemas/tenant-consolidation.ts",
+      "default": "./dist/schemas/tenant-consolidation.js"
+    },
     "./schemas/platform-tenant-assignments": {
       "types": "./dist/schemas/platform-tenant-assignments.d.ts",
       "heuresys-source": "./src/schemas/platform-tenant-assignments.ts",

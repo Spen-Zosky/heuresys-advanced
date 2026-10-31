@@ -21,6 +21,7 @@ interface Riga {
   user_delegation_delegate_id: string;
   delegate_name: string | null;
   user_delegation_scope: string;
+  user_delegation_groups: string[] | null;
   user_delegation_starts_on: Date;
   user_delegation_ends_on: Date | null;
   user_delegation_status: string;
@@ -33,7 +34,7 @@ interface Riga {
 const SELEZIONE = `
   d.user_delegation_id, d.user_delegation_tenant_id,
   d.user_delegation_delegator_id, d.user_delegation_delegate_id,
-  d.user_delegation_scope, d.user_delegation_starts_on, d.user_delegation_ends_on,
+  d.user_delegation_scope, d.user_delegation_groups, d.user_delegation_starts_on, d.user_delegation_ends_on,
   d.user_delegation_status, d.user_delegation_reason, d.created_at, d.updated_at,
   nullif(trim(coalesce(ud.user_first_name,'') || ' ' || coalesce(ud.user_last_name,'')), '') AS delegator_name,
   nullif(trim(coalesce(ue.user_first_name,'') || ' ' || coalesce(ue.user_last_name,'')), '') AS delegate_name,
@@ -55,6 +56,7 @@ function mappa(r: Riga): Delegation {
     delegateUserId: r.user_delegation_delegate_id,
     delegateName: r.delegate_name,
     scope: r.user_delegation_scope as Delegation["scope"],
+    groups: r.user_delegation_groups,
     startsOn: toDateOnly(r.user_delegation_starts_on) ?? "",
     endsOn: toDateOnly(r.user_delegation_ends_on),
     status: r.user_delegation_status as Delegation["status"],
@@ -124,7 +126,7 @@ export async function createDelegation(
   q: DbConnector,
   tenantId: string,
   dati: {
-    delegatorUserId: string; delegateUserId: string; scope: string;
+    delegatorUserId: string; delegateUserId: string; scope: string; groups: string[] | null;
     startsOn: string; endsOn: string | null; reason: string | null; actorId: string;
   },
 ): Promise<Delegation> {
@@ -132,11 +134,11 @@ export async function createDelegation(
     `INSERT INTO sys.sys_user_delegations
        (user_delegation_tenant_id, user_delegation_delegator_id, user_delegation_delegate_id,
         user_delegation_scope, user_delegation_starts_on, user_delegation_ends_on,
-        user_delegation_reason, created_by, updated_by)
-     VALUES ($1, $2, $3, $4, $5::date, $6::date, $7, $8, $8)
+        user_delegation_reason, created_by, updated_by, user_delegation_groups)
+     VALUES ($1, $2, $3, $4, $5::date, $6::date, $7, $8, $8, $9::text[])
      RETURNING user_delegation_id AS id`,
     [tenantId, dati.delegatorUserId, dati.delegateUserId, dati.scope,
-     dati.startsOn, dati.endsOn, dati.reason, dati.actorId],
+     dati.startsOn, dati.endsOn, dati.reason, dati.actorId, dati.groups],
   );
   const id = ins.rows[0]?.id;
   if (!id) throw new Error("delega creata ma senza identificativo");

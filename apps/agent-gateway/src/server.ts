@@ -25,6 +25,7 @@ import { HeuresysClient } from "./heuresys-client.js";
 import { redact } from "./redact.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
+import { giudica, LottoNonValido } from "./consolidation-propose.js";
 import type { ApprovalRequest, GatePrincipal } from "./write-gate.js";
 
 const PORT = Number(process.env.AGENT_GATEWAY_PORT ?? 8790);
@@ -58,6 +59,8 @@ const APPROVAL_TIMEOUT_MS = Number(process.env.AGENT_GATEWAY_APPROVAL_TIMEOUT_MS
 // l'endpoint NON esiste: un servizio in ascolto senza autenticazione «perche' tanto e'
 // locale» e' un servizio che puo' chiamare qualcun altro.
 const RESEARCH_TOKEN = process.env.AGENT_GATEWAY_RESEARCH_TOKEN ?? "";
+/** AC-6: il segreto condiviso con l'API per il giudice del consolidamento. Assente = rotta spenta. */
+const CONSOLIDATION_TOKEN = process.env.AGENT_GATEWAY_CONSOLIDATION_TOKEN ?? "";
 
 // Module-level singletons (one per server process):
 //  - the HITL approval registry bridges the SSE stream ↔ POST /agent/approve;
@@ -167,6 +170,42 @@ const server = createServer(async (req, res) => {
         // registra come corsa FAILED col motivo, e la corsa resta nel registro.
         res.writeHead(502, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "PROPOSE_FAILED", message: String(err) }));
+      }
+      return;
+    }
+
+    // AC-6 — il giudice del consolidamento del tenant: riceve un lotto di voci strutturali e
+    // restituisce proposte. Nessuno strumento, nessuna persona nel lotto, nessuna decisione.
+    if (req.method === "POST" && req.url === "/consolidation/propose") {
+      if (!CONSOLIDATION_TOKEN) {
+        res.writeHead(503, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "CONSOLIDATION_DISABLED", message: "AGENT_GATEWAY_CONSOLIDATION_TOKEN non configurato" }));
+        return;
+      }
+      if (req.headers["x-consolidation-token"] !== CONSOLIDATION_TOKEN) {
+        res.writeHead(401, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "BAD_TOKEN" }));
+        return;
+      }
+      let lotto: unknown;
+      try {
+        lotto = JSON.parse((await readBody(req)) || "{}");
+      } catch {
+        res.writeHead(400, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "BAD_JSON" }));
+        return;
+      }
+      try {
+        const esito = await giudica(lotto);
+        res.writeHead(200, { "content-type": "application/json" });
+        res.end(JSON.stringify(esito));
+      } catch (err) {
+        // Il motivo di un lotto rifiutato è nostro e si dice; un guasto del modello resta nel log,
+        // non nella risposta (CodeQL: nessuna traccia d'errore verso chi chiama).
+        const rifiuto = err instanceof LottoNonValido;
+        if (!rifiuto) console.error("[consolidation/propose]", err);
+        res.writeHead(rifiuto ? 422 : 502, { "content-type": "application/json" });
+        res.end(JSON.stringify(rifiuto ? { error: "BAD_BATCH", message: err.message } : { error: "PROPOSE_FAILED" }));
       }
       return;
     }

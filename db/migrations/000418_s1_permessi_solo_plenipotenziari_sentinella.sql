@@ -168,6 +168,20 @@ SELECT v.code, 'figlio di job-requisition:read/:manage (stato di partenza 2026-0
   ) AS v(code)
 ON CONFLICT (permission_code) DO NOTHING;
 
+-- [agente di consolidamento AC-4, mig 000465] i permessi del consolidamento del tenant sono
+-- solo-plenipotenziari PER DECISIONE di Enzo (specifica confermata il 2026-10-30, §6): decide il
+-- Direttore HR (HRMS_MANAGER) e, attraverso una delega CONSOLIDATION, chi lui nomina; il vocabolario
+-- comune lo approva solo la piattaforma. Non e' uno stato di partenza da ridurre, e' la regola.
+INSERT INTO sys.sys_permessi_plenipotenziari_ammessi (permission_code, motivo, data)
+SELECT v.code, 'specifica dell''agente di consolidamento (Enzo, 2026-10-30, §6): decide il Direttore HR o un suo delegato; il vocabolario comune lo approva la piattaforma. E'' la regola, non un debito.', DATE '2026-10-30'
+  FROM (VALUES
+  ('consolidation:read'),
+  ('consolidation:run'),
+  ('consolidation:decide'),
+  ('vocabulary:approve')
+  ) AS v(code)
+ON CONFLICT (permission_code) DO NOTHING;
+
 CREATE OR REPLACE VIEW sys.v_permessi_solo_plenipotenziari AS
 WITH titolari AS (
   SELECT p.auth_permission_code AS permission_code,

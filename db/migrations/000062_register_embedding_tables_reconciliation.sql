@@ -172,7 +172,19 @@ VALUES
   ('sys_tenant_process_activity_rules', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — struttura del processo del tenant (mig 000462, ADR-0049, onda 2). Righe nuove, scritte dal riempimento fuori catena a partire dal modello e dalle fasi del datastore: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000462: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
   ('sys_blueprint_content_receipts', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — registro tecnico dei ricevimenti dei pacchetti del datastore (mig 000460, consolidamento C3). Lo scrive solo il caricatore: non ha sorgente nel legacy (ADR-0038), quindi non e'' un bersaglio di riconciliazione. Registrata qui e non in 000460: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]')
+   '[sign-off: EXCLUDE — registro tecnico dei ricevimenti dei pacchetti del datastore (mig 000460, consolidamento C3). Lo scrive solo il caricatore: non ha sorgente nel legacy (ADR-0038), quindi non e'' un bersaglio di riconciliazione. Registrata qui e non in 000460: il controllo di 0 UNCLASSIFIED gira in questo file, e la seconda passata della catena lo vede.]'),
+  ('sys_tenant_consolidations', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — registro dell''agente di consolidamento del tenant (mig 000464, AC-3). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000464: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
+  ('sys_tenant_consolidation_rounds', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — registro dell''agente di consolidamento del tenant (mig 000464, AC-3). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000464: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
+  ('sys_tenant_consolidation_working_items', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — registro dell''agente di consolidamento del tenant (mig 000464, AC-3). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000464: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
+  ('sys_tenant_consolidation_proposals', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — registro dell''agente di consolidamento del tenant (mig 000464, AC-3). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000464: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
+  ('sys_tenant_consolidation_decisions', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — registro dell''agente di consolidamento del tenant (mig 000464, AC-3). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000464: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
+  ('sys_platform_vocabulary_equivalences', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — registro dell''agente di consolidamento del tenant (mig 000464, AC-3). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000464: il controllo di 0 UNCLASSIFIED gira in questo file.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

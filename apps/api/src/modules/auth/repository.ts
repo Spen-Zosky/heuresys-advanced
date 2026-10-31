@@ -98,6 +98,12 @@ export async function getUserRoleGrants(
     is_platform: boolean;
     tenant_id: string | null;
   }>(
+    // Il ruolo USER è comune a ogni utente (Enzo, 2026-10-31; invariante I17): con /me ogni
+    // persona accede a tutti i propri dati, secondo le regole generali di accesso e
+    // visibilità. Non dipende da un'assegnazione che qualcuno deve ricordarsi di fare: se
+    // la riga manca, il ruolo si aggiunge qui, nel tenant della persona. L'analisi del
+    // 2026-10-31 aveva misurato ruoli funzionali senza USER che perdevano l'area personale
+    // (D-09) e un menu che offriva voci /me/* poi negate (D-16).
     `
     SELECT r.auth_role_code        AS role_code,
            r.auth_role_is_platform AS is_platform,
@@ -106,6 +112,16 @@ export async function getUserRoleGrants(
       JOIN sys.sys_auth_roles r ON r.auth_role_id = uar.user_auth_role_role_id
      WHERE uar.user_auth_role_user_id = $1
        AND uar.user_auth_role_revoked_at IS NULL
+    UNION ALL
+    SELECT r.auth_role_code, r.auth_role_is_platform, u.user_tenant_id
+      FROM sys.sys_users u
+      JOIN sys.sys_auth_roles r ON r.auth_role_code = 'USER'
+     WHERE u.user_id = $1
+       AND NOT EXISTS (
+         SELECT 1 FROM sys.sys_user_auth_roles uar
+          WHERE uar.user_auth_role_user_id = u.user_id
+            AND uar.user_auth_role_role_id = r.auth_role_id
+            AND uar.user_auth_role_revoked_at IS NULL)
     `,
     [userId],
   );

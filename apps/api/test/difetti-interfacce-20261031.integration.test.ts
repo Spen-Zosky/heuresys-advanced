@@ -11,6 +11,7 @@
  *  - D-17: DPO vede la voce Utenti, SECURITY_ADMIN le voci Ruoli e Policy MFA, perché il
  *    permesso che le voci dichiarano glielo dà il loro mandato.
  *  - INC-10: la voce Ruoli chiede `role_matrix:read`, il permesso della sua pagina (000467).
+ *  - D-09/D-16: il ruolo USER è comune a ogni utente (regola di Enzo del 2026-10-31).
  *
  * D-10 (skill-categories), l'organico (analytics) e D-22 (build-plan in GET) hanno le loro
  * prove nei file dei rispettivi moduli.
@@ -130,6 +131,16 @@ describe("analisi interfacce 2026-10-31 — i difetti delle pagine", () => {
   it("il mandato apre solo le proprie voci: il DPO non vede Ruoli, SECURITY_ADMIN non vede Utenti", async () => {
     expect(await rotteDelMenu("DPO")).not.toContain("/admin/roles");
     expect(await rotteDelMenu("SECURITY_ADMIN")).not.toContain("/users");
+  });
+
+  // D-09/D-16 — regola di Enzo del 2026-10-31: «il ruolo USER è comune a ogni user e con /me
+  // ogni user accede a tutti i suoi dati». Le persone di collaudo di questi ruoli non hanno
+  // una riga USER: il ruolo arriva lo stesso, dalla risoluzione dei ruoli al login.
+  it("D-09: ogni utente ha USER e apre la propria area /me, anche senza la riga di assegnazione", async () => {
+    for (const ruolo of Object.keys(PERSONE) as Ruolo[]) {
+      const r = await get(ruolo, "/v1/me/profile");
+      expect(r.statusCode, `${ruolo}: ${r.body}`).not.toBe(403);
+    }
   });
 
   it("INC-10: la voce Ruoli dichiara role_matrix:read", async () => {

@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `eaa191d5` (2026-10-30T12:24:49+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `9286f3ff` (2026-10-31T03:26:29+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 113 |
-| Route API | 661 |
+| Moduli API | 114 |
+| Route API | 673 |
 | Pagine web | 129 |
-| Schemi shared | 123 |
-| Tabelle DB | 374 (vuote: 68) |
+| Schemi shared | 124 |
+| Tabelle DB | 380 (vuote: 74) |
 | Viste / matview | 77 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 294 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 314 |
 
 ## Moduli API
 
@@ -113,6 +113,7 @@
 | talent-review | /v1/talent-review | 6 | 1 | 7 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
 | tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 14 | 1 |
+| tenant-consolidation | /v1/consolidation-vocabulary, /v1/tenant-consolidations | 12 | 3 | 26 | 1 |
 | tenant-import-runs | /v1/tenant-import-runs | 5 | 2 | 15 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 3 | 1 |
@@ -208,6 +209,12 @@
 - `sys.sys_notification_preferences`
 - `sys.sys_occupation_classification_mappings`
 - `sys.sys_platform_user_tenant_assignments`
+- `sys.sys_platform_vocabulary_equivalences`
+- `sys.sys_tenant_consolidation_decisions`
+- `sys.sys_tenant_consolidation_proposals`
+- `sys.sys_tenant_consolidation_rounds`
+- `sys.sys_tenant_consolidation_working_items`
+- `sys.sys_tenant_consolidations`
 - `sys.sys_user_delegations`
 
 ## Key counts live
@@ -217,8 +224,8 @@
 - positions: **315**
 - org_units: **45**
 - roles: **24**
-- permissions: **242**
-- role_permission_mappings: **1248**
+- permissions: **246**
+- role_permission_mappings: **1254**
 - ui_interfaces_active: **76**
 - skills: **14031**
 

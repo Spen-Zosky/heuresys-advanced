@@ -65,6 +65,9 @@ beforeAll(async () => {
        JOIN sys.sys_auth_role_permissions rp ON rp.auth_role_id = ur.user_auth_role_role_id
        JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
       WHERE p.auth_permission_code = 'consolidation:decide' AND u.user_status = 'ACTIVE' AND u.user_tenant_id IS NOT NULL
+        -- la 000005 dà ogni permesso al ruolo di piattaforma: il Direttore è chi lo ha da un ruolo di tenant
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_user_auth_roles ur2 JOIN sys.sys_auth_roles r2 ON r2.auth_role_id = ur2.user_auth_role_role_id
+                         WHERE ur2.user_auth_role_user_id = u.user_id AND ur2.user_auth_role_revoked_at IS NULL AND r2.auth_role_is_platform)
       ORDER BY u.user_id LIMIT 1`,
   );
   const dir = d.rows[0];

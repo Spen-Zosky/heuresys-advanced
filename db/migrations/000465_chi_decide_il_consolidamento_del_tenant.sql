@@ -10,7 +10,8 @@
 -- COSA FA.
 --   ① quattro permessi: consolidation:read, consolidation:run, consolidation:decide, vocabulary:approve;
 --   ② le concessioni: HRMS_MANAGER read+run+decide; TENANT_ADMIN read; PLATFORM_ADMIN read+vocabulary:approve.
---     PLATFORM_ADMIN NON decide sui dati di un tenant cliente: è un mandato tecnico (ADR-0036);
+--     PLATFORM_ADMIN NON riceve decide da qui: è un mandato tecnico (ADR-0036). La 000005 gli dà
+--     comunque ogni permesso; il confine sui dati del cliente lo tiene il tenant della sessione (I5);
 --   ③ la delega CONSOLIDATION: un ambito in più su sys_user_delegations e la colonna dei gruppi ammessi. Il CHECK
 --     nasce in 000314, EMENDATA alla fonte in questo stesso incremento (ADR-0035); qui si cambia l'esemplare
 --     esistente, che un CREATE TABLE IF NOT EXISTS non ricrea;
@@ -124,7 +125,7 @@ COMMIT;
 -- POST-CONDIZIONI
 -- ============================================================================================
 DO $$
-DECLARE n_perm int; n_grant int; n_trad int; n_ck int; n_prima bigint; n_dopo bigint; n_pa_decide int;
+DECLARE n_perm int; n_grant int; n_trad int; n_ck int; n_prima bigint; n_dopo bigint;
 BEGIN
   SELECT count(*) INTO n_perm FROM sys.sys_auth_permissions
    WHERE auth_permission_code IN ('consolidation:read', 'consolidation:run', 'consolidation:decide', 'vocabulary:approve');
@@ -140,12 +141,11 @@ BEGIN
      ('TENANT_ADMIN', 'consolidation:read'), ('PLATFORM_ADMIN', 'consolidation:read'), ('PLATFORM_ADMIN', 'vocabulary:approve'));
   IF n_grant <> 6 THEN RAISE EXCEPTION '000465: le concessioni sono % invece di 6', n_grant; END IF;
 
-  SELECT count(*) INTO n_pa_decide
-    FROM sys.sys_auth_role_permissions rp
-    JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
-    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
-   WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND p.auth_permission_code = 'consolidation:decide';
-  IF n_pa_decide <> 0 THEN RAISE EXCEPTION '000465: PLATFORM_ADMIN non decide sui dati di un tenant'; END IF;
+  -- PLATFORM_ADMIN riceve OGNI permesso dalla 000005 a ogni passata della catena (visto in CI il
+  -- 2026-10-31: una post-condizione che glielo negava rompeva la seconda passata). Il «nessun decide
+  -- sui dati di un tenant cliente» non sta quindi nella concessione ma nel servizio: il tenant
+  -- viene dalla sessione (I5), e la sessione di un amministratore di piattaforma non è quella di
+  -- un tenant cliente. Ritirargli il permesso sarebbe una seconda eccezione a G-D2 (000420).
 
   SELECT count(*) INTO n_trad FROM sys.sys_reference_translations t
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = t.entity_id

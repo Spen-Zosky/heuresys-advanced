@@ -14,13 +14,15 @@ import { pool, closePool } from "../src/db/client.js";
 import { loginRaw } from "./helpers/login.js";
 import { activeDomainsOf, hasAnyDomain } from "../src/lib/scope/domains.js";
 import type { RoleCode } from "../src/config/constants.js";
+import { delegationChainUserIds } from "../src/lib/scope/org.js";
+import { unCapoConSottoposti, unSottopostoOrganizzativo } from "./helpers/org-actors.js";
 
 let t: TestApp;
 let cookie = "";
 let csrf = "";
 /** Chi amministra (ha `delegation:manage`). */
 const AMMINISTRA = "federica.marchetti@rtl-bank.org";
-/** Due persone reali del tenant, nessuna delle quali è l'amministratore. */
+/** Un capo reale del tenant e una persona della sua catena (ADR-0051), nessuno dei due amministratore. */
 let delegante = { id: "", email: "" };
 let delegato = { id: "", email: "" };
 /**
@@ -69,23 +71,25 @@ beforeAll(async () => {
     .join("; ");
   csrf = (login.json() as { csrfToken: string }).csrfToken;
 
-  const r = await pool.query<{ user_id: string; user_email: string }>(
-    `SELECT u.user_id, u.user_email
-       FROM sys.sys_users u
-      WHERE u.user_status = 'ACTIVE'
-        AND u.user_email <> $1
-        AND u.user_tenant_id = (SELECT user_tenant_id FROM sys.sys_users WHERE user_email = $1)
-      ORDER BY u.user_email
-      LIMIT 3`,
-    [AMMINISTRA],
+  // ADR-0051: una delega di approvazioni è di CATENA, quindi delegante e delegati si derivano
+  // dall'organigramma vivo — un capo con sottoposti, e due persone della sua catena.
+  const capo = await unCapoConSottoposti(pool);
+  const sotto = await unSottopostoOrganizzativo(pool, capo.userId);
+  const catena = await delegationChainUserIds(pool, capo.userId);
+  const altro = catena.find((id) => id !== sotto.userId);
+  if (!altro) throw new Error("serve una seconda persona nella catena del capo: la prova sarebbe cieca");
+  const altroEmail = await pool.query<{ e: string }>(
+    `SELECT user_email AS e FROM sys.sys_users WHERE user_id = $1`, [altro],
   );
-  const a = r.rows[0];
-  const b = r.rows[1];
-  const c = r.rows[2];
-  if (!a || !b || !c) throw new Error("servono tre persone del tenant: la prova sarebbe cieca");
-  delegante = { id: a.user_id, email: a.user_email };
-  delegato = { id: b.user_id, email: b.user_email };
-  delegatoSoloRevoca = { id: c.user_id, email: c.user_email };
+  const stessoTenant = await pool.query<{ ok: boolean }>(
+    `SELECT (SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1)
+          = (SELECT user_tenant_id FROM sys.sys_users WHERE user_email = $2) AS ok`,
+    [capo.userId, AMMINISTRA],
+  );
+  if (!stessoTenant.rows[0]?.ok) throw new Error("il capo scelto non è del tenant dell'amministratore");
+  delegante = { id: capo.userId, email: capo.email };
+  delegato = { id: sotto.userId, email: sotto.email };
+  delegatoSoloRevoca = { id: altro, email: altroEmail.rows[0]?.e ?? "" };
 }, 60_000);
 
 afterAll(async () => {

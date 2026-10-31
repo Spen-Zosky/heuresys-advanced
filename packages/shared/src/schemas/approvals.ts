@@ -63,6 +63,8 @@ export const ApprovalStepSchema = z.object({
   decisionComment: z.string().nullable(),
   decidedAt: z.iso.datetime().nullable(),
   decidedBy: z.uuid().nullable(),
+  /** ADR-0051 §5: la delega in forza della quale il passo è stato deciso («per conto di»); null se ha deciso l'approvatore. */
+  actingDelegationId: z.uuid().nullable(),
   metadata: META,
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),

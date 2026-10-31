@@ -257,3 +257,98 @@ export async function unitaEntroLivello(q: DbConnector, livelloMax: number): Pro
   );
   return res.rows.map((r) => r.ou);
 }
+
+/* ── ADR-0051 — la catena di DELEGA ─────────────────────────────────────────── */
+
+/**
+ * Le persone a cui `delegatorUserId` può delegare una sua attività (ADR-0051 §1): l'unione di
+ *
+ *  (a) il sottoalbero delle unità che dirige — la stessa fonte di {@link orgSubtreeUserIds};
+ *  (b) il sottoalbero TRANSITIVO delle posizioni che riportano a una sua posizione attiva
+ *      (`position_reports_to_position_id`), cioè i titolari attivi di quelle posizioni.
+ *
+ * La fonte (b) è quella del referente che non dirige un'unità ma ha persone che gli riportano.
+ * Vale SOLO per la delega: il perimetro dei dati sensibili (I18-I20) resta sull'albero delle
+ * unità, e un referente senza unità non vede per questo stipendi e valutazioni dei suoi.
+ *
+ * Il delegante NON è nell'elenco: nessuno delega a se stesso. `UNION` (non UNION ALL) in
+ * entrambe le ricorsioni, così un ciclo malformato termina invece di avvitarsi.
+ */
+export async function delegationChainUserIds(q: DbConnector, delegatorUserId: string): Promise<string[]> {
+  const res = await q.query<{ user_id: string }>(
+    `WITH RECURSIVE my_units AS (
+       SELECT o.organization_unit_id AS ou_id
+         FROM sys.sys_organization_units o
+        WHERE o.organization_unit_manager_user_id = $1
+          AND o.organization_unit_is_active
+     ),
+     unit_subtree AS (
+       SELECT ou_id FROM my_units
+       UNION
+       SELECT o.organization_unit_id
+         FROM sys.sys_organization_units o
+         JOIN unit_subtree s ON o.organization_unit_parent_id = s.ou_id
+        WHERE o.organization_unit_is_active
+     ),
+     my_positions AS (
+       SELECT upa.user_position_assignment_position_id AS pos_id
+         FROM sys.sys_user_position_assignments upa
+        WHERE upa.user_position_assignment_user_id = $1
+          AND upa.user_position_assignment_status = 'ACTIVE'
+     ),
+     position_subtree AS (
+       SELECT p.position_id AS pos_id
+         FROM sys.sys_positions p
+         JOIN my_positions m ON p.position_reports_to_position_id = m.pos_id
+        WHERE p.position_is_active
+       UNION
+       SELECT p.position_id
+         FROM sys.sys_positions p
+         JOIN position_subtree s ON p.position_reports_to_position_id = s.pos_id
+        WHERE p.position_is_active
+     )
+     SELECT upa.user_position_assignment_user_id AS user_id
+       FROM sys.sys_user_position_assignments upa
+       JOIN sys.sys_positions p ON p.position_id = upa.user_position_assignment_position_id
+       JOIN unit_subtree s ON s.ou_id = p.position_organization_unit_id
+      WHERE upa.user_position_assignment_status = 'ACTIVE'
+        AND upa.user_position_assignment_user_id <> $1
+     UNION
+     SELECT upa.user_position_assignment_user_id
+       FROM sys.sys_user_position_assignments upa
+       JOIN position_subtree s ON s.pos_id = upa.user_position_assignment_position_id
+      WHERE upa.user_position_assignment_status = 'ACTIVE'
+        AND upa.user_position_assignment_user_id <> $1`,
+    [delegatorUserId],
+  );
+  return res.rows.map((r) => r.user_id);
+}
+
+/** La forma booleana di {@link delegationChainUserIds}, per il controllo su una sola persona. */
+export async function isInDelegationChain(
+  q: DbConnector,
+  delegatorUserId: string,
+  delegateUserId: string,
+): Promise<boolean> {
+  if (delegatorUserId === delegateUserId) return false;
+  return (await delegationChainUserIds(q, delegatorUserId)).includes(delegateUserId);
+}
+
+/**
+ * Le unità in cui una persona lavora o che dirige: quelle del sottoalbero che dirige più
+ * quelle delle sue posizioni attive. Serve a dire se un'attività di processo è «sua»
+ * (ADR-0051 §3): l'attività appartiene a un'unità (`tenant_process_step_org_unit_id`).
+ */
+export async function ownUnitIds(q: DbConnector, userId: string): Promise<string[]> {
+  const sotto = await orgSubtreeUnitIds(q, userId);
+  const res = await q.query<{ ou_id: string }>(
+    `SELECT DISTINCT p.position_organization_unit_id::text AS ou_id
+       FROM sys.sys_user_position_assignments upa
+       JOIN sys.sys_positions p ON p.position_id = upa.user_position_assignment_position_id
+      WHERE upa.user_position_assignment_user_id = $1
+        AND upa.user_position_assignment_status = 'ACTIVE'
+        AND p.position_organization_unit_id IS NOT NULL`,
+    [userId],
+  );
+  return [...new Set([...sotto, ...res.rows.map((r) => r.ou_id)])];
+}

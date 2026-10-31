@@ -96,6 +96,7 @@ const toStep = (r: repo.ApprovalStepRow): ApprovalStep => ({
   decisionComment: r.decisionComment,
   decidedAt: r.decidedAt,
   decidedBy: r.decidedBy,
+  actingDelegationId: r.actingDelegationId,
   metadata: r.metadata,
   createdAt: r.createdAt,
   updatedAt: r.updatedAt,
@@ -262,14 +263,34 @@ export const approvalService = {
     };
   },
 
-  async decideStep(a: ActorContext, requestId: string, stepId: string, body: DecideApprovalStepBody): Promise<ApprovalStep> {
+  /**
+   * ADR-0051 — `onBehalf`: il passo si decide PER CONTO DI chi ha delegato. La validità della delega
+   * (in vigore, in catena, tipo delegabile, il delegante può ancora decidere) la verifica il servizio
+   * delle deleghe PRIMA di chiamare qui, dentro la stessa transazione; qui cambia solo di chi è il
+   * passo (del delegante) e che cosa si firma (il delegato decide, la delega è il titolo).
+   */
+  async decideStep(
+    a: ActorContext,
+    requestId: string,
+    stepId: string,
+    body: DecideApprovalStepBody,
+    onBehalf?: { delegationId: string; delegatorUserId: string; verifica: (client: import("pg").PoolClient, found: { resourceType: string | null; tenantProcessStepId: string | null }) => Promise<void> },
+  ): Promise<ApprovalStep> {
     const scope = buildScope(a);
+    const titolare = onBehalf ? onBehalf.delegatorUserId : a.userId;
     const decided = await withTransaction(async (client) => {
       const found = await repo.findStepWithRequest(client, scope, requestId, stepId);
       if (!found) throw new NotFoundError("Approval step");
-      // Data-layer authority: you may only decide YOUR OWN step (necessary on top of the perm).
-      if (found.step.approverUserId !== a.userId) {
+      // Data-layer authority: you may only decide YOUR OWN step (necessary on top of the perm) —
+      // or, with a delegation, the step of the person who delegated you.
+      if (found.step.approverUserId !== titolare) {
         throw new ForbiddenError("Not your approval step", "PERMISSION_DENIED");
+      }
+      if (onBehalf) {
+        await onBehalf.verifica(client, {
+          resourceType: found.resourceType,
+          tenantProcessStepId: found.tenantProcessStepId,
+        });
       }
       if (found.requestStatus !== "PENDING") {
         throw new ConflictError("Request already resolved", "REQUEST_RESOLVED");
@@ -281,10 +302,12 @@ export const approvalService = {
         throw new ConflictError("This approval level is not yet active", "LEVEL_NOT_ACTIVE");
       }
       const newStatus = body.decision === "APPROVE" ? "APPROVED" : "REJECTED";
-      const step = await repo.decideStepGuarded(client, stepId, newStatus, body.comment ?? null, a.userId);
+      const step = await repo.decideStepGuarded(
+        client, stepId, newStatus, body.comment ?? null, a.userId, onBehalf?.delegationId ?? null,
+      );
       if (!step) throw new ConflictError("This step was already decided", "ALREADY_DECIDED");
 
-      await repo.markInboxReadForStep(client, stepId, a.userId);
+      await repo.markInboxReadForStep(client, stepId, titolare);
 
       // Re-derive the chain (level-aware) from all steps.
       const steps = await repo.loadSteps(client, requestId);

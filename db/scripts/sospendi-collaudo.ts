@@ -14,7 +14,9 @@
  * dire: identita' LOCAL disattivata (il login non le trova piu', `findLoginCandidates`
  * pretende `auth_identity_is_active`), esenzione dal secondo fattore spenta (il trigger della
  * 000118 la scrive nel registro di audit), sessioni aperte revocate. Le righe RESTANO: niente
- * si cancella, e la riattivazione ripristina esattamente lo stato di prima.
+ * si cancella. La riattivazione ripristina accesso ed esenzione come li aveva trovati l'ultima
+ * sospensione; le sessioni revocate restano revocate (di proposito: chi rientra fa un login
+ * nuovo), e il giornale e l'audit delle esenzioni restano come storia.
  *
  * Le quattro cose di ogni scrittura (db-migrations.md):
  *  (a) misura prima  — stato di ogni utenza di collaudo, e conteggi delle persone vere

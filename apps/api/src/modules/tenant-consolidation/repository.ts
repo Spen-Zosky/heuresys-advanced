@@ -484,3 +484,44 @@ export async function setEquivalenceStatus(
   );
   return (r.rowCount ?? 0) > 0;
 }
+
+/* ── il giro in corso ───────────────────────────────────────────────────────────────── */
+
+/**
+ * Prende il turno di un giro: riesce solo se nessun altro giro della sessione è in corso. Il
+ * segno sta nel metadata della sessione, così si vede dalla pagina e sopravvive a un riavvio
+ * (un giro interrotto da un riavvio resta segnato e si libera con `releaseRun`).
+ */
+export async function claimRun(q: DbConnector, tenantId: string, id: string, group: ConsolidationGroup): Promise<boolean> {
+  const r = await q.query(
+    `UPDATE sys.sys_tenant_consolidations
+        SET tenant_consolidation_metadata = tenant_consolidation_metadata
+              || jsonb_build_object('running_group', $3::text, 'running_since', now())
+      WHERE tenant_consolidation_tenant_id = $1 AND tenant_consolidation_id = $2
+        AND tenant_consolidation_status = 'GIRI'
+        AND tenant_consolidation_metadata->>'running_group' IS NULL`,
+    [tenantId, id, group],
+  );
+  return (r.rowCount ?? 0) > 0;
+}
+
+export async function releaseRun(q: DbConnector, id: string, esito: Record<string, unknown>): Promise<void> {
+  await q.query(
+    `UPDATE sys.sys_tenant_consolidations
+        SET tenant_consolidation_metadata = (tenant_consolidation_metadata - 'running_group' - 'running_since')
+              || jsonb_build_object('last_run', $2::jsonb)
+      WHERE tenant_consolidation_id = $1`,
+    [id, JSON.stringify(esito)],
+  );
+}
+
+export async function pendingInGroup(q: DbConnector, consolidationId: string, group: ConsolidationGroup): Promise<number> {
+  const { rows } = await q.query<{ n: number }>(
+    `SELECT count(*)::int AS n FROM sys.sys_tenant_consolidation_proposals p
+       ${ULTIMA_DECISIONE}
+      WHERE p.tenant_consolidation_proposal_consolidation_id = $1 AND p.tenant_consolidation_proposal_group = $2
+        AND p.tenant_consolidation_proposal_superseded_at IS NULL AND ud.decision_value IS NULL`,
+    [consolidationId, group],
+  );
+  return rows[0]?.n ?? 0;
+}

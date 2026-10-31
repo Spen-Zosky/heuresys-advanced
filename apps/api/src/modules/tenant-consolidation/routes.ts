@@ -21,12 +21,14 @@ import {
   ConfirmCertainBodySchema,
   ConfirmCertainResponseSchema,
   ConsolidationAccessSchema,
+  ConsolidationGroupSchema,
   ConsolidationIdParamSchema,
   ConsolidationListResponseSchema,
   ConsolidationProgressResponseSchema,
   ConsolidationProposalListQuerySchema,
   ConsolidationProposalListResponseSchema,
   ConsolidationProposalSchema,
+  ConsolidationRunStartedSchema,
   DecideProposalBodySchema,
   StartConsolidationBodySchema,
   TenantConsolidationSchema,
@@ -56,6 +58,7 @@ function ruoloODelega(code: string, perRuolo: preHandlerAsyncHookHandler): preHa
 const LEGGE = ruoloODelega("consolidation:read", requirePermission("consolidation:read"));
 const DECIDE = ruoloODelega("consolidation:decide", requirePermission("consolidation:decide"));
 const PROPOSTA = z.object({ proposalId: z.uuid() });
+const GRUPPO = z.object({ id: z.uuid(), group: ConsolidationGroupSchema });
 
 export const tenantConsolidationRoutes: FastifyPluginAsyncZod = async (app) => {
   const conf = { orgGate: "service", tenantGate: "service" } as const;
@@ -100,6 +103,19 @@ export const tenantConsolidationRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [LEGGE],
     schema: { params: ConsolidationIdParamSchema, response: { 200: ConsolidationProgressResponseSchema } },
   }, async (req) => ({ groups: await svc.progress(actor(req), req.params.id) }));
+
+  // I giri del gruppo aperto: si avviano e la risposta torna subito (202); l'esito si legge dal registro.
+  app.post("/:id/groups/:group/run", {
+    config: conf,
+    preHandler: [app.verifyCsrf, requirePermission("consolidation:run")],
+    schema: { params: GRUPPO, response: { 202: ConsolidationRunStartedSchema } },
+  }, async (req, reply) => reply.code(202).send(await svc.runGroup(actor(req), req.params.id, req.params.group)));
+
+  app.post("/:id/groups/:group/close", {
+    config: conf,
+    preHandler: [app.verifyCsrf, requirePermission("consolidation:run")],
+    schema: { params: GRUPPO, response: { 200: TenantConsolidationSchema } },
+  }, async (req) => svc.closeGroup(actor(req), req.params.id, req.params.group));
 
   app.post("/proposals/:proposalId/decision", {
     config: conf,

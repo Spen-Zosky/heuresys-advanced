@@ -12,7 +12,8 @@ import { closePool, pool } from "../src/db/client.js";
 import { loadRolePermissionCache } from "../src/modules/auth/cache-loader.js";
 import type { ActorContext } from "../src/lib/actor.js";
 import type { RoleCode } from "../src/config/constants.js";
-import { tenantConsolidationService as svc } from "../src/modules/tenant-consolidation/service.js";
+import { eseguiGiri, tenantConsolidationService as svc } from "../src/modules/tenant-consolidation/service.js";
+import type { Giudice } from "../src/modules/tenant-consolidation/engine.js";
 
 let direttore: ActorContext;
 let delegato: ActorContext;
@@ -187,5 +188,33 @@ describe("il registro del consolidamento (000464)", () => {
     const avanzamento = await svc.progress(direttore, sessioneId);
     expect(avanzamento.find((g) => g.group === "ORGANIZATION")).toMatchObject({ linked: 1, pending: 0 });
     expect(avanzamento.find((g) => g.group === "SKILLS")).toMatchObject({ rejected: 1, pending: 1 });
+  });
+});
+
+describe("un giro sul gruppo aperto, con un giudice finto", () => {
+  it("legge le voci vere, non manda persone al giudice e scrive il registro", async () => {
+    const s = await svc.get(direttore, sessioneId);
+    const lotti: unknown[] = [];
+    // Il giudice di prova non abbina niente: tutto ciò che il giro zero non chiude resta lacuna o personalizzazione.
+    const giudice: Giudice = async (lotto) => {
+      lotti.push(lotto);
+      return lotto.questions.map((d) => ({ tenantKey: d.tenantItem.key, prototypeKeys: [], confidence: 10, reason: "prova" }));
+    };
+    await eseguiGiri(direttore.tenantId!, s, "ORGANIZATION", giudice);
+    const dopo = await pool.query<{ m: { last_run?: { ok: boolean; error?: string } } }>(
+      `SELECT tenant_consolidation_metadata AS m FROM sys.sys_tenant_consolidations WHERE tenant_consolidation_id = $1`,
+      [sessioneId],
+    );
+    expect(dopo.rows[0]!.m.last_run, JSON.stringify(dopo.rows[0]!.m)).toMatchObject({ ok: true });
+    expect(JSON.stringify(lotti)).not.toMatch(/userid/i);
+
+    const unita = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1 AND organization_unit_is_active`,
+      [direttore.tenantId],
+    );
+    const proposte = await svc.proposals(direttore, sessioneId, "ORGANIZATION");
+    const coperte = new Set(proposte.flatMap((p) => p.tenantKeys));
+    // Ogni unità attiva del tenant esce dal giro con una proposta: collegata o sua.
+    expect(coperte.size).toBeGreaterThanOrEqual(unita.rows[0]!.n);
   });
 });

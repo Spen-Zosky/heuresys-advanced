@@ -16,11 +16,13 @@ import { userHasPermission } from "../../middleware/rbac.js";
 import {
   ConflictError,
   ForbiddenError,
+  InternalError,
   NotFoundError,
   UnprocessableEntityError,
 } from "../../errors/index.js";
 import {
   CONSOLIDATION_GROUP_VALUES,
+  nextConsolidationGroup,
   type ConsolidationAccess,
   type ConsolidationGroup,
   type ConsolidationProposal,
@@ -32,6 +34,9 @@ import {
   type TenantConsolidation,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { consolidaGruppo, nuovoStato, type Giudice } from "./engine.js";
+import { giudiceDaAmbiente } from "./giudice.js";
+import { vociDelPrototipo, vociDelTenant } from "./sorgenti.js";
 
 /** La soglia degli abbinamenti certi che si confermano a gruppi (specifica R-5, valore iniziale). */
 export const SOGLIA_CERTI = 90;
@@ -86,6 +91,39 @@ async function sessione(tenantId: string, id: string): Promise<TenantConsolidati
   const s = await repo.getConsolidation(pool, tenantId, id);
   if (!s) throw new NotFoundError("Sessione di consolidamento non trovata", "CONSOLIDATION_NOT_FOUND");
   return s;
+}
+
+/**
+ * I giri di un gruppo, dalla lettura delle voci al registro. Esportata perché la prova la
+ * aspetti; la rotta la lancia senza aspettarla. Non lancia mai: l'esito, buono o no, finisce
+ * nel metadata della sessione e libera il turno.
+ */
+export async function eseguiGiri(
+  tenantId: string,
+  s: TenantConsolidation,
+  group: ConsolidationGroup,
+  giudice: Giudice,
+): Promise<void> {
+  const id = s.consolidationId;
+  const inizio = Date.now();
+  try {
+    const [tenant, prototipo, rifiuti] = await Promise.all([
+      vociDelTenant(pool, tenantId, group),
+      vociDelPrototipo(pool, s.variantVersionId, group),
+      repo.rejectedPairs(pool, id, group),
+    ]);
+    const vocabolario = await repo.approvedVocabulary(pool, group);
+    const stato = nuovoStato(group, prototipo, tenant);
+    stato.rejected.push(...rifiuti);
+    await consolidaGruppo(stato, giudice, { vocabulary: vocabolario });
+    const scritte = await withTransaction((client) => repo.saveGroup(client, id, stato, null));
+    await repo.releaseRun(pool, id, {
+      group, ok: true, proposals: scritte, rounds: stato.rounds.length, fuse: stato.fuseTripped, ms: Date.now() - inizio,
+    });
+  } catch (e) {
+    const codice = e instanceof InternalError ? e.code : "CONSOLIDATION_RUN_FAILED";
+    await repo.releaseRun(pool, id, { group, ok: false, error: codice, ms: Date.now() - inizio }).catch(() => undefined);
+  }
 }
 
 export const tenantConsolidationService = {
@@ -234,6 +272,57 @@ export const tenantConsolidationService = {
         confirmed++;
       }
       return { confirmed, skipped };
+    });
+  },
+
+  /**
+   * Avvia i giri del gruppo aperto (R-6: i gruppi si fanno in ordine). La risposta torna subito:
+   * un gruppo grande chiede molti lotti al giudice, e una richiesta HTTP non resta aperta per
+   * minuti. L'esito si legge dal registro (giri, proposte) e dal metadata della sessione.
+   * Lo stato si ricostruisce ogni volta dalle voci vere e dai rifiuti del registro: così un
+   * rifiuto rifà i giri che ne dipendevano (R-13) senza una seconda memoria da tenere allineata.
+   */
+  async runGroup(
+    actor: ActorContext,
+    id: string,
+    group: ConsolidationGroup,
+    giudice: Giudice | null = giudiceDaAmbiente(),
+  ): Promise<{ started: true; group: ConsolidationGroup }> {
+    const tenantId = tenantDi(actor);
+    const s = await sessione(tenantId, id);
+    if (s.openGroup !== group) {
+      throw new ConflictError(`Il gruppo aperto è ${s.openGroup ?? "nessuno"}: i gruppi si fanno in ordine`, "CONSOLIDATION_GROUP_NOT_OPEN");
+    }
+    if (!giudice) {
+      throw new InternalError(
+        "CONSOLIDATION_JUDGE_UNAVAILABLE",
+        "CONSOLIDATION_GATEWAY_URL o CONSOLIDATION_GATEWAY_TOKEN non configurati",
+        "Il giudice del consolidamento non è configurato su questo server",
+      );
+    }
+    if (!(await repo.claimRun(pool, tenantId, id, group))) {
+      throw new ConflictError("Un giro di questa sessione è già in corso, o la sessione non è nei giri", "CONSOLIDATION_RUN_BUSY");
+    }
+    void eseguiGiri(tenantId, s, group, giudice);
+    return { started: true, group };
+  },
+
+  /** Chiude il gruppo aperto quando nessuna proposta aspetta più una decisione, e apre il prossimo. */
+  async closeGroup(actor: ActorContext, id: string, group: ConsolidationGroup): Promise<TenantConsolidation> {
+    const tenantId = tenantDi(actor);
+    return withTransaction(async (client) => {
+      const s = await repo.getConsolidation(client, tenantId, id, true);
+      if (!s) throw new NotFoundError("Sessione di consolidamento non trovata", "CONSOLIDATION_NOT_FOUND");
+      if (s.status !== "GIRI" || s.openGroup !== group) {
+        throw new ConflictError("Il gruppo non è quello aperto", "CONSOLIDATION_GROUP_NOT_OPEN");
+      }
+      const aperte = await repo.pendingInGroup(client, id, group);
+      if (aperte > 0) {
+        throw new ConflictError(`${aperte} proposte aspettano ancora una decisione`, "CONSOLIDATION_GROUP_PENDING");
+      }
+      const prossimo = nextConsolidationGroup(group);
+      await repo.setStatus(client, id, prossimo ? "GIRI" : "IN_CONFERMA", prossimo);
+      return (await repo.getConsolidation(client, tenantId, id))!;
     });
   },
 

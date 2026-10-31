@@ -246,3 +246,5 @@ export const VocabularyEquivalenceSchema = z.object({
 export type VocabularyEquivalence = z.infer<typeof VocabularyEquivalenceSchema>;
 export const VocabularyListResponseSchema = z.object({ items: z.array(VocabularyEquivalenceSchema) });
 export const VocabularyDecideBodySchema = z.object({ status: z.enum(["APPROVATA", "RITIRATA"]) }).strict();
+
+export const ConsolidationRunStartedSchema = z.object({ started: z.literal(true), group: ConsolidationGroupSchema });

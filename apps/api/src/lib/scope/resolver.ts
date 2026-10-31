@@ -27,15 +27,12 @@ import { recordScopeAccess, type ScopeAxis } from "./audit.js";
 export const HR_MANDATED_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
   "TENANT_ADMIN",
   "HRMS_MANAGER",
-  // ⚠ PEOPLE_MANAGER NON sta qui (correzione di sicurezza del 2026-10-31, difetto D-01
-  // dell'analisi delle interfacce). Il mandato K, R-6 (mig. 000432) ce lo aveva messo come
-  // «conseguenza applicata senza chiedere», e il risultato misurato in produzione era che
-  // il ruolo leggeva retribuzioni e valutazioni di tutto il tenant in chiaro, con risposte
-  // identiche byte per byte a TENANT_ADMIN. I20 (CLAUDE.md di progetto, ADR-0036) nomina
-  // come mandati HR solo TENANT_ADMIN e HRMS_MANAGER: cambiarlo richiede un ADR, non una
-  // riga in questo insieme. PEOPLE_MANAGER segue quindi l'asse organizzativo come ogni altro
-  // ruolo: se stesso, e la catena che dirige se dirige un'unità.
-  // La prova: test/unit/people-manager-mandato.unit.test.ts.
+  // Mandato K, R-6 (2026-09-19, mig. 000432): stesso perimetro organizzativo di
+  // TENANT_ADMIN/HRMS_MANAGER (I18, tutto il tenant) — i permessi RBAC restano
+  // piu' stretti (scrittura solo su nativo/ibrido, mai GDPR/avviamento/recruiting/
+  // tassonomia/whistleblowing), ma l'asse organizzativo non li distingue: dice
+  // SU CHI, non COSA (ADR-0036).
+  "PEOPLE_MANAGER",
 ]);
 
 /**

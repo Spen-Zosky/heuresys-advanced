@@ -70,8 +70,8 @@ export const ROLE_CODES = [
   // Mandato K, R-6 (2026-09-19): ruolo di cliente per la gestione operativa delle
   // persone — scrittura su tutte le tabelle NATIVE/IBRIDE di X-1 (obiettivi,
   // competenze, formazione, carriera, engagement, KPI, posizioni, organigramma) +
-  // lettura sulle tabelle IMPORTATE. NON e' un mandato HR tenant-wide: dal 2026-10-31
-  // (D-01) segue l'asse organizzativo, I20 resta a TENANT_ADMIN/HRMS_MANAGER. Elenco permessi rivisto a mano,
+  // lettura sulle tabelle IMPORTATE. Mandato HR tenant-wide (HR_MANDATED_ROLES),
+  // come TENANT_ADMIN/HRMS_MANAGER. Elenco permessi rivisto a mano,
   // esiti/R-6_permessi_people_manager.md (migration 000432).
   "PEOPLE_MANAGER",
   // Mandato K, R-6 sessione 2 (2026-09-19, passo 57): ruolo di cliente per il

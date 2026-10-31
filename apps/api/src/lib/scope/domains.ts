@@ -275,9 +275,9 @@ const TENANT_WIDE_MANDATES: ReadonlySet<string> = new Set([
  *
  * È un 403, non un 500 (2026-10-31, verifica della correzione D-01): fino a qui estendeva
  * `Error`, l'errorHandler non lo riconosceva e la risposta era INTERNAL_ERROR. Il caso è
- * diventato visibile quando PEOPLE_MANAGER ha smesso di essere un mandato HR: un people
- * manager che non dirige niente apriva /v1/analytics/compensation e riceveva 500. Nessun dato
- * usciva, ma «non hai perimetro su questa superficie» è un divieto, e va detto come tale.
+ * emerso provando su una copia un attore senza alcun dominio attivo: apriva
+ * /v1/analytics/compensation e riceveva 500. Nessun dato usciva, ma «non hai perimetro su
+ * questa superficie» è un divieto, e va detto come tale.
  */
 export class NoScopeTierError extends ForbiddenError {
   constructor(surface: string) {

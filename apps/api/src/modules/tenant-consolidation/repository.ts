@@ -30,6 +30,7 @@ interface RigaSessione {
   tenant_consolidation_open_group: string | null;
   tenant_consolidation_started_by: string | null;
   tenant_consolidation_started_at: Date;
+  tenant_consolidation_metadata: Record<string, unknown> | null;
 }
 
 function mappaSessione(r: RigaSessione): TenantConsolidation {
@@ -42,13 +43,15 @@ function mappaSessione(r: RigaSessione): TenantConsolidation {
     openGroup: r.tenant_consolidation_open_group as TenantConsolidation["openGroup"],
     startedByUserId: r.tenant_consolidation_started_by,
     startedAt: r.tenant_consolidation_started_at.toISOString(),
+    runningGroup: (r.tenant_consolidation_metadata?.["running_group"] ?? null) as TenantConsolidation["runningGroup"],
+    lastRun: (r.tenant_consolidation_metadata?.["last_run"] ?? null) as TenantConsolidation["lastRun"],
   };
 }
 
 const SESSIONE = `
   tenant_consolidation_id, tenant_consolidation_tenant_id, tenant_consolidation_variant_version_id,
   tenant_consolidation_trigger, tenant_consolidation_status, tenant_consolidation_open_group,
-  tenant_consolidation_started_by, tenant_consolidation_started_at`;
+  tenant_consolidation_started_by, tenant_consolidation_started_at, tenant_consolidation_metadata`;
 
 export async function listConsolidations(q: DbConnector, tenantId: string): Promise<TenantConsolidation[]> {
   const { rows } = await q.query<RigaSessione>(
@@ -84,6 +87,20 @@ export async function variantVersionExists(q: DbConnector, id: string): Promise<
   return rows.length > 0;
 }
 
+/** La versione del prototipo in vigore per il tenant: quella dell'attivazione ACTIVE (000463). */
+export async function activeVariantVersion(q: DbConnector, tenantId: string): Promise<string | null> {
+  const { rows } = await q.query<{ id: string }>(
+    `SELECT blueprint_activation_variant_version_id AS id
+       FROM sys.sys_blueprint_activations
+      WHERE blueprint_activation_tenant_id = $1 AND blueprint_activation_status = 'ACTIVE'
+        AND blueprint_activation_variant_version_id IS NOT NULL
+      ORDER BY blueprint_activation_effective_from DESC
+      LIMIT 1`,
+    [tenantId],
+  );
+  return rows[0]?.id ?? null;
+}
+
 /**
  * Apre una sessione. L'indice unico parziale della 000464 vieta due sessioni aperte per lo
  * stesso tenant: il conflitto torna `null` e il servizio lo traduce in 409.
@@ -91,7 +108,7 @@ export async function variantVersionExists(q: DbConnector, id: string): Promise<
 export async function createConsolidation(
   q: DbConnector,
   tenantId: string,
-  v: { variantVersionId: string; trigger: string; userId: string; openGroup: ConsolidationGroup },
+  v: { variantVersionId: string; trigger: string; userId: string | null; openGroup: ConsolidationGroup },
 ): Promise<TenantConsolidation | null> {
   const { rows } = await q.query<RigaSessione>(
     `INSERT INTO sys.sys_tenant_consolidations
@@ -154,6 +171,8 @@ function mappaProposta(r: RigaProposta): ConsolidationProposal {
     adoptedInWorkingCopy: r.tenant_consolidation_proposal_adopted,
     dependsOn: r.tenant_consolidation_proposal_depends_on,
     decision: r.decision_value as Decision | null,
+    tenantItems: [],
+    prototypeItems: [],
   };
 }
 

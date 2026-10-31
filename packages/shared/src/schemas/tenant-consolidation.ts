@@ -63,6 +63,19 @@ export const DecisionSchema = z.enum(DECISION_VALUES);
 export type Decision = z.infer<typeof DecisionSchema>;
 
 /**
+ * Quali decisioni ammette ogni esito: una lacuna non si «conferma», si adotta o no. Sta qui e
+ * non nel servizio perché la pagina mostra gli stessi bottoni che la rotta accetta.
+ */
+export const ALLOWED_DECISIONS: Readonly<Record<ProposalOutcome, readonly Decision[]>> = {
+  CORRISPONDENZA: ["CONFERMATA", "RIFIUTATA"],
+  LACUNA: ["ADOTTATA", "NON_ADOTTATA"],
+  PERSONALIZZAZIONE: ["PERSONALIZZAZIONE", "RIFIUTATA"],
+};
+
+/** La soglia degli abbinamenti certi che si confermano a gruppi (specifica R-5, valore iniziale). */
+export const CONSOLIDATION_CERTAIN_THRESHOLD = 90;
+
+/**
  * La forma di una corrispondenza (specifica §5). `NORMALIZZATA` è la predefinita: nome e codice
  * restano del tenant, il prototipo porta ciò che manca. `NOME_PROTOTIPO` solo su richiesta.
  */
@@ -155,6 +168,20 @@ export function batchCarriesPersonKeys(batch: unknown): boolean {
 
 /* ── Le forme delle rotte ─────────────────────────────────────────────────────────────── */
 
+export const ConsolidationLastRunSchema = z.object({
+  group: ConsolidationGroupSchema,
+  ok: z.boolean(),
+  error: z.string().optional(),
+  proposals: z.number().int().optional(),
+  rounds: z.number().int().optional(),
+  ms: z.number().int().optional(),
+});
+export type ConsolidationLastRun = z.infer<typeof ConsolidationLastRunSchema>;
+
+/** Una voce di una proposta con il suo nome, perché chi decide legge nomi e non chiavi. */
+export const ConsolidationItemRefSchema = z.object({ key: z.string(), name: z.string().nullable() });
+export type ConsolidationItemRef = z.infer<typeof ConsolidationItemRefSchema>;
+
 export const TenantConsolidationSchema = z.object({
   consolidationId: z.uuid(),
   tenantId: z.uuid(),
@@ -164,6 +191,10 @@ export const TenantConsolidationSchema = z.object({
   openGroup: ConsolidationGroupSchema.nullable(),
   startedByUserId: z.uuid().nullable(),
   startedAt: z.iso.datetime(),
+  /** Il gruppo i cui giri sono in corso adesso, o `null`: la pagina lo legge per non rilanciarli. */
+  runningGroup: ConsolidationGroupSchema.nullable(),
+  /** L'esito dell'ultimo giro, buono o no, come lo ha scritto il motore. */
+  lastRun: ConsolidationLastRunSchema.nullable(),
 });
 export type TenantConsolidation = z.infer<typeof TenantConsolidationSchema>;
 
@@ -182,11 +213,15 @@ export const ConsolidationProposalSchema = z.object({
   dependsOn: z.array(z.uuid()),
   /** L'ultima decisione valida, se c'è. */
   decision: DecisionSchema.nullable(),
+  /** Le voci delle due parti con il loro nome; `name` nullo se la voce non c'è più. */
+  tenantItems: z.array(ConsolidationItemRefSchema),
+  prototypeItems: z.array(ConsolidationItemRefSchema),
 });
 export type ConsolidationProposal = z.infer<typeof ConsolidationProposalSchema>;
 
 export const StartConsolidationBodySchema = z.object({
-  variantVersionId: z.uuid(),
+  /** Se manca, la versione del prototipo attiva per il tenant (`sys_blueprint_activations`). */
+  variantVersionId: z.uuid().optional(),
   trigger: ConsolidationTriggerSchema,
 });
 export type StartConsolidationBody = z.infer<typeof StartConsolidationBodySchema>;

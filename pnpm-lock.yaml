@@ -145,8 +145,8 @@ importers:
         specifier: 7.0.0
         version: 7.0.0(@fastify/swagger@9.9.2)(fastify@5.12.6)(openapi-types@12.1.3)(zod@4.6.7)
       nodemailer:
-        specifier: ^9.0.6
-        version: 9.1.1
+        specifier: ^10.1.4
+        version: 10.1.4
       otpauth:
         specifier: ^9.5.2
         version: 9.5.2
@@ -3027,8 +3027,8 @@ packages:
   bn.js@4.12.3:
     resolution: {integrity: sha512-fGTi3gxV/23FTYdAoUtLYp6qySe2KE3teyZitipKNRuVYcBkoP/bB3guXN/XVKUe9mxCHXnc9C4ocyz8OmgN0g==}
 
-  body-parser@2.3.0:
-    resolution: {integrity: sha512-2cGmJupaNgg+QUwVLAucDuWuoMZ6EX9iHDRswZ5lsNYEmwPaRknMPCLZz07yTzVq/83p4o/wzbDZbBrTvGGTIw==}
+  body-parser@2.4.0:
+    resolution: {integrity: sha512-Ifk1KcLrxaGt1occQagQNFNNOqRt1LFuehEnHHzB8Z6cRgIxRU1TBaiIsUiCdA+gy5PL7Y1IX31DNKkRmxtXjQ==}
     engines: {node: '>=18'}
 
   brace-expansion@1.1.18:
@@ -3577,8 +3577,8 @@ packages:
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
 
-  encodeurl@2.0.0:
-    resolution: {integrity: sha512-Q0n9HRi4m6JuGIV1eFlmvJB7ZEVxu93IrMyiMsGC0lrMJMWzRgx6WGquyfQgZVb31vhGgXnfmPNNXmxnOkRBrg==}
+  encodeurl@2.0.1:
+    resolution: {integrity: sha512-Ev/hIyePLZtpL98x562lvPtenrUfGr0lfaf44HFZ+hDEwso7ccV9QAZrEVLg0hxNAzygaAFxy2dYaAKKM0G06A==}
     engines: {node: '>= 0.8'}
 
   end-of-stream@1.4.5:
@@ -3747,6 +3747,7 @@ packages:
   eslint@9.39.4:
     resolution: {integrity: sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -3803,8 +3804,8 @@ packages:
     resolution: {integrity: sha512-knvyeauYhqjOYvQ66MznSMs83wmHrCycNEN6Ao+2AeYEfxUIkuiVxdEa1qlGEPK+We3n0THiDciYSsCcgW/DoA==}
     engines: {node: '>=12.0.0'}
 
-  express-rate-limit@8.7.1:
-    resolution: {integrity: sha512-2FXbqkygil3mZiXzEtM0IjE/UBmBNot0J1GEVrJT4JbrvwOSoEtqtO+wHbiMQELWe1eNvHoYRg2dkjOid+6JkA==}
+  express-rate-limit@8.7.2:
+    resolution: {integrity: sha512-U1ScocxDD9WI09LaBVypvNkOtNR5yWAmZLkuKJdAzIchA4YKFYF6GT5IKER7epG58oXtjvGlV0/6ii0F83EyZg==}
     engines: {node: '>= 16'}
     peerDependencies:
       express: '>= 4.11'
@@ -4156,8 +4157,8 @@ packages:
   hls.js@1.6.16:
     resolution: {integrity: sha512-VSIRpLfRwlAAdGL4wiTucx2ScRipo0ed1FBatWkyt832jC4CReKstga6yIhYVwGu9LOBjuX9wzmRMeQdBJtzEA==}
 
-  hono@4.13.13:
-    resolution: {integrity: sha512-CQ46U0ZkAGmbT/4UxdzzGJpacP2IeKgY4a5/tOI9AABbpOMfK739wfDXmv1usCk+3RkKj1hQy4/fjhiwa2xlrA==}
+  hono@4.13.14:
+    resolution: {integrity: sha512-yhRLQ21U6qa9Hsu2N7Qcbh8tE+WKEcoErjIo56LeSGiGXGp9sA7UpE86Ui9uexb61KakiGwuHMn2QdV7w6i6kQ==}
     engines: {node: '>=16.9.0'}
 
   html-parse-stringify@4.0.1:
@@ -4243,6 +4244,10 @@ packages:
 
   ip-address@10.7.4:
     resolution: {integrity: sha512-DWBMKyeM25D70nrIiTkgQth59/G+naKOTep6huF9j+GmeK3DMD60Zvxg5d5qQnz+38AHgou6ean2LECX+lrKDg==}
+    engines: {node: '>= 12'}
+
+  ip-address@10.7.5:
+    resolution: {integrity: sha512-t2v0rkILYv9WXmSL7TpAaU3HXgaFYOPUcH3QHgwQ++gpJuH3bqyMy4Fvt/DJCTKwzH3Cf+bAp5W/mFL39KPLzA==}
     engines: {node: '>= 12'}
 
   ipaddr.js@1.9.1:
@@ -4408,8 +4413,8 @@ packages:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
 
-  jose@6.2.12:
-    resolution: {integrity: sha512-9NiFmJEex0sy2Dk58j2UGBSHgUs2ypF9eZSu4L6vjOX3Dp96Sw1F3uL+H+D1sx02jZZdzUT0HgvCy59CuvXcWw==}
+  jose@6.2.14:
+    resolution: {integrity: sha512-3JasLuki1NRLQvY4wCoC37KZk4qxoBx2k2aFqLxT84IezqW0bkJKnNtxnZj/Fu1xsQivoc/lytxaRHJoGLjJ1A==}
 
   joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
@@ -5067,9 +5072,9 @@ packages:
     resolution: {integrity: sha512-A0Eq+qVDQI97IbAD6g/HriIuv256el9N8EwF4+xqJ49pwrdRYpdCSmLk0sO4I3fnS6hpYE5v22B73Bk+WArEoQ==}
     engines: {node: '>=18'}
 
-  nodemailer@9.1.1:
-    resolution: {integrity: sha512-izw9mVKFix6YSnC9eLgV6g1opl9DUlRio9ZNcq+Wu9Ujn2UwF+8Nl0B8nz22kEC+CTZCvinkxwJ0DeFbb6NwcQ==}
-    engines: {node: '>=6.0.0'}
+  nodemailer@10.1.4:
+    resolution: {integrity: sha512-EsMnOR2oRv4LGnWvHgcVYkkQ4O2j8KO4WTw6l+PHR4sOXo8SAgIraxtEnGDmotjbhv0hDsu3IuDIFZm8iXwO4A==}
+    engines: {node: '>=20.0.0'}
 
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
@@ -5118,8 +5123,8 @@ packages:
     resolution: {integrity: sha512-0eJJY6hXLGf1udHwfNftBqH+g73EU4B504nZeKpz1sYRKafAghwxEJunB2O7rDZkL4PGfsMVnTXZ2EjibbqcsA==}
     engines: {node: '>=14.0.0'}
 
-  on-finished@2.4.1:
-    resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
+  on-finished@2.4.2:
+    resolution: {integrity: sha512-ATWUv387i+nLD49EiDoOft5scf32Vsdz3ktrQJG9bi7jRFmaXTssvyvj1EmeKVVgvesbqUtvQQvaS2TpTukAZQ==}
     engines: {node: '>= 0.8'}
 
   once@1.4.0:
@@ -5391,6 +5396,7 @@ packages:
   prom-client@15.1.3:
     resolution: {integrity: sha512-6ZiOBfCywsD4k1BN9IX0uZhF+tJkV8q8llP64G5Hajs4JOeVLPCwpPVcpXy3BwYiUGgyJzsJJQeOIv7+hDSq8g==}
     engines: {node: ^16 || ^18 || >=20}
+    deprecated: prom-client has been replaced by @prometheus-io/client
 
   promise-worker-transferable@1.0.4:
     resolution: {integrity: sha512-bN+0ehEnrXfxV2ZQvU2PetO0n4gqBD4ulq3MI1WOPLgr7/Mg9yRQkX5+0v1vagr74ZTsl7XtzlaYDo2EuCeYJw==}
@@ -5426,8 +5432,8 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
-  qs@6.16.1:
-    resolution: {integrity: sha512-5Px6J7rfHBAGUhNQ3es4YzcOdBBw0SDcVtThJml4RdnKw4tKs2epA0kPZ+K8X+WiHktT93RHVcQ/3ym5aTCgtg==}
+  qs@6.17.1:
+    resolution: {integrity: sha512-jd3COkaKVgGUW+ZHyEHCG9bH7RoaaiWuMgzsIBjUMVjLAaWGWpoUAVwljVvBHxRu/2qEHnadLGZrkutYUBPQJA==}
     engines: {node: '>=0.6'}
 
   queue-microtask@1.2.3:
@@ -7236,9 +7242,9 @@ snapshots:
 
   '@hexagon/base64@1.1.28': {}
 
-  '@hono/node-server@2.1.5(hono@4.13.13)':
+  '@hono/node-server@2.1.5(hono@4.13.14)':
     dependencies:
-      hono: 4.13.13
+      hono: 4.13.14
 
   '@hookform/resolvers@5.9.1(@standard-schema/spec@1.1.0)(ajv@8.20.0)(react-hook-form@7.87.0(react@19.2.8))(zod@3.25.76)':
     dependencies:
@@ -7422,7 +7428,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.29.0(zod@4.6.7)':
     dependencies:
-      '@hono/node-server': 2.1.5(hono@4.13.13)
+      '@hono/node-server': 2.1.5(hono@4.13.14)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
@@ -7431,9 +7437,9 @@ snapshots:
       eventsource: 3.0.7
       eventsource-parser: 3.1.1
       express: 5.3.0
-      express-rate-limit: 8.7.1(express@5.3.0)
-      hono: 4.13.13
-      jose: 6.2.12
+      express-rate-limit: 8.7.2(express@5.3.0)
+      hono: 4.13.14
+      jose: 6.2.14
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
       raw-body: 3.0.2
@@ -9353,15 +9359,15 @@ snapshots:
 
   bn.js@4.12.3: {}
 
-  body-parser@2.3.0:
+  body-parser@2.4.0:
     dependencies:
       bytes: 3.1.2
       content-type: 2.1.0
       debug: 4.4.3
       http-errors: 2.0.1
       iconv-lite: 0.7.3
-      on-finished: 2.4.1
-      qs: 6.16.1
+      on-finished: 2.4.2
+      qs: 6.17.1
       raw-body: 3.0.2
       type-is: 2.1.0
     transitivePeerDependencies:
@@ -9905,7 +9911,7 @@ snapshots:
 
   emoji-regex@9.2.2: {}
 
-  encodeurl@2.0.0: {}
+  encodeurl@2.0.1: {}
 
   end-of-stream@1.4.5:
     dependencies:
@@ -10299,25 +10305,25 @@ snapshots:
 
   expect-type@1.3.0: {}
 
-  express-rate-limit@8.7.1(express@5.3.0):
+  express-rate-limit@8.7.2(express@5.3.0):
     dependencies:
       debug: 4.4.3
       express: 5.3.0
-      ip-address: 10.7.4
+      ip-address: 10.7.5
     transitivePeerDependencies:
       - supports-color
 
   express@5.3.0:
     dependencies:
       accepts: 2.0.0
-      body-parser: 2.3.0
+      body-parser: 2.4.0
       content-disposition: 2.0.1
       content-type: 2.1.0
       cookie: 0.7.2
       cookie-signature: 1.2.2
       debug: 4.4.3
       depd: 2.0.0
-      encodeurl: 2.0.0
+      encodeurl: 2.0.1
       escape-html: 1.0.3
       etag: 1.8.1
       finalhandler: 2.1.1
@@ -10325,11 +10331,11 @@ snapshots:
       http-errors: 2.0.1
       merge-descriptors: 2.0.0
       mime-types: 3.0.2
-      on-finished: 2.4.1
+      on-finished: 2.4.2
       once: 1.4.0
       parseurl: 1.3.3
       proxy-addr: 2.0.8
-      qs: 6.16.1
+      qs: 6.17.1
       range-parser: 1.3.0
       router: 2.2.0
       send: 1.2.1
@@ -10468,9 +10474,9 @@ snapshots:
   finalhandler@2.1.1:
     dependencies:
       debug: 4.4.3
-      encodeurl: 2.0.0
+      encodeurl: 2.0.1
       escape-html: 1.0.3
-      on-finished: 2.4.1
+      on-finished: 2.4.2
       parseurl: 1.3.3
       statuses: 2.0.2
     transitivePeerDependencies:
@@ -10783,7 +10789,7 @@ snapshots:
 
   hls.js@1.6.16: {}
 
-  hono@4.13.13: {}
+  hono@4.13.14: {}
 
   html-parse-stringify@4.0.1: {}
 
@@ -10852,6 +10858,8 @@ snapshots:
   internmap@2.0.3: {}
 
   ip-address@10.7.4: {}
+
+  ip-address@10.7.5: {}
 
   ipaddr.js@1.9.1: {}
 
@@ -11016,7 +11024,7 @@ snapshots:
 
   jiti@2.7.0: {}
 
-  jose@6.2.12: {}
+  jose@6.2.14: {}
 
   joycon@3.1.1: {}
 
@@ -11837,7 +11845,7 @@ snapshots:
 
   node-releases@2.0.62: {}
 
-  nodemailer@9.1.1: {}
+  nodemailer@10.1.4: {}
 
   normalize-path@3.0.0: {}
 
@@ -11889,7 +11897,7 @@ snapshots:
 
   on-exit-leak-free@2.1.2: {}
 
-  on-finished@2.4.1:
+  on-finished@2.4.2:
     dependencies:
       ee-first: 1.1.1
 
@@ -12181,7 +12189,7 @@ snapshots:
       pngjs: 5.0.0
       yargs: 15.4.1
 
-  qs@6.16.1:
+  qs@6.17.1:
     dependencies:
       es-define-property: 1.0.1
       side-channel: 1.1.1
@@ -12639,14 +12647,14 @@ snapshots:
   send@1.2.1:
     dependencies:
       debug: 4.4.3
-      encodeurl: 2.0.0
+      encodeurl: 2.0.1
       escape-html: 1.0.3
       etag: 1.8.1
       fresh: 2.0.0
       http-errors: 2.0.1
       mime-types: 3.0.2
       ms: 2.1.3
-      on-finished: 2.4.1
+      on-finished: 2.4.2
       range-parser: 1.3.0
       statuses: 2.0.2
     transitivePeerDependencies:
@@ -12654,7 +12662,7 @@ snapshots:
 
   serve-static@2.2.1:
     dependencies:
-      encodeurl: 2.0.0
+      encodeurl: 2.0.1
       escape-html: 1.0.3
       parseurl: 1.3.3
       send: 1.2.1

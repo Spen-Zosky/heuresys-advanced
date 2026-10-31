@@ -108,7 +108,7 @@ export async function activeVariantVersion(q: DbConnector, tenantId: string): Pr
 export async function createConsolidation(
   q: DbConnector,
   tenantId: string,
-  v: { variantVersionId: string; trigger: string; userId: string; openGroup: ConsolidationGroup },
+  v: { variantVersionId: string; trigger: string; userId: string | null; openGroup: ConsolidationGroup },
 ): Promise<TenantConsolidation | null> {
   const { rows } = await q.query<RigaSessione>(
     `INSERT INTO sys.sys_tenant_consolidations

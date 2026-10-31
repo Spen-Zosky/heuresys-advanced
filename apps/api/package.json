@@ -22,7 +22,8 @@
     "capability:recompute": "tsx src/modules/capability-composition/recompute-cli.ts",
     "capability-maturity:recompute": "tsx src/modules/capability-maturity/recompute-cli.ts",
     "notifications:digest": "tsx src/modules/notifications/digest-cli.ts",
-    "approvals:sla": "tsx src/modules/approvals/sla-cli.ts"
+    "approvals:sla": "tsx src/modules/approvals/sla-cli.ts",
+    "consolidation:run": "tsx src/modules/tenant-consolidation/giri-cli.ts"
   },
   "dependencies": {
     "@fastify/cookie": "11.1.3",

@@ -25,6 +25,16 @@
 --
 -- NESSUN RITIRO. Due ruoli nuovi, nessuna riga esistente tocca. G-D2 resta vuota.
 --
+-- EMENDAMENTO 2026-10-31 (analisi interfacce, D-06/D-15). La pulizia del passo 4 toglieva a
+-- questi due ruoli anche il pavimento ESS di I17 — i 9 permessi `:self` che OGNI ruolo ha
+-- (000053, 000054, 000089, 000101, 000135, 000186, 000202 li concedono a tutti i ruoli, e
+-- 000432 lo scrive: «ogni ruolo li ha»). La catena si riapplica per intero: quei file li
+-- davano, questo li toglieva subito dopo. Effetto misurato in produzione il 2026-10-31:
+-- GET /v1/me/preferences in 403 per entrambi, quindi nessuna pagina apribile, e la voce
+-- «Il mio team» offerta con un 403 dietro. Si emenda il file che toglie (ADR-0035): il
+-- pavimento si concede qui (3 bis) ed entra nell'elenco di ciò che la pulizia conserva.
+-- Restano esclusi i permessi di dominio non previsti dal mandato (offer:manage ecc.).
+--
 -- Effetto per dove_siamo.py:
 --   select 1 from sys.sys_auth_roles where auth_role_code='RECRUITER' and retired_at is null
 --
@@ -69,6 +79,19 @@ SELECT r.auth_role_id, p.auth_permission_id
    AND p.auth_permission_code IN ('requisition:read', 'candidate:read', 'interview:feedback')
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
+-- 3 bis. Il pavimento ESS di I17 (emendamento 2026-10-31): ogni ruolo gestisce i propri dati.
+INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
+SELECT r.auth_role_id, p.auth_permission_id
+  FROM sys.sys_auth_roles r
+  CROSS JOIN sys.sys_auth_permissions p
+ WHERE r.auth_role_code IN ('RECRUITER', 'HIRING_MANAGER')
+   AND p.auth_permission_code IN (
+     'consent:manage:self', 'gdpr:export:self', 'leave:request:self',
+     'me:content:read', 'me:preferences:read', 'me:preferences:update',
+     'me:sessions:manage', 'surveys:respond:self', 'team:read:self'
+   )
+ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
+
 -- 4. Self-healing: nessun altro permesso finisce su questi due ruoli (nessun blanket li
 --    tocca, ma la catena si riapplica per intero: una riga in piu' qui la toglierebbe
 --    subito, non fra un anno).
@@ -80,7 +103,10 @@ DELETE FROM sys.sys_auth_role_permissions rp
    AND p.auth_permission_code NOT IN (
      'requisition:read', 'requisition:manage',
      'candidate:read', 'candidate:write',
-     'interview:feedback', 'offer:manage'
+     'interview:feedback', 'offer:manage',
+     'consent:manage:self', 'gdpr:export:self', 'leave:request:self',
+     'me:content:read', 'me:preferences:read', 'me:preferences:update',
+     'me:sessions:manage', 'surveys:respond:self', 'team:read:self'
    );
 
 DELETE FROM sys.sys_auth_role_permissions rp
@@ -88,7 +114,12 @@ DELETE FROM sys.sys_auth_role_permissions rp
  WHERE rp.auth_role_id = r.auth_role_id
    AND rp.auth_permission_id = p.auth_permission_id
    AND r.auth_role_code = 'HIRING_MANAGER'
-   AND p.auth_permission_code NOT IN ('requisition:read', 'candidate:read', 'interview:feedback');
+   AND p.auth_permission_code NOT IN (
+     'requisition:read', 'candidate:read', 'interview:feedback',
+     'consent:manage:self', 'gdpr:export:self', 'leave:request:self',
+     'me:content:read', 'me:preferences:read', 'me:preferences:update',
+     'me:sessions:manage', 'surveys:respond:self', 'team:read:self'
+   );
 
 -- 5. Le traduzioni inglesi (guardia 000255: copertura EN totale, nome E descrizione).
 INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
@@ -107,7 +138,7 @@ ON CONFLICT DO NOTHING;
 -- 6. Post-condizione: la migrazione fallisce se qualcosa non torna.
 DO $$
 DECLARE
-  n_recruiter int; n_hm int; n_hm_vietati int; n_gap int;
+  n_recruiter int; n_hm int; n_hm_vietati int; n_gap int; n_pavimento int;
 BEGIN
   SELECT count(*) INTO n_recruiter
     FROM sys.sys_auth_role_permissions rp
@@ -145,6 +176,21 @@ BEGIN
     RAISE EXCEPTION '000428: HIRING_MANAGER non deve avere requisition:manage/candidate:write/offer:manage, ne ha %', n_hm_vietati;
   END IF;
 
+  -- Il pavimento ESS (emendamento 2026-10-31): 9 permessi su ciascuno dei due ruoli.
+  SELECT count(*) INTO n_pavimento
+    FROM sys.sys_auth_role_permissions rp
+    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+    JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+   WHERE r.auth_role_code IN ('RECRUITER', 'HIRING_MANAGER') AND rp.revoked_at IS NULL
+     AND p.auth_permission_code IN (
+       'consent:manage:self', 'gdpr:export:self', 'leave:request:self',
+     'me:content:read', 'me:preferences:read', 'me:preferences:update',
+     'me:sessions:manage', 'surveys:respond:self', 'team:read:self'
+     );
+  IF n_pavimento <> 18 THEN
+    RAISE EXCEPTION '000428: RECRUITER e HIRING_MANAGER devono avere i 9 permessi del pavimento ESS ciascuno (18), ne hanno %', n_pavimento;
+  END IF;
+
   IF EXISTS (SELECT 1 FROM sys.v_permessi_ritirati_a_ruoli_preesistenti) THEN
     RAISE EXCEPTION '000428: G-D2 non e'' vuota dopo una migrazione senza ritiri previsti';
   END IF;
@@ -154,7 +200,7 @@ BEGIN
     RAISE EXCEPTION '000428: copertura EN globale non a zero dopo questa migrazione (guardia 000255), % mancanti', n_gap;
   END IF;
 
-  RAISE NOTICE '000428: RECRUITER (6 permessi) e HIRING_MANAGER (3 permessi, niente offer:manage/requisition:manage/candidate:write) creati; G-D2 a zero; copertura EN completa.';
+  RAISE NOTICE '000428: RECRUITER (6 permessi) e HIRING_MANAGER (3 permessi, niente offer:manage/requisition:manage/candidate:write) creati, piu'' il pavimento ESS (9 ciascuno); G-D2 a zero; copertura EN completa.';
 END $$;
 
 COMMIT;

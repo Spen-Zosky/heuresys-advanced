@@ -174,6 +174,11 @@ export const RESOURCE_MULTICLASSE: Readonly<Record<string, ResourceMulticlasse>>
  */
 export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = {
   blueprint: "modelli organizzativi: struttura, non persone",
+  // AC-10 (000466): il registro del consolidamento confronta voci di struttura del tenant con
+  // il prototipo — unità, posizioni, competenze, processi, indicatori — per nome e codice, e le
+  // sorgenti hanno un elenco CHIUSO di colonne senza identificativi di persona (specifica §7,
+  // `modules/tenant-consolidation/sorgenti.ts`). Chi decide è un attore, non un soggetto.
+  consolidation: "consolidamento col prototipo: voci di struttura, mai persone",
   tenant_blueprint: "il fascicolo di configurazione di un tenant",
   bpm_process: "definizioni di processo",
   job_role: "catalogo delle mansioni — la mansione è un posto, non chi lo occupa",
@@ -189,7 +194,11 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
   // candidato. Persone esterne all'organico, come `leads`: fuori dalla tassonomia dei dipendenti,
   // e `check_concetti_agente.py` le ESCLUDE dall'agente per nome. Separare il permesso e' di #54.
   "job-requisition": "richiesta di assunzione: una posizione da coprire, non chi la coprira'",
+  // `requisition` e `role_matrix` (2026-10-31, analisi interfacce D-07 e INC-10): le voci
+  // Recruiting e Ruoli dichiarano ora il permesso che le loro rotte usano davvero.
+  requisition: "richiesta di assunzione: una posizione da coprire, non chi la coprira' (permesso nuovo di 000427)",
   role: "ruoli RBAC: il permesso, non il titolare",
+  role_matrix: "matrice ruoli x permessi: configurazione dell'accesso, non chi lo detiene",
   mfa_policy: "una politica di tenant è configurazione (misurato in 000315: dichiararla CREDENTIAL toglieva la pagina ai due TENANT_ADMIN reali)",
   tenant: "configurazione del tenant e salute di sistema",
   seed_acquisition: "corse tecniche di acquisizione",

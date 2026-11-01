@@ -256,6 +256,87 @@
       }
     }
   },
+  "consolidation": {
+    "title": "Consolidation with the prototype",
+    "description": "The agent compares your company's data with the prototype, one group at a time, and proposes. You decide: nothing changes in the data until a proposal is confirmed.",
+    "roles": {
+      "DIRETTORE": "Deciding as HR Director",
+      "DELEGATO": "Deciding as delegate"
+    },
+    "loadError": "The consolidation could not be read. Try again shortly.",
+    "emptyTitle": "No open consolidation",
+    "emptyDescription": "Start a consolidation to compare your company with its active prototype. It begins with the organization.",
+    "start": "Start the consolidation",
+    "session": "Consolidation of {{date}}",
+    "statuses": {
+      "GIRI": "Rounds in progress",
+      "IN_CONFERMA": "Awaiting confirmation",
+      "APPLICATA": "Applied",
+      "CHIUSA": "Closed"
+    },
+    "running": "The agent is working on {{group}}",
+    "groups": {
+      "ORGANIZATION": "Organization",
+      "POSITIONS_ROLES": "Positions and roles",
+      "SKILLS": "Skills",
+      "PROCESSES": "Processes",
+      "INDICATORS_GOALS": "Indicators and goals"
+    },
+    "open": "Open",
+    "done": "Done",
+    "waiting": "Waiting",
+    "pending": "{{count}} to decide",
+    "lastRunOk": "Last run on {{group}}: {{proposals}} proposals in {{rounds}} rounds, {{seconds}} s.",
+    "lastRunFailed": "The last run on {{group}} failed: {{error}}",
+    "run": "Run the rounds on {{group}}",
+    "confirmCertain": "Confirm the certain matches: {{count}} (confidence ≥ {{threshold}})",
+    "closeGroup": "Close the group and move to the next",
+    "proposalsTitle": "Proposals: {{group}}",
+    "proposalsDescription": "One row per item. Confidence goes from 0 to 100; the reason is the agent's.",
+    "count": "{{count}} proposals",
+    "proposalsEmptyTitle": "No proposals in this group",
+    "proposalsEmptyDescription": "Proposals appear once the agent has run the group's rounds.",
+    "caption": "Consolidation agent proposals for the selected group",
+    "none": "—",
+    "cols": {
+      "tenant": "Your company",
+      "prototype": "Prototype",
+      "outcome": "Outcome",
+      "confidence": "Confidence",
+      "reason": "Reason",
+      "decision": "Decision"
+    },
+    "outcomes": {
+      "CORRISPONDENZA": "Match",
+      "LACUNA": "Gap",
+      "PERSONALIZZAZIONE": "Customization"
+    },
+    "decisions": {
+      "CONFERMATA": "Confirmed",
+      "RIFIUTATA": "Rejected",
+      "ADOTTATA": "Adopted",
+      "NON_ADOTTATA": "Not adopted",
+      "PERSONALIZZAZIONE": "Kept as own"
+    },
+    "actions": {
+      "CONFERMATA": "Confirm",
+      "RIFIUTATA": "Reject",
+      "ADOTTATA": "Adopt",
+      "NON_ADOTTATA": "Do not adopt",
+      "PERSONALIZZAZIONE": "Keep as own"
+    },
+    "errors": {
+      "generic": "The operation failed. Try again.",
+      "CONSOLIDATION_ALREADY_OPEN": "A consolidation is already open.",
+      "CONSOLIDATION_VERSION_INVALID": "Your company has no active prototype to compare with.",
+      "CONSOLIDATION_GROUP_NOT_OPEN": "Groups go in order: this is not the open one.",
+      "CONSOLIDATION_RUN_BUSY": "The agent is already working on this consolidation.",
+      "CONSOLIDATION_JUDGE_UNAVAILABLE": "The agent cannot be reached right now.",
+      "CONSOLIDATION_GROUP_PENDING": "Some proposals in this group still need a decision.",
+      "CONSOLIDATION_RUN_FAILED": "error during the run.",
+      "PERMISSION_DENIED": "You have no mandate for this decision."
+    }
+  },
   "gaps": {
     "title": "Gap analysis",
     "description": "Competency gaps by severity, across the whole tenant.",

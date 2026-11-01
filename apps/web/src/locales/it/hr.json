@@ -256,6 +256,87 @@
       }
     }
   },
+  "consolidation": {
+    "title": "Consolidamento con il prototipo",
+    "description": "L'agente confronta i dati della tua azienda con il prototipo, un gruppo alla volta, e propone. Decidi tu: niente cambia nei dati finché una proposta non è confermata.",
+    "roles": {
+      "DIRETTORE": "Decidi come Direttore HR",
+      "DELEGATO": "Decidi come delegato"
+    },
+    "loadError": "Non è stato possibile leggere il consolidamento. Riprova tra poco.",
+    "emptyTitle": "Nessun consolidamento aperto",
+    "emptyDescription": "Avvia un consolidamento per confrontare la tua azienda con il prototipo che ha attivo. Si comincia dall'organizzazione.",
+    "start": "Avvia il consolidamento",
+    "session": "Consolidamento del {{date}}",
+    "statuses": {
+      "GIRI": "Giri in corso",
+      "IN_CONFERMA": "In conferma",
+      "APPLICATA": "Applicata",
+      "CHIUSA": "Chiusa"
+    },
+    "running": "L'agente sta lavorando su {{group}}",
+    "groups": {
+      "ORGANIZATION": "Organizzazione",
+      "POSITIONS_ROLES": "Posizioni e ruoli",
+      "SKILLS": "Competenze",
+      "PROCESSES": "Processi",
+      "INDICATORS_GOALS": "Indicatori e obiettivi"
+    },
+    "open": "Aperto",
+    "done": "Concluso",
+    "waiting": "In attesa",
+    "pending": "{{count}} da decidere",
+    "lastRunOk": "Ultimo giro su {{group}}: {{proposals}} proposte in {{rounds}} giri, {{seconds}} s.",
+    "lastRunFailed": "L'ultimo giro su {{group}} non è riuscito: {{error}}",
+    "run": "Avvia i giri su {{group}}",
+    "confirmCertain": "Conferma gli abbinamenti certi: {{count}} (fiducia ≥ {{threshold}})",
+    "closeGroup": "Chiudi il gruppo e passa al successivo",
+    "proposalsTitle": "Proposte: {{group}}",
+    "proposalsDescription": "Una riga per voce. La fiducia va da 0 a 100; la motivazione è dell'agente.",
+    "count": "{{count}} proposte",
+    "proposalsEmptyTitle": "Nessuna proposta in questo gruppo",
+    "proposalsEmptyDescription": "Le proposte compaiono quando l'agente ha fatto i giri del gruppo.",
+    "caption": "Proposte dell'agente di consolidamento per il gruppo selezionato",
+    "none": "—",
+    "cols": {
+      "tenant": "La tua azienda",
+      "prototype": "Prototipo",
+      "outcome": "Esito",
+      "confidence": "Fiducia",
+      "reason": "Motivazione",
+      "decision": "Decisione"
+    },
+    "outcomes": {
+      "CORRISPONDENZA": "Corrispondenza",
+      "LACUNA": "Lacuna",
+      "PERSONALIZZAZIONE": "Personalizzazione"
+    },
+    "decisions": {
+      "CONFERMATA": "Confermata",
+      "RIFIUTATA": "Rifiutata",
+      "ADOTTATA": "Adottata",
+      "NON_ADOTTATA": "Non adottata",
+      "PERSONALIZZAZIONE": "Tenuta come propria"
+    },
+    "actions": {
+      "CONFERMATA": "Conferma",
+      "RIFIUTATA": "Rifiuta",
+      "ADOTTATA": "Adotta",
+      "NON_ADOTTATA": "Non adottare",
+      "PERSONALIZZAZIONE": "Tieni come propria"
+    },
+    "errors": {
+      "generic": "Operazione non riuscita. Riprova.",
+      "CONSOLIDATION_ALREADY_OPEN": "C'è già un consolidamento aperto.",
+      "CONSOLIDATION_VERSION_INVALID": "La tua azienda non ha un prototipo attivo da confrontare.",
+      "CONSOLIDATION_GROUP_NOT_OPEN": "I gruppi si fanno in ordine: questo non è quello aperto.",
+      "CONSOLIDATION_RUN_BUSY": "L'agente sta già lavorando su questo consolidamento.",
+      "CONSOLIDATION_JUDGE_UNAVAILABLE": "L'agente non è raggiungibile in questo momento.",
+      "CONSOLIDATION_GROUP_PENDING": "Ci sono ancora proposte da decidere in questo gruppo.",
+      "CONSOLIDATION_RUN_FAILED": "errore durante il giro.",
+      "PERMISSION_DENIED": "Non hai il mandato per questa decisione."
+    }
+  },
   "gaps": {
     "title": "Gap analysis",
     "description": "Gap di competenza per severità, sull'intero tenant.",

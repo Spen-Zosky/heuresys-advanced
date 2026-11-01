@@ -60,4 +60,4 @@ Write-Host "=== Restore complete ===" -ForegroundColor Green
 Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "  1. Try Path G: pnpm --filter '@heuresys/web' build (should pass with React overrides)" -ForegroundColor Yellow
 Write-Host "  2. If still fails with createContext error: run scripts/bisect-cw-b59-createctx.ps1" -ForegroundColor Yellow
-Write-Host "  3. If bisect inconclusive: split @heuresys/ui per docs/cw-b59-true-root-cause §6" -ForegroundColor Yellow
+Write-Host "  3. If bisect inconclusive: split @heuresys/ui per docs/archive/cw-b59-true-root-cause §6" -ForegroundColor Yellow

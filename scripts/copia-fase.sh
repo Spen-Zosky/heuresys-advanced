@@ -32,7 +32,8 @@
 #     e' attraversabile dall'utente postgres (stesso motivo di dr-drill.sh).
 #   - i segreti non si scrivono mai in chiaro fuori dal loro posto: su Drive passano da una
 #     pipe dentro gpg.
-#   - le copie piu' vecchie delle ultime due si SPOSTANO in ~/_da_eliminare/, non si cancellano.
+#   - le copie piu' vecchie delle ultime due, e una copia fallita a meta', si SPOSTANO in
+#     <repo>/_da_eliminare/<AAAAMMGG>_copie-fase/, non si cancellano.
 #
 # Esiti: 0 fatto e verde · 1 rosso (la copia non vale come punto di ritorno) · 2 uso sbagliato
 #        · 3 precondizione mancante (strumento, database, chiave)
@@ -64,6 +65,7 @@ PSQL=(sudo -n -u postgres psql -X -p "$PGPORT_COPIA" -v ON_ERROR_STOP=1 -Atq)
 say() { printf '[copia-fase] %s\n' "$*"; }
 err() { printf '[copia-fase] %s\n' "$*" >&2; }
 ora() { TZ=Europe/Rome date '+%Y-%m-%d %H:%M:%S %Z'; }
+cestino() { printf '%s' "$REPO_DIR/_da_eliminare/$(TZ=Europe/Rome date +%Y%m%d)_copie-fase"; }
 uso() { sed -n '11,27p' "$0" | sed 's/^# \{0,3\}//' >&2; exit 2; }
 
 # Le query di conteggio e di confronto, uguali per la copia e per la prova: se divergessero,
@@ -97,6 +99,9 @@ cmd_copia() {
   local d="$COPIE_DIR/$nome"
   [ -e "$d" ] && { err "la copia $d esiste gia': non la sovrascrivo"; exit 2; }
   mkdir -p "$d/config"
+  # una copia fallita a meta' non resta fra le copie (sembrerebbe buona): si sposta da parte
+  COPIA_IN_CORSO="$d"
+  trap 'if [ -n "${COPIA_IN_CORSO:-}" ] && [ -d "$COPIA_IN_CORSO" ]; then c="$(cestino)"; mkdir -p "$c"; mv "$COPIA_IN_CORSO" "$c/$(basename "$COPIA_IN_CORSO")_fallita_$(date +%H%M%S)"; err "copia fallita: spostata in $c"; fi' EXIT
   local t0; t0=$(date +%s)
 
   # --- 1. codice: il commit IN PRODUZIONE, non la punta del ramo
@@ -104,7 +109,12 @@ cmd_copia() {
   printf '%s' "$sha" | grep -qE '^[0-9a-f]{40}$' || { err "LAST_GOOD_SHA assente o non valido: non so quale codice e' in produzione"; rm -rf "$d"; exit 3; }
   local tag="fase-${nome}"
   if [ "${COPIE_NO_TAG:-0}" != 1 ]; then
-    git -C "$REPO_DIR" tag -a "$tag" "$sha" -m "Copia ripristinabile di fine fase: $fase (ADR-0052)"
+    local gia; gia="$(git -C "$REPO_DIR" rev-parse -q --verify "refs/tags/$tag^{commit}" || true)"
+    if [ -z "$gia" ]; then
+      git -C "$REPO_DIR" tag -a "$tag" "$sha" -m "Copia ripristinabile di fine fase: $fase (ADR-0052)"
+    elif [ "$gia" != "$sha" ]; then
+      err "l'etichetta $tag esiste gia' e punta a ${gia:0:8}, non a ${sha:0:8}"; exit 3
+    fi
     git -C "$REPO_DIR" push origin "refs/tags/$tag" --quiet || err "ATTENZIONE: etichetta $tag creata ma non spinta su GitHub"
   fi
   say "codice: $tag -> ${sha:0:8}"
@@ -115,7 +125,10 @@ cmd_copia() {
   # descrivono esattamente cio' che il dump contiene, anche se la produzione scrive intanto.
   say "database: dump di $DB_NAME (porta $PGPORT_COPIA) nell'istantanea esportata"
   coproc SESS { "${PSQL[@]}" -d "$DB_NAME" 2>&1; }
-  local in="${SESS[1]}" out="${SESS[0]}" snap="" riga
+  # bash chiude i descrittori del coproc quando psql esce (dopo \q): li duplichiamo, cosi'
+  # l'uscita ancora nel tubo si legge per intero anche a sessione finita.
+  local spid="$SESS_PID" in out snap="" riga
+  exec {in}>&"${SESS[1]}" {out}<&"${SESS[0]}"
   printf 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\nSELECT pg_export_snapshot();\n' >&"$in"
   read -r -t 60 snap <&"$out" || true
   printf '%s' "$snap" | grep -qE '^[0-9A-F]+-[0-9A-F]+-[0-9]+$' || { err "istantanea non ottenuta: '$snap'"; exit 1; }
@@ -135,7 +148,8 @@ cmd_copia() {
       *) [ -n "$sez" ] && printf '%s\n' "$riga" >> "$d/$sez" ;;
     esac
   done
-  wait "$SESS_PID" 2>/dev/null || true
+  exec {in}>&- {out}<&-
+  wait "$spid" 2>/dev/null || true
   local ntab; ntab=$(wc -l < "$d/conteggi.txt")
   [ "$ntab" -gt 0 ] || { err "nessun conteggio letto"; exit 1; }
   [ "$(stat -c %s "$d/database.dump")" -gt "${COPIE_DUMP_MIN:-1048576}" ] || { err "dump troppo piccolo"; exit 1; }
@@ -188,9 +202,10 @@ cmd_copia() {
   say "copia fatta: $d"
 
   # --- 7. rotazione: restano le ultime $COPIE_TIENI, le altre si SPOSTANO
-  local vecchie; vecchie="$(find "$COPIE_DIR" -mindepth 1 -maxdepth 1 -type d -name '20[0-9]*' -printf '%f\n' | LC_ALL=C sort | head -n -"$COPIE_TIENI")"
+  COPIA_IN_CORSO=""   # copia completa: da qui in poi non si sposta piu'
+  local vecchie; vecchie="$(find "$COPIE_DIR" -mindepth 1 -maxdepth 1 -type d -name '20[0-9]*' -printf '%T@ %f\n' | sort -n | cut -d' ' -f2- | head -n -"$COPIE_TIENI")"
   if [ -n "$vecchie" ]; then
-    local cestino; cestino="$HOME/_da_eliminare/copie-fase_$(TZ=Europe/Rome date +%Y%m%d)"
+    local cestino; cestino="$(cestino)"
     mkdir -p "$cestino"
     for u in $vecchie; do mv "$COPIE_DIR/$u" "$cestino/"; registro "spostata in $cestino: $u"; say "spostata in $cestino: $u"; done
   fi

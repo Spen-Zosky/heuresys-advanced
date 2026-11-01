@@ -23,7 +23,7 @@ Esistono già un backup giornaliero (`scripts/backup-db.sh`), un'istantanea prim
 
 ## Decisione
 
-1. **La copia.** A ogni fine fase `scripts/copia-fase.sh copia <nome>` produce, in `~/backup-hr/copie-fase/<AAAAMMGG-HHMM>_<nome>/`:
+1. **La copia.** A ogni fine fase `scripts/copia-fase.sh copia <nome>` produce, in `~/backup-hr/copie-fase/<AAAAMMGG>-<nome>/`:
    - l'etichetta git `fase-AAAAMMGG-<nome>` sul commit in produzione (`LAST_GOOD_SHA`), pubblicata su origin;
    - il dump completo di `heuresys_advanced` (`pg_dump -Fc`, con proprietari e permessi), preso dentro una transazione `REPEATABLE READ` con istantanea esportata;
    - i conteggi esatti di ogni tabella, le estensioni e il registro delle migrazioni letti **nella stessa istantanea** del dump, così una scrittura concorrente non li fa divergere;
@@ -32,7 +32,7 @@ Esistono già un backup giornaliero (`scripts/backup-db.sh`), un'istantanea prim
    - un manifesto e le impronte di ogni file.
    Nella copia non entra niente degli altri progetti della VM.
 2. **La prova.** `copia-fase.sh prova` ripristina la copia su `heuresys_advanced_prova_ripristino` (database marcato da un commento: lo script non tocca un database con quel nome che non abbia creato lui), con proprietari e permessi, fermandosi al primo errore, e confronta conteggi, estensioni e registro delle migrazioni. **Una copia senza prova verde non è un punto di ritorno.** L'esito si scrive nel manifesto.
-3. **Le due sedi.** Sulla VM restano l'ultima copia e la precedente; le altre si spostano in `~/_da_eliminare/`. Su Drive (`gdrive-hr:Heuresys/copie-fase`, fuori dalla rotazione di restic) restano tutte: `copia-fase.sh drive` cifra dump e segreti con la chiave pubblica gpg dedicata (`~/.config/heuresys/copie-fase.pub.asc`), carica, riscarica e confronta le impronte SHA-256. La chiave privata, protetta dalla passphrase di Enzo, sta solo in `Heuresys/30_cassaforte` su Drive; la crea una volta Enzo con `scripts/copia-fase-chiave.sh` in un terminale della VM. Finché la chiave non c'è, su Drive va solo la parte in chiaro, e il manifesto lo dice.
+3. **Le due sedi.** Sulla VM restano l'ultima copia e la precedente; le altre, e una copia fallita a metà, si spostano in `_da_eliminare/<AAAAMMGG>_copie-fase/` del repository. Su Drive (`gdrive-hr:Heuresys/copie-fase`, fuori dalla rotazione di restic) restano tutte: `copia-fase.sh drive` cifra dump e segreti con la chiave pubblica gpg dedicata (`~/.config/heuresys/copie-fase.pub.asc`), carica, riscarica e confronta le impronte SHA-256. La chiave privata, protetta dalla passphrase di Enzo, sta solo in `Heuresys/30_cassaforte` su Drive; la crea una volta Enzo con `scripts/copia-fase-chiave.sh` in un terminale della VM. Finché la chiave non c'è, su Drive va solo la parte in chiaro, e il manifesto lo dice.
 4. **Il ritorno.** Solo con il sì di Enzo. `copia-fase.sh ritorna <copia>` stampa la sequenza e non esegue niente: si fermano timer e servizi, il database attuale si rinomina (`<db>_prima_del_ritorno_<data>`, mai cancellato), si ripristina il dump, il codice torna con `scripts/vm-rollback.sh <etichetta>`, si verificano le impronte dei segreti e si fa un login vero su RTL.
 5. **Cosa non cambia.** Sviluppo, rilascio armato (ADR-0028), backup giornaliero e prova settimanale restano come sono.
 

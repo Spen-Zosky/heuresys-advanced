@@ -36,6 +36,7 @@
  * Uso, sulla VM, dalla radice del repository:
  *   cd apps/api && npx tsx ../../scripts/analisi/giro-interfacce.ts --prova      # solo anonimo e scelta persone
  *   cd apps/api && npx tsx ../../scripts/analisi/giro-interfacce.ts               # giro intero
+ * Fuori dal repository: GIRO_REPO=~/heuresys-advanced npx tsx <percorso dello script> (dalla cartella apps/api).
  * Opzioni: --base https://www.heuresys.com  --uscita <cartella>  --pausa-ms 1200
  *          --solo <sigla,sigla>  --senza-db (niente database: solo anonimo)
  */
@@ -45,7 +46,7 @@ import { join, resolve, dirname, relative, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 
-const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const REPO = resolve(process.env.GIRO_REPO ?? resolve(dirname(fileURLToPath(import.meta.url)), "..", ".."));
 const args = process.argv.slice(2);
 const opt = (name: string, def?: string) => {
   const i = args.indexOf(`--${name}`);

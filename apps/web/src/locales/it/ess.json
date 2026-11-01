@@ -762,5 +762,76 @@
     "colGoals": "Obiettivi",
     "colCompetency": "Competenze",
     "colPotential": "Potenziale"
+  },
+  "delegations": {
+    "title": "Deleghe",
+    "description": "Le attività che affidi a una persona della tua catena, e quelle che ti sono state affidate. Ogni azione fatta per conto di altri resta firmata.",
+    "error": "Impossibile caricare le deleghe.",
+    "proposals": {
+      "title": "Proposte",
+      "use": "Usa questa proposta",
+      "reason": "Assenza approvata",
+      "note": "La proposta la prepara l'agente della piattaforma; la delega nasce solo se la confermi tu."
+    },
+    "form": {
+      "title": "Delega una tua attività",
+      "delegate": "A chi",
+      "choose": "Scegli una persona della tua catena",
+      "object": "Che cosa",
+      "from": "Dal",
+      "to": "Al (facoltativo)",
+      "reason": "Motivo",
+      "rules": "Puoi delegare solo a chi sta nella tua catena e solo ciò che puoi fare tu. Adeguamenti retributivi e valutazioni non si delegano. Chi riceve la delega non può delegarla a sua volta.",
+      "submit": "Conferisci la delega"
+    },
+    "object": {
+      "allApprovals": "Tutte le approvazioni delegabili",
+      "type": {
+        "TIME_OFF_REQUEST": "Approvazioni di ferie e permessi",
+        "TRAINING_INITIATIVE": "Approvazioni di iniziative formative"
+      },
+      "step": "Attività: {{name}}",
+      "mandate": {
+        "CONSOLIDATION": "Consolidamento del tenant",
+        "FULL": "Delega piena"
+      }
+    },
+    "state": {
+      "inForce": "In vigore",
+      "notInForce": "Non ancora in vigore o scaduta",
+      "suspended": "Sospesa: fuori dalla catena",
+      "revoked": "Revocata"
+    },
+    "period": {
+      "range": "dal {{from}} al {{to}}",
+      "open": "dal {{from}}, senza scadenza"
+    },
+    "inbox": {
+      "title": "Da decidere per conto di altri",
+      "onBehalf": "Per conto di {{name}}",
+      "requester": "richiesta di {{name}}",
+      "approve": "Approva",
+      "reject": "Respingi"
+    },
+    "granted": {
+      "title": "Deleghe che hai conferito",
+      "empty": "Non hai conferito deleghe.",
+      "noChain": "Nessuna persona riporta a te, quindi non hai attività da delegare.",
+      "revoke": "Revoca"
+    },
+    "received": {
+      "title": "Deleghe che hai ricevuto",
+      "emptyTitle": "Nessuna delega ricevuta",
+      "emptyDesc": "Quando qualcuno ti affida una sua attività, la trovi qui."
+    },
+    "errors": {
+      "generic": "Operazione non riuscita.",
+      "DELEGATION_OUT_OF_CHAIN": "Questa persona non è nella tua catena.",
+      "DELEGATION_NOT_OWN_ACTIVITY": "Questa attività non è tua.",
+      "DELEGATION_SELF": "Non puoi delegare a te stesso.",
+      "DELEGATION_WINDOW_INVALID": "La data di fine viene prima di quella di inizio.",
+      "DELEGATION_TYPE_EXCLUDED": "Questo tipo di richiesta non è delegato.",
+      "DELEGATION_NOT_IN_FORCE": "La delega non è in vigore."
+    }
   }
 }

@@ -762,5 +762,76 @@
     "colGoals": "Goals",
     "colCompetency": "Competencies",
     "colPotential": "Potential"
+  },
+  "delegations": {
+    "title": "Delegations",
+    "description": "The activities you entrust to someone in your chain, and those entrusted to you. Every action taken on someone else's behalf stays signed.",
+    "error": "Unable to load delegations.",
+    "proposals": {
+      "title": "Proposals",
+      "use": "Use this proposal",
+      "reason": "Approved absence",
+      "note": "The platform agent prepares the proposal; the delegation exists only once you confirm it."
+    },
+    "form": {
+      "title": "Delegate one of your activities",
+      "delegate": "To whom",
+      "choose": "Choose a person in your chain",
+      "object": "What",
+      "from": "From",
+      "to": "To (optional)",
+      "reason": "Reason",
+      "rules": "You can delegate only to people in your chain and only what you can do yourself. Pay adjustments and evaluations cannot be delegated. The delegate cannot delegate it further.",
+      "submit": "Grant the delegation"
+    },
+    "object": {
+      "allApprovals": "All delegable approvals",
+      "type": {
+        "TIME_OFF_REQUEST": "Time-off approvals",
+        "TRAINING_INITIATIVE": "Training initiative approvals"
+      },
+      "step": "Activity: {{name}}",
+      "mandate": {
+        "CONSOLIDATION": "Tenant consolidation",
+        "FULL": "Full delegation"
+      }
+    },
+    "state": {
+      "inForce": "In force",
+      "notInForce": "Not yet in force or expired",
+      "suspended": "Suspended: outside the chain",
+      "revoked": "Revoked"
+    },
+    "period": {
+      "range": "from {{from}} to {{to}}",
+      "open": "from {{from}}, no end date"
+    },
+    "inbox": {
+      "title": "To decide on behalf of others",
+      "onBehalf": "On behalf of {{name}}",
+      "requester": "requested by {{name}}",
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "granted": {
+      "title": "Delegations you granted",
+      "empty": "You have not granted any delegation.",
+      "noChain": "Nobody reports to you, so you have no activities to delegate.",
+      "revoke": "Revoke"
+    },
+    "received": {
+      "title": "Delegations you received",
+      "emptyTitle": "No delegation received",
+      "emptyDesc": "When someone entrusts you with one of their activities, you will find it here."
+    },
+    "errors": {
+      "generic": "Operation failed.",
+      "DELEGATION_OUT_OF_CHAIN": "This person is not in your chain.",
+      "DELEGATION_NOT_OWN_ACTIVITY": "This activity is not yours.",
+      "DELEGATION_SELF": "You cannot delegate to yourself.",
+      "DELEGATION_WINDOW_INVALID": "The end date comes before the start date.",
+      "DELEGATION_TYPE_EXCLUDED": "This request type is not delegated.",
+      "DELEGATION_NOT_IN_FORCE": "The delegation is not in force."
+    }
   }
 }

@@ -66,6 +66,8 @@ Regola cardine: **la delega non dà mai più di quanto abbia chi delega**. Il di
 
 **Niente sub-delega.** Il delegato non può delegare a sua volta ciò che ha ricevuto.
 
+**Niente decisioni su di sé.** Il delegato non vede e non decide per conto del delegante una richiesta che lo riguarda: una che ha presentato lui o di cui è il soggetto (per esempio le sue ferie). Errore `DELEGATION_OWN_REQUEST`. Aggiunta il 2026-11-01 dopo la segnalazione della revisione di sicurezza del rilascio.
+
 ### 4. Chi può creare una delega
 
 - **Il capo, da sé**, per le proprie attività: `POST /v1/me/delegations` (delegante = chi chiama, sempre). Non serve un permesso di ruolo: il diritto nasce dall'essere capo (il ruolo segue il lavoro). Vive nel modulo ESS (ADR-0011).
@@ -111,3 +113,4 @@ Fatta il 2026-10-31 sul ramo del thread, con queste precisazioni rispetto alla b
 - Un referente senza unità ma con posizioni che gli riportano può delegare ai titolari di quelle posizioni, e non vede per questo i loro dati sensibili.
 - Un delegato che esce dalla catena perde l'effetto della delega senza che la riga cambi.
 - Un'approvazione decisa dal delegato porta la firma «per conto di».
+- Il delegato non decide per conto del capo una richiesta che lo riguarda (`DELEGATION_OWN_REQUEST`).

@@ -831,6 +831,7 @@
       "DELEGATION_SELF": "Non puoi delegare a te stesso.",
       "DELEGATION_WINDOW_INVALID": "La data di fine viene prima di quella di inizio.",
       "DELEGATION_TYPE_EXCLUDED": "Questo tipo di richiesta non è delegato.",
+      "DELEGATION_OWN_REQUEST": "Una richiesta che ti riguarda non si decide per conto d'altri.",
       "DELEGATION_NOT_IN_FORCE": "La delega non è in vigore."
     }
   }

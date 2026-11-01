@@ -126,6 +126,19 @@ export const delegationsService = {
         "DELEGATION_NOT_ACTIVE",
       );
     }
+    // Chi aveva ricevuto la delega sa che è finita: da qui le pratiche del delegante non sono più sue.
+    await emitNotification(pool, {
+      tenantId,
+      userId: esiste.delegateUserId,
+      type: "SYSTEM",
+      subject: `${esiste.delegatorName ?? "Il tuo responsabile"} ha revocato la delega ${
+        esiste.scope === "PROCESS_STEP" ? `dell'attività «${esiste.tenantProcessStepName ?? ""}»` : "delle sue approvazioni"
+      }`,
+      body: reason,
+      priority: "INFO",
+      actionUrl: "/me/delegations",
+      createdBy: actor.userId,
+    });
     return this.get(actor, id);
   },
 
@@ -187,8 +200,11 @@ export const delegationsService = {
       if (!(await isInDelegationChain(pool, d.delegatorUserId, actor.userId))) continue;
       if (!(await puoDecidere(pool, tenantId, d.delegatorUserId))) continue;
       const tipi = tipiDellaDelega(d);
-      for (const p of await repo.openStepsAssignedTo(pool, tenantId, d.delegatorUserId, tipi)) {
+      const aperti = await repo.openStepsAssignedTo(pool, tenantId, d.delegatorUserId, tipi);
+      const proprie = await repo.requestsConcerning(pool, aperti.map((p) => p.approvalRequestId), actor.userId);
+      for (const p of aperti) {
         if (d.scope === "PROCESS_STEP" && p.tenantProcessStepId !== d.tenantProcessStepId) continue;
+        if (proprie.has(p.approvalRequestId)) continue;
         if (visti.has(p.approvalStepId)) continue;
         visti.add(p.approvalStepId);
         const { tenantProcessStepId: _t, ...resto } = p;
@@ -243,6 +259,12 @@ export const delegationsService = {
       delegatorUserId: delega.delegatorUserId,
       verifica: async (client, richiesta) => {
         await verificaUso(client, tenantId, delega.delegationId, actor.userId, richiesta);
+        if ((await repo.requestsConcerning(client, [requestId], actor.userId)).size > 0) {
+          throw new ForbiddenError(
+            "Una richiesta che ti riguarda non si decide per conto d'altri",
+            "DELEGATION_OWN_REQUEST",
+          );
+        }
       },
     });
     // §5 — il delegante sa di ogni azione fatta a suo nome. Fuori dalla transazione: un avviso

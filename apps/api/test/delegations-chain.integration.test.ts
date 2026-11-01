@@ -230,6 +230,12 @@ describe("ADR-0051 §2-§4 — chi delega, a chi, che cosa", () => {
     const sua = await chiama(capo.email, "POST", `/v1/me/delegations/${id}/revoke`, { reason: "fine prova" });
     expect(sua.statusCode).toBe(200);
     expect((sua.json() as { status: string }).status).toBe("REVOKED");
+    const avviso = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_inbox_notifications
+        WHERE notification_user_id = $1 AND notification_subject LIKE '%ha revocato la delega%'`,
+      [sotto.userId],
+    );
+    expect(Number(avviso.rows[0]?.n), "il delegato non ha saputo della revoca").toBeGreaterThan(0);
   });
 });
 
@@ -275,6 +281,22 @@ describe("ADR-0051 §3 e §5 — decidere per conto di", () => {
     });
     expect(r.statusCode).toBe(403);
     expect((r.json() as { error: { code: string } }).error.code).toBe("DELEGATION_NOT_IN_FORCE");
+  });
+
+  it("§3 — il delegato non decide per conto del capo una richiesta che lo riguarda", async () => {
+    const { requestId, stepId } = await richiestaPerIlCapo("TIME_OFF_REQUEST", "Ferie di prova ADR-0051, del delegato");
+    // La richiesta diventa del delegato: è lui ad averla presentata.
+    await pool.query(`UPDATE sys.sys_approval_requests SET created_by = $1 WHERE approval_request_id = $2`,
+      [sotto.userId, requestId]);
+    const casella = await chiama(sotto.email, "GET", "/v1/me/delegations/approvals");
+    const ids = (casella.json() as { items: { approvalStepId: string }[] }).items.map((i) => i.approvalStepId);
+    expect(ids, "la richiesta del delegato è arrivata nella sua casella per conto del capo").not.toContain(stepId);
+
+    const r = await chiama(sotto.email, "POST", `/v1/me/delegations/approvals/${requestId}/steps/${stepId}/decide`, {
+      decision: "APPROVE",
+    });
+    expect(r.statusCode, `il delegato si è approvato da sé: ${r.statusCode} ${r.body.slice(0, 300)}`).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("DELEGATION_OWN_REQUEST");
   });
 
   it("§2 — se il delegato esce dalla catena la delega resta, ma smette di avere effetto", async () => {

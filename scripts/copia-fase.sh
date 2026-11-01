@@ -233,7 +233,7 @@ cmd_prova() {
   sudo -n -u postgres createdb -p "$PGPORT_COPIA" -O "$owner" "$SCRATCH_DB"
   "${PSQL[@]}" -d postgres -c "COMMENT ON DATABASE $SCRATCH_DB IS '$MARCA $(date -u +%Y%m%dT%H%M%SZ)'"
   say "ripristino in $SCRATCH_DB (proprietari e permessi, fermo al primo errore)"
-  local esito=VERDE motivo=""
+  local esito=VERDE nota="" motivo=""
   if ! sudo -n -u postgres pg_restore -p "$PGPORT_COPIA" -d "$SCRATCH_DB" --exit-on-error < "$d/database.dump" 2> "$d/prova_errori.txt"; then
     esito=ROSSO; motivo="pg_restore si e' fermato: $(head -3 "$d/prova_errori.txt" | tr '\n' ' ')"
   fi
@@ -242,12 +242,28 @@ cmd_prova() {
     printf '%s\n\\gexec\n' "$Q_CONTEGGI_GEN" | "${PSQL[@]}" -d "$SCRATCH_DB" > "$d/prova_conteggi.txt"
     "${PSQL[@]}" -d "$SCRATCH_DB" -c "$Q_ESTENSIONI" > "$d/prova_estensioni.txt"
     "${PSQL[@]}" -d "$SCRATCH_DB" -c "$Q_MIGRAZIONI" > "$d/prova_migrazioni.txt"
+    # Un'estensione torna alla versione che il server sa installare: se la versione registrata
+    # nella copia non e' piu' fra quelle disponibili (il pacchetto e' stato aggiornato, e nel
+    # database vivo manca solo ALTER EXTENSION ... UPDATE), e quella ripristinata e' la versione
+    # predefinita del server, non e' un difetto della copia: si annota, e il confronto resta sul resto.
+    local nome ver vprova nota=""
+    while IFS='|' read -r nome ver; do
+      vprova="$(grep -E "^${nome}[|]" "$d/prova_estensioni.txt" | cut -d'|' -f2 || true)"
+      [ -n "$vprova" ] && [ "$vprova" != "$ver" ] || continue
+      local q="SELECT (SELECT default_version FROM pg_available_extensions WHERE name = '$nome') = '$vprova'
+                  AND NOT EXISTS (SELECT 1 FROM pg_available_extension_versions WHERE name = '$nome' AND version = '$ver')"
+      if [ "$("${PSQL[@]}" -d postgres -c "$q")" = t ]; then
+        sed -i "s#^${nome}|${vprova}\$#${nome}|${ver}#" "$d/prova_estensioni.txt"
+        nota="$nota $nome torna alla $vprova perche' il server non ha piu' la $ver;"
+      fi
+    done < "$d/estensioni.txt"
     local f; for f in conteggi estensioni migrazioni; do
       if ! diff -q "$d/$f.txt" "$d/prova_$f.txt" >/dev/null; then
         esito=ROSSO; motivo="$motivo $f diversi ($(diff "$d/$f.txt" "$d/prova_$f.txt" | grep -c '^[<>]' || true) righe);"
       fi
     done
   fi
+  [ -n "${nota:-}" ] && motivo="${motivo}${motivo:+ }nota:$nota"
   local ntab; ntab=$(wc -l < "$d/conteggi.txt")
   local righe; righe=$(awk -F'|' '{s+=$2} END{print s+0}' "$d/conteggi.txt")
   if [ "${COPIE_TIENI_PROVA:-0}" = 1 ]; then say "tengo $SCRATCH_DB (COPIE_TIENI_PROVA=1)"

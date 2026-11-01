@@ -379,3 +379,27 @@ export async function lastChainDelegateOf(
   );
   return res.rows[0]?.id ?? null;
 }
+
+/**
+ * ADR-0051 §3 — le richieste, fra quelle date, che riguardano la persona: le ha create lei, oppure
+ * ne è il soggetto (le ferie e i permessi sono di chi li chiede). Su queste una delega non vale:
+ * nessuno approva per conto d'altri una richiesta propria.
+ */
+export async function requestsConcerning(
+  q: DbConnector,
+  requestIds: readonly string[],
+  userId: string,
+): Promise<Set<string>> {
+  if (requestIds.length === 0) return new Set();
+  const res = await q.query<{ id: string }>(
+    `SELECT r.approval_request_id::text AS id
+       FROM sys.sys_approval_requests r
+       LEFT JOIN sys.sys_time_off_requests t
+              ON r.approval_request_resource_type = 'TIME_OFF_REQUEST'
+             AND t.request_id = r.approval_request_resource_id
+      WHERE r.approval_request_id = ANY($1::uuid[])
+        AND (r.created_by = $2 OR t.request_subject_user_id = $2)`,
+    [requestIds, userId],
+  );
+  return new Set(res.rows.map((r) => r.id));
+}

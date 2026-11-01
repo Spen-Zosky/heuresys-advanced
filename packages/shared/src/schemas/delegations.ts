@@ -43,7 +43,9 @@ export function delegationKindOf(scope: DelegationScope): DelegationKind {
  * ADR-0051 §3 — i tipi di richiesta che una delega di catena può toccare. Elenco CHIUSO e per
  * inclusione: un tipo nuovo non diventa delegabile da sé. Restano fuori per regola gli adeguamenti
  * retributivi e le valutazioni (classi COMPENSATION ed EVALUATION), e le richieste senza tipo, di
- * cui non si sa che cosa contengano.
+ * cui non si sa che cosa contengano. Chi aggiunge un tipo qui aggiunge anche la sua regola in
+ * `requestsConcerning` (repository delle deleghe): senza, ogni richiesta di quel tipo vale come
+ * «propria» del delegato e non si decide per delega.
  */
 export const DELEGABLE_REQUEST_TYPES = ["TIME_OFF_REQUEST", "TRAINING_INITIATIVE"] as const;
 export const DelegableRequestTypeSchema = z.enum(DELEGABLE_REQUEST_TYPES);

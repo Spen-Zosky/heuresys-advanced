@@ -59,9 +59,9 @@ async function chiama(email: string, method: "GET" | "POST", url: string, payloa
 }
 
 /** Una richiesta di approvazione con il capo come approvatore, creata dall'amministratore. */
-async function richiestaPerIlCapo(resourceType: string, title: string) {
+async function richiestaPerIlCapo(resourceType: string, title: string, resourceId?: string) {
   const r = await chiama(AMMINISTRA, "POST", "/v1/approvals", {
-    title, resourceType, approverUserIds: [capo.userId],
+    title, resourceType, approverUserIds: [capo.userId], ...(resourceId ? { resourceId } : {}),
   });
   expect(r.statusCode, `richiesta ${resourceType}: ${r.statusCode} ${r.body.slice(0, 300)}`).toBe(200);
   const req = r.json() as { approvalRequestId: string };
@@ -296,6 +296,47 @@ describe("ADR-0051 §3 e §5 — decidere per conto di", () => {
       decision: "APPROVE",
     });
     expect(r.statusCode, `il delegato si è approvato da sé: ${r.statusCode} ${r.body.slice(0, 300)}`).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("DELEGATION_OWN_REQUEST");
+  });
+
+  it("§3 — vale per ogni tipo delegabile: l'iniziativa formativa che il delegato conduce resta fuori", async () => {
+    const ini = await pool.query<{ id: string }>(
+      `SELECT i.training_initiative_id AS id FROM sys.sys_training_initiatives i
+         JOIN sys.sys_users u ON u.user_tenant_id = i.training_initiative_tenant_id
+        WHERE u.user_id = $1 LIMIT 1`,
+      [capo.userId],
+    );
+    const iniziativa = ini.rows[0]?.id;
+    if (!iniziativa) throw new Error("nessuna iniziativa formativa nel tenant del capo: verifica cieca");
+    const dl = await chiama(capo.email, "POST", "/v1/me/delegations", {
+      delegateUserId: sotto.userId, scope: "APPROVALS", requestType: "TRAINING_INITIATIVE",
+      startsOn: oggi(), endsOn: fra(14),
+    });
+    expect(dl.statusCode, `delega della formazione: ${dl.statusCode} ${dl.body.slice(0, 300)}`).toBe(201);
+    // Il delegato conduce l'iniziativa; la richiesta l'ha creata un altro.
+    await pool.query(
+      `UPDATE sys.sys_training_initiatives SET training_initiative_facilitator_user_id = $1 WHERE training_initiative_id = $2`,
+      [sotto.userId, iniziativa],
+    );
+    const { requestId, stepId } = await richiestaPerIlCapo("TRAINING_INITIATIVE", "Iniziativa di prova ADR-0051", iniziativa);
+    const casella = await chiama(sotto.email, "GET", "/v1/me/delegations/approvals");
+    const ids = (casella.json() as { items: { approvalStepId: string }[] }).items.map((i) => i.approvalStepId);
+    expect(ids, "l'iniziativa che il delegato conduce è nella sua casella per conto del capo").not.toContain(stepId);
+    const r = await chiama(sotto.email, "POST", `/v1/me/delegations/approvals/${requestId}/steps/${stepId}/decide`, {
+      decision: "APPROVE",
+    });
+    expect(r.statusCode, `${r.statusCode} ${r.body.slice(0, 300)}`).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("DELEGATION_OWN_REQUEST");
+  });
+
+  it("§3 — una risorsa nominata che non si trova più vale come propria, per prudenza", async () => {
+    const { requestId, stepId } = await richiestaPerIlCapo(
+      "TIME_OFF_REQUEST", "Ferie di prova ADR-0051, risorsa sparita", "00000000-0000-4000-8000-000000000051",
+    );
+    const r = await chiama(sotto.email, "POST", `/v1/me/delegations/approvals/${requestId}/steps/${stepId}/decide`, {
+      decision: "APPROVE",
+    });
+    expect(r.statusCode, `${r.statusCode} ${r.body.slice(0, 300)}`).toBe(403);
     expect((r.json() as { error: { code: string } }).error.code).toBe("DELEGATION_OWN_REQUEST");
   });
 

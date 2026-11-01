@@ -230,6 +230,12 @@ describe("ADR-0051 §2-§4 — chi delega, a chi, che cosa", () => {
     const sua = await chiama(capo.email, "POST", `/v1/me/delegations/${id}/revoke`, { reason: "fine prova" });
     expect(sua.statusCode).toBe(200);
     expect((sua.json() as { status: string }).status).toBe("REVOKED");
+    const avviso = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_inbox_notifications
+        WHERE notification_user_id = $1 AND notification_subject LIKE '%ha revocato la delega%'`,
+      [sotto.userId],
+    );
+    expect(Number(avviso.rows[0]?.n), "il delegato non ha saputo della revoca").toBeGreaterThan(0);
   });
 });
 

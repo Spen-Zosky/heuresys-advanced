@@ -126,6 +126,19 @@ export const delegationsService = {
         "DELEGATION_NOT_ACTIVE",
       );
     }
+    // Chi aveva ricevuto la delega sa che è finita: da qui le pratiche del delegante non sono più sue.
+    await emitNotification(pool, {
+      tenantId,
+      userId: esiste.delegateUserId,
+      type: "SYSTEM",
+      subject: `${esiste.delegatorName ?? "Il tuo responsabile"} ha revocato la delega ${
+        esiste.scope === "PROCESS_STEP" ? `dell'attività «${esiste.tenantProcessStepName ?? ""}»` : "delle sue approvazioni"
+      }`,
+      body: reason,
+      priority: "INFO",
+      actionUrl: "/me/delegations",
+      createdBy: actor.userId,
+    });
     return this.get(actor, id);
   },
 

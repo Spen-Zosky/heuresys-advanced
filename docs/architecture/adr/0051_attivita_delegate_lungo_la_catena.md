@@ -66,7 +66,7 @@ Regola cardine: **la delega non dà mai più di quanto abbia chi delega**. Il di
 
 **Niente sub-delega.** Il delegato non può delegare a sua volta ciò che ha ricevuto.
 
-**Niente decisioni su di sé.** Il delegato non vede e non decide per conto del delegante una richiesta che lo riguarda: una che ha presentato lui o di cui è il soggetto (per esempio le sue ferie). Errore `DELEGATION_OWN_REQUEST`. Aggiunta il 2026-11-01 dopo la segnalazione della revisione di sicurezza del rilascio.
+**Niente decisioni su di sé.** Il delegato non vede e non decide per conto del delegante una richiesta che lo riguarda: una che ha presentato lui o di cui è il soggetto (per esempio le sue ferie). Errore `DELEGATION_OWN_REQUEST`. Aggiunta il 2026-11-01 dopo la segnalazione della revisione di sicurezza del rilascio. Ogni tipo delegabile ha la sua regola per dire chi riguarda (ferie: la persona; formazione: chi ha creato l'iniziativa, chi la conduce, chi vi è iscritto); una richiesta che non si sa ricondurre, per tipo o per risorsa sparita, vale come propria.
 
 ### 4. Chi può creare una delega
 

@@ -381,9 +381,15 @@ export async function lastChainDelegateOf(
 }
 
 /**
- * ADR-0051 §3 — le richieste, fra quelle date, che riguardano la persona: le ha create lei, oppure
- * ne è il soggetto (le ferie e i permessi sono di chi li chiede). Su queste una delega non vale:
- * nessuno approva per conto d'altri una richiesta propria.
+ * ADR-0051 §3 — le richieste, fra quelle date, che riguardano la persona. Su queste una delega non
+ * vale: nessuno decide per conto d'altri una richiesta che lo riguarda. Ogni tipo delegabile si
+ * riconduce alle persone che riguarda:
+ *   - sempre: chi ha creato la richiesta;
+ *   - TIME_OFF_REQUEST: la persona delle ferie o del permesso;
+ *   - TRAINING_INITIATIVE: chi ha creato l'iniziativa, chi la conduce, chi vi è iscritto.
+ * Per prudenza è «propria» anche una richiesta che non si sa ricondurre: un tipo senza regola qui,
+ * oppure una risorsa nominata che non si trova più. Una richiesta senza risorsa riguarda solo chi
+ * l'ha creata.
  */
 export async function requestsConcerning(
   q: DbConnector,
@@ -394,11 +400,29 @@ export async function requestsConcerning(
   const res = await q.query<{ id: string }>(
     `SELECT r.approval_request_id::text AS id
        FROM sys.sys_approval_requests r
-       LEFT JOIN sys.sys_time_off_requests t
-              ON r.approval_request_resource_type = 'TIME_OFF_REQUEST'
-             AND t.request_id = r.approval_request_resource_id
       WHERE r.approval_request_id = ANY($1::uuid[])
-        AND (r.created_by = $2 OR t.request_subject_user_id = $2)`,
+        AND (
+              r.created_by = $2
+           OR CASE
+                WHEN r.approval_request_resource_id IS NULL THEN false
+                WHEN r.approval_request_resource_type = 'TIME_OFF_REQUEST' THEN
+                  NOT EXISTS (SELECT 1 FROM sys.sys_time_off_requests t
+                               WHERE t.request_id = r.approval_request_resource_id)
+                  OR EXISTS (SELECT 1 FROM sys.sys_time_off_requests t
+                              WHERE t.request_id = r.approval_request_resource_id
+                                AND t.request_subject_user_id = $2)
+                WHEN r.approval_request_resource_type = 'TRAINING_INITIATIVE' THEN
+                  NOT EXISTS (SELECT 1 FROM sys.sys_training_initiatives i
+                               WHERE i.training_initiative_id = r.approval_request_resource_id)
+                  OR EXISTS (SELECT 1 FROM sys.sys_training_initiatives i
+                              WHERE i.training_initiative_id = r.approval_request_resource_id
+                                AND $2 IN (i.created_by, i.training_initiative_facilitator_user_id))
+                  OR EXISTS (SELECT 1 FROM sys.sys_user_learning_assignments a
+                              WHERE a.user_learning_assignment_initiative_id = r.approval_request_resource_id
+                                AND a.user_learning_assignment_user_id = $2)
+                ELSE true
+              END
+        )`,
     [requestIds, userId],
   );
   return new Set(res.rows.map((r) => r.id));

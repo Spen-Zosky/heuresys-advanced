@@ -37,8 +37,8 @@ function argomento(nome: string): string | undefined {
 async function tenantDa(valore: string): Promise<string> {
   const { rows } = await pool.query<{ id: string }>(
     UUID.test(valore)
-      ? `SELECT tenant_id AS id FROM sys.sys_tenants WHERE tenant_id = $1`
-      : `SELECT tenant_id AS id FROM sys.sys_tenants WHERE tenant_code = $1`,
+      ? `SELECT tenant_id AS id FROM sys.sys_tenancies WHERE tenant_id = $1`
+      : `SELECT tenant_id AS id FROM sys.sys_tenancies WHERE tenant_code = $1`,
     [valore],
   );
   if (!rows[0]) throw new Error(`tenant non trovato: ${valore}`);

@@ -23,7 +23,7 @@
 #                        con il si' di Enzo.
 #
 # Sedi (ADR-0052 §4): VM  $COPIE_DIR (predefinita ~/backup-hr/copie-fase), ultime due copie;
-#                     Drive $COPIE_REMOTE (predefinito gdrive-hr:copie-fase), tutte.
+#                     Drive $COPIE_REMOTE (predefinito gdrive-hr:Heuresys/copie-fase), tutte.
 #
 # GUARDIE
 #   - `prova` non ripristina mai in un database che si chiama come quello di produzione, e non
@@ -52,7 +52,7 @@ fi
 DB_NAME="${DB_NAME:-heuresys_advanced}"
 PGPORT_COPIA="${PGPORT_COPIA:-5432}"
 COPIE_DIR="${COPIE_DIR:-$HOME/backup-hr/copie-fase}"
-COPIE_REMOTE="${COPIE_REMOTE:-gdrive-hr:copie-fase}"
+COPIE_REMOTE="${COPIE_REMOTE:-gdrive-hr:Heuresys/copie-fase}"
 COPIE_TIENI="${COPIE_TIENI:-2}"
 COPIE_RUOLI="${COPIE_RUOLI:-heuresys heuresys_app heuresys_ro heuresys_backup}"
 PUBKEY_FILE="${COPIE_PUBKEY_FILE:-$HOME/.config/heuresys/copie-fase.pub.asc}"

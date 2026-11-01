@@ -17,7 +17,7 @@
 # Esiti: 0 fatto · 1 rosso, niente e' stato messo al suo posto · 3 la chiave c'e' gia'
 set -euo pipefail
 
-REMOTE="${COPIE_CASSAFORTE:-gdrive-hr:30_cassaforte}"
+REMOTE="${COPIE_CASSAFORTE:-gdrive-hr:Heuresys/30_cassaforte}"
 CFG="$HOME/.config/heuresys"
 PUB="$CFG/copie-fase.pub.asc"
 OGGI="$(TZ=Europe/Rome date +%Y%m%d)"

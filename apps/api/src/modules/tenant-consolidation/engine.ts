@@ -236,7 +236,12 @@ async function unGiro(stato: StatoGruppo, giudice: Giudice, round: number, o: Re
   stato.proposals = stato.proposals.filter((p) => p.adoptedInWorkingCopy || p.method !== "SEMANTICA");
   const base = stato.proposals.filter((p) => p.adoptedInWorkingCopy).map((p) => p.id);
 
-  const domande: Domanda[] = tenantLiberi.map((t) => ({ tenantItem: t, candidates: scegliCandidati(t, protoLiberi, o.maxCandidates) }));
+  // Al giudice va la voce, non la copia di lavoro: il suo contratto è `.strict()`.
+  const comeVoce = ({ originalName: _o, translatedInRound: _t, ...v }: VoceDiLavoro): Voce => v;
+  const domande: Domanda[] = tenantLiberi.map((t) => ({
+    tenantItem: t,
+    candidates: scegliCandidati(t, protoLiberi, o.maxCandidates).map(comeVoce),
+  }));
   const risposte: RispostaGiudice[] = [];
   for (let i = 0; i < domande.length; i += o.batchSize) {
     risposte.push(...(await giudice({ group: stato.group, round, questions: domande.slice(i, i + o.batchSize) })));

@@ -6,6 +6,7 @@
  * un rifiuto. Nessun database, nessun modello.
  */
 import { describe, it, expect } from "vitest";
+import { JudgeBatchSchema } from "@heuresys/shared";
 import {
   consolidaGruppo,
   giroZero,
@@ -80,6 +81,17 @@ describe("giri semantici", () => {
     expect(per("LACUNA").map((p) => p.prototypeKeys[0])).toEqual(["P-FOR"]);
     expect(per("PERSONALIZZAZIONE").map((p) => p.tenantKeys[0])).toEqual(["t-cc"]);
     expect(s.prototype.find((v) => v.key === "P-ASS")).toMatchObject({ name: "Recruiting", originalName: "Gestione delle assunzioni" });
+  });
+
+  it("manda al giudice un lotto che il contratto del giudice vero accetta, senza i campi della copia di lavoro", async () => {
+    const { g } = giudiceDa({ "t-rec": ["P-ASS"] });
+    const lotti: unknown[] = [];
+    const severo: Giudice = async (lotto) => {
+      lotti.push(lotto);
+      return g(JudgeBatchSchema.parse(lotto));
+    };
+    await consolidaGruppo(nuovoStato("PROCESSES", prototipo, tenant), severo);
+    expect(lotti.length).toBeGreaterThan(0);
   });
 
   it("una proposta sotto la soglia sicura resta da confermare e non si traduce", async () => {

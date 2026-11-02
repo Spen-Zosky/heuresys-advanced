@@ -331,7 +331,7 @@ async function main() {
   // Un Chromium già presente sulla macchina si usa così: GIRO_CHROMIUM=<percorso dell'eseguibile>.
   // Senza, Playwright cerca la sua build, che va installata con «npx playwright install chromium».
   const browser = await chromium.launch(
-    process.env.GIRO_CHROMIUM ? { executablePath: process.env.GIRO_CHROMIUM, args: ["--headless=new", "--no-sandbox"] } : {},
+    process.env.GIRO_CHROMIUM ? { executablePath: process.env.GIRO_CHROMIUM } : {},
   );
   for (const p of persone) {
     if (PROVA && p.sigla !== "ANON") {

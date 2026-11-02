@@ -43,7 +43,7 @@ Chi: **C** = Claude (questo thread), **E** = Enzo, **VM** = Claude in una sessio
 | id | cosa | chi | fatta quando | stato |
 |---|---|---|---|---|
 | A1 | Rigenerare l'atlante dopo #140 e #141, così Atlas freshness torna verde su main | VM | `python docs/kb/tools/build_atlas.py` con il database della VM, commit `docs(kb): rigenera l'atlante`, PR unita, corsa Atlas freshness verde su main | non chiusa: `build_atlas.py` legge il database con la parola d'ordine del `.env`, che la protezione della VM non lascia usare; l'utente di sola lettura non vede lo schema `audit`. Serve una scelta di Enzo |
-| A2 | Indagine: perché l'atlante diventa rosso a ogni unione, e proposta perché si rigeneri da solo (per esempio un passo sul runner della VM che apre la PR di rigenerazione) | C | proposta scritta qui sotto con costo e rischio; la scelta è di Enzo | da fare |
+| A2 | Indagine: perché l'atlante diventa rosso a ogni unione, e proposta perché si rigeneri da solo (per esempio un passo sul runner della VM che apre la PR di rigenerazione) | C | proposta scritta qui sotto con costo e rischio; la scelta è di Enzo | proposta scritta (sezione «Proposta A2»), aspetta Enzo |
 | A3 | Riallineare la §0 di `SOT_STATE.md` (migrazione 000468) e togliere i due avvisi | VM | `python docs/kb/tools/aggiorna_numeri_sot.py` sulla VM, poi `handoff_lint.py` con 0 FAIL | fatto 2026-11-02 in PR #147: headline a `463 file migration 000001..000468`, `handoff_lint.py` senza FAIL |
 | A4 | Aggiornamenti di sicurezza falliti (glob, minimatch, postcss-selector-parser, @modelcontextprotocol/sdk): alzarli con `pnpm.overrides` nella radice, una PR sola | C | PR con lockfile aggiornato, CI verde, elenco delle allerte prima e dopo | in PR #142: `pnpm audit` da 51 allerte (1 critica, 19 alte) a 18 (0 critiche, 3 alte); restano solo salti di versione grossi: nodemailer 10, zod 4, glob 14, minimatch 11, katex 0.18. Typecheck di tutti i pacchetti verde, prove agent-gateway 160/160 e web 15/15 |
 | A5 | Descrizione del repository su GitHub superata | E | testo nuovo proposto: «Heuresys Advanced — piattaforma HRMS/BPM agentica: monorepo pnpm, API Fastify 5 su PostgreSQL 16, web Next.js 16, contratti Zod condivisi. Conteggi vivi in docs/kb/SOT_STATE.md». Da incollare in Settings, General, Description (non ho uno strumento che la cambi) | fatto 2026-11-02: descrizione aggiornata con il sì di Enzo e riletta |
@@ -76,6 +76,14 @@ for b in $(git for-each-ref --format='%(refname:short)' refs/remotes/origin); do
   echo "$b fuori-da-main=$(git rev-list --count origin/main..$b) dietro=$(git rev-list --count $b..origin/main)"
 done
 ```
+
+## Proposta A2: l'atlante che si rigenera da solo
+
+Perché diventa rosso: `atlante_fresco.py` confronta l'atlante con il codice, e ogni unione che tocca moduli, rotte, pagine o migrazioni lo rende vecchio. Rigenerarlo chiede il database (`build_atlas.py` legge lo schema vivo), quindi oggi lo fa qualcuno a mano sulla VM con `atlante-vm.sh`.
+
+Proposta: un'unità `systemd` sulla VM (timer giornaliero, o agganciata a `heuresys-advanced-deploy-watch` dopo ogni rilascio) che, quando `atlante_fresco.py` dice «vecchio», lancia `atlante-vm.sh` su una copia di prova aperta da `origin/main`, committa su un ramo `atlante/<AAAAMMGG>` e apre la PR. Nessuna unione automatica: la PR resta da unire come le altre.
+
+Costo: una sera di lavoro (unità, script di contorno, prova). Rischio: basso; legge soltanto il database e non tocca `main`. Il punto delicato è il permesso di aprire PR dalla VM con le credenziali già presenti per `gh`.
 
 ## Esito dei rami
 

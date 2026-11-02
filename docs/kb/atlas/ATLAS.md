@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `dd84fbe8` (2026-11-01T19:00:24+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `69258ecd` (2026-11-02T12:22:40+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,7 +10,7 @@
 | Route API | 679 |
 | Pagine web | 131 |
 | Schemi shared | 124 |
-| Tabelle DB | 382 (vuote: 69) |
+| Tabelle DB | 383 (vuote: 68) |
 | Viste / matview | 77 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 313 |
 
@@ -45,7 +45,7 @@
 | content-blueprint-links | /v1/content-blueprint-links | 5 | 4 | 4 | 1 |
 | dashboard | /v1/dashboard | 4 | 1 | 25 | 4 |
 | data-classification | /v1/data-classification | 1 | 1 | 1 | 1 |
-| delegations | /v1/delegations | 4 | 2 | 10 | 2 |
+| delegations | /v1/delegations | 4 | 2 | 12 | 2 |
 | engagement | /v1/engagement | 4 | 1 | 5 | 2 |
 | engagement-feedback | /v1/engagement-feedback | 10 | 4 | 2 | 1 |
 | enterprise-size-bands | /v1/enterprise-size-bands | 4 | 3 | 1 | 1 |
@@ -210,7 +210,6 @@
 - `sys.sys_occupation_classification_mappings`
 - `sys.sys_platform_user_tenant_assignments`
 - `sys.sys_platform_vocabulary_equivalences`
-- `sys.sys_tenant_consolidation_decisions`
 
 ## Key counts live
 

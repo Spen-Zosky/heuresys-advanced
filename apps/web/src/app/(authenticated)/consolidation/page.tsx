@@ -143,7 +143,13 @@ export default function ConsolidationPage() {
     queryFn: () => apiFetch<{ items: ConsolidationProposal[] }>(`${BASE}/${idCorrente}/proposals?group=${gruppo}`),
     enabled: idCorrente !== null && gruppo !== null,
   });
-  const righe = useMemo(() => proposals.data?.items ?? [], [proposals.data]);
+  // Le righe da decidere in cima, e fra queste le più incerte prima: è lì che serve lo sguardo.
+  const righe = useMemo(
+    () => [...(proposals.data?.items ?? [])].sort(
+      (a, b) => Number(a.decision !== null) - Number(b.decision !== null) || a.confidence - b.confidence,
+    ),
+    [proposals.data],
+  );
   const certe = useMemo(
     () => righe.filter((p) => p.outcome === "CORRISPONDENZA" && p.confidence >= CONSOLIDATION_CERTAIN_THRESHOLD && p.decision === null),
     [righe],
@@ -322,7 +328,7 @@ export default function ConsolidationPage() {
           />
           <EntityTable<ConsolidationProposal>
             isLoading={proposals.isLoading} isError={proposals.isError} errorMessage={t("consolidation.loadError")}
-            rows={righe} rowKey={(p) => p.proposalId} rowTestId="consolidation-proposal-row" columns={columns}
+            rows={righe} pageSize={100} rowKey={(p) => p.proposalId} rowTestId="consolidation-proposal-row" columns={columns}
             emptyTestId="consolidation-proposals-empty"
             emptyTitle={t("consolidation.proposalsEmptyTitle")} emptyDescription={t("consolidation.proposalsEmptyDescription")}
             caption={t("consolidation.caption")}

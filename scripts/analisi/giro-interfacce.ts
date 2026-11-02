@@ -176,7 +176,10 @@ async function scegliPersone(db: Db, hr: Set<string>, mascherati: Set<string>): 
           and u.user_status = 'ACTIVE' and u.user_type = 'STANDARD'
           and lower(u.user_email) <> all($1::text[]))
      select distinct on (ruolo, tenant_id) * from base
-      order by ruolo, tenant_id, fattore desc, dirige desc, incarico desc, email`,
+      order by ruolo, tenant_id, fattore desc,
+               -- per USER e TEAM_MEMBER serve una persona che NON dirige: è il caso «vedo solo me»
+               case when ruolo in ('USER','TEAM_MEMBER') then not dirige else dirige end desc,
+               incarico desc, email`,
     [escluse],
   );
 
@@ -192,8 +195,15 @@ async function scegliPersone(db: Db, hr: Set<string>, mascherati: Set<string>): 
   const persone: Persona[] = [
     { sigla: "ANON", ruolo: "(anonimo)", email: null, userId: null, tenantId: null, nota: "", ruoli: [], visibili: null, sottoposto: null, sorella: null },
   ];
+  const giaScelte = new Map<string, string>();
   for (const r of righe) {
     const tenant = r.tenant_id === rtl.tenant_id ? "RTL" : "SYS";
+    // La stessa persona scelta per due ruoli si visita una volta sola.
+    if (giaScelte.has(r.user_id)) {
+      log(`${tenant}-${r.ruolo}: stessa persona di ${giaScelte.get(r.user_id)}, non ripetuta`);
+      continue;
+    }
+    giaScelte.set(r.user_id, `${tenant}-${r.ruolo}`);
     persone.push({
       sigla: `${tenant}-${r.ruolo}`, ruolo: r.ruolo, email: r.email, userId: r.user_id, tenantId: r.tenant_id,
       nota: `incarico=${r.incarico} dirige=${r.dirige} fattore=${r.fattore}`, ruoli: [], visibili: null, sottoposto: null, sorella: null,
@@ -334,7 +344,7 @@ async function main() {
     process.env.GIRO_CHROMIUM ? { executablePath: process.env.GIRO_CHROMIUM } : {},
   );
   for (const p of persone) {
-    if (PROVA && p.sigla !== "ANON") {
+    if (PROVA) {
       wP([p.sigla, p.ruolo, p.ruoli.join(" "), p.visibili instanceof Set ? `${p.visibili.size} persone` : (p.visibili ?? ""), p.nota, "non provato (--prova)"]);
       continue;
     }

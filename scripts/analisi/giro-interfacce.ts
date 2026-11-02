@@ -328,7 +328,11 @@ async function main() {
   const utentiTenant = new Set<string>();
   if (db) for (const r of await db.q<{ u: string }>(`select user_id u from sys.sys_users`)) utentiTenant.add(r.u);
 
-  const browser = await chromium.launch();
+  // Un Chromium già presente sulla macchina si usa così: GIRO_CHROMIUM=<percorso dell'eseguibile>.
+  // Senza, Playwright cerca la sua build, che va installata con «npx playwright install chromium».
+  const browser = await chromium.launch(
+    process.env.GIRO_CHROMIUM ? { executablePath: process.env.GIRO_CHROMIUM, args: ["--headless=new", "--no-sandbox"] } : {},
+  );
   for (const p of persone) {
     if (PROVA && p.sigla !== "ANON") {
       wP([p.sigla, p.ruolo, p.ruoli.join(" "), p.visibili instanceof Set ? `${p.visibili.size} persone` : (p.visibili ?? ""), p.nota, "non provato (--prova)"]);

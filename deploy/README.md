@@ -165,6 +165,7 @@ bash scripts/vm-bootstrap.sh          # API :8013, web :3013, systemd units, ufw
 - Manage: `sudo systemctl {status,restart} heuresys-advanced-{api,web}` ·
   `journalctl -u heuresys-advanced-api -f`.
 - Override: `REPO_DIR=… PUBLIC_HOST=… API_PORT=… WEB_PORT=… bash scripts/vm-bootstrap.sh`.
+- Unit che il deploy non installa: `systemd/solo-vm/` (solo VM, a mano: `heuresys-advanced-atlante`, l'atlante che si rigenera e apre la PR) e `systemd/solo-linux-pc/` (solo gemello, da `scripts/provision-linux-pc.sh`).
 
 ### Mappa porte VM (oracle-vm-default) — registro allocazioni
 

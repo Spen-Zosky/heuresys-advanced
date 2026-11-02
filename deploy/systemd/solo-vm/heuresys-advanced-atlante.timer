@@ -1,0 +1,17 @@
+# Static unit (nessun segnaposto). Si installa a mano, vedi README.md qui accanto.
+#
+# Una volta al giorno basta: l'atlante diventa vecchio a ogni unione, ma la PR di rigenerazione
+# si unisce comunque a mano, e finche' ne resta una aperta lo script non ne apre un'altra.
+[Unit]
+Description=Heuresys Advanced — tick giornaliero dell'atlante automatico (A2)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=*-*-* 05:00:00 Europe/Rome
+RandomizedDelaySec=120
+# Recupera il giro perso se la VM era spenta alle 05:00.
+Persistent=true
+Unit=heuresys-advanced-atlante.service
+
+[Install]
+WantedBy=timers.target

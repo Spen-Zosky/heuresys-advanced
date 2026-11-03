@@ -113,6 +113,8 @@ export interface MyPerspective {
 }
 export interface MyInterfaces {
   perspectives: MyPerspective[];
+  /** S-1: ogni rotta del registro con il verdetto per chi chiama (guardia di pagina). */
+  routes: { route: string; allowed: boolean }[];
 }
 
 export const ME_INTERFACES_QUERY_KEY = ["me", "interfaces"] as const;

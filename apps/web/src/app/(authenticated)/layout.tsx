@@ -44,7 +44,8 @@ import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { setLocale } from "../../lib/i18n";
 import { primaryRoleOf } from "../../lib/role-precedence";
 import { PreferencesApplier } from "../../components/preferences-applier";
-import { SectionTabs } from "../../components/section-tabs";
+import { SectionTabs, SECTION_TAB_GROUPS } from "../../components/section-tabs";
+import { pageVerdict } from "../../lib/page-guard";
 
 const ICON = "h-4 w-4 shrink-0";
 
@@ -122,6 +123,16 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     return null;
   }
 
+  // S-1: senza il registro la guardia non può decidere, e una pagina aperta alla cieca è
+  // proprio il difetto che la guardia toglie. Si mostra l'errore, non la pagina.
+  if (ifaces.isError) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <span data-testid="app-error" className="text-sm text-danger">{t("shell:session.error")}</span>
+      </main>
+    );
+  }
+
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   // Build the sidebar from the DB-driven registry (GET /v1/me/interfaces). Server-side gating
@@ -158,6 +169,10 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   }
 
   const groups: NavGroup[] = navGroups;
+
+  // S-1: la pagina si disegna solo se la stessa regola del menu la apre a chi chiama. Una
+  // pagina negata non monta i propri componenti, quindi non parte nessuna chiamata a valle.
+  const verdict = pageVerdict(pathname, ifaces.data?.routes ?? [], SECTION_TAB_GROUPS);
 
   const roles = user.roles ?? [];
   const ADMIN_ROLES = new Set(["PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER", "ORG_DIRECTOR"]);
@@ -243,8 +258,20 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           the session is known. Renders nothing. */}
       <PreferencesApplier />
       {/* S1009: in-page tab bar for the 6 merge groups; renders nothing off those routes. */}
-      <SectionTabs />
-      {children}
+      {verdict.kind === "denied" ? (
+        <main data-testid="page-no-access" className="mx-auto max-w-2xl px-6 py-16 space-y-4">
+          <h1 className="text-xl font-semibold">{t("shell:noAccess.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("shell:noAccess.body", { route: verdict.route })}</p>
+          <Button variant="outline" size="sm" onClick={() => router.push("/me")}>
+            {t("shell:noAccess.home")}
+          </Button>
+        </main>
+      ) : (
+        <>
+          <SectionTabs />
+          {children}
+        </>
+      )}
     </DashboardShell>
   );
 }

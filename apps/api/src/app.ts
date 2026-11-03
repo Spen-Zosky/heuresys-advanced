@@ -286,7 +286,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     }
   });
 
-  // 2b-bis. Il test del valore (F0-3, migrazione 000469) — registro degli eventi di uso e di
+  // 2b-bis. Il test del valore (F0-3, migrazione 000470) — registro degli eventi di uso e di
   //     decisione in audit.valore_eventi. Hook di ciclo di vita (onSend + onResponse), come le
   //     metriche: indipendente dall'ordine dei plugin, e non rompe mai una risposta.
   registraEventiDiValore(app, { serializzato: options.valoreSerializzato ?? false });

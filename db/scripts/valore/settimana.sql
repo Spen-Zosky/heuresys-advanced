@@ -3,7 +3,7 @@
 -- Per tenant e per settimana (lunedì, ora di Roma): le decisioni tracciabili, chi le ha
 -- prese, su quanti oggetti, e quante persone hanno usato pagine o agenti. Sola lettura.
 -- La definizione di «decisione tracciabile» è una sola: sys.v_valore_decisioni_tracciabili
--- (migrazione 000469). Uso:
+-- (migrazione 000470). Uso:
 --   psql -v ON_ERROR_STOP=1 -v tenant="'rtl-bank'" -f db/scripts/valore/settimana.sql
 -- Senza -v tenant restituisce tutti i tenant.
 \if :{?tenant}

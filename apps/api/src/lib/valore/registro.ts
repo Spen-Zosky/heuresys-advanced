@@ -1,7 +1,7 @@
 /**
  * apps/api/src/lib/valore/registro.ts — F0-3, il test del valore come misura.
  *
- * Dopo ogni risposta l'API scrive in `audit.valore_eventi` (migrazione 000469):
+ * Dopo ogni risposta l'API scrive in `audit.valore_eventi` (migrazione 000470):
  *  - una DECISIONE per ogni risposta 2xx su una rotta del catalogo
  *    `audit.valore_rotte_decisione`, con chi, che cosa, su quale oggetto, l'esito
  *    se la rotta lo porta, e la superficie (pagina, agente o `api` se manca);

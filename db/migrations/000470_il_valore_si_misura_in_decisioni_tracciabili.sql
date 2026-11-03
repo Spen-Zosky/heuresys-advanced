@@ -1,4 +1,4 @@
--- 000469 — F0-3 del programma change management: il «test del valore» diventa una misura.
+-- 000470 — F0-3 del programma change management: il «test del valore» diventa una misura.
 --
 -- IL PERCHE'. Il PRD (docs/product/BUSINESS_SCOPE_AND_PRD.md §1.2) tiene come stella polare
 -- il test del valore: «il sistema crea valore se e solo se il dato inserito genera decisioni
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS audit.valore_tipi_decisione (
 );
 
 COMMENT ON TABLE audit.valore_tipi_decisione IS
-  '000469 (F0-3) — catalogo chiuso dei tipi di decisione che contano per il test del valore. '
+  '000470 (F0-3) — catalogo chiuso dei tipi di decisione che contano per il test del valore. '
   'Un tipo nuovo entra solo con una migrazione: è parte della definizione di decisione tracciabile.';
 
 -- ---------------------------------------------------------------------------
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS audit.valore_rotte_decisione (
 );
 
 COMMENT ON TABLE audit.valore_rotte_decisione IS
-  '000469 (F0-3) — mappa rotta API -> tipo di decisione. L''API la legge (cache di 5 minuti) e '
+  '000470 (F0-3) — mappa rotta API -> tipo di decisione. L''API la legge (cache di 5 minuti) e '
   'registra un evento di decisione per ogni risposta 2xx su queste rotte.';
 
 -- ---------------------------------------------------------------------------
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS audit.valore_eventi (
 );
 
 COMMENT ON TABLE audit.valore_eventi IS
-  '000469 (F0-3) — registro append-only degli eventi di uso e di decisione (attore, verbo, '
+  '000470 (F0-3) — registro append-only degli eventi di uso e di decisione (attore, verbo, '
   'oggetto, superficie, istante). Lo scrive l''API dopo la risposta; la superficie è dichiarata '
   'dal client (intestazione x-heuresys-superficie), l''identità viene dal token.';
 
@@ -275,7 +275,7 @@ WHERE e.valore_evento_tipo = 'decisione'
   AND e.valore_evento_oggetto_id IS NOT NULL;
 
 COMMENT ON VIEW sys.v_valore_decisioni_tracciabili IS
-  '000469 (F0-3) — LA definizione di decisione tracciabile: chi, che cosa (catalogo chiuso), su che '
+  '000470 (F0-3) — LA definizione di decisione tracciabile: chi, che cosa (catalogo chiuso), su che '
   'cosa, quando, da quale pagina o agente. INFORMATIVA: zero righe finché nessuno ha deciso.';
 
 -- ---------------------------------------------------------------------------
@@ -309,7 +309,7 @@ JOIN sys.sys_tenancies tn ON tn.tenant_id = ev.valore_evento_tenant_id
 GROUP BY ev.valore_evento_tenant_id, tn.tenant_code, ev.settimana;
 
 COMMENT ON VIEW sys.v_valore_settimana IS
-  '000469 (F0-3) — il test del valore come misura: per tenant e per settimana (lunedì, ora di Roma) '
+  '000470 (F0-3) — il test del valore come misura: per tenant e per settimana (lunedì, ora di Roma) '
   'le decisioni tracciabili, chi le ha prese (persona o agente), su quanti oggetti, e quante persone '
   'hanno usato pagine o agenti. INFORMATIVA.';
 
@@ -327,7 +327,7 @@ BEGIN
   SELECT count(*) INTO n_tipi FROM audit.valore_tipi_decisione WHERE attivo;
   SELECT count(*) INTO n_rotte FROM audit.valore_rotte_decisione;
   IF n_tipi < 20 OR n_rotte < 26 THEN
-    RAISE EXCEPTION '000469: catalogo incompleto (% tipi attivi, attesi almeno 20; % rotte, attese almeno 26)', n_tipi, n_rotte;
+    RAISE EXCEPTION '000470: catalogo incompleto (% tipi attivi, attesi almeno 20; % rotte, attese almeno 26)', n_tipi, n_rotte;
   END IF;
 
   -- ogni tipo attivo ha almeno una rotta: un verbo senza rotta non verrebbe mai contato
@@ -335,26 +335,26 @@ BEGIN
     FROM audit.valore_tipi_decisione t
    WHERE t.attivo AND NOT EXISTS (SELECT 1 FROM audit.valore_rotte_decisione r WHERE r.codice = t.codice);
   IF n_orfani <> 0 THEN
-    RAISE EXCEPTION '000469: % tipi di decisione attivi senza alcuna rotta', n_orfani;
+    RAISE EXCEPTION '000470: % tipi di decisione attivi senza alcuna rotta', n_orfani;
   END IF;
 
   SELECT count(*) INTO n_viste FROM pg_views
    WHERE schemaname = 'sys' AND viewname IN ('v_valore_decisioni_tracciabili', 'v_valore_settimana');
   IF n_viste <> 2 THEN
-    RAISE EXCEPTION '000469: viste attese 2 in sys, trovate %', n_viste;
+    RAISE EXCEPTION '000470: viste attese 2 in sys, trovate %', n_viste;
   END IF;
 
   SELECT count(*) INTO n_gdpr FROM sys.sys_gdpr_data_map
    WHERE gdpr_map_table_schema = 'audit' AND gdpr_map_table_name = 'valore_eventi'
      AND gdpr_map_subject_fk = 'valore_evento_attore_user_id' AND gdpr_map_reference_kind = 'ACTOR';
   IF n_gdpr <> 1 THEN
-    RAISE EXCEPTION '000469: la colonna attore non è classificata ACTOR nel registro GDPR (%)', n_gdpr;
+    RAISE EXCEPTION '000470: la colonna attore non è classificata ACTOR nel registro GDPR (%)', n_gdpr;
   END IF;
 
   PERFORM count(*) FROM sys.v_valore_settimana;
-  RAISE NOTICE '000469 ok: % tipi, % rotte, viste interrogabili', n_tipi, n_rotte;
+  RAISE NOTICE '000470 ok: % tipi, % rotte, viste interrogabili', n_tipi, n_rotte;
 END $$;
 
 COMMIT;
 
--- FINE 000469
+-- FINE 000470

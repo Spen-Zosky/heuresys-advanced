@@ -12,7 +12,7 @@ Una decisione è tracciabile quando porta tutte e cinque queste informazioni:
 4. **quando**: l'istante in cui l'API ha accettato la decisione (risposta 2xx);
 5. **da dove**: la superficie, cioè una pagina del web o un agente.
 
-La sola forma eseguibile della definizione è la vista `sys.v_valore_decisioni_tracciabili` (migrazione `000469`). Ogni altro testo che parli di decisioni tracciabili rimanda a quella vista.
+La sola forma eseguibile della definizione è la vista `sys.v_valore_decisioni_tracciabili` (migrazione `000470`). Ogni altro testo che parli di decisioni tracciabili rimanda a quella vista.
 
 Una decisione che arriva senza superficie (uno script, un'integrazione, una chiamata diretta all'API) si registra lo stesso, con superficie `api`, ma non è tracciabile: si conta a parte come `decisioni_senza_traccia`. Il motivo è il test stesso: un dato entrato nel sistema non prova che il sistema abbia guidato una scelta.
 

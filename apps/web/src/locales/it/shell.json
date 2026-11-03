@@ -97,5 +97,10 @@
     "team_peer": "Compagno di squadra",
     "delegation": "Delega ricevuta",
     "custody": "Custodia segnalazioni"
+  },
+  "noAccess": {
+    "title": "Non hai accesso a questa pagina",
+    "body": "La pagina «{{route}}» non fa parte del tuo profilo, quindi non ti mostriamo dati a metà. Se ti serve per il tuo lavoro, chiedi a chi gestisce i ruoli nella tua azienda.",
+    "home": "Torna alla tua pagina iniziale"
   }
 }

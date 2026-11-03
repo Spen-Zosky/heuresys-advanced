@@ -98,6 +98,17 @@ export function useCurrentUserPermissions() {
   });
 }
 
+/**
+ * S-5 (piano interfacce 2026-11-03): true se chi chiama ha il permesso. Una pagina mostra un
+ * pulsante o un modulo di scrittura solo se l'API accetterà la scrittura, e non fa partire le
+ * letture di supporto a un modulo che non mostra: niente pulsanti che finiscono in 403.
+ * Mentre i permessi si caricano la risposta è false, quindi il pulsante compare dopo, non prima.
+ */
+export function useCan(permission: string): boolean {
+  const perms = useCurrentUserPermissions();
+  return perms.data?.permissions.includes(permission) ?? false;
+}
+
 export interface MyInterface {
   code: string;
   label: string;
@@ -107,12 +118,14 @@ export interface MyInterface {
   order: number;
 }
 export interface MyPerspective {
-  code: "PROCESS" | "ENTERPRISE" | "TALENT";
+  code: "OVERVIEW" | "GOVERNANCE" | "WORKFORCE" | "INTELLIGENCE" | "PERSONAL";
   label: string;
   interfaces: MyInterface[];
 }
 export interface MyInterfaces {
   perspectives: MyPerspective[];
+  /** S-1: ogni rotta del registro con il verdetto per chi chiama (guardia di pagina). */
+  routes: { route: string; allowed: boolean }[];
 }
 
 export const ME_INTERFACES_QUERY_KEY = ["me", "interfaces"] as const;

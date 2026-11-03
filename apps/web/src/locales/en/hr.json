@@ -798,7 +798,8 @@
       "moved": "Application moved to {{stage}}",
       "moveError": "Move rejected by the server.",
       "emptyTitle": "No applications",
-      "emptyDesc": "Register a candidate and apply them to a posting: it will show up here as a card."
+      "emptyDesc": "Register a candidate and apply them to a posting: it will show up here as a card.",
+      "readOnly": "You can view the board, but moving an application is up to whoever manages candidates."
     },
     "stage": {
       "APPLIED": "Applied",

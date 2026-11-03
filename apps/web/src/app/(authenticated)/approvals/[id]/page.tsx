@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { AgentPanel, Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import type { ApprovalRequestDetail, ApprovalStatus, ApprovalStepStatus, ApprovalStepDetail } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
-import { useCurrentUser } from "@/lib/api/auth";
+import { useCan, useCurrentUser } from "@/lib/api/auth";
 import { AGENT_DEV_ENABLED, useAgentStream } from "@/lib/use-agent-stream";
 
 function reqStatusVariant(s: ApprovalStatus): "success" | "secondary" | "destructive" {
@@ -83,6 +83,10 @@ export default function ApprovalDetailPage() {
 
   const d = detail.data;
   const myUserId = me.data?.userId;
+  // S-5: decidere chiede `approval:decide`, applicare l'esito `approval:create` (le stesse
+  // guardie dell'API). Chi non le ha vede lo stato, non i pulsanti che finirebbero in 403.
+  const canDecide = useCan("approval:decide");
+  const canApply = useCan("approval:create");
   const myPendingStep: ApprovalStepDetail | undefined = d?.steps.find((s) => s.approverUserId === myUserId && s.status === "PENDING");
   const busy = decide.isPending || apply.isPending;
 
@@ -128,7 +132,7 @@ export default function ApprovalDetailPage() {
           />
 
           {/* My pending action (approver of an open step) */}
-          {myPendingStep && (
+          {canDecide && myPendingStep && (
             <Card data-testid="approval-my-action">
               <CardHeader>
                 <CardTitle>{t("approvals.detail.yourDecisionTitle")}</CardTitle>
@@ -160,7 +164,7 @@ export default function ApprovalDetailPage() {
           )}
 
           {/* Apply (terminal effect) — visible when APPROVED */}
-          {d.status === "APPROVED" && (
+          {canApply && d.status === "APPROVED" && (
             <Card data-testid="approval-apply-card">
               <CardHeader>
                 <CardTitle>{t("approvals.detail.applyTitle")}</CardTitle>

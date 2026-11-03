@@ -9,6 +9,7 @@ import {
 } from "@heuresys/ui";
 import type { JobPosting, JobPostingStatus } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import {
   CODE_PATTERN, KEY, POSTING_STATUSES, POSTING_VISIBILITIES,
   usePostings, useRequisitions,
@@ -44,6 +45,8 @@ export default function PostingsPage() {
     defaultValues: { requisitionId: "", code: "", title: "", description: "", visibility: "INTERNAL", location: "", expiresOn: "" },
   });
 
+  // S-5: creare e cambiare stato chiedono `requisition:manage`; senza, la pagina è in sola lettura.
+  const canWrite = useCan("requisition:manage");
   const create = useMutation({
     mutationFn: (v: FormValues) =>
       apiFetch<JobPosting>("/v1/job-postings", {
@@ -90,6 +93,7 @@ export default function PostingsPage() {
     <main data-testid="postings-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader title={t("recruiting.postings.title")} description={t("recruiting.postings.description")} />
 
+      {canWrite && (
       <Card>
         <CardHeader><CardTitle>{t("recruiting.postings.newTitle")}</CardTitle></CardHeader>
         <CardContent>
@@ -141,6 +145,7 @@ export default function PostingsPage() {
           )}
         </CardContent>
       </Card>
+      )}
 
       {q.isLoading ? (
         <div className="flex justify-center py-12"><Spinner /></div>
@@ -170,7 +175,7 @@ export default function PostingsPage() {
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
                       <Badge data-testid="posting-row-status">{t(`recruiting.postingStatus.${p.status}`)}</Badge>
-                      <select
+                      {canWrite && <select
                         aria-label={t("recruiting.fields.status")}
                         data-testid="posting-row-status-select"
                         className={SELECT_CLASS}
@@ -181,7 +186,7 @@ export default function PostingsPage() {
                         {POSTING_STATUSES.map((s) => (
                           <option key={s} value={s}>{t(`recruiting.postingStatus.${s}`)}</option>
                         ))}
-                      </select>
+                      </select>}
                     </div>
                   </td>
                 </tr>

@@ -143,7 +143,8 @@ export const PositionIntelligenceProfileSchema = z.object({
   requiredKpis: z.unknown(),
   requiredLearningPaths: z.unknown(),
   careerPaths: z.unknown(),
-  compensationProfile: z.unknown(),
+  /** S-7: assente (dichiarato in `masked`) a chi non legge `COMPENSATION` in chiaro. */
+  compensationProfile: z.unknown().optional(),
   successionRelevance: z.unknown(),
   aiHints: z.record(z.string(), z.unknown()),
   /** S-7: `compensationProfile`, `economicWeight` e `ownerUserId` trattenuti a chi non legge `COMPENSATION` in chiaro. */

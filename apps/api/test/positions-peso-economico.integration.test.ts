@@ -20,7 +20,10 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 
 const PLATFORM_EMAIL = "platform-test-admin@collaudo.invalid";
-const HR_MANDATE_EMAIL = "federica.marchetti@rtl-bank.org";
+// Un collaudo con TENANT_ADMIN che esiste sia nella CI sia in produzione (data-steward lo usa
+// gia'): una persona vera puo' perdere il mandato, e allora la prova HR cadrebbe per la ragione
+// sbagliata — e' successo il 2026-10-31 con la Direttrice HR di RTL.
+const HR_MANDATE_EMAIL = "governo@collaudo.invalid";
 const MANAGER_EMAIL = "paolo.caputo@rtl-bank.org";
 
 type Riga = {
@@ -35,6 +38,8 @@ const cookie: Record<string, string> = {};
 let posConPeso = "";
 let posDelCapo = "";
 let capoUserId = "";
+/** Il peso messo dalla prova, se la posizione non ne aveva uno: si rimette com'era. */
+let pesoDaRipristinare: { id: string } | null = null;
 
 async function get<T>(chi: string, url: string): Promise<{ status: number; body: T }> {
   const r = await t.app.inject({ method: "GET", url, headers: { cookie: cookie[chi] ?? "" } });
@@ -55,6 +60,24 @@ describe("S-7 — il peso economico della posizione solo a chi vede le retribuzi
         ORDER BY p.position_code LIMIT 1`,
     );
     posConPeso = conPeso.rows[0]?.id ?? "";
+    if (!posConPeso) {
+      // Misurato sul banco del 2026-11-03: 312 posizioni RTL, 0 con un peso. Senza un peso la
+      // prova non avrebbe bersaglio, quindi se lo da' da se' su una posizione con proprietario
+      // e lo toglie alla fine.
+      const r = await pool.query<{ id: string }>(
+        `UPDATE sys.sys_positions SET position_economic_weight = 0.42
+          WHERE position_id = (
+            SELECT p.position_id FROM sys.sys_positions p
+              JOIN sys.sys_tenancies tn ON tn.tenant_id = p.position_tenant_id AND tn.tenant_code = 'RTL_BANK'
+             WHERE p.position_economic_weight IS NULL AND p.position_owner_user_id IS NOT NULL
+               AND p.position_owner_user_id <> (SELECT user_id FROM sys.sys_users WHERE lower(user_email) = $1)
+             ORDER BY p.position_code LIMIT 1)
+          RETURNING position_id AS id`,
+        [MANAGER_EMAIL],
+      );
+      posConPeso = r.rows[0]?.id ?? "";
+      if (posConPeso) pesoDaRipristinare = { id: posConPeso };
+    }
     const delCapo = await pool.query<{ id: string; owner: string }>(
       `SELECT p.position_id AS id, p.position_owner_user_id AS owner FROM sys.sys_positions p
         WHERE p.position_owner_user_id =
@@ -66,6 +89,12 @@ describe("S-7 — il peso economico della posizione solo a chi vede le retribuzi
     capoUserId = delCapo.rows[0]?.owner ?? "";
   });
   afterAll(async () => {
+    if (pesoDaRipristinare) {
+      await pool.query(
+        `UPDATE sys.sys_positions SET position_economic_weight = NULL WHERE position_id = $1`,
+        [pesoDaRipristinare.id],
+      );
+    }
     await t.app.close();
     await closePool();
   });

@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/
 import { TimelinePanel } from "@/components/timeline-panel";
 import type { UserDossier } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
@@ -93,6 +94,7 @@ export default function UserDetailPage() {
   const params = useParams<{ userId: string }>();
   const userId = params.userId;
 
+  const canReadTimeline = useCan("timeline:read");
   const q = useQuery({
     queryKey: ["users", userId, "dossier"],
     queryFn: () => apiFetch<UserDossier>(`/v1/users/${userId}/dossier`),
@@ -310,7 +312,10 @@ export default function UserDetailPage() {
       {/* D5 (#49): il percorso della persona, non solo il suo presente.
           L'API decide chi puo' vederla (asse organizzativo, I18): qui si
           mostra e basta. */}
-      <TimelinePanel basePath="/v1/user-timeline" userId={userId} testId="user-timeline-panel" />
+      {/* S-6: la storia chiede timeline:read; senza il permesso il riquadro non chiede e non compare. */}
+      {canReadTimeline && (
+        <TimelinePanel basePath="/v1/user-timeline" userId={userId} testId="user-timeline-panel" />
+      )}
 
       {/* Fin qui la scheda RACCONTA. Da qui si GOVERNA: anagrafica e ruoli
           sono le due cose che un amministratore deve poter cambiare senza

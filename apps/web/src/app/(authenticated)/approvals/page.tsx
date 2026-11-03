@@ -15,6 +15,7 @@ import type {
   UserListResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { etichettaPersona } from "@/lib/person-label";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
@@ -59,9 +60,14 @@ export default function ApprovalsPage() {
   });
 
   // Tenant-scoped user list to pick approvers from (live, no mock).
+  // S-5, S-19: il modulo di creazione e la lista delle persone servono solo a chi può creare
+  // una richiesta; per gli altri non si mostrano e la lista non si chiede (era un 403).
+  const canCreate = useCan("approval:create");
+  const canReadUsers = useCan("user:read");
   const users = useQuery({
     queryKey: ["approvals", "users"],
     queryFn: () => apiFetch<UserListResponse>("/v1/users?limit=200"),
+    enabled: canCreate && canReadUsers,
   });
 
   const createReq = useMutation({
@@ -118,6 +124,7 @@ export default function ApprovalsPage() {
       />
 
       {/* Create approval request */}
+      {canCreate && (
       <Card>
         <CardHeader>
           <CardTitle>{t("approvals.create.cardTitle")}</CardTitle>
@@ -209,6 +216,7 @@ export default function ApprovalsPage() {
           </form>
         </CardContent>
       </Card>
+      )}
 
       {/* Filter */}
       <div data-testid="approvals-filters" className="flex flex-wrap items-end gap-3">

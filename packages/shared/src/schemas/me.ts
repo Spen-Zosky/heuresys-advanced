@@ -355,8 +355,19 @@ export type MePerspectiveGroup = z.infer<typeof MePerspectiveGroupSchema>;
 
 /** GET /v1/me/interfaces — sidebar interfaces visible to the caller, grouped by the 3 PET
  *  perspectives (all 3 always present, so an empty perspective renders an honest empty-state). */
+/** S-1 (piano interfacce 2026-11-03): per ogni rotta del registro, attiva o assorbita come
+ *  scheda, se chi chiama la può aprire. La pagina web lo usa come guardia: chi digita
+ *  l'indirizzo di una pagina che non gli spetta vede «non hai accesso», non una pagina a
+ *  metà con errori 403. L'autorità resta l'API; questa è la stessa regola del menu. */
+export const MeRouteAccessSchema = z.object({
+  route: z.string(),
+  allowed: z.boolean(),
+});
+export type MeRouteAccess = z.infer<typeof MeRouteAccessSchema>;
+
 export const MeInterfacesResponseSchema = z.object({
   perspectives: z.array(MePerspectiveGroupSchema),
+  routes: z.array(MeRouteAccessSchema),
 });
 export type MeInterfacesResponse = z.infer<typeof MeInterfacesResponseSchema>;
 

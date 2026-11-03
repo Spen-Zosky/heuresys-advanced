@@ -48,7 +48,10 @@ async function login(t: TestApp, email: string): Promise<Map<string, string>> {
   return cookies;
 }
 
-type Body = { perspectives: { code: string; label: string; interfaces: { code: string }[] }[] };
+type Body = {
+  perspectives: { code: string; label: string; interfaces: { code: string; route: string }[] }[];
+  routes: { route: string; allowed: boolean }[];
+};
 async function interfaces(t: TestApp, c: Map<string, string>): Promise<Body> {
   const r = await t.app.inject({ method: "GET", url: "/v1/me/interfaces", headers: { cookie: ch(c) } });
   expect(r.statusCode).toBe(200);
@@ -68,7 +71,7 @@ type Reg = {
   classi: DataClass[];
 };
 
-/** The active sidebar registry — mirrors repo.loadActiveInterfaces' source. `reqPair` is the
+/** The active sidebar registry — mirrors the active rows of repo.loadInterfaces. `reqPair` is the
  *  `resource:action` string the service tests against the caller's permission codes; `classi`
  *  are the data classes the page declares (#99 F7, mig `000315`).
  *
@@ -293,6 +296,32 @@ describe("/v1/me/interfaces", () => {
       const shouldSee = (i.reqPair === null || managerPerms.has(i.reqPair)) && m1Manager.has(i.code);
       expect(visible.has(i.code), `${i.code} (reqPair=${i.reqPair ?? "none"})`).toBe(shouldSee);
     }
+  });
+
+  // S-1 (piano interfacce 2026-11-03): la guardia di pagina legge `routes`. Il verdetto deve
+  // essere la STESSA regola del menu: una rotta del menu è aperta, una rotta del registro che
+  // non è nel menu è chiusa, e le pagine assorbite come schede (is_active=false) ci sono
+  // anch'esse, perché si raggiungono digitandone l'indirizzo.
+  it("routes: un verdetto per ogni riga del registro, coerente con il menu", async () => {
+    const tutte = await pool.query<{ route: string; active: boolean }>(
+      `SELECT ui_interface_route AS route, ui_interface_is_active AS active FROM sys.sys_ui_interfaces`,
+    );
+    for (const c of [adminC, managerC, userC]) {
+      const b = await interfaces(suite, c);
+      expect(b.routes.length).toBe(tutte.rows.length);
+      const nelMenu = new Set(b.perspectives.flatMap((p) => p.interfaces.map((i) => i.route)));
+      const aperte = new Set(b.routes.filter((r) => r.allowed).map((r) => r.route));
+      for (const r of nelMenu) expect(aperte.has(r), `${r} è nel menu ma la guardia la chiude`).toBe(true);
+      const attive = new Set(tutte.rows.filter((r) => r.active).map((r) => r.route));
+      for (const r of b.routes) {
+        if (attive.has(r.route) && !nelMenu.has(r.route)) {
+          expect(r.allowed, `${r.route} non è nel menu ma la guardia la apre`).toBe(false);
+        }
+      }
+    }
+    // la verifica non è cieca: la persona senza deleghe ha almeno una rotta chiusa
+    const b = await interfaces(suite, userC);
+    expect(b.routes.some((r) => !r.allowed)).toBe(true);
   });
 
   it("unauthenticated → 401", async () => {

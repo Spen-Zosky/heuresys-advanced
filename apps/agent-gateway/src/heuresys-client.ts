@@ -30,6 +30,13 @@ export interface HeuresysClientOptions {
   baseUrl: string; // e.g. http://localhost:3001
   session: Session;
   fetchImpl?: FetchLike;
+  /**
+   * F0-3, il test del valore: il codice dell'agente che chiama, dichiarato all'API in
+   * `x-heuresys-superficie: agente:<codice>`. Così una decisione presa dall'agente per
+   * conto della persona si conta come decisione dell'agente, non come dato di uno script.
+   * È contesto, non identità: chi agisce resta la persona del cookie.
+   */
+  agente?: string;
 }
 
 /**
@@ -45,6 +52,7 @@ export class HeuresysClient {
   private readonly baseUrl: string;
   private session: Session;
   private readonly fetchImpl: FetchLike;
+  private readonly superficie: string;
   private refreshing: Promise<boolean> | null = null;
   private contatore: OsservatoreRisposte | undefined;
 
@@ -52,12 +60,14 @@ export class HeuresysClient {
     this.baseUrl = opts.baseUrl.replace(/\/$/, "");
     this.session = opts.session;
     this.fetchImpl = opts.fetchImpl ?? (globalThis.fetch as unknown as FetchLike);
+    this.superficie = `agente:${opts.agente ?? "assistente-hr"}`;
   }
 
   private headers(method: string): Record<string, string> {
     const h: Record<string, string> = {
       "content-type": "application/json",
       cookie: `hrx_access=${this.session.cookieAccess}; hrx_csrf=${this.session.cookieCsrf}`,
+      "x-heuresys-superficie": this.superficie,
     };
     if (!SAFE_METHODS.has(method)) h["x-csrf-token"] = this.session.csrf; // CSRF on writes only
     return h;

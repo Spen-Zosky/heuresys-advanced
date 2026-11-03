@@ -44,6 +44,9 @@ export async function buildTestApp(options: TestAppOptions = {}): Promise<TestAp
     // identical regardless of a dev .env MFA_ENFORCEMENT_ENABLED=false (S989);
     // the dedicated bypass test opts out with { mfaEnforcement: false }.
     mfaEnforcement: true,
+    // F0-3: le scritture tardive del registro del valore non devono intrecciarsi con la
+    // transazione di file (D-52): ogni richiesta aspetta quelle ancora in volo.
+    valoreSerializzato: true,
     ...options,
     smsSender: sms,
   });

@@ -70,6 +70,12 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
   ] },
 ];
 
+/** S-1: i gruppi come elenchi di indirizzi, per la guardia di pagina (una scheda senza riga
+ *  propria nel registro segue la pagina principale del suo gruppo). */
+export const SECTION_TAB_GROUPS: ReadonlyArray<ReadonlyArray<string>> = MERGE_GROUPS.map((g) =>
+  g.tabs.map((t) => t.href),
+);
+
 /** Match with a "/" boundary so /analytics/skills does NOT swallow
  *  /analytics/skills-by-category (a bare startsWith would). */
 function matchHref(pathname: string, href: string): boolean {

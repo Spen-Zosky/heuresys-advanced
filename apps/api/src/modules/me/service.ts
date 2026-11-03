@@ -145,8 +145,11 @@ export const meService = {
     // perche' M1 va interrogata dominio per dominio.
     const dominiCheAprono = await dominiCheApronoUnaSuperficie(pool, ctx);
     const hasAdminRole = dominiCheAprono.size > 0;
-    const rows = await repo.loadActiveInterfaces(pool);
-    const visible = rows.filter((i) => {
+    const rows = await repo.loadInterfaces(pool);
+    // La stessa regola decide il menu (righe attive) e la guardia di pagina (S-1, tutte le
+    // righe: una pagina assorbita come scheda resta raggiungibile digitandone l'indirizzo, e
+    // va negata a chi non la potrebbe aprire dal menu).
+    const canOpen = (i: repo.UiInterfaceRow): boolean => {
       // Una coppia permesso DICHIARATA si valuta SEMPRE, admin o no. La stesura
       // precedente usciva su `if (!i.requiresAdmin) return true` e non arrivava mai
       // a leggerla: la console delle segnalazioni, che ha `whistleblowing:read` e
@@ -194,7 +197,9 @@ export const meService = {
         ? i.dataClasses
         : i.dataClasses.filter((c) => !i.dataClassesOpenToTenant.includes(c));
       return almenoUnaCellaAperta(dominiCheAprono, daFiltrare);
-    });
+    };
+    const verdicts = rows.map((i) => ({ row: i, allowed: canOpen(i) }));
+    const visible = verdicts.filter((v) => v.row.isActive && v.allowed).map((v) => v.row);
     return {
       perspectives: UI_PERSPECTIVES.map((p) => ({
         code: p.code,
@@ -210,6 +215,7 @@ export const meService = {
             order: i.order,
           })),
       })),
+      routes: verdicts.map((v) => ({ route: v.row.route, allowed: v.allowed })),
     };
   },
 

@@ -201,6 +201,11 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
   role_matrix: "matrice ruoli x permessi: configurazione dell'accesso, non chi lo detiene",
   mfa_policy: "una politica di tenant è configurazione (misurato in 000315: dichiararla CREDENTIAL toglieva la pagina ai due TENANT_ADMIN reali)",
   tenant: "configurazione del tenant e salute di sistema",
+  // S-3 (000469, piano interfacce 2026-11-03): la voce «Salute del sistema» dichiara ora il
+  // permesso che le sue rotte usano. Il cruscotto porta metriche tecniche e il registro delle
+  // azioni self-service (chi ha fatto quale azione e quando, col nome visualizzato): metadati
+  // operativi, nessuna delle classi sensibili (retribuzione, valutazione, salute, credenziali).
+  observability: "salute di sistema: metriche tecniche e registro operativo delle azioni, nessun dato sensibile di persona",
   seed_acquisition: "corse tecniche di acquisizione",
   provenance: "tracciabilità dei dati: da dove vengono, non di chi sono",
   content: "contenuti editoriali",

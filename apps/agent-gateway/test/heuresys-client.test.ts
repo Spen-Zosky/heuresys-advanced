@@ -46,6 +46,19 @@ describe("HeuresysClient auth/CSRF", () => {
     expect(calls[0]!.headers["cookie"]).toContain("hrx_csrf=CT");
   });
 
+  it("F0-3: dichiara la superficie agente su ogni chiamata, così l'API la conta come agente", async () => {
+    const { fetchImpl, calls } = recordingFetch(() => ({ ok: true, status: 200, body: {} }));
+    const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
+    await c.call("GET", "/positions");
+    await c.call("POST", "/goals", { title: "x" });
+    expect(calls.map((x) => x.headers["x-heuresys-superficie"])).toEqual(["agente:assistente-hr", "agente:assistente-hr"]);
+
+    const altro = recordingFetch(() => ({ ok: true, status: 200, body: {} }));
+    const c2 = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl: altro.fetchImpl, agente: "consolidamento" });
+    await c2.call("GET", "/positions");
+    expect(altro.calls[0]!.headers["x-heuresys-superficie"]).toBe("agente:consolidamento");
+  });
+
   it("refreshes once on 401 then retries (single-flight, M-5)", async () => {
     let first = true;
     const { fetchImpl, calls } = recordingFetch((url) => {

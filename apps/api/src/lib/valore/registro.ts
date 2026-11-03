@@ -211,8 +211,20 @@ async function registra(req: FastifyRequest, reply: FastifyReply): Promise<void>
   if (voce) await registraDecisioni(req, user.tenantId, user.userId, sup, rotta, voce);
 }
 
+// Le scritture del registro ancora in volo, in catena. Usata solo in modo serializzato.
+let inVolo: Promise<void> = Promise.resolve();
+
 /** Aggancia il registro all'app. Va chiamata prima della registrazione delle rotte. */
-export function registraEventiDiValore(app: FastifyInstance): void {
+export function registraEventiDiValore(app: FastifyInstance, opzioni: { serializzato?: boolean } = {}): void {
+  const serializzato = opzioni.serializzato === true;
+  if (serializzato) {
+    // Prima di toccare il database una richiesta aspetta le scritture del registro lasciate
+    // dalle precedenti (onRequest gira prima dell'handler: nessun rischio per la risposta).
+    app.addHook("onRequest", async () => {
+      await inVolo;
+    });
+  }
+
   // Il corpo della risposta serve alle rotte che ne prendono l'oggetto, e in onResponse non
   // c'è più: qui se ne tiene solo il riferimento. Il hook è SINCRONO di proposito: un onSend
   // che aspetta (una query, anche solo il catalogo) lascia aperta una finestra in cui un
@@ -227,10 +239,10 @@ export function registraEventiDiValore(app: FastifyInstance): void {
   });
 
   app.addHook("onResponse", async (req, reply) => {
-    try {
-      await registra(req, reply);
-    } catch (err) {
+    const lavoro = registra(req, reply).catch((err: unknown) => {
       req.log.warn({ err, route: req.routeOptions?.url }, "valore: evento non registrato");
-    }
+    });
+    if (serializzato) inVolo = inVolo.then(() => lavoro);
+    await lavoro;
   });
 }

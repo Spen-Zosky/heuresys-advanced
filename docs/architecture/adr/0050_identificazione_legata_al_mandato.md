@@ -1,10 +1,10 @@
 # ADR-0050 — La forza dell'identificazione segue il mandato funzionale
 
-- **Status**: PROPOSTO il 2026-10-31, aspetta la decisione di Enzo
+- **Status**: ACCETTATO il 2026-11-03 da Enzo Spenuso (in chat alle 00:38 UTC, 01:38 ora di Roma: «accetto l'ADR-0050, aggiornalo e unisci la 132»); proposto il 2026-10-31
 - **Date**: 2026-10-31
 - **Redatto da**: Claude Code, thread «Analizzare a fondo le interfacce web di advanced»
 - **Richiesta**: Amministratore di Sistema, 2026-10-31 17:09 ora di Roma: «crea la bozza di adr e suggeriscimi a chi vanno assegnati i ruoli funzionali in virtù dei loro scopi di lavoro»
-- **Relates to**: ADR-0036 (domini gerarchici e funzionali, §C6 e §5), ADR-0027 (autorizzazione a due assi), ADR-0032 (mandato di piattaforma mascherato), ADR-0040 (l'agente legge ciò che legge la persona), I7, I16–I22
+- **Relates to**: ADR-0051 (attività delegate: un agente non riceve deleghe finché non ha l'identità che D6 descrive), ADR-0036 (domini gerarchici e funzionali, §C6 e §5), ADR-0027 (autorizzazione a due assi), ADR-0032 (mandato di piattaforma mascherato), ADR-0040 (l'agente legge ciò che legge la persona), I7, I16–I22
 - **Poggia su**: migrazioni 000116, 000118, 000284 (esenzioni MFA), 000432 (Mandato K, R-6: `PEOPLE_MANAGER` nel mandato HR), `apps/api/src/lib/scope/resolver.ts` (`HR_MANDATED_ROLES`, `TENANT_WIDE_MASKED_ROLES`)
 
 > **In parole semplici.**
@@ -41,6 +41,13 @@ group by 1, 2 order by 1, 2;
 
 (I nomi delle colonne vanno verificati sull'atlante prima dell'uso: la query è la traccia, non il controllo.)
 
+**Stato al 2026-11-03, prima dell'accettazione.** Due delle situazioni descritte sopra sono già state corrette, senza codice di questo ADR:
+
+- le utenze `@collaudo.invalid` sono sospese in produzione dal rilascio `103a6bcf` del 2026-11-01, PR #130 (`pnpm db:sospendi-collaudo`). Le esenzioni sono spente e le sessioni azzerate, e il giornale è `staging.collaudo_sospensione_undo`;
+- i ruoli con mandato di RTL sono passati a persone vere il 2026-10-31, applicando il principio di D8 (`db/scripts/rtl-ruolo-segue-lavoro.sql`, giornale `staging.rtl_ruolo_segue_lavoro_undo`, concedente registrato). La migrazione 000049 è stata emendata nella PR #134, così un deploy non restituisce i ruoli revocati.
+
+Resta valido il resto. Le esenzioni non hanno ancora una scadenza (D3), la concessione non passa da un secondo titolare (D4), la nuova conferma prima delle classi sensibili non esiste (D5) e gli agenti non hanno un'identità propria (D6). Lo stato si rimisura con `pnpm db:sospendi-collaudo` (stato) e con la query sopra.
+
 Heuresys è una piattaforma agentica (regola di Enzo del 2026-10-31): un agente che agisce per conto di chi porta un mandato raggiunge l'intero tenant con una sola chiamata. Il rischio di un mandato rubato cresce con gli agenti, non diminuisce.
 
 ## Decisione
@@ -70,7 +77,7 @@ Heuresys è una piattaforma agentica (regola di Enzo del 2026-10-31): un agente 
 
 ## Ordine di attuazione proposto
 
-1. D1 e D2 (codice e una migrazione piccola), insieme alle assegnazioni dei mandati a persone vere.
+1. D1 e D2 (codice e una migrazione piccola). Le assegnazioni dei mandati a persone vere sono già fatte in RTL, dal 2026-10-31.
 2. D3 (migrazione su `sys_auth_mfa_exemptions`).
 3. D4 e D7 (concessione come atto, con riconferma delle concessioni esistenti).
 4. D6 (nel gateway degli agenti e nel resolver).

@@ -10,6 +10,7 @@ import {
 } from "@heuresys/ui";
 import type { ApplicationStage, CandidateApplication } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import {
   APPLICATION_STAGES, KEY, candidateName,
   useApplications, useCandidates, usePostings, useRequisitions,
@@ -38,6 +39,10 @@ export default function RecruitingPipelinePage() {
   const postings = usePostings();
   const requisitions = useRequisitions();
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
+  // S-5: spostare una candidatura è una PATCH con `candidate:write`. Chi non ce l'ha vede la
+  // tavola in sola lettura: un trascinamento viene annullato subito, con il motivo.
+  const canWrite = useCan("candidate:write");
+  const [annullati, setAnnullati] = useState(0);
 
   const move = useMutation({
     mutationFn: (v: { id: string; stage: ApplicationStage }) =>
@@ -101,6 +106,11 @@ export default function RecruitingPipelinePage() {
   const impronta = items.map((a) => `${a.applicationId}:${a.stage}`).join("|");
 
   function onChange(next: KanbanColumn[]) {
+    if (!canWrite) {
+      setFeedback({ kind: "err", msg: t("recruiting.pipeline.readOnly") });
+      setAnnullati((n) => n + 1);
+      return;
+    }
     for (const col of next) {
       for (const card of col.cards) {
         const prima = items.find((a) => a.applicationId === card.id);
@@ -167,7 +177,7 @@ export default function RecruitingPipelinePage() {
         />
       ) : (
         <div data-testid="pipeline-board" className="overflow-x-auto">
-          <KanbanBoard key={impronta} columns={columns} onChange={onChange} />
+          <KanbanBoard key={`${impronta}#${annullati}`} columns={columns} onChange={onChange} />
         </div>
       )}
     </main>

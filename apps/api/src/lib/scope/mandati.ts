@@ -33,8 +33,8 @@ export const PLATFORM_MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
 
 /**
  * I ruoli di piattaforma che vedono/scrivono solo sui clienti a cui sono stati assegnati
- * (D9=B, mandato K — R-0 costruisce la tabella di assegnazione, questo insieme resta VUOTO
- * finché nessun ruolo lo popola). Lo riempiono, in ordine di nascita: R-9
+ * (D9=B, mandato K — R-0 ha costruito la tabella di assegnazione con l'insieme vuoto; oggi
+ * contiene i quattro ruoli qui sotto, S-22/INC-08). Lo hanno riempito, in ordine di nascita: R-9
  * (`PLATFORM_OPERATOR`, `SALES`), R-8 (`IMPLEMENTATION_CONSULTANT`), R-5
  * (`BLUEPRINT_MANAGER`). `SECURITY_ADMIN` (R-7) NON entra qui: è un ruolo di cliente
  * (mandato, sezione 2, conseguenza c).

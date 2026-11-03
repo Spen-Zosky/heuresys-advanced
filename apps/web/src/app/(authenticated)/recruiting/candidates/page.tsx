@@ -10,6 +10,7 @@ import {
 } from "@heuresys/ui";
 import type { Candidate, CandidateApplication } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import {
   CANDIDATE_SOURCES, KEY, candidateName,
   useApplications, useCandidates, usePostings,
@@ -54,6 +55,8 @@ export default function CandidatesPage() {
     defaultValues: { firstName: "", lastName: "", email: "", phone: "", source: "DIRECT", consentGivenOn: oggi, retentionUntil: "" },
   });
 
+  // S-5: creare e cambiare stato chiedono `candidate:write`; senza, la pagina è in sola lettura.
+  const canWrite = useCan("candidate:write");
   const create = useMutation({
     mutationFn: (v: FormValues) =>
       apiFetch<Candidate>("/v1/candidates", {
@@ -97,6 +100,7 @@ export default function CandidatesPage() {
     <main data-testid="candidates-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader title={t("recruiting.candidates.title")} description={t("recruiting.candidates.description")} />
 
+      {canWrite && (
       <Card>
         <CardHeader><CardTitle>{t("recruiting.candidates.newTitle")}</CardTitle></CardHeader>
         <CardContent>
@@ -142,6 +146,7 @@ export default function CandidatesPage() {
           )}
         </CardContent>
       </Card>
+      )}
 
       {q.isLoading ? (
         <div className="flex justify-center py-12"><Spinner /></div>
@@ -180,7 +185,7 @@ export default function CandidatesPage() {
                     </ul>
                   )}
 
-                  {c.status === "ACTIVE" && (
+                  {canWrite && c.status === "ACTIVE" && (
                     <div className="flex items-center gap-2">
                       <select
                         aria-label={t("recruiting.fields.posting")}

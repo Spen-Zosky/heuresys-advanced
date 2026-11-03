@@ -798,7 +798,8 @@
       "moved": "Candidatura spostata in {{stage}}",
       "moveError": "Spostamento rifiutato dal server.",
       "emptyTitle": "Nessuna candidatura",
-      "emptyDesc": "Registra un candidato e candidalo a un annuncio: comparira' qui come carta."
+      "emptyDesc": "Registra un candidato e candidalo a un annuncio: comparira' qui come carta.",
+      "readOnly": "Puoi consultare la tavola, ma spostare una candidatura spetta a chi gestisce i candidati."
     },
     "stage": {
       "APPLIED": "Candidato",

@@ -72,6 +72,28 @@ describe("/v1/skill-categories/* integration", () => {
     expect(body.items.some((i) => i.code === code)).toBe(true);
   });
 
+  // D-10 (analisi interfacce 2026-10-31): la colonna della famiglia è nullable dalla 000051, e
+  // in produzione ci sono categorie senza famiglia. Con il contratto che la pretendeva, la
+  // lista intera rispondeva 500 (ResponseSerializationError su items[0].familyId) e la pagina
+  // /skill-taxonomy era rotta per tutti.
+  it("D-10: una categoria senza famiglia non rompe la lista (200, familyId null)", async () => {
+    const code = `${SUITE_PREFIX}_NOFAM`;
+    const ins = await pool.query<{ id: string }>(
+      `INSERT INTO sys.sys_skill_categories (skill_category_family_id, skill_category_code, skill_category_name)
+       VALUES (NULL, $1, 'Categoria senza famiglia') RETURNING skill_category_id AS id`,
+      [code],
+    );
+    createdCategoryIds.push(ins.rows[0]!.id);
+
+    const list = await suite.app.inject({
+      method: "GET", url: `/v1/skill-categories?search=${code}`,
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(list.statusCode, list.body).toBe(200);
+    const body = list.json() as { items: Array<{ code: string; familyId: string | null }> };
+    expect(body.items.find((i) => i.code === code)?.familyId).toBeNull();
+  });
+
   it("Missing familyId FK → 404 NOT_FOUND", async () => {
     const r = await suite.app.inject({
       method: "POST", url: "/v1/skill-categories",

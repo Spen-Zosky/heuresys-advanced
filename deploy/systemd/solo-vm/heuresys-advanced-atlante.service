@@ -1,0 +1,24 @@
+# Template — @@REPO_DIR@@ si rende a mano all'installazione (vedi README.md qui accanto).
+# Non sta in deploy/systemd/ ma in solo-vm/: il glob di scripts/vm-deploy.sh non e' ricorsivo,
+# quindi il deploy non la installa da solo, ne' sulla VM ne' sul gemello linux-pc, dove
+# rigenererebbe l'atlante dal clone e aprirebbe una seconda PR.
+#
+# Piano di pulizia, voce A2 (Enzo, 2026-11-02): l'atlante si rigenera da solo. Ogni mattina chiede
+# atlante_fresco.py su una copia di prova da origin/main; se e' «vecchio» lo rigenera dal database
+# (sola lettura), committa su atlante/<AAAAMMGG> e apre la PR. Non unisce mai.
+[Unit]
+Description=Heuresys Advanced — rigenera l'atlante e ne apre la PR quando e' vecchio (A2)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+OnFailure=heuresys-unit-failure@%n.service
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/atlante-automatico.sh
+# clone locale + pnpm install + build_atlas: un paio di minuti nel caso tipico
+TimeoutStartSec=1800

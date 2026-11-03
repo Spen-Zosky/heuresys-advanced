@@ -38,6 +38,7 @@ import { HR_MANDATED_ROLES } from "./resolver.js";
 import { roleGrantSize } from "../../middleware/rbac.js";
 import { PARTECIPANTI_OGGI_SQL } from "./functional.js";
 import type { RoleCode } from "../../config/constants.js";
+import { ForbiddenError } from "../../errors/index.js";
 // `matrix.ts` importa da qui solo il TIPO `Domain`, che sparisce in compilazione: la
 // dipendenza a runtime e' quindi a senso unico, non un ciclo.
 import { M1 } from "./matrix.js";
@@ -269,13 +270,21 @@ const TENANT_WIDE_MANDATES: ReadonlySet<string> = new Set([
   "PROCESS_OWNER",
 ]);
 
-/** Raised when an actor reaches an aggregate surface with no breadth at all. */
-export class NoScopeTierError extends Error {
-  readonly code = "NO_SCOPE_TIER";
+/**
+ * Raised when an actor reaches an aggregate surface with no breadth at all.
+ *
+ * È un 403, non un 500 (2026-10-31, verifica della correzione D-01): fino a qui estendeva
+ * `Error`, l'errorHandler non lo riconosceva e la risposta era INTERNAL_ERROR. Il caso è
+ * emerso provando su una copia un attore senza alcun dominio attivo: apriva
+ * /v1/analytics/compensation e riceveva 500. Nessun dato usciva, ma «non hai perimetro su
+ * questa superficie» è un divieto, e va detto come tale.
+ */
+export class NoScopeTierError extends ForbiddenError {
   constructor(surface: string) {
     super(
       `No scope tier on ${surface}: the caller holds no active domain. ` +
         "The personal area is their surface — see #119.",
+      "NO_SCOPE_TIER",
     );
   }
 }

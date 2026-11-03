@@ -93,7 +93,7 @@ describe("GET /v1/analytics/:view/export integration", () => {
     expect(body).toContain("# summary");
     expect(body).toContain("key,value");
     expect(body).toContain("scope.kind,PLATFORM");
-    const { rows } = await pool.query<{ n: string }>(`SELECT count(*)::text AS n FROM sys.sys_users`);
+    const { rows } = await pool.query<{ n: string }>(`SELECT count(*)::text AS n FROM sys.sys_users WHERE user_type <> 'SERVICE'`);
     expect(body).toContain(`totalHeadcount,${rows[0]!.n}`);
     // breakdown arrays become their own sections.
     expect(body).toContain("# byOrgUnit");
@@ -112,7 +112,7 @@ describe("GET /v1/analytics/:view/export integration", () => {
     expect(r.headers["content-disposition"]).toContain('analytics-workforce-');
     expect(r.headers["content-disposition"]).toContain('.json"');
     const parsed = JSON.parse(r.body) as { totalHeadcount: number; scope: { kind: string } };
-    const { rows } = await pool.query<{ n: string }>(`SELECT count(*)::text AS n FROM sys.sys_users`);
+    const { rows } = await pool.query<{ n: string }>(`SELECT count(*)::text AS n FROM sys.sys_users WHERE user_type <> 'SERVICE'`);
     expect(parsed.totalHeadcount).toBe(Number(rows[0]!.n));
     expect(parsed.scope.kind).toBe("PLATFORM");
   });

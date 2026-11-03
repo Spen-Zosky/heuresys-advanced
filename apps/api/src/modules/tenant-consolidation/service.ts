@@ -21,6 +21,8 @@ import {
   UnprocessableEntityError,
 } from "../../errors/index.js";
 import {
+  ALLOWED_DECISIONS,
+  CONSOLIDATION_CERTAIN_THRESHOLD,
   CONSOLIDATION_GROUP_VALUES,
   nextConsolidationGroup,
   type ConsolidationAccess,
@@ -38,15 +40,9 @@ import { consolidaGruppo, nuovoStato, type Giudice } from "./engine.js";
 import { giudiceDaAmbiente } from "./giudice.js";
 import { vociDelPrototipo, vociDelTenant } from "./sorgenti.js";
 
-/** La soglia degli abbinamenti certi che si confermano a gruppi (specifica R-5, valore iniziale). */
-export const SOGLIA_CERTI = 90;
-
-/** Quali decisioni ammette ogni esito: una lacuna non si «conferma», si adotta o no. */
-const DECISIONI_AMMESSE: Record<ConsolidationProposal["outcome"], readonly Decision[]> = {
-  CORRISPONDENZA: ["CONFERMATA", "RIFIUTATA"],
-  LACUNA: ["ADOTTATA", "NON_ADOTTATA"],
-  PERSONALIZZAZIONE: ["PERSONALIZZAZIONE", "RIFIUTATA"],
-};
+/** La soglia degli abbinamenti certi, la stessa che la pagina usa (`@heuresys/shared`). */
+export const SOGLIA_CERTI = CONSOLIDATION_CERTAIN_THRESHOLD;
+const DECISIONI_AMMESSE = ALLOWED_DECISIONS;
 
 function tenantDi(actor: ActorContext): string {
   if (!actor.tenantId) throw new ForbiddenError("Tenant context required", "PERMISSION_DENIED");
@@ -91,6 +87,32 @@ async function sessione(tenantId: string, id: string): Promise<TenantConsolidati
   const s = await repo.getConsolidation(pool, tenantId, id);
   if (!s) throw new NotFoundError("Sessione di consolidamento non trovata", "CONSOLIDATION_NOT_FOUND");
   return s;
+}
+
+/**
+ * Le proposte con il nome delle loro voci. Il registro tiene le chiavi (identificativi del
+ * tenant, codici del prototipo); i nomi si rileggono dalle stesse sorgenti dei giri, così una
+ * voce rinominata nel frattempo si vede col nome di oggi, e una sparita col nome nullo.
+ */
+async function conNomi(
+  tenantId: string,
+  s: TenantConsolidation,
+  proposte: ConsolidationProposal[],
+): Promise<ConsolidationProposal[]> {
+  const gruppi = [...new Set(proposte.map((p) => p.group))];
+  const nomi = new Map<ConsolidationGroup, { tenant: Map<string, string>; prototipo: Map<string, string> }>();
+  await Promise.all(gruppi.map(async (g) => {
+    const [t, pr] = await Promise.all([vociDelTenant(pool, tenantId, g), vociDelPrototipo(pool, s.variantVersionId, g)]);
+    nomi.set(g, { tenant: new Map(t.map((v) => [v.key, v.name])), prototipo: new Map(pr.map((v) => [v.key, v.name])) });
+  }));
+  return proposte.map((p) => {
+    const n = nomi.get(p.group)!;
+    return {
+      ...p,
+      tenantItems: p.tenantKeys.map((key) => ({ key, name: n.tenant.get(key) ?? null })),
+      prototypeItems: p.prototypeKeys.map((key) => ({ key, name: n.prototipo.get(key) ?? null })),
+    };
+  });
 }
 
 /**
@@ -148,7 +170,16 @@ export const tenantConsolidationService = {
 
   async start(actor: ActorContext, body: StartConsolidationBody): Promise<TenantConsolidation> {
     const tenantId = tenantDi(actor);
-    if (!(await repo.variantVersionExists(pool, body.variantVersionId))) {
+    // Senza versione indicata vale quella attiva per il tenant: è il prototipo che ha davvero.
+    const variantVersionId = body.variantVersionId ?? (await repo.activeVariantVersion(pool, tenantId));
+    if (!variantVersionId) {
+      throw new UnprocessableEntityError(
+        { variantVersionId: "nessuna attiva" },
+        "Il tenant non ha una versione del prototipo attiva",
+        "CONSOLIDATION_VERSION_INVALID",
+      );
+    }
+    if (!(await repo.variantVersionExists(pool, variantVersionId))) {
       throw new UnprocessableEntityError(
         { variantVersionId: "inesistente" },
         "La versione del prototipo non esiste",
@@ -156,7 +187,7 @@ export const tenantConsolidationService = {
       );
     }
     const creata = await repo.createConsolidation(pool, tenantId, {
-      variantVersionId: body.variantVersionId,
+      variantVersionId,
       trigger: body.trigger,
       userId: actor.userId,
       openGroup: CONSOLIDATION_GROUP_VALUES[0],
@@ -173,7 +204,7 @@ export const tenantConsolidationService = {
   async proposals(actor: ActorContext, id: string, group: ConsolidationGroup | undefined): Promise<ConsolidationProposal[]> {
     const tenantId = tenantDi(actor);
     const leggibili = await gruppiLeggibili(actor);
-    await sessione(tenantId, id);
+    const s = await sessione(tenantId, id);
     let gruppi: ConsolidationGroup[] | null = leggibili;
     if (group) {
       if (leggibili && !leggibili.includes(group)) {
@@ -181,7 +212,7 @@ export const tenantConsolidationService = {
       }
       gruppi = [group];
     }
-    return repo.listProposals(pool, tenantId, id, gruppi);
+    return conNomi(tenantId, s, await repo.listProposals(pool, tenantId, id, gruppi));
   },
 
   async progress(actor: ActorContext, id: string): Promise<GroupProgress[]> {
@@ -195,7 +226,7 @@ export const tenantConsolidationService = {
   async decide(actor: ActorContext, proposalId: string, body: DecideProposalBody): Promise<ConsolidationProposal> {
     const tenantId = tenantDi(actor);
     const m = await mandatoDi(actor);
-    return withTransaction(async (client) => {
+    const decisa = await withTransaction(async (client) => {
       const [p] = await repo.getProposals(client, tenantId, [proposalId]);
       if (!p) throw new NotFoundError("Proposta non trovata", "CONSOLIDATION_PROPOSAL_NOT_FOUND");
       if (p.status !== "GIRI" && p.status !== "IN_CONFERMA") {
@@ -237,6 +268,8 @@ export const tenantConsolidationService = {
       const { decisionId: _d, status: _s, ...proposta } = dopo!;
       return proposta;
     });
+    const [conNome] = await conNomi(tenantId, await sessione(tenantId, decisa.consolidationId), [decisa]);
+    return conNome!;
   },
 
   /**

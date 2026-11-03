@@ -60,12 +60,17 @@ export interface KpiAchievement {
  * (LEFT JOINed). For TEAM scope we constrain to users whose primary active
  * assignment position is one of the manager's owned positions.
  */
+// L'organico conta persone, non utenze tecniche: le utenze di servizio (agenti, collaudo)
+// restano fuori. Senza questo filtro /analytics/workforce mostrava 167 invece di 158 su RTL
+// (analisi interfacce del 2026-10-31, V6).
+const ONLY_PEOPLE = `u.user_type <> 'SERVICE'`;
+
 function userScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] } {
   if (scope.isPlatformScope) {
-    return { sql: "TRUE", params: [] };
+    return { sql: ONLY_PEOPLE, params: [] };
   }
   const params: unknown[] = [scope.tenantId];
-  const clauses = [`u.user_tenant_id = $1`];
+  const clauses = [`u.user_tenant_id = $1`, ONLY_PEOPLE];
   if (scope.teamPositionIds.length > 0) {
     params.push(scope.teamPositionIds);
     clauses.push(`a.user_position_assignment_position_id = ANY($${params.length}::uuid[])`);

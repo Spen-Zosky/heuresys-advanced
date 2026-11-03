@@ -9,7 +9,9 @@ import { z } from "zod";
 import { paginationFields } from "./_pagination.js";
 export const SkillCategorySchema = z.object({
   skillCategoryId: z.uuid(),
-  familyId: z.uuid(),
+  // La colonna è nullable dalla migrazione 000051: una categoria può non avere famiglia.
+  // Con z.uuid() non nullable la lista intera rispondeva 500 (ResponseSerializationError).
+  familyId: z.uuid().nullable(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),

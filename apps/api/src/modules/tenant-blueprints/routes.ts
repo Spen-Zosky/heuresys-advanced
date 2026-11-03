@@ -220,10 +220,13 @@ export const tenantBlueprintsRoutes: FastifyPluginAsyncZod = async (app) => {
   // #198 T6 — IL PIANO, SENZA SCRIVERE. Permesso di sola lettura: guardare cosa
   // nascerebbe non e' un atto, e pretendere `write` per una simulazione insegnerebbe a
   // chiedere il permesso piu' alto per l'operazione piu' innocua.
-  app.post(
+  // È un GET dal 2026-10-31 (analisi interfacce, D-22): servito da un POST, la pagina
+  // sembrava scrivere a ogni apertura, e un agente o un controllo che legge il verbo
+  // l'avrebbe trattata come una scrittura. Una lettura si dichiara con il verbo giusto.
+  app.get(
     "/:id/versions/:number/build-plan",
     {
-      preHandler: [app.verifyCsrf, requirePermission(READ)],
+      preHandler: [requirePermission(READ)],
       schema: { params: VersionParamSchema, response: { 200: BuildPlanPreviewSchema } },
     },
     async (req) => svc.buildPlan(actor(req), req.params.id, req.params.number),

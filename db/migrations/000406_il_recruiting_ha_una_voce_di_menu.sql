@@ -10,11 +10,17 @@
 -- ne' intelligence. Ordine 31, subito dopo l'ultima voce del gruppo (max
 -- misurato oggi: 30) — cosi' nessuna voce esistente si sposta.
 --
--- CHI LA VEDE. `job-requisition` / `read`, cioe' lo stesso permesso delle sette rotte. La voce
+-- CHI LA VEDE. `requisition` / `read` (era `job-requisition`, vedi l'emendamento), lo stesso permesso delle rotte. La voce
 -- compare a chi puo' chiamare l'API, e non a chi non puo': una voce di menu che
 -- porta a un 403 e' peggio di una voce assente. ⚠ `requires_admin = false`: la
 -- pagina non e' amministrativa — la vede chi ha il permesso di lettura del ciclo,
--- cioe' PLATFORM_ADMIN, TENANT_ADMIN e HRMS_MANAGER (mig 000374, I22).
+-- cioe' PLATFORM_ADMIN, TENANT_ADMIN, HRMS_MANAGER (000374, 000427), RECRUITER e HIRING_MANAGER (000428).
+--
+-- EMENDAMENTO 2026-10-31 (analisi interfacce, D-07). Dal 2026-09-19 (000427) le rotte del
+-- recruiting chiedono `requisition:read`, non piu' `job-requisition:read`: la voce chiedeva
+-- ancora il permesso superato, e RECRUITER e HIRING_MANAGER — gli unici due ruoli nati per
+-- questo lavoro, che hanno il permesso nuovo e non il vecchio — non la vedevano. La voce
+-- chiede ora lo stesso permesso delle rotte, come dice il paragrafo qui sopra.
 --
 -- RITIRO (ADR-0035): si emenda QUESTO file, non se ne scrive uno che cancella.
 --
@@ -36,7 +42,7 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_requires_admin, ui_interface_order, ui_interface_is_active)
 VALUES
   ('recruiting', 'Recruiting', '/recruiting', 'UserPlus',
-   'workforce', 'WORKFORCE', 'job-requisition', 'read', false, 31, true)
+   'workforce', 'WORKFORCE', 'requisition', 'read', false, 31, true)
 ON CONFLICT (ui_interface_code) DO UPDATE
   SET ui_interface_label = EXCLUDED.ui_interface_label,
       ui_interface_route = EXCLUDED.ui_interface_route,

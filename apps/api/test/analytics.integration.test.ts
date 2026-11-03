@@ -108,7 +108,7 @@ describe("GET /v1/analytics/* integration", () => {
     const body = await getJson<WorkforceBody>("/v1/analytics/workforce", platformS);
     expect(body.scope.kind).toBe("PLATFORM");
     expect(body.scope.tenantId).toBeNull();
-    const expectedHeadcount = await num(`SELECT count(*)::text AS n FROM sys.sys_users`);
+    const expectedHeadcount = await num(`SELECT count(*)::text AS n FROM sys.sys_users WHERE user_type <> 'SERVICE'`);
     expect(body.totalHeadcount).toBe(expectedHeadcount);
     expect(body.byOrgUnit.length).toBeGreaterThan(0);
     expect(body.byJobRole.length).toBeGreaterThan(0);
@@ -125,7 +125,7 @@ describe("GET /v1/analytics/* integration", () => {
     expect(body.scope.tenantId).not.toBeNull();
     // Own-tenant headcount equals the live per-tenant user count.
     const { rows } = await pool.query<{ n: string }>(
-      `SELECT count(*)::text AS n FROM sys.sys_users WHERE user_tenant_id = $1::uuid`,
+      `SELECT count(*)::text AS n FROM sys.sys_users WHERE user_tenant_id = $1::uuid AND user_type <> 'SERVICE'`,
       [body.scope.tenantId],
     );
     expect(body.totalHeadcount).toBe(Number(rows[0]?.n ?? 0));

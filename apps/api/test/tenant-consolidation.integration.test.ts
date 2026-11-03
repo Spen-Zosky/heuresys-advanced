@@ -13,6 +13,7 @@ import { loadRolePermissionCache } from "../src/modules/auth/cache-loader.js";
 import type { ActorContext } from "../src/lib/actor.js";
 import type { RoleCode } from "../src/config/constants.js";
 import { eseguiGiri, tenantConsolidationService as svc } from "../src/modules/tenant-consolidation/service.js";
+import { activeVariantVersion } from "../src/modules/tenant-consolidation/repository.js";
 import type { Giudice } from "../src/modules/tenant-consolidation/engine.js";
 
 let direttore: ActorContext;
@@ -140,7 +141,7 @@ describe("il registro del consolidamento (000464)", () => {
     );
     const body = { variantVersionId: vv.rows[0]!.id, trigger: "RICHIESTA" as const };
     const s = await svc.start(direttore, body);
-    expect(s).toMatchObject({ status: "GIRI", openGroup: "ORGANIZATION", tenantId: direttore.tenantId });
+    expect(s).toMatchObject({ status: "GIRI", openGroup: "ORGANIZATION", tenantId: direttore.tenantId, runningGroup: null, lastRun: null });
     sessioneId = s.consolidationId;
     expect(await codiceDi(svc.start(direttore, body))).toBe("CONSOLIDATION_ALREADY_OPEN");
 
@@ -210,14 +211,36 @@ describe("un giro sul gruppo aperto, con un giudice finto", () => {
     );
     expect(dopo.rows[0]!.m.last_run, JSON.stringify(dopo.rows[0]!.m)).toMatchObject({ ok: true });
     expect(JSON.stringify(lotti)).not.toMatch(/userid/i);
+    // La pagina legge l'esito dalla sessione: nessun giro in corso, l'ultimo andato bene.
+    expect(await svc.get(direttore, sessioneId)).toMatchObject({ runningGroup: null, lastRun: { group: "ORGANIZATION", ok: true } });
 
     const unita = await pool.query<{ n: number }>(
       `SELECT count(*)::int AS n FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1 AND organization_unit_is_active`,
       [direttore.tenantId],
     );
-    const proposte = await svc.proposals(direttore, sessioneId, "ORGANIZATION");
-    const coperte = new Set(proposte.flatMap((p) => p.tenantKeys));
+    const registro = await svc.proposals(direttore, sessioneId, "ORGANIZATION");
+    const coperte = new Set(registro.flatMap((p) => p.tenantKeys));
     // Ogni unità attiva del tenant esce dal giro con una proposta: collegata o sua.
     expect(coperte.size).toBeGreaterThanOrEqual(unita.rows[0]!.n);
+    // Chi decide legge nomi: ogni voce nata dal giro porta il nome della sua parte.
+    const dalGiro = registro.filter((p) => p.proposalId !== proposte.orgCerta);
+    expect(dalGiro.length).toBeGreaterThan(0);
+    const senzaNome = dalGiro.flatMap((p) => [...p.tenantItems, ...p.prototypeItems]).filter((v) => v.name === null);
+    expect(senzaNome, JSON.stringify(senzaNome.slice(0, 5))).toEqual([]);
+  });
+});
+
+describe("la versione del prototipo, quando la sessione non la indica", () => {
+  it("è quella dell'attivazione ACTIVE del tenant", async () => {
+    const attesa = await pool.query<{ id: string | null }>(
+      `SELECT blueprint_activation_variant_version_id AS id FROM sys.sys_blueprint_activations
+        WHERE blueprint_activation_tenant_id = $1 AND blueprint_activation_status = 'ACTIVE'
+          AND blueprint_activation_variant_version_id IS NOT NULL
+        ORDER BY blueprint_activation_effective_from DESC LIMIT 1`,
+      [direttore.tenantId],
+    );
+    expect(await activeVariantVersion(pool, direttore.tenantId!)).toBe(attesa.rows[0]?.id ?? null);
+    // Un tenant inesistente non ha versione: la sessione non si apre su un prototipo indovinato.
+    expect(await activeVariantVersion(pool, "00000000-0000-0000-0000-000000000000")).toBeNull();
   });
 });

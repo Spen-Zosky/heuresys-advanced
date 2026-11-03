@@ -73,7 +73,8 @@ BEGIN
   SELECT c.conname, pg_get_constraintdef(c.oid) INTO nome, def
     FROM pg_constraint c
    WHERE c.conrelid = 'sys.sys_user_delegations'::regclass AND c.contype = 'c'
-     AND pg_get_constraintdef(c.oid) LIKE '%user_delegation_scope%';
+     -- EMENDATO per la 000468 (ADR-0051): per nome, perché il CHECK dell'oggetto nomina anch'esso l'ambito
+     AND c.conname = 'sys_user_delegations_user_delegation_scope_check';
   IF def IS NULL OR def NOT LIKE '%CONSOLIDATION%' THEN
     IF nome IS NOT NULL THEN EXECUTE format('ALTER TABLE sys.sys_user_delegations DROP CONSTRAINT %I', nome); END IF;
     ALTER TABLE sys.sys_user_delegations ADD CONSTRAINT sys_user_delegations_user_delegation_scope_check

@@ -95,4 +95,4 @@ Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "  1. If converged: inspect the bad commit diff for createContext / 'use client' / peer-dep changes." -ForegroundColor Yellow
 Write-Host "  2. Apply mirror fix in ux-design-shared/ui source and republish @heuresys/ui as 0.1.2." -ForegroundColor Yellow
 Write-Host "  3. Bump dep here and re-build to confirm." -ForegroundColor Yellow
-Write-Host "  4. If NOT converged: fall to Path F (split @heuresys/ui) per docs/cw-b59-true-root-cause-2026-05-26.md §6." -ForegroundColor Yellow
+Write-Host "  4. If NOT converged: fall to Path F (split @heuresys/ui) per docs/archive/cw-b59-true-root-cause-2026-05-26.md §6." -ForegroundColor Yellow

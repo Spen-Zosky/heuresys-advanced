@@ -322,13 +322,13 @@ export function SkillCategoriesPanel() {
     },
   });
 
-  const nomeFamiglia = (id: string): string =>
-    families.data?.items.find((f) => f.skillFamilyId === id)?.name ?? t("taxonomy.dash");
+  const nomeFamiglia = (id: string | null): string =>
+    (id ? families.data?.items.find((f) => f.skillFamilyId === id)?.name : undefined) ?? t("taxonomy.dash");
 
   const createForm = useForm<CategoryForm>({ defaultValues: { code: "", name: "", description: "", familyId: "" } });
   const editForm = useForm<CategoryForm>({
     values: editing
-      ? { code: editing.code, name: editing.name, description: editing.description ?? "", familyId: editing.familyId }
+      ? { code: editing.code, name: editing.name, description: editing.description ?? "", familyId: editing.familyId ?? "" }
       : undefined,
   });
 

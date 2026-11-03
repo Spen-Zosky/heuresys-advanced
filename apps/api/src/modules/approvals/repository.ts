@@ -72,6 +72,8 @@ export interface ApprovalStepRow {
   decisionComment: string | null;
   decidedAt: string | null;
   decidedBy: string | null;
+  /** ADR-0051 §5: la delega in forza della quale il passo è stato deciso. */
+  actingDelegationId: string | null;
   metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
@@ -101,7 +103,7 @@ const REQ_COLS = `approval_request_id, approval_request_tenant_id, approval_requ
 const STEP_COLS = `approval_step_id, approval_step_request_id, approval_step_tenant_id,
   approval_step_approver_user_id, approval_step_ordinal, approval_step_level_policy,
   approval_step_status, approval_step_decision_comment, approval_step_decided_at,
-  approval_step_decided_by, approval_step_metadata, created_at, updated_at`;
+  approval_step_decided_by, approval_step_acting_delegation_id, approval_step_metadata, created_at, updated_at`;
 // Same columns prefixed with the step alias — required whenever the query joins
 // sys_users (which also has created_at/updated_at → otherwise an ambiguous reference).
 const STEP_COLS_S = STEP_COLS.split(",").map((c) => "s." + c.trim()).join(", ");
@@ -138,6 +140,7 @@ function mapStep(r: Record<string, unknown>): ApprovalStepRow {
     decisionComment: (r.approval_step_decision_comment as string | null) ?? null,
     decidedAt: isoN(r.approval_step_decided_at),
     decidedBy: (r.approval_step_decided_by as string | null) ?? null,
+    actingDelegationId: (r.approval_step_acting_delegation_id as string | null) ?? null,
     metadata: (r.approval_step_metadata as Record<string, unknown>) ?? {},
     createdAt: iso(r.created_at),
     updatedAt: iso(r.updated_at),
@@ -322,12 +325,16 @@ export async function findStepWithRequest(
   scope: ScopeFilter,
   requestId: string,
   stepId: string,
-): Promise<{ step: ApprovalStepRow; requestPolicy: string; requestStatus: string } | null> {
+): Promise<{
+  step: ApprovalStepRow; requestPolicy: string; requestStatus: string;
+  resourceType: string | null; tenantProcessStepId: string | null;
+} | null> {
   const params: unknown[] = [requestId, stepId];
   const clause = scopeClause(scope, "r.approval_request_tenant_id", params);
   const res = await client.query(
     `SELECT ${STEP_COLS_S},
-            r.approval_request_decision_policy, r.approval_request_status
+            r.approval_request_decision_policy, r.approval_request_status,
+            r.approval_request_resource_type, r.approval_request_tenant_process_step_id
        FROM sys.sys_approval_steps s
        JOIN sys.sys_approval_requests r ON r.approval_request_id = s.approval_step_request_id
       WHERE s.approval_step_request_id = $1 AND s.approval_step_id = $2${clause}`,
@@ -335,7 +342,13 @@ export async function findStepWithRequest(
   );
   const row = res.rows[0];
   if (!row) return null;
-  return { step: mapStep(row), requestPolicy: row.approval_request_decision_policy as string, requestStatus: row.approval_request_status as string };
+  return {
+    step: mapStep(row),
+    requestPolicy: row.approval_request_decision_policy as string,
+    requestStatus: row.approval_request_status as string,
+    resourceType: (row.approval_request_resource_type as string | null) ?? null,
+    tenantProcessStepId: (row.approval_request_tenant_process_step_id as string | null) ?? null,
+  };
 }
 
 /** State-guarded decide: only flips a PENDING step. rowCount=0 ⇒ already decided. */
@@ -345,16 +358,18 @@ export async function decideStepGuarded(
   newStatus: "APPROVED" | "REJECTED",
   comment: string | null,
   deciderUserId: string,
+  actingDelegationId: string | null = null,
 ): Promise<ApprovalStepRow | null> {
   const res = await client.query(
     `UPDATE sys.sys_approval_steps
         SET approval_step_status = $2, approval_step_decision_comment = $3,
             approval_step_decided_at = now(), approval_step_decided_by = $4,
             approval_step_decided_by_snapshot =
-              (SELECT user_email FROM sys.sys_users WHERE user_id = $4)
+              (SELECT user_email FROM sys.sys_users WHERE user_id = $4),
+            approval_step_acting_delegation_id = $5
       WHERE approval_step_id = $1 AND approval_step_status = 'PENDING'
       RETURNING ${STEP_COLS}`,
-    [stepId, newStatus, comment, deciderUserId],
+    [stepId, newStatus, comment, deciderUserId, actingDelegationId],
   );
   return res.rows[0] ? mapStep(res.rows[0]) : null;
 }

@@ -108,7 +108,7 @@ None are blockers. Brand v1.0 + v1.1 is shippable as-is.
 
 ## References
 
-- `docs/SHOWCASE_AUDIT_2026-05-20.md` (Tier 1-3 source audit)
+- `docs/archive/SHOWCASE_AUDIT_2026-05-20.md` (Tier 1-3 source audit)
 - `docs/A11Y_AUDIT_TIER7_2026-05-20.md` (Tier 7 source audit)
 - `docs/a11y-baseline/showcase/` (18 axe baseline JSONs)
 - `ux-design-shared/governance/DECISION_REGISTER.md` (12/12 ADR

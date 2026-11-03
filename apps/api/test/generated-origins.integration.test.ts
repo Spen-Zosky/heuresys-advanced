@@ -74,9 +74,9 @@ describe("#198 T6 — il piano di costruzione", () => {
   it("dice cosa nascerebbe, e non scrive niente", async () => {
     const prima = await conta("sys_organization_units", "organization_unit_tenant_id");
     const r = await t.app.inject({
-      method: "POST",
+      method: "GET",
       url: `/v1/tenant-blueprints/${blueprintId}/versions/1/build-plan`,
-      headers: { cookie, "x-csrf-token": csrf },
+      headers: { cookie },
     });
     expect(r.statusCode, r.body).toBe(200);
     const corpo = r.json() as { sourceKey: string; willCreate: Record<string, number>; alreadyThere: Record<string, number> };
@@ -86,6 +86,15 @@ describe("#198 T6 — il piano di costruzione", () => {
     // starebbe contando righe di qualcun altro
     expect(corpo.alreadyThere.orgUnits).toBe(0);
     expect(await conta("sys_organization_units", "organization_unit_tenant_id")).toBe(prima);
+  });
+
+  it("il vecchio POST non esiste più: una lettura non si serve con un verbo di scrittura", async () => {
+    const r = await t.app.inject({
+      method: "POST",
+      url: `/v1/tenant-blueprints/${blueprintId}/versions/1/build-plan`,
+      headers: { cookie, "x-csrf-token": csrf },
+    });
+    expect(r.statusCode, r.body).toBe(404);
   });
 });
 

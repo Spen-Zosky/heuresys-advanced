@@ -21,8 +21,9 @@ import { StatusPill } from "@/components/status-pill";
  *
  * Due cose che questa pagina deve dire, e che sono la ragione per cui esiste:
  *
- * ① IL PIANO NON COSTRUISCE. `build-plan` è una lettura (è un `POST` per convenzione di
- *    protocollo, non perché scriva), e mostra due colonne che non si confondono:
+ * ① IL PIANO NON COSTRUISCE. `build-plan` è una lettura, servita da un `GET` (fino al
+ *    2026-10-31 era un `POST`, e la pagina sembrava scrivere appena aperta), e mostra due
+ *    colonne che non si confondono:
  *    `willCreate` = quante righe NASCEREBBERO · `alreadyThere` = quante ci sono GIÀ.
  *    La seconda è ciò che separa una costruzione nuova da una ri-applicazione su
  *    un'azienda già popolata, e chi firma deve vederla PRIMA di firmare.
@@ -72,15 +73,12 @@ export default function TenantBlueprintBuildPage({
     queryFn: () => apiFetch<TenantBlueprintDetail>(`/v1/tenant-blueprints/${id}`),
   });
 
-  // Il piano è una LETTURA servita da un POST: si chiede al caricamento come una
+  // Il piano è una LETTURA servita da un GET: si chiede al caricamento come una
   // qualunque vista, non dietro un bottone. Chiamarlo non cambia niente nel database —
   // è la proprietà che T4/T6 hanno dimostrato con un sabotaggio.
   const piano = useQuery({
     queryKey: ["tenant-blueprint-build-plan", id, n],
-    queryFn: () =>
-      apiFetch<BuildPlanPreview>(`/v1/tenant-blueprints/${id}/versions/${n}/build-plan`, {
-        method: "POST",
-      }),
+    queryFn: () => apiFetch<BuildPlanPreview>(`/v1/tenant-blueprints/${id}/versions/${n}/build-plan`),
     // ⚠ UN 4xx NON SI RITENTA, ED E' LA CURA DI UN DIFETTO MISURATO (#211 F4, S1072).
     //   Il servizio risponde 409 quando il piano non e' calcolabile — modello vuoto, sorgente
     //   non dichiarata, contenuto incoerente — e sono condizioni STABILI: ritentarle non

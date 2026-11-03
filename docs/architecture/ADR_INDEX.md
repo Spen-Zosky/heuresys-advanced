@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**47 ADR** in `docs/architecture/adr/`.
+**49 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -55,6 +55,8 @@
 | [0047](adr/0047_contratto_del_fascicolo.md) | Il contratto del fascicolo: consegna per file, identità della versione, versione fissata sull'attivazione | ACCETTATO il 2026-10-23 da Enzo Spenuso | Il contratto del fascicolo: consegna per file, identità della versione, versione fissata sull'attivazione *(dal titolo)* | 2026-10-23 |
 | [0048](adr/0048_personalizzazioni_del_tenant.md) | Le personalizzazioni del tenant all'arrivo di una versione nuova del modello | ACCETTATO il 2026-10-23 da Enzo Spenuso | Le personalizzazioni del tenant all'arrivo di una versione nuova del modello *(dal titolo)* | 2026-10-23 |
 | [0049](adr/0049_le_attivita_appartengono_a_un_processo.md) | Le attività appartengono a un processo | ACCETTATO il 2026-10-29 da Enzo Spenuso | Le attività appartengono a un processo *(dal titolo)* | 2026-10-27 |
+| [0051](adr/0051_attivita_delegate_lungo_la_catena.md) | Le attività delegate lungo la catena | ACCETTATO il 2026-10-31 da Enzo Spenuso | Le attività delegate lungo la catena *(dal titolo)* | 2026-10-31 |
+| [0052](adr/0052_la_copia_ripristinabile_a_ogni_fine_fase.md) | La copia ripristinabile di advanced a ogni fine fase | ACCETTATO il 2026-11-01 da Enzo Spenuso | La copia ripristinabile di advanced a ogni fine fase *(dal titolo)* | 2026-11-01 |
 
 ## Conventions
 

@@ -387,4 +387,8 @@ Le pagine. Tutte le 131 pagine hanno almeno una voce. Le 109 di prodotto portano
 
 ## 11. Chiusura
 
-CICLO NON CHIUSO: manca il sì di Enzo al piano e le sue scelte del §8, a partire dall'ambiente di prova.
+Il 2026-11-03 alle 03:06 ora di Roma Enzo ha risposto «sì» nel thread del piano. Lo leggo come approvazione del piano con le raccomandazioni del §8 dove non serve altro: l'ambiente di prova è l'opzione A (decisione 1). Le decisioni 2-12 toccano scelte di prodotto, spese o cancellazioni, e si chiedono a Enzo una alla volta quando arriva il loro lotto.
+
+Ordine del coordinatore: le unioni su `main` restano ferme finché il rilascio 636a51fa non è DEPLOYATO; poi si uniscono #152 e #153, si fa la copia di fase, e solo dopo parte il primo lotto. Intanto il lotto si prepara su un ramo, senza toccare la produzione né `heuresys_ci`.
+
+CICLO DEL PIANO CHIUSO: il piano è approvato. L'attuazione è un ciclo nuovo, lotto per lotto.

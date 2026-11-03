@@ -129,3 +129,4 @@ export * from "./schemas/time-off.js";
 export * from "./schemas/user-position-assignments.js";
 export * from "./schemas/user-timeline.js";
 export * from "./schemas/talent-review.js";
+export * from "./schemas/valore.js";

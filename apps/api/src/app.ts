@@ -155,6 +155,7 @@ import { gdprRoutes } from "./modules/gdpr/routes.js";
 import { publicStatsRoutes } from "./modules/public-stats/routes.js";
 import { publicJobPostingsRoutes } from "./modules/public-job-postings/routes.js";
 import { tenantMaterializationRoutes } from "./modules/tenant-materialization/routes.js";
+import { registraEventiDiValore } from "./lib/valore/registro.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 import { makeSmsSender, type ISmsSender } from "./modules/auth/sms-sender.js";
@@ -276,6 +277,11 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       /* metrics must never break the response */
     }
   });
+
+  // 2b-bis. Il test del valore (F0-3, migrazione 000469) — registro degli eventi di uso e di
+  //     decisione in audit.valore_eventi. Hook di ciclo di vita (onSend + onResponse), come le
+  //     metriche: indipendente dall'ordine dei plugin, e non rompe mai una risposta.
+  registraEventiDiValore(app);
 
   // 2c. Reporting/export (3.5) — global onSend hook: `?format=csv|xlsx|pdf` on any
   //     {items,total} list endpoint downloads it as a file. Runs after the handler,

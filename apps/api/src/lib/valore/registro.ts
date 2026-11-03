@@ -27,8 +27,8 @@ import { estraiValori } from "./estrai.js";
 
 declare module "fastify" {
   interface FastifyRequest {
-    /** Corpo della risposta, letto solo per le rotte del catalogo che ne prendono l'oggetto. */
-    valoreRisposta?: unknown;
+    /** Corpo della risposta così come è partito (testo JSON), tenuto da onSend per onResponse. */
+    valoreRispostaGrezza?: string;
   }
 }
 
@@ -135,6 +135,17 @@ async function registraUso(req: FastifyRequest, tenantId: string, userId: string
   );
 }
 
+/** Il corpo della risposta, letto solo se la rotta ne prende l'oggetto o l'esito. */
+function leggiRisposta(req: FastifyRequest, voce: RottaDecisione): unknown {
+  const serve = voce.oggettoDa.startsWith("risposta:") || (voce.esitoDa?.startsWith("risposta:") ?? false);
+  if (!serve || req.valoreRispostaGrezza === undefined) return null;
+  try {
+    return JSON.parse(req.valoreRispostaGrezza) as unknown;
+  } catch {
+    return null;
+  }
+}
+
 async function registraDecisioni(
   req: FastifyRequest,
   tenantId: string,
@@ -143,7 +154,7 @@ async function registraDecisioni(
   rotta: string,
   voce: RottaDecisione,
 ): Promise<void> {
-  const ctx = { params: req.params, corpo: req.body, risposta: req.valoreRisposta ?? null };
+  const ctx = { params: req.params, corpo: req.body, risposta: leggiRisposta(req, voce) };
   const oggetti = estraiValori(voce.oggettoDa, ctx);
   const esito = estraiValori(voce.esitoDa, ctx)[0] ?? null;
   // Senza oggetto la decisione si registra lo stesso: la vista la conta «senza traccia».
@@ -202,21 +213,17 @@ async function registra(req: FastifyRequest, reply: FastifyReply): Promise<void>
 
 /** Aggancia il registro all'app. Va chiamata prima della registrazione delle rotte. */
 export function registraEventiDiValore(app: FastifyInstance): void {
-  // Il corpo della risposta serve solo alle rotte che ne prendono l'oggetto: lo si legge qui,
-  // perché in onResponse non c'è più.
-  app.addHook("onSend", async (req, reply, payload) => {
-    try {
-      if (!SCRITTURE.has(req.method) || reply.statusCode >= 300 || typeof payload !== "string") return payload;
-      const modello = req.routeOptions?.url;
-      if (!modello || !req.user?.tenantId) return payload;
-      const voce = (await catalogoValore(req)).get(chiaveRotta(req.method, modello));
-      if (voce && (voce.oggettoDa.startsWith("risposta:") || voce.esitoDa?.startsWith("risposta:"))) {
-        req.valoreRisposta = JSON.parse(payload) as unknown;
-      }
-    } catch {
-      /* il registro non rompe mai la risposta */
+  // Il corpo della risposta serve alle rotte che ne prendono l'oggetto, e in onResponse non
+  // c'è più: qui se ne tiene solo il riferimento. Il hook è SINCRONO di proposito: un onSend
+  // che aspetta (una query, anche solo il catalogo) lascia aperta una finestra in cui un
+  // handler `async (req, reply) => { reply.code(201).send(x) }` si risolve con undefined
+  // mentre la risposta non è ancora partita, e Fastify la rimanda vuota (misurato in CI
+  // sulla #157: 84 prove con «Unexpected end of JSON input», tutte su POST che rispondono 201).
+  app.addHook("onSend", (req, reply, payload, done) => {
+    if (SCRITTURE.has(req.method) && reply.statusCode < 300 && typeof payload === "string" && req.user?.tenantId) {
+      req.valoreRispostaGrezza = payload;
     }
-    return payload;
+    done(null, payload);
   });
 
   app.addHook("onResponse", async (req, reply) => {

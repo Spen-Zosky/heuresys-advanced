@@ -16,6 +16,7 @@
 import type { ZodTypeAny } from "zod";
 import { csrfStore } from "./csrf-store";
 import { ApiError, NetworkError, SessionExpiredError, type ApiErrorBody } from "./errors";
+import { SUPERFICIE_HEADER, superficiePagina } from "@heuresys/shared/schemas/valore";
 
 export type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
@@ -109,6 +110,10 @@ export async function apiFetch<T = unknown>(
 
   const headers: Record<string, string> = {
     accept: "application/json",
+    // F0-3, il test del valore: la pagina da cui parte la richiesta. È contesto, non
+    // identità (chi agisce lo dice il cookie); senza, una decisione presa da qui
+    // conterebbe come un dato caricato da uno script.
+    ...(typeof window !== "undefined" ? { [SUPERFICIE_HEADER]: superficiePagina(window.location.pathname) } : {}),
     ...extraHeaders,
   };
 

@@ -4,6 +4,7 @@
 - **Date**: 2026-11-03
 - **Redatto da**: Claude Code, thread «Liberare gli agenti IA in produzione»
 - **Decided by**: Enzo Spenuso, 2026-11-03 alle 04:39 ora di Roma, sulla scheda «Dove lasciamo liberi gli agenti per vedere fin dove arrivano?» del thread «Ricostruire la visione completa di Heuresys»: «anche in produzione», cioè agenti che scrivono senza conferma sui dati veri di RTL, con due condizioni previe (informativa ai lavoratori e ritorno provato). Alla base, la sua risposta 5 dello stesso giorno: «prima liberiamo i cavalli della AI per capire fino a dove può arrivare, poi decideremo le regole».
+- **Percorso accettato**: Enzo Spenuso, 2026-11-03 alle 05:15 ora di Roma, nello stesso thread: «accettato il tuo consiglio di cominciare dalle copie e passare alla produzione per capacità, una alla volta, ciascuna con il proprio ritorno provato». È il percorso che questo ADR rende obbligatorio (D2, D6, §4).
 - **Supersedes**:
   - la **regola R-4** della specifica dell'agente di consolidamento (versione 4 del 2026-10-30, `consolidamento/20261030_SPECIFICA_AGENTE_CONSOLIDAMENTO_TENANT.md` nei file del progetto), nella parte «l'agente non scrive mai da solo nei dati del cliente»; resta la parte sul registro delle decisioni;
   - la **regola R-5** della stessa specifica, «niente vale senza una conferma umana, nemmeno gli abbinamenti certi», per le sole capacità attivate in modo libero;
@@ -25,7 +26,7 @@
 
 Oggi nessun agente di advanced scrive senza una persona. Il gate del gateway (`apps/agent-gateway/src/write-gate.ts`) lascia passare da solo le letture fino alla soglia di persone distinte (ADR-0040) e chiede un'approvazione umana per ogni scrittura, con esito «negato» se l'approvazione non arriva. L'agente di consolidamento propone e il Direttore HR decide (specifica, R-4 e R-5): il 1/11 il primo giro su RTL ha prodotto 40 proposte e il 2/11 la Direttrice HR le ha decise tutte, 40 su 40 confermate (registro `sys.sys_tenant_consolidation_decisions`, sessione `77b96bd7`).
 
-Quelle regole le ha volute Enzo, e hanno fatto il loro lavoro: hanno permesso di costruire l'agente senza rischio. Il 3/11 Enzo ha deciso di cambiare direzione: prima si vede fin dove arriva l'IA, poi si scrivono le regole, e l'esplorazione avviene anche in produzione. Il thread della visione aveva raccomandato una «zona libera» fatta solo di copie; Enzo ha scelto la produzione. Questo ADR traduce quella scelta in un modo di lavorare che si possa controllare e disfare.
+Quelle regole le ha volute Enzo, e hanno fatto il loro lavoro: hanno permesso di costruire l'agente senza rischio. Il 3/11 Enzo ha deciso di cambiare direzione: prima si vede fin dove arriva l'IA, poi si scrivono le regole, e l'esplorazione avviene anche in produzione. Il thread della visione aveva raccomandato una «zona libera» fatta solo di copie; Enzo ha scelto la produzione, e alle 05:15 ha accettato il percorso per arrivarci: **prima le copie, poi la produzione, una capacità alla volta, ciascuna con il proprio ritorno provato**. Questo ADR traduce quella scelta in un modo di lavorare che si possa controllare e disfare.
 
 Due fatti delimitano la scelta e non dipendono da essa:
 
@@ -67,7 +68,7 @@ Una capacità si attiva per un tenant alla volta, in uno di due modi: `CONFERMA`
 - la cancellazione fisica: un agente ritira marcando, non cancella (ADR-0035; specifica del consolidamento, «una voce rifiutata resta, marcata»);
 - i mandati: un agente non riceve mai un ruolo di mandato (ADR-0050 D6), e il suo perimetro resta al più quello della persona per cui agisce (ADR-0040 R1).
 
-**D6 — L'ordine.** Si comincia dalle capacità che descrivono la struttura e non le persone, nell'ordine dei gruppi del consolidamento (specifica, R-6): organizzazione, posizioni e ruoli, competenze, processi, indicatori e obiettivi. La prima candidata è il consolidamento dell'organizzazione su RTL Bank: l'agente collega da sé le unità del tenant al prototipo. È la capacità con più storia misurata (il giro del 1/11 e le decisioni del 2/11), quindi quella in cui si vede meglio la differenza fra ciò che l'agente avrebbe deciso e ciò che ha deciso la Direttrice HR. Ogni capacità successiva si libera solo dopo che la precedente ha girato in produzione senza annullamenti di massa. Le soglie di fiducia sotto le quali l'agente si ferma e chiede sono un parametro della capacità, fissato all'attivazione e scritto nel registro; non stanno in questo ADR, perché vanno misurate.
+**D6 — L'ordine.** Ogni capacità percorre sempre gli stessi due tempi, senza saltarne uno: prima gira in modo `LIBERA` su una copia usa-e-getta della produzione (la zona libera), con il suo ritorno provato lì; solo dopo passa alla produzione. Si comincia dalle capacità che descrivono la struttura e non le persone, nell'ordine dei gruppi del consolidamento (specifica, R-6): organizzazione, posizioni e ruoli, competenze, processi, indicatori e obiettivi. La prima candidata è il consolidamento dell'organizzazione su RTL Bank: l'agente collega da sé le unità del tenant al prototipo. È la capacità con più storia misurata (il giro del 1/11 e le decisioni del 2/11), quindi quella in cui si vede meglio la differenza fra ciò che l'agente avrebbe deciso e ciò che ha deciso la Direttrice HR. Ogni capacità successiva si libera solo dopo che la precedente ha girato in produzione senza annullamenti di massa. Le soglie di fiducia sotto le quali l'agente si ferma e chiede sono un parametro della capacità, fissato all'attivazione e scritto nel registro; non stanno in questo ADR, perché vanno misurate.
 
 ## §3 — Che cosa cambia nel codice (attuazione, non in questo ADR)
 
@@ -94,7 +95,7 @@ Per ogni capacità, prima di dichiararla `LIBERA` in produzione:
 
 ## §5 — Alternative scartate
 
-- **Solo la zona libera** (datastore, banco dimostrativo e copie usa-e-getta): era la raccomandazione del thread della visione. Enzo l'ha scartata scegliendo la produzione. Resta come primo passo di ogni capacità (§4, punto 1).
+- **Solo la zona libera** (datastore, banco dimostrativo e copie usa-e-getta): era la raccomandazione del thread della visione. Enzo ha scelto di arrivare alla produzione, e ha accettato che la zona libera resti il primo tempo obbligatorio di ogni capacità (D6; §4, punto 1).
 - **Tutti gli agenti liberi insieme, con un solo interruttore**: non si saprebbe quale capacità ha prodotto un errore, e il ritorno sarebbe uno solo, per tutto. Scartata.
 - **Libertà senza registro «per conto di»**: una scrittura che non si sa chi ha fatto non si può spiegare a una persona né annullare con sicurezza. Scartata.
 - **Liberare anche le decisioni sulle singole persone**: lo vieta il GDPR, art. 22; non è una scelta che un ADR possa fare.

@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**50 ADR** in `docs/architecture/adr/`.
+**52 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -58,6 +58,8 @@
 | [0050](adr/0050_identificazione_legata_al_mandato.md) | La forza dell'identificazione segue il mandato funzionale | ACCETTATO il 2026-11-03 da Enzo Spenuso | La forza dell'identificazione segue il mandato funzionale *(dal titolo)* | 2026-10-31 |
 | [0051](adr/0051_attivita_delegate_lungo_la_catena.md) | Le attività delegate lungo la catena | ACCETTATO il 2026-10-31 da Enzo Spenuso | Le attività delegate lungo la catena *(dal titolo)* | 2026-10-31 |
 | [0052](adr/0052_la_copia_ripristinabile_a_ogni_fine_fase.md) | La copia ripristinabile di advanced a ogni fine fase | ACCETTATO il 2026-11-01 da Enzo Spenuso | La copia ripristinabile di advanced a ogni fine fase *(dal titolo)* | 2026-11-01 |
+| [0053](adr/0053_gli_agenti_agiscono_senza_conferma_una_capacita_alla_volta.md) | Gli agenti agiscono senza conferma anche in produzione, una capacità alla volta | ACCETTATO il 2026-11-03 da Enzo Spenuso | Gli agenti agiscono senza conferma anche in produzione, una capacità alla volta *(dal titolo)* | 2026-11-03 |
+| [0054](adr/0054_heuresys_piattaforma_del_cambiamento_organizzativo.md) | Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa | ACCETTATO il 2026-11-03 da Enzo Spenuso | Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa *(dal titolo)* | 2026-11-03 |
 
 ## Conventions
 

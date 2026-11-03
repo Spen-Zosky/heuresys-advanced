@@ -171,7 +171,9 @@ export type ConsentEventResponse = z.infer<typeof ConsentEventResponseSchema>;
  */
 export const GdprRequestSchema = z.object({
   gdprRequestId: z.uuid(),
-  tenantId: z.uuid(),
+  // S-11: la FK e' ON DELETE SET NULL (000186): il registro sopravvive al tenant e deve restare
+  // leggibile anche quando la colonna e' vuota.
+  tenantId: z.uuid().nullable(),
   subjectUserId: z.uuid().nullable(),
   type: z.enum(["EXPORT", "ERASURE", "RETENTION_RUN"]),
   status: z.enum(["COMPLETED", "DRY_RUN"]),

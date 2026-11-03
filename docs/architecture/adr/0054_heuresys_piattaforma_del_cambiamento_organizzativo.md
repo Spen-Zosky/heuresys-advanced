@@ -1,6 +1,6 @@
 # ADR-0054 — Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa
 
-- **Status**: PROPOSTO — aspetta il sì di Enzo Spenuso. Le parole del posizionamento sono sue; questo ADR le mette in forma di decisione e ne trae le conseguenze.
+- **Status**: ACCETTATO il 2026-11-03 da Enzo Spenuso (alle 14:16 UTC, 15:16 ora di Roma, sulla scheda «Accetti l'ADR-0054 sul posizionamento di Heuresys?» del thread «Scrivere l'ADR del posizionamento»: «Sì, accetto»)
 - **Date**: 2026-11-03
 - **Redatto da**: Claude Code, thread «Scrivere l'ADR del posizionamento» (mandato F0-1 del programma esecutivo del change management)
 - **Decided by**: Enzo Spenuso, 2026-11-03, nel thread «Ricostruire la visione completa di Heuresys»: alle 04:33 ora di Roma le sei risposte all'intervista («il change management è al centro»; «sarà per il change management quello che SAP è per l'ERP»; primo cliente «un fornitore come SAP o Zucchetti, più un primo cliente di medie dimensioni dell'industria manifatturiera»); alle 04:34 la precisazione: «non voglio che Heuresys sia uno specialista per industry ma per modellazione organizzativa di qualunque tipo di impresa».

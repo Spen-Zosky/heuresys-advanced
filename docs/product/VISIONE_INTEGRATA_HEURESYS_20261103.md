@@ -2,7 +2,7 @@
 
 Data: 3 novembre 2026. Thread «Ricostruire la visione completa di Heuresys». Lavoro di sola analisi su heuresys-advanced (main 636a51f) e heuresys-datastore (main 17de9d1): nessuna scrittura su database, nessun rilascio. Scala di grigi, nessuna emoji.
 
-Stato del documento: versione 1, scritta prima delle risposte di Enzo all'intervista (sezione 10). Le risposte la correggeranno.
+Stato del documento: versione 2, aggiornata con le risposte di Enzo all'intervista del 3/11 alle 04:33 ora di Roma (sezione 10). Le risposte cambiano il baricentro: la sezione 1bis dice come, e la sezione 8 è riordinata di conseguenza.
 
 ## 0. Come leggere le fonti
 
@@ -29,6 +29,29 @@ Secondo: «agentica, AI driven» è oggi più un vincolo di progetto che un'espe
 Terzo: l'apparato di governo del lavoro (riti, controlli, registri, piani) è grande rispetto al numero di persone che usano il prodotto. Il rito di chiusura del datastore ha 23 sezioni e costa 161 secondi (DS/CLAUDE.md, sezione «La chiusura»); il piano interfacce ha 14 lotti, ognuno con PR, rilascio e copia di fase (PIANO, §6-§7). È una forza per la qualità, ma è anche il rischio principale di overengineering: il collo di bottiglia non è il codice, sono le ore di prova e decisione di Enzo.
 
 La raccomandazione che ne discende: per i prossimi mesi conviene riscuotere più che costruire. Prima portare nelle pagine ciò che esiste (sezione 7), poi aggiungere poche funzioni agentiche piccole e misurabili che si appoggiano su dati già presenti (sezione 8).
+
+## 1bis. Che cosa cambia dopo l'intervista
+
+Le risposte di Enzo (sezione 10) fissano tre cose che i documenti lasciavano aperte.
+
+La categoria è il change management. «Heuresys sarà per il change management quello che SAP è per l'ERP», e «il change management è al centro» (sezione 10, risposte 3 e 4). È una terza formulazione, diversa sia da «Skills & Org Intelligence» del PRD di giugno sia da «Organizational Intelligence & Workforce Orchestration» della visione di agosto (sezione 2.3). Non le contraddice: le contiene. La catena di agosto, strategia, processi, struttura, competenze, persone, gap (posizionamento-centrale.md, righe 1-35), descrive lo stato di un'organizzazione; il change management è il passaggio governato da uno stato a un altro. Va scritto in un documento di prodotto o in un ADR, altrimenti restano tre posizionamenti in circolazione.
+
+I clienti sono due, in quest'ordine: un fornitore come SAP o Zucchetti, poi un'impresa manifatturiera di medie dimensioni (risposta 1). Il pilota attuale è una banca (ADV/CLAUDE.md, «Che cos'è»), e il contenuto di settore in advanced è solo FIN_BANKING (AI/V7_lacune/lacune.md punto 8). Il datastore però ha già un prototipo metalmeccanico completo, 31 passi su 31 con pacchetto v0.3 depositato, 93 posizioni raggruppate in 67 mestieri (DS/esecuzione/STATO_CORRENTE.md righe 14-15), e il CCNL Metalmeccanici Industria con i nove livelli da D1 ad A1 (DS/docs/04_impianto/18_IL_MODELLO_DEL_CCNL.md riga 537). Il manifatturiero non parte da zero: parte da un prototipo che advanced non ha ancora ricevuto.
+
+Precisazione di Enzo delle 04:34: Heuresys non deve essere uno specialista di un'industria, ma della modellazione organizzativa di qualunque tipo di impresa. La banca e il manifatturiero sono quindi primi clienti, non specializzazioni. L'architettura lo regge solo in parte, e va detto. Il nucleo è già indipendente dal settore: posizioni, unità, processi con attività, competenze ESCO, accesso per catena, consolidamento (sezione 3.2). Ma la fabbrica dei modelli nel datastore parte dal codice ATECO e produce un prototipo per industria (DS/docs/04_impianto/27_IL_VOCABOLARIO_DEI_VERBI.md righe 82-112), e l'invariante I21 fa vedere a un tenant solo il perimetro della propria industria (ADV/CLAUDE.md, I21; ADR-0043). Questo va bene se il prototipo d'industria resta ciò che è, un acceleratore di partenza che il consolidamento poi piega alla lingua del tenant (specifica, §4bis), e non diventa il prodotto. Il rischio concreto è un altro: che ogni nuovo cliente richieda una corsa e un controllo di prototipo dedicati, e che il metodo per le famiglie fuori dalle banche resti una domanda aperta, come oggi (DS/esecuzione/DOMANDE_APERTE.md, D-68). Proposta: separare nel datastore ciò che è comune a ogni impresa (funzioni di supporto, processi trasversali del PCF, strutture tipiche per dimensione) da ciò che è di settore, così che un'impresa di un settore mai visto parta comunque da un modello completo al 60-70% e il resto lo costruisca il consolidamento. La percentuale è una stima mia, da misurare sul prototipo metalmeccanico e su quello bancario confrontando quante voci hanno in comune.
+
+Le tre persone e che cosa devono trovare (risposta 2): il Direttore HR governa il capitale umano; il capo di unità ha un cockpit che lo aiuta a gestire il suo presidio; il dipendente non deve più telefonare o scrivere ad altri per conoscere l'azienda e il proprio ruolo in essa.
+
+Che cosa ne segue, con giudizio.
+
+1. Heuresys ha già il motore del cambiamento, ma non lo chiama così. L'agente di consolidamento confronta uno stato di riferimento (il prototipo) con lo stato reale del tenant, e per ogni voce propone corrispondenza, lacuna o personalizzazione, con una persona che decide e un registro delle decisioni (specifica del consolidamento, §5 e §8). Una riorganizzazione è la stessa operazione con uno stato futuro al posto del prototipo. Il primo passo del change management è quindi generalizzare ciò che esiste, non costruire un modulo nuovo.
+2. Manca l'oggetto «cambiamento». Nel codice non ho trovato un modulo per iniziative di cambiamento, scenari o riorganizzazioni (`ls apps/api/src/modules` filtrato per scenario, change, reorg, plan: nessuno, eseguito il 3/11). C'è la storia delle unità (406 righe senza pagina: sezione 7, voce 14), che dice che cosa è cambiato, non che cosa cambierà.
+3. Il fattore di successo più misurato del change management è umano, non tecnico. Prosci rileva che i progetti con sponsor molto efficace raggiungono gli obiettivi nel 79% dei casi contro il 27% con sponsor molto inefficace (https://www.prosci.com/blog/change-management-best-practices); McKinsey rileva che comunicare chiaramente il risultato atteso prima del lancio rende 3,5 volte più probabile il successo di una trasformazione digitale (https://www.mckinsey.com/~/media/McKinsey/Business%20Functions/McKinsey%20Implementation/Our%20Insights/How%20the%20implementation%20of%20organizational%20change%20is%20evolving/How-the-implementation-of-organizational-change-is-evolving.pdf). Sono dati di chi vende metodo e consulenza, da prendere con cautela. Avvertenza: il famoso «70% dei cambiamenti fallisce» non ha una base empirica valida (Hughes, Journal of Change Management 2011, https://doi.org/10.1080/14697017.2011.630506) e non va usato nei materiali di vendita. La lezione per Heuresys: il prodotto deve rendere visibili lo sponsor, chi è toccato, che cosa sa ciascuno del cambiamento e quanto lo ha adottato, che è proprio ciò che la struttura posizione-unità-processo permette di calcolare.
+4. Un fornitore come SAP o Zucchetti compra integrabilità, non pagine. Oggi l'API pubblica è presente ma spenta di default, e SSO, SCIM e webhook non ci sono (AI/V8_mercato/matrice_funzioni.tsv righe 37-40). Per il primo cliente nominato da Enzo, questi diventano prioritari e non opzionali: nel piano interfacce stanno nei lotti L10 e L13 (PIANO), cioè in fondo.
+
+Sulla risposta 5, «prima liberiamo i cavalli dell'IA per capire fino a dove può arrivare, poi decideremo le regole»: sono d'accordo sull'esplorazione, non sul luogo. Le regole che oggi frenano l'IA le ha volute Enzo stesso e sono già scritte: l'agente non scrive da solo nei dati del cliente e niente vale senza conferma (specifica del consolidamento, §7, R-4 e R-5; ADR-0040). Dal 10 ottobre 2025 chi usa l'IA sui lavoratori deve informarli (legge 132/2025, art. 11, WEB-12), e i dati di RTL sono produzione reale (ADV/CLAUDE.md). La proposta è una «zona libera»: il datastore, il banco dimostrativo e una copia usa-e-getta del tenant, dove gli agenti possono anche scrivere da soli, senza conferma, e ogni loro mossa si misura. Il precedente esiste già: nei giri preliminari del consolidamento l'agente adotta da sé le equipollenze sicure, ma su una copia di lavoro (specifica, §4bis). Quando la zona libera ha mostrato fin dove arrivano, si scrivono le regole per la produzione. Così si esplora senza il rischio di dover spiegare a una persona vera una decisione presa da un agente libero.
+
+Sulla risposta 6, «tutto il mio tempo è dedicato a questo»: il collo di bottiglia non sono le ore ma le decisioni che solo Enzo può prendere. Esempio: 40 proposte di consolidamento in produzione dal 1/11 e 0 decise (MEM), anche perché la pagina in cui decidere era ancora in costruzione. Proposta: ogni settimana un solo momento di decisione, con le proposte degli agenti già raggruppate, come prevede la conferma a gruppi della specifica (§8).
 
 ## 2. Strategia
 
@@ -196,7 +219,25 @@ Casi di riferimento:
 - WEB-11 Mercato italiano: TeamSystem ha già due agenti HR, uno sulla contrattazione collettiva; Zucchetti ha chatbot e filtro dei CV; nessuno pubblica risultati misurati; solo il 15% delle aziende italiane usa l'IA in HR (https://www.teamsystem.com/media/files/1626_TS_BROCHURE_HR_AI_2026_short_IT.pdf; https://www.zucchetti.it/it/cms/soluzioni/software-hr-zucchetti/hr-ai-intelligenza-artificiale; https://www.hrnet.it/blog/osservatorio-zucchetti-hr/innovazione-ai-e-dati-le-tre-leve-della-trasformazione-hr-secondo-losservatorio-zucchetti-hr-2025).
 - WEB-12 AI Act e legge italiana: gli obblighi per i sistemi ad alto rischio dell'Allegato III, che comprende selezione, promozioni, assegnazione di compiti per tratti personali e valutazione delle prestazioni, si applicano dal 2 dicembre 2027 (https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai; https://www.regulatoryai.eu/en/annex/III-4/); la profilazione di persone resta sempre ad alto rischio (https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-6); dal 10 ottobre 2025 il datore di lavoro deve informare lavoratori e rappresentanze sull'uso dell'IA (legge 132/2025, art. 11: https://ascom.bo.it/2025/11/10/obblighi-di-informazione-ai-lavoratori-sulluso-dellintelligenza-artificiale-in-ambito-lavorativo/).
 
-Proposte, in ordine di attuazione. Ognuna ha un perimetro minimo; il resto si aggiunge solo se la metrica lo giustifica.
+### 8.1 Proposte per il change management (versione 2, dopo l'intervista)
+
+Queste vengono prima delle proposte N, perché rispondono direttamente alle risposte 2, 3 e 4 di Enzo. Ognuna riusa qualcosa che esiste.
+
+C-1. Il cambiamento come oggetto. Una riorganizzazione, un nuovo processo o un nuovo modello operativo diventano un oggetto con uno sponsor, uno stato attuale e uno stato futuro della struttura (unità, posizioni, processi, competenze). Il motore del consolidamento calcola la differenza voce per voce, con gli stessi tre esiti e lo stesso registro delle decisioni (ADV/apps/api/src/modules/tenant-consolidation/engine.ts; specifica del consolidamento, §5 e §8). Prima versione: solo lettura e calcolo dell'impatto, cioè quali posizioni, persone, processi e competenze sono toccati e come. Modello: WEB-9 (Orgvue lavora su posizioni e scenari) e il dato Prosci sullo sponsor (sezione 1bis). Metrica: per ogni cambiamento, quota di persone toccate che hanno ricevuto la comunicazione. Rischio basso: descrive la struttura, non giudica le persone.
+
+C-2. Il cockpit del capo di unità. Una pagina sola per il suo presidio: le sue persone e posizioni, le posizioni scoperte, le approvazioni in attesa, le fasi di processo che la sua unità esegue con i tempi, i gap di competenza, le deleghe attive e i cambiamenti in arrivo che toccano la sua unità (da C-1). I dati ci sono quasi tutti e il perimetro di catena è già provato dal vivo (AI/V12_giro_persone_vere/ESITO_E_VERDETTO_20261103.md punti 2-3; sezione 7, voci 2, 5, 7, 8). Metrica: quante volte a settimana il capo la apre e quante azioni chiude da lì.
+
+C-3. «La mia azienda e il mio ruolo» per il dipendente. Una pagina e un agente che rispondono a: qual è la mia posizione e a che cosa serve, in quali processi intervengo e in quale fase, chi è il responsabile di ciascun processo, a chi mi rivolgo per una certa cosa, che cosa cambia per me (da C-1). Le fonti sono la struttura del tenant, i processi con le fasi e i proprietari (ADR-0044, ADR-0049), le policy e il CCNL. È la proposta N-6 allargata dalle policy a tutta l'organizzazione, ed è la risposta diretta alla frase di Enzo «non deve più telefonare o scrivere ad altri». Modelli: WEB-1 e WEB-3; il lavoro vero è sui contenuti, come mostra IAG. Metrica: domande risolte senza scrivere a nessuno, definita prima di partire (WEB-2). Rischio: obblighi di trasparenza e informativa, non alto rischio (WEB-12).
+
+C-4. Prontezza misurata per unità. Brevi rilevazioni sulle cinque tappe dell'adozione individuale del modello ADKAR, consapevolezza, desiderio, conoscenza, capacità, rinforzo (https://www.prosci.com/methodology/adkar), mandate solo alle persone toccate da un cambiamento e lette solo in forma aggregata per unità, sopra una soglia minima di risposte. Riusa i sondaggi di engagement, che hanno dati e API ma nessuna pagina (sezione 7, voce 12). Metrica: andamento della prontezza per unità nel tempo. Avvertenza: aggregata per unità resta fuori dalla profilazione; letta per singola persona ci entrerebbe (WEB-12).
+
+C-5. Adozione misurata. Per ogni cambiamento, tre misure semplici prese dai dati del tenant e non da questionari: le persone toccate usano il nuovo processo o la nuova posizione (adozione), con quale frequenza (utilizzo), con quali tempi per fase rispetto al prima (efficacia, da N-2). È anche la prima attuazione del «test del valore» del PRD (sezione 2.1), che oggi è solo una frase. Una compagnia assicurativa cliente di Prosci riporta che ogni iniziativa del portafoglio oggi rende conto di adozione, utilizzo e competenza (https://www.prosci.com/resources/success-stories/insurance-company-change-success); è un caso del venditore, senza numeri di risultato.
+
+Per il primo cliente manifatturiero, senza farne una specializzazione: consegnare ad advanced il prototipo metalmeccanico già pronto nel datastore e farne un tenant dimostrativo, su cui provare C-1…C-5 nella zona libera della sezione 1bis. C-1…C-5 non dipendono dal settore: lavorano su unità, posizioni, processi e competenze, che ogni impresa ha. Per il fornitore: anticipare API pubblica documentata, SSO e webhook (sezione 1bis, punto 4).
+
+### 8.2 Proposte trasversali
+
+Proposte, in ordine di attuazione. Ognuna ha un perimetro minimo; il resto si aggiunge solo se la metrica lo giustifica. N-1 e N-3 servono anche al change management; N-6 confluisce in C-3.
 
 N-1. Registro degli agenti e firma «per conto di». Una tabella degli agenti (nome, capacità, versione, stato, chi può usarli) e due campi in ogni riga di audit: chi ha agito e per conto di chi. È il prerequisito di tutto il resto, ed è già nel piano come lotto L9 (PIANO; ADR-0050 D6). Modello: WEB-10. Metrica: quota delle azioni dell'agente attribuite a una persona, che deve essere il 100%. Rischio basso.
 
@@ -226,7 +267,7 @@ Strumenti sofisticati da introdurre per gradi, dopo che N-1…N-4 hanno una metr
 
 ## 10. Intervista a Enzo
 
-Domande inviate nel thread il 3/11 alle 04:20 circa ora di Roma. Le risposte entrano qui e correggono le sezioni 2, 5, 6 e 8.
+Domande inviate nel thread il 3/11 alle 04:20 circa ora di Roma; risposte di Enzo alle 04:33. Le risposte sono riportate fedelmente, con i soli refusi corretti; il loro effetto è nella sezione 1bis e nella sezione 8.1.
 
 1. Il primo cliente vero fra 12 mesi: banca media, PMI italiana o fornitore come Zucchetti o JetHR?
 2. Chi apre Heuresys ogni mattina e che cosa ci deve trovare che oggi non ha?
@@ -235,7 +276,14 @@ Domande inviate nel thread il 3/11 alle 04:20 circa ora di Roma. Le risposte ent
 5. Quali decisioni sulle persone l'IA non deve mai nemmeno proporre?
 6. Quante ore a settimana puoi dedicare a provare e decidere?
 
-Risposte: in attesa.
+Risposte:
+
+1. Un fornitore come SAP o Zucchetti, più un primo cliente di medie dimensioni dell'industria manifatturiera.
+2. Il Direttore HR che governa il capitale umano; il capo di unità, che ha un cockpit che lo aiuta nella gestione del suo presidio; il dipendente, che non deve più telefonare o scrivere ad altri per conoscere l'azienda e il suo ruolo all'interno di essa.
+3. Il change management è al centro.
+4. Sarà per il change management quello che SAP è per l'ERP.
+5. Prima liberiamo i cavalli dell'IA per capire fino a dove può arrivare, poi decideremo le regole.
+6. Tutto il mio tempo è dedicato a questo.
 
 ## 11. Che cosa non ho verificato
 

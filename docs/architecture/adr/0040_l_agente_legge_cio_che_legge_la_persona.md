@@ -2,6 +2,7 @@
 
 - **Status**: **ACCEPTED** — dottrina ratificata da Enzo Spenuso il 2026-09-14, dopo rilettura integrale
 - **Date**: 2026-09-14
+- **Superseded in part by**: [ADR-0053](0053_gli_agenti_agiscono_senza_conferma_una_capacita_alla_volta.md) (2026-11-03), solo nella frase di §5 per cui ogni scrittura dell'agente passa dal ponte di approvazione umana: per le capacità attivate in modo `LIBERA` non è più così. R1, R2 e R3 sulle letture restano in vigore.
 - **Supersedes**: ADR-0033 **§6.1**, nella parte che ordina l'adozione dell'agente come **coda per rischio crescente** consumata un perimetro per volta (`check_concetti_agente.py` come criterio di apertura). ⚠ Il mandato di questa sessione nominava «§5.2»: **misurato**, §5.2 è il gate HITL che classifica le scritture per metodo risolto e nega ciò che non risolve — **resta intatto**, e questo ADR vi si appoggia. I tre strumenti generici di ADR-0033 §3 restano tre.
 - **Builds on**: ADR-0036 (domini ortogonali; le eccezioni del §5 — quattro quando questo ADR fu scritto, cinque dal 2026-09-24 con D11), ADR-0032 (`mask` come quarto stato), I17 (pavimento ESS), I22 (`HRMS_MANAGER` plenipotenziario), I5 (mai RLS)
 - **Decided by**: Enzo Spenuso — direzione data il 2026-09-08 (*«dobbiamo cambiare la dottrina che crea vincoli e blocchi nell'uso»*), ratifica il 2026-09-14

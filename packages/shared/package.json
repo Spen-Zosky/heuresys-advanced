@@ -527,6 +527,11 @@
       "heuresys-source": "./src/schemas/talent-review.ts",
       "default": "./dist/schemas/talent-review.js"
     },
+    "./schemas/valore": {
+      "types": "./dist/schemas/valore.d.ts",
+      "heuresys-source": "./src/schemas/valore.ts",
+      "default": "./dist/schemas/valore.js"
+    },
     "./schemas/okrs": {
       "types": "./dist/schemas/okrs.d.ts",
       "heuresys-source": "./src/schemas/okrs.ts",

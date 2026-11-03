@@ -1,5 +1,7 @@
 # Business Scope & PRD — heuresys-advanced
 
+> **DOCUMENTO STORICO dal 2026-11-03.** Il posizionamento («Skills & Org Intelligence EU-native», §1.3-§1.5) e il cliente tipo («mid-market europeo 250-2000 dipendenti in settori regolati», §1.4) sono superati da **ADR-0054** (`docs/architecture/adr/0054_heuresys_piattaforma_del_cambiamento_organizzativo.md`): Heuresys è la piattaforma del cambiamento organizzativo per qualunque tipo di impresa, con primi clienti un fornitore come SAP o Zucchetti e un'impresa manifatturiera di medie dimensioni. Anche la descrizione di §1.1 è invecchiata: «non è un BPM» e «layer prescrittivo non costruito» non valgono più (runtime di approvazione, MLCE, VRIO, maturità e advisor esistono). Restano validi e citati da ADR-0054 il «test del valore» (§1.2, §2.8) e l'analisi competitiva. Il testo che segue non si aggiorna più.
+
 > **Documento di prodotto** (mancante prima d'ora). Prodotto da un programma di Product Discovery a 5 fasi (2026-06-17), partendo dal presupposto di *scoprire* ciò che non era esplicito.
 > **Basi**: la due-diligence forense (`docs/due-diligence/`), i tre store di conoscenza (`heuresys-advanced-wiki` ingegneristico, `heuresys-advanced-graph` codice, **`heuresys-wiki`** prodotto/strategia — mai entrato nella DD), una cartografia funzionale del codice (F0), una ricerca competitiva web live (F2) e una caccia alle funzionalità latenti (F3).
 > **Postura**: la visione di prodotto è stata trattata come **da sfidare**, non come verità; l'ICP come **finding da derivare**.

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Button, Input } from "@heuresys/ui";
 import type { OccupationMatch, SkillMatch } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/errors";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 
@@ -34,6 +35,10 @@ export function SemanticSearchPanel() {
   const { t } = useTranslation();
   const [term, setTerm] = useState("");
   const [submitted, setSubmitted] = useState("");
+  // S-19 (INC-11): la ricerca chiede `matching:read`. La pagina /skills si apre con
+  // `skill:read`, e chi non ha anche la ricerca (CEO, READ_ONLY, TAXONOMY_STEWARD) vedeva un
+  // pannello che finiva in 403. Senza il permesso il pannello non si mostra.
+  const canSearch = useCan("matching:read");
 
   const search = useQuery({
     queryKey: ["matching", "search", submitted],
@@ -41,7 +46,7 @@ export function SemanticSearchPanel() {
       apiFetch<FreeTextSearchResponse>(
         `/v1/matching/search?q=${encodeURIComponent(submitted)}&limit=20`,
       ),
-    enabled: submitted.length >= 2,
+    enabled: canSearch && submitted.length >= 2,
     retry: false, // 404 flag-off / 429 throttle must surface, never auto-re-bill
     staleTime: 5 * 60_000,
   });
@@ -90,6 +95,8 @@ export function SemanticSearchPanel() {
     ],
     [t],
   );
+
+  if (!canSearch) return null;
 
   return (
     <section data-testid="semantic-search" className="space-y-4 rounded-card border border-border bg-card p-4 shadow-card">

@@ -6,6 +6,7 @@ import { Badge, PageHeader } from "@heuresys/ui";
 import type { LeadListResponse, LeadResponse, LeadStatus } from "@heuresys/shared";
 import { LeadStatusEnum } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 
@@ -38,6 +39,8 @@ export default function LeadsPage() {
       apiFetch<LeadListResponse>(`/v1/leads${status ? `?status=${status}` : ""}`),
   });
 
+  // S-5: il cambio di stato si offre solo a chi l'API lo accetta.
+  const canUpdate = useCan("leads:update");
   const advance = useMutation({
     mutationFn: (v: { leadId: string; status: LeadStatus }) =>
       apiFetch<LeadResponse>(`/v1/leads/${v.leadId}`, { method: "PATCH", body: { status: v.status } }),
@@ -95,7 +98,7 @@ export default function LeadsPage() {
         cell: (r) => (
           <span className="flex items-center gap-2" data-testid={`lead-status-${r.status}`}>
             <StatusPill tone={STATUS_TONE[r.status]}>{t(`leads.statuses.${r.status}`)}</StatusPill>
-            <select
+            {canUpdate && <select
               aria-label={t("leads.filterLabel")}
               data-testid="lead-status-select"
               className="rounded-input border border-border bg-background px-2 py-1 text-xs text-foreground"
@@ -108,12 +111,12 @@ export default function LeadsPage() {
                   {t(`leads.statuses.${s}`)}
                 </option>
               ))}
-            </select>
+            </select>}
           </span>
         ),
       },
     ],
-    [t, dateFmt, advance],
+    [t, dateFmt, advance, canUpdate],
   );
 
   const data = leads.data;

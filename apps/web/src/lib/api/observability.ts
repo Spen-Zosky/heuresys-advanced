@@ -33,9 +33,11 @@ export function useSystemHealth() {
 
 export const ROLE_PERMISSIONS_QUERY_KEY = ["auth", "role-permissions"] as const;
 
-export function useRolePermissions() {
+/** `enabled=false` per chi non ha `role_matrix:read`: niente chiamata destinata al 403 (S-3). */
+export function useRolePermissions(enabled = true) {
   return useQuery({
     queryKey: ROLE_PERMISSIONS_QUERY_KEY,
+    enabled,
     queryFn: ({ signal }) =>
       apiFetch<RolePermissionsResponse>("/v1/auth/role-permissions", { signal }),
     staleTime: 60_000,

@@ -36,6 +36,7 @@ import {
 } from "@heuresys/ui";
 import { Activity, Database, Gauge, Lock, ShieldCheck, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useCan } from "../lib/api/auth";
 import { ROLE_PRECEDENCE } from "../lib/role-precedence";
 import {
   useRequestSeries,
@@ -147,7 +148,10 @@ function buildMatrix(items: ReadonlyArray<RolePermissionItem>) {
 export function SystemHealthLive() {
   const { t } = useTranslation();
   const health = useSystemHealth();
-  const rolePerms = useRolePermissions();
+  // S-3: la matrice ruoli×permessi chiede `role_matrix:read`, che PLATFORM_OPERATOR non ha.
+  // Senza il permesso la sezione non si mostra e la chiamata non parte (giro del banco L1).
+  const canReadMatrix = useCan("role_matrix:read");
+  const rolePerms = useRolePermissions(canReadMatrix);
   const slowQueries = useSlowQueries(10);           // #35 B7 — live pg_stat_statements
   const requestSeries = useRequestSeries(180, 5);   // #35 B7 — in-RAM 24h ring
 
@@ -455,7 +459,7 @@ export function SystemHealthLive() {
         />
       )}
 
-      {matrix && matrix.rows.length > 0 ? (
+      {!canReadMatrix ? null : matrix && matrix.rows.length > 0 ? (
         <RBACMatrix
           roles={matrix.roles}
           rows={matrix.rows}

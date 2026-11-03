@@ -14,6 +14,7 @@ import type {
   JobOffer, JobOfferListResponse, JobOfferStatus, UserListResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import {
   APPLICATION_STAGES, FEEDBACK_RECOMMENDATIONS, INTERVIEW_KINDS, INTERVIEW_STATUSES,
   KEY, OFFER_STATUSES, candidateName, useCandidates, usePostings,
@@ -67,6 +68,12 @@ export default function ApplicationDetailPage() {
   });
 
   const [rejectReason, setRejectReason] = useState("");
+  // S-5: ogni sezione scrive con il suo permesso (le guardie delle rotte): lo stadio
+  // `candidate:write`, colloqui e valutazioni `interview:feedback`, offerte `offer:manage`.
+  // Senza permesso la sezione si legge e non offre comandi che finirebbero in 403.
+  const canMoveStage = useCan("candidate:write");
+  const canInterview = useCan("interview:feedback");
+  const canOffer = useCan("offer:manage");
   const setStage = useMutation({
     mutationFn: (stage: ApplicationStage) =>
       apiFetch<CandidateApplication>(`/v1/candidate-applications/${id}`, {
@@ -172,7 +179,7 @@ export default function ApplicationDetailPage() {
             <p className="text-xs text-muted-foreground">{t("recruiting.fields.appliedOn")}</p>
             <p className="text-sm" data-testid="application-applied-on">{a.appliedOn}</p>
           </div>
-          <label className="space-y-1 text-sm">
+          {canMoveStage && (<label className="space-y-1 text-sm">
             <span className="text-xs text-muted-foreground">{t("recruiting.application.moveTo")}</span>
             <select
               data-testid="application-stage-select"
@@ -183,11 +190,11 @@ export default function ApplicationDetailPage() {
             >
               {APPLICATION_STAGES.map((s) => <option key={s} value={s}>{t(`recruiting.stage.${s}`)}</option>)}
             </select>
-          </label>
-          <label className="space-y-1 text-sm sm:col-span-3">
+          </label>)}
+          {canMoveStage && (<label className="space-y-1 text-sm sm:col-span-3">
             <span className="text-xs text-muted-foreground">{t("recruiting.fields.rejectReason")}</span>
             <Input data-testid="application-reject-reason" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder={t("recruiting.application.rejectHint")} />
-          </label>
+          </label>)}
           {a.rejectReason && <p className="text-sm sm:col-span-3" data-testid="application-reject-reason-shown">{t("recruiting.fields.rejectReason")}: {a.rejectReason}</p>}
         </CardContent>
       </Card>
@@ -195,7 +202,7 @@ export default function ApplicationDetailPage() {
       <Card>
         <CardHeader><CardTitle>{t("recruiting.application.interviewsTitle")}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-3 md:grid-cols-5" data-testid="interview-form">
+          {canInterview && (<div className="grid gap-3 md:grid-cols-5" data-testid="interview-form">
             <select data-testid="interview-kind" className={SELECT_CLASS} value={iv.kind} onChange={(e) => setIv({ ...iv, kind: e.target.value })}>
               {INTERVIEW_KINDS.map((k) => <option key={k} value={k}>{t(`recruiting.interviewKind.${k}`)}</option>)}
             </select>
@@ -205,7 +212,7 @@ export default function ApplicationDetailPage() {
             <Button type="button" data-testid="interview-submit" disabled={createInterview.isPending} onClick={() => createInterview.mutate()}>
               {t("recruiting.application.scheduleInterview")}
             </Button>
-          </div>
+          </div>)}
 
           {(interviews.data?.items ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground" data-testid="interviews-empty">{t("recruiting.application.noInterviews")}</p>
@@ -217,7 +224,7 @@ export default function ApplicationDetailPage() {
                     <span className="font-medium">{t(`recruiting.interviewKind.${i.kind}`)}{i.scheduledAt ? ` · ${new Date(i.scheduledAt).toLocaleString()}` : ""}{i.location ? ` · ${i.location}` : ""}</span>
                     <div className="flex items-center gap-2">
                       <Badge data-testid="interview-row-status">{t(`recruiting.interviewStatus.${i.status}`)}</Badge>
-                      <select
+                      {canInterview && (<select
                         aria-label={t("recruiting.fields.status")}
                         data-testid="interview-row-status-select"
                         className={SELECT_CLASS}
@@ -225,10 +232,10 @@ export default function ApplicationDetailPage() {
                         onChange={(e) => setInterviewStatus.mutate({ interviewId: i.interviewId, status: e.target.value as InterviewStatus })}
                       >
                         {INTERVIEW_STATUSES.map((s) => <option key={s} value={s}>{t(`recruiting.interviewStatus.${s}`)}</option>)}
-                      </select>
+                      </select>)}
                     </div>
                   </div>
-                  <FeedbackBlock interviewId={i.interviewId} interviewers={interviewers} onError={(e) => err(e, t("recruiting.application.feedbackError"))} onOk={() => setFeedback({ kind: "ok", msg: t("recruiting.application.feedbackCreated") })} />
+                  <FeedbackBlock canWrite={canInterview} interviewId={i.interviewId} interviewers={interviewers} onError={(e) => err(e, t("recruiting.application.feedbackError"))} onOk={() => setFeedback({ kind: "ok", msg: t("recruiting.application.feedbackCreated") })} />
                 </li>
               ))}
             </ul>
@@ -239,12 +246,12 @@ export default function ApplicationDetailPage() {
       <Card>
         <CardHeader><CardTitle>{t("recruiting.application.offerTitle")}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-3 md:grid-cols-4" data-testid="offer-form">
+          {canOffer && (<div className="grid gap-3 md:grid-cols-4" data-testid="offer-form">
             <Input type="number" min={1} step={100} data-testid="offer-salary" placeholder={t("recruiting.fields.grossAnnualSalary")} value={of.grossAnnualSalary} onChange={(e) => setOf({ ...of, grossAnnualSalary: e.target.value })} />
             <Input data-testid="offer-contract-type" placeholder={t("recruiting.fields.contractType")} value={of.contractType} onChange={(e) => setOf({ ...of, contractType: e.target.value })} />
             <Input type="date" data-testid="offer-start-date" value={of.startDate} onChange={(e) => setOf({ ...of, startDate: e.target.value })} />
             <Button type="button" data-testid="offer-submit" disabled={createOffer.isPending} onClick={() => createOffer.mutate()}>{t("recruiting.application.createOffer")}</Button>
-          </div>
+          </div>)}
           {(offers.data?.items ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground" data-testid="offers-empty">{t("recruiting.application.noOffers")}</p>
           ) : (
@@ -259,7 +266,7 @@ export default function ApplicationDetailPage() {
                   </span>
                   <div className="flex items-center gap-2">
                     <Badge data-testid="offer-row-status">{t(`recruiting.offerStatus.${o.status}`)}</Badge>
-                    <select
+                    {canOffer && (<select
                       aria-label={t("recruiting.fields.status")}
                       data-testid="offer-row-status-select"
                       className={SELECT_CLASS}
@@ -267,7 +274,7 @@ export default function ApplicationDetailPage() {
                       onChange={(e) => setOfferStatus.mutate({ offerId: o.offerId, status: e.target.value as JobOfferStatus })}
                     >
                       {OFFER_STATUSES.map((s) => <option key={s} value={s}>{t(`recruiting.offerStatus.${s}`)}</option>)}
-                    </select>
+                    </select>)}
                   </div>
                 </li>
               ))}
@@ -280,8 +287,9 @@ export default function ApplicationDetailPage() {
 }
 
 function FeedbackBlock({
-  interviewId, interviewers, onError, onOk,
+  canWrite, interviewId, interviewers, onError, onOk,
 }: {
+  canWrite: boolean;
   interviewId: string;
   interviewers: UserListResponse["items"];
   onError: (e: unknown) => void;
@@ -319,7 +327,7 @@ function FeedbackBlock({
 
   return (
     <div className="space-y-2 rounded-card bg-muted/30 p-3" data-testid="feedback-block">
-      <div className="grid gap-2 md:grid-cols-5" data-testid="feedback-form">
+      {canWrite && (<div className="grid gap-2 md:grid-cols-5" data-testid="feedback-form">
         <select data-testid="feedback-interviewer" className={SELECT_CLASS} value={fb.interviewerUserId} onChange={(e) => setFb({ ...fb, interviewerUserId: e.target.value })}>
           <option value="">{t("recruiting.fields.chooseInterviewer")}</option>
           {interviewers.map((u) => <option key={u.userId} value={u.userId}>{u.displayName}</option>)}
@@ -332,7 +340,7 @@ function FeedbackBlock({
         <Button type="button" variant="outline" data-testid="feedback-submit" disabled={!fb.interviewerUserId || create.isPending} onClick={() => create.mutate()}>
           {t("recruiting.application.submitFeedback")}
         </Button>
-      </div>
+      </div>)}
       {(q.data?.items ?? []).length > 0 && (
         <ul className="space-y-1 text-sm" data-testid="feedback-list">
           {(q.data?.items ?? []).map((f) => (

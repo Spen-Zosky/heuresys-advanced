@@ -17,6 +17,7 @@ import type {
   ContentSearchResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 
 const SELECT_CLASS =
@@ -117,6 +118,10 @@ export default function ContentPage() {
     return m;
   }, [cats.data]);
 
+  // S-5: creare documenti e categorie chiede `content:create`, eliminare una categoria
+  // `content:delete`. Chi legge soltanto non vede moduli e pulsanti che finirebbero in 403.
+  const canCreate = useCan("content:create");
+  const canDelete = useCan("content:delete");
   const createDoc = useMutation({
     mutationFn: (v: CreateDocValues) => {
       const body: Record<string, unknown> = { title: v.title, kind: v.kind, bodyFormat: v.bodyFormat };
@@ -210,6 +215,7 @@ export default function ContentPage() {
       />
 
       {/* Create document */}
+      {canCreate && (
       <Card>
         <CardHeader>
           <CardTitle>{t("content.create.cardTitle")}</CardTitle>
@@ -301,6 +307,7 @@ export default function ContentPage() {
           </form>
         </CardContent>
       </Card>
+      )}
 
       {/* Full-text search (ranked, body-aware, snippet) */}
       <Card data-testid="content-search">
@@ -437,6 +444,7 @@ export default function ContentPage() {
           <CardTitle>{t("content.categories.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {canCreate && (
           <form
             data-testid="content-category-form"
             onSubmit={(e) => {
@@ -473,6 +481,7 @@ export default function ContentPage() {
               )}
             </div>
           </form>
+          )}
 
           {(cats.data?.items ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("content.categories.empty")}</p>
@@ -482,7 +491,7 @@ export default function ContentPage() {
                 <li key={c.categoryId} data-testid="content-category-row" className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
                   <span className="font-medium text-foreground">{c.name}</span>
                   <span className="font-mono text-xs text-muted-foreground">{c.slug ?? "—"}</span>
-                  <Button
+                  {canDelete && <Button
                     type="button"
                     variant="outline"
                     size="sm"
@@ -491,7 +500,7 @@ export default function ContentPage() {
                     onClick={() => deleteCat.mutate(c.categoryId)}
                   >
                     {t("content.categories.delete")}
-                  </Button>
+                  </Button>}
                 </li>
               ))}
             </ul>

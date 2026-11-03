@@ -38,6 +38,8 @@ export interface UiInterfaceRow {
   requiredAction: string | null;
   requiresAdmin: boolean;
   order: number;
+  /** false = pagina assorbita come scheda (S1009): fuori dal menu, rotta ancora viva. */
+  isActive: boolean;
   /**
    * Le classi di dato che questa voce espone (#99 F7, mig. `000315`).
    *
@@ -57,9 +59,11 @@ export interface UiInterfaceRow {
   dataClassesOpenToTenant: DataClass[];
 }
 
-/** All active sidebar interfaces (the DB-driven registry). Visibility/gating is applied in the
- *  service layer (per-permission + hasAdminRole), mirroring the web layout's hybrid gate. */
-export async function loadActiveInterfaces(q: DbConnector): Promise<UiInterfaceRow[]> {
+/** All sidebar interfaces of the DB-driven registry, active and absorbed (S1009: an absorbed
+ *  page leaves the sidebar with is_active=false but keeps its route as a tab). Visibility/gating
+ *  is applied in the service layer; the sidebar shows only active rows, the page guard (S-1)
+ *  uses all of them. */
+export async function loadInterfaces(q: DbConnector): Promise<UiInterfaceRow[]> {
   const res = await q.query<UiInterfaceRow>(
     `SELECT ui_interface_code              AS code,
             ui_interface_label             AS label,
@@ -71,6 +75,7 @@ export async function loadActiveInterfaces(q: DbConnector): Promise<UiInterfaceR
             ui_interface_required_action   AS "requiredAction",
             ui_interface_requires_admin    AS "requiresAdmin",
             ui_interface_order             AS "order",
+            ui_interface_is_active         AS "isActive",
             -- #99 F7: le classi dichiarate dalla 000315. Il COALESCE a '{}' c'e' perche' una
             -- voce senza dichiarazioni deve arrivare come lista VUOTA, non come NULL: e' la
             -- differenza fra «non espone dati di persona» e «non lo sappiamo», e la seconda
@@ -88,7 +93,6 @@ export async function loadActiveInterfaces(q: DbConnector): Promise<UiInterfaceR
                        WHERE dc.ui_interface_id = i.ui_interface_id
                          AND dc.data_class_open_to_tenant), '{}') AS "dataClassesOpenToTenant"
        FROM sys.sys_ui_interfaces i
-      WHERE ui_interface_is_active = true
       ORDER BY ui_interface_order, ui_interface_code`,
   );
   return res.rows;

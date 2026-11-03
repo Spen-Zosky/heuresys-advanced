@@ -124,6 +124,24 @@ describe("#124 — le quattro superfici per-persona", () => {
     expect(hrView.body.items.every((r) => r.masked === undefined)).toBe(true);
   });
 
+  it("user-career-plans: metadata tolto al tecnico, presente all'HR (S-16, INC-14)", async () => {
+    const url = "/v1/user-career-plans?limit=25";
+    type Plan = { metadata?: Record<string, unknown>; masked?: string[] };
+    const tecnico = await get<Page<Plan>>(platform, url);
+    expect(tecnico.status).toBe(200);
+    if (tecnico.body.items.length === 0) {
+      throw new Error("nessun piano di carriera: la prova non misurerebbe nulla");
+    }
+    for (const r of tecnico.body.items) {
+      expect(r.metadata).toBeUndefined();
+      expect(r.masked).toEqual(["metadata"]);
+    }
+
+    const hrView = await get<Page<Plan>>(hr, url);
+    expect(hrView.status).toBe(200);
+    expect(hrView.body.items.every((r) => r.masked === undefined && r.metadata !== undefined)).toBe(true);
+  });
+
   it("compensation profile per posizione: banda tolta al tecnico, presente all'HR", async () => {
     const { rows } = await pool.query<{ id: string }>(
       `SELECT position_id AS id FROM sys.sys_position_compensation_profiles LIMIT 1`,

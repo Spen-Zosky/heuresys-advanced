@@ -20,7 +20,7 @@ import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import type { RoleCode, RoleGrant } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
-import { useCurrentUserPermissions } from "@/lib/api/auth";
+import { useCurrentUser, useCurrentUserPermissions } from "@/lib/api/auth";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -62,6 +62,12 @@ export function RolesEditor({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const perms = useCurrentUserPermissions();
   const canAssign = new Set(perms.data?.permissions ?? []).has("role:assign");
+  // S-6 (piano interfacce 2026-11-03, D-28): l'API rende i ruoli di una persona solo a chi
+  // li puo' concedere (role:assign) o alla persona stessa, e a tutti gli altri risponde 404.
+  // Prima la scheda chiedeva comunque e restava con un riquadro rotto; ora non chiede e il
+  // riquadro non compare.
+  const me = useCurrentUser();
+  const canSeeRoles = canAssign || me.data?.userId === userId;
 
   const [roleCode, setRoleCode] = useState<RoleCode>("USER");
 
@@ -69,7 +75,7 @@ export function RolesEditor({ userId }: { userId: string }) {
   const roles = useQuery({
     queryKey: rolesKey,
     queryFn: () => apiFetch<{ items: RoleGrant[] }>(`/v1/users/${userId}/roles`),
-    enabled: !!userId,
+    enabled: !!userId && canSeeRoles,
   });
 
   const grant = useMutation({
@@ -94,6 +100,8 @@ export function RolesEditor({ userId }: { userId: string }) {
     : null;
 
   const items = roles.data?.items ?? [];
+
+  if (!canSeeRoles) return null;
 
   return (
     <Card data-testid="user-roles-editor">

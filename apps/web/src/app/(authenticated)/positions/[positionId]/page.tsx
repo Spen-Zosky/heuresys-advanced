@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
+import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { PositionEditor } from "./_components/position-editor";
 
 interface PositionDetail {
@@ -19,15 +20,17 @@ interface PositionDetail {
   organizationUnitId: string | null;
   jobRoleId: string | null;
   reportsToPositionId: string | null;
-  ownerUserId: string | null;
+  /** S-7: assenti e dichiarati in `masked` a chi non vede le retribuzioni. */
+  ownerUserId?: string | null;
   criticality: string | null;
-  economicWeight: string | null;
+  economicWeight?: string | null;
   isActive: boolean;
   effectiveFrom: string | null;
   effectiveTo: string | null;
   metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
+  masked?: string[];
 }
 
 export default function PositionDetailPage() {
@@ -95,10 +98,10 @@ export default function PositionDetailPage() {
               { label: t("positions.detail.fields.tenantId"), value: p.tenantId, mono: true },
               { label: t("positions.detail.fields.orgUnit"), value: p.organizationUnitId ?? t("positions.detail.dash"), mono: true },
               { label: t("positions.detail.fields.jobRole"), value: p.jobRoleId ?? t("positions.detail.dash"), mono: true },
-              { label: t("positions.detail.fields.owner"), value: p.ownerUserId ?? t("positions.detail.dash"), mono: true },
+              { label: t("positions.detail.fields.owner"), value: isMasked(p, "ownerUserId") ? <MaskedCell /> : (p.ownerUserId ?? t("positions.detail.dash")), mono: true },
               { label: t("positions.detail.fields.reportsTo"), value: p.reportsToPositionId ?? t("positions.detail.dash"), mono: true },
               { label: t("positions.detail.fields.criticality"), value: <StatusBadge value={p.criticality} /> },
-              { label: t("positions.detail.fields.economicWeight"), value: p.economicWeight ?? t("positions.detail.dash") },
+              { label: t("positions.detail.fields.economicWeight"), value: isMasked(p, "economicWeight") ? <MaskedCell /> : (p.economicWeight ?? t("positions.detail.dash")) },
               { label: t("positions.detail.fields.effectiveFrom"), value: p.effectiveFrom ?? t("positions.detail.dash") },
               { label: t("positions.detail.fields.effectiveTo"), value: p.effectiveTo ?? t("positions.detail.dash") },
             ]}

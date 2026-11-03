@@ -18,9 +18,12 @@ export const UserCareerPlanSchema = z.object({
   targetPositionId: z.uuid().nullable(),
   horizonMonths: z.number().int().nullable(),
   status: UserCareerPlanStatusSchema,
-  metadata: z.record(z.string(), z.unknown()),
+  // S-16 (piano interfacce 2026-11-03): assente per chi legge sotto un mandato che maschera
+  // EVALUATION, e allora il suo nome sta in `masked`.
+  metadata: z.record(z.string(), z.unknown()).optional(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
+  masked: z.array(z.string()).optional(),
 });
 export type UserCareerPlan = z.infer<typeof UserCareerPlanSchema>;
 

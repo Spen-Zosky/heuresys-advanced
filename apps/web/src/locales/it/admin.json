@@ -154,7 +154,7 @@
     "noName": "—",
     "detail": {
       "back": "← Utenti",
-      "notFound": "Utente non trovato.",
+      "notFound": "Questa persona non esiste oppure è fuori dalla tua catena organizzativa: la sua scheda non è visibile con il tuo profilo.",
       "loadError": "Errore di caricamento.",
       "unnamed": "(senza nome)",
       "cardTitle": "Anagrafica",

@@ -21,7 +21,10 @@ import { queryBoolean } from "./_query-boolean.js";
  */
 export const CondivisioneEccezioneSchema = z.object({
   motivo: z.string(),
-  decisaDa: z.string(),
+  /** S-24 (piano interfacce 2026-11-03): non piu' consegnato. La colonna e' una nota interna di
+   *  lavoro (568 righe su 568 con lo stesso testo libero che cita una sessione), non il nome di
+   *  chi ha deciso; resta nel registro. Opzionale per non rompere chi legge il contratto. */
+  decisaDa: z.string().optional(),
   decisaIl: z.string(),
   condizioneChiusura: z.string(),
 });

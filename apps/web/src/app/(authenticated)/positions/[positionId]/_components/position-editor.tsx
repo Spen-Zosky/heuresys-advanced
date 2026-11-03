@@ -23,6 +23,7 @@ import { isApiError } from "@/lib/api/errors";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { etichettaPersona } from "@/lib/person-label";
+import { isMasked } from "@/components/masked-cell";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -77,10 +78,15 @@ export function PositionEditor({ positionId }: { positionId: string }) {
     queryFn: () => apiFetch<{ items: Position[] }>(`/v1/positions?limit=${LIST_LIMIT}`),
     enabled: canUpdate,
   });
+  // S-7: proprietario e peso economico arrivano trattenuti a chi non vede le retribuzioni.
+  // Chi non li vede non li riscrive: il modulo li omette dal PATCH invece di mandarli
+  // vuoti, che cancellerebbe il valore vero.
+  const ownerMasked = isMasked(position.data, "ownerUserId");
+  const weightMasked = isMasked(position.data, "economicWeight");
   const users = useQuery({
     queryKey: ["users", "picker"],
     queryFn: () => apiFetch<{ items: User[] }>(`/v1/users?limit=${LIST_LIMIT}`),
-    enabled: canUpdate,
+    enabled: canUpdate && !ownerMasked,
   });
 
   const { register, handleSubmit, formState } = useForm<FormValues>({
@@ -110,14 +116,14 @@ export function PositionEditor({ positionId }: { positionId: string }) {
         organizationUnitId: orNull(v.organizationUnitId),
         jobRoleId: orNull(v.jobRoleId),
         reportsToPositionId: orNull(v.reportsToPositionId),
-        ownerUserId: orNull(v.ownerUserId),
         criticality: orNull(v.criticality),
-        // il peso economico è 0..1 sull'API: stringa vuota = "non impostato",
-        // NON zero (che significherebbe "vale niente").
-        economicWeight: v.economicWeight.trim() === "" ? null : Number(v.economicWeight),
         isActive: v.isActive,
         effectiveTo: orNull(v.effectiveTo),
       };
+      if (!ownerMasked) body.ownerUserId = orNull(v.ownerUserId);
+      // il peso economico è 0..1 sull'API: stringa vuota = "non impostato",
+      // NON zero (che significherebbe "vale niente").
+      if (!weightMasked) body.economicWeight = v.economicWeight.trim() === "" ? null : Number(v.economicWeight);
       if (v.effectiveFrom.trim() !== "") body.effectiveFrom = v.effectiveFrom.trim();
       return apiFetch<Position>(`/v1/positions/${positionId}`, { method: "PATCH", body });
     },
@@ -215,6 +221,7 @@ export function PositionEditor({ positionId }: { positionId: string }) {
               </select>
             </div>
 
+            {!ownerMasked && (
             <div>
               <label htmlFor="pos-owner" className="mb-1 block text-sm font-medium text-foreground">
                 {t("positions.detail.edit.owner")}
@@ -230,6 +237,7 @@ export function PositionEditor({ positionId }: { positionId: string }) {
                 ))}
               </select>
             </div>
+            )}
 
             <div>
               <label htmlFor="pos-criticality" className="mb-1 block text-sm font-medium text-foreground">
@@ -245,6 +253,7 @@ export function PositionEditor({ positionId }: { positionId: string }) {
               </select>
             </div>
 
+            {!weightMasked && (
             <div>
               <label htmlFor="pos-weight" className="mb-1 block text-sm font-medium text-foreground">
                 {t("positions.detail.edit.economicWeight")}
@@ -259,6 +268,7 @@ export function PositionEditor({ positionId }: { positionId: string }) {
                 {...register("economicWeight")}
               />
             </div>
+            )}
 
             <div>
               <label htmlFor="pos-from" className="mb-1 block text-sm font-medium text-foreground">

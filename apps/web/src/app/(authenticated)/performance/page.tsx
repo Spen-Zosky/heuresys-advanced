@@ -138,7 +138,7 @@ export default function PerformancePage() {
             // nel testo — così l'HR vede QUALI valutazioni sono coperte, e da quando.
             <span
               className="text-xs text-muted-foreground underline decoration-dotted"
-              title={`${r.condivisioneEccezione.motivo} — ${r.condivisioneEccezione.decisaDa}`}
+              title={r.condivisioneEccezione.motivo}
             >
               {t("performance.reviews.notSharedException", {
                 date: new Date(r.condivisioneEccezione.decisaIl).toLocaleDateString(),

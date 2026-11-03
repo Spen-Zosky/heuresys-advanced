@@ -16,7 +16,7 @@ const COLS = `review_id, review_tenant_id, review_subject_user_id,
   review_self_assessment_status,
   review_self_submitted_at, review_manager_submitted_at, review_calibrated_at,
   review_finalized_at, review_shared_at, review_acknowledged_at,
-  (SELECT json_build_object('motivo', e.eccezione_motivo, 'decisaDa', e.eccezione_decisa_da,
+  (SELECT json_build_object('motivo', e.eccezione_motivo,
                             'decisaIl', e.eccezione_decisa_il::text,
                             'condizioneChiusura', e.eccezione_condizione_chiusura)
      FROM sys.sys_valutazione_condivisione_eccezioni e

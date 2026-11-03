@@ -20,6 +20,23 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
+import { masksSensitiveClass, maskFields } from "../../lib/scope/mask.js";
+
+/**
+ * S-16 (piano interfacce 2026-11-03; analisi V2 INC-14). Un piano di carriera e' un dato
+ * EVALUATION (`career_succession` in data-classes.ts), e la matrice M1 maschera EVALUATION al
+ * mandato di piattaforma e al perimetro tenant-wide mascherato. Il piano in se' (quale
+ * percorso, quale posizione, con che stato e orizzonte) resta visibile, come l'aspirazione
+ * in user-target-positions; si nega `metadata`, l'unico campo libero dove un valutatore
+ * scrive su una persona. Stessa regola di `reviewNotes` in user-target-positions.
+ */
+const PLAN_JUDGMENT_FIELDS = ["metadata"] as const;
+
+function maskPlan(actor: ActorContext, plan: UserCareerPlan): UserCareerPlan {
+  return masksSensitiveClass(actor, "EVALUATION", plan.userId)
+    ? maskFields(plan, PLAN_JUDGMENT_FIELDS)
+    : plan;
+}
 
 async function validateFks(
   body: { userId: string; pathId?: string | null; targetPositionId?: string | null },
@@ -56,7 +73,8 @@ export const userCareerPlansService = {
     const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
     const userIdAllowList =
       scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
-    return repo.listPlans(pool, { tenantId, userIdAllowList, query });
+    const page = await repo.listPlans(pool, { tenantId, userIdAllowList, query });
+    return { ...page, items: page.items.map((p) => maskPlan(actor, p)) };
   },
 
   async getById(actor: ActorContext, id: string): Promise<UserCareerPlan> {
@@ -67,7 +85,7 @@ export const userCareerPlansService = {
     if (!(await canReadOrgTarget(pool, actor, target.userId, target.tenantId))) {
       throw new NotFoundError("UserCareerPlan");
     }
-    return target;
+    return maskPlan(actor, target);
   },
 
   async create(actor: ActorContext, body: CreateUserCareerPlanBody): Promise<UserCareerPlan> {

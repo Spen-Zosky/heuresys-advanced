@@ -154,7 +154,7 @@
     "noName": "—",
     "detail": {
       "back": "← Users",
-      "notFound": "User not found.",
+      "notFound": "This person does not exist or is outside your organizational chain: their profile is not visible to your role.",
       "loadError": "Loading error.",
       "unnamed": "(unnamed)",
       "cardTitle": "Profile",

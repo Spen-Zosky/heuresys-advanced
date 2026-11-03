@@ -10,6 +10,9 @@ import type { SeedCandidateRecord, SeedCandidateRecordListQuery } from "@heuresy
 import * as repo from "./repository.js";
 
 function visible(a: ActorContext, r: SeedCandidateRecord): boolean {
+  // S-11: un record senza cliente non appartiene a nessun perimetro di consulente: lo vede
+  // solo chi non ha perimetro (la piattaforma), come gia' fa il filtro dell'elenco.
+  if (r.tenantId === null) return perimetroClienti(a) === undefined;
   return puoVedereCliente(a, r.tenantId);
 }
 

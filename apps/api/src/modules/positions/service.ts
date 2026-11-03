@@ -28,7 +28,50 @@ import type {
   PositionLearningModule,
 } from "@heuresys/shared";
 import { TENANT_WIDE_MANDATE_ROLES } from "../../lib/scope/resolver.js";
+import { activeDomainsOf } from "../../lib/scope/domains.js";
+import { modalitaDellaVista } from "../../lib/scope/matrix.js";
+import { maskFields, type Masked } from "../../lib/scope/mask.js";
 import * as repo from "./repository.js";
+
+/**
+ * S-7 del piano interfacce (docs/piani/PIANO_interfacce_20261103.md; analisi V4 D-03,
+ * decisione 5 confermata da Enzo il 2026-11-03).
+ *
+ * Il peso economico di una posizione e' una retribuzione indiretta: misurato nel 2026-08,
+ * 280 posizioni su 299 hanno un solo titolare, quindi il valore e' individuale. La rotta
+ * delle retribuzioni (`compensation/service.ts`) lo maschera gia'; qui usciva in chiaro a
+ * chiunque avesse `position:read`. Insieme al peso si trattiene il proprietario della
+ * posizione, che e' il nome da cui il peso si ricondurrebbe a una persona; e nel profilo
+ * della posizione (PIP) il profilo retributivo, che porta la banda.
+ *
+ * CHI LO VEDE lo decide M1, non una lista di ruoli: solo chi legge `COMPENSATION` in chiaro
+ * (`edit` o `read`) per uno dei suoi domini. Oggi e' il solo mandato HR; il capo di una
+ * catena ha `mask`, il mandato di piattaforma `mask`, i domini funzionali `none`. Il valore
+ * resta nel database e il servizio decide `canUpdate` sulla riga vera: la maschera riguarda
+ * solo cio' che si consegna.
+ */
+const CAMPI_ECONOMICI_DELLA_POSIZIONE = ["economicWeight", "ownerUserId"] as const;
+const CAMPI_ECONOMICI_DEL_PROFILO = ["compensationProfile", "economicWeight", "ownerUserId"] as const;
+
+/** I17: chi e' proprietario della posizione vede di esserlo; il peso resta trattenuto. */
+function campiDaTrattenere(
+  actor: ActorContext,
+  ownerUserId: string | null,
+  campi: readonly string[],
+): string[] {
+  return campi.filter((c) => !(c === "ownerUserId" && ownerUserId !== null && ownerUserId === actor.userId));
+}
+
+async function nascondeIlPesoEconomico(actor: ActorContext): Promise<boolean> {
+  const domini = await activeDomainsOf(pool, actor);
+  return modalitaDellaVista(domini, ["COMPENSATION"]) !== "open";
+}
+
+function mascheraPosizione(actor: ActorContext, maschera: boolean, p: Position): Masked<Position> {
+  return maschera
+    ? maskFields(p, campiDaTrattenere(actor, p.ownerUserId ?? null, CAMPI_ECONOMICI_DELLA_POSIZIONE))
+    : p;
+}
 
 // [#99 F3] Era una lista locale: `["PLATFORM_ADMIN", "TENANT_ADMIN", "HRMS_MANAGER"]`.
 // Stessi ruoli, ma ora composti dai mandati canonici — un ruolo che entra o esce da un
@@ -69,14 +112,16 @@ async function canUpdate(actor: ActorContext, target: Position): Promise<boolean
 export const positionsService = {
   async list(actor: ActorContext, query: PositionListQuery): Promise<PositionListResponse> {
     const tenantId = isPlatformAdmin(actor) ? undefined : requireOwnTenant(actor);
-    return repo.listPositions(pool, { tenantId, query });
+    const page = await repo.listPositions(pool, { tenantId, query });
+    const maschera = await nascondeIlPesoEconomico(actor);
+    return { ...page, items: page.items.map((p) => mascheraPosizione(actor, maschera, p)) };
   },
 
   async getById(actor: ActorContext, id: string): Promise<Position> {
     const target = await repo.findPositionById(pool, id);
     if (!target) throw new NotFoundError("Position");
     await ensureSameTenant(actor, target);
-    return target;
+    return mascheraPosizione(actor, await nascondeIlPesoEconomico(actor), target);
   },
 
   async create(actor: ActorContext, body: CreatePositionBody): Promise<Position> {
@@ -100,7 +145,8 @@ export const positionsService = {
         "POSITION_CODE_CONFLICT",
       );
     }
-    return repo.insertPosition(pool, tenantId, body, actor.userId);
+    const created = await repo.insertPosition(pool, tenantId, body, actor.userId);
+    return mascheraPosizione(actor, await nascondeIlPesoEconomico(actor), created);
   },
 
   async update(actor: ActorContext, id: string, patch: UpdatePositionBody): Promise<Position> {
@@ -118,7 +164,7 @@ export const positionsService = {
     }
     const updated = await repo.updatePositionPartial(pool, id, patch, actor.userId);
     if (!updated) throw new NotFoundError("Position");
-    return updated;
+    return mascheraPosizione(actor, await nascondeIlPesoEconomico(actor), updated);
   },
 
   async softDelete(actor: ActorContext, id: string): Promise<void> {
@@ -153,7 +199,9 @@ export const positionsService = {
         throw new NotFoundError("Position");
       }
     }
-    return profile;
+    return (await nascondeIlPesoEconomico(actor))
+      ? maskFields(profile, campiDaTrattenere(actor, profile.ownerUserId ?? null, CAMPI_ECONOMICI_DEL_PROFILO))
+      : profile;
   },
 
   /* -------------------------------------------------- skill requirements */

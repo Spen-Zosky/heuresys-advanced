@@ -192,14 +192,21 @@ export async function knnSimilarSkills(q: DbConnector, skillId: string, tenantId
 
   const params: unknown[] = tenantId === undefined ? [skillId, limit] : [skillId, tenantId, limit];
   const limIdx = params.length;
+  // Exact scan, not the HNSW index: pgvector applies the WHERE filter AFTER the approximate
+  // index scan (it returns at most hnsw.ef_search candidates), so a tenant-filtered query could
+  // come back short or empty even when visible neighbours exist. The OFFSET 0 subquery keeps the
+  // planner from ordering through the index; the skill corpus is small enough for a full scan.
   const r = await q.query<{ skill_id: string; skill_name: string | null; score: string }>(
     `WITH s AS (SELECT embedding FROM sys.sys_skill_embeddings WHERE skill_id = $1)
-     SELECT se.skill_id, sk.skill_name,
-            (1 - (se.embedding <=> (SELECT embedding FROM s)))::text AS score
-     FROM sys.sys_skill_embeddings se
-     JOIN sys.sys_skills sk ON sk.skill_id = se.skill_id
-     WHERE se.skill_id <> $1${vis(2)}
-     ORDER BY se.embedding <=> (SELECT embedding FROM s)
+     SELECT x.skill_id, x.skill_name, (1 - x.dist)::text AS score
+     FROM (
+       SELECT se.skill_id, sk.skill_name, se.embedding <=> (SELECT embedding FROM s) AS dist
+       FROM sys.sys_skill_embeddings se
+       JOIN sys.sys_skills sk ON sk.skill_id = se.skill_id
+       WHERE se.skill_id <> $1${vis(2)}
+       OFFSET 0
+     ) x
+     ORDER BY x.dist, x.skill_id
      LIMIT $${limIdx}`, params);
   return r.rows.map((x) => ({ skillId: x.skill_id, skillName: x.skill_name, score: num(x.score) }));
 }

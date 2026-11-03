@@ -9,6 +9,7 @@ import {
 } from "@heuresys/ui";
 import type { JobRequisition, JobRequisitionStatus } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import {
   CODE_PATTERN, KEY, REQUISITION_REASONS, REQUISITION_STATUSES,
   useActivePositions, useRequisitions,
@@ -43,6 +44,8 @@ export default function RequisitionsPage() {
     defaultValues: { code: "", positionId: "", headcount: 1, reason: "", targetStart: "", notes: "" },
   });
 
+  // S-5: creare e cambiare stato chiedono `requisition:manage`; senza, la pagina è in sola lettura.
+  const canWrite = useCan("requisition:manage");
   const create = useMutation({
     mutationFn: (v: FormValues) =>
       apiFetch<JobRequisition>("/v1/job-requisitions", {
@@ -82,6 +85,7 @@ export default function RequisitionsPage() {
     <main data-testid="requisitions-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader title={t("recruiting.requisitions.title")} description={t("recruiting.requisitions.description")} />
 
+      {canWrite && (
       <Card>
         <CardHeader><CardTitle>{t("recruiting.requisitions.newTitle")}</CardTitle></CardHeader>
         <CardContent>
@@ -142,6 +146,7 @@ export default function RequisitionsPage() {
           )}
         </CardContent>
       </Card>
+      )}
 
       {q.isLoading ? (
         <div className="flex justify-center py-12"><Spinner /></div>
@@ -171,7 +176,7 @@ export default function RequisitionsPage() {
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
                       <Badge data-testid="requisition-row-status">{t(`recruiting.requisitionStatus.${r.status}`)}</Badge>
-                      <select
+                      {canWrite && <select
                         aria-label={t("recruiting.fields.status")}
                         data-testid="requisition-row-status-select"
                         className={SELECT_CLASS}
@@ -182,7 +187,7 @@ export default function RequisitionsPage() {
                         {REQUISITION_STATUSES.map((s) => (
                           <option key={s} value={s}>{t(`recruiting.requisitionStatus.${s}`)}</option>
                         ))}
-                      </select>
+                      </select>}
                     </div>
                   </td>
                 </tr>

@@ -27,6 +27,7 @@ import {
 } from "@heuresys/shared/schemas/whistleblowing";
 import { useMyInterfaces } from "@/lib/api/auth";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import { isApiError } from "@/lib/api/errors";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
@@ -74,6 +75,9 @@ export default function WhistleblowingConsolePage() {
     }
   }, [detail.data, reset]);
 
+  // S-5: chi legge le segnalazioni senza poterle gestire vede i campi in sola lettura e
+  // nessun pulsante di salvataggio (whistleblowing:manage è il permesso della PATCH).
+  const canManage = useCan("whistleblowing:manage");
   const update = useMutation({
     mutationFn: (body: WhistleblowingUpdate) =>
       apiFetch<WhistleblowingReport>(`/v1/whistleblowing/reports/${selectedId}`, { method: "PATCH", body }),
@@ -222,6 +226,7 @@ export default function WhistleblowingConsolePage() {
                 </div>
 
                 <form onSubmit={(e) => { void onSubmit(e); }} className="space-y-4 border-t border-border pt-4" noValidate>
+                  <fieldset disabled={!canManage} className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label htmlFor="wb-console-status" className="mb-1 block text-sm font-medium text-foreground">
@@ -270,7 +275,8 @@ export default function WhistleblowingConsolePage() {
                     <p className="mt-1 text-xs text-muted-foreground">{t("whistleblowingConsole.detail.internalNotesHint")}</p>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  </fieldset>
+                  {canManage && <div className="flex items-center gap-3">
                     <Button type="submit" data-testid="wb-console-save" disabled={update.isPending}>
                       {update.isPending ? t("whistleblowingConsole.detail.saving") : t("whistleblowingConsole.detail.save")}
                     </Button>
@@ -283,7 +289,7 @@ export default function WhistleblowingConsolePage() {
                         {saveFeedback.msg}
                       </p>
                     )}
-                  </div>
+                  </div>}
                 </form>
               </>
             )}

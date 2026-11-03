@@ -189,6 +189,23 @@ describe("mandato K, R-9 — PLATFORM_OPERATOR e SALES", () => {
     expect(denied.statusCode).toBe(403);
   });
 
+  // S-3 (piano interfacce 2026-11-03, mig. 000469): la voce «Salute del sistema» chiede il
+  // permesso della sua pagina. L'operatore, che ha observability:read, la vede nel menu e la
+  // guardia di pagina gliela apre; chi vende non ha il permesso e non la vede.
+  it("la voce «Salute del sistema» segue observability:read", async () => {
+    const voce = async (cookies: Map<string, string>) => {
+      const r = await suite.app.inject({ method: "GET", url: "/v1/me/interfaces", headers: { cookie: ch(cookies) } });
+      expect(r.statusCode).toBe(200);
+      const b = r.json() as { perspectives: { interfaces: { code: string }[] }[]; routes: { route: string; allowed: boolean }[] };
+      return {
+        nelMenu: b.perspectives.some((p) => p.interfaces.some((i) => i.code === "system-health")),
+        aperta: b.routes.some((x) => x.route === "/system-health" && x.allowed),
+      };
+    };
+    expect(await voce(operator.cookies)).toEqual({ nelMenu: true, aperta: true });
+    expect(await voce(sales.cookies)).toEqual({ nelMenu: false, aperta: false });
+  });
+
   it("controprova — PLATFORM_ADMIN vede tutto senza bisogno di assegnazione", async () => {
     const r = await suite.app.inject({
       method: "GET", url: "/v1/provenance/summary",

@@ -13,6 +13,7 @@ import type {
   BlueprintFamily, BlueprintVariant, OperatingModel, EnterpriseSizeBand, EnterpriseTypingProfile,
 } from "@heuresys/shared";
 import { apiFetch } from "../../../../../lib/api/fetch";
+import { useCan } from "../../../../../lib/api/auth";
 
 // B-xx (#42 part B): the 5 local interfaces this page used to declare (BlueprintFamily/
 // BlueprintVariant/OperatingModel/EnterpriseSizeBand/EnterpriseProfile) are gone —
@@ -59,6 +60,9 @@ export default function EnterpriseTypingWizardPage() {
     [variants.data, familyId],
   );
 
+  // S-5: salvare la tipizzazione chiede `enterprise_typing:update`; senza, il modulo è in sola
+  // lettura e il pulsante non c'è. (Il verbo sbagliato della chiamata è D-11, voce V-5.)
+  const canUpdate = useCan("enterprise_typing:update");
   const create = useMutation({
     mutationFn: (body: TypingFormValues) =>
       apiFetch<EnterpriseTypingProfile>("/v1/enterprise-typing-profiles", {
@@ -99,6 +103,7 @@ export default function EnterpriseTypingWizardPage() {
             className="space-y-4"
             data-testid="enterprise-typing-form"
           >
+            <fieldset disabled={!canUpdate} className="space-y-4">
             <div className="space-y-1">
               <label htmlFor="blueprintFamilyId" className="text-sm font-medium text-foreground">{t("enterpriseTyping.familyLabel")}</label>
               <select
@@ -177,13 +182,14 @@ export default function EnterpriseTypingWizardPage() {
               </p>
             )}
 
-            <Button
+            {canUpdate && <Button
               type="submit"
               data-testid="typing-submit"
               disabled={isSubmitting || create.isPending}
             >
               {create.isPending ? t("enterpriseTyping.submitting") : t("enterpriseTyping.submit")}
-            </Button>
+            </Button>}
+            </fieldset>
           </form>
         </CardContent>
       </Card>

@@ -188,6 +188,11 @@ giro() {
   prod_readyz="$(sonda "$PROD_URL/api/readyz")"
   prod_login="$(sonda "$PROD_URL/login")"
   esito "produzione" "readyz=$prod_readyz login=$prod_login"
+  # S-4 (piano interfacce 2026-11-03): la vetrina dei componenti (/showcase) e' spenta in
+  # produzione solo da una variabile d'ambiente (showcase/layout.tsx). Nessun controllo lo
+  # garantiva: qui si misura. Atteso 404; un 200 vuol dire che la variabile e' stata accesa.
+  prod_vetrina="$(sonda "$PROD_URL/showcase")"
+  esito "vetrina spenta" "showcase=$prod_vetrina (atteso 404)"
 
   # DEPLOYATO chiede che TUTTO torni: un solo host allineato non basta — i due gemelli
   # devono raccontare la stessa storia, o la prossima verifica girerebbe su un codice
@@ -202,6 +207,8 @@ giro() {
     fi
     if [ -n "$servizi_ko" ]; then
       verdetto="DISALLINEATO"; motivo="servizi non attivi su:$servizi_ko"
+    elif [ "$prod_vetrina" = "200" ]; then
+      verdetto="DISALLINEATO"; motivo="la vetrina /showcase e' accesa in produzione (NEXT_PUBLIC_ENABLE_SHOWCASE)"
     elif [ "$prod_readyz" != "200" ] && [ "${totali:-0}" -gt 0 ] && [ "${in_corso:-0}" -eq 0 ]; then
       verdetto="DISALLINEATO"; motivo="produzione non risponde (readyz=$prod_readyz) a CI conclusa"
     elif [ -n "$cloni_in_corso" ]; then

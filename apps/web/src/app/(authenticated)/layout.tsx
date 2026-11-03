@@ -175,8 +175,10 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   const verdict = pageVerdict(pathname, ifaces.data?.routes ?? [], SECTION_TAB_GROUPS);
 
   const roles = user.roles ?? [];
-  const ADMIN_ROLES = new Set(["PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER", "ORG_DIRECTOR"]);
-  const hasAdminRole = roles.some((r) => ADMIN_ROLES.has(r));
+  // S-22 (INC-16): il tono dell'etichetta non viene più da una lista di sette ruoli scritta
+  // qui (che non conosceva i ruoli nati col mandato K), ma dal dato: chi ha nel menu almeno
+  // una voce fuori dall'area personale ha un lavoro che va oltre il proprio record.
+  const hasAdminRole = sections.some((s) => s.code !== "PERSONAL" && s.interfaces.length > 0);
   const displayName = user.displayName?.trim() || user.email;
   const initials = (
     user.displayName?.trim()

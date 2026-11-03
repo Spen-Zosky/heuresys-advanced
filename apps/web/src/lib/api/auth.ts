@@ -118,7 +118,7 @@ export interface MyInterface {
   order: number;
 }
 export interface MyPerspective {
-  code: "PROCESS" | "ENTERPRISE" | "TALENT";
+  code: "OVERVIEW" | "GOVERNANCE" | "WORKFORCE" | "INTELLIGENCE" | "PERSONAL";
   label: string;
   interfaces: MyInterface[];
 }

@@ -2,11 +2,10 @@
 
 import type { KeyboardEvent, ReactNode } from "react";
 import { useState } from "react";
-import { Badge, Button, DataTableWithCrossHair, EmptyState, ErrorState, PageHeader } from "@heuresys/ui";
-import { Inbox } from "lucide-react";
+import { Badge, Button, DataTableWithCrossHair, PageHeader } from "@heuresys/ui";
 import { useTranslation } from "react-i18next";
 import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
-import { testoPerLaPersona } from "@/lib/api/errors";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /**
  * Canonical list-page composition (brand-component-contract.md: "Data table /
@@ -89,28 +88,23 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
   }
 
   if (isLoading) {
-    return (
-      <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">
-        {t("loading")}
-      </div>
-    );
+    return <StatoCaricamento />;
   }
   if (isError) {
     return (
-      <ErrorState
-        data-testid={errorTestId}
-        title={errorMessage ?? t("error.load")}
-        description={testoPerLaPersona(error) ?? t("error.loadHint")}
+      <StatoErrore
+        errore={error}
+        titolo={errorMessage ?? t("error.load")}
+        {...(errorTestId ? { testId: errorTestId } : {})}
       />
     );
   }
   if (rows.length === 0 && (!server || server.total === 0)) {
     return (
-      <EmptyState
-        data-testid={emptyTestId}
-        icon={<Inbox className="h-6 w-6" />}
-        title={emptyTitle ?? t("empty.none")}
-        {...(emptyDescription ? { description: emptyDescription } : {})}
+      <StatoVuoto
+        titolo={emptyTitle ?? t("empty.none")}
+        {...(emptyDescription ? { motivo: emptyDescription } : {})}
+        {...(emptyTestId ? { testId: emptyTestId } : {})}
       />
     );
   }

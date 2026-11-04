@@ -765,5 +765,12 @@
       "emptyDesc": "Il registro degli eventi è vuoto nella finestra corrente."
     }
   },
-  "unnamed": "senza nome"
+  "unnamed": "senza nome",
+  "stato": {
+    "negato": {
+      "titolo": "Non hai accesso a questi dati",
+      "motivo": "Il tuo profilo non comprende questi dati. Se ti servono per il tuo lavoro, chiedi a chi gestisce i ruoli nella tua azienda."
+    },
+    "codice": "Codice: {{codice}}."
+  }
 }

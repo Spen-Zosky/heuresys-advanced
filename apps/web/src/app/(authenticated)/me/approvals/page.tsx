@@ -59,6 +59,7 @@ export default function MeApprovalsPage() {
                 <thead>
                   <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                     <th className="px-4 py-2">{t("approvals.colTitle")}</th>
+                    <th className="px-4 py-2">{t("approvals.colProcess")}</th>
                     <th className="px-4 py-2">{t("approvals.colStatus")}</th>
                     <th className="px-4 py-2">{t("approvals.colPriority")}</th>
                     <th className="px-4 py-2">{t("approvals.colCreated")}</th>
@@ -68,6 +69,16 @@ export default function MeApprovalsPage() {
                   {items.map((a, i) => (
                     <tr key={`appr-${i}`} data-testid="me-approvals-row" className="transition-colors hover:bg-muted/60">
                       <td className="px-4 py-2 align-middle font-medium text-foreground">{a.title ?? "—"}</td>
+                      <td className="px-4 py-2 align-middle text-xs">
+                        {a.processName ? (
+                          <>
+                            <span className="text-foreground">{a.processName}</span>
+                            {a.processStepName && <span className="block text-muted-foreground">{a.processStepName}</span>}
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">{t("approvals.noProcess")}</span>
+                        )}
+                      </td>
                       <td className="px-4 py-2 align-middle"><EnumStatusBadge domain="approvalStatus" value={a.status} /></td>
                       <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{enumLabel("notificationPriority", a.priority)}</td>
                       <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{a.createdAt ? a.createdAt.slice(0, 10) : "—"}</td>

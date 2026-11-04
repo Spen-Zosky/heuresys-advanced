@@ -9,7 +9,8 @@
       "policy": "Quorum",
       "priority": "Priorità",
       "steps": "Passi",
-      "created": "Creata"
+      "created": "Creata",
+      "process": "Processo e attività"
     },
     "status": {
       "PENDING": "In attesa",
@@ -40,7 +41,7 @@
       "policyLabel": "Quorum",
       "priorityLabel": "Priorità",
       "approversLabel": "Approvatori",
-      "approversHint": "Seleziona uno o più approvatori (Ctrl/Cmd per selezione multipla).",
+      "approversHint": "Cerca le persone per nome o email e aggiungile una alla volta.",
       "bodyLabel": "Descrizione",
       "submit": "Crea richiesta",
       "submitting": "Creazione…",
@@ -48,7 +49,11 @@
       "errorUnexpected": "Errore imprevisto."
     },
     "filters": {
-      "statusAll": "Tutti gli stati"
+      "statusAll": "Tutti gli stati",
+      "processAll": "Tutti i processi",
+      "process": "Processo",
+      "stepAll": "Tutte le attività",
+      "step": "Attività"
     },
     "emptyTitle": "Nessuna richiesta",
     "emptyDescription": "Non ci sono richieste di approvazione.",
@@ -89,8 +94,12 @@
         "approvalResolved": "Decisione inviata: {{decision}}",
         "errorRun": "Esecuzione fallita: {{message}}",
         "noSession": "Nessuna sessione: effettua il login per inoltrare i cookie al gateway."
-      }
-    }
+      },
+      "onBehalfOf": "deciso da {{delegate}} per conto di {{approver}}"
+    },
+    "noProcess": "Fuori processo",
+    "delegated_one": "{{count}} passo deciso per delega",
+    "delegated_other": "{{count}} passi decisi per delega"
   },
   "engagement": {
     "title": "Engagement & Sondaggi",

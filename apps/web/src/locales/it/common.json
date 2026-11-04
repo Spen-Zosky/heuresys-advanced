@@ -611,5 +611,14 @@
     "network": "Il server non risponde: controlla la connessione e riprova.",
     "sessionExpired": "La sessione è scaduta: accedi di nuovo.",
     "reference": "Riferimento da citare: {{requestId}}"
+  },
+  "personPicker": {
+    "selected": "Persone scelte",
+    "remove": "Togli {{name}}",
+    "placeholder": "Scrivi almeno {{count}} lettere del nome o dell'email",
+    "typeMore": "Scrivi almeno {{count}} lettere per cercare.",
+    "error": "Ricerca non riuscita.",
+    "found_one": "{{count}} persona trovata",
+    "found_other": "{{count}} persone trovate"
   }
 }

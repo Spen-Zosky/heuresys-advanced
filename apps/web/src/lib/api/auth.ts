@@ -14,6 +14,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UserPreference, UpdateUserPreferenceBody } from "@heuresys/shared";
 import { apiFetch } from "./fetch";
 import { csrfStore } from "./csrf-store";
+import { FRESCHEZZA_MS, leggiCopia, scriviCopia, svuotaCopiaDiSessione } from "./session-cache";
 
 export interface AuthMeUser {
   userId: string;
@@ -66,12 +67,24 @@ export interface LoginBody {
 
 export const AUTH_ME_QUERY_KEY = ["auth", "me"] as const;
 
+/**
+ * V-12: le tre letture di sessione partono dalla copia della scheda, se e' fresca, e restano
+ * fresche per FRESCHEZZA_MS: aprire una pagina non le richiede piu'.
+ */
+function daCopia<T>(chiave: string) {
+  const c = leggiCopia<T>(chiave);
+  return {
+    staleTime: FRESCHEZZA_MS,
+    ...(c ? { initialData: c.data, initialDataUpdatedAt: c.savedAt } : {}),
+  };
+}
+
 export function useCurrentUser() {
   return useQuery({
     queryKey: AUTH_ME_QUERY_KEY,
-    queryFn: ({ signal }) =>
-      apiFetch<AuthMeUser>("/v1/auth/me", { signal }),
-    staleTime: 30_000,
+    queryFn: async ({ signal }) => scriviCopia("auth-me", await apiFetch<AuthMeUser>("/v1/auth/me", { signal })),
+    // V-12: una lettura per sessione, non una per pagina (vedi session-cache.ts).
+    ...daCopia<AuthMeUser>("auth-me"),
     // 401 is handled by apiFetch silent-refresh; if it still bubbles up here,
     // the user is genuinely unauthenticated — render the login redirect.
     retry: 0,
@@ -92,8 +105,8 @@ export const ME_PERMISSIONS_QUERY_KEY = ["me", "permissions"] as const;
 export function useCurrentUserPermissions() {
   return useQuery({
     queryKey: ME_PERMISSIONS_QUERY_KEY,
-    queryFn: ({ signal }) => apiFetch<MePermissions>("/v1/me/permissions", { signal }),
-    staleTime: 60_000,
+    queryFn: async ({ signal }) => scriviCopia("me-permissions", await apiFetch<MePermissions>("/v1/me/permissions", { signal })),
+    ...daCopia<MePermissions>("me-permissions"),
     retry: 0,
   });
 }
@@ -138,8 +151,8 @@ export const ME_INTERFACES_QUERY_KEY = ["me", "interfaces"] as const;
 export function useMyInterfaces() {
   return useQuery({
     queryKey: ME_INTERFACES_QUERY_KEY,
-    queryFn: ({ signal }) => apiFetch<MyInterfaces>("/v1/me/interfaces", { signal }),
-    staleTime: 60_000,
+    queryFn: async ({ signal }) => scriviCopia("me-interfaces", await apiFetch<MyInterfaces>("/v1/me/interfaces", { signal })),
+    ...daCopia<MyInterfaces>("me-interfaces"),
     retry: 0,
   });
 }
@@ -198,6 +211,8 @@ export function useLogin() {
       return res;
     },
     onSuccess: async (res) => {
+      // V-12: chi entra non eredita la copia di sessione di chi c'era prima nella scheda.
+      svuotaCopiaDiSessione();
       if (res.status !== "success") return;
       // The login response splits `user` (profile fields) from `roles`. The
       // /v1/auth/me endpoint returns them merged — mirror that shape so the
@@ -216,6 +231,7 @@ export function useLogout() {
       csrfStore.clear();
     },
     onSettled: () => {
+      svuotaCopiaDiSessione();
       qc.clear();
     },
   });

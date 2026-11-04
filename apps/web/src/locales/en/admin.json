@@ -9,7 +9,8 @@
       "policy": "Quorum",
       "priority": "Priority",
       "steps": "Steps",
-      "created": "Created"
+      "created": "Created",
+      "process": "Process and activity"
     },
     "status": {
       "PENDING": "Pending",
@@ -40,7 +41,7 @@
       "policyLabel": "Quorum",
       "priorityLabel": "Priority",
       "approversLabel": "Approvers",
-      "approversHint": "Select one or more approvers (Ctrl/Cmd for multi-select).",
+      "approversHint": "Search people by name or email and add them one at a time.",
       "bodyLabel": "Description",
       "submit": "Create request",
       "submitting": "Creating…",
@@ -48,7 +49,11 @@
       "errorUnexpected": "Unexpected error."
     },
     "filters": {
-      "statusAll": "All statuses"
+      "statusAll": "All statuses",
+      "processAll": "All processes",
+      "process": "Process",
+      "stepAll": "All activities",
+      "step": "Activity"
     },
     "emptyTitle": "No requests",
     "emptyDescription": "There are no approval requests.",
@@ -89,8 +94,12 @@
         "approvalResolved": "Decision sent: {{decision}}",
         "errorRun": "Run failed: {{message}}",
         "noSession": "No session: log in so the cookies are forwarded to the gateway."
-      }
-    }
+      },
+      "onBehalfOf": "decided by {{delegate}} on behalf of {{approver}}"
+    },
+    "noProcess": "No process",
+    "delegated_one": "{{count}} step decided by delegation",
+    "delegated_other": "{{count}} steps decided by delegation"
   },
   "engagement": {
     "title": "Engagement & Surveys",

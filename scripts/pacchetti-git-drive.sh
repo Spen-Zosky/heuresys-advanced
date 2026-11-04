@@ -6,10 +6,10 @@
 # che lo rinnovava vive sul PC, congelato dal 22/10, e advanced non ne aveva uno. Se si
 # perde GitHub devono restare un file solo, verificato, con tutta la storia.
 #
-# COSA FA. Per ogni repository: fetch, `git bundle create --all`, e sostituzione su Drive
-# solo dopo le guardie. Il pacchetto in carica diventa `.precedente`. Se una guardia
-# fallisce la destinazione resta com'era e scatta l'allarme. Il lavoro non committato e i
-# file ignorati (`.env` compresi) non entrano: non sono in Git.
+# COSA FA. Per ogni repository: fetch, pacchetto di rami, etichette e rami remoti, e
+# sostituzione su Drive solo dopo le guardie. Il pacchetto in carica diventa `.precedente`.
+# Se una guardia fallisce la destinazione resta com'era e scatta l'allarme. Gli stash, il
+# lavoro non committato e i file ignorati (`.env` compresi) non entrano.
 #
 # DOVE GIRA. Sulla VM, da cron, copiato in ~/backup-hr/bin/.
 # Piano: docs/piani/PIANO_pacchetti-git-drive_20261104.md
@@ -38,8 +38,14 @@ pacchetto() {
   local atteso nel_pacchetto peso in_carica impronta riletta
 
   git -C "$repo" fetch origin --quiet || { log "$nome: fetch fallita"; return 1; }
-  git -C "$repo" bundle create --quiet "$locale" --all || { log "$nome: costruzione fallita"; return 1; }
+  git -C "$repo" bundle create --quiet "$locale" HEAD --branches --tags --remotes || { log "$nome: costruzione fallita"; return 1; }
   git -C "$repo" bundle verify --quiet "$locale" 2>> "$LOG" || { log "$nome: verifica fallita"; return 1; }
+
+  # niente stash o altri riferimenti di lavoro: il pacchetto sta in chiaro su Drive
+  if git bundle list-heads "$locale" | grep -qvE ' (HEAD|refs/(heads|tags|remotes)/.*)$'; then
+    log "$nome: riferimenti fuori dagli ammessi nel pacchetto"
+    return 1
+  fi
 
   # il pacchetto deve contenere la main di GitHub appena letta
   atteso=$(git -C "$repo" rev-parse origin/main)

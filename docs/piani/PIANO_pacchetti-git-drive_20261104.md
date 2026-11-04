@@ -14,7 +14,7 @@ Non si chiude in questa sessione: la verifica della prima corsa notturna di cron
 
 ## Simulazione
 
-**P1, P2.** Prerequisiti: `gdrive-hr` funziona, `git fetch` funziona con l'ambiente di cron (provato il 4/11 con `env -i`). Effetto: `git bundle create --all` dopo una fetch. Sostituisce il pacchetto su Drive solo dopo verifica; il precedente resta come `.precedente`. Portata: il file su Drive è la copia fuori sede, nessun'altra macchina deve riceverlo. Serve Enzo: no.
+**P1, P2.** Prerequisiti: `gdrive-hr` funziona, `git fetch` funziona con l'ambiente di cron (provato il 4/11 con `env -i`). Effetto: `git bundle create` di rami, etichette e rami remoti dopo una fetch, senza stash. Sostituisce il pacchetto su Drive solo dopo verifica; il precedente resta come `.precedente`. Portata: il file su Drive è la copia fuori sede, nessun'altra macchina deve riceverlo. Serve Enzo: no.
 
 Caso limite distruttivo: un repository danneggiato produrrebbe un pacchetto piccolo che sostituisce quello buono. Guardie: `git bundle verify`, `origin/main` presente nel pacchetto, peso almeno metà del pacchetto in carica, impronta riscaricata da Drive. Se una fallisce, la destinazione resta com'era e scatta l'allarme. La prima corsa manda il pacchetto del datastore del 21/10 a `.precedente` e il vecchio `.precedente` nel cestino di Drive: tutti i suoi commit sono su GitHub.
 

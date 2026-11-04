@@ -125,7 +125,12 @@
       "workload": "Workload",
       "satisfaction": "Satisfaction",
       "totalChecks": "{{count}} total checks",
-      "empty": "No pulse data."
+      "empty": "No pulse data.",
+      "axisWeek": "Week",
+      "axisScore": "Average score",
+      "tableTitle": "Show the data as a table",
+      "colCount": "Check-ins",
+      "weekShort": "Wk {{n}}"
     },
     "results": {
       "back": "Back to Engagement",
@@ -352,23 +357,36 @@
     }
   },
   "enterpriseTyping": {
-    "title": "Enterprise Typing Wizard",
-    "description": "Type the enterprise by selecting family, variant, operating model and size band.",
+    "title": "Enterprise typing",
+    "description": "The profile that describes the company: activity class, size, operating model, regulatory intensity.",
     "back": "← Tenant",
-    "cardTitle": "Profile",
-    "familyLabel": "Blueprint family",
-    "variantLabel": "Variant",
+    "cardTitleNew": "New profile",
+    "cardTitleSaved": "Saved profile",
+    "classLabel": "Activity class",
+    "classNone": "No class chosen.",
+    "classSearch": "Search by code or name (at least 2 letters)",
+    "classClear": "Remove the class",
     "modelLabel": "Operating model",
     "sizeBandLabel": "Size band",
-    "selectPlaceholder": "— Select —",
+    "intensityLabel": "Regulatory intensity",
+    "intensity": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "EXTREME": "Extreme"
+    },
+    "countryLabel": "Country (two-letter code)",
+    "countryInvalid": "The country is a two-letter code, e.g. IT.",
+    "employeesLabel": "Employees",
+    "revenueLabel": "Revenue (€)",
+    "numbersInvalid": "Employees and revenue are plain numbers.",
     "nonePlaceholderMale": "— None —",
     "nonePlaceholderFemale": "— None —",
-    "familyRequired": "Family is required.",
-    "variantRequired": "Variant is required.",
-    "createError": "Profile creation error.",
-    "createSuccess": "Profile created.",
-    "submit": "Create profile",
-    "submitting": "Creating…"
+    "loadError": "Could not read the profile.",
+    "saveError": "Save failed.",
+    "saveSuccess": "Profile saved.",
+    "submit": "Save the profile",
+    "submitting": "Saving…"
   },
   "organization": {
     "title": "Organization Units",
@@ -978,6 +996,12 @@
       "total": "Total",
       "avgConfidence": "Avg conf.",
       "conflicted": "Conflicted"
+    },
+    "status": {
+      "VALID": "Valid",
+      "STALE": "Stale",
+      "CONFLICTED": "Conflicted",
+      "REJECTED": "Rejected"
     }
   },
   "timeOff": {
@@ -1228,6 +1252,11 @@
       "confirmed": "Confirmed",
       "superseded": "Superseded",
       "tables": "Tables involved"
+    },
+    "status": {
+      "GENERATED": "Generated",
+      "CONFIRMED": "Confirmed",
+      "SUPERSEDED": "Superseded"
     }
   }
 }

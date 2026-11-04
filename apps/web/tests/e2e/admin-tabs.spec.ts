@@ -37,7 +37,7 @@ test.describe("MVP-2a admin tabbed pages — live data", () => {
       await expect(page.getByTestId("tenant-users-link")).toBeVisible();
     });
 
-    test("/tenants/[id]/enterprise-typing wizard renders all 4 selects", async ({ page }) => {
+    test("/tenants/[id]/enterprise-typing: il profilo si apre e si salva con PUT (V-5)", async ({ page }) => {
       await page.goto("/tenants");
       const firstLink = page.getByTestId("tenant-link").first();
       const href = await firstLink.getAttribute("href");
@@ -46,11 +46,16 @@ test.describe("MVP-2a admin tabbed pages — live data", () => {
 
       await page.goto(`/tenants/${tenantId}/enterprise-typing`);
       await expect(page.getByTestId("enterprise-typing-page")).toBeVisible();
-      await expect(page.getByTestId("typing-family")).toBeVisible();
-      await expect(page.getByTestId("typing-variant")).toBeVisible();
       await expect(page.getByTestId("typing-model")).toBeVisible();
       await expect(page.getByTestId("typing-sizeband")).toBeVisible();
-      await expect(page.getByTestId("typing-submit")).toBeVisible();
+      await expect(page.getByTestId("typing-intensity")).toBeVisible();
+      // Si risalva il profilo cosi' come si e' aperto: prima il verbo era POST e finiva in 404.
+      const [res] = await Promise.all([
+        page.waitForResponse((r) => r.url().includes("/v1/enterprise-typing-profiles") && r.request().method() === "PUT"),
+        page.getByTestId("typing-submit").click(),
+      ]);
+      expect(res.status()).toBe(200);
+      await expect(page.getByTestId("typing-success")).toBeVisible();
     });
   });
 

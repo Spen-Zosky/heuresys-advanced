@@ -719,7 +719,10 @@
         "comp": "Compensation",
         "promotion": "Role growth"
       }
-    }
+    },
+    "axisMonth": "Month",
+    "axisHours": "Hours",
+    "tableTitle": "Show the data as a table"
   },
   "orgChart": {
     "title": "Org chart",

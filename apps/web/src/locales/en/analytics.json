@@ -171,7 +171,9 @@
       "hoursLabel": "Requested hours",
       "hoursDesc": "Overtime hours requested",
       "compLabel": "Total compensation",
-      "compDesc": "Estimated compensation of the requests"
+      "compDesc": "Estimated compensation of the requests",
+      "compUnavailable": "Not available",
+      "compUnavailableDesc": "No request in your scope carries an amount."
     },
     "statusTitle": "Requests by status",
     "statusAria": "Overtime requests distribution by status",
@@ -220,5 +222,14 @@
     "canvasEmpty": "No links for this skill at this depth.",
     "legendExplicit": "Declared link between skills",
     "legendGroup": "Taxonomy membership"
+  },
+  "charts": {
+    "axisMonth": "Month",
+    "axisHours": "Hours",
+    "axisUnit": "Organizational unit",
+    "axisRequests": "Requests",
+    "tableTitle": "Show the data as a table",
+    "colStatus": "Status",
+    "colType": "Type"
   }
 }

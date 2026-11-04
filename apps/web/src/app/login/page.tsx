@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore, type FormEvent } from "react";
+import { useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { startRegistration, startAuthentication } from "@simplewebauthn/browser";
 import { QRCodeSVG } from "qrcode.react";
 import { Button, Card, CardContent, CardHeader, CardTitle, HeuresysWordmark, Input } from "@heuresys/ui";
-import { useLogin, type LoginSuccessResponse } from "../../lib/api/auth";
+import { useCurrentUserPermissions, useLogin, type LoginSuccessResponse } from "../../lib/api/auth";
 import { apiFetch } from "../../lib/api/fetch";
 import { csrfStore } from "../../lib/api/csrf-store";
 import { isApiError } from "../../lib/api/errors";
@@ -93,6 +93,14 @@ export default function LoginPage() {
     resolver: zodResolver(LoginFormSchema),
     defaultValues: { email: "", password: "" },
   });
+
+  // V-4 (D-23): chi ha gia' una sessione non resta sul modulo di accesso, va avanti alla sua
+  // pagina iniziale. Una sessione di sola iscrizione all'MFA non ha permessi, quindi resta qui.
+  const sessione = useCurrentUserPermissions();
+  useEffect(() => {
+    const p = sessione.data?.permissions;
+    if (p && p.length > 0) router.replace(readNextParam() ?? landingForPermissions(p));
+  }, [sessione.data, router]);
 
   // #116: the destination is derived from what the caller may DO, never from
   // which roles they hold — the login response carries the resolved permission

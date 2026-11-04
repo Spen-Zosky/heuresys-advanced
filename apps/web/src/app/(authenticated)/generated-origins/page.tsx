@@ -58,7 +58,7 @@ function colonneRighe(t: TFunction): DataColumn<GeneratedOrigin>[] {
     },
     {
       header: t("generatedOrigins.cols.status"),
-      cell: (r) => <StatusPill tone={tonoPerStato(r.status)}>{r.status}</StatusPill>,
+      cell: (r) => <StatusPill tone={tonoPerStato(r.status)}>{t(`generatedOrigins.status.${r.status}`)}</StatusPill>,
     },
     {
       header: t("generatedOrigins.cols.justification"),
@@ -124,9 +124,9 @@ export default function GeneratedOriginsPage() {
         align: "right",
         cell: (r) => <span className="tabular-nums">{r.total.toLocaleString()}</span>,
       },
-      { header: "GENERATED", align: "right", cell: (r) => <span className="tabular-nums">{r.generated.toLocaleString()}</span> },
-      { header: "CONFIRMED", align: "right", cell: (r) => <span className="tabular-nums">{r.confirmed.toLocaleString()}</span> },
-      { header: "SUPERSEDED", align: "right", cell: (r) => <span className="tabular-nums">{r.superseded.toLocaleString()}</span> },
+      { header: t("generatedOrigins.status.GENERATED"), align: "right", cell: (r) => <span className="tabular-nums">{r.generated.toLocaleString()}</span> },
+      { header: t("generatedOrigins.status.CONFIRMED"), align: "right", cell: (r) => <span className="tabular-nums">{r.confirmed.toLocaleString()}</span> },
+      { header: t("generatedOrigins.status.SUPERSEDED"), align: "right", cell: (r) => <span className="tabular-nums">{r.superseded.toLocaleString()}</span> },
     ],
     [t],
   );
@@ -185,7 +185,7 @@ export default function GeneratedOriginsPage() {
             <option value="">{t("generatedOrigins.allStatuses")}</option>
             {STATI.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {t(`generatedOrigins.status.${s}`)}
               </option>
             ))}
           </select>

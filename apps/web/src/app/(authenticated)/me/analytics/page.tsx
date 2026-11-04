@@ -11,7 +11,7 @@ import { EChartsCard } from "../../_charts-client";
  *  #59 F/F5 (ADR-0031): + "Il mio sviluppo" — own computed scores with
  *  evidence, coach framing (supersedes D-6). */
 export default function MeAnalyticsPage() {
-  const { t } = useTranslation("ess");
+  const { t, i18n } = useTranslation("ess");
   const q = useQuery({
     queryKey: ["me", "analytics"],
     queryFn: () => apiFetch<MeAnalyticsResponse>("/v1/me/analytics"),
@@ -25,7 +25,7 @@ export default function MeAnalyticsPage() {
   const trendOption = {
     tooltip: { trigger: "axis" as const },
     legend: { data: [t("analytics.regular"), t("analytics.overtime")], textStyle: { color: "hsl(var(--muted-foreground))" } },
-    grid: { left: 48, right: 16, top: 32, bottom: 28 },
+    grid: { left: 64, right: 16, top: 32, bottom: 48 },
     xAxis: { type: "category" as const, data: trend.map((m) => m.month), axisLabel: { color: "hsl(var(--muted-foreground))" } },
     yAxis: { type: "value" as const, axisLabel: { color: "hsl(var(--muted-foreground))" } },
     series: [
@@ -70,7 +70,18 @@ export default function MeAnalyticsPage() {
                 <p className="p-4 text-sm text-muted-foreground" data-testid="analytics-trend-empty">{t("analytics.trendEmpty")}</p>
               ) : (
                 <div data-testid="analytics-trend">
-                  <EChartsCard option={trendOption} height={360} ariaLabel={t("analytics.trendAria")} />
+                  <EChartsCard
+                    option={trendOption}
+                    height={360}
+                    ariaLabel={t("analytics.trendAria")}
+                    assi={{ x: t("analytics.axisMonth"), y: t("analytics.axisHours") }}
+                    lingua={i18n.language}
+                    tabella={{
+                      titolo: t("analytics.tableTitle"),
+                      colonne: [t("analytics.axisMonth"), t("analytics.regular"), t("analytics.overtime")],
+                      righe: trend.map((m) => [m.month, m.regularHours, m.overtimeHours]),
+                    }}
+                  />
                 </div>
               )}
             </CardContent>

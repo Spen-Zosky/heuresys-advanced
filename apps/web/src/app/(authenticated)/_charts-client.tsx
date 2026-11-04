@@ -68,9 +68,82 @@ function resolveCssVars<T>(value: T, root: HTMLElement): T {
   return value;
 }
 
-type EChartsCardProps = ComponentProps<typeof RawEChartsCard>;
+type RawProps = ComponentProps<typeof RawEChartsCard>;
 
-export function EChartsCard(props: EChartsCardProps) {
+/**
+ * V-11 del piano interfacce (2026-11-04): ogni grafico dice che cosa misurano i suoi assi
+ * (nome e unita') e ha una tabella equivalente, leggibile da chi non vede il disegno e da un
+ * agente. `assi` scrive `name` su xAxis e yAxis quando sono oggetti; `tabella` disegna sotto il
+ * grafico una tabella apribile con gli stessi numeri.
+ */
+export interface ChartTable {
+  titolo: string;
+  colonne: string[];
+  righe: Array<Array<string | number>>;
+}
+type EChartsCardProps = RawProps & {
+  assi?: { x?: string; y?: string };
+  tabella?: ChartTable;
+  /** Lingua dei numeri della tabella. */
+  lingua?: string;
+};
+
+function conNomiDegliAssi(option: RawProps["option"], assi: { x?: string; y?: string } | undefined): RawProps["option"] {
+  if (!assi) return option;
+  const o = { ...(option as Record<string, unknown>) };
+  const metti = (k: "xAxis" | "yAxis", nome: string | undefined, verticale: boolean) => {
+    const a = o[k];
+    if (!nome || !a || typeof a !== "object" || Array.isArray(a)) return;
+    o[k] = { ...(a as Record<string, unknown>), name: nome, nameLocation: "middle", nameGap: verticale ? 44 : 28 };
+  };
+  metti("xAxis", assi.x, false);
+  metti("yAxis", assi.y, true);
+  // Il nome dell'asse sta fuori dalla griglia: si lascia il posto, senza togliere margini piu' larghi.
+  const g = o.grid;
+  if (g && typeof g === "object" && !Array.isArray(g)) {
+    const grid = { ...(g as Record<string, unknown>) };
+    const almeno = (k: string, v: number) => {
+      const cur = grid[k];
+      if (typeof cur !== "number" || cur < v) grid[k] = v;
+    };
+    if (assi.x) almeno("bottom", 40);
+    if (assi.y) almeno("left", 56);
+    o.grid = grid;
+  }
+  return o as RawProps["option"];
+}
+
+function TabellaEquivalente({ tabella, lingua }: { tabella: ChartTable; lingua: string | undefined }) {
+  const fmt = (v: string | number) => (typeof v === "number" ? v.toLocaleString(lingua, { maximumFractionDigits: 2 }) : v);
+  return (
+    <details className="mt-3 text-sm" data-testid="chart-table">
+      <summary className="cursor-pointer text-xs text-muted-foreground">{tabella.titolo}</summary>
+      <div className="mt-2 overflow-x-auto">
+        <table className="w-full border-collapse text-xs">
+          <caption className="sr-only">{tabella.titolo}</caption>
+          <thead>
+            <tr className="border-b border-border text-left text-muted-foreground">
+              {tabella.colonne.map((c, i) => (
+                <th key={i} scope="col" className={`px-2 py-1 ${i > 0 ? "text-right" : ""}`}>{c}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {tabella.righe.map((r, i) => (
+              <tr key={i} className="border-b border-border/50">
+                {r.map((v, j) => (
+                  <td key={j} className={`px-2 py-1 ${j > 0 ? "text-right tabular-nums" : ""}`}>{fmt(v)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  );
+}
+
+export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProps) {
   // bump on theme (html.class) change so colors re-resolve when IT/dark toggles
   const [themeTick, setThemeTick] = useState(0);
   useEffect(() => {
@@ -84,13 +157,18 @@ export function EChartsCard(props: EChartsCardProps) {
     () =>
       typeof document === "undefined"
         ? props.option
-        : resolveCssVars(props.option, document.documentElement),
+        : resolveCssVars(conNomiDegliAssi(props.option, assi), document.documentElement),
     // themeTick intentionally re-triggers resolution on theme switch
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.option, themeTick],
+    [props.option, themeTick, assi?.x, assi?.y],
   );
 
-  return <RawEChartsCard {...props} option={option} />;
+  return (
+    <>
+      <RawEChartsCard {...props} option={option} />
+      {tabella && <TabellaEquivalente tabella={tabella} lingua={lingua} />}
+    </>
+  );
 }
 
 export const MermaidDiagram = dynamic(

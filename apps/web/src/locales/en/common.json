@@ -567,6 +567,18 @@
       "TALENT_POOL_INCLUSION": "Talent pool inclusion",
       "DISCIPLINARY_ACTION": "Disciplinary action",
       "OTHER": "Other"
+    },
+    "tenantBlueprintVersionStatus": {
+      "DRAFT": "Draft",
+      "IN_APPROVAL": "In approval",
+      "APPROVED": "Approved",
+      "APPLIED": "Applied",
+      "SUPERSEDED": "Superseded",
+      "ABANDONED": "Abandoned"
+    },
+    "tenantBlueprintStatus": {
+      "ACTIVE": "Active",
+      "ARCHIVED": "Archived"
     }
   },
   "masked": "withheld for your profile",
@@ -620,5 +632,77 @@
     "error": "Search failed.",
     "found_one": "{{count}} person found",
     "found_other": "{{count}} people found"
+  },
+  "health": {
+    "loadError": "Could not read the platform status.",
+    "title": "Platform status",
+    "description": "Cross-tenant platform observability: database connections, permissions in memory, sign-in integrity and the last 24 hours of requests. Every value is read live.",
+    "updated": "updated {{when}}",
+    "kpi": {
+      "uptime": "API availability · 24 h",
+      "requests_one": "{{n}} request",
+      "requests_other": "{{n}} requests",
+      "avgMs": "{{ms}} ms on average",
+      "pool": "Database connections",
+      "poolUnit": "/ {{max}} connections",
+      "poolDetail": "idle {{idle}} · active {{active}} · waiting {{waiting}}",
+      "serverMax": "server max {{max}}",
+      "rbac": "Permissions in memory",
+      "rbacUnit": "mappings",
+      "rolesLoaded_one": "{{count}} role loaded",
+      "rolesLoaded_other": "{{count}} roles loaded",
+      "loaded": "loaded",
+      "notLoaded": "not loaded",
+      "lastLoad": "last load {{when}}",
+      "tenants": "Active tenants",
+      "activeCount_one": "{{count}} active",
+      "activeCount_other": "{{count}} active",
+      "usersCount_one": "{{n}} user",
+      "usersCount_other": "{{n}} users",
+      "auth": "Sign-in integrity · 24 h",
+      "replay": "replays blocked",
+      "logins": "Sign-ins",
+      "failed": "Failed",
+      "rotations": "Rotations"
+    },
+    "fleet": {
+      "title": "Tenants",
+      "description": "Active tenants, with user count and last sign-in",
+      "tenant": "Tenant",
+      "status": "Status",
+      "users": "Users",
+      "lastActivity": "Last activity",
+      "statusLabel": {
+        "ACTIVE": "Active",
+        "SUSPENDED": "Suspended",
+        "ARCHIVED": "Archived"
+      }
+    },
+    "series": {
+      "requests": "Requests every 5 minutes · 3 h",
+      "requestsFoot": "{{n}} requests in the window",
+      "errors": "Server errors every 5 minutes · 3 h",
+      "errorsFoot_one": "{{count}} server error",
+      "errorsFoot_other": "{{count}} server errors",
+      "latency": "Average response time (ms) every 5 minutes · 3 h",
+      "latencyFoot": "peak {{ms}} ms"
+    },
+    "slow": {
+      "cumulative": "cumulative",
+      "p95Note": "p95 ≈ μ + 1.645σ (estimate: PostgreSQL statistics have no percentiles)",
+      "unavailableTitle": "Statement statistics unavailable",
+      "unavailableDesc": "The pg_stat_statements extension is not loaded on this database, so per-statement timings cannot be collected.",
+      "emptyTitle": "No tracked statements yet",
+      "emptyDesc": "There are no tracked statements for the application database in the current window."
+    },
+    "rbac": {
+      "unavailableTitle": "Permission matrix unavailable",
+      "unavailableDesc": "The role-permission map could not be loaded."
+    },
+    "audit": {
+      "tenant": "tenant {{code}}",
+      "emptyTitle": "No recent events",
+      "emptyDesc": "The event log is empty for the current window."
+    }
   }
 }

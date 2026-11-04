@@ -34,7 +34,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  DataTable,
   EmptyState,
   ErrorState,
   PageHeader,
@@ -49,9 +48,12 @@ import type {
   DashboardDataResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
+import { EntityTable } from "../../../../components/data-table-panel";
 
 /** Le viste con valori si disegnano per forma; le altre dicono perché non li hanno. */
 function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
+  const { i18n } = useTranslation();
+  const lingua = i18n.language;
   if (v.content === null) {
     const negata = v.access === "denied";
     return (
@@ -140,12 +142,18 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
         {righe.length === 0 ? (
           <EmptyState title={t("dashboard.famiglie.vuotoRighe")} />
         ) : (
-          <DataTable
-            data={righe}
+          // V-9: la tabella del pacchetto UI scrive la paginazione in inglese; EntityTable la
+          // scrive nella lingua della persona.
+          <EntityTable
+            isLoading={false}
+            isError={false}
+            rows={righe}
+            rowKey={(r) => r.id}
+            caption={v.name}
             columns={[
-              { accessorKey: "label", header: t("dashboard.famiglie.colonnaVoce") },
-              { accessorKey: "detail", header: t("dashboard.famiglie.colonnaDettaglio") },
-              { accessorKey: "value", header: t("dashboard.famiglie.colonnaValore") },
+              { header: t("dashboard.famiglie.colonnaVoce"), cell: (r) => r.label },
+              { header: t("dashboard.famiglie.colonnaDettaglio"), cell: (r) => r.detail ?? "—" },
+              { header: t("dashboard.famiglie.colonnaValore"), align: "right", cell: (r) => (r.value === null ? "—" : r.value.toLocaleString(lingua)) },
             ]}
           />
         )}

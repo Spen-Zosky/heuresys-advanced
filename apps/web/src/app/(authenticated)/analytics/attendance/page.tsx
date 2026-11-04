@@ -87,7 +87,7 @@ function ouBarOption(rows: AttendanceByOrgUnitRow[]) {
 }
 
 export default function AttendanceAnalyticsPage() {
-  const { t } = useTranslation("analytics");
+  const { t, i18n } = useTranslation("analytics");
   const q = useQuery({
     queryKey: ["analytics", "attendance"],
     queryFn: () => apiFetch<AttendanceAnalyticsResponse>("/v1/analytics/attendance"),
@@ -169,6 +169,13 @@ export default function AttendanceAnalyticsPage() {
                 })}
                 height={320}
                 ariaLabel={t("attendance.monthlyAria")}
+                assi={{ x: t("charts.axisMonth"), y: t("charts.axisHours") }}
+                lingua={i18n.language}
+                tabella={{
+                  titolo: t("charts.tableTitle"),
+                  colonne: [t("charts.axisMonth"), t("attendance.seriesTotal"), t("attendance.seriesOvertime")],
+                  righe: d.monthly.map((r) => [r.month, r.totalHours, r.overtimeHours]),
+                }}
               />
             </div>
             <p className="text-xs text-muted-foreground">
@@ -189,6 +196,13 @@ export default function AttendanceAnalyticsPage() {
                   option={ouBarOption(d.byOrgUnit)}
                   height={Math.max(280, d.byOrgUnit.length * 26)}
                   ariaLabel={t("attendance.ouTitle")}
+                  assi={{ x: t("charts.axisHours"), y: t("charts.axisUnit") }}
+                  lingua={i18n.language}
+                  tabella={{
+                    titolo: t("charts.tableTitle"),
+                    colonne: [t("charts.axisUnit"), t("charts.axisHours")],
+                    righe: [...d.byOrgUnit].sort((a, b) => b.totalHours - a.totalHours).map((r) => [r.dimension, r.totalHours]),
+                  }}
                 />
               </div>
             ) : (

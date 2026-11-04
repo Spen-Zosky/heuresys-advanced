@@ -20,12 +20,12 @@ function statusVariant(s: string): "success" | "secondary" {
 }
 
 /** Multi-series pulse trend over weeks (mood / workload / satisfaction). */
-function pulseOption(items: EngagementPulseResponse["items"], lbl: { mood: string; workload: string; satisfaction: string }) {
+function pulseOption(items: EngagementPulseResponse["items"], lbl: { mood: string; workload: string; satisfaction: string; week: (n: number | null) => string }) {
   return {
     tooltip: { trigger: "axis" as const },
     legend: { data: [lbl.mood, lbl.workload, lbl.satisfaction] },
-    grid: { left: 40, right: 20, top: 40, bottom: 30 },
-    xAxis: { type: "category" as const, data: items.map((i) => `W${i.weekNumber}`) },
+    grid: { left: 56, right: 20, top: 40, bottom: 48 },
+    xAxis: { type: "category" as const, data: items.map((i) => lbl.week(i.weekNumber)) },
     yAxis: { type: "value" as const },
     series: [
       { name: lbl.mood, type: "line" as const, smooth: true, data: items.map((i) => i.avgMood) },
@@ -36,7 +36,7 @@ function pulseOption(items: EngagementPulseResponse["items"], lbl: { mood: strin
 }
 
 export default function EngagementPage() {
-  const { t } = useTranslation("admin");
+  const { t, i18n } = useTranslation("admin");
   const enumLabel = useEnumLabel();
 
   const surveys = useQuery({
@@ -67,7 +67,12 @@ export default function EngagementPage() {
     [t, enumLabel],
   );
 
-  const pulseLabels = { mood: t("engagement.pulse.mood"), workload: t("engagement.pulse.workload"), satisfaction: t("engagement.pulse.satisfaction") };
+  const pulseLabels = {
+    mood: t("engagement.pulse.mood"),
+    workload: t("engagement.pulse.workload"),
+    satisfaction: t("engagement.pulse.satisfaction"),
+    week: (n: number | null) => (n === null ? "—" : t("engagement.pulse.weekShort", { n })),
+  };
 
   return (
     <main data-testid="engagement-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
@@ -117,7 +122,24 @@ export default function EngagementPage() {
               <Badge variant="secondary" data-testid="engagement-pulse-total">
                 {t("engagement.pulse.totalChecks", { count: pulse.data?.totalChecks ?? 0 })}
               </Badge>
-              <EChartsCard option={pulseOption(pulse.data!.items, pulseLabels)} height={340} ariaLabel={t("engagement.pulse.cardTitle")} />
+              <EChartsCard
+                option={pulseOption(pulse.data!.items, pulseLabels)}
+                height={340}
+                ariaLabel={t("engagement.pulse.cardTitle")}
+                assi={{ x: t("engagement.pulse.axisWeek"), y: t("engagement.pulse.axisScore") }}
+                lingua={i18n.language}
+                tabella={{
+                  titolo: t("engagement.pulse.tableTitle"),
+                  colonne: [t("engagement.pulse.axisWeek"), pulseLabels.mood, pulseLabels.workload, pulseLabels.satisfaction, t("engagement.pulse.colCount")],
+                  righe: pulse.data!.items.map((i) => [
+                    pulseLabels.week(i.weekNumber),
+                    i.avgMood ?? "—",
+                    i.avgWorkload ?? "—",
+                    i.avgSatisfaction ?? "—",
+                    i.count,
+                  ]),
+                }}
+              />
             </>
           )}
         </CardContent>

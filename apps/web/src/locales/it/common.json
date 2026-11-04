@@ -567,6 +567,18 @@
       "TALENT_POOL_INCLUSION": "Inserimento nel bacino talenti",
       "DISCIPLINARY_ACTION": "Provvedimento disciplinare",
       "OTHER": "Altro"
+    },
+    "tenantBlueprintVersionStatus": {
+      "DRAFT": "Bozza",
+      "IN_APPROVAL": "In approvazione",
+      "APPROVED": "Approvata",
+      "APPLIED": "Applicata",
+      "SUPERSEDED": "Sostituita",
+      "ABANDONED": "Abbandonata"
+    },
+    "tenantBlueprintStatus": {
+      "ACTIVE": "Attivo",
+      "ARCHIVED": "Archiviato"
     }
   },
   "masked": "nascosto per il tuo profilo",
@@ -620,5 +632,77 @@
     "error": "Ricerca non riuscita.",
     "found_one": "{{count}} persona trovata",
     "found_other": "{{count}} persone trovate"
+  },
+  "health": {
+    "loadError": "Impossibile leggere lo stato della piattaforma.",
+    "title": "Stato della piattaforma",
+    "description": "Osservabilità della piattaforma su tutti i tenant: connessioni al database, permessi in memoria, integrità degli accessi e richieste delle ultime 24 ore. Ogni valore è letto dal vivo.",
+    "updated": "aggiornato {{when}}",
+    "kpi": {
+      "uptime": "Disponibilità dell'API · 24 h",
+      "requests_one": "{{n}} richiesta",
+      "requests_other": "{{n}} richieste",
+      "avgMs": "{{ms}} ms in media",
+      "pool": "Connessioni al database",
+      "poolUnit": "/ {{max}} connessioni",
+      "poolDetail": "libere {{idle}} · attive {{active}} · in attesa {{waiting}}",
+      "serverMax": "massimo del server {{max}}",
+      "rbac": "Permessi in memoria",
+      "rbacUnit": "associazioni",
+      "rolesLoaded_one": "{{count}} ruolo caricato",
+      "rolesLoaded_other": "{{count}} ruoli caricati",
+      "loaded": "caricati",
+      "notLoaded": "non caricati",
+      "lastLoad": "ultimo caricamento {{when}}",
+      "tenants": "Tenant attivi",
+      "activeCount_one": "{{count}} attivo",
+      "activeCount_other": "{{count}} attivi",
+      "usersCount_one": "{{n}} utente",
+      "usersCount_other": "{{n}} utenti",
+      "auth": "Integrità degli accessi · 24 h",
+      "replay": "riusi bloccati",
+      "logins": "Accessi",
+      "failed": "Falliti",
+      "rotations": "Rinnovi"
+    },
+    "fleet": {
+      "title": "Tenant",
+      "description": "Tenant attivi, con il numero di utenti e l'ultimo accesso",
+      "tenant": "Tenant",
+      "status": "Stato",
+      "users": "Utenti",
+      "lastActivity": "Ultima attività",
+      "statusLabel": {
+        "ACTIVE": "Attivo",
+        "SUSPENDED": "Sospeso",
+        "ARCHIVED": "Archiviato"
+      }
+    },
+    "series": {
+      "requests": "Richieste ogni 5 minuti · 3 h",
+      "requestsFoot": "{{n}} richieste nella finestra",
+      "errors": "Errori del server ogni 5 minuti · 3 h",
+      "errorsFoot_one": "{{count}} errore del server",
+      "errorsFoot_other": "{{count}} errori del server",
+      "latency": "Tempo medio di risposta (ms) ogni 5 minuti · 3 h",
+      "latencyFoot": "picco {{ms}} ms"
+    },
+    "slow": {
+      "cumulative": "cumulato",
+      "p95Note": "p95 ≈ μ + 1,645σ (stima: le statistiche di PostgreSQL non hanno percentili)",
+      "unavailableTitle": "Statistiche delle istruzioni non disponibili",
+      "unavailableDesc": "L'estensione pg_stat_statements non è caricata su questo database: i tempi per istruzione non si possono raccogliere.",
+      "emptyTitle": "Nessuna istruzione registrata",
+      "emptyDesc": "Nella finestra corrente non ci sono istruzioni registrate per il database dell'applicazione."
+    },
+    "rbac": {
+      "unavailableTitle": "Matrice dei permessi non disponibile",
+      "unavailableDesc": "Non è stato possibile leggere l'associazione fra ruoli e permessi."
+    },
+    "audit": {
+      "tenant": "tenant {{code}}",
+      "emptyTitle": "Nessun evento recente",
+      "emptyDesc": "Il registro degli eventi è vuoto nella finestra corrente."
+    }
   }
 }

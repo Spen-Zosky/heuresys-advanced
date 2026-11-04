@@ -15,6 +15,7 @@ import { apiFetch } from "@/lib/api/fetch";
 
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { StatusPill } from "@/components/status-pill";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 /**
  * #198 Tenant Builder P3, T7 — LA COSTRUZIONE: il piano prima, e la firma dopo.
@@ -45,6 +46,7 @@ export default function TenantBlueprintBuildPage({
 }) {
   const { id, n } = use(params);
   const { t } = useTranslation("blueprints");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
 
   /**
@@ -132,6 +134,8 @@ export default function TenantBlueprintBuildPage({
         : null;
 
   const p = piano.data;
+  // V-16: questa lista e' la configurazione delle ETICHETTE delle righe del piano, non un dato:
+  // ogni numero della tabella viene da `GET .../build-plan` (willCreate, alreadyThere).
   const righe: Array<{ chiave: keyof BuildPlanPreview["willCreate"]; etichetta: string }> = [
     { chiave: "orgUnits", etichetta: t("dossier.build.rows.orgUnits") },
     { chiave: "positions", etichetta: t("dossier.build.rows.positions") },
@@ -155,7 +159,7 @@ export default function TenantBlueprintBuildPage({
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="text-xl font-semibold text-foreground">{t("dossier.build.title")}</h1>
           <StatusPill tone={versione.status === "APPLIED" ? "success" : "info"}>
-            {versione.status}
+            {enumLabel("tenantBlueprintVersionStatus", versione.status)}
           </StatusPill>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">{t("dossier.build.description")}</p>

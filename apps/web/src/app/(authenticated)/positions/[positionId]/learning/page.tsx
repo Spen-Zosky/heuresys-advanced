@@ -15,6 +15,7 @@ import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
+import { useFormat } from "@/lib/format";
 
 interface LearningGap {
   learningGapId: string;
@@ -27,6 +28,7 @@ interface LearningGap {
 
 export default function PositionLearningPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
 
@@ -127,7 +129,7 @@ export default function PositionLearningPage() {
               },
               {
                 header: t("positions.learning.requirements.columns.since"),
-                cell: (r) => <span className="text-xs">{r.createdAt.slice(0, 10)}</span>,
+                cell: (r) => <span className="text-xs">{fmt.data(r.createdAt)}</span>,
               },
             ]}
           />
@@ -203,7 +205,7 @@ export default function PositionLearningPage() {
               { header: t("positions.learning.gaps.columns.user"), cell: (g) => <span className="font-mono text-xs">{g.userId.slice(0, 8)}</span> },
               { header: t("positions.learning.gaps.columns.skill"), cell: (g) => g.skillName ? <span className="text-xs">{g.skillName}</span> : <span className="font-mono text-xs">{g.skillId?.slice(0, 8) ?? t("positions.learning.dash")}</span> },
               { header: t("positions.learning.gaps.columns.severity"), cell: (g) => <EnumStatusBadge domain="severity" value={g.severity} /> },
-              { header: t("positions.learning.gaps.columns.detected"), cell: (g) => <span className="text-xs">{g.detectedAt.slice(0, 10)}</span> },
+              { header: t("positions.learning.gaps.columns.detected"), cell: (g) => <span className="text-xs">{fmt.data(g.detectedAt)}</span> },
             ]}
           />
         </CardContent>

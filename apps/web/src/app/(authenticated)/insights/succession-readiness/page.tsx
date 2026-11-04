@@ -14,6 +14,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
+import { useFormat } from "@/lib/format";
 
 // Higher readiness = better: READY_NOW → success, NOT_READY → destructive.
 // Only confirmed @heuresys/ui Badge variants + registered text tokens.
@@ -36,6 +37,7 @@ const positionLabel = (r: SuccessionReadinessScore) => r.positionTitle ?? r.posi
 
 export default function SuccessionReadinessPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<SuccessionReadinessScore | null>(null);
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
@@ -73,7 +75,7 @@ export default function SuccessionReadinessPage() {
         // #124 D6: assente e dichiarato, non «—».
         isMasked(r, "value") || r.value === undefined
           ? <MaskedCell />
-          : <span className={`font-mono font-semibold ${r.horizon ? HORIZON_TEXT[r.horizon] : ""}`}>{r.value.toFixed(1)}</span>
+          : <span className={`font-mono font-semibold ${r.horizon ? HORIZON_TEXT[r.horizon] : ""}`}>{fmt.numeroFisso(r.value, 1)}</span>
       ) },
       { header: t("insightsReadiness.colHorizon"), cell: (r) => (
         isMasked(r, "horizon") || r.horizon === undefined
@@ -81,7 +83,7 @@ export default function SuccessionReadinessPage() {
           : <Badge variant={HORIZON_BADGE[r.horizon]}>{t(`insightsReadiness.horizon.${r.horizon}`)}</Badge>
       ) },
     ],
-    [t],
+    [t, fmt],
   );
 
   return (
@@ -139,7 +141,7 @@ export default function SuccessionReadinessPage() {
                 <MaskedCell />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {t("insightsReadiness.explainDesc", { value: selected.value!.toFixed(1), horizon: t(`insightsReadiness.horizon.${selected.horizon}`), model: selected.modelVersion })}
+                  {t("insightsReadiness.explainDesc", { value: fmt.numeroFisso(selected.value!, 1), horizon: t(`insightsReadiness.horizon.${selected.horizon}`), model: selected.modelVersion })}
                 </p>
               )}
               {(selected.features ?? []).map((f) => (
@@ -149,7 +151,7 @@ export default function SuccessionReadinessPage() {
                     <div className="h-full bg-primary" style={{ width: `${Math.min(100, Math.max(0, f.normalized ?? 0))}%` }} />
                   </div>
                   <span className="w-48 shrink-0 text-right font-mono text-xs text-muted-foreground">
-                    {t("insightsReadiness.featureDetail", { normalized: (f.normalized ?? 0).toFixed(0), weight: (f.weight * 100).toFixed(0), contribution: f.contribution.toFixed(1) })}
+                    {t("insightsReadiness.featureDetail", { normalized: fmt.numeroFisso(f.normalized ?? 0, 0), weight: fmt.numeroFisso(f.weight * 100, 0), contribution: fmt.numeroFisso(f.contribution, 1) })}
                   </span>
                 </div>
               ))}

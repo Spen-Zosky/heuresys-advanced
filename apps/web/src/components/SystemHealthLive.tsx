@@ -46,6 +46,7 @@ import {
   useSystemHealth,
   type RolePermissionsResponse,
 } from "@/lib/api/observability";
+import { useFormat } from "@/lib/format";
 
 type RolePermissionItem = RolePermissionsResponse["items"][number];
 
@@ -142,7 +143,8 @@ function buildMatrix(items: ReadonlyArray<RolePermissionItem>) {
 export function SystemHealthLive() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
-  const n = (v: number, max = 0) => v.toLocaleString(lang, { maximumFractionDigits: max });
+  const fmt = useFormat();
+  const n = (v: number, max = 0) => fmt.numero(v, max);
   const rel = (iso: string | null) => formatRelative(iso, lang);
   const health = useSystemHealth();
   // S-3: la matrice ruoli×permessi chiede `role_matrix:read`, che PLATFORM_OPERATOR non ha.
@@ -197,7 +199,7 @@ export function SystemHealthLive() {
         items={[
           {
             label: t("health.kpi.uptime"),
-            value: rm.uptime24hPct.toLocaleString(lang, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            value: fmt.numeroFisso(rm.uptime24hPct, 2),
             unit: "%",
             iconTone: "success",
             icon: <Activity className="h-4 w-4" />,
@@ -340,7 +342,7 @@ export function SystemHealthLive() {
       {/* Request-metrics error breakdown (live, last 24h). Endpoint sparklines are
           empty: only point-in-time recent errors exist (no per-route time series). */}
       <ErrorRateBreakdown
-        overallRate={rm.errorRate5xxPct.toFixed(2)}
+        overallRate={fmt.numeroFisso(rm.errorRate5xxPct, 2)}
         totalRequests={rm.totalRequests}
         distribution={{
           "2xx": rm.byStatusClass.xx2,
@@ -422,7 +424,7 @@ export function SystemHealthLive() {
                 totalTimeBarPct: Math.round((q.totalMs / maxTotal) * 100),
                 totalTimeTone:
                   q.meanMs > 250 ? ("danger" as const) : q.meanMs > 50 ? ("warning" as const) : ("palette-2" as const),
-                totalTimeLabel: `${(q.totalMs / 1000).toLocaleString(lang, { maximumFractionDigits: 1 })} s`,
+                totalTimeLabel: fmt.durata(q.totalMs),
                 lastSeen: t("health.slow.cumulative"),
               }));
             })()}

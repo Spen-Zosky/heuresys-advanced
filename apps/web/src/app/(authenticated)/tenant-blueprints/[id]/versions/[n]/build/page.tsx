@@ -16,6 +16,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 /**
  * #198 Tenant Builder P3, T7 — LA COSTRUZIONE: il piano prima, e la firma dopo.
@@ -46,6 +47,7 @@ export default function TenantBlueprintBuildPage({
 }) {
   const { id, n } = use(params);
   const { t } = useTranslation("blueprints");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const qc = useQueryClient();
 
@@ -221,10 +223,10 @@ export default function TenantBlueprintBuildPage({
                 <tr key={r.chiave} className="border-t border-border" data-testid={`build-row-${r.chiave}`}>
                   <td className="py-1 text-foreground">{r.etichetta}</td>
                   <td className="py-1 text-right tabular-nums text-foreground">
-                    {p.willCreate[r.chiave].toLocaleString()}
+                    {fmt.numero(p.willCreate[r.chiave])}
                   </td>
                   <td className="py-1 text-right tabular-nums text-muted-foreground">
-                    {p.alreadyThere[r.chiave].toLocaleString()}
+                    {fmt.numero(p.alreadyThere[r.chiave])}
                   </td>
                 </tr>
               ))}

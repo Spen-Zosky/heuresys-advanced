@@ -6,10 +6,12 @@ import type { MeRiskResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { Field, ProfileSection, fmtDate } from "../../profile/_components/field";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 /** Rischio & Successione — own flight-risk + succession-readiness per target position. */
 export function RiskTab() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["me", "risk"],
@@ -43,7 +45,7 @@ export function RiskTab() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2" data-testid="career-succession">
             {succession.map((s, i) => (
               <ProfileSection key={`succ-${i}`} title={s.positionTitle ?? t("career.risk.position")}>
-                <Field label={t("career.risk.value")} value={s.value != null ? s.value.toFixed(2) : null} />
+                <Field label={t("career.risk.value")} value={s.value != null ? fmt.numeroFisso(s.value, 2) : null} />
                 <Field label={t("career.risk.horizon")} value={enumLabel("horizon", s.horizon)} />
                 <Field label={t("career.risk.model")} value={s.modelVersion} />
               </ProfileSection>

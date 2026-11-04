@@ -19,6 +19,7 @@ import type {
 import { apiFetch } from "@/lib/api/fetch";
 import { useCan } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -69,6 +70,7 @@ function renderSnippet(snippet: string): ReactNode {
 
 export default function ContentPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [kind, setKind] = useState("");
   const [status, setStatus] = useState("");
@@ -196,9 +198,9 @@ export default function ContentPage() {
         header: t("content.columns.category"),
         cell: (d) => <span className="text-muted-foreground">{d.categoryId ? catMap.get(d.categoryId) ?? "—" : "—"}</span>,
       },
-      { header: t("content.columns.updated"), cell: (d) => <span className="text-xs text-muted-foreground">{d.updatedAt.slice(0, 10)}</span> },
+      { header: t("content.columns.updated"), cell: (d) => <span className="text-xs text-muted-foreground">{fmt.data(d.updatedAt)}</span> },
     ],
-    [t, catMap],
+    [t, catMap, fmt],
   );
 
   return (

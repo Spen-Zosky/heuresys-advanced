@@ -8,9 +8,11 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 
 import type { MeGap, MeGapsResponse } from "@heuresys/shared";
+import { useFormat } from "@/lib/format";
 
 export default function MeGapsPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const gaps = useQuery({
     queryKey: ["me", "gaps"],
     queryFn: () => apiFetch<MeGapsResponse>("/v1/me/gaps"),
@@ -45,11 +47,11 @@ export default function MeGapsPage() {
       { header: t("gaps.colSeverity"), cell: (g) => <EnumStatusBadge domain="severity" value={g.severity} /> },
       {
         header: t("gaps.colScore"),
-        cell: (g) => <span className="text-xs text-muted-foreground">{g.score !== null ? g.score.toFixed(1) : "—"}</span>,
+        cell: (g) => <span className="text-xs text-muted-foreground">{g.score !== null ? fmt.numeroFisso(g.score, 1) : "—"}</span>,
       },
-      { header: t("gaps.colDetected"), cell: (g) => <span className="text-xs text-muted-foreground">{g.detectedAt.slice(0, 10)}</span> },
+      { header: t("gaps.colDetected"), cell: (g) => <span className="text-xs text-muted-foreground">{fmt.data(g.detectedAt)}</span> },
     ],
-    [t],
+    [t, fmt],
   );
 
   return (

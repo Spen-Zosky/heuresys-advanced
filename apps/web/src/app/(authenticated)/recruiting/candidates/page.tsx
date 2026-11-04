@@ -15,6 +15,7 @@ import {
   CANDIDATE_SOURCES, KEY, candidateName,
   useApplications, useCandidates, usePostings,
 } from "@/lib/recruiting";
+import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -43,6 +44,7 @@ type FormValues = {
  */
 export default function CandidatesPage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const q = useCandidates();
   const postings = usePostings();
@@ -170,7 +172,7 @@ export default function CandidatesPage() {
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {t(`recruiting.source.${c.source}`)}
-                    {c.consentGivenOn ? ` · ${t("recruiting.fields.consentGivenOn")}: ${c.consentGivenOn}` : ""}
+                    {c.consentGivenOn ? ` · ${t("recruiting.fields.consentGivenOn")}: ${fmt.data(c.consentGivenOn)}` : ""}
                   </p>
 
                   {sue.length > 0 && (
@@ -178,7 +180,7 @@ export default function CandidatesPage() {
                       {sue.map((a) => (
                         <li key={a.applicationId}>
                           <Link href={`/recruiting/applications/${a.applicationId}`} className="underline" data-testid="candidate-application-link">
-                            {t(`recruiting.stage.${a.stage}`)} · {a.appliedOn}
+                            {t(`recruiting.stage.${a.stage}`)} · {fmt.data(a.appliedOn)}
                           </Link>
                         </li>
                       ))}

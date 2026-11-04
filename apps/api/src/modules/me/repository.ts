@@ -396,15 +396,19 @@ export async function loadPaySlips(q: DbConnector, userId: string): Promise<MePa
   const res = await q.query<{
     period: string | null; period_start: string | null; period_end: string | null;
     gross_pay: string | null; net_pay: string | null; deductions: Record<string, number> | null;
-    payment_date: string | null; status: string | null;
+    payment_date: string | null; status: string | null; currency: string | null;
   }>(
+    // F-1 (piano interfacce, 2026-11-04): la busta non porta una valuta sua; e' pagata nella
+    // valuta del rapporto di lavoro, che la pagina usa invece di scrivere EUR a mano.
     `SELECT user_pay_slip_period AS period,
             to_char(user_pay_slip_period_start,'YYYY-MM-DD') AS period_start,
             to_char(user_pay_slip_period_end,'YYYY-MM-DD') AS period_end,
             user_pay_slip_gross_pay AS gross_pay, user_pay_slip_net_pay AS net_pay,
             user_pay_slip_deductions AS deductions,
             to_char(user_pay_slip_payment_date,'YYYY-MM-DD') AS payment_date,
-            user_pay_slip_status AS status
+            user_pay_slip_status AS status,
+            (SELECT e.user_employment_currency FROM sys.sys_user_employment e
+              WHERE e.user_employment_user_id = $1 LIMIT 1) AS currency
        FROM sys.sys_user_pay_slips WHERE user_pay_slip_user_id = $1
       ORDER BY user_pay_slip_period_start DESC NULLS LAST`, [userId],
   );
@@ -412,6 +416,7 @@ export async function loadPaySlips(q: DbConnector, userId: string): Promise<MePa
     period: r.period, periodStart: r.period_start, periodEnd: r.period_end,
     grossPay: numOrNull(r.gross_pay), netPay: numOrNull(r.net_pay),
     deductions: r.deductions ?? {}, paymentDate: r.payment_date, status: r.status,
+    currency: r.currency,
   }));
 }
 

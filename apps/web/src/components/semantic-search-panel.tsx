@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useCan } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/errors";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { useFormat } from "@/lib/format";
 
 /**
  * #40 (S1018) — free-text semantic search over the live pgvector embeddings
@@ -33,6 +34,7 @@ function escoUriTail(uri: string): string {
 
 export function SemanticSearchPanel() {
   const { t } = useTranslation();
+  const fmt = useFormat();
   const [term, setTerm] = useState("");
   const [submitted, setSubmitted] = useState("");
   // S-19 (INC-11): la ricerca chiede `matching:read`. La pagina /skills si apre con
@@ -73,11 +75,11 @@ export function SemanticSearchPanel() {
         header: t("semanticSearch.colScore"),
         align: "right",
         cell: (m) => (
-          <span className="font-medium tabular-nums text-foreground">{`${(m.score * 100).toFixed(0)}%`}</span>
+          <span className="font-medium tabular-nums text-foreground">{`${fmt.percento(m.score, "0-1", 0)}`}</span>
         ),
       },
     ],
-    [t],
+    [t, fmt],
   );
   const skillColumns = useMemo<DataColumn<SkillMatch>[]>(
     () => [
@@ -89,11 +91,11 @@ export function SemanticSearchPanel() {
         header: t("semanticSearch.colScore"),
         align: "right",
         cell: (m) => (
-          <span className="font-medium tabular-nums text-foreground">{`${(m.score * 100).toFixed(0)}%`}</span>
+          <span className="font-medium tabular-nums text-foreground">{`${fmt.percento(m.score, "0-1", 0)}`}</span>
         ),
       },
     ],
-    [t],
+    [t, fmt],
   );
 
   if (!canSearch) return null;

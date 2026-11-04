@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
+import { useFormat } from "@/lib/format";
 
 interface MePositionAssignment {
   userPositionAssignmentId: string;
@@ -26,6 +27,7 @@ interface MePositionsList {
 
 export default function MePositionsPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const positions = useQuery({
     queryKey: ["me", "positions"],
     queryFn: () => apiFetch<MePositionsList>("/v1/me/positions"),
@@ -42,10 +44,10 @@ export default function MePositionsPage() {
         ),
       },
       { header: t("positions.colStatus"), cell: (p) => <EnumStatusBadge domain="assignmentStatus" value={p.status} /> },
-      { header: t("positions.colStart"), cell: (p) => <span className="text-xs text-muted-foreground">{p.startDate ?? "—"}</span> },
-      { header: t("positions.colEnd"), cell: (p) => <span className="text-xs text-muted-foreground">{p.endDate ?? "—"}</span> },
+      { header: t("positions.colStart"), cell: (p) => <span className="text-xs text-muted-foreground">{fmt.data(p.startDate)}</span> },
+      { header: t("positions.colEnd"), cell: (p) => <span className="text-xs text-muted-foreground">{fmt.data(p.endDate)}</span> },
     ],
-    [t],
+    [t, fmt],
   );
 
   return (

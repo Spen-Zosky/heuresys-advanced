@@ -10,6 +10,7 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusPill } from "@/components/enum-badge";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { GoalTimelineDialog } from "@/components/goal-timeline-dialog";
+import { useFormat, type Formati } from "@/lib/format";
 
 function toneForStatus(s: string): "info" | "success" | "warning" | "danger" | "neutral" {
   if (s === "COMPLETED" || s === "ON_TRACK") return "success";
@@ -19,13 +20,13 @@ function toneForStatus(s: string): "info" | "success" | "warning" | "danger" | "
   return "neutral";
 }
 
-function buildColumns(t: TFunction, enumLabel: EnumLabelFn, onTimeline: (g: Goal) => void): DataColumn<Goal>[] {
+function buildColumns(t: TFunction, enumLabel: EnumLabelFn, onTimeline: (g: Goal) => void, fmt: Formati): DataColumn<Goal>[] {
   return [
     { header: t("shared.name"), cell: (g) => <span className="font-medium text-foreground">{g.title}</span> },
     { header: t("goals.cols.type"), cell: (g) => <span className="text-xs text-muted-foreground">{enumLabel("goalType", g.type)}</span> },
     { header: t("goals.cols.priority"), cell: (g) => <span className="text-xs text-muted-foreground">{enumLabel("goalPriority", g.priority)}</span> },
-    { header: t("goals.cols.progress"), cell: (g) => <span className="text-xs text-muted-foreground">{g.progressPercent}%</span> },
-    { header: t("goals.cols.due"), cell: (g) => <span className="text-xs text-muted-foreground">{g.dueDate ?? "—"}</span> },
+    { header: t("goals.cols.progress"), cell: (g) => <span className="text-xs text-muted-foreground">{fmt.percento(g.progressPercent, "0-100")}</span> },
+    { header: t("goals.cols.due"), cell: (g) => <span className="text-xs text-muted-foreground">{fmt.data(g.dueDate)}</span> },
     { header: t("shared.status"), cell: (g) => <EnumStatusPill domain="goalStatus" value={g.status} tone={toneForStatus(g.status)} /> },
     {
       header: "", align: "right",
@@ -40,9 +41,10 @@ function buildColumns(t: TFunction, enumLabel: EnumLabelFn, onTimeline: (g: Goal
 
 export default function GoalsPage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const [active, setActive] = useState<Goal | null>(null);
-  const columns = useMemo(() => buildColumns(t, enumLabel, setActive), [t, enumLabel]);
+  const columns = useMemo(() => buildColumns(t, enumLabel, setActive, fmt), [t, enumLabel, fmt]);
   // C4 (#42): server-side pagination (was `?limit=200`).
   const goals = usePaginatedList<Goal>({ queryKey: ["goals", "list"], path: "/v1/goals" });
 

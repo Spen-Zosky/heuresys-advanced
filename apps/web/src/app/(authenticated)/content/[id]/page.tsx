@@ -51,6 +51,7 @@ function statusVariant(s: ContentStatus): "secondary" | "success" {
 
 export default function ContentEditPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const params = useParams<{ id: string }>();
   const id = params.id;
   const router = useRouter();
@@ -195,7 +196,7 @@ export default function ContentEditPage() {
       { header: t("content.detail.vCols.title"), cell: (v) => <span className="text-foreground">{v.title ?? "—"}</span> },
       { header: t("content.detail.vCols.changeNote"), cell: (v) => <span className="text-muted-foreground">{v.changeNote ?? "—"}</span> },
       { header: t("content.detail.vCols.author"), cell: (v) => <span className="font-mono text-xs text-muted-foreground">{v.authorUserId ? v.authorUserId.slice(0, 8) : "—"}</span> },
-      { header: t("content.detail.vCols.created"), cell: (v) => <span className="text-xs text-muted-foreground">{v.createdAt.slice(0, 10)}</span> },
+      { header: t("content.detail.vCols.created"), cell: (v) => <span className="text-xs text-muted-foreground">{fmt.data(v.createdAt)}</span> },
       {
         header: t("content.detail.vCols.actions"),
         align: "right",
@@ -216,7 +217,7 @@ export default function ContentEditPage() {
           ),
       },
     ],
-    [t, currentVersionId, restore],
+    [t, currentVersionId, restore, fmt],
   );
 
   if (detail.isError) {
@@ -472,3 +473,4 @@ export default function ContentEditPage() {
   );
 }
 import { ContentMediaPanel } from "../../../../components/ContentMediaPanel";
+import { useFormat } from "@/lib/format";

@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
+import { useFormat } from "@/lib/format";
 
 // Band → @heuresys/ui Badge variant (only confirmed variants) + registered text token.
 const BAND_BADGE: Record<FlightRiskBand, "success" | "secondary" | "destructive"> = {
@@ -26,6 +27,7 @@ const BAND_TEXT: Record<FlightRiskBand, string> = {
 
 export default function InsightsPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<FlightRiskScore | null>(null);
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
@@ -64,7 +66,7 @@ export default function InsightsPage() {
       { header: t("insights.colScore"), align: "right", cell: (r) => (
         isMasked(r, "score") || r.score === undefined
           ? <MaskedCell />
-          : <span className={`font-mono font-semibold ${r.band ? BAND_TEXT[r.band] : ""}`}>{r.score.toFixed(1)}</span>
+          : <span className={`font-mono font-semibold ${r.band ? BAND_TEXT[r.band] : ""}`}>{fmt.numeroFisso(r.score, 1)}</span>
       ) },
       { header: t("insights.colBand"), cell: (r) => (
         isMasked(r, "band") || r.band === undefined
@@ -72,7 +74,7 @@ export default function InsightsPage() {
           : <Badge variant={BAND_BADGE[r.band]}>{t(`insights.band.${r.band}`)}</Badge>
       ) },
     ],
-    [t],
+    [t, fmt],
   );
 
   return (
@@ -125,7 +127,7 @@ export default function InsightsPage() {
               <p className="text-sm text-muted-foreground">
                 {selected.score === undefined || selected.band === undefined
                   ? <MaskedCell />
-                  : t("insights.explainDesc", { score: selected.score.toFixed(1), band: t(`insights.band.${selected.band}`), model: selected.modelVersion })}
+                  : t("insights.explainDesc", { score: fmt.numeroFisso(selected.score, 1), band: t(`insights.band.${selected.band}`), model: selected.modelVersion })}
               </p>
               {(selected.features ?? []).map((f) => (
                 <div key={f.feature} data-testid="insights-feature" className="flex items-center gap-3 text-sm">
@@ -134,7 +136,7 @@ export default function InsightsPage() {
                     <div className="h-full bg-primary" style={{ width: `${Math.min(100, Math.max(0, f.normalized ?? 0))}%` }} />
                   </div>
                   <span className="w-48 shrink-0 text-right font-mono text-xs text-muted-foreground">
-                    {t("insights.featureDetail", { normalized: (f.normalized ?? 0).toFixed(0), weight: (f.weight * 100).toFixed(0), contribution: f.contribution.toFixed(1) })}
+                    {t("insights.featureDetail", { normalized: fmt.numeroFisso(f.normalized ?? 0, 0), weight: fmt.numeroFisso(f.weight * 100, 0), contribution: fmt.numeroFisso(f.contribution, 1) })}
                   </span>
                 </div>
               ))}

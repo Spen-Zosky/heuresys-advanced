@@ -13,6 +13,7 @@ import type {
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
+import { useFormat, type Formati } from "@/lib/format";
 
 /**
  * A/L3 (#29) — Talent review admin page. Live over /v1/talent-review/*:
@@ -34,42 +35,42 @@ function shortId(id: string): string {
   return id.slice(0, 8);
 }
 
-function buildFitColumns(t: TFunction): DataColumn<FitScore>[] {
+function buildFitColumns(t: TFunction, f: Formati): DataColumn<FitScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
     { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
     { header: t("talentReview.cols.dimension"), cell: (r) => <span className="text-xs text-muted-foreground">{r.dimension}</span> },
     { header: t("talentReview.cols.score"), align: "right", cell: (r) => <span className="tabular-nums">{r.score}</span> },
-    { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{r.computedAt.slice(0, 10)}</span> },
+    { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.computedAt)}</span> },
   ];
 }
 
-function buildReadinessColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<ReadinessScore>[] {
+function buildReadinessColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<ReadinessScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
     { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
     { header: t("talentReview.cols.horizon"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("horizon", r.horizon)}</span> },
     { header: t("talentReview.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value ?? "—"}</span> },
-    { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{r.computedAt.slice(0, 10)}</span> },
+    { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.computedAt)}</span> },
   ];
 }
 
-function buildSuccessionColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<SuccessionScore>[] {
+function buildSuccessionColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<SuccessionScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
     { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
     { header: t("talentReview.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value ?? "—"}</span> },
     { header: t("talentReview.cols.horizon"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("horizon", r.horizon)}</span> },
-    { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{r.computedAt.slice(0, 10)}</span> },
+    { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.computedAt)}</span> },
   ];
 }
 
-function buildCriticalPositionColumns(t: TFunction): DataColumn<CriticalPosition>[] {
+function buildCriticalPositionColumns(t: TFunction, f: Formati): DataColumn<CriticalPosition>[] {
   return [
     { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
     { header: t("talentReview.cols.rationale"), cell: (r) => <span className="text-xs text-muted-foreground">{r.rationale ?? "—"}</span> },
     { header: t("talentReview.cols.businessImpact"), align: "right", cell: (r) => <span className="tabular-nums">{r.businessImpactScore ?? "—"}</span> },
-    { header: t("talentReview.cols.flaggedAt"), cell: (r) => <span className="tabular-nums text-xs">{r.flaggedAt.slice(0, 10)}</span> },
+    { header: t("talentReview.cols.flaggedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.flaggedAt)}</span> },
   ];
 }
 
@@ -85,6 +86,7 @@ function buildCoverageColumns(t: TFunction): DataColumn<CriticalCoverage>[] {
 
 export default function TalentReviewPage() {
   const { t } = useTranslation("admin");
+  const f = useFormat();
   const enumLabel = useEnumLabel();
 
   // C4 (#42): server-side pagination. `initialPageSize: 200` is an HONEST cap (matches
@@ -103,10 +105,10 @@ export default function TalentReviewPage() {
   const criticalPositions = usePaginatedList<CriticalPosition>({ queryKey: ["talent-review", "critical-positions"], path: "/v1/talent-review/critical-positions" });
   const coverage = usePaginatedList<CriticalCoverage>({ queryKey: ["talent-review", "critical-coverage"], path: "/v1/talent-review/critical-coverage" });
 
-  const fitColumns = useMemo(() => buildFitColumns(t), [t]);
-  const readinessColumns = useMemo(() => buildReadinessColumns(t, enumLabel), [t, enumLabel]);
-  const successionColumns = useMemo(() => buildSuccessionColumns(t, enumLabel), [t, enumLabel]);
-  const criticalPositionColumns = useMemo(() => buildCriticalPositionColumns(t), [t]);
+  const fitColumns = useMemo(() => buildFitColumns(t, f), [t, f]);
+  const readinessColumns = useMemo(() => buildReadinessColumns(t, enumLabel, f), [t, enumLabel, f]);
+  const successionColumns = useMemo(() => buildSuccessionColumns(t, enumLabel, f), [t, enumLabel, f]);
+  const criticalPositionColumns = useMemo(() => buildCriticalPositionColumns(t, f), [t, f]);
   const coverageColumns = useMemo(() => buildCoverageColumns(t), [t]);
 
   /** Righe che la griglia non può posizionare perché il giudizio è trattenuto (#124 D6). */
@@ -134,12 +136,12 @@ export default function TalentReviewPage() {
   }, [nineBox.rows]);
 
   const kpis: KpiCardData[] = useMemo(() => [
-    { label: t("talentReview.kpi.assessed"), value: nineBox.total.toLocaleString() },
-    { label: t("talentReview.kpi.fit"), value: fit.total.toLocaleString() },
-    { label: t("talentReview.kpi.readiness"), value: readiness.total.toLocaleString() },
-    { label: t("talentReview.kpi.succession"), value: succession.total.toLocaleString() },
-    { label: t("talentReview.kpi.criticalPositions"), value: criticalPositions.total.toLocaleString() },
-  ], [nineBox.total, fit.total, readiness.total, succession.total, criticalPositions.total, t]);
+    { label: t("talentReview.kpi.assessed"), value: f.numero(nineBox.total) },
+    { label: t("talentReview.kpi.fit"), value: f.numero(fit.total) },
+    { label: t("talentReview.kpi.readiness"), value: f.numero(readiness.total) },
+    { label: t("talentReview.kpi.succession"), value: f.numero(succession.total) },
+    { label: t("talentReview.kpi.criticalPositions"), value: f.numero(criticalPositions.total) },
+  ], [nineBox.total, fit.total, readiness.total, succession.total, criticalPositions.total, t, f]);
 
   return (
     <main data-testid="talent-review-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">

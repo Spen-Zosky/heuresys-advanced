@@ -15,6 +15,7 @@ import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { EvidenceDrawer } from "@/components/evidence-drawer";
+import { useFormat } from "@/lib/format";
 
 // Higher value = larger gap = worse: ALIGNED → success, MAJOR_GAP → destructive.
 // Only confirmed @heuresys/ui Badge variants + registered text tokens.
@@ -35,6 +36,7 @@ const positionLabel = (r: SkillGapScore) => r.positionTitle ?? r.positionCode ??
 
 export default function SkillGapPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<SkillGapScore | null>(null);
   const [evidenceFor, setEvidenceFor] = useState<SkillGapScore | null>(null);
@@ -73,7 +75,7 @@ export default function SkillGapPage() {
         // #124 D6: assente e dichiarato, non «—».
         isMasked(r, "value") || r.value === undefined
           ? <MaskedCell />
-          : <span className={`font-mono font-semibold ${r.segment ? SEGMENT_TEXT[r.segment] : ""}`}>{r.value.toFixed(1)}</span>
+          : <span className={`font-mono font-semibold ${r.segment ? SEGMENT_TEXT[r.segment] : ""}`}>{fmt.numeroFisso(r.value, 1)}</span>
       ) },
       { header: t("insightsSkillGap.colSegment"), cell: (r) => (
         isMasked(r, "segment") || r.segment === undefined
@@ -81,7 +83,7 @@ export default function SkillGapPage() {
           : <Badge variant={SEGMENT_BADGE[r.segment]}>{t(`insightsSkillGap.segment.${r.segment}`)}</Badge>
       ) },
     ],
-    [t],
+    [t, fmt],
   );
 
   return (
@@ -143,7 +145,7 @@ export default function SkillGapPage() {
                 <MaskedCell />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {t("insightsSkillGap.explainDesc", { value: selected.value!.toFixed(1), segment: t(`insightsSkillGap.segment.${selected.segment}`), model: selected.modelVersion })}
+                  {t("insightsSkillGap.explainDesc", { value: fmt.numeroFisso(selected.value!, 1), segment: t(`insightsSkillGap.segment.${selected.segment}`), model: selected.modelVersion })}
                 </p>
               )}
               <Button type="button" variant="outline" size="sm" data-testid="skillgap-evidence-open"
@@ -157,7 +159,7 @@ export default function SkillGapPage() {
                     <div className="h-full bg-primary" style={{ width: `${Math.min(100, Math.max(0, f.normalized ?? 0))}%` }} />
                   </div>
                   <span className="w-48 shrink-0 text-right font-mono text-xs text-muted-foreground">
-                    {t("insightsSkillGap.featureDetail", { normalized: (f.normalized ?? 0).toFixed(0), weight: (f.weight * 100).toFixed(0), contribution: f.contribution.toFixed(1) })}
+                    {t("insightsSkillGap.featureDetail", { normalized: fmt.numeroFisso(f.normalized ?? 0, 0), weight: fmt.numeroFisso(f.weight * 100, 0), contribution: fmt.numeroFisso(f.contribution, 1) })}
                   </span>
                 </div>
               ))}

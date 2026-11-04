@@ -19,6 +19,7 @@ import {
   APPLICATION_STAGES, FEEDBACK_RECOMMENDATIONS, INTERVIEW_KINDS, INTERVIEW_STATUSES,
   KEY, OFFER_STATUSES, candidateName, useCandidates, usePostings,
 } from "@/lib/recruiting";
+import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -37,6 +38,7 @@ type Feedback = { kind: "ok" | "err"; msg: string } | null;
  */
 export default function ApplicationDetailPage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const params = useParams<{ id: string }>();
   const id = params?.id ?? "";
@@ -221,7 +223,7 @@ export default function ApplicationDetailPage() {
               {(interviews.data?.items ?? []).map((i) => (
                 <li key={i.interviewId} className="space-y-3 px-4 py-3" data-testid="interview-row">
                   <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-                    <span className="font-medium">{t(`recruiting.interviewKind.${i.kind}`)}{i.scheduledAt ? ` · ${new Date(i.scheduledAt).toLocaleString()}` : ""}{i.location ? ` · ${i.location}` : ""}</span>
+                    <span className="font-medium">{t(`recruiting.interviewKind.${i.kind}`)}{i.scheduledAt ? ` · ${fmt.dataOra(i.scheduledAt)}` : ""}{i.location ? ` · ${i.location}` : ""}</span>
                     <div className="flex items-center gap-2">
                       <Badge data-testid="interview-row-status">{t(`recruiting.interviewStatus.${i.status}`)}</Badge>
                       {canInterview && (<select
@@ -261,8 +263,8 @@ export default function ApplicationDetailPage() {
                   <span>
                     {o.masked?.includes("grossAnnualSalary")
                       ? <em data-testid="offer-salary-masked">{t("recruiting.application.salaryMasked")}</em>
-                      : <span data-testid="offer-row-salary">{o.grossAnnualSalary !== null && o.grossAnnualSalary !== undefined ? `${o.grossAnnualSalary.toLocaleString()} €` : "—"}</span>}
-                    {o.contractType ? ` · ${o.contractType}` : ""}{o.startDate ? ` · ${o.startDate}` : ""}
+                      : <span data-testid="offer-row-salary">{fmt.importo(o.grossAnnualSalary, "EUR", 0)}</span>}
+                    {o.contractType ? ` · ${o.contractType}` : ""}{o.startDate ? ` · ${fmt.data(o.startDate)}` : ""}
                   </span>
                   <div className="flex items-center gap-2">
                     <Badge data-testid="offer-row-status">{t(`recruiting.offerStatus.${o.status}`)}</Badge>

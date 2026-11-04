@@ -6,10 +6,12 @@ import type { MePerformanceResponse } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { Field, ProfileSection, fmtDate } from "../profile/_components/field";
+import { useFormat } from "@/lib/format";
 
 /** Performance — review history (read-only consultation), lazy on tab open. */
 export function MePerformanceTab() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["me", "performance"],
@@ -31,8 +33,8 @@ export function MePerformanceTab() {
         >
           <Field label={t("landing.perf.status")} value={enumLabel("perfReviewStatus", r.status)} />
           <Field label={t("landing.perf.overall")} value={r.overallRating != null ? r.overallRating.toFixed(1) : null} testId={i === 0 ? "perf-overall" : undefined} />
-          <Field label={t("landing.perf.goal")} value={r.goalRating != null ? r.goalRating.toFixed(1) : null} />
-          <Field label={t("landing.perf.competency")} value={r.competencyRating != null ? r.competencyRating.toFixed(1) : null} />
+          <Field label={t("landing.perf.goal")} value={r.goalRating != null ? fmt.numeroFisso(r.goalRating, 1) : null} />
+          <Field label={t("landing.perf.competency")} value={r.competencyRating != null ? fmt.numeroFisso(r.competencyRating, 1) : null} />
           <Field label={t("landing.perf.perfBox")} value={r.performanceBox != null ? String(r.performanceBox) : null} />
           <Field label={t("landing.perf.potBox")} value={r.potentialBox != null ? String(r.potentialBox) : null} />
           <Field label={t("landing.perf.period")} value={`${fmtDate(r.periodStart) ?? "—"} → ${fmtDate(r.periodEnd) ?? "—"}`} />

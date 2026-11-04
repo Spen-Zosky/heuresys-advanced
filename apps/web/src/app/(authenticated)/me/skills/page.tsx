@@ -18,6 +18,7 @@ import type { MeSkillPossession, MeSkillPossessionResponse } from "@heuresys/sha
 import { EnumStatusPill } from "@/components/enum-badge";
 import { apiFetch } from "@/lib/api/fetch";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 interface MeSkillEvidence {
   userSkillEvidenceId: string;
@@ -32,6 +33,7 @@ interface MeSkillEvidence {
 
 export default function MeSkillsPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const possession = useQuery({
     queryKey: ["me", "skills", "possession"],
@@ -139,7 +141,7 @@ export default function MeSkillsPage() {
                     </td>
                     <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{enumLabel("skillEvidenceSource", s.source)}</td>
                     <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{s.score ?? "—"}</td>
-                    <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{s.assessedAt.slice(0, 10)}</td>
+                    <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{fmt.data(s.assessedAt)}</td>
                   </tr>
                 ))}
               </tbody>

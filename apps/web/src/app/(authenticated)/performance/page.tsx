@@ -36,6 +36,7 @@ import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
+import { useFormat } from "@/lib/format";
 
 interface ListaCicli { items: ReviewCycle[]; total: number }
 interface ListaCalibrazioni { items: CalibrationSession[]; total: number }
@@ -54,6 +55,7 @@ function voto(riga: { masked?: string[] }, campo: string, valore: number | null 
 
 export default function PerformancePage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
 
   const cicli = useQuery({
     queryKey: ["review-cycles", "list"],
@@ -132,7 +134,7 @@ export default function PerformancePage() {
         header: t("performance.reviews.cols.shared"),
         cell: (r) =>
           r.sharedAt ? (
-            <span className="text-xs text-muted-foreground">{new Date(r.sharedAt).toLocaleDateString()}</span>
+            <span className="text-xs text-muted-foreground">{fmt.data(r.sharedAt)}</span>
           ) : r.condivisioneEccezione ? (
             // S1097 — l'eccezione di condivisione (registro 000396) non fa sparire la riga «non
             // comunicata»: la qualifica. Il motivo intero sta nel title, la data della decisione
@@ -142,7 +144,7 @@ export default function PerformancePage() {
               title={r.condivisioneEccezione.motivo}
             >
               {t("performance.reviews.notSharedException", {
-                date: new Date(r.condivisioneEccezione.decisaIl).toLocaleDateString(),
+                date: fmt.data(r.condivisioneEccezione.decisaIl),
               })}
             </span>
           ) : (
@@ -150,7 +152,7 @@ export default function PerformancePage() {
           ),
       },
     ],
-    [t],
+    [t, fmt],
   );
 
   const colonneCalibrazioni = useMemo<DataColumn<CalibrationSession>[]>(
@@ -164,13 +166,13 @@ export default function PerformancePage() {
         header: t("performance.calib.cols.scheduled"),
         cell: (s) => (
           <span className="text-xs text-muted-foreground">
-            {s.scheduledAt ? new Date(s.scheduledAt).toLocaleDateString() : "—"}
+            {s.scheduledAt ? fmt.data(s.scheduledAt) : "—"}
           </span>
         ),
       },
       { header: t("performance.calib.cols.status"), cell: (s) => <EnumStatusBadge domain="status" value={s.status} /> },
     ],
-    [t],
+    [t, fmt],
   );
 
   return (

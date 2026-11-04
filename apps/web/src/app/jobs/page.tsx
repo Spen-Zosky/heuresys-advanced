@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, HeuresysWordmark, EmptyState, Spinner } from "@heuresys/ui";
 import type { PublicJobPostingListResponse } from "@heuresys/shared/schemas/public-job-postings";
+import { useFormat } from "@/lib/format";
 
 /**
  * `/jobs` — la vetrina PUBBLICA degli annunci (`#54` F4, percorso prospect ADR-0026).
@@ -17,6 +18,7 @@ import type { PublicJobPostingListResponse } from "@heuresys/shared/schemas/publ
  */
 export default function PublicJobsPage() {
   const { t } = useTranslation("landing");
+  const fmt = useFormat();
   const [data, setData] = useState<PublicJobPostingListResponse | null>(null);
   const [error, setError] = useState(false);
 
@@ -62,8 +64,8 @@ export default function PublicJobsPage() {
                       <h2 className="text-lg font-medium" data-testid="jobs-row-title">{p.title}</h2>
                       <p className="text-sm text-muted-foreground">
                         {p.location ?? t("jobs.noLocation")}
-                        {p.publishedOn ? ` · ${t("jobs.publishedOn", { date: p.publishedOn })}` : ""}
-                        {p.expiresOn ? ` · ${t("jobs.expiresOn", { date: p.expiresOn })}` : ""}
+                        {p.publishedOn ? ` · ${t("jobs.publishedOn", { date: fmt.data(p.publishedOn) })}` : ""}
+                        {p.expiresOn ? ` · ${t("jobs.expiresOn", { date: fmt.data(p.expiresOn) })}` : ""}
                       </p>
                       {p.description && <p className="whitespace-pre-line text-sm">{p.description}</p>}
                     </CardContent>

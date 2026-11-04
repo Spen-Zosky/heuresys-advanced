@@ -219,6 +219,8 @@ export const MePaySlipSchema = z.object({
   deductions: z.record(z.string(), z.number()).optional(),
   paymentDate: z.string().nullable(),
   status: z.string().nullable(),
+  /** Valuta del rapporto di lavoro in cui la busta e' pagata (F-1, piano interfacce). */
+  currency: z.string().nullable().optional(),
   masked: z.array(z.string()).optional(),
 });
 export type MePaySlip = z.infer<typeof MePaySlipSchema>;

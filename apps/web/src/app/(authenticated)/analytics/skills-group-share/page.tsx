@@ -7,9 +7,11 @@ import { Boxes, Layers, PieChart } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { SkillsGroupShareAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useFormat } from "@/lib/format";
 
 export default function SkillsGroupShareAnalyticsPage() {
   const { t } = useTranslation("analytics");
+  const fmt = useFormat();
   const q = useQuery({
     queryKey: ["analytics", "skills-group-share"],
     queryFn: () => apiFetch<SkillsGroupShareAnalyticsResponse>("/v1/analytics/skills-group-share"),
@@ -131,7 +133,7 @@ export default function SkillsGroupShareAnalyticsPage() {
                       <td className="px-4 py-2 font-mono text-xs text-foreground">{g.groupCode}</td>
                       <td className="px-4 py-2 text-right tabular-nums text-foreground">{g.skillCount}</td>
                       <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">
-                        {g.sharePct.toFixed(2)}%
+                        {fmt.numeroFisso(g.sharePct, 2)}%
                       </td>
                     </tr>
                   ))}

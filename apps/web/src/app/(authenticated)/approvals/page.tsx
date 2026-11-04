@@ -20,6 +20,7 @@ import { useCan } from "@/lib/api/auth";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { PersonPicker } from "@/components/person-picker";
+import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -37,7 +38,8 @@ function statusVariant(s: ApprovalStatus): "success" | "secondary" | "destructiv
 }
 
 export default function ApprovalsPage() {
-  const { t, i18n } = useTranslation("admin");
+  const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState("");
   const [processFilter, setProcessFilter] = useState("");
@@ -130,12 +132,12 @@ export default function ApprovalsPage() {
         header: t("approvals.columns.created"),
         cell: (r) => (
           <time dateTime={r.createdAt} className="text-xs text-muted-foreground">
-            {new Date(r.createdAt).toLocaleDateString(i18n.language, { day: "2-digit", month: "2-digit", year: "numeric" })}
+            {fmt.data(r.createdAt)}
           </time>
         ),
       },
     ],
-    [t, i18n.language],
+    [t, fmt],
   );
 
   return (

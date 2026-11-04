@@ -62,11 +62,14 @@ export default function TenantBlueprintBuildPage({
    * per questa versione», che e' proprio il ramo di ripiego.
    * Un controllo strutturale non dipende da quale copia della classe ha costruito l'oggetto.
    */
-  const erroreApi = (e: unknown): { status: number; message: string } | null =>
+  const erroreApi = (e: unknown): { status: number; message: string; serverMessage?: string } | null =>
     typeof e === "object" && e !== null && "status" in e && "code" in e
       ? {
           status: Number((e as { status: unknown }).status),
           message: String((e as { message?: unknown }).message ?? ""),
+          ...(typeof (e as { serverMessage?: unknown }).serverMessage === "string"
+            ? { serverMessage: String((e as { serverMessage?: unknown }).serverMessage) }
+            : {}),
         }
       : null;
   const perms = useCurrentUserPermissions();
@@ -183,9 +186,14 @@ export default function TenantBlueprintBuildPage({
         // ⚠ Il `data-testid` sta sul contenitore di `StatoErrore` (il componente dei design system
         //   non propaga gli attributi che non conosce: misurato, il caso E2E non trovava
         //   l'elemento). Il motivo preciso del servizio resta nel titolo.
+        // ⚠ È `serverMessage`, non `message`: dal lotto L4 (F-4) `message` è il testo per la
+        //   persona ricavato dal CODICE, uguale per ogni causa dello stesso codice
+        //   («L'operazione è in conflitto…»), e aveva rifatto muta questa pagina. Il motivo
+        //   del servizio sulla costruzione è scritto per chi la decide, con i nomi del modello
+        //   e delle righe che non tornano; il testo per la persona e il codice restano sotto.
         <StatoErrore
           errore={piano.error}
-          titolo={erroreApi(piano.error)?.message ?? t("dossier.build.planError")}
+          titolo={erroreApi(piano.error)?.serverMessage ?? t("dossier.build.planError")}
           testId="build-plan-error"
           onRiprova={() => void piano.refetch()}
         />

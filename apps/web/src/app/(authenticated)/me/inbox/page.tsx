@@ -130,7 +130,7 @@ export default function MeInboxPage() {
         badges={
           <div className="flex items-center gap-2">
             <Badge variant="secondary" data-testid="me-inbox-count">
-              {inbox.data ? t("inbox.count", { count: inbox.data.total }) : t("common:loading")}
+              {inbox.data ? t("inbox.count", { count: inbox.data.total }) : inbox.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
             </Badge>
             {unreadCount > 0 && (
               <Badge

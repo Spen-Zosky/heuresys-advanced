@@ -76,7 +76,9 @@ export default function PositionLearningPage() {
           <span data-testid="position-learning-count" className="text-sm text-muted-foreground">
             {requirements.data
               ? t("positions.learning.count", { count: reqItems.length, modules: moduleItems.length })
-              : t("common:loading")}
+              : requirements.isError
+                ? t("common:stato.nonDisponibile")
+                : t("common:loading")}
           </span>
         }
       />

@@ -212,7 +212,7 @@ export default function ContentPage() {
         description={t("content.description")}
         badges={
           <Badge variant="secondary" data-testid="content-count">
-            {docs.data ? t("content.count", { count: docs.data.total }) : t("common:loading")}
+            {docs.data ? t("content.count", { count: docs.data.total }) : docs.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />

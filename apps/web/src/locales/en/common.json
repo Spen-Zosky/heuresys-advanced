@@ -771,6 +771,7 @@
       "titolo": "You do not have access to this data",
       "motivo": "Your profile does not include this data. If you need it for your work, ask whoever manages roles in your company."
     },
-    "codice": "Code: {{codice}}."
+    "codice": "Code: {{codice}}.",
+    "nonDisponibile": "unavailable"
   }
 }

@@ -31,7 +31,7 @@ const ATTIVO = process.env.CENSIMENTO === "1";
 const OUT_DIR = path.resolve(__dirname, "..", "..", "test-results", "censimento-interfacce");
 const APP_DIR = path.resolve(__dirname, "..", "..", "src", "app", "(authenticated)");
 
-const PERSONE: readonly PersonaKey[] = ["platformAdmin", "tenantAdmin", "manager", "employee", "outsider"];
+const PERSONE: readonly PersonaKey[] = ["platformAdmin", "tenantAdmin", "manager", "employee", "outsider", "custodian"];
 
 /** Le rotte di prodotto, dalle cartelle: ogni `page.tsx` sotto il layout autenticato. */
 function rotteDiProdotto(): string[] {
@@ -90,30 +90,35 @@ function espressione(segmenti: string[], aperta: boolean): RegExp {
 async function risolvi(page: Page, rotta: string): Promise<string | null> {
   const segmenti = rotta.split("/");
   const posizioni = segmenti.flatMap((seg, i) => (eParametro(seg) ? [i] : []));
+  const finale = espressione(segmenti, false);
   let dove = segmenti.slice(0, posizioni[0]).join("/") || "/";
-  for (let k = 0; k < posizioni.length; k++) {
-    const ultimo = k === posizioni.length - 1;
-    const fine = ultimo ? segmenti.length : (posizioni[k + 1] ?? segmenti.length);
-    const pattern = espressione(segmenti.slice(0, fine), !ultimo);
-    const finale = espressione(segmenti, false);
+  // Un passo per parametro, più uno: `/positions/[positionId]/kpis` si trova sulla pagina della
+  // posizione, che a sua volta si trova sulla lista. A ogni passo vale prima l'indirizzo finale;
+  // se non c'è, si scende di un livello fino al parametro successivo.
+  for (let k = 0; k <= posizioni.length; k++) {
     await page.goto(dove);
     await page.waitForLoadState("networkidle").catch(() => {});
     await page.waitForTimeout(1500);
     const hrefs = await page.$$eval("a[href]", (as) => as.map((a) => a.getAttribute("href") ?? ""));
-    let trovato = hrefs.find((h) => finale.test(h)) ?? hrefs.find((h) => pattern.test(h));
-    if (!trovato) {
+    const diretto = hrefs.find((h) => finale.test(h));
+    if (diretto) return diretto;
+    const p = posizioni[k];
+    if (p === undefined) return null;
+    const passo = espressione(segmenti.slice(0, p + 1), true);
+    let avanti = hrefs.find((h) => passo.test(h) && h !== dove);
+    if (!avanti) {
       // Righe cliccabili senza <a>: si prova il clic sulla prima riga di tabella.
       const riga = page.locator("table tbody tr").first();
       if (await riga.count()) {
         await riga.click().catch(() => {});
         await page.waitForTimeout(1500);
         const qui = new URL(page.url()).pathname;
-        if (finale.test(qui) || pattern.test(qui)) trovato = qui;
+        if (finale.test(qui)) return qui;
+        if (passo.test(qui) && qui !== dove) avanti = qui;
       }
     }
-    if (!trovato) return null;
-    if (finale.test(trovato)) return trovato;
-    dove = trovato;
+    if (!avanti) return null;
+    dove = avanti;
   }
   return null;
 }
@@ -130,7 +135,8 @@ async function misura(page: Page, rotta: string, aperta: string, telefono: boole
   const risposteMe: string[] = [];
   const ascolta = (r: import("@playwright/test").Response) => {
     const u = new URL(r.url());
-    if (!u.pathname.startsWith("/v1/me")) return;
+    // Il browser chiama l'API attraverso il proxy del web (`/api/v1/...`).
+    if (!u.pathname.replace(/^\/api(?=\/)/, "").startsWith("/v1/me")) return;
     const cc = r.headers()["cache-control"] ?? "";
     if (!/no-store/i.test(cc)) risposteMe.push(`${u.pathname} [${cc || "nessuna"}]`);
   };
@@ -233,7 +239,7 @@ test.describe("censimento interfacce (L7: F-5, F-6, F-7)", () => {
       await censisci(browser, persona, false);
     });
   }
-  for (const persona of ["employee", "outsider", "manager"] as const) {
+  for (const persona of ["employee", "outsider", "manager", "tenantAdmin", "custodian"] as const) {
     test(`telefono 390: ${persona}`, async ({ browser }) => {
       await censisci(browser, persona, true);
     });

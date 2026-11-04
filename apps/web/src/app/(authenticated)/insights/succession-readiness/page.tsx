@@ -95,7 +95,7 @@ export default function SuccessionReadinessPage() {
         countTestId="readiness-count"
         title={t("insightsReadiness.title")}
         description={data.data ? t("insightsReadiness.descriptionScoped", { kind: data.data.scope.kind }) : t("insightsReadiness.description")}
-        count={data.data ? t("insightsReadiness.count", { count: data.data.total }) : t("common:loading")}
+        count={data.data ? t("insightsReadiness.count", { count: data.data.total }) : data.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
         actions={
           canAdmin ? (
             <Button type="button" data-testid="readiness-recompute" disabled={recompute.isPending} onClick={() => { setFeedback(null); recompute.mutate(); }}>

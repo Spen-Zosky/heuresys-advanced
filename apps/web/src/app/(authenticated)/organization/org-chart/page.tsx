@@ -87,7 +87,7 @@ export default function OrgChartPage() {
         }
         badges={
           <span data-testid="org-chart-count" className="text-sm text-muted-foreground">
-            {graphs.data ? t("orgChart.count", { count: graphs.data.total }) : t("common:loading")}
+            {graphs.data ? t("orgChart.count", { count: graphs.data.total }) : graphs.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </span>
         }
       />

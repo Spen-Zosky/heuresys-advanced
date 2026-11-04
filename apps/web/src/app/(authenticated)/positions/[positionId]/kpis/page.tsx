@@ -46,7 +46,7 @@ export default function PositionKpisPage() {
         }
         badges={
           <span data-testid="position-kpis-count" className="text-sm text-muted-foreground">
-            {kpis.data ? t("positions.kpis.count", { count: items.length }) : t("common:loading")}
+            {kpis.data ? t("positions.kpis.count", { count: items.length }) : kpis.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </span>
         }
       />

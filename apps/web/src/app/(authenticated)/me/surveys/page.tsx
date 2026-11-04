@@ -26,7 +26,7 @@ export default function MeSurveysPage() {
         description={t("surveys.description")}
         badges={
           <Badge variant="secondary" data-testid="me-surveys-count">
-            {surveys.data ? t("surveys.count", { count: surveys.data.total }) : t("common:loading")}
+            {surveys.data ? t("surveys.count", { count: surveys.data.total }) : surveys.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />

@@ -148,7 +148,7 @@ export default function ApprovalsPage() {
         description={t("approvals.description")}
         badges={
           <Badge variant="secondary" data-testid="approvals-count">
-            {requests.data ? t("approvals.count", { count: list.total }) : t("common:loading")}
+            {requests.data ? t("approvals.count", { count: list.total }) : requests.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />

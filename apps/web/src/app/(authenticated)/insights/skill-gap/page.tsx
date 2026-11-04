@@ -95,7 +95,7 @@ export default function SkillGapPage() {
         countTestId="skillgap-count"
         title={t("insightsSkillGap.title")}
         description={data.data ? t("insightsSkillGap.descriptionScoped", { kind: data.data.scope.kind }) : t("insightsSkillGap.description")}
-        count={data.data ? t("insightsSkillGap.count", { count: data.data.total }) : t("common:loading")}
+        count={data.data ? t("insightsSkillGap.count", { count: data.data.total }) : data.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
         actions={
           canAdmin ? (
             <Button type="button" data-testid="skillgap-recompute" disabled={recompute.isPending} onClick={() => { setFeedback(null); recompute.mutate(); }}>

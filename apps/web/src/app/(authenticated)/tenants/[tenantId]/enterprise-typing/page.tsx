@@ -187,7 +187,9 @@ export default function EnterpriseTypingPage() {
                       ? t("enterpriseTyping.classNone")
                       : classeScelta.data
                         ? `${classeScelta.data.scheme} ${classeScelta.data.code} — ${classeScelta.data.name}`
-                        : t("common:loading")}
+                        : classeScelta.isError
+                          ? t("common:stato.nonDisponibile")
+                          : t("common:loading")}
                   </p>
                   <Input
                     id="typing-class-search"

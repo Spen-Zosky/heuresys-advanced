@@ -165,7 +165,7 @@ export default function WhistleblowingConsolePage() {
         description={t("whistleblowingConsole.description")}
         badges={
           <Badge variant="secondary" data-testid="whistleblowing-console-count">
-            {reports.data ? t("whistleblowingConsole.count", { count: reports.data.total }) : t("common:loading")}
+            {reports.data ? t("whistleblowingConsole.count", { count: reports.data.total }) : reports.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />

@@ -53,7 +53,7 @@ export default function MeSkillsPage() {
         description={t("skills.description")}
         badges={
           <Badge variant="secondary" data-testid="me-skills-count">
-            {possession.data ? t("skills.count", { count: possession.data.total }) : t("common:loading")}
+            {possession.data ? t("skills.count", { count: possession.data.total }) : possession.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />

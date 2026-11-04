@@ -97,7 +97,11 @@ export default function VisualizationsPage() {
         description={t("visualizations.description")}
         badges={
           <Badge variant="secondary" data-testid="visualizations-count">
-            {graphs.query.data ? t("visualizations.count", { count: graphs.total }) : t("visualizations.countLoading")}
+            {graphs.query.data
+              ? t("visualizations.count", { count: graphs.total })
+              : graphs.query.isError
+                ? t("common:stato.nonDisponibile")
+                : t("visualizations.countLoading")}
           </Badge>
         }
       />

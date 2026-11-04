@@ -42,7 +42,7 @@ export default function AdminRolesPage() {
 
   const countLabel = rp.data
     ? t("roles.count", { roles: roles.length, perms: perms.length, total: rp.data.total })
-    : t("common:loading");
+    : rp.isError ? t("common:stato.nonDisponibile") : t("common:loading");
 
   return (
     <main data-testid="admin-roles-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">

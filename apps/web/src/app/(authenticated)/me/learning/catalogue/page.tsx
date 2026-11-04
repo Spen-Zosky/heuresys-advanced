@@ -100,7 +100,7 @@ export default function MeLearningCataloguePage() {
         description={t("catalogue.description")}
         badges={
           <Badge variant="secondary" data-testid="learning-catalogue-count">
-            {paths.query.data ? t("catalogue.count", { count: paths.total }) : t("common:loading")}
+            {paths.query.data ? t("catalogue.count", { count: paths.total }) : paths.query.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />

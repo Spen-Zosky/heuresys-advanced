@@ -83,7 +83,7 @@ export default function EngagementPage() {
         description={t("engagement.description")}
         badges={
           <Badge variant="secondary" data-testid="engagement-count">
-            {surveys.data ? t("engagement.count", { count: surveys.data.total }) : t("common:loading")}
+            {surveys.data ? t("engagement.count", { count: surveys.data.total }) : surveys.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />

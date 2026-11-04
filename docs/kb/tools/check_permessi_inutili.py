@@ -77,26 +77,44 @@ def citati_nel_codice() -> dict[str, str]:
     return dove
 
 
-def concessioni_delle_migrazioni() -> list[tuple[str, str]]:
-    """Ogni istruzione INSERT su sys_auth_role_permissions, con il file che la contiene."""
-    out: list[tuple[str, str]] = []
+def concessioni_delle_migrazioni() -> list[tuple[str, str, list[str]]]:
+    """Per ogni migrazione: nome, testo senza commenti, istruzioni INSERT su sys_auth_role_permissions."""
+    out: list[tuple[str, str, list[str]]] = []
     for f in sorted(MIGRAZIONI.glob("*.sql")):
         testo = re.sub(r"--[^\n]*", "", f.read_text(encoding="utf-8", errors="replace"))
-        for st in testo.split(";"):
-            if "sys_auth_role_permissions" in st and re.search(r"INSERT\s+INTO", st, re.I):
-                out.append((f.name, st))
+        istruzioni = [
+            st for st in testo.split(";")
+            if "sys_auth_role_permissions" in st and re.search(r"INSERT\s+INTO", st, re.I)
+        ]
+        out.append((f.name, testo, istruzioni))
     return out
 
 
-def spiegata(ruolo: str, permesso: str, istruzioni: list[tuple[str, str]]) -> str | None:
-    """Il file che concede il permesso al ruolo: per nome, oppure a tutti i ruoli (nessun filtro
-    sul codice del ruolo) o per specchio di un altro permesso (stessa forma senza filtro)."""
+def spiegata(ruolo: str, permesso: str, migrazioni: list[tuple[str, str, list[str]]]) -> str | None:
+    """Il file che spiega la concessione. Due vie, e basta una:
+    - il file nomina il ruolo e il permesso (o la sua risorsa): e' il caso degli elenchi in una
+      tabella d'appoggio, come l'allowlist di 000210;
+    - un'istruzione INSERT nomina il permesso e non filtra sul ruolo, o ne copia l'audience da un
+      altro permesso (000177, 000186, 000199, 000208), oppure da' a un ruolo tutto il catalogo
+      meno un elenco che non lo nomina (000005).
+    E' una lettura del testo, non un'esecuzione: dice dove cercare, non prova l'effetto."""
     risorsa = permesso.split(":")[0]
-    for nome, st in istruzioni:
-        if f"'{permesso}'" not in st and f"'{risorsa}'" not in st and f"'{risorsa}:%'" not in st:
-            continue
-        if f"'{ruolo}'" in st or "auth_role_code" not in st:
+    nomi = (f"'{permesso}'", f"'{risorsa}'", f"'{risorsa}:%'")
+    for nome, testo, istruzioni in migrazioni:
+        if f"'{ruolo}'" in testo and any(n in testo for n in nomi):
             return nome
+        for st in istruzioni:
+            nomina = any(n in st for n in nomi)
+            # a tutti i ruoli: nomina il permesso e non filtra sul ruolo
+            if nomina and "auth_role_code" not in st:
+                return nome
+            # per specchio: l'audience si copia da quella di un altro permesso (000177, 000199)
+            if nomina and re.search(r"JOIN\s+sys\.sys_auth_role_permissions", st):
+                return nome
+            # tutto il catalogo a un ruolo (000005: PLATFORM_ADMIN, TENANT_ADMIN meno un elenco)
+            if f"'{ruolo}'" in st and "CROSS JOIN sys.sys_auth_permissions" in st and not nomina \
+                    and re.search(r"auth_permission_code\s+IN\s*\(", st) is None:
+                return nome
     return None
 
 

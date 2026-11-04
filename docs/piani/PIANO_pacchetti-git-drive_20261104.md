@@ -2,7 +2,7 @@
 
 Mandato di Enzo (4/11/2026, «sì» alla raccomandazione del controllo di commit, push e copie): rinnovo notturno dalla VM dei pacchetti Git di advanced e datastore, e `.env` del datastore nelle copie cifrate. Rapporto del controllo: https://claude.ai/artifact/JvqAoTpr11jt3Db5n8p3q4
 
-Non si chiude in questa sessione: la verifica della prima corsa notturna di cron (voce P5), e HDD-01, che richiede la macchina avviata con Debian. Le altre discrepanze del rapporto restano fuori da questo ciclo.
+Non si chiude in questa sessione: la verifica della prima corsa notturna di cron (voce P5). HDD-01 è controllato dal disco D: di DESKTOP-E6VGGAE, che è lo stesso: copia di fase 52 file su 52 uguali. Le altre discrepanze del rapporto restano fuori da questo ciclo.
 
 | id | cosa | chi | fatta quando | stato |
 |---|---|---|---|---|

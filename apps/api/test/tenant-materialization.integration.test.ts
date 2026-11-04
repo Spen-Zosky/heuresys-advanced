@@ -205,6 +205,14 @@ describe("costruzione di un'azienda da un modello (#4 WI-C)", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("TENANT_MATERIALIZE_ADMIN_ONLY");
   });
 
+  it("S-10 — chi non costruisce non legge nemmeno l'elenco dei modelli", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/tenant-materialization/sources", headers: { cookie: ch(federica.cookies) },
+    });
+    expect(r.statusCode).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("TENANT_MATERIALIZE_ADMIN_ONLY");
+  });
+
   it("un'azienda che non esiste → 404, e niente viene scritto", async () => {
     const r = await materialize(admin, "00000000-0000-0000-0000-000000000000", "apply");
     expect(r.statusCode).toBe(404);

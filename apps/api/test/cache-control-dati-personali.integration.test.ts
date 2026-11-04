@@ -14,6 +14,11 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { senzaCacheDiSessione } from "./helpers/session-cache.js";
+
+// Z-251 F2 — questo file chiama /v1/auth/refresh (il rifiuto senza CSRF): fuori dalla cache
+// di sessioni, come ogni file che tocca il flusso di autenticazione. I login qui sono veri.
+senzaCacheDiSessione();
 
 let suite: TestApp;
 let cookie = "";

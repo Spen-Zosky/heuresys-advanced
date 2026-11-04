@@ -110,11 +110,18 @@ const PAGES_PER_PERSONA = {
   ],
 } as const satisfies Record<string, readonly string[]>;
 
-async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
+async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo, saltaSeNegata = false) {
   await page.goto(route);
   await page.waitForLoadState("networkidle").catch(() => {
     // networkidle may not settle on pages with long-poll websockets; ignore
   });
+  // F-6 (L7): nel giro su TUTTE le pagine di prodotto una persona apre anche pagine che il suo
+  // profilo non comprende; lì c'è la sola schermata di accesso negato (misurata a parte), e la
+  // guardia di non-vacuità la scambierebbe per un guscio. Si salta dicendolo.
+  if (saltaSeNegata && (await page.getByTestId("page-no-access").count()) > 0) {
+    test.skip(true, `${route}: fuori dal profilo di questa persona`);
+    return;
+  }
 
   // D-24 anti-vacuity guard: an expired session is redirected server-side to
   // /login BEFORE any client API call, and the login page audits clean — the
@@ -289,6 +296,43 @@ for (const [persona, pages] of Object.entries(PAGES_PER_PERSONA)) {
     for (const route of pages) {
       test(`${route} has no critical a11y violations`, async ({ page }, testInfo) => {
         await runAxeOnRoute(page, route, testInfo);
+      });
+    }
+  });
+}
+
+/**
+ * F-6 del piano interfacce (lotto L7) — TUTTE le pagine di prodotto, non solo l'elenco scritto
+ * a mano qui sopra. L'elenco si ricava dalle cartelle di `src/app/(authenticated)` (rotte senza
+ * parametri: quelle con un identificativo le misura il censimento, che le risolve seguendo i
+ * collegamenti), così una pagina nuova entra nel cancello senza che qualcuno se ne ricordi.
+ * Ogni persona apre le pagine che il suo elenco non copre già; quelle fuori dal suo profilo
+ * si saltano. Stessa asticella: zero critical e zero serious.
+ */
+const APP_AUTENTICATA = path.resolve(__dirname, "..", "..", "src", "app", "(authenticated)");
+function rotteStaticheDiProdotto(): string[] {
+  const out: string[] = [];
+  const visita = (dir: string, rel: string) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (e.isDirectory()) {
+        if (e.name.startsWith("[")) continue;
+        visita(path.join(dir, e.name), rel + (/^\(.*\)$/.test(e.name) ? "" : `/${e.name}`));
+      } else if (e.name === "page.tsx" && rel !== "") {
+        out.push(rel);
+      }
+    }
+  };
+  visita(APP_AUTENTICATA, "");
+  return out.sort();
+}
+const TUTTE_LE_ROTTE = rotteStaticheDiProdotto();
+for (const persona of ["tenantAdmin", "platformAdmin", "employee"] as const) {
+  const giaCoperte = new Set<string>(PAGES_PER_PERSONA[persona]);
+  test.describe(`a11y di tutte le pagine di prodotto come ${persona}`, () => {
+    test.use({ storageState: storageStateFor(persona) });
+    for (const route of TUTTE_LE_ROTTE.filter((r) => !giaCoperte.has(r))) {
+      test(`${route} has no critical or serious a11y violations`, async ({ page }, testInfo) => {
+        await runAxeOnRoute(page, route, testInfo, true);
       });
     }
   });

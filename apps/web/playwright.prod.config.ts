@@ -41,7 +41,8 @@
  *
  * Rate-limit note: one auth.setup pass = **6** login POSTs — sei personas, contate
  * in `auth.setup.ts`, non cinque come diceva questa riga (corretto S1068) — contro un
- * tetto di 10 ogni 5 minuti per IP. Con QUATTRO passaggi di setup (uno iniziale piu'
+ * tetto di 10 ogni 5 minuti per IP. Dal lotto L7 i passaggi di setup sono SETTE (l'iniziale, uno
+ * per ciascuna delle tre fasi «a11y di tutte le pagine», e i re-login dei blocchi); prima di L7 erano QUATTRO (uno iniziale piu'
  * tre re-login) il vincolo diventa: **due setup consecutivi non devono cadere dentro
  * la stessa finestra di 5 minuti**. Regge perche' ogni blocco dura molti minuti; se un
  * blocco diventasse rapidissimo il setto successivo prenderebbe un **429**, e il
@@ -138,8 +139,21 @@ const matchDi = (g: string[]): RegExp[] =>
  * liste direbbero cose diverse e la fase mancante non girerebbe — di nuovo in silenzio.
  * Il wrapper verifica anche che ogni progetto della config compaia in esattamente una fase.
  */
+/**
+ * F-6 del piano interfacce (lotto L7): il controllo di accessibilità su TUTTE le pagine di
+ * prodotto, una persona per fase. Stessa spec (`a11y.spec.ts`), ma ogni persona ha il suo
+ * progetto e il suo re-login: le tre insieme sono più di 250 scansioni, e dentro la fase
+ * `a11y-desktop` facevano scadere la sessione dei 15 minuti a metà (misurato sul banco del
+ * 2026-11-04: dopo il quindicesimo minuto ogni pagina era il login). I progetti si separano
+ * per titolo del blocco (`grep`), così la fase `a11y-desktop` e quella da telefono non le
+ * eseguono, e nessun caso compare come «saltato».
+ */
+const A11Y_TUTTE = /a11y di tutte le pagine di prodotto come /;
+const PERSONE_A11Y_TUTTE = ["tenantAdmin", "platformAdmin", "employee"] as const;
+
 export const FASI: string[][] = [
   ["setup", "mobile-a11y", "a11y-desktop"],
+  ...PERSONE_A11Y_TUTTE.map((p) => [`setup-a11y-${p}`, `a11y-tutte-${p}`]),
   ...GRUPPI.map((_, i) =>
     i === 0 ? ["setup-refresh", "chromium"] : [`setup-refresh-${i + 1}`, `chromium-${i + 1}`],
   ),
@@ -156,15 +170,32 @@ export default defineConfig({
     {
       name: "mobile-a11y",
       testMatch: /[\\/]a11y\.spec\.ts$/,
+      grepInvert: A11Y_TUTTE,
       use: { ...devices["Pixel 7"] },
       dependencies: ["setup"],
     },
     {
       name: "a11y-desktop",
       testMatch: /[\\/]a11y\.spec\.ts$/,
+      grepInvert: A11Y_TUTTE,
       use: { ...devices["Desktop Chrome"] },
       dependencies: ["setup"],
     },
+    ...PERSONE_A11Y_TUTTE.flatMap((p) => [
+      {
+        name: `setup-a11y-${p}`,
+        testMatch: /auth\.setup\.ts/,
+        use: { ...devices["Desktop Chrome"] },
+      },
+      {
+        name: `a11y-tutte-${p}`,
+        testMatch: /[\\/]a11y\.spec\.ts$/,
+        // Il titolo completo è «describe test»: la persona è seguita da uno spazio.
+        grep: new RegExp(`${A11Y_TUTTE.source}${p} `),
+        use: { ...devices["Desktop Chrome"] },
+        dependencies: [`setup-a11y-${p}`],
+      },
+    ]),
     /* ⚠ I RE-LOGIN NON DIPENDONO PIU' DAL BLOCCO CHE LI PRECEDE, e la ragione e' un
      * difetto MISURATO nella prima stesura di questa correzione (S1068).
      *

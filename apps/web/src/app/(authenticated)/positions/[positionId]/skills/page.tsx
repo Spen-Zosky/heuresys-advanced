@@ -57,6 +57,7 @@ export default function PositionSkillsPage() {
           <EntityTable<PositionSkillReq>
             isLoading={skills.isLoading}
             isError={skills.isError}
+            error={skills.error}
             rows={items}
             rowKey={(s) => s.requirementId}
             rowTestId="position-skill-row"

@@ -159,6 +159,7 @@ export default function VrioScorecardPage() {
       <EntityTable<VrioCapabilityItem>
         isLoading={scorecard.isLoading}
         isError={scorecard.isError}
+        error={scorecard.error}
         errorMessage={t("vrio.errorMessage")}
         rows={data?.items ?? []}
         rowKey={(r) => r.skillGroupId}

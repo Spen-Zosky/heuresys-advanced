@@ -102,6 +102,7 @@ export default function SkillGapPage() {
         }
         isLoading={data.isLoading}
         isError={data.isError}
+        error={data.error}
         errorMessage={t("insightsSkillGap.errorMessage")}
         rows={data.data?.items ?? []}
         rowKey={(r) => `${r.userId}:${r.positionId}`}

@@ -190,6 +190,7 @@ export default function MeTimeOffPage() {
           <EntityTable<TimeOffRequest>
             isLoading={requests.isLoading}
             isError={requests.isError}
+            error={requests.error}
             errorMessage={t("timeOff.historyError")}
             rows={requests.data?.items ?? []}
             rowKey={(r) => r.requestId}

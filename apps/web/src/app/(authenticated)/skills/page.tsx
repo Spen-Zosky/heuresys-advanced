@@ -63,6 +63,7 @@ export default function SkillsCataloguePage() {
       count={skills.query.data ? t("skills.count", { count: skills.total }) : undefined}
       isLoading={skills.query.isLoading}
       isError={skills.query.isError}
+      error={skills.query.error}
       errorMessage={t("skills.errorMessage")}
       rows={skills.rows}
       server={skills.server}

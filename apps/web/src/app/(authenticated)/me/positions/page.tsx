@@ -58,6 +58,7 @@ export default function MePositionsPage() {
       count={positions.data ? t("positions.count", { count: positions.data.total }) : undefined}
       isLoading={positions.isLoading}
       isError={positions.isError}
+      error={positions.error}
       errorMessage={t("positions.errorMessage")}
       rows={positions.data?.items ?? []}
       rowKey={(p) => p.userPositionAssignmentId}

@@ -68,6 +68,7 @@ export default function MeKpisPage() {
       count={kpis.data ? t("kpis.count", { count: kpis.data.total }) : undefined}
       isLoading={kpis.isLoading}
       isError={kpis.isError}
+      error={kpis.error}
       errorMessage={t("kpis.errorMessage")}
       rows={kpis.data?.items ?? []}
       rowKey={(k) => k.positionKpiRequirementId}

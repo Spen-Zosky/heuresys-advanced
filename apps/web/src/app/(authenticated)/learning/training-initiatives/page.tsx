@@ -45,6 +45,7 @@ export default function TrainingInitiativesPage() {
       count={inits.query.data ? t("training.count", { count: inits.total }) : undefined}
       isLoading={inits.query.isLoading}
       isError={inits.query.isError}
+      error={inits.query.error}
       errorMessage={t("training.errorMessage")}
       rows={inits.rows}
       server={inits.server}

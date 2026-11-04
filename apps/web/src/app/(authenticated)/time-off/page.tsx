@@ -113,6 +113,7 @@ export default function TimeOffPage() {
         <EntityTable<TimeOffRequest>
           isLoading={requests.query.isLoading}
           isError={requests.query.isError}
+          error={requests.query.error}
           errorMessage={t("timeOff.error")}
           rows={requests.rows}
           server={requests.server}
@@ -129,6 +130,7 @@ export default function TimeOffPage() {
         <EntityTable<LeaveAccrualRule>
           isLoading={rules.query.isLoading}
           isError={rules.query.isError}
+          error={rules.query.error}
           errorMessage={t("timeOff.error")}
           rows={rules.rows}
           server={rules.server}
@@ -145,6 +147,7 @@ export default function TimeOffPage() {
         <EntityTable<LeaveBalanceTransaction>
           isLoading={txns.query.isLoading}
           isError={txns.query.isError}
+          error={txns.query.error}
           errorMessage={t("timeOff.error")}
           rows={txns.rows}
           server={txns.server}

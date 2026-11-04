@@ -216,6 +216,7 @@ export function JobRolesPanel() {
         <EntityTable<JobRole>
           isLoading={roles.isLoading}
           isError={roles.isError}
+          error={roles.error}
           errorMessage={t("jobCatalog.loadError")}
           rows={roles.data?.items ?? []}
           rowKey={(r) => r.jobRoleId}

@@ -11,6 +11,7 @@ import type {
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
+import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
@@ -47,11 +48,15 @@ export default function PositionLearningPage() {
     enabled: !!positionId,
   });
   // C4 (#42): server-side pagination (was `?limit=200`).
+  // S-25: le lacune formative chiedono gap_analysis:read. Chi non lo ha (per esempio un capo)
+  // non vede il riquadro e la pagina non fa una chiamata destinata al 403.
+  const perms = useCurrentUserPermissions();
+  const leggeLeLacune = perms.data?.permissions.includes("gap_analysis:read") ?? false;
   const gaps = usePaginatedList<LearningGap>({
     queryKey: ["learning-gaps", "by-position", positionId],
     path: "/v1/learning-gaps",
     params: { positionId },
-    enabled: !!positionId,
+    enabled: !!positionId && leggeLeLacune,
   });
 
   const reqItems = requirements.data?.items ?? [];
@@ -89,6 +94,7 @@ export default function PositionLearningPage() {
           <EntityTable<PositionLearningRequirement>
             isLoading={requirements.isLoading}
             isError={requirements.isError}
+            error={requirements.error}
             rows={reqItems}
             rowKey={(r) => r.requirementId}
             rowTestId="position-learning-req-row"
@@ -136,6 +142,7 @@ export default function PositionLearningPage() {
           <EntityTable<PositionLearningModule>
             isLoading={modules.isLoading}
             isError={modules.isError}
+            error={modules.error}
             rows={moduleItems}
             rowKey={(m) => `${m.skillId}-${m.learningModuleId}`}
             rowTestId="position-learning-module-row"
@@ -175,6 +182,7 @@ export default function PositionLearningPage() {
         </CardContent>
       </Card>
 
+      {leggeLeLacune ? (
       <Card>
         <CardHeader>
           <CardTitle>{t("positions.learning.gaps.cardTitle")}</CardTitle>
@@ -183,6 +191,7 @@ export default function PositionLearningPage() {
           <EntityTable<LearningGap>
             isLoading={gaps.query.isLoading}
             isError={gaps.query.isError}
+            error={gaps.query.error}
             rows={gapItems}
             server={gaps.server}
             rowKey={(g) => g.learningGapId}
@@ -199,6 +208,7 @@ export default function PositionLearningPage() {
           />
         </CardContent>
       </Card>
+      ) : null}
     </main>
   );
 }

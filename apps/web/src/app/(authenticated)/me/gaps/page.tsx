@@ -62,6 +62,7 @@ export default function MeGapsPage() {
       count={gaps.data ? t("gaps.count", { count: gaps.data.total }) : undefined}
       isLoading={gaps.isLoading}
       isError={gaps.isError}
+      error={gaps.error}
       errorMessage={t("gaps.errorMessage")}
       rows={gaps.data?.items ?? []}
       rowKey={(g) => g.learningGapId}

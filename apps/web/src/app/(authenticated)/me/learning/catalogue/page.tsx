@@ -118,6 +118,7 @@ export default function MeLearningCataloguePage() {
         <EntityTable<LearningPath>
           isLoading={paths.query.isLoading}
           isError={paths.query.isError}
+          error={paths.query.error}
           errorMessage={t("catalogue.errorMessage")}
           rows={paths.rows}
           server={paths.server}

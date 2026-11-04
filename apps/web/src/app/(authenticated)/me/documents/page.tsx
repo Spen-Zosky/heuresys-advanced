@@ -59,6 +59,7 @@ export default function MeDocumentsPage() {
       count={docs.data ? t("documents.count", { count: docs.data.total }) : undefined}
       isLoading={docs.isLoading}
       isError={docs.isError}
+      error={docs.error}
       errorMessage={t("documents.errorMessage")}
       rows={docs.data?.items ?? []}
       rowKey={(d) => d.userDocumentId}

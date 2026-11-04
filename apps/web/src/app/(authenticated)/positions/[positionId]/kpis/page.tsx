@@ -56,6 +56,7 @@ export default function PositionKpisPage() {
           <EntityTable<PositionKpiReq>
             isLoading={kpis.isLoading}
             isError={kpis.isError}
+            error={kpis.error}
             rows={items}
             rowKey={(k) => k.requirementId}
             rowTestId="position-kpi-row"

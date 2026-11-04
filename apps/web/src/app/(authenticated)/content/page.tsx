@@ -426,6 +426,7 @@ export default function ContentPage() {
         <EntityTable<ContentDocument>
           isLoading={docs.isLoading}
           isError={docs.isError}
+          error={docs.error}
           errorMessage={t("content.errorMessage")}
           rows={docs.data?.items ?? []}
           rowKey={(d) => d.documentId}

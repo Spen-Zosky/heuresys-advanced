@@ -184,6 +184,7 @@ export default function PerformancePage() {
         <EntityTable<ReviewCycle>
           isLoading={cicli.isLoading}
           isError={cicli.isError}
+          error={cicli.error}
           errorTestId="perf-cycles-error"
           errorMessage={t("performance.error")}
           rows={cicli.data?.items ?? []}
@@ -202,6 +203,7 @@ export default function PerformancePage() {
         <EntityTable<PerformanceReview>
           isLoading={valutazioni.query.isLoading}
           isError={valutazioni.query.isError}
+          error={valutazioni.query.error}
           errorTestId="perf-reviews-error"
           errorMessage={t("performance.error")}
           rows={valutazioni.rows}
@@ -221,6 +223,7 @@ export default function PerformancePage() {
         <EntityTable<CalibrationSession>
           isLoading={calibrazioni.isLoading}
           isError={calibrazioni.isError}
+          error={calibrazioni.error}
           errorTestId="perf-calib-error"
           errorMessage={t("performance.error")}
           rows={calibrazioni.data?.items ?? []}

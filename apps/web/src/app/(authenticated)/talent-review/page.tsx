@@ -216,6 +216,7 @@ export default function TalentReviewPage() {
         <EntityTable<FitScore>
           isLoading={fit.query.isLoading}
           isError={fit.query.isError}
+          error={fit.query.error}
           errorMessage={t("talentReview.error")}
           rows={fit.rows}
           server={fit.server}
@@ -232,6 +233,7 @@ export default function TalentReviewPage() {
         <EntityTable<ReadinessScore>
           isLoading={readiness.query.isLoading}
           isError={readiness.query.isError}
+          error={readiness.query.error}
           errorMessage={t("talentReview.error")}
           rows={readiness.rows}
           server={readiness.server}
@@ -248,6 +250,7 @@ export default function TalentReviewPage() {
         <EntityTable<SuccessionScore>
           isLoading={succession.query.isLoading}
           isError={succession.query.isError}
+          error={succession.query.error}
           errorMessage={t("talentReview.error")}
           rows={succession.rows}
           server={succession.server}
@@ -264,6 +267,7 @@ export default function TalentReviewPage() {
         <EntityTable<CriticalPosition>
           isLoading={criticalPositions.query.isLoading}
           isError={criticalPositions.query.isError}
+          error={criticalPositions.query.error}
           errorMessage={t("talentReview.error")}
           rows={criticalPositions.rows}
           server={criticalPositions.server}
@@ -280,6 +284,7 @@ export default function TalentReviewPage() {
         <EntityTable<CriticalCoverage>
           isLoading={coverage.query.isLoading}
           isError={coverage.query.isError}
+          error={coverage.query.error}
           errorMessage={t("talentReview.error")}
           rows={coverage.rows}
           server={coverage.server}

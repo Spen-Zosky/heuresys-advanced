@@ -54,6 +54,7 @@ export default function SeedRunsPage() {
       count={runs.query.data ? t("seedRuns.count", { count: runs.total }) : undefined}
       isLoading={runs.query.isLoading}
       isError={runs.query.isError}
+      error={runs.query.error}
       errorMessage={t("seedRuns.error")}
       rows={runs.rows}
       server={runs.server}

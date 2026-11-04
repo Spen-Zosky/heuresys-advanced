@@ -131,6 +131,7 @@ export default function BlueprintVariantDetailPage() {
             <EntityTable<BlueprintProcess>
               isLoading={processes.query.isLoading}
               isError={processes.query.isError}
+              error={processes.query.error}
               rows={processes.rows}
               server={processes.server}
               rowKey={(p) => p.blueprintProcessId}
@@ -163,6 +164,7 @@ export default function BlueprintVariantDetailPage() {
             <EntityTable<BlueprintActivation>
               isLoading={activations.query.isLoading}
               isError={activations.query.isError}
+              error={activations.query.error}
               rows={activations.rows}
               server={activations.server}
               rowKey={(a) => a.blueprintActivationId}
@@ -187,6 +189,7 @@ export default function BlueprintVariantDetailPage() {
             <EntityTable<LinkedDoc>
               isLoading={documentation.isLoading}
               isError={documentation.isError}
+              error={documentation.error}
               rows={documentation.data?.items ?? []}
               rowKey={(d) => d.linkId}
               rowTestId="blueprint-doc-row"

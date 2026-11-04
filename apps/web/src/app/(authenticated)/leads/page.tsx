@@ -165,6 +165,7 @@ export default function LeadsPage() {
       <EntityTable<LeadResponse>
         isLoading={leads.isLoading}
         isError={leads.isError}
+        error={leads.error}
         errorMessage={t("leads.errorMessage")}
         rows={data?.items ?? []}
         rowKey={(r) => r.leadId}

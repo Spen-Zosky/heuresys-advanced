@@ -106,6 +106,7 @@ export default function AdvisorPage() {
       <EntityTable<AdvisorSuggestion>
         isLoading={advisor.isLoading}
         isError={advisor.isError}
+        error={advisor.error}
         errorMessage={t("advisor.errorMessage")}
         rows={data?.items ?? []}
         rowKey={(r) => `${r.ruleId}-${r.subjectId}`}

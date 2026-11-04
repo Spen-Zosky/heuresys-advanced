@@ -200,6 +200,7 @@ export function LearningPathsPanel() {
           <EntityTable<LearningPath>
             isLoading={paths.isLoading}
             isError={paths.isError}
+            error={paths.error}
             errorMessage={t("learning.paths.loadError")}
             rows={paths.data?.items ?? []}
             rowKey={(p) => p.learningPathId}

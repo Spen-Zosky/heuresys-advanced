@@ -57,6 +57,7 @@ export default function GoalsPage() {
         count={goals.query.data ? t("goals.count", { count: goals.total }) : undefined}
         isLoading={goals.query.isLoading}
         isError={goals.query.isError}
+        error={goals.query.error}
         errorMessage={t("goals.errorMessage")}
         rows={goals.rows}
         server={goals.server}

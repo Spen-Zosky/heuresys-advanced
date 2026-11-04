@@ -482,6 +482,7 @@ export default function CompensationIntelligencePage() {
       <EntityTable<RewardGate>
         isLoading={gates.query.isLoading}
         isError={gates.query.isError}
+        error={gates.query.error}
         errorTestId="compensation-error"
         errorMessage={t("compensation.error")}
         rows={gates.rows}
@@ -501,6 +502,7 @@ export default function CompensationIntelligencePage() {
         <EntityTable<VariablePayCalculation>
           isLoading={variablePay.query.isLoading}
           isError={variablePay.query.isError}
+          error={variablePay.query.error}
           errorMessage={tA("compReward.error")}
           rows={variablePay.rows}
           server={variablePay.server}
@@ -520,6 +522,7 @@ export default function CompensationIntelligencePage() {
         <EntityTable<CompensationRecommendationRow>
           isLoading={recommendations.query.isLoading}
           isError={recommendations.query.isError}
+          error={recommendations.query.error}
           errorMessage={tA("compReward.error")}
           rows={recommendations.rows}
           server={recommendations.server}
@@ -536,6 +539,7 @@ export default function CompensationIntelligencePage() {
         <EntityTable<BonusPool>
           isLoading={bonusPools.query.isLoading}
           isError={bonusPools.query.isError}
+          error={bonusPools.query.error}
           errorMessage={tA("compReward.error")}
           rows={bonusPools.rows}
           server={bonusPools.server}
@@ -552,6 +556,7 @@ export default function CompensationIntelligencePage() {
         <EntityTable<ObjectiveRewardRule>
           isLoading={objectiveRules.query.isLoading}
           isError={objectiveRules.query.isError}
+          error={objectiveRules.query.error}
           errorMessage={tA("compReward.error")}
           rows={objectiveRules.rows}
           server={objectiveRules.server}
@@ -568,6 +573,7 @@ export default function CompensationIntelligencePage() {
         <EntityTable<PositionEconomicWeight>
           isLoading={positionWeight.query.isLoading}
           isError={positionWeight.query.isError}
+          error={positionWeight.query.error}
           errorMessage={tA("compReward.error")}
           rows={positionWeight.rows}
           server={positionWeight.server}
@@ -584,6 +590,7 @@ export default function CompensationIntelligencePage() {
         <EntityTable<PayrollHandoffRecord>
           isLoading={handoffRecords.query.isLoading}
           isError={handoffRecords.query.isError}
+          error={handoffRecords.query.error}
           errorMessage={tA("compReward.error")}
           rows={handoffRecords.rows}
           server={handoffRecords.server}
@@ -603,6 +610,7 @@ export default function CompensationIntelligencePage() {
         <EntityTable<CompensationBandRow>
           isLoading={bands.isLoading}
           isError={bands.isError}
+          error={bands.error}
           errorMessage={t("compensation.bands.error")}
           rows={bands.data?.items ?? []}
           rowKey={(r) => r.compensationBandId}

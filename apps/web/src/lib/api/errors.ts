@@ -74,3 +74,15 @@ export class NetworkError extends Error {
 export function isApiError(e: unknown): e is ApiError {
   return e instanceof ApiError;
 }
+
+/**
+ * Il testo che un errore della chiamata porta gia' nella lingua della persona (con il riferimento
+ * da citare, se c'e'), oppure niente per un errore che non viene dall'API: allora la pagina usa
+ * il suo testo generico. F-4: prima le tabelle mostravano sempre «Impossibile caricare i dati.».
+ */
+export function testoPerLaPersona(error: unknown): string | undefined {
+  if (error instanceof ApiError || error instanceof NetworkError || error instanceof SessionExpiredError) {
+    return error.message;
+  }
+  return undefined;
+}

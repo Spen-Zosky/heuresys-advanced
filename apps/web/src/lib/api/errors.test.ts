@@ -8,7 +8,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import i18next from "i18next";
 import commonIt from "../../locales/it/common.json";
-import { ApiError, testoErrore } from "./errors";
+import { ApiError, testoErrore, testoPerLaPersona } from "./errors";
 
 beforeAll(async () => {
   if (!i18next.isInitialized) {
@@ -45,5 +45,16 @@ describe("S-12 — il testo dell'errore viene dal codice, poi dallo stato", () =
   it("nessun testo inglese del server arriva alla persona", () => {
     const e = new ApiError(500, { error: { code: "INTERNAL_ERROR", message: "Unexpected server error" } });
     expect(e.message).not.toMatch(/Unexpected|server error/);
+  });
+});
+
+describe("F-4 — le tabelle mostrano il testo dell'errore, non un generico «impossibile caricare»", () => {
+  it("un errore dell'API arriva alla tabella con la frase e il riferimento", () => {
+    const e = new ApiError(403, { error: { code: "FORBIDDEN", message: "Missing permission: learning:read", requestId: "req-7" } });
+    expect(testoPerLaPersona(e)).toBe("Il tuo profilo non permette questa operazione. Riferimento da citare: req-7");
+  });
+  it("un errore qualunque lascia il testo generico della pagina", () => {
+    expect(testoPerLaPersona(new Error("boom"))).toBeUndefined();
+    expect(testoPerLaPersona(null)).toBeUndefined();
   });
 });

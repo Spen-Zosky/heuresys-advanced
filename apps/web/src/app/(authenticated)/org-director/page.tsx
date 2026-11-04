@@ -182,6 +182,7 @@ export default function OrgDirectorPage() {
         <EntityTable<EssentialCapabilityItem>
           isLoading={essential.isLoading}
           isError={essential.isError}
+          error={essential.error}
           errorMessage={t("orgDirector.essential.errorMessage")}
           rows={essential.data?.items ?? []}
           rowKey={(r) => r.skillId}

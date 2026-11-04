@@ -240,6 +240,7 @@ export default function ApprovalsPage() {
         <EntityTable<ApprovalRequestListItem>
           isLoading={requests.isLoading}
           isError={requests.isError}
+          error={requests.error}
           errorMessage={t("approvals.errorMessage")}
           rows={requests.data?.items ?? []}
           rowKey={(r) => r.approvalRequestId}

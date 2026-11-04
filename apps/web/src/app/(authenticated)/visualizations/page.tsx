@@ -103,6 +103,7 @@ export default function VisualizationsPage() {
         <EntityTable<VizGraph>
           isLoading={graphs.query.isLoading}
           isError={graphs.query.isError}
+          error={graphs.query.error}
           errorMessage={t("visualizations.errorMessage")}
           rows={graphs.rows}
           server={graphs.server}

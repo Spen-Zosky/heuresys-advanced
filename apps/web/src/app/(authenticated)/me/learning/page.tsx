@@ -60,6 +60,7 @@ export default function MeLearningPage() {
       count={learning.data ? t("learning.count", { count: learning.data.total }) : undefined}
       isLoading={learning.isLoading}
       isError={learning.isError}
+      error={learning.error}
       errorMessage={t("learning.errorMessage")}
       rows={learning.data?.items ?? []}
       rowKey={(l) => l.userLearningAssignmentId}

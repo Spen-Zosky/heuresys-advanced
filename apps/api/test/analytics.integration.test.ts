@@ -268,6 +268,25 @@ describe("GET /v1/analytics/* integration", () => {
   const BANDED_JOIN = `FROM sys.sys_position_compensation_profiles pcp
     JOIN sys.sys_compensation_bands b ON b.compensation_band_id = pcp.compensation_band_id`;
 
+  // Le posizioni fuori dalle unita' di vertice (livello <= 2): cio' che vede chi non ha
+  // posizione (soglia di catena, #99 F4, ADR-0036 §5; stessa CTE di unitaEntroLivello()).
+  const SENZA_VERTICE = `
+      WITH RECURSIVE albero AS (
+        SELECT organization_unit_id AS ou, 1 AS livello
+          FROM sys.sys_organization_units
+         WHERE organization_unit_parent_id IS NULL AND organization_unit_is_active
+        UNION ALL
+        SELECT o.organization_unit_id, a.livello + 1
+          FROM sys.sys_organization_units o
+          JOIN albero a ON o.organization_unit_parent_id = a.ou
+         WHERE o.organization_unit_is_active
+      ), vertice AS (SELECT DISTINCT ou FROM albero WHERE livello <= 2)
+      SELECT count(*)::text AS n
+        ${BANDED_JOIN}
+        JOIN sys.sys_positions p ON p.position_id = pcp.position_id
+       WHERE p.position_organization_unit_id IS NULL
+          OR p.position_organization_unit_id NOT IN (SELECT ou FROM vertice)`;
+
   it("compensation: USER (employee) lacks analytics:view → 403", async () => {
     const r = await suite.app.inject({
       method: "GET",
@@ -292,30 +311,16 @@ describe("GET /v1/analytics/* integration", () => {
     // #258 (2026-09-26): platformS e' senza posizione (prima era Enzo, al vertice
     // reale) — la soglia di catena (#99 F4, ADR-0036 §5) esclude le posizioni delle
     // unita' di vertice per chi non ha posizione, stessa CTE di unitaEntroLivello().
-    const expectedProfilesTecnico = await num(`
-      WITH RECURSIVE albero AS (
-        SELECT organization_unit_id AS ou, 1 AS livello
-          FROM sys.sys_organization_units
-         WHERE organization_unit_parent_id IS NULL AND organization_unit_is_active
-        UNION ALL
-        SELECT o.organization_unit_id, a.livello + 1
-          FROM sys.sys_organization_units o
-          JOIN albero a ON o.organization_unit_parent_id = a.ou
-         WHERE o.organization_unit_is_active
-      ), vertice AS (SELECT DISTINCT ou FROM albero WHERE livello <= 2)
-      SELECT count(*)::text AS n
-        ${BANDED_JOIN}
-        JOIN sys.sys_positions p ON p.position_id = pcp.position_id
-       WHERE p.position_organization_unit_id IS NULL
-          OR p.position_organization_unit_id NOT IN (SELECT ou FROM vertice)`);
+    const expectedProfilesTecnico = await num(SENZA_VERTICE);
     expect(tecnico.totalProfiles).toBe(expectedProfilesTecnico);
     expect(tecnico.scatter).toBeUndefined();
 
-    // tenantS ha una posizione (nessuna esclusione di soglia): vede il conteggio
-    // grezzo, che e' quello che il BANDED_JOIN senza filtro produce da sempre.
-    const expectedProfilesConVertice = await num(`SELECT count(*)::text AS n ${BANDED_JOIN}`);
+    // tenantS e' governo@collaudo.invalid (L3 del piano interfacce, 2026-11-04): mandato
+    // HR senza posizione, quindi la stessa soglia di catena del mandato tecnico. Il
+    // conteggio grezzo con il vertice resta solo come limite superiore.
     const body = await getJson<CompensationBody>("/v1/analytics/compensation", tenantS);
-    expect(body.totalProfiles).toBe(expectedProfilesConVertice);
+    expect(body.totalProfiles).toBe(await num(SENZA_VERTICE));
+    expect(body.totalProfiles).toBeLessThanOrEqual(await num(`SELECT count(*)::text AS n ${BANDED_JOIN}`));
     // Restringere una volta sola, e con un'asserzione: se il mandato HR NON
     // ricevesse questi campi, il test deve dirlo qui invece di morire piu' sotto
     // con un errore di tipo che sembrerebbe un difetto della prova.

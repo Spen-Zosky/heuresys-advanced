@@ -37,6 +37,24 @@
 -- ============================================================================
 BEGIN;
 
+-- ── 0. UN SOLO CODICE PER CRUSCOTTO (F-9, piano interfacce, emendato il 2026-11-04) ──
+-- Le voci di menu nascevano con codice e route in italiano (`dashboard-azienda`,
+-- `/dashboard/azienda`) mentre la famiglia si chiama `company`: ora codice di voce,
+-- route e codice di famiglia dicono la stessa parola. Si rinomina PRIMA della fotografia
+-- qui sotto, cosi' la post-condizione 4 confronta lo stato gia' rinominato; l'id della
+-- riga non cambia, quindi traduzioni, classi di dato e aggancio restano dove sono.
+-- Una sola volta per riga: se la voce col codice nuovo esiste gia' non si tocca niente.
+UPDATE sys.sys_ui_interfaces i
+   SET ui_interface_code = v.nuovo, ui_interface_route = v.rotta, updated_at = now()
+  FROM (VALUES
+    ('dashboard-azienda',        'dashboard-company', '/dashboard/company'),
+    ('dashboard-processi',       'dashboard-process', '/dashboard/process'),
+    ('dashboard-organizzazione', 'dashboard-org',     '/dashboard/org'),
+    ('dashboard-filiale',        'dashboard-branch',  '/dashboard/branch')
+  ) AS v(vecchio, nuovo, rotta)
+ WHERE i.ui_interface_code = v.vecchio
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_ui_interfaces x WHERE x.ui_interface_code = v.nuovo);
+
 -- Cio' che NON deve cambiare, letto PRIMA: nessuna voce di menu preesistente si sposta.
 CREATE TEMP TABLE _menu_prima ON COMMIT DROP AS
 SELECT ui_interface_code AS codice, ui_interface_sidebar_group AS gruppo,
@@ -50,13 +68,13 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_required_resource, ui_interface_required_action,
    ui_interface_requires_admin, ui_interface_order, ui_interface_is_active)
 VALUES
-  ('dashboard-azienda',       'Cruscotto Azienda',             '/dashboard/azienda',
+  ('dashboard-company',       'Cruscotto Azienda',             '/dashboard/company',
    'Building2',   'overview', 'OVERVIEW', 'dashboard_company',  'view', true, 12, true),
-  ('dashboard-processi',      'Cruscotto Processi',            '/dashboard/processi',
+  ('dashboard-process',       'Cruscotto Processi',            '/dashboard/process',
    'GitBranch',   'overview', 'OVERVIEW', 'dashboard_process',  'view', true, 13, true),
-  ('dashboard-organizzazione','Cruscotto Organizzazione',      '/dashboard/organizzazione',
+  ('dashboard-org',           'Cruscotto Organizzazione',      '/dashboard/org',
    'Network',     'overview', 'OVERVIEW', 'dashboard_org',      'view', true, 14, true),
-  ('dashboard-filiale',       'Cruscotto Filiale',             '/dashboard/filiale',
+  ('dashboard-branch',        'Cruscotto Filiale',             '/dashboard/branch',
    'Layers',      'overview', 'OVERVIEW', 'dashboard_branch',   'view', true, 15, true),
   ('dashboard-hr',            'Cruscotto HR Management',       '/dashboard/hr',
    'Users',       'overview', 'OVERVIEW', 'dashboard_hr',       'view', true, 16, true),
@@ -73,10 +91,10 @@ INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, loca
 SELECT 'sys_ui_interfaces', i.ui_interface_id, 'ui_interface_label', 'en', v.en, 'MANUAL'
   FROM sys.sys_ui_interfaces i
   JOIN (VALUES
-    ('dashboard-azienda',        'Company dashboard'),
-    ('dashboard-processi',       'Processes dashboard'),
-    ('dashboard-organizzazione', 'Organization dashboard'),
-    ('dashboard-filiale',        'Branch dashboard'),
+    ('dashboard-company',        'Company dashboard'),
+    ('dashboard-process',        'Processes dashboard'),
+    ('dashboard-org',            'Organization dashboard'),
+    ('dashboard-branch',         'Branch dashboard'),
     ('dashboard-hr',             'HR management dashboard'),
     ('dashboard-platform',       'Platform management dashboard'),
     ('dashboard-tenant',         'Tenant management dashboard')
@@ -195,8 +213,8 @@ BEGIN
   SELECT count(*) INTO n
     FROM sys.sys_ui_interface_data_classes dc
     JOIN sys.sys_ui_interfaces i ON i.ui_interface_id = dc.ui_interface_id
-   WHERE i.ui_interface_code IN ('dashboard-azienda','dashboard-processi','dashboard-organizzazione',
-                                 'dashboard-filiale','dashboard-hr','dashboard-platform',
+   WHERE i.ui_interface_code IN ('dashboard-company','dashboard-process','dashboard-org',
+                                 'dashboard-branch','dashboard-hr','dashboard-platform',
                                  'dashboard-tenant');
   IF n <> 15 THEN
     RAISE EXCEPTION '000326: le sette famiglie dichiarano % classi invece di 15', n;
@@ -211,6 +229,23 @@ BEGIN
    WHERE i.ui_interface_code LIKE 'dashboard-%';
   IF n <> 7 THEN
     RAISE EXCEPTION '000326: attese 7 etichette tradotte, trovate %', n;
+  END IF;
+
+  -- 9. F-9: un solo codice. Ogni famiglia con pagina propria ha route `/dashboard/<codice>`
+  --    e la sua voce di menu si chiama `dashboard-<codice>`; nessun codice italiano resta.
+  SELECT string_agg(d.dashboard_code, ', ') INTO v_mancanti
+    FROM sys.sys_dashboards d
+    LEFT JOIN sys.sys_ui_interfaces i ON i.ui_interface_id = d.dashboard_ui_interface_id
+   WHERE d.dashboard_route LIKE '/dashboard/%'
+     AND (d.dashboard_route <> '/dashboard/' || d.dashboard_code
+          OR i.ui_interface_code IS DISTINCT FROM 'dashboard-' || d.dashboard_code);
+  IF v_mancanti IS NOT NULL THEN
+    RAISE EXCEPTION '000326: famiglie con codice di menu o route diversi dal codice: %', v_mancanti;
+  END IF;
+  SELECT count(*) INTO n FROM sys.sys_ui_interfaces
+   WHERE ui_interface_code IN ('dashboard-azienda','dashboard-processi','dashboard-organizzazione','dashboard-filiale');
+  IF n <> 0 THEN
+    RAISE EXCEPTION '000326: % voci di menu con il codice italiano sopravvissute', n;
   END IF;
 END $$;
 

@@ -101,10 +101,10 @@ for (const persona of PERSONE) {
       const offerte = new Set(conPaginaPropria(catalogo).map((d) => d.route));
       // Tutte le route che ESISTONO nel prodotto, meno quelle che questa persona ha.
       const TUTTE = [
-        "/dashboard/azienda",
-        "/dashboard/processi",
-        "/dashboard/organizzazione",
-        "/dashboard/filiale",
+        "/dashboard/company",
+        "/dashboard/process",
+        "/dashboard/org",
+        "/dashboard/branch",
         "/dashboard/hr",
         "/dashboard/platform",
         "/dashboard/tenant",

@@ -77,6 +77,31 @@ describe("mandato K, R-2 — DPO (nucleo GDPR, D3=A)", () => {
     expect(r.statusCode).toBe(403);
   });
 
+  it("S-18 — la pulizia dei dati scaduti e' solo della piattaforma: il permesso lo dice prima del servizio", async () => {
+    // Scelta di Enzo del 2026-11-04 («Solo la piattaforma»), migrazione 000471. Prima il DPO
+    // aveva il permesso e riceveva il 403 PLATFORM_ONLY dal servizio: il permesso mentiva.
+    const key = readCollaudoKey();
+    const dpo = await login(suite, DPO_EMAIL, deriveCollaudoPassword(key, DPO_EMAIL));
+    const r = await suite.app.inject({
+      method: "POST",
+      url: "/v1/gdpr/retention/run",
+      headers: headers(dpo),
+      payload: { dryRun: true },
+    });
+    expect(r.statusCode).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
+
+    const titolari = await pool.query<{ ruolo: string }>(
+      `SELECT r.auth_role_code AS ruolo
+         FROM sys.sys_auth_role_permissions rp
+         JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+         JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+        WHERE p.auth_permission_code = 'gdpr:retention' AND rp.revoked_at IS NULL
+        ORDER BY 1`,
+    );
+    expect(titolari.rows.map((x) => x.ruolo)).toEqual(["PLATFORM_ADMIN"]);
+  });
+
   it("DPO su /v1/gdpr/* → 200 (data-map, export)", async () => {
     const key = readCollaudoKey();
     const dpo = await login(suite, DPO_EMAIL, deriveCollaudoPassword(key, DPO_EMAIL));

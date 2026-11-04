@@ -40,7 +40,10 @@ COMMENT ON TABLE sys.sys_ritiri_ammessi IS
   '000420 (mandato K, R-1, guardia G-D2) — l''unica eccezione ammessa a D2 (HRMS_MANAGER resta plenipotenziario): un ritiro di permesso a uno dei 14 ruoli preesistenti al mandato K deve avere una riga qui, o la vista v_permessi_ritirati_a_ruoli_preesistenti si accende.';
 
 INSERT INTO sys.sys_ritiri_ammessi (role_code, permission_code, voce)
-VALUES ('HRMS_MANAGER', 'gdpr:erase', 'R-2')
+VALUES ('HRMS_MANAGER', 'gdpr:erase', 'R-2'),
+       -- S-18 (2026-11-04): seconda eccezione, decisa da Enzo sulla scheda «Chi puo' lanciare
+       -- la pulizia dei dati scaduti?» -> «Solo la piattaforma». Il ritiro e' in 000471.
+       ('HRMS_MANAGER', 'gdpr:retention', 'S-18')
 ON CONFLICT (role_code, permission_code) DO NOTHING;
 
 -- I 14 ruoli che esistevano ALLA CHIUSURA di F0.3 (baseline del mandato K, misurata
@@ -93,7 +96,7 @@ BEGIN
   IF n_col <> 1 THEN RAISE EXCEPTION '000420: colonna revoked_at non trovata'; END IF;
 
   SELECT count(*) INTO n_ritiri FROM sys.sys_ritiri_ammessi;
-  IF n_ritiri <> 1 THEN RAISE EXCEPTION '000420: sys_ritiri_ammessi ha % righe, attesa 1', n_ritiri; END IF;
+  IF n_ritiri <> 2 THEN RAISE EXCEPTION '000420: sys_ritiri_ammessi ha % righe, attese 2 (R-2, S-18)', n_ritiri; END IF;
 
   SELECT count(*) INTO n_guardia FROM sys.v_permessi_ritirati_a_ruoli_preesistenti;
   IF n_guardia <> 0 THEN RAISE EXCEPTION '000420: guardia G-D2 nasce con % righe, attese 0', n_guardia; END IF;

@@ -116,7 +116,9 @@ INSERT INTO _ta_allowlist(code) VALUES
     ('gdpr:export'),
     ('gdpr:export:self'),
     ('gdpr:read'),
-    ('gdpr:retention'),
+    -- ('gdpr:retention') tolto il 2026-11-04 (S-18, scelta di Enzo «solo la piattaforma»): la
+    -- pulizia dei dati scaduti tocca tutta la piattaforma e il servizio la nega gia' con
+    -- PLATFORM_ONLY a chiunque non sia PLATFORM_ADMIN. Traccia in 000471.
     ('goal:create'),
     ('goal:delete'),
     ('goal:read'),

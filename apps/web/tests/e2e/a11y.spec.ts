@@ -27,6 +27,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { test, expect, type Page, type TestInfo } from "@playwright/test";
 import { storageStateFor } from "./fixtures";
+import { dividi, PARTI_A11Y_TUTTE, titoloParte, type PersonaA11yTutte } from "./a11y-parti";
 import AxeBuilder from "@axe-core/playwright";
 
 const AUDIT_OUT_DIR = path.resolve(__dirname, "..", "..", "test-results", "a11y-audit");
@@ -330,15 +331,19 @@ function rotteStaticheDiProdotto(): string[] {
   return out.sort();
 }
 const TUTTE_LE_ROTTE = rotteStaticheDiProdotto();
-for (const persona of ["tenantAdmin", "platformAdmin", "employee"] as const) {
+for (const persona of Object.keys(PARTI_A11Y_TUTTE) as PersonaA11yTutte[]) {
   const giaCoperte = new Set<string>(PAGES_PER_PERSONA[persona]);
-  test.describe(`a11y di tutte le pagine di prodotto come ${persona}`, () => {
-    test.use({ storageState: storageStateFor(persona) });
-    for (const route of TUTTE_LE_ROTTE.filter((r) => !giaCoperte.has(r))) {
-      test(`${route} has no critical or serious a11y violations`, async ({ page }, testInfo) => {
-        await runAxeOnRoute(page, route, testInfo, true);
-      });
-    }
+  const rotte = TUTTE_LE_ROTTE.filter((r) => !giaCoperte.has(r));
+  // Una parte per fase, ognuna con il suo re-login: vedi `a11y-parti.ts`.
+  dividi(rotte, PARTI_A11Y_TUTTE[persona]).forEach((parte, i) => {
+    test.describe(titoloParte(persona, i + 1), () => {
+      test.use({ storageState: storageStateFor(persona) });
+      for (const route of parte) {
+        test(`${route} has no critical or serious a11y violations`, async ({ page }, testInfo) => {
+          await runAxeOnRoute(page, route, testInfo, true);
+        });
+      }
+    });
   });
 }
 

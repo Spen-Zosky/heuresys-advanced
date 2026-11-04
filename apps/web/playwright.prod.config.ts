@@ -41,8 +41,9 @@
  *
  * Rate-limit note: one auth.setup pass = **6** login POSTs — sei personas, contate
  * in `auth.setup.ts`, non cinque come diceva questa riga (corretto S1068) — contro un
- * tetto di 10 ogni 5 minuti per IP. Dal lotto L7 i passaggi di setup sono SETTE (l'iniziale, uno
- * per ciascuna delle tre fasi «a11y di tutte le pagine», e i re-login dei blocchi); prima di L7 erano QUATTRO (uno iniziale piu'
+ * tetto di 10 ogni 5 minuti per IP. Dal lotto L7 i passaggi di setup sono DIECI (l'iniziale, uno
+ * per ciascuna delle sei parti «a11y di tutte le pagine», vedi tests/e2e/a11y-parti.ts, e i
+ * re-login dei blocchi); prima di L7 erano QUATTRO (uno iniziale piu'
  * tre re-login) il vincolo diventa: **due setup consecutivi non devono cadere dentro
  * la stessa finestra di 5 minuti**. Regge perche' ogni blocco dura molti minuti; se un
  * blocco diventasse rapidissimo il setto successivo prenderebbe un **429**, e il
@@ -54,6 +55,7 @@ import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 import baseConfig, { WEB_BASE_URL, WEB_PORT } from "./playwright.config";
+import { PARTI_A11Y_TUTTE, titoloParte, type PersonaA11yTutte } from "./tests/e2e/a11y-parti";
 
 const SHOWCASE_ENABLED = process.env.NEXT_PUBLIC_ENABLE_SHOWCASE === "1";
 
@@ -141,7 +143,7 @@ const matchDi = (g: string[]): RegExp[] =>
  */
 /**
  * F-6 del piano interfacce (lotto L7): il controllo di accessibilità su TUTTE le pagine di
- * prodotto, una persona per fase. Stessa spec (`a11y.spec.ts`), ma ogni persona ha il suo
+ * prodotto, a parti, ognuna in una fase sua. Stessa spec (`a11y.spec.ts`), ma ogni parte ha il suo
  * progetto e il suo re-login: le tre insieme sono più di 250 scansioni, e dentro la fase
  * `a11y-desktop` facevano scadere la sessione dei 15 minuti a metà (misurato sul banco del
  * 2026-11-04: dopo il quindicesimo minuto ogni pagina era il login). I progetti si separano
@@ -149,11 +151,18 @@ const matchDi = (g: string[]): RegExp[] =>
  * eseguono, e nessun caso compare come «saltato».
  */
 const A11Y_TUTTE = /a11y di tutte le pagine di prodotto come /;
-const PERSONE_A11Y_TUTTE = ["tenantAdmin", "platformAdmin", "employee"] as const;
+/** Le parti, persona per persona, con il titolo che le distingue (vedi `a11y-parti.ts`). */
+const PARTI_A11Y = (Object.keys(PARTI_A11Y_TUTTE) as PersonaA11yTutte[]).flatMap((persona) =>
+  Array.from({ length: PARTI_A11Y_TUTTE[persona] }, (_, i) => ({
+    nome: `${persona}-${i + 1}`,
+    titolo: titoloParte(persona, i + 1),
+  })),
+);
+const scappa = (x: string) => x.replace(/[\\^$.*+?()[\]{}|/-]/g, "\\$&");
 
 export const FASI: string[][] = [
   ["setup", "mobile-a11y", "a11y-desktop"],
-  ...PERSONE_A11Y_TUTTE.map((p) => [`setup-a11y-${p}`, `a11y-tutte-${p}`]),
+  ...PARTI_A11Y.map(({ nome }) => [`setup-a11y-${nome}`, `a11y-tutte-${nome}`]),
   ...GRUPPI.map((_, i) =>
     i === 0 ? ["setup-refresh", "chromium"] : [`setup-refresh-${i + 1}`, `chromium-${i + 1}`],
   ),
@@ -181,19 +190,19 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
       dependencies: ["setup"],
     },
-    ...PERSONE_A11Y_TUTTE.flatMap((p) => [
+    ...PARTI_A11Y.flatMap(({ nome, titolo }) => [
       {
-        name: `setup-a11y-${p}`,
+        name: `setup-a11y-${nome}`,
         testMatch: /auth\.setup\.ts/,
         use: { ...devices["Desktop Chrome"] },
       },
       {
-        name: `a11y-tutte-${p}`,
+        name: `a11y-tutte-${nome}`,
         testMatch: /[\\/]a11y\.spec\.ts$/,
-        // Il titolo completo è «describe test»: la persona è seguita da uno spazio.
-        grep: new RegExp(`${A11Y_TUTTE.source}${p} `),
+        // Il titolo completo è «describe test»: la parte è seguita da uno spazio.
+        grep: new RegExp(`${scappa(titolo)} `),
         use: { ...devices["Desktop Chrome"] },
-        dependencies: [`setup-a11y-${p}`],
+        dependencies: [`setup-a11y-${nome}`],
       },
     ]),
     /* ⚠ I RE-LOGIN NON DIPENDONO PIU' DAL BLOCCO CHE LI PRECEDE, e la ragione e' un

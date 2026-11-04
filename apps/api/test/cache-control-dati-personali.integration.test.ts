@@ -8,6 +8,8 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import type { FastifyInstance } from "fastify";
+import { buildApp } from "../src/app.js";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { closePool } from "../src/db/client.js";
@@ -40,5 +42,42 @@ describe("cache-control sui dati personali (F-7)", () => {
     const r = await suite.app.inject({ method: "GET", url: "/v1/me/profile" });
     expect(r.statusCode).toBe(401);
     expect(r.headers["cache-control"]).toBe("no-store");
+  });
+});
+
+/**
+ * La prima stesura scriveva l'intestazione in un `onSend` asincrono, e su ogni risposta
+ * d'errore Fastify scriveva le intestazioni due volte: due avvisi «Reply was already sent»
+ * (ERR_HTTP_HEADERS_SENT) per ogni 401, 403 o 409. Le risposte arrivavano giuste, quindi
+ * nessuna prova se ne accorgeva; sul banco erano 480 righe di registro in un giro della suite.
+ * Qui si contano gli avvisi della richiesta: zero, anche quando la risposta è un rifiuto.
+ */
+describe("cache-control senza risposte scritte due volte (F-7)", () => {
+  let app: FastifyInstance;
+  const avvisi: string[] = [];
+
+  beforeAll(async () => {
+    app = await buildApp();
+    // Il registro della richiesta è lo stesso della risposta (`reply.log`): si osserva da qui.
+    app.addHook("onRequest", async (req) => {
+      const warn = req.log.warn.bind(req.log);
+      req.log.warn = ((...a: unknown[]) => {
+        avvisi.push(String(a[a.length - 1]));
+        return (warn as (...x: unknown[]) => void)(...a);
+      }) as typeof req.log.warn;
+    });
+    await app.ready();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it("un rifiuto (403, CSRF mancante) porta no-store e non lascia avvisi", async () => {
+    avvisi.length = 0;
+    const r = await app.inject({ method: "POST", url: "/v1/auth/refresh" });
+    expect(r.statusCode).toBe(403);
+    expect(r.headers["cache-control"]).toBe("no-store");
+    expect(avvisi.filter((m) => /already sent/i.test(m))).toEqual([]);
   });
 });

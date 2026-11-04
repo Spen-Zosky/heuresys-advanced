@@ -59,6 +59,8 @@ export const ContentVersionSchema = z.object({
   body: z.string().nullable(),
   bodyFormat: ContentBodyFormatEnum,
   authorUserId: z.uuid().nullable(),
+  /** F-3 (piano interfacce, L6): il nome dell'autore, perché la pagina non mostri l'identificativo. */
+  authorName: z.string().nullable().optional(),
   changeNote: z.string().nullable(),
   metadata: META,
   createdAt: z.iso.datetime(),

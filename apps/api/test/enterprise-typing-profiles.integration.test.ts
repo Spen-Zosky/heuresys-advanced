@@ -153,6 +153,18 @@ describe("/v1/enterprise-typing-profiles/* integration", () => {
     expect(back.tenantId).toBe(throwawayTenantId);
   });
 
+  it("F-3: LIST ?tenantId= as PLATFORM_ADMIN returns only that tenant's profile", async () => {
+    expect(createdProfileId).not.toBeNull();
+    const r = await suite.app.inject({
+      method: "GET", url: `/v1/enterprise-typing-profiles?tenantId=${throwawayTenantId}`,
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as ListBody;
+    expect(body.total).toBe(1);
+    expect(body.items.map((p) => p.enterpriseTypingProfileId)).toEqual([createdProfileId]);
+  });
+
   it("DELETE /:id (throwaway profile) as PLATFORM_ADMIN → 204, then GET → 404", async () => {
     // Guard: only meaningful if the upsert test above produced a row.
     expect(createdProfileId).not.toBeNull();

@@ -32,6 +32,7 @@ import { isApiError } from "@/lib/api/errors";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -44,6 +45,7 @@ interface UpdateFormValues {
 
 export default function WhistleblowingConsolePage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -119,10 +121,10 @@ export default function WhistleblowingConsolePage() {
       { header: t("whistleblowingConsole.columns.subject"), cell: (r) => <span className="text-foreground">{r.subject}</span> },
       {
         header: t("whistleblowingConsole.columns.submittedAt"),
-        cell: (r) => <span className="text-xs text-muted-foreground">{r.submittedAt.slice(0, 10)}</span>,
+        cell: (r) => <span className="text-xs text-muted-foreground">{fmt.data(r.submittedAt)}</span>,
       },
     ],
-    [t],
+    [t, fmt],
   );
 
   // GATE CLIENT — il commento in testa a questo file dichiarava da sempre che la console

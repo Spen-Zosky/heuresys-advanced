@@ -8,6 +8,7 @@ import type { OccupationMatch, PositionMatch, JobRoleMatch } from "@heuresys/sha
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { SemanticSearchPanel } from "@/components/semantic-search-panel";
+import { useFormat } from "@/lib/format";
 
 /**
  * Mirrors the *ListResponseSchema envelopes in @heuresys/shared. Those schemas'
@@ -39,6 +40,7 @@ function escoUriTail(uri: string): string {
 
 export default function MeMatchingPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
 
   const occupations = useQuery({
     queryKey: ["me", "matching", "occupations"],
@@ -69,11 +71,11 @@ export default function MeMatchingPage() {
         header: t("matching.colScore"),
         align: "right",
         cell: (m) => (
-          <span className="font-medium tabular-nums text-foreground">{`${(m.score * 100).toFixed(0)}%`}</span>
+          <span className="font-medium tabular-nums text-foreground">{`${fmt.percento(m.score, "0-1", 0)}`}</span>
         ),
       },
     ],
-    [t],
+    [t, fmt],
   );
 
   const posColumns = useMemo<DataColumn<PositionMatch>[]>(
@@ -88,11 +90,11 @@ export default function MeMatchingPage() {
         header: t("matching.positions.colScore"),
         align: "right",
         cell: (p) => (
-          <span className="font-medium tabular-nums text-foreground">{`${(p.score * 100).toFixed(0)}%`}</span>
+          <span className="font-medium tabular-nums text-foreground">{`${fmt.percento(p.score, "0-1", 0)}`}</span>
         ),
       },
     ],
-    [t],
+    [t, fmt],
   );
 
   const roleColumns = useMemo<DataColumn<JobRoleMatch>[]>(
@@ -111,11 +113,11 @@ export default function MeMatchingPage() {
         header: t("matching.jobRoles.colScore"),
         align: "right",
         cell: (jr) => (
-          <span className="font-medium tabular-nums text-foreground">{`${(jr.score * 100).toFixed(0)}%`}</span>
+          <span className="font-medium tabular-nums text-foreground">{`${fmt.percento(jr.score, "0-1", 0)}`}</span>
         ),
       },
     ],
-    [t],
+    [t, fmt],
   );
 
   const noOccEvidence = occupations.data?.evidenceCount === 0;

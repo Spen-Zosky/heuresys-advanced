@@ -332,6 +332,9 @@
       },
       "dash": "—",
       "wizardLink": "Open Enterprise Typing wizard →",
+      "typingAssessed": "Assessed on {{date}}",
+      "typingRegulatory": "Regulatory intensity: {{value}}",
+      "typingEmployees": "{{n}} employees",
       "typingEmpty": "No typing profile registered.",
       "usersHint": "The full user list is managed on its dedicated page.",
       "usersLink": "Open /users →"

@@ -39,6 +39,7 @@ import {
 import { apiFetch } from "../../../../lib/api/fetch";
 import { isApiError } from "../../../../lib/api/errors";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 // Stable no-op subscribe for useSyncExternalStore reads of immutable browser capabilities.
 const subscribeNever = () => () => {};
@@ -53,6 +54,7 @@ type VerifyCodeFormValues = z.infer<ReturnType<typeof buildVerifyCodeSchema>>;
 
 export default function MeSecurityPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
@@ -480,7 +482,7 @@ export default function MeSecurityPage() {
                     </div>
                     <div className="font-mono text-xs text-muted-foreground">
                       {f.verified ? t("security.verified") : t("security.pendingVerification")} ·{" "}
-                      {t("security.createdAt", { date: new Date(f.createdAt).toLocaleDateString() })}
+                      {t("security.createdAt", { date: fmt.data(f.createdAt) })}
                     </div>
                   </div>
                   <Button
@@ -894,7 +896,7 @@ export default function MeSecurityPage() {
                           {isCurrent && <Badge variant="outline" className="border-success text-success" data-testid="me-security-session-current-badge">{t("security.sessions.thisDevice")}</Badge>}
                         </div>
                         <div className="font-mono text-xs text-muted-foreground">
-                          {(s.userAgent ?? t("security.sessions.unknownDevice")).slice(0, 60)} · {t("security.sessions.lastSeen", { date: new Date(s.lastIssuedAt).toLocaleString() })}
+                          {(s.userAgent ?? t("security.sessions.unknownDevice")).slice(0, 60)} · {t("security.sessions.lastSeen", { date: fmt.dataOra(s.lastIssuedAt) })}
                         </div>
                       </div>
                       <Button

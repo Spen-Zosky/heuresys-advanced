@@ -11,6 +11,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../../_charts-client";
+import { useFormat } from "@/lib/format";
 
 /** Bar of avgRating per rated question (rating/nps only). */
 function ratingsBarOption(questions: EngagementQuestionResult[], label: string) {
@@ -26,6 +27,7 @@ function ratingsBarOption(questions: EngagementQuestionResult[], label: string) 
 
 export default function EngagementResultsPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const params = useParams<{ surveyId: string }>();
   const surveyId = params.surveyId;
@@ -40,11 +42,11 @@ export default function EngagementResultsPage() {
     () => [
       { header: t("engagement.results.question"), cell: (q) => <span className="font-medium text-foreground">{q.text}</span> },
       { header: t("engagement.results.type"), cell: (q) => <span className="text-muted-foreground">{enumLabel("questionType", q.type)}</span> },
-      { header: t("engagement.results.category"), cell: (q) => <span className="text-muted-foreground">{q.category ?? "—"}</span> },
+      { header: t("engagement.results.category"), cell: (q) => <span className="text-muted-foreground">{enumLabel("surveyCategory", q.category)}</span> },
       { header: t("engagement.results.responses"), cell: (q) => <span className="text-muted-foreground">{q.responseCount}</span> },
-      { header: t("engagement.results.avg"), cell: (q) => <span className="text-muted-foreground">{q.avgRating != null ? q.avgRating.toFixed(2) : "—"}</span> },
+      { header: t("engagement.results.avg"), cell: (q) => <span className="text-muted-foreground">{q.avgRating != null ? fmt.numeroFisso(q.avgRating, 2) : "—"}</span> },
     ],
-    [t, enumLabel],
+    [t, enumLabel, fmt],
   );
 
   const d = results.data;

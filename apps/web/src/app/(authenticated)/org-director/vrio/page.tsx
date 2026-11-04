@@ -7,6 +7,7 @@ import type { VrioCapabilityItem, VrioScorecard, VrioVerdict } from "@heuresys/s
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { useFormat } from "@/lib/format";
 
 // #56 F2 — VRIO scorecard. Board-ready reading of the capabilities the organization
 // actually uses (skill groups in play), classified with Barney's lattice over four
@@ -33,16 +34,15 @@ const VERDICT_ORDER: VrioVerdict[] = [
   "CAPABILITY_GAP",
 ];
 
-const pct = (v: number): string => `${Math.round(v * 100)}%`;
-
 /** A dimension cell: the percentile, with the raw measure and the threshold verdict beneath. */
 function DimensionCell({ percentile, raw, present }: { percentile: number; raw: number; present: boolean }) {
+  const fmt = useFormat();
   return (
     <span className="inline-flex flex-col items-end leading-tight">
       <span className={present ? "font-semibold tabular-nums text-foreground" : "tabular-nums text-muted-foreground"}>
-        {pct(percentile)}
+        {fmt.percento(percentile, "0-1")}
       </span>
-      <span className="tabular-nums text-[10px] text-muted-foreground">{raw.toFixed(2)}</span>
+      <span className="tabular-nums text-[10px] text-muted-foreground">{fmt.numeroFisso(raw, 2)}</span>
     </span>
   );
 }

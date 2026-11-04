@@ -31,16 +31,12 @@ import { FieldGrid } from "@/components/detail-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 import { IdentityEditor } from "./_components/identity-editor";
 import { RolesEditor } from "./_components/roles-editor";
 
 /* --- formattazione: mai una data ISO o un numero nudo davanti a una persona --- */
-const fmtDate = (v: string | null | undefined): string =>
-  v ? new Date(v).toLocaleDateString() : "—";
-const fmtMoney = (v: number | string | null | undefined): string =>
-  v === null || v === undefined || v === ""
-    ? "—"
-    : new Intl.NumberFormat(undefined, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Number(v));
+// F-1 (piano interfacce, 2026-11-04): la forma comune di `@/lib/format`, nella lingua del portale.
 
 /** Una sezione della scheda: mostra il conteggio, e sparisce se non ha nulla da dire. */
 function Section({
@@ -90,6 +86,7 @@ function MiniTable({ head, rows, empty }: { head: string[]; rows: ReactNode[][];
 
 export default function UserDetailPage() {
   const { t } = useTranslation("admin");
+  const f = useFormat();
   const enumLabel = useEnumLabel();
   const params = useParams<{ userId: string }>();
   const userId = params.userId;
@@ -158,7 +155,7 @@ export default function UserDetailPage() {
               { label: s("position"), value: primary?.positionTitle ?? "—", testId: "field-position" },
               { label: s("orgUnit"), value: org.orgUnit ?? org.department ?? "—", testId: "field-orgunit" },
               { label: s("manager"), value: org.managerName ?? "—" },
-              { label: s("hiredOn"), value: fmtDate(emp?.hireDate), testId: "field-hired" },
+              { label: s("hiredOn"), value: f.data(emp?.hireDate), testId: "field-hired" },
               { label: s("ccnlLevel"), value: contract?.ccnlLevel ?? "—" },
               { label: s("contractType"), value: contract?.type ? enumLabel("contractType", contract.type) : "—" },
             ]}
@@ -173,8 +170,8 @@ export default function UserDetailPage() {
           rows={d.positions.map((x) => [
             x.positionTitle,
             x.isPrimary ? s("primary") : s("secondary"),
-            fmtDate(x.startDate),
-            fmtDate(x.endDate),
+            f.data(x.startDate),
+            f.data(x.endDate),
             <EnumStatusBadge key="s" domain="assignmentStatus" value={x.status} />,
           ])}
         />
@@ -187,9 +184,9 @@ export default function UserDetailPage() {
           rows={d.contracts.map((c, i) => [
             c.type ? enumLabel("contractType", c.type) : "—",
             c.ccnlLevel ?? "—",
-            isMasked(c, "grossAnnualSalary") ? <MaskedCell key={`m${i}`} /> : fmtMoney(c.grossAnnualSalary),
+            isMasked(c, "grossAnnualSalary") ? <MaskedCell key={`m${i}`} /> : f.importo(c.grossAnnualSalary, c.currency, 0),
             c.workHoursWeekly ?? "—",
-            fmtDate(c.startDate),
+            f.data(c.startDate),
             <EnumStatusBadge key={i} domain="contractStatus" value={c.status ?? ""} />,
           ])}
         />
@@ -201,9 +198,9 @@ export default function UserDetailPage() {
           empty={s("empty.paySlips")}
           rows={d.paySlips.slice(0, 12).map((x) => [
             x.period,
-            fmtMoney(x.grossPay),
-            fmtMoney(x.netPay),
-            fmtDate(x.paymentDate),
+            f.importo(x.grossPay, x.currency),
+            f.importo(x.netPay, x.currency),
+            f.data(x.paymentDate),
           ])}
         />
         {d.paySlips.length > 12 && (
@@ -216,7 +213,7 @@ export default function UserDetailPage() {
           head={[s("col.period"), s("col.type"), s("col.overall"), s("col.box"), s("col.status")]}
           empty={s("empty.performance")}
           rows={d.performance.map((x, i) => [
-            `${fmtDate(x.periodStart)} – ${fmtDate(x.periodEnd)}`,
+            `${f.data(x.periodStart)} – ${f.data(x.periodEnd)}`,
             x.type ?? "—",
             x.overallRating ?? "—",
             x.performanceBox ?? "—",
@@ -247,7 +244,7 @@ export default function UserDetailPage() {
             x.skillName,
             x.declaredProficiency,
             x.source,
-            fmtDate(x.assessedAt),
+            f.data(x.assessedAt),
           ])}
         />
       </Section>
@@ -260,7 +257,7 @@ export default function UserDetailPage() {
             x.title ?? x.moduleTitle ?? x.pathName ?? "—",
             x.isMandatory ? s("yes") : s("no"),
             <EnumStatusBadge key={i} domain="learningStatus" value={x.status ?? ""} />,
-            fmtDate(x.enrolledAt),
+            f.data(x.enrolledAt),
           ])}
         />
         {d.learning.length > 12 && (
@@ -275,8 +272,8 @@ export default function UserDetailPage() {
           rows={d.certifications.map((x) => [
             x.name,
             x.issuer,
-            fmtDate(x.issuedDate),
-            fmtDate(x.expiresDate),
+            f.data(x.issuedDate),
+            f.data(x.expiresDate),
           ])}
         />
       </Section>
@@ -287,8 +284,8 @@ export default function UserDetailPage() {
           empty={s("empty.goals")}
           rows={d.goals.slice(0, 12).map((x, i) => [
             x.title,
-            x.progressPercent !== null && x.progressPercent !== undefined ? `${x.progressPercent}%` : "—",
-            fmtDate(x.dueDate),
+            f.percento(x.progressPercent, "0-100"),
+            f.data(x.dueDate),
             <EnumStatusBadge key={i} domain="goalStatus" value={x.status ?? ""} />,
           ])}
         />

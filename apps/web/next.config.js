@@ -51,6 +51,21 @@ module.exports = {
   // ogni login «Impossibile contattare il server», 12/12 `auth.setup` rossi con l'API viva su
   // :3001. La `PORT` che interessa e' quella dell'API, e sta nel `.env` di radice: si legge DA
   // LI', non dall'ambiente del processo, che `next` ha gia' riscritto.
+  // F-9 (piano interfacce, L6, 2026-11-04): le route dei cruscotti sono ora il codice della
+  // famiglia (`/dashboard/company`). Le vecchie route in italiano restano raggiungibili per
+  // chi le ha nei segnalibri, e portano alla nuova; il menu e l'API non le usano piu'.
+  async redirects() {
+    return [
+      ["azienda", "company"],
+      ["processi", "process"],
+      ["organizzazione", "org"],
+      ["filiale", "branch"],
+    ].map(([vecchia, nuova]) => ({
+      source: `/dashboard/${vecchia}`,
+      destination: `/dashboard/${nuova}`,
+      permanent: false,
+    }));
+  },
   async rewrites() {
     const esplicita = process.env.NEXT_PUBLIC_API_PROXY_BASE_URL;
     const daPort = portaApiDalDotenv();

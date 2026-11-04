@@ -10,6 +10,7 @@ import { ORG_HEALTH_DIMENSIONS } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { useFormat, type Formati } from "@/lib/format";
 
 // #57 F3 — organizational health index. Everything here comes from GET /v1/org-health,
 // computed live over engagement, goals, flight-risk, attendance, reviews and capability
@@ -39,7 +40,7 @@ const STANDING_TONE: Record<OrgHealthStanding, "info" | "success" | "warning" | 
 
 const STATUS_ORDER: OrgHealthStatus[] = ["STRONG", "HEALTHY", "WATCH", "CRITICAL", "INSUFFICIENT_DATA"];
 
-function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<OrgHealthUnit>[] {
+function buildColumns(t: ReturnType<typeof useTranslation>["t"], fmt: Formati): DataColumn<OrgHealthUnit>[] {
   const dimensionColumns: DataColumn<OrgHealthUnit>[] = ORG_HEALTH_DIMENSIONS.map((dim: OrgHealthDimension) => ({
     header: t(`orgHealth.dims.${dim}`),
     align: "right" as const,
@@ -75,7 +76,7 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Org
       header: t("orgHealth.cols.index"), align: "right",
       cell: (r) => (
         <span className="font-semibold tabular-nums text-foreground">
-          {r.index === null ? "—" : r.index.toFixed(1)}
+          {r.index === null ? "—" : fmt.numeroFisso(r.index, 1)}
         </span>
       ),
     },
@@ -98,7 +99,7 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Org
     {
       header: t("orgHealth.cols.coverage"), align: "right",
       cell: (r) => (
-        <span className="tabular-nums text-xs text-muted-foreground">{Math.round(r.coverage * 100)}%</span>
+        <span className="tabular-nums text-xs text-muted-foreground">{fmt.percento(r.coverage, "0-1")}</span>
       ),
     },
     ...dimensionColumns,
@@ -107,13 +108,14 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Org
 
 export default function OrgHealthPage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
 
   const scorecard = useQuery({
     queryKey: ["org-health"],
     queryFn: () => apiFetch<OrgHealthScorecard>("/v1/org-health"),
   });
 
-  const columns = useMemo(() => buildColumns(t), [t]);
+  const columns = useMemo(() => buildColumns(t, fmt), [t, fmt]);
   const data = scorecard.data;
 
   return (
@@ -135,7 +137,7 @@ export default function OrgHealthPage() {
         <section data-testid="org-health-summary" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <div className="rounded-card border border-border bg-card px-4 py-3 shadow-card">
             <div data-testid="org-health-org-index" className="text-2xl font-semibold tabular-nums text-foreground">
-              {data.organizationIndex === null ? "—" : data.organizationIndex.toFixed(1)}
+              {data.organizationIndex === null ? "—" : fmt.numeroFisso(data.organizationIndex, 1)}
             </div>
             <div className="mt-1 text-xs text-muted-foreground">{t("orgHealth.organizationIndex")}</div>
           </div>
@@ -170,10 +172,10 @@ export default function OrgHealthPage() {
       <p data-testid="org-health-method" className="text-xs text-muted-foreground">
         {data && data.distribution.spread !== null
           ? t("orgHealth.method", {
-              min: data.distribution.min?.toFixed(1),
-              median: data.distribution.median?.toFixed(1),
-              max: data.distribution.max?.toFixed(1),
-              spread: data.distribution.spread.toFixed(1),
+              min: fmt.numeroFisso(data.distribution.min, 1),
+              median: fmt.numeroFisso(data.distribution.median, 1),
+              max: fmt.numeroFisso(data.distribution.max, 1),
+              spread: fmt.numeroFisso(data.distribution.spread, 1),
             })
           : t("orgHealth.methodIdle")}
       </p>

@@ -75,7 +75,7 @@ export type LoginResponse = z.infer<typeof LoginResponseSchema>;
 export const DASHBOARD_PERMISSION = "dashboard:view";
 /** V-14: il cruscotto Azienda (000316, 000326) e la sua pagina. */
 export const COMPANY_DASHBOARD_PERMISSION = "dashboard_company:view";
-export const COMPANY_DASHBOARD_ROUTE = "/dashboard/azienda";
+export const COMPANY_DASHBOARD_ROUTE = "/dashboard/company";
 
 /**
  * The landing rule, derived from grants rather than enumerated from role names:

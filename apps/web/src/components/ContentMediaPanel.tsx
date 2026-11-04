@@ -15,17 +15,14 @@ import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import type { ContentMediaItem, ListContentMediaResponse } from "@heuresys/shared";
 import { apiFetch } from "../lib/api/fetch";
+import { useFormat } from "@/lib/format";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
-function fmtSize(n: number): string {
-  if (n >= 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
-  if (n >= 1024) return `${(n / 1024).toFixed(0)} KB`;
-  return `${n} B`;
-}
 
 export function ContentMediaPanel({ documentId, canEdit }: { documentId: string; canEdit: boolean }) {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -129,7 +126,7 @@ export function ContentMediaPanel({ documentId, canEdit }: { documentId: string;
                     {m.filename}
                   </a>
                   <p className="text-xs text-muted-foreground">
-                    {m.mime} · {fmtSize(m.sizeBytes)}
+                    {m.mime} · {fmt.dimensione(m.sizeBytes)}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-2">

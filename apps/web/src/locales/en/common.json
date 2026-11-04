@@ -281,7 +281,10 @@
     },
     "perfReviewType": {
       "ANNUAL": "Annual",
-      "MID_YEAR": "Mid-year"
+      "MID_YEAR": "Mid-year",
+      "PROBATION": "End of probation",
+      "PROJECT": "Project",
+      "AD_HOC": "Ad hoc"
     },
     "perfReviewStatus": {
       "IN_PROGRESS": "In progress",
@@ -493,7 +496,8 @@
       "STUDY": "Study",
       "SABBATICAL": "Sabbatical",
       "UNPAID": "Unpaid",
-      "OTHER": "Other"
+      "OTHER": "Other",
+      "PAID_LEAVE": "Paid leave"
     },
     "whistleblowingStatus": {
       "NEW": "New",
@@ -579,6 +583,61 @@
     "tenantBlueprintStatus": {
       "ACTIVE": "Active",
       "ARCHIVED": "Archived"
+    },
+    "accrualMethod": {
+      "MONTHLY": "Monthly",
+      "QUARTERLY": "Quarterly",
+      "SEMIANNUAL": "Semiannual",
+      "ANNUAL": "Annual",
+      "PER_PAY_PERIOD": "Per pay period",
+      "LUMP_SUM": "Lump sum"
+    },
+    "vizExportFormat": {
+      "SVG": "SVG image",
+      "PDF": "PDF",
+      "PNG": "PNG image",
+      "GENERIC_JSON": "JSON data",
+      "REACT_FLOW_JSON": "Graph JSON (React Flow)",
+      "MERMAID": "Mermaid diagram"
+    },
+    "fitDimension": {
+      "SKILL": "Skills",
+      "KPI": "KPIs",
+      "LEARNING": "Learning",
+      "CERTIFICATION": "Certifications",
+      "BEHAVIORAL": "Behaviours",
+      "OVERALL": "Overall"
+    },
+    "overtimeType": {
+      "WEEKDAY": "Weekday",
+      "WEEKEND": "Weekend",
+      "NIGHT": "Night",
+      "HOLIDAY": "Holiday",
+      "EMERGENCY": "Emergency",
+      "PROJECT": "Project",
+      "ON_CALL": "On call"
+    },
+    "overtimeStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXPORTED": "Exported",
+      "PAID": "Paid",
+      "CANCELLED": "Cancelled"
+    },
+    "payrollRecipientSystem": {
+      "ZUCCHETTI_PAGHE": "Zucchetti Payroll"
+    },
+    "leadSource": {
+      "WEBSITE": "Website",
+      "INVESTOR": "Investor page",
+      "DEMO": "Demo request"
+    },
+    "regulatoryIntensity": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "EXTREME": "Extreme"
     }
   },
   "masked": "withheld for your profile",
@@ -597,6 +656,7 @@
     "code": {
       "FORBIDDEN": "Your profile does not allow this operation.",
       "CSRF_FAIL": "The page has been open too long: reload it and try again.",
+      "ORIGIN_MISMATCH": "The request comes from an address the server does not recognise: this is a service configuration problem, not your profile. Tell whoever runs the service.",
       "VALIDATION_ERROR": "The request is not valid: check the data you entered.",
       "RESPONSE_CONTRACT_VIOLATION": "The server produced a non-conforming response: the error is ours, not yours.",
       "RESULT_LIMIT_EXCEEDED": "There are too many results to show at once: narrow them with a filter, such as unit or period.",
@@ -704,5 +764,6 @@
       "emptyTitle": "No recent events",
       "emptyDesc": "The event log is empty for the current window."
     }
-  }
+  },
+  "unnamed": "unnamed"
 }

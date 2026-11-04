@@ -37,6 +37,8 @@ export const TenantBlueprintSchema = z.object({
   code: z.string().min(1).max(64),
   name: z.string().min(1).max(255),
   tenantId: z.uuid().nullable(),
+  /** F-3 (piano interfacce, L6): il nome dell'azienda, perché la pagina non mostri l'identificativo. */
+  tenantName: z.string().nullable().optional(),
   status: z.enum(["ACTIVE", "ARCHIVED"]),
   currentVersionId: z.uuid().nullable(),
   createdAt: z.iso.datetime(),

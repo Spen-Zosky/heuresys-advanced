@@ -12,6 +12,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { StatusPill } from "@/components/status-pill";
+import { useFormat, type Formati } from "@/lib/format";
 
 /**
  * #28 (S1018) — Trust Ledger page: the ingestion provenance of every imported
@@ -28,15 +29,11 @@ function toneForStatus(s: ValidationStatus): "success" | "warning" | "danger" | 
   return "neutral";
 }
 
-function pct(n: number, d: number): string {
-  return d === 0 ? "0%" : `${Math.round((n / d) * 100)}%`;
-}
-
-function buildRecordColumns(t: TFunction): DataColumn<ProvenanceRecord>[] {
+function buildRecordColumns(t: TFunction, f: Formati): DataColumn<ProvenanceRecord>[] {
   return [
     { header: t("provenance.cols.targetTable"), cell: (r) => <span className="font-mono text-xs">{r.targetTableName}</span> },
     { header: t("provenance.cols.sourceTable"), cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.sourceTable}</span> },
-    { header: t("provenance.cols.confidence"), align: "right", cell: (r) => <span className="tabular-nums">{(r.mappingConfidence * 100).toFixed(1)}%</span> },
+    { header: t("provenance.cols.confidence"), align: "right", cell: (r) => <span className="tabular-nums">{f.percento(r.mappingConfidence, "0-1", 1)}</span> },
     { header: t("provenance.cols.status"), cell: (r) => <StatusPill tone={toneForStatus(r.validationStatus)}>{t(`provenance.status.${r.validationStatus}`)}</StatusPill> },
     {
       header: t("provenance.cols.provenance"),
@@ -54,6 +51,7 @@ const STATUSES: ValidationStatus[] = ["VALID", "STALE", "CONFLICTED", "REJECTED"
 
 export default function ProvenancePage() {
   const { t } = useTranslation("admin");
+  const f = useFormat();
   const [status, setStatus] = useState<ValidationStatus | "">("");
 
   const summary = useQuery({
@@ -67,27 +65,27 @@ export default function ProvenancePage() {
     params: { validationStatus: status || undefined },
   });
 
-  const columns = useMemo(() => buildRecordColumns(t), [t]);
+  const columns = useMemo(() => buildRecordColumns(t, f), [t, f]);
 
   const kpis: KpiCardData[] = useMemo(() => {
     const s = summary.data?.totals;
     if (!s) return [];
     return [
-      { label: t("provenance.kpi.records"), value: s.records.toLocaleString() },
-      { label: t("provenance.kpi.avgConfidence"), value: s.avgConfidence != null ? `${(s.avgConfidence * 100).toFixed(1)}%` : "—" },
-      { label: t("provenance.kpi.humanApproved"), value: pct(s.humanApproved, s.records), iconTone: "success" },
-      { label: t("provenance.kpi.aiAssisted"), value: pct(s.aiAssisted, s.records), iconTone: "info" },
-      { label: t("provenance.kpi.conflicted"), value: s.conflicted.toLocaleString(), iconTone: s.conflicted > 0 ? "warning" : "success" },
+      { label: t("provenance.kpi.records"), value: f.numero(s.records) },
+      { label: t("provenance.kpi.avgConfidence"), value: s.avgConfidence != null ? `${f.percento(s.avgConfidence, "0-1", 1)}` : "—" },
+      { label: t("provenance.kpi.humanApproved"), value: f.percento(s.records === 0 ? 0 : s.humanApproved / s.records, "0-1"), iconTone: "success" },
+      { label: t("provenance.kpi.aiAssisted"), value: f.percento(s.records === 0 ? 0 : s.aiAssisted / s.records, "0-1"), iconTone: "info" },
+      { label: t("provenance.kpi.conflicted"), value: f.numero(s.conflicted), iconTone: s.conflicted > 0 ? "warning" : "success" },
     ];
-  }, [summary.data, t]);
+  }, [summary.data, t, f]);
 
   const summaryColumns: DataColumn<ProvenanceSummaryResponse["byTable"][number]>[] = useMemo(() => [
     { header: t("provenance.cols.targetTable"), cell: (r) => <span className="font-mono text-xs">{r.targetTable}</span> },
-    { header: t("provenance.cols.total"), align: "right", cell: (r) => <span className="tabular-nums">{r.total.toLocaleString()}</span> },
-    { header: t("provenance.cols.avgConfidence"), align: "right", cell: (r) => <span className="tabular-nums">{r.avgConfidence != null ? `${(r.avgConfidence * 100).toFixed(1)}%` : "—"}</span> },
-    { header: t("provenance.status.VALID"), align: "right", cell: (r) => <span className="tabular-nums">{r.valid.toLocaleString()}</span> },
-    { header: t("provenance.cols.conflicted"), align: "right", cell: (r) => <span className="tabular-nums">{(r.conflicted + r.rejected).toLocaleString()}</span> },
-  ], [t]);
+    { header: t("provenance.cols.total"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.total)}</span> },
+    { header: t("provenance.cols.avgConfidence"), align: "right", cell: (r) => <span className="tabular-nums">{r.avgConfidence != null ? `${f.percento(r.avgConfidence, "0-1", 1)}` : "—"}</span> },
+    { header: t("provenance.status.VALID"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.valid)}</span> },
+    { header: t("provenance.cols.conflicted"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.conflicted + r.rejected)}</span> },
+  ], [t, f]);
 
   return (
     <main data-testid="provenance-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">

@@ -15,6 +15,7 @@ import {
   APPLICATION_STAGES, KEY, candidateName,
   useApplications, useCandidates, usePostings, useRequisitions,
 } from "@/lib/recruiting";
+import { useFormat } from "@/lib/format";
 
 /**
  * `#54` F4 — la pipeline di selezione: ogni candidatura e' una carta, ogni stadio una
@@ -33,6 +34,7 @@ import {
  */
 export default function RecruitingPipelinePage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const apps = useApplications();
   const candidates = useCandidates();
@@ -84,21 +86,21 @@ export default function RecruitingPipelinePage() {
             const p = byPosting.get(a.postingId);
             return {
               id: a.applicationId,
-              title: c ? candidateName(c) : a.candidateId.slice(0, 8),
-              description: p ? p.title : a.postingId.slice(0, 8),
+              title: c ? candidateName(c) : t("common:unnamed"),
+              description: p ? p.title : t("common:unnamed"),
               meta: (
                 <Link
                   href={`/recruiting/applications/${a.applicationId}`}
                   data-testid="pipeline-card-link"
                   className="text-xs underline"
                 >
-                  {t("recruiting.pipeline.open")} · {a.appliedOn}
+                  {t("recruiting.pipeline.open")} · {fmt.data(a.appliedOn)}
                 </Link>
               ),
             };
           }),
       })),
-    [items, byCandidate, byPosting, t],
+    [items, byCandidate, byPosting, t, fmt],
   );
 
   // L'impronta dei dati: cambia quando cambia una candidatura o il suo stadio, e rimonta la

@@ -5,6 +5,7 @@ import { Button, Card, CardContent, HeuresysWordmark } from "@heuresys/ui";
 import LeadForm from "@/components/lead-form";
 import { usePlatformStats } from "@/lib/api/public-stats";
 import type { PlatformStatsResponse } from "@heuresys/shared/schemas/public-stats";
+import { useFormat } from "@/lib/format";
 
 const LIVE_KEYS: (keyof PlatformStatsResponse)[] = [
   "skills", "occupationSkillEdges", "escoOccupationMappings", "users", "positions",
@@ -13,6 +14,7 @@ const LIVE_KEYS: (keyof PlatformStatsResponse)[] = [
 
 export default function InvestorsPage() {
   const { t } = useTranslation("investors");
+  const fmt = useFormat();
   const { data } = usePlatformStats();
   return (
     <main data-testid="investors-page" className="min-h-screen bg-background text-foreground">
@@ -42,7 +44,7 @@ export default function InvestorsPage() {
             <Card key={k} data-print-card {...(k === "skills" ? { "data-testid": "stat-skills" } : {})}>
               <CardContent className="p-5">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-2xl font-semibold tabular-nums">{data ? data[k].toLocaleString("it") : t("proof.loading")}</span>
+                  <span className="text-2xl font-semibold tabular-nums">{data ? fmt.numero(data[k]) : t("proof.loading")}</span>
                   <span className="rounded-control bg-card px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">{t("proof.liveLabel")}</span>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{t(`proof.live.${k}`)}</p>

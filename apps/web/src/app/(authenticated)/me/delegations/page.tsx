@@ -25,6 +25,7 @@ import type {
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { ApiError } from "@/lib/api/errors";
+import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -45,6 +46,7 @@ function messaggioDi(err: unknown, t: (k: string) => string): string {
 
 export default function MeDelegationsPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const qc = useQueryClient();
 
   const mie = useQuery({
@@ -125,7 +127,7 @@ export default function MeDelegationsPage() {
     );
 
   const periodo = (d: Delegation) =>
-    d.endsOn ? t("delegations.period.range", { from: d.startsOn, to: d.endsOn }) : t("delegations.period.open", { from: d.startsOn });
+    d.endsOn ? t("delegations.period.range", { from: fmt.data(d.startsOn), to: fmt.data(d.endsOn) }) : t("delegations.period.open", { from: fmt.data(d.startsOn) });
 
   if (mie.isLoading) {
     return <main className="mx-auto max-w-5xl px-6 py-8"><p className="text-sm text-muted-foreground">{t("common:loading")}</p></main>;
@@ -235,7 +237,7 @@ export default function MeDelegationsPage() {
                   <p className="text-xs text-muted-foreground">
                     {t("delegations.inbox.onBehalf", { name: a.delegatorName ?? "" })}
                     {a.requesterName ? ` · ${t("delegations.inbox.requester", { name: a.requesterName })}` : ""}
-                    {` · ${a.createdAt.slice(0, 10)}`}
+                    {` · ${fmt.data(a.createdAt)}`}
                   </p>
                 </div>
                 <div className="flex gap-2">

@@ -27,9 +27,13 @@ import { EnumStatusBadge } from "@/components/enum-badge";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 
 import type { MePerformanceReview, MePerformanceResponse } from "@heuresys/shared";
+import { useFormat } from "@/lib/format";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 export default function MePerformancePage() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
+  const fmt = useFormat();
 
   const reviews = useQuery({
     queryKey: ["me", "performance"],
@@ -46,11 +50,11 @@ export default function MePerformancePage() {
         header: t("performance.colPeriod"),
         cell: (r) => (
           <span className="text-xs text-muted-foreground">
-            {r.periodStart || r.periodEnd ? `${r.periodStart ?? "…"} → ${r.periodEnd ?? "…"}` : "—"}
+            {r.periodStart || r.periodEnd ? `${r.periodStart ? fmt.data(r.periodStart) : "…"} → ${r.periodEnd ? fmt.data(r.periodEnd) : "…"}` : "—"}
           </span>
         ),
       },
-      { header: t("performance.colType"), cell: (r) => <span className="text-xs">{r.type ?? "—"}</span> },
+      { header: t("performance.colType"), cell: (r) => <span className="text-xs">{enumLabel("perfReviewType", r.type)}</span> },
       {
         header: t("performance.colStatus"),
         cell: (r) => (r.status ? <EnumStatusBadge domain="status" value={r.status} /> : <span className="text-xs">—</span>),
@@ -67,7 +71,7 @@ export default function MePerformancePage() {
       },
     ],
     // `voto` è una closure stabile sui soli argomenti: la dipendenza vera è `t`.
-    [t],
+    [t, enumLabel, fmt],
   );
 
   return (

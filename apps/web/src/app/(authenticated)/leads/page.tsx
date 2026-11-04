@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useCan } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 // #4 GTM W4 — gestione delle richieste di contatto arrivate dal sito pubblico.
 // Tutto viene da GET /v1/leads sul database vivo; lo stato si cambia con PATCH
@@ -30,6 +31,7 @@ const STATUSES = LeadStatusEnum.options;
 
 export default function LeadsPage() {
   const { t, i18n } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const [status, setStatus] = useState<LeadStatus | "">("");
 
@@ -74,7 +76,7 @@ export default function LeadsPage() {
       },
       {
         header: t("leads.cols.source"),
-        cell: (r) => <span className="text-xs text-muted-foreground">{r.source}</span>,
+        cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("leadSource", r.source)}</span>,
       },
       {
         header: t("leads.cols.received"),
@@ -116,7 +118,7 @@ export default function LeadsPage() {
         ),
       },
     ],
-    [t, dateFmt, advance, canUpdate],
+    [t, dateFmt, advance, canUpdate, enumLabel],
   );
 
   const data = leads.data;

@@ -8,6 +8,7 @@ import {
 } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { useQuery } from "@tanstack/react-query";
+import { useFormat } from "@/lib/format";
 
 /**
  * OkrCheckInsDialog (#26) — check-in history of ONE OKR, read-only over
@@ -21,6 +22,7 @@ export function OkrCheckInsDialog({
   okrId: string; okrTitle: string; open: boolean; onOpenChange: (o: boolean) => void;
 }) {
   const { t, i18n } = useTranslation("hr");
+  const fmt = useFormat();
   const q = useQuery({
     queryKey: ["okr-checkins", okrId],
     queryFn: () => apiFetch<OkrCheckInList>(`/v1/okrs/${okrId}/check-ins?limit=200`),
@@ -54,7 +56,7 @@ export function OkrCheckInsDialog({
                   </div>
                   <p className="mt-1 text-sm text-foreground">
                     {t(c.scope === "OKR_AGGREGATE" ? "okrs.checkIns.overall" : "okrs.checkIns.progress")}:{" "}
-                    {progress != null ? `${progress}%` : "—"}
+                    {progress != null ? `${fmt.percento(progress, "0-100")}` : "—"}
                     {c.statusUpdate ? ` · ${c.statusUpdate}` : ""}
                   </p>
                   {c.notes ? <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">{c.notes}</p> : null}

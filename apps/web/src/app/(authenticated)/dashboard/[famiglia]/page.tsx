@@ -10,11 +10,11 @@
  * vista: così una famiglia nuova, o una vista in più, non chiede una riga di frontend.
  * Scrivere otto pagine gemelle avrebbe riportato a mano ciò che M3 esiste per derivare.
  *
- * LA FAMIGLIA SI TROVA PER ROUTE, non da una mappa segmento→codice. Le route sono in
- * italiano (`/dashboard/azienda`) e i codici in inglese (`company`); tenere una tabella di
- * corrispondenza qui significherebbe una seconda verità che invecchia da sola. La pagina
- * confronta invece il proprio percorso con `route` del catalogo: la corrispondenza la
- * dichiara il database, che è dove sta già.
+ * LA FAMIGLIA SI TROVA PER ROUTE, non da una mappa segmento→codice. Dal 2026-11-04 (F-9)
+ * la route È il codice (`/dashboard/company` per `company`): menu, API e giro usano la
+ * stessa parola, e le vecchie route in italiano rimandano qui (`next.config.js`). La
+ * pagina confronta comunque il proprio percorso con `route` del catalogo, così la
+ * corrispondenza resta dichiarata dal database e non da una tabella qui.
  *
  * LE TRE MODALITÀ SI DISEGNANO TUTTE E TRE, e la mascherata NON è uno stato vuoto:
  * ADR-0032 vuole che la vista resti visibile mentre i valori sono trattenuti, con il perché

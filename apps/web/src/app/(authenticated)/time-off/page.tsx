@@ -13,6 +13,7 @@ import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { EnumStatusPill } from "@/components/enum-badge";
+import { useFormat, type Formati } from "@/lib/format";
 
 /**
  * A/L8 (#33) — Time-off & leave admin page. Live over /v1/time-off/*:
@@ -28,34 +29,34 @@ function toneForRequestStatus(s: string): "success" | "warning" | "danger" | "ne
   return "neutral";
 }
 
-function buildRequestColumns(t: TFunction): DataColumn<TimeOffRequest>[] {
+function buildRequestColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): DataColumn<TimeOffRequest>[] {
   return [
     { header: t("timeOff.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
-    { header: t("timeOff.cols.leaveType"), cell: (r) => <span className="font-mono text-xs">{r.leaveType}</span> },
-    { header: t("timeOff.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.startDate} → {r.endDate}</span> },
+    { header: t("timeOff.cols.leaveType"), cell: (r) => <span className="text-xs">{enumLabel("leaveType", r.leaveType)}</span> },
+    { header: t("timeOff.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.startDate)} → {f.data(r.endDate)}</span> },
     { header: t("timeOff.cols.days"), align: "right", cell: (r) => <span className="tabular-nums">{r.daysRequested}</span> },
     { header: t("timeOff.cols.status"), cell: (r) => <EnumStatusPill domain="timeOffStatus" value={r.status} tone={toneForRequestStatus(r.status)} /> },
   ];
 }
 
-function buildRuleColumns(t: TFunction): DataColumn<LeaveAccrualRule>[] {
+function buildRuleColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<LeaveAccrualRule>[] {
   return [
-    { header: t("timeOff.cols.leaveType"), cell: (r) => <span className="font-mono text-xs">{r.leaveType}</span> },
+    { header: t("timeOff.cols.leaveType"), cell: (r) => <span className="text-xs">{enumLabel("leaveType", r.leaveType)}</span> },
     { header: t("timeOff.cols.ruleName"), cell: (r) => <span>{r.name}</span> },
-    { header: t("timeOff.cols.method"), cell: (r) => <span className="text-xs text-muted-foreground">{r.method}</span> },
+    { header: t("timeOff.cols.method"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("accrualMethod", r.method)}</span> },
     { header: t("timeOff.cols.amount"), align: "right", cell: (r) => <span className="tabular-nums">{r.amount}</span> },
     { header: t("timeOff.cols.ccnl"), cell: (r) => <span className="text-xs">{r.ccnlType ?? "—"}</span> },
     { header: t("timeOff.cols.active"), cell: (r) => <StatusPill tone={r.isActive ? "success" : "neutral"}>{r.isActive ? t("timeOff.active") : t("timeOff.inactive")}</StatusPill> },
   ];
 }
 
-function buildTxnColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<LeaveBalanceTransaction>[] {
+function buildTxnColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<LeaveBalanceTransaction>[] {
   return [
     { header: t("timeOff.cols.txnType"), cell: (r) => <span className="font-mono text-xs">{enumLabel("timeOffTxnType", r.type)}</span> },
     { header: t("timeOff.cols.days"), align: "right", cell: (r) => <span className="tabular-nums">{r.daysAmount}</span> },
     { header: t("timeOff.cols.description"), cell: (r) => <span className="text-xs text-muted-foreground">{r.description ?? "—"}</span> },
     { header: t("timeOff.cols.reference"), cell: (r) => <span className="text-xs">{r.referenceType ?? "—"}</span> },
-    { header: t("timeOff.cols.date"), cell: (r) => <span className="tabular-nums text-xs">{r.createdAt.slice(0, 10)}</span> },
+    { header: t("timeOff.cols.date"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.createdAt)}</span> },
   ];
 }
 
@@ -63,6 +64,7 @@ const REQUEST_STATUSES = TimeOffRequestStatusEnum.options;
 
 export default function TimeOffPage() {
   const { t } = useTranslation("admin");
+  const f = useFormat();
   const enumLabel = useEnumLabel();
   const [status, setStatus] = useState<string>("");
 
@@ -80,15 +82,15 @@ export default function TimeOffPage() {
     path: "/v1/time-off/balance-transactions",
   });
 
-  const requestColumns = useMemo(() => buildRequestColumns(t), [t]);
-  const ruleColumns = useMemo(() => buildRuleColumns(t), [t]);
-  const txnColumns = useMemo(() => buildTxnColumns(t, enumLabel), [t, enumLabel]);
+  const requestColumns = useMemo(() => buildRequestColumns(t, f, enumLabel), [t, f, enumLabel]);
+  const ruleColumns = useMemo(() => buildRuleColumns(t, enumLabel), [t, enumLabel]);
+  const txnColumns = useMemo(() => buildTxnColumns(t, enumLabel, f), [t, enumLabel, f]);
 
   const kpis: KpiCardData[] = useMemo(() => [
-    { label: t("timeOff.kpi.requests"), value: requests.total.toLocaleString() },
-    { label: t("timeOff.kpi.rules"), value: rules.total.toLocaleString() },
-    { label: t("timeOff.kpi.transactions"), value: txns.total.toLocaleString() },
-  ], [requests.total, rules.total, txns.total, t]);
+    { label: t("timeOff.kpi.requests"), value: f.numero(requests.total) },
+    { label: t("timeOff.kpi.rules"), value: f.numero(rules.total) },
+    { label: t("timeOff.kpi.transactions"), value: f.numero(txns.total) },
+  ], [requests.total, rules.total, txns.total, t, f]);
 
   return (
     <main data-testid="time-off-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">

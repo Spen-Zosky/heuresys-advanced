@@ -22,11 +22,15 @@ interface Row {
   skill_taxonomy_edge_kind: SkillEdgeKind;
   skill_taxonomy_edge_metadata: Record<string, unknown>;
   created_at: Date;
+  parent_skill_name: string | null;
+  child_skill_name: string | null;
 }
 
 const COLS = `e.skill_taxonomy_edge_id, e.skill_taxonomy_edge_parent_id,
   e.skill_taxonomy_edge_child_id, e.skill_taxonomy_edge_kind,
-  e.skill_taxonomy_edge_metadata, e.created_at`;
+  e.skill_taxonomy_edge_metadata, e.created_at,
+  (SELECT s.skill_name FROM sys.sys_skills s WHERE s.skill_id = e.skill_taxonomy_edge_parent_id) AS parent_skill_name,
+  (SELECT s.skill_name FROM sys.sys_skills s WHERE s.skill_id = e.skill_taxonomy_edge_child_id) AS child_skill_name`;
 
 function toEdge(r: Row): SkillTaxonomyEdge {
   return {
@@ -36,6 +40,8 @@ function toEdge(r: Row): SkillTaxonomyEdge {
     kind: r.skill_taxonomy_edge_kind,
     metadata: r.skill_taxonomy_edge_metadata,
     createdAt: r.created_at.toISOString(),
+    parentSkillName: r.parent_skill_name ?? null,
+    childSkillName: r.child_skill_name ?? null,
   };
 }
 
@@ -184,7 +190,9 @@ export async function insertEdge(
                 skill_taxonomy_edge_child_id AS "skill_taxonomy_edge_child_id",
                 skill_taxonomy_edge_kind AS "skill_taxonomy_edge_kind",
                 skill_taxonomy_edge_metadata AS "skill_taxonomy_edge_metadata",
-                created_at`,
+                created_at,
+                (SELECT s.skill_name FROM sys.sys_skills s WHERE s.skill_id = skill_taxonomy_edge_parent_id) AS parent_skill_name,
+                (SELECT s.skill_name FROM sys.sys_skills s WHERE s.skill_id = skill_taxonomy_edge_child_id) AS child_skill_name`,
     [body.parentSkillId, body.childSkillId, body.kind ?? "IS_A", JSON.stringify(body.metadata ?? {})],
   );
   return toEdge(res.rows[0]!);

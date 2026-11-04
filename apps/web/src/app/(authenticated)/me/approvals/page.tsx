@@ -8,10 +8,12 @@ import type { MeApprovalsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 /** Le mie approvazioni (S1011 F5.3) — track-only view of the caller's own approval requests. */
 export default function MeApprovalsPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["me", "approvals"],
@@ -81,7 +83,7 @@ export default function MeApprovalsPage() {
                       </td>
                       <td className="px-4 py-2 align-middle"><EnumStatusBadge domain="approvalStatus" value={a.status} /></td>
                       <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{enumLabel("notificationPriority", a.priority)}</td>
-                      <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{a.createdAt ? a.createdAt.slice(0, 10) : "—"}</td>
+                      <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{fmt.data(a.createdAt)}</td>
                     </tr>
                   ))}
                 </tbody>

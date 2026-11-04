@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { i18n } from "@/lib/i18n";
+import { formati, VUOTO } from "@/lib/format";
 
 /** A single read-only label/value pair inside a profile section. Empty -> em-dash. */
 export function Field({ label, value, testId }: { label: string; value: ReactNode; testId?: string }) {
@@ -39,23 +41,26 @@ export function ProfileSection({
   );
 }
 
-/** ISO `YYYY-MM-DD` -> `DD/MM/YYYY` (locale-neutral, display only). */
-export function fmtDate(iso: string | null): string | null {
+/**
+ * F-1 (piano interfacce, 2026-11-04): le due funzioni restano per le schede del profilo, ma
+ * delegano alla forma comune (`@/lib/format`) nella lingua del portale. Restituiscono `null`
+ * quando il valore manca, cosi' `Field` mostra il suo trattino.
+ */
+export function fmtDate(iso: string | null | undefined): string | null {
   if (!iso) return null;
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
-  return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
+  const v = formati(i18n.language).data(iso);
+  return v === VUOTO ? iso : v;
 }
 
-/** Number + ISO currency -> grouped amount, e.g. 368734.11 EUR -> "368.734,11 €". */
-export function fmtMoney(amount: number | null, currency: string | null): string | null {
+/** Data e ora (per gli istanti, come l'ultimo accesso). */
+export function fmtDateTime(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const v = formati(i18n.language).dataOra(iso);
+  return v === VUOTO ? iso : v;
+}
+
+/** Importo nella valuta del dato; senza valuta, il solo numero (non si inventa l'euro). */
+export function fmtMoney(amount: number | null | undefined, currency: string | null | undefined): string | null {
   if (amount == null) return null;
-  try {
-    return new Intl.NumberFormat("it-IT", {
-      style: "currency",
-      currency: currency ?? "EUR",
-      maximumFractionDigits: 2,
-    }).format(amount);
-  } catch {
-    return `${amount.toFixed(2)} ${currency ?? ""}`.trim();
-  }
+  return formati(i18n.language).importo(amount, currency ?? null);
 }

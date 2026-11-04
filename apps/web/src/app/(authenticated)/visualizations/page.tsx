@@ -12,6 +12,7 @@ import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../_charts-client";
+import { useFormat } from "@/lib/format";
 
 type TypeDistItem = VizGraphTypeDistributionItem;
 
@@ -45,6 +46,7 @@ function typeChartOption(items: TypeDistItem[], labels: { series: string }) {
 
 export default function VisualizationsPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   // C4 (#42): server-side pagination (was `?limit=200`). The donut is fed by the
   // separate server-side GROUP BY aggregate below, so paging the table never
@@ -144,14 +146,14 @@ export default function VisualizationsPage() {
             {recentExports.data.items.map((e) => (
               <li key={e.exportId} className="flex flex-wrap items-center justify-between gap-3 py-2 text-sm">
                 <span className="flex items-center gap-3">
-                  <span className="font-mono text-xs text-muted-foreground">{e.format}</span>
+                  <span className="text-xs text-muted-foreground">{enumLabel("vizExportFormat", e.format)}</span>
                   <span className="text-muted-foreground">
                     {e.byteSize === null
                       ? t("visualizations.exports.noContent")
-                      : t("visualizations.exports.size", { bytes: e.byteSize })}
+                      : fmt.dimensione(e.byteSize)}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {new Date(e.generatedAt).toLocaleDateString()}
+                    {fmt.data(e.generatedAt)}
                   </span>
                 </span>
                 <Link

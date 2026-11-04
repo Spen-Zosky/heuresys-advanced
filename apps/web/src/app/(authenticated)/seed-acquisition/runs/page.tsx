@@ -12,15 +12,12 @@ function buildColumns(t: TFunction): DataColumn<SeedAcquisitionRun>[] {
   const none = t("common:value.none");
   return [
     {
-      header: t("seedRuns.columns.runId"),
-      cell: (r) => <span className="font-mono text-xs">{r.seedAcquisitionRunId.slice(0, 8)}</span>,
-    },
-    {
       // Was a `blueprintVariantId` column — a field the API never returned, so it
       // rendered the "none" dash on every row. Replaced with the run code, which
       // the contract does expose (C4 #42: local interfaces had drifted).
       header: t("seedRuns.columns.code"),
-      cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.code}</span>,
+      // F-3 (L6): l'identificativo della corsa non è più una colonna a sé; resta nel suggerimento del codice.
+      cell: (r) => <span className="font-mono text-xs text-muted-foreground" title={r.seedAcquisitionRunId}>{r.code}</span>,
     },
     { header: t("seedRuns.columns.status"), cell: (r) => <EnumStatusBadge domain="seedRunStatus" value={r.status} /> },
     {

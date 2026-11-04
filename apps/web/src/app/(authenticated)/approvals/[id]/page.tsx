@@ -10,6 +10,7 @@ import type { ApprovalRequestDetail, ApprovalStatus, ApprovalStepStatus, Approva
 import { apiFetch } from "@/lib/api/fetch";
 import { useCan, useCurrentUser } from "@/lib/api/auth";
 import { AGENT_DEV_ENABLED, useAgentStream } from "@/lib/use-agent-stream";
+import { useFormat } from "@/lib/format";
 
 function reqStatusVariant(s: ApprovalStatus): "success" | "secondary" | "destructive" {
   if (s === "APPROVED" || s === "APPLIED") return "success";
@@ -36,7 +37,8 @@ function stepStatusVariant(s: ApprovalStepStatus): "success" | "secondary" | "de
  */
 
 export default function ApprovalDetailPage() {
-  const { t, i18n } = useTranslation("admin");
+  const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -212,7 +214,7 @@ export default function ApprovalDetailPage() {
                       {s.decisionComment && <span className="text-xs text-muted-foreground">“{s.decisionComment}”</span>}
                       {s.decidedAt && (
                         <time dateTime={s.decidedAt} className="text-xs text-muted-foreground">
-                          {new Date(s.decidedAt).toLocaleDateString(i18n.language, { day: "2-digit", month: "2-digit", year: "numeric" })}
+                          {fmt.data(s.decidedAt)}
                         </time>
                       )}
                       <Badge variant={stepStatusVariant(s.status)} data-testid="approval-step-status">{t(`approvals.stepStatus.${s.status}`)}</Badge>

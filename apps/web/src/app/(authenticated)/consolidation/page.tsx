@@ -21,6 +21,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { ApiError } from "@/lib/api/errors";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill, type StatusTone } from "@/components/status-pill";
+import { useFormat } from "@/lib/format";
 
 // AC-10 — La pagina del Direttore HR per il consolidamento del tenant col prototipo
 // (`.programmi/consolidamento/agente/`). L'agente propone, una persona decide: qui si avviano
@@ -103,6 +104,7 @@ function buildColumns(
 
 export default function ConsolidationPage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [scelto, setScelto] = useState<ConsolidationGroup | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
@@ -235,7 +237,7 @@ export default function ConsolidationPage() {
         <Card data-testid="consolidation-session">
           <CardHeader>
             <CardTitle className="flex flex-wrap items-center gap-3">
-              <span>{t("consolidation.session", { date: new Date(corrente.startedAt).toLocaleDateString() })}</span>
+              <span>{t("consolidation.session", { date: fmt.data(corrente.startedAt) })}</span>
               <StatusPill tone="info">{t(`consolidation.statuses.${corrente.status}`)}</StatusPill>
               {inCorso ? (
                 <StatusPill tone="warning" data-testid="consolidation-running">

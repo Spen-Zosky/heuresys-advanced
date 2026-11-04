@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
+import { NomeOppure } from "@/components/senza-nome";
 
 interface PositionSkillReq {
   requirementId: string;
@@ -66,7 +67,7 @@ export default function PositionSkillsPage() {
             caption={t("positions.skills.caption")}
             columns={[
               { header: t("positions.skills.columns.code"), cell: (s) => <span className="font-mono text-xs">{s.skillCode ?? "—"}</span> },
-              { header: t("positions.skills.columns.skill"), cell: (s) => s.skillName ?? s.skillId.slice(0, 8) },
+              { header: t("positions.skills.columns.skill"), cell: (s) => <NomeOppure nome={s.skillName} id={s.skillId} /> },
               { header: t("positions.skills.columns.proficiency"), cell: (s) => <StatusBadge value={s.requiredProficiency} /> },
               { header: t("positions.skills.columns.weight"), cell: (s) => <span className="text-xs">{s.weight}</span> },
             ]}

@@ -7,8 +7,9 @@ import type { TrainingInitiative } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
+import { useFormat, type Formati } from "@/lib/format";
 
-function buildColumns(t: TFunction): DataColumn<TrainingInitiative>[] {
+function buildColumns(t: TFunction, fmt: Formati): DataColumn<TrainingInitiative>[] {
   return [
     {
       header: t("training.cols.cohort"),
@@ -20,15 +21,16 @@ function buildColumns(t: TFunction): DataColumn<TrainingInitiative>[] {
       ),
     },
     { header: t("training.cols.status"), cell: (ti) => <EnumStatusBadge domain="trainingInitiativeStatus" value={ti.status} /> },
-    { header: t("training.cols.start"), cell: (ti) => <span className="text-xs text-muted-foreground">{ti.startDate ?? "—"}</span> },
-    { header: t("training.cols.end"), cell: (ti) => <span className="text-xs text-muted-foreground">{ti.endDate ?? "—"}</span> },
+    { header: t("training.cols.start"), cell: (ti) => <span className="text-xs text-muted-foreground">{fmt.data(ti.startDate)}</span> },
+    { header: t("training.cols.end"), cell: (ti) => <span className="text-xs text-muted-foreground">{fmt.data(ti.endDate)}</span> },
     { header: t("training.cols.seats"), cell: (ti) => <span className="text-xs text-muted-foreground">{ti.capacity ?? "—"}</span> },
   ];
 }
 
 export default function TrainingInitiativesPage() {
   const { t } = useTranslation("hr");
-  const columns = useMemo(() => buildColumns(t), [t]);
+  const fmt = useFormat();
+  const columns = useMemo(() => buildColumns(t, fmt), [t, fmt]);
   // C4 (#42): server-side pagination (was `?limit=200`).
   const inits = usePaginatedList<TrainingInitiative>({
     queryKey: ["training-initiatives", "list"],

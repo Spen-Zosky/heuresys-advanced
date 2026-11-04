@@ -19,6 +19,9 @@ import {
   APPLICATION_STAGES, FEEDBACK_RECOMMENDATIONS, INTERVIEW_KINDS, INTERVIEW_STATUSES,
   KEY, OFFER_STATUSES, candidateName, useCandidates, usePostings,
 } from "@/lib/recruiting";
+import { useFormat } from "@/lib/format";
+import { useEnumLabel } from "@/lib/enum-labels";
+import { NomeOppure } from "@/components/senza-nome";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -37,6 +40,8 @@ type Feedback = { kind: "ok" | "err"; msg: string } | null;
  */
 export default function ApplicationDetailPage() {
   const { t } = useTranslation("hr");
+  const enumLabel = useEnumLabel();
+  const fmt = useFormat();
   const qc = useQueryClient();
   const params = useParams<{ id: string }>();
   const id = params?.id ?? "";
@@ -221,7 +226,7 @@ export default function ApplicationDetailPage() {
               {(interviews.data?.items ?? []).map((i) => (
                 <li key={i.interviewId} className="space-y-3 px-4 py-3" data-testid="interview-row">
                   <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-                    <span className="font-medium">{t(`recruiting.interviewKind.${i.kind}`)}{i.scheduledAt ? ` · ${new Date(i.scheduledAt).toLocaleString()}` : ""}{i.location ? ` · ${i.location}` : ""}</span>
+                    <span className="font-medium">{t(`recruiting.interviewKind.${i.kind}`)}{i.scheduledAt ? ` · ${fmt.dataOra(i.scheduledAt)}` : ""}{i.location ? ` · ${i.location}` : ""}</span>
                     <div className="flex items-center gap-2">
                       <Badge data-testid="interview-row-status">{t(`recruiting.interviewStatus.${i.status}`)}</Badge>
                       {canInterview && (<select
@@ -248,7 +253,12 @@ export default function ApplicationDetailPage() {
         <CardContent className="space-y-4">
           {canOffer && (<div className="grid gap-3 md:grid-cols-4" data-testid="offer-form">
             <Input type="number" min={1} step={100} data-testid="offer-salary" placeholder={t("recruiting.fields.grossAnnualSalary")} value={of.grossAnnualSalary} onChange={(e) => setOf({ ...of, grossAnnualSalary: e.target.value })} />
-            <Input data-testid="offer-contract-type" placeholder={t("recruiting.fields.contractType")} value={of.contractType} onChange={(e) => setOf({ ...of, contractType: e.target.value })} />
+            {/* F-2 (L6): il tipo di contratto si sceglie fra i valori noti, con la loro etichetta; prima era un testo libero che mostrava «permanent». */}
+            <select data-testid="offer-contract-type" aria-label={t("recruiting.fields.contractType")} className={SELECT_CLASS} value={of.contractType} onChange={(e) => setOf({ ...of, contractType: e.target.value })}>
+              {["permanent", "fixed_term"].map((c) => (
+                <option key={c} value={c}>{enumLabel("contractType", c)}</option>
+              ))}
+            </select>
             <Input type="date" data-testid="offer-start-date" value={of.startDate} onChange={(e) => setOf({ ...of, startDate: e.target.value })} />
             <Button type="button" data-testid="offer-submit" disabled={createOffer.isPending} onClick={() => createOffer.mutate()}>{t("recruiting.application.createOffer")}</Button>
           </div>)}
@@ -261,8 +271,8 @@ export default function ApplicationDetailPage() {
                   <span>
                     {o.masked?.includes("grossAnnualSalary")
                       ? <em data-testid="offer-salary-masked">{t("recruiting.application.salaryMasked")}</em>
-                      : <span data-testid="offer-row-salary">{o.grossAnnualSalary !== null && o.grossAnnualSalary !== undefined ? `${o.grossAnnualSalary.toLocaleString()} €` : "—"}</span>}
-                    {o.contractType ? ` · ${o.contractType}` : ""}{o.startDate ? ` · ${o.startDate}` : ""}
+                      : <span data-testid="offer-row-salary">{fmt.importo(o.grossAnnualSalary, "EUR", 0)}</span>}
+                    {o.contractType ? ` · ${enumLabel("contractType", o.contractType)}` : ""}{o.startDate ? ` · ${fmt.data(o.startDate)}` : ""}
                   </span>
                   <div className="flex items-center gap-2">
                     <Badge data-testid="offer-row-status">{t(`recruiting.offerStatus.${o.status}`)}</Badge>
@@ -345,7 +355,7 @@ function FeedbackBlock({
         <ul className="space-y-1 text-sm" data-testid="feedback-list">
           {(q.data?.items ?? []).map((f) => (
             <li key={f.feedbackId} data-testid="feedback-row">
-              <span className="font-medium">{byId.get(f.interviewerUserId) ?? f.interviewerUserId.slice(0, 8)}</span>
+              <span className="font-medium"><NomeOppure nome={byId.get(f.interviewerUserId)} id={f.interviewerUserId} /></span>
               {" · "}<Badge variant="outline" data-testid="feedback-row-recommendation">{t(`recruiting.recommendation.${f.recommendation}`)}</Badge>
               {f.score !== null ? ` · ${f.score}/10` : ""}{f.notes ? ` · ${f.notes}` : ""}
             </li>

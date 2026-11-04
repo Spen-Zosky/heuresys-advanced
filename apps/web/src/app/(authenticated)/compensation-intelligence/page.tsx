@@ -16,10 +16,14 @@ import { EnumStatusBadge } from "@/components/enum-badge";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EChartsCard } from "../_charts-client";
+import { useFormat, type Formati } from "@/lib/format";
+import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
+import { NomeOppure } from "@/components/senza-nome";
 
 interface RewardGate {
   rewardGateId: string;
   userId: string | null;
+  userName?: string | null;
   positionId: string | null;
   catalogCode: string;
   catalogName: string;
@@ -60,9 +64,8 @@ interface DistributionItem {
 
 // ── A/L7 (#32) read-panel columns (admin namespace) ──────────────────────────
 
-function money(v: number | null): string {
-  return v === null ? "—" : v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+// F-1 (piano interfacce, 2026-11-04): gli importi di questa pagina sono in euro per contratto
+// (campi `*Eur`), quindi la valuta del dato e' EUR; la forma la da' `@/lib/format`.
 
 /**
  * #124 / ADR-0032 — a withheld field is ABSENT from the row and named in `masked`.
@@ -77,10 +80,11 @@ function MaskedCell({ t }: { t: TFunction }) {
 function buildVariablePayColumns(
   t: TFunction,
   onEvaluate: (id: string) => void,
+  f: Formati,
 ): DataColumn<VariablePayCalculation>[] {
   return [
     { header: t("compReward.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
-    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.periodStart} → {r.periodEnd}</span> },
+    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
     { header: t("compReward.cols.signalScore"), align: "right", cell: (r) => (
       r.masked?.includes("signalScore")
         ? <MaskedCell t={t} />
@@ -89,7 +93,7 @@ function buildVariablePayColumns(
     { header: t("compReward.cols.amount"), align: "right", cell: (r) => (
       r.masked?.includes("amountEur")
         ? <MaskedCell t={t} />
-        : <span className="tabular-nums">{money(r.amountEur ?? null)}</span>
+        : <span className="tabular-nums">{f.importo(r.amountEur, "EUR")}</span>
     ) },
     {
       // #37 (B2): l'importo da solo non dice se il premio sia erogabile né come
@@ -127,6 +131,7 @@ type VariablePayEvaluationView = VariablePayEvaluation;
 
 function EvaluationPanel({ calculationId, onClose }: { calculationId: string; onClose: () => void }) {
   const { t } = useTranslation("admin");
+  const f = useFormat();
   const q = useQuery({
     queryKey: ["compensation", "variable-pay", calculationId, "evaluation"],
     queryFn: () =>
@@ -166,12 +171,12 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
             difetto che rompeva questo pannello (vedi il commento su `finalFactor`).
           */}
           <p className="text-muted-foreground">
-            {t("compReward.evaluation.period", { from: q.data.periodStart, to: q.data.periodEnd })}
+            {t("compReward.evaluation.period", { from: f.data(q.data.periodStart), to: f.data(q.data.periodEnd) })}
             {" · "}
             {q.data.masked?.includes("recordedAmountEur") ? (
               <MaskedCell t={t} />
             ) : (
-              t("compReward.evaluation.recorded", { amount: money(q.data.recordedAmountEur ?? null) })
+              t("compReward.evaluation.recorded", { amount: f.importo(q.data.recordedAmountEur, "EUR") })
             )}
           </p>
 
@@ -204,8 +209,8 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
                 {q.data.gates.map((g) => (
                   <li key={g.gateCode} className="flex items-center justify-between gap-3 py-1">
                     <span>
-                      <span className="font-mono text-xs text-muted-foreground">{g.gateCode}</span>
-                      <span className="ml-2">{g.gateName}</span>
+                      {/* F-2 (L6): il nome del cancello; il codice resta nel suggerimento. */}
+                      <span title={g.gateCode}>{g.gateName}</span>
                       {!g.isBlocking ? (
                         <span className="ml-2 text-xs text-muted-foreground">
                           {t("compReward.evaluation.nonBlocking")}
@@ -237,7 +242,7 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
           */}
           {q.data.masked?.includes("finalFactor") ? null : q.data.finalFactor != null ? (
             <p data-testid="comp-evaluation-final" className="font-medium text-foreground">
-              {t("compReward.evaluation.finalFactor", { factor: q.data.finalFactor.toFixed(4) })}
+              {t("compReward.evaluation.finalFactor", { factor: f.numero(q.data.finalFactor, 4) })}
             </p>
           ) : null}
         </div>
@@ -246,15 +251,15 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
   );
 }
 
-function buildRecommendationColumns(t: TFunction): DataColumn<CompensationRecommendationRow>[] {
+function buildRecommendationColumns(t: TFunction, f: Formati): DataColumn<CompensationRecommendationRow>[] {
   return [
     { header: t("compReward.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
-    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.periodStart} → {r.periodEnd}</span> },
+    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
     { header: t("compReward.cols.signal"), cell: (r) => <StatusBadge value={r.signal} /> },
     { header: t("compReward.cols.amount"), align: "right", cell: (r) => (
       r.masked?.includes("amountEur")
         ? <MaskedCell t={t} />
-        : <span className="tabular-nums">{money(r.amountEur ?? null)}</span>
+        : <span className="tabular-nums">{f.importo(r.amountEur, "EUR")}</span>
     ) },
     { header: t("compReward.cols.narrative"), cell: (r) => (
       r.masked?.includes("narrative")
@@ -264,49 +269,54 @@ function buildRecommendationColumns(t: TFunction): DataColumn<CompensationRecomm
   ];
 }
 
-function buildBonusPoolColumns(t: TFunction): DataColumn<BonusPool>[] {
+function buildBonusPoolColumns(t: TFunction, f: Formati): DataColumn<BonusPool>[] {
   return [
     { header: t("compReward.cols.scope"), cell: (r) => <span className="font-mono text-xs">{r.scope}</span> },
-    { header: t("compReward.cols.orgUnit"), cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.organizationUnitId?.slice(0, 8) ?? "—"}</span> },
-    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.periodStart} → {r.periodEnd}</span> },
+    { header: t("compReward.cols.orgUnit"), cell: (r) => <span className="text-xs">{r.organizationUnitId ? <NomeOppure nome={r.organizationUnitName} id={r.organizationUnitId} /> : "—"}</span> },
+    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
     { header: t("compReward.cols.total"), align: "right", cell: (r) => (
       r.masked?.includes("totalEur")
         ? <MaskedCell t={t} />
-        : <span className="tabular-nums">{money(r.totalEur ?? null)}</span>
+        : <span className="tabular-nums">{f.importo(r.totalEur, "EUR")}</span>
     ) },
   ];
 }
 
 function buildObjectiveRuleColumns(t: TFunction): DataColumn<ObjectiveRewardRule>[] {
   return [
-    { header: t("compReward.cols.code"), cell: (r) => <span className="font-mono text-xs">{r.code}</span> },
+    // F-3 (banco L6, 4/11): sei regole portano come codice una chiave d'importazione
+    // (`LEGACY_BP::<uuid>`), che non è un codice da leggere. Si mostra il codice solo quando
+    // è un codice; la chiave resta nel suggerimento. La bonifica del dato è a parte.
+    { header: t("compReward.cols.code"), cell: (r) => r.code.includes("::")
+      ? <span className="text-xs text-muted-foreground" title={r.code}>—</span>
+      : <span className="font-mono text-xs">{r.code}</span> },
     { header: t("compReward.cols.name"), cell: (r) => <span>{r.name}</span> },
   ];
 }
 
-function buildPositionWeightColumns(t: TFunction): DataColumn<PositionEconomicWeight>[] {
+function buildPositionWeightColumns(t: TFunction, f: Formati): DataColumn<PositionEconomicWeight>[] {
   return [
-    { header: t("compReward.cols.position"), cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.positionId.slice(0, 8)}</span> },
+    { header: t("compReward.cols.position"), cell: (r) => <span className="text-xs"><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
     { header: t("compReward.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value}</span> },
-    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.periodStart ?? "—"} → {r.periodEnd ?? "—"}</span> },
+    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
   ];
 }
 
-function buildHandoffColumns(t: TFunction): DataColumn<PayrollHandoffRecord>[] {
+function buildHandoffColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): DataColumn<PayrollHandoffRecord>[] {
   return [
-    { header: t("compReward.cols.recipient"), cell: (r) => <span className="font-mono text-xs">{r.recipientSystem}</span> },
-    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.periodStart} → {r.periodEnd}</span> },
+    { header: t("compReward.cols.recipient"), cell: (r) => <span className="text-xs" title={r.recipientSystem}>{enumLabel("payrollRecipientSystem", r.recipientSystem)}</span> },
+    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
     { header: t("compReward.cols.status"), cell: (r) => <EnumStatusBadge domain="payrollHandoffStatus" value={r.status} /> },
-    { header: t("compReward.cols.handedOff"), cell: (r) => <span className="tabular-nums text-xs">{r.handedOffAt.slice(0, 10)}</span> },
+    { header: t("compReward.cols.handedOff"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.handedOffAt)}</span> },
   ];
 }
 
 // C4 (#42): the reward-gates table — was a hand-rolled <table> (pre-dating the
 // EntityTable migration of the six panels below). Converted to EntityTable for the
 // same server-pagination + loading/error/empty states as everything else on this page.
-function buildRewardGateColumns(t: TFunction): DataColumn<RewardGate>[] {
+function buildRewardGateColumns(t: TFunction, f: Formati): DataColumn<RewardGate>[] {
   return [
-    { header: t("compensation.cols.user"), cell: (g) => <span className="font-mono text-xs text-muted-foreground">{g.userId?.slice(0, 8) ?? "—"}</span> },
+    { header: t("compensation.cols.user"), cell: (g) => <span className="text-xs">{g.userId ? <NomeOppure nome={g.userName} id={g.userId} /> : "—"}</span> },
     {
       header: t("compensation.cols.gate"),
       cell: (g) => (
@@ -316,7 +326,7 @@ function buildRewardGateColumns(t: TFunction): DataColumn<RewardGate>[] {
         </span>
       ),
     },
-    { header: t("compensation.cols.period"), cell: (g) => <span className="text-xs">{g.periodStart} → {g.periodEnd}</span> },
+    { header: t("compensation.cols.period"), cell: (g) => <span className="text-xs">{f.data(g.periodStart)} → {f.data(g.periodEnd)}</span> },
     {
       header: t("compensation.cols.blocking"),
       cell: (g) => <StatusPill tone={g.isBlocking ? "warning" : "neutral"}>{g.isBlocking ? t("compensation.blockingYes") : t("compensation.blockingNo")}</StatusPill>,
@@ -326,8 +336,10 @@ function buildRewardGateColumns(t: TFunction): DataColumn<RewardGate>[] {
 }
 
 export default function CompensationIntelligencePage() {
-  const { t, i18n } = useTranslation("hr");
+  const { t } = useTranslation("hr");
   const { t: tA } = useTranslation("admin");
+  const f = useFormat();
+  const enumLabel = useEnumLabel();
   // C4 (#42): server-side pagination (was `?limit=200`).
   const gates = usePaginatedList<RewardGate>({
     queryKey: ["compensation", "reward-gates"],
@@ -395,17 +407,17 @@ export default function CompensationIntelligencePage() {
     queryKey: ["compensation", "handoff-records"], path: "/v1/compensation/handoff-records",
   });
 
-  const rewardGateColumns = useMemo(() => buildRewardGateColumns(t), [t]);
+  const rewardGateColumns = useMemo(() => buildRewardGateColumns(t, f), [t, f]);
   const [evaluatingId, setEvaluatingId] = useState<string | null>(null);
   const variablePayColumns = useMemo(
-    () => buildVariablePayColumns(tA, setEvaluatingId),
-    [tA],
+    () => buildVariablePayColumns(tA, setEvaluatingId, f),
+    [tA, f],
   );
-  const recommendationColumns = useMemo(() => buildRecommendationColumns(tA), [tA]);
-  const bonusPoolColumns = useMemo(() => buildBonusPoolColumns(tA), [tA]);
+  const recommendationColumns = useMemo(() => buildRecommendationColumns(tA, f), [tA, f]);
+  const bonusPoolColumns = useMemo(() => buildBonusPoolColumns(tA, f), [tA, f]);
   const objectiveRuleColumns = useMemo(() => buildObjectiveRuleColumns(tA), [tA]);
-  const positionWeightColumns = useMemo(() => buildPositionWeightColumns(tA), [tA]);
-  const handoffColumns = useMemo(() => buildHandoffColumns(tA), [tA]);
+  const positionWeightColumns = useMemo(() => buildPositionWeightColumns(tA, f), [tA, f]);
+  const handoffColumns = useMemo(() => buildHandoffColumns(tA, f, enumLabel), [tA, f, enumLabel]);
 
   // #53 E4 — catalogo delle fasce del tenant.
   const bands = useQuery({
@@ -413,15 +425,11 @@ export default function CompensationIntelligencePage() {
     queryFn: () => apiFetch<CompensationBandListResponse>("/v1/compensation/bands?limit=200"),
   });
 
-  const eur = useMemo(
-    () => new Intl.NumberFormat(i18n.language, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
-    [i18n.language],
-  );
   const bandColumns = useMemo<DataColumn<CompensationBandRow>[]>(
     () => {
       // Dentro il memo, non fuori: definita nel corpo del componente si ricreerebbe a
       // ogni render, e il memo la userebbe senza poterla dichiarare fra le dipendenze.
-      const money = (v: string | null) => (v === null ? "—" : eur.format(Number(v)));
+      const money = (v: string | null) => f.importo(v, "EUR", 0);
       return [
       { header: t("compensation.bands.colBand"), cell: (r) => <span className="font-medium text-foreground">{r.name}</span> },
       { header: t("compensation.bands.colMin"), align: "right", cell: (r) => <span className="tabular-nums">{money(r.minEur)}</span> },
@@ -434,12 +442,12 @@ export default function CompensationIntelligencePage() {
           // e ampiezze diverse si governano in modo diverso.
           if (r.minEur === null || r.maxEur === null || Number(r.minEur) === 0) return <span>—</span>;
           const pct = Math.round(((Number(r.maxEur) - Number(r.minEur)) / Number(r.minEur)) * 100);
-          return <span className="tabular-nums text-muted-foreground">{pct}%</span>;
+          return <span className="tabular-nums text-muted-foreground">{f.percento(pct, "0-100")}</span>;
         },
       },
       ];
     },
-    [t, eur],
+    [t, f],
   );
 
   return (

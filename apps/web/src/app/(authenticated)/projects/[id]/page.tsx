@@ -9,6 +9,7 @@ import {
 import { Crown } from "lucide-react";
 import type { ProjectDetail } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useFormat } from "@/lib/format";
 
 /**
  * `#143` F5 — il dettaglio di un progetto: il lavoro e chi lo fa.
@@ -25,6 +26,7 @@ import { apiFetch } from "@/lib/api/fetch";
  */
 export default function ProjectDetailPage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
   const params = useParams<{ id: string }>();
   const id = params?.id;
 
@@ -70,7 +72,7 @@ export default function ProjectDetailPage() {
           <div data-testid="field-progress">
             <p className="text-xs text-muted-foreground">{t("projects.progressLabel")}</p>
             <p className="text-sm">
-              {p.progressPct === null ? t("projects.progressUnset") : `${p.progressPct}%`}
+              {p.progressPct === null ? t("projects.progressUnset") : `${fmt.percento(p.progressPct, "0-100")}`}
             </p>
           </div>
           {p.purpose && (
@@ -96,7 +98,7 @@ export default function ProjectDetailPage() {
                     {m.fullName ?? m.email ?? m.userId}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {t("projects.since", { date: m.startsOn })}
+                    {t("projects.since", { date: fmt.data(m.startsOn) })}
                   </p>
                 </div>
                 <Badge data-testid="member-role">

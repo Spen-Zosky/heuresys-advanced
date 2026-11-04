@@ -13,6 +13,7 @@ import { isApiError } from "@/lib/api/errors";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { EnumStatusPill } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
   "rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -58,6 +59,7 @@ interface GraphEdge {
 
 export default function VisualizationDetailPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const params = useParams<{ graphId: string }>();
   const graphId = params.graphId;
@@ -298,11 +300,11 @@ export default function VisualizationDetailPage() {
                 {graphExports.data.items.map((e) => (
                   <li key={e.exportId} className="flex items-center justify-between gap-3 py-2 text-sm">
                     <span>
-                      <span className="font-mono text-xs text-muted-foreground">{e.format}</span>
+                      <span className="text-xs text-muted-foreground">{enumLabel("vizExportFormat", e.format)}</span>
                       <span className="ml-2 text-muted-foreground">
                         {e.byteSize === null
                           ? t("visualizations.detail.exportNoContent")
-                          : t("visualizations.detail.exportSize", { bytes: e.byteSize })}
+                          : fmt.dimensione(e.byteSize)}
                       </span>
                     </span>
                     <Button

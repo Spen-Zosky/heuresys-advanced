@@ -112,6 +112,7 @@ interface FitDbRow {
   employee_position_fit_score_user_id: string;
   subject_user_name: string | null;
   employee_position_fit_score_position_id: string;
+  position_title: string | null;
   employee_position_fit_score_dimension: string;
   employee_position_fit_score_score: string;
   employee_position_fit_score_payload: Record<string, unknown>;
@@ -119,7 +120,8 @@ interface FitDbRow {
   created_at: Date;
 }
 
-const FIT_COLS = `employee_position_fit_score_id, employee_position_fit_score_tenant_id,
+const FIT_COLS = `(SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = employee_position_fit_score_position_id) AS position_title,
+  employee_position_fit_score_id, employee_position_fit_score_tenant_id,
   employee_position_fit_score_user_id,
   (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = employee_position_fit_score_user_id) AS subject_user_name,
   employee_position_fit_score_position_id, employee_position_fit_score_dimension,
@@ -133,6 +135,7 @@ function toFit(r: FitDbRow): FitScore {
     userId: r.employee_position_fit_score_user_id,
     subjectUserName: r.subject_user_name ?? null,
     positionId: r.employee_position_fit_score_position_id,
+    positionTitle: r.position_title ?? null,
     dimension: r.employee_position_fit_score_dimension,
     score: Number(r.employee_position_fit_score_score),
     payload: r.employee_position_fit_score_payload ?? {},
@@ -187,6 +190,7 @@ interface ReadinessDbRow {
   readiness_score_user_id: string;
   subject_user_name: string | null;
   readiness_score_position_id: string;
+  position_title: string | null;
   readiness_score_horizon: string;
   readiness_score_value: string | null;
   readiness_score_payload: Record<string, unknown>;
@@ -194,7 +198,8 @@ interface ReadinessDbRow {
   created_at: Date;
 }
 
-const READINESS_COLS = `readiness_score_id, readiness_score_tenant_id, readiness_score_user_id,
+const READINESS_COLS = `(SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = readiness_score_position_id) AS position_title,
+  readiness_score_id, readiness_score_tenant_id, readiness_score_user_id,
   (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = readiness_score_user_id) AS subject_user_name,
   readiness_score_position_id, readiness_score_horizon, readiness_score_value,
   readiness_score_payload, readiness_score_computed_at, created_at`;
@@ -206,6 +211,7 @@ function toReadiness(r: ReadinessDbRow): ReadinessScore {
     userId: r.readiness_score_user_id,
     subjectUserName: r.subject_user_name ?? null,
     positionId: r.readiness_score_position_id,
+    positionTitle: r.position_title ?? null,
     horizon: r.readiness_score_horizon,
     value: numOrNull(r.readiness_score_value),
     payload: r.readiness_score_payload ?? {},
@@ -264,6 +270,7 @@ interface SuccessionDbRow {
   succession_score_user_id: string;
   subject_user_name: string | null;
   succession_score_position_id: string;
+  position_title: string | null;
   succession_score_value: string | null;
   succession_score_horizon: string | null;
   succession_score_payload: Record<string, unknown>;
@@ -271,7 +278,8 @@ interface SuccessionDbRow {
   created_at: Date;
 }
 
-const SUCCESSION_COLS = `succession_score_id, succession_score_tenant_id, succession_score_user_id,
+const SUCCESSION_COLS = `(SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = succession_score_position_id) AS position_title,
+  succession_score_id, succession_score_tenant_id, succession_score_user_id,
   (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = succession_score_user_id) AS subject_user_name,
   succession_score_position_id, succession_score_value, succession_score_horizon,
   succession_score_payload, succession_score_computed_at, created_at`;
@@ -283,6 +291,7 @@ function toSuccession(r: SuccessionDbRow): SuccessionScore {
     userId: r.succession_score_user_id,
     subjectUserName: r.subject_user_name ?? null,
     positionId: r.succession_score_position_id,
+    positionTitle: r.position_title ?? null,
     value: numOrNull(r.succession_score_value),
     horizon: r.succession_score_horizon,
     payload: r.succession_score_payload ?? {},
@@ -339,6 +348,7 @@ interface CriticalPositionDbRow {
   critical_position_id: string;
   critical_position_tenant_id: string;
   critical_position_position_id: string;
+  position_title: string | null;
   critical_position_rationale: string | null;
   critical_position_business_impact_score: string | null;
   critical_position_flagged_at: Date;
@@ -347,7 +357,8 @@ interface CriticalPositionDbRow {
   created_by: string | null;
 }
 
-const CRITICAL_POSITION_COLS = `critical_position_id, critical_position_tenant_id,
+const CRITICAL_POSITION_COLS = `(SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = critical_position_position_id) AS position_title,
+  critical_position_id, critical_position_tenant_id,
   critical_position_position_id, critical_position_rationale, critical_position_business_impact_score,
   critical_position_flagged_at, critical_position_metadata, created_at, created_by`;
 
@@ -356,6 +367,7 @@ function toCriticalPosition(r: CriticalPositionDbRow): CriticalPosition {
     criticalPositionId: r.critical_position_id,
     tenantId: r.critical_position_tenant_id,
     positionId: r.critical_position_position_id,
+    positionTitle: r.position_title ?? null,
     rationale: r.critical_position_rationale,
     businessImpactScore: numOrNull(r.critical_position_business_impact_score),
     flaggedAt: r.critical_position_flagged_at.toISOString(),
@@ -401,6 +413,7 @@ interface CriticalCoverageDbRow {
   critical_role_coverage_status_id: string;
   critical_role_coverage_status_tenant_id: string;
   critical_role_coverage_status_position_id: string;
+  position_title: string | null;
   critical_role_coverage_ready_now_count: number;
   critical_role_coverage_ready_6mo_count: number;
   critical_role_coverage_ready_1y_count: number;
@@ -410,7 +423,8 @@ interface CriticalCoverageDbRow {
   created_at: Date;
 }
 
-const CRITICAL_COVERAGE_COLS = `critical_role_coverage_status_id, critical_role_coverage_status_tenant_id,
+const CRITICAL_COVERAGE_COLS = `(SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = critical_role_coverage_status_position_id) AS position_title,
+  critical_role_coverage_status_id, critical_role_coverage_status_tenant_id,
   critical_role_coverage_status_position_id, critical_role_coverage_ready_now_count,
   critical_role_coverage_ready_6mo_count, critical_role_coverage_ready_1y_count,
   critical_role_coverage_overall_score, critical_role_coverage_payload,
@@ -421,6 +435,7 @@ function toCriticalCoverage(r: CriticalCoverageDbRow): CriticalCoverage {
     criticalRoleCoverageStatusId: r.critical_role_coverage_status_id,
     tenantId: r.critical_role_coverage_status_tenant_id,
     positionId: r.critical_role_coverage_status_position_id,
+    positionTitle: r.position_title ?? null,
     readyNowCount: r.critical_role_coverage_ready_now_count,
     ready6moCount: r.critical_role_coverage_ready_6mo_count,
     ready1yCount: r.critical_role_coverage_ready_1y_count,

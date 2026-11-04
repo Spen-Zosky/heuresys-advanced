@@ -21,6 +21,7 @@ import {
 import { Lock } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
+import { formati } from "@/lib/format";
 
 /**
  * GoalTimelineDialog (#26) — merged activity timeline (updates ∪ check-ins ∪
@@ -53,7 +54,7 @@ function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: str
       const u = e.update;
       const delta =
         u.previousProgress != null || u.newProgress != null
-          ? ` · ${t("goals.timeline.progress")}: ${u.previousProgress ?? "—"}% → ${u.newProgress ?? "—"}%`
+          ? ` · ${t("goals.timeline.progress")}: ${formati(locale).percento(u.previousProgress, "0-100")} → ${formati(locale).percento(u.newProgress, "0-100")}`
           : "";
       return {
         id: u.updateId,
@@ -74,7 +75,7 @@ function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: str
       return {
         id: c.checkInId,
         time,
-        title: `${t("goals.timeline.checkIn")}${c.statusUpdate ? ` · ${enumLabel("goalCheckInStatus", c.statusUpdate)}` : ""} · ${c.newProgress}%`,
+        title: `${t("goals.timeline.checkIn")}${c.statusUpdate ? ` · ${enumLabel("goalCheckInStatus", c.statusUpdate)}` : ""} · ${formati(locale).percento(c.newProgress, "0-100")}`,
         description: description || undefined,
         tone: toneForCheckIn(c.statusUpdate),
       };
@@ -84,7 +85,7 @@ function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: str
       id: m.milestoneId,
       time,
       title: `${t("goals.timeline.milestone")} · ${m.title} · ${enumLabel("goalMilestoneStatus", m.status)}`,
-      description: m.targetDate ? `${t("goals.timeline.target")}: ${m.targetDate}` : undefined,
+      description: m.targetDate ? `${t("goals.timeline.target")}: ${formati(locale).data(m.targetDate)}` : undefined,
       tone: toneForMilestone(m.status),
     };
   });

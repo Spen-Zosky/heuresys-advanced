@@ -112,6 +112,8 @@ export const RewardGateSchema = z.object({
   rewardGateId: z.uuid(),
   tenantId: z.uuid(),
   userId: z.uuid().nullable(),
+  /** F-3 (piano interfacce, L6): il nome, perché la pagina non mostri l'identificativo. */
+  userName: z.string().nullable().optional(),
   positionId: z.uuid().nullable(),
   catalogId: z.uuid(),
   catalogCode: z.string(),

@@ -21,6 +21,8 @@ import type { RoleCode, RoleGrant } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { useCurrentUser, useCurrentUserPermissions } from "@/lib/api/auth";
+import { useFormat } from "@/lib/format";
+import { codiceInParole } from "@/lib/enum-labels";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -54,11 +56,9 @@ const ROLE_CODES: readonly RoleCode[] = [
   "DATA_STEWARD",
 ];
 
-const fmtDate = (v: string | null | undefined): string =>
-  v ? new Date(v).toLocaleDateString() : "—";
-
 export function RolesEditor({ userId }: { userId: string }) {
   const { t } = useTranslation("admin");
+  const f = useFormat();
   const qc = useQueryClient();
   const perms = useCurrentUserPermissions();
   const canAssign = new Set(perms.data?.permissions ?? []).has("role:assign");
@@ -134,11 +134,11 @@ export function RolesEditor({ userId }: { userId: string }) {
               <tbody>
                 {items.map((g) => (
                   <tr key={g.grantId} className="border-b last:border-0" data-testid={`user-role-${g.roleCode}`}>
-                    <td className="py-2 pr-4 align-top">{g.roleCode}</td>
+                    <td className="py-2 pr-4 align-top" title={g.roleCode}>{t(`shell:roles.${g.roleCode}`, { defaultValue: codiceInParole(g.roleCode) })}</td>
                     <td className="py-2 pr-4 align-top text-muted-foreground">
                       {g.tenantId ? t("users.detail.roles.scopeTenant") : t("users.detail.roles.scopePlatform")}
                     </td>
-                    <td className="py-2 pr-4 align-top text-muted-foreground">{fmtDate(g.grantedAt)}</td>
+                    <td className="py-2 pr-4 align-top text-muted-foreground">{f.data(g.grantedAt)}</td>
                     {canAssign && (
                       <td className="py-2 pr-4 align-top">
                         <Button

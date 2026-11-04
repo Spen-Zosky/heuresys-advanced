@@ -49,7 +49,7 @@ pacchetto() {
 
   # il pacchetto deve contenere la main di GitHub appena letta
   atteso=$(git -C "$repo" rev-parse origin/main)
-  nel_pacchetto=$(git bundle list-heads "$locale" refs/remotes/origin/main | cut -d' ' -f1)
+  nel_pacchetto=$(git bundle list-heads "$locale" refs/remotes/origin/main | cut -d' ' -f1 | sort -u)   # origin/HEAD ripete la stessa riga
   [ "$atteso" = "$nel_pacchetto" ] || { log "$nome: origin/main assente dal pacchetto"; return 1; }
 
   # un repository danneggiato farebbe un pacchetto piccolo che sostituisce quello buono

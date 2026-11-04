@@ -58,6 +58,10 @@ type AxeImpact = "critical" | "serious" | "moderate" | "minor";
 const SOGLIA_NODI_DEFAULT = 40;
 const SOGLIA_NODI_PER_ROTTA: Readonly<Record<string, number>> = {
   "/privacy": 25,
+  // L7 (2026-11-04): la dichiarazione di accessibilità è un testo statico in sei sezioni e
+  // ne esamina **29**, misurati sul banco su desktop e Pixel 7 (0 violazioni). 22 sta fra il
+  // guscio (17) e la pagina renderizzata, come per /privacy.
+  "/accessibilita": 22,
 };
 
 const PAGES_PER_PERSONA = {

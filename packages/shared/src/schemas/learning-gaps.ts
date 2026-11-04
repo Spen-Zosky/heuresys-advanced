@@ -167,6 +167,8 @@ export const GapClosurePlanStatusEnum = z.enum(["PROPOSED","ACTIVE","COMPLETED",
 export const GapClosurePlanSchema = z.object({
   planId: z.uuid(),
   userId: z.uuid(),
+  /** F-3 (piano interfacce, L6): il nome della persona, perché la pagina non mostri l'identificativo. */
+  userName: z.string().nullable().optional(),
   positionId: z.uuid().nullable(),
   /** jsonb array — shape is plan-authored, not normalized. */
   milestones: z.array(z.unknown()),
@@ -191,6 +193,8 @@ export const GapAnalysisResultKindEnum = z.enum(["SKILL","KPI","LEARNING","CERTI
 export const GapAnalysisResultSchema = z.object({
   resultId: z.uuid(),
   userId: z.uuid(),
+  /** F-3 (piano interfacce, L6): il nome della persona, perché la pagina non mostri l'identificativo. */
+  userName: z.string().nullable().optional(),
   positionId: z.uuid().nullable(),
   kind: GapAnalysisResultKindEnum,
   overallScore: z.number().nullable(),

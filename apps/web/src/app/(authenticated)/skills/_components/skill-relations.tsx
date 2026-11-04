@@ -23,6 +23,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
 import type { Skill, SkillAlias, SkillEdgeKind, SkillTaxonomyEdge } from "@heuresys/shared";
+import { NomeOppure } from "@/components/senza-nome";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
@@ -248,8 +249,10 @@ export function SkillEdgesPanel({ skillId }: { skillId: string }) {
                 <span className="text-muted-foreground">
                   {ruolo === "parent" ? t("skills.relations.towardsChild") : t("skills.relations.towardsParent")}
                 </span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  {ruolo === "parent" ? e.childSkillId.slice(0, 8) : e.parentSkillId.slice(0, 8)}
+                <span className="text-sm text-foreground">
+                  {ruolo === "parent"
+                    ? <NomeOppure nome={e.childSkillName} id={e.childSkillId} />
+                    : <NomeOppure nome={e.parentSkillName} id={e.parentSkillId} />}
                 </span>
                 {canDelete && (
                   <Button

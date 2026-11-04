@@ -14,6 +14,7 @@ import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { useFormat, type Formati } from "@/lib/format";
+import { NomeOppure } from "@/components/senza-nome";
 
 /**
  * A/L3 (#29) — Talent review admin page. Live over /v1/talent-review/*:
@@ -31,14 +32,10 @@ function cellKey(pot: TalentBand, perf: TalentBand): string {
   return `${pot}|${perf}`;
 }
 
-function shortId(id: string): string {
-  return id.slice(0, 8);
-}
-
 function buildFitColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): DataColumn<FitScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
-    { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
+    { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
     { header: t("talentReview.cols.dimension"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("fitDimension", r.dimension)}</span> },
     { header: t("talentReview.cols.score"), align: "right", cell: (r) => <span className="tabular-nums">{r.score}</span> },
     { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.computedAt)}</span> },
@@ -48,7 +45,7 @@ function buildFitColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): Data
 function buildReadinessColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<ReadinessScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
-    { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
+    { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
     { header: t("talentReview.cols.horizon"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("horizon", r.horizon)}</span> },
     { header: t("talentReview.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value ?? "—"}</span> },
     { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.computedAt)}</span> },
@@ -58,7 +55,7 @@ function buildReadinessColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati)
 function buildSuccessionColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<SuccessionScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
-    { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
+    { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
     { header: t("talentReview.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value ?? "—"}</span> },
     { header: t("talentReview.cols.horizon"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("horizon", r.horizon)}</span> },
     { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.computedAt)}</span> },
@@ -67,7 +64,7 @@ function buildSuccessionColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati
 
 function buildCriticalPositionColumns(t: TFunction, f: Formati): DataColumn<CriticalPosition>[] {
   return [
-    { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
+    { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
     { header: t("talentReview.cols.rationale"), cell: (r) => <span className="text-xs text-muted-foreground">{r.rationale ?? "—"}</span> },
     { header: t("talentReview.cols.businessImpact"), align: "right", cell: (r) => <span className="tabular-nums">{r.businessImpactScore ?? "—"}</span> },
     { header: t("talentReview.cols.flaggedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.flaggedAt)}</span> },
@@ -76,7 +73,7 @@ function buildCriticalPositionColumns(t: TFunction, f: Formati): DataColumn<Crit
 
 function buildCoverageColumns(t: TFunction): DataColumn<CriticalCoverage>[] {
   return [
-    { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
+    { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
     { header: t("talentReview.cols.readyNow"), align: "right", cell: (r) => <span className="tabular-nums">{r.readyNowCount}</span> },
     { header: t("talentReview.cols.ready6mo"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready6moCount}</span> },
     { header: t("talentReview.cols.ready1y"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready1yCount}</span> },

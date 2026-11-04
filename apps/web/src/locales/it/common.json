@@ -632,6 +632,12 @@
       "WEBSITE": "Sito",
       "INVESTOR": "Pagina investitori",
       "DEMO": "Richiesta di dimostrazione"
+    },
+    "regulatoryIntensity": {
+      "LOW": "Bassa",
+      "MEDIUM": "Media",
+      "HIGH": "Alta",
+      "EXTREME": "Estrema"
     }
   },
   "masked": "nascosto per il tuo profilo",
@@ -757,5 +763,6 @@
       "emptyTitle": "Nessun evento recente",
       "emptyDesc": "Il registro degli eventi è vuoto nella finestra corrente."
     }
-  }
+  },
+  "unnamed": "senza nome"
 }

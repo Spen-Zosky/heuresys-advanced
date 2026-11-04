@@ -354,10 +354,11 @@ interface PlanRow {
   gap_closure_plan_position_id: string | null; gap_closure_plan_milestones: unknown[];
   gap_closure_plan_status: string; gap_closure_plan_owner_user_id: string | null;
   gap_closure_plan_target_completion_date: string | null; created_at: Date; updated_at: Date;
+  user_name: string | null;
 }
 function toPlan(r: PlanRow): GapClosurePlan {
   return {
-    planId: r.gap_closure_plan_id, userId: r.gap_closure_plan_user_id,
+    planId: r.gap_closure_plan_id, userId: r.gap_closure_plan_user_id, userName: r.user_name ?? null,
     positionId: r.gap_closure_plan_position_id, milestones: r.gap_closure_plan_milestones ?? [],
     status: r.gap_closure_plan_status as GapClosurePlan["status"],
     ownerUserId: r.gap_closure_plan_owner_user_id,
@@ -368,7 +369,9 @@ function toPlan(r: PlanRow): GapClosurePlan {
 const PLAN_COLS = `gap_closure_plan_id, gap_closure_plan_user_id, gap_closure_plan_position_id,
   gap_closure_plan_milestones, gap_closure_plan_status, gap_closure_plan_owner_user_id,
   gap_closure_plan_target_completion_date::text AS gap_closure_plan_target_completion_date,
-  created_at, updated_at`;
+  created_at, updated_at,
+  (SELECT u.user_display_name FROM sys.sys_users u
+    WHERE u.user_id = gap_closure_plan_user_id AND u.user_tenant_id = gap_closure_plan_tenant_id) AS user_name`;
 
 export async function listClosurePlans(
   q: DbConnector, tenantId: string | undefined, query: GapClosurePlanListQuery,
@@ -405,6 +408,7 @@ interface ResultRow {
   gap_analysis_result_position_id: string | null; gap_analysis_result_kind: string;
   gap_analysis_result_overall_score: string | null;
   gap_analysis_result_payload: Record<string, unknown>; gap_analysis_result_computed_at: Date;
+  user_name: string | null;
 }
 export async function listAnalysisResults(
   q: DbConnector, tenantId: string | undefined, query: GapAnalysisResultListQuery,
@@ -426,13 +430,15 @@ export async function listAnalysisResults(
   const res = await q.query<ResultRow>(
     `SELECT gap_analysis_result_id, gap_analysis_result_user_id, gap_analysis_result_position_id,
             gap_analysis_result_kind, gap_analysis_result_overall_score, gap_analysis_result_payload,
-            gap_analysis_result_computed_at
+            gap_analysis_result_computed_at,
+            (SELECT u.user_display_name FROM sys.sys_users u
+              WHERE u.user_id = gap_analysis_result_user_id AND u.user_tenant_id = gap_analysis_result_tenant_id) AS user_name
        FROM sys.sys_gap_analysis_results ${wc}
       ORDER BY gap_analysis_result_computed_at DESC LIMIT $${lim} OFFSET $${off}`, params);
   return {
     total: Number(totalRow.rows[0]?.total ?? 0),
     items: res.rows.map((r) => ({
-      resultId: r.gap_analysis_result_id, userId: r.gap_analysis_result_user_id,
+      resultId: r.gap_analysis_result_id, userId: r.gap_analysis_result_user_id, userName: r.user_name ?? null,
       positionId: r.gap_analysis_result_position_id,
       kind: r.gap_analysis_result_kind as GapAnalysisResult["kind"],
       overallScore: r.gap_analysis_result_overall_score === null ? null : Number(r.gap_analysis_result_overall_score),

@@ -16,6 +16,7 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { EvidenceDrawer } from "@/components/evidence-drawer";
 import { useFormat } from "@/lib/format";
+import { NomeOppure } from "@/components/senza-nome";
 
 // Higher value = larger gap = worse: ALIGNED → success, MAJOR_GAP → destructive.
 // Only confirmed @heuresys/ui Badge variants + registered text tokens.
@@ -32,7 +33,7 @@ const SEGMENT_TEXT: Record<SkillGapSegment, string> = {
   MAJOR_GAP: "text-danger",
 };
 
-const positionLabel = (r: SkillGapScore) => r.positionTitle ?? r.positionCode ?? r.positionId.slice(0, 8);
+const positionLabel = (r: SkillGapScore, senzaNome: string) => r.positionTitle ?? r.positionCode ?? senzaNome;
 
 export default function SkillGapPage() {
   const { t } = useTranslation("admin");
@@ -66,11 +67,11 @@ export default function SkillGapPage() {
         header: t("insightsSkillGap.colSubject"),
         cell: (r) => (
           <button type="button" data-testid="skillgap-row-select" className="text-left font-medium text-foreground hover:underline" onClick={() => setSelected(r)}>
-            {r.displayName ?? r.userId.slice(0, 8)}
+            <NomeOppure nome={r.displayName} id={r.userId} />
           </button>
         ),
       },
-      { header: t("insightsSkillGap.colPosition"), cell: (r) => <span className="text-foreground">{positionLabel(r)}</span> },
+      { header: t("insightsSkillGap.colPosition"), cell: (r) => <span className="text-foreground">{positionLabel(r, t("common:unnamed"))}</span> },
       { header: t("insightsSkillGap.colValue"), align: "right", cell: (r) => (
         // #124 D6: assente e dichiarato, non «—».
         isMasked(r, "value") || r.value === undefined
@@ -130,7 +131,7 @@ export default function SkillGapPage() {
         <div className="mx-auto max-w-7xl px-6">
           <Card data-testid="skillgap-explain">
             <CardHeader>
-              <CardTitle>{t("insightsSkillGap.explainTitle", { name: selected.displayName ?? selected.userId.slice(0, 8), position: positionLabel(selected) })}</CardTitle>
+              <CardTitle>{t("insightsSkillGap.explainTitle", { name: selected.displayName ?? t("common:unnamed"), position: positionLabel(selected, t("common:unnamed")) })}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {/* #219 F2/B — QUI LA PAGINA SI ROMPEVA, e non per un test.
@@ -171,7 +172,7 @@ export default function SkillGapPage() {
       {evidenceFor && (
         <EvidenceDrawer
           subjectUserId={evidenceFor.userId}
-          subjectName={evidenceFor.displayName ?? evidenceFor.userId.slice(0, 8)}
+          subjectName={evidenceFor.displayName ?? t("common:unnamed")}
           open={evidenceFor !== null}
           onOpenChange={(o) => { if (!o) setEvidenceFor(null); }}
         />

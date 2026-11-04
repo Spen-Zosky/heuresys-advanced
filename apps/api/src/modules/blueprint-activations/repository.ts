@@ -19,6 +19,7 @@ interface Row {
   blueprint_activation_effective_to: Date | null;
   blueprint_activation_metadata: Record<string, unknown>;
   created_at: Date; updated_at: Date;
+  tenant_name: string | null;
 }
 
 import { toDateOnly } from "../../lib/date-only.js";
@@ -26,7 +27,8 @@ import { toDateOnly } from "../../lib/date-only.js";
 const COLS = `blueprint_activation_id, blueprint_activation_tenant_id,
   blueprint_activation_variant_id, blueprint_activation_variant_version_id, blueprint_activation_status,
   blueprint_activation_effective_from, blueprint_activation_effective_to,
-  blueprint_activation_metadata, created_at, updated_at`;
+  blueprint_activation_metadata, created_at, updated_at,
+  (SELECT tn.tenant_name FROM sys.sys_tenancies tn WHERE tn.tenant_id = blueprint_activation_tenant_id) AS tenant_name`;
 
 function toAct(r: Row): BlueprintActivation {
   return {
@@ -40,6 +42,7 @@ function toAct(r: Row): BlueprintActivation {
     metadata: r.blueprint_activation_metadata,
     createdAt: r.created_at.toISOString(),
     updatedAt: r.updated_at.toISOString(),
+    tenantName: r.tenant_name ?? null,
   };
 }
 

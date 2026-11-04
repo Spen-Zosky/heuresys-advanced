@@ -47,6 +47,7 @@ import {
   type RolePermissionsResponse,
 } from "@/lib/api/observability";
 import { useFormat } from "@/lib/format";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 type RolePermissionItem = RolePermissionsResponse["items"][number];
 
@@ -146,6 +147,7 @@ export function SystemHealthLive() {
   const fmt = useFormat();
   const n = (v: number, max = 0) => fmt.numero(v, max);
   const rel = (iso: string | null) => formatRelative(iso, lang);
+  const enumLabel = useEnumLabel();
   const health = useSystemHealth();
   // S-3: la matrice ruoli×permessi chiede `role_matrix:read`, che PLATFORM_OPERATOR non ha.
   // Senza il permesso la sezione non si mostra e la chiamata non parte (giro del banco L1).
@@ -476,10 +478,10 @@ export function SystemHealthLive() {
             events={d.auditFeed.map((ev) => ({
               icon: <ShieldCheck className="h-3.5 w-3.5" />,
               tone: "palette-3" as const,
-              title: ev.actionType,
-              description: ev.resourceType
-                ? `${ev.resourceType}${ev.resourceId ? ` · ${ev.resourceId}` : ""}`
-                : undefined,
+              // F-3 (L6): l'identificativo della risorsa non va nel testo del registro;
+              // azione e tipo di risorsa si leggono a parole (etichetta, o il codice sciolto).
+              title: enumLabel("auditAction", ev.actionType),
+              description: ev.resourceType ? enumLabel("auditResource", ev.resourceType) : undefined,
               meta: (
                 <>
                   <span>{rel(ev.occurredAt)}</span>

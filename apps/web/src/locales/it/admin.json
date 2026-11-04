@@ -332,6 +332,9 @@
       },
       "dash": "—",
       "wizardLink": "Apri wizard Enterprise Typing →",
+      "typingAssessed": "Valutato il {{date}}",
+      "typingRegulatory": "Intensità regolatoria: {{value}}",
+      "typingEmployees": "{{n}} dipendenti",
       "typingEmpty": "Nessun profilo di tipizzazione registrato.",
       "usersHint": "La lista utenti completa è gestita nella pagina dedicata.",
       "usersLink": "Apri /users →"

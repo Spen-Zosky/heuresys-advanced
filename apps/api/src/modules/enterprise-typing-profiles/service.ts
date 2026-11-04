@@ -20,7 +20,7 @@ function visible(a: ActorContext, p: EnterpriseTypingProfile): boolean {
 
 export const enterpriseTypingProfilesService = {
   async list(actor: ActorContext, query: EnterpriseTypingProfileListQuery) {
-    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+    const tenantId = isPlatform(actor) ? query.tenantId : actor.tenantId ?? undefined;
     return repo.listProfiles(pool, { tenantId, query });
   },
   async getById(actor: ActorContext, id: string): Promise<EnterpriseTypingProfile> {

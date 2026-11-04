@@ -14,6 +14,7 @@ import {
   CODE_PATTERN, KEY, REQUISITION_REASONS, REQUISITION_STATUSES,
   useActivePositions, useRequisitions,
 } from "@/lib/recruiting";
+import { NomeOppure } from "@/components/senza-nome";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -170,7 +171,7 @@ export default function RequisitionsPage() {
               {items.map((r) => (
                 <tr key={r.requisitionId} data-testid="requisition-row">
                   <td className="px-4 py-2 font-medium" data-testid="requisition-row-code">{r.code}</td>
-                  <td className="px-4 py-2">{r.positionTitle ?? r.positionId.slice(0, 8)}</td>
+                  <td className="px-4 py-2"><NomeOppure nome={r.positionTitle} id={r.positionId} /></td>
                   <td className="px-4 py-2">{r.headcount}</td>
                   <td className="px-4 py-2">{r.reason ? t(`recruiting.reason.${r.reason}`) : "—"}</td>
                   <td className="px-4 py-2">

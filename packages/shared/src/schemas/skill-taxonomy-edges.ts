@@ -18,6 +18,10 @@ export const SkillTaxonomyEdgeSchema = z.object({
   kind: SkillEdgeKindSchema,
   metadata: z.record(z.string(), z.unknown()),
   createdAt: z.iso.datetime(),
+  // F-3 (piano interfacce, L6): i nomi delle due competenze, perché la pagina non mostri
+  // l'identificativo. Facoltativi per i chiamanti che costruiscono l'arco a mano.
+  parentSkillName: z.string().nullable().optional(),
+  childSkillName: z.string().nullable().optional(),
 });
 export type SkillTaxonomyEdge = z.infer<typeof SkillTaxonomyEdgeSchema>;
 

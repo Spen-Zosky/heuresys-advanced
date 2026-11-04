@@ -6,25 +6,15 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
-import type { BlueprintVariant, BlueprintProcess, ContentLinkForProcess } from "@heuresys/shared";
+import type { BlueprintActivation, BlueprintVariant, BlueprintProcess, ContentLinkForProcess } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
-
-// B-xx: BlueprintActivation stays a LOCAL interface (NOT deduped) — the shared
-// `BlueprintActivation` schema has no `activatedAt` field (it has effectiveFrom/
-// effectiveTo instead), but the "Activated at" column below renders `a.activatedAt`.
-// Flagged, not touched (C4/#42 REGOLA CRITICA: used field missing from shared = STOP).
-interface BlueprintActivation {
-  blueprintActivationId: string;
-  tenantId: string;
-  variantId: string;
-  status: string;
-  activatedAt: string | null;
-}
+import { NomeOppure } from "@/components/senza-nome";
+import { useFormat } from "@/lib/format";
 
 // LinkedDoc === the shared `ContentLinkForProcess` row shape (linkId/role/documentId/
 // documentTitle/documentKind/documentStatus/blueprintProcessName + a few unused extras).
@@ -36,6 +26,7 @@ const TAB_KEYS: ReadonlyArray<Tab> = ["processes", "activations", "documentation
 
 export default function BlueprintVariantDetailPage() {
   const { t } = useTranslation("blueprints");
+  const fmt = useFormat();
   const params = useParams<{ variantId: string }>();
   const variantId = params.variantId;
   const [tab, setTab] = useState<Tab>("processes");
@@ -173,9 +164,9 @@ export default function BlueprintVariantDetailPage() {
               emptyTitle={t("detail.activationsEmpty")}
               caption={t("detail.activationsCaption")}
               columns={[
-                { header: t("detail.activationColumns.tenantId"), cell: (a) => <span className="font-mono text-xs">{a.tenantId.slice(0, 8)}</span> },
+                { header: t("detail.activationColumns.tenantId"), cell: (a) => <span title={a.tenantId}><NomeOppure nome={a.tenantName} id={a.tenantId} /></span> },
                 { header: t("detail.activationColumns.status"), cell: (a) => <EnumStatusBadge domain="blueprintActivationStatus" value={a.status} /> },
-                { header: t("detail.activationColumns.activatedAt"), cell: (a) => <span className="text-xs">{a.activatedAt ?? t("common:value.none")}</span> },
+                { header: t("detail.activationColumns.activatedAt"), cell: (a) => <span className="text-xs">{fmt.data(a.effectiveFrom)}</span> },
               ]}
             />
           </CardContent>

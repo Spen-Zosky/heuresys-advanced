@@ -37,9 +37,9 @@
       "optional": "Optional"
     },
     "activationColumns": {
-      "tenantId": "Tenant ID",
+      "tenantId": "Tenant",
       "status": "Status",
-      "activatedAt": "Activated"
+      "activatedAt": "Effective from"
     },
     "documentationTitle": "Linked documentation",
     "documentationEmpty": "No documents linked.",

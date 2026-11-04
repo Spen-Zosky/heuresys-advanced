@@ -23,6 +23,8 @@ export const BlueprintActivationSchema = z.object({
   metadata: z.record(z.string(), z.unknown()),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
+  /** F-3 (piano interfacce, L6): il nome del tenant, perché la pagina non mostri l'identificativo. */
+  tenantName: z.string().nullable().optional(),
 });
 export type BlueprintActivation = z.infer<typeof BlueprintActivationSchema>;
 

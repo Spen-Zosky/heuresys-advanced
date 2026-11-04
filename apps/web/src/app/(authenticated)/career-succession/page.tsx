@@ -12,6 +12,7 @@ import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { EChartsCard } from "../_charts-client";
+import { NomeOppure } from "@/components/senza-nome";
 
 // B-xx: CareerPath stays a LOCAL interface (NOT deduped) — the shared `CareerPath`
 // schema has no fromJobRoleId/toJobRoleId/difficulty fields at all (it has
@@ -57,8 +58,8 @@ function buildPoolsCols(t: TFunction): DataColumn<SuccessionPool>[] {
 }
 function buildCandidatesCols(t: TFunction): DataColumn<SuccessorCandidate>[] {
   return [
-    { header: t("career.candidatesCols.user"), cell: (c) => <span className="text-xs text-foreground">{c.userName ?? c.userId.slice(0, 8)}</span> },
-    { header: t("career.candidatesCols.pool"), cell: (c) => <span className="text-xs text-muted-foreground">{c.poolName ?? c.poolId.slice(0, 8)}</span> },
+    { header: t("career.candidatesCols.user"), cell: (c) => <span className="text-xs text-foreground"><NomeOppure nome={c.userName} id={c.userId} /></span> },
+    { header: t("career.candidatesCols.pool"), cell: (c) => <span className="text-xs text-muted-foreground"><NomeOppure nome={c.poolName} id={c.poolId} /></span> },
     { header: t("career.candidatesCols.readiness"), cell: (c) => <StatusBadge value={c.readinessLevel} /> },
     { header: t("career.candidatesCols.status"), cell: (c) => <EnumStatusBadge domain="successorCandidateStatus" value={c.status} /> },
   ];

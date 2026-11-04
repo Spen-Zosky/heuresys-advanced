@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import type {
+  LearningGap,
   PositionLearningRequirement,
   PositionLearningModule,
 } from "@heuresys/shared";
@@ -16,15 +17,7 @@ import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useFormat } from "@/lib/format";
-
-interface LearningGap {
-  learningGapId: string;
-  userId: string;
-  skillId: string | null;
-  skillName: string | null;
-  severity: string;
-  detectedAt: string;
-}
+import { NomeOppure, SenzaNome } from "@/components/senza-nome";
 
 export default function PositionLearningPage() {
   const { t } = useTranslation("admin");
@@ -202,8 +195,8 @@ export default function PositionLearningPage() {
             emptyTitle={t("positions.learning.gaps.empty")}
             caption={t("positions.learning.gaps.caption")}
             columns={[
-              { header: t("positions.learning.gaps.columns.user"), cell: (g) => <span className="font-mono text-xs">{g.userId.slice(0, 8)}</span> },
-              { header: t("positions.learning.gaps.columns.skill"), cell: (g) => g.skillName ? <span className="text-xs">{g.skillName}</span> : <span className="font-mono text-xs">{g.skillId?.slice(0, 8) ?? t("positions.learning.dash")}</span> },
+              { header: t("positions.learning.gaps.columns.user"), cell: (g) => <NomeOppure nome={g.userName} id={g.userId} /> },
+              { header: t("positions.learning.gaps.columns.skill"), cell: (g) => g.skillName ? <span className="text-xs">{g.skillName}</span> : g.skillId ? <SenzaNome id={g.skillId} /> : <span className="text-xs">{t("positions.learning.dash")}</span> },
               { header: t("positions.learning.gaps.columns.severity"), cell: (g) => <EnumStatusBadge domain="severity" value={g.severity} /> },
               { header: t("positions.learning.gaps.columns.detected"), cell: (g) => <span className="text-xs">{fmt.data(g.detectedAt)}</span> },
             ]}

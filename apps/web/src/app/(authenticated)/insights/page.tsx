@@ -10,6 +10,7 @@ import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { useFormat } from "@/lib/format";
+import { NomeOppure } from "@/components/senza-nome";
 
 // Band → @heuresys/ui Badge variant (only confirmed variants) + registered text token.
 const BAND_BADGE: Record<FlightRiskBand, "success" | "secondary" | "destructive"> = {
@@ -56,7 +57,7 @@ export default function InsightsPage() {
         header: t("insights.colSubject"),
         cell: (r) => (
           <button type="button" data-testid="insights-row-select" className="text-left font-medium text-foreground hover:underline" onClick={() => setSelected(r)}>
-            {r.displayName ?? r.userId.slice(0, 8)}
+            <NomeOppure nome={r.displayName} id={r.userId} />
           </button>
         ),
       },
@@ -121,7 +122,7 @@ export default function InsightsPage() {
         <div className="mx-auto max-w-7xl px-6">
           <Card data-testid="insights-explain">
             <CardHeader>
-              <CardTitle>{t("insights.explainTitle", { name: selected.displayName ?? selected.userId.slice(0, 8) })}</CardTitle>
+              <CardTitle>{t("insights.explainTitle", { name: selected.displayName ?? t("common:unnamed") })}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">

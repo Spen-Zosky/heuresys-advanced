@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable } from "@/components/data-table-panel";
+import { NomeOppure } from "@/components/senza-nome";
 
 interface PositionKpiReq {
   requirementId: string;
@@ -65,7 +66,7 @@ export default function PositionKpisPage() {
             caption={t("positions.kpis.caption")}
             columns={[
               { header: t("positions.kpis.columns.code"), cell: (k) => <span className="font-mono text-xs">{k.kpiCode ?? "—"}</span> },
-              { header: t("positions.kpis.columns.kpi"), cell: (k) => k.kpiName ?? k.kpiDefinitionId.slice(0, 8) },
+              { header: t("positions.kpis.columns.kpi"), cell: (k) => <NomeOppure nome={k.kpiName} id={k.kpiDefinitionId} /> },
               { header: t("positions.kpis.columns.weight"), cell: (k) => <span className="text-xs">{k.weight}</span> },
               { header: t("positions.kpis.columns.template"), cell: (k) => <span className="font-mono text-xs">{JSON.stringify(k.targetTemplate)}</span> },
             ]}

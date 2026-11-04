@@ -139,6 +139,7 @@ interface GateRow {
   result_override_reason: string | null;
   result_payload: Record<string, unknown> | null;
   result_recorded_at: Date | null;
+  user_name?: string | null;
 }
 
 function toGate(r: GateRow): RewardGate {
@@ -159,6 +160,7 @@ function toGate(r: GateRow): RewardGate {
     rewardGateId: r.reward_gate_id,
     tenantId: r.reward_gate_tenant_id,
     userId: r.reward_gate_user_id,
+    userName: r.user_name ?? null,
     positionId: r.reward_gate_position_id,
     catalogId: r.reward_gate_catalog_id,
     catalogCode: r.catalog_code,
@@ -253,7 +255,9 @@ export async function listRewardGates(
        latest.reward_gate_result_evaluator_user_id AS result_evaluator_user_id,
        latest.reward_gate_result_override_reason   AS result_override_reason,
        latest.reward_gate_result_payload AS result_payload,
-       latest.reward_gate_result_recorded_at AS result_recorded_at
+       latest.reward_gate_result_recorded_at AS result_recorded_at,
+       (SELECT u.user_display_name FROM sys.sys_users u
+         WHERE u.user_id = g.reward_gate_user_id AND u.user_tenant_id = g.reward_gate_tenant_id) AS user_name
      FROM sys.sys_reward_gates g
      JOIN sys.sys_reward_gate_catalog c ON c.reward_gate_catalog_id = g.reward_gate_catalog_id
      LEFT JOIN LATERAL (
@@ -689,13 +693,16 @@ interface BonusPoolRow {
   bonus_pool_payload: Record<string, unknown> | null;
   created_at: Date;
   updated_at: Date;
+  organization_unit_name: string | null;
 }
 
 const BONUS_POOL_COLS = `bonus_pool_id, bonus_pool_tenant_id, bonus_pool_scope,
   bonus_pool_organization_unit_id,
   bonus_pool_period_start::text AS bonus_pool_period_start,
   bonus_pool_period_end::text AS bonus_pool_period_end,
-  bonus_pool_total_eur, bonus_pool_payload, created_at, updated_at`;
+  bonus_pool_total_eur, bonus_pool_payload, created_at, updated_at,
+  (SELECT ou.organization_unit_name FROM sys.sys_organization_units ou
+    WHERE ou.organization_unit_id = bonus_pool_organization_unit_id) AS organization_unit_name`;
 
 function toBonusPool(r: BonusPoolRow): BonusPool {
   return {
@@ -703,6 +710,7 @@ function toBonusPool(r: BonusPoolRow): BonusPool {
     tenantId: r.bonus_pool_tenant_id,
     scope: r.bonus_pool_scope,
     organizationUnitId: r.bonus_pool_organization_unit_id,
+    organizationUnitName: r.organization_unit_name ?? null,
     periodStart: r.bonus_pool_period_start,
     periodEnd: r.bonus_pool_period_end,
     totalEur: r.bonus_pool_total_eur === null ? null : Number(r.bonus_pool_total_eur),
@@ -828,18 +836,22 @@ interface PositionEconomicWeightRow {
   position_economic_weight_metadata: Record<string, unknown> | null;
   created_at: Date;
   updated_at: Date;
+  position_title: string | null;
 }
 
 const POSITION_ECONOMIC_WEIGHT_COLS = `position_economic_weight_id, position_economic_weight_position_id,
   position_economic_weight_tenant_id, position_economic_weight_value,
   position_economic_weight_period_start::text AS position_economic_weight_period_start,
   position_economic_weight_period_end::text AS position_economic_weight_period_end,
-  position_economic_weight_metadata, created_at, updated_at`;
+  position_economic_weight_metadata, created_at, updated_at,
+  (SELECT p.position_title FROM sys.sys_positions p
+    WHERE p.position_id = position_economic_weight_position_id) AS position_title`;
 
 function toPositionEconomicWeight(r: PositionEconomicWeightRow): PositionEconomicWeight {
   return {
     positionEconomicWeightId: r.position_economic_weight_id,
     positionId: r.position_economic_weight_position_id,
+    positionTitle: r.position_title ?? null,
     tenantId: r.position_economic_weight_tenant_id,
     value: Number(r.position_economic_weight_value),
     periodStart: r.position_economic_weight_period_start,

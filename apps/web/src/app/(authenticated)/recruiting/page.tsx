@@ -86,8 +86,8 @@ export default function RecruitingPipelinePage() {
             const p = byPosting.get(a.postingId);
             return {
               id: a.applicationId,
-              title: c ? candidateName(c) : a.candidateId.slice(0, 8),
-              description: p ? p.title : a.postingId.slice(0, 8),
+              title: c ? candidateName(c) : t("common:unnamed"),
+              description: p ? p.title : t("common:unnamed"),
               meta: (
                 <Link
                   href={`/recruiting/applications/${a.applicationId}`}

@@ -20,6 +20,7 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
+import { NomeOppure } from "@/components/senza-nome";
 
 function buildColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<TenantBlueprint>[] {
   return [
@@ -44,7 +45,7 @@ function buildColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<TenantBl
       // ed e' il caso che ha fatto nascere l'oggetto. Si dice per quello che e'.
       cell: (b) =>
         b.tenantId ? (
-          <span className="font-mono text-xs text-muted-foreground">{b.tenantId}</span>
+          <span className="text-xs"><NomeOppure nome={b.tenantName} id={b.tenantId} /></span>
         ) : (
           <span className="text-xs uppercase text-muted-foreground">
             {t("dossier.negotiation")}

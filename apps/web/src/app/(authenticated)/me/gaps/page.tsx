@@ -9,6 +9,7 @@ import { EnumStatusBadge } from "@/components/enum-badge";
 
 import type { MeGap, MeGapsResponse } from "@heuresys/shared";
 import { useFormat } from "@/lib/format";
+import { SenzaNome } from "@/components/senza-nome";
 
 export default function MeGapsPage() {
   const { t } = useTranslation("ess");
@@ -32,7 +33,7 @@ export default function MeGapsPage() {
           if (nomi.length === 0) {
             return (
               <span className="font-medium text-foreground">
-                {g.skillId ? g.skillId.slice(0, 8) : t("gaps.skillFallback")}
+                {g.skillId ? <SenzaNome id={g.skillId} /> : t("gaps.skillFallback")}
               </span>
             );
           }

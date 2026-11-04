@@ -21,6 +21,7 @@ import {
 } from "@/lib/recruiting";
 import { useFormat } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { NomeOppure } from "@/components/senza-nome";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -354,7 +355,7 @@ function FeedbackBlock({
         <ul className="space-y-1 text-sm" data-testid="feedback-list">
           {(q.data?.items ?? []).map((f) => (
             <li key={f.feedbackId} data-testid="feedback-row">
-              <span className="font-medium">{byId.get(f.interviewerUserId) ?? f.interviewerUserId.slice(0, 8)}</span>
+              <span className="font-medium"><NomeOppure nome={byId.get(f.interviewerUserId)} id={f.interviewerUserId} /></span>
               {" · "}<Badge variant="outline" data-testid="feedback-row-recommendation">{t(`recruiting.recommendation.${f.recommendation}`)}</Badge>
               {f.score !== null ? ` · ${f.score}/10` : ""}{f.notes ? ` · ${f.notes}` : ""}
             </li>

@@ -26,6 +26,7 @@ interface BlueprintRow {
   tenant_blueprint_current_version_id: string | null;
   created_at: Date;
   updated_at: Date;
+  tenant_name?: string | null;
 }
 
 interface VersionRow {
@@ -67,7 +68,8 @@ const V_COLS = `tenant_blueprint_version_id, tenant_blueprint_version_blueprint_
   tenant_blueprint_version_regulatory_intensity, tenant_blueprint_version_country_code,
   tenant_blueprint_version_employee_count, tenant_blueprint_version_revenue_eur,
   tenant_blueprint_version_approved_at, tenant_blueprint_version_applied_at,
-  created_at, updated_at`;
+  created_at, updated_at,
+  (SELECT tn.tenant_name FROM sys.sys_tenancies tn WHERE tn.tenant_id = tenant_blueprint_tenant_id) AS tenant_name`;
 
 function toBlueprint(r: BlueprintRow): TenantBlueprint {
   return {
@@ -75,6 +77,7 @@ function toBlueprint(r: BlueprintRow): TenantBlueprint {
     code: r.tenant_blueprint_code,
     name: r.tenant_blueprint_name,
     tenantId: r.tenant_blueprint_tenant_id,
+    tenantName: r.tenant_name ?? null,
     status: r.tenant_blueprint_status as TenantBlueprint["status"],
     currentVersionId: r.tenant_blueprint_current_version_id,
     createdAt: r.created_at.toISOString(),

@@ -18,10 +18,12 @@ import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EChartsCard } from "../_charts-client";
 import { useFormat, type Formati } from "@/lib/format";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
+import { NomeOppure } from "@/components/senza-nome";
 
 interface RewardGate {
   rewardGateId: string;
   userId: string | null;
+  userName?: string | null;
   positionId: string | null;
   catalogCode: string;
   catalogName: string;
@@ -270,7 +272,7 @@ function buildRecommendationColumns(t: TFunction, f: Formati): DataColumn<Compen
 function buildBonusPoolColumns(t: TFunction, f: Formati): DataColumn<BonusPool>[] {
   return [
     { header: t("compReward.cols.scope"), cell: (r) => <span className="font-mono text-xs">{r.scope}</span> },
-    { header: t("compReward.cols.orgUnit"), cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.organizationUnitId?.slice(0, 8) ?? "—"}</span> },
+    { header: t("compReward.cols.orgUnit"), cell: (r) => <span className="text-xs">{r.organizationUnitId ? <NomeOppure nome={r.organizationUnitName} id={r.organizationUnitId} /> : "—"}</span> },
     { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
     { header: t("compReward.cols.total"), align: "right", cell: (r) => (
       r.masked?.includes("totalEur")
@@ -289,7 +291,7 @@ function buildObjectiveRuleColumns(t: TFunction): DataColumn<ObjectiveRewardRule
 
 function buildPositionWeightColumns(t: TFunction, f: Formati): DataColumn<PositionEconomicWeight>[] {
   return [
-    { header: t("compReward.cols.position"), cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.positionId.slice(0, 8)}</span> },
+    { header: t("compReward.cols.position"), cell: (r) => <span className="text-xs"><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
     { header: t("compReward.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value}</span> },
     { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
   ];
@@ -309,7 +311,7 @@ function buildHandoffColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): 
 // same server-pagination + loading/error/empty states as everything else on this page.
 function buildRewardGateColumns(t: TFunction, f: Formati): DataColumn<RewardGate>[] {
   return [
-    { header: t("compensation.cols.user"), cell: (g) => <span className="font-mono text-xs text-muted-foreground">{g.userId?.slice(0, 8) ?? "—"}</span> },
+    { header: t("compensation.cols.user"), cell: (g) => <span className="text-xs">{g.userId ? <NomeOppure nome={g.userName} id={g.userId} /> : "—"}</span> },
     {
       header: t("compensation.cols.gate"),
       cell: (g) => (

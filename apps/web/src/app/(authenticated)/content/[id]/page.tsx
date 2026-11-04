@@ -195,7 +195,7 @@ export default function ContentEditPage() {
       },
       { header: t("content.detail.vCols.title"), cell: (v) => <span className="text-foreground">{v.title ?? "—"}</span> },
       { header: t("content.detail.vCols.changeNote"), cell: (v) => <span className="text-muted-foreground">{v.changeNote ?? "—"}</span> },
-      { header: t("content.detail.vCols.author"), cell: (v) => <span className="font-mono text-xs text-muted-foreground">{v.authorUserId ? v.authorUserId.slice(0, 8) : "—"}</span> },
+      { header: t("content.detail.vCols.author"), cell: (v) => <span className="text-xs">{v.authorUserId ? <NomeOppure nome={v.authorName} id={v.authorUserId} /> : "—"}</span> },
       { header: t("content.detail.vCols.created"), cell: (v) => <span className="text-xs text-muted-foreground">{fmt.data(v.createdAt)}</span> },
       {
         header: t("content.detail.vCols.actions"),
@@ -474,3 +474,4 @@ export default function ContentEditPage() {
 }
 import { ContentMediaPanel } from "../../../../components/ContentMediaPanel";
 import { useFormat } from "@/lib/format";
+import { NomeOppure } from "@/components/senza-nome";

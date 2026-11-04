@@ -4,11 +4,11 @@ Mandato di Enzo: «arma il rilascio di main 7d04cc06». Non si chiude in questa 
 
 | id | cosa | chi | fatta quando | stato |
 |---|---|---|---|---|
-| R1 | Atlante rigenerato con `scripts/atlante-automatico.sh` (PR #161) | Claude | `atlante_fresco.py` dice fresco sul commit da armare | in corso |
-| R2 | CI di 7d04cc06 e del commit dell'atlante (`gh run list`; Atlas con `gh workflow run atlas-freshness.yml`) | Claude | nessun esito rosso o in corso sul commit da armare | da fare |
-| R3 | Copia di fase: `bash scripts/copia-fase.sh copia rilascio-20261104-l2`, poi `prova` e `drive` | Claude | conteggi uguali, impronte verificate | da fare |
-| R4 | Armare con `scripts/close-propagate.sh` | Claude | `refs/heads/prod` sul commit da armare | da fare |
-| R5 | Esito con `scripts/verifica-deploy.sh`, poi readyz, login e ultima migrazione | Claude | verdetto DEPLOYATO | da fare |
+| R1 | Atlante rigenerato con `scripts/atlante-automatico.sh` (PR #161) | Claude | `atlante_fresco.py` dice fresco sul commit da armare | fatta |
+| R2 | CI di 7d04cc06 e del commit dell'atlante (`gh run list`; Atlas con `gh workflow run atlas-freshness.yml`) | Claude | nessun esito rosso o in corso sul commit da armare | fatta |
+| R3 | Copia di fase: `bash scripts/copia-fase.sh copia rilascio-20261104-l2`, poi `prova` e `drive` | Claude | conteggi uguali, impronte verificate | fatta |
+| R4 | Armare con `scripts/close-propagate.sh` | Claude | `refs/heads/prod` sul commit da armare | fatta |
+| R5 | Esito con `scripts/verifica-deploy.sh`, poi readyz, login e ultima migrazione | Claude | verdetto DEPLOYATO | fatta |
 
 ## Simulazione
 
@@ -21,3 +21,5 @@ Nessuna migrazione nella finestra: `git diff --name-status 6028ead3 7d04cc06 -- 
 Guardia: nessun altro push su main dopo l'armamento finché il verdetto non è DEPLOYATO, altrimenti il deploy armato non parte. Niente `--force`, niente `DEPLOY_REQUIRE_CI=0`.
 
 Ritorno: la copia di fase di R3 (`bash scripts/copia-fase.sh ritorna <cartella>`), solo con il sì di Enzo.
+
+Esito: CICLO CHIUSO — 5/5 voci fatte. Armato 24d041f5 alle 01:29 (Roma), verifica-deploy DEPLOYATO alle 01:38. Da `close-propagate.sh` si è passati a `arma-deploy.sh`: il primo propaga anche su altre macchine, decisione separata di Enzo.

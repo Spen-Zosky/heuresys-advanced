@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { PageHeader } from "@heuresys/ui";
+import { StatoCaricamento } from "@/components/stato-pagina";
 import { ProfileTabs, type ProfileTabDef } from "@/components/profile-tabs";
 import { GoalsTab } from "./_components/goals-tab";
 import { PathsTab } from "./_components/paths-tab";
@@ -19,7 +20,7 @@ export default function MeCareerPage() {
   return (
     <main data-testid="me-career-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader title={t("career.title")} description={t("career.description")} />
-      <Suspense fallback={<span className="text-sm text-muted-foreground">{t("common:loading")}</span>}>
+      <Suspense fallback={<StatoCaricamento />}>
         <ProfileTabs tabs={tabs} ariaLabel={t("career.tabs.aria")} />
       </Suspense>
     </main>

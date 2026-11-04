@@ -2,12 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, EmptyState, PageHeader, StatsCard, echartsPresets } from "@heuresys/ui";
+import { Badge, PageHeader, StatsCard, echartsPresets } from "@heuresys/ui";
 import { Boxes, Layers, PieChart } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { SkillsGroupShareAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 export default function SkillsGroupShareAnalyticsPage() {
   const { t } = useTranslation("analytics");
@@ -19,15 +20,15 @@ export default function SkillsGroupShareAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main data-testid="analytics-skills-group-share-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoCaricamento testId="analytics-skills-group-share-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main data-testid="analytics-skills-group-share-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">{t("error")}</p>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-skills-group-share-error" onRiprova={() => void q.refetch()} />
       </main>
     );
   }
@@ -143,11 +144,11 @@ export default function SkillsGroupShareAnalyticsPage() {
           </div>
         </section>
       ) : (
-        <EmptyState
-          data-testid="analytics-skills-group-share-empty"
-          icon={<PieChart className="h-6 w-6" />}
-          title={t("empty.title")}
-          description={t("skillsGroupShare.emptyDesc")}
+        <StatoVuoto
+          testId="analytics-skills-group-share-empty"
+          icona={<PieChart className="h-6 w-6" />}
+          titolo={t("empty.title")}
+          motivo={t("skillsGroupShare.emptyDesc")}
         />
       )}
     </main>

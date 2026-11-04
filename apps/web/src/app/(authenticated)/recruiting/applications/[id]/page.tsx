@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input, Spinner,
+  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input,
 } from "@heuresys/ui";
 import type {
   ApplicationStage, CandidateApplication, Interview, InterviewFeedback,
@@ -22,6 +22,7 @@ import {
 import { useFormat } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { NomeOppure } from "@/components/senza-nome";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -146,12 +147,21 @@ export default function ApplicationDetailPage() {
   });
 
   if (app.isLoading) {
-    return <main className="flex justify-center py-16" data-testid="application-loading"><Spinner /></main>;
+    return (
+      <main className="mx-auto max-w-5xl px-6 py-8">
+        <StatoCaricamento testId="application-loading" />
+      </main>
+    );
   }
   if (app.isError || !app.data) {
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="application-error">
-        <p className="text-sm text-danger">{t("recruiting.application.error")}</p>
+      <main className="mx-auto max-w-5xl px-6 py-8">
+        <StatoErrore
+          errore={app.error}
+          titolo={t("recruiting.application.error")}
+          testId="application-error"
+          onRiprova={() => void app.refetch()}
+        />
       </main>
     );
   }
@@ -220,7 +230,7 @@ export default function ApplicationDetailPage() {
           </div>)}
 
           {(interviews.data?.items ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground" data-testid="interviews-empty">{t("recruiting.application.noInterviews")}</p>
+            <StatoVuoto titolo={t("recruiting.application.noInterviews")} testId="interviews-empty" />
           ) : (
             <ul className="divide-y divide-border rounded-card border border-border" data-testid="interviews-list">
               {(interviews.data?.items ?? []).map((i) => (
@@ -263,7 +273,7 @@ export default function ApplicationDetailPage() {
             <Button type="button" data-testid="offer-submit" disabled={createOffer.isPending} onClick={() => createOffer.mutate()}>{t("recruiting.application.createOffer")}</Button>
           </div>)}
           {(offers.data?.items ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground" data-testid="offers-empty">{t("recruiting.application.noOffers")}</p>
+            <StatoVuoto titolo={t("recruiting.application.noOffers")} testId="offers-empty" />
           ) : (
             <ul className="divide-y divide-border rounded-card border border-border" data-testid="offers-list">
               {(offers.data?.items ?? []).map((o) => (

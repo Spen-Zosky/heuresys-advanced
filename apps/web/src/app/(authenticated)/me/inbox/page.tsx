@@ -12,7 +12,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  EmptyState,
   PageHeader,
   formatRelativeTime,
 } from "@heuresys/ui";
@@ -26,6 +25,7 @@ import {
 import { apiFetch } from "@/lib/api/fetch";
 import { useInboxStream } from "@/lib/use-inbox-stream";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 interface MeNotification {
   notificationId: string;
@@ -181,19 +181,15 @@ export default function MeInboxPage() {
       )}
 
       {inbox.isLoading ? (
-        <p className="text-sm text-muted-foreground" data-testid="me-inbox-loading">
-          {t("common:loading")}
-        </p>
+        <StatoCaricamento testId="me-inbox-loading" />
       ) : inbox.isError ? (
-        <p className="text-sm text-danger" data-testid="me-inbox-error">
-          {t("inbox.error")}
-        </p>
+        <StatoErrore errore={inbox.error} titolo={t("inbox.error")} testId="me-inbox-error" onRiprova={() => void inbox.refetch()} />
       ) : inbox.data && inbox.data.items.length === 0 ? (
-        <EmptyState
-          data-testid="me-inbox-empty"
-          icon={<Inbox className="h-6 w-6" />}
-          title={t("inbox.emptyTitle")}
-          description={t("inbox.emptyDesc")}
+        <StatoVuoto
+          testId="me-inbox-empty"
+          icona={<Inbox className="h-6 w-6" />}
+          titolo={t("inbox.emptyTitle")}
+          motivo={t("inbox.emptyDesc")}
         />
       ) : (
         <div data-testid="me-inbox-list">

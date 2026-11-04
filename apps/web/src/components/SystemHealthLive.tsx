@@ -28,7 +28,6 @@
 import {
   AuditFeed,
   Badge,
-  EmptyState,
   ErrorRateBreakdown,
   KPIStrip,
   RBACMatrix,
@@ -48,6 +47,7 @@ import {
 } from "@/lib/api/observability";
 import { useFormat } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 type RolePermissionItem = RolePermissionsResponse["items"][number];
 
@@ -162,14 +162,14 @@ export function SystemHealthLive() {
         data-testid="system-health-loading"
         className="mx-auto max-w-7xl px-6 py-8"
       >
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+        <StatoCaricamento />
       </main>
     );
   }
   if (health.isError || !health.data) {
     return (
       <main data-testid="system-health-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">{t("health.loadError")}</p>
+        <StatoErrore errore={health.error} titolo={t("health.loadError")} onRiprova={() => void health.refetch()} />
       </main>
     );
   }
@@ -438,15 +438,15 @@ export function SystemHealthLive() {
           />
         </div>
       ) : (
-        <EmptyState
-          data-testid="system-health-slow-queries-empty"
-          icon={<Database className="h-6 w-6" />}
-          title={
+        <StatoVuoto
+          testId="system-health-slow-queries-empty"
+          icona={<Database className="h-6 w-6" />}
+          titolo={
             slowQueries.data && !slowQueries.data.extensionAvailable
               ? t("health.slow.unavailableTitle")
               : t("health.slow.emptyTitle")
           }
-          description={
+          motivo={
             slowQueries.data && !slowQueries.data.extensionAvailable
               ? t("health.slow.unavailableDesc")
               : t("health.slow.emptyDesc")
@@ -464,11 +464,11 @@ export function SystemHealthLive() {
           lastReload={d.rbac.loadedAt ? rel(d.rbac.loadedAt) : undefined}
         />
       ) : (
-        <EmptyState
-          data-testid="system-health-rbac-empty"
-          icon={<Lock className="h-6 w-6" />}
-          title={t("health.rbac.unavailableTitle")}
-          description={t("health.rbac.unavailableDesc")}
+        <StatoVuoto
+          testId="system-health-rbac-empty"
+          icona={<Lock className="h-6 w-6" />}
+          titolo={t("health.rbac.unavailableTitle")}
+          motivo={t("health.rbac.unavailableDesc")}
         />
       )}
 
@@ -495,11 +495,11 @@ export function SystemHealthLive() {
           />
         ) : (
           <div className="lg:col-span-2">
-            <EmptyState
-              data-testid="system-health-audit-empty"
-              icon={<ShieldCheck className="h-6 w-6" />}
-              title={t("health.audit.emptyTitle")}
-              description={t("health.audit.emptyDesc")}
+            <StatoVuoto
+              testId="system-health-audit-empty"
+              icona={<ShieldCheck className="h-6 w-6" />}
+              titolo={t("health.audit.emptyTitle")}
+              motivo={t("health.audit.emptyDesc")}
             />
           </div>
         )}

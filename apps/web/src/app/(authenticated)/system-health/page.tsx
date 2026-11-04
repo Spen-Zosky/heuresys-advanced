@@ -1,8 +1,8 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { useCurrentUserPermissions } from "../../../lib/api/auth";
 import { SystemHealthLive } from "../../../components/SystemHealthLive";
+import { StatoCaricamento } from "@/components/stato-pagina";
 
 /**
  * /system-health — production route, gated on `observability:read`.
@@ -17,13 +17,12 @@ import { SystemHealthLive } from "../../../components/SystemHealthLive";
  * the authenticated layout shows around the DashboardShell).
  */
 export default function SystemHealthPage() {
-  const { t } = useTranslation("admin");
   const perms = useCurrentUserPermissions();
 
   if (perms.isLoading) {
     return (
       <main className="flex h-screen items-center justify-center">
-        <span className="text-sm opacity-60">{t("common:loading")}</span>
+        <StatoCaricamento />
       </main>
     );
   }

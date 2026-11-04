@@ -20,6 +20,7 @@ import type { UserTimelineEvent, UserTimelineSummaryResponse } from "@heuresys/s
 import { apiFetch } from "@/lib/api/fetch";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const PAGE = 25;
 
@@ -101,13 +102,11 @@ export function TimelinePanel({ basePath, userId, testId = "timeline-panel" }: T
         ) : null}
 
         {events.isLoading ? (
-          <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+          <StatoCaricamento />
         ) : events.isError ? (
-          <p className="text-sm text-danger" data-testid="timeline-error">{t("timeline.error")}</p>
+          <StatoErrore errore={events.error} titolo={t("timeline.error")} testId="timeline-error" onRiprova={() => void events.refetch()} />
         ) : shown === 0 ? (
-          <p className="text-sm text-muted-foreground" data-testid="timeline-empty">
-            {t("timeline.empty")}
-          </p>
+          <StatoVuoto compatto titolo={t("timeline.empty")} testId="timeline-empty" />
         ) : (
           <ol className="space-y-3" data-testid="timeline-list">
             {events.data!.items.map((e) => (

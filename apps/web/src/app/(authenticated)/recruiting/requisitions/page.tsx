@@ -5,10 +5,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input, EmptyState, Spinner,
+  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input,
 } from "@heuresys/ui";
 import type { JobRequisition, JobRequisitionStatus } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { useCan } from "@/lib/api/auth";
 import {
   CODE_PATTERN, KEY, REQUISITION_REASONS, REQUISITION_STATUSES,
@@ -150,11 +151,11 @@ export default function RequisitionsPage() {
       )}
 
       {q.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <StatoCaricamento />
       ) : q.isError ? (
-        <p className="text-sm text-danger" data-testid="requisitions-error">{t("recruiting.error")}</p>
+        <StatoErrore errore={q.error} titolo={t("recruiting.error")} testId="requisitions-error" onRiprova={() => void q.refetch()} />
       ) : items.length === 0 ? (
-        <EmptyState data-testid="requisitions-empty" title={t("recruiting.requisitions.emptyTitle")} description={t("recruiting.requisitions.emptyDesc")} />
+        <StatoVuoto testId="requisitions-empty" titolo={t("recruiting.requisitions.emptyTitle")} motivo={t("recruiting.requisitions.emptyDesc")} />
       ) : (
         <div className="overflow-x-auto rounded-card border border-border">
           <table className="w-full text-sm" data-testid="requisitions-table">

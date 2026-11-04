@@ -32,6 +32,7 @@ import { isApiError } from "@/lib/api/errors";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
@@ -178,11 +179,8 @@ export default function WhistleblowingConsolePage() {
         // connessione»: chi non ha diritto di leggere veniva invitato a insistere, e chi
         // il diritto ce l'ha non avrebbe saputo distinguere un vero problema di rete.
         // `ApiError` porta lo status, quindi la distinzione si fa sul fatto, non sul testo.
-        errorMessage={
-          isApiError(reports.error) && reports.error.status === 403
-            ? t("whistleblowingConsole.forbiddenMessage")
-            : t("whistleblowingConsole.errorMessage")
-        }
+        errorMessage={t("whistleblowingConsole.errorMessage")}
+        deniedReason={t("whistleblowingConsole.forbiddenMessage")}
         rows={reports.data?.items ?? []}
         rowKey={(r) => r.reportId}
         rowTestId="wb-console-row"
@@ -212,11 +210,14 @@ export default function WhistleblowingConsolePage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {detail.isLoading && <p className="text-sm text-muted-foreground">{t("common:loading")}</p>}
+            {detail.isLoading && <StatoCaricamento />}
             {detail.isError && (
-              <p className="text-sm text-danger" data-testid="wb-console-detail-error">
-                {t("whistleblowingConsole.detail.loadError")}
-              </p>
+              <StatoErrore
+                errore={detail.error}
+                titolo={t("whistleblowingConsole.detail.loadError")}
+                testId="wb-console-detail-error"
+                onRiprova={() => void detail.refetch()}
+              />
             )}
             {detail.data && (
               <>

@@ -9,7 +9,6 @@ import {
   type AuditEvent,
   type AuditTone,
   Badge,
-  EmptyState,
   PageHeader,
   StatsCard,
   formatRelativeTime,
@@ -30,6 +29,7 @@ import {
 import type { DashboardTrendKey, DashboardWidgetsResponse } from "@heuresys/shared";
 import { apiFetch } from "../../../lib/api/fetch";
 import { useEnumLabel } from "../../../lib/enum-labels";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /** Map a free-text activity kind to a branded icon + tone (no fabricated data —
  *  purely a presentation choice over the real `kind` string). */
@@ -71,15 +71,15 @@ export default function DashboardPage() {
 
   if (widgets.isLoading) {
     return (
-      <main data-testid="dashboard-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoCaricamento testId="dashboard-loading" />
       </main>
     );
   }
   if (widgets.isError) {
     return (
-      <main data-testid="dashboard-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">{t("dashboard.error")}</p>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoErrore errore={widgets.error} titolo={t("dashboard.error")} testId="dashboard-error" onRiprova={() => void widgets.refetch()} />
       </main>
     );
   }
@@ -145,11 +145,11 @@ export default function DashboardPage() {
         <div className="space-y-3">
           <h2 className="text-base font-semibold tracking-tight">{t("dashboard.gapsTitle")}</h2>
           {w.upcomingLearningDeadlines.length === 0 ? (
-            <EmptyState
-              data-testid="deadlines-empty"
-              icon={<ShieldCheck className="h-6 w-6" />}
-              title={t("dashboard.gapsEmptyTitle")}
-              description={t("dashboard.gapsEmptyDesc")}
+            <StatoVuoto
+              testId="deadlines-empty"
+              icona={<ShieldCheck className="h-6 w-6" />}
+              titolo={t("dashboard.gapsEmptyTitle")}
+              motivo={t("dashboard.gapsEmptyDesc")}
             />
           ) : (
             <ul data-testid="dashboard-deadlines" className="divide-y divide-border overflow-hidden rounded-card border border-border bg-card">
@@ -170,10 +170,10 @@ export default function DashboardPage() {
         <div className="space-y-3">
           <h2 className="text-base font-semibold tracking-tight">{t("dashboard.activityTitle")}</h2>
           {activityEvents.length === 0 ? (
-            <EmptyState
-              icon={<Activity className="h-6 w-6" />}
-              title={t("dashboard.activityEmptyTitle")}
-              description={t("dashboard.activityEmptyDesc")}
+            <StatoVuoto
+              icona={<Activity className="h-6 w-6" />}
+              titolo={t("dashboard.activityEmptyTitle")}
+              motivo={t("dashboard.activityEmptyDesc")}
             />
           ) : (
             <AuditFeed events={activityEvents} title={t("dashboard.activityTitle")} subtitle={t("dashboard.activitySubtitle", { kind: w.scope.kind })} />

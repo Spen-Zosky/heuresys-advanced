@@ -10,6 +10,7 @@ import type {
   ObjectiveRewardRule, PositionEconomicWeight, PayrollHandoffRecord,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import type { CompensationBandListResponse, CompensationBand as CompensationBandRow, VariablePayEvaluation } from "@heuresys/shared";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
@@ -157,11 +158,14 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
       </div>
 
       {q.isLoading ? (
-        <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+        <StatoCaricamento />
       ) : q.isError ? (
-        <p className="text-sm text-danger" data-testid="comp-evaluation-error">
-          {t("compReward.error")}
-        </p>
+        <StatoErrore
+          errore={q.error}
+          titolo={t("compReward.error")}
+          testId="comp-evaluation-error"
+          onRiprova={() => void q.refetch()}
+        />
       ) : q.data ? (
         <div className="space-y-4 text-sm">
           {/*
@@ -479,10 +483,10 @@ export default function CompensationIntelligencePage() {
               height={240}
               ariaLabel={t("compensation.distributionAria")}
             />
+          ) : dist.isLoading ? (
+            <StatoCaricamento />
           ) : (
-            <p className="py-12 text-center text-xs text-muted-foreground">
-              {dist.isLoading ? t("common:loading") : t("compensation.distributionEmpty")}
-            </p>
+            <StatoVuoto titolo={t("compensation.distributionEmpty")} />
           )}
         </div>
       </section>

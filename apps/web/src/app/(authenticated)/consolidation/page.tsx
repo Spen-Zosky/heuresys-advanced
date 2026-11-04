@@ -22,6 +22,7 @@ import { ApiError } from "@/lib/api/errors";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill, type StatusTone } from "@/components/status-pill";
 import { useFormat } from "@/lib/format";
+import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 // AC-10 — La pagina del Direttore HR per il consolidamento del tenant col prototipo
 // (`.programmi/consolidamento/agente/`). L'agente propone, una persona decide: qui si avviano
@@ -214,23 +215,30 @@ export default function ConsolidationPage() {
       ) : null}
 
       {access.isError || sessions.isError ? (
-        <div data-testid="consolidation-load-error" className="rounded-card border border-border bg-card px-4 py-6 text-sm text-muted-foreground">
-          {t("consolidation.loadError")}
-        </div>
+        <StatoErrore
+          errore={access.error ?? sessions.error}
+          titolo={t("consolidation.loadError")}
+          testId="consolidation-load-error"
+          onRiprova={() => {
+            void access.refetch();
+            void sessions.refetch();
+          }}
+        />
       ) : null}
 
       {sessions.data && corrente === null ? (
-        <Card data-testid="consolidation-empty">
-          <CardHeader><CardTitle>{t("consolidation.emptyTitle")}</CardTitle></CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <p>{t("consolidation.emptyDescription")}</p>
-            {canRun ? (
+        <StatoVuoto
+          testId="consolidation-empty"
+          titolo={t("consolidation.emptyTitle")}
+          motivo={t("consolidation.emptyDescription")}
+          azione={
+            canRun ? (
               <Button type="button" data-testid="consolidation-start" disabled={occupato} onClick={() => start.mutate()}>
                 {t("consolidation.start")}
               </Button>
-            ) : null}
-          </CardContent>
-        </Card>
+            ) : undefined
+          }
+        />
       ) : null}
 
       {corrente ? (

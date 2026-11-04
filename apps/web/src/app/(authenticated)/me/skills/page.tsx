@@ -12,13 +12,14 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Card, CardContent, CardHeader, CardTitle, EmptyState, PageHeader } from "@heuresys/ui";
+import { Badge, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { Inbox } from "lucide-react";
 import type { MeSkillPossession, MeSkillPossessionResponse } from "@heuresys/shared";
 import { EnumStatusPill } from "@/components/enum-badge";
 import { apiFetch } from "@/lib/api/fetch";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 interface MeSkillEvidence {
   userSkillEvidenceId: string;
@@ -59,19 +60,15 @@ export default function MeSkillsPage() {
 
       {/* Current possession — the primary view (#46 D1) */}
       {possession.isLoading ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">
-          {t("common:loading")}
-        </div>
+        <StatoCaricamento />
       ) : possession.isError ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-danger" data-testid="me-skills-error">
-          {t("skills.error")}
-        </div>
+        <StatoErrore errore={possession.error} titolo={t("skills.error")} testId="me-skills-error" onRiprova={() => void possession.refetch()} />
       ) : possession.data && possession.data.items.length === 0 ? (
-        <EmptyState
-          data-testid="me-skills-empty"
-          icon={<Inbox className="h-6 w-6" />}
-          title={t("skills.emptyTitle")}
-          description={t("skills.emptyDesc")}
+        <StatoVuoto
+          testId="me-skills-empty"
+          icona={<Inbox className="h-6 w-6" />}
+          titolo={t("skills.emptyTitle")}
+          motivo={t("skills.emptyDesc")}
         />
       ) : (
         <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
@@ -116,11 +113,11 @@ export default function MeSkillsPage() {
         <CardHeader><CardTitle>{t("skills.evidenceTitle")}</CardTitle></CardHeader>
         <CardContent className="p-0">
           {evidence.isLoading ? (
-            <p className="p-4 text-sm text-muted-foreground">{t("common:loading")}</p>
+            <StatoCaricamento />
           ) : evidence.isError ? (
-            <p className="p-4 text-sm text-danger">{t("skills.error")}</p>
+            <StatoErrore errore={evidence.error} titolo={t("skills.error")} testId="stato-errore-evidenze" onRiprova={() => void evidence.refetch()} />
           ) : (evidence.data?.items.length ?? 0) === 0 ? (
-            <p className="p-4 text-sm text-muted-foreground" data-testid="me-skill-evidence-empty">{t("skills.evidenceEmpty")}</p>
+            <StatoVuoto titolo={t("skills.evidenceEmpty")} testId="me-skill-evidence-empty" />
           ) : (
             <table className="w-full border-collapse text-sm" data-testid="me-skill-evidence-table">
               <thead>

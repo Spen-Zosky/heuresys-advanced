@@ -34,13 +34,11 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  EmptyState,
-  ErrorState,
   PageHeader,
   Sparkline,
-  Spinner,
   StatsCard,
 } from "@heuresys/ui";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { LayoutDashboard, Lock, EyeOff } from "lucide-react";
 import type {
   DashboardBlockData,
@@ -95,7 +93,7 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
         </CardHeader>
         <CardContent>
           {v.content.counters.length === 0 ? (
-            <EmptyState title={t("dashboard.famiglie.vuotoValori")} />
+            <StatoVuoto titolo={t("dashboard.famiglie.vuotoValori")} />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {v.content.counters.map((c) => (
@@ -117,7 +115,7 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
         </CardHeader>
         <CardContent>
           {punti.length === 0 ? (
-            <EmptyState title={t("dashboard.famiglie.vuotoAndamento")} />
+            <StatoVuoto titolo={t("dashboard.famiglie.vuotoAndamento")} />
           ) : (
             <>
               <Sparkline data={punti.map((p) => p.value)} />
@@ -140,7 +138,7 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
       </CardHeader>
       <CardContent>
         {righe.length === 0 ? (
-          <EmptyState title={t("dashboard.famiglie.vuotoRighe")} />
+          <StatoVuoto titolo={t("dashboard.famiglie.vuotoRighe")} />
         ) : (
           // V-9: la tabella del pacchetto UI scrive la paginazione in inglese; EntityTable la
           // scrive nella lingua della persona.
@@ -185,18 +183,26 @@ export default function CruscottoDiFamigliaPage() {
     enabled: famiglia !== null,
   });
 
-  if (catalogo.isLoading) return <Spinner />;
-  if (catalogo.isError) return <ErrorState title={t("dashboard.famiglie.catalogoIrraggiungibile")} />;
+  if (catalogo.isLoading) return <StatoCaricamento />;
+  if (catalogo.isError) {
+    return (
+      <StatoErrore
+        errore={catalogo.error}
+        titolo={t("dashboard.famiglie.catalogoIrraggiungibile")}
+        onRiprova={() => void catalogo.refetch()}
+      />
+    );
+  }
 
   // Il catalogo contiene SOLO ciò a cui l'attore ha diritto: se la famiglia non c'è, o non
   // esiste o non è sua — e in entrambi i casi la risposta onesta è la stessa, senza
   // rivelare quale dei due (nessuna enumerazione).
   if (famiglia === null) {
     return (
-      <EmptyState
-        data-testid="cruscotto-non-disponibile"
-        title={t("dashboard.famiglie.nonDisponibileTitolo")}
-        description={t("dashboard.famiglie.nonDisponibileTesto")}
+      <StatoVuoto
+        testId="cruscotto-non-disponibile"
+        titolo={t("dashboard.famiglie.nonDisponibileTitolo")}
+        motivo={t("dashboard.famiglie.nonDisponibileTesto")}
       />
     );
   }
@@ -216,8 +222,14 @@ export default function CruscottoDiFamigliaPage() {
         }
       />
 
-      {dati.isLoading && <Spinner />}
-      {dati.isError && <ErrorState title={t("dashboard.famiglie.datiIrraggiungibili")} />}
+      {dati.isLoading && <StatoCaricamento />}
+      {dati.isError && (
+        <StatoErrore
+          errore={dati.error}
+          titolo={t("dashboard.famiglie.datiIrraggiungibili")}
+          onRiprova={() => void dati.refetch()}
+        />
+      )}
 
       {dati.data && (
         <div className="grid gap-4 lg:grid-cols-2">

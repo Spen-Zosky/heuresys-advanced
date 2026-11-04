@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, EmptyState, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge, PageHeader, StatsCard } from "@heuresys/ui";
 import { GitBranch, Layers, Network, Sigma, Users } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type {
@@ -12,6 +12,7 @@ import type {
   OrgNetworkSpanRow,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /** Brand palette as raw HSL CSS-var refs so the echarts canvas (outside Tailwind's
  *  reach) still follows the active theme tokens — same pattern as attendance/page.tsx. */
@@ -117,15 +118,15 @@ export default function OrgNetworkAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main data-testid="analytics-org-network-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoCaricamento testId="analytics-org-network-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main data-testid="analytics-org-network-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">{t("error")}</p>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-org-network-error" onRiprova={() => void q.refetch()} />
       </main>
     );
   }
@@ -217,11 +218,11 @@ export default function OrgNetworkAnalyticsPage() {
                   />
                 </div>
               ) : (
-                <EmptyState
-                  data-testid="analytics-org-network-span-empty"
-                  icon={<Users className="h-6 w-6" />}
-                  title={t("orgNetwork.spanEmptyTitle")}
-                  description={t("orgNetwork.spanEmptyDesc")}
+                <StatoVuoto
+                  testId="analytics-org-network-span-empty"
+                  icona={<Users className="h-6 w-6" />}
+                  titolo={t("orgNetwork.spanEmptyTitle")}
+                  motivo={t("orgNetwork.spanEmptyDesc")}
                 />
               )}
             </div>
@@ -242,22 +243,22 @@ export default function OrgNetworkAnalyticsPage() {
                   />
                 </div>
               ) : (
-                <EmptyState
-                  data-testid="analytics-org-network-reach-empty"
-                  icon={<Network className="h-6 w-6" />}
-                  title={t("orgNetwork.spanEmptyTitle")}
-                  description={t("orgNetwork.spanEmptyDesc")}
+                <StatoVuoto
+                  testId="analytics-org-network-reach-empty"
+                  icona={<Network className="h-6 w-6" />}
+                  titolo={t("orgNetwork.spanEmptyTitle")}
+                  motivo={t("orgNetwork.spanEmptyDesc")}
                 />
               )}
             </div>
           </div>
         </section>
       ) : (
-        <EmptyState
-          data-testid="analytics-org-network-empty"
-          icon={<Network className="h-6 w-6" />}
-          title={t("empty.title")}
-          description={t("orgNetwork.emptyDesc")}
+        <StatoVuoto
+          testId="analytics-org-network-empty"
+          icona={<Network className="h-6 w-6" />}
+          titolo={t("empty.title")}
+          motivo={t("orgNetwork.emptyDesc")}
         />
       )}
     </main>

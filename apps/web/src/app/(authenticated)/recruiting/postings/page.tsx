@@ -5,10 +5,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input, EmptyState, Spinner,
+  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input,
 } from "@heuresys/ui";
 import type { JobPosting, JobPostingStatus } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { useCan } from "@/lib/api/auth";
 import {
   CODE_PATTERN, KEY, POSTING_STATUSES, POSTING_VISIBILITIES,
@@ -148,11 +149,11 @@ export default function PostingsPage() {
       )}
 
       {q.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <StatoCaricamento />
       ) : q.isError ? (
-        <p className="text-sm text-danger" data-testid="postings-error">{t("recruiting.error")}</p>
+        <StatoErrore errore={q.error} titolo={t("recruiting.error")} testId="postings-error" onRiprova={() => void q.refetch()} />
       ) : items.length === 0 ? (
-        <EmptyState data-testid="postings-empty" title={t("recruiting.postings.emptyTitle")} description={t("recruiting.postings.emptyDesc")} />
+        <StatoVuoto testId="postings-empty" titolo={t("recruiting.postings.emptyTitle")} motivo={t("recruiting.postings.emptyDesc")} />
       ) : (
         <div className="overflow-x-auto rounded-card border border-border">
           <table className="w-full text-sm" data-testid="postings-table">

@@ -34,6 +34,8 @@ export interface EntityTableProps<T> {
   isError: boolean;
   errorTestId?: string;
   errorMessage?: string;
+  /** Il motivo da dire se l'API nega l'accesso (403), quando la pagina lo sa meglio dell'API (F-5). */
+  deniedReason?: string;
   /**
    * L'errore della chiamata (F-4, S-12). Se e' un errore dell'API, la riga d'errore dice che cosa
    * e' successo nella lingua della persona e porta il riferimento da citare; altrimenti resta il
@@ -66,7 +68,7 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 export function EntityTable<T>(props: EntityTableProps<T>) {
   const { t } = useTranslation();
   const {
-    isLoading, isError, errorTestId, errorMessage, error,
+    isLoading, isError, errorTestId, errorMessage, error, deniedReason,
     rows, rowKey, rowTestId, onRowClick, columns,
     emptyTestId, emptyTitle, emptyDescription, caption,
     pageSize: pageSizeProp, server,
@@ -95,6 +97,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       <StatoErrore
         errore={error}
         titolo={errorMessage ?? t("error.load")}
+        {...(deniedReason ? { motivoNegato: deniedReason } : {})}
         {...(errorTestId ? { testId: errorTestId } : {})}
       />
     );

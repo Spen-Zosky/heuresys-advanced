@@ -30,7 +30,7 @@ export function StatoCaricamento({ etichetta, testId = "stato-caricamento" }: { 
       role="status"
       aria-live="polite"
       aria-busy="true"
-      className="flex items-center gap-2 rounded-card border border-border bg-card p-6 text-sm text-muted-foreground"
+      className="flex items-center gap-2 py-6 text-sm text-muted-foreground"
     >
       <Spinner className="h-4 w-4" />
       <span>{etichetta ?? t("common:loading")}</span>
@@ -43,15 +43,26 @@ export function StatoVuoto({
   motivo,
   azione,
   icona,
+  compatto,
   testId = "stato-vuoto",
 }: {
   titolo?: string;
   motivo?: string;
   azione?: ReactNode;
   icona?: ReactNode;
+  /** Una riga sola, per i vuoti dentro una scheda o una tabellina: stesso stato, meno spazio. */
+  compatto?: boolean;
   testId?: string;
 }) {
   const { t } = useTranslation();
+  if (compatto) {
+    return (
+      <p data-testid={testId} data-stato="vuoto" className="text-sm text-muted-foreground">
+        {titolo ?? t("common:empty.none")}
+        {motivo ? ` ${motivo}` : ""}
+      </p>
+    );
+  }
   return (
     <div data-testid={testId} data-stato="vuoto">
       <EmptyState
@@ -89,16 +100,19 @@ export function StatoErrore({
   errore,
   titolo,
   onRiprova,
+  motivoNegato,
   testId = "stato-errore",
 }: {
   errore?: unknown;
   titolo?: string;
   onRiprova?: () => void;
+  /** Il motivo da dire se l'API nega l'accesso (403), quando la pagina lo sa meglio dell'API. */
+  motivoNegato?: string;
   testId?: string;
 }) {
   const { t } = useTranslation();
   if (isApiError(errore) && errore.status === 403) {
-    return <StatoNegato motivo={errore.message} testId={testId} />;
+    return <StatoNegato motivo={motivoNegato ?? errore.message} testId={testId} />;
   }
   const codice = codiceErrore(errore);
   const testo = testoPerLaPersona(errore) ?? t("common:error.loadHint");

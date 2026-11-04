@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, EmptyState, PageHeader, StatsCard, formatCurrency } from "@heuresys/ui";
+import { Badge, PageHeader, StatsCard, formatCurrency } from "@heuresys/ui";
 import { ClipboardList, Clock, Euro } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type {
@@ -13,6 +13,7 @@ import type {
   OvertimeMonthlyRow,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /** Brand palette as raw HSL CSS-var refs so the echarts canvas (outside Tailwind's
  *  reach) follows the active theme tokens — same pattern as attendance/page.tsx. */
@@ -142,15 +143,15 @@ export default function OvertimeAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main data-testid="analytics-overtime-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoCaricamento testId="analytics-overtime-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main data-testid="analytics-overtime-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">{t("error")}</p>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-overtime-error" onRiprova={() => void q.refetch()} />
       </main>
     );
   }
@@ -306,21 +307,21 @@ export default function OvertimeAnalyticsPage() {
                 />
               </div>
             ) : (
-              <EmptyState
-                data-testid="analytics-overtime-ou-empty"
-                icon={<Clock className="h-6 w-6" />}
-                title={t("overtime.ouEmptyTitle")}
-                description={t("overtime.ouEmptyDesc")}
+              <StatoVuoto
+                testId="analytics-overtime-ou-empty"
+                icona={<Clock className="h-6 w-6" />}
+                titolo={t("overtime.ouEmptyTitle")}
+                motivo={t("overtime.ouEmptyDesc")}
               />
             )}
           </div>
         </section>
       ) : (
-        <EmptyState
-          data-testid="analytics-overtime-empty"
-          icon={<ClipboardList className="h-6 w-6" />}
-          title={t("empty.title")}
-          description={t("overtime.emptyDesc")}
+        <StatoVuoto
+          testId="analytics-overtime-empty"
+          icona={<ClipboardList className="h-6 w-6" />}
+          titolo={t("empty.title")}
+          motivo={t("overtime.emptyDesc")}
         />
       )}
     </main>

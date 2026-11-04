@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   Badge,
-  EmptyState,
   PageHeader,
   RadialGauge,
   StatsCard,
@@ -14,6 +13,7 @@ import { Gauge, Target } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { KpiAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const ICON_CLS = "h-4 w-4";
 
@@ -26,15 +26,15 @@ export default function AnalyticsKpiPage() {
 
   if (q.isLoading) {
     return (
-      <main data-testid="analytics-kpi-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoCaricamento testId="analytics-kpi-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main data-testid="analytics-kpi-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">{t("error")}</p>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-kpi-error" onRiprova={() => void q.refetch()} />
       </main>
     );
   }
@@ -103,11 +103,11 @@ export default function AnalyticsKpiPage() {
           {t("kpi.chartTitle")}
         </h2>
         {d.byKpi.length === 0 ? (
-          <EmptyState
-            data-testid="analytics-kpi-empty"
-            icon={<Gauge className="h-6 w-6" />}
-            title={t("empty.title")}
-            description={t("kpi.emptyDesc")}
+          <StatoVuoto
+            testId="analytics-kpi-empty"
+            icona={<Gauge className="h-6 w-6" />}
+            titolo={t("empty.title")}
+            motivo={t("kpi.emptyDesc")}
           />
         ) : (
           <>

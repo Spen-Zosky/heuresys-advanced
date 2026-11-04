@@ -7,6 +7,7 @@ import type { MeAnalyticsResponse, MeDevelopmentResponse } from "@heuresys/share
 import { apiFetch } from "@/lib/api/fetch";
 import { EChartsCard } from "../../_charts-client";
 import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /** Le mie analisi (S1011 F5.1) — own attendance trend + summary KPIs.
  *  #59 F/F5 (ADR-0031): + "Il mio sviluppo" — own computed scores with
@@ -49,9 +50,9 @@ export default function MeAnalyticsPage() {
       <PageHeader title={t("analytics.title")} description={t("analytics.description")} />
 
       {q.isLoading ? (
-        <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+        <StatoCaricamento />
       ) : q.isError || !q.data ? (
-        <p className="text-sm text-danger" data-testid="me-analytics-error">{t("analytics.error")}</p>
+        <StatoErrore errore={q.error} titolo={t("analytics.error")} testId="me-analytics-error" onRiprova={() => void q.refetch()} />
       ) : (
         <>
           <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="analytics-summary">
@@ -96,11 +97,9 @@ export default function MeAnalyticsPage() {
               <p className="mt-1 text-sm text-muted-foreground">{t("analytics.development.description")}</p>
             </div>
             {dev.isLoading ? (
-              <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+              <StatoCaricamento />
             ) : !dev.data || (!dev.data.flightRisk && !dev.data.capability) ? (
-              <p className="text-sm text-muted-foreground" data-testid="me-development-empty">
-                {t("analytics.development.empty")}
-              </p>
+              <StatoVuoto titolo={t("analytics.development.empty")} testId="me-development-empty" />
             ) : (
               <div className="grid gap-4 lg:grid-cols-2">
                 {dev.data.capability && (

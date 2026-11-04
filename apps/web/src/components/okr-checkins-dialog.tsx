@@ -4,9 +4,10 @@ import { useTranslation } from "react-i18next";
 import type { OkrCheckIn } from "@heuresys/shared";
 import {
   Badge, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
-  ErrorState, Spinner, formatDateTime,
+  formatDateTime,
 } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { useQuery } from "@tanstack/react-query";
 import { useFormat } from "@/lib/format";
 
@@ -38,9 +39,9 @@ export function OkrCheckInsDialog({
         </DialogHeader>
 
         {q.isLoading ? (
-          <div className="flex justify-center py-8"><Spinner className="h-5 w-5" /></div>
+          <StatoCaricamento />
         ) : q.isError ? (
-          <ErrorState title={t("okrs.checkIns.error")} />
+          <StatoErrore errore={q.error} titolo={t("okrs.checkIns.error")} onRiprova={() => void q.refetch()} />
         ) : q.data && q.data.items.length > 0 ? (
           <ul className="space-y-3" data-testid="okr-checkins">
             {q.data.items.map((c) => {
@@ -65,7 +66,7 @@ export function OkrCheckInsDialog({
             })}
           </ul>
         ) : (
-          <p className="text-sm text-muted-foreground" data-testid="okr-checkins-empty">{t("okrs.checkIns.empty")}</p>
+          <StatoVuoto compatto titolo={t("okrs.checkIns.empty")} testId="okr-checkins-empty" />
         )}
       </DialogContent>
     </Dialog>

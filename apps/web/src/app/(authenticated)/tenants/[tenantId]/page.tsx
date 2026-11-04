@@ -13,6 +13,7 @@ import { FieldGrid } from "@/components/detail-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useFormat } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 type Tab = "overview" | "typing" | "users";
 
@@ -51,7 +52,7 @@ export default function TenantDetailPage() {
   if (tenant.isLoading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+        <StatoCaricamento />
       </main>
     );
   }
@@ -60,9 +61,14 @@ export default function TenantDetailPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="tenant-error">
         <Link href="/tenants" className="text-sm underline">{t("tenants.detail.back")}</Link>
-        <p className="mt-4 text-danger">
-          {status === 404 ? t("tenants.detail.notFound") : t("tenants.detail.loadError")}
-        </p>
+        <div className="mt-4">
+          <StatoErrore
+            errore={tenant.error}
+            titolo={status === 404 ? t("tenants.detail.notFound") : t("tenants.detail.loadError")}
+            testId="tenant-error-state"
+            onRiprova={() => void tenant.refetch()}
+          />
+        </div>
       </main>
     );
   }
@@ -140,11 +146,9 @@ export default function TenantDetailPage() {
           <CardHeader><CardTitle>{t("tenants.detail.typingTitle")}</CardTitle></CardHeader>
           <CardContent>
             {typing.isLoading ? (
-              <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+              <StatoCaricamento />
             ) : typing.data && typing.data.items.length === 0 ? (
-              <p className="text-sm text-muted-foreground" data-testid="tenant-typing-empty">
-                {t("tenants.detail.typingEmpty")}
-              </p>
+              <StatoVuoto titolo={t("tenants.detail.typingEmpty")} testId="tenant-typing-empty" />
             ) : (
               <ul className="space-y-2 text-sm" data-testid="tenant-typing-list">
                 {(typing.data?.items ?? []).map((p) => (

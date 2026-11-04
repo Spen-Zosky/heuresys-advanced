@@ -31,6 +31,7 @@ import { EntityTable } from "@/components/data-table-panel";
 import { isApiError } from "@/lib/api/errors";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoVuoto } from "@/components/stato-pagina";
 
 export default function MeTimeOffPage() {
   const { t } = useTranslation("ess");
@@ -101,9 +102,9 @@ export default function MeTimeOffPage() {
         <CardHeader><CardTitle>{t("timeOff.balancesTitle")}</CardTitle></CardHeader>
         <CardContent>
           {attendance.isLoading ? (
-            <p className="p-2 text-sm text-muted-foreground">{t("common:loading")}</p>
+            <StatoCaricamento />
           ) : balances.length === 0 ? (
-            <p className="p-2 text-sm text-muted-foreground" data-testid="me-time-off-balances-empty">{t("timeOff.balancesEmpty")}</p>
+            <StatoVuoto titolo={t("timeOff.balancesEmpty")} testId="me-time-off-balances-empty" />
           ) : (
             <div className="grid gap-3 sm:grid-cols-3" data-testid="me-time-off-balances">
               {balances.map((b) => (

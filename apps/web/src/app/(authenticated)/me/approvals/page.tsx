@@ -2,10 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, EmptyState, PageHeader } from "@heuresys/ui";
+import { Card, CardContent, PageHeader } from "@heuresys/ui";
 import { CheckSquare } from "lucide-react";
 import type { MeApprovalsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
@@ -32,9 +33,9 @@ export default function MeApprovalsPage() {
       <PageHeader title={t("approvals.title")} description={t("approvals.description")} />
 
       {q.isLoading ? (
-        <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+        <StatoCaricamento />
       ) : q.isError || !data ? (
-        <p className="text-sm text-danger" data-testid="me-approvals-error">{t("approvals.error")}</p>
+        <StatoErrore errore={q.error} titolo={t("approvals.error")} testId="me-approvals-error" onRiprova={() => void q.refetch()} />
       ) : (
         <>
           <section className="grid gap-4 sm:grid-cols-3" data-testid="approvals-stats">
@@ -49,11 +50,11 @@ export default function MeApprovalsPage() {
           </section>
 
           {items.length === 0 ? (
-            <EmptyState
-              data-testid="me-approvals-empty"
-              icon={<CheckSquare className="h-6 w-6" />}
-              title={t("approvals.emptyTitle")}
-              description={t("approvals.emptyDesc")}
+            <StatoVuoto
+              testId="me-approvals-empty"
+              icona={<CheckSquare className="h-6 w-6" />}
+              titolo={t("approvals.emptyTitle")}
+              motivo={t("approvals.emptyDesc")}
             />
           ) : (
             <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">

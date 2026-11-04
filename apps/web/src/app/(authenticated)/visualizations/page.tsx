@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/status-pill";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../_charts-client";
 import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoVuoto } from "@/components/stato-pagina";
 
 type TypeDistItem = VizGraphTypeDistributionItem;
 
@@ -124,10 +125,10 @@ export default function VisualizationsPage() {
           <h2 className="mb-2 text-sm font-medium text-foreground">{t("visualizations.distributionTitle")}</h2>
           {summary.data && summary.data.total > 0 ? (
             <EChartsCard option={typeChartOption(summary.data.items, { series: t("visualizations.chartSeries") })} height={260} ariaLabel={t("visualizations.chartAria")} />
+          ) : summary.isLoading ? (
+            <StatoCaricamento />
           ) : (
-            <p className="py-12 text-center text-xs text-muted-foreground">
-              {summary.isLoading ? t("common:loading") : t("visualizations.noData")}
-            </p>
+            <StatoVuoto titolo={t("visualizations.noData")} testId="visualizations-type-chart-empty" />
           )}
         </div>
       </section>
@@ -140,7 +141,7 @@ export default function VisualizationsPage() {
       >
         <h2 className="mb-3 text-sm font-medium text-foreground">{t("visualizations.exports.title")}</h2>
         {recentExports.isLoading ? (
-          <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+          <StatoCaricamento />
         ) : recentExports.data && recentExports.data.items.length > 0 ? (
           <ul className="divide-y divide-border" data-testid="visualizations-exports-list">
             {recentExports.data.items.map((e) => (
@@ -167,9 +168,7 @@ export default function VisualizationsPage() {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-muted-foreground" data-testid="visualizations-exports-empty">
-            {t("visualizations.exports.empty")}
-          </p>
+          <StatoVuoto titolo={t("visualizations.exports.empty")} testId="visualizations-exports-empty" />
         )}
       </section>
     </main>

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { PageHeader } from "@heuresys/ui";
+import { StatoCaricamento, StatoVuoto } from "@/components/stato-pagina";
 import type { SuccessionPool, SuccessorCandidate } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
@@ -189,10 +190,10 @@ export default function CareerSuccessionPage() {
                 height={240}
                 ariaLabel={t("career.pipelineAria")}
               />
+            ) : readinessDist.isLoading ? (
+              <StatoCaricamento />
             ) : (
-              <p className="py-10 text-center text-xs text-muted-foreground">
-                {readinessDist.isLoading ? t("common:loading") : t("career.pipelineEmpty")}
-              </p>
+              <StatoVuoto titolo={t("career.pipelineEmpty")} />
             )}
           </div>
           <EntityTable<SuccessorCandidate>

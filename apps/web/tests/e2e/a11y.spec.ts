@@ -308,7 +308,7 @@ for (const [persona, pages] of Object.entries(PAGES_PER_PERSONA)) {
  * violazioni per nome invece di un numero, è deterministico e non aggiunge dipendenze.
  * L'asticella è più alta di ≥95, non più bassa: ZERO violazioni critical e serious.
  */
-const PUBLIC_PAGES = ["/", "/investors", "/demo", "/login", "/privacy"] as const;
+const PUBLIC_PAGES = ["/", "/investors", "/demo", "/login", "/privacy", "/accessibilita"] as const;
 
 test.describe("a11y delle pagine pubbliche", () => {
   test.use({ storageState: { cookies: [], origins: [] } });

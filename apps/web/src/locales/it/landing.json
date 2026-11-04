@@ -120,7 +120,8 @@
   },
   "footer": {
     "tagline": "Heuresys — Skills & Org Intelligence EU-native.",
-    "whistleblowing": "Segnalazioni whistleblowing"
+    "whistleblowing": "Segnalazioni whistleblowing",
+    "accessibility": "Dichiarazione di accessibilità"
   },
   "jobs": {
     "title": "Posizioni aperte",
@@ -133,5 +134,22 @@
     "noLocation": "Sede non indicata",
     "publishedOn": "pubblicato il {{date}}",
     "expiresOn": "scade il {{date}}"
+  },
+  "accessibility": {
+    "title": "Dichiarazione di accessibilità",
+    "updated": "Ultimo aggiornamento: 4 novembre 2026",
+    "intro": "Heuresys S.r.l. vuole che il portale Heuresys Advanced sia usabile da tutte le persone, comprese quelle che usano la tastiera al posto del mouse, un lettore di schermo o uno schermo piccolo. Questa pagina dice a che punto siamo, come lo abbiamo misurato e che cosa manca.",
+    "scopeTitle": "A che cosa si riferisce",
+    "scope": "Alle pagine del portale che si usano dopo l'accesso: le pagine personali (/me), quelle per chi guida un'unità e quelle per la direzione del personale e l'amministrazione. Non comprende le pagine di presentazione pubblica.",
+    "statusTitle": "Stato di conformità",
+    "status": "Parzialmente conforme alle Web Content Accessibility Guidelines (WCAG) 2.2, livello AA. La misura automatica non trova violazioni gravi o critiche; una verifica a mano con un lettore di schermo non è ancora stata fatta, e finché non lo sarà non dichiariamo la piena conformità.",
+    "methodTitle": "Come lo abbiamo misurato",
+    "method": "Con axe, uno strumento automatico che controlla le regole WCAG 2.0, 2.1 e 2.2 di livello A e AA, su ogni pagina del portale aperta con ogni profilo di accesso; le pagine personali sono controllate anche a 390 pixel di larghezza, come su un telefono, verificando che non scorrano in orizzontale e che nessun dato personale resti nella memoria del browser. La misura si ripete a ogni modifica rilevante dell'interfaccia.",
+    "knownTitle": "Limiti noti",
+    "known": "Un controllo automatico trova solo una parte dei problemi: l'ordine di lettura, la comprensibilità dei testi alternativi e l'uso completo da tastiera dei grafici interattivi (organigrammi, reti, mappe delle competenze) non sono ancora stati verificati a mano. Alcune pagine con un identificativo nell'indirizzo sono state misurate solo quando c'erano dati da aprire.",
+    "feedbackTitle": "Segnalazioni",
+    "feedback": "Se incontri una barriera o non riesci a usare una parte del portale, scrivi a privacy@heuresys.com indicando la pagina e che cosa stavi facendo: ti rispondiamo entro 30 giorni e, se serve, ti diamo l'informazione in un altro modo.",
+    "enforcementTitle": "Se la risposta non ti soddisfa",
+    "enforcement": "Puoi rivolgerti all'Agenzia per l'Italia Digitale (AgID), che vigila sull'accessibilità dei servizi digitali, attraverso il modulo sul suo sito (www.agid.gov.it)."
   }
 }

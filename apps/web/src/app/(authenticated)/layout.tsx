@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Button,
   DashboardShell,
@@ -255,6 +256,10 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
               <span>{t("shell:brand.version")}</span>
               <span aria-hidden className="text-border">·</span>
               <span>{identity.role}</span>
+              <span aria-hidden className="text-border">·</span>
+              <Link href="/accessibilita" data-testid="app-footer-accessibility" className="underline-offset-2 hover:underline">
+                {t("shell:brand.accessibility")}
+              </Link>
             </>
           }
         />

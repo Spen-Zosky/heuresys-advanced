@@ -60,7 +60,8 @@
   },
   "brand": {
     "badge": "advanced",
-    "version": "v5 · heuresys-advanced"
+    "version": "v5 · heuresys-advanced",
+    "accessibility": "Accessibilità"
   },
   "roles": {
     "PLATFORM_ADMIN": "Amministratore piattaforma",

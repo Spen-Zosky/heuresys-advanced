@@ -64,7 +64,7 @@ const health = (s: S) =>
 describe("#57 F3 — organizational health index", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantAdmin = await login(suite, "governo@collaudo.invalid");
     plainUser = await login(suite, "tommaso.fiore@rtl-bank.org");
   }, 60_000);
 

@@ -184,7 +184,7 @@ async function candidaturaSu(
 describe("/v1/job-offers/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenant = await login(suite, "federica.marchetti@rtl-bank.org", TEST_PERSONA_PASSWORD);
+    tenant = await login(suite, "governo@collaudo.invalid", TEST_PERSONA_PASSWORD);
     semplice = await login(suite, "tommaso.fiore@rtl-bank.org", TEST_PERSONA_PASSWORD);
     platform = await login(suite, PLATFORM_EMAIL, passwordFor(PLATFORM_EMAIL));
 

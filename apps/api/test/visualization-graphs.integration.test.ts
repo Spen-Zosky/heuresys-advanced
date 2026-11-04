@@ -35,7 +35,7 @@ const createdGraphIds: string[] = [];
 describe("/v1/visualization-graphs/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     managerS = await login(suite, "paolo.caputo@rtl-bank.org");
   });
 

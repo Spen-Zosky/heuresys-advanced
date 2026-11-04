@@ -16,7 +16,7 @@ import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { SKILL_PROFICIENCY_VALUES } from "@heuresys/shared";
 
 const PWD = TEST_PERSONA_PASSWORD;
-const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
+const TENANT_ADMIN_EMAIL = "governo@collaudo.invalid";
 
 interface Session {
   cookies: Map<string, string>;

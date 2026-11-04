@@ -53,7 +53,7 @@ describe("/v1/teams/* + /v1/me/team integration (WS-4 R1b)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     adminS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     leaderS = await login(suite, "marco.rinaldi@rtl-bank.org");
     memberS = await login(suite, "antonio.parisi@rtl-bank.org");
 

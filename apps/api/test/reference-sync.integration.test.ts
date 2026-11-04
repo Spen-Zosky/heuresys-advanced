@@ -65,7 +65,7 @@ beforeAll(async () => {
     },
   });
   admin = await login(suite, "platform-test-admin@collaudo.invalid");
-  tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+  tenantAdmin = await login(suite, "governo@collaudo.invalid");
   manager = await login(suite, "paolo.caputo@rtl-bank.org");
   await pool.query("DELETE FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_esco_uri LIKE $1", [`${TEST_PREFIX}%`]);
   await pool.query(RESET_WATERMARK);

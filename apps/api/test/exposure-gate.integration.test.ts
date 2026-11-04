@@ -86,7 +86,7 @@ describe("cancello di esposizione — i dati del programma sono raggiungibili da
   beforeAll(async () => {
     suite = await buildTestApp();
     dipendente = await login(suite, "tommaso.fiore@rtl-bank.org");
-    hr = await login(suite, "federica.marchetti@rtl-bank.org");
+    hr = await login(suite, "governo@collaudo.invalid");
 
     espDipendente = await seminaEsperienza(dipendente.userId, "Banca Seminata SpA");
     espHr = await seminaEsperienza(hr.userId, "Altra Banca Seminata SpA");

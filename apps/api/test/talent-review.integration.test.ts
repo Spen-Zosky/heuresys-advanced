@@ -44,12 +44,12 @@ describe("#29 A/L3 talent-review 9-box read", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     admin = await login(suite, "platform-test-admin@collaudo.invalid");
-    federica = await login(suite, "federica.marchetti@rtl-bank.org"); // TENANT_ADMIN (HR mandate)
+    federica = await login(suite, "governo@collaudo.invalid"); // TENANT_ADMIN (HR mandate)
     paolo = await login(suite, "paolo.caputo@rtl-bank.org"); // MANAGER
     tommaso = await login(suite, "tommaso.fiore@rtl-bank.org"); // USER (paolo's report, no talent:read)
     const t = await pool.query<{ user_tenant_id: string }>(
       `SELECT user_tenant_id FROM sys.sys_users WHERE user_email = $1`,
-      ["federica.marchetti@rtl-bank.org"]);
+      ["governo@collaudo.invalid"]);
     rtlTenantId = t.rows[0]!.user_tenant_id;
     paoloSubtree = await orgSubtreeUserIds(pool, await userId("paolo.caputo@rtl-bank.org"));
   });

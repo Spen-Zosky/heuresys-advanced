@@ -33,7 +33,7 @@ describe("/v1/skill-taxonomy-edges/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     // Two global skills as endpoints for edges.
     const sp = await suite.app.inject({
       method: "POST", url: "/v1/skills",

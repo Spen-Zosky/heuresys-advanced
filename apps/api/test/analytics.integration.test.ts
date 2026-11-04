@@ -72,7 +72,7 @@ describe("GET /v1/analytics/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     employeeS = await login(suite, "tommaso.fiore@rtl-bank.org");
   });
 

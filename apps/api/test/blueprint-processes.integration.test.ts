@@ -77,7 +77,7 @@ describe("/v1/blueprint-processes/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
 
     const fam = await suite.app.inject({
       method: "POST",

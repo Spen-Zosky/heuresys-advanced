@@ -54,7 +54,7 @@ const JR_CODES = ["IT_MATCH_JR_NEAR", "IT_MATCH_JR_XT"];
 beforeAll(async () => {
   suite = await buildTestApp();
   admin = await login(suite, "platform-test-admin@collaudo.invalid");
-  tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+  tenantAdmin = await login(suite, "governo@collaudo.invalid");
   manager = await login(suite, "paolo.caputo@rtl-bank.org");
   plainUser = await login(suite, "antonio.parisi@rtl-bank.org");
 

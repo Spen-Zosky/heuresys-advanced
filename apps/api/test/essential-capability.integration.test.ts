@@ -53,7 +53,7 @@ async function ranking(s: S) {
 describe("#55 F1 — Essential Capability Ranker", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantAdmin = await login(suite, "governo@collaudo.invalid");
     plainUser = await login(suite, "tommaso.fiore@rtl-bank.org");
   }, 60_000);
 

@@ -43,7 +43,7 @@ describe("/v1/blueprint-variants/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     userS = await login(suite, "tommaso.fiore@rtl-bank.org");
     // Seed a real parent blueprint family (FK target) as PLATFORM_ADMIN, mirroring the
     // skill-categories template (which seeds a skill-family parent).

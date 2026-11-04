@@ -59,7 +59,7 @@ describe("/v1/job-requisitions/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platform = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenant = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenant = await login(suite, "governo@collaudo.invalid");
     semplice = await login(suite, "tommaso.fiore@rtl-bank.org");
 
     const r = await pool.query<{ position_id: string; position_tenant_id: string }>(

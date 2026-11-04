@@ -299,6 +299,19 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   //     so RBAC/scope/filters already applied. No-op without ?format. (§3.2-independent)
   addExportHook(app);
 
+  // 2d. F-7 del piano interfacce (lotto L7): nessun dato dell'API resta nella cache del
+  //     browser o di un proxy. Le risposte `/v1/*` sono dati di una persona autenticata
+  //     (cedolini, documenti, profilo); senza un'intestazione il browser è libero di tenerle.
+  //     Misurato sul banco il 4/11: /v1/me/profile, /pay-slips, /documents e le altre
+  //     rispondevano 200 senza `cache-control`. Chi ha già scelto la sua politica (il flusso
+  //     SSE, un'esportazione) la tiene: si scrive solo dove manca.
+  app.addHook("onSend", async (req, reply, payload) => {
+    if (req.url.startsWith("/v1/") && !reply.hasHeader("cache-control")) {
+      reply.header("cache-control", "no-store");
+    }
+    return payload;
+  });
+
   // 3. Security headers
   await app.register(helmet, {
     contentSecurityPolicy: {

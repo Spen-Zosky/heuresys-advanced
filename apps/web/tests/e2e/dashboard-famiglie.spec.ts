@@ -48,9 +48,6 @@ const PERSONE: PersonaKey[] = [
   "custodian",
 ];
 
-/** Raccoglie, fra tutte le personas, quali famiglie sono risultate raggiungibili. */
-const raggiunte = new Set<string>();
-
 for (const persona of PERSONE) {
   test.describe(`cruscotti per tipologia — ${persona}`, () => {
     test.use({ storageState: storageStateFor(persona) });
@@ -88,8 +85,6 @@ for (const persona of PERSONE) {
           await expect(motivo).toBeVisible();
           await expect(motivo).not.toHaveText("");
         }
-
-        raggiunte.add(f.code);
       }
     });
 
@@ -113,7 +108,12 @@ for (const persona of PERSONE) {
       test.skip(negata === undefined, `${persona} le vede tutte: nessun caso negativo da provare`);
 
       await page.goto(negata as string);
-      await expect(page.getByTestId("cruscotto-non-disponibile")).toBeVisible();
+      // Dal lotto L1 (S-1) la guardia di pagina del layout ferma la route prima che la
+      // pagina chieda i dati: risponde lei, con lo stesso testo per «non esiste» e «non è
+      // tua». Se la guardia lasciasse passare, risponde la pagina: vale l'uno o l'altro.
+      await expect(
+        page.getByTestId("page-no-access").or(page.getByTestId("cruscotto-non-disponibile")),
+      ).toBeVisible();
     });
   });
 }
@@ -148,6 +148,7 @@ test.describe("copertura", () => {
 
   test("nessuna famiglia con pagina propria resta irraggiungibile da tutte le tipologie", async ({
     request,
+    playwright,
   }) => {
     // `platformAdmin` le vede tutte per il tappeto di `000005`, quindi questo caso è la
     // rete di sicurezza: se una famiglia esiste, ha una pagina e nessuno la raggiunge,
@@ -155,6 +156,19 @@ test.describe("copertura", () => {
     const catalogo = await catalogoDi(request);
     const attese = conPaginaPropria(catalogo).map((d) => d.code);
     expect(attese.length, "il mandato tecnico deve vedere tutte le famiglie con pagina").toBe(7);
+    // L'unione si calcola QUI, dai cataloghi di ciascuna persona, e non da un insieme tenuto
+    // nel processo: un test fallito riavvia il worker e svuotava quell'insieme, così questo
+    // caso diventava rosso per un motivo che non era il suo (banco L5, 2026-11-04). Che ogni
+    // famiglia offerta si apra davvero lo prova, persona per persona, il primo test.
+    const raggiunte = new Set<string>();
+    for (const persona of PERSONE) {
+      const ctx = await playwright.request.newContext({ storageState: storageStateFor(persona) });
+      try {
+        for (const f of conPaginaPropria(await catalogoDi(ctx))) raggiunte.add(f.code);
+      } finally {
+        await ctx.dispose();
+      }
+    }
     for (const code of attese) {
       expect(raggiunte.has(code), `famiglia mai raggiunta da nessuna tipologia: ${code}`).toBe(true);
     }

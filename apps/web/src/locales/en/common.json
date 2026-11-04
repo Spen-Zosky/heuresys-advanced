@@ -656,6 +656,7 @@
     "code": {
       "FORBIDDEN": "Your profile does not allow this operation.",
       "CSRF_FAIL": "The page has been open too long: reload it and try again.",
+      "ORIGIN_MISMATCH": "The request comes from an address the server does not recognise: this is a service configuration problem, not your profile. Tell whoever runs the service.",
       "VALIDATION_ERROR": "The request is not valid: check the data you entered.",
       "RESPONSE_CONTRACT_VIOLATION": "The server produced a non-conforming response: the error is ours, not yours.",
       "RESULT_LIMIT_EXCEEDED": "There are too many results to show at once: narrow them with a filter, such as unit or period.",

@@ -5,7 +5,7 @@ Richiesta di Enzo, 4/11/2026 14:39 Roma: «è necessario cancellare immediatamen
 | id | cosa | chi | fatta quando | stato |
 |---|---|---|---|---|
 | P1 | Cluster di prova sulla porta 55432 e scratchpad del 31/10 della sessione YWF2AQ (`pgprova`, due dump SQL) | Claude | porta libera, cartella assente | fatta |
-| P2 | `~/heuresys-advanced/_da_eliminare/*` | Claude | cartella vuota | fatta |
+| P2 | `~/heuresys-advanced/_da_eliminare/*` | non Claude: autore non accertato | cartella vuota | vuota alle 13:47 UTC |
 | P3 | Rami locali già uniti, senza worktree, di advanced e datastore (`git branch -d`) | Claude | elenco vuoto | fatta |
 | P4 | Verifica finale: `df -h /`, produzione e `heuresys_ci` intatti | Claude | registro compilato | fatta |
 
@@ -23,7 +23,7 @@ Produzione (`heuresys_advanced`), `heuresys_ci`, restic, `pg_dump_snapshots` (co
 
 ## Non si chiude in questa sessione
 
-Dipende da P2: se la guardia la ferma, serve Enzo.
+Niente: P2 si è risolta da sola prima che servisse Enzo.
 
 ## Registro
 

@@ -712,6 +712,9 @@ export const MeApprovalRowSchema = z.object({
   resourceType: z.string().nullable(),
   createdAt: z.string().nullable(),
   resolvedAt: z.string().nullable(),
+  /** V-3 (ADR-0049): processo e attivita' della richiesta, se nasce da un processo. */
+  processName: z.string().nullable(),
+  processStepName: z.string().nullable(),
 });
 export const MeApprovalsResponseSchema = z.object({
   items: z.array(MeApprovalRowSchema),

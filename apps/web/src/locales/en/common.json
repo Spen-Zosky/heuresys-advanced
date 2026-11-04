@@ -611,5 +611,14 @@
     "network": "The server is not responding: check your connection and try again.",
     "sessionExpired": "Your session has expired: please sign in again.",
     "reference": "Reference to quote: {{requestId}}"
+  },
+  "personPicker": {
+    "selected": "Selected people",
+    "remove": "Remove {{name}}",
+    "placeholder": "Type at least {{count}} letters of the name or email",
+    "typeMore": "Type at least {{count}} letters to search.",
+    "error": "Search failed.",
+    "found_one": "{{count}} person found",
+    "found_other": "{{count}} people found"
   }
 }

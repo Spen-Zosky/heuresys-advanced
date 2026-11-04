@@ -36,7 +36,7 @@ function stepStatusVariant(s: ApprovalStepStatus): "success" | "secondary" | "de
  */
 
 export default function ApprovalDetailPage() {
-  const { t } = useTranslation("admin");
+  const { t, i18n } = useTranslation("admin");
   const qc = useQueryClient();
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -196,10 +196,25 @@ export default function ApprovalDetailPage() {
               <ul className="divide-y divide-border rounded-card border border-border">
                 {d.steps.map((s) => (
                   <li key={s.approvalStepId} data-testid="approval-step-row" className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
-                    <span className="font-medium text-foreground">{s.approverName ?? s.approverEmail ?? s.approverUserId}</span>
+                    <span className="flex flex-col">
+                      <span className="font-medium text-foreground">{s.approverName ?? s.approverEmail ?? "—"}</span>
+                      {/* V-3 (ADR-0051 §5): quando ha deciso un delegato, la firma lo dice. */}
+                      {s.actingDelegationId && (
+                        <span className="text-xs text-muted-foreground" data-testid="approval-step-on-behalf">
+                          {t("approvals.detail.onBehalfOf", {
+                            delegate: s.decidedByName ?? "—",
+                            approver: s.approverName ?? s.approverEmail ?? "—",
+                          })}
+                        </span>
+                      )}
+                    </span>
                     <div className="flex items-center gap-3">
                       {s.decisionComment && <span className="text-xs text-muted-foreground">“{s.decisionComment}”</span>}
-                      {s.decidedAt && <span className="text-xs text-muted-foreground">{s.decidedAt.slice(0, 10)}</span>}
+                      {s.decidedAt && (
+                        <time dateTime={s.decidedAt} className="text-xs text-muted-foreground">
+                          {new Date(s.decidedAt).toLocaleDateString(i18n.language, { day: "2-digit", month: "2-digit", year: "numeric" })}
+                        </time>
+                      )}
                       <Badge variant={stepStatusVariant(s.status)} data-testid="approval-step-status">{t(`approvals.stepStatus.${s.status}`)}</Badge>
                     </div>
                   </li>

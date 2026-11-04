@@ -745,7 +745,9 @@
     "colTitle": "Title",
     "colStatus": "Status",
     "colPriority": "Priority",
-    "colCreated": "Created"
+    "colCreated": "Created",
+    "colProcess": "Process and activity",
+    "noProcess": "No process"
   },
   "performance": {
     "title": "My performance reviews",

@@ -16,8 +16,7 @@ test.describe.configure({ retries: 1 });
 
 test.describe("approvals lifecycle (live)", () => {
   test("create naming self → approve → APPROVED → apply → APPLIED", async ({ page, request }) => {
-    const { user } = await completeApiLogin(request, PERSONAS.tenantAdmin.email);
-    const federicaId = user.userId;
+    await completeApiLogin(request, PERSONAS.tenantAdmin.email);
     const title = `E2E Approval ${Date.now()}`;
 
     await gotoAuthenticated(page, "/approvals");
@@ -25,7 +24,10 @@ test.describe("approvals lifecycle (live)", () => {
 
     // Create a request with federica as the sole approver.
     await page.getByTestId("approval-create-title").fill(title);
-    await page.getByTestId("approval-create-approvers").selectOption([federicaId]);
+    // V-2: la persona si cerca sul server per nome o email, poi si sceglie dai risultati.
+    await page.getByTestId("approval-create-approvers-input").fill(PERSONAS.tenantAdmin.email);
+    await page.getByTestId("approval-create-approvers-option").first().click();
+    await expect(page.getByTestId("approval-create-approvers-selected")).toBeVisible();
     const [createRes] = await Promise.all([
       page.waitForResponse((r) => r.url().includes("/v1/approvals") && r.request().method() === "POST"),
       page.getByTestId("approval-create-submit").click(),

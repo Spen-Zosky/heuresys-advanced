@@ -27,8 +27,7 @@ test.describe("#159 F3 — /approvals/[id] consuma AgentPanel con un contesto ve
   }) => {
     test.setTimeout(300_000); // il modello risponde in 60-100 s: la prova aspetta lo stream, non la pagina
 
-    const { user } = await completeApiLogin(request, PERSONAS.tenantAdmin.email);
-    const federicaId = user.userId;
+    await completeApiLogin(request, PERSONAS.tenantAdmin.email);
     const title = `E2E Approval Agent ${Date.now()}`;
 
     await gotoAuthenticated(page, "/approvals");
@@ -38,7 +37,10 @@ test.describe("#159 F3 — /approvals/[id] consuma AgentPanel con un contesto ve
     // approvals.spec.ts) — serve solo ad avere un id/titolo REALI su cui costruire il
     // context, non a esercitare il ciclo di vita dell'approvazione.
     await page.getByTestId("approval-create-title").fill(title);
-    await page.getByTestId("approval-create-approvers").selectOption([federicaId]);
+    // V-2: la persona si cerca sul server per nome o email, poi si sceglie dai risultati.
+    await page.getByTestId("approval-create-approvers-input").fill(PERSONAS.tenantAdmin.email);
+    await page.getByTestId("approval-create-approvers-option").first().click();
+    await expect(page.getByTestId("approval-create-approvers-selected")).toBeVisible();
     const [createRes] = await Promise.all([
       page.waitForResponse((r) => r.url().includes("/v1/approvals") && r.request().method() === "POST"),
       page.getByTestId("approval-create-submit").click(),

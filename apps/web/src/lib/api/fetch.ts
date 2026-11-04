@@ -18,6 +18,7 @@ import i18next from "i18next";
 import { csrfStore } from "./csrf-store";
 import { ApiError, NetworkError, SessionExpiredError, type ApiErrorBody } from "./errors";
 import { SUPERFICIE_HEADER, superficiePagina } from "@heuresys/shared/schemas/valore";
+import { segnalaPermessoNegato, svuotaCopiaDiSessione } from "./session-cache";
 
 export type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
@@ -161,6 +162,7 @@ export async function apiFetch<T = unknown>(
     if (ok) {
       return apiFetch<T>(path, { ...options, isRetry: true });
     }
+    svuotaCopiaDiSessione();
     throw new SessionExpiredError();
   }
 
@@ -176,6 +178,8 @@ export async function apiFetch<T = unknown>(
   }
 
   if (!response.ok) {
+    // V-12: un 403 puo' voler dire che i ruoli sono cambiati: si rileggono permessi e menu.
+    if (response.status === 403) segnalaPermessoNegato();
     if (parsed && typeof parsed === "object" && "error" in parsed) {
       throw new ApiError(response.status, parsed as ApiErrorBody);
     }

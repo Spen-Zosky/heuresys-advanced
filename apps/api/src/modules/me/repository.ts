@@ -663,21 +663,28 @@ export async function loadMyApprovals(q: DbConnector, userId: string): Promise<M
   const res = await q.query<{
     title: string | null; status: string | null; priority: string | null;
     resource_type: string | null; created_at: Date | null; resolved_at: Date | null;
+    process_name: string | null; process_step_name: string | null;
   }>(
-    `SELECT approval_request_title AS title, approval_request_status AS status,
-            approval_request_priority AS priority, approval_request_resource_type AS resource_type,
-            created_at, approval_request_resolved_at AS resolved_at
-       FROM sys.sys_approval_requests WHERE created_by = $1
-      ORDER BY created_at DESC`, [userId],
+    `SELECT r.approval_request_title AS title, r.approval_request_status AS status,
+            r.approval_request_priority AS priority, r.approval_request_resource_type AS resource_type,
+            r.created_at, r.approval_request_resolved_at AS resolved_at,
+            tp.tenant_process_name AS process_name, st.tenant_process_step_name AS process_step_name
+       FROM sys.sys_approval_requests r
+       LEFT JOIN sys.sys_tenant_processes tp ON tp.tenant_process_id = r.approval_request_tenant_process_id
+       LEFT JOIN sys.sys_tenant_process_steps st ON st.tenant_process_step_id = r.approval_request_tenant_process_step_id
+      WHERE r.created_by = $1
+      ORDER BY r.created_at DESC`, [userId],
   );
   const items = res.rows.map((r) => ({
     title: r.title, status: r.status, priority: r.priority, resourceType: r.resource_type,
     createdAt: r.created_at ? r.created_at.toISOString() : null,
     resolvedAt: r.resolved_at ? r.resolved_at.toISOString() : null,
+    processName: r.process_name, processStepName: r.process_step_name,
   }));
   const byStatus = { pending: 0, approved: 0, rejected: 0 };
   for (const it of items) {
-    if (it.status === "APPROVED") byStatus.approved++;
+    // V-1: APPLIED e' un'approvazione gia' applicata, non una richiesta in attesa.
+    if (it.status === "APPROVED" || it.status === "APPLIED") byStatus.approved++;
     else if (it.status === "REJECTED") byStatus.rejected++;
     else byStatus.pending++;
   }

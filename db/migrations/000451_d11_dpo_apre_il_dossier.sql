@@ -171,7 +171,7 @@ BEGIN
     JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    WHERE r.auth_role_code = 'DPO' AND rp.revoked_at IS NULL
-     AND p.auth_permission_code IN ('gdpr:read', 'gdpr:export', 'gdpr:erase') -- gdpr:retention tolto il 2026-11-04 (S-18, 000471);
+     AND p.auth_permission_code IN ('gdpr:read', 'gdpr:export', 'gdpr:erase'); -- gdpr:retention tolto il 2026-11-04 (S-18, 000471)
   IF n_dpo_gdpr <> 3 THEN
     RAISE EXCEPTION '000451: il nucleo GDPR di DPO non e'' piu'' completo (% su 3)', n_dpo_gdpr;
   END IF;

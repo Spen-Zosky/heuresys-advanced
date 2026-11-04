@@ -179,8 +179,12 @@ export const EmptyResponseSchema = z.strictObject({});
 
 export const ErrorEnvelopeSchema = z.object({
   error: z.object({
+    /** Il codice e' anche la chiave del messaggio: il client lo traduce (S-12). */
     code: z.string(),
+    /** Testo tecnico in inglese, per i log e per un agente; non e' il messaggio per la persona. */
     message: z.string(),
+    /** L'identificativo della richiesta, da citare per ritrovarla nei log (S-12). */
+    requestId: z.string().optional(),
     details: z.unknown().optional(),
   }),
 });

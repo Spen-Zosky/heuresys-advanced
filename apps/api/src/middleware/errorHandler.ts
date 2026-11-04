@@ -1,13 +1,23 @@
 /**
  * apps/api/src/middleware/errorHandler.ts
  * Centralised error handler. Maps typed ApiError subclasses to uniform
- * envelopes { error: { code, message, details? } }. Logs unhandled errors
- * at level=error with the requestId for forensics.
+ * envelopes { error: { code, message, requestId, details? } }. Logs unhandled
+ * errors at level=error with the requestId for forensics.
  *
  * Per API_IMPLEMENTATION_PLAN §4.2 + §8.
+ *
+ * S-12 del piano interfacce (2026-11-04). Ogni risposta d'errore porta tre cose:
+ *  - `code`, che e' anche la chiave del messaggio: il client lo traduce nella lingua
+ *    della persona (apps/web/src/lib/api/errors.ts), e un agente lo legge per capire
+ *    se riprovare;
+ *  - `message`, testo tecnico in inglese, per i log e per chi integra;
+ *  - `requestId`, l'identificativo da citare: senza, un 500 non si ritrova nei log.
+ * Una risposta che non rispetta il proprio contratto Zod non e' piu' un anonimo
+ * «Unexpected server error»: e' `RESPONSE_CONTRACT_VIOLATION`, con la rotta nel log.
  */
 
 import type { FastifyError, FastifyReply, FastifyRequest } from "fastify";
+import { isResponseSerializationError } from "fastify-type-provider-zod";
 import { ZodError } from "zod";
 import {
   ApiError,
@@ -27,8 +37,32 @@ import {
 export async function errorHandler(
   err: FastifyError | Error,
   req: FastifyRequest,
-  reply: FastifyReply,
+  rawReply: FastifyReply,
 ): Promise<void> {
+  // Ogni busta d'errore riceve l'identificativo della richiesta, qualunque ramo la scriva.
+  const reply = {
+    header: (k: string, v: string) => rawReply.header(k, v),
+    code: (status: number) => ({
+      send: (body: { error: Record<string, unknown> }) =>
+        rawReply.code(status).send({ error: { ...body.error, requestId: req.id } }),
+    }),
+  };
+
+  // S-12: la risposta non rispetta il contratto dichiarato. Colpa del server, non del
+  // chiamante; il dettaglio (campo e regola violata) va nel log, non al client.
+  if (isResponseSerializationError(err)) {
+    req.log.error(
+      { method: err.method, url: err.url, issues: err.cause?.issues },
+      "RESPONSE_CONTRACT_VIOLATION",
+    );
+    reply.code(500).send({
+      error: {
+        code: "RESPONSE_CONTRACT_VIOLATION",
+        message: "The response did not match its declared contract",
+      },
+    });
+    return;
+  }
   // Zod validation errors from fastify-type-provider-zod
   if (err instanceof ZodError) {
     reply.code(400).send({

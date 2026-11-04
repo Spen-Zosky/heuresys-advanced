@@ -14,7 +14,7 @@ test.use({ storageState: storageStateFor("tenantAdmin") });
 
 // La dimensione del file nel formato unico (lotto L6, F-1, `lib/format.ts`): «512 B», «34 KB»,
 // «1,2 MB». Prima era «N byte».
-const DIMENSIONE = /\d+(?:[.,]\d+)?\s(?:B|KB|MB)\b/;
+const DIMENSIONE = /\d+(?:[.,]\d+)?\s(?:B|KB|MB)/;
 
 test.describe("MVP-2a visualizations — live data", () => {
   test("/visualizations browser renders (empty state OK)", async ({ page }) => {

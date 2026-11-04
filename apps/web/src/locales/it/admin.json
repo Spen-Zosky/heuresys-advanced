@@ -303,8 +303,8 @@
     "caption": "Registry tenant",
     "columns": {
       "name": "Nome",
-      "country": "Country",
-      "size": "Size",
+      "country": "Paese",
+      "size": "Dimensione",
       "status": "Stato"
     },
     "fallbackName": "ND",

@@ -35,11 +35,11 @@ function shortId(id: string): string {
   return id.slice(0, 8);
 }
 
-function buildFitColumns(t: TFunction, f: Formati): DataColumn<FitScore>[] {
+function buildFitColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): DataColumn<FitScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
     { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
-    { header: t("talentReview.cols.dimension"), cell: (r) => <span className="text-xs text-muted-foreground">{r.dimension}</span> },
+    { header: t("talentReview.cols.dimension"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("fitDimension", r.dimension)}</span> },
     { header: t("talentReview.cols.score"), align: "right", cell: (r) => <span className="tabular-nums">{r.score}</span> },
     { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.computedAt)}</span> },
   ];
@@ -105,7 +105,7 @@ export default function TalentReviewPage() {
   const criticalPositions = usePaginatedList<CriticalPosition>({ queryKey: ["talent-review", "critical-positions"], path: "/v1/talent-review/critical-positions" });
   const coverage = usePaginatedList<CriticalCoverage>({ queryKey: ["talent-review", "critical-coverage"], path: "/v1/talent-review/critical-coverage" });
 
-  const fitColumns = useMemo(() => buildFitColumns(t, f), [t, f]);
+  const fitColumns = useMemo(() => buildFitColumns(t, f, enumLabel), [t, f, enumLabel]);
   const readinessColumns = useMemo(() => buildReadinessColumns(t, enumLabel, f), [t, enumLabel, f]);
   const successionColumns = useMemo(() => buildSuccessionColumns(t, enumLabel, f), [t, enumLabel, f]);
   const criticalPositionColumns = useMemo(() => buildCriticalPositionColumns(t, f), [t, f]);

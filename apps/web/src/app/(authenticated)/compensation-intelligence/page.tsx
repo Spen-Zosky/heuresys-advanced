@@ -17,6 +17,7 @@ import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EChartsCard } from "../_charts-client";
 import { useFormat, type Formati } from "@/lib/format";
+import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 
 interface RewardGate {
   rewardGateId: string;
@@ -206,8 +207,8 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
                 {q.data.gates.map((g) => (
                   <li key={g.gateCode} className="flex items-center justify-between gap-3 py-1">
                     <span>
-                      <span className="font-mono text-xs text-muted-foreground">{g.gateCode}</span>
-                      <span className="ml-2">{g.gateName}</span>
+                      {/* F-2 (L6): il nome del cancello; il codice resta nel suggerimento. */}
+                      <span title={g.gateCode}>{g.gateName}</span>
                       {!g.isBlocking ? (
                         <span className="ml-2 text-xs text-muted-foreground">
                           {t("compReward.evaluation.nonBlocking")}
@@ -294,9 +295,9 @@ function buildPositionWeightColumns(t: TFunction, f: Formati): DataColumn<Positi
   ];
 }
 
-function buildHandoffColumns(t: TFunction, f: Formati): DataColumn<PayrollHandoffRecord>[] {
+function buildHandoffColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): DataColumn<PayrollHandoffRecord>[] {
   return [
-    { header: t("compReward.cols.recipient"), cell: (r) => <span className="font-mono text-xs">{r.recipientSystem}</span> },
+    { header: t("compReward.cols.recipient"), cell: (r) => <span className="text-xs" title={r.recipientSystem}>{enumLabel("payrollRecipientSystem", r.recipientSystem)}</span> },
     { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
     { header: t("compReward.cols.status"), cell: (r) => <EnumStatusBadge domain="payrollHandoffStatus" value={r.status} /> },
     { header: t("compReward.cols.handedOff"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.handedOffAt)}</span> },
@@ -331,6 +332,7 @@ export default function CompensationIntelligencePage() {
   const { t } = useTranslation("hr");
   const { t: tA } = useTranslation("admin");
   const f = useFormat();
+  const enumLabel = useEnumLabel();
   // C4 (#42): server-side pagination (was `?limit=200`).
   const gates = usePaginatedList<RewardGate>({
     queryKey: ["compensation", "reward-gates"],
@@ -408,7 +410,7 @@ export default function CompensationIntelligencePage() {
   const bonusPoolColumns = useMemo(() => buildBonusPoolColumns(tA, f), [tA, f]);
   const objectiveRuleColumns = useMemo(() => buildObjectiveRuleColumns(tA), [tA]);
   const positionWeightColumns = useMemo(() => buildPositionWeightColumns(tA, f), [tA, f]);
-  const handoffColumns = useMemo(() => buildHandoffColumns(tA, f), [tA, f]);
+  const handoffColumns = useMemo(() => buildHandoffColumns(tA, f, enumLabel), [tA, f, enumLabel]);
 
   // #53 E4 — catalogo delle fasce del tenant.
   const bands = useQuery({

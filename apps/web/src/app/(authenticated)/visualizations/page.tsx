@@ -146,11 +146,11 @@ export default function VisualizationsPage() {
             {recentExports.data.items.map((e) => (
               <li key={e.exportId} className="flex flex-wrap items-center justify-between gap-3 py-2 text-sm">
                 <span className="flex items-center gap-3">
-                  <span className="font-mono text-xs text-muted-foreground">{e.format}</span>
+                  <span className="text-xs text-muted-foreground">{enumLabel("vizExportFormat", e.format)}</span>
                   <span className="text-muted-foreground">
                     {e.byteSize === null
                       ? t("visualizations.exports.noContent")
-                      : t("visualizations.exports.size", { bytes: e.byteSize })}
+                      : fmt.dimensione(e.byteSize)}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {fmt.data(e.generatedAt)}

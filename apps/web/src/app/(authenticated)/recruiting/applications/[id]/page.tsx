@@ -20,6 +20,7 @@ import {
   KEY, OFFER_STATUSES, candidateName, useCandidates, usePostings,
 } from "@/lib/recruiting";
 import { useFormat } from "@/lib/format";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -38,6 +39,7 @@ type Feedback = { kind: "ok" | "err"; msg: string } | null;
  */
 export default function ApplicationDetailPage() {
   const { t } = useTranslation("hr");
+  const enumLabel = useEnumLabel();
   const fmt = useFormat();
   const qc = useQueryClient();
   const params = useParams<{ id: string }>();
@@ -250,7 +252,12 @@ export default function ApplicationDetailPage() {
         <CardContent className="space-y-4">
           {canOffer && (<div className="grid gap-3 md:grid-cols-4" data-testid="offer-form">
             <Input type="number" min={1} step={100} data-testid="offer-salary" placeholder={t("recruiting.fields.grossAnnualSalary")} value={of.grossAnnualSalary} onChange={(e) => setOf({ ...of, grossAnnualSalary: e.target.value })} />
-            <Input data-testid="offer-contract-type" placeholder={t("recruiting.fields.contractType")} value={of.contractType} onChange={(e) => setOf({ ...of, contractType: e.target.value })} />
+            {/* F-2 (L6): il tipo di contratto si sceglie fra i valori noti, con la loro etichetta; prima era un testo libero che mostrava «permanent». */}
+            <select data-testid="offer-contract-type" aria-label={t("recruiting.fields.contractType")} className={SELECT_CLASS} value={of.contractType} onChange={(e) => setOf({ ...of, contractType: e.target.value })}>
+              {["permanent", "fixed_term"].map((c) => (
+                <option key={c} value={c}>{enumLabel("contractType", c)}</option>
+              ))}
+            </select>
             <Input type="date" data-testid="offer-start-date" value={of.startDate} onChange={(e) => setOf({ ...of, startDate: e.target.value })} />
             <Button type="button" data-testid="offer-submit" disabled={createOffer.isPending} onClick={() => createOffer.mutate()}>{t("recruiting.application.createOffer")}</Button>
           </div>)}
@@ -264,7 +271,7 @@ export default function ApplicationDetailPage() {
                     {o.masked?.includes("grossAnnualSalary")
                       ? <em data-testid="offer-salary-masked">{t("recruiting.application.salaryMasked")}</em>
                       : <span data-testid="offer-row-salary">{fmt.importo(o.grossAnnualSalary, "EUR", 0)}</span>}
-                    {o.contractType ? ` · ${o.contractType}` : ""}{o.startDate ? ` · ${fmt.data(o.startDate)}` : ""}
+                    {o.contractType ? ` · ${enumLabel("contractType", o.contractType)}` : ""}{o.startDate ? ` · ${fmt.data(o.startDate)}` : ""}
                   </span>
                   <div className="flex items-center gap-2">
                     <Badge data-testid="offer-row-status">{t(`recruiting.offerStatus.${o.status}`)}</Badge>

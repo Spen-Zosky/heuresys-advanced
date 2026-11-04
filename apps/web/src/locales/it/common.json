@@ -281,7 +281,10 @@
     },
     "perfReviewType": {
       "ANNUAL": "Annuale",
-      "MID_YEAR": "Semestrale"
+      "MID_YEAR": "Semestrale",
+      "PROBATION": "Fine del periodo di prova",
+      "PROJECT": "Di progetto",
+      "AD_HOC": "Straordinaria"
     },
     "perfReviewStatus": {
       "IN_PROGRESS": "In corso",
@@ -493,7 +496,8 @@
       "STUDY": "Studio",
       "SABBATICAL": "Aspettativa",
       "UNPAID": "Non retribuito",
-      "OTHER": "Altro"
+      "OTHER": "Altro",
+      "PAID_LEAVE": "Permesso retribuito"
     },
     "whistleblowingStatus": {
       "NEW": "Nuova",
@@ -579,6 +583,55 @@
     "tenantBlueprintStatus": {
       "ACTIVE": "Attivo",
       "ARCHIVED": "Archiviato"
+    },
+    "accrualMethod": {
+      "MONTHLY": "Mensile",
+      "QUARTERLY": "Trimestrale",
+      "SEMIANNUAL": "Semestrale",
+      "ANNUAL": "Annuale",
+      "PER_PAY_PERIOD": "A ogni periodo di paga",
+      "LUMP_SUM": "In un'unica soluzione"
+    },
+    "vizExportFormat": {
+      "SVG": "Immagine SVG",
+      "PDF": "PDF",
+      "PNG": "Immagine PNG",
+      "GENERIC_JSON": "Dati JSON",
+      "REACT_FLOW_JSON": "Grafo JSON (React Flow)",
+      "MERMAID": "Diagramma Mermaid"
+    },
+    "fitDimension": {
+      "SKILL": "Competenze",
+      "KPI": "Indicatori",
+      "LEARNING": "Formazione",
+      "CERTIFICATION": "Certificazioni",
+      "BEHAVIORAL": "Comportamenti",
+      "OVERALL": "Complessivo"
+    },
+    "overtimeType": {
+      "WEEKDAY": "Feriale",
+      "WEEKEND": "Fine settimana",
+      "NIGHT": "Notturno",
+      "HOLIDAY": "Festivo",
+      "EMERGENCY": "Emergenza",
+      "PROJECT": "Di progetto",
+      "ON_CALL": "Reperibilità"
+    },
+    "overtimeStatus": {
+      "PENDING": "In attesa",
+      "APPROVED": "Approvato",
+      "REJECTED": "Respinto",
+      "EXPORTED": "Esportato",
+      "PAID": "Pagato",
+      "CANCELLED": "Annullato"
+    },
+    "payrollRecipientSystem": {
+      "ZUCCHETTI_PAGHE": "Zucchetti Paghe"
+    },
+    "leadSource": {
+      "WEBSITE": "Sito",
+      "INVESTOR": "Pagina investitori",
+      "DEMO": "Richiesta di dimostrazione"
     }
   },
   "masked": "nascosto per il tuo profilo",

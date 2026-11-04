@@ -42,7 +42,7 @@ export default function EngagementResultsPage() {
     () => [
       { header: t("engagement.results.question"), cell: (q) => <span className="font-medium text-foreground">{q.text}</span> },
       { header: t("engagement.results.type"), cell: (q) => <span className="text-muted-foreground">{enumLabel("questionType", q.type)}</span> },
-      { header: t("engagement.results.category"), cell: (q) => <span className="text-muted-foreground">{q.category ?? "—"}</span> },
+      { header: t("engagement.results.category"), cell: (q) => <span className="text-muted-foreground">{enumLabel("surveyCategory", q.category)}</span> },
       { header: t("engagement.results.responses"), cell: (q) => <span className="text-muted-foreground">{q.responseCount}</span> },
       { header: t("engagement.results.avg"), cell: (q) => <span className="text-muted-foreground">{q.avgRating != null ? fmt.numeroFisso(q.avgRating, 2) : "—"}</span> },
     ],

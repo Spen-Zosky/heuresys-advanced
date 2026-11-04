@@ -36,15 +36,16 @@ import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
-import { useFormat } from "@/lib/format";
+import { useFormat, type Formati } from "@/lib/format";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 interface ListaCicli { items: ReviewCycle[]; total: number }
 interface ListaCalibrazioni { items: CalibrationSession[]; total: number }
 
 /** Un intervallo di date leggibile, o un trattino se il dato non lo porta. */
-function periodo(da: string | null, a: string | null): string {
+function periodo(da: string | null, a: string | null, fmt: Formati): string {
   if (!da && !a) return "—";
-  return `${da ?? "…"} → ${a ?? "…"}`;
+  return `${da ? fmt.data(da) : "…"} → ${a ? fmt.data(a) : "…"}`;
 }
 
 /** Il voto, oppure la dichiarazione che è stato ritirato per mandato. */
@@ -55,6 +56,7 @@ function voto(riga: { masked?: string[] }, campo: string, valore: number | null 
 
 export default function PerformancePage() {
   const { t } = useTranslation("hr");
+  const enumLabel = useEnumLabel();
   const fmt = useFormat();
 
   const cicli = useQuery({
@@ -95,14 +97,14 @@ export default function PerformancePage() {
     () => [
       { header: t("performance.cycles.cols.code"), cell: (c) => <span className="text-xs font-medium">{c.code}</span> },
       { header: t("performance.cycles.cols.name"), cell: (c) => <span className="text-xs">{c.name}</span> },
-      { header: t("performance.cycles.cols.type"), cell: (c) => <span className="text-xs">{c.type}</span> },
+      { header: t("performance.cycles.cols.type"), cell: (c) => <span className="text-xs">{enumLabel("perfReviewType", c.type)}</span> },
       {
         header: t("performance.cycles.cols.period"),
-        cell: (c) => <span className="text-xs text-muted-foreground">{periodo(c.periodStart, c.periodEnd)}</span>,
+        cell: (c) => <span className="text-xs text-muted-foreground">{periodo(c.periodStart, c.periodEnd, fmt)}</span>,
       },
       { header: t("performance.cycles.cols.status"), cell: (c) => <EnumStatusBadge domain="status" value={c.status} /> },
     ],
-    [t],
+    [t, enumLabel, fmt],
   );
 
   const colonneValutazioni = useMemo<DataColumn<PerformanceReview>[]>(
@@ -117,9 +119,9 @@ export default function PerformancePage() {
       },
       {
         header: t("performance.reviews.cols.period"),
-        cell: (r) => <span className="text-xs text-muted-foreground">{periodo(r.periodStart, r.periodEnd)}</span>,
+        cell: (r) => <span className="text-xs text-muted-foreground">{periodo(r.periodStart, r.periodEnd, fmt)}</span>,
       },
-      { header: t("performance.reviews.cols.type"), cell: (r) => <span className="text-xs">{r.type ?? "—"}</span> },
+      { header: t("performance.reviews.cols.type"), cell: (r) => <span className="text-xs">{enumLabel("perfReviewType", r.type)}</span> },
       {
         header: t("performance.reviews.cols.status"),
         cell: (r) => (r.status ? <EnumStatusBadge domain="status" value={r.status} /> : <span className="text-xs">—</span>),
@@ -152,7 +154,7 @@ export default function PerformancePage() {
           ),
       },
     ],
-    [t, fmt],
+    [t, fmt, enumLabel],
   );
 
   const colonneCalibrazioni = useMemo<DataColumn<CalibrationSession>[]>(

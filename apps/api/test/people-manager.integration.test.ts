@@ -9,7 +9,8 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
-import { closePool } from "../src/db/client.js";
+import { pool, closePool } from "../src/db/client.js";
+import { userWithRole } from "./helpers/actors.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { readCollaudoKey, deriveCollaudoPassword } from "../scripts/collaudo-access.mjs";
 import { senzaCacheDiSessione } from "./helpers/session-cache.js";
@@ -17,9 +18,9 @@ import { senzaCacheDiSessione } from "./helpers/session-cache.js";
 senzaCacheDiSessione();
 
 const PEOPLE_MANAGER_EMAIL = "people-manager@collaudo.invalid";
-// Controprova: una persona REALE con HRMS_MANAGER su RTL_BANK (measured live —
-// non una persona di collaudo dedicata, il ruolo e' storico e non nato in R-6).
-const HRMS_MANAGER_EMAIL = "maria.colombo@rtl-bank.org";
+// Controprova: chi detiene HRMS_MANAGER OGGI nel tenant del People Manager, scelto dal dato
+// (helpers/actors.ts). Prima era un nome scritto a mano, e quando la persona ha perso il ruolo
+// (il ruolo segue il lavoro, 2026-10-31) la controprova riceveva 403 per la ragione sbagliata.
 
 interface S { cookies: Map<string, string>; csrfToken: string; userId: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
@@ -40,7 +41,12 @@ describe("mandato K, R-6 — PEOPLE_MANAGER", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     const key = readCollaudoKey();
-    hrmsManager = await login(suite, HRMS_MANAGER_EMAIL, TEST_PERSONA_PASSWORD);
+    const t = await pool.query<{ tenant: string }>(
+      `SELECT user_tenant_id AS tenant FROM sys.sys_users WHERE lower(user_email) = $1`,
+      [PEOPLE_MANAGER_EMAIL],
+    );
+    const hrms = await userWithRole("HRMS_MANAGER", { tenantId: t.rows[0]!.tenant });
+    hrmsManager = await login(suite, hrms.email, TEST_PERSONA_PASSWORD);
     peopleManager = await login(suite, PEOPLE_MANAGER_EMAIL, deriveCollaudoPassword(key, PEOPLE_MANAGER_EMAIL));
   });
 

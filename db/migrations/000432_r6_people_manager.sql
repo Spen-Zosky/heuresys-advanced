@@ -47,7 +47,7 @@ ON CONFLICT (auth_role_code) DO UPDATE
   SET auth_role_category = EXCLUDED.auth_role_category,
       auth_role_is_platform = EXCLUDED.auth_role_is_platform;
 
--- 2. Grant: i 78 permessi rivisti a mano (esiti/R-6_permessi_people_manager.md).
+-- 2. Grant: i 78 permessi rivisti a mano (esiti/R-6_permessi_people_manager.md), piu' le 14 letture di S-8 (2026-11-04).
 INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
 SELECT r.auth_role_id, p.auth_permission_id
   FROM sys.sys_auth_roles r
@@ -364,7 +364,7 @@ BEGIN
     RAISE EXCEPTION '000432: auth_role_is_platform=true deve restare su UN solo ruolo (PLATFORM_ADMIN), ne ha %', n_platform_true;
   END IF;
 
-  RAISE NOTICE '000432: PEOPLE_MANAGER creato (% permessi live: 78 espliciti + % derivati su 10 self-floor/mirror); 0 permessi di altri domini; HRMS_MANAGER intatto (% permessi); G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.', n_pm, n_derivati_presenti, n_hrms;
+  RAISE NOTICE '000432: PEOPLE_MANAGER creato (% permessi live: 92 espliciti (78 + 14 letture di S-8) + % derivati su 10 self-floor/mirror); 0 permessi di altri domini; HRMS_MANAGER intatto (% permessi); G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.', n_pm, n_derivati_presenti, n_hrms;
 END $$;
 
 DROP TABLE _hrms_prima;

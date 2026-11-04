@@ -91,19 +91,20 @@ async function risolvi(page: Page, rotta: string): Promise<string | null> {
   const segmenti = rotta.split("/");
   const posizioni = segmenti.flatMap((seg, i) => (eParametro(seg) ? [i] : []));
   const finale = espressione(segmenti, false);
-  let dove = segmenti.slice(0, posizioni[0]).join("/") || "/";
-  // Un passo per parametro, più uno: `/positions/[positionId]/kpis` si trova sulla pagina della
-  // posizione, che a sua volta si trova sulla lista. A ogni passo vale prima l'indirizzo finale;
-  // se non c'è, si scende di un livello fino al parametro successivo.
-  for (let k = 0; k <= posizioni.length; k++) {
+  const collegamenti = async (dove: string) => {
     await page.goto(dove);
     await page.waitForLoadState("networkidle").catch(() => {});
     await page.waitForTimeout(1500);
-    const hrefs = await page.$$eval("a[href]", (as) => as.map((a) => a.getAttribute("href") ?? ""));
+    return page.$$eval("a[href]", (as) => as.map((a) => a.getAttribute("href") ?? ""));
+  };
+  let dove = segmenti.slice(0, posizioni[0]).join("/") || "/";
+  // Un passo per parametro: `/positions/[positionId]/kpis` si trova sulla pagina della
+  // posizione, che a sua volta si trova sulla lista. A ogni passo vale prima l'indirizzo
+  // finale; se non c'è, si scende di un livello fino al parametro successivo.
+  for (const p of posizioni) {
+    const hrefs = await collegamenti(dove);
     const diretto = hrefs.find((h) => finale.test(h));
     if (diretto) return diretto;
-    const p = posizioni[k];
-    if (p === undefined) return null;
     const passo = espressione(segmenti.slice(0, p + 1), true);
     let avanti = hrefs.find((h) => passo.test(h) && h !== dove);
     if (!avanti) {
@@ -120,7 +121,9 @@ async function risolvi(page: Page, rotta: string): Promise<string | null> {
     if (!avanti) return null;
     dove = avanti;
   }
-  return null;
+  // Dopo l'ultimo parametro resta da trovare la sottopagina, se la rotta ne ha una.
+  const hrefs = await collegamenti(dove);
+  return finale.test(dove) ? dove : (hrefs.find((h) => finale.test(h)) ?? null);
 }
 
 async function aspetta(page: Page) {

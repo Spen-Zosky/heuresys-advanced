@@ -32,6 +32,7 @@ import { Button, Input, Spinner, EmptyState, ErrorState } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { StatusPill } from "@/components/status-pill";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 const INCLUSIONI = ["IN", "PARTIAL", "OUT"] as const;
 
@@ -42,6 +43,7 @@ export default function TenantBlueprintDetailPage({
 }) {
   const { id } = use(params);
   const { t } = useTranslation("blueprints");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const perms = useCurrentUserPermissions();
   const canWrite = perms.data?.permissions.includes("tenant_blueprint:write") ?? false;
@@ -86,7 +88,7 @@ export default function TenantBlueprintDetailPage({
             {t("dossier.version")} {versione.number}
           </span>
           <StatusPill tone={versione.status === "DRAFT" ? "info" : "success"}>
-            {versione.status}
+            {enumLabel("tenantBlueprintVersionStatus", versione.status)}
           </StatusPill>
           <Link
             href={`/tenant-blueprints/${id}/versions/${versione.number}/diff`}
@@ -590,6 +592,7 @@ function Sottometti({
   modificabile: boolean;
 }) {
   const { t } = useTranslation("blueprints");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const [errore, setErrore] = useState<string | null>(null);
 
@@ -615,7 +618,7 @@ function Sottometti({
         </Button>
       ) : (
         <p className="text-sm text-muted-foreground" data-testid="fascicolo-stato">
-          {versione.status}
+          {enumLabel("tenantBlueprintVersionStatus", versione.status)}
         </p>
       )}
       {invia.isSuccess ? (

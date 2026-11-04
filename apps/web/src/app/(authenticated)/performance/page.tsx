@@ -70,20 +70,21 @@ export default function PerformancePage() {
     queryFn: () => apiFetch<ListaCalibrazioni>("/v1/calibration-sessions?limit=100&offset=0"),
   });
 
+  // V-16: finche' il dato non c'e' (caricamento o errore) l'indicatore dice «—», non zero.
   const kpi: KpiCardData[] = [
     {
       label: t("performance.kpi.cycles"),
-      value: <span data-testid="perf-kpi-cycles">{cicli.data?.total ?? 0}</span>,
+      value: <span data-testid="perf-kpi-cycles">{cicli.data ? cicli.data.total : "—"}</span>,
       iconTone: "info",
     },
     {
       label: t("performance.kpi.reviews"),
-      value: <span data-testid="perf-kpi-reviews">{valutazioni.total}</span>,
+      value: <span data-testid="perf-kpi-reviews">{valutazioni.query.data ? valutazioni.total : "—"}</span>,
       iconTone: "palette-4",
     },
     {
       label: t("performance.kpi.calibrations"),
-      value: <span data-testid="perf-kpi-calibrations">{calibrazioni.data?.total ?? 0}</span>,
+      value: <span data-testid="perf-kpi-calibrations">{calibrazioni.data ? calibrazioni.data.total : "—"}</span>,
       iconTone: "success",
     },
   ];

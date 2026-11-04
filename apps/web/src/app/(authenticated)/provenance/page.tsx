@@ -37,7 +37,7 @@ function buildRecordColumns(t: TFunction): DataColumn<ProvenanceRecord>[] {
     { header: t("provenance.cols.targetTable"), cell: (r) => <span className="font-mono text-xs">{r.targetTableName}</span> },
     { header: t("provenance.cols.sourceTable"), cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.sourceTable}</span> },
     { header: t("provenance.cols.confidence"), align: "right", cell: (r) => <span className="tabular-nums">{(r.mappingConfidence * 100).toFixed(1)}%</span> },
-    { header: t("provenance.cols.status"), cell: (r) => <StatusPill tone={toneForStatus(r.validationStatus)}>{r.validationStatus}</StatusPill> },
+    { header: t("provenance.cols.status"), cell: (r) => <StatusPill tone={toneForStatus(r.validationStatus)}>{t(`provenance.status.${r.validationStatus}`)}</StatusPill> },
     {
       header: t("provenance.cols.provenance"),
       cell: (r) => (
@@ -85,7 +85,7 @@ export default function ProvenancePage() {
     { header: t("provenance.cols.targetTable"), cell: (r) => <span className="font-mono text-xs">{r.targetTable}</span> },
     { header: t("provenance.cols.total"), align: "right", cell: (r) => <span className="tabular-nums">{r.total.toLocaleString()}</span> },
     { header: t("provenance.cols.avgConfidence"), align: "right", cell: (r) => <span className="tabular-nums">{r.avgConfidence != null ? `${(r.avgConfidence * 100).toFixed(1)}%` : "—"}</span> },
-    { header: "VALID", align: "right", cell: (r) => <span className="tabular-nums">{r.valid.toLocaleString()}</span> },
+    { header: t("provenance.status.VALID"), align: "right", cell: (r) => <span className="tabular-nums">{r.valid.toLocaleString()}</span> },
     { header: t("provenance.cols.conflicted"), align: "right", cell: (r) => <span className="tabular-nums">{(r.conflicted + r.rejected).toLocaleString()}</span> },
   ], [t]);
 
@@ -121,7 +121,7 @@ export default function ProvenancePage() {
             onChange={(e) => setStatus(e.target.value as ValidationStatus | "")}
           >
             <option value="">{t("provenance.allStatuses")}</option>
-            {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+            {STATUSES.map((s) => <option key={s} value={s}>{t(`provenance.status.${s}`)}</option>)}
           </select>
         </div>
         <EntityTable<ProvenanceRecord>

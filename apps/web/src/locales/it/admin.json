@@ -125,7 +125,12 @@
       "workload": "Carico",
       "satisfaction": "Soddisfazione",
       "totalChecks": "{{count}} check totali",
-      "empty": "Nessun dato pulse."
+      "empty": "Nessun dato pulse.",
+      "axisWeek": "Settimana",
+      "axisScore": "Punteggio medio",
+      "tableTitle": "Mostra i dati in tabella",
+      "colCount": "Rilevazioni",
+      "weekShort": "Sett. {{n}}"
     },
     "results": {
       "back": "Torna a Engagement",
@@ -352,23 +357,36 @@
     }
   },
   "enterpriseTyping": {
-    "title": "Enterprise Typing Wizard",
-    "description": "Tipizza l'enterprise selezionando family, variante, operating model e size band.",
+    "title": "Tipizzazione dell'azienda",
+    "description": "Il profilo che descrive l'azienda: classe di attività, dimensione, modello operativo, intensità regolatoria.",
     "back": "← Tenant",
-    "cardTitle": "Profilo",
-    "familyLabel": "Blueprint family",
-    "variantLabel": "Variante",
-    "modelLabel": "Operating model",
-    "sizeBandLabel": "Size band",
-    "selectPlaceholder": "— Seleziona —",
+    "cardTitleNew": "Nuovo profilo",
+    "cardTitleSaved": "Profilo salvato",
+    "classLabel": "Classe di attività",
+    "classNone": "Nessuna classe scelta.",
+    "classSearch": "Cerca per codice o nome (almeno 2 lettere)",
+    "classClear": "Togli la classe",
+    "modelLabel": "Modello operativo",
+    "sizeBandLabel": "Fascia dimensionale",
+    "intensityLabel": "Intensità regolatoria",
+    "intensity": {
+      "LOW": "Bassa",
+      "MEDIUM": "Media",
+      "HIGH": "Alta",
+      "EXTREME": "Estrema"
+    },
+    "countryLabel": "Paese (codice di due lettere)",
+    "countryInvalid": "Il paese è un codice di due lettere, per esempio IT.",
+    "employeesLabel": "Addetti",
+    "revenueLabel": "Fatturato (€)",
+    "numbersInvalid": "Addetti e fatturato sono numeri senza segni.",
     "nonePlaceholderMale": "— Nessuno —",
     "nonePlaceholderFemale": "— Nessuna —",
-    "familyRequired": "Famiglia richiesta.",
-    "variantRequired": "Variante richiesta.",
-    "createError": "Errore creazione profilo.",
-    "createSuccess": "Profilo creato.",
-    "submit": "Crea profilo",
-    "submitting": "Creazione…"
+    "loadError": "Impossibile leggere il profilo.",
+    "saveError": "Salvataggio non riuscito.",
+    "saveSuccess": "Profilo salvato.",
+    "submit": "Salva il profilo",
+    "submitting": "Salvataggio…"
   },
   "organization": {
     "title": "Organization Units",
@@ -978,6 +996,12 @@
       "total": "Totale",
       "avgConfidence": "Conf. media",
       "conflicted": "In conflitto"
+    },
+    "status": {
+      "VALID": "Valide",
+      "STALE": "Superate",
+      "CONFLICTED": "In conflitto",
+      "REJECTED": "Respinte"
     }
   },
   "timeOff": {
@@ -1228,6 +1252,11 @@
       "confirmed": "Confermate",
       "superseded": "Sostituite",
       "tables": "Tabelle coinvolte"
+    },
+    "status": {
+      "GENERATED": "Generate",
+      "CONFIRMED": "Confermate",
+      "SUPERSEDED": "Sostituite"
     }
   }
 }

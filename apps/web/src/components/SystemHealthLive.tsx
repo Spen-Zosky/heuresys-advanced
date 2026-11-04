@@ -20,8 +20,9 @@
  * LogStream (log tail = systemd/journalctl infra, not app data) and
  * IncidentTimeline/AlertBanner (no incident module shipped).
  *
- * Composed from @heuresys/ui primitives. English copy (this lives in components/,
- * outside the apps/web/src/app/** i18n guardrail — same as the showcase mock).
+ * Composed from @heuresys/ui primitives. V-9 del piano interfacce (2026-11-04): i testi
+ * sono tradotti (`common:health.*`) e i numeri e i tempi relativi seguono la lingua della
+ * persona; prima erano in inglese («req», «ms avg», «just now»).
  */
 
 import {
@@ -50,30 +51,23 @@ type RolePermissionItem = RolePermissionsResponse["items"][number];
 
 /* ---------- helpers (pure, render-time) ---------------------------------- */
 
-function formatRelative(iso: string | null): string {
+function formatRelative(iso: string | null, lang: string): string {
   if (!iso) return "—";
-  const diffMs = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diffMs / 60_000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  const rtf = new Intl.RelativeTimeFormat(lang, { numeric: "auto" });
+  const m = Math.round((new Date(iso).getTime() - Date.now()) / 60_000);
+  if (Math.abs(m) < 60) return rtf.format(m, "minute");
+  const h = Math.round(m / 60);
+  if (Math.abs(h) < 24) return rtf.format(h, "hour");
+  return rtf.format(Math.round(h / 24), "day");
 }
 
-const TENANT_STATUS: Record<string, { dot: string; text: string; label: string }> = {
-  ACTIVE: { dot: "bg-success", text: "text-success", label: "Active" },
-  SUSPENDED: { dot: "bg-warning", text: "text-warning", label: "Suspended" },
-  ARCHIVED: { dot: "bg-muted-foreground", text: "text-muted-foreground", label: "Archived" },
+const TENANT_STATUS: Record<string, { dot: string; text: string }> = {
+  ACTIVE: { dot: "bg-success", text: "text-success" },
+  SUSPENDED: { dot: "bg-warning", text: "text-warning" },
+  ARCHIVED: { dot: "bg-muted-foreground", text: "text-muted-foreground" },
 };
 function tenantStatus(s: string) {
-  return (
-    TENANT_STATUS[s.toUpperCase()] ?? {
-      dot: "bg-muted-foreground",
-      text: "text-muted-foreground",
-      label: s,
-    }
-  );
+  return TENANT_STATUS[s.toUpperCase()] ?? { dot: "bg-muted-foreground", text: "text-muted-foreground" };
 }
 
 const HTTP_METHODS = ["GET", "POST", "PATCH", "DELETE", "PUT"] as const;
@@ -146,7 +140,10 @@ function buildMatrix(items: ReadonlyArray<RolePermissionItem>) {
 /* ---------- component ---------------------------------------------------- */
 
 export function SystemHealthLive() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  const n = (v: number, max = 0) => v.toLocaleString(lang, { maximumFractionDigits: max });
+  const rel = (iso: string | null) => formatRelative(iso, lang);
   const health = useSystemHealth();
   // S-3: la matrice ruoli×permessi chiede `role_matrix:read`, che PLATFORM_OPERATOR non ha.
   // Senza il permesso la sezione non si mostra e la chiamata non parte (giro del banco L1).
@@ -168,7 +165,7 @@ export function SystemHealthLive() {
   if (health.isError || !health.data) {
     return (
       <main data-testid="system-health-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">Failed to load system health.</p>
+        <p className="text-sm text-danger">{t("health.loadError")}</p>
       </main>
     );
   }
@@ -187,34 +184,30 @@ export function SystemHealthLive() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            System Health &amp; Observability
+            {t("health.title")}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Cross-tenant platform observability — live pg.Pool, RBAC cache, auth integrity &amp;
-            24h request metrics. Every value is read live from the OCI PostgreSQL via
-            <code className="mx-1 font-mono text-xs">/v1/observability</code>.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("health.description")}</p>
         </div>
         <Badge variant="secondary" data-testid="system-health-generated-at">
-          updated {formatRelative(d.generatedAt)}
+          {t("health.updated", { when: rel(d.generatedAt) })}
         </Badge>
       </div>
 
       <KPIStrip
         items={[
           {
-            label: "API uptime · 24h",
-            value: rm.uptime24hPct.toFixed(2),
+            label: t("health.kpi.uptime"),
+            value: rm.uptime24hPct.toLocaleString(lang, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
             unit: "%",
             iconTone: "success",
             icon: <Activity className="h-4 w-4" />,
-            footerLeft: `${rm.totalRequests.toLocaleString()} req`,
-            footerRight: `${rm.avgDurationMs.toFixed(0)}ms avg`,
+            footerLeft: t("health.kpi.requests", { count: rm.totalRequests, n: n(rm.totalRequests) }),
+            footerRight: t("health.kpi.avgMs", { ms: n(rm.avgDurationMs) }),
           },
           {
-            label: "DB pool · pg 16",
+            label: t("health.kpi.pool"),
             value: d.pool.active,
-            unit: `/ ${d.pool.max} conn`,
+            unit: t("health.kpi.poolUnit", { max: d.pool.max }),
             iconTone: "palette-2",
             icon: <Database className="h-4 w-4" />,
             body: (
@@ -229,62 +222,62 @@ export function SystemHealthLive() {
                 </div>
                 <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
                   <span className="num">
-                    idle {d.pool.idle} · active {d.pool.active} · waiting {d.pool.waiting}
+                    {t("health.kpi.poolDetail", { idle: d.pool.idle, active: d.pool.active, waiting: d.pool.waiting })}
                   </span>
-                  <span className="num">srv max {d.pool.serverMaxConnections}</span>
+                  <span className="num">{t("health.kpi.serverMax", { max: d.pool.serverMaxConnections })}</span>
                 </div>
               </div>
             ),
           },
           {
-            label: "RBAC cache",
+            label: t("health.kpi.rbac"),
             value: d.rbac.mappingsLoaded,
-            unit: "mappings",
+            unit: t("health.kpi.rbacUnit"),
             iconTone: "palette-3",
             icon: <Lock className="h-4 w-4" />,
             body: (
               <>
                 <div className="mt-3 flex items-baseline justify-between text-[11px]">
-                  <span className="text-muted-foreground">{d.rbac.rolesLoaded} roles loaded</span>
-                  <span className="font-mono text-success">LOADED</span>
+                  <span className="text-muted-foreground">{t("health.kpi.rolesLoaded", { count: d.rbac.rolesLoaded })}</span>
+                  <span className="text-success">{d.rbac.loadedAt ? t("health.kpi.loaded") : t("health.kpi.notLoaded")}</span>
                 </div>
-                <div className="mt-1 font-mono text-[10px] text-muted-foreground">
-                  {d.rbac.loadedAt ? `last load · ${formatRelative(d.rbac.loadedAt)}` : "not loaded"}
+                <div className="mt-1 text-[10px] text-muted-foreground">
+                  {d.rbac.loadedAt ? t("health.kpi.lastLoad", { when: rel(d.rbac.loadedAt) }) : t("health.kpi.notLoaded")}
                 </div>
               </>
             ),
           },
           {
-            label: "Active tenants",
+            label: t("health.kpi.tenants"),
             value: activeTenants,
             unit: `/ ${d.tenantFleet.length}`,
             iconTone: "palette-1",
             icon: <Users className="h-4 w-4" />,
             body: (
               <div className="mt-3 flex items-baseline justify-between text-[11px] text-muted-foreground">
-                <span>{activeTenants} active</span>
-                <span className="num">{totalUsers} users</span>
+                <span>{t("health.kpi.activeCount", { count: activeTenants })}</span>
+                <span className="num">{t("health.kpi.usersCount", { count: totalUsers, n: n(totalUsers) })}</span>
               </div>
             ),
           },
           {
-            label: "Auth integrity · 24h",
+            label: t("health.kpi.auth"),
             value: d.authIntegrity.replayRevoked,
-            unit: "replay",
+            unit: t("health.kpi.replay"),
             iconTone: d.authIntegrity.replayRevoked > 0 ? "danger" : "success",
             icon: <ShieldCheck className="h-4 w-4" />,
             body: (
               <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
                 <div>
-                  <div className="text-muted-foreground">Login</div>
+                  <div className="text-muted-foreground">{t("health.kpi.logins")}</div>
                   <div className="num font-medium text-foreground">{d.authIntegrity.login24h}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Failed</div>
+                  <div className="text-muted-foreground">{t("health.kpi.failed")}</div>
                   <div className="num font-medium text-warning">{d.authIntegrity.failed24h}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Rotations</div>
+                  <div className="text-muted-foreground">{t("health.kpi.rotations")}</div>
                   <div className="num font-medium text-foreground">{d.authIntegrity.rotations}</div>
                 </div>
               </div>
@@ -302,41 +295,39 @@ export function SystemHealthLive() {
         className="overflow-hidden rounded-card border border-border bg-card shadow-card"
       >
         <div className="border-b border-border px-5 py-4">
-          <h2 className="text-sm font-semibold text-foreground">Tenant fleet</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Active tenants — live user count + last login activity
-          </p>
+          <h2 className="text-sm font-semibold text-foreground">{t("health.fleet.title")}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t("health.fleet.description")}</p>
         </div>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-              <th className="px-5 py-2.5">Tenant</th>
-              <th className="px-3 py-2.5">Status</th>
-              <th className="px-3 py-2.5 text-right">Users</th>
-              <th className="px-3 py-2.5">Last activity</th>
+              <th className="px-5 py-2.5">{t("health.fleet.tenant")}</th>
+              <th className="px-3 py-2.5">{t("health.fleet.status")}</th>
+              <th className="px-3 py-2.5 text-right">{t("health.fleet.users")}</th>
+              <th className="px-3 py-2.5">{t("health.fleet.lastActivity")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {d.tenantFleet.map((t) => {
-              const st = tenantStatus(t.status);
+            {d.tenantFleet.map((tn) => {
+              const st = tenantStatus(tn.status);
               return (
-                <tr key={t.code}>
+                <tr key={tn.code}>
                   <td className="px-5 py-3">
-                    <div className="font-medium text-foreground">{t.code}</div>
-                    <div className="text-[11px] text-muted-foreground">{t.name}</div>
+                    <div className="font-medium text-foreground">{tn.code}</div>
+                    <div className="text-[11px] text-muted-foreground">{tn.name}</div>
                   </td>
                   <td className="px-3 py-3">
                     <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${st.text}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${st.dot}`} />
-                      {st.label}
+                      {t(`health.fleet.statusLabel.${tn.status.toUpperCase()}`, { defaultValue: tn.status })}
                     </span>
                   </td>
                   <td className="num px-3 py-3 text-right tabular-nums text-foreground">
-                    {t.userCount}
+                    {n(tn.userCount)}
                   </td>
                   <td className="px-3 py-3">
-                    <span className="font-mono text-[11px] text-muted-foreground">
-                      {formatRelative(t.lastActivity)}
+                    <span className="text-[11px] text-muted-foreground">
+                      {rel(tn.lastActivity)}
                     </span>
                   </td>
                 </tr>
@@ -377,19 +368,19 @@ export function SystemHealthLive() {
             const pts = requestSeries.data.points;
             const cards = [
               {
-                label: "Requests / 5min · 3h",
+                label: t("health.series.requests"),
                 data: pts.map((p) => p.total),
-                foot: `${pts.reduce((s, p) => s + p.total, 0).toLocaleString()} req in window`,
+                foot: t("health.series.requestsFoot", { n: n(pts.reduce((s, p) => s + p.total, 0)) }),
               },
               {
-                label: "5xx errors / 5min · 3h",
+                label: t("health.series.errors"),
                 data: pts.map((p) => p.xx5),
-                foot: `${pts.reduce((s, p) => s + p.xx5, 0)} server errors`,
+                foot: t("health.series.errorsFoot", { count: pts.reduce((s, p) => s + p.xx5, 0) }),
               },
               {
-                label: "Avg latency ms / 5min · 3h",
+                label: t("health.series.latency"),
                 data: pts.map((p) => p.avgDurationMs),
-                foot: `${Math.max(...pts.map((p) => p.avgDurationMs)).toFixed(0)}ms peak`,
+                foot: t("health.series.latencyFoot", { ms: n(Math.max(...pts.map((p) => p.avgDurationMs))) }),
               },
             ];
             return cards.map((c) => (
@@ -431,15 +422,15 @@ export function SystemHealthLive() {
                 totalTimeBarPct: Math.round((q.totalMs / maxTotal) * 100),
                 totalTimeTone:
                   q.meanMs > 250 ? ("danger" as const) : q.meanMs > 50 ? ("warning" as const) : ("palette-2" as const),
-                totalTimeLabel: `${(q.totalMs / 1000).toFixed(1)}s`,
-                lastSeen: "cumulative",
+                totalTimeLabel: `${(q.totalMs / 1000).toLocaleString(lang, { maximumFractionDigits: 1 })} s`,
+                lastSeen: t("health.slow.cumulative"),
               }));
             })()}
             totalTracked={slowQueries.data.totalTracked}
             sampleSince={
-              slowQueries.data.statsSince ? formatRelative(slowQueries.data.statsSince) : undefined
+              slowQueries.data.statsSince ? rel(slowQueries.data.statsSince) : undefined
             }
-            totalCaptured="p95 ≈ μ+1.645σ (estimated — pg_stat_statements has no percentiles)"
+            totalCaptured={t("health.slow.p95Note")}
           />
         </div>
       ) : (
@@ -448,13 +439,13 @@ export function SystemHealthLive() {
           icon={<Database className="h-6 w-6" />}
           title={
             slowQueries.data && !slowQueries.data.extensionAvailable
-              ? "Statement statistics unavailable"
-              : "No tracked statements yet"
+              ? t("health.slow.unavailableTitle")
+              : t("health.slow.emptyTitle")
           }
           description={
             slowQueries.data && !slowQueries.data.extensionAvailable
-              ? "The pg_stat_statements extension is not loaded on this database, so per-statement timings cannot be collected."
-              : "pg_stat_statements has no rows for the app database in the current stats window."
+              ? t("health.slow.unavailableDesc")
+              : t("health.slow.emptyDesc")
           }
         />
       )}
@@ -466,14 +457,14 @@ export function SystemHealthLive() {
           totalRoles={matrix.roles.length}
           totalMappings={rolePerms.data?.total}
           totalPermissions={matrix.rows.length}
-          lastReload={d.rbac.loadedAt ? formatRelative(d.rbac.loadedAt) : undefined}
+          lastReload={d.rbac.loadedAt ? rel(d.rbac.loadedAt) : undefined}
         />
       ) : (
         <EmptyState
           data-testid="system-health-rbac-empty"
           icon={<Lock className="h-6 w-6" />}
-          title="RBAC matrix unavailable"
-          description="The role-permission map could not be loaded."
+          title={t("health.rbac.unavailableTitle")}
+          description={t("health.rbac.unavailableDesc")}
         />
       )}
 
@@ -489,9 +480,9 @@ export function SystemHealthLive() {
                 : undefined,
               meta: (
                 <>
-                  <span>{formatRelative(ev.occurredAt)}</span>
+                  <span>{rel(ev.occurredAt)}</span>
                   <span aria-hidden="true">·</span>
-                  <span>tenant={ev.tenantCode}</span>
+                  <span>{t("health.audit.tenant", { code: ev.tenantCode })}</span>
                   <span aria-hidden="true">·</span>
                   <span>{ev.userDisplayName}</span>
                 </>
@@ -503,8 +494,8 @@ export function SystemHealthLive() {
             <EmptyState
               data-testid="system-health-audit-empty"
               icon={<ShieldCheck className="h-6 w-6" />}
-              title="No recent self-service audit events"
-              description="The audit feed is empty for the current window."
+              title={t("health.audit.emptyTitle")}
+              description={t("health.audit.emptyDesc")}
             />
           </div>
         )}

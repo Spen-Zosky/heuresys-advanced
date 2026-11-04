@@ -73,6 +73,9 @@ export type LoginResponse = z.infer<typeof LoginResponseSchema>;
 
 /** The permission the API enforces on the dashboard surface itself. */
 export const DASHBOARD_PERMISSION = "dashboard:view";
+/** V-14: il cruscotto Azienda (000316, 000326) e la sua pagina. */
+export const COMPANY_DASHBOARD_PERMISSION = "dashboard_company:view";
+export const COMPANY_DASHBOARD_ROUTE = "/dashboard/azienda";
 
 /**
  * The landing rule, derived from grants rather than enumerated from role names:
@@ -92,7 +95,11 @@ export const DASHBOARD_PERMISSION = "dashboard:view";
  * are denied — 28 of the 45 people who land there.
  */
 export function landingForPermissions(permissions: readonly string[]): string {
-  return permissions.includes(DASHBOARD_PERMISSION) ? "/dashboard" : "/me";
+  if (permissions.includes(DASHBOARD_PERMISSION)) return "/dashboard";
+  // V-14 (piano interfacce 2026-11-03; V2 INC-20): chi governa l'azienda senza il cruscotto
+  // generale (il CEO) arriva sul cruscotto Azienda, che ha, e non sulla propria area personale.
+  if (permissions.includes(COMPANY_DASHBOARD_PERMISSION)) return COMPANY_DASHBOARD_ROUTE;
+  return "/me";
 }
 
 /**

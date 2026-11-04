@@ -197,9 +197,11 @@ export default function OvertimeAnalyticsPage() {
         <div data-testid="overtime-total-comp">
           <StatsCard
             label={t("overtime.stats.compLabel")}
-            value={formatCurrency(d.totalCompensationEur ?? 0, "EUR", locale)}
+            // V-7: un importo assente non e' zero euro. L'API da' null quando nessuna richiesta
+            // porta un compenso, e la pagina lo dice invece di scrivere «0 €».
+            value={d.totalCompensationEur === null ? t("overtime.stats.compUnavailable") : formatCurrency(d.totalCompensationEur, "EUR", locale)}
             icon={<Euro className="h-4 w-4 text-palette-3" />}
-            description={t("overtime.stats.compDesc")}
+            description={d.totalCompensationEur === null ? t("overtime.stats.compUnavailableDesc") : t("overtime.stats.compDesc")}
           />
         </div>
       </section>
@@ -221,6 +223,12 @@ export default function OvertimeAnalyticsPage() {
                   )}
                   height={320}
                   ariaLabel={t("overtime.statusAria")}
+                  lingua={i18n.language}
+                  tabella={{
+                    titolo: t("charts.tableTitle"),
+                    colonne: [t("charts.colStatus"), t("charts.axisRequests")],
+                    righe: d.byStatus.map((r) => [statusName(r), r.count]),
+                  }}
                 />
               </div>
             </div>
@@ -239,6 +247,13 @@ export default function OvertimeAnalyticsPage() {
                   )}
                   height={320}
                   ariaLabel={t("overtime.typeAria")}
+                  assi={{ x: t("charts.axisRequests") }}
+                  lingua={i18n.language}
+                  tabella={{
+                    titolo: t("charts.tableTitle"),
+                    colonne: [t("charts.colType"), t("charts.axisRequests")],
+                    righe: d.byType.map((r) => [typeName(r), r.count]),
+                  }}
                 />
               </div>
             </div>
@@ -256,6 +271,13 @@ export default function OvertimeAnalyticsPage() {
                 option={monthlyLineOption(d.monthly, t("overtime.seriesHours"))}
                 height={320}
                 ariaLabel={t("overtime.monthlyAria")}
+                assi={{ x: t("charts.axisMonth"), y: t("charts.axisHours") }}
+                lingua={i18n.language}
+                tabella={{
+                  titolo: t("charts.tableTitle"),
+                  colonne: [t("charts.axisMonth"), t("charts.axisRequests"), t("charts.axisHours")],
+                  righe: d.monthly.map((r) => [r.month, r.count, r.hours]),
+                }}
               />
             </div>
             <p className="text-xs text-muted-foreground">{t("overtime.monthlyNote")}</p>
@@ -274,6 +296,13 @@ export default function OvertimeAnalyticsPage() {
                   option={ouBarOption(d.byOrgUnit)}
                   height={Math.max(280, d.byOrgUnit.length * 26)}
                   ariaLabel={t("overtime.ouAria")}
+                  assi={{ x: t("charts.axisHours"), y: t("charts.axisUnit") }}
+                  lingua={i18n.language}
+                  tabella={{
+                    titolo: t("charts.tableTitle"),
+                    colonne: [t("charts.axisUnit"), t("charts.axisRequests"), t("charts.axisHours")],
+                    righe: [...d.byOrgUnit].sort((a, b) => b.hours - a.hours).map((r) => [r.dimension, r.count, r.hours]),
+                  }}
                 />
               </div>
             ) : (

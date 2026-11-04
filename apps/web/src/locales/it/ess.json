@@ -719,7 +719,10 @@
         "comp": "Retribuzione",
         "promotion": "Crescita di ruolo"
       }
-    }
+    },
+    "axisMonth": "Mese",
+    "axisHours": "Ore",
+    "tableTitle": "Mostra i dati in tabella"
   },
   "orgChart": {
     "title": "Organigramma",

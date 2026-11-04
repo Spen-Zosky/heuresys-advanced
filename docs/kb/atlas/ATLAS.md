@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `56a667b6` (2026-11-03T11:03:50+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `7d04cc06` (2026-11-04T00:41:31+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 679 |
 | Pagine web | 131 |
 | Schemi shared | 125 |
-| Tabelle DB | 383 (vuote: 68) |
-| Viste / matview | 77 / 0 |
+| Tabelle DB | 386 (vuote: 69) |
+| Viste / matview | 79 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 313 |
 
 ## Moduli API
@@ -86,7 +86,7 @@
 | platform-tenant-assignments | /v1/platform-tenant-assignments | 3 | 1 | 3 | 1 |
 | position-career-paths | /v1/position-career-paths | 4 | 3 | 3 | 1 |
 | position-succession-relevance | /v1/position-succession-relevance | 4 | 3 | 2 | 1 |
-| positions | /v1/positions | 16 | 4 | 12 | 3 |
+| positions | /v1/positions | 16 | 4 | 12 | 4 |
 | predictions | /v1/predictions | 4 | 1 | 2 | 3 |
 | process-kpi-templates | /v1/process-kpi-templates | 4 | 3 | 3 | 1 |
 | projects | /v1/projects | 7 | 3 | 3 | 1 |
@@ -144,6 +144,7 @@
 
 - `audit.agent_gateway_decisions`
 - `audit.user_self_service_actions`
+- `audit.valore_eventi`
 - `staging.attivita_processi_dubbi`
 - `staging.mig349_esco_consolidamento_undo`
 - `staging.process_participants_regole_esclusi`

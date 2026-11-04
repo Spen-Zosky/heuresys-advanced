@@ -284,7 +284,12 @@ function buildBonusPoolColumns(t: TFunction, f: Formati): DataColumn<BonusPool>[
 
 function buildObjectiveRuleColumns(t: TFunction): DataColumn<ObjectiveRewardRule>[] {
   return [
-    { header: t("compReward.cols.code"), cell: (r) => <span className="font-mono text-xs">{r.code}</span> },
+    // F-3 (banco L6, 4/11): sei regole portano come codice una chiave d'importazione
+    // (`LEGACY_BP::<uuid>`), che non è un codice da leggere. Si mostra il codice solo quando
+    // è un codice; la chiave resta nel suggerimento. La bonifica del dato è a parte.
+    { header: t("compReward.cols.code"), cell: (r) => r.code.includes("::")
+      ? <span className="text-xs text-muted-foreground" title={r.code}>—</span>
+      : <span className="font-mono text-xs">{r.code}</span> },
     { header: t("compReward.cols.name"), cell: (r) => <span>{r.name}</span> },
   ];
 }

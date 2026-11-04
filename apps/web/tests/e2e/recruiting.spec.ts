@@ -227,13 +227,15 @@ test.describe.serial("#54 F4 — recruiting, ciclo intero con login reale", () =
   test.describe("⭐ senza il permesso (paolo.caputo)", () => {
     test.use({ storageState: storageStateFor("employee") });
 
-    test("la voce di menu non c'e' e la pagina risponde con l'errore, non con una pipeline vuota", async ({ page }) => {
+    test("la voce di menu non c'e' e la pagina dice che non è sua, non mostra una pipeline vuota", async ({ page }) => {
       await page.goto("/dashboard");
       await expect(page.locator('a[href="/recruiting"]')).toHaveCount(0);
 
+      // Dal lotto L1 (S-1) la guardia di pagina ferma la persona prima che la pagina chieda i
+      // dati: al posto dell'errore dell'API c'è la schermata di accesso negato.
       await page.goto("/recruiting");
-      await expect(page.getByTestId("recruiting-page")).toBeVisible();
-      await expect(page.getByTestId("recruiting-error")).toBeVisible();
+      await expect(page.getByTestId("page-no-access")).toBeVisible();
+      await expect(page.getByTestId("recruiting-page")).toHaveCount(0);
       await expect(page.getByTestId("pipeline-board")).toHaveCount(0);
       await expect(page.getByTestId("pipeline-empty")).toHaveCount(0);
     });

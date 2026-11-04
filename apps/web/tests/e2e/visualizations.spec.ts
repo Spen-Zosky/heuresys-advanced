@@ -12,6 +12,10 @@ import { storageStateFor } from "./fixtures";
 
 test.use({ storageState: storageStateFor("tenantAdmin") });
 
+// La dimensione del file nel formato unico (lotto L6, F-1, `lib/format.ts`): «512 B», «34 KB»,
+// «1,2 MB». Prima era «N byte».
+const DIMENSIONE = /\d+(?:[.,]\d+)?\s(?:B|KB|MB)\b/;
+
 test.describe("MVP-2a visualizations — live data", () => {
   test("/visualizations browser renders (empty state OK)", async ({ page }) => {
     await page.goto("/visualizations");
@@ -71,14 +75,14 @@ test.describe("MVP-2a visualizations — live data", () => {
 
       // L'export compare nell'elenco della pagina con un peso reale, non "senza contenuto".
       await expect(page.getByTestId("visualization-export-list")).toBeVisible();
-      await expect(page.getByTestId("visualization-export-list")).toContainText(/\d+\s+byte/);
+      await expect(page.getByTestId("visualization-export-list")).toContainText(DIMENSIONE);
     });
 
     test("the generated exports are listed on /visualizations", async ({ page }) => {
       await page.goto("/visualizations");
       await expect(page.getByTestId("visualizations-exports-section")).toBeVisible();
       // Dopo il test precedente esiste almeno un export con contenuto.
-      await expect(page.getByTestId("visualizations-exports-list")).toContainText(/\d+\s+byte/);
+      await expect(page.getByTestId("visualizations-exports-list")).toContainText(DIMENSIONE);
     });
   });
 });

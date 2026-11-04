@@ -69,25 +69,51 @@ interface Esito {
   };
 }
 
-/** Apre la pagina madre e segue il primo collegamento che corrisponde alla rotta con parametri. */
+const scappa = (x: string) => x.replace(/[\\^$.*+?()[\]{}|/-]/g, "\\$&");
+const eParametro = (seg: string) => /^\[[^\]]+\]$/.test(seg);
+
+/**
+ * L'espressione che riconosce un indirizzo concreto della rotta: ogni segmento alla lettera
+ * (scappando ciò che in un'espressione regolare ha un significato), i parametri `[x]` come
+ * un segmento qualunque. `aperta` lascia libero ciò che segue (un livello più in giù).
+ */
+function espressione(segmenti: string[], aperta: boolean): RegExp {
+  const corpo = segmenti.map((seg) => (eParametro(seg) ? "[^/?#]+" : scappa(seg))).join("\\/");
+  return new RegExp(`^${corpo}${aperta ? "(?:[/?#].*)?" : "(?:[?#].*)?"}$`);
+}
+
+/**
+ * Risolve una rotta con parametri seguendo i collegamenti, un livello alla volta: dalla pagina
+ * madre al primo collegamento che corrisponde fino al primo parametro, poi da lì al secondo, e
+ * così via (`/tenant-blueprints/[id]/versions/[n]/build` si trova solo sulla pagina del fascicolo).
+ */
 async function risolvi(page: Page, rotta: string): Promise<string | null> {
-  const madre = rotta.split("/[")[0] || "/";
-  const pattern = new RegExp(
-    "^" + rotta.replace(/\[[^\]]+\]/g, "[^/?#]+").replace(/\//g, "\\/") + "(?:[?#].*)?$",
-  );
-  await page.goto(madre);
-  await page.waitForLoadState("networkidle").catch(() => {});
-  await page.waitForTimeout(1500);
-  const hrefs = await page.$$eval("a[href]", (as) => as.map((a) => a.getAttribute("href") ?? ""));
-  const trovato = hrefs.find((h) => pattern.test(h));
-  if (trovato) return trovato;
-  // Righe cliccabili senza <a>: si prova il primo clic su una riga di tabella.
-  const riga = page.locator("table tbody tr").first();
-  if (await riga.count()) {
-    await riga.click().catch(() => {});
+  const segmenti = rotta.split("/");
+  const posizioni = segmenti.flatMap((seg, i) => (eParametro(seg) ? [i] : []));
+  let dove = segmenti.slice(0, posizioni[0]).join("/") || "/";
+  for (let k = 0; k < posizioni.length; k++) {
+    const ultimo = k === posizioni.length - 1;
+    const fine = ultimo ? segmenti.length : (posizioni[k + 1] ?? segmenti.length);
+    const pattern = espressione(segmenti.slice(0, fine), !ultimo);
+    const finale = espressione(segmenti, false);
+    await page.goto(dove);
+    await page.waitForLoadState("networkidle").catch(() => {});
     await page.waitForTimeout(1500);
-    const dove = new URL(page.url()).pathname;
-    if (pattern.test(dove)) return dove;
+    const hrefs = await page.$$eval("a[href]", (as) => as.map((a) => a.getAttribute("href") ?? ""));
+    let trovato = hrefs.find((h) => finale.test(h)) ?? hrefs.find((h) => pattern.test(h));
+    if (!trovato) {
+      // Righe cliccabili senza <a>: si prova il clic sulla prima riga di tabella.
+      const riga = page.locator("table tbody tr").first();
+      if (await riga.count()) {
+        await riga.click().catch(() => {});
+        await page.waitForTimeout(1500);
+        const qui = new URL(page.url()).pathname;
+        if (finale.test(qui) || pattern.test(qui)) trovato = qui;
+      }
+    }
+    if (!trovato) return null;
+    if (finale.test(trovato)) return trovato;
+    dove = trovato;
   }
   return null;
 }

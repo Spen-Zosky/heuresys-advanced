@@ -327,7 +327,7 @@ export default function ConsolidationPage() {
               : undefined}
           />
           <EntityTable<ConsolidationProposal>
-            isLoading={proposals.isLoading} isError={proposals.isError} errorMessage={t("consolidation.loadError")}
+            isLoading={proposals.isLoading} isError={proposals.isError} error={proposals.error} errorMessage={t("consolidation.loadError")}
             rows={righe} pageSize={100} rowKey={(p) => p.proposalId} rowTestId="consolidation-proposal-row" columns={columns}
             emptyTestId="consolidation-proposals-empty"
             emptyTitle={t("consolidation.proposalsEmptyTitle")} emptyDescription={t("consolidation.proposalsEmptyDescription")}

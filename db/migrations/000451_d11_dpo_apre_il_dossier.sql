@@ -197,7 +197,7 @@ BEGIN
     RAISE EXCEPTION '000451: la descrizione EN di DPO non e'' coperta esattamente una volta (%)', n_en;
   END IF;
 
-  RAISE NOTICE '000451 ok: DPO ha user:read (ruoli con user:read: % -> %), nucleo GDPR intatto (4), zero scritture su user',
+  RAISE NOTICE '000451 ok: DPO ha user:read (ruoli con user:read: % -> %), nucleo GDPR intatto (3), zero scritture su user',
     n_ruoli_prima, n_ruoli_dopo;
 END $$;
 

@@ -148,7 +148,7 @@ BEGIN
     RAISE EXCEPTION '000423: auth_role_is_platform=true deve restare su UN solo ruolo (PLATFORM_ADMIN), ne ha %', n_platform_true;
   END IF;
 
-  RAISE NOTICE '000423: DPO creato con 4 permessi; HRMS_MANAGER ha perso gdpr:erase (ritirato, non cancellato); TENANT_ADMIN invariato; G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.';
+  RAISE NOTICE '000423: DPO creato con 3 permessi (gdpr:retention solo piattaforma da S-18); HRMS_MANAGER ha perso gdpr:erase (ritirato, non cancellato); TENANT_ADMIN invariato; G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.';
 END $$;
 
 COMMIT;

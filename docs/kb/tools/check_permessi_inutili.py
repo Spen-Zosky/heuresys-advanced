@@ -24,6 +24,7 @@ Opzione --elenco: stampa i due elenchi completi in TSV, senza giudicare.
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 import subprocess
@@ -33,7 +34,12 @@ from pathlib import Path
 RADICE = Path(__file__).resolve().parents[3]
 CODICE = [RADICE / "apps/api/src", RADICE / "apps/web/src", RADICE / "packages/shared/src"]
 MIGRAZIONI = RADICE / "db/migrations"
-CODICE_PERMESSO = re.compile(r"""["'`]([a-z][a-z0-9_]*:[a-z][a-z0-9_]*(?::[a-z][a-z0-9_]*)?)["'`]""")
+# Il trattino conta: `review-cycle:manage`, `job-requisition:read` sono codici veri.
+CODICE_PERMESSO = re.compile(r"""["'`]([a-z][a-z0-9_-]*:[a-z][a-z0-9_-]*(?::[a-z][a-z0-9_-]*)?)["'`]""")
+
+# I permessi senza rotta hanno gia' il loro esito, uno per uno, nel registro della prova
+# permessi-senza-rotta (S-2 del mandato K, a cricchetto): qui si leggono da li', non si ricopiano.
+REGISTRO_SENZA_ROTTA = RADICE / "apps/api/test/permessi-senza-rotta.allowlist.json"
 
 # Esiti scritti a mano dopo la misura. Chiave: codice del permesso, oppure «RUOLO permesso»
 # per una concessione. Valore: l'esito e la sua ragione, in una riga.
@@ -71,16 +77,25 @@ def citati_nel_codice() -> dict[str, str]:
     return dove
 
 
-def testi_delle_migrazioni() -> list[tuple[str, str]]:
-    return [(f.name, f.read_text(encoding="utf-8", errors="replace")) for f in sorted(MIGRAZIONI.glob("*.sql"))]
+def concessioni_delle_migrazioni() -> list[tuple[str, str]]:
+    """Ogni istruzione INSERT su sys_auth_role_permissions, con il file che la contiene."""
+    out: list[tuple[str, str]] = []
+    for f in sorted(MIGRAZIONI.glob("*.sql")):
+        testo = re.sub(r"--[^\n]*", "", f.read_text(encoding="utf-8", errors="replace"))
+        for st in testo.split(";"):
+            if "sys_auth_role_permissions" in st and re.search(r"INSERT\s+INTO", st, re.I):
+                out.append((f.name, st))
+    return out
 
 
-def spiegata(ruolo: str, permesso: str, migrazioni: list[tuple[str, str]]) -> str | None:
+def spiegata(ruolo: str, permesso: str, istruzioni: list[tuple[str, str]]) -> str | None:
+    """Il file che concede il permesso al ruolo: per nome, oppure a tutti i ruoli (nessun filtro
+    sul codice del ruolo) o per specchio di un altro permesso (stessa forma senza filtro)."""
     risorsa = permesso.split(":")[0]
-    for nome, testo in migrazioni:
-        if ruolo not in testo:
+    for nome, st in istruzioni:
+        if f"'{permesso}'" not in st and f"'{risorsa}'" not in st and f"'{risorsa}:%'" not in st:
             continue
-        if f"'{permesso}'" in testo or f"'{risorsa}:%'" in testo or f"'{risorsa}'" in testo:
+        if f"'{ruolo}'" in st or "auth_role_code" not in st:
             return nome
     return None
 
@@ -105,21 +120,25 @@ def main() -> int:
     dal_menu = {r[0] for r in menu}
     inutili = [c[0] for c in catalogo if c[0] not in codice and c[0] not in dal_menu]
 
-    migrazioni = testi_delle_migrazioni()
-    da_spiegare = [f"{r} {p}" for r, p in concessioni if spiegata(r, p, migrazioni) is None]
+    istruzioni = concessioni_delle_migrazioni()
+    da_spiegare = [f"{r} {p}" for r, p in concessioni if spiegata(r, p, istruzioni) is None]
+    esiti = dict(ESITI)
+    if REGISTRO_SENZA_ROTTA.exists():
+        for codice, ragione in json.loads(REGISTRO_SENZA_ROTTA.read_text(encoding="utf-8"))["permessi"].items():
+            esiti.setdefault(codice, f"registro permessi-senza-rotta: {ragione}")
 
     if "--elenco" in sys.argv:
         print(f"# permessi del catalogo: {len(catalogo)}; citati nel codice o nel menu: {len(catalogo) - len(inutili)}")
         print(f"# permessi che niente usa: {len(inutili)}")
         for c in inutili:
-            print(f"inutile\t{c}")
+            print(f"inutile\t{c}\t{esiti.get(c, 'SENZA ESITO')}")
         print(f"# concessioni vive: {len(concessioni)}; senza una migrazione che le spieghi: {len(da_spiegare)}")
         for k in da_spiegare:
             print(f"da_spiegare\t{k}")
         return 0
 
     trovati = set(inutili) | set(da_spiegare)
-    senza_esito = sorted(k for k in trovati if k not in ESITI)
+    senza_esito = sorted(k for k in trovati if k not in esiti)
     esiti_orfani = sorted(k for k in ESITI if k not in trovati)
     print(f"permessi che niente usa: {len(inutili)}; concessioni senza migrazione: {len(da_spiegare)}")
     for k in senza_esito:

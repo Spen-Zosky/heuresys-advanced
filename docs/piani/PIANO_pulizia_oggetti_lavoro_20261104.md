@@ -34,3 +34,9 @@ Niente: P2 si è risolta da sola prima che servisse Enzo.
 - P4 fatta: `df -B1M /` da 24G a 27428 MB liberi; `readyz` 200; `heuresys_advanced` e `heuresys_ci` presenti; ultime due copie di fase al loro posto.
 
 CICLO CHIUSO: 4/4 voci fatte, non resta niente.
+
+## Secondo giro: worktree (sì di Enzo, 4/11/2026 14:50 Roma)
+
+Chiusi 37 worktree (32 di advanced, 5 di datastore) con il rito di progetto più lo sblocco chiesto da Enzo: commit tutti in `origin/main`, nessuna modifica, nessun processo, nessuna sessione attiva da 6 ore. Rami uniti cancellati con `git branch -d`; parti rigenerabili e residui ignorati cancellati. `df -h /`: da 70G a 67G usati. Tenuti: i worktree dei thread attivi (questo, interfacce, `/tmp`) e `bridge-cse_01L8VLYSxh4b6cyRRx3yCMpp` di datastore, che ha file di configurazione locale e una misura non salvati altrove. I temporanei di `/tmp` restano al thread dedicato.
+
+CICLO CHIUSO: secondo giro fatto, non resta niente.

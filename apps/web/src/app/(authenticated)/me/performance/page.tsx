@@ -80,6 +80,7 @@ export default function MePerformancePage() {
       count={reviews.data ? t("performance.count", { count: reviews.data.total }) : undefined}
       isLoading={reviews.isLoading}
       isError={reviews.isError}
+      error={reviews.error}
       errorMessage={t("performance.errorMessage")}
       rows={reviews.data?.items ?? []}
       // Il contratto ESS non espone l'identificativo della valutazione — di proposito: alla

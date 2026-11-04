@@ -47,7 +47,7 @@ describe(`${BASE}/* integration`, () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     // Pull two distinct existing classification ids so the create happy path can
     // satisfy the acExists() FK checks in the service. If the table has < 2 rows
     // the create-dependent tests self-skip (no hard-coded seed assumptions).

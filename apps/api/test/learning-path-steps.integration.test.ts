@@ -33,7 +33,7 @@ const createdModuleIds: string[] = [];
 describe("/v1/learning-path-steps integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
 
     const mr = await suite.app.inject({
       method: "POST", url: "/v1/learning-modules",

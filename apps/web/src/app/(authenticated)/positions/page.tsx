@@ -53,6 +53,7 @@ export default function PositionsListPage() {
       count={positions.data ? t("positions.count", { count: positions.data.total }) : undefined}
       isLoading={positions.isLoading}
       isError={positions.isError}
+      error={positions.error}
       errorTestId="positions-error"
       errorMessage={t("positions.errorMessage")}
       rows={positions.data?.items ?? []}

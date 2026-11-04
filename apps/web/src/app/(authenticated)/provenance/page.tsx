@@ -100,6 +100,7 @@ export default function ProvenancePage() {
         <EntityTable<ProvenanceSummaryResponse["byTable"][number]>
           isLoading={summary.isLoading}
           isError={summary.isError}
+          error={summary.error}
           errorMessage={t("provenance.error")}
           rows={summary.data?.byTable ?? []}
           rowKey={(r) => r.targetTable}
@@ -126,6 +127,7 @@ export default function ProvenancePage() {
         <EntityTable<ProvenanceRecord>
           isLoading={records.query.isLoading}
           isError={records.query.isError}
+          error={records.query.error}
           errorMessage={t("provenance.error")}
           rows={records.rows}
           server={records.server}

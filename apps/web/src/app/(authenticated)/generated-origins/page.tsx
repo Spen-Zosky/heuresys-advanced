@@ -161,6 +161,7 @@ export default function GeneratedOriginsPage() {
         <EntityTable<GeneratedOriginSummaryResponse["byTable"][number]>
           isLoading={sommario.isLoading}
           isError={sommario.isError}
+          error={sommario.error}
           errorMessage={t("generatedOrigins.error")}
           rows={sommario.data?.byTable ?? []}
           rowKey={(r) => r.targetTable}
@@ -192,6 +193,7 @@ export default function GeneratedOriginsPage() {
         <EntityTable<GeneratedOrigin>
           isLoading={righe.query.isLoading}
           isError={righe.query.isError}
+          error={righe.query.error}
           errorMessage={t("generatedOrigins.error")}
           rows={righe.rows}
           server={righe.server}

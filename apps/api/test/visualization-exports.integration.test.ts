@@ -49,7 +49,7 @@ const createdExportIds: string[] = [];
 describe("/v1/visualization-exports/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantAdminS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantAdminS = await login(suite, "governo@collaudo.invalid");
     managerS = await login(suite, "paolo.caputo@rtl-bank.org");
 
     // Create a real parent graph so exports have a visible graphId to hang off.

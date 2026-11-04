@@ -56,7 +56,7 @@ let membroUserId: string;
 describe("/v1/projects/* integration (#143 F4)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
 
     // Il capo: chi guida adesso il progetto con piu' membri, fra le persone che hanno
     // credenziali di collaudo. Non si sceglie per nome — si chiede al dato chi lo e'.

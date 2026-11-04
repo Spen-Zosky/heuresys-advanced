@@ -14,7 +14,7 @@ import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { anIndustryCode } from "./helpers/industry.js";
 
 const PLATFORM_ADMIN = "platform-test-admin@collaudo.invalid";
-const TENANT_ADMIN = "federica.marchetti@rtl-bank.org";
+const TENANT_ADMIN = "governo@collaudo.invalid";
 const MANAGER = "paolo.caputo@rtl-bank.org";
 const EMPLOYEE = "tommaso.fiore@rtl-bank.org";
 const SUITE = `GDPR_${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -108,7 +108,7 @@ describe("D-14 F3/F4 GDPR tooling", () => {
     // tutto il sorgente dell'API: ogni export/erasure lasciava la sua riga di
     // accountability e nessuno poteva consultarla. Un registro che nessuno
     // legge non dimostra la conformità a nessuno.
-    const tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+    const tenantAdmin = await login(suite, "governo@collaudo.invalid");
     const r = await suite.app.inject({
       method: "GET", url: "/v1/gdpr/requests?limit=200",
       headers: headers(tenantAdmin),

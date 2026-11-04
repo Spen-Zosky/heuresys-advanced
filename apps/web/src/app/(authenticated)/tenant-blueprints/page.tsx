@@ -141,6 +141,7 @@ export default function TenantBlueprintsPage() {
         description={t("dossier.description")}
         isLoading={lista.query.isLoading}
         isError={lista.query.isError}
+        error={lista.query.error}
         errorTestId="tenant-blueprints-error"
         errorMessage={t("dossier.error")}
         rows={lista.query.data?.items ?? []}

@@ -569,5 +569,47 @@
       "OTHER": "Other"
     }
   },
-  "masked": "withheld for your profile"
+  "masked": "withheld for your profile",
+  "apiErrors": {
+    "status": {
+      "400": "The request is not valid: check the data you entered.",
+      "401": "Your session has expired: please sign in again.",
+      "403": "Your profile does not allow this operation.",
+      "404": "What you are looking for does not exist, or is not visible with your profile.",
+      "409": "The operation conflicts with the current state of the data: reload the page and try again.",
+      "422": "The data does not meet the rules of this operation.",
+      "429": "Too many requests in a short time: wait a moment and try again.",
+      "500": "A server error occurred.",
+      "default": "An error occurred."
+    },
+    "code": {
+      "FORBIDDEN": "Your profile does not allow this operation.",
+      "CSRF_FAIL": "The page has been open too long: reload it and try again.",
+      "VALIDATION_ERROR": "The request is not valid: check the data you entered.",
+      "RESPONSE_CONTRACT_VIOLATION": "The server produced a non-conforming response: the error is ours, not yours.",
+      "RESULT_LIMIT_EXCEEDED": "There are too many results to show at once: narrow them with a filter, such as unit or period.",
+      "INTERNAL_ERROR": "A server error occurred.",
+      "TOO_MANY_REQUESTS": "Too many requests in a short time: wait a moment and try again.",
+      "LOGIN_INVALID": "Incorrect email or password.",
+      "MFA_CHALLENGE_EXPIRED": "The verification has expired: sign in again.",
+      "MFA_CHALLENGE_INVALID": "The verification is no longer valid: sign in again.",
+      "MFA_CODE_REQUIRED": "The second-factor code is required.",
+      "MFA_INVALID": "The verification is not valid: sign in again.",
+      "MFA_NOT_ENROLLED": "Register a second factor first.",
+      "MFA_OTP_EXPIRED": "The code has expired: request a new one.",
+      "MFA_OTP_INVALID": "The code is not valid.",
+      "MFA_OTP_LOCKED": "Too many attempts: request a new code.",
+      "MFA_TOTP_INVALID": "The authenticator app code is not valid.",
+      "REFRESH_EXPIRED": "Your session has expired: sign in again.",
+      "REFRESH_INVALID": "Your session is no longer valid: sign in again.",
+      "REFRESH_MISSING": "Your session has expired: sign in again.",
+      "RESET_INVALID": "The password reset link is invalid or has expired.",
+      "SURVEY_ALREADY_ANSWERED": "You have already answered this survey.",
+      "SURVEY_NOT_ASSIGNED": "This survey has not been assigned to you.",
+      "USER_INACTIVE": "This account is no longer active."
+    },
+    "network": "The server is not responding: check your connection and try again.",
+    "sessionExpired": "Your session has expired: please sign in again.",
+    "reference": "Reference to quote: {{requestId}}"
+  }
 }

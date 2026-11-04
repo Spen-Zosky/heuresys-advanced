@@ -455,6 +455,7 @@ export default function ContentEditPage() {
             <EntityTable<ContentVersion>
               isLoading={versions.isLoading}
               isError={versions.isError}
+              error={versions.error}
               errorMessage={t("content.detail.loadError")}
               rows={versions.data?.items ?? []}
               rowKey={(v) => v.versionId}

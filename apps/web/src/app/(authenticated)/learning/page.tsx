@@ -85,6 +85,7 @@ export default function LearningCataloguePage() {
       }
       isLoading={modules.query.isLoading}
       isError={modules.query.isError}
+      error={modules.query.error}
       errorMessage={t("learning.errorMessage")}
       rows={modules.rows}
       server={modules.server}

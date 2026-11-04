@@ -47,7 +47,7 @@ ON CONFLICT (auth_role_code) DO UPDATE
   SET auth_role_category = EXCLUDED.auth_role_category,
       auth_role_is_platform = EXCLUDED.auth_role_is_platform;
 
--- 2. Grant: i 78 permessi rivisti a mano (esiti/R-6_permessi_people_manager.md).
+-- 2. Grant: i 78 permessi rivisti a mano (esiti/R-6_permessi_people_manager.md), piu' le 14 letture di S-8 (2026-11-04).
 INSERT INTO sys.sys_auth_role_permissions (auth_role_id, auth_permission_id)
 SELECT r.auth_role_id, p.auth_permission_id
   FROM sys.sys_auth_roles r
@@ -131,7 +131,25 @@ SELECT r.auth_role_id, p.auth_permission_id
     ('user:update'),
     ('visualization:create'),
     ('visualization:delete'),
-    ('visualization:update_layout')
+    ('visualization:update_layout'),
+    -- S-8 del piano interfacce (2026-11-04, emenda ADR-0035): chi scrive una risorsa la
+    -- legge. Il ruolo scriveva persone, unita', competenze e altre 11 risorse senza poterle
+    -- leggere: non apriva nemmeno /users o /organization (analisi V2 INC-03, V4 D-08).
+    -- Si allinea la lettura alla scrittura, non si restringe il mandato (000432, D-01 ritirato).
+    ('approval:read'),
+    ('assessment:read'),
+    ('content:read'),
+    ('engagement_feedback:read'),
+    ('job_role:read'),
+    ('learning:read'),
+    ('okr:read'),
+    ('organization_unit:read'),
+    ('organization_unit_processes:read'),
+    ('skill:read'),
+    ('team:read'),
+    ('training_initiative:read'),
+    ('user:read'),
+    ('visualization:read')
    )
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
@@ -199,7 +217,9 @@ INSERT INTO _pm_espliciti(code) VALUES
   ('surveys:read'),('surveys:update'),('talent:read'),('team:manage'),
   ('timeline:read'),('training_initiative:create'),('training_initiative:update'),
   ('user:create'),('user:delete'),('user:update'),('visualization:create'),
-  ('visualization:delete'),('visualization:update_layout');
+  ('visualization:delete'),('visualization:update_layout'),
+  -- S-8 (2026-11-04): le 14 letture di cio' che il ruolo scrive.
+('approval:read'),('assessment:read'),('content:read'),('engagement_feedback:read'),('job_role:read'),('learning:read'),('okr:read'),('organization_unit:read'),('organization_unit_processes:read'),('skill:read'),('team:read'),('training_initiative:read'),('user:read'),('visualization:read');
 
 CREATE TEMP TABLE _pm_derivati(code text PRIMARY KEY);
 INSERT INTO _pm_derivati(code) VALUES
@@ -228,8 +248,8 @@ DECLARE
   n_derivati_presenti int; n_fuori_elenco int;
 BEGIN
   SELECT count(*) INTO n_espliciti FROM _pm_espliciti;
-  IF n_espliciti <> 78 THEN
-    RAISE EXCEPTION '000432: l''elenco _pm_espliciti ha % righe, attese 78 (duplicato interno?)', n_espliciti;
+  IF n_espliciti <> 92 THEN
+    RAISE EXCEPTION '000432: l''elenco _pm_espliciti ha % righe, attese 92 (78 + 14 letture di S-8; duplicato interno?)', n_espliciti;
   END IF;
   SELECT count(*) INTO n_derivati_attesi FROM _pm_derivati;
   IF n_derivati_attesi <> 10 THEN
@@ -344,7 +364,7 @@ BEGIN
     RAISE EXCEPTION '000432: auth_role_is_platform=true deve restare su UN solo ruolo (PLATFORM_ADMIN), ne ha %', n_platform_true;
   END IF;
 
-  RAISE NOTICE '000432: PEOPLE_MANAGER creato (% permessi live: 78 espliciti + % derivati su 10 self-floor/mirror); 0 permessi di altri domini; HRMS_MANAGER intatto (% permessi); G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.', n_pm, n_derivati_presenti, n_hrms;
+  RAISE NOTICE '000432: PEOPLE_MANAGER creato (% permessi live: 92 espliciti (78 + 14 letture di S-8) + % derivati su 10 self-floor/mirror); 0 permessi di altri domini; HRMS_MANAGER intatto (% permessi); G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.', n_pm, n_derivati_presenti, n_hrms;
 END $$;
 
 DROP TABLE _hrms_prima;

@@ -59,6 +59,7 @@ export default function MeHandbookPage() {
       }
       isLoading={docs.query.isLoading}
       isError={docs.query.isError}
+      error={docs.query.error}
       errorMessage={t("handbook.errorMessage")}
       rows={docs.rows}
       server={docs.server}

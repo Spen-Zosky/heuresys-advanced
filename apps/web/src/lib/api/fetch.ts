@@ -14,6 +14,7 @@
  */
 
 import type { ZodTypeAny } from "zod";
+import i18next from "i18next";
 import { csrfStore } from "./csrf-store";
 import { ApiError, NetworkError, SessionExpiredError, type ApiErrorBody } from "./errors";
 import { SUPERFICIE_HEADER, superficiePagina } from "@heuresys/shared/schemas/valore";
@@ -148,7 +149,10 @@ export async function apiFetch<T = unknown>(
       ...(signal ? { signal } : {}),
     });
   } catch (err) {
-    throw new NetworkError("Unable to reach the API", err);
+    throw new NetworkError(
+      i18next.isInitialized ? i18next.t("common:apiErrors.network") : "Unable to reach the API",
+      err,
+    );
   }
 
   // Silent refresh on 401 (once, single-flight).

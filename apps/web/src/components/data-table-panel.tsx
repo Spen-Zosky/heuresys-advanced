@@ -6,6 +6,7 @@ import { Badge, Button, DataTableWithCrossHair, EmptyState, ErrorState, PageHead
 import { Inbox } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
+import { testoPerLaPersona } from "@/lib/api/errors";
 
 /**
  * Canonical list-page composition (brand-component-contract.md: "Data table /
@@ -34,6 +35,12 @@ export interface EntityTableProps<T> {
   isError: boolean;
   errorTestId?: string;
   errorMessage?: string;
+  /**
+   * L'errore della chiamata (F-4, S-12). Se e' un errore dell'API, la riga d'errore dice che cosa
+   * e' successo nella lingua della persona e porta il riferimento da citare; altrimenti resta il
+   * testo generico.
+   */
+  error?: unknown;
   rows: T[];
   rowKey: (row: T) => string;
   rowTestId?: string;
@@ -60,7 +67,7 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 export function EntityTable<T>(props: EntityTableProps<T>) {
   const { t } = useTranslation();
   const {
-    isLoading, isError, errorTestId, errorMessage,
+    isLoading, isError, errorTestId, errorMessage, error,
     rows, rowKey, rowTestId, onRowClick, columns,
     emptyTestId, emptyTitle, emptyDescription, caption,
     pageSize: pageSizeProp, server,
@@ -93,7 +100,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       <ErrorState
         data-testid={errorTestId}
         title={errorMessage ?? t("error.load")}
-        description={t("error.loadHint")}
+        description={testoPerLaPersona(error) ?? t("error.loadHint")}
       />
     );
   }

@@ -170,6 +170,7 @@ export default function WhistleblowingConsolePage() {
       <EntityTable<WhistleblowingListItem>
         isLoading={reports.isLoading}
         isError={reports.isError}
+        error={reports.error}
         // Un diniego di autorizzazione non e' un guasto. Prima il 403 veniva reso come
         // «Errore di caricamento delle segnalazioni. Riprova piu' tardi o verifica la
         // connessione»: chi non ha diritto di leggere veniva invitato a insistere, e chi

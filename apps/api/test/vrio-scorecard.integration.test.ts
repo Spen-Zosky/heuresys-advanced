@@ -75,7 +75,7 @@ async function vrio(s: S) {
 describe("#56 F2 — VRIO scorecard", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantAdmin = await login(suite, "governo@collaudo.invalid");
     plainUser = await login(suite, "tommaso.fiore@rtl-bank.org");
   }, 60_000);
 

@@ -64,7 +64,7 @@ describe("#51 E1 — whistleblowing (D.Lgs 24/2023)", () => {
 
     custodian = await login(suite, "antonio.parisi@rtl-bank.org");
     platformAdmin = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantAdmin = await login(suite, "governo@collaudo.invalid");
   }, 60_000);
 
   afterAll(async () => {

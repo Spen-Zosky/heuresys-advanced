@@ -97,7 +97,7 @@ export default function ProcessOwnerPage() {
         badges={processes.query.data ? <Badge variant="secondary" data-testid="process-owner-count">{t("processOwner.count", { count: processes.total })}</Badge> : undefined}
       />
       <EntityTable<ProcessRow>
-        isLoading={processes.query.isLoading} isError={processes.query.isError} errorMessage={t("processOwner.errorMessage")}
+        isLoading={processes.query.isLoading} isError={processes.query.isError} error={processes.query.error} errorMessage={t("processOwner.errorMessage")}
         rows={rows} server={processes.server} rowKey={(p) => p.blueprintProcessId} rowTestId="process-owner-row" columns={processColumns}
         emptyTestId="process-owner-empty" emptyTitle={t("processOwner.emptyTitle")} emptyDescription={t("processOwner.emptyDescription")} caption={t("processOwner.caption")}
       />
@@ -115,7 +115,7 @@ export default function ProcessOwnerPage() {
           </div>
         ) : (
           <EntityTable<OrgUnitProcessForProcess>
-            isLoading={raci.isLoading} isError={raci.isError} errorMessage={t("processOwner.raci.errorMessage")}
+            isLoading={raci.isLoading} isError={raci.isError} error={raci.error} errorMessage={t("processOwner.raci.errorMessage")}
             rows={raciRows} rowKey={(r) => r.orgUnitProcessId} rowTestId="raci-drill-row" columns={raciColumns}
             emptyTestId="raci-drill-empty" emptyTitle={t("processOwner.raci.empty")} caption={t("processOwner.raci.caption")}
           />

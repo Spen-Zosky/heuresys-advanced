@@ -569,5 +569,47 @@
       "OTHER": "Altro"
     }
   },
-  "masked": "nascosto per il tuo profilo"
+  "masked": "nascosto per il tuo profilo",
+  "apiErrors": {
+    "status": {
+      "400": "La richiesta non è valida: controlla i dati inseriti.",
+      "401": "La sessione è scaduta: accedi di nuovo.",
+      "403": "Il tuo profilo non permette questa operazione.",
+      "404": "Quello che cerchi non esiste, oppure non è visibile con il tuo profilo.",
+      "409": "L'operazione è in conflitto con lo stato attuale dei dati: ricarica la pagina e riprova.",
+      "422": "I dati non rispettano le regole di questa operazione.",
+      "429": "Troppe richieste in poco tempo: attendi qualche istante e riprova.",
+      "500": "Si è verificato un errore del server.",
+      "default": "Si è verificato un errore."
+    },
+    "code": {
+      "FORBIDDEN": "Il tuo profilo non permette questa operazione.",
+      "CSRF_FAIL": "La pagina è rimasta aperta troppo a lungo: ricaricala e riprova.",
+      "VALIDATION_ERROR": "La richiesta non è valida: controlla i dati inseriti.",
+      "RESPONSE_CONTRACT_VIOLATION": "Il server ha prodotto una risposta non conforme: è un nostro errore, non tuo.",
+      "RESULT_LIMIT_EXCEEDED": "I risultati sono troppi per essere mostrati insieme: restringi con un filtro, per esempio unità o periodo.",
+      "INTERNAL_ERROR": "Si è verificato un errore del server.",
+      "TOO_MANY_REQUESTS": "Troppe richieste in poco tempo: attendi qualche istante e riprova.",
+      "LOGIN_INVALID": "Email o password non corretti.",
+      "MFA_CHALLENGE_EXPIRED": "La verifica è scaduta: accedi di nuovo.",
+      "MFA_CHALLENGE_INVALID": "La verifica non è più valida: accedi di nuovo.",
+      "MFA_CODE_REQUIRED": "Serve il codice del secondo fattore.",
+      "MFA_INVALID": "La verifica non è valida: accedi di nuovo.",
+      "MFA_NOT_ENROLLED": "Prima registra un secondo fattore.",
+      "MFA_OTP_EXPIRED": "Il codice è scaduto: chiedine uno nuovo.",
+      "MFA_OTP_INVALID": "Il codice non è valido.",
+      "MFA_OTP_LOCKED": "Troppi tentativi: chiedi un codice nuovo.",
+      "MFA_TOTP_INVALID": "Il codice dell'app di autenticazione non è valido.",
+      "REFRESH_EXPIRED": "La sessione è scaduta: accedi di nuovo.",
+      "REFRESH_INVALID": "La sessione non è più valida: accedi di nuovo.",
+      "REFRESH_MISSING": "La sessione è scaduta: accedi di nuovo.",
+      "RESET_INVALID": "Il collegamento per reimpostare la password non è valido o è scaduto.",
+      "SURVEY_ALREADY_ANSWERED": "Hai già risposto a questo questionario.",
+      "SURVEY_NOT_ASSIGNED": "Questo questionario non ti è stato assegnato.",
+      "USER_INACTIVE": "Questa utenza non è più attiva."
+    },
+    "network": "Il server non risponde: controlla la connessione e riprova.",
+    "sessionExpired": "La sessione è scaduta: accedi di nuovo.",
+    "reference": "Riferimento da citare: {{requestId}}"
+  }
 }

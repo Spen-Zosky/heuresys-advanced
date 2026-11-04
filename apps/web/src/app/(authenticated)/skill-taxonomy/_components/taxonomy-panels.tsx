@@ -183,6 +183,7 @@ export function SkillFamiliesPanel() {
         <EntityTable<SkillFamily>
           isLoading={families.isLoading}
           isError={families.isError}
+          error={families.error}
           errorMessage={t("taxonomy.loadError")}
           rows={families.data?.items ?? []}
           rowKey={(f) => f.skillFamilyId}
@@ -438,6 +439,7 @@ export function SkillCategoriesPanel() {
         <EntityTable<SkillCategory>
           isLoading={categories.isLoading}
           isError={categories.isError}
+          error={categories.error}
           errorMessage={t("taxonomy.loadError")}
           rows={categories.data?.items ?? []}
           rowKey={(c) => c.skillCategoryId}
@@ -590,6 +592,7 @@ export function ProficiencyLevelsPanel() {
         <EntityTable<SkillProficiencyLevel>
           isLoading={levels.isLoading}
           isError={levels.isError}
+          error={levels.error}
           errorMessage={t("taxonomy.loadError")}
           rows={levels.data?.items ?? []}
           rowKey={(l) => l.proficiencyLevelId}

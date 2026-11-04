@@ -40,6 +40,7 @@ export default function ProcessesPage() {
       count={processes.query.data ? t("processes.count", { count: processes.total }) : undefined}
       isLoading={processes.query.isLoading}
       isError={processes.query.isError}
+      error={processes.query.error}
       errorMessage={t("processes.error")}
       rows={processes.rows}
       server={processes.server}

@@ -281,6 +281,7 @@ export default function MeCertificationsPage() {
         <EntityTable<MeCertification>
           isLoading={certs.isLoading}
           isError={certs.isError}
+          error={certs.error}
           errorMessage={t("certifications.errorMessage")}
           rows={certs.data?.items ?? []}
           rowKey={(c) => c.userCertificationId}

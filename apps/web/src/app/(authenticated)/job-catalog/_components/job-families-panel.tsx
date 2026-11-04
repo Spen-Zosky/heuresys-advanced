@@ -140,6 +140,7 @@ export function JobFamiliesPanel() {
         <EntityTable<JobFamily>
           isLoading={families.isLoading}
           isError={families.isError}
+          error={families.error}
           errorMessage={t("jobCatalog.loadError")}
           rows={families.data?.items ?? []}
           rowKey={(f) => f.jobFamilyId}

@@ -50,7 +50,7 @@ SELECT r.auth_role_id, p.auth_permission_id
   FROM sys.sys_auth_roles r
   CROSS JOIN sys.sys_auth_permissions p
  WHERE r.auth_role_code = 'DPO'
-   AND p.auth_permission_code IN ('gdpr:read', 'gdpr:export', 'gdpr:erase', 'gdpr:retention')
+   AND p.auth_permission_code IN ('gdpr:read', 'gdpr:export', 'gdpr:erase') -- gdpr:retention tolto il 2026-11-04 (S-18, 000471)
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
 -- 3. Il ritiro (D3=A): gdpr:erase a HRMS_MANAGER. Ritirare non e'' cancellare (ADR-0035):
@@ -88,9 +88,9 @@ BEGIN
     JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    WHERE r.auth_role_code = 'DPO' AND rp.revoked_at IS NULL
-     AND p.auth_permission_code IN ('gdpr:read', 'gdpr:export', 'gdpr:erase', 'gdpr:retention');
-  IF n_dpo <> 4 THEN
-    RAISE EXCEPTION '000423: DPO deve avere 4 permessi (gdpr:read/export/erase/retention), ne ha %', n_dpo;
+     AND p.auth_permission_code IN ('gdpr:read', 'gdpr:export', 'gdpr:erase'); -- gdpr:retention tolto il 2026-11-04 (S-18, 000471)
+  IF n_dpo <> 3 THEN
+    RAISE EXCEPTION '000423: DPO deve avere 3 permessi (gdpr:read/export/erase; retention solo piattaforma da S-18), ne ha %', n_dpo;
   END IF;
 
   SELECT count(*) INTO n_hrms_erase_active
@@ -148,7 +148,7 @@ BEGIN
     RAISE EXCEPTION '000423: auth_role_is_platform=true deve restare su UN solo ruolo (PLATFORM_ADMIN), ne ha %', n_platform_true;
   END IF;
 
-  RAISE NOTICE '000423: DPO creato con 4 permessi; HRMS_MANAGER ha perso gdpr:erase (ritirato, non cancellato); TENANT_ADMIN invariato; G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.';
+  RAISE NOTICE '000423: DPO creato con 3 permessi (gdpr:retention solo piattaforma da S-18); HRMS_MANAGER ha perso gdpr:erase (ritirato, non cancellato); TENANT_ADMIN invariato; G-D2 a zero; 0 ruoli senza famiglia; is_platform invariato su PLATFORM_ADMIN.';
 END $$;
 
 COMMIT;

@@ -20,7 +20,7 @@ import { readCollaudoKey, deriveCollaudoPassword } from "../scripts/collaudo-acc
 const PREFIX = `IT_R5_${randomUUID().slice(0, 8).toUpperCase()}`;
 const BM_EMAIL = "blueprint-manager@collaudo.invalid";
 const PLATFORM_ADMIN_EMAIL = "platform-test-admin@collaudo.invalid";
-const TENANT_ADMIN_RTL_EMAIL = "federica.marchetti@rtl-bank.org";
+const TENANT_ADMIN_RTL_EMAIL = "governo@collaudo.invalid";
 
 interface Auth {
   cookies: Map<string, string>;

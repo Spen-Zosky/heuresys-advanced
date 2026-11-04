@@ -42,7 +42,7 @@ let aliasDiA: string; // alias sulla competenza di A, seminato via SQL
 // rollbackata a fine file (D-52) e non dipende da nessuna persona di piattaforma.
 beforeAll(async () => {
   suite = await buildTestApp();
-  rtlAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+  rtlAdmin = await login(suite, "governo@collaudo.invalid");
   const hs = await pool.query<{ tenant_id: string }>("SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_name = 'Heuresys System'");
   const tenantA = hs.rows[0]!.tenant_id;
   const a = await pool.query<{ id: string }>(

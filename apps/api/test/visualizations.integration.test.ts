@@ -38,7 +38,7 @@ let exportId: string;
 describe("/v1/visualization-* end-to-end pipeline", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
   });
 
   afterAll(async () => {

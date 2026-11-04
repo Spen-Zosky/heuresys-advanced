@@ -12,7 +12,7 @@ import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const PLATFORM_EMAIL = "platform-test-admin@collaudo.invalid";
-const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
+const TENANT_ADMIN_EMAIL = "governo@collaudo.invalid";
 const MANAGER_EMAIL = "paolo.caputo@rtl-bank.org";
 const EMPLOYEE_EMAIL = "tommaso.fiore@rtl-bank.org";
 

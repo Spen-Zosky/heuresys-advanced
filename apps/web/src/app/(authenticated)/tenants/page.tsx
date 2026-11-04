@@ -215,6 +215,7 @@ export default function TenantsListPage() {
       count={tenants.query.data ? t("tenants.count", { count: tenants.total }) : undefined}
       isLoading={tenants.query.isLoading}
       isError={tenants.query.isError}
+      error={tenants.query.error}
       errorTestId="tenants-error"
       errorMessage={t("tenants.errorMessage")}
       rows={tenants.rows}

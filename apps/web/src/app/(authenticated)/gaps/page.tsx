@@ -132,6 +132,7 @@ export default function AdminGapsPage() {
         <EntityTable<LearningGap>
           isLoading={gaps.query.isLoading}
           isError={gaps.query.isError}
+          error={gaps.query.error}
           errorTestId="gaps-error"
           errorMessage={t("gaps.error")}
           rows={gaps.rows}

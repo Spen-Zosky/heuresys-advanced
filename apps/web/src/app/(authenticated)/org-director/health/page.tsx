@@ -155,6 +155,7 @@ export default function OrgHealthPage() {
       <EntityTable<OrgHealthUnit>
         isLoading={scorecard.isLoading}
         isError={scorecard.isError}
+        error={scorecard.error}
         errorMessage={t("orgHealth.errorMessage")}
         rows={data?.units ?? []}
         rowKey={(r) => r.orgUnitId}

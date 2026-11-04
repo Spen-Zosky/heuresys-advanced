@@ -196,7 +196,7 @@ async function unUtenteDi(tenantId: string): Promise<string> {
 describe("/v1/interview-feedback/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenant = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenant = await login(suite, "governo@collaudo.invalid");
     semplice = await login(suite, "tommaso.fiore@rtl-bank.org");
 
     const t = await pool.query<{ tenant_id: string; tenant_name: string }>(

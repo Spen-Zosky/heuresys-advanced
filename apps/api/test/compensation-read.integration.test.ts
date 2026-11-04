@@ -93,13 +93,13 @@ describe("#32 A/L7 compensation & reward read", () => {
     await grantCeoToPaolo(PAOLO_EMAIL);
 
     admin = await login(suite, "platform-test-admin@collaudo.invalid");
-    federica = await login(suite, "federica.marchetti@rtl-bank.org"); // TENANT_ADMIN (HR mandate)
+    federica = await login(suite, "governo@collaudo.invalid"); // TENANT_ADMIN (HR mandate)
     paolo = await login(suite, PAOLO_EMAIL); // MANAGER (+CEO granted) → org sub-tree
     tommaso = await login(suite, "tommaso.fiore@rtl-bank.org"); // USER (no compensation_intelligence:read)
 
     const t = await pool.query<{ user_tenant_id: string }>(
       `SELECT user_tenant_id FROM sys.sys_users WHERE user_email = $1`,
-      ["federica.marchetti@rtl-bank.org"]);
+      ["governo@collaudo.invalid"]);
     rtlTenantId = t.rows[0]!.user_tenant_id;
     paoloSubtree = await orgSubtreeUserIds(pool, await userId(PAOLO_EMAIL));
   });
@@ -409,7 +409,7 @@ describe("#32 A/L7 compensation & reward read", () => {
            FROM sys.sys_compensation_bands b
            JOIN sys.sys_users u ON u.user_tenant_id = b.compensation_band_tenant_id
           WHERE u.user_email = $1 AND b.compensation_band_mid_eur IS NULL`,
-        ["federica.marchetti@rtl-bank.org"],
+        ["governo@collaudo.invalid"],
       );
       const senzaImporti = Number(rows[0]!.senza);
 
@@ -500,7 +500,7 @@ describe("#32 A/L7 compensation & reward read", () => {
       const items = (r.json() as { items: Array<{ tenantId: string | null }> }).items;
       const { rows } = await pool.query<{ t: string }>(
         `SELECT user_tenant_id AS t FROM sys.sys_users WHERE user_email = $1`,
-        ["federica.marchetti@rtl-bank.org"],
+        ["governo@collaudo.invalid"],
       );
       for (const b of items) {
         if (b.tenantId !== null) expect(b.tenantId).toBe(rows[0]!.t);

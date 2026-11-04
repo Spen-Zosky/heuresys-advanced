@@ -202,6 +202,7 @@ export default function BlueprintsPage() {
             <EntityTable<BlueprintActivation>
               isLoading={activations.isLoading}
               isError={activations.isError}
+              error={activations.error}
               errorMessage={t("activations.loadError")}
               rows={activations.data?.items ?? []}
               rowKey={(a) => a.blueprintActivationId}
@@ -224,6 +225,7 @@ export default function BlueprintsPage() {
       count={variants.query.data ? t("list.count", { count: variants.total }) : undefined}
       isLoading={variants.query.isLoading || families.isLoading}
       isError={variants.query.isError}
+      error={variants.query.error}
       errorTestId="blueprints-error"
       errorMessage={t("list.error")}
       rows={rows}

@@ -52,7 +52,7 @@ describe("/v1/enterprise-typing pipeline", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     const tq = await pool.query<{ tenant_id: string }>(
       `SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'`,
     );

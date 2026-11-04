@@ -171,9 +171,9 @@ BEGIN
     JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    WHERE r.auth_role_code = 'DPO' AND rp.revoked_at IS NULL
-     AND p.auth_permission_code IN ('gdpr:read', 'gdpr:export', 'gdpr:erase', 'gdpr:retention');
-  IF n_dpo_gdpr <> 4 THEN
-    RAISE EXCEPTION '000451: il nucleo GDPR di DPO non e'' piu'' completo (% su 4)', n_dpo_gdpr;
+     AND p.auth_permission_code IN ('gdpr:read', 'gdpr:export', 'gdpr:erase'); -- gdpr:retention tolto il 2026-11-04 (S-18, 000471)
+  IF n_dpo_gdpr <> 3 THEN
+    RAISE EXCEPTION '000451: il nucleo GDPR di DPO non e'' piu'' completo (% su 3)', n_dpo_gdpr;
   END IF;
 
   -- il DPO resta SENZA scritture sulle persone: e'' il confine di questa voce
@@ -197,7 +197,7 @@ BEGIN
     RAISE EXCEPTION '000451: la descrizione EN di DPO non e'' coperta esattamente una volta (%)', n_en;
   END IF;
 
-  RAISE NOTICE '000451 ok: DPO ha user:read (ruoli con user:read: % -> %), nucleo GDPR intatto (4), zero scritture su user',
+  RAISE NOTICE '000451 ok: DPO ha user:read (ruoli con user:read: % -> %), nucleo GDPR intatto (3), zero scritture su user',
     n_ruoli_prima, n_ruoli_dopo;
 END $$;
 

@@ -32,7 +32,10 @@ import {
 import { tenantMaterializationService } from "./service.js";
 
 export const tenantMaterializationRoutes: FastifyPluginAsyncZod = async (app) => {
+  // S-10: l'elenco dei modelli da materializzare serve solo a chi materializza; prima lo leggeva
+  // qualunque utente autenticato.
   app.get("/sources", {
+    preHandler: [requirePermission("tenant_materialization:execute", "TENANT_MATERIALIZE_ADMIN_ONLY")],
     schema: { response: { 200: BuildSourceListResponseSchema } },
   }, async (req) => tenantMaterializationService.listSources(actor(req)));
 

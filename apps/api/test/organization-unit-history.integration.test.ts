@@ -34,7 +34,7 @@ const created: string[] = [];
 describe("/v1/organization-unit-history integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     const u = await pool.query<{ id: string }>(
       `SELECT o.organization_unit_id AS id FROM sys.sys_organization_units o
         JOIN sys.sys_users us ON us.user_tenant_id = o.organization_unit_tenant_id

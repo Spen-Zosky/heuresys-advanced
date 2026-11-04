@@ -142,6 +142,7 @@ export default function MeMatchingPage() {
         <EntityTable<OccupationMatch>
           isLoading={occupations.isLoading}
           isError={occupations.isError}
+          error={occupations.error}
           errorMessage={t("matching.errorMessage")}
           rows={occupations.data?.items ?? []}
           rowKey={(m) => m.escoUri}
@@ -169,6 +170,7 @@ export default function MeMatchingPage() {
         <EntityTable<PositionMatch>
           isLoading={positions.isLoading}
           isError={positions.isError}
+          error={positions.error}
           errorMessage={t("matching.errorMessage")}
           rows={positions.data?.items ?? []}
           rowKey={(p) => p.positionId}
@@ -196,6 +198,7 @@ export default function MeMatchingPage() {
         <EntityTable<JobRoleMatch>
           isLoading={jobRoles.isLoading}
           isError={jobRoles.isError}
+          error={jobRoles.error}
           errorMessage={t("matching.errorMessage")}
           rows={jobRoles.data?.items ?? []}
           rowKey={(jr) => jr.jobRoleId}

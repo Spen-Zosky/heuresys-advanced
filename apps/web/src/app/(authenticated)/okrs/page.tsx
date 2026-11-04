@@ -46,7 +46,7 @@ export default function OkrsPage() {
         pageTestId="okrs-page" titleTestId="okrs-title" countTestId="okrs-count"
         title={t("okrs.title")} description={t("okrs.description")}
         count={okrs.query.data ? t("okrs.count", { count: okrs.total }) : undefined}
-        isLoading={okrs.query.isLoading} isError={okrs.query.isError} errorMessage={t("okrs.errorMessage")}
+        isLoading={okrs.query.isLoading} isError={okrs.query.isError} error={okrs.query.error} errorMessage={t("okrs.errorMessage")}
         rows={okrs.rows} server={okrs.server} rowKey={(o) => o.okrId} rowTestId="okrs-row" columns={columns}
         emptyTestId="okrs-empty" emptyTitle={t("okrs.emptyTitle")} emptyDescription={t("okrs.emptyDescription")} caption={t("okrs.caption")}
       />

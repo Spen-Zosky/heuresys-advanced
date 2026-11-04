@@ -146,6 +146,7 @@ export default function CareerSuccessionPage() {
           <EntityTable<CareerPath>
             isLoading={paths.query.isLoading}
             isError={paths.query.isError}
+            error={paths.query.error}
             rows={paths.rows}
             server={paths.server}
             rowKey={(p) => p.careerPathId}
@@ -162,6 +163,7 @@ export default function CareerSuccessionPage() {
           <EntityTable<SuccessionPool>
             isLoading={pools.query.isLoading}
             isError={pools.query.isError}
+            error={pools.query.error}
             rows={pools.rows}
             server={pools.server}
             rowKey={(p) => p.successionPoolId}
@@ -195,6 +197,7 @@ export default function CareerSuccessionPage() {
           <EntityTable<SuccessorCandidate>
             isLoading={candidates.query.isLoading}
             isError={candidates.query.isError}
+            error={candidates.query.error}
             rows={candidates.rows}
             server={candidates.server}
             rowKey={(c) => c.successorCandidateId}

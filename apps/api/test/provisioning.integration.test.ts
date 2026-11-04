@@ -18,7 +18,7 @@ import { anIndustryCode } from "./helpers/industry.js";
 import { env } from "../src/config/env.js";
 
 const ADMIN_EMAIL = "platform-test-admin@collaudo.invalid";
-const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
+const TENANT_ADMIN_EMAIL = "governo@collaudo.invalid";
 const MARCA_MODELLO = `PROV-${Date.now()}`;
 let modello: ModelloDiProva;
 const SUITE_PREFIX = `PROV_${randomUUID().slice(0, 8).toUpperCase()}`;

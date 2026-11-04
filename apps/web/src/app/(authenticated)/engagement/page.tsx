@@ -87,6 +87,7 @@ export default function EngagementPage() {
         <EntityTable<EngagementSurvey>
           isLoading={surveys.isLoading}
           isError={surveys.isError}
+          error={surveys.error}
           errorMessage={t("engagement.errorMessage")}
           rows={surveys.data?.items ?? []}
           rowKey={(s) => s.surveyId}

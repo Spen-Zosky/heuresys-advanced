@@ -62,6 +62,7 @@ export default function OrganizationPage() {
       count={ous.query.data ? t("organization.count", { count: ous.total }) : undefined}
       isLoading={ous.query.isLoading}
       isError={ous.query.isError}
+      error={ous.query.error}
       errorMessage={t("organization.errorMessage")}
       rows={ous.rows}
       server={ous.server}

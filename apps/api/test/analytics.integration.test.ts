@@ -270,7 +270,7 @@ describe("GET /v1/analytics/* integration", () => {
 
   // Le posizioni fuori dalle unita' di vertice (livello <= 2): cio' che vede chi non ha
   // posizione (soglia di catena, #99 F4, ADR-0036 §5; stessa CTE di unitaEntroLivello()).
-  const SENZA_VERTICE = `
+  const senzaVertice = (sel: string) => `
       WITH RECURSIVE albero AS (
         SELECT organization_unit_id AS ou, 1 AS livello
           FROM sys.sys_organization_units
@@ -281,11 +281,12 @@ describe("GET /v1/analytics/* integration", () => {
           JOIN albero a ON o.organization_unit_parent_id = a.ou
          WHERE o.organization_unit_is_active
       ), vertice AS (SELECT DISTINCT ou FROM albero WHERE livello <= 2)
-      SELECT count(*)::text AS n
+      SELECT ${sel} AS n
         ${BANDED_JOIN}
         JOIN sys.sys_positions p ON p.position_id = pcp.position_id
        WHERE p.position_organization_unit_id IS NULL
           OR p.position_organization_unit_id NOT IN (SELECT ou FROM vertice)`;
+  const SENZA_VERTICE = senzaVertice("count(*)::text");
 
   it("compensation: USER (employee) lacks analytics:view → 403", async () => {
     const r = await suite.app.inject({
@@ -331,9 +332,9 @@ describe("GET /v1/analytics/* integration", () => {
     expect(body.ouCount).toBe(bandingByOu.length);
     // One scatter point per banded profile.
     expect(scatter.length).toBe(body.totalProfiles);
-    // Overall mid-€ range across all banded positions, derived live.
-    expect(body.overallMinMidEur).toBe(await num(`SELECT min(b.compensation_band_mid_eur)::text AS n ${BANDED_JOIN}`));
-    expect(body.overallMaxMidEur).toBe(await num(`SELECT max(b.compensation_band_mid_eur)::text AS n ${BANDED_JOIN}`));
+    // Overall mid-€ range across the banded positions this mandate sees (no vertice), derived live.
+    expect(body.overallMinMidEur).toBe(await num(senzaVertice("min(b.compensation_band_mid_eur)::text")));
+    expect(body.overallMaxMidEur).toBe(await num(senzaVertice("max(b.compensation_band_mid_eur)::text")));
     // Every OU cell is internally consistent (min ≤ q1 ≤ median ≤ q3 ≤ max, count > 0).
     for (const cell of bandingByOu) {
       expect(cell.count).toBeGreaterThan(0);

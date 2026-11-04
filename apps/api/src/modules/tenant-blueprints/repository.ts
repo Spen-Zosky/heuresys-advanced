@@ -59,7 +59,8 @@ interface DecisionRow {
 
 const B_COLS = `tenant_blueprint_id, tenant_blueprint_code, tenant_blueprint_name,
   tenant_blueprint_tenant_id, tenant_blueprint_status, tenant_blueprint_current_version_id,
-  created_at, updated_at`;
+  created_at, updated_at,
+  (SELECT tn.tenant_name FROM sys.sys_tenancies tn WHERE tn.tenant_id = tenant_blueprint_tenant_id) AS tenant_name`;
 
 const V_COLS = `tenant_blueprint_version_id, tenant_blueprint_version_blueprint_id,
   tenant_blueprint_version_number, tenant_blueprint_version_status,
@@ -68,8 +69,7 @@ const V_COLS = `tenant_blueprint_version_id, tenant_blueprint_version_blueprint_
   tenant_blueprint_version_regulatory_intensity, tenant_blueprint_version_country_code,
   tenant_blueprint_version_employee_count, tenant_blueprint_version_revenue_eur,
   tenant_blueprint_version_approved_at, tenant_blueprint_version_applied_at,
-  created_at, updated_at,
-  (SELECT tn.tenant_name FROM sys.sys_tenancies tn WHERE tn.tenant_id = tenant_blueprint_tenant_id) AS tenant_name`;
+  created_at, updated_at`;
 
 function toBlueprint(r: BlueprintRow): TenantBlueprint {
   return {

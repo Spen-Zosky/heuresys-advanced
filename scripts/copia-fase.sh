@@ -83,7 +83,9 @@ registro() { mkdir -p "$COPIE_DIR"; printf '%s | %s\n' "$(ora)" "$*" >> "$COPIE_
 
 manifesto_impronte() {  # $1 = cartella della copia: riscrive la sezione delle impronte
   local d="$1"
-  ( cd "$d" && find . -type f ! -name MANIFESTO.txt ! -name IMPRONTE.sha256 -printf '%P\n' | LC_ALL=C sort \
+  # le cartelle di lavoro di drive (.gnupg.*, .invio.*) non sono la copia: fuori dalle impronte,
+  # altrimenti una prova ripetuta dopo drive le trova sparite e dichiara alterata una copia sana
+  ( cd "$d" && find . -type f ! -name MANIFESTO.txt ! -name IMPRONTE.sha256 ! -path './.gnupg*' ! -path './.invio*' -printf '%P\n' | LC_ALL=C sort \
       | xargs -r -d '\n' sha256sum ) > "$d/IMPRONTE.sha256"
 }
 
@@ -315,6 +317,7 @@ cmd_drive() {
   local nfile; nfile=$(wc -l < "$d/DRIVE_IMPRONTE.sha256")
   local completa; [ "$cifra" = 1 ] && completa="completa e cifrata" || completa="SOLO PARTE IN CHIARO, senza database e segreti"
   sed -i "s#^DRIVE:.*#DRIVE: $esito il $(ora) — $dest, $nfile file, impronte riscaricate e confrontate; $completa#" "$d/MANIFESTO.txt"
+  rm -rf "$gh" "$inv"
   manifesto_impronte "$d"
   rclone copyto "$d/MANIFESTO.txt" "$dest/MANIFESTO.txt" --quiet
   registro "drive $nome: $esito, $nfile file, $completa"

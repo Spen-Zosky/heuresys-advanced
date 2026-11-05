@@ -57,6 +57,25 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
     tool(n, `GET ${base}/:id`, { id: z.string() }, async (a: { id: string }) =>
       ok(await client.call("GET", `${base}/${a.id}`)),
     );
+  /** A-16: una lettura con filtri facoltativi in querystring (paginazione, soggetto, periodo). */
+  const filtri = z.object({}).catchall(z.union([z.string(), z.number(), z.boolean()])).optional();
+  const conQuery = (p: string, q?: Record<string, string | number | boolean>) => {
+    const qs = new URLSearchParams(Object.entries(q ?? {}).map(([k, v]) => [k, String(v)] as [string, string])).toString();
+    return qs ? `${p}?${qs}` : p;
+  };
+  const rdQ = (n: string, descr: string, p: string) =>
+    tool(n, `${descr} — GET ${p}`, { query: filtri }, async (a: { query?: Record<string, string | number | boolean> }) =>
+      ok(await client.call("GET", conQuery(p, a.query))),
+    );
+  /** A-16: una lettura sotto un identificativo, con filtri facoltativi. */
+  const rdSotto = (n: string, descr: string, prima: string, dopo: string) =>
+    tool(
+      n,
+      `${descr} — GET ${prima}/:id${dopo}`,
+      { id: z.string(), query: filtri },
+      async (a: { id: string; query?: Record<string, string | number | boolean> }) =>
+        ok(await client.call("GET", conQuery(`${prima}/${encodeURIComponent(a.id)}${dopo}`, a.query))),
+    );
   const up = (n: string, base: string) =>
     tool(
       n,
@@ -173,6 +192,15 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
       rd("hrx_blueprint_processes_list", "/blueprint-processes"),
       rd("hrx_blueprint_activations_list", "/blueprint-activations"),
       rd("hrx_blueprint_overrides_list", "/blueprint-overrides"),
+      // --- L10, A-16: le letture di maggior valore che nessuna pagina mostra ---
+      // Valutazioni, misure KPI, predizioni e processi del tenant: si leggono con i permessi
+      // della persona (gettone d'agente, ADR-0050 D6), e le persone lette contano nel freno.
+      rdQ("hrx_performance_reviews_list", "Valutazioni delle prestazioni (filtri: ciclo, persona, stato, limit)", "/performance-reviews"),
+      rdSotto("hrx_performance_reviews_get", "Una valutazione delle prestazioni", "/performance-reviews", ""),
+      rdSotto("hrx_kpi_measurements_list", "Le misure registrate di un KPI (id della definizione)", "/kpi-definitions", "/measurements"),
+      rdQ("hrx_predictions_list", "Predizioni dei modelli (rischio di uscita, prontezza, …)", "/predictions"),
+      rdSotto("hrx_predictions_get", "Una predizione", "/predictions", ""),
+      rdSotto("hrx_org_unit_processes_list", "I processi di un'unità organizzativa del tenant (id dell'unità)", "/organization-unit-processes/by-ou", ""),
       // --- writes (gated by canUseTool) ---
       // user OR service principal:
       up("hrx_org_units_upsert", "/organization-units"), // organization_unit:{create,update}

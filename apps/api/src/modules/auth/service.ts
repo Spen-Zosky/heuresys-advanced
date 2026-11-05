@@ -143,6 +143,8 @@ export interface AuthServiceDeps {
     fam: string;
     /** Enrollment-only restricted session (mandatory-MFA gate, MVP-4 par.2.5 #4). */
     enr?: boolean;
+    /** ADR-0050 D5: ultima verifica del secondo fattore della sessione, secondi epoch. */
+    sua?: number;
   }) => Promise<string> | string;
   mailer: IMailer;
   log: FastifyBaseLogger;
@@ -234,6 +236,12 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
     previousRefreshId: string | null;
     ip: string | null;
     userAgent: string | null;
+    /**
+     * ADR-0050 D5: l'ultima verifica del secondo fattore della sessione. Al login è adesso se
+     * il login ci è passato; al rinnovo è quella che la famiglia portava. Va nel claim `sua`
+     * dell'access token e sulla riga di rinnovo, che la passa al rinnovo successivo.
+     */
+    secondoFattoreAt?: Date | null;
   }): Promise<LoginSuccess> {
     const platformGrant = args.grants.find((g) => g.isPlatform && g.tenantId === null);
     const jwtTenantId = platformGrant ? null : args.userTenantId;
@@ -247,6 +255,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       roles: roleCodes,
       jti,
       fam: familyId,
+      ...(args.secondoFattoreAt ? { sua: Math.floor(args.secondoFattoreAt.getTime() / 1000) } : {}),
     });
 
     const refreshToken = generateOpaqueToken();
@@ -262,6 +271,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       expiresAt,
       ip: args.ip,
       userAgent: args.userAgent,
+      secondoFattoreAt: args.secondoFattoreAt ?? null,
     } satisfies repo.InsertRefreshTokenParams);
 
     const csrfToken = generateOpaqueToken();
@@ -478,6 +488,8 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         previousRefreshId: null,
         ip: input.ip,
         userAgent: input.userAgent,
+        // ADR-0050 D5: qui si arriva con un challengeToken solo dopo averlo verificato.
+        secondoFattoreAt: mfaEnforcement && input.challengeToken ? now() : null,
       });
 
       await repo.insertLoginEvent(pool, {
@@ -507,6 +519,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         previousRefreshId: null,
         ip: input.ip,
         userAgent: input.userAgent,
+        secondoFattoreAt: now(), // ADR-0050 D5: la cerimonia WebAuthn è il secondo fattore
       });
       await repo.insertLoginEvent(pool, {
         userId: me.userId,
@@ -603,6 +616,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         previousRefreshId: row.refreshTokenId,
         ip: input.ip,
         userAgent: input.userAgent,
+        secondoFattoreAt: row.stepUpAt, // ADR-0050 D5: il rinnovo non conferma, porta avanti
       });
 
       await repo.insertLoginEvent(pool, {

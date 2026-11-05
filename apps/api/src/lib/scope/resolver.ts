@@ -18,6 +18,7 @@ import { ForbiddenError } from "../../errors/index.js";
 import { orgSubtreeUserIds, isInOrgSubtree, isOrgUnitManager, type DbConnector } from "./org.js";
 import { functionalScopeUserIds, isFunctionalLeader } from "./functional.js";
 import { recordScopeAccess, type ScopeAxis } from "./audit.js";
+import { serveConferma, confermaRichiesta } from "./conferma.js";
 
 /**
  * Roles with an explicit HR mandate to read sensitive personal data tenant-wide (ADR-0027 §2.5,
@@ -131,6 +132,12 @@ export async function resolveOrgReadScope(q: DbConnector, actor: ActorContext): 
   const tenantId = actor.tenantId;
   if (!tenantId) throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
   if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) {
+    // ADR-0050 D5: un elenco del tenant per mandato su retribuzione o valutazioni chiede una
+    // conferma recente del secondo fattore (sulle sole rotte marcate: `actor.classeD5`).
+    if (await serveConferma(q, actor, actor.classeD5, null)) {
+      recordScopeAccess({ op: "resolve", actorUserId: actor.userId, tenantId, granted: false, axis: "hr_mandate" });
+      throw confermaRichiesta(actor.classeD5!);
+    }
     audit("hr_mandate", tenantId);
     return { kind: "tenant", tenantId };
   }
@@ -247,7 +254,15 @@ export async function canReadOrgTarget(
   if (actor.roles.includes("PLATFORM_ADMIN")) return audit(true, "platform");
   if (!actor.tenantId || targetTenantId !== actor.tenantId) return audit(false, "denied");
   if (actor.userId === targetUserId) return audit(true, "self"); // self (I17)
-  if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) return audit(true, "hr_mandate"); // HR mandate (I20)
+  if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) {
+    // ADR-0050 D5: per mandato, e fuori dalla catena, retribuzione e valutazioni chiedono una
+    // conferma recente del secondo fattore. Per la catena `serveConferma` risponde falso.
+    if (await serveConferma(q, actor, actor.classeD5, targetUserId)) {
+      audit(false, "hr_mandate");
+      throw confermaRichiesta(actor.classeD5!);
+    }
+    return audit(true, "hr_mandate"); // HR mandate (I20)
+  }
   // D11 — il terzo stato: il DPO raggiunge chiunque nel proprio tenant (il confine di tenant
   // è già stato imposto due righe sopra), e ciò che legge arriva mascherato.
   if (haPerimetroTenantMascherato(actor)) return audit(true, "tenant_masked");

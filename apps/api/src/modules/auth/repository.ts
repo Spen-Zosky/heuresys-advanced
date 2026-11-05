@@ -205,6 +205,8 @@ export interface RefreshTokenRow {
   usedAt: Date | null;
   revokedAt: Date | null;
   expiresAt: Date;
+  /** ADR-0050 D5: ultima verifica del secondo fattore della sessione, portata avanti. */
+  stepUpAt: Date | null;
 }
 
 export interface InsertRefreshTokenParams {
@@ -216,6 +218,8 @@ export interface InsertRefreshTokenParams {
   expiresAt: Date;
   ip: string | null;
   userAgent: string | null;
+  /** ADR-0050 D5: ultima verifica del secondo fattore della sessione (null = nessuna). */
+  secondoFattoreAt?: Date | null;
 }
 
 export async function insertRefreshToken(
@@ -230,8 +234,9 @@ export async function insertRefreshToken(
        (auth_refresh_token_user_id, auth_refresh_token_tenant_id,
         auth_refresh_token_family_id, auth_refresh_token_previous_id,
         auth_refresh_token_hash, auth_refresh_token_expires_at,
-        auth_refresh_token_ip, auth_refresh_token_user_agent)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        auth_refresh_token_ip, auth_refresh_token_user_agent,
+        auth_refresh_token_step_up_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING auth_refresh_token_id, auth_refresh_token_issued_at`,
     [
       params.userId,
@@ -242,6 +247,7 @@ export async function insertRefreshToken(
       params.expiresAt,
       params.ip,
       params.userAgent,
+      params.secondoFattoreAt ?? null,
     ],
   );
   return {
@@ -263,11 +269,13 @@ export async function findRefreshTokenByHash(
     auth_refresh_token_used_at: Date | null;
     auth_refresh_token_revoked_at: Date | null;
     auth_refresh_token_expires_at: Date;
+    auth_refresh_token_step_up_at: Date | null;
   }>(
     `SELECT auth_refresh_token_id, auth_refresh_token_user_id,
             auth_refresh_token_tenant_id, auth_refresh_token_family_id,
             auth_refresh_token_previous_id, auth_refresh_token_used_at,
-            auth_refresh_token_revoked_at, auth_refresh_token_expires_at
+            auth_refresh_token_revoked_at, auth_refresh_token_expires_at,
+            auth_refresh_token_step_up_at
        FROM sys.sys_auth_refresh_tokens
       WHERE auth_refresh_token_hash = $1`,
     [tokenHash],
@@ -283,6 +291,7 @@ export async function findRefreshTokenByHash(
     usedAt: r.auth_refresh_token_used_at,
     revokedAt: r.auth_refresh_token_revoked_at,
     expiresAt: r.auth_refresh_token_expires_at,
+    stepUpAt: r.auth_refresh_token_step_up_at,
   };
 }
 
@@ -736,4 +745,31 @@ export async function isUserMfaExempt(
     [userId],
   );
   return result.rows[0]?.exempt ?? false;
+}
+
+/* ── ADR-0050 D5 — la conferma recente del secondo fattore, per sessione ─────────────── */
+
+/**
+ * Segna sulla sessione (famiglia di rinnovo) una verifica del secondo fattore adesso.
+ * Tocca solo le righe vive della famiglia e di quella persona: una famiglia chiusa
+ * (logout, replay) non si riapre con una conferma. Restituisce quante righe ha segnato.
+ */
+export async function segnaConfermaDiSessione(
+  q: DbConnector,
+  familyId: string,
+  userId: string,
+  quando: Date,
+): Promise<number> {
+  // Tutte le righe vive della famiglia: quella non ancora usata porta la conferma al
+  // prossimo rinnovo, le altre la tengono come storia della sessione.
+  const { rowCount } = await q.query(
+    `UPDATE sys.sys_auth_refresh_tokens
+        SET auth_refresh_token_step_up_at = $3
+      WHERE auth_refresh_token_family_id = $1
+        AND auth_refresh_token_user_id = $2
+        AND auth_refresh_token_revoked_at IS NULL
+        AND auth_refresh_token_expires_at > now()`,
+    [familyId, userId, quando],
+  );
+  return rowCount ?? 0;
 }

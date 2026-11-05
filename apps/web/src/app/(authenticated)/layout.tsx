@@ -45,6 +45,7 @@ import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { setLocale } from "../../lib/i18n";
 import { primaryRoleOf } from "../../lib/role-precedence";
 import { PreferencesApplier } from "../../components/preferences-applier";
+import { StepUpDialog } from "../../components/step-up-dialog";
 import { SectionTabs, SECTION_TAB_GROUPS } from "../../components/section-tabs";
 import { pageVerdict } from "../../lib/page-guard";
 
@@ -268,6 +269,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       {/* WS-4 P1: apply the user's server-stored theme + palette + locale (source of truth) once
           the session is known. Renders nothing. */}
       <PreferencesApplier />
+      <StepUpDialog />
       {/* S1009: in-page tab bar for the 6 merge groups; renders nothing off those routes. */}
       {verdict.kind === "denied" ? (
         <main data-testid="page-no-access" className="mx-auto max-w-2xl px-6 py-16 space-y-4">

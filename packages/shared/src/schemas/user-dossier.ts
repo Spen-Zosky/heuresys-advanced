@@ -78,6 +78,11 @@ export const UserDossierSchema = z.object({
   certifications: z.array(MeCertificationSchema),
   /** Gli obiettivi assegnati. */
   goals: z.array(MeGoalSchema),
+  /**
+   * ADR-0050 D5: le classi trattenute perché chi legge per mandato non ha confermato da poco
+   * il secondo fattore. La pagina offre la conferma e rilegge il dossier.
+   */
+  stepUpRequired: z.array(z.enum(["COMPENSATION", "EVALUATION"])).optional(),
   /** Dove vuole arrivare: gli obiettivi di carriera. */
   careerTargets: z.array(MeCareerTargetSchema),
 });

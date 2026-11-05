@@ -117,6 +117,7 @@ import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import { analyticsRoutes } from "./modules/analytics/routes.js";
 import { addExportHook } from "./lib/export/hook.js";
 import { registerOrgGateAssertion } from "./lib/scope/gate.js";
+import { registerConfermaD5 } from "./lib/scope/conferma.js";
 import { registraGuardiaRotte } from "./lib/scope/guardia.js";
 import { notificationsRoutes } from "./modules/notifications/routes.js";
 import { observabilityRoutes } from "./modules/observability/routes.js";
@@ -243,6 +244,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   //     registration: onRoute only sees routes declared after the hook. Refuses to boot if a
   //     read route on a SENSITIVE data-class resource lacks a config.orgGate declaration.
   registerOrgGateAssertion(app);
+  // ADR-0050 D5: acceso con il secondo fattore al login (stessa leva, stesso valore).
+  registerConfermaD5(app, options.mfaEnforcement ?? env.MFA_ENFORCEMENT_ENABLED);
   // 1a-bis. S-10: raccoglie le rotte senza permesso (la prova le confronta con il loro elenco).
   registraGuardiaRotte(app);
 

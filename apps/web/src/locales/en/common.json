@@ -691,7 +691,9 @@
       "MANDATE_ACT_DECIDED": "The act has already been decided.",
       "MANDATE_APPROVER_WITHOUT_MANDATE": "Approving a mandate act requires holding a mandate.",
       "NOT_A_MANDATE": "This role is not a mandate: grant and revoke it directly.",
-      "MANDATE_ACT_SUBJECT_GONE": "The person this act concerned no longer exists: the act remains as history and cannot be approved."
+      "MANDATE_ACT_SUBJECT_GONE": "The person this act concerned no longer exists: the act remains as history and cannot be approved.",
+      "STEP_UP_REQUIRED": "A second-factor confirmation is required to see this data.",
+      "STEP_UP_SESSION_REQUIRED": "Your session is no longer active: please sign in again."
     },
     "network": "The server is not responding: check your connection and try again.",
     "sessionExpired": "Your session has expired: please sign in again.",
@@ -786,5 +788,18 @@
     },
     "codice": "Code: {{codice}}.",
     "nonDisponibile": "unavailable"
+  },
+  "stepUp": {
+    "title": "Confirm your identity",
+    "description": "You are about to see another person's pay or evaluations through your mandate. Enter your second-factor code: the confirmation lasts 15 minutes.",
+    "codeLabel": "Code",
+    "codeHint": "The code from your app, the one received by email or SMS, or a recovery code.",
+    "confirm": "Confirm",
+    "confirming": "Verifying…",
+    "cancel": "Cancel",
+    "usePasskey": "Use passkey",
+    "error": "The code could not be verified.",
+    "dossierNotice": "Pay and evaluations are hidden until you confirm your second factor.",
+    "dossierAction": "Confirm to see them"
   }
 }

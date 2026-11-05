@@ -38,6 +38,7 @@ import {
 import { MANDATE_ROLES, puoConcedereRuoli } from "../../lib/scope/mandati.js";
 import { masksSensitiveClass, masksTopOfChainPay, maskFields } from "../../lib/scope/mask.js";
 import { chainLevelOf } from "../../lib/scope/org.js";
+import { serveConferma } from "../../lib/scope/conferma.js";
 import { isPlatform } from "../../lib/actor.js";
 import { DOSSIER_PRIV_SECTIONS, type UserDossierProfile } from "@heuresys/shared";
 
@@ -190,7 +191,14 @@ export const usersService = {
     // D11 — `masksSensitiveClass` e non più il solo mandato di piattaforma: il dossier è
     // la superficie in cui si vede il terzo stato (tenant-wide mascherato, ADR-0036 §5,
     // quinta eccezione). Per ogni altro attore il predicato risponde esattamente come prima.
-    const masksEval = masksSensitiveClass(actor, "EVALUATION", id);
+    // ADR-0050 D5: per mandato e fuori dalla catena, senza una conferma recente del secondo
+    // fattore le due classi si trattengono come per gli altri mascheramenti, e la risposta
+    // dice perché, così la pagina può chiedere la conferma invece di mostrare un vuoto.
+    const [d5Comp, d5Eval] = await Promise.all([
+      serveConferma(pool, actor, "COMPENSATION", id),
+      serveConferma(pool, actor, "EVALUATION", id),
+    ]);
+    const masksEval = masksSensitiveClass(actor, "EVALUATION", id) || d5Eval;
 
     /* #99 F4 — la soglia di catena arriva anche QUI, e non era un dettaglio.
      *
@@ -209,7 +217,8 @@ export const usersService = {
     ]);
     const masksComp =
       masksSensitiveClass(actor, "COMPENSATION", id) ||
-      masksTopOfChainPay(actor, id, livelloAttore, livelloSoggetto);
+      masksTopOfChainPay(actor, id, livelloAttore, livelloSoggetto) ||
+      d5Comp;
 
     // #124 D2 — strato 1: la sfera PRIVATA dell'anagrafica (matrice dei domini,
     // cella line_management/IDENTITY = mask) va a self, mandato HR e mandato
@@ -244,6 +253,9 @@ export const usersService = {
       paySlips: masksComp ? paySlips.map((p) => maskFields(p, PAY_SLIP_MONEY_FIELDS)) : paySlips,
       performance: masksEval ? performance.map((r) => maskFields(r, REVIEW_JUDGMENT_FIELDS)) : performance,
       attendance, skills, learning, certifications, goals, careerTargets,
+      ...(d5Comp || d5Eval
+        ? { stepUpRequired: [...(d5Comp ? ["COMPENSATION" as const] : []), ...(d5Eval ? ["EVALUATION" as const] : [])] }
+        : {}),
     };
   },
 

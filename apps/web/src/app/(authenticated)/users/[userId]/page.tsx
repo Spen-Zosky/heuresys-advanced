@@ -21,7 +21,7 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { TimelinePanel } from "@/components/timeline-panel";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import type { UserDossier } from "@heuresys/shared";
@@ -35,6 +35,7 @@ import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
 import { IdentityEditor } from "./_components/identity-editor";
 import { RolesEditor } from "./_components/roles-editor";
+import { chiediConferma } from "@/lib/api/step-up";
 
 /* --- formattazione: mai una data ISO o un numero nudo davanti a una persona --- */
 // F-1 (piano interfacce, 2026-11-04): la forma comune di `@/lib/format`, nella lingua del portale.
@@ -87,6 +88,7 @@ function MiniTable({ head, rows, empty }: { head: string[]; rows: ReactNode[][];
 
 export default function UserDetailPage() {
   const { t } = useTranslation("admin");
+  const { t: tc } = useTranslation("common");
   const f = useFormat();
   const enumLabel = useEnumLabel();
   const params = useParams<{ userId: string }>();
@@ -151,6 +153,29 @@ export default function UserDetailPage() {
           </>
         }
       />
+
+      {/* ADR-0050 D5: per mandato, retribuzione e valutazioni chiedono una conferma recente */}
+      {d.stepUpRequired && d.stepUpRequired.length > 0 && (
+        <div
+          role="status"
+          data-testid="dossier-step-up"
+          className="flex flex-wrap items-center justify-between gap-3 rounded border border-border bg-muted/40 px-4 py-3 text-sm"
+        >
+          <span>{tc("stepUp.dossierNotice")}</span>
+          <Button
+            type="button"
+            size="sm"
+            data-testid="dossier-step-up-confirm"
+            onClick={() => {
+              void chiediConferma().then((ok) => {
+                if (ok) void q.refetch();
+              });
+            }}
+          >
+            {tc("stepUp.dossierAction")}
+          </Button>
+        </div>
+      )}
 
       {/* Chi è, in una riga: il ruolo, l'unità, da quando, con che inquadramento */}
       <Card data-testid="dossier-summary">

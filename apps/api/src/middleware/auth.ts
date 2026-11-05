@@ -24,6 +24,8 @@ export interface AuthUser {
    *  Such sessions carry roles [] so every requirePermission() denies them; the only
    *  usable surface is the MFA self-service enrollment under /v1/auth/mfa. */
   enrollmentOnly?: boolean;
+  /** ADR-0050 D5: ultima verifica del secondo fattore della sessione (claim `sua`, secondi epoch). */
+  stepUpAt?: number;
 }
 
 declare module "fastify" {
@@ -45,6 +47,7 @@ declare module "@fastify/jwt" {
       jti?: string;
       fam?: string;
       enr?: boolean;
+      sua?: number;
       iat?: number;
       exp?: number;
       iss?: string;
@@ -89,6 +92,7 @@ const plugin: FastifyPluginAsync = async (app) => {
         jti?: string;
         fam?: string;
         enr?: boolean;
+        sua?: number;
       }>(token);
       req.user = {
         userId: payload.sub,
@@ -97,6 +101,7 @@ const plugin: FastifyPluginAsync = async (app) => {
         jti: payload.jti,
         familyId: payload.fam,
         enrollmentOnly: payload.enr === true,
+        ...(typeof payload.sua === "number" ? { stepUpAt: payload.sua } : {}),
       };
     } catch (err) {
       // Token invalid / expired — leave req.user undefined; RBAC handles 401.

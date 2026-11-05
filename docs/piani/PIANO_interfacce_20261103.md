@@ -347,6 +347,7 @@ Enzo risponde una decisione alla volta, nel thread «Decidere S-17, S-20, S-2, P
 | voce | data e ora (Roma) | scelta di Enzo | che cosa si attua |
 |---|---|---|---|
 | S-17 | 2026-11-05 16:27 | la Direttrice HR (`HRMS_MANAGER`) disattiva una persona, il People Manager no | `canActOnTarget` ammette `delete` anche per `HRMS_MANAGER` del proprio tenant; una migrazione toglie `user:delete` a `PEOPLE_MANAGER`; prova sul banco. La cancellazione fisica resta limitata a chi non ha storia (ADR-0037). Manca ancora una via di riattivazione: oggi tornare indietro richiede un intervento tecnico. |
+| S-20 | 2026-11-05 16:28 | il capo vede fascia e importo esatto della retribuzione delle sole persone della propria catena: conferma la decisione del 2026-08-04 (ADR-0036 §4 punto 1) | la matrice M1 (`apps/api/src/lib/scope/matrix.ts`, `line_management.COMPENSATION`) passa da `mask` a `read`; restano le eccezioni di ADR-0036 §5 (retribuzione dei vertici); prova T-2 con un capo vero; l'agente del capo eredita la stessa cella. |
 
 ## 9. Registro delle scoperte fuori ciclo
 

@@ -248,6 +248,11 @@ describe("ADR-0050 D5 — conferma recente del secondo fattore per le letture pe
     expect(await serveConferma(pool, attore, "COMPENSATION", capo.userId)).toBe(false);
     // senza mandato HR la lettura non passa dal mandato: D5 non c'entra
     expect(await serveConferma(pool, { ...attore, roles: ["MANAGER"] as never }, "COMPENSATION", fuori.userId)).toBe(false);
+    // senza sessione: un attore costruito fuori da una richiesta non è governato (confine
+    // dichiarato), una richiesta senza sessione per mandato non legge
+    const { sessioneD5: _s, ...senzaSessione } = attore;
+    expect(await serveConferma(pool, senzaSessione, "COMPENSATION", fuori.userId)).toBe(false);
+    expect(await serveConferma(pool, { ...senzaSessione, daRichiesta: true }, "COMPENSATION", fuori.userId)).toBe(true);
   });
 
   it("la finestra: dentro, fuori, e un'ora nel futuro non vale", () => {

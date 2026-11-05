@@ -36,6 +36,12 @@ export interface ActorContext {
   sessioneD5?: SessioneD5;
   /** ADR-0050 D5: la classe che la rotta legge per persona, se è COMPENSATION o EVALUATION. */
   classeD5?: DataClass;
+  /**
+   * ADR-0050 D5: l'attore viene da una richiesta HTTP (`actorFromRequest`). Distingue «una
+   * richiesta senza sessione», che per mandato non legge, da «un attore costruito fuori da
+   * una richiesta» (lavoro pianificato, script), che D5 non governa (confine dichiarato).
+   */
+  daRichiesta?: true;
 }
 
 /** True iff the actor holds the cross-tenant PLATFORM_ADMIN role. */
@@ -78,11 +84,12 @@ export function actorFromRequest(req: FastifyRequest): ActorContext {
   };
 }
 
-function d5(req: FastifyRequest): Pick<ActorContext, "sessioneD5" | "classeD5"> {
+function d5(req: FastifyRequest): Pick<ActorContext, "sessioneD5" | "classeD5" | "daRichiesta"> {
   if (!req.user) return {};
   const sessione = sessioneD5(req.user.familyId, req.user.stepUpAt);
   const classe = req.routeOptions?.config?.confermaD5;
   return {
+    daRichiesta: true,
     ...(sessione ? { sessioneD5: sessione } : {}),
     ...(classe ? { classeD5: classe } : {}),
   };

@@ -98,10 +98,16 @@ export async function serveConferma(
   if (!classe || !CLASSI_CON_CONFERMA.has(classe)) return false;
   const sessione = actor.sessioneD5;
   if (!sessione) {
-    // D5 acceso e richiesta autenticata senza famiglia: non c'è una sessione da confermare,
-    // e la lettura per mandato non passa. Un attore senza richiesta (attiva=false nel suo
-    // processo, o costruito a mano) non arriva qui con `attiva` vero e senza sessione.
-    return attiva && actor.roles.some((r) => HR_MANDATED_ROLES.has(r)) && soggetto !== actor.userId;
+    // Un attore costruito fuori da una richiesta (lavoro pianificato, script, prova che chiama
+    // il servizio) non porta una sessione e D5 non lo governa: è il confine dichiarato in
+    // testa. Una RICHIESTA senza sessione (nessuna famiglia nel token) con D5 acceso invece
+    // non legge per mandato: non c'è niente che possa essere stato confermato.
+    return (
+      actor.daRichiesta === true &&
+      attiva &&
+      soggetto !== actor.userId &&
+      actor.roles.some((r) => HR_MANDATED_ROLES.has(r))
+    );
   }
   if (soggetto === actor.userId) return false; // I17
   if (!actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) return false; // non passa per il mandato

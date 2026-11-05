@@ -119,7 +119,9 @@ describe("ADR-0050 D4 e D7 — il mandato come atto, la separazione dei compiti"
          JOIN sys.sys_users u ON u.user_id = g.user_auth_role_user_id
         WHERE lower(u.user_email) = $1 AND g.user_auth_role_revoked_at IS NULL`, [DPO]);
     const del = await suite.app.inject({
-      method: "DELETE", url: `/v1/users/${await idUtente(DPO)}/roles/${dpoGrant.rows[0]!.id}`, headers: headers(governo),
+      // una DELETE senza corpo non porta content-type: Fastify la rifiuterebbe prima del service
+      method: "DELETE", url: `/v1/users/${await idUtente(DPO)}/roles/${dpoGrant.rows[0]!.id}`,
+      headers: { cookie: headers(governo).cookie, "x-csrf-token": governo.csrfToken },
     });
     expect(del.statusCode).toBe(409);
     expect((del.json() as ErrBody).error.code).toBe("MANDATE_REQUIRES_ACT");

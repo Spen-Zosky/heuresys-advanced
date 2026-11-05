@@ -39,7 +39,10 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS sys.sys_mandate_acts (
   mandate_act_id            uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   mandate_act_kind          varchar(8)  NOT NULL,
-  mandate_act_user_id       uuid        NOT NULL REFERENCES sys.sys_users(user_id) ON DELETE CASCADE,
+  -- SET NULL e non CASCADE: un atto è storia di governo e sopravvive alla cancellazione della
+  -- persona (000303 vieta CASCADE verso sys_users fuori dall'elenco; 000304 vuole nel registro
+  -- GDPR ogni chiave di appartenenza CASCADE o RESTRICT). Alla nascita il trigger lo pretende.
+  mandate_act_user_id       uuid        REFERENCES sys.sys_users(user_id) ON DELETE SET NULL,
   mandate_act_role_id       uuid        NOT NULL REFERENCES sys.sys_auth_roles(auth_role_id) ON DELETE RESTRICT,
   mandate_act_tenant_id     uuid        REFERENCES sys.sys_tenancies(tenant_id) ON DELETE CASCADE,
   mandate_act_grant_id      uuid        REFERENCES sys.sys_user_auth_roles(user_auth_role_id) ON DELETE SET NULL,
@@ -102,6 +105,9 @@ BEGIN
     IF NEW.mandate_act_status <> 'PENDING' THEN
       RAISE EXCEPTION 'mandate act refused: an act is born PENDING (ADR-0050 D4)' USING ERRCODE = 'check_violation';
     END IF;
+    IF NEW.mandate_act_user_id IS NULL THEN
+      RAISE EXCEPTION 'mandate act refused: user_id is required (ADR-0050 D4)' USING ERRCODE = 'check_violation';
+    END IF;
     IF NEW.mandate_act_proposed_by IS NULL THEN
       RAISE EXCEPTION 'mandate act refused: proposed_by is required (ADR-0050 D4)' USING ERRCODE = 'check_violation';
     END IF;
@@ -129,7 +135,7 @@ BEGIN
 
   -- UPDATE: ciò che l'atto dice non cambia; cambia solo lo stato, una volta, da PENDING.
   IF NEW.mandate_act_kind        IS DISTINCT FROM OLD.mandate_act_kind
-     OR NEW.mandate_act_user_id  IS DISTINCT FROM OLD.mandate_act_user_id
+     OR (NEW.mandate_act_user_id IS DISTINCT FROM OLD.mandate_act_user_id AND NEW.mandate_act_user_id IS NOT NULL)
      OR NEW.mandate_act_role_id  IS DISTINCT FROM OLD.mandate_act_role_id
      OR NEW.mandate_act_tenant_id IS DISTINCT FROM OLD.mandate_act_tenant_id
      OR NEW.mandate_act_reason   IS DISTINCT FROM OLD.mandate_act_reason

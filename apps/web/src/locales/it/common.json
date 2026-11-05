@@ -690,7 +690,8 @@
       "MANDATE_NOT_PROPOSER": "Solo chi ha proposto l'atto può ritirarlo.",
       "MANDATE_ACT_DECIDED": "L'atto è già stato deciso.",
       "MANDATE_APPROVER_WITHOUT_MANDATE": "Per approvare un atto di mandato serve portare un mandato.",
-      "NOT_A_MANDATE": "Questo ruolo non è un mandato: si assegna e si revoca direttamente."
+      "NOT_A_MANDATE": "Questo ruolo non è un mandato: si assegna e si revoca direttamente.",
+      "MANDATE_ACT_SUBJECT_GONE": "La persona a cui l'atto si riferiva non esiste più: l'atto resta come storia e non si approva."
     },
     "network": "Il server non risponde: controlla la connessione e riprova.",
     "sessionExpired": "La sessione è scaduta: accedi di nuovo.",

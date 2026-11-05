@@ -218,16 +218,21 @@ export const mandateActsService = {
           throw new ForbiddenError("Nobody approves an act about themselves (ADR-0050 D4)", "MANDATE_SAME_PERSON");
         }
 
+        if (act.userId === null) {
+          throw new ConflictError("The person this act concerns no longer exists", "MANDATE_ACT_SUBJECT_GONE");
+        }
+        const soggetto = act.userId;
+
         await repo.decideAct(client, actId, "APPROVED", actor.userId, note);
         const roleId = (await repo.findRoleByCode(client, act.roleCode))?.id;
         if (!roleId) throw new NotFoundError("Role");
 
         if (act.kind === "GRANT") {
-          if (await repo.findActiveGrantByRole(client, act.userId, roleId, act.tenantId)) {
+          if (await repo.findActiveGrantByRole(client, soggetto, roleId, act.tenantId)) {
             throw new ConflictError(`Role ${act.roleCode} already granted with the same scope`, "ROLE_GRANT_DUPLICATE");
           }
           const grantId = await repo.insertMandateGrant(client, {
-            userId: act.userId,
+            userId: soggetto,
             roleId,
             tenantId: act.tenantId,
             grantedBy: act.proposedBy,

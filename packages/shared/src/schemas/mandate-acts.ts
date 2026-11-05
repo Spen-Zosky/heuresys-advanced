@@ -39,7 +39,8 @@ export const MandateActSchema = z.object({
   actId: z.uuid(),
   kind: MandateActKindSchema,
   status: MandateActStatusSchema,
-  userId: z.uuid(),
+  /** null quando la persona è stata cancellata: l'atto resta come storia (ON DELETE SET NULL). */
+  userId: z.uuid().nullable(),
   userDisplayName: z.string().nullable(),
   roleCode: RoleCodeSchema,
   tenantId: z.uuid().nullable(),

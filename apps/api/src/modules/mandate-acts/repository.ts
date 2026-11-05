@@ -15,7 +15,7 @@ interface RawActRow {
   mandate_act_id: string;
   mandate_act_kind: MandateActKind;
   mandate_act_status: MandateActStatus;
-  mandate_act_user_id: string;
+  mandate_act_user_id: string | null;
   user_display_name: string | null;
   role_code: string;
   mandate_act_tenant_id: string | null;
@@ -41,7 +41,7 @@ const SELECT_ACT = `
          a.mandate_act_decided_by, a.mandate_act_decided_at, a.mandate_act_decision_note
     FROM sys.sys_mandate_acts a
     JOIN sys.sys_auth_roles r ON r.auth_role_id = a.mandate_act_role_id
-    JOIN sys.sys_users tu ON tu.user_id = a.mandate_act_user_id
+    LEFT JOIN sys.sys_users tu ON tu.user_id = a.mandate_act_user_id
     LEFT JOIN sys.sys_users pu ON pu.user_id = a.mandate_act_proposed_by`;
 
 function rowToAct(r: RawActRow): MandateAct {

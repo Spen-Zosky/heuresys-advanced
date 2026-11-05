@@ -690,7 +690,8 @@
       "MANDATE_NOT_PROPOSER": "Only the proposer can withdraw the act.",
       "MANDATE_ACT_DECIDED": "The act has already been decided.",
       "MANDATE_APPROVER_WITHOUT_MANDATE": "Approving a mandate act requires holding a mandate.",
-      "NOT_A_MANDATE": "This role is not a mandate: grant and revoke it directly."
+      "NOT_A_MANDATE": "This role is not a mandate: grant and revoke it directly.",
+      "MANDATE_ACT_SUBJECT_GONE": "The person this act concerned no longer exists: the act remains as history and cannot be approved."
     },
     "network": "The server is not responding: check your connection and try again.",
     "sessionExpired": "Your session has expired: please sign in again.",

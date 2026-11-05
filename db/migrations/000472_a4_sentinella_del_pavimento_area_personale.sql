@@ -12,7 +12,10 @@
 -- Vista sys.v_pavimento_area_personale_mancante: una riga per ogni ruolo di tenant
 -- (auth_role_is_platform = false) a cui manca almeno uno dei 9 permessi; il dettaglio li elenca.
 -- I ruoli di piattaforma restano fuori: hanno un perimetro tecnico, non un'area personale di
--- tenant. La sentinella pretende zero.
+-- tenant. Restano fuori anche i ruoli ritirati (`retired_at`). Un permesso revocato
+-- (`rp.revoked_at`) conta come mancante, come nella cache dei permessi
+-- (`modules/auth/cache-loader.ts`): la sentinella vede ciò che la persona ha davvero.
+-- La sentinella pretende zero.
 --
 -- Le persone senza la riga USER NON sono qui, ed è voluto: dal 31/10 la risoluzione dei ruoli
 -- al login aggiunge USER quando manca (`modules/auth/repository.ts`, getUserRoleGrants,
@@ -35,11 +38,13 @@ WITH pavimento(codice) AS (
     FROM sys.sys_auth_roles r
     CROSS JOIN pavimento pv
    WHERE r.auth_role_is_platform = false
+     AND r.retired_at IS NULL
      AND NOT EXISTS (
        SELECT 1
          FROM sys.sys_auth_role_permissions rp
          JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
-        WHERE rp.auth_role_id = r.auth_role_id AND p.auth_permission_code = pv.codice)
+        WHERE rp.auth_role_id = r.auth_role_id AND p.auth_permission_code = pv.codice
+          AND rp.revoked_at IS NULL)
    GROUP BY r.auth_role_code
 )
 SELECT 'ruolo'::text AS specie, auth_role_code::text AS soggetto, 'mancano: ' || mancanti AS dettaglio

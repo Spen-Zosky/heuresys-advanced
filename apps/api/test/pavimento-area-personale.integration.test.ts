@@ -40,6 +40,22 @@ describe("A-4 — sentinella del pavimento dell'area personale", () => {
         [ruolo?.id, PAVIMENTO],
       );
       expect(await leggi()).toHaveLength(0);
+
+      // Un permesso revocato conta come mancante, come nella cache dei permessi.
+      await client.query(
+        `UPDATE sys.sys_auth_role_permissions rp SET revoked_at = now()
+           FROM sys.sys_auth_permissions p
+          WHERE p.auth_permission_id = rp.auth_permission_id
+            AND rp.auth_role_id = $1 AND p.auth_permission_code = 'team:read:self'`,
+        [ruolo?.id],
+      );
+      const revocato = await leggi();
+      expect(revocato).toHaveLength(1);
+      expect(revocato[0]?.dettaglio).toBe("mancano: team:read:self");
+
+      // Un ruolo ritirato esce dalla sentinella.
+      await client.query(`UPDATE sys.sys_auth_roles SET retired_at = now() WHERE auth_role_id = $1`, [ruolo?.id]);
+      expect(await leggi()).toHaveLength(0);
     } finally {
       await client.query("ROLLBACK");
       client.release();

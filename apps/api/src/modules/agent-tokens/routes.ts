@@ -85,7 +85,7 @@ export const agentTokensRoutes: FastifyPluginAsyncZod = async (app) => {
       const tenantCode = persona.tenantId
         ? ((
             await pool.query<{ codice: string }>(
-              "SELECT tenant_code AS codice FROM sys.sys_tenants WHERE tenant_id = $1",
+              "SELECT tenant_code AS codice FROM sys.sys_tenancies WHERE tenant_id = $1",
               [persona.tenantId],
             )
           ).rows[0]?.codice ?? null)

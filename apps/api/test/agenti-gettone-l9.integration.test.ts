@@ -110,7 +110,7 @@ describe("L9 A-1 e ADR-0050 D6 — il gettone dice chi è l'agente e per conto d
     // A-12: il gettone dice per conto di chi e in quale tenant (il diario del gateway li scrive).
     expect(g.userId).toBe(capo.userId);
     const tenant = await pool.query<{ codice: string }>(
-      `SELECT t.tenant_code AS codice FROM sys.sys_users u JOIN sys.sys_tenants t ON t.tenant_id = u.user_tenant_id WHERE u.user_id = $1`,
+      `SELECT t.tenant_code AS codice FROM sys.sys_users u JOIN sys.sys_tenancies t ON t.tenant_id = u.user_tenant_id WHERE u.user_id = $1`,
       [capo.userId],
     );
     expect(g.tenantCode).toBe(tenant.rows[0]?.codice ?? null);

@@ -96,5 +96,8 @@ export function registraConcorrenza(app: FastifyInstance): void {
       },
     ];
   });
-  app.addHook("onSend", async (req, reply, payload) => etichetta(req, reply, payload));
+  // Sincrono, come gli altri onSend che toccano le scritture (vedi idempotenza.ts).
+  app.addHook("onSend", (req, reply, payload, done) => {
+    done(null, etichetta(req, reply, payload));
+  });
 }

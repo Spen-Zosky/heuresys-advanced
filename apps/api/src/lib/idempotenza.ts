@@ -32,6 +32,8 @@ declare module "fastify" {
   interface FastifyRequest {
     /** La riga di audit.chiavi_idempotenza di questa richiesta, se la richiesta l'ha aperta. */
     chiaveIdempotenzaId?: string;
+    /** La conservazione della risposta, avviata in onSend e attesa in onResponse. */
+    chiusuraIdempotenza?: Promise<void>;
   }
 }
 
@@ -100,16 +102,7 @@ async function apri(req: FastifyRequest, reply: FastifyReply): Promise<FastifyRe
     return undefined;
   }
 
-  const r = await pool.query<RigaChiave>(
-    `SELECT chiave_idempotenza_id::text AS id, chiave_idempotenza_impronta AS impronta,
-            chiave_idempotenza_stato AS stato, chiave_idempotenza_stato_http AS stato_http,
-            chiave_idempotenza_tipo AS tipo, chiave_idempotenza_corpo AS corpo
-       FROM audit.chiavi_idempotenza
-      WHERE chiave_idempotenza_user_id = $1 AND chiave_idempotenza_agente = $2
-        AND chiave_idempotenza_chiave = $3`,
-    [user.userId, agente, sotto.chiave],
-  );
-  const riga = r.rows[0];
+  const riga = await rigaConclusa(user.userId, agente, sotto.chiave);
   if (!riga) {
     // Tolta fra l'inserimento mancato e la lettura (una 5xx concorrente): si chiede di riprovare.
     throw new ConflictError("The request with this Idempotency-Key is being retried; repeat it", "IDEMPOTENCY_IN_PROGRESS");
@@ -129,15 +122,42 @@ async function apri(req: FastifyRequest, reply: FastifyReply): Promise<FastifyRe
   return reply.send(riga.corpo === null || riga.corpo === "" ? undefined : riga.corpo);
 }
 
-async function chiudi(req: FastifyRequest, reply: FastifyReply, payload: unknown): Promise<void> {
-  const id = req.chiaveIdempotenzaId;
-  if (!id) return;
+/** Quanto chi riprova aspetta che la richiesta originale finisca di conservare la risposta. */
+const ATTESA_MASSIMA_MS = 3_000;
+const PASSO_MS = 50;
+
+/**
+ * La riga della chiave; se è «in corso» si rilegge per al più tre secondi: la risposta può essere
+ * già partita mentre la sua conservazione è ancora in volo (onSend non attende, vedi sotto).
+ */
+async function rigaConclusa(userId: string, agente: string, chiave: string): Promise<RigaChiave | undefined> {
+  const limite = Date.now() + ATTESA_MASSIMA_MS;
+  for (;;) {
+    const riga = await leggiRiga(userId, agente, chiave);
+    if (!riga || riga.stato === "conclusa" || Date.now() >= limite) return riga;
+    await new Promise((r) => setTimeout(r, PASSO_MS));
+  }
+}
+
+async function leggiRiga(userId: string, agente: string, chiave: string): Promise<RigaChiave | undefined> {
+  const r = await pool.query<RigaChiave>(
+    `SELECT chiave_idempotenza_id::text AS id, chiave_idempotenza_impronta AS impronta,
+            chiave_idempotenza_stato AS stato, chiave_idempotenza_stato_http AS stato_http,
+            chiave_idempotenza_tipo AS tipo, chiave_idempotenza_corpo AS corpo
+       FROM audit.chiavi_idempotenza
+      WHERE chiave_idempotenza_user_id = $1 AND chiave_idempotenza_agente = $2
+        AND chiave_idempotenza_chiave = $3`,
+    [userId, agente, chiave],
+  );
+  return r.rows[0];
+}
+
+async function chiudi(id: string, reply: FastifyReply, payload: unknown): Promise<void> {
   const stato = reply.statusCode;
   const corpo = typeof payload === "string" ? payload : Buffer.isBuffer(payload) ? payload.toString("utf8") : null;
   // Una 5xx (o un flusso, che non si può ripetere) non si conserva: la riga si toglie e si riprova.
   if (stato >= 500 || (payload !== null && payload !== undefined && corpo === null)) {
     await pool.query("DELETE FROM audit.chiavi_idempotenza WHERE chiave_idempotenza_id = $1", [id]);
-    req.chiaveIdempotenzaId = undefined;
     return;
   }
   const tipo = reply.getHeader("content-type");
@@ -148,7 +168,6 @@ async function chiudi(req: FastifyRequest, reply: FastifyReply, payload: unknown
       WHERE chiave_idempotenza_id = $1`,
     [id, stato, typeof tipo === "string" ? tipo.slice(0, 100) : null, corpo],
   );
-  req.chiaveIdempotenzaId = undefined;
 }
 
 /**
@@ -167,14 +186,24 @@ export function registraIdempotenza(app: FastifyInstance): void {
       return apri(req, reply);
     }];
   });
-  app.addHook("onSend", async (req, reply, payload) => {
-    try {
-      await chiudi(req, reply, payload);
-    } catch (err) {
-      req.log.warn({ err }, "idempotenza: la risposta non si è potuta conservare");
-      const id = req.chiaveIdempotenzaId;
-      if (id) await pool.query("DELETE FROM audit.chiavi_idempotenza WHERE chiave_idempotenza_id = $1", [id]).catch(() => undefined);
+  // L'onSend è SINCRONO di proposito (come quello del registro delle scritture, #157): un onSend
+  // che attende una query lascia una finestra in cui un gestore `reply.code(201).send(x)` che non
+  // ritorna `reply` si risolve con undefined prima che la risposta parta, e Fastify la rimanda
+  // vuota («Cannot write headers»). Qui la conservazione si AVVIA senza attendere; onResponse la
+  // attende, e chi riprova mentre è in volo aspetta un attimo in `apri` invece di ricevere 409.
+  app.addHook("onSend", (req, reply, payload, done) => {
+    const id = req.chiaveIdempotenzaId;
+    if (id) {
+      // Stato, tipo e corpo si leggono ora, nello stesso giro: la query parte senza attesa.
+      req.chiaveIdempotenzaId = undefined;
+      req.chiusuraIdempotenza = chiudi(id, reply, payload).catch(async (err: unknown) => {
+        req.log.warn({ err }, "idempotenza: la risposta non si è potuta conservare");
+        await pool.query("DELETE FROM audit.chiavi_idempotenza WHERE chiave_idempotenza_id = $1", [id]).catch(() => undefined);
+      });
     }
-    return payload;
+    done(null, payload);
+  });
+  app.addHook("onResponse", async (req) => {
+    await req.chiusuraIdempotenza;
   });
 }

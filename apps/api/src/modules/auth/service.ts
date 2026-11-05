@@ -17,7 +17,7 @@ import {
 } from "../../config/constants.js";
 import { UnauthorizedError, NotFoundError, ForbiddenError, ApiError } from "../../errors/index.js";
 import { pool, withTransaction } from "../../db/client.js";
-import { ruoliHannoMandatoPiattaforma } from "../../lib/scope/mandati.js";
+import { ruoliHannoMandatoPiattaforma, ruoliPortanoMandato } from "../../lib/scope/mandati.js";
 
 import { hashPassword, verifyPassword } from "./password.js";
 import { generateOpaqueToken, sha256Hex } from "./tokens.js";
@@ -219,6 +219,12 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
   const mfaService = deps.mfaService ?? sharedMfaService;
   const mfaEnforcement = deps.mfaEnforcement ?? env.MFA_ENFORCEMENT_ENABLED;
 
+  /** ADR-0050 D1/D2: la persona porta un mandato forte (letto dalle sue concessioni attive). */
+  async function portaMandato(userId: string): Promise<boolean> {
+    const grants = await repo.getUserRoleGrants(pool, userId);
+    return ruoliPortanoMandato(grants.map((g) => g.roleCode));
+  }
+
   async function issueLoginBundle(args: {
     userId: string;
     userEmail: string;
@@ -354,6 +360,8 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       //     falls straight through to token issuance, no second factor. PROD
       //     keeps it true (default); enrolled factors + the per-tenant policy
       //     are untouched, only login-time enforcement is suspended.
+      // ADR-0050 D1/D2: letto una volta, serve sia all'esenzione sia all'iscrizione obbligatoria.
+      const mandato = mfaEnforcement && !input.challengeToken ? await portaMandato(candidate.userId) : false;
       if (mfaEnforcement && input.challengeToken) {
         if (!input.mfaCode) {
           throw new UnauthorizedError("MFA code required", "MFA_CODE_REQUIRED");
@@ -390,7 +398,12 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
           });
           throw new UnauthorizedError("Invalid MFA challenge", "MFA_INVALID");
         }
-      } else if (mfaEnforcement && !(await repo.isUserMfaExempt(pool, candidate.userId))) {
+      } else if (
+        mfaEnforcement &&
+        // ADR-0050 D2: chi porta un mandato forte non salta mai il secondo fattore, nemmeno
+        // con un'esenzione (che il database comunque rifiuta di creare per lui, mig. 000473).
+        (mandato || !(await repo.isUserMfaExempt(pool, candidate.userId)))
+      ) {
         // #9 WI-A: a user with an ACTIVE MFA exemption (headless service account,
         // sys_auth_mfa_exemptions / mig 000116) skips the WHOLE gate (no
         // mfa_required, no mfa_enrollment_required) and falls through to full
@@ -415,13 +428,16 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         // (claim `enr`, roles [] -> every requirePermission() denies; the only
         // usable surface is /v1/auth/mfa self-service). Default OFF: with no
         // policy row (or enabled=false) behaviour is identical to pre-#4.
+        // ADR-0050 D2: per chi porta un mandato forte l'iscrizione al secondo fattore è
+        // obbligatoria anche senza una politica del tenant che la chieda.
         const policy = await repo.findMfaPolicyForTenant(pool, candidate.userTenantId);
-        if (policy?.enabled) {
+        if (mandato || policy?.enabled) {
           const grants = await repo.getUserRoleGrants(pool, candidate.userId);
           const roleCodes = [...new Set(grants.map((g) => g.roleCode))];
           const inScope =
-            policy.roleCodes === null ||
-            roleCodes.some((r) => policy.roleCodes!.includes(r));
+            mandato ||
+            (policy?.enabled === true &&
+              (policy.roleCodes === null || roleCodes.some((r) => policy.roleCodes!.includes(r))));
           if (inScope) {
             const accessJwt = await deps.jwtSign({
               sub: candidate.userId,

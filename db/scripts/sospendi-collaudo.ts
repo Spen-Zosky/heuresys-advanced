@@ -231,8 +231,15 @@ async function main(): Promise<void> {
         }
         if (ultima.esenzione) {
           await db.query(
+            // ADR-0050 D2: a chi porta un mandato forte l'esenzione non si riaccende (il
+            // database la rifiuterebbe, migrazione 000473): entra con il suo fattore.
             `UPDATE sys.sys_auth_mfa_exemptions SET auth_mfa_exemption_enabled = true
-              WHERE auth_mfa_exemption_user_id = $1 AND NOT auth_mfa_exemption_enabled`,
+              WHERE auth_mfa_exemption_user_id = $1 AND NOT auth_mfa_exemption_enabled
+                AND NOT EXISTS (
+                  SELECT 1 FROM sys.sys_user_auth_roles ur
+                    JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+                   WHERE ur.user_auth_role_user_id = $1 AND ur.user_auth_role_revoked_at IS NULL
+                     AND r.auth_role_code IN (SELECT sys.f_ruoli_mandato()))`,
             [r.user_id],
           );
         }

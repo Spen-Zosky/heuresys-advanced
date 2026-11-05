@@ -123,9 +123,17 @@ describe("D-14 tenant provisioning /v1/tenants/provision", () => {
     );
     expect(policy.rows.length).toBe(1);
 
-    // LIVE proof: the provisioned admin can authenticate with the issued password
-    const asNew = await loginRaw(suite.app, newAdminEmail, NEW_ADMIN_PW);
-    expect(asNew.statusCode).toBe(200);
+    // LIVE proof: the provisioned admin can authenticate with the issued password.
+    // ADR-0050 D2 (mig 000473): TENANT_ADMIN è un mandato, quindi il primo login di chi non ha
+    // ancora un secondo fattore apre solo la sessione d'iscrizione. La password è accettata
+    // (200) e il passo successivo è registrare il fattore.
+    const asNew = await suite.app.inject({
+      method: "POST",
+      url: "/v1/auth/login",
+      payload: { email: newAdminEmail, password: NEW_ADMIN_PW },
+    });
+    expect(asNew.statusCode, `admin login body: ${asNew.body}`).toBe(200);
+    expect((asNew.json() as { status: string }).status).toBe("mfa_enrollment_required");
   });
 
   it("rejects a non-PLATFORM_ADMIN actor (403)", async () => {

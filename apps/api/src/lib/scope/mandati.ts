@@ -26,7 +26,7 @@
 
 import type { ActorContext } from "../actor.js";
 import type { RoleCode } from "../../config/constants.js";
-import { HR_MANDATED_ROLES } from "./resolver.js";
+import { HR_MANDATED_ROLES, TENANT_WIDE_MASKED_ROLES } from "./resolver.js";
 
 /** Il mandato tecnico di piattaforma (ADR-0032): apre la superficie, non i dati sensibili. */
 export const PLATFORM_MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>(["PLATFORM_ADMIN"]);
@@ -123,3 +123,22 @@ export const MANDATI_FUNZIONALI_CON_SUPERFICIE: ReadonlySet<RoleCode> = new Set<
   "DPO",
   "SECURITY_ADMIN",
 ]);
+
+/**
+ * ADR-0050 D1 — l'insieme dei MANDATI FORTI: chi li porta vede, o governa, ciò che sta oltre la
+ * propria catena. Un solo insieme, composto dagli altri e non elencato a mano: ogni regola
+ * dell'ADR (secondo fattore senza esenzioni D2, esenzioni a scadenza D3, concessione come atto
+ * D4, nuova conferma D5, agenti senza mandati D6) lo legge da qui.
+ */
+export const MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
+  ...HR_MANDATED_ROLES,
+  ...TENANT_WIDE_MASKED_ROLES,
+  ...PLATFORM_MANDATE_ROLES,
+  "SECURITY_ADMIN",
+  "WHISTLEBLOWING_CUSTODIAN",
+]);
+
+/** ADR-0050 D1: la persona porta almeno un mandato forte. */
+export function ruoliPortanoMandato(roles: readonly RoleCode[]): boolean {
+  return roles.some((r) => MANDATE_ROLES.has(r));
+}

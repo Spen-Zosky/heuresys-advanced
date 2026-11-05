@@ -28,7 +28,7 @@ import { unCapoConSottoposti, unSottopostoOrganizzativo, type Attore } from "./h
 
 senzaCacheDiSessione();
 
-const AMMINISTRA = "federica.marchetti@rtl-bank.org";
+const AMMINISTRA = "governo@collaudo.invalid";
 
 interface Sessione { cookies: Map<string, string>; csrf: string }
 interface Riga {
@@ -259,7 +259,7 @@ describe("L9 A-5 — una delega vera, usata da un agente del delegato", () => {
     expect(riga).toMatchObject({ attore_tipo: "agente", persona: sotto.userId, agente: "assistente-hr", stato: 200 });
 
     const avviso = await pool.query<{ s: string }>(
-      `SELECT notification_subject AS s FROM sys.sys_notifications
+      `SELECT notification_subject AS s FROM sys.sys_inbox_notifications
         WHERE notification_user_id = $1 AND notification_resource_id::text = $2`,
       [capo.userId, stepId],
     );

@@ -2,7 +2,8 @@
  * ADR-0050 D3, parte visibile (S-14): la pagina della politica MFA elenca le esenzioni con
  * autore, scadenza e stato, e permette di spegnerle. Attori: governo@ (TENANT_ADMIN di RTL,
  * mfa_policy:read e :manage) e un'esenzione creata qui, nella transazione del file, per una
- * persona di prova con un autore vero (D3: una persona, non l'esentato).
+ * utenza di servizio di prova (user_type SERVICE e iscritta fra le idonee: i due lucchetti
+ * M-8b e #139 valgono anche qui) con un autore vero (D3: una persona, non l'esentato).
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
@@ -34,17 +35,22 @@ describe("S-14 — esenzioni dal secondo fattore con autore e scadenza", () => {
       `SELECT user_id AS id, user_tenant_id AS t FROM sys.sys_users WHERE lower(user_email) = lower($1)`, [AUTORE],
     )).rows[0]!;
     tenantRtl = autore.t;
-    const persona = (await pool.query<{ id: string }>(
-      `INSERT INTO sys.sys_users (user_tenant_id, user_email, user_display_name, user_first_name, user_last_name, user_status)
-       VALUES ($1, 'esenzione.s14@prova.invalid', 'Prova Esenzione', 'Prova', 'Esenzione', 'ACTIVE') RETURNING user_id AS id`,
+    const servizio = (await pool.query<{ id: string }>(
+      `INSERT INTO sys.sys_users (user_tenant_id, user_email, user_display_name, user_first_name, user_last_name, user_status, user_type)
+       VALUES ($1, 'esenzione.s14@prova.invalid', 'Prova Esenzione', 'Prova', 'Esenzione', 'ACTIVE', 'SERVICE') RETURNING user_id AS id`,
       [tenantRtl],
     )).rows[0]!.id;
+    await pool.query(
+      `INSERT INTO sys.sys_auth_mfa_exemption_eligible_users (auth_mfa_eligible_user_id, auth_mfa_eligible_reason)
+       VALUES ($1, 'prova S-14: utenza di servizio idonea')`,
+      [servizio],
+    );
     esenzioneId = (await pool.query<{ id: string }>(
       `INSERT INTO sys.sys_auth_mfa_exemptions
          (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_expires_at, created_by)
        VALUES ($1, 'prova S-14: utenza senza secondo fattore', now() + interval '10 days', $2)
        RETURNING auth_mfa_exemption_id AS id`,
-      [persona, autore.id],
+      [servizio, autore.id],
     )).rows[0]!.id;
   });
   afterAll(async () => {

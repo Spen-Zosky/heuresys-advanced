@@ -81,6 +81,15 @@ export const agentTokensRoutes: FastifyPluginAsyncZod = async (app) => {
       if (!rowCount) {
         throw new UnauthorizedError("Session no longer active", AGENT_TOKEN_ERRORS.AGENT_SESSION_REQUIRED);
       }
+      // A-12: il codice del tenant, che il diario del gateway e le sue soglie usano come chiave.
+      const tenantCode = persona.tenantId
+        ? ((
+            await pool.query<{ codice: string }>(
+              "SELECT tenant_code AS codice FROM sys.sys_tenancies WHERE tenant_id = $1",
+              [persona.tenantId],
+            )
+          ).rows[0]?.codice ?? null)
+        : null;
 
       const jti = randomUUID();
       const token = await app.jwt.sign(
@@ -103,7 +112,17 @@ export const agentTokensRoutes: FastifyPluginAsyncZod = async (app) => {
         gettoneAgente: { jti, agente: req.body.agentCode, compito: req.body.task, permessi: chiesti, scade: expiresAt },
       };
       reply.code(201);
-      return { token, expiresAt, agentCode: req.body.agentCode, task: req.body.task, permissions: chiesti, roles };
+      return {
+        token,
+        expiresAt,
+        agentCode: req.body.agentCode,
+        task: req.body.task,
+        permissions: chiesti,
+        roles,
+        userId: persona.userId,
+        tenantId: persona.tenantId ?? null,
+        tenantCode,
+      };
     },
   );
 };

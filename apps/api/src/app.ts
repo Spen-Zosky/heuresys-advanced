@@ -19,7 +19,6 @@ import {
   ZodTypeProvider,
   serializerCompiler,
   validatorCompiler,
-  jsonSchemaTransform,
 } from "fastify-type-provider-zod";
 
 import { env } from "./config/env.js";
@@ -160,6 +159,10 @@ import { publicStatsRoutes } from "./modules/public-stats/routes.js";
 import { publicJobPostingsRoutes } from "./modules/public-job-postings/routes.js";
 import { tenantMaterializationRoutes } from "./modules/tenant-materialization/routes.js";
 import { registraEventiDiValore } from "./lib/valore/registro.js";
+import { registraRotteDellaSpecifica } from "./lib/openapi/rotte.js";
+import { registraConcorrenza } from "./lib/concorrenza.js";
+import { registraIdempotenza } from "./lib/idempotenza.js";
+import { intestazioneDellaSpecifica, trasformaPerLaSpecifica } from "./lib/openapi/specifica.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 import { makeSmsSender, type ISmsSender } from "./modules/auth/sms-sender.js";
@@ -195,6 +198,8 @@ export interface BuildAppOptions {
    * pool ha connessioni separate e il registro non deve rallentare nessuno: spento.
    */
   valoreSerializzato?: boolean;
+  /** A-9: accende la specifica OpenAPI e la scoperta (default env.API_DOCS_ENABLED); le prove la accendono. */
+  apiDocs?: boolean;
 }
 
 /**
@@ -249,28 +254,32 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   registerConfermaD5(app, options.mfaEnforcement ?? env.MFA_ENFORCEMENT_ENABLED);
   // 1a-bis. S-10: raccoglie le rotte senza permesso (la prova le confronta con il loro elenco).
   registraGuardiaRotte(app);
+  // A-10 del piano interfacce: ETag e If-Match, poi Idempotency-Key, in coda ai preHandler di
+  // ogni scrittura (dopo CSRF e permesso). L'ordine di questi due conta: prima la condizione.
+  registraConcorrenza(app);
+  registraIdempotenza(app);
 
-  // 1b. OpenAPI/Swagger (R6) — gated OFF by default (env.API_DOCS_ENABLED). Registered
-  //     right after the type-provider compilers so its onRoute hook captures EVERY route
-  //     declared below (the Zod schemas are converted via jsonSchemaTransform). When the
-  //     flag is off neither /docs (UI) nor /openapi.json (spec) exists.
-  if (env.API_DOCS_ENABLED) {
+  // 1b. OpenAPI/Swagger (R6; A-9 del piano interfacce) — spenta per difetto (env.API_DOCS_ENABLED):
+  //     accenderla in produzione è una decisione di Enzo. Registrata subito dopo i compilatori
+  //     così il suo onRoute vede OGNI rotta dichiarata sotto; ogni operazione riceve
+  //     identificativo, etichetta, riassunto, permesso e sicurezza (lib/openapi/specifica.ts).
+  //     Specifica, interfaccia e scoperta rispondono solo a chi è autenticato (persona o gettone).
+  if (options.apiDocs ?? env.API_DOCS_ENABLED) {
     await app.register(fastifySwagger, {
-      openapi: {
-        info: {
-          title: "Heuresys Advanced API",
-          description: "Fastify 5 + Zod-typed contract — the /v1/* endpoint surface.",
-          version: "1.0.0",
-        },
-        servers: [{ url: "/", description: "same-origin (behind the /api proxy in the web app)" }],
-      },
-      transform: jsonSchemaTransform,
+      openapi: intestazioneDellaSpecifica(),
+      transform: trasformaPerLaSpecifica,
     });
-    await app.register(fastifySwaggerUi, { routePrefix: "/docs" });
-    // Canonical OpenAPI spec endpoint (swagger-ui also serves it at /docs/json).
-    // app.swagger() is resolved at request time (after ready) → captures every route.
-    // hide:true keeps this meta-route out of the spec it returns.
-    app.get("/openapi.json", { schema: { hide: true } }, async () => app.swagger());
+    await app.register(fastifySwaggerUi, {
+      routePrefix: "/docs",
+      uiHooks: {
+        // Il contesto dell'interfaccia nasce prima del gestore d'errori: la risposta si scrive qui.
+        onRequest: async (req, reply) => {
+          if (!req.user || req.user.enrollmentOnly) {
+            return reply.code(401).send({ error: { code: "UNAUTHORIZED", message: "Authentication required" } });
+          }
+        },
+      },
+    });
   }
 
   // 2. Request id (so every subsequent log/error/response carries it)
@@ -447,6 +456,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(authRoutes, { prefix: "/v1/auth", mailer: authMailer, mfaService, mfaEnforcement });
   // Piano interfacce L9, A-1/A-2/A-3: il gettone breve dell'agente, chiesto dalla persona.
   await app.register(agentTokensRoutes, { prefix: "/v1/auth/agent-tokens" });
+  // A-9: specifica e scoperta, dopo autenticazione e limite di frequenza (onRoute li vede).
+  if (options.apiDocs ?? env.API_DOCS_ENABLED) registraRotteDellaSpecifica(app);
   await app.register(mfaRoutes, {
     prefix: "/v1/auth/mfa",
     service: mfaService,

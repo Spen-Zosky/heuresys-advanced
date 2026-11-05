@@ -137,14 +137,11 @@ describe("#156 il gate usa il resolver, e senza di esso nega", () => {
 describe("#156 il file generato sul disco è coerente con la decisione", () => {
   const vero = AtlasOperationResolver.load();
 
-  it("porta il perimetro deciso, e solo quello", () => {
-    // ⚠ Il commento diceva «l'atteso NON è cablato» e la riga sotto lo cablava
-    // (`toEqual(["organization-units"])`): il caso è andato rosso il 2026-08-17, quando
-    // Enzo ha aperto `positions` — cioè si è rotto per un'adozione RIUSCITA. Un test che
-    // fotografa quali perimetri sono aperti duplica una SoT (`agent-perimetri.json`) e
-    // trasforma ogni apertura futura in un rosso da spegnere a mano. Ora l'atteso si
-    // DERIVA dalla fonte, e la proprietà verificata è quella vera: il generato dice
-    // esattamente ciò che la decisione dice, né uno in più né uno in meno.
+  it("porta i perimetri decisi con la loro decisione, e ogni altro modulo in sola lettura (#254)", () => {
+    // L'atteso si DERIVA dalla fonte, non si fotografa (lezione del 2026-08-17). Dal 2026-11-05
+    // (#254, ADR-0040 §5, piano interfacce L10 A-13) le LETTURE si aprono su tutti i moduli:
+    // i perimetri decisi restano con la loro decisione, gli altri entrano in sola lettura con
+    // la decisione di ADR-0040; restano fuori solo i moduli dichiarati nel generatore.
     expect(vero.isEmpty(),
       "agent-operations.json non si legge: rigenerarlo con build_agent_operations.py").toBe(false);
     const perimetri = JSON.parse(
@@ -152,7 +149,15 @@ describe("#156 il file generato sul disco è coerente con la decisione", () => {
     ) as { aperti?: Array<{ concetto: string }> };
     const decisi = (perimetri.aperti ?? []).map((v) => v.concetto).sort();
     expect(decisi.length, "nessun perimetro deciso: la fonte non si legge").toBeGreaterThan(0);
-    expect(vero.conceptIds().slice().sort()).toEqual(decisi);
+    const aperti = vero.conceptIds();
+    for (const d of decisi) expect(aperti, `il perimetro deciso ${d} manca`).toContain(d);
+    expect(aperti.length).toBeGreaterThan(decisi.length);
+    // Le eccezioni dichiarate restano fuori anche dalle letture.
+    expect(aperti).not.toContain("auth");
+    expect(aperti).not.toContain("whistleblowing");
+    // Un modulo con dati di persona ora si legge, con il permesso della persona: è l'API a filtrare.
+    expect(aperti).toContain("compensation");
+    for (const op of Object.values(vero.operationsOf("compensation"))) expect(op.method).toBe("GET");
   });
 
   it("non contiene NESSUNA operazione di scrittura", () => {

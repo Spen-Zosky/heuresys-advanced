@@ -262,7 +262,13 @@ const server = createServer(async (req, res) => {
       // `personeDistinte` e `livello`: senza quei tre campi il pannello direbbe «l'agente vuole
       // eseguire una scrittura» davanti a una lettura, cioè chiederebbe di approvare una cosa
       // raccontandone un'altra. Sono numeri e identificatori: niente da redigere, per requisito.
-      const principal: GatePrincipal = { principal: "user" };
+      // A-12: il diario e le soglie (A-6) sanno per conto di chi lavora l'agente e in quale
+      // tenant: lo dice l'API nel gettone, non il corpo della richiesta.
+      const principal: GatePrincipal = {
+        principal: "user",
+        subject: gettone.persona.userId,
+        ...(gettone.persona.tenantCode ? { tenant: gettone.persona.tenantCode } : {}),
+      };
       const approve = async (reqApprove: ApprovalRequest): Promise<boolean> => {
         const { approvalId, decided } = approvals.create();
         const payload = {

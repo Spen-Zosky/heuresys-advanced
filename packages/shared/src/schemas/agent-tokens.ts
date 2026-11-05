@@ -39,6 +39,13 @@ export const AgentTokenResponseSchema = z.object({
   permissions: z.array(z.string()).nullable(),
   /** I ruoli che il gettone porta: quelli della persona senza i mandati (ADR-0050 D6). */
   roles: z.array(z.string()),
+  /**
+   * L10, A-12: per conto di chi lavora l'agente, perché il suo diario dica chi e in quale tenant
+   * (`audit.agent_gateway_decisions`) e le soglie di persone siano quelle del tenant (A-6).
+   */
+  userId: z.string(),
+  tenantId: z.string().nullable(),
+  tenantCode: z.string().nullable(),
 });
 export type AgentTokenResponse = z.infer<typeof AgentTokenResponseSchema>;
 

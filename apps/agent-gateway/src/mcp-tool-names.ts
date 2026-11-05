@@ -53,6 +53,13 @@ export const READ_TOOL_NAMES = [
   "hrx_blueprint_processes_list",
   "hrx_blueprint_activations_list",
   "hrx_blueprint_overrides_list",
+  // L10, A-16: le letture di maggior valore che nessuna pagina mostra (piano interfacce §6.4).
+  "hrx_performance_reviews_list",
+  "hrx_performance_reviews_get",
+  "hrx_kpi_measurements_list",
+  "hrx_predictions_list",
+  "hrx_predictions_get",
+  "hrx_org_unit_processes_list",
 ] as const;
 
 /** Write tools (allowlisted, but still routed through the HITL approval round-trip). */

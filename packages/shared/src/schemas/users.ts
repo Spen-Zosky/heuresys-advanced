@@ -132,6 +132,10 @@ export const RoleGrantSchema = z.object({
   tenantId: z.uuid().nullable(),
   grantedAt: z.iso.datetime(),
   grantedBy: z.uuid().nullable(),
+  /** ADR-0050 D4 (mig 000475): l'atto approvato che regge la concessione di un mandato. */
+  actId: z.uuid().nullable(),
+  /** ADR-0050 D4: la data di revisione del mandato; null sui ruoli che non sono mandati. */
+  reviewBy: z.iso.date().nullable(),
 });
 export type RoleGrant = z.infer<typeof RoleGrantSchema>;
 

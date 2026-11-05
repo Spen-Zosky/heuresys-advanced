@@ -40,6 +40,7 @@ import { makeMailer } from "./modules/auth/smtp-mailer.js";
 import { buildMfaServiceWithMailer } from "./modules/auth/mfa-service.js";
 import { tenantsRoutes } from "./modules/tenants/routes.js";
 import { usersRoutes } from "./modules/users/routes.js";
+import { mandateActsRoutes } from "./modules/mandate-acts/routes.js";
 import { positionsRoutes } from "./modules/positions/routes.js";
 import { organizationUnitsRoutes } from "./modules/organization-units/routes.js";
 import { projectsRoutes } from "./modules/projects/routes.js";
@@ -449,6 +450,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(mfaPolicyRoutes, { prefix: "/v1/mfa-policy" });
   await app.register(tenantsRoutes, { prefix: "/v1/tenants" });
   await app.register(usersRoutes, { prefix: "/v1/users" });
+  await app.register(mandateActsRoutes, { prefix: "/v1/mandate-acts" });
   await app.register(positionsRoutes, { prefix: "/v1/positions" });
   await app.register(organizationUnitsRoutes, { prefix: "/v1/organization-units" });
   await app.register(tenantMaterializationRoutes, { prefix: "/v1/tenant-materialization" });

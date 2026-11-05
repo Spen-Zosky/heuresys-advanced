@@ -142,3 +142,28 @@ export const MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
 export function ruoliPortanoMandato(roles: readonly RoleCode[]): boolean {
   return roles.some((r) => MANDATE_ROLES.has(r));
 }
+
+/**
+ * ADR-0050 D7 — separazione dei compiti: le coppie di mandati che non stanno sulla stessa persona.
+ * Copia di `sys.f_mandati_incompatibili()` (mig 000475), che le fa rispettare a ogni concessione;
+ * la parità la verifica adr0050-mandato-atto.integration.test.ts. Qui servono a rifiutare la
+ * proposta subito, invece di lasciarla arrivare all'approvazione per farla cadere lì.
+ */
+export const INCOMPATIBILI: ReadonlyArray<readonly [RoleCode, RoleCode]> = [
+  ["WHISTLEBLOWING_CUSTODIAN", "TENANT_ADMIN"],
+  ["WHISTLEBLOWING_CUSTODIAN", "HRMS_MANAGER"],
+  ["WHISTLEBLOWING_CUSTODIAN", "PEOPLE_MANAGER"],
+  ["WHISTLEBLOWING_CUSTODIAN", "SECURITY_ADMIN"],
+  ["SECURITY_ADMIN", "TENANT_ADMIN"],
+  ["DPO", "TENANT_ADMIN"],
+  ["DPO", "HRMS_MANAGER"],
+  ["DPO", "PEOPLE_MANAGER"],
+];
+
+/** ADR-0050 D7: il primo ruolo già portato che non può stare con `ruolo`, oppure null. */
+export function mandatoIncompatibileCon(ruolo: RoleCode, portati: readonly RoleCode[]): RoleCode | null {
+  for (const altro of portati) {
+    if (INCOMPATIBILI.some(([a, b]) => (a === ruolo && b === altro) || (a === altro && b === ruolo))) return altro;
+  }
+  return null;
+}

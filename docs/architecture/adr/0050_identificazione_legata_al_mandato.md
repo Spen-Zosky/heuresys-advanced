@@ -84,3 +84,9 @@ Heuresys è una piattaforma agentica (regola di Enzo del 2026-10-31): un agente 
 5. D5 (dopo una misura di quante letture passano per `hr_mandate`).
 
 Ogni passo si chiude con una dimostrazione dal vivo su dati reali (ADR-0026).
+
+## Attuazione
+
+- D1 e D2: migrazione 000473, PR #172.
+- D3 e D6: migrazione 000474 e ritiro di `db/scripts/seed-service-user.ts`, PR #174.
+- D4 e D7: migrazione 000475 e modulo `apps/api/src/modules/mandate-acts`. Un mandato si propone, si revoca o si riconferma con un atto (`POST /v1/mandate-acts`, kind `GRANT`, `REVOKE`, `CONFIRM`), con motivo e, per concessione e riconferma, una data di revisione entro un anno; lo decide un secondo titolare (`/approve`, `/reject`), mai chi lo propone né chi lo riceve; il proponente può ritirarlo (`/withdraw`). Solo l'approvazione produce l'effetto su `sys.sys_user_auth_roles`, che porta il riferimento all'atto. `POST` e `DELETE /v1/users/:id/roles` rispondono 409 `MANDATE_REQUIRES_ACT` su un mandato. Ogni passaggio di stato va in `sys.sys_mandate_act_audit`. D7 è un trigger su `sys.sys_user_auth_roles` (`sys.f_mandati_incompatibili`, copia di `INCOMPATIBILI` in `lib/scope/mandati.ts`). Le concessioni di prima stanno in `sys.v_mandato_da_riconfermare` (informativa, si svuota con atti `CONFIRM`); `sys.v_mandati_incompatibili` e `sys.v_mandato_revisione_scaduta` pretendono zero. La proposta nasce dalla scheda della persona, la decisione dalla pagina Ruoli (`/admin/roles`). La posizione che giustifica il mandato (D8) si può citare nell'atto (`positionId`, una posizione che la persona regge); il controllo periodico di D8 resta da fare.

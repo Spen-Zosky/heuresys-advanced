@@ -7,6 +7,7 @@ import { Badge, Card, CardContent, PageHeader } from "@heuresys/ui";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { Check } from "lucide-react";
 import { apiFetch } from "../../../../lib/api/fetch";
+import { MandateActsQueue } from "./_components/mandate-acts-queue";
 
 interface RolePermItem {
   roleCode: string;
@@ -55,6 +56,9 @@ export default function AdminRolesPage() {
           </Badge>
         }
       />
+
+      {/* ADR-0050 D4: gli atti di mandato da decidere stanno sopra la matrice, perché aspettano qualcuno. */}
+      <MandateActsQueue />
 
       <Card>
         {/* tabIndex/role: the matrix is a wide scrollable region whose content

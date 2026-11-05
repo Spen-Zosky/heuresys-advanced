@@ -681,7 +681,16 @@
       "USER_INACTIVE": "Questa utenza non è più attiva.",
       "BLUEPRINT_TENANT_NOT_LINKED": "Il fascicolo non è legato a un'azienda: non c'è nulla da costruire.",
       "BLUEPRINT_BUILD_SOURCE_MISSING": "La versione non dichiara una sorgente di costruzione: nessun modello è ancorato, oppure il modello non ne dichiara una.",
-      "BLUEPRINT_BUILD_SOURCE_UNKNOWN": "La sorgente di costruzione dichiarata dal modello non è tra quelle che la piattaforma conosce."
+      "BLUEPRINT_BUILD_SOURCE_UNKNOWN": "La sorgente di costruzione dichiarata dal modello non è tra quelle che la piattaforma conosce.",
+      "MANDATE_REQUIRES_ACT": "Questo ruolo è un mandato: non si assegna né si revoca con un clic, si propone un atto che un secondo titolare decide.",
+      "MANDATE_ACT_PENDING": "C'è già una proposta aperta per lo stesso atto: aspetta che venga decisa o ritirala.",
+      "MANDATE_INCOMPATIBLE": "Questo mandato non può stare insieme a uno che la persona porta già (separazione dei compiti).",
+      "MANDATE_SELF_PROPOSAL": "Un mandato non si propone per sé stessi.",
+      "MANDATE_SAME_PERSON": "Un atto lo decide un secondo titolare: né chi l'ha proposto né chi lo riceve.",
+      "MANDATE_NOT_PROPOSER": "Solo chi ha proposto l'atto può ritirarlo.",
+      "MANDATE_ACT_DECIDED": "L'atto è già stato deciso.",
+      "MANDATE_APPROVER_WITHOUT_MANDATE": "Per approvare un atto di mandato serve portare un mandato.",
+      "NOT_A_MANDATE": "Questo ruolo non è un mandato: si assegna e si revoca direttamente."
     },
     "network": "Il server non risponde: controlla la connessione e riprova.",
     "sessionExpired": "La sessione è scaduta: accedi di nuovo.",

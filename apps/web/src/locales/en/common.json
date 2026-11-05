@@ -681,7 +681,16 @@
       "USER_INACTIVE": "This account is no longer active.",
       "BLUEPRINT_TENANT_NOT_LINKED": "The dossier is not linked to a company: there is nothing to build.",
       "BLUEPRINT_BUILD_SOURCE_MISSING": "The version declares no build source: no model is anchored, or the model does not declare one.",
-      "BLUEPRINT_BUILD_SOURCE_UNKNOWN": "The build source declared by the model is not one the platform knows."
+      "BLUEPRINT_BUILD_SOURCE_UNKNOWN": "The build source declared by the model is not one the platform knows.",
+      "MANDATE_REQUIRES_ACT": "This role is a mandate: it is not granted or revoked with one click; propose an act for a second holder to decide.",
+      "MANDATE_ACT_PENDING": "An open proposal for the same act already exists: wait for the decision or withdraw it.",
+      "MANDATE_INCOMPATIBLE": "This mandate cannot be held together with one the person already holds (separation of duties).",
+      "MANDATE_SELF_PROPOSAL": "Nobody proposes a mandate for themselves.",
+      "MANDATE_SAME_PERSON": "A second holder decides the act: neither the proposer nor the person it concerns.",
+      "MANDATE_NOT_PROPOSER": "Only the proposer can withdraw the act.",
+      "MANDATE_ACT_DECIDED": "The act has already been decided.",
+      "MANDATE_APPROVER_WITHOUT_MANDATE": "Approving a mandate act requires holding a mandate.",
+      "NOT_A_MANDATE": "This role is not a mandate: grant and revoke it directly."
     },
     "network": "The server is not responding: check your connection and try again.",
     "sessionExpired": "Your session has expired: please sign in again.",

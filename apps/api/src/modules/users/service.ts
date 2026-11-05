@@ -35,7 +35,7 @@ import * as meRepo from "../me/repository.js";
 import {
   resolveOrgReadScope, canReadOrgTarget, HR_MANDATED_ROLES, haPerimetroTenantMascherato,
 } from "../../lib/scope/resolver.js";
-import { puoConcedereRuoli } from "../../lib/scope/mandati.js";
+import { MANDATE_ROLES, puoConcedereRuoli } from "../../lib/scope/mandati.js";
 import { masksSensitiveClass, masksTopOfChainPay, maskFields } from "../../lib/scope/mask.js";
 import { chainLevelOf } from "../../lib/scope/org.js";
 import { isPlatform } from "../../lib/actor.js";
@@ -425,6 +425,15 @@ export const usersService = {
       grantTenantId = actor.tenantId;
     }
 
+    // ADR-0050 D4 (mig 000475): un mandato forte non si concede con un gesto solo. Si propone
+    // un atto (POST /v1/mandate-acts) e lo decide un secondo titolare di mandato.
+    if (MANDATE_ROLES.has(roleCode)) {
+      throw new ConflictError(
+        `Role ${roleCode} is a mandate: propose a mandate act (POST /v1/mandate-acts) for a second holder to approve`,
+        "MANDATE_REQUIRES_ACT",
+      );
+    }
+
     const dup = await repo.findActiveGrant(pool, id, role.id, grantTenantId);
     if (dup) {
       throw new ConflictError(
@@ -469,6 +478,13 @@ export const usersService = {
       if (grant.tenantId !== actor.tenantId) {
         throw new NotFoundError("RoleGrant");
       }
+    }
+    // ADR-0050 D4: anche la revoca di un mandato è un atto, deciso da un secondo titolare.
+    if (MANDATE_ROLES.has(grant.roleCode as RoleCode)) {
+      throw new ConflictError(
+        `Role ${grant.roleCode} is a mandate: propose a REVOKE act (POST /v1/mandate-acts) for a second holder to approve`,
+        "MANDATE_REQUIRES_ACT",
+      );
     }
     await repo.revokeRoleGrant(pool, grantId);
   },

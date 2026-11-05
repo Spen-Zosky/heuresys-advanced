@@ -289,7 +289,34 @@
         "readOnly": "You do not have permission to grant or revoke roles.",
         "error": "Operation failed.",
         "forbidden": "You do not have permission to grant or revoke roles.",
-        "duplicate": "This role is already granted."
+        "duplicate": "This role is already granted.",
+        "colReview": "Review",
+        "act": {
+          "toConfirm": "To be confirmed",
+          "hint": "This is a mandate: propose it with a reason and a review date; a second holder decides it from the Roles page.",
+          "proposeGrant": "Propose",
+          "proposeRevoke": "Propose revocation",
+          "proposeConfirm": "Propose confirmation",
+          "title": {
+            "GRANT": "Grant proposal: {{role}}",
+            "REVOKE": "Revocation proposal: {{role}}",
+            "CONFIRM": "Confirmation proposal: {{role}}"
+          },
+          "reason": "Reason",
+          "reasonHint": "At least ten characters: why the person must hold, or no longer hold, this mandate.",
+          "reviewBy": "Review by",
+          "submit": "Send the proposal",
+          "cancel": "Cancel",
+          "sent": "Proposal sent: a second mandate holder decides it from the Roles page.",
+          "pendingTitle": "Acts awaiting a decision",
+          "kind": {
+            "GRANT": "Grant",
+            "REVOKE": "Revocation",
+            "CONFIRM": "Confirmation"
+          },
+          "proposedBy": "proposed by {{who}} on {{when}}",
+          "withdraw": "Withdraw"
+        }
       }
     }
   },
@@ -583,7 +610,24 @@
     "accessDeniedDesc": "This matrix requires the PLATFORM_ADMIN role.",
     "headerCell": "permission \\ role",
     "granted": "granted",
-    "denied": "denied"
+    "denied": "denied",
+    "mandateActs": {
+      "title": "Mandate acts to decide",
+      "description": "Grants, revocations and confirmations of mandates proposed by another holder. A second holder decides them: never the proposer, never the person concerned.",
+      "empty": "No acts awaiting a decision.",
+      "colPerson": "Person",
+      "colAct": "Act",
+      "colRole": "Mandate",
+      "colReason": "Reason",
+      "colReview": "Review",
+      "colProposed": "Proposed by",
+      "approve": "Approve",
+      "reject": "Reject",
+      "rejectNote": "Reason for rejection",
+      "confirmReject": "Confirm rejection",
+      "cancel": "Cancel",
+      "notYours": "You cannot decide an act you proposed or that concerns you."
+    }
   },
   "dashboard": {
     "title": "Dashboard",

@@ -121,16 +121,22 @@ function etichetta(req: FastifyRequest, reply: FastifyReply): void {
  * `DURATA_MS`, fuori da qualunque richiesta.
  */
 export function registraOrigineDelDato(app: FastifyInstance): void {
-  let timer: NodeJS.Timeout | undefined;
+  // Nessun gancio della richiesta tocca il database: la classificazione si legge alla
+  // costruzione dell'app e poi ogni `DURATA_MS`, fuori da qualunque richiesta.
+  const carica = (): Promise<void> =>
+    classificazione().then(
+      () => undefined,
+      (err: unknown) => app.log.warn({ err }, "origine del dato: classificazione non letta"),
+    );
+  const primoCarico = carica();
+  const timer = setInterval(() => void carica(), DURATA_MS);
+  timer.unref();
+  // L'app è pronta quando la prima lettura è finita (riuscita o no): la prima risposta ha già l'origine.
   app.addHook("onReady", async () => {
-    await classificazione().catch((err: unknown) => app.log.warn({ err }, "origine del dato: classificazione non letta"));
-    timer = setInterval(() => {
-      void classificazione().catch((err: unknown) => app.log.warn({ err }, "origine del dato: rilettura non riuscita"));
-    }, DURATA_MS);
-    timer.unref();
+    await primoCarico;
   });
   app.addHook("onClose", async () => {
-    if (timer) clearInterval(timer);
+    clearInterval(timer);
   });
   app.addHook("onSend", (req, reply, payload, done) => {
     etichetta(req, reply);

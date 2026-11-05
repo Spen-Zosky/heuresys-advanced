@@ -990,7 +990,21 @@
     "rolesHint": "Ambito: tutti i ruoli oppure una selezione (almeno uno).",
     "empty": "Nessun tenant disponibile.",
     "accessDeniedTitle": "Accesso negato",
-    "accessDeniedDesc": "Servono i permessi mfa_policy per leggere le policy."
+    "accessDeniedDesc": "Servono i permessi mfa_policy per leggere le policy.",
+    "exemptions": {
+      "title": "Esenzioni dal secondo fattore",
+      "description": "Chi può entrare senza il secondo fattore, perché, chi l'ha deciso e fino a quando. Un'esenzione scaduta non apre più niente; chi porta un mandato non può averne.",
+      "empty": "Nessuna esenzione.",
+      "state": {
+        "ACTIVE": "Attiva",
+        "EXPIRED": "Scaduta",
+        "DISABLED": "Spenta"
+      },
+      "expires": "Scade il {{date}}",
+      "author": "decisa da {{name}}",
+      "noAuthor": "senza autore (di prima della regola)",
+      "disable": "Spegni"
+    }
   },
   "agentDev": {
     "title": "Console agente (DEV)",

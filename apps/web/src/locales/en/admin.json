@@ -990,7 +990,21 @@
     "rolesHint": "Scope: all roles or a selection (at least one).",
     "empty": "No tenants available.",
     "accessDeniedTitle": "Access denied",
-    "accessDeniedDesc": "mfa_policy permissions are required to read policies."
+    "accessDeniedDesc": "mfa_policy permissions are required to read policies.",
+    "exemptions": {
+      "title": "Second-factor exemptions",
+      "description": "Who may sign in without the second factor, why, who decided it and until when. An expired exemption no longer opens anything; mandate holders cannot have one.",
+      "empty": "No exemptions.",
+      "state": {
+        "ACTIVE": "Active",
+        "EXPIRED": "Expired",
+        "DISABLED": "Disabled"
+      },
+      "expires": "Expires {{date}}",
+      "author": "decided by {{name}}",
+      "noAuthor": "no author (predates the rule)",
+      "disable": "Disable"
+    }
   },
   "agentDev": {
     "title": "Agent console (DEV)",

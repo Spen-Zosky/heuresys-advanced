@@ -46,3 +46,37 @@ export const UpsertMfaPolicyBodySchema = z.object({
 export type UpsertMfaPolicyBody = z.infer<typeof UpsertMfaPolicyBodySchema>;
 
 export const UpsertMfaPolicyResponseSchema = MfaPolicySchema;
+
+/* --- ADR-0050 D3, parte visibile (S-14): le esenzioni dal secondo fattore -------------- */
+/* Un'esenzione ha un autore e una scadenza (mig. 000474). La pagina le mostra tutte, con
+   lo stato che ne deriva, e permette di spegnerle: chiudere una porta non chiede la firma
+   di nessuno. Accenderle o rinnovarle resta un atto con autore (provisioning, D3). */
+
+export const MfaExemptionStateSchema = z.enum(["ACTIVE", "EXPIRED", "DISABLED"]);
+export type MfaExemptionState = z.infer<typeof MfaExemptionStateSchema>;
+
+export const MfaExemptionSchema = z.object({
+  exemptionId: z.uuid(),
+  tenantId: z.uuid(),
+  userId: z.uuid(),
+  userEmail: z.string(),
+  userDisplayName: z.string().nullable(),
+  userType: z.string(),
+  reason: z.string(),
+  state: MfaExemptionStateSchema,
+  expiresAt: z.iso.datetime().nullable(),
+  createdAt: z.iso.datetime(),
+  /** Chi l'ha accesa o rinnovata; null sulle righe di prima di D3. */
+  authorDisplayName: z.string().nullable(),
+  updatedAt: z.iso.datetime(),
+});
+export type MfaExemption = z.infer<typeof MfaExemptionSchema>;
+
+export const ListMfaExemptionsResponseSchema = z.object({
+  items: z.array(MfaExemptionSchema),
+  total: z.number().int().min(0),
+});
+export type ListMfaExemptionsResponse = z.infer<typeof ListMfaExemptionsResponseSchema>;
+
+export const MfaExemptionIdParamsSchema = z.object({ exemptionId: z.uuid() });
+export type MfaExemptionIdParams = z.infer<typeof MfaExemptionIdParamsSchema>;

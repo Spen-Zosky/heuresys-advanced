@@ -483,11 +483,16 @@ async function main(): Promise<void> {
         // ADR-0050 D3 (mig 000474): l'esenzione ha un autore e scade entro 30 giorni. Si rinnova
         // quando manca, è spenta, non ha autore o scade entro RINNOVO_GIORNI: così due corse di fila non
         // cambiano niente, e la CI, che gira ogni giorno, la tiene viva.
+        // Fuori dal collaudo (D-02) le utenze sono accese solo per un giro dichiarato, e
+        // `sospendi-collaudo --riattiva` dà all'esenzione un giorno: qui non si allunga. Si rinnova
+        // solo se manca, è spenta, non ha autore o è già scaduta, e di nuovo per un giorno.
+        const sogliaGiorni = ambienteDiCollaudo ? RINNOVO_GIORNI : 0;
+        const durataGiorni = ambienteDiCollaudo ? 30 : 1;
         const exemption = await db.query(
           `SELECT 1 FROM sys.sys_auth_mfa_exemptions WHERE auth_mfa_exemption_user_id = $1
              AND auth_mfa_exemption_enabled AND created_by IS NOT NULL
              AND auth_mfa_exemption_expires_at > now() + make_interval(days => $2)`,
-          [userId, RINNOVO_GIORNI]);
+          [userId, sogliaGiorni]);
         if (exemption.rowCount === 0) {
           stats.esenzioni++; touched = true;
           // il trigger della 000118 RI-VERIFICA qui che l'utente sia SERVICE, e quello della
@@ -498,13 +503,13 @@ async function main(): Promise<void> {
               `INSERT INTO sys.sys_auth_mfa_exemptions
                  (auth_mfa_exemption_user_id, auth_mfa_exemption_reason,
                   auth_mfa_exemption_expires_at, created_by)
-               VALUES ($1, $2, now() + interval '30 days', $3)
+               VALUES ($1, $2, now() + make_interval(days => $4), $3)
                ON CONFLICT (auth_mfa_exemption_user_id)
                DO UPDATE SET auth_mfa_exemption_enabled = true,
                              auth_mfa_exemption_reason = EXCLUDED.auth_mfa_exemption_reason,
                              auth_mfa_exemption_expires_at = EXCLUDED.auth_mfa_exemption_expires_at,
                              created_by = EXCLUDED.created_by`,
-              [userId, EXEMPTION_REASON, autore]);
+              [userId, EXEMPTION_REASON, autore, durataGiorni]);
           }
         }
 

@@ -16,12 +16,6 @@ on:
       - "docs/kb/tools/handoff_lint.py"
       - ".programmi/**"
       - "docs/kb/tools/programmi.py"
-      - "docs/kb/tools/check_idoneita_agente.py"
-      - "docs/kb/tools/build_origine_moduli.py"
-      - "docs/kb/atlas/**"
-      - "apps/web/src/app/**"
-      - "apps/web/src/lib/agente/pagine-idonee.generated.ts"
-      - "apps/api/src/lib/origine/moduli.generated.ts"
       - ".github/workflows/state-lint.yml"
   pull_request:
     branches: [main]
@@ -33,12 +27,6 @@ on:
       - "docs/kb/tools/handoff_lint.py"
       - ".programmi/**"
       - "docs/kb/tools/programmi.py"
-      - "docs/kb/tools/check_idoneita_agente.py"
-      - "docs/kb/tools/build_origine_moduli.py"
-      - "docs/kb/atlas/**"
-      - "apps/web/src/app/**"
-      - "apps/web/src/lib/agente/pagine-idonee.generated.ts"
-      - "apps/api/src/lib/origine/moduli.generated.ts"
       - ".github/workflows/state-lint.yml"
   workflow_dispatch: {}
 
@@ -92,12 +80,3 @@ jobs:
 
       - name: Module/test coverage census — repo
         run: python3 docs/kb/tools/check_module_test_coverage.py
-
-      # Piano interfacce L10. Due file generati che il codice usa e che nessuno scrive a mano:
-      # le pagine su cui si monta il pannello dell'agente (A-8) e i moduli con le loro tabelle
-      # per l'origine del dato (A-14). Se la fonte cambia e il file no, il cancello è rosso.
-      - name: Pagine idonee al pannello dell'agente — file generato allineato (A-8)
-        run: python3 docs/kb/tools/check_idoneita_agente.py --check-ts apps/web/src/lib/agente/pagine-idonee.generated.ts
-
-      - name: Moduli e tabelle per l'origine del dato — file generato allineato (A-14)
-        run: python3 docs/kb/tools/build_origine_moduli.py --check

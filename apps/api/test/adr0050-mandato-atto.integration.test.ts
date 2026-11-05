@@ -345,6 +345,75 @@ describe("ADR-0050 D4 e D7 — il mandato come atto, la separazione dei compiti"
     }
   });
 
+  it("D4 nel database: un atto sopravvive alla cancellazione di chiunque vi compaia", async () => {
+    // Banco del 2026-11-05: con IS DISTINCT FROM nel CHECK delle persone quattro di questi sei
+    // casi bloccavano la cancellazione. L'atto è storia di governo e resta, con il riferimento a NULL.
+    const casi: Array<{ nome: string; approvato: boolean; ordine: Array<"soggetto" | "proponente" | "decisore"> }> = [
+      { nome: "proposta aperta, cade il soggetto", approvato: false, ordine: ["soggetto"] },
+      { nome: "proposta aperta, cade il proponente", approvato: false, ordine: ["proponente"] },
+      { nome: "approvato, cade il decisore poi il proponente", approvato: true, ordine: ["decisore", "proponente"] },
+      { nome: "approvato, cade il decisore poi il soggetto", approvato: true, ordine: ["decisore", "soggetto"] },
+      { nome: "approvato, cade il soggetto", approvato: true, ordine: ["soggetto"] },
+      { nome: "approvato, cadono tutti e tre", approvato: true, ordine: ["proponente", "soggetto", "decisore"] },
+    ];
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const tenant = (await client.query<{ t: string }>(`SELECT user_tenant_id AS t FROM sys.sys_users WHERE user_id = $1`, [targetId])).rows[0]!.t;
+      const ruolo = async (c: string) =>
+        (await client.query<{ id: string }>(`SELECT auth_role_id AS id FROM sys.sys_auth_roles WHERE auth_role_code = $1`, [c])).rows[0]!.id;
+      const hrms = await ruolo("HRMS_MANAGER");
+      const tenantAdmin = await ruolo("TENANT_ADMIN");
+      const esiti: Record<string, string> = {};
+      for (const [i, caso] of casi.entries()) {
+        await client.query("SAVEPOINT caso");
+        try {
+          const persona = async (chi: string) =>
+            (await client.query<{ id: string }>(
+              `INSERT INTO sys.sys_users (user_tenant_id, user_email, user_display_name, user_first_name, user_last_name, user_status)
+               VALUES ($1, $2, $3, 'Prova', $4, 'ACTIVE') RETURNING user_id AS id`,
+              [tenant, `atto.${chi}.${i}@cancellazione.invalid`, `Prova ${chi} ${i}`, chi])).rows[0]!.id;
+          const ids = { soggetto: await persona("soggetto"), proponente: await persona("proponente"), decisore: await persona("decisore") };
+          await client.query(
+            `INSERT INTO sys.sys_user_auth_roles (user_auth_role_user_id, user_auth_role_role_id, user_auth_role_tenant_id)
+             VALUES ($1, $2, $3)`, [ids.decisore, tenantAdmin, tenant]);
+          const atto = (await client.query<{ id: string }>(
+            `INSERT INTO sys.sys_mandate_acts (mandate_act_kind, mandate_act_user_id, mandate_act_role_id, mandate_act_tenant_id,
+               mandate_act_reason, mandate_act_review_by, mandate_act_proposed_by)
+             VALUES ('GRANT', $1, $2, $3, 'prova di cancellazione', CURRENT_DATE + 30, $4) RETURNING mandate_act_id AS id`,
+            [ids.soggetto, hrms, tenant, ids.proponente])).rows[0]!.id;
+          if (caso.approvato) {
+            await client.query(
+              `UPDATE sys.sys_mandate_acts SET mandate_act_status = 'APPROVED', mandate_act_decided_by = $2, mandate_act_decided_at = now()
+                WHERE mandate_act_id = $1`, [atto, ids.decisore]);
+          }
+          for (const chi of caso.ordine) {
+            await client.query(`DELETE FROM sys.sys_users WHERE user_id = $1`, [ids[chi]]);
+          }
+          const resta = await client.query<{ status: string; u: string | null; p: string | null; d: string | null }>(
+            `SELECT mandate_act_status AS status, mandate_act_user_id AS u, mandate_act_proposed_by AS p, mandate_act_decided_by AS d
+               FROM sys.sys_mandate_acts WHERE mandate_act_id = $1`, [atto]);
+          const r = resta.rows[0];
+          const attesi = {
+            u: caso.ordine.includes("soggetto") ? null : ids.soggetto,
+            p: caso.ordine.includes("proponente") ? null : ids.proponente,
+            d: !caso.approvato || caso.ordine.includes("decisore") ? null : ids.decisore,
+          };
+          esiti[caso.nome] = r && r.status === (caso.approvato ? "APPROVED" : "PENDING")
+            && r.u === attesi.u && r.p === attesi.p && r.d === attesi.d ? "resta" : `diverso: ${JSON.stringify(r)}`;
+          await client.query("RELEASE SAVEPOINT caso");
+        } catch (e) {
+          await client.query("ROLLBACK TO SAVEPOINT caso");
+          esiti[caso.nome] = (e as Error).message;
+        }
+      }
+      expect(esiti).toEqual(Object.fromEntries(casi.map((c) => [c.nome, "resta"])));
+    } finally {
+      await client.query("ROLLBACK");
+      client.release();
+    }
+  });
+
   it("le sentinelle di D4 e D7 sono a zero", async () => {
     const inc = await pool.query(`SELECT * FROM sys.v_mandati_incompatibili`);
     expect(inc.rows).toEqual([]);

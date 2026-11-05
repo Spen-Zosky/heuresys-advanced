@@ -59,14 +59,35 @@ CREATE TABLE IF NOT EXISTS sys.sys_mandate_acts (
   CONSTRAINT sys_mandate_acts_status_ck CHECK (mandate_act_status IN ('PENDING', 'APPROVED', 'REJECTED', 'WITHDRAWN')),
   CONSTRAINT sys_mandate_acts_reason_ck CHECK (length(btrim(mandate_act_reason)) >= 10),
   CONSTRAINT sys_mandate_acts_review_ck CHECK (mandate_act_kind = 'REVOKE' OR mandate_act_review_by IS NOT NULL),
-  CONSTRAINT sys_mandate_acts_decided_ck CHECK ((mandate_act_status = 'PENDING') = (mandate_act_decided_at IS NULL)),
-  -- le tre persone distinte: chi decide non è chi propone (salvo il ritiro, che è del proponente)
-  -- né chi riceve; chi riceve non si propone una concessione o una riconferma
-  CONSTRAINT sys_mandate_acts_persone_ck CHECK (
-        (mandate_act_status = 'WITHDRAWN' OR mandate_act_decided_by IS DISTINCT FROM mandate_act_proposed_by)
-    AND (mandate_act_status = 'WITHDRAWN' OR mandate_act_decided_by IS DISTINCT FROM mandate_act_user_id)
-    AND (mandate_act_kind = 'REVOKE' OR mandate_act_proposed_by IS DISTINCT FROM mandate_act_user_id))
+  CONSTRAINT sys_mandate_acts_decided_ck CHECK ((mandate_act_status = 'PENDING') = (mandate_act_decided_at IS NULL))
 );
+
+-- Un database che ha visto la prima versione di questo file (CASCADE, NOT NULL: banco e CI del
+-- 2026-11-05) si riporta alla forma giusta; altrove non fa niente.
+ALTER TABLE sys.sys_mandate_acts ALTER COLUMN mandate_act_user_id DROP NOT NULL;
+DO $fk$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_constraint
+              WHERE conname = 'sys_mandate_acts_mandate_act_user_id_fkey' AND confdeltype <> 'n') THEN
+    ALTER TABLE sys.sys_mandate_acts DROP CONSTRAINT sys_mandate_acts_mandate_act_user_id_fkey;
+    ALTER TABLE sys.sys_mandate_acts ADD CONSTRAINT sys_mandate_acts_mandate_act_user_id_fkey
+      FOREIGN KEY (mandate_act_user_id) REFERENCES sys.sys_users(user_id) ON DELETE SET NULL;
+  END IF;
+END;
+$fk$;
+
+-- Fuori dal CREATE TABLE perché si riscrive a ogni applicazione: la prima versione usava
+-- IS DISTINCT FROM e bloccava la cancellazione di una persona (banco del 2026-11-05).
+ALTER TABLE sys.sys_mandate_acts DROP CONSTRAINT IF EXISTS sys_mandate_acts_persone_ck;
+-- le tre persone distinte: chi decide non è chi propone (salvo il ritiro, che è del proponente)
+-- né chi riceve; chi riceve non si propone una concessione o una riconferma.
+-- `<>` e non IS DISTINCT FROM: con un riferimento azzerato dalla cancellazione di una persona
+-- (ON DELETE SET NULL) il confronto è ignoto e il CHECK passa. Che le persone ci siano alla
+-- nascita e alla decisione lo pretende il trigger.
+ALTER TABLE sys.sys_mandate_acts ADD CONSTRAINT sys_mandate_acts_persone_ck CHECK (
+        (mandate_act_status = 'WITHDRAWN' OR mandate_act_decided_by <> mandate_act_proposed_by)
+  AND (mandate_act_status = 'WITHDRAWN' OR mandate_act_decided_by <> mandate_act_user_id)
+  AND (mandate_act_kind = 'REVOKE' OR mandate_act_proposed_by <> mandate_act_user_id));
 
 CREATE UNIQUE INDEX IF NOT EXISTS sys_mandate_acts_una_proposta_aperta_ux
   ON sys.sys_mandate_acts (mandate_act_user_id, mandate_act_role_id,

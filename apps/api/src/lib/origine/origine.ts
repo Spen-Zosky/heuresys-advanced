@@ -116,18 +116,24 @@ function etichetta(req: FastifyRequest, reply: FastifyReply): void {
 }
 
 /**
- * Da chiamare prima di registrare le rotte. L'onSend è sincrono (vedi idempotenza.ts): usa la
- * classificazione già letta e, se è vecchia, ne avvia la rilettura senza attenderla.
+ * Da chiamare prima di registrare le rotte. L'onSend è sincrono (vedi idempotenza.ts) e non tocca
+ * il database: usa la classificazione già letta. La rilettura la fa un timer, una volta ogni
+ * `DURATA_MS`, fuori da qualunque richiesta.
  */
 export function registraOrigineDelDato(app: FastifyInstance): void {
+  let timer: NodeJS.Timeout | undefined;
   app.addHook("onReady", async () => {
     await classificazione().catch((err: unknown) => app.log.warn({ err }, "origine del dato: classificazione non letta"));
+    timer = setInterval(() => {
+      void classificazione().catch((err: unknown) => app.log.warn({ err }, "origine del dato: rilettura non riuscita"));
+    }, DURATA_MS);
+    timer.unref();
+  });
+  app.addHook("onClose", async () => {
+    if (timer) clearInterval(timer);
   });
   app.addHook("onSend", (req, reply, payload, done) => {
     etichetta(req, reply);
-    if (corrente && Date.now() - corrente.lettaIl.getTime() >= DURATA_MS) {
-      void classificazione().catch(() => undefined);
-    }
     done(null, payload);
   });
 }
@@ -136,7 +142,11 @@ export function registraOrigineDelDato(app: FastifyInstance): void {
 export function registraRottaDelleOrigini(app: FastifyInstance): void {
   app.withTypeProvider<ZodTypeProvider>().get(
     "/v1/meta/data-origins",
-    { schema: { querystring: DataOriginsQuerySchema, response: { 200: DataOriginsResponseSchema } } },
+    {
+      schema: { querystring: DataOriginsQuerySchema, response: { 200: DataOriginsResponseSchema } },
+      // Legge al più una volta ogni dieci minuti (cache), ma la rotta resta limitata come le altre letture di meta.
+      config: { rateLimit: { max: 120, timeWindow: "1 minute" } },
+    },
     async (req) => {
       if (!req.user || req.user.enrollmentOnly) throw new UnauthorizedError("Authentication required");
       const c = await classificazione();

@@ -155,6 +155,9 @@ const DISALLINEO_REASON =
   "non verifica contro la password derivata dalla chiave di collaudo di questa macchina: la " +
   "credenziale era nata da un'altra chiave (misurato in CI, corsa 36052896981: login 401 su " +
   "cinque identita' create il 19/09 fra le 04:44 e le 05:04).";
+const ADR0050_REASON =
+  "ADR-0050 D2 (2026-11-05): chi porta un mandato forte non e' esentabile dal secondo fattore; " +
+  "l'identita' di collaudo passa al fattore 'derived-access' come platform-test-admin@.";
 const EXEMPTION_REASON =
   "collaudo-access (#169 F2, direttiva Enzo 2026-08-25): utenza di collaudo SERVICE, " +
   "verifiche funzionali e frontend senza il rito di login delle persone reali";
@@ -222,7 +225,7 @@ async function main(): Promise<void> {
 
     const stats = {
       utenti: 0, ruoli: 0, identita: 0, credenziali: 0, iscrizioni: 0, esenzioni: 0,
-      riallineate: 0, disallineate: 0, fattoriRimossi: 0, fattoriCreatiMfa: 0, invariati: 0,
+      riallineate: 0, disallineate: 0, fattoriRimossi: 0, fattoriCreatiMfa: 0, esenzioniSpente: 0, invariati: 0,
     };
     // #258 — solo per le identita' mfaExempt:false, e solo se l'ambiente e' di collaudo:
     // il segreto (nuovo o gia' esistente) va depositato dove Playwright lo legge.
@@ -488,7 +491,27 @@ async function main(): Promise<void> {
           `SELECT 1 FROM sys.sys_auth_mfa_exemptions WHERE auth_mfa_exemption_user_id = $1
              AND auth_mfa_exemption_enabled`, [userId]);
         if ((giaEsente.rowCount ?? 0) > 0) {
-          fail(`${c.email} e' dichiarata mfaExempt:false ma risulta ESENTE dal secondo fattore: fermati e guarda`);
+          // ADR-0050 D2 (migrazione 000473): le identità con un mandato forte erano esenti fino
+          // al 2026-11-05 e da lì non lo sono più. Per loro l'esenzione trovata è lo stato
+          // vecchio, dichiarato, e lo stato a cui si porta è «spenta»: si spegne (mai una
+          // cancellazione) e si scrive nel giornale. Per ogni altra identità resta un fatto da
+          // guardare, come prima.
+          const mandato = await db.query(
+            `SELECT 1 FROM sys.f_ruoli_mandato() AS m(codice) WHERE m.codice = $1`, [c.roleCode]);
+          if ((mandato.rowCount ?? 0) === 0) {
+            fail(`${c.email} e' dichiarata mfaExempt:false ma risulta ESENTE dal secondo fattore: fermati e guarda`);
+          }
+          stats.esenzioniSpente++; touched = true;
+          if (!DRY) {
+            await db.query(
+              `INSERT INTO staging.collaudo_riallineo_undo (undo_email, undo_specie, undo_valore, undo_ragione)
+               VALUES ($1, 'esenzione-mfa', 'enabled=true', $2)`,
+              [c.email, ADR0050_REASON]);
+            await db.query(
+              `UPDATE sys.sys_auth_mfa_exemptions SET auth_mfa_exemption_enabled = false
+                WHERE auth_mfa_exemption_user_id = $1 AND auth_mfa_exemption_enabled`,
+              [userId]);
+          }
         }
 
         const fac = await db.query<{ n: string; secret: string | null }>(
@@ -569,6 +592,7 @@ ${DRY ? "DRY-RUN (nessuna scrittura)" : "ESEGUITO"}
   di cui DISALLINEATE misurate .. ${stats.disallineate}   [D11-0: l'hash non verifica contro la password derivata]
   fattori MFA rimossi ........... ${stats.fattoriRimossi}   [un segreto di troppo su un'utenza esente]
   fattori MFA creati (#258) ..... ${stats.fattoriCreatiMfa}   [identita' non esente: cammina l'MFA vera]
+  esenzioni spente (ADR-0050) ... ${stats.esenzioniSpente}   [mandato forte: niente esenzione, fattore vero]
   gia' a posto (invariati) ...... ${stats.invariati}
   rollback dichiarato ........... pnpm db:provision-collaudo --undo  (elenco esplicito, mai un jolly)
 `);

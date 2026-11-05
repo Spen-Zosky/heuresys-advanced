@@ -720,6 +720,7 @@ export async function findMfaPolicyForTenant(
  * headless service account (Agent SDK, PLATFORM_ADMIN) bypass the mandatory-MFA
  * requirement. Invariant I7: the exemption is an auth-only table, never a flag on
  * sys_users. Empty table -> returns false for everyone (login behaviour unchanged).
+ * ADR-0050 D3 (mig 000474): un'esenzione scaduta vale come assente.
  */
 export async function isUserMfaExempt(
   db: DbConnector,
@@ -730,6 +731,7 @@ export async function isUserMfaExempt(
         SELECT 1 FROM sys.sys_auth_mfa_exemptions
          WHERE auth_mfa_exemption_user_id = $1
            AND auth_mfa_exemption_enabled = true
+           AND auth_mfa_exemption_expires_at > now()
       ) AS exempt`,
     [userId],
   );

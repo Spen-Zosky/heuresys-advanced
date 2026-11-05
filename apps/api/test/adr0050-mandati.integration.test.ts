@@ -8,6 +8,9 @@
  *     un'esenzione attiva non si concede.
  *   · D2, login: chi porta un mandato e non ha un fattore riceve la sessione di sola iscrizione,
  *     anche dove la politica del tenant non lo chiederebbe.
+ *   · D3 (migrazione 000474): un'esenzione accesa ha un autore, una persona diversa
+ *     dall'esentato, e una scadenza entro 30 giorni; scaduta, vale come assente e la
+ *     sentinella sys.v_esenzione_mfa_scaduta_o_senza_autore la segnala.
  *
  * Soggetti: due utenze usa-e-getta create qui (una di servizio, iscritta all'elenco
  * dell'esenzione; una persona con password), cancellate alla fine.
@@ -17,6 +20,7 @@ import argon2 from "argon2";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool } from "../src/db/client.js";
 import { MANDATE_ROLES } from "../src/lib/scope/mandati.js";
+import { isUserMfaExempt } from "../src/modules/auth/repository.js";
 import { senzaCacheDiSessione } from "./helpers/session-cache.js";
 
 // Esercita il flusso di autenticazione: i login sono veri, mai presi dalla copia di sessione.
@@ -55,7 +59,7 @@ async function creaUtenza(tenantId: string, email: string, tipo: "SERVICE" | "ST
   return userId;
 }
 
-describe("ADR-0050 D1 e D2 — mandati senza esenzioni", () => {
+describe("ADR-0050 D1, D2 e D3 — mandati senza esenzioni, esenzioni con autore e scadenza", () => {
   let app: TestApp;
   let tenantId: string;
   let svcId: string;
@@ -100,9 +104,10 @@ describe("ADR-0050 D1 e D2 — mandati senza esenzioni", () => {
       );
       await expect(
         client.query(
-          `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled)
-           VALUES ($1, 'deve essere rifiutata', true)`,
-          [svcId],
+          `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled,
+                                                    auth_mfa_exemption_expires_at, created_by)
+           VALUES ($1, 'deve essere rifiutata', true, now() + interval '1 day', $2)`,
+          [svcId, personaId],
         ),
       ).rejects.toThrow(/ADR-0050 D2/);
     } finally {
@@ -116,9 +121,10 @@ describe("ADR-0050 D1 e D2 — mandati senza esenzioni", () => {
     try {
       await client.query("BEGIN");
       await client.query(
-        `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled)
-         VALUES ($1, 'esenzione di prova', true)`,
-        [svcId],
+        `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled,
+                                                  auth_mfa_exemption_expires_at, created_by)
+         VALUES ($1, 'esenzione di prova', true, now() + interval '1 day', $2)`,
+        [svcId, personaId],
       );
       await client.query("SAVEPOINT prima");
       await expect(
@@ -172,6 +178,70 @@ describe("ADR-0050 D1 e D2 — mandati senza esenzioni", () => {
       expect((con.json() as { status: string }).status).toBe("mfa_enrollment_required");
     } finally {
       await pool.query(`DELETE FROM sys.sys_user_auth_roles WHERE user_auth_role_id = $1`, [concessione.rows[0]!.id]);
+    }
+  });
+  it("D3: un'esenzione accesa pretende un autore che sia una persona e una scadenza entro 30 giorni", async () => {
+    const client = await pool.connect();
+    const prova = async (scadenza: string, autore: string | null) => {
+      await client.query("SAVEPOINT p");
+      try {
+        await client.query(
+          `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled,
+                                                    auth_mfa_exemption_expires_at, created_by)
+           VALUES ($1, 'prova D3', true, ${scadenza}, $2)`,
+          [svcId, autore],
+        );
+        await client.query("ROLLBACK TO SAVEPOINT p");
+        return "accettata";
+      } catch (e) {
+        await client.query("ROLLBACK TO SAVEPOINT p");
+        return String((e as Error).message);
+      }
+    };
+    try {
+      await client.query("BEGIN");
+      expect(await prova("now() + interval '1 day'", null)).toMatch(/ADR-0050 D3/);
+      expect(await prova("now() + interval '1 day'", svcId)).toMatch(/ADR-0050 D3/);
+      expect(await prova("now() + interval '31 days'", personaId)).toMatch(/ADR-0050 D3/);
+      expect(await prova("now() - interval '1 minute'", personaId)).toMatch(/ADR-0050 D3/);
+      expect(await prova("now() + interval '30 days'", personaId)).toBe("accettata");
+      // Una spenta non chiede niente: chiudere una porta non chiede la firma di nessuno.
+      await expect(
+        client.query(
+          `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled,
+                                                    auth_mfa_exemption_expires_at)
+           VALUES ($1, 'prova D3 spenta', false, now() - interval '1 day')`,
+          [svcId],
+        ),
+      ).resolves.toBeTruthy();
+    } finally {
+      await client.query("ROLLBACK");
+      client.release();
+    }
+  });
+
+  it("D3: un'esenzione scaduta vale come assente e la sentinella la segnala", async () => {
+    // Fuori da una transazione: la scadenza deve passare davvero, e now() dentro una
+    // transazione resta fermo al suo inizio.
+    await pool.query(
+      `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled,
+                                                auth_mfa_exemption_expires_at, created_by)
+       VALUES ($1, 'prova D3 scadenza', true, clock_timestamp() + interval '2 seconds', $2)`,
+      [svcId, personaId],
+    );
+    try {
+      expect(await isUserMfaExempt(pool, svcId)).toBe(true);
+      const sentinella = () =>
+        pool.query<{ dettaglio: string }>(
+          `SELECT dettaglio FROM sys.v_esenzione_mfa_scaduta_o_senza_autore WHERE utente = $1`, [svcId]);
+      expect((await sentinella()).rows).toHaveLength(0);
+      await pool.query(`SELECT pg_sleep(2.5)`);
+      expect(await isUserMfaExempt(pool, svcId)).toBe(false);
+      expect((await sentinella()).rows.map((r) => r.dettaglio)).toEqual(["scaduta"]);
+    } finally {
+      await pool.query(
+        `UPDATE sys.sys_auth_mfa_exemptions SET auth_mfa_exemption_enabled = false WHERE auth_mfa_exemption_user_id = $1`,
+        [svcId]);
     }
   });
 });

@@ -340,6 +340,14 @@ Raccolte in un posto solo, per non spargerle. Ognuna ha la raccomandazione.
 | 11 | Gateway in servizio e OpenAPI accesa | dopo A-1, A-2, A-3 | A-9, A-11 |
 | 12 | Funzioni nuove di prodotto (presenze, paghe, inserimento, esecuzione dei processi) e scelte commerciali (connettori, firma, benchmark) | una alla volta, con costo e rischio scritti prima | G-13, G-15, G-21, G-24, M-5, M-11, M-15 |
 
+### 8.1 Esiti delle decisioni
+
+Enzo risponde una decisione alla volta, nel thread «Decidere S-17, S-20, S-2, P-5, P-6 e privacy@». Ogni esito si attua nel lotto della sua voce.
+
+| voce | data e ora (Roma) | scelta di Enzo | che cosa si attua |
+|---|---|---|---|
+| S-17 | 2026-11-05 16:27 | la Direttrice HR (`HRMS_MANAGER`) disattiva una persona, il People Manager no | `canActOnTarget` ammette `delete` anche per `HRMS_MANAGER` del proprio tenant; una migrazione toglie `user:delete` a `PEOPLE_MANAGER`; prova sul banco. La cancellazione fisica resta limitata a chi non ha storia (ADR-0037). Manca ancora una via di riattivazione: oggi tornare indietro richiede un intervento tecnico. |
+
 ## 9. Registro delle scoperte fuori ciclo
 
 Ciò che emerge strada facendo va qui e si propone una volta sola a Enzo come «fuori da questo ciclo: lo vuoi nel prossimo?».

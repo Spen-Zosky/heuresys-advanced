@@ -3,7 +3,8 @@
  *
  * Hybrid auth (the only identity channel is a user JWT cookie, PLATFORM_MAP §1):
  *  - user-scoped ops  → the webapp forwards the logged-in user's cookies;
- *  - catalogue authoring → the dedicated service-user session (PLATFORM_ADMIN).
+ *  - catalogue authoring → la persona con PLATFORM_ADMIN, come ogni altra scrittura
+ *    (ADR-0050 D6: niente utenza di servizio con mandato).
  * Writes carry the CSRF double-submit (`hrx_csrf` cookie + `x-csrf-token` header).
  * Tenant is implicit in the JWT — never sent as a header (I5).
  *

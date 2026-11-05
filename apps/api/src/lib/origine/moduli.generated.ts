@@ -31,6 +31,15 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_advisor_suggestions"
     ]
   },
+  "agent-tokens": {
+    "prefissi": [
+      "/v1/auth/agent-tokens"
+    ],
+    "tabelle": [
+      "sys_auth_refresh_tokens",
+      "sys_tenancies"
+    ]
+  },
   "analytics": {
     "prefissi": [
       "/v1/analytics"
@@ -59,6 +68,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_approval_requests",
       "sys_approval_steps",
       "sys_inbox_notifications",
+      "sys_tenant_process_steps",
+      "sys_tenant_processes",
       "sys_users"
     ]
   },
@@ -119,7 +130,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     "tabelle": [
       "sys_blueprint_activations",
       "sys_blueprint_variant_versions",
-      "sys_blueprint_variants"
+      "sys_blueprint_variants",
+      "sys_tenancies"
     ]
   },
   "blueprint-families": {
@@ -270,6 +282,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_compensation_bands",
       "sys_compensation_recommendations",
       "sys_objective_reward_rules",
+      "sys_organization_units",
       "sys_payout_curves",
       "sys_payroll_handoff_records",
       "sys_position_compensation_profiles",
@@ -290,7 +303,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_content_categories",
       "sys_content_documents",
       "sys_content_media",
-      "sys_content_versions"
+      "sys_content_versions",
+      "sys_users"
     ]
   },
   "content-blueprint-links": {
@@ -625,6 +639,18 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_learning_paths"
     ]
   },
+  "mandate-acts": {
+    "prefissi": [
+      "/v1/mandate-acts"
+    ],
+    "tabelle": [
+      "sys_auth_roles",
+      "sys_mandate_acts",
+      "sys_user_auth_roles",
+      "sys_user_position_assignments",
+      "sys_users"
+    ]
+  },
   "me": {
     "prefissi": [
       "/v1/me"
@@ -712,8 +738,10 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/mfa-policy"
     ],
     "tabelle": [
+      "sys_auth_mfa_exemptions",
       "sys_auth_mfa_policies",
-      "sys_tenancies"
+      "sys_tenancies",
+      "sys_users"
     ]
   },
   "notifications": {
@@ -1105,6 +1133,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_critical_positions",
       "sys_critical_role_coverage_status",
       "sys_employee_position_fit_scores",
+      "sys_positions",
       "sys_readiness_scores",
       "sys_succession_scores",
       "sys_talent_scores",
@@ -1134,6 +1163,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_blueprint_variant_versions",
       "sys_blueprint_variants",
       "sys_enterprise_size_bands",
+      "sys_tenancies",
       "sys_tenant_blueprint_process_decisions",
       "sys_tenant_blueprint_snapshots",
       "sys_tenant_blueprint_versions",

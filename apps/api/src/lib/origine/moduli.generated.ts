@@ -1379,13 +1379,5 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_visualization_graphs",
       "sys_visualization_styles"
     ]
-  },
-  "whistleblowing": {
-    "prefissi": [
-      "/v1/whistleblowing"
-    ],
-    "tabelle": [
-      "sys_whistleblowing_reports"
-    ]
   }
 };

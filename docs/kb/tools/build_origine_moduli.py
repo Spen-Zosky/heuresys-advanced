@@ -26,14 +26,23 @@ import yaml
 ATLAS = os.path.join("docs", "kb", "atlas", "atlas.yaml")
 USCITA = os.path.join("apps", "api", "src", "lib", "origine", "moduli.generated.ts")
 
+# Fuori, con la ragione. Le segnalazioni hanno l'isolamento assoluto (ADR-0036 §5, #99 F4):
+# nessun modulo fuori dalla custodia nomina le loro tabelle, nemmeno per descriverne
+# l'origine. Lo stesso confine delle letture dell'agente (A-13).
+MODULI_FUORI = {"whistleblowing"}
+TABELLE_FUORI_PREFISSO = "sys_whistleblowing"
+
 
 def genera() -> str:
     with io.open(ATLAS, encoding="utf-8") as f:
         atlante = yaml.safe_load(f)
     moduli = {}
     for nome, mod in sorted((atlante.get("api") or {}).items()):
+        if nome in MODULI_FUORI:
+            continue
         prefissi = sorted(p for p in (mod.get("prefixes") or []) if p.startswith("/v1/"))
         tabelle = sorted(t.split(".", 1)[1] for t in (mod.get("tables") or []) if t.startswith("sys."))
+        tabelle = [t for t in tabelle if not t.startswith(TABELLE_FUORI_PREFISSO)]
         if prefissi:
             moduli[nome] = {"prefissi": prefissi, "tabelle": tabelle}
     corpo = json.dumps(moduli, ensure_ascii=False, indent=2)

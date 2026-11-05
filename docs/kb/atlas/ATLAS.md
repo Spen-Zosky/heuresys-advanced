@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `7d04cc06` (2026-11-04T00:41:31+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `38bf0e68` (2026-11-05T05:01:18+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -8,7 +8,7 @@
 |---|---|
 | Moduli API | 114 |
 | Route API | 679 |
-| Pagine web | 131 |
+| Pagine web | 132 |
 | Schemi shared | 125 |
 | Tabelle DB | 386 (vuote: 69) |
 | Viste / matview | 79 / 0 |
@@ -22,12 +22,12 @@
 | activity-classifications | /v1/activity-classifications | 5 | 4 | 1 | 1 |
 | advisor | /v1/advisor | 2 | 1 | 1 | 1 |
 | analytics | /v1/analytics | 10 | 1 | 13 | 5 |
-| approvals | /v1/approvals | 5 | 3 | 4 | 4 |
+| approvals | /v1/approvals | 5 | 3 | 6 | 5 |
 | assessment-methods | /v1/assessment-methods | 1 | 1 | 1 | 1 |
 | assessment-results | /v1/assessment-results | 3 | 2 | 2 | 2 |
 | assessments | /v1/assessments | 4 | 3 | 2 | 2 |
 | auth | /v1/auth, /v1/auth/mfa | 31 | 3 | 16 | 7 |
-| blueprint-activations | /v1/blueprint-activations | 5 | 3 | 3 | 1 |
+| blueprint-activations | /v1/blueprint-activations | 5 | 3 | 4 | 1 |
 | blueprint-families | /v1/blueprint-families | 5 | 4 | 2 | 1 |
 | blueprint-overrides | /v1/blueprint-overrides | 4 | 3 | 3 | 1 |
 | blueprint-processes | /v1/blueprint-processes | 5 | 4 | 3 | 1 |
@@ -40,8 +40,8 @@
 | capability-maturity | /v1/capability | 3 | 2 | 8 | 2 |
 | career-path-steps | /v1/career-path-steps | 5 | 4 | 3 | 1 |
 | career-paths | /v1/career-paths | 5 | 4 | 2 | 2 |
-| compensation | /v1/compensation | 14 | 2 | 14 | 5 |
-| content | /v1/content | 20 | 5 | 4 | 5 |
+| compensation | /v1/compensation | 14 | 2 | 15 | 5 |
+| content | /v1/content | 20 | 5 | 5 | 5 |
 | content-blueprint-links | /v1/content-blueprint-links | 5 | 4 | 4 | 1 |
 | dashboard | /v1/dashboard | 4 | 1 | 25 | 4 |
 | data-classification | /v1/data-classification | 1 | 1 | 1 | 1 |
@@ -69,7 +69,7 @@
 | learning-modules | /v1/learning-modules | 5 | 4 | 1 | 1 |
 | learning-path-steps | /v1/learning-path-steps | 5 | 4 | 3 | 1 |
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
-| me | /v1/me | 73 | 32 | 64 | 44 |
+| me | /v1/me | 73 | 32 | 64 | 46 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 2 | 2 | 2 | 1 |
 | notifications | /v1/notifications | 2 | 2 | 2 | 0 |
@@ -110,9 +110,9 @@
 | successor-candidates | /v1/successor-candidates | 6 | 4 | 3 | 2 |
 | successor-readiness | /v1/successor-readiness | 3 | 2 | 2 | 2 |
 | surveys | /v1/surveys | 12 | 4 | 3 | 4 |
-| talent-review | /v1/talent-review | 6 | 1 | 7 | 2 |
+| talent-review | /v1/talent-review | 6 | 1 | 8 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
-| tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 14 | 1 |
+| tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 15 | 1 |
 | tenant-consolidation | /v1/consolidation-vocabulary, /v1/tenant-consolidations | 12 | 3 | 28 | 1 |
 | tenant-import-runs | /v1/tenant-import-runs | 5 | 2 | 15 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
@@ -137,7 +137,7 @@
 
 - **admin** (78): /admin/mfa-policy · /admin/roles · /analytics/attendance · /analytics/compensation · /analytics/kpi · /analytics/org-network · /analytics/overtime · /analytics/skills · /analytics/skills-by-category · /analytics/skills-graph · /analytics/skills-group-share · /analytics/workforce · /approvals · /approvals/[id] · /blueprints · /blueprints/[variantId] · /career-succession · /compensation-intelligence · /consolidation · /content · /content/[id] · /dashboard · /dashboard/[famiglia] · /dev/agent · /engagement · /engagement/[surveyId] · /gaps · /generated-origins · /goals · /insights · /insights/skill-gap · /insights/succession-readiness · /job-catalog · /kpis · /leads · /learning · /learning/training-initiatives · /okrs · /org-director · /org-director/advisor · /org-director/health · /org-director/vrio · /organization · /organization/org-chart · /performance · /positions · /positions/[positionId] · /positions/[positionId]/kpis · /positions/[positionId]/learning · /positions/[positionId]/skills · /process-owner · /processes · /projects · /projects/[id] · /provenance · /recruiting · /recruiting/applications/[id] · /recruiting/candidates · /recruiting/postings · /recruiting/requisitions · /seed-acquisition/runs · /skill-taxonomy · /skills · /system-health · /talent-review · /tenant-blueprints · /tenant-blueprints/[id] · /tenant-blueprints/[id]/versions/[n]/build · /tenant-blueprints/[id]/versions/[n]/diff · /tenants · /tenants/[tenantId] · /tenants/[tenantId]/enterprise-typing · /time-off · /users · /users/[userId] · /visualizations · /visualizations/[graphId] · /whistleblowing-console
 - **me** (27): /me · /me/analytics · /me/approvals · /me/career · /me/career/target · /me/certifications · /me/delegations · /me/documents · /me/gaps · /me/handbook · /me/handbook/[id] · /me/inbox · /me/kpis · /me/learning · /me/learning/catalogue · /me/matching · /me/org-chart · /me/performance · /me/positions · /me/profile · /me/security · /me/skills · /me/skills/self-assessment · /me/surveys · /me/surveys/[surveyId] · /me/team · /me/time-off
-- **public** (8): / · /app · /demo · /investors · /jobs · /login · /privacy · /whistleblowing
+- **public** (9): / · /accessibilita · /app · /demo · /investors · /jobs · /login · /privacy · /whistleblowing
 - **showcase** (18): /showcase · /showcase/charts · /showcase/dashboard-cards · /showcase/footer · /showcase/forms · /showcase/header · /showcase/icons · /showcase/landing-page · /showcase/login-page · /showcase/logo · /showcase/page-types · /showcase/palettes · /showcase/primary-initial-page · /showcase/shell · /showcase/sidebar · /showcase/system-health · /showcase/tables · /showcase/typography
 
 ## Tabelle DB vuote (feature senza dati — candidate brainstorming)

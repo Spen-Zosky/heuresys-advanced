@@ -12,6 +12,11 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { anIndustryCode } from "./helpers/industry.js";
+import { senzaCacheDiSessione } from "./helpers/session-cache.js";
+
+// Questo file muta i ruoli del soggetto (ADR-0050 D2, prova di cancellazione): sta fuori dalla
+// cache di sessioni, come chiede il cancello Z-251 F2.
+senzaCacheDiSessione();
 
 const PLATFORM_ADMIN = "platform-test-admin@collaudo.invalid";
 const TENANT_ADMIN = "governo@collaudo.invalid";

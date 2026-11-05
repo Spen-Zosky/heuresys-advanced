@@ -128,10 +128,13 @@ describe("A-10 — Idempotency-Key: chi riprova non duplica", () => {
     cookies.set(COOKIES.ACCESS, (g.json() as AgentTokenResponse).token);
     cookies.delete(COOKIES.REFRESH);
     const agente: Sessione = { cookies, csrf: s.csrf };
-    const ra = await chiama(agente, "POST", "/v1/me/certifications", corpo, { "idempotency-key": chiave });
+    // Un corpo diverso: la stessa certificazione due volte violerebbe la chiave naturale della
+    // tabella. Qui conta che la stessa chiave, per l'agente, apra una scrittura nuova.
+    const corpoAgente = { ...corpo, name: "Prova A-10 dell'agente" };
+    const ra = await chiama(agente, "POST", "/v1/me/certifications", corpoAgente, { "idempotency-key": chiave });
     expect(ra.statusCode, ra.body).toBe(201);
     expect(ra.headers["idempotent-replayed"]).toBeUndefined();
-    const ra2 = await chiama(agente, "POST", "/v1/me/certifications", corpo, { "idempotency-key": chiave });
+    const ra2 = await chiama(agente, "POST", "/v1/me/certifications", corpoAgente, { "idempotency-key": chiave });
     expect(ra2.headers["idempotent-replayed"]).toBe("true");
     expect(await quanteCertificazioni(s)).toBe(prima + 2);
     expect(await righeDellaChiave(chiave)).toBe(2);

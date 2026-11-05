@@ -25,7 +25,7 @@ export const ROTTE_SENZA_PERMESSO: Readonly<Record<string, string>> = {
   "GET /metrics":
     "metriche Prometheus: rispondono solo al loopback e con PROM_METRICS_ENABLED, nginx blocca /metrics dal pubblico",
   "GET /openapi.json":
-    "specifica dell'API: esiste solo con API_DOCS_ENABLED (spento in produzione), scelta scritta in app.ts",
+    "specifica dell'API (A-9): esiste solo con API_DOCS_ENABLED, e risponde solo a chi è autenticato",
   "GET /readyz":
     "sonda di prontezza: dice solo se il database risponde",
   "GET /v1/auth/me":
@@ -50,6 +50,8 @@ export const ROTTE_SENZA_PERMESSO: Readonly<Record<string, string>> = {
     "dati della propria sessione: richiede l'autenticazione e risponde solo sull'utente che chiama",
   "GET /v1/me/permissions":
     "dati della propria sessione: richiede l'autenticazione e risponde solo sull'utente che chiama",
+  "GET /v1/meta/operations":
+    "scoperta delle operazioni (A-9): esiste solo con API_DOCS_ENABLED, risponde solo a chi è autenticato e dice che cosa può fare lui",
   "GET /v1/public/job-postings":
     "vetrina pubblica delle offerte di lavoro pubblicate: per scelta, con limite di frequenza",
   "GET /v1/public/job-postings/:id":
@@ -137,7 +139,7 @@ export const ROTTE_SENZA_PERMESSO: Readonly<Record<string, string>> = {
 };
 
 /** Esistono solo con una configurazione (API_DOCS_ENABLED): non sono «ragioni orfane» se mancano. */
-export const SECONDO_CONFIGURAZIONE: ReadonlySet<string> = new Set(["GET /openapi.json"]);
+export const SECONDO_CONFIGURAZIONE: ReadonlySet<string> = new Set(["GET /openapi.json", "GET /v1/meta/operations"]);
 
 export interface GuardiaStats {
   /** «METODO url» di ogni rotta registrata senza un permesso nel preHandler. */

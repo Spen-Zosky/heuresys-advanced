@@ -20,10 +20,15 @@
  * di cinque minuti, così un tipo nuovo entra con la sua migrazione senza riavvio.
  */
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { SUPERFICIE_HEADER, leggiSuperficie, type Superficie } from "@heuresys/shared";
+import {
+  SUPERFICIE_HEADER,
+  leggiSuperficie,
+  type Superficie,
+} from "@heuresys/shared";
 
 import { pool } from "../../db/client.js";
 import { estraiValori } from "./estrai.js";
+import { registraScrittura } from "./scritture.js";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -49,7 +54,8 @@ let inCorso: Promise<Map<string, RottaDecisione>> | null = null;
 
 /** Chiave del catalogo: metodo e modello di rotta senza barra finale. */
 export function chiaveRotta(metodo: string, rotta: string): string {
-  const r = rotta.length > 1 && rotta.endsWith("/") ? rotta.slice(0, -1) : rotta;
+  const r =
+    rotta.length > 1 && rotta.endsWith("/") ? rotta.slice(0, -1) : rotta;
   return `${metodo.toUpperCase()} ${r}`;
 }
 
@@ -59,7 +65,14 @@ export function invalidaCatalogoValore(): void {
 }
 
 async function leggiCatalogo(): Promise<Map<string, RottaDecisione>> {
-  const r = await pool.query<{ metodo: string; rotta: string; codice: string; oggetto_tipo: string; oggetto_da: string; esito_da: string | null }>(
+  const r = await pool.query<{
+    metodo: string;
+    rotta: string;
+    codice: string;
+    oggetto_tipo: string;
+    oggetto_da: string;
+    esito_da: string | null;
+  }>(
     `SELECT r.metodo, r.rotta, r.codice, r.oggetto_tipo, r.oggetto_da, r.esito_da
        FROM audit.valore_rotte_decisione r
        JOIN audit.valore_tipi_decisione t ON t.codice = r.codice
@@ -78,7 +91,9 @@ async function leggiCatalogo(): Promise<Map<string, RottaDecisione>> {
 }
 
 /** Il catalogo, dalla cache se fresca. Un database senza la migrazione dà un catalogo vuoto. */
-export async function catalogoValore(req: FastifyRequest): Promise<Map<string, RottaDecisione>> {
+export async function catalogoValore(
+  req: FastifyRequest,
+): Promise<Map<string, RottaDecisione>> {
   if (cache && Date.now() - cache.letto < TTL_MS) return cache.mappa;
   if (!inCorso) {
     inCorso = leggiCatalogo()
@@ -87,7 +102,10 @@ export async function catalogoValore(req: FastifyRequest): Promise<Map<string, R
         return mappa;
       })
       .catch((err: unknown) => {
-        req.log.warn({ err }, "valore: catalogo delle decisioni non leggibile, registro sospeso per 5 minuti");
+        req.log.warn(
+          { err },
+          "valore: catalogo delle decisioni non leggibile, registro sospeso per 5 minuti",
+        );
         const vuota = new Map<string, RottaDecisione>();
         cache = { letto: Date.now(), mappa: vuota };
         return vuota;
@@ -119,43 +137,13 @@ function superficieDi(req: FastifyRequest): Superficie | null {
   return leggiSuperficie(req.headers[SUPERFICIE_HEADER]);
 }
 
-/**
- * L9, A-1 (migrazione 000477): ogni scrittura su /v1/* di chi è autenticato, con qualunque
- * esito, in `audit.registro_scritture`: chi (persona o agente), per conto di chi, che cosa,
- * quando, con quale risposta. È un registro diverso dalle decisioni qui sopra: quelle sono le
- * sole scritture del catalogo andate a buon fine, questo le tiene tutte.
- */
-async function registraScrittura(req: FastifyRequest, reply: FastifyReply): Promise<void> {
-  if (!SCRITTURE.has(req.method)) return;
-  const user = req.user;
-  if (!user) return;
-  const modello = req.routeOptions?.url;
-  if (!modello || !modello.startsWith("/v1/")) return;
-  const agente = user.agente;
-  await pool.query(
-    `INSERT INTO audit.registro_scritture
-       (registro_scrittura_tenant_id, registro_scrittura_attore_tipo, registro_scrittura_persona_user_id,
-        registro_scrittura_agente_codice, registro_scrittura_agente_compito, registro_scrittura_gettone_jti,
-        registro_scrittura_metodo, registro_scrittura_rotta, registro_scrittura_stato_http,
-        registro_scrittura_richiesta_id, registro_scrittura_dettaglio)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-    [
-      user.tenantId,
-      agente ? "agente" : "persona",
-      user.userId,
-      agente?.codice ?? null,
-      agente?.compito ?? null,
-      user.jti ?? null,
-      req.method,
-      chiaveRotta(req.method, modello).slice(req.method.length + 1),
-      reply.statusCode,
-      String(req.id),
-      req.dettaglioScrittura ? JSON.stringify(req.dettaglioScrittura) : null,
-    ],
-  );
-}
-
-async function registraUso(req: FastifyRequest, tenantId: string, userId: string, sup: Superficie, rotta: string): Promise<void> {
+async function registraUso(
+  req: FastifyRequest,
+  tenantId: string,
+  userId: string,
+  sup: Superficie,
+  rotta: string,
+): Promise<void> {
   const ora = inizioOra(new Date());
   const oraChiave = ora.toISOString();
   if (oraChiave !== oraMemoria || usiVisti.size > MAX_USI_IN_MEMORIA) {
@@ -172,13 +160,25 @@ async function registraUso(req: FastifyRequest, tenantId: string, userId: string
         valore_evento_richiesta_id, valore_evento_ora_uso)
      VALUES ($1, 'uso', $2, $3, $4, $5, $6, $7, $8, $9)
      ON CONFLICT DO NOTHING`,
-    [tenantId, userId, sup.tipo === "agente" ? "agente" : "persona", sup.tipo, sup.valore, req.method, rotta, String(req.id), ora],
+    [
+      tenantId,
+      userId,
+      sup.tipo === "agente" ? "agente" : "persona",
+      sup.tipo,
+      sup.valore,
+      req.method,
+      rotta,
+      String(req.id),
+      ora,
+    ],
   );
 }
 
 /** Il corpo della risposta, letto solo se la rotta ne prende l'oggetto o l'esito. */
 function leggiRisposta(req: FastifyRequest, voce: RottaDecisione): unknown {
-  const serve = voce.oggettoDa.startsWith("risposta:") || (voce.esitoDa?.startsWith("risposta:") ?? false);
+  const serve =
+    voce.oggettoDa.startsWith("risposta:") ||
+    (voce.esitoDa?.startsWith("risposta:") ?? false);
   if (!serve || req.valoreRispostaGrezza === undefined) return null;
   try {
     return JSON.parse(req.valoreRispostaGrezza) as unknown;
@@ -195,7 +195,11 @@ async function registraDecisioni(
   rotta: string,
   voce: RottaDecisione,
 ): Promise<void> {
-  const ctx = { params: req.params, corpo: req.body, risposta: leggiRisposta(req, voce) };
+  const ctx = {
+    params: req.params,
+    corpo: req.body,
+    risposta: leggiRisposta(req, voce),
+  };
   const oggetti = estraiValori(voce.oggettoDa, ctx);
   const esito = estraiValori(voce.esitoDa, ctx)[0] ?? null;
   // Senza oggetto la decisione si registra lo stesso: la vista la conta «senza traccia».
@@ -234,7 +238,10 @@ async function registraDecisioni(
   );
 }
 
-async function registra(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+async function registra(
+  req: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
   if (reply.statusCode < 200 || reply.statusCode >= 300) return;
   const user = req.user;
   if (!user || !user.tenantId) return;
@@ -248,15 +255,21 @@ async function registra(req: FastifyRequest, reply: FastifyReply): Promise<void>
     return;
   }
   if (!SCRITTURE.has(req.method)) return;
-  const voce = (await catalogoValore(req)).get(chiaveRotta(req.method, modello));
-  if (voce) await registraDecisioni(req, user.tenantId, user.userId, sup, rotta, voce);
+  const voce = (await catalogoValore(req)).get(
+    chiaveRotta(req.method, modello),
+  );
+  if (voce)
+    await registraDecisioni(req, user.tenantId, user.userId, sup, rotta, voce);
 }
 
 // Le scritture del registro ancora in volo, in catena. Usata solo in modo serializzato.
 let inVolo: Promise<void> = Promise.resolve();
 
 /** Aggancia il registro all'app. Va chiamata prima della registrazione delle rotte. */
-export function registraEventiDiValore(app: FastifyInstance, opzioni: { serializzato?: boolean } = {}): void {
+export function registraEventiDiValore(
+  app: FastifyInstance,
+  opzioni: { serializzato?: boolean } = {},
+): void {
   const serializzato = opzioni.serializzato === true;
   if (serializzato) {
     // Prima di toccare il database una richiesta aspetta le scritture del registro lasciate
@@ -273,7 +286,12 @@ export function registraEventiDiValore(app: FastifyInstance, opzioni: { serializ
   // mentre la risposta non è ancora partita, e Fastify la rimanda vuota (misurato in CI
   // sulla #157: 84 prove con «Unexpected end of JSON input», tutte su POST che rispondono 201).
   app.addHook("onSend", (req, reply, payload, done) => {
-    if (SCRITTURE.has(req.method) && reply.statusCode < 300 && typeof payload === "string" && req.user?.tenantId) {
+    if (
+      SCRITTURE.has(req.method) &&
+      reply.statusCode < 300 &&
+      typeof payload === "string" &&
+      req.user?.tenantId
+    ) {
       req.valoreRispostaGrezza = payload;
     }
     done(null, payload);
@@ -282,10 +300,16 @@ export function registraEventiDiValore(app: FastifyInstance, opzioni: { serializ
   app.addHook("onResponse", async (req, reply) => {
     const lavoro = Promise.all([
       registra(req, reply).catch((err: unknown) => {
-        req.log.warn({ err, route: req.routeOptions?.url }, "valore: evento non registrato");
+        req.log.warn(
+          { err, route: req.routeOptions?.url },
+          "valore: evento non registrato",
+        );
       }),
       registraScrittura(req, reply).catch((err: unknown) => {
-        req.log.warn({ err, route: req.routeOptions?.url }, "registro delle scritture: riga non scritta");
+        req.log.warn(
+          { err, route: req.routeOptions?.url },
+          "registro delle scritture: riga non scritta",
+        );
       }),
     ]).then(() => undefined);
     if (serializzato) inVolo = inVolo.then(() => lavoro);

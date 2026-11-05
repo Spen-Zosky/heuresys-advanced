@@ -10,7 +10,8 @@
  *    misure — mai ricopiando un numero, che domani sarebbe una prova che misura il passato.
  */
 import { describe, it, expect } from "vitest";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -99,5 +100,51 @@ describe("#251 F1 — le soglie di OGGI, ri-derivate dal file generato", () => {
     // `package.json` esiste, è JSON valido e NON porta le due misure: il caso vero di un file
     // rinominato o rigenerato male. Deve uscire `undefined`, non una soglia dedotta a caso.
     expect(caricaSoglie("package.json")).toBeUndefined();
+  });
+});
+
+describe("A-6 — soglie per tenant, con il tenant più grande come predefinito", () => {
+  const scrivi = (dati: unknown): string => {
+    const dir = mkdtempSync(join(tmpdir(), "soglie-a6-"));
+    const f = join(dir, "misure.json");
+    writeFileSync(f, JSON.stringify(dati));
+    return f;
+  };
+  const file = () =>
+    scrivi({
+      misuratoIl: "2026-11-05",
+      tenantPiuGrande: "RTL_BANK",
+      massimoPosizioniPerUnita: 38,
+      p90PersonePerCatena: 21.4,
+      perTenant: {
+        RTL_BANK: { massimoPosizioniPerUnita: 38, p90PersonePerCatena: 21.4 },
+        PICCOLO: { massimoPosizioniPerUnita: 7, p90PersonePerCatena: 3 },
+      },
+    });
+
+  it("un tenant con la sua misura usa le sue soglie", () => {
+    const s = caricaSoglie(file(), "PICCOLO");
+    expect(s?.alta).toBe(10);
+    expect(s?.bassa).toBe(5);
+    expect(s?.provenienza.tenant).toBe("PICCOLO");
+  });
+
+  it("un tenant senza misura, o una chiamata senza tenant, prende il predefinito", () => {
+    const f = file();
+    for (const s of [caricaSoglie(f, "SCONOSCIUTO"), caricaSoglie(f)]) {
+      expect(s?.alta).toBe(40);
+      expect(s?.bassa).toBe(25);
+      expect(s?.provenienza.tenant).toBe("RTL_BANK");
+    }
+  });
+
+  it("una misura del tenant incompleta non si usa: si torna al predefinito", () => {
+    const f = scrivi({
+      tenantPiuGrande: "RTL_BANK",
+      massimoPosizioniPerUnita: 38,
+      p90PersonePerCatena: 21.4,
+      perTenant: { ROTTO: { massimoPosizioniPerUnita: 7 } },
+    });
+    expect(caricaSoglie(f, "ROTTO")?.alta).toBe(40);
   });
 });

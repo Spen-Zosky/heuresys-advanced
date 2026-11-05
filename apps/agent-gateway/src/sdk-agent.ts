@@ -61,7 +61,8 @@ export async function* runHrAgent(
   // al gate (che lo legge e lo scrive nel diario): due contatori diversi renderebbero il
   // numero del diario diverso da quello che il freno guarda — lo stesso divario che il
   // commento sul resolver qui sopra esiste per impedire.
-  const contatore = opts.contatore ?? new ContatorePersone(caricaSoglie());
+  // A-6: le soglie del tenant della persona, quando il principal lo porta.
+  const contatore = opts.contatore ?? new ContatorePersone(caricaSoglie(undefined, opts.principal?.tenant));
   client.collegaContatore(contatore);
 
   // Il diario si risolve QUI e non dentro il gate: serve anche alla voce di chiusura, e due

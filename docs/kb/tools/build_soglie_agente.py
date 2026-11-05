@@ -87,6 +87,34 @@ from c
 """
 
 
+# A-6 (piano interfacce, 2026-11-05): la stessa misura (3), PER TENANT. La catena appartiene al
+# tenant della sua unita' radice. Le soglie di RTL restano il predefinito per i tenant che non
+# hanno ancora una misura; un tenant con la sua misura usa le sue.
+Q_P90_CATENE_PER_TENANT = """
+with recursive ou as (
+  select organization_unit_id id, organization_unit_parent_id parent, organization_unit_tenant_id tid
+  from sys.sys_organization_units
+), sub as (
+  select id as radice, tid, id as nodo from ou
+  union all
+  select s.radice, s.tid, o.id from sub s join ou o on o.parent = s.nodo
+), p as (
+  select pos.position_organization_unit_id ou, a.user_position_assignment_user_id uid
+  from sys.sys_user_position_assignments a
+  join sys.sys_positions pos on pos.position_id = a.user_position_assignment_position_id
+  join sys.sys_users u on u.user_id = a.user_position_assignment_user_id
+  where a.user_position_assignment_status='ACTIVE' and u.user_status='ACTIVE' and u.user_type<>'SERVICE'
+), c as (
+  select s.radice, s.tid, count(distinct p.uid) n from sub s join p on p.ou = s.nodo group by 1,2
+)
+select t.tenant_code,
+       round(percentile_cont(0.9) within group (order by n)::numeric, 2) as p90,
+       max(n) as massimo, count(*) as catene
+from c join sys.sys_tenancies t on t.tenant_id = c.tid
+group by 1 order by 1
+"""
+
+
 def psql(sql: str) -> list[list[str]]:
     """Esegue una `select` e restituisce le righe. Alza se il database non risponde."""
     cmd = [
@@ -130,7 +158,25 @@ def misura() -> dict[str, object]:
         "p90PersonePerCatena": p90,
         "massimoPersonePerCatena": massimo_catena,
         "catene": quante,
+        "perTenant": per_tenant(posizioni),
     }
+
+
+def per_tenant(posizioni: list[list[str]]) -> dict[str, dict[str, object]]:
+    """A-6: le misure di ogni tenant che ne ha entrambe. Un tenant senza catene con persone
+    attive resta fuori, e il gateway gli applica il predefinito: non si inventa una misura."""
+    unita = {r[0]: int(r[1]) for r in posizioni}
+    esito: dict[str, dict[str, object]] = {}
+    for codice, p90, massimo, catene in psql(Q_P90_CATENE_PER_TENANT):
+        if codice not in unita:
+            continue
+        esito[codice] = {
+            "massimoPosizioniPerUnita": unita[codice],
+            "p90PersonePerCatena": float(p90),
+            "massimoPersonePerCatena": int(massimo),
+            "catene": int(catene),
+        }
+    return esito
 
 
 def selftest() -> int:

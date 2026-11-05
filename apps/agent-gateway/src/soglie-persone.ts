@@ -111,20 +111,38 @@ function radiceRepo(): string {
 export const PERCORSO_MISURE = "docs/kb/agent-soglie-persone.json";
 
 /**
- * Legge le misure generate e ri-deriva le soglie. `undefined` se il file manca, non è
+ * Legge le misure generate e ri-deriva le soglie, quelle del `tenant` se il file ne porta la
+ * misura (A-6), altrimenti quelle del tenant più grande. `undefined` se il file manca, non è
  * leggibile o non porta le due misure: il chiamante lo traduce in `non-misurato`.
  *
  * ⚠ Si rideriva a ogni chiamata dalle MISURE del file, e non si leggono soglie dal file
  * nemmeno se ci fossero: così il file non può mentire sul criterio. Chi lo modificasse a mano
  * potrebbe cambiare la misura — che è un fatto verificabile con una query — non la regola.
  */
-export function caricaSoglie(percorso?: string): Soglie | undefined {
+export function caricaSoglie(percorso?: string, tenant?: string): Soglie | undefined {
   const p = percorso
     ? isAbsolute(percorso) ? percorso : resolvePath(radiceRepo(), percorso)
     : join(radiceRepo(), PERCORSO_MISURE);
   if (!existsSync(p)) return undefined;
   try {
-    const dati = JSON.parse(readFileSync(p, "utf8")) as Partial<MisureTenant>;
+    const dati = JSON.parse(readFileSync(p, "utf8")) as Partial<MisureTenant> & {
+      perTenant?: Record<string, Partial<MisureTenant>>;
+    };
+    // A-6 (piano interfacce): un tenant con la sua misura usa le sue soglie; gli altri, e le
+    // chiamate che non sanno ancora il tenant, quelle del tenant più grande (oggi RTL Bank).
+    const propria = tenant !== undefined ? dati.perTenant?.[tenant] : undefined;
+    if (
+      propria &&
+      typeof propria.massimoPosizioniPerUnita === "number" &&
+      typeof propria.p90PersonePerCatena === "number"
+    ) {
+      return derivaSoglie({
+        tenantPiuGrande: tenant as string,
+        massimoPosizioniPerUnita: propria.massimoPosizioniPerUnita,
+        p90PersonePerCatena: propria.p90PersonePerCatena,
+        ...(typeof dati.misuratoIl === "string" ? { misuratoIl: dati.misuratoIl } : {}),
+      });
+    }
     if (typeof dati.massimoPosizioniPerUnita !== "number") return undefined;
     if (typeof dati.p90PersonePerCatena !== "number") return undefined;
     return derivaSoglie({

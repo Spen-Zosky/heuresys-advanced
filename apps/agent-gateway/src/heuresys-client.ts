@@ -164,7 +164,10 @@ export async function chiediGettoneAgente(
   persona: { cookieAccess: string; cookieCsrf: string },
   richiesta: RichiestaGettone,
   fetchImpl: FetchLike = globalThis.fetch as unknown as FetchLike,
-): Promise<{ ok: true; session: Session; expiresAt: string } | { ok: false; status: number; corpo: unknown }> {
+): Promise<
+  | { ok: true; session: Session; expiresAt: string; persona: { userId: string; tenantCode: string | null } }
+  | { ok: false; status: number; corpo: unknown }
+> {
   const res = await fetchImpl(`${baseUrl.replace(/\/$/, "")}/v1/auth/agent-tokens`, {
     method: "POST",
     headers: {
@@ -183,10 +186,12 @@ export async function chiediGettoneAgente(
     }
     return { ok: false, status: res.status, corpo };
   }
-  const dati = (await res.json()) as { token: string; expiresAt: string };
+  const dati = (await res.json()) as { token: string; expiresAt: string; userId: string; tenantCode?: string | null };
   return {
     ok: true,
     session: { cookieAccess: dati.token, cookieCsrf: persona.cookieCsrf, csrf: persona.cookieCsrf },
     expiresAt: dati.expiresAt,
+    // A-12: per conto di chi, perché il diario dica chi e in quale tenant.
+    persona: { userId: dati.userId, tenantCode: dati.tenantCode ?? null },
   };
 }

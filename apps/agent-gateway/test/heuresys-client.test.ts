@@ -88,7 +88,12 @@ describe("L9 A-1/A-3 — il gettone dell'agente", () => {
     const { fetchImpl, calls } = recordingFetch(() => ({
       ok: true,
       status: 201,
-      body: { token: "GETTONE", expiresAt: "2026-11-05T10:00:00.000Z" },
+      body: {
+        token: "GETTONE",
+        expiresAt: "2026-11-05T10:00:00.000Z",
+        userId: "11111111-1111-4111-8111-111111111111",
+        tenantCode: "RTL_BANK",
+      },
     }));
     const esito = await chiediGettoneAgente(
       "http://api/",
@@ -104,6 +109,8 @@ describe("L9 A-1/A-3 — il gettone dell'agente", () => {
     if (!esito.ok) return;
     expect(esito.session.cookieAccess).toBe("GETTONE");
     expect(esito.session.cookieRefresh).toBeUndefined();
+    // A-12: il diario saprà per conto di chi e in quale tenant.
+    expect(esito.persona).toEqual({ userId: "11111111-1111-4111-8111-111111111111", tenantCode: "RTL_BANK" });
 
     // A-3: scaduto il gettone, il client non rinnova: un 401 resta un 401, con una sola chiamata.
     const dopo = recordingFetch(() => ({ ok: false, status: 401 }));

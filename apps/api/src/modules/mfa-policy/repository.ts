@@ -98,3 +98,92 @@ export async function tenantExists(db: DbConnector, tenantId: string): Promise<b
   );
   return result.rows.length > 0;
 }
+
+/* ── ADR-0050 D3, parte visibile (S-14): le esenzioni dal secondo fattore ─────────────── */
+
+export interface MfaExemptionRecord {
+  exemptionId: string;
+  tenantId: string;
+  userId: string;
+  userEmail: string;
+  userDisplayName: string | null;
+  userType: string;
+  reason: string;
+  enabled: boolean;
+  expired: boolean;
+  expiresAt: Date | null;
+  createdAt: Date;
+  authorDisplayName: string | null;
+  updatedAt: Date;
+}
+
+const EXEMPTION_SELECT = `
+  SELECT e.auth_mfa_exemption_id AS exemption_id, u.user_tenant_id AS tenant_id,
+         u.user_id, u.user_email, u.user_display_name, u.user_type,
+         e.auth_mfa_exemption_reason AS reason, e.auth_mfa_exemption_enabled AS enabled,
+         (e.auth_mfa_exemption_expires_at IS NULL OR e.auth_mfa_exemption_expires_at <= now()) AS expired,
+         e.auth_mfa_exemption_expires_at AS expires_at, e.created_at,
+         a.user_display_name AS author_display_name, e.updated_at
+    FROM sys.sys_auth_mfa_exemptions e
+    JOIN sys.sys_users u ON u.user_id = e.auth_mfa_exemption_user_id
+    LEFT JOIN sys.sys_users a ON a.user_id = e.created_by`;
+
+interface ExemptionRow {
+  exemption_id: string;
+  tenant_id: string;
+  user_id: string;
+  user_email: string;
+  user_display_name: string | null;
+  user_type: string;
+  reason: string;
+  enabled: boolean;
+  expired: boolean;
+  expires_at: Date | null;
+  created_at: Date;
+  author_display_name: string | null;
+  updated_at: Date;
+}
+
+function toExemption(r: ExemptionRow): MfaExemptionRecord {
+  return {
+    exemptionId: r.exemption_id,
+    tenantId: r.tenant_id,
+    userId: r.user_id,
+    userEmail: r.user_email,
+    userDisplayName: r.user_display_name,
+    userType: r.user_type,
+    reason: r.reason,
+    enabled: r.enabled,
+    expired: r.expired,
+    expiresAt: r.expires_at,
+    createdAt: r.created_at,
+    authorDisplayName: r.author_display_name,
+    updatedAt: r.updated_at,
+  };
+}
+
+/** Le esenzioni di un tenant (null = tutti, vista di piattaforma). Le accese per prime. */
+export async function listExemptions(db: DbConnector, tenantId: string | null): Promise<MfaExemptionRecord[]> {
+  const { rows } = await db.query<ExemptionRow>(
+    `${EXEMPTION_SELECT}
+      WHERE ($1::uuid IS NULL OR u.user_tenant_id = $1)
+      ORDER BY e.auth_mfa_exemption_enabled DESC, e.auth_mfa_exemption_expires_at DESC NULLS LAST, u.user_email`,
+    [tenantId],
+  );
+  return rows.map(toExemption);
+}
+
+export async function findExemption(db: DbConnector, exemptionId: string): Promise<MfaExemptionRecord | null> {
+  const { rows } = await db.query<ExemptionRow>(`${EXEMPTION_SELECT} WHERE e.auth_mfa_exemption_id = $1`, [exemptionId]);
+  return rows[0] ? toExemption(rows[0]) : null;
+}
+
+/** Spegne un'esenzione. Idempotente: una già spenta resta com'è. */
+export async function disableExemption(db: DbConnector, exemptionId: string, actorUserId: string): Promise<void> {
+  await db.query(
+    `UPDATE sys.sys_auth_mfa_exemptions
+        SET auth_mfa_exemption_enabled = false, updated_at = now(), updated_by = $2
+      WHERE auth_mfa_exemption_id = $1 AND auth_mfa_exemption_enabled`,
+    [exemptionId, actorUserId],
+  );
+}

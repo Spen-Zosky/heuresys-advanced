@@ -160,6 +160,8 @@ import { publicJobPostingsRoutes } from "./modules/public-job-postings/routes.js
 import { tenantMaterializationRoutes } from "./modules/tenant-materialization/routes.js";
 import { registraEventiDiValore } from "./lib/valore/registro.js";
 import { registraRotteDellaSpecifica } from "./lib/openapi/rotte.js";
+import { registraConcorrenza } from "./lib/concorrenza.js";
+import { registraIdempotenza } from "./lib/idempotenza.js";
 import { intestazioneDellaSpecifica, trasformaPerLaSpecifica } from "./lib/openapi/specifica.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
@@ -252,6 +254,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   registerConfermaD5(app, options.mfaEnforcement ?? env.MFA_ENFORCEMENT_ENABLED);
   // 1a-bis. S-10: raccoglie le rotte senza permesso (la prova le confronta con il loro elenco).
   registraGuardiaRotte(app);
+  // A-10 del piano interfacce: ETag e If-Match, poi Idempotency-Key, in coda ai preHandler di
+  // ogni scrittura (dopo CSRF e permesso). L'ordine di questi due conta: prima la condizione.
+  registraConcorrenza(app);
+  registraIdempotenza(app);
 
   // 1b. OpenAPI/Swagger (R6; A-9 del piano interfacce) — spenta per difetto (env.API_DOCS_ENABLED):
   //     accenderla in produzione è una decisione di Enzo. Registrata subito dopo i compilatori

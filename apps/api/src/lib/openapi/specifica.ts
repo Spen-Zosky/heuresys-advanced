@@ -119,6 +119,31 @@ export function rottaPubblica(url: string): boolean {
   );
 }
 
+/** A-10: il limite di frequenza dichiarato per ogni operazione, leggibile da una macchina. */
+export const ESTENSIONE_LIMITE = "x-heuresys-rate-limit";
+/** Il limite globale di app.ts (@fastify/rate-limit), per indirizzo. */
+export const LIMITE_GLOBALE = { max: 600, windowSeconds: 60, per: "ip" } as const;
+
+const SECONDI_PER_FINESTRA: Readonly<Record<string, number>> = {
+  "1 minute": 60,
+  "1 hour": 3600,
+  "15 minutes": 900,
+};
+
+function limiteDi(route: RouteOptions): { max: number; windowSeconds: number; per: string } {
+  const proprio = (route.config as { rateLimit?: { max?: unknown; timeWindow?: unknown } } | undefined)?.rateLimit;
+  if (proprio && typeof proprio.max === "number") {
+    const finestra =
+      typeof proprio.timeWindow === "number"
+        ? Math.round(proprio.timeWindow / 1000)
+        : typeof proprio.timeWindow === "string"
+          ? (SECONDI_PER_FINESTRA[proprio.timeWindow] ?? LIMITE_GLOBALE.windowSeconds)
+          : LIMITE_GLOBALE.windowSeconds;
+    return { max: proprio.max, windowSeconds: finestra, per: "ip" };
+  }
+  return { ...LIMITE_GLOBALE };
+}
+
 type ArgomentiDellaTrasformazione = Parameters<typeof jsonSchemaTransform>[0];
 
 /**
@@ -138,6 +163,7 @@ export function trasformaPerLaSpecifica(argomenti: ArgomentiDellaTrasformazione)
   if (schema.description === undefined) schema.description = descrizioneDi(metodo, url, permessi);
   if (schema.security === undefined) schema.security = rottaPubblica(url) ? [] : [{ [SCHEMA_DI_SICUREZZA]: [] }];
   schema[OPENAPI_PERMISSION_EXTENSION] = permessi.length > 0 ? permessi.join(" ") : null;
+  schema[ESTENSIONE_LIMITE] = limiteDi(route);
   return { ...base, schema };
 }
 
@@ -151,7 +177,11 @@ export function intestazioneDellaSpecifica() {
         "carries an operationId, a tag (its module), the permission it requires (description and " +
         `\`${OPENAPI_PERMISSION_EXTENSION}\`) and the cookie security scheme. Discovery for the ` +
         "caller: GET /v1/meta/operations. Agents authenticate with an agent token " +
-        "(POST /v1/auth/agent-tokens) in the same cookie.",
+        "(POST /v1/auth/agent-tokens) in the same cookie. Rate limits are declared per operation " +
+        "(`x-heuresys-rate-limit`) and returned as x-ratelimit-* headers (Retry-After on 429). " +
+        "Writes accept an `Idempotency-Key` header (24 hours; a retry with the same key replays the " +
+        "first response with `Idempotent-Replayed: true`); JSON reads carry an `ETag`, and " +
+        "PUT/PATCH/DELETE accept `If-Match` (412 when the resource changed).",
       version: VERSIONE_SPECIFICA,
     },
     servers: [{ url: "/", description: "same-origin (behind the /api proxy in the web app)" }],

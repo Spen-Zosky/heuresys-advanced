@@ -52,6 +52,13 @@ export class ConflictError extends ApiError {
   }
 }
 
+/** L10, A-10: la condizione `If-Match` non vale più (la risorsa è cambiata, o non si può leggere). */
+export class PreconditionFailedError extends ApiError {
+  constructor(message = "Precondition failed", code = "PRECONDITION_FAILED") {
+    super(code, message);
+  }
+}
+
 export class TenantBoundaryViolation extends ApiError {
   constructor(public attemptedTenant: string, public actualTenant: string) {
     super("TENANT_BOUNDARY_VIOLATION", "Tenant boundary violation");

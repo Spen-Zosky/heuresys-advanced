@@ -27,6 +27,7 @@ import {
   UnprocessableEntityError,
   NotFoundError,
   ConflictError,
+  PreconditionFailedError,
   TenantBoundaryViolation,
   RefreshReplayDetected,
   CsrfFailedError,
@@ -101,6 +102,10 @@ export async function errorHandler(
     reply.code(422).send({
       error: { code: err.code, message: err.message, details: err.details },
     });
+    return;
+  }
+  if (err instanceof PreconditionFailedError) {
+    reply.code(412).send({ error: { code: err.code, message: err.message } });
     return;
   }
   if (err instanceof TenantBoundaryViolation) {

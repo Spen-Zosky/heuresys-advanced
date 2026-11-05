@@ -114,6 +114,9 @@ describe("A-9 — ogni operazione è descritta e identificata", () => {
       if (!op.description) difetti.push(`${chi}: senza descrizione`);
       if (!Array.isArray(op.security)) difetti.push(`${chi}: senza sicurezza`);
       if (!(OPENAPI_PERMISSION_EXTENSION in op)) difetti.push(`${chi}: senza ${OPENAPI_PERMISSION_EXTENSION}`);
+      // A-10: il limite di frequenza è dichiarato su ogni operazione.
+      const limite = (op as { "x-heuresys-rate-limit"?: { max?: number; windowSeconds?: number } })["x-heuresys-rate-limit"];
+      if (!limite || !(limite.max! > 0) || !(limite.windowSeconds! > 0)) difetti.push(`${chi}: senza limite di frequenza`);
       const perm = op[OPENAPI_PERMISSION_EXTENSION];
       if (perm && !perm.split(" ").every((x) => op.description?.includes(`\`${x}\``))) {
         difetti.push(`${chi}: la descrizione non nomina il permesso ${perm}`);

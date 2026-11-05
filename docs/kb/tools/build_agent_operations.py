@@ -18,8 +18,9 @@ La dottrina di Enzo (2026-08-16) e' che l'agente vada **ovunque porti valore agg
 quell'elenco cresce, e questo strumento non va toccato quando cresce.
 
 FAIL-CLOSED DUE VOLTE:
-  · esce **solo** cio' che e' dichiarato aperto. Un concetto non in elenco non ha
-    operazioni, quindi non si risolve, quindi il gate lo nega;
+  · le SCRITTURE escono **solo** per cio' che e' dichiarato aperto. Dal 2026-11-05 (#254,
+    ADR-0040 §5) le LETTURE escono per ogni modulo, tranne quelli in FUORI_DALLE_LETTURE:
+    il perimetro delle letture lo fa l'API, con i permessi della persona senza mandati;
   · per i perimetri `sola_lettura` escono **solo le GET**. Una POST che non compare non
     puo' essere risolta nemmeno per sbaglio: non e' filtrata a valle, non esiste proprio.
 
@@ -43,6 +44,19 @@ import sys
 ATLAS = os.path.join("docs", "kb", "atlas", "atlas.yaml")
 PERIMETRI = os.path.join("docs", "kb", "agent-perimetri.json")
 USCITA = os.path.join("docs", "kb", "atlas", "agent-operations.json")
+
+# #254 (ADR-0040 §5, piano interfacce L10 A-13): l'agente LEGGE cio' che legge la persona, su
+# tutti i moduli, in una mossa sola. Il filtro sulle letture non e' piu' qui: e' nell'API, che
+# risponde all'agente con i permessi della persona senza mandati (ADR-0050 D6, gettone di L9).
+# `agent-perimetri.json` resta la fonte delle SCRITTURE e la cronaca delle aperture decise.
+DECISIONE_LETTURE = ("ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge "
+                     "la persona, senza mandati; le scritture restano dei soli perimetri decisi")
+DATA_LETTURE = "2026-11-05"
+# Fuori anche dalle letture, uno per uno con la ragione (mai un jolly):
+FUORI_DALLE_LETTURE = {
+    "auth": "superficie di autenticazione: il gettone d'agente non la tocca (L9, A-3)",
+    "whistleblowing": "isolamento assoluto delle segnalazioni, solo la custodia (ADR-0036 §5, mig 000414)",
+}
 
 
 def ceco(cosa, rimedio):
@@ -157,6 +171,25 @@ def costruisci(radice="."):
             "decisione": voce["decisione"],
             "operations": ops,
         }
+    # #254: ogni altro modulo con una lettura entra in sola lettura, con le sole GET.
+    for cid, righe in rotte.items():
+        if cid in out or cid in FUORI_DALLE_LETTURE:
+            continue
+        ops = {}
+        for r in righe:
+            if r.get("path") and (r["method"] or "").upper() == "GET":
+                ops[operation_id(r["method"], r["path"])] = {
+                    "method": "GET",
+                    "path": r["path"],
+                    "permission": r.get("permission"),
+                }
+        if ops:
+            out[cid] = {
+                "solaLettura": True,
+                "data": DATA_LETTURE,
+                "decisione": DECISIONE_LETTURE,
+                "operations": ops,
+            }
     if mancanti:
         ceco("questi perimetri aperti non esistono nell'atlante: %s" % ", ".join(mancanti),
              "o il nome del concetto e' sbagliato, o l'atlante e' superato "

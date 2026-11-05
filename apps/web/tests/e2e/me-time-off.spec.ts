@@ -12,6 +12,7 @@
  */
 
 import { test, expect } from "@playwright/test";
+import { ME_LEAVE_TYPES } from "@heuresys/shared";
 import { storageStateFor } from "./fixtures";
 
 test.describe("/me/time-off — ESS leave requests (B3)", () => {
@@ -29,7 +30,9 @@ test.describe("/me/time-off — ESS leave requests (B3)", () => {
     // Form is live with the translated leave-type options.
     await expect(page.getByTestId("me-time-off-form")).toBeVisible();
     const options = page.getByTestId("me-time-off-type").locator("option");
-    expect(await options.count()).toBe(10);
+    // Tante opzioni quanti i tipi del contratto: il numero si legge da lì, non si scrive qui
+    // (era 10 ed è diventato 11 con PAID_LEAVE).
+    expect(await options.count()).toBe(ME_LEAVE_TYPES.length);
 
     // History table (or its legitimate empty state) is present.
     const anyRow = page.getByTestId("me-time-off-row").first();

@@ -678,7 +678,10 @@
       "RESET_INVALID": "Il collegamento per reimpostare la password non è valido o è scaduto.",
       "SURVEY_ALREADY_ANSWERED": "Hai già risposto a questo questionario.",
       "SURVEY_NOT_ASSIGNED": "Questo questionario non ti è stato assegnato.",
-      "USER_INACTIVE": "Questa utenza non è più attiva."
+      "USER_INACTIVE": "Questa utenza non è più attiva.",
+      "BLUEPRINT_TENANT_NOT_LINKED": "Il fascicolo non è legato a un'azienda: non c'è nulla da costruire.",
+      "BLUEPRINT_BUILD_SOURCE_MISSING": "La versione non dichiara una sorgente di costruzione: nessun modello è ancorato, oppure il modello non ne dichiara una.",
+      "BLUEPRINT_BUILD_SOURCE_UNKNOWN": "La sorgente di costruzione dichiarata dal modello non è tra quelle che la piattaforma conosce."
     },
     "network": "Il server non risponde: controlla la connessione e riprova.",
     "sessionExpired": "La sessione è scaduta: accedi di nuovo.",
@@ -765,5 +768,13 @@
       "emptyDesc": "Il registro degli eventi è vuoto nella finestra corrente."
     }
   },
-  "unnamed": "senza nome"
+  "unnamed": "senza nome",
+  "stato": {
+    "negato": {
+      "titolo": "Non hai accesso a questi dati",
+      "motivo": "Il tuo profilo non comprende questi dati. Se ti servono per il tuo lavoro, chiedi a chi gestisce i ruoli nella tua azienda."
+    },
+    "codice": "Codice: {{codice}}.",
+    "nonDisponibile": "non disponibile"
+  }
 }

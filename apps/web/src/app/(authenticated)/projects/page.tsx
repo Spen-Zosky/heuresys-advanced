@@ -4,11 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import {
-  PageHeader, Card, CardContent, Badge, EmptyState, Spinner,
+  PageHeader, Card, CardContent, Badge,
 } from "@heuresys/ui";
 import { FolderKanban } from "lucide-react";
 import type { ProjectListResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /**
  * `#143` F5 — i progetti, dall'API reale e da nient'altro.
@@ -42,18 +43,19 @@ export default function ProjectsPage() {
       />
 
       {q.isLoading ? (
-        <div className="flex justify-center py-12" data-testid="projects-loading">
-          <Spinner />
-        </div>
+        <StatoCaricamento testId="projects-loading" />
       ) : q.isError ? (
-        <p className="text-sm text-danger" data-testid="projects-error">
-          {t("projects.error")}
-        </p>
+        <StatoErrore
+          errore={q.error}
+          titolo={t("projects.error")}
+          testId="projects-error"
+          onRiprova={() => void q.refetch()}
+        />
       ) : items.length === 0 ? (
-        <EmptyState
-          data-testid="projects-empty"
-          title={t("projects.emptyTitle")}
-          description={t("projects.emptyDesc")}
+        <StatoVuoto
+          testId="projects-empty"
+          titolo={t("projects.emptyTitle")}
+          motivo={t("projects.emptyDesc")}
         />
       ) : (
         <>

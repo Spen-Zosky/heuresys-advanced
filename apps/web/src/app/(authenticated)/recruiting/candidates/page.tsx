@@ -6,10 +6,11 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input, EmptyState, Spinner,
+  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input,
 } from "@heuresys/ui";
 import type { Candidate, CandidateApplication } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { useCan } from "@/lib/api/auth";
 import {
   CANDIDATE_SOURCES, KEY, candidateName,
@@ -151,11 +152,11 @@ export default function CandidatesPage() {
       )}
 
       {q.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <StatoCaricamento />
       ) : q.isError ? (
-        <p className="text-sm text-danger" data-testid="candidates-error">{t("recruiting.error")}</p>
+        <StatoErrore errore={q.error} titolo={t("recruiting.error")} testId="candidates-error" onRiprova={() => void q.refetch()} />
       ) : items.length === 0 ? (
-        <EmptyState data-testid="candidates-empty" title={t("recruiting.candidates.emptyTitle")} description={t("recruiting.candidates.emptyDesc")} />
+        <StatoVuoto testId="candidates-empty" titolo={t("recruiting.candidates.emptyTitle")} motivo={t("recruiting.candidates.emptyDesc")} />
       ) : (
         <section className="grid gap-4 md:grid-cols-2" data-testid="candidates-list">
           {items.map((c) => {

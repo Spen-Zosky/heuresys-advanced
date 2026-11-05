@@ -152,7 +152,7 @@ export default function MeCertificationsPage() {
         description={t("certifications.description")}
         badges={
           <Badge variant="secondary" data-testid="me-certifications-count">
-            {certs.data ? t("certifications.count", { count: certs.data.total }) : t("common:loading")}
+            {certs.data ? t("certifications.count", { count: certs.data.total }) : certs.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />

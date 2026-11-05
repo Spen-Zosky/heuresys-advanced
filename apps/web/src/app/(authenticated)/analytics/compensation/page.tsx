@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, EmptyState, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge, PageHeader, StatsCard } from "@heuresys/ui";
 import { Building2, Coins, Scale } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import { MaskedCell } from "@/components/masked-cell";
@@ -13,6 +13,7 @@ import type {
   CompensationScatterPoint,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /** Brand palette as raw HSL CSS-var refs so the echarts canvas follows the theme. */
 const COLOR_PALETTE_1 = "hsl(var(--palette-1))";
@@ -102,15 +103,15 @@ export default function CompensationAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main data-testid="analytics-compensation-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoCaricamento testId="analytics-compensation-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main data-testid="analytics-compensation-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">{t("error")}</p>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-compensation-error" onRiprova={() => void q.refetch()} />
       </main>
     );
   }
@@ -224,11 +225,11 @@ export default function CompensationAnalyticsPage() {
           </div>
         </section>
       ) : (
-        <EmptyState
-          data-testid="analytics-compensation-empty"
-          icon={<Coins className="h-6 w-6" />}
-          title={t("empty.title")}
-          description={t("compensation.emptyDesc")}
+        <StatoVuoto
+          testId="analytics-compensation-empty"
+          icona={<Coins className="h-6 w-6" />}
+          titolo={t("empty.title")}
+          motivo={t("compensation.emptyDesc")}
         />
       )}
     </main>

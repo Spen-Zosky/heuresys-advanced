@@ -6,9 +6,10 @@ import { useTranslation } from "react-i18next";
 import type { EvidenceItem, EvidenceListResponse } from "@heuresys/shared";
 import {
   Badge, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
-  ErrorState, Spinner, formatDateTime,
+  formatDateTime,
 } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { useFormat, type Formati } from "@/lib/format";
 
 /**
@@ -72,9 +73,9 @@ export function EvidenceDrawer({
         </DialogHeader>
 
         {q.isLoading ? (
-          <div className="flex justify-center py-8"><Spinner className="h-5 w-5" /></div>
+          <StatoCaricamento />
         ) : q.isError ? (
-          <ErrorState title={t("evidence.error")} />
+          <StatoErrore errore={q.error} titolo={t("evidence.error")} onRiprova={() => void q.refetch()} />
         ) : grouped.length > 0 ? (
           <div className="space-y-5" data-testid="evidence-drawer">
             {grouped.map(([kind, items]) => (
@@ -102,7 +103,7 @@ export function EvidenceDrawer({
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground" data-testid="evidence-empty">{t("evidence.empty")}</p>
+          <StatoVuoto compatto titolo={t("evidence.empty")} testId="evidence-empty" />
         )}
       </DialogContent>
     </Dialog>

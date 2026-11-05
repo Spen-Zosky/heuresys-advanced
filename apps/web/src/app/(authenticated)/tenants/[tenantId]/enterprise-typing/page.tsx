@@ -25,6 +25,7 @@ import type {
 import { apiFetch } from "../../../../../lib/api/fetch";
 import { useCan } from "../../../../../lib/api/auth";
 import { testoPerLaPersona } from "../../../../../lib/api/errors";
+import { StatoErrore } from "@/components/stato-pagina";
 
 const INTENSITA: readonly RegulatoryIntensity[] = ["LOW", "MEDIUM", "HIGH", "EXTREME"];
 const CAMPO =
@@ -160,9 +161,12 @@ export default function EnterpriseTypingPage() {
         </CardHeader>
         <CardContent>
           {profili.isError ? (
-            <p className="text-sm text-danger" role="alert" data-testid="typing-load-error">
-              {testoPerLaPersona(profili.error) ?? t("enterpriseTyping.loadError")}
-            </p>
+            <StatoErrore
+              errore={profili.error}
+              titolo={t("enterpriseTyping.loadError")}
+              testId="typing-load-error"
+              onRiprova={() => void profili.refetch()}
+            />
           ) : (
             <form
               onSubmit={(e) => {
@@ -183,7 +187,9 @@ export default function EnterpriseTypingPage() {
                       ? t("enterpriseTyping.classNone")
                       : classeScelta.data
                         ? `${classeScelta.data.scheme} ${classeScelta.data.code} — ${classeScelta.data.name}`
-                        : t("common:loading")}
+                        : classeScelta.isError
+                          ? t("common:stato.nonDisponibile")
+                          : t("common:loading")}
                   </p>
                   <Input
                     id="typing-class-search"

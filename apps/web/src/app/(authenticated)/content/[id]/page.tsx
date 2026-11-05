@@ -22,6 +22,7 @@ import type {
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
+import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 
 type WorkflowAction = "submit-for-review" | "publish" | "unpublish" | "return-to-draft";
@@ -226,7 +227,11 @@ export default function ContentEditPage() {
         <Link href="/content" data-testid="content-edit-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {t("content.detail.back")}
         </Link>
-        <p className="text-sm text-danger">{t("content.detail.notFound")}</p>
+        <StatoErrore
+          errore={detail.error}
+          titolo={t("content.detail.notFound")}
+          onRiprova={() => void detail.refetch()}
+        />
       </main>
     );
   }
@@ -425,7 +430,7 @@ export default function ContentEditPage() {
           )}
 
           {(links.data?.items ?? []).length === 0 ? (
-            <p data-testid="content-links-empty" className="text-sm text-muted-foreground">{t("content.links.empty")}</p>
+            <StatoVuoto titolo={t("content.links.empty")} testId="content-links-empty" />
           ) : (
             <ul data-testid="content-links-list" className="divide-y divide-border rounded-card border border-border">
               {(links.data?.items ?? []).map((l) => (

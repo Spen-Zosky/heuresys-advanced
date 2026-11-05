@@ -86,7 +86,7 @@ export default function InsightsPage() {
         countTestId="insights-count"
         title={t("insights.title")}
         description={data.data ? t("insights.descriptionScoped", { kind: data.data.scope.kind }) : t("insights.description")}
-        count={data.data ? t("insights.count", { count: data.data.total }) : t("common:loading")}
+        count={data.data ? t("insights.count", { count: data.data.total }) : data.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
         actions={
           canAdmin ? (
             <Button type="button" data-testid="insights-recompute" disabled={recompute.isPending} onClick={() => { setFeedback(null); recompute.mutate(); }}>

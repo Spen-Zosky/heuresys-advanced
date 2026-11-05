@@ -11,7 +11,8 @@
  *   1. platformAdmin → live dashboard renders heading + live KPI labels + the
  *      real tenant fleet (the old mock's fabricated tenants must be ABSENT) + the
  *      live RBAC matrix.
- *   2. tenantAdmin   → role gate redirects away from /system-health.
+ *   2. tenantAdmin   → the page guard (L1, S-1) shows the no-access screen and the
+ *      dashboard never renders.
  */
 
 import { test, expect } from "@playwright/test";
@@ -27,14 +28,15 @@ test.describe("MVP-2a /system-health — live data + role gate", () => {
         timeout: 15_000,
       });
 
+      // Labels in the person's language (lotto L6, F-2): the suite runs in Italian.
       await expect(
-        page.getByRole("heading", { name: /System Health & Observability/i }),
+        page.getByRole("heading", { name: /Stato della piattaforma/i }),
       ).toBeVisible({ timeout: 15_000 });
 
-      // KPIStrip — live point-in-time labels (sparklines dropped: no history endpoint).
-      await expect(page.getByText("API uptime · 24h").first()).toBeVisible();
-      await expect(page.getByText("DB pool · pg 16").first()).toBeVisible();
-      await expect(page.getByText("RBAC cache").first()).toBeVisible();
+      // KPIStrip — live point-in-time labels.
+      await expect(page.getByText("Disponibilità dell'API · 24 h").first()).toBeVisible();
+      await expect(page.getByText("Connessioni al database").first()).toBeVisible();
+      await expect(page.getByText("Permessi in memoria").first()).toBeVisible();
 
       // LIVE DATA: the tenant fleet comes from GET /v1/observability/system-health
       // (the real RTL_BANK + HEURESYS tenants). The former mock's fabricated tenants
@@ -51,15 +53,13 @@ test.describe("MVP-2a /system-health — live data + role gate", () => {
   test.describe("as tenantAdmin (non-PLATFORM_ADMIN)", () => {
     test.use({ storageState: storageStateFor("tenantAdmin") });
 
-    test("/system-health redirects non-superuser away", async ({ page }) => {
+    test("/system-health is closed to a non-superuser", async ({ page }) => {
       await page.goto("/system-health");
-      // page.tsx replaces to "/" when the role check fails; the authenticated
-      // layout then forwards based on the role. The only invariant we assert is
-      // "no longer on /system-health".
-      await page.waitForURL((url) => url.pathname !== "/system-health", {
-        timeout: 15_000,
-      });
-      expect(page.url()).not.toContain("/system-health");
+      // Since lotto L1 (S-1) the page guard answers before the page asks for data: the
+      // no-access screen replaces the dashboard, on the same address.
+      await expect(page.getByTestId("page-no-access")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId("system-health-page")).toHaveCount(0);
+      await expect(page.getByTestId("system-health-tenant-fleet")).toHaveCount(0);
     });
   });
 });

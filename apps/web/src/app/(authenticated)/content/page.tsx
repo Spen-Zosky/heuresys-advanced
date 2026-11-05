@@ -20,6 +20,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useCan } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -211,7 +212,7 @@ export default function ContentPage() {
         description={t("content.description")}
         badges={
           <Badge variant="secondary" data-testid="content-count">
-            {docs.data ? t("content.count", { count: docs.data.total }) : t("common:loading")}
+            {docs.data ? t("content.count", { count: docs.data.total }) : docs.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />
@@ -334,16 +335,20 @@ export default function ContentPage() {
           {searchActive && (
             <div data-testid="content-search-panel">
               {search.isLoading ? (
-                <p className="text-sm text-muted-foreground">{t("content.search.loading")}</p>
+                <StatoCaricamento etichetta={t("content.search.loading")} />
               ) : search.isError ? (
-                <p data-testid="content-search-error" role="alert" className="text-sm font-medium text-danger">
-                  {t("content.search.errorMessage")}
-                </p>
+                <StatoErrore
+                  errore={search.error}
+                  titolo={t("content.search.errorMessage")}
+                  testId="content-search-error"
+                  onRiprova={() => void search.refetch()}
+                />
               ) : (search.data?.items.length ?? 0) === 0 ? (
-                <div data-testid="content-search-empty" className="rounded-card border border-border px-4 py-3">
-                  <p className="text-sm font-medium text-foreground">{t("content.search.emptyTitle")}</p>
-                  <p className="text-xs text-muted-foreground">{t("content.search.emptyDescription", { q: searchQDebounced })}</p>
-                </div>
+                <StatoVuoto
+                  testId="content-search-empty"
+                  titolo={t("content.search.emptyTitle")}
+                  motivo={t("content.search.emptyDescription", { q: searchQDebounced })}
+                />
               ) : (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground">{t("content.search.resultsCount", { count: search.data?.total ?? 0 })}</p>
@@ -487,7 +492,7 @@ export default function ContentPage() {
           )}
 
           {(cats.data?.items ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("content.categories.empty")}</p>
+            <StatoVuoto titolo={t("content.categories.empty")} />
           ) : (
             <ul className="divide-y divide-border rounded-card border border-border">
               {(cats.data?.items ?? []).map((c) => (

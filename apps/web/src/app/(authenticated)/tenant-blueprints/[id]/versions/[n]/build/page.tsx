@@ -10,7 +10,8 @@ import type {
   TenantBlueprintDetail,
   TenantBlueprintVersion,
 } from "@heuresys/shared";
-import { Button, Spinner, ErrorState, EmptyState } from "@heuresys/ui";
+import { Button } from "@heuresys/ui";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 
 import { useCurrentUserPermissions } from "@/lib/api/auth";
@@ -61,11 +62,14 @@ export default function TenantBlueprintBuildPage({
    * per questa versione», che e' proprio il ramo di ripiego.
    * Un controllo strutturale non dipende da quale copia della classe ha costruito l'oggetto.
    */
-  const erroreApi = (e: unknown): { status: number; message: string } | null =>
+  const erroreApi = (e: unknown): { status: number; message: string; serverMessage?: string } | null =>
     typeof e === "object" && e !== null && "status" in e && "code" in e
       ? {
           status: Number((e as { status: unknown }).status),
           message: String((e as { message?: unknown }).message ?? ""),
+          ...(typeof (e as { serverMessage?: unknown }).serverMessage === "string"
+            ? { serverMessage: String((e as { serverMessage?: unknown }).serverMessage) }
+            : {}),
         }
       : null;
   const perms = useCurrentUserPermissions();
@@ -108,13 +112,15 @@ export default function TenantBlueprintBuildPage({
     },
   });
 
-  if (fascicolo.isLoading || piano.isLoading) return <Spinner />;
-  if (fascicolo.isError) return <ErrorState description={t("dossier.error")} />;
+  if (fascicolo.isLoading || piano.isLoading) return <StatoCaricamento />;
+  if (fascicolo.isError) {
+    return <StatoErrore errore={fascicolo.error} titolo={t("dossier.error")} onRiprova={() => void fascicolo.refetch()} />;
+  }
 
   const versione: TenantBlueprintVersion | undefined = fascicolo.data?.versions.find(
     (v) => String(v.number) === n,
   );
-  if (!versione) return <EmptyState title={t("dossier.notFound")} />;
+  if (!versione) return <StatoVuoto titolo={t("dossier.notFound")} />;
 
   // Perché NON si può firmare — un motivo per volta, e in ordine di precedenza.
   // ⚠ SE IL PIANO NON C'E', LA FIRMA NON DEVE ACCENDERSI — difetto misurato in `#211` F4.
@@ -177,17 +183,20 @@ export default function TenantBlueprintBuildPage({
         //   caso di questa suite chiama «la pagina dice la verità sul vuoto, invece di tacere».
         //   Trovato perché `#132` F3 ha reso il modello vuoto: la pagina è diventata muta
         //   proprio quando aveva qualcosa di preciso da dire.
-        // ⚠ Il contenitore porta il `data-testid`, non `ErrorState`: quel componente viene dal
-        //   design system (`@heuresys/ui`) e NON propaga gli attributi che non conosce —
-        //   misurato, il caso E2E non trovava l'elemento. Il componente non si modifica da
-        //   qui (vive nell'altro repo), quindi il marcatore va sul contenitore.
-        <div data-testid="build-plan-error">
-          <ErrorState
-            description={
-              erroreApi(piano.error)?.message ?? t("dossier.build.planError")
-            }
-          />
-        </div>
+        // ⚠ Il `data-testid` sta sul contenitore di `StatoErrore` (il componente dei design system
+        //   non propaga gli attributi che non conosce: misurato, il caso E2E non trovava
+        //   l'elemento). Il motivo preciso del servizio resta nel titolo.
+        // ⚠ È `serverMessage`, non `message`: dal lotto L4 (F-4) `message` è il testo per la
+        //   persona ricavato dal CODICE, uguale per ogni causa dello stesso codice
+        //   («L'operazione è in conflitto…»), e aveva rifatto muta questa pagina. Il motivo
+        //   del servizio sulla costruzione è scritto per chi la decide, con i nomi del modello
+        //   e delle righe che non tornano; il testo per la persona e il codice restano sotto.
+        <StatoErrore
+          errore={piano.error}
+          titolo={erroreApi(piano.error)?.serverMessage ?? t("dossier.build.planError")}
+          testId="build-plan-error"
+          onRiprova={() => void piano.refetch()}
+        />
       ) : p ? (
         <section
           className="rounded-lg border border-border bg-card p-4"

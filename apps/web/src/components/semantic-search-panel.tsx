@@ -144,6 +144,7 @@ export function SemanticSearchPanel() {
             <EntityTable<OccupationMatch>
               isLoading={search.isLoading}
               isError={search.isError && !flagOff && !throttled}
+              error={search.error}
               errorMessage={t("semanticSearch.error")}
               rows={search.data?.occupations ?? []}
               rowKey={(m) => m.escoUri}
@@ -162,6 +163,7 @@ export function SemanticSearchPanel() {
             <EntityTable<SkillMatch>
               isLoading={search.isLoading}
               isError={search.isError && !flagOff && !throttled}
+              error={search.error}
               errorMessage={t("semanticSearch.error")}
               rows={search.data?.skills ?? []}
               rowKey={(m) => m.skillId}

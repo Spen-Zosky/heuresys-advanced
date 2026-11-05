@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import type { BlueprintActivation, BlueprintVariant, BlueprintProcess, ContentLinkForProcess } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
@@ -62,18 +63,23 @@ export default function BlueprintVariantDetailPage() {
   if (variant.isLoading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+        <StatoCaricamento />
       </main>
     );
   }
   if (variant.isError) {
     const status = isApiError(variant.error) ? variant.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="blueprint-error">
+      <main className="mx-auto max-w-5xl px-6 py-8">
         <Link href="/blueprints" className="text-sm underline">{t("detail.back")}</Link>
-        <p className="mt-4 text-danger">
-          {status === 404 ? t("detail.notFound") : t("detail.error")}
-        </p>
+        <div className="mt-4">
+          <StatoErrore
+            errore={variant.error}
+            titolo={status === 404 ? t("detail.notFound") : t("detail.error")}
+            testId="blueprint-error"
+            onRiprova={() => void variant.refetch()}
+          />
+        </div>
       </main>
     );
   }

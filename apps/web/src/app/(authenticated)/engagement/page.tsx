@@ -12,6 +12,7 @@ import type {
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../_charts-client";
 
@@ -82,7 +83,7 @@ export default function EngagementPage() {
         description={t("engagement.description")}
         badges={
           <Badge variant="secondary" data-testid="engagement-count">
-            {surveys.data ? t("engagement.count", { count: surveys.data.total }) : t("common:loading")}
+            {surveys.data ? t("engagement.count", { count: surveys.data.total }) : surveys.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />
@@ -112,11 +113,16 @@ export default function EngagementPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           {pulse.isLoading ? (
-            <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+            <StatoCaricamento />
           ) : pulse.isError ? (
-            <p className="text-sm text-danger" data-testid="engagement-pulse-error">{t("engagement.errorMessage")}</p>
+            <StatoErrore
+              errore={pulse.error}
+              titolo={t("engagement.errorMessage")}
+              testId="engagement-pulse-error"
+              onRiprova={() => void pulse.refetch()}
+            />
           ) : (pulse.data?.items.length ?? 0) === 0 ? (
-            <p className="text-sm text-muted-foreground" data-testid="engagement-pulse-empty">{t("engagement.pulse.empty")}</p>
+            <StatoVuoto titolo={t("engagement.pulse.empty")} testId="engagement-pulse-empty" />
           ) : (
             <>
               <Badge variant="secondary" data-testid="engagement-pulse-total">

@@ -299,6 +299,22 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   //     so RBAC/scope/filters already applied. No-op without ?format. (§3.2-independent)
   addExportHook(app);
 
+  // 2d. F-7 del piano interfacce (lotto L7): nessun dato dell'API resta nella cache del
+  //     browser o di un proxy. Le risposte `/v1/*` sono dati di una persona autenticata
+  //     (cedolini, documenti, profilo); senza un'intestazione il browser è libero di tenerle.
+  //     Misurato sul banco il 4/11: /v1/me/profile, /pay-slips, /documents e le altre
+  //     rispondevano 200 senza `cache-control`.
+  //     ⚠ Si scrive all'INGRESSO (onRequest), non all'uscita. La prima stesura era un
+  //     `onSend` asincrono, e su ogni risposta d'errore Fastify scriveva le intestazioni due
+  //     volte: due avvisi «Reply was already sent» (ERR_HTTP_HEADERS_SENT) per ogni 401, 403
+  //     o 409, misurati sul banco (480 in un giro della suite) e riprodotti in locale. Qui
+  //     l'intestazione è già sulla risposta quando il gestore la scrive: chi ha una politica
+  //     sua (un'esportazione) la sovrascrive, e il flusso SSE scrive le proprie con
+  //     `reply.raw.writeHead`, che non eredita queste.
+  app.addHook("onRequest", async (req, reply) => {
+    if (req.url.startsWith("/v1/")) reply.header("cache-control", "no-store");
+  });
+
   // 3. Security headers
   await app.register(helmet, {
     contentSecurityPolicy: {

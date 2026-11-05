@@ -66,15 +66,21 @@ test.describe("MVP-2a landing pages — live data", () => {
       // ritardo — ed e' la stessa specie di difetto gia' corretta in `#219` F3/G.
       //
       // Cio' che separa davvero e' che **i dati di governo non arrivano**: si asserisce quello.
-      const risposta = page.waitForResponse(
-        (r) => r.url().includes("/v1/provenance/summary"),
-        { timeout: 20_000 },
-      );
+      //
+      // Dal lotto L1 (S-1) la guardia di pagina risponde PRIMA che la pagina chieda i dati:
+      // la schermata di accesso negato sostituisce il guscio e la chiamata al sommario non
+      // parte nemmeno. Il confine resta nel servizio (il 403 c'è ancora, per chi chiama l'API
+      // direttamente); qui si asserisce che dalla pagina non passa niente: nessuna risposta del
+      // sommario, e nessun pezzo della pagina di provenienza.
+      const sommari: string[] = [];
+      page.on("response", (r) => {
+        if (r.url().includes("/v1/provenance/summary")) sommari.push(`${r.status()} ${r.url()}`);
+      });
       await page.goto("/provenance");
-      expect((await risposta).status(), "senza provenance:read il sommario dev'essere negato").toBe(403);
-      // Il guscio c'e' — ed e' corretto che ci sia: e' cio' che questo caso ora dichiara,
-      // invece di negarlo. I dati no, e li' sta la separazione.
-      await expect(page.getByTestId("provenance-title")).toBeVisible();
+      await expect(page.getByTestId("page-no-access")).toBeVisible({ timeout: 15_000 });
+      await page.waitForLoadState("networkidle").catch(() => {});
+      expect(sommari, "senza provenance:read la pagina non deve chiedere il sommario").toEqual([]);
+      await expect(page.getByTestId("provenance-title")).toHaveCount(0);
     });
   });
 

@@ -2,10 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, EmptyState, Spinner } from "@heuresys/ui";
+import { PageHeader, Card, CardHeader, CardTitle, CardContent, Badge } from "@heuresys/ui";
 import { Users, Crown } from "lucide-react";
 import type { MyTeamsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /**
  * "Il mio team" (WS-4 R1b) — the caller's own teams (lead + member), each with its members.
@@ -28,19 +29,11 @@ export default function MeTeamPage() {
       />
 
       {teams.isLoading ? (
-        <div className="flex justify-center py-12" data-testid="me-team-loading">
-          <Spinner />
-        </div>
+        <StatoCaricamento testId="me-team-loading" />
       ) : teams.isError ? (
-        <p className="text-sm text-danger" data-testid="me-team-error">
-          {t("team.error")}
-        </p>
+        <StatoErrore errore={teams.error} titolo={t("team.error")} testId="me-team-error" onRiprova={() => void teams.refetch()} />
       ) : (teams.data?.teams.length ?? 0) === 0 ? (
-        <EmptyState
-          data-testid="me-team-empty"
-          title={t("team.emptyTitle")}
-          description={t("team.emptyDesc")}
-        />
+        <StatoVuoto testId="me-team-empty" titolo={t("team.emptyTitle")} motivo={t("team.emptyDesc")} />
       ) : (
         <section className="space-y-6" data-testid="me-team-list">
           {teams.data!.teams.map((team) => (

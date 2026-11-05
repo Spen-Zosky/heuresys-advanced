@@ -23,6 +23,7 @@ import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { TimelinePanel } from "@/components/timeline-panel";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import type { UserDossier } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCan } from "@/lib/api/auth";
@@ -59,7 +60,7 @@ function Section({
 
 /** Tabellina compatta: le righe scorrono da sole se la pagina è stretta. */
 function MiniTable({ head, rows, empty }: { head: string[]; rows: ReactNode[][]; empty: string }) {
-  if (rows.length === 0) return <p className="text-sm text-muted-foreground">{empty}</p>;
+  if (rows.length === 0) return <StatoVuoto titolo={empty} compatto />;
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -101,7 +102,7 @@ export default function UserDetailPage() {
   if (q.isLoading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+        <StatoCaricamento />
       </main>
     );
   }
@@ -110,9 +111,14 @@ export default function UserDetailPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="user-error">
         <Link href="/users" className="text-sm underline">{t("users.detail.back")}</Link>
-        <p className="mt-4 text-danger">
-          {code === 404 ? t("users.detail.notFound") : t("users.detail.loadError")}
-        </p>
+        <div className="mt-4">
+          <StatoErrore
+            errore={q.error}
+            titolo={code === 404 ? t("users.detail.notFound") : t("users.detail.loadError")}
+            testId="user-error-state"
+            onRiprova={() => void q.refetch()}
+          />
+        </div>
       </main>
     );
   }

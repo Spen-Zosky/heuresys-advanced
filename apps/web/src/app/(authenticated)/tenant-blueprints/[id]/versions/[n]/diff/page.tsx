@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { BlueprintDiffResponse } from "@heuresys/shared";
-import { Spinner, ErrorState } from "@heuresys/ui";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 
 export default function TenantBlueprintDiffPage({
@@ -33,8 +33,10 @@ export default function TenantBlueprintDiffPage({
       ),
   });
 
-  if (confronto.isLoading) return <Spinner />;
-  if (confronto.isError) return <ErrorState description={t("dossier.error")} />;
+  if (confronto.isLoading) return <StatoCaricamento />;
+  if (confronto.isError) {
+    return <StatoErrore errore={confronto.error} titolo={t("dossier.error")} onRiprova={() => void confronto.refetch()} />;
+  }
   const d = confronto.data;
   if (!d) return null;
 

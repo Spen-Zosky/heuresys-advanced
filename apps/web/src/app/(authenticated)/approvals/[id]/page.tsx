@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { AgentPanel, Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import type { ApprovalRequestDetail, ApprovalStatus, ApprovalStepStatus, ApprovalStepDetail } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCan, useCurrentUser } from "@/lib/api/auth";
@@ -115,9 +116,14 @@ export default function ApprovalDetailPage() {
       </div>
 
       {detail.isLoading ? (
-        <p className="text-sm text-muted-foreground" data-testid="approval-detail-loading">{t("common:loading")}</p>
+        <StatoCaricamento testId="approval-detail-loading" />
       ) : detail.isError || !d ? (
-        <p className="text-sm text-danger" data-testid="approval-detail-error">{t("approvals.detail.notFound")}</p>
+        <StatoErrore
+          errore={detail.error}
+          titolo={t("approvals.detail.notFound")}
+          testId="approval-detail-error"
+          onRiprova={() => void detail.refetch()}
+        />
       ) : (
         <>
           <PageHeader

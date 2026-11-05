@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Button,
   DashboardShell,
@@ -220,7 +221,11 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           language={i18n.language === "en" ? "EN" : "IT"}
           onToggleLanguage={handleToggleLanguage}
           logo={<HeuresysWordmark variant="brand" size={24} />}
-          logoBadge={<HeuresysLogoBadge>{t("shell:brand.badge")}</HeuresysLogoBadge>}
+          // F-6 (L7): il collegamento del marchio ha già il suo nome accessibile («Heuresys —
+          // pagina iniziale autenticata»); il distintivo «advanced» visibile ma fuori da quel
+          // nome è la violazione `label-content-name-mismatch` misurata su 97 pagine. È
+          // decorativo: si nasconde ai lettori di schermo invece di cambiare il nome.
+          logoBadge={<HeuresysLogoBadge aria-hidden="true">{t("shell:brand.badge")}</HeuresysLogoBadge>}
         />
       }
       sidebar={
@@ -251,6 +256,10 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
               <span>{t("shell:brand.version")}</span>
               <span aria-hidden className="text-border">·</span>
               <span>{identity.role}</span>
+              <span aria-hidden className="text-border">·</span>
+              <Link href="/accessibilita" data-testid="app-footer-accessibility" className="underline-offset-2 hover:underline">
+                {t("shell:brand.accessibility")}
+              </Link>
             </>
           }
         />

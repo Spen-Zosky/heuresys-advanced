@@ -12,14 +12,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  ErrorState,
-  Spinner,
   Timeline,
   type TimelineEvent,
   formatDateTime,
 } from "@heuresys/ui";
 import { Lock } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { formati } from "@/lib/format";
 
@@ -134,11 +133,9 @@ export function GoalTimelineDialog({
         </DialogHeader>
 
         {timeline.isLoading ? (
-          <div className="flex justify-center py-8">
-            <Spinner className="h-5 w-5" />
-          </div>
+          <StatoCaricamento />
         ) : timeline.isError ? (
-          <ErrorState title={t("goals.timeline.error")} />
+          <StatoErrore errore={timeline.error} titolo={t("goals.timeline.error")} testId="goal-timeline-error" onRiprova={() => void timeline.refetch()} />
         ) : (
           <div data-testid="goal-timeline">
             <Timeline events={events} emptyMessage={t("goals.timeline.empty")} />
@@ -149,11 +146,9 @@ export function GoalTimelineDialog({
           <section className="space-y-3 border-t border-border pt-4">
             <h3 className="text-sm font-semibold text-foreground">{t("goals.timeline.comments")}</h3>
             {comments.isLoading ? (
-              <div className="flex justify-center py-4">
-                <Spinner className="h-5 w-5" />
-              </div>
+              <StatoCaricamento />
             ) : comments.isError ? (
-              <ErrorState title={t("goals.timeline.error")} />
+              <StatoErrore errore={comments.error} titolo={t("goals.timeline.error")} testId="goal-comments-error" onRiprova={() => void comments.refetch()} />
             ) : comments.data && comments.data.items.length > 0 ? (
               <ul className="space-y-3">
                 {comments.data.items.map((c) => (
@@ -176,9 +171,7 @@ export function GoalTimelineDialog({
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground" data-testid="goal-comments-empty">
-                {t("goals.timeline.commentsEmpty")}
-              </p>
+              <StatoVuoto compatto titolo={t("goals.timeline.commentsEmpty")} testId="goal-comments-empty" />
             )}
           </section>
         ) : null}

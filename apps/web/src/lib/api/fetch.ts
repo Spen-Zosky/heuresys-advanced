@@ -48,8 +48,11 @@ function joinUrl(base: string, path: string): string {
 async function attemptRefresh(baseUrl: string): Promise<boolean> {
   try {
     const csrf = csrfStore.get();
-    const headers: Record<string, string> = { accept: "application/json" };
-    if (csrf) headers["x-csrf-token"] = csrf;
+    // Senza il token CSRF non c'è una sessione da rinnovare: l'API risponde sempre 403
+    // CSRF_FAIL (verifyCsrf sulla rotta), e la richiesta inutile consuma il limite di 60
+    // rinnovi in 5 minuti. Succede su ogni pagina aperta da chi non è entrato (L7).
+    if (!csrf) return false;
+    const headers: Record<string, string> = { accept: "application/json", "x-csrf-token": csrf };
     const res = await fetch(joinUrl(baseUrl, "/v1/auth/refresh"), {
       method: "POST",
       headers,

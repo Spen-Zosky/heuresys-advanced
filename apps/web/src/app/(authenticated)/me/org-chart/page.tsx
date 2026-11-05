@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { EChartsCard } from "../../_charts-client";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 interface VizGraph { graphId: string; name: string; type: string; isActive: boolean }
 interface RenderNode { nodeId: string; label: string; sourceEntityId: string | null }
@@ -77,13 +78,13 @@ export default function MeOrgChartPage() {
         </CardHeader>
         <CardContent>
           {graphs.isLoading || (graphId && render.isLoading) ? (
-            <p className="p-4 text-sm text-muted-foreground">{t("common:loading")}</p>
+            <StatoCaricamento />
           ) : !graphId ? (
-            <p className="p-4 text-sm text-muted-foreground" data-testid="me-org-chart-empty">{t("orgChart.empty")}</p>
+            <StatoVuoto titolo={t("orgChart.empty")} testId="me-org-chart-empty" />
           ) : render.isError ? (
-            <p className="p-4 text-sm text-danger" data-testid="me-org-chart-error">{t("orgChart.error")}</p>
+            <StatoErrore errore={render.error} titolo={t("orgChart.error")} testId="me-org-chart-error" onRiprova={() => void render.refetch()} />
           ) : nodes.length === 0 ? (
-            <p className="p-4 text-sm text-muted-foreground" data-testid="me-org-chart-nodes-empty">{t("orgChart.noNodes")}</p>
+            <StatoVuoto titolo={t("orgChart.noNodes")} testId="me-org-chart-nodes-empty" />
           ) : (
             <div data-testid="me-org-chart-graph">
               <EChartsCard option={option} height={520} ariaLabel={t("orgChart.graphAria")} />

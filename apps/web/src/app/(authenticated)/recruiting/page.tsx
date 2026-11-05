@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import {
-  PageHeader, Card, CardContent, EmptyState, Spinner, KanbanBoard,
+  PageHeader, Card, CardContent, KanbanBoard,
   type KanbanColumn,
 } from "@heuresys/ui";
 import type { ApplicationStage, CandidateApplication } from "@heuresys/shared";
@@ -16,6 +16,7 @@ import {
   useApplications, useCandidates, usePostings, useRequisitions,
 } from "@/lib/recruiting";
 import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /**
  * `#54` F4 — la pipeline di selezione: ogni candidatura e' una carta, ogni stadio una
@@ -168,14 +169,23 @@ export default function RecruitingPipelinePage() {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-12" data-testid="recruiting-loading"><Spinner /></div>
+        <StatoCaricamento testId="recruiting-loading" />
       ) : error ? (
-        <p className="text-sm text-danger" data-testid="recruiting-error">{t("recruiting.error")}</p>
+        <StatoErrore
+          errore={apps.error ?? candidates.error ?? postings.error}
+          titolo={t("recruiting.error")}
+          testId="recruiting-error"
+          onRiprova={() => {
+            if (apps.isError) void apps.refetch();
+            if (candidates.isError) void candidates.refetch();
+            if (postings.isError) void postings.refetch();
+          }}
+        />
       ) : items.length === 0 ? (
-        <EmptyState
-          data-testid="pipeline-empty"
-          title={t("recruiting.pipeline.emptyTitle")}
-          description={t("recruiting.pipeline.emptyDesc")}
+        <StatoVuoto
+          testId="pipeline-empty"
+          titolo={t("recruiting.pipeline.emptyTitle")}
+          motivo={t("recruiting.pipeline.emptyDesc")}
         />
       ) : (
         <div data-testid="pipeline-board" className="overflow-x-auto">

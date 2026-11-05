@@ -10,13 +10,12 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  ErrorState,
   PageHeader,
-  Spinner,
 } from "@heuresys/ui";
 import type { MfaPolicy, ListMfaPoliciesResponse } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { useCurrentUserPermissions } from "../../../../lib/api/auth";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /** The 8 canonical roles (config/constants.ts ROLE_CODES — validated server-side). */
 const ROLE_CODES = [
@@ -225,21 +224,22 @@ export default function AdminMfaPolicyPage() {
         </CardHeader>
         <CardContent className="p-0">
           {policies.isLoading ? (
-            <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
-              <Spinner /> {t("common:loading")}
+            <div className="p-6">
+              <StatoCaricamento />
             </div>
           ) : policies.isError ? (
-            <div className="p-6" data-testid="mfa-policy-access-error">
-              <ErrorState
-                title={t("mfaPolicy.accessDeniedTitle")}
-                description={t("mfaPolicy.accessDeniedDesc")}
-                retry={() => void policies.refetch()}
+            <div className="p-6">
+              <StatoErrore
+                errore={policies.error}
+                motivoNegato={t("mfaPolicy.accessDeniedDesc")}
+                testId="mfa-policy-access-error"
+                onRiprova={() => void policies.refetch()}
               />
             </div>
           ) : rows.length === 0 ? (
-            <p className="p-6 text-sm text-muted-foreground" data-testid="mfa-policy-empty">
-              {t("mfaPolicy.empty")}
-            </p>
+            <div className="p-6">
+              <StatoVuoto titolo={t("mfaPolicy.empty")} testId="mfa-policy-empty" />
+            </div>
           ) : (
             <ul className="divide-y divide-border" data-testid="mfa-policy-list">
               {rows.map((r) => (

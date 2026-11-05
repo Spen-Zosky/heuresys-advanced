@@ -4,12 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useParams } from "next/navigation";
 import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Spinner,
+  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge,
 } from "@heuresys/ui";
 import { Crown } from "lucide-react";
 import type { ProjectDetail } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 
 /**
  * `#143` F5 — il dettaglio di un progetto: il lavoro e chi lo fa.
@@ -40,15 +41,20 @@ export default function ProjectDetailPage() {
 
   if (q.isLoading) {
     return (
-      <main className="flex justify-center py-16" data-testid="project-detail-loading">
-        <Spinner />
+      <main className="mx-auto max-w-4xl px-6 py-8">
+        <StatoCaricamento testId="project-detail-loading" />
       </main>
     );
   }
   if (q.isError || !q.data) {
     return (
-      <main className="mx-auto max-w-4xl px-6 py-8" data-testid="project-detail-error">
-        <p className="text-sm text-danger">{t("projects.detailError")}</p>
+      <main className="mx-auto max-w-4xl px-6 py-8">
+        <StatoErrore
+          errore={q.error}
+          titolo={t("projects.detailError")}
+          testId="project-detail-error"
+          onRiprova={() => void q.refetch()}
+        />
       </main>
     );
   }

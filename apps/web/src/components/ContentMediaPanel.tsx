@@ -16,6 +16,7 @@ import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import type { ContentMediaItem, ListContentMediaResponse } from "@heuresys/shared";
 import { apiFetch } from "../lib/api/fetch";
 import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoVuoto } from "@/components/stato-pagina";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
@@ -104,11 +105,9 @@ export function ContentMediaPanel({ documentId, canEdit }: { documentId: string;
           </div>
         )}
         {media.isLoading ? (
-          <p className="text-sm text-muted-foreground">{t("content.media.loading")}</p>
+          <StatoCaricamento etichetta={t("content.media.loading")} />
         ) : items.length === 0 ? (
-          <p data-testid="content-media-empty" className="text-sm text-muted-foreground">
-            {t("content.media.empty")}
-          </p>
+          <StatoVuoto compatto titolo={t("content.media.empty")} testId="content-media-empty" />
         ) : (
           <ul className="divide-y">
             {items.map((m) => (

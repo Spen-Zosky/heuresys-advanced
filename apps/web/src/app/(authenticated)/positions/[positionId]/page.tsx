@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { FieldGrid } from "@/components/detail-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
@@ -46,7 +47,7 @@ export default function PositionDetailPage() {
   if (position.isLoading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+        <StatoCaricamento />
       </main>
     );
   }
@@ -55,7 +56,14 @@ export default function PositionDetailPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="position-error">
         <Link href="/positions" className="text-sm underline">{t("positions.detail.back")}</Link>
-        <p className="mt-4 text-danger">{code === 404 ? t("positions.detail.notFound") : t("positions.detail.loadError")}</p>
+        <div className="mt-4">
+          <StatoErrore
+            errore={position.error}
+            titolo={code === 404 ? t("positions.detail.notFound") : t("positions.detail.loadError")}
+            testId="position-error-state"
+            onRiprova={() => void position.refetch()}
+          />
+        </div>
       </main>
     );
   }

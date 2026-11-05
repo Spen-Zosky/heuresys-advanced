@@ -2,11 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, EmptyState, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge, PageHeader, StatsCard } from "@heuresys/ui";
 import { Building2, TrendingUp, Users } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { WorkforceAnalyticsResponse, WorkforceByDimensionRow } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /** Brand palette colors as raw HSL CSS-var references so the echarts canvas
  *  (which is outside Tailwind's reach) still follows the active theme tokens. */
@@ -81,15 +82,15 @@ export default function WorkforceAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main data-testid="analytics-workforce-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoCaricamento testId="analytics-workforce-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main data-testid="analytics-workforce-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">{t("error")}</p>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-workforce-error" onRiprova={() => void q.refetch()} />
       </main>
     );
   }
@@ -161,21 +162,21 @@ export default function WorkforceAnalyticsPage() {
                 />
               </div>
             ) : (
-              <EmptyState
-                data-testid="analytics-role-empty"
-                icon={<TrendingUp className="h-6 w-6" />}
-                title={t("workforce.roleEmptyTitle")}
-                description={t("workforce.roleEmptyDesc")}
+              <StatoVuoto
+                testId="analytics-role-empty"
+                icona={<TrendingUp className="h-6 w-6" />}
+                titolo={t("workforce.roleEmptyTitle")}
+                motivo={t("workforce.roleEmptyDesc")}
               />
             )}
           </div>
         </section>
       ) : (
-        <EmptyState
-          data-testid="analytics-workforce-empty"
-          icon={<Users className="h-6 w-6" />}
-          title={t("empty.title")}
-          description={t("workforce.emptyDesc")}
+        <StatoVuoto
+          testId="analytics-workforce-empty"
+          icona={<Users className="h-6 w-6" />}
+          titolo={t("empty.title")}
+          motivo={t("workforce.emptyDesc")}
         />
       )}
     </main>

@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import type { MeSurveyDetail } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 
 const INPUT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -64,9 +65,9 @@ export default function MeSurveyAnswerPage() {
       </div>
 
       {detail.isLoading ? (
-        <p className="text-sm text-muted-foreground" data-testid="me-survey-loading">{t("common:loading")}</p>
+        <StatoCaricamento testId="me-survey-loading" />
       ) : detail.isError || !d ? (
-        <p className="text-sm text-danger" data-testid="me-survey-detail-error">{t("surveys.notFound")}</p>
+        <StatoErrore errore={detail.error} titolo={t("surveys.notFound")} testId="me-survey-detail-error" onRiprova={() => void detail.refetch()} />
       ) : (
         <>
           <PageHeader

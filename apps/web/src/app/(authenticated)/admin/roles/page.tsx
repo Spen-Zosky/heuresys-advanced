@@ -3,7 +3,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Card, CardContent, ErrorState, PageHeader, Spinner } from "@heuresys/ui";
+import { Badge, Card, CardContent, PageHeader } from "@heuresys/ui";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { Check } from "lucide-react";
 import { apiFetch } from "../../../../lib/api/fetch";
 
@@ -41,7 +42,7 @@ export default function AdminRolesPage() {
 
   const countLabel = rp.data
     ? t("roles.count", { roles: roles.length, perms: perms.length, total: rp.data.total })
-    : t("common:loading");
+    : rp.isError ? t("common:stato.nonDisponibile") : t("common:loading");
 
   return (
     <main data-testid="admin-roles-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
@@ -66,15 +67,16 @@ export default function AdminRolesPage() {
           aria-label={t("roles.title")}
         >
           {rp.isLoading ? (
-            <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
-              <Spinner /> {t("common:loading")}
+            <div className="p-6">
+              <StatoCaricamento />
             </div>
           ) : rp.isError ? (
-            <div className="p-6" data-testid="admin-roles-error">
-              <ErrorState
-                title={t("roles.accessDeniedTitle")}
-                description={t("roles.accessDeniedDesc")}
-                retry={() => void rp.refetch()}
+            <div className="p-6">
+              <StatoErrore
+                errore={rp.error}
+                motivoNegato={t("roles.accessDeniedDesc")}
+                testId="admin-roles-error"
+                onRiprova={() => void rp.refetch()}
               />
             </div>
           ) : (

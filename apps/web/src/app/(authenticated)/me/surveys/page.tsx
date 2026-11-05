@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, EmptyState, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, PageHeader } from "@heuresys/ui";
 import { ClipboardList } from "lucide-react";
 import type { MeSurveysResponse } from "@heuresys/shared";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 
 export default function MeSurveysPage() {
@@ -25,21 +26,21 @@ export default function MeSurveysPage() {
         description={t("surveys.description")}
         badges={
           <Badge variant="secondary" data-testid="me-surveys-count">
-            {surveys.data ? t("surveys.count", { count: surveys.data.total }) : t("common:loading")}
+            {surveys.data ? t("surveys.count", { count: surveys.data.total }) : surveys.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />
 
       {surveys.isLoading ? (
-        <p className="text-sm text-muted-foreground" data-testid="me-surveys-loading">{t("common:loading")}</p>
+        <StatoCaricamento testId="me-surveys-loading" />
       ) : surveys.isError ? (
-        <p className="text-sm text-danger" data-testid="me-surveys-error">{t("surveys.error")}</p>
+        <StatoErrore errore={surveys.error} titolo={t("surveys.error")} testId="me-surveys-error" onRiprova={() => void surveys.refetch()} />
       ) : items.length === 0 ? (
-        <EmptyState
-          data-testid="me-surveys-empty"
-          icon={<ClipboardList className="h-6 w-6" />}
-          title={t("surveys.emptyTitle")}
-          description={t("surveys.emptyDesc")}
+        <StatoVuoto
+          testId="me-surveys-empty"
+          icona={<ClipboardList className="h-6 w-6" />}
+          titolo={t("surveys.emptyTitle")}
+          motivo={t("surveys.emptyDesc")}
         />
       ) : (
         <Card data-testid="me-surveys-list">

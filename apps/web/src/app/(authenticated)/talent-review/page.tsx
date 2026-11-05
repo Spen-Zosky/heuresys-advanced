@@ -186,9 +186,18 @@ export default function TalentReviewPage() {
                           </span>
                           <Badge variant="secondary">{rows.length}</Badge>
                         </div>
-                        <div className="flex max-h-40 flex-wrap gap-1 overflow-auto">
+                        {/* F-6 (L7): la cella scorre quando le persone sono molte; un'area che
+                            scorre deve potersi raggiungere da tastiera (`scrollable-region-focusable`),
+                            e allora porta un nome: la casella e quante persone contiene. */}
+                        <div
+                          role="list"
+                          tabIndex={0}
+                          aria-label={`${t(`talentReview.nineBox.band.${pot}`)} / ${t(`talentReview.nineBox.band.${perf}`)}: ${rows.length}`}
+                          className="flex max-h-40 flex-wrap gap-1 overflow-auto rounded-control focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+                        >
                           {rows.map((r) => (
                             <span
+                              role="listitem"
                               key={r.talentScoreId}
                               className="rounded-control border border-border bg-muted px-1.5 py-0.5 text-[11px] text-foreground"
                             >

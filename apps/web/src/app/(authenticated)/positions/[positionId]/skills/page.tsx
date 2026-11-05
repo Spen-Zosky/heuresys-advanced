@@ -47,7 +47,7 @@ export default function PositionSkillsPage() {
         }
         badges={
           <span data-testid="position-skills-count" className="text-sm text-muted-foreground">
-            {skills.data ? t("positions.skills.count", { count: items.length }) : t("common:loading")}
+            {skills.data ? t("positions.skills.count", { count: items.length }) : skills.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </span>
         }
       />

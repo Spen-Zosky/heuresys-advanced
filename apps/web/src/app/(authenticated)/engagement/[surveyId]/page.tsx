@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import type { EngagementSurveyResultsResponse, EngagementQuestionResult } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../../_charts-client";
@@ -61,9 +62,14 @@ export default function EngagementResultsPage() {
       </div>
 
       {results.isLoading ? (
-        <p className="text-sm text-muted-foreground" data-testid="engagement-results-loading">{t("common:loading")}</p>
+        <StatoCaricamento testId="engagement-results-loading" />
       ) : results.isError || !d ? (
-        <p className="text-sm text-danger" data-testid="engagement-results-error">{t("engagement.results.notFound")}</p>
+        <StatoErrore
+          errore={results.error}
+          titolo={t("engagement.results.notFound")}
+          testId="engagement-results-error"
+          onRiprova={() => void results.refetch()}
+        />
       ) : (
         <>
           <PageHeader data-testid="engagement-results-title" title={d.title} description={t("engagement.results.subtitle", { count: d.questions.length })} />

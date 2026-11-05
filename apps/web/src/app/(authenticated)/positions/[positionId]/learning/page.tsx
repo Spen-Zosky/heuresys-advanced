@@ -88,7 +88,7 @@ export default function PositionLearningPage() {
           <CardTitle>{t("positions.learning.requirements.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <EntityTable<PositionLearningRequirement>
+          <EntityTable<PositionLearningRequirement> originPath={"/v1/positions"}
             isLoading={requirements.isLoading}
             isError={requirements.isError}
             error={requirements.error}
@@ -136,7 +136,7 @@ export default function PositionLearningPage() {
           <CardTitle>{t("positions.learning.modules.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <EntityTable<PositionLearningModule>
+          <EntityTable<PositionLearningModule> originPath={"/v1/positions"}
             isLoading={modules.isLoading}
             isError={modules.isError}
             error={modules.error}

@@ -89,7 +89,7 @@ export default function SkillGapPage() {
 
   return (
     <div className="space-y-6">
-      <DataTablePanel<SkillGapScore>
+      <DataTablePanel<SkillGapScore> originPath={"/v1/insights/skill-gap"}
         pageTestId="skillgap-page"
         titleTestId="skillgap-title"
         countTestId="skillgap-count"

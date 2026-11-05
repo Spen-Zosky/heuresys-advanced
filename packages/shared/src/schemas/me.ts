@@ -61,6 +61,8 @@ export const MeIdentityDocumentSchema = z.object({
   kind: z.string(),
   number: z.string(),
   expiryDate: z.string().nullable(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 
 export const MeAddressSchema = z.object({
@@ -196,6 +198,8 @@ export const MeContractSchema = z.object({
   terminationReason: z.string().nullable(),
   notes: z.string().nullable(),
   masked: z.array(z.string()).optional(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 export type MeContract = z.infer<typeof MeContractSchema>;
 
@@ -222,6 +226,8 @@ export const MePaySlipSchema = z.object({
   /** Valuta del rapporto di lavoro in cui la busta e' pagata (F-1, piano interfacce). */
   currency: z.string().nullable().optional(),
   masked: z.array(z.string()).optional(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 export type MePaySlip = z.infer<typeof MePaySlipSchema>;
 
@@ -265,6 +271,8 @@ export const MeAttendanceDaySchema = z.object({
   hoursOvertime: z.number().nullable(),
   hoursTotal: z.number().nullable(),
   status: z.string().nullable(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 export const MeOvertimeEntrySchema = z.object({
   date: z.string().nullable(),
@@ -272,6 +280,8 @@ export const MeOvertimeEntrySchema = z.object({
   hours: z.number().nullable(),
   totalCompensation: z.number().nullable(),
   status: z.string().nullable(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 export const MeLeaveBalanceSchema = z.object({
   leaveType: z.string().nullable(),
@@ -280,6 +290,8 @@ export const MeLeaveBalanceSchema = z.object({
   usedDays: z.number().nullable(),
   pendingDays: z.number().nullable(),
   carryoverDays: z.number().nullable(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 export const MeAttendanceResponseSchema = z.object({
   recent: z.array(MeAttendanceDaySchema),

@@ -4,7 +4,7 @@
  * in a header, and single-flight refresh on 401 (M-5).
  */
 import { describe, it, expect } from "vitest";
-import { HeuresysClient, chiediGettoneAgente, type FetchLike, type Session } from "../src/heuresys-client.js";
+import { HeuresysClient, INTESTAZIONE_ORIGINE, chiediGettoneAgente, type FetchLike, type Session } from "../src/heuresys-client.js";
 
 const session: Session = {
   cookieAccess: "ACCESS",
@@ -125,3 +125,27 @@ describe("L9 A-1/A-3 — il gettone dell'agente", () => {
     expect(esito).toEqual({ ok: false, status: 403, corpo: { code: "AGENT_NO_ROLES" } });
   });
 });
+
+describe("A-14 — l'origine del dato dichiarata dall'API", () => {
+  it("resta legata alla risposta: origineDi la ritrova, e senza intestazione non c'è", async () => {
+    let n = 0;
+    const fetchImpl: FetchLike = async () => {
+      n += 1;
+      const conOrigine = n === 1;
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ items: [n] }),
+        text: async () => "",
+        headers: { get: (h: string) => (conOrigine && h === INTESTAZIONE_ORIGINE ? "importato" : null) },
+      };
+    };
+    const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
+    const prima = await c.call("GET", "/me/pay-slips");
+    const seconda = await c.call("GET", "/me/profile");
+    expect(c.origineDi(prima)).toBe("importato");
+    expect(c.origineDi(seconda)).toBeUndefined();
+    expect(c.origineDi(null)).toBeUndefined();
+  });
+});
+

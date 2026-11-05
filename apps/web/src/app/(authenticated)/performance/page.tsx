@@ -186,7 +186,7 @@ export default function PerformancePage() {
       <section className="space-y-3" data-testid="perf-cycles-section">
         <h2 className="text-sm font-semibold text-foreground">{t("performance.cycles.title")}</h2>
         <p className="text-xs text-muted-foreground">{t("performance.cycles.hint")}</p>
-        <EntityTable<ReviewCycle>
+        <EntityTable<ReviewCycle> originPath={"/v1/review-cycles"}
           isLoading={cicli.isLoading}
           isError={cicli.isError}
           error={cicli.error}
@@ -225,7 +225,7 @@ export default function PerformancePage() {
 
       <section className="space-y-3" data-testid="perf-calib-section">
         <h2 className="text-sm font-semibold text-foreground">{t("performance.calib.title")}</h2>
-        <EntityTable<CalibrationSession>
+        <EntityTable<CalibrationSession> originPath={"/v1/calibration-sessions"}
           isLoading={calibrazioni.isLoading}
           isError={calibrazioni.isError}
           error={calibrazioni.error}

@@ -58,7 +58,7 @@ export function GapClosurePanel() {
     <section data-testid="gap-closure" className="space-y-6">
       <div className="space-y-2">
         <h2 className="text-sm font-semibold text-foreground">{t("gaps.closure.plansTitle")}</h2>
-        <EntityTable<GapClosurePlan>
+        <EntityTable<GapClosurePlan> originPath={"/v1/learning-gaps"}
           isLoading={plans.isLoading} isError={plans.isError} error={plans.error} errorMessage={t("gaps.error")}
           rows={plans.data?.items ?? []} rowKey={(p) => p.planId} rowTestId="gap-plan-row"
           columns={planCols} emptyTitle={t("gaps.closure.plansEmpty")} caption={t("gaps.closure.plansTitle")}
@@ -66,7 +66,7 @@ export function GapClosurePanel() {
       </div>
       <div className="space-y-2">
         <h2 className="text-sm font-semibold text-foreground">{t("gaps.closure.resultsTitle")}</h2>
-        <EntityTable<GapAnalysisResult>
+        <EntityTable<GapAnalysisResult> originPath={"/v1/learning-gaps"}
           isLoading={results.isLoading} isError={results.isError} error={results.error} errorMessage={t("gaps.error")}
           rows={results.data?.items ?? []} rowKey={(r) => r.resultId} rowTestId="gap-result-row"
           columns={resultCols} emptyTitle={t("gaps.closure.resultsEmpty")} caption={t("gaps.closure.resultsTitle")}

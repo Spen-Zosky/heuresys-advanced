@@ -213,7 +213,7 @@ export function JobRolesPanel() {
           </div>
         </div>
 
-        <EntityTable<JobRole>
+        <EntityTable<JobRole> originPath={"/v1/job-roles"}
           isLoading={roles.isLoading}
           isError={roles.isError}
           error={roles.error}

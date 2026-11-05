@@ -52,7 +52,7 @@ export function KpiMetrologyPanel() {
 
       <div className="space-y-2">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("kpis.metrology.methods")}</h3>
-        <EntityTable<KpiAssessmentMethod>
+        <EntityTable<KpiAssessmentMethod> originPath={"/v1/kpi-definitions"}
           isLoading={methods.isLoading} isError={methods.isError} error={methods.error} errorMessage={t("kpis.errorMessage")}
           rows={methods.data?.items ?? []} rowKey={(m) => m.methodId} rowTestId="kpi-method-row"
           columns={methodCols} emptyTitle={t("kpis.metrology.empty")} caption={t("kpis.metrology.methods")}
@@ -61,7 +61,7 @@ export function KpiMetrologyPanel() {
 
       <div className="space-y-2">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("kpis.metrology.rules")}</h3>
-        <EntityTable<KpiWeightingRule>
+        <EntityTable<KpiWeightingRule> originPath={"/v1/kpi-definitions"}
           isLoading={rules.isLoading} isError={rules.isError} error={rules.error} errorMessage={t("kpis.errorMessage")}
           rows={rules.data?.items ?? []} rowKey={(r) => r.ruleId} rowTestId="kpi-rule-row"
           columns={ruleCols} emptyTitle={t("kpis.metrology.empty")} caption={t("kpis.metrology.rules")}

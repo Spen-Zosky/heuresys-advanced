@@ -129,6 +129,8 @@ export const CompensationRecommendationRowSchema = z.object({
   amountEur: z.number().nullable().optional(),
   narrative: z.string().nullable().optional(),
   payload: z.record(z.string(), z.unknown()).optional(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
   computedAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
   /** Names of the fields withheld from THIS row. Absent when nothing was withheld. */

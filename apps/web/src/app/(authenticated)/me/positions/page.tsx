@@ -51,7 +51,7 @@ export default function MePositionsPage() {
   );
 
   return (
-    <DataTablePanel<MePositionAssignment>
+    <DataTablePanel<MePositionAssignment> originPath={"/v1/me/positions"}
       pageTestId="me-positions-page"
       titleTestId="me-positions-title"
       countTestId="me-positions-count"

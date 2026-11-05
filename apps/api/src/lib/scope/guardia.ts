@@ -50,6 +50,8 @@ export const ROTTE_SENZA_PERMESSO: Readonly<Record<string, string>> = {
     "dati della propria sessione: richiede l'autenticazione e risponde solo sull'utente che chiama",
   "GET /v1/me/permissions":
     "dati della propria sessione: richiede l'autenticazione e risponde solo sull'utente che chiama",
+  "GET /v1/meta/data-origins":
+    "origine del dato per modulo (A-14): risponde solo a chi è autenticato, descrive tabelle e loro classificazione, nessun dato di persona",
   "GET /v1/meta/operations":
     "scoperta delle operazioni (A-9): esiste solo con API_DOCS_ENABLED, risponde solo a chi è autenticato e dice che cosa può fare lui",
   "GET /v1/public/job-postings":

@@ -801,5 +801,28 @@
     "error": "The code could not be verified.",
     "dossierNotice": "Pay and evaluations are hidden until you confirm your second factor.",
     "dossierAction": "Confirm to see them"
+  },
+  "origine": {
+    "label": "Data origin",
+    "riassunto": {
+      "nativo": "native",
+      "importato": "imported",
+      "ibrido": "hybrid",
+      "misto": "mixed",
+      "infrastruttura": "technical"
+    },
+    "stato": {
+      "nativo": "native",
+      "importato": "imported",
+      "ibrido": "hybrid",
+      "infrastruttura": "technical"
+    },
+    "perRiga": "origin per row",
+    "colonna": "Origin",
+    "riga": {
+      "IMPORT": "Imported",
+      "NATIVO": "Native",
+      "MATERIALIZZAZIONE": "Materialized"
+    }
   }
 }

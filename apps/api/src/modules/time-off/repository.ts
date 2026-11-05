@@ -42,6 +42,7 @@ interface RequestRow {
   request_cancelled_at: Date | null;
   request_cancelled_by_user_id: string | null;
   request_metadata: Record<string, unknown>;
+  origine_dato: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -53,7 +54,7 @@ const REQUEST_COLS = `request_id, request_tenant_id, request_subject_user_id,
   request_approver_user_id, request_approved_at, request_rejection_reason, request_overlap_approved,
   request_medical_cert_required, request_medical_cert_uploaded, request_cancellation_requested,
   request_cancellation_reason, request_cancelled_at, request_cancelled_by_user_id, request_metadata,
-  created_at, updated_at`;
+  origine_dato, created_at, updated_at`;
 
 function toRequest(r: RequestRow): TimeOffRequest {
   return {
@@ -80,6 +81,7 @@ function toRequest(r: RequestRow): TimeOffRequest {
     cancelledAt: r.request_cancelled_at ? r.request_cancelled_at.toISOString() : null,
     cancelledByUserId: r.request_cancelled_by_user_id,
     metadata: r.request_metadata ?? {},
+    origineDato: r.origine_dato,
     createdAt: r.created_at.toISOString(),
     updatedAt: r.updated_at.toISOString(),
   };
@@ -160,6 +162,7 @@ interface RuleRow {
   accrual_rule_is_ccnl_default: boolean;
   accrual_rule_is_active: boolean;
   accrual_rule_metadata: Record<string, unknown>;
+  origine_dato: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -168,7 +171,7 @@ const RULE_COLS = `accrual_rule_id, accrual_rule_tenant_id, accrual_rule_leave_t
   accrual_rule_description, accrual_rule_method, accrual_rule_amount, accrual_rule_max_accrual,
   accrual_rule_allow_carryover, accrual_rule_max_carryover_days, accrual_rule_carryover_expiry_months,
   accrual_rule_min_tenure_months, accrual_rule_prorated_first_year, accrual_rule_ccnl_type,
-  accrual_rule_is_ccnl_default, accrual_rule_is_active, accrual_rule_metadata, created_at, updated_at`;
+  accrual_rule_is_ccnl_default, accrual_rule_is_active, accrual_rule_metadata, origine_dato, created_at, updated_at`;
 
 function toRule(r: RuleRow): LeaveAccrualRule {
   return {
@@ -190,6 +193,7 @@ function toRule(r: RuleRow): LeaveAccrualRule {
     isCcnlDefault: r.accrual_rule_is_ccnl_default,
     isActive: r.accrual_rule_is_active,
     metadata: r.accrual_rule_metadata ?? {},
+    origineDato: r.origine_dato,
     createdAt: r.created_at.toISOString(),
     updatedAt: r.updated_at.toISOString(),
   };
@@ -251,13 +255,14 @@ interface TxnRow {
   transaction_description: string | null;
   transaction_performed_by_user_id: string | null;
   transaction_metadata: Record<string, unknown>;
+  origine_dato: string;
   created_at: Date;
 }
 
 const TXN_COLS = `t.transaction_id, t.transaction_tenant_id, t.transaction_balance_id,
   b.balance_subject_user_id, t.transaction_type, t.transaction_days_amount, t.transaction_reference_type,
   t.transaction_reference_id, t.transaction_description, t.transaction_performed_by_user_id,
-  t.transaction_metadata, t.created_at`;
+  t.transaction_metadata, t.origine_dato, t.created_at`;
 
 function toTxn(r: TxnRow): LeaveBalanceTransaction {
   return {
@@ -272,6 +277,7 @@ function toTxn(r: TxnRow): LeaveBalanceTransaction {
     description: r.transaction_description,
     performedByUserId: r.transaction_performed_by_user_id,
     metadata: r.transaction_metadata ?? {},
+    origineDato: r.origine_dato,
     createdAt: r.created_at.toISOString(),
   };
 }

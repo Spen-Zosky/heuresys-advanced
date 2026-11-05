@@ -458,7 +458,7 @@ export default function ContentEditPage() {
         </CardHeader>
         <CardContent>
           <div data-testid="content-versions-table">
-            <EntityTable<ContentVersion>
+            <EntityTable<ContentVersion> originPath={"/v1/content"}
               isLoading={versions.isLoading}
               isError={versions.isError}
               error={versions.error}

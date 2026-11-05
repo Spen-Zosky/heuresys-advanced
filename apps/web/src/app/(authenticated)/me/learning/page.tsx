@@ -53,7 +53,7 @@ export default function MeLearningPage() {
   );
 
   return (
-    <DataTablePanel<MeLearningAssignment>
+    <DataTablePanel<MeLearningAssignment> originPath={"/v1/me/learning"}
       pageTestId="me-learning-page"
       titleTestId="me-learning-title"
       countTestId="me-learning-count"

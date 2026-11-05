@@ -37,6 +37,11 @@
       "heuresys-source": "./src/schemas/mfa-policy.ts",
       "default": "./dist/schemas/mfa-policy.js"
     },
+    "./schemas/data-origins": {
+      "types": "./dist/schemas/data-origins.d.ts",
+      "heuresys-source": "./src/schemas/data-origins.ts",
+      "default": "./dist/schemas/data-origins.js"
+    },
     "./schemas/api-discovery": {
       "types": "./dist/schemas/api-discovery.d.ts",
       "heuresys-source": "./src/schemas/api-discovery.ts",

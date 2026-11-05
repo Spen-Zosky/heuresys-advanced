@@ -280,7 +280,7 @@ export default function MeCertificationsPage() {
       </Card>
 
       <div data-testid="me-certifications-table">
-        <EntityTable<MeCertification>
+        <EntityTable<MeCertification> originPath={"/v1/me/certifications"}
           isLoading={certs.isLoading}
           isError={certs.isError}
           error={certs.error}

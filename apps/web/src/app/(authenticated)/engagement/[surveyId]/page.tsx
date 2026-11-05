@@ -75,7 +75,7 @@ export default function EngagementResultsPage() {
           <PageHeader data-testid="engagement-results-title" title={d.title} description={t("engagement.results.subtitle", { count: d.questions.length })} />
 
           <div data-testid="engagement-results-table">
-            <EntityTable<EngagementQuestionResult>
+            <EntityTable<EngagementQuestionResult> originPath={"/v1/engagement/surveys"}
               isLoading={false}
               isError={false}
               errorMessage={t("engagement.errorMessage")}

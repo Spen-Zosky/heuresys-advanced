@@ -430,7 +430,7 @@ export default function ContentPage() {
 
       {/* Documents table */}
       <div data-testid="content-table">
-        <EntityTable<ContentDocument>
+        <EntityTable<ContentDocument> originPath={"/v1/content"}
           isLoading={docs.isLoading}
           isError={docs.isError}
           error={docs.error}

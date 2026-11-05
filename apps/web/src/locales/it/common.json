@@ -801,5 +801,28 @@
     "error": "Non è stato possibile verificare il codice.",
     "dossierNotice": "Retribuzione e valutazioni sono nascoste finché non confermi il secondo fattore.",
     "dossierAction": "Conferma per vederle"
+  },
+  "origine": {
+    "label": "Origine del dato",
+    "riassunto": {
+      "nativo": "nativa",
+      "importato": "importata",
+      "ibrido": "ibrida",
+      "misto": "mista",
+      "infrastruttura": "tecnica"
+    },
+    "stato": {
+      "nativo": "nativa",
+      "importato": "importata",
+      "ibrido": "ibrida",
+      "infrastruttura": "tecnica"
+    },
+    "perRiga": "origine riga per riga",
+    "colonna": "Origine",
+    "riga": {
+      "IMPORT": "Importata",
+      "NATIVO": "Nativa",
+      "MATERIALIZZAZIONE": "Materializzata"
+    }
   }
 }

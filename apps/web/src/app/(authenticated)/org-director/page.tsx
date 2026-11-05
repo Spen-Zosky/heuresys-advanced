@@ -139,7 +139,7 @@ export default function OrgDirectorPage() {
         description={t("orgDirector.description")}
         badges={composition.data ? <Badge variant="secondary" data-testid="org-director-count">{t("orgDirector.count", { count: rows.length })}</Badge> : undefined}
       />
-      <EntityTable<OrgRow>
+      <EntityTable<OrgRow> originPath={"/v1/capability/composition"}
         isLoading={isLoading} isError={isError} errorMessage={t("orgDirector.errorMessage")}
         rows={rows} rowKey={(r) => r.ouId} rowTestId="org-director-row" columns={columns}
         emptyTestId="org-director-empty" emptyTitle={t("orgDirector.emptyTitle")} emptyDescription={t("orgDirector.emptyDescription")} caption={t("orgDirector.caption")}
@@ -181,7 +181,7 @@ export default function OrgDirectorPage() {
               : t("orgDirector.essential.subtitleIdle")
           }
         />
-        <EntityTable<EssentialCapabilityItem>
+        <EntityTable<EssentialCapabilityItem> originPath={"/v1/capability/composition/essential-ranking"}
           isLoading={essential.isLoading}
           isError={essential.isError}
           error={essential.error}

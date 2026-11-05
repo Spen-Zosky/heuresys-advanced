@@ -170,7 +170,7 @@ export default function WhistleblowingConsolePage() {
         }
       />
 
-      <EntityTable<WhistleblowingListItem>
+      <EntityTable<WhistleblowingListItem> originPath={"/v1/whistleblowing/reports"}
         isLoading={reports.isLoading}
         isError={reports.isError}
         error={reports.error}

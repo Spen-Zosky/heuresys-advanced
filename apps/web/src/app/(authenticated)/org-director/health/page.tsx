@@ -154,7 +154,7 @@ export default function OrgHealthPage() {
         </section>
       ) : null}
 
-      <EntityTable<OrgHealthUnit>
+      <EntityTable<OrgHealthUnit> originPath={"/v1/org-health"}
         isLoading={scorecard.isLoading}
         isError={scorecard.isError}
         error={scorecard.error}

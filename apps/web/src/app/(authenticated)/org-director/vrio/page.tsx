@@ -156,7 +156,7 @@ export default function VrioScorecardPage() {
         </section>
       ) : null}
 
-      <EntityTable<VrioCapabilityItem>
+      <EntityTable<VrioCapabilityItem> originPath={"/v1/capability/composition/vrio"}
         isLoading={scorecard.isLoading}
         isError={scorecard.isError}
         error={scorecard.error}

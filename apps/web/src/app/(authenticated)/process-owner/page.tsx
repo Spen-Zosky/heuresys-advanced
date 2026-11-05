@@ -114,7 +114,7 @@ export default function ProcessOwnerPage() {
             {t("processOwner.raci.hint")}
           </div>
         ) : (
-          <EntityTable<OrgUnitProcessForProcess>
+          <EntityTable<OrgUnitProcessForProcess> originPath={"/v1/organization-unit-processes"}
             isLoading={raci.isLoading} isError={raci.isError} error={raci.error} errorMessage={t("processOwner.raci.errorMessage")}
             rows={raciRows} rowKey={(r) => r.orgUnitProcessId} rowTestId="raci-drill-row" columns={raciColumns}
             emptyTestId="raci-drill-empty" emptyTitle={t("processOwner.raci.empty")} caption={t("processOwner.raci.caption")}

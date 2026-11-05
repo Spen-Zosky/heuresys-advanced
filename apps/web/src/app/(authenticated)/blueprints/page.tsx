@@ -203,7 +203,7 @@ export default function BlueprintsPage() {
             </p>
           ) : null}
           <div className="mt-4">
-            <EntityTable<BlueprintActivation>
+            <EntityTable<BlueprintActivation> originPath={"/v1/blueprint-activations"}
               isLoading={activations.isLoading}
               isError={activations.isError}
               error={activations.error}

@@ -59,7 +59,7 @@ export default function MeKpisPage() {
   );
 
   return (
-    <DataTablePanel<MeKpi>
+    <DataTablePanel<MeKpi> originPath={"/v1/me/kpis"}
       pageTestId="me-kpis-page"
       titleTestId="me-kpis-title"
       countTestId="me-kpis-count"

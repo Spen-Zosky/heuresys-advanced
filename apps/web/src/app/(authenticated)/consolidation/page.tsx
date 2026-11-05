@@ -336,7 +336,7 @@ export default function ConsolidationPage() {
               ? <Badge variant="secondary" data-testid="consolidation-proposals-count">{t("consolidation.count", { count: righe.length })}</Badge>
               : undefined}
           />
-          <EntityTable<ConsolidationProposal>
+          <EntityTable<ConsolidationProposal> originPath={"/v1/tenant-consolidations"}
             isLoading={proposals.isLoading} isError={proposals.isError} error={proposals.error} errorMessage={t("consolidation.loadError")}
             rows={righe} pageSize={100} rowKey={(p) => p.proposalId} rowTestId="consolidation-proposal-row" columns={columns}
             emptyTestId="consolidation-proposals-empty"

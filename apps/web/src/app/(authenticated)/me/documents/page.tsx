@@ -50,7 +50,7 @@ export default function MeDocumentsPage() {
   );
 
   return (
-    <DataTablePanel<MeDocument>
+    <DataTablePanel<MeDocument> originPath={"/v1/me/documents"}
       pageTestId="me-documents-page"
       titleTestId="me-documents-title"
       countTestId="me-documents-count"

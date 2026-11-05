@@ -75,7 +75,7 @@ export default function MePerformancePage() {
   );
 
   return (
-    <DataTablePanel<MePerformanceReview>
+    <DataTablePanel<MePerformanceReview> originPath={"/v1/me/performance"}
       pageTestId="me-performance-page"
       titleTestId="me-performance-title"
       countTestId="me-performance-count"

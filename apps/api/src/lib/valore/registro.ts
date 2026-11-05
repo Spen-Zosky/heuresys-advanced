@@ -29,6 +29,8 @@ declare module "fastify" {
   interface FastifyRequest {
     /** Corpo della risposta così come è partito (testo JSON), tenuto da onSend per onResponse. */
     valoreRispostaGrezza?: string;
+    /** L9, A-1: un dettaglio che il gestore vuole nel registro delle scritture (audit.registro_scritture). */
+    dettaglioScrittura?: Record<string, unknown>;
   }
 }
 
@@ -111,7 +113,46 @@ function inizioOra(d: Date): Date {
 }
 
 function superficieDi(req: FastifyRequest): Superficie | null {
+  // L9, A-1: un gettone d'agente dice da sé chi è; l'intestazione non lo contraddice.
+  const agente = req.user?.agente;
+  if (agente) return { tipo: "agente", valore: agente.codice };
   return leggiSuperficie(req.headers[SUPERFICIE_HEADER]);
+}
+
+/**
+ * L9, A-1 (migrazione 000477): ogni scrittura su /v1/* di chi è autenticato, con qualunque
+ * esito, in `audit.registro_scritture`: chi (persona o agente), per conto di chi, che cosa,
+ * quando, con quale risposta. È un registro diverso dalle decisioni qui sopra: quelle sono le
+ * sole scritture del catalogo andate a buon fine, questo le tiene tutte.
+ */
+async function registraScrittura(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  if (!SCRITTURE.has(req.method)) return;
+  const user = req.user;
+  if (!user) return;
+  const modello = req.routeOptions?.url;
+  if (!modello || !modello.startsWith("/v1/")) return;
+  const agente = user.agente;
+  await pool.query(
+    `INSERT INTO audit.registro_scritture
+       (registro_scrittura_tenant_id, registro_scrittura_attore_tipo, registro_scrittura_persona_user_id,
+        registro_scrittura_agente_codice, registro_scrittura_agente_compito, registro_scrittura_gettone_jti,
+        registro_scrittura_metodo, registro_scrittura_rotta, registro_scrittura_stato_http,
+        registro_scrittura_richiesta_id, registro_scrittura_dettaglio)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+    [
+      user.tenantId,
+      agente ? "agente" : "persona",
+      user.userId,
+      agente?.codice ?? null,
+      agente?.compito ?? null,
+      user.jti ?? null,
+      req.method,
+      chiaveRotta(req.method, modello).slice(req.method.length + 1),
+      reply.statusCode,
+      String(req.id),
+      req.dettaglioScrittura ? JSON.stringify(req.dettaglioScrittura) : null,
+    ],
+  );
 }
 
 async function registraUso(req: FastifyRequest, tenantId: string, userId: string, sup: Superficie, rotta: string): Promise<void> {
@@ -239,9 +280,14 @@ export function registraEventiDiValore(app: FastifyInstance, opzioni: { serializ
   });
 
   app.addHook("onResponse", async (req, reply) => {
-    const lavoro = registra(req, reply).catch((err: unknown) => {
-      req.log.warn({ err, route: req.routeOptions?.url }, "valore: evento non registrato");
-    });
+    const lavoro = Promise.all([
+      registra(req, reply).catch((err: unknown) => {
+        req.log.warn({ err, route: req.routeOptions?.url }, "valore: evento non registrato");
+      }),
+      registraScrittura(req, reply).catch((err: unknown) => {
+        req.log.warn({ err, route: req.routeOptions?.url }, "registro delle scritture: riga non scritta");
+      }),
+    ]).then(() => undefined);
     if (serializzato) inVolo = inVolo.then(() => lavoro);
     await lavoro;
   });

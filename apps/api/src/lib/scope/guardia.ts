@@ -76,6 +76,8 @@ export const ROTTE_SENZA_PERMESSO: Readonly<Record<string, string>> = {
     "catalogo di tassonomia comune (ADR-0039, catalogGate): lettura aperta a ogni utente autenticato, nessun dato di persona",
   "GET /v1/whistleblowing/status/:code":
     "il segnalante segue la pratica con il codice ricevuto: il codice e' la credenziale, 20 al minuto",
+  "POST /v1/auth/agent-tokens":
+    "piano interfacce L9, A-1/A-2/A-3: la persona presta a un agente al più il proprio perimetro senza mandati (ADR-0050 D6), con CSRF, sessione viva e limite di frequenza; un gettone d'agente non ne chiede un altro",
   "POST /v1/auth/login":
     "si entra senza sessione: e' la porta d'accesso, protetta dal limite di frequenza della rotta",
   "POST /v1/auth/logout":

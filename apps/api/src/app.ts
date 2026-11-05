@@ -41,6 +41,7 @@ import { buildMfaServiceWithMailer } from "./modules/auth/mfa-service.js";
 import { tenantsRoutes } from "./modules/tenants/routes.js";
 import { usersRoutes } from "./modules/users/routes.js";
 import { mandateActsRoutes } from "./modules/mandate-acts/routes.js";
+import { agentTokensRoutes } from "./modules/agent-tokens/routes.js";
 import { positionsRoutes } from "./modules/positions/routes.js";
 import { organizationUnitsRoutes } from "./modules/organization-units/routes.js";
 import { projectsRoutes } from "./modules/projects/routes.js";
@@ -444,6 +445,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     },
   });
   await app.register(authRoutes, { prefix: "/v1/auth", mailer: authMailer, mfaService, mfaEnforcement });
+  // Piano interfacce L9, A-1/A-2/A-3: il gettone breve dell'agente, chiesto dalla persona.
+  await app.register(agentTokensRoutes, { prefix: "/v1/auth/agent-tokens" });
   await app.register(mfaRoutes, {
     prefix: "/v1/auth/mfa",
     service: mfaService,

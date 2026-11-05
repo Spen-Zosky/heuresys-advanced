@@ -140,3 +140,53 @@ export class HeuresysClient {
     return dati;
   }
 }
+
+/**
+ * Piano interfacce L9, A-1/A-2/A-3 (ADR-0050 D6): il gettone dell'agente.
+ *
+ * Con i cookie della persona il gateway chiede all'API un gettone breve per un agente e un
+ * compito (`POST /v1/auth/agent-tokens`); da lì in poi l'agente chiama con quel gettone, non con
+ * i cookie della persona. Così l'API sa che chi scrive è un agente e per conto di chi, il
+ * perimetro è al più quello della persona senza mandati (ristretto se il compito porta
+ * `permissions`), e alla scadenza non c'è rinnovo: si ripassa dalla persona.
+ *
+ * Restituisce la sessione da dare al client (senza `cookieRefresh`: niente rinnovo), oppure
+ * l'esito dell'API quando il gettone è rifiutato.
+ */
+export interface RichiestaGettone {
+  agentCode: string;
+  task: string;
+  permissions?: string[];
+}
+
+export async function chiediGettoneAgente(
+  baseUrl: string,
+  persona: { cookieAccess: string; cookieCsrf: string },
+  richiesta: RichiestaGettone,
+  fetchImpl: FetchLike = globalThis.fetch as unknown as FetchLike,
+): Promise<{ ok: true; session: Session; expiresAt: string } | { ok: false; status: number; corpo: unknown }> {
+  const res = await fetchImpl(`${baseUrl.replace(/\/$/, "")}/v1/auth/agent-tokens`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      cookie: `hrx_access=${persona.cookieAccess}; hrx_csrf=${persona.cookieCsrf}`,
+      "x-csrf-token": persona.cookieCsrf,
+    },
+    body: JSON.stringify(richiesta),
+  });
+  if (!res.ok) {
+    let corpo: unknown = null;
+    try {
+      corpo = await res.json();
+    } catch {
+      /* il corpo dell'errore è informazione in più, non la condizione */
+    }
+    return { ok: false, status: res.status, corpo };
+  }
+  const dati = (await res.json()) as { token: string; expiresAt: string };
+  return {
+    ok: true,
+    session: { cookieAccess: dati.token, cookieCsrf: persona.cookieCsrf, csrf: persona.cookieCsrf },
+    expiresAt: dati.expiresAt,
+  };
+}

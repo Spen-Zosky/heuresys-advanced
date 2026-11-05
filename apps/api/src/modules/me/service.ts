@@ -131,7 +131,7 @@ export const meService = {
    *  require an admin-class role AND the per-item permission. All 5 sections are always
    *  returned (an empty one renders an honest empty-state in the UI). */
   async getInterfaces(actor: SelfActor): Promise<MeInterfacesResponse> {
-    const permSet = new Set(userPermissionCodes({ roles: actor.roles }));
+    const permSet = new Set(userPermissionCodes(actor));
     const permessiDaMandato = new Set(
       userPermissionCodes({ roles: actor.roles.filter((r) => MANDATI_FUNZIONALI_CON_SUPERFICIE.has(r as RoleCode)) }),
     );

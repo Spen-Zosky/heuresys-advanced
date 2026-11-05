@@ -18,6 +18,7 @@ import type { RoleCode } from "../config/constants.js";
 import { UnauthorizedError } from "../errors/index.js";
 import { sessioneD5, type SessioneD5 } from "./scope/conferma.js";
 import type { DataClass } from "./scope/data-classes.js";
+import type { AgenteDelGettone } from "../middleware/auth.js";
 
 /** Authenticated caller projection used by services for scope authorization. */
 export interface ActorContext {
@@ -42,6 +43,12 @@ export interface ActorContext {
    * una richiesta» (lavoro pianificato, script), che D5 non governa (confine dichiarato).
    */
   daRichiesta?: true;
+  /**
+   * Piano interfacce L9, A-1/A-2: chi chiama è un agente per conto di `userId`. I ruoli sono
+   * già senza mandati (ADR-0050 D6); `permessi` restringe per compito, e `userHasPermission`
+   * lo legge anche dall'attore, non solo da `req.user`.
+   */
+  agente?: AgenteDelGettone;
 }
 
 /** True iff the actor holds the cross-tenant PLATFORM_ADMIN role. */
@@ -80,6 +87,7 @@ export function actorFromRequest(req: FastifyRequest): ActorContext {
     tenantId: req.user.tenantId,
     roles: req.user.roles,
     ...(req.assignedTenantIds !== undefined ? { assignedTenantIds: req.assignedTenantIds } : {}),
+    ...(req.user.agente ? { agente: req.user.agente } : {}),
     ...d5(req),
   };
 }

@@ -95,7 +95,7 @@ export const dashboardService = {
    * autenticato, e ciò che restituisce è già solo suo.
    */
   async getCatalog(actor: ActorContext): Promise<DashboardCatalogResponse> {
-    const permessi = new Set(userPermissionCodes({ roles: actor.roles }));
+    const permessi = new Set(userPermissionCodes(actor));
     const domini = await dominiCheApronoUnaSuperficie(pool, {
       userId: actor.userId, tenantId: actor.tenantId, roles: actor.roles,
     });
@@ -132,7 +132,7 @@ export const dashboardService = {
     // stesso che quel middleware userebbe: la condizione è identica, e due codici diversi
     // per lo stesso diniego renderebbero il contratto pubblico incoerente.
     if (riga.permission_code !== null) {
-      const permessi = new Set(userPermissionCodes({ roles: actor.roles }));
+      const permessi = new Set(userPermissionCodes(actor));
       if (!permessi.has(riga.permission_code)) {
         throw new ForbiddenError(`Manca il permesso ${riga.permission_code}`, "FORBIDDEN");
       }
@@ -177,7 +177,7 @@ export const dashboardService = {
     if (!riga) throw new NotFoundError(`Cruscotto '${code}' inesistente`, "DASHBOARD_NOT_FOUND");
 
     if (riga.permission_code !== null) {
-      const permessi = new Set(userPermissionCodes({ roles: actor.roles }));
+      const permessi = new Set(userPermissionCodes(actor));
       if (!permessi.has(riga.permission_code)) {
         throw new ForbiddenError(`Manca il permesso ${riga.permission_code}`, "FORBIDDEN");
       }

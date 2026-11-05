@@ -37,6 +37,11 @@
       "heuresys-source": "./src/schemas/mfa-policy.ts",
       "default": "./dist/schemas/mfa-policy.js"
     },
+    "./schemas/agent-tokens": {
+      "types": "./dist/schemas/agent-tokens.d.ts",
+      "heuresys-source": "./src/schemas/agent-tokens.ts",
+      "default": "./dist/schemas/agent-tokens.js"
+    },
     "./schemas/role-codes": {
       "types": "./dist/schemas/role-codes.d.ts",
       "heuresys-source": "./src/schemas/role-codes.ts",

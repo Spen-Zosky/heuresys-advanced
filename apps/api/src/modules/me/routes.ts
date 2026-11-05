@@ -95,7 +95,7 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { response: { 200: MePermissionsResponseSchema } },
   }, async (req) => {
     const actor = selfActor(req);
-    return { roles: actor.roles, permissions: userPermissionCodes({ roles: actor.roles }) };
+    return { roles: actor.roles, permissions: userPermissionCodes({ roles: actor.roles, agente: req.user?.agente }) };
   });
 
   // DB-driven sidebar registry (U1) — the interfaces the caller can see, grouped by PET

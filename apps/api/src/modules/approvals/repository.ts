@@ -443,6 +443,8 @@ export async function decideStepGuarded(
   comment: string | null,
   deciderUserId: string,
   actingDelegationId: string | null = null,
+  /** L9, A-5 (ADR-0051 §6): la firma «agente X per conto di Y», quando decide un agente della persona. */
+  agente: { codice: string; compito: string } | null = null,
 ): Promise<ApprovalStepRow | null> {
   const res = await client.query(
     `UPDATE sys.sys_approval_steps
@@ -450,10 +452,12 @@ export async function decideStepGuarded(
             approval_step_decided_at = now(), approval_step_decided_by = $4,
             approval_step_decided_by_snapshot =
               (SELECT user_email FROM sys.sys_users WHERE user_id = $4),
-            approval_step_acting_delegation_id = $5
+            approval_step_acting_delegation_id = $5,
+            approval_step_metadata = CASE WHEN $6::jsonb IS NULL THEN approval_step_metadata
+                                          ELSE approval_step_metadata || jsonb_build_object('decisoDaAgente', $6::jsonb) END
       WHERE approval_step_id = $1 AND approval_step_status = 'PENDING'
       RETURNING ${STEP_COLS}`,
-    [stepId, newStatus, comment, deciderUserId, actingDelegationId],
+    [stepId, newStatus, comment, deciderUserId, actingDelegationId, agente ? JSON.stringify(agente) : null],
   );
   return res.rows[0] ? mapStep(res.rows[0]) : null;
 }

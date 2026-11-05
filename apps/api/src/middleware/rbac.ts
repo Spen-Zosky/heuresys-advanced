@@ -65,7 +65,15 @@ export function roleGrantSize(role: RoleCode): number {
   return rolePermissionCache.get(role)?.size ?? 0;
 }
 
-export function userHasPermission(user: { roles: RoleCode[] }, permissionCode: string): boolean {
+/** A-2: il perimetro di un gettone d'agente, se c'è (null = tutti i permessi dei suoi ruoli). */
+interface ConAgente {
+  agente?: { permessi: ReadonlySet<string> | null } | undefined;
+}
+
+export function userHasPermission(user: { roles: RoleCode[] } & ConAgente, permissionCode: string): boolean {
+  // A-2: un agente ha un permesso solo se lo hanno i ruoli del gettone E il compito lo comprende.
+  const compito = user.agente?.permessi;
+  if (compito && !compito.has(permissionCode)) return false;
   for (const role of user.roles) {
     const perms = rolePermissionCache.get(role);
     if (perms?.has(permissionCode)) return true;
@@ -77,11 +85,12 @@ export function userHasPermission(user: { roles: RoleCode[] }, permissionCode: s
  * Flattened, de-duplicated, sorted set of permission codes the user holds across
  * all their roles. Backs GET /v1/me/permissions, which drives per-item sidebar gating.
  */
-export function userPermissionCodes(user: { roles: readonly string[] }): string[] {
+export function userPermissionCodes(user: { roles: readonly string[] } & ConAgente): string[] {
   const out = new Set<string>();
+  const compito = user.agente?.permessi;
   for (const role of user.roles) {
     const perms = rolePermissionCache.get(role as RoleCode);
-    if (perms) for (const p of perms) out.add(p);
+    if (perms) for (const p of perms) if (!compito || compito.has(p)) out.add(p);
   }
   return Array.from(out).sort();
 }

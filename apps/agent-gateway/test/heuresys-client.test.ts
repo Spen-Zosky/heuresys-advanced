@@ -4,7 +4,7 @@
  * in a header, and single-flight refresh on 401 (M-5).
  */
 import { describe, it, expect } from "vitest";
-import { HeuresysClient, type FetchLike, type Session } from "../src/heuresys-client.js";
+import { HeuresysClient, chiediGettoneAgente, type FetchLike, type Session } from "../src/heuresys-client.js";
 
 const session: Session = {
   cookieAccess: "ACCESS",
@@ -80,5 +80,41 @@ describe("HeuresysClient auth/CSRF", () => {
     const { fetchImpl } = recordingFetch(() => ({ ok: false, status: 403, body: {} }));
     const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
     await expect(c.call("GET", "/positions")).rejects.toThrow(/403/);
+  });
+});
+
+describe("L9 A-1/A-3 — il gettone dell'agente", () => {
+  it("lo chiede con i cookie e il CSRF della persona, e la sessione che ne esce non si rinnova", async () => {
+    const { fetchImpl, calls } = recordingFetch(() => ({
+      ok: true,
+      status: 201,
+      body: { token: "GETTONE", expiresAt: "2026-11-05T10:00:00.000Z" },
+    }));
+    const esito = await chiediGettoneAgente(
+      "http://api/",
+      { cookieAccess: "PERSONA", cookieCsrf: "CT" },
+      { agentCode: "assistente-hr", task: "prova", permissions: ["approval:read"] },
+      fetchImpl,
+    );
+    expect(calls[0]!.url).toBe("http://api/v1/auth/agent-tokens");
+    expect(calls[0]!.method).toBe("POST");
+    expect(calls[0]!.headers["cookie"]).toContain("hrx_access=PERSONA");
+    expect(calls[0]!.headers["x-csrf-token"]).toBe("CT");
+    expect(esito.ok).toBe(true);
+    if (!esito.ok) return;
+    expect(esito.session.cookieAccess).toBe("GETTONE");
+    expect(esito.session.cookieRefresh).toBeUndefined();
+
+    // A-3: scaduto il gettone, il client non rinnova: un 401 resta un 401, con una sola chiamata.
+    const dopo = recordingFetch(() => ({ ok: false, status: 401 }));
+    const c = new HeuresysClient({ baseUrl: "http://api", session: esito.session, fetchImpl: dopo.fetchImpl });
+    await expect(c.call("GET", "/approvals")).rejects.toThrow(/401/);
+    expect(dopo.calls.map((x) => x.url)).toEqual(["http://api/v1/approvals"]);
+  });
+
+  it("restituisce il rifiuto dell'API invece di proseguire con i cookie della persona", async () => {
+    const { fetchImpl } = recordingFetch(() => ({ ok: false, status: 403, body: { code: "AGENT_NO_ROLES" } }));
+    const esito = await chiediGettoneAgente("http://api", { cookieAccess: "P", cookieCsrf: "CT" }, { agentCode: "a", task: "prova" }, fetchImpl);
+    expect(esito).toEqual({ ok: false, status: 403, corpo: { code: "AGENT_NO_ROLES" } });
   });
 });

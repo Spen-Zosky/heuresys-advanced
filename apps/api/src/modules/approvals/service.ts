@@ -318,6 +318,7 @@ export const approvalService = {
       const newStatus = body.decision === "APPROVE" ? "APPROVED" : "REJECTED";
       const step = await repo.decideStepGuarded(
         client, stepId, newStatus, body.comment ?? null, a.userId, onBehalf?.delegationId ?? null,
+        a.agente ? { codice: a.agente.codice, compito: a.agente.compito } : null,
       );
       if (!step) throw new ConflictError("This step was already decided", "ALREADY_DECIDED");
 

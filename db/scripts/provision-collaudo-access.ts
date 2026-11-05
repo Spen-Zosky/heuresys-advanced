@@ -166,6 +166,42 @@ function fail(msg: string): never {
   throw new Error(msg);
 }
 
+/** ADR-0050 D3: un'esenzione si rinnova quando scade entro questi giorni. */
+const RINNOVO_GIORNI = 7;
+
+/**
+ * ADR-0050 D3: l'autore di un'esenzione è una persona (utenza STANDARD, ACTIVE). Per il
+ * collaudo è chi lo ha disposto: la direttiva del 2026-08-25 (EXEMPTION_REASON) viene
+ * dall'Amministratore di Sistema, cioè la persona che regge la piattaforma. Si legge dai
+ * dati, senza nomi nel codice: `COLLAUDO_AUTORE_EMAIL` se l'ambiente lo dichiara, altrimenti
+ * la persona con la concessione PLATFORM_ADMIN attiva più antica. Se non c'è nessuno ci si
+ * ferma: un'esenzione senza autore non nasce.
+ */
+async function autoreDelleEsenzioni(db: Client): Promise<string> {
+  const email = process.env.COLLAUDO_AUTORE_EMAIL?.trim();
+  const r = email
+    ? await db.query<{ user_id: string }>(
+        `SELECT user_id FROM sys.sys_users
+          WHERE lower(user_email) = lower($1) AND user_type = 'STANDARD' AND user_status = 'ACTIVE'`,
+        [email])
+    : await db.query<{ user_id: string }>(
+        `SELECT u.user_id
+           FROM sys.sys_user_auth_roles ur
+           JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+           JOIN sys.sys_users u ON u.user_id = ur.user_auth_role_user_id
+          WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND ur.user_auth_role_revoked_at IS NULL
+            AND u.user_type = 'STANDARD' AND u.user_status = 'ACTIVE'
+          ORDER BY ur.user_auth_role_granted_at, u.user_id
+          LIMIT 1`);
+  const id = r.rows[0]?.user_id;
+  if (!id) {
+    fail(email
+      ? `COLLAUDO_AUTORE_EMAIL non è una persona attiva (STANDARD, ACTIVE): un'esenzione senza autore non nasce (ADR-0050 D3)`
+      : `nessuna persona attiva con PLATFORM_ADMIN: un'esenzione senza autore non nasce (ADR-0050 D3); dichiara COLLAUDO_AUTORE_EMAIL`);
+  }
+  return id;
+}
+
 async function main(): Promise<void> {
   const db = new Client({
     host: process.env.POSTGRES_HOST ?? "localhost",
@@ -223,6 +259,7 @@ async function main(): Promise<void> {
         WHERE u.user_type <> 'SERVICE'`);
     const fattoriPersoneBefore = facBefore.rows[0]!.n;
 
+    let autore: string | undefined;
     const stats = {
       utenti: 0, ruoli: 0, identita: 0, credenziali: 0, iscrizioni: 0, esenzioni: 0,
       riallineate: 0, disallineate: 0, fattoriRimossi: 0, fattoriCreatiMfa: 0, esenzioniSpente: 0, invariati: 0,
@@ -443,19 +480,37 @@ async function main(): Promise<void> {
             [userId, EXEMPTION_REASON]);
         }
 
+        // ADR-0050 D3 (mig 000474): l'esenzione ha un autore e scade entro 30 giorni. Si rinnova
+        // quando manca, è spenta, non ha autore o scade entro RINNOVO_GIORNI: così due corse di fila non
+        // cambiano niente, e la CI, che gira ogni giorno, la tiene viva.
+        // Fuori dal collaudo (D-02) le utenze sono accese solo per un giro dichiarato, e
+        // `sospendi-collaudo --riattiva` dà all'esenzione un giorno: qui non si allunga. Si rinnova
+        // solo se manca, è spenta, non ha autore o è già scaduta, e di nuovo per un giorno.
+        const sogliaGiorni = ambienteDiCollaudo ? RINNOVO_GIORNI : 0;
+        const durataGiorni = ambienteDiCollaudo ? 30 : 1;
         const exemption = await db.query(
           `SELECT 1 FROM sys.sys_auth_mfa_exemptions WHERE auth_mfa_exemption_user_id = $1
-             AND auth_mfa_exemption_enabled`, [userId]);
+             AND auth_mfa_exemption_enabled AND created_by IS NOT NULL
+             AND auth_mfa_exemption_expires_at > now() + make_interval(days => $2)`,
+          [userId, sogliaGiorni]);
         if (exemption.rowCount === 0) {
           stats.esenzioni++; touched = true;
-          // il trigger della 000118 RI-VERIFICA qui che l'utente sia SERVICE:
-          // la guardia vive nel database, non in questa riga.
-          if (!DRY) await db.query(
-            `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason)
-             VALUES ($1, $2)
-             ON CONFLICT (auth_mfa_exemption_user_id)
-             DO UPDATE SET auth_mfa_exemption_enabled = true, auth_mfa_exemption_reason = EXCLUDED.auth_mfa_exemption_reason`,
-            [userId, EXEMPTION_REASON]);
+          // il trigger della 000118 RI-VERIFICA qui che l'utente sia SERVICE, e quello della
+          // 000474 l'autore e la scadenza: la guardia vive nel database, non in questa riga.
+          if (!DRY) {
+            autore ??= await autoreDelleEsenzioni(db);
+            await db.query(
+              `INSERT INTO sys.sys_auth_mfa_exemptions
+                 (auth_mfa_exemption_user_id, auth_mfa_exemption_reason,
+                  auth_mfa_exemption_expires_at, created_by)
+               VALUES ($1, $2, now() + make_interval(days => $4), $3)
+               ON CONFLICT (auth_mfa_exemption_user_id)
+               DO UPDATE SET auth_mfa_exemption_enabled = true,
+                             auth_mfa_exemption_reason = EXCLUDED.auth_mfa_exemption_reason,
+                             auth_mfa_exemption_expires_at = EXCLUDED.auth_mfa_exemption_expires_at,
+                             created_by = EXCLUDED.created_by`,
+              [userId, EXEMPTION_REASON, autore, durataGiorni]);
+          }
         }
 
         // un fattore TOTP su un'utenza di collaudo esente sarebbe un segreto di troppo

@@ -188,14 +188,16 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
       putUp("hrx_typing_profile_upsert", "/enterprise-typing-profiles"), // enterprise_typing:update (tenant-admin)
       up("hrx_blueprint_activation_upsert", "/blueprint-activations"), // blueprint:activate (tenant-admin)
       putUp("hrx_blueprint_override_upsert", "/blueprint-overrides"), // blueprint:override (tenant-admin)
-      // SERVICE principal (PLATFORM_ADMIN): job-families + blueprint catalogue --
+      // Catalogo (job-families, blueprint): li scrive una persona con PLATFORM_ADMIN, con il suo
+      // secondo fattore. ADR-0050 D6: l'agente non porta mandati e agisce con i cookie della
+      // persona; non esiste più un'utenza di servizio con PLATFORM_ADMIN.
       up("hrx_job_families_upsert", "/job-families"), // PLATFORM_ADMIN service-gate
       del("hrx_job_families_delete", "/job-families"),
       up("hrx_blueprint_families_upsert", "/blueprint-families"), // blueprint:activate/override (PLATFORM_ADMIN)
       up("hrx_blueprint_variants_upsert", "/blueprint-variants"),
       up("hrx_blueprint_processes_upsert", "/blueprint-processes"),
-      // WI-C: costruzione di un'azienda da un MODELLO (WRITE; utente di servizio
-      // PLATFORM_ADMIN). Prendeva la chiave di un modello cablato in TypeScript, ritirato
+      // WI-C: costruzione di un'azienda da un MODELLO (WRITE; persona con PLATFORM_ADMIN,
+      // ADR-0050 D6). Prendeva la chiave di un modello cablato in TypeScript, ritirato
       // da #132 F3 (E29): qualunque azienda si costruisse nasceva la stessa banca.
       // mode=plan is a dry-run (no writes); mode=apply mutates. Both route through the HITL
       // gate (classified WRITE by name in mcp-tool-names.ts → canUseTool approval).

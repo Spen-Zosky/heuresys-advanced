@@ -19,6 +19,7 @@ import { csrfStore } from "./csrf-store";
 import { ApiError, NetworkError, SessionExpiredError, type ApiErrorBody } from "./errors";
 import { SUPERFICIE_HEADER, superficiePagina } from "@heuresys/shared/schemas/valore";
 import { segnalaPermessoNegato, svuotaCopiaDiSessione } from "./session-cache";
+import { chiediConferma, STEP_UP_REQUIRED_CODE } from "./step-up";
 
 export type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
@@ -29,6 +30,8 @@ export interface ApiFetchOptions<TSchema extends ZodTypeAny | undefined = undefi
   schema?: TSchema;
   /** Internal flag — set by the silent-refresh retry to prevent infinite loops. */
   isRetry?: boolean;
+  /** Internal flag — set by the ADR-0050 D5 retry after a second-factor confirmation. */
+  isStepUpRetry?: boolean;
   /** Override base URL (default: same-origin `/api`). */
   baseUrl?: string;
   /** Extra headers (caller-supplied; we always set content-type for JSON). */
@@ -108,6 +111,7 @@ export async function apiFetch<T = unknown>(
     body,
     schema,
     isRetry = false,
+    isStepUpRetry = false,
     baseUrl = "/api",
     headers: extraHeaders,
     signal,
@@ -181,6 +185,18 @@ export async function apiFetch<T = unknown>(
   }
 
   if (!response.ok) {
+    // ADR-0050 D5: non è un permesso negato, è una conferma che manca. Si chiede il secondo
+    // fattore e, se la persona lo conferma, si ripete la richiesta una volta.
+    const codice =
+      parsed && typeof parsed === "object" && "error" in parsed
+        ? (parsed as ApiErrorBody).error?.code
+        : undefined;
+    if (response.status === 403 && codice === STEP_UP_REQUIRED_CODE) {
+      if (!isStepUpRetry && (await chiediConferma())) {
+        return apiFetch<T>(path, { ...options, isStepUpRetry: true });
+      }
+      throw new ApiError(response.status, parsed as ApiErrorBody);
+    }
     // V-12: un 403 puo' voler dire che i ruoli sono cambiati: si rileggono permessi e menu.
     if (response.status === 403) segnalaPermessoNegato();
     if (parsed && typeof parsed === "object" && "error" in parsed) {

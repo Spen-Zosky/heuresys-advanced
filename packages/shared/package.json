@@ -62,6 +62,11 @@
       "heuresys-source": "./src/schemas/tenant-materialization.ts",
       "default": "./dist/schemas/tenant-materialization.js"
     },
+    "./schemas/mandate-acts": {
+      "types": "./dist/schemas/mandate-acts.d.ts",
+      "heuresys-source": "./src/schemas/mandate-acts.ts",
+      "default": "./dist/schemas/mandate-acts.js"
+    },
     "./schemas/users": {
       "types": "./dist/schemas/users.d.ts",
       "heuresys-source": "./src/schemas/users.ts",

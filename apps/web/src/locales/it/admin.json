@@ -289,7 +289,34 @@
         "readOnly": "Non hai i permessi per assegnare o revocare ruoli.",
         "error": "Operazione non riuscita.",
         "forbidden": "Non hai i permessi per assegnare o revocare ruoli.",
-        "duplicate": "Questo ruolo è già assegnato."
+        "duplicate": "Questo ruolo è già assegnato.",
+        "colReview": "Revisione",
+        "act": {
+          "toConfirm": "Da riconfermare",
+          "hint": "È un mandato: si propone con un motivo e una data di revisione, e lo decide un secondo titolare dalla pagina Ruoli.",
+          "proposeGrant": "Proponi",
+          "proposeRevoke": "Proponi la revoca",
+          "proposeConfirm": "Proponi la riconferma",
+          "title": {
+            "GRANT": "Proposta di concessione: {{role}}",
+            "REVOKE": "Proposta di revoca: {{role}}",
+            "CONFIRM": "Proposta di riconferma: {{role}}"
+          },
+          "reason": "Motivo",
+          "reasonHint": "Almeno dieci caratteri: perché la persona deve portare, o non portare più, questo mandato.",
+          "reviewBy": "Da rivedere entro",
+          "submit": "Invia la proposta",
+          "cancel": "Annulla",
+          "sent": "Proposta inviata: la decide un secondo titolare di mandato dalla pagina Ruoli.",
+          "pendingTitle": "Atti in attesa di decisione",
+          "kind": {
+            "GRANT": "Concessione",
+            "REVOKE": "Revoca",
+            "CONFIRM": "Riconferma"
+          },
+          "proposedBy": "proposto da {{who}} il {{when}}",
+          "withdraw": "Ritira"
+        }
       }
     }
   },
@@ -583,7 +610,24 @@
     "accessDeniedDesc": "Questa matrice richiede il ruolo PLATFORM_ADMIN.",
     "headerCell": "permission \\ role",
     "granted": "granted",
-    "denied": "denied"
+    "denied": "denied",
+    "mandateActs": {
+      "title": "Atti di mandato da decidere",
+      "description": "Concessioni, revoche e riconferme di mandati proposte da un altro titolare. Le decide un secondo titolare: mai chi le ha proposte, mai chi le riceve.",
+      "empty": "Nessun atto in attesa.",
+      "colPerson": "Persona",
+      "colAct": "Atto",
+      "colRole": "Mandato",
+      "colReason": "Motivo",
+      "colReview": "Revisione",
+      "colProposed": "Proposto da",
+      "approve": "Approva",
+      "reject": "Respingi",
+      "rejectNote": "Motivo del rifiuto",
+      "confirmReject": "Conferma il rifiuto",
+      "cancel": "Annulla",
+      "notYours": "Non puoi decidere un atto che hai proposto o che ti riguarda."
+    }
   },
   "dashboard": {
     "title": "Dashboard",

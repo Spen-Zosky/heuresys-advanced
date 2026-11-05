@@ -110,6 +110,25 @@ BEGIN
   SELECT tenant_id INTO v_ten FROM sys.sys_tenancies ORDER BY tenant_code LIMIT 1;
 
   BEGIN
+    -- ADR-0050 D3 (mig 000474, emendamento del 2026-11-05): la catena si riapplica a ogni
+    -- deploy, e dopo la 000474 un'esenzione accesa pretende autore e scadenza. Il suo trigger
+    -- scatta prima di quello di eleggibilità (ordine alfabetico) e rifiuterebbe con lo stesso
+    -- codice, falsando la prova qui sotto. Si spegne per la sola prova: l'eccezione finale
+    -- annulla anche questo ALTER, e il trigger torna acceso senza che nessuno lo riaccenda.
+    IF EXISTS (SELECT 1 FROM pg_trigger
+                WHERE tgname = 'sys_auth_mfa_exemptions_autore_e_scadenza'
+                  AND tgrelid = 'sys.sys_auth_mfa_exemptions'::regclass) THEN
+      ALTER TABLE sys.sys_auth_mfa_exemptions DISABLE TRIGGER sys_auth_mfa_exemptions_autore_e_scadenza;
+    END IF;
+    -- e la scadenza è NOT NULL: le INSERT qui sotto non la nominano, perché la prova è più
+    -- vecchia della colonna. Un valore predefinito per la sola prova, annullato come sopra.
+    IF EXISTS (SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'sys' AND table_name = 'sys_auth_mfa_exemptions'
+                  AND column_name = 'auth_mfa_exemption_expires_at') THEN
+      ALTER TABLE sys.sys_auth_mfa_exemptions
+        ALTER COLUMN auth_mfa_exemption_expires_at SET DEFAULT now() + interval '1 day';
+    END IF;
+
     -- Un account di servizio NON iscritto non deve poter essere esentato. E' la
     -- proprieta' nuova, e un controllo che non si e' mai visto rifiutare non e' una prova.
     INSERT INTO sys.sys_users (user_tenant_id, user_email, user_display_name, user_status, user_type)

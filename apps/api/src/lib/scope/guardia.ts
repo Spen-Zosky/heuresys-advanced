@@ -104,6 +104,12 @@ export const ROTTE_SENZA_PERMESSO: Readonly<Record<string, string>> = {
     "secondo fattore della propria sessione: agisce solo sull'utente autenticato (o sul login in corso), con limite di frequenza",
   "POST /v1/auth/mfa/sms-otp/verify-setup":
     "secondo fattore della propria sessione: agisce solo sull'utente autenticato (o sul login in corso), con limite di frequenza",
+  "POST /v1/auth/mfa/step-up/begin":
+    "ADR-0050 D5, conferma del secondo fattore nella propria sessione: richiede l'autenticazione e il CSRF, agisce solo su chi chiama, con limite di frequenza",
+  "POST /v1/auth/mfa/step-up/verify":
+    "ADR-0050 D5, conferma del secondo fattore nella propria sessione: richiede l'autenticazione e il CSRF, agisce solo su chi chiama, con limite di frequenza",
+  "POST /v1/auth/mfa/step-up/webauthn/verify":
+    "ADR-0050 D5, conferma del secondo fattore nella propria sessione: richiede l'autenticazione e il CSRF, agisce solo su chi chiama, con limite di frequenza",
   "POST /v1/auth/mfa/verify-login":
     "secondo fattore della propria sessione: agisce solo sull'utente autenticato (o sul login in corso), con limite di frequenza",
   "POST /v1/auth/mfa/verify-setup":

@@ -103,6 +103,13 @@ INFORMATIVE = {
         "righe e' l'atteso finche' il gateway non scrive nel database (FileAuditSink resta il "
         "fallback, server.ts sceglie in base a POSTGRES_HOST); righe con numeri alti non sono "
         "un difetto, sono il freno di #252 che ha gia' fatto il suo lavoro se serviva.",
+    "v_mandato_da_riconfermare":
+        "ADR-0050 D4 (mig 000475): concessioni di mandato attive nate prima dell'atto, senza "
+        "un atto approvato. Non pretende zero alla nascita: l'ADR chiede di elencarle e "
+        "riconfermarle una per una (atto CONFIRM), e si svuota man mano. Le utenze di collaudo "
+        "vi compaiono sempre, perche' i loro ruoli li scrive il provisioning e non un atto. Le "
+        "sentinelle vere della stessa migrazione sono v_mandati_incompatibili (D7) e "
+        "v_mandato_revisione_scaduta, che restano a zero.",
 }
 
 # Soglie: superate = allarme. Derivano dalla misura del 2026-08-03, non da teoria.

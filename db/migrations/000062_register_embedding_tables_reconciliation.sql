@@ -184,7 +184,11 @@ VALUES
   ('sys_tenant_consolidation_decisions', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — registro dell''agente di consolidamento del tenant (mig 000464, AC-3). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000464: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
   ('sys_platform_vocabulary_equivalences', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — registro dell''agente di consolidamento del tenant (mig 000464, AC-3). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000464: il controllo di 0 UNCLASSIFIED gira in questo file.]')
+   '[sign-off: EXCLUDE — registro dell''agente di consolidamento del tenant (mig 000464, AC-3). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000464: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
+  ('sys_mandate_acts', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — atti di mandato di ADR-0050 D4 (mig 000475): proposta, decisione di un secondo titolare, effetto. Righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000475: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
+  ('sys_mandate_act_audit', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — registro di audit degli atti di mandato (ADR-0050 D4, mig 000475), popolato da trigger. Nessuna sorgente nel legacy. Registrata qui e non in 000475.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

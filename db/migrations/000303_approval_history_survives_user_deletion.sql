@@ -32,6 +32,29 @@
 --   -- il ripristino CASCADE della FK e' il rollback della 000132 emendata, non di questa.
 
 -- ----------------------------------------------------------------------------
+-- 0. Riporto di un'esemplare nato storto più avanti nella catena (2026-11-05)
+-- ----------------------------------------------------------------------------
+-- La prima versione della 000475 (ADR-0050 D4, commit 548dd5f, mai unita né rilasciata)
+-- creava sys_mandate_acts.mandate_act_user_id con ON DELETE CASCADE. Un database che l'ha
+-- vista (banco, forse heuresys_ci) si fermerebbe alla sentinella qui sotto prima di arrivare
+-- alla 000475 emendata che lo corregge: il riporto sta quindi qui, prima del controllo.
+-- Dove la tabella non c'è o la FK è già SET NULL non fa niente.
+DO $riporto_000475$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_constraint
+              WHERE conname = 'sys_mandate_acts_mandate_act_user_id_fkey'
+                AND conrelid = to_regclass('sys.sys_mandate_acts')
+                AND confdeltype <> 'n') THEN
+    ALTER TABLE sys.sys_mandate_acts ALTER COLUMN mandate_act_user_id DROP NOT NULL;
+    ALTER TABLE sys.sys_mandate_acts DROP CONSTRAINT sys_mandate_acts_mandate_act_user_id_fkey;
+    ALTER TABLE sys.sys_mandate_acts ADD CONSTRAINT sys_mandate_acts_mandate_act_user_id_fkey
+      FOREIGN KEY (mandate_act_user_id) REFERENCES sys.sys_users(user_id) ON DELETE SET NULL;
+    RAISE NOTICE '000303: riportata a SET NULL la FK di sys_mandate_acts nata CASCADE (000475 prima versione)';
+  END IF;
+END;
+$riporto_000475$;
+
+-- ----------------------------------------------------------------------------
 -- 1. Backfill dei tombstone (idempotente: solo dove NULL, solo da utenti vivi)
 -- ----------------------------------------------------------------------------
 DO $backfill$

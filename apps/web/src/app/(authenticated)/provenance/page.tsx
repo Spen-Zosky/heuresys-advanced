@@ -95,7 +95,7 @@ export default function ProvenancePage() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-foreground">{t("provenance.byTable")}</h2>
-        <EntityTable<ProvenanceSummaryResponse["byTable"][number]>
+        <EntityTable<ProvenanceSummaryResponse["byTable"][number]> originPath={"/v1/provenance"}
           isLoading={summary.isLoading}
           isError={summary.isError}
           error={summary.error}

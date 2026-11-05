@@ -198,7 +198,7 @@ export function LearningPathsPanel() {
             />
           </div>
 
-          <EntityTable<LearningPath>
+          <EntityTable<LearningPath> originPath={"/v1/learning-paths"}
             isLoading={paths.isLoading}
             isError={paths.isError}
             error={paths.error}

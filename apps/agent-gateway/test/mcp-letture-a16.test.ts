@@ -58,3 +58,30 @@ describe("A-16 — strumenti MCP per le letture che nessuna pagina mostra", () =
     }
   });
 });
+
+describe("A-14 — lo strumento passa all'agente l'origine del dato", () => {
+  it("se l'API l'ha dichiarata, la risposta porta un secondo blocco con l'origine", async () => {
+    class ConOrigine extends ClienteCheRegistra {
+      override async call<T = unknown>(method: string, path: string): Promise<T> {
+        const d = await super.call<T>(method, path);
+        this.dichiarata = d;
+        return d;
+      }
+      dichiarata: unknown;
+      override origineDi(d: unknown): string | undefined {
+        return d === this.dichiarata ? "importato" : undefined;
+      }
+    }
+    const c = new ConOrigine();
+    const server = buildHeuresysMcp(c, AtlasOperationResolver.load()) as unknown as {
+      instance: { server: { _requestHandlers: Map<string, Handler> } };
+    };
+    const h = server.instance.server._requestHandlers.get("tools/call")!;
+    const r = await h(
+      { method: "tools/call", params: { name: "hrx_predictions_list", arguments: {} } },
+      { signal: new AbortController().signal },
+    );
+    expect(r.content.map((x) => x.text)).toEqual([JSON.stringify({ ok: true }), "origine del dato: importato"]);
+  });
+});
+

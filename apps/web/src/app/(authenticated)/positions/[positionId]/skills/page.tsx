@@ -55,7 +55,7 @@ export default function PositionSkillsPage() {
       <Card>
         <CardHeader><CardTitle>{t("positions.skills.cardTitle")}</CardTitle></CardHeader>
         <CardContent className="p-0">
-          <EntityTable<PositionSkillReq>
+          <EntityTable<PositionSkillReq> originPath={"/v1/positions"}
             isLoading={skills.isLoading}
             isError={skills.isError}
             error={skills.error}

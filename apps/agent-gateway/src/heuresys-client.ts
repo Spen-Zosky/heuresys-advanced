@@ -23,7 +23,17 @@ export interface Session {
 export type FetchLike = (
   url: string,
   init: { method: string; headers: Record<string, string>; body?: string },
-) => Promise<{ ok: boolean; status: number; json: () => Promise<unknown>; text: () => Promise<string> }>;
+) => Promise<{
+  ok: boolean;
+  status: number;
+  json: () => Promise<unknown>;
+  text: () => Promise<string>;
+  /** Le intestazioni della risposta (A-14: l'origine del dato); facoltative per i doppi delle prove. */
+  headers?: { get(name: string): string | null };
+}>;
+
+/** A-14: l'intestazione con cui l'API dichiara l'origine del dato (`DATA_ORIGIN_HEADER` in @heuresys/shared). */
+export const INTESTAZIONE_ORIGINE = "x-heuresys-data-origin";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
@@ -111,6 +121,14 @@ export class HeuresysClient {
     return this.refreshing;
   }
 
+  /** A-14: per ogni risposta (oggetto), l'origine del dato che l'API ha dichiarato. */
+  private readonly origini = new WeakMap<object, string>();
+
+  /** L'origine del dato di una risposta di `call`, se l'API l'ha dichiarata (A-14). */
+  origineDi(dati: unknown): string | undefined {
+    return typeof dati === "object" && dati !== null ? this.origini.get(dati) : undefined;
+  }
+
   async call<T = unknown>(method: string, path: string, body?: unknown): Promise<T> {
     const url = `${this.baseUrl}/v1${path}`;
     const doFetch = () =>
@@ -129,6 +147,10 @@ export class HeuresysClient {
       throw new Error(`${method} ${path} -> ${res.status}`);
     }
     const dati = (await res.json()) as T;
+    // A-14: l'origine del dato del modulo che ha risposto (nativo, importato, ibrido, misto),
+    // legata alla risposta stessa: chi la passa all'agente la ritrova senza indovinarla.
+    const origine = res.headers?.get(INTESTAZIONE_ORIGINE);
+    if (origine && typeof dati === "object" && dati !== null) this.origini.set(dati, origine);
     // #251 — le persone distinte si contano QUI, sulla risposta già mascherata dall'API (R3):
     // il contatore non vede mai un campo che l'utente non poteva vedere. `aggiungi` non alza
     // per contratto, ma il `try` resta: un contatore rotto non deve poter negare una lettura.

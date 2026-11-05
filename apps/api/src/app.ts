@@ -162,6 +162,7 @@ import { registraEventiDiValore } from "./lib/valore/registro.js";
 import { registraRotteDellaSpecifica } from "./lib/openapi/rotte.js";
 import { registraConcorrenza } from "./lib/concorrenza.js";
 import { registraIdempotenza } from "./lib/idempotenza.js";
+import { registraOrigineDelDato, registraRottaDelleOrigini } from "./lib/origine/origine.js";
 import { intestazioneDellaSpecifica, trasformaPerLaSpecifica } from "./lib/openapi/specifica.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
@@ -258,6 +259,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // ogni scrittura (dopo CSRF e permesso). L'ordine di questi due conta: prima la condizione.
   registraConcorrenza(app);
   registraIdempotenza(app);
+  // A-14: l'origine del dato (I23) in ogni lettura JSON su /v1/*.
+  registraOrigineDelDato(app);
 
   // 1b. OpenAPI/Swagger (R6; A-9 del piano interfacce) — spenta per difetto (env.API_DOCS_ENABLED):
   //     accenderla in produzione è una decisione di Enzo. Registrata subito dopo i compilatori
@@ -458,6 +461,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(agentTokensRoutes, { prefix: "/v1/auth/agent-tokens" });
   // A-9: specifica e scoperta, dopo autenticazione e limite di frequenza (onRoute li vede).
   if (options.apiDocs ?? env.API_DOCS_ENABLED) registraRotteDellaSpecifica(app);
+  // A-14: le origini del dato per modulo, sempre accese (le pagine le mostrano).
+  registraRottaDelleOrigini(app);
   await app.register(mfaRoutes, {
     prefix: "/v1/auth/mfa",
     service: mfaService,

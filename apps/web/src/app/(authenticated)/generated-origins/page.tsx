@@ -160,7 +160,7 @@ export default function GeneratedOriginsPage() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-foreground">{t("generatedOrigins.byTable")}</h2>
-        <EntityTable<GeneratedOriginSummaryResponse["byTable"][number]>
+        <EntityTable<GeneratedOriginSummaryResponse["byTable"][number]> originPath={"/v1/generated-origins"}
           isLoading={sommario.isLoading}
           isError={sommario.isError}
           error={sommario.error}

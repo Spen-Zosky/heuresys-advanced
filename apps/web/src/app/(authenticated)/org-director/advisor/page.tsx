@@ -103,7 +103,7 @@ export default function AdvisorPage() {
         }
       />
 
-      <EntityTable<AdvisorSuggestion>
+      <EntityTable<AdvisorSuggestion> originPath={"/v1/advisor/suggestions"}
         isLoading={advisor.isLoading}
         isError={advisor.isError}
         error={advisor.error}

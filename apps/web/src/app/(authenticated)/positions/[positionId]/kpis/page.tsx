@@ -54,7 +54,7 @@ export default function PositionKpisPage() {
       <Card>
         <CardHeader><CardTitle>{t("positions.kpis.cardTitle")}</CardTitle></CardHeader>
         <CardContent className="p-0">
-          <EntityTable<PositionKpiReq>
+          <EntityTable<PositionKpiReq> originPath={"/v1/positions"}
             isLoading={kpis.isLoading}
             isError={kpis.isError}
             error={kpis.error}

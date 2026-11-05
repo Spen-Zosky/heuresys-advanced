@@ -141,7 +141,7 @@ export function SemanticSearchPanel() {
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t("semanticSearch.occupations")}
             </h3>
-            <EntityTable<OccupationMatch>
+            <EntityTable<OccupationMatch> originPath={"/v1/matching/search"}
               isLoading={search.isLoading}
               isError={search.isError && !flagOff && !throttled}
               error={search.error}
@@ -160,7 +160,7 @@ export function SemanticSearchPanel() {
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t("semanticSearch.skills")}
             </h3>
-            <EntityTable<SkillMatch>
+            <EntityTable<SkillMatch> originPath={"/v1/matching/search"}
               isLoading={search.isLoading}
               isError={search.isError && !flagOff && !throttled}
               error={search.error}

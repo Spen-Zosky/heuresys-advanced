@@ -164,7 +164,7 @@ export default function LeadsPage() {
         </p>
       ) : null}
 
-      <EntityTable<LeadResponse>
+      <EntityTable<LeadResponse> originPath={"/v1/leads"}
         isLoading={leads.isLoading}
         isError={leads.isError}
         error={leads.error}

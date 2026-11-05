@@ -190,7 +190,7 @@ export default function MeTimeOffPage() {
       <Card>
         <CardHeader><CardTitle>{t("timeOff.historyTitle")}</CardTitle></CardHeader>
         <CardContent className="p-0">
-          <EntityTable<TimeOffRequest>
+          <EntityTable<TimeOffRequest> originPath={"/v1/me/time-off/requests"}
             isLoading={requests.isLoading}
             isError={requests.isError}
             error={requests.error}

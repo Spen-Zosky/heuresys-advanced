@@ -183,7 +183,7 @@ export default function BlueprintVariantDetailPage() {
         <Card data-testid="blueprint-tab-content-documentation">
           <CardHeader><CardTitle>{t("detail.documentationTitle")}</CardTitle></CardHeader>
           <CardContent className="p-0">
-            <EntityTable<LinkedDoc>
+            <EntityTable<LinkedDoc> originPath={"/v1/content-blueprint-links"}
               isLoading={documentation.isLoading}
               isError={documentation.isError}
               error={documentation.error}

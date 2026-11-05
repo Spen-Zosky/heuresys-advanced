@@ -13,6 +13,7 @@ export * from "./schemas/mfa.js";
 export * from "./schemas/mfa-policy.js";
 export * from "./schemas/agent-tokens.js";
 export * from "./schemas/api-discovery.js";
+export * from "./schemas/data-origins.js";
 export * from "./schemas/tenants.js";
 export * from "./schemas/provisioning.js";
 export * from "./schemas/gdpr.js";

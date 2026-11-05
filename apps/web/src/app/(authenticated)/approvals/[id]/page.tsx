@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { AgentPanel, Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import type { ApprovalRequestDetail, ApprovalStatus, ApprovalStepStatus, ApprovalStepDetail } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCan, useCurrentUser } from "@/lib/api/auth";
-import { AGENT_DEV_ENABLED, useAgentStream } from "@/lib/use-agent-stream";
+import { useContestoAgente } from "@/lib/agente/contesto";
 import { useFormat } from "@/lib/format";
 
 function reqStatusVariant(s: ApprovalStatus): "success" | "secondary" | "destructive" {
@@ -27,14 +27,10 @@ function stepStatusVariant(s: ApprovalStepStatus): "success" | "secondary" | "de
 /**
  * #159 F3 (S1116) — prima pagina parametrica ad adottare il ponte dopo la console.
  *
- * Monta `AgentPanel` (`@heuresys/ui`) con `useAgentStream`, LO STESSO canale/componente
- * della console `/dev/agent`: questa pagina non li tocca, li usa. Il `context` e' un
- * valore VERO — titolo + id della richiesta di approvazione realmente aperta, presi dal
- * segmento dinamico `[id]` — mai un ramo condizionale per tipo di pagina. Le parole
- * vivono nel namespace proprio di questa pagina (`approvals.detail.agent.*`), cosi'
- * nessuna pagina eredita le stringhe della prima (`agentDev.*`). Dietro lo stesso flag
- * `NEXT_PUBLIC_ENABLE_AGENT_DEV` della console: l'agente resta uno strumento di sviluppo,
- * non una funzione servita ai clienti.
+ * Dal piano interfacce L10 (A-8) il pannello non lo monta più la pagina: lo monta il layout
+ * autenticato su ogni pagina idonea (`components/pannello-agente.tsx`). Qui resta ciò che solo
+ * questa pagina sa: il CONTESTO, un valore vero (titolo e id della richiesta realmente aperta,
+ * presi dal segmento `[id]`), dichiarato con `useContestoAgente`.
  */
 
 export default function ApprovalDetailPage() {
@@ -46,11 +42,6 @@ export default function ApprovalDetailPage() {
   const me = useCurrentUser();
   const [comment, setComment] = useState("");
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
-
-  // #159 F3 — il prompt dell'assistente e' della VISTA; canale, stato e traduzione dei
-  // suoi avvisi restano lo stesso pattern del primo consumatore (`dev/agent`).
-  const [agentPrompt, setAgentPrompt] = useState("");
-  const agent = useAgentStream();
 
   const detail = useQuery({
     queryKey: ["approvals", "detail", id],
@@ -93,19 +84,8 @@ export default function ApprovalDetailPage() {
   const myPendingStep: ApprovalStepDetail | undefined = d?.steps.find((s) => s.approverUserId === myUserId && s.status === "PENDING");
   const busy = decide.isPending || apply.isPending;
 
-  // #159 F3 — stessa traduzione del `notice` non tradotto dell'hook (`code` senza
-  // namespace), qui prefissato con `approvals.detail.agent.*` invece di `agentDev.*`.
-  const agentNoticeText =
-    agent.notice === null ? null : t(`approvals.detail.agent.${agent.notice.code}`, agent.notice.params ?? {});
-
-  // Stessa logica a tre esiti del primo consumatore (#252): la descrizione la compone
-  // la pagina, mai il pannello, e "non l'ho misurato" resta una frase diversa da "0 persone".
-  const agentApprovalDesc =
-    agent.approval?.classe === "read"
-      ? agent.approval.personeDistinte === undefined
-        ? t("approvals.detail.agent.approvalDescReadUnknown")
-        : t("approvals.detail.agent.approvalDescRead", { persone: agent.approval.personeDistinte })
-      : t("approvals.detail.agent.approvalDesc");
+  // L10 A-8 — il contesto che il pannello comune dell'agente mostra e manda al gateway.
+  useContestoAgente(d ? t("approvals.detail.agent.context", { title: d.title, id }) : null);
 
   return (
     <main data-testid="approval-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
@@ -231,40 +211,7 @@ export default function ApprovalDetailPage() {
             </CardContent>
           </Card>
 
-          {/* #159 F3 — l'assistente su QUESTA richiesta, dietro lo stesso flag della console. */}
-          {AGENT_DEV_ENABLED && (
-            <AgentPanel
-              testIdPrefix="approval-agent"
-              context={t("approvals.detail.agent.context", { title: d.title, id })}
-              labels={{
-                title: t("approvals.detail.agent.title"),
-                description: t("approvals.detail.agent.description"),
-                contextLabel: t("approvals.detail.agent.contextLabel"),
-                promptLabel: t("approvals.detail.agent.promptLabel"),
-                promptPlaceholder: t("approvals.detail.agent.promptPlaceholder"),
-                run: t("approvals.detail.agent.run"),
-                running: t("approvals.detail.agent.running"),
-                stop: t("approvals.detail.agent.stop"),
-                streamTitle: t("approvals.detail.agent.streamTitle"),
-                streamEmpty: t("approvals.detail.agent.streamEmpty"),
-                approvalTitle: t("approvals.detail.agent.approvalTitle"),
-                approvalDesc: agentApprovalDesc,
-                approvalTool: t("approvals.detail.agent.approvalTool"),
-                approvalInput: t("approvals.detail.agent.approvalInput"),
-                allow: t("approvals.detail.agent.allow"),
-                deny: t("approvals.detail.agent.deny"),
-              }}
-              prompt={agentPrompt}
-              onPromptChange={setAgentPrompt}
-              running={agent.running}
-              onRun={() => void agent.run(agentPrompt)}
-              onStop={agent.stop}
-              lines={agent.lines}
-              approval={agent.approval}
-              onApproval={(decision) => void agent.resolveApproval(decision)}
-              notice={agent.notice === null || agentNoticeText === null ? null : { kind: agent.notice.kind, text: agentNoticeText }}
-            />
-          )}
+
         </>
       )}
     </main>

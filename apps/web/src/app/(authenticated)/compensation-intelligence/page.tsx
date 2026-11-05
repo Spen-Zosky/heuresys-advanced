@@ -619,7 +619,7 @@ export default function CompensationIntelligencePage() {
           entrano (una fascia senza importi non è una fascia) ma vengono dichiarate. */}
       <section data-testid="compensation-bands" className="space-y-2">
         <h2 className="text-base font-semibold text-foreground">{t("compensation.bands.title")}</h2>
-        <EntityTable<CompensationBandRow>
+        <EntityTable<CompensationBandRow> originPath={"/v1/compensation/bands"}
           isLoading={bands.isLoading}
           isError={bands.isError}
           error={bands.error}

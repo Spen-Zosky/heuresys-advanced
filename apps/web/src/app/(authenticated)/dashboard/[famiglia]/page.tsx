@@ -142,7 +142,7 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
         ) : (
           // V-9: la tabella del pacchetto UI scrive la paginazione in inglese; EntityTable la
           // scrive nella lingua della persona.
-          <EntityTable
+          <EntityTable originPath={"/v1/dashboard/catalog"}
             isLoading={false}
             isError={false}
             rows={righe}

@@ -59,7 +59,7 @@ export default function UsersListPage() {
   );
 
   return (
-    <DataTablePanel<User>
+    <DataTablePanel<User> originPath={"/v1/users"}
       pageTestId="users-page"
       titleTestId="users-title"
       countTestId="users-count"

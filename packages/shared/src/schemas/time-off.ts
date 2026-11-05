@@ -52,6 +52,8 @@ export const TimeOffRequestSchema = z.object({
   cancelledAt: z.iso.datetime().nullable(),
   cancelledByUserId: z.uuid().nullable(),
   metadata: z.record(z.string(), z.unknown()),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -91,6 +93,8 @@ export const LeaveAccrualRuleSchema = z.object({
   isCcnlDefault: z.boolean(),
   isActive: z.boolean(),
   metadata: z.record(z.string(), z.unknown()),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -125,6 +129,8 @@ export const LeaveBalanceTransactionSchema = z.object({
   description: z.string().nullable(),
   performedByUserId: z.uuid().nullable(),
   metadata: z.record(z.string(), z.unknown()),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
   createdAt: z.iso.datetime(),
 });
 export type LeaveBalanceTransaction = z.infer<typeof LeaveBalanceTransactionSchema>;

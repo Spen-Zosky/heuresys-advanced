@@ -48,6 +48,8 @@ import { PreferencesApplier } from "../../components/preferences-applier";
 import { StepUpDialog } from "../../components/step-up-dialog";
 import { SectionTabs, SECTION_TAB_GROUPS } from "../../components/section-tabs";
 import { pageVerdict } from "../../lib/page-guard";
+import { PannelloAgente } from "../../components/pannello-agente";
+import { ContestoAgenteProvider } from "../../lib/agente/contesto";
 
 const ICON = "h-4 w-4 shrink-0";
 
@@ -280,10 +282,12 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           </Button>
         </main>
       ) : (
-        <>
+        <ContestoAgenteProvider>
           <SectionTabs />
+          {/* L10 A-8: il pannello dell'agente, solo sulle pagine idonee e solo a flag acceso. */}
+          <PannelloAgente />
           {children}
-        </>
+        </ContestoAgenteProvider>
       )}
     </DashboardShell>
   );

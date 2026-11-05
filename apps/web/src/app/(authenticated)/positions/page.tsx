@@ -44,7 +44,7 @@ export default function PositionsListPage() {
   );
 
   return (
-    <DataTablePanel<Position>
+    <DataTablePanel<Position> originPath={"/v1/positions"}
       pageTestId="positions-page"
       titleTestId="positions-title"
       countTestId="positions-count"

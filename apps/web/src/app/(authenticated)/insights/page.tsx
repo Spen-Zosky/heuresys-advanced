@@ -80,7 +80,7 @@ export default function InsightsPage() {
 
   return (
     <div className="space-y-6">
-      <DataTablePanel<FlightRiskScore>
+      <DataTablePanel<FlightRiskScore> originPath={"/v1/insights/flight-risk"}
         pageTestId="insights-page"
         titleTestId="insights-title"
         countTestId="insights-count"

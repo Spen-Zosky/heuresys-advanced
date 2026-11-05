@@ -49,7 +49,17 @@ export function bindPath(template: string, params: Record<string, unknown>): str
 // lanciare, e' lui a dirlo, non la prova live. Dal 2026-10-30 (SDK 0.3.314, zod 4.6.7) il
 // crash non si riproduce piu' e la controprova lo verifica; qui si resta su `catchall`.
 export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOperationResolver) {
-  const ok = (d: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(d) }] });
+  // A-14: l'agente sa da dove viene ciò che legge. Se l'API ha dichiarato l'origine del dato
+  // (nativo, importato, ibrido, misto), la risposta la porta in un secondo blocco.
+  const ok = (d: unknown) => {
+    const origine = client.origineDi(d);
+    return {
+      content: [
+        { type: "text" as const, text: JSON.stringify(d) },
+        ...(origine ? [{ type: "text" as const, text: `origine del dato: ${origine}` }] : []),
+      ],
+    };
+  };
 
   const rd = (n: string, p: string) =>
     tool(n, `GET ${p}`, {}, async () => ok(await client.call("GET", p)));

@@ -141,7 +141,7 @@ export default function MeMatchingPage() {
             ) : undefined
           }
         />
-        <EntityTable<OccupationMatch>
+        <EntityTable<OccupationMatch> originPath={"/v1/matching/me/occupations"}
           isLoading={occupations.isLoading}
           isError={occupations.isError}
           error={occupations.error}
@@ -169,7 +169,7 @@ export default function MeMatchingPage() {
             ) : undefined
           }
         />
-        <EntityTable<PositionMatch>
+        <EntityTable<PositionMatch> originPath={"/v1/matching/me/positions"}
           isLoading={positions.isLoading}
           isError={positions.isError}
           error={positions.error}
@@ -197,7 +197,7 @@ export default function MeMatchingPage() {
             ) : undefined
           }
         />
-        <EntityTable<JobRoleMatch>
+        <EntityTable<JobRoleMatch> originPath={"/v1/matching/me/job-roles"}
           isLoading={jobRoles.isLoading}
           isError={jobRoles.isError}
           error={jobRoles.error}

@@ -89,7 +89,7 @@ export default function SuccessionReadinessPage() {
 
   return (
     <div className="space-y-6">
-      <DataTablePanel<SuccessionReadinessScore>
+      <DataTablePanel<SuccessionReadinessScore> originPath={"/v1/insights/succession-readiness"}
         pageTestId="readiness-page"
         titleTestId="readiness-title"
         countTestId="readiness-count"

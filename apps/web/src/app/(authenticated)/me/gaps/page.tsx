@@ -56,7 +56,7 @@ export default function MeGapsPage() {
   );
 
   return (
-    <DataTablePanel<MeGap>
+    <DataTablePanel<MeGap> originPath={"/v1/me/gaps"}
       pageTestId="me-gaps-page"
       titleTestId="me-gaps-title"
       countTestId="me-gaps-count"

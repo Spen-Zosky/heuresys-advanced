@@ -6,6 +6,7 @@ import { Badge, Button, DataTableWithCrossHair, PageHeader } from "@heuresys/ui"
 import { useTranslation } from "react-i18next";
 import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { OrigineDelDato, OrigineDellaRiga } from "@/components/origine-del-dato";
 
 /**
  * Canonical list-page composition (brand-component-contract.md: "Data table /
@@ -61,6 +62,11 @@ export interface EntityTableProps<T> {
    * When set, client slicing and the rows-change page reset are disabled.
    */
   server?: ServerPagination;
+  /**
+   * Il percorso API da cui vengono le righe (A-14, origine del dato). Con la paginazione del
+   * server viene da `server.apiPath`; un elenco caricato per intero lo passa qui.
+   */
+  originPath?: string;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
@@ -71,8 +77,9 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
     isLoading, isError, errorTestId, errorMessage, error, deniedReason,
     rows, rowKey, rowTestId, onRowClick, columns,
     emptyTestId, emptyTitle, emptyDescription, caption,
-    pageSize: pageSizeProp, server,
+    pageSize: pageSizeProp, server, originPath,
   } = props;
+  const percorsoOrigine = originPath ?? server?.apiPath;
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(pageSizeProp ?? 25);
@@ -119,6 +126,23 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
   const start = safePageIndex * effPageSize;
   const visibleRows = server ? rows : showPagination ? rows.slice(start, start + effPageSize) : rows;
   const end = server ? start + rows.length : Math.min(start + effPageSize, total);
+  // A-14: se le righe portano la loro origine (`origineDato`, X-2), la si mostra in colonna.
+  const primaRiga = visibleRows[0] as Record<string, unknown> | undefined;
+  const conOrigine = typeof primaRiga?.origineDato === "string";
+  const colonnaOrigine: DataColumn<T> = {
+    header: t("origine.colonna"),
+    cell: (r: T) => {
+      const v = (r as Record<string, unknown>).origineDato;
+      return typeof v === "string" ? <OrigineDellaRiga valore={v} /> : null;
+    },
+  };
+  // Prima della colonna delle azioni (intestazione vuota), se c'è.
+  const ultima = columns[columns.length - 1];
+  const colonne: DataColumn<T>[] = !conOrigine
+    ? columns
+    : ultima && ultima.header === ""
+      ? [...columns.slice(0, -1), colonnaOrigine, ultima]
+      : [...columns, colonnaOrigine];
   const from = total === 0 ? 0 : start + 1;
   const to = end;
   const goToPage = (i: number) =>
@@ -134,10 +158,15 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
 
   return (
     <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
+      {percorsoOrigine ? (
+        <div className="flex justify-end border-b border-border px-3 py-1.5">
+          <OrigineDelDato path={percorsoOrigine} />
+        </div>
+      ) : null}
       <DataTableWithCrossHair caption={caption} className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-            {columns.map((c, i) => (
+            {colonne.map((c, i) => (
               <th key={i} className={`px-4 py-2 ${c.align === "right" ? "text-right" : ""} ${c.headClassName ?? ""}`}>
                 {c.header}
               </th>
@@ -164,7 +193,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
                   }
                 : {})}
             >
-              {columns.map((c, i) => (
+              {colonne.map((c, i) => (
                 <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`}>
                   {c.cell(row)}
                 </td>

@@ -90,7 +90,7 @@ export default function EngagementPage() {
 
       {/* Surveys overview */}
       <div data-testid="engagement-table">
-        <EntityTable<EngagementSurvey>
+        <EntityTable<EngagementSurvey> originPath={"/v1/engagement/surveys"}
           isLoading={surveys.isLoading}
           isError={surveys.isError}
           error={surveys.error}

@@ -339,33 +339,20 @@ def scan_shared():
 # ---------------------------------------------------------------- DB live
 
 def scan_db():
-    tables = []
-    raw = psql("SELECT schemaname||'.'||relname||'|'||n_live_tup FROM pg_stat_user_tables ORDER BY 1")
-    zero_candidates = []
-    for line in raw.splitlines():
-        name, rows = line.rsplit("|", 1)
-        rows = int(rows)
-        tables.append([name, rows])
-        if rows == 0:
-            zero_candidates.append(name)
-    # verifica esatta dei soli zero-candidati (stime pg_stat possono essere stale),
-    # in batch UNION ALL per non moltiplicare i round-trip sul tunnel
-    empty = []
+    # Righe contate con count(*), mai le stime di pg_stat: su una tabella mai analizzata
+    # n_live_tup dava 13 contro 425 righe vere (Enzo, 2026-11-06). In batch UNION ALL per non
+    # moltiplicare i round-trip sul tunnel.
+    names = psql("SELECT schemaname||'.'||relname FROM pg_stat_user_tables ORDER BY 1").splitlines()
     exact = {}
-    for i in range(0, len(zero_candidates), 25):
-        chunk = zero_candidates[i:i + 25]
+    for i in range(0, len(names), 25):
+        chunk = names[i:i + 25]
         union = " UNION ALL ".join(
             f"SELECT '{n}' AS t, count(*) AS c FROM {n}" for n in chunk)
         for line in psql(union).splitlines():
             n, c = line.rsplit("|", 1)
             exact[n] = int(c)
-    for name in zero_candidates:
-        if exact.get(name, 0) == 0:
-            empty.append(name)
-        else:  # stima stale: correggi col count reale
-            for t in tables:
-                if t[0] == name:
-                    t[1] = exact[name]
+    tables = [[name, exact[name]] for name in names]
+    empty = [name for name in names if exact[name] == 0]
     views = psql("SELECT table_schema||'.'||table_name FROM information_schema.views "
                  "WHERE table_schema IN ('sys','brownfield','audit','staging') ORDER BY 1").splitlines()
     matviews = psql("SELECT schemaname||'.'||matviewname FROM pg_matviews ORDER BY 1").splitlines()

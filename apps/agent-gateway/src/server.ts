@@ -98,12 +98,14 @@ const auditSink: AuditSink = pool ? new DbAuditSink(pool) : new FileAuditSink();
 // questo file: qui sarebbe troppo tardi, perche' gli import ESM sono hoisted e l'SDK
 // risulterebbe gia' caricato (S1029).
 
-function parseCookies(header: string | undefined): Record<string, string> {
-  const out: Record<string, string> = {};
+// Una Map e non un oggetto: il nome di un cookie lo sceglie chi chiama, e un nome come
+// `__proto__` scritto come proprietà di un oggetto ne toccherebbe il prototipo (CodeQL).
+function parseCookies(header: string | undefined): Map<string, string> {
+  const out = new Map<string, string>();
   if (!header) return out;
   for (const part of header.split(";")) {
     const i = part.indexOf("=");
-    if (i > 0) out[part.slice(0, i).trim()] = part.slice(i + 1).trim();
+    if (i > 0) out.set(part.slice(0, i).trim(), part.slice(i + 1).trim());
   }
   return out;
 }
@@ -147,7 +149,7 @@ const server = createServer(async (req, res) => {
       // ADR-0056 T3 — L'APPROVAZIONE È DI CHI HA CHIESTO. Chi decide lo dice l'API, dai cookie di
       // chi ha premuto, non il corpo della richiesta: senza sessione, o con la sessione di
       // un'altra persona, la richiesta resta in attesa e scade da sola (deny-by-default).
-      const approvatore = parseCookies(req.headers.cookie)["hrx_access"];
+      const approvatore = parseCookies(req.headers.cookie).get("hrx_access");
       if (!approvatore) {
         res.writeHead(401, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "NO_SESSION", message: "forward hrx_access cookie" }));
@@ -245,8 +247,8 @@ const server = createServer(async (req, res) => {
 
     if (req.method === "POST" && req.url === "/agent") {
       const cookies = parseCookies(req.headers.cookie);
-      const cookieAccess = cookies["hrx_access"];
-      const cookieCsrf = cookies["hrx_csrf"] ?? "";
+      const cookieAccess = cookies.get("hrx_access");
+      const cookieCsrf = cookies.get("hrx_csrf") ?? "";
       if (!cookieAccess) {
         res.writeHead(401, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "NO_SESSION", message: "forward hrx_access cookie" }));

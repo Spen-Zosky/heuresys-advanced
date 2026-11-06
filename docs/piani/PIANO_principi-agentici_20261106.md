@@ -8,7 +8,8 @@ Questo piano non si chiude nella sessione che lo scrive. In questa sessione si f
 |---|---|---|---|---|---|
 | T0 | ADR-0056, copia del documento, questo piano | `docs/architecture/adr/0056_*.md`, `docs/architecture/agenti/`, `python docs/kb/tools/build_adr_index.py` | Claude | PR in bozza aperta | fatta |
 | T1 | Sì di Enzo su ADR-0056 | — | Enzo | stato ACCETTATO scritto nell'ADR | fatta (2026-11-06, 04:00 UTC) |
-| T2 | Catalogo con le classi: la classe di D2 per ogni operazione di `mcp-tool-names.ts` e di `agent-operations.json`; registro delle capacità di ADR-0053 (A1); prova automatica (nessuna C senza conferme, nessuna X, operazione senza classe negata) | `apps/agent-gateway/src/`, migrazione nuova in `sys.*`, `apps/agent-gateway/test/` | Claude | prova vista rossa e poi verde; migrazione provata con `bash db/scripts/prova-idempotenza.sh` | da fare |
+| T2a | Classe A/B/C per ogni strumento del catalogo (`classi-azioni.ts`); il gate nega una scrittura senza classe; prova automatica (ogni nome ha una classe, nessuna scrittura è A, ogni cancellazione è C, lo strumento generico prende la classe dal metodo risolto) | `apps/agent-gateway/src/classi-azioni.ts`, `write-gate.ts`, `mcp-tool-names.ts`, `test/classi-azioni.test.ts` | Claude | prova vista rossa e poi verde; `vitest run` del gateway verde | fatta (2026-11-06) |
+| T2b | Registro delle capacità e delle attivazioni per tenant (A1 di ADR-0053), con la classe di ogni operazione | migrazione nuova in `sys.*` | Claude | migrazione provata con `bash db/scripts/prova-idempotenza.sh` sul gemello o su copia | da fare |
 | T3 | Cancello per classe, modo e tetto (A3); approvazione legata alla persona che ha chiesto; limiti di conversazioni contemporanee, giri e durata; modello fissato per nome | `write-gate.ts`, `server.ts`, `sdk-agent.ts`, `approval-bridge.ts` | Claude | prove verdi; dimostrazione dal vivo con Enzo: un'approvazione da un'altra sessione è rifiutata | da fare |
 | T4 | Controllo «niente chiave API» in advanced e nel datastore; ritiro del motore `api` del datastore | advanced: `docs/kb/tools/` o prova del gateway; datastore: `src/config/config.ts`, `src/modello/cliente.ts` (sessione del datastore) | Claude | il controllo è visto rosso con una chiave finta nell'ambiente, poi verde | da fare |
 | T5 | Registro «per conto di» (A2) e anagrafe degli agenti di advanced e datastore, con il controllo che la confronta col codice | `audit-sink.ts`, migrazione nuova, `docs/architecture/agenti/ANAGRAFE_agenti.md`, `docs/kb/tools/check_anagrafe_agenti.py` | Claude | il controllo gira nella verifica e passa | da fare |
@@ -26,3 +27,7 @@ T4 nel datastore si fa con le regole del datastore (la sua sessione, `pnpm run f
 T6 è il lotto più grande. Tocca anche `ux-design-shared`, e la nuova versione di `@heuresys/ui` va pubblicata su npm, che è un passo di Enzo.
 
 Fuori da questo ciclo: P4, P6, P8, P9 e P16 (ADR-0056 D7), finché non nasce ciò che li rende necessari.
+
+## Scoperte (fuori da questo ciclo)
+
+- 2026-11-06, durante T2a: `isWriteTool` (`write-gate.ts`) riconosce le scritture dal verbo nel nome, e vede «override» in `hrx_blueprint_overrides_list`, che è una lettura (GET, `mcp-tools.ts`). Il gate quindi chiede l'approvazione umana per una lettura. È prudente, non apre un buco; la prova `classi-azioni.test.ts` si appoggia agli elenchi del catalogo e non al verbo. Da decidere se correggerlo nel prossimo ciclo.

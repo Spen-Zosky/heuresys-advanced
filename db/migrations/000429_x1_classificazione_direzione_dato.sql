@@ -350,7 +350,10 @@ VALUES
   ('sys_tenant_consolidation_decisions', 'nativo', 'EMENDATO per la mig 000464 (agente di consolidamento AC-3): registro del consolidamento del tenant, scritto solo dall''API (modulo tenant-consolidation), nessuno scrittore di importazione'),
   ('sys_platform_vocabulary_equivalences', 'infrastruttura', 'EMENDATO per la mig 000464 (AC-3): vocabolario comune di piattaforma, nessun dato di un tenant, scritto solo dall''API'),
   ('sys_mandate_acts', 'nativo', 'EMENDATO per la mig 000475 (ADR-0050 D4): atti di mandato, scritti solo dall''API (modulo mandate-acts), nessuno scrittore di importazione'),
-  ('sys_mandate_act_audit', 'infrastruttura', 'EMENDATO per la mig 000475 (ADR-0050 D4): popolata da un trigger di database, registro di audit degli atti di mandato')
+  ('sys_mandate_act_audit', 'infrastruttura', 'EMENDATO per la mig 000475 (ADR-0050 D4): popolata da un trigger di database, registro di audit degli atti di mandato'),
+  ('sys_agent_capabilities', 'infrastruttura', 'EMENDATO per la mig 000480 (ADR-0053 A1, ADR-0056 D2): catalogo di piattaforma delle capacita'' degli agenti, nessun dato di un tenant'),
+  ('sys_agent_capability_operations', 'infrastruttura', 'EMENDATO per la mig 000480 (ADR-0053 A1, ADR-0056 D2): elenco chiuso delle operazioni di una capacita'' con la classe A/B/C, nessun dato di un tenant'),
+  ('sys_agent_capability_activations', 'nativo', 'EMENDATO per la mig 000480 (ADR-0053 A1): attivazioni di una capacita'' per tenant, scritte solo dall''API, nessuno scrittore di importazione')
 ON CONFLICT (tabella) DO UPDATE SET stato = EXCLUDED.stato, motivo = EXCLUDED.motivo;
 
 CREATE OR REPLACE VIEW sys.v_tabelle_non_classificate AS
@@ -367,8 +370,8 @@ DECLARE
   n_tot int; n_non_class int; n_ibrido int; n_nativo int; n_importato int; n_infra int;
 BEGIN
   SELECT count(*) INTO n_tot FROM sys.sys_classificazione_direzione_dato;
-  IF n_tot <> 308 THEN
-    RAISE EXCEPTION '000429: attese 308 righe di classificazione, trovate %', n_tot;
+  IF n_tot <> 311 THEN
+    RAISE EXCEPTION '000429: attese 311 righe di classificazione, trovate %', n_tot;
   END IF;
 
   SELECT count(*) INTO n_non_class FROM sys.v_tabelle_non_classificate;
@@ -380,12 +383,12 @@ BEGIN
   SELECT count(*) FILTER (WHERE stato = 'nativo')   INTO n_nativo   FROM sys.sys_classificazione_direzione_dato;
   SELECT count(*) FILTER (WHERE stato = 'importato') INTO n_importato FROM sys.sys_classificazione_direzione_dato;
   SELECT count(*) FILTER (WHERE stato = 'infrastruttura') INTO n_infra FROM sys.sys_classificazione_direzione_dato;
-  IF n_ibrido <> 76 OR n_nativo <> 57 OR n_importato <> 132 OR n_infra <> 43 THEN
-    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/57/132/43)',
+  IF n_ibrido <> 76 OR n_nativo <> 58 OR n_importato <> 132 OR n_infra <> 45 THEN
+    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/58/132/45)',
       n_ibrido, n_nativo, n_importato, n_infra;
   END IF;
 
-  RAISE NOTICE '000429: 308 tabelle classificate (76 ibrido, 57 nativo, 132 importato, 43 infrastruttura); v_tabelle_non_classificate a zero.';
+  RAISE NOTICE '000429: 311 tabelle classificate (76 ibrido, 58 nativo, 132 importato, 45 infrastruttura); v_tabelle_non_classificate a zero.';
 END $$;
 
 COMMIT;

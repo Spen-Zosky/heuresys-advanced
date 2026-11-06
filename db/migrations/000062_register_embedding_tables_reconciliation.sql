@@ -188,7 +188,13 @@ VALUES
   ('sys_mandate_acts', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — atti di mandato di ADR-0050 D4 (mig 000475): proposta, decisione di un secondo titolare, effetto. Righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000475: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
   ('sys_mandate_act_audit', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — registro di audit degli atti di mandato (ADR-0050 D4, mig 000475), popolato da trigger. Nessuna sorgente nel legacy. Registrata qui e non in 000475.]')
+   '[sign-off: EXCLUDE — registro di audit degli atti di mandato (ADR-0050 D4, mig 000475), popolato da trigger. Nessuna sorgente nel legacy. Registrata qui e non in 000475.]'),
+  ('sys_agent_capabilities', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — catalogo delle capacita'' degli agenti (ADR-0053 A1, mig 000480): modello di piattaforma, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000480: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
+  ('sys_agent_capability_operations', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — operazioni di una capacita'' degli agenti con la classe A/B/C (ADR-0056 D2, mig 000480): modello di piattaforma, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000480.]'),
+  ('sys_agent_capability_activations', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — attivazioni di una capacita'' degli agenti per tenant (ADR-0053 A1, mig 000480): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000480.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

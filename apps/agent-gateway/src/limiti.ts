@@ -20,7 +20,9 @@
 export const MODELLO_DEFAULT = "claude-sonnet-5-5";
 
 /** Un nome di modello completo: `claude-<famiglia>-<versione>`, niente alias né spazi. */
-const NOME_MODELLO = /^claude-[a-z]+(-[0-9]+)+(-[0-9]{8})?$/;
+// Un solo modo di leggere ogni nome: ogni gruppo comincia con un trattino e ha solo cifre, quindi
+// non ci sono due modi di dividere la stessa stringa (niente ritorni a ritroso esponenziali).
+const NOME_MODELLO = /^claude-[a-z]+(?:-[0-9]+)+$/;
 
 export class ModelloNonValido extends Error {}
 

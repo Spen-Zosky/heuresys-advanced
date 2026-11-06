@@ -81,7 +81,7 @@ export async function list(db: Q, tenantId: string | null, id?: string): Promise
         `SELECT a.* FROM sys.v_agent_capability_activations_current v
            JOIN sys.sys_agent_capability_activations a
              ON a.agent_capability_activation_id = v.agent_capability_activation_id
-          WHERE v.agent_capability_activation_tenant_id = $1
+          WHERE v.agent_capability_activation_tenant_id = $1::uuid
             AND v.agent_capability_activation_capability_id = ANY($2::uuid[])`,
         [tenantId, ids],
       )
@@ -105,8 +105,9 @@ export async function create(db: Q, body: CreateAgentCapabilityBody, createdBy: 
         agent_capability_description, agent_capability_data_groups, agent_capability_excluded_groups,
         agent_capability_undo_mechanism, agent_capability_undo_ref, agent_capability_volume_cap,
         agent_capability_created_by)
-     SELECT $1, coalesce(max(agent_capability_version), 0) + 1, $2, $3, $4, $5, $6, $7, $8, $9
-       FROM sys.sys_agent_capabilities WHERE agent_capability_code = $1
+     SELECT $1::varchar, coalesce(max(agent_capability_version), 0) + 1, $2::varchar, $3::text,
+            $4::text[], $5::text[], $6::varchar, $7::varchar, $8::integer, $9::uuid
+       FROM sys.sys_agent_capabilities WHERE agent_capability_code = $1::varchar
      RETURNING agent_capability_id`,
     [body.code, body.agentCode, body.description, body.dataGroups, body.excludedGroups,
       body.undoMechanism, body.undoRef, body.volumeCap, createdBy],
@@ -171,10 +172,10 @@ export async function decide(
         agent_capability_activation_notice_ref, agent_capability_activation_rollback_proof_ref,
         agent_capability_activation_reason, agent_capability_activation_decided_by,
         agent_capability_activation_supersedes_id)
-     SELECT $1, $2, $3, 'PERSONA', $4, $5, $6, $7,
+     SELECT $1::uuid, $2::uuid, $3::varchar, 'PERSONA', $4::varchar, $5::varchar, $6::text, $7::uuid,
             (SELECT v.agent_capability_activation_id FROM sys.v_agent_capability_activations_current v
-              WHERE v.agent_capability_activation_tenant_id = $1
-                AND v.agent_capability_activation_capability_id = $2)
+              WHERE v.agent_capability_activation_tenant_id = $1::uuid
+                AND v.agent_capability_activation_capability_id = $2::uuid)
      RETURNING agent_capability_activation_id`,
     [a.tenantId, a.capabilityId, a.mode, a.noticeRef, a.rollbackProofRef, a.reason, a.decidedBy],
   );

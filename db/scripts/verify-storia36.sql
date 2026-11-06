@@ -4980,11 +4980,14 @@ BEGIN
   SELECT count(*), min(rq.requisition_code) INTO v_cnt, v_smpl
     FROM sys.sys_job_requisitions rq
    WHERE rq.requisition_metadata->>'storia36' = 'C13' AND rq.requisition_status = 'OPEN'
-     AND EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
-                  WHERE a.user_position_assignment_position_id = rq.requisition_position_id
-                    AND a.user_position_assignment_kind = 'PRIMARY'
-                    AND a.user_position_assignment_status = 'ACTIVE');
-  IF v_cnt > 0 THEN v_g := v_g || format('C13d: %s selezioni aperte su un posto che ha già un titolare (es. %s)', v_cnt, v_smpl); END IF;
+     AND (EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
+                   WHERE a.user_position_assignment_position_id = rq.requisition_position_id
+                     AND a.user_position_assignment_kind = 'PRIMARY'
+                     AND a.user_position_assignment_status = 'ACTIVE')
+          -- un posto chiuso (riordino) non si copre: aprirci una selezione sarebbe un falso
+          OR NOT EXISTS (SELECT 1 FROM sys.sys_positions p
+                          WHERE p.position_id = rq.requisition_position_id AND p.position_is_active));
+  IF v_cnt > 0 THEN v_g := v_g || format('C13d: %s selezioni aperte su un posto che ha già un titolare o che è chiuso (es. %s)', v_cnt, v_smpl); END IF;
 
   SELECT count(*), min(rq.requisition_code) INTO v_cnt, v_smpl
     FROM sys.sys_job_requisitions rq
@@ -7498,6 +7501,23 @@ BEGIN
     END;
     IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13b(i) FALLITO: un colloquio prima della candidatura è passato'; END IF;
     RAISE NOTICE '[OK] SELFTEST C13b(i) (colloquio prima della candidatura, rollback)';
+
+    -- ST-C13b(ii): un colloquio spostato oltre la frontiera
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_interviews SET interview_scheduled_at = (staging.storia36_c4_frontier() + 20) + time '10:00'
+       WHERE interview_id = (SELECT interview_id FROM sys.sys_interviews
+                              WHERE interview_metadata->>'storia36' = 'C13' ORDER BY interview_id LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13b(staging.storia36_c4_frontier());
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13b(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13b(ii) FALLITO: un colloquio oltre la frontiera è passato'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13b(ii) (colloquio oltre la frontiera, rollback)';
 
     -- ST-C13b(iii): il candidato che valuta il proprio colloquio
     v_fired := false;

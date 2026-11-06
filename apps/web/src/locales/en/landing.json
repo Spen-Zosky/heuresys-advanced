@@ -148,7 +148,7 @@
     "knownTitle": "Known limitations",
     "known": "An automated check finds only part of the problems: reading order, how understandable text alternatives are, and full keyboard use of interactive charts (org charts, networks, skill maps) have not yet been checked by hand. Some pages with an identifier in the address were measured only when there was data to open.",
     "feedbackTitle": "Feedback",
-    "feedback": "If you hit a barrier or cannot use part of the portal, write to privacy@heuresys.com with the page and what you were doing: we reply within 30 days and, if needed, give you the information another way.",
+    "feedback": "If you hit a barrier or cannot use part of the portal, write to accessibilita@heuresys.com with the page and what you were doing: we reply within 30 days and, if needed, give you the information another way.",
     "enforcementTitle": "If the answer does not satisfy you",
     "enforcement": "You can contact the Agenzia per l'Italia Digitale (AgID), which oversees the accessibility of digital services, through the form on its website (www.agid.gov.it)."
   }

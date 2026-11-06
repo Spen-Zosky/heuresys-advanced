@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**52 ADR** in `docs/architecture/adr/`.
+**53 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -60,6 +60,7 @@
 | [0052](adr/0052_la_copia_ripristinabile_a_ogni_fine_fase.md) | La copia ripristinabile di advanced a ogni fine fase | ACCETTATO il 2026-11-01 da Enzo Spenuso | La copia ripristinabile di advanced a ogni fine fase *(dal titolo)* | 2026-11-01 |
 | [0053](adr/0053_gli_agenti_agiscono_senza_conferma_una_capacita_alla_volta.md) | Gli agenti agiscono senza conferma anche in produzione, una capacità alla volta | ACCETTATO il 2026-11-03 da Enzo Spenuso | Gli agenti agiscono senza conferma anche in produzione, una capacità alla volta *(dal titolo)* | 2026-11-03 |
 | [0054](adr/0054_heuresys_piattaforma_del_cambiamento_organizzativo.md) | Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa | ACCETTATO il 2026-11-03 da Enzo Spenuso | Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa *(dal titolo)* | 2026-11-03 |
+| [0055](adr/0055_la_piattaforma_concede_ruoli_nel_cliente_con_un_motivo.md) | La piattaforma concede ruoli dentro un cliente solo con un motivo scritto | ACCETTATO il 2026-11-06 da Enzo Spenuso, alle 01:22 UTC | La piattaforma concede ruoli dentro un cliente solo con un motivo scritto *(dal titolo)* | 2026-11-06 |
 
 ## Conventions
 

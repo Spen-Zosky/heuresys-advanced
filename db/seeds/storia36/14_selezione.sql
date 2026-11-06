@@ -256,6 +256,38 @@ BEGIN
     RAISE NOTICE 'storia36 C13: posti nuovi per potenziamento %', v_n;
   END IF;
 
+  -- Il profilo del posto nuovo è quello del posto modello: competenze, KPI e
+  -- formazione richiesti (senza, la vista v_pip_completeness li segnalava vuoti
+  -- e le pagine del posto non avevano niente da mostrare). Copia generica per
+  -- colonne, così una colonna aggiunta domani a queste tabelle viene copiata.
+  DECLARE
+    t     text;
+    pk    text;
+    cols  text;
+  BEGIN
+    FOREACH t IN ARRAY ARRAY['sys_position_skill_requirements',
+                             'sys_position_kpi_requirements',
+                             'sys_position_learning_requirements'] LOOP
+      pk := replace(substr(t, 5), 'requirements', 'requirement') || '_id';
+      SELECT string_agg(quote_ident(c.column_name), ', ' ORDER BY c.ordinal_position) INTO cols
+        FROM information_schema.columns c
+       WHERE c.table_schema = 'sys' AND c.table_name = t
+         AND c.column_name NOT IN (pk, 'position_id', 'created_at', 'created_by', 'updated_at', 'updated_by');
+      EXECUTE format(
+        'INSERT INTO sys.%1$I (%2$I, position_id, %3$s, created_at, created_by, updated_at, updated_by)
+         SELECT uuid_generate_v5($1, ''STORIA36::C13::PROFILO::'' || %1$L || ''::'' || r.%2$I),
+                p.position_id, %4$s, p.created_at, p.created_by, p.created_at, p.created_by
+           FROM sys.sys_positions p
+           JOIN sys.%1$I r ON r.position_id = (p.position_metadata->>''modello_position_id'')::uuid
+          WHERE p.position_tenant_id = $2 AND p.position_metadata->>''storia36'' = ''C13''
+         ON CONFLICT DO NOTHING',
+        t, pk, cols, (SELECT string_agg('r.' || x, ', ') FROM unnest(string_to_array(cols, ', ')) x))
+      USING c_ns, c_rtl;
+      GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
+      RAISE NOTICE 'storia36 C13: profilo dei posti nuovi, % %', t, v_n;
+    END LOOP;
+  END;
+
   INSERT INTO _sel
   SELECT 'OPEN', 'OPEN::' || p.position_id, p.position_id, NULL, NULL,
          -- l'ancora: un mese dopo la nascita del posto, così annuncio e
@@ -316,7 +348,8 @@ BEGIN
     req_id  = uuid_generate_v5(c_ns, 'STORIA36::C13::REQ::'  || k),
     post_id = uuid_generate_v5(c_ns, 'STORIA36::C13::POST::' || k),
     n_altri = CASE kind WHEN 'MOVE' THEN 1 + hk % 3 ELSE 5 + hk % 9 END,
-    declina = (kind = 'HIRE' AND hk % 7 = 0);
+    -- una selezione chiusa su cinque ha un'offerta declinata dal secondo arrivato
+    declina = (kind IN ('HIRE','MOVE') AND hk % 5 = 0);
   UPDATE _req SET final_on = pg_temp.wd(offer_sent - (3 + hk % 5)) WHERE kind <> 'OPEN';
   UPDATE _req SET tech_on  = pg_temp.wd(final_on  - (6 + hk % 7)) WHERE kind = 'HIRE';
   UPDATE _req SET screen_on = pg_temp.wd(coalesce(tech_on, final_on) - (6 + hk % 6)) WHERE kind <> 'OPEN';
@@ -326,6 +359,14 @@ BEGIN
   -- (le dimissioni hanno un preavviso), l'annuncio dopo, e nulla oltre la frontiera.
   UPDATE _req SET published = LEAST(pg_temp.wd(vacated - (hk % 20)), pg_temp.wd(c_to - 14))
    WHERE kind = 'OPEN';
+  -- Le selezioni aperte non stanno tutte allo stesso punto: una appena
+  -- pubblicata, una ai primi colloqui, una ai tecnici, una all'offerta. Le
+  -- posizioni nuove si scaglionano così (in ordine stabile di chiave).
+  UPDATE _req r SET published = pg_temp.wd(c_to - (ARRAY[9, 20, 33, 48])[1 + (x.rn - 1) % 4])
+    FROM (SELECT k, row_number() OVER (ORDER BY md5(k)) AS rn FROM _req
+           WHERE kind = 'OPEN' AND EXISTS (SELECT 1 FROM sys.sys_positions p
+                   WHERE p.position_id = _req.pos AND p.position_metadata->>'storia36' = 'C13')) x
+   WHERE r.k = x.k;
   UPDATE _req SET opened = pg_temp.wd(published - (4 + hk % 8));
   UPDATE _req SET reason = CASE
       WHEN kind = 'MOVE' THEN 'INTERNAL_MOBILITY'
@@ -606,7 +647,7 @@ BEGIN
          r.vis,
          CASE WHEN r.kind = 'OPEN' THEN 'PUBLISHED' ELSE 'CLOSED' END,
          r.published,
-         CASE WHEN r.kind = 'OPEN' THEN r.published + 60 ELSE GREATEST(r.published, r.offer_sent) END,
+         CASE WHEN r.kind = 'OPEN' THEN r.published + 90 ELSE GREATEST(r.published, r.offer_sent) END,
          r.sede,
          jsonb_build_object('storia36', 'C13'),
          pg_temp.slot(r.published, r.k || 'PC'), v_rec,

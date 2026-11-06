@@ -7460,9 +7460,15 @@ BEGIN
     v_fired := false;
     BEGIN
       DELETE FROM sys.sys_job_offers WHERE offer_id = (
+        -- l'esca deve essere un'ASSUNZIONE: un'offerta di mobilità interna non
+        -- riguarda C13a, e con LIMIT 1 senza filtro ci si cadeva (prova del 2026-11-06)
         SELECT o.offer_id FROM sys.sys_job_offers o
+          JOIN sys.sys_candidate_applications ap ON ap.application_id = o.offer_application_id
+          JOIN sys.sys_job_postings jp ON jp.posting_id = ap.application_posting_id
+          JOIN sys.sys_job_requisitions rq ON rq.requisition_id = jp.posting_requisition_id
          WHERE o.offer_status = 'ACCEPTED' AND o.offer_metadata->>'storia36' = 'C13'
-           AND o.offer_start_date >= DATE '2023-08-01' LIMIT 1);
+           AND rq.requisition_metadata->>'origine' = 'HIRE'
+         ORDER BY o.offer_id LIMIT 1);
       IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
       PERFORM staging.storia36_check_c13a();
       RAISE EXCEPTION 'ST_NOT_FIRED';

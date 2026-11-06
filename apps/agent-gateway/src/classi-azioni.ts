@@ -12,10 +12,10 @@
  *     singolo lavoratore, tocca le eccezioni di ADR-0036 §5, oppure cancella. Mai automatica;
  *   · X, non esiste: non sta in questo elenco, e quindi non sta nemmeno nel catalogo.
  *
- * ⚠ OGGI LA CLASSE NON CAMBIA NESSUNA DECISIONE CHE IL GATE GIÀ PRENDE: ogni scrittura passa
- * ancora dal ponte di approvazione umana. Cambia una cosa sola: una scrittura senza classe è
- * NEGATA (ADR-0056 D2, «un'operazione che non si sa classificare è negata»). La classe serve al
- * cancello per modo e tetto (voce T3, passo A3 di ADR-0053), che verrà dopo.
+ * COSA DECIDE LA CLASSE. Una scrittura senza classe è NEGATA (ADR-0056 D2, «un'operazione che non
+ * si sa classificare è negata»). Una scrittura B può passare senza ponte di approvazione solo dentro
+ * una capacità `LIBERA` del tenant e sotto il suo tetto (`capacita.ts`, passo A3 di ADR-0053); ogni
+ * altra scrittura, e ogni C sempre, passa dal ponte di approvazione umana.
  *
  * LE CANCELLAZIONI SONO C, non B. ADR-0035 vuole che si ritiri marcando e non cancellando, e
  * P17 mette ogni cancellazione possibile in C o X. Non è verificato qui se l'API, dietro le

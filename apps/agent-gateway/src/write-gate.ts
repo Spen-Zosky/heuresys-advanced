@@ -24,6 +24,8 @@ import {
 } from "./audit-sink.js";
 import { bareToolName, DEFAULT_TOOL_ALLOWLIST, isParametricToolName } from "./mcp-tool-names.js";
 import { classeAzione } from "./classi-azioni.js";
+import { ContatoreVolume, type RegistroCapacita } from "./capacita.js";
+import { operazioneDiChiamata } from "./operazione.js";
 import type { LettoreContatore } from "./persone-distinte.js";
 import type { LivelloPersone } from "./soglie-persone.js";
 
@@ -158,6 +160,13 @@ export interface GateOptions {
    * costruisce per ogni conversazione): questo ramo copre chi monta il gate a mano.
    */
   persone?: LettoreContatore;
+  /**
+   * ADR-0053 A3 (piano T3b): il registro delle capacità e l'agente per cui leggerlo. Assente, ogni
+   * scrittura va al ponte di approvazione come prima: è il default sicuro, e quello dei test che
+   * non lo montano. Il contatore del tetto di volume nasce dentro `makeCanUseTool`, una volta per
+   * conversazione.
+   */
+  capacita?: { registro: RegistroCapacita; agentCode: string };
 }
 
 const DENY_NOT_APPROVED = "write not approved (compliance gate)";
@@ -238,6 +247,8 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
    * e ri-chiedere a ogni lettura sarebbe il tetto che ADR-0040 §6 ha scartato.
    */
   let consensoLetture = false;
+  /** ADR-0053 D1: il tetto di volume delle capacità `LIBERA`, per questa conversazione. */
+  const volume = new ContatoreVolume();
   let richiestaInVolo: Promise<boolean> | undefined;
 
   const chiediPerLettura = (
@@ -359,14 +370,41 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
     }
 
     // 2c. Scrittura senza classe → si NEGA, senza chiedere (ADR-0056 D2: un'operazione che non si
-    //     sa classificare è negata). Oggi ogni scrittura con una classe va comunque al ponte qui
-    //     sotto: la classe deciderà modo e tetto nella voce T3. Quello che cambia ora è che una
-    //     scrittura entrata nell'allowlist senza passare da `classi-azioni.ts` non arriva più
-    //     davanti a una persona come se fosse una scrittura qualsiasi.
-    if (classeAzione(name, input, opts.operations) === undefined) {
+    //     sa classificare è negata). Una scrittura entrata nell'allowlist senza passare da
+    //     `classi-azioni.ts` non arriva davanti a una persona come se fosse una scrittura qualsiasi.
+    const classeAz = classeAzione(name, input, opts.operations);
+    if (classeAz === undefined) {
       const d: ToolDecision = { behavior: "deny", message: DENY_ACTION_CLASS_UNKNOWN };
       auditDecision(name, input, d, "ACTION_CLASS_UNKNOWN");
       return d;
+    }
+
+    // 2d. ADR-0053 A3 (piano T3b) — LA CAPACITÀ LIBERA. Solo una scrittura di classe B, solo se il
+    //     registro dice che per il tenant della persona una capacità pubblicata dell'agente in modo
+    //     `LIBERA` contiene proprio quest'operazione, e solo sotto il tetto della conversazione.
+    //     Il registro si legge ora, a ogni scrittura: l'interruttore vale dalla chiamata successiva.
+    //     Qualunque dubbio (registro assente o guasto, operazione non risolta, tenant ignoto) porta
+    //     al ponte qui sotto, cioè a una persona: mai a un'esecuzione e mai a un diniego nuovo.
+    let oltreIlTetto: string | undefined;
+    if (classeAz === "B" && opts.capacita && who.tenant) {
+      const op = operazioneDiChiamata(name, input, opts.operations);
+      let libera: Awaited<ReturnType<RegistroCapacita["liberaPer"]>>;
+      if (op) {
+        try {
+          libera = await opts.capacita.registro.liberaPer(opts.capacita.agentCode, who.tenant, op);
+        } catch {
+          libera = undefined;
+        }
+      }
+      if (libera) {
+        const etichetta = `${libera.code}@${libera.version}`;
+        if (volume.prenota(libera)) {
+          const d: ToolDecision = { behavior: "allow", updatedInput: input as Record<string, unknown> };
+          auditDecision(name, input, d, `WRITE_CAPABILITY_LIBERA ${etichetta}`);
+          return d;
+        }
+        oltreIlTetto = etichetta; // il tetto è raggiunto: si ferma e chiede (ADR-0053 D4)
+      }
     }
 
     // 3. Allowlisted write → HITL with deny-by-default on timeout/throw.
@@ -390,7 +428,8 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
     const d: ToolDecision = approved
       ? { behavior: "allow", updatedInput: input as Record<string, unknown> }
       : { behavior: "deny", message: DENY_NOT_APPROVED };
-    auditDecision(name, input, d, approved ? "WRITE_HUMAN_APPROVED" : "WRITE_DENIED_OR_TIMEOUT");
+    const ragione = approved ? "WRITE_HUMAN_APPROVED" : "WRITE_DENIED_OR_TIMEOUT";
+    auditDecision(name, input, d, oltreIlTetto ? `${ragione} OVER_VOLUME_CAP ${oltreIlTetto}` : ragione);
     return d;
   };
 }

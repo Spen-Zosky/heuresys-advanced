@@ -1,7 +1,7 @@
 # ADR-0056 — I principi agentici sono la dottrina comune degli agenti di advanced e del datastore
 
-- **Status**: PROPOSTO il 2026-11-06 (diventa ACCETTATO con il sì di Enzo Spenuso su questo testo). Le due scelte che lo rendevano possibile le ha già fatte Enzo sulle schede del thread «Portare i principi agentici in Heuresys»: alle 03:53 UTC (04:53 ora di Roma) «Solo io, decido prima dei clienti» (D3) e alle 03:55 UTC (04:55 ora di Roma) «P14 adattato, ADR-0053 resta» (D2).
-- **Date**: 2026-11-06
+- **Status**: ACCETTATO il 2026-11-06 da Enzo Spenuso, alle 04:00 UTC (05:00 ora di Roma), nel thread «Portare i principi agentici in Heuresys»: «Sì, accetto l'ADR-0056». Le due scelte su cui poggia le aveva fatte prima, sulle schede dello stesso thread: alle 03:53 UTC (04:53 ora di Roma) «Solo io, decido prima dei clienti» (D3) e alle 03:55 UTC (04:55 ora di Roma) «P14 adattato, ADR-0053 resta» (D2).
+- **Date**: 2026-11-06 (proposto e accettato lo stesso giorno)
 - **Redatto da**: Claude Code, thread «Portare i principi agentici in Heuresys»
 - **Richiesta**: Enzo Spenuso, 2026-11-05 alle 21:23 ora di Roma: «leggi il file PRINCIPI_agenti-e-assistenti_20261105.md e analizzalo a fondo per comprendere se possiamo portarlo dentro il progetto heuresys (advanced e datastore) per rendere il progetto pienamente agentico e con AI inglobata».
 - **Fonte**: [`docs/architecture/agenti/PRINCIPI_agenti-e-assistenti_20261105.md`](../agenti/PRINCIPI_agenti-e-assistenti_20261105.md), versione 3 del 2026-11-05, nata in MOD. È copiata identica dall'originale sulla VM (nella cartella dell'utente `ubuntu`): stessa impronta SHA-256 `f4a159d2…aa57` dopo aver riportato i fine riga da LF a CRLF, l'unica normalizzazione applicata.

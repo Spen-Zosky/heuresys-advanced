@@ -41,5 +41,31 @@ export function applySubscriptionAuth(env: Record<string, string | undefined>): 
   return removed;
 }
 
-// Side effect all'import: è il punto dell'intero modulo.
+/**
+ * ADR-0056 D3, principio P24, piano dei principi agentici voce T4: finché Enzo non decide
+ * altrimenti, gli agenti pensano SOLO con l'abbonamento, mai con una chiave a pagamento.
+ * Dopo `applySubscriptionAuth` una credenziale API ancora presente vuol dire che l'SDK la
+ * userebbe: il gateway non parte.
+ */
+export class ChiaveApiVietata extends Error {}
+
+/** Le credenziali API che resterebbero all'SDK (vuoto = nessuna). */
+export function credenzialiRimaste(env: Record<string, string | undefined>): string[] {
+  return API_CREDENTIAL_ENV_VARS.filter((k) => env[k] !== undefined && env[k] !== "");
+}
+
+export function verificaNienteChiave(env: Record<string, string | undefined>): void {
+  const rimaste = credenzialiRimaste(env);
+  if (rimaste.length) {
+    throw new ChiaveApiVietata(
+      `credenziali API nell'ambiente (${rimaste.join(", ")}): gli agenti usano solo l'abbonamento ` +
+        "(ADR-0056 D3, P24). Toglile, oppure imposta AGENT_GATEWAY_SUBSCRIPTION_AUTH=1 perché il gateway le neutralizzi.",
+    );
+  }
+}
+
+// Side effect all'import: è il punto dell'intero modulo. Prima si neutralizza (se la modalità
+// abbonamento è attiva), poi si pretende che non resti niente: altrimenti l'import alza e il
+// gateway non parte.
 applySubscriptionAuth(process.env);
+verificaNienteChiave(process.env);

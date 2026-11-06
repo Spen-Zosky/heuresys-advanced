@@ -9,7 +9,13 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { applySubscriptionAuth, API_CREDENTIAL_ENV_VARS } from "../src/subscription-auth.js";
+import {
+  applySubscriptionAuth,
+  API_CREDENTIAL_ENV_VARS,
+  ChiaveApiVietata,
+  credenzialiRimaste,
+  verificaNienteChiave,
+} from "../src/subscription-auth.js";
 
 describe("applySubscriptionAuth", () => {
   it("con il flag attivo rimuove entrambe le credenziali e le dichiara", () => {
@@ -29,7 +35,7 @@ describe("applySubscriptionAuth", () => {
     expect(env.AGENT_GATEWAY_SUBSCRIPTION_AUTH).toBe("1");
   });
 
-  it("senza il flag NON tocca nulla — la modalità a chiave API resta possibile", () => {
+  it("senza il flag applySubscriptionAuth non tocca nulla (poi verificaNienteChiave ferma il gateway)", () => {
     const env: Record<string, string | undefined> = { ANTHROPIC_API_KEY: "sk-test-non-reale" };
     expect(applySubscriptionAuth(env)).toEqual([]);
     expect(env.ANTHROPIC_API_KEY).toBe("sk-test-non-reale");
@@ -51,5 +57,31 @@ describe("applySubscriptionAuth", () => {
     const env: Record<string, string | undefined> = { AGENT_GATEWAY_SUBSCRIPTION_AUTH: "1" };
     expect(applySubscriptionAuth(env)).toEqual([]);
     expect(applySubscriptionAuth(env)).toEqual([]);
+  });
+});
+
+describe("verificaNienteChiave (ADR-0056 D3, P24, voce T4)", () => {
+  it("una chiave senza la modalità abbonamento ferma il gateway", () => {
+    for (const k of API_CREDENTIAL_ENV_VARS) {
+      const env: Record<string, string | undefined> = { [k]: "valore-finto" };
+      applySubscriptionAuth(env);
+      expect(credenzialiRimaste(env)).toEqual([k]);
+      expect(() => verificaNienteChiave(env)).toThrow(ChiaveApiVietata);
+    }
+  });
+
+  it("con la modalità abbonamento la chiave è tolta e il gateway parte", () => {
+    const env: Record<string, string | undefined> = {
+      AGENT_GATEWAY_SUBSCRIPTION_AUTH: "1",
+      ANTHROPIC_API_KEY: "valore-finto",
+      ANTHROPIC_AUTH_TOKEN: "valore-finto",
+    };
+    applySubscriptionAuth(env);
+    expect(() => verificaNienteChiave(env)).not.toThrow();
+  });
+
+  it("senza chiavi parte anche senza la modalità abbonamento (vale il login della macchina)", () => {
+    expect(() => verificaNienteChiave({})).not.toThrow();
+    expect(() => verificaNienteChiave({ ANTHROPIC_API_KEY: "" })).not.toThrow();
   });
 });

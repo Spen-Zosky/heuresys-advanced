@@ -40,17 +40,24 @@ export async function persone(profilo) {
          join sys.sys_users u on u.user_id = uar.user_auth_role_user_id
         where uar.user_auth_role_revoked_at is null and u.user_status = 'ACTIVE' and u.user_type = 'STANDARD'
           and lower(u.user_email) <> all($1::text[]))
-     select distinct on (ruolo, tenant_id) * from base
+     select * from base
       order by ruolo, tenant_id, fattore desc,
                case when ruolo in ('USER','TEAM_MEMBER') then not dirige else dirige end desc, incarico desc, email`,
     [REAL_PERSON_EMAILS.map((e) => e.toLowerCase())]);
+  // per ogni ruolo e tenant la prima persona che può entrare e non è già stata scelta per un altro ruolo:
+  // così ogni ruolo ha la sua persona, invece di sparire dietro chi ne ha già un altro
   const out = [{ sigla: 'ANON', ruolo: '(anonimo)' }];
-  const viste = new Set();
+  const viste = new Set(), coperti = new Set();
+  const senzaFattore = [];
   for (const r of righe) {
-    if (viste.has(r.user_id)) continue;
-    viste.add(r.user_id);
+    const k = r.ruolo + '|' + r.tenant_id;
+    if (coperti.has(k) || viste.has(r.user_id)) continue;
+    if (!r.fattore) { if (!righe.some((x) => x.ruolo === r.ruolo && x.tenant_id === r.tenant_id && x.fattore && !viste.has(x.user_id))) senzaFattore.push(k); continue; }
+    coperti.add(k); viste.add(r.user_id);
     out.push({ sigla: `${r.tenant_id === rtl?.tenant_id ? 'RTL' : 'SYS'}-${r.ruolo}`, ruolo: r.ruolo, email: r.email, userId: r.user_id, fattore: r.fattore });
   }
+  // un ruolo senza nessuna persona che possa entrare resta scritto nel registro come persona non visitabile
+  for (const k of new Set(senzaFattore)) if (!coperti.has(k)) { const [ruolo, t] = k.split('|'); out.push({ sigla: `${t === rtl?.tenant_id ? 'RTL' : 'SYS'}-${ruolo}`, ruolo, email: null, nota: 'nessun titolare con secondo fattore derived-access' }); }
   const solo = (process.env.QA_WEB_SOLO || '').split(',').filter(Boolean);
   return solo.length ? out.filter((p) => solo.includes(p.sigla)) : out;
 }

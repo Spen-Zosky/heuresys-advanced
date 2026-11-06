@@ -1,0 +1,88 @@
+{
+  "progetto": "heuresys-advanced",
+  "base": "https://www.heuresys.com",
+  "ambiente": "produzione",
+  "radice": ".",
+  "adattatore": "scripts/qa-web/adattatore.mjs",
+  "rotte": {
+    "tipo": "next-app",
+    "cartella": "apps/web/src/app"
+  },
+  "pagine_iniziali": [
+    "/",
+    "/login"
+  ],
+  "scritture_ammesse": [
+    "^/api/v1/auth/login$",
+    "^/api/v1/auth/refresh$"
+  ],
+  "lingue": [
+    "it",
+    "en"
+  ],
+  "viewport": [
+    [
+      1440,
+      900
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "profondita_stati": 3,
+  "id_per_rotta": 3,
+  "escludi": [
+    "/logout"
+  ],
+  "escludi_nodi": [
+    "^Esci$",
+    "^Logout$",
+    "^Sign out$"
+  ],
+  "glossario": [
+    "Heuresys",
+    "OKR",
+    "KPI",
+    "HRMS",
+    "BPM",
+    "ESS",
+    "RTL Bank",
+    "DPO",
+    "IBAN",
+    "CCNL",
+    "ESCO",
+    "ISCO",
+    "NACE",
+    "ATECO",
+    "CEO",
+    "CFO",
+    "HR",
+    "AI",
+    "IA",
+    "ID"
+  ],
+  "eccezioni": [
+    {
+      "codice": "P-RIMANDO",
+      "persona": "ANON",
+      "regex": "porta a /login",
+      "ragione": "chi non ha fatto l'accesso va al login"
+    },
+    {
+      "codice": "R-RETE",
+      "persona": "ANON",
+      "regex": "/api/v1/me/.* → 401",
+      "ragione": "il guscio chiede chi sei prima di rimandare al login"
+    },
+    {
+      "codice": "R-CONSOLE",
+      "persona": "ANON",
+      "regex": "401",
+      "ragione": "la stessa chiamata 401 del guscio, vista dalla console"
+    }
+  ],
+  "pausa_ms": 400,
+  "attesa_rete_ms": 6000,
+  "pagina_accesso": "/login"
+}

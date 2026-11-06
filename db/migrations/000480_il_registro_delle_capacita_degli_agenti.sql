@@ -329,6 +329,11 @@ SELECT DISTINCT ON (a.agent_capability_activation_tenant_id, a.agent_capability_
        a.agent_capability_activation_decided_at
   FROM sys.sys_agent_capability_activations a
   JOIN sys.sys_agent_capabilities c ON c.agent_capability_id = a.agent_capability_activation_capability_id
+ -- In vigore è l'attivazione che nessun'altra sostituisce (T3c, 2026-11-06): due decisioni nella
+ -- stessa transazione hanno lo stesso decided_at, e l'ordine per id (casuale) le invertiva.
+ WHERE NOT EXISTS (
+         SELECT 1 FROM sys.sys_agent_capability_activations s
+          WHERE s.agent_capability_activation_supersedes_id = a.agent_capability_activation_id)
  ORDER BY a.agent_capability_activation_tenant_id, a.agent_capability_activation_capability_id,
           a.agent_capability_activation_decided_at DESC, a.agent_capability_activation_id DESC;
 

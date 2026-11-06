@@ -44,8 +44,15 @@
 --    conservasse i curricula oltre il termine mostrerebbe a un agente di
 --    conformità un'infrazione che nessuno ha commesso.
 --
--- IL PRESENTE NON SI TOCCA: questo seed non scrive su persone, posizioni,
--- assegnazioni, contratti o ruoli. Racconta come ci si è arrivati.
+--  · QUATTRO POSTI NUOVI PER POTENZIAMENTO, scoperti, con la selezione in corso:
+--    in RTL ogni posto attivo ha il suo titolare, e senza un posto scoperto
+--    nessuna selezione può essere aperta (I1: la requisizione nasce da una
+--    posizione). Sono secondi seggi di mestieri che nella stessa unità ne hanno
+--    già almeno due, e si creano una volta sola.
+--
+-- IL PRESENTE SI TOCCA SOLO LÌ: a parte i quattro posti nuovi, questo seed non
+-- scrive su persone, posizioni, assegnazioni, contratti o ruoli. Racconta come
+-- ci si è arrivati.
 --
 -- Post-condizioni: staging.storia36_check_c13a..c13d (verify-storia36.sql),
 -- con i loro selftest. Idempotente: id uuid_generate_v5 su chiavi naturali,
@@ -206,6 +213,63 @@ BEGIN
           AND p.user_position_assignment_end_date BETWEEN a.user_position_assignment_start_date - 45
                                                       AND a.user_position_assignment_start_date);
 
+  -- 1c-bis. QUATTRO POSTI NUOVI, per potenziamento (scelta di Enzo del 2026-11-06,
+  --     da confermare). In RTL ogni posto attivo ha il suo titolare (158 su 158,
+  --     misurato il 2026-11-06), quindi una selezione IN CORSO non avrebbe dove
+  --     stare. Il posto nuovo è un secondo seggio di un mestiere che nella stessa
+  --     unità ne ha già almeno due: stesso titolo, ruolo, riporto, criticità e
+  --     peso economico del modello — si potenzia ciò che c'è, non si inventa un
+  --     mestiere. Si creano UNA volta sola: se esistono già, il seed non ne fa altri.
+  IF NOT EXISTS (SELECT 1 FROM sys.sys_positions
+                  WHERE position_tenant_id = c_rtl AND position_metadata->>'storia36' = 'C13') THEN
+    INSERT INTO sys.sys_positions (
+      position_id, position_tenant_id, position_code, position_title,
+      position_organization_unit_id, position_job_role_id, position_reports_to_position_id,
+      position_esco_occupation_uri, position_criticality, position_economic_weight,
+      position_is_active, position_effective_from, position_metadata, position_ai_hints,
+      created_at, created_by, updated_at, updated_by)
+    SELECT uuid_generate_v5(c_ns, 'STORIA36::C13::POS::' || m.position_id), c_rtl,
+           left(m.position_code, 112) || '-N' || upper(substr(md5(m.position_id::text), 1, 4)),
+           m.position_title, m.position_organization_unit_id, m.position_job_role_id,
+           m.position_reports_to_position_id, m.position_esco_occupation_uri,
+           m.position_criticality, m.position_economic_weight, true,
+           pg_temp.wd(c_to - 60 - pg_temp.h(m.position_id::text || 'NEW') % 15),
+           jsonb_build_object('storia36', 'C13', 'origine', 'potenziamento',
+                              'modello_position_id', m.position_id,
+                              'nota', 'posto nuovo, ancora scoperto: la selezione è in corso'),
+           '{}'::jsonb,
+           pg_temp.slot(pg_temp.wd(c_to - 60 - pg_temp.h(m.position_id::text || 'NEW') % 15), m.position_id::text || 'PNC'), v_hrh,
+           pg_temp.slot(pg_temp.wd(c_to - 60 - pg_temp.h(m.position_id::text || 'NEW') % 15), m.position_id::text || 'PNC'), v_hrh
+      FROM (
+        SELECT DISTINCT ON (p.position_title) p.*
+          FROM sys.sys_positions p
+          JOIN sys.sys_organization_units o ON o.organization_unit_id = p.position_organization_unit_id
+         WHERE p.position_tenant_id = c_rtl AND p.position_is_active AND o.organization_unit_is_active
+           AND (SELECT count(*) FROM sys.sys_positions q
+                 WHERE q.position_tenant_id = c_rtl AND q.position_is_active
+                   AND q.position_organization_unit_id = p.position_organization_unit_id
+                   AND q.position_title = p.position_title) >= 2
+         ORDER BY p.position_title, md5('C13POS' || p.position_id)) m
+     ORDER BY md5('C13POS' || m.position_id)
+     LIMIT 4;
+    GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
+    RAISE NOTICE 'storia36 C13: posti nuovi per potenziamento %', v_n;
+  END IF;
+
+  INSERT INTO _sel
+  SELECT 'OPEN', 'OPEN::' || p.position_id, p.position_id, NULL, NULL,
+         -- l'ancora: un mese dopo la nascita del posto, così annuncio e
+         -- requisizione cadono dopo che il posto esiste
+         p.position_effective_from + 32
+    FROM sys.sys_positions p
+   WHERE p.position_tenant_id = c_rtl AND p.position_is_active
+     AND p.position_metadata->>'storia36' = 'C13'
+     AND NOT EXISTS (
+       SELECT 1 FROM sys.sys_user_position_assignments a
+        WHERE a.user_position_assignment_position_id = p.position_id
+          AND a.user_position_assignment_kind = 'PRIMARY'
+          AND a.user_position_assignment_status = 'ACTIVE');
+
   -- 1c. le posizioni lasciate negli ultimi sei mesi e ancora scoperte
   INSERT INTO _sel
   SELECT 'OPEN', 'OPEN::' || p.position_id, p.position_id, NULL, NULL, v.lasciata
@@ -265,6 +329,9 @@ BEGIN
   UPDATE _req SET opened = pg_temp.wd(published - (4 + hk % 8));
   UPDATE _req SET reason = CASE
       WHEN kind = 'MOVE' THEN 'INTERNAL_MOBILITY'
+      WHEN kind = 'OPEN' AND EXISTS (SELECT 1 FROM sys.sys_positions p
+                                      WHERE p.position_id = _req.pos
+                                        AND p.position_metadata->>'storia36' = 'C13') THEN 'GROWTH'
       WHEN kind = 'OPEN' THEN 'REPLACEMENT'
       WHEN EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
                     WHERE a.user_position_assignment_position_id = _req.pos

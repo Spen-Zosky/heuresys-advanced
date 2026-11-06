@@ -27,6 +27,7 @@ import { DbAuditSink, FileAuditSink, type AuditSink } from "./audit-sink.js";
 import { auditPool } from "./db-pool.js";
 import { HeuresysClient, chiSei, chiediGettoneAgente } from "./heuresys-client.js";
 import { ConversazioniAperte, leggiLimiti, modelloAgenti } from "./limiti.js";
+import { DbRegistroCapacita } from "./capacita.js";
 import { redact } from "./redact.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
@@ -85,6 +86,9 @@ const MODELLO = modelloAgenti();
 const conversazioni = new ConversazioniAperte(LIMITI);
 const pool = auditPool();
 const auditSink: AuditSink = pool ? new DbAuditSink(pool) : new FileAuditSink();
+// ADR-0053 A3 (piano T3b): il registro delle capacità si legge dallo stesso database del diario.
+// Senza database non c'è registro, e ogni scrittura passa dal ponte di approvazione come prima.
+const registroCapacita = pool ? new DbRegistroCapacita(pool) : undefined;
 
 // #9 §A.1 — subscription auth: with AGENT_GATEWAY_SUBSCRIPTION_AUTH=1 do NOT forward
 // an ANTHROPIC_API_KEY to the SDK, so query() falls back to the machine's logged-in
@@ -352,6 +356,7 @@ const server = createServer(async (req, res) => {
           principal,
           maxTurns: LIMITI.giri,
           abortController: interrompi,
+          ...(registroCapacita ? { capacita: { registro: registroCapacita, agentCode: AGENTE_ASSISTENTE } } : {}),
         })) {
           res.write(`data: ${JSON.stringify(event)}\n\n`);
         }

@@ -19,6 +19,7 @@ import { ContatorePersone } from "./persone-distinte.js";
 import { caricaSoglie } from "./soglie-persone.js";
 import type { HeuresysClient } from "./heuresys-client.js";
 import { LIMITI_DEFAULT, modelloAgenti } from "./limiti.js";
+import type { RegistroCapacita } from "./capacita.js";
 
 export interface RunHrAgentOptions {
   /** Bridges to the webapp (SSE/WebSocket) so a human authorises each write. */
@@ -48,6 +49,11 @@ export interface RunHrAgentOptions {
    * connessione, entrambi in `server.ts`. Assente, la conversazione non ha un'interruzione esterna.
    */
   abortController?: AbortController;
+  /**
+   * ADR-0053 A3 (piano T3b): il registro delle capacità e il codice dell'agente. Assente, ogni
+   * scrittura passa dal ponte di approvazione come prima.
+   */
+  capacita?: { registro: RegistroCapacita; agentCode: string };
 }
 
 export async function* runHrAgent(
@@ -90,6 +96,7 @@ export async function* runHrAgent(
     principal,
     ...(opts.approvalTimeoutMs !== undefined ? { approvalTimeoutMs: opts.approvalTimeoutMs } : {}),
     ...(opts.allowlist !== undefined ? { allowlist: opts.allowlist } : {}),
+    ...(opts.capacita !== undefined ? { capacita: opts.capacita } : {}),
   });
 
   const iterator = query({

@@ -348,7 +348,9 @@ BEGIN
     req_id  = uuid_generate_v5(c_ns, 'STORIA36::C13::REQ::'  || k),
     post_id = uuid_generate_v5(c_ns, 'STORIA36::C13::POST::' || k),
     n_altri = CASE kind WHEN 'MOVE' THEN 1 + hk % 3 ELSE 5 + hk % 9 END,
-    -- una selezione chiusa su cinque ha un'offerta declinata dal secondo arrivato
+    -- circa una selezione chiusa su cinque PUÒ avere un'offerta declinata dal secondo
+    -- arrivato: succede solo se le date lo consentono (offerta prima di quella al
+    -- vincitore). Sul dato del 2026-11-05 ne nasce una sola su venti.
     declina = (kind IN ('HIRE','MOVE') AND hk % 5 = 0);
   UPDATE _req SET final_on = pg_temp.wd(offer_sent - (3 + hk % 5)) WHERE kind <> 'OPEN';
   UPDATE _req SET tech_on  = pg_temp.wd(final_on  - (6 + hk % 7)) WHERE kind = 'HIRE';

@@ -360,6 +360,7 @@ Enzo risponde una decisione alla volta, nel thread «Decidere S-17, S-20, S-2, P
 Ciò che emerge strada facendo va qui e si propone una volta sola a Enzo come «fuori da questo ciclo: lo vuoi nel prossimo?».
 
 - Il CLAUDE.md di advanced indica ancora il linux-pc come gemello per le prove (tabella «Dove si esegue il lavoro sul database»); il coordinatore dice che quel database è fuori perimetro dal 2026-10-25 e che il gemello vivo è stato scartato il 2026-11-01. Il CLAUDE.md va riallineato.
+- Sulla VM `sudo -u postgres` funziona senza password per ogni sessione, anche non presidiata (lo usa `scripts/copia-fase.sh`): è un accesso da amministratore al database di produzione che scavalca i controlli sulle credenziali. Scoperto il 2026-11-05 nel lavoro su P-6; da valutare se restringerlo a `copia-fase.sh`.
 - Due sentinelle di dati hanno righe note: `v_direzione_del_dato_violata` (1, una tabella «nativa» con 20 righe da seed storico) e `v_registro_provenienza_orfano` (11 tabelle). Non sono interfaccia; la prima entra in A-14, la seconda resta informativa.
 
 ## 10. Copertura: ogni pagina, ogni difetto, ogni rilievo ha una voce o un motivo

@@ -159,16 +159,19 @@ BEGIN
          NULL::date AS vacated
     FROM sys.sys_users u
     JOIN _hire h ON h.user_id = u.user_id
-    -- la posizione con cui la persona è entrata: l'incarico principale che
-    -- comincia più vicino all'assunzione (entro un mese)
+    -- la posizione con cui la persona è entrata: il primo incarico principale
+    -- che comincia fra un mese prima e sei mesi dopo l'assunzione (chi entra
+    -- può cominciare in affiancamento e ricevere il posto poco dopo).
+    -- Chi ha un incarico cominciato ANNI prima della propria assunzione porta un
+    -- dato incoerente: per lui la selezione non si inventa (C13a lo esclude e
+    -- lo dichiara, vedi staging.storia36_c13_assunti_incoerenti).
     JOIN LATERAL (
       SELECT a.user_position_assignment_position_id
         FROM sys.sys_user_position_assignments a
        WHERE a.user_position_assignment_user_id = u.user_id
          AND a.user_position_assignment_kind = 'PRIMARY'
-         AND abs(coalesce(a.user_position_assignment_start_date, h.hire) - h.hire) <= 31
-       ORDER BY abs(coalesce(a.user_position_assignment_start_date, h.hire) - h.hire),
-                a.user_position_assignment_start_date NULLS LAST
+         AND a.user_position_assignment_start_date BETWEEN h.hire - 31 AND h.hire + 183
+       ORDER BY a.user_position_assignment_start_date
        LIMIT 1) a ON true
    WHERE u.user_tenant_id = c_rtl
      AND u.user_type = 'STANDARD'
@@ -188,6 +191,12 @@ BEGIN
      AND a.user_position_assignment_kind = 'PRIMARY'
      AND a.user_position_assignment_start_date BETWEEN c_start AND c_to
      AND a.user_position_assignment_start_date <> c_reorg
+     -- un giorno in cui cambiano posto in tanti è una riorganizzazione, non una
+     -- serie di selezioni: nessuno si è candidato (stesso motivo del riordino)
+     AND (SELECT count(*) FROM sys.sys_user_position_assignments z
+            JOIN sys.sys_users zu ON zu.user_id = z.user_position_assignment_user_id
+           WHERE zu.user_tenant_id = c_rtl AND z.user_position_assignment_kind = 'PRIMARY'
+             AND z.user_position_assignment_start_date = a.user_position_assignment_start_date) <= 5
      AND a.user_position_assignment_start_date > h.hire + 31
      AND EXISTS (
        SELECT 1 FROM sys.sys_user_position_assignments p

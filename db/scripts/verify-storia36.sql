@@ -4781,6 +4781,24 @@ END $fn$;
 --   e la requisizione FILLED è su una posizione che ha occupato. Esito (a) se
 --   manca: `storia36.sh custodia --repair-missing` la ricrea.
 -- ----------------------------------------------------------------------------
+-- Gli assunti della finestra il cui primo incarico non sta vicino all'assunzione:
+-- dato incoerente già nel tenant, che C13a non copre con una selezione inventata.
+CREATE OR REPLACE VIEW staging.storia36_c13_assunti_incoerenti AS
+SELECT u.user_email, e.hire AS assunzione,
+       (SELECT min(a.user_position_assignment_start_date) FROM sys.sys_user_position_assignments a
+         WHERE a.user_position_assignment_user_id = u.user_id
+           AND a.user_position_assignment_kind = 'PRIMARY') AS primo_incarico
+  FROM sys.sys_users u
+  JOIN (SELECT user_employment_user_id AS uid, min(user_employment_hire_date) AS hire
+          FROM sys.sys_user_employment GROUP BY 1) e ON e.uid = u.user_id
+ WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND u.user_type = 'STANDARD'
+   AND u.user_email NOT LIKE '%.invalid'
+   AND e.hire >= DATE '2023-08-01'
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a0
+                    WHERE a0.user_position_assignment_user_id = u.user_id
+                      AND a0.user_position_assignment_kind = 'PRIMARY'
+                      AND a0.user_position_assignment_start_date BETWEEN e.hire - 31 AND e.hire + 183);
+
 CREATE OR REPLACE FUNCTION staging.storia36_check_c13a()
 RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
@@ -4796,6 +4814,14 @@ BEGIN
    WHERE u.user_tenant_id = c_rtl AND u.user_type = 'STANDARD'
      AND u.user_email NOT LIKE '%.invalid'
      AND e.hire BETWEEN DATE '2023-08-01' AND v_to
+     -- la stessa regola del seed: entra da una selezione chi ha il primo incarico
+     -- fra un mese prima e sei mesi dopo l'assunzione. Gli altri hanno un dato
+     -- incoerente (incarico di anni prima dell'assunzione) e stanno nella vista
+     -- staging.storia36_c13_assunti_incoerenti: si dichiarano, non si coprono.
+     AND EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a0
+                  WHERE a0.user_position_assignment_user_id = u.user_id
+                    AND a0.user_position_assignment_kind = 'PRIMARY'
+                    AND a0.user_position_assignment_start_date BETWEEN e.hire - 31 AND e.hire + 183)
      AND NOT EXISTS (
        SELECT 1
          FROM sys.sys_candidates c

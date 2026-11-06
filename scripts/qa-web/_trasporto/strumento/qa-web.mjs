@@ -111,6 +111,7 @@ async function esegui() {
   const browser = await chromium.launch(process.env.QA_WEB_CHROMIUM ? { executablePath: process.env.QA_WEB_CHROMIUM } : {});
   const script = readFileSync(join(QUI, 'lib', 'nella-pagina.js'), 'utf8');
   const axe = (() => {
+    if (process.env.QA_WEB_AXE) return readFileSync(process.env.QA_WEB_AXE, 'utf8');
     for (const b of [profilo.__radice, join(profilo.__radice || '.', 'apps/web'), QUI, process.cwd()].filter(Boolean)) { try { return readFileSync(createRequire(join(b, 'package.json')).resolve('axe-core/axe.min.js'), 'utf8'); } catch {} }
     return null;
   })();

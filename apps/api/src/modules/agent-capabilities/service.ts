@@ -16,7 +16,8 @@
  * registro nasce con la voce T5 del piano, e finché non c'è nessuna capacità si libera.
  */
 import { pool, withTransaction } from "../../db/client.js";
-import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import type { ActorContext } from "../../lib/actor.js";
+import { haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 import {
   ConflictError,
   ForbiddenError,
@@ -106,7 +107,7 @@ export const agentCapabilitiesService = {
 
   async decide(actor: ActorContext, id: string, body: DecideAgentCapabilityModeBody): Promise<AgentCapability> {
     nessunAgente(actor);
-    const piattaforma = isPlatform(actor);
+    const piattaforma = haMandatoPiattaforma(actor);
 
     // Per quale tenant. Il Direttore decide per il tenant della sua sessione e non ne nomina altri;
     // la piattaforma nomina il tenant, e può solo spegnere.

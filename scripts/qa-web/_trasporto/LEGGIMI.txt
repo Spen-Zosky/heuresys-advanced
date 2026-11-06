@@ -1,1 +1,0 @@
-Copia di trasporto verso ~/.claude/tools/qa-web e ~/.claude/skills/qa-web sulla VM (fonte dell ecosistema). Si toglie dal ramo appena copiata: lo strumento appartiene all ecosistema, non al progetto.

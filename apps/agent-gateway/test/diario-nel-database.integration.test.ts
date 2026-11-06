@@ -68,4 +68,43 @@ describe.skipIf(!conDatabase)("A-12 — il diario dell'agente nel database", () 
     expect(diario.rows.map((r) => r.tool)).toEqual(["hrx_positions_list", "(conversazione)"]);
     expect(diario.rows.every((r) => r.principal_subject === persona)).toBe(true);
   });
+
+  it("T5 (000482): la scrittura autonoma porta capacità, versione e per conto di chi; senza, il database la rifiuta", async () => {
+    const conversazione = randomUUID();
+    const persona = randomUUID();
+    const sink = new DbAuditSink(client);
+    const base = {
+      conversationId: conversazione,
+      who: { principal: "user" as const, subject: persona },
+      tenant: "RTL_BANK",
+      tool: "hrx_org_units_upsert",
+      args: { payload: { name: "x" } },
+      decision: "allow" as const,
+      reason: "WRITE_CAPABILITY_LIBERA struttura.unita@1",
+      outcome: "allow-write-autonomous" as const,
+      actionClass: "B" as const,
+      capability: { code: "struttura.unita", version: 1 },
+    };
+    await sink.record({ ...base, onBehalfOf: persona });
+    const riga = await client.query(
+      `SELECT outcome, action_class, capability_code, capability_version, on_behalf_of
+         FROM audit.agent_gateway_decisions WHERE conversation_id = $1`,
+      [conversazione],
+    );
+    expect(riga.rows).toEqual([{
+      outcome: "allow-write-autonomous", action_class: "B", capability_code: "struttura.unita",
+      capability_version: 1, on_behalf_of: persona,
+    }]);
+
+    await client.query("SAVEPOINT senza_per_conto_di");
+    const rifiuto = await sink.record(base).then(() => "accettata", (e: { code?: string }) => e.code);
+    await client.query("ROLLBACK TO SAVEPOINT senza_per_conto_di");
+    expect(rifiuto).toBe("23514");
+
+    const sentinella = await client.query<{ n: string }>(
+      `SELECT count(*) AS n FROM sys.v_agente_scritture_senza_per_conto_di WHERE conversation_id = $1`,
+      [conversazione],
+    );
+    expect(sentinella.rows[0]!.n).toBe("0");
+  });
 });

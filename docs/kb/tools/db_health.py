@@ -111,6 +111,11 @@ INFORMATIVE = {
         "righe e' l'atteso finche' il gateway non scrive nel database (FileAuditSink resta il "
         "fallback, server.ts sceglie in base a POSTGRES_HOST); righe con numeri alti non sono "
         "un difetto, sono il freno di #252 che ha gia' fatto il suo lavoro se serviva.",
+    "v_agent_capability_activations_current":
+        "ADR-0053 A1 (mig 000480): il modo in vigore (CONFERMA o LIBERA) per tenant e capacita' "
+        "dell'agente. Conta stato, non anomalie: una riga per ogni capacita' su cui un tenant ha "
+        "deciso. Senza questa voce la prima decisione del Direttore HR avrebbe acceso il rosso. "
+        "La sentinella vera del registro e' v_agente_scritture_senza_per_conto_di (000482).",
     "v_mandato_da_riconfermare":
         "ADR-0050 D4 (mig 000475): concessioni di mandato attive nate prima dell'atto, senza "
         "un atto approvato. Non pretende zero alla nascita: l'ADR chiede di elencarle e "

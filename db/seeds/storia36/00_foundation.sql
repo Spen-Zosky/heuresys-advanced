@@ -21,25 +21,28 @@ CREATE TABLE IF NOT EXISTS staging.storia36_runs (
   run_id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   cluster_code    varchar(8)  NOT NULL
                   CONSTRAINT storia36_runs_cluster_code_check
-                  CHECK (cluster_code ~ '^(C([0-9]|1[0-2])|ADV)$'),
+                  CHECK (cluster_code ~ '^(C([0-9]|1[0-3])|ADV)$'),
   seed_file       text        NOT NULL,
   rows_written    bigint      NOT NULL,
   executed_at     timestamptz NOT NULL DEFAULT now(),
   twice_run_delta bigint      NOT NULL
 );
 
--- Il vocabolario si è allargato quando è nato il modo `avanzamento` (ADV, che
--- non è un cluster ma una corsa di estensione). CREATE TABLE IF NOT EXISTS non
--- tocca un vincolo già esistente: qui lo si riallinea, idempotente.
+-- Il vocabolario si è allargato due volte: quando è nato il modo `avanzamento`
+-- (ADV, che non è un cluster ma una corsa di estensione) e quando la selezione è
+-- entrata nella storia (C13, 2026-11-06). CREATE TABLE IF NOT EXISTS non tocca
+-- un vincolo già esistente: qui lo si riallinea, idempotente. La guardia guarda
+-- la forma ESATTA del vincolo, non una sua parola: con `!~ 'ADV'` un vincolo che
+-- avesse già ADV ma non C13 sarebbe passato per buono.
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_constraint
               WHERE conname = 'storia36_runs_cluster_code_check'
-                AND pg_get_constraintdef(oid) !~ 'ADV') THEN
+                AND pg_get_constraintdef(oid) !~ '1\[0-3\]') THEN
     ALTER TABLE staging.storia36_runs DROP CONSTRAINT storia36_runs_cluster_code_check;
     ALTER TABLE staging.storia36_runs ADD CONSTRAINT storia36_runs_cluster_code_check
-      CHECK (cluster_code ~ '^(C([0-9]|1[0-2])|ADV)$');
-    RAISE NOTICE 'storia36 C0: vocabolario cluster_code esteso ad ADV';
+      CHECK (cluster_code ~ '^(C([0-9]|1[0-3])|ADV)$');
+    RAISE NOTICE 'storia36 C0: vocabolario cluster_code esteso a C13 (selezione) e ADV';
   END IF;
 END $$;
 

@@ -214,7 +214,7 @@ BEGIN
                                                       AND a.user_position_assignment_start_date);
 
   -- 1c-bis. QUATTRO POSTI NUOVI, per potenziamento (scelta di Enzo del 2026-11-06,
-  --     da confermare). In RTL ogni posto attivo ha il suo titolare (158 su 158,
+  --     sulla scheda «Vuoi selezioni ancora aperte in RTL?»: «Sì, 4 posti nuovi vacanti»). In RTL ogni posto attivo ha il suo titolare (158 su 158,
   --     misurato il 2026-11-06), quindi una selezione IN CORSO non avrebbe dove
   --     stare. Il posto nuovo è un secondo seggio di un mestiere che nella stessa
   --     unità ne ha già almeno due: stesso titolo, ruolo, riporto, criticità e

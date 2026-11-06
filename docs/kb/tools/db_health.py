@@ -97,6 +97,14 @@ INFORMATIVE = {
         "spiegazione: una violazione su QUALUNQUE altra tabella, o un conteggio diverso da 20 "
         "su questa, e' un progresso o un regresso vero da guardare (post-condizione della "
         "000447 lo verifica gia' alla nascita).",
+    "v_valore_decisioni_tracciabili":
+        "mig. 000470 (F0-3): LA definizione di decisione tracciabile, una riga per decisione presa "
+        "da una persona o da un agente. Conta stato, non anomalie: la migrazione la dichiara "
+        "INFORMATIVA nel commento della vista.",
+    "v_valore_settimana":
+        "mig. 000470 (F0-3): il test del valore come misura, una riga per tenant e settimana con "
+        "le decisioni tracciabili e chi le ha prese. Conta stato, non anomalie: la migrazione la "
+        "dichiara INFORMATIVA. Accendeva il rosso della prova generale appena c'era una decisione.",
     "v_agente_persone_per_conversazione":
         "#253 (mig 000452): una riga per conversazione CHIUSA dell'agente, col totale finale "
         "di persone distinte lette (ADR-0040 R2, #251/#252). Conta stato, non anomalie: zero "

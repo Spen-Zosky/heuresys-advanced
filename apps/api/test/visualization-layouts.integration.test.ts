@@ -51,7 +51,7 @@ describe("/v1/visualization-layouts/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     userS = await login(suite, "tommaso.fiore@rtl-bank.org");
 
     // Create a parent graph as TENANT_ADMIN so it lands in a real tenant.

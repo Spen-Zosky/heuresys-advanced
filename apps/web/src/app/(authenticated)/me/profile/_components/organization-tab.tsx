@@ -2,7 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import type { MeProfileFull } from "@heuresys/shared";
-import { Field, ProfileSection, fmtDate, fmtMoney } from "./field";
+import { Field, ProfileSection, fmtDate, fmtDateTime, fmtMoney } from "./field";
 
 /** Organizzazione — role/position, lifecycle, compensation, SAP keys, auth summary. */
 export function OrganizationTab({ data }: { data: MeProfileFull }) {
@@ -61,7 +61,7 @@ export function OrganizationTab({ data }: { data: MeProfileFull }) {
       <ProfileSection title={t("profile.full.auth.title")} testId="section-auth">
         <Field label={t("profile.full.auth.username")} value={data.auth.username} />
         <Field label={t("profile.full.auth.roles")} value={data.auth.roles.join(", ")} />
-        <Field label={t("profile.full.auth.lastLogin")} value={fmtDate(data.auth.lastLogin)} />
+        <Field label={t("profile.full.auth.lastLogin")} value={fmtDateTime(data.auth.lastLogin)} />
       </ProfileSection>
     </div>
   );

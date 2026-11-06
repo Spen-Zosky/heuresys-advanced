@@ -36,14 +36,16 @@ import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
+import { useFormat, type Formati } from "@/lib/format";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 interface ListaCicli { items: ReviewCycle[]; total: number }
 interface ListaCalibrazioni { items: CalibrationSession[]; total: number }
 
 /** Un intervallo di date leggibile, o un trattino se il dato non lo porta. */
-function periodo(da: string | null, a: string | null): string {
+function periodo(da: string | null, a: string | null, fmt: Formati): string {
   if (!da && !a) return "—";
-  return `${da ?? "…"} → ${a ?? "…"}`;
+  return `${da ? fmt.data(da) : "…"} → ${a ? fmt.data(a) : "…"}`;
 }
 
 /** Il voto, oppure la dichiarazione che è stato ritirato per mandato. */
@@ -54,6 +56,8 @@ function voto(riga: { masked?: string[] }, campo: string, valore: number | null 
 
 export default function PerformancePage() {
   const { t } = useTranslation("hr");
+  const enumLabel = useEnumLabel();
+  const fmt = useFormat();
 
   const cicli = useQuery({
     queryKey: ["review-cycles", "list"],
@@ -70,20 +74,21 @@ export default function PerformancePage() {
     queryFn: () => apiFetch<ListaCalibrazioni>("/v1/calibration-sessions?limit=100&offset=0"),
   });
 
+  // V-16: finche' il dato non c'e' (caricamento o errore) l'indicatore dice «—», non zero.
   const kpi: KpiCardData[] = [
     {
       label: t("performance.kpi.cycles"),
-      value: <span data-testid="perf-kpi-cycles">{cicli.data?.total ?? 0}</span>,
+      value: <span data-testid="perf-kpi-cycles">{cicli.data ? cicli.data.total : "—"}</span>,
       iconTone: "info",
     },
     {
       label: t("performance.kpi.reviews"),
-      value: <span data-testid="perf-kpi-reviews">{valutazioni.total}</span>,
+      value: <span data-testid="perf-kpi-reviews">{valutazioni.query.data ? valutazioni.total : "—"}</span>,
       iconTone: "palette-4",
     },
     {
       label: t("performance.kpi.calibrations"),
-      value: <span data-testid="perf-kpi-calibrations">{calibrazioni.data?.total ?? 0}</span>,
+      value: <span data-testid="perf-kpi-calibrations">{calibrazioni.data ? calibrazioni.data.total : "—"}</span>,
       iconTone: "success",
     },
   ];
@@ -92,14 +97,14 @@ export default function PerformancePage() {
     () => [
       { header: t("performance.cycles.cols.code"), cell: (c) => <span className="text-xs font-medium">{c.code}</span> },
       { header: t("performance.cycles.cols.name"), cell: (c) => <span className="text-xs">{c.name}</span> },
-      { header: t("performance.cycles.cols.type"), cell: (c) => <span className="text-xs">{c.type}</span> },
+      { header: t("performance.cycles.cols.type"), cell: (c) => <span className="text-xs">{enumLabel("perfReviewType", c.type)}</span> },
       {
         header: t("performance.cycles.cols.period"),
-        cell: (c) => <span className="text-xs text-muted-foreground">{periodo(c.periodStart, c.periodEnd)}</span>,
+        cell: (c) => <span className="text-xs text-muted-foreground">{periodo(c.periodStart, c.periodEnd, fmt)}</span>,
       },
       { header: t("performance.cycles.cols.status"), cell: (c) => <EnumStatusBadge domain="status" value={c.status} /> },
     ],
-    [t],
+    [t, enumLabel, fmt],
   );
 
   const colonneValutazioni = useMemo<DataColumn<PerformanceReview>[]>(
@@ -114,9 +119,9 @@ export default function PerformancePage() {
       },
       {
         header: t("performance.reviews.cols.period"),
-        cell: (r) => <span className="text-xs text-muted-foreground">{periodo(r.periodStart, r.periodEnd)}</span>,
+        cell: (r) => <span className="text-xs text-muted-foreground">{periodo(r.periodStart, r.periodEnd, fmt)}</span>,
       },
-      { header: t("performance.reviews.cols.type"), cell: (r) => <span className="text-xs">{r.type ?? "—"}</span> },
+      { header: t("performance.reviews.cols.type"), cell: (r) => <span className="text-xs">{enumLabel("perfReviewType", r.type)}</span> },
       {
         header: t("performance.reviews.cols.status"),
         cell: (r) => (r.status ? <EnumStatusBadge domain="status" value={r.status} /> : <span className="text-xs">—</span>),
@@ -131,17 +136,17 @@ export default function PerformancePage() {
         header: t("performance.reviews.cols.shared"),
         cell: (r) =>
           r.sharedAt ? (
-            <span className="text-xs text-muted-foreground">{new Date(r.sharedAt).toLocaleDateString()}</span>
+            <span className="text-xs text-muted-foreground">{fmt.data(r.sharedAt)}</span>
           ) : r.condivisioneEccezione ? (
             // S1097 — l'eccezione di condivisione (registro 000396) non fa sparire la riga «non
             // comunicata»: la qualifica. Il motivo intero sta nel title, la data della decisione
             // nel testo — così l'HR vede QUALI valutazioni sono coperte, e da quando.
             <span
               className="text-xs text-muted-foreground underline decoration-dotted"
-              title={`${r.condivisioneEccezione.motivo} — ${r.condivisioneEccezione.decisaDa}`}
+              title={r.condivisioneEccezione.motivo}
             >
               {t("performance.reviews.notSharedException", {
-                date: new Date(r.condivisioneEccezione.decisaIl).toLocaleDateString(),
+                date: fmt.data(r.condivisioneEccezione.decisaIl),
               })}
             </span>
           ) : (
@@ -149,7 +154,7 @@ export default function PerformancePage() {
           ),
       },
     ],
-    [t],
+    [t, fmt, enumLabel],
   );
 
   const colonneCalibrazioni = useMemo<DataColumn<CalibrationSession>[]>(
@@ -163,13 +168,13 @@ export default function PerformancePage() {
         header: t("performance.calib.cols.scheduled"),
         cell: (s) => (
           <span className="text-xs text-muted-foreground">
-            {s.scheduledAt ? new Date(s.scheduledAt).toLocaleDateString() : "—"}
+            {s.scheduledAt ? fmt.data(s.scheduledAt) : "—"}
           </span>
         ),
       },
       { header: t("performance.calib.cols.status"), cell: (s) => <EnumStatusBadge domain="status" value={s.status} /> },
     ],
-    [t],
+    [t, fmt],
   );
 
   return (
@@ -181,9 +186,10 @@ export default function PerformancePage() {
       <section className="space-y-3" data-testid="perf-cycles-section">
         <h2 className="text-sm font-semibold text-foreground">{t("performance.cycles.title")}</h2>
         <p className="text-xs text-muted-foreground">{t("performance.cycles.hint")}</p>
-        <EntityTable<ReviewCycle>
+        <EntityTable<ReviewCycle> originPath={"/v1/review-cycles"}
           isLoading={cicli.isLoading}
           isError={cicli.isError}
+          error={cicli.error}
           errorTestId="perf-cycles-error"
           errorMessage={t("performance.error")}
           rows={cicli.data?.items ?? []}
@@ -202,6 +208,7 @@ export default function PerformancePage() {
         <EntityTable<PerformanceReview>
           isLoading={valutazioni.query.isLoading}
           isError={valutazioni.query.isError}
+          error={valutazioni.query.error}
           errorTestId="perf-reviews-error"
           errorMessage={t("performance.error")}
           rows={valutazioni.rows}
@@ -218,9 +225,10 @@ export default function PerformancePage() {
 
       <section className="space-y-3" data-testid="perf-calib-section">
         <h2 className="text-sm font-semibold text-foreground">{t("performance.calib.title")}</h2>
-        <EntityTable<CalibrationSession>
+        <EntityTable<CalibrationSession> originPath={"/v1/calibration-sessions"}
           isLoading={calibrazioni.isLoading}
           isError={calibrazioni.isError}
+          error={calibrazioni.error}
           errorTestId="perf-calib-error"
           errorMessage={t("performance.error")}
           rows={calibrazioni.data?.items ?? []}

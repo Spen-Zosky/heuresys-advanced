@@ -49,6 +49,8 @@ interface ProfileRow {
   band_is_global: boolean | null;
   band_kind: "BAND" | "CCNL" | "UNION" | null;
   band_metadata: Record<string, unknown> | null;
+  band_origine_dato: string | null;
+  origine_dato: string;
   economic_weight: string | null;
   reward_gates_applied: unknown[];
   position_compensation_profile_metadata: Record<string, unknown>;
@@ -75,6 +77,8 @@ export async function findCompensationProfileByPositionId(
        b.compensation_band_is_global AS band_is_global,
        b.compensation_band_kind      AS band_kind,
        b.compensation_band_metadata  AS band_metadata,
+       b.origine_dato                AS band_origine_dato,
+       p.origine_dato,
        p.economic_weight::text AS economic_weight,
        p.reward_gates_applied,
        p.position_compensation_profile_metadata,
@@ -103,11 +107,13 @@ export async function findCompensationProfileByPositionId(
           isGlobal: r.band_is_global ?? false,
           kind: r.band_kind ?? "BAND",
           metadata: r.band_metadata ?? {},
+          origineDato: r.band_origine_dato ?? "",
         }
       : null,
     economicWeight: r.economic_weight,
     rewardGatesApplied: r.reward_gates_applied ?? [],
     metadata: r.position_compensation_profile_metadata ?? {},
+    origineDato: r.origine_dato,
     createdAt: r.created_at.toISOString(),
     updatedAt: r.updated_at.toISOString(),
   };
@@ -139,6 +145,7 @@ interface GateRow {
   result_override_reason: string | null;
   result_payload: Record<string, unknown> | null;
   result_recorded_at: Date | null;
+  user_name?: string | null;
 }
 
 function toGate(r: GateRow): RewardGate {
@@ -159,6 +166,7 @@ function toGate(r: GateRow): RewardGate {
     rewardGateId: r.reward_gate_id,
     tenantId: r.reward_gate_tenant_id,
     userId: r.reward_gate_user_id,
+    userName: r.user_name ?? null,
     positionId: r.reward_gate_position_id,
     catalogId: r.reward_gate_catalog_id,
     catalogCode: r.catalog_code,
@@ -253,7 +261,9 @@ export async function listRewardGates(
        latest.reward_gate_result_evaluator_user_id AS result_evaluator_user_id,
        latest.reward_gate_result_override_reason   AS result_override_reason,
        latest.reward_gate_result_payload AS result_payload,
-       latest.reward_gate_result_recorded_at AS result_recorded_at
+       latest.reward_gate_result_recorded_at AS result_recorded_at,
+       (SELECT u.user_display_name FROM sys.sys_users u
+         WHERE u.user_id = g.reward_gate_user_id AND u.user_tenant_id = g.reward_gate_tenant_id) AS user_name
      FROM sys.sys_reward_gates g
      JOIN sys.sys_reward_gate_catalog c ON c.reward_gate_catalog_id = g.reward_gate_catalog_id
      LEFT JOIN LATERAL (
@@ -398,6 +408,7 @@ interface HandoffRow {
   payroll_handoff_record_payload: Record<string, unknown>;
   payroll_handoff_record_handed_off_at: Date;
   payroll_handoff_record_status: string;
+  origine_dato: string;
   created_at: Date;
 }
 
@@ -411,6 +422,7 @@ function toHandoff(r: HandoffRow): PayrollHandoffRecord {
     payload: r.payroll_handoff_record_payload,
     handedOffAt: r.payroll_handoff_record_handed_off_at.toISOString(),
     status: r.payroll_handoff_record_status as PayrollHandoffRecord["status"],
+    origineDato: r.origine_dato,
     createdAt: r.created_at.toISOString(),
   };
 }
@@ -439,6 +451,7 @@ export async function insertPayrollHandoffRecord(
         payroll_handoff_record_payload,
         payroll_handoff_record_handed_off_at,
         payroll_handoff_record_status,
+        origine_dato,
         created_at`,
     [
       tenantId,
@@ -594,6 +607,7 @@ interface RecReadRow {
   compensation_recommendation_narrative: string | null;
   compensation_recommendation_payload: Record<string, unknown> | null;
   compensation_recommendation_computed_at: Date;
+  origine_dato: string;
   created_at: Date;
 }
 
@@ -605,7 +619,7 @@ const REC_READ_COLS = `compensation_recommendation_id, compensation_recommendati
   compensation_recommendation_period_end::text AS compensation_recommendation_period_end,
   compensation_recommendation_signal, compensation_recommendation_amount_eur,
   compensation_recommendation_narrative, compensation_recommendation_payload,
-  compensation_recommendation_computed_at, created_at`;
+  compensation_recommendation_computed_at, origine_dato, created_at`;
 
 function toRecRead(r: RecReadRow): CompensationRecommendationRow {
   return {
@@ -623,6 +637,7 @@ function toRecRead(r: RecReadRow): CompensationRecommendationRow {
         : Number(r.compensation_recommendation_amount_eur),
     narrative: r.compensation_recommendation_narrative,
     payload: r.compensation_recommendation_payload ?? {},
+    origineDato: r.origine_dato,
     computedAt: r.compensation_recommendation_computed_at.toISOString(),
     createdAt: r.created_at.toISOString(),
   };
@@ -689,13 +704,16 @@ interface BonusPoolRow {
   bonus_pool_payload: Record<string, unknown> | null;
   created_at: Date;
   updated_at: Date;
+  organization_unit_name: string | null;
 }
 
 const BONUS_POOL_COLS = `bonus_pool_id, bonus_pool_tenant_id, bonus_pool_scope,
   bonus_pool_organization_unit_id,
   bonus_pool_period_start::text AS bonus_pool_period_start,
   bonus_pool_period_end::text AS bonus_pool_period_end,
-  bonus_pool_total_eur, bonus_pool_payload, created_at, updated_at`;
+  bonus_pool_total_eur, bonus_pool_payload, created_at, updated_at,
+  (SELECT ou.organization_unit_name FROM sys.sys_organization_units ou
+    WHERE ou.organization_unit_id = bonus_pool_organization_unit_id) AS organization_unit_name`;
 
 function toBonusPool(r: BonusPoolRow): BonusPool {
   return {
@@ -703,6 +721,7 @@ function toBonusPool(r: BonusPoolRow): BonusPool {
     tenantId: r.bonus_pool_tenant_id,
     scope: r.bonus_pool_scope,
     organizationUnitId: r.bonus_pool_organization_unit_id,
+    organizationUnitName: r.organization_unit_name ?? null,
     periodStart: r.bonus_pool_period_start,
     periodEnd: r.bonus_pool_period_end,
     totalEur: r.bonus_pool_total_eur === null ? null : Number(r.bonus_pool_total_eur),
@@ -828,18 +847,22 @@ interface PositionEconomicWeightRow {
   position_economic_weight_metadata: Record<string, unknown> | null;
   created_at: Date;
   updated_at: Date;
+  position_title: string | null;
 }
 
 const POSITION_ECONOMIC_WEIGHT_COLS = `position_economic_weight_id, position_economic_weight_position_id,
   position_economic_weight_tenant_id, position_economic_weight_value,
   position_economic_weight_period_start::text AS position_economic_weight_period_start,
   position_economic_weight_period_end::text AS position_economic_weight_period_end,
-  position_economic_weight_metadata, created_at, updated_at`;
+  position_economic_weight_metadata, created_at, updated_at,
+  (SELECT p.position_title FROM sys.sys_positions p
+    WHERE p.position_id = position_economic_weight_position_id) AS position_title`;
 
 function toPositionEconomicWeight(r: PositionEconomicWeightRow): PositionEconomicWeight {
   return {
     positionEconomicWeightId: r.position_economic_weight_id,
     positionId: r.position_economic_weight_position_id,
+    positionTitle: r.position_title ?? null,
     tenantId: r.position_economic_weight_tenant_id,
     value: Number(r.position_economic_weight_value),
     periodStart: r.position_economic_weight_period_start,
@@ -927,6 +950,7 @@ export async function listPayrollHandoffRecords(
        payroll_handoff_record_payload,
        payroll_handoff_record_handed_off_at,
        payroll_handoff_record_status,
+       origine_dato,
        created_at
      FROM sys.sys_payroll_handoff_records ${wc}
      ORDER BY payroll_handoff_record_period_end DESC, payroll_handoff_record_id
@@ -1103,7 +1127,7 @@ export async function listCompensationBands(
     `SELECT compensation_band_id, compensation_band_tenant_id, compensation_band_code,
             compensation_band_name, compensation_band_min_eur::text AS min_eur,
             compensation_band_mid_eur::text AS mid_eur, compensation_band_max_eur::text AS max_eur,
-            compensation_band_is_global, compensation_band_kind, compensation_band_metadata
+            compensation_band_is_global, compensation_band_kind, compensation_band_metadata, origine_dato
        FROM sys.sys_compensation_bands
       WHERE ${whereSql}
       ORDER BY compensation_band_mid_eur DESC NULLS LAST, compensation_band_name
@@ -1125,6 +1149,7 @@ export async function listCompensationBands(
       isGlobal: (r.compensation_band_is_global as boolean) ?? false,
       kind: r.compensation_band_kind as "BAND" | "CCNL" | "UNION",
       metadata: (r.compensation_band_metadata as Record<string, unknown>) ?? {},
+      origineDato: r.origine_dato as string,
     })),
   };
 }

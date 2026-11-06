@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, EmptyState, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge, PageHeader, StatsCard } from "@heuresys/ui";
 import { Activity, Clock, TrendingUp } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type {
@@ -11,6 +11,7 @@ import type {
   AttendanceMonthlyRow,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /** Brand palette as raw HSL CSS-var refs so the echarts canvas (outside Tailwind's
  *  reach) still follows the active theme tokens — same pattern as workforce/page.tsx. */
@@ -87,7 +88,7 @@ function ouBarOption(rows: AttendanceByOrgUnitRow[]) {
 }
 
 export default function AttendanceAnalyticsPage() {
-  const { t } = useTranslation("analytics");
+  const { t, i18n } = useTranslation("analytics");
   const q = useQuery({
     queryKey: ["analytics", "attendance"],
     queryFn: () => apiFetch<AttendanceAnalyticsResponse>("/v1/analytics/attendance"),
@@ -95,15 +96,15 @@ export default function AttendanceAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main data-testid="analytics-attendance-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoCaricamento testId="analytics-attendance-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main data-testid="analytics-attendance-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">{t("error")}</p>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-attendance-error" onRiprova={() => void q.refetch()} />
       </main>
     );
   }
@@ -169,6 +170,13 @@ export default function AttendanceAnalyticsPage() {
                 })}
                 height={320}
                 ariaLabel={t("attendance.monthlyAria")}
+                assi={{ x: t("charts.axisMonth"), y: t("charts.axisHours") }}
+                lingua={i18n.language}
+                tabella={{
+                  titolo: t("charts.tableTitle"),
+                  colonne: [t("charts.axisMonth"), t("attendance.seriesTotal"), t("attendance.seriesOvertime")],
+                  righe: d.monthly.map((r) => [r.month, r.totalHours, r.overtimeHours]),
+                }}
               />
             </div>
             <p className="text-xs text-muted-foreground">
@@ -189,24 +197,31 @@ export default function AttendanceAnalyticsPage() {
                   option={ouBarOption(d.byOrgUnit)}
                   height={Math.max(280, d.byOrgUnit.length * 26)}
                   ariaLabel={t("attendance.ouTitle")}
+                  assi={{ x: t("charts.axisHours"), y: t("charts.axisUnit") }}
+                  lingua={i18n.language}
+                  tabella={{
+                    titolo: t("charts.tableTitle"),
+                    colonne: [t("charts.axisUnit"), t("charts.axisHours")],
+                    righe: [...d.byOrgUnit].sort((a, b) => b.totalHours - a.totalHours).map((r) => [r.dimension, r.totalHours]),
+                  }}
                 />
               </div>
             ) : (
-              <EmptyState
-                data-testid="analytics-attendance-ou-empty"
-                icon={<Clock className="h-6 w-6" />}
-                title={t("attendance.ouEmptyTitle")}
-                description={t("attendance.ouEmptyDesc")}
+              <StatoVuoto
+                testId="analytics-attendance-ou-empty"
+                icona={<Clock className="h-6 w-6" />}
+                titolo={t("attendance.ouEmptyTitle")}
+                motivo={t("attendance.ouEmptyDesc")}
               />
             )}
           </div>
         </section>
       ) : (
-        <EmptyState
-          data-testid="analytics-attendance-empty"
-          icon={<Clock className="h-6 w-6" />}
-          title={t("empty.title")}
-          description={t("attendance.emptyDesc")}
+        <StatoVuoto
+          testId="analytics-attendance-empty"
+          icona={<Clock className="h-6 w-6" />}
+          titolo={t("empty.title")}
+          motivo={t("attendance.emptyDesc")}
         />
       )}
     </main>

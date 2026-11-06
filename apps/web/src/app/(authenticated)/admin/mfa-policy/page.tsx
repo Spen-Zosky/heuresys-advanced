@@ -10,13 +10,13 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  ErrorState,
   PageHeader,
-  Spinner,
 } from "@heuresys/ui";
-import type { MfaPolicy, ListMfaPoliciesResponse } from "@heuresys/shared";
+import type { MfaPolicy, ListMfaPoliciesResponse, ListMfaExemptionsResponse, MfaExemption } from "@heuresys/shared";
+import { useFormat } from "@/lib/format";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { useCurrentUserPermissions } from "../../../../lib/api/auth";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /** The 8 canonical roles (config/constants.ts ROLE_CODES — validated server-side). */
 const ROLE_CODES = [
@@ -176,6 +176,87 @@ function PolicyRow({ tenantId, tenantLabel, policy, canManage }: PolicyRowProps)
   );
 }
 
+/**
+ * ADR-0050 D3, parte visibile (S-14): chi è esentato dal secondo fattore, perché, da chi e
+ * fino a quando. Una scaduta vale come assente (il login la ignora); spegnerla la chiude.
+ * Accendere o rinnovare un'esenzione resta un atto con autore, fuori da questa pagina.
+ */
+function ExemptionsCard({ canManage }: { canManage: boolean }) {
+  const { t } = useTranslation("admin");
+  const f = useFormat();
+  const qc = useQueryClient();
+  const q = useQuery({
+    queryKey: ["mfa-policy", "exemptions"],
+    queryFn: () => apiFetch<ListMfaExemptionsResponse>("/v1/mfa-policy/exemptions"),
+  });
+  const spegni = useMutation({
+    mutationFn: (id: string) =>
+      apiFetch<MfaExemption>(`/v1/mfa-policy/exemptions/${id}/disable`, { method: "POST", body: {} }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["mfa-policy", "exemptions"] }),
+  });
+  const variante = (s: MfaExemption["state"]) =>
+    s === "ACTIVE" ? "default" : s === "EXPIRED" ? "destructive" : "secondary";
+
+  return (
+    <Card data-testid="mfa-exemptions-card">
+      <CardHeader>
+        <CardTitle>{t("mfaPolicy.exemptions.title")}</CardTitle>
+        <p className="text-sm text-muted-foreground">{t("mfaPolicy.exemptions.description")}</p>
+      </CardHeader>
+      <CardContent className="p-0">
+        {q.isLoading ? (
+          <div className="p-6"><StatoCaricamento /></div>
+        ) : q.isError ? (
+          <div className="p-6">
+            <StatoErrore errore={q.error} testId="mfa-exemptions-error" onRiprova={() => void q.refetch()} />
+          </div>
+        ) : (q.data?.items.length ?? 0) === 0 ? (
+          <div className="p-6"><StatoVuoto titolo={t("mfaPolicy.exemptions.empty")} testId="mfa-exemptions-empty" /></div>
+        ) : (
+          <ul className="divide-y divide-border" data-testid="mfa-exemptions-list">
+            {q.data!.items.map((e) => (
+              <li key={e.exemptionId} className="flex flex-wrap items-start justify-between gap-3 px-6 py-4" data-testid="mfa-exemption-row">
+                <div className="min-w-0 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium">{e.userDisplayName ?? e.userEmail}</span>
+                    <Badge variant={variante(e.state)} data-testid="mfa-exemption-state">
+                      {t(`mfaPolicy.exemptions.state.${e.state}`)}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{e.userEmail}</p>
+                  <p className="text-sm">{e.reason}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("mfaPolicy.exemptions.expires", { date: e.expiresAt ? f.dataOra(e.expiresAt) : "—" })}
+                    {" · "}
+                    {e.authorDisplayName
+                      ? t("mfaPolicy.exemptions.author", { name: e.authorDisplayName })
+                      : t("mfaPolicy.exemptions.noAuthor")}
+                  </p>
+                </div>
+                {canManage && e.state !== "DISABLED" && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    data-testid="mfa-exemption-disable"
+                    disabled={spegni.isPending}
+                    onClick={() => spegni.mutate(e.exemptionId)}
+                  >
+                    {t("mfaPolicy.exemptions.disable")}
+                  </Button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {spegni.isError && (
+          <p role="alert" className="px-6 pb-4 text-sm text-danger">{spegni.error.message}</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminMfaPolicyPage() {
   const { t } = useTranslation("admin");
   const perms = useCurrentUserPermissions();
@@ -225,21 +306,22 @@ export default function AdminMfaPolicyPage() {
         </CardHeader>
         <CardContent className="p-0">
           {policies.isLoading ? (
-            <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
-              <Spinner /> {t("common:loading")}
+            <div className="p-6">
+              <StatoCaricamento />
             </div>
           ) : policies.isError ? (
-            <div className="p-6" data-testid="mfa-policy-access-error">
-              <ErrorState
-                title={t("mfaPolicy.accessDeniedTitle")}
-                description={t("mfaPolicy.accessDeniedDesc")}
-                retry={() => void policies.refetch()}
+            <div className="p-6">
+              <StatoErrore
+                errore={policies.error}
+                motivoNegato={t("mfaPolicy.accessDeniedDesc")}
+                testId="mfa-policy-access-error"
+                onRiprova={() => void policies.refetch()}
               />
             </div>
           ) : rows.length === 0 ? (
-            <p className="p-6 text-sm text-muted-foreground" data-testid="mfa-policy-empty">
-              {t("mfaPolicy.empty")}
-            </p>
+            <div className="p-6">
+              <StatoVuoto titolo={t("mfaPolicy.empty")} testId="mfa-policy-empty" />
+            </div>
           ) : (
             <ul className="divide-y divide-border" data-testid="mfa-policy-list">
               {rows.map((r) => (
@@ -255,6 +337,8 @@ export default function AdminMfaPolicyPage() {
           )}
         </CardContent>
       </Card>
+
+      <ExemptionsCard canManage={canManage} />
     </main>
   );
 }

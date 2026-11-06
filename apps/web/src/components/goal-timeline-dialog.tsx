@@ -12,15 +12,15 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  ErrorState,
-  Spinner,
   Timeline,
   type TimelineEvent,
   formatDateTime,
 } from "@heuresys/ui";
 import { Lock } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
+import { formati } from "@/lib/format";
 
 /**
  * GoalTimelineDialog (#26) — merged activity timeline (updates ∪ check-ins ∪
@@ -53,7 +53,7 @@ function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: str
       const u = e.update;
       const delta =
         u.previousProgress != null || u.newProgress != null
-          ? ` · ${t("goals.timeline.progress")}: ${u.previousProgress ?? "—"}% → ${u.newProgress ?? "—"}%`
+          ? ` · ${t("goals.timeline.progress")}: ${formati(locale).percento(u.previousProgress, "0-100")} → ${formati(locale).percento(u.newProgress, "0-100")}`
           : "";
       return {
         id: u.updateId,
@@ -74,7 +74,7 @@ function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: str
       return {
         id: c.checkInId,
         time,
-        title: `${t("goals.timeline.checkIn")}${c.statusUpdate ? ` · ${enumLabel("goalCheckInStatus", c.statusUpdate)}` : ""} · ${c.newProgress}%`,
+        title: `${t("goals.timeline.checkIn")}${c.statusUpdate ? ` · ${enumLabel("goalCheckInStatus", c.statusUpdate)}` : ""} · ${formati(locale).percento(c.newProgress, "0-100")}`,
         description: description || undefined,
         tone: toneForCheckIn(c.statusUpdate),
       };
@@ -84,7 +84,7 @@ function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: str
       id: m.milestoneId,
       time,
       title: `${t("goals.timeline.milestone")} · ${m.title} · ${enumLabel("goalMilestoneStatus", m.status)}`,
-      description: m.targetDate ? `${t("goals.timeline.target")}: ${m.targetDate}` : undefined,
+      description: m.targetDate ? `${t("goals.timeline.target")}: ${formati(locale).data(m.targetDate)}` : undefined,
       tone: toneForMilestone(m.status),
     };
   });
@@ -133,11 +133,9 @@ export function GoalTimelineDialog({
         </DialogHeader>
 
         {timeline.isLoading ? (
-          <div className="flex justify-center py-8">
-            <Spinner className="h-5 w-5" />
-          </div>
+          <StatoCaricamento />
         ) : timeline.isError ? (
-          <ErrorState title={t("goals.timeline.error")} />
+          <StatoErrore errore={timeline.error} titolo={t("goals.timeline.error")} testId="goal-timeline-error" onRiprova={() => void timeline.refetch()} />
         ) : (
           <div data-testid="goal-timeline">
             <Timeline events={events} emptyMessage={t("goals.timeline.empty")} />
@@ -148,11 +146,9 @@ export function GoalTimelineDialog({
           <section className="space-y-3 border-t border-border pt-4">
             <h3 className="text-sm font-semibold text-foreground">{t("goals.timeline.comments")}</h3>
             {comments.isLoading ? (
-              <div className="flex justify-center py-4">
-                <Spinner className="h-5 w-5" />
-              </div>
+              <StatoCaricamento />
             ) : comments.isError ? (
-              <ErrorState title={t("goals.timeline.error")} />
+              <StatoErrore errore={comments.error} titolo={t("goals.timeline.error")} testId="goal-comments-error" onRiprova={() => void comments.refetch()} />
             ) : comments.data && comments.data.items.length > 0 ? (
               <ul className="space-y-3">
                 {comments.data.items.map((c) => (
@@ -175,9 +171,7 @@ export function GoalTimelineDialog({
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground" data-testid="goal-comments-empty">
-                {t("goals.timeline.commentsEmpty")}
-              </p>
+              <StatoVuoto compatto titolo={t("goals.timeline.commentsEmpty")} testId="goal-comments-empty" />
             )}
           </section>
         ) : null}

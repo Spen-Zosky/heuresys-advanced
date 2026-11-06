@@ -22,7 +22,8 @@ import {
   type AuditPrincipal,
   type AuditSink,
 } from "./audit-sink.js";
-import { bareToolName, DEFAULT_TOOL_ALLOWLIST } from "./mcp-tool-names.js";
+import { bareToolName, DEFAULT_TOOL_ALLOWLIST, isParametricToolName } from "./mcp-tool-names.js";
+import { classeAzione } from "./classi-azioni.js";
 import type { LettoreContatore } from "./persone-distinte.js";
 import type { LivelloPersone } from "./soglie-persone.js";
 
@@ -55,10 +56,9 @@ export function isWriteTool(name: string): boolean {
  *     ignota — l'esito è **negare**, non «trattare come lettura». Non sapere cosa fa
  *     una chiamata è una ragione per fermarla, mai per lasciarla passare.
  */
-const PARAMETRIC_TOOLS = new Set(["hrx_entity_query"]);
 
 export function isParametricTool(name: string): boolean {
-  return PARAMETRIC_TOOLS.has(bareToolName(name));
+  return isParametricToolName(bareToolName(name));
 }
 
 /** Metodo HTTP di un'operazione dichiarata dall'atlante. Iniettato, mai dedotto. */
@@ -172,6 +172,8 @@ const DENY_READ_OVER_THRESHOLD =
   "high threshold (ADR-0040 R2) and the human confirmation was not granted. Not a permission " +
   "denial: ask the person to confirm, then retry.";
 const DENY_NOT_ALLOWLISTED = "tool not in allowlist (defense-in-depth)";
+const DENY_ACTION_CLASS_UNKNOWN =
+  "write has no action class in the catalogue (ADR-0056 D2 fail-closed)";
 const DENY_UNRESOLVED_OPERATION =
   "operation could not be resolved to an HTTP method (ADR-0033 §5.2 fail-closed)";
 
@@ -353,6 +355,17 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
         name, input, d,
         consentito ? "READ_OVER_THRESHOLD_APPROVED" : "READ_OVER_THRESHOLD_DENIED",
       );
+      return d;
+    }
+
+    // 2c. Scrittura senza classe → si NEGA, senza chiedere (ADR-0056 D2: un'operazione che non si
+    //     sa classificare è negata). Oggi ogni scrittura con una classe va comunque al ponte qui
+    //     sotto: la classe deciderà modo e tetto nella voce T3. Quello che cambia ora è che una
+    //     scrittura entrata nell'allowlist senza passare da `classi-azioni.ts` non arriva più
+    //     davanti a una persona come se fosse una scrittura qualsiasi.
+    if (classeAzione(name, input, opts.operations) === undefined) {
+      const d: ToolDecision = { behavior: "deny", message: DENY_ACTION_CLASS_UNKNOWN };
+      auditDecision(name, input, d, "ACTION_CLASS_UNKNOWN");
       return d;
     }
 

@@ -52,10 +52,10 @@ let federicaTenantId: string;
 describe("D-54 inbox orphan prevention (v_inbox_resource_consistency = 0)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     const u = await pool.query<{ user_id: string; user_tenant_id: string }>(
       `SELECT user_id, user_tenant_id FROM sys.sys_users WHERE user_email = $1`,
-      ["federica.marchetti@rtl-bank.org"],
+      ["governo@collaudo.invalid"],
     );
     federicaUserId = u.rows[0]!.user_id;
     federicaTenantId = u.rows[0]!.user_tenant_id;

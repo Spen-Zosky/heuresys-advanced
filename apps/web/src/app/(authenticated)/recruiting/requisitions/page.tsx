@@ -5,14 +5,17 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input, EmptyState, Spinner,
+  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input,
 } from "@heuresys/ui";
 import type { JobRequisition, JobRequisitionStatus } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { useCan } from "@/lib/api/auth";
 import {
   CODE_PATTERN, KEY, REQUISITION_REASONS, REQUISITION_STATUSES,
   useActivePositions, useRequisitions,
 } from "@/lib/recruiting";
+import { NomeOppure } from "@/components/senza-nome";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -43,6 +46,8 @@ export default function RequisitionsPage() {
     defaultValues: { code: "", positionId: "", headcount: 1, reason: "", targetStart: "", notes: "" },
   });
 
+  // S-5: creare e cambiare stato chiedono `requisition:manage`; senza, la pagina è in sola lettura.
+  const canWrite = useCan("requisition:manage");
   const create = useMutation({
     mutationFn: (v: FormValues) =>
       apiFetch<JobRequisition>("/v1/job-requisitions", {
@@ -82,6 +87,7 @@ export default function RequisitionsPage() {
     <main data-testid="requisitions-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader title={t("recruiting.requisitions.title")} description={t("recruiting.requisitions.description")} />
 
+      {canWrite && (
       <Card>
         <CardHeader><CardTitle>{t("recruiting.requisitions.newTitle")}</CardTitle></CardHeader>
         <CardContent>
@@ -142,13 +148,14 @@ export default function RequisitionsPage() {
           )}
         </CardContent>
       </Card>
+      )}
 
       {q.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <StatoCaricamento />
       ) : q.isError ? (
-        <p className="text-sm text-danger" data-testid="requisitions-error">{t("recruiting.error")}</p>
+        <StatoErrore errore={q.error} titolo={t("recruiting.error")} testId="requisitions-error" onRiprova={() => void q.refetch()} />
       ) : items.length === 0 ? (
-        <EmptyState data-testid="requisitions-empty" title={t("recruiting.requisitions.emptyTitle")} description={t("recruiting.requisitions.emptyDesc")} />
+        <StatoVuoto testId="requisitions-empty" titolo={t("recruiting.requisitions.emptyTitle")} motivo={t("recruiting.requisitions.emptyDesc")} />
       ) : (
         <div className="overflow-x-auto rounded-card border border-border">
           <table className="w-full text-sm" data-testid="requisitions-table">
@@ -165,13 +172,13 @@ export default function RequisitionsPage() {
               {items.map((r) => (
                 <tr key={r.requisitionId} data-testid="requisition-row">
                   <td className="px-4 py-2 font-medium" data-testid="requisition-row-code">{r.code}</td>
-                  <td className="px-4 py-2">{r.positionTitle ?? r.positionId.slice(0, 8)}</td>
+                  <td className="px-4 py-2"><NomeOppure nome={r.positionTitle} id={r.positionId} /></td>
                   <td className="px-4 py-2">{r.headcount}</td>
                   <td className="px-4 py-2">{r.reason ? t(`recruiting.reason.${r.reason}`) : "—"}</td>
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
                       <Badge data-testid="requisition-row-status">{t(`recruiting.requisitionStatus.${r.status}`)}</Badge>
-                      <select
+                      {canWrite && <select
                         aria-label={t("recruiting.fields.status")}
                         data-testid="requisition-row-status-select"
                         className={SELECT_CLASS}
@@ -182,7 +189,7 @@ export default function RequisitionsPage() {
                         {REQUISITION_STATUSES.map((s) => (
                           <option key={s} value={s}>{t(`recruiting.requisitionStatus.${s}`)}</option>
                         ))}
-                      </select>
+                      </select>}
                     </div>
                   </td>
                 </tr>

@@ -19,7 +19,6 @@ import {
   ZodTypeProvider,
   serializerCompiler,
   validatorCompiler,
-  jsonSchemaTransform,
 } from "fastify-type-provider-zod";
 
 import { env } from "./config/env.js";
@@ -40,6 +39,8 @@ import { makeMailer } from "./modules/auth/smtp-mailer.js";
 import { buildMfaServiceWithMailer } from "./modules/auth/mfa-service.js";
 import { tenantsRoutes } from "./modules/tenants/routes.js";
 import { usersRoutes } from "./modules/users/routes.js";
+import { mandateActsRoutes } from "./modules/mandate-acts/routes.js";
+import { agentTokensRoutes } from "./modules/agent-tokens/routes.js";
 import { positionsRoutes } from "./modules/positions/routes.js";
 import { organizationUnitsRoutes } from "./modules/organization-units/routes.js";
 import { projectsRoutes } from "./modules/projects/routes.js";
@@ -116,6 +117,8 @@ import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import { analyticsRoutes } from "./modules/analytics/routes.js";
 import { addExportHook } from "./lib/export/hook.js";
 import { registerOrgGateAssertion } from "./lib/scope/gate.js";
+import { registerConfermaD5 } from "./lib/scope/conferma.js";
+import { registraGuardiaRotte } from "./lib/scope/guardia.js";
 import { notificationsRoutes } from "./modules/notifications/routes.js";
 import { observabilityRoutes } from "./modules/observability/routes.js";
 import { mentorshipRoutes } from "./modules/mentorship/routes.js";
@@ -155,6 +158,12 @@ import { gdprRoutes } from "./modules/gdpr/routes.js";
 import { publicStatsRoutes } from "./modules/public-stats/routes.js";
 import { publicJobPostingsRoutes } from "./modules/public-job-postings/routes.js";
 import { tenantMaterializationRoutes } from "./modules/tenant-materialization/routes.js";
+import { registraEventiDiValore } from "./lib/valore/registro.js";
+import { registraRotteDellaSpecifica } from "./lib/openapi/rotte.js";
+import { registraConcorrenza } from "./lib/concorrenza.js";
+import { registraIdempotenza } from "./lib/idempotenza.js";
+import { registraOrigineDelDato, registraRottaDelleOrigini } from "./lib/origine/origine.js";
+import { intestazioneDellaSpecifica, trasformaPerLaSpecifica } from "./lib/openapi/specifica.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 import { makeSmsSender, type ISmsSender } from "./modules/auth/sms-sender.js";
@@ -182,6 +191,16 @@ export interface BuildAppOptions {
    * the login §3b gate is suspended (dev/test proceeds without a second factor).
    */
   mfaEnforcement?: boolean;
+  /**
+   * F0-3: il registro del valore scrive dopo la risposta. Con `true` ogni richiesta aspetta
+   * che le scritture del registro ancora in volo siano finite. buildTestApp lo accende: le
+   * prove girano su UNA connessione in una transazione (D-52), e una scrittura tardiva che
+   * si intreccia con i savepoint della richiesta successiva li distrugge. In produzione il
+   * pool ha connessioni separate e il registro non deve rallentare nessuno: spento.
+   */
+  valoreSerializzato?: boolean;
+  /** A-9: accende la specifica OpenAPI e la scoperta (default env.API_DOCS_ENABLED); le prove la accendono. */
+  apiDocs?: boolean;
 }
 
 /**
@@ -232,28 +251,38 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   //     registration: onRoute only sees routes declared after the hook. Refuses to boot if a
   //     read route on a SENSITIVE data-class resource lacks a config.orgGate declaration.
   registerOrgGateAssertion(app);
+  // ADR-0050 D5: acceso con il secondo fattore al login (stessa leva, stesso valore).
+  registerConfermaD5(app, options.mfaEnforcement ?? env.MFA_ENFORCEMENT_ENABLED);
+  // 1a-bis. S-10: raccoglie le rotte senza permesso (la prova le confronta con il loro elenco).
+  registraGuardiaRotte(app);
+  // A-10 del piano interfacce: ETag e If-Match, poi Idempotency-Key, in coda ai preHandler di
+  // ogni scrittura (dopo CSRF e permesso). L'ordine di questi due conta: prima la condizione.
+  registraConcorrenza(app);
+  registraIdempotenza(app);
+  // A-14: l'origine del dato (I23) in ogni lettura JSON su /v1/*.
+  registraOrigineDelDato(app);
 
-  // 1b. OpenAPI/Swagger (R6) — gated OFF by default (env.API_DOCS_ENABLED). Registered
-  //     right after the type-provider compilers so its onRoute hook captures EVERY route
-  //     declared below (the Zod schemas are converted via jsonSchemaTransform). When the
-  //     flag is off neither /docs (UI) nor /openapi.json (spec) exists.
-  if (env.API_DOCS_ENABLED) {
+  // 1b. OpenAPI/Swagger (R6; A-9 del piano interfacce) — spenta per difetto (env.API_DOCS_ENABLED):
+  //     accenderla in produzione è una decisione di Enzo. Registrata subito dopo i compilatori
+  //     così il suo onRoute vede OGNI rotta dichiarata sotto; ogni operazione riceve
+  //     identificativo, etichetta, riassunto, permesso e sicurezza (lib/openapi/specifica.ts).
+  //     Specifica, interfaccia e scoperta rispondono solo a chi è autenticato (persona o gettone).
+  if (options.apiDocs ?? env.API_DOCS_ENABLED) {
     await app.register(fastifySwagger, {
-      openapi: {
-        info: {
-          title: "Heuresys Advanced API",
-          description: "Fastify 5 + Zod-typed contract — the /v1/* endpoint surface.",
-          version: "1.0.0",
-        },
-        servers: [{ url: "/", description: "same-origin (behind the /api proxy in the web app)" }],
-      },
-      transform: jsonSchemaTransform,
+      openapi: intestazioneDellaSpecifica(),
+      transform: trasformaPerLaSpecifica,
     });
-    await app.register(fastifySwaggerUi, { routePrefix: "/docs" });
-    // Canonical OpenAPI spec endpoint (swagger-ui also serves it at /docs/json).
-    // app.swagger() is resolved at request time (after ready) → captures every route.
-    // hide:true keeps this meta-route out of the spec it returns.
-    app.get("/openapi.json", { schema: { hide: true } }, async () => app.swagger());
+    await app.register(fastifySwaggerUi, {
+      routePrefix: "/docs",
+      uiHooks: {
+        // Il contesto dell'interfaccia nasce prima del gestore d'errori: la risposta si scrive qui.
+        onRequest: async (req, reply) => {
+          if (!req.user || req.user.enrollmentOnly) {
+            return reply.code(401).send({ error: { code: "UNAUTHORIZED", message: "Authentication required" } });
+          }
+        },
+      },
+    });
   }
 
   // 2. Request id (so every subsequent log/error/response carries it)
@@ -277,10 +306,31 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     }
   });
 
+  // 2b-bis. Il test del valore (F0-3, migrazione 000470) — registro degli eventi di uso e di
+  //     decisione in audit.valore_eventi. Hook di ciclo di vita (onSend + onResponse), come le
+  //     metriche: indipendente dall'ordine dei plugin, e non rompe mai una risposta.
+  registraEventiDiValore(app, { serializzato: options.valoreSerializzato ?? false });
+
   // 2c. Reporting/export (3.5) — global onSend hook: `?format=csv|xlsx|pdf` on any
   //     {items,total} list endpoint downloads it as a file. Runs after the handler,
   //     so RBAC/scope/filters already applied. No-op without ?format. (§3.2-independent)
   addExportHook(app);
+
+  // 2d. F-7 del piano interfacce (lotto L7): nessun dato dell'API resta nella cache del
+  //     browser o di un proxy. Le risposte `/v1/*` sono dati di una persona autenticata
+  //     (cedolini, documenti, profilo); senza un'intestazione il browser è libero di tenerle.
+  //     Misurato sul banco il 4/11: /v1/me/profile, /pay-slips, /documents e le altre
+  //     rispondevano 200 senza `cache-control`.
+  //     ⚠ Si scrive all'INGRESSO (onRequest), non all'uscita. La prima stesura era un
+  //     `onSend` asincrono, e su ogni risposta d'errore Fastify scriveva le intestazioni due
+  //     volte: due avvisi «Reply was already sent» (ERR_HTTP_HEADERS_SENT) per ogni 401, 403
+  //     o 409, misurati sul banco (480 in un giro della suite) e riprodotti in locale. Qui
+  //     l'intestazione è già sulla risposta quando il gestore la scrive: chi ha una politica
+  //     sua (un'esportazione) la sovrascrive, e il flusso SSE scrive le proprie con
+  //     `reply.raw.writeHead`, che non eredita queste.
+  app.addHook("onRequest", async (req, reply) => {
+    if (req.url.startsWith("/v1/")) reply.header("cache-control", "no-store");
+  });
 
   // 3. Security headers
   await app.register(helmet, {
@@ -407,6 +457,12 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     },
   });
   await app.register(authRoutes, { prefix: "/v1/auth", mailer: authMailer, mfaService, mfaEnforcement });
+  // Piano interfacce L9, A-1/A-2/A-3: il gettone breve dell'agente, chiesto dalla persona.
+  await app.register(agentTokensRoutes, { prefix: "/v1/auth/agent-tokens" });
+  // A-9: specifica e scoperta, dopo autenticazione e limite di frequenza (onRoute li vede).
+  if (options.apiDocs ?? env.API_DOCS_ENABLED) registraRotteDellaSpecifica(app);
+  // A-14: le origini del dato per modulo, sempre accese (le pagine le mostrano).
+  registraRottaDelleOrigini(app);
   await app.register(mfaRoutes, {
     prefix: "/v1/auth/mfa",
     service: mfaService,
@@ -416,6 +472,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(mfaPolicyRoutes, { prefix: "/v1/mfa-policy" });
   await app.register(tenantsRoutes, { prefix: "/v1/tenants" });
   await app.register(usersRoutes, { prefix: "/v1/users" });
+  await app.register(mandateActsRoutes, { prefix: "/v1/mandate-acts" });
   await app.register(positionsRoutes, { prefix: "/v1/positions" });
   await app.register(organizationUnitsRoutes, { prefix: "/v1/organization-units" });
   await app.register(tenantMaterializationRoutes, { prefix: "/v1/tenant-materialization" });

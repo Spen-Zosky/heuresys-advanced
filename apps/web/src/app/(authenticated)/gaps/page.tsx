@@ -10,6 +10,7 @@ import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { GapClosurePanel } from "@/components/gap-closure-panel";
+import { NomeOppure } from "@/components/senza-nome";
 
 const SEVERITIES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const;
 const SEV_TONE: Record<(typeof SEVERITIES)[number], KpiCardData["iconTone"]> = {
@@ -52,7 +53,7 @@ export default function AdminGapsPage() {
     () => [
       {
         header: t("gaps.cols.user"),
-        cell: (g) => <span className="text-xs text-foreground">{g.userName ?? g.userId.slice(0, 8)}</span>,
+        cell: (g) => <span className="text-xs text-foreground"><NomeOppure nome={g.userName} id={g.userId} /></span>,
       },
       {
         header: t("gaps.cols.position"),
@@ -132,6 +133,7 @@ export default function AdminGapsPage() {
         <EntityTable<LearningGap>
           isLoading={gaps.query.isLoading}
           isError={gaps.query.isError}
+          error={gaps.query.error}
           errorTestId="gaps-error"
           errorMessage={t("gaps.error")}
           rows={gaps.rows}

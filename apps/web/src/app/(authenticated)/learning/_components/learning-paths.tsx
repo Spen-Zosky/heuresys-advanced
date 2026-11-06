@@ -27,6 +27,7 @@ import { isApiError } from "@/lib/api/errors";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { NomeOppure } from "@/components/senza-nome";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -197,9 +198,10 @@ export function LearningPathsPanel() {
             />
           </div>
 
-          <EntityTable<LearningPath>
+          <EntityTable<LearningPath> originPath={"/v1/learning-paths"}
             isLoading={paths.isLoading}
             isError={paths.isError}
+            error={paths.error}
             errorMessage={t("learning.paths.loadError")}
             rows={paths.data?.items ?? []}
             rowKey={(p) => p.learningPathId}
@@ -336,7 +338,7 @@ function NomeModulo({ id }: { id: string }) {
   });
   return (
     <span className="font-medium text-foreground" data-testid="step-module-name">
-      {modulo.data?.title ?? id.slice(0, 8)}
+      <NomeOppure nome={modulo.data?.title} id={id} />
     </span>
   );
 }

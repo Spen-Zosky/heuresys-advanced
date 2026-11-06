@@ -277,7 +277,8 @@ export const delegationsService = {
       tenantId,
       userId: delega.delegatorUserId,
       type: "SYSTEM",
-      subject: `${delega.delegateName ?? "Il tuo delegato"} ha ${body.decision === "APPROVE" ? "approvato" : "respinto"} per conto tuo: ${titolo.rows[0]?.t ?? "una richiesta"}`,
+      // L9, A-5 (ADR-0051 §6): se ha deciso un agente del delegato, la firma lo dice.
+      subject: `${delega.delegateName ?? "Il tuo delegato"}${actor.agente ? `, tramite l'agente ${actor.agente.codice},` : ""} ha ${body.decision === "APPROVE" ? "approvato" : "respinto"} per conto tuo: ${titolo.rows[0]?.t ?? "una richiesta"}`,
       body: body.comment ?? null,
       priority: "INFO",
       resourceType: "APPROVAL_STEP",

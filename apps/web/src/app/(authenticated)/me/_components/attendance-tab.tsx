@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import type { MeAttendanceResponse } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { Field, ProfileSection, fmtDate } from "../profile/_components/field";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 /** Presenze — imported attendance/overtime/leave (read-only consultation), lazy on tab open. */
 export function MeAttendanceTab() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["me", "attendance"],
     queryFn: () => apiFetch<MeAttendanceResponse>("/v1/me/attendance"),
@@ -28,7 +30,7 @@ export function MeAttendanceTab() {
           d.leaveBalances.map((b, i) => (
             <Field
               key={`bal-${i}`}
-              label={`${b.leaveType ?? "—"} ${b.year ?? ""}`}
+              label={`${enumLabel("leaveType", b.leaveType)} ${b.year ?? ""}`}
               value={`${b.usedDays ?? 0}/${b.totalDays ?? 0} ${t("landing.att.daysUsed")}${b.pendingDays ? ` · ${b.pendingDays} ${t("landing.att.pending")}` : ""}`}
             />
           ))
@@ -63,9 +65,9 @@ export function MeAttendanceTab() {
               {d.overtime.map((o, i) => (
                 <li key={`ot-${i}`} className="flex items-center justify-between gap-4 py-2">
                   <span className="text-foreground">{fmtDate(o.date)}</span>
-                  <span className="text-muted-foreground">{o.type ?? "—"}</span>
+                  <span className="text-muted-foreground">{enumLabel("overtimeType", o.type)}</span>
                   <span className="text-muted-foreground">{o.hours != null ? `${o.hours}h` : "—"}</span>
-                  <span className="text-xs text-muted-foreground">{o.status ?? ""}</span>
+                  <span className="text-xs text-muted-foreground">{o.status ? enumLabel("overtimeStatus", o.status) : ""}</span>
                 </li>
               ))}
             </ul>

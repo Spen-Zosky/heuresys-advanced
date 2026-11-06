@@ -171,7 +171,9 @@
       "hoursLabel": "Ore richieste",
       "hoursDesc": "Ore di straordinario richieste",
       "compLabel": "Compenso totale",
-      "compDesc": "Compenso stimato delle richieste"
+      "compDesc": "Compenso stimato delle richieste",
+      "compUnavailable": "Non disponibile",
+      "compUnavailableDesc": "Nessuna richiesta nel tuo ambito porta un importo."
     },
     "statusTitle": "Richieste per stato",
     "statusAria": "Distribuzione delle richieste di straordinario per stato",
@@ -220,5 +222,14 @@
     "canvasEmpty": "Nessun legame per questa competenza a questa profondita'.",
     "legendExplicit": "Legame dichiarato fra competenze",
     "legendGroup": "Appartenenza alla tassonomia"
+  },
+  "charts": {
+    "axisMonth": "Mese",
+    "axisHours": "Ore",
+    "axisUnit": "Unità organizzativa",
+    "axisRequests": "Richieste",
+    "tableTitle": "Mostra i dati in tabella",
+    "colStatus": "Stato",
+    "colType": "Tipo"
   }
 }

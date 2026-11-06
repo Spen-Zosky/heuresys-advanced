@@ -129,6 +129,8 @@ export const CompensationRecommendationRowSchema = z.object({
   amountEur: z.number().nullable().optional(),
   narrative: z.string().nullable().optional(),
   payload: z.record(z.string(), z.unknown()).optional(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
   computedAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
   /** Names of the fields withheld from THIS row. Absent when nothing was withheld. */
@@ -161,6 +163,8 @@ export const BonusPoolSchema = z.object({
   tenantId: z.uuid(),
   scope: z.string(),
   organizationUnitId: z.uuid().nullable(),
+  /** F-3 (piano interfacce, L6): il nome, perché la pagina non mostri l'identificativo. */
+  organizationUnitName: z.string().nullable().optional(),
   periodStart: z.string(),
   periodEnd: z.string(),
   // #124 D3 / vincolo 5: aggregato monetario senza soggetto — mascherabile
@@ -217,6 +221,8 @@ export type ObjectiveRewardRuleListResponse = z.infer<
 export const PositionEconomicWeightSchema = z.object({
   positionEconomicWeightId: z.uuid(),
   positionId: z.uuid(),
+  /** F-3 (piano interfacce, L6): il nome, perché la pagina non mostri l'identificativo. */
+  positionTitle: z.string().nullable().optional(),
   tenantId: z.uuid(),
   // #124 D3: sulle posizioni mono-titolare il valore e' un proxy dello stipendio
   value: z.number().optional(),

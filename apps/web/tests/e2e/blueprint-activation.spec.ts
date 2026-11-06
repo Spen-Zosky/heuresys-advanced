@@ -66,7 +66,8 @@ test.describe("#45 C3 — attivazione dei blueprint", () => {
     // un'attivazione ACTIVE gia' presente, l'ultima riga era quella e il caso falliva
     // dicendo «expected PROPOSED, received …ACTIVE». Si cerca quindi la riga PER CIO' CHE
     // DEVE ESSERE, non per la posizione che si spera occupi.
-    const proposta = page.getByTestId("blueprint-activation-row").filter({ hasText: "PROPOSED" });
+    // Lo stato si legge nella lingua della persona (lotto L6, F-2): PROPOSED è «Proposta».
+    const proposta = page.getByTestId("blueprint-activation-row").filter({ hasText: "Proposta" });
     await expect(proposta).toHaveCount(1);
   });
 

@@ -155,12 +155,51 @@ const DISALLINEO_REASON =
   "non verifica contro la password derivata dalla chiave di collaudo di questa macchina: la " +
   "credenziale era nata da un'altra chiave (misurato in CI, corsa 36052896981: login 401 su " +
   "cinque identita' create il 19/09 fra le 04:44 e le 05:04).";
+const ADR0050_REASON =
+  "ADR-0050 D2 (2026-11-05): chi porta un mandato forte non e' esentabile dal secondo fattore; " +
+  "l'identita' di collaudo passa al fattore 'derived-access' come platform-test-admin@.";
 const EXEMPTION_REASON =
   "collaudo-access (#169 F2, direttiva Enzo 2026-08-25): utenza di collaudo SERVICE, " +
   "verifiche funzionali e frontend senza il rito di login delle persone reali";
 
 function fail(msg: string): never {
   throw new Error(msg);
+}
+
+/** ADR-0050 D3: un'esenzione si rinnova quando scade entro questi giorni. */
+const RINNOVO_GIORNI = 7;
+
+/**
+ * ADR-0050 D3: l'autore di un'esenzione è una persona (utenza STANDARD, ACTIVE). Per il
+ * collaudo è chi lo ha disposto: la direttiva del 2026-08-25 (EXEMPTION_REASON) viene
+ * dall'Amministratore di Sistema, cioè la persona che regge la piattaforma. Si legge dai
+ * dati, senza nomi nel codice: `COLLAUDO_AUTORE_EMAIL` se l'ambiente lo dichiara, altrimenti
+ * la persona con la concessione PLATFORM_ADMIN attiva più antica. Se non c'è nessuno ci si
+ * ferma: un'esenzione senza autore non nasce.
+ */
+async function autoreDelleEsenzioni(db: Client): Promise<string> {
+  const email = process.env.COLLAUDO_AUTORE_EMAIL?.trim();
+  const r = email
+    ? await db.query<{ user_id: string }>(
+        `SELECT user_id FROM sys.sys_users
+          WHERE lower(user_email) = lower($1) AND user_type = 'STANDARD' AND user_status = 'ACTIVE'`,
+        [email])
+    : await db.query<{ user_id: string }>(
+        `SELECT u.user_id
+           FROM sys.sys_user_auth_roles ur
+           JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+           JOIN sys.sys_users u ON u.user_id = ur.user_auth_role_user_id
+          WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND ur.user_auth_role_revoked_at IS NULL
+            AND u.user_type = 'STANDARD' AND u.user_status = 'ACTIVE'
+          ORDER BY ur.user_auth_role_granted_at, u.user_id
+          LIMIT 1`);
+  const id = r.rows[0]?.user_id;
+  if (!id) {
+    fail(email
+      ? `COLLAUDO_AUTORE_EMAIL non è una persona attiva (STANDARD, ACTIVE): un'esenzione senza autore non nasce (ADR-0050 D3)`
+      : `nessuna persona attiva con PLATFORM_ADMIN: un'esenzione senza autore non nasce (ADR-0050 D3); dichiara COLLAUDO_AUTORE_EMAIL`);
+  }
+  return id;
 }
 
 async function main(): Promise<void> {
@@ -220,9 +259,10 @@ async function main(): Promise<void> {
         WHERE u.user_type <> 'SERVICE'`);
     const fattoriPersoneBefore = facBefore.rows[0]!.n;
 
+    let autore: string | undefined;
     const stats = {
       utenti: 0, ruoli: 0, identita: 0, credenziali: 0, iscrizioni: 0, esenzioni: 0,
-      riallineate: 0, disallineate: 0, fattoriRimossi: 0, fattoriCreatiMfa: 0, invariati: 0,
+      riallineate: 0, disallineate: 0, fattoriRimossi: 0, fattoriCreatiMfa: 0, esenzioniSpente: 0, invariati: 0,
     };
     // #258 — solo per le identita' mfaExempt:false, e solo se l'ambiente e' di collaudo:
     // il segreto (nuovo o gia' esistente) va depositato dove Playwright lo legge.
@@ -440,19 +480,37 @@ async function main(): Promise<void> {
             [userId, EXEMPTION_REASON]);
         }
 
+        // ADR-0050 D3 (mig 000474): l'esenzione ha un autore e scade entro 30 giorni. Si rinnova
+        // quando manca, è spenta, non ha autore o scade entro RINNOVO_GIORNI: così due corse di fila non
+        // cambiano niente, e la CI, che gira ogni giorno, la tiene viva.
+        // Fuori dal collaudo (D-02) le utenze sono accese solo per un giro dichiarato, e
+        // `sospendi-collaudo --riattiva` dà all'esenzione un giorno: qui non si allunga. Si rinnova
+        // solo se manca, è spenta, non ha autore o è già scaduta, e di nuovo per un giorno.
+        const sogliaGiorni = ambienteDiCollaudo ? RINNOVO_GIORNI : 0;
+        const durataGiorni = ambienteDiCollaudo ? 30 : 1;
         const exemption = await db.query(
           `SELECT 1 FROM sys.sys_auth_mfa_exemptions WHERE auth_mfa_exemption_user_id = $1
-             AND auth_mfa_exemption_enabled`, [userId]);
+             AND auth_mfa_exemption_enabled AND created_by IS NOT NULL
+             AND auth_mfa_exemption_expires_at > now() + make_interval(days => $2)`,
+          [userId, sogliaGiorni]);
         if (exemption.rowCount === 0) {
           stats.esenzioni++; touched = true;
-          // il trigger della 000118 RI-VERIFICA qui che l'utente sia SERVICE:
-          // la guardia vive nel database, non in questa riga.
-          if (!DRY) await db.query(
-            `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason)
-             VALUES ($1, $2)
-             ON CONFLICT (auth_mfa_exemption_user_id)
-             DO UPDATE SET auth_mfa_exemption_enabled = true, auth_mfa_exemption_reason = EXCLUDED.auth_mfa_exemption_reason`,
-            [userId, EXEMPTION_REASON]);
+          // il trigger della 000118 RI-VERIFICA qui che l'utente sia SERVICE, e quello della
+          // 000474 l'autore e la scadenza: la guardia vive nel database, non in questa riga.
+          if (!DRY) {
+            autore ??= await autoreDelleEsenzioni(db);
+            await db.query(
+              `INSERT INTO sys.sys_auth_mfa_exemptions
+                 (auth_mfa_exemption_user_id, auth_mfa_exemption_reason,
+                  auth_mfa_exemption_expires_at, created_by)
+               VALUES ($1, $2, now() + make_interval(days => $4), $3)
+               ON CONFLICT (auth_mfa_exemption_user_id)
+               DO UPDATE SET auth_mfa_exemption_enabled = true,
+                             auth_mfa_exemption_reason = EXCLUDED.auth_mfa_exemption_reason,
+                             auth_mfa_exemption_expires_at = EXCLUDED.auth_mfa_exemption_expires_at,
+                             created_by = EXCLUDED.created_by`,
+              [userId, EXEMPTION_REASON, autore, durataGiorni]);
+          }
         }
 
         // un fattore TOTP su un'utenza di collaudo esente sarebbe un segreto di troppo
@@ -488,7 +546,27 @@ async function main(): Promise<void> {
           `SELECT 1 FROM sys.sys_auth_mfa_exemptions WHERE auth_mfa_exemption_user_id = $1
              AND auth_mfa_exemption_enabled`, [userId]);
         if ((giaEsente.rowCount ?? 0) > 0) {
-          fail(`${c.email} e' dichiarata mfaExempt:false ma risulta ESENTE dal secondo fattore: fermati e guarda`);
+          // ADR-0050 D2 (migrazione 000473): le identità con un mandato forte erano esenti fino
+          // al 2026-11-05 e da lì non lo sono più. Per loro l'esenzione trovata è lo stato
+          // vecchio, dichiarato, e lo stato a cui si porta è «spenta»: si spegne (mai una
+          // cancellazione) e si scrive nel giornale. Per ogni altra identità resta un fatto da
+          // guardare, come prima.
+          const mandato = await db.query(
+            `SELECT 1 FROM sys.f_ruoli_mandato() AS m(codice) WHERE m.codice = $1`, [c.roleCode]);
+          if ((mandato.rowCount ?? 0) === 0) {
+            fail(`${c.email} e' dichiarata mfaExempt:false ma risulta ESENTE dal secondo fattore: fermati e guarda`);
+          }
+          stats.esenzioniSpente++; touched = true;
+          if (!DRY) {
+            await db.query(
+              `INSERT INTO staging.collaudo_riallineo_undo (undo_email, undo_specie, undo_valore, undo_ragione)
+               VALUES ($1, 'esenzione-mfa', 'enabled=true', $2)`,
+              [c.email, ADR0050_REASON]);
+            await db.query(
+              `UPDATE sys.sys_auth_mfa_exemptions SET auth_mfa_exemption_enabled = false
+                WHERE auth_mfa_exemption_user_id = $1 AND auth_mfa_exemption_enabled`,
+              [userId]);
+          }
         }
 
         const fac = await db.query<{ n: string; secret: string | null }>(
@@ -569,6 +647,7 @@ ${DRY ? "DRY-RUN (nessuna scrittura)" : "ESEGUITO"}
   di cui DISALLINEATE misurate .. ${stats.disallineate}   [D11-0: l'hash non verifica contro la password derivata]
   fattori MFA rimossi ........... ${stats.fattoriRimossi}   [un segreto di troppo su un'utenza esente]
   fattori MFA creati (#258) ..... ${stats.fattoriCreatiMfa}   [identita' non esente: cammina l'MFA vera]
+  esenzioni spente (ADR-0050) ... ${stats.esenzioniSpente}   [mandato forte: niente esenzione, fattore vero]
   gia' a posto (invariati) ...... ${stats.invariati}
   rollback dichiarato ........... pnpm db:provision-collaudo --undo  (elenco esplicito, mai un jolly)
 `);

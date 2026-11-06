@@ -59,7 +59,7 @@ export default function UsersListPage() {
   );
 
   return (
-    <DataTablePanel<User>
+    <DataTablePanel<User> originPath={"/v1/users"}
       pageTestId="users-page"
       titleTestId="users-title"
       countTestId="users-count"
@@ -68,6 +68,7 @@ export default function UsersListPage() {
       count={users.data ? t("users.count", { count: users.data.total }) : undefined}
       isLoading={users.isLoading}
       isError={users.isError}
+      error={users.error}
       errorTestId="users-error"
       errorMessage={t("users.errorMessage")}
       rows={users.data?.items ?? []}

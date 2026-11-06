@@ -44,12 +44,12 @@ describe("#29 A/L3 talent-review 9-box read", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     admin = await login(suite, "platform-test-admin@collaudo.invalid");
-    federica = await login(suite, "federica.marchetti@rtl-bank.org"); // TENANT_ADMIN (HR mandate)
+    federica = await login(suite, "governo@collaudo.invalid"); // TENANT_ADMIN (HR mandate)
     paolo = await login(suite, "paolo.caputo@rtl-bank.org"); // MANAGER
     tommaso = await login(suite, "tommaso.fiore@rtl-bank.org"); // USER (paolo's report, no talent:read)
     const t = await pool.query<{ user_tenant_id: string }>(
       `SELECT user_tenant_id FROM sys.sys_users WHERE user_email = $1`,
-      ["federica.marchetti@rtl-bank.org"]);
+      ["governo@collaudo.invalid"]);
     rtlTenantId = t.rows[0]!.user_tenant_id;
     paoloSubtree = await orgSubtreeUserIds(pool, await userId("paolo.caputo@rtl-bank.org"));
   });
@@ -175,6 +175,22 @@ describe("#29 A/L3 talent-review 9-box read", () => {
     const body = r.json() as { items: unknown[]; total: number };
     expect(body.total).toBe(live);
     expect(body.total).toBeGreaterThan(0);
+  });
+
+  it("F-3: ogni posizione critica porta il titolo vivo della posizione, non solo l'identificativo", async () => {
+    const live = await pool.query<{ id: string; title: string | null }>(
+      `SELECT c.critical_position_id AS id, p.position_title AS title
+         FROM sys.sys_critical_positions c
+         LEFT JOIN sys.sys_positions p ON p.position_id = c.critical_position_position_id`);
+    const atteso = new Map(live.rows.map((r) => [r.id, r.title]));
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/talent-review/critical-positions?limit=200", headers: { cookie: ch(admin.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const items = (r.json() as { items: Array<{ criticalPositionId: string; positionTitle: string | null }> }).items;
+    expect(items.length).toBeGreaterThan(0);
+    for (const it_ of items) expect(it_.positionTitle).toBe(atteso.get(it_.criticalPositionId));
+    expect(items.some((x) => typeof x.positionTitle === "string" && x.positionTitle.length > 0)).toBe(true);
   });
 
   it("critical-coverage catalog: PLATFORM_ADMIN all; TENANT_ADMIN own-tenant (live-derived)", async () => {

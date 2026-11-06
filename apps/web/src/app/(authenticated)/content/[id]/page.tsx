@@ -22,6 +22,7 @@ import type {
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
+import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 
 type WorkflowAction = "submit-for-review" | "publish" | "unpublish" | "return-to-draft";
@@ -51,6 +52,7 @@ function statusVariant(s: ContentStatus): "secondary" | "success" {
 
 export default function ContentEditPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const params = useParams<{ id: string }>();
   const id = params.id;
   const router = useRouter();
@@ -194,8 +196,8 @@ export default function ContentEditPage() {
       },
       { header: t("content.detail.vCols.title"), cell: (v) => <span className="text-foreground">{v.title ?? "—"}</span> },
       { header: t("content.detail.vCols.changeNote"), cell: (v) => <span className="text-muted-foreground">{v.changeNote ?? "—"}</span> },
-      { header: t("content.detail.vCols.author"), cell: (v) => <span className="font-mono text-xs text-muted-foreground">{v.authorUserId ? v.authorUserId.slice(0, 8) : "—"}</span> },
-      { header: t("content.detail.vCols.created"), cell: (v) => <span className="text-xs text-muted-foreground">{v.createdAt.slice(0, 10)}</span> },
+      { header: t("content.detail.vCols.author"), cell: (v) => <span className="text-xs">{v.authorUserId ? <NomeOppure nome={v.authorName} id={v.authorUserId} /> : "—"}</span> },
+      { header: t("content.detail.vCols.created"), cell: (v) => <span className="text-xs text-muted-foreground">{fmt.data(v.createdAt)}</span> },
       {
         header: t("content.detail.vCols.actions"),
         align: "right",
@@ -216,7 +218,7 @@ export default function ContentEditPage() {
           ),
       },
     ],
-    [t, currentVersionId, restore],
+    [t, currentVersionId, restore, fmt],
   );
 
   if (detail.isError) {
@@ -225,7 +227,11 @@ export default function ContentEditPage() {
         <Link href="/content" data-testid="content-edit-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {t("content.detail.back")}
         </Link>
-        <p className="text-sm text-danger">{t("content.detail.notFound")}</p>
+        <StatoErrore
+          errore={detail.error}
+          titolo={t("content.detail.notFound")}
+          onRiprova={() => void detail.refetch()}
+        />
       </main>
     );
   }
@@ -424,7 +430,7 @@ export default function ContentEditPage() {
           )}
 
           {(links.data?.items ?? []).length === 0 ? (
-            <p data-testid="content-links-empty" className="text-sm text-muted-foreground">{t("content.links.empty")}</p>
+            <StatoVuoto titolo={t("content.links.empty")} testId="content-links-empty" />
           ) : (
             <ul data-testid="content-links-list" className="divide-y divide-border rounded-card border border-border">
               {(links.data?.items ?? []).map((l) => (
@@ -452,9 +458,10 @@ export default function ContentEditPage() {
         </CardHeader>
         <CardContent>
           <div data-testid="content-versions-table">
-            <EntityTable<ContentVersion>
+            <EntityTable<ContentVersion> originPath={"/v1/content"}
               isLoading={versions.isLoading}
               isError={versions.isError}
+              error={versions.error}
               errorMessage={t("content.detail.loadError")}
               rows={versions.data?.items ?? []}
               rowKey={(v) => v.versionId}
@@ -471,3 +478,5 @@ export default function ContentEditPage() {
   );
 }
 import { ContentMediaPanel } from "../../../../components/ContentMediaPanel";
+import { useFormat } from "@/lib/format";
+import { NomeOppure } from "@/components/senza-nome";

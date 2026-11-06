@@ -15,6 +15,8 @@ import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { EvidenceDrawer } from "@/components/evidence-drawer";
+import { useFormat } from "@/lib/format";
+import { NomeOppure } from "@/components/senza-nome";
 
 // Higher value = larger gap = worse: ALIGNED → success, MAJOR_GAP → destructive.
 // Only confirmed @heuresys/ui Badge variants + registered text tokens.
@@ -31,10 +33,11 @@ const SEGMENT_TEXT: Record<SkillGapSegment, string> = {
   MAJOR_GAP: "text-danger",
 };
 
-const positionLabel = (r: SkillGapScore) => r.positionTitle ?? r.positionCode ?? r.positionId.slice(0, 8);
+const positionLabel = (r: SkillGapScore, senzaNome: string) => r.positionTitle ?? r.positionCode ?? senzaNome;
 
 export default function SkillGapPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<SkillGapScore | null>(null);
   const [evidenceFor, setEvidenceFor] = useState<SkillGapScore | null>(null);
@@ -64,16 +67,16 @@ export default function SkillGapPage() {
         header: t("insightsSkillGap.colSubject"),
         cell: (r) => (
           <button type="button" data-testid="skillgap-row-select" className="text-left font-medium text-foreground hover:underline" onClick={() => setSelected(r)}>
-            {r.displayName ?? r.userId.slice(0, 8)}
+            <NomeOppure nome={r.displayName} id={r.userId} />
           </button>
         ),
       },
-      { header: t("insightsSkillGap.colPosition"), cell: (r) => <span className="text-foreground">{positionLabel(r)}</span> },
+      { header: t("insightsSkillGap.colPosition"), cell: (r) => <span className="text-foreground">{positionLabel(r, t("common:unnamed"))}</span> },
       { header: t("insightsSkillGap.colValue"), align: "right", cell: (r) => (
         // #124 D6: assente e dichiarato, non «—».
         isMasked(r, "value") || r.value === undefined
           ? <MaskedCell />
-          : <span className={`font-mono font-semibold ${r.segment ? SEGMENT_TEXT[r.segment] : ""}`}>{r.value.toFixed(1)}</span>
+          : <span className={`font-mono font-semibold ${r.segment ? SEGMENT_TEXT[r.segment] : ""}`}>{fmt.numeroFisso(r.value, 1)}</span>
       ) },
       { header: t("insightsSkillGap.colSegment"), cell: (r) => (
         isMasked(r, "segment") || r.segment === undefined
@@ -81,18 +84,18 @@ export default function SkillGapPage() {
           : <Badge variant={SEGMENT_BADGE[r.segment]}>{t(`insightsSkillGap.segment.${r.segment}`)}</Badge>
       ) },
     ],
-    [t],
+    [t, fmt],
   );
 
   return (
     <div className="space-y-6">
-      <DataTablePanel<SkillGapScore>
+      <DataTablePanel<SkillGapScore> originPath={"/v1/insights/skill-gap"}
         pageTestId="skillgap-page"
         titleTestId="skillgap-title"
         countTestId="skillgap-count"
         title={t("insightsSkillGap.title")}
         description={data.data ? t("insightsSkillGap.descriptionScoped", { kind: data.data.scope.kind }) : t("insightsSkillGap.description")}
-        count={data.data ? t("insightsSkillGap.count", { count: data.data.total }) : t("common:loading")}
+        count={data.data ? t("insightsSkillGap.count", { count: data.data.total }) : data.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
         actions={
           canAdmin ? (
             <Button type="button" data-testid="skillgap-recompute" disabled={recompute.isPending} onClick={() => { setFeedback(null); recompute.mutate(); }}>
@@ -102,6 +105,7 @@ export default function SkillGapPage() {
         }
         isLoading={data.isLoading}
         isError={data.isError}
+        error={data.error}
         errorMessage={t("insightsSkillGap.errorMessage")}
         rows={data.data?.items ?? []}
         rowKey={(r) => `${r.userId}:${r.positionId}`}
@@ -127,7 +131,7 @@ export default function SkillGapPage() {
         <div className="mx-auto max-w-7xl px-6">
           <Card data-testid="skillgap-explain">
             <CardHeader>
-              <CardTitle>{t("insightsSkillGap.explainTitle", { name: selected.displayName ?? selected.userId.slice(0, 8), position: positionLabel(selected) })}</CardTitle>
+              <CardTitle>{t("insightsSkillGap.explainTitle", { name: selected.displayName ?? t("common:unnamed"), position: positionLabel(selected, t("common:unnamed")) })}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {/* #219 F2/B — QUI LA PAGINA SI ROMPEVA, e non per un test.
@@ -142,7 +146,7 @@ export default function SkillGapPage() {
                 <MaskedCell />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {t("insightsSkillGap.explainDesc", { value: selected.value!.toFixed(1), segment: t(`insightsSkillGap.segment.${selected.segment}`), model: selected.modelVersion })}
+                  {t("insightsSkillGap.explainDesc", { value: fmt.numeroFisso(selected.value!, 1), segment: t(`insightsSkillGap.segment.${selected.segment}`), model: selected.modelVersion })}
                 </p>
               )}
               <Button type="button" variant="outline" size="sm" data-testid="skillgap-evidence-open"
@@ -156,7 +160,7 @@ export default function SkillGapPage() {
                     <div className="h-full bg-primary" style={{ width: `${Math.min(100, Math.max(0, f.normalized ?? 0))}%` }} />
                   </div>
                   <span className="w-48 shrink-0 text-right font-mono text-xs text-muted-foreground">
-                    {t("insightsSkillGap.featureDetail", { normalized: (f.normalized ?? 0).toFixed(0), weight: (f.weight * 100).toFixed(0), contribution: f.contribution.toFixed(1) })}
+                    {t("insightsSkillGap.featureDetail", { normalized: fmt.numeroFisso(f.normalized ?? 0, 0), weight: fmt.numeroFisso(f.weight * 100, 0), contribution: fmt.numeroFisso(f.contribution, 1) })}
                   </span>
                 </div>
               ))}
@@ -168,7 +172,7 @@ export default function SkillGapPage() {
       {evidenceFor && (
         <EvidenceDrawer
           subjectUserId={evidenceFor.userId}
-          subjectName={evidenceFor.displayName ?? evidenceFor.userId.slice(0, 8)}
+          subjectName={evidenceFor.displayName ?? t("common:unnamed")}
           open={evidenceFor !== null}
           onOpenChange={(o) => { if (!o) setEvidenceFor(null); }}
         />

@@ -58,6 +58,10 @@ export default function HomePage() {
           <Link href="/whistleblowing" data-testid="landing-footer-whistleblowing" className="underline underline-offset-2 hover:text-foreground">
             {t("footer.whistleblowing")}
           </Link>
+          <span aria-hidden="true" className="mx-2">·</span>
+          <Link href="/accessibilita" data-testid="landing-footer-accessibility" className="underline underline-offset-2 hover:text-foreground">
+            {t("footer.accessibility")}
+          </Link>
         </p>
       </footer>
     </main>

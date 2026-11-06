@@ -39,15 +39,18 @@ export const PositionSchema = z.object({
   organizationUnitId: z.uuid().nullable(),
   jobRoleId: z.uuid().nullable(),
   reportsToPositionId: z.uuid().nullable(),
-  ownerUserId: z.uuid().nullable(),
+  /** S-7: assente (e dichiarato in `masked`) a chi non legge `COMPENSATION` in chiaro. */
+  ownerUserId: z.uuid().nullable().optional(),
   escoOccupationUri: z.string().nullable(),
   criticality: PositionCriticalitySchema.nullable(),
-  economicWeight: z.number().min(0).max(1).nullable(),
+  /** S-7: retribuzione indiretta, assente (e dichiarata in `masked`) a chi non legge `COMPENSATION` in chiaro. */
+  economicWeight: z.number().min(0).max(1).nullable().optional(),
   isActive: z.boolean(),
   effectiveFrom: z.string(),
   effectiveTo: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
   aiHints: z.record(z.string(), z.unknown()),
+  masked: z.array(z.string()).optional(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -128,11 +131,11 @@ export const PositionIntelligenceProfileSchema = z.object({
   title: z.string(),
   organizationUnitId: z.uuid().nullable(),
   jobRoleId: z.uuid().nullable(),
-  ownerUserId: z.uuid().nullable(),
+  ownerUserId: z.uuid().nullable().optional(),
   reportsToPositionId: z.uuid().nullable(),
   escoOccupationUri: z.string().nullable(),
   criticality: PositionCriticalitySchema.nullable(),
-  economicWeight: z.number().nullable(),
+  economicWeight: z.number().nullable().optional(),
   isActive: z.boolean(),
   effectiveFrom: z.string(),
   effectiveTo: z.string().nullable(),
@@ -140,9 +143,12 @@ export const PositionIntelligenceProfileSchema = z.object({
   requiredKpis: z.unknown(),
   requiredLearningPaths: z.unknown(),
   careerPaths: z.unknown(),
-  compensationProfile: z.unknown(),
+  /** S-7: assente (dichiarato in `masked`) a chi non legge `COMPENSATION` in chiaro. */
+  compensationProfile: z.unknown().optional(),
   successionRelevance: z.unknown(),
   aiHints: z.record(z.string(), z.unknown()),
+  /** S-7: `compensationProfile`, `economicWeight` e `ownerUserId` trattenuti a chi non legge `COMPENSATION` in chiaro. */
+  masked: z.array(z.string()).optional(),
   updatedAt: z.iso.datetime(),
 });
 export type PositionIntelligenceProfile = z.infer<typeof PositionIntelligenceProfileSchema>;

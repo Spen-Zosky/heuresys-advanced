@@ -259,6 +259,19 @@ describe("ADR-0051 §3 e §5 — decidere per conto di", () => {
     expect(passo.approverUserId, "il passo ha cambiato titolare").toBe(capo.userId);
     expect(passo.decidedBy, "la decisione non è firmata dal delegato").toBe(sotto.userId);
     expect(passo.actingDelegationId, "manca il titolo della decisione").toBe(voce!.delegationId);
+
+    // V-3 del piano interfacce: la pagina dice «deciso da X per conto di Y», quindi il
+    // dettaglio porta il nome di chi ha deciso e la lista conta i passi decisi per delega.
+    const nome = await pool.query<{ n: string }>(`SELECT user_display_name AS n FROM sys.sys_users WHERE user_id = $1`, [sotto.userId]);
+    const dett = await chiama(capo.email, "GET", `/v1/approvals/${requestId}`);
+    expect(dett.statusCode).toBe(200);
+    const visto = (dett.json() as { steps: { approvalStepId: string; decidedByName: string | null }[] }).steps
+      .find((x) => x.approvalStepId === stepId);
+    expect(visto?.decidedByName, "il dettaglio non dice chi ha deciso per conto del capo").toBe(nome.rows[0]!.n);
+    const lista = await chiama(capo.email, "GET", "/v1/approvals?limit=200");
+    const riga = (lista.json() as { items: { approvalRequestId: string; delegatedStepCount: number }[] }).items
+      .find((x) => x.approvalRequestId === requestId);
+    expect(riga?.delegatedStepCount, "la lista non conta il passo deciso per delega").toBe(1);
   });
 
   it("un tipo fuori delega non compare e non si decide", async () => {

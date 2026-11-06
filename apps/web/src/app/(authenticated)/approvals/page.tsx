@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
 import type {
@@ -12,12 +12,15 @@ import type {
   ApprovalStatus,
   ApprovalDecisionPolicy,
   ApprovalPriority,
-  UserListResponse,
+  ApprovalProcessFacet,
+  User,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
-import { useEnumLabel } from "@/lib/enum-labels";
-import { etichettaPersona } from "@/lib/person-label";
+import { useCan } from "@/lib/api/auth";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { PersonPicker } from "@/components/person-picker";
+import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -36,37 +39,37 @@ function statusVariant(s: ApprovalStatus): "success" | "secondary" | "destructiv
 
 export default function ApprovalsPage() {
   const { t } = useTranslation("admin");
-  const enumLabel = useEnumLabel();
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState("");
+  const [processFilter, setProcessFilter] = useState("");
+  const [stepFilter, setStepFilter] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [policy, setPolicy] = useState<ApprovalDecisionPolicy>("ALL_OF");
   const [priority, setPriority] = useState<ApprovalPriority>("MEDIUM");
-  const [approverIds, setApproverIds] = useState<string[]>([]);
+  const [approvers, setApprovers] = useState<User[]>([]);
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
 
-  const queryString = useMemo(() => {
-    const p = new URLSearchParams();
-    if (statusFilter) p.set("status", statusFilter);
-    p.set("limit", "200");
-    return p.toString();
-  }, [statusFilter]);
-
-  const requests = useQuery({
-    queryKey: ["approvals", "list", statusFilter],
-    queryFn: () => apiFetch<ApprovalListResponse>(`/v1/approvals?${queryString}`),
+  // V-1 (D-27): la lista si sfoglia sul server e il totale e' quello vero, non la pagina.
+  // Prima si chiedevano 200 righe e la pagina diceva «200 richieste» anche quando erano 741.
+  const list = usePaginatedList<ApprovalRequestListItem>({
+    queryKey: ["approvals", "list"],
+    path: "/v1/approvals",
+    params: { status: statusFilter, processId: processFilter, processStepId: stepFilter },
   });
+  const requests = list.query;
+  const processes: ApprovalProcessFacet[] = (requests.data as ApprovalListResponse | undefined)?.processes ?? [];
+  const stepsOfProcess = processes.find((p) => p.processId === processFilter)?.steps ?? [];
 
-  // Tenant-scoped user list to pick approvers from (live, no mock).
-  const users = useQuery({
-    queryKey: ["approvals", "users"],
-    queryFn: () => apiFetch<UserListResponse>("/v1/users?limit=200"),
-  });
+  // S-5, S-19: il modulo di creazione serve solo a chi puo' creare una richiesta.
+  // V-2: le persone si cercano sul server (PersonPicker), non si caricano le prime 200.
+  const canCreate = useCan("approval:create");
+  const canReadUsers = useCan("user:read");
 
   const createReq = useMutation({
     mutationFn: () => {
-      const payload: Record<string, unknown> = { title, decisionPolicy: policy, priority, approverUserIds: approverIds };
+      const payload: Record<string, unknown> = { title, decisionPolicy: policy, priority, approverUserIds: approvers.map((u) => u.userId) };
       if (body) payload.body = body;
       return apiFetch<ApprovalRequest>("/v1/approvals", { method: "POST", body: payload });
     },
@@ -75,12 +78,12 @@ export default function ApprovalsPage() {
       setFeedback({ kind: "ok", msg: t("approvals.create.successMsg") });
       setTitle("");
       setBody("");
-      setApproverIds([]);
+      setApprovers([]);
     },
     onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("approvals.create.errorUnexpected") }),
   });
 
-  const canSubmit = title.trim().length > 0 && approverIds.length > 0 && !createReq.isPending;
+  const canSubmit = title.trim().length > 0 && approvers.length > 0 && !createReq.isPending;
 
   const columns: DataColumn<ApprovalRequestListItem>[] = useMemo(
     () => [
@@ -92,16 +95,49 @@ export default function ApprovalsPage() {
           </Link>
         ),
       },
-      { header: t("approvals.columns.status"), cell: (r) => <Badge variant={statusVariant(r.status)}>{t(`approvals.status.${r.status}`)}</Badge> },
+      {
+        // V-3 (ADR-0049): processo e attivita' della richiesta.
+        header: t("approvals.columns.process"),
+        cell: (r) =>
+          r.processName ? (
+            <span data-testid="approval-row-process">
+              <span className="text-foreground">{r.processName}</span>
+              {r.processStepName && <span className="block text-xs text-muted-foreground">{r.processStepName}</span>}
+            </span>
+          ) : (
+            <span className="text-xs text-muted-foreground">{t("approvals.noProcess")}</span>
+          ),
+      },
+      {
+        header: t("approvals.columns.status"),
+        cell: (r) => (
+          <span className="flex flex-col items-start gap-1">
+            <Badge variant={statusVariant(r.status)}>{t(`approvals.status.${r.status}`)}</Badge>
+            {/* V-3 (ADR-0051): se un passo l'ha deciso un delegato, la riga lo dice. */}
+            {r.delegatedStepCount > 0 && (
+              <span className="text-xs text-muted-foreground" data-testid="approval-row-delegated">
+                {t("approvals.delegated", { count: r.delegatedStepCount })}
+              </span>
+            )}
+          </span>
+        ),
+      },
       { header: t("approvals.columns.policy"), cell: (r) => <span className="text-muted-foreground">{t(`approvals.policy.${r.decisionPolicy}`)}</span> },
       { header: t("approvals.columns.priority"), cell: (r) => <span className="text-muted-foreground">{t(`approvals.priority.${r.priority}`)}</span> },
       {
         header: t("approvals.columns.steps"),
         cell: (r) => <span className="text-muted-foreground">{t("approvals.stepSummary", { pending: r.pendingStepCount, total: r.stepCount })}</span>,
       },
-      { header: t("approvals.columns.created"), cell: (r) => <span className="text-xs text-muted-foreground">{r.createdAt.slice(0, 10)}</span> },
+      {
+        header: t("approvals.columns.created"),
+        cell: (r) => (
+          <time dateTime={r.createdAt} className="text-xs text-muted-foreground">
+            {fmt.data(r.createdAt)}
+          </time>
+        ),
+      },
     ],
-    [t],
+    [t, fmt],
   );
 
   return (
@@ -112,12 +148,13 @@ export default function ApprovalsPage() {
         description={t("approvals.description")}
         badges={
           <Badge variant="secondary" data-testid="approvals-count">
-            {requests.data ? t("approvals.count", { count: requests.data.total }) : t("common:loading")}
+            {requests.data ? t("approvals.count", { count: list.total }) : requests.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />
 
       {/* Create approval request */}
+      {canCreate && (
       <Card>
         <CardHeader>
           <CardTitle>{t("approvals.create.cardTitle")}</CardTitle>
@@ -164,27 +201,14 @@ export default function ApprovalsPage() {
               </select>
             </div>
             <div>
-              <label htmlFor="approval-approvers" className="mb-1 block text-sm font-medium text-foreground">
-                {t("approvals.create.approversLabel")} <span aria-hidden="true">*</span>
-              </label>
-              <select
-                id="approval-approvers"
-                data-testid="approval-create-approvers"
-                multiple
-                className={`${SELECT_CLASS} h-32`}
-                value={approverIds}
-                onChange={(e) => setApproverIds(Array.from(e.target.selectedOptions, (o) => o.value))}
-              >
-                {/* #198 T7 — un segnaposto generato non deve poter essere scelto come
-                    approvatore senza che si veda: la richiesta di firma resterebbe
-                    appesa a qualcuno che non esiste. */}
-                {(users.data?.items ?? []).map((u) => (
-                  <option key={u.userId} value={u.userId}>
-                    {etichettaPersona(u, enumLabel)}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-xs text-muted-foreground">{t("approvals.create.approversHint")}</p>
+              <PersonPicker
+                label={t("approvals.create.approversLabel")}
+                value={approvers}
+                onChange={setApprovers}
+                hint={t("approvals.create.approversHint")}
+                testId="approval-create-approvers"
+                enabled={canReadUsers}
+              />
             </div>
             <div className="md:col-span-2">
               <label htmlFor="approval-body" className="mb-1 block text-sm font-medium text-foreground">
@@ -209,6 +233,7 @@ export default function ApprovalsPage() {
           </form>
         </CardContent>
       </Card>
+      )}
 
       {/* Filter */}
       <div data-testid="approvals-filters" className="flex flex-wrap items-end gap-3">
@@ -225,6 +250,45 @@ export default function ApprovalsPage() {
             ))}
           </select>
         </div>
+        {processes.length > 0 && (
+          <div className="w-64">
+            <label htmlFor="approvals-filter-process" className="mb-1 block text-xs font-medium text-muted-foreground">
+              {t("approvals.filters.process")}
+            </label>
+            <select
+              id="approvals-filter-process"
+              data-testid="approvals-filter-process"
+              className={SELECT_CLASS}
+              value={processFilter}
+              onChange={(e) => {
+                setProcessFilter(e.target.value);
+                setStepFilter("");
+              }}
+            >
+              <option value="">{t("approvals.filters.processAll")}</option>
+              {processes.map((p) => (
+                <option key={p.processId} value={p.processId}>
+                  {p.processName} ({p.count})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {stepsOfProcess.length > 0 && (
+          <div className="w-64">
+            <label htmlFor="approvals-filter-step" className="mb-1 block text-xs font-medium text-muted-foreground">
+              {t("approvals.filters.step")}
+            </label>
+            <select id="approvals-filter-step" data-testid="approvals-filter-step" className={SELECT_CLASS} value={stepFilter} onChange={(e) => setStepFilter(e.target.value)}>
+              <option value="">{t("approvals.filters.stepAll")}</option>
+              {stepsOfProcess.map((st) => (
+                <option key={st.processStepId} value={st.processStepId}>
+                  {st.processStepName} ({st.count})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Requests table */}
@@ -232,8 +296,10 @@ export default function ApprovalsPage() {
         <EntityTable<ApprovalRequestListItem>
           isLoading={requests.isLoading}
           isError={requests.isError}
+          error={requests.error}
           errorMessage={t("approvals.errorMessage")}
-          rows={requests.data?.items ?? []}
+          rows={list.rows}
+          server={list.server}
           rowKey={(r) => r.approvalRequestId}
           rowTestId="approval-row"
           columns={columns}

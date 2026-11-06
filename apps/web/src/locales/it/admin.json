@@ -9,7 +9,8 @@
       "policy": "Quorum",
       "priority": "Priorità",
       "steps": "Passi",
-      "created": "Creata"
+      "created": "Creata",
+      "process": "Processo e attività"
     },
     "status": {
       "PENDING": "In attesa",
@@ -40,7 +41,7 @@
       "policyLabel": "Quorum",
       "priorityLabel": "Priorità",
       "approversLabel": "Approvatori",
-      "approversHint": "Seleziona uno o più approvatori (Ctrl/Cmd per selezione multipla).",
+      "approversHint": "Cerca le persone per nome o email e aggiungile una alla volta.",
       "bodyLabel": "Descrizione",
       "submit": "Crea richiesta",
       "submitting": "Creazione…",
@@ -48,7 +49,11 @@
       "errorUnexpected": "Errore imprevisto."
     },
     "filters": {
-      "statusAll": "Tutti gli stati"
+      "statusAll": "Tutti gli stati",
+      "processAll": "Tutti i processi",
+      "process": "Processo",
+      "stepAll": "Tutte le attività",
+      "step": "Attività"
     },
     "emptyTitle": "Nessuna richiesta",
     "emptyDescription": "Non ci sono richieste di approvazione.",
@@ -89,8 +94,12 @@
         "approvalResolved": "Decisione inviata: {{decision}}",
         "errorRun": "Esecuzione fallita: {{message}}",
         "noSession": "Nessuna sessione: effettua il login per inoltrare i cookie al gateway."
-      }
-    }
+      },
+      "onBehalfOf": "deciso da {{delegate}} per conto di {{approver}}"
+    },
+    "noProcess": "Fuori processo",
+    "delegated_one": "{{count}} passo deciso per delega",
+    "delegated_other": "{{count}} passi decisi per delega"
   },
   "engagement": {
     "title": "Engagement & Sondaggi",
@@ -116,7 +125,12 @@
       "workload": "Carico",
       "satisfaction": "Soddisfazione",
       "totalChecks": "{{count}} check totali",
-      "empty": "Nessun dato pulse."
+      "empty": "Nessun dato pulse.",
+      "axisWeek": "Settimana",
+      "axisScore": "Punteggio medio",
+      "tableTitle": "Mostra i dati in tabella",
+      "colCount": "Rilevazioni",
+      "weekShort": "Sett. {{n}}"
     },
     "results": {
       "back": "Torna a Engagement",
@@ -154,7 +168,7 @@
     "noName": "—",
     "detail": {
       "back": "← Utenti",
-      "notFound": "Utente non trovato.",
+      "notFound": "Questa persona non esiste oppure è fuori dalla tua catena organizzativa: la sua scheda non è visibile con il tuo profilo.",
       "loadError": "Errore di caricamento.",
       "unnamed": "(senza nome)",
       "cardTitle": "Anagrafica",
@@ -275,7 +289,34 @@
         "readOnly": "Non hai i permessi per assegnare o revocare ruoli.",
         "error": "Operazione non riuscita.",
         "forbidden": "Non hai i permessi per assegnare o revocare ruoli.",
-        "duplicate": "Questo ruolo è già assegnato."
+        "duplicate": "Questo ruolo è già assegnato.",
+        "colReview": "Revisione",
+        "act": {
+          "toConfirm": "Da riconfermare",
+          "hint": "È un mandato: si propone con un motivo e una data di revisione, e lo decide un secondo titolare dalla pagina Ruoli.",
+          "proposeGrant": "Proponi",
+          "proposeRevoke": "Proponi la revoca",
+          "proposeConfirm": "Proponi la riconferma",
+          "title": {
+            "GRANT": "Proposta di concessione: {{role}}",
+            "REVOKE": "Proposta di revoca: {{role}}",
+            "CONFIRM": "Proposta di riconferma: {{role}}"
+          },
+          "reason": "Motivo",
+          "reasonHint": "Almeno dieci caratteri: perché la persona deve portare, o non portare più, questo mandato.",
+          "reviewBy": "Da rivedere entro",
+          "submit": "Invia la proposta",
+          "cancel": "Annulla",
+          "sent": "Proposta inviata: la decide un secondo titolare di mandato dalla pagina Ruoli.",
+          "pendingTitle": "Atti in attesa di decisione",
+          "kind": {
+            "GRANT": "Concessione",
+            "REVOKE": "Revoca",
+            "CONFIRM": "Riconferma"
+          },
+          "proposedBy": "proposto da {{who}} il {{when}}",
+          "withdraw": "Ritira"
+        }
       }
     }
   },
@@ -289,8 +330,8 @@
     "caption": "Registry tenant",
     "columns": {
       "name": "Nome",
-      "country": "Country",
-      "size": "Size",
+      "country": "Paese",
+      "size": "Dimensione",
       "status": "Stato"
     },
     "fallbackName": "ND",
@@ -318,6 +359,9 @@
       },
       "dash": "—",
       "wizardLink": "Apri wizard Enterprise Typing →",
+      "typingAssessed": "Valutato il {{date}}",
+      "typingRegulatory": "Intensità regolatoria: {{value}}",
+      "typingEmployees": "{{n}} dipendenti",
       "typingEmpty": "Nessun profilo di tipizzazione registrato.",
       "usersHint": "La lista utenti completa è gestita nella pagina dedicata.",
       "usersLink": "Apri /users →"
@@ -343,23 +387,36 @@
     }
   },
   "enterpriseTyping": {
-    "title": "Enterprise Typing Wizard",
-    "description": "Tipizza l'enterprise selezionando family, variante, operating model e size band.",
+    "title": "Tipizzazione dell'azienda",
+    "description": "Il profilo che descrive l'azienda: classe di attività, dimensione, modello operativo, intensità regolatoria.",
     "back": "← Tenant",
-    "cardTitle": "Profilo",
-    "familyLabel": "Blueprint family",
-    "variantLabel": "Variante",
-    "modelLabel": "Operating model",
-    "sizeBandLabel": "Size band",
-    "selectPlaceholder": "— Seleziona —",
+    "cardTitleNew": "Nuovo profilo",
+    "cardTitleSaved": "Profilo salvato",
+    "classLabel": "Classe di attività",
+    "classNone": "Nessuna classe scelta.",
+    "classSearch": "Cerca per codice o nome (almeno 2 lettere)",
+    "classClear": "Togli la classe",
+    "modelLabel": "Modello operativo",
+    "sizeBandLabel": "Fascia dimensionale",
+    "intensityLabel": "Intensità regolatoria",
+    "intensity": {
+      "LOW": "Bassa",
+      "MEDIUM": "Media",
+      "HIGH": "Alta",
+      "EXTREME": "Estrema"
+    },
+    "countryLabel": "Paese (codice di due lettere)",
+    "countryInvalid": "Il paese è un codice di due lettere, per esempio IT.",
+    "employeesLabel": "Addetti",
+    "revenueLabel": "Fatturato (€)",
+    "numbersInvalid": "Addetti e fatturato sono numeri senza segni.",
     "nonePlaceholderMale": "— Nessuno —",
     "nonePlaceholderFemale": "— Nessuna —",
-    "familyRequired": "Famiglia richiesta.",
-    "variantRequired": "Variante richiesta.",
-    "createError": "Errore creazione profilo.",
-    "createSuccess": "Profilo creato.",
-    "submit": "Crea profilo",
-    "submitting": "Creazione…"
+    "loadError": "Impossibile leggere il profilo.",
+    "saveError": "Salvataggio non riuscito.",
+    "saveSuccess": "Profilo salvato.",
+    "submit": "Salva il profilo",
+    "submitting": "Salvataggio…"
   },
   "organization": {
     "title": "Organization Units",
@@ -553,7 +610,24 @@
     "accessDeniedDesc": "Questa matrice richiede il ruolo PLATFORM_ADMIN.",
     "headerCell": "permission \\ role",
     "granted": "granted",
-    "denied": "denied"
+    "denied": "denied",
+    "mandateActs": {
+      "title": "Atti di mandato da decidere",
+      "description": "Concessioni, revoche e riconferme di mandati proposte da un altro titolare. Le decide un secondo titolare: mai chi le ha proposte, mai chi le riceve.",
+      "empty": "Nessun atto in attesa.",
+      "colPerson": "Persona",
+      "colAct": "Atto",
+      "colRole": "Mandato",
+      "colReason": "Motivo",
+      "colReview": "Revisione",
+      "colProposed": "Proposto da",
+      "approve": "Approva",
+      "reject": "Respingi",
+      "rejectNote": "Motivo del rifiuto",
+      "confirmReject": "Conferma il rifiuto",
+      "cancel": "Annulla",
+      "notYours": "Non puoi decidere un atto che hai proposto o che ti riguarda."
+    }
   },
   "dashboard": {
     "title": "Dashboard",
@@ -916,7 +990,21 @@
     "rolesHint": "Ambito: tutti i ruoli oppure una selezione (almeno uno).",
     "empty": "Nessun tenant disponibile.",
     "accessDeniedTitle": "Accesso negato",
-    "accessDeniedDesc": "Servono i permessi mfa_policy per leggere le policy."
+    "accessDeniedDesc": "Servono i permessi mfa_policy per leggere le policy.",
+    "exemptions": {
+      "title": "Esenzioni dal secondo fattore",
+      "description": "Chi può entrare senza il secondo fattore, perché, chi l'ha deciso e fino a quando. Un'esenzione scaduta non apre più niente; chi porta un mandato non può averne.",
+      "empty": "Nessuna esenzione.",
+      "state": {
+        "ACTIVE": "Attiva",
+        "EXPIRED": "Scaduta",
+        "DISABLED": "Spenta"
+      },
+      "expires": "Scade il {{date}}",
+      "author": "decisa da {{name}}",
+      "noAuthor": "senza autore (di prima della regola)",
+      "disable": "Spegni"
+    }
   },
   "agentDev": {
     "title": "Console agente (DEV)",
@@ -969,6 +1057,12 @@
       "total": "Totale",
       "avgConfidence": "Conf. media",
       "conflicted": "In conflitto"
+    },
+    "status": {
+      "VALID": "Valide",
+      "STALE": "Superate",
+      "CONFLICTED": "In conflitto",
+      "REJECTED": "Respinte"
     }
   },
   "timeOff": {
@@ -1219,6 +1313,11 @@
       "confirmed": "Confermate",
       "superseded": "Sostituite",
       "tables": "Tabelle coinvolte"
+    },
+    "status": {
+      "GENERATED": "Generate",
+      "CONFIRMED": "Confermate",
+      "SUPERSEDED": "Sostituite"
     }
   }
 }

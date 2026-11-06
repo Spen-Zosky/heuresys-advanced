@@ -17,7 +17,7 @@ import {
 } from "../../config/constants.js";
 import { UnauthorizedError, NotFoundError, ForbiddenError, ApiError } from "../../errors/index.js";
 import { pool, withTransaction } from "../../db/client.js";
-import { ruoliHannoMandatoPiattaforma } from "../../lib/scope/mandati.js";
+import { ruoliHannoMandatoPiattaforma, ruoliPortanoMandato } from "../../lib/scope/mandati.js";
 
 import { hashPassword, verifyPassword } from "./password.js";
 import { generateOpaqueToken, sha256Hex } from "./tokens.js";
@@ -143,6 +143,8 @@ export interface AuthServiceDeps {
     fam: string;
     /** Enrollment-only restricted session (mandatory-MFA gate, MVP-4 par.2.5 #4). */
     enr?: boolean;
+    /** ADR-0050 D5: ultima verifica del secondo fattore della sessione, secondi epoch. */
+    sua?: number;
   }) => Promise<string> | string;
   mailer: IMailer;
   log: FastifyBaseLogger;
@@ -219,6 +221,12 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
   const mfaService = deps.mfaService ?? sharedMfaService;
   const mfaEnforcement = deps.mfaEnforcement ?? env.MFA_ENFORCEMENT_ENABLED;
 
+  /** ADR-0050 D1/D2: la persona porta un mandato forte (letto dalle sue concessioni attive). */
+  async function portaMandato(userId: string): Promise<boolean> {
+    const grants = await repo.getUserRoleGrants(pool, userId);
+    return ruoliPortanoMandato(grants.map((g) => g.roleCode));
+  }
+
   async function issueLoginBundle(args: {
     userId: string;
     userEmail: string;
@@ -228,6 +236,12 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
     previousRefreshId: string | null;
     ip: string | null;
     userAgent: string | null;
+    /**
+     * ADR-0050 D5: l'ultima verifica del secondo fattore della sessione. Al login è adesso se
+     * il login ci è passato; al rinnovo è quella che la famiglia portava. Va nel claim `sua`
+     * dell'access token e sulla riga di rinnovo, che la passa al rinnovo successivo.
+     */
+    secondoFattoreAt?: Date | null;
   }): Promise<LoginSuccess> {
     const platformGrant = args.grants.find((g) => g.isPlatform && g.tenantId === null);
     const jwtTenantId = platformGrant ? null : args.userTenantId;
@@ -241,6 +255,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       roles: roleCodes,
       jti,
       fam: familyId,
+      ...(args.secondoFattoreAt ? { sua: Math.floor(args.secondoFattoreAt.getTime() / 1000) } : {}),
     });
 
     const refreshToken = generateOpaqueToken();
@@ -256,6 +271,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       expiresAt,
       ip: args.ip,
       userAgent: args.userAgent,
+      secondoFattoreAt: args.secondoFattoreAt ?? null,
     } satisfies repo.InsertRefreshTokenParams);
 
     const csrfToken = generateOpaqueToken();
@@ -354,6 +370,8 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       //     falls straight through to token issuance, no second factor. PROD
       //     keeps it true (default); enrolled factors + the per-tenant policy
       //     are untouched, only login-time enforcement is suspended.
+      // ADR-0050 D1/D2: letto una volta, serve sia all'esenzione sia all'iscrizione obbligatoria.
+      const mandato = mfaEnforcement && !input.challengeToken ? await portaMandato(candidate.userId) : false;
       if (mfaEnforcement && input.challengeToken) {
         if (!input.mfaCode) {
           throw new UnauthorizedError("MFA code required", "MFA_CODE_REQUIRED");
@@ -390,7 +408,12 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
           });
           throw new UnauthorizedError("Invalid MFA challenge", "MFA_INVALID");
         }
-      } else if (mfaEnforcement && !(await repo.isUserMfaExempt(pool, candidate.userId))) {
+      } else if (
+        mfaEnforcement &&
+        // ADR-0050 D2: chi porta un mandato forte non salta mai il secondo fattore, nemmeno
+        // con un'esenzione (che il database comunque rifiuta di creare per lui, mig. 000473).
+        (mandato || !(await repo.isUserMfaExempt(pool, candidate.userId)))
+      ) {
         // #9 WI-A: a user with an ACTIVE MFA exemption (headless service account,
         // sys_auth_mfa_exemptions / mig 000116) skips the WHOLE gate (no
         // mfa_required, no mfa_enrollment_required) and falls through to full
@@ -415,13 +438,16 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         // (claim `enr`, roles [] -> every requirePermission() denies; the only
         // usable surface is /v1/auth/mfa self-service). Default OFF: with no
         // policy row (or enabled=false) behaviour is identical to pre-#4.
+        // ADR-0050 D2: per chi porta un mandato forte l'iscrizione al secondo fattore è
+        // obbligatoria anche senza una politica del tenant che la chieda.
         const policy = await repo.findMfaPolicyForTenant(pool, candidate.userTenantId);
-        if (policy?.enabled) {
+        if (mandato || policy?.enabled) {
           const grants = await repo.getUserRoleGrants(pool, candidate.userId);
           const roleCodes = [...new Set(grants.map((g) => g.roleCode))];
           const inScope =
-            policy.roleCodes === null ||
-            roleCodes.some((r) => policy.roleCodes!.includes(r));
+            mandato ||
+            (policy?.enabled === true &&
+              (policy.roleCodes === null || roleCodes.some((r) => policy.roleCodes!.includes(r))));
           if (inScope) {
             const accessJwt = await deps.jwtSign({
               sub: candidate.userId,
@@ -462,6 +488,8 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         previousRefreshId: null,
         ip: input.ip,
         userAgent: input.userAgent,
+        // ADR-0050 D5: qui si arriva con un challengeToken solo dopo averlo verificato.
+        secondoFattoreAt: mfaEnforcement && input.challengeToken ? now() : null,
       });
 
       await repo.insertLoginEvent(pool, {
@@ -491,6 +519,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         previousRefreshId: null,
         ip: input.ip,
         userAgent: input.userAgent,
+        secondoFattoreAt: now(), // ADR-0050 D5: la cerimonia WebAuthn è il secondo fattore
       });
       await repo.insertLoginEvent(pool, {
         userId: me.userId,
@@ -587,6 +616,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         previousRefreshId: row.refreshTokenId,
         ip: input.ip,
         userAgent: input.userAgent,
+        secondoFattoreAt: row.stepUpAt, // ADR-0050 D5: il rinnovo non conferma, porta avanti
       });
 
       await repo.insertLoginEvent(pool, {

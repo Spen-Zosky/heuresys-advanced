@@ -21,25 +21,24 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { TimelinePanel } from "@/components/timeline-panel";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import type { UserDossier } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 import { IdentityEditor } from "./_components/identity-editor";
 import { RolesEditor } from "./_components/roles-editor";
+import { chiediConferma } from "@/lib/api/step-up";
 
 /* --- formattazione: mai una data ISO o un numero nudo davanti a una persona --- */
-const fmtDate = (v: string | null | undefined): string =>
-  v ? new Date(v).toLocaleDateString() : "—";
-const fmtMoney = (v: number | string | null | undefined): string =>
-  v === null || v === undefined || v === ""
-    ? "—"
-    : new Intl.NumberFormat(undefined, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Number(v));
+// F-1 (piano interfacce, 2026-11-04): la forma comune di `@/lib/format`, nella lingua del portale.
 
 /** Una sezione della scheda: mostra il conteggio, e sparisce se non ha nulla da dire. */
 function Section({
@@ -62,7 +61,7 @@ function Section({
 
 /** Tabellina compatta: le righe scorrono da sole se la pagina è stretta. */
 function MiniTable({ head, rows, empty }: { head: string[]; rows: ReactNode[][]; empty: string }) {
-  if (rows.length === 0) return <p className="text-sm text-muted-foreground">{empty}</p>;
+  if (rows.length === 0) return <StatoVuoto titolo={empty} compatto />;
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -89,10 +88,13 @@ function MiniTable({ head, rows, empty }: { head: string[]; rows: ReactNode[][];
 
 export default function UserDetailPage() {
   const { t } = useTranslation("admin");
+  const { t: tc } = useTranslation("common");
+  const f = useFormat();
   const enumLabel = useEnumLabel();
   const params = useParams<{ userId: string }>();
   const userId = params.userId;
 
+  const canReadTimeline = useCan("timeline:read");
   const q = useQuery({
     queryKey: ["users", userId, "dossier"],
     queryFn: () => apiFetch<UserDossier>(`/v1/users/${userId}/dossier`),
@@ -102,7 +104,7 @@ export default function UserDetailPage() {
   if (q.isLoading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+        <StatoCaricamento />
       </main>
     );
   }
@@ -111,9 +113,14 @@ export default function UserDetailPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="user-error">
         <Link href="/users" className="text-sm underline">{t("users.detail.back")}</Link>
-        <p className="mt-4 text-danger">
-          {code === 404 ? t("users.detail.notFound") : t("users.detail.loadError")}
-        </p>
+        <div className="mt-4">
+          <StatoErrore
+            errore={q.error}
+            titolo={code === 404 ? t("users.detail.notFound") : t("users.detail.loadError")}
+            testId="user-error-state"
+            onRiprova={() => void q.refetch()}
+          />
+        </div>
       </main>
     );
   }
@@ -147,6 +154,29 @@ export default function UserDetailPage() {
         }
       />
 
+      {/* ADR-0050 D5: per mandato, retribuzione e valutazioni chiedono una conferma recente */}
+      {d.stepUpRequired && d.stepUpRequired.length > 0 && (
+        <div
+          role="status"
+          data-testid="dossier-step-up"
+          className="flex flex-wrap items-center justify-between gap-3 rounded border border-border bg-muted/40 px-4 py-3 text-sm"
+        >
+          <span>{tc("stepUp.dossierNotice")}</span>
+          <Button
+            type="button"
+            size="sm"
+            data-testid="dossier-step-up-confirm"
+            onClick={() => {
+              void chiediConferma().then((ok) => {
+                if (ok) void q.refetch();
+              });
+            }}
+          >
+            {tc("stepUp.dossierAction")}
+          </Button>
+        </div>
+      )}
+
       {/* Chi è, in una riga: il ruolo, l'unità, da quando, con che inquadramento */}
       <Card data-testid="dossier-summary">
         <CardContent className="pt-6">
@@ -156,7 +186,7 @@ export default function UserDetailPage() {
               { label: s("position"), value: primary?.positionTitle ?? "—", testId: "field-position" },
               { label: s("orgUnit"), value: org.orgUnit ?? org.department ?? "—", testId: "field-orgunit" },
               { label: s("manager"), value: org.managerName ?? "—" },
-              { label: s("hiredOn"), value: fmtDate(emp?.hireDate), testId: "field-hired" },
+              { label: s("hiredOn"), value: f.data(emp?.hireDate), testId: "field-hired" },
               { label: s("ccnlLevel"), value: contract?.ccnlLevel ?? "—" },
               { label: s("contractType"), value: contract?.type ? enumLabel("contractType", contract.type) : "—" },
             ]}
@@ -171,8 +201,8 @@ export default function UserDetailPage() {
           rows={d.positions.map((x) => [
             x.positionTitle,
             x.isPrimary ? s("primary") : s("secondary"),
-            fmtDate(x.startDate),
-            fmtDate(x.endDate),
+            f.data(x.startDate),
+            f.data(x.endDate),
             <EnumStatusBadge key="s" domain="assignmentStatus" value={x.status} />,
           ])}
         />
@@ -185,9 +215,9 @@ export default function UserDetailPage() {
           rows={d.contracts.map((c, i) => [
             c.type ? enumLabel("contractType", c.type) : "—",
             c.ccnlLevel ?? "—",
-            isMasked(c, "grossAnnualSalary") ? <MaskedCell key={`m${i}`} /> : fmtMoney(c.grossAnnualSalary),
+            isMasked(c, "grossAnnualSalary") ? <MaskedCell key={`m${i}`} /> : f.importo(c.grossAnnualSalary, c.currency, 0),
             c.workHoursWeekly ?? "—",
-            fmtDate(c.startDate),
+            f.data(c.startDate),
             <EnumStatusBadge key={i} domain="contractStatus" value={c.status ?? ""} />,
           ])}
         />
@@ -199,9 +229,9 @@ export default function UserDetailPage() {
           empty={s("empty.paySlips")}
           rows={d.paySlips.slice(0, 12).map((x) => [
             x.period,
-            fmtMoney(x.grossPay),
-            fmtMoney(x.netPay),
-            fmtDate(x.paymentDate),
+            f.importo(x.grossPay, x.currency),
+            f.importo(x.netPay, x.currency),
+            f.data(x.paymentDate),
           ])}
         />
         {d.paySlips.length > 12 && (
@@ -214,7 +244,7 @@ export default function UserDetailPage() {
           head={[s("col.period"), s("col.type"), s("col.overall"), s("col.box"), s("col.status")]}
           empty={s("empty.performance")}
           rows={d.performance.map((x, i) => [
-            `${fmtDate(x.periodStart)} – ${fmtDate(x.periodEnd)}`,
+            `${f.data(x.periodStart)} – ${f.data(x.periodEnd)}`,
             x.type ?? "—",
             x.overallRating ?? "—",
             x.performanceBox ?? "—",
@@ -245,7 +275,7 @@ export default function UserDetailPage() {
             x.skillName,
             x.declaredProficiency,
             x.source,
-            fmtDate(x.assessedAt),
+            f.data(x.assessedAt),
           ])}
         />
       </Section>
@@ -258,7 +288,7 @@ export default function UserDetailPage() {
             x.title ?? x.moduleTitle ?? x.pathName ?? "—",
             x.isMandatory ? s("yes") : s("no"),
             <EnumStatusBadge key={i} domain="learningStatus" value={x.status ?? ""} />,
-            fmtDate(x.enrolledAt),
+            f.data(x.enrolledAt),
           ])}
         />
         {d.learning.length > 12 && (
@@ -273,8 +303,8 @@ export default function UserDetailPage() {
           rows={d.certifications.map((x) => [
             x.name,
             x.issuer,
-            fmtDate(x.issuedDate),
-            fmtDate(x.expiresDate),
+            f.data(x.issuedDate),
+            f.data(x.expiresDate),
           ])}
         />
       </Section>
@@ -285,8 +315,8 @@ export default function UserDetailPage() {
           empty={s("empty.goals")}
           rows={d.goals.slice(0, 12).map((x, i) => [
             x.title,
-            x.progressPercent !== null && x.progressPercent !== undefined ? `${x.progressPercent}%` : "—",
-            fmtDate(x.dueDate),
+            f.percento(x.progressPercent, "0-100"),
+            f.data(x.dueDate),
             <EnumStatusBadge key={i} domain="goalStatus" value={x.status ?? ""} />,
           ])}
         />
@@ -310,7 +340,10 @@ export default function UserDetailPage() {
       {/* D5 (#49): il percorso della persona, non solo il suo presente.
           L'API decide chi puo' vederla (asse organizzativo, I18): qui si
           mostra e basta. */}
-      <TimelinePanel basePath="/v1/user-timeline" userId={userId} testId="user-timeline-panel" />
+      {/* S-6: la storia chiede timeline:read; senza il permesso il riquadro non chiede e non compare. */}
+      {canReadTimeline && (
+        <TimelinePanel basePath="/v1/user-timeline" userId={userId} testId="user-timeline-panel" />
+      )}
 
       {/* Fin qui la scheda RACCONTA. Da qui si GOVERNA: anagrafica e ruoli
           sono le due cose che un amministratore deve poter cambiare senza

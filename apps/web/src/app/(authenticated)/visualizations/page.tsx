@@ -12,6 +12,8 @@ import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../_charts-client";
+import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoVuoto } from "@/components/stato-pagina";
 
 type TypeDistItem = VizGraphTypeDistributionItem;
 
@@ -45,6 +47,7 @@ function typeChartOption(items: TypeDistItem[], labels: { series: string }) {
 
 export default function VisualizationsPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   // C4 (#42): server-side pagination (was `?limit=200`). The donut is fed by the
   // separate server-side GROUP BY aggregate below, so paging the table never
@@ -94,7 +97,11 @@ export default function VisualizationsPage() {
         description={t("visualizations.description")}
         badges={
           <Badge variant="secondary" data-testid="visualizations-count">
-            {graphs.query.data ? t("visualizations.count", { count: graphs.total }) : t("visualizations.countLoading")}
+            {graphs.query.data
+              ? t("visualizations.count", { count: graphs.total })
+              : graphs.query.isError
+                ? t("common:stato.nonDisponibile")
+                : t("visualizations.countLoading")}
           </Badge>
         }
       />
@@ -103,6 +110,7 @@ export default function VisualizationsPage() {
         <EntityTable<VizGraph>
           isLoading={graphs.query.isLoading}
           isError={graphs.query.isError}
+          error={graphs.query.error}
           errorMessage={t("visualizations.errorMessage")}
           rows={graphs.rows}
           server={graphs.server}
@@ -121,10 +129,10 @@ export default function VisualizationsPage() {
           <h2 className="mb-2 text-sm font-medium text-foreground">{t("visualizations.distributionTitle")}</h2>
           {summary.data && summary.data.total > 0 ? (
             <EChartsCard option={typeChartOption(summary.data.items, { series: t("visualizations.chartSeries") })} height={260} ariaLabel={t("visualizations.chartAria")} />
+          ) : summary.isLoading ? (
+            <StatoCaricamento />
           ) : (
-            <p className="py-12 text-center text-xs text-muted-foreground">
-              {summary.isLoading ? t("common:loading") : t("visualizations.noData")}
-            </p>
+            <StatoVuoto titolo={t("visualizations.noData")} testId="visualizations-type-chart-empty" />
           )}
         </div>
       </section>
@@ -137,20 +145,20 @@ export default function VisualizationsPage() {
       >
         <h2 className="mb-3 text-sm font-medium text-foreground">{t("visualizations.exports.title")}</h2>
         {recentExports.isLoading ? (
-          <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+          <StatoCaricamento />
         ) : recentExports.data && recentExports.data.items.length > 0 ? (
           <ul className="divide-y divide-border" data-testid="visualizations-exports-list">
             {recentExports.data.items.map((e) => (
               <li key={e.exportId} className="flex flex-wrap items-center justify-between gap-3 py-2 text-sm">
                 <span className="flex items-center gap-3">
-                  <span className="font-mono text-xs text-muted-foreground">{e.format}</span>
+                  <span className="text-xs text-muted-foreground">{enumLabel("vizExportFormat", e.format)}</span>
                   <span className="text-muted-foreground">
                     {e.byteSize === null
                       ? t("visualizations.exports.noContent")
-                      : t("visualizations.exports.size", { bytes: e.byteSize })}
+                      : fmt.dimensione(e.byteSize)}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {new Date(e.generatedAt).toLocaleDateString()}
+                    {fmt.data(e.generatedAt)}
                   </span>
                 </span>
                 <Link
@@ -164,9 +172,7 @@ export default function VisualizationsPage() {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-muted-foreground" data-testid="visualizations-exports-empty">
-            {t("visualizations.exports.empty")}
-          </p>
+          <StatoVuoto titolo={t("visualizations.exports.empty")} testId="visualizations-exports-empty" />
         )}
       </section>
     </main>

@@ -13,6 +13,7 @@ import type {
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { useFormat, type Formati } from "@/lib/format";
 
 // Gap#1 Porta 2 — Org-Director console. Live capability/maturity per org-unit,
 // driven by the MLCE composite (/v1/capability/composition) + the Maturity engine
@@ -50,11 +51,11 @@ function radarValues(criteria: MaturityCriterion[]): number[] {
   ];
 }
 
-function buildColumns(t: TFunction, onSelect: (o: SelectedOu) => void, selectedId: string | null): DataColumn<OrgRow>[] {
+function buildColumns(t: TFunction, onSelect: (o: SelectedOu) => void, selectedId: string | null, fmt: Formati): DataColumn<OrgRow>[] {
   return [
     { header: t("orgDirector.cols.unit"), cell: (r) => <span className="font-medium text-foreground">{r.name}</span> },
-    { header: t("orgDirector.cols.capability"), cell: (r) => <span className="text-xs text-muted-foreground">{r.capability}%</span> },
-    { header: t("orgDirector.cols.coverage"), cell: (r) => <span className="text-xs text-muted-foreground">{r.coverage}%</span> },
+    { header: t("orgDirector.cols.capability"), cell: (r) => <span className="text-xs text-muted-foreground">{fmt.percento(r.capability, "0-100")}</span> },
+    { header: t("orgDirector.cols.coverage"), cell: (r) => <span className="text-xs text-muted-foreground">{fmt.percento(r.coverage, "0-100")}</span> },
     { header: t("orgDirector.cols.positions"), cell: (r) => <span className="text-xs text-muted-foreground">{r.positions}</span> },
     { header: t("orgDirector.cols.maturity"), cell: (r) => (r.level ? <StatusPill tone={toneForLevel(r.level)}>{`${r.level} · ${r.levelLabel ?? ""}`}</StatusPill> : <span className="text-xs text-muted-foreground">—</span>) },
     {
@@ -74,6 +75,7 @@ function buildColumns(t: TFunction, onSelect: (o: SelectedOu) => void, selectedI
 
 export default function OrgDirectorPage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
   const [selected, setSelected] = useState<SelectedOu | null>(null);
 
   const composition = useQuery({
@@ -104,22 +106,22 @@ export default function OrgDirectorPage() {
       .sort((a, b) => b.capability - a.capability);
   }, [composition.data, maturity.data]);
 
-  const columns = useMemo(() => buildColumns(t, setSelected, selected?.ouId ?? null), [t, selected]);
+  const columns = useMemo(() => buildColumns(t, setSelected, selected?.ouId ?? null, fmt), [t, selected, fmt]);
   const isLoading = composition.isLoading || maturity.isLoading;
   const isError = composition.isError || maturity.isError;
 
   // Drill columns: every score component is shown, never just the blend (no black box).
   const essentialColumns = useMemo<DataColumn<EssentialCapabilityItem>[]>(() => [
     { header: t("orgDirector.essential.cols.skill"), cell: (r) => <span className="font-medium text-foreground" title={r.skillCode}>{r.skillName}</span> },
-    { header: t("orgDirector.essential.cols.priority"), align: "right", cell: (r) => <span className="font-semibold tabular-nums text-foreground">{r.investmentPriority.toFixed(1)}</span> },
-    { header: t("orgDirector.essential.cols.essentiality"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{r.essentialityScore.toFixed(1)}</span> },
-    { header: t("orgDirector.essential.cols.econ"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{Math.round(r.econ * 100)}%</span> },
-    { header: t("orgDirector.essential.cols.crit"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{Math.round(r.crit * 100)}%</span> },
-    { header: t("orgDirector.essential.cols.scarcity"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{Math.round(r.scarcity * 100)}%</span> },
-    { header: t("orgDirector.essential.cols.maturity"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{Math.round(r.maturity * 100)}%</span> },
+    { header: t("orgDirector.essential.cols.priority"), align: "right", cell: (r) => <span className="font-semibold tabular-nums text-foreground">{fmt.numeroFisso(r.investmentPriority, 1)}</span> },
+    { header: t("orgDirector.essential.cols.essentiality"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.numeroFisso(r.essentialityScore, 1)}</span> },
+    { header: t("orgDirector.essential.cols.econ"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.percento(r.econ, "0-1")}</span> },
+    { header: t("orgDirector.essential.cols.crit"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.percento(r.crit, "0-1")}</span> },
+    { header: t("orgDirector.essential.cols.scarcity"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.percento(r.scarcity, "0-1")}</span> },
+    { header: t("orgDirector.essential.cols.maturity"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.percento(r.maturity, "0-1")}</span> },
     { header: t("orgDirector.essential.cols.demand"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{r.positionsRequiring} · {r.criticalPositions}</span> },
     { header: t("orgDirector.essential.cols.holders"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{r.holders}</span> },
-  ], [t]);
+  ], [t, fmt]);
 
   const radarAxes = useMemo(() => [
     { id: "composite", label: t("orgDirector.radar.axes.composite") },
@@ -137,7 +139,7 @@ export default function OrgDirectorPage() {
         description={t("orgDirector.description")}
         badges={composition.data ? <Badge variant="secondary" data-testid="org-director-count">{t("orgDirector.count", { count: rows.length })}</Badge> : undefined}
       />
-      <EntityTable<OrgRow>
+      <EntityTable<OrgRow> originPath={"/v1/capability/composition"}
         isLoading={isLoading} isError={isError} errorMessage={t("orgDirector.errorMessage")}
         rows={rows} rowKey={(r) => r.ouId} rowTestId="org-director-row" columns={columns}
         emptyTestId="org-director-empty" emptyTitle={t("orgDirector.emptyTitle")} emptyDescription={t("orgDirector.emptyDescription")} caption={t("orgDirector.caption")}
@@ -179,9 +181,10 @@ export default function OrgDirectorPage() {
               : t("orgDirector.essential.subtitleIdle")
           }
         />
-        <EntityTable<EssentialCapabilityItem>
+        <EntityTable<EssentialCapabilityItem> originPath={"/v1/capability/composition/essential-ranking"}
           isLoading={essential.isLoading}
           isError={essential.isError}
+          error={essential.error}
           errorMessage={t("orgDirector.essential.errorMessage")}
           rows={essential.data?.items ?? []}
           rowKey={(r) => r.skillId}

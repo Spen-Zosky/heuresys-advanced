@@ -8,9 +8,11 @@ import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
+import { useFormat } from "@/lib/format";
 
 export default function MeLearningPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const learning = useQuery({
     queryKey: ["me", "learning"],
     queryFn: () => apiFetch<MeLearningResponse>("/v1/me/learning"),
@@ -40,18 +42,18 @@ export default function MeLearningPage() {
       },
       {
         header: t("learning.colEnrolled"),
-        cell: (l) => <span className="text-xs text-muted-foreground">{l.enrolledAt?.slice(0, 10) ?? "—"}</span>,
+        cell: (l) => <span className="text-xs text-muted-foreground">{fmt.data(l.enrolledAt)}</span>,
       },
       {
         header: t("learning.colDeadline"),
         cell: (l) => <span className="text-xs text-muted-foreground">{l.deadline ?? "—"}</span>,
       },
     ],
-    [t],
+    [t, fmt],
   );
 
   return (
-    <DataTablePanel<MeLearningAssignment>
+    <DataTablePanel<MeLearningAssignment> originPath={"/v1/me/learning"}
       pageTestId="me-learning-page"
       titleTestId="me-learning-title"
       countTestId="me-learning-count"
@@ -60,6 +62,7 @@ export default function MeLearningPage() {
       count={learning.data ? t("learning.count", { count: learning.data.total }) : undefined}
       isLoading={learning.isLoading}
       isError={learning.isError}
+      error={learning.error}
       errorMessage={t("learning.errorMessage")}
       rows={learning.data?.items ?? []}
       rowKey={(l) => l.userLearningAssignmentId}

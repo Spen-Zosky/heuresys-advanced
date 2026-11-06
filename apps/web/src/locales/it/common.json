@@ -281,7 +281,10 @@
     },
     "perfReviewType": {
       "ANNUAL": "Annuale",
-      "MID_YEAR": "Semestrale"
+      "MID_YEAR": "Semestrale",
+      "PROBATION": "Fine del periodo di prova",
+      "PROJECT": "Di progetto",
+      "AD_HOC": "Straordinaria"
     },
     "perfReviewStatus": {
       "IN_PROGRESS": "In corso",
@@ -493,7 +496,8 @@
       "STUDY": "Studio",
       "SABBATICAL": "Aspettativa",
       "UNPAID": "Non retribuito",
-      "OTHER": "Altro"
+      "OTHER": "Altro",
+      "PAID_LEAVE": "Permesso retribuito"
     },
     "whistleblowingStatus": {
       "NEW": "Nuova",
@@ -567,7 +571,284 @@
       "TALENT_POOL_INCLUSION": "Inserimento nel bacino talenti",
       "DISCIPLINARY_ACTION": "Provvedimento disciplinare",
       "OTHER": "Altro"
+    },
+    "tenantBlueprintVersionStatus": {
+      "DRAFT": "Bozza",
+      "IN_APPROVAL": "In approvazione",
+      "APPROVED": "Approvata",
+      "APPLIED": "Applicata",
+      "SUPERSEDED": "Sostituita",
+      "ABANDONED": "Abbandonata"
+    },
+    "tenantBlueprintStatus": {
+      "ACTIVE": "Attivo",
+      "ARCHIVED": "Archiviato"
+    },
+    "accrualMethod": {
+      "MONTHLY": "Mensile",
+      "QUARTERLY": "Trimestrale",
+      "SEMIANNUAL": "Semestrale",
+      "ANNUAL": "Annuale",
+      "PER_PAY_PERIOD": "A ogni periodo di paga",
+      "LUMP_SUM": "In un'unica soluzione"
+    },
+    "vizExportFormat": {
+      "SVG": "Immagine SVG",
+      "PDF": "PDF",
+      "PNG": "Immagine PNG",
+      "GENERIC_JSON": "Dati JSON",
+      "REACT_FLOW_JSON": "Grafo JSON (React Flow)",
+      "MERMAID": "Diagramma Mermaid"
+    },
+    "fitDimension": {
+      "SKILL": "Competenze",
+      "KPI": "Indicatori",
+      "LEARNING": "Formazione",
+      "CERTIFICATION": "Certificazioni",
+      "BEHAVIORAL": "Comportamenti",
+      "OVERALL": "Complessivo"
+    },
+    "overtimeType": {
+      "WEEKDAY": "Feriale",
+      "WEEKEND": "Fine settimana",
+      "NIGHT": "Notturno",
+      "HOLIDAY": "Festivo",
+      "EMERGENCY": "Emergenza",
+      "PROJECT": "Di progetto",
+      "ON_CALL": "Reperibilità"
+    },
+    "overtimeStatus": {
+      "PENDING": "In attesa",
+      "APPROVED": "Approvato",
+      "REJECTED": "Respinto",
+      "EXPORTED": "Esportato",
+      "PAID": "Pagato",
+      "CANCELLED": "Annullato"
+    },
+    "payrollRecipientSystem": {
+      "ZUCCHETTI_PAGHE": "Zucchetti Paghe"
+    },
+    "leadSource": {
+      "WEBSITE": "Sito",
+      "INVESTOR": "Pagina investitori",
+      "DEMO": "Richiesta di dimostrazione"
+    },
+    "regulatoryIntensity": {
+      "LOW": "Bassa",
+      "MEDIUM": "Media",
+      "HIGH": "Alta",
+      "EXTREME": "Estrema"
     }
   },
-  "masked": "nascosto per il tuo profilo"
+  "masked": "nascosto per il tuo profilo",
+  "apiErrors": {
+    "status": {
+      "400": "La richiesta non è valida: controlla i dati inseriti.",
+      "401": "La sessione è scaduta: accedi di nuovo.",
+      "403": "Il tuo profilo non permette questa operazione.",
+      "404": "Quello che cerchi non esiste, oppure non è visibile con il tuo profilo.",
+      "409": "L'operazione è in conflitto con lo stato attuale dei dati: ricarica la pagina e riprova.",
+      "422": "I dati non rispettano le regole di questa operazione.",
+      "429": "Troppe richieste in poco tempo: attendi qualche istante e riprova.",
+      "500": "Si è verificato un errore del server.",
+      "default": "Si è verificato un errore."
+    },
+    "code": {
+      "FORBIDDEN": "Il tuo profilo non permette questa operazione.",
+      "CSRF_FAIL": "La pagina è rimasta aperta troppo a lungo: ricaricala e riprova.",
+      "ORIGIN_MISMATCH": "La richiesta arriva da un indirizzo che il server non riconosce: è un problema di configurazione del servizio, non del tuo profilo. Avvisa chi lo gestisce.",
+      "VALIDATION_ERROR": "La richiesta non è valida: controlla i dati inseriti.",
+      "RESPONSE_CONTRACT_VIOLATION": "Il server ha prodotto una risposta non conforme: è un nostro errore, non tuo.",
+      "RESULT_LIMIT_EXCEEDED": "I risultati sono troppi per essere mostrati insieme: restringi con un filtro, per esempio unità o periodo.",
+      "INTERNAL_ERROR": "Si è verificato un errore del server.",
+      "TOO_MANY_REQUESTS": "Troppe richieste in poco tempo: attendi qualche istante e riprova.",
+      "LOGIN_INVALID": "Email o password non corretti.",
+      "MFA_CHALLENGE_EXPIRED": "La verifica è scaduta: accedi di nuovo.",
+      "MFA_CHALLENGE_INVALID": "La verifica non è più valida: accedi di nuovo.",
+      "MFA_CODE_REQUIRED": "Serve il codice del secondo fattore.",
+      "MFA_INVALID": "La verifica non è valida: accedi di nuovo.",
+      "MFA_NOT_ENROLLED": "Prima registra un secondo fattore.",
+      "MFA_OTP_EXPIRED": "Il codice è scaduto: chiedine uno nuovo.",
+      "MFA_OTP_INVALID": "Il codice non è valido.",
+      "MFA_OTP_LOCKED": "Troppi tentativi: chiedi un codice nuovo.",
+      "MFA_TOTP_INVALID": "Il codice dell'app di autenticazione non è valido.",
+      "REFRESH_EXPIRED": "La sessione è scaduta: accedi di nuovo.",
+      "REFRESH_INVALID": "La sessione non è più valida: accedi di nuovo.",
+      "REFRESH_MISSING": "La sessione è scaduta: accedi di nuovo.",
+      "RESET_INVALID": "Il collegamento per reimpostare la password non è valido o è scaduto.",
+      "SURVEY_ALREADY_ANSWERED": "Hai già risposto a questo questionario.",
+      "SURVEY_NOT_ASSIGNED": "Questo questionario non ti è stato assegnato.",
+      "USER_INACTIVE": "Questa utenza non è più attiva.",
+      "BLUEPRINT_TENANT_NOT_LINKED": "Il fascicolo non è legato a un'azienda: non c'è nulla da costruire.",
+      "BLUEPRINT_BUILD_SOURCE_MISSING": "La versione non dichiara una sorgente di costruzione: nessun modello è ancorato, oppure il modello non ne dichiara una.",
+      "BLUEPRINT_BUILD_SOURCE_UNKNOWN": "La sorgente di costruzione dichiarata dal modello non è tra quelle che la piattaforma conosce.",
+      "MANDATE_REQUIRES_ACT": "Questo ruolo è un mandato: non si assegna né si revoca con un clic, si propone un atto che un secondo titolare decide.",
+      "MANDATE_ACT_PENDING": "C'è già una proposta aperta per lo stesso atto: aspetta che venga decisa o ritirala.",
+      "MANDATE_INCOMPATIBLE": "Questo mandato non può stare insieme a uno che la persona porta già (separazione dei compiti).",
+      "MANDATE_SELF_PROPOSAL": "Un mandato non si propone per sé stessi.",
+      "MANDATE_SAME_PERSON": "Un atto lo decide un secondo titolare: né chi l'ha proposto né chi lo riceve.",
+      "MANDATE_NOT_PROPOSER": "Solo chi ha proposto l'atto può ritirarlo.",
+      "MANDATE_ACT_DECIDED": "L'atto è già stato deciso.",
+      "MANDATE_APPROVER_WITHOUT_MANDATE": "Per approvare un atto di mandato serve portare un mandato.",
+      "NOT_A_MANDATE": "Questo ruolo non è un mandato: si assegna e si revoca direttamente.",
+      "MANDATE_ACT_SUBJECT_GONE": "La persona a cui l'atto si riferiva non esiste più: l'atto resta come storia e non si approva.",
+      "STEP_UP_REQUIRED": "Per vedere questi dati serve una conferma del secondo fattore.",
+      "STEP_UP_SESSION_REQUIRED": "La sessione non è più attiva: accedi di nuovo."
+    },
+    "network": "Il server non risponde: controlla la connessione e riprova.",
+    "sessionExpired": "La sessione è scaduta: accedi di nuovo.",
+    "reference": "Riferimento da citare: {{requestId}}"
+  },
+  "personPicker": {
+    "selected": "Persone scelte",
+    "remove": "Togli {{name}}",
+    "placeholder": "Scrivi almeno {{count}} lettere del nome o dell'email",
+    "typeMore": "Scrivi almeno {{count}} lettere per cercare.",
+    "error": "Ricerca non riuscita.",
+    "found_one": "{{count}} persona trovata",
+    "found_other": "{{count}} persone trovate"
+  },
+  "health": {
+    "loadError": "Impossibile leggere lo stato della piattaforma.",
+    "title": "Stato della piattaforma",
+    "description": "Osservabilità della piattaforma su tutti i tenant: connessioni al database, permessi in memoria, integrità degli accessi e richieste delle ultime 24 ore. Ogni valore è letto dal vivo.",
+    "updated": "aggiornato {{when}}",
+    "kpi": {
+      "uptime": "Disponibilità dell'API · 24 h",
+      "requests_one": "{{n}} richiesta",
+      "requests_other": "{{n}} richieste",
+      "avgMs": "{{ms}} ms in media",
+      "pool": "Connessioni al database",
+      "poolUnit": "/ {{max}} connessioni",
+      "poolDetail": "libere {{idle}} · attive {{active}} · in attesa {{waiting}}",
+      "serverMax": "massimo del server {{max}}",
+      "rbac": "Permessi in memoria",
+      "rbacUnit": "associazioni",
+      "rolesLoaded_one": "{{count}} ruolo caricato",
+      "rolesLoaded_other": "{{count}} ruoli caricati",
+      "loaded": "caricati",
+      "notLoaded": "non caricati",
+      "lastLoad": "ultimo caricamento {{when}}",
+      "tenants": "Tenant attivi",
+      "activeCount_one": "{{count}} attivo",
+      "activeCount_other": "{{count}} attivi",
+      "usersCount_one": "{{n}} utente",
+      "usersCount_other": "{{n}} utenti",
+      "auth": "Integrità degli accessi · 24 h",
+      "replay": "riusi bloccati",
+      "logins": "Accessi",
+      "failed": "Falliti",
+      "rotations": "Rinnovi"
+    },
+    "fleet": {
+      "title": "Tenant",
+      "description": "Tenant attivi, con il numero di utenti e l'ultimo accesso",
+      "tenant": "Tenant",
+      "status": "Stato",
+      "users": "Utenti",
+      "lastActivity": "Ultima attività",
+      "statusLabel": {
+        "ACTIVE": "Attivo",
+        "SUSPENDED": "Sospeso",
+        "ARCHIVED": "Archiviato"
+      }
+    },
+    "series": {
+      "requests": "Richieste ogni 5 minuti · 3 h",
+      "requestsFoot": "{{n}} richieste nella finestra",
+      "errors": "Errori del server ogni 5 minuti · 3 h",
+      "errorsFoot_one": "{{count}} errore del server",
+      "errorsFoot_other": "{{count}} errori del server",
+      "latency": "Tempo medio di risposta (ms) ogni 5 minuti · 3 h",
+      "latencyFoot": "picco {{ms}} ms"
+    },
+    "slow": {
+      "cumulative": "cumulato",
+      "p95Note": "p95 ≈ μ + 1,645σ (stima: le statistiche di PostgreSQL non hanno percentili)",
+      "unavailableTitle": "Statistiche delle istruzioni non disponibili",
+      "unavailableDesc": "L'estensione pg_stat_statements non è caricata su questo database: i tempi per istruzione non si possono raccogliere.",
+      "emptyTitle": "Nessuna istruzione registrata",
+      "emptyDesc": "Nella finestra corrente non ci sono istruzioni registrate per il database dell'applicazione."
+    },
+    "rbac": {
+      "unavailableTitle": "Matrice dei permessi non disponibile",
+      "unavailableDesc": "Non è stato possibile leggere l'associazione fra ruoli e permessi."
+    },
+    "audit": {
+      "tenant": "tenant {{code}}",
+      "emptyTitle": "Nessun evento recente",
+      "emptyDesc": "Il registro degli eventi è vuoto nella finestra corrente."
+    }
+  },
+  "unnamed": "senza nome",
+  "stato": {
+    "negato": {
+      "titolo": "Non hai accesso a questi dati",
+      "motivo": "Il tuo profilo non comprende questi dati. Se ti servono per il tuo lavoro, chiedi a chi gestisce i ruoli nella tua azienda."
+    },
+    "codice": "Codice: {{codice}}.",
+    "nonDisponibile": "non disponibile"
+  },
+  "stepUp": {
+    "title": "Conferma la tua identità",
+    "description": "Stai per vedere la retribuzione o le valutazioni di un'altra persona attraverso il tuo mandato. Inserisci il codice del secondo fattore: la conferma vale 15 minuti.",
+    "codeLabel": "Codice",
+    "codeHint": "Il codice dell'app, quello ricevuto per email o SMS, oppure un codice di recupero.",
+    "confirm": "Conferma",
+    "confirming": "Verifica in corso…",
+    "cancel": "Annulla",
+    "usePasskey": "Usa la passkey",
+    "error": "Non è stato possibile verificare il codice.",
+    "dossierNotice": "Retribuzione e valutazioni sono nascoste finché non confermi il secondo fattore.",
+    "dossierAction": "Conferma per vederle"
+  },
+  "origine": {
+    "label": "Origine del dato",
+    "riassunto": {
+      "nativo": "nativa",
+      "importato": "importata",
+      "ibrido": "ibrida",
+      "misto": "mista",
+      "infrastruttura": "tecnica"
+    },
+    "stato": {
+      "nativo": "nativa",
+      "importato": "importata",
+      "ibrido": "ibrida",
+      "infrastruttura": "tecnica"
+    },
+    "perRiga": "origine riga per riga",
+    "colonna": "Origine",
+    "riga": {
+      "IMPORT": "Importata",
+      "NATIVO": "Nativa",
+      "MATERIALIZZAZIONE": "Materializzata"
+    }
+  },
+  "agente": {
+    "title": "Assistente su questa pagina",
+    "description": "Strumento di sviluppo: chiedi all'agente qualcosa su ciò che vedi in questa pagina. Tool e input di eventuali scritture sono già oscurati dal gateway.",
+    "contextLabel": "Contesto",
+    "promptLabel": "Prompt",
+    "promptPlaceholder": "Es. Riassumi ciò che mostra questa pagina.",
+    "run": "Esegui",
+    "running": "In esecuzione…",
+    "stop": "Interrompi",
+    "streamTitle": "Stream eventi",
+    "streamEmpty": "Nessun evento ancora. Invia un prompt per avviare l'agente.",
+    "approvalTitle": "Approvazione richiesta",
+    "approvalDesc": "L'agente vuole eseguire una scrittura. Tool e input sono già oscurati dal gateway.",
+    "approvalDescRead": "L'assistente ha già consultato dati di {{persone}} persone diverse in questa richiesta, più di quante ne conti il reparto più grande dell'azienda. Vuoi che continui a leggere? Non è un divieto: se confermi, procede.",
+    "approvalDescReadUnknown": "L'assistente sta per leggere altri dati, ma quante persone abbia consultato finora non risulta misurato. Vuoi che continui?",
+    "approvalTool": "Tool",
+    "approvalInput": "Input (oscurato)",
+    "allow": "Consenti",
+    "deny": "Nega",
+    "approvalResolved": "Decisione inviata: {{decision}}",
+    "errorRun": "Esecuzione fallita: {{message}}",
+    "noSession": "Nessuna sessione: effettua il login per inoltrare i cookie al gateway.",
+    "contestoPagina": "Pagina «{{titolo}}» ({{percorso}})",
+    "apri": "Chiedi all'assistente",
+    "chiudi": "Chiudi l'assistente"
+  }
 }

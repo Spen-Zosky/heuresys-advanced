@@ -66,7 +66,7 @@ describe("GET /v1/observability/system-health integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
   });
 
   afterAll(async () => {

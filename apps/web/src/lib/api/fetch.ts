@@ -14,8 +14,12 @@
  */
 
 import type { ZodTypeAny } from "zod";
+import i18next from "i18next";
 import { csrfStore } from "./csrf-store";
 import { ApiError, NetworkError, SessionExpiredError, type ApiErrorBody } from "./errors";
+import { SUPERFICIE_HEADER, superficiePagina } from "@heuresys/shared/schemas/valore";
+import { segnalaPermessoNegato, svuotaCopiaDiSessione } from "./session-cache";
+import { chiediConferma, STEP_UP_REQUIRED_CODE } from "./step-up";
 
 export type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
@@ -26,6 +30,8 @@ export interface ApiFetchOptions<TSchema extends ZodTypeAny | undefined = undefi
   schema?: TSchema;
   /** Internal flag — set by the silent-refresh retry to prevent infinite loops. */
   isRetry?: boolean;
+  /** Internal flag — set by the ADR-0050 D5 retry after a second-factor confirmation. */
+  isStepUpRetry?: boolean;
   /** Override base URL (default: same-origin `/api`). */
   baseUrl?: string;
   /** Extra headers (caller-supplied; we always set content-type for JSON). */
@@ -45,8 +51,11 @@ function joinUrl(base: string, path: string): string {
 async function attemptRefresh(baseUrl: string): Promise<boolean> {
   try {
     const csrf = csrfStore.get();
-    const headers: Record<string, string> = { accept: "application/json" };
-    if (csrf) headers["x-csrf-token"] = csrf;
+    // Senza il token CSRF non c'è una sessione da rinnovare: l'API risponde sempre 403
+    // CSRF_FAIL (verifyCsrf sulla rotta), e la richiesta inutile consuma il limite di 60
+    // rinnovi in 5 minuti. Succede su ogni pagina aperta da chi non è entrato (L7).
+    if (!csrf) return false;
+    const headers: Record<string, string> = { accept: "application/json", "x-csrf-token": csrf };
     const res = await fetch(joinUrl(baseUrl, "/v1/auth/refresh"), {
       method: "POST",
       headers,
@@ -102,6 +111,7 @@ export async function apiFetch<T = unknown>(
     body,
     schema,
     isRetry = false,
+    isStepUpRetry = false,
     baseUrl = "/api",
     headers: extraHeaders,
     signal,
@@ -109,6 +119,10 @@ export async function apiFetch<T = unknown>(
 
   const headers: Record<string, string> = {
     accept: "application/json",
+    // F0-3, il test del valore: la pagina da cui parte la richiesta. È contesto, non
+    // identità (chi agisce lo dice il cookie); senza, una decisione presa da qui
+    // conterebbe come un dato caricato da uno script.
+    ...(typeof window !== "undefined" ? { [SUPERFICIE_HEADER]: superficiePagina(window.location.pathname) } : {}),
     ...extraHeaders,
   };
 
@@ -143,7 +157,10 @@ export async function apiFetch<T = unknown>(
       ...(signal ? { signal } : {}),
     });
   } catch (err) {
-    throw new NetworkError("Unable to reach the API", err);
+    throw new NetworkError(
+      i18next.isInitialized ? i18next.t("common:apiErrors.network") : "Unable to reach the API",
+      err,
+    );
   }
 
   // Silent refresh on 401 (once, single-flight).
@@ -152,6 +169,7 @@ export async function apiFetch<T = unknown>(
     if (ok) {
       return apiFetch<T>(path, { ...options, isRetry: true });
     }
+    svuotaCopiaDiSessione();
     throw new SessionExpiredError();
   }
 
@@ -167,6 +185,20 @@ export async function apiFetch<T = unknown>(
   }
 
   if (!response.ok) {
+    // ADR-0050 D5: non è un permesso negato, è una conferma che manca. Si chiede il secondo
+    // fattore e, se la persona lo conferma, si ripete la richiesta una volta.
+    const codice =
+      parsed && typeof parsed === "object" && "error" in parsed
+        ? (parsed as ApiErrorBody).error?.code
+        : undefined;
+    if (response.status === 403 && codice === STEP_UP_REQUIRED_CODE) {
+      if (!isStepUpRetry && (await chiediConferma())) {
+        return apiFetch<T>(path, { ...options, isStepUpRetry: true });
+      }
+      throw new ApiError(response.status, parsed as ApiErrorBody);
+    }
+    // V-12: un 403 puo' voler dire che i ruoli sono cambiati: si rileggono permessi e menu.
+    if (response.status === 403) segnalaPermessoNegato();
     if (parsed && typeof parsed === "object" && "error" in parsed) {
       throw new ApiError(response.status, parsed as ApiErrorBody);
     }

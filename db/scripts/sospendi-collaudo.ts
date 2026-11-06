@@ -30,7 +30,7 @@
  * Uso (senza flag di azione mostra solo lo stato):
  *   pnpm db:sospendi-collaudo                                  # stato, nessuna scrittura
  *   pnpm db:sospendi-collaudo --sospendi --motivo "<perche'>"  [--dry-run]
- *   pnpm db:sospendi-collaudo --riattiva --motivo "<giro>"     [--dry-run] [--solo a@collaudo.invalid,b@...]
+ *   pnpm db:sospendi-collaudo --riattiva --motivo "<giro>"     [--dry-run] [--solo a@collaudo.invalid,b@...] [--autore <email>]
  * Idempotente: sospendere due volte = 0 scritture la seconda volta.
  */
 import { Client } from "pg";
@@ -110,6 +110,37 @@ function stampa(titolo: string, righe: Riga[]): void {
   }
 }
 
+/**
+ * ADR-0050 D3: chi autorizza la riaccensione è una persona (STANDARD, ACTIVE): `--autore
+ * <email>`, oppure `COLLAUDO_AUTORE_EMAIL`, oppure la persona con la concessione
+ * PLATFORM_ADMIN attiva più antica, come in provision-collaudo-access.ts. Senza nessuno ci si
+ * ferma: un'esenzione senza autore non si riaccende.
+ */
+async function autoreDelleEsenzioni(db: Client): Promise<string> {
+  const email = (valoreDi("--autore") ?? process.env.COLLAUDO_AUTORE_EMAIL)?.trim();
+  const r = email
+    ? await db.query<{ user_id: string }>(
+        `SELECT user_id FROM sys.sys_users
+          WHERE lower(user_email) = lower($1) AND user_type = 'STANDARD' AND user_status = 'ACTIVE'`,
+        [email])
+    : await db.query<{ user_id: string }>(
+        `SELECT u.user_id
+           FROM sys.sys_user_auth_roles ur
+           JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+           JOIN sys.sys_users u ON u.user_id = ur.user_auth_role_user_id
+          WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND ur.user_auth_role_revoked_at IS NULL
+            AND u.user_type = 'STANDARD' AND u.user_status = 'ACTIVE'
+          ORDER BY ur.user_auth_role_granted_at, u.user_id
+          LIMIT 1`);
+  const id = r.rows[0]?.user_id;
+  if (!id) {
+    throw new Error(email
+      ? "l'autore indicato non è una persona attiva (STANDARD, ACTIVE): l'esenzione non si riaccende (ADR-0050 D3)"
+      : "nessuna persona attiva con PLATFORM_ADMIN: indica --autore <email> (ADR-0050 D3)");
+  }
+  return id;
+}
+
 async function main(): Promise<void> {
   if (SOSPENDI && RIATTIVA) fail("--sospendi e --riattiva insieme: scegline uno");
   if ((SOSPENDI || RIATTIVA) && (!MOTIVO || MOTIVO.length < 8)) {
@@ -174,6 +205,9 @@ async function main(): Promise<void> {
 
     let cambiate = 0;
     let sessioniRevocate = 0;
+    // ADR-0050 D3 (mig 000474): un'esenzione che si riaccende ha un autore, una persona, e
+    // vale per il solo giro: scade dopo un giorno, non dopo i 30 consentiti.
+    const autore = RIATTIVA ? await autoreDelleEsenzioni(db) : undefined;
     for (const r of prima) {
       if (SOSPENDI) {
         const giaSpenta = !r.identita_attiva && r.esenzione_attiva !== true && r.sessioni_aperte === 0;
@@ -231,9 +265,19 @@ async function main(): Promise<void> {
         }
         if (ultima.esenzione) {
           await db.query(
-            `UPDATE sys.sys_auth_mfa_exemptions SET auth_mfa_exemption_enabled = true
-              WHERE auth_mfa_exemption_user_id = $1 AND NOT auth_mfa_exemption_enabled`,
-            [r.user_id],
+            // ADR-0050 D2: a chi porta un mandato forte l'esenzione non si riaccende (il
+            // database la rifiuterebbe, migrazione 000473): entra con il suo fattore.
+            `UPDATE sys.sys_auth_mfa_exemptions
+                SET auth_mfa_exemption_enabled = true,
+                    auth_mfa_exemption_expires_at = now() + interval '1 day',
+                    created_by = $2
+              WHERE auth_mfa_exemption_user_id = $1 AND NOT auth_mfa_exemption_enabled
+                AND NOT EXISTS (
+                  SELECT 1 FROM sys.sys_user_auth_roles ur
+                    JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+                   WHERE ur.user_auth_role_user_id = $1 AND ur.user_auth_role_revoked_at IS NULL
+                     AND r.auth_role_code IN (SELECT sys.f_ruoli_mandato()))`,
+            [r.user_id, autore],
           );
         }
         cambiate++;

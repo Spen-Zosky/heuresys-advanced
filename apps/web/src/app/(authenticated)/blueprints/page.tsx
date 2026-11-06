@@ -14,6 +14,8 @@ import { StatusPill } from "@/components/status-pill";
 import type { BlueprintActivation, TenantListResponse } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 // B-xx: BlueprintFamily stays a LOCAL interface (NOT deduped to @heuresys/shared) —
 // the shared `BlueprintFamily` schema has no `industryCode` field at all, but the
@@ -55,6 +57,8 @@ function buildColumns(t: TFunction): DataColumn<VariantRow>[] {
 // `blueprint:activate`, ma l'autorità resta il service.
 export default function BlueprintsPage() {
   const { t } = useTranslation("blueprints");
+  const enumLabel = useEnumLabel();
+  const fmt = useFormat();
   const qc = useQueryClient();
   const perms = useCurrentUserPermissions();
   const canActivate = perms.data?.permissions.includes("blueprint:activate") ?? false;
@@ -128,10 +132,10 @@ export default function BlueprintsPage() {
           return <span className="text-foreground">{v?.name ?? a.variantId}</span>;
         },
       },
-      { header: t("activations.colStatus"), cell: (a) => <StatusPill tone="info">{a.status}</StatusPill> },
-      { header: t("activations.colFrom"), cell: (a) => <span className="text-xs text-muted-foreground">{a.effectiveFrom}</span> },
+      { header: t("activations.colStatus"), cell: (a) => <StatusPill tone="info">{enumLabel("blueprintActivationStatus", a.status)}</StatusPill> },
+      { header: t("activations.colFrom"), cell: (a) => <span className="text-xs text-muted-foreground">{fmt.data(a.effectiveFrom)}</span> },
     ],
-    [t, variants.rows],
+    [t, variants.rows, enumLabel, fmt],
   );
 
   return (
@@ -199,9 +203,10 @@ export default function BlueprintsPage() {
             </p>
           ) : null}
           <div className="mt-4">
-            <EntityTable<BlueprintActivation>
+            <EntityTable<BlueprintActivation> originPath={"/v1/blueprint-activations"}
               isLoading={activations.isLoading}
               isError={activations.isError}
+              error={activations.error}
               errorMessage={t("activations.loadError")}
               rows={activations.data?.items ?? []}
               rowKey={(a) => a.blueprintActivationId}
@@ -224,6 +229,7 @@ export default function BlueprintsPage() {
       count={variants.query.data ? t("list.count", { count: variants.total }) : undefined}
       isLoading={variants.query.isLoading || families.isLoading}
       isError={variants.query.isError}
+      error={variants.query.error}
       errorTestId="blueprints-error"
       errorMessage={t("list.error")}
       rows={rows}

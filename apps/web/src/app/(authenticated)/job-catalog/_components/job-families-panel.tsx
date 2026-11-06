@@ -137,9 +137,10 @@ export function JobFamiliesPanel() {
           />
         </div>
 
-        <EntityTable<JobFamily>
+        <EntityTable<JobFamily> originPath={"/v1/job-families"}
           isLoading={families.isLoading}
           isError={families.isError}
+          error={families.error}
           errorMessage={t("jobCatalog.loadError")}
           rows={families.data?.items ?? []}
           rowKey={(f) => f.jobFamilyId}

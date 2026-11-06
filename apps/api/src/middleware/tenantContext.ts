@@ -5,8 +5,9 @@
  * endpoints; repository layer never substitutes a default.
  *
  * Mandato K, R-0 (D9=B): per un ruolo di piattaforma ASSEGNATO
- * (`PLATFORM_ASSIGNED_MANDATE_ROLES`, apps/api/src/lib/scope/mandati.ts — oggi vuoto: nessuna
- * richiesta esegue mai la query sotto) carica anche `req.assignedTenantIds`, letto da
+ * (`PLATFORM_ASSIGNED_MANDATE_ROLES`, apps/api/src/lib/scope/mandati.ts — oggi quattro ruoli:
+ * PLATFORM_OPERATOR, SALES, BLUEPRINT_MANAGER, IMPLEMENTATION_CONSULTANT) carica anche
+ * `req.assignedTenantIds`, letto da
  * `actorFromRequest` (apps/api/src/lib/actor.ts) per costruire `perimetroClienti(actor)`.
  *
  * Per AUTH_SECURITY_PLAN §7.

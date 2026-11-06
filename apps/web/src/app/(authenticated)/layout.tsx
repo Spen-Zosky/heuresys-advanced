@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Button,
   DashboardShell,
@@ -44,7 +45,11 @@ import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { setLocale } from "../../lib/i18n";
 import { primaryRoleOf } from "../../lib/role-precedence";
 import { PreferencesApplier } from "../../components/preferences-applier";
-import { SectionTabs } from "../../components/section-tabs";
+import { StepUpDialog } from "../../components/step-up-dialog";
+import { SectionTabs, SECTION_TAB_GROUPS } from "../../components/section-tabs";
+import { pageVerdict } from "../../lib/page-guard";
+import { PannelloAgente } from "../../components/pannello-agente";
+import { ContestoAgenteProvider } from "../../lib/agente/contesto";
 
 const ICON = "h-4 w-4 shrink-0";
 
@@ -122,6 +127,16 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     return null;
   }
 
+  // S-1: senza il registro la guardia non può decidere, e una pagina aperta alla cieca è
+  // proprio il difetto che la guardia toglie. Si mostra l'errore, non la pagina.
+  if (ifaces.isError) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <span data-testid="app-error" className="text-sm text-danger">{t("shell:session.error")}</span>
+      </main>
+    );
+  }
+
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   // Build the sidebar from the DB-driven registry (GET /v1/me/interfaces). Server-side gating
@@ -159,9 +174,15 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
   const groups: NavGroup[] = navGroups;
 
+  // S-1: la pagina si disegna solo se la stessa regola del menu la apre a chi chiama. Una
+  // pagina negata non monta i propri componenti, quindi non parte nessuna chiamata a valle.
+  const verdict = pageVerdict(pathname, ifaces.data?.routes ?? [], SECTION_TAB_GROUPS);
+
   const roles = user.roles ?? [];
-  const ADMIN_ROLES = new Set(["PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER", "ORG_DIRECTOR"]);
-  const hasAdminRole = roles.some((r) => ADMIN_ROLES.has(r));
+  // S-22 (INC-16): il tono dell'etichetta non viene più da una lista di sette ruoli scritta
+  // qui (che non conosceva i ruoli nati col mandato K), ma dal dato: chi ha nel menu almeno
+  // una voce fuori dall'area personale ha un lavoro che va oltre il proprio record.
+  const hasAdminRole = sections.some((s) => s.code !== "PERSONAL" && s.interfaces.length > 0);
   const displayName = user.displayName?.trim() || user.email;
   const initials = (
     user.displayName?.trim()
@@ -203,7 +224,11 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           language={i18n.language === "en" ? "EN" : "IT"}
           onToggleLanguage={handleToggleLanguage}
           logo={<HeuresysWordmark variant="brand" size={24} />}
-          logoBadge={<HeuresysLogoBadge>{t("shell:brand.badge")}</HeuresysLogoBadge>}
+          // F-6 (L7): il collegamento del marchio ha già il suo nome accessibile («Heuresys —
+          // pagina iniziale autenticata»); il distintivo «advanced» visibile ma fuori da quel
+          // nome è la violazione `label-content-name-mismatch` misurata su 97 pagine. È
+          // decorativo: si nasconde ai lettori di schermo invece di cambiare il nome.
+          logoBadge={<HeuresysLogoBadge aria-hidden="true">{t("shell:brand.badge")}</HeuresysLogoBadge>}
         />
       }
       sidebar={
@@ -234,6 +259,10 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
               <span>{t("shell:brand.version")}</span>
               <span aria-hidden className="text-border">·</span>
               <span>{identity.role}</span>
+              <span aria-hidden className="text-border">·</span>
+              <Link href="/accessibilita" data-testid="app-footer-accessibility" className="underline-offset-2 hover:underline">
+                {t("shell:brand.accessibility")}
+              </Link>
             </>
           }
         />
@@ -242,9 +271,24 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       {/* WS-4 P1: apply the user's server-stored theme + palette + locale (source of truth) once
           the session is known. Renders nothing. */}
       <PreferencesApplier />
+      <StepUpDialog />
       {/* S1009: in-page tab bar for the 6 merge groups; renders nothing off those routes. */}
-      <SectionTabs />
-      {children}
+      {verdict.kind === "denied" ? (
+        <main data-testid="page-no-access" className="mx-auto max-w-2xl px-6 py-16 space-y-4">
+          <h1 className="text-xl font-semibold">{t("shell:noAccess.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("shell:noAccess.body", { route: verdict.route })}</p>
+          <Button variant="outline" size="sm" onClick={() => router.push("/me")}>
+            {t("shell:noAccess.home")}
+          </Button>
+        </main>
+      ) : (
+        <ContestoAgenteProvider>
+          <SectionTabs />
+          {/* L10 A-8: il pannello dell'agente, solo sulle pagine idonee e solo a flag acceso. */}
+          <PannelloAgente />
+          {children}
+        </ContestoAgenteProvider>
+      )}
     </DashboardShell>
   );
 }

@@ -38,6 +38,8 @@ export interface UiInterfaceRow {
   requiredAction: string | null;
   requiresAdmin: boolean;
   order: number;
+  /** false = pagina assorbita come scheda (S1009): fuori dal menu, rotta ancora viva. */
+  isActive: boolean;
   /**
    * Le classi di dato che questa voce espone (#99 F7, mig. `000315`).
    *
@@ -57,9 +59,11 @@ export interface UiInterfaceRow {
   dataClassesOpenToTenant: DataClass[];
 }
 
-/** All active sidebar interfaces (the DB-driven registry). Visibility/gating is applied in the
- *  service layer (per-permission + hasAdminRole), mirroring the web layout's hybrid gate. */
-export async function loadActiveInterfaces(q: DbConnector): Promise<UiInterfaceRow[]> {
+/** All sidebar interfaces of the DB-driven registry, active and absorbed (S1009: an absorbed
+ *  page leaves the sidebar with is_active=false but keeps its route as a tab). Visibility/gating
+ *  is applied in the service layer; the sidebar shows only active rows, the page guard (S-1)
+ *  uses all of them. */
+export async function loadInterfaces(q: DbConnector): Promise<UiInterfaceRow[]> {
   const res = await q.query<UiInterfaceRow>(
     `SELECT ui_interface_code              AS code,
             ui_interface_label             AS label,
@@ -71,6 +75,7 @@ export async function loadActiveInterfaces(q: DbConnector): Promise<UiInterfaceR
             ui_interface_required_action   AS "requiredAction",
             ui_interface_requires_admin    AS "requiresAdmin",
             ui_interface_order             AS "order",
+            ui_interface_is_active         AS "isActive",
             -- #99 F7: le classi dichiarate dalla 000315. Il COALESCE a '{}' c'e' perche' una
             -- voce senza dichiarazioni deve arrivare come lista VUOTA, non come NULL: e' la
             -- differenza fra «non espone dati di persona» e «non lo sappiamo», e la seconda
@@ -88,7 +93,6 @@ export async function loadActiveInterfaces(q: DbConnector): Promise<UiInterfaceR
                        WHERE dc.ui_interface_id = i.ui_interface_id
                          AND dc.data_class_open_to_tenant), '{}') AS "dataClassesOpenToTenant"
        FROM sys.sys_ui_interfaces i
-      WHERE ui_interface_is_active = true
       ORDER BY ui_interface_order, ui_interface_code`,
   );
   return res.rows;
@@ -219,9 +223,9 @@ export async function loadProfileFull(q: DbConnector, userId: string, roles: str
               user_demographics_emergency_phone AS emergency_phone,
               user_demographics_emergency_relationship AS emergency_relationship
          FROM sys.sys_user_demographics WHERE user_demographics_user_id = $1`, [userId]),
-    q.query<{ kind: string; number: string; expiry_date: string | null }>(
+    q.query<{ kind: string; number: string; expiry_date: string | null; origine_dato: string }>(
       `SELECT user_identity_document_kind AS kind, user_identity_document_number AS number,
-              to_char(user_identity_document_expiry_date,'YYYY-MM-DD') AS expiry_date
+              to_char(user_identity_document_expiry_date,'YYYY-MM-DD') AS expiry_date, origine_dato
          FROM sys.sys_user_identity_documents WHERE user_identity_document_user_id = $1
         ORDER BY user_identity_document_kind`, [userId]),
     q.query<{ kind: string; street: string | null; city: string | null; postal_code: string | null; country: string | null; region: string | null }>(
@@ -302,7 +306,7 @@ export async function loadProfileFull(q: DbConnector, userId: string, roles: str
       gender: d?.gender ?? null, nationality: d?.nationality ?? null,
       maritalStatus: d?.marital_status ?? null, taxId: d?.tax_id ?? null,
     },
-    documents: docsRes.rows.map((r) => ({ kind: r.kind, number: r.number, expiryDate: r.expiry_date })),
+    documents: docsRes.rows.map((r) => ({ kind: r.kind, number: r.number, expiryDate: r.expiry_date, origineDato: r.origine_dato })),
     addresses: addrRes.rows.map((r) => ({
       kind: r.kind, street: r.street, city: r.city, postalCode: r.postal_code, country: r.country, region: r.region,
     })),
@@ -360,6 +364,7 @@ export async function loadContracts(q: DbConnector, userId: string): Promise<MeC
     payment_frequency: string | null; work_hours_weekly: string | null; work_schedule_type: string | null;
     part_time_percentage: string | null; job_title: string | null; status: string | null;
     termination_date: string | null; termination_reason: string | null; notes: string | null;
+    origine_dato: string;
   }>(
     `SELECT user_contract_type AS type, user_contract_code AS code,
             to_char(user_contract_start_date,'YYYY-MM-DD') AS start_date,
@@ -372,7 +377,7 @@ export async function loadContracts(q: DbConnector, userId: string): Promise<MeC
             user_contract_part_time_percentage AS part_time_percentage, user_contract_job_title AS job_title,
             user_contract_status AS status,
             to_char(user_contract_termination_date,'YYYY-MM-DD') AS termination_date,
-            user_contract_termination_reason AS termination_reason, user_contract_notes AS notes
+            user_contract_termination_reason AS termination_reason, user_contract_notes AS notes, origine_dato
        FROM sys.sys_user_contracts WHERE user_contract_user_id = $1
       ORDER BY user_contract_start_date DESC NULLS LAST`, [userId],
   );
@@ -383,6 +388,7 @@ export async function loadContracts(q: DbConnector, userId: string): Promise<MeC
     salaryType: r.salary_type, paymentFrequency: r.payment_frequency, workHoursWeekly: num(r.work_hours_weekly),
     workScheduleType: r.work_schedule_type, partTimePercentage: num(r.part_time_percentage), jobTitle: r.job_title,
     status: r.status, terminationDate: r.termination_date, terminationReason: r.termination_reason, notes: r.notes,
+    origineDato: r.origine_dato,
   }));
 }
 
@@ -392,15 +398,19 @@ export async function loadPaySlips(q: DbConnector, userId: string): Promise<MePa
   const res = await q.query<{
     period: string | null; period_start: string | null; period_end: string | null;
     gross_pay: string | null; net_pay: string | null; deductions: Record<string, number> | null;
-    payment_date: string | null; status: string | null;
+    payment_date: string | null; status: string | null; currency: string | null; origine_dato: string;
   }>(
+    // F-1 (piano interfacce, 2026-11-04): la busta non porta una valuta sua; e' pagata nella
+    // valuta del rapporto di lavoro, che la pagina usa invece di scrivere EUR a mano.
     `SELECT user_pay_slip_period AS period,
             to_char(user_pay_slip_period_start,'YYYY-MM-DD') AS period_start,
             to_char(user_pay_slip_period_end,'YYYY-MM-DD') AS period_end,
             user_pay_slip_gross_pay AS gross_pay, user_pay_slip_net_pay AS net_pay,
             user_pay_slip_deductions AS deductions,
             to_char(user_pay_slip_payment_date,'YYYY-MM-DD') AS payment_date,
-            user_pay_slip_status AS status
+            user_pay_slip_status AS status, origine_dato,
+            (SELECT e.user_employment_currency FROM sys.sys_user_employment e
+              WHERE e.user_employment_user_id = $1 LIMIT 1) AS currency
        FROM sys.sys_user_pay_slips WHERE user_pay_slip_user_id = $1
       ORDER BY user_pay_slip_period_start DESC NULLS LAST`, [userId],
   );
@@ -408,6 +418,7 @@ export async function loadPaySlips(q: DbConnector, userId: string): Promise<MePa
     period: r.period, periodStart: r.period_start, periodEnd: r.period_end,
     grossPay: numOrNull(r.gross_pay), netPay: numOrNull(r.net_pay),
     deductions: r.deductions ?? {}, paymentDate: r.payment_date, status: r.status,
+    currency: r.currency, origineDato: r.origine_dato,
   }));
 }
 
@@ -448,21 +459,22 @@ export async function loadPerformance(q: DbConnector, userId: string): Promise<M
 export async function loadAttendance(q: DbConnector, userId: string): Promise<MeAttendanceResponse> {
   const num = (v: string | null): number | null => (v == null ? null : Number(v));
   const [att, ot, bal] = await Promise.all([
-    q.query<{ date: string | null; clock_in: string | null; clock_out: string | null; hours_regular: string | null; hours_overtime: string | null; hours_total: string | null; status: string | null }>(
+    q.query<{ date: string | null; clock_in: string | null; clock_out: string | null; hours_regular: string | null; hours_overtime: string | null; hours_total: string | null; status: string | null; origine_dato: string }>(
       `SELECT to_char(attendance_date,'YYYY-MM-DD') AS date,
               to_char(attendance_clock_in,'HH24:MI') AS clock_in, to_char(attendance_clock_out,'HH24:MI') AS clock_out,
               attendance_hours_regular AS hours_regular, attendance_hours_overtime AS hours_overtime,
-              attendance_hours_total AS hours_total, attendance_status AS status
+              attendance_hours_total AS hours_total, attendance_status AS status, origine_dato
          FROM sys.sys_attendance WHERE attendance_subject_user_id = $1
         ORDER BY attendance_date DESC LIMIT 30`, [userId]),
-    q.query<{ date: string | null; type: string | null; hours: string | null; total_compensation: string | null; status: string | null }>(
+    q.query<{ date: string | null; type: string | null; hours: string | null; total_compensation: string | null; status: string | null; origine_dato: string }>(
       `SELECT to_char(overtime_date,'YYYY-MM-DD') AS date, overtime_type AS type, overtime_hours AS hours,
-              overtime_total_compensation AS total_compensation, overtime_status AS status
+              overtime_total_compensation AS total_compensation, overtime_status AS status, origine_dato
          FROM sys.sys_overtime WHERE overtime_subject_user_id = $1
         ORDER BY overtime_date DESC LIMIT 30`, [userId]),
-    q.query<{ leave_type: string | null; year: number | null; total_days: string | null; used_days: string | null; pending_days: string | null; carryover_days: string | null }>(
+    q.query<{ leave_type: string | null; year: number | null; total_days: string | null; used_days: string | null; pending_days: string | null; carryover_days: string | null; origine_dato: string }>(
       `SELECT balance_leave_type AS leave_type, balance_year AS year, balance_total_days AS total_days,
-              balance_used_days AS used_days, balance_pending_days AS pending_days, balance_carryover_days AS carryover_days
+              balance_used_days AS used_days, balance_pending_days AS pending_days, balance_carryover_days AS carryover_days,
+              origine_dato
          FROM sys.sys_time_off_balances WHERE balance_subject_user_id = $1
         ORDER BY balance_year DESC, balance_leave_type`, [userId]),
   ]);
@@ -470,13 +482,15 @@ export async function loadAttendance(q: DbConnector, userId: string): Promise<Me
     recent: att.rows.map((r) => ({
       date: r.date, clockIn: r.clock_in, clockOut: r.clock_out,
       hoursRegular: num(r.hours_regular), hoursOvertime: num(r.hours_overtime), hoursTotal: num(r.hours_total), status: r.status,
+      origineDato: r.origine_dato,
     })),
     overtime: ot.rows.map((r) => ({
       date: r.date, type: r.type, hours: num(r.hours), totalCompensation: num(r.total_compensation), status: r.status,
+      origineDato: r.origine_dato,
     })),
     leaveBalances: bal.rows.map((r) => ({
       leaveType: r.leave_type, year: r.year, totalDays: num(r.total_days), usedDays: num(r.used_days),
-      pendingDays: num(r.pending_days), carryoverDays: num(r.carryover_days),
+      pendingDays: num(r.pending_days), carryoverDays: num(r.carryover_days), origineDato: r.origine_dato,
     })),
   };
 }
@@ -659,21 +673,28 @@ export async function loadMyApprovals(q: DbConnector, userId: string): Promise<M
   const res = await q.query<{
     title: string | null; status: string | null; priority: string | null;
     resource_type: string | null; created_at: Date | null; resolved_at: Date | null;
+    process_name: string | null; process_step_name: string | null;
   }>(
-    `SELECT approval_request_title AS title, approval_request_status AS status,
-            approval_request_priority AS priority, approval_request_resource_type AS resource_type,
-            created_at, approval_request_resolved_at AS resolved_at
-       FROM sys.sys_approval_requests WHERE created_by = $1
-      ORDER BY created_at DESC`, [userId],
+    `SELECT r.approval_request_title AS title, r.approval_request_status AS status,
+            r.approval_request_priority AS priority, r.approval_request_resource_type AS resource_type,
+            r.created_at, r.approval_request_resolved_at AS resolved_at,
+            tp.tenant_process_name AS process_name, st.tenant_process_step_name AS process_step_name
+       FROM sys.sys_approval_requests r
+       LEFT JOIN sys.sys_tenant_processes tp ON tp.tenant_process_id = r.approval_request_tenant_process_id
+       LEFT JOIN sys.sys_tenant_process_steps st ON st.tenant_process_step_id = r.approval_request_tenant_process_step_id
+      WHERE r.created_by = $1
+      ORDER BY r.created_at DESC`, [userId],
   );
   const items = res.rows.map((r) => ({
     title: r.title, status: r.status, priority: r.priority, resourceType: r.resource_type,
     createdAt: r.created_at ? r.created_at.toISOString() : null,
     resolvedAt: r.resolved_at ? r.resolved_at.toISOString() : null,
+    processName: r.process_name, processStepName: r.process_step_name,
   }));
   const byStatus = { pending: 0, approved: 0, rejected: 0 };
   for (const it of items) {
-    if (it.status === "APPROVED") byStatus.approved++;
+    // V-1: APPLIED e' un'approvazione gia' applicata, non una richiesta in attesa.
+    if (it.status === "APPROVED" || it.status === "APPLIED") byStatus.approved++;
     else if (it.status === "REJECTED") byStatus.rejected++;
     else byStatus.pending++;
   }

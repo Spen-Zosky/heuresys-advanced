@@ -2,16 +2,19 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, EmptyState, PageHeader } from "@heuresys/ui";
+import { Card, CardContent, PageHeader } from "@heuresys/ui";
 import { CheckSquare } from "lucide-react";
 import type { MeApprovalsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 /** Le mie approvazioni (S1011 F5.3) — track-only view of the caller's own approval requests. */
 export default function MeApprovalsPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["me", "approvals"],
@@ -30,9 +33,9 @@ export default function MeApprovalsPage() {
       <PageHeader title={t("approvals.title")} description={t("approvals.description")} />
 
       {q.isLoading ? (
-        <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+        <StatoCaricamento />
       ) : q.isError || !data ? (
-        <p className="text-sm text-danger" data-testid="me-approvals-error">{t("approvals.error")}</p>
+        <StatoErrore errore={q.error} titolo={t("approvals.error")} testId="me-approvals-error" onRiprova={() => void q.refetch()} />
       ) : (
         <>
           <section className="grid gap-4 sm:grid-cols-3" data-testid="approvals-stats">
@@ -47,11 +50,11 @@ export default function MeApprovalsPage() {
           </section>
 
           {items.length === 0 ? (
-            <EmptyState
-              data-testid="me-approvals-empty"
-              icon={<CheckSquare className="h-6 w-6" />}
-              title={t("approvals.emptyTitle")}
-              description={t("approvals.emptyDesc")}
+            <StatoVuoto
+              testId="me-approvals-empty"
+              icona={<CheckSquare className="h-6 w-6" />}
+              titolo={t("approvals.emptyTitle")}
+              motivo={t("approvals.emptyDesc")}
             />
           ) : (
             <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
@@ -59,6 +62,7 @@ export default function MeApprovalsPage() {
                 <thead>
                   <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                     <th className="px-4 py-2">{t("approvals.colTitle")}</th>
+                    <th className="px-4 py-2">{t("approvals.colProcess")}</th>
                     <th className="px-4 py-2">{t("approvals.colStatus")}</th>
                     <th className="px-4 py-2">{t("approvals.colPriority")}</th>
                     <th className="px-4 py-2">{t("approvals.colCreated")}</th>
@@ -68,9 +72,19 @@ export default function MeApprovalsPage() {
                   {items.map((a, i) => (
                     <tr key={`appr-${i}`} data-testid="me-approvals-row" className="transition-colors hover:bg-muted/60">
                       <td className="px-4 py-2 align-middle font-medium text-foreground">{a.title ?? "—"}</td>
+                      <td className="px-4 py-2 align-middle text-xs">
+                        {a.processName ? (
+                          <>
+                            <span className="text-foreground">{a.processName}</span>
+                            {a.processStepName && <span className="block text-muted-foreground">{a.processStepName}</span>}
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">{t("approvals.noProcess")}</span>
+                        )}
+                      </td>
                       <td className="px-4 py-2 align-middle"><EnumStatusBadge domain="approvalStatus" value={a.status} /></td>
                       <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{enumLabel("notificationPriority", a.priority)}</td>
-                      <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{a.createdAt ? a.createdAt.slice(0, 10) : "—"}</td>
+                      <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{fmt.data(a.createdAt)}</td>
                     </tr>
                   ))}
                 </tbody>

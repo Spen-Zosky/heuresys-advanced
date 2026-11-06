@@ -49,7 +49,7 @@ async function single(s: S, subjectType: string, subjectId: string) {
 beforeAll(async () => {
   suite = await buildTestApp();
   admin = await login(suite, "platform-test-admin@collaudo.invalid");
-  tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+  tenantAdmin = await login(suite, "governo@collaudo.invalid");
   manager = await login(suite, "paolo.caputo@rtl-bank.org");
   plainUser = await login(suite, "tommaso.fiore@rtl-bank.org");
   await recompute(admin); // guarantee a cohort exists regardless of test order

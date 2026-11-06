@@ -91,6 +91,7 @@ export default function KpisCataloguePage() {
       }
       isLoading={kpis.query.isLoading}
       isError={kpis.query.isError}
+      error={kpis.query.error}
       errorMessage={t("kpis.errorMessage")}
       rows={kpis.rows}
       server={kpis.server}

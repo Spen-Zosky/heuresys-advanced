@@ -27,6 +27,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { test, expect, type Page, type TestInfo } from "@playwright/test";
 import { storageStateFor } from "./fixtures";
+import { dividi, PARTI_A11Y_TUTTE, titoloParte, type PersonaA11yTutte } from "./a11y-parti";
 import AxeBuilder from "@axe-core/playwright";
 
 const AUDIT_OUT_DIR = path.resolve(__dirname, "..", "..", "test-results", "a11y-audit");
@@ -58,6 +59,10 @@ type AxeImpact = "critical" | "serious" | "moderate" | "minor";
 const SOGLIA_NODI_DEFAULT = 40;
 const SOGLIA_NODI_PER_ROTTA: Readonly<Record<string, number>> = {
   "/privacy": 25,
+  // L7 (2026-11-04): la dichiarazione di accessibilità è un testo statico in sei sezioni e
+  // ne esamina **29**, misurati sul banco su desktop e Pixel 7 (0 violazioni). 22 sta fra il
+  // guscio (17) e la pagina renderizzata, come per /privacy.
+  "/accessibilita": 22,
 };
 
 const PAGES_PER_PERSONA = {
@@ -110,11 +115,18 @@ const PAGES_PER_PERSONA = {
   ],
 } as const satisfies Record<string, readonly string[]>;
 
-async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
+async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo, saltaSeNegata = false) {
   await page.goto(route);
   await page.waitForLoadState("networkidle").catch(() => {
     // networkidle may not settle on pages with long-poll websockets; ignore
   });
+  // F-6 (L7): nel giro su TUTTE le pagine di prodotto una persona apre anche pagine che il suo
+  // profilo non comprende; lì c'è la sola schermata di accesso negato (misurata a parte), e la
+  // guardia di non-vacuità la scambierebbe per un guscio. Si salta dicendolo.
+  if (saltaSeNegata && (await page.getByTestId("page-no-access").count()) > 0) {
+    test.skip(true, `${route}: fuori dal profilo di questa persona`);
+    return;
+  }
 
   // D-24 anti-vacuity guard: an expired session is redirected server-side to
   // /login BEFORE any client API call, and the login page audits clean — the
@@ -295,6 +307,47 @@ for (const [persona, pages] of Object.entries(PAGES_PER_PERSONA)) {
 }
 
 /**
+ * F-6 del piano interfacce (lotto L7) — TUTTE le pagine di prodotto, non solo l'elenco scritto
+ * a mano qui sopra. L'elenco si ricava dalle cartelle di `src/app/(authenticated)` (rotte senza
+ * parametri: quelle con un identificativo le misura il censimento, che le risolve seguendo i
+ * collegamenti), così una pagina nuova entra nel cancello senza che qualcuno se ne ricordi.
+ * Ogni persona apre le pagine che il suo elenco non copre già; quelle fuori dal suo profilo
+ * si saltano. Stessa asticella: zero critical e zero serious.
+ */
+const APP_AUTENTICATA = path.resolve(__dirname, "..", "..", "src", "app", "(authenticated)");
+function rotteStaticheDiProdotto(): string[] {
+  const out: string[] = [];
+  const visita = (dir: string, rel: string) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (e.isDirectory()) {
+        if (e.name.startsWith("[")) continue;
+        visita(path.join(dir, e.name), rel + (/^\(.*\)$/.test(e.name) ? "" : `/${e.name}`));
+      } else if (e.name === "page.tsx" && rel !== "") {
+        out.push(rel);
+      }
+    }
+  };
+  visita(APP_AUTENTICATA, "");
+  return out.sort();
+}
+const TUTTE_LE_ROTTE = rotteStaticheDiProdotto();
+for (const persona of Object.keys(PARTI_A11Y_TUTTE) as PersonaA11yTutte[]) {
+  const giaCoperte = new Set<string>(PAGES_PER_PERSONA[persona]);
+  const rotte = TUTTE_LE_ROTTE.filter((r) => !giaCoperte.has(r));
+  // Una parte per fase, ognuna con il suo re-login: vedi `a11y-parti.ts`.
+  dividi(rotte, PARTI_A11Y_TUTTE[persona]).forEach((parte, i) => {
+    test.describe(titoloParte(persona, i + 1), () => {
+      test.use({ storageState: storageStateFor(persona) });
+      for (const route of parte) {
+        test(`${route} has no critical or serious a11y violations`, async ({ page }, testInfo) => {
+          await runAxeOnRoute(page, route, testInfo, true);
+        });
+      }
+    });
+  });
+}
+
+/**
  * #4 GTM W4 — le pagine PUBBLICHE, sottoposte alla stessa asticella di quelle interne.
  *
  * Erano l'unica parte del sito senza controllo di accessibilità, ed è la parte che vede
@@ -308,7 +361,7 @@ for (const [persona, pages] of Object.entries(PAGES_PER_PERSONA)) {
  * violazioni per nome invece di un numero, è deterministico e non aggiunge dipendenze.
  * L'asticella è più alta di ≥95, non più bassa: ZERO violazioni critical e serious.
  */
-const PUBLIC_PAGES = ["/", "/investors", "/demo", "/login", "/privacy"] as const;
+const PUBLIC_PAGES = ["/", "/investors", "/demo", "/login", "/privacy", "/accessibilita"] as const;
 
 test.describe("a11y delle pagine pubbliche", () => {
   test.use({ storageState: { cookies: [], origins: [] } });

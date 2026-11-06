@@ -12,9 +12,14 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { anIndustryCode } from "./helpers/industry.js";
+import { senzaCacheDiSessione } from "./helpers/session-cache.js";
+
+// Questo file muta i ruoli del soggetto (ADR-0050 D2, prova di cancellazione): sta fuori dalla
+// cache di sessioni, come chiede il cancello Z-251 F2.
+senzaCacheDiSessione();
 
 const PLATFORM_ADMIN = "platform-test-admin@collaudo.invalid";
-const TENANT_ADMIN = "federica.marchetti@rtl-bank.org";
+const TENANT_ADMIN = "governo@collaudo.invalid";
 const MANAGER = "paolo.caputo@rtl-bank.org";
 const EMPLOYEE = "tommaso.fiore@rtl-bank.org";
 const SUITE = `GDPR_${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -108,7 +113,7 @@ describe("D-14 F3/F4 GDPR tooling", () => {
     // tutto il sorgente dell'API: ogni export/erasure lasciava la sua riga di
     // accountability e nessuno poteva consultarla. Un registro che nessuno
     // legge non dimostra la conformità a nessuno.
-    const tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+    const tenantAdmin = await login(suite, "governo@collaudo.invalid");
     const r = await suite.app.inject({
       method: "GET", url: "/v1/gdpr/requests?limit=200",
       headers: headers(tenantAdmin),
@@ -315,6 +320,17 @@ describe("D-14 F3/F4 GDPR tooling", () => {
     // 2. the subject uses the platform: logs in + records a consent (ledger row).
     // Raw single-step inject (a fresh subject has no MFA factor) so a failure
     // surfaces the response BODY, not just the status.
+    // ADR-0050 D2 (mig 000473): il motore di provisioning lo nomina TENANT_ADMIN, che è un
+    // mandato e al login chiederebbe di registrare il secondo fattore. Qui il soggetto conta come
+    // persona che usa la piattaforma, non come amministratore: il mandato si ritira prima del login.
+    await pool.query(
+      `UPDATE sys.sys_user_auth_roles ur SET user_auth_role_revoked_at = now()
+         FROM sys.sys_auth_roles r
+        WHERE r.auth_role_id = ur.user_auth_role_role_id
+          AND ur.user_auth_role_user_id = $1 AND ur.user_auth_role_revoked_at IS NULL
+          AND r.auth_role_code IN (SELECT sys.f_ruoli_mandato())`,
+      [subjectId],
+    );
     const rawLogin = await suite.app.inject({
       method: "POST",
       url: "/v1/auth/login",

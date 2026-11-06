@@ -50,7 +50,7 @@ export default function MeDocumentsPage() {
   );
 
   return (
-    <DataTablePanel<MeDocument>
+    <DataTablePanel<MeDocument> originPath={"/v1/me/documents"}
       pageTestId="me-documents-page"
       titleTestId="me-documents-title"
       countTestId="me-documents-count"
@@ -59,6 +59,7 @@ export default function MeDocumentsPage() {
       count={docs.data ? t("documents.count", { count: docs.data.total }) : undefined}
       isLoading={docs.isLoading}
       isError={docs.isError}
+      error={docs.error}
       errorMessage={t("documents.errorMessage")}
       rows={docs.data?.items ?? []}
       rowKey={(d) => d.userDocumentId}

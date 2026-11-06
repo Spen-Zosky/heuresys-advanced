@@ -17,7 +17,10 @@ import type {
   ContentSearchResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -68,6 +71,7 @@ function renderSnippet(snippet: string): ReactNode {
 
 export default function ContentPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [kind, setKind] = useState("");
   const [status, setStatus] = useState("");
@@ -117,6 +121,10 @@ export default function ContentPage() {
     return m;
   }, [cats.data]);
 
+  // S-5: creare documenti e categorie chiede `content:create`, eliminare una categoria
+  // `content:delete`. Chi legge soltanto non vede moduli e pulsanti che finirebbero in 403.
+  const canCreate = useCan("content:create");
+  const canDelete = useCan("content:delete");
   const createDoc = useMutation({
     mutationFn: (v: CreateDocValues) => {
       const body: Record<string, unknown> = { title: v.title, kind: v.kind, bodyFormat: v.bodyFormat };
@@ -191,9 +199,9 @@ export default function ContentPage() {
         header: t("content.columns.category"),
         cell: (d) => <span className="text-muted-foreground">{d.categoryId ? catMap.get(d.categoryId) ?? "—" : "—"}</span>,
       },
-      { header: t("content.columns.updated"), cell: (d) => <span className="text-xs text-muted-foreground">{d.updatedAt.slice(0, 10)}</span> },
+      { header: t("content.columns.updated"), cell: (d) => <span className="text-xs text-muted-foreground">{fmt.data(d.updatedAt)}</span> },
     ],
-    [t, catMap],
+    [t, catMap, fmt],
   );
 
   return (
@@ -204,12 +212,13 @@ export default function ContentPage() {
         description={t("content.description")}
         badges={
           <Badge variant="secondary" data-testid="content-count">
-            {docs.data ? t("content.count", { count: docs.data.total }) : t("common:loading")}
+            {docs.data ? t("content.count", { count: docs.data.total }) : docs.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />
 
       {/* Create document */}
+      {canCreate && (
       <Card>
         <CardHeader>
           <CardTitle>{t("content.create.cardTitle")}</CardTitle>
@@ -301,6 +310,7 @@ export default function ContentPage() {
           </form>
         </CardContent>
       </Card>
+      )}
 
       {/* Full-text search (ranked, body-aware, snippet) */}
       <Card data-testid="content-search">
@@ -325,16 +335,20 @@ export default function ContentPage() {
           {searchActive && (
             <div data-testid="content-search-panel">
               {search.isLoading ? (
-                <p className="text-sm text-muted-foreground">{t("content.search.loading")}</p>
+                <StatoCaricamento etichetta={t("content.search.loading")} />
               ) : search.isError ? (
-                <p data-testid="content-search-error" role="alert" className="text-sm font-medium text-danger">
-                  {t("content.search.errorMessage")}
-                </p>
+                <StatoErrore
+                  errore={search.error}
+                  titolo={t("content.search.errorMessage")}
+                  testId="content-search-error"
+                  onRiprova={() => void search.refetch()}
+                />
               ) : (search.data?.items.length ?? 0) === 0 ? (
-                <div data-testid="content-search-empty" className="rounded-card border border-border px-4 py-3">
-                  <p className="text-sm font-medium text-foreground">{t("content.search.emptyTitle")}</p>
-                  <p className="text-xs text-muted-foreground">{t("content.search.emptyDescription", { q: searchQDebounced })}</p>
-                </div>
+                <StatoVuoto
+                  testId="content-search-empty"
+                  titolo={t("content.search.emptyTitle")}
+                  motivo={t("content.search.emptyDescription", { q: searchQDebounced })}
+                />
               ) : (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground">{t("content.search.resultsCount", { count: search.data?.total ?? 0 })}</p>
@@ -416,9 +430,10 @@ export default function ContentPage() {
 
       {/* Documents table */}
       <div data-testid="content-table">
-        <EntityTable<ContentDocument>
+        <EntityTable<ContentDocument> originPath={"/v1/content"}
           isLoading={docs.isLoading}
           isError={docs.isError}
+          error={docs.error}
           errorMessage={t("content.errorMessage")}
           rows={docs.data?.items ?? []}
           rowKey={(d) => d.documentId}
@@ -437,6 +452,7 @@ export default function ContentPage() {
           <CardTitle>{t("content.categories.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {canCreate && (
           <form
             data-testid="content-category-form"
             onSubmit={(e) => {
@@ -473,16 +489,17 @@ export default function ContentPage() {
               )}
             </div>
           </form>
+          )}
 
           {(cats.data?.items ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("content.categories.empty")}</p>
+            <StatoVuoto titolo={t("content.categories.empty")} />
           ) : (
             <ul className="divide-y divide-border rounded-card border border-border">
               {(cats.data?.items ?? []).map((c) => (
                 <li key={c.categoryId} data-testid="content-category-row" className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
                   <span className="font-medium text-foreground">{c.name}</span>
                   <span className="font-mono text-xs text-muted-foreground">{c.slug ?? "—"}</span>
-                  <Button
+                  {canDelete && <Button
                     type="button"
                     variant="outline"
                     size="sm"
@@ -491,7 +508,7 @@ export default function ContentPage() {
                     onClick={() => deleteCat.mutate(c.categoryId)}
                   >
                     {t("content.categories.delete")}
-                  </Button>
+                  </Button>}
                 </li>
               ))}
             </ul>

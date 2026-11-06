@@ -47,7 +47,7 @@ export default function MeHandbookPage() {
       countTestId="handbook-count"
       title={t("handbook.title")}
       description={t("handbook.description")}
-      count={docs.query.data ? t("handbook.count", { count: docs.total }) : t("common:loading")}
+      count={docs.query.data ? t("handbook.count", { count: docs.total }) : docs.query.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
       actions={
         <Input
           data-testid="handbook-search"
@@ -59,6 +59,7 @@ export default function MeHandbookPage() {
       }
       isLoading={docs.query.isLoading}
       isError={docs.query.isError}
+      error={docs.query.error}
       errorMessage={t("handbook.errorMessage")}
       rows={docs.rows}
       server={docs.server}

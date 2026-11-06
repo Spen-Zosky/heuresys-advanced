@@ -9,6 +9,7 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { OrgUnitCreator, OrgUnitEditor } from "./_components/org-unit-forms";
+import { SenzaNome } from "@/components/senza-nome";
 
 export default function OrganizationPage() {
   const { t } = useTranslation("admin");
@@ -29,7 +30,7 @@ export default function OrganizationPage() {
       { header: t("organization.columns.type"), cell: (o) => <span className="text-xs uppercase text-muted-foreground">{enumLabel("orgUnitType", o.type)}</span> },
       {
         header: t("organization.columns.parent"),
-        cell: (o) => <span className="text-xs text-muted-foreground">{o.parentName ?? (o.parentId ? o.parentId.slice(0, 8) : t("organization.dash"))}</span>,
+        cell: (o) => <span className="text-xs text-muted-foreground">{o.parentName ?? (o.parentId ? <SenzaNome id={o.parentId} /> : t("organization.dash"))}</span>,
       },
       {
         header: t("organization.columns.active"),
@@ -62,6 +63,7 @@ export default function OrganizationPage() {
       count={ous.query.data ? t("organization.count", { count: ous.total }) : undefined}
       isLoading={ous.query.isLoading}
       isError={ous.query.isError}
+      error={ous.query.error}
       errorMessage={t("organization.errorMessage")}
       rows={ous.rows}
       server={ous.server}

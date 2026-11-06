@@ -16,6 +16,9 @@
 import type { FastifyRequest } from "fastify";
 import type { RoleCode } from "../config/constants.js";
 import { UnauthorizedError } from "../errors/index.js";
+import { sessioneD5, type SessioneD5 } from "./scope/conferma.js";
+import type { DataClass } from "./scope/data-classes.js";
+import type { AgenteDelGettone } from "../middleware/auth.js";
 
 /** Authenticated caller projection used by services for scope authorization. */
 export interface ActorContext {
@@ -30,6 +33,22 @@ export interface ActorContext {
    * — la differenza la fa `perimetroClienti`.
    */
   assignedTenantIds?: readonly string[];
+  /** ADR-0050 D5: la sessione della richiesta, presente solo con D5 acceso (lib/scope/conferma.ts). */
+  sessioneD5?: SessioneD5;
+  /** ADR-0050 D5: la classe che la rotta legge per persona, se è COMPENSATION o EVALUATION. */
+  classeD5?: DataClass;
+  /**
+   * ADR-0050 D5: l'attore viene da una richiesta HTTP (`actorFromRequest`). Distingue «una
+   * richiesta senza sessione», che per mandato non legge, da «un attore costruito fuori da
+   * una richiesta» (lavoro pianificato, script), che D5 non governa (confine dichiarato).
+   */
+  daRichiesta?: true;
+  /**
+   * Piano interfacce L9, A-1/A-2: chi chiama è un agente per conto di `userId`. I ruoli sono
+   * già senza mandati (ADR-0050 D6); `permessi` restringe per compito, e `userHasPermission`
+   * lo legge anche dall'attore, non solo da `req.user`.
+   */
+  agente?: AgenteDelGettone;
 }
 
 /** True iff the actor holds the cross-tenant PLATFORM_ADMIN role. */
@@ -68,5 +87,18 @@ export function actorFromRequest(req: FastifyRequest): ActorContext {
     tenantId: req.user.tenantId,
     roles: req.user.roles,
     ...(req.assignedTenantIds !== undefined ? { assignedTenantIds: req.assignedTenantIds } : {}),
+    ...(req.user.agente ? { agente: req.user.agente } : {}),
+    ...d5(req),
+  };
+}
+
+function d5(req: FastifyRequest): Pick<ActorContext, "sessioneD5" | "classeD5" | "daRichiesta"> {
+  if (!req.user) return {};
+  const sessione = sessioneD5(req.user.familyId, req.user.stepUpAt);
+  const classe = req.routeOptions?.config?.confermaD5;
+  return {
+    daRichiesta: true,
+    ...(sessione ? { sessioneD5: sessione } : {}),
+    ...(classe ? { classeD5: classe } : {}),
   };
 }

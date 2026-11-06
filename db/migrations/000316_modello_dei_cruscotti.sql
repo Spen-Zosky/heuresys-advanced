@@ -206,10 +206,10 @@ SELECT v.code, v.nome, v.rotta,
        NULLIF(v.permesso, '')::varchar(64),
        v.ord
   FROM (VALUES
-    ('company',   'Cruscotto Azienda',             '/dashboard/azienda',      'dashboard_company:view',  10),
-    ('process',   'Cruscotto Processi',            '/dashboard/processi',     'dashboard_process:view',  20),
-    ('org',       'Cruscotto Organizzazione',      '/dashboard/organizzazione','dashboard_org:view',     30),
-    ('branch',    'Cruscotto Filiale',             '/dashboard/filiale',      'dashboard_branch:view',   40),
+    ('company',   'Cruscotto Azienda',             '/dashboard/company',      'dashboard_company:view',  10),
+    ('process',   'Cruscotto Processi',            '/dashboard/process',      'dashboard_process:view',  20),
+    ('org',       'Cruscotto Organizzazione',      '/dashboard/org',          'dashboard_org:view',      30),
+    ('branch',    'Cruscotto Filiale',             '/dashboard/branch',       'dashboard_branch:view',   40),
     ('hr',        'Cruscotto HR Management',       '/dashboard/hr',           'dashboard_hr:view',       50),
     ('platform',  'Cruscotto Platform Management', '/dashboard/platform',     'dashboard_platform:view', 60),
     ('tenant',    'Cruscotto Tenant Management',   '/dashboard/tenant',       'dashboard_tenant:view',   70),
@@ -220,6 +220,17 @@ SELECT v.code, v.nome, v.rotta,
  WHERE NOT EXISTS (
    SELECT 1 FROM sys.sys_dashboards d WHERE d.dashboard_code = v.code
  );
+
+-- ── 6b. UN SOLO CODICE PER CRUSCOTTO (F-9, piano interfacce 2026-11-03, emendato il
+--     2026-11-04). Le route nascevano in italiano (`/dashboard/azienda`) e i codici in
+--     inglese (`company`): due vocabolari per la stessa cosa, e l'agente non poteva
+--     chiamare il cruscotto con il codice del menu. Ora la route E' il codice. Le righe
+--     esistenti si portano qui, perche' l'INSERT qui sopra non tocca chi c'e' gia'
+--     (ADR-0035: la catena si riapplica a ogni deploy, quindi si emenda chi crea).
+UPDATE sys.sys_dashboards
+   SET dashboard_route = '/dashboard/' || dashboard_code, updated_at = now()
+ WHERE dashboard_code IN ('company','process','org','branch','hr','platform','tenant')
+   AND dashboard_route IS DISTINCT FROM '/dashboard/' || dashboard_code;
 
 -- ── 7. Le viste, e le classi che ciascuna espone ─────────────────────────────
 INSERT INTO sys.sys_dashboard_blocks

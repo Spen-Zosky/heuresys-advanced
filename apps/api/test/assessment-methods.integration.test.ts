@@ -26,7 +26,7 @@ let tenantS: S;
 describe("/v1/assessment-methods integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
   });
 
   afterAll(async () => {

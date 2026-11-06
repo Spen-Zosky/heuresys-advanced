@@ -100,7 +100,7 @@ export default function MeLearningCataloguePage() {
         description={t("catalogue.description")}
         badges={
           <Badge variant="secondary" data-testid="learning-catalogue-count">
-            {paths.query.data ? t("catalogue.count", { count: paths.total }) : t("common:loading")}
+            {paths.query.data ? t("catalogue.count", { count: paths.total }) : paths.query.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />
@@ -118,6 +118,7 @@ export default function MeLearningCataloguePage() {
         <EntityTable<LearningPath>
           isLoading={paths.query.isLoading}
           isError={paths.query.isError}
+          error={paths.query.error}
           errorMessage={t("catalogue.errorMessage")}
           rows={paths.rows}
           server={paths.server}

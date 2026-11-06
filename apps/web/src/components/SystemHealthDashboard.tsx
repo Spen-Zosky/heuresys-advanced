@@ -70,7 +70,7 @@ export function SystemHealthDashboard() {
           user={{ initials: "ES", username: "enzo.spenuso", role: "SUPERUSER", roleTone: "warning" }}
           language="IT"
           logo={<HeuresysWordmark variant="brand" size={24} />}
-          logoBadge={<HeuresysLogoBadge>advanced</HeuresysLogoBadge>}
+          logoBadge={<HeuresysLogoBadge aria-hidden="true">advanced</HeuresysLogoBadge>}
         />
       }
       sidebar={

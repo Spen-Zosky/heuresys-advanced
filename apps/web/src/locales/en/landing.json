@@ -120,7 +120,8 @@
   },
   "footer": {
     "tagline": "Heuresys — EU-native Skills & Org Intelligence.",
-    "whistleblowing": "Whistleblowing channel"
+    "whistleblowing": "Whistleblowing channel",
+    "accessibility": "Accessibility statement"
   },
   "jobs": {
     "title": "Open positions",
@@ -133,5 +134,22 @@
     "noLocation": "Location not specified",
     "publishedOn": "published on {{date}}",
     "expiresOn": "expires on {{date}}"
+  },
+  "accessibility": {
+    "title": "Accessibility statement",
+    "updated": "Last updated: 4 November 2026",
+    "intro": "Heuresys S.r.l. wants the Heuresys Advanced portal to be usable by everyone, including people who use a keyboard instead of a mouse, a screen reader or a small screen. This page says where we stand, how we measured it and what is still missing.",
+    "scopeTitle": "What it covers",
+    "scope": "The portal pages used after signing in: personal pages (/me), pages for people who lead a unit, and pages for HR management and administration. It does not cover the public presentation pages.",
+    "statusTitle": "Compliance status",
+    "status": "Partially compliant with the Web Content Accessibility Guidelines (WCAG) 2.2, level AA. The automated measurement finds no serious or critical violations; a manual check with a screen reader has not been done yet, and until it is we do not claim full compliance.",
+    "methodTitle": "How we measured it",
+    "method": "With axe, an automated tool that checks the WCAG 2.0, 2.1 and 2.2 level A and AA rules, on every portal page opened with every access profile; personal pages are also checked at 390 pixels wide, as on a phone, verifying that they do not scroll horizontally and that no personal data stays in the browser's storage. The measurement is repeated at every relevant interface change.",
+    "knownTitle": "Known limitations",
+    "known": "An automated check finds only part of the problems: reading order, how understandable text alternatives are, and full keyboard use of interactive charts (org charts, networks, skill maps) have not yet been checked by hand. Some pages with an identifier in the address were measured only when there was data to open.",
+    "feedbackTitle": "Feedback",
+    "feedback": "If you hit a barrier or cannot use part of the portal, write to accessibilita@heuresys.com with the page and what you were doing: we reply within 30 days and, if needed, give you the information another way.",
+    "enforcementTitle": "If the answer does not satisfy you",
+    "enforcement": "You can contact the Agenzia per l'Italia Digitale (AgID), which oversees the accessibility of digital services, through the form on its website (www.agid.gov.it)."
   }
 }

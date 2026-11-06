@@ -13,6 +13,8 @@ import { isApiError } from "@/lib/api/errors";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { EnumStatusPill } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const SELECT_CLASS =
   "rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -58,6 +60,7 @@ interface GraphEdge {
 
 export default function VisualizationDetailPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const params = useParams<{ graphId: string }>();
   const graphId = params.graphId;
@@ -150,7 +153,7 @@ export default function VisualizationDetailPage() {
   if (graph.isLoading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+        <StatoCaricamento />
       </main>
     );
   }
@@ -159,9 +162,14 @@ export default function VisualizationDetailPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="visualization-error">
         <Link href="/visualizations" className="text-sm underline">{t("visualizations.detail.back")}</Link>
-        <p className="mt-4 text-danger">
-          {status === 404 ? t("visualizations.detail.notFound") : t("visualizations.detail.loadError")}
-        </p>
+        <div className="mt-4">
+          <StatoErrore
+            errore={graph.error}
+            titolo={status === 404 ? t("visualizations.detail.notFound") : t("visualizations.detail.loadError")}
+            testId="visualization-error-state"
+            onRiprova={() => void graph.refetch()}
+          />
+        </div>
       </main>
     );
   }
@@ -221,7 +229,7 @@ export default function VisualizationDetailPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {versions.isLoading ? (
-              <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+              <StatoCaricamento />
             ) : (
               <>
                 <label htmlFor="viz-version" className="block text-sm text-muted-foreground">
@@ -298,11 +306,11 @@ export default function VisualizationDetailPage() {
                 {graphExports.data.items.map((e) => (
                   <li key={e.exportId} className="flex items-center justify-between gap-3 py-2 text-sm">
                     <span>
-                      <span className="font-mono text-xs text-muted-foreground">{e.format}</span>
+                      <span className="text-xs text-muted-foreground">{enumLabel("vizExportFormat", e.format)}</span>
                       <span className="ml-2 text-muted-foreground">
                         {e.byteSize === null
                           ? t("visualizations.detail.exportNoContent")
-                          : t("visualizations.detail.exportSize", { bytes: e.byteSize })}
+                          : fmt.dimensione(e.byteSize)}
                       </span>
                     </span>
                     <Button
@@ -317,9 +325,7 @@ export default function VisualizationDetailPage() {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground" data-testid="visualization-export-empty">
-                {t("visualizations.detail.exportEmpty")}
-              </p>
+              <StatoVuoto titolo={t("visualizations.detail.exportEmpty")} testId="visualization-export-empty" />
             )}
           </CardContent>
         </Card>
@@ -347,11 +353,9 @@ export default function VisualizationDetailPage() {
           </CardHeader>
           <CardContent className="p-0">
             {nodes.isLoading ? (
-              <div className="p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
+              <StatoCaricamento />
             ) : nodes.data && nodes.data.items.length === 0 ? (
-              <div className="p-6 text-sm text-muted-foreground" data-testid="visualization-nodes-empty">
-                {t("visualizations.detail.nodesEmpty")}
-              </div>
+              <StatoVuoto titolo={t("visualizations.detail.nodesEmpty")} testId="visualization-nodes-empty" />
             ) : (
               <ul className="divide-y divide-border" data-testid="visualization-nodes-list">
                 {nodes.data!.items.slice(0, 20).map((n) => (
@@ -371,11 +375,9 @@ export default function VisualizationDetailPage() {
           </CardHeader>
           <CardContent className="p-0">
             {edges.isLoading ? (
-              <div className="p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
+              <StatoCaricamento />
             ) : edges.data && edges.data.items.length === 0 ? (
-              <div className="p-6 text-sm text-muted-foreground" data-testid="visualization-edges-empty">
-                {t("visualizations.detail.edgesEmpty")}
-              </div>
+              <StatoVuoto titolo={t("visualizations.detail.edgesEmpty")} testId="visualization-edges-empty" />
             ) : (
               <ul className="divide-y divide-border" data-testid="visualization-edges-list">
                 {edges.data!.items.slice(0, 20).map((e) => (

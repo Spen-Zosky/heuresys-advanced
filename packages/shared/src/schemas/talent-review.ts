@@ -62,6 +62,8 @@ export const FitScoreSchema = z.object({
   userId: z.uuid(),
   subjectUserName: z.string().nullable(),
   positionId: z.uuid(),
+  /** F-3 (piano interfacce, L6): il titolo della posizione, perche' una persona non legge un UUID. */
+  positionTitle: z.string().nullable(),
   dimension: z.string(),
   // giudizio (mascherabile, ADR-0032 / #124 D4): il punteggio e il payload che
   // lo spiega. La DIMENSIONE resta — dice su cosa e' stato valutato, non quanto.
@@ -93,6 +95,8 @@ export const ReadinessScoreSchema = z.object({
   userId: z.uuid(),
   subjectUserName: z.string().nullable(),
   positionId: z.uuid(),
+  /** F-3 (piano interfacce, L6): il titolo della posizione, perche' una persona non legge un UUID. */
+  positionTitle: z.string().nullable(),
   horizon: z.string(),
   // giudizio (mascherabile, ADR-0032 / #124 D4). L'ORIZZONTE resta: dice entro
   // quando ci si chiede se la persona sia pronta, non la risposta.
@@ -125,6 +129,8 @@ export const SuccessionScoreSchema = z.object({
   userId: z.uuid(),
   subjectUserName: z.string().nullable(),
   positionId: z.uuid(),
+  /** F-3 (piano interfacce, L6): il titolo della posizione, perche' una persona non legge un UUID. */
+  positionTitle: z.string().nullable(),
   // giudizio (mascherabile, ADR-0032 / #124 D4)
   value: z.number().nullable().optional(),
   payload: z.record(z.string(), z.unknown()).optional(),
@@ -154,6 +160,8 @@ export const CriticalPositionSchema = z.object({
   criticalPositionId: z.uuid(),
   tenantId: z.uuid(),
   positionId: z.uuid(),
+  /** F-3 (piano interfacce, L6): il titolo della posizione, perche' una persona non legge un UUID. */
+  positionTitle: z.string().nullable(),
   rationale: z.string().nullable(),
   businessImpactScore: z.number().nullable(),
   flaggedAt: z.iso.datetime(),
@@ -180,6 +188,8 @@ export const CriticalCoverageSchema = z.object({
   criticalRoleCoverageStatusId: z.uuid(),
   tenantId: z.uuid(),
   positionId: z.uuid(),
+  /** F-3 (piano interfacce, L6): il titolo della posizione, perche' una persona non legge un UUID. */
+  positionTitle: z.string().nullable(),
   readyNowCount: z.number().int(),
   ready6moCount: z.number().int(),
   ready1yCount: z.number().int(),

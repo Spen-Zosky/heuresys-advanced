@@ -31,6 +31,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -184,6 +185,7 @@ function SubmitBlock() {
 
 function StatusBlock() {
   const { t } = useTranslation("landing");
+  const fmt = useFormat();
   const [code, setCode] = useState("");
 
   const check = useMutation({
@@ -241,8 +243,8 @@ function StatusBlock() {
               <EnumStatusBadge domain="whistleblowingCategory" value={check.data.category} />
             </div>
             <p className="text-xs text-muted-foreground">
-              {t("whistleblowing.status.submittedAt")}: {check.data.submittedAt.slice(0, 10)} ·{" "}
-              {t("whistleblowing.status.lastUpdateAt")}: {check.data.lastUpdateAt.slice(0, 10)}
+              {t("whistleblowing.status.submittedAt")}: {fmt.data(check.data.submittedAt)} ·{" "}
+              {t("whistleblowing.status.lastUpdateAt")}: {fmt.data(check.data.lastUpdateAt)}
             </p>
             {check.data.publicMessage && (
               <p className="text-sm text-foreground">

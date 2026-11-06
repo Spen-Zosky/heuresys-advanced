@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { AgentPanel, Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import type { ApprovalRequestDetail, ApprovalStatus, ApprovalStepStatus, ApprovalStepDetail } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
-import { useCurrentUser } from "@/lib/api/auth";
-import { AGENT_DEV_ENABLED, useAgentStream } from "@/lib/use-agent-stream";
+import { useCan, useCurrentUser } from "@/lib/api/auth";
+import { useContestoAgente } from "@/lib/agente/contesto";
+import { useFormat } from "@/lib/format";
 
 function reqStatusVariant(s: ApprovalStatus): "success" | "secondary" | "destructive" {
   if (s === "APPROVED" || s === "APPLIED") return "success";
@@ -25,29 +27,21 @@ function stepStatusVariant(s: ApprovalStepStatus): "success" | "secondary" | "de
 /**
  * #159 F3 (S1116) — prima pagina parametrica ad adottare il ponte dopo la console.
  *
- * Monta `AgentPanel` (`@heuresys/ui`) con `useAgentStream`, LO STESSO canale/componente
- * della console `/dev/agent`: questa pagina non li tocca, li usa. Il `context` e' un
- * valore VERO — titolo + id della richiesta di approvazione realmente aperta, presi dal
- * segmento dinamico `[id]` — mai un ramo condizionale per tipo di pagina. Le parole
- * vivono nel namespace proprio di questa pagina (`approvals.detail.agent.*`), cosi'
- * nessuna pagina eredita le stringhe della prima (`agentDev.*`). Dietro lo stesso flag
- * `NEXT_PUBLIC_ENABLE_AGENT_DEV` della console: l'agente resta uno strumento di sviluppo,
- * non una funzione servita ai clienti.
+ * Dal piano interfacce L10 (A-8) il pannello non lo monta più la pagina: lo monta il layout
+ * autenticato su ogni pagina idonea (`components/pannello-agente.tsx`). Qui resta ciò che solo
+ * questa pagina sa: il CONTESTO, un valore vero (titolo e id della richiesta realmente aperta,
+ * presi dal segmento `[id]`), dichiarato con `useContestoAgente`.
  */
 
 export default function ApprovalDetailPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const params = useParams<{ id: string }>();
   const id = params.id;
   const me = useCurrentUser();
   const [comment, setComment] = useState("");
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
-
-  // #159 F3 — il prompt dell'assistente e' della VISTA; canale, stato e traduzione dei
-  // suoi avvisi restano lo stesso pattern del primo consumatore (`dev/agent`).
-  const [agentPrompt, setAgentPrompt] = useState("");
-  const agent = useAgentStream();
 
   const detail = useQuery({
     queryKey: ["approvals", "detail", id],
@@ -83,22 +77,15 @@ export default function ApprovalDetailPage() {
 
   const d = detail.data;
   const myUserId = me.data?.userId;
+  // S-5: decidere chiede `approval:decide`, applicare l'esito `approval:create` (le stesse
+  // guardie dell'API). Chi non le ha vede lo stato, non i pulsanti che finirebbero in 403.
+  const canDecide = useCan("approval:decide");
+  const canApply = useCan("approval:create");
   const myPendingStep: ApprovalStepDetail | undefined = d?.steps.find((s) => s.approverUserId === myUserId && s.status === "PENDING");
   const busy = decide.isPending || apply.isPending;
 
-  // #159 F3 — stessa traduzione del `notice` non tradotto dell'hook (`code` senza
-  // namespace), qui prefissato con `approvals.detail.agent.*` invece di `agentDev.*`.
-  const agentNoticeText =
-    agent.notice === null ? null : t(`approvals.detail.agent.${agent.notice.code}`, agent.notice.params ?? {});
-
-  // Stessa logica a tre esiti del primo consumatore (#252): la descrizione la compone
-  // la pagina, mai il pannello, e "non l'ho misurato" resta una frase diversa da "0 persone".
-  const agentApprovalDesc =
-    agent.approval?.classe === "read"
-      ? agent.approval.personeDistinte === undefined
-        ? t("approvals.detail.agent.approvalDescReadUnknown")
-        : t("approvals.detail.agent.approvalDescRead", { persone: agent.approval.personeDistinte })
-      : t("approvals.detail.agent.approvalDesc");
+  // L10 A-8 — il contesto che il pannello comune dell'agente mostra e manda al gateway.
+  useContestoAgente(d ? t("approvals.detail.agent.context", { title: d.title, id }) : null);
 
   return (
     <main data-testid="approval-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
@@ -109,9 +96,14 @@ export default function ApprovalDetailPage() {
       </div>
 
       {detail.isLoading ? (
-        <p className="text-sm text-muted-foreground" data-testid="approval-detail-loading">{t("common:loading")}</p>
+        <StatoCaricamento testId="approval-detail-loading" />
       ) : detail.isError || !d ? (
-        <p className="text-sm text-danger" data-testid="approval-detail-error">{t("approvals.detail.notFound")}</p>
+        <StatoErrore
+          errore={detail.error}
+          titolo={t("approvals.detail.notFound")}
+          testId="approval-detail-error"
+          onRiprova={() => void detail.refetch()}
+        />
       ) : (
         <>
           <PageHeader
@@ -128,7 +120,7 @@ export default function ApprovalDetailPage() {
           />
 
           {/* My pending action (approver of an open step) */}
-          {myPendingStep && (
+          {canDecide && myPendingStep && (
             <Card data-testid="approval-my-action">
               <CardHeader>
                 <CardTitle>{t("approvals.detail.yourDecisionTitle")}</CardTitle>
@@ -160,7 +152,7 @@ export default function ApprovalDetailPage() {
           )}
 
           {/* Apply (terminal effect) — visible when APPROVED */}
-          {d.status === "APPROVED" && (
+          {canApply && d.status === "APPROVED" && (
             <Card data-testid="approval-apply-card">
               <CardHeader>
                 <CardTitle>{t("approvals.detail.applyTitle")}</CardTitle>
@@ -192,10 +184,25 @@ export default function ApprovalDetailPage() {
               <ul className="divide-y divide-border rounded-card border border-border">
                 {d.steps.map((s) => (
                   <li key={s.approvalStepId} data-testid="approval-step-row" className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
-                    <span className="font-medium text-foreground">{s.approverName ?? s.approverEmail ?? s.approverUserId}</span>
+                    <span className="flex flex-col">
+                      <span className="font-medium text-foreground">{s.approverName ?? s.approverEmail ?? "—"}</span>
+                      {/* V-3 (ADR-0051 §5): quando ha deciso un delegato, la firma lo dice. */}
+                      {s.actingDelegationId && (
+                        <span className="text-xs text-muted-foreground" data-testid="approval-step-on-behalf">
+                          {t("approvals.detail.onBehalfOf", {
+                            delegate: s.decidedByName ?? "—",
+                            approver: s.approverName ?? s.approverEmail ?? "—",
+                          })}
+                        </span>
+                      )}
+                    </span>
                     <div className="flex items-center gap-3">
                       {s.decisionComment && <span className="text-xs text-muted-foreground">“{s.decisionComment}”</span>}
-                      {s.decidedAt && <span className="text-xs text-muted-foreground">{s.decidedAt.slice(0, 10)}</span>}
+                      {s.decidedAt && (
+                        <time dateTime={s.decidedAt} className="text-xs text-muted-foreground">
+                          {fmt.data(s.decidedAt)}
+                        </time>
+                      )}
                       <Badge variant={stepStatusVariant(s.status)} data-testid="approval-step-status">{t(`approvals.stepStatus.${s.status}`)}</Badge>
                     </div>
                   </li>
@@ -204,40 +211,7 @@ export default function ApprovalDetailPage() {
             </CardContent>
           </Card>
 
-          {/* #159 F3 — l'assistente su QUESTA richiesta, dietro lo stesso flag della console. */}
-          {AGENT_DEV_ENABLED && (
-            <AgentPanel
-              testIdPrefix="approval-agent"
-              context={t("approvals.detail.agent.context", { title: d.title, id })}
-              labels={{
-                title: t("approvals.detail.agent.title"),
-                description: t("approvals.detail.agent.description"),
-                contextLabel: t("approvals.detail.agent.contextLabel"),
-                promptLabel: t("approvals.detail.agent.promptLabel"),
-                promptPlaceholder: t("approvals.detail.agent.promptPlaceholder"),
-                run: t("approvals.detail.agent.run"),
-                running: t("approvals.detail.agent.running"),
-                stop: t("approvals.detail.agent.stop"),
-                streamTitle: t("approvals.detail.agent.streamTitle"),
-                streamEmpty: t("approvals.detail.agent.streamEmpty"),
-                approvalTitle: t("approvals.detail.agent.approvalTitle"),
-                approvalDesc: agentApprovalDesc,
-                approvalTool: t("approvals.detail.agent.approvalTool"),
-                approvalInput: t("approvals.detail.agent.approvalInput"),
-                allow: t("approvals.detail.agent.allow"),
-                deny: t("approvals.detail.agent.deny"),
-              }}
-              prompt={agentPrompt}
-              onPromptChange={setAgentPrompt}
-              running={agent.running}
-              onRun={() => void agent.run(agentPrompt)}
-              onStop={agent.stop}
-              lines={agent.lines}
-              approval={agent.approval}
-              onApproval={(decision) => void agent.resolveApproval(decision)}
-              notice={agent.notice === null || agentNoticeText === null ? null : { kind: agent.notice.kind, text: agentNoticeText }}
-            />
-          )}
+
         </>
       )}
     </main>

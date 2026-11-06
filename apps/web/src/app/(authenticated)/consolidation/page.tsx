@@ -21,6 +21,8 @@ import { apiFetch } from "@/lib/api/fetch";
 import { ApiError } from "@/lib/api/errors";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill, type StatusTone } from "@/components/status-pill";
+import { useFormat } from "@/lib/format";
+import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 // AC-10 — La pagina del Direttore HR per il consolidamento del tenant col prototipo
 // (`.programmi/consolidamento/agente/`). L'agente propone, una persona decide: qui si avviano
@@ -103,6 +105,7 @@ function buildColumns(
 
 export default function ConsolidationPage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [scelto, setScelto] = useState<ConsolidationGroup | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
@@ -212,30 +215,37 @@ export default function ConsolidationPage() {
       ) : null}
 
       {access.isError || sessions.isError ? (
-        <div data-testid="consolidation-load-error" className="rounded-card border border-border bg-card px-4 py-6 text-sm text-muted-foreground">
-          {t("consolidation.loadError")}
-        </div>
+        <StatoErrore
+          errore={access.error ?? sessions.error}
+          titolo={t("consolidation.loadError")}
+          testId="consolidation-load-error"
+          onRiprova={() => {
+            void access.refetch();
+            void sessions.refetch();
+          }}
+        />
       ) : null}
 
       {sessions.data && corrente === null ? (
-        <Card data-testid="consolidation-empty">
-          <CardHeader><CardTitle>{t("consolidation.emptyTitle")}</CardTitle></CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <p>{t("consolidation.emptyDescription")}</p>
-            {canRun ? (
+        <StatoVuoto
+          testId="consolidation-empty"
+          titolo={t("consolidation.emptyTitle")}
+          motivo={t("consolidation.emptyDescription")}
+          azione={
+            canRun ? (
               <Button type="button" data-testid="consolidation-start" disabled={occupato} onClick={() => start.mutate()}>
                 {t("consolidation.start")}
               </Button>
-            ) : null}
-          </CardContent>
-        </Card>
+            ) : undefined
+          }
+        />
       ) : null}
 
       {corrente ? (
         <Card data-testid="consolidation-session">
           <CardHeader>
             <CardTitle className="flex flex-wrap items-center gap-3">
-              <span>{t("consolidation.session", { date: new Date(corrente.startedAt).toLocaleDateString() })}</span>
+              <span>{t("consolidation.session", { date: fmt.data(corrente.startedAt) })}</span>
               <StatusPill tone="info">{t(`consolidation.statuses.${corrente.status}`)}</StatusPill>
               {inCorso ? (
                 <StatusPill tone="warning" data-testid="consolidation-running">
@@ -326,8 +336,8 @@ export default function ConsolidationPage() {
               ? <Badge variant="secondary" data-testid="consolidation-proposals-count">{t("consolidation.count", { count: righe.length })}</Badge>
               : undefined}
           />
-          <EntityTable<ConsolidationProposal>
-            isLoading={proposals.isLoading} isError={proposals.isError} errorMessage={t("consolidation.loadError")}
+          <EntityTable<ConsolidationProposal> originPath={"/v1/tenant-consolidations"}
+            isLoading={proposals.isLoading} isError={proposals.isError} error={proposals.error} errorMessage={t("consolidation.loadError")}
             rows={righe} pageSize={100} rowKey={(p) => p.proposalId} rowTestId="consolidation-proposal-row" columns={columns}
             emptyTestId="consolidation-proposals-empty"
             emptyTitle={t("consolidation.proposalsEmptyTitle")} emptyDescription={t("consolidation.proposalsEmptyDescription")}

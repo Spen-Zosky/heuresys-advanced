@@ -19,6 +19,8 @@ import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heures
 import type { UserTimelineEvent, UserTimelineSummaryResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const PAGE = 25;
 
@@ -32,6 +34,7 @@ export interface TimelinePanelProps {
 
 export function TimelinePanel({ basePath, userId, testId = "timeline-panel" }: TimelinePanelProps) {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const [type, setType] = useState<string | null>(null);
   const [limit, setLimit] = useState(PAGE);
@@ -68,8 +71,8 @@ export function TimelinePanel({ basePath, userId, testId = "timeline-panel" }: T
           <p className="text-sm text-muted-foreground" data-testid="timeline-range">
             {t("timeline.range", {
               count: summary.data.total,
-              from: summary.data.firstEventAt?.slice(0, 10) ?? "—",
-              to: summary.data.lastEventAt?.slice(0, 10) ?? "—",
+              from: fmt.data(summary.data.firstEventAt),
+              to: fmt.data(summary.data.lastEventAt),
             })}
           </p>
         ) : null}
@@ -99,20 +102,18 @@ export function TimelinePanel({ basePath, userId, testId = "timeline-panel" }: T
         ) : null}
 
         {events.isLoading ? (
-          <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+          <StatoCaricamento />
         ) : events.isError ? (
-          <p className="text-sm text-danger" data-testid="timeline-error">{t("timeline.error")}</p>
+          <StatoErrore errore={events.error} titolo={t("timeline.error")} testId="timeline-error" onRiprova={() => void events.refetch()} />
         ) : shown === 0 ? (
-          <p className="text-sm text-muted-foreground" data-testid="timeline-empty">
-            {t("timeline.empty")}
-          </p>
+          <StatoVuoto compatto titolo={t("timeline.empty")} testId="timeline-empty" />
         ) : (
           <ol className="space-y-3" data-testid="timeline-list">
             {events.data!.items.map((e) => (
               <li key={e.userTimelineEventId} className="flex gap-3" data-testid="timeline-item">
                 {/* La data a sinistra, il fatto a destra: si legge scorrendo. */}
                 <span className="w-24 shrink-0 tabular-nums text-xs text-muted-foreground">
-                  {e.occurredAt.slice(0, 10)}
+                  {fmt.data(e.occurredAt)}
                 </span>
                 <span className="min-w-0 flex-1">
                   <Badge variant="secondary">{enumLabel("timelineEventType", e.type)}</Badge>

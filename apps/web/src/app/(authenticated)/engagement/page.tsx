@@ -12,6 +12,7 @@ import type {
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../_charts-client";
 
@@ -20,12 +21,12 @@ function statusVariant(s: string): "success" | "secondary" {
 }
 
 /** Multi-series pulse trend over weeks (mood / workload / satisfaction). */
-function pulseOption(items: EngagementPulseResponse["items"], lbl: { mood: string; workload: string; satisfaction: string }) {
+function pulseOption(items: EngagementPulseResponse["items"], lbl: { mood: string; workload: string; satisfaction: string; week: (n: number | null) => string }) {
   return {
     tooltip: { trigger: "axis" as const },
     legend: { data: [lbl.mood, lbl.workload, lbl.satisfaction] },
-    grid: { left: 40, right: 20, top: 40, bottom: 30 },
-    xAxis: { type: "category" as const, data: items.map((i) => `W${i.weekNumber}`) },
+    grid: { left: 56, right: 20, top: 40, bottom: 48 },
+    xAxis: { type: "category" as const, data: items.map((i) => lbl.week(i.weekNumber)) },
     yAxis: { type: "value" as const },
     series: [
       { name: lbl.mood, type: "line" as const, smooth: true, data: items.map((i) => i.avgMood) },
@@ -36,7 +37,7 @@ function pulseOption(items: EngagementPulseResponse["items"], lbl: { mood: strin
 }
 
 export default function EngagementPage() {
-  const { t } = useTranslation("admin");
+  const { t, i18n } = useTranslation("admin");
   const enumLabel = useEnumLabel();
 
   const surveys = useQuery({
@@ -67,7 +68,12 @@ export default function EngagementPage() {
     [t, enumLabel],
   );
 
-  const pulseLabels = { mood: t("engagement.pulse.mood"), workload: t("engagement.pulse.workload"), satisfaction: t("engagement.pulse.satisfaction") };
+  const pulseLabels = {
+    mood: t("engagement.pulse.mood"),
+    workload: t("engagement.pulse.workload"),
+    satisfaction: t("engagement.pulse.satisfaction"),
+    week: (n: number | null) => (n === null ? "—" : t("engagement.pulse.weekShort", { n })),
+  };
 
   return (
     <main data-testid="engagement-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
@@ -77,16 +83,17 @@ export default function EngagementPage() {
         description={t("engagement.description")}
         badges={
           <Badge variant="secondary" data-testid="engagement-count">
-            {surveys.data ? t("engagement.count", { count: surveys.data.total }) : t("common:loading")}
+            {surveys.data ? t("engagement.count", { count: surveys.data.total }) : surveys.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />
 
       {/* Surveys overview */}
       <div data-testid="engagement-table">
-        <EntityTable<EngagementSurvey>
+        <EntityTable<EngagementSurvey> originPath={"/v1/engagement/surveys"}
           isLoading={surveys.isLoading}
           isError={surveys.isError}
+          error={surveys.error}
           errorMessage={t("engagement.errorMessage")}
           rows={surveys.data?.items ?? []}
           rowKey={(s) => s.surveyId}
@@ -106,17 +113,39 @@ export default function EngagementPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           {pulse.isLoading ? (
-            <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+            <StatoCaricamento />
           ) : pulse.isError ? (
-            <p className="text-sm text-danger" data-testid="engagement-pulse-error">{t("engagement.errorMessage")}</p>
+            <StatoErrore
+              errore={pulse.error}
+              titolo={t("engagement.errorMessage")}
+              testId="engagement-pulse-error"
+              onRiprova={() => void pulse.refetch()}
+            />
           ) : (pulse.data?.items.length ?? 0) === 0 ? (
-            <p className="text-sm text-muted-foreground" data-testid="engagement-pulse-empty">{t("engagement.pulse.empty")}</p>
+            <StatoVuoto titolo={t("engagement.pulse.empty")} testId="engagement-pulse-empty" />
           ) : (
             <>
               <Badge variant="secondary" data-testid="engagement-pulse-total">
                 {t("engagement.pulse.totalChecks", { count: pulse.data?.totalChecks ?? 0 })}
               </Badge>
-              <EChartsCard option={pulseOption(pulse.data!.items, pulseLabels)} height={340} ariaLabel={t("engagement.pulse.cardTitle")} />
+              <EChartsCard
+                option={pulseOption(pulse.data!.items, pulseLabels)}
+                height={340}
+                ariaLabel={t("engagement.pulse.cardTitle")}
+                assi={{ x: t("engagement.pulse.axisWeek"), y: t("engagement.pulse.axisScore") }}
+                lingua={i18n.language}
+                tabella={{
+                  titolo: t("engagement.pulse.tableTitle"),
+                  colonne: [t("engagement.pulse.axisWeek"), pulseLabels.mood, pulseLabels.workload, pulseLabels.satisfaction, t("engagement.pulse.colCount")],
+                  righe: pulse.data!.items.map((i) => [
+                    pulseLabels.week(i.weekNumber),
+                    i.avgMood ?? "—",
+                    i.avgWorkload ?? "—",
+                    i.avgSatisfaction ?? "—",
+                    i.count,
+                  ]),
+                }}
+              />
             </>
           )}
         </CardContent>

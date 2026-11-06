@@ -6,25 +6,16 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
-import type { BlueprintVariant, BlueprintProcess, ContentLinkForProcess } from "@heuresys/shared";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
+import type { BlueprintActivation, BlueprintVariant, BlueprintProcess, ContentLinkForProcess } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
-
-// B-xx: BlueprintActivation stays a LOCAL interface (NOT deduped) — the shared
-// `BlueprintActivation` schema has no `activatedAt` field (it has effectiveFrom/
-// effectiveTo instead), but the "Activated at" column below renders `a.activatedAt`.
-// Flagged, not touched (C4/#42 REGOLA CRITICA: used field missing from shared = STOP).
-interface BlueprintActivation {
-  blueprintActivationId: string;
-  tenantId: string;
-  variantId: string;
-  status: string;
-  activatedAt: string | null;
-}
+import { NomeOppure } from "@/components/senza-nome";
+import { useFormat } from "@/lib/format";
 
 // LinkedDoc === the shared `ContentLinkForProcess` row shape (linkId/role/documentId/
 // documentTitle/documentKind/documentStatus/blueprintProcessName + a few unused extras).
@@ -36,6 +27,7 @@ const TAB_KEYS: ReadonlyArray<Tab> = ["processes", "activations", "documentation
 
 export default function BlueprintVariantDetailPage() {
   const { t } = useTranslation("blueprints");
+  const fmt = useFormat();
   const params = useParams<{ variantId: string }>();
   const variantId = params.variantId;
   const [tab, setTab] = useState<Tab>("processes");
@@ -71,18 +63,23 @@ export default function BlueprintVariantDetailPage() {
   if (variant.isLoading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+        <StatoCaricamento />
       </main>
     );
   }
   if (variant.isError) {
     const status = isApiError(variant.error) ? variant.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="blueprint-error">
+      <main className="mx-auto max-w-5xl px-6 py-8">
         <Link href="/blueprints" className="text-sm underline">{t("detail.back")}</Link>
-        <p className="mt-4 text-danger">
-          {status === 404 ? t("detail.notFound") : t("detail.error")}
-        </p>
+        <div className="mt-4">
+          <StatoErrore
+            errore={variant.error}
+            titolo={status === 404 ? t("detail.notFound") : t("detail.error")}
+            testId="blueprint-error"
+            onRiprova={() => void variant.refetch()}
+          />
+        </div>
       </main>
     );
   }
@@ -131,6 +128,7 @@ export default function BlueprintVariantDetailPage() {
             <EntityTable<BlueprintProcess>
               isLoading={processes.query.isLoading}
               isError={processes.query.isError}
+              error={processes.query.error}
               rows={processes.rows}
               server={processes.server}
               rowKey={(p) => p.blueprintProcessId}
@@ -163,6 +161,7 @@ export default function BlueprintVariantDetailPage() {
             <EntityTable<BlueprintActivation>
               isLoading={activations.query.isLoading}
               isError={activations.query.isError}
+              error={activations.query.error}
               rows={activations.rows}
               server={activations.server}
               rowKey={(a) => a.blueprintActivationId}
@@ -171,9 +170,9 @@ export default function BlueprintVariantDetailPage() {
               emptyTitle={t("detail.activationsEmpty")}
               caption={t("detail.activationsCaption")}
               columns={[
-                { header: t("detail.activationColumns.tenantId"), cell: (a) => <span className="font-mono text-xs">{a.tenantId.slice(0, 8)}</span> },
+                { header: t("detail.activationColumns.tenantId"), cell: (a) => <span title={a.tenantId}><NomeOppure nome={a.tenantName} id={a.tenantId} /></span> },
                 { header: t("detail.activationColumns.status"), cell: (a) => <EnumStatusBadge domain="blueprintActivationStatus" value={a.status} /> },
-                { header: t("detail.activationColumns.activatedAt"), cell: (a) => <span className="text-xs">{a.activatedAt ?? t("common:value.none")}</span> },
+                { header: t("detail.activationColumns.activatedAt"), cell: (a) => <span className="text-xs">{fmt.data(a.effectiveFrom)}</span> },
               ]}
             />
           </CardContent>
@@ -184,9 +183,10 @@ export default function BlueprintVariantDetailPage() {
         <Card data-testid="blueprint-tab-content-documentation">
           <CardHeader><CardTitle>{t("detail.documentationTitle")}</CardTitle></CardHeader>
           <CardContent className="p-0">
-            <EntityTable<LinkedDoc>
+            <EntityTable<LinkedDoc> originPath={"/v1/content-blueprint-links"}
               isLoading={documentation.isLoading}
               isError={documentation.isError}
+              error={documentation.error}
               rows={documentation.data?.items ?? []}
               rowKey={(d) => d.linkId}
               rowTestId="blueprint-doc-row"

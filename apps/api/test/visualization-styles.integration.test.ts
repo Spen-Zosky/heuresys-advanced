@@ -42,7 +42,7 @@ const createdStyleIds: string[] = [];
 describe("/v1/visualization-styles/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     userS = await login(suite, "tommaso.fiore@rtl-bank.org");
 
     // Parent graph: tenant-scoped, owned by federica's RTL tenant so styles are visible to her.

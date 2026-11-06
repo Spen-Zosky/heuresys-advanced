@@ -85,6 +85,13 @@ describe("mandato K, R-6 — PEOPLE_MANAGER", () => {
     expect(grant.statusCode).toBe(403);
   });
 
+  it("S-8 — PEOPLE_MANAGER legge ciò che scrive: persone e unità organizzative -> 200", async () => {
+    for (const url of ["/v1/users?limit=5", "/v1/organization-units?limit=5", "/v1/skills?limit=5", "/v1/job-roles?limit=5"]) {
+      const r = await suite.app.inject({ method: "GET", url, headers: { cookie: ch(peopleManager.cookies) } });
+      expect(r.statusCode, url).toBe(200);
+    }
+  });
+
   it("controprova — HRMS_MANAGER scrive un obiettivo senza bisogno di PEOPLE_MANAGER", async () => {
     const r = await suite.app.inject({
       method: "POST",

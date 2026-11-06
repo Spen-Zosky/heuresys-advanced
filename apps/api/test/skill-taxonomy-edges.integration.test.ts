@@ -33,7 +33,7 @@ describe("/v1/skill-taxonomy-edges/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     // Two global skills as endpoints for edges.
     const sp = await suite.app.inject({
       method: "POST", url: "/v1/skills",
@@ -71,15 +71,19 @@ describe("/v1/skill-taxonomy-edges/* integration", () => {
       payload: { parentSkillId, childSkillId, kind: "IS_A" },
     });
     expect(created.statusCode).toBe(201);
-    const e = created.json() as { edgeId: string; kind: string };
+    const e = created.json() as { edgeId: string; kind: string; parentSkillName: string | null; childSkillName: string | null };
     expect(e.kind).toBe("IS_A");
     createdEdgeIds.push(e.edgeId);
+    // F-3 (L6): l'arco porta i nomi delle due competenze, così la pagina non mostra l'identificativo.
+    expect(e.parentSkillName).toBe("Parent Skill");
+    expect(e.childSkillName).toBe("Child Skill");
 
     const got = await suite.app.inject({
       method: "GET", url: `/v1/skill-taxonomy-edges/${e.edgeId}`,
       headers: { cookie: ch(tenantS.cookies) },
     });
     expect(got.statusCode).toBe(200);
+    expect((got.json() as { parentSkillName: string | null }).parentSkillName).toBe("Parent Skill");
   });
 
   it("Self-loop → 400 VALIDATION_ERROR", async () => {

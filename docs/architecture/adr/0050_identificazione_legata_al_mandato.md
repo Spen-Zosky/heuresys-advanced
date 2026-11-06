@@ -1,0 +1,94 @@
+# ADR-0050 — La forza dell'identificazione segue il mandato funzionale
+
+- **Status**: ACCETTATO il 2026-11-03 da Enzo Spenuso (in chat alle 00:38 UTC, 01:38 ora di Roma: «accetto l'ADR-0050, aggiornalo e unisci la 132»); proposto il 2026-10-31
+- **Date**: 2026-10-31
+- **Redatto da**: Claude Code, thread «Analizzare a fondo le interfacce web di advanced»
+- **Richiesta**: Amministratore di Sistema, 2026-10-31 17:09 ora di Roma: «crea la bozza di adr e suggeriscimi a chi vanno assegnati i ruoli funzionali in virtù dei loro scopi di lavoro»
+- **Relates to**: ADR-0051 (attività delegate: un agente non riceve deleghe finché non ha l'identità che D6 descrive), ADR-0036 (domini gerarchici e funzionali, §C6 e §5), ADR-0027 (autorizzazione a due assi), ADR-0032 (mandato di piattaforma mascherato), ADR-0040 (l'agente legge ciò che legge la persona), I7, I16–I22
+- **Poggia su**: migrazioni 000116, 000118, 000284 (esenzioni MFA), 000432 (Mandato K, R-6: `PEOPLE_MANAGER` nel mandato HR), `apps/api/src/lib/scope/resolver.ts` (`HR_MANDATED_ROLES`, `TENANT_WIDE_MASKED_ROLES`)
+
+> **In parole semplici.**
+> 1. Un ruolo gerarchico (capo di un'unità) vede ciò che ha sotto, e il suo perimetro cambia da solo quando cambia l'organigramma. Un ruolo funzionale con mandato (TENANT_ADMIN, HRMS_MANAGER, PEOPLE_MANAGER, DPO, SECURITY_ADMIN, PLATFORM_ADMIN, il custode delle segnalazioni) vede tutto il tenant, e lo deve alla sola concessione.
+> 2. Per questo chi porta un mandato va identificato più forte di chiunque altro: secondo fattore sempre, nessuna esenzione, una nuova conferma prima di aprire retribuzioni e valutazioni di tutti.
+> 3. Concedere un mandato diventa un atto registrato: chi lo concede, perché, fino a quando. Lo stesso vale per un'esenzione dal secondo fattore.
+> 4. Un agente non porta mai un mandato suo: lavora con quello della persona, mai più largo, e lo dichiara.
+
+---
+
+## Contesto
+
+L'analisi forense delle interfacce del 2026-10-31 (rapporto in `/mnt/project-files/analisi-interfacce/V9_rapporto/`, fuori dal deposito) ha misurato in produzione, in sola lettura:
+
+- un'utenza di collaudo con `PEOPLE_MANAGER` e senza unità riceve retribuzioni e valutazioni dell'intero tenant, byte per byte come `TENANT_ADMIN`. È il comportamento voluto (ADR-0036 §C6; 000432): il giudizio di difetto dell'analisi è stato ritirato. Resta però la domanda su **chi** porta quel mandato e **come** entra;
+- le utenze `@collaudo.invalid` esenti dal secondo fattore hanno l'esenzione senza scadenza (la tabella `sys.sys_auth_mfa_exemptions` non ha la colonna) e senza autore (`created_by` nullo, registro di audit con attore nullo); fra esse ci sono titolari di `TENANT_ADMIN` e `PLATFORM_ADMIN`;
+- per alcuni mandati tenant-wide l'unico titolare in RTL è un'utenza di collaudo;
+- nelle concessioni dei ruoli con mandato `user_auth_role_granted_by` (000005) è vuoto: il sistema non sa chi ha dato un mandato;
+- la politica MFA (`apps/api/src/modules/mfa-policy`) è la stessa per tutti i ruoli.
+
+Le misure si rifanno con le query dell'analisi (`~/analisi-interfacce-20261031/sql/` sulla VM) o con:
+
+```sql
+select r.role_code, u.user_type, count(*) as titolari,
+       count(*) filter (where e.enabled) as esenti,
+       count(*) filter (where ur.user_auth_role_granted_by is null) as senza_autore
+from sys.sys_user_auth_roles ur
+join sys.sys_auth_roles r on r.role_id = ur.user_auth_role_role_id
+join sys.sys_users u on u.user_id = ur.user_auth_role_user_id
+left join sys.sys_auth_mfa_exemptions e on e.user_id = u.user_id
+where r.role_code in ('TENANT_ADMIN','HRMS_MANAGER','PEOPLE_MANAGER','DPO','SECURITY_ADMIN','PLATFORM_ADMIN','WHISTLEBLOWING_CUSTODIAN')
+group by 1, 2 order by 1, 2;
+```
+
+(I nomi delle colonne vanno verificati sull'atlante prima dell'uso: la query è la traccia, non il controllo.)
+
+**Stato al 2026-11-03, prima dell'accettazione.** Due delle situazioni descritte sopra sono già state corrette, senza codice di questo ADR:
+
+- le utenze `@collaudo.invalid` sono sospese in produzione dal rilascio `103a6bcf` del 2026-11-01, PR #130 (`pnpm db:sospendi-collaudo`). Le esenzioni sono spente e le sessioni azzerate, e il giornale è `staging.collaudo_sospensione_undo`;
+- i ruoli con mandato di RTL sono passati a persone vere il 2026-10-31, applicando il principio di D8 (`db/scripts/rtl-ruolo-segue-lavoro.sql`, giornale `staging.rtl_ruolo_segue_lavoro_undo`, concedente registrato). La migrazione 000049 è stata emendata nella PR #134, così un deploy non restituisce i ruoli revocati.
+
+Resta valido il resto. Le esenzioni non hanno ancora una scadenza (D3), la concessione non passa da un secondo titolare (D4), la nuova conferma prima delle classi sensibili non esiste (D5) e gli agenti non hanno un'identità propria (D6). Lo stato si rimisura con `pnpm db:sospendi-collaudo` (stato) e con la query sopra.
+
+Heuresys è una piattaforma agentica (regola di Enzo del 2026-10-31): un agente che agisce per conto di chi porta un mandato raggiunge l'intero tenant con una sola chiamata. Il rischio di un mandato rubato cresce con gli agenti, non diminuisce.
+
+## Decisione
+
+**D1 — Insieme dei mandati forti.** Un solo insieme nel codice, `MANDATE_ROLES`, unione di `HR_MANDATED_ROLES`, `TENANT_WIDE_MASKED_ROLES`, `PLATFORM_ADMIN`, `SECURITY_ADMIN` e il custode delle segnalazioni. Ogni regola di questo ADR lo legge da lì; nessuna lista sparsa.
+
+**D2 — Secondo fattore obbligatorio, senza esenzioni, per chi porta un mandato.** La verifica di eleggibilità all'esenzione (000118, 000284) aggiunge una terza condizione: l'utenza non porta alcun ruolo di `MANDATE_ROLES`. Una concessione di mandato a un'utenza esente fallisce; un'esenzione a un'utenza con mandato fallisce. Le utenze di collaudo possono esistere in produzione solo senza mandati, oppure restare sospese fuori dalle finestre di collaudo (PR #130, D-02).
+
+**D3 — Esenzioni con autore e scadenza.** `sys.sys_auth_mfa_exemptions` riceve `expires_at` (obbligatoria, al massimo 30 giorni) e `created_by` obbligatorio (persona, non utente di database). Un'esenzione scaduta vale come assente; un controllo di salute la segnala.
+
+**D4 — La concessione di un mandato è un atto.** Concedere o revocare un ruolo di `MANDATE_ROLES` richiede autore, motivo e data di revisione (`user_auth_role_granted_by`, nuovo `_reason`, nuovo `_review_by`), e passa per proposta → approvazione → effetto da parte di un secondo titolare di mandato (mai chi la riceve). L'evento va nel registro di audit. Le concessioni esistenti senza autore vengono elencate e riconfermate una per una.
+
+**D5 — Nuova conferma prima delle classi sensibili per mandato.** Quando la lettura di `COMPENSATION` o `EVALUATION` di un'altra persona passa per il mandato (asse di audit `hr_mandate`) e non per la catena, la sessione deve avere una verifica del secondo fattore recente (15 minuti, da regolare). Usa la verifica già esistente (`POST /verify-login`, WebAuthn); non vale per i propri dati (I17) né per la catena (I18).
+
+**D6 — Gli agenti non portano mandati.** Un agente non riceve mai un ruolo di `MANDATE_ROLES`. Agisce con l'identità della persona (ADR-0040), dichiara in ogni chiamata per chi agisce, e il suo perimetro è al più quello della persona, restringibile per compito. Un'azione dell'agente che userebbe D5 richiede la conferma della persona, non dell'agente.
+
+**D7 — Separazione dei compiti.** Il custode delle segnalazioni non porta mandati HR né `SECURITY_ADMIN`; `SECURITY_ADMIN` non è `TENANT_ADMIN` sulla stessa persona; `DPO` non porta un mandato HR in chiaro (già ADR-0036 §5, quinta eccezione). Il controllo sta nella stessa funzione di D4.
+
+**D8 — Il ruolo segue il lavoro.** Principio generale e trasversale fissato dall'Amministratore di Sistema il 2026-10-31 alle 17:18 ora di Roma: «concordo sulla tua raccomandazione che il ruolo segua il lavoro. è un principio generale e trasversale, quindi lo applichiamo e controlliamo». Un ruolo, e soprattutto un ruolo funzionale con mandato, si concede solo perché lo richiede lo scopo del lavoro della posizione della persona, mai per comodità o per eredità. Due persone con scopi di lavoro diversi non portano lo stesso mandato soltanto perché stanno nella stessa area. La concessione (D4) cita la posizione che la giustifica. Un controllo periodico confronta i ruoli con le posizioni e segnala le concessioni senza giustificazione e quelle rimaste dopo un cambio di posizione.
+
+## Conseguenze
+
+- I mandati tenant-wide oggi tenuti solo da utenze di collaudo restano scoperti quando quelle utenze vengono sospese: prima di applicare D2, Enzo (o il TENANT_ADMIN del tenant) assegna ogni mandato a una persona vera con secondo fattore. Le assegnazioni sono un dato del tenant e non stanno in questo ADR.
+- La documentazione dei ruoli (`docs/kb/xtras/RBAC_COME_FUNZIONA_DAVVERO.md`) va aggiornata: `PEOPLE_MANAGER`, `DPO` e `SECURITY_ADMIN` sono funzionali con perimetro tenant-wide.
+- I giri dal vivo con utenze di collaudo diventano più costosi: riattivazione con motivo, esenzione a scadenza breve, sospensione a fine giro.
+- D5 aggiunge un attrito per i titolari di mandato. È voluto, e misurabile dal registro di audit.
+
+## Ordine di attuazione proposto
+
+1. D1 e D2 (codice e una migrazione piccola). Le assegnazioni dei mandati a persone vere sono già fatte in RTL, dal 2026-10-31.
+2. D3 (migrazione su `sys_auth_mfa_exemptions`).
+3. D4 e D7 (concessione come atto, con riconferma delle concessioni esistenti).
+4. D6 (nel gateway degli agenti e nel resolver).
+5. D5 (dopo una misura di quante letture passano per `hr_mandate`).
+
+Ogni passo si chiude con una dimostrazione dal vivo su dati reali (ADR-0026).
+
+## Attuazione
+
+- D1 e D2: migrazione 000473, PR #172.
+- D3 e D6: migrazione 000474 e ritiro di `db/scripts/seed-service-user.ts`, PR #174.
+- D4 e D7: migrazione 000475 e modulo `apps/api/src/modules/mandate-acts`. Un mandato si propone, si revoca o si riconferma con un atto (`POST /v1/mandate-acts`, kind `GRANT`, `REVOKE`, `CONFIRM`), con motivo e, per concessione e riconferma, una data di revisione entro un anno; lo decide un secondo titolare (`/approve`, `/reject`), mai chi lo propone né chi lo riceve; il proponente può ritirarlo (`/withdraw`). Solo l'approvazione produce l'effetto su `sys.sys_user_auth_roles`, che porta il riferimento all'atto. `POST` e `DELETE /v1/users/:id/roles` rispondono 409 `MANDATE_REQUIRES_ACT` su un mandato. Ogni passaggio di stato va in `sys.sys_mandate_act_audit`. D7 è un trigger su `sys.sys_user_auth_roles` (`sys.f_mandati_incompatibili`, copia di `INCOMPATIBILI` in `lib/scope/mandati.ts`). Le concessioni di prima stanno in `sys.v_mandato_da_riconfermare` (informativa, si svuota con atti `CONFIRM`); `sys.v_mandati_incompatibili` e `sys.v_mandato_revisione_scaduta` pretendono zero. La proposta nasce dalla scheda della persona, la decisione dalla pagina Ruoli (`/admin/roles`). La posizione che giustifica il mandato (D8) si può citare nell'atto (`positionId`, una posizione che la persona regge); il controllo periodico di D8 resta da fare.
+- D5: migrazione 000476 e `apps/api/src/lib/scope/conferma.ts`. L'ora dell'ultima verifica del secondo fattore viaggia firmata nell'access token (claim `sua`): la mette il login che passa dal secondo fattore, la rinnova la conferma (`POST /v1/auth/mfa/step-up/begin` e `/verify`, oppure `/step-up/webauthn/verify` con la passkey), il rinnovo del token la porta avanti senza rinnovarla (colonna `auth_refresh_token_step_up_at`). La finestra è di 15 minuti (`STEP_UP_WINDOW_MINUTES`). All'avvio si marcano le rotte di lettura su una resource di classe `COMPENSATION` o `EVALUATION` che restituiscono righe di persona (`orgGate: "service"`); su quelle, per mandato HR e fuori dalla catena, senza una conferma recente il risolutore risponde 403 `STEP_UP_REQUIRED`, e il portale apre la finestra di conferma e ripete la richiesta. Nel dossier di una persona le due classi restano trattenute, con `stepUpRequired` che dice perché. Non vale per i propri dati né per la catena. È acceso con il secondo fattore al login (`MFA_ENFORCEMENT_ENABLED`). Confine dichiarato: un attore costruito fuori da una richiesta HTTP non porta una sessione e non passa da qui. La misura di quante letture passano per `hr_mandate` (passo 5 dell'ordine) si legge dal registro `scope.access` dell'API.
+- D6, parte dell'identità degli agenti (piano interfacce, lotto L9, voci A-1, A-2, A-3, A-5): migrazione 000477 e `apps/api/src/modules/agent-tokens`. La persona, con la propria sessione, chiede un gettone per un agente e un compito (`POST /v1/auth/agent-tokens`): il gettone porta la persona (`sub`), l'agente e il compito (claim `agt`), i ruoli della persona senza `MANDATE_ROLES` e, se il compito lo dice, solo alcuni permessi (claim `scp`, che `userHasPermission` interseca con i ruoli). Dura dieci minuti (`AGENT_TOKEN_TTL_SECONDS`), non si rinnova, non tocca la superficie di autenticazione (403 `AGENT_FORBIDDEN_AUTH`, salvo `GET /v1/auth/me`) e cade appena si chiude la sessione della persona da cui nasce (claim `fam`, controllato a ogni richiesta dell'agente). Ogni scrittura su `/v1/*` di chi è autenticato, con qualunque esito, va in `audit.registro_scritture` con l'attore (persona o agente), la persona per cui si agisce, l'agente e il compito; il registro accetta solo aggiunte. Una decisione presa da un agente porta la firma in `approval_step_metadata.decisoDaAgente`, e l'avviso al delegante dice «tramite l'agente X» (ADR-0051 §6). Il gateway degli agenti chiede il gettone con i cookie della persona e chiama solo con quello. Siccome il gettone non porta mandati, D5 non si pone per un agente: legge per catena o per i propri dati.

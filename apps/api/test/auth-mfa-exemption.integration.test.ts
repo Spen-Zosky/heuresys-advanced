@@ -48,6 +48,10 @@ describe("/v1/auth/login MFA exemption — M-8 + M-8b (mfaEnforcement=true)", ()
   let adminUserId: string;
   let humanUserId: string;
   let svcUserId: string;
+  // ADR-0050 D3 (mig 000474): ogni esenzione accesa ha un autore, una persona attiva diversa
+  // dall'esentato, e una scadenza entro 30 giorni. Le prove qui sotto le danno sempre, così
+  // ciascuna resta rossa per la ragione che dichiara e non per la D3.
+  let autoreId: string;
 
   async function login(payload: Record<string, unknown>) {
     return app.app.inject({ method: "POST", url: "/v1/auth/login", payload });
@@ -68,6 +72,12 @@ describe("/v1/auth/login MFA exemption — M-8 + M-8b (mfaEnforcement=true)", ()
       `SELECT user_id FROM sys.sys_users WHERE lower(user_email) = lower($1)`, [HUMAN]);
     if (!h.rows[0]) throw new Error(`persona not seeded: ${HUMAN}`);
     humanUserId = h.rows[0].user_id;
+    const au = await pool.query<{ user_id: string }>(
+      `SELECT user_id FROM sys.sys_users
+        WHERE user_type = 'STANDARD' AND user_status = 'ACTIVE' AND user_id <> $1
+        ORDER BY user_id LIMIT 1`, [humanUserId]);
+    if (!au.rows[0]) throw new Error("nessuna persona attiva da usare come autore (ADR-0050 D3)");
+    autoreId = au.rows[0].user_id;
     const tenantId = a.rows[0].user_tenant_id;
 
     // throwaway SERVICE user (loginable) in admin's tenant
@@ -103,10 +113,12 @@ describe("/v1/auth/login MFA exemption — M-8 + M-8b (mfaEnforcement=true)", ()
   it("M-8b: a HUMAN account is NOT exemptable (trigger rejects on user_type)", async () => {
     await expect(
       pool.query(
-        `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason) VALUES ($1, $2)`,
-        [humanUserId, "must be rejected by 000118"],
+        `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason,
+                                                  auth_mfa_exemption_expires_at, created_by)
+         VALUES ($1, $2, now() + interval '1 day', $3)`,
+        [humanUserId, "must be rejected by 000118", autoreId],
       ),
-    ).rejects.toThrow();
+    ).rejects.toThrow(/SERVICE/);
   });
 
   // #139 — dal 000284 l'eleggibilita' e' una CONGIUNZIONE: essere un account di
@@ -120,10 +132,12 @@ describe("/v1/auth/login MFA exemption — M-8 + M-8b (mfaEnforcement=true)", ()
   it("#139: a SERVICE account NOT on the allowlist is NOT exemptable", async () => {
     await expect(
       pool.query(
-        `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled) VALUES ($1, $2, true)`,
-        [svcUserId, "must be rejected by 000284 — not listed"],
+        `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled,
+                                                  auth_mfa_exemption_expires_at, created_by)
+         VALUES ($1, $2, true, now() + interval '1 day', $3)`,
+        [svcUserId, "must be rejected by 000284 — not listed", autoreId],
       ),
-    ).rejects.toThrow();
+    ).rejects.toThrow(/allowlist|eligible_users|not listed/);
   });
 
   it("M-8b + #139: a SERVICE account ON the allowlist IS exemptable", async () => {
@@ -134,8 +148,10 @@ describe("/v1/auth/login MFA exemption — M-8 + M-8b (mfaEnforcement=true)", ()
     );
     await expect(
       pool.query(
-        `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled) VALUES ($1, $2, true)`,
-        [svcUserId, "wi-a service exemption"],
+        `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled,
+                                                  auth_mfa_exemption_expires_at, created_by)
+         VALUES ($1, $2, true, now() + interval '1 day', $3)`,
+        [svcUserId, "wi-a service exemption", autoreId],
       ),
     ).resolves.toBeTruthy();
   });
@@ -153,9 +169,11 @@ describe("/v1/auth/login MFA exemption — M-8 + M-8b (mfaEnforcement=true)", ()
   it("login bypass: an ACTIVE exemption on the SERVICE account yields a FULL session", async () => {
     // ensure exemption present (from previous test) and no factor
     await pool.query(
-      `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled)
-       VALUES ($1, 'wi-a service exemption', true) ON CONFLICT (auth_mfa_exemption_user_id) DO UPDATE SET auth_mfa_exemption_enabled = true`,
-      [svcUserId],
+      `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled,
+                                                auth_mfa_exemption_expires_at, created_by)
+       VALUES ($1, 'wi-a service exemption', true, now() + interval '1 day', $2)
+       ON CONFLICT (auth_mfa_exemption_user_id) DO UPDATE SET auth_mfa_exemption_enabled = true`,
+      [svcUserId, autoreId],
     );
     const resp = await login({ email: SVC_EMAIL, password: PASSWORD });
     expect(resp.statusCode).toBe(200);

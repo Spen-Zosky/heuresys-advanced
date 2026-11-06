@@ -6,34 +6,21 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
-import type { Tenant } from "@heuresys/shared";
+import type { EnterpriseTypingProfile, Tenant } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
-import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
-
-// B-xx: EnterpriseProfile stays a LOCAL interface (NOT deduped) — the shared
-// `EnterpriseTypingProfile` schema has no `status` field at all (nor blueprintFamilyId/
-// blueprintVariantId/activityClassificationId/decidedAt by those names), but the
-// "typing" tab renders `p.status` via StatusBadge. Flagged, not touched (C4/#42 REGOLA
-// CRITICA: used field missing from the shared type = STOP).
-interface EnterpriseProfile {
-  enterpriseTypingProfileId: string;
-  tenantId: string;
-  blueprintFamilyId: string | null;
-  blueprintVariantId: string | null;
-  activityClassificationId: string | null;
-  enterpriseSizeBandId: string | null;
-  operatingModelId: string | null;
-  status: string;
-  decidedAt: string | null;
-}
+import { useFormat } from "@/lib/format";
+import { useEnumLabel } from "@/lib/enum-labels";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 type Tab = "overview" | "typing" | "users";
 
 export default function TenantDetailPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
+  const enumLabel = useEnumLabel();
   const params = useParams<{ tenantId: string }>();
   const tenantId = params.tenantId;
   const [tab, setTab] = useState<Tab>("overview");
@@ -56,7 +43,7 @@ export default function TenantDetailPage() {
   const typing = useQuery({
     queryKey: ["enterprise-typing-profiles", tenantId],
     queryFn: () =>
-      apiFetch<{ items: EnterpriseProfile[]; total: number }>(
+      apiFetch<{ items: EnterpriseTypingProfile[]; total: number }>(
         `/v1/enterprise-typing-profiles?tenantId=${tenantId}&limit=10`,
       ),
     enabled: !!tenantId && tab === "typing",
@@ -65,7 +52,7 @@ export default function TenantDetailPage() {
   if (tenant.isLoading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+        <StatoCaricamento />
       </main>
     );
   }
@@ -74,9 +61,14 @@ export default function TenantDetailPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="tenant-error">
         <Link href="/tenants" className="text-sm underline">{t("tenants.detail.back")}</Link>
-        <p className="mt-4 text-danger">
-          {status === 404 ? t("tenants.detail.notFound") : t("tenants.detail.loadError")}
-        </p>
+        <div className="mt-4">
+          <StatoErrore
+            errore={tenant.error}
+            titolo={status === 404 ? t("tenants.detail.notFound") : t("tenants.detail.loadError")}
+            testId="tenant-error-state"
+            onRiprova={() => void tenant.refetch()}
+          />
+        </div>
       </main>
     );
   }
@@ -154,11 +146,9 @@ export default function TenantDetailPage() {
           <CardHeader><CardTitle>{t("tenants.detail.typingTitle")}</CardTitle></CardHeader>
           <CardContent>
             {typing.isLoading ? (
-              <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+              <StatoCaricamento />
             ) : typing.data && typing.data.items.length === 0 ? (
-              <p className="text-sm text-muted-foreground" data-testid="tenant-typing-empty">
-                {t("tenants.detail.typingEmpty")}
-              </p>
+              <StatoVuoto titolo={t("tenants.detail.typingEmpty")} testId="tenant-typing-empty" />
             ) : (
               <ul className="space-y-2 text-sm" data-testid="tenant-typing-list">
                 {(typing.data?.items ?? []).map((p) => (
@@ -167,8 +157,19 @@ export default function TenantDetailPage() {
                     className="flex items-center gap-3 rounded-card border border-border px-3 py-2"
                     data-testid="tenant-typing-item"
                   >
-                    <span className="font-mono text-xs text-foreground">{p.enterpriseTypingProfileId}</span>
-                    <StatusBadge value={p.status} />
+                    {/* F-3 (L6): l'identificativo del profilo resta nel suggerimento; prima la riga
+                        mostrava solo quello e uno stato che l'API non manda. */}
+                    <span className="text-foreground" title={p.enterpriseTypingProfileId}>
+                      {t("tenants.detail.typingAssessed", { date: fmt.data(p.assessedAt) })}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {t("tenants.detail.typingRegulatory", { value: enumLabel("regulatoryIntensity", p.regulatoryIntensity) })}
+                    </span>
+                    {p.employeeCount !== null && (
+                      <span className="text-xs text-muted-foreground">
+                        {t("tenants.detail.typingEmployees", { n: fmt.numero(p.employeeCount) })}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

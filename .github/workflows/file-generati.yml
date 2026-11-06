@@ -1,0 +1,54 @@
+name: File generati allineati
+
+# Piano interfacce L10. Due file generati che il codice usa e che nessuno scrive a mano:
+# le pagine su cui si monta il pannello dell'agente (A-8) e i moduli con le loro tabelle per
+# l'origine del dato (A-14). Se la fonte cambia e il file no, il cancello è rosso. Sta in un
+# workflow suo e non in state-lint: le sue fonti (le pagine del portale, l'atlante) cambiano
+# spesso, e non devono trascinare con sé il controllo dei file di stato.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/src/app/**"
+      - "apps/web/src/lib/agente/pagine-idonee.generated.ts"
+      - "apps/api/src/lib/origine/moduli.generated.ts"
+      - "docs/kb/atlas/**"
+      - "docs/kb/tools/check_idoneita_agente.py"
+      - "docs/kb/tools/build_origine_moduli.py"
+      - ".github/workflows/file-generati.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/web/src/app/**"
+      - "apps/web/src/lib/agente/pagine-idonee.generated.ts"
+      - "apps/api/src/lib/origine/moduli.generated.ts"
+      - "docs/kb/atlas/**"
+      - "docs/kb/tools/check_idoneita_agente.py"
+      - "docs/kb/tools/build_origine_moduli.py"
+      - ".github/workflows/file-generati.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+concurrency:
+  group: file-generati-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  file-generati:
+    # Come state-lint (D-08): il runner sta sull'host di produzione, niente PR da fork.
+    if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: Pagine idonee al pannello dell'agente (A-8)
+        run: python3 docs/kb/tools/check_idoneita_agente.py --check-ts apps/web/src/lib/agente/pagine-idonee.generated.ts
+
+      - name: Moduli e tabelle per l'origine del dato (A-14)
+        run: python3 docs/kb/tools/build_origine_moduli.py --check

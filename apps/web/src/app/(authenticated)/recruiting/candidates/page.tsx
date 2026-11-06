@@ -6,14 +6,17 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input, EmptyState, Spinner,
+  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input,
 } from "@heuresys/ui";
 import type { Candidate, CandidateApplication } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { useCan } from "@/lib/api/auth";
 import {
   CANDIDATE_SOURCES, KEY, candidateName,
   useApplications, useCandidates, usePostings,
 } from "@/lib/recruiting";
+import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -42,6 +45,7 @@ type FormValues = {
  */
 export default function CandidatesPage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const q = useCandidates();
   const postings = usePostings();
@@ -54,6 +58,8 @@ export default function CandidatesPage() {
     defaultValues: { firstName: "", lastName: "", email: "", phone: "", source: "DIRECT", consentGivenOn: oggi, retentionUntil: "" },
   });
 
+  // S-5: creare e cambiare stato chiedono `candidate:write`; senza, la pagina è in sola lettura.
+  const canWrite = useCan("candidate:write");
   const create = useMutation({
     mutationFn: (v: FormValues) =>
       apiFetch<Candidate>("/v1/candidates", {
@@ -97,6 +103,7 @@ export default function CandidatesPage() {
     <main data-testid="candidates-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader title={t("recruiting.candidates.title")} description={t("recruiting.candidates.description")} />
 
+      {canWrite && (
       <Card>
         <CardHeader><CardTitle>{t("recruiting.candidates.newTitle")}</CardTitle></CardHeader>
         <CardContent>
@@ -142,13 +149,14 @@ export default function CandidatesPage() {
           )}
         </CardContent>
       </Card>
+      )}
 
       {q.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <StatoCaricamento />
       ) : q.isError ? (
-        <p className="text-sm text-danger" data-testid="candidates-error">{t("recruiting.error")}</p>
+        <StatoErrore errore={q.error} titolo={t("recruiting.error")} testId="candidates-error" onRiprova={() => void q.refetch()} />
       ) : items.length === 0 ? (
-        <EmptyState data-testid="candidates-empty" title={t("recruiting.candidates.emptyTitle")} description={t("recruiting.candidates.emptyDesc")} />
+        <StatoVuoto testId="candidates-empty" titolo={t("recruiting.candidates.emptyTitle")} motivo={t("recruiting.candidates.emptyDesc")} />
       ) : (
         <section className="grid gap-4 md:grid-cols-2" data-testid="candidates-list">
           {items.map((c) => {
@@ -165,7 +173,7 @@ export default function CandidatesPage() {
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {t(`recruiting.source.${c.source}`)}
-                    {c.consentGivenOn ? ` · ${t("recruiting.fields.consentGivenOn")}: ${c.consentGivenOn}` : ""}
+                    {c.consentGivenOn ? ` · ${t("recruiting.fields.consentGivenOn")}: ${fmt.data(c.consentGivenOn)}` : ""}
                   </p>
 
                   {sue.length > 0 && (
@@ -173,14 +181,14 @@ export default function CandidatesPage() {
                       {sue.map((a) => (
                         <li key={a.applicationId}>
                           <Link href={`/recruiting/applications/${a.applicationId}`} className="underline" data-testid="candidate-application-link">
-                            {t(`recruiting.stage.${a.stage}`)} · {a.appliedOn}
+                            {t(`recruiting.stage.${a.stage}`)} · {fmt.data(a.appliedOn)}
                           </Link>
                         </li>
                       ))}
                     </ul>
                   )}
 
-                  {c.status === "ACTIVE" && (
+                  {canWrite && c.status === "ACTIVE" && (
                     <div className="flex items-center gap-2">
                       <select
                         aria-label={t("recruiting.fields.posting")}

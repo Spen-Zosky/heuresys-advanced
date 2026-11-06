@@ -37,6 +37,21 @@
       "heuresys-source": "./src/schemas/mfa-policy.ts",
       "default": "./dist/schemas/mfa-policy.js"
     },
+    "./schemas/data-origins": {
+      "types": "./dist/schemas/data-origins.d.ts",
+      "heuresys-source": "./src/schemas/data-origins.ts",
+      "default": "./dist/schemas/data-origins.js"
+    },
+    "./schemas/api-discovery": {
+      "types": "./dist/schemas/api-discovery.d.ts",
+      "heuresys-source": "./src/schemas/api-discovery.ts",
+      "default": "./dist/schemas/api-discovery.js"
+    },
+    "./schemas/agent-tokens": {
+      "types": "./dist/schemas/agent-tokens.d.ts",
+      "heuresys-source": "./src/schemas/agent-tokens.ts",
+      "default": "./dist/schemas/agent-tokens.js"
+    },
     "./schemas/role-codes": {
       "types": "./dist/schemas/role-codes.d.ts",
       "heuresys-source": "./src/schemas/role-codes.ts",
@@ -61,6 +76,11 @@
       "types": "./dist/schemas/tenant-materialization.d.ts",
       "heuresys-source": "./src/schemas/tenant-materialization.ts",
       "default": "./dist/schemas/tenant-materialization.js"
+    },
+    "./schemas/mandate-acts": {
+      "types": "./dist/schemas/mandate-acts.d.ts",
+      "heuresys-source": "./src/schemas/mandate-acts.ts",
+      "default": "./dist/schemas/mandate-acts.js"
     },
     "./schemas/users": {
       "types": "./dist/schemas/users.d.ts",
@@ -526,6 +546,11 @@
       "types": "./dist/schemas/talent-review.d.ts",
       "heuresys-source": "./src/schemas/talent-review.ts",
       "default": "./dist/schemas/talent-review.js"
+    },
+    "./schemas/valore": {
+      "types": "./dist/schemas/valore.d.ts",
+      "heuresys-source": "./src/schemas/valore.ts",
+      "default": "./dist/schemas/valore.js"
     },
     "./schemas/okrs": {
       "types": "./dist/schemas/okrs.d.ts",

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { PageHeader } from "@heuresys/ui";
+import { StatoCaricamento, StatoVuoto } from "@/components/stato-pagina";
 import type { SuccessionPool, SuccessorCandidate } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
@@ -12,6 +13,7 @@ import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { EChartsCard } from "../_charts-client";
+import { NomeOppure } from "@/components/senza-nome";
 
 // B-xx: CareerPath stays a LOCAL interface (NOT deduped) — the shared `CareerPath`
 // schema has no fromJobRoleId/toJobRoleId/difficulty fields at all (it has
@@ -57,8 +59,8 @@ function buildPoolsCols(t: TFunction): DataColumn<SuccessionPool>[] {
 }
 function buildCandidatesCols(t: TFunction): DataColumn<SuccessorCandidate>[] {
   return [
-    { header: t("career.candidatesCols.user"), cell: (c) => <span className="text-xs text-foreground">{c.userName ?? c.userId.slice(0, 8)}</span> },
-    { header: t("career.candidatesCols.pool"), cell: (c) => <span className="text-xs text-muted-foreground">{c.poolName ?? c.poolId.slice(0, 8)}</span> },
+    { header: t("career.candidatesCols.user"), cell: (c) => <span className="text-xs text-foreground"><NomeOppure nome={c.userName} id={c.userId} /></span> },
+    { header: t("career.candidatesCols.pool"), cell: (c) => <span className="text-xs text-muted-foreground"><NomeOppure nome={c.poolName} id={c.poolId} /></span> },
     { header: t("career.candidatesCols.readiness"), cell: (c) => <StatusBadge value={c.readinessLevel} /> },
     { header: t("career.candidatesCols.status"), cell: (c) => <EnumStatusBadge domain="successorCandidateStatus" value={c.status} /> },
   ];
@@ -146,6 +148,7 @@ export default function CareerSuccessionPage() {
           <EntityTable<CareerPath>
             isLoading={paths.query.isLoading}
             isError={paths.query.isError}
+            error={paths.query.error}
             rows={paths.rows}
             server={paths.server}
             rowKey={(p) => p.careerPathId}
@@ -162,6 +165,7 @@ export default function CareerSuccessionPage() {
           <EntityTable<SuccessionPool>
             isLoading={pools.query.isLoading}
             isError={pools.query.isError}
+            error={pools.query.error}
             rows={pools.rows}
             server={pools.server}
             rowKey={(p) => p.successionPoolId}
@@ -186,15 +190,16 @@ export default function CareerSuccessionPage() {
                 height={240}
                 ariaLabel={t("career.pipelineAria")}
               />
+            ) : readinessDist.isLoading ? (
+              <StatoCaricamento />
             ) : (
-              <p className="py-10 text-center text-xs text-muted-foreground">
-                {readinessDist.isLoading ? t("common:loading") : t("career.pipelineEmpty")}
-              </p>
+              <StatoVuoto titolo={t("career.pipelineEmpty")} />
             )}
           </div>
           <EntityTable<SuccessorCandidate>
             isLoading={candidates.query.isLoading}
             isError={candidates.query.isError}
+            error={candidates.query.error}
             rows={candidates.rows}
             server={candidates.server}
             rowKey={(c) => c.successorCandidateId}

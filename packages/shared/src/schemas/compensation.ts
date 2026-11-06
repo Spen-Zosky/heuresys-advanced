@@ -28,6 +28,8 @@ export const CompensationBandSchema = z.object({
   /** #232 (000409): la specie e' DICHIARATA, non dedotta da un importo mancante. Una BAND
    *  senza `midEur` e' impossibile per CHECK; CCNL e UNION sono classificazioni (I21). */
   kind: z.enum(["BAND", "CCNL", "UNION"]),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
   metadata: z.record(z.string(), z.unknown()),
 });
 export type CompensationBand = z.infer<typeof CompensationBandSchema>;
@@ -73,6 +75,8 @@ export const CompensationProfileSchema = z.object({
   rewardGatesApplied: z.array(z.unknown()).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
   masked: z.array(z.string()).optional(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -112,6 +116,8 @@ export const RewardGateSchema = z.object({
   rewardGateId: z.uuid(),
   tenantId: z.uuid(),
   userId: z.uuid().nullable(),
+  /** F-3 (piano interfacce, L6): il nome, perché la pagina non mostri l'identificativo. */
+  userName: z.string().nullable().optional(),
   positionId: z.uuid().nullable(),
   catalogId: z.uuid(),
   catalogCode: z.string(),
@@ -231,6 +237,8 @@ export const PayrollHandoffRecordSchema = z.object({
   payload: z.record(z.string(), z.unknown()).optional(),
   handedOffAt: z.iso.datetime(),
   status: PayrollHandoffStatusSchema,
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
   createdAt: z.iso.datetime(),
   masked: z.array(z.string()).optional(),
 });

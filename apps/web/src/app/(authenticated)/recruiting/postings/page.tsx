@@ -5,10 +5,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input, EmptyState, Spinner,
+  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input,
 } from "@heuresys/ui";
 import type { JobPosting, JobPostingStatus } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { useCan } from "@/lib/api/auth";
 import {
   CODE_PATTERN, KEY, POSTING_STATUSES, POSTING_VISIBILITIES,
   usePostings, useRequisitions,
@@ -44,6 +46,8 @@ export default function PostingsPage() {
     defaultValues: { requisitionId: "", code: "", title: "", description: "", visibility: "INTERNAL", location: "", expiresOn: "" },
   });
 
+  // S-5: creare e cambiare stato chiedono `requisition:manage`; senza, la pagina è in sola lettura.
+  const canWrite = useCan("requisition:manage");
   const create = useMutation({
     mutationFn: (v: FormValues) =>
       apiFetch<JobPosting>("/v1/job-postings", {
@@ -90,6 +94,7 @@ export default function PostingsPage() {
     <main data-testid="postings-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader title={t("recruiting.postings.title")} description={t("recruiting.postings.description")} />
 
+      {canWrite && (
       <Card>
         <CardHeader><CardTitle>{t("recruiting.postings.newTitle")}</CardTitle></CardHeader>
         <CardContent>
@@ -141,13 +146,14 @@ export default function PostingsPage() {
           )}
         </CardContent>
       </Card>
+      )}
 
       {q.isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
+        <StatoCaricamento />
       ) : q.isError ? (
-        <p className="text-sm text-danger" data-testid="postings-error">{t("recruiting.error")}</p>
+        <StatoErrore errore={q.error} titolo={t("recruiting.error")} testId="postings-error" onRiprova={() => void q.refetch()} />
       ) : items.length === 0 ? (
-        <EmptyState data-testid="postings-empty" title={t("recruiting.postings.emptyTitle")} description={t("recruiting.postings.emptyDesc")} />
+        <StatoVuoto testId="postings-empty" titolo={t("recruiting.postings.emptyTitle")} motivo={t("recruiting.postings.emptyDesc")} />
       ) : (
         <div className="overflow-x-auto rounded-card border border-border">
           <table className="w-full text-sm" data-testid="postings-table">
@@ -170,7 +176,7 @@ export default function PostingsPage() {
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
                       <Badge data-testid="posting-row-status">{t(`recruiting.postingStatus.${p.status}`)}</Badge>
-                      <select
+                      {canWrite && <select
                         aria-label={t("recruiting.fields.status")}
                         data-testid="posting-row-status-select"
                         className={SELECT_CLASS}
@@ -181,7 +187,7 @@ export default function PostingsPage() {
                         {POSTING_STATUSES.map((s) => (
                           <option key={s} value={s}>{t(`recruiting.postingStatus.${s}`)}</option>
                         ))}
-                      </select>
+                      </select>}
                     </div>
                   </td>
                 </tr>

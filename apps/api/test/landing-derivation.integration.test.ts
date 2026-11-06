@@ -18,7 +18,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
-import { landingForPermissions, DASHBOARD_PERMISSION } from "@heuresys/shared";
+import { landingForPermissions, DASHBOARD_PERMISSION, COMPANY_DASHBOARD_PERMISSION, COMPANY_DASHBOARD_ROUTE } from "@heuresys/shared";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { userPermissionCodes } from "../src/middleware/rbac.js";
@@ -86,6 +86,19 @@ describe("#116 — the landing is derived from the permission", () => {
       wrong.map((r) => `${r.role_code} (grants=${r.grants_dashboard})`),
       "these roles land somewhere their grants do not justify",
     ).toEqual([]);
+  });
+
+  // V-14: chi ha il cruscotto Azienda e non quello generale (oggi il CEO) arriva li', non su /me;
+  // e nessuno arriva sul cruscotto Azienda senza poterlo vedere.
+  it("sends a role to the company dashboard iff it may view it and not the general one", () => {
+    const wrong = roles.filter((r) => {
+      const perms = userPermissionCodes({ roles: [r.role_code] });
+      const atteso = perms.includes(DASHBOARD_PERMISSION)
+        ? "/dashboard"
+        : perms.includes(COMPANY_DASHBOARD_PERMISSION) ? COMPANY_DASHBOARD_ROUTE : "/me";
+      return landingForPermissions(perms) !== atteso;
+    });
+    expect(wrong.map((r) => r.role_code), "these roles land on the wrong page").toEqual([]);
   });
 
   /**

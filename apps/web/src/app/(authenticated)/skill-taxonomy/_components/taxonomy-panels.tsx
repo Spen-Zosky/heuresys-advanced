@@ -180,9 +180,10 @@ export function SkillFamiliesPanel() {
           />
         </div>
 
-        <EntityTable<SkillFamily>
+        <EntityTable<SkillFamily> originPath={"/v1/skill-families"}
           isLoading={families.isLoading}
           isError={families.isError}
+          error={families.error}
           errorMessage={t("taxonomy.loadError")}
           rows={families.data?.items ?? []}
           rowKey={(f) => f.skillFamilyId}
@@ -435,9 +436,10 @@ export function SkillCategoriesPanel() {
           </div>
         </div>
 
-        <EntityTable<SkillCategory>
+        <EntityTable<SkillCategory> originPath={"/v1/skill-categories"}
           isLoading={categories.isLoading}
           isError={categories.isError}
+          error={categories.error}
           errorMessage={t("taxonomy.loadError")}
           rows={categories.data?.items ?? []}
           rowKey={(c) => c.skillCategoryId}
@@ -587,9 +589,10 @@ export function ProficiencyLevelsPanel() {
         {/* L'API espone SOLO l'elenco: nessun pannello di modifica, perché non
             esiste l'endpoint per farlo. Meglio dirlo che simularlo. */}
         <p className="text-sm text-muted-foreground">{t("taxonomy.levels.readOnlyNote")}</p>
-        <EntityTable<SkillProficiencyLevel>
+        <EntityTable<SkillProficiencyLevel> originPath={"/v1/skill-proficiency-levels"}
           isLoading={levels.isLoading}
           isError={levels.isError}
+          error={levels.error}
           errorMessage={t("taxonomy.loadError")}
           rows={levels.data?.items ?? []}
           rowKey={(l) => l.proficiencyLevelId}

@@ -32,7 +32,7 @@ const createdPoolIds: string[] = [];
 describe("/v1/successor-readiness integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     const managerS = await login(suite, "paolo.caputo@rtl-bank.org");
     const p = await pool.query<{ position_id: string }>(
       `SELECT position_id FROM sys.sys_positions WHERE position_owner_user_id = (SELECT user_id FROM sys.sys_users WHERE lower(user_email) = 'paolo.caputo@rtl-bank.org') LIMIT 1`,

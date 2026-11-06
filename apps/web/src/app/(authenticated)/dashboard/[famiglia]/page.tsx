@@ -10,11 +10,11 @@
  * vista: così una famiglia nuova, o una vista in più, non chiede una riga di frontend.
  * Scrivere otto pagine gemelle avrebbe riportato a mano ciò che M3 esiste per derivare.
  *
- * LA FAMIGLIA SI TROVA PER ROUTE, non da una mappa segmento→codice. Le route sono in
- * italiano (`/dashboard/azienda`) e i codici in inglese (`company`); tenere una tabella di
- * corrispondenza qui significherebbe una seconda verità che invecchia da sola. La pagina
- * confronta invece il proprio percorso con `route` del catalogo: la corrispondenza la
- * dichiara il database, che è dove sta già.
+ * LA FAMIGLIA SI TROVA PER ROUTE, non da una mappa segmento→codice. Dal 2026-11-04 (F-9)
+ * la route È il codice (`/dashboard/company` per `company`): menu, API e giro usano la
+ * stessa parola, e le vecchie route in italiano rimandano qui (`next.config.js`). La
+ * pagina confronta comunque il proprio percorso con `route` del catalogo, così la
+ * corrispondenza resta dichiarata dal database e non da una tabella qui.
  *
  * LE TRE MODALITÀ SI DISEGNANO TUTTE E TRE, e la mascherata NON è uno stato vuoto:
  * ADR-0032 vuole che la vista resti visibile mentre i valori sono trattenuti, con il perché
@@ -34,14 +34,11 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  DataTable,
-  EmptyState,
-  ErrorState,
   PageHeader,
   Sparkline,
-  Spinner,
   StatsCard,
 } from "@heuresys/ui";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { LayoutDashboard, Lock, EyeOff } from "lucide-react";
 import type {
   DashboardBlockData,
@@ -49,9 +46,12 @@ import type {
   DashboardDataResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
+import { EntityTable } from "../../../../components/data-table-panel";
 
 /** Le viste con valori si disegnano per forma; le altre dicono perché non li hanno. */
 function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
+  const { i18n } = useTranslation();
+  const lingua = i18n.language;
   if (v.content === null) {
     const negata = v.access === "denied";
     return (
@@ -93,7 +93,7 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
         </CardHeader>
         <CardContent>
           {v.content.counters.length === 0 ? (
-            <EmptyState title={t("dashboard.famiglie.vuotoValori")} />
+            <StatoVuoto titolo={t("dashboard.famiglie.vuotoValori")} />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {v.content.counters.map((c) => (
@@ -115,7 +115,7 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
         </CardHeader>
         <CardContent>
           {punti.length === 0 ? (
-            <EmptyState title={t("dashboard.famiglie.vuotoAndamento")} />
+            <StatoVuoto titolo={t("dashboard.famiglie.vuotoAndamento")} />
           ) : (
             <>
               <Sparkline data={punti.map((p) => p.value)} />
@@ -138,14 +138,20 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
       </CardHeader>
       <CardContent>
         {righe.length === 0 ? (
-          <EmptyState title={t("dashboard.famiglie.vuotoRighe")} />
+          <StatoVuoto titolo={t("dashboard.famiglie.vuotoRighe")} />
         ) : (
-          <DataTable
-            data={righe}
+          // V-9: la tabella del pacchetto UI scrive la paginazione in inglese; EntityTable la
+          // scrive nella lingua della persona.
+          <EntityTable originPath={"/v1/dashboard/catalog"}
+            isLoading={false}
+            isError={false}
+            rows={righe}
+            rowKey={(r) => r.id}
+            caption={v.name}
             columns={[
-              { accessorKey: "label", header: t("dashboard.famiglie.colonnaVoce") },
-              { accessorKey: "detail", header: t("dashboard.famiglie.colonnaDettaglio") },
-              { accessorKey: "value", header: t("dashboard.famiglie.colonnaValore") },
+              { header: t("dashboard.famiglie.colonnaVoce"), cell: (r) => r.label },
+              { header: t("dashboard.famiglie.colonnaDettaglio"), cell: (r) => r.detail ?? "—" },
+              { header: t("dashboard.famiglie.colonnaValore"), align: "right", cell: (r) => (r.value === null ? "—" : r.value.toLocaleString(lingua)) },
             ]}
           />
         )}
@@ -177,18 +183,26 @@ export default function CruscottoDiFamigliaPage() {
     enabled: famiglia !== null,
   });
 
-  if (catalogo.isLoading) return <Spinner />;
-  if (catalogo.isError) return <ErrorState title={t("dashboard.famiglie.catalogoIrraggiungibile")} />;
+  if (catalogo.isLoading) return <StatoCaricamento />;
+  if (catalogo.isError) {
+    return (
+      <StatoErrore
+        errore={catalogo.error}
+        titolo={t("dashboard.famiglie.catalogoIrraggiungibile")}
+        onRiprova={() => void catalogo.refetch()}
+      />
+    );
+  }
 
   // Il catalogo contiene SOLO ciò a cui l'attore ha diritto: se la famiglia non c'è, o non
   // esiste o non è sua — e in entrambi i casi la risposta onesta è la stessa, senza
   // rivelare quale dei due (nessuna enumerazione).
   if (famiglia === null) {
     return (
-      <EmptyState
-        data-testid="cruscotto-non-disponibile"
-        title={t("dashboard.famiglie.nonDisponibileTitolo")}
-        description={t("dashboard.famiglie.nonDisponibileTesto")}
+      <StatoVuoto
+        testId="cruscotto-non-disponibile"
+        titolo={t("dashboard.famiglie.nonDisponibileTitolo")}
+        motivo={t("dashboard.famiglie.nonDisponibileTesto")}
       />
     );
   }
@@ -208,8 +222,14 @@ export default function CruscottoDiFamigliaPage() {
         }
       />
 
-      {dati.isLoading && <Spinner />}
-      {dati.isError && <ErrorState title={t("dashboard.famiglie.datiIrraggiungibili")} />}
+      {dati.isLoading && <StatoCaricamento />}
+      {dati.isError && (
+        <StatoErrore
+          errore={dati.error}
+          titolo={t("dashboard.famiglie.datiIrraggiungibili")}
+          onRiprova={() => void dati.refetch()}
+        />
+      )}
 
       {dati.data && (
         <div className="grid gap-4 lg:grid-cols-2">

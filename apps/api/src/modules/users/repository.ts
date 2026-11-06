@@ -316,6 +316,8 @@ interface RawGrantRow {
   user_auth_role_tenant_id: string | null;
   user_auth_role_granted_at: Date;
   user_auth_role_granted_by: string | null;
+  user_auth_role_act_id: string | null;
+  review_by: string | null;
 }
 
 function rowToGrant(r: RawGrantRow): RoleGrant {
@@ -325,6 +327,8 @@ function rowToGrant(r: RawGrantRow): RoleGrant {
     tenantId: r.user_auth_role_tenant_id,
     grantedAt: r.user_auth_role_granted_at.toISOString(),
     grantedBy: r.user_auth_role_granted_by,
+    actId: r.user_auth_role_act_id,
+    reviewBy: r.review_by,
   };
 }
 
@@ -335,7 +339,8 @@ export async function listRoleGrantsForUser(
   const res = await q.query<RawGrantRow>(
     `SELECT uar.user_auth_role_id, r.auth_role_code AS role_code,
             uar.user_auth_role_tenant_id, uar.user_auth_role_granted_at,
-            uar.user_auth_role_granted_by
+            uar.user_auth_role_granted_by, uar.user_auth_role_act_id,
+            to_char(uar.user_auth_role_review_by, 'YYYY-MM-DD') AS review_by
        FROM sys.sys_user_auth_roles uar
        JOIN sys.sys_auth_roles r ON r.auth_role_id = uar.user_auth_role_role_id
       WHERE uar.user_auth_role_user_id = $1
@@ -398,7 +403,8 @@ export async function insertRoleGrant(
       RETURNING user_auth_role_id,
                 (SELECT auth_role_code FROM sys.sys_auth_roles WHERE auth_role_id = $2) AS role_code,
                 user_auth_role_tenant_id, user_auth_role_granted_at,
-                user_auth_role_granted_by`,
+                user_auth_role_granted_by, user_auth_role_act_id,
+                to_char(user_auth_role_review_by, 'YYYY-MM-DD') AS review_by`,
     [params.userId, params.roleId, params.tenantId, params.grantedBy],
   );
   return rowToGrant(res.rows[0]!);
@@ -420,16 +426,24 @@ export async function revokeRoleGrant(
 export async function findGrantById(
   q: DbConnector,
   grantId: string,
-): Promise<{ grantId: string; userId: string; tenantId: string | null; revokedAt: Date | null } | null> {
+): Promise<{
+  grantId: string; userId: string; tenantId: string | null; revokedAt: Date | null;
+  roleId: string; roleCode: string;
+} | null> {
   const res = await q.query<{
     user_auth_role_id: string;
     user_auth_role_user_id: string;
     user_auth_role_tenant_id: string | null;
     user_auth_role_revoked_at: Date | null;
+    user_auth_role_role_id: string;
+    role_code: string;
   }>(
-    `SELECT user_auth_role_id, user_auth_role_user_id,
-            user_auth_role_tenant_id, user_auth_role_revoked_at
-       FROM sys.sys_user_auth_roles WHERE user_auth_role_id = $1`,
+    `SELECT g.user_auth_role_id, g.user_auth_role_user_id,
+            g.user_auth_role_tenant_id, g.user_auth_role_revoked_at,
+            g.user_auth_role_role_id, r.auth_role_code AS role_code
+       FROM sys.sys_user_auth_roles g
+       JOIN sys.sys_auth_roles r ON r.auth_role_id = g.user_auth_role_role_id
+      WHERE g.user_auth_role_id = $1`,
     [grantId],
   );
   if (!res.rows[0]) return null;
@@ -438,5 +452,7 @@ export async function findGrantById(
     userId: res.rows[0].user_auth_role_user_id,
     tenantId: res.rows[0].user_auth_role_tenant_id,
     revokedAt: res.rows[0].user_auth_role_revoked_at,
+    roleId: res.rows[0].user_auth_role_role_id,
+    roleCode: res.rows[0].role_code,
   };
 }

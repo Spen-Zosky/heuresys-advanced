@@ -8,8 +8,23 @@
 import fp from "fastify-plugin";
 import type { FastifyPluginAsync, FastifyRequest } from "fastify";
 import { COOKIES } from "../config/constants.js";
-import { UnauthorizedError } from "../errors/index.js";
+import { ForbiddenError, UnauthorizedError } from "../errors/index.js";
 import type { RoleCode } from "../config/constants.js";
+import { pool } from "../db/client.js";
+
+/**
+ * Piano interfacce L9, A-1/A-2/A-3 (ADR-0050 D6): chi chiama è un AGENTE che agisce per conto
+ * della persona del token (`sub`). Lo porta solo il gettone emesso da
+ * `POST /v1/auth/agent-tokens` (claim `agt`, e `scp` quando il compito restringe i permessi).
+ */
+export interface AgenteDelGettone {
+  /** Il codice dell'agente (come in `x-heuresys-superficie: agente:<codice>`). */
+  codice: string;
+  /** Il compito dichiarato da chi ha emesso il gettone. */
+  compito: string;
+  /** A-2: i soli permessi del compito; null = tutti quelli dei ruoli del gettone. */
+  permessi: ReadonlySet<string> | null;
+}
 
 export interface AuthUser {
   userId: string;
@@ -24,6 +39,10 @@ export interface AuthUser {
    *  Such sessions carry roles [] so every requirePermission() denies them; the only
    *  usable surface is the MFA self-service enrollment under /v1/auth/mfa. */
   enrollmentOnly?: boolean;
+  /** ADR-0050 D5: ultima verifica del secondo fattore della sessione (claim `sua`, secondi epoch). */
+  stepUpAt?: number;
+  /** A-1: presente solo se chi chiama è un agente per conto di `userId` (claim `agt`). */
+  agente?: AgenteDelGettone;
 }
 
 declare module "fastify" {
@@ -45,6 +64,11 @@ declare module "@fastify/jwt" {
       jti?: string;
       fam?: string;
       enr?: boolean;
+      sua?: number;
+      /** A-1: gettone d'agente — codice e compito. */
+      agt?: { cod: string; cmp: string };
+      /** A-2: permessi del compito. */
+      scp?: string[];
       iat?: number;
       exp?: number;
       iss?: string;
@@ -74,6 +98,35 @@ const ENR_ALLOW_PREFIXES = [
   "/readyz",
 ];
 
+/**
+ * A-3: un gettone d'agente non tocca l'autenticazione. Non rinnova (non c'è niente da rinnovare:
+ * scaduto, si ripassa dalla persona), non conferma il secondo fattore, non chiede un altro gettone,
+ * non chiude la sessione della persona. Legge solo chi è (`GET /v1/auth/me`).
+ */
+function agenteSuAutenticazione(method: string, url: string): boolean {
+  if (!url.startsWith("/v1/auth/") && url !== "/v1/auth") return false;
+  const percorso = url.split("?", 1)[0];
+  return !(method === "GET" && percorso === "/v1/auth/me");
+}
+
+/**
+ * Il gettone vive al più quanto la sessione della persona da cui nasce: chiusa la sessione
+ * (uscita, revoca, cambio di parola d'ordine), il gettone smette di valere subito, non alla
+ * sua scadenza. Solo per i gettoni d'agente: le sessioni delle persone restano senza database.
+ */
+async function sessioneDellaPersonaViva(familyId: string, userId: string): Promise<boolean> {
+  const { rowCount } = await pool.query(
+    `SELECT 1 FROM sys.sys_auth_refresh_tokens
+      WHERE auth_refresh_token_family_id = $1
+        AND auth_refresh_token_user_id = $2
+        AND auth_refresh_token_revoked_at IS NULL
+        AND auth_refresh_token_expires_at > now()
+      LIMIT 1`,
+    [familyId, userId],
+  );
+  return (rowCount ?? 0) > 0;
+}
+
 const plugin: FastifyPluginAsync = async (app) => {
   // Try to decode the JWT from the access cookie on every request. Failure
   // is non-fatal here — req.user remains undefined and downstream RBAC will
@@ -89,7 +142,22 @@ const plugin: FastifyPluginAsync = async (app) => {
         jti?: string;
         fam?: string;
         enr?: boolean;
+        sua?: number;
+        agt?: { cod: string; cmp: string };
+        scp?: string[];
       }>(token);
+      const agt = payload.agt;
+      if (agt) {
+        // Un gettone d'agente senza la sessione della persona viva non vale: niente utente.
+        if (
+          typeof agt.cod !== "string" ||
+          typeof agt.cmp !== "string" ||
+          !payload.fam ||
+          !(await sessioneDellaPersonaViva(payload.fam, payload.sub))
+        ) {
+          return;
+        }
+      }
       req.user = {
         userId: payload.sub,
         tenantId: payload.tenant_id,
@@ -97,13 +165,30 @@ const plugin: FastifyPluginAsync = async (app) => {
         jti: payload.jti,
         familyId: payload.fam,
         enrollmentOnly: payload.enr === true,
+        ...(typeof payload.sua === "number" ? { stepUpAt: payload.sua } : {}),
+        ...(agt
+          ? {
+              agente: {
+                codice: agt.cod,
+                compito: agt.cmp,
+                permessi: Array.isArray(payload.scp) ? new Set(payload.scp) : null,
+              },
+            }
+          : {}),
       };
     } catch (err) {
       // Token invalid / expired — leave req.user undefined; RBAC handles 401.
       req.log.debug({ err }, "JWT verify failed");
     }
     // OUTSIDE the try/catch (the catch above swallows verify failures and must
-    // never swallow this): enforce the enrollment-only allowlist.
+    // never swallow this): A-3, l'agente resta fuori dall'autenticazione.
+    if (req.user?.agente && agenteSuAutenticazione(req.method, req.url)) {
+      throw new ForbiddenError(
+        "An agent token cannot use the authentication surface: the person acts there",
+        "AGENT_FORBIDDEN_AUTH",
+      );
+    }
+    // Same: enforce the enrollment-only allowlist.
     if (req.user?.enrollmentOnly && !ENR_ALLOW_PREFIXES.some((p) => req.url.startsWith(p))) {
       throw new UnauthorizedError(
         "MFA enrollment required before this session can be used",

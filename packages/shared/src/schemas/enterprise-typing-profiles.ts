@@ -27,6 +27,13 @@ export const EnterpriseTypingProfileSchema = z.object({
 export type EnterpriseTypingProfile = z.infer<typeof EnterpriseTypingProfileSchema>;
 
 export const EnterpriseTypingProfileListQuerySchema = z.object({
+  /**
+   * F-3 (piano interfacce, L6): la scheda di un tenant chiede il SUO profilo. Prima il
+   * parametro non esisteva e veniva scartato, così la piattaforma vedeva sotto ogni tenant
+   * i profili di tutti. Vale solo per la piattaforma: per gli altri il perimetro resta il
+   * proprio tenant, qualunque cosa chiedano.
+   */
+  tenantId: z.uuid().optional(),
   regulatoryIntensity: RegulatoryIntensitySchema.optional(),
   industryClassId: z.uuid().optional(),
   sizeBandId: z.uuid().optional(),

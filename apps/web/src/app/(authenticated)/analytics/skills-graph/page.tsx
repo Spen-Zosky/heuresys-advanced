@@ -24,8 +24,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, EmptyState, Input, KGGraphCanvas, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge, Input, KGGraphCanvas, PageHeader, StatsCard } from "@heuresys/ui";
 import { Network, Share2, Waypoints } from "lucide-react";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import type { Skill, SkillGraphResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 
@@ -118,19 +119,20 @@ export default function SkillsGraphPage() {
         )}
 
         {rootId === null ? (
-          <EmptyState
-            data-testid="skills-graph-empty"
-            title={t("skillsGraph.pickTitle")}
-            description={t("skillsGraph.pickDescription")}
+          <StatoVuoto
+            testId="skills-graph-empty"
+            titolo={t("skillsGraph.pickTitle")}
+            motivo={t("skillsGraph.pickDescription")}
           />
         ) : graph.isLoading ? (
-          <span data-testid="skills-graph-loading" className="text-sm text-muted-foreground">
-            {t("common:loading")}
-          </span>
+          <StatoCaricamento testId="skills-graph-loading" />
         ) : graph.isError ? (
-          <p data-testid="skills-graph-error" className="text-sm text-danger">
-            {t("error")}
-          </p>
+          <StatoErrore
+            errore={graph.error}
+            titolo={t("error")}
+            testId="skills-graph-error"
+            onRiprova={() => void graph.refetch()}
+          />
         ) : d ? (
           <>
             <div className="grid gap-4 sm:grid-cols-3">

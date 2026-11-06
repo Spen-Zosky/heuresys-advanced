@@ -56,7 +56,7 @@ test.describe("compensation intelligence — comp & reward read panels (#32 A/L7
     await expect(panel).toBeVisible({ timeout: 20_000 });
 
     // Il periodo e l'importo in archivio arrivano dal calcolo vero.
-    await expect(panel).toContainText(/\d{4}-\d{2}-\d{2}\s+→\s+\d{4}-\d{2}-\d{2}/);
+    await expect(panel).toContainText(/\d{2}\/\d{2}\/\d{4}\s+→\s+\d{2}\/\d{2}\/\d{4}/);
 
     // Il verdetto sui cancelli c'e' sempre: o li elenca, o dice che non ce ne sono.
     await expect(page.getByTestId("comp-evaluation-gates")).toBeVisible();

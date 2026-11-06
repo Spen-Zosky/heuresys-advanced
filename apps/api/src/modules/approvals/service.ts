@@ -106,12 +106,18 @@ const toStepDetail = (r: repo.ApprovalStepDetailRow): ApprovalStepDetail => ({
   ...toStep(r),
   approverEmail: r.approverEmail,
   approverName: r.approverName,
+  decidedByName: r.decidedByName,
 });
 
 const toListItem = (r: repo.ApprovalRequestListRow): ApprovalRequestListItem => ({
   ...toRequest(r),
   stepCount: r.stepCount,
   pendingStepCount: r.pendingStepCount,
+  processId: r.processId,
+  processName: r.processName,
+  processStepId: r.processStepId,
+  processStepName: r.processStepName,
+  delegatedStepCount: r.delegatedStepCount,
 });
 
 interface ChainPlan {
@@ -216,12 +222,20 @@ export const approvalService = {
   },
 
   async listRequests(a: ActorContext, query: ApprovalListQuery): Promise<ApprovalListResponse> {
-    const items = await repo.listRequests(pool, await buildReadScope(a), {
-      status: query.status,
-      resourceType: query.resourceType,
-      limit: query.limit ?? DEFAULT_LIST_LIMIT,
-    });
-    return { items: items.map(toListItem), total: items.length };
+    const scope = await buildReadScope(a);
+    const base = { status: query.status, resourceType: query.resourceType };
+    const [page, processes] = await Promise.all([
+      repo.listRequests(pool, scope, {
+        ...base,
+        processId: query.processId,
+        processStepId: query.processStepId,
+        limit: query.limit ?? DEFAULT_LIST_LIMIT,
+        offset: query.offset ?? 0,
+      }),
+      repo.listProcessFacets(pool, scope, base),
+    ]);
+    // V-1 (D-27): `total` e' il conteggio dell'insieme filtrato, non la lunghezza della pagina.
+    return { items: page.rows.map(toListItem), total: page.total, processes };
   },
 
   /**
@@ -304,6 +318,7 @@ export const approvalService = {
       const newStatus = body.decision === "APPROVE" ? "APPROVED" : "REJECTED";
       const step = await repo.decideStepGuarded(
         client, stepId, newStatus, body.comment ?? null, a.userId, onBehalf?.delegationId ?? null,
+        a.agente ? { codice: a.agente.codice, compito: a.agente.compito } : null,
       );
       if (!step) throw new ConflictError("This step was already decided", "ALREADY_DECIDED");
 

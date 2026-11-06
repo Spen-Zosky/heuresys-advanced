@@ -113,7 +113,7 @@ async function seminaCandidato(tenantId: string, etichetta: string): Promise<str
 describe("/v1/candidate-applications/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenant = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenant = await login(suite, "governo@collaudo.invalid");
     semplice = await login(suite, "tommaso.fiore@rtl-bank.org");
 
     const t = await pool.query<{ tenant_id: string; tenant_name: string }>(

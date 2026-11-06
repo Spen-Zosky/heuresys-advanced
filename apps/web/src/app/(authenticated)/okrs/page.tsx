@@ -9,6 +9,7 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusPill } from "@/components/enum-badge";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { OkrCheckInsDialog } from "@/components/okr-checkins-dialog";
+import { useFormat, type Formati } from "@/lib/format";
 
 function toneForStatus(s: string): "info" | "success" | "warning" | "danger" | "neutral" {
   if (s === "ACHIEVED") return "success";
@@ -16,12 +17,12 @@ function toneForStatus(s: string): "info" | "success" | "warning" | "danger" | "
   if (s === "ACTIVE") return "info";
   return "neutral";
 }
-function buildColumns(t: TFunction, enumLabel: EnumLabelFn, onCheckIns: (o: Okr) => void): DataColumn<Okr>[] {
+function buildColumns(t: TFunction, enumLabel: EnumLabelFn, onCheckIns: (o: Okr) => void, fmt: Formati): DataColumn<Okr>[] {
   return [
     { header: t("okrs.cols.objective"), cell: (o) => <span className="font-medium text-foreground">{o.objective}</span> },
     { header: t("okrs.cols.type"), cell: (o) => <span className="text-xs text-muted-foreground">{enumLabel("okrType", o.okrType)}</span> },
-    { header: t("okrs.cols.period"), cell: (o) => <span className="text-xs text-muted-foreground">{o.periodStart} → {o.periodEnd}</span> },
-    { header: t("okrs.cols.progress"), cell: (o) => <span className="text-xs text-muted-foreground">{o.overallProgress}%</span> },
+    { header: t("okrs.cols.period"), cell: (o) => <span className="text-xs text-muted-foreground">{fmt.data(o.periodStart)} → {fmt.data(o.periodEnd)}</span> },
+    { header: t("okrs.cols.progress"), cell: (o) => <span className="text-xs text-muted-foreground">{fmt.percento(o.overallProgress, "0-100")}</span> },
     { header: t("shared.status"), cell: (o) => <EnumStatusPill domain="okrStatus" value={o.status} tone={toneForStatus(o.status)} /> },
     {
       header: "", align: "right",
@@ -35,9 +36,10 @@ function buildColumns(t: TFunction, enumLabel: EnumLabelFn, onCheckIns: (o: Okr)
 }
 export default function OkrsPage() {
   const { t } = useTranslation("hr");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const [active, setActive] = useState<Okr | null>(null);
-  const columns = useMemo(() => buildColumns(t, enumLabel, setActive), [t, enumLabel]);
+  const columns = useMemo(() => buildColumns(t, enumLabel, setActive, fmt), [t, enumLabel, fmt]);
   // C4 (#42): server-side pagination (was `?limit=200`).
   const okrs = usePaginatedList<Okr>({ queryKey: ["okrs", "list"], path: "/v1/okrs" });
   return (
@@ -46,7 +48,7 @@ export default function OkrsPage() {
         pageTestId="okrs-page" titleTestId="okrs-title" countTestId="okrs-count"
         title={t("okrs.title")} description={t("okrs.description")}
         count={okrs.query.data ? t("okrs.count", { count: okrs.total }) : undefined}
-        isLoading={okrs.query.isLoading} isError={okrs.query.isError} errorMessage={t("okrs.errorMessage")}
+        isLoading={okrs.query.isLoading} isError={okrs.query.isError} error={okrs.query.error} errorMessage={t("okrs.errorMessage")}
         rows={okrs.rows} server={okrs.server} rowKey={(o) => o.okrId} rowTestId="okrs-row" columns={columns}
         emptyTestId="okrs-empty" emptyTitle={t("okrs.emptyTitle")} emptyDescription={t("okrs.emptyDescription")} caption={t("okrs.caption")}
       />

@@ -41,7 +41,7 @@ const PERCORSO = resolve(REPO, "apps", "web", "tests", ".auth", "totp-secrets.js
 // Le sei persone della suite (apps/web/tests/e2e/fixtures.ts, PERSONAS). Elenco esplicito,
 // non «tutti i fattori»: il deposito porta il minimo che la suite usa.
 const PERSONE = [
-  "enzo.spenuso@heuresys.com",
+  "platform-test-admin@collaudo.invalid", // fixtures.ts platformAdmin (#258: non è più la persona di Enzo)
   "federica.marchetti@rtl-bank.org",
   "paolo.caputo@rtl-bank.org",
   "tommaso.fiore@rtl-bank.org",

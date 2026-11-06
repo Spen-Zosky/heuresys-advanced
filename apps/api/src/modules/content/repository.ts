@@ -69,6 +69,7 @@ export interface VersionRow {
   body: string | null;
   bodyFormat: string;
   authorUserId: string | null;
+  authorName: string | null;
   changeNote: string | null;
   metadata: Record<string, unknown>;
   createdAt: string;
@@ -203,7 +204,9 @@ function mapDocument(r: Record<string, unknown>): DocumentRow {
 }
 
 const VER_COLS = `version_id, version_tenant_id, version_document_id, version_number, version_title, version_body,
-  version_body_format, version_author_user_id, version_change_note, version_metadata, created_at`;
+  version_body_format, version_author_user_id, version_change_note, version_metadata, created_at,
+  (SELECT u.user_display_name FROM sys.sys_users u
+    WHERE u.user_id = version_author_user_id AND u.user_tenant_id = version_tenant_id) AS version_author_name`;
 
 function mapVersion(r: Record<string, unknown>): VersionRow {
   return {
@@ -215,6 +218,7 @@ function mapVersion(r: Record<string, unknown>): VersionRow {
     body: (r.version_body as string | null) ?? null,
     bodyFormat: r.version_body_format as string,
     authorUserId: (r.version_author_user_id as string | null) ?? null,
+    authorName: (r.version_author_name as string | null) ?? null,
     changeNote: (r.version_change_note as string | null) ?? null,
     metadata: (r.version_metadata as Record<string, unknown>) ?? {},
     createdAt: iso(r.created_at),

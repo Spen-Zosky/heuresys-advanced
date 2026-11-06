@@ -30,9 +30,12 @@ import { useEnumLabel } from "@/lib/enum-labels";
 import { EntityTable } from "@/components/data-table-panel";
 import { isApiError } from "@/lib/api/errors";
 import { apiFetch } from "@/lib/api/fetch";
+import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoVuoto } from "@/components/stato-pagina";
 
 export default function MeTimeOffPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const qc = useQueryClient();
 
@@ -79,11 +82,11 @@ export default function MeTimeOffPage() {
   const requestColumns = useMemo(
     () => [
       { header: t("timeOff.colType"), cell: (r: TimeOffRequest) => <span className="text-sm">{enumLabel("leaveType", r.leaveType)}</span> },
-      { header: t("timeOff.colPeriod"), cell: (r: TimeOffRequest) => <span className="tabular-nums text-xs">{r.startDate} → {r.endDate}</span> },
+      { header: t("timeOff.colPeriod"), cell: (r: TimeOffRequest) => <span className="tabular-nums text-xs">{fmt.data(r.startDate)} → {fmt.data(r.endDate)}</span> },
       { header: t("timeOff.colDays"), align: "right" as const, cell: (r: TimeOffRequest) => <span className="tabular-nums">{r.daysRequested}</span> },
       { header: t("timeOff.colStatus"), cell: (r: TimeOffRequest) => <EnumStatusBadge domain="timeOffStatus" value={r.status} /> },
     ],
-    [t, enumLabel],
+    [t, enumLabel, fmt],
   );
 
   return (
@@ -99,16 +102,16 @@ export default function MeTimeOffPage() {
         <CardHeader><CardTitle>{t("timeOff.balancesTitle")}</CardTitle></CardHeader>
         <CardContent>
           {attendance.isLoading ? (
-            <p className="p-2 text-sm text-muted-foreground">{t("common:loading")}</p>
+            <StatoCaricamento />
           ) : balances.length === 0 ? (
-            <p className="p-2 text-sm text-muted-foreground" data-testid="me-time-off-balances-empty">{t("timeOff.balancesEmpty")}</p>
+            <StatoVuoto titolo={t("timeOff.balancesEmpty")} testId="me-time-off-balances-empty" />
           ) : (
             <div className="grid gap-3 sm:grid-cols-3" data-testid="me-time-off-balances">
               {balances.map((b) => (
                 <div key={`${b.leaveType}-${b.year}`} className="rounded-control border border-border bg-muted/40 p-3">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">{enumLabel("leaveType", b.leaveType)} · {b.year}</p>
                   <p className="mt-1 text-lg font-semibold text-foreground tabular-nums">
-                    {b.totalDays !== null && b.usedDays !== null ? (b.totalDays + (b.carryoverDays ?? 0) - b.usedDays).toFixed(1) : "—"}
+                    {b.totalDays !== null && b.usedDays !== null ? fmt.numeroFisso(b.totalDays + (b.carryoverDays ?? 0) - b.usedDays, 1) : "—"}
                     <span className="ml-1 text-xs font-normal text-muted-foreground">{t("timeOff.daysAvailable")}</span>
                   </p>
                   <p className="text-xs text-muted-foreground tabular-nums">
@@ -187,9 +190,10 @@ export default function MeTimeOffPage() {
       <Card>
         <CardHeader><CardTitle>{t("timeOff.historyTitle")}</CardTitle></CardHeader>
         <CardContent className="p-0">
-          <EntityTable<TimeOffRequest>
+          <EntityTable<TimeOffRequest> originPath={"/v1/me/time-off/requests"}
             isLoading={requests.isLoading}
             isError={requests.isError}
+            error={requests.error}
             errorMessage={t("timeOff.historyError")}
             rows={requests.data?.items ?? []}
             rowKey={(r) => r.requestId}

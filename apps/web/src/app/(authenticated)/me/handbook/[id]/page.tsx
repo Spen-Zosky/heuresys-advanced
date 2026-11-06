@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 import { Badge, Card, CardContent, CardHeader, CardTitle, PageHeader, MarkdownView } from "@heuresys/ui";
 import type { ContentDocumentDetailResponse, ListContentMediaResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 
 /**
  * ESS knowledge-base document view (cap④ CMS P2). Reads a PUBLISHED document via
@@ -31,14 +33,10 @@ function toEssMediaUrl(src: string): string {
     : src;
 }
 
-function fmtSize(n: number): string {
-  if (n >= 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
-  if (n >= 1024) return `${(n / 1024).toFixed(0)} KB`;
-  return `${n} B`;
-}
 
 export default function MeHandbookDetailPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const params = useParams<{ id: string }>();
   const id = params.id;
 
@@ -53,13 +51,24 @@ export default function MeHandbookDetailPage() {
     enabled: detail.isSuccess,
   });
 
+  if (detail.isLoading) {
+    return (
+      <main data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-4 px-6 py-8">
+        <Link href="/me/handbook" data-testid="handbook-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
+          {t("handbook.back")}
+        </Link>
+        <StatoCaricamento />
+      </main>
+    );
+  }
+
   if (detail.isError) {
     return (
       <main data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-4 px-6 py-8">
         <Link href="/me/handbook" data-testid="handbook-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {t("handbook.back")}
         </Link>
-        <p className="text-sm text-danger">{t("handbook.notFound")}</p>
+        <StatoErrore errore={detail.error} titolo={t("handbook.notFound")} onRiprova={() => void detail.refetch()} />
       </main>
     );
   }
@@ -75,7 +84,7 @@ export default function MeHandbookDetailPage() {
       </Link>
       <PageHeader
         data-testid="handbook-detail-title"
-        title={doc?.title ?? t("common:loading")}
+        title={doc?.title ?? ""}
         badges={doc ? <Badge variant="secondary">{t(`handbook.kind.${doc.kind}`)}</Badge> : undefined}
       />
       <Card>
@@ -118,7 +127,7 @@ export default function MeHandbookDetailPage() {
                     {m.filename}
                   </a>
                   <span className="shrink-0 text-xs text-muted-foreground">
-                    {m.mime} · {fmtSize(m.sizeBytes)}
+                    {m.mime} · {fmt.dimensione(m.sizeBytes)}
                   </span>
                 </li>
               ))}

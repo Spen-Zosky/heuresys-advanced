@@ -10,11 +10,14 @@ import type {
   TenantBlueprintDetail,
   TenantBlueprintVersion,
 } from "@heuresys/shared";
-import { Button, Spinner, ErrorState, EmptyState } from "@heuresys/ui";
+import { Button } from "@heuresys/ui";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { StatusPill } from "@/components/status-pill";
+import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 /**
  * #198 Tenant Builder P3, T7 — LA COSTRUZIONE: il piano prima, e la firma dopo.
@@ -45,6 +48,8 @@ export default function TenantBlueprintBuildPage({
 }) {
   const { id, n } = use(params);
   const { t } = useTranslation("blueprints");
+  const fmt = useFormat();
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
 
   /**
@@ -57,11 +62,14 @@ export default function TenantBlueprintBuildPage({
    * per questa versione», che e' proprio il ramo di ripiego.
    * Un controllo strutturale non dipende da quale copia della classe ha costruito l'oggetto.
    */
-  const erroreApi = (e: unknown): { status: number; message: string } | null =>
+  const erroreApi = (e: unknown): { status: number; message: string; serverMessage?: string } | null =>
     typeof e === "object" && e !== null && "status" in e && "code" in e
       ? {
           status: Number((e as { status: unknown }).status),
           message: String((e as { message?: unknown }).message ?? ""),
+          ...(typeof (e as { serverMessage?: unknown }).serverMessage === "string"
+            ? { serverMessage: String((e as { serverMessage?: unknown }).serverMessage) }
+            : {}),
         }
       : null;
   const perms = useCurrentUserPermissions();
@@ -104,13 +112,15 @@ export default function TenantBlueprintBuildPage({
     },
   });
 
-  if (fascicolo.isLoading || piano.isLoading) return <Spinner />;
-  if (fascicolo.isError) return <ErrorState description={t("dossier.error")} />;
+  if (fascicolo.isLoading || piano.isLoading) return <StatoCaricamento />;
+  if (fascicolo.isError) {
+    return <StatoErrore errore={fascicolo.error} titolo={t("dossier.error")} onRiprova={() => void fascicolo.refetch()} />;
+  }
 
   const versione: TenantBlueprintVersion | undefined = fascicolo.data?.versions.find(
     (v) => String(v.number) === n,
   );
-  if (!versione) return <EmptyState title={t("dossier.notFound")} />;
+  if (!versione) return <StatoVuoto titolo={t("dossier.notFound")} />;
 
   // Perché NON si può firmare — un motivo per volta, e in ordine di precedenza.
   // ⚠ SE IL PIANO NON C'E', LA FIRMA NON DEVE ACCENDERSI — difetto misurato in `#211` F4.
@@ -132,6 +142,8 @@ export default function TenantBlueprintBuildPage({
         : null;
 
   const p = piano.data;
+  // V-16: questa lista e' la configurazione delle ETICHETTE delle righe del piano, non un dato:
+  // ogni numero della tabella viene da `GET .../build-plan` (willCreate, alreadyThere).
   const righe: Array<{ chiave: keyof BuildPlanPreview["willCreate"]; etichetta: string }> = [
     { chiave: "orgUnits", etichetta: t("dossier.build.rows.orgUnits") },
     { chiave: "positions", etichetta: t("dossier.build.rows.positions") },
@@ -155,7 +167,7 @@ export default function TenantBlueprintBuildPage({
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="text-xl font-semibold text-foreground">{t("dossier.build.title")}</h1>
           <StatusPill tone={versione.status === "APPLIED" ? "success" : "info"}>
-            {versione.status}
+            {enumLabel("tenantBlueprintVersionStatus", versione.status)}
           </StatusPill>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">{t("dossier.build.description")}</p>
@@ -171,17 +183,20 @@ export default function TenantBlueprintBuildPage({
         //   caso di questa suite chiama «la pagina dice la verità sul vuoto, invece di tacere».
         //   Trovato perché `#132` F3 ha reso il modello vuoto: la pagina è diventata muta
         //   proprio quando aveva qualcosa di preciso da dire.
-        // ⚠ Il contenitore porta il `data-testid`, non `ErrorState`: quel componente viene dal
-        //   design system (`@heuresys/ui`) e NON propaga gli attributi che non conosce —
-        //   misurato, il caso E2E non trovava l'elemento. Il componente non si modifica da
-        //   qui (vive nell'altro repo), quindi il marcatore va sul contenitore.
-        <div data-testid="build-plan-error">
-          <ErrorState
-            description={
-              erroreApi(piano.error)?.message ?? t("dossier.build.planError")
-            }
-          />
-        </div>
+        // ⚠ Il `data-testid` sta sul contenitore di `StatoErrore` (il componente dei design system
+        //   non propaga gli attributi che non conosce: misurato, il caso E2E non trovava
+        //   l'elemento). Il motivo preciso del servizio resta nel titolo.
+        // ⚠ È `serverMessage`, non `message`: dal lotto L4 (F-4) `message` è il testo per la
+        //   persona ricavato dal CODICE, uguale per ogni causa dello stesso codice
+        //   («L'operazione è in conflitto…»), e aveva rifatto muta questa pagina. Il motivo
+        //   del servizio sulla costruzione è scritto per chi la decide, con i nomi del modello
+        //   e delle righe che non tornano; il testo per la persona e il codice restano sotto.
+        <StatoErrore
+          errore={piano.error}
+          titolo={erroreApi(piano.error)?.serverMessage ?? t("dossier.build.planError")}
+          testId="build-plan-error"
+          onRiprova={() => void piano.refetch()}
+        />
       ) : p ? (
         <section
           className="rounded-lg border border-border bg-card p-4"
@@ -217,10 +232,10 @@ export default function TenantBlueprintBuildPage({
                 <tr key={r.chiave} className="border-t border-border" data-testid={`build-row-${r.chiave}`}>
                   <td className="py-1 text-foreground">{r.etichetta}</td>
                   <td className="py-1 text-right tabular-nums text-foreground">
-                    {p.willCreate[r.chiave].toLocaleString()}
+                    {fmt.numero(p.willCreate[r.chiave])}
                   </td>
                   <td className="py-1 text-right tabular-nums text-muted-foreground">
-                    {p.alreadyThere[r.chiave].toLocaleString()}
+                    {fmt.numero(p.alreadyThere[r.chiave])}
                   </td>
                 </tr>
               ))}

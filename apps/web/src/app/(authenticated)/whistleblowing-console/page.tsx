@@ -27,10 +27,13 @@ import {
 } from "@heuresys/shared/schemas/whistleblowing";
 import { useMyInterfaces } from "@/lib/api/auth";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import { isApiError } from "@/lib/api/errors";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
+import { useFormat } from "@/lib/format";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -43,6 +46,7 @@ interface UpdateFormValues {
 
 export default function WhistleblowingConsolePage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -74,6 +78,9 @@ export default function WhistleblowingConsolePage() {
     }
   }, [detail.data, reset]);
 
+  // S-5: chi legge le segnalazioni senza poterle gestire vede i campi in sola lettura e
+  // nessun pulsante di salvataggio (whistleblowing:manage è il permesso della PATCH).
+  const canManage = useCan("whistleblowing:manage");
   const update = useMutation({
     mutationFn: (body: WhistleblowingUpdate) =>
       apiFetch<WhistleblowingReport>(`/v1/whistleblowing/reports/${selectedId}`, { method: "PATCH", body }),
@@ -115,10 +122,10 @@ export default function WhistleblowingConsolePage() {
       { header: t("whistleblowingConsole.columns.subject"), cell: (r) => <span className="text-foreground">{r.subject}</span> },
       {
         header: t("whistleblowingConsole.columns.submittedAt"),
-        cell: (r) => <span className="text-xs text-muted-foreground">{r.submittedAt.slice(0, 10)}</span>,
+        cell: (r) => <span className="text-xs text-muted-foreground">{fmt.data(r.submittedAt)}</span>,
       },
     ],
-    [t],
+    [t, fmt],
   );
 
   // GATE CLIENT — il commento in testa a questo file dichiarava da sempre che la console
@@ -158,24 +165,22 @@ export default function WhistleblowingConsolePage() {
         description={t("whistleblowingConsole.description")}
         badges={
           <Badge variant="secondary" data-testid="whistleblowing-console-count">
-            {reports.data ? t("whistleblowingConsole.count", { count: reports.data.total }) : t("common:loading")}
+            {reports.data ? t("whistleblowingConsole.count", { count: reports.data.total }) : reports.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />
 
-      <EntityTable<WhistleblowingListItem>
+      <EntityTable<WhistleblowingListItem> originPath={"/v1/whistleblowing/reports"}
         isLoading={reports.isLoading}
         isError={reports.isError}
+        error={reports.error}
         // Un diniego di autorizzazione non e' un guasto. Prima il 403 veniva reso come
         // «Errore di caricamento delle segnalazioni. Riprova piu' tardi o verifica la
         // connessione»: chi non ha diritto di leggere veniva invitato a insistere, e chi
         // il diritto ce l'ha non avrebbe saputo distinguere un vero problema di rete.
         // `ApiError` porta lo status, quindi la distinzione si fa sul fatto, non sul testo.
-        errorMessage={
-          isApiError(reports.error) && reports.error.status === 403
-            ? t("whistleblowingConsole.forbiddenMessage")
-            : t("whistleblowingConsole.errorMessage")
-        }
+        errorMessage={t("whistleblowingConsole.errorMessage")}
+        deniedReason={t("whistleblowingConsole.forbiddenMessage")}
         rows={reports.data?.items ?? []}
         rowKey={(r) => r.reportId}
         rowTestId="wb-console-row"
@@ -205,11 +210,14 @@ export default function WhistleblowingConsolePage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {detail.isLoading && <p className="text-sm text-muted-foreground">{t("common:loading")}</p>}
+            {detail.isLoading && <StatoCaricamento />}
             {detail.isError && (
-              <p className="text-sm text-danger" data-testid="wb-console-detail-error">
-                {t("whistleblowingConsole.detail.loadError")}
-              </p>
+              <StatoErrore
+                errore={detail.error}
+                titolo={t("whistleblowingConsole.detail.loadError")}
+                testId="wb-console-detail-error"
+                onRiprova={() => void detail.refetch()}
+              />
             )}
             {detail.data && (
               <>
@@ -222,6 +230,7 @@ export default function WhistleblowingConsolePage() {
                 </div>
 
                 <form onSubmit={(e) => { void onSubmit(e); }} className="space-y-4 border-t border-border pt-4" noValidate>
+                  <fieldset disabled={!canManage} className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label htmlFor="wb-console-status" className="mb-1 block text-sm font-medium text-foreground">
@@ -270,7 +279,8 @@ export default function WhistleblowingConsolePage() {
                     <p className="mt-1 text-xs text-muted-foreground">{t("whistleblowingConsole.detail.internalNotesHint")}</p>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  </fieldset>
+                  {canManage && <div className="flex items-center gap-3">
                     <Button type="submit" data-testid="wb-console-save" disabled={update.isPending}>
                       {update.isPending ? t("whistleblowingConsole.detail.saving") : t("whistleblowingConsole.detail.save")}
                     </Button>
@@ -283,7 +293,7 @@ export default function WhistleblowingConsolePage() {
                         {saveFeedback.msg}
                       </p>
                     )}
-                  </div>
+                  </div>}
                 </form>
               </>
             )}

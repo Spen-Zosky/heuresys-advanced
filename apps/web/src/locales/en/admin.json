@@ -9,7 +9,8 @@
       "policy": "Quorum",
       "priority": "Priority",
       "steps": "Steps",
-      "created": "Created"
+      "created": "Created",
+      "process": "Process and activity"
     },
     "status": {
       "PENDING": "Pending",
@@ -40,7 +41,7 @@
       "policyLabel": "Quorum",
       "priorityLabel": "Priority",
       "approversLabel": "Approvers",
-      "approversHint": "Select one or more approvers (Ctrl/Cmd for multi-select).",
+      "approversHint": "Search people by name or email and add them one at a time.",
       "bodyLabel": "Description",
       "submit": "Create request",
       "submitting": "Creating…",
@@ -48,7 +49,11 @@
       "errorUnexpected": "Unexpected error."
     },
     "filters": {
-      "statusAll": "All statuses"
+      "statusAll": "All statuses",
+      "processAll": "All processes",
+      "process": "Process",
+      "stepAll": "All activities",
+      "step": "Activity"
     },
     "emptyTitle": "No requests",
     "emptyDescription": "There are no approval requests.",
@@ -89,8 +94,12 @@
         "approvalResolved": "Decision sent: {{decision}}",
         "errorRun": "Run failed: {{message}}",
         "noSession": "No session: log in so the cookies are forwarded to the gateway."
-      }
-    }
+      },
+      "onBehalfOf": "decided by {{delegate}} on behalf of {{approver}}"
+    },
+    "noProcess": "No process",
+    "delegated_one": "{{count}} step decided by delegation",
+    "delegated_other": "{{count}} steps decided by delegation"
   },
   "engagement": {
     "title": "Engagement & Surveys",
@@ -116,7 +125,12 @@
       "workload": "Workload",
       "satisfaction": "Satisfaction",
       "totalChecks": "{{count}} total checks",
-      "empty": "No pulse data."
+      "empty": "No pulse data.",
+      "axisWeek": "Week",
+      "axisScore": "Average score",
+      "tableTitle": "Show the data as a table",
+      "colCount": "Check-ins",
+      "weekShort": "Wk {{n}}"
     },
     "results": {
       "back": "Back to Engagement",
@@ -154,7 +168,7 @@
     "noName": "—",
     "detail": {
       "back": "← Users",
-      "notFound": "User not found.",
+      "notFound": "This person does not exist or is outside your organizational chain: their profile is not visible to your role.",
       "loadError": "Loading error.",
       "unnamed": "(unnamed)",
       "cardTitle": "Profile",
@@ -275,7 +289,34 @@
         "readOnly": "You do not have permission to grant or revoke roles.",
         "error": "Operation failed.",
         "forbidden": "You do not have permission to grant or revoke roles.",
-        "duplicate": "This role is already granted."
+        "duplicate": "This role is already granted.",
+        "colReview": "Review",
+        "act": {
+          "toConfirm": "To be confirmed",
+          "hint": "This is a mandate: propose it with a reason and a review date; a second holder decides it from the Roles page.",
+          "proposeGrant": "Propose",
+          "proposeRevoke": "Propose revocation",
+          "proposeConfirm": "Propose confirmation",
+          "title": {
+            "GRANT": "Grant proposal: {{role}}",
+            "REVOKE": "Revocation proposal: {{role}}",
+            "CONFIRM": "Confirmation proposal: {{role}}"
+          },
+          "reason": "Reason",
+          "reasonHint": "At least ten characters: why the person must hold, or no longer hold, this mandate.",
+          "reviewBy": "Review by",
+          "submit": "Send the proposal",
+          "cancel": "Cancel",
+          "sent": "Proposal sent: a second mandate holder decides it from the Roles page.",
+          "pendingTitle": "Acts awaiting a decision",
+          "kind": {
+            "GRANT": "Grant",
+            "REVOKE": "Revocation",
+            "CONFIRM": "Confirmation"
+          },
+          "proposedBy": "proposed by {{who}} on {{when}}",
+          "withdraw": "Withdraw"
+        }
       }
     }
   },
@@ -318,6 +359,9 @@
       },
       "dash": "—",
       "wizardLink": "Open Enterprise Typing wizard →",
+      "typingAssessed": "Assessed on {{date}}",
+      "typingRegulatory": "Regulatory intensity: {{value}}",
+      "typingEmployees": "{{n}} employees",
       "typingEmpty": "No typing profile registered.",
       "usersHint": "The full user list is managed on its dedicated page.",
       "usersLink": "Open /users →"
@@ -343,23 +387,36 @@
     }
   },
   "enterpriseTyping": {
-    "title": "Enterprise Typing Wizard",
-    "description": "Type the enterprise by selecting family, variant, operating model and size band.",
+    "title": "Enterprise typing",
+    "description": "The profile that describes the company: activity class, size, operating model, regulatory intensity.",
     "back": "← Tenant",
-    "cardTitle": "Profile",
-    "familyLabel": "Blueprint family",
-    "variantLabel": "Variant",
+    "cardTitleNew": "New profile",
+    "cardTitleSaved": "Saved profile",
+    "classLabel": "Activity class",
+    "classNone": "No class chosen.",
+    "classSearch": "Search by code or name (at least 2 letters)",
+    "classClear": "Remove the class",
     "modelLabel": "Operating model",
     "sizeBandLabel": "Size band",
-    "selectPlaceholder": "— Select —",
+    "intensityLabel": "Regulatory intensity",
+    "intensity": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "EXTREME": "Extreme"
+    },
+    "countryLabel": "Country (two-letter code)",
+    "countryInvalid": "The country is a two-letter code, e.g. IT.",
+    "employeesLabel": "Employees",
+    "revenueLabel": "Revenue (€)",
+    "numbersInvalid": "Employees and revenue are plain numbers.",
     "nonePlaceholderMale": "— None —",
     "nonePlaceholderFemale": "— None —",
-    "familyRequired": "Family is required.",
-    "variantRequired": "Variant is required.",
-    "createError": "Profile creation error.",
-    "createSuccess": "Profile created.",
-    "submit": "Create profile",
-    "submitting": "Creating…"
+    "loadError": "Could not read the profile.",
+    "saveError": "Save failed.",
+    "saveSuccess": "Profile saved.",
+    "submit": "Save the profile",
+    "submitting": "Saving…"
   },
   "organization": {
     "title": "Organization Units",
@@ -553,7 +610,24 @@
     "accessDeniedDesc": "This matrix requires the PLATFORM_ADMIN role.",
     "headerCell": "permission \\ role",
     "granted": "granted",
-    "denied": "denied"
+    "denied": "denied",
+    "mandateActs": {
+      "title": "Mandate acts to decide",
+      "description": "Grants, revocations and confirmations of mandates proposed by another holder. A second holder decides them: never the proposer, never the person concerned.",
+      "empty": "No acts awaiting a decision.",
+      "colPerson": "Person",
+      "colAct": "Act",
+      "colRole": "Mandate",
+      "colReason": "Reason",
+      "colReview": "Review",
+      "colProposed": "Proposed by",
+      "approve": "Approve",
+      "reject": "Reject",
+      "rejectNote": "Reason for rejection",
+      "confirmReject": "Confirm rejection",
+      "cancel": "Cancel",
+      "notYours": "You cannot decide an act you proposed or that concerns you."
+    }
   },
   "dashboard": {
     "title": "Dashboard",
@@ -916,7 +990,21 @@
     "rolesHint": "Scope: all roles or a selection (at least one).",
     "empty": "No tenants available.",
     "accessDeniedTitle": "Access denied",
-    "accessDeniedDesc": "mfa_policy permissions are required to read policies."
+    "accessDeniedDesc": "mfa_policy permissions are required to read policies.",
+    "exemptions": {
+      "title": "Second-factor exemptions",
+      "description": "Who may sign in without the second factor, why, who decided it and until when. An expired exemption no longer opens anything; mandate holders cannot have one.",
+      "empty": "No exemptions.",
+      "state": {
+        "ACTIVE": "Active",
+        "EXPIRED": "Expired",
+        "DISABLED": "Disabled"
+      },
+      "expires": "Expires {{date}}",
+      "author": "decided by {{name}}",
+      "noAuthor": "no author (predates the rule)",
+      "disable": "Disable"
+    }
   },
   "agentDev": {
     "title": "Agent console (DEV)",
@@ -969,6 +1057,12 @@
       "total": "Total",
       "avgConfidence": "Avg conf.",
       "conflicted": "Conflicted"
+    },
+    "status": {
+      "VALID": "Valid",
+      "STALE": "Stale",
+      "CONFLICTED": "Conflicted",
+      "REJECTED": "Rejected"
     }
   },
   "timeOff": {
@@ -1219,6 +1313,11 @@
       "confirmed": "Confirmed",
       "superseded": "Superseded",
       "tables": "Tables involved"
+    },
+    "status": {
+      "GENERATED": "Generated",
+      "CONFIRMED": "Confirmed",
+      "SUPERSEDED": "Superseded"
     }
   }
 }

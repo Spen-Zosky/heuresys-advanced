@@ -11,6 +11,7 @@
  * the enums below mirror those CHECK domains. Zod v4 API (z.uuid()/z.iso.datetime()).
  */
 import { z } from "zod";
+import { paginationFields } from "./_pagination.js";
 
 const META = z.record(z.string(), z.unknown());
 
@@ -75,6 +76,8 @@ export type ApprovalStep = z.infer<typeof ApprovalStepSchema>;
 export const ApprovalStepDetailSchema = ApprovalStepSchema.extend({
   approverEmail: z.string().nullable(),
   approverName: z.string().nullable(),
+  /** V-3 (ADR-0051): chi ha deciso davvero; diverso dall'approvatore quando ha deciso un delegato «per conto di». */
+  decidedByName: z.string().nullable(),
 });
 export type ApprovalStepDetail = z.infer<typeof ApprovalStepDetailSchema>;
 
@@ -89,12 +92,33 @@ export type ApprovalRequestDetail = z.infer<typeof ApprovalRequestDetailSchema>;
 export const ApprovalRequestListItemSchema = ApprovalRequestSchema.extend({
   stepCount: z.number().int(),
   pendingStepCount: z.number().int(),
+  /** V-3 (ADR-0049): il processo e l'attività a cui la richiesta appartiene; null se non nasce da un processo. */
+  processId: z.uuid().nullable(),
+  processName: z.string().nullable(),
+  processStepId: z.uuid().nullable(),
+  processStepName: z.string().nullable(),
+  /** V-3 (ADR-0051): quanti passi ha deciso un delegato «per conto di» l'approvatore. */
+  delegatedStepCount: z.number().int(),
 });
 export type ApprovalRequestListItem = z.infer<typeof ApprovalRequestListItemSchema>;
 
+/** V-3: un processo presente fra le richieste visibili (con lo stato filtrato), con le sue attività. */
+export const ApprovalProcessFacetSchema = z.object({
+  processId: z.uuid(),
+  processName: z.string(),
+  count: z.number().int().min(0),
+  steps: z.array(z.object({ processStepId: z.uuid(), processStepName: z.string(), count: z.number().int().min(0) })),
+});
+export type ApprovalProcessFacet = z.infer<typeof ApprovalProcessFacetSchema>;
+
+/**
+ * V-1 (D-27): `total` è il numero di TUTTE le richieste che rispondono ai filtri, non la
+ * lunghezza della pagina; `items` è la pagina chiesta con `limit` e `offset`.
+ */
 export const ApprovalListResponseSchema = z.object({
   items: z.array(ApprovalRequestListItemSchema),
   total: z.number().int().min(0),
+  processes: z.array(ApprovalProcessFacetSchema),
 });
 export type ApprovalListResponse = z.infer<typeof ApprovalListResponseSchema>;
 
@@ -141,6 +165,9 @@ export const ApprovalDecideParamsSchema = z.object({ id: z.uuid(), stepId: z.uui
 export const ApprovalListQuerySchema = z.object({
   status: ApprovalStatusEnum.optional(),
   resourceType: z.string().max(64).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional(),
+  /** V-3: solo le richieste di un processo, o di una sua attività. */
+  processId: z.uuid().optional(),
+  processStepId: z.uuid().optional(),
+  ...paginationFields(200, 50),
 });
 export type ApprovalListQuery = z.infer<typeof ApprovalListQuerySchema>;

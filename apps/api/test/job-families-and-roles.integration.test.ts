@@ -33,7 +33,7 @@ describe("/v1/job-families + /v1/job-roles integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     employeeS = await login(suite, "tommaso.fiore@rtl-bank.org");
   });
 

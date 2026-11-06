@@ -719,7 +719,10 @@
         "comp": "Compensation",
         "promotion": "Role growth"
       }
-    }
+    },
+    "axisMonth": "Month",
+    "axisHours": "Hours",
+    "tableTitle": "Show the data as a table"
   },
   "orgChart": {
     "title": "Org chart",
@@ -745,7 +748,9 @@
     "colTitle": "Title",
     "colStatus": "Status",
     "colPriority": "Priority",
-    "colCreated": "Created"
+    "colCreated": "Created",
+    "colProcess": "Process and activity",
+    "noProcess": "No process"
   },
   "performance": {
     "title": "My performance reviews",

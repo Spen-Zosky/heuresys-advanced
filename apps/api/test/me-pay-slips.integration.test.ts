@@ -60,6 +60,13 @@ describe("/v1/me/pay-slips — F4 cedolini", () => {
     expect(typeof first.grossPay).toBe("number");
     expect(typeof first.netPay).toBe("number");
     expect(first.deductions).toBeTypeOf("object"); // {INPS, IRPEF, total}
+    // F-1 (piano interfacce, L6): la busta porta la valuta del rapporto di lavoro, letta dal vivo.
+    const valuta = await pool.query<{ c: string | null }>(
+      `SELECT e.user_employment_currency AS c FROM sys.sys_user_employment e
+        JOIN sys.sys_users u ON u.user_id = e.user_employment_user_id
+       WHERE u.user_email = 'antonio.parisi@rtl-bank.org' LIMIT 1`,
+    );
+    expect(first.currency ?? null).toBe(valuta.rows[0]?.c ?? null);
   });
 
   it("returns an honest empty-state for a user with no slips", async () => {

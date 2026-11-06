@@ -40,7 +40,7 @@ describe("insights API P2 (cap③ succession-readiness + skill-gap)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     admin = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantAdmin = await login(suite, "governo@collaudo.invalid");
     manager = await login(suite, "paolo.caputo@rtl-bank.org");
     plainUser = await login(suite, "tommaso.fiore@rtl-bank.org");
     // populate both slices once (PLATFORM scope)

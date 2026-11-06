@@ -28,10 +28,12 @@ import type {
   TenantBlueprintDetail,
   TenantBlueprintVersion,
 } from "@heuresys/shared";
-import { Button, Input, Spinner, EmptyState, ErrorState } from "@heuresys/ui";
+import { Button, Input } from "@heuresys/ui";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { StatusPill } from "@/components/status-pill";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 const INCLUSIONI = ["IN", "PARTIAL", "OUT"] as const;
 
@@ -42,6 +44,7 @@ export default function TenantBlueprintDetailPage({
 }) {
   const { id } = use(params);
   const { t } = useTranslation("blueprints");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const perms = useCurrentUserPermissions();
   const canWrite = perms.data?.permissions.includes("tenant_blueprint:write") ?? false;
@@ -62,9 +65,11 @@ export default function TenantBlueprintDetailPage({
   const numero = versione?.number ?? 1;
   const base = `/v1/tenant-blueprints/${id}/versions/${numero}`;
 
-  if (fascicolo.isLoading) return <Spinner />;
-  if (fascicolo.isError) return <ErrorState description={t("dossier.error")} />;
-  if (!fascicolo.data || !versione) return <EmptyState title={t("dossier.notFound")} />;
+  if (fascicolo.isLoading) return <StatoCaricamento />;
+  if (fascicolo.isError) {
+    return <StatoErrore errore={fascicolo.error} titolo={t("dossier.error")} onRiprova={() => void fascicolo.refetch()} />;
+  }
+  if (!fascicolo.data || !versione) return <StatoVuoto titolo={t("dossier.notFound")} />;
 
   return (
     <div className="space-y-6" data-testid="tenant-blueprint-detail">
@@ -86,7 +91,7 @@ export default function TenantBlueprintDetailPage({
             {t("dossier.version")} {versione.number}
           </span>
           <StatusPill tone={versione.status === "DRAFT" ? "info" : "success"}>
-            {versione.status}
+            {enumLabel("tenantBlueprintVersionStatus", versione.status)}
           </StatusPill>
           <Link
             href={`/tenant-blueprints/${id}/versions/${versione.number}/diff`}
@@ -378,7 +383,7 @@ function PassoModello({
           {t("dossier.identity.incomplete")}
         </p>
       ) : proposta.isLoading ? (
-        <Spinner />
+        <StatoCaricamento />
       ) : disponibile ? (
         <div className="mt-2 space-y-2" data-testid="modello-proposto">
           <p className="text-sm text-foreground">
@@ -456,11 +461,9 @@ function PassoProcessi({
       <h2 className="text-sm font-semibold text-foreground">{t("dossier.steps.processes")}</h2>
 
       {!versione.variantVersionId ? (
-        <p className="mt-2 text-sm text-muted-foreground" data-testid="processi-vuoto">
-          {t("dossier.decisions.empty")}
-        </p>
+        <StatoVuoto titolo={t("dossier.decisions.empty")} testId="processi-vuoto" />
       ) : processi.isLoading ? (
-        <Spinner />
+        <StatoCaricamento />
       ) : (
         <ul className="mt-3 space-y-3">
           {(processi.data?.items ?? []).map((p) => (
@@ -590,6 +593,7 @@ function Sottometti({
   modificabile: boolean;
 }) {
   const { t } = useTranslation("blueprints");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const [errore, setErrore] = useState<string | null>(null);
 
@@ -615,7 +619,7 @@ function Sottometti({
         </Button>
       ) : (
         <p className="text-sm text-muted-foreground" data-testid="fascicolo-stato">
-          {versione.status}
+          {enumLabel("tenantBlueprintVersionStatus", versione.status)}
         </p>
       )}
       {invia.isSuccess ? (

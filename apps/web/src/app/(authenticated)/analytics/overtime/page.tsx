@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, EmptyState, PageHeader, StatsCard, formatCurrency } from "@heuresys/ui";
+import { Badge, PageHeader, StatsCard, formatCurrency } from "@heuresys/ui";
 import { ClipboardList, Clock, Euro } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type {
@@ -13,6 +13,7 @@ import type {
   OvertimeMonthlyRow,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 /** Brand palette as raw HSL CSS-var refs so the echarts canvas (outside Tailwind's
  *  reach) follows the active theme tokens — same pattern as attendance/page.tsx. */
@@ -142,15 +143,15 @@ export default function OvertimeAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main data-testid="analytics-overtime-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoCaricamento testId="analytics-overtime-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main data-testid="analytics-overtime-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">{t("error")}</p>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-overtime-error" onRiprova={() => void q.refetch()} />
       </main>
     );
   }
@@ -197,9 +198,11 @@ export default function OvertimeAnalyticsPage() {
         <div data-testid="overtime-total-comp">
           <StatsCard
             label={t("overtime.stats.compLabel")}
-            value={formatCurrency(d.totalCompensationEur ?? 0, "EUR", locale)}
+            // V-7: un importo assente non e' zero euro. L'API da' null quando nessuna richiesta
+            // porta un compenso, e la pagina lo dice invece di scrivere «0 €».
+            value={d.totalCompensationEur === null ? t("overtime.stats.compUnavailable") : formatCurrency(d.totalCompensationEur, "EUR", locale)}
             icon={<Euro className="h-4 w-4 text-palette-3" />}
-            description={t("overtime.stats.compDesc")}
+            description={d.totalCompensationEur === null ? t("overtime.stats.compUnavailableDesc") : t("overtime.stats.compDesc")}
           />
         </div>
       </section>
@@ -221,6 +224,12 @@ export default function OvertimeAnalyticsPage() {
                   )}
                   height={320}
                   ariaLabel={t("overtime.statusAria")}
+                  lingua={i18n.language}
+                  tabella={{
+                    titolo: t("charts.tableTitle"),
+                    colonne: [t("charts.colStatus"), t("charts.axisRequests")],
+                    righe: d.byStatus.map((r) => [statusName(r), r.count]),
+                  }}
                 />
               </div>
             </div>
@@ -239,6 +248,13 @@ export default function OvertimeAnalyticsPage() {
                   )}
                   height={320}
                   ariaLabel={t("overtime.typeAria")}
+                  assi={{ x: t("charts.axisRequests") }}
+                  lingua={i18n.language}
+                  tabella={{
+                    titolo: t("charts.tableTitle"),
+                    colonne: [t("charts.colType"), t("charts.axisRequests")],
+                    righe: d.byType.map((r) => [typeName(r), r.count]),
+                  }}
                 />
               </div>
             </div>
@@ -256,6 +272,13 @@ export default function OvertimeAnalyticsPage() {
                 option={monthlyLineOption(d.monthly, t("overtime.seriesHours"))}
                 height={320}
                 ariaLabel={t("overtime.monthlyAria")}
+                assi={{ x: t("charts.axisMonth"), y: t("charts.axisHours") }}
+                lingua={i18n.language}
+                tabella={{
+                  titolo: t("charts.tableTitle"),
+                  colonne: [t("charts.axisMonth"), t("charts.axisRequests"), t("charts.axisHours")],
+                  righe: d.monthly.map((r) => [r.month, r.count, r.hours]),
+                }}
               />
             </div>
             <p className="text-xs text-muted-foreground">{t("overtime.monthlyNote")}</p>
@@ -274,24 +297,31 @@ export default function OvertimeAnalyticsPage() {
                   option={ouBarOption(d.byOrgUnit)}
                   height={Math.max(280, d.byOrgUnit.length * 26)}
                   ariaLabel={t("overtime.ouAria")}
+                  assi={{ x: t("charts.axisHours"), y: t("charts.axisUnit") }}
+                  lingua={i18n.language}
+                  tabella={{
+                    titolo: t("charts.tableTitle"),
+                    colonne: [t("charts.axisUnit"), t("charts.axisRequests"), t("charts.axisHours")],
+                    righe: [...d.byOrgUnit].sort((a, b) => b.hours - a.hours).map((r) => [r.dimension, r.count, r.hours]),
+                  }}
                 />
               </div>
             ) : (
-              <EmptyState
-                data-testid="analytics-overtime-ou-empty"
-                icon={<Clock className="h-6 w-6" />}
-                title={t("overtime.ouEmptyTitle")}
-                description={t("overtime.ouEmptyDesc")}
+              <StatoVuoto
+                testId="analytics-overtime-ou-empty"
+                icona={<Clock className="h-6 w-6" />}
+                titolo={t("overtime.ouEmptyTitle")}
+                motivo={t("overtime.ouEmptyDesc")}
               />
             )}
           </div>
         </section>
       ) : (
-        <EmptyState
-          data-testid="analytics-overtime-empty"
-          icon={<ClipboardList className="h-6 w-6" />}
-          title={t("empty.title")}
-          description={t("overtime.emptyDesc")}
+        <StatoVuoto
+          testId="analytics-overtime-empty"
+          icona={<ClipboardList className="h-6 w-6" />}
+          titolo={t("empty.title")}
+          motivo={t("overtime.emptyDesc")}
         />
       )}
     </main>

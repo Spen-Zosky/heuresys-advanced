@@ -719,7 +719,10 @@
         "comp": "Retribuzione",
         "promotion": "Crescita di ruolo"
       }
-    }
+    },
+    "axisMonth": "Mese",
+    "axisHours": "Ore",
+    "tableTitle": "Mostra i dati in tabella"
   },
   "orgChart": {
     "title": "Organigramma",
@@ -745,7 +748,9 @@
     "colTitle": "Titolo",
     "colStatus": "Stato",
     "colPriority": "Priorità",
-    "colCreated": "Creata"
+    "colCreated": "Creata",
+    "colProcess": "Processo e attività",
+    "noProcess": "Fuori processo"
   },
   "performance": {
     "title": "Le mie valutazioni",

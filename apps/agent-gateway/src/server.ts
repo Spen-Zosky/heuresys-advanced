@@ -2,9 +2,10 @@
  * Agent gateway HTTP server (#9 WI-B.2) — READ-LIVE service port.
  *
  * POST /agent          → Server-Sent Events stream of the Agent SDK run (runHrAgent).
- *   Auth (READ): the caller's heuresys session cookies (hrx_access + hrx_csrf) are
- *   FORWARDED per request → the agent acts as the logged-in user (RBAC + tenant
- *   enforced by /v1). No service account / secret for reads (PLATFORM_MAP §1).
+ *   Auth: the caller's heuresys session cookies (hrx_access + hrx_csrf) are used ONCE per
+ *   request to ask /v1 for an AGENT TOKEN (L9, A-1/A-2/A-3, ADR-0050 D6): the agent then calls
+ *   with that token — the API knows it is an agent acting for that person, the perimeter is the
+ *   person's without mandates, and the token expires without refresh. No service account.
  *   Write gate (M-2): every write triggers a human-in-the-loop round-trip. The stream
  *   emits an `approval_required` event carrying an `approvalId` + the REDACTED tool/args;
  *   a human resolves it via POST /agent/approve. DENY-BY-DEFAULT on timeout / unknown id.
@@ -21,7 +22,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { ApprovalRegistry, type ApprovalDecision } from "./approval-bridge.js";
 import { DbAuditSink, FileAuditSink, type AuditSink } from "./audit-sink.js";
 import { auditPool } from "./db-pool.js";
-import { HeuresysClient } from "./heuresys-client.js";
+import { HeuresysClient, chiediGettoneAgente } from "./heuresys-client.js";
 import { redact } from "./redact.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
@@ -29,6 +30,8 @@ import { giudica, LottoNonValido } from "./consolidation-propose.js";
 import type { ApprovalRequest, GatePrincipal } from "./write-gate.js";
 
 const PORT = Number(process.env.AGENT_GATEWAY_PORT ?? 8790);
+/** Il codice con cui l'assistente si presenta all'API (gettone e superficie). */
+const AGENTE_ASSISTENTE = "assistente-hr";
 const HEURESYS_API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
 // S1099 (#159 F2) — L'ORIGINE DEL WEB. La console dell'agente sta su un'altra porta del
 // browser (il web su :3000, il gateway su :8790): senza le intestazioni CORS il browser
@@ -227,9 +230,21 @@ const server = createServer(async (req, res) => {
         return;
       }
 
+      // L9, A-1/A-2/A-3: l'agente non usa i cookie della persona, ma un gettone suo, breve e
+      // senza rinnovo, chiesto qui con quei cookie. Se l'API lo rifiuta, la risposta lo dice.
+      const gettone = await chiediGettoneAgente(HEURESYS_API, { cookieAccess, cookieCsrf }, {
+        agentCode: AGENTE_ASSISTENTE,
+        task: "assistente HR: richiesta della persona dalla console",
+      });
+      if (!gettone.ok) {
+        res.writeHead(gettone.status === 401 ? 401 : 403, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "AGENT_TOKEN_REFUSED", status: gettone.status, detail: gettone.corpo }));
+        return;
+      }
       const client = new HeuresysClient({
         baseUrl: HEURESYS_API,
-        session: { cookieAccess, cookieCsrf, csrf: cookieCsrf },
+        session: gettone.session,
+        agente: AGENTE_ASSISTENTE,
       });
 
       res.writeHead(200, {
@@ -247,7 +262,13 @@ const server = createServer(async (req, res) => {
       // `personeDistinte` e `livello`: senza quei tre campi il pannello direbbe «l'agente vuole
       // eseguire una scrittura» davanti a una lettura, cioè chiederebbe di approvare una cosa
       // raccontandone un'altra. Sono numeri e identificatori: niente da redigere, per requisito.
-      const principal: GatePrincipal = { principal: "user" };
+      // A-12: il diario e le soglie (A-6) sanno per conto di chi lavora l'agente e in quale
+      // tenant: lo dice l'API nel gettone, non il corpo della richiesta.
+      const principal: GatePrincipal = {
+        principal: "user",
+        subject: gettone.persona.userId,
+        ...(gettone.persona.tenantCode ? { tenant: gettone.persona.tenantCode } : {}),
+      };
       const approve = async (reqApprove: ApprovalRequest): Promise<boolean> => {
         const { approvalId, decided } = approvals.create();
         const payload = {

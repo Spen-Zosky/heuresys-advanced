@@ -281,7 +281,10 @@
     },
     "perfReviewType": {
       "ANNUAL": "Annual",
-      "MID_YEAR": "Mid-year"
+      "MID_YEAR": "Mid-year",
+      "PROBATION": "End of probation",
+      "PROJECT": "Project",
+      "AD_HOC": "Ad hoc"
     },
     "perfReviewStatus": {
       "IN_PROGRESS": "In progress",
@@ -493,7 +496,8 @@
       "STUDY": "Study",
       "SABBATICAL": "Sabbatical",
       "UNPAID": "Unpaid",
-      "OTHER": "Other"
+      "OTHER": "Other",
+      "PAID_LEAVE": "Paid leave"
     },
     "whistleblowingStatus": {
       "NEW": "New",
@@ -567,7 +571,284 @@
       "TALENT_POOL_INCLUSION": "Talent pool inclusion",
       "DISCIPLINARY_ACTION": "Disciplinary action",
       "OTHER": "Other"
+    },
+    "tenantBlueprintVersionStatus": {
+      "DRAFT": "Draft",
+      "IN_APPROVAL": "In approval",
+      "APPROVED": "Approved",
+      "APPLIED": "Applied",
+      "SUPERSEDED": "Superseded",
+      "ABANDONED": "Abandoned"
+    },
+    "tenantBlueprintStatus": {
+      "ACTIVE": "Active",
+      "ARCHIVED": "Archived"
+    },
+    "accrualMethod": {
+      "MONTHLY": "Monthly",
+      "QUARTERLY": "Quarterly",
+      "SEMIANNUAL": "Semiannual",
+      "ANNUAL": "Annual",
+      "PER_PAY_PERIOD": "Per pay period",
+      "LUMP_SUM": "Lump sum"
+    },
+    "vizExportFormat": {
+      "SVG": "SVG image",
+      "PDF": "PDF",
+      "PNG": "PNG image",
+      "GENERIC_JSON": "JSON data",
+      "REACT_FLOW_JSON": "Graph JSON (React Flow)",
+      "MERMAID": "Mermaid diagram"
+    },
+    "fitDimension": {
+      "SKILL": "Skills",
+      "KPI": "KPIs",
+      "LEARNING": "Learning",
+      "CERTIFICATION": "Certifications",
+      "BEHAVIORAL": "Behaviours",
+      "OVERALL": "Overall"
+    },
+    "overtimeType": {
+      "WEEKDAY": "Weekday",
+      "WEEKEND": "Weekend",
+      "NIGHT": "Night",
+      "HOLIDAY": "Holiday",
+      "EMERGENCY": "Emergency",
+      "PROJECT": "Project",
+      "ON_CALL": "On call"
+    },
+    "overtimeStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXPORTED": "Exported",
+      "PAID": "Paid",
+      "CANCELLED": "Cancelled"
+    },
+    "payrollRecipientSystem": {
+      "ZUCCHETTI_PAGHE": "Zucchetti Payroll"
+    },
+    "leadSource": {
+      "WEBSITE": "Website",
+      "INVESTOR": "Investor page",
+      "DEMO": "Demo request"
+    },
+    "regulatoryIntensity": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "EXTREME": "Extreme"
     }
   },
-  "masked": "withheld for your profile"
+  "masked": "withheld for your profile",
+  "apiErrors": {
+    "status": {
+      "400": "The request is not valid: check the data you entered.",
+      "401": "Your session has expired: please sign in again.",
+      "403": "Your profile does not allow this operation.",
+      "404": "What you are looking for does not exist, or is not visible with your profile.",
+      "409": "The operation conflicts with the current state of the data: reload the page and try again.",
+      "422": "The data does not meet the rules of this operation.",
+      "429": "Too many requests in a short time: wait a moment and try again.",
+      "500": "A server error occurred.",
+      "default": "An error occurred."
+    },
+    "code": {
+      "FORBIDDEN": "Your profile does not allow this operation.",
+      "CSRF_FAIL": "The page has been open too long: reload it and try again.",
+      "ORIGIN_MISMATCH": "The request comes from an address the server does not recognise: this is a service configuration problem, not your profile. Tell whoever runs the service.",
+      "VALIDATION_ERROR": "The request is not valid: check the data you entered.",
+      "RESPONSE_CONTRACT_VIOLATION": "The server produced a non-conforming response: the error is ours, not yours.",
+      "RESULT_LIMIT_EXCEEDED": "There are too many results to show at once: narrow them with a filter, such as unit or period.",
+      "INTERNAL_ERROR": "A server error occurred.",
+      "TOO_MANY_REQUESTS": "Too many requests in a short time: wait a moment and try again.",
+      "LOGIN_INVALID": "Incorrect email or password.",
+      "MFA_CHALLENGE_EXPIRED": "The verification has expired: sign in again.",
+      "MFA_CHALLENGE_INVALID": "The verification is no longer valid: sign in again.",
+      "MFA_CODE_REQUIRED": "The second-factor code is required.",
+      "MFA_INVALID": "The verification is not valid: sign in again.",
+      "MFA_NOT_ENROLLED": "Register a second factor first.",
+      "MFA_OTP_EXPIRED": "The code has expired: request a new one.",
+      "MFA_OTP_INVALID": "The code is not valid.",
+      "MFA_OTP_LOCKED": "Too many attempts: request a new code.",
+      "MFA_TOTP_INVALID": "The authenticator app code is not valid.",
+      "REFRESH_EXPIRED": "Your session has expired: sign in again.",
+      "REFRESH_INVALID": "Your session is no longer valid: sign in again.",
+      "REFRESH_MISSING": "Your session has expired: sign in again.",
+      "RESET_INVALID": "The password reset link is invalid or has expired.",
+      "SURVEY_ALREADY_ANSWERED": "You have already answered this survey.",
+      "SURVEY_NOT_ASSIGNED": "This survey has not been assigned to you.",
+      "USER_INACTIVE": "This account is no longer active.",
+      "BLUEPRINT_TENANT_NOT_LINKED": "The dossier is not linked to a company: there is nothing to build.",
+      "BLUEPRINT_BUILD_SOURCE_MISSING": "The version declares no build source: no model is anchored, or the model does not declare one.",
+      "BLUEPRINT_BUILD_SOURCE_UNKNOWN": "The build source declared by the model is not one the platform knows.",
+      "MANDATE_REQUIRES_ACT": "This role is a mandate: it is not granted or revoked with one click; propose an act for a second holder to decide.",
+      "MANDATE_ACT_PENDING": "An open proposal for the same act already exists: wait for the decision or withdraw it.",
+      "MANDATE_INCOMPATIBLE": "This mandate cannot be held together with one the person already holds (separation of duties).",
+      "MANDATE_SELF_PROPOSAL": "Nobody proposes a mandate for themselves.",
+      "MANDATE_SAME_PERSON": "A second holder decides the act: neither the proposer nor the person it concerns.",
+      "MANDATE_NOT_PROPOSER": "Only the proposer can withdraw the act.",
+      "MANDATE_ACT_DECIDED": "The act has already been decided.",
+      "MANDATE_APPROVER_WITHOUT_MANDATE": "Approving a mandate act requires holding a mandate.",
+      "NOT_A_MANDATE": "This role is not a mandate: grant and revoke it directly.",
+      "MANDATE_ACT_SUBJECT_GONE": "The person this act concerned no longer exists: the act remains as history and cannot be approved.",
+      "STEP_UP_REQUIRED": "A second-factor confirmation is required to see this data.",
+      "STEP_UP_SESSION_REQUIRED": "Your session is no longer active: please sign in again."
+    },
+    "network": "The server is not responding: check your connection and try again.",
+    "sessionExpired": "Your session has expired: please sign in again.",
+    "reference": "Reference to quote: {{requestId}}"
+  },
+  "personPicker": {
+    "selected": "Selected people",
+    "remove": "Remove {{name}}",
+    "placeholder": "Type at least {{count}} letters of the name or email",
+    "typeMore": "Type at least {{count}} letters to search.",
+    "error": "Search failed.",
+    "found_one": "{{count}} person found",
+    "found_other": "{{count}} people found"
+  },
+  "health": {
+    "loadError": "Could not read the platform status.",
+    "title": "Platform status",
+    "description": "Cross-tenant platform observability: database connections, permissions in memory, sign-in integrity and the last 24 hours of requests. Every value is read live.",
+    "updated": "updated {{when}}",
+    "kpi": {
+      "uptime": "API availability · 24 h",
+      "requests_one": "{{n}} request",
+      "requests_other": "{{n}} requests",
+      "avgMs": "{{ms}} ms on average",
+      "pool": "Database connections",
+      "poolUnit": "/ {{max}} connections",
+      "poolDetail": "idle {{idle}} · active {{active}} · waiting {{waiting}}",
+      "serverMax": "server max {{max}}",
+      "rbac": "Permissions in memory",
+      "rbacUnit": "mappings",
+      "rolesLoaded_one": "{{count}} role loaded",
+      "rolesLoaded_other": "{{count}} roles loaded",
+      "loaded": "loaded",
+      "notLoaded": "not loaded",
+      "lastLoad": "last load {{when}}",
+      "tenants": "Active tenants",
+      "activeCount_one": "{{count}} active",
+      "activeCount_other": "{{count}} active",
+      "usersCount_one": "{{n}} user",
+      "usersCount_other": "{{n}} users",
+      "auth": "Sign-in integrity · 24 h",
+      "replay": "replays blocked",
+      "logins": "Sign-ins",
+      "failed": "Failed",
+      "rotations": "Rotations"
+    },
+    "fleet": {
+      "title": "Tenants",
+      "description": "Active tenants, with user count and last sign-in",
+      "tenant": "Tenant",
+      "status": "Status",
+      "users": "Users",
+      "lastActivity": "Last activity",
+      "statusLabel": {
+        "ACTIVE": "Active",
+        "SUSPENDED": "Suspended",
+        "ARCHIVED": "Archived"
+      }
+    },
+    "series": {
+      "requests": "Requests every 5 minutes · 3 h",
+      "requestsFoot": "{{n}} requests in the window",
+      "errors": "Server errors every 5 minutes · 3 h",
+      "errorsFoot_one": "{{count}} server error",
+      "errorsFoot_other": "{{count}} server errors",
+      "latency": "Average response time (ms) every 5 minutes · 3 h",
+      "latencyFoot": "peak {{ms}} ms"
+    },
+    "slow": {
+      "cumulative": "cumulative",
+      "p95Note": "p95 ≈ μ + 1.645σ (estimate: PostgreSQL statistics have no percentiles)",
+      "unavailableTitle": "Statement statistics unavailable",
+      "unavailableDesc": "The pg_stat_statements extension is not loaded on this database, so per-statement timings cannot be collected.",
+      "emptyTitle": "No tracked statements yet",
+      "emptyDesc": "There are no tracked statements for the application database in the current window."
+    },
+    "rbac": {
+      "unavailableTitle": "Permission matrix unavailable",
+      "unavailableDesc": "The role-permission map could not be loaded."
+    },
+    "audit": {
+      "tenant": "tenant {{code}}",
+      "emptyTitle": "No recent events",
+      "emptyDesc": "The event log is empty for the current window."
+    }
+  },
+  "unnamed": "unnamed",
+  "stato": {
+    "negato": {
+      "titolo": "You do not have access to this data",
+      "motivo": "Your profile does not include this data. If you need it for your work, ask whoever manages roles in your company."
+    },
+    "codice": "Code: {{codice}}.",
+    "nonDisponibile": "unavailable"
+  },
+  "stepUp": {
+    "title": "Confirm your identity",
+    "description": "You are about to see another person's pay or evaluations through your mandate. Enter your second-factor code: the confirmation lasts 15 minutes.",
+    "codeLabel": "Code",
+    "codeHint": "The code from your app, the one received by email or SMS, or a recovery code.",
+    "confirm": "Confirm",
+    "confirming": "Verifying…",
+    "cancel": "Cancel",
+    "usePasskey": "Use passkey",
+    "error": "The code could not be verified.",
+    "dossierNotice": "Pay and evaluations are hidden until you confirm your second factor.",
+    "dossierAction": "Confirm to see them"
+  },
+  "origine": {
+    "label": "Data origin",
+    "riassunto": {
+      "nativo": "native",
+      "importato": "imported",
+      "ibrido": "hybrid",
+      "misto": "mixed",
+      "infrastruttura": "technical"
+    },
+    "stato": {
+      "nativo": "native",
+      "importato": "imported",
+      "ibrido": "hybrid",
+      "infrastruttura": "technical"
+    },
+    "perRiga": "origin per row",
+    "colonna": "Origin",
+    "riga": {
+      "IMPORT": "Imported",
+      "NATIVO": "Native",
+      "MATERIALIZZAZIONE": "Materialized"
+    }
+  },
+  "agente": {
+    "title": "Assistant on this page",
+    "description": "Developer tool: ask the agent something about what this page shows. Tool and input for any write are already redacted by the gateway.",
+    "contextLabel": "Context",
+    "promptLabel": "Prompt",
+    "promptPlaceholder": "e.g. Summarize what this page shows.",
+    "run": "Run",
+    "running": "Running…",
+    "stop": "Stop",
+    "streamTitle": "Event stream",
+    "streamEmpty": "No events yet. Send a prompt to start the agent.",
+    "approvalTitle": "Approval required",
+    "approvalDesc": "The agent wants to perform a write. Tool and input are already redacted by the gateway.",
+    "approvalDescRead": "The assistant has already read data about {{persone}} different people in this request — more than the largest department in the company. Let it keep reading? This is not a ban: confirm and it proceeds.",
+    "approvalDescReadUnknown": "The assistant is about to read more data, but how many people it has read so far is not measured. Let it continue?",
+    "approvalTool": "Tool",
+    "approvalInput": "Input (redacted)",
+    "allow": "Allow",
+    "deny": "Deny",
+    "approvalResolved": "Decision sent: {{decision}}",
+    "errorRun": "Run failed: {{message}}",
+    "noSession": "No session: log in so the cookies are forwarded to the gateway.",
+    "contestoPagina": "Page \"{{titolo}}\" ({{percorso}})",
+    "apri": "Ask the assistant",
+    "chiudi": "Close the assistant"
+  }
 }

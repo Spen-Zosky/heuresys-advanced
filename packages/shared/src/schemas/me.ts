@@ -61,6 +61,8 @@ export const MeIdentityDocumentSchema = z.object({
   kind: z.string(),
   number: z.string(),
   expiryDate: z.string().nullable(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 
 export const MeAddressSchema = z.object({
@@ -196,6 +198,8 @@ export const MeContractSchema = z.object({
   terminationReason: z.string().nullable(),
   notes: z.string().nullable(),
   masked: z.array(z.string()).optional(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 export type MeContract = z.infer<typeof MeContractSchema>;
 
@@ -219,7 +223,11 @@ export const MePaySlipSchema = z.object({
   deductions: z.record(z.string(), z.number()).optional(),
   paymentDate: z.string().nullable(),
   status: z.string().nullable(),
+  /** Valuta del rapporto di lavoro in cui la busta e' pagata (F-1, piano interfacce). */
+  currency: z.string().nullable().optional(),
   masked: z.array(z.string()).optional(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 export type MePaySlip = z.infer<typeof MePaySlipSchema>;
 
@@ -263,6 +271,8 @@ export const MeAttendanceDaySchema = z.object({
   hoursOvertime: z.number().nullable(),
   hoursTotal: z.number().nullable(),
   status: z.string().nullable(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 export const MeOvertimeEntrySchema = z.object({
   date: z.string().nullable(),
@@ -270,6 +280,8 @@ export const MeOvertimeEntrySchema = z.object({
   hours: z.number().nullable(),
   totalCompensation: z.number().nullable(),
   status: z.string().nullable(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 export const MeLeaveBalanceSchema = z.object({
   leaveType: z.string().nullable(),
@@ -278,6 +290,8 @@ export const MeLeaveBalanceSchema = z.object({
   usedDays: z.number().nullable(),
   pendingDays: z.number().nullable(),
   carryoverDays: z.number().nullable(),
+  /** Origine della riga (I23, A-14): IMPORT, NATIVO o MATERIALIZZAZIONE (`DATA_ROW_ORIGINS`). */
+  origineDato: z.string(),
 });
 export const MeAttendanceResponseSchema = z.object({
   recent: z.array(MeAttendanceDaySchema),
@@ -355,8 +369,19 @@ export type MePerspectiveGroup = z.infer<typeof MePerspectiveGroupSchema>;
 
 /** GET /v1/me/interfaces — sidebar interfaces visible to the caller, grouped by the 3 PET
  *  perspectives (all 3 always present, so an empty perspective renders an honest empty-state). */
+/** S-1 (piano interfacce 2026-11-03): per ogni rotta del registro, attiva o assorbita come
+ *  scheda, se chi chiama la può aprire. La pagina web lo usa come guardia: chi digita
+ *  l'indirizzo di una pagina che non gli spetta vede «non hai accesso», non una pagina a
+ *  metà con errori 403. L'autorità resta l'API; questa è la stessa regola del menu. */
+export const MeRouteAccessSchema = z.object({
+  route: z.string(),
+  allowed: z.boolean(),
+});
+export type MeRouteAccess = z.infer<typeof MeRouteAccessSchema>;
+
 export const MeInterfacesResponseSchema = z.object({
   perspectives: z.array(MePerspectiveGroupSchema),
+  routes: z.array(MeRouteAccessSchema),
 });
 export type MeInterfacesResponse = z.infer<typeof MeInterfacesResponseSchema>;
 
@@ -701,6 +726,9 @@ export const MeApprovalRowSchema = z.object({
   resourceType: z.string().nullable(),
   createdAt: z.string().nullable(),
   resolvedAt: z.string().nullable(),
+  /** V-3 (ADR-0049): processo e attivita' della richiesta, se nasce da un processo. */
+  processName: z.string().nullable(),
+  processStepName: z.string().nullable(),
 });
 export const MeApprovalsResponseSchema = z.object({
   items: z.array(MeApprovalRowSchema),

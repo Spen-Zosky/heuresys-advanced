@@ -144,7 +144,7 @@ export interface OrgGateStats {
 }
 
 /** Extract the RBAC permission codes attached to the route's preHandlers by requirePermission. */
-function permissionCodesOf(route: RouteOptions): string[] {
+export function permissionCodesOf(route: RouteOptions): string[] {
   const pre = route.preHandler;
   const handlers: preHandlerHookHandler[] = pre === undefined ? [] : Array.isArray(pre) ? pre : [pre];
   const codes: string[] = [];

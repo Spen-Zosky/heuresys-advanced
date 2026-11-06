@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { EChartsCard } from "../../_charts-client";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 // Real schema fields (graphId/type/isActive), not the stale visualizationGraphId/
 // graphKind this page used before F4.4. The list query also now filters by ?type=
@@ -86,7 +87,7 @@ export default function OrgChartPage() {
         }
         badges={
           <span data-testid="org-chart-count" className="text-sm text-muted-foreground">
-            {graphs.data ? t("orgChart.count", { count: graphs.data.total }) : t("common:loading")}
+            {graphs.data ? t("orgChart.count", { count: graphs.data.total }) : graphs.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </span>
         }
       />
@@ -118,19 +119,18 @@ export default function OrgChartPage() {
         </CardHeader>
         <CardContent>
           {!effectiveGraphId ? (
-            <div className="p-6 text-sm text-muted-foreground" data-testid="org-chart-empty">
-              {t("orgChart.emptyPrefix")}
-            </div>
+            <StatoVuoto titolo={t("orgChart.emptyPrefix")} testId="org-chart-empty" />
           ) : render.isLoading ? (
-            <div className="p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
+            <StatoCaricamento />
           ) : render.isError ? (
-            <div className="p-6 text-sm text-danger" data-testid="org-chart-error">
-              {t("orgChart.error")}
-            </div>
+            <StatoErrore
+              errore={render.error}
+              titolo={t("orgChart.error")}
+              testId="org-chart-error"
+              onRiprova={() => void render.refetch()}
+            />
           ) : nodeCount === 0 ? (
-            <div className="p-6 text-sm text-muted-foreground" data-testid="org-chart-nodes-empty">
-              {t("orgChart.noNodes")}
-            </div>
+            <StatoVuoto titolo={t("orgChart.noNodes")} testId="org-chart-nodes-empty" />
           ) : (
             <div data-testid="org-chart-graph">
               <EChartsCard

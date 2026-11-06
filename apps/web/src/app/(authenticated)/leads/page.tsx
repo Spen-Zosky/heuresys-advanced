@@ -6,8 +6,10 @@ import { Badge, PageHeader } from "@heuresys/ui";
 import type { LeadListResponse, LeadResponse, LeadStatus } from "@heuresys/shared";
 import { LeadStatusEnum } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 // #4 GTM W4 — gestione delle richieste di contatto arrivate dal sito pubblico.
 // Tutto viene da GET /v1/leads sul database vivo; lo stato si cambia con PATCH
@@ -29,6 +31,7 @@ const STATUSES = LeadStatusEnum.options;
 
 export default function LeadsPage() {
   const { t, i18n } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const [status, setStatus] = useState<LeadStatus | "">("");
 
@@ -38,6 +41,8 @@ export default function LeadsPage() {
       apiFetch<LeadListResponse>(`/v1/leads${status ? `?status=${status}` : ""}`),
   });
 
+  // S-5: il cambio di stato si offre solo a chi l'API lo accetta.
+  const canUpdate = useCan("leads:update");
   const advance = useMutation({
     mutationFn: (v: { leadId: string; status: LeadStatus }) =>
       apiFetch<LeadResponse>(`/v1/leads/${v.leadId}`, { method: "PATCH", body: { status: v.status } }),
@@ -71,7 +76,7 @@ export default function LeadsPage() {
       },
       {
         header: t("leads.cols.source"),
-        cell: (r) => <span className="text-xs text-muted-foreground">{r.source}</span>,
+        cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("leadSource", r.source)}</span>,
       },
       {
         header: t("leads.cols.received"),
@@ -95,7 +100,7 @@ export default function LeadsPage() {
         cell: (r) => (
           <span className="flex items-center gap-2" data-testid={`lead-status-${r.status}`}>
             <StatusPill tone={STATUS_TONE[r.status]}>{t(`leads.statuses.${r.status}`)}</StatusPill>
-            <select
+            {canUpdate && <select
               aria-label={t("leads.filterLabel")}
               data-testid="lead-status-select"
               className="rounded-input border border-border bg-background px-2 py-1 text-xs text-foreground"
@@ -108,12 +113,12 @@ export default function LeadsPage() {
                   {t(`leads.statuses.${s}`)}
                 </option>
               ))}
-            </select>
+            </select>}
           </span>
         ),
       },
     ],
-    [t, dateFmt, advance],
+    [t, dateFmt, advance, canUpdate, enumLabel],
   );
 
   const data = leads.data;
@@ -159,9 +164,10 @@ export default function LeadsPage() {
         </p>
       ) : null}
 
-      <EntityTable<LeadResponse>
+      <EntityTable<LeadResponse> originPath={"/v1/leads"}
         isLoading={leads.isLoading}
         isError={leads.isError}
+        error={leads.error}
         errorMessage={t("leads.errorMessage")}
         rows={data?.items ?? []}
         rowKey={(r) => r.leadId}

@@ -27,8 +27,7 @@ test.describe("#159 F3 — /approvals/[id] consuma AgentPanel con un contesto ve
   }) => {
     test.setTimeout(300_000); // il modello risponde in 60-100 s: la prova aspetta lo stream, non la pagina
 
-    const { user } = await completeApiLogin(request, PERSONAS.tenantAdmin.email);
-    const federicaId = user.userId;
+    await completeApiLogin(request, PERSONAS.tenantAdmin.email);
     const title = `E2E Approval Agent ${Date.now()}`;
 
     await gotoAuthenticated(page, "/approvals");
@@ -38,7 +37,10 @@ test.describe("#159 F3 — /approvals/[id] consuma AgentPanel con un contesto ve
     // approvals.spec.ts) — serve solo ad avere un id/titolo REALI su cui costruire il
     // context, non a esercitare il ciclo di vita dell'approvazione.
     await page.getByTestId("approval-create-title").fill(title);
-    await page.getByTestId("approval-create-approvers").selectOption([federicaId]);
+    // V-2: la persona si cerca sul server per nome o email, poi si sceglie dai risultati.
+    await page.getByTestId("approval-create-approvers-input").fill(PERSONAS.tenantAdmin.email);
+    await page.getByTestId("approval-create-approvers-option").first().click();
+    await expect(page.getByTestId("approval-create-approvers-selected")).toBeVisible();
     const [createRes] = await Promise.all([
       page.waitForResponse((r) => r.url().includes("/v1/approvals") && r.request().method() === "POST"),
       page.getByTestId("approval-create-submit").click(),
@@ -57,30 +59,30 @@ test.describe("#159 F3 — /approvals/[id] consuma AgentPanel con un contesto ve
     const id = page.url().split("/approvals/")[1];
     if (!id) throw new Error("id non estraibile dall'URL dopo la navigazione al dettaglio");
 
-    // Il pannello e' della prossima pagina idonea (#159 F3): stesso componente
-    // (`AgentPanel`) e stesso canale (`useAgentStream`) della console, montati qui col
-    // namespace i18n e col context propri di questa pagina.
-    await expect(page.getByTestId("approval-agent-page")).toBeVisible();
-    await expect(page.getByTestId("approval-agent-title")).toBeVisible();
+    // Dal piano interfacce L10 (A-8) il pannello lo monta il layout su ogni pagina idonea, chiuso:
+    // si apre col pulsante. Il contesto resta quello che QUESTA pagina dichiara.
+    await page.getByTestId("agente-apri").click();
+    await expect(page.getByTestId("agente-page")).toBeVisible();
+    await expect(page.getByTestId("agente-title")).toBeVisible();
 
     // Il CONTESTO e' un valore VERO — titolo + id della richiesta appena creata, presi
     // dal segmento dinamico — non un placeholder: la prova fallirebbe se la pagina
     // passasse una stringa fissa invece del titolo/id reali.
-    await expect(page.getByTestId("approval-agent-context")).toContainText(title);
-    await expect(page.getByTestId("approval-agent-context")).toContainText(id);
-    await expect(page.getByTestId("approval-agent-stream-empty")).toBeVisible();
+    await expect(page.getByTestId("agente-context")).toContainText(title);
+    await expect(page.getByTestId("agente-context")).toContainText(id);
+    await expect(page.getByTestId("agente-stream-empty")).toBeVisible();
 
     await page
-      .getByTestId("approval-agent-prompt")
+      .getByTestId("agente-prompt")
       .fill("Quante unita' organizzative esistono? Rispondi in una riga.");
-    await page.getByTestId("approval-agent-run").click();
+    await page.getByTestId("agente-run").click();
     // Lo stream e' del canale, non del componente: se arriva, il ponte e' intero anche
     // su una seconda pagina che non lo ha toccato.
-    await expect(page.getByTestId("approval-agent-stream-line").first()).toBeVisible({ timeout: 180_000 });
+    await expect(page.getByTestId("agente-stream-line").first()).toBeVisible({ timeout: 180_000 });
     // Una corsa riuscita NON produce un avviso (l'hook lo emette solo su errore o
     // approvazione, come nella console): la fine si legge dal pulsante «Ferma» che sparisce.
-    await expect(page.getByTestId("approval-agent-stop")).toBeHidden({ timeout: 240_000 });
-    await expect(page.getByTestId("approval-agent-notice-err")).toBeHidden();
-    expect(await page.getByTestId("approval-agent-stream-line").count()).toBeGreaterThan(0);
+    await expect(page.getByTestId("agente-stop")).toBeHidden({ timeout: 240_000 });
+    await expect(page.getByTestId("agente-notice-err")).toBeHidden();
+    expect(await page.getByTestId("agente-stream-line").count()).toBeGreaterThan(0);
   });
 });

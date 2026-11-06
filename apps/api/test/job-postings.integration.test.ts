@@ -65,7 +65,7 @@ async function creaAnnuncio(sessione: S, payload: Record<string, unknown>) {
 describe("/v1/job-postings/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenant = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenant = await login(suite, "governo@collaudo.invalid");
     semplice = await login(suite, "tommaso.fiore@rtl-bank.org");
 
     // La richiesta padre si crea VIA API, non con un INSERT: cosi' il test esercita

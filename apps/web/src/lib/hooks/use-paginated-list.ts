@@ -50,6 +50,8 @@ export interface ServerPagination {
   pageSize: number;
   onPageIndexChange: (index: number) => void;
   onPageSizeChange: (size: number) => void;
+  /** Il percorso API dell'elenco (A-14): la tabella ne mostra l'origine del dato. */
+  apiPath?: string;
 }
 
 export function usePaginatedList<TRow>(options: UsePaginatedListOptions) {
@@ -93,6 +95,7 @@ export function usePaginatedList<TRow>(options: UsePaginatedListOptions) {
   }
 
   const server: ServerPagination = {
+    apiPath: path,
     total,
     pageIndex,
     pageSize,

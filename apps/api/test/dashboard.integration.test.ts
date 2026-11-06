@@ -32,7 +32,7 @@ describe("GET /v1/dashboard/widgets integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     // [S1045] Il manager si sceglie per CARATTERISTICA: deve possedere almeno una
     // posizione ATTIVA, perche' e' da li' che il cruscotto ricava lo scope TEAM.
     // `paolo.caputo`, nominato prima, dopo la ricostruzione ne possiede 5 tutte

@@ -39,6 +39,8 @@ import {
 import { apiFetch } from "../../../../lib/api/fetch";
 import { isApiError } from "../../../../lib/api/errors";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 // Stable no-op subscribe for useSyncExternalStore reads of immutable browser capabilities.
 const subscribeNever = () => () => {};
@@ -53,6 +55,7 @@ type VerifyCodeFormValues = z.infer<ReturnType<typeof buildVerifyCodeSchema>>;
 
 export default function MeSecurityPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
@@ -455,17 +458,14 @@ export default function MeSecurityPage() {
         </CardHeader>
         <CardContent className="p-0">
           {factors.isLoading ? (
-            <div className="p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
+            <StatoCaricamento />
+          ) : factors.isError || !factors.data ? (
+            <StatoErrore errore={factors.error} testId="me-security-factors-error" onRiprova={() => void factors.refetch()} />
           ) : factors.data && factors.data.items.length === 0 ? (
-            <div
-              className="p-6 text-sm text-muted-foreground"
-              data-testid="me-security-factors-empty"
-            >
-              {t("security.factorsEmpty")}
-            </div>
+            <StatoVuoto compatto titolo={t("security.factorsEmpty")} testId="me-security-factors-empty" />
           ) : (
             <ul className="divide-y divide-border" data-testid="me-security-factors-list">
-              {factors.data!.items.map((f: MfaFactorListItem) => (
+              {factors.data.items.map((f: MfaFactorListItem) => (
                 <li
                   key={f.factorId}
                   className="flex items-center justify-between gap-3 px-4 py-3"
@@ -480,7 +480,7 @@ export default function MeSecurityPage() {
                     </div>
                     <div className="font-mono text-xs text-muted-foreground">
                       {f.verified ? t("security.verified") : t("security.pendingVerification")} ·{" "}
-                      {t("security.createdAt", { date: new Date(f.createdAt).toLocaleDateString() })}
+                      {t("security.createdAt", { date: fmt.data(f.createdAt) })}
                     </div>
                   </div>
                   <Button
@@ -878,9 +878,11 @@ export default function MeSecurityPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {sessions.isLoading ? (
-            <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+            <StatoCaricamento />
+          ) : sessions.isError ? (
+            <StatoErrore errore={sessions.error} testId="me-security-sessions-error" onRiprova={() => void sessions.refetch()} />
           ) : (sessions.data?.items.length ?? 0) === 0 ? (
-            <p data-testid="me-security-sessions-empty" className="text-sm text-muted-foreground">{t("security.sessions.empty")}</p>
+            <StatoVuoto compatto titolo={t("security.sessions.empty")} testId="me-security-sessions-empty" />
           ) : (
             <>
               <ul className="divide-y divide-border rounded-card border border-border" data-testid="me-security-sessions-list">
@@ -894,7 +896,7 @@ export default function MeSecurityPage() {
                           {isCurrent && <Badge variant="outline" className="border-success text-success" data-testid="me-security-session-current-badge">{t("security.sessions.thisDevice")}</Badge>}
                         </div>
                         <div className="font-mono text-xs text-muted-foreground">
-                          {(s.userAgent ?? t("security.sessions.unknownDevice")).slice(0, 60)} · {t("security.sessions.lastSeen", { date: new Date(s.lastIssuedAt).toLocaleString() })}
+                          {(s.userAgent ?? t("security.sessions.unknownDevice")).slice(0, 60)} · {t("security.sessions.lastSeen", { date: fmt.dataOra(s.lastIssuedAt) })}
                         </div>
                       </div>
                       <Button

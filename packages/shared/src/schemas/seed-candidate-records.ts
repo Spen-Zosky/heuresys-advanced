@@ -14,7 +14,8 @@ export type SeedCandidateValidationStatus = z.infer<typeof SeedCandidateValidati
 export const SeedCandidateRecordSchema = z.object({
   seedCandidateRecordId: z.uuid(),
   runId: z.uuid(),
-  tenantId: z.uuid(),
+  // S-11: la colonna e' annullabile dalla 000333 (ricerca di piattaforma), come nelle corse.
+  tenantId: z.uuid().nullable(),
   domain: z.string(),
   naturalKey: z.string(),
   payload: z.record(z.string(), z.unknown()),

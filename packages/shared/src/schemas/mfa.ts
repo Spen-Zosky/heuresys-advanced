@@ -148,6 +148,31 @@ export const VerifyMfaLoginBodySchema = z.object({
 });
 export type VerifyMfaLoginBody = z.infer<typeof VerifyMfaLoginBodySchema>;
 
+/* --- ADR-0050 D5: conferma del secondo fattore dentro una sessione aperta --- */
+/* Chi legge per mandato la retribuzione o le valutazioni di un'altra persona deve avere
+   confermato il secondo fattore da poco (STEP_UP_WINDOW_MINUTES). La pagina chiede
+   /step-up/begin, la persona inserisce il codice (o usa la passkey), e /step-up/verify
+   segna la sessione. */
+
+export const STEP_UP_WINDOW_MINUTES = 15;
+export const STEP_UP_REQUIRED_CODE = "STEP_UP_REQUIRED";
+
+export const StepUpBeginResponseSchema = MfaChallengeSchema;
+export type StepUpBeginResponse = z.infer<typeof StepUpBeginResponseSchema>;
+
+export const StepUpVerifyBodySchema = z.object({
+  challengeToken: z.string().min(16),
+  /** Un codice di 6 cifre (app, email, SMS) oppure un codice di recupero. */
+  code: z.string().trim().min(6).max(32),
+});
+export type StepUpVerifyBody = z.infer<typeof StepUpVerifyBodySchema>;
+
+export const StepUpVerifyResponseSchema = z.object({
+  confirmed: z.literal(true),
+  validForMinutes: z.number().int().positive(),
+});
+export type StepUpVerifyResponse = z.infer<typeof StepUpVerifyResponseSchema>;
+
 /* ===================================================================== */
 /* === EMAIL_OTP factor (MVP-4) ======================================== */
 /* ---------------------------------------------------------------------

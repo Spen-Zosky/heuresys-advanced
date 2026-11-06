@@ -68,7 +68,8 @@ test.describe("MVP-2a ESS pages — live data", () => {
     if ((await righe.count()) > 0) {
       const prima = righe.first();
       await expect(prima.locator("td").first()).not.toHaveText(/^\s*(—)?\s*$/);
-      await expect(prima.locator("td").nth(3)).toHaveText(/\d{4}-\d{2}-\d{2}/);
+      // F-1 (L6): la data e' nella forma della lingua (gg/mm/aaaa), non piu' ISO.
+      await expect(prima.locator("td").nth(3)).toHaveText(/\d{2}\/\d{2}\/\d{4}/);
     }
   });
 

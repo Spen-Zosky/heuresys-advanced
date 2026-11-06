@@ -6,8 +6,10 @@ import { useTranslation } from "react-i18next";
 import { Button, Input } from "@heuresys/ui";
 import type { OccupationMatch, SkillMatch } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCan } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/errors";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { useFormat } from "@/lib/format";
 
 /**
  * #40 (S1018) — free-text semantic search over the live pgvector embeddings
@@ -32,8 +34,13 @@ function escoUriTail(uri: string): string {
 
 export function SemanticSearchPanel() {
   const { t } = useTranslation();
+  const fmt = useFormat();
   const [term, setTerm] = useState("");
   const [submitted, setSubmitted] = useState("");
+  // S-19 (INC-11): la ricerca chiede `matching:read`. La pagina /skills si apre con
+  // `skill:read`, e chi non ha anche la ricerca (CEO, READ_ONLY, TAXONOMY_STEWARD) vedeva un
+  // pannello che finiva in 403. Senza il permesso il pannello non si mostra.
+  const canSearch = useCan("matching:read");
 
   const search = useQuery({
     queryKey: ["matching", "search", submitted],
@@ -41,7 +48,7 @@ export function SemanticSearchPanel() {
       apiFetch<FreeTextSearchResponse>(
         `/v1/matching/search?q=${encodeURIComponent(submitted)}&limit=20`,
       ),
-    enabled: submitted.length >= 2,
+    enabled: canSearch && submitted.length >= 2,
     retry: false, // 404 flag-off / 429 throttle must surface, never auto-re-bill
     staleTime: 5 * 60_000,
   });
@@ -68,11 +75,11 @@ export function SemanticSearchPanel() {
         header: t("semanticSearch.colScore"),
         align: "right",
         cell: (m) => (
-          <span className="font-medium tabular-nums text-foreground">{`${(m.score * 100).toFixed(0)}%`}</span>
+          <span className="font-medium tabular-nums text-foreground">{`${fmt.percento(m.score, "0-1", 0)}`}</span>
         ),
       },
     ],
-    [t],
+    [t, fmt],
   );
   const skillColumns = useMemo<DataColumn<SkillMatch>[]>(
     () => [
@@ -84,12 +91,14 @@ export function SemanticSearchPanel() {
         header: t("semanticSearch.colScore"),
         align: "right",
         cell: (m) => (
-          <span className="font-medium tabular-nums text-foreground">{`${(m.score * 100).toFixed(0)}%`}</span>
+          <span className="font-medium tabular-nums text-foreground">{`${fmt.percento(m.score, "0-1", 0)}`}</span>
         ),
       },
     ],
-    [t],
+    [t, fmt],
   );
+
+  if (!canSearch) return null;
 
   return (
     <section data-testid="semantic-search" className="space-y-4 rounded-card border border-border bg-card p-4 shadow-card">
@@ -132,9 +141,10 @@ export function SemanticSearchPanel() {
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t("semanticSearch.occupations")}
             </h3>
-            <EntityTable<OccupationMatch>
+            <EntityTable<OccupationMatch> originPath={"/v1/matching/search"}
               isLoading={search.isLoading}
               isError={search.isError && !flagOff && !throttled}
+              error={search.error}
               errorMessage={t("semanticSearch.error")}
               rows={search.data?.occupations ?? []}
               rowKey={(m) => m.escoUri}
@@ -150,9 +160,10 @@ export function SemanticSearchPanel() {
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t("semanticSearch.skills")}
             </h3>
-            <EntityTable<SkillMatch>
+            <EntityTable<SkillMatch> originPath={"/v1/matching/search"}
               isLoading={search.isLoading}
               isError={search.isError && !flagOff && !throttled}
+              error={search.error}
               errorMessage={t("semanticSearch.error")}
               rows={search.data?.skills ?? []}
               rowKey={(m) => m.skillId}

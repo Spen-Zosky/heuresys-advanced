@@ -35,7 +35,7 @@ let tenantId: string;
 describe("/v1/seed-acquisition-* pipeline", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     const tr = await pool.query<{ user_tenant_id: string }>(
       `SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1`, [tenantS.userId],
     );

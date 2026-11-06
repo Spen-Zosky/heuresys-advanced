@@ -26,15 +26,15 @@
 
 import type { ActorContext } from "../actor.js";
 import type { RoleCode } from "../../config/constants.js";
-import { HR_MANDATED_ROLES } from "./resolver.js";
+import { HR_MANDATED_ROLES, TENANT_WIDE_MASKED_ROLES } from "./resolver.js";
 
 /** Il mandato tecnico di piattaforma (ADR-0032): apre la superficie, non i dati sensibili. */
 export const PLATFORM_MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>(["PLATFORM_ADMIN"]);
 
 /**
  * I ruoli di piattaforma che vedono/scrivono solo sui clienti a cui sono stati assegnati
- * (D9=B, mandato K — R-0 costruisce la tabella di assegnazione, questo insieme resta VUOTO
- * finché nessun ruolo lo popola). Lo riempiono, in ordine di nascita: R-9
+ * (D9=B, mandato K — R-0 ha costruito la tabella di assegnazione con l'insieme vuoto; oggi
+ * contiene i quattro ruoli qui sotto, S-22/INC-08). Lo hanno riempito, in ordine di nascita: R-9
  * (`PLATFORM_OPERATOR`, `SALES`), R-8 (`IMPLEMENTATION_CONSULTANT`), R-5
  * (`BLUEPRINT_MANAGER`). `SECURITY_ADMIN` (R-7) NON entra qui: è un ruolo di cliente
  * (mandato, sezione 2, conseguenza c).
@@ -123,3 +123,47 @@ export const MANDATI_FUNZIONALI_CON_SUPERFICIE: ReadonlySet<RoleCode> = new Set<
   "DPO",
   "SECURITY_ADMIN",
 ]);
+
+/**
+ * ADR-0050 D1 — l'insieme dei MANDATI FORTI: chi li porta vede, o governa, ciò che sta oltre la
+ * propria catena. Un solo insieme, composto dagli altri e non elencato a mano: ogni regola
+ * dell'ADR (secondo fattore senza esenzioni D2, esenzioni a scadenza D3, concessione come atto
+ * D4, nuova conferma D5, agenti senza mandati D6) lo legge da qui.
+ */
+export const MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
+  ...HR_MANDATED_ROLES,
+  ...TENANT_WIDE_MASKED_ROLES,
+  ...PLATFORM_MANDATE_ROLES,
+  "SECURITY_ADMIN",
+  "WHISTLEBLOWING_CUSTODIAN",
+]);
+
+/** ADR-0050 D1: la persona porta almeno un mandato forte. */
+export function ruoliPortanoMandato(roles: readonly RoleCode[]): boolean {
+  return roles.some((r) => MANDATE_ROLES.has(r));
+}
+
+/**
+ * ADR-0050 D7 — separazione dei compiti: le coppie di mandati che non stanno sulla stessa persona.
+ * Copia di `sys.f_mandati_incompatibili()` (mig 000475), che le fa rispettare a ogni concessione;
+ * la parità la verifica adr0050-mandato-atto.integration.test.ts. Qui servono a rifiutare la
+ * proposta subito, invece di lasciarla arrivare all'approvazione per farla cadere lì.
+ */
+export const INCOMPATIBILI: ReadonlyArray<readonly [RoleCode, RoleCode]> = [
+  ["WHISTLEBLOWING_CUSTODIAN", "TENANT_ADMIN"],
+  ["WHISTLEBLOWING_CUSTODIAN", "HRMS_MANAGER"],
+  ["WHISTLEBLOWING_CUSTODIAN", "PEOPLE_MANAGER"],
+  ["WHISTLEBLOWING_CUSTODIAN", "SECURITY_ADMIN"],
+  ["SECURITY_ADMIN", "TENANT_ADMIN"],
+  ["DPO", "TENANT_ADMIN"],
+  ["DPO", "HRMS_MANAGER"],
+  ["DPO", "PEOPLE_MANAGER"],
+];
+
+/** ADR-0050 D7: il primo ruolo già portato che non può stare con `ruolo`, oppure null. */
+export function mandatoIncompatibileCon(ruolo: RoleCode, portati: readonly RoleCode[]): RoleCode | null {
+  for (const altro of portati) {
+    if (INCOMPATIBILI.some(([a, b]) => (a === ruolo && b === altro) || (a === altro && b === ruolo))) return altro;
+  }
+  return null;
+}

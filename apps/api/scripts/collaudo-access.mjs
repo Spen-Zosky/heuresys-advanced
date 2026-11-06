@@ -26,19 +26,24 @@ export const COLLAUDO_PATH = join(REPO, ".secrets", "collaudo-access.key");
  * "creati come utenti, non come persone di RTL" (mandato, passo 53). L'assegnazione a RTL
  * Bank via sys_platform_user_tenant_assignments (R-0) è un atto separato, fatto con l'API.
  */
+// ADR-0050 D2 (accettato il 2026-11-03): chi porta un mandato forte non è esentabile dal
+// secondo fattore, nemmeno un'utenza di collaudo. Le cinque identità con un ruolo di
+// MANDATE_ROLES (piattaforma@, governo@, dpo@, security-admin@, people-manager@) portano quindi
+// `mfaExempt: false` come platform-test-admin@: un fattore 'derived-access' e la sfida vera.
+// Il database rifiuta comunque l'esenzione per loro (migrazione 000473).
 export const COLLAUDO_IDENTITIES = [
-  { email: "piattaforma@collaudo.invalid", displayName: "Collaudo Piattaforma",  tenantCode: "HEURESYS", roleCode: "PLATFORM_ADMIN" },
-  { email: "governo@collaudo.invalid",     displayName: "Collaudo Governo",      tenantCode: "RTL_BANK", roleCode: "TENANT_ADMIN" },
+  { email: "piattaforma@collaudo.invalid", displayName: "Collaudo Piattaforma",  tenantCode: "HEURESYS", roleCode: "PLATFORM_ADMIN", mfaExempt: false },
+  { email: "governo@collaudo.invalid",     displayName: "Collaudo Governo",      tenantCode: "RTL_BANK", roleCode: "TENANT_ADMIN", mfaExempt: false },
   { email: "persona@collaudo.invalid",     displayName: "Collaudo Persona",      tenantCode: "RTL_BANK", roleCode: "USER" },
   { email: "platform-operator@collaudo.invalid", displayName: "Collaudo Platform Operator", tenantCode: "HEURESYS", roleCode: "PLATFORM_OPERATOR" },
   { email: "sales@collaudo.invalid",             displayName: "Collaudo Sales",             tenantCode: "HEURESYS", roleCode: "SALES" },
   // Mandato K, R-2 (2026-09-18): DPO e' un ruolo di CLIENTE (tenant-scoped, come
   // TENANT_ADMIN/HRMS_MANAGER — non entra in GDPR_MANDATE_ROLES), quindi la persona
   // di collaudo nasce su RTL_BANK come governo@collaudo.invalid, non su HEURESYS.
-  { email: "dpo@collaudo.invalid",               displayName: "Collaudo DPO",               tenantCode: "RTL_BANK", roleCode: "DPO" },
+  { email: "dpo@collaudo.invalid",               displayName: "Collaudo DPO",               tenantCode: "RTL_BANK", roleCode: "DPO", mfaExempt: false },
   // Mandato K, R-7 (2026-09-19): SECURITY_ADMIN e' un ruolo di CLIENTE (tenant-scoped,
   // stesso vincolo di TENANT_ADMIN su grantRole/revokeRole/listRoles), quindi RTL_BANK.
-  { email: "security-admin@collaudo.invalid",    displayName: "Collaudo Security Admin",    tenantCode: "RTL_BANK", roleCode: "SECURITY_ADMIN" },
+  { email: "security-admin@collaudo.invalid",    displayName: "Collaudo Security Admin",    tenantCode: "RTL_BANK", roleCode: "SECURITY_ADMIN", mfaExempt: false },
   // Mandato K, R-3 (2026-09-19): TAXONOMY_STEWARD e' un ruolo di CLIENTE (governo lato
   // cliente della tassonomia di competenze/ruoli professionali), quindi RTL_BANK.
   { email: "taxonomy-steward@collaudo.invalid",  displayName: "Collaudo Taxonomy Steward",  tenantCode: "RTL_BANK", roleCode: "TAXONOMY_STEWARD" },
@@ -59,7 +64,7 @@ export const COLLAUDO_IDENTITIES = [
   { email: "implementation-consultant@collaudo.invalid", displayName: "Collaudo Implementation Consultant", tenantCode: "HEURESYS", roleCode: "IMPLEMENTATION_CONSULTANT" },
   // Mandato K, R-6 (2026-09-19): PEOPLE_MANAGER e' un ruolo di CLIENTE (tenant-scoped,
   // mandato HR tenant-wide come TENANT_ADMIN/HRMS_MANAGER), quindi RTL_BANK.
-  { email: "people-manager@collaudo.invalid",     displayName: "Collaudo People Manager",     tenantCode: "RTL_BANK", roleCode: "PEOPLE_MANAGER" },
+  { email: "people-manager@collaudo.invalid",     displayName: "Collaudo People Manager",     tenantCode: "RTL_BANK", roleCode: "PEOPLE_MANAGER", mfaExempt: false },
   // Mandato K, R-6 sessione 2 (2026-09-19, passo 57): DATA_STEWARD e' un ruolo di CLIENTE
   // (tenant-scoped, come PEOPLE_MANAGER — non un ruolo di piattaforma assegnato), quindi
   // RTL_BANK.

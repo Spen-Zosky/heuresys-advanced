@@ -12,6 +12,7 @@ import type { MeProfileFull, MeTheme, MePalette } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { useMyPreferences, useUpdateMyPreferences } from "../../../../lib/api/auth";
 import { ProfileTabs, type ProfileTabDef } from "../../../../components/profile-tabs";
+import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { OverviewTab } from "./_components/overview-tab";
 import { OrganizationTab } from "./_components/organization-tab";
 import { ContractsTab } from "./_components/contracts-tab";
@@ -65,7 +66,7 @@ function AppearanceCard() {
       <CardHeader><CardTitle>{t("profile.appearanceTitle")}</CardTitle></CardHeader>
       <CardContent>
         {prefs.isLoading ? (
-          <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+          <StatoCaricamento />
         ) : (
           <div className="space-y-4" data-testid="me-appearance">
             <div className="space-y-1">
@@ -156,7 +157,7 @@ function SettingsForm() {
       <CardHeader><CardTitle>{t("profile.anagraficaTitle")}</CardTitle></CardHeader>
       <CardContent>
         {profile.isLoading ? (
-          <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+          <StatoCaricamento />
         ) : (
           <form onSubmit={(e) => { void onSubmit(e); }} className="space-y-4" data-testid="me-profile-form">
             <div className="space-y-1">
@@ -212,10 +213,10 @@ function ProfileTabsSection() {
   });
 
   if (full.isLoading) {
-    return <span className="text-sm text-muted-foreground" data-testid="profile-full-loading">{t("common:loading")}</span>;
+    return <StatoCaricamento testId="profile-full-loading" />;
   }
   if (full.isError || !full.data) {
-    return <p className="text-sm text-danger" data-testid="profile-full-error">{t("profile.full.error")}</p>;
+    return <StatoErrore errore={full.error} titolo={t("profile.full.error")} testId="profile-full-error" onRiprova={() => void full.refetch()} />;
   }
   const data = full.data;
   const tabs: ProfileTabDef[] = [
@@ -267,7 +268,7 @@ export default function MeProfilePage() {
         }
       />
 
-      <Suspense fallback={<span className="text-sm text-muted-foreground">{t("common:loading")}</span>}>
+      <Suspense fallback={<StatoCaricamento />}>
         <ProfileTabsSection />
       </Suspense>
 

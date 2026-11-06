@@ -168,7 +168,8 @@ describe("#92 passo 3/7 — /v1/performance-reviews", () => {
         const r = res.json() as { condivisioneEccezione: Record<string, string> | null; masked?: string[] };
         expect(r.condivisioneEccezione, `${who}: eccezione assente`).not.toBeNull();
         expect(r.condivisioneEccezione!["motivo"]).toBe(unaCoperta!.motivo);
-        expect(r.condivisioneEccezione!["decisaDa"]).toBe(unaCoperta!.decisa_da);
+        // S-24: la nota interna «decisa da» resta nel registro e non esce piu' dall'API.
+        expect(r.condivisioneEccezione!["decisaDa"]).toBeUndefined();
         expect(r.condivisioneEccezione!["decisaIl"]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         expect(r.condivisioneEccezione!["condizioneChiusura"]!.length).toBeGreaterThan(10);
         // e' governo del percorso, non giudizio: il platform la legge (le date di workflow pure)

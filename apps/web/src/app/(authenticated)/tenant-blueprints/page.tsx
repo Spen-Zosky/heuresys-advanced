@@ -19,8 +19,10 @@ import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
+import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
+import { NomeOppure } from "@/components/senza-nome";
 
-function buildColumns(t: TFunction): DataColumn<TenantBlueprint>[] {
+function buildColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<TenantBlueprint>[] {
   return [
     {
       header: t("dossier.name"),
@@ -43,7 +45,7 @@ function buildColumns(t: TFunction): DataColumn<TenantBlueprint>[] {
       // ed e' il caso che ha fatto nascere l'oggetto. Si dice per quello che e'.
       cell: (b) =>
         b.tenantId ? (
-          <span className="font-mono text-xs text-muted-foreground">{b.tenantId}</span>
+          <span className="text-xs"><NomeOppure nome={b.tenantName} id={b.tenantId} /></span>
         ) : (
           <span className="text-xs uppercase text-muted-foreground">
             {t("dossier.negotiation")}
@@ -53,7 +55,7 @@ function buildColumns(t: TFunction): DataColumn<TenantBlueprint>[] {
     {
       header: t("dossier.status"),
       cell: (b) => (
-        <StatusPill tone={b.status === "ACTIVE" ? "success" : "neutral"}>{b.status}</StatusPill>
+        <StatusPill tone={b.status === "ACTIVE" ? "success" : "neutral"}>{enumLabel("tenantBlueprintStatus", b.status)}</StatusPill>
       ),
     },
   ];
@@ -61,6 +63,7 @@ function buildColumns(t: TFunction): DataColumn<TenantBlueprint>[] {
 
 export default function TenantBlueprintsPage() {
   const { t } = useTranslation("blueprints");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const perms = useCurrentUserPermissions();
   const canWrite = perms.data?.permissions.includes("tenant_blueprint:write") ?? false;
@@ -141,13 +144,14 @@ export default function TenantBlueprintsPage() {
         description={t("dossier.description")}
         isLoading={lista.query.isLoading}
         isError={lista.query.isError}
+        error={lista.query.error}
         errorTestId="tenant-blueprints-error"
         errorMessage={t("dossier.error")}
         rows={lista.query.data?.items ?? []}
         server={lista.server}
         rowKey={(b) => b.tenantBlueprintId}
         rowTestId="tenant-blueprints-row"
-        columns={buildColumns(t)}
+        columns={buildColumns(t, enumLabel)}
         emptyTestId="tenant-blueprints-empty"
         emptyTitle={t("dossier.emptyTitle")}
         emptyDescription={t("dossier.emptyDescription")}

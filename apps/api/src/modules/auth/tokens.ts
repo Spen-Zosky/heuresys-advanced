@@ -56,6 +56,17 @@ export interface AuthCookieBundle {
   secure: boolean;
 }
 
+/** ADR-0050 D5: riemette il solo cookie di accesso (stessi attributi di setAuthCookies). */
+export function setAccessCookie(reply: FastifyReply, accessJwt: string, secure: boolean): void {
+  reply.setCookie(COOKIES.ACCESS, accessJwt, {
+    httpOnly: true,
+    secure,
+    sameSite: "lax",
+    path: "/",
+    maxAge: ACCESS_JWT_TTL_SECONDS,
+  });
+}
+
 /**
  * Sets all three auth cookies on the reply with the canonical attributes.
  * `secure` should be true in production (HTTPS only) and false in development.

@@ -14,6 +14,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { StatusPill } from "@/components/status-pill";
+import { useFormat, type Formati } from "@/lib/format";
 
 /**
  * #198 Tenant Builder P3, T7 — IL REGISTRO DELLE RIGHE GENERATE.
@@ -44,7 +45,7 @@ function tonoPerStato(s: GeneratedOriginStatus): "success" | "warning" | "info" 
   return "neutral";
 }
 
-function colonneRighe(t: TFunction): DataColumn<GeneratedOrigin>[] {
+function colonneRighe(t: TFunction, f: Formati): DataColumn<GeneratedOrigin>[] {
   return [
     {
       header: t("generatedOrigins.cols.targetTable"),
@@ -58,7 +59,7 @@ function colonneRighe(t: TFunction): DataColumn<GeneratedOrigin>[] {
     },
     {
       header: t("generatedOrigins.cols.status"),
-      cell: (r) => <StatusPill tone={tonoPerStato(r.status)}>{r.status}</StatusPill>,
+      cell: (r) => <StatusPill tone={tonoPerStato(r.status)}>{t(`generatedOrigins.status.${r.status}`)}</StatusPill>,
     },
     {
       header: t("generatedOrigins.cols.justification"),
@@ -71,7 +72,7 @@ function colonneRighe(t: TFunction): DataColumn<GeneratedOrigin>[] {
     {
       header: t("generatedOrigins.cols.createdAt"),
       cell: (r) => (
-        <span className="tabular-nums text-xs">{r.createdAt.slice(0, 10)}</span>
+        <span className="tabular-nums text-xs">{f.data(r.createdAt)}</span>
       ),
     },
   ];
@@ -79,6 +80,7 @@ function colonneRighe(t: TFunction): DataColumn<GeneratedOrigin>[] {
 
 export default function GeneratedOriginsPage() {
   const { t } = useTranslation("admin");
+  const f = useFormat();
   const [stato, setStato] = useState<GeneratedOriginStatus | "">("");
 
   const sommario = useQuery({
@@ -92,26 +94,26 @@ export default function GeneratedOriginsPage() {
     params: { status: stato || undefined },
   });
 
-  const colonne = useMemo(() => colonneRighe(t), [t]);
+  const colonne = useMemo(() => colonneRighe(t, f), [t, f]);
 
   const kpis: KpiCardData[] = useMemo(() => {
     const s = sommario.data?.totals;
     if (!s) return [];
     return [
-      { label: t("generatedOrigins.kpi.total"), value: s.total.toLocaleString() },
-      { label: t("generatedOrigins.kpi.generated"), value: s.generated.toLocaleString(), iconTone: "info" },
-      { label: t("generatedOrigins.kpi.confirmed"), value: s.confirmed.toLocaleString(), iconTone: "success" },
+      { label: t("generatedOrigins.kpi.total"), value: f.numero(s.total) },
+      { label: t("generatedOrigins.kpi.generated"), value: f.numero(s.generated), iconTone: "info" },
+      { label: t("generatedOrigins.kpi.confirmed"), value: f.numero(s.confirmed), iconTone: "success" },
       {
         label: t("generatedOrigins.kpi.superseded"),
-        value: s.superseded.toLocaleString(),
+        value: f.numero(s.superseded),
         iconTone: s.superseded > 0 ? "warning" : "success",
       },
       {
         label: t("generatedOrigins.kpi.tables"),
-        value: (sommario.data?.byTable.length ?? 0).toLocaleString(),
+        value: f.numero(sommario.data?.byTable.length ?? 0),
       },
     ];
-  }, [sommario.data, t]);
+  }, [sommario.data, t, f]);
 
   const colonneSommario: DataColumn<GeneratedOriginSummaryResponse["byTable"][number]>[] = useMemo(
     () => [
@@ -122,13 +124,13 @@ export default function GeneratedOriginsPage() {
       {
         header: t("generatedOrigins.cols.total"),
         align: "right",
-        cell: (r) => <span className="tabular-nums">{r.total.toLocaleString()}</span>,
+        cell: (r) => <span className="tabular-nums">{f.numero(r.total)}</span>,
       },
-      { header: "GENERATED", align: "right", cell: (r) => <span className="tabular-nums">{r.generated.toLocaleString()}</span> },
-      { header: "CONFIRMED", align: "right", cell: (r) => <span className="tabular-nums">{r.confirmed.toLocaleString()}</span> },
-      { header: "SUPERSEDED", align: "right", cell: (r) => <span className="tabular-nums">{r.superseded.toLocaleString()}</span> },
+      { header: t("generatedOrigins.status.GENERATED"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.generated)}</span> },
+      { header: t("generatedOrigins.status.CONFIRMED"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.confirmed)}</span> },
+      { header: t("generatedOrigins.status.SUPERSEDED"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.superseded)}</span> },
     ],
-    [t],
+    [t, f],
   );
 
   const vuotoDelTutto =
@@ -158,9 +160,10 @@ export default function GeneratedOriginsPage() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-foreground">{t("generatedOrigins.byTable")}</h2>
-        <EntityTable<GeneratedOriginSummaryResponse["byTable"][number]>
+        <EntityTable<GeneratedOriginSummaryResponse["byTable"][number]> originPath={"/v1/generated-origins"}
           isLoading={sommario.isLoading}
           isError={sommario.isError}
+          error={sommario.error}
           errorMessage={t("generatedOrigins.error")}
           rows={sommario.data?.byTable ?? []}
           rowKey={(r) => r.targetTable}
@@ -184,7 +187,7 @@ export default function GeneratedOriginsPage() {
             <option value="">{t("generatedOrigins.allStatuses")}</option>
             {STATI.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {t(`generatedOrigins.status.${s}`)}
               </option>
             ))}
           </select>
@@ -192,6 +195,7 @@ export default function GeneratedOriginsPage() {
         <EntityTable<GeneratedOrigin>
           isLoading={righe.query.isLoading}
           isError={righe.query.isError}
+          error={righe.query.error}
           errorMessage={t("generatedOrigins.error")}
           rows={righe.rows}
           server={righe.server}

@@ -20,6 +20,7 @@ import {
 } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { useFormat, type Formati } from "@/lib/format";
 
 interface MeCertification {
   userCertificationId: string;
@@ -78,12 +79,12 @@ function cleanPayload(v: CertificationFormValues): Record<string, unknown> {
   };
 }
 
-function buildColumns(t: CertI18n): DataColumn<MeCertification>[] {
+function buildColumns(t: CertI18n, fmt: Formati): DataColumn<MeCertification>[] {
   return [
     { header: t("certifications.colName"), cell: (c) => <span className="font-medium text-foreground">{c.name}</span> },
     { header: t("certifications.colIssuer"), cell: (c) => <span className="text-muted-foreground">{c.issuer}</span> },
-    { header: t("certifications.colIssued"), cell: (c) => <span className="text-xs text-muted-foreground">{c.issuedDate ?? "—"}</span> },
-    { header: t("certifications.colExpires"), cell: (c) => <span className="text-xs text-muted-foreground">{c.expiresDate ?? "—"}</span> },
+    { header: t("certifications.colIssued"), cell: (c) => <span className="text-xs text-muted-foreground">{fmt.data(c.issuedDate)}</span> },
+    { header: t("certifications.colExpires"), cell: (c) => <span className="text-xs text-muted-foreground">{fmt.data(c.expiresDate)}</span> },
     {
       header: t("certifications.colCredential"),
       cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.credentialId ?? "—"}</span>,
@@ -102,10 +103,11 @@ const EMPTY_FORM: CertificationFormValues = {
 
 export default function MeCertificationsPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
   const schema = useMemo(() => buildCertificationSchema(t), [t]);
-  const columns = useMemo(() => buildColumns(t), [t]);
+  const columns = useMemo(() => buildColumns(t, fmt), [t, fmt]);
   const certs = useQuery({
     queryKey: ["me", "certifications"],
     queryFn: () => apiFetch<MeCertificationsList>("/v1/me/certifications"),
@@ -150,7 +152,7 @@ export default function MeCertificationsPage() {
         description={t("certifications.description")}
         badges={
           <Badge variant="secondary" data-testid="me-certifications-count">
-            {certs.data ? t("certifications.count", { count: certs.data.total }) : t("common:loading")}
+            {certs.data ? t("certifications.count", { count: certs.data.total }) : certs.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
           </Badge>
         }
       />
@@ -278,9 +280,10 @@ export default function MeCertificationsPage() {
       </Card>
 
       <div data-testid="me-certifications-table">
-        <EntityTable<MeCertification>
+        <EntityTable<MeCertification> originPath={"/v1/me/certifications"}
           isLoading={certs.isLoading}
           isError={certs.isError}
+          error={certs.error}
           errorMessage={t("certifications.errorMessage")}
           rows={certs.data?.items ?? []}
           rowKey={(c) => c.userCertificationId}

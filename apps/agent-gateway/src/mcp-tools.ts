@@ -49,13 +49,42 @@ export function bindPath(template: string, params: Record<string, unknown>): str
 // lanciare, e' lui a dirlo, non la prova live. Dal 2026-10-30 (SDK 0.3.314, zod 4.6.7) il
 // crash non si riproduce piu' e la controprova lo verifica; qui si resta su `catchall`.
 export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOperationResolver) {
-  const ok = (d: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(d) }] });
+  // A-14: l'agente sa da dove viene ciò che legge. Se l'API ha dichiarato l'origine del dato
+  // (nativo, importato, ibrido, misto), la risposta la porta in un secondo blocco.
+  const ok = (d: unknown) => {
+    const origine = client.origineDi(d);
+    return {
+      content: [
+        { type: "text" as const, text: JSON.stringify(d) },
+        ...(origine ? [{ type: "text" as const, text: `origine del dato: ${origine}` }] : []),
+      ],
+    };
+  };
 
   const rd = (n: string, p: string) =>
     tool(n, `GET ${p}`, {}, async () => ok(await client.call("GET", p)));
   const rdId = (n: string, base: string) =>
     tool(n, `GET ${base}/:id`, { id: z.string() }, async (a: { id: string }) =>
       ok(await client.call("GET", `${base}/${a.id}`)),
+    );
+  /** A-16: una lettura con filtri facoltativi in querystring (paginazione, soggetto, periodo). */
+  const filtri = z.object({}).catchall(z.union([z.string(), z.number(), z.boolean()])).optional();
+  const conQuery = (p: string, q?: Record<string, string | number | boolean>) => {
+    const qs = new URLSearchParams(Object.entries(q ?? {}).map(([k, v]) => [k, String(v)] as [string, string])).toString();
+    return qs ? `${p}?${qs}` : p;
+  };
+  const rdQ = (n: string, descr: string, p: string) =>
+    tool(n, `${descr} — GET ${p}`, { query: filtri }, async (a: { query?: Record<string, string | number | boolean> }) =>
+      ok(await client.call("GET", conQuery(p, a.query))),
+    );
+  /** A-16: una lettura sotto un identificativo, con filtri facoltativi. */
+  const rdSotto = (n: string, descr: string, prima: string, dopo: string) =>
+    tool(
+      n,
+      `${descr} — GET ${prima}/:id${dopo}`,
+      { id: z.string(), query: filtri },
+      async (a: { id: string; query?: Record<string, string | number | boolean> }) =>
+        ok(await client.call("GET", conQuery(`${prima}/${encodeURIComponent(a.id)}${dopo}`, a.query))),
     );
   const up = (n: string, base: string) =>
     tool(
@@ -173,6 +202,15 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
       rd("hrx_blueprint_processes_list", "/blueprint-processes"),
       rd("hrx_blueprint_activations_list", "/blueprint-activations"),
       rd("hrx_blueprint_overrides_list", "/blueprint-overrides"),
+      // --- L10, A-16: le letture di maggior valore che nessuna pagina mostra ---
+      // Valutazioni, misure KPI, predizioni e processi del tenant: si leggono con i permessi
+      // della persona (gettone d'agente, ADR-0050 D6), e le persone lette contano nel freno.
+      rdQ("hrx_performance_reviews_list", "Valutazioni delle prestazioni (filtri: ciclo, persona, stato, limit)", "/performance-reviews"),
+      rdSotto("hrx_performance_reviews_get", "Una valutazione delle prestazioni", "/performance-reviews", ""),
+      rdSotto("hrx_kpi_measurements_list", "Le misure registrate di un KPI (id della definizione)", "/kpi-definitions", "/measurements"),
+      rdQ("hrx_predictions_list", "Predizioni dei modelli (rischio di uscita, prontezza, …)", "/predictions"),
+      rdSotto("hrx_predictions_get", "Una predizione", "/predictions", ""),
+      rdSotto("hrx_org_unit_processes_list", "I processi di un'unità organizzativa del tenant (id dell'unità)", "/organization-unit-processes/by-ou", ""),
       // --- writes (gated by canUseTool) ---
       // user OR service principal:
       up("hrx_org_units_upsert", "/organization-units"), // organization_unit:{create,update}
@@ -188,14 +226,16 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
       putUp("hrx_typing_profile_upsert", "/enterprise-typing-profiles"), // enterprise_typing:update (tenant-admin)
       up("hrx_blueprint_activation_upsert", "/blueprint-activations"), // blueprint:activate (tenant-admin)
       putUp("hrx_blueprint_override_upsert", "/blueprint-overrides"), // blueprint:override (tenant-admin)
-      // SERVICE principal (PLATFORM_ADMIN): job-families + blueprint catalogue --
+      // Catalogo (job-families, blueprint): li scrive una persona con PLATFORM_ADMIN, con il suo
+      // secondo fattore. ADR-0050 D6: l'agente non porta mandati e agisce con i cookie della
+      // persona; non esiste più un'utenza di servizio con PLATFORM_ADMIN.
       up("hrx_job_families_upsert", "/job-families"), // PLATFORM_ADMIN service-gate
       del("hrx_job_families_delete", "/job-families"),
       up("hrx_blueprint_families_upsert", "/blueprint-families"), // blueprint:activate/override (PLATFORM_ADMIN)
       up("hrx_blueprint_variants_upsert", "/blueprint-variants"),
       up("hrx_blueprint_processes_upsert", "/blueprint-processes"),
-      // WI-C: costruzione di un'azienda da un MODELLO (WRITE; utente di servizio
-      // PLATFORM_ADMIN). Prendeva la chiave di un modello cablato in TypeScript, ritirato
+      // WI-C: costruzione di un'azienda da un MODELLO (WRITE; persona con PLATFORM_ADMIN,
+      // ADR-0050 D6). Prendeva la chiave di un modello cablato in TypeScript, ritirato
       // da #132 F3 (E29): qualunque azienda si costruisse nasceva la stessa banca.
       // mode=plan is a dry-run (no writes); mode=apply mutates. Both route through the HITL
       // gate (classified WRITE by name in mcp-tool-names.ts → canUseTool approval).

@@ -47,7 +47,7 @@ async function createTarget(subjectUserId: string, extra: Record<string, unknown
 describe("/v1/user-target-positions integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantS = await login(suite, "governo@collaudo.invalid");
     managerS = await login(suite, "paolo.caputo@rtl-bank.org");
 
     // una posizione reale del tenant, presa dal dato e non inventata

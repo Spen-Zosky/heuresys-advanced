@@ -136,3 +136,37 @@ if "--json" in sys.argv:
     with io.open(sys.argv[i + 1], "w", encoding="utf-8", newline="\n") as fh:
         json.dump({"idonee": idonee, "non_idonee": non_idonee}, fh, ensure_ascii=False, indent=1)
     print("\n  scritto: %s" % sys.argv[i + 1])
+
+# L10, A-8 del piano interfacce: l'elenco delle pagine idonee diventa il file da cui il
+# pannello comune dell'agente decide dove montarsi. Generato, mai scritto a mano:
+#   --ts <percorso>        scrive il file
+#   --check-ts <percorso>  esce 1 se il file non coincide con la misura di adesso
+def _testo_ts() -> str:
+    righe = ",\n".join("  %s" % json.dumps(r) for r, _ in idonee)
+    return (
+        "// GENERATO da docs/kb/tools/check_idoneita_agente.py --ts: non si modifica a mano.\n"
+        "// Piano interfacce L10, A-8: le pagine idonee al pannello dell'agente (#159 F1, prove P1-P4).\n"
+        "// Un segmento [x] della rotta vale per un segmento qualunque dell'indirizzo.\n"
+        "export const PAGINE_IDONEE_AGENTE: readonly string[] = [\n" + righe + ",\n];\n"
+    )
+
+for opzione in ("--ts", "--check-ts"):
+    if opzione in sys.argv:
+        i = sys.argv.index(opzione)
+        if i + 1 >= len(sys.argv):
+            raise SystemExit("%s vuole un percorso" % opzione)
+        dest = sys.argv[i + 1]
+        testo = _testo_ts()
+        if opzione == "--ts":
+            with io.open(dest, "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(testo)
+            print("\n  scritto: %s" % dest)
+        else:
+            try:
+                attuale = io.open(dest, encoding="utf-8", newline="").read()
+            except FileNotFoundError:
+                attuale = ""
+            if attuale != testo:
+                raise SystemExit("\n  %s NON allineato alle pagine idonee: rigenerare con --ts" % dest)
+            print("\n  allineato: %s" % dest)
+

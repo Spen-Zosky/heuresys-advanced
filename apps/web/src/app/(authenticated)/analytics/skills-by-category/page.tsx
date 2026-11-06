@@ -2,11 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, EmptyState, PageHeader, StatsCard, echartsPresets } from "@heuresys/ui";
+import { Badge, PageHeader, StatsCard, echartsPresets } from "@heuresys/ui";
 import { GraduationCap, Layers, Users } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { SkillsByCategoryAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
 const GRID_COLOR = "hsl(var(--border))";
@@ -66,15 +67,15 @@ export default function SkillsByCategoryAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main data-testid="analytics-skills-by-category-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoCaricamento testId="analytics-skills-by-category-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main data-testid="analytics-skills-by-category-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">{t("error")}</p>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-skills-by-category-error" onRiprova={() => void q.refetch()} />
       </main>
     );
   }
@@ -171,11 +172,11 @@ export default function SkillsByCategoryAnalyticsPage() {
           </div>
         </section>
       ) : (
-        <EmptyState
-          data-testid="analytics-skills-by-category-empty"
-          icon={<Layers className="h-6 w-6" />}
-          title={t("empty.title")}
-          description={t("skillsByCategory.emptyDesc")}
+        <StatoVuoto
+          testId="analytics-skills-by-category-empty"
+          icona={<Layers className="h-6 w-6" />}
+          titolo={t("empty.title")}
+          motivo={t("skillsByCategory.emptyDesc")}
         />
       )}
     </main>

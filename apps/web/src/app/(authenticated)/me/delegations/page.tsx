@@ -13,7 +13,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, EmptyState, Input, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
 import { Users } from "lucide-react";
 import type {
   CreateMyDelegationBody,
@@ -25,6 +25,8 @@ import type {
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { ApiError } from "@/lib/api/errors";
+import { useFormat } from "@/lib/format";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -45,6 +47,7 @@ function messaggioDi(err: unknown, t: (k: string) => string): string {
 
 export default function MeDelegationsPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const qc = useQueryClient();
 
   const mie = useQuery({
@@ -125,13 +128,15 @@ export default function MeDelegationsPage() {
     );
 
   const periodo = (d: Delegation) =>
-    d.endsOn ? t("delegations.period.range", { from: d.startsOn, to: d.endsOn }) : t("delegations.period.open", { from: d.startsOn });
+    d.endsOn ? t("delegations.period.range", { from: fmt.data(d.startsOn), to: fmt.data(d.endsOn) }) : t("delegations.period.open", { from: fmt.data(d.startsOn) });
 
   if (mie.isLoading) {
-    return <main className="mx-auto max-w-5xl px-6 py-8"><p className="text-sm text-muted-foreground">{t("common:loading")}</p></main>;
+    return <main className="mx-auto max-w-5xl px-6 py-8"><StatoCaricamento /></main>;
   }
   if (mie.isError || !mie.data) {
-    return <main className="mx-auto max-w-5xl px-6 py-8"><p className="text-sm text-danger" data-testid="me-delegations-error">{t("delegations.error")}</p></main>;
+    return <main className="mx-auto max-w-5xl px-6 py-8">
+        <StatoErrore errore={mie.error} titolo={t("delegations.error")} testId="me-delegations-error" onRiprova={() => void mie.refetch()} />
+      </main>;
   }
   const { granted, received } = mie.data;
 
@@ -235,7 +240,7 @@ export default function MeDelegationsPage() {
                   <p className="text-xs text-muted-foreground">
                     {t("delegations.inbox.onBehalf", { name: a.delegatorName ?? "" })}
                     {a.requesterName ? ` · ${t("delegations.inbox.requester", { name: a.requesterName })}` : ""}
-                    {` · ${a.createdAt.slice(0, 10)}`}
+                    {` · ${fmt.data(a.createdAt)}`}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -258,9 +263,7 @@ export default function MeDelegationsPage() {
         <CardHeader><CardTitle>{t("delegations.granted.title")}</CardTitle></CardHeader>
         <CardContent>
           {granted.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {persone.length > 0 ? t("delegations.granted.empty") : t("delegations.granted.noChain")}
-            </p>
+            <StatoVuoto titolo={persone.length > 0 ? t("delegations.granted.empty") : t("delegations.granted.noChain")} />
           ) : (
             <ul className="divide-y divide-border">
               {granted.map((d) => (
@@ -289,7 +292,7 @@ export default function MeDelegationsPage() {
         <CardHeader><CardTitle>{t("delegations.received.title")}</CardTitle></CardHeader>
         <CardContent>
           {received.length === 0 ? (
-            <EmptyState icon={<Users className="h-6 w-6" />} title={t("delegations.received.emptyTitle")} description={t("delegations.received.emptyDesc")} />
+            <StatoVuoto icona={<Users className="h-6 w-6" />} titolo={t("delegations.received.emptyTitle")} motivo={t("delegations.received.emptyDesc")} />
           ) : (
             <ul className="divide-y divide-border">
               {received.map((d) => (

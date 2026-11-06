@@ -15,6 +15,8 @@
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import { randomUUID } from "node:crypto";
 import {
   EnrollMfaBodySchema,
   EnrollMfaResponseSchema,
@@ -49,12 +51,17 @@ import {
   WebauthnAuthenticationOptionsResponseSchema,
   WebauthnAuthenticationVerifyBodySchema,
   WebauthnAuthenticationVerifyResponseSchema,
+  StepUpBeginResponseSchema,
+  StepUpVerifyBodySchema,
+  StepUpVerifyResponseSchema,
+  STEP_UP_WINDOW_MINUTES,
 } from "@heuresys/shared";
 import type {
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
 } from "@simplewebauthn/server";
-import { UnauthorizedError } from "../../errors/index.js";
+import { ApiError, ConflictError, UnauthorizedError } from "../../errors/index.js";
+import * as authRepo from "./repository.js";
 import { userPermissionCodes } from "../../middleware/rbac.js";
 import {
   type MfaService,
@@ -67,7 +74,7 @@ import {
 } from "./webauthn-service.js";
 import { ConsoleMailer, type IMailer } from "./mailer.js";
 import { createAuthService, type AuthService } from "./service.js";
-import { setAuthCookies } from "./tokens.js";
+import { setAccessCookie, setAuthCookies } from "./tokens.js";
 import { env } from "../../config/env.js";
 import { pool } from "../../db/client.js";
 
@@ -586,6 +593,134 @@ export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, op
         permissions: userPermissionCodes({ roles: result.roles }),
         csrfToken: result.csrfToken,
       };
+    },
+  );
+
+  /* === ADR-0050 D5 — conferma del secondo fattore dentro la sessione ============= */
+  // Chi porta un mandato e legge la retribuzione o le valutazioni di un'altra persona deve
+  // avere confermato il secondo fattore da poco (lib/scope/conferma.ts). Queste tre rotte
+  // sono la conferma: autenticate e con CSRF, perché segnano la sessione di chi chiama.
+  // Il challengeToken è lo stesso del login (stesso negozio, stessa durata, monouso), e la
+  // verifica è la stessa (`verifyLoginChallenge`, WebAuthn): niente secondo meccanismo.
+
+  /** La sessione di chi chiama: senza famiglia (sessione di sola iscrizione) non c'è niente da segnare. */
+  function sessioneDi(req: FastifyRequest) {
+    if (!req.user) throw new UnauthorizedError("Authentication required");
+    if (!req.user.familyId || req.user.enrollmentOnly) {
+      throw new UnauthorizedError("A full session is required", "STEP_UP_SESSION_REQUIRED");
+    }
+    return { userId: req.user.userId, familyId: req.user.familyId };
+  }
+
+  async function segnaConferma(
+    req: FastifyRequest,
+    reply: FastifyReply,
+    sessione: { userId: string; familyId: string },
+    verificato: string,
+    metodo: string,
+  ) {
+    const ua = req.headers["user-agent"];
+    const evento = {
+      userId: sessione.userId,
+      tenantId: req.user?.tenantId ?? null,
+      ip: req.ip ?? null,
+      userAgent: typeof ua === "string" ? ua.slice(0, 1024) : null,
+    };
+    if (verificato !== sessione.userId) {
+      await authRepo.insertLoginEvent(pool, {
+        ...evento, type: "MFA_FAIL", details: { purpose: "STEP_UP", reason: "IDENTITY_MISMATCH" },
+      });
+      throw new UnauthorizedError("Invalid MFA challenge", "MFA_INVALID");
+    }
+    const adesso = new Date();
+    const segnate = await authRepo.segnaConfermaDiSessione(pool, sessione.familyId, sessione.userId, adesso);
+    if (segnate === 0) {
+      throw new UnauthorizedError("Session no longer active", "STEP_UP_SESSION_REQUIRED");
+    }
+    // Il token nuovo è lo stesso di prima (persona, cliente, ruoli, sessione) con l'ora della
+    // conferma: la decisione la legge da qui, senza andare al database.
+    const accessJwt = await app.jwt.sign({
+      sub: sessione.userId,
+      tenant_id: req.user!.tenantId,
+      roles: req.user!.roles,
+      jti: randomUUID(),
+      fam: sessione.familyId,
+      sua: Math.floor(adesso.getTime() / 1000),
+    });
+    setAccessCookie(reply, accessJwt, secureCookies);
+    await authRepo.insertLoginEvent(pool, {
+      ...evento, type: "MFA_OK", details: { purpose: "STEP_UP", method: metodo, familyId: sessione.familyId },
+    });
+    return { confirmed: true as const, validForMinutes: STEP_UP_WINDOW_MINUTES };
+  }
+
+  /* --- POST /step-up/begin ------------------------------------------ */
+  app.post(
+    "/step-up/begin",
+    {
+      preHandler: [app.verifyCsrf],
+      schema: { response: { 200: StepUpBeginResponseSchema } },
+      config: { rateLimit: { max: 10, timeWindow: 5 * 60 * 1000 } },
+    },
+    async (req) => {
+      const { userId } = sessioneDi(req);
+      const challenge = await service.beginLoginChallenge(userId);
+      if (!challenge) {
+        throw new ConflictError("No verified second factor to confirm with", "MFA_NOT_ENROLLED");
+      }
+      return challenge;
+    },
+  );
+
+  /* --- POST /step-up/verify ----------------------------------------- */
+  app.post(
+    "/step-up/verify",
+    {
+      preHandler: [app.verifyCsrf],
+      schema: { body: StepUpVerifyBodySchema, response: { 200: StepUpVerifyResponseSchema } },
+      config: { rateLimit: { max: 10, timeWindow: 5 * 60 * 1000 } },
+    },
+    async (req, reply) => {
+      const sessione = sessioneDi(req);
+      let verificato: { userId: string };
+      try {
+        verificato = await service.verifyLoginChallenge({
+          challengeToken: req.body.challengeToken,
+          code: req.body.code,
+        });
+      } catch (err) {
+        const ua = req.headers["user-agent"];
+        await authRepo.insertLoginEvent(pool, {
+          userId: sessione.userId,
+          tenantId: req.user?.tenantId ?? null,
+          type: "MFA_FAIL",
+          ip: req.ip ?? null,
+          userAgent: typeof ua === "string" ? ua.slice(0, 1024) : null,
+          details: { purpose: "STEP_UP", reason: err instanceof ApiError ? err.code : "MFA_CHALLENGE_ERROR" },
+        });
+        throw err;
+      }
+      return segnaConferma(req, reply, sessione, verificato.userId, "CODE");
+    },
+  );
+
+  /* --- POST /step-up/webauthn/verify -------------------------------- */
+  // Le opzioni si chiedono a /webauthn/authentication/options con il challengeToken di
+  // /step-up/begin; qui la cerimonia NON apre una sessione nuova: segna quella che c'è.
+  app.post(
+    "/step-up/webauthn/verify",
+    {
+      preHandler: [app.verifyCsrf],
+      schema: { body: WebauthnAuthenticationVerifyBodySchema, response: { 200: StepUpVerifyResponseSchema } },
+      config: { rateLimit: { max: 10, timeWindow: 5 * 60 * 1000 } },
+    },
+    async (req, reply) => {
+      const sessione = sessioneDi(req);
+      const { userId } = await webauthn.verifyAuthentication({
+        challengeToken: req.body.challengeToken,
+        response: req.body.response as unknown as AuthenticationResponseJSON,
+      });
+      return segnaConferma(req, reply, sessione, userId, "WEBAUTHN");
     },
   );
 };

@@ -26,7 +26,7 @@ let plainUser: S;    // USER — no predictions perms
 beforeAll(async () => {
   suite = await buildTestApp();
   admin = await login(suite, "platform-test-admin@collaudo.invalid");
-  tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+  tenantAdmin = await login(suite, "governo@collaudo.invalid");
   plainUser = await login(suite, "tommaso.fiore@rtl-bank.org");
 });
 

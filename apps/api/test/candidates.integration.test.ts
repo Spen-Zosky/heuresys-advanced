@@ -74,7 +74,7 @@ async function patch(sessione: S, id: string, payload: Record<string, unknown>) 
 describe("/v1/candidates/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenant = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenant = await login(suite, "governo@collaudo.invalid");
     semplice = await login(suite, "tommaso.fiore@rtl-bank.org");
     const u = await pool.query<{ user_id: string }>(
       `SELECT user_id FROM sys.sys_users

@@ -6,26 +6,22 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import type {
+  LearningGap,
   PositionLearningRequirement,
   PositionLearningModule,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
+import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
-
-interface LearningGap {
-  learningGapId: string;
-  userId: string;
-  skillId: string | null;
-  skillName: string | null;
-  severity: string;
-  detectedAt: string;
-}
+import { useFormat } from "@/lib/format";
+import { NomeOppure, SenzaNome } from "@/components/senza-nome";
 
 export default function PositionLearningPage() {
   const { t } = useTranslation("admin");
+  const fmt = useFormat();
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
 
@@ -47,11 +43,15 @@ export default function PositionLearningPage() {
     enabled: !!positionId,
   });
   // C4 (#42): server-side pagination (was `?limit=200`).
+  // S-25: le lacune formative chiedono gap_analysis:read. Chi non lo ha (per esempio un capo)
+  // non vede il riquadro e la pagina non fa una chiamata destinata al 403.
+  const perms = useCurrentUserPermissions();
+  const leggeLeLacune = perms.data?.permissions.includes("gap_analysis:read") ?? false;
   const gaps = usePaginatedList<LearningGap>({
     queryKey: ["learning-gaps", "by-position", positionId],
     path: "/v1/learning-gaps",
     params: { positionId },
-    enabled: !!positionId,
+    enabled: !!positionId && leggeLeLacune,
   });
 
   const reqItems = requirements.data?.items ?? [];
@@ -76,7 +76,9 @@ export default function PositionLearningPage() {
           <span data-testid="position-learning-count" className="text-sm text-muted-foreground">
             {requirements.data
               ? t("positions.learning.count", { count: reqItems.length, modules: moduleItems.length })
-              : t("common:loading")}
+              : requirements.isError
+                ? t("common:stato.nonDisponibile")
+                : t("common:loading")}
           </span>
         }
       />
@@ -86,9 +88,10 @@ export default function PositionLearningPage() {
           <CardTitle>{t("positions.learning.requirements.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <EntityTable<PositionLearningRequirement>
+          <EntityTable<PositionLearningRequirement> originPath={"/v1/positions"}
             isLoading={requirements.isLoading}
             isError={requirements.isError}
+            error={requirements.error}
             rows={reqItems}
             rowKey={(r) => r.requirementId}
             rowTestId="position-learning-req-row"
@@ -121,7 +124,7 @@ export default function PositionLearningPage() {
               },
               {
                 header: t("positions.learning.requirements.columns.since"),
-                cell: (r) => <span className="text-xs">{r.createdAt.slice(0, 10)}</span>,
+                cell: (r) => <span className="text-xs">{fmt.data(r.createdAt)}</span>,
               },
             ]}
           />
@@ -133,9 +136,10 @@ export default function PositionLearningPage() {
           <CardTitle>{t("positions.learning.modules.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <EntityTable<PositionLearningModule>
+          <EntityTable<PositionLearningModule> originPath={"/v1/positions"}
             isLoading={modules.isLoading}
             isError={modules.isError}
+            error={modules.error}
             rows={moduleItems}
             rowKey={(m) => `${m.skillId}-${m.learningModuleId}`}
             rowTestId="position-learning-module-row"
@@ -175,6 +179,7 @@ export default function PositionLearningPage() {
         </CardContent>
       </Card>
 
+      {leggeLeLacune ? (
       <Card>
         <CardHeader>
           <CardTitle>{t("positions.learning.gaps.cardTitle")}</CardTitle>
@@ -183,6 +188,7 @@ export default function PositionLearningPage() {
           <EntityTable<LearningGap>
             isLoading={gaps.query.isLoading}
             isError={gaps.query.isError}
+            error={gaps.query.error}
             rows={gapItems}
             server={gaps.server}
             rowKey={(g) => g.learningGapId}
@@ -191,14 +197,15 @@ export default function PositionLearningPage() {
             emptyTitle={t("positions.learning.gaps.empty")}
             caption={t("positions.learning.gaps.caption")}
             columns={[
-              { header: t("positions.learning.gaps.columns.user"), cell: (g) => <span className="font-mono text-xs">{g.userId.slice(0, 8)}</span> },
-              { header: t("positions.learning.gaps.columns.skill"), cell: (g) => g.skillName ? <span className="text-xs">{g.skillName}</span> : <span className="font-mono text-xs">{g.skillId?.slice(0, 8) ?? t("positions.learning.dash")}</span> },
+              { header: t("positions.learning.gaps.columns.user"), cell: (g) => <NomeOppure nome={g.userName} id={g.userId} /> },
+              { header: t("positions.learning.gaps.columns.skill"), cell: (g) => g.skillName ? <span className="text-xs">{g.skillName}</span> : g.skillId ? <SenzaNome id={g.skillId} /> : <span className="text-xs">{t("positions.learning.dash")}</span> },
               { header: t("positions.learning.gaps.columns.severity"), cell: (g) => <EnumStatusBadge domain="severity" value={g.severity} /> },
-              { header: t("positions.learning.gaps.columns.detected"), cell: (g) => <span className="text-xs">{g.detectedAt.slice(0, 10)}</span> },
+              { header: t("positions.learning.gaps.columns.detected"), cell: (g) => <span className="text-xs">{fmt.data(g.detectedAt)}</span> },
             ]}
           />
         </CardContent>
       </Card>
+      ) : null}
     </main>
   );
 }

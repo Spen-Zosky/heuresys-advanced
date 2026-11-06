@@ -57,7 +57,7 @@ describe("/v1/seed-acquisition-runs/* integration", () => {
     platformS = await login(suite, "platform-test-admin@collaudo.invalid");
     // TENANT_ADMIN persona — has seed_acquisition:trigger AND a non-null tenantId,
     // so trigger() derives the tenant from actor.tenantId (no body.tenantId needed).
-    tenantAdminS = await login(suite, "federica.marchetti@rtl-bank.org");
+    tenantAdminS = await login(suite, "governo@collaudo.invalid");
     // Plain USER persona — expected to lack seed_acquisition:trigger (and likely :read).
     userS = await login(suite, "tommaso.fiore@rtl-bank.org");
   });

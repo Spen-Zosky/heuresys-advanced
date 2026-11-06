@@ -54,7 +54,13 @@
     "ESCO",
     "ISCO",
     "NACE",
-    "ATECO"
+    "ATECO",
+    "CEO",
+    "CFO",
+    "HR",
+    "AI",
+    "IA",
+    "ID"
   ],
   "eccezioni": [
     {

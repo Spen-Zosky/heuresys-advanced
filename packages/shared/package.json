@@ -656,6 +656,11 @@
       "types": "./dist/schemas/branches.d.ts",
       "heuresys-source": "./src/schemas/branches.ts",
       "default": "./dist/schemas/branches.js"
+    },
+    "./schemas/agent-capabilities": {
+      "types": "./dist/schemas/agent-capabilities.d.ts",
+      "heuresys-source": "./src/schemas/agent-capabilities.ts",
+      "default": "./dist/schemas/agent-capabilities.js"
     }
   },
   "scripts": {

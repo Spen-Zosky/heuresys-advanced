@@ -182,6 +182,18 @@ SELECT v.code, 'specifica dell''agente di consolidamento (Enzo, 2026-10-30, §6)
   ) AS v(code)
 ON CONFLICT (permission_code) DO NOTHING;
 
+-- [principi agentici T3c, mig 000481] il registro delle capacità degli agenti è solo-plenipotenziario
+-- PER DECISIONE (ADR-0053 D4 e passo A1): il catalogo lo scrive la piattaforma, il modo per il tenant
+-- lo decide il Direttore HR, la piattaforma può solo riportare a CONFERMA. È la regola, non un debito.
+INSERT INTO sys.sys_permessi_plenipotenziari_ammessi (permission_code, motivo, data)
+SELECT v.code, 'ADR-0053 D4 e passo A1: il catalogo delle capacità è della piattaforma, il modo lo decide il Direttore HR del tenant. E'' la regola, non un debito.', DATE '2026-11-06'
+  FROM (VALUES
+  ('agent_capability:read'),
+  ('agent_capability:manage'),
+  ('agent_capability:activate')
+  ) AS v(code)
+ON CONFLICT (permission_code) DO NOTHING;
+
 CREATE OR REPLACE VIEW sys.v_permessi_solo_plenipotenziari AS
 WITH titolari AS (
   SELECT p.auth_permission_code AS permission_code,

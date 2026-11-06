@@ -72,6 +72,7 @@ import { learningPathStepsRoutes } from "./modules/learning-path-steps/routes.js
 import { learningGapsRoutes } from "./modules/learning-gaps/routes.js";
 import { delegationsRoutes } from "./modules/delegations/routes.js";
 import { consolidationVocabularyRoutes, tenantConsolidationRoutes } from "./modules/tenant-consolidation/routes.js";
+import { agentCapabilitiesRoutes } from "./modules/agent-capabilities/routes.js";
 import { platformTenantAssignmentsRoutes } from "./modules/platform-tenant-assignments/routes.js";
 import { careerPathsRoutes } from "./modules/career-paths/routes.js";
 import { careerPathStepsRoutes } from "./modules/career-path-steps/routes.js";
@@ -506,6 +507,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(learningGapsRoutes, { prefix: "/v1/learning-gaps" });
   await app.register(delegationsRoutes, { prefix: "/v1/delegations" });
   await app.register(tenantConsolidationRoutes, { prefix: "/v1/tenant-consolidations" });
+  // ADR-0053 A1/A3/D4, piano dei principi agentici T3c: il registro delle capacità degli agenti.
+  await app.register(agentCapabilitiesRoutes, { prefix: "/v1/agent-capabilities" });
   await app.register(consolidationVocabularyRoutes, { prefix: "/v1/consolidation-vocabulary" });
   await app.register(platformTenantAssignmentsRoutes, { prefix: "/v1/platform-tenant-assignments" });
   await app.register(careerPathsRoutes, { prefix: "/v1/career-paths" });

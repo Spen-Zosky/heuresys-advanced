@@ -18,6 +18,7 @@ import { FileAuditSink, registraChiusuraConversazione, type AuditSink } from "./
 import { ContatorePersone } from "./persone-distinte.js";
 import { caricaSoglie } from "./soglie-persone.js";
 import type { HeuresysClient } from "./heuresys-client.js";
+import { LIMITI_DEFAULT, modelloAgenti } from "./limiti.js";
 
 export interface RunHrAgentOptions {
   /** Bridges to the webapp (SSE/WebSocket) so a human authorises each write. */
@@ -40,6 +41,13 @@ export interface RunHrAgentOptions {
    * per non dipendere da un file che cambia quando il tenant cresce.
    */
   contatore?: ContatorePersone;
+  /** ADR-0056 T3: giri massimi della conversazione (default in `limiti.ts`). */
+  maxTurns?: number;
+  /**
+   * ADR-0056 T3: chi interrompe la conversazione — il tetto di durata e la chiusura della
+   * connessione, entrambi in `server.ts`. Assente, la conversazione non ha un'interruzione esterna.
+   */
+  abortController?: AbortController;
 }
 
 export async function* runHrAgent(
@@ -107,6 +115,10 @@ export async function* runHrAgent(
       mcpServers: { heuresys },
       permissionMode: "default", // unlisted tools (the heuresys MCP set) → canUseTool
       canUseTool,
+      // ADR-0056 T3: il modello per nome, mai il default della CLI; e un numero di giri finito.
+      model: modelloAgenti(),
+      maxTurns: opts.maxTurns ?? LIMITI_DEFAULT.giri,
+      ...(opts.abortController !== undefined ? { abortController: opts.abortController } : {}),
     },
   });
 

@@ -23,6 +23,7 @@
  * servizio che qualcun altro puo' chiamare.
  */
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { modelloAgenti } from "./limiti.js";
 
 export interface RichiestaIndirizzi {
   fase: "indirizzi";
@@ -82,6 +83,9 @@ async function chiedi(prompt: string): Promise<string> {
       settingSources: [],
       allowedTools: [],
       permissionMode: "default",
+      // ADR-0056 T3: il modello per nome; senza strumenti basta un giro, tre per margine.
+      model: modelloAgenti(),
+      maxTurns: 3,
     },
   })) {
     const e = ev as { type?: string; result?: unknown; message?: { content?: unknown } };

@@ -76,3 +76,36 @@ describe("ApprovalRegistry", () => {
     reg.resolve(b.approvalId, "deny");
   });
 });
+
+describe("ApprovalRegistry.resolveAs: l'approvazione è della persona che ha chiesto (ADR-0056 T3)", () => {
+  it("la persona che ha chiesto decide", async () => {
+    const reg = new ApprovalRegistry({ genId: () => "p-1" });
+    const { decided } = reg.create("anna");
+    expect(reg.resolveAs("p-1", "allow", "anna")).toBe("resolved");
+    await expect(decided).resolves.toBe(true);
+  });
+
+  it("un'altra persona non decide, né allow né deny, e la richiesta resta in attesa", async () => {
+    const reg = new ApprovalRegistry({ genId: () => "p-2" });
+    const { decided } = reg.create("anna");
+    expect(reg.resolveAs("p-2", "allow", "bruno")).toBe("not-owner");
+    expect(reg.resolveAs("p-2", "deny", "bruno")).toBe("not-owner");
+    expect(reg.size).toBe(1);
+    expect(reg.resolveAs("p-2", "deny", "anna")).toBe("resolved");
+    await expect(decided).resolves.toBe(false);
+  });
+
+  it("senza chi decide, o con una richiesta aperta senza persona, nessuno decide", () => {
+    const reg = new ApprovalRegistry({ genId: (() => { let i = 0; return () => `p-3-${i++}`; })() });
+    reg.create("anna");
+    reg.create();
+    expect(reg.resolveAs("p-3-0", "allow", undefined)).toBe("not-owner");
+    expect(reg.resolveAs("p-3-1", "allow", "anna")).toBe("not-owner");
+    expect(reg.size).toBe(2);
+  });
+
+  it("un id sconosciuto resta sconosciuto", () => {
+    const reg = new ApprovalRegistry();
+    expect(reg.resolveAs("nessuno", "allow", "anna")).toBe("unknown");
+  });
+});

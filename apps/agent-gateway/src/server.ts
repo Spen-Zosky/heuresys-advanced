@@ -10,7 +10,10 @@
  *   emits an `approval_required` event carrying an `approvalId` + the REDACTED tool/args;
  *   a human resolves it via POST /agent/approve. DENY-BY-DEFAULT on timeout / unknown id.
  *   Reads auto-allow (write-gate.ts). EVERY decision is audited (audit-sink.ts).
- * POST /agent/approve   → { approvalId, decision:'allow'|'deny' } resolves a pending write.
+ * POST /agent/approve   → { approvalId, decision:'allow'|'deny' } resolves a pending write — only for the
+ *   person who opened it (ADR-0056 T3: the API says who is pressing, from their own cookies).
+ *   Limits (ADR-0056 T3, limiti.ts): concurrent conversations per person and in total (429),
+ *   turns, duration (SSE `limit` event); the model is fixed by name (AGENT_GATEWAY_MODEL).
  * GET  /healthz         → liveness.
  *
  * Node http only (no framework dep). HEURESYS_API defaults to the dev API on :3001.
@@ -22,7 +25,8 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { ApprovalRegistry, type ApprovalDecision } from "./approval-bridge.js";
 import { DbAuditSink, FileAuditSink, type AuditSink } from "./audit-sink.js";
 import { auditPool } from "./db-pool.js";
-import { HeuresysClient, chiediGettoneAgente } from "./heuresys-client.js";
+import { HeuresysClient, chiSei, chiediGettoneAgente } from "./heuresys-client.js";
+import { ConversazioniAperte, leggiLimiti, modelloAgenti } from "./limiti.js";
 import { redact } from "./redact.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
@@ -73,6 +77,12 @@ const CONSOLIDATION_TOKEN = process.env.AGENT_GATEWAY_CONSOLIDATION_TOKEN ?? "";
 // non c'e' (dev senza tunnel, un test che non lo imposta) si ricade sul file — la
 // decisione presa in #253 ("il file resta come fallback"), non un errore silenzioso.
 const approvals = new ApprovalRegistry({ approvalTimeoutMs: APPROVAL_TIMEOUT_MS });
+// ADR-0056 T3: i limiti della conversazione e il modello per nome. `modelloAgenti()` qui, all'avvio,
+// e non solo alla prima conversazione: un nome sbagliato nell'ambiente ferma il servizio subito,
+// invece di scoprirsi davanti alla prima persona.
+const LIMITI = leggiLimiti();
+const MODELLO = modelloAgenti();
+const conversazioni = new ConversazioniAperte(LIMITI);
 const pool = auditPool();
 const auditSink: AuditSink = pool ? new DbAuditSink(pool) : new FileAuditSink();
 
@@ -134,10 +144,30 @@ const server = createServer(async (req, res) => {
         res.end(JSON.stringify({ error: "BAD_REQUEST", message: "approvalId + decision:'allow'|'deny'" }));
         return;
       }
+      // ADR-0056 T3 — L'APPROVAZIONE È DI CHI HA CHIESTO. Chi decide lo dice l'API, dai cookie di
+      // chi ha premuto, non il corpo della richiesta: senza sessione, o con la sessione di
+      // un'altra persona, la richiesta resta in attesa e scade da sola (deny-by-default).
+      const approvatore = parseCookies(req.headers.cookie)["hrx_access"];
+      if (!approvatore) {
+        res.writeHead(401, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "NO_SESSION", message: "forward hrx_access cookie" }));
+        return;
+      }
+      const chi = await chiSei(HEURESYS_API, { cookieAccess: approvatore });
+      if (!chi) {
+        res.writeHead(401, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "SESSION_NOT_RECOGNISED" }));
+        return;
+      }
       // unknown / expired / already-resolved id → no-op (deny-by-default semantics).
-      const resolved = approvals.resolve(approvalId, decision as ApprovalDecision);
+      const esito = approvals.resolveAs(approvalId, decision as ApprovalDecision, chi);
+      if (esito === "not-owner") {
+        res.writeHead(403, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "APPROVER_NOT_REQUESTER", resolved: false }));
+        return;
+      }
       res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({ ok: true, resolved }));
+      res.end(JSON.stringify({ ok: true, resolved: esito === "resolved" }));
       return;
     }
 
@@ -241,10 +271,37 @@ const server = createServer(async (req, res) => {
         res.end(JSON.stringify({ error: "AGENT_TOKEN_REFUSED", status: gettone.status, detail: gettone.corpo }));
         return;
       }
+      // ADR-0056 T3: quante conversazioni insieme, per persona e in tutto il servizio. Il posto si
+      // prende dopo il gettone, perché è il gettone a dire chi è la persona, e si libera nel
+      // `finally` qui sotto, comunque finisca la conversazione.
+      const posto = conversazioni.entra(gettone.persona.userId);
+      if (!posto.ok) {
+        res.writeHead(429, { "content-type": "application/json" });
+        res.end(JSON.stringify({
+          error: posto.motivo === "PERSONA" ? "TOO_MANY_CONVERSATIONS_PERSON" : "TOO_MANY_CONVERSATIONS",
+          limite: posto.motivo === "PERSONA" ? LIMITI.perPersona : LIMITI.totali,
+        }));
+        return;
+      }
       const client = new HeuresysClient({
         baseUrl: HEURESYS_API,
         session: gettone.session,
         agente: AGENTE_ASSISTENTE,
+      });
+
+      // ADR-0056 T3: la conversazione si interrompe allo scadere della durata massima, o quando la
+      // persona chiude la connessione (non c'è più nessuno a cui rispondere né chi approvi).
+      const interrompi = new AbortController();
+      let motivoStop: "DURATA" | "CHIUSA" | undefined;
+      const timerDurata = setTimeout(() => {
+        motivoStop = "DURATA";
+        interrompi.abort();
+      }, LIMITI.durataMs);
+      res.on("close", () => {
+        if (!res.writableEnded) {
+          motivoStop ??= "CHIUSA";
+          interrompi.abort();
+        }
       });
 
       res.writeHead(200, {
@@ -270,7 +327,7 @@ const server = createServer(async (req, res) => {
         ...(gettone.persona.tenantCode ? { tenant: gettone.persona.tenantCode } : {}),
       };
       const approve = async (reqApprove: ApprovalRequest): Promise<boolean> => {
-        const { approvalId, decided } = approvals.create();
+        const { approvalId, decided } = approvals.create(gettone.persona.userId);
         const payload = {
           approvalId,
           tool: redact(reqApprove.tool),
@@ -291,14 +348,27 @@ const server = createServer(async (req, res) => {
           approvalTimeoutMs: APPROVAL_TIMEOUT_MS,
           audit: auditSink,
           principal,
+          maxTurns: LIMITI.giri,
+          abortController: interrompi,
         })) {
           res.write(`data: ${JSON.stringify(event)}\n\n`);
         }
       } catch (err) {
-        res.write(`event: error\ndata: ${JSON.stringify({ message: String(err) })}\n\n`);
+        // Un'interruzione voluta non è un errore: la si racconta qui sotto, una volta sola.
+        if (motivoStop === undefined) {
+          res.write(`event: error\ndata: ${JSON.stringify({ message: String(err) })}\n\n`);
+        }
+      } finally {
+        clearTimeout(timerDurata);
+        posto.esci();
       }
-      res.write("event: done\ndata: {}\n\n");
-      res.end();
+      if (!res.writableEnded && motivoStop !== "CHIUSA") {
+        if (motivoStop === "DURATA") {
+          res.write(`event: limit\ndata: ${JSON.stringify({ limite: "DURATA", durataMs: LIMITI.durataMs })}\n\n`);
+        }
+        res.write("event: done\ndata: {}\n\n");
+        res.end();
+      }
       return;
     }
 
@@ -312,5 +382,5 @@ const server = createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   // eslint-disable-next-line no-console
-  console.log(`[agent-gateway] listening on :${PORT} → ${HEURESYS_API}`);
+  console.log(`[agent-gateway] listening on :${PORT} → ${HEURESYS_API} (modello ${MODELLO})`);
 });

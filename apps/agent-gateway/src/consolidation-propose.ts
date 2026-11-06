@@ -21,6 +21,7 @@
  * non si fida del gateway.
  */
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { modelloAgenti } from "./limiti.js";
 
 export interface VoceGiudice {
   key: string;
@@ -161,7 +162,7 @@ export const chiediAlModello: Chiedi = async (prompt) => {
   let testo = "";
   for await (const ev of query({
     prompt,
-    options: { settingSources: [], allowedTools: [], permissionMode: "default" },
+    options: { settingSources: [], allowedTools: [], permissionMode: "default", model: modelloAgenti(), maxTurns: 3 },
   })) {
     const e = ev as { type?: string; result?: unknown; message?: { content?: unknown } };
     if (e.type === "result" && typeof e.result === "string") testo = e.result;

@@ -217,3 +217,27 @@ export async function chiediGettoneAgente(
     persona: { userId: dati.userId, tenantCode: dati.tenantCode ?? null },
   };
 }
+
+/**
+ * Chi sta decidendo un'approvazione (ADR-0056, piano dei principi agentici T3). Il ponte di
+ * approvazione non si fida del corpo della richiesta: chiede all'API, con i cookie di chi ha
+ * premuto, chi è (`GET /v1/auth/me`). Senza una risposta valida non c'è nessuno, e chi non c'è
+ * non decide niente.
+ */
+export async function chiSei(
+  baseUrl: string,
+  persona: { cookieAccess: string },
+  fetchImpl: FetchLike = globalThis.fetch as unknown as FetchLike,
+): Promise<string | undefined> {
+  try {
+    const res = await fetchImpl(`${baseUrl.replace(/\/$/, "")}/v1/auth/me`, {
+      method: "GET",
+      headers: { cookie: `hrx_access=${persona.cookieAccess}` },
+    });
+    if (!res.ok) return undefined;
+    const dati = (await res.json()) as { userId?: unknown };
+    return typeof dati.userId === "string" && dati.userId ? dati.userId : undefined;
+  } catch {
+    return undefined; // un'API che non risponde non dice chi sei: fail-closed
+  }
+}

@@ -4,7 +4,7 @@
  * in a header, and single-flight refresh on 401 (M-5).
  */
 import { describe, it, expect } from "vitest";
-import { HeuresysClient, INTESTAZIONE_ORIGINE, chiediGettoneAgente, type FetchLike, type Session } from "../src/heuresys-client.js";
+import { HeuresysClient, INTESTAZIONE_ORIGINE, chiSei, chiediGettoneAgente, type FetchLike, type Session } from "../src/heuresys-client.js";
 
 const session: Session = {
   cookieAccess: "ACCESS",
@@ -149,3 +149,22 @@ describe("A-14 — l'origine del dato dichiarata dall'API", () => {
   });
 });
 
+
+describe("chiSei: chi decide un'approvazione lo dice l'API (ADR-0056 T3)", () => {
+  it("chiede /v1/auth/me con i cookie di chi ha premuto e restituisce la persona", async () => {
+    const { fetchImpl, calls } = recordingFetch(() => ({ ok: true, status: 200, body: { userId: "u-1" } }));
+    await expect(chiSei("http://api/", { cookieAccess: "PERSONA" }, fetchImpl)).resolves.toBe("u-1");
+    expect(calls[0]!.url).toBe("http://api/v1/auth/me");
+    expect(calls[0]!.method).toBe("GET");
+    expect(calls[0]!.headers["cookie"]).toBe("hrx_access=PERSONA");
+  });
+
+  it("una sessione rifiutata, una risposta senza persona o un'API che non risponde non sono nessuno", async () => {
+    const rifiuto = recordingFetch(() => ({ ok: false, status: 401 }));
+    await expect(chiSei("http://api", { cookieAccess: "X" }, rifiuto.fetchImpl)).resolves.toBeUndefined();
+    const vuota = recordingFetch(() => ({ ok: true, status: 200, body: {} }));
+    await expect(chiSei("http://api", { cookieAccess: "X" }, vuota.fetchImpl)).resolves.toBeUndefined();
+    const guasto: FetchLike = async () => { throw new Error("ECONNREFUSED"); };
+    await expect(chiSei("http://api", { cookieAccess: "X" }, guasto)).resolves.toBeUndefined();
+  });
+});

@@ -21,6 +21,8 @@ export type ApprovalDecision = "allow" | "deny";
 
 interface Pending {
   resolve: (allowed: boolean) => void;
+  /** La persona che ha chiesto (ADR-0056, cancello): solo lei può decidere. */
+  owner: string | undefined;
   expiresAt: number;
   timer: ReturnType<typeof setTimeout>;
 }
@@ -33,6 +35,16 @@ export interface ApprovalRegistryOptions {
   /** Injectable for tests (default crypto.randomUUID). */
   genId?: () => string;
 }
+
+/**
+ * L'esito di una decisione legata alla persona (ADR-0056, piano dei principi agentici T3):
+ *  - `resolved`: la richiesta era in attesa e l'ha decisa la persona che l'aveva aperta;
+ *  - `unknown`: sconosciuta, scaduta o già decisa (nessun effetto, come sempre);
+ *  - `not-owner`: in attesa, ma chi decide non è la persona che ha chiesto. La richiesta resta in
+ *    attesa e scade da sola: un tentativo da un'altra persona non la chiude, né in un senso né
+ *    nell'altro, perché altrimenti chiunque potrebbe almeno negare le scritture altrui.
+ */
+export type ResolveOutcome = "resolved" | "unknown" | "not-owner";
 
 export interface PendingApproval {
   /** Opaque id the SSE event carries and /agent/approve resolves against. */
@@ -66,7 +78,7 @@ export class ApprovalRegistry {
    * Registers a new pending approval. Returns the id (for the SSE event) and a promise
    * that resolves to the human's decision (or false on timeout). The promise NEVER rejects.
    */
-  create(): PendingApproval {
+  create(owner?: string): PendingApproval {
     const approvalId = this.genId();
     const expiresAt = this.now() + this.timeoutMs;
     const decided = new Promise<boolean>((resolve) => {
@@ -82,7 +94,7 @@ export class ApprovalRegistry {
       if (typeof timer === "object" && typeof (timer as { unref?: () => void }).unref === "function") {
         (timer as { unref: () => void }).unref();
       }
-      this.pending.set(approvalId, { resolve: finalize, expiresAt, timer });
+      this.pending.set(approvalId, { resolve: finalize, owner, expiresAt, timer });
     });
     return { approvalId, decided };
   }
@@ -96,5 +108,18 @@ export class ApprovalRegistry {
     if (!entry) return false; // unknown / expired / already-resolved → no-op (deny-by-default)
     entry.resolve(decision === "allow");
     return true;
+  }
+
+  /**
+   * Come `resolve`, ma solo per la persona che ha aperto la richiesta. Una richiesta creata senza
+   * persona (`create()` senza argomento) non si può decidere da qui: chi la apre senza dire per
+   * conto di chi non ottiene una richiesta che chiunque può chiudere.
+   */
+  resolveAs(approvalId: string, decision: ApprovalDecision, caller: string | undefined): ResolveOutcome {
+    const entry = this.pending.get(approvalId);
+    if (!entry) return "unknown";
+    if (!caller || !entry.owner || entry.owner !== caller) return "not-owner";
+    entry.resolve(decision === "allow");
+    return "resolved";
   }
 }

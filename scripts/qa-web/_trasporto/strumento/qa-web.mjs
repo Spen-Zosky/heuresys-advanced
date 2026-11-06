@@ -102,11 +102,18 @@ async function avvia() {
 async function esegui() {
   const { dir, profilo, db } = carica(opt('giro'));
   const fine = Date.now() + Number(opt('minuti', '100000')) * 60000;
-  const { chromium } = require('playwright');
+  // Playwright si cerca accanto al progetto, poi accanto allo strumento, poi nella cartella corrente
+  const { chromium } = (() => {
+    for (const b of [profilo.__radice, QUI, process.cwd()].filter(Boolean)) { try { return createRequire(join(b, 'package.json'))('playwright'); } catch {} }
+    return require('playwright');
+  })();
   const ad = profilo.__adattatore ? await import(pathToFileURL(profilo.__adattatore).href) : {};
   const browser = await chromium.launch(process.env.QA_WEB_CHROMIUM ? { executablePath: process.env.QA_WEB_CHROMIUM } : {});
   const script = readFileSync(join(QUI, 'lib', 'nella-pagina.js'), 'utf8');
-  const axe = (() => { try { return readFileSync(require.resolve('axe-core/axe.min.js', { paths: [profilo.__radice, QUI, process.cwd()] }), 'utf8'); } catch { return null; } })();
+  const axe = (() => {
+    for (const b of [profilo.__radice, join(profilo.__radice || '.', 'apps/web'), QUI, process.cwd()].filter(Boolean)) { try { return readFileSync(createRequire(join(b, 'package.json')).resolve('axe-core/axe.min.js'), 'utf8'); } catch {} }
+    return null;
+  })();
   const rotte = JSON.parse(db.prepare("select valore from meta where chiave='rotte'").get()?.valore || '[]');
   const modelli = rotte.map(r => ({ r, re: modelloDi(r) }));
   const persone = JSON.parse(db.prepare("select valore from meta where chiave='persone'").get()?.valore || '[]');

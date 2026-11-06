@@ -201,10 +201,16 @@ BEGIN
     RAISE EXCEPTION 'storia36_calendar: % festività marcate lavorative', v_bad;
   END IF;
 
-  -- sanità volumetrica: ~250 giorni lavorativi/anno su 3 anni
+  -- sanità volumetrica: ~250 giorni lavorativi l'anno, PROPORZIONATI alla
+  -- lunghezza della finestra. Il vecchio intervallo fisso 730-790 valeva per i
+  -- soli tre anni della costruzione: con l'avanzamento notturno la finestra è
+  -- cresciuta (2026-11-06: 1.193 giorni, 824 lavorativi) e la foundation si
+  -- fermava in errore — era esattamente la trappola 3 della custodia, l'orologio
+  -- scambiato per una rottura. Stessa banda di prima, 243-263 giorni l'anno.
   SELECT count(*) INTO v_workdays FROM staging.storia36_calendar WHERE is_workday;
-  IF v_workdays NOT BETWEEN 730 AND 790 THEN
-    RAISE EXCEPTION 'storia36_calendar: giorni lavorativi fuori range plausibile (%)', v_workdays;
+  IF v_workdays NOT BETWEEN floor(v_cnt * 243 / 365.25) AND ceil(v_cnt * 263 / 365.25) THEN
+    RAISE EXCEPTION 'storia36_calendar: giorni lavorativi fuori range plausibile (% su % giorni, attesi %..%)',
+      v_workdays, v_cnt, floor(v_cnt * 243 / 365.25), ceil(v_cnt * 263 / 365.25);
   END IF;
 
   RAISE NOTICE 'storia36 C0 foundation OK: % giorni (% lavorativi), finestra %..%',

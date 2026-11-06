@@ -97,6 +97,7 @@ window.__qaWeb = {
       out.grafici.push({ percorso: Q.percorso(g), rett: [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height)], etichetta: g.getAttribute('aria-label') || '' });
     });
     document.querySelectorAll('img').forEach(im => { if (Q.visibile(im)) out.immagini.push({ percorso: Q.percorso(im), rotta: im.complete && im.naturalWidth === 0, alt: im.getAttribute('alt') }); });
+    out.testoPagina = document.body.innerText.slice(0, 200000);
     out.layout = { scorrimentoOrizzontale: document.documentElement.scrollWidth > window.innerWidth + 1, larghezza: window.innerWidth, titolo: document.title };
     out.dialoghi = document.querySelectorAll('[role=dialog],[role=alertdialog],dialog[open]').length;
     return out;

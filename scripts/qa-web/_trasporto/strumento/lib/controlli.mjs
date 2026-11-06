@@ -13,6 +13,12 @@ const RE = {
   numEn: /\b\d{1,3}(,\d{3})+(\.\d+)?\b/,     // 1,234.56 : formato inglese
   numIt: /\b\d{1,3}(\.\d{3})+(,\d+)?\b/,     // 1.234,56 : formato italiano
   numNudo: /(^|[^\d.,/-])\d{5,}([^\d.,/-]|$)/, // 12345 senza separatori (non anni, non codici brevi)
+  maiuscolo: /\b[A-Z]{3,}\b/g,
+  serpente: /\b[a-z]+(?:_[a-z0-9]+)+\b/,
+  apostrofo: /\b(e|perche|poiche|finche|affinche|unita|attivita|comparira|mobilita|piu|gia|puo|cosi|citta|qualita|identita|priorita|novita|capacita|responsabilita|sara|verra|potra|dovra|opportunita|eta|realta)'/i,
+  plurale: /(^|[^\d,.])1\s+(persone|competenze|totali|elementi|giorni|ore|posizioni|utenti|voci|righe|risultati|dipendenti|richieste|attivit[aà]|squadre|unit[aà])\b/i,
+  decimalePunto: /(^|[^\d.,])\d+\.\d{1,2}(?![\d.])|(^|[^\d.,])\d+\.\d{4,}\b/,
+  attaccato: /\d[a-zàèéìòù]{3,}|[a-zàèéìòù]{3,}[A-Z][a-z]+_|[a-zàèéìòù]{4,}[a-z]+_[a-z]+/,
   dataUs: /\b(0?[1-9]|1[0-2])\/(1[3-9]|2\d|3[01])\/\d{4}\b/, // 3/27/2026
 };
 
@@ -33,6 +39,14 @@ export function controllaTesto(t, contesto) {
   if (RE.uuid.test(s)) add('T-UUID', 'FAIL', 'identificativo tecnico mostrato a una persona: ' + s.match(RE.uuid)[0]);
   if (RE.codice.test(s)) add('T-CODICE', 'FAIL', 'codice al posto di una descrizione: ' + s.match(RE.codice)[0]);
   if (RE.chiave.test(s.trim()) && !/^https?:|@|\.(com|it|org|net|pdf|csv|xlsx)$/i.test(s)) add('T-CHIAVE', 'FAIL', 'chiave di traduzione o nome tecnico non risolto: ' + s.trim());
+  const gloss = new Set((contesto.glossario || []).flatMap(g => g.split(/\s+/)).map(g => g.toUpperCase()));
+  const caps = (s.match(RE.maiuscolo) || []).filter(w => !gloss.has(w) && !(contesto.sigle || []).includes(w));
+  if (caps.length && !RE.codice.test(s)) add('T-CODICE', 'FAIL', 'parola in maiuscolo grezzo, probabile codice: ' + [...new Set(caps)].slice(0, 5).join(', '));
+  if (RE.serpente.test(s) && !/^https?:|@/.test(s)) add('T-CODICE', 'FAIL', 'nome tecnico con trattino basso: ' + s.match(RE.serpente)[0]);
+  if (lang === 'it' && RE.apostrofo.test(s)) add('T-ACCENTO', 'FAIL', 'apostrofo al posto dell\'accento: «' + s.match(RE.apostrofo)[0] + '»');
+  if (lang === 'it' && RE.plurale.test(s)) add('T-PLURALE', 'FAIL', 'plurale con «1»: «' + s.match(RE.plurale)[0].trim() + '»');
+  if (lang === 'it' && RE.decimalePunto.test(s) && !RE.dataIso.test(s) && !/\bv?\d+\.\d+\.\d+/.test(s)) add('T-DECIMALE', 'FAIL', 'decimale con il punto in pagina italiana: ' + s.match(RE.decimalePunto)[0].trim());
+  if (RE.attaccato.test(s) && !RE.uuid.test(s)) add('T-ATTACCATO', 'GIUDIZIO', 'testo attaccato senza spazio: «' + s.match(RE.attaccato)[0] + '»');
   const tec = s.match(RE.tecnico); if (tec) add('T-TECNICO', 'FAIL', 'valore tecnico in chiaro: «' + tec[2] + '»');
   const iso = s.match(RE.dataIso); if (iso) add('T-DATA-ISO', 'FAIL', 'data in formato macchina: ' + iso[0]);
   if (lang === 'it' && RE.numEn.test(s)) add('T-NUMERO-EN', 'FAIL', 'numero in formato inglese in pagina italiana: ' + s.match(RE.numEn)[0]);
@@ -45,6 +59,15 @@ export function controllaTesto(t, contesto) {
   if (t.troncato) add('T-TRONCATO', t.haTitolo ? 'GIUDIZIO' : 'FAIL', t.haTitolo ? 'testo troncato, il testo intero è nel suggerimento' : 'testo troncato senza modo di leggerlo intero');
   if (t.fuori) add('T-FUORI', 'FAIL', 'testo che esce dalla finestra');
   if (t.corpo && parseFloat(t.corpo) < 11) add('T-CORPO', 'GIUDIZIO', 'corpo del testo ' + t.corpo + ': leggibile?');
+  return out;
+}
+
+// totali che non tornano con la paginazione: «312 totali» e «1–25 di 50»
+export function controllaPagina(testo) {
+  const out = [];
+  const tot = [...testo.matchAll(/(\d[\d.]*)\s+(totali|in tutto|risultati|total)\b/gi)].map(m => Number(m[1].replace(/\./g, '')));
+  const di = [...testo.matchAll(/\d+\s*[–-]\s*\d+\s+(?:di|of)\s+(\d[\d.]*)/gi)].map(m => Number(m[1].replace(/\./g, '')));
+  for (const t of tot) for (const d of di) if (d < t) out.push({ codice: 'T-TOTALI', esito: 'FAIL', dettaglio: `la pagina dichiara ${t} in tutto ma la paginazione arriva a ${d}` });
   return out;
 }
 

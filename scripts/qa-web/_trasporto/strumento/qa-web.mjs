@@ -18,7 +18,7 @@ import { join, resolve, dirname, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import { apri, verifica as verificaGrezza, accoda, firmaNuova } from './lib/registro.mjs';
-import { controllaTesto, incoerenzeEtichette } from './lib/controlli.mjs';
+import { controllaTesto, incoerenzeEtichette, controllaPagina } from './lib/controlli.mjs';
 
 const QUI = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -256,6 +256,7 @@ async function esegui() {
         if (diLayout ? nuovoLayout : nuovoTesto) verifica(db, u.id, { percorso: t.percorso, tipo: 'testo', nome: t.testo.slice(0, 120) }, r.codice, r.esito, r.dettaglio, shot);
       }
     }
+    for (const r of controllaPagina(c.testoPagina || '')) if (firmaNuova(db, 'P|' + chiaveBase(false), r.dettaglio)) verifica(db, u.id, null, r.codice, r.esito, r.dettaglio, shot);
     const doppie = incoerenzeEtichette(c.interattivi.map(i => i.nome).filter(Boolean));
     for (const d of doppie) verifica(db, u.id, null, 'T-ETICHETTE', 'GIUDIZIO', 'la stessa etichetta scritta in modi diversi nella pagina: ' + d.join(' / '), shot);
     // --- tabelle, grafici, immagini
@@ -459,7 +460,7 @@ function rapporto() {
   const dif = tutte.filter(r => r.verdetto === 'DIFETTO');
   const perCod = new Map();
   for (const r of dif) { if (!perCod.has(r.controllo)) perCod.set(r.controllo, []); perCod.get(r.controllo).push(r); }
-  const NOMI = { 'T-UUID': 'identificativi tecnici mostrati', 'T-CODICE': 'codici al posto di descrizioni', 'T-CHIAVE': 'chiavi di traduzione non risolte', 'T-TECNICO': 'valori tecnici in chiaro', 'T-DATA-ISO': 'date in formato macchina', 'T-DATA-US': 'date in formato americano', 'T-NUMERO-EN': 'numeri in formato inglese', 'T-NUMERO-IT': 'numeri in formato italiano in pagina inglese', 'T-LINGUA': 'testi nella lingua sbagliata', 'T-TRONCATO': 'testi troncati illeggibili', 'T-FUORI': 'testi fuori dalla finestra', 'T-CELLE-VUOTE': 'celle vuote senza spiegazione', 'T-INTESTAZIONI': 'tabelle senza intestazioni', 'C-DINAMICO': 'grafici che non rispondono al mouse', 'E-ESERCIZIO': 'elementi che danno errore', 'E-LINK': 'collegamenti rotti', 'E-SENZA-NOME': 'elementi senza nome', 'R-RETE': 'chiamate in errore al caricamento', 'R-CONSOLE': 'errori in console', 'L-SCORRIMENTO': 'pagine che scorrono in orizzontale', 'P-HTTP': 'pagine in errore', 'P-LANG': 'lingua della pagina dichiarata male', 'P-TITOLO': 'pagine senza titolo', 'I-ROTTA': 'immagini rotte' };
+  const NOMI = { 'T-UUID': 'identificativi tecnici mostrati', 'T-CODICE': 'codici al posto di descrizioni', 'T-CHIAVE': 'chiavi di traduzione non risolte', 'T-TECNICO': 'valori tecnici in chiaro', 'T-DATA-ISO': 'date in formato macchina', 'T-DATA-US': 'date in formato americano', 'T-NUMERO-EN': 'numeri in formato inglese', 'T-NUMERO-IT': 'numeri in formato italiano in pagina inglese', 'T-LINGUA': 'testi nella lingua sbagliata', 'T-TRONCATO': 'testi troncati illeggibili', 'T-FUORI': 'testi fuori dalla finestra', 'T-CELLE-VUOTE': 'celle vuote senza spiegazione', 'T-ACCENTO': 'apostrofi al posto degli accenti', 'T-PLURALE': 'plurali sbagliati', 'T-DECIMALE': 'decimali con il punto', 'T-ATTACCATO': 'testi attaccati', 'T-TOTALI': 'totali che non tornano con la paginazione', 'T-ETICHETTE': 'etichette incoerenti', 'P-NON-RAGGIUNTA': 'pagine non raggiungibili', 'P-SESSIONE': 'sessione persa', 'T-INTESTAZIONI': 'tabelle senza intestazioni', 'C-DINAMICO': 'grafici che non rispondono al mouse', 'E-ESERCIZIO': 'elementi che danno errore', 'E-LINK': 'collegamenti rotti', 'E-SENZA-NOME': 'elementi senza nome', 'R-RETE': 'chiamate in errore al caricamento', 'R-CONSOLE': 'errori in console', 'L-SCORRIMENTO': 'pagine che scorrono in orizzontale', 'P-HTTP': 'pagine in errore', 'P-LANG': 'lingua della pagina dichiarata male', 'P-TITOLO': 'pagine senza titolo', 'I-ROTTA': 'immagini rotte' };
   const q = (s) => db.prepare(s).get();
   const u = q("select count(*) n, count(distinct url) p, count(distinct persona) pe from unita");
   const conteggi = q("select count(*) n, sum(verdetto='OK') ok, sum(verdetto='DIFETTO') d, sum(verdetto='NON-APPLICABILE') na, sum(verdetto='BLOCCATO') b, sum(verdetto is null) a from verifica");

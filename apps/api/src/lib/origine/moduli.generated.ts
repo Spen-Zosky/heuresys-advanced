@@ -31,6 +31,18 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_advisor_suggestions"
     ]
   },
+  "agent-capabilities": {
+    "prefissi": [
+      "/v1/agent-capabilities"
+    ],
+    "tabelle": [
+      "sys_agent_capabilities",
+      "sys_agent_capability_activations",
+      "sys_agent_capability_operations",
+      "sys_tenancies",
+      "v_agent_capability_activations_current"
+    ]
+  },
   "agent-tokens": {
     "prefissi": [
       "/v1/auth/agent-tokens"

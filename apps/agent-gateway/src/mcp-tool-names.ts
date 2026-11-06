@@ -34,6 +34,18 @@ export const GENERIC_TOOL_NAMES = [
   "hrx_entity_query",
 ] as const;
 
+/**
+ * Gli strumenti PARAMETRICI: la natura della chiamata sta nell'input (concetto e operazione),
+ * non nel nome. Una sola fonte, letta dal gate (`write-gate.ts`) e dalle classi
+ * (`classi-azioni.ts`, ADR-0056 D2).
+ */
+export const PARAMETRIC_TOOL_NAMES: ReadonlySet<string> = new Set(["hrx_entity_query"]);
+
+/** Vero se il nome NUDO (senza spazio dei nomi) è uno strumento parametrico. */
+export function isParametricToolName(bare: string): boolean {
+  return PARAMETRIC_TOOL_NAMES.has(bare);
+}
+
 /** Read tools (auto-allowed by the gate once allowlisted). */
 export const READ_TOOL_NAMES = [
   "hrx_org_units_list",

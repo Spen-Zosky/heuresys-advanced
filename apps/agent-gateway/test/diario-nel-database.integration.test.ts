@@ -16,7 +16,16 @@ import type pg from "pg";
 import { DbAuditSink, registraChiusuraConversazione } from "../src/audit-sink.js";
 import { auditPool, closeAuditPool } from "../src/db-pool.js";
 
-const conDatabase = Boolean(process.env.POSTGRES_HOST);
+/**
+ * Solo su un database di collaudo, dichiarato per nome: mai sulla produzione (D-08). Il runner
+ * della CI sta sull'host della produzione e porta POSTGRES_DB=heuresys_advanced; un database
+ * non dichiarato vale come produzione (è il valore predefinito di `db-pool.ts`).
+ */
+const nomeDb = process.env.POSTGRES_DB ?? "";
+const conDatabase =
+  Boolean(process.env.POSTGRES_HOST) &&
+  nomeDb !== "heuresys_advanced" &&
+  /^heuresys_(ci|rehearsal_.+|prova_.+|test_.+|collaudo_.+)$/.test(nomeDb);
 
 describe.skipIf(!conDatabase)("A-12 — il diario dell'agente nel database", () => {
   let client: pg.PoolClient;

@@ -29,7 +29,9 @@
    che non ha FK né verso né dai dossier — infra (schema_migrations, i18n, embeddings,
    crosswalk non ancora agganciati, RBAC platform-global, leads GTM, gdpr_data_map,
    reconciliation_registry, ui_interfaces, kpi_weighting_rules, skill_proficiency_levels
-   che è agganciato via `varchar+CHECK` RD-08 e non via FK).
+   che è agganciato via `varchar+CHECK` RD-08 e non via FK; dal 2026-11-07 anche il vocabolario comune di
+   piattaforma (mig 000464), il giornale degli atti di mandato senza FK (mig 000475) e le
+   operazioni delle capacità degli agenti, figlie di un catalogo (mig 000480)).
 6. **MODELLO** (famiglia derivata, dal 2026-10-23): le `sys_blueprint_content_*`, il
    contenuto di una versione di variante (ADR-0039) prima che diventi l'azienda di un
    cliente. Ne fa parte una tabella solo se tutte le sue FK restano nel piano del modello

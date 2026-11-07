@@ -27,13 +27,20 @@ function registro(risposta: (op: Operazione) => CapacitaLibera | undefined | Err
   return { r, domande };
 }
 
-function gate(reg: RegistroCapacita | undefined, tenant: string | null = "RTL_BANK") {
+type Principal = Parameters<typeof makeCanUseTool>[1] extends infer O
+  ? O extends { principal?: infer P } ? P : never : never;
+
+function gate(
+  reg: RegistroCapacita | undefined,
+  tenant: string | null = "RTL_BANK",
+  principal: Principal = { principal: "user", subject: "u-1", conversationId: "c-1" },
+) {
   const audit = new MemoryAuditSink();
   const approve = vi.fn(async () => false);
   const canUseTool = makeCanUseTool(approve, {
     audit,
     persone: { conta: () => 0, livello: () => "silenzioso" },
-    principal: { principal: "user", subject: "u-1", ...(tenant ? { tenant } : {}) },
+    principal: { ...principal, ...(tenant ? { tenant } : {}) },
     ...(reg ? { capacita: { registro: reg, agentCode: "assistente-hr" } } : {}),
   });
   return { canUseTool, approve, audit };
@@ -139,5 +146,56 @@ describe("DbRegistroCapacita", () => {
       const r = new DbRegistroCapacita({ query: async () => ({ rows }) });
       await expect(r.liberaPer("a", "T", op)).resolves.toBeUndefined();
     }
+  });
+});
+
+describe("il registro «per conto di» (ADR-0053 A2, voce T5)", () => {
+  it("la scrittura autonoma dice capacità, versione, giro, classe e per conto di chi", async () => {
+    const { r } = registro(() => LIBERA);
+    const { canUseTool, audit } = gate(r);
+    await canUseTool("hrx_org_units_upsert", { payload: { name: "x" } });
+    expect(audit.entries[0]).toMatchObject({
+      conversationId: "c-1",
+      decision: "allow",
+      outcome: "allow-write-autonomous",
+      actionClass: "B",
+      capability: { code: "struttura.unita", version: 1 },
+      onBehalfOf: "u-1",
+    });
+  });
+
+  it("senza una persona da nominare la capacità non si legge nemmeno: la scrittura va al ponte", async () => {
+    for (const p of [
+      { principal: "service" as const, subject: "svc", conversationId: "c-1" },
+      { principal: "user" as const, conversationId: "c-1" },
+      { principal: "user" as const, subject: "u-1" },
+    ]) {
+      const { r, domande } = registro(() => LIBERA);
+      const { canUseTool, approve, audit } = gate(r, "RTL_BANK", p);
+      expect((await canUseTool("hrx_org_units_upsert", { payload: {} })).behavior).toBe("deny");
+      expect(approve).toHaveBeenCalledTimes(1);
+      expect(domande).toEqual([]);
+      expect(audit.entries.some((e) => e.outcome === "allow-write-autonomous")).toBe(false);
+    }
+  });
+
+  it("la scrittura approvata da una persona è allow-write, quella negata deny, la lettura allow-read", async () => {
+    const audit = new MemoryAuditSink();
+    let risposta = true;
+    const canUseTool = makeCanUseTool(async () => risposta, {
+      audit,
+      persone: { conta: () => 0, livello: () => "silenzioso" },
+      principal: { principal: "user", subject: "u-2", tenant: "RTL_BANK", conversationId: "c-2" },
+    });
+    await canUseTool("hrx_org_units_upsert", { payload: {} });
+    risposta = false;
+    await canUseTool("hrx_org_units_upsert", { payload: {} });
+    await canUseTool("hrx_org_units_list", {});
+    expect(audit.entries.map((e) => [e.outcome, e.actionClass, e.onBehalfOf])).toEqual([
+      ["allow-write", "B", "u-2"],
+      ["deny", "B", "u-2"],
+      ["allow-read", "A", "u-2"],
+    ]);
+    expect(audit.entries.every((e) => e.capability === undefined)).toBe(true);
   });
 });

@@ -1,4 +1,6 @@
 /**
+ * @agente assistente-hr (anagrafe: docs/architecture/agenti/ANAGRAFE_agenti.md)
+ *
  * Agent SDK wiring (#9 WI-B, regime path). Loads the human-resources-plus plugin,
  * attaches the heuresys MCP tools, and enforces the human-in-the-loop WRITE gate
  * via canUseTool (the runtime compliance control; GDPR Art. 22). See

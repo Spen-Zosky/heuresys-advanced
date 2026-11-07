@@ -118,10 +118,14 @@ describe("il catalogo e il modo (000480, ADR-0053)", () => {
     expect(await codiceDi(svc.setStatus(piattaforma, id, "PUBBLICATA"))).toBe("AGENT_CAPABILITY_RULE");
   });
 
-  it("il Direttore decide CONFERMA per il suo tenant, non per un altro, e non libera finché manca il registro «per conto di»", async () => {
+  it("il Direttore decide CONFERMA per il suo tenant, non per un altro; LIBERA solo con informativa e ritorno provato", async () => {
     const c = await svc.decide(direttore, id, { mode: "CONFERMA", reason: "prova del Direttore" });
     expect(c.activation).toMatchObject({ mode: "CONFERMA", tenantId: direttore.tenantId, decidedBy: direttore.userId, source: "PERSONA" });
-    expect(await codiceDi(svc.decide(direttore, id, { mode: "LIBERA", reason: "prova", noticeRef: "inf-1", rollbackProofRef: "prova-1" }))).toBe("AGENT_ONBEHALF_REGISTER_MISSING");
+    // T5: il registro «per conto di» c'è (000482), quindi restano le due condizioni del database.
+    expect(await codiceDi(svc.decide(direttore, id, { mode: "LIBERA", reason: "prova", rollbackProofRef: "prova-1" }))).toBe("AGENT_CAPABILITY_RULE");
+    expect(await codiceDi(svc.decide(direttore, id, { mode: "LIBERA", reason: "prova", noticeRef: "inf-1" }))).toBe("AGENT_CAPABILITY_RULE");
+    const l = await svc.decide(direttore, id, { mode: "LIBERA", reason: "prova", noticeRef: "inf-1", rollbackProofRef: "prova-1" });
+    expect(l.activation).toMatchObject({ mode: "LIBERA", decidedBy: direttore.userId, source: "PERSONA" });
     const altro = await pool.query<{ tenant_id: string }>(`SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_id <> $1 LIMIT 1`, [direttore.tenantId]);
     if (altro.rows[0]) {
       expect(await codiceDi(svc.decide(direttore, id, { mode: "CONFERMA", reason: "prova", tenantId: altro.rows[0].tenant_id }))).toBe("PERMISSION_DENIED");

@@ -5013,6 +5013,31 @@ BEGIN
                             AND a.user_position_assignment_position_id = rq.requisition_position_id));
   IF v_cnt > 0 THEN v_g := v_g || format('C13d: %s vincitori che la posizione non l''hanno mai occupata (es. %s)', v_cnt, v_smpl); END IF;
 
+  -- (2026-11-07) un'offerta senza cifra o senza contratto non è un'offerta: le
+  -- due in attesa sui posti nuovi erano state scritte così in produzione
+  SELECT count(*), min(o.offer_id::text) INTO v_cnt, v_smpl
+    FROM sys.sys_job_offers o
+   WHERE o.offer_metadata->>'storia36' = 'C13'
+     AND (o.offer_gross_annual_salary IS NULL OR o.offer_contract_type IS NULL);
+  IF v_cnt > 0 THEN v_g := v_g || format('C13d(offerte): %s offerte senza RAL o senza tipo di contratto (es. %s)', v_cnt, v_smpl); END IF;
+
+  -- (2026-11-07) chi in una selezione in corso è fra un colloquio e l'altro ha
+  -- il successivo in agenda
+  SELECT count(*), min(rq.requisition_code) INTO v_cnt, v_smpl
+    FROM sys.sys_job_requisitions rq
+    JOIN sys.sys_job_postings jp ON jp.posting_requisition_id = rq.requisition_id
+    JOIN sys.sys_candidate_applications ap ON ap.application_posting_id = jp.posting_id
+   WHERE rq.requisition_metadata->>'storia36' = 'C13' AND rq.requisition_status = 'OPEN'
+     AND ap.application_stage = 'INTERVIEWING'
+     AND NOT EXISTS (SELECT 1 FROM sys.sys_interviews i
+                      WHERE i.interview_application_id = ap.application_id
+                        AND i.interview_status = 'SCHEDULED')
+     -- chi ha già fatto il finale aspetta la decisione, non un altro colloquio
+     AND NOT EXISTS (SELECT 1 FROM sys.sys_interviews i
+                      WHERE i.interview_application_id = ap.application_id
+                        AND i.interview_kind = 'FINAL' AND i.interview_status = 'COMPLETED');
+  IF v_cnt > 0 THEN v_g := v_g || format('C13d(agenda): %s candidature in colloquio senza un colloquio in agenda (es. %s)', v_cnt, v_smpl); END IF;
+
   IF array_length(v_g, 1) > 0 THEN RAISE EXCEPTION '%', array_to_string(v_g, ' | '); END IF;
 END $fn$;
 
@@ -7599,6 +7624,39 @@ BEGIN
     END;
     IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13d FALLITO: una selezione aperta su un posto occupato è passata'; END IF;
     RAISE NOTICE '[OK] SELFTEST C13d (selezione aperta su un posto occupato, rollback)';
+
+    -- ST-C13d(offerte): un'offerta a cui si toglie la RAL
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_job_offers SET offer_gross_annual_salary = NULL
+       WHERE offer_id = (SELECT offer_id FROM sys.sys_job_offers
+                          WHERE offer_metadata->>'storia36' = 'C13' ORDER BY offer_id LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13d();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13d(offerte)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13d(offerte) FALLITO: un''offerta senza RAL è passata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13d(offerte) (offerta senza RAL, rollback)';
+
+    -- ST-C13d(agenda): un colloquio in agenda che si annulla
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_interviews SET interview_status = 'CANCELLED'
+       WHERE interview_metadata->>'storia36' = 'C13' AND interview_status = 'SCHEDULED';
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13d();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13d(agenda)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13d(agenda) FALLITO: una candidatura in colloquio senza agenda è passata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13d(agenda) (colloqui in agenda annullati, rollback)';
 
   END;
 END $$;

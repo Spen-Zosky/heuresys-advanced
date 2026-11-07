@@ -21,25 +21,28 @@ CREATE TABLE IF NOT EXISTS staging.storia36_runs (
   run_id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   cluster_code    varchar(8)  NOT NULL
                   CONSTRAINT storia36_runs_cluster_code_check
-                  CHECK (cluster_code ~ '^(C([0-9]|1[0-2])|ADV)$'),
+                  CHECK (cluster_code ~ '^(C([0-9]|1[0-3])|ADV)$'),
   seed_file       text        NOT NULL,
   rows_written    bigint      NOT NULL,
   executed_at     timestamptz NOT NULL DEFAULT now(),
   twice_run_delta bigint      NOT NULL
 );
 
--- Il vocabolario si è allargato quando è nato il modo `avanzamento` (ADV, che
--- non è un cluster ma una corsa di estensione). CREATE TABLE IF NOT EXISTS non
--- tocca un vincolo già esistente: qui lo si riallinea, idempotente.
+-- Il vocabolario si è allargato due volte: quando è nato il modo `avanzamento`
+-- (ADV, che non è un cluster ma una corsa di estensione) e quando la selezione è
+-- entrata nella storia (C13, 2026-11-06). CREATE TABLE IF NOT EXISTS non tocca
+-- un vincolo già esistente: qui lo si riallinea, idempotente. La guardia guarda
+-- la forma ESATTA del vincolo, non una sua parola: con `!~ 'ADV'` un vincolo che
+-- avesse già ADV ma non C13 sarebbe passato per buono.
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_constraint
               WHERE conname = 'storia36_runs_cluster_code_check'
-                AND pg_get_constraintdef(oid) !~ 'ADV') THEN
+                AND pg_get_constraintdef(oid) !~ '1\[0-3\]') THEN
     ALTER TABLE staging.storia36_runs DROP CONSTRAINT storia36_runs_cluster_code_check;
     ALTER TABLE staging.storia36_runs ADD CONSTRAINT storia36_runs_cluster_code_check
-      CHECK (cluster_code ~ '^(C([0-9]|1[0-2])|ADV)$');
-    RAISE NOTICE 'storia36 C0: vocabolario cluster_code esteso ad ADV';
+      CHECK (cluster_code ~ '^(C([0-9]|1[0-3])|ADV)$');
+    RAISE NOTICE 'storia36 C0: vocabolario cluster_code esteso a C13 (selezione) e ADV';
   END IF;
 END $$;
 
@@ -198,10 +201,16 @@ BEGIN
     RAISE EXCEPTION 'storia36_calendar: % festività marcate lavorative', v_bad;
   END IF;
 
-  -- sanità volumetrica: ~250 giorni lavorativi/anno su 3 anni
+  -- sanità volumetrica: ~250 giorni lavorativi l'anno, PROPORZIONATI alla
+  -- lunghezza della finestra. Il vecchio intervallo fisso 730-790 valeva per i
+  -- soli tre anni della costruzione: con l'avanzamento notturno la finestra è
+  -- cresciuta (2026-11-06: 1.193 giorni, 824 lavorativi) e la foundation si
+  -- fermava in errore — era esattamente la trappola 3 della custodia, l'orologio
+  -- scambiato per una rottura. Stessa banda di prima, 243-263 giorni l'anno.
   SELECT count(*) INTO v_workdays FROM staging.storia36_calendar WHERE is_workday;
-  IF v_workdays NOT BETWEEN 730 AND 790 THEN
-    RAISE EXCEPTION 'storia36_calendar: giorni lavorativi fuori range plausibile (%)', v_workdays;
+  IF v_workdays NOT BETWEEN floor(v_cnt * 243 / 365.25) AND ceil(v_cnt * 263 / 365.25) THEN
+    RAISE EXCEPTION 'storia36_calendar: giorni lavorativi fuori range plausibile (% su % giorni, attesi %..%)',
+      v_workdays, v_cnt, floor(v_cnt * 243 / 365.25), ceil(v_cnt * 263 / 365.25);
   END IF;
 
   RAISE NOTICE 'storia36 C0 foundation OK: % giorni (% lavorativi), finestra %..%',

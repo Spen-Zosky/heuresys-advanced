@@ -754,10 +754,12 @@ BEGIN
   RAISE NOTICE 'storia36 C13: colloqui %', v_n;
 
   -- Le selezioni in corso hanno il prossimo colloquio in agenda: chi è ancora
-  -- fra un colloquio e l'altro ha il successivo fissato il giorno della
-  -- frontiera, SCHEDULED e senza valutazione. Prima del 2026-11-07 tutti i
-  -- colloqui erano svolti, anche nelle selezioni in corso. Il giorno è la
-  -- frontiera e non dopo: niente oltre la frontiera (G1, C13b(ii)).
+  -- fra un colloquio e l'altro ha il successivo fissato da due a sette giorni
+  -- dopo la frontiera, in un giorno feriale, SCHEDULED e senza valutazione.
+  -- Prima del 2026-11-07 tutti i colloqui erano svolti, anche nelle selezioni
+  -- in corso. G1 e C13b(ii) ammettono dopo la frontiera i soli SCHEDULED, entro
+  -- 30 giorni. LIMITE NOTO: l'avanzamento notturno non rilegge questo seed,
+  -- quindi l'appuntamento resta fermo mentre la frontiera avanza.
   INSERT INTO sys.sys_interviews (
     interview_id, interview_tenant_id, interview_application_id, interview_kind, interview_status,
     interview_scheduled_at, interview_duration_min, interview_location, interview_metadata,
@@ -772,7 +774,9 @@ BEGIN
     JOIN _req r ON r.k = a.req_k AND r.kind = 'OPEN'
     CROSS JOIN LATERAL (
       SELECT CASE WHEN a.t_on IS NULL THEN 'TECHNICAL' ELSE 'FINAL' END AS kind,
-             pg_temp.slot(pg_temp.wd(c_to), a.app_id || 'AGENDA') AS quando) n
+             pg_temp.slot(g.d + CASE extract(isodow FROM g.d) WHEN 6 THEN 2 WHEN 7 THEN 1 ELSE 0 END,
+                          a.app_id || 'AGENDA') AS quando
+        FROM (SELECT c_to + 2 + pg_temp.h(a.app_id || 'AGENDA-G') % 6 AS d) g) n
    WHERE a.stage = 'INTERVIEWING' AND a.f_on IS NULL
   ON CONFLICT DO NOTHING;
   GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;

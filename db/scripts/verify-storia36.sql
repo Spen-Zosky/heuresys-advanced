@@ -141,7 +141,10 @@ BEGIN
       ('sys_variable_pay_calculations','variable_pay_calculation_period_end')
     ) AS t(tbl, col)
   LOOP
+    -- un colloquio in agenda (SCHEDULED) è un appuntamento, non un fatto: sta
+    -- dopo la frontiera per definizione (C13b(ii) lo tiene entro 30 giorni)
     EXECUTE format('SELECT count(*) FROM sys.%I WHERE (%I)::date > $1', r.tbl, r.col)
+            || CASE WHEN r.tbl = 'sys_interviews' THEN ' AND interview_status <> ''SCHEDULED''' ELSE '' END
       INTO v_cnt USING p_end;
     IF v_cnt > 0 THEN
       v_bad := v_bad || format(' %s.%s=%s', r.tbl, r.col, v_cnt);
@@ -4895,7 +4898,8 @@ BEGIN
     UNION ALL
     SELECT 1 FROM sys.sys_interviews
      WHERE interview_metadata->>'storia36' = 'C13'
-       AND (interview_scheduled_at AT TIME ZONE 'Europe/Rome')::date > p_to
+       AND (interview_scheduled_at AT TIME ZONE 'Europe/Rome')::date
+           > p_to + CASE WHEN interview_status = 'SCHEDULED' THEN 30 ELSE 0 END
     UNION ALL
     SELECT 1 FROM sys.sys_interview_feedback
      WHERE feedback_metadata->>'storia36' = 'C13' AND feedback_submitted_on > p_to
@@ -7544,7 +7548,8 @@ BEGIN
     BEGIN
       UPDATE sys.sys_interviews SET interview_scheduled_at = (staging.storia36_c4_frontier() + 20) + time '10:00'
        WHERE interview_id = (SELECT interview_id FROM sys.sys_interviews
-                              WHERE interview_metadata->>'storia36' = 'C13' ORDER BY interview_id LIMIT 1);
+                              WHERE interview_metadata->>'storia36' = 'C13' AND interview_status = 'COMPLETED'
+                              ORDER BY interview_id LIMIT 1);
       IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
       PERFORM staging.storia36_check_c13b(staging.storia36_c4_frontier());
       RAISE EXCEPTION 'ST_NOT_FIRED';

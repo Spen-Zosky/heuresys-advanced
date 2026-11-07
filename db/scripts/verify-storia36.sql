@@ -4050,16 +4050,27 @@ BEGIN
   -- zero righe anche quando ne ha migliaia — sfuggirebbe al controllo proprio
   -- nel caso che conta. Scoperto dal selftest C12a(iii), che con le statistiche
   -- non scattava.
-  SELECT count(*), min(c.table_name || '.' || c.column_name) INTO v_bad, v_smpl
-  FROM information_schema.columns c
-  WHERE c.table_schema = 'sys'
-    AND c.column_name ~ '_(recorded|computed|requested|detected)_at$'
-    AND NOT (c.table_name = ANY (c_exempt))
-    AND NOT EXISTS (
-      SELECT 1 FROM generate_subscripts(c_reg, 1) i
-       WHERE c_reg[i][1] = c.table_name AND c_reg[i][2] = c.column_name)
-    AND (xpath('/row/n/text()',
-          query_to_xml(format('SELECT count(*) AS n FROM sys.%I', c.table_name),
+  --
+  -- Le colonne candidate si fissano PRIMA in un CTE materializzato, e solo su
+  -- quelle si conta: lasciando il conteggio nello stesso WHERE il pianificatore
+  -- è libero di valutare query_to_xml prima del filtro sullo schema, e su un
+  -- database appena ripristinato (senza statistiche) l'ha fatto davvero,
+  -- contando `sys.overtime_exempt_archive`, che esiste solo in `audit`
+  -- (prova su copia del 2026-11-07, corsa rossa e poi verde senza modifiche).
+  WITH cand AS MATERIALIZED (
+    SELECT c.table_name::text AS table_name, c.column_name::text AS column_name
+    FROM information_schema.columns c
+    WHERE c.table_schema = 'sys'
+      AND c.column_name ~ '_(recorded|computed|requested|detected)_at$'
+      AND NOT (c.table_name = ANY (c_exempt))
+      AND NOT EXISTS (
+        SELECT 1 FROM generate_subscripts(c_reg, 1) i
+         WHERE c_reg[i][1] = c.table_name AND c_reg[i][2] = c.column_name)
+  )
+  SELECT count(*), min(k.table_name || '.' || k.column_name) INTO v_bad, v_smpl
+  FROM cand k
+  WHERE (xpath('/row/n/text()',
+          query_to_xml(format('SELECT count(*) AS n FROM sys.%I', k.table_name),
                        false, true, '')))[1]::text::bigint >= 30;
   IF v_bad > 0 THEN
     BEGIN

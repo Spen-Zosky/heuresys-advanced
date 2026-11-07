@@ -545,6 +545,11 @@ BEGIN
     t_on = CASE WHEN a.t_on <= c_to THEN a.t_on END,
     s_on = CASE WHEN a.s_on <= c_to THEN a.s_on END
     FROM _req r WHERE r.k = a.req_k AND r.kind = 'OPEN' AND a.stage LIKE 'X%';
+  -- una tappa viene dopo la precedente, mai lo stesso giorno: vicino alla
+  -- frontiera il ritorno al giorno lavorativo le schiacciava tutte sull'ultimo
+  -- giorno della storia (in produzione, 2026-11-07, un finale prima del tecnico)
+  UPDATE _app SET t_on = NULL WHERE t_on <= s_on;
+  UPDATE _app SET f_on = NULL WHERE f_on <= coalesce(t_on, s_on);
   -- una tappa senza la precedente non esiste
   UPDATE _app SET t_on = NULL WHERE s_on IS NULL;
   UPDATE _app SET f_on = NULL WHERE s_on IS NULL OR (t_on IS NULL AND stage = 'XF' AND
@@ -877,33 +882,6 @@ BEGIN
   ON CONFLICT DO NOTHING;
   GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
   RAISE NOTICE 'storia36 C13: offerte %', v_n;
-
-  -- Le offerte già scritte prima del 2026-11-07 senza RAL (posto nuovo, mai un
-  -- titolare): la stessa regola di sopra, applicata a ciò che c'è. Tocca solo
-  -- offerte C13 con RAL vuota; alla seconda corsa non trova niente.
-  UPDATE sys.sys_job_offers o
-     SET offer_gross_annual_salary = m.sal,
-         offer_contract_type = coalesce(o.offer_contract_type, m.tipo),
-         offer_metadata = o.offer_metadata
-                          || jsonb_build_object('ral_da', 'contratto di chi occupa il posto modello del potenziamento')
-    FROM sys.sys_candidate_applications ap
-    JOIN sys.sys_job_postings jp ON jp.posting_id = ap.application_posting_id
-    JOIN sys.sys_job_requisitions rq ON rq.requisition_id = jp.posting_requisition_id
-    JOIN sys.sys_positions p ON p.position_id = rq.requisition_position_id
-                            AND p.position_metadata->>'storia36' = 'C13'
-    CROSS JOIN LATERAL (
-      SELECT c.user_contract_gross_annual_salary AS sal, c.user_contract_type AS tipo
-        FROM sys.sys_user_position_assignments pa
-        JOIN sys.sys_user_contracts c ON c.user_contract_user_id = pa.user_position_assignment_user_id
-       WHERE pa.user_position_assignment_position_id = (p.position_metadata->>'modello_position_id')::uuid
-         AND pa.user_position_assignment_kind = 'PRIMARY'
-       ORDER BY pa.user_position_assignment_start_date DESC NULLS LAST, c.user_contract_start_date DESC
-       LIMIT 1) m
-   WHERE ap.application_id = o.offer_application_id
-     AND o.offer_tenant_id = c_rtl AND o.offer_metadata->>'storia36' = 'C13'
-     AND o.offer_gross_annual_salary IS NULL AND m.sal IS NOT NULL;
-  GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
-  RAISE NOTICE 'storia36 C13: offerte completate con la RAL del posto modello %', v_n;
 
   -- ==========================================================================
   -- 4. REGISTRO + POST-CONDIZIONI

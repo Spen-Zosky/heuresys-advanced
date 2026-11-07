@@ -4890,6 +4890,21 @@ BEGIN
        OR (o.offer_status = 'ACCEPTED' AND o.offer_start_date < o.offer_responded_on)
        OR ap.application_closed_on < ap.application_applied_on);
   IF v_cnt > 0 THEN v_g := v_g || format('C13b(i): %s righe con le tappe fuori ordine (es. %s)', v_cnt, v_smpl); END IF;
+  -- (2026-11-07) i colloqui di una candidatura seguono l'ordine dei tipi
+  -- (primo colloquio, tecnico, finale) e quelli in agenda vengono dopo i
+  -- svolti: in produzione un finale era fissato prima del tecnico
+  SELECT count(*), min(rq.requisition_code) INTO v_cnt, v_smpl
+    FROM sys.sys_job_requisitions rq
+    JOIN sys.sys_job_postings jp ON jp.posting_requisition_id = rq.requisition_id
+    JOIN sys.sys_candidate_applications ap ON ap.application_posting_id = jp.posting_id
+    JOIN sys.sys_interviews a ON a.interview_application_id = ap.application_id
+    JOIN sys.sys_interviews b ON b.interview_application_id = ap.application_id
+   WHERE rq.requisition_metadata->>'storia36' = 'C13'
+     AND a.interview_scheduled_at >= b.interview_scheduled_at AND a.interview_id <> b.interview_id
+     AND (array_position(ARRAY['SCREENING','TECHNICAL','FINAL'], a.interview_kind::text)
+            < array_position(ARRAY['SCREENING','TECHNICAL','FINAL'], b.interview_kind::text)
+          OR (a.interview_status = 'COMPLETED' AND b.interview_status = 'SCHEDULED'));
+  IF v_cnt > 0 THEN v_g := v_g || format('C13b(ordine): %s coppie di colloqui fuori ordine di tipo (es. %s)', v_cnt, v_smpl); END IF;
 
   -- (ii) niente oltre la frontiera, niente colloqui nei giorni di festa
   SELECT count(*) INTO v_cnt FROM (
@@ -7542,6 +7557,29 @@ BEGIN
     END;
     IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13b(i) FALLITO: un colloquio prima della candidatura è passato'; END IF;
     RAISE NOTICE '[OK] SELFTEST C13b(i) (colloquio prima della candidatura, rollback)';
+
+    -- ST-C13b(ordine): il finale spostato a prima del tecnico della stessa candidatura
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_interviews f SET interview_scheduled_at = t.interview_scheduled_at - interval '1 hour'
+        FROM sys.sys_interviews t
+       WHERE t.interview_application_id = f.interview_application_id
+         AND t.interview_kind = 'TECHNICAL' AND f.interview_kind = 'FINAL'
+         AND f.interview_id = (SELECT f2.interview_id FROM sys.sys_interviews f2
+                                JOIN sys.sys_interviews t2 ON t2.interview_application_id = f2.interview_application_id
+                                                         AND t2.interview_kind = 'TECHNICAL'
+                               WHERE f2.interview_metadata->>'storia36' = 'C13' AND f2.interview_kind = 'FINAL'
+                               ORDER BY f2.interview_id LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13b(staging.storia36_c4_frontier());
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13b(ordine)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13b(ordine) FALLITO: un finale prima del tecnico è passato'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13b(ordine) (finale prima del tecnico, rollback)';
 
     -- ST-C13b(ii): un colloquio spostato oltre la frontiera
     v_fired := false;

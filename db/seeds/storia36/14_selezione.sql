@@ -545,6 +545,11 @@ BEGIN
     t_on = CASE WHEN a.t_on <= c_to THEN a.t_on END,
     s_on = CASE WHEN a.s_on <= c_to THEN a.s_on END
     FROM _req r WHERE r.k = a.req_k AND r.kind = 'OPEN' AND a.stage LIKE 'X%';
+  -- una tappa viene dopo la precedente, mai lo stesso giorno: vicino alla
+  -- frontiera il ritorno al giorno lavorativo le schiacciava tutte sull'ultimo
+  -- giorno della storia (in produzione, 2026-11-07, un finale prima del tecnico)
+  UPDATE _app SET t_on = NULL WHERE t_on <= s_on;
+  UPDATE _app SET f_on = NULL WHERE f_on <= coalesce(t_on, s_on);
   -- una tappa senza la precedente non esiste
   UPDATE _app SET t_on = NULL WHERE s_on IS NULL;
   UPDATE _app SET f_on = NULL WHERE s_on IS NULL OR (t_on IS NULL AND stage = 'XF' AND
@@ -753,6 +758,35 @@ BEGIN
   GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
   RAISE NOTICE 'storia36 C13: colloqui %', v_n;
 
+  -- Le selezioni in corso hanno il prossimo colloquio in agenda: chi è ancora
+  -- fra un colloquio e l'altro ha il successivo fissato da due a sette giorni
+  -- dopo la frontiera, in un giorno feriale, SCHEDULED e senza valutazione.
+  -- Prima del 2026-11-07 tutti i colloqui erano svolti, anche nelle selezioni
+  -- in corso. G1 e C13b(ii) ammettono dopo la frontiera i soli SCHEDULED, entro
+  -- 30 giorni. LIMITE NOTO: l'avanzamento notturno non rilegge questo seed,
+  -- quindi l'appuntamento resta fermo mentre la frontiera avanza.
+  INSERT INTO sys.sys_interviews (
+    interview_id, interview_tenant_id, interview_application_id, interview_kind, interview_status,
+    interview_scheduled_at, interview_duration_min, interview_location, interview_metadata,
+    created_at, created_by, updated_at, updated_by)
+  SELECT uuid_generate_v5(c_ns, 'STORIA36::C13::INT::' || a.app_id || '::' || n.kind),
+         c_rtl, a.app_id, n.kind, 'SCHEDULED', n.quando,
+         CASE n.kind WHEN 'TECHNICAL' THEN 60 ELSE 45 END,
+         'Sede di ' || r.sede,
+         jsonb_build_object('storia36', 'C13', 'agenda', 'colloquio fissato, non ancora svolto'),
+         n.quando - interval '2 days', v_rec, n.quando - interval '2 days', v_rec
+    FROM _app a
+    JOIN _req r ON r.k = a.req_k AND r.kind = 'OPEN'
+    CROSS JOIN LATERAL (
+      SELECT CASE WHEN a.t_on IS NULL THEN 'TECHNICAL' ELSE 'FINAL' END AS kind,
+             pg_temp.slot(g.d + CASE extract(isodow FROM g.d) WHEN 6 THEN 2 WHEN 7 THEN 1 ELSE 0 END,
+                          a.app_id || 'AGENDA') AS quando
+        FROM (SELECT c_to + 2 + pg_temp.h(a.app_id || 'AGENDA-G') % 6 AS d) g) n
+   WHERE a.stage = 'INTERVIEWING' AND a.f_on IS NULL
+  ON CONFLICT DO NOTHING;
+  GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
+  RAISE NOTICE 'storia36 C13: colloqui in agenda %', v_n;
+
   -- Le valutazioni: chi ha condotto il colloquio, già in RTL quel giorno, mai il candidato.
   INSERT INTO sys.sys_interview_feedback (
     feedback_id, feedback_tenant_id, feedback_interview_id, feedback_interviewer_user_id,
@@ -810,6 +844,9 @@ BEGIN
          jsonb_build_object('storia36', 'C13') ||
            CASE WHEN ct.sal IS NOT NULL THEN jsonb_build_object('ral_da',
                   CASE WHEN r.kind = 'HIRE' THEN 'primo contratto della persona' ELSE 'contratto della persona al cambio di posto' END)
+                WHEN EXISTS (SELECT 1 FROM sys.sys_positions p
+                              WHERE p.position_id = r.pos AND p.position_metadata->>'storia36' = 'C13')
+                  THEN jsonb_build_object('ral_da', 'contratto di chi occupa il posto modello del potenziamento')
                 ELSE jsonb_build_object('ral_da', 'contratto di chi occupava o occupa la posizione') END,
          pg_temp.slot(a.o_sent, a.app_id::text || 'OC'), v_rec,
          pg_temp.slot(coalesce(a.o_resp, a.o_sent), a.app_id::text || 'OU'), v_rec
@@ -824,14 +861,22 @@ BEGIN
        ORDER BY CASE WHEN r.kind = 'HIRE' THEN c.user_contract_start_date END ASC NULLS LAST,
                 c.user_contract_start_date DESC
        LIMIT 1) ct ON true
-    -- per chi non è entrato, la RAL di riferimento è quella di chi ha il posto
+    -- per chi non è entrato, la RAL di riferimento è quella di chi ha il posto;
+    -- un posto nuovo di potenziamento non ha mai avuto titolari, e allora vale
+    -- quella di chi occupa il posto modello da cui è stato copiato (prima del
+    -- 2026-11-07 le due offerte in attesa restavano senza RAL e senza contratto)
     LEFT JOIN LATERAL (
       SELECT c.user_contract_gross_annual_salary AS sal, c.user_contract_type AS tipo
         FROM sys.sys_user_position_assignments pa
         JOIN sys.sys_user_contracts c ON c.user_contract_user_id = pa.user_position_assignment_user_id
-       WHERE pa.user_position_assignment_position_id = r.pos
+       WHERE pa.user_position_assignment_position_id IN (
+               r.pos,
+               (SELECT (p.position_metadata->>'modello_position_id')::uuid
+                  FROM sys.sys_positions p
+                 WHERE p.position_id = r.pos AND p.position_metadata->>'storia36' = 'C13'))
          AND pa.user_position_assignment_kind = 'PRIMARY'
-       ORDER BY pa.user_position_assignment_start_date DESC NULLS LAST, c.user_contract_start_date
+       ORDER BY (pa.user_position_assignment_position_id = r.pos) DESC,
+                pa.user_position_assignment_start_date DESC NULLS LAST, c.user_contract_start_date DESC
        LIMIT 1) ref ON true
    WHERE a.o_status IS NOT NULL AND a.o_sent IS NOT NULL
   ON CONFLICT DO NOTHING;

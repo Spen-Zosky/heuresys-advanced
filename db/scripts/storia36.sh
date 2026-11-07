@@ -195,6 +195,20 @@ avanzamento() {
   log "avanzamento: tengo aperto l'ascolto (rilevazione di clima)"
   "${PSQL[@]}" -c "SELECT * FROM staging.rilevazione_clima_rinnova();"
 
+  # Le SELEZIONI IN CORSO (C13) hanno la stessa forma del difetto dell'ascolto:
+  # `14_selezione.sql` le scrive una volta sola, con il colloquio successivo in
+  # agenda pochi giorni dopo la frontiera di quel giorno, e senza questo passo
+  # l'agenda restava nel passato. Decisione di Enzo del 2026-11-07. Il file non
+  # fa parte della costruzione (sta in una sottocartella) e gira due volte: la
+  # seconda corsa deve scrivere 0 righe, ed è la prova di doppia esecuzione che
+  # G6 pretende per ogni seed del registro.
+  local sel="$REPO_ROOT/db/seeds/storia36/avanzamento/selezioni_in_corso.sql"
+  if [[ -f "$sel" ]]; then
+    log "avanzamento: faccio avanzare le selezioni in corso (due corse, la seconda a 0)"
+    "${PSQL[@]}" -f "$sel"
+    "${PSQL[@]}" -f "$sel"
+  fi
+
   log "avanzamento: verifico con la custodia"
   custodia
 }

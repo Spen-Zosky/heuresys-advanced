@@ -4053,10 +4053,11 @@ BEGIN
   --
   -- Le colonne candidate si fissano PRIMA in un CTE materializzato, e solo su
   -- quelle si conta: lasciando il conteggio nello stesso WHERE il pianificatore
-  -- è libero di valutare query_to_xml prima del filtro sullo schema, e su un
-  -- database appena ripristinato (senza statistiche) l'ha fatto davvero,
-  -- contando `sys.overtime_exempt_archive`, che esiste solo in `audit`
-  -- (prova su copia del 2026-11-07, corsa rossa e poi verde senza modifiche).
+  -- è libero di valutare query_to_xml prima del filtro sullo schema. È la
+  -- spiegazione più probabile del rosso visto su una copia appena ripristinata
+  -- il 2026-11-07 («relation sys.overtime_exempt_archive does not exist», una
+  -- tabella che esiste solo in `audit`): la corsa dopo, senza modifiche, era
+  -- verde, e il rosso non si è più riprodotto, quindi non c'è un EXPLAIN.
   WITH cand AS MATERIALIZED (
     SELECT c.table_name::text AS table_name, c.column_name::text AS column_name
     FROM information_schema.columns c

@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `4d0d1387` (2026-11-06T15:24:43+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `038d895e` (2026-11-07T13:10:59+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 698 |
 | Pagine web | 132 |
 | Schemi shared | 130 |
-| Tabelle DB | 392 (vuote: 71) |
-| Viste / matview | 84 / 0 |
+| Tabelle DB | 396 (vuote: 68) |
+| Viste / matview | 87 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 327 |
 
 ## Moduli API
@@ -152,6 +152,9 @@
 - `staging.mig349_esco_consolidamento_undo`
 - `staging.process_participants_regole_esclusi`
 - `staging.tenant_import_people`
+- `sys.sys_agent_capabilities`
+- `sys.sys_agent_capability_activations`
+- `sys.sys_agent_capability_operations`
 - `sys.sys_auth_mfa_otp_challenges`
 - `sys.sys_auth_mfa_recovery_codes`
 - `sys.sys_auth_mfa_webauthn_credentials`
@@ -201,15 +204,9 @@
 - `sys.sys_blueprint_content_training_skills`
 - `sys.sys_blueprint_content_training`
 - `sys.sys_blueprint_content_unit_processes`
-- `sys.sys_candidate_applications`
 - `sys.sys_conflitti_ibridi`
 - `sys.sys_content_media`
 - `sys.sys_generated_record_origins`
-- `sys.sys_interview_feedback`
-- `sys.sys_interviews`
-- `sys.sys_job_offers`
-- `sys.sys_job_postings`
-- `sys.sys_job_requisitions`
 - `sys.sys_mandate_act_audit`
 - `sys.sys_mandate_acts`
 - `sys.sys_notification_preferences`
@@ -221,11 +218,11 @@
 
 - tenants_active: **2**
 - users: **176**
-- positions: **315**
+- positions: **319**
 - org_units: **45**
 - roles: **24**
-- permissions: **246**
-- role_permission_mappings: **1287**
+- permissions: **249**
+- role_permission_mappings: **1293**
 - ui_interfaces_active: **78**
 - skills: **14031**
 

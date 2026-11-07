@@ -57,6 +57,16 @@ interface EnrollState {
   confirmPending: boolean;
 }
 
+const CODICI_SFIDA_SCADUTA = new Set(["MFA_CHALLENGE_INVALID", "MFA_CHALLENGE_EXPIRED"]);
+const CODICI_CODICE_RIFIUTATO = new Set([
+  "MFA_TOTP_INVALID",
+  "MFA_OTP_INVALID",
+  "MFA_OTP_EXPIRED",
+  "MFA_OTP_LOCKED",
+  "MFA_CODE_REQUIRED",
+  "MFA_INVALID",
+]);
+
 export default function LoginPage() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -185,9 +195,37 @@ export default function LoginPage() {
         setFormError(t("auth.login.mfa.expired"));
       }
     } catch (err) {
-      handleError(err);
+      await riapriSfida(err);
     }
   };
+
+  /**
+   * La sfida è monouso e un tentativo fallito la consuma: restando con quella, anche il codice
+   * giusto verrebbe rifiutato. Dopo un codice rifiutato o una sfida scaduta se ne chiede una nuova
+   * con le stesse credenziali, così si può riprovare da questa schermata.
+   */
+  async function riapriSfida(err: unknown) {
+    const sfidaScaduta = isApiError(err) && CODICI_SFIDA_SCADUTA.has(err.code ?? "");
+    const codiceRifiutato = isApiError(err) && CODICI_CODICE_RIFIUTATO.has(err.code ?? "");
+    if (!mfa || (!sfidaScaduta && !codiceRifiutato)) {
+      if (isApiError(err) && err.status === 401) setMfa(null);
+      handleError(err);
+      return;
+    }
+    try {
+      const res = await login.mutateAsync({ email: mfa.email, password: mfa.password });
+      if (res.status === "mfa_required") {
+        setMfaCode("");
+        setMfa({ ...mfa, challengeToken: res.challengeToken, availableKinds: res.availableKinds });
+        setFormError(t(sfidaScaduta ? "auth.login.mfa.expired" : "auth.login.mfa.invalid"));
+        return;
+      }
+      setMfa(null);
+    } catch (nuovo) {
+      setMfa(null);
+      handleError(nuovo);
+    }
+  }
 
   /* --- "use passkey" on the MFA step (WebAuthn assertion completes login) --- */
   const onUsePasskey = async () => {

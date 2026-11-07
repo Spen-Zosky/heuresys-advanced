@@ -138,12 +138,30 @@ BEGIN
                                                -- governo RBAC di piattaforma, chiave testuale.
     ('sys_classificazione_direzione_dato'),    -- direzione del dato di ogni tabella sys.* (mig 000429, I23,
                                                -- ADR-0041): metadato sulle tabelle, come sys_gdpr_data_map.
-    ('sys_conflitti_ibridi')                   -- registro dei conflitti nativo/importato sulle tabelle ibride
+    ('sys_conflitti_ibridi'),                  -- registro dei conflitti nativo/importato sulle tabelle ibride
                                                -- (mig 000446, X-4): governo delle importazioni, indirizza le
                                                -- righe per (tabella, id) senza FK, come il registro delle
                                                -- riconciliazioni. Nota: porta valori di righe di un cliente
                                                -- senza una FK al tenant; se un giorno si popola, il suo posto
                                                -- e' il dossier TENANT con quella FK, non questa lista.
+    ('sys_platform_vocabulary_equivalences'),  -- vocabolario comune a tutti i tenant (mig 000464, AC-3, R-7):
+                                               -- equivalenze fra termini approvate dalla piattaforma, nessuna
+                                               -- colonna di tenant. La sua unica FK va a `sys_users` come
+                                               -- ATTORE (approved_by), che la derivazione ignora, come per
+                                               -- sys_research_sources: chi firma non e' il soggetto della riga.
+    ('sys_mandate_act_audit'),                 -- giornale degli atti di mandato (mig 000475, ADR-0050 D4),
+                                               -- scritto da un trigger e SENZA chiavi esterne per scelta: deve
+                                               -- sopravvivere alla cancellazione delle persone. Porta tenant e
+                                               -- persona come uuid nudi, come sys_conflitti_ibridi porta righe
+                                               -- di un cliente: e' audit, non il dato; il dato vivo e'
+                                               -- `sys_mandate_acts`, che i dossier gia' raggiungono.
+    ('sys_agent_capability_operations')        -- elenco chiuso delle operazioni di una capacita' degli agenti
+                                               -- con la classe A/B/C (mig 000480, ADR-0053 A1, ADR-0056 D2).
+                                               -- La sua unica FK sale a `sys_agent_capabilities`, che e'
+                                               -- CATALOGO (la referenziano le attivazioni per tenant); la
+                                               -- derivazione CATALOGO sale verso i genitori e non scende ai
+                                               -- figli di un catalogo, e nessuno referenzia le operazioni.
+                                               -- E' il catalogo stesso, non il dato di un tenant.
   ),
   alltab AS (
     SELECT c.relname AS tbl

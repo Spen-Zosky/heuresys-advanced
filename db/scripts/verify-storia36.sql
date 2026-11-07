@@ -128,11 +128,23 @@ BEGIN
       ('sys_user_professional_experiences','user_prof_exp_start_date'),
       ('sys_user_professional_experiences','user_prof_exp_end_date'),
       ('sys_user_skills','user_skill_last_used_on'),
+      -- C13, la selezione (2026-11-06): le date dei fatti, non quelle pianificate
+      -- (requisition_target_start, posting_expires_on, offer_start_date di
+      -- un'offerta in attesa possono stare legittimamente dopo la frontiera)
+      ('sys_job_requisitions','requisition_opened_on'),
+      ('sys_job_postings','posting_published_on'),
+      ('sys_candidate_applications','application_applied_on'),
+      ('sys_interviews','interview_scheduled_at'),
+      ('sys_interview_feedback','feedback_submitted_on'),
+      ('sys_job_offers','offer_sent_on'),
       ('sys_variable_pay_calculations','variable_pay_calculation_period_start'),
       ('sys_variable_pay_calculations','variable_pay_calculation_period_end')
     ) AS t(tbl, col)
   LOOP
+    -- un colloquio in agenda (SCHEDULED) è un appuntamento, non un fatto: sta
+    -- dopo la frontiera per definizione (C13b(ii) lo tiene entro 30 giorni)
     EXECUTE format('SELECT count(*) FROM sys.%I WHERE (%I)::date > $1', r.tbl, r.col)
+            || CASE WHEN r.tbl = 'sys_interviews' THEN ' AND interview_status <> ''SCHEDULED''' ELSE '' END
       INTO v_cnt USING p_end;
     IF v_cnt > 0 THEN
       v_bad := v_bad || format(' %s.%s=%s', r.tbl, r.col, v_cnt);
@@ -4041,16 +4053,28 @@ BEGIN
   -- zero righe anche quando ne ha migliaia — sfuggirebbe al controllo proprio
   -- nel caso che conta. Scoperto dal selftest C12a(iii), che con le statistiche
   -- non scattava.
-  SELECT count(*), min(c.table_name || '.' || c.column_name) INTO v_bad, v_smpl
-  FROM information_schema.columns c
-  WHERE c.table_schema = 'sys'
-    AND c.column_name ~ '_(recorded|computed|requested|detected)_at$'
-    AND NOT (c.table_name = ANY (c_exempt))
-    AND NOT EXISTS (
-      SELECT 1 FROM generate_subscripts(c_reg, 1) i
-       WHERE c_reg[i][1] = c.table_name AND c_reg[i][2] = c.column_name)
-    AND (xpath('/row/n/text()',
-          query_to_xml(format('SELECT count(*) AS n FROM sys.%I', c.table_name),
+  --
+  -- Le colonne candidate si fissano PRIMA in un CTE materializzato, e solo su
+  -- quelle si conta: lasciando il conteggio nello stesso WHERE il pianificatore
+  -- è libero di valutare query_to_xml prima del filtro sullo schema. È la
+  -- spiegazione più probabile del rosso visto su una copia appena ripristinata
+  -- il 2026-11-07 («relation sys.overtime_exempt_archive does not exist», una
+  -- tabella che esiste solo in `audit`): la corsa dopo, senza modifiche, era
+  -- verde, e il rosso non si è più riprodotto, quindi non c'è un EXPLAIN.
+  WITH cand AS MATERIALIZED (
+    SELECT c.table_name::text AS table_name, c.column_name::text AS column_name
+    FROM information_schema.columns c
+    WHERE c.table_schema = 'sys'
+      AND c.column_name ~ '_(recorded|computed|requested|detected)_at$'
+      AND NOT (c.table_name = ANY (c_exempt))
+      AND NOT EXISTS (
+        SELECT 1 FROM generate_subscripts(c_reg, 1) i
+         WHERE c_reg[i][1] = c.table_name AND c_reg[i][2] = c.column_name)
+  )
+  SELECT count(*), min(k.table_name || '.' || k.column_name) INTO v_bad, v_smpl
+  FROM cand k
+  WHERE (xpath('/row/n/text()',
+          query_to_xml(format('SELECT count(*) AS n FROM sys.%I', k.table_name),
                        false, true, '')))[1]::text::bigint >= 30;
   IF v_bad > 0 THEN
     BEGIN
@@ -4759,6 +4783,281 @@ BEGIN
     RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
   END IF;
 
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C13 — LA SELEZIONE (seed 14_selezione.sql). Quattro proprietà, sulle sole
+-- righe della storia (metadato storia36 = C13): ciò che le persone fanno dalle
+-- pagine della selezione resta loro e non si giudica qui.
+--
+-- C13a — OGNI ASSUNZIONE DELLA FINESTRA NASCE DA UNA SELEZIONE: chi è entrato in
+--   RTL fra l'inizio della storia e la sua frontiera ha un candidato legato a sé
+--   (HIRED), una candidatura HIRED, un'offerta ACCEPTED con inizio = assunzione,
+--   e la requisizione FILLED è su una posizione che ha occupato. Esito (a) se
+--   manca: `storia36.sh custodia --repair-missing` la ricrea.
+-- ----------------------------------------------------------------------------
+-- Gli assunti della finestra il cui primo incarico non sta vicino all'assunzione:
+-- dato incoerente già nel tenant, che C13a non copre con una selezione inventata.
+CREATE OR REPLACE VIEW staging.storia36_c13_assunti_incoerenti AS
+SELECT u.user_email, e.hire AS assunzione,
+       (SELECT min(a.user_position_assignment_start_date) FROM sys.sys_user_position_assignments a
+         WHERE a.user_position_assignment_user_id = u.user_id
+           AND a.user_position_assignment_kind = 'PRIMARY') AS primo_incarico
+  FROM sys.sys_users u
+  JOIN (SELECT user_employment_user_id AS uid, min(user_employment_hire_date) AS hire
+          FROM sys.sys_user_employment GROUP BY 1) e ON e.uid = u.user_id
+ WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND u.user_type = 'STANDARD'
+   AND u.user_email NOT LIKE '%.invalid'
+   AND e.hire >= DATE '2023-08-01'
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a0
+                    WHERE a0.user_position_assignment_user_id = u.user_id
+                      AND a0.user_position_assignment_kind = 'PRIMARY'
+                      AND a0.user_position_assignment_start_date BETWEEN e.hire - 31 AND e.hire + 183);
+
+CREATE OR REPLACE FUNCTION staging.storia36_check_c13a()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl  constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_to   date := staging.storia36_c4_frontier();
+  v_cnt  bigint;
+  v_smpl text;
+BEGIN
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_smpl
+    FROM sys.sys_users u
+    JOIN (SELECT user_employment_user_id AS uid, min(user_employment_hire_date) AS hire
+            FROM sys.sys_user_employment GROUP BY 1) e ON e.uid = u.user_id
+   WHERE u.user_tenant_id = c_rtl AND u.user_type = 'STANDARD'
+     AND u.user_email NOT LIKE '%.invalid'
+     AND e.hire BETWEEN DATE '2023-08-01' AND v_to
+     -- la stessa regola del seed: entra da una selezione chi ha il primo incarico
+     -- fra un mese prima e sei mesi dopo l'assunzione. Gli altri hanno un dato
+     -- incoerente (incarico di anni prima dell'assunzione) e stanno nella vista
+     -- staging.storia36_c13_assunti_incoerenti: si dichiarano, non si coprono.
+     AND EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a0
+                  WHERE a0.user_position_assignment_user_id = u.user_id
+                    AND a0.user_position_assignment_kind = 'PRIMARY'
+                    AND a0.user_position_assignment_start_date BETWEEN e.hire - 31 AND e.hire + 183)
+     AND NOT EXISTS (
+       SELECT 1
+         FROM sys.sys_candidates c
+         JOIN sys.sys_candidate_applications ap ON ap.application_candidate_id = c.candidate_id
+         JOIN sys.sys_job_offers o ON o.offer_application_id = ap.application_id
+         JOIN sys.sys_job_postings jp ON jp.posting_id = ap.application_posting_id
+         JOIN sys.sys_job_requisitions rq ON rq.requisition_id = jp.posting_requisition_id
+        WHERE c.candidate_hired_user_id = u.user_id AND c.candidate_status = 'HIRED'
+          AND ap.application_stage = 'HIRED'
+          AND o.offer_status = 'ACCEPTED' AND o.offer_start_date = e.hire
+          AND rq.requisition_status = 'FILLED'
+          AND EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
+                       WHERE a.user_position_assignment_user_id = u.user_id
+                         AND a.user_position_assignment_position_id = rq.requisition_position_id));
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C13a: % persone assunte nella finestra senza la selezione da cui sono entrate (es. %)', v_cnt, v_smpl;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C13b — LA CRONOLOGIA DI OGNI SELEZIONE TIENE, E NIENTE VA OLTRE LA FRONTIERA:
+--   (i)   requisizione aperta <= annuncio pubblicato <= candidatura <= colloqui
+--         <= offerta inviata <= risposta <= inizio;
+--   (ii)  nessuna candidatura, colloquio, valutazione o offerta inviata dopo la
+--         frontiera (la storia si ferma a ieri), nessun colloquio svolto in un
+--         giorno non lavorativo del calendario;
+--   (iii) chi valuta un colloquio era già in RTL quel giorno e non è il candidato;
+--   (iv)  ogni colloquio svolto ha almeno una valutazione, ogni requisizione
+--         FILLED ha esattamente tante candidature HIRED quanti posti.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c13b(p_to date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt  bigint;
+  v_smpl text;
+  v_g    text[] := '{}';
+BEGIN
+  -- (i) l'ordine delle tappe
+  SELECT count(*), min(rq.requisition_code) INTO v_cnt, v_smpl
+    FROM sys.sys_job_requisitions rq
+    JOIN sys.sys_job_postings jp ON jp.posting_requisition_id = rq.requisition_id
+    JOIN sys.sys_candidate_applications ap ON ap.application_posting_id = jp.posting_id
+    LEFT JOIN sys.sys_interviews i ON i.interview_application_id = ap.application_id
+    LEFT JOIN sys.sys_job_offers o ON o.offer_application_id = ap.application_id
+   WHERE rq.requisition_metadata->>'storia36' = 'C13'
+     AND (jp.posting_published_on < rq.requisition_opened_on
+       OR ap.application_applied_on < jp.posting_published_on
+       OR (i.interview_scheduled_at AT TIME ZONE 'Europe/Rome')::date < ap.application_applied_on
+       OR o.offer_sent_on < (i.interview_scheduled_at AT TIME ZONE 'Europe/Rome')::date
+       OR o.offer_responded_on < o.offer_sent_on
+       OR (o.offer_status = 'ACCEPTED' AND o.offer_start_date < o.offer_responded_on)
+       OR ap.application_closed_on < ap.application_applied_on);
+  IF v_cnt > 0 THEN v_g := v_g || format('C13b(i): %s righe con le tappe fuori ordine (es. %s)', v_cnt, v_smpl); END IF;
+  -- (2026-11-07) i colloqui di una candidatura seguono l'ordine dei tipi
+  -- (primo colloquio, tecnico, finale) e quelli in agenda vengono dopo i
+  -- svolti: in produzione un finale era fissato prima del tecnico
+  SELECT count(*), min(rq.requisition_code) INTO v_cnt, v_smpl
+    FROM sys.sys_job_requisitions rq
+    JOIN sys.sys_job_postings jp ON jp.posting_requisition_id = rq.requisition_id
+    JOIN sys.sys_candidate_applications ap ON ap.application_posting_id = jp.posting_id
+    JOIN sys.sys_interviews a ON a.interview_application_id = ap.application_id
+    JOIN sys.sys_interviews b ON b.interview_application_id = ap.application_id
+   WHERE rq.requisition_metadata->>'storia36' = 'C13'
+     AND a.interview_scheduled_at >= b.interview_scheduled_at AND a.interview_id <> b.interview_id
+     AND (array_position(ARRAY['SCREENING','TECHNICAL','FINAL'], a.interview_kind::text)
+            < array_position(ARRAY['SCREENING','TECHNICAL','FINAL'], b.interview_kind::text)
+          OR (a.interview_status = 'COMPLETED' AND b.interview_status = 'SCHEDULED'));
+  IF v_cnt > 0 THEN v_g := v_g || format('C13b(ordine): %s coppie di colloqui fuori ordine di tipo (es. %s)', v_cnt, v_smpl); END IF;
+
+  -- (ii) niente oltre la frontiera, niente colloqui nei giorni di festa
+  SELECT count(*) INTO v_cnt FROM (
+    SELECT 1 FROM sys.sys_candidate_applications
+     WHERE application_metadata->>'storia36' = 'C13' AND application_applied_on > p_to
+    UNION ALL
+    SELECT 1 FROM sys.sys_interviews
+     WHERE interview_metadata->>'storia36' = 'C13'
+       AND (interview_scheduled_at AT TIME ZONE 'Europe/Rome')::date
+           > p_to + CASE WHEN interview_status = 'SCHEDULED' THEN 30 ELSE 0 END
+    UNION ALL
+    SELECT 1 FROM sys.sys_interview_feedback
+     WHERE feedback_metadata->>'storia36' = 'C13' AND feedback_submitted_on > p_to
+    UNION ALL
+    SELECT 1 FROM sys.sys_job_offers
+     WHERE offer_metadata->>'storia36' = 'C13' AND (offer_sent_on > p_to OR offer_responded_on > p_to)) z;
+  IF v_cnt > 0 THEN v_g := v_g || format('C13b(ii): %s fatti della selezione oltre la frontiera %s', v_cnt, p_to); END IF;
+  SELECT count(*) INTO v_cnt
+    FROM sys.sys_interviews i
+    JOIN staging.storia36_calendar c ON c.cal_date = (i.interview_scheduled_at AT TIME ZONE 'Europe/Rome')::date
+   WHERE i.interview_metadata->>'storia36' = 'C13' AND NOT c.is_workday;
+  IF v_cnt > 0 THEN v_g := v_g || format('C13b(ii): %s colloqui in un giorno non lavorativo', v_cnt); END IF;
+
+  -- (iii) chi valuta
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_smpl
+    FROM sys.sys_interview_feedback f
+    JOIN sys.sys_interviews i ON i.interview_id = f.feedback_interview_id
+    JOIN sys.sys_candidate_applications ap ON ap.application_id = i.interview_application_id
+    JOIN sys.sys_candidates c ON c.candidate_id = ap.application_candidate_id
+    JOIN sys.sys_users u ON u.user_id = f.feedback_interviewer_user_id
+    LEFT JOIN (SELECT user_employment_user_id AS uid, min(user_employment_hire_date) AS hire
+                 FROM sys.sys_user_employment GROUP BY 1) e ON e.uid = u.user_id
+   WHERE f.feedback_metadata->>'storia36' = 'C13'
+     AND (e.hire IS NULL OR e.hire > (i.interview_scheduled_at AT TIME ZONE 'Europe/Rome')::date
+          OR f.feedback_interviewer_user_id = c.candidate_hired_user_id
+          OR u.user_tenant_id <> f.feedback_tenant_id);
+  IF v_cnt > 0 THEN v_g := v_g || format('C13b(iii): %s valutazioni di chi non era in RTL quel giorno o è il candidato (es. %s)', v_cnt, v_smpl); END IF;
+
+  -- (iv) completezza degli atti
+  SELECT count(*) INTO v_cnt
+    FROM sys.sys_interviews i
+   WHERE i.interview_metadata->>'storia36' = 'C13' AND i.interview_status = 'COMPLETED'
+     AND NOT EXISTS (SELECT 1 FROM sys.sys_interview_feedback f WHERE f.feedback_interview_id = i.interview_id);
+  IF v_cnt > 0 THEN v_g := v_g || format('C13b(iv): %s colloqui svolti senza una valutazione', v_cnt); END IF;
+  SELECT count(*), min(rq.requisition_code) INTO v_cnt, v_smpl
+    FROM sys.sys_job_requisitions rq
+   WHERE rq.requisition_metadata->>'storia36' = 'C13' AND rq.requisition_status = 'FILLED'
+     AND rq.requisition_headcount <> (
+       SELECT count(*) FROM sys.sys_job_postings jp
+         JOIN sys.sys_candidate_applications ap ON ap.application_posting_id = jp.posting_id
+        WHERE jp.posting_requisition_id = rq.requisition_id AND ap.application_stage = 'HIRED');
+  IF v_cnt > 0 THEN v_g := v_g || format('C13b(iv): %s requisizioni FILLED con un numero di assunti diverso dai posti (es. %s)', v_cnt, v_smpl); END IF;
+
+  IF array_length(v_g, 1) > 0 THEN RAISE EXCEPTION '%', array_to_string(v_g, ' | '); END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C13c — LA CONSERVAZIONE DEI CANDIDATI È QUELLA DEL GDPR: nessun candidato
+--   esterno con la conservazione scaduta alla frontiera porta ancora nome,
+--   cognome o indirizzo; il consenso non è successivo alla prima candidatura.
+--   Vale per TUTTI i candidati del tenant, non solo per quelli della storia: un
+--   curriculum conservato oltre il termine è un'infrazione chiunque l'abbia
+--   scritto.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c13c(p_to date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl  constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt  bigint;
+  v_smpl text;
+  v_g    text[] := '{}';
+BEGIN
+  SELECT count(*), min(c.candidate_external_code) INTO v_cnt, v_smpl
+    FROM sys.sys_candidates c
+   WHERE c.candidate_tenant_id = c_rtl AND c.candidate_hired_user_id IS NULL
+     AND c.candidate_retention_until < p_to
+     AND (c.candidate_status <> 'ARCHIVED' OR c.candidate_last_name <> 'anonimizzato'
+          OR c.candidate_email NOT LIKE 'anonimo-%' OR c.candidate_phone IS NOT NULL);
+  IF v_cnt > 0 THEN v_g := v_g || format('C13c: %s candidati con la conservazione scaduta e i dati ancora leggibili (es. %s)', v_cnt, v_smpl); END IF;
+
+  SELECT count(*), min(c.candidate_external_code) INTO v_cnt, v_smpl
+    FROM sys.sys_candidates c
+   WHERE c.candidate_tenant_id = c_rtl
+     AND c.candidate_consent_given_on > (SELECT min(ap.application_applied_on) FROM sys.sys_candidate_applications ap
+                                          WHERE ap.application_candidate_id = c.candidate_id);
+  IF v_cnt > 0 THEN v_g := v_g || format('C13c: %s candidati con il consenso dato dopo la prima candidatura (es. %s)', v_cnt, v_smpl); END IF;
+
+  IF array_length(v_g, 1) > 0 THEN RAISE EXCEPTION '%', array_to_string(v_g, ' | '); END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C13d — UNA SELEZIONE APERTA È SU UN POSTO SCOPERTO, E UNA CHIUSA È COERENTE
+--   CON CHI L'HA VINTA: la requisizione OPEN della storia sta su una posizione
+--   senza titolare principale attivo; il candidato HIRED di una requisizione
+--   FILLED è una persona di RTL che quella posizione l'ha occupata.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c13d()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt  bigint;
+  v_smpl text;
+  v_g    text[] := '{}';
+BEGIN
+  SELECT count(*), min(rq.requisition_code) INTO v_cnt, v_smpl
+    FROM sys.sys_job_requisitions rq
+   WHERE rq.requisition_metadata->>'storia36' = 'C13' AND rq.requisition_status = 'OPEN'
+     AND (EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
+                   WHERE a.user_position_assignment_position_id = rq.requisition_position_id
+                     AND a.user_position_assignment_kind = 'PRIMARY'
+                     AND a.user_position_assignment_status = 'ACTIVE')
+          -- un posto chiuso (riordino) non si copre: aprirci una selezione sarebbe un falso
+          OR NOT EXISTS (SELECT 1 FROM sys.sys_positions p
+                          WHERE p.position_id = rq.requisition_position_id AND p.position_is_active));
+  IF v_cnt > 0 THEN v_g := v_g || format('C13d: %s selezioni aperte su un posto che ha già un titolare o che è chiuso (es. %s)', v_cnt, v_smpl); END IF;
+
+  SELECT count(*), min(rq.requisition_code) INTO v_cnt, v_smpl
+    FROM sys.sys_job_requisitions rq
+    JOIN sys.sys_job_postings jp ON jp.posting_requisition_id = rq.requisition_id
+    JOIN sys.sys_candidate_applications ap ON ap.application_posting_id = jp.posting_id
+    JOIN sys.sys_candidates c ON c.candidate_id = ap.application_candidate_id
+   WHERE rq.requisition_metadata->>'storia36' = 'C13' AND ap.application_stage = 'HIRED'
+     AND (c.candidate_hired_user_id IS NULL
+          OR NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
+                          WHERE a.user_position_assignment_user_id = c.candidate_hired_user_id
+                            AND a.user_position_assignment_position_id = rq.requisition_position_id));
+  IF v_cnt > 0 THEN v_g := v_g || format('C13d: %s vincitori che la posizione non l''hanno mai occupata (es. %s)', v_cnt, v_smpl); END IF;
+
+  -- (2026-11-07) un'offerta senza cifra o senza contratto non è un'offerta: le
+  -- due in attesa sui posti nuovi erano state scritte così in produzione
+  SELECT count(*), min(o.offer_id::text) INTO v_cnt, v_smpl
+    FROM sys.sys_job_offers o
+   WHERE o.offer_metadata->>'storia36' = 'C13'
+     AND (o.offer_gross_annual_salary IS NULL OR o.offer_contract_type IS NULL);
+  IF v_cnt > 0 THEN v_g := v_g || format('C13d(offerte): %s offerte senza RAL o senza tipo di contratto (es. %s)', v_cnt, v_smpl); END IF;
+
+  -- (2026-11-07) chi in una selezione in corso è fra un colloquio e l'altro ha
+  -- il successivo in agenda
+  SELECT count(*), min(rq.requisition_code) INTO v_cnt, v_smpl
+    FROM sys.sys_job_requisitions rq
+    JOIN sys.sys_job_postings jp ON jp.posting_requisition_id = rq.requisition_id
+    JOIN sys.sys_candidate_applications ap ON ap.application_posting_id = jp.posting_id
+   WHERE rq.requisition_metadata->>'storia36' = 'C13' AND rq.requisition_status = 'OPEN'
+     AND ap.application_stage = 'INTERVIEWING'
+     AND NOT EXISTS (SELECT 1 FROM sys.sys_interviews i
+                      WHERE i.interview_application_id = ap.application_id
+                        AND i.interview_status = 'SCHEDULED')
+     -- chi ha già fatto il finale aspetta la decisione, non un altro colloquio
+     AND NOT EXISTS (SELECT 1 FROM sys.sys_interviews i
+                      WHERE i.interview_application_id = ap.application_id
+                        AND i.interview_kind = 'FINAL' AND i.interview_status = 'COMPLETED');
+  IF v_cnt > 0 THEN v_g := v_g || format('C13d(agenda): %s candidature in colloquio senza un colloquio in agenda (es. %s)', v_cnt, v_smpl); END IF;
+
+  IF array_length(v_g, 1) > 0 THEN RAISE EXCEPTION '%', array_to_string(v_g, ' | '); END IF;
 END $fn$;
 
 -- ============================================================================
@@ -7216,6 +7515,192 @@ BEGIN
     IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C12c(iii) FALLITO: un festivo marcato lavorativo è passato'; END IF;
     RAISE NOTICE '[OK] SELFTEST C12c(iii) (Natale marcato lavorativo, rollback)';
 
+    -- ST-C13a: togliere a un assunto della finestra l'offerta accettata
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_job_offers WHERE offer_id = (
+        -- l'esca deve essere un'ASSUNZIONE: un'offerta di mobilità interna non
+        -- riguarda C13a, e con LIMIT 1 senza filtro ci si cadeva (prova del 2026-11-06)
+        SELECT o.offer_id FROM sys.sys_job_offers o
+          JOIN sys.sys_candidate_applications ap ON ap.application_id = o.offer_application_id
+          JOIN sys.sys_job_postings jp ON jp.posting_id = ap.application_posting_id
+          JOIN sys.sys_job_requisitions rq ON rq.requisition_id = jp.posting_requisition_id
+         WHERE o.offer_status = 'ACCEPTED' AND o.offer_metadata->>'storia36' = 'C13'
+           AND rq.requisition_metadata->>'origine' = 'HIRE'
+         ORDER BY o.offer_id LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13a:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13a FALLITO: un assunto senza la sua selezione è passato inosservato'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13a (assunto senza offerta accettata, rollback)';
+
+    -- ST-C13b(i): un colloquio spostato a prima della candidatura
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_interviews i SET interview_scheduled_at = ap.application_applied_on - 30 + time '10:00'
+        FROM sys.sys_candidate_applications ap
+       WHERE ap.application_id = i.interview_application_id
+         AND i.interview_id = (SELECT interview_id FROM sys.sys_interviews
+                                WHERE interview_metadata->>'storia36' = 'C13' LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13b(staging.storia36_c4_frontier());
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13b(i)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13b(i) FALLITO: un colloquio prima della candidatura è passato'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13b(i) (colloquio prima della candidatura, rollback)';
+
+    -- ST-C13b(ordine): il finale spostato a prima del tecnico della stessa candidatura
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_interviews f SET interview_scheduled_at = t.interview_scheduled_at - interval '1 hour'
+        FROM sys.sys_interviews t
+       WHERE t.interview_application_id = f.interview_application_id
+         AND t.interview_kind = 'TECHNICAL' AND f.interview_kind = 'FINAL'
+         AND f.interview_id = (SELECT f2.interview_id FROM sys.sys_interviews f2
+                                JOIN sys.sys_interviews t2 ON t2.interview_application_id = f2.interview_application_id
+                                                         AND t2.interview_kind = 'TECHNICAL'
+                               WHERE f2.interview_metadata->>'storia36' = 'C13' AND f2.interview_kind = 'FINAL'
+                               ORDER BY f2.interview_id LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13b(staging.storia36_c4_frontier());
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13b(ordine)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13b(ordine) FALLITO: un finale prima del tecnico è passato'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13b(ordine) (finale prima del tecnico, rollback)';
+
+    -- ST-C13b(ii): un colloquio spostato oltre la frontiera
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_interviews SET interview_scheduled_at = (staging.storia36_c4_frontier() + 20) + time '10:00'
+       WHERE interview_id = (SELECT interview_id FROM sys.sys_interviews
+                              WHERE interview_metadata->>'storia36' = 'C13' AND interview_status = 'COMPLETED'
+                              ORDER BY interview_id LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13b(staging.storia36_c4_frontier());
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13b(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13b(ii) FALLITO: un colloquio oltre la frontiera è passato'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13b(ii) (colloquio oltre la frontiera, rollback)';
+
+    -- ST-C13b(iii): il candidato che valuta il proprio colloquio
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_interview_feedback f SET feedback_interviewer_user_id = c.candidate_hired_user_id
+        FROM sys.sys_interviews i
+        JOIN sys.sys_candidate_applications ap ON ap.application_id = i.interview_application_id
+        JOIN sys.sys_candidates c ON c.candidate_id = ap.application_candidate_id
+       WHERE i.interview_id = f.feedback_interview_id
+         AND f.feedback_id = (
+           SELECT f2.feedback_id FROM sys.sys_interview_feedback f2
+             JOIN sys.sys_interviews i2 ON i2.interview_id = f2.feedback_interview_id
+             JOIN sys.sys_candidate_applications ap2 ON ap2.application_id = i2.interview_application_id
+             JOIN sys.sys_candidates c2 ON c2.candidate_id = ap2.application_candidate_id
+            WHERE f2.feedback_metadata->>'storia36' = 'C13' AND c2.candidate_hired_user_id IS NOT NULL
+              AND NOT EXISTS (SELECT 1 FROM sys.sys_interview_feedback f3
+                               WHERE f3.feedback_interview_id = f2.feedback_interview_id
+                                 AND f3.feedback_interviewer_user_id = c2.candidate_hired_user_id)
+            LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13b(staging.storia36_c4_frontier());
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13b(iii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13b(iii) FALLITO: un candidato che si valuta da solo è passato'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13b(iii) (il candidato valuta se stesso, rollback)';
+
+    -- ST-C13c: un candidato anonimizzato che torna ad avere il nome
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_candidates SET candidate_last_name = 'Rossi'
+       WHERE candidate_id = (SELECT candidate_id FROM sys.sys_candidates
+                              WHERE candidate_status = 'ARCHIVED' AND candidate_metadata->>'storia36' = 'C13' LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13c(staging.storia36_c4_frontier());
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13c:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13c FALLITO: un curriculum oltre la conservazione è passato'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13c (conservazione scaduta con il nome leggibile, rollback)';
+
+    -- ST-C13d: una selezione chiusa riaperta su un posto che ha il titolare
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_job_requisitions SET requisition_status = 'OPEN', requisition_closed_on = NULL
+       WHERE requisition_id = (
+         SELECT rq.requisition_id FROM sys.sys_job_requisitions rq
+          WHERE rq.requisition_metadata->>'storia36' = 'C13' AND rq.requisition_status = 'FILLED'
+            AND EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
+                         WHERE a.user_position_assignment_position_id = rq.requisition_position_id
+                           AND a.user_position_assignment_kind = 'PRIMARY'
+                           AND a.user_position_assignment_status = 'ACTIVE')
+          LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13d();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13d:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13d FALLITO: una selezione aperta su un posto occupato è passata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13d (selezione aperta su un posto occupato, rollback)';
+
+    -- ST-C13d(offerte): un'offerta a cui si toglie la RAL
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_job_offers SET offer_gross_annual_salary = NULL
+       WHERE offer_id = (SELECT offer_id FROM sys.sys_job_offers
+                          WHERE offer_metadata->>'storia36' = 'C13' ORDER BY offer_id LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13d();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13d(offerte)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13d(offerte) FALLITO: un''offerta senza RAL è passata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13d(offerte) (offerta senza RAL, rollback)';
+
+    -- ST-C13d(agenda): un colloquio in agenda che si annulla
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_interviews SET interview_status = 'CANCELLED'
+       WHERE interview_metadata->>'storia36' = 'C13' AND interview_status = 'SCHEDULED';
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c13d();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C13d(agenda)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13d(agenda) FALLITO: una candidatura in colloquio senza agenda è passata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C13d(agenda) (colloqui in agenda annullati, rollback)';
+
   END;
 END $$;
 \endif
@@ -7755,6 +8240,38 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C12c'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c13a();
+    RAISE NOTICE '[OK] C13a ogni assunzione della finestra nasce da una selezione';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C13a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c13b(staging.storia36_c4_frontier());
+    RAISE NOTICE '[OK] C13b la cronologia di ogni selezione tiene e si ferma alla frontiera';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C13b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c13c(staging.storia36_c4_frontier());
+    RAISE NOTICE '[OK] C13c nessun curriculum oltre la conservazione GDPR';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C13c'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c13d();
+    RAISE NOTICE '[OK] C13d le selezioni aperte stanno su posti scoperti, le chiuse su chi li ha occupati';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C13d'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   IF array_length(v_failed, 1) > 0 THEN

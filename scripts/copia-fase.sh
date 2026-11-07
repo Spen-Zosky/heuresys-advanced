@@ -33,13 +33,16 @@
 #   - i segreti non si scrivono mai in chiaro fuori dal loro posto: su Drive passano da una
 #     pipe dentro gpg.
 #   - le copie piu' vecchie delle ultime due, e una copia fallita a meta', si SPOSTANO in
-#     <repo>/_da_eliminare/<AAAAMMGG>_copie-fase/, non si cancellano.
+#     <repo>/_da_eliminare/<AAAAMMGG>_copie-fase/, non si cancellano. Una copia vecchia si
+#     sposta solo se e' anche su Drive (manifesto «DRIVE: VERDE» e manifesto presente su
+#     Drive): altrimenti resta sulla VM e il registro lo dice.
 #
 # Esiti: 0 fatto e verde · 1 rosso (la copia non vale come punto di ritorno) · 2 uso sbagliato
 #        · 3 precondizione mancante (strumento, database, chiave)
 #
 # Variabili: REPO_DIR COPIE_DIR COPIE_REMOTE COPIE_GPG_RECIPIENT DB_NAME PGPORT_COPIA
 #            COPIE_RUOLI COPIE_TIENI COPIE_TIENI_PROVA=1 COPIE_NO_TAG=1
+#            COPIE_NO_VERIFICA_REMOTA=1 (solo per le prove: la rotazione non interroga Drive)
 set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-$(git -C "$(dirname "$0")/.." rev-parse --show-toplevel)}"
@@ -205,13 +208,35 @@ cmd_copia() {
 
   # --- 7. rotazione: restano le ultime $COPIE_TIENI, le altre si SPOSTANO
   COPIA_IN_CORSO=""   # copia completa: da qui in poi non si sposta piu'
-  local vecchie; vecchie="$(find "$COPIE_DIR" -mindepth 1 -maxdepth 1 -type d -name '20[0-9]*' -printf '%T@ %f\n' | sort -n | cut -d' ' -f2- | head -n -"$COPIE_TIENI")"
-  if [ -n "$vecchie" ]; then
-    local cestino; cestino="$(cestino)"
-    mkdir -p "$cestino"
-    for u in $vecchie; do mv "$COPIE_DIR/$u" "$cestino/"; registro "spostata in $cestino: $u"; say "spostata in $cestino: $u"; done
-  fi
+  ruota
   printf '%s\n' "$d"
+}
+
+# Una copia oltre le ultime $COPIE_TIENI si sposta nel cestino solo se esiste anche su Drive:
+# il manifesto dice «DRIVE: VERDE ... completa e cifrata» E il manifesto e' davvero presente
+# nella sua cartella su Drive. Altrimenti resta sulla VM e lo si scrive nel registro: il 7/11
+# la rotazione ha spostato la copia 20261106-adr0055, mai caricata, che era l'unico esemplare
+# della copia di ritorno del rilascio del 6/11.
+su_drive() {
+  local c="$1"
+  grep -q '^DRIVE: VERDE .*completa e cifrata' "$c/MANIFESTO.txt" 2>/dev/null || return 1
+  [ "${COPIE_NO_VERIFICA_REMOTA:-0}" = 1 ] && return 0
+  rclone lsf "$COPIE_REMOTE/$(basename "$c")/MANIFESTO.txt" 2>/dev/null | grep -qx 'MANIFESTO.txt'
+}
+
+ruota() {
+  local vecchie; vecchie="$(find "$COPIE_DIR" -mindepth 1 -maxdepth 1 -type d -name '20[0-9]*' -printf '%T@ %f\n' | sort -n | cut -d' ' -f2- | head -n -"$COPIE_TIENI")"
+  [ -n "$vecchie" ] || return 0
+  local cestino; cestino="$(cestino)"
+  local u; for u in $vecchie; do
+    if su_drive "$COPIE_DIR/$u"; then
+      mkdir -p "$cestino"
+      mv "$COPIE_DIR/$u" "$cestino/"; registro "spostata in $cestino: $u"; say "spostata in $cestino: $u"
+    else
+      registro "NON spostata: $u non risulta su Drive (resta sulla VM finche' 'drive' non e' VERDE)"
+      err "NON spostata: $u non risulta su Drive, resta in $COPIE_DIR; portala con: $0 drive $COPIE_DIR/$u"
+    fi
+  done
 }
 
 # ---------------------------------------------------------------------------------------------

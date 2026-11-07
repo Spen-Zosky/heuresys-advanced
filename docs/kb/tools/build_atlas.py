@@ -339,33 +339,31 @@ def scan_shared():
 # ---------------------------------------------------------------- DB live
 
 def scan_db():
-    tables = []
-    raw = psql("SELECT schemaname||'.'||relname||'|'||n_live_tup FROM pg_stat_user_tables ORDER BY 1")
-    zero_candidates = []
+    # Conteggi ESATTI con count(*) su ogni tabella (decisione di Enzo, 2026-11-06): le stime
+    # di pg_stat_user_tables (n_live_tup) restano sbagliate finche' una tabella non viene
+    # analizzata, e il 2026-11-06 lo erano su 339 tabelle su 391 della produzione (13 righe
+    # invece di 425 in sys_user_auth_roles). Un atlante che e' la SoT interrogabile non puo'
+    # scrivere stime. Batch UNION ALL per non moltiplicare i round-trip sul tunnel.
+    raw = psql("SELECT schemaname||'.'||relname||'|'||format('%I.%I', schemaname, relname) "
+               "FROM pg_stat_user_tables ORDER BY 1")
+    names = []
     for line in raw.splitlines():
-        name, rows = line.rsplit("|", 1)
-        rows = int(rows)
-        tables.append([name, rows])
-        if rows == 0:
-            zero_candidates.append(name)
-    # verifica esatta dei soli zero-candidati (stime pg_stat possono essere stale),
-    # in batch UNION ALL per non moltiplicare i round-trip sul tunnel
-    empty = []
+        name, quoted = line.split("|", 1)
+        names.append((name, quoted))
     exact = {}
-    for i in range(0, len(zero_candidates), 25):
-        chunk = zero_candidates[i:i + 25]
+    for i in range(0, len(names), 25):
+        chunk = names[i:i + 25]
         union = " UNION ALL ".join(
-            f"SELECT '{n}' AS t, count(*) AS c FROM {n}" for n in chunk)
+            f"SELECT '{n}' AS t, count(*) AS c FROM {q}" for n, q in chunk)
         for line in psql(union).splitlines():
             n, c = line.rsplit("|", 1)
             exact[n] = int(c)
-    for name in zero_candidates:
-        if exact.get(name, 0) == 0:
-            empty.append(name)
-        else:  # stima stale: correggi col count reale
-            for t in tables:
-                if t[0] == name:
-                    t[1] = exact[name]
+    missing = [n for n, _ in names if n not in exact]
+    if missing:
+        raise SystemExit(f"build_atlas: conteggio esatto mancante per {len(missing)} tabelle: "
+                         f"{missing[:5]}")
+    tables = [[n, exact[n]] for n, _ in names]
+    empty = [n for n, c in tables if c == 0]
     views = psql("SELECT table_schema||'.'||table_name FROM information_schema.views "
                  "WHERE table_schema IN ('sys','brownfield','audit','staging') ORDER BY 1").splitlines()
     matviews = psql("SELECT schemaname||'.'||matviewname FROM pg_matviews ORDER BY 1").splitlines()

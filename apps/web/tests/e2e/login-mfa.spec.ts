@@ -11,8 +11,8 @@
  * plus the invalid-code error path. The factor is deleted in `finally` so the
  * persona's storageState / auth.setup is unaffected on subsequent runs.
  *
- * The login challenge is single-use (consumed on first verify attempt), so the
- * invalid and valid attempts each start a fresh login (fresh challenge).
+ * The login challenge is single-use (consumed on first verify attempt): after an
+ * invalid code the page obtains a new one, so the valid code works from the same screen.
  *
  * NO storageState — these tests drive the unauthenticated /login page directly.
  */
@@ -117,15 +117,14 @@ test.describe("MVP-3 Tappa E /login — MFA login-gating", () => {
       );
       await expect(page.getByTestId("login-mfa-form")).toBeVisible();
       await expect(page.getByTestId("login-mfa-code")).toBeVisible();
-      // Wrong code -> error (also consumes this single-use challenge).
+      // Wrong code -> error. It consumes the single-use challenge, and the page asks for a new one.
       await page.getByTestId("login-mfa-code").fill("000000");
       await page.getByTestId("login-mfa-submit").click();
       await expect(page.getByTestId("login-error")).toBeVisible();
 
-      // --- Attempt 2: fresh challenge, real code -> success redirect ---
-      await page.goto("/login");
-      await submitPassword(page, MFA_EMAIL);
-      await expect(page.getByTestId("login-mfa-code")).toBeVisible();
+      await expect(page.getByTestId("login-mfa-code")).toHaveValue("");
+
+      // --- Attempt 2: same screen, no reload, real code -> success redirect ---
       await page.getByTestId("login-mfa-code").fill(genTotp(setup.secret));
       await page.getByTestId("login-mfa-submit").click();
       await expect(page).toHaveURL(new RegExp(`${PERSONAS.outsider.expectedLandingPath}`), {

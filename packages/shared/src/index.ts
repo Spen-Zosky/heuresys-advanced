@@ -103,6 +103,7 @@ export * from "./schemas/okrs.js";
 export * from "./schemas/generated-origins.js";
 export * from "./schemas/tenant-consolidation.js";
 export * from "./schemas/agent-capabilities.js";
+export * from "./schemas/agent-conversations.js";
 export * from "./schemas/provenance.js";
 export * from "./schemas/evidence.js";
 export * from "./schemas/predictions.js";

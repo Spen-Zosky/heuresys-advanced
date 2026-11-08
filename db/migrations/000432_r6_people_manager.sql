@@ -239,7 +239,9 @@ INSERT INTO _pm_concessi_altrove(code, migrazione) VALUES
   -- Mandato K, G-1 (000448, D4=B): la porta nativa assegna/termina/trasferisci.
   ('user_position_assignment:create', '000448'), ('user_position_assignment:delete', '000448'),
   ('user_position_assignment:list', '000448'), ('user_position_assignment:read', '000448'),
-  ('user_position_assignment:update', '000448');
+  ('user_position_assignment:update', '000448'),
+  -- EMENDATO per la mig 000483 (ADR-0056 D4): le proprie conversazioni con l'assistente, a ogni ruolo.
+  ('agent_conversation:use:self', '000483');
 
 DO $$
 DECLARE

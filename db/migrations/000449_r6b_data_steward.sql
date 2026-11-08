@@ -144,7 +144,9 @@ INSERT INTO _ds_derivati(code) VALUES
 -- grant esplicito, deciso e datato, di una migrazione successiva.
 CREATE TEMP TABLE _ds_posteriori(code text PRIMARY KEY);
 INSERT INTO _ds_posteriori(code) VALUES
-  ('data_classification:read');
+  ('data_classification:read'),
+  -- EMENDATO per la mig 000483 (ADR-0056 D4): le proprie conversazioni con l'assistente, a ogni ruolo.
+  ('agent_conversation:use:self');
 
 DO $$
 DECLARE
@@ -161,8 +163,8 @@ BEGIN
     RAISE EXCEPTION '000449: l''elenco _ds_derivati ha % righe, attese 9 (duplicato interno?)', n_derivati_attesi;
   END IF;
 
-  -- i posteriori (grant di migrazioni successive, oggi solo #262) sono 0 su un clone che
-  -- non e' ancora arrivato alla 000453, 1 da li' in poi. Un numero diverso e' un difetto.
+  -- i posteriori (grant di migrazioni successive: #262 e la 000483) sono 0 su un clone che
+  -- non e' ancora arrivato alla 000453, 1 fino alla 000483, 2 da li' in poi. Altro e' un difetto.
   SELECT count(*) INTO n_posteriori_presenti
     FROM _ds_posteriori pt
    WHERE EXISTS (
@@ -172,8 +174,8 @@ BEGIN
       WHERE r.auth_role_code = 'DATA_STEWARD' AND rp.revoked_at IS NULL
         AND p.auth_permission_code = pt.code
    );
-  IF n_posteriori_presenti NOT IN (0, 1) THEN
-    RAISE EXCEPTION '000449: % posteriori su 1 presenti — atteso 0 prima della 000453, 1 da li'' in poi', n_posteriori_presenti;
+  IF n_posteriori_presenti NOT IN (0, 1, 2) THEN
+    RAISE EXCEPTION '000449: % posteriori su 2 presenti — atteso 0 prima della 000453, 1 fino alla 000483, 2 da li'' in poi', n_posteriori_presenti;
   END IF;
 
   -- i 6 espliciti DEVONO esserci SEMPRE: li concede questa stessa migrazione,

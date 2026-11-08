@@ -36,14 +36,14 @@ export const RISORSE_SCRITTURE: Readonly<Record<string, { base: string; forma: F
   hrx_job_roles_upsert: { base: "/job-roles", forma: "up" },
   hrx_skills_upsert: { base: "/skills", forma: "up" },
   hrx_kpi_defs_upsert: { base: "/kpi-definitions", forma: "up" },
-  hrx_kpi_defs_delete: { base: "/kpi-definitions", forma: "del" },
+  // hrx_kpi_defs_delete tolto il 2026-11-08 (classe X, ADR-0056 D2).
   hrx_process_kpi_template_upsert: { base: "/process-kpi-templates", forma: "putUp" },
   hrx_orgunit_kpi_template_upsert: { base: "/organization-unit-kpi-templates", forma: "putUp" },
   hrx_typing_profile_upsert: { base: "/enterprise-typing-profiles", forma: "putUp" },
   hrx_blueprint_activation_upsert: { base: "/blueprint-activations", forma: "up" },
   hrx_blueprint_override_upsert: { base: "/blueprint-overrides", forma: "putUp" },
   hrx_job_families_upsert: { base: "/job-families", forma: "up" },
-  hrx_job_families_delete: { base: "/job-families", forma: "del" },
+  // hrx_job_families_delete tolto il 2026-11-08 (classe X, ADR-0056 D2).
   hrx_blueprint_families_upsert: { base: "/blueprint-families", forma: "up" },
   hrx_blueprint_variants_upsert: { base: "/blueprint-variants", forma: "up" },
   hrx_blueprint_processes_upsert: { base: "/blueprint-processes", forma: "up" },

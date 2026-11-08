@@ -83,14 +83,14 @@ export const WRITE_TOOL_NAMES = [
   "hrx_job_roles_upsert",
   "hrx_skills_upsert",
   "hrx_kpi_defs_upsert",
-  "hrx_kpi_defs_delete",
+  // hrx_kpi_defs_delete tolto il 2026-11-08 (ADR-0056 D2, prova avversaria T7: l'API cancella fisicamente (DELETE FROM), cioè classe X, che non sta nel catalogo).
   "hrx_process_kpi_template_upsert",
   "hrx_orgunit_kpi_template_upsert",
   "hrx_typing_profile_upsert",
   "hrx_blueprint_activation_upsert",
   "hrx_blueprint_override_upsert",
   "hrx_job_families_upsert",
-  "hrx_job_families_delete",
+  // hrx_job_families_delete tolto il 2026-11-08 (ADR-0056 D2, prova avversaria T7: l'API cancella fisicamente (DELETE FROM), cioè classe X, che non sta nel catalogo).
   "hrx_blueprint_families_upsert",
   "hrx_blueprint_variants_upsert",
   "hrx_blueprint_processes_upsert",

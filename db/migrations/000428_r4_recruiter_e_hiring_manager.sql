@@ -106,7 +106,9 @@ DELETE FROM sys.sys_auth_role_permissions rp
      'interview:feedback', 'offer:manage',
      'consent:manage:self', 'gdpr:export:self', 'leave:request:self',
      'me:content:read', 'me:preferences:read', 'me:preferences:update',
-     'me:sessions:manage', 'surveys:respond:self', 'team:read:self'
+     'me:sessions:manage', 'surveys:respond:self', 'team:read:self',
+     -- EMENDATO per la mig 000483 (ADR-0056 D4): le proprie conversazioni con l'assistente.
+     'agent_conversation:use:self'
    );
 
 DELETE FROM sys.sys_auth_role_permissions rp
@@ -118,7 +120,9 @@ DELETE FROM sys.sys_auth_role_permissions rp
      'requisition:read', 'candidate:read', 'interview:feedback',
      'consent:manage:self', 'gdpr:export:self', 'leave:request:self',
      'me:content:read', 'me:preferences:read', 'me:preferences:update',
-     'me:sessions:manage', 'surveys:respond:self', 'team:read:self'
+     'me:sessions:manage', 'surveys:respond:self', 'team:read:self',
+     -- EMENDATO per la mig 000483 (ADR-0056 D4): le proprie conversazioni con l'assistente.
+     'agent_conversation:use:self'
    );
 
 -- 5. Le traduzioni inglesi (guardia 000255: copertura EN totale, nome E descrizione).

@@ -241,3 +241,36 @@ export async function chiSei(
     return undefined; // un'API che non risponde non dice chi sei: fail-closed
   }
 }
+
+/**
+ * ADR-0056 D4 (piano T6b): registra la decisione della persona su una proposta dell'assistente,
+ * con i cookie e il token CSRF di chi ha premuto (`POST /v1/agent-conversations/proposals/:id/decision`).
+ * Il token CSRF è quello che la finestra ha mandato nell'intestazione, mai ricavato dal cookie:
+ * ricavarlo qui toglierebbe la protezione che chiede. Non lancia: un guasto è uno stato 0.
+ */
+export async function registraDecisione(
+  baseUrl: string,
+  persona: { cookieAccess: string; cookieCsrf: string; csrfHeader: string },
+  proposalId: string,
+  decision: "APPROVATA" | "SCARTATA",
+  reason: string | undefined,
+  fetchImpl: FetchLike = globalThis.fetch as unknown as FetchLike,
+): Promise<{ ok: boolean; status: number }> {
+  try {
+    const res = await fetchImpl(
+      `${baseUrl.replace(/\/$/, "")}/v1/agent-conversations/proposals/${encodeURIComponent(proposalId)}/decision`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          cookie: `hrx_access=${persona.cookieAccess}; hrx_csrf=${persona.cookieCsrf}`,
+          "x-csrf-token": persona.csrfHeader,
+        },
+        body: JSON.stringify({ decision, ...(reason !== undefined ? { reason } : {}) }),
+      },
+    );
+    return { ok: res.ok, status: res.status };
+  } catch {
+    return { ok: false, status: 0 }; // un'API che non risponde non registra: niente si sblocca
+  }
+}

@@ -63,6 +63,8 @@ test.describe("#159 F3 — /approvals/[id] consuma AgentPanel con un contesto ve
     // si apre col pulsante. Il contesto resta quello che QUESTA pagina dichiara.
     await page.getByTestId("agente-apri").click();
     await expect(page.getByTestId("agente-page")).toBeVisible();
+    // ADR-0056 D4: accanto al pannello, le conversazioni salvate della persona.
+    await expect(page.getByTestId("agente-attivita-list")).toBeVisible();
     await expect(page.getByTestId("agente-title")).toBeVisible();
 
     // Il CONTESTO e' un valore VERO — titolo + id della richiesta appena creata, presi

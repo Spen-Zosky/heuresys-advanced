@@ -56,6 +56,17 @@ export interface RunHrAgentOptions {
    * scrittura passa dal ponte di approvazione come prima.
    */
   capacita?: { registro: RegistroCapacita; agentCode: string };
+  /**
+   * ADR-0056 D4 (piano T6b): l'identificativo della conversazione salvata nel database. Diventa
+   * quello del diario, così le decisioni del gate e la conversazione che la persona rilegge sono
+   * la stessa cosa. Assente, se ne genera uno come prima.
+   */
+  conversationId?: string;
+  /**
+   * ADR-0056 D4 (piano T6b): la sessione dell'SDK da riprendere, salvata con la conversazione.
+   * Il contatore delle persone che continua lo passa chi chiama, in `contatore`.
+   */
+  resume?: string;
 }
 
 export async function* runHrAgent(
@@ -89,7 +100,7 @@ export async function* runHrAgent(
   // conversazione (ADR-0040 §4b, lo stesso confine del contatore sopra). Si fonde nel principal
   // cosi' arriva a ENTRAMBI i punti che scrivono nel diario (le decisioni del gate e la voce di
   // chiusura) senza un terzo parametro da tenere sincronizzato.
-  const principal: GatePrincipal = { ...(opts.principal ?? { principal: "unknown" }), conversationId: randomUUID() };
+  const principal: GatePrincipal = { ...(opts.principal ?? { principal: "unknown" }), conversationId: opts.conversationId ?? randomUUID() };
 
   const canUseTool = makeCanUseTool(opts.approve, {
     operations,
@@ -128,6 +139,7 @@ export async function* runHrAgent(
       model: modelloAgenti(),
       maxTurns: opts.maxTurns ?? LIMITI_DEFAULT.giri,
       ...(opts.abortController !== undefined ? { abortController: opts.abortController } : {}),
+      ...(opts.resume !== undefined ? { resume: opts.resume } : {}),
     },
   });
 

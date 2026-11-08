@@ -82,8 +82,8 @@ export const CLASSI_STRUMENTI: Readonly<Record<string, ClasseAzione>> = Object.f
   // Cancellazioni: C (vedi l'intestazione).
   hrx_org_units_delete: "C",
   hrx_positions_delete: "C",
-  hrx_kpi_defs_delete: "C",
-  hrx_job_families_delete: "C",
+  // hrx_kpi_defs_delete e hrx_job_families_delete tolti il 2026-11-08 (ADR-0056 D2, prova avversaria T7: l'API cancella fisicamente (DELETE FROM), cioè classe X, che non sta nel catalogo). Le due
+  // cancellazioni rimaste sono logiche (is_active = false) e restano C.
 });
 
 /** Risolve il metodo HTTP di un'operazione dell'atlante (lo stesso contratto del gate). */

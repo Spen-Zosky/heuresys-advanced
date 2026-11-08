@@ -1033,7 +1033,10 @@
     "reasonRequired": "Per negare serve un motivo: scrivilo e conferma.",
     "approvalNotRecorded": "La decisione non è stata registrata: la proposta era già scaduta o decisa.",
     "conversationBusy": "Questa conversazione ha già un'attività in corso: aspetta che finisca.",
-    "conversationNotFound": "Conversazione non trovata."
+    "conversationNotFound": "Conversazione non trovata.",
+    "rejectReasonLabel": "Perché rifiuti?",
+    "rejectConfirm": "Conferma il rifiuto",
+    "approvalExpires": "Scade"
   },
   "provenance": {
     "title": "Registro di provenienza",

@@ -1033,7 +1033,10 @@
     "reasonRequired": "Denying needs a reason: write it and confirm.",
     "approvalNotRecorded": "The decision was not recorded: the proposal had already expired or been decided.",
     "conversationBusy": "This conversation already has an activity running: wait for it to finish.",
-    "conversationNotFound": "Conversation not found."
+    "conversationNotFound": "Conversation not found.",
+    "rejectReasonLabel": "Why are you rejecting?",
+    "rejectConfirm": "Confirm rejection",
+    "approvalExpires": "Expires"
   },
   "provenance": {
     "title": "Provenance ledger",

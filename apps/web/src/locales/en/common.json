@@ -849,6 +849,10 @@
     "noSession": "No session: log in so the cookies are forwarded to the gateway.",
     "contestoPagina": "Page \"{{titolo}}\" ({{percorso}})",
     "apri": "Ask the assistant",
-    "chiudi": "Close the assistant"
+    "chiudi": "Close the assistant",
+    "reasonRequired": "Denying needs a reason: write it and confirm.",
+    "approvalNotRecorded": "The decision was not recorded: the proposal had already expired or been decided.",
+    "conversationBusy": "This conversation already has an activity running: wait for it to finish.",
+    "conversationNotFound": "Conversation not found."
   }
 }

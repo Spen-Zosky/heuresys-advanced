@@ -28,6 +28,15 @@
  */
 
 import { useCallback, useRef, useState } from "react";
+import type { AgentConversationSummary } from "@heuresys/shared/schemas/agent-conversations";
+import { csrfStore } from "./api/csrf-store";
+import {
+  elencoConversazioni,
+  leggiAttivita,
+  leggiConversazione,
+  propostaDaDecidere,
+  ultimaAttivita,
+} from "./agente/conversazioni";
 
 /** Acceso a build-time. I NOMI delle chiavi, mai i valori (R10). */
 export const AGENT_DEV_ENABLED = process.env.NEXT_PUBLIC_ENABLE_AGENT_DEV === "1";
@@ -53,6 +62,8 @@ export interface PendingApproval {
   personeDistinte?: number;
   /** Il livello di quel numero: `silenzioso` · `dichiarato` · `confermato` · `non-misurato`. */
   livello?: string;
+  /** ADR-0056 D4: fin quando si può decidere (ISO). Dopo, il giro l'ha già negata. */
+  expiresAt?: string;
 }
 
 /** Una riga dello stream (blocco SSE grezzo, con un tetto). */
@@ -70,7 +81,16 @@ export interface StreamLine {
  */
 export interface AgentNotice {
   kind: "ok" | "err";
-  code: "approvalResolved" | "noSession" | "errorRun";
+  code:
+    | "approvalResolved"
+    | "noSession"
+    | "errorRun"
+    // ADR-0056 D4 (T6c): scartare chiede un motivo; una decisione arrivata tardi non si registra;
+    // una conversazione con un giro aperto non si riprende due volte; una che non c'è non si apre.
+    | "reasonRequired"
+    | "approvalNotRecorded"
+    | "conversationBusy"
+    | "conversationNotFound";
   params?: Record<string, string>;
 }
 
@@ -94,6 +114,7 @@ export function parseApprovalPayload(data: string): PendingApproval | null {
     classe?: unknown;
     personeDistinte?: unknown;
     livello?: unknown;
+    expiresAt?: unknown;
   };
   try {
     parsed = JSON.parse(data) as typeof parsed;
@@ -112,7 +133,47 @@ export function parseApprovalPayload(data: string): PendingApproval | null {
       ? { personeDistinte: parsed.personeDistinte }
       : {}),
     ...(typeof parsed.livello === "string" ? { livello: parsed.livello } : {}),
+    ...(typeof parsed.expiresAt === "string" && !Number.isNaN(Date.parse(parsed.expiresAt))
+      ? { expiresAt: parsed.expiresAt }
+      : {}),
   };
+}
+
+/**
+ * ADR-0056 D4 (T6c): l'evento `conversation` con cui il gateway dice in quale conversazione e
+ * attività sta scrivendo. `null` se non ha la forma attesa: senza identificativo non c'è niente
+ * da riprendere.
+ */
+export function parseConversationPayload(data: string): { conversationId: string; activityId: string } | null {
+  try {
+    const p = JSON.parse(data) as { conversationId?: unknown; activityId?: unknown };
+    return typeof p.conversationId === "string" && p.conversationId && typeof p.activityId === "string" && p.activityId
+      ? { conversationId: p.conversationId, activityId: p.activityId }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Come si mostra nello stream un evento salvato (`TESTO`, `STRUMENTO`…), riletto dall'API. */
+export function lineaDaEvento(e: { kind: string; payload: Record<string, unknown> }): { kind: string; text: string } {
+  const p = e.payload;
+  switch (e.kind) {
+    case "TESTO":
+      return { kind: "message", text: typeof p.testo === "string" ? p.testo : "" };
+    case "STRUMENTO":
+      return { kind: "tool", text: typeof p.strumento === "string" ? p.strumento : "" };
+    case "PROPOSTA":
+      return { kind: "approval_required", text: typeof p.strumento === "string" ? p.strumento : "" };
+    case "LIMITE":
+      return { kind: "limit", text: typeof p.limite === "string" ? p.limite : "" };
+    case "ERRORE":
+      return { kind: "error", text: typeof p.messaggio === "string" ? p.messaggio : "" };
+    case "FINE":
+      return { kind: "done", text: typeof p.risultato === "string" ? p.risultato : "" };
+    default:
+      return { kind: e.kind.toLowerCase(), text: JSON.stringify(p) };
+  }
 }
 
 /** Interpreta un blocco SSE («event: x\n data: {...}») in tipo + testo. */
@@ -134,10 +195,23 @@ export interface UseAgentStream {
   notice: AgentNotice | null;
   /** Apre lo stream per questo prompt. Non fa nulla se una corsa è già in volo o il prompt è vuoto. */
   run: (prompt: string) => Promise<void>;
-  /** Interrompe la corsa. Un'interruzione voluta NON è un errore e non produce avviso. */
+  /**
+   * Smette di ascoltare. Dal 2026-11-08 (ADR-0056 D4) il giro NON si ferma: continua nel gateway
+   * fino a un limite, e la finestra lo ritrova riprendendo la conversazione.
+   */
   stop: () => void;
-  resolveApproval: (decision: "allow" | "deny") => Promise<void>;
+  /** Con `deny` il motivo è obbligatorio: l'API lo pretende, e senza resta l'avviso `reasonRequired`. */
+  resolveApproval: (decision: "allow" | "deny", reason?: string) => Promise<void>;
   clearNotice: () => void;
+  /** La conversazione in cui scrive `run`; `null` = la prossima ne apre una nuova. */
+  conversationId: string | null;
+  /** Le conversazioni della persona, lette dall'API (`refreshConversations`). */
+  conversations: AgentConversationSummary[];
+  refreshConversations: () => Promise<void>;
+  /** Riprende una conversazione: ricarica ciò che l'ultima attività ha mostrato e la proposta in attesa. */
+  resume: (conversationId: string) => Promise<void>;
+  /** La prossima richiesta apre una conversazione nuova. */
+  startNew: () => void;
 }
 
 export function useAgentStream(): UseAgentStream {
@@ -145,6 +219,9 @@ export function useAgentStream(): UseAgentStream {
   const [lines, setLines] = useState<StreamLine[]>([]);
   const [approval, setApproval] = useState<PendingApproval | null>(null);
   const [notice, setNotice] = useState<AgentNotice | null>(null);
+
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<AgentConversationSummary[]>([]);
 
   const abortRef = useRef<AbortController | null>(null);
   const lineIdRef = useRef(0);
@@ -164,23 +241,42 @@ export function useAgentStream(): UseAgentStream {
         const richiesta = parseApprovalPayload(data);
         if (richiesta) setApproval(richiesta);
       }
+      if (kind === "conversation") {
+        const c = parseConversationPayload(data);
+        if (c) setConversationId(c.conversationId);
+      }
       pushLine(kind, data.replace(/\s+/g, " ").slice(0, 600));
     },
     [pushLine],
   );
 
   const resolveApproval = useCallback(
-    async (decision: "allow" | "deny") => {
+    async (decision: "allow" | "deny", reason?: string) => {
       if (!approval) return;
       const { approvalId } = approval;
-      setApproval(null);
       try {
-        await fetch(`${GATEWAY_URL}/agent/approve`, {
+        const res = await fetch(`${GATEWAY_URL}/agent/approve`, {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: {
+            "content-type": "application/json",
+            // ADR-0056 D4: il gateway registra la decisione nell'API con la sessione di chi preme,
+            // e l'API vuole il token CSRF della finestra (double-submit), mai ricavato altrove.
+            "x-csrf-token": csrfStore.get() ?? "",
+          },
           credentials: "include",
-          body: JSON.stringify({ approvalId, decision }),
+          body: JSON.stringify({ approvalId, decision, ...(reason ? { reason } : {}) }),
         });
+        if (res.status === 422) {
+          // Scartare senza motivo: l'approvazione resta lì, la persona scrive il perché.
+          setNotice({ kind: "err", code: "reasonRequired" });
+          return;
+        }
+        const corpo = (await res.json().catch(() => ({}))) as { resolved?: unknown };
+        setApproval(null);
+        if (!res.ok || corpo.resolved !== true) {
+          setNotice({ kind: "err", code: "approvalNotRecorded" });
+          return;
+        }
         setNotice({ kind: "ok", code: "approvalResolved", params: { decision } });
       } catch (err) {
         setNotice({
@@ -210,7 +306,7 @@ export function useAgentStream(): UseAgentStream {
           method: "POST",
           headers: { "content-type": "application/json" },
           credentials: "include", // inoltra i cookie hrx_access / hrx_csrf al gateway
-          body: JSON.stringify({ prompt }),
+          body: JSON.stringify({ prompt, ...(conversationId ? { conversationId } : {}) }),
           signal: controller.signal,
         });
 
@@ -218,6 +314,10 @@ export function useAgentStream(): UseAgentStream {
           const detail = await res.text().catch(() => "");
           if (res.status === 401) {
             setNotice({ kind: "err", code: "noSession" });
+          } else if (res.status === 409) {
+            setNotice({ kind: "err", code: "conversationBusy" });
+          } else if (res.status === 404) {
+            setNotice({ kind: "err", code: "conversationNotFound" });
           } else {
             setNotice({
               kind: "err",
@@ -256,7 +356,7 @@ export function useAgentStream(): UseAgentStream {
         abortRef.current = null;
       }
     },
-    [running, handleSseBlock],
+    [running, handleSseBlock, conversationId],
   );
 
   const stop = useCallback(() => {
@@ -265,5 +365,74 @@ export function useAgentStream(): UseAgentStream {
 
   const clearNotice = useCallback(() => setNotice(null), []);
 
-  return { running, lines, approval, notice, run, stop, resolveApproval, clearNotice };
+  const refreshConversations = useCallback(async () => {
+    try {
+      setConversations(await elencoConversazioni());
+    } catch (err) {
+      setNotice({ kind: "err", code: "errorRun", params: { message: err instanceof Error ? err.message : String(err) } });
+    }
+  }, []);
+
+  const resume = useCallback(
+    async (id: string) => {
+      if (running) return;
+      setNotice(null);
+      setApproval(null);
+      try {
+        const c = await leggiConversazione(id);
+        setConversationId(c.id);
+        const ultima = ultimaAttivita(c);
+        const righe: StreamLine[] = [];
+        let n = 0;
+        if (ultima) {
+          righe.push({ id: ++n, kind: "prompt", text: ultima.prompt.replace(/\s+/g, " ").slice(0, 600) });
+          const dettaglio = await leggiAttivita(ultima.id);
+          for (const e of dettaglio.events) {
+            const l = lineaDaEvento(e);
+            righe.push({ id: ++n, kind: l.kind, text: l.text.replace(/\s+/g, " ").slice(0, 600) });
+          }
+          const p = propostaDaDecidere(dettaglio.proposals);
+          if (p) {
+            setApproval({
+              approvalId: p.id,
+              tool: p.tool,
+              input: p.input,
+              classe: p.kind === "LETTURA" ? "read" : "write",
+              ...(p.personsCount !== null ? { personeDistinte: p.personsCount } : {}),
+              expiresAt: p.expiresAt,
+            });
+          }
+        }
+        lineIdRef.current = n;
+        setLines(righe.slice(-200));
+      } catch (err) {
+        setNotice({ kind: "err", code: "conversationNotFound", params: { message: err instanceof Error ? err.message : String(err) } });
+      }
+    },
+    [running],
+  );
+
+  const startNew = useCallback(() => {
+    if (running) return;
+    setConversationId(null);
+    setApproval(null);
+    setLines([]);
+    lineIdRef.current = 0;
+  }, [running]);
+
+  return {
+    running,
+    lines,
+    approval,
+    notice,
+    run,
+    stop,
+    resolveApproval,
+    clearNotice,
+    conversationId,
+    conversations,
+    refreshConversations,
+    resume,
+    startNew,
+  };
 }

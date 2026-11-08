@@ -19,7 +19,7 @@
 
 import { describe, it, expect } from "vitest";
 
-import { parseApprovalPayload, parseSseBlock } from "./use-agent-stream.js";
+import { lineaDaEvento, parseApprovalPayload, parseConversationPayload, parseSseBlock } from "./use-agent-stream.js";
 
 describe("parseSseBlock — l'interprete dei blocchi SSE", () => {
   it("legge tipo e dati da un blocco completo", () => {
@@ -141,5 +141,28 @@ describe("parseApprovalPayload — la richiesta di conferma, e i suoi tre campi 
   it("un payload malformato non alza: `null`, e la riga resta visibile nello stream", () => {
     expect(parseApprovalPayload("{non-json")).toBeNull();
     expect(parseApprovalPayload("")).toBeNull();
+  });
+});
+
+describe("ADR-0056 D4 (T6c) — la conversazione salvata vista dalla finestra", () => {
+  it("l'evento conversation porta i due identificativi; senza uno dei due non c'è niente da riprendere", () => {
+    expect(parseConversationPayload('{"conversationId":"c-1","activityId":"a-1"}')).toEqual({ conversationId: "c-1", activityId: "a-1" });
+    expect(parseConversationPayload('{"conversationId":"c-1"}')).toBeNull();
+    expect(parseConversationPayload("non json")).toBeNull();
+  });
+
+  it("la scadenza dell'approvazione si accetta solo se è una data", () => {
+    expect(parseApprovalPayload('{"approvalId":"a","expiresAt":"2026-11-08T10:00:00.000Z"}')?.expiresAt).toBe("2026-11-08T10:00:00.000Z");
+    expect(parseApprovalPayload('{"approvalId":"a","expiresAt":"domani"}')).not.toHaveProperty("expiresAt");
+  });
+
+  it("gli eventi salvati tornano righe dello stream con il genere che lo stream dal vivo usa", () => {
+    expect(lineaDaEvento({ kind: "TESTO", payload: { testo: "ciao" } })).toEqual({ kind: "message", text: "ciao" });
+    expect(lineaDaEvento({ kind: "STRUMENTO", payload: { strumento: "hrx_x" } })).toEqual({ kind: "tool", text: "hrx_x" });
+    expect(lineaDaEvento({ kind: "PROPOSTA", payload: { strumento: "hrx_y" } })).toEqual({ kind: "approval_required", text: "hrx_y" });
+    expect(lineaDaEvento({ kind: "LIMITE", payload: { limite: "GETTONE" } })).toEqual({ kind: "limit", text: "GETTONE" });
+    expect(lineaDaEvento({ kind: "FINE", payload: { esito: "success", risultato: "fatto" } })).toEqual({ kind: "done", text: "fatto" });
+    // un campo dal tipo sbagliato non diventa testo: la riga resta vuota, non «[object Object]»
+    expect(lineaDaEvento({ kind: "TESTO", payload: { testo: { x: 1 } } })).toEqual({ kind: "message", text: "" });
   });
 });

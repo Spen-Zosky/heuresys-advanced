@@ -43,6 +43,17 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "v_agent_capability_activations_current"
     ]
   },
+  "agent-conversations": {
+    "prefissi": [
+      "/v1/agent-conversations"
+    ],
+    "tabelle": [
+      "sys_agent_activities",
+      "sys_agent_activity_events",
+      "sys_agent_conversations",
+      "sys_agent_proposals"
+    ]
+  },
   "agent-tokens": {
     "prefissi": [
       "/v1/auth/agent-tokens"

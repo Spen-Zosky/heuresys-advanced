@@ -220,7 +220,7 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
       up("hrx_job_roles_upsert", "/job-roles"), // job_role:{create,update} (no delete)
       up("hrx_skills_upsert", "/skills"), // skill:{create,update} (no delete)
       up("hrx_kpi_defs_upsert", "/kpi-definitions"), // kpi:{create,update}
-      del("hrx_kpi_defs_delete", "/kpi-definitions"), // kpi:delete
+      // hrx_kpi_defs_delete tolto il 2026-11-08 (ADR-0056 D2, prova avversaria T7: l'API cancella fisicamente (DELETE FROM), cioè classe X, che non sta nel catalogo).
       putUp("hrx_process_kpi_template_upsert", "/process-kpi-templates"), // bpm_process:update
       putUp("hrx_orgunit_kpi_template_upsert", "/organization-unit-kpi-templates"), // bpm_process:update
       putUp("hrx_typing_profile_upsert", "/enterprise-typing-profiles"), // enterprise_typing:update (tenant-admin)
@@ -230,7 +230,7 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
       // secondo fattore. ADR-0050 D6: l'agente non porta mandati e agisce con i cookie della
       // persona; non esiste più un'utenza di servizio con PLATFORM_ADMIN.
       up("hrx_job_families_upsert", "/job-families"), // PLATFORM_ADMIN service-gate
-      del("hrx_job_families_delete", "/job-families"),
+      // hrx_job_families_delete tolto il 2026-11-08 (ADR-0056 D2, prova avversaria T7: l'API cancella fisicamente (DELETE FROM), cioè classe X, che non sta nel catalogo).
       up("hrx_blueprint_families_upsert", "/blueprint-families"), // blueprint:activate/override (PLATFORM_ADMIN)
       up("hrx_blueprint_variants_upsert", "/blueprint-variants"),
       up("hrx_blueprint_processes_upsert", "/blueprint-processes"),

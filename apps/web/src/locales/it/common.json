@@ -849,6 +849,23 @@
     "noSession": "Nessuna sessione: effettua il login per inoltrare i cookie al gateway.",
     "contestoPagina": "Pagina «{{titolo}}» ({{percorso}})",
     "apri": "Chiedi all'assistente",
-    "chiudi": "Chiudi l'assistente"
+    "chiudi": "Chiudi l'assistente",
+    "reasonRequired": "Per negare serve un motivo: scrivilo e conferma.",
+    "approvalNotRecorded": "La decisione non è stata registrata: la proposta era già scaduta o decisa.",
+    "conversationBusy": "Questa conversazione ha già un'attività in corso: aspetta che finisca.",
+    "conversationNotFound": "Conversazione non trovata.",
+    "rejectReasonLabel": "Perché rifiuti?",
+    "rejectConfirm": "Conferma il rifiuto",
+    "approvalExpires": "Scade",
+    "attivitaTitolo": "Le tue conversazioni",
+    "attivitaVuota": "Non hai ancora conversazioni con l'assistente.",
+    "riprendi": "Riprendi",
+    "nuovaConversazione": "Nuova conversazione",
+    "statoIN_CORSO": "In corso",
+    "statoIN_ATTESA": "Aspetta te",
+    "statoFATTA": "Fatta",
+    "statoFALLITA": "Non riuscita",
+    "statoINTERROTTA": "Interrotta",
+    "aggiornata": "Aggiornata il {{quando}}"
   }
 }

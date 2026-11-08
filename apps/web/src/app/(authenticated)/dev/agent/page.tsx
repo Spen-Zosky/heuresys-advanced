@@ -60,7 +60,7 @@ function DisabledNotice() {
 }
 
 export default function AgentDevConsolePage() {
-  const { t } = useTranslation("admin");
+  const { t, i18n } = useTranslation("admin");
 
   // Il prompt e' della VISTA (e' cio' che l'utente scrive); tutto il resto e' del canale.
   const [prompt, setPrompt] = useState("");
@@ -108,7 +108,12 @@ export default function AgentDevConsolePage() {
           approvalInput: t("agentDev.approvalInput"),
           allow: t("agentDev.allow"),
           deny: t("agentDev.deny"),
+          rejectReasonLabel: t("agentDev.rejectReasonLabel"),
+          rejectConfirm: t("agentDev.rejectConfirm"),
+          approvalExpires: t("agentDev.approvalExpires"),
         }}
+        // ADR-0056 D4: il rifiuto porta il motivo, che il gateway registra (senza, l'API dà 422).
+        requireRejectReason
         gatewayUrl={GATEWAY_URL}
         prompt={prompt}
         onPromptChange={setPrompt}
@@ -116,8 +121,17 @@ export default function AgentDevConsolePage() {
         onRun={() => void run(prompt)}
         onStop={stop}
         lines={lines}
-        approval={approval}
-        onApproval={(d) => void resolveApproval(d)}
+        approval={
+          approval === null
+            ? null
+            : {
+                ...approval,
+                ...(approval.expiresAt
+                  ? { expiresText: new Date(approval.expiresAt).toLocaleString(i18n.language) }
+                  : {}),
+              }
+        }
+        onApproval={(d, reason) => void resolveApproval(d, reason)}
         notice={notice === null || noticeText === null ? null : { kind: notice.kind, text: noticeText }}
       />
     </div>

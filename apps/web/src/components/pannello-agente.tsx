@@ -13,11 +13,15 @@
  * Il contesto è un valore: quello dichiarato dalla pagina con `useContestoAgente`, oppure il
  * titolo della finestra con l'indirizzo. Dietro lo stesso flag di sempre
  * (`NEXT_PUBLIC_ENABLE_AGENT_DEV`): a flag spento non si disegna niente.
+ *
+ * Dal piano dei principi agentici T6c (ADR-0056 D4): accanto al pannello la colonna delle
+ * conversazioni salvate (`AgentActivityList`), da cui la persona ne riprende una; il rifiuto di
+ * una proposta chiede il motivo, che il gateway registra (senza motivo l'API risponde 422).
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { AgentPanel, Button } from "@heuresys/ui";
+import { AgentActivityList, AgentPanel, Button, type AgentActivityStatus } from "@heuresys/ui";
 import { AGENT_DEV_ENABLED, useAgentStream } from "@/lib/use-agent-stream";
 import { paginaIdonea } from "@/lib/agente/idoneita";
 import { useContestoDichiarato } from "@/lib/agente/contesto";
@@ -29,11 +33,26 @@ export function PannelloAgente() {
 }
 
 function PannelloAgenteAcceso({ pathname }: { pathname: string }) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const dichiarato = useContestoDichiarato();
   const agent = useAgentStream();
   const [aperto, setAperto] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const { refreshConversations } = agent;
+
+  // Le conversazioni si rileggono a ogni apertura: il lavoro continua anche a finestra chiusa.
+  useEffect(() => {
+    if (aperto) void refreshConversations();
+  }, [aperto, refreshConversations]);
+
+  const quando = (iso: string) => new Date(iso).toLocaleString(i18n.language);
+  const stati: Record<AgentActivityStatus, string> = {
+    IN_CORSO: t("agente.statoIN_CORSO"),
+    IN_ATTESA: t("agente.statoIN_ATTESA"),
+    FATTA: t("agente.statoFATTA"),
+    FALLITA: t("agente.statoFALLITA"),
+    INTERROTTA: t("agente.statoINTERROTTA"),
+  };
 
   // Il titolo della finestra si legge al disegno: il contesto si mostra solo a pannello aperto,
   // cioè dopo un gesto nel browser, mai nel disegno del server.
@@ -66,6 +85,25 @@ function PannelloAgenteAcceso({ pathname }: { pathname: string }) {
           {t("agente.chiudi")}
         </Button>
       </div>
+      <AgentActivityList
+        testIdPrefix="agente-attivita"
+        labels={{
+          title: t("agente.attivitaTitolo"),
+          empty: t("agente.attivitaVuota"),
+          resume: t("agente.riprendi"),
+          newConversation: t("agente.nuovaConversazione"),
+          statusLabels: stati,
+        }}
+        items={agent.conversations.map((c) => ({
+          id: c.id,
+          title: c.title,
+          status: c.lastActivityStatus,
+          updatedText: t("agente.aggiornata", { quando: quando(c.updatedAt) }),
+        }))}
+        selectedId={agent.conversationId}
+        onSelect={(id) => void agent.resume(id)}
+        onNew={agent.startNew}
+      />
       <AgentPanel
         testIdPrefix="agente"
         context={contesto}
@@ -86,7 +124,11 @@ function PannelloAgenteAcceso({ pathname }: { pathname: string }) {
           approvalInput: t("agente.approvalInput"),
           allow: t("agente.allow"),
           deny: t("agente.deny"),
+          rejectReasonLabel: t("agente.rejectReasonLabel"),
+          rejectConfirm: t("agente.rejectConfirm"),
+          approvalExpires: t("agente.approvalExpires"),
         }}
+        requireRejectReason
         prompt={prompt}
         onPromptChange={setPrompt}
         running={agent.running}
@@ -94,8 +136,15 @@ function PannelloAgenteAcceso({ pathname }: { pathname: string }) {
         onRun={() => void agent.run(`${t("agente.contextLabel")}: ${contesto}\n\n${prompt}`)}
         onStop={agent.stop}
         lines={agent.lines}
-        approval={agent.approval}
-        onApproval={(decision) => void agent.resolveApproval(decision)}
+        approval={
+          agent.approval === null
+            ? null
+            : {
+                ...agent.approval,
+                ...(agent.approval.expiresAt ? { expiresText: quando(agent.approval.expiresAt) } : {}),
+              }
+        }
+        onApproval={(decision, reason) => void agent.resolveApproval(decision, reason)}
         notice={agent.notice === null || testoAvviso === null ? null : { kind: agent.notice.kind, text: testoAvviso }}
       />
     </section>

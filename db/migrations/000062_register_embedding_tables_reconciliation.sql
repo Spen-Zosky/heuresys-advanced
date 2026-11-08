@@ -194,7 +194,15 @@ VALUES
   ('sys_agent_capability_operations', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — operazioni di una capacita'' degli agenti con la classe A/B/C (ADR-0056 D2, mig 000480): modello di piattaforma, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000480.]'),
   ('sys_agent_capability_activations', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — attivazioni di una capacita'' degli agenti per tenant (ADR-0053 A1, mig 000480): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000480.]')
+   '[sign-off: EXCLUDE — attivazioni di una capacita'' degli agenti per tenant (ADR-0053 A1, mig 000480): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000480.]'),
+  ('sys_agent_conversations', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — conversazioni di una persona con l''assistente (ADR-0056 D4, mig 000483): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000483: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
+  ('sys_agent_activities', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — attivita'' dell''assistente in una conversazione (ADR-0056 D4, mig 000483): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000483.]'),
+  ('sys_agent_activity_events', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — eventi di un''attivita'' dell''assistente (ADR-0056 D4, mig 000483): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000483.]'),
+  ('sys_agent_proposals', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — proposte dell''assistente in attesa della persona (ADR-0056 D4, mig 000483): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000483.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

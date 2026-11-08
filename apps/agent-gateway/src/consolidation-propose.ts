@@ -1,4 +1,6 @@
 /**
+ * @agente consolidamento-giudice (anagrafe: docs/architecture/agenti/ANAGRAFE_agenti.md)
+ *
  * apps/agent-gateway/src/consolidation-propose.ts
  *
  * IL GIUDICE del consolidamento del tenant (AC-6, `.programmi/consolidamento/agente/`).

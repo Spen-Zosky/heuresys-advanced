@@ -137,6 +137,9 @@ ROUTES: list[tuple[str, list[str]]] = [
     ("apps/web/src/lib/role-precedence.ts", ["typecheck", "lint", "test-api"]),
     ("apps/web/src/app/(authenticated)/users/[userId]/_components/roles-editor.tsx",
      ["typecheck", "lint", "test-api"]),
+    # T5b (P22): il consolidamento ospita un agente (il suo giudice vive nel gateway); toccarlo
+    # rilancia anche il confronto fra anagrafe e codice. Prima di `apps/api/`, che vince per primo.
+    ("apps/api/src/modules/tenant-consolidation/", ["typecheck", "test-api", "anagrafe-agenti"]),
     ("apps/api/",        ["typecheck", "test-api"]),
     ("packages/shared/", ["typecheck", "test-api"]),
     ("apps/web/",        ["typecheck", "lint"]),
@@ -146,7 +149,10 @@ ROUTES: list[tuple[str, list[str]]] = [
     # DECISIONE (`agent-perimetri.json`, `agent-operations.json`). Conseguenza misurata:
     # aggiungere 31 prove e riscrivere il gate lasciava il cancello locale verde, perche'
     # non aveva guardato. La copertura e' ora un caso del `selftest`, visto rosso prima.
-    ("apps/agent-gateway/", ["typecheck", "agent-gateway-test"]),
+    ("apps/agent-gateway/", ["typecheck", "agent-gateway-test", "anagrafe-agenti"]),
+    # T5b (P22): l'anagrafe degli agenti e il suo controllo instradano il confronto col codice.
+    ("docs/architecture/agenti/", ["anagrafe-agenti"]),
+    ("docs/kb/tools/check_anagrafe_agenti.py", ["anagrafe-agenti"]),
     # `handoff-lint` c'e' perche' verifica anche il CONTEGGIO delle migrazioni sul
     # disco contro la headline di SOT_STATE (check D3). Legarlo ai soli file di
     # stato era un buco: aggiungere una migrazione cambia cio' che quel lint
@@ -295,6 +301,10 @@ SUITES: dict[str, tuple[str, str]] = {
     "lab-inbox-selftest": ("L0", "python docs/kb/tools/lab_inbox.py --selftest"),
     "canale-cowork-selftest": ("L0", "python docs/kb/tools/check_canale_cowork.py --selftest"),
     "numeri-sot-selftest": ("L0", "python docs/kb/tools/aggiorna_numeri_sot.py --selftest"),
+    # T5b (P22): l'anagrafe degli agenti coincide col codice, nei due sensi; prima l'autoprova.
+    # Il datastore si confronta se sta accanto a questo repository, altrimenti si dice non verificato.
+    "anagrafe-agenti":    ("L0", "python docs/kb/tools/check_anagrafe_agenti.py --selftest && "
+                                 "python docs/kb/tools/check_anagrafe_agenti.py"),
     # I test del gateway, che sono anche i guardiani della coerenza fra i perimetri decisi e
     # la mappa generata. L0 nel costo, L1 nella sostanza: girano senza database.
     "agent-gateway-test": ("L1", "pnpm --filter @heuresys/agent-gateway test"),
@@ -868,6 +878,11 @@ CASI_ROUTER: list[tuple[str, list[str], list[str]]] = [
     # `db/`): la regola c'era, il router non la applicava dove il codice vive.
     ("apps/agent-gateway/src/write-gate.ts", ["agent-gateway-test", "typecheck"], []),
     ("apps/agent-gateway/test/persone-distinte.test.ts", ["agent-gateway-test"], []),
+    # T5b: un agente nuovo nel gateway, o l'anagrafe toccata, rilanciano il confronto
+    ("apps/agent-gateway/src/research-propose.ts", ["anagrafe-agenti"], []),
+    ("docs/architecture/agenti/ANAGRAFE_agenti.md", ["anagrafe-agenti"], ["migrate-idempotent"]),
+    ("apps/api/src/modules/tenant-consolidation/engine.ts", ["anagrafe-agenti", "test-api"], []),
+    ("apps/api/src/modules/auth/y.ts",     [],                       ["anagrafe-agenti"]),
 ]
 
 

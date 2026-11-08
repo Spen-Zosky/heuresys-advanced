@@ -1,4 +1,6 @@
 /**
+ * @agente ricerca-proponente (anagrafe: docs/architecture/agenti/ANAGRAFE_agenti.md)
+ *
  * apps/agent-gateway/src/research-propose.ts
  *
  * CHI PROPONE, per davvero (#132 F4h).

@@ -763,8 +763,9 @@ BEGIN
   -- dopo la frontiera, in un giorno feriale, SCHEDULED e senza valutazione.
   -- Prima del 2026-11-07 tutti i colloqui erano svolti, anche nelle selezioni
   -- in corso. G1 e C13b(ii) ammettono dopo la frontiera i soli SCHEDULED, entro
-  -- 30 giorni. LIMITE NOTO: l'avanzamento notturno non rilegge questo seed,
-  -- quindi l'appuntamento resta fermo mentre la frontiera avanza.
+  -- 30 giorni. Dal 2026-11-07 l'avanzamento notturno fa svolgere questi
+  -- colloqui quando la frontiera li raggiunge, e fissa i successivi:
+  -- avanzamento/selezioni_in_corso.sql, lanciato da storia36.sh avanzamento.
   INSERT INTO sys.sys_interviews (
     interview_id, interview_tenant_id, interview_application_id, interview_kind, interview_status,
     interview_scheduled_at, interview_duration_min, interview_location, interview_metadata,

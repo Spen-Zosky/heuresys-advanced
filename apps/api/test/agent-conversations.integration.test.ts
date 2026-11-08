@@ -177,15 +177,17 @@ describe("attività, eventi e proposte", () => {
     expect(await codiceDi(svc.appendEvents(agente, a.id, { events: [{ kind: "TESTO", payload: {} }] }))).toBe("AGENT_ACTIVITY_CLOSED");
     expect(await codiceDi(svc.updateActivity(agente, a.id, { status: "IN_CORSO" }))).toBe("AGENT_ACTIVITY_CLOSED");
 
-    const b = await svc.createActivity(agente, c.id, { prompt: "lavoro lungo" });
+    // in una conversazione sua, così l'attività più recente della conversazione è questa
+    const c2 = await svc.create(agente, { agentCode: "assistente-hr", title: "Lavoro lungo" });
+    const b = await svc.createActivity(agente, c2.id, { prompt: "lavoro lungo" });
     await pool.query(
       `UPDATE sys.sys_agent_activities SET agent_activity_started_at = now() - interval '31 minutes'
         WHERE agent_activity_id = $1`,
       [b.id],
     );
-    const letta = (await svc.get(anna, c.id)).activities.find((x) => x.id === b.id);
+    const letta = (await svc.get(anna, c2.id)).activities.find((x) => x.id === b.id);
     expect(letta?.status).toBe("INTERROTTA");
-    expect((await svc.list(anna)).find((x) => x.id === c.id)?.lastActivityStatus).toBe("INTERROTTA");
+    expect((await svc.list(anna)).find((x) => x.id === c2.id)?.lastActivityStatus).toBe("INTERROTTA");
     expect(await codiceDi(svc.appendEvents(agente, b.id, { events: [{ kind: "TESTO", payload: {} }] }))).toBe("AGENT_ACTIVITY_CLOSED");
   });
 

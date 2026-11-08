@@ -33,8 +33,13 @@ import {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 
-/** Vero quando esiste il registro «per conto di» (ADR-0053 A2). Si accende con la voce T5. */
-export const REGISTRO_PER_CONTO_DI = false;
+/**
+ * Vero quando esiste il registro «per conto di» (ADR-0053 A2). Acceso con la voce T5: la migrazione
+ * 000482 dà al diario del cancello capacità, versione, esito autonomo e «per conto di», e il cancello
+ * (`apps/agent-gateway/src/write-gate.ts`) non esegue da solo una scrittura che non sa attribuire.
+ * Le altre due condizioni di D2 (informativa e ritorno provato) le pretende il database (000480).
+ */
+export const REGISTRO_PER_CONTO_DI = true;
 
 function nessunAgente(actor: ActorContext): void {
   if (actor.agente) {

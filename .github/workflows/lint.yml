@@ -98,4 +98,10 @@ jobs:
         run: pnpm --filter @heuresys/agent-gateway run lint
 
       - name: Test — @heuresys/agent-gateway (vitest, nessun DB)
+        # D-08: il runner sta sull'host della produzione e il suo EnvironmentFile porta
+        # POSTGRES_DB=heuresys_advanced. Senza questa riga la prova del diario nel database si
+        # collegava alla produzione (in una transazione annullata, ma alla produzione). «Nessun
+        # DB» lo diventa davvero: la prova del diario gira in test-integration, su heuresys_ci.
+        env:
+          POSTGRES_HOST: ""
         run: pnpm --filter @heuresys/agent-gateway run test

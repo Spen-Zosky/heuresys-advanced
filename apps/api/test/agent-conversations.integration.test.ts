@@ -109,8 +109,10 @@ describe("attività, eventi e proposte", () => {
     const c = await svc.create(agente, { agentCode: "assistente-hr", title: "Giro" });
     const a = await svc.createActivity(agente, c.id, { prompt: "quante persone nel mio reparto?" });
     expect(a).toMatchObject({ status: "IN_CORSO", stopReason: null, endedAt: null, pendingProposals: 0 });
-    expect(await svc.appendEvent(agente, a.id, { kind: "TESTO", payload: { testo: "Guardo." } })).toEqual({ seq: 1 });
-    expect(await svc.appendEvent(agente, a.id, { kind: "STRUMENTO", payload: { strumento: "hrx_users_list" } })).toEqual({ seq: 2 });
+    expect(await svc.appendEvents(agente, a.id, { events: [{ kind: "TESTO", payload: { testo: "Guardo." } }] })).toEqual({ lastSeq: 1 });
+    expect(await svc.appendEvents(agente, a.id, {
+      events: [{ kind: "STRUMENTO", payload: { strumento: "hrx_users_list" } }, { kind: "TESTO", payload: { testo: "Sono 7." } }],
+    })).toEqual({ lastSeq: 3 });
     const id = randomUUID();
     const p = await svc.createProposal(agente, a.id, {
       proposalId: id, kind: "SCRITTURA", tool: "hrx_goal_update", input: { goalId: "[redatto]" },
@@ -119,13 +121,13 @@ describe("attività, eventi e proposte", () => {
     expect(p).toMatchObject({ id, status: "IN_ATTESA", actionClass: "B", rejectReason: null, decidedAt: null });
 
     const e = await svc.events(anna, a.id, 0);
-    expect(e.events.map((x) => [x.seq, x.kind])).toEqual([[1, "TESTO"], [2, "STRUMENTO"]]);
+    expect(e.events.map((x) => [x.seq, x.kind])).toEqual([[1, "TESTO"], [2, "STRUMENTO"], [3, "TESTO"]]);
     expect(e.proposals.map((x) => x.status)).toEqual(["IN_ATTESA"]);
     expect(e.activity.pendingProposals).toBe(1);
-    expect((await svc.events(anna, a.id, 1)).events.map((x) => x.seq)).toEqual([2]);
+    expect((await svc.events(anna, a.id, 1)).events.map((x) => x.seq)).toEqual([2, 3]);
 
     expect(await codiceDi(svc.events(bruno, a.id, 0))).toBe("NOT_FOUND");
-    expect(await codiceDi(svc.appendEvent(bruno, a.id, { kind: "TESTO", payload: {} }))).toBe("NOT_FOUND");
+    expect(await codiceDi(svc.appendEvents(bruno, a.id, { events: [{ kind: "TESTO", payload: {} }] }))).toBe("NOT_FOUND");
     expect(await codiceDi(svc.decide(bruno, id, { decision: "APPROVATA" }))).toBe("NOT_FOUND");
   });
 
@@ -172,7 +174,7 @@ describe("attività, eventi e proposte", () => {
     const chiusa = await svc.updateActivity(agente, a.id, { status: "FATTA", result: "Fatto." });
     expect(chiusa).toMatchObject({ status: "FATTA", result: "Fatto." });
     expect(chiusa.endedAt).not.toBeNull();
-    expect(await codiceDi(svc.appendEvent(agente, a.id, { kind: "TESTO", payload: {} }))).toBe("AGENT_ACTIVITY_CLOSED");
+    expect(await codiceDi(svc.appendEvents(agente, a.id, { events: [{ kind: "TESTO", payload: {} }] }))).toBe("AGENT_ACTIVITY_CLOSED");
     expect(await codiceDi(svc.updateActivity(agente, a.id, { status: "IN_CORSO" }))).toBe("AGENT_ACTIVITY_CLOSED");
 
     const b = await svc.createActivity(agente, c.id, { prompt: "lavoro lungo" });
@@ -184,7 +186,7 @@ describe("attività, eventi e proposte", () => {
     const letta = (await svc.get(anna, c.id)).activities.find((x) => x.id === b.id);
     expect(letta?.status).toBe("INTERROTTA");
     expect((await svc.list(anna)).find((x) => x.id === c.id)?.lastActivityStatus).toBe("INTERROTTA");
-    expect(await codiceDi(svc.appendEvent(agente, b.id, { kind: "TESTO", payload: {} }))).toBe("AGENT_ACTIVITY_CLOSED");
+    expect(await codiceDi(svc.appendEvents(agente, b.id, { events: [{ kind: "TESTO", payload: {} }] }))).toBe("AGENT_ACTIVITY_CLOSED");
   });
 
   it("il database rifiuta uno scarto senza motivo anche se il servizio lo lasciasse passare", async () => {

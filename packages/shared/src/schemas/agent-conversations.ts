@@ -149,13 +149,23 @@ export const UpdateAgentActivityBodySchema = z.object({
 });
 export type UpdateAgentActivityBody = z.infer<typeof UpdateAgentActivityBodySchema>;
 
-export const AppendAgentActivityEventBodySchema = z.object({
+export const AgentActivityEventInputSchema = z.object({
   kind: AgentActivityEventKindSchema,
   payload: PAYLOAD,
 });
-export type AppendAgentActivityEventBody = z.infer<typeof AppendAgentActivityEventBodySchema>;
+export type AgentActivityEventInput = z.infer<typeof AgentActivityEventInputSchema>;
 
-export const AppendAgentActivityEventResponseSchema = z.object({ seq: z.number().int() });
+/**
+ * Gli eventi arrivano a lotti: il gateway li raccoglie e li manda insieme, così un giro non
+ * diventa una scrittura per ogni riga di testo (e una riga del registro delle scritture, 000477).
+ */
+export const AppendAgentActivityEventsBodySchema = z.object({
+  events: z.array(AgentActivityEventInputSchema).min(1).max(100),
+});
+export type AppendAgentActivityEventsBody = z.infer<typeof AppendAgentActivityEventsBodySchema>;
+
+/** Il numero dell'ultimo evento scritto. */
+export const AppendAgentActivityEventsResponseSchema = z.object({ lastSeq: z.number().int() });
 
 export const AgentActivityEventsQuerySchema = z.object({
   /** Solo gli eventi dopo questo numero (0 = tutti). */

@@ -17,7 +17,7 @@ import {
   type AgentConversation,
   type AgentConversationSummary,
   type AgentProposal,
-  type AppendAgentActivityEventBody,
+  type AgentActivityEventInput,
   type CreateAgentProposalBody,
   type UpdateAgentActivityBody,
 } from "@heuresys/shared";
@@ -207,17 +207,22 @@ export async function updateActivity(db: Q, activityId: string, body: UpdateAgen
   );
 }
 
-/** Aggiunge un evento con il numero successivo; la riga dell'attività è già bloccata da chi chiama. */
-export async function appendEvent(db: Q, activityId: string, body: AppendAgentActivityEventBody): Promise<number> {
+/**
+ * Aggiunge gli eventi in ordine, dopo l'ultimo; la riga dell'attività è già bloccata da chi chiama,
+ * quindi nessun altro scrive nel frattempo. Restituisce il numero dell'ultimo.
+ */
+export async function appendEvents(db: Q, activityId: string, events: readonly AgentActivityEventInput[]): Promise<number> {
   const r = await db.query<{ seq: number }>(
     `INSERT INTO sys.sys_agent_activity_events
        (agent_activity_event_activity_id, agent_activity_event_seq, agent_activity_event_kind, agent_activity_event_payload)
-     SELECT $1, COALESCE(max(agent_activity_event_seq), 0) + 1, $2, $3::jsonb
-       FROM sys.sys_agent_activity_events WHERE agent_activity_event_activity_id = $1
+     SELECT $1, base.n + e.ord, e.kind, e.payload
+       FROM (SELECT COALESCE(max(agent_activity_event_seq), 0) AS n
+               FROM sys.sys_agent_activity_events WHERE agent_activity_event_activity_id = $1) base,
+            ROWS FROM (jsonb_to_recordset($2::jsonb) AS (kind varchar, payload jsonb)) WITH ORDINALITY AS e(kind, payload, ord)
      RETURNING agent_activity_event_seq AS seq`,
-    [activityId, body.kind, JSON.stringify(body.payload)],
+    [activityId, JSON.stringify(events.map((x) => ({ kind: x.kind, payload: x.payload })))],
   );
-  return Number(r.rows[0]!.seq);
+  return Math.max(...r.rows.map((x) => Number(x.seq)));
 }
 
 export async function listEvents(db: Q, activityId: string, after: number): Promise<AgentActivityEvent[]> {

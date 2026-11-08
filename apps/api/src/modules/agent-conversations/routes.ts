@@ -17,8 +17,8 @@ import {
   AgentConversationSchema,
   AgentProposalIdParamSchema,
   AgentProposalSchema,
-  AppendAgentActivityEventBodySchema,
-  AppendAgentActivityEventResponseSchema,
+  AppendAgentActivityEventsBodySchema,
+  AppendAgentActivityEventsResponseSchema,
   CreateAgentActivityBodySchema,
   CreateAgentConversationBodySchema,
   CreateAgentProposalBodySchema,
@@ -88,10 +88,10 @@ export const agentConversationsRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, USA],
     schema: {
       params: AgentActivityIdParamSchema,
-      body: AppendAgentActivityEventBodySchema,
-      response: { 201: AppendAgentActivityEventResponseSchema },
+      body: AppendAgentActivityEventsBodySchema,
+      response: { 201: AppendAgentActivityEventsResponseSchema },
     },
-  }, async (req, reply) => reply.code(201).send(await svc.appendEvent(actor(req), req.params.activityId, req.body)));
+  }, async (req, reply) => reply.code(201).send(await svc.appendEvents(actor(req), req.params.activityId, req.body)));
 
   app.post("/activities/:activityId/proposals", {
     preHandler: [app.verifyCsrf, USA],

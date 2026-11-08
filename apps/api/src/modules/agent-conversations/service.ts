@@ -25,7 +25,7 @@ import {
   type AgentConversation,
   type AgentConversationSummary,
   type AgentProposal,
-  type AppendAgentActivityEventBody,
+  type AppendAgentActivityEventsBody,
   type CreateAgentActivityBody,
   type CreateAgentConversationBody,
   type CreateAgentProposalBody,
@@ -120,14 +120,14 @@ export const agentConversationsService = {
     });
   },
 
-  async appendEvent(actor: ActorContext, activityId: string, body: AppendAgentActivityEventBody): Promise<{ seq: number }> {
+  async appendEvents(actor: ActorContext, activityId: string, body: AppendAgentActivityEventsBody): Promise<{ lastSeq: number }> {
     const chi = proprietario(actor);
     return withTransaction(async (db) => {
       const a = await repo.getActivity(db, chi, activityId, true);
       if (!a) throw new NotFoundError("Agent activity");
       if (!APERTA.has(a.status)) throw new ConflictError("The activity is closed", E.ACTIVITY_CLOSED);
       try {
-        return { seq: await repo.appendEvent(db, activityId, body) };
+        return { lastSeq: await repo.appendEvents(db, activityId, body.events) };
       } catch (e) {
         dalDatabase(e);
       }

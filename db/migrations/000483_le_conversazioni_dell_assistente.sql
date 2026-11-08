@@ -32,6 +32,8 @@
 -- aperta più vecchia della durata massima si legge INTERROTTA: nessun processo deve passare a
 -- chiuderle, e un riavvio del gateway non lascia righe «in corso» per sempre.
 --
+-- CASCADE VERSO LA PERSONA. È un possesso personale, come le altre 61 FK dell'allowlist della 000303
+--   (sentinella sys.v_history_cascade_to_users): emendata lì, con il nome del vincolo dichiarato qui.
 -- GDPR. La conversazione appartiene alla persona: è nel registro `sys_gdpr_data_map` come PERSONAL,
 --   cancellata con la persona (DELETE); le tabelle figlie seguono per ON DELETE CASCADE.
 -- CLASSIFICAZIONE E REGISTRO: le tabelle sono classificate in 000429 e registrate in 000062, file di
@@ -59,7 +61,8 @@ CREATE TABLE IF NOT EXISTS sys.sys_agent_conversations (
   agent_conversation_id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   agent_conversation_tenant_id      uuid NOT NULL REFERENCES sys.sys_tenancies(tenant_id),
   -- la persona che possiede la conversazione: l'assistente agisce per conto suo (ADR-0050 D6)
-  agent_conversation_user_id        uuid NOT NULL REFERENCES sys.sys_users(user_id) ON DELETE CASCADE,
+  agent_conversation_user_id        uuid NOT NULL
+    CONSTRAINT sys_agent_conversations_user_fk REFERENCES sys.sys_users(user_id) ON DELETE CASCADE,
   -- il codice dell'agente, come nell'anagrafe (`docs/architecture/agenti/ANAGRAFE_agenti.md`)
   agent_conversation_agent_code     varchar(64) NOT NULL,
   agent_conversation_title          varchar(200) NOT NULL,

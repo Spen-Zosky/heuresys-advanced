@@ -27,6 +27,7 @@
  * campo nuovo è contato dal primo giorno; il costo è che qualche attore finisce fra i
  * soggetti, e quello fa scattare il freno **prima** — che è il verso sicuro.
  */
+import { createHash } from "node:crypto";
 import { livelloDi, type LivelloPersone, type Soglie } from "./soglie-persone.js";
 
 /**
@@ -100,6 +101,17 @@ export function raccogliPersone(
   return trovati;
 }
 
+const IMPRONTA = /^[0-9a-f]{64}$/;
+
+/**
+ * L'impronta di un identificativo di persona: SHA-256 dell'UUID in minuscolo. È uno pseudonimo e
+ * non un anonimato (chi ha l'elenco delle persone del tenant può ricalcolarla): basta perché la
+ * conversazione salvata non porti identificativi di altre persone in chiaro (000483).
+ */
+export function impronta(id: string): string {
+  return createHash("sha256").update(id.toLowerCase()).digest("hex");
+}
+
 /** Ciò che il gate e il diario leggono dal contatore: il numero e il livello. Niente di più. */
 export interface LettoreContatore {
   conta(): number;
@@ -119,12 +131,22 @@ export interface LettoreContatore {
  * ripresa riparte da zero — e il freno si aggira riprendendo.
  */
 export class ContatorePersone implements LettoreContatore {
+  /** Impronte, non identificativi: per contare i distinti basta l'uguaglianza (T6, ADR-0056 D4). */
   private readonly persone = new Set<string>();
   private guasto = false;
   private readonly soglie: Soglie | undefined;
 
-  constructor(soglie?: Soglie) {
+  /**
+   * `iniziali` sono le impronte già salvate con la conversazione (T6b): una conversazione ripresa
+   * riparte dal conto a cui era arrivata, e il freno non si aggira riprendendo. Una voce che non ha
+   * la forma di un'impronta si scarta, e il contatore si dichiara guasto: il conto sarebbe un minimo.
+   */
+  constructor(soglie?: Soglie, iniziali: readonly string[] = []) {
     this.soglie = soglie;
+    for (const h of iniziali) {
+      if (IMPRONTA.test(h)) this.persone.add(h);
+      else this.guasto = true;
+    }
   }
 
   /**
@@ -134,7 +156,7 @@ export class ContatorePersone implements LettoreContatore {
    */
   aggiungi(risposta: unknown): void {
     try {
-      for (const id of raccogliPersone(risposta)) this.persone.add(id);
+      for (const id of raccogliPersone(risposta)) this.persone.add(impronta(id));
     } catch {
       this.guasto = true;
     }
@@ -142,6 +164,11 @@ export class ContatorePersone implements LettoreContatore {
 
   conta(): number {
     return this.persone.size;
+  }
+
+  /** Le impronte raccolte, in ordine: ciò che si salva con la conversazione (T6b). */
+  impronte(): string[] {
+    return [...this.persone].sort();
   }
 
   /** `true` se la raccolta è fallita almeno una volta: il conto è un minimo, non il totale. */

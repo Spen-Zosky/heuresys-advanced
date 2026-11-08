@@ -111,6 +111,19 @@ export class ApprovalRegistry {
   }
 
   /**
+   * Guarda senza decidere (ADR-0056 D4, piano T6b): prima di registrare la decisione nel database
+   * il server vuole sapere se c'è ancora un giro in attesa e se è di chi ha premuto. Senza questo
+   * passo una decisione su una richiesta già scaduta in memoria resterebbe scritta come approvata
+   * senza che niente venga eseguito.
+   */
+  peek(approvalId: string, caller: string | undefined): "pending" | "unknown" | "not-owner" {
+    const entry = this.pending.get(approvalId);
+    if (!entry) return "unknown";
+    if (!caller || !entry.owner || entry.owner !== caller) return "not-owner";
+    return "pending";
+  }
+
+  /**
    * Come `resolve`, ma solo per la persona che ha aperto la richiesta. Una richiesta creata senza
    * persona (`create()` senza argomento) non si può decidere da qui: chi la apre senza dire per
    * conto di chi non ottiene una richiesta che chiunque può chiudere.

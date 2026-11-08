@@ -14,6 +14,12 @@
  *   person who opened it (ADR-0056 T3: the API says who is pressing, from their own cookies).
  *   Limits (ADR-0056 T3, limiti.ts): concurrent conversations per person and in total (429),
  *   turns, duration (SSE `limit` event); the model is fixed by name (AGENT_GATEWAY_MODEL).
+ *   ADR-0056 D4 (piano T6b): body `{ prompt, conversationId? }`. La conversazione, il giro, ciò che
+ *   la persona vede e le proposte si scrivono nel database attraverso `/v1/agent-conversations`
+ *   (giro.ts, conversazione.ts); il giro continua a finestra chiusa fino a un limite (durata,
+ *   gettone, giri) e una conversazione si riprende (sessione dell'SDK e contatore delle persone).
+ *   `/agent/approve` porta anche `reason` (obbligatorio quando si scarta) e l'intestazione
+ *   `x-csrf-token`: la decisione si registra nell'API prima di sbloccare il giro.
  * GET  /healthz         → liveness.
  *
  * Node http only (no framework dep). HEURESYS_API defaults to the dev API on :3001.
@@ -25,14 +31,19 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { ApprovalRegistry, type ApprovalDecision } from "./approval-bridge.js";
 import { DbAuditSink, FileAuditSink, type AuditSink } from "./audit-sink.js";
 import { auditPool } from "./db-pool.js";
-import { HeuresysClient, chiSei, chiediGettoneAgente } from "./heuresys-client.js";
+import { HeuresysClient, chiSei, chiediGettoneAgente, registraDecisione } from "./heuresys-client.js";
+import { ConversazioneNonTrovata, ConversazioneOccupata, RegistroConversazione } from "./conversazione.js";
+import { eseguiGiro } from "./giro.js";
+import { ContatorePersone } from "./persone-distinte.js";
+import { caricaSoglie } from "./soglie-persone.js";
 import { ConversazioniAperte, leggiLimiti, modelloAgenti } from "./limiti.js";
 import { DbRegistroCapacita } from "./capacita.js";
-import { redact } from "./redact.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
 import { giudica, LottoNonValido } from "./consolidation-propose.js";
-import type { ApprovalRequest, GatePrincipal } from "./write-gate.js";
+import type { GatePrincipal } from "./write-gate.js";
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const PORT = Number(process.env.AGENT_GATEWAY_PORT ?? 8790);
 /** Il codice con cui l'assistente si presenta all'API (gettone e superficie). */
@@ -135,9 +146,9 @@ const server = createServer(async (req, res) => {
     // HITL resolve route: a human allows/denies a pending write from the webapp.
     if (req.method === "POST" && req.url === "/agent/approve") {
       const body = await readBody(req);
-      let parsed: { approvalId?: string; decision?: string };
+      let parsed: { approvalId?: string; decision?: string; reason?: unknown };
       try {
-        parsed = JSON.parse(body || "{}") as { approvalId?: string; decision?: string };
+        parsed = JSON.parse(body || "{}") as { approvalId?: string; decision?: string; reason?: unknown };
       } catch {
         res.writeHead(400, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "BAD_JSON" }));
@@ -166,6 +177,42 @@ const server = createServer(async (req, res) => {
         return;
       }
       // unknown / expired / already-resolved id → no-op (deny-by-default semantics).
+      const prima = approvals.peek(approvalId, chi);
+      if (prima === "not-owner") {
+        res.writeHead(403, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "APPROVER_NOT_REQUESTER", resolved: false }));
+        return;
+      }
+      if (prima === "unknown") {
+        res.writeHead(200, { "content-type": "application/json" });
+        res.end(JSON.stringify({ ok: true, resolved: false }));
+        return;
+      }
+      // ADR-0056 D4 (T6b): la decisione si scrive nel registro PRIMA di sbloccare il giro, con i
+      // cookie di chi ha premuto (un gettone d'agente non decide). L'API pretende il motivo quando
+      // si scarta e rifiuta una proposta scaduta: se rifiuta, il giro resta in attesa e scade.
+      const reason = typeof parsed.reason === "string" ? parsed.reason : undefined;
+      const registrata = await registraDecisione(HEURESYS_API, {
+        cookieAccess: approvatore,
+        cookieCsrf: parseCookies(req.headers.cookie).get("hrx_csrf") ?? "",
+        csrfHeader: typeof req.headers["x-csrf-token"] === "string" ? req.headers["x-csrf-token"] : "",
+      }, approvalId, decision === "allow" ? "APPROVATA" : "SCARTATA", reason);
+      if (registrata.status === 422) {
+        res.writeHead(422, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "REJECT_REASON_REQUIRED", resolved: false }));
+        return;
+      }
+      if (registrata.status === 404 || registrata.status === 403) {
+        res.writeHead(403, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "APPROVER_NOT_REQUESTER", resolved: false }));
+        return;
+      }
+      if (!registrata.ok) {
+        // 409 (scaduta o già decisa) e ogni altro rifiuto: nessuna decisione, il giro resta negato.
+        res.writeHead(200, { "content-type": "application/json" });
+        res.end(JSON.stringify({ ok: true, resolved: false, status: registrata.status }));
+        return;
+      }
       const esito = approvals.resolveAs(approvalId, decision as ApprovalDecision, chi);
       if (esito === "not-owner") {
         res.writeHead(403, { "content-type": "application/json" });
@@ -258,11 +305,25 @@ const server = createServer(async (req, res) => {
         res.end(JSON.stringify({ error: "NO_SESSION", message: "forward hrx_access cookie" }));
         return;
       }
-      const body = await readBody(req);
-      const prompt = (JSON.parse(body || "{}") as { prompt?: string }).prompt;
+      let corpo: { prompt?: unknown; conversationId?: unknown };
+      try {
+        corpo = JSON.parse((await readBody(req)) || "{}") as { prompt?: unknown; conversationId?: unknown };
+      } catch {
+        res.writeHead(400, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "BAD_JSON" }));
+        return;
+      }
+      const prompt = typeof corpo.prompt === "string" ? corpo.prompt.trim() : "";
       if (!prompt) {
         res.writeHead(400, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "NO_PROMPT" }));
+        return;
+      }
+      // ADR-0056 D4: una conversazione si riprende per identificativo. Se c'è, deve averne la forma.
+      const conversationId = corpo.conversationId;
+      if (conversationId !== undefined && (typeof conversationId !== "string" || !UUID.test(conversationId))) {
+        res.writeHead(400, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "BAD_CONVERSATION_ID" }));
         return;
       }
 
@@ -279,7 +340,7 @@ const server = createServer(async (req, res) => {
       }
       // ADR-0056 T3: quante conversazioni insieme, per persona e in tutto il servizio. Il posto si
       // prende dopo il gettone, perché è il gettone a dire chi è la persona, e si libera nel
-      // `finally` qui sotto, comunque finisca la conversazione.
+      // `finally` qui sotto quando il GIRO finisce, non quando si chiude la finestra (T6b).
       const posto = conversazioni.entra(gettone.persona.userId);
       if (!posto.ok) {
         res.writeHead(429, { "content-type": "application/json" });
@@ -289,92 +350,84 @@ const server = createServer(async (req, res) => {
         }));
         return;
       }
-      const client = new HeuresysClient({
-        baseUrl: HEURESYS_API,
-        session: gettone.session,
-        agente: AGENTE_ASSISTENTE,
-      });
-
-      // ADR-0056 T3: la conversazione si interrompe allo scadere della durata massima, o quando la
-      // persona chiude la connessione (non c'è più nessuno a cui rispondere né chi approvi).
-      const interrompi = new AbortController();
-      let motivoStop: "DURATA" | "CHIUSA" | undefined;
-      const timerDurata = setTimeout(() => {
-        motivoStop = "DURATA";
-        interrompi.abort();
-      }, LIMITI.durataMs);
-      res.on("close", () => {
-        if (!res.writableEnded) {
-          motivoStop ??= "CHIUSA";
-          interrompi.abort();
-        }
-      });
-
-      res.writeHead(200, {
-        "content-type": "text/event-stream",
-        "cache-control": "no-cache",
-        connection: "keep-alive",
-      });
-
-      // M-2 HITL bridge: each write registers a pending approval, emits an
-      // `approval_required` SSE event with the REDACTED tool/args, and awaits the
-      // human's decision via POST /agent/approve (deny-by-default on timeout).
-      //
-      // #252 — e da qui non solo le scritture: anche una LETTURA oltre la soglia alta di
-      // persone distinte passa da questo ponte. Perciò il payload porta `classe`,
-      // `personeDistinte` e `livello`: senza quei tre campi il pannello direbbe «l'agente vuole
-      // eseguire una scrittura» davanti a una lettura, cioè chiederebbe di approvare una cosa
-      // raccontandone un'altra. Sono numeri e identificatori: niente da redigere, per requisito.
-      // A-12: il diario e le soglie (A-6) sanno per conto di chi lavora l'agente e in quale
-      // tenant: lo dice l'API nel gettone, non il corpo della richiesta.
-      const principal: GatePrincipal = {
-        principal: "user",
-        subject: gettone.persona.userId,
-        ...(gettone.persona.tenantCode ? { tenant: gettone.persona.tenantCode } : {}),
-      };
-      const approve = async (reqApprove: ApprovalRequest): Promise<boolean> => {
-        const { approvalId, decided } = approvals.create(gettone.persona.userId);
-        const payload = {
-          approvalId,
-          tool: redact(reqApprove.tool),
-          input: redact(reqApprove.input),
-          ...(reqApprove.classe !== undefined ? { classe: reqApprove.classe } : {}),
-          ...(reqApprove.personeDistinte !== undefined
-            ? { personeDistinte: reqApprove.personeDistinte }
-            : {}),
-          ...(reqApprove.livello !== undefined ? { livello: reqApprove.livello } : {}),
-        };
-        res.write(`event: approval_required\ndata: ${JSON.stringify(payload)}\n\n`);
-        return decided; // resolves allow/deny; false on timeout / unknown id
-      };
-
       try {
-        for await (const event of runHrAgent(prompt, client, {
-          approve,
+        // Due client con lo stesso gettone: quello dell'agente alimenta il contatore delle persone,
+        // quello del registro no (le risposte del registro non sono letture dell'agente).
+        const client = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE });
+        const clientRegistro = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE });
+
+        // ADR-0056 D4 (T6b): la conversazione e il giro stanno nel database, attraverso l'API.
+        // Se non si riesce a salvarli il giro non parte: una conversazione che la persona non
+        // ritrova non è la conversazione che le abbiamo promesso.
+        let registro: RegistroConversazione;
+        try {
+          registro = await RegistroConversazione.apri(clientRegistro, {
+            ...(typeof conversationId === "string" ? { conversationId } : {}),
+            agentCode: AGENTE_ASSISTENTE,
+            prompt,
+          });
+        } catch (e) {
+          const [stato, codice] = e instanceof ConversazioneNonTrovata
+            ? [404, "CONVERSATION_NOT_FOUND"]
+            : e instanceof ConversazioneOccupata
+              ? [409, "CONVERSATION_BUSY"]
+              : [502, "CONVERSATION_NOT_SAVED"];
+          if (stato === 502) console.error(JSON.stringify({ level: "error", phase: "agent-gateway", msg: "conversazione non salvata", error: String(e) }));
+          res.writeHead(stato, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: codice }));
+          return;
+        }
+
+        // A-12: il diario e le soglie (A-6) sanno per conto di chi lavora l'agente e in quale
+        // tenant: lo dice l'API nel gettone, non il corpo della richiesta.
+        const principal: GatePrincipal = {
+          principal: "user",
+          subject: gettone.persona.userId,
+          ...(gettone.persona.tenantCode ? { tenant: gettone.persona.tenantCode } : {}),
+        };
+        // ADR-0040 §4b e T6b: il contatore riparte dalle persone già lette in questa conversazione.
+        const contatore = new ContatorePersone(
+          caricaSoglie(undefined, gettone.persona.tenantCode ?? undefined),
+          registro.conversazione.personsSeen,
+        );
+
+        res.writeHead(200, {
+          "content-type": "text/event-stream",
+          "cache-control": "no-cache",
+          connection: "keep-alive",
+        });
+        // T6b: chiudere la finestra NON ferma il giro. Da quel momento non si scrive più verso la
+        // finestra; il giro prosegue fino a un limite e lascia tutto nel registro.
+        const scrivi = (pezzo: string) => {
+          if (!res.writableEnded && !res.destroyed) res.write(pezzo);
+        };
+
+        await eseguiGiro({
+          registro,
+          contatore,
+          approvals,
+          owner: gettone.persona.userId,
+          scadenzaGettone: Date.parse(gettone.expiresAt),
+          durataMs: LIMITI.durataMs,
           approvalTimeoutMs: APPROVAL_TIMEOUT_MS,
-          audit: auditSink,
-          principal,
-          maxTurns: LIMITI.giri,
-          abortController: interrompi,
-          ...(registroCapacita ? { capacita: { registro: registroCapacita, agentCode: AGENTE_ASSISTENTE } } : {}),
-        })) {
-          res.write(`data: ${JSON.stringify(event)}\n\n`);
-        }
-      } catch (err) {
-        // Un'interruzione voluta non è un errore: la si racconta qui sotto, una volta sola.
-        if (motivoStop === undefined) {
-          res.write(`event: error\ndata: ${JSON.stringify({ message: String(err) })}\n\n`);
-        }
+          scrivi,
+          esegui: (o) =>
+            runHrAgent(prompt, client, {
+              approve: o.approve,
+              approvalTimeoutMs: APPROVAL_TIMEOUT_MS,
+              audit: auditSink,
+              principal,
+              maxTurns: LIMITI.giri,
+              abortController: o.abortController,
+              contatore: o.contatore,
+              conversationId: o.conversationId,
+              ...(o.resume !== undefined ? { resume: o.resume } : {}),
+              ...(registroCapacita ? { capacita: { registro: registroCapacita, agentCode: AGENTE_ASSISTENTE } } : {}),
+            }),
+        });
+        if (!res.writableEnded && !res.destroyed) res.end();
       } finally {
-        clearTimeout(timerDurata);
         posto.esci();
-      }
-      if (!res.writableEnded && motivoStop !== "CHIUSA") {
-        if (motivoStop === "DURATA") {
-          res.write(`event: limit\ndata: ${JSON.stringify({ limite: "DURATA", durataMs: LIMITI.durataMs })}\n\n`);
-        }
-        res.write("event: done\ndata: {}\n\n");
-        res.end();
       }
       return;
     }

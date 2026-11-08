@@ -11,6 +11,7 @@ import { describe, it, expect } from "vitest";
 import {
   ATTORI_DI_AUDIT,
   ContatorePersone,
+  impronta,
   raccogliPersone,
 } from "../src/persone-distinte.js";
 import { derivaSoglie } from "../src/soglie-persone.js";
@@ -250,5 +251,38 @@ describe("#251 F3 — il diario porta il numero", () => {
     await expect(
       registraChiusuraConversazione(rotto, { principal: "user" }, c),
     ).resolves.toBeUndefined();
+  });
+});
+
+describe("T6b (ADR-0056 D4) — il contatore riparte dalla conversazione salvata", () => {
+  it("conta impronte e non identificativi, e le impronte sono 64 esadecimali in ordine", () => {
+    const c = new ContatorePersone(SOGLIE);
+    c.aggiungi({ items: [{ subjectUserId: B }, { subjectUserId: A }] });
+    const h = c.impronte();
+    expect(h).toHaveLength(2);
+    expect(h.every((x) => /^[0-9a-f]{64}$/.test(x))).toBe(true);
+    expect(h).toEqual([...h].sort());
+    expect(h).toContain(impronta(A));
+    expect(h.join()).not.toContain(A);
+  });
+
+  it("ripreso con le impronte salvate, lo stesso soggetto non conta due volte e uno nuovo sì", () => {
+    const prima = new ContatorePersone(SOGLIE);
+    prima.aggiungi({ items: [{ subjectUserId: A }, { subjectUserId: B }] });
+    const ripresa = new ContatorePersone(SOGLIE, prima.impronte());
+    expect(ripresa.conta()).toBe(2);
+    ripresa.aggiungi({ items: [{ subjectUserId: A }, { subjectUserId: C }] });
+    expect(ripresa.conta()).toBe(3);
+    expect(ripresa.eGuasto()).toBe(false);
+  });
+
+  it("un'impronta malformata nel seme rende il contatore guasto (il conto sarebbe un minimo)", () => {
+    const c = new ContatorePersone(SOGLIE, ["non-un-impronta"]);
+    expect(c.conta()).toBe(0);
+    expect(c.eGuasto()).toBe(true);
+  });
+
+  it("l'impronta non dipende dalle maiuscole dell'UUID", () => {
+    expect(impronta(A.toUpperCase())).toBe(impronta(A));
   });
 });

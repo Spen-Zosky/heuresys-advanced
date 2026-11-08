@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `038d895e` (2026-11-07T13:10:59+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `19bd730d` (2026-11-08T19:09:15+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 117 |
-| Route API | 698 |
+| Moduli API | 118 |
+| Route API | 708 |
 | Pagine web | 132 |
-| Schemi shared | 130 |
+| Schemi shared | 131 |
 | Tabelle DB | 396 (vuote: 68) |
 | Viste / matview | 87 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 327 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 334 |
 
 ## Moduli API
 
@@ -22,6 +22,7 @@
 | activity-classifications | /v1/activity-classifications | 5 | 4 | 1 | 1 |
 | advisor | /v1/advisor | 2 | 1 | 1 | 1 |
 | agent-capabilities | /v1/agent-capabilities | 7 | 0 | 5 | 1 |
+| agent-conversations | /v1/agent-conversations | 10 | 0 | 4 | 1 |
 | agent-tokens | /v1/auth/agent-tokens | 1 | 0 | 2 | 0 |
 | analytics | /v1/analytics | 10 | 1 | 13 | 5 |
 | approvals | /v1/approvals | 5 | 3 | 6 | 5 |

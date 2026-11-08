@@ -22,13 +22,32 @@ import { appendFile, mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { redact } from "./redact.js";
 import type { LivelloPersone } from "./soglie-persone.js";
+import type { ClasseAzione } from "./classi-azioni.js";
 
 export type AuditDecision = "allow" | "deny";
+
+/**
+ * ADR-0053 A2 (piano T5, migrazione 000482): l'esito che distingue la scrittura approvata da una
+ * persona da quella eseguita da una capacità `LIBERA` senza ponte. `decision` resta `allow`/`deny`
+ * perché è ciò che l'SDK riceve; `outcome` è ciò che il registro conta.
+ */
+export type AuditOutcome = "allow-read" | "allow-write" | "allow-write-autonomous" | "deny";
+
+/** Il registro «per conto di» (ADR-0053 A2): campi facoltativi, scritti dal cancello quando li sa. */
+export interface PerContoDi {
+  outcome?: AuditOutcome;
+  /** La classe dell'azione (ADR-0056 D2), quando il cancello l'ha calcolata. */
+  actionClass?: ClasseAzione;
+  /** La capacità che ha liberato la scrittura, con la sua versione. */
+  capability?: { code: string; version: number };
+  /** Per conto di chi (ADR-0050 D6): l'identificativo opaco della persona che ha avviato il giro. */
+  onBehalfOf?: string;
+}
 
 /** Principal that drove the tool call (hybrid auth: forwarded user vs service user). */
 export type AuditPrincipal = "user" | "service" | "unknown";
 
-export interface AuditEntry {
+export interface AuditEntry extends PerContoDi {
   /** ISO-8601 UTC timestamp. */
   ts: string;
   /**
@@ -96,7 +115,7 @@ export interface AuditEntry {
 }
 
 /** Fields the caller supplies; ts + argsHash are derived by the sink. */
-export interface AuditInput {
+export interface AuditInput extends PerContoDi {
   /** #253 — vedi `AuditEntry.conversationId`. */
   conversationId?: string;
   who: { principal: AuditPrincipal; subject?: string };
@@ -150,6 +169,10 @@ export function toEntry(input: AuditInput): AuditEntry {
     ...(input.livelloPersone !== undefined ? { livelloPersone: input.livelloPersone } : {}),
     decision: input.decision,
     reason: input.reason,
+    ...(input.outcome !== undefined ? { outcome: input.outcome } : {}),
+    ...(input.actionClass !== undefined ? { actionClass: input.actionClass } : {}),
+    ...(input.capability !== undefined ? { capability: input.capability } : {}),
+    ...(input.onBehalfOf !== undefined ? { onBehalfOf: input.onBehalfOf } : {}),
   };
 }
 
@@ -204,8 +227,9 @@ export class DbAuditSink implements AuditSink {
     await this.db.query(
       `INSERT INTO audit.agent_gateway_decisions
          (conversation_id, ts, principal_kind, principal_subject, tenant, tool, args_hash,
-          concept, operation, persone_distinte, livello_persone, decision, reason)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+          concept, operation, persone_distinte, livello_persone, decision, reason,
+          outcome, action_class, capability_code, capability_version, on_behalf_of)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
       [
         entry.conversationId ?? null,
         entry.ts,
@@ -220,6 +244,11 @@ export class DbAuditSink implements AuditSink {
         entry.livelloPersone ?? null,
         entry.decision,
         entry.reason,
+        entry.outcome ?? null,
+        entry.actionClass ?? null,
+        entry.capability?.code ?? null,
+        entry.capability?.version ?? null,
+        entry.onBehalfOf ?? null,
       ],
     );
   }

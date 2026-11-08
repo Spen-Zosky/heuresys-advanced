@@ -21,6 +21,7 @@ import {
   FileAuditSink,
   type AuditPrincipal,
   type AuditSink,
+  type PerContoDi,
 } from "./audit-sink.js";
 import { bareToolName, DEFAULT_TOOL_ALLOWLIST, isParametricToolName } from "./mcp-tool-names.js";
 import { classeAzione } from "./classi-azioni.js";
@@ -180,6 +181,8 @@ const DENY_READ_OVER_THRESHOLD =
   "read paused: this conversation has already touched more distinct people than the tenant's " +
   "high threshold (ADR-0040 R2) and the human confirmation was not granted. Not a permission " +
   "denial: ask the person to confirm, then retry.";
+/** Il registro di una lettura consentita: classe A (ADR-0056 D2). */
+const LETTURA: PerContoDi = { outcome: "allow-read", actionClass: "A" };
 const DENY_NOT_ALLOWLISTED = "tool not in allowlist (defense-in-depth)";
 const DENY_ACTION_CLASS_UNKNOWN =
   "write has no action class in the catalogue (ADR-0056 D2 fail-closed)";
@@ -286,11 +289,19 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
     return richiestaInVolo;
   };
 
+  /**
+   * ADR-0053 A2 (piano T5): per conto di chi. È la persona che ha avviato il giro (ADR-0050 D6), cioè
+   * il soggetto del principal quando è una persona; un principal di servizio o ignoto non nomina
+   * nessuno, e allora il cancello non libera niente da solo (ramo 2d).
+   */
+  const perContoDi = who.principal === "user" && who.subject ? who.subject : undefined;
+
   const auditDecision = (
     tool: string,
     args: unknown,
     decision: ToolDecision,
     reason: string,
+    registro: PerContoDi,
   ): void => {
     const { quante, livello } = leggiPersone();
     // Audit is best-effort and MUST NOT change the gate decision: swallow sink errors.
@@ -305,6 +316,8 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
         ...(livello !== undefined ? { livelloPersone: livello } : {}),
         decision: decision.behavior,
         reason,
+        ...registro,
+        ...(perContoDi !== undefined ? { onBehalfOf: perContoDi } : {}),
       })
       .catch(() => {});
   };
@@ -313,7 +326,7 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
     // 1. Allowlist (deny-by-default, before classification).
     if (!allowlist.has(name)) {
       const d: ToolDecision = { behavior: "deny", message: DENY_NOT_ALLOWLISTED };
-      auditDecision(name, input, d, "TOOL_NOT_ALLOWLISTED");
+      auditDecision(name, input, d, "TOOL_NOT_ALLOWLISTED", { outcome: "deny" });
       return d;
     }
 
@@ -328,7 +341,7 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
     //     generico può esistere senza aprire un buco.
     if (classe === "unresolved") {
       const d: ToolDecision = { behavior: "deny", message: DENY_UNRESOLVED_OPERATION };
-      auditDecision(name, input, d, "OPERATION_UNRESOLVED");
+      auditDecision(name, input, d, "OPERATION_UNRESOLVED", { outcome: "deny" });
       return d;
     }
 
@@ -347,7 +360,7 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
         livello === undefined || livello === "confermato" || livello === "non-misurato";
       if (!oltreLaSoglia) {
         const d: ToolDecision = { behavior: "allow", updatedInput: input as Record<string, unknown> };
-        auditDecision(name, input, d, "READ_AUTO_ALLOW");
+        auditDecision(name, input, d, "READ_AUTO_ALLOW", LETTURA);
         return d;
       }
       // L'assenso già dato in questa conversazione non si ri-chiede (D5) — ma si scrive nel
@@ -355,7 +368,7 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
       // un umano aveva già acconsentito» sono due fatti diversi, e a posteriori contano.
       if (consensoLetture) {
         const d: ToolDecision = { behavior: "allow", updatedInput: input as Record<string, unknown> };
-        auditDecision(name, input, d, "READ_OVER_THRESHOLD_CONSENTED");
+        auditDecision(name, input, d, "READ_OVER_THRESHOLD_CONSENTED", LETTURA);
         return d;
       }
       const consentito = await chiediPerLettura(name, input, quante, livello);
@@ -365,6 +378,7 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
       auditDecision(
         name, input, d,
         consentito ? "READ_OVER_THRESHOLD_APPROVED" : "READ_OVER_THRESHOLD_DENIED",
+        consentito ? LETTURA : { outcome: "deny", actionClass: "A" },
       );
       return d;
     }
@@ -375,7 +389,7 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
     const classeAz = classeAzione(name, input, opts.operations);
     if (classeAz === undefined) {
       const d: ToolDecision = { behavior: "deny", message: DENY_ACTION_CLASS_UNKNOWN };
-      auditDecision(name, input, d, "ACTION_CLASS_UNKNOWN");
+      auditDecision(name, input, d, "ACTION_CLASS_UNKNOWN", { outcome: "deny" });
       return d;
     }
 
@@ -385,8 +399,10 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
     //     Il registro si legge ora, a ogni scrittura: l'interruttore vale dalla chiamata successiva.
     //     Qualunque dubbio (registro assente o guasto, operazione non risolta, tenant ignoto) porta
     //     al ponte qui sotto, cioè a una persona: mai a un'esecuzione e mai a un diniego nuovo.
-    let oltreIlTetto: string | undefined;
-    if (classeAz === "B" && opts.capacita && who.tenant) {
+    let oltreIlTetto: { code: string; version: number } | undefined;
+    // Una scrittura autonoma deve poter dire per conto di chi e in quale giro (ADR-0053 A2): senza
+    // persona o senza conversazione la capacità non si legge nemmeno, e la scrittura va al ponte.
+    if (classeAz === "B" && opts.capacita && who.tenant && perContoDi && who.conversationId) {
       const op = operazioneDiChiamata(name, input, opts.operations);
       let libera: Awaited<ReturnType<RegistroCapacita["liberaPer"]>>;
       if (op) {
@@ -397,13 +413,17 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
         }
       }
       if (libera) {
-        const etichetta = `${libera.code}@${libera.version}`;
+        const capability = { code: libera.code, version: libera.version };
         if (volume.prenota(libera)) {
           const d: ToolDecision = { behavior: "allow", updatedInput: input as Record<string, unknown> };
-          auditDecision(name, input, d, `WRITE_CAPABILITY_LIBERA ${etichetta}`);
+          auditDecision(name, input, d, `WRITE_CAPABILITY_LIBERA ${libera.code}@${libera.version}`, {
+            outcome: "allow-write-autonomous",
+            actionClass: "B",
+            capability,
+          });
           return d;
         }
-        oltreIlTetto = etichetta; // il tetto è raggiunto: si ferma e chiede (ADR-0053 D4)
+        oltreIlTetto = capability; // il tetto è raggiunto: si ferma e chiede (ADR-0053 D4)
       }
     }
 
@@ -429,7 +449,15 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
       ? { behavior: "allow", updatedInput: input as Record<string, unknown> }
       : { behavior: "deny", message: DENY_NOT_APPROVED };
     const ragione = approved ? "WRITE_HUMAN_APPROVED" : "WRITE_DENIED_OR_TIMEOUT";
-    auditDecision(name, input, d, oltreIlTetto ? `${ragione} OVER_VOLUME_CAP ${oltreIlTetto}` : ragione);
+    auditDecision(
+      name, input, d,
+      oltreIlTetto ? `${ragione} OVER_VOLUME_CAP ${oltreIlTetto.code}@${oltreIlTetto.version}` : ragione,
+      {
+        outcome: approved ? "allow-write" : "deny",
+        actionClass: classeAz,
+        ...(oltreIlTetto ? { capability: oltreIlTetto } : {}),
+      },
+    );
     return d;
   };
 }

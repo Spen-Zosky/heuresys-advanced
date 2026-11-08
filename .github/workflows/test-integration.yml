@@ -146,6 +146,13 @@ jobs:
         working-directory: apps/api
         run: pnpm exec vitest run --reporter=verbose --no-coverage
 
+      # Il diario del cancello dell'agente nel database (#253, 000452, 000482). Gira qui, e non
+      # nel job di lint, perche' qui il database e' heuresys_ci e la catena e' gia' applicata:
+      # nel lint il runner porta il POSTGRES_DB della produzione (D-08).
+      - name: Run agent-gateway diary test (heuresys_ci)
+        working-directory: apps/agent-gateway
+        run: pnpm exec vitest run test/diario-nel-database.integration.test.ts --reporter=verbose
+
       - name: Upload test artifacts on failure
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

@@ -91,7 +91,9 @@ export async function impostaLingua(ctx, lingua, profilo) {
   await ctx.addCookies([{ name: 'NEXT_LOCALE', value: lingua, domain: host, path: '/' }]);
   await ctx.route('**/v1/me/preferences', async (route) => {
     if (route.request().method() !== 'GET') return route.fallback();
-    const r = await route.fetch();
+    // la pagina può chiudersi con la chiamata in volo: non deve far cadere tutto il giro
+    const r = await route.fetch().catch(() => null);
+    if (!r) return route.abort().catch(() => {});
     let corpo = await r.text();
     try { const j = JSON.parse(corpo); const giu = (o) => { if (o && typeof o === 'object') for (const k of Object.keys(o)) { if (k === 'locale') o[k] = lingua; else giu(o[k]); } }; giu(j); corpo = JSON.stringify(j); } catch {}
     return route.fulfill({ response: r, body: corpo });

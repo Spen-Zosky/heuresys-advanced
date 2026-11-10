@@ -64,6 +64,14 @@ export const CLASSI_STRUMENTI: Readonly<Record<string, ClasseAzione>> = Object.f
   hrx_predictions_list: "A",
   hrx_predictions_get: "A",
   hrx_org_unit_processes_list: "A",
+  hrx_capability_composition: "A",
+  hrx_capability_essential_ranking: "A",
+  hrx_capability_vrio: "A",
+  hrx_capability_maturity: "A",
+  hrx_matching_my_positions: "A",
+  hrx_matching_my_job_roles: "A",
+  hrx_matching_my_occupations: "A",
+  hrx_tenant_consolidations_list: "A",
 
   // Scritture sulla struttura del tenant: B.
   hrx_org_units_upsert: "B",

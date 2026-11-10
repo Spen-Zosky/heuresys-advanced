@@ -13,6 +13,7 @@ Richiesta di Enzo del 2026-11-10 (thread «Creare agente esperto bancario per le
 | 2026-11-10 | Sola lettura e proposte finché Enzo non approva le scritture. |
 | 2026-11-10 | Il livello di Area di RTL sparisce: i direttori di filiale riportano al Retail Director, e i Responsabili di Area non entrano nella corsa. |
 | 2026-11-10 | RTL è un tenant di prova: nessun vincolo di demansionamento o di stipendio, la corsa vince anche su livelli e retribuzioni. Ogni cambiamento controlla e aggiorna tutta la catena relazionale dei dati, senza escludere nessuna tabella; restano invariati solo i dati anagrafici e di utenza (data di nascita, indirizzo, email, password, titolo di studio e simili, tabelle `sys.sys_auth_*`). |
+| 2026-11-10 | Approvate tutte e sette le decisioni sulle persone del documento («tutti sì», 21:27 Roma): abbinamenti corretti, livello del posto della corsa in salita e in discesa, Pellegrini responsabile delle casse della rete e Leone della consulenza di Milano Centro, posti mancanti per 13 persone, Gallo e Costa responsabili IT, responsabili di cassa e di consulenza in tutte e 10 le filiali, Martino Responsabile Compliance e Protezione Dati. |
 
 La terza decisione rovescia, per questo caso, la regola R-13 della specifica dell'agente (il prototipo prende la lingua del tenant): l'interprete riceve la fonte di verità come parametro (`sourceOfTruth`), invece di averla scritta dentro.
 

@@ -8,6 +8,7 @@ import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { OrigineDelDato, OrigineDellaRiga } from "@/components/origine-del-dato";
 import { descrivi, useTabellaAgente } from "@/lib/agente/use-tabella-agente";
+import { useLeggibile } from "@/lib/leggibile";
 
 /**
  * Canonical list-page composition (brand-component-contract.md: "Data table /
@@ -74,6 +75,9 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
 export function EntityTable<T>(props: EntityTableProps<T>) {
   const { t } = useTranslation();
+  // C1, C2, C4 del piano interfaccia sistematica: ogni cella passa per la rete di leggibilità
+  // (numeri it-IT, codici e frasi inglesi in italiano, email e identificativi in nomi).
+  const leggi = useLeggibile();
   const {
     isLoading, isError, errorTestId, errorMessage, error, deniedReason,
     rows: righeRicevute, rowKey, rowTestId, onRowClick, columns,
@@ -208,7 +212,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
             >
               {colonne.map((c, i) => (
                 <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`}>
-                  {c.cell(row)}
+                  {leggi.nodo(c.cell(row))}
                 </td>
               ))}
             </tr>

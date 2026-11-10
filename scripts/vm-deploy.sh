@@ -240,6 +240,8 @@ pnpm --filter @heuresys/api build
 NODE_ENV=production \
 NEXT_PUBLIC_API_PROXY_BASE_URL="http://localhost:$API_PORT" \
 NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \
+NEXT_PUBLIC_ENABLE_AGENT_DEV=1 \
+NEXT_PUBLIC_AGENT_GATEWAY_URL="/agent-gateway" \
 pnpm --filter @heuresys/web build
 
 # 3c. Render + install ALL systemd units (api/web + EVERY scheduler) from deploy/systemd/.

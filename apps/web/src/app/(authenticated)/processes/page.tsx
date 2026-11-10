@@ -11,11 +11,12 @@ import { StatusPill } from "@/components/status-pill";
 function buildColumns(t: TFunction): DataColumn<BlueprintProcess>[] {
   return [
     { header: t("processes.columns.ordinal"), cell: (p) => <span className="text-xs text-muted-foreground">{p.ordinal}</span> },
-    { header: t("processes.columns.code"), cell: (p) => <span className="font-mono text-xs">{p.code}</span> },
-    { header: t("processes.columns.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
+    // Repertorio interfacce (B3): il nome del processo, non il suo codice (R2, R4); il tipo in parole,
+    // con gli stessi termini della pagina del responsabile di processo (R7).
+    { header: t("processes.columns.name"), cell: (p) => <span className="font-medium text-foreground" data-testid="process-name">{p.name}</span> },
     {
       header: t("processes.columns.optional"),
-      cell: (p) => <StatusPill tone={p.isOptional ? "warning" : "neutral"}>{p.isOptional ? t("processes.yes") : t("processes.no")}</StatusPill>,
+      cell: (p) => <StatusPill tone={p.isOptional ? "warning" : "neutral"}>{p.isOptional ? t("processes.optionalYes") : t("processes.optionalNo")}</StatusPill>,
     },
   ];
 }

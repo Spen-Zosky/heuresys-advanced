@@ -53,20 +53,19 @@
   },
   "processes": {
     "title": "Process catalogue",
-    "description": "Blueprint-anchored process catalog.",
+    "description": "The processes of the tenant's blueprint, in value-chain order.",
     "count": "{{count}} processes",
     "error": "Unable to load the processes.",
     "emptyTitle": "No processes",
     "emptyDescription": "There are no processes.",
-    "caption": "Process catalog (blueprint-anchored)",
-    "yes": "yes",
-    "no": "no",
+    "caption": "Processes in value-chain order",
     "columns": {
-      "ordinal": "#",
-      "code": "Code",
-      "name": "Name",
-      "optional": "Optional"
-    }
+      "ordinal": "No.",
+      "name": "Process",
+      "optional": "Type"
+    },
+    "optionalYes": "Optional",
+    "optionalNo": "Core"
   },
   "brownfield": {
     "title": "Brownfield adaptation",

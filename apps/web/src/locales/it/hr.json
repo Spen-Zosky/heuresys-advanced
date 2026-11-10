@@ -233,9 +233,9 @@
     "emptyDescription": "Non ci sono processi nel blueprint.",
     "caption": "Catalogo processi",
     "core": "Essenziale",
-    "optional": "Opzionale",
+    "optional": "Facoltativo",
     "cols": {
-      "ordinal": "#",
+      "ordinal": "N.",
       "code": "Codice",
       "name": "Processo",
       "kind": "Tipo",

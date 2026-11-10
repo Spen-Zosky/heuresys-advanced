@@ -34,7 +34,6 @@ function raciTone(role: OrgUnitProcessRole): "success" | "info" | "warning" | "n
 function buildProcessColumns(t: TFunction, onSelect: (p: SelectedProcess) => void, selectedId: string | null): DataColumn<ProcessRow>[] {
   return [
     { header: t("processOwner.cols.ordinal"), cell: (p) => <span className="text-xs text-muted-foreground">{p.ordinal}</span> },
-    { header: t("processOwner.cols.code"), cell: (p) => <span className="text-xs text-muted-foreground">{p.code}</span> },
     { header: t("processOwner.cols.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
     { header: t("processOwner.cols.kind"), cell: (p) => <StatusPill tone={p.isOptional ? "neutral" : "info"}>{p.isOptional ? t("processOwner.optional") : t("processOwner.core")}</StatusPill> },
     {
@@ -55,7 +54,6 @@ function buildProcessColumns(t: TFunction, onSelect: (p: SelectedProcess) => voi
 function buildRaciColumns(t: TFunction): DataColumn<OrgUnitProcessForProcess>[] {
   return [
     { header: t("processOwner.raci.cols.unit"), cell: (r) => <span className="font-medium text-foreground">{r.orgUnitName}</span> },
-    { header: t("processOwner.raci.cols.code"), cell: (r) => <span className="text-xs text-muted-foreground">{r.orgUnitCode}</span> },
     { header: t("processOwner.raci.cols.role"), cell: (r) => <StatusPill tone={raciTone(r.role)}>{t(`processOwner.raci.roles.${r.role}`)}</StatusPill> },
   ];
 }

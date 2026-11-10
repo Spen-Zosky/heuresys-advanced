@@ -3,7 +3,7 @@
   "pagine": {
     "/users": [],
     "/positions": [],
-    "/approvals": ["R3-stato-non-in-coda"],
+    "/approvals": [],
     "/processes": [],
     "/skills": [],
     "/learning": [],

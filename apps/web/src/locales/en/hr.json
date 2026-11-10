@@ -235,7 +235,7 @@
     "core": "Core",
     "optional": "Optional",
     "cols": {
-      "ordinal": "#",
+      "ordinal": "No.",
       "code": "Code",
       "name": "Process",
       "kind": "Kind",
@@ -257,8 +257,8 @@
         "role": "RACI role"
       },
       "roles": {
-        "OWNER": "Owner · A",
-        "CONTRIBUTOR": "Contributor · R",
+        "OWNER": "Accountable · A",
+        "CONTRIBUTOR": "Responsible · R",
         "CONSULTED": "Consulted · C",
         "INFORMED": "Informed · I"
       }

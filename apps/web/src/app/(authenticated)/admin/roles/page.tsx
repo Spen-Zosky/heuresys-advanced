@@ -16,6 +16,11 @@ interface RolePermItem {
   permissionAction: string;
 }
 
+/**
+ * Repertorio interfacce (blocco B2): ogni riga dice il permesso in parole, «Utenti · leggere»,
+ * e il codice tecnico (`user:read`) resta solo nel suggerimento al passaggio del mouse (R4).
+ * Le righe sono in ordine alfabetico delle parole, così i permessi di una stessa area stanno insieme.
+ */
 export default function AdminRolesPage() {
   const { t } = useTranslation("admin");
   const rp = useQuery({
@@ -25,21 +30,27 @@ export default function AdminRolesPage() {
 
   const { roles, perms, matrix } = useMemo(() => {
     const rolesSet = new Set<string>();
-    const permsSet = new Set<string>();
+    const permsMap = new Map<string, { label: string }>();
     const mat = new Map<string, Set<string>>(); // role → set of perms
     for (const r of rp.data?.items ?? []) {
       rolesSet.add(r.roleCode);
-      permsSet.add(r.permissionCode);
+      if (!permsMap.has(r.permissionCode)) {
+        const area = t(`roles.resources.${r.permissionResource}`, { defaultValue: r.permissionResource });
+        const azione = t(`roles.actions.${r.permissionAction}`, { defaultValue: r.permissionAction });
+        permsMap.set(r.permissionCode, { label: `${area} · ${azione}` });
+      }
       let s = mat.get(r.roleCode);
       if (!s) { s = new Set<string>(); mat.set(r.roleCode, s); }
       s.add(r.permissionCode);
     }
     return {
       roles: [...rolesSet].sort(),
-      perms: [...permsSet].sort(),
+      perms: [...permsMap.entries()]
+        .map(([code, v]) => ({ code, label: v.label }))
+        .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base" })),
       matrix: mat,
     };
-  }, [rp.data]);
+  }, [rp.data, t]);
 
   const countLabel = rp.data
     ? t("roles.count", { roles: roles.length, perms: perms.length, total: rp.data.total })
@@ -87,7 +98,7 @@ export default function AdminRolesPage() {
             <table className="min-w-full border-collapse text-xs" data-testid="admin-roles-table">
               <thead>
                 <tr className="sticky top-0 border-b border-border bg-card text-left text-muted-foreground">
-                  <th className="px-3 py-2 font-mono font-medium">{t("roles.headerCell")}</th>
+                  <th className="px-3 py-2 font-medium">{t("roles.headerCell")}</th>
                   {roles.map((r) => (
                     <th
                       key={r}
@@ -101,13 +112,15 @@ export default function AdminRolesPage() {
                 </tr>
               </thead>
               <tbody>
-                {perms.map((p) => (
+                {perms.map(({ code: p, label }) => (
                   <tr
                     key={p}
                     className="border-b border-border last:border-b-0 transition-colors hover:bg-muted/50"
                     data-testid="admin-roles-perm-row"
                   >
-                    <td className="px-3 py-1.5 font-mono whitespace-nowrap text-foreground">{p}</td>
+                    <td className="px-3 py-1.5 whitespace-nowrap text-foreground" title={p} data-testid="admin-roles-perm-label">
+                      {label}
+                    </td>
                     {roles.map((r) => {
                       const has = matrix.get(r)?.has(p) ?? false;
                       return (

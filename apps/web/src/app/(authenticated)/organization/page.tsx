@@ -25,9 +25,9 @@ export default function OrganizationPage() {
 
   const columns = useMemo<DataColumn<OrganizationUnit>[]>(
     () => [
-      { header: t("organization.columns.code"), cell: (o) => <span className="font-mono text-xs">{o.code}</span> },
-      { header: t("organization.columns.name"), cell: (o) => <span className="font-medium text-foreground">{o.name}</span> },
-      { header: t("organization.columns.type"), cell: (o) => <span className="text-xs uppercase text-muted-foreground">{enumLabel("orgUnitType", o.type)}</span> },
+      // Repertorio interfacce (B2): il nome dell'unità apre la riga, il codice tecnico non va a video (R2, R4).
+      { header: t("organization.columns.name"), cell: (o) => <span className="font-medium text-foreground" data-testid="organization-name">{o.name}</span> },
+      { header: t("organization.columns.type"), cell: (o) => <span className="text-sm text-muted-foreground">{enumLabel("orgUnitType", o.type)}</span> },
       {
         header: t("organization.columns.parent"),
         cell: (o) => <span className="text-xs text-muted-foreground">{o.parentName ?? (o.parentId ? <SenzaNome id={o.parentId} /> : t("organization.dash"))}</span>,

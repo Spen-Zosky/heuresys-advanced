@@ -99,7 +99,7 @@ export async function listOus(
             (SELECT p.organization_unit_name FROM sys.sys_organization_units p
               WHERE p.organization_unit_id = sys.sys_organization_units.organization_unit_parent_id) AS parent_name
        FROM sys.sys_organization_units ${whereClause}
-      ORDER BY organization_unit_code LIMIT $${limIdx} OFFSET $${offIdx}`,
+      ORDER BY lower(organization_unit_name), organization_unit_code LIMIT $${limIdx} OFFSET $${offIdx}`,
     params,
   );
   return { items: res.rows.map(toOu), total };

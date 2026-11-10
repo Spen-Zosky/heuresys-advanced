@@ -123,7 +123,7 @@ BEGIN
     RAISE EXCEPTION 'Promozioni incoerenti: % totali contro %+%', n_promossi, n_mgr, n_tl;
   END IF;
 
-  RAISE NOTICE 'RUOLI DI COMANDO OK — % responsabili promossi (% MANAGER, % TEAM_LEADER); tutti i % responsabili di unita attive hanno ora un comando riconosciuto dai permessi.',
+  RAISE NOTICE 'RUOLI DI COMANDO OK — % responsabili candidati (nessuna concessione se il modello ADR-0057 e'' applicato) (% MANAGER, % TEAM_LEADER); tutti i % responsabili di unita attive hanno ora un comando riconosciuto dai permessi.',
                n_promossi, n_mgr, n_tl, n_universo;
 END $$;
 

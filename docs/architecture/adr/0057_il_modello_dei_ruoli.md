@@ -22,7 +22,7 @@ Misura del 2026-11-10 sul dump di produzione delle 03:42, ripristinato in una co
 
 **R1.** Due assi separati (ADR-0027): il ruolo di comando viene dall'organigramma, il ruolo funzionale dal lavoro della persona.
 
-**R2.** Il ruolo di comando si calcola e non si concede a mano (`sys.v_ruoli_di_comando_attesi`, migrazione 000485): titolare della sede o della Direzione Generale = `CEO`; di una filiale = `BRANCH_MANAGER`; di un'unità con figlie attive = `MANAGER`; di un'unità foglia o di una squadra attiva = `TEAM_LEADER`. Vince il grado più alto. Al massimo uno per persona.
+**R2.** Il ruolo di comando si calcola e non si concede a mano (`sys.v_ruoli_di_comando_attesi`, migrazione 000485): titolare della sede o della Direzione Generale = `CEO`; di una filiale = `BRANCH_MANAGER`; di un'unità con figlie attive = `MANAGER`; di un'unità foglia = `TEAM_LEADER`. Guidare una squadra senza reggere un'unità non dà `TEAM_LEADER` (decisione di Enzo del 2026-10-31 su Marco Rinaldi). Vince il grado più alto. Al massimo uno per persona.
 
 **R3.** `USER` è di tutti e non si tocca. `TEAM_MEMBER` non si concede più: l'appartenenza a una squadra è in `sys.sys_team_members`.
 

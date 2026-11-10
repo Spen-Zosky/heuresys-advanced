@@ -115,18 +115,12 @@ WITH titolari AS (
            ELSE 'TEAM_LEADER'
          END AS ruolo,
          'titolare dell''unita ' || ou.organization_unit_code AS fonte
+    -- Guidare una squadra (sys_teams) senza reggere un'unita' non da' TEAM_LEADER: decisione di
+    -- Enzo del 2026-10-31 (revoca a marco.rinaldi, «non guida un'unita»), confermata dalla prova
+    -- del 2026-11-10 che altrimenti lo avrebbe ridato a lui e a martina.gentile.
     FROM sys.sys_organization_units ou
     JOIN sys.sys_users u ON u.user_id = ou.organization_unit_manager_user_id
    WHERE ou.organization_unit_is_active
-     AND u.user_status = 'ACTIVE'
-     AND u.user_email NOT ILIKE '%@collaudo.invalid'
-  UNION ALL
-  -- asse funzionale (ADR-0027): chi guida una squadra attiva comanda la squadra
-  SELECT t.team_lead_user_id, t.team_tenant_id, t.team_code, 'TEAM_LEADER',
-         'guida la squadra ' || t.team_code
-    FROM sys.sys_teams t
-    JOIN sys.sys_users u ON u.user_id = t.team_lead_user_id
-   WHERE t.team_is_active
      AND u.user_status = 'ACTIVE'
      AND u.user_email NOT ILIKE '%@collaudo.invalid'
 ), graduati AS (
@@ -139,7 +133,7 @@ SELECT DISTINCT ON (user_id) user_id, tenant_id, ruolo, unita, fonte
  ORDER BY user_id, grado, unita;
 
 COMMENT ON VIEW sys.v_ruoli_di_comando_attesi IS
-  'ADR-0057 R2 (mig 000485): il ruolo di comando che l''organigramma assegna a ogni persona: titolare di sede o Direzione Generale = CEO, di filiale = BRANCH_MANAGER, di un''unita con figlie = MANAGER, di un''unita foglia o di una squadra attiva = TEAM_LEADER. Vince il grado piu alto. Utenze di collaudo escluse.';
+  'ADR-0057 R2 (mig 000485): il ruolo di comando che l''organigramma assegna a ogni persona: titolare di sede o Direzione Generale = CEO, di filiale = BRANCH_MANAGER, di un''unita con figlie = MANAGER, di un''unita foglia = TEAM_LEADER. Vince il grado piu alto. Utenze di collaudo escluse.';
 
 -- §3 cio' che il modello non prevede ----------------------------------------------------------
 CREATE OR REPLACE VIEW sys.v_ruoli_fuori_modello AS

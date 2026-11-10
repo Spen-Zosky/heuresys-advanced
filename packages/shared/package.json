@@ -82,6 +82,16 @@
       "heuresys-source": "./src/schemas/mandate-acts.ts",
       "default": "./dist/schemas/mandate-acts.js"
     },
+    "./schemas/rubrica": {
+      "types": "./dist/schemas/rubrica.d.ts",
+      "heuresys-source": "./src/schemas/rubrica.ts",
+      "default": "./dist/schemas/rubrica.js"
+    },
+    "./schemas/quadro": {
+      "types": "./dist/schemas/quadro.d.ts",
+      "heuresys-source": "./src/schemas/quadro.ts",
+      "default": "./dist/schemas/quadro.js"
+    },
     "./schemas/users": {
       "types": "./dist/schemas/users.d.ts",
       "heuresys-source": "./src/schemas/users.ts",

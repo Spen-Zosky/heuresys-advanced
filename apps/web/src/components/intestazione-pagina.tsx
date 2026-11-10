@@ -10,9 +10,13 @@
  * 24 px, poco più grande di un titolo di scheda. Qui: titolo più grande e in grassetto con una
  * barra di colore che lo segna, descrizione su una riga, niente aria morta sotto. Stessa firma:
  * le pagine importano `PageHeader` da qui invece che da @heuresys/ui.
+ *
+ * Sotto il titolo si monta il quadro degli insight (classe C15): ogni pagina con un titolo lo
+ * riceve senza toccarla.
  */
 import type { ReactNode } from "react";
 import type { PageHeaderProps } from "@heuresys/ui";
+import { QuadroInsight } from "@/components/quadro-insight";
 
 export function PageHeader(props: PageHeaderProps & { children?: ReactNode }) {
   // `divider` della libreria non si usa: la barra di colore del titolo separa già
@@ -34,6 +38,8 @@ export function PageHeader(props: PageHeaderProps & { children?: ReactNode }) {
         </div>
         {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
       </div>
+      {/* C15: le cose che contano su questa pagina, prima di tutto il resto */}
+      <QuadroInsight />
     </header>
   );
 }

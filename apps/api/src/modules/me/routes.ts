@@ -10,7 +10,8 @@
  *   - Routes here use `requirePermission(":self")` perms from the seed.
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { RubricaResponseSchema } from "@heuresys/shared";
+import { QuadroQuerySchema, QuadroResponseSchema, RubricaResponseSchema } from "@heuresys/shared";
+import { areeDa, leggiQuadro } from "../quadro/service.js";
 import { leggiRubrica } from "../rubrica/repository.js";
 import type { FastifyRequest } from "fastify";
 import {
@@ -484,6 +485,15 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("user_profile:read:self")],
     schema: { response: { 200: RubricaResponseSchema } },
   }, async (req) => leggiRubrica(actorFromRequest(req)));
+
+  // Classe C15: il quadro degli insight di una pagina, sul perimetro di chi guarda (ADR-0027).
+  // Conteggi, mai nomi né importi individuali; le lenti sensibili solo per i mandati HR.
+  app.get("/quadro", {
+    preHandler: [requirePermission("user_profile:read:self")],
+    schema: { querystring: QuadroQuerySchema, response: { 200: QuadroResponseSchema } },
+  }, async (req) =>
+    leggiQuadro(actorFromRequest(req), areeDa(req.query.aree), (chiave, errore) =>
+      req.log.warn({ chiave, err: errore }, "quadro: lente non calcolata")));
 
   app.get("/delegations", {
     preHandler: [requirePermission("approval:read:self")],

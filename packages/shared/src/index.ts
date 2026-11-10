@@ -137,3 +137,4 @@ export * from "./schemas/user-timeline.js";
 export * from "./schemas/talent-review.js";
 export * from "./schemas/valore.js";
 export * from "./schemas/rubrica.js";
+export * from "./schemas/quadro.js";

@@ -333,16 +333,18 @@ const server = createServer(async (req, res) => {
         res.end(JSON.stringify({ error: "BAD_JSON" }));
         return;
       }
+      // /interpret: l'interprete delle non corrispondenze, stesso agente, stesse difese.
+      const interpret = req.url === "/consolidation/interpret";
       try {
-        // /interpret: l'interprete delle non corrispondenze, stesso agente, stesse difese.
-        const esito = req.url === "/consolidation/interpret" ? await interpreta(lotto) : await giudica(lotto);
+        const esito = interpret ? await interpreta(lotto) : await giudica(lotto);
         res.writeHead(200, { "content-type": "application/json" });
         res.end(JSON.stringify(esito));
       } catch (err) {
         // Il motivo di un lotto rifiutato è nostro e si dice; un guasto del modello resta nel log,
         // non nella risposta (CodeQL: nessuna traccia d'errore verso chi chiama).
+        // L'etichetta del log è fissa, non l'URL della richiesta (CodeQL: niente dato esterno nel log).
         const rifiuto = err instanceof LottoNonValido;
-        if (!rifiuto) console.error(`[${req.url}]`, err);
+        if (!rifiuto) console.error(interpret ? "[consolidation/interpret]" : "[consolidation/propose]", err);
         res.writeHead(rifiuto ? 422 : 502, { "content-type": "application/json" });
         res.end(JSON.stringify(rifiuto ? { error: "BAD_BATCH", message: err.message } : { error: "PROPOSE_FAILED" }));
       }

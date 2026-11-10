@@ -9,6 +9,7 @@ import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { OrigineDelDato, OrigineDellaRiga } from "@/components/origine-del-dato";
 import { descrivi, useTabellaAgente } from "@/lib/agente/use-tabella-agente";
+import { ConSpiegazione } from "@/components/spiegazione";
 import { useLeggibile } from "@/lib/leggibile";
 
 /**
@@ -186,7 +187,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
           <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
             {colonne.map((c, i) => (
               <th key={i} className={`px-4 py-2 ${c.align === "right" ? "text-right" : ""} ${c.headClassName ?? ""}`}>
-                {c.header}
+                <ConSpiegazione>{c.header}</ConSpiegazione>
               </th>
             ))}
           </tr>

@@ -10,6 +10,7 @@
 import type { Pool, PoolClient } from "pg";
 import type {
   User,
+  UserListItem,
   UserListQuery,
   CreateUserBody,
   UpdateUserBody,
@@ -64,6 +65,18 @@ const USER_COLS = `user_id, user_tenant_id, user_email, user_display_name,
 
 /* === Listing + scope ===================================================== */
 
+/** R1: cognome, nome; chi non ha cognome (utenze di servizio) va in coda per nome. */
+const PERSON_ORDER = `lower(user_last_name) NULLS LAST, lower(user_first_name) NULLS LAST,
+                 lower(user_display_name), user_id`;
+
+interface RawUserListRow extends RawUserRow {
+  tenant_name: string | null;
+  position_title: string | null;
+  organization_unit_name: string | null;
+  site_name: string | null;
+  site_city: string | null;
+}
+
 export interface ListFilter {
   /** Restrict to this tenant (TENANT_ADMIN / MANAGER / USER). undefined = no tenant filter (PLATFORM_ADMIN). */
   tenantId?: string;
@@ -75,7 +88,7 @@ export interface ListFilter {
 export async function listUsers(
   q: DbConnector,
   filter: ListFilter,
-): Promise<{ items: User[]; total: number }> {
+): Promise<{ items: UserListItem[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
 
@@ -116,16 +129,69 @@ export async function listUsers(
   params.push(filter.query.offset);
   const offsetIdx = params.length;
 
-  const res = await q.query<RawUserRow>(
-    `SELECT ${USER_COLS}
-       FROM sys.sys_users
-       ${whereClause}
-      ORDER BY user_email
-      LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+  // R1 del repertorio interfacce: le persone si ordinano per cognome, poi nome.
+  // R2: ogni riga porta il contesto che la rende riconoscibile (ruolo, unità,
+  // sede, tenant), letto in un solo giro e solo per la pagina richiesta.
+  const res = await q.query<RawUserListRow>(
+    `WITH page AS (
+       SELECT ${USER_COLS}
+         FROM sys.sys_users
+         ${whereClause}
+        ORDER BY ${PERSON_ORDER}
+        LIMIT $${limitIdx} OFFSET $${offsetIdx}
+     )
+     SELECT page.*,
+            t.tenant_name,
+            pos.position_title,
+            pos.organization_unit_name,
+            sede.site_name,
+            sede.site_city
+       FROM page
+       LEFT JOIN sys.sys_tenancies t ON t.tenant_id = page.user_tenant_id
+       LEFT JOIN LATERAL (
+         SELECT p.position_title, p.position_organization_unit_id, ou.organization_unit_name
+           FROM sys.sys_user_position_assignments a
+           JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+           LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = p.position_organization_unit_id
+          WHERE a.user_position_assignment_user_id = page.user_id
+            AND a.user_position_assignment_status = 'ACTIVE'
+          ORDER BY (a.user_position_assignment_kind = 'PRIMARY') DESC,
+                   a.user_position_assignment_start_date DESC NULLS LAST
+          LIMIT 1
+       ) pos ON true
+       LEFT JOIN LATERAL (
+         WITH RECURSIVE su AS (
+           SELECT ou.organization_unit_id, ou.organization_unit_parent_id, 0 AS depth
+             FROM sys.sys_organization_units ou
+            WHERE ou.organization_unit_id = pos.position_organization_unit_id
+           UNION ALL
+           SELECT ou.organization_unit_id, ou.organization_unit_parent_id, su.depth + 1
+             FROM sys.sys_organization_units ou
+             JOIN su ON ou.organization_unit_id = su.organization_unit_parent_id
+            WHERE su.depth < 32
+         )
+         SELECT COALESCE(b.branch_metadata->>'name', b.branch_city) AS site_name,
+                b.branch_city AS site_city
+           FROM su
+           JOIN sys.sys_branches b ON b.branch_organization_unit_id = su.organization_unit_id
+          ORDER BY su.depth
+          LIMIT 1
+       ) sede ON true
+      ORDER BY ${PERSON_ORDER.replace(/user_/g, "page.user_")}`,
     params,
   );
 
-  return { items: res.rows.map(rowToUser), total };
+  return {
+    items: res.rows.map((r) => ({
+      ...rowToUser(r),
+      positionTitle: r.position_title,
+      organizationUnitName: r.organization_unit_name,
+      siteName: r.site_name,
+      siteCity: r.site_city,
+      tenantName: r.tenant_name,
+    })),
+    total,
+  };
 }
 
 export async function findUserById(

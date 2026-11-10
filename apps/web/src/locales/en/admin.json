@@ -153,14 +153,31 @@
   },
   "users": {
     "title": "Users",
-    "description": "Tenant users with status and type.",
-    "count": "{{count}} total",
+    "description": "The people of the organization with the role they hold and the site they work at.",
+    "count": "{{count}} people",
+    "countKind": {
+      "STANDARD": "{{count}} people",
+      "SERVICE": "{{count}} service accounts",
+      "GENERATED_INCUMBENT": "{{count}} placeholder incumbents",
+      "ALL": "{{count}} accounts"
+    },
+    "filters": {
+      "kind": "Show",
+      "tenant": "Tenant",
+      "allTenants": "All",
+      "ALL": "All accounts"
+    },
+    "noRole": "No active position",
+    "noSite": "—",
     "errorMessage": "Unable to load the users.",
     "emptyTitle": "No users",
-    "emptyDescription": "There are no users in the tenant.",
-    "caption": "User list",
+    "emptyDescription": "There are no users matching these filters.",
+    "caption": "User list sorted by last name",
     "columns": {
-      "name": "Name",
+      "name": "Last name, First name",
+      "role": "Role in the organization",
+      "site": "Site",
+      "tenant": "Tenant",
       "email": "Email",
       "status": "Status",
       "type": "Type"

@@ -52,8 +52,12 @@ set -euo pipefail
 REPO_DIR="${REPO_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 BRANCH="${BRANCH:-main}"
 ARM_REF="${DEPLOY_ARM_REF:-prod}"
-STATE_FILE="${DEPLOY_WATCH_STATE:-$REPO_DIR/.deploy-watch-state}"
-LOCK_FILE="${DEPLOY_WATCH_LOCK:-$REPO_DIR/.deploy-watch.lock}"
+# Copia rilasciata (D1, docs/piani/PIANO_turni-advanced-datastore_20261110.md): se questo script gira da
+# una copia, git sta nel repo da cui la copia e' nata, e li' restano anche stato e lock.
+GIT_TOP="$REPO_DIR"
+[ -f "$REPO_DIR/.rilascio/sorgente" ] && GIT_TOP="$(cat "$REPO_DIR/.rilascio/sorgente")"
+STATE_FILE="${DEPLOY_WATCH_STATE:-$GIT_TOP/.deploy-watch-state}"
+LOCK_FILE="${DEPLOY_WATCH_LOCK:-$GIT_TOP/.deploy-watch.lock}"
 
 say()  { printf '[deploy-watch] %s\n' "$*"; }
 err()  { printf '[deploy-watch] %s\n' "$*" >&2; }
@@ -69,7 +73,7 @@ if command -v flock >/dev/null 2>&1; then
   fi
 fi
 
-cd "$REPO_DIR"
+cd "$GIT_TOP"
 
 # --- 1. stato remoto. `git fetch origin` porta anche refs/heads/prod con il refspec
 #     standard; se il remoto non ha (ancora) la ref, rev-parse fallisce ed e' il caso
@@ -248,4 +252,6 @@ fi
 export SERVICE_USER="${SERVICE_USER:-$(id -un)}"
 say "deploy di ${ARMED:0:8} (utente $SERVICE_USER, repo $REPO_DIR)"
 rm -f "$STATE_FILE"
+# lo sha da portare in produzione e' quello armato, detto per nome (la copia rilasciata non fa reset)
+export DEPLOY_SHA="$ARMED"
 exec bash "$REPO_DIR/scripts/vm-deploy.sh"

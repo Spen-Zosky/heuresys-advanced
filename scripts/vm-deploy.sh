@@ -131,6 +131,52 @@ set -euo pipefail
 export PATH="$NODE_BIN:$PATH"
 echo "node=$(node -v) pnpm=$(pnpm -v)"
 
+# 0. MODO COPIA RILASCIATA (D1 di docs/piani/PIANO_turni-advanced-datastore_20261110.md).
+#    Quando il collegamento del servizio esiste (o DEPLOY_COPIA=1), la produzione non gira piu' dalla
+#    cartella del repo: si estrae lo sha in una copia nuova (scripts/rilascio-copia.sh prepara), si
+#    rilancia QUESTO script dalla copia, e il resto del rito (deps, snapshot, migrazioni, build, unita')
+#    lavora li'. La cartella del repo non viene mai toccata: niente checkout, niente reset --hard. Le
+#    unita' si rendono con il collegamento fisso (UNIT_REPO_DIR), che passa alla copia nuova solo
+#    subito prima del riavvio e torna alla precedente se la prova fallisce.
+#    Senza il collegamento (linux-pc, o VM prima del passaggio) il rito e' quello di sempre.
+SERVIZIO_LINK="${SERVIZIO_LINK:-$HOME/heuresys-servizio/advanced-produzione}"
+RILASCI_DIR="${RILASCI_DIR:-$HOME/rilasci/advanced-produzione}"
+COPIA=0
+if [ -L "$SERVIZIO_LINK" ] || [ "${DEPLOY_COPIA:-0}" = 1 ]; then COPIA=1; fi
+if [ "$COPIA" = 1 ] && [ -z "${VM_DEPLOY_REEXEC:-}" ]; then
+  # la sorgente e' il repo da cui nasce la copia: se questo script gira gia' da una copia, e' scritta li'
+  if [ -f "$REPO_DIR/.rilascio/sorgente" ]; then SORGENTE="$(cat "$REPO_DIR/.rilascio/sorgente")"; else SORGENTE="$REPO_DIR"; fi
+  log "copia rilasciata: sorgente $SORGENTE, servizio $SERVIZIO_LINK"
+  git -C "$SORGENTE" fetch origin --quiet
+  DEPLOY_SHA="$(git -C "$SORGENTE" rev-parse --verify "${DEPLOY_SHA:-origin/$BRANCH}^{commit}")"
+  git -C "$SORGENTE" log --oneline -1 "$DEPLOY_SHA"
+  log "gate: CI must be green for the deployed sha (D-08 F2)"
+  # il cancello gira PRIMA di preparare la copia: con una CI non verde non nasce niente
+  GATE_RC=0
+  gate_ci "$DEPLOY_SHA" || GATE_RC=$?
+  [ "$GATE_RC" = 10 ] && exit 0
+  [ "$GATE_RC" = 0 ] || exit "$GATE_RC"
+  PREV_DIR="$(readlink -f "$SERVIZIO_LINK" 2>/dev/null || true)"
+  if [ -n "$PREV_DIR" ] && [ -f "$PREV_DIR/.rilascio/commit" ]; then PREV_SHA="$(cat "$PREV_DIR/.rilascio/commit")"
+  else
+    # primo passaggio: fino ad ora i servizi giravano dalla cartella del repo, che il modo copia non
+    # tocca (dist e .next restano quelli in servizio): il ritorno indietro punta li'
+    PREV_SHA="$(git -C "$SORGENTE" rev-parse HEAD)"; PREV_DIR="$SORGENTE"
+  fi
+  NUOVA="$(bash "$SORGENTE/scripts/rilascio-copia.sh" prepara "$SORGENTE" "$DEPLOY_SHA" "$RILASCI_DIR")" || exit 1
+  exec env VM_DEPLOY_REEXEC=1 VM_DEPLOY_COPIA=1 VM_DEPLOY_PREV_SHA="$PREV_SHA" VM_DEPLOY_PREV_DIR="$PREV_DIR" \
+    DEPLOY_SHA="$DEPLOY_SHA" UNIT_REPO_DIR="$SERVIZIO_LINK" SERVIZIO_LINK="$SERVIZIO_LINK" RILASCI_DIR="$RILASCI_DIR" \
+    REPO_DIR="$NUOVA" BRANCH="$BRANCH" PUBLIC_HOST="$PUBLIC_HOST" \
+    API_PORT="$API_PORT" WEB_PORT="$WEB_PORT" NODE_MAJOR="$NODE_MAJOR" RESTART_API="$RESTART_API" \
+    SERVICE_USER="$SERVICE_USER" SERVICE_GROUP="$SERVICE_GROUP" \
+    bash "$NUOVA/scripts/vm-deploy.sh"
+fi
+
+if [ "${VM_DEPLOY_COPIA:-0}" = 1 ]; then
+  PREV_SHA="${VM_DEPLOY_PREV_SHA:-unknown}"
+  log "copia rilasciata: $REPO_DIR (${DEPLOY_SHA:0:8}), in servizio fino ad ora ${PREV_SHA:0:8}"
+  printf '%s\n' "${VM_DEPLOY_PREV_DIR:-}" > "$REPO_DIR/.rilascio/precedente"
+else
 # 1. Sync the repo to the authoritative remote (prod box: no local edits expected;
 #    gitignored .env/.secrets are preserved by reset).
 log "sync: $BRANCH @ origin"
@@ -170,6 +216,8 @@ GATE_RC=0
 gate_ci "$(git -C "$REPO_DIR" rev-parse HEAD)" || GATE_RC=$?
 [ "$GATE_RC" = 10 ] && exit 0
 [ "$GATE_RC" = 0 ] || exit "$GATE_RC"
+DEPLOY_SHA="$(git -C "$REPO_DIR" rev-parse HEAD)"
+fi   # fine del ramo «cartella del repo» (senza copia rilasciata)
 
 # 2. Deps (reproducible, exact lockfile match). Clean-reinstall if the Node ABI changed
 #    (native modules argon2/@next/swc/sharp must match NODE_MODULE_VERSION) — a frozen
@@ -255,7 +303,7 @@ log "systemd: render + install ALL units (api/web + schedulers) — User=$SERVIC
 swtmp="$(mktemp -d)"
 render_unit() {  # $1 = absolute path to a template unit file
   local base; base="$(basename "$1")"
-  sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
+  sed -e "s#@@REPO_DIR@@#${UNIT_REPO_DIR:-$REPO_DIR}#g" -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
       -e "s#@@PUBLIC_HOST@@#$PUBLIC_HOST#g" -e "s#@@API_PORT@@#$API_PORT#g" -e "s#@@WEB_PORT@@#$WEB_PORT#g" \
       -e "s#^User=ubuntu#User=$SERVICE_USER#g" -e "s#^Group=ubuntu#Group=$SERVICE_GROUP#g" \
       "$1" > "$swtmp/$base"
@@ -280,12 +328,22 @@ for t in "$REPO_DIR"/deploy/systemd/*.timer; do
 done
 
 # 4. Restart services (api first so the web's proxy target is up).
+#    Modo copia: il collegamento del servizio passa alla copia nuova adesso, e non prima, cosi' fino a
+#    questo punto un guasto (deps, build, unita') ha lasciato in servizio la copia di prima.
+if [ "${VM_DEPLOY_COPIA:-0}" = 1 ]; then
+  log "copia rilasciata: il servizio passa a $REPO_DIR"
+  bash "$REPO_DIR/scripts/rilascio-copia.sh" punta "$SERVIZIO_LINK" "$REPO_DIR"
+fi
 log "restart"
 if [ "$RESTART_API" = 1 ]; then
   sudo systemctl restart heuresys-advanced-api.service
   sleep 4
 fi
 sudo systemctl restart heuresys-advanced-web.service
+# il gateway degli agenti gira dalla stessa copia: si riavvia solo se e' gia' acceso su questa macchina
+if systemctl is-enabled --quiet heuresys-agent-gateway.service 2>/dev/null; then
+  sudo systemctl restart heuresys-agent-gateway.service
+fi
 sleep 5
 
 # 5. Verify.
@@ -323,11 +381,25 @@ if [ "$DEPLOY_OK" != 1 ]; then
   last_dump="$(ls -1t "$REPO_DIR"/pg_dump_snapshots/pre-deploy/*.dump 2>/dev/null | head -1 || true)"
   {
     echo ""
-    echo "DEPLOY FAILED at probe gate (sha $(git -C "$REPO_DIR" rev-parse --short HEAD))."
+    echo "DEPLOY FAILED at probe gate (sha ${DEPLOY_SHA:0:8})."
     echo "  app rollback:  bash scripts/vm-rollback.sh ${PREV_SHA}"
     echo "  db snapshot (pg_restore is DESTRUCTIVE — only if a migration broke data):"
     echo "    ${last_dump:-<none taken this run>}"
   } >&2
+  # Modo copia: tornare indietro costa un collegamento e un riavvio, quindi si fa da se', sempre.
+  if [ "${VM_DEPLOY_COPIA:-0}" = 1 ]; then
+    if [ -n "${VM_DEPLOY_PREV_DIR:-}" ] && [ -d "$VM_DEPLOY_PREV_DIR" ]; then
+      echo "copia rilasciata: torno alla copia precedente $VM_DEPLOY_PREV_DIR (${PREV_SHA:0:8})" >&2
+      bash "$REPO_DIR/scripts/rilascio-copia.sh" punta "$SERVIZIO_LINK" "$VM_DEPLOY_PREV_DIR"
+      [ "$RESTART_API" = 1 ] && sudo systemctl restart heuresys-advanced-api.service && sleep 4
+      sudo systemctl restart heuresys-advanced-web.service
+      systemctl is-enabled --quiet heuresys-agent-gateway.service 2>/dev/null && sudo systemctl restart heuresys-agent-gateway.service
+      echo "copia rilasciata: tornato a ${PREV_SHA:0:8}; la copia guasta resta in $REPO_DIR" >&2
+      exit 3
+    fi
+    echo "copia rilasciata: nessuna copia precedente a cui tornare: serve una persona" >&2
+    exit 4
+  fi
   if [ "${AUTO_ROLLBACK:-0}" = 1 ] && [ "$PREV_SHA" != "unknown" ]; then
     echo "AUTO_ROLLBACK=1 → rolling back to $PREV_SHA" >&2
     exec bash "$REPO_DIR/scripts/vm-rollback.sh" "$PREV_SHA"
@@ -335,7 +407,10 @@ if [ "$DEPLOY_OK" != 1 ]; then
   exit 1
 fi
 mkdir -p "$REPO_DIR/pg_dump_snapshots"
-printf '%s\n' "$(git -C "$REPO_DIR" rev-parse HEAD)" > "$REPO_DIR/pg_dump_snapshots/LAST_GOOD_SHA"
-echo "  LAST_GOOD recorded: $(git -C "$REPO_DIR" rev-parse --short HEAD)"
+printf '%s\n' "$DEPLOY_SHA" > "$REPO_DIR/pg_dump_snapshots/LAST_GOOD_SHA"
+echo "  LAST_GOOD recorded: ${DEPLOY_SHA:0:8}"
+if [ "${VM_DEPLOY_COPIA:-0}" = 1 ]; then
+  bash "$REPO_DIR/scripts/rilascio-copia.sh" pulisci "$RILASCI_DIR" "$SERVIZIO_LINK" 2 || true
+fi
 echo
 echo "Done. Web http://$PUBLIC_HOST:$WEB_PORT  |  API http://$PUBLIC_HOST:$API_PORT"

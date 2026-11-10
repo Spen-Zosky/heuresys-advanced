@@ -37,6 +37,9 @@ export const CLASSI_STRUMENTI: Readonly<Record<string, ClasseAzione>> = Object.f
   hrx_concepts_search: "A",
   hrx_concept_describe: "A",
 
+  // La vista della pagina aperta: cambia ciò che si vede, mai i dati.
+  hrx_vista_comanda: "A",
+
   // Letture.
   hrx_org_units_list: "A",
   hrx_org_units_get: "A",

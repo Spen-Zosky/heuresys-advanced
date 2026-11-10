@@ -831,6 +831,9 @@
     }
   },
   "agente": {
+    "vistaCambiata": "View changed by the assistant: {{cosa}} ({{righe}} rows).",
+    "vistaAzzera": "Back to the full table",
+    "comandoVista": "View command: {{nome}}",
     "title": "Assistant on this page",
     "description": "Developer tool: ask the agent something about what this page shows. Tool and input for any write are already redacted by the gateway.",
     "contextLabel": "Context",

@@ -15,6 +15,7 @@ import { createSdkMcpServer, tool } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod";
 import type { HeuresysClient } from "./heuresys-client.js";
 import type { AtlasOperationResolver } from "./atlas-resolver.js";
+import type { PonteVista } from "./comandi-vista.js";
 
 /**
  * Sostituisce i `:segnaposto` del percorso con i parametri, e rifiuta ciò che non torna.
@@ -48,7 +49,7 @@ export function bindPath(template: string, params: Record<string, unknown>): str
 // passa. Il test `mcp-tools-list.test.ts` chiama `tools/list` sul server VERO: se torna a
 // lanciare, e' lui a dirlo, non la prova live. Dal 2026-10-30 (SDK 0.3.314, zod 4.6.7) il
 // crash non si riproduce piu' e la controprova lo verifica; qui si resta su `catchall`.
-export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOperationResolver) {
+export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOperationResolver, vista?: PonteVista) {
   // A-14: l'agente sa da dove viene ciò che legge. Se l'API ha dichiarato l'origine del dato
   // (nativo, importato, ibrido, misto), la risposta la porta in un secondo blocco.
   const ok = (d: unknown) => {
@@ -184,6 +185,16 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
     name: "heuresys",
     tools: [
       ...generici,
+      // --- la vista della pagina aperta (classe A, modo «mostra»: non cambia dati) ---
+      // I comandi validi e i loro argomenti li dice il blocco <pagina> del mandato; il gateway li
+      // ricontrolla in comandi-vista.ts. L'esito torna dalla pagina: si riferisce quello, non altro.
+      tool(
+        "hrx_vista_comanda",
+        "Comanda la vista della pagina aperta dalla persona (cerca, filtra, ordina, azzera): cambia solo ciò che si vede, mai i dati. Usa solo i comandi elencati nel blocco <pagina>. Restituisce l'esito riferito dalla pagina (ok, parziale, rifiutata, non_confermata): racconta alla persona solo ciò che l'esito dice.",
+        { nome: z.string(), argomenti: z.object({}).catchall(z.any()).optional() },
+        async (a: { nome: string; argomenti?: Record<string, unknown> }) =>
+          ok(vista ? await vista.comanda(a.nome, a.argomenti ?? {}) : { stato: "rifiutata", dettaglio: "Nessuna pagina collegata a questa conversazione." }),
+      ),
       // --- reads (auto-approved) ---
       rd("hrx_org_units_list", "/organization-units"),
       rdId("hrx_org_units_get", "/organization-units"),

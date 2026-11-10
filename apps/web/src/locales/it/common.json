@@ -831,6 +831,9 @@
     }
   },
   "agente": {
+    "vistaCambiata": "Vista cambiata dall'assistente: {{cosa}} ({{righe}} righe).",
+    "vistaAzzera": "Torna alla tabella intera",
+    "comandoVista": "Comando della vista: {{nome}}",
     "title": "Assistente su questa pagina",
     "description": "Strumento di sviluppo: chiedi all'agente qualcosa su ciò che vedi in questa pagina. Tool e input di eventuali scritture sono già oscurati dal gateway.",
     "contextLabel": "Contesto",

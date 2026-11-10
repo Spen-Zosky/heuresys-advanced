@@ -8,6 +8,12 @@ I conteggi (moduli, migrazioni, endpoint, test, permessi) non stanno qui perché
 
 I dati sono produzione reale. Esiste un solo ambiente, di produzione, con due tenant: RTL Bank (un cliente modello, con il dataset popolato) e Heuresys System (piattaforma) — ADR-0026. L'ingestione dal vecchio `heuresys-evo` è chiusa dal 2026-08-14 (ADR-0038): ciò che manca si costruisce o si ricava da `sys.*`; il legacy si consulta per i concetti, mai per le righe (`python docs/kb/tools/check_no_legacy_ingest.py`). Un dato si descrive per ciò che è (una busta paga, un IBAN), senza etichette rassicuranti tipo «sintetico» o «senza PII».
 
+## Il motore degli agenti: abbonamento di Enzo, questione chiusa
+
+Decisione definitiva di Enzo, 2026-11-10. Tutti i suoi repo sono in sviluppo e test e non sono aperti al pubblico. Gli agenti e l'assistente pensano con il suo abbonamento Claude (Claude Code autenticato sulla VM): è un uso personale e privato legittimo e **non richiede nessuna approvazione di Anthropic**. Nessuna chiave API entra nel codice, nella configurazione o nell'ambiente passato al modello (ADR-0056 D3, principio P24). Quando i repo apriranno al pubblico sarà Enzo a scegliere il fornitore del modello, anche un modello locale, e la chiave API.
+
+Perciò: **non sollevare la questione**, né come blocco né come domanda a Enzo, né in un piano, in un ADR, in una PR o in un rapporto. Non scrivere «serve l'approvazione di Anthropic», «serve una chiave API» o «lo può usare solo Enzo per le regole di Anthropic». Se un testo lo dice, correggilo. I cancelli tecnici dell'assistente (prova avversaria, elenco delle persone ammesse, limiti) restano: sono ingegneria, non licenza.
+
 ## Quando un lavoro è finito
 
 Un passo si chiude solo con una dimostrazione dal vivo su dati reali: comando, output, percorso e orario (ADR-0026). Un test verde o un mock che funziona significano «in corso». Per le pagine autenticate la dimostrazione è un login con una persona reale del tenant e l'uso secondo il suo profilo. Se manca un input che solo Enzo può dare, lo stato è `blocked-on-Enzo: <cosa, perché>`. Nessun mock, fixture o endpoint finto nel frontend: ogni dato arriva da una chiamata `/v1/*` reale.

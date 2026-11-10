@@ -27,7 +27,7 @@
  * `redact(tool)` / `redact(input)`), quindi qui non transita mai un dato in chiaro.
  */
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { AgentConversationSummary } from "@heuresys/shared/schemas/agent-conversations";
 import { csrfStore } from "./api/csrf-store";
 import {
@@ -193,8 +193,12 @@ export interface UseAgentStream {
   lines: StreamLine[];
   approval: PendingApproval | null;
   notice: AgentNotice | null;
-  /** Apre lo stream per questo prompt. Non fa nulla se una corsa è già in volo o il prompt è vuoto. */
-  run: (prompt: string) => Promise<void>;
+  /**
+   * Apre lo stream per questo prompt. Non fa nulla se una corsa è già in volo o il prompt è vuoto.
+   * `pagina` è ciò che la pagina aperta dichiara (dove si trova, che cosa mostra, quali comandi
+   * della vista accetta): il gateway la passa al modello come dato, non come mandato.
+   */
+  run: (prompt: string, pagina?: PaginaPerAgente) => Promise<void>;
   /**
    * Smette di ascoltare. Dal 2026-11-08 (ADR-0056 D4) il giro NON si ferma: continua nel gateway
    * fino a un limite, e la finestra lo ritrova riprendendo la conversazione.
@@ -214,7 +218,60 @@ export interface UseAgentStream {
   startNew: () => void;
 }
 
-export function useAgentStream(): UseAgentStream {
+/** Ciò che la finestra dice al gateway della pagina aperta (`comandi-vista.ts` del gateway). */
+export interface PaginaPerAgente {
+  percorso: string;
+  titolo?: string;
+  vista?: Record<string, unknown>;
+  comandi: readonly string[];
+}
+
+/** L'esito di un comando della vista, come la pagina lo riferisce. */
+export interface EsitoComandoPagina {
+  stato: "ok" | "parziale" | "rifiutata";
+  dettaglio?: string;
+}
+
+export interface OpzioniAgentStream {
+  /** Esegue un comando della vista sulla pagina aperta. Assente, ogni comando torna «rifiutata». */
+  onPageCommand?: (nome: string, argomenti: Record<string, unknown>) => EsitoComandoPagina;
+}
+
+/**
+ * Interpreta il `data:` di un evento `nota`: la correzione che il gateway mette sotto il testo del
+ * modello quando un comando non è avvenuto come raccontato (piano dell'assistente, blocco I4).
+ * Si mostra come un messaggio, lo stesso che la finestra riaperta rilegge dal registro.
+ */
+export function parseNota(data: string): string | null {
+  try {
+    const p = JSON.parse(data) as { testo?: unknown };
+    return typeof p.testo === "string" && p.testo.trim() ? p.testo : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Interpreta il `data:` di un evento `page_command`. `null` se non ne ha la forma. */
+export function parsePageCommand(data: string): { commandId: string; nome: string; argomenti: Record<string, unknown> } | null {
+  try {
+    const p = JSON.parse(data) as { commandId?: unknown; nome?: unknown; argomenti?: unknown };
+    if (typeof p.commandId !== "string" || !p.commandId || typeof p.nome !== "string") return null;
+    const a = p.argomenti;
+    return {
+      commandId: p.commandId,
+      nome: p.nome,
+      argomenti: typeof a === "object" && a !== null && !Array.isArray(a) ? (a as Record<string, unknown>) : {},
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream {
+  const comandoRef = useRef(opzioni.onPageCommand);
+  useEffect(() => {
+    comandoRef.current = opzioni.onPageCommand;
+  });
   const [running, setRunning] = useState(false);
   const [lines, setLines] = useState<StreamLine[]>([]);
   const [approval, setApproval] = useState<PendingApproval | null>(null);
@@ -244,6 +301,36 @@ export function useAgentStream(): UseAgentStream {
       if (kind === "conversation") {
         const c = parseConversationPayload(data);
         if (c) setConversationId(c.conversationId);
+      }
+      if (kind === "page_command") {
+        // Il comando si applica appena arriva, e l'esito vero torna al gateway: l'assistente
+        // racconta alla persona ciò che la pagina ha fatto, non ciò che voleva fare.
+        const c = parsePageCommand(data);
+        if (c) {
+          let esito: EsitoComandoPagina;
+          try {
+            esito = comandoRef.current
+              ? comandoRef.current(c.nome, c.argomenti)
+              : { stato: "rifiutata", dettaglio: "Questa pagina non accetta comandi della vista." };
+          } catch (e) {
+            esito = { stato: "rifiutata", dettaglio: e instanceof Error ? e.message : String(e) };
+          }
+          void fetch(`${GATEWAY_URL}/agent/esiti`, {
+            method: "POST",
+            headers: { "content-type": "application/json", "x-csrf-token": csrfStore.get() ?? "" },
+            credentials: "include",
+            body: JSON.stringify({ commandId: c.commandId, ...esito }),
+          }).catch(() => undefined);
+          pushLine("page_command", `${c.nome} → ${esito.stato}${esito.dettaglio ? `: ${esito.dettaglio}` : ""}`);
+          return;
+        }
+      }
+      if (kind === "nota") {
+        const testo = parseNota(data);
+        if (testo) {
+          pushLine("message", testo.replace(/\s+/g, " ").slice(0, 600));
+          return;
+        }
       }
       pushLine(kind, data.replace(/\s+/g, " ").slice(0, 600));
     },
@@ -290,7 +377,7 @@ export function useAgentStream(): UseAgentStream {
   );
 
   const run = useCallback(
-    async (prompt: string) => {
+    async (prompt: string, pagina?: PaginaPerAgente) => {
       if (running || !prompt.trim()) return;
       setRunning(true);
       setNotice(null);
@@ -306,7 +393,7 @@ export function useAgentStream(): UseAgentStream {
           method: "POST",
           headers: { "content-type": "application/json" },
           credentials: "include", // inoltra i cookie hrx_access / hrx_csrf al gateway
-          body: JSON.stringify({ prompt, ...(conversationId ? { conversationId } : {}) }),
+          body: JSON.stringify({ prompt, ...(conversationId ? { conversationId } : {}), ...(pagina ? { pagina } : {}) }),
           signal: controller.signal,
         });
 

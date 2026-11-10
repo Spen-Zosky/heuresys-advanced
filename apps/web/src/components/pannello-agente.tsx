@@ -18,13 +18,13 @@
  * conversazioni salvate (`AgentActivityList`), da cui la persona ne riprende una; il rifiuto di
  * una proposta chiede il motivo, che il gateway registra (senza motivo l'API risponde 422).
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { AgentActivityList, AgentPanel, Button, type AgentActivityStatus } from "@heuresys/ui";
 import { AGENT_DEV_ENABLED, useAgentStream } from "@/lib/use-agent-stream";
 import { paginaIdonea } from "@/lib/agente/idoneita";
-import { useContestoDichiarato } from "@/lib/agente/contesto";
+import { useContestoDichiarato, useVistaAttuale } from "@/lib/agente/contesto";
 
 export function PannelloAgente() {
   const pathname = usePathname() ?? "";
@@ -35,7 +35,24 @@ export function PannelloAgente() {
 function PannelloAgenteAcceso({ pathname }: { pathname: string }) {
   const { t, i18n } = useTranslation("common");
   const dichiarato = useContestoDichiarato();
-  const agent = useAgentStream();
+  const vistaAttuale = useVistaAttuale();
+  // La pagina da cui è partita la richiesta, e quella aperta ora: un comando arrivato dopo un cambio
+  // di pagina non si applica alla pagina nuova (in mod-platform: «La persona ha cambiato pagina»).
+  const percorsoInvio = useRef<string | null>(null);
+  const percorsoOra = useRef(pathname);
+  useEffect(() => {
+    percorsoOra.current = pathname;
+  }, [pathname]);
+  // I comandi della vista vanno alla parte della pagina che si è dichiarata (oggi ogni tabella).
+  const agent = useAgentStream({
+    onPageCommand: (nome, argomenti) => {
+      if (percorsoInvio.current !== percorsoOra.current)
+        return { stato: "rifiutata", dettaglio: "La persona ha cambiato pagina: il comando non si applica a quella nuova." };
+      const v = vistaAttuale();
+      if (!v || !v.comandi.includes(nome)) return { stato: "rifiutata", dettaglio: "Questa pagina non accetta il comando." };
+      return v.esegui(nome, argomenti);
+    },
+  });
   const [aperto, setAperto] = useState(false);
   const [prompt, setPrompt] = useState("");
   const { refreshConversations } = agent;
@@ -132,8 +149,18 @@ function PannelloAgenteAcceso({ pathname }: { pathname: string }) {
         prompt={prompt}
         onPromptChange={setPrompt}
         running={agent.running}
-        // Il contesto viaggia col prompt: il gateway non vede la pagina, vede ciò che le si dice.
-        onRun={() => void agent.run(`${t("agente.contextLabel")}: ${contesto}\n\n${prompt}`)}
+        // Il gateway non vede la pagina, vede ciò che le si dice: dove si trova, che cosa mostra e
+        // quali comandi della vista accetta, letti al momento dell'invio. Il mandato resta la sola
+        // parola della persona.
+        onRun={() => {
+          const v = vistaAttuale();
+          percorsoInvio.current = pathname;
+          void agent.run(prompt, {
+            percorso: pathname,
+            titolo: contesto,
+            ...(v ? { vista: v.vista, comandi: v.comandi } : { comandi: [] }),
+          });
+        }}
         onStop={agent.stop}
         lines={agent.lines}
         approval={

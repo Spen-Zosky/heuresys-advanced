@@ -29,6 +29,7 @@ import type { RegistroCapacita } from "../src/capacita.js";
 import { ContatorePersone } from "../src/persone-distinte.js";
 import { eseguiGiro, type RegistroGiro } from "../src/giro.js";
 import type { Evento, MotivoArresto, StatoAttivita } from "../src/conversazione.js";
+import { PonteVista, RegistroEsiti, notaSugliEsiti } from "../src/comandi-vista.js";
 
 const PERSONA = "11111111-1111-4111-8111-111111111111";
 const ALTRA = "22222222-2222-4222-8222-222222222222";
@@ -222,5 +223,90 @@ describe("R5 — l'approvazione che non viene dalla persona", () => {
     const approvals = new ApprovalRegistry({ approvalTimeoutMs: 30 });
     const { approvalId } = approvals.create();
     expect(approvals.resolveAs(approvalId, "allow", PERSONA)).toBe("not-owner");
+  });
+});
+
+/**
+ * Blocco I4 del piano dell'assistente nelle interfacce (logica L6, MOD voce F12): il caso peggiore è
+ * un modello che riceve «rifiutata» o nessuna risposta dalla pagina e scrive lo stesso «fatto».
+ */
+describe("R5 — il testo non dichiara fatto ciò che la pagina non ha fatto", () => {
+  const PAGINA = { percorso: "/org-units", comandi: ["tabella.filtra"] };
+
+  async function giroCon(risposta: "rifiutata" | "nessuna" | "ok" | "rifiutata-poi-ok") {
+    const reg = new RegistroManomesso();
+    const esiti = new RegistroEsiti();
+    const scritti: string[] = [];
+    const vista = new PonteVista({
+      pagina: PAGINA,
+      registro: esiti,
+      owner: PERSONA,
+      finestraAperta: () => true,
+      attesaMs: 20,
+      scrivi: (pezzo) => {
+        scritti.push(pezzo);
+        const m = /data: (.*)\n/.exec(pezzo);
+        if (!pezzo.startsWith("event: page_command") || !m?.[1]) return;
+        const { commandId } = JSON.parse(m[1]) as { commandId: string };
+        const giaUno = scritti.filter((s) => s.startsWith("event: page_command")).length > 1;
+        if (risposta === "nessuna") return;
+        const stato = risposta === "ok" || (risposta === "rifiutata-poi-ok" && giaUno) ? "ok" : "rifiutata";
+        queueMicrotask(() => esiti.riferisci(commandId, PERSONA, { stato, dettaglio: stato === "ok" ? "Righe mostrate: 3 di 40 caricate." : "Colonne: Nome, Sede." }));
+      },
+    });
+    const stati: Array<{ result?: string }> = [];
+    reg.stato = async (_s, e) => { stati.push(e ?? {}); };
+    await eseguiGiro({
+      registro: reg,
+      contatore: new ContatorePersone(),
+      approvals: new ApprovalRegistry({ approvalTimeoutMs: 30 }),
+      owner: PERSONA,
+      scadenzaGettone: Date.now() + 600_000,
+      durataMs: 60_000,
+      approvalTimeoutMs: 30,
+      scrivi: (p) => scritti.push(p),
+      nota: () => notaSugliEsiti(vista.esiti),
+      esegui: async function* () {
+        await vista.comanda("tabella.filtra", { colonna: "Città", valore: "Milano" });
+        if (risposta === "rifiutata-poi-ok") await vista.comanda("tabella.filtra", { colonna: "Sede", valore: "Milano" });
+        // Il modello ostile: qualunque cosa sia successo, dice che è fatto.
+        const falso = "Fatto: ora la tabella mostra solo le unità di Milano.";
+        yield { type: "assistant", message: { content: [{ type: "text", text: falso }] } };
+        yield { type: "result", subtype: "success", is_error: false, result: falso };
+      },
+    });
+    const testi = reg.eventi.filter((e) => e.kind === "TESTO").map((e) => String(e.payload.testo));
+    return { testi, scritti, risultato: stati.at(-1)?.result ?? "" };
+  }
+
+  it("comando rifiutato: dopo il «fatto» del modello la persona legge che non è avvenuto, anche riaprendo", async () => {
+    const { testi, scritti, risultato } = await giroCon("rifiutata");
+    expect(testi).toHaveLength(2);
+    expect(testi[1]).toMatch(/tabella\.filtra: non fatto/);
+    expect(testi[1]).toContain("Colonne: Nome, Sede.");
+    expect(scritti.some((s) => s.startsWith("event: nota"))).toBe(true);
+    expect(risultato).toMatch(/non fatto/);
+  });
+
+  it("comando senza risposta: la nota dice «non confermato»", async () => {
+    const { testi, risultato } = await giroCon("nessuna");
+    expect(testi[1]).toMatch(/non confermato/);
+    expect(risultato).toMatch(/non confermato/);
+  });
+
+  it("comando riuscito, o riuscito al secondo tentativo: nessuna nota", async () => {
+    for (const r of ["ok", "rifiutata-poi-ok"] as const) {
+      const { testi, scritti, risultato } = await giroCon(r);
+      expect(testi, r).toHaveLength(1);
+      expect(scritti.some((s) => s.startsWith("event: nota")), r).toBe(false);
+      expect(risultato, r).not.toMatch(/Nota della piattaforma/);
+    }
+  });
+
+  it("parziale: la nota lo dice con il dettaglio", () => {
+    expect(notaSugliEsiti([{ nome: "tabella.cerca", esito: { stato: "parziale", dettaglio: "Sono 50 di 812." } }])).toMatch(
+      /tabella\.cerca: fatto solo in parte \(Sono 50 di 812\.\)/,
+    );
+    expect(notaSugliEsiti([])).toBeNull();
   });
 });

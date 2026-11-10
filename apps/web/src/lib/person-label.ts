@@ -49,3 +49,21 @@ export function etichettaPersona(u: PersonaConTipo, enumLabel: EnumLabelFn): str
   if (!nonEUnaPersona(u)) return u.displayName;
   return `${u.displayName} (${enumLabel("userType", u.type)})`;
 }
+
+/**
+ * R1 del repertorio interfacce (docs/kb/xtras/INTERFACCE_INTELLIGENTI.md, regola di Enzo
+ * del 10/11/2026): in ogni elenco una persona si scrive «Cognome, Nome», così l'occhio
+ * scorre l'ordine alfabetico per cognome. Senza cognome (un'utenza di servizio) resta il
+ * nome com'è.
+ */
+export function cognomeNome(u: {
+  displayName: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+}): string {
+  const cognome = u.lastName?.trim();
+  const nome = u.firstName?.trim();
+  if (cognome && nome) return `${cognome}, ${nome}`;
+  if (cognome) return cognome;
+  return u.displayName ?? "";
+}

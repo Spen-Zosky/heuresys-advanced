@@ -13,7 +13,34 @@
       "me": "Il mio spazio",
       "me_profile": "Il mio profilo",
       "me_growth": "La mia crescita",
-      "me_results": "I miei risultati"
+      "me_results": "I miei risultati",
+      "me_area": "La mia area"
+    },
+    "rami": {
+      "dash_aree": "Per area",
+      "dash_ruoli": "Per responsabilità",
+      "dash_governo": "Governo e piattaforma",
+      "org_struttura": "Struttura",
+      "org_diagnosi": "Diagnosi",
+      "persone_anagrafica": "Persone e selezione",
+      "persone_tempo": "Tempo di lavoro",
+      "persone_retribuzioni": "Retribuzioni",
+      "talento_risultati": "Risultati",
+      "talento_sviluppo": "Sviluppo",
+      "comp_mappa": "Mappa delle competenze",
+      "comp_formazione": "Formazione",
+      "conf_accessi": "Accessi",
+      "conf_registri": "Registri",
+      "cfg_modello": "Modello organizzativo",
+      "cfg_dati": "Dati di base",
+      "cfg_sito": "Sito pubblico",
+      "me_lavoro": "Il mio lavoro",
+      "me_profilo": "Il mio profilo",
+      "me_crescita": "La mia crescita",
+      "me_risultati": "I miei risultati",
+      "comp": "Competenze",
+      "formazione": "Formazione",
+      "carriera": "Carriera"
     }
   },
   "tabs": {

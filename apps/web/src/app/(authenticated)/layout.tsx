@@ -88,7 +88,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useCurrentUser, useLogout, useMyInterfaces, useUpdateMyPreferences, type MyInterface } from "../../lib/api/auth";
+import { useCurrentUser, useLogout, useMyInterfaces, useUpdateMyPreferences } from "../../lib/api/auth";
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { setLocale } from "../../lib/i18n";
 import { primaryRoleOf } from "../../lib/role-precedence";
@@ -98,6 +98,8 @@ import { SectionTabs, SECTION_TAB_GROUPS } from "../../components/section-tabs";
 import { pageVerdict } from "../../lib/page-guard";
 import { PannelloAgente } from "../../components/pannello-agente";
 import { ContestoAgenteProvider } from "../../lib/agente/contesto";
+import { CorpoGruppo, useScorrimentoMenu } from "../../components/menu-laterale";
+import { alberoDelGruppo, ramoDi, type VoceMenu } from "../../lib/menu-albero";
 
 const ICON = "h-4 w-4 shrink-0";
 
@@ -190,9 +192,6 @@ const NAV_TESTID: Record<string, string> = {
   users: "nav-users",
 };
 
-function navLabel(testId: string, text: string) {
-  return <span data-testid={testId}>{text}</span>;
-}
 
 export default function AuthenticatedLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -202,6 +201,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   const ifaces = useMyInterfaces();
   const logout = useLogout();
   const updatePrefs = useUpdateMyPreferences();
+  useScorrimentoMenu(pathname);
 
   if (me.isLoading || ifaces.isLoading) {
     return (
@@ -257,36 +257,29 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     .filter((r) => isActive(r))
     .reduce<string | null>((best, r) => (best === null || r.length > best.length ? r : best), null);
 
-  const byGroup = new Map<string, MyInterface[]>();
+  // C6 (piano interfaccia sistematica): voci con Link di Next e rami più profondi, vedi
+  // components/menu-laterale.tsx e lib/menu-albero.ts. I gruppi di primo livello restano quelli
+  // del registro (000484), nell'ordine del registro; i gruppi personali si fondono in uno.
+  const byGroup = new Map<string, Array<VoceMenu & { ramo: string[] }>>();
   for (const section of sections) {
     for (const i of section.interfaces) {
-      const arr = byGroup.get(i.sidebarGroup);
-      if (arr) arr.push(i);
-      else byGroup.set(i.sidebarGroup, [i]);
+      const { gruppo, ramo } = ramoDi(i.route, i.sidebarGroup);
+      const voce = { id: i.code, label: i.label, href: i.route, icona: i.icon ?? null, ordine: i.order, ramo, ...(NAV_TESTID[i.code] ? { testId: NAV_TESTID[i.code] } : {}) };
+      const arr = byGroup.get(gruppo);
+      if (arr) arr.push(voce);
+      else byGroup.set(gruppo, [voce]);
     }
   }
-  const minOrder = (items: MyInterface[]) => Math.min(...items.map((i) => i.order));
+  const minOrder = (items: Array<{ ordine: number }>) => Math.min(...items.map((i) => i.ordine));
+  const iconaDi = (v: VoceMenu) => ICON_MAP[v.icona ?? ""] ?? FALLBACK_ICON;
   const groups: NavGroup[] = [...byGroup.entries()]
     .sort(([, a], [, b]) => minOrder(a) - minOrder(b))
     .map(([sub, items]) => ({
       id: `nav-${sub}`,
-      label: t(`shell:nav.groups.${sub}`, { defaultValue: sub }),
-      items: [...items]
-        .sort((a, b) => a.order - b.order)
-        .map((i) => {
-          const testId = NAV_TESTID[i.code];
-          return {
-            id: i.code,
-            label: testId ? navLabel(testId, i.label) : i.label,
-            href: i.route,
-            icon: ICON_MAP[i.icon ?? ""] ?? FALLBACK_ICON,
-            active: i.route === activeRoute,
-          };
-        }),
+      label: t(`shell:nav.groups.${sub === "me" ? "me_area" : sub}`, { defaultValue: sub }),
+      customContent: <CorpoGruppo id={`nav-${sub}`} albero={alberoDelGruppo(items)} attiva={activeRoute} icone={iconaDi} />,
     }));
 
-  // S-1: la pagina si disegna solo se la stessa regola del menu la apre a chi chiama. Una
-  // pagina negata non monta i propri componenti, quindi non parte nessuna chiamata a valle.
   const verdict = pageVerdict(pathname, ifaces.data?.routes ?? [], SECTION_TAB_GROUPS);
 
   const roles = user.roles ?? [];

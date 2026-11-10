@@ -98,10 +98,17 @@ BEGIN
   --    esistente ha cambiato posizione. L'ordine 21 era libero (misurato: in
   --    governance esistono 10..20 e 40), e se qualcuno lo occupasse in futuro
   --    questa verifica lo direbbe invece di lasciare due voci sovrapposte.
-  SELECT count(*) INTO n FROM sys.sys_ui_interfaces
-   WHERE ui_interface_sidebar_group = 'governance' AND ui_interface_order = 21;
+  --    EMENDATA dalla 000484 (ADR-0035): la voce non sta più per sempre in `governance`
+  --    all'ordine 21 — la 000484 la porta nel gruppo `configuration`. Ciò che questa
+  --    verifica protegge è l'intento, non la coppia di numeri: nessuna voce si
+  --    sovrappone al fascicolo nella posizione che occupa ADESSO, qualunque essa sia.
+  SELECT count(*) INTO n
+    FROM sys.sys_ui_interfaces i
+    JOIN sys.sys_ui_interfaces f ON f.ui_interface_code = 'tenant-blueprints'
+   WHERE i.ui_interface_sidebar_group = f.ui_interface_sidebar_group
+     AND i.ui_interface_order = f.ui_interface_order;
   IF n <> 1 THEN
-    RAISE EXCEPTION '000302: in governance ci sono % voci all''ordine 21, ne serve una sola', n;
+    RAISE EXCEPTION '000302: % voci nella posizione del fascicolo, ne serve una sola', n;
   END IF;
 
   -- 5. La copertura EN della voce nuova, col campo canonico (emendato S1068).

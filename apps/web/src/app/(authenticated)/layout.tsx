@@ -16,28 +16,76 @@ import {
 } from "@heuresys/ui";
 import {
   Activity,
+  Award,
+  BadgeCheck,
+  Blocks,
+  BookMarked,
+  BookOpen,
   Briefcase,
+  BriefcaseBusiness,
+  Building,
   Building2,
+  CalendarDays,
+  ChartColumn,
+  ChartNoAxesCombined,
+  ChartPie,
+  CheckCheck,
+  Circle,
+  ClipboardCheck,
+  ClipboardList,
   Clock,
   Coins,
+  Compass,
+  Contact,
+  Crosshair,
   Database,
+  DatabaseZap,
+  FileStack,
   FileText,
+  Fingerprint,
+  Flag,
   FolderKanban,
   Gauge,
   GitBranch,
+  GitMerge,
   GraduationCap,
+  Grid3x3,
+  Handshake,
+  HeartPulse,
+  House,
   Inbox,
+  KeyRound,
+  Landmark,
   Layers,
   LayoutDashboard,
+  Library,
+  Lightbulb,
+  Megaphone,
+  MessageSquareHeart,
   Network,
+  Newspaper,
   PieChart,
+  Puzzle,
+  Radar,
+  Route,
+  ScrollText,
+  ServerCog,
+  Shapes,
+  Shield,
   ShieldCheck,
   Sprout,
+  Star,
+  Store,
+  Target,
+  Telescope,
   TrendingUp,
   TriangleAlert,
   User,
+  UserCog,
   UserPlus,
   Users,
+  UsersRound,
+  Workflow,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCurrentUser, useLogout, useMyInterfaces, useUpdateMyPreferences, type MyInterface } from "../../lib/api/auth";
@@ -53,32 +101,86 @@ import { ContestoAgenteProvider } from "../../lib/agente/contesto";
 
 const ICON = "h-4 w-4 shrink-0";
 
-/** Registry icon name (sys_ui_interfaces.icon) → lucide node. */
+/**
+ * Registry icon name (sys_ui_interfaces.icon) → lucide node. Every icon the registry uses
+ * must be here (mig. 000484 dichiara le icone di tutte le voci); a name that is missing
+ * falls back to FALLBACK_ICON, so no sidebar entry is ever drawn without an icon.
+ */
 const ICON_MAP: Record<string, ReactNode> = {
   Activity: <Activity className={ICON} />,
+  Award: <Award className={ICON} />,
+  BadgeCheck: <BadgeCheck className={ICON} />,
+  Blocks: <Blocks className={ICON} />,
+  BookMarked: <BookMarked className={ICON} />,
+  BookOpen: <BookOpen className={ICON} />,
   Briefcase: <Briefcase className={ICON} />,
+  BriefcaseBusiness: <BriefcaseBusiness className={ICON} />,
+  Building: <Building className={ICON} />,
   Building2: <Building2 className={ICON} />,
+  CalendarDays: <CalendarDays className={ICON} />,
+  ChartColumn: <ChartColumn className={ICON} />,
+  ChartNoAxesCombined: <ChartNoAxesCombined className={ICON} />,
+  ChartPie: <ChartPie className={ICON} />,
+  CheckCheck: <CheckCheck className={ICON} />,
+  ClipboardCheck: <ClipboardCheck className={ICON} />,
+  ClipboardList: <ClipboardList className={ICON} />,
   Clock: <Clock className={ICON} />,
   Coins: <Coins className={ICON} />,
+  Compass: <Compass className={ICON} />,
+  Contact: <Contact className={ICON} />,
+  Crosshair: <Crosshair className={ICON} />,
   Database: <Database className={ICON} />,
+  DatabaseZap: <DatabaseZap className={ICON} />,
+  FileStack: <FileStack className={ICON} />,
   FileText: <FileText className={ICON} />,
+  Fingerprint: <Fingerprint className={ICON} />,
+  Flag: <Flag className={ICON} />,
   FolderKanban: <FolderKanban className={ICON} />,
   Gauge: <Gauge className={ICON} />,
   GitBranch: <GitBranch className={ICON} />,
+  GitMerge: <GitMerge className={ICON} />,
   GraduationCap: <GraduationCap className={ICON} />,
+  Grid3x3: <Grid3x3 className={ICON} />,
+  Handshake: <Handshake className={ICON} />,
+  HeartPulse: <HeartPulse className={ICON} />,
+  House: <House className={ICON} />,
   Inbox: <Inbox className={ICON} />,
+  KeyRound: <KeyRound className={ICON} />,
+  Landmark: <Landmark className={ICON} />,
   Layers: <Layers className={ICON} />,
   LayoutDashboard: <LayoutDashboard className={ICON} />,
+  Library: <Library className={ICON} />,
+  Lightbulb: <Lightbulb className={ICON} />,
+  Megaphone: <Megaphone className={ICON} />,
+  MessageSquareHeart: <MessageSquareHeart className={ICON} />,
   Network: <Network className={ICON} />,
+  Newspaper: <Newspaper className={ICON} />,
   PieChart: <PieChart className={ICON} />,
+  Puzzle: <Puzzle className={ICON} />,
+  Radar: <Radar className={ICON} />,
+  Route: <Route className={ICON} />,
+  ScrollText: <ScrollText className={ICON} />,
+  ServerCog: <ServerCog className={ICON} />,
+  Shapes: <Shapes className={ICON} />,
+  Shield: <Shield className={ICON} />,
   ShieldCheck: <ShieldCheck className={ICON} />,
   Sprout: <Sprout className={ICON} />,
+  Star: <Star className={ICON} />,
+  Store: <Store className={ICON} />,
+  Target: <Target className={ICON} />,
+  Telescope: <Telescope className={ICON} />,
   TrendingUp: <TrendingUp className={ICON} />,
   TriangleAlert: <TriangleAlert className={ICON} />,
   User: <User className={ICON} />,
+  UserCog: <UserCog className={ICON} />,
   UserPlus: <UserPlus className={ICON} />,
   Users: <Users className={ICON} />,
+  UsersRound: <UsersRound className={ICON} />,
+  Workflow: <Workflow className={ICON} />,
 };
+
+/** Shown when an entry declares no icon, or one this map does not know yet. */
+const FALLBACK_ICON = <Circle className={ICON} />;
 
 /** The 4 nav items the E2E suite targets by stable test-id. */
 const NAV_TESTID: Record<string, string> = {
@@ -140,39 +242,48 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   // Build the sidebar from the DB-driven registry (GET /v1/me/interfaces). Server-side gating
-  // means we render exactly what is returned. The registry groups interfaces into 5 always-present
-  // SECTIONS (Panoramica / Governance / Forza lavoro / Intelligence / Area personale — S1009 IA
-  // redesign, the old PET perspective filter is retired); each section becomes a collapsible
-  // NavGroup whose label comes from i18n and whose items keep the registry order.
+  // means we render exactly what is returned. Mig. 000484 groups the entries BY FUNCTION:
+  // `sidebarGroup` is the functional group (Dashboard, Organizzazione, Persone, …, and the four
+  // groups of the personal area) and is the only thing that shapes the menu. The section
+  // (`perspective`) is semantic — PERSONAL is the ESS floor of I17 — and does not decide the
+  // order: groups are sorted by the smallest `order` of their entries, which the registry
+  // declares in blocks of 100 per group. Every group is collapsible (DashboardSidebar keeps
+  // the open/closed state per group id).
   const sections = ifaces.data?.perspectives ?? [];
+  // Una voce sola accesa: la rotta piu' lunga che contiene la pagina. Con la sola regola del
+  // prefisso «/dashboard» restava accesa anche su «/dashboard/company», insieme alla sua voce.
+  const allRoutes = sections.flatMap((s) => s.interfaces.map((i) => i.route));
+  const activeRoute = allRoutes
+    .filter((r) => isActive(r))
+    .reduce<string | null>((best, r) => (best === null || r.length > best.length ? r : best), null);
 
-  const navGroups: NavGroup[] = [];
+  const byGroup = new Map<string, MyInterface[]>();
   for (const section of sections) {
-    const bySub = new Map<string, MyInterface[]>();
     for (const i of section.interfaces) {
-      const arr = bySub.get(i.sidebarGroup);
+      const arr = byGroup.get(i.sidebarGroup);
       if (arr) arr.push(i);
-      else bySub.set(i.sidebarGroup, [i]);
+      else byGroup.set(i.sidebarGroup, [i]);
     }
-    for (const [sub, items] of bySub) {
-      navGroups.push({
-        id: `${section.code}-${sub}`,
-        label: t(`shell:nav.groups.${sub}`, { defaultValue: section.label }),
-        items: items.map((i) => {
+  }
+  const minOrder = (items: MyInterface[]) => Math.min(...items.map((i) => i.order));
+  const groups: NavGroup[] = [...byGroup.entries()]
+    .sort(([, a], [, b]) => minOrder(a) - minOrder(b))
+    .map(([sub, items]) => ({
+      id: `nav-${sub}`,
+      label: t(`shell:nav.groups.${sub}`, { defaultValue: sub }),
+      items: [...items]
+        .sort((a, b) => a.order - b.order)
+        .map((i) => {
           const testId = NAV_TESTID[i.code];
           return {
             id: i.code,
             label: testId ? navLabel(testId, i.label) : i.label,
             href: i.route,
-            icon: ICON_MAP[i.icon ?? ""] ?? null,
-            active: isActive(i.route),
+            icon: ICON_MAP[i.icon ?? ""] ?? FALLBACK_ICON,
+            active: i.route === activeRoute,
           };
         }),
-      });
-    }
-  }
-
-  const groups: NavGroup[] = navGroups;
+    }));
 
   // S-1: la pagina si disegna solo se la stessa regola del menu la apre a chi chiama. Una
   // pagina negata non monta i propri componenti, quindi non parte nessuna chiamata a valle.

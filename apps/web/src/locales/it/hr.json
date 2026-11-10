@@ -166,7 +166,7 @@
     }
   },
   "orgDirector": {
-    "title": "Console Org Director",
+    "title": "Direzione organizzativa",
     "description": "Capability e maturità per unità organizzativa, dai motori MLCE e Maturity.",
     "count": "{{count}} unità",
     "errorMessage": "Impossibile caricare la capability/maturità",
@@ -217,7 +217,7 @@
     }
   },
   "processOwner": {
-    "title": "Console Process Owner",
+    "title": "Process owner",
     "description": "Catalogo dei processi del blueprint (navigazione del grafo, non runtime BPM).",
     "count": "{{count}} processi",
     "errorMessage": "Impossibile caricare i processi",

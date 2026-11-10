@@ -6,7 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type {
   ContentDocument,
   ContentDocumentDetailResponse,
@@ -223,7 +224,7 @@ export default function ContentEditPage() {
 
   if (detail.isError) {
     return (
-      <main data-testid="content-edit-page" className="mx-auto max-w-3xl space-y-4 px-6 py-8">
+      <main data-testid="content-edit-page" className="mx-auto max-w-3xl space-y-4 px-6 pb-8">
         <Link href="/content" data-testid="content-edit-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {t("content.detail.back")}
         </Link>
@@ -239,7 +240,7 @@ export default function ContentEditPage() {
   const doc = detail.data?.document;
 
   return (
-    <main data-testid="content-edit-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+    <main data-testid="content-edit-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <div className="space-y-3">
         <Link href="/content" data-testid="content-edit-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {t("content.detail.back")}

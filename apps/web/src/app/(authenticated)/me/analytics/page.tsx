@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Badge, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { MeAnalyticsResponse, MeDevelopmentResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EChartsCard } from "../../_charts-client";
@@ -46,7 +47,7 @@ export default function MeAnalyticsPage() {
   ];
 
   return (
-    <main data-testid="me-analytics-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="me-analytics-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("analytics.title")} description={t("analytics.description")} />
 
       {q.isLoading ? (

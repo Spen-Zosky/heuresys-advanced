@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { PageHeader, Badge, type KpiCardData } from "@heuresys/ui";
+import { Badge, type KpiCardData } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { KPIStrip } from "@/components/indicatori-leggibili";
 import type {
   ProvenanceRecord, ProvenanceSummaryResponse, ProvenanceValidationStatusEnum,
@@ -89,7 +90,7 @@ export default function ProvenancePage() {
   ], [t, f]);
 
   return (
-    <main data-testid="provenance-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="provenance-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader data-testid="provenance-title" title={t("provenance.title")} description={t("provenance.description")} />
 
       {kpis.length > 0 ? <KPIStrip items={kpis} /> : null}

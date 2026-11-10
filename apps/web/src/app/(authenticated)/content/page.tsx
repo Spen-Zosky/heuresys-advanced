@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type {
   ContentDocument,
   ContentDocumentListResponse,
@@ -205,7 +206,7 @@ export default function ContentPage() {
   );
 
   return (
-    <main data-testid="content-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="content-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="content-title"
         title={t("content.title")}

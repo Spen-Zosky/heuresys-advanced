@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { StatsCard } from "@/components/indicatori-leggibili";
 import { GitBranch, Layers, Network, Sigma, Users } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
@@ -119,14 +120,14 @@ export default function OrgNetworkAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-org-network-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-org-network-error" onRiprova={() => void q.refetch()} />
       </main>
     );
@@ -136,7 +137,7 @@ export default function OrgNetworkAnalyticsPage() {
   const hasData = d.totalPositions > 0;
 
   return (
-    <main data-testid="analytics-org-network-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="analytics-org-network-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-org-network-title"
         title={t("orgNetwork.title")}

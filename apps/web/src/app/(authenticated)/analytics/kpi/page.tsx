@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, RadialGauge, echartsPresets } from "@heuresys/ui";
+import { Badge, RadialGauge, echartsPresets } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { StatsCard } from "@/components/indicatori-leggibili";
 import { Gauge, Target } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
@@ -21,14 +22,14 @@ export default function AnalyticsKpiPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-kpi-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-kpi-error" onRiprova={() => void q.refetch()} />
       </main>
     );
@@ -53,7 +54,7 @@ export default function AnalyticsKpiPage() {
   const nullCount = d.byKpi.length - scored.length;
 
   return (
-    <main data-testid="analytics-kpi-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="analytics-kpi-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         title={t("kpi.title")}
         description={t("kpi.description")}

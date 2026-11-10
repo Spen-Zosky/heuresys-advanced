@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { PageHeader, Card, CardHeader, CardTitle, CardContent, Badge } from "@heuresys/ui";
+import { Card, CardHeader, CardTitle, CardContent, Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { Users, Crown } from "lucide-react";
 import type { MyTeamsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -22,7 +23,7 @@ export default function MeTeamPage() {
   });
 
   return (
-    <main data-testid="me-team-page" className="mx-auto max-w-5xl space-y-8 px-6 py-8">
+    <main data-testid="me-team-page" className="mx-auto max-w-5xl space-y-8 px-6 pb-8">
       <PageHeader
         title={t("team.title")}
         description={t("team.description")}

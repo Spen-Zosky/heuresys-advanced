@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { PageHeader, type KpiCardData } from "@heuresys/ui";
+import { type KpiCardData } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { KPIStrip } from "@/components/indicatori-leggibili";
 import type {
   GeneratedOrigin,
@@ -138,7 +139,7 @@ export default function GeneratedOriginsPage() {
     !sommario.isLoading && !sommario.isError && (sommario.data?.totals.total ?? 0) === 0;
 
   return (
-    <main data-testid="generated-origins-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="generated-origins-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="generated-origins-title"
         title={t("generatedOrigins.title")}

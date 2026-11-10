@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { UpdateMeProfileBodySchema } from "@heuresys/shared";
 import type { MeProfileFull, MeTheme, MePalette } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
@@ -256,7 +257,7 @@ export default function MeProfilePage() {
   });
 
   return (
-    <main data-testid="me-profile-page" className="mx-auto max-w-5xl space-y-8 px-6 py-8">
+    <main data-testid="me-profile-page" className="mx-auto max-w-5xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="me-profile-title"
         title={t("profile.title")}

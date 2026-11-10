@@ -3,15 +3,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  PageHeader,
-} from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { MfaPolicy, ListMfaPoliciesResponse, ListMfaExemptionsResponse, MfaExemption } from "@heuresys/shared";
 import { useFormat } from "@/lib/format";
 import { apiFetch } from "../../../../lib/api/fetch";
@@ -289,7 +282,7 @@ export default function AdminMfaPolicyPage() {
   const enabledCount = (policies.data?.items ?? []).filter((p) => p.enabled).length;
 
   return (
-    <main data-testid="admin-mfa-policy-page" className="mx-auto max-w-4xl space-y-6 px-6 py-8">
+    <main data-testid="admin-mfa-policy-page" className="mx-auto max-w-4xl space-y-6 px-6 pb-8">
       <PageHeader
         title={t("mfaPolicy.title")}
         description={t("mfaPolicy.description")}

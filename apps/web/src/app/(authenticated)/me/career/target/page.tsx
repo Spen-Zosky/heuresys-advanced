@@ -7,7 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { CreateMeCareerTargetBody, Position } from "@heuresys/shared";
 import { CAREER_TARGET_HORIZON_VALUES, CareerTargetHorizonSchema, CreateMeCareerTargetBodySchema } from "@heuresys/shared";
 import { StatusPill } from "@/components/status-pill";
@@ -60,7 +61,7 @@ export default function MeCareerTargetPage() {
   const onSubmit = handleSubmit(async (vals) => { await create.mutateAsync(vals); });
 
   return (
-    <main data-testid="career-target-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+    <main data-testid="career-target-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <div className="space-y-3">
         <Link
           href="/me/career"

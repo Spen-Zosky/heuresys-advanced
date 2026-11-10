@@ -16,7 +16,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import {
   CreateMeTimeOffRequestBodySchema,
   ME_LEAVE_TYPES,
@@ -90,7 +91,7 @@ export default function MeTimeOffPage() {
   );
 
   return (
-    <main data-testid="me-time-off-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="me-time-off-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-time-off-title"
         title={t("timeOff.title")}

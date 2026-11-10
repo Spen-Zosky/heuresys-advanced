@@ -13,7 +13,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { Users } from "lucide-react";
 import type {
   CreateMyDelegationBody,
@@ -131,17 +132,17 @@ export default function MeDelegationsPage() {
     d.endsOn ? t("delegations.period.range", { from: fmt.data(d.startsOn), to: fmt.data(d.endsOn) }) : t("delegations.period.open", { from: fmt.data(d.startsOn) });
 
   if (mie.isLoading) {
-    return <main className="mx-auto max-w-5xl px-6 py-8"><StatoCaricamento /></main>;
+    return <main className="mx-auto max-w-5xl px-6 pb-8"><StatoCaricamento /></main>;
   }
   if (mie.isError || !mie.data) {
-    return <main className="mx-auto max-w-5xl px-6 py-8">
+    return <main className="mx-auto max-w-5xl px-6 pb-8">
         <StatoErrore errore={mie.error} titolo={t("delegations.error")} testId="me-delegations-error" onRiprova={() => void mie.refetch()} />
       </main>;
   }
   const { granted, received } = mie.data;
 
   return (
-    <main data-testid="me-delegations-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="me-delegations-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader title={t("delegations.title")} description={t("delegations.description")} />
 
       {(proposte.data?.items ?? []).length > 0 && (

@@ -3,7 +3,8 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import {
   ALLOWED_DECISIONS,
   CONSOLIDATION_CERTAIN_THRESHOLD,
@@ -198,7 +199,7 @@ export default function ConsolidationPage() {
   const ultimo = corrente?.lastRun ?? null;
 
   return (
-    <main data-testid="consolidation-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="consolidation-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="consolidation-title"
         title={t("consolidation.title")}

@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
@@ -46,7 +47,7 @@ export default function PositionDetailPage() {
 
   if (position.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
       </main>
     );
@@ -54,7 +55,7 @@ export default function PositionDetailPage() {
   if (position.isError) {
     const code = isApiError(position.error) ? position.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="position-error">
+      <main className="mx-auto max-w-5xl px-6 pb-8" data-testid="position-error">
         <Link href="/positions" className="text-sm underline">{t("positions.detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -69,7 +70,7 @@ export default function PositionDetailPage() {
   }
   const p = position.data!;
   return (
-    <main data-testid="position-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="position-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="position-title"
         title={p.title}

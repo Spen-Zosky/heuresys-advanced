@@ -2,19 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import {
-  AuditFeed,
-  type AuditEvent,
-  type AuditTone,
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  PageHeader,
-  formatRelativeTime,
-} from "@heuresys/ui";
+import { AuditFeed, type AuditEvent, type AuditTone, Badge, Button, Card, CardContent, CardHeader, CardTitle, formatRelativeTime } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import {
   AlertTriangle,
   Bell,
@@ -122,7 +111,7 @@ export default function MeInboxPage() {
   });
 
   return (
-    <main data-testid="me-inbox-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="me-inbox-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-inbox-title"
         title={t("inbox.title")}

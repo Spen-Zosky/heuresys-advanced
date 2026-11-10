@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { Badge, Button, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { Badge, Button, type KpiCardData } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { KPIStrip } from "@/components/indicatori-leggibili";
 import type {
   VariablePayCalculation, CompensationRecommendationRow, BonusPool,
@@ -456,7 +457,7 @@ export default function CompensationIntelligencePage() {
   );
 
   return (
-    <main data-testid="compensation-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="compensation-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="compensation-title"
         title={t("compensation.title")}

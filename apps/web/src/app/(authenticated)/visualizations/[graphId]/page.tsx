@@ -5,7 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { MermaidDiagram } from "../../_charts-client";
 import { apiFetch } from "@/lib/api/fetch";
 import { apiDownload } from "@/lib/api/download";
@@ -152,7 +153,7 @@ export default function VisualizationDetailPage() {
 
   if (graph.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
       </main>
     );
@@ -160,7 +161,7 @@ export default function VisualizationDetailPage() {
   if (graph.isError) {
     const status = isApiError(graph.error) ? graph.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="visualization-error">
+      <main className="mx-auto max-w-5xl px-6 pb-8" data-testid="visualization-error">
         <Link href="/visualizations" className="text-sm underline">{t("visualizations.detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -196,7 +197,7 @@ export default function VisualizationDetailPage() {
       : null;
 
   return (
-    <main data-testid="visualization-detail-page" className="mx-auto max-w-6xl space-y-6 px-6 py-8">
+    <main data-testid="visualization-detail-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="visualization-name"
         title={g.name}

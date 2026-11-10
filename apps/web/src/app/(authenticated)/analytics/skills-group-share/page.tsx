@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, echartsPresets } from "@heuresys/ui";
+import { Badge, echartsPresets } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { StatsCard } from "@/components/indicatori-leggibili";
 import { Boxes, Layers, PieChart } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
@@ -21,14 +22,14 @@ export default function SkillsGroupShareAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-skills-group-share-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-skills-group-share-error" onRiprova={() => void q.refetch()} />
       </main>
     );
@@ -53,7 +54,7 @@ export default function SkillsGroupShareAnalyticsPage() {
   });
 
   return (
-    <main data-testid="analytics-skills-group-share-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="analytics-skills-group-share-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-skills-group-share-title"
         title={t("skillsGroupShare.title")}

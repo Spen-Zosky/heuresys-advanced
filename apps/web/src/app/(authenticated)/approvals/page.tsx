@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type {
   ApprovalListResponse,
   ApprovalRequest,
@@ -141,7 +142,7 @@ export default function ApprovalsPage() {
   );
 
   return (
-    <main data-testid="approvals-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="approvals-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="approvals-title"
         title={t("approvals.title")}

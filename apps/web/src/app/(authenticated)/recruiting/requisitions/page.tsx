@@ -4,9 +4,8 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input,
-} from "@heuresys/ui";
+import { Card, CardHeader, CardTitle, CardContent, Badge, Button, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { JobRequisition, JobRequisitionStatus } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
@@ -84,7 +83,7 @@ export default function RequisitionsPage() {
   const items = q.data?.items ?? [];
 
   return (
-    <main data-testid="requisitions-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="requisitions-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader title={t("recruiting.requisitions.title")} description={t("recruiting.requisitions.description")} />
 
       {canWrite && (

@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, PageHeader } from "@heuresys/ui";
+import { Card, CardContent } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { CheckSquare } from "lucide-react";
 import type { MeApprovalsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -29,7 +30,7 @@ export default function MeApprovalsPage() {
   ];
 
   return (
-    <main data-testid="me-approvals-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="me-approvals-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader title={t("approvals.title")} description={t("approvals.description")} />
 
       {q.isLoading ? (

@@ -2,7 +2,8 @@
 
 import type { KeyboardEvent, ReactNode } from "react";
 import { useState } from "react";
-import { Badge, Button, DataTableWithCrossHair, PageHeader } from "@heuresys/ui";
+import { Badge, Button, DataTableWithCrossHair } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { useTranslation } from "react-i18next";
 import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
@@ -285,7 +286,7 @@ export function DataTablePanel<T>(props: DataTablePanelProps<T>) {
   } = props;
 
   return (
-    <main data-testid={pageTestId} className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid={pageTestId} className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid={titleTestId}
         title={title}

@@ -4,7 +4,8 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
-import { Badge, PageHeader } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { VizGraph, VizGraphTypeDistributionItem } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
@@ -90,7 +91,7 @@ export default function VisualizationsPage() {
   );
 
   return (
-    <main data-testid="visualizations-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="visualizations-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="visualizations-title"
         title={t("visualizations.title")}

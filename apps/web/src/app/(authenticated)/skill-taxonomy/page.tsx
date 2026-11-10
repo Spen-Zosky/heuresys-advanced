@@ -15,7 +15,7 @@
  */
 
 import { useTranslation } from "react-i18next";
-import { PageHeader } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import {
   ProficiencyLevelsPanel,
   SkillCategoriesPanel,
@@ -26,7 +26,7 @@ export default function SkillTaxonomyPage() {
   const { t } = useTranslation("hr");
 
   return (
-    <main data-testid="skill-taxonomy-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="skill-taxonomy-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="skill-taxonomy-title"
         title={t("taxonomy.title")}

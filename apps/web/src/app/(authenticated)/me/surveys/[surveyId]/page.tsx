@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { MeSurveyDetail } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
@@ -57,7 +58,7 @@ export default function MeSurveyAnswerPage() {
   const myAnswerFor = (questionId: string) => d?.myAnswers.find((a) => a.questionId === questionId);
 
   return (
-    <main data-testid="me-survey-answer-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+    <main data-testid="me-survey-answer-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <div className="text-sm">
         <Link href="/me/surveys" className="text-muted-foreground hover:underline" data-testid="me-survey-back">
           ← {t("surveys.back")}

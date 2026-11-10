@@ -153,7 +153,7 @@ export function SystemHealthLive() {
     return (
       <main
         data-testid="system-health-loading"
-        className="mx-auto max-w-7xl px-6 py-8"
+        className="mx-auto max-w-7xl px-6 pb-8"
       >
         <StatoCaricamento />
       </main>
@@ -161,7 +161,7 @@ export function SystemHealthLive() {
   }
   if (health.isError || !health.data) {
     return (
-      <main data-testid="system-health-error" className="mx-auto max-w-7xl px-6 py-8">
+      <main data-testid="system-health-error" className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={health.error} titolo={t("health.loadError")} onRiprova={() => void health.refetch()} />
       </main>
     );
@@ -176,7 +176,7 @@ export function SystemHealthLive() {
   return (
     <main
       data-testid="system-health-page"
-      className="mx-auto max-w-[1600px] space-y-6 px-6 py-8"
+      className="mx-auto max-w-[1600px] space-y-6 px-6 pb-8"
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>

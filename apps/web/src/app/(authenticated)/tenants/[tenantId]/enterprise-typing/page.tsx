@@ -14,7 +14,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type {
   ActivityClassification,
   EnterpriseSizeBand,
@@ -139,7 +140,7 @@ export default function EnterpriseTypingPage() {
   const set = (k: keyof Modulo) => (v: string) => setModulo((m) => ({ ...m, [k]: v }));
 
   return (
-    <main data-testid="enterprise-typing-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+    <main data-testid="enterprise-typing-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="enterprise-typing-title"
         title={t("enterpriseTyping.title")}

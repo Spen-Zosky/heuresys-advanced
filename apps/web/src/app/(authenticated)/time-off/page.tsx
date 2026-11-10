@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { PageHeader, type KpiCardData } from "@heuresys/ui";
+import { type KpiCardData } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { KPIStrip } from "@/components/indicatori-leggibili";
 import { TimeOffRequestStatusEnum } from "@heuresys/shared";
 import type {
@@ -94,7 +95,7 @@ export default function TimeOffPage() {
   ], [requests.total, rules.total, txns.total, t, f]);
 
   return (
-    <main data-testid="time-off-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="time-off-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader data-testid="time-off-title" title={t("timeOff.title")} description={t("timeOff.description")} />
 
       <KPIStrip items={kpis} />

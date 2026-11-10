@@ -3,7 +3,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { Badge, type KpiCardData } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { KPIStrip } from "@/components/indicatori-leggibili";
 import type { LearningGap, LearningGapSummaryResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -114,7 +115,7 @@ export default function AdminGapsPage() {
   );
 
   return (
-    <main data-testid="gaps-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="gaps-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="gaps-title"
         title={t("gaps.title")}

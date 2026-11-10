@@ -8,16 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { QRCodeSVG } from "qrcode.react";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Input,
-  PageHeader,
-} from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import {
   type EnrollMfaResponse,
   type ListMfaFactorsResponse,
@@ -426,7 +418,7 @@ export default function MeSecurityPage() {
   return (
     <main
       data-testid="me-security-page"
-      className="mx-auto max-w-3xl space-y-6 px-6 py-8"
+      className="mx-auto max-w-3xl space-y-6 px-6 pb-8"
     >
       <PageHeader
         data-testid="me-security-title"

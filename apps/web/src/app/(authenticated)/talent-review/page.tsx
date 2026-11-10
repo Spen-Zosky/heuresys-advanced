@@ -3,7 +3,8 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { Badge, Card, CardContent, CardHeader, CardTitle, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { Badge, Card, CardContent, CardHeader, CardTitle, type KpiCardData } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { KPIStrip } from "@/components/indicatori-leggibili";
 import type {
   NineBoxRow, TalentBand, FitScore, ReadinessScore, SuccessionScore,
@@ -140,7 +141,7 @@ export default function TalentReviewPage() {
   ], [nineBox.total, fit.total, readiness.total, succession.total, criticalPositions.total, t, f]);
 
   return (
-    <main data-testid="talent-review-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="talent-review-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="talent-review-title"
         title={t("talentReview.title")}

@@ -3,7 +3,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { PageHeader, Badge } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { OccupationMatch, PositionMatch, JobRoleMatch } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
@@ -125,7 +126,7 @@ export default function MeMatchingPage() {
   const noRoleEvidence = jobRoles.data?.evidenceCount === 0;
 
   return (
-    <main data-testid="me-matching-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="me-matching-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       {/* #40 (S1018): free-text semantic search — live pgvector + query-time Voyage embedding */}
       <SemanticSearchPanel />
       <section className="space-y-6">

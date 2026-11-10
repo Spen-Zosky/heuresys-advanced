@@ -21,7 +21,8 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
-import { Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { TimelinePanel } from "@/components/timeline-panel";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import type { UserDossier } from "@heuresys/shared";
@@ -103,7 +104,7 @@ export default function UserDetailPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
       </main>
     );
@@ -111,7 +112,7 @@ export default function UserDetailPage() {
   if (q.isError) {
     const code = isApiError(q.error) ? q.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="user-error">
+      <main className="mx-auto max-w-5xl px-6 pb-8" data-testid="user-error">
         <Link href="/users" className="text-sm underline">{t("users.detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -137,7 +138,7 @@ export default function UserDetailPage() {
   const s = (k: string) => t(`users.detail.dossier.${k}`);
 
   return (
-    <main data-testid="user-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="user-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="user-display-name"
         title={p.displayName ?? t("users.detail.unnamed")}

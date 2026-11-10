@@ -12,7 +12,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Badge, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { Inbox } from "lucide-react";
 import type { MeSkillPossession, MeSkillPossessionResponse } from "@heuresys/shared";
 import { EnumStatusPill } from "@/components/enum-badge";
@@ -46,7 +47,7 @@ export default function MeSkillsPage() {
   });
 
   return (
-    <main data-testid="me-skills-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="me-skills-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-skills-title"
         title={t("skills.title")}

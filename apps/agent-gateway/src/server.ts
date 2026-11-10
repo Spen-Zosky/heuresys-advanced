@@ -42,6 +42,7 @@ import { DbRegistroCapacita } from "./capacita.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
 import { giudica, LottoNonValido } from "./consolidation-propose.js";
+import { interpreta } from "./consolidation-interpret.js";
 import type { GatePrincipal } from "./write-gate.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -313,7 +314,7 @@ const server = createServer(async (req, res) => {
 
     // AC-6 — il giudice del consolidamento del tenant: riceve un lotto di voci strutturali e
     // restituisce proposte. Nessuno strumento, nessuna persona nel lotto, nessuna decisione.
-    if (req.method === "POST" && req.url === "/consolidation/propose") {
+    if (req.method === "POST" && (req.url === "/consolidation/propose" || req.url === "/consolidation/interpret")) {
       if (!CONSOLIDATION_TOKEN) {
         res.writeHead(503, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "CONSOLIDATION_DISABLED", message: "AGENT_GATEWAY_CONSOLIDATION_TOKEN non configurato" }));
@@ -333,14 +334,15 @@ const server = createServer(async (req, res) => {
         return;
       }
       try {
-        const esito = await giudica(lotto);
+        // /interpret: l'interprete delle non corrispondenze, stesso agente, stesse difese.
+        const esito = req.url === "/consolidation/interpret" ? await interpreta(lotto) : await giudica(lotto);
         res.writeHead(200, { "content-type": "application/json" });
         res.end(JSON.stringify(esito));
       } catch (err) {
         // Il motivo di un lotto rifiutato è nostro e si dice; un guasto del modello resta nel log,
         // non nella risposta (CodeQL: nessuna traccia d'errore verso chi chiama).
         const rifiuto = err instanceof LottoNonValido;
-        if (!rifiuto) console.error("[consolidation/propose]", err);
+        if (!rifiuto) console.error(`[${req.url}]`, err);
         res.writeHead(rifiuto ? 422 : 502, { "content-type": "application/json" });
         res.end(JSON.stringify(rifiuto ? { error: "BAD_BATCH", message: err.message } : { error: "PROPOSE_FAILED" }));
       }

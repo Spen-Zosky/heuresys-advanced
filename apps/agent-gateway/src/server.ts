@@ -34,9 +34,10 @@ import { auditPool } from "./db-pool.js";
 import { HeuresysClient, chiSei, chiediGettoneAgente, registraDecisione } from "./heuresys-client.js";
 import { ConversazioneNonTrovata, ConversazioneOccupata, RegistroConversazione } from "./conversazione.js";
 import { eseguiGiro } from "./giro.js";
+import { PonteVista, RegistroEsiti, contestoPagina, leggiEsito, leggiPagina, notaSugliEsiti } from "./comandi-vista.js";
 import { ContatorePersone } from "./persone-distinte.js";
 import { caricaSoglie } from "./soglie-persone.js";
-import { ConversazioniAperte, leggiLimiti, modelloAgenti } from "./limiti.js";
+import { ConversazioniAperte, leggiLimiti, modelloAgenti, personeAmmesse } from "./limiti.js";
 import { DbRegistroCapacita } from "./capacita.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
@@ -89,6 +90,8 @@ const CONSOLIDATION_TOKEN = process.env.AGENT_GATEWAY_CONSOLIDATION_TOKEN ?? "";
 // non c'e' (dev senza tunnel, un test che non lo imposta) si ricade sul file — la
 // decisione presa in #253 ("il file resta come fallback"), non un errore silenzioso.
 const approvals = new ApprovalRegistry({ approvalTimeoutMs: APPROVAL_TIMEOUT_MS });
+/** I comandi della vista in attesa dell'esito della pagina (comandi-vista.ts). */
+const esitiVista = new RegistroEsiti();
 // ADR-0056 T3: i limiti della conversazione e il modello per nome. `modelloAgenti()` qui, all'avvio,
 // e non solo alla prima conversazione: un nome sbagliato nell'ambiente ferma il servizio subito,
 // invece di scoprirsi davanti alla prima persona.
@@ -140,6 +143,54 @@ const server = createServer(async (req, res) => {
     if (req.method === "GET" && req.url === "/healthz") {
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ ok: true, service: "agent-gateway", api: HEURESYS_API }));
+      return;
+    }
+
+    // L'esito di un comando della vista, riferito dalla finestra (comandi-vista.ts). Lo riferisce
+    // solo la persona per cui l'agente lavora, con il token CSRF della finestra (double-submit);
+    // un id ignoto o già chiuso non fa niente. Nessun dato cambia: si sblocca solo la risposta.
+    if (req.method === "POST" && req.url === "/agent/esiti") {
+      const cookies = parseCookies(req.headers.cookie);
+      const access = cookies.get("hrx_access");
+      const csrf = cookies.get("hrx_csrf") ?? "";
+      if (!access) {
+        res.writeHead(401, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "NO_SESSION" }));
+        return;
+      }
+      if (!csrf || req.headers["x-csrf-token"] !== csrf) {
+        res.writeHead(403, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "CSRF" }));
+        return;
+      }
+      let corpo: { commandId?: unknown };
+      try {
+        corpo = JSON.parse((await readBody(req)) || "{}") as { commandId?: unknown };
+      } catch {
+        res.writeHead(400, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "BAD_JSON" }));
+        return;
+      }
+      const esito = leggiEsito(corpo);
+      if (typeof corpo.commandId !== "string" || !UUID.test(corpo.commandId) || !esito) {
+        res.writeHead(400, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "BAD_REQUEST", message: "commandId + stato:'ok'|'parziale'|'rifiutata'" }));
+        return;
+      }
+      const chi = await chiSei(HEURESYS_API, { cookieAccess: access });
+      if (!chi) {
+        res.writeHead(401, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "SESSION_NOT_RECOGNISED" }));
+        return;
+      }
+      const r = esitiVista.riferisci(corpo.commandId, chi, esito);
+      if (r === "not-owner") {
+        res.writeHead(403, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "NOT_OWNER", resolved: false }));
+        return;
+      }
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ ok: true, resolved: r === "resolved" }));
       return;
     }
 
@@ -305,9 +356,22 @@ const server = createServer(async (req, res) => {
         res.end(JSON.stringify({ error: "NO_SESSION", message: "forward hrx_access cookie" }));
         return;
       }
-      let corpo: { prompt?: unknown; conversationId?: unknown };
+      // ADR-0056 D3: solo le persone nominate. Chi non è riconosciuto o non è nell'elenco non
+      // arriva al modello (fail-closed: elenco vuoto = nessuno).
+      const chiParla = await chiSei(HEURESYS_API, { cookieAccess });
+      if (!chiParla) {
+        res.writeHead(401, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "SESSION_NOT_RECOGNISED" }));
+        return;
+      }
+      if (!personeAmmesse().has(chiParla)) {
+        res.writeHead(403, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "PERSON_NOT_ADMITTED" }));
+        return;
+      }
+      let corpo: { prompt?: unknown; conversationId?: unknown; pagina?: unknown };
       try {
-        corpo = JSON.parse((await readBody(req)) || "{}") as { prompt?: unknown; conversationId?: unknown };
+        corpo = JSON.parse((await readBody(req)) || "{}") as { prompt?: unknown; conversationId?: unknown; pagina?: unknown };
       } catch {
         res.writeHead(400, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "BAD_JSON" }));
@@ -398,9 +462,15 @@ const server = createServer(async (req, res) => {
         });
         // T6b: chiudere la finestra NON ferma il giro. Da quel momento non si scrive più verso la
         // finestra; il giro prosegue fino a un limite e lascia tutto nel registro.
+        const finestraAperta = () => !res.writableEnded && !res.destroyed;
         const scrivi = (pezzo: string) => {
-          if (!res.writableEnded && !res.destroyed) res.write(pezzo);
+          if (finestraAperta()) res.write(pezzo);
         };
+        // Il ponte con la pagina aperta: ciò che la pagina ha dichiarato (un dato, non un mandato)
+        // va al modello in un blocco marcato, e i comandi della vista tornano alla finestra.
+        const pagina = leggiPagina(corpo.pagina);
+        const vista = new PonteVista({ pagina, registro: esitiVista, owner: gettone.persona.userId, scrivi, finestraAperta });
+        const mandato = pagina ? `${contestoPagina(pagina)}\n\n${prompt}` : prompt;
 
         await eseguiGiro({
           registro,
@@ -411,9 +481,11 @@ const server = createServer(async (req, res) => {
           durataMs: LIMITI.durataMs,
           approvalTimeoutMs: APPROVAL_TIMEOUT_MS,
           scrivi,
+          nota: () => notaSugliEsiti(vista.esiti),
           esegui: (o) =>
-            runHrAgent(prompt, client, {
+            runHrAgent(mandato, client, {
               approve: o.approve,
+              vista,
               approvalTimeoutMs: APPROVAL_TIMEOUT_MS,
               audit: auditSink,
               principal,

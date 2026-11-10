@@ -22,6 +22,7 @@ import { caricaSoglie } from "./soglie-persone.js";
 import type { HeuresysClient } from "./heuresys-client.js";
 import { LIMITI_DEFAULT, modelloAgenti } from "./limiti.js";
 import type { RegistroCapacita } from "./capacita.js";
+import type { PonteVista } from "./comandi-vista.js";
 
 export interface RunHrAgentOptions {
   /** Bridges to the webapp (SSE/WebSocket) so a human authorises each write. */
@@ -67,6 +68,11 @@ export interface RunHrAgentOptions {
    * Il contatore delle persone che continua lo passa chi chiama, in `contatore`.
    */
   resume?: string;
+  /**
+   * Il ponte con la pagina aperta (comandi-vista.ts): lo strumento `hrx_vista_comanda` manda i
+   * comandi della vista alla finestra e riferisce l'esito. Assente, lo strumento rifiuta.
+   */
+  vista?: PonteVista;
 }
 
 export async function* runHrAgent(
@@ -80,7 +86,7 @@ export async function* runHrAgent(
   // che la guardia non conosce — cioe' esattamente il divario che il gate esiste per
   // impedire. Una fonte sola, letta una volta.
   const operations = opts.operations ?? AtlasOperationResolver.load();
-  const heuresys = buildHeuresysMcp(client, operations);
+  const heuresys = buildHeuresysMcp(client, operations, opts.vista);
 
   // #251 — IL CONTATORE DI PERSONE DISTINTE, uno per conversazione. Vive qui e non nel client
   // perche' una conversazione e' UNA runHrAgent (ADR-0040 §4b), mentre il client nasce per

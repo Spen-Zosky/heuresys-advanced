@@ -77,6 +77,13 @@ module.exports = {
           "Se i login falliscono con ECONNREFUSED, la causa e' questa riga, non il prodotto.",
       );
     }
-    return [{ source: "/api/:path*", destination: `${base}/:path*` }];
+    // L'assistente (piano principi agentici T6): il browser parla al gateway dallo stesso sito, cosi'
+    // i cookie restano same-origin e la porta del gateway non si apre al mondo. Il gateway ascolta
+    // solo sulla VM; la destinazione si cambia con `AGENT_GATEWAY_PROXY_BASE_URL`.
+    const gateway = process.env.AGENT_GATEWAY_PROXY_BASE_URL ?? "http://127.0.0.1:8790";
+    return [
+      { source: "/api/:path*", destination: `${base}/:path*` },
+      { source: "/agent-gateway/:path*", destination: `${gateway}/:path*` },
+    ];
   },
 };

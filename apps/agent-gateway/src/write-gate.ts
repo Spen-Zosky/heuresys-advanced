@@ -23,7 +23,7 @@ import {
   type AuditSink,
   type PerContoDi,
 } from "./audit-sink.js";
-import { bareToolName, DEFAULT_TOOL_ALLOWLIST, isParametricToolName } from "./mcp-tool-names.js";
+import { bareToolName, DEFAULT_TOOL_ALLOWLIST, isParametricToolName, VIEW_TOOL_NAMES } from "./mcp-tool-names.js";
 import { classeAzione } from "./classi-azioni.js";
 import { ContatoreVolume, type RegistroCapacita } from "./capacita.js";
 import { operazioneDiChiamata } from "./operazione.js";
@@ -350,6 +350,14 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
     //     stesso ponte delle scritture, con lo stesso evento `approval_required` che il web
     //     già gestisce. Non è un tetto: chi conferma legge tutto il suo tenant (I22), e
     //     l'assenso vale per il resto della conversazione.
+    // 2a-bis. Comando della vista: non legge dati, cambia solo ciò che la pagina mostra. Passa
+    //     sempre, e il diario lo dice con una ragione propria.
+    if (VIEW_TOOL_NAMES.has(bareToolName(name))) {
+      const d: ToolDecision = { behavior: "allow", updatedInput: input as Record<string, unknown> };
+      auditDecision(name, input, d, "VIEW_COMMAND", LETTURA);
+      return d;
+    }
+
     if (classe === "read") {
       const { quante, livello } = leggiPersone();
       // TRE casi fanno chiedere, e sono tre affermazioni diverse con la stessa conseguenza:

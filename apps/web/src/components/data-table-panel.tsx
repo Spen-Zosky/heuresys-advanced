@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { OrigineDelDato, OrigineDellaRiga } from "@/components/origine-del-dato";
+import { descrivi, useTabellaAgente } from "@/lib/agente/use-tabella-agente";
 
 /**
  * Canonical list-page composition (brand-component-contract.md: "Data table /
@@ -75,11 +76,15 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
   const { t } = useTranslation();
   const {
     isLoading, isError, errorTestId, errorMessage, error, deniedReason,
-    rows, rowKey, rowTestId, onRowClick, columns,
+    rows: righeRicevute, rowKey, rowTestId, onRowClick, columns,
     emptyTestId, emptyTitle, emptyDescription, caption,
     pageSize: pageSizeProp, server, originPath,
   } = props;
   const percorsoOrigine = originPath ?? server?.apiPath;
+  // La tabella si dichiara all'assistente e ne esegue i comandi della vista (cerca, filtra,
+  // ordina): cambiano solo le righe mostrate, e la riga sopra la tabella dice che cosa è cambiato.
+  const agente = useTabellaAgente(columns, righeRicevute, server);
+  const rows = agente.righe;
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(pageSizeProp ?? 25);
@@ -109,7 +114,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       />
     );
   }
-  if (rows.length === 0 && (!server || server.total === 0)) {
+  if (righeRicevute.length === 0 && (!server || server.total === 0)) {
     return (
       <StatoVuoto
         titolo={emptyTitle ?? t("empty.none")}
@@ -158,6 +163,14 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
 
   return (
     <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
+      {agente.stato.testo !== undefined || agente.stato.filtro !== undefined || agente.stato.ordine !== undefined ? (
+        <div data-testid="vista-assistente" className="flex items-center justify-between gap-3 border-b border-border bg-muted px-3 py-1.5 text-xs">
+          <span>{t("agente.vistaCambiata", { cosa: descrivi(agente.stato, agente.nomiColonne), righe: rows.length })}</span>
+          <Button variant="ghost" size="sm" data-testid="vista-assistente-azzera" onClick={agente.azzera}>
+            {t("agente.vistaAzzera")}
+          </Button>
+        </div>
+      ) : null}
       {percorsoOrigine ? (
         <div className="flex justify-end border-b border-border px-3 py-1.5">
           <OrigineDelDato path={percorsoOrigine} />

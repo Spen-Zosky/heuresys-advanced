@@ -60,6 +60,11 @@ export interface GiroDeps {
   approvalTimeoutMs: number;
   /** Verso la finestra. Una finestra chiusa non riceve niente, e il giro continua lo stesso. */
   scrivi: (pezzo: string) => void;
+  /**
+   * A fine giro, la nota che corregge il testo quando un'azione non è avvenuta come il modello
+   * potrebbe raccontarla (blocco I4: `notaSugliEsiti` sui comandi della vista). `null`, niente nota.
+   */
+  nota?: () => string | null;
   now?: () => number;
 }
 
@@ -169,6 +174,14 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
     clearTimeout(timer);
   }
 
+  // La nota del gateway viene dopo il testo del modello e prima della fine, anche se il giro si è
+  // fermato: un comando non confermato resta tale qualunque cosa sia successo dopo.
+  const nota = d.nota?.() ?? null;
+  if (nota) {
+    registro.aggiungi([{ kind: "TESTO", payload: { testo: nota, origine: "piattaforma" } }]);
+    d.scrivi(evento("nota", { testo: nota }));
+  }
+
   let esito: EsitoGiro;
   if (motivo !== undefined) {
     registro.aggiungi([{ kind: "LIMITE", payload: { limite: motivo } }]);
@@ -181,7 +194,8 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
   }
   await registro.stato(esito.stato, {
     ...(esito.motivo ? { stopReason: esito.motivo } : {}),
-    ...(fine?.risultato && esito.stato === "FATTA" ? { result: fine.risultato } : {}),
+    // Il risultato salvato porta la nota: chi lo rilegge non trova un «fatto» senza la correzione.
+    ...(fine?.risultato && esito.stato === "FATTA" ? { result: nota ? `${fine.risultato}\n\n${nota}` : fine.risultato } : {}),
   });
   await registro.ricorda({ personsSeen: d.contatore.impronte() });
   d.scrivi(evento("done", {}));

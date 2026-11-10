@@ -102,6 +102,14 @@ export const PERSONAS = {
     email: "federica.marchetti@rtl-bank.org",
     expectedLandingPath: "/dashboard",
   },
+  // Repertorio interfacce (10/11/2026): chi ha davvero il mandato HR del tenant (TENANT_ADMIN +
+  // HRMS_MANAGER) e quindi vede tutte le pagine con tabelle. `tenantAdmin` (federica.marchetti)
+  // dopo ADR-0050 è CEO senza TENANT_ADMIN nei dati di produzione: con lei 12 pagine su 27
+  // rispondono «Non hai accesso» e il cricchetto non misurerebbe niente.
+  hrManager: {
+    email: "valentina.conti@rtl-bank.org",
+    expectedLandingPath: "/dashboard",
+  },
   manager: {
     email: "paolo.caputo@rtl-bank.org",
     expectedLandingPath: "/dashboard",

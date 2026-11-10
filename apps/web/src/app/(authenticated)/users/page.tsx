@@ -95,7 +95,9 @@ export default function UsersListPage() {
           u.positionTitle ? (
             <span className="flex flex-col" data-testid="user-role">
               <span className="text-foreground">{u.positionTitle}</span>
-              {u.organizationUnitName ? (
+              {/* l'unità sotto il titolo solo se il titolo non la dice già («Responsabile Direzione X» in Direzione X) */}
+              {u.organizationUnitName &&
+              !u.positionTitle.toLowerCase().includes(u.organizationUnitName.toLowerCase()) ? (
                 <span className="text-xs text-muted-foreground">{u.organizationUnitName}</span>
               ) : null}
             </span>

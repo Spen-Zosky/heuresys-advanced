@@ -2,7 +2,7 @@
   "_leggimi": "Registro dei rilievi noti del repertorio interfacce (docs/kb/xtras/INTERFACCE_INTELLIGENTI.md). Misurato dal vivo il 2026-11-10 come Valentina Conti (RTL) su produzione 8ac24a6e. Si può solo accorciare: chi corregge una pagina toglie qui il suo rilievo nella stessa PR; una pagina nuova con tabelle entra con l'elenco vuoto. /users è già corretta da questa PR.",
   "pagine": {
     "/users": [],
-    "/positions": ["R4-codice-a-video", "R5-numeri-diversi"],
+    "/positions": ["R4-codice-a-video"],
     "/approvals": ["R3-stato-non-in-coda"],
     "/processes": [],
     "/skills": [],
@@ -11,7 +11,7 @@
     "/job-catalog": [],
     "/time-off": ["R3-stato-non-in-coda", "R4-codice-a-video"],
     "/content": ["R3-stato-non-in-coda"],
-    "/performance": ["R4-codice-a-video"],
+    "/performance": ["R3-stato-non-in-coda", "R4-codice-a-video"],
     "/tenants": ["R4-codice-a-video"],
     "/blueprints": ["R4-codice-a-video"],
     "/visualizations": ["R4-codice-a-video"],

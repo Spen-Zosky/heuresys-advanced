@@ -35,7 +35,7 @@ Ogni blocco è una PR in bozza, provata su un banco usa-e-getta della VM con una
 | id | blocco | pagine | stato |
 |---|---|---|---|
 | B0 | Repertorio, controllo a cricchetto, questo piano | `docs/kb/xtras/INTERFACCE_INTELLIGENTI.md`, `.claude/rules/interfacce-intelligenti.md`, spec e registro | in revisione nella PR del blocco B1 |
-| B1 | Utenti, primo esempio | `/users` (API `GET /v1/users` con ruolo, unità, sede, tenant, ordine per cognome, filtro tenant per la piattaforma; pagina con Cognome, Nome, Ruolo, Sede, Stato; «158 persone»; paginazione del server) | scritto; CI e banco da chiudere |
+| B1 | Utenti, primo esempio | `/users` (API `GET /v1/users` con ruolo, unità, sede, tenant, ordine per cognome, filtro tenant per la piattaforma; pagina con Cognome, Nome, Ruolo, Sede, Stato; «158 persone»; paginazione del server) | CI verde su 9496524; banco provato il 10/11 alle 14:09-14:21 Roma (§3.1); in attesa del sì di Enzo e della fine del rilascio #212 |
 | B2 | Organizzazione | `/positions` (titolare, unità, sede; criticità leggibile; numero coerente), `/organization`, `/organization/org-chart`, `/job-catalog`, `/admin/roles` (nomi dei ruoli al posto dei codici) | da fare |
 | B3 | Processi e approvazioni | `/processes`, `/process-owner`, `/approvals`, `/me/approvals`, `/dashboard/process` | da fare |
 | B4 | Persone e presenze | `/time-off`, `/me/time-off`, `/engagement`, `/content`, `/me/documents`, `/me/certifications` | da fare |
@@ -44,6 +44,16 @@ Ogni blocco è una PR in bozza, provata su un banco usa-e-getta della VM con una
 | B7 | Configurazione e piattaforma | `/tenants`, `/blueprints`, `/tenant-blueprints`, `/visualizations`, `/seed-acquisition/runs`, `/provenance`, `/generated-origins`, `/consolidation`, `/admin/mfa-policy` | da fare |
 | B8 | Caselle di scelta e selettori di persone in tutto il prodotto | `person-picker`, filtri di stato, selettori di ruolo: R1, R4, R6 | da fare |
 
+### 3.1 Dimostrazione del blocco B1, 2026-11-10 14:09-14:21 Roma
+
+Banco: copia di prova sulla VM al commit 9496524, database ripristinato dal dump delle 03:42 del 10/11 (`~/backup-hr/copie-fase/20261110-prima-rilascio-20261110/database.dump`) in un cluster PostgreSQL privato, migrazioni del ramo applicate; API e web in build di produzione su porte libere. Il database usa-e-getta `heuresys_prova_utenti_b1`, creato con il sì di Enzo delle 11:44, è stato eliminato a fine prova; `heuresys_advanced` e `heuresys_ci` non sono stati toccati.
+
+- Valentina Conti (TENANT_ADMIN, HRMS_MANAGER di RTL Bank), login reale: titolo «Utenti, 158 persone»; colonne Cognome, Nome | Ruolo nell'organizzazione | Sede | Stato; prime righe Amato, Gabriele | Gestore Piccole Imprese, Filiale Sesto San Giovanni | Sede Centrale Milano | Attivo, poi Barbieri, Paolo; Barbieri, Pietro; Barbieri, Riccardo; Bellini, Quintino; Benedetti, Roberta; Bernardi, Antonio; Bianchi, Luca (Centro Operativo Assago); Bianco, Valentina (Filiale Brescia Centro); Bruno, Ilaria. La seconda pagina continua l'ordine (Colombo, Filippo poi Colombo, Gabriele). «Mostra: Utenze di servizio» porta il titolo a «9 utenze di servizio» con «Nessuna posizione attiva». Nessuna casella Tenant per lei.
+- platform-test-admin (PLATFORM_ADMIN): casella Tenant con «Tutti», «Heuresys System», «RTL Bank»; «Tutti» dà 161 persone con la colonna Tenant prima di Stato; «RTL Bank» dà 158, lo stesso numero di Valentina.
+- Prove: `admin-lists.spec.ts` verde; il cricchetto con Valentina 27 verdi e 1 rosso su `/performance` (R3, «Stato» colonna 4 di 6: debito già presente, mancava nel registro, ora registrato). Debito pagato autentico: `/positions` R5, tolto dal registro.
+- Correzioni nate dal banco (stessa PR): persona `hrManager` (Valentina Conti) per il cricchetto, perché `tenantAdmin` (federica.marchetti) dopo ADR-0050 è CEO senza TENANT_ADMIN e riceve «Non hai accesso» su 12 pagine su 27; il cricchetto ora è rosso su una pagina negata invece di passare senza misurare; l'unità sotto il ruolo non si ripete quando il titolo la contiene già.
+
 ## 4. Fuori da questo ciclo, da proporre una volta sola
 
+- La persona `tenantAdmin` delle prove E2E (federica.marchetti) non ha più TENANT_ADMIN nei dati di produzione (ADR-0050): le spec che la usano come amministratrice del tenant vanno riviste contro un dump recente.
 - Le 9 utenze «Collaudo …» del tenant RTL sono visibili a chi amministra il tenant (già G-5 del giro forense del 6/11): dove devono vivere è una scelta di Enzo.

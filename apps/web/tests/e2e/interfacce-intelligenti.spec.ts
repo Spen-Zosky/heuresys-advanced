@@ -2,7 +2,7 @@
  * apps/web/tests/e2e/interfacce-intelligenti.spec.ts
  *
  * Il controllo automatico del repertorio interfacce (docs/kb/xtras/INTERFACCE_INTELLIGENTI.md,
- * regole di Enzo del 10/11/2026). Apre le pagine con tabelle come TENANT_ADMIN di RTL e misura le
+ * regole di Enzo del 10/11/2026). Apre le pagine con tabelle come persona con mandato HR di RTL (TENANT_ADMIN + HRMS_MANAGER) e misura le
  * regole che una macchina sa vedere (vedi `interfacce-intelligenti.regole.ts`: R3, R4, R5).
  *
  * È un CRICCHETTO, non una fotografia. `interfacce-intelligenti.debiti.json` elenca, pagina per
@@ -21,7 +21,7 @@ import { test, expect } from "@playwright/test";
 import { storageStateFor } from "./fixtures";
 import { misuraPagina } from "./interfacce-intelligenti.regole";
 
-test.use({ storageState: storageStateFor("tenantAdmin") });
+test.use({ storageState: storageStateFor("hrManager") });
 
 const DEBITI: Record<string, string[]> = JSON.parse(
   readFileSync(join(__dirname, "interfacce-intelligenti.debiti.json"), "utf8"),
@@ -39,11 +39,14 @@ test.describe("Repertorio interfacce intelligenti (R3, R4, R5) — cricchetto", 
         .waitForFunction(
           () =>
             document.querySelector("main tbody tr") != null ||
+            document.querySelector("[data-testid='page-no-access']") != null ||
             document.querySelector("[data-testid$='-empty']") != null,
           undefined,
           { timeout: 30_000 },
         )
         .catch(() => {});
+      // Una pagina negata non si misura: senza questo il caso passerebbe verde senza aver visto niente.
+      await expect(page.getByTestId("page-no-access"), `${route}: la persona del controllo non ha accesso`).toHaveCount(0);
       const misura = await page.evaluate(misuraPagina);
       const attesi = new Set(DEBITI[route] ?? []);
       const nuovi = misura.rilievi.filter((r) => !attesi.has(r));

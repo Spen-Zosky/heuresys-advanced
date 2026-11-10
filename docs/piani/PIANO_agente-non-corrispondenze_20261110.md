@@ -11,6 +11,7 @@ Richiesta di Enzo del 2026-11-10 (thread «Creare agente esperto bancario per le
 | 2026-11-10 | Nell'armonizzazione la corsa è la fonte di verità: molti dati del tenant cambieranno per allinearsi. Fanno eccezione le filiali, che restano quelle reali del tenant, con il modello di filiale della corsa applicato a ciascuna. |
 | 2026-11-10 | Le catene gerarchiche e funzionali devono essere coerenti: chi lavora in filiale risponde alla catena della filiale. |
 | 2026-11-10 | Sola lettura e proposte finché Enzo non approva le scritture. |
+| 2026-11-10 | Il livello di Area di RTL sparisce: i direttori di filiale riportano al Retail Director, e i Responsabili di Area non entrano nella corsa. |
 
 La terza decisione rovescia, per questo caso, la regola R-13 della specifica dell'agente (il prototipo prende la lingua del tenant): l'interprete riceve la fonte di verità come parametro (`sourceOfTruth`), invece di averla scritta dentro.
 
@@ -50,7 +51,7 @@ Con la corsa come fonte di verità, il nome del processo unico si prende dalla c
 | NC-2 | Interprete delle non corrispondenze, rotta `POST /consolidation/interpret` (`apps/agent-gateway/src/consolidation-interpret.ts`) | Claude | prove verdi | FATTO |
 | NC-3 | Giro vero dell'interprete sui Processi, dalla VM, con l'abbonamento | Claude | proposte confrontate con il giro a mano del 2026-11-10 | ACTIVE, dopo l'unione e il rilascio |
 | NC-4 | Cliente dell'interprete nell'API e comando che lancia un dominio su una corsa e un tenant, in sola lettura | Claude | prova dal vivo | ACTIVE |
-| NC-5 | Verifica delle catene persona per persona in RTL | Claude | riporti letti dal dump | WAIT-INPUT: riporti chiesti al thread dei ruoli |
+| NC-5 | Verifica delle catene persona per persona in RTL | Claude | riporti letti dal dump | FATTO il 2026-11-10: 157 riporti su 158, nessuna violazione fra unità; correzioni proposte nel documento (Area tolta, sviluppo e infrastrutture, modello di filiale) |
 | NC-6 | Applicazione delle proposte approvate | advanced, dopo il sì di Enzo | dimostrazione dal vivo | GATED: Enzo approva le scritture |
 
 ## Fuori da questo ciclo

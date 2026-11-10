@@ -28,15 +28,20 @@ test.describe("compensation intelligence — comp & reward read panels (#32 A/L7
     await page.goto("/compensation-intelligence");
     await expect(page.getByTestId("compensation-page")).toBeVisible({ timeout: 30_000 });
 
-    for (const panel of [
-      "comp-variable-pay-panel", "comp-recommendation-panel", "comp-bonus-pool-panel",
-      "comp-objective-rule-panel", "comp-position-weight-panel", "comp-handoff-panel",
-    ]) {
+    // C5 del piano interfaccia sistematica: un pannello per scheda, la scheda nell'indirizzo.
+    for (const [scheda, panel] of [
+      ["variabile", "comp-variable-pay-panel"], ["raccomandazioni", "comp-recommendation-panel"],
+      ["fondi", "comp-bonus-pool-panel"], ["regole", "comp-objective-rule-panel"],
+      ["pesi", "comp-position-weight-panel"], ["paghe", "comp-handoff-panel"],
+    ] as const) {
+      await page.goto(`/compensation-intelligence?scheda=${scheda}`);
       await expect(page.getByTestId(panel)).toBeVisible({ timeout: 20_000 });
     }
 
-    // Live rows from populated tables: variable-pay (121) + recommendations (116).
+    // Live rows from populated tables: variable-pay + recommendations.
+    await page.goto("/compensation-intelligence?scheda=variabile");
     await expect(page.getByTestId("comp-variable-pay-row").first()).toBeVisible({ timeout: 20_000 });
+    await page.goto("/compensation-intelligence?scheda=raccomandazioni");
     await expect(page.getByTestId("comp-recommendation-row").first()).toBeVisible({ timeout: 20_000 });
   });
 
@@ -48,7 +53,7 @@ test.describe("compensation intelligence — comp & reward read panels (#32 A/L7
    * un calcolo REALE del tenant, non da un esempio costruito.
    */
   test("the evaluation panel explains a real calculation", async ({ page }) => {
-    await page.goto("/compensation-intelligence");
+    await page.goto("/compensation-intelligence?scheda=variabile");
     await expect(page.getByTestId("comp-variable-pay-row").first()).toBeVisible({ timeout: 30_000 });
 
     await page.getByTestId("comp-evaluate-button").first().click();
@@ -91,7 +96,7 @@ test.describe("compensation intelligence — comp & reward read panels (#32 A/L7
    * senza aver verificato nulla.
    */
   test("at least one real calculation shows the full payout reasoning", async ({ page }) => {
-    await page.goto("/compensation-intelligence");
+    await page.goto("/compensation-intelligence?scheda=variabile");
     await expect(page.getByTestId("comp-variable-pay-row").first()).toBeVisible({ timeout: 30_000 });
 
     const buttons = page.getByTestId("comp-evaluate-button");
@@ -136,7 +141,7 @@ test.describe("ADR-0032 sul frontend: al mandato tecnico i valori economici non 
     // scorciatoia: la stessa pagina, con lo stesso percorso, non deve consegnare i valori a
     // `PLATFORM_ADMIN`. Se un giorno li consegnasse, questo caso diventa rosso — ed e'
     // esattamente il rosso che si vuole vedere.
-    await page.goto("/compensation-intelligence");
+    await page.goto("/compensation-intelligence?scheda=variabile");
     await expect(page.getByTestId("comp-variable-pay-row").first()).toBeVisible({ timeout: 30_000 });
 
     await page.getByTestId("comp-evaluate-button").first().click();

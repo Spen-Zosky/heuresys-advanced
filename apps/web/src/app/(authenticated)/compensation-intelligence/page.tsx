@@ -8,12 +8,24 @@ import { Badge, Button, type KpiCardData } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { KPIStrip } from "@/components/indicatori-leggibili";
 import type {
-  VariablePayCalculation, CompensationRecommendationRow, BonusPool,
-  ObjectiveRewardRule, PositionEconomicWeight, PayrollHandoffRecord,
+  VariablePayCalculation,
+  CompensationRecommendationRow,
+  BonusPool,
+  ObjectiveRewardRule,
+  PositionEconomicWeight,
+  PayrollHandoffRecord,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
-import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
-import type { CompensationBandListResponse, CompensationBand as CompensationBandRow, VariablePayEvaluation } from "@heuresys/shared";
+import {
+  StatoCaricamento,
+  StatoErrore,
+  StatoVuoto,
+} from "@/components/stato-pagina";
+import type {
+  CompensationBandListResponse,
+  CompensationBand as CompensationBandRow,
+  VariablePayEvaluation,
+} from "@heuresys/shared";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
@@ -22,6 +34,7 @@ import { EChartsCard } from "../_charts-client";
 import { useFormat, type Formati } from "@/lib/format";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { NomeOppure } from "@/components/senza-nome";
+import { SchedePagina } from "@/components/schede-pagina";
 
 interface RewardGate {
   rewardGateId: string;
@@ -40,15 +53,23 @@ interface RewardGate {
   } | null;
 }
 
-const STATUSES = ["PASSED", "WARNING", "BLOCKED", "ESCALATED", "OVERRIDDEN_WITH_REASON", "PENDING"] as const;
-const STATUS_TONE: Record<(typeof STATUSES)[number], KpiCardData["iconTone"]> = {
-  PASSED: "success",
-  WARNING: "warning",
-  BLOCKED: "danger",
-  ESCALATED: "danger",
-  OVERRIDDEN_WITH_REASON: "palette-3",
-  PENDING: "info",
-};
+const STATUSES = [
+  "PASSED",
+  "WARNING",
+  "BLOCKED",
+  "ESCALATED",
+  "OVERRIDDEN_WITH_REASON",
+  "PENDING",
+] as const;
+const STATUS_TONE: Record<(typeof STATUSES)[number], KpiCardData["iconTone"]> =
+  {
+    PASSED: "success",
+    WARNING: "warning",
+    BLOCKED: "danger",
+    ESCALATED: "danger",
+    OVERRIDDEN_WITH_REASON: "palette-3",
+    PENDING: "info",
+  };
 
 // Explicit chart palette (echarts can't read CSS tokens) — kept in step with STATUS_TONE.
 const STATUS_COLOR: Record<string, string> = {
@@ -77,7 +98,11 @@ interface DistributionItem {
  * (see `CompensationRecommendationRowSchema`). So the cell says it is withheld.
  */
 function MaskedCell({ t }: { t: TFunction }) {
-  return <span className="text-xs italic text-muted-foreground">{t("compReward.masked")}</span>;
+  return (
+    <span className="text-xs italic text-muted-foreground">
+      {t("compReward.masked")}
+    </span>
+  );
 }
 
 function buildVariablePayColumns(
@@ -86,18 +111,38 @@ function buildVariablePayColumns(
   f: Formati,
 ): DataColumn<VariablePayCalculation>[] {
   return [
-    { header: t("compReward.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
-    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
-    { header: t("compReward.cols.signalScore"), align: "right", cell: (r) => (
-      r.masked?.includes("signalScore")
-        ? <MaskedCell t={t} />
-        : <span className="tabular-nums">{r.signalScore ?? "—"}</span>
-    ) },
-    { header: t("compReward.cols.amount"), align: "right", cell: (r) => (
-      r.masked?.includes("amountEur")
-        ? <MaskedCell t={t} />
-        : <span className="tabular-nums">{f.importo(r.amountEur, "EUR")}</span>
-    ) },
+    {
+      header: t("compReward.cols.employee"),
+      cell: (r) => <span>{r.subjectUserName ?? "—"}</span>,
+    },
+    {
+      header: t("compReward.cols.period"),
+      cell: (r) => (
+        <span className="tabular-nums text-xs">
+          {f.data(r.periodStart)} → {f.data(r.periodEnd)}
+        </span>
+      ),
+    },
+    {
+      header: t("compReward.cols.signalScore"),
+      align: "right",
+      cell: (r) =>
+        r.masked?.includes("signalScore") ? (
+          <MaskedCell t={t} />
+        ) : (
+          <span className="tabular-nums">{r.signalScore ?? "—"}</span>
+        ),
+    },
+    {
+      header: t("compReward.cols.amount"),
+      align: "right",
+      cell: (r) =>
+        r.masked?.includes("amountEur") ? (
+          <MaskedCell t={t} />
+        ) : (
+          <span className="tabular-nums">{f.importo(r.amountEur, "EUR")}</span>
+        ),
+    },
     {
       // #37 (B2): l'importo da solo non dice se il premio sia erogabile né come
       // ci si è arrivati. Da qui si apre il ragionamento.
@@ -132,13 +177,21 @@ function buildVariablePayColumns(
  */
 type VariablePayEvaluationView = VariablePayEvaluation;
 
-function EvaluationPanel({ calculationId, onClose }: { calculationId: string; onClose: () => void }) {
+function EvaluationPanel({
+  calculationId,
+  onClose,
+}: {
+  calculationId: string;
+  onClose: () => void;
+}) {
   const { t } = useTranslation("admin");
   const f = useFormat();
   const q = useQuery({
     queryKey: ["compensation", "variable-pay", calculationId, "evaluation"],
     queryFn: () =>
-      apiFetch<VariablePayEvaluationView>(`/v1/compensation/variable-pay/${calculationId}/evaluation`),
+      apiFetch<VariablePayEvaluationView>(
+        `/v1/compensation/variable-pay/${calculationId}/evaluation`,
+      ),
   });
 
   const decisionTone: Record<string, string> = {
@@ -153,8 +206,14 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
       className="rounded-card border border-border bg-card p-4 shadow-card"
     >
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">{t("compReward.evaluation.title")}</h3>
-        <Button variant="ghost" data-testid="comp-evaluation-close" onClick={onClose}>
+        <h3 className="text-sm font-semibold text-foreground">
+          {t("compReward.evaluation.title")}
+        </h3>
+        <Button
+          variant="ghost"
+          data-testid="comp-evaluation-close"
+          onClick={onClose}
+        >
           {t("compReward.evaluation.close")}
         </Button>
       </div>
@@ -177,23 +236,34 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
             difetto che rompeva questo pannello (vedi il commento su `finalFactor`).
           */}
           <p className="text-muted-foreground">
-            {t("compReward.evaluation.period", { from: f.data(q.data.periodStart), to: f.data(q.data.periodEnd) })}
+            {t("compReward.evaluation.period", {
+              from: f.data(q.data.periodStart),
+              to: f.data(q.data.periodEnd),
+            })}
             {" · "}
             {q.data.masked?.includes("recordedAmountEur") ? (
               <MaskedCell t={t} />
             ) : (
-              t("compReward.evaluation.recorded", { amount: f.importo(q.data.recordedAmountEur, "EUR") })
+              t("compReward.evaluation.recorded", {
+                amount: f.importo(q.data.recordedAmountEur, "EUR"),
+              })
             )}
           </p>
 
           {q.data.notEvaluable ? (
-            <p data-testid="comp-evaluation-not-evaluable" className="text-muted-foreground">
+            <p
+              data-testid="comp-evaluation-not-evaluable"
+              className="text-muted-foreground"
+            >
               {q.data.notEvaluable}
             </p>
           ) : (
             <div data-testid="comp-evaluation-curve" className="space-y-1">
               <p className="font-medium text-foreground">
-                {t("compReward.evaluation.curve", { code: q.data.curveCode, kind: q.data.curveKind })}
+                {t("compReward.evaluation.curve", {
+                  code: q.data.curveCode,
+                  kind: q.data.curveKind,
+                })}
               </p>
               {/* La spiegazione arriva dal motore: la stessa frase che un
                   destinatario può usare per rifare il conto — e al mandato solo
@@ -201,19 +271,26 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
               {q.data.masked?.includes("curveExplanation") ? (
                 <MaskedCell t={t} />
               ) : (
-                <p className="text-muted-foreground">{q.data.curveExplanation}</p>
+                <p className="text-muted-foreground">
+                  {q.data.curveExplanation}
+                </p>
               )}
             </div>
           )}
 
           <div data-testid="comp-evaluation-gates" className="space-y-2">
-            <p className={`font-medium ${decisionTone[q.data.gateDecision] ?? ""}`}>
+            <p
+              className={`font-medium ${decisionTone[q.data.gateDecision] ?? ""}`}
+            >
               {q.data.gateExplanation}
             </p>
             {q.data.gates.length > 0 ? (
               <ul className="divide-y divide-border">
                 {q.data.gates.map((g) => (
-                  <li key={g.gateCode} className="flex items-center justify-between gap-3 py-1">
+                  <li
+                    key={g.gateCode}
+                    className="flex items-center justify-between gap-3 py-1"
+                  >
                     <span>
                       {/* F-2 (L6): il nome del cancello; il codice resta nel suggerimento. */}
                       <span title={g.gateCode}>{g.gateName}</span>
@@ -225,7 +302,9 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
                     </span>
                     <span className="flex items-center gap-2">
                       {g.overrideReason ? (
-                        <span className="text-xs text-muted-foreground">{g.overrideReason}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {g.overrideReason}
+                        </span>
                       ) : null}
                       <StatusBadge value={g.status} />
                     </span>
@@ -246,9 +325,15 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
             si ripresenta ovunque un controllo `!== null` incontri un campo mascherato.
             Si guarda `masked` PRIMA, e solo dopo si legge il valore.
           */}
-          {q.data.masked?.includes("finalFactor") ? null : q.data.finalFactor != null ? (
-            <p data-testid="comp-evaluation-final" className="font-medium text-foreground">
-              {t("compReward.evaluation.finalFactor", { factor: f.numero(q.data.finalFactor, 4) })}
+          {q.data.masked?.includes("finalFactor") ? null : q.data.finalFactor !=
+            null ? (
+            <p
+              data-testid="comp-evaluation-final"
+              className="font-medium text-foreground"
+            >
+              {t("compReward.evaluation.finalFactor", {
+                factor: f.numero(q.data.finalFactor, 4),
+              })}
             </p>
           ) : null}
         </div>
@@ -257,87 +342,233 @@ function EvaluationPanel({ calculationId, onClose }: { calculationId: string; on
   );
 }
 
-function buildRecommendationColumns(t: TFunction, f: Formati): DataColumn<CompensationRecommendationRow>[] {
+function buildRecommendationColumns(
+  t: TFunction,
+  f: Formati,
+): DataColumn<CompensationRecommendationRow>[] {
   return [
-    { header: t("compReward.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
-    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
-    { header: t("compReward.cols.signal"), cell: (r) => <StatusBadge value={r.signal} /> },
-    { header: t("compReward.cols.amount"), align: "right", cell: (r) => (
-      r.masked?.includes("amountEur")
-        ? <MaskedCell t={t} />
-        : <span className="tabular-nums">{f.importo(r.amountEur, "EUR")}</span>
-    ) },
-    { header: t("compReward.cols.narrative"), cell: (r) => (
-      r.masked?.includes("narrative")
-        ? <MaskedCell t={t} />
-        : <span className="text-xs text-muted-foreground">{r.narrative ?? "—"}</span>
-    ) },
+    {
+      header: t("compReward.cols.employee"),
+      cell: (r) => <span>{r.subjectUserName ?? "—"}</span>,
+    },
+    {
+      header: t("compReward.cols.period"),
+      cell: (r) => (
+        <span className="tabular-nums text-xs">
+          {f.data(r.periodStart)} → {f.data(r.periodEnd)}
+        </span>
+      ),
+    },
+    {
+      header: t("compReward.cols.signal"),
+      cell: (r) => <StatusBadge value={r.signal} />,
+    },
+    {
+      header: t("compReward.cols.amount"),
+      align: "right",
+      cell: (r) =>
+        r.masked?.includes("amountEur") ? (
+          <MaskedCell t={t} />
+        ) : (
+          <span className="tabular-nums">{f.importo(r.amountEur, "EUR")}</span>
+        ),
+    },
+    {
+      header: t("compReward.cols.narrative"),
+      cell: (r) =>
+        r.masked?.includes("narrative") ? (
+          <MaskedCell t={t} />
+        ) : (
+          <span className="text-xs text-muted-foreground">
+            {r.narrative ?? "—"}
+          </span>
+        ),
+    },
   ];
 }
 
-function buildBonusPoolColumns(t: TFunction, f: Formati): DataColumn<BonusPool>[] {
+function buildBonusPoolColumns(
+  t: TFunction,
+  f: Formati,
+): DataColumn<BonusPool>[] {
   return [
-    { header: t("compReward.cols.scope"), cell: (r) => <span className="font-mono text-xs">{r.scope}</span> },
-    { header: t("compReward.cols.orgUnit"), cell: (r) => <span className="text-xs">{r.organizationUnitId ? <NomeOppure nome={r.organizationUnitName} id={r.organizationUnitId} /> : "—"}</span> },
-    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
-    { header: t("compReward.cols.total"), align: "right", cell: (r) => (
-      r.masked?.includes("totalEur")
-        ? <MaskedCell t={t} />
-        : <span className="tabular-nums">{f.importo(r.totalEur, "EUR")}</span>
-    ) },
+    {
+      header: t("compReward.cols.scope"),
+      cell: (r) => <span className="font-mono text-xs">{r.scope}</span>,
+    },
+    {
+      header: t("compReward.cols.orgUnit"),
+      cell: (r) => (
+        <span className="text-xs">
+          {r.organizationUnitId ? (
+            <NomeOppure
+              nome={r.organizationUnitName}
+              id={r.organizationUnitId}
+            />
+          ) : (
+            "—"
+          )}
+        </span>
+      ),
+    },
+    {
+      header: t("compReward.cols.period"),
+      cell: (r) => (
+        <span className="tabular-nums text-xs">
+          {f.data(r.periodStart)} → {f.data(r.periodEnd)}
+        </span>
+      ),
+    },
+    {
+      header: t("compReward.cols.total"),
+      align: "right",
+      cell: (r) =>
+        r.masked?.includes("totalEur") ? (
+          <MaskedCell t={t} />
+        ) : (
+          <span className="tabular-nums">{f.importo(r.totalEur, "EUR")}</span>
+        ),
+    },
   ];
 }
 
-function buildObjectiveRuleColumns(t: TFunction): DataColumn<ObjectiveRewardRule>[] {
+function buildObjectiveRuleColumns(
+  t: TFunction,
+): DataColumn<ObjectiveRewardRule>[] {
   return [
     // F-3 (banco L6, 4/11): sei regole portano come codice una chiave d'importazione
     // (`LEGACY_BP::<uuid>`), che non è un codice da leggere. Si mostra il codice solo quando
     // è un codice; la chiave resta nel suggerimento. La bonifica del dato è a parte.
-    { header: t("compReward.cols.code"), cell: (r) => r.code.includes("::")
-      ? <span className="text-xs text-muted-foreground" title={r.code}>—</span>
-      : <span className="font-mono text-xs">{r.code}</span> },
+    {
+      header: t("compReward.cols.code"),
+      cell: (r) =>
+        r.code.includes("::") ? (
+          <span className="text-xs text-muted-foreground" title={r.code}>
+            —
+          </span>
+        ) : (
+          <span className="font-mono text-xs">{r.code}</span>
+        ),
+    },
     { header: t("compReward.cols.name"), cell: (r) => <span>{r.name}</span> },
   ];
 }
 
-function buildPositionWeightColumns(t: TFunction, f: Formati): DataColumn<PositionEconomicWeight>[] {
+function buildPositionWeightColumns(
+  t: TFunction,
+  f: Formati,
+): DataColumn<PositionEconomicWeight>[] {
   return [
-    { header: t("compReward.cols.position"), cell: (r) => <span className="text-xs"><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
-    { header: t("compReward.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value}</span> },
-    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
+    {
+      header: t("compReward.cols.position"),
+      cell: (r) => (
+        <span className="text-xs">
+          <NomeOppure nome={r.positionTitle} id={r.positionId} />
+        </span>
+      ),
+    },
+    {
+      header: t("compReward.cols.value"),
+      align: "right",
+      cell: (r) => <span className="tabular-nums">{r.value}</span>,
+    },
+    {
+      header: t("compReward.cols.period"),
+      cell: (r) => (
+        <span className="tabular-nums text-xs">
+          {f.data(r.periodStart)} → {f.data(r.periodEnd)}
+        </span>
+      ),
+    },
   ];
 }
 
-function buildHandoffColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): DataColumn<PayrollHandoffRecord>[] {
+function buildHandoffColumns(
+  t: TFunction,
+  f: Formati,
+  enumLabel: EnumLabelFn,
+): DataColumn<PayrollHandoffRecord>[] {
   return [
-    { header: t("compReward.cols.recipient"), cell: (r) => <span className="text-xs" title={r.recipientSystem}>{enumLabel("payrollRecipientSystem", r.recipientSystem)}</span> },
-    { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.periodStart)} → {f.data(r.periodEnd)}</span> },
-    { header: t("compReward.cols.status"), cell: (r) => <EnumStatusBadge domain="payrollHandoffStatus" value={r.status} /> },
-    { header: t("compReward.cols.handedOff"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.handedOffAt)}</span> },
+    {
+      header: t("compReward.cols.recipient"),
+      cell: (r) => (
+        <span className="text-xs" title={r.recipientSystem}>
+          {enumLabel("payrollRecipientSystem", r.recipientSystem)}
+        </span>
+      ),
+    },
+    {
+      header: t("compReward.cols.period"),
+      cell: (r) => (
+        <span className="tabular-nums text-xs">
+          {f.data(r.periodStart)} → {f.data(r.periodEnd)}
+        </span>
+      ),
+    },
+    {
+      header: t("compReward.cols.status"),
+      cell: (r) => (
+        <EnumStatusBadge domain="payrollHandoffStatus" value={r.status} />
+      ),
+    },
+    {
+      header: t("compReward.cols.handedOff"),
+      cell: (r) => (
+        <span className="tabular-nums text-xs">{f.data(r.handedOffAt)}</span>
+      ),
+    },
   ];
 }
 
 // C4 (#42): the reward-gates table — was a hand-rolled <table> (pre-dating the
 // EntityTable migration of the six panels below). Converted to EntityTable for the
 // same server-pagination + loading/error/empty states as everything else on this page.
-function buildRewardGateColumns(t: TFunction, f: Formati): DataColumn<RewardGate>[] {
+function buildRewardGateColumns(
+  t: TFunction,
+  f: Formati,
+): DataColumn<RewardGate>[] {
   return [
-    { header: t("compensation.cols.user"), cell: (g) => <span className="text-xs">{g.userId ? <NomeOppure nome={g.userName} id={g.userId} /> : "—"}</span> },
+    {
+      header: t("compensation.cols.user"),
+      cell: (g) => (
+        <span className="text-xs">
+          {g.userId ? <NomeOppure nome={g.userName} id={g.userId} /> : "—"}
+        </span>
+      ),
+    },
     {
       header: t("compensation.cols.gate"),
       cell: (g) => (
         <span>
           <span className="font-mono text-xs">{g.catalogCode}</span>
-          <span className="block text-xs text-muted-foreground">{g.catalogName}</span>
+          <span className="block text-xs text-muted-foreground">
+            {g.catalogName}
+          </span>
         </span>
       ),
     },
-    { header: t("compensation.cols.period"), cell: (g) => <span className="text-xs">{f.data(g.periodStart)} → {f.data(g.periodEnd)}</span> },
+    {
+      header: t("compensation.cols.period"),
+      cell: (g) => (
+        <span className="text-xs">
+          {f.data(g.periodStart)} → {f.data(g.periodEnd)}
+        </span>
+      ),
+    },
     {
       header: t("compensation.cols.blocking"),
-      cell: (g) => <StatusPill tone={g.isBlocking ? "warning" : "neutral"}>{g.isBlocking ? t("compensation.blockingYes") : t("compensation.blockingNo")}</StatusPill>,
+      cell: (g) => (
+        <StatusPill tone={g.isBlocking ? "warning" : "neutral"}>
+          {g.isBlocking
+            ? t("compensation.blockingYes")
+            : t("compensation.blockingNo")}
+        </StatusPill>
+      ),
     },
-    { header: t("compensation.cols.status"), cell: (g) => <StatusBadge value={g.latestResult?.status ?? "PENDING"} /> },
+    {
+      header: t("compensation.cols.status"),
+      cell: (g) => <StatusBadge value={g.latestResult?.status ?? "PENDING"} />,
+    },
   ];
 }
 
@@ -359,13 +590,21 @@ export default function CompensationIntelligencePage() {
   const dist = useQuery({
     queryKey: ["compensation", "distribution"],
     queryFn: () =>
-      apiFetch<{ items: DistributionItem[]; total: number }>("/v1/compensation/distribution"),
+      apiFetch<{ items: DistributionItem[]; total: number }>(
+        "/v1/compensation/distribution",
+      ),
   });
 
-  const distByStatus = new Map((dist.data?.items ?? []).map((i) => [i.status, i.count]));
+  const distByStatus = new Map(
+    (dist.data?.items ?? []).map((i) => [i.status, i.count]),
+  );
   const statusItems: KpiCardData[] = STATUSES.map((s) => ({
     label: s.replace(/_/g, " "),
-    value: <span data-testid={`compensation-status-${s}`}>{distByStatus.get(s) ?? 0}</span>,
+    value: (
+      <span data-testid={`compensation-status-${s}`}>
+        {distByStatus.get(s) ?? 0}
+      </span>
+    ),
     iconTone: STATUS_TONE[s],
   }));
 
@@ -395,22 +634,28 @@ export default function CompensationIntelligencePage() {
 
   // ── A/L7 (#32) read lists — server-paginated over the dormant reward tables ──
   const variablePay = usePaginatedList<VariablePayCalculation>({
-    queryKey: ["compensation", "variable-pay"], path: "/v1/compensation/variable-pay",
+    queryKey: ["compensation", "variable-pay"],
+    path: "/v1/compensation/variable-pay",
   });
   const recommendations = usePaginatedList<CompensationRecommendationRow>({
-    queryKey: ["compensation", "recommendations"], path: "/v1/compensation/recommendations",
+    queryKey: ["compensation", "recommendations"],
+    path: "/v1/compensation/recommendations",
   });
   const bonusPools = usePaginatedList<BonusPool>({
-    queryKey: ["compensation", "bonus-pools"], path: "/v1/compensation/bonus-pools",
+    queryKey: ["compensation", "bonus-pools"],
+    path: "/v1/compensation/bonus-pools",
   });
   const objectiveRules = usePaginatedList<ObjectiveRewardRule>({
-    queryKey: ["compensation", "objective-reward-rules"], path: "/v1/compensation/objective-reward-rules",
+    queryKey: ["compensation", "objective-reward-rules"],
+    path: "/v1/compensation/objective-reward-rules",
   });
   const positionWeight = usePaginatedList<PositionEconomicWeight>({
-    queryKey: ["compensation", "position-economic-weight"], path: "/v1/compensation/position-economic-weight",
+    queryKey: ["compensation", "position-economic-weight"],
+    path: "/v1/compensation/position-economic-weight",
   });
   const handoffRecords = usePaginatedList<PayrollHandoffRecord>({
-    queryKey: ["compensation", "handoff-records"], path: "/v1/compensation/handoff-records",
+    queryKey: ["compensation", "handoff-records"],
+    path: "/v1/compensation/handoff-records",
   });
 
   const rewardGateColumns = useMemo(() => buildRewardGateColumns(t, f), [t, f]);
@@ -419,229 +664,394 @@ export default function CompensationIntelligencePage() {
     () => buildVariablePayColumns(tA, setEvaluatingId, f),
     [tA, f],
   );
-  const recommendationColumns = useMemo(() => buildRecommendationColumns(tA, f), [tA, f]);
+  const recommendationColumns = useMemo(
+    () => buildRecommendationColumns(tA, f),
+    [tA, f],
+  );
   const bonusPoolColumns = useMemo(() => buildBonusPoolColumns(tA, f), [tA, f]);
-  const objectiveRuleColumns = useMemo(() => buildObjectiveRuleColumns(tA), [tA]);
-  const positionWeightColumns = useMemo(() => buildPositionWeightColumns(tA, f), [tA, f]);
-  const handoffColumns = useMemo(() => buildHandoffColumns(tA, f, enumLabel), [tA, f, enumLabel]);
+  const objectiveRuleColumns = useMemo(
+    () => buildObjectiveRuleColumns(tA),
+    [tA],
+  );
+  const positionWeightColumns = useMemo(
+    () => buildPositionWeightColumns(tA, f),
+    [tA, f],
+  );
+  const handoffColumns = useMemo(
+    () => buildHandoffColumns(tA, f, enumLabel),
+    [tA, f, enumLabel],
+  );
 
   // #53 E4 — catalogo delle fasce del tenant.
   const bands = useQuery({
     queryKey: ["compensation", "bands"],
-    queryFn: () => apiFetch<CompensationBandListResponse>("/v1/compensation/bands?limit=200"),
+    queryFn: () =>
+      apiFetch<CompensationBandListResponse>(
+        "/v1/compensation/bands?limit=200",
+      ),
   });
 
-  const bandColumns = useMemo<DataColumn<CompensationBandRow>[]>(
-    () => {
-      // Dentro il memo, non fuori: definita nel corpo del componente si ricreerebbe a
-      // ogni render, e il memo la userebbe senza poterla dichiarare fra le dipendenze.
-      const money = (v: string | null) => f.importo(v, "EUR", 0);
-      return [
-      { header: t("compensation.bands.colBand"), cell: (r) => <span className="font-medium text-foreground">{r.name}</span> },
-      { header: t("compensation.bands.colMin"), align: "right", cell: (r) => <span className="tabular-nums">{money(r.minEur)}</span> },
-      { header: t("compensation.bands.colMid"), align: "right", cell: (r) => <span className="font-semibold tabular-nums text-foreground">{money(r.midEur)}</span> },
-      { header: t("compensation.bands.colMax"), align: "right", cell: (r) => <span className="tabular-nums">{money(r.maxEur)}</span> },
+  const bandColumns = useMemo<DataColumn<CompensationBandRow>[]>(() => {
+    // Dentro il memo, non fuori: definita nel corpo del componente si ricreerebbe a
+    // ogni render, e il memo la userebbe senza poterla dichiarare fra le dipendenze.
+    const money = (v: string | null) => f.importo(v, "EUR", 0);
+    return [
       {
-        header: t("compensation.bands.colSpread"), align: "right",
+        header: t("compensation.bands.colBand"),
+        cell: (r) => (
+          <span className="font-medium text-foreground">{r.name}</span>
+        ),
+      },
+      {
+        header: t("compensation.bands.colMin"),
+        align: "right",
+        cell: (r) => <span className="tabular-nums">{money(r.minEur)}</span>,
+      },
+      {
+        header: t("compensation.bands.colMid"),
+        align: "right",
+        cell: (r) => (
+          <span className="font-semibold tabular-nums text-foreground">
+            {money(r.midEur)}
+          </span>
+        ),
+      },
+      {
+        header: t("compensation.bands.colMax"),
+        align: "right",
+        cell: (r) => <span className="tabular-nums">{money(r.maxEur)}</span>,
+      },
+      {
+        header: t("compensation.bands.colSpread"),
+        align: "right",
         cell: (r) => {
           // L'ampiezza dice quanto margine ha una fascia: due fasce con lo stesso centro
           // e ampiezze diverse si governano in modo diverso.
-          if (r.minEur === null || r.maxEur === null || Number(r.minEur) === 0) return <span>—</span>;
-          const pct = Math.round(((Number(r.maxEur) - Number(r.minEur)) / Number(r.minEur)) * 100);
-          return <span className="tabular-nums text-muted-foreground">{f.percento(pct, "0-100")}</span>;
+          if (r.minEur === null || r.maxEur === null || Number(r.minEur) === 0)
+            return <span>—</span>;
+          const pct = Math.round(
+            ((Number(r.maxEur) - Number(r.minEur)) / Number(r.minEur)) * 100,
+          );
+          return (
+            <span className="tabular-nums text-muted-foreground">
+              {f.percento(pct, "0-100")}
+            </span>
+          );
         },
       },
-      ];
-    },
-    [t, f],
-  );
+    ];
+  }, [t, f]);
 
   return (
-    <main data-testid="compensation-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <main
+      data-testid="compensation-page"
+      className="mx-auto max-w-7xl space-y-6 px-6 pb-8"
+    >
       <PageHeader
         data-testid="compensation-title"
         title={t("compensation.title")}
         description={t("compensation.description")}
         badges={
           <Badge variant="secondary" data-testid="compensation-count">
-            {gates.query.data ? t("compensation.count", { count: gates.total }) : "…"}
+            {gates.query.data
+              ? t("compensation.count", { count: gates.total })
+              : "…"}
           </Badge>
         }
       />
 
-      <section
-        data-testid="compensation-summary"
-        className="grid gap-4 lg:grid-cols-[1fr_minmax(280px,360px)]"
-      >
-        <KPIStrip items={statusItems} />
-        <div
-          data-testid="compensation-distribution-chart"
-          className="rounded-card border border-border bg-card p-4 shadow-card"
-        >
-          <h2 className="mb-2 text-sm font-medium text-foreground">{t("compensation.distributionTitle")}</h2>
-          {dist.data && dist.data.total > 0 ? (
-            <EChartsCard
-              option={chartOption}
-              height={240}
-              ariaLabel={t("compensation.distributionAria")}
-            />
-          ) : dist.isLoading ? (
-            <StatoCaricamento />
-          ) : (
-            <StatoVuoto titolo={t("compensation.distributionEmpty")} />
-          )}
-        </div>
-      </section>
+      {/* C5: otto argomenti in schede invece che una pagina da scorrere */}
+      <SchedePagina
+        schede={[
+          {
+            id: "cancelli",
+            titolo: tA("compReward.rewardGates"),
+            conteggio: gates.query.data ? gates.total : null,
+            contenuto: (
+              <>
+                <section
+                  data-testid="compensation-summary"
+                  className="grid gap-4 lg:grid-cols-[1fr_minmax(280px,360px)]"
+                >
+                  <KPIStrip items={statusItems} />
+                  <div
+                    data-testid="compensation-distribution-chart"
+                    className="rounded-card border border-border bg-card p-4 shadow-card"
+                  >
+                    <h2 className="mb-2 text-sm font-medium text-foreground">
+                      {t("compensation.distributionTitle")}
+                    </h2>
+                    {dist.data && dist.data.total > 0 ? (
+                      <EChartsCard
+                        option={chartOption}
+                        height={240}
+                        ariaLabel={t("compensation.distributionAria")}
+                      />
+                    ) : dist.isLoading ? (
+                      <StatoCaricamento />
+                    ) : (
+                      <StatoVuoto
+                        titolo={t("compensation.distributionEmpty")}
+                      />
+                    )}
+                  </div>
+                </section>
 
-      <EntityTable<RewardGate>
-        isLoading={gates.query.isLoading}
-        isError={gates.query.isError}
-        error={gates.query.error}
-        errorTestId="compensation-error"
-        errorMessage={t("compensation.error")}
-        rows={gates.rows}
-        server={gates.server}
-        rowKey={(g) => g.rewardGateId}
-        rowTestId="compensation-row"
-        columns={rewardGateColumns}
-        emptyTestId="compensation-empty"
-        emptyTitle={t("compensation.emptyTitle")}
-        emptyDescription={t("compensation.emptyDescription")}
-        caption={t("compensation.caption")}
-      />
-
-      {/* A/L7 (#32) — read panels over the six dormant compensation & reward tables. */}
-      <section data-testid="comp-variable-pay-panel" className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{tA("compReward.variablePay")}</h2>
-        <EntityTable<VariablePayCalculation>
-          isLoading={variablePay.query.isLoading}
-          isError={variablePay.query.isError}
-          error={variablePay.query.error}
-          errorMessage={tA("compReward.error")}
-          rows={variablePay.rows}
-          server={variablePay.server}
-          rowKey={(r) => r.variablePayCalculationId}
-          rowTestId="comp-variable-pay-row"
-          columns={variablePayColumns}
-          emptyTitle={tA("compReward.empty")}
-          caption={tA("compReward.variablePay")}
-        />
-        {evaluatingId ? (
-          <EvaluationPanel calculationId={evaluatingId} onClose={() => setEvaluatingId(null)} />
-        ) : null}
-      </section>
-
-      <section data-testid="comp-recommendation-panel" className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{tA("compReward.recommendations")}</h2>
-        <EntityTable<CompensationRecommendationRow>
-          isLoading={recommendations.query.isLoading}
-          isError={recommendations.query.isError}
-          error={recommendations.query.error}
-          errorMessage={tA("compReward.error")}
-          rows={recommendations.rows}
-          server={recommendations.server}
-          rowKey={(r) => r.compensationRecommendationId}
-          rowTestId="comp-recommendation-row"
-          columns={recommendationColumns}
-          emptyTitle={tA("compReward.empty")}
-          caption={tA("compReward.recommendations")}
-        />
-      </section>
-
-      <section data-testid="comp-bonus-pool-panel" className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{tA("compReward.bonusPools")}</h2>
-        <EntityTable<BonusPool>
-          isLoading={bonusPools.query.isLoading}
-          isError={bonusPools.query.isError}
-          error={bonusPools.query.error}
-          errorMessage={tA("compReward.error")}
-          rows={bonusPools.rows}
-          server={bonusPools.server}
-          rowKey={(r) => r.bonusPoolId}
-          rowTestId="comp-bonus-pool-row"
-          columns={bonusPoolColumns}
-          emptyTitle={tA("compReward.empty")}
-          caption={tA("compReward.bonusPools")}
-        />
-      </section>
-
-      <section data-testid="comp-objective-rule-panel" className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{tA("compReward.objectiveRewardRules")}</h2>
-        <EntityTable<ObjectiveRewardRule>
-          isLoading={objectiveRules.query.isLoading}
-          isError={objectiveRules.query.isError}
-          error={objectiveRules.query.error}
-          errorMessage={tA("compReward.error")}
-          rows={objectiveRules.rows}
-          server={objectiveRules.server}
-          rowKey={(r) => r.objectiveRewardRuleId}
-          rowTestId="comp-objective-rule-row"
-          columns={objectiveRuleColumns}
-          emptyTitle={tA("compReward.empty")}
-          caption={tA("compReward.objectiveRewardRules")}
-        />
-      </section>
-
-      <section data-testid="comp-position-weight-panel" className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{tA("compReward.positionEconomicWeight")}</h2>
-        <EntityTable<PositionEconomicWeight>
-          isLoading={positionWeight.query.isLoading}
-          isError={positionWeight.query.isError}
-          error={positionWeight.query.error}
-          errorMessage={tA("compReward.error")}
-          rows={positionWeight.rows}
-          server={positionWeight.server}
-          rowKey={(r) => r.positionEconomicWeightId}
-          rowTestId="comp-position-weight-row"
-          columns={positionWeightColumns}
-          emptyTitle={tA("compReward.empty")}
-          caption={tA("compReward.positionEconomicWeight")}
-        />
-      </section>
-
-      <section data-testid="comp-handoff-panel" className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{tA("compReward.handoffRecords")}</h2>
-        <EntityTable<PayrollHandoffRecord>
-          isLoading={handoffRecords.query.isLoading}
-          isError={handoffRecords.query.isError}
-          error={handoffRecords.query.error}
-          errorMessage={tA("compReward.error")}
-          rows={handoffRecords.rows}
-          server={handoffRecords.server}
-          rowKey={(r) => r.payrollHandoffRecordId}
-          rowTestId="comp-handoff-row"
-          columns={handoffColumns}
-          emptyTitle={tA("compReward.empty")}
-          caption={tA("compReward.handoffRecords")}
-        />
-      </section>
-
-      {/* #53 E4 — le fasce retributive erano leggibili solo di riflesso, risolte per una
+                <EntityTable<RewardGate>
+                  isLoading={gates.query.isLoading}
+                  isError={gates.query.isError}
+                  error={gates.query.error}
+                  errorTestId="compensation-error"
+                  errorMessage={t("compensation.error")}
+                  rows={gates.rows}
+                  server={gates.server}
+                  rowKey={(g) => g.rewardGateId}
+                  rowTestId="compensation-row"
+                  columns={rewardGateColumns}
+                  emptyTestId="compensation-empty"
+                  emptyTitle={t("compensation.emptyTitle")}
+                  emptyDescription={t("compensation.emptyDescription")}
+                  caption={t("compensation.caption")}
+                />
+              </>
+            ),
+          },
+          {
+            id: "variabile",
+            titolo: tA("compReward.variablePay"),
+            conteggio: variablePay.query.data ? variablePay.server.total : null,
+            contenuto: (
+              <>
+                <section
+                  data-testid="comp-variable-pay-panel"
+                  className="space-y-3"
+                >
+                  <h2 className="text-sm font-semibold text-foreground">
+                    {tA("compReward.variablePay")}
+                  </h2>
+                  <EntityTable<VariablePayCalculation>
+                    isLoading={variablePay.query.isLoading}
+                    isError={variablePay.query.isError}
+                    error={variablePay.query.error}
+                    errorMessage={tA("compReward.error")}
+                    rows={variablePay.rows}
+                    server={variablePay.server}
+                    rowKey={(r) => r.variablePayCalculationId}
+                    rowTestId="comp-variable-pay-row"
+                    columns={variablePayColumns}
+                    emptyTitle={tA("compReward.empty")}
+                    caption={tA("compReward.variablePay")}
+                  />
+                  {evaluatingId ? (
+                    <EvaluationPanel
+                      calculationId={evaluatingId}
+                      onClose={() => setEvaluatingId(null)}
+                    />
+                  ) : null}
+                </section>
+              </>
+            ),
+          },
+          {
+            id: "raccomandazioni",
+            titolo: tA("compReward.recommendations"),
+            conteggio: recommendations.query.data
+              ? recommendations.server.total
+              : null,
+            contenuto: (
+              <>
+                <section
+                  data-testid="comp-recommendation-panel"
+                  className="space-y-3"
+                >
+                  <h2 className="text-sm font-semibold text-foreground">
+                    {tA("compReward.recommendations")}
+                  </h2>
+                  <EntityTable<CompensationRecommendationRow>
+                    isLoading={recommendations.query.isLoading}
+                    isError={recommendations.query.isError}
+                    error={recommendations.query.error}
+                    errorMessage={tA("compReward.error")}
+                    rows={recommendations.rows}
+                    server={recommendations.server}
+                    rowKey={(r) => r.compensationRecommendationId}
+                    rowTestId="comp-recommendation-row"
+                    columns={recommendationColumns}
+                    emptyTitle={tA("compReward.empty")}
+                    caption={tA("compReward.recommendations")}
+                  />
+                </section>
+              </>
+            ),
+          },
+          {
+            id: "fondi",
+            titolo: tA("compReward.bonusPools"),
+            conteggio: bonusPools.query.data ? bonusPools.server.total : null,
+            contenuto: (
+              <>
+                <section
+                  data-testid="comp-bonus-pool-panel"
+                  className="space-y-3"
+                >
+                  <h2 className="text-sm font-semibold text-foreground">
+                    {tA("compReward.bonusPools")}
+                  </h2>
+                  <EntityTable<BonusPool>
+                    isLoading={bonusPools.query.isLoading}
+                    isError={bonusPools.query.isError}
+                    error={bonusPools.query.error}
+                    errorMessage={tA("compReward.error")}
+                    rows={bonusPools.rows}
+                    server={bonusPools.server}
+                    rowKey={(r) => r.bonusPoolId}
+                    rowTestId="comp-bonus-pool-row"
+                    columns={bonusPoolColumns}
+                    emptyTitle={tA("compReward.empty")}
+                    caption={tA("compReward.bonusPools")}
+                  />
+                </section>
+              </>
+            ),
+          },
+          {
+            id: "regole",
+            titolo: tA("compReward.objectiveRewardRules"),
+            conteggio: objectiveRules.query.data
+              ? objectiveRules.server.total
+              : null,
+            contenuto: (
+              <>
+                <section
+                  data-testid="comp-objective-rule-panel"
+                  className="space-y-3"
+                >
+                  <h2 className="text-sm font-semibold text-foreground">
+                    {tA("compReward.objectiveRewardRules")}
+                  </h2>
+                  <EntityTable<ObjectiveRewardRule>
+                    isLoading={objectiveRules.query.isLoading}
+                    isError={objectiveRules.query.isError}
+                    error={objectiveRules.query.error}
+                    errorMessage={tA("compReward.error")}
+                    rows={objectiveRules.rows}
+                    server={objectiveRules.server}
+                    rowKey={(r) => r.objectiveRewardRuleId}
+                    rowTestId="comp-objective-rule-row"
+                    columns={objectiveRuleColumns}
+                    emptyTitle={tA("compReward.empty")}
+                    caption={tA("compReward.objectiveRewardRules")}
+                  />
+                </section>
+              </>
+            ),
+          },
+          {
+            id: "pesi",
+            titolo: tA("compReward.positionEconomicWeight"),
+            conteggio: positionWeight.query.data
+              ? positionWeight.server.total
+              : null,
+            contenuto: (
+              <>
+                <section
+                  data-testid="comp-position-weight-panel"
+                  className="space-y-3"
+                >
+                  <h2 className="text-sm font-semibold text-foreground">
+                    {tA("compReward.positionEconomicWeight")}
+                  </h2>
+                  <EntityTable<PositionEconomicWeight>
+                    isLoading={positionWeight.query.isLoading}
+                    isError={positionWeight.query.isError}
+                    error={positionWeight.query.error}
+                    errorMessage={tA("compReward.error")}
+                    rows={positionWeight.rows}
+                    server={positionWeight.server}
+                    rowKey={(r) => r.positionEconomicWeightId}
+                    rowTestId="comp-position-weight-row"
+                    columns={positionWeightColumns}
+                    emptyTitle={tA("compReward.empty")}
+                    caption={tA("compReward.positionEconomicWeight")}
+                  />
+                </section>
+              </>
+            ),
+          },
+          {
+            id: "paghe",
+            titolo: tA("compReward.handoffRecords"),
+            conteggio: handoffRecords.query.data
+              ? handoffRecords.server.total
+              : null,
+            contenuto: (
+              <>
+                <section data-testid="comp-handoff-panel" className="space-y-3">
+                  <h2 className="text-sm font-semibold text-foreground">
+                    {tA("compReward.handoffRecords")}
+                  </h2>
+                  <EntityTable<PayrollHandoffRecord>
+                    isLoading={handoffRecords.query.isLoading}
+                    isError={handoffRecords.query.isError}
+                    error={handoffRecords.query.error}
+                    errorMessage={tA("compReward.error")}
+                    rows={handoffRecords.rows}
+                    server={handoffRecords.server}
+                    rowKey={(r) => r.payrollHandoffRecordId}
+                    rowTestId="comp-handoff-row"
+                    columns={handoffColumns}
+                    emptyTitle={tA("compReward.empty")}
+                    caption={tA("compReward.handoffRecords")}
+                  />
+                </section>
+              </>
+            ),
+          },
+          {
+            id: "fasce",
+            titolo: t("compensation.bands.title"),
+            conteggio: bands.data ? bands.data.total : null,
+            contenuto: (
+              <>
+                {/* #53 E4 — le fasce retributive erano leggibili solo di riflesso, risolte per una
           singola posizione: qui c'è il catalogo del tenant. Le fasce senza importi NON
           entrano (una fascia senza importi non è una fascia) ma vengono dichiarate. */}
-      <section data-testid="compensation-bands" className="space-y-2">
-        <h2 className="text-base font-semibold text-foreground">{t("compensation.bands.title")}</h2>
-        <EntityTable<CompensationBandRow> originPath={"/v1/compensation/bands"}
-          isLoading={bands.isLoading}
-          isError={bands.isError}
-          error={bands.error}
-          errorMessage={t("compensation.bands.error")}
-          rows={bands.data?.items ?? []}
-          rowKey={(r) => r.compensationBandId}
-          rowTestId="comp-band-row"
-          columns={bandColumns}
-          emptyTestId="comp-bands-empty"
-          emptyTitle={t("compensation.bands.empty")}
-          caption={t("compensation.bands.caption")}
-        />
-        {bands.data && bands.data.totalIncludingValueless > bands.data.total ? (
-          <p data-testid="comp-bands-valueless" className="text-xs text-muted-foreground">
-            {t("compensation.bands.valuelessNote", {
-              count: bands.data.totalIncludingValueless - bands.data.total,
-            })}
-          </p>
-        ) : null}
-      </section>
+                <section data-testid="compensation-bands" className="space-y-2">
+                  <h2 className="text-base font-semibold text-foreground">
+                    {t("compensation.bands.title")}
+                  </h2>
+                  <EntityTable<CompensationBandRow>
+                    originPath={"/v1/compensation/bands"}
+                    isLoading={bands.isLoading}
+                    isError={bands.isError}
+                    error={bands.error}
+                    errorMessage={t("compensation.bands.error")}
+                    rows={bands.data?.items ?? []}
+                    rowKey={(r) => r.compensationBandId}
+                    rowTestId="comp-band-row"
+                    columns={bandColumns}
+                    emptyTestId="comp-bands-empty"
+                    emptyTitle={t("compensation.bands.empty")}
+                    caption={t("compensation.bands.caption")}
+                  />
+                  {bands.data &&
+                  bands.data.totalIncludingValueless > bands.data.total ? (
+                    <p
+                      data-testid="comp-bands-valueless"
+                      className="text-xs text-muted-foreground"
+                    >
+                      {t("compensation.bands.valuelessNote", {
+                        count:
+                          bands.data.totalIncludingValueless - bands.data.total,
+                      })}
+                    </p>
+                  ) : null}
+                </section>
+              </>
+            ),
+          },
+        ]}
+      />
     </main>
   );
 }

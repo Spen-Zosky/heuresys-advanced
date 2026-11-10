@@ -1207,7 +1207,8 @@
       "recipient": "Recipient system",
       "status": "Status",
       "handedOff": "Handed off"
-    }
+    },
+    "rewardGates": "Reward gates"
   },
   "whistleblowingConsole": {
     "title": "Whistleblowing reports",

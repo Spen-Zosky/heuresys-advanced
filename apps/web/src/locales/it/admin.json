@@ -1207,7 +1207,8 @@
       "recipient": "Sistema destinatario",
       "status": "Stato",
       "handedOff": "Consegnato"
-    }
+    },
+    "rewardGates": "Cancelli di premio"
   },
   "whistleblowingConsole": {
     "title": "Segnalazioni whistleblowing",

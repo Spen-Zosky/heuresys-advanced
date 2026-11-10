@@ -42,6 +42,11 @@
 --
 -- Chi gia' detiene un ruolo di comando non viene toccato: `NOT EXISTS` sul ruolo.
 -- Rieseguibile. Non distruttiva: solo concessioni.
+--
+-- EMENDATA il 2026-11-10 (ADR-0057, modello dei ruoli approvato da Enzo): quando il modello
+-- e' stato applicato (sys.f_modello_ruoli_applicato(), registro staging.modello_ruoli_corse)
+-- questo file non concede piu' ruoli: le concessioni le governa db/scripts/modello-ruoli.sql.
+-- Su un database nuovo il comportamento non cambia.
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 BEGIN;
@@ -79,7 +84,8 @@ SELECT d.persona_id, r.auth_role_id, d.tenant_id, now()
    SELECT 1 FROM sys.sys_user_auth_roles x
     WHERE x.user_auth_role_user_id = d.persona_id
       AND x.user_auth_role_role_id = r.auth_role_id
-      AND x.user_auth_role_revoked_at IS NULL);
+      AND x.user_auth_role_revoked_at IS NULL)
+   AND NOT sys.f_modello_ruoli_applicato();
 
 -- ───────────────────────────────────────────────────────────────────────────────
 -- AUTO-VERIFICA
@@ -103,7 +109,7 @@ BEGIN
         WHERE ur.user_auth_role_user_id = ou.organization_unit_manager_user_id
           AND ur.user_auth_role_revoked_at IS NULL
           AND r.auth_role_code IN ('CEO','MANAGER','TEAM_LEADER','HRMS_MANAGER','PLATFORM_ADMIN','TENANT_ADMIN'));
-  IF n_senza <> 0 THEN
+  IF n_senza <> 0 AND NOT sys.f_modello_ruoli_applicato() THEN
     RAISE EXCEPTION 'Responsabili di unita ancora senza ruolo di comando: % su %', n_senza, n_universo;
   END IF;
 

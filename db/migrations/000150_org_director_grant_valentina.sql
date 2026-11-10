@@ -14,7 +14,30 @@
 -- Resilient (joins by email + role_code, not hard-coded UUIDs) + idempotent
 -- (NOT-EXISTS guard on the active (user,role,tenant) grant; fixed granted_at for an
 -- empty twice-run diff). Authored: 2026-06-21 (Gap#1 follow-up).
+--
+-- EMENDATA il 2026-11-10 (ADR-0057, modello dei ruoli approvato da Enzo): quando il modello
+-- e' stato applicato (sys.f_modello_ruoli_applicato(), registro staging.modello_ruoli_corse)
+-- questo file non concede piu' ruoli: le concessioni le governa db/scripts/modello-ruoli.sql.
+-- Su un database nuovo il comportamento non cambia.
 -- ============================================================================
+
+-- ADR-0057 (emendamento del 2026-11-10): il modello dei ruoli e' applicato? Lo dice il registro
+-- delle corse di db/scripts/modello-ruoli.sql, creato da 000485. Prima di 000485 la tabella non
+-- esiste e la risposta e' «no»: su un database nuovo le migrazioni che concedono ruoli fanno
+-- quello che hanno sempre fatto.
+CREATE OR REPLACE FUNCTION sys.f_modello_ruoli_applicato()
+RETURNS boolean
+LANGUAGE plpgsql STABLE AS $fn$
+DECLARE v boolean := false;
+BEGIN
+  IF to_regclass('staging.modello_ruoli_corse') IS NULL THEN
+    RETURN false;
+  END IF;
+  EXECUTE 'SELECT EXISTS (SELECT 1 FROM staging.modello_ruoli_corse
+                           WHERE esito = ''APPLICATA'' AND annullata_il IS NULL)' INTO v;
+  RETURN v;
+END
+$fn$;
 
 INSERT INTO sys.sys_user_auth_roles
   (user_auth_role_user_id, user_auth_role_role_id, user_auth_role_tenant_id, user_auth_role_granted_at)
@@ -29,7 +52,8 @@ WHERE lower(u.user_email) = lower('valentina.conti@rtl-bank.org')
       AND COALESCE(ex.user_auth_role_tenant_id, '00000000-0000-0000-0000-000000000000'::uuid)
           = COALESCE(u.user_tenant_id, '00000000-0000-0000-0000-000000000000'::uuid)
       AND ex.user_auth_role_revoked_at IS NULL
-  );
+  )
+  AND NOT sys.f_modello_ruoli_applicato();
 
 DO $$
 DECLARE n int;
@@ -41,7 +65,7 @@ BEGIN
   WHERE lower(u.user_email) = lower('valentina.conti@rtl-bank.org')
     AND r.auth_role_code = 'ORG_DIRECTOR'
     AND uar.user_auth_role_revoked_at IS NULL;
-  IF n <> 1 THEN
+  IF n <> 1 AND NOT sys.f_modello_ruoli_applicato() THEN
     RAISE EXCEPTION '000150: expected exactly 1 active ORG_DIRECTOR grant for valentina.conti@rtl-bank.org, found %', n;
   END IF;
   RAISE NOTICE '000150: ORG_DIRECTOR holder-of-record = valentina.conti@rtl-bank.org (RTL_BANK).';

@@ -166,9 +166,18 @@ function misuraPagina() {
   if (righe >= 5 && righeCliccabili === 0) segna("C12-tabella-senza-dettaglio", `${righe} righe`);
 
   /* C13 — aiuti: quanti indicatori e intestazioni hanno una spiegazione. */
-  const aiuti = main.querySelectorAll("[data-info], [aria-describedby], [data-glossario]").length;
+  const aiuti = main.querySelectorAll("[data-info], [aria-describedby], [data-glossario], [data-spiegazione]").length;
   const intestazioni = main.querySelectorAll("th").length + main.querySelectorAll("[data-kpi], .stats-card").length;
   if (intestazioni >= 4 && aiuti === 0) segna("C13-senza-spiegazioni", `${intestazioni} intestazioni, 0 aiuti`);
+
+  /* C10 — dati di un'industria diversa: RTL è una banca, un CCNL di altro settore è un'incoerenza
+     (per il mandato di piattaforma, che vede il catalogo, il rapporto lo legge per persona). */
+  for (const { t } of testi) {
+    if (/\b(commercio|terziario|metalmeccanic\w*|edil\w*|turismo|chimic\w*|tessil\w*|alimentar\w*)\b/i.test(t)) segna("C10-industria-diversa", t);
+  }
+
+  /* C15 — la pagina apre con gli insight */
+  if (h1 && !document.querySelector("[data-testid=quadro-insight]")) segna("C15-senza-insight", (h1.textContent || "").trim());
 
   return {
     titolo: (h1?.textContent || "").trim(),

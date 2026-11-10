@@ -190,7 +190,7 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
       // ricontrolla in comandi-vista.ts. L'esito torna dalla pagina: si riferisce quello, non altro.
       tool(
         "hrx_vista_comanda",
-        "Comanda la vista della pagina aperta dalla persona (cerca, filtra, ordina, azzera): cambia solo ciò che si vede, mai i dati. Usa solo i comandi elencati nel blocco <pagina>. Restituisce l'esito riferito dalla pagina (ok, parziale, rifiutata, non_confermata): racconta alla persona solo ciò che l'esito dice.",
+        "Comanda la pagina aperta dalla persona: i comandi «mostra» (cerca, filtra, ordina, azzera) cambiano solo ciò che si vede; i comandi «lavora» preparano sulla pagina un passo annullabile dell'oggetto che la persona costruisce, e lo registra lei. Nessuno cambia i dati. Usa solo i comandi elencati nel blocco <pagina>. Restituisce l'esito riferito dalla pagina (ok, parziale, rifiutata, non_confermata): racconta alla persona solo ciò che l'esito dice.",
         { nome: z.string(), argomenti: z.object({}).catchall(z.any()).optional() },
         async (a: { nome: string; argomenti?: Record<string, unknown> }) =>
           ok(vista ? await vista.comanda(a.nome, a.argomenti ?? {}) : { stato: "rifiutata", dettaglio: "Nessuna pagina collegata a questa conversazione." }),

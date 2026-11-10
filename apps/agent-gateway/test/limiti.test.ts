@@ -105,3 +105,13 @@ describe("personeAmmesse: solo chi è nominato (ADR-0056 D3)", () => {
     expect(e.has("d4")).toBe(false);
   });
 });
+
+describe("strumenti integrati: l'assistente non ha gli strumenti di sviluppo", () => {
+  it("restano solo ToolSearch e Skill, nessuno che scriva o lanci comandi", async () => {
+    const { STRUMENTI_INTEGRATI } = await import("../src/sdk-agent.js");
+    expect([...STRUMENTI_INTEGRATI].sort()).toEqual(["Skill", "ToolSearch"]);
+    for (const vietato of ["Bash", "Write", "Edit", "WebSearch", "Workflow", "CronCreate", "NotebookEdit"]) {
+      expect(STRUMENTI_INTEGRATI as readonly string[]).not.toContain(vietato);
+    }
+  });
+});

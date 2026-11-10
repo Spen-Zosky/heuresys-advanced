@@ -36,7 +36,7 @@ import { ConversazioneNonTrovata, ConversazioneOccupata, RegistroConversazione }
 import { eseguiGiro } from "./giro.js";
 import { ContatorePersone } from "./persone-distinte.js";
 import { caricaSoglie } from "./soglie-persone.js";
-import { ConversazioniAperte, leggiLimiti, modelloAgenti } from "./limiti.js";
+import { ConversazioniAperte, leggiLimiti, modelloAgenti, personeAmmesse } from "./limiti.js";
 import { DbRegistroCapacita } from "./capacita.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
@@ -303,6 +303,19 @@ const server = createServer(async (req, res) => {
       if (!cookieAccess) {
         res.writeHead(401, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "NO_SESSION", message: "forward hrx_access cookie" }));
+        return;
+      }
+      // ADR-0056 D3: solo le persone nominate. Chi non è riconosciuto o non è nell'elenco non
+      // arriva al modello (fail-closed: elenco vuoto = nessuno).
+      const chiParla = await chiSei(HEURESYS_API, { cookieAccess });
+      if (!chiParla) {
+        res.writeHead(401, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "SESSION_NOT_RECOGNISED" }));
+        return;
+      }
+      if (!personeAmmesse().has(chiParla)) {
+        res.writeHead(403, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "PERSON_NOT_ADMITTED" }));
         return;
       }
       let corpo: { prompt?: unknown; conversationId?: unknown };

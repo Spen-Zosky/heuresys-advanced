@@ -9,6 +9,7 @@ import {
   ModelloNonValido,
   leggiLimiti,
   modelloAgenti,
+  personeAmmesse,
 } from "../src/limiti.js";
 
 describe("modelloAgenti: il modello è fissato per nome", () => {
@@ -89,5 +90,18 @@ describe("ConversazioniAperte", () => {
     expect(c.aperte).toBe(1);
     expect(c.entra("bruno")).toEqual({ ok: false, motivo: "PERSONA" });
     expect(c.entra("anna").ok).toBe(true);
+  });
+});
+
+describe("personeAmmesse: solo chi è nominato (ADR-0056 D3)", () => {
+  it("senza elenco non ammette nessuno", () => {
+    expect(personeAmmesse({}).size).toBe(0);
+    expect(personeAmmesse({ AGENT_GATEWAY_ALLOWED_USER_IDS: " , " }).size).toBe(0);
+  });
+
+  it("legge un elenco separato da virgole, senza spazi", () => {
+    const e = personeAmmesse({ AGENT_GATEWAY_ALLOWED_USER_IDS: "a1, b2 ,c3" });
+    expect([...e]).toEqual(["a1", "b2", "c3"]);
+    expect(e.has("d4")).toBe(false);
   });
 });

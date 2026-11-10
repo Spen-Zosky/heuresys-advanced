@@ -42,6 +42,21 @@ export function modelloAgenti(env: Record<string, string | undefined> = process.
   return scelto;
 }
 
+/**
+ * Le persone ammesse all'assistente (decisione di Enzo, ADR-0056 D3: prima solo lui). Un elenco di
+ * identificativi utente in `AGENT_GATEWAY_ALLOWED_USER_IDS`, separati da virgola. Vuoto o assente
+ * = nessuno: chi non è nominato non parla con l'assistente, e aprirlo ad altri è un cambio di
+ * questa riga di configurazione, non del codice.
+ */
+export function personeAmmesse(env: Record<string, string | undefined> = process.env): ReadonlySet<string> {
+  return new Set(
+    (env.AGENT_GATEWAY_ALLOWED_USER_IDS ?? "")
+      .split(",")
+      .map((x) => x.trim())
+      .filter((x) => x.length > 0),
+  );
+}
+
 export interface Limiti {
   /** Conversazioni contemporanee della stessa persona. */
   perPersona: number;

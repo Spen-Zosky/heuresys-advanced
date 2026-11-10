@@ -17,6 +17,7 @@ import { API_BASE, completeMfaIfChallenged, fillLoginForm, PERSONAS, passwordFor
 const TARGET_PERSONAS = [
   "platformAdmin",
   "tenantAdmin",
+  "hrManager",
   "manager",
   "employee",
   "outsider",

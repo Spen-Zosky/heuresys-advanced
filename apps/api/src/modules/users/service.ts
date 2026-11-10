@@ -127,6 +127,9 @@ function ensureFieldsAllowed(actor: ActorContext, patch: UpdateUserBody): void {
 export const usersService = {
   async list(actor: ActorContext, query: UserListQuery): Promise<UserListResponse> {
     const scope = await resolveReadScope(actor);
+    // R5: il filtro per tenant vale solo per chi vede tutti i tenant; per gli altri il
+    // perimetro resta quello del servizio, qualunque cosa chieda la richiesta.
+    if (scope.tenantId === undefined && query.tenantId) scope.tenantId = query.tenantId;
     return repo.listUsers(pool, { ...scope, query });
   },
 

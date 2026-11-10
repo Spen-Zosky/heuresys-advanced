@@ -122,6 +122,73 @@ describe("/v1/users/* integration (4-tier scope)", () => {
   });
 
   /**
+   * Repertorio interfacce (10/11/2026). R1: l'elenco e' ordinato per cognome, poi nome.
+   * R2: ogni riga porta ruolo, unita', sede e tenant (null quando il dato non c'e').
+   * R5: il filtro `tenantId` vale solo per chi vede tutti i tenant.
+   */
+  it("LIST: ordinato per cognome, con ruolo, sede e tenant su ogni riga (R1, R2)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/users?limit=200&type=STANDARD",
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const items = (r.json() as {
+      items: { lastName: string | null; positionTitle: string | null; siteName: string | null; tenantName: string | null }[];
+    }).items;
+    expect(items.length).toBeGreaterThan(5);
+    for (const u of items) {
+      expect(u).toHaveProperty("positionTitle");
+      expect(u).toHaveProperty("siteName");
+      expect(u.tenantName).toBeTruthy();
+    }
+    // Chi non ha cognome va in coda (NULLS LAST); gli altri in ordine di iniziale del cognome.
+    const primoSenza = items.findIndex((u) => !u.lastName);
+    if (primoSenza >= 0) expect(items.slice(primoSenza).every((u) => !u.lastName)).toBe(true);
+    const iniziali = items.filter((u) => u.lastName).map((u) => u.lastName!.toLowerCase().charAt(0));
+    expect(iniziali).toEqual([...iniziali].sort());
+    // La sede si risolve per la grande maggioranza delle persone con una posizione attiva.
+    const conRuolo = items.filter((u) => u.positionTitle);
+    expect(conRuolo.length).toBeGreaterThan(0);
+    expect(conRuolo.filter((u) => u.siteName).length).toBeGreaterThanOrEqual(Math.floor(conRuolo.length * 0.9));
+  });
+
+  it("LIST: `tenantId` filtra per chi vede tutti i tenant e non allarga il perimetro degli altri (R5)", async () => {
+    const own = await suite.app.inject({
+      method: "GET",
+      url: "/v1/users?limit=1",
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    const ownBody = own.json() as { total: number; items: { tenantId: string }[] };
+    const tenantId = ownBody.items[0]!.tenantId;
+
+    const all = await suite.app.inject({
+      method: "GET",
+      url: "/v1/users?limit=1",
+      headers: { cookie: cookieHeader(platformS.cookies) },
+    });
+    const filtered = await suite.app.inject({
+      method: "GET",
+      url: `/v1/users?limit=200&tenantId=${tenantId}`,
+      headers: { cookie: cookieHeader(platformS.cookies) },
+    });
+    const allTotal = (all.json() as { total: number }).total;
+    const f = filtered.json() as { total: number; items: { tenantId: string }[] };
+    expect(f.total).toBe(ownBody.total);
+    expect(f.total).toBeLessThan(allTotal);
+    expect(f.items.every((u) => u.tenantId === tenantId)).toBe(true);
+
+    // Un TENANT_ADMIN che chiede un altro tenant resta nel proprio.
+    const other = "00000000-0000-4000-8000-000000000000";
+    const tryOther = await suite.app.inject({
+      method: "GET",
+      url: `/v1/users?limit=1&tenantId=${other}`,
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    expect((tryOther.json() as { total: number }).total).toBe(ownBody.total);
+  });
+
+  /**
    * C4 (#42): `search` lets approver/assignee pickers query the server instead of
    * filtering a `?limit=200` bulk fetch in the browser (which silently capped the
    * reachable set). Expectations derive from the live response — a term is taken

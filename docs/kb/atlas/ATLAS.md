@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `19bd730d` (2026-11-08T19:09:15+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `23adfa40` (2026-11-10T17:57:03+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 708 |
 | Pagine web | 132 |
 | Schemi shared | 131 |
-| Tabelle DB | 396 (vuote: 68) |
-| Viste / matview | 87 / 0 |
+| Tabelle DB | 400 (vuote: 69) |
+| Viste / matview | 88 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 334 |
 
 ## Moduli API
@@ -127,7 +127,7 @@
 | user-position-assignments | /v1/user-position-assignments | 5 | 4 | 6 | 0 |
 | user-target-positions | /v1/user-target-positions | 6 | 4 | 3 | 1 |
 | user-timeline | /v1/user-timeline | 2 | 1 | 1 | 1 |
-| users | /v1/users | 10 | 5 | 3 | 1 |
+| users | /v1/users | 10 | 5 | 8 | 1 |
 | visualization-edges | /v1/visualization-edges | 4 | 3 | 3 | 1 |
 | visualization-exports | /v1/visualization-exports | 4 | 2 | 2 | 1 |
 | visualization-graphs | /v1/visualization-graphs | 9 | 4 | 6 | 1 |
@@ -156,6 +156,7 @@
 - `sys.sys_agent_capabilities`
 - `sys.sys_agent_capability_activations`
 - `sys.sys_agent_capability_operations`
+- `sys.sys_agent_proposals`
 - `sys.sys_auth_mfa_otp_challenges`
 - `sys.sys_auth_mfa_recovery_codes`
 - `sys.sys_auth_mfa_webauthn_credentials`
@@ -222,8 +223,8 @@
 - positions: **319**
 - org_units: **45**
 - roles: **24**
-- permissions: **249**
-- role_permission_mappings: **1293**
+- permissions: **250**
+- role_permission_mappings: **1317**
 - ui_interfaces_active: **78**
 - skills: **14031**
 

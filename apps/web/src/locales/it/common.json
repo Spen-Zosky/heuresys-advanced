@@ -42,7 +42,7 @@
   "auth": {
     "login": {
       "title": "Accedi a Heuresys",
-      "subtitle": "Console di amministrazione e portale dipendente",
+      "subtitle": "Amministrazione e portale del dipendente",
       "emailLabel": "Email",
       "emailPlaceholder": "nome@azienda.it",
       "passwordLabel": "Password",

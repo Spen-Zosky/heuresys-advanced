@@ -11,7 +11,7 @@
     "s04": { "persona": "Federica · Tenant Admin", "shows": "Heatmap di copertura competenze per unità", "narration": "Dove la banca è forte e dove è scoperta — calcolato live, non una slide." },
     "s05": { "persona": "Federica · Tenant Admin", "shows": "Prontezza alla successione, spiegabile per feature", "narration": "Analytics predittiva delle persone — e il perché: ogni score si scompone in feature pesate." },
     "s06": { "persona": "Federica · Tenant Admin", "shows": "Maturità di capacità organizzativa L0-L5 per unità", "narration": "Il differenziatore: maturità organizzativa aggregata dal basso a partire da evidenze reali." },
-    "s07": { "persona": "Federica · Tenant Admin", "shows": "Console Process Owner + mappa RACI", "narration": "I processi sono presidiati, con accountability RACI viva per unità organizzativa." },
+    "s07": { "persona": "Federica · Tenant Admin", "shows": "Dashboard Process owner + mappa RACI", "narration": "I processi sono presidiati, con accountability RACI viva per unità organizzativa." },
     "s08": { "persona": "Tommaso · Dipendente", "shows": "Matching AI a occupazioni ESCO e posizioni, con affinità", "narration": "Occhi del dipendente: il motore mi abbina a occupazioni e ruoli, con una percentuale di affinità." },
     "s09": { "persona": "Paolo · Manager", "shows": "Vista 'il mio team': solo i riporti diretti", "narration": "Lo scope è imposto, non cosmetico — un manager vede il suo team, niente di più." },
     "s10": { "persona": "Federica · Tenant Admin", "shows": "Dashboard direzionale cross-modulo", "narration": "Una panoramica viva: utenti, posizioni, gap critici e attività recenti in un colpo d'occhio." }

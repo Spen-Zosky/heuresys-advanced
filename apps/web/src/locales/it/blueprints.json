@@ -52,7 +52,7 @@
     }
   },
   "processes": {
-    "title": "Processi BPM",
+    "title": "Catalogo dei processi",
     "description": "Catalogo processi blueprint-anchored.",
     "count": "{{count}} processi",
     "error": "Impossibile caricare i processi.",
@@ -102,7 +102,7 @@
     }
   },
   "seedRuns": {
-    "title": "Seed acquisition — Runs",
+    "title": "Acquisizione dei dati di base — esecuzioni",
     "description": "Run della pipeline di acquisizione seed.",
     "count": "{{count}} run",
     "error": "Impossibile caricare i run.",

@@ -166,7 +166,7 @@
     }
   },
   "orgDirector": {
-    "title": "Org-Director Console",
+    "title": "Organisation design",
     "description": "Capability and maturity per org unit, from the MLCE and Maturity engines.",
     "count": "{{count}} units",
     "errorMessage": "Failed to load capability/maturity",
@@ -217,7 +217,7 @@
     }
   },
   "processOwner": {
-    "title": "Process-Owner Console",
+    "title": "Process owner",
     "description": "Blueprint process catalog (graph navigation, not BPM runtime).",
     "count": "{{count}} processes",
     "errorMessage": "Failed to load processes",

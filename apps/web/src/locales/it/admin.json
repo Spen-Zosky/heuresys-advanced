@@ -654,7 +654,7 @@
     "activityEmptyDesc": "Le azioni recenti del tuo ambito appariranno qui.",
     "activitySubtitle": "Ambito {{kind}}",
     "famiglie": {
-      "badge": "cruscotto",
+      "badge": "dashboard",
       "vistePlurale": "{{count}} viste",
       "visteConTrattenute": "{{count}} viste, di cui {{masked}} con valori trattenuti",
       "colonnaVoce": "Voce",
@@ -664,14 +664,14 @@
       "vuotoAndamento": "Nessun andamento nel tuo perimetro",
       "vuotoRighe": "Nessuna riga nel tuo perimetro",
       "senzaValori": "Valori non disponibili",
-      "catalogoIrraggiungibile": "Catalogo dei cruscotti non raggiungibile",
-      "datiIrraggiungibili": "Dati del cruscotto non raggiungibili",
-      "nonDisponibileTitolo": "Cruscotto non disponibile",
-      "nonDisponibileTesto": "Questo cruscotto non esiste o non rientra nei tuoi permessi."
+      "catalogoIrraggiungibile": "Catalogo delle dashboard non raggiungibile",
+      "datiIrraggiungibili": "Dati della dashboard non raggiungibili",
+      "nonDisponibileTitolo": "Dashboard non disponibile",
+      "nonDisponibileTesto": "Questa dashboard non esiste o non rientra nei tuoi permessi."
     }
   },
   "visualizations": {
-    "title": "Visualizations",
+    "title": "Visualizzazioni",
     "description": "Grafici registrati con tipo e stato.",
     "count": "{{count}} grafici",
     "countLoading": "…",
@@ -1193,11 +1193,11 @@
     }
   },
   "whistleblowingConsole": {
-    "title": "Console segnalazioni whistleblowing",
-    "description": "Console riservata al custode designato (D.Lgs 24/2023). Nessun altro ruolo può leggere queste segnalazioni.",
+    "title": "Segnalazioni whistleblowing",
+    "description": "Area riservata al custode designato (D.Lgs 24/2023). Nessun altro ruolo può leggere queste segnalazioni.",
     "count": "{{count}} segnalazioni",
     "errorMessage": "Errore di caricamento delle segnalazioni.",
-    "forbiddenMessage": "Non hai accesso a questa console: le segnalazioni sono leggibili dal solo custode designato (D.Lgs 24/2023).",
+    "forbiddenMessage": "Non hai accesso a questa area: le segnalazioni sono leggibili dal solo custode designato (D.Lgs 24/2023).",
     "emptyTitle": "Nessuna segnalazione",
     "emptyDescription": "Non risultano segnalazioni al momento.",
     "caption": "Elenco segnalazioni whistleblowing",

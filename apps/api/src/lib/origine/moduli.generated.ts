@@ -1359,7 +1359,12 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     ],
     "tabelle": [
       "sys_auth_roles",
+      "sys_branches",
+      "sys_organization_units",
+      "sys_positions",
+      "sys_tenancies",
       "sys_user_auth_roles",
+      "sys_user_position_assignments",
       "sys_users"
     ]
   },

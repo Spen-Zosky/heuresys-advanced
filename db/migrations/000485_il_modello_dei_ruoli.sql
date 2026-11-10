@@ -105,7 +105,7 @@ CREATE OR REPLACE VIEW sys.v_ruoli_di_comando_attesi AS
 WITH titolari AS (
   SELECT ou.organization_unit_manager_user_id AS user_id,
          ou.organization_unit_tenant_id       AS tenant_id,
-         ou.organization_unit_code            AS unita,
+         ou.organization_unit_code::varchar   AS unita,  -- varchar senza lunghezza: tipo stabile per CREATE OR REPLACE
          CASE
            WHEN ou.organization_unit_type IN ('HEADQUARTERS','GENERAL_MANAGEMENT') THEN 'CEO'
            WHEN ou.organization_unit_type = 'BRANCH'                               THEN 'BRANCH_MANAGER'

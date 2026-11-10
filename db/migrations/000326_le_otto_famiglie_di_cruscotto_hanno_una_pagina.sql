@@ -91,13 +91,15 @@ INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, loca
 SELECT 'sys_ui_interfaces', i.ui_interface_id, 'ui_interface_label', 'en', v.en, 'MANUAL'
   FROM sys.sys_ui_interfaces i
   JOIN (VALUES
-    ('dashboard-company',        'Company dashboard'),
-    ('dashboard-process',        'Processes dashboard'),
-    ('dashboard-org',            'Organization dashboard'),
-    ('dashboard-branch',         'Branch dashboard'),
-    ('dashboard-hr',             'HR management dashboard'),
-    ('dashboard-platform',       'Platform management dashboard'),
-    ('dashboard-tenant',         'Tenant management dashboard')
+    -- Emendate dalla 000484: nel menu le voci stanno nel gruppo «Dashboards» e si chiamano
+    -- col solo ambito; la 000484 scrive gli stessi testi, così i due file non si contendono la riga.
+    ('dashboard-company',        'Company'),
+    ('dashboard-process',        'Processes'),
+    ('dashboard-org',            'Organisation'),
+    ('dashboard-branch',         'Branch'),
+    ('dashboard-hr',             'HR management'),
+    ('dashboard-platform',       'Platform'),
+    ('dashboard-tenant',         'Tenant management')
   ) AS v(code, en) ON v.code = i.ui_interface_code
 ON CONFLICT (entity_table, entity_id, field, locale)
   DO UPDATE SET text = EXCLUDED.text, source = 'MANUAL', updated_at = now();

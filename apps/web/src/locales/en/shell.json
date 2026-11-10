@@ -1,14 +1,19 @@
 {
   "nav": {
     "groups": {
-      "overview": "Overview",
-      "me": "My area",
-      "personal": "Personal area",
-      "workforce": "Workforce",
-      "operations": "Operations",
-      "intelligence": "Intelligence",
-      "governance": "Governance",
-      "content": "Content"
+      "dashboards": "Dashboards",
+      "organization": "Organisation",
+      "processes": "Processes & projects",
+      "people": "People",
+      "talent": "Performance & talent",
+      "skills": "Skills & learning",
+      "analytics": "Analytics",
+      "compliance": "Security & compliance",
+      "configuration": "Configuration",
+      "me": "My space",
+      "me_profile": "My profile",
+      "me_growth": "My growth",
+      "me_results": "My results"
     }
   },
   "tabs": {

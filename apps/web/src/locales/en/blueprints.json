@@ -52,7 +52,7 @@
     }
   },
   "processes": {
-    "title": "BPM Processes",
+    "title": "Process catalogue",
     "description": "Blueprint-anchored process catalog.",
     "count": "{{count}} processes",
     "error": "Unable to load the processes.",

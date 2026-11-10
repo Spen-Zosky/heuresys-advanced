@@ -285,6 +285,16 @@ pnpm --filter @heuresys/shared build
 # values — derived here from PUBLIC_HOST/API_PORT.
 log "build: production api (tsup) + web (next build)"
 pnpm --filter @heuresys/api build
+# In modo copia la cache di next (circa 1,5 GB, misurata il 2026-11-10) passa dalla copia di prima a
+# questa: una sola cache sulla VM invece di una per copia, e la build resta calda (a freddo 486 s).
+# La copia in servizio non la usa: serve solo a `next build`. Non si prende mai dalla cartella del repo.
+if [ "${VM_DEPLOY_COPIA:-0}" = 1 ] && [ -n "${VM_DEPLOY_PREV_DIR:-}" ] \
+   && [ -f "$VM_DEPLOY_PREV_DIR/.rilascio/commit" ] && [ -d "$VM_DEPLOY_PREV_DIR/apps/web/.next/cache" ] \
+   && [ ! -e "$REPO_DIR/apps/web/.next/cache" ]; then
+  mkdir -p "$REPO_DIR/apps/web/.next" \
+    && mv "$VM_DEPLOY_PREV_DIR/apps/web/.next/cache" "$REPO_DIR/apps/web/.next/cache" \
+    && log "build: cache di next presa dalla copia di prima"
+fi
 NODE_ENV=production \
 NEXT_PUBLIC_API_PROXY_BASE_URL="http://localhost:$API_PORT" \
 NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \

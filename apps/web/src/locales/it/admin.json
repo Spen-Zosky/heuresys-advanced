@@ -492,17 +492,20 @@
   },
   "positions": {
     "title": "Posizioni",
-    "description": "Posizioni del tenant con criticità e stato.",
-    "count": "{{count}} totali",
+    "description": "Posti del tenant: chi li occupa, in quale unità e sede, quanto contano.",
+    "count": "{{count}} posizioni",
     "errorMessage": "Impossibile caricare le posizioni.",
     "emptyTitle": "Nessuna posizione",
     "emptyDescription": "Non ci sono posizioni nel tenant.",
-    "caption": "Elenco posizioni",
+    "caption": "Elenco delle posizioni ordinato per titolo",
     "columns": {
-      "code": "Codice",
-      "title": "Titolo",
+      "title": "Posizione",
       "criticality": "Criticità",
-      "active": "Attiva"
+      "incumbent": "Titolare",
+      "unit": "Unità",
+      "site": "Sede",
+      "tenant": "Tenant",
+      "status": "Stato"
     },
     "activeOn": "Attiva",
     "activeOff": "Inattiva",
@@ -617,6 +620,20 @@
         "proficiency": "Proficiency",
         "weight": "Peso"
       }
+    },
+    "countKind": {
+      "ALL": "{{count}} posizioni",
+      "ACTIVE": "{{count}} posizioni attive",
+      "INACTIVE": "{{count}} posizioni non attive"
+    },
+    "vacant": "Scoperta",
+    "filters": {
+      "status": "Mostra",
+      "ALL": "Tutte",
+      "ACTIVE": "Attive",
+      "INACTIVE": "Non attive",
+      "tenant": "Tenant",
+      "allTenants": "Tutti"
     }
   },
   "roles": {

@@ -67,12 +67,27 @@ export const PositionListQuerySchema = z.object({
   /** C4 (#42): ILIKE on title OR code — lets pickers search server-side instead
    *  of filtering a `?limit=200` bulk fetch in the browser. */
   search: z.string().min(1).max(255).optional(),
+  /** R5 (repertorio interfacce, 10/11/2026): il mandato di piattaforma filtra per tenant.
+   *  Per chi ha un tenant è ignorato: il perimetro non si allarga dalla richiesta. */
+  tenantId: z.uuid().optional(),
   ...paginationFields(200, 50),
 });
 export type PositionListQuery = z.infer<typeof PositionListQuerySchema>;
 
+/** Riga dell'elenco: la posizione con ciò che serve a chi la guarda (R2) — il titolare
+ *  (R1, «Cognome, Nome»), l'unità, la sede e, per la piattaforma, il tenant. */
+export const PositionListItemSchema = PositionSchema.extend({
+  incumbentFirstName: z.string().nullable(),
+  incumbentLastName: z.string().nullable(),
+  incumbentDisplayName: z.string().nullable(),
+  organizationUnitName: z.string().nullable(),
+  siteName: z.string().nullable(),
+  tenantName: z.string().nullable(),
+});
+export type PositionListItem = z.infer<typeof PositionListItemSchema>;
+
 export const PositionListResponseSchema = z.object({
-  items: z.array(PositionSchema),
+  items: z.array(PositionListItemSchema),
   total: z.number().int().min(0),
 });
 export type PositionListResponse = z.infer<typeof PositionListResponseSchema>;

@@ -31,7 +31,7 @@ import { EnumStatusBadge } from "../../../components/enum-badge";
 import { useEnumLabel } from "../../../lib/enum-labels";
 import { cognomeNome } from "../../../lib/person-label";
 
-const KINDS = ["STANDARD", "SERVICE", "GENERATED_INCUMBENT", "ALL"] as const;
+const KINDS = ["ALL", "STANDARD", "SERVICE", "GENERATED_INCUMBENT"] as const; // R6: «Tutte» in testa
 type Kind = (typeof KINDS)[number];
 
 const SELECT_CLASS =

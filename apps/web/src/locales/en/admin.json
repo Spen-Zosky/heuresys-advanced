@@ -492,17 +492,20 @@
   },
   "positions": {
     "title": "Positions",
-    "description": "Tenant positions with criticality and status.",
-    "count": "{{count}} total",
+    "description": "Tenant positions: who holds them, in which unit and site, how much they matter.",
+    "count": "{{count}} positions",
     "errorMessage": "Unable to load the positions.",
     "emptyTitle": "No positions",
     "emptyDescription": "There are no positions in the tenant.",
-    "caption": "Position list",
+    "caption": "Position list sorted by title",
     "columns": {
-      "code": "Code",
-      "title": "Title",
+      "title": "Position",
       "criticality": "Criticality",
-      "active": "Active"
+      "incumbent": "Incumbent",
+      "unit": "Unit",
+      "site": "Site",
+      "tenant": "Tenant",
+      "status": "Status"
     },
     "activeOn": "Active",
     "activeOff": "Inactive",
@@ -617,6 +620,20 @@
         "proficiency": "Proficiency",
         "weight": "Weight"
       }
+    },
+    "countKind": {
+      "ALL": "{{count}} positions",
+      "ACTIVE": "{{count}} active positions",
+      "INACTIVE": "{{count}} inactive positions"
+    },
+    "vacant": "Vacant",
+    "filters": {
+      "status": "Show",
+      "ALL": "All",
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "tenant": "Tenant",
+      "allTenants": "All"
     }
   },
   "roles": {

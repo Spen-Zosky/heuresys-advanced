@@ -28,6 +28,7 @@ import type { RubricaResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
 import { costruisci, type Leggi } from "@/lib/leggibile-nucleo";
+import { Riferimento, useScheda } from "@/components/scheda-rapida";
 
 export type { Leggi };
 
@@ -61,7 +62,15 @@ export function useLeggibile(): Leggi {
   const rubrica = useRubrica();
   const { i18n } = useTranslation();
   const italiano = (i18n.language ?? "it").startsWith("it");
-  return useMemo(() => costruisci(fmt, enumi, rubrica.data, italiano), [fmt, enumi, rubrica.data, italiano]);
+  const schede = useScheda();
+  return useMemo(
+    () =>
+      costruisci(
+        fmt, enumi, rubrica.data, italiano,
+        schede ? (tipo, id, etichetta) => <Riferimento key={id} tipo={tipo} id={id}>{etichetta}</Riferimento> : undefined,
+      ),
+    [fmt, enumi, rubrica.data, italiano, schede],
+  );
 }
 
 /** Per i punti che non passano da `EntityTable`: `<Leggibile>{valore}</Leggibile>`. */

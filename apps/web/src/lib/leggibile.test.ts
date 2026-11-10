@@ -3,8 +3,8 @@ import { costruisci } from "./leggibile-nucleo";
 import { formati } from "./format";
 
 const rubrica = {
-  persone: [{ id: "2208f6e5-3d60-47cc-9664-42e45c196bae", email: "xenia.leone@rtl-bank.org", etichetta: "Leone, Xenia", posizione: null, unita: null }],
-  posizioni: [{ id: "08dfa814-de0a-4d93-b1c9-87b9badf1fff", codice: "POS-1", titolo: "Cassiere", unita: "Filiale Monza", titolare: null }],
+  persone: [{ id: "2208f6e5-3d60-47cc-9664-42e45c196bae", email: "xenia.leone@rtl-bank.org", etichetta: "Leone, Xenia", posizione: null, unita: null, posizioneId: null, unitaId: null, attiva: true }],
+  posizioni: [{ id: "08dfa814-de0a-4d93-b1c9-87b9badf1fff", codice: "POS-1", titolo: "Cassiere", unita: "Filiale Monza", titolare: null, unitaId: null, titolareId: null, riportaAId: null, criticita: null, attiva: true }],
   unita: [],
 };
 const l = costruisci(formati("it"), new Map([["APPROVED", "Approvata"]]), rubrica, true);
@@ -36,5 +36,20 @@ describe("rete di leggibilità (C1, C2, C4)", () => {
   it("attraversa gli elementi", () => {
     const n = l.nodo(["883217", 12693]) as string[];
     expect(n).toEqual(["883.217", "12.693"]);
+  });
+});
+
+describe("riferimenti cliccabili (C12)", () => {
+  it("un identificativo o un'email esatti diventano un riferimento alla scheda", () => {
+    const visti: string[] = [];
+    const r = costruisci(formati("it"), new Map(), rubrica, true, (tipo, id, etichetta) => {
+      visti.push(`${tipo}:${id}:${etichetta}`);
+      return etichetta;
+    });
+    const p = rubrica.persone[0]!;
+    r.nodo(p.id);
+    r.nodo(p.email!.toUpperCase());
+    r.nodo("testo qualunque");
+    expect(visti).toEqual([`persona:${p.id}:${p.etichetta}`, `persona:${p.id}:${p.etichetta}`]);
   });
 });

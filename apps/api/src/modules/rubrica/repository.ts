@@ -16,16 +16,18 @@ export async function leggiRubrica(actor: ActorContext): Promise<RubricaResponse
   const perimetro = perimetroClienti(actor);
   const tenants = perimetro === undefined ? null : [...perimetro];
 
-  const persone = await pool.query<{ id: string; email: string | null; etichetta: string; posizione: string | null; unita: string | null }>(
+  const persone = await pool.query<RubricaResponse["persone"][number]>(
     `SELECT u.user_id AS id, u.user_email AS email,
             CASE WHEN nullif(trim(u.user_last_name), '') IS NOT NULL AND nullif(trim(u.user_first_name), '') IS NOT NULL
                    THEN trim(u.user_last_name) || ', ' || trim(u.user_first_name)
                  ELSE coalesce(nullif(trim(u.user_last_name), ''), nullif(trim(u.user_display_name), ''), u.user_email, '—')
             END AS etichetta,
-            pos.position_title AS posizione, pos.organization_unit_name AS unita
+            pos.position_title AS posizione, pos.organization_unit_name AS unita,
+            pos.position_id AS "posizioneId", pos.organization_unit_id AS "unitaId",
+            (u.user_status = 'ACTIVE') AS attiva
        FROM sys.sys_users u
        LEFT JOIN LATERAL (
-         SELECT p.position_title, ou.organization_unit_name
+         SELECT p.position_id, p.position_title, ou.organization_unit_id, ou.organization_unit_name
            FROM sys.sys_user_position_assignments a
            JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
            LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = p.position_organization_unit_id
@@ -40,28 +42,40 @@ export async function leggiRubrica(actor: ActorContext): Promise<RubricaResponse
     [tenants],
   );
 
-  const posizioni = await pool.query<{ id: string; codice: string | null; titolo: string; unita: string | null; titolare: string | null }>(
+  const posizioni = await pool.query<RubricaResponse["posizioni"][number]>(
     `SELECT p.position_id AS id, p.position_code AS codice, coalesce(p.position_title, p.position_code, '—') AS titolo,
             ou.organization_unit_name AS unita,
-            (SELECT CASE WHEN nullif(trim(u.user_last_name), '') IS NOT NULL
+            p.position_organization_unit_id AS "unitaId",
+            p.position_reports_to_position_id AS "riportaAId",
+            p.position_criticality AS criticita,
+            p.position_is_active AS attiva,
+            tit.user_id AS "titolareId",
+            tit.etichetta AS titolare
+       FROM sys.sys_positions p
+       LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = p.position_organization_unit_id
+       LEFT JOIN LATERAL (
+             SELECT u.user_id, CASE WHEN nullif(trim(u.user_last_name), '') IS NOT NULL
                            THEN trim(u.user_last_name) || coalesce(', ' || nullif(trim(u.user_first_name), ''), '')
-                         ELSE u.user_display_name END
+                         ELSE u.user_display_name END AS etichetta
                FROM sys.sys_user_position_assignments a
                JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id
               WHERE a.user_position_assignment_position_id = p.position_id
                 AND a.user_position_assignment_status = 'ACTIVE'
               ORDER BY a.user_position_assignment_start_date DESC NULLS LAST
-              LIMIT 1) AS titolare
-       FROM sys.sys_positions p
-       LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = p.position_organization_unit_id
+              LIMIT 1
+       ) tit ON true
       WHERE ($1::uuid[] IS NULL OR p.position_tenant_id = ANY($1::uuid[]))
       ORDER BY lower(p.position_title), p.position_id`,
     [tenants],
   );
 
-  const unita = await pool.query<{ id: string; codice: string | null; nome: string }>(
+  const unita = await pool.query<RubricaResponse["unita"][number]>(
     `SELECT ou.organization_unit_id AS id, ou.organization_unit_code AS codice,
-            coalesce(ou.organization_unit_name, ou.organization_unit_code, '—') AS nome
+            coalesce(ou.organization_unit_name, ou.organization_unit_code, '—') AS nome,
+            ou.organization_unit_type AS tipo,
+            ou.organization_unit_parent_id AS "padreId",
+            ou.organization_unit_manager_user_id AS "responsabileId",
+            ou.organization_unit_is_active AS attiva
        FROM sys.sys_organization_units ou
       WHERE ($1::uuid[] IS NULL OR ou.organization_unit_tenant_id = ANY($1::uuid[]))
       ORDER BY lower(ou.organization_unit_name), ou.organization_unit_id`,

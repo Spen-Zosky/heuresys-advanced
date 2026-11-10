@@ -17,6 +17,9 @@ export const RubricaPersonaSchema = z.object({
   etichetta: z.string(),
   posizione: z.string().nullable(),
   unita: z.string().nullable(),
+  posizioneId: z.string().uuid().nullable(),
+  unitaId: z.string().uuid().nullable(),
+  attiva: z.boolean(),
 });
 export type RubricaPersona = z.infer<typeof RubricaPersonaSchema>;
 
@@ -26,6 +29,11 @@ export const RubricaPosizioneSchema = z.object({
   titolo: z.string(),
   unita: z.string().nullable(),
   titolare: z.string().nullable(),
+  unitaId: z.string().uuid().nullable(),
+  titolareId: z.string().uuid().nullable(),
+  riportaAId: z.string().uuid().nullable(),
+  criticita: z.string().nullable(),
+  attiva: z.boolean(),
 });
 export type RubricaPosizione = z.infer<typeof RubricaPosizioneSchema>;
 
@@ -33,6 +41,10 @@ export const RubricaUnitaSchema = z.object({
   id: z.string().uuid(),
   codice: z.string().nullable(),
   nome: z.string(),
+  tipo: z.string().nullable(),
+  padreId: z.string().uuid().nullable(),
+  responsabileId: z.string().uuid().nullable(),
+  attiva: z.boolean(),
 });
 export type RubricaUnita = z.infer<typeof RubricaUnitaSchema>;
 

@@ -21,15 +21,31 @@ export interface Leggi {
   persona: (idOEmail: string | null | undefined) => string | null;
 }
 
-export function costruisci(fmt: Formati, enumi: Map<string, string>, rubrica: RubricaResponse | undefined, italiano: boolean): Leggi {
+export type TipoRiferimento = "persona" | "posizione" | "unita";
+/** Rende un nome che apre la sua scheda (classe C12); senza, il nome resta testo. */
+export type Riferisci = (tipo: TipoRiferimento, id: string, etichetta: string) => ReactNode;
+
+export function costruisci(fmt: Formati, enumi: Map<string, string>, rubrica: RubricaResponse | undefined, italiano: boolean, riferisci?: Riferisci): Leggi {
   const perId = new Map<string, string>();
   const perEmail = new Map<string, string>();
+  /* chiave esatta (id o email in minuscolo) → a che cosa porta */
+  const bersaglio = new Map<string, { tipo: TipoRiferimento; id: string }>();
   for (const p of rubrica?.persone ?? []) {
     perId.set(p.id, p.etichetta);
-    if (p.email) perEmail.set(p.email.toLowerCase(), p.etichetta);
+    bersaglio.set(p.id, { tipo: "persona", id: p.id });
+    if (p.email) {
+      perEmail.set(p.email.toLowerCase(), p.etichetta);
+      bersaglio.set(p.email.toLowerCase(), { tipo: "persona", id: p.id });
+    }
   }
-  for (const p of rubrica?.posizioni ?? []) perId.set(p.id, p.titolare ? `${p.titolo} (${p.titolare})` : p.titolo);
-  for (const u of rubrica?.unita ?? []) perId.set(u.id, u.nome);
+  for (const p of rubrica?.posizioni ?? []) {
+    perId.set(p.id, p.titolare ? `${p.titolo} (${p.titolare})` : p.titolo);
+    bersaglio.set(p.id, { tipo: "posizione", id: p.id });
+  }
+  for (const u of rubrica?.unita ?? []) {
+    perId.set(u.id, u.nome);
+    bersaglio.set(u.id, { tipo: "unita", id: u.id });
+  }
 
   const voce = (k: string): string | undefined => {
     const e = enumi.get(k) ?? enumi.get(k.toUpperCase());
@@ -58,7 +74,11 @@ export function costruisci(fmt: Formati, enumi: Map<string, string>, rubrica: Ru
   };
 
   const nodo = (n: ReactNode): ReactNode => {
-    if (typeof n === "string") return testo(n);
+    if (typeof n === "string") {
+      const b = riferisci ? bersaglio.get(n.trim().toLowerCase()) : undefined;
+      if (b && riferisci) return riferisci(b.tipo, b.id, testo(n));
+      return testo(n);
+    }
     if (typeof n === "number") return Number.isFinite(n) ? testo(String(n)) : "—";
     if (Array.isArray(n)) return Children.map(n, nodo);
     if (isValidElement(n)) {

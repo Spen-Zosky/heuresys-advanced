@@ -82,7 +82,11 @@ UPDATE sys.sys_ui_interfaces t SET
   ui_interface_order         = r.ord,
   ui_interface_is_active     = r.active
 FROM ui_remap r
-WHERE t.ui_interface_route = r.route;
+WHERE t.ui_interface_route = r.route
+  -- Emendato dalla 000484 (ADR-0035): questa tassonomia a cinque sezioni vale solo per le voci
+  -- che ancora la portano. Una voce già passata ai gruppi per funzione (000484) non si
+  -- riporta indietro a ogni deploy per poi essere ri-spostata: si lascia dov'è.
+  AND t.ui_interface_sidebar_group IN ('overview','governance','workforce','intelligence','personal');
 
 -- The CHECK is the 5 section values ONLY (D-46, S1011). The upstream interface
 -- migrations (000050+) now seed rows DIRECTLY with their final section value, and

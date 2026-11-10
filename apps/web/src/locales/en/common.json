@@ -42,7 +42,7 @@
   "auth": {
     "login": {
       "title": "Sign in to Heuresys",
-      "subtitle": "Admin console and employee self-service portal",
+      "subtitle": "Administration and employee self-service portal",
       "emailLabel": "Email",
       "emailPlaceholder": "name@company.com",
       "passwordLabel": "Password",

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { StatsCard } from "@heuresys/ui";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { Briefcase, GraduationCap, TriangleAlert } from "lucide-react";
 import { apiFetch } from "../../../../lib/api/fetch";
 

@@ -25,15 +25,8 @@
  * persona; prima erano in inglese («req», «ms avg», «just now»).
  */
 
-import {
-  AuditFeed,
-  Badge,
-  ErrorRateBreakdown,
-  KPIStrip,
-  RBACMatrix,
-  Sparkline,
-  SQLSlowQueryTable,
-} from "@heuresys/ui";
+import { AuditFeed, Badge, ErrorRateBreakdown, RBACMatrix, Sparkline, SQLSlowQueryTable } from "@heuresys/ui";
+import { KPIStrip } from "@/components/indicatori-leggibili";
 import { Activity, Database, Gauge, Lock, ShieldCheck, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCan } from "../lib/api/auth";

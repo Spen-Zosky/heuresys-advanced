@@ -3,7 +3,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge, PageHeader } from "@heuresys/ui";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { Building2, Coins, Scale } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import { MaskedCell } from "@/components/masked-cell";

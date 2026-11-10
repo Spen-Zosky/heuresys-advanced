@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge, PageHeader } from "@heuresys/ui";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { Building2, TrendingUp, Users } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { WorkforceAnalyticsResponse, WorkforceByDimensionRow } from "@heuresys/shared";

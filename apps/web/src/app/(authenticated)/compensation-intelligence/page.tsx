@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { Badge, Button, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { Badge, Button, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { KPIStrip } from "@/components/indicatori-leggibili";
 import type {
   VariablePayCalculation, CompensationRecommendationRow, BonusPool,
   ObjectiveRewardRule, PositionEconomicWeight, PayrollHandoffRecord,

@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { PageHeader, type KpiCardData } from "@heuresys/ui";
+import { KPIStrip } from "@/components/indicatori-leggibili";
 import { TimeOffRequestStatusEnum } from "@heuresys/shared";
 import type {
   TimeOffRequest, LeaveAccrualRule, LeaveBalanceTransaction,

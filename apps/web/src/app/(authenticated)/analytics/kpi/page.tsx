@@ -2,13 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import {
-  Badge,
-  PageHeader,
-  RadialGauge,
-  StatsCard,
-  echartsPresets,
-} from "@heuresys/ui";
+import { Badge, PageHeader, RadialGauge, echartsPresets } from "@heuresys/ui";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { Gauge, Target } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { KpiAnalyticsResponse } from "@heuresys/shared";

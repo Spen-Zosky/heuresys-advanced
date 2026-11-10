@@ -4,15 +4,8 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import {
-  AuditFeed,
-  type AuditEvent,
-  type AuditTone,
-  Badge,
-  PageHeader,
-  StatsCard,
-  formatRelativeTime,
-} from "@heuresys/ui";
+import { AuditFeed, type AuditEvent, type AuditTone, Badge, PageHeader, formatRelativeTime } from "@heuresys/ui";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import {
   Activity,
   BadgeCheck,

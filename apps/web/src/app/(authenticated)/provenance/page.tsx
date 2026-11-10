@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { KPIStrip, PageHeader, Badge, type KpiCardData } from "@heuresys/ui";
+import { PageHeader, Badge, type KpiCardData } from "@heuresys/ui";
+import { KPIStrip } from "@/components/indicatori-leggibili";
 import type {
   ProvenanceRecord, ProvenanceSummaryResponse, ProvenanceValidationStatusEnum,
 } from "@heuresys/shared";

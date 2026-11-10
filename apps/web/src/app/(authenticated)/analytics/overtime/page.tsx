@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, StatsCard, formatCurrency } from "@heuresys/ui";
+import { Badge, PageHeader, formatCurrency } from "@heuresys/ui";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { ClipboardList, Clock, Euro } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type {

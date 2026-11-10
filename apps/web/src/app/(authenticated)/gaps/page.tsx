@@ -3,7 +3,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { Badge, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { KPIStrip } from "@/components/indicatori-leggibili";
 import type { LearningGap, LearningGapSummaryResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";

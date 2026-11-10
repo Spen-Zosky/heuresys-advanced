@@ -20,12 +20,25 @@ Allegati: `allegati/agente-non-corrispondenze/COERENZA_PERSONE_20261110.tsv` (un
 6. In tutte e 10 le filiali un Responsabile Sportello e Cassa e un Responsabile Consulenza Clienti e Fidi, con i livelli della corsa; i cassieri e i consulenti riportano a loro, loro al direttore. Candidati: Bergamo Centro De Santis C. / Esposito M.; Brescia Centro Gatti M. / Cattaneo D.; Como Colombo F. / Mariani D.; Dalmine Esposito T. / Pagano M.; Milano Centro Moretti A. / Leone X.; Milano Porta Romana Colombo S. / Ferrara P.; Milano Sempione Deluca U. / Costa F.; Monza Caruso M. / Mariani E.; Sesto San Giovanni Fabbri G. / Marchetti N.; Varese Caruso S. / Romano C. Il vice direttore non è un ruolo della corsa: Orlando I. va su R044 Specialista Customer Care e Gestione Reclami.
 7. Martino A. diventa «Responsabile Compliance e Protezione Dati».
 
+## Estensione del mandato (Enzo, 2026-11-11 ore 00:23 Roma)
+
+Messaggio di Enzo nella chat del progetto (id cmsg_01FMWxNibmDwSNyptL3ETuJq7tMTyzRRbx9CHfQhAuZQ3J), passi rilevanti alla lettera: «non riesci a definire un programma preliminare di allineamento e omogeneizzazione dei dati, specialmente per riempire gap e differenze tra il modello e i dati reali: ti ho chiesto di creare e attivare un assistente esperto di banche proprio per fare questo lavoro ma quello che fa è presentarmi report lunghi e noiosi che devo leggermi e approvare o cassare punto per putno invede di prendere decisioni e agire»; «ccnl mischiati (rtl è una banca, cosa c'entra il commercio)»; «ti ostini a fare il notaio su questioni formali e su tecnicismi che nella catena di sviluppo arrivano solo alla fine».
+
+Quindi il mandato comprende, oltre alle sette decisioni (A):
+
+- B. Il CCNL del Credito (ABI) per ogni persona, posto, livello e retribuzione del tenant; nessun CCNL di altri settori in nessuna tabella.
+- C. I 21 processi del catalogo approvato, con fasi, responsabili e partecipazioni.
+- D. Gli altri domini (skill, formazione, obiettivi e metriche, criticità, carriere, inquadramento) con i criteri di `apps/agent-gateway/src/settori/profili.ts`: l'agente colma i vuoti dalla corsa e corregge le incoerenze, e decide da solo.
+
+L'agente decide e agisce; a Enzo arrivano un esito breve e solo le decisioni strategiche. Letture e prove sul gemello o su copie, senza leggere la produzione. La scrittura in produzione resta legata alle due condizioni della frase del 2026-11-10 ore 21:30 (prova sulla copia, copia di ritorno provata); per B, C e D serve in più la frase di Enzo chiesta nel thread alle 00:25 Roma.
+
 ## Ordine dei passi
 
 | id | passo | fatto quando | stato |
 | --- | --- | --- | --- |
-| D-1 | Copia di ritorno: `bash scripts/copia-fase.sh copia rtl-persone-20261110`, poi `prova` | ripristino su un database a parte con tutti i conteggi uguali | WAIT-INPUT: frase di Enzo per la copia di fase e la lettura della produzione |
-| D-2 | Conteggio delle righe di RTL per ognuna delle 206 tabelle e classificazione (ANAGRAFICA_UTENZA, ORGANIZZAZIONE, ALTRO), sul database ripristinato | TSV completo | GATED: D-1 |
+| D-0 | Copia di lavoro sul gemello (linux-pc), senza leggere la produzione: clone esistente o copia usa-e-getta con `bash db/scripts/sul-gemello.sh` | copia aperta | ACTIVE |
+| D-1 | Copia di ritorno: `bash scripts/copia-fase.sh copia rtl-persone-20261110`, poi `prova` | ripristino su un database a parte con tutti i conteggi uguali | WAIT-INPUT: serve prima della produzione, non prima delle prove |
+| D-2 | Conteggio delle righe di RTL per ognuna delle 206 tabelle e classificazione (ANAGRAFICA_UTENZA, ORGANIZZAZIONE, ALTRO), sulla copia del gemello | TSV completo | GATED: D-0 |
 | D-3 | Piano di modifica tabella per tabella, con un giornale `staging.*_undo` per ogni tabella toccata | piano scritto | GATED: D-2 |
-| D-4 | Prova del piano sul database ripristinato: nessuna riga orfana, ogni vincolo soddisfatto, anagrafica e utenze identiche per impronta riga per riga, storia 36 mesi coerente | prova verde | GATED: D-3 |
-| D-5 | Scrittura in produzione con le guardie di ADR-0035 e la post-condizione di D-4, poi dimostrazione dal vivo con un login di una persona RTL | dimostrazione | GATED: D-4 |
+| D-4 | Prova del piano sulla copia del gemello: nessuna riga orfana, ogni vincolo soddisfatto, anagrafica e utenze identiche per impronta riga per riga, storia 36 mesi coerente | prova verde | GATED: D-3 |
+| D-5 | Dopo D-1 e D-4: scrittura in produzione con le guardie di ADR-0035 e la post-condizione di D-4, poi dimostrazione dal vivo con un login di una persona RTL | dimostrazione | GATED: D-4 |

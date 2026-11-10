@@ -85,6 +85,9 @@ const PERSONA_EMAILS: readonly string[] = [
   // #51 E1 (S1026): the designated whistleblowing custodian (Head of Legal &
   // Compliance, role granted by mig 000205) needs a login to reach the console.
   "andrea.martino@rtl-bank.org",
+  // Repertorio interfacce (10/11/2026): la persona con il mandato HR del tenant
+  // (TENANT_ADMIN + HRMS_MANAGER) per il cricchetto `interfacce-intelligenti.spec.ts`.
+  "valentina.conti@rtl-bank.org",
 ];
 
 const ARGON2_PARAMS = {

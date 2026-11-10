@@ -124,6 +124,9 @@ export const FIXTURE_PERSONA_EMAILS = [
   "antonio.parisi@rtl-bank.org",
   "marco.rinaldi@rtl-bank.org",
   "andrea.martino@rtl-bank.org",
+  // Repertorio interfacce (10/11/2026): la persona con il mandato HR del tenant
+  // (TENANT_ADMIN + HRMS_MANAGER) per il cricchetto `interfacce-intelligenti.spec.ts`.
+  "valentina.conti@rtl-bank.org",
 ];
 
 /**

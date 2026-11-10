@@ -28,6 +28,8 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
+import { useTranslation } from "react-i18next";
+import { localeDi } from "@/lib/format";
 
 const RawEChartsCard = dynamic(
   // Subpath `/charts` isolates echarts so this lazy import does NOT drag the whole
@@ -69,6 +71,64 @@ function resolveCssVars<T>(value: T, root: HTMLElement): T {
 }
 
 type RawProps = ComponentProps<typeof RawEChartsCard>;
+
+/**
+ * C8 del piano interfaccia sistematica (2026-11-11): grafici leggibili per costruzione, non
+ * pagina per pagina. Enzo: «grafici che non sono intellegibili» (legende che scorrono a pagine
+ * sopra l'asse, numeri all'inglese «60,000», etichette tagliate). Su ogni opzione:
+ *   - gli assi di valore scrivono i numeri nella forma della lingua («60.000»);
+ *   - gli assi di categoria tengono l'etichetta intera fino a 200 px e la griglia la contiene;
+ *   - la legenda sta sotto il grafico, va a capo invece di scorrere a pagine, e la griglia le
+ *     lascia il posto che serve;
+ *   - il riquadro al passaggio scrive i valori nella stessa forma.
+ * Una pagina che ha già un `formatter` suo lo tiene.
+ */
+function numeroLocale(locale: string) {
+  const nf = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
+  return (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? nf.format(v) : String(v ?? ""));
+}
+
+function rendiLeggibile(option: RawProps["option"], locale: string): RawProps["option"] {
+  const o = { ...(option as Record<string, unknown>) };
+  const num = numeroLocale(locale);
+  const asse = (a: unknown): unknown => {
+    if (Array.isArray(a)) return a.map(asse);
+    if (!a || typeof a !== "object") return a;
+    const ax = { ...(a as Record<string, unknown>) };
+    const label = { ...((ax.axisLabel as Record<string, unknown>) ?? {}) };
+    const tipo = ax.type ?? "value";
+    if (tipo === "value" || tipo === "log") {
+      if (label.formatter === undefined) label.formatter = num;
+    } else if (tipo === "category") {
+      if (label.width === undefined) label.width = 200;
+      if (label.overflow === undefined) label.overflow = "truncate";
+    }
+    ax.axisLabel = label;
+    return ax;
+  };
+  if (o.xAxis) o.xAxis = asse(o.xAxis);
+  if (o.yAxis) o.yAxis = asse(o.yAxis);
+  const serie = Array.isArray(o.series) ? (o.series as unknown[]).length : 0;
+  if (o.legend && typeof o.legend === "object" && !Array.isArray(o.legend)) {
+    const voci = Array.isArray((o.legend as Record<string, unknown>).data)
+      ? ((o.legend as Record<string, unknown>).data as unknown[]).length
+      : serie;
+    o.legend = { ...(o.legend as Record<string, unknown>), type: "plain", bottom: 0, left: "center", itemGap: 14, textStyle: { fontSize: 11 } };
+    const righe = Math.max(1, Math.ceil(voci / 4));
+    const g = (o.grid && typeof o.grid === "object" && !Array.isArray(o.grid) ? { ...(o.grid as Record<string, unknown>) } : {}) as Record<string, unknown>;
+    const serve = 36 + righe * 20;
+    if (typeof g.bottom !== "number" || g.bottom < serve) g.bottom = serve;
+    g.containLabel = true;
+    o.grid = g;
+  } else if (o.grid && typeof o.grid === "object" && !Array.isArray(o.grid)) {
+    o.grid = { ...(o.grid as Record<string, unknown>), containLabel: true };
+  }
+  if (o.tooltip && typeof o.tooltip === "object" && !Array.isArray(o.tooltip)) {
+    const tt = o.tooltip as Record<string, unknown>;
+    if (tt.valueFormatter === undefined && tt.formatter === undefined) o.tooltip = { ...tt, valueFormatter: num };
+  }
+  return o as RawProps["option"];
+}
 
 /**
  * V-11 del piano interfacce (2026-11-04): ogni grafico dice che cosa misurano i suoi assi
@@ -144,6 +204,8 @@ function TabellaEquivalente({ tabella, lingua }: { tabella: ChartTable; lingua: 
 }
 
 export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProps) {
+  const { i18n } = useTranslation();
+  const locale = localeDi(lingua ?? i18n.language);
   // bump on theme (html.class) change so colors re-resolve when IT/dark toggles
   const [themeTick, setThemeTick] = useState(0);
   useEffect(() => {
@@ -157,16 +219,16 @@ export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProp
     () =>
       typeof document === "undefined"
         ? props.option
-        : resolveCssVars(conNomiDegliAssi(props.option, assi), document.documentElement),
+        : resolveCssVars(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale), document.documentElement),
     // themeTick intentionally re-triggers resolution on theme switch
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.option, themeTick, assi?.x, assi?.y],
+    [props.option, themeTick, assi?.x, assi?.y, locale],
   );
 
   return (
     <>
       <RawEChartsCard {...props} option={option} />
-      {tabella && <TabellaEquivalente tabella={tabella} lingua={lingua} />}
+      {tabella && <TabellaEquivalente tabella={tabella} lingua={locale} />}
     </>
   );
 }

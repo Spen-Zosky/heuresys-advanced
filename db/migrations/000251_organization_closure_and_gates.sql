@@ -109,6 +109,12 @@ UPDATE sys.sys_positions p
        position_effective_to  = CURRENT_DATE,
        updated_at             = now()
  WHERE p.position_is_active
+   -- (2026-11-10) i posti nuovi della selezione RTL (storia36 C13, «potenziamento»)
+   -- sono vacanti per costruzione: una selezione aperta li sta coprendo. Senza questa
+   -- riga la catena, riapplicata a ogni deploy, li richiudeva (deploy dell'8/11) e il
+   -- controllo C13d della custodia diventava rosso. La marca e' scritta dal seed
+   -- db/seeds/storia36/14_selezione.sql; quando il posto e' coperto ha un titolare.
+   AND COALESCE(p.position_metadata->>'storia36', '') <> 'C13'
    AND NOT EXISTS (
      SELECT 1 FROM sys.sys_user_position_assignments a
       WHERE a.user_position_assignment_position_id = p.position_id

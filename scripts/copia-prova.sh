@@ -7,11 +7,10 @@
 # ~/adv-rilascio-20261025, ...), ognuna per conto suo, e a lavoro finito nessuno le toglieva:
 # il 30/10 erano cinque, 2,2 GB, nessuna piu' in uso. Questo comando da' alle copie una sede
 # sola, un registro che impedisce a due thread di aprirne in parallelo, e una chiusura che le
-# porta nel cestino.
+# cancella (regola VM del 30/10/2026: le copie di lavoro si eliminano, un cestino sulla VM non libera spazio).
 #
 #   sede       ~/prove-heuresys-advanced/<nome>            (HEURESYS_PROVE_DIR la cambia)
 #   registro   ~/prove-heuresys-advanced/.registro/<nome>/chi.txt
-#   cestino    ~/_da_eliminare/prove-heuresys-advanced_<AAAAMMGG>/<nome>_<HHMMSS>
 #
 # Uso:
 #   bash scripts/copia-prova.sh elenco
@@ -25,7 +24,7 @@
 #     se e' aperta un'altra copia qualsiasi (la si riusa o si aspetta). --anche-se-altre e'
 #     per le prove che hanno davvero bisogno di due copie insieme (per esempio prima/dopo);
 #   - `chiudi` rifiuta se la copia ha modifiche non committate, commit non pubblicati, uno
-#     stash o un processo dentro; poi la sposta nel cestino (niente rm) e toglie la voce.
+#     stash o un processo dentro; poi la cancella (rm -rf) e toglie la voce.
 #
 # Esiti: 0 fatto, 2 uso sbagliato, 3 copia gia' aperta, 4 altre copie aperte,
 #        5 chiusura rifiutata, 6 clone fallito.
@@ -103,7 +102,7 @@ apri() {
 }
 
 chiudi() {
-  local nome="${1:-}" dir motivi=() cestino p
+  local nome="${1:-}" dir motivi=() p
   [ -n "$nome" ] || uso
   [[ "$nome" =~ ^[a-z0-9][a-z0-9-]*$ ]] || { echo "nome non valido: solo minuscole, cifre e trattini" >&2; exit 2; }
   [ -d "$REG/$nome" ] || { echo "la copia '$nome' non e' nel registro" >&2; elenco >&2; exit 2; }
@@ -127,10 +126,11 @@ chiudi() {
       echo "RIFIUTATO: la copia '$nome' contiene lavoro o e' in uso:" >&2
       printf '  - %s\n' "${motivi[@]}" >&2; exit 5
     fi
-    cestino="$HOME/_da_eliminare/prove-heuresys-advanced_$(date +%Y%m%d)"
-    mkdir -p "$cestino"
-    mv "$dir" "$cestino/${nome}_$(date +%H%M%S)"
-    echo "CHIUSA: $dir spostata in $cestino/"
+    # le guardie sopra garantiscono che non c'e' lavoro non pubblicato: la copia si
+    # cancella, perche' sulla VM lo spazio torna solo se l'oggetto non esiste piu'.
+    case "$dir" in "$SEDE"/?*) ;; *) echo "RIFIUTATO: percorso inatteso '$dir'" >&2; exit 5 ;; esac
+    rm -rf -- "$dir"
+    echo "CHIUSA: $dir cancellata"
   else
     echo "la cartella $dir non c'e': tolgo solo la voce dal registro"
   fi

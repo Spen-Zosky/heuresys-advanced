@@ -237,6 +237,20 @@ export interface OpzioniAgentStream {
   onPageCommand?: (nome: string, argomenti: Record<string, unknown>) => EsitoComandoPagina;
 }
 
+/**
+ * Interpreta il `data:` di un evento `nota`: la correzione che il gateway mette sotto il testo del
+ * modello quando un comando non è avvenuto come raccontato (piano dell'assistente, blocco I4).
+ * Si mostra come un messaggio, lo stesso che la finestra riaperta rilegge dal registro.
+ */
+export function parseNota(data: string): string | null {
+  try {
+    const p = JSON.parse(data) as { testo?: unknown };
+    return typeof p.testo === "string" && p.testo.trim() ? p.testo : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Interpreta il `data:` di un evento `page_command`. `null` se non ne ha la forma. */
 export function parsePageCommand(data: string): { commandId: string; nome: string; argomenti: Record<string, unknown> } | null {
   try {
@@ -308,6 +322,13 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
             body: JSON.stringify({ commandId: c.commandId, ...esito }),
           }).catch(() => undefined);
           pushLine("page_command", `${c.nome} → ${esito.stato}${esito.dettaglio ? `: ${esito.dettaglio}` : ""}`);
+          return;
+        }
+      }
+      if (kind === "nota") {
+        const testo = parseNota(data);
+        if (testo) {
+          pushLine("message", testo.replace(/\s+/g, " ").slice(0, 600));
           return;
         }
       }

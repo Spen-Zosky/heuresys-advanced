@@ -34,7 +34,7 @@ import { auditPool } from "./db-pool.js";
 import { HeuresysClient, chiSei, chiediGettoneAgente, registraDecisione } from "./heuresys-client.js";
 import { ConversazioneNonTrovata, ConversazioneOccupata, RegistroConversazione } from "./conversazione.js";
 import { eseguiGiro } from "./giro.js";
-import { PonteVista, RegistroEsiti, contestoPagina, leggiEsito, leggiPagina } from "./comandi-vista.js";
+import { PonteVista, RegistroEsiti, contestoPagina, leggiEsito, leggiPagina, notaSugliEsiti } from "./comandi-vista.js";
 import { ContatorePersone } from "./persone-distinte.js";
 import { caricaSoglie } from "./soglie-persone.js";
 import { ConversazioniAperte, leggiLimiti, modelloAgenti, personeAmmesse } from "./limiti.js";
@@ -481,6 +481,7 @@ const server = createServer(async (req, res) => {
           durataMs: LIMITI.durataMs,
           approvalTimeoutMs: APPROVAL_TIMEOUT_MS,
           scrivi,
+          nota: () => notaSugliEsiti(vista.esiti),
           esegui: (o) =>
             runHrAgent(mandato, client, {
               approve: o.approve,

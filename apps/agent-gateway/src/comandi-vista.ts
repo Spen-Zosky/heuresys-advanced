@@ -199,9 +199,22 @@ export interface PonteVistaDeps {
  * e restituisce l'esito che la pagina riferisce. Non tocca dati: la pagina cambia solo la vista.
  */
 export class PonteVista {
+  /** Ciò che la pagina ha riferito per ogni comando di questo giro, in ordine. */
+  private readonly storia: Array<{ nome: string; esito: EsitoComando }> = [];
+
   constructor(private readonly d: PonteVistaDeps) {}
 
+  get esiti(): ReadonlyArray<{ nome: string; esito: EsitoComando }> {
+    return this.storia;
+  }
+
   async comanda(nome: string, argomenti: unknown): Promise<EsitoComando> {
+    const esito = await this.esegui(nome, argomenti);
+    this.storia.push({ nome, esito });
+    return esito;
+  }
+
+  private async esegui(nome: string, argomenti: unknown): Promise<EsitoComando> {
     const voce = Object.hasOwn(CATALOGO_VISTA, nome) ? CATALOGO_VISTA[nome] : undefined;
     if (!voce) return { stato: "rifiutata", dettaglio: `Il comando «${nome}» non esiste.` };
     if (!this.d.pagina) return { stato: "rifiutata", dettaglio: "La finestra non ha detto in quale pagina si trova." };
@@ -218,4 +231,32 @@ export class PonteVista {
     this.d.scrivi(`event: page_command\ndata: ${JSON.stringify({ commandId: id, nome, argomenti: a.data })}\n\n`);
     return esito;
   }
+}
+
+/**
+ * La nota del gateway in coda al testo del modello (blocco I4, logica L6; MOD voce F12). Il modello
+ * riceve l'esito di ogni comando, ma ciò che scrive resta un testo libero: può dire «fatto» di un
+ * comando che la pagina ha rifiutato o non ha confermato. Il gateway non prova a capire il testo:
+ * quando un comando non è riuscito per intero lo dice lui, con le parole dell'esito, e la persona
+ * legge la nota sotto la risposta. Un comando rifiutato e poi riuscito al tentativo dopo non lascia
+ * nota: conta l'ultimo esito di ogni comando.
+ */
+export function notaSugliEsiti(esiti: ReadonlyArray<{ nome: string; esito: EsitoComando }>): string | null {
+  const ultimo = new Map<string, EsitoComando>();
+  for (const { nome, esito } of esiti) {
+    ultimo.delete(nome);
+    ultimo.set(nome, esito);
+  }
+  const PAROLE: Record<Exclude<StatoEsito, "ok">, string> = {
+    parziale: "fatto solo in parte",
+    rifiutata: "non fatto: la pagina l'ha rifiutato",
+    non_confermata: "non confermato: la pagina non ha risposto, quindi non è detto che sia avvenuto",
+  };
+  const righe: string[] = [];
+  for (const [nome, e] of ultimo) {
+    if (e.stato === "ok") continue;
+    righe.push(`- ${nome}: ${PAROLE[e.stato]}${e.dettaglio ? ` (${e.dettaglio})` : ""}.`);
+  }
+  if (righe.length === 0) return null;
+  return ["Nota della piattaforma, su ciò che la pagina ha davvero fatto:", ...righe].join("\n");
 }

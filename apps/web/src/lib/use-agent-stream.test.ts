@@ -19,7 +19,7 @@
 
 import { describe, it, expect } from "vitest";
 
-import { lineaDaEvento, parseApprovalPayload, parseConversationPayload, parseSseBlock } from "./use-agent-stream.js";
+import { lineaDaEvento, parseApprovalPayload, parseConversationPayload, parseNota, parseSseBlock } from "./use-agent-stream.js";
 
 describe("parseSseBlock — l'interprete dei blocchi SSE", () => {
   it("legge tipo e dati da un blocco completo", () => {
@@ -164,5 +164,16 @@ describe("ADR-0056 D4 (T6c) — la conversazione salvata vista dalla finestra", 
     expect(lineaDaEvento({ kind: "FINE", payload: { esito: "success", risultato: "fatto" } })).toEqual({ kind: "done", text: "fatto" });
     // un campo dal tipo sbagliato non diventa testo: la riga resta vuota, non «[object Object]»
     expect(lineaDaEvento({ kind: "TESTO", payload: { testo: { x: 1 } } })).toEqual({ kind: "message", text: "" });
+  });
+});
+
+describe("parseNota (blocco I4)", () => {
+  it("legge il testo della nota del gateway, e scarta ciò che non ne ha la forma", () => {
+    expect(parseNota(JSON.stringify({ testo: "Nota della piattaforma: tabella.filtra non fatto." }))).toBe(
+      "Nota della piattaforma: tabella.filtra non fatto.",
+    );
+    expect(parseNota(JSON.stringify({ testo: "  " }))).toBeNull();
+    expect(parseNota(JSON.stringify({ altro: 1 }))).toBeNull();
+    expect(parseNota("non json")).toBeNull();
   });
 });

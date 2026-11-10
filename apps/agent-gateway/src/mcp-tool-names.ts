@@ -46,8 +46,17 @@ export function isParametricToolName(bare: string): boolean {
   return PARAMETRIC_TOOL_NAMES.has(bare);
 }
 
+/**
+ * Comandi della vista (comandi-vista.ts): cambiano ciò che la pagina mostra e non leggono dati
+ * dall'API, quindi non contano nel freno delle persone distinte e il cancello li lascia passare
+ * sempre, scrivendolo nel diario. Stanno anche fra le letture, per la classe A e l'allowlist.
+ */
+export const VIEW_TOOL_NAMES: ReadonlySet<string> = new Set(["hrx_vista_comanda"]);
+
 /** Read tools (auto-allowed by the gate once allowlisted). */
 export const READ_TOOL_NAMES = [
+  // Comandi della vista della pagina aperta: cambiano ciò che si vede, mai i dati (comandi-vista.ts).
+  "hrx_vista_comanda",
   "hrx_org_units_list",
   "hrx_org_units_get",
   "hrx_positions_list",

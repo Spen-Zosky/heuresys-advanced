@@ -1,0 +1,207 @@
+tabella	colonna	tabella_puntata	livello	tenant	righe_RTL_o_totali_se_senza_tenant	classe
+audit.user_self_service_actions	action_user_id	sys.sys_users	1	diretto	0	ALTRO (audit/sincronizzazione, non dato di organizzazione)
+audit.valore_eventi	valore_evento_attore_user_id	sys.sys_users	1	diretto	95	ALTRO (audit/sincronizzazione, non dato di organizzazione)
+reference_sync.import_runs	import_run_initiated_by	sys.sys_users	1	via 1 passi	3	ALTRO (audit/sincronizzazione, non dato di organizzazione)
+sys.sys_agent_capabilities	agent_capability_created_by	sys.sys_users	1	via 1 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_agent_capability_activations	agent_capability_activation_decided_by	sys.sys_users	1	diretto	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_agent_conversations	agent_conversation_user_id	sys.sys_users	1	diretto	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_approval_requests	created_by	sys.sys_users	1	diretto	741	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_approval_steps	approval_step_approver_user_id	sys.sys_users	1	diretto	850	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_assessment_results	assessment_result_assessor_user_id	sys.sys_users	1	diretto	1560	ORGANIZZAZIONE
+sys.sys_assessments	assessment_subject_user_id	sys.sys_users	1	diretto	611	ORGANIZZAZIONE
+sys.sys_attendance	attendance_created_by	sys.sys_users	1	diretto	127736	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_auth_identities	auth_identity_user_id	sys.sys_users	1	via 1 passi	167	ANAGRAFICA_UTENZA
+sys.sys_auth_login_events	auth_login_event_user_id	sys.sys_users	1	diretto	56082	ANAGRAFICA_UTENZA
+sys.sys_auth_mfa_exemption_audit	auth_mfa_exemption_audit_user_id	sys.sys_users	1	via 1 passi	27	ANAGRAFICA_UTENZA
+sys.sys_auth_mfa_exemption_eligible_users	auth_mfa_eligible_user_id	sys.sys_users	1	via 1 passi	9	ANAGRAFICA_UTENZA
+sys.sys_auth_mfa_exemptions	auth_mfa_exemption_user_id	sys.sys_users	1	via 1 passi	9	ANAGRAFICA_UTENZA
+sys.sys_auth_mfa_factors	auth_mfa_factor_user_id	sys.sys_users	1	via 1 passi	158	ANAGRAFICA_UTENZA
+sys.sys_auth_mfa_otp_challenges	auth_mfa_otp_user_id	sys.sys_users	1	via 1 passi	0	ANAGRAFICA_UTENZA
+sys.sys_auth_mfa_recovery_codes	recovery_code_user_id	sys.sys_users	1	via 1 passi	0	ANAGRAFICA_UTENZA
+sys.sys_auth_mfa_webauthn_credentials	auth_webauthn_cred_user_id	sys.sys_users	1	via 1 passi	0	ANAGRAFICA_UTENZA
+sys.sys_auth_password_reset_tokens	auth_password_reset_user_id	sys.sys_users	1	via 1 passi	0	ANAGRAFICA_UTENZA
+sys.sys_auth_refresh_tokens	auth_refresh_token_user_id	sys.sys_users	1	diretto	31	ANAGRAFICA_UTENZA
+sys.sys_auth_sessions	auth_session_user_id	sys.sys_users	1	diretto	0	ANAGRAFICA_UTENZA
+sys.sys_behavioral_assessments	behavioral_assessment_user_id	sys.sys_users	1	diretto	465	ORGANIZZAZIONE
+sys.sys_blueprint_activations	created_by	sys.sys_users	1	diretto	1	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_blueprint_overrides	created_by	sys.sys_users	1	via 1 passi	7	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_bonus_pools	bonus_pool_organization_unit_id	sys.sys_organization_units	1	diretto	6	ORGANIZZAZIONE
+sys.sys_branches	branch_organization_unit_id	sys.sys_organization_units	1	diretto	5	ORGANIZZAZIONE
+sys.sys_calibration_discussions	calibration_discussion_subject_user_id	sys.sys_users	1	diretto	40	ORGANIZZAZIONE
+sys.sys_calibration_participants	calibration_participant_user_id	sys.sys_users	1	diretto	20	ORGANIZZAZIONE
+sys.sys_calibration_sessions	calibration_session_org_unit_id	sys.sys_organization_units	1	diretto	35	ORGANIZZAZIONE
+sys.sys_candidates	candidate_hired_user_id	sys.sys_users	1	diretto	112	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_capability_maturity_scores	capability_maturity_score_org_unit_id	sys.sys_organization_units	1	diretto	20	ORGANIZZAZIONE
+sys.sys_career_path_steps	career_path_step_origin_position_id	sys.sys_positions	1	via 1 passi	28	ORGANIZZAZIONE
+sys.sys_career_paths	created_by	sys.sys_users	1	diretto	7	ORGANIZZAZIONE
+sys.sys_compensation_recommendations	compensation_recommendation_position_id	sys.sys_positions	1	diretto	116	ORGANIZZAZIONE
+sys.sys_content_blueprint_links	link_created_by	sys.sys_users	1	diretto	1	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_content_documents	document_author_user_id	sys.sys_users	1	diretto	189	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_content_media	media_uploaded_by	sys.sys_users	1	diretto	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_content_versions	version_author_user_id	sys.sys_users	1	diretto	237	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_continuous_feedback	feedback_from_user_id	sys.sys_users	1	diretto	473	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_critical_positions	critical_position_position_id	sys.sys_positions	1	diretto	8	ORGANIZZAZIONE
+sys.sys_critical_role_coverage_status	critical_role_coverage_status_position_id	sys.sys_positions	1	diretto	8	ORGANIZZAZIONE
+sys.sys_employee_position_fit_scores	employee_position_fit_score_position_id	sys.sys_positions	1	diretto	146	ORGANIZZAZIONE
+sys.sys_engagement_action_plans	action_plan_created_by_user_id	sys.sys_users	1	diretto	8	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_engagement_feedback	feedback_reviewed_by_user_id	sys.sys_users	1	diretto	400	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_engagement_survey_responses	response_subject_user_id	sys.sys_users	1	diretto	862	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_engagement_survey_templates	template_created_by_user_id	sys.sys_users	1	diretto	5	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_engagement_surveys	survey_created_by_user_id	sys.sys_users	1	diretto	6	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_enterprise_typing_profiles	created_by	sys.sys_users	1	diretto	1	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_feedback_360_responses	response_reviewer_user_id	sys.sys_users	1	diretto	776	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_flight_risk_scores	flight_risk_score_user_id	sys.sys_users	1	diretto	167	ORGANIZZAZIONE
+sys.sys_gap_analysis_results	gap_analysis_result_position_id	sys.sys_positions	1	diretto	158	ORGANIZZAZIONE
+sys.sys_gap_closure_actions	gap_closure_action_owner_user_id	sys.sys_users	1	diretto	440	ORGANIZZAZIONE
+sys.sys_gap_closure_plans	gap_closure_plan_position_id	sys.sys_positions	1	diretto	35	ORGANIZZAZIONE
+sys.sys_gdpr_requests	gdpr_request_requested_by	sys.sys_users	1	diretto	7	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_generated_record_origins	created_by	sys.sys_users	1	diretto	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_goal_check_ins	check_in_subject_user_id	sys.sys_users	1	diretto	7567	ORGANIZZAZIONE
+sys.sys_goal_comments	comment_author_user_id	sys.sys_users	1	diretto	500	ORGANIZZAZIONE
+sys.sys_goal_milestones	milestone_created_by	sys.sys_users	1	diretto	1000	ORGANIZZAZIONE
+sys.sys_goal_templates	template_org_unit_id	sys.sys_organization_units	1	diretto	40	ORGANIZZAZIONE
+sys.sys_goal_updates	update_author_user_id	sys.sys_users	1	diretto	1075	ORGANIZZAZIONE
+sys.sys_goals	goal_created_by	sys.sys_users	1	diretto	2189	ORGANIZZAZIONE
+sys.sys_inbox_notifications	created_by	sys.sys_users	1	diretto	77	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_interview_feedback	feedback_interviewer_user_id	sys.sys_users	1	diretto	199	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_job_requisitions	requisition_position_id	sys.sys_positions	1	diretto	24	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_job_roles	created_by	sys.sys_users	1	diretto	0	ORGANIZZAZIONE
+sys.sys_kpi_assessment_results	kpi_assessment_result_position_id	sys.sys_positions	1	diretto	248	ORGANIZZAZIONE
+sys.sys_kpi_definitions	created_by	sys.sys_users	1	diretto	0	ORGANIZZAZIONE
+sys.sys_kpi_measurements	kpi_measurement_position_id	sys.sys_positions	1	diretto	248	ORGANIZZAZIONE
+sys.sys_kpi_targets	kpi_target_position_id	sys.sys_positions	1	diretto	301	ORGANIZZAZIONE
+sys.sys_learning_gaps	learning_gap_position_id	sys.sys_positions	1	diretto	270	ORGANIZZAZIONE
+sys.sys_learning_modules	created_by	sys.sys_users	1	diretto	15	ORGANIZZAZIONE
+sys.sys_learning_paths	created_by	sys.sys_users	1	diretto	50	ORGANIZZAZIONE
+sys.sys_leave_accrual_rules	accrual_rule_created_by	sys.sys_users	1	diretto	20	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_leave_balance_transactions	transaction_performed_by_user_id	sys.sys_users	1	diretto	20	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_mandate_acts	mandate_act_position_id	sys.sys_positions	1	diretto	0	ORGANIZZAZIONE
+sys.sys_mentor_match_scores	match_mentee_user_id	sys.sys_users	1	diretto	30	ORGANIZZAZIONE
+sys.sys_mentorships	mentorship_mentee_user_id	sys.sys_users	1	diretto	63	ORGANIZZAZIONE
+sys.sys_model_predictions	prediction_subject_user_id	sys.sys_users	1	diretto	468	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_notification_preferences	preference_user_id	sys.sys_users	1	diretto	0	ANAGRAFICA_UTENZA
+sys.sys_okr_check_ins	check_in_subject_user_id	sys.sys_users	1	diretto	25	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_okr_key_results	key_result_owner_user_id	sys.sys_users	1	diretto	20	ORGANIZZAZIONE
+sys.sys_okrs	okr_created_by_user_id	sys.sys_users	1	diretto	15	ORGANIZZAZIONE
+sys.sys_organization_unit_history	organization_unit_history_unit_id	sys.sys_organization_units	1	diretto	406	ORGANIZZAZIONE
+sys.sys_organization_unit_kpi_templates	organization_unit_kpi_template_unit_id	sys.sys_organization_units	1	diretto	0	ORGANIZZAZIONE
+sys.sys_organization_unit_processes	org_unit_process_org_unit_id	sys.sys_organization_units	1	diretto	96	ORGANIZZAZIONE
+sys.sys_organization_unit_templates	created_by	sys.sys_users	1	via 1 passi	0	ORGANIZZAZIONE
+sys.sys_organization_units	created_by	sys.sys_users	1	diretto	42	ORGANIZZAZIONE
+sys.sys_overtime	overtime_approved_by_user_id	sys.sys_users	1	diretto	12557	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_performance_review_competency_ratings	rating_subject_user_id	sys.sys_users	1	diretto	1710	ORGANIZZAZIONE
+sys.sys_performance_reviews	review_calibrated_by_user_id	sys.sys_users	1	diretto	570	ORGANIZZAZIONE
+sys.sys_person_evidence_records	person_evidence_record_user_id	sys.sys_users	1	diretto	237	ORGANIZZAZIONE
+sys.sys_platform_user_tenant_assignments	platform_user_tenant_assignment_assigned_by	sys.sys_users	1	diretto	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_platform_vocabulary_equivalences	platform_vocabulary_equivalence_approved_by	sys.sys_users	1	via 1 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_position_career_paths	position_id	sys.sys_positions	1	diretto	231	ORGANIZZAZIONE
+sys.sys_position_compensation_profiles	position_id	sys.sys_positions	1	diretto	157	ORGANIZZAZIONE
+sys.sys_position_economic_weight	position_economic_weight_position_id	sys.sys_positions	1	diretto	24	ORGANIZZAZIONE
+sys.sys_position_kpi_requirements	position_id	sys.sys_positions	1	diretto	176	ORGANIZZAZIONE
+sys.sys_position_learning_requirements	position_id	sys.sys_positions	1	diretto	1931	ORGANIZZAZIONE
+sys.sys_position_skill_requirement_history	position_skill_requirement_history_position_id	sys.sys_positions	1	diretto	181	ORGANIZZAZIONE
+sys.sys_position_skill_requirements	position_id	sys.sys_positions	1	diretto	1450	ORGANIZZAZIONE
+sys.sys_position_succession_relevance	position_id	sys.sys_positions	1	diretto	18	ORGANIZZAZIONE
+sys.sys_positions	position_organization_unit_id	sys.sys_organization_units	1	diretto	316	ORGANIZZAZIONE
+sys.sys_process_participants	process_participant_position_id	sys.sys_positions	1	diretto	845	ORGANIZZAZIONE
+sys.sys_project_members	project_member_user_id	sys.sys_users	1	diretto	172	ORGANIZZAZIONE
+sys.sys_projects	project_organization_unit_id	sys.sys_organization_units	1	diretto	25	ORGANIZZAZIONE
+sys.sys_pulse_checks	pulse_check_subject_user_id	sys.sys_users	1	diretto	2833	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_readiness_scores	readiness_score_position_id	sys.sys_positions	1	diretto	88	ORGANIZZAZIONE
+sys.sys_reconciliation_registry	created_by	sys.sys_users	1	via 1 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_research_sources	created_by	sys.sys_users	1	via 1 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_review_cycles	created_by	sys.sys_users	1	diretto	1	ORGANIZZAZIONE
+sys.sys_reward_gate_results	reward_gate_result_evaluator_user_id	sys.sys_users	1	diretto	3283	ORGANIZZAZIONE
+sys.sys_reward_gates	reward_gate_position_id	sys.sys_positions	1	diretto	3283	ORGANIZZAZIONE
+sys.sys_seed_acquisition_runs	created_by	sys.sys_users	1	diretto	16	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_seed_approval_decisions	seed_approval_decision_approver_user_id	sys.sys_users	1	via 1 passi	16	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_skill_gap_scores	skill_gap_score_position_id	sys.sys_positions	1	diretto	156	ORGANIZZAZIONE
+sys.sys_skills	created_by	sys.sys_users	1	diretto	28	ORGANIZZAZIONE
+sys.sys_succession_pools	succession_pool_position_id	sys.sys_positions	1	diretto	8	ORGANIZZAZIONE
+sys.sys_succession_readiness_scores	succession_readiness_score_position_id	sys.sys_positions	1	diretto	468	ORGANIZZAZIONE
+sys.sys_succession_scores	succession_score_position_id	sys.sys_positions	1	diretto	88	ORGANIZZAZIONE
+sys.sys_successor_candidates	successor_candidate_user_id	sys.sys_users	1	diretto	20	ORGANIZZAZIONE
+sys.sys_survey_assignments	survey_assignment_user_id	sys.sys_users	1	diretto	957	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_survey_responses	survey_response_subject_user_id	sys.sys_users	1	diretto	8288	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_talent_scores	talent_score_user_id	sys.sys_users	1	diretto	153	ORGANIZZAZIONE
+sys.sys_team_members	created_by	sys.sys_users	1	via 1 passi	0	ORGANIZZAZIONE
+sys.sys_teams	team_organization_unit_id	sys.sys_organization_units	1	diretto	25	ORGANIZZAZIONE
+sys.sys_tenant_blueprint_process_decisions	created_by	sys.sys_users	1	via 1 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_tenant_blueprint_snapshots	tenant_blueprint_snapshot_taken_by	sys.sys_users	1	via 1 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_tenant_blueprint_versions	created_by	sys.sys_users	1	via 1 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_tenant_blueprints	created_by	sys.sys_users	1	diretto	1	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_tenant_consolidation_decisions	tenant_consolidation_decision_decided_by	sys.sys_users	1	diretto	40	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_tenant_consolidations	tenant_consolidation_started_by	sys.sys_users	1	diretto	1	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_tenant_process_steps	tenant_process_step_org_unit_id	sys.sys_organization_units	1	diretto	131	ORGANIZZAZIONE
+sys.sys_tenant_processes	tenant_process_owner_position_id	sys.sys_positions	1	diretto	23	ORGANIZZAZIONE
+sys.sys_time_off_balances	balance_subject_user_id	sys.sys_users	1	diretto	1886	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_time_off_requests	request_approver_user_id	sys.sys_users	1	diretto	2315	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_training_initiatives	created_by	sys.sys_users	1	diretto	62	ORGANIZZAZIONE
+sys.sys_user_addresses	created_by	sys.sys_users	1	diretto	169	ANAGRAFICA_UTENZA
+sys.sys_user_assessment_evidence	created_by	sys.sys_users	1	diretto	1560	ORGANIZZAZIONE
+sys.sys_user_auth_roles	user_auth_role_approved_by	sys.sys_users	1	diretto	407	ORGANIZZAZIONE
+sys.sys_user_bank_details	created_by	sys.sys_users	1	diretto	156	ANAGRAFICA_UTENZA
+sys.sys_user_career_plans	user_career_plan_target_position_id	sys.sys_positions	1	diretto	113	ORGANIZZAZIONE
+sys.sys_user_certifications	created_by	sys.sys_users	1	diretto	1067	ORGANIZZAZIONE
+sys.sys_user_consents	consent_user_id	sys.sys_users	1	diretto	677	ANAGRAFICA_UTENZA
+sys.sys_user_contracts	created_by	sys.sys_users	1	diretto	158	ORGANIZZAZIONE
+sys.sys_user_delegations	user_delegation_delegate_id	sys.sys_users	1	diretto	1	ORGANIZZAZIONE
+sys.sys_user_demographics	created_by	sys.sys_users	1	diretto	158	ANAGRAFICA_UTENZA
+sys.sys_user_documents	created_by	sys.sys_users	1	diretto	657	ANAGRAFICA_UTENZA
+sys.sys_user_education_records	created_by	sys.sys_users	1	diretto	158	ANAGRAFICA_UTENZA
+sys.sys_user_employment	created_by	sys.sys_users	1	diretto	158	ORGANIZZAZIONE
+sys.sys_user_family_members	created_by	sys.sys_users	1	diretto	150	ANAGRAFICA_UTENZA
+sys.sys_user_identity_documents	created_by	sys.sys_users	1	diretto	329	ANAGRAFICA_UTENZA
+sys.sys_user_kpi_evidence	created_by	sys.sys_users	1	diretto	248	ORGANIZZAZIONE
+sys.sys_user_learning_assignments	user_learning_assignment_assigned_by	sys.sys_users	1	diretto	3061	ORGANIZZAZIONE
+sys.sys_user_learning_evidence	created_by	sys.sys_users	1	diretto	3899	ORGANIZZAZIONE
+sys.sys_user_pay_slips	created_by	sys.sys_users	1	diretto	6112	ORGANIZZAZIONE
+sys.sys_user_position_assignments	user_position_assignment_position_id	sys.sys_positions	1	diretto	326	ORGANIZZAZIONE
+sys.sys_user_preferences	created_by	sys.sys_users	1	diretto	6	ANAGRAFICA_UTENZA
+sys.sys_user_professional_experiences	created_by	sys.sys_users	1	diretto	255	ORGANIZZAZIONE
+sys.sys_user_profile_embeddings	user_id	sys.sys_users	1	diretto	156	ANAGRAFICA_UTENZA
+sys.sys_user_profiles	created_by	sys.sys_users	1	diretto	156	ANAGRAFICA_UTENZA
+sys.sys_user_skill_evidence	created_by	sys.sys_users	1	diretto	902	ORGANIZZAZIONE
+sys.sys_user_skills	user_skill_user_id	sys.sys_users	1	diretto	1351	ORGANIZZAZIONE
+sys.sys_user_target_positions	user_target_position_position_id	sys.sys_positions	1	diretto	255	ORGANIZZAZIONE
+sys.sys_user_timeline_events	user_timeline_event_user_id	sys.sys_users	1	diretto	2664	ORGANIZZAZIONE
+sys.sys_variable_pay_calculations	variable_pay_calculation_position_id	sys.sys_positions	1	diretto	182	ORGANIZZAZIONE
+sys.sys_visualization_graphs	created_by	sys.sys_users	1	diretto	2	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_whistleblowing_reports	whistleblowing_report_assignee_user_id	sys.sys_users	1	diretto	2	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+reference_sync.source_watermarks	source_watermark_last_import_run_id	reference_sync.import_runs	2	via 2 passi	0	ALTRO (audit/sincronizzazione, non dato di organizzazione)
+sys.sys_agent_activities	agent_activity_conversation_id	sys.sys_agent_conversations	2	via 1 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_agent_capability_operations	agent_capability_operation_capability_id	sys.sys_agent_capabilities	2	via 2 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_auth_credentials	auth_credential_identity_id	sys.sys_auth_identities	2	via 2 passi	673	ANAGRAFICA_UTENZA
+sys.sys_candidate_applications	application_candidate_id	sys.sys_candidates	2	diretto	122	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_esco_occupation_mappings	esco_occupation_mapping_job_role_id	sys.sys_job_roles	2	via 1 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_goal_alignments	alignment_aligned_goal_id	sys.sys_goals	2	diretto	100	ORGANIZZAZIONE
+sys.sys_job_postings	posting_requisition_id	sys.sys_job_requisitions	2	diretto	24	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_job_role_embeddings	job_role_id	sys.sys_job_roles	2	via 1 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_kpi_metric_definitions	kpi_metric_definition_kpi_id	sys.sys_kpi_definitions	2	via 1 passi	0	ORGANIZZAZIONE
+sys.sys_learning_path_steps	learning_path_step_module_id	sys.sys_learning_modules	2	via 1 passi	31	ORGANIZZAZIONE
+sys.sys_mentorship_sessions	session_mentorship_id	sys.sys_mentorships	2	diretto	150	ORGANIZZAZIONE
+sys.sys_occupation_skill_requirements	occupation_skill_req_skill_id	sys.sys_skills	2	via 1 passi	0	ORGANIZZAZIONE
+sys.sys_process_kpi_templates	process_kpi_template_kpi_id	sys.sys_kpi_definitions	2	via 1 passi	0	ORGANIZZAZIONE
+sys.sys_seed_candidate_records	seed_candidate_record_run_id	sys.sys_seed_acquisition_runs	2	diretto	25	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_skill_aliases	skill_alias_skill_id	sys.sys_skills	2	via 1 passi	0	ORGANIZZAZIONE
+sys.sys_skill_embeddings	skill_id	sys.sys_skills	2	via 1 passi	28	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_skill_learning_mappings	skill_learning_mapping_module_id	sys.sys_learning_modules	2	via 1 passi	46	ORGANIZZAZIONE
+sys.sys_skill_taxonomy_edges	skill_taxonomy_edge_child_id	sys.sys_skills	2	via 1 passi	18	ORGANIZZAZIONE
+sys.sys_successor_readiness	successor_readiness_candidate_id	sys.sys_successor_candidates	2	diretto	59	ORGANIZZAZIONE
+sys.sys_tenant_consolidation_proposals	tenant_consolidation_proposal_consolidation_id	sys.sys_tenant_consolidations	2	via 1 passi	51	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_tenant_consolidation_rounds	tenant_consolidation_round_consolidation_id	sys.sys_tenant_consolidations	2	via 1 passi	9	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_tenant_consolidation_working_items	tenant_consolidation_working_item_consolidation_id	sys.sys_tenant_consolidations	2	via 1 passi	33	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_tenant_process_activity_rules	tenant_process_activity_rule_step_id	sys.sys_tenant_process_steps	2	diretto	3	ORGANIZZAZIONE
+sys.sys_valutazione_condivisione_eccezioni	review_id	sys.sys_performance_reviews	2	via 1 passi	568	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_visualization_edges	edge_graph_id	sys.sys_visualization_graphs	2	via 1 passi	314	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_visualization_exports	export_graph_id	sys.sys_visualization_graphs	2	via 1 passi	16	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_visualization_layouts	layout_graph_id	sys.sys_visualization_graphs	2	via 1 passi	2	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_visualization_nodes	node_graph_id	sys.sys_visualization_graphs	2	via 1 passi	316	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_visualization_styles	style_graph_id	sys.sys_visualization_graphs	2	via 1 passi	6	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_agent_activity_events	agent_activity_event_activity_id	sys.sys_agent_activities	3	via 2 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_agent_proposals	agent_proposal_activity_id	sys.sys_agent_activities	3	via 2 passi	0	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_interviews	interview_application_id	sys.sys_candidate_applications	3	diretto	161	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_job_offers	offer_application_id	sys.sys_candidate_applications	3	diretto	23	ALTRO (presenze/permessi/selezione/clima: non struttura organizzativa)
+sys.sys_seed_source_evidence	seed_source_evidence_candidate_id	sys.sys_seed_candidate_records	3	via 1 passi	28	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_seed_validation_results	seed_validation_result_candidate_id	sys.sys_seed_candidate_records	3	via 1 passi	140	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)
+sys.sys_visualization_node_layouts	layout_id	sys.sys_visualization_layouts	3	via 2 passi	316	ALTRO (infrastruttura, agente, contenuti, privacy o catalogo: non organigramma)

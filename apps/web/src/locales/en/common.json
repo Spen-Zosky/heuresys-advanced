@@ -202,7 +202,10 @@
       "ACCRUAL": "Accrual",
       "USAGE": "Usage",
       "ADJUSTMENT": "Adjustment",
-      "CARRYOVER": "Carryover"
+      "CARRYOVER": "Carryover",
+      "EXPIRY": "Expiry",
+      "RESET": "Reset",
+      "TRANSFER": "Transfer"
     },
     "severity": {
       "LOW": "Low",
@@ -530,7 +533,8 @@
       "SABBATICAL": "Sabbatical",
       "UNPAID": "Unpaid",
       "OTHER": "Other",
-      "PAID_LEAVE": "Paid leave"
+      "PAID_LEAVE": "Paid leave",
+      "UNPAID_LEAVE": "Unpaid leave of absence"
     },
     "whistleblowingStatus": {
       "NEW": "New",

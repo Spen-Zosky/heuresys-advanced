@@ -1359,7 +1359,7 @@
       "transactions": "Transactions"
     },
     "cols": {
-      "employee": "Employee",
+      "employee": "Person",
       "leaveType": "Leave type",
       "period": "Period",
       "days": "Days",
@@ -1368,11 +1368,17 @@
       "method": "Method",
       "amount": "Amount",
       "ccnl": "CCNL",
-      "active": "Active",
+      "active": "Status",
       "txnType": "Type",
       "description": "Description",
       "reference": "Reference",
       "date": "Date"
+    },
+    "referenceType": {
+      "TIME_OFF_REQUEST": "Time-off request",
+      "SYSTEM": "System",
+      "MANUAL": "Manual entry",
+      "ACCRUAL": "Automatic accrual"
     }
   },
   "talentReview": {

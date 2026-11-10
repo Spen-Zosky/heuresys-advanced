@@ -1359,7 +1359,7 @@
       "transactions": "Transazioni"
     },
     "cols": {
-      "employee": "Dipendente",
+      "employee": "Persona",
       "leaveType": "Tipo assenza",
       "period": "Periodo",
       "days": "Giorni",
@@ -1368,11 +1368,17 @@
       "method": "Metodo",
       "amount": "Quantità",
       "ccnl": "CCNL",
-      "active": "Attiva",
+      "active": "Stato",
       "txnType": "Tipo",
       "description": "Descrizione",
       "reference": "Riferimento",
       "date": "Data"
+    },
+    "referenceType": {
+      "TIME_OFF_REQUEST": "Richiesta di assenza",
+      "SYSTEM": "Sistema",
+      "MANUAL": "Inserimento a mano",
+      "ACCRUAL": "Maturazione automatica"
     }
   },
   "talentReview": {

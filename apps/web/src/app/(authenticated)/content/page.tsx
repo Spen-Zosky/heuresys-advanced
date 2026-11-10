@@ -196,12 +196,13 @@ export default function ContentPage() {
         ),
       },
       { header: t("content.columns.kind"), cell: (d) => <span className="text-muted-foreground">{t(`content.kind.${d.kind}`)}</span> },
-      { header: t("content.columns.status"), cell: (d) => <Badge variant={statusVariant(d.status)}>{t(`content.status.${d.status}`)}</Badge> },
       {
         header: t("content.columns.category"),
         cell: (d) => <span className="text-muted-foreground">{d.categoryId ? catMap.get(d.categoryId) ?? "—" : "—"}</span>,
       },
       { header: t("content.columns.updated"), cell: (d) => <span className="text-xs text-muted-foreground">{fmt.data(d.updatedAt)}</span> },
+      // Repertorio interfacce, R3: lo stato chiude la riga.
+      { header: t("content.columns.status"), cell: (d) => <Badge variant={statusVariant(d.status)}>{t(`content.status.${d.status}`)}</Badge> },
     ],
     [t, catMap, fmt],
   );

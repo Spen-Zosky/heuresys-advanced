@@ -202,7 +202,10 @@
       "ACCRUAL": "Maturazione",
       "USAGE": "Utilizzo",
       "ADJUSTMENT": "Rettifica",
-      "CARRYOVER": "Riporto"
+      "CARRYOVER": "Riporto",
+      "EXPIRY": "Scadenza",
+      "RESET": "Azzeramento",
+      "TRANSFER": "Trasferimento"
     },
     "severity": {
       "LOW": "Bassa",
@@ -530,7 +533,8 @@
       "SABBATICAL": "Aspettativa",
       "UNPAID": "Non retribuito",
       "OTHER": "Altro",
-      "PAID_LEAVE": "Permesso retribuito"
+      "PAID_LEAVE": "Permesso retribuito",
+      "UNPAID_LEAVE": "Aspettativa non retribuita"
     },
     "whistleblowingStatus": {
       "NEW": "Nuova",

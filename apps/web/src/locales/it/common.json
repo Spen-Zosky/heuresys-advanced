@@ -262,9 +262,14 @@
       "DEACTIVATED": "Disattivato"
     },
     "userType": {
-      "STANDARD": "Standard",
-      "GENERATED_INCUMBENT": "Incumbent generato",
-      "SERVICE": "Di servizio"
+      "STANDARD": "Persona",
+      "GENERATED_INCUMBENT": "Titolare segnaposto",
+      "SERVICE": "Utenza di servizio"
+    },
+    "userTypePlural": {
+      "STANDARD": "Persone",
+      "SERVICE": "Utenze di servizio",
+      "GENERATED_INCUMBENT": "Titolari segnaposto"
     },
     "contractType": {
       "permanent": "Tempo indeterminato",

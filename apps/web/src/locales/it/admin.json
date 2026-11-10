@@ -153,14 +153,31 @@
   },
   "users": {
     "title": "Utenti",
-    "description": "Utenti del tenant con stato e tipo.",
-    "count": "{{count}} totali",
+    "description": "Le persone dell'organizzazione con il ruolo che ricoprono e la sede in cui operano.",
+    "count": "{{count}} persone",
+    "countKind": {
+      "STANDARD": "{{count}} persone",
+      "SERVICE": "{{count}} utenze di servizio",
+      "GENERATED_INCUMBENT": "{{count}} titolari segnaposto",
+      "ALL": "{{count}} utenze"
+    },
+    "filters": {
+      "kind": "Mostra",
+      "tenant": "Tenant",
+      "allTenants": "Tutti",
+      "ALL": "Tutte le utenze"
+    },
+    "noRole": "Nessuna posizione attiva",
+    "noSite": "—",
     "errorMessage": "Impossibile caricare gli utenti.",
     "emptyTitle": "Nessun utente",
-    "emptyDescription": "Non ci sono utenti nel tenant.",
-    "caption": "Elenco utenti",
+    "emptyDescription": "Non ci sono utenti con questi filtri.",
+    "caption": "Elenco utenti ordinato per cognome",
     "columns": {
-      "name": "Nome",
+      "name": "Cognome, Nome",
+      "role": "Ruolo nell'organizzazione",
+      "site": "Sede",
+      "tenant": "Tenant",
       "email": "Email",
       "status": "Stato",
       "type": "Tipo"

@@ -17,11 +17,23 @@ test.describe("MVP-2a admin lists — live data", () => {
 
     await expect(page.getByTestId("users-page")).toBeVisible();
     await expect(page.getByTestId("users-title")).toBeVisible();
-    await expect(page.getByTestId("users-count")).toContainText(/\d+\s+totali/);
+    // R5 del repertorio interfacce: un solo numero, che dice che cosa conta.
+    await expect(page.getByTestId("users-count")).toContainText(/\d+\s+persone/);
     const rows = page.getByTestId("users-row");
     await expect(rows.first()).toBeVisible();
     const rowCount = await rows.count();
     expect(rowCount).toBeGreaterThanOrEqual(5);
+
+    // R2 e R3: le colonne sono quelle del contesto, e lo stato chiude la riga.
+    const headers = (await page.locator('[data-testid="users-page"] thead th').allInnerTexts()).map((h) => h.trim().toLowerCase());
+    expect(headers).toEqual(["cognome, nome", "ruolo nell'organizzazione", "sede", "stato"]);
+
+    // R1: «Cognome, Nome», in ordine di cognome.
+    const nomi = await page.getByTestId("user-link").allInnerTexts();
+    for (const n of nomi) expect(n).toMatch(/^[^,]+, .+$/);
+    // L'iniziale del cognome non torna mai indietro (la collazione fine la decide il DB).
+    const iniziali = nomi.map((n) => n.trim().charAt(0).toLowerCase());
+    expect(iniziali).toEqual([...iniziali].sort());
 
     const firstLink = page.getByTestId("user-link").first();
     await firstLink.click();

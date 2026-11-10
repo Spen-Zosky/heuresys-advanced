@@ -262,9 +262,14 @@
       "DEACTIVATED": "Deactivated"
     },
     "userType": {
-      "STANDARD": "Standard",
-      "GENERATED_INCUMBENT": "Generated incumbent",
-      "SERVICE": "Service"
+      "STANDARD": "Person",
+      "GENERATED_INCUMBENT": "Placeholder incumbent",
+      "SERVICE": "Service account"
+    },
+    "userTypePlural": {
+      "STANDARD": "People",
+      "SERVICE": "Service accounts",
+      "GENERATED_INCUMBENT": "Placeholder incumbents"
     },
     "contractType": {
       "permanent": "Permanent",

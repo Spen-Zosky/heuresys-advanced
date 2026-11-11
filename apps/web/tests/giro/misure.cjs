@@ -165,14 +165,19 @@ function misuraPagina() {
   }
   /* righe di tabella con puntatore: devono aprire qualcosa (ruolo di comando) */
   let righeCliccabili = 0;
-  for (const tr of Array.from(main.querySelectorAll("tbody tr"))) if (tr.getAttribute("role") === "button" || tr.querySelector("a, button")) righeCliccabili++;
-  const righe = main.querySelectorAll("tbody tr").length;
+  /* la tabella dei numeri di un grafico è già il dettaglio del grafico: non conta */
+  const righeDati = Array.from(main.querySelectorAll("tbody tr")).filter((tr) => !tr.closest("[data-testid=chart-table]"));
+  for (const tr of righeDati) if (tr.getAttribute("role") === "button" || tr.querySelector("a, button")) righeCliccabili++;
+  const righe = righeDati.length;
   if (righe >= 5 && righeCliccabili === 0) segna("C12-tabella-senza-dettaglio", `${righe} righe`);
 
   /* C13 — aiuti: quanti indicatori e intestazioni hanno una spiegazione. */
   const aiuti = main.querySelectorAll("[data-info], [aria-describedby], [data-glossario], [data-spiegazione]").length;
   const intestazioni = main.querySelectorAll("th").length + main.querySelectorAll("[data-kpi], .stats-card").length;
-  if (intestazioni >= 4 && aiuti === 0) segna("C13-senza-spiegazioni", `${intestazioni} intestazioni, 0 aiuti`);
+  if (intestazioni >= 4 && aiuti === 0) {
+    const nomi = Array.from(main.querySelectorAll("th")).map((th) => (th.textContent || "").trim()).filter(Boolean);
+    segna("C13-senza-spiegazioni", `${intestazioni} intestazioni, 0 aiuti: ${[...new Set(nomi)].slice(0, 12).join(" | ")}`);
+  }
 
   /* C10 — dati di un'industria diversa: RTL è una banca, un CCNL di altro settore è un'incoerenza
      (per il mandato di piattaforma, che vede il catalogo, il rapporto lo legge per persona). */

@@ -13,7 +13,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-type Quadro = { insight: { chiave: string; area: string; tono: string; titolo: string }[]; nonCalcolate: string[] };
+type Quadro = { insight: { chiave: string; area: string; tono: string; titolo: string }[]; nonCalcolate: string[]; verifiche: number };
 const PESO: Record<string, number> = { rischio: 0, attenzione: 1, informazione: 2, positivo: 3 };
 
 describe("GET /v1/me/quadro", () => {
@@ -38,6 +38,8 @@ describe("GET /v1/me/quadro", () => {
     expect(r.statusCode).toBe(200);
     const b = r.json() as Quadro;
     expect(b.nonCalcolate).toEqual([]);
+    // tutte le lenti del mandato HR, comprese quelle di governo (accessi, processi, contenuti…)
+    expect(b.verifiche).toBeGreaterThanOrEqual(20);
     const pesi = b.insight.map((i) => PESO[i.tono]!);
     expect(pesi).toEqual([...pesi].sort((a, c) => a - c));
   });

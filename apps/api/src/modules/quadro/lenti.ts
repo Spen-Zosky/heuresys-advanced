@@ -349,6 +349,139 @@ export const LENTI: Lente[] = [
             azione: { etichetta: "Approvazioni", href: "/approvals" },
           },
   },
+  /* ---------------- accessi, processi, contenuti, segnalazioni, progetti, contatti ----------------
+     Lenti di chi governa il cliente o la piattaforma: contano su tutto il cliente ($2 NULL). */
+  {
+    chiave: "utenze-senza-ruolo",
+    aree: ["accessi"],
+    sql: `SELECT count(*)::int AS valore, NULL::int AS prima FROM sys.sys_users u
+           WHERE u.user_status = 'ACTIVE' AND $2::uuid[] IS NULL
+             AND ($1::uuid[] IS NULL OR u.user_tenant_id = ANY($1::uuid[]))
+             AND NOT EXISTS (SELECT 1 FROM sys.sys_user_auth_roles r
+                              WHERE r.user_auth_role_user_id = u.user_id AND r.user_auth_role_revoked_at IS NULL)`,
+    leggi: (v) =>
+      v === 0
+        ? { tono: "positivo", titolo: "Ogni utenza attiva ha un ruolo", dettaglio: "Nessuno entra senza sapere che cosa può fare.", azione: null }
+        : {
+            tono: "attenzione",
+            titolo: `${n(v)} ${plurale(v, "utenza attiva non ha", "utenze attive non hanno")} nessun ruolo`,
+            dettaglio: "Entrano ma non vedono niente: o il ruolo manca, o l'utenza andrebbe chiusa.",
+            azione: { etichetta: "Vedi gli utenti", href: "/users" },
+          },
+  },
+  {
+    chiave: "utenze-senza-secondo-fattore",
+    aree: ["accessi"],
+    sql: `SELECT count(*)::int AS valore, NULL::int AS prima FROM sys.sys_users u
+           WHERE u.user_status = 'ACTIVE' AND u.user_type IS DISTINCT FROM 'SERVICE' AND $2::uuid[] IS NULL
+             AND ($1::uuid[] IS NULL OR u.user_tenant_id = ANY($1::uuid[]))
+             AND NOT EXISTS (SELECT 1 FROM sys.sys_auth_mfa_factors f
+                              WHERE f.auth_mfa_factor_user_id = u.user_id AND f.auth_mfa_factor_verified)
+             AND NOT EXISTS (SELECT 1 FROM sys.sys_auth_mfa_webauthn_credentials w
+                              WHERE w.auth_webauthn_cred_user_id = u.user_id)`,
+    leggi: (v) =>
+      v === 0
+        ? { tono: "positivo", titolo: "Tutte le utenze hanno il secondo fattore", dettaglio: "Ogni accesso chiede più della sola password.", azione: null }
+        : {
+            tono: "attenzione",
+            titolo: `${n(v)} ${plurale(v, "persona entra", "persone entrano")} con la sola password`,
+            dettaglio: "Senza secondo fattore un accesso rubato basta per entrare: va attivato.",
+            azione: { etichetta: "Regole del secondo fattore", href: "/admin/mfa-policy" },
+          },
+  },
+  {
+    chiave: "processi-senza-responsabile",
+    aree: ["processi"],
+    sql: `SELECT count(*) FILTER (WHERE tp.tenant_process_owner_position_id IS NULL
+                                  OR NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
+                                                  WHERE a.user_position_assignment_position_id = tp.tenant_process_owner_position_id
+                                                    AND a.user_position_assignment_status = 'ACTIVE'))::int AS valore,
+                  count(*)::int AS prima
+             FROM sys.sys_tenant_processes tp
+            WHERE tp.tenant_process_is_active AND $2::uuid[] IS NULL
+              AND ($1::uuid[] IS NULL OR tp.tenant_process_tenant_id = ANY($1::uuid[]))`,
+    leggi: (v, tot) =>
+      !tot
+        ? null
+        : v === 0
+          ? { tono: "positivo", titolo: `Tutti i ${n(tot)} processi hanno un responsabile al suo posto`, dettaglio: "Ogni processo ha una persona che ne risponde.", azione: null }
+          : {
+              tono: "rischio",
+              titolo: `${n(v)} processi su ${n(tot)} non hanno un responsabile in carica`,
+              dettaglio: "Il processo c'è, ma la posizione che ne risponde manca o è scoperta: nessuno lo presidia.",
+              azione: { etichetta: "Vedi i processi", href: "/processes" },
+            },
+  },
+  {
+    chiave: "documenti-da-rivedere",
+    aree: ["contenuti"],
+    sql: `SELECT count(*) FILTER (WHERE d.document_status = 'in_review')::int AS valore,
+                  count(*) FILTER (WHERE d.document_status = 'published' AND d.document_expires_date < current_date)::int AS prima
+             FROM sys.sys_content_documents d
+            WHERE $2::uuid[] IS NULL AND ($1::uuid[] IS NULL OR d.document_tenant_id = ANY($1::uuid[]))`,
+    leggi: (v, scaduti) =>
+      v === 0 && !scaduti
+        ? { tono: "positivo", titolo: "Nessun documento fermo in revisione né scaduto", dettaglio: "Il regolamento pubblicato è quello in vigore.", azione: null }
+        : {
+            tono: scaduti ? "attenzione" : "informazione",
+            titolo: `${n(v)} in revisione, ${n(scaduti ?? 0)} pubblicati ma scaduti`,
+            dettaglio: "Un documento scaduto ancora pubblicato dice alle persone una regola che non vale più.",
+            azione: { etichetta: "Vedi i documenti", href: "/content" },
+          },
+  },
+  {
+    chiave: "segnalazioni-aperte",
+    aree: ["segnalazioni"],
+    sql: `SELECT count(*) FILTER (WHERE w.created_at < now() - interval '30 days')::int AS valore,
+                  count(*)::int AS prima
+             FROM sys.sys_whistleblowing_reports w
+            WHERE w.whistleblowing_report_status IN ('NEW','UNDER_REVIEW','MORE_INFO_REQUESTED') AND $2::uuid[] IS NULL
+              AND ($1::uuid[] IS NULL OR w.whistleblowing_report_tenant_id = ANY($1::uuid[]))`,
+    leggi: (vecchie, aperte) =>
+      !aperte
+        ? { tono: "positivo", titolo: "Nessuna segnalazione aperta", dettaglio: "Ogni segnalazione ricevuta ha avuto un esito.", azione: null }
+        : {
+            tono: vecchie ? "rischio" : "informazione",
+            titolo: `${n(aperte)} ${plurale(aperte, "segnalazione aperta", "segnalazioni aperte")}, ${n(vecchie)} da oltre 30 giorni`,
+            dettaglio: "La legge chiede un riscontro a chi segnala entro tre mesi: le più vecchie vanno chiuse per prime.",
+            azione: { etichetta: "Apri la console", href: "/whistleblowing-console" },
+          },
+  },
+  {
+    chiave: "progetti-oltre-la-scadenza",
+    aree: ["progetti"],
+    sql: `SELECT count(*) FILTER (WHERE p.project_ends_on < current_date)::int AS valore, count(*)::int AS prima
+             FROM sys.sys_projects p
+            WHERE p.project_status = 'ACTIVE' AND $2::uuid[] IS NULL
+              AND ($1::uuid[] IS NULL OR p.project_tenant_id = ANY($1::uuid[]))`,
+    leggi: (v, tot) =>
+      !tot
+        ? null
+        : v === 0
+          ? { tono: "positivo", titolo: `I ${n(tot)} progetti attivi sono nei tempi`, dettaglio: "Nessuno ha superato la data di fine.", azione: null }
+          : {
+              tono: "attenzione",
+              titolo: `${n(v)} progetti attivi su ${n(tot)} hanno superato la data di fine`,
+              dettaglio: "O vanno chiusi, o la data va rivista: un progetto senza termine credibile non si governa.",
+              azione: { etichetta: "Vedi i progetti", href: "/projects" },
+            },
+  },
+  {
+    chiave: "contatti-da-richiamare",
+    aree: ["contatti"],
+    sql: `SELECT count(*) FILTER (WHERE l.created_at < now() - interval '3 days')::int AS valore, count(*)::int AS prima
+             FROM sys.sys_leads l
+            WHERE l.lead_status = 'NEW' AND $1::uuid[] IS NULL AND $2::uuid[] IS NULL`,
+    leggi: (v, nuovi) =>
+      !nuovi
+        ? { tono: "positivo", titolo: "Nessun contatto nuovo in attesa", dettaglio: "Ogni richiesta arrivata dal sito è stata presa in carico.", azione: null }
+        : {
+            tono: v ? "attenzione" : "informazione",
+            titolo: `${n(nuovi)} ${plurale(nuovi, "contatto nuovo", "contatti nuovi")}, ${n(v)} in attesa da oltre 3 giorni`,
+            dettaglio: "Un contatto che aspetta si raffredda: va richiamato.",
+            azione: { etichetta: "Vedi i contatti", href: "/leads" },
+          },
+  },
   /* ---------------- coerenza dei dati ---------------- */
   {
     chiave: "contratti-fuori-dal-ccnl-prevalente",

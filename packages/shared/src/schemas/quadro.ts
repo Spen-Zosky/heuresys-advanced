@@ -21,6 +21,12 @@ export const AREE_QUADRO = [
   "approvazioni",
   "retribuzioni",
   "personale",
+  "accessi",
+  "processi",
+  "contenuti",
+  "segnalazioni",
+  "progetti",
+  "contatti",
 ] as const;
 export const AreaQuadroSchema = z.enum(AREE_QUADRO);
 export type AreaQuadro = z.infer<typeof AreaQuadroSchema>;
@@ -51,5 +57,7 @@ export const QuadroResponseSchema = z.object({
   insight: z.array(InsightSchema),
   /** le lenti che non si sono potute calcolare (mai un rosso muto) */
   nonCalcolate: z.array(z.string()),
+  /** quante verifiche sono state fatte: con zero insight, «nessuna anomalia su N» */
+  verifiche: z.number().int(),
 });
 export type QuadroResponse = z.infer<typeof QuadroResponseSchema>;

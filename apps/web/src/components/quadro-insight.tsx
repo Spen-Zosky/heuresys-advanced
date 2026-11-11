@@ -64,7 +64,15 @@ export function QuadroInsight() {
     retry: 0,
   });
   const voci = q.data?.insight ?? [];
-  if (aree.length === 0 || voci.length === 0) return null;
+  if (aree.length === 0 || !q.data) return null;
+  if (voci.length === 0) {
+    // C15: anche «niente da segnalare» è un'informazione, se le verifiche sono state fatte
+    return q.data.verifiche > 0 ? (
+      <p data-testid="quadro-insight" className="mt-1 pl-4 text-xs text-success">
+        {`Nessuna anomalia: ${q.data.verifiche} ${q.data.verifiche === 1 ? "verifica fatta" : "verifiche fatte"} su questa pagina.`}
+      </p>
+    ) : null;
+  }
   const visibili = tutte ? voci : voci.slice(0, 4);
   return (
     <section aria-label="Da guardare" data-testid="quadro-insight" className="mt-1">

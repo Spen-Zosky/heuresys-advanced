@@ -67,5 +67,5 @@ export async function leggiQuadro(
   );
   const insight = esiti.filter((x): x is Insight => x !== null);
   insight.sort((a, b) => PESO[a.tono] - PESO[b.tono]);
-  return { insight, nonCalcolate };
+  return { insight, nonCalcolate, verifiche: scelte.length - nonCalcolate.length };
 }

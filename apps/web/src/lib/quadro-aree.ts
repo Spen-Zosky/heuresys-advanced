@@ -5,7 +5,9 @@
  */
 import type { AreaQuadro } from "@heuresys/shared";
 
-const TUTTE: AreaQuadro[] = ["organizzazione", "posizioni", "persone", "assenze", "obiettivi", "valutazioni", "formazione", "selezione", "approvazioni", "retribuzioni", "personale"];
+const TUTTE: AreaQuadro[] = ["organizzazione", "posizioni", "persone", "assenze", "obiettivi", "valutazioni", "formazione", "selezione", "approvazioni", "retribuzioni", "personale", "accessi", "processi", "contenuti", "segnalazioni", "progetti", "contatti"];
+/* le pagine di governo del cliente e della piattaforma */
+const GOVERNO: AreaQuadro[] = ["accessi", "processi", "contenuti", "segnalazioni", "progetti", "contatti"];
 
 export const AREE_PER_ROTTA: Array<[string, AreaQuadro[]]> = [
   ["/dashboard", TUTTE],
@@ -14,7 +16,6 @@ export const AREE_PER_ROTTA: Array<[string, AreaQuadro[]]> = [
   ["/organization", ["organizzazione", "posizioni"]],
   ["/positions", ["posizioni"]],
   ["/job-catalog", ["posizioni"]],
-  ["/users", ["persone"]],
   ["/time-off", ["assenze"]],
   ["/analytics/attendance", ["assenze"]],
   ["/analytics/overtime", ["assenze"]],
@@ -37,6 +38,25 @@ export const AREE_PER_ROTTA: Array<[string, AreaQuadro[]]> = [
   ["/approvals", ["approvazioni"]],
   ["/engagement", ["persone"]],
   ["/me", ["personale"]],
+  ["/admin", ["accessi"]],
+  ["/users", ["persone", "accessi"]],
+  ["/tenants", GOVERNO],
+  ["/system-health", GOVERNO],
+  ["/dev", GOVERNO],
+  ["/blueprints", ["processi", "organizzazione"]],
+  ["/tenant-blueprints", ["processi", "organizzazione"]],
+  ["/processes", ["processi"]],
+  ["/consolidation", ["processi", "organizzazione"]],
+  ["/generated-origins", ["organizzazione", "persone"]],
+  ["/provenance", ["organizzazione", "persone"]],
+  ["/seed-acquisition", ["organizzazione", "persone"]],
+  ["/skill-taxonomy", ["formazione"]],
+  ["/visualizations", ["organizzazione", "posizioni"]],
+  ["/content", ["contenuti"]],
+  ["/whistleblowing-console", ["segnalazioni"]],
+  ["/projects", ["progetti"]],
+  ["/leads", ["contatti"]],
+  ["/analytics", ["persone", "organizzazione"]],
 ];
 
 export function areeDellaRotta(pathname: string | null): AreaQuadro[] {

@@ -42,4 +42,17 @@ Un banco sulla VM, su una **copia** del database ripristinata dall'ultima copia 
 
 | classe | stato | misura prima | misura dopo | PR |
 |---|---|---|---|---|
-| C1-C14 | in corso | giro 1 da fare | | |
+| C6 barra laterale | soluzione centrale fatta (`components/menu-laterale.tsx`, `lib/menu-albero.ts`) | giro 1 | | #227 |
+| C2 persone | fatta: rubrica `GET /v1/me/rubrica` e rete in ogni cella | giro 1 | | #227 |
+| C1, C4 lingua e numeri | fatta: rete di leggibilità (`lib/leggibile*.ts`), indicatori; la correzione alla fonte dei dati inglesi resta da fare per ciò che il giro trova | giro 1 | | #227 |
+| C8 grafici | fatta: `rendiLeggibile` in `_charts-client.tsx` | giro 1 | | #227 |
+| C7 intestazioni | fatta: `components/intestazione-pagina.tsx` in 77 pagine | giro 1 | | #227 |
+| C12 schede a cascata | fatta: `components/scheda-rapida.tsx`, nomi cliccabili dalla rete | giro 1 | | #227 |
+| C13 spiegazioni | fatta: `lib/glossario.ts`, `components/spiegazione.tsx` su colonne e indicatori | giro 1 | | #227 |
+| C15 insight | fatta: `GET /v1/me/quadro` (22 lenti) montato da `PageHeader`; le pagine di configurazione non hanno ancora un'area | giro 1 | | #227 |
+| C5 schede | componente fatto (`components/schede-pagina.tsx`), applicato a retribuzioni; le altre pagine dalle misure del giro | giro 1 | | #227 |
+| C3, C9, C10, C11, C14 | da fare sulle misure del giro (C10 ha ora il suo rilevatore) | giro 1 | | |
+
+Criterio di chiusura (Enzo, 2026-11-11): «non dirai "fatto" fino a quando non avrai verificato e corretto il singolo bit di tutte le interfacce e delle loro catene». Il lavoro si chiude solo con un giro completo, tutte le pagine per tutti i ruoli, a zero rilievi, con le schermate.
+
+Coordinamento: le pagine del ramo «tabelle intelligenti» (`claude/project-thread-k0v5tl`: posizioni, ruoli, catalogo delle professioni, organizzazione, persone) non si toccano finché quel ramo non è unito. Sul CCNL di RTL l'agente esperto bancario ha misurato 158 contratti, tutti Credito 2024, e 15 regole di maturazione del Commercio duplicate che sta togliendo lui; le fasce Commercio e Metalmeccanico sono righe di catalogo senza tenant, visibili al solo mandato di piattaforma.

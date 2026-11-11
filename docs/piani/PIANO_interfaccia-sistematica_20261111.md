@@ -40,18 +40,30 @@ Un banco sulla VM, su una **copia** del database ripristinata dall'ultima copia 
 
 ## 4. Registro di avanzamento
 
-| classe | stato | misura prima | misura dopo | PR |
-|---|---|---|---|---|
-| C6 barra laterale | soluzione centrale fatta (`components/menu-laterale.tsx`, `lib/menu-albero.ts`) | giro 1 | | #227 |
-| C2 persone | fatta: rubrica `GET /v1/me/rubrica` e rete in ogni cella | giro 1 | | #227 |
-| C1, C4 lingua e numeri | fatta: rete di leggibilità (`lib/leggibile*.ts`), indicatori; la correzione alla fonte dei dati inglesi resta da fare per ciò che il giro trova | giro 1 | | #227 |
-| C8 grafici | fatta: `rendiLeggibile` in `_charts-client.tsx` | giro 1 | | #227 |
-| C7 intestazioni | fatta: `components/intestazione-pagina.tsx` in 77 pagine | giro 1 | | #227 |
-| C12 schede a cascata | fatta: `components/scheda-rapida.tsx`, nomi cliccabili dalla rete | giro 1 | | #227 |
-| C13 spiegazioni | fatta: `lib/glossario.ts`, `components/spiegazione.tsx` su colonne e indicatori | giro 1 | | #227 |
-| C15 insight | fatta: `GET /v1/me/quadro` (22 lenti) montato da `PageHeader`; le pagine di configurazione non hanno ancora un'area | giro 1 | | #227 |
-| C5 schede | componente fatto (`components/schede-pagina.tsx`), applicato a retribuzioni; le altre pagine dalle misure del giro | giro 1 | | #227 |
-| C3, C9, C10, C11, C14 | da fare sulle misure del giro (C10 ha ora il suo rilevatore) | giro 1 | | |
+Misure del giro (pagine / occorrenze; giro 2 = `20261111-0223` su a8921995, giro 3 = `20261111-0411` su 9f82ba92; esiti in `~/heuresys-advanced-giro/<giro>/` sulla VM, non versionati):
+
+| classe | giro 2 | giro 3 | correzioni dopo il giro 3 |
+|---|---|---|---|
+| C1-codice | 35 / 2141 | 24 / 1368 | codici interpolati nelle frasi (formattatore i18n), caselle di scelta di assenze e visualizzazioni |
+| C1-inglese | 56 / 3190 | 37 / 1851 | resto in buona parte testi salvati nel database (storia retributiva, obiettivi): passati al thread dei dati |
+| C2-email | 5 / 1056 | 2 / 24 | |
+| C2-uuid | 6 / 491 | 0 / 0 | |
+| C3-codice-solo | 15 / 2871 | 4 / 628 | annunci e richieste aprono con titolo e posizione; numero dell'attestato nella scheda |
+| C3-codice-prima-colonna | 13 / 135 | 7 / 69 | |
+| C4-decimale-col-punto | 11 / 793 | 4 / 274 | importi accanto alla valuta |
+| C4-migliaia-inglesi | 3 / 117 | 3 / 117 | «4,069 EUR» → «4.069 EUR» |
+| C4-senza-separatore | 19 / 550 | 16 / 338 | numeri interpolati con i separatori; copertura dati 0..100 |
+| C5-pagina-lunga | 18 / 100 | 19 / 119 | schede su persona, visualizzazione, candidati, selezione, talent review, assenze, lacune |
+| C7 (tre classi) | 82 / 896 | 1 / 19 | |
+| C8-canvas-senza-testo | 15 / 230 | 6 / 114 | |
+| C9-riga-vuota | 5 / 398 | 6 / 423 | colonne vuote ovunque escono dalla tabella; serie vuote dalla tabella del grafico |
+| C10-industria-diversa | 3 / 128 | 3 / 128 | dato: thread dell'agente bancario |
+| C12-tabella-senza-dettaglio | 33 / 289 | 15 / 122 | il giro non lo chiede più alle tabelle dei grafici |
+| C13-senza-spiegazioni | 41 / 415 | 22 / 208 | otto concetti nuovi nel glossario; intestazioni ovvie escluse dalla misura |
+| C14-console | 98 / 1191 | 0 / 0 | |
+| C14-rete | 8 / 103 | 0 / 0 | |
+| C14-caricamento | 9 / 40 | 1 / 1 | /system-health: misura del tempo dell'API nel giro 4 |
+| C15-senza-insight | 44 / 270 | 6 / 13 | chi vede solo sé stesso riceve le lenti personali |
 
 Criterio di chiusura (Enzo, 2026-11-11): «non dirai "fatto" fino a quando non avrai verificato e corretto il singolo bit di tutte le interfacce e delle loro catene». Il lavoro si chiude solo con un giro completo, tutte le pagine per tutti i ruoli, a zero rilievi, con le schermate.
 

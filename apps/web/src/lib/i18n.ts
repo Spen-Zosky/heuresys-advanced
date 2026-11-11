@@ -85,12 +85,14 @@ const CODICE_DI_LAVORO = /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+$/;
 /** C1: un codice di lavoro dentro una frase («Ruoli: BRANCH_MANAGER, TEAM_LEADER», «Ambito
  *  TENANT») si scrive con la sua etichetta: prima il nome del ruolo, poi i valori enumerati,
  *  infine il codice in parole. */
-function codiceNellaFrase(v: string, lng: string): string {
+function codiceNellaFrase(v: string, lng: string, chiave?: string): string {
   const voce = (c: string): string => {
     if (!CODICE_DI_LAVORO.test(c) && !/^[A-Z]{4,}$/.test(c)) return c;
     const ruolo = i18next.getResource(lng, "shell", `roles.${c}`) as unknown;
     if (typeof ruolo === "string") return ruolo;
     const enums = (i18next.getResource(lng, "common", "enums") ?? {}) as Record<string, Record<string, string>>;
+    // «Ambito {{kind}}»: il genere di perimetro ha il suo dominio, prima degli altri
+    if (chiave === "kind" && typeof enums.scopeKind?.[c] === "string") return enums.scopeKind[c];
     for (const dominio of Object.values(enums)) if (typeof dominio?.[c] === "string") return dominio[c];
     return CODICE_DI_LAVORO.test(c) ? codiceInParole(c) : c;
   };
@@ -99,7 +101,7 @@ function codiceNellaFrase(v: string, lng: string): string {
 
 export function numeroNellaFrase(value: unknown, lng: string | undefined, chiave: string | undefined): unknown {
   if (chiave && CHIAVI_GREZZE.has(chiave)) return value;
-  if (typeof value === "string") return codiceNellaFrase(value, lng ?? DEFAULT_LOCALE);
+  if (typeof value === "string") return codiceNellaFrase(value, lng ?? DEFAULT_LOCALE, chiave);
   if (typeof value !== "number" || !Number.isFinite(value)) return value;
   return new Intl.NumberFormat(lng === "en" ? "en-GB" : "it-IT", { useGrouping: "always", maximumFractionDigits: 2 } as unknown as Intl.NumberFormatOptions).format(value);
 }

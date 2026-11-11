@@ -25,7 +25,10 @@
  * persona; prima erano in inglese («req», «ms avg», «just now»).
  */
 
-import { AuditFeed, Badge, ErrorRateBreakdown, RBACMatrix, Sparkline, SQLSlowQueryTable } from "@heuresys/ui";
+import { AuditFeed, Badge, ErrorRateBreakdown, Sparkline, SQLSlowQueryTable } from "@heuresys/ui";
+import Link from "next/link";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { SchedePagina } from "@/components/schede-pagina";
 import { KPIStrip } from "@/components/indicatori-leggibili";
 import { Activity, Database, Gauge, Lock, ShieldCheck, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -179,17 +182,15 @@ export function SystemHealthLive() {
       data-testid="system-health-page"
       className="mx-auto max-w-[1600px] space-y-6 px-6 pb-8"
     >
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            {t("health.title")}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t("health.description")}</p>
-        </div>
-        <Badge variant="secondary" data-testid="system-health-generated-at">
-          {t("health.updated", { when: rel(d.generatedAt) })}
-        </Badge>
-      </div>
+      <PageHeader
+        title={t("health.title")}
+        description={t("health.description")}
+        badges={
+          <Badge variant="secondary" data-testid="system-health-generated-at">
+            {t("health.updated", { when: rel(d.generatedAt) })}
+          </Badge>
+        }
+      />
 
       <KPIStrip
         items={[
@@ -284,220 +285,227 @@ export function SystemHealthLive() {
         ]}
       />
 
-      {/* Tenant fleet — honest table over the real per-tenant fields the API exposes
-          (code/name/status/users/lastActivity). The mock's per-tenant tables/errors1h/
-          poolUtilPct do not exist in this architecture (I5: single schema + FK tenant
-          isolation; the pg.Pool is global, surfaced in the DB-pool KPI above). */}
-      <section
-        data-testid="system-health-tenant-fleet"
-        className="overflow-hidden rounded-card border border-border bg-card shadow-card"
-      >
-        <div className="border-b border-border px-5 py-4">
-          <h2 className="text-sm font-semibold text-foreground">{t("health.fleet.title")}</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">{t("health.fleet.description")}</p>
-        </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/30 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-              <th className="px-5 py-2.5">{t("health.fleet.tenant")}</th>
-              <th className="px-3 py-2.5">{t("health.fleet.status")}</th>
-              <th className="px-3 py-2.5 text-right">{t("health.fleet.users")}</th>
-              <th className="px-3 py-2.5">{t("health.fleet.lastActivity")}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border"><Leggibile>
-            {d.tenantFleet.map((tn) => {
-              const st = tenantStatus(tn.status);
-              return (
-                <tr key={tn.code}>
-                  <td className="px-5 py-3">
-                    <div className="font-medium text-foreground">{tn.code}</div>
-                    <div className="text-[11px] text-muted-foreground">{tn.name}</div>
-                  </td>
-                  <td className="px-3 py-3">
-                    <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${st.text}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${st.dot}`} />
-                      {t(`health.fleet.statusLabel.${tn.status.toUpperCase()}`, { defaultValue: tn.status })}
-                    </span>
-                  </td>
-                  <td className="num px-3 py-3 text-right tabular-nums text-foreground">
-                    {n(tn.userCount)}
-                  </td>
-                  <td className="px-3 py-3">
-                    <span className="text-[11px] text-muted-foreground">
-                      {rel(tn.lastActivity)}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
-          </Leggibile></tbody>
-        </table>
-      </section>
-
-      {/* Request-metrics error breakdown (live, last 24h). Endpoint sparklines are
-          empty: only point-in-time recent errors exist (no per-route time series). */}
-      <ErrorRateBreakdown
-        overallRate={fmt.numeroFisso(rm.errorRate5xxPct, 2)}
-        totalRequests={rm.totalRequests}
-        distribution={{
-          "2xx": rm.byStatusClass.xx2,
-          "3xx": rm.byStatusClass.xx3,
-          "4xx": rm.byStatusClass.xx4,
-          "5xx": rm.byStatusClass.xx5,
-        }}
-        endpoints={rm.recentErrors.slice(0, 8).map((e) => ({
-          method: parseMethod(e.route),
-          path: parsePath(e.route),
-          statusBadge: String(e.status),
-          statusTone: e.status >= 500 ? ("danger" as const) : ("warning" as const),
-          sparkline: [],
-          sparklineTone: e.status >= 500 ? ("danger" as const) : ("warning" as const),
-        }))}
-      />
-
-      {/* --- #35 B7: request time-series sparklines (in-RAM 24h ring, live) --- */}
-      {requestSeries.data && requestSeries.data.points.length > 0 ? (
-        <section
-          data-testid="system-health-request-series"
-          className="grid gap-3 md:grid-cols-3"
-        >
-          {(() => {
-            const pts = requestSeries.data.points;
-            const cards = [
-              {
-                label: t("health.series.requests"),
-                data: pts.map((p) => p.total),
-                foot: t("health.series.requestsFoot", { n: n(pts.reduce((s, p) => s + p.total, 0)) }),
-              },
-              {
-                label: t("health.series.errors"),
-                data: pts.map((p) => p.xx5),
-                foot: t("health.series.errorsFoot", { count: pts.reduce((s, p) => s + p.xx5, 0) }),
-              },
-              {
-                label: t("health.series.latency"),
-                data: pts.map((p) => p.avgDurationMs),
-                foot: t("health.series.latencyFoot", { ms: n(Math.max(...pts.map((p) => p.avgDurationMs))) }),
-              },
-            ];
-            return cards.map((c) => (
-              <div key={c.label} className="rounded-xl border border-border bg-card p-4">
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                  <Gauge className="h-3.5 w-3.5" aria-hidden="true" />
-                  {c.label}
-                </div>
-                <div className="mt-3">
-                  <Sparkline data={c.data} width={280} height={48} ariaLabel={c.label} />
-                </div>
-                <div className="mt-2 text-[11px] text-muted-foreground num">{c.foot}</div>
+      {/* C5: dieci schermate diventano cinque schede. La matrice ruoli × permessi non si ripete
+          qui: vive, leggibile, nella sua pagina (C1, C9). */}
+      <SchedePagina
+        schede={[
+          { id: "aziende", titolo: t("health.tabs.fleet"), conteggio: d.tenantFleet.length, contenuto: (
+            <>
+            {/* Tenant fleet — honest table over the real per-tenant fields the API exposes
+                (code/name/status/users/lastActivity). The mock's per-tenant tables/errors1h/
+                poolUtilPct do not exist in this architecture (I5: single schema + FK tenant
+                isolation; the pg.Pool is global, surfaced in the DB-pool KPI above). */}
+            <section
+              data-testid="system-health-tenant-fleet"
+              className="overflow-hidden rounded-card border border-border bg-card shadow-card"
+            >
+              <div className="border-b border-border px-5 py-4">
+                <h2 className="text-sm font-semibold text-foreground">{t("health.fleet.title")}</h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">{t("health.fleet.description")}</p>
               </div>
-            ));
-          })()}
-        </section>
-      ) : null}
-
-      {/* --- #35 B7: SQL slow queries (live pg_stat_statements, app-db scope) --- */}
-      {slowQueries.data && slowQueries.data.items.length > 0 ? (
-        <div data-testid="system-health-slow-queries">
-          <SQLSlowQueryTable
-            rows={(() => {
-              const items = slowQueries.data.items;
-              const maxTotal = Math.max(...items.map((q) => q.totalMs), 1);
-              return items.map((q) => ({
-                rank: q.rank,
-                query: (
-                  <code className="font-mono text-xs">
-                    {q.query.length > 120 ? `${q.query.slice(0, 120)}…` : q.query}
-                  </code>
-                ),
-                tenant: "app-db",
-                tenantTone: "muted" as const,
-                calls: q.calls,
-                // p95 estimated as μ+1.645σ — pg_stat_statements has no percentiles
-                p95Ms: Math.max(0, Math.round(q.meanMs + 1.645 * q.stddevMs)),
-                meanMs: Math.round(q.meanMs * 100) / 100,
-                totalTimeBarPct: Math.round((q.totalMs / maxTotal) * 100),
-                totalTimeTone:
-                  q.meanMs > 250 ? ("danger" as const) : q.meanMs > 50 ? ("warning" as const) : ("palette-2" as const),
-                totalTimeLabel: fmt.durata(q.totalMs),
-                lastSeen: t("health.slow.cumulative"),
-              }));
-            })()}
-            totalTracked={slowQueries.data.totalTracked}
-            sampleSince={
-              slowQueries.data.statsSince ? rel(slowQueries.data.statsSince) : undefined
-            }
-            totalCaptured={t("health.slow.p95Note")}
-          />
-        </div>
-      ) : (
-        <StatoVuoto
-          testId="system-health-slow-queries-empty"
-          icona={<Database className="h-6 w-6" />}
-          titolo={
-            slowQueries.data && !slowQueries.data.extensionAvailable
-              ? t("health.slow.unavailableTitle")
-              : t("health.slow.emptyTitle")
-          }
-          motivo={
-            slowQueries.data && !slowQueries.data.extensionAvailable
-              ? t("health.slow.unavailableDesc")
-              : t("health.slow.emptyDesc")
-          }
-        />
-      )}
-
-      {!canReadMatrix ? null : matrix && matrix.rows.length > 0 ? (
-        <RBACMatrix
-          roles={matrix.roles}
-          rows={matrix.rows}
-          totalRoles={matrix.roles.length}
-          totalMappings={rolePerms.data?.total}
-          totalPermissions={matrix.rows.length}
-          lastReload={d.rbac.loadedAt ? rel(d.rbac.loadedAt) : undefined}
-        />
-      ) : (
-        <StatoVuoto
-          testId="system-health-rbac-empty"
-          icona={<Lock className="h-6 w-6" />}
-          titolo={t("health.rbac.unavailableTitle")}
-          motivo={t("health.rbac.unavailableDesc")}
-        />
-      )}
-
-      <section className="grid gap-3 lg:grid-cols-5">
-        {d.auditFeed.length > 0 ? (
-          <AuditFeed
-            events={d.auditFeed.map((ev) => ({
-              icon: <ShieldCheck className="h-3.5 w-3.5" />,
-              tone: "palette-3" as const,
-              // F-3 (L6): l'identificativo della risorsa non va nel testo del registro;
-              // azione e tipo di risorsa si leggono a parole (etichetta, o il codice sciolto).
-              title: enumLabel("auditAction", ev.actionType),
-              description: ev.resourceType ? enumLabel("auditResource", ev.resourceType) : undefined,
-              meta: (
-                <>
-                  <span>{rel(ev.occurredAt)}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>{t("health.audit.tenant", { code: ev.tenantCode })}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>{ev.userDisplayName}</span>
-                </>
-              ),
-            }))}
-          />
-        ) : (
-          <div className="lg:col-span-2">
-            <StatoVuoto
-              testId="system-health-audit-empty"
-              icona={<ShieldCheck className="h-6 w-6" />}
-              titolo={t("health.audit.emptyTitle")}
-              motivo={t("health.audit.emptyDesc")}
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                    <th className="px-5 py-2.5">{t("health.fleet.tenant")}</th>
+                    <th className="px-3 py-2.5">{t("health.fleet.status")}</th>
+                    <th className="px-3 py-2.5 text-right">{t("health.fleet.users")}</th>
+                    <th className="px-3 py-2.5">{t("health.fleet.lastActivity")}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border"><Leggibile>
+                  {d.tenantFleet.map((tn) => {
+                    const st = tenantStatus(tn.status);
+                    return (
+                      <tr key={tn.code}>
+                        <td className="px-5 py-3">
+                          <div className="font-medium text-foreground">{tn.code}</div>
+                          <div className="text-[11px] text-muted-foreground">{tn.name}</div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${st.text}`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${st.dot}`} />
+                            {t(`health.fleet.statusLabel.${tn.status.toUpperCase()}`, { defaultValue: tn.status })}
+                          </span>
+                        </td>
+                        <td className="num px-3 py-3 text-right tabular-nums text-foreground">
+                          {n(tn.userCount)}
+                        </td>
+                        <td className="px-3 py-3">
+                          <span className="text-[11px] text-muted-foreground">
+                            {rel(tn.lastActivity)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </Leggibile></tbody>
+              </table>
+            </section>
+            </>
+          ) },
+          { id: "richieste", titolo: t("health.tabs.requests"), contenuto: (
+            <>
+            {/* Request-metrics error breakdown (live, last 24h). Endpoint sparklines are
+                empty: only point-in-time recent errors exist (no per-route time series). */}
+            <ErrorRateBreakdown
+              overallRate={fmt.numeroFisso(rm.errorRate5xxPct, 2)}
+              totalRequests={rm.totalRequests}
+              distribution={{
+                "2xx": rm.byStatusClass.xx2,
+                "3xx": rm.byStatusClass.xx3,
+                "4xx": rm.byStatusClass.xx4,
+                "5xx": rm.byStatusClass.xx5,
+              }}
+              endpoints={rm.recentErrors.slice(0, 8).map((e) => ({
+                method: parseMethod(e.route),
+                path: parsePath(e.route),
+                statusBadge: String(e.status),
+                statusTone: e.status >= 500 ? ("danger" as const) : ("warning" as const),
+                sparkline: [],
+                sparklineTone: e.status >= 500 ? ("danger" as const) : ("warning" as const),
+              }))}
             />
-          </div>
-        )}
-      </section>
+
+            {/* --- #35 B7: request time-series sparklines (in-RAM 24h ring, live) --- */}
+            {requestSeries.data && requestSeries.data.points.length > 0 ? (
+              <section
+                data-testid="system-health-request-series"
+                className="grid gap-3 md:grid-cols-3"
+              >
+                {(() => {
+                  const pts = requestSeries.data.points;
+                  const cards = [
+                    {
+                      label: t("health.series.requests"),
+                      data: pts.map((p) => p.total),
+                      foot: t("health.series.requestsFoot", { n: n(pts.reduce((s, p) => s + p.total, 0)) }),
+                    },
+                    {
+                      label: t("health.series.errors"),
+                      data: pts.map((p) => p.xx5),
+                      foot: t("health.series.errorsFoot", { count: pts.reduce((s, p) => s + p.xx5, 0) }),
+                    },
+                    {
+                      label: t("health.series.latency"),
+                      data: pts.map((p) => p.avgDurationMs),
+                      foot: t("health.series.latencyFoot", { ms: n(Math.max(...pts.map((p) => p.avgDurationMs))) }),
+                    },
+                  ];
+                  return cards.map((c) => (
+                    <div key={c.label} className="rounded-xl border border-border bg-card p-4">
+                      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                        <Gauge className="h-3.5 w-3.5" aria-hidden="true" />
+                        {c.label}
+                      </div>
+                      <div className="mt-3">
+                        <Sparkline data={c.data} width={280} height={48} ariaLabel={c.label} />
+                      </div>
+                      <div className="mt-2 text-[11px] text-muted-foreground num">{c.foot}</div>
+                    </div>
+                  ));
+                })()}
+              </section>
+            ) : null}
+            </>
+          ) },
+          { id: "database", titolo: t("health.tabs.database"), contenuto: (
+            <>
+            {/* --- #35 B7: SQL slow queries (live pg_stat_statements, app-db scope) --- */}
+            {slowQueries.data && slowQueries.data.items.length > 0 ? (
+              <div data-testid="system-health-slow-queries">
+                <SQLSlowQueryTable
+                  rows={(() => {
+                    const items = slowQueries.data.items;
+                    const maxTotal = Math.max(...items.map((q) => q.totalMs), 1);
+                    return items.map((q) => ({
+                      rank: q.rank,
+                      query: (
+                        <code className="font-mono text-xs">
+                          {q.query.length > 120 ? `${q.query.slice(0, 120)}…` : q.query}
+                        </code>
+                      ),
+                      tenant: "app-db",
+                      tenantTone: "muted" as const,
+                      calls: q.calls,
+                      // p95 estimated as μ+1.645σ — pg_stat_statements has no percentiles
+                      p95Ms: Math.max(0, Math.round(q.meanMs + 1.645 * q.stddevMs)),
+                      meanMs: Math.round(q.meanMs * 100) / 100,
+                      totalTimeBarPct: Math.round((q.totalMs / maxTotal) * 100),
+                      totalTimeTone:
+                        q.meanMs > 250 ? ("danger" as const) : q.meanMs > 50 ? ("warning" as const) : ("palette-2" as const),
+                      totalTimeLabel: fmt.durata(q.totalMs),
+                      lastSeen: t("health.slow.cumulative"),
+                    }));
+                  })()}
+                  totalTracked={slowQueries.data.totalTracked}
+                  sampleSince={
+                    slowQueries.data.statsSince ? rel(slowQueries.data.statsSince) : undefined
+                  }
+                  totalCaptured={t("health.slow.p95Note")}
+                />
+              </div>
+            ) : (
+              <StatoVuoto
+                testId="system-health-slow-queries-empty"
+                icona={<Database className="h-6 w-6" />}
+                titolo={
+                  slowQueries.data && !slowQueries.data.extensionAvailable
+                    ? t("health.slow.unavailableTitle")
+                    : t("health.slow.emptyTitle")
+                }
+                motivo={
+                  slowQueries.data && !slowQueries.data.extensionAvailable
+                    ? t("health.slow.unavailableDesc")
+                    : t("health.slow.emptyDesc")
+                }
+              />
+            )}
+            </>
+          ) },
+          { id: "registro", titolo: t("health.tabs.audit"), conteggio: d.auditFeed.length, contenuto: (
+            <>
+            <section className="grid gap-3 lg:grid-cols-5">
+              {d.auditFeed.length > 0 ? (
+                <AuditFeed
+                  events={d.auditFeed.map((ev) => ({
+                    icon: <ShieldCheck className="h-3.5 w-3.5" />,
+                    tone: "palette-3" as const,
+                    // F-3 (L6): l'identificativo della risorsa non va nel testo del registro;
+                    // azione e tipo di risorsa si leggono a parole (etichetta, o il codice sciolto).
+                    title: enumLabel("auditAction", ev.actionType),
+                    description: ev.resourceType ? enumLabel("auditResource", ev.resourceType) : undefined,
+                    meta: (
+                      <>
+                        <span>{rel(ev.occurredAt)}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{t("health.audit.tenant", { code: ev.tenantCode })}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{ev.userDisplayName}</span>
+                      </>
+                    ),
+                  }))}
+                />
+              ) : (
+                <div className="lg:col-span-2">
+                  <StatoVuoto
+                    testId="system-health-audit-empty"
+                    icona={<ShieldCheck className="h-6 w-6" />}
+                    titolo={t("health.audit.emptyTitle")}
+                    motivo={t("health.audit.emptyDesc")}
+                  />
+                </div>
+              )}
+            </section>
+            </>
+          ) },
+          { id: "permessi", titolo: t("health.tabs.permissions"), nascosta: !canReadMatrix, contenuto: (
+            <p className="text-sm" data-testid="system-health-rbac-link">
+              {t("health.rbac.moved", { count: matrix?.rows.length ?? 0 })}{" "}
+              <Link href="/admin/roles" className="font-medium text-primary underline">{t("health.rbac.open")}</Link>
+            </p>
+          ) },
+        ]}
+      />
     </main>
   );
 }

@@ -24,3 +24,9 @@ describe("codici nelle frasi tradotte (C1)", () => {
     expect(numeroNellaFrase("POS_001", "it", "code")).toBe("POS_001");
   });
 });
+
+describe("perimetro nelle frasi (C1)", () => {
+  it("«Ambito {{kind}}» si legge", () => {
+    expect(numeroNellaFrase("TENANT", "it", "kind")).toBe("intera azienda");
+  });
+});

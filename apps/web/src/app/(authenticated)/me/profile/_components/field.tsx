@@ -12,7 +12,7 @@ export function Field({ label, value, testId }: { label: string; value: ReactNod
       {/* Un testo del profilo (CAP, matricola, IBAN, telefono) è un identificativo: la rete di
           leggibilità non lo tocca, altrimenti «24122» diventerebbe «24.122». I numeri veri
           arrivano già in forma dalla pagina. */}
-      <dd className="text-sm font-medium text-foreground" data-testid={testId} {...(typeof value === "string" ? { "data-grezzo": "" } : {})}>
+      <dd className="text-sm font-medium text-foreground" data-testid={testId} {...(typeof value === "string" && !/^-?\d+[.,]\d+$/.test(value) ? { "data-grezzo": "" } : {})}>
         {empty ? <span className="text-muted-foreground">—</span> : value}
       </dd>
     </div>

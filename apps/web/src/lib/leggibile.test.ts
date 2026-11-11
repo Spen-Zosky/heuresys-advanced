@@ -15,6 +15,7 @@ describe("rete di leggibilità (C1, C2, C4)", () => {
     expect(l.testo("0.5")).toBe("0,5");
     expect(l.testo("4.06")).toBe("4,06");
     expect(l.testo("2026")).toBe("2026");
+    expect(l.testo("2023-08")).toBe("ago 2023");
     expect(l.testo("1.234")).toBe("1.234"); // già in forma italiana
     expect(l.testo("0.850")).toBe("0,85");
     expect(l.testo("Richiesta di ferie — 8.00 giorni dal 15/08/2026")).toBe("Richiesta di ferie — 8 giorni dal 15/08/2026");

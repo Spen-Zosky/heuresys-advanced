@@ -45,8 +45,10 @@ test.describe("MVP-2a /system-health — live data + role gate", () => {
       await expect(page.getByText("GENESIS_DEMO")).toHaveCount(0);
       await expect(page.getByText("ACME_CORP")).toHaveCount(0);
 
-      // RBAC matrix is pivoted from GET /v1/auth/role-permissions (live).
-      await expect(page.getByText("RBAC permissions matrix")).toBeVisible();
+      // C5/C1: la matrice ruoli × permessi non si ripete qui; la scheda porta alla sua pagina,
+      // con il numero vero dei permessi letto da GET /v1/auth/role-permissions.
+      await page.getByTestId("scheda-permessi").click();
+      await expect(page.getByTestId("system-health-rbac-link")).toContainText(/\d+ permessi/);
     });
   });
 

@@ -189,7 +189,7 @@ function misuraPagina() {
   }
 
   /* C15 — la pagina apre con gli insight */
-  if (h1 && !document.querySelector("[data-testid=quadro-insight]")) segna("C15-senza-insight", (h1.textContent || "").trim());
+  if (h1 && !document.querySelector("[data-testid=quadro-insight], [data-testid=page-no-access]")) segna("C15-senza-insight", (h1.textContent || "").trim());
 
   return {
     titolo: (h1?.textContent || "").trim(),

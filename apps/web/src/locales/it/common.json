@@ -178,7 +178,19 @@
       "COMPLETED": "Completato",
       "ABANDONED": "Abbandonato"
     },
-    "employeeStatus": {"ACTIVE": "In servizio", "INACTIVE": "Non in servizio", "TERMINATED": "Cessato", "ON_LEAVE": "In aspettativa", "SUSPENDED": "Sospeso", "PROBATION": "In prova"},
+    "scopeKind": {
+      "PLATFORM": "tutte le aziende",
+      "TENANT": "intera azienda",
+      "TEAM": "la tua squadra"
+    },
+    "employeeStatus": {
+      "ACTIVE": "In servizio",
+      "INACTIVE": "Non in servizio",
+      "TERMINATED": "Cessato",
+      "ON_LEAVE": "In aspettativa",
+      "SUSPENDED": "Sospeso",
+      "PROBATION": "In prova"
+    },
     "timeOffStatus": {
       "PENDING": "In attesa",
       "APPROVED": "Approvata",
@@ -333,7 +345,14 @@
       "POSITION_INTELLIGENCE_MAP": "Mappa position intelligence",
       "ENTERPRISE_BLUEPRINT_MAP": "Mappa blueprint aziendale"
     },
-    "vizExportFormat": {"SVG": "Immagine vettoriale (SVG)", "MERMAID": "Diagramma Mermaid", "GENERIC_JSON": "Dati JSON", "REACT_FLOW_JSON": "Dati JSON per editor di grafi"},
+    "vizExportFormat": {
+      "SVG": "Immagine SVG",
+      "PDF": "PDF",
+      "PNG": "Immagine PNG",
+      "GENERIC_JSON": "Dati JSON",
+      "REACT_FLOW_JSON": "Grafo JSON (React Flow)",
+      "MERMAID": "Diagramma Mermaid"
+    },
     "vizEdgeType": {
       "REPORTS_TO": "Riporta a",
       "REQUIRES_SKILL": "Richiede skill",
@@ -599,14 +618,6 @@
       "PER_PAY_PERIOD": "A ogni periodo di paga",
       "LUMP_SUM": "In un'unica soluzione"
     },
-    "vizExportFormat": {
-      "SVG": "Immagine SVG",
-      "PDF": "PDF",
-      "PNG": "Immagine PNG",
-      "GENERIC_JSON": "Dati JSON",
-      "REACT_FLOW_JSON": "Grafo JSON (React Flow)",
-      "MERMAID": "Diagramma Mermaid"
-    },
     "fitDimension": {
       "SKILL": "Competenze",
       "KPI": "Indicatori",
@@ -792,12 +803,21 @@
     },
     "rbac": {
       "unavailableTitle": "Matrice dei permessi non disponibile",
-      "unavailableDesc": "Non è stato possibile leggere l'associazione fra ruoli e permessi."
+      "unavailableDesc": "Non è stato possibile leggere l'associazione fra ruoli e permessi.",
+      "moved": "I {{count}} permessi per ruolo si leggono e si governano nella pagina dei ruoli.",
+      "open": "Apri Ruoli e permessi"
     },
     "audit": {
       "tenant": "azienda {{code}}",
       "emptyTitle": "Nessun evento recente",
       "emptyDesc": "Il registro degli eventi è vuoto nella finestra corrente."
+    },
+    "tabs": {
+      "fleet": "Aziende",
+      "requests": "Richieste ed errori",
+      "database": "Database",
+      "audit": "Registro",
+      "permissions": "Ruoli e permessi"
     }
   },
   "unnamed": "senza nome",

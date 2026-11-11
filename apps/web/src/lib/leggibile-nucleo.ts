@@ -69,6 +69,11 @@ export function costruisci(fmt: Formati, enumi: Map<string, string>, rubrica: Ru
       return fmt.numero(n, decimali);
     }
     if (ISO_DATA.test(t)) return fmt.data(t);
+    // un mese «2023-08» si legge «ago 2023» (C3: una colonna di mesi non è una colonna di codici)
+    if (/^(19|20)\d{2}-(0[1-9]|1[0-2])$/.test(t)) {
+      const [a, m] = t.split("-").map(Number) as [number, number];
+      return new Intl.DateTimeFormat(italiano ? "it-IT" : "en-GB", { month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(a, m - 1, 1)));
+    }
     if (ISO_ISTANTE.test(t) && !Number.isNaN(Date.parse(t))) return fmt.dataOra(t);
     if (CODICE.test(t)) return voce(t) ?? (italiano ? codiceInParole(t) : t);
     const frase = voce(t) ?? (italiano ? frasiComposte(t, voce) : undefined);

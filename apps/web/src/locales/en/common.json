@@ -178,7 +178,19 @@
       "COMPLETED": "Completed",
       "ABANDONED": "Abandoned"
     },
-    "employeeStatus": {"ACTIVE": "Active", "INACTIVE": "Inactive", "TERMINATED": "Terminated", "ON_LEAVE": "On leave", "SUSPENDED": "Suspended", "PROBATION": "Probation"},
+    "scopeKind": {
+      "PLATFORM": "all companies",
+      "TENANT": "whole company",
+      "TEAM": "your team"
+    },
+    "employeeStatus": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "TERMINATED": "Terminated",
+      "ON_LEAVE": "On leave",
+      "SUSPENDED": "Suspended",
+      "PROBATION": "Probation"
+    },
     "timeOffStatus": {
       "PENDING": "Pending",
       "APPROVED": "Approved",
@@ -333,7 +345,14 @@
       "POSITION_INTELLIGENCE_MAP": "Position intelligence map",
       "ENTERPRISE_BLUEPRINT_MAP": "Enterprise blueprint map"
     },
-    "vizExportFormat": {"SVG": "Vector image (SVG)", "MERMAID": "Mermaid diagram", "GENERIC_JSON": "JSON data", "REACT_FLOW_JSON": "JSON data for graph editors"},
+    "vizExportFormat": {
+      "SVG": "SVG image",
+      "PDF": "PDF",
+      "PNG": "PNG image",
+      "GENERIC_JSON": "JSON data",
+      "REACT_FLOW_JSON": "Graph JSON (React Flow)",
+      "MERMAID": "Mermaid diagram"
+    },
     "vizEdgeType": {
       "REPORTS_TO": "Reports to",
       "REQUIRES_SKILL": "Requires skill",
@@ -599,14 +618,6 @@
       "PER_PAY_PERIOD": "Per pay period",
       "LUMP_SUM": "Lump sum"
     },
-    "vizExportFormat": {
-      "SVG": "SVG image",
-      "PDF": "PDF",
-      "PNG": "PNG image",
-      "GENERIC_JSON": "JSON data",
-      "REACT_FLOW_JSON": "Graph JSON (React Flow)",
-      "MERMAID": "Mermaid diagram"
-    },
     "fitDimension": {
       "SKILL": "Skills",
       "KPI": "KPIs",
@@ -792,12 +803,21 @@
     },
     "rbac": {
       "unavailableTitle": "Permission matrix unavailable",
-      "unavailableDesc": "The role-permission map could not be loaded."
+      "unavailableDesc": "The role-permission map could not be loaded.",
+      "moved": "The {{count}} permissions by role are read and managed on the roles page.",
+      "open": "Open Roles and permissions"
     },
     "audit": {
       "tenant": "tenant {{code}}",
       "emptyTitle": "No recent events",
       "emptyDesc": "The event log is empty for the current window."
+    },
+    "tabs": {
+      "fleet": "Companies",
+      "requests": "Requests and errors",
+      "database": "Database",
+      "audit": "Audit log",
+      "permissions": "Roles and permissions"
     }
   },
   "unnamed": "unnamed",

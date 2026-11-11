@@ -597,7 +597,7 @@
           "required": "Richiesta",
           "module": "Modulo",
           "delivery": "Erogazione",
-          "target": "Target"
+          "target": "Livello atteso"
         }
       },
       "gaps": {
@@ -605,7 +605,7 @@
         "caption": "Gap formativi aperti per la posizione",
         "empty": "Nessun gap formativo associato a questa posizione.",
         "columns": {
-          "user": "User",
+          "user": "Persona",
           "skill": "Skill",
           "severity": "Severità",
           "detected": "Rilevato"
@@ -1024,7 +1024,7 @@
     "rolesHint": "Ambito: tutti i ruoli oppure una selezione (almeno uno).",
     "empty": "Nessun tenant disponibile.",
     "accessDeniedTitle": "Accesso negato",
-    "accessDeniedDesc": "Servono i permessi mfa_policy per leggere le policy.",
+    "accessDeniedDesc": "Servono i permessi sulla verifica in due passaggi per leggerne le regole.",
     "exemptions": {
       "title": "Esenzioni dal secondo fattore",
       "description": "Chi può entrare senza il secondo fattore, perché, chi l'ha deciso e fino a quando. Un'esenzione scaduta non apre più niente; chi porta un mandato non può averne.",

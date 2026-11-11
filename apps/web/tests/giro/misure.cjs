@@ -60,7 +60,7 @@ function misuraPagina() {
   /* parole che coincidono con l'italiano o sono entrate nell'uso: non contano */
   /* (le parentesi contano: senza, `split` tagliava solo la seconda riga e l'insieme era fatto di lettere) */
   const AMMESSE = new Set(("dashboard team manager skill budget performance feedback coaching mentor mentoring report " +
-    "online offline email badge ok no in a di da e o per con su tra fra il la le lo gli un una").split(" "));
+    "online offline email badge ok no note in a di da e o per con su tra fra il la le lo gli un una").split(" "));
   const CODICE = /\b[A-Z][A-Z0-9]*_[A-Z0-9_]*[A-Z0-9]\b|\b[a-z]+_[a-z_]+\b|\b(?:ACTIVE|INACTIVE|PENDING|DRAFT|STANDARD|MEDIUM|HIGH|LOW|CRITICAL|APPROVED|REJECTED|COMPLETED|CANCELLED|ARCHIVED|SUBMITTED|OPEN|CLOSED|IN_PROGRESS|TENANT|PLATFORM)\b/g;
   for (const { t } of testi) {
     for (const m of t.match(CODICE) || []) segna("C1-codice", `${m} — «${t}»`);

@@ -36,13 +36,8 @@ function Citation({ c, t }: { c: AdvisorCitation; t: ReturnType<typeof useTransl
 function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<AdvisorSuggestion>[] {
   return [
     {
-      header: t("advisor.cols.priority"),
-      align: "right",
-      cell: (r) => (
-        <span data-testid={`advisor-priority-${r.ruleId}`}>
-          <StatusPill tone={PRIORITY_TONE(r.priority)}>{Math.round(r.priority)}</StatusPill>
-        </span>
-      ),
+      header: t("advisor.cols.subject"),
+      cell: (r) => <span className="text-sm font-medium text-foreground">{r.subjectLabel}</span>,
     },
     {
       header: t("advisor.cols.rule"),
@@ -52,10 +47,6 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Adv
           <span className="text-[10px] text-muted-foreground">{t(`advisor.subjectTypes.${r.subjectType}`)}</span>
         </span>
       ),
-    },
-    {
-      header: t("advisor.cols.subject"),
-      cell: (r) => <span className="text-sm font-medium text-foreground">{r.subjectLabel}</span>,
     },
     {
       header: t("advisor.cols.action"),
@@ -73,6 +64,16 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Adv
             <Citation key={`${c.source}-${c.field}-${i}`} c={c} t={t} />
           ))}
         </ul>
+      ),
+    },
+    // C3/R3: la priorità chiude la riga, non la apre
+    {
+      header: t("advisor.cols.priority"),
+      align: "right",
+      cell: (r) => (
+        <span data-testid={`advisor-priority-${r.ruleId}`}>
+          <StatusPill tone={PRIORITY_TONE(r.priority)}>{Math.round(r.priority)}</StatusPill>
+        </span>
       ),
     },
   ];

@@ -2,7 +2,7 @@
 
 import type { KeyboardEvent, ReactNode } from "react";
 import { useState } from "react";
-import { Badge, Button, DataTableWithCrossHair } from "@heuresys/ui";
+import { Badge, Button, DataTableWithCrossHair, Dialog, DialogContent, DialogDescription, DialogTitle } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { useTranslation } from "react-i18next";
 import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
@@ -93,6 +93,10 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
   const rows = agente.righe;
 
   const [pageIndex, setPageIndex] = useState(0);
+  // C12: una riga senza pagina di dettaglio apre la sua scheda (tutte le colonne, con le persone,
+  // posizioni e unità che aprono a loro volta la propria). Nessuna riga «che sembra cliccabile e
+  // non apre niente», e nessuna tabella che obbliga a leggere di traverso una riga lunga.
+  const [rigaAperta, setRigaAperta] = useState<T | null>(null);
   const [pageSize, setPageSize] = useState(pageSizeProp ?? 25);
   const [trackedRows, setTrackedRows] = useState(rows);
 
@@ -197,20 +201,24 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
             <tr
               key={rowKey(row)}
               data-testid={rowTestId}
-              className={`transition-colors hover:bg-muted/60 ${onRowClick ? "cursor-pointer" : ""}`}
-              {...(onRowClick
-                ? {
-                    onClick: () => onRowClick(row),
-                    tabIndex: 0,
-                    role: "button",
-                    onKeyDown: (e: KeyboardEvent<HTMLTableRowElement>) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        onRowClick(row);
-                      }
-                    },
-                  }
-                : {})}
+              className="cursor-pointer transition-colors hover:bg-muted/60"
+              tabIndex={0}
+              role="button"
+              {...(onRowClick ? {} : { "data-scheda-riga": "" })}
+              onClick={(e) => {
+                // un comando dentro la cella (collegamento, pulsante, campo) fa il suo lavoro
+                if ((e.target as HTMLElement).closest("a, button, input, select, textarea, label, [data-riferimento]")) return;
+                if (onRowClick) onRowClick(row);
+                else setRigaAperta(row);
+              }}
+              onKeyDown={(e: KeyboardEvent<HTMLTableRowElement>) => {
+                if (e.target !== e.currentTarget) return;
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  if (onRowClick) onRowClick(row);
+                  else setRigaAperta(row);
+                }
+              }}
             >
               {colonne.map((c, i) => (
                 <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`}>
@@ -221,6 +229,24 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
           ))}
         </tbody>
       </DataTableWithCrossHair>
+      <Dialog open={rigaAperta !== null} onOpenChange={(o) => { if (!o) setRigaAperta(null); }}>
+        {rigaAperta !== null ? (
+          <DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto" data-testid="scheda-riga">
+            <DialogTitle className="text-lg font-bold leading-tight">{leggi.nodo(colonne[0]?.cell(rigaAperta))}</DialogTitle>
+            <DialogDescription className="text-xs">{caption ?? t("dettaglio.riga")}</DialogDescription>
+            <dl className="mt-3 divide-y divide-border">
+              {colonne.slice(1).map((c, i) =>
+                c.header === "" ? null : (
+                  <div key={i} className="grid grid-cols-[10rem_1fr] gap-3 py-1.5 text-sm">
+                    <dt className="text-muted-foreground"><ConSpiegazione>{c.header}</ConSpiegazione></dt>
+                    <dd className="min-w-0">{leggi.nodo(c.cell(rigaAperta))}</dd>
+                  </div>
+                ),
+              )}
+            </dl>
+          </DialogContent>
+        ) : null}
+      </Dialog>
       {showPagination ? (
         <div
           data-testid="table-pagination"

@@ -875,5 +875,8 @@
     "statoFALLITA": "Failed",
     "statoINTERROTTA": "Stopped",
     "aggiornata": "Updated {{quando}}"
+  },
+  "dettaglio": {
+    "riga": "Row detail"
   }
 }

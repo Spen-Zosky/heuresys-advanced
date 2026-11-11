@@ -875,5 +875,8 @@
     "statoFALLITA": "Non riuscita",
     "statoINTERROTTA": "Interrotta",
     "aggiornata": "Aggiornata il {{quando}}"
+  },
+  "dettaglio": {
+    "riga": "Dettaglio della riga"
   }
 }

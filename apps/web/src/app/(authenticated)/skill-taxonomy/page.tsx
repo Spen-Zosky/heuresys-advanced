@@ -16,6 +16,7 @@
 
 import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/intestazione-pagina";
+import { SchedePagina } from "@/components/schede-pagina";
 import {
   ProficiencyLevelsPanel,
   SkillCategoriesPanel,
@@ -34,9 +35,14 @@ export default function SkillTaxonomyPage() {
       />
       {/* Ordine = gerarchia: le famiglie contengono le categorie, che
           classificano le competenze; i livelli chiudono come riferimento. */}
-      <SkillFamiliesPanel />
-      <SkillCategoriesPanel />
-      <ProficiencyLevelsPanel />
+      {/* C5: tre schede invece di una pagina lunga, nello stesso ordine. */}
+      <SchedePagina
+        schede={[
+          { id: "famiglie", titolo: t("taxonomy.families.title"), contenuto: <SkillFamiliesPanel /> },
+          { id: "categorie", titolo: t("taxonomy.categories.title"), contenuto: <SkillCategoriesPanel /> },
+          { id: "livelli", titolo: t("taxonomy.levels.title"), contenuto: <ProficiencyLevelsPanel /> },
+        ]}
+      />
     </main>
   );
 }

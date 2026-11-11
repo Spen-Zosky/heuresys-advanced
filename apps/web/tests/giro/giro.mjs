@@ -102,7 +102,14 @@ for (const p of persone) {
       if (page.url().includes("/login")) { e.stato = "sessione-persa"; esiti.push(e); continue; }
       if (await page.getByTestId("page-no-access").isVisible().catch(() => false)) { e.stato = "negata"; esiti.push(e); continue; }
       e.stato = "ok";
+      /* C14-caricamento: una pagina che resta su "Caricamento…" oltre 15 secondi e' rossa */
+      const ancoraCaricamento = () => page.evaluate(() => /Caricamento/i.test(document.querySelector("main")?.innerText ?? document.body.innerText));
+      let bloccata = false;
+      if (await ancoraCaricamento()) {
+        bloccata = await page.waitForFunction(() => !/Caricamento/i.test(document.querySelector("main")?.innerText ?? document.body.innerText), null, { timeout: 15_000 }).then(() => false, () => true);
+      }
       e.misura = await page.evaluate(misuraPagina);
+      if (bloccata) (e.misura.esito ??= {})["C14-caricamento"] = { n: 1, esempi: ["resta su 'Caricamento…' oltre 15 secondi"] };
       const file = `${rotta.replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") || "radice"}.png`;
       await page.screenshot({ path: path.join(dir, file), fullPage: true });
       e.schermata = path.join("schermate", p.chiave, file);

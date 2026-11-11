@@ -55,7 +55,14 @@ avvia_servizi() {
   for _ in $(seq 60); do curl -fs -o /dev/null "http://127.0.0.1:$WEBPORT/login" && break; sleep 1; done
   echo "banco '$nome': web http://127.0.0.1:$WEBPORT  api http://127.0.0.1:$PORT  db porta $PGPORT"
 }
-ferma_servizi() { for s in web api; do [ -f "$B/$s.pid" ] && kill "$(cat "$B/$s.pid")" 2>/dev/null || true; rm -f "$B/$s.pid"; done; }
+ferma_servizi() {
+  for s in web api; do [ -f "$B/$s.pid" ] && kill "$(cat "$B/$s.pid")" 2>/dev/null || true; rm -f "$B/$s.pid"; done
+  # il pid salvato e' quello del lanciatore (npx), non del server figlio: si ferma chi ascolta le porte del banco (e solo quelle)
+  for p in "$WEBPORT" "$PORT"; do
+    for pid in $(ss -ltnpH "sport = :$p" 2>/dev/null | grep -o 'pid=[0-9]*' | cut -d= -f2 | sort -u); do kill "$pid" 2>/dev/null || true; done
+  done
+  for _ in $(seq 10); do ss -ltnH "( sport = :$WEBPORT or sport = :$PORT )" | grep -q . || break; sleep 1; done
+}
 costruisci() {
   carica; guardia_db
   ( cd "$C" && pnpm install --frozen-lockfile >"$B/install.log" 2>&1 )

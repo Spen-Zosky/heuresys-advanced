@@ -21,7 +21,7 @@
  * dato che si sta guardando). È una rete: ogni pagina dovrebbe già mostrare il valore giusto, e il
  * giro (§3) misura dove la rete sta lavorando al posto della pagina.
  */
-import { useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { RubricaResponse } from "@heuresys/shared";
@@ -77,4 +77,54 @@ export function useLeggibile(): Leggi {
 export function Leggibile({ children }: { children: ReactNode }) {
   const l = useLeggibile();
   return <>{l.nodo(children)}</>;
+}
+
+/** Dove la rete di pagina non entra: ciò che si scrive, il codice mostrato apposta, il grezzo. */
+const ESCLUSI = "input, textarea, select, option, code, pre, script, style, [contenteditable], [data-grezzo]";
+
+/**
+ * La rete di pagina (classi C1, C2, C4 ovunque, non solo nelle tabelle). Il primo giro ha
+ * misurato numeri senza separatori, decimali col punto e codici di macchina in 60 pagine: valori
+ * scritti da componenti che non passano da `EntityTable` (indicatori, schede, assi dei grafici in
+ * SVG). Invece di correggerli uno a uno, ogni nodo di testo che contiene SOLO un valore grezzo
+ * (un numero, una data ISO, un codice enumerato noto, un'email o un identificativo della rubrica)
+ * si riscrive nella sua forma leggibile appena compare. Le frasi non si toccano: la regola guarda
+ * il nodo intero, quindi «3 richieste» resta com'è. Il nodo riscritto si ricorda, e se React lo
+ * aggiorna si rilegge il valore nuovo.
+ */
+export function ReteDiPagina({ children }: { children: ReactNode }) {
+  const l = useLeggibile();
+  const radice = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const r = radice.current;
+    if (!r) return;
+    const scritti = new WeakMap<Text, string>();
+    const rileggi = (t: Text) => {
+      const v = t.nodeValue ?? "";
+      if (!v.trim() || scritti.get(t) === v) return;
+      const p = t.parentElement;
+      if (!p || p.closest(ESCLUSI)) return;
+      const nuovo = l.testo(v);
+      if (nuovo !== v) {
+        scritti.set(t, nuovo);
+        t.nodeValue = nuovo;
+      }
+    };
+    const scorri = (n: Node) => {
+      if (n.nodeType === Node.TEXT_NODE) return rileggi(n as Text);
+      if (n.nodeType !== Node.ELEMENT_NODE) return;
+      const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT);
+      for (let t = w.nextNode(); t; t = w.nextNode()) rileggi(t as Text);
+    };
+    scorri(r);
+    const o = new MutationObserver((cambi) => {
+      for (const c of cambi) {
+        if (c.type === "characterData") rileggi(c.target as Text);
+        else c.addedNodes.forEach(scorri);
+      }
+    });
+    o.observe(r, { subtree: true, childList: true, characterData: true });
+    return () => o.disconnect();
+  }, [l]);
+  return <div ref={radice} className="contents" data-rete-leggibile>{children}</div>;
 }

@@ -15,6 +15,7 @@
  * diventare rossa per il motivo sbagliato.
  */
 
+import { cifra } from "./cifra";
 import { test, expect, type Page } from "@playwright/test";
 import { API_BASE, storageStateFor } from "./fixtures";
 
@@ -44,7 +45,7 @@ test.describe("#92 F7 — il ciclo di valutazione, lato di chi lo conduce", () =
 
     await page.goto("/performance");
     await expect(page.getByTestId("perf-reviews-section")).toBeVisible();
-    await expect(page.getByTestId("perf-kpi-reviews")).toHaveText(String(totaleValutazioni));
+    await expect(page.getByTestId("perf-kpi-reviews")).toHaveText(cifra(totaleValutazioni));
 
     // La lista è paginata lato server: le righe VISIBILI sono una pagina, non il totale.
     // Asserire l'uguaglianza qui sarebbe sbagliato — si asserisce che ce ne sia almeno una
@@ -108,7 +109,7 @@ test.describe("#92 F7 — il ciclo di valutazione, lato di chi lo conduce", () =
       await expect(page.getByTestId("perf-cycles-row")).not.toHaveCount(0);
     }
     // In entrambi i casi il numero in cima deve coincidere con la risposta.
-    await expect(page.getByTestId("perf-kpi-cycles")).toHaveText(String(totaleCicli));
+    await expect(page.getByTestId("perf-kpi-cycles")).toHaveText(cifra(totaleCicli));
   });
 });
 

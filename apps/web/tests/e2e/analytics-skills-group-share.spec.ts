@@ -12,6 +12,7 @@
  * is granted to the admin roles by migration 000057; the catalogue is global.
  */
 
+import { cifra } from "./cifra";
 import { test, expect, type APIRequestContext } from "@playwright/test";
 import { storageStateFor } from "./fixtures";
 
@@ -76,6 +77,6 @@ test.describe("BI T3.8 /analytics/skills-group-share — live data (ESCO group s
     await expect(table).toBeVisible({ timeout: 15_000 });
     const top = api.groups[0]!;
     await expect(table).toContainText(top.groupCode);
-    await expect(table).toContainText(String(top.skillCount));
+    await expect(table).toContainText(cifra(top.skillCount));
   });
 });

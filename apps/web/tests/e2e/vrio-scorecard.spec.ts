@@ -12,6 +12,7 @@
  * "does it load" test and fail this one.
  */
 
+import { cifra } from "./cifra";
 import { test, expect } from "@playwright/test";
 import { storageStateFor, PERSONAS, API_BASE, passwordFor, totpFor } from "./fixtures";
 
@@ -58,7 +59,7 @@ test.describe("#56 F2 — VRIO scorecard", () => {
 
     // every summary tile shows the count the engine reported
     for (const [verdict, count] of Object.entries(api.summary)) {
-      await expect(page.getByTestId(`vrio-summary-${verdict}`)).toContainText(String(count));
+      await expect(page.getByTestId(`vrio-summary-${verdict}`)).toContainText(cifra(count));
     }
 
     // the strongest capability the engine found leads the table

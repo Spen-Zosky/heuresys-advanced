@@ -11,6 +11,7 @@
  * e avrebbe perso esattamente la proprietà per cui la capability esiste.
  */
 
+import { comeAVideo } from "./cifra";
 import { test, expect } from "@playwright/test";
 import { storageStateFor, PERSONAS, API_BASE, passwordFor, totpFor } from "./fixtures";
 
@@ -79,7 +80,7 @@ test.describe("#58 F4 — consigli operativi", () => {
     await expect(row.getByTestId("advisor-citation")).toHaveCount(first.citations.length);
     for (const c of first.citations) {
       await expect(row.getByTestId("advisor-citations")).toContainText(c.field);
-      await expect(row.getByTestId("advisor-citations")).toContainText(String(c.value));
+      await expect(row.getByTestId("advisor-citations")).toContainText(comeAVideo(c.value));
     }
   });
 

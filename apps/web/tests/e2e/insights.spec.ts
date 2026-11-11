@@ -9,6 +9,7 @@
  * would re-score the whole tenant (covered by the API integration test instead).
  */
 
+import { cifra } from "./cifra";
 import { test, expect } from "@playwright/test";
 import { storageStateFor } from "./fixtures";
 
@@ -34,7 +35,7 @@ test.describe("cap③ insights /insights flight-risk — live data", () => {
     await expect(page.getByTestId("insights-page")).toBeVisible({ timeout: 45_000 });
 
     // the page count reflects the live API total
-    await expect(page.getByTestId("insights-count")).toContainText(String(body.total));
+    await expect(page.getByTestId("insights-count")).toContainText(cifra(body.total));
 
     // rows render; admin recompute control present (not clicked — it re-scores everyone)
     await expect(page.getByTestId("insights-row").first()).toBeVisible();

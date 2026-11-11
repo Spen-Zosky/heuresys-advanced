@@ -100,6 +100,7 @@ import { PannelloAgente } from "../../components/pannello-agente";
 import { ContestoAgenteProvider } from "../../lib/agente/contesto";
 import { SchedeProvider } from "@/components/scheda-rapida";
 import { CorpoGruppo, useScorrimentoMenu } from "../../components/menu-laterale";
+import { ReteDiPagina } from "../../lib/leggibile";
 import { alberoDelGruppo, ramoDi, type VoceMenu } from "../../lib/menu-albero";
 
 const ICON = "h-4 w-4 shrink-0";
@@ -394,7 +395,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           <SectionTabs />
           {/* L10 A-8: il pannello dell'agente, solo sulle pagine idonee e solo a flag acceso. */}
           <PannelloAgente />
-          {children}
+          <ReteDiPagina>{children}</ReteDiPagina>
           </SchedeProvider>
         </ContestoAgenteProvider>
       )}

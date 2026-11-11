@@ -15,6 +15,8 @@ describe("rete di leggibilità (C1, C2, C4)", () => {
     expect(l.testo("0.5")).toBe("0,5");
     expect(l.testo("4.06")).toBe("4,06");
     expect(l.testo("2026")).toBe("2026");
+    expect(l.testo("1.234")).toBe("1.234"); // già in forma italiana
+    expect(l.testo("0.850")).toBe("0,85");
   });
   it("codici e frasi inglesi in italiano", () => {
     expect(l.testo("APPROVED")).toBe("Approvata");

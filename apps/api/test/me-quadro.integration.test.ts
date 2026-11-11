@@ -16,6 +16,7 @@ import { AREE_QUADRO, type AreaQuadro } from "@heuresys/shared";
 import { pool } from "../src/db/client.js";
 import type { ActorContext } from "../src/lib/actor.js";
 import { leggiQuadro } from "../src/modules/quadro/service.js";
+import { resolveOrgReadScope } from "../src/lib/scope/resolver.js";
 
 type Quadro = { insight: { chiave: string; area: string; tono: string; titolo: string }[]; nonCalcolate: string[]; verifiche: number };
 const PESO: Record<string, number> = { rischio: 0, attenzione: 1, informazione: 2, positivo: 3 };
@@ -49,16 +50,20 @@ describe("GET /v1/me/quadro", () => {
   });
 
   it("chi vede solo sé stesso riceve solo le lenti personali, anche su una pagina senza lenti personali", async () => {
-    // L'attore si costruisce con il solo ruolo USER: il perimetro è sé stesso per definizione
-    // (resolveOrgReadScope), qualunque cosa dica l'organigramma della persona nei dati.
-    const u = await pool.query<{ user_id: string; tenant_id: string }>(
-      `SELECT u.user_id, u.user_tenant_id AS tenant_id FROM sys.sys_users u WHERE u.user_email = $1`,
-      ["tommaso.fiore@rtl-bank.org"],
+    // L'attore ha il solo ruolo USER e non guida unità: si sceglie fra le persone di RTL la
+    // prima il cui perimetro risolve davvero a sé stesso (chi guida un'unità vede il suo ramo).
+    const candidati = await pool.query<{ user_id: string; tenant_id: string }>(
+      `SELECT u.user_id, u.user_tenant_id AS tenant_id FROM sys.sys_users u
+        WHERE u.user_email LIKE '%@rtl-bank.org' ORDER BY u.user_email LIMIT 50`,
     );
-    const riga = u.rows[0]!;
-    const actor = { userId: riga.user_id, tenantId: riga.tenant_id, roles: ["USER"] } as ActorContext;
+    let actor: ActorContext | null = null;
+    for (const c of candidati.rows) {
+      const prova = { userId: c.user_id, tenantId: c.tenant_id, roles: ["USER"] } as ActorContext;
+      if ((await resolveOrgReadScope(pool, prova)).kind === "self") { actor = prova; break; }
+    }
+    expect(actor).not.toBeNull();
     for (const aree of [[...AREE_QUADRO], ["selezione"]] as AreaQuadro[][]) {
-      const b = await leggiQuadro(actor, aree);
+      const b = await leggiQuadro(actor!, aree);
       expect(b.nonCalcolate).toEqual([]);
       expect(b.verifiche).toBeGreaterThan(0);
       for (const i of b.insight) expect(i.area).toBe("personale");

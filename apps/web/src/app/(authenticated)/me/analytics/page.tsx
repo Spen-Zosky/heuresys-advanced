@@ -7,9 +7,9 @@ import { PageHeader } from "@/components/intestazione-pagina";
 import type { MeAnalyticsResponse, MeDevelopmentResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EChartsCard } from "../../_charts-client";
+import { EntityTable } from "@/components/data-table-panel";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
-import { Leggibile } from "@/lib/leggibile";
 
 /** Le mie analisi (S1011 F5.1) — own attendance trend + summary KPIs.
  *  #59 F/F5 (ADR-0031): + "Il mio sviluppo" — own computed scores with
@@ -134,28 +134,19 @@ export default function MeAnalyticsPage() {
                       <p className="text-xs text-muted-foreground">{t("analytics.development.flightHint")}</p>
                       <div>
                         <h3 className="text-sm font-medium text-foreground">{t("analytics.development.factors")}</h3>
-                        <table className="mt-2 w-full text-sm">
-                          <thead>
-                            <tr className="text-left text-xs text-muted-foreground">
-                              <th className="py-1 font-medium">{t("analytics.development.factorFeature")}</th>
-                              <th className="py-1 font-medium">{t("analytics.development.factorWeight")}</th>
-                              <th className="py-1 font-medium">{t("analytics.development.factorValue")}</th>
-                              <th className="py-1 font-medium">{t("analytics.development.factorContribution")}</th>
-                            </tr>
-                          </thead>
-                          <tbody><Leggibile>
-                            {dev.data.flightRisk.factors.map((f) => (
-                              <tr key={f.feature} className="border-t border-border">
-                                <td className="py-1.5">
-                                  {t(`analytics.development.feature.${f.feature}`, { defaultValue: f.feature })}
-                                </td>
-                                <td className="py-1.5 tabular-nums">{fmt.percento(f.weight, "0-1", 0)}</td>
-                                <td className="py-1.5 tabular-nums">{f.normalized ?? "—"}</td>
-                                <td className="py-1.5 tabular-nums">{fmt.numeroFisso(f.contribution, 1)}</td>
-                              </tr>
-                            ))}
-                          </Leggibile></tbody>
-                        </table>
+                        {/* C12: ogni fattore si apre nella sua scheda */}
+                        <EntityTable<(typeof dev.data.flightRisk.factors)[number]>
+                          isLoading={false}
+                          isError={false}
+                          rows={dev.data.flightRisk.factors}
+                          rowKey={(f) => f.feature}
+                          columns={[
+                            { header: t("analytics.development.factorFeature"), cell: (f) => t(`analytics.development.feature.${f.feature}`, { defaultValue: f.feature }) },
+                            { header: t("analytics.development.factorWeight"), align: "right", cell: (f) => fmt.percento(f.weight, "0-1", 0) },
+                            { header: t("analytics.development.factorValue"), align: "right", cell: (f) => (f.normalized === null || f.normalized === undefined ? "—" : fmt.numeroFisso(f.normalized, 1)) },
+                            { header: t("analytics.development.factorContribution"), align: "right", cell: (f) => fmt.numeroFisso(f.contribution, 1) },
+                          ]}
+                        />
                       </div>
                     </CardContent>
                   </Card>

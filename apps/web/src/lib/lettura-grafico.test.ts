@@ -31,3 +31,18 @@ describe("lettura di mappe di calore e alberi (C8)", () => {
     expect(r?.frase).toMatch(/^2 elementi; in testa: Banca, Filiale\./);
   });
 });
+
+describe("dispersione (C8)", () => {
+  it("conta i punti per gruppo e scrive le medie", () => {
+    const r = letturaDelGrafico({
+      xAxis: { type: "value", name: "Punto medio" }, yAxis: { type: "value", name: "Ampiezza" },
+      series: [
+        { name: "Filiale A", type: "scatter", data: [[30000, 2000], [32000, 4000]] },
+        { name: "Filiale B", type: "scatter", data: [[40000, 9000]] },
+      ],
+    }, "it-IT");
+    expect(r?.frase).toContain("3 punti in 2 gruppi");
+    expect(r?.frase).toContain("9.000 (Filiale B)");
+    expect(r?.tabella.righe[0]).toEqual(["Filiale A", 2, 31000, 3000]);
+  });
+});

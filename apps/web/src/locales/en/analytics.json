@@ -132,7 +132,8 @@
     "colGroup": "Group",
     "colCount": "Skills",
     "colShare": "Share",
-    "emptyDesc": "The skill catalogue has no ESCO groups populated yet."
+    "emptyDesc": "The skill catalogue has no ESCO groups populated yet.",
+    "colCode": "ESCO code"
   },
   "orgNetwork": {
     "title": "Org Network",

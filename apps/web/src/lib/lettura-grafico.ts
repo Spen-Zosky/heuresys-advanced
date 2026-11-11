@@ -31,8 +31,37 @@ export function letturaDelGrafico(option: unknown, locale: string): { frase: str
   if (!option || typeof option !== "object") return null;
   const o = option as Record<string, unknown>;
   const serie = (Array.isArray(o.series) ? o.series : o.series ? [o.series] : []) as Serie[];
-  if (serie.length === 0 || serie.length > 8) return null;
   const tipi = new Set(serie.map((s) => s.type));
+  // Dispersione: per gruppo quanti punti e la media sui due assi (anche oltre otto gruppi).
+  if (serie.length > 0 && tipi.size === 1 && tipi.has("scatter")) {
+    const nfS = new Intl.NumberFormat(locale, { maximumFractionDigits: 0, useGrouping: "always" } as unknown as Intl.NumberFormatOptions);
+    const nomeAsse = (a: unknown) => {
+      const x = (Array.isArray(a) ? a[0] : a) as Record<string, unknown> | undefined;
+      return typeof x?.name === "string" && x.name ? x.name : null;
+    };
+    const ax = nomeAsse(o.xAxis) ?? "Asse orizzontale";
+    const ay = nomeAsse(o.yAxis) ?? "Asse verticale";
+    const gruppi = serie.map((g, i) => {
+      const pt = ((Array.isArray(g.data) ? g.data : []) as unknown[])
+        .map((d) => (Array.isArray(d) ? d : (d as Record<string, unknown>)?.value) as unknown[] | undefined)
+        .filter((d): d is unknown[] => Array.isArray(d) && d.length >= 2 && Number.isFinite(Number(d[0])) && Number.isFinite(Number(d[1])))
+        .map((d) => [Number(d[0]), Number(d[1])] as const);
+      const media = (k: 0 | 1) => (pt.length ? pt.reduce((a, b) => a + b[k], 0) / pt.length : 0);
+      return { nome: typeof g.name === "string" && g.name ? g.name : `Gruppo ${i + 1}`, n: pt.length, mx: media(0), my: media(1) };
+    }).filter((g) => g.n > 0);
+    if (gruppi.length === 0) return null;
+    const punti = gruppi.reduce((a, g) => a + g.n, 0);
+    const alto = gruppi.reduce((a, b) => (b.my > a.my ? b : a));
+    return {
+      frase: `${nfS.format(punti)} punti in ${nfS.format(gruppi.length)} gruppi; la media più alta di «${ay}» è ${nfS.format(alto.my)} (${alto.nome}).`,
+      tabella: {
+        titolo: "Vedi i numeri del grafico",
+        colonne: ["Voce", "Punti", `${ax} (media)`, `${ay} (media)`],
+        righe: gruppi.map((g) => [g.nome, g.n, Math.round(g.mx), Math.round(g.my)]),
+      },
+    };
+  }
+  if (serie.length === 0 || serie.length > 8) return null;
   const asseCat = [o.xAxis, o.yAxis].flat().find((a) => a && typeof a === "object" && (a as Record<string, unknown>).type === "category") as Record<string, unknown> | undefined;
   const categorie = Array.isArray(asseCat?.data) ? (asseCat!.data as unknown[]).map((c) => (c && typeof c === "object" ? String((c as Record<string, unknown>).value ?? "") : String(c))) : null;
   const nf0 = new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: "always" } as unknown as Intl.NumberFormatOptions);
@@ -114,7 +143,12 @@ export function letturaDelGrafico(option: unknown, locale: string): { frase: str
       r[k + 1] = p.v;
       righe.set(p.nome, r);
     }
-    if (punti.length < 2) return;
+    if (punti.length === 0) return;
+    if (punti.length === 1) {
+      // un solo valore è comunque una lettura: si scrive, invece di lasciare il disegno muto
+      frasi.push(`${typeof s.name === "string" && s.name && serie.length > 1 ? `${s.name}: ` : ""}un solo valore, ${nf.format(punti[0]!.v)} (${punti[0]!.nome}).`);
+      return;
+    }
     const alto = punti.reduce((a, b) => (b.v > a.v ? b : a));
     const basso = punti.reduce((a, b) => (b.v < a.v ? b : a));
     const nome = typeof s.name === "string" && s.name && serie.length > 1 ? `${s.name}: ` : "";

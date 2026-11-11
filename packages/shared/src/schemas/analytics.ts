@@ -333,6 +333,7 @@ export type OvertimeAnalyticsResponse = z.infer<typeof OvertimeAnalyticsResponse
 
 export const SkillsGroupShareGroupSchema = z.object({
   groupCode: z.string(), // human-readable ESCO group, e.g. "skill/S2.8.1" / "isced-f/0613"
+  groupName: z.string().nullable(), // nome del gruppo da sys.sys_skill_groups (C1); null se non censito
   groupUri: z.string(),
   skillCount: z.number().int(),
   sharePct: z.number(), // % of total grouped skills (2-dp)

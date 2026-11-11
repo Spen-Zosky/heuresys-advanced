@@ -289,7 +289,9 @@
     "errorMessage": "Impossibile caricare i KPI.",
     "emptyTitle": "Nessun KPI assegnato",
     "emptyDesc": "Non hai KPI assegnati.",
-    "caption": "Obiettivi attivi"
+    "caption": "Obiettivi attivi",
+    "notMeasured": "Non ancora misurato",
+    "targetIs": "obiettivo {{value}}"
   },
   "learning": {
     "title": "La mia formazione",

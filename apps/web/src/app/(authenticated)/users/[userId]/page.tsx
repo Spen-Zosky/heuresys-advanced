@@ -38,7 +38,7 @@ import { IdentityEditor } from "./_components/identity-editor";
 import { RolesEditor } from "./_components/roles-editor";
 import { SchedePagina } from "@/components/schede-pagina";
 import { chiediConferma } from "@/lib/api/step-up";
-import { Leggibile } from "@/lib/leggibile";
+import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 
 /* --- formattazione: mai una data ISO o un numero nudo davanti a una persona --- */
 // F-1 (piano interfacce, 2026-11-04): la forma comune di `@/lib/format`, nella lingua del portale.
@@ -63,29 +63,20 @@ function Section({
 }
 
 /** Tabellina compatta: le righe scorrono da sole se la pagina è stretta. */
+/** C12: ogni riga del fascicolo si apre nella sua scheda, come nelle altre tabelle. */
 function MiniTable({ head, rows, empty }: { head: string[]; rows: ReactNode[][]; empty: string }) {
   if (rows.length === 0) return <StatoVuoto titolo={empty} compatto />;
+  const righe = rows.map((r, i) => ({ i, r }));
+  const colonne: DataColumn<{ i: number; r: ReactNode[] }>[] = head.map((h, j) => ({ header: h, cell: (x) => x.r[j] }));
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
-            {head.map((h) => (
-              <th key={h} className="py-2 pr-4 font-medium">{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody><Leggibile>
-          {rows.map((r, i) => (
-            <tr key={i} className="border-b last:border-0">
-              {r.map((c, j) => (
-                <td key={j} className="py-2 pr-4 align-top">{c}</td>
-              ))}
-            </tr>
-          ))}
-        </Leggibile></tbody>
-      </table>
-    </div>
+    <EntityTable<{ i: number; r: ReactNode[] }>
+      isLoading={false}
+      isError={false}
+      rows={righe}
+      rowKey={(x) => String(x.i)}
+      columns={colonne}
+      pageSize={25}
+    />
   );
 }
 
@@ -235,10 +226,11 @@ export default function UserDetailPage() {
             <MiniTable
               head={[s("col.period"), s("col.gross"), s("col.net"), s("col.paidOn")]}
               empty={s("empty.paySlips")}
-              rows={d.paySlips.slice(0, 12).map((x) => [
+              rows={d.paySlips.slice(0, 12).map((x, i) => [
                 x.period,
-                f.importo(x.grossPay, x.currency),
-                f.importo(x.netPay, x.currency),
+                // C9/ADR-0032: un importo trattenuto lo dice, non è un trattino
+                isMasked(x, "grossPay") ? <MaskedCell key={`g${i}`} /> : f.importo(x.grossPay, x.currency),
+                isMasked(x, "netPay") ? <MaskedCell key={`n${i}`} /> : f.importo(x.netPay, x.currency),
                 f.data(x.paymentDate),
               ])}
             />

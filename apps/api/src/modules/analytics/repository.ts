@@ -1111,6 +1111,7 @@ export const SKILLS_GROUP_SHARE_TOP_N = 25;
 
 export interface SkillsGroupShareGroupRow {
   groupCode: string;
+  groupName: string | null;
   groupUri: string;
   skillCount: number;
   sharePct: number;
@@ -1151,6 +1152,12 @@ export async function getSkillsGroupShare(q: DbConnector): Promise<SkillsGroupSh
       ORDER BY count(*) DESC, 1`,
   );
 
+  // C1/C3: il gruppo si legge per nome (sys.sys_skill_groups), il codice ESCO resta accanto.
+  const nomi = await q.query<{ uri: string; name: string }>(
+    `SELECT skill_group_esco_uri AS uri, skill_group_name AS name FROM sys.sys_skill_groups`,
+  );
+  const nomePerCodice = new Map(nomi.rows.map((r) => [escoGroupCode(r.uri), r.name]));
+
   const t = totals.rows[0];
   const totalSkills = Number(t?.total ?? 0);
   const totalGrouped = Number(t?.grouped ?? 0);
@@ -1165,6 +1172,7 @@ export async function getSkillsGroupShare(q: DbConnector): Promise<SkillsGroupSh
 
   const groups: SkillsGroupShareGroupRow[] = top.map((g) => ({
     groupCode: g.groupCode,
+    groupName: nomePerCodice.get(g.groupCode) ?? null,
     groupUri: g.groupUri,
     skillCount: g.count,
     sharePct: totalGrouped > 0 ? Math.round((g.count / totalGrouped) * 10000) / 100 : 0,

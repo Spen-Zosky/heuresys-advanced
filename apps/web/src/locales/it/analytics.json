@@ -132,7 +132,8 @@
     "colGroup": "Gruppo",
     "colCount": "Competenze",
     "colShare": "Quota",
-    "emptyDesc": "Il catalogo competenze non ha ancora gruppi ESCO popolati."
+    "emptyDesc": "Il catalogo competenze non ha ancora gruppi ESCO popolati.",
+    "colCode": "Codice ESCO"
   },
   "orgNetwork": {
     "title": "Rete organizzativa",

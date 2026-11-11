@@ -47,7 +47,9 @@ const GATEWAY_URL = (process.env.NEXT_PUBLIC_AGENT_GATEWAY_URL ?? "http://localh
 function DisabledNotice() {
   const { t } = useTranslation("admin");
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    // C7: anche spenta, la pagina ha il suo titolo
+    <main className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+      <PageHeader title={t("agentDev.title")} description={t("agentDev.description")} />
       <Card data-testid="agentdev-disabled">
         <CardHeader>
           <CardTitle>{t("agentDev.disabledTitle")}</CardTitle>
@@ -56,7 +58,7 @@ function DisabledNotice() {
           <p className="text-sm text-muted-foreground">{t("agentDev.disabledDesc")}</p>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }
 

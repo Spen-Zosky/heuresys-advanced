@@ -148,6 +148,9 @@ function misuraPagina() {
   /* C9 — righe vuote o incomplete. */
   const VUOTO = /^(—|-|–|n\/d|null|undefined|nan|)$/i;
   for (const tr of Array.from(main.querySelectorAll("tbody tr"))) {
+    /* la tabella dei numeri di un grafico ripete il disegno: un trattino lì è un punto che il
+       grafico non ha, non una riga del dato rimasta a metà */
+    if (tr.closest("[data-testid=chart-table]")) continue;
     const celle = Array.from(tr.querySelectorAll("td"));
     if (celle.length < 3) continue;
     const vuote = celle.filter((td) => VUOTO.test((td.textContent || "").trim())).length;
@@ -178,9 +181,11 @@ function misuraPagina() {
   /* un'intestazione che si spiega da sé (Nome, Stato, Data…) non chiede aiuto: conta solo quella
      che porta un concetto del dominio */
   const OVVIE = /^(nome|titolo|stato|tipo|data|inizio|fine|creat[ao]|aggiornat[ao]|categoria|codice|azioni|descrizione|paese|attiv[ao]|email|telefono|sede|unità|persona|ruolo|posizione|note|valore|voce|quando|chi|da|a|origine)$/i;
-  const intestazioni = Array.from(main.querySelectorAll("th")).filter((th) => !OVVIE.test((th.textContent || "").trim())).length + main.querySelectorAll("[data-kpi], .stats-card").length;
+  /* le intestazioni della tabella di un grafico sono le voci del grafico, già lette dalla sua frase */
+  const thDati = Array.from(main.querySelectorAll("th")).filter((th) => !th.closest("[data-testid=chart-table]"));
+  const intestazioni = thDati.filter((th) => !OVVIE.test((th.textContent || "").trim())).length + main.querySelectorAll("[data-kpi], .stats-card").length;
   if (intestazioni >= 4 && aiuti === 0) {
-    const nomi = Array.from(main.querySelectorAll("th")).map((th) => (th.textContent || "").trim()).filter(Boolean);
+    const nomi = thDati.map((th) => (th.textContent || "").trim()).filter(Boolean);
     segna("C13-senza-spiegazioni", `${intestazioni} intestazioni, 0 aiuti: ${[...new Set(nomi)].slice(0, 12).join(" | ")}`);
   }
 

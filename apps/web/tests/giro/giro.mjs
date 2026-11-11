@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* global process, console, URL */
+/* global process, console, URL, document */
 /**
  * apps/web/tests/giro/giro.mjs — il giro di tutte le pagine con tutti i ruoli
  * (docs/piani/PIANO_interfaccia-sistematica_20261111.md, §3).
@@ -10,6 +10,10 @@
  *
  * `persone.json` è un elenco di { chiave, email, ruoli, cookie } dove `cookie` è il valore del
  * cookie di accesso firmato con la chiave del banco (`scripts/banco-verifica.sh persone`).
+ * Con `GIRO_GETTONE` (un comando con `{email}`, lo passa `banco-verifica.sh giro`) il cookie si
+ * rifirma prima di ogni persona: la conferma del secondo fattore vale 15 minuti, e un cookie
+ * firmato all'inizio del giro (o il giorno prima) farebbe rispondere 403 a ogni dato riservato
+ * delle persone visitate dopo, accusando la pagina di un difetto che non ha.
  *
  * Per ogni persona e per ogni rotta di prodotto (dalle cartelle di `src/app/(authenticated)`):
  * apre la pagina, aspetta che le richieste si fermino, salva la schermata intera, misura le classi
@@ -20,6 +24,7 @@
  * Esito in GIRO_OUT: `giro-esito.json`, `rapporto.md` (per classe e per pagina), `provini.html`
  * (tutte le schermate) e le schermate in `schermate/<persona>/`.
  */
+import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
@@ -77,7 +82,10 @@ for (const p of persone) {
   const dir = path.join(OUT, "schermate", p.chiave);
   fs.mkdirSync(dir, { recursive: true });
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "it-IT" });
-  await ctx.addCookies([{ name: "hrx_access", value: p.cookie, domain: host, path: "/", httpOnly: true, sameSite: "Lax" }]);
+  const cookie = process.env.GIRO_GETTONE
+    ? execSync(process.env.GIRO_GETTONE.replace("{email}", p.email), { encoding: "utf8" }).trim()
+    : p.cookie;
+  await ctx.addCookies([{ name: "hrx_access", value: cookie, domain: host, path: "/", httpOnly: true, sameSite: "Lax" }]);
   const page = await ctx.newPage();
   let console_ = [];
   let rete = [];

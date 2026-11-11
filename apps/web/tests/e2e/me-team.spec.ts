@@ -56,9 +56,11 @@ test.describe("ESS /me/team — my team (TEAM_MEMBER persona)", () => {
     expect(await page.getByTestId("me-team-card").count()).toBe(mie.teams.length);
     await expect(page.getByTestId("me-team-name").first()).toContainText(mie.teams[0]!.name);
 
-    // The team's real lead (marco.rinaldi) and the caller (antonio.parisi) both appear as members.
-    await expect(card).toContainText("marco.rinaldi@rtl-bank.org");
-    await expect(card).toContainText("antonio.parisi@rtl-bank.org");
+    // Il responsabile reale (Marco Rinaldi) e chi guarda (Antonio Parisi) compaiono come
+    // «Cognome, Nome» e aprono la loro scheda; l'email non è più a video (C2, C12).
+    await expect(card).toContainText("Rinaldi, Marco");
+    await expect(card).toContainText("Parisi, Antonio");
+    await expect(card).not.toContainText("@rtl-bank.org");
 
     // At least 2 member rows (lead + self), all sourced from the live API.
     const rows = page.getByTestId("me-team-member-row");

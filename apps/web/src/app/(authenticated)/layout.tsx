@@ -379,9 +379,11 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       <StepUpDialog />
       {/* S1009: in-page tab bar for the 6 merge groups; renders nothing off those routes. */}
       {verdict.kind === "denied" ? (
-        <main data-testid="page-no-access" className="mx-auto max-w-2xl px-6 py-16 space-y-4">
-          <h1 className="text-xl font-semibold">{t("shell:noAccess.title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("shell:noAccess.body", { route: verdict.route })}</p>
+        <main data-testid="page-no-access" className="mx-auto max-w-2xl space-y-4 px-6 py-10">
+          <header className="space-y-1">
+            <h1 className="text-2xl font-bold tracking-tight">{t("shell:noAccess.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("shell:noAccess.body", { route: verdict.route })}</p>
+          </header>
           <Button variant="outline" size="sm" onClick={() => router.push("/me")}>
             {t("shell:noAccess.home")}
           </Button>

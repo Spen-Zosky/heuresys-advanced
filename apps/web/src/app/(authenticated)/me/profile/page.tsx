@@ -263,7 +263,7 @@ export default function MeProfilePage() {
         title={t("profile.title")}
         description={t("profile.description")}
         badges={
-          <Badge variant="secondary" data-testid="me-profile-email">
+          <Badge variant="secondary" data-testid="me-profile-email" data-giro-email-ammessa>
             {profile.data?.email ?? "…"}
           </Badge>
         }

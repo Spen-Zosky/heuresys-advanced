@@ -35,13 +35,14 @@ function toneForStatus(s: ValidationStatus): "success" | "warning" | "danger" | 
  *  non censita mostra il suo nome tecnico, così la mancanza si vede. */
 function nomeTabella(t: TFunction, tabella: string): string {
   const chiave = tabella.replace(/^sys\./, "");
-  return t(`provenance.tables.${chiave}`, { defaultValue: chiave });
+  // la tabella d'origine porta lo stesso nome senza il prefisso («calibration_participants»)
+  return t(`provenance.tables.${chiave}`, { defaultValue: "" }) || t(`provenance.tables.sys_${chiave}`, { defaultValue: chiave });
 }
 
 function buildRecordColumns(t: TFunction, f: Formati): DataColumn<ProvenanceRecord>[] {
   return [
     { header: t("provenance.cols.targetTable"), cell: (r) => nomeTabella(t, r.targetTableName) },
-    { header: t("provenance.cols.sourceTable"), cell: (r) => <span className="font-mono text-xs text-muted-foreground" data-grezzo="">{r.sourceTable}</span> },
+    { header: t("provenance.cols.sourceTable"), cell: (r) => <span className="text-xs text-muted-foreground">{nomeTabella(t, r.sourceTable)}</span> },
     { header: t("provenance.cols.confidence"), align: "right", cell: (r) => <span className="tabular-nums">{f.percento(r.mappingConfidence, "0-1", 1)}</span> },
     { header: t("provenance.cols.status"), cell: (r) => <StatusPill tone={toneForStatus(r.validationStatus)}>{t(`provenance.status.${r.validationStatus}`)}</StatusPill> },
     {

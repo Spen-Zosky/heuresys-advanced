@@ -59,7 +59,7 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Adv
     {
       header: t("advisor.cols.citations"),
       cell: (r) => (
-        <ul data-testid="advisor-citations" className="space-y-0.5">
+        <ul data-testid="advisor-citations" className="flex max-w-md flex-wrap gap-x-3 gap-y-0.5">
           {r.citations.map((c, i) => (
             <Citation key={`${c.source}-${c.field}-${i}`} c={c} t={t} />
           ))}

@@ -20,11 +20,11 @@
 -- 1. Enterprise size bands
 -- -----------------------------------------------------------------------------
 INSERT INTO sys.sys_enterprise_size_bands (enterprise_size_band_code, enterprise_size_band_name, enterprise_size_band_min_employees, enterprise_size_band_max_employees) VALUES
-  ('XS', 'Extra Small', 1,    9),
-  ('S',  'Small',       10,   49),
-  ('M',  'Medium',      50,   249),
-  ('L',  'Large',       250,  999),
-  ('XL', 'Extra Large', 1000, NULL)
+  ('XS', 'Molto piccola', 1,    9),
+  ('S',  'Piccola',      10,   49),
+  ('M',  'Media',        50,   249),
+  ('L',  'Grande',       250,  999),
+  ('XL', 'Molto grande', 1000, NULL)
 ON CONFLICT (enterprise_size_band_code) DO NOTHING;
 
 -- -----------------------------------------------------------------------------
@@ -85,14 +85,14 @@ ON CONFLICT (assessment_method_code) DO NOTHING;
 -- 6. Blueprint family + variant — FIN_BANKING / REGIONAL_RETAIL_BANK_MEDIUM
 -- -----------------------------------------------------------------------------
 INSERT INTO sys.sys_blueprint_families (blueprint_family_code, blueprint_family_name, blueprint_family_description) VALUES
-  ('FIN_BANKING', 'Financial Services — Banking', 'Retail and commercial banking blueprint family.')
+  ('FIN_BANKING', 'Servizi finanziari — Banche', 'Famiglia di blueprint per la banca retail e commerciale.')
 ON CONFLICT (blueprint_family_code) DO NOTHING;
 
 INSERT INTO sys.sys_blueprint_variants (blueprint_variant_family_id, blueprint_variant_code, blueprint_variant_name, blueprint_variant_size_band_id)
 SELECT
   bf.blueprint_family_id,
   'REGIONAL_RETAIL_BANK_MEDIUM',
-  'Regional Retail Bank (Medium)',
+  'Banca retail regionale (media)',
   sb.enterprise_size_band_id
 FROM sys.sys_blueprint_families bf
 CROSS JOIN sys.sys_enterprise_size_bands sb
@@ -140,7 +140,7 @@ FROM sys.sys_blueprint_variants bv
 CROSS JOIN (VALUES
   ('00', 'Enterprise Strategy & Governance',  0),
   ('01', 'Customer Acquisition & Onboarding', 1),
-  ('02', 'KYC / AML',                          2),
+  ('02', 'Adeguata verifica e antiriciclaggio',  2),
   ('03', 'Account Opening & Maintenance',     3),
   ('04', 'Payments & Transfers',              4),
   ('05', 'Credit Origination',                5),

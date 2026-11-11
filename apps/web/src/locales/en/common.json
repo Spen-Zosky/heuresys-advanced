@@ -319,7 +319,14 @@
       "DIVISION": "Division",
       "DEPARTMENT": "Department",
       "OFFICE": "Office",
-      "TEAM": "Team"
+      "TEAM": "Team",
+      "GENERAL_MANAGEMENT": "General management",
+      "AREA": "Area",
+      "BRANCH": "Branch",
+      "SERVICE": "Service",
+      "UNIT": "Unit",
+      "PLANT": "Plant",
+      "WAREHOUSE": "Warehouse"
     },
     "vizGraphType": {
       "ORG_CHART": "Org chart",

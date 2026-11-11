@@ -44,6 +44,19 @@ Ogni blocco è una PR in bozza, provata su un banco usa-e-getta della VM con una
 | B7 | Configurazione e piattaforma | `/tenants`, `/blueprints`, `/tenant-blueprints`, `/visualizations`, `/seed-acquisition/runs`, `/provenance`, `/generated-origins`, `/consolidation`, `/admin/mfa-policy` | da fare |
 | B8 | Caselle di scelta e selettori di persone in tutto il prodotto | `person-picker`, filtri di stato, selettori di ruolo: R1, R4, R6 | da fare |
 
+### 3.2 Dimostrazione del blocco B2, 2026-11-11 01:15-01:17 Roma
+
+Banco: dump della copia di fase `20261110-prima-rilascio-18917d19` ripristinato in un cluster privato sulla VM (porta 5442, database `heuresys_prova_b2`), ramo della PR #220 a 55789c4b, API e web di produzione su porte di prova; niente creato nel cluster di produzione, copia eliminata a fine prova. Login reale come Valentina Conti e come utente di piattaforma.
+
+- `/positions`: «158 posizioni attive» e «1–25 di 158»; colonne Posizione, Titolare, Unità, Sede, Criticità, Stato; prima riga «Addetto Amministrazione del Personale | Bruno, Marco | Ufficio Amministrazione del Personale | Sede Centrale Milano»; l'ordine per titolo continua in pagina 2; «Mostra» offre Tutte (316), Attive (158), Non attive (158), e parte da Attive. Per la piattaforma «161 posizioni attive», colonna Tenant e casella «Tutti, Heuresys System, RTL Bank».
+- `/organization`: «42 unità», Nome, Tipo, Unità superiore, Stato, ordine per nome, nessun codice. Rilievo: «AREA» e «General management» nel tipo, corretti dopo la prova con le etichette italiane dei tipi mancanti.
+- `/job-catalog`: 16 famiglie e 142 ruoli per nome, senza codice.
+- `/admin/roles`: «24 ruoli · 250 permessi · 1317 abbinamenti», permessi in parole. Rilievo: «BRANCH_MANAGER» e «agent_conversation · use» in codice, corretti dopo la prova.
+- `/users`: «158 persone», «Tutte le utenze» in testa alla casella.
+- Cricchetto, `admin-lists` e `admin-org-bpm` contro il banco: 32 passati, 0 falliti.
+
+Fuori da questo blocco, da guardare nei dati: 158 posizioni non attive accanto a 158 attive (possibili posizioni storiche doppie); criticità vuota sulle posizioni viste; ruoli del catalogo senza famiglia o livello e con nomi in minuscolo.
+
 ### 3.1 Dimostrazione del blocco B1, 2026-11-10 14:09-14:21 Roma
 
 Banco: copia di prova sulla VM al commit 9496524, database ripristinato dal dump delle 03:42 del 10/11 (`~/backup-hr/copie-fase/20261110-prima-rilascio-20261110/database.dump`) in un cluster PostgreSQL privato, migrazioni del ramo applicate; API e web in build di produzione su porte libere. Il database usa-e-getta `heuresys_prova_utenti_b1`, creato con il sì di Enzo delle 11:44, è stato eliminato a fine prova; `heuresys_advanced` e `heuresys_ci` non sono stati toccati.

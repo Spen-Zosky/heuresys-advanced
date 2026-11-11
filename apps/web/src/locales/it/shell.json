@@ -77,7 +77,7 @@
     "MANAGER": "Manager",
     "USER": "Dipendente",
     "READ_ONLY": "Sola lettura",
-    "CEO": "CEO",
+    "CEO": "Amministratore delegato",
     "TEAM_LEADER": "Team leader",
     "TEAM_MEMBER": "Membro del team",
     "ORG_DIRECTOR": "Direttore organizzativo",
@@ -102,7 +102,8 @@
     "approver": "Approvatore",
     "team_peer": "Compagno di squadra",
     "delegation": "Delega ricevuta",
-    "custody": "Custodia segnalazioni"
+    "custody": "Custodia segnalazioni",
+    "BRANCH_MANAGER": "Responsabile di filiale"
   },
   "noAccess": {
     "title": "Non hai accesso a questa pagina",

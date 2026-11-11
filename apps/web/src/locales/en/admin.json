@@ -664,6 +664,7 @@
     },
     "resources": {
       "agent_capability": "Agent capabilities",
+      "agent_conversation": "Assistant conversations",
       "analytics": "Analytics",
       "approval": "Approvals",
       "assessment": "Assessments",
@@ -774,6 +775,7 @@
       "trigger": "trigger",
       "update": "update",
       "update_layout": "update the layout",
+      "use": "use",
       "view": "view",
       "write": "write"
     }

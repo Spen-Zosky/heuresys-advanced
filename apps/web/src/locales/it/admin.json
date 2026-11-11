@@ -664,6 +664,7 @@
     },
     "resources": {
       "agent_capability": "Capacità degli agenti",
+      "agent_conversation": "Conversazioni con l'assistente",
       "analytics": "Analisi",
       "approval": "Approvazioni",
       "assessment": "Valutazioni delle competenze",
@@ -774,6 +775,7 @@
       "trigger": "lanciare",
       "update": "modificare",
       "update_layout": "modificare la disposizione",
+      "use": "usare",
       "view": "vedere",
       "write": "scrivere"
     }

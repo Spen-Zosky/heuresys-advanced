@@ -319,7 +319,14 @@
       "DIVISION": "Divisione",
       "DEPARTMENT": "Dipartimento",
       "OFFICE": "Ufficio",
-      "TEAM": "Team"
+      "TEAM": "Team",
+      "GENERAL_MANAGEMENT": "Direzione generale",
+      "AREA": "Area",
+      "BRANCH": "Filiale",
+      "SERVICE": "Servizio",
+      "UNIT": "Unità",
+      "PLANT": "Stabilimento",
+      "WAREHOUSE": "Magazzino"
     },
     "vizGraphType": {
       "ORG_CHART": "Organigramma",

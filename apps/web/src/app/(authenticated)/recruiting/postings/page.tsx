@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -41,6 +42,7 @@ export default function PostingsPage() {
   const q = usePostings();
   const requisitions = useRequisitions();
   const posizioneDellaRichiesta = new Map((requisitions.data?.items ?? []).map((r) => [r.requisitionId, r.positionTitle ?? r.code] as const));
+  const idPosizioneDellaRichiesta = new Map((requisitions.data?.items ?? []).map((r) => [r.requisitionId, r.positionId] as const));
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
@@ -174,7 +176,12 @@ export default function PostingsPage() {
                     <div className="font-medium">{p.title}</div>
                     <div className="text-xs text-muted-foreground" data-testid="posting-row-code" data-grezzo>{p.code}</div>
                   </td>
-                  <td className="px-4 py-2">{posizioneDellaRichiesta.get(p.requisitionId) ?? p.requisitionCode ?? "—"}</td>
+                  <td className="px-4 py-2">
+                    {/* C12: la posizione dell'annuncio apre la sua pagina */}
+                    {idPosizioneDellaRichiesta.get(p.requisitionId) ? (
+                      <Link href={`/positions/${idPosizioneDellaRichiesta.get(p.requisitionId)}`} className="hover:underline">{posizioneDellaRichiesta.get(p.requisitionId)}</Link>
+                    ) : (posizioneDellaRichiesta.get(p.requisitionId) ?? p.requisitionCode ?? "—")}
+                  </td>
                   <td className="px-4 py-2"><Badge variant="outline" data-testid="posting-row-visibility">{t(`recruiting.visibility.${p.visibility}`)}</Badge></td>
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">

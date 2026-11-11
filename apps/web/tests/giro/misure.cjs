@@ -109,7 +109,6 @@ function misuraPagina() {
   }
 
   /* C5 — pagina lunga senza schede. */
-  const scroller = main.closest("[tabindex='0']") || document.scrollingElement;
   const altezza = main.scrollHeight;
   const schermo = window.innerHeight;
   const schede = main.querySelector("[role=tablist]");

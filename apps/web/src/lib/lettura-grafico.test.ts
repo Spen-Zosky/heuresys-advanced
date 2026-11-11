@@ -19,3 +19,15 @@ describe("lettura del grafico (C8)", () => {
     expect(letturaDelGrafico(null, "it-IT")).toBeNull();
   });
 });
+
+describe("lettura di mappe di calore e alberi (C8)", () => {
+  it("mappa di calore", () => {
+    const r = letturaDelGrafico({ xAxis: { data: ["A", "B"] }, yAxis: { data: ["Uno", "Due"] }, series: [{ type: "heatmap", data: [[0, 0, 5], [1, 0, 1], [0, 1, 9]] }] }, "it-IT");
+    expect(r?.frase).toContain("9 (Due · A)");
+    expect(r?.tabella.righe[0]).toEqual(["Uno", 5, 1]);
+  });
+  it("albero", () => {
+    const r = letturaDelGrafico({ series: [{ type: "tree", data: [{ name: "Banca", children: [{ name: "Filiale" }] }] }] }, "it-IT");
+    expect(r?.frase).toMatch(/^2 elementi; in testa: Banca, Filiale\./);
+  });
+});

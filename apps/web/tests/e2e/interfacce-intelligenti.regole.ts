@@ -62,7 +62,12 @@ export function misuraPagina(): Misura {
   }
 
   const testo = (main.textContent ?? "").replace(/\s+/g, " ");
-  const dich = testo.match(/(?<![\d.])(\d[\d.]*)\s+(?:totali|persone|utenze|posizioni|righe|elementi)\b/i);
+  /* Il totale dichiarato si cerca solo nel titolo della pagina (intestazione e conteggio), non nel
+     corpo: «158 persone hanno più di 20 giorni di ferie» in una scheda di sintesi di /time-off non
+     è il numero delle righe, e confrontarlo con «1–25 di 2.325» era un falso rosso. */
+  const titolo = Array.from(main.querySelectorAll("header, h1, h2, [data-testid$='-count']"))
+    .map((el) => el.textContent ?? "").join(" ").replace(/\s+/g, " ");
+  const dich = titolo.match(/(?<![\d.])(\d[\d.]*)\s+(?:totali|persone|utenze|posizioni|righe|elementi)\b/i);
   const pag = testo.match(/\d+\s*[–-]\s*\d+\s+di\s+(\d[\d.]*)/);
   if (dich && pag) {
     const n = Number(dich[1]!.replace(/\./g, ""));

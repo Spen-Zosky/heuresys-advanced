@@ -70,6 +70,20 @@ describe("GET /v1/me/quadro", () => {
     }
   });
 
+  it("le segnalazioni arrivano solo a chi le custodisce, come due conteggi", async () => {
+    const t0 = await pool.query<{ tenant_id: string }>(
+      `SELECT u.user_tenant_id AS tenant_id FROM sys.sys_users u WHERE u.user_email = 'federica.marchetti@rtl-bank.org'`,
+    );
+    const tenantId = t0.rows[0]!.tenant_id;
+    const custode = { userId: "00000000-0000-0000-0000-000000000000", tenantId, roles: ["WHISTLEBLOWING_CUSTODIAN"] } as ActorContext;
+    const altro = { ...custode, roles: ["TENANT_ADMIN"] } as ActorContext;
+    const visto = await leggiQuadro(custode, ["segnalazioni"]);
+    expect(visto.nonCalcolate).toEqual([]);
+    expect(visto.insight.map((i) => i.chiave)).toContain("segnalazioni-aperte");
+    const nonVisto = await leggiQuadro(altro, ["segnalazioni"]);
+    expect(nonVisto.insight.map((i) => i.chiave)).not.toContain("segnalazioni-aperte");
+  });
+
   it("le aree filtrano le lenti", async () => {
     const r = await chiedi("federica.marchetti@rtl-bank.org", "assenze");
     const b = r.json() as Quadro;

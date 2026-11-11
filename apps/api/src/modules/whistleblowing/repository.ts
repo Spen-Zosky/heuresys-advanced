@@ -122,3 +122,23 @@ export async function updateReport(
   );
   return res.rows[0] ? toReport(res.rows[0]) : null;
 }
+
+/**
+ * Il solo numero che il quadro degli insight (C15) chiede alla custodia: segnalazioni aperte e,
+ * fra queste, quelle oltre i 30 giorni. La query resta qui, nella custodia (#99 F4); il quadro la
+ * chiama solo per chi ha `whistleblowing:read`, e riceve due conteggi, mai una riga.
+ */
+export async function contaSegnalazioniAperte(
+  q: DbConnector,
+  clienti: string[] | null,
+): Promise<{ aperte: number; vecchie: number }> {
+  const r = await q.query<{ aperte: number; vecchie: number }>(
+    `SELECT count(*)::int AS aperte,
+            count(*) FILTER (WHERE w.created_at < now() - interval '30 days')::int AS vecchie
+       FROM sys.sys_whistleblowing_reports w
+      WHERE w.whistleblowing_report_status IN ('NEW','UNDER_REVIEW','MORE_INFO_REQUESTED')
+        AND ($1::uuid[] IS NULL OR w.whistleblowing_report_tenant_id = ANY($1::uuid[]))`,
+    [clienti],
+  );
+  return { aperte: r.rows[0]?.aperte ?? 0, vecchie: r.rows[0]?.vecchie ?? 0 };
+}

@@ -16,6 +16,8 @@
  * su rischio d'uscita e retribuzioni girano solo per i mandati HR (`soloMandatoHR`).
  */
 import type { AreaQuadro, Insight } from "@heuresys/shared";
+import { pool } from "../../db/client.js";
+import { contaSegnalazioniAperte } from "../whistleblowing/repository.js";
 
 /* Le persone attive del perimetro. */
 const PP = `pp AS (
@@ -46,7 +48,11 @@ export interface Lente {
   soloMandatoHR?: boolean;
   /** la lente ha senso solo guardando se stessi (area «personale») */
   personale?: boolean;
+  /** la lente gira solo per chi ha questo permesso */
+  permesso?: string;
+  /** la query: oppure, per i dati che vivono in un modulo isolato, il calcolo che quel modulo espone */
   sql: string;
+  calcola?: (clienti: string[] | null) => Promise<{ valore: number; prima: number | null }>;
   /** dal valore (e dal precedente) all'insight; null = niente da dire */
   leggi: (valore: number, prima: number | null) => Omit<Insight, "chiave" | "area" | "valore" | "andamento"> | null;
 }
@@ -429,7 +435,26 @@ export const LENTI: Lente[] = [
             azione: { etichetta: "Vedi i documenti", href: "/content" },
           },
   },
-  // Le segnalazioni restano fuori dal quadro: il loro isolamento è assoluto (#99 F4), solo la custodia le legge.
+  // Le segnalazioni: la query vive nella custodia (#99 F4) e la lente gira solo per chi la custodisce.
+  {
+    chiave: "segnalazioni-aperte",
+    aree: ["segnalazioni"],
+    permesso: "whistleblowing:read",
+    sql: "",
+    calcola: async (clienti) => {
+      const c = await contaSegnalazioniAperte(pool, clienti);
+      return { valore: c.vecchie, prima: c.aperte };
+    },
+    leggi: (vecchie, aperte) =>
+      !aperte
+        ? { tono: "positivo", titolo: "Nessuna segnalazione aperta", dettaglio: "Ogni segnalazione ricevuta ha avuto un esito.", azione: null }
+        : {
+            tono: vecchie ? "rischio" : "informazione",
+            titolo: `${n(aperte)} ${plurale(aperte, "segnalazione aperta", "segnalazioni aperte")}, ${n(vecchie)} da oltre 30 giorni`,
+            dettaglio: "La legge chiede un riscontro a chi segnala entro tre mesi: le più vecchie vanno chiuse per prime.",
+            azione: null,
+          },
+  },
   {
     chiave: "progetti-oltre-la-scadenza",
     aree: ["progetti"],

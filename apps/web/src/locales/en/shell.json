@@ -104,7 +104,7 @@
     "MANAGER": "Manager",
     "USER": "Employee",
     "READ_ONLY": "Read-only",
-    "CEO": "CEO",
+    "CEO": "Chief executive officer",
     "TEAM_LEADER": "Team leader",
     "TEAM_MEMBER": "Team member",
     "ORG_DIRECTOR": "Organization director",
@@ -129,7 +129,8 @@
     "approver": "Approver",
     "team_peer": "Team peer",
     "delegation": "Received delegation",
-    "custody": "Whistleblowing custody"
+    "custody": "Whistleblowing custody",
+    "BRANCH_MANAGER": "Branch manager"
   },
   "noAccess": {
     "title": "You do not have access to this page",

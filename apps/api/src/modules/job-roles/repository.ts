@@ -99,7 +99,7 @@ export async function listJobRoles(
   const off = params.length;
   const res = await q.query<Row>(
     `SELECT ${COLS} FROM sys.sys_job_roles ${whereClause}
-      ORDER BY job_role_code LIMIT $${lim} OFFSET $${off}`,
+      ORDER BY lower(job_role_name), job_role_code LIMIT $${lim} OFFSET $${off}`,
     params,
   );
   return { items: res.rows.map(toJr), total };

@@ -62,7 +62,7 @@ export async function listJobFamilies(
   const off = params.length;
   const res = await q.query<Row>(
     `SELECT ${COLS} FROM sys.sys_job_families ${whereClause}
-      ORDER BY job_family_code LIMIT $${lim} OFFSET $${off}`,
+      ORDER BY lower(job_family_name), job_family_code LIMIT $${lim} OFFSET $${off}`,
     params,
   );
   return { items: res.rows.map(toJf), total };

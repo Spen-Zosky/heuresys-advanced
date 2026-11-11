@@ -7,6 +7,7 @@
 import type { Pool, PoolClient } from "pg";
 import type {
   Position,
+  PositionListItem,
   PositionListQuery,
   CreatePositionBody,
   UpdatePositionBody,
@@ -86,10 +87,19 @@ export interface ListFilter {
   query: PositionListQuery;
 }
 
+interface RawPositionListRow extends RawPositionRow {
+  incumbent_first_name: string | null;
+  incumbent_last_name: string | null;
+  incumbent_display_name: string | null;
+  organization_unit_name: string | null;
+  site_name: string | null;
+  tenant_name: string | null;
+}
+
 export async function listPositions(
   q: DbConnector,
   filter: ListFilter,
-): Promise<{ items: Position[]; total: number }> {
+): Promise<{ items: PositionListItem[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
   const add = (col: string, value: unknown) => {
@@ -119,12 +129,62 @@ export async function listPositions(
   params.push(filter.query.offset);
   const offsetIdx = params.length;
 
-  const res = await q.query<RawPositionRow>(
-    `SELECT ${POSITION_COLS} FROM sys.sys_positions ${whereClause}
-      ORDER BY position_code LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+  // R2 (repertorio interfacce): l'elenco si legge per titolo, il nome che una persona
+  // riconosce, non per codice; il codice resta solo come spareggio stabile.
+  const res = await q.query<RawPositionListRow>(
+    `WITH page AS (
+       SELECT ${POSITION_COLS} FROM sys.sys_positions ${whereClause}
+        ORDER BY lower(position_title), position_code LIMIT $${limitIdx} OFFSET $${offsetIdx}
+     )
+     SELECT page.*, tit.user_first_name AS incumbent_first_name,
+            tit.user_last_name AS incumbent_last_name,
+            tit.user_display_name AS incumbent_display_name,
+            ou.organization_unit_name, sede.site_name, t.tenant_name
+       FROM page
+       LEFT JOIN sys.sys_tenancies t ON t.tenant_id = page.position_tenant_id
+       LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = page.position_organization_unit_id
+       LEFT JOIN LATERAL (
+         SELECT u.user_first_name, u.user_last_name, u.user_display_name
+           FROM sys.sys_user_position_assignments a
+           JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id
+          WHERE a.user_position_assignment_position_id = page.position_id
+            AND a.user_position_assignment_status = 'ACTIVE'
+          ORDER BY (a.user_position_assignment_kind = 'PRIMARY') DESC,
+                   a.user_position_assignment_start_date DESC NULLS LAST
+          LIMIT 1
+       ) tit ON true
+       LEFT JOIN LATERAL (
+         WITH RECURSIVE su AS (
+           SELECT o.organization_unit_id, o.organization_unit_parent_id, 0 AS depth
+             FROM sys.sys_organization_units o
+            WHERE o.organization_unit_id = page.position_organization_unit_id
+           UNION ALL
+           SELECT o.organization_unit_id, o.organization_unit_parent_id, su.depth + 1
+             FROM sys.sys_organization_units o
+             JOIN su ON o.organization_unit_id = su.organization_unit_parent_id
+            WHERE su.depth < 32
+         )
+         SELECT COALESCE(b.branch_metadata->>'name', b.branch_city) AS site_name
+           FROM su
+           JOIN sys.sys_branches b ON b.branch_organization_unit_id = su.organization_unit_id
+          ORDER BY su.depth
+          LIMIT 1
+       ) sede ON true
+      ORDER BY lower(page.position_title), page.position_code`,
     params,
   );
-  return { items: res.rows.map(rowToPosition), total };
+  return {
+    items: res.rows.map((r) => ({
+      ...rowToPosition(r),
+      incumbentFirstName: r.incumbent_first_name,
+      incumbentLastName: r.incumbent_last_name,
+      incumbentDisplayName: r.incumbent_display_name,
+      organizationUnitName: r.organization_unit_name,
+      siteName: r.site_name,
+      tenantName: r.tenant_name,
+    })),
+    total,
+  };
 }
 
 export async function findPositionById(

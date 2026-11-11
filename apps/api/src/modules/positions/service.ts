@@ -111,10 +111,25 @@ async function canUpdate(actor: ActorContext, target: Position): Promise<boolean
 
 export const positionsService = {
   async list(actor: ActorContext, query: PositionListQuery): Promise<PositionListResponse> {
-    const tenantId = isPlatformAdmin(actor) ? undefined : requireOwnTenant(actor);
+    // R5: la piattaforma vede tutti i tenant e può filtrarne uno; per chi ha un tenant il
+    // filtro della richiesta è ignorato, il perimetro resta il suo.
+    const tenantId = isPlatformAdmin(actor) ? query.tenantId : requireOwnTenant(actor);
     const page = await repo.listPositions(pool, { tenantId, query });
     const maschera = await nascondeIlPesoEconomico(actor);
-    return { ...page, items: page.items.map((p) => mascheraPosizione(actor, maschera, p)) };
+    return {
+      ...page,
+      items: page.items.map((p) => {
+        const {
+          incumbentFirstName, incumbentLastName, incumbentDisplayName,
+          organizationUnitName, siteName, tenantName, ...pos
+        } = p;
+        return {
+          ...mascheraPosizione(actor, maschera, pos),
+          incumbentFirstName, incumbentLastName, incumbentDisplayName,
+          organizationUnitName, siteName, tenantName,
+        };
+      }),
+    };
   },
 
   async getById(actor: ActorContext, id: string): Promise<Position> {

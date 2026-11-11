@@ -16,6 +16,12 @@ test.describe("MVP-2a admin org + bpm — live data", () => {
     await expect(page.getByTestId("organization-page")).toBeVisible();
     await expect(page.getByTestId("organization-count")).toContainText(/\d+\s+unità/);
     await expect(page.getByTestId("organization-row").first()).toBeVisible();
+    // Repertorio interfacce (B2): il nome apre la riga, niente codice, lo stato in coda (R2, R3, R4).
+    const heads = (await page.locator("main table thead th").allTextContents()).map((h) => h.trim().toLowerCase());
+    expect(heads.slice(0, 4)).toEqual(["nome", "tipo", "unità superiore", "stato"]);
+    // L'ordine per nome lo fa il server.
+    const nomi = (await page.getByTestId("organization-name").allTextContents()).map((s) => s.trim().toLowerCase().charAt(0));
+    expect(nomi).toEqual([...nomi].sort());
   });
 
   test("/blueprints lists variants with family info", async ({ page }) => {

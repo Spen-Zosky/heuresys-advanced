@@ -73,5 +73,12 @@ UPDATE sys.sys_visualization_exports e SET export_graph_id = nv.graph_id,
 FROM v old JOIN v nv ON nv.graph_tenant_id=old.graph_tenant_id AND nv.graph_code=old.graph_code AND nv.rn=1
 WHERE old.rn>1 AND old.graph_id=e.export_graph_id;
 UPDATE sys.sys_visualization_graphs g SET graph_is_active=false FROM v WHERE v.graph_id=g.graph_id AND v.rn>1 AND g.graph_is_active;
+-- «Qualita» senza accento nei titoli e nelle mansioni
+INSERT INTO staging.rtl_allinea_testi_undo (tabella, colonna, vecchio, nuovo, righe) SELECT 'sys_positions','position_title', position_title, replace(position_title,'Qualita ','Qualità '), count(*) FROM sys.sys_positions WHERE position_title LIKE '%Qualita %' GROUP BY position_title ON CONFLICT DO NOTHING;
+UPDATE sys.sys_positions SET position_title = replace(position_title,'Qualita ','Qualità ') WHERE position_title LIKE '%Qualita %';
+INSERT INTO staging.rtl_allinea_testi_undo (tabella, colonna, vecchio, nuovo, righe) SELECT 'sys_job_roles','job_role_name', job_role_name, replace(job_role_name,'Qualita ','Qualità '), count(*) FROM sys.sys_job_roles WHERE job_role_name LIKE '%Qualita %' GROUP BY job_role_name ON CONFLICT DO NOTHING;
+UPDATE sys.sys_job_roles SET job_role_name = replace(job_role_name,'Qualita ','Qualità ') WHERE job_role_name LIKE '%Qualita %';
+INSERT INTO staging.rtl_allinea_testi_undo (tabella, colonna, vecchio, nuovo, righe) SELECT 'sys_user_contracts','user_contract_job_title', user_contract_job_title, replace(user_contract_job_title,'Qualita ','Qualità '), count(*) FROM sys.sys_user_contracts WHERE user_contract_job_title LIKE '%Qualita %' GROUP BY user_contract_job_title ON CONFLICT DO NOTHING;
+UPDATE sys.sys_user_contracts SET user_contract_job_title = replace(user_contract_job_title,'Qualita ','Qualità ') WHERE user_contract_job_title LIKE '%Qualita %';
 COMMIT;
 SELECT 'S ok';

@@ -114,7 +114,7 @@
   },
   "skillsGroupShare": {
     "title": "Quote competenze per gruppo ESCO",
-    "description": "Distribuzione del catalogo competenze ESCO tra i suoi gruppi (cluster). Il catalogo è globale di piattaforma.",
+    "description": "Come si distribuiscono fra i gruppi ESCO le competenze che le persone dell'azienda possiedono. Chi gestisce la piattaforma vede il catalogo intero.",
     "stats": {
       "groupedLabel": "Competenze raggruppate",
       "groupedDesc": "Competenze con un gruppo ESCO assegnato",

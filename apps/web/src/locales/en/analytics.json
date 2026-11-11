@@ -114,7 +114,7 @@
   },
   "skillsGroupShare": {
     "title": "Skills group share (ESCO)",
-    "description": "Distribution of the ESCO skill catalogue across its groups (clusters). The catalogue is platform-global.",
+    "description": "How the skills your company's people hold spread across ESCO groups. The platform mandate sees the whole catalogue.",
     "stats": {
       "groupedLabel": "Grouped skills",
       "groupedDesc": "Skills with an ESCO group assigned",

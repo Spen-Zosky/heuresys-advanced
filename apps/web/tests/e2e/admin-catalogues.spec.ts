@@ -72,7 +72,8 @@ test.describe("MVP-2a admin catalogues — live data", () => {
       await expect(page.getByTestId("learning-count")).toContainText(
         /\d+\s+(moduli|modules)\s+—\s+\d+\s+(di piattaforma|platform),\s+\d+\s+(dell'azienda|company)/,
       );
-      // e il pannello dei percorsi, che mostrava un numero nudo accanto al titolo
+      // e il pannello dei percorsi, che mostrava un numero nudo accanto al titolo (scheda C5)
+      await page.getByTestId("scheda-percorsi").click();
       await expect(page.getByTestId("learning-paths-panel")).toBeVisible();
       await expect(page.getByTestId("learning-paths-count")).toContainText(
         /\d+\s+—\s+\d+\s+(di piattaforma|platform),\s+\d+\s+(dell'azienda|company)/,

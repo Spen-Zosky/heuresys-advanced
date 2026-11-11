@@ -513,6 +513,10 @@
       "moveUp": "Su",
       "searchModule": "Cerca un modulo",
       "searchModulePlaceholder": "almeno 2 caratteri…"
+    },
+    "tabs": {
+      "modules": "Moduli",
+      "paths": "Percorsi"
     }
   },
   "training": {

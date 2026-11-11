@@ -65,6 +65,19 @@ Misure del giro (pagine / occorrenze; giro 2 = `20261111-0223` su a8921995, giro
 | C14-caricamento | 9 / 40 | 1 / 1 | /system-health: misura del tempo dell'API nel giro 4 |
 | C15-senza-insight | 44 / 270 | 6 / 13 | chi vede solo sé stesso riceve le lenti personali |
 
+Giro 10 (`giro-20261111-1259` su 5f0b172f, 2014 esiti, nessuna richiesta `/v1` fallita né errore di console). Ciò che resta sopra zero, e di chi è:
+
+| classe | pagine / occorrenze | dove sta | chi lo chiude |
+|---|---|---|---|
+| C1-codice, C1-inglese, C5, C9, C12 | /admin/roles, /job-catalog | pagine del ramo k0v5tl | il thread «tabelle intelligenti» |
+| C1-inglese | /me/delegations, /okrs, /me/career, /dashboard/[famiglia], /analytics/kpi, /leads (54) | titoli di posizioni, obiettivi, KPI, corsi e messaggi salvati in inglese | il thread dei dati (agente bancario) |
+| C1-inglese | /me/matching (4) | nomi ESCO in inglese: il codice legge già l'etichetta italiana, che arriva con la migrazione 000486 della PR #228 | PR #228 |
+| C4 | /content, /me/inbox, /me/career (19) | residui di prova («ZZZ Link E2E», «Fascicolo di prova») e un titolo «4.5/5» | il thread dei dati |
+| C10 | /org-director/vrio, /analytics/skills-group-share (8) | competenze di altre industrie assegnate alle persone di RTL; il VRIO ora mostra quali competenze compongono ogni gruppo | il thread dei dati |
+| C15 | cinque pagine diverse a ogni giro, piene se richieste a mano | tempo della chiamata del quadro: il giro ora la aspetta (5e291a8e) | verifica nel giro 11 |
+
+Correzioni dei giri 4-10, tutte nel ramo `claude/project-thread-s3y6jo` (PR #227): schede orizzontali su KPI, formazione, tassonomia, direzione, contenuti, MFA, approvazioni; testoLeggibile su codici e chiavi minuscole; deleghe in «Cognome, Nome»; provenienza con i nomi italiani di tutte le 70 tabelle d'origine misurate; quote dei gruppi di competenze nel perimetro del cliente (I21); consigli del direttore a pagine; professioni ESCO in italiano quando il catalogo le porta; VRIO con le competenze che compongono ogni gruppo; tendine della scheda di posizione nel catalogo e nelle persone del suo cliente; quadro della console delle segnalazioni calcolato dentro la custodia (#99 F4).
+
 Criterio di chiusura (Enzo, 2026-11-11): «non dirai "fatto" fino a quando non avrai verificato e corretto il singolo bit di tutte le interfacce e delle loro catene». Il lavoro si chiude solo con un giro completo, tutte le pagine per tutti i ruoli, a zero rilievi, con le schermate.
 
 Coordinamento: le pagine del ramo «tabelle intelligenti» (`claude/project-thread-k0v5tl`: posizioni, ruoli, catalogo delle professioni, organizzazione, persone) non si toccano finché quel ramo non è unito. Sul CCNL di RTL l'agente esperto bancario ha misurato 158 contratti, tutti Credito 2024, e 15 regole di maturazione del Commercio duplicate che sta togliendo lui; le fasce Commercio e Metalmeccanico sono righe di catalogo senza tenant, visibili al solo mandato di piattaforma.

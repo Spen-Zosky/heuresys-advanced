@@ -36,6 +36,7 @@ test.describe("#159 F3 — /approvals/[id] consuma AgentPanel con un contesto ve
     // Crea una richiesta vera, con federica come sola approvatrice (stesso schema di
     // approvals.spec.ts) — serve solo ad avere un id/titolo REALI su cui costruire il
     // context, non a esercitare il ciclo di vita dell'approvazione.
+    await page.getByTestId("approval-create-toggle").click();
     await page.getByTestId("approval-create-title").fill(title);
     // V-2: la persona si cerca sul server per nome o email, poi si sceglie dai risultati.
     await page.getByTestId("approval-create-approvers-input").fill(PERSONAS.tenantAdmin.email);

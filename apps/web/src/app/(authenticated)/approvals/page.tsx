@@ -155,8 +155,16 @@ export default function ApprovalsPage() {
       />
 
       {/* Create approval request */}
+      {/* C5: il modulo di creazione si apre a richiesta, così l'elenco resta in vista */}
       {canCreate && (
-      <Card>
+      <details data-testid="approval-create-panel" className="group">
+      <summary
+        data-testid="approval-create-toggle"
+        className="inline-flex cursor-pointer list-none items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-card hover:bg-muted"
+      >
+        {t("approvals.create.cardTitle")}
+      </summary>
+      <Card className="mt-3">
         <CardHeader>
           <CardTitle>{t("approvals.create.cardTitle")}</CardTitle>
         </CardHeader>
@@ -234,6 +242,7 @@ export default function ApprovalsPage() {
           </form>
         </CardContent>
       </Card>
+      </details>
       )}
 
       {/* Filter */}

@@ -1038,6 +1038,10 @@
       "author": "decisa da {{name}}",
       "noAuthor": "senza autore (di prima della regola)",
       "disable": "Spegni"
+    },
+    "tabs": {
+      "rules": "Regole per azienda",
+      "exemptions": "Esenzioni"
     }
   },
   "agentDev": {

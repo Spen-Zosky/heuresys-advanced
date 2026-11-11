@@ -1038,6 +1038,10 @@
       "author": "decided by {{name}}",
       "noAuthor": "no author (predates the rule)",
       "disable": "Disable"
+    },
+    "tabs": {
+      "rules": "Rules by company",
+      "exemptions": "Exemptions"
     }
   },
   "agentDev": {

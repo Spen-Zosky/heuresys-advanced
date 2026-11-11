@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
+import { SchedePagina } from "@/components/schede-pagina";
 import type { MfaPolicy, ListMfaPoliciesResponse, ListMfaExemptionsResponse, MfaExemption } from "@heuresys/shared";
 import { useFormat } from "@/lib/format";
 import { apiFetch } from "../../../../lib/api/fetch";
@@ -293,6 +294,10 @@ export default function AdminMfaPolicyPage() {
         }
       />
 
+      {/* C5: regole per azienda ed esenzioni in due schede */}
+      <SchedePagina
+        schede={[
+          { id: "regole", titolo: t("mfaPolicy.tabs.rules"), contenuto: (
       <Card>
         <CardHeader>
           <CardTitle>{t("mfaPolicy.cardTitle")}</CardTitle>
@@ -330,8 +335,10 @@ export default function AdminMfaPolicyPage() {
           )}
         </CardContent>
       </Card>
-
-      <ExemptionsCard canManage={canManage} />
+          ) },
+          { id: "esenzioni", titolo: t("mfaPolicy.tabs.exemptions"), contenuto: <ExemptionsCard canManage={canManage} /> },
+        ]}
+      />
     </main>
   );
 }

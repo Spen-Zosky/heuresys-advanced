@@ -902,6 +902,10 @@
       "uploadError": "Caricamento non riuscito",
       "deleteError": "Eliminazione non riuscita",
       "copyMarkdown": "Copia markdown"
+    },
+    "tabs": {
+      "documents": "Documenti",
+      "categories": "Categorie"
     }
   },
   "insights": {

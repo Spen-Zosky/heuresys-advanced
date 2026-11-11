@@ -902,6 +902,10 @@
       "uploadError": "Upload failed",
       "deleteError": "Delete failed",
       "copyMarkdown": "Copy markdown"
+    },
+    "tabs": {
+      "documents": "Documents",
+      "categories": "Categories"
     }
   },
   "insights": {

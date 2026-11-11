@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
+import { SchedePagina } from "@/components/schede-pagina";
 import type {
   ContentDocument,
   ContentDocumentListResponse,
@@ -218,6 +219,11 @@ export default function ContentPage() {
         }
       />
 
+      {/* C5: documenti e categorie in due schede, invece di una pagina lunga. */}
+      <SchedePagina
+        schede={[
+          { id: "documenti", titolo: t("content.tabs.documents"), contenuto: (
+      <div className="space-y-6">
       {/* Create document */}
       {canCreate && (
       <Card>
@@ -446,8 +452,9 @@ export default function ContentPage() {
           caption={t("content.caption")}
         />
       </div>
-
-      {/* Categories */}
+      </div>
+          ) },
+          { id: "categorie", titolo: t("content.tabs.categories"), contenuto: (
       <Card data-testid="content-categories">
         <CardHeader>
           <CardTitle>{t("content.categories.cardTitle")}</CardTitle>
@@ -516,6 +523,9 @@ export default function ContentPage() {
           )}
         </CardContent>
       </Card>
+          ) },
+        ]}
+      />
     </main>
   );
 }

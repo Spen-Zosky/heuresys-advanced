@@ -28,6 +28,7 @@ import type { RubricaResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
 import { costruisci, type Leggi } from "@/lib/leggibile-nucleo";
+import { spiegazioneDi } from "@/lib/glossario";
 import { Riferimento, useScheda } from "@/components/scheda-rapida";
 
 export type { Leggi };
@@ -110,11 +111,31 @@ export function ReteDiPagina({ children }: { children: ReactNode }) {
         t.nodeValue = nuovo;
       }
     };
+    // C13: un'intestazione (di tabella, di elenco, di indicatore) che il glossario conosce porta la
+    // sua spiegazione al passaggio del mouse, anche nelle tabelle scritte a mano.
+    const spiega = (el: Element) => {
+      if (el.hasAttribute("data-spiegazione") || el.querySelector("[data-spiegazione]") || el.closest(ESCLUSI)) return;
+      const testo = (el.textContent ?? "").trim();
+      if (!testo || testo.length > 40) return;
+      const v = spiegazioneDi(testo);
+      if (!v) return;
+      el.setAttribute("data-spiegazione", "auto");
+      el.setAttribute("title", v.esteso ? `${v.esteso}. ${v.testo}` : v.testo);
+    };
+    const INTESTAZIONI = "th, dt, [data-kpi-label]";
     const scorri = (n: Node) => {
-      if (n.nodeType === Node.TEXT_NODE) return rileggi(n as Text);
+      if (n.nodeType === Node.TEXT_NODE) {
+        rileggi(n as Text);
+        const p = (n as Text).parentElement?.closest(INTESTAZIONI);
+        if (p) spiega(p);
+        return;
+      }
       if (n.nodeType !== Node.ELEMENT_NODE) return;
       const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT);
       for (let t = w.nextNode(); t; t = w.nextNode()) rileggi(t as Text);
+      const el = n as Element;
+      if (el.matches(INTESTAZIONI)) spiega(el);
+      el.querySelectorAll(INTESTAZIONI).forEach(spiega);
     };
     scorri(r);
     const o = new MutationObserver((cambi) => {

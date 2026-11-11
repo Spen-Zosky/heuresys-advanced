@@ -111,10 +111,21 @@ for (const p of persone) {
       if (await page.getByTestId("page-no-access").isVisible().catch(() => false)) { e.stato = "negata"; esiti.push(e); continue; }
       e.stato = "ok";
       /* C14-caricamento: una pagina che resta su "Caricamento…" oltre 15 secondi e' rossa */
-      const ancoraCaricamento = () => page.evaluate(() => /Caricamento/i.test(document.querySelector("main")?.innerText ?? document.body.innerText));
+      // Lo stato di attesa, non la parola: «ultimo caricamento 3 minuti fa» e' un dato, non un'attesa.
+      const IN_ATTESA = () => {
+        const radice = document.querySelector("main") ?? document.body;
+        if (radice.querySelector("[aria-busy=true]")) return true;
+        return /(^|\n)\s*Caricamento\s*(…|\.\.\.)?\s*(\n|$)/i.test(radice.innerText);
+      };
+      const ancoraCaricamento = () => page.evaluate(IN_ATTESA);
       let bloccata = false;
       if (await ancoraCaricamento()) {
-        bloccata = await page.waitForFunction(() => !/Caricamento/i.test(document.querySelector("main")?.innerText ?? document.body.innerText), null, { timeout: 15_000 }).then(() => false, () => true);
+        const FINITO = () => {
+          const radice = document.querySelector("main") ?? document.body;
+          if (radice.querySelector("[aria-busy=true]")) return false;
+          return !/(^|\n)\s*Caricamento\s*(…|\.\.\.)?\s*(\n|$)/i.test(radice.innerText);
+        };
+        bloccata = await page.waitForFunction(FINITO, null, { timeout: 15_000 }).then(() => false, () => true);
       }
       e.misura = await page.evaluate(misuraPagina);
       if (bloccata) (e.misura.esito ??= {})["C14-caricamento"] = { n: 1, esempi: ["resta su 'Caricamento…' oltre 15 secondi"] };

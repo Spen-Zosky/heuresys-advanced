@@ -134,8 +134,10 @@ function misuraPagina() {
   /* C8 — grafici: legenda a scorrimento (frecce, «3/6»), grafico senza assi né legenda. */
   for (const t of testi) if (/^\d+\/\d+$/.test(t.t) && t.el.closest(".recharts-legend-wrapper, [class*=legend]")) segna("C8-legenda-a-pagine", t.t);
   for (const c of Array.from(main.querySelectorAll("canvas"))) {
-    const box = c.closest("div");
-    if (box && !/legend|legenda/i.test(box.parentElement?.textContent || "")) segna("C8-canvas-senza-testo", "grafico su canvas");
+    /* un grafico su canvas è leggibile se accanto ha la sua lettura in parole o la tabella */
+    let box = c.parentElement;
+    for (let i = 0; i < 4 && box && !box.querySelector("[data-grafico-lettura], [data-testid=chart-table]"); i++) box = box.parentElement;
+    if (!box || !box.querySelector("[data-grafico-lettura], [data-testid=chart-table]")) segna("C8-canvas-senza-testo", "grafico su canvas");
   }
 
   /* C9 — righe vuote o incomplete. */

@@ -30,6 +30,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { localeDi } from "@/lib/format";
+import { letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
 
 const RawEChartsCard = dynamic(
   // Subpath `/charts` isolates echarts so this lazy import does NOT drag the whole
@@ -136,11 +137,7 @@ function rendiLeggibile(option: RawProps["option"], locale: string): RawProps["o
  * agente. `assi` scrive `name` su xAxis e yAxis quando sono oggetti; `tabella` disegna sotto il
  * grafico una tabella apribile con gli stessi numeri.
  */
-export interface ChartTable {
-  titolo: string;
-  colonne: string[];
-  righe: Array<Array<string | number>>;
-}
+export type { ChartTable };
 type EChartsCardProps = RawProps & {
   assi?: { x?: string; y?: string };
   tabella?: ChartTable;
@@ -225,10 +222,14 @@ export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProp
     [props.option, themeTick, assi?.x, assi?.y, locale],
   );
 
+  const lettura = useMemo(() => letturaDelGrafico(props.option, locale), [props.option, locale]);
   return (
     <>
       <RawEChartsCard {...props} option={option} />
-      {tabella && <TabellaEquivalente tabella={tabella} lingua={locale} />}
+      {lettura ? (
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground" data-grafico-lettura>{lettura.frase}</p>
+      ) : null}
+      {tabella ? <TabellaEquivalente tabella={tabella} lingua={locale} /> : lettura ? <TabellaEquivalente tabella={lettura.tabella} lingua={locale} /> : null}
     </>
   );
 }

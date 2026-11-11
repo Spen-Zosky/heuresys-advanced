@@ -46,7 +46,9 @@ export async function leggiQuadro(
   const esiti: Array<Insight | null> = await Promise.all(
     scelte.map(async (l) => {
       try {
-        const params = l.personale ? [clienti, [actor.userId]] : [clienti, persone];
+        // una lente personale riceve un solo parametro, $1 = [chi guarda]: un parametro che la
+        // query non usa non ha tipo, e PostgreSQL rifiuta la query.
+        const params = l.personale ? [[actor.userId]] : [clienti, persone];
         const r = await pool.query<{ valore: number | null; prima: number | null }>(l.sql, params);
         const valore = Number(r.rows[0]?.valore ?? 0);
         const prima = r.rows[0]?.prima === null || r.rows[0]?.prima === undefined ? null : Number(r.rows[0].prima);

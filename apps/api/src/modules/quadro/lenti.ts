@@ -7,6 +7,7 @@
  * perimetro di chi guarda. Ogni query riceve due parametri:
  *   $1 uuid[] — i clienti del perimetro (NULL = tutti, mandato di piattaforma);
  *   $2 uuid[] — le persone del perimetro organizzativo (NULL = tutto il cliente).
+ * (le lenti personali ricevono il solo $1 = [chi guarda])
  * e restituisce una riga `{ valore, prima }`: il valore di oggi e, per le lenti d'andamento,
  * quello del periodo precedente. Il tono e le frasi stanno qui, accanto alla query, perché una
  * frase che non corrisponde alla query è il difetto che il quadro deve evitare.
@@ -377,7 +378,7 @@ export const LENTI: Lente[] = [
     sql: `SELECT coalesce(sum(coalesce(b.balance_total_days,0) + coalesce(b.balance_carryover_days,0)
                  + coalesce(b.balance_adjustment_days,0) - coalesce(b.balance_used_days,0)), 0)::int AS valore, NULL::int AS prima
             FROM sys.sys_time_off_balances b
-           WHERE b.balance_subject_user_id = ($2::uuid[])[1] AND b.balance_year = extract(year FROM current_date)::int`,
+           WHERE b.balance_subject_user_id = ($1::uuid[])[1] AND b.balance_year = extract(year FROM current_date)::int`,
     leggi: (v) => ({
       tono: v > 20 ? "attenzione" : "informazione",
       titolo: `Hai ${n(v)} giorni di ferie e permessi da godere quest'anno`,
@@ -392,7 +393,7 @@ export const LENTI: Lente[] = [
     sql: `SELECT count(*) FILTER (WHERE g.goal_status IN ('AT_RISK','BLOCKED') OR g.goal_due_date < current_date)::int AS valore,
                  count(*)::int AS prima
             FROM sys.sys_goals g
-           WHERE coalesce(g.goal_subject_user_id, g.goal_owner_user_id) = ($2::uuid[])[1]
+           WHERE coalesce(g.goal_subject_user_id, g.goal_owner_user_id) = ($1::uuid[])[1]
              AND g.goal_status NOT IN ('COMPLETED','CANCELLED')`,
     leggi: (v, tot) =>
       !tot
@@ -410,7 +411,7 @@ export const LENTI: Lente[] = [
     personale: true,
     sql: `SELECT count(*) FILTER (WHERE la.user_learning_assignment_deadline < current_date + 30)::int AS valore, count(*)::int AS prima
             FROM sys.sys_user_learning_assignments la
-           WHERE la.user_learning_assignment_user_id = ($2::uuid[])[1]
+           WHERE la.user_learning_assignment_user_id = ($1::uuid[])[1]
              AND la.user_learning_assignment_status IN ('ASSIGNED','IN_PROGRESS','OVERDUE')`,
     leggi: (v, tot) =>
       !tot
@@ -427,7 +428,7 @@ export const LENTI: Lente[] = [
     aree: ["personale"],
     personale: true,
     sql: `SELECT count(*)::int AS valore, NULL::int AS prima FROM sys.sys_time_off_requests r
-           WHERE r.request_subject_user_id = ($2::uuid[])[1] AND r.request_status = 'PENDING'`,
+           WHERE r.request_subject_user_id = ($1::uuid[])[1] AND r.request_status = 'PENDING'`,
     leggi: (v) =>
       v === 0
         ? null

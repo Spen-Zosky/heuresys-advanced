@@ -218,6 +218,10 @@
         "demand": "Posizioni · critiche",
         "holders": "Titolari"
       }
+    },
+    "tabs": {
+      "units": "Unità organizzative",
+      "essential": "Capacità essenziali"
     }
   },
   "processOwner": {

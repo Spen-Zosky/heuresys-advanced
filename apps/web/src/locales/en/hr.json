@@ -218,6 +218,10 @@
         "demand": "Positions · critical",
         "holders": "Holders"
       }
+    },
+    "tabs": {
+      "units": "Organisational units",
+      "essential": "Essential capabilities"
     }
   },
   "processOwner": {
